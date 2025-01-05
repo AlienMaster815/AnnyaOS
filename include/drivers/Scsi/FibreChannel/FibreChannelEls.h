@@ -241,6 +241,141 @@ static inline void* LouFibreChannelTlvWalkListkNext(void* Descriptor){
     return (void*)((uint64_t)Descriptor + FIBRE_CHANNEL_TLV_DESCRIPTOR_SIZE_FROM_LENGTH(Tlv));
 }
 
+typedef struct _FIBRE_CHANNEL_LSRI_DESCRIPTOR{
+    uint32_t DescriptorTag;     //big endian
+    uint32_t DescriptorLength;  //big Endian
+    struct {
+        uint8_t Commad;
+        uint8_t Bytes[3];
+    } RequestDWORD;
+}FIBRE_CHANNEL_LSRI_DESCRIPTOR, * PFIBRE_CHANNEL_LSRI_DESCRIPTOR;
+
+typedef struct _FIBRE_CHANNEL_ELS_CSP{
+    uint8_t     SupportedVersionHigh;
+    uint8_t     SupportedVersionLow;
+    uint16_t    BtbCredits;             //BigEndian
+    uint16_t    CommonFeatures;         //BigEndian
+    uint16_t    BtbData;
+    union{
+        struct{
+            uint16_t TCS;               //big endian
+            uint16_t RelitiveOffset;    //Big Endian
+        }PLogicAcc;
+        struct {
+            uint32_t ResourceAllocTimeout; //big endian
+        }FLogicAcc;
+    }SpUnion;
+    uint32_t ErrorDetectTimeout;        //Big Endian
+}FIBRE_CHANNEL_ELS_CSP, * PFIBRE_CHANNEL_ELS_CSP;
+
+#define FIBRE_CHANNEL_SP_BTB_DATA_BITS  0xFFF
+
+#define FIBRE_CHANNEL_SP_MINIMUM_MAXIMUM_PAYLOAD   FIBRE_CHANNEL_MINIMUM_MAXIMUM_PAYLOAD
+#define FIBRE_CHANNEL_SP_MAXIMUM_MAXIMUM_PAYLOAD   FIBRE_CHANNEL_MAXIMUM_MAXIMUM_PAYLOAD
+
+#define FIBRE_CHANNEL_SP_FEATURE_NPIV           0x8000
+#define FIBRE_CHANNEL_SP_FEATURE_CIRO
+#define FIBRE_CHANNEL_SP_FEATURE_CLAD
+#define FIBRE_CHANNEL_SP_FEATURE_RAND
+#define FIBRE_CHANNEL_SP_FEATURE_VAL
+#define FIBRE_CHANNEL_SP_FEATURE_NPIV_ACC
+#define FIBRE_CHANNEL_SP_FEATURE_FPORT
+#define FIBRE_CHANNEL_SP_FEATURE_ABB
+#define FIBRE_CHANNEL_SP_FEATURE_EDTR
+#define FIBRE_CHANNEL_SP_FEATURE_MCAST
+#define FIBRE_CHANNEL_SP_FEATURE_BCAST
+#define FIBRE_CHANNEL_SP_FEATURE_HUNT
+#define FIBRE_CHANNEL_SP_FEATURE_SIMP
+#define FIBRE_CHANNEL_SP_FEATURE_SEC
+#define FIBRE_CHANNEL_SP_FEATURE_CSYN
+#define FIBRE_CHANNEL_SP_FEATURE_RTTOV
+#define FIBRE_CHANNEL_SP_FEATURE_HALF
+#define FIBRE_CHANNEL_SP_FEATURE_SEQC
+#define FIBRE_CHANNEL_SP_FEATURE_PAYL
+
+typedef struct _FIBRE_CHANNEL_ELS_CSSP{
+    uint16_t CpClass;   //BigEndian
+    uint16_t CpInit;    
+    uint16_t CpRecip;   
+    uint16_t CpRdfs;
+    uint16_t CpConSeq;
+    uint16_t CpEeCredit;
+    uint8_t  CpReserved1;
+    uint8_t  CpOpenSequence;
+    uint8_t  CpReserved[2];
+}FIBRE_CHANNEL_ELS_CSSP, * PFIBRE_CHANNEL_ELS_CSSP;
+
+#define FIBRE_CHANNEL_CPC_VALID     0x8000
+#define FIBRE_CHANNEL_CPC_IMIX      0x4000
+#define FIBRE_CHANNEL_CPC_SEQUENCE  0x0800
+#define FIBRE_CHANNEL_CPC_CAMP      0x0200
+#define FIBRE_CHANNEL_CPC_PRIORITY  0x0080
+
+#define FIBRE_CHANNEL_CPI_CSYN  0x0010
+
+#define FIBRE_CHANNEL_CPR_CSYN  0x0008
+
+//big endian structure
+typedef struct _FIBRE_CHANNEL_ELS_SPP{
+    uint8_t SppType;
+    uint8_t SppTypeExtention;
+    uint8_t SppFlags;
+    uint8_t SppReserved;
+    uint32_t SppOriginPa;
+    uint32_t SppRespPa;
+    uint32_t SppParameters;
+}FIBRE_CHANNEL_ELS_SPP, * PFIBRE_CHANNEL_ELS_SPP;
+
+#define FIBRE_CHANNEL_OPA_VALID     0x80
+#define FIBRE_CHANNEL_RPA_VALID     0x40
+#define FIBRE_CHANNEL_EST_IMG_PAIR  0x20
+#define FIBRE_CHANNEL_RESP_BITS     0x0F
+
+#define FIBRE_CHANNEL_SSP_RESPONCE_ACKNOWLEDGE      1
+#define FIBRE_CHANNEL_SSP_RESPONCE_RESOURCES        2
+#define FIBRE_CHANNEL_SSP_RESPONCE_INITIALIZATION   3
+#define FIBRE_CHANNEL_SSP_RESPONCE_NO_PA            4
+#define FIBRE_CHANNEL_SSP_RESPONCE_CONFIGURATION    5
+#define FIBRE_CHANNEL_SSP_RESPONCE_CONDIFIONALLY    6
+#define FIBRE_CHANNEL_SSP_RESPONCE_MULTIPLE         7
+#define FIBRE_CHANNEL_SSP_RESPONCE_INVALID          8
+
+//big endian struct
+typedef struct _FIBRE_CHANNEL_ELS_RRQ{
+    uint8_t     RrqCommand;
+    uint8_t     RrqZero[3];
+    uint8_t     RrqReserved;
+    uint8_t     RrqSID[3];
+    uint16_t    RrqOxID;
+    uint16_t    RrqRxID;
+}FIBRE_CHANNEL_ELS_RRQ, * PFIBRE_CHANNEL_ELS_RRQ;
+
+//big endian struct
+typedef struct _FIBRE_CHANNEL_ELS_REC{
+    uint8_t     RecCommand;
+    uint8_t     RecZero[3];
+    uint8_t     RecReserved;
+    uint8_t     RecSID[3];
+    uint16_t    RecOxID;
+    uint16_t    RecRxID;
+}FIBRE_CHANNEL_ELS_REC, * PFIBRE_CHANNEL_ELS_REC;
+
+//big endian struct
+typedef struct _FIBRE_CHANNEL_ELS_REC_ACC{
+    uint8_t     RecaCommand;
+    uint8_t     RecaZero[3];
+    uint16_t    RecaOxID;
+    uint16_t    RecaRxID;
+    uint8_t     RecaReserved1;
+    uint8_t     RecaOfID[3];
+    uint8_t     RecaReserved2;
+    uint8_t     RecaRfID[3];
+    uint32_t    RecaFcValue;
+    uint32_t    RecaEStatus;
+}FIBRE_CHANNEL_ELS_REC_ACC, * PFIBRE_CHANNEL_ELS_REC_ACC;
+
+
+
 #ifdef __cplusplus
 }
 #endif
