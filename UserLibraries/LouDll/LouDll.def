@@ -1,0 +1,16 @@
+;x86_64-w64-mingw32-dlltool --input-def LouDll.def --output-lib LouDll.lib
+
+LIBRARY LouDll.dll
+
+EXPORTS	
+    LouPrint
+    AnnyaGetScreenBufferHeight
+    AnnyaGetScreenBufferWidth
+    AnnyaCreateThread
+    vsprintf_s
+    _vsprintf
+    GetRtcTimeData
+    AnnyaUpdateButton
+    LouCALL
+    AnnyaUserThreadStub
+    AnnyaDestroyThread

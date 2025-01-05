@@ -1,0 +1,12 @@
+;x86_64-w64-mingw32-dlltool --input-def User32.def --output-lib user32.lib
+LIBRARY User32.dll
+
+EXPORTS	
+    AnnyaStartUserMode
+    AnnyaOpenBitmapImage 
+    DrawDesktopBackground
+    AnnyaCreateWindow
+    AnnyaCreateCanvasBuffer
+    AnnyaChangeCanvasBufferColor
+    AnnyaCreateButton
+    AnnyaRegisterCallbackProcedure

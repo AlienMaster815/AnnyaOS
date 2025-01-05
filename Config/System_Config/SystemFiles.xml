@@ -1,0 +1,21 @@
+
+<!--File Map For Operating System-->
+<FILESBEFORECOPY>
+    <32Targets>
+        <FILETOCPY32>cp Registry/System32/Config/SYSTEM ISO/Annya/System32/Config/SYSTEM</FILETOCPY32>
+        <FILETOCPY32>cp release/x86/LOUOSKRNL.exe ISO/Annya/System32/LOUOSKRNL.exe</FILETOCPY32>
+        <FILETOCPY32>cp Registry/Profiles/Username ISO/Annya/Profiles/Username</FILETOCPY32>
+    </32Targets>
+    <64Targets>
+        <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/Annya/System64/LOUOSKRNL.exe</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/Annya/System64/user32.dll</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/LouDll/LouDll.dll ISO/Annya/System64/LouDll.dll</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/Annya/System64/ntdll.dll</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/Annya/System64/CRT140.dll</FILETOCPY64>
+        <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/Annya/AnnyaExp.exe</FILETOCPY64>
+        <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/Annya/Profiles/Default/BG/Annya.bmp</FILETOCPY64>
+        <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/Annya/System64/Drivers/DRIVERS.cfg</FILETOCPY64>
+    </64Targets>
+</FILESBEFORECOPY>
+    
+
