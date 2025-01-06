@@ -5,5 +5,9 @@
 #include "FibreChannel2.h"
 #include "FibreChannelFip.h"
 #include "FibreChannelEls.h"
+#include "FibreChannelFs.h"
+#include "FibreChannelGs.h"
+
+
 
 #endif //_FIBRE_CHANNEL_H
