@@ -1,6 +1,7 @@
 #ifndef _FIBRE_CHANNEL_ELS_H
 #define _FIBRE_CHANNEL_ELS_H
 
+#pragma pack(push,1)
 
 #ifdef __cplusplus
 #include <LouDDK.h>
@@ -374,9 +375,496 @@ typedef struct _FIBRE_CHANNEL_ELS_REC_ACC{
     uint32_t    RecaEStatus;
 }FIBRE_CHANNEL_ELS_REC_ACC, * PFIBRE_CHANNEL_ELS_REC_ACC;
 
+//big endian struct 
+typedef struct _FIBRE_CHANNEL_ELS_PROCESS_LOGIN{
+    uint8_t     ProcessLoginCommand;
+    uint8_t     ProcessLoginSppLength;
+    uint16_t    ProcessLoginLength;
+}FIBRE_CHANNEL_ELS_PROCESS_LOGIN, * PFIBRE_CHANNEL_ELS_PROCESS_LOGIN;
 
+//big Endian Struct
+typedef struct _FIBRE_CHANNEL_ELS_PROCESS_LOGOUT{
+    uint8_t     ProcessLogoutCommand;
+    uint8_t     ProcessLogoutObsolete;
+    uint16_t    ProcessLogoutLength;
+}FIBRE_CHANNEL_ELS_PROCESS_LOGOUT, * PFIBRE_CHANNEL_ELS_PROCESS_LOGOUT;
+
+//big Endian
+typedef struct _FIBRE_CHANNEL_ELS_ADISC{
+    uint8_t     AdiscCommand;
+    uint8_t     AdiscReserved1[3];
+    uint8_t     AdiscReserved2;
+    uint8_t     AdiscHardAddress[3];
+    uint64_t    AdiscWwpn;
+    uint64_t    AdiscWwnn;
+    uint8_t     AdiscReserved3;
+    uint8_t     AdiscPortID[3];
+}FIBRE_CHANNEL_ELS_ADISC, * PFIBRE_CHANNEL_ELS_ADISC;
+
+//big endian
+typedef struct _FIBRE_CHANNEL_ELS_FABRIC_LOGOUT{
+    uint8_t     FabricLogoutCommand;
+    uint8_t     FabricLogoutZero[3];
+    uint8_t     FabricLogoutReserved;
+    uint8_t     FabricLogoutNPortID[3];
+    uint64_t    FabricLogoutNPortWwn;
+}FIBRE_CHANNEL_ELS_FABRIC_LOGOUT, * PFIBRE_CHANNEL_ELS_FABRIC_LOGOUT;
+
+//Big Endian
+typedef struct _FIBRE_CHANNEL_ELS_READ_TIMEOUT_VALUE_ACC{
+    uint8_t     ReadTimeValueCommand;
+    uint8_t     ReadTimeValueZero[3];
+    uint32_t    ReadTimeValueResourceAllocTimeValue;
+    uint32_t    ReadTimeValueTimeoutQualifier;
+}FIBRE_CHANNEL_ELS_READ_TIMEOUT_VALUE_ACC, * PFIBRE_CHANNEL_ELS_READ_TIMEOUT_VALUE_ACC;
+
+#define FIBRE_CHANNEL_ELS_READ_TIME_VALUE_ED_RESOLUTION (1 << 26)
+#define FIBRE_CHANNEL_ELS_READ_TIME_VALUE_RT_TIMEOUTVAL (1 << 19)
+
+//big endian
+typedef struct _FIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION{
+    uint8_t Command;
+    uint8_t Reserved[6];
+    uint8_t RegistrationFunction;
+}FIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION, * PFIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION;
+
+#define FIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION_FABRIC      1
+#define FIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION_NPORT       2
+#define FIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION_FULL        3
+#define FIBRE_CHANNEL_ELS_STATE_CHANGE_REGISTRATION_CLEAR       255
+
+typedef struct _FIBRE_CHANNEL_ELS_REGISTERED_STATE_CHANGE_NOTIFICATION{
+    uint8_t     Command;
+    uint8_t     PageLength;
+    uint16_t    PayloadLength;
+}FIBRE_CHANNEL_ELS_REGISTERED_STATE_CHANGE_NOTIFICATION, * PFIBRE_CHANNEL_ELS_REGISTERED_STATE_CHANGE_NOTIFICATION;
+
+typedef struct _FIBRE_CHANNEL_ELS_RSCN_PAGE{
+    uint8_t     PageFlags;
+    uint8_t     FabricID[3];
+}FIBRE_CHANNEL_ELS_RSCN_PAGE, * PFIBRE_CHANNEL_ELS_RSCN_PAGE;
+
+#define ELS_RSCN_EV_QUALIFIER_BIT       2
+#define ELS_RSCN_EV_QUALIFIER_BITS      0x0F
+#define ELS_RSCN_ADDRESS_FORMAT_BIT     0
+#define ELS_RSCN_ADDRESS_FORMAT_BITS    0x03
+
+#define ELS_EV_QUALIFIER_NONE                       0
+#define ELS_EV_QUALIFIER_NAME_SERVICE_OBJECT        1
+#define ELS_EV_QUALIFIER_PORT_ATTRIBUTE             2 
+#define ELS_EV_QUALIFIER_SERVICE_OBJECT             3
+#define ELS_EV_QUALIFIER_SWITCH_CONFIGURATION       4
+#define ELS_EV_QUALIFIER_REMOVED_OBJECT             5
+
+#define ELS_ADDRESS_FORMAT_PORT_ADDRESS             0
+#define ELS_ADDRESS_FORMAT_AREA_ADDRESS             1
+#define ELS_ADDRESS_FORMAT_DOMAIN_ADDRESS           2
+#define ELS_ADDRESS_FORMAT_FABRIC_ADDRESS_CHANGE    3
+
+typedef struct _FIBRE_CHANNEL_REQUEST_NODE_ID{
+    uint8_t     Command;
+    uint8_t     Reserved1[3];
+    uint8_t     Format;
+    uint8_t     Reserved2[3];
+}FIBRE_CHANNEL_REQUEST_NODE_ID, * PFIBRE_CHANNEL_REQUEST_NODE_ID;
+
+#define ELS_REQUEST_NODE_ID_FORMAT_NONE     0
+#define ELS_REQUEST_NODE_ID_FORMAT_GENERAL  0xDF
+
+typedef struct _FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_RESPONCE{
+    uint8_t     Command;
+    uint8_t     Reserved1[3];
+    uint8_t     DataFormat;
+    uint8_t     CommonIDLength;
+    uint8_t     Reserved2;
+    uint8_t     SpecificIDLength;
+}FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_RESPONCE, * PFIBRE_CHANNEL_ELS_REQUEST_NODE_ID_RESPONCE;
+
+//big endian
+typedef struct _FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_COMMAND_ID{
+    uint64_t    Wwpn;
+    uint64_t    Wwnn;
+}FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_COMMAND_ID, * PFIBRE_CHANNEL_ELS_REQUEST_NODE_ID_COMMAND_ID;
+
+//big endian
+typedef struct _FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_GENERIC{
+    uint8_t     VendorID[16];
+    uint32_t    AType;
+    uint32_t    PhysicalPort;
+    uint32_t    AttachedNodeCount;
+    uint8_t     NodeManagement;
+    uint8_t     IpVersion;
+    uint16_t    ProtocolPort;
+    uint32_t    IpAddress[4];
+    uint8_t     Reserved[2];
+    uint16_t    VendorSpecific;
+}FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_GENERIC, * PFIBRE_CHANNEL_ELS_REQUEST_NODE_ID_GENERIC;
+
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_UNKOWN      0x01
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_OTHER       0x02
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_HUB         0x03
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_SWITCH      0x04
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_GATEWAY     0x05
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_CONV        0x06
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_HBA         0x07
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_PROXY       0x08
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_STORAGE     0x09
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_HOST        0x0A
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_SUB_SYSTEM  0x0B
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_ACCESS      0x0E
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_NAS         0x11
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_BRIDGE      0x12
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_VIRTUAL     0x13
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MULTIFUNC   0xFF
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_HUB      1 << 31
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_SW       1 << 30
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_GW       1 << 29
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_ST       1 << 28
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_HOST     1 << 27
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_SUB      1 << 26
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_ACC      1 << 25
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_WDM      1 << 24
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_NAS      1 << 23
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_BR       1 << 22
+#define FIBRE_CHANNEL_ELS_REQUEST_NODE_ID_ATYPE_MF_VIRT     1 << 21
+
+#define ELS_REQUEST_NODE_ID_MANAGEMENT_SNMP     0
+#define ELS_REQUEST_NODE_ID_MANAGEMENT_TELNET   1
+#define ELS_REQUEST_NODE_ID_MANAGEMENT_HTTP     2
+#define ELS_REQUEST_NODE_ID_MANAGEMENT_HTTPS    3
+#define ELS_REQUEST_NODE_ID_MANAGEMENT_XML      4
+
+#define ELS_REQUEST_NODE_ID_IP_VERSION_NONE     0
+#define ELS_REQUEST_NODE_ID_IP_VERSION_V4       1
+#define ELS_REQUEST_NODE_ID_IP_VERSION_V6       2
+
+//big endian struct
+typedef struct _FIBRE_CHANNEL_ELS_READ_PORT_LIST{
+    uint8_t     Command;
+    uint8_t     Reserved1[5];
+    uint16_t    MaxSize;
+    uint8_t     Reserved2;
+    uint8_t     Index[3];
+}FIBRE_CHANNEL_ELS_READ_PORT_LIST, * PFIBRE_CHANNEL_ELS_READ_PORT_LIST;
+
+//big endian struct 
+typedef struct _FIBRE_CHANNEL_ELS_PORT_NUMBER_BLOCK{
+    uint32_t    PhysicalPortNumber;
+    uint8_t     Reserved;
+    uint8_t     PortID[3];
+    uint64_t    Wwpn;
+}FIBRE_CHANNEL_ELS_PORT_NUMBER_BLOCK, * PFIBRE_CHANNEL_ELS_PORT_NUMBER_BLOCK;
+
+//Big Endian Struct
+typedef struct _FIBRE_CHANNEL_ELS_READ_PORT_LIST_RESPONCE{
+    uint8_t     Command;
+    uint8_t     Reserved1;
+    uint16_t    PayloadLength;
+    uint8_t     Reserved2;
+    uint8_t     ListLength[3];
+    uint8_t     Reserved3;
+    uint8_t     Index[3];
+}FIBRE_CHANNEL_ELS_READ_PORT_LIST_RESPONCE, * PFIBRE_CHANNEL_ELS_READ_PORT_LIST_RESPONCE;
+
+//Big Endian
+typedef struct _FIBRE_CHANNEL_ELS_LINK_ERROR_STATUS_BLOCK{
+    uint32_t    LinkFail;
+    uint32_t    SyncLoss;
+    uint32_t    SingnalLoss;
+    uint32_t    PrimativeError;
+    uint32_t    InvalidWordCount;
+    uint32_t    InvalidCrcCount;
+}FIBRE_CHANNEL_ELS_LINK_ERROR_STATUS_BLOCK, * PFIBRE_CHANNEL_ELS_LINK_ERROR_STATUS_BLOCK;
+
+//Big Endian Struct
+typedef struct _FIBRE_CHANNEL_ELS_READ_PORT_STATUS_BLOCK_REQUEST{
+    uint8_t     Command;
+    uint8_t     Reserved2[2];
+    uint8_t     Flags;
+    uint64_t    PortSelect;
+}FIBRE_CHANNEL_ELS_READ_PORT_STATUS_BLOCK_REQUEST, * PFIBRE_CHANNEL_ELS_READ_PORT_STATUS_BLOCK_REQUEST;
+
+#define FIBRE_CHANNEL_READ_PORT_STATUS_D_ID                     0x00
+#define FIBRE_CHANNEL_READ_PORT_STATUS_PHYSICAL_PORT_NUMBER     0x01
+#define FIBRE_CHANNEL_READ_PORT_STATUS_WWPN                     0x02
+
+//Big Endian Struct
+typedef struct _FIBRE_CHANNEL_ELS_READ_PORT_STATUS_BLOCK_RESPONCE{
+    uint8_t     Command; 
+    uint8_t     Reserved1[2];
+    uint8_t     Flags;
+    uint8_t     Reserved2[2];
+    uint16_t    Status;
+}FIBRE_CHANNEL_ELS_READ_PORT_STATUS_BLOCK_RESPONCE, * PFIBRE_CHANNEL_ELS_READ_PORT_STATUS_BLOCK_RESPONCE;
+
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_LPORT_EXTENTION  0x01
+
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_POINT_TO_POINT   1 << 5
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_LOOP             1 << 4
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_FABRIC           1 << 3
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_NO_SIGNAL        1 << 2
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_NO_SYNX          1 << 1
+#define FIBRE_CHANNEL_ELS_READ_PORT_STATUS_RESET            1
+
+typedef struct _FIBRE_CHANNEL_ELS_LINK_INCEDENT_RECORD_REQUEST{
+    uint8_t     Command;    
+    uint8_t     Reserved1[3];
+    uint8_t     Function;
+    uint8_t     Format;
+    uint8_t     Reserved2[2];
+}FIBRE_CHANNEL_ELS_LINK_INCEDENT_RECORD_REQUEST, * PFIBRE_CHANNEL_ELS_LINK_INCEDENT_RECORD_REQUEST;
+
+#define ELS_LINK_INCEDENT_RECORD_REQUEST_SET_CONDITIONAL        0x01
+#define ELS_LINK_INCEDENT_RECORD_REQUEST_SET_UNCONDITIONAL      0x02
+#define ELS_LINK_INCEDENT_RECORD_REQUEST_CLEAR                  0xFF
+
+typedef struct _FIBRE_CHANNEL_SCAN_REMOTE_LIST_LOOP_REQUEST{
+    uint8_t     Command;
+    uint8_t     Reserved[3];
+    uint8_t     Flags;
+    uint8_t     FlagParameter[3];
+}FIBRE_CHANNEL_SCAN_REMOTE_LIST_LOOP_REQUEST, * PFIBRE_CHANNEL_SCAN_REMOTE_LIST_LOOP_REQUEST;
+
+#define FIBRE_CHANNEL_ELS_SCAN_REMOTE_LIST_ALL                  0x00
+#define FIBRE_CHANNEL_ELS_SCAN_REMOTE_LIST_ONE                  0x01
+#define FIBRE_CHANNEL_ELS_SCAN_REMOTE_LIST_ENABLE_PERIODIC      0x02
+#define FIBRE_CHANNEL_ELS_SCAN_REMOTE_LIST_DISABLE_PERIODIC     0x03
+
+typedef struct _FIBRE_CHANNEL_READ_LINK_ERROR_STATUS_BLOCK_REQUEST{
+    uint8_t     Command;
+    uint8_t     Reserved1[4];
+    uint8_t     PortID[3];
+}FIBRE_CHANNEL_READ_LINK_ERROR_STATUS_BLOCK_REQUEST, * PFIBRE_CHANNEL_READ_LINK_ERROR_STATUS_BLOCK_REQUEST;
+
+typedef struct _FIBRE_CHANNEL_ELS_REGISTERD_LINK_INCIDENT_REPORT{
+    uint8_t     Command;
+    uint8_t     Reserved[3];
+    uint8_t     Format;
+    uint8_t     CommonLinkIncidentRecordLength;
+    uint8_t     CommonLinkIncidentDescriptorLength;
+    uint8_t     SpecificIncidentRecordLength;
+}FIBRE_CHANNEL_ELS_REGISTERD_LINK_INCIDENT_REPORT, * PFIBRE_CHANNEL_ELS_REGISTERD_LINK_INCIDENT_REPORT;
+
+typedef struct _FIBRE_CHANNEL_COMMON_LINK_INCIDENT_RECORD_DATA{
+    uint64_t    Wwpn;
+    uint64_t    Wwnn;
+    uint8_t     PortType;
+    uint8_t     PortID[3];
+    uint64_t    ConnectedWwpn;
+    uint64_t    ConnectedWwnn;
+    uint64_t    FabricName;
+    uint32_t    PhysicalPort;
+    uint32_t    TransactionID;
+    uint8_t     Reserved[3];
+    uint8_t     TimeStampFormat;
+    uint64_t    TimeStamp;
+}FIBRE_CHANNEL_COMMON_LINK_INCIDENT_RECORD_DATA, * PFIBRE_CHANNEL_COMMON_LINK_INCIDENT_RECORD_DATA;
+
+#define ELS_CLIR_TIME_STAMP_VALUE_UNKOWN                0
+#define ELS_CLIR_TIME_STAMP_VALUE_SECOND_AND_FRACTION   1
+#define ELS_CLIR_TIME_STAMP_VALUE_CLOCK_SYNC_UPDATE     2
+
+typedef struct _FIBRE_CHANNEL_ELS_COMMON_LINK_INCIDENT_DESCRIPTOR{
+    uint8_t     IncidentQualifier;
+    uint8_t     IncidentCode;
+    uint16_t    DomainAreaOfISL;
+}FIBRE_CHANNEL_ELS_COMMON_LINK_INCIDENT_DESCRIPTOR, * PFIBRE_CHANNEL_ELS_COMMON_LINK_INCIDENT_DESCRIPTOR;
+
+#define ELS_CLID_SWITCH                 0x20
+#define ELS_CLID_E_PORT                 0x10
+#define ELS_CLID_SEVERITY_BITS          0x0C
+#define ELS_CLID_SEVERITY_INFO          0x00
+#define ELS_CLID_SEVERITY_NOP           0x08
+#define ELS_CLID_SEVERITY_DEGRADED      0x04
+#define ELS_CLID_LASER_DISC             0x02
+#define ELS_CLID_FRU_FORMATED           0x01
+
+#define ELS_CLID_IC_IMPLICIT            1
+#define ELS_CLID_IC_BIT_ERROR           2
+#define ELS_CLID_IC_LOSS_OF_FOO         3
+#define ELS_CLID_IC_NOP_PRIM_SEQ        4
+#define ELS_CLID_IC_PRIM_SEQ_TO         5
+#define ELS_CLID_IC_INVAL_PRIM_SEQ      6
+#define ELS_CLID_IC_LOOP_TO             7
+#define ELS_CLID_IC_LIP                 8
+
+#define FPIN_LI_UNKOWN              0x00
+#define FPIN_LI_LINK_FAILURE        0x01
+#define FPIN_LI_LOSS_OF_SYNC        0x02
+#define FPIN_LI_LOSS_OF_SIGNAL      0x03
+#define FPIN_LI_PRIM_SEQ_ERR        0x04
+#define FPIN_LI_INVALID_TX_WD       0x05
+#define FPIN_LI_INVALID_CRC         0x06
+#define FPIN_LI_DEVICE_SPEC         0x0F
+
+#define FIBRE_CHANNEL_LI_EVENT_TYPES_INIT {                 \
+    {FPIN_LI_UNKOWN,        "Unkown"},                      \
+    {FPIN_LI_LINK_FAILURE,  "Link Failure"},                \
+    {FPIN_LI_LOSS_OF_SYNC,  "Loss Of Sync"},                \
+    {FPIN_LI_LOSS_OF_SIGNAL,"Loss Of Signal"},              \
+    {FPIN_LI_PRIM_SEQ_ERR,  "Primitive Sequnce Error"},     \
+    {FPIN_LI_INVALID_TX_WD, "Invalid Transmition Word"},    \
+    {FPIN_LI_INVALID_CRC,   "Invalid Crc"},                 \
+    {FPIN_LI_DEVICE_SPEC,   "Device Specific"},             \
+}
+
+#define FPIN_DELIVERY_UNKOWN            0x00
+#define FPIN_DELIVERY_TIMEOUT           0x01
+#define FPIN_DELIVERY_UNABLE_TO_ROUTE   0x02
+#define FPIN_DELIVERY_DEVICE_SPEC       0x0F
+
+#define FIBRE_CHANNEL_DELIVERY_EVENT_TYPES_INIT {               \
+    {FPIN_DELIVERY_UNKOWN,              "Unkown"},              \
+    {FPIN_DELIVERY_TIMEOUT,             "Timeout"},             \
+    {FPIN_DELIVERY_UNABLE_TO_ROUTE,     "Unable To Route"},     \
+    {FPIN_DELIVERY_DEVICE_SPEC,         "Device Specific"},     \
+}
+
+#define FPIN_CONGESTION_CLEAR               0x00
+#define FPIN_CONGESTION_LOST_CREDIT         0x01
+#define FPIN_CONGESTION_CREDIT_STALL        0x02
+#define FPIN_CONGESTION_OVER_SUBSCIPTION    0x03
+#define FPIN_CONGESTION_DEVICE_SPECIFIC     0x0F
+
+#define FIBRE_CHANNEL_CONGESTED_EVENT_TYPE_INIT {               \
+    {FPIN_CONGESTION_CLEAR,             "Clear"},               \
+    {FPIN_CONGESTION_LOST_CREDIT,       "Lost Credit"},         \
+    {FPIN_CONGESTION_CREDIT_STALL,      "Credit Stall"},        \
+    {FPIN_CONGESTION_OVER_SUBSCIPTION   "Over Subscription"},   \
+    {FPIN_CONGESTION_DEVICE_SPECIFIC,   "Device Specific"},     \
+}
+
+#define FPIN_CONGESTION_SEVERITY_WARNING    0xF1
+#define FPIN_CONGESTION_SEVERITY_ERROR      0xF7
+
+typedef struct _FIBRE_CHANNEL_LINK_INTEGRITY_DESCRIPTOR{
+    uint32_t    DescriptorTag;
+    uint32_t    DescriptorLength;
+    uint64_t    DetectingWwpn;
+    uint64_t    AttachedWwpn;
+    uint16_t    EventType;
+    uint16_t    EventModifier;
+    uint32_t    EventThreshold;
+    uint32_t    EventCount;
+    uint32_t    PortNameCount;
+    uint64_t    PortNameList[];
+}FIBRE_CHANNEL_LINK_INTEGRITY_DESCRIPTOR, * PFIBRE_CHANNEL_LINK_INTEGRITY_DESCRIPTOR;
+
+typedef struct _FIBRE_CHANNEL_DELIVERY_DESCRIPTOR{
+    uint32_t    DescriptorTag;
+    uint32_t    DescriptorLength;
+    uint64_t    DetectingWwpn;
+    uint64_t    AttachedWwpn;
+    uint32_t    DeliveryReason;
+}FIBRE_CHANNEL_DELIVERY_DESCRIPTOR, * PFIBRE_CHANNEL_DELIVERY_DESCRIPTOR;
+
+typedef struct _FIBRE_CHANNEL_PEER_CONGESTION_DESCRIPTOR{
+    uint32_t    DescriptorTag;
+    uint32_t    DescriptorLength;
+    uint64_t    DetectingWwpn;
+    uint64_t    AttachedWwpn;
+    uint16_t    EventType;
+    uint16_t    EventModifier;
+    uint32_t    EventPeriod;
+    uint32_t    PNameCount;
+    uint64_t    PNameList[];
+}FIBRE_CHANNEL_PEER_CONGESTION_DESCRIPTOR, * PFIBRE_CHANNEL_PEER_CONGESTION_DESCRIPTOR;
+
+typedef struct _FIBRE_CHANNEL_CONGESTION_DESCRIPTOR{
+    uint32_t    DescriptorTag;
+    uint32_t    DescriptorLength;
+    uint16_t    EventType;
+    uint16_t    EventModifier;
+    uint32_t    EventPeriod;
+    uint8_t     Severity;
+    uint8_t     Reserved[3];
+}FIBRE_CHANNEL_CONGESTION_DESCRIPTOR, * PFIBRE_CHANNEL_CONGESTION_DESCRIPTOR;
+
+typedef struct _FIBRE_CHANNEL_ELS_FPIN{
+    uint8_t                         Command;
+    uint8_t                         Zero[3];
+    uint32_t                        Length;
+    FIBRE_CHANNEL_TLV_DESCRIPTOR    FpinDescriptor[];
+}FIBRE_CHANNEL_ELS_FPIN, * PFIBRE_CHANNEL_ELS_FPIN;
+
+typedef struct _FIBRE_CHANNEL_DIAGNOSTIC_FUNCTION_FPIN_REGISTRATION{
+    uint32_t    Tag;
+    uint32_t    Length;
+    uint32_t    Count;
+    uint32_t    Tags[];
+}FIBRE_CHANNEL_DIAGNOSTIC_FUNCTION_FPIN_REGISTRATION, * PFIBRE_CHANNEL_DIAGNOSTIC_FUNCTION_FPIN_REGISTRATION;
+
+typedef struct _FIBRE_CHANNEL_ELS_REGISTER_DIAGNOSTIC_FUNCTION{
+    uint8_t                         Command;
+    uint8_t                         Zero[3];
+    uint32_t                        Length;
+    FIBRE_CHANNEL_TLV_DESCRIPTOR    Descriptor[];
+}FIBRE_CHANNEL_ELS_REGISTER_DIAGNOSTIC_FUNCTION, * PFIBRE_CHANNEL_ELS_REGISTER_DIAGNOSTIC_FUNCTION;
+
+
+typedef struct _FIBRE_CHANNEL_ELS_RDF_RESPONCE{
+    FC_ELS_LS_ACC_PAYLOAD           AccHeader;
+    uint32_t                        ListLength;
+    FIBRE_CHANNEL_LSRI_DESCRIPTOR   Lrsi;
+    FIBRE_CHANNEL_TLV_DESCRIPTOR    Descriptor[];
+}FIBRE_CHANNEL_ELS_RDF_RESPONCE, * PFIBRE_CHANNEL_ELS_RDF_RESPONCE;
+
+typedef struct _FIBRE_CHANNEL_DIAGNOSTIC_LINK_FAULT_DESCRIPTOR{
+    uint32_t    Tag;
+    uint32_t    Length;
+    uint32_t    Dat;
+    uint32_t    Ddt;
+    uint32_t    Fdi;
+}FIBRE_CHANNEL_DIAGNOSTIC_LINK_FAULT_DESCRIPTOR, * PFIBRE_CHANNEL_DIAGNOSTIC_LINK_FAULT_DESCRIPTOR;
+
+#define EDC_CG_SINGAL_NOT_SUPPORTED 0x00
+#define EDC_CG_SINGAL_WARN_ONLY     0x01
+#define EDC_CG_SINGAL_WARN_ALARM    0x02
+
+#define FIBRE_CHANNEL_EDC_SIGNAL_CAP_TYPES_INTI {               \
+    {EDC_CG_SINGAL_NOT_SUPPORTED,   "Signal Not Supported"},    \
+    {EDC_CG_SINGAL_WARN_ONLY,       "Warning Signal"},          \
+    {EDC_CG_SINGAL_WARN_ALARM,      "Warning And Alarm Signal"},\
+}
+
+#define EDC_CG_SIGNAL_FREQUENCY_COUNT_MIN       1
+#define EDC_CG_SIGNAL_FREQUENCY_COUNT_MAX       999
+
+#define EDC_CG_SIGNAL_FREQUENCY_SECONDS         0x01
+#define EDC_CG_SIGNAL_FREQUENCY_MSECONDS        0x01
+
+typedef struct _FIBRE_CHANNEL_DIAGNOSTIC_SINGNAL_FREQUENCY{
+    uint16_t Count;
+    uint16_t Units;
+}FIBRE_CHANNEL_DIAGNOSTIC_SINGNAL_FREQUENCY, * PFIBRE_CHANNEL_DIAGNOSTIC_SINGNAL_FREQUENCY;
+
+typedef struct _FIBRE_CHANNEL_DIAGNOSTIC_CONGESTION_SINGAL_CAP_DESCRIPTOR{
+    uint32_t                                    Tag;
+    uint32_t                                    Length;
+    uint32_t                                    XmtSignalCapability;
+    FIBRE_CHANNEL_DIAGNOSTIC_SINGNAL_FREQUENCY  XmtFrequency;
+    uint32_t                                    RcvSingalCapability;
+    FIBRE_CHANNEL_DIAGNOSTIC_SINGNAL_FREQUENCY  RcvFrequency;
+}FIBRE_CHANNEL_DIAGNOSTIC_CONGESTION_SINGAL_CAP_DESCRIPTOR, * PFIBRE_CHANNEL_DIAGNOSTIC_CONGESTION_SINGAL_CAP_DESCRIPTOR;
+
+typedef struct _FIBRE_CHANNEL_EXCHANGE_DIAGNOSTIC_CAPABILITY{
+    uint8_t                         Command;
+    uint8_t                         Zero[3];
+    uint32_t                        Length;
+    FIBRE_CHANNEL_TLV_DESCRIPTOR    Descriptor[];
+}FIBRE_CHANNEL_EXCHANGE_DIAGNOSTIC_CAPABILITY, * PFIBRE_CHANNEL_EXCHANGE_DIAGNOSTIC_CAPABILITY;
+
+typedef struct _FIBRE_CHANNEL_ELS_EDS_RESPONCE{
+    FC_ELS_LS_ACC_PAYLOAD            AccHeader;
+    uint32_t                            ListLength;
+    FIBRE_CHANNEL_LSRI_DESCRIPTOR   Lsri;
+    FIBRE_CHANNEL_TLV_DESCRIPTOR        Descriptor[];
+}FIBRE_CHANNEL_ELS_EDS_RESPONCE, * PFIBRE_CHANNEL_ELS_EDS_RESPONCE;
 
 #ifdef __cplusplus
 }
 #endif
+
+#pragma pack(pop)
+
 #endif //_FIBRE_CHANNEL_ELS_H
