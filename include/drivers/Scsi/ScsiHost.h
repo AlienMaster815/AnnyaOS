@@ -10,6 +10,6 @@ typedef unsigned long long uint64_t;
 
 
 #include "FibreChannel/FibreChannelFrame.h"
-
+#include "CxlFlashIoCtl.h"
 
 #endif //_SCSI_HOST_H

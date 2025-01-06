@@ -1,6 +1,8 @@
 #ifndef _FIBRE_CHANNEL_NS_H
 #define _FIBRE_CHANNEL_NS_H
 
+#pragma pack(push,1)
+
 #ifdef __cplusplus
 #include <LouDDK.h>
 extern "C" {
@@ -124,4 +126,5 @@ typedef struct _FIBRE_CHANNEL_NS_RFF_ID_REQUEST{
 #ifdef __cplusplus
 }
 #endif
+#pragma pack(pop)
 #endif //_FIBRE_CHANNEL_NS_H
