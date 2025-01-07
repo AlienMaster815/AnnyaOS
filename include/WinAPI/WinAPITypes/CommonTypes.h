@@ -268,10 +268,10 @@ typedef struct _DISPATCHER_HEADER {
 typedef
 VOID
 KDEFERRED_ROUTINE (
-    _In_ struct _KDPC *Dpc,
-    _In_opt_ PVOID DeferredContext,
-    _In_opt_ PVOID SystemArgument1,
-    _In_opt_ PVOID SystemArgument2
+     struct _KDPC *Dpc,
+     PVOID DeferredContext,
+     PVOID SystemArgument1,
+     PVOID SystemArgument2
     );
 
 typedef KDEFERRED_ROUTINE *PKDEFERRED_ROUTINE;
@@ -333,8 +333,8 @@ typedef struct _KDPC {
 typedef
 NTSTATUS
 DRIVER_ADD_DEVICE (
-    _In_ struct _DRIVER_OBJECT *DriverObject,
-    _In_ struct _DEVICE_OBJECT *PhysicalDeviceObject
+     struct _DRIVER_OBJECT *DriverObject,
+     struct _DEVICE_OBJECT *PhysicalDeviceObject
     );
 
 typedef DRIVER_ADD_DEVICE *PDRIVER_ADD_DEVICE;
@@ -351,14 +351,14 @@ typedef const UNICODE_STRING CUNICODE_STRING;
 typedef
 NTSTATUS
 DRIVER_INITIALIZE (
-    _In_ struct _DRIVER_OBJECT *DriverObject,
-    _In_ PUNICODE_STRING RegistryPath
+     struct _DRIVER_OBJECT *DriverObject,
+     PUNICODE_STRING RegistryPath
     );
 
 typedef
 VOID
 DRIVER_UNLOAD (
-    _In_ struct _DRIVER_OBJECT *DriverObject
+     struct _DRIVER_OBJECT *DriverObject
     );
 
 typedef DRIVER_UNLOAD *PDRIVER_UNLOAD;
@@ -366,8 +366,8 @@ typedef DRIVER_UNLOAD *PDRIVER_UNLOAD;
 typedef
 NTSTATUS
 DRIVER_DISPATCH (
-    _In_ struct _DEVICE_OBJECT *DeviceObject,
-    _Inout_ struct _IRP *Irp
+     struct _DEVICE_OBJECT *DeviceObject,
+     struct _IRP *Irp
     );
 
 typedef DRIVER_DISPATCH *PDRIVER_DISPATCH;
@@ -377,8 +377,8 @@ typedef DRIVER_INITIALIZE *PDRIVER_INITIALIZE;
 typedef
 VOID
 DRIVER_STARTIO (
-    _Inout_ struct _DEVICE_OBJECT *DeviceObject,
-    _Inout_ struct _IRP *Irp
+     struct _DEVICE_OBJECT *DeviceObject,
+     struct _IRP *Irp
     );
 
 typedef DRIVER_STARTIO *PDRIVER_STARTIO;
@@ -472,14 +472,14 @@ typedef ULARGE_INTEGER *PULARGE_INTEGER;
 typedef
 BOOLEAN
 FAST_IO_READ (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ BOOLEAN Wait,
-    _In_ ULONG LockKey,
-    _Out_ PVOID Buffer,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     BOOLEAN Wait,
+     ULONG LockKey,
+     PVOID Buffer,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_READ *PFAST_IO_READ;
@@ -493,31 +493,29 @@ typedef enum _IO_ALLOCATION_ACTION {
 } IO_ALLOCATION_ACTION, *PIO_ALLOCATION_ACTION;
 
 typedef
-_Function_class_(DRIVER_CONTROL)
-_IRQL_requires_same_
 IO_ALLOCATION_ACTION
 DRIVER_CONTROL (
-    _In_ struct _DEVICE_OBJECT *DeviceObject,
-    _Inout_ struct _IRP *Irp,
-    _In_ PVOID MapRegisterBase,
-    _In_ PVOID Context
+     struct _DEVICE_OBJECT *DeviceObject,
+     struct _IRP *Irp,
+     PVOID MapRegisterBase,
+     PVOID Context
     );
 typedef DRIVER_CONTROL *PDRIVER_CONTROL;
 
 typedef
 BOOLEAN
 FAST_IO_CHECK_IF_POSSIBLE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ BOOLEAN Wait,
-    _In_ ULONG LockKey,
-    _In_ BOOLEAN CheckForReadOperation,
-    _Pre_notnull_
-    _When_(return != FALSE, _Post_equal_to_(_Old_(IoStatus)))
-    _When_(return == FALSE, _Post_valid_)
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     BOOLEAN Wait,
+     ULONG LockKey,
+     BOOLEAN CheckForReadOperation,
+    //_Pre_notnull_
+    //_When_(return != FALSE, _Post_equal_to_(_Old_(IoStatus)))
+    //_When_(return == FALSE, _Post_valid_)
     PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_CHECK_IF_POSSIBLE *PFAST_IO_CHECK_IF_POSSIBLE;
@@ -547,14 +545,14 @@ typedef struct _WAIT_CONTEXT_BLOCK {
 typedef
 BOOLEAN
 FAST_IO_WRITE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ BOOLEAN Wait,
-    _In_ ULONG LockKey,
-    _In_ PVOID Buffer,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     BOOLEAN Wait,
+     ULONG LockKey,
+     PVOID Buffer,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_WRITE *PFAST_IO_WRITE;
@@ -571,11 +569,11 @@ typedef struct _FILE_BASIC_INFORMATION {
 typedef
 BOOLEAN
 FAST_IO_QUERY_BASIC_INFO (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ BOOLEAN Wait,
-    _Out_ PFILE_BASIC_INFORMATION Buffer,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     BOOLEAN Wait,
+     PFILE_BASIC_INFORMATION Buffer,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_QUERY_BASIC_INFO *PFAST_IO_QUERY_BASIC_INFO;
@@ -594,15 +592,15 @@ typedef struct _KPROCESS *PEPROCESS;
 typedef
 BOOLEAN
 FAST_IO_LOCK (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ PLARGE_INTEGER Length,
-    _In_ PEPROCESS ProcessId,
-    _In_ ULONG Key,
-    _In_ BOOLEAN FailImmediately,
-    _In_ BOOLEAN ExclusiveLock,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     PLARGE_INTEGER Length,
+     PEPROCESS ProcessId,
+     ULONG Key,
+     BOOLEAN FailImmediately,
+     BOOLEAN ExclusiveLock,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_LOCK *PFAST_IO_LOCK;
@@ -610,11 +608,11 @@ typedef FAST_IO_LOCK *PFAST_IO_LOCK;
 typedef
 BOOLEAN
 FAST_IO_QUERY_STANDARD_INFO (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ BOOLEAN Wait,
-    _Out_ PFILE_STANDARD_INFORMATION Buffer,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     BOOLEAN Wait,
+     PFILE_STANDARD_INFORMATION Buffer,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_QUERY_STANDARD_INFO *PFAST_IO_QUERY_STANDARD_INFO;
@@ -622,10 +620,10 @@ typedef FAST_IO_QUERY_STANDARD_INFO *PFAST_IO_QUERY_STANDARD_INFO;
 typedef
 BOOLEAN
 FAST_IO_UNLOCK_ALL (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PEPROCESS ProcessId,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PEPROCESS ProcessId,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_UNLOCK_ALL *PFAST_IO_UNLOCK_ALL;
@@ -634,13 +632,13 @@ typedef FAST_IO_UNLOCK_ALL *PFAST_IO_UNLOCK_ALL;
 typedef
 BOOLEAN
 FAST_IO_UNLOCK_SINGLE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ PLARGE_INTEGER Length,
-    _In_ PEPROCESS ProcessId,
-    _In_ ULONG Key,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     PLARGE_INTEGER Length,
+     PEPROCESS ProcessId,
+     ULONG Key,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_UNLOCK_SINGLE *PFAST_IO_UNLOCK_SINGLE;
@@ -648,11 +646,11 @@ typedef FAST_IO_UNLOCK_SINGLE *PFAST_IO_UNLOCK_SINGLE;
 typedef
 BOOLEAN
 FAST_IO_UNLOCK_ALL_BY_KEY (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PVOID ProcessId,
-    _In_ ULONG Key,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PVOID ProcessId,
+     ULONG Key,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_UNLOCK_ALL_BY_KEY *PFAST_IO_UNLOCK_ALL_BY_KEY;
@@ -660,15 +658,15 @@ typedef FAST_IO_UNLOCK_ALL_BY_KEY *PFAST_IO_UNLOCK_ALL_BY_KEY;
 typedef
 BOOLEAN
 FAST_IO_DEVICE_CONTROL (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ BOOLEAN Wait,
-    _In_opt_ PVOID InputBuffer,
-    _In_ ULONG InputBufferLength,
-    _Out_opt_ PVOID OutputBuffer,
-    _In_ ULONG OutputBufferLength,
-    _In_ ULONG IoControlCode,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     BOOLEAN Wait,
+     PVOID InputBuffer,
+     ULONG InputBufferLength,
+     PVOID OutputBuffer,
+     ULONG OutputBufferLength,
+     ULONG IoControlCode,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_DEVICE_CONTROL *PFAST_IO_DEVICE_CONTROL;
@@ -676,7 +674,7 @@ typedef FAST_IO_DEVICE_CONTROL *PFAST_IO_DEVICE_CONTROL;
 typedef
 VOID
 FAST_IO_RELEASE_FILE (
-    _In_ struct _FILE_OBJECT *FileObject
+     struct _FILE_OBJECT *FileObject
     );
 
 typedef FAST_IO_RELEASE_FILE *PFAST_IO_RELEASE_FILE;
@@ -684,7 +682,7 @@ typedef FAST_IO_RELEASE_FILE *PFAST_IO_RELEASE_FILE;
 typedef
 VOID
 FAST_IO_ACQUIRE_FILE (
-    _In_ struct _FILE_OBJECT *FileObject
+     struct _FILE_OBJECT *FileObject
     );
 
 typedef FAST_IO_ACQUIRE_FILE *PFAST_IO_ACQUIRE_FILE;
@@ -693,8 +691,8 @@ typedef FAST_IO_ACQUIRE_FILE *PFAST_IO_ACQUIRE_FILE;
 typedef
 VOID
 FAST_IO_DETACH_DEVICE (
-    _In_ struct _DEVICE_OBJECT *SourceDevice,
-    _In_ struct _DEVICE_OBJECT *TargetDevice
+     struct _DEVICE_OBJECT *SourceDevice,
+     struct _DEVICE_OBJECT *TargetDevice
     );
 
 typedef FAST_IO_DETACH_DEVICE *PFAST_IO_DETACH_DEVICE;
@@ -702,11 +700,11 @@ typedef FAST_IO_DETACH_DEVICE *PFAST_IO_DETACH_DEVICE;
 typedef
 BOOLEAN
 FAST_IO_QUERY_NETWORK_OPEN_INFO (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ BOOLEAN Wait,
-    _Out_ struct _FILE_NETWORK_OPEN_INFORMATION *Buffer,
-    _Out_ struct _IO_STATUS_BLOCK *IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     BOOLEAN Wait,
+     struct _FILE_NETWORK_OPEN_INFORMATION *Buffer,
+     struct _IO_STATUS_BLOCK *IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_QUERY_NETWORK_OPEN_INFO *PFAST_IO_QUERY_NETWORK_OPEN_INFO;
@@ -714,10 +712,10 @@ typedef FAST_IO_QUERY_NETWORK_OPEN_INFO *PFAST_IO_QUERY_NETWORK_OPEN_INFO;
 typedef
 NTSTATUS
 FAST_IO_ACQUIRE_FOR_MOD_WRITE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER EndingOffset,
-    _Out_ struct _ERESOURCE **ResourceToRelease,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER EndingOffset,
+     struct _ERESOURCE **ResourceToRelease,
+     struct _DEVICE_OBJECT *DeviceObject
              );
 
 typedef FAST_IO_ACQUIRE_FOR_MOD_WRITE *PFAST_IO_ACQUIRE_FOR_MOD_WRITE;
@@ -737,25 +735,23 @@ typedef MDL *PMDL;
 typedef
 BOOLEAN
 FAST_IO_MDL_READ (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ ULONG LockKey,
-    _Out_ PMDL *MdlChain,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     ULONG LockKey,
+     PMDL *MdlChain,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_MDL_READ *PFAST_IO_MDL_READ;
 
-_Function_class_(FAST_IO_MDL_READ_COMPLETE)
-_IRQL_requires_same_
 typedef
 BOOLEAN
 FAST_IO_MDL_READ_COMPLETE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PMDL MdlChain,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PMDL MdlChain,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_MDL_READ_COMPLETE *PFAST_IO_MDL_READ_COMPLETE;
@@ -763,13 +759,13 @@ typedef FAST_IO_MDL_READ_COMPLETE *PFAST_IO_MDL_READ_COMPLETE;
 typedef
 BOOLEAN
 FAST_IO_PREPARE_MDL_WRITE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ ULONG LockKey,
-    _Out_ PMDL *MdlChain,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     ULONG LockKey,
+     PMDL *MdlChain,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_PREPARE_MDL_WRITE *PFAST_IO_PREPARE_MDL_WRITE;
@@ -777,10 +773,10 @@ typedef FAST_IO_PREPARE_MDL_WRITE *PFAST_IO_PREPARE_MDL_WRITE;
 typedef
 BOOLEAN
 FAST_IO_MDL_WRITE_COMPLETE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ PMDL MdlChain,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     PMDL MdlChain,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_MDL_WRITE_COMPLETE *PFAST_IO_MDL_WRITE_COMPLETE;
@@ -788,16 +784,16 @@ typedef FAST_IO_MDL_WRITE_COMPLETE *PFAST_IO_MDL_WRITE_COMPLETE;
 typedef
 BOOLEAN
 FAST_IO_READ_COMPRESSED (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ ULONG LockKey,
-    _Out_ PVOID Buffer,
-    _Out_ PMDL *MdlChain,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _Out_writes_bytes_(CompressedDataInfoLength) struct _COMPRESSED_DATA_INFO *CompressedDataInfo,
-    _In_ ULONG CompressedDataInfoLength,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     ULONG LockKey,
+     PVOID Buffer,
+     PMDL *MdlChain,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _COMPRESSED_DATA_INFO *CompressedDataInfo,
+     ULONG CompressedDataInfoLength,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_READ_COMPRESSED *PFAST_IO_READ_COMPRESSED;
@@ -805,16 +801,16 @@ typedef FAST_IO_READ_COMPRESSED *PFAST_IO_READ_COMPRESSED;
 typedef
 BOOLEAN
 FAST_IO_WRITE_COMPRESSED (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ ULONG Length,
-    _In_ ULONG LockKey,
-    _In_ PVOID Buffer,
-    _Out_ PMDL *MdlChain,
-    _Out_ PIO_STATUS_BLOCK IoStatus,
-    _In_reads_bytes_(CompressedDataInfoLength) struct _COMPRESSED_DATA_INFO *CompressedDataInfo,
-    _In_ ULONG CompressedDataInfoLength,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     ULONG Length,
+     ULONG LockKey,
+     PVOID Buffer,
+     PMDL *MdlChain,
+     PIO_STATUS_BLOCK IoStatus,
+     struct _COMPRESSED_DATA_INFO *CompressedDataInfo,
+     ULONG CompressedDataInfoLength,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_WRITE_COMPRESSED *PFAST_IO_WRITE_COMPRESSED;
@@ -822,9 +818,9 @@ typedef FAST_IO_WRITE_COMPRESSED *PFAST_IO_WRITE_COMPRESSED;
 typedef
 BOOLEAN
 FAST_IO_MDL_READ_COMPLETE_COMPRESSED (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PMDL MdlChain,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PMDL MdlChain,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_MDL_READ_COMPLETE_COMPRESSED *PFAST_IO_MDL_READ_COMPLETE_COMPRESSED;
@@ -832,10 +828,10 @@ typedef FAST_IO_MDL_READ_COMPLETE_COMPRESSED *PFAST_IO_MDL_READ_COMPLETE_COMPRES
 typedef
 BOOLEAN
 FAST_IO_MDL_WRITE_COMPLETE_COMPRESSED (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ PLARGE_INTEGER FileOffset,
-    _In_ PMDL MdlChain,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     PLARGE_INTEGER FileOffset,
+     PMDL MdlChain,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_MDL_WRITE_COMPLETE_COMPRESSED *PFAST_IO_MDL_WRITE_COMPLETE_COMPRESSED;
@@ -856,9 +852,9 @@ typedef struct _FILE_NETWORK_OPEN_INFORMATION {
 typedef
 BOOLEAN
 FAST_IO_QUERY_OPEN (
-    _Inout_ struct _IRP *Irp,
-    _Out_ PFILE_NETWORK_OPEN_INFORMATION NetworkInformation,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _IRP *Irp,
+     PFILE_NETWORK_OPEN_INFORMATION NetworkInformation,
+     struct _DEVICE_OBJECT *DeviceObject
     );
 
 typedef FAST_IO_QUERY_OPEN *PFAST_IO_QUERY_OPEN;
@@ -866,9 +862,9 @@ typedef FAST_IO_QUERY_OPEN *PFAST_IO_QUERY_OPEN;
 typedef
 NTSTATUS
 FAST_IO_RELEASE_FOR_MOD_WRITE (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ struct _ERESOURCE *ResourceToRelease,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     struct _ERESOURCE *ResourceToRelease,
+     struct _DEVICE_OBJECT *DeviceObject
              );
 
 typedef FAST_IO_RELEASE_FOR_MOD_WRITE *PFAST_IO_RELEASE_FOR_MOD_WRITE;
@@ -876,8 +872,8 @@ typedef FAST_IO_RELEASE_FOR_MOD_WRITE *PFAST_IO_RELEASE_FOR_MOD_WRITE;
 typedef
 NTSTATUS
 FAST_IO_ACQUIRE_FOR_CCFLUSH (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     struct _DEVICE_OBJECT *DeviceObject
              );
 
 typedef FAST_IO_ACQUIRE_FOR_CCFLUSH *PFAST_IO_ACQUIRE_FOR_CCFLUSH;
@@ -885,8 +881,8 @@ typedef FAST_IO_ACQUIRE_FOR_CCFLUSH *PFAST_IO_ACQUIRE_FOR_CCFLUSH;
 typedef
 NTSTATUS
 FAST_IO_RELEASE_FOR_CCFLUSH (
-    _In_ struct _FILE_OBJECT *FileObject,
-    _In_ struct _DEVICE_OBJECT *DeviceObject
+     struct _FILE_OBJECT *FileObject,
+     struct _DEVICE_OBJECT *DeviceObject
              );
 
 typedef FAST_IO_RELEASE_FOR_CCFLUSH *PFAST_IO_RELEASE_FOR_CCFLUSH;

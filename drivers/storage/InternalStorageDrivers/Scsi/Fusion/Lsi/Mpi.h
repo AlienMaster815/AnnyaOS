@@ -349,8 +349,8 @@
 #define MPI_IOC_STATUS_SAS_SMP_DATA_OVERRUN                     0x91
 
 //Inband Values
-#define MPI_IOC_STATUS_IN_BAND_ABORTED                          0x98
-#define MPI_IOC_STATUS_IN_BAND_NO_CONNECTION                    0x99
+#define MPI_IOC_STATUSBAND_ABORTED                          0x98
+#define MPI_IOC_STATUSBAND_NO_CONNECTION                    0x99
 
 //Diagnostic Tools Values
 #define MPI_IOC_STATUS_DIAGNOSTIC_RELEASED                      0xA0

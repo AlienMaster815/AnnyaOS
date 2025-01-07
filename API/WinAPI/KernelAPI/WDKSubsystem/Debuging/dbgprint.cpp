@@ -131,7 +131,7 @@ vDbgPrintExWithPrefix (
 }
 
 
-ULONG DbgPrint(_In_z_ _Printf_format_string_ PCSTR Format, ...){
+ULONG DbgPrint(PCSTR Format, ...){
     va_list args;
     va_start(args, Format);
 
@@ -191,7 +191,7 @@ ULONG DbgPrint(_In_z_ _Printf_format_string_ PCSTR Format, ...){
     return 0;
 }
 
-ULONG DbgPrintEx ( _In_ ULONG ComponentId, _In_ ULONG Level, _In_z_ _Printf_format_string_ PCSTR Format, ...){
+ULONG DbgPrintEx (  ULONG ComponentId,  ULONG Level, PCSTR Format, ...){
        va_list args;
     va_start(args, Format);
 

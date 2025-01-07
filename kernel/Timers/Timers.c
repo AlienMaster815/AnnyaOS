@@ -47,9 +47,9 @@ uint64_t GetCurrentTimeInMilliseconds() {
     uint64_t tsc_frequency = GetTscMaster();
     
     // Convert TSC ticks to milliseconds
-    uint64_t time_in_milliseconds = (current_tsc * 1000) / tsc_frequency;
+    uint64_t timemilliseconds = (current_tsc * 1000) / tsc_frequency;
     
-    return time_in_milliseconds;
+    return timemilliseconds;
 }
 
 int is_leap_year(int year) {
@@ -85,9 +85,9 @@ void LouKeGetTime(
 
     // Calculate the year
     while (1) {
-        int days_in_year = is_leap_year(year) ? 366 : 365;
-        if (days_since_epoch >= days_in_year) {
-            days_since_epoch -= days_in_year;
+        int daysyear = is_leap_year(year) ? 366 : 365;
+        if (days_since_epoch >= daysyear) {
+            days_since_epoch -= daysyear;
             year++;
         } else {
             break;
@@ -96,13 +96,13 @@ void LouKeGetTime(
 
     // Calculate the month and day
     int month = 0;
-    int days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    int days_in_month_leap[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int daysmonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int daysmonth_leap[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     while (1) {
-        int days_in_current_month = is_leap_year(year) ? days_in_month_leap[month] : days_in_month[month];
-        if (days_since_epoch >= days_in_current_month) {
-            days_since_epoch -= days_in_current_month;
+        int dayscurrent_month = is_leap_year(year) ? daysmonth_leap[month] : daysmonth[month];
+        if (days_since_epoch >= dayscurrent_month) {
+            days_since_epoch -= dayscurrent_month;
             month++;
         } else {
             break;

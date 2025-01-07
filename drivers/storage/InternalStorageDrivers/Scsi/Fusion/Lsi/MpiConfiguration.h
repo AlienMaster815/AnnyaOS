@@ -33,7 +33,7 @@
 #define MPI_CONFIGURATION_PAGE_TYPE_RAID_VOLUME                             0x08
 #define MPI_CONFIGURATION_PAGE_TYPE_MANUFACTURING                           0x09
 #define MPI_CONFIGURATION_PAGE_TYPE_RAID_PHYSICAL_DISK                      0x0A
-#define MPI_CONFIGURATION_PAGE_TYPE_IN_BAND                                 0x0B
+#define MPI_CONFIGURATION_PAGE_TYPEBAND                                 0x0B
 #define MPI_CONFIGURATION_PAGE_TYPE_EXTENDED                                0x0F
 #define MPI_CONFIGURATION_PAGE_TYPE_BITS                                    0x0F
 

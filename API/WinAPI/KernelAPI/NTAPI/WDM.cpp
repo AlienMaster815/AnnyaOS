@@ -2,23 +2,23 @@
 #include <NtAPI.h>
 
 void IoDisconnectInterrupt(
-  _In_ PKINTERRUPT InterruptObject
+   PKINTERRUPT InterruptObject
 ){
     RegisterInterruptHandler(0x00, InterruptObject->Vector);
 }
 
 NTSTATUS IoConnectInterrupt(
-  _Out_          PKINTERRUPT       *InterruptObject,
-  _In_           PKSERVICE_ROUTINE  ServiceRoutine,
-  _In_opt_ PVOID                    ServiceContext,
-  _In_opt_ PKSPIN_LOCK              SpinLock,
-  _In_           ULONG              Vector,
-  _In_           KIRQL              Irql,
-  _In_           KIRQL              SynchronizeIrql,
-  _In_           KINTERRUPT_MODE    InterruptMode,
-  _In_           BOOLEAN            ShareVector,
-  _In_           KAFFINITY          ProcessorEnableMask,
-  _In_           BOOLEAN            FloatingSave
+            PKINTERRUPT       *InterruptObject,
+             PKSERVICE_ROUTINE  ServiceRoutine,
+   PVOID                    ServiceContext,
+   PKSPIN_LOCK              SpinLock,
+             ULONG              Vector,
+             KIRQL              Irql,
+             KIRQL              SynchronizeIrql,
+             KINTERRUPT_MODE    InterruptMode,
+             BOOLEAN            ShareVector,
+             KAFFINITY          ProcessorEnableMask,
+             BOOLEAN            FloatingSave
 ){
     //we will do more later
     RegisterInterruptHandler((void(*)())ServiceRoutine ,Vector);
@@ -140,7 +140,7 @@ void RtlCopyMemory(
 
  VOID RtlCopyUnicodeString(
             PUNICODE_STRING  DestinationString,
-            _In_opt_ PCUNICODE_STRING SourceString
+             PCUNICODE_STRING SourceString
 ){
 
     LouPrint("RtlCopyUnicodeString()\n");

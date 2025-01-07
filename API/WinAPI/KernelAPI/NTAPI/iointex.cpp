@@ -2,13 +2,13 @@
 #include <LouDDK.h>
 
 NTSTATUS WdmlibIoConnectInterruptEx(
-	_In_ _Out_ PIO_CONNECT_INTERRUPT_PARAMETERS Parameters
+	  PIO_CONNECT_INTERRUPT_PARAMETERS Parameters
 ) {
 	return IoConnectInterruptEx(Parameters);
 }
 
 NTSTATUS WdmlibIoDisconnectInterruptEx(
-	_In_ _Out_ PIO_DISCONNECT_INTERRUPT_PARAMETERS Parameters
+	  PIO_DISCONNECT_INTERRUPT_PARAMETERS Parameters
 ) {
 
 	IoDisconnectInterruptEx(Parameters);
@@ -17,8 +17,8 @@ NTSTATUS WdmlibIoDisconnectInterruptEx(
 }
 
 NTSTATUS WdmlibIoGetAffinityInterrupt(
-    _In_  PKINTERRUPT     InterruptObject,
-    _Out_ PGROUP_AFFINITY GroupAffinity
+      PKINTERRUPT     InterruptObject,
+     PGROUP_AFFINITY GroupAffinity
 ) {
     if (InterruptObject == 0x00 || GroupAffinity == 0x00) {
         return STATUS_INVALID_PARAMETER;

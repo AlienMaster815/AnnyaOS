@@ -10,8 +10,8 @@ unsigned char _BitTest64(
 }
 
 LONG InterlockedAnd(
-	_In_ _Out_ LONG volatile* Destination,
-	_In_      LONG          Value
+	  LONG volatile* Destination,
+	      LONG          Value
 ) {
 	//AND WRAPPER
 	return LouKeAndOperationLong((int32_t volatile*)Destination,(int32_t)Value);
@@ -20,7 +20,7 @@ LONG InterlockedAnd(
 
 LONG 
 InterlockedCompareExchange(
-	_In_ _Out_ LONG volatile* Destination,
+	  LONG volatile* Destination,
 	LONG          ExChange,
 	LONG          Comperand
 ) {
@@ -36,8 +36,8 @@ InterlockedCompareExchange(
 
 PVOID 
 InterlockedCompareExchangePointer(
-	_In_ _Out_ PVOID volatile* Destination,
-	_In_      PVOID          Exchange,
+	  PVOID volatile* Destination,
+	      PVOID          Exchange,
 	PVOID          Comperand
 ) {
 	return LouKeComparePointer(Destination, Exchange, Comperand);
@@ -47,8 +47,8 @@ InterlockedCompareExchangePointer(
 
 LONG
 InterlockedOr(
-	_In_ _Out_ LONG volatile* Destination,
-	_In_      LONG          Value
+	  LONG volatile* Destination,
+	      LONG          Value
 ) {
 	return LouKeOrOperationLong((int32_t volatile*)Destination,(int32_t)Value);
 }
@@ -57,8 +57,8 @@ InterlockedOr(
 
 LONG 
 InterlockedXor(
-	_In_ _Out_ LONG volatile* Destination,
-	_In_      LONG          Value
+	  LONG volatile* Destination,
+	      LONG          Value
 ) {
 	return LouKeXorOperationLong((int32_t volatile*)Destination, (int32_t)Value);
 }

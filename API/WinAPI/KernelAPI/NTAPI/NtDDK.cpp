@@ -17,7 +17,7 @@ NTSTATUS IoAllocateAdapterChannel(
 }
 
 BOOLEAN WheaSignalHandlerOverrideCallback(
-	_In_ _Out_opt_ UINT_PTR Context
+	  UINT_PTR Context
 ){
 
 	return true;
@@ -42,22 +42,22 @@ void CUSTOM_SYSTEM_EVENT_TRIGGER_INIT(
 }
 
 void DriverReinitialize(
-	_In_          _DRIVER_OBJECT* DriverObject,
-	_In_opt_ PVOID Context,
-	_In_           ULONG Count
+	          _DRIVER_OBJECT* DriverObject,
+	 PVOID Context,
+	           ULONG Count
 ) {
 
 
 }
 
 void ExFreePool(
-  _In_ PVOID P
+   PVOID P
 ){
 
 }
 
 void ExpandStackCallout(
-	_In_opt_ PVOID Parameter
+	 PVOID Parameter
 ) {
 
 
@@ -92,7 +92,7 @@ void KeQuerySystemTime(LARGE_INTEGER* TimeCurrent){ //T = OUT
 }
 
 NTSTATUS ExUuidCreate(
-	_Out_ UUID* Uuid
+	 UUID* Uuid
 ) {
 
 
@@ -103,26 +103,26 @@ NTSTATUS ExUuidCreate(
 
 NTSTATUS HalAllocateHardwareCounters(
 	PGROUP_AFFINITY                 GroupAffinty,
-	_In_  ULONG                           GroupCount,
-	_In_  PPHYSICAL_COUNTER_RESOURCE_LIST ResourceList,
-	_Out_ PHANDLE                         CounterSetHandle
+	  ULONG                           GroupCount,
+	  PPHYSICAL_COUNTER_RESOURCE_LIST ResourceList,
+	 PHANDLE                         CounterSetHandle
 ) {
 
 	return STATUS_SUCCESS;
 }
 
 void HalExamineMBR(
-	_In_  PDEVICE_OBJECT DeviceObject,
-	_In_  ULONG          SectorSize,
-	_In_  ULONG          MBRTypeIdentifier,
-	_Out_ PVOID* Buffer
+	  PDEVICE_OBJECT DeviceObject,
+	  ULONG          SectorSize,
+	  ULONG          MBRTypeIdentifier,
+	 PVOID* Buffer
 ) {
 
 
 }
 
 NTSTATUS HalFreeHardwareCounters(
-	_In_ HANDLE CounterSetHandle
+	 HANDLE CounterSetHandle
 ) {
 
 	return STATUS_SUCCESS;
@@ -130,12 +130,12 @@ NTSTATUS HalFreeHardwareCounters(
 
 //WARNING BACKPATIBLE STABILITY THREAT
 ULONG HalGetBusDataByOffset(
-	_In_ BUS_DATA_TYPE BusDataType,
-	_In_ ULONG         BusNumber,
-	_In_ ULONG         SlotNumber,
-	_In_ PVOID         Buffer,
-	_In_ ULONG         Offset,
-	_In_ ULONG         Length
+	 BUS_DATA_TYPE BusDataType,
+	 ULONG         BusNumber,
+	 ULONG         SlotNumber,
+	 PVOID         Buffer,
+	 ULONG         Offset,
+	 ULONG         Length
 ) {
 
 
@@ -143,30 +143,30 @@ ULONG HalGetBusDataByOffset(
 }
 
 ULONG HalSetBusDataByOffset(
-	_In_ BUS_DATA_TYPE BusDataType,
-	_In_ ULONG         BusNumber,
-	_In_ ULONG         SlotNumber,
-	_In_ PVOID         Buffer,
-	_In_ ULONG         Offset,
-	_In_ ULONG         Length
+	 BUS_DATA_TYPE BusDataType,
+	 ULONG         BusNumber,
+	 ULONG         SlotNumber,
+	 PVOID         Buffer,
+	 ULONG         Offset,
+	 ULONG         Length
 ) {
 
 	return 0;
 }
 
 void IoAllocateController(
-	_In_           PCONTROLLER_OBJECT ControllerObject,
-	_In_           PDEVICE_OBJECT     DeviceObject,
-	_In_           PDRIVER_CONTROL    ExecutionRoutine,
-	_In_opt_ PVOID              Context
+	           PCONTROLLER_OBJECT ControllerObject,
+	           PDEVICE_OBJECT     DeviceObject,
+	           PDRIVER_CONTROL    ExecutionRoutine,
+	 PVOID              Context
 ) {
 
 
 }
 /*
 void IoAssignArcName(
-	_In_  ArcName,
-	_In_  DeviceName
+	  ArcName,
+	  DeviceName
 ) {
 
 
@@ -174,41 +174,41 @@ void IoAssignArcName(
 */
 
 void IoClearActivityIdThread(
-	_In_ LPCGUID OriginalId
+	 LPCGUID OriginalId
 ) {
 
 
 }
 
 PCONTROLLER_OBJECT IoCreateController(
-	_In_ ULONG Size
+	 ULONG Size
 ) {
 
 	return 0;
 }
 
 //void IoDeassignArcName(
-//	_In_  ArcName
+//	  ArcName
 //){
 
 //}
 
 //void IoDeassignArcName(
-//	_In_  ArcName
+//	  ArcName
 //){
 
 //}
 
 NTSTATUS IoDecrementKeepAliveCount(
-	_In_ _Out_ PFILE_OBJECT FileObject,
-	_In_ _Out_ PEPROCESS    Process
+	  PFILE_OBJECT FileObject,
+	  PEPROCESS    Process
 ) {
 
 	return STATUS_SUCCESS;
 }
 
 void IoDeleteController(
-  _In_ PCONTROLLER_OBJECT ControllerObject
+   PCONTROLLER_OBJECT ControllerObject
 ){
 
 }
@@ -223,14 +223,14 @@ bool NT_SUCCESS(NTSTATUS Status){
 }
 
 void IoFreeController(
-  _In_ PCONTROLLER_OBJECT ControllerObject
+   PCONTROLLER_OBJECT ControllerObject
 ){
 
 }
 
 NTSTATUS IoGetActivityIdIrp(
-  _In_  PIRP   Irp,
-  _Out_ LPGUID Guid
+    PIRP   Irp,
+   LPGUID Guid
 ){
 
 
@@ -257,7 +257,7 @@ PGENERIC_MAPPING IoGetFileObjectGenericMapping(){
 }
 
 PEPROCESS IoGetInitiatorProcess(
-  _In_ PFILE_OBJECT FileObject
+   PFILE_OBJECT FileObject
 ){
 
 
@@ -266,7 +266,7 @@ PEPROCESS IoGetInitiatorProcess(
 }
 
 IO_PAGING_PRIORITY IoGetPagingIoPriority(
-  _In_ PIRP Irp
+   PIRP Irp
 ){
 
 	return IoPagingPriorityInvalid;
@@ -274,8 +274,8 @@ IO_PAGING_PRIORITY IoGetPagingIoPriority(
 }
 
 NTSTATUS IoIncrementKeepAliveCount(
-	_In_ _Out_ PFILE_OBJECT FileObject,
-	_In_ _Out_ PEPROCESS    Process
+	  PFILE_OBJECT FileObject,
+	  PEPROCESS    Process
 ){
 
 
@@ -283,7 +283,7 @@ NTSTATUS IoIncrementKeepAliveCount(
 }
 
 LOGICAL IoIsValidIrpStatus(
-  _In_ NTSTATUS Status
+   NTSTATUS Status
 ){
 
 

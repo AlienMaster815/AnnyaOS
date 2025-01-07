@@ -50,10 +50,10 @@ ULONG KeNumberProcessors();
 
 VOID
 RtlUnwind(
-    _In_opt_ PVOID TargetFrame,
-    _In_opt_ PVOID TargetIp,
-    _In_opt_ PEXCEPTION_RECORD ExceptionRecord,
-    _In_ PVOID ReturnValue
+     PVOID TargetFrame,
+     PVOID TargetIp,
+     PEXCEPTION_RECORD ExceptionRecord,
+     PVOID ReturnValue
 );
 
 LOUDDK_API_ENTRY
@@ -625,10 +625,10 @@ void InitializeWDFLDR_SYS(){
 }
 
 STOR_PHYSICAL_ADDRESS StorPortGetPhysicalAddress(
-  _In_   PVOID HwDeviceExtension,
-  _In_   PSCSI_REQUEST_BLOCK Srb,
-  _In_   PVOID VirtualAddress,
-  _Out_  ULONG *Length
+     PVOID HwDeviceExtension,
+     PSCSI_REQUEST_BLOCK Srb,
+     PVOID VirtualAddress,
+    ULONG *Length
 );
 
 VOID StorPortStallExecution(
@@ -644,9 +644,9 @@ void StorPortNotification(
 void StorPortSetDeviceQueueDepth();
 
 PVOID StorPortGetUncachedExtension(
-  _In_ PVOID HwDeviceExtension,
-  _In_ PPORT_CONFIGURATION_INFORMATION ConfigInfo,
-  _In_ ULONG NumberOfBytes
+   PVOID HwDeviceExtension,
+   PPORT_CONFIGURATION_INFORMATION ConfigInfo,
+   ULONG NumberOfBytes
 );
 
 NTSTATUS StorPortInitialize(
@@ -659,12 +659,12 @@ NTSTATUS StorPortInitialize(
 void StorPortGetScatterGatherList();
 
 PVOID StorPortGetDeviceBase(
-  _In_  PVOID   HwDeviceExtension,
-  _In_  INTERFACE_TYPE BusType,
-  _In_  ULONG   SystemIoBusNumber,
-  _In_  PHYSICAL_ADDRESS IoAddress,
-  _In_  ULONG   NumberOfBytes,
-  _In_  BOOLEAN InIoSpace
+    PVOID   HwDeviceExtension,
+    INTERFACE_TYPE BusType,
+    ULONG   SystemIoBusNumber,
+    PHYSICAL_ADDRESS IoAddress,
+    ULONG   NumberOfBytes,
+    BOOLEAN InIoSpace
 );
 
 NTSTATUS StorPortGetBusData(

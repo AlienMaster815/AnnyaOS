@@ -656,249 +656,249 @@ void BarrierAfterReadR1();
 void BarrierAfterReadR2();
 
 LONG InterlockedAnd(
-	_In_ _Out_ LONG volatile* Destination,
-	_In_      LONG          Value
+	  LONG volatile* Destination,
+	      LONG          Value
 );
 
 LONG InterlockedCompareExchange(
-	_In_ _Out_ LONG volatile* Destination,
+	  LONG volatile* Destination,
 	LONG          ExChange,
 	LONG          Comperand
 );
 
 PVOID InterlockedCompareExchangePointer(
-	_In_ _Out_ PVOID volatile* Destination,
-	_In_      PVOID          Exchange,
+	  PVOID volatile* Destination,
+	      PVOID          Exchange,
 	PVOID          Comperand
 );
 
 LONG InterlockedDecrement(
-	_In_ _Out_ LONG volatile* Addend
+	  LONG volatile* Addend
 );
 
 //Copy From Here
 
 LONG InterlockedExchange(
-	_In_ _Out_ LONG volatile* Target,
-	_In_      LONG          Value
+	  LONG volatile* Target,
+	      LONG          Value
 );
 
 LONG InterlockedExchangeAdd(
-	_In_ _Out_ LONG volatile* Addend,
-	_In_      LONG          Value
+	  LONG volatile* Addend,
+	      LONG          Value
 );
 
 PVOID InterlockedExchangePointer(
-	_In_ _Out_      PVOID volatile* Target,
-	_In_opt_ PVOID          Value
+	       PVOID volatile* Target,
+	 PVOID          Value
 );
 
 LONG InterlockedIncrement(
-	_In_ _Out_ LONG volatile* Addend
+	  LONG volatile* Addend
 );
 
 LONG InterlockedOr(
-	_In_ _Out_ LONG volatile* Destination,
-	_In_      LONG          Value
+	  LONG volatile* Destination,
+	      LONG          Value
 );
 
 LONG InterlockedXor(
-	_In_ _Out_ LONG volatile* Destination,
-	_In_      LONG          Value
+	  LONG volatile* Destination,
+	      LONG          Value
 );
 
 //PINTERFACE_DEREFERENCE PinterfaceDereference;
 
 void PinterfaceDereference(
-	_In_ PVOID Context
+	 PVOID Context
 );
 
 void PinterfaceReference(
-	_In_ PVOID Context
+	 PVOID Context
 );
 
 void READ_PORT_BUFFER_UCHAR(
-	_In_  PUCHAR Port,
-	_Out_ PUCHAR Buffer,
-	_In_  ULONG  Count
+	  PUCHAR Port,
+	 PUCHAR Buffer,
+	  ULONG  Count
 );
 
 void READ_PORT_BUFFER_ULONG(
-	_In_  PULONG Port,
-	_Out_ PULONG Buffer,
-	_In_  ULONG  Count
+	  PULONG Port,
+	 PULONG Buffer,
+	  ULONG  Count
 );
 
 void READ_PORT_BUFFER_USHORT(
-	_In_  PUSHORT Port,
-	_Out_ PUSHORT Buffer,
-	_In_  ULONG   Count
+	  PUSHORT Port,
+	 PUSHORT Buffer,
+	  ULONG   Count
 );
 
 UCHAR READ_PORT_UCHAR(
-	_In_ PVOID Port
+	 PVOID Port
 );
 
 ULONG READ_PORT_ULONG(
-	_In_ PVOID Port
+	 PVOID Port
 );
 
 USHORT READ_PORT_USHORT(
-	_In_ PVOID Port
+	 PVOID Port
 );
 
 void READ_REGISTER_BUFFER_UCHAR(
-	_In_  volatile UCHAR* Register,
-	_Out_ PUCHAR         Buffer,
-	_In_  ULONG          Count
+	  volatile UCHAR* Register,
+	 PUCHAR         Buffer,
+	  ULONG          Count
 );
 
 void READ_REGISTER_BUFFER_ULONG(
-	_In_  volatile ULONG* Register,
-	_Out_ PULONG         Buffer,
-	_In_  ULONG          Count
+	  volatile ULONG* Register,
+	 PULONG         Buffer,
+	  ULONG          Count
 );
 
 void READ_REGISTER_BUFFER_USHORT(
-	_In_  volatile USHORT* Register,
-	_Out_ PUSHORT         Buffer,
-	_In_  ULONG           Count
+	  volatile USHORT* Register,
+	 PUSHORT         Buffer,
+	  ULONG           Count
 );
 
 //UCHAR READ_REGISTER_UCHAR(
-//	_In_ volatile UCHAR* Register
+//	 volatile UCHAR* Register
 //);
 
 //ULONG READ_REGISTER_ULONG(
-//	_In_ volatile ULONG* Register
+//	 volatile ULONG* Register
 //);
 
 //USHORT READ_REGISTER_USHORT(
-//	_In_ volatile USHORT* Register
+//	 volatile USHORT* Register
 //);
 
 UCHAR ReadBooleanRaw(
-	_In_ BOOLEAN const volatile* Source
+	 BOOLEAN const volatile* Source
 );
 
 INT32 ReadInt32Acquire(
-	_In_ INT32 const volatile* Source
+	 INT32 const volatile* Source
 );
 
 INT32 ReadInt32NoFence(
-	_In_ INT32 const volatile* Source
+	 INT32 const volatile* Source
 );
 
 INT32 ReadInt32Raw(
-	_In_ INT32 const volatile* Source
+	 INT32 const volatile* Source
 );
 
 UINT32 ReadUInt32Acquire(
-	_In_ UINT32 const volatile* Source
+	 UINT32 const volatile* Source
 );
 
 UINT32 ReadUInt32NoFence(
-	_In_ UINT32 const volatile* Source
+	 UINT32 const volatile* Source
 );
 
 UINT32 ReadUInt32Raw(
-	_In_ UINT32 const volatile* Source
+	 UINT32 const volatile* Source
 );
 
 void WRITE_PORT_BUFFER_UCHAR(
-	_In_ PUCHAR Port,
-	_In_ PUCHAR Buffer,
-	_In_ ULONG  Count
+	 PUCHAR Port,
+	 PUCHAR Buffer,
+	 ULONG  Count
 );
 
 void WRITE_PORT_BUFFER_ULONG(
-	_In_ PULONG Port,
-	_In_ PULONG Buffer,
-	_In_ ULONG  Count
+	 PULONG Port,
+	 PULONG Buffer,
+	 ULONG  Count
 );
 
 void WRITE_PORT_BUFFER_USHORT(
-	_In_ PUSHORT Port,
-	_In_ PUSHORT Buffer,
-	_In_ ULONG   Count
+	 PUSHORT Port,
+	 PUSHORT Buffer,
+	 ULONG   Count
 );
 /*
 void WRITE_PORT_UCHAR(
-	_In_ PUCHAR Port,
-	_In_ UCHAR  Value
+	 PUCHAR Port,
+	 UCHAR  Value
 );
 
 void WRITE_PORT_ULONG(
-	_In_ PULONG Port,
-	_In_ ULONG  Value
+	 PULONG Port,
+	 ULONG  Value
 );
 
 void WRITE_PORT_USHORT(
-	_In_ PUSHORT Port,
-	_In_ USHORT  Value
+	 PUSHORT Port,
+	 USHORT  Value
 );
 */
 void WRITE_REGISTER_BUFFER_UCHAR(
-	_In_ volatile UCHAR* Register,
-	_In_ PUCHAR         Buffer,
-	_In_ ULONG          Count
+	 volatile UCHAR* Register,
+	 PUCHAR         Buffer,
+	 ULONG          Count
 );
 
 void WRITE_REGISTER_BUFFER_ULONG(
-	_In_ volatile ULONG* Register,
-	_In_ PULONG         Buffer,
-	_In_ ULONG          Count
+	 volatile ULONG* Register,
+	 PULONG         Buffer,
+	 ULONG          Count
 );
 
 void WRITE_REGISTER_BUFFER_USHORT(
-	_In_ volatile USHORT* Register,
-	_In_ PUSHORT         Buffer,
-	_In_ ULONG           Count
+	 volatile USHORT* Register,
+	 PUSHORT         Buffer,
+	 ULONG           Count
 );
 
 //void WRITE_REGISTER_UCHAR(
-//	_In_ volatile UCHAR* Register,
-//	_In_ UCHAR          Value
+//	 volatile UCHAR* Register,
+//	 UCHAR          Value
 //);
 
 //void WRITE_REGISTER_ULONG(
-//	_In_ volatile ULONG* Register,
-//	_In_ ULONG          Value
+//	 volatile ULONG* Register,
+//	 ULONG          Value
 //);
 
 //void WRITE_REGISTER_USHORT(
-//	_In_ volatile USHORT* Register,
-//	_In_ USHORT          Value
+//	 volatile USHORT* Register,
+//	 USHORT          Value
 //);
 
 void WriteInt32NoFence(
-	_Out_ INT32 volatile* Destination,
-	_In_  INT32          Value
+	 INT32 volatile* Destination,
+	  INT32          Value
 );
 
 void WriteInt32Raw(
-	_Out_ INT32 volatile* Destination,
-	_In_  INT32          Value
+	 INT32 volatile* Destination,
+	  INT32          Value
 );
 
 void WriteInt32Release(
-	_Out_ INT32 volatile* Destination,
-	_In_  INT32          Value
+	 INT32 volatile* Destination,
+	  INT32          Value
 );
 
 void WriteUInt32NoFence(
-	_Out_ UINT32 volatile* Destination,
-	_In_  UINT32          Value
+	 UINT32 volatile* Destination,
+	  UINT32          Value
 );
 
 void WriteUInt32Raw(
-	_Out_ UINT32 volatile* Destination,
-	_In_  UINT32          Value
+	 UINT32 volatile* Destination,
+	  UINT32          Value
 );
 
 void WriteUInt32Release(
-	_Out_ UINT32 volatile* Destination,
-	_In_  UINT32          Value
+	 UINT32 volatile* Destination,
+	  UINT32          Value
 );
 
 typedef struct _ACCESS_RANGE {

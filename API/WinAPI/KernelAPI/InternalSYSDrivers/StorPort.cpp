@@ -23,10 +23,10 @@ PSTOR_PORT_STACK_OBJECT GetStorPortObject(PDRIVER_OBJECT DrvObject){
 }
 
 STOR_PHYSICAL_ADDRESS StorPortGetPhysicalAddress(
-  _In_   PVOID HwDeviceExtension,
-  _In_   PSCSI_REQUEST_BLOCK Srb,
-  _In_   PVOID VirtualAddress,
-  _Out_  ULONG *Length
+     PVOID HwDeviceExtension,
+     PSCSI_REQUEST_BLOCK Srb,
+     PVOID VirtualAddress,
+    ULONG *Length
 ){
     LouPrint("void StorPortGetPhysicalAddress()\n");
 
@@ -84,9 +84,9 @@ void StorPortSetDeviceQueueDepth(){
 }
 
 PVOID StorPortGetUncachedExtension(
-  _In_ PVOID HwDeviceExtension,
-  _In_ PPORT_CONFIGURATION_INFORMATION ConfigInfo,
-  _In_ ULONG NumberOfBytes
+   PVOID HwDeviceExtension,
+   PPORT_CONFIGURATION_INFORMATION ConfigInfo,
+   ULONG NumberOfBytes
 ){
     LouPrint("void StorPortGetUncachedExtension()\n");
 
@@ -175,12 +175,12 @@ void StorPortGetScatterGatherList(){
 }
 
 PVOID StorPortGetDeviceBase(
-  _In_  PVOID   HwDeviceExtension,
-  _In_  INTERFACE_TYPE BusType,
-  _In_  ULONG   SystemIoBusNumber,
-  _In_  PHYSICAL_ADDRESS IoAddress,
-  _In_  ULONG   NumberOfBytes,
-  _In_  BOOLEAN InIoSpace
+    PVOID   HwDeviceExtension,
+    INTERFACE_TYPE BusType,
+    ULONG   SystemIoBusNumber,
+    PHYSICAL_ADDRESS IoAddress,
+    ULONG   NumberOfBytes,
+    BOOLEAN InIoSpace
 ){
     LouPrint("PVOID StorPortGetDeviceBase()\n");
 

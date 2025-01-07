@@ -72,10 +72,10 @@ typedef struct _CC_FILE_SIZES {
 } CC_FILE_SIZES, * PCC_FILE_SIZES;
 
 BOOLEAN CcCanIWrite(
-	_In_ PFILE_OBJECT FileObject,
-	_In_ ULONG        BytesToWrite,
-	_In_ BOOLEAN      Wait,
-	_In_ UCHAR        Retrying
+	 PFILE_OBJECT FileObject,
+	 ULONG        BytesToWrite,
+	 BOOLEAN      Wait,
+	 UCHAR        Retrying
 );
 
 typedef struct _COPY_INFORMATION {
@@ -110,23 +110,23 @@ typedef struct _FILE_ALL_INFORMATION {
 
 
 BOOLEAN IoCheckFileObjectOpenedAsCopyDestination(
-  _In_ PFILE_OBJECT FileObject
+   PFILE_OBJECT FileObject
 );
 
 BOOLEAN IoCheckFileObjectOpenedAsCopySource(
-  _In_ PFILE_OBJECT FileObject
+   PFILE_OBJECT FileObject
 );
 
 PDEVICE_OBJECT IoGetAttachedDeviceReference(
-  _In_ PDEVICE_OBJECT DeviceObject
+   PDEVICE_OBJECT DeviceObject
 );
 
 PCONFIGURATION_INFORMATION IoGetConfigurationInformation();
 
 void IoSetStartIoAttributes(
-  _In_ PDEVICE_OBJECT DeviceObject,
-  _In_ BOOLEAN        DeferredStartIo,
-  _In_ BOOLEAN        NonCancelable
+   PDEVICE_OBJECT DeviceObject,
+   BOOLEAN        DeferredStartIo,
+   BOOLEAN        NonCancelable
 );
 
 void IoSizeOfIrp(
@@ -134,50 +134,50 @@ void IoSizeOfIrp(
 );
 
 void IoStartNextPacket(
-  _In_ PDEVICE_OBJECT DeviceObject,
-  _In_ BOOLEAN        Cancelable
+   PDEVICE_OBJECT DeviceObject,
+   BOOLEAN        Cancelable
 );
 
 void IoStartNextPacketByKey(
-  _In_ PDEVICE_OBJECT DeviceObject,
-  _In_ BOOLEAN        Cancelable,
-  _In_ ULONG          Key
+   PDEVICE_OBJECT DeviceObject,
+   BOOLEAN        Cancelable,
+   ULONG          Key
 );
 
 void IoStartPacket(
-  _In_           PDEVICE_OBJECT DeviceObject,
-  _In_           PIRP           Irp,
-  _In_opt_ PULONG         Key,
-  _In_opt_ PDRIVER_CANCEL CancelFunction
+             PDEVICE_OBJECT DeviceObject,
+             PIRP           Irp,
+   PULONG         Key,
+   PDRIVER_CANCEL CancelFunction
 );
 
 void IoStartTimer(
-  _In_ PDEVICE_OBJECT DeviceObject
+   PDEVICE_OBJECT DeviceObject
 );
 
 void IoStopTimer(
-  _In_ PDEVICE_OBJECT DeviceObject
+   PDEVICE_OBJECT DeviceObject
 );
 
 void IoWriteErrorLogEntry(
-  _In_ PVOID ElEntry
+   PVOID ElEntry
 );
 
 ULONG KeGetProcessorIndexFromNumber(
-  _In_ PPROCESSOR_NUMBER ProcNumber
+   PPROCESSOR_NUMBER ProcNumber
 );
 
 NTSTATUS KeGetProcessorNumberFromIndex(
-  _In_  ULONG             ProcIndex,
-  _Out_ PPROCESSOR_NUMBER ProcNumber
+    ULONG             ProcIndex,
+   PPROCESSOR_NUMBER ProcNumber
 );
 
 BOOLEAN KeSetKernelStackSwapEnable(
-  _In_ BOOLEAN Enable
+   BOOLEAN Enable
 );
 
 NTHALAPI VOID KeStallExecutionProcessor(
-  _In_ ULONG MicroSeconds
+   ULONG MicroSeconds
 );
 
 typedef struct _MEMORY_BASIC_INFORMATION {
@@ -209,710 +209,710 @@ NtClose(
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtCopyFileChunk(
-  _In_           HANDLE           SourceHandle,
-  _In_           HANDLE           DestHandle,
-  _In_opt_		 HANDLE           Event,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _In_           ULONG            Length,
-  _In_           PLARGE_INTEGER   SourceOffset,
-  _In_           PLARGE_INTEGER   DestOffset,
-  _In_opt_		 PULONG           SourceKey,
-  _In_opt_		 PULONG           DestKey,
-  _In_           ULONG            Flags
+             HANDLE           SourceHandle,
+             HANDLE           DestHandle,
+  		 HANDLE           Event,
+            PIO_STATUS_BLOCK IoStatusBlock,
+             ULONG            Length,
+             PLARGE_INTEGER   SourceOffset,
+             PLARGE_INTEGER   DestOffset,
+  		 PULONG           SourceKey,
+  		 PULONG           DestKey,
+             ULONG            Flags
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtCreateFile(
-  _Out_          PHANDLE            FileHandle,
-  _In_           ACCESS_MASK        DesiredAccess,
-  _In_           POBJECT_ATTRIBUTES ObjectAttributes,
-  _Out_          PIO_STATUS_BLOCK   IoStatusBlock,
-  _In_opt_		 PLARGE_INTEGER     AllocationSize,
-  _In_           ULONG              FileAttributes,
-  _In_           ULONG              ShareAccess,
-  _In_           ULONG              CreateDisposition,
-  _In_           ULONG              CreateOptions,
-  _In_opt_		 PVOID              EaBuffer,
-  _In_           ULONG              EaLength
+            PHANDLE            FileHandle,
+             ACCESS_MASK        DesiredAccess,
+             POBJECT_ATTRIBUTES ObjectAttributes,
+            PIO_STATUS_BLOCK   IoStatusBlock,
+  		 PLARGE_INTEGER     AllocationSize,
+             ULONG              FileAttributes,
+             ULONG              ShareAccess,
+             ULONG              CreateDisposition,
+             ULONG              CreateOptions,
+  		 PVOID              EaBuffer,
+             ULONG              EaLength
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtCreateSection(
-  _Out_          PHANDLE            SectionHandle,
-  _In_           ACCESS_MASK        DesiredAccess,
-  _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
-  _In_opt_ PLARGE_INTEGER     MaximumSize,
-  _In_           ULONG              SectionPageProtection,
-  _In_           ULONG              AllocationAttributes,
-  _In_opt_ HANDLE             FileHandle
+            PHANDLE            SectionHandle,
+             ACCESS_MASK        DesiredAccess,
+   POBJECT_ATTRIBUTES ObjectAttributes,
+   PLARGE_INTEGER     MaximumSize,
+             ULONG              SectionPageProtection,
+             ULONG              AllocationAttributes,
+   HANDLE             FileHandle
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtCreateSectionEx(
-  _Out_          PHANDLE                 SectionHandle,
-  _Out_          ACCESS_MASK             DesiredAccess,
-  _In_opt_ POBJECT_ATTRIBUTES      ObjectAttributes,
-  _In_opt_ PLARGE_INTEGER          MaximumSize,
-  _In_           ULONG                   SectionPageProtection,
-  _In_           ULONG                   AllocationAttributes,
-  _In_opt_ HANDLE                  FileHandle,
-  _In_ _Out_       PMEM_EXTENDED_PARAMETER ExtendedParameters,
+            PHANDLE                 SectionHandle,
+            ACCESS_MASK             DesiredAccess,
+   POBJECT_ATTRIBUTES      ObjectAttributes,
+   PLARGE_INTEGER          MaximumSize,
+             ULONG                   SectionPageProtection,
+             ULONG                   AllocationAttributes,
+   HANDLE                  FileHandle,
+          PMEM_EXTENDED_PARAMETER ExtendedParameters,
 				 ULONG                   ExtendedParameterCount
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtDeviceIoControlFile(
-  _In_            HANDLE           FileHandle,
-  _In_opt_  HANDLE           Event,
-  _In_opt_  PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_  PVOID            ApcContext,
-  _Out_           PIO_STATUS_BLOCK IoStatusBlock,
-  _In_            ULONG            IoControlCode,
-  _In_opt_  PVOID            InputBuffer,
-  _In_            ULONG            InputBufferLength,
-  _Out_ PVOID            OutputBuffer,
-  _In_            ULONG            OutputBufferLength
+              HANDLE           FileHandle,
+    HANDLE           Event,
+    PIO_APC_ROUTINE  ApcRoutine,
+    PVOID            ApcContext,
+             PIO_STATUS_BLOCK IoStatusBlock,
+              ULONG            IoControlCode,
+    PVOID            InputBuffer,
+              ULONG            InputBufferLength,
+   PVOID            OutputBuffer,
+              ULONG            OutputBufferLength
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtDuplicateToken(
-  _In_  HANDLE             ExistingTokenHandle,
-  _In_  ACCESS_MASK        DesiredAccess,
-  _In_  POBJECT_ATTRIBUTES ObjectAttributes,
-  _In_  BOOLEAN            EffectiveOnly,
-  _In_  TOKEN_TYPE         TokenType,
-  _Out_ PHANDLE            NewTokenHandle
+    HANDLE             ExistingTokenHandle,
+    ACCESS_MASK        DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes,
+    BOOLEAN            EffectiveOnly,
+    TOKEN_TYPE         TokenType,
+   PHANDLE            NewTokenHandle
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtFlushBuffersFileEx(
-  _In_  HANDLE           FileHandle,
-  _In_  ULONG            Flags,
-  _In_  PVOID            Parameters,
-  _In_  ULONG            ParametersSize,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock
+    HANDLE           FileHandle,
+    ULONG            Flags,
+    PVOID            Parameters,
+    ULONG            ParametersSize,
+   PIO_STATUS_BLOCK IoStatusBlock
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtFreeVirtualMemory(
-  _In_      HANDLE  ProcessHandle,
-  _In_ _Out_ PVOID   *BaseAddress,
-  _In_ _Out_ PSIZE_T RegionSize,
-  _In_      ULONG   FreeType
+        HANDLE  ProcessHandle,
+    PVOID   *BaseAddress,
+    PSIZE_T RegionSize,
+        ULONG   FreeType
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtFsControlFile(
-  _In_            HANDLE           FileHandle,
-  _In_opt_  HANDLE           Event,
-  _In_opt_  PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_  PVOID            ApcContext,
-  _Out_           PIO_STATUS_BLOCK IoStatusBlock,
-  _In_            ULONG            FsControlCode,
-  _In_opt_  PVOID            InputBuffer,
-  _In_            ULONG            InputBufferLength,
-  _Out_ PVOID            OutputBuffer,
-  _In_            ULONG            OutputBufferLength
+              HANDLE           FileHandle,
+    HANDLE           Event,
+    PIO_APC_ROUTINE  ApcRoutine,
+    PVOID            ApcContext,
+             PIO_STATUS_BLOCK IoStatusBlock,
+              ULONG            FsControlCode,
+    PVOID            InputBuffer,
+              ULONG            InputBufferLength,
+   PVOID            OutputBuffer,
+              ULONG            OutputBufferLength
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtLockFile(
-  _In_           HANDLE           FileHandle,
-  _In_opt_ HANDLE           Event,
-  _In_opt_ PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_ PVOID            ApcContext,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _In_           PLARGE_INTEGER   ByteOffset,
-  _In_           PLARGE_INTEGER   Length,
-  _In_           ULONG            Key,
-  _In_           BOOLEAN          FailImmediately,
-  _In_           BOOLEAN          ExclusiveLock
+             HANDLE           FileHandle,
+   HANDLE           Event,
+   PIO_APC_ROUTINE  ApcRoutine,
+   PVOID            ApcContext,
+            PIO_STATUS_BLOCK IoStatusBlock,
+             PLARGE_INTEGER   ByteOffset,
+             PLARGE_INTEGER   Length,
+             ULONG            Key,
+             BOOLEAN          FailImmediately,
+             BOOLEAN          ExclusiveLock
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtOpenFile(
-  _Out_ PHANDLE            FileHandle,
-  _In_  ACCESS_MASK        DesiredAccess,
-  _In_  POBJECT_ATTRIBUTES ObjectAttributes,
-  _Out_ PIO_STATUS_BLOCK   IoStatusBlock,
-  _In_  ULONG              ShareAccess,
-  _In_  ULONG              OpenOptions
+   PHANDLE            FileHandle,
+    ACCESS_MASK        DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes,
+   PIO_STATUS_BLOCK   IoStatusBlock,
+    ULONG              ShareAccess,
+    ULONG              OpenOptions
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtOpenProcessToken(
-  _In_  HANDLE      ProcessHandle,
-  _In_  ACCESS_MASK DesiredAccess,
-  _Out_ PHANDLE     TokenHandle
+    HANDLE      ProcessHandle,
+    ACCESS_MASK DesiredAccess,
+   PHANDLE     TokenHandle
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtOpenProcessTokenEx(
-  _In_  HANDLE      ProcessHandle,
-  _In_  ACCESS_MASK DesiredAccess,
-  _In_  ULONG       HandleAttributes,
-  _Out_ PHANDLE     TokenHandle
+    HANDLE      ProcessHandle,
+    ACCESS_MASK DesiredAccess,
+    ULONG       HandleAttributes,
+   PHANDLE     TokenHandle
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtOpenThreadToken(
-  _In_  HANDLE      ThreadHandle,
-  _In_  ACCESS_MASK DesiredAccess,
-  _In_  BOOLEAN     OpenAsSelf,
-  _Out_ PHANDLE     TokenHandle
+    HANDLE      ThreadHandle,
+    ACCESS_MASK DesiredAccess,
+    BOOLEAN     OpenAsSelf,
+   PHANDLE     TokenHandle
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtOpenThreadTokenEx(
-  _In_  HANDLE      ThreadHandle,
-  _In_  ACCESS_MASK DesiredAccess,
-  _In_  BOOLEAN     OpenAsSelf,
-  _In_  ULONG       HandleAttributes,
-  _Out_ PHANDLE     TokenHandle
+    HANDLE      ThreadHandle,
+    ACCESS_MASK DesiredAccess,
+    BOOLEAN     OpenAsSelf,
+    ULONG       HandleAttributes,
+   PHANDLE     TokenHandle
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtPrivilegeCheck(
-  _In_      HANDLE         ClientToken,
-  _In_ _Out_ PPRIVILEGE_SET RequiredPrivileges,
-  _Out_     PBOOLEAN       Result
+        HANDLE         ClientToken,
+    PPRIVILEGE_SET RequiredPrivileges,
+       PBOOLEAN       Result
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryDirectoryFile(
-  _In_           HANDLE                 FileHandle,
-  _In_opt_ HANDLE                 Event,
-  _In_opt_ PIO_APC_ROUTINE        ApcRoutine,
-  _In_opt_ PVOID                  ApcContext,
-  _Out_          PIO_STATUS_BLOCK       IoStatusBlock,
-  _Out_          PVOID                  FileInformation,
-  _In_           ULONG                  Length,
-  _In_           FILE_INFORMATION_CLASS FileInformationClass,
-  _In_           BOOLEAN                ReturnSingleEntry,
-  _In_opt_ PUNICODE_STRING        FileName,
-  _In_           BOOLEAN                RestartScan
+             HANDLE                 FileHandle,
+   HANDLE                 Event,
+   PIO_APC_ROUTINE        ApcRoutine,
+   PVOID                  ApcContext,
+            PIO_STATUS_BLOCK       IoStatusBlock,
+            PVOID                  FileInformation,
+             ULONG                  Length,
+             FILE_INFORMATION_CLASS FileInformationClass,
+             BOOLEAN                ReturnSingleEntry,
+   PUNICODE_STRING        FileName,
+             BOOLEAN                RestartScan
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryDirectoryFileEx(
-  _In_           HANDLE                 FileHandle,
-  _In_opt_ HANDLE                 Event,
-  _In_opt_ PIO_APC_ROUTINE        ApcRoutine,
-  _In_opt_ PVOID                  ApcContext,
-  _Out_          PIO_STATUS_BLOCK       IoStatusBlock,
-  _Out_          PVOID                  FileInformation,
-  _In_           ULONG                  Length,
+             HANDLE                 FileHandle,
+   HANDLE                 Event,
+   PIO_APC_ROUTINE        ApcRoutine,
+   PVOID                  ApcContext,
+            PIO_STATUS_BLOCK       IoStatusBlock,
+            PVOID                  FileInformation,
+             ULONG                  Length,
 				 FILE_INFORMATION_CLASS FileInformationClass,
-  _In_           ULONG                  QueryFlags,
-  _In_opt_ PUNICODE_STRING        FileName
+             ULONG                  QueryFlags,
+   PUNICODE_STRING        FileName
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryInformationFile(
-  _In_  HANDLE                 FileHandle,
-  _Out_ PIO_STATUS_BLOCK       IoStatusBlock,
-  _Out_ PVOID                  FileInformation,
-  _In_  ULONG                  Length,
-  _In_  FILE_INFORMATION_CLASS FileInformationClass
+    HANDLE                 FileHandle,
+   PIO_STATUS_BLOCK       IoStatusBlock,
+   PVOID                  FileInformation,
+    ULONG                  Length,
+    FILE_INFORMATION_CLASS FileInformationClass
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryInformationToken(
-  _In_  HANDLE                  TokenHandle,
-  _In_  TOKEN_INFORMATION_CLASS TokenInformationClass,
-  _Out_ PVOID                   TokenInformation,
-  _In_  ULONG                   TokenInformationLength,
-  _Out_ PULONG                  ReturnLength
+    HANDLE                  TokenHandle,
+    TOKEN_INFORMATION_CLASS TokenInformationClass,
+   PVOID                   TokenInformation,
+    ULONG                   TokenInformationLength,
+   PULONG                  ReturnLength
 );
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryObject(
-  _In_opt_  HANDLE                   Handle,
-  _In_            OBJECT_INFORMATION_CLASS ObjectInformationClass,
-  _Out_ PVOID                    ObjectInformation,
-  _In_            ULONG                    ObjectInformationLength,
-  _Out_ PULONG                   ReturnLength
+    HANDLE                   Handle,
+              OBJECT_INFORMATION_CLASS ObjectInformationClass,
+   PVOID                    ObjectInformation,
+              ULONG                    ObjectInformationLength,
+   PULONG                   ReturnLength
 );
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryQuotaInformationFile(
-  _In_           HANDLE           FileHandle,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _Out_          PVOID            Buffer,
-  _In_           ULONG            Length,
-  _In_           BOOLEAN          ReturnSingleEntry,
-  _In_opt_ PVOID            SidList,
-  _In_           ULONG            SidListLength,
-  _In_opt_ PSID             StartSid,
-  _In_           BOOLEAN          RestartScan
+             HANDLE           FileHandle,
+            PIO_STATUS_BLOCK IoStatusBlock,
+            PVOID            Buffer,
+             ULONG            Length,
+             BOOLEAN          ReturnSingleEntry,
+   PVOID            SidList,
+             ULONG            SidListLength,
+   PSID             StartSid,
+             BOOLEAN          RestartScan
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQuerySecurityObject(
-  _In_  HANDLE               Handle,
-  _In_  SECURITY_INFORMATION SecurityInformation,
-  _Out_ PSECURITY_DESCRIPTOR SecurityDescriptor,
-  _In_  ULONG                Length,
-  _Out_ PULONG               LengthNeeded
+    HANDLE               Handle,
+    SECURITY_INFORMATION SecurityInformation,
+   PSECURITY_DESCRIPTOR SecurityDescriptor,
+    ULONG                Length,
+   PULONG               LengthNeeded
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryVirtualMemory(
-  _In_            HANDLE                   ProcessHandle,
-  _In_opt_  PVOID                    BaseAddress,
-  _In_            MEMORY_INFORMATION_CLASS MemoryInformationClass,
-  _Out_           PVOID                    MemoryInformation,
-  _In_            SIZE_T                   MemoryInformationLength,
-  _Out_ PSIZE_T                  ReturnLength
+              HANDLE                   ProcessHandle,
+    PVOID                    BaseAddress,
+              MEMORY_INFORMATION_CLASS MemoryInformationClass,
+             PVOID                    MemoryInformation,
+              SIZE_T                   MemoryInformationLength,
+   PSIZE_T                  ReturnLength
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtQueryVolumeInformationFile(
-  _In_  HANDLE               FileHandle,
-  _Out_ PIO_STATUS_BLOCK     IoStatusBlock,
-  _Out_ PVOID                FsInformation,
-  _In_  ULONG                Length,
-  _In_  FS_INFORMATION_CLASS FsInformationClass
+    HANDLE               FileHandle,
+   PIO_STATUS_BLOCK     IoStatusBlock,
+   PVOID                FsInformation,
+    ULONG                Length,
+    FS_INFORMATION_CLASS FsInformationClass
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtReadFile(
-  _In_           HANDLE           FileHandle,
-  _In_opt_ HANDLE           Event,
-  _In_opt_ PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_ PVOID            ApcContext,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _Out_          PVOID            Buffer,
-  _In_           ULONG            Length,
-  _In_opt_ PLARGE_INTEGER   ByteOffset,
-  _In_opt_ PULONG           Key
+             HANDLE           FileHandle,
+   HANDLE           Event,
+   PIO_APC_ROUTINE  ApcRoutine,
+   PVOID            ApcContext,
+            PIO_STATUS_BLOCK IoStatusBlock,
+            PVOID            Buffer,
+             ULONG            Length,
+   PLARGE_INTEGER   ByteOffset,
+   PULONG           Key
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtSetInformationFile(
-  _In_  HANDLE                 FileHandle,
-  _Out_ PIO_STATUS_BLOCK       IoStatusBlock,
-  _In_  PVOID                  FileInformation,
-  _In_  ULONG                  Length,
-  _In_  FILE_INFORMATION_CLASS FileInformationClass
+    HANDLE                 FileHandle,
+   PIO_STATUS_BLOCK       IoStatusBlock,
+    PVOID                  FileInformation,
+    ULONG                  Length,
+    FILE_INFORMATION_CLASS FileInformationClass
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtSetInformationThread(
-  _In_ HANDLE          ThreadHandle,
-  _In_ THREADINFOCLASS ThreadInformationClass,
-  _In_ PVOID           ThreadInformation,
-  _In_ ULONG           ThreadInformationLength
+   HANDLE          ThreadHandle,
+   THREADINFOCLASS ThreadInformationClass,
+   PVOID           ThreadInformation,
+   ULONG           ThreadInformationLength
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtSetInformationToken(
-  _In_ HANDLE                  TokenHandle,
-  _In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
-  _In_ PVOID                   TokenInformation,
-  _In_ ULONG                   TokenInformationLength
+   HANDLE                  TokenHandle,
+   TOKEN_INFORMATION_CLASS TokenInformationClass,
+   PVOID                   TokenInformation,
+   ULONG                   TokenInformationLength
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtSetQuotaInformationFile(
-  _In_  HANDLE           FileHandle,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock,
-  _In_  PVOID            Buffer,
-  _In_  ULONG            Length
+    HANDLE           FileHandle,
+   PIO_STATUS_BLOCK IoStatusBlock,
+    PVOID            Buffer,
+    ULONG            Length
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtSetSecurityObject(
-  _In_ HANDLE               Handle,
-  _In_ SECURITY_INFORMATION SecurityInformation,
-  _In_ PSECURITY_DESCRIPTOR SecurityDescriptor
+   HANDLE               Handle,
+   SECURITY_INFORMATION SecurityInformation,
+   PSECURITY_DESCRIPTOR SecurityDescriptor
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtUnlockFile(
-  _In_  HANDLE           FileHandle,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock,
-  _In_  PLARGE_INTEGER   ByteOffset,
-  _In_  PLARGE_INTEGER   Length,
-  _In_  ULONG            Key
+    HANDLE           FileHandle,
+   PIO_STATUS_BLOCK IoStatusBlock,
+    PLARGE_INTEGER   ByteOffset,
+    PLARGE_INTEGER   Length,
+    ULONG            Key
 );
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtWriteFile(
-  _In_           HANDLE           FileHandle,
-  _In_opt_ HANDLE           Event,
-  _In_opt_ PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_ PVOID            ApcContext,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _In_           PVOID            Buffer,
-  _In_           ULONG            Length,
-  _In_opt_ PLARGE_INTEGER   ByteOffset,
-  _In_opt_ PULONG           Key
+             HANDLE           FileHandle,
+   HANDLE           Event,
+   PIO_APC_ROUTINE  ApcRoutine,
+   PVOID            ApcContext,
+            PIO_STATUS_BLOCK IoStatusBlock,
+             PVOID            Buffer,
+             ULONG            Length,
+   PLARGE_INTEGER   ByteOffset,
+   PULONG           Key
 );
 
 NTSTATUS PoCallDriver(
-  _In_      PDEVICE_OBJECT        DeviceObject,
-  _In_ _Out_ PIRP Irp
+        PDEVICE_OBJECT        DeviceObject,
+    PIRP Irp
 );
 
 NTSTATUS PoClearPowerRequest(
-  _In_ _Out_ PVOID              PowerRequest,
-  _In_      POWER_REQUEST_TYPE Type
+    PVOID              PowerRequest,
+        POWER_REQUEST_TYPE Type
 );
 
 NTSTATUS PoCreatePowerRequest(
-  _Out_ PVOID                   *PowerRequest,
-  _In_  PDEVICE_OBJECT          DeviceObject,
-  _In_  PCOUNTED_REASON_CONTEXT Context
+   PVOID                   *PowerRequest,
+    PDEVICE_OBJECT          DeviceObject,
+    PCOUNTED_REASON_CONTEXT Context
 );
 
 void PoDeletePowerRequest(
-  _In_ _Out_ PVOID PowerRequest
+    PVOID PowerRequest
 );
 
 void PoEndDeviceBusy(
-  _In_ _Out_ PULONG IdlePointer
+    PULONG IdlePointer
 );
 
 BOOLEAN PoQueryWatchdogTime(
-  _In_  PDEVICE_OBJECT Pdo,
-  _Out_ PULONG         SecondsRemaining
+    PDEVICE_OBJECT Pdo,
+   PULONG         SecondsRemaining
 );
 
 PULONG PoRegisterDeviceForIdleDetection(
-  _In_ PDEVICE_OBJECT     DeviceObject,
-  _In_ ULONG              ConservationIdleTime,
-  _In_ ULONG              PerformanceIdleTime,
-  _In_ DEVICE_POWER_STATE State
+   PDEVICE_OBJECT     DeviceObject,
+   ULONG              ConservationIdleTime,
+   ULONG              PerformanceIdleTime,
+   DEVICE_POWER_STATE State
 );
 
 NTSTATUS PoRegisterPowerSettingCallback(
-  _In_opt_ PDEVICE_OBJECT          DeviceObject,
-  _In_           LPCGUID                 SettingGuid,
-  _In_           PPOWER_SETTING_CALLBACK Callback,
-  _In_opt_ PVOID                   Context,
-  _Out_          PVOID                   *Handle
+   PDEVICE_OBJECT          DeviceObject,
+             LPCGUID                 SettingGuid,
+             PPOWER_SETTING_CALLBACK Callback,
+   PVOID                   Context,
+            PVOID                   *Handle
 );
 
 PVOID PoRegisterSystemState(
-  _In_ _Out_ PVOID           StateHandle,
-  _In_       EXECUTION_STATE Flags
+    PVOID           StateHandle,
+         EXECUTION_STATE Flags
 );
 
 void PoSetDeviceBusyEx(
-  _In_ _Out_ PULONG IdlePointer
+    PULONG IdlePointer
 );
 
 NTSTATUS PoSetPowerRequest(
-  _In_ _Out_ PVOID              PowerRequest,
-  _In_      POWER_REQUEST_TYPE Type
+    PVOID              PowerRequest,
+        POWER_REQUEST_TYPE Type
 );
 
 POWER_STATE PoSetPowerState(
-  _In_ PDEVICE_OBJECT   DeviceObject,
-  _In_ POWER_STATE_TYPE Type,
-  _In_ POWER_STATE      State
+   PDEVICE_OBJECT   DeviceObject,
+   POWER_STATE_TYPE Type,
+   POWER_STATE      State
 );
 
 void PoStartDeviceBusy(
-  _In_ _Out_ PULONG IdlePointer
+    PULONG IdlePointer
 );
 
 void PoStartNextPowerIrp(
-  _In_ _Out_ PIRP Irp
+    PIRP Irp
 );
 
 NTSTATUS PoUnregisterPowerSettingCallback(
-  _In_ _Out_ PVOID Handle
+    PVOID Handle
 );
 
 void PoUnregisterSystemState(
-  _In_ _Out_ PVOID StateHandle
+    PVOID StateHandle
 );
 
 PETHREAD PsGetCurrentThread();
 
 BOOLEAN PsIsSystemThread(
-  _In_ PETHREAD Thread
+   PETHREAD Thread
 );
 
 NTSYSAPI NTSTATUS RtlInitStringEx(
-  _Out_          PSTRING               DestinationString,
-  _In_opt_  PCSZ SourceString
+            PSTRING               DestinationString,
+    PCSZ SourceString
 );
 
 NTSYSAPI NTSTATUS RtlUTF8ToUnicodeN(
-  _Out_ PWSTR  UnicodeStringDestination,
-  _In_            ULONG  UnicodeStringMaxByteCount,
-  _Out_           PULONG UnicodeStringActualByteCount,
-  _In_            PCCH   UTF8StringSource,
-  _In_            ULONG  UTF8StringByteCount
+   PWSTR  UnicodeStringDestination,
+              ULONG  UnicodeStringMaxByteCount,
+             PULONG UnicodeStringActualByteCount,
+              PCCH   UTF8StringSource,
+              ULONG  UTF8StringByteCount
 );
 
 void SeFreePrivileges(
-  _In_ PPRIVILEGE_SET Privileges
+   PPRIVILEGE_SET Privileges
 );
 
 NTSYSAPI NTSTATUS ZwAllocateVirtualMemory(
-  _In_      HANDLE    ProcessHandle,
-  _In_ _Out_ PVOID     *BaseAddress,
-  _In_      ULONG_PTR ZeroBits,
-  _In_ _Out_ PSIZE_T   RegionSize,
-  _In_      ULONG     AllocationType,
-  _In_      ULONG     Protect
+        HANDLE    ProcessHandle,
+    PVOID     *BaseAddress,
+        ULONG_PTR ZeroBits,
+    PSIZE_T   RegionSize,
+        ULONG     AllocationType,
+        ULONG     Protect
 );
 
 NTSYSAPI NTSTATUS ZwCreateEvent(
-  _Out_          PHANDLE            EventHandle,
-  _In_           ACCESS_MASK        DesiredAccess,
-  _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
-  _In_           EVENT_TYPE         EventType,
-  _In_           BOOLEAN            InitialState
+            PHANDLE            EventHandle,
+             ACCESS_MASK        DesiredAccess,
+   POBJECT_ATTRIBUTES ObjectAttributes,
+             EVENT_TYPE         EventType,
+             BOOLEAN            InitialState
 );
 
 NTSYSAPI NTSTATUS ZwDeleteFile(
-  _In_ POBJECT_ATTRIBUTES ObjectAttributes
+   POBJECT_ATTRIBUTES ObjectAttributes
 );
 
 NTSYSAPI NTSTATUS ZwDeviceIoControlFile(
-  _In_            HANDLE           FileHandle,
-  _In_opt_  HANDLE           Event,
-  _In_opt_  PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_  PVOID            ApcContext,
-  _Out_           PIO_STATUS_BLOCK IoStatusBlock,
-  _In_            ULONG            IoControlCode,
-  _In_opt_  PVOID            InputBuffer,
-  _In_            ULONG            InputBufferLength,
-  _Out_ PVOID            OutputBuffer,
-  _In_            ULONG            OutputBufferLength
+              HANDLE           FileHandle,
+    HANDLE           Event,
+    PIO_APC_ROUTINE  ApcRoutine,
+    PVOID            ApcContext,
+             PIO_STATUS_BLOCK IoStatusBlock,
+              ULONG            IoControlCode,
+    PVOID            InputBuffer,
+              ULONG            InputBufferLength,
+   PVOID            OutputBuffer,
+              ULONG            OutputBufferLength
 );
 
 NTSYSAPI NTSTATUS ZwDuplicateObject(
-  _In_            HANDLE      SourceProcessHandle,
-  _In_            HANDLE      SourceHandle,
-  _In_opt_  HANDLE      TargetProcessHandle,
-  _Out_ PHANDLE     TargetHandle,
-  _In_            ACCESS_MASK DesiredAccess,
-  _In_            ULONG       HandleAttributes,
-  _In_            ULONG       Options
+              HANDLE      SourceProcessHandle,
+              HANDLE      SourceHandle,
+    HANDLE      TargetProcessHandle,
+   PHANDLE     TargetHandle,
+              ACCESS_MASK DesiredAccess,
+              ULONG       HandleAttributes,
+              ULONG       Options
 );
 
 NTSYSAPI NTSTATUS ZwDuplicateToken(
-  _In_  HANDLE             ExistingTokenHandle,
-  _In_  ACCESS_MASK        DesiredAccess,
-  _In_  POBJECT_ATTRIBUTES ObjectAttributes,
-  _In_  BOOLEAN            EffectiveOnly,
-  _In_  TOKEN_TYPE         TokenType,
-  _Out_ PHANDLE            NewTokenHandle
+    HANDLE             ExistingTokenHandle,
+    ACCESS_MASK        DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes,
+    BOOLEAN            EffectiveOnly,
+    TOKEN_TYPE         TokenType,
+   PHANDLE            NewTokenHandle
 );
 
 NTSYSAPI NTSTATUS ZwFlushBuffersFile(
-  _In_  HANDLE           FileHandle,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock
+    HANDLE           FileHandle,
+   PIO_STATUS_BLOCK IoStatusBlock
 );
 
 NTSYSAPI NTSTATUS ZwFlushBuffersFileEx(
-  _In_  HANDLE           FileHandle,
+    HANDLE           FileHandle,
 		ULONG            FLags,
 		PVOID            Parameters,
 		ULONG            ParametersSize,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock
+   PIO_STATUS_BLOCK IoStatusBlock
 );
 
 NTSYSAPI NTSTATUS ZwFlushVirtualMemory(
-  _In_      HANDLE           ProcessHandle,
-  _In_ _Out_ PVOID            *BaseAddress,
-  _In_ _Out_ PSIZE_T          RegionSize,
-  _Out_     PIO_STATUS_BLOCK IoStatus
+        HANDLE           ProcessHandle,
+    PVOID            *BaseAddress,
+    PSIZE_T          RegionSize,
+       PIO_STATUS_BLOCK IoStatus
 );
 
 
 NTSYSAPI NTSTATUS ZwFreeVirtualMemory(
-  _In_      HANDLE  ProcessHandle,
-  _In_ _Out_ PVOID   *BaseAddress,
-  _In_ _Out_ PSIZE_T RegionSize,
-  _In_      ULONG   FreeType
+        HANDLE  ProcessHandle,
+    PVOID   *BaseAddress,
+    PSIZE_T RegionSize,
+        ULONG   FreeType
 );
 
 NTSYSAPI NTSTATUS ZwFsControlFile(
-  _In_            HANDLE           FileHandle,
-  _In_opt_  HANDLE           Event,
-  _In_opt_  PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_  PVOID            ApcContext,
-  _Out_           PIO_STATUS_BLOCK IoStatusBlock,
-  _In_            ULONG            FsControlCode,
-  _In_opt_  PVOID            InputBuffer,
-  _In_            ULONG            InputBufferLength,
-  _Out_ PVOID            OutputBuffer,
-  _In_            ULONG            OutputBufferLength
+              HANDLE           FileHandle,
+    HANDLE           Event,
+    PIO_APC_ROUTINE  ApcRoutine,
+    PVOID            ApcContext,
+             PIO_STATUS_BLOCK IoStatusBlock,
+              ULONG            FsControlCode,
+    PVOID            InputBuffer,
+              ULONG            InputBufferLength,
+   PVOID            OutputBuffer,
+              ULONG            OutputBufferLength
 );
 
 NTSYSAPI NTSTATUS ZwLockFile(
-  _In_           HANDLE           FileHandle,
-  _In_opt_ HANDLE           Event,
-  _In_opt_ PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_ PVOID            ApcContext,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _In_           PLARGE_INTEGER   ByteOffset,
-  _In_           PLARGE_INTEGER   Length,
-  _In_           ULONG            Key,
-  _In_           BOOLEAN          FailImmediately,
-  _In_           BOOLEAN          ExclusiveLock
+             HANDLE           FileHandle,
+   HANDLE           Event,
+   PIO_APC_ROUTINE  ApcRoutine,
+   PVOID            ApcContext,
+            PIO_STATUS_BLOCK IoStatusBlock,
+             PLARGE_INTEGER   ByteOffset,
+             PLARGE_INTEGER   Length,
+             ULONG            Key,
+             BOOLEAN          FailImmediately,
+             BOOLEAN          ExclusiveLock
 );
 
 NTSYSAPI NTSTATUS ZwNotifyChangeKey(
-  _In_            HANDLE           KeyHandle,
-  _In_opt_  HANDLE           Event,
-  _In_opt_  PIO_APC_ROUTINE  ApcRoutine,
-  _In_opt_  PVOID            ApcContext,
-  _Out_           PIO_STATUS_BLOCK IoStatusBlock,
-  _In_            ULONG            CompletionFilter,
-  _In_            BOOLEAN          WatchTree,
-  _Out_ PVOID            Buffer,
-  _In_            ULONG            BufferSize,
-  _In_            BOOLEAN          Asynchronous
+              HANDLE           KeyHandle,
+    HANDLE           Event,
+    PIO_APC_ROUTINE  ApcRoutine,
+    PVOID            ApcContext,
+             PIO_STATUS_BLOCK IoStatusBlock,
+              ULONG            CompletionFilter,
+              BOOLEAN          WatchTree,
+   PVOID            Buffer,
+              ULONG            BufferSize,
+              BOOLEAN          Asynchronous
 );
 
 NTSYSAPI NTSTATUS ZwOpenDirectoryObject(
-  _Out_ PHANDLE            DirectoryHandle,
-  _In_  ACCESS_MASK        DesiredAccess,
-  _In_  POBJECT_ATTRIBUTES ObjectAttributes
+   PHANDLE            DirectoryHandle,
+    ACCESS_MASK        DesiredAccess,
+    POBJECT_ATTRIBUTES ObjectAttributes
 );
 
 NTSYSAPI NTSTATUS ZwOpenProcessTokenEx(
-  _In_  HANDLE      ProcessHandle,
-  _In_  ACCESS_MASK DesiredAccess,
-  _In_  ULONG       HandleAttributes,
-  _Out_ PHANDLE     TokenHandle
+    HANDLE      ProcessHandle,
+    ACCESS_MASK DesiredAccess,
+    ULONG       HandleAttributes,
+   PHANDLE     TokenHandle
 );
 
 NTSYSAPI NTSTATUS ZwOpenThreadTokenEx(
-  _In_  HANDLE      ThreadHandle,
-  _In_  ACCESS_MASK DesiredAccess,
-  _In_  BOOLEAN     OpenAsSelf,
-  _In_  ULONG       HandleAttributes,
-  _Out_ PHANDLE     TokenHandle
+    HANDLE      ThreadHandle,
+    ACCESS_MASK DesiredAccess,
+    BOOLEAN     OpenAsSelf,
+    ULONG       HandleAttributes,
+   PHANDLE     TokenHandle
 );
 
 NTSYSAPI NTSTATUS ZwQueryDirectoryFile(
-  _In_           HANDLE                 FileHandle,
-  _In_opt_ HANDLE                 Event,
-  _In_opt_ PIO_APC_ROUTINE        ApcRoutine,
-  _In_opt_ PVOID                  ApcContext,
-  _Out_          PIO_STATUS_BLOCK       IoStatusBlock,
-  _Out_          PVOID                  FileInformation,
-  _In_           ULONG                  Length,
-  _In_           FILE_INFORMATION_CLASS FileInformationClass,
-  _In_           BOOLEAN                ReturnSingleEntry,
-  _In_opt_ PUNICODE_STRING        FileName,
-  _In_           BOOLEAN                RestartScan
+             HANDLE                 FileHandle,
+   HANDLE                 Event,
+   PIO_APC_ROUTINE        ApcRoutine,
+   PVOID                  ApcContext,
+            PIO_STATUS_BLOCK       IoStatusBlock,
+            PVOID                  FileInformation,
+             ULONG                  Length,
+             FILE_INFORMATION_CLASS FileInformationClass,
+             BOOLEAN                ReturnSingleEntry,
+   PUNICODE_STRING        FileName,
+             BOOLEAN                RestartScan
 );
 
 NTSYSAPI NTSTATUS ZwQueryDirectoryFileEx(
-  _In_           HANDLE                 FileHandle,
-  _In_opt_ HANDLE                 Event,
-  _In_opt_ PIO_APC_ROUTINE        ApcRoutine,
-  _In_opt_ PVOID                  ApcContext,
-  _Out_          PIO_STATUS_BLOCK       IoStatusBlock,
-  _Out_          PVOID                  FileInformation,
-  _In_           ULONG                  Length,
-  _In_           FILE_INFORMATION_CLASS FileInformationClass,
-  _In_           ULONG                  QueryFlags,
-  _In_opt_ PUNICODE_STRING        FileName
+             HANDLE                 FileHandle,
+   HANDLE                 Event,
+   PIO_APC_ROUTINE        ApcRoutine,
+   PVOID                  ApcContext,
+            PIO_STATUS_BLOCK       IoStatusBlock,
+            PVOID                  FileInformation,
+             ULONG                  Length,
+             FILE_INFORMATION_CLASS FileInformationClass,
+             ULONG                  QueryFlags,
+   PUNICODE_STRING        FileName
 );
 
 NTSTATUS ZwQueryEaFile(
-  _In_           HANDLE           FileHandle,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _Out_          PVOID            Buffer,
-  _In_           ULONG            Length,
-  _In_           BOOLEAN          ReturnSingleEntry,
-  _In_opt_ PVOID            EaList,
-  _In_           ULONG            EaListLength,
-  _In_opt_ PULONG           EaIndex,
-  _In_           BOOLEAN          RestartScan
+             HANDLE           FileHandle,
+            PIO_STATUS_BLOCK IoStatusBlock,
+            PVOID            Buffer,
+             ULONG            Length,
+             BOOLEAN          ReturnSingleEntry,
+   PVOID            EaList,
+             ULONG            EaListLength,
+   PULONG           EaIndex,
+             BOOLEAN          RestartScan
 );
 
 NTSYSAPI NTSTATUS ZwQueryInformationToken(
-  _In_  HANDLE                  TokenHandle,
-  _In_  TOKEN_INFORMATION_CLASS TokenInformationClass,
-  _Out_ PVOID                   TokenInformation,
-  _In_  ULONG                   TokenInformationLength,
-  _Out_ PULONG                  ReturnLength
+    HANDLE                  TokenHandle,
+    TOKEN_INFORMATION_CLASS TokenInformationClass,
+   PVOID                   TokenInformation,
+    ULONG                   TokenInformationLength,
+   PULONG                  ReturnLength
 );
 
 NTSYSAPI NTSTATUS ZwQueryObject(
-  _In_opt_  HANDLE                   Handle,
-  _In_            OBJECT_INFORMATION_CLASS ObjectInformationClass,
-  _Out_ PVOID                    ObjectInformation,
-  _In_            ULONG                    ObjectInformationLength,
-  _Out_ PULONG                   ReturnLength
+    HANDLE                   Handle,
+              OBJECT_INFORMATION_CLASS ObjectInformationClass,
+   PVOID                    ObjectInformation,
+              ULONG                    ObjectInformationLength,
+   PULONG                   ReturnLength
 );
 
 NTSYSAPI NTSTATUS ZwQueryQuotaInformationFile(
-  _In_           HANDLE           FileHandle,
-  _Out_          PIO_STATUS_BLOCK IoStatusBlock,
-  _Out_          PVOID            Buffer,
-  _In_           ULONG            Length,
-  _In_           BOOLEAN          ReturnSingleEntry,
-  _In_opt_ PVOID            SidList,
-  _In_           ULONG            SidListLength,
-  _In_opt_ PSID             StartSid,
-  _In_           BOOLEAN          RestartScan
+             HANDLE           FileHandle,
+            PIO_STATUS_BLOCK IoStatusBlock,
+            PVOID            Buffer,
+             ULONG            Length,
+             BOOLEAN          ReturnSingleEntry,
+   PVOID            SidList,
+             ULONG            SidListLength,
+   PSID             StartSid,
+             BOOLEAN          RestartScan
 );
 
 NTSYSAPI NTSTATUS ZwQuerySecurityObject(
-  _In_  HANDLE               Handle,
-  _In_  SECURITY_INFORMATION SecurityInformation,
-  _Out_ PSECURITY_DESCRIPTOR SecurityDescriptor,
-  _In_  ULONG                Length,
-  _Out_ PULONG               LengthNeeded
+    HANDLE               Handle,
+    SECURITY_INFORMATION SecurityInformation,
+   PSECURITY_DESCRIPTOR SecurityDescriptor,
+    ULONG                Length,
+   PULONG               LengthNeeded
 );
 
 NTSYSAPI NTSTATUS ZwQueryVirtualMemory(
-  _In_            HANDLE                   ProcessHandle,
-  _In_opt_  PVOID                    BaseAddress,
-  _In_            MEMORY_INFORMATION_CLASS MemoryInformationClass,
-  _Out_           PVOID                    MemoryInformation,
-  _In_            SIZE_T                   MemoryInformationLength,
-  _Out_ PSIZE_T                  ReturnLength
+              HANDLE                   ProcessHandle,
+    PVOID                    BaseAddress,
+              MEMORY_INFORMATION_CLASS MemoryInformationClass,
+             PVOID                    MemoryInformation,
+              SIZE_T                   MemoryInformationLength,
+   PSIZE_T                  ReturnLength
 );
 
 NTSYSAPI NTSTATUS ZwQueryVolumeInformationFile(
-  _In_  HANDLE               FileHandle,
-  _Out_ PIO_STATUS_BLOCK     IoStatusBlock,
-  _Out_ PVOID                FsInformation,
-  _In_  ULONG                Length,
-  _In_  FS_INFORMATION_CLASS FsInformationClass
+    HANDLE               FileHandle,
+   PIO_STATUS_BLOCK     IoStatusBlock,
+   PVOID                FsInformation,
+    ULONG                Length,
+    FS_INFORMATION_CLASS FsInformationClass
 );
 
 NTSTATUS ZwSetEaFile(
-  _In_  HANDLE           FileHandle,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock,
-  _In_  PVOID            Buffer,
-  _In_  ULONG            Length
+    HANDLE           FileHandle,
+   PIO_STATUS_BLOCK IoStatusBlock,
+    PVOID            Buffer,
+    ULONG            Length
 );
 
 NTSYSAPI NTSTATUS ZwSetEvent(
-  _In_            HANDLE EventHandle,
-  _Out_ PLONG  PreviousState
+              HANDLE EventHandle,
+   PLONG  PreviousState
 );
 
 NTSYSAPI NTSTATUS ZwSetInformationToken(
-  _In_ HANDLE                  TokenHandle,
-  _In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
-  _In_ PVOID                   TokenInformation,
-  _In_ ULONG                   TokenInformationLength
+   HANDLE                  TokenHandle,
+   TOKEN_INFORMATION_CLASS TokenInformationClass,
+   PVOID                   TokenInformation,
+   ULONG                   TokenInformationLength
 );
 
 NTSYSAPI NTSTATUS ZwSetInformationVirtualMemory(
-  _In_ HANDLE                           ProcessHandle,
-  _In_ VIRTUAL_MEMORY_INFORMATION_CLASS VmInformationClass,
-  _In_ ULONG_PTR                        NumberOfEntries,
-  _In_ PMEMORY_RANGE_ENTRY              VirtualAddresses,
-  _In_ PVOID                            VmInformation,
-  _In_ ULONG                            VmInformationLength
+   HANDLE                           ProcessHandle,
+   VIRTUAL_MEMORY_INFORMATION_CLASS VmInformationClass,
+   ULONG_PTR                        NumberOfEntries,
+   PMEMORY_RANGE_ENTRY              VirtualAddresses,
+   PVOID                            VmInformation,
+   ULONG                            VmInformationLength
 );
 
 NTSYSAPI NTSTATUS ZwSetQuotaInformationFile(
-  _In_  HANDLE           FileHandle,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock,
-  _In_  PVOID            Buffer,
-  _In_  ULONG            Length
+    HANDLE           FileHandle,
+   PIO_STATUS_BLOCK IoStatusBlock,
+    PVOID            Buffer,
+    ULONG            Length
 );
 
 NTSYSAPI NTSTATUS ZwSetSecurityObject(
-  _In_ HANDLE               Handle,
-  _In_ SECURITY_INFORMATION SecurityInformation,
-  _In_ PSECURITY_DESCRIPTOR SecurityDescriptor
+   HANDLE               Handle,
+   SECURITY_INFORMATION SecurityInformation,
+   PSECURITY_DESCRIPTOR SecurityDescriptor
 );
 
 NTSYSAPI NTSTATUS ZwSetVolumeInformationFile(
-  _In_  HANDLE               FileHandle,
-  _Out_ PIO_STATUS_BLOCK     IoStatusBlock,
-  _In_  PVOID                FsInformation,
-  _In_  ULONG                Length,
-  _In_  FS_INFORMATION_CLASS FsInformationClass
+    HANDLE               FileHandle,
+   PIO_STATUS_BLOCK     IoStatusBlock,
+    PVOID                FsInformation,
+    ULONG                Length,
+    FS_INFORMATION_CLASS FsInformationClass
 );
 
 NTSYSAPI NTSTATUS ZwUnlockFile(
-  _In_  HANDLE           FileHandle,
-  _Out_ PIO_STATUS_BLOCK IoStatusBlock,
-  _In_  PLARGE_INTEGER   ByteOffset,
-  _In_  PLARGE_INTEGER   Length,
-  _In_  ULONG            Key
+    HANDLE           FileHandle,
+   PIO_STATUS_BLOCK IoStatusBlock,
+    PLARGE_INTEGER   ByteOffset,
+    PLARGE_INTEGER   Length,
+    ULONG            Key
 );
 
 NTSYSAPI NTSTATUS ZwWaitForSingleObject(
-  _In_           HANDLE         Handle,
-  _In_           BOOLEAN        Alertable,
-  _In_opt_ PLARGE_INTEGER Timeout
+             HANDLE         Handle,
+             BOOLEAN        Alertable,
+   PLARGE_INTEGER Timeout
 );
 
 

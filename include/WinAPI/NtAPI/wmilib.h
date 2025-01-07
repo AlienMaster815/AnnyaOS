@@ -6,21 +6,21 @@
 
 
 NTSTATUS WmiCompleteRequest(
-  _In_       PDEVICE_OBJECT DeviceObject,
-  _In_ _Out_ PIRP           Irp,
-  _In_       NTSTATUS       Status,
-  _In_       ULONG          BufferUsed,
-  _In_       CCHAR          PriorityBoost
+         PDEVICE_OBJECT DeviceObject,
+    PIRP           Irp,
+         NTSTATUS       Status,
+         ULONG          BufferUsed,
+         CCHAR          PriorityBoost
 );
 
 
 
 NTSTATUS WmiFireEvent(
-  _In_           PDEVICE_OBJECT DeviceObject,
-  _In_           LPCGUID        Guid,
-  _In_           ULONG          InstanceIndex,
-  _In_           ULONG          EventDataSize,
-  _In_opt_		 PVOID          EventData
+             PDEVICE_OBJECT DeviceObject,
+             LPCGUID        Guid,
+             ULONG          InstanceIndex,
+             ULONG          EventDataSize,
+  		 PVOID          EventData
 );
 
 typedef struct _WMIGUIDREGINFO {
@@ -41,10 +41,10 @@ typedef struct _WMILIB_CONTEXT {
 } WMILIB_CONTEXT, *PWMILIB_CONTEXT;
 
 NTSTATUS WmiSystemControl(
-  _In_      PWMILIB_CONTEXT         WmiLibInfo,
-  _In_      PDEVICE_OBJECT          DeviceObject,
-  _In_ _Out_ PIRP                    Irp,
-  _Out_     PSYSCTL_IRP_DISPOSITION IrpDisposition
+        PWMILIB_CONTEXT         WmiLibInfo,
+        PDEVICE_OBJECT          DeviceObject,
+    PIRP                    Irp,
+       PSYSCTL_IRP_DISPOSITION IrpDisposition
 );
 
 

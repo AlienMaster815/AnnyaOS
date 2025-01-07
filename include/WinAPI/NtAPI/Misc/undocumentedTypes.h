@@ -44,9 +44,9 @@ typedef HANDLE* PHANDLE;
 typedef
 VOID
 (*PIO_APC_ROUTINE) (
-    _In_ PVOID ApcContext,
-    _In_ PIO_STATUS_BLOCK IoStatusBlock,
-    _In_ ULONG Reserved
+     PVOID ApcContext,
+     PIO_STATUS_BLOCK IoStatusBlock,
+     ULONG Reserved
     );
 #define PIO_APC_ROUTINE_DEFINED
 
@@ -226,14 +226,12 @@ typedef enum _THREADINFOCLASS {
 #include "../aux_klib.h"
 
 typedef
-_Function_class_(POWER_SETTING_CALLBACK)
-_IRQL_requires_same_
 NTSTATUS
 POWER_SETTING_CALLBACK (
-    _In_ LPCGUID SettingGuid,
-    _In_reads_bytes_(ValueLength) PVOID Value,
-    _In_ ULONG ValueLength,
-    _Inout_opt_ PVOID Context
+     LPCGUID SettingGuid,
+     PVOID Value,
+     ULONG ValueLength,
+     PVOID Context
 );
 
 typedef POWER_SETTING_CALLBACK *PPOWER_SETTING_CALLBACK;

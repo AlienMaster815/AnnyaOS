@@ -53,7 +53,7 @@
 #define MPI_RAID_ACTION_STATUS_SUCCESS              0
 #define MPI_RAID_ACTION_STATUS_INVALID_ACTION       1
 #define MPI_RAID_ACTION_STATUS_FAILURE              2
-#define MPI_RAID_ACTION_STATUS_IN_PROGRESS          3
+#define MPI_RAID_ACTION_STATUSPROGRESS          3
 
 
 //raid Action Request

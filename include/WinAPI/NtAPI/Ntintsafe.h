@@ -4,335 +4,335 @@
 #include <NtAPI.h>
 
 NTSTATUS RtlByteToChar(
-  _In_  BYTE bOperand,
-  _Out_ CHAR *pch
+    BYTE bOperand,
+   CHAR *pch
 );
 
 NTSTATUS RtlByteToInt8(
-  _In_  BYTE bOperand,
-  _Out_ INT8 *pi8Result
+    BYTE bOperand,
+   INT8 *pi8Result
 );
 
 NTSTATUS RtlDWordPtrAdd(
-  _In_  DWORD_PTR dwAugend,
-  _In_  DWORD_PTR dwAddend,
-  _Out_ DWORD_PTR *pdwResult
+    DWORD_PTR dwAugend,
+    DWORD_PTR dwAddend,
+   DWORD_PTR *pdwResult
 );
 
 NTSTATUS RtlDWordPtrMult(
-  _In_  DWORD_PTR dwMultiplicand,
-  _In_  DWORD_PTR dwMultiplier,
-  _Out_ DWORD_PTR *pdwResult
+    DWORD_PTR dwMultiplicand,
+    DWORD_PTR dwMultiplier,
+   DWORD_PTR *pdwResult
 );
 
 NTSTATUS RtlDWordPtrSub(
-  _In_  DWORD_PTR dwMinuend,
-  _In_  DWORD_PTR dwSubtrahend,
-  _Out_ DWORD_PTR *pdwResult
+    DWORD_PTR dwMinuend,
+    DWORD_PTR dwSubtrahend,
+   DWORD_PTR *pdwResult
 );
 
 NTSTATUS RtlInt8Add(
-  _In_  INT8 i8Augend,
-  _In_  INT8 i8Addend,
-  _Out_ INT8 *pi8Result
+    INT8 i8Augend,
+    INT8 i8Addend,
+   INT8 *pi8Result
 );
 
 NTSTATUS RtlInt8Mult(
-  _In_  INT8 i8Multiplicand,
-  _In_  INT8 i8Multiplier,
-  _Out_ INT8 *pi8Result
+    INT8 i8Multiplicand,
+    INT8 i8Multiplier,
+   INT8 *pi8Result
 );
 
 NTSTATUS RtlInt8Sub(
-  _In_  INT8 i8Minuend,
-  _In_  INT8 i8Subtrahend,
-  _Out_ INT8 *pi8Result
+    INT8 i8Minuend,
+    INT8 i8Subtrahend,
+   INT8 *pi8Result
 );
 
 NTSTATUS RtlInt8ToUChar(
-  _In_  INT8  i8Operand,
-  _Out_ UCHAR *pch
+    INT8  i8Operand,
+   UCHAR *pch
 );
 
 NTSTATUS RtlInt8ToUInt(
-  _In_  INT8 i8Operand,
-  _Out_ UINT *puResult
+    INT8 i8Operand,
+   UINT *puResult
 );
 
 NTSTATUS RtlInt8ToUInt8(
-  _In_  INT8  i8Operand,
-  _Out_ UINT8 *pu8Result
+    INT8  i8Operand,
+   UINT8 *pu8Result
 );
 
 NTSTATUS RtlInt8ToUIntPtr(
-  _In_  INT8     i8Operand,
-  _Out_ UINT_PTR *puResult
+    INT8     i8Operand,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlInt8ToULong(
-  _In_  INT8  i8Operand,
-  _Out_ ULONG *pulResult
+    INT8  i8Operand,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlInt8ToULongLong(
-  _In_  INT8      i8Operand,
-  _Out_ ULONGLONG *pullResult
+    INT8      i8Operand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlInt8ToULongPtr(
-  _In_  INT8      i8Operand,
-  _Out_ ULONG_PTR *pulResult
+    INT8      i8Operand,
+   ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlInt8ToUShort(
-  _In_  INT8   i8Operand,
-  _Out_ USHORT *pusResult
+    INT8   i8Operand,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlIntAdd(
-  _In_  INT iAugend,
-  _In_  INT iAddend,
-  _Out_ INT *piResult
+    INT iAugend,
+    INT iAddend,
+   INT *piResult
 );
 
 NTSTATUS RtlIntMult(
-  _In_  INT iMultiplicand,
-  _In_  INT iMultiplier,
-  _Out_ INT *piResult
+    INT iMultiplicand,
+    INT iMultiplier,
+   INT *piResult
 );
 
 NTSTATUS RtlIntPtrAdd(
-  _In_  INT_PTR iAugend,
-  _In_  INT_PTR iAddend,
-  _Out_ INT_PTR *piResult
+    INT_PTR iAugend,
+    INT_PTR iAddend,
+   INT_PTR *piResult
 );
 
 NTSTATUS RtlIntPtrMult(
-  _In_  INT_PTR iMultiplicand,
-  _In_  INT_PTR iMultiplier,
-  _Out_ INT_PTR *piResult
+    INT_PTR iMultiplicand,
+    INT_PTR iMultiplier,
+   INT_PTR *piResult
 );
 
 NTSTATUS RtlIntPtrSub(
-  _In_  INT_PTR iMinuend,
-  _In_  INT_PTR iSubtrahend,
-  _Out_ INT_PTR *piResult
+    INT_PTR iMinuend,
+    INT_PTR iSubtrahend,
+   INT_PTR *piResult
 );
 
 NTSTATUS RtlIntPtrToChar(
-  _In_  INT_PTR iOperand,
-  _Out_ CHAR    *pch
+    INT_PTR iOperand,
+   CHAR    *pch
 );
 
 NTSTATUS RtlIntPtrToChar(
-  _In_  INT_PTR iOperand,
-  _Out_ CHAR    *pch
+    INT_PTR iOperand,
+   CHAR    *pch
 );
 
 NTSTATUS RtlIntPtrToInt8(
-  _In_  INT_PTR iOperand,
-  _Out_ INT8    *pi8Result
+    INT_PTR iOperand,
+   INT8    *pi8Result
 );
 
 NTSTATUS RtlIntPtrToLong(
-  _In_  INT_PTR iOperand,
-  _Out_ LONG    *plResult
+    INT_PTR iOperand,
+   LONG    *plResult
 );
 
 NTSTATUS RtlIntPtrToLongPtr(
-  _In_  INT_PTR  iOperand,
-  _Out_ LONG_PTR *plResult
+    INT_PTR  iOperand,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlIntPtrToShort(
-  _In_  INT_PTR iOperand,
-  _Out_ SHORT   *psResult
+    INT_PTR iOperand,
+   SHORT   *psResult
 );
 
 NTSTATUS RtlIntPtrToUChar(
-  _In_  INT_PTR iOperand,
-  _Out_ UCHAR   *pch
+    INT_PTR iOperand,
+   UCHAR   *pch
 );
 
 NTSTATUS RtlIntPtrToUInt(
-  _In_  INT_PTR iOperand,
-  _Out_ UINT    *puResult
+    INT_PTR iOperand,
+   UINT    *puResult
 );
 
 NTSTATUS RtlIntPtrToUInt8(
-  _In_  INT_PTR iOperand,
-  _Out_ UINT8   *pui8Result
+    INT_PTR iOperand,
+   UINT8   *pui8Result
 );
 
 NTSTATUS RtlIntPtrToUIntPtr(
-  _In_  INT_PTR  iOperand,
-  _Out_ UINT_PTR *puResult
+    INT_PTR  iOperand,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlIntPtrToULong(
-  _In_  INT_PTR iOperand,
-  _Out_ ULONG   *pulResult
+    INT_PTR iOperand,
+   ULONG   *pulResult
 );
 
 NTSTATUS RtlIntPtrToULongLong(
-  _In_  INT_PTR   iOperand,
-  _Out_ ULONGLONG *pullResult
+    INT_PTR   iOperand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlIntPtrToULongPtr(
-  _In_  INT_PTR   iOperand,
-  _Out_ ULONG_PTR *pulResult
+    INT_PTR   iOperand,
+   ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlIntPtrToUShort(
-  _In_  INT_PTR iOperand,
-  _Out_ USHORT  *pusResult
+    INT_PTR iOperand,
+   USHORT  *pusResult
 );
 
 NTSTATUS RtlIntSub(
-  _In_ INT iMinuend,
-  _In_ INT iSubtrahend,
+   INT iMinuend,
+   INT iSubtrahend,
        INT *piResult
 );
 
 NTSTATUS RtlIntToChar(
-  _In_  INT  iOperand,
-  _Out_ CHAR *pch
+    INT  iOperand,
+   CHAR *pch
 );
 
 NTSTATUS RtlIntToInt8(
-  _In_  INT  iOperand,
-  _Out_ INT8 *pi8Result
+    INT  iOperand,
+   INT8 *pi8Result
 );
 
 
 NTSTATUS RtlIntToShort(
-  _In_  INT   iOperand,
-  _Out_ SHORT *psResult
+    INT   iOperand,
+   SHORT *psResult
 );
 
 NTSTATUS RtlIntToUChar(
-  _In_  INT   iOperand,
-  _Out_ UCHAR *pch
+    INT   iOperand,
+   UCHAR *pch
 );
 
 NTSTATUS RtlIntToUInt(
-  _In_  INT  iOperand,
-  _Out_ UINT *puResult
+    INT  iOperand,
+   UINT *puResult
 );
 
 NTSTATUS RtlIntToUInt8(
-  _In_  INT   iOperand,
-  _Out_ UINT8 *pui8Result
+    INT   iOperand,
+   UINT8 *pui8Result
 );
 
 NTSTATUS RtlIntToULong(
-  _In_  INT   iOperand,
-  _Out_ ULONG *pulResult
+    INT   iOperand,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlIntToULongLong(
-  _In_  INT       iOperand,
-  _Out_ ULONGLONG *pullResult
+    INT       iOperand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlIntToUShort(
-  _In_  INT    iOperand,
-  _Out_ USHORT *pusResult
+    INT    iOperand,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlLongAdd(
-  _In_  LONG lAugend,
-  _In_  LONG lAddend,
-  _Out_ LONG *plResult
+    LONG lAugend,
+    LONG lAddend,
+   LONG *plResult
 );
 
 NTSTATUS RtlLongLongAdd(
-  _In_  LONGLONG llAugend,
-  _In_  LONGLONG llAddend,
-  _Out_ LONGLONG *pllResult
+    LONGLONG llAugend,
+    LONGLONG llAddend,
+   LONGLONG *pllResult
 );
 
 NTSTATUS RtlLongLongMult(
-  _In_  LONGLONG llMultiplicand,
-  _In_  LONGLONG llMultiplier,
-  _Out_ LONGLONG *pllResult
+    LONGLONG llMultiplicand,
+    LONGLONG llMultiplier,
+   LONGLONG *pllResult
 );
 
 NTSTATUS RtlLongLongSub(
-  _In_  LONGLONG llMinuend,
-  _In_  LONGLONG llSubtrahend,
-  _Out_ LONGLONG *pllResult
+    LONGLONG llMinuend,
+    LONGLONG llSubtrahend,
+   LONGLONG *pllResult
 );
 
 NTSTATUS RtlLongLongToChar(
-  _In_  LONGLONG llOperand,
-  _Out_ CHAR     *pch
+    LONGLONG llOperand,
+   CHAR     *pch
 );
 
 NTSTATUS RtlLongLongToInt(
-  _In_  LONGLONG llOperand,
-  _Out_ INT      *piResult
+    LONGLONG llOperand,
+   INT      *piResult
 );
 
 NTSTATUS RtlLongLongToInt8(
-  _In_  LONGLONG llOperand,
-  _Out_ INT8     *pi8Result
+    LONGLONG llOperand,
+   INT8     *pi8Result
 );
 
 NTSTATUS RtlLongLongToIntPtr(
-  _In_  LONGLONG llOperand,
-  _Out_ INT_PTR  *piResult
+    LONGLONG llOperand,
+   INT_PTR  *piResult
 );
 
 NTSTATUS RtlLongLongToLong(
-  _In_  LONGLONG llOperand,
-  _Out_ LONG     *plResult
+    LONGLONG llOperand,
+   LONG     *plResult
 );
 
 NTSTATUS RtlLongLongToLongPtr(
-  _In_  LONGLONG llOperand,
-  _Out_ LONG_PTR *plResult
+    LONGLONG llOperand,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlLongLongToShort(
-  _In_  LONGLONG llOperand,
-  _Out_ SHORT    *psResult
+    LONGLONG llOperand,
+   SHORT    *psResult
 );
 
 NTSTATUS RtlLongLongToUChar(
-  _In_  LONGLONG llOperand,
-  _Out_ UCHAR    *pch
+    LONGLONG llOperand,
+   UCHAR    *pch
 );
 
 NTSTATUS RtlLongLongToUInt(
-  _In_  LONGLONG llOperand,
-  _Out_ UINT     *puResult
+    LONGLONG llOperand,
+   UINT     *puResult
 );
 
 NTSTATUS RtlLongLongToUInt8(
-  _In_  LONGLONG llOperand,
-  _Out_ UINT8    *pu8Result
+    LONGLONG llOperand,
+   UINT8    *pu8Result
 );
 
 NTSTATUS RtlLongLongToULong(
-  _In_  LONGLONG llOperand,
-  _Out_ ULONG    *pulResult
+    LONGLONG llOperand,
+   ULONG    *pulResult
 )
 ;NTSTATUS RtlLongLongToULongLong(
-  _In_  LONGLONG  llOperand,
-  _Out_ ULONGLONG *pullResult
+    LONGLONG  llOperand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlLongLongToUShort(
-  _In_  LONGLONG llOperand,
-  _Out_ USHORT   *pusResult
+    LONGLONG llOperand,
+   USHORT   *pusResult
 );
 
 NTSTATUS RtlLongMult(
-  _In_  LONG lMultiplicand,
-  _In_  LONG lMultiplier,
-  _Out_ LONG *plResult
+    LONG lMultiplicand,
+    LONG lMultiplier,
+   LONG *plResult
 );
 
 NTSTATUS RtlLongPtrAdd(
@@ -342,126 +342,126 @@ NTSTATUS RtlLongPtrAdd(
 );
 
 NTSTATUS RtlLongPtrMult(
-  _In_  LONG_PTR lMultiplicand,
-  _In_  LONG_PTR lMultiplier,
-  _Out_ LONG_PTR *plResult
+    LONG_PTR lMultiplicand,
+    LONG_PTR lMultiplier,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlLongPtrSub(
-  _In_  LONG_PTR lMinuend,
-  _In_  LONG_PTR lSubtrahend,
-  _Out_ LONG_PTR *plResult
+    LONG_PTR lMinuend,
+    LONG_PTR lSubtrahend,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlLongPtrToChar(
-  _In_  LONG_PTR lOperand,
-  _Out_ CHAR     *pch
+    LONG_PTR lOperand,
+   CHAR     *pch
 );
 
 NTSTATUS RtlLongPtrToInt(
-  _In_  LONG_PTR lOperand,
-  _Out_ INT      *piResult
+    LONG_PTR lOperand,
+   INT      *piResult
 );
 
 NTSTATUS RtlLongPtrToInt8(
-  _In_  LONG_PTR lOperand,
-  _Out_ INT8     *pi8Result
+    LONG_PTR lOperand,
+   INT8     *pi8Result
 );
 
 NTSTATUS RtlLongPtrToIntPtr(
-  _In_  LONG_PTR lOperand,
-  _Out_ INT_PTR  *piResult
+    LONG_PTR lOperand,
+   INT_PTR  *piResult
 );
 
 NTSTATUS RtlLongPtrToLong(
-  _In_  LONG_PTR lOperand,
-  _Out_ LONG     *plResult
+    LONG_PTR lOperand,
+   LONG     *plResult
 );
 
 NTSTATUS RtlLongPtrToShort(
-  _In_  LONG_PTR lOperand,
-  _Out_ SHORT    *psResult
+    LONG_PTR lOperand,
+   SHORT    *psResult
 );
 
 NTSTATUS RtlLongPtrToUChar(
-  _In_  LONG_PTR lOperand,
-  _Out_ UCHAR    *pch
+    LONG_PTR lOperand,
+   UCHAR    *pch
 );
 
 NTSTATUS RtlLongPtrToUInt(
-  _In_  LONG_PTR lOperand,
-  _Out_ UINT     *puResult
+    LONG_PTR lOperand,
+   UINT     *puResult
 );
 
 NTSTATUS RtlLongPtrToUInt8(
-  _In_  LONG_PTR lOperand,
-  _Out_ UINT8    *pui8Result
+    LONG_PTR lOperand,
+   UINT8    *pui8Result
 );
 
 NTSTATUS RtlLongPtrToUIntPtr(
-  _In_  LONG_PTR lOperand,
-  _Out_ UINT_PTR *puResult
+    LONG_PTR lOperand,
+   UINT_PTR *puResult
 );
 NTSTATUS RtlLongPtrToULong(
-  _In_  LONG_PTR lOperand,
-  _Out_ ULONG    *pulResult
+    LONG_PTR lOperand,
+   ULONG    *pulResult
 );
 
 NTSTATUS RtlLongPtrToULongLong(
-  _In_  LONG_PTR  lOperand,
-  _Out_ ULONGLONG *pullResult
+    LONG_PTR  lOperand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlLongPtrToULongPtr(
-  _In_  LONG_PTR  lOperand,
-  _Out_ ULONG_PTR *pulResult
+    LONG_PTR  lOperand,
+   ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlLongPtrToUShort(
-  _In_  LONG_PTR lOperand,
-  _Out_ USHORT   *pusResult
+    LONG_PTR lOperand,
+   USHORT   *pusResult
 );
 
 NTSTATUS RtlLongSub(
-  _In_  LONG lMinuend,
-  _In_  LONG lSubtrahend,
-  _Out_ LONG *plResult
+    LONG lMinuend,
+    LONG lSubtrahend,
+   LONG *plResult
 );
 
 NTSTATUS RtlLongToChar(
-  _In_  LONG lOperand,
-  _Out_ CHAR *pch
+    LONG lOperand,
+   CHAR *pch
 );
 
 NTSTATUS RtlLongToInt(
-  _In_  LONG lOperand,
-  _Out_ INT  *piResult
+    LONG lOperand,
+   INT  *piResult
 );
 
 NTSTATUS RtlLongToInt8(
-  _In_  LONG lOperand,
-  _Out_ INT8 *pi8Result
+    LONG lOperand,
+   INT8 *pi8Result
 );
 
 NTSTATUS RtlLongToIntPtr(
-  _In_  LONG    lOperand,
-  _Out_ INT_PTR *piResult
+    LONG    lOperand,
+   INT_PTR *piResult
 );
 
 NTSTATUS RtlLongToShort(
-  _In_  LONG  lOperand,
-  _Out_ SHORT *psResult
+    LONG  lOperand,
+   SHORT *psResult
 );
 
 NTSTATUS RtlLongToUChar(
-  _In_  LONG  lOperand,
-  _Out_ UCHAR *pch
+    LONG  lOperand,
+   UCHAR *pch
 );
 
 
 NTSTATUS RtlLongToUInt(
-  _In_  LONG lOperand,
-  _Out_ UINT *puResult
+    LONG lOperand,
+   UINT *puResult
 );
 
 NTSTATUS RtlLongToUInt8(
@@ -470,18 +470,18 @@ NTSTATUS RtlLongToUInt8(
 );
 
 NTSTATUS RtlLongToUIntPtr(
-  _In_  LONG     lOperand,
-  _Out_ UINT_PTR *puResult
+    LONG     lOperand,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlLongToULong(
-  _In_  LONG  lOperand,
-  _Out_ ULONG *pulResult
+    LONG  lOperand,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlLongToULongLong(
-  _In_  LONG      lOperand,
-  _Out_ ULONGLONG *pullResult
+    LONG      lOperand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlLongToULongPtr(
@@ -490,193 +490,193 @@ NTSTATUS RtlLongToULongPtr(
 );
 
 NTSTATUS RtlLongToUShort(
-  _In_  LONG   lOperand,
-  _Out_ USHORT *pusResult
+    LONG   lOperand,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlPtrdiffTAdd(
-  _In_  ptrdiff_t Augend,
-  _In_  ptrdiff_t Addend,
-  _Out_ ptrdiff_t *pResult
+    ptrdiff_t Augend,
+    ptrdiff_t Addend,
+   ptrdiff_t *pResult
 );
 
 NTSTATUS RtlPtrdiffTMult(
-  _In_  ptrdiff_t Multiplicand,
-  _In_  ptrdiff_t Multiplier,
-  _Out_ ptrdiff_t *pResult
+    ptrdiff_t Multiplicand,
+    ptrdiff_t Multiplier,
+   ptrdiff_t *pResult
 );
 
 NTSTATUS RtlPtrdiffTSub(
-  _In_  ptrdiff_t Minuend,
-  _In_  ptrdiff_t Subtrahend,
-  _Out_ ptrdiff_t *pResult
+    ptrdiff_t Minuend,
+    ptrdiff_t Subtrahend,
+   ptrdiff_t *pResult
 );
 
 NTSTATUS RtlShortAdd(
-  _In_  SHORT sAugend,
-  _In_  SHORT sAddend,
-  _Out_ SHORT *psResult
+    SHORT sAugend,
+    SHORT sAddend,
+   SHORT *psResult
 );
 
 NTSTATUS RtlShortMult(
-  _In_  SHORT sMultiplicand,
-  _In_  SHORT sMultiplier,
-  _Out_ SHORT *psResult
+    SHORT sMultiplicand,
+    SHORT sMultiplier,
+   SHORT *psResult
 );
 
 NTSTATUS RtlShortSub(
-  _In_  SHORT sMinuend,
-  _In_  SHORT sSubtrahend,
-  _Out_ SHORT *psResult
+    SHORT sMinuend,
+    SHORT sSubtrahend,
+   SHORT *psResult
 );
 
 NTSTATUS RtlShortToChar(
-  _In_  SHORT sOperand,
-  _Out_ CHAR  *pch
+    SHORT sOperand,
+   CHAR  *pch
 );
 
 NTSTATUS RtlShortToDWordPtr(
-  _In_  SHORT     sOperand,
-  _Out_ DWORD_PTR *pdwResult
+    SHORT     sOperand,
+   DWORD_PTR *pdwResult
 );
 
 NTSTATUS RtlShortToInt8(
-  _In_  SHORT sOperand,
-  _Out_ INT8  *pi8Result
+    SHORT sOperand,
+   INT8  *pi8Result
 );
 
 NTSTATUS RtlShortToUChar(
-  _In_  SHORT sOperand,
-  _Out_ UCHAR *pch
+    SHORT sOperand,
+   UCHAR *pch
 );
 
 NTSTATUS RtlShortToUInt(
-  _In_  SHORT sOperand,
-  _Out_ UINT  *puResult
+    SHORT sOperand,
+   UINT  *puResult
 );
 
 NTSTATUS RtlShortToUInt8(
-  _In_ SHORT sOperand,
+   SHORT sOperand,
        UINT8 *pui8Result
 );
 
 NTSTATUS RtlShortToUIntPtr(
-  _In_  SHORT    sOperand,
-  _Out_ UINT_PTR *puResult
+    SHORT    sOperand,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlShortToULong(
-  _In_  SHORT sOperand,
-  _Out_ ULONG *pulResult
+    SHORT sOperand,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlShortToULongLong(
-  _In_  SHORT     sOperand,
-  _Out_ ULONGLONG *pullResult
+    SHORT     sOperand,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlShortToULongPtr(
-  _In_  SHORT     sOperand,
-  _Out_ ULONG_PTR *pulResult
+    SHORT     sOperand,
+   ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlShortToUShort(
-  _In_  SHORT  sOperand,
-  _Out_ USHORT *pusResult
+    SHORT  sOperand,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlSizeTAdd(
-  _In_  size_t Augend,
-  _In_  size_t Addend,
-  _Out_ size_t *pResult
+    size_t Augend,
+    size_t Addend,
+   size_t *pResult
 );
 
 NTSTATUS RtlSizeTMult(
-  _In_  size_t Multiplicand,
-  _In_  size_t Multiplier,
-  _Out_ size_t *pResult
+    size_t Multiplicand,
+    size_t Multiplier,
+   size_t *pResult
 );
 
 NTSTATUS RtlSizeTSub(
-  _In_  size_t Minuend,
-  _In_  size_t Subtrahend,
-  _Out_ size_t *pResult
+    size_t Minuend,
+    size_t Subtrahend,
+   size_t *pResult
 );
 
 NTSTATUS RtlSSIZETAdd(
-  _In_  SSIZE_T Augend,
-  _In_  SSIZE_T Addend,
-  _Out_ SSIZE_T *pResult
+    SSIZE_T Augend,
+    SSIZE_T Addend,
+   SSIZE_T *pResult
 );
 
 NTSTATUS RtlSSIZETMult(
-  _In_  SSIZE_T Multiplicand,
-  _In_  SSIZE_T Multiplier,
-  _Out_ SSIZE_T *pResult
+    SSIZE_T Multiplicand,
+    SSIZE_T Multiplier,
+   SSIZE_T *pResult
 );
 
 NTSTATUS RtlSSIZETSub(
-  _In_  SSIZE_T Minuend,
-  _In_  SSIZE_T Subtrahend,
-  _Out_ SSIZE_T *pResult
+    SSIZE_T Minuend,
+    SSIZE_T Subtrahend,
+   SSIZE_T *pResult
 );
 
 NTSTATUS RtlUInt8Add(
-  _In_  UINT8 u8Augend,
-  _In_  UINT8 u8Addend,
-  _Out_ UINT8 *pu8Result
+    UINT8 u8Augend,
+    UINT8 u8Addend,
+   UINT8 *pu8Result
 );
 
 NTSTATUS RtlUInt8Mult(
-  _In_  UINT8 u8Multiplicand,
-  _In_  UINT8 u8Multiplier,
-  _Out_ UINT8 *pu8Result
+    UINT8 u8Multiplicand,
+    UINT8 u8Multiplier,
+   UINT8 *pu8Result
 );
 
 NTSTATUS RtlUInt8Sub(
-  _In_  UINT8 u8Minuend,
-  _In_  UINT8 u8Subtrahend,
-  _Out_ UINT8 *pu8Result
+    UINT8 u8Minuend,
+    UINT8 u8Subtrahend,
+   UINT8 *pu8Result
 );
 
 NTSTATUS RtlUInt8ToChar(
-  _In_  UINT8 u8Operand,
-  _Out_ CHAR  *pch
+    UINT8 u8Operand,
+   CHAR  *pch
 );
 
 NTSTATUS RtlUInt8ToInt8(
-  _In_  UINT8 u8Operand,
-  _Out_ INT8  *pi8Result
+    UINT8 u8Operand,
+   INT8  *pi8Result
 );
 
 NTSTATUS RtlUIntAdd(
-  _In_  UINT uAugend,
-  _In_  UINT uAddend,
-  _Out_ UINT *puResult
+    UINT uAugend,
+    UINT uAddend,
+   UINT *puResult
 );
 
 NTSTATUS RtlUIntMult(
-  _In_  UINT uMultiplicand,
-  _In_  UINT uMultiplier,
-  _Out_ UINT *puResult
+    UINT uMultiplicand,
+    UINT uMultiplier,
+   UINT *puResult
 );
 
 NTSTATUS RtlUIntPtrAdd(
-  _In_  UINT_PTR uAugend,
-  _In_  UINT_PTR uAddend,
-  _Out_ UINT_PTR *puResult
+    UINT_PTR uAugend,
+    UINT_PTR uAddend,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlUIntPtrMult(
-  _In_  UINT_PTR uMultiplicand,
-  _In_  UINT_PTR uMultiplier,
-  _Out_ UINT_PTR *puResult
+    UINT_PTR uMultiplicand,
+    UINT_PTR uMultiplier,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlUIntPtrSub(
-  _In_  UINT_PTR uMinuend,
-  _In_  UINT_PTR uSubtrahend,
-  _Out_ UINT_PTR *puResult
+    UINT_PTR uMinuend,
+    UINT_PTR uSubtrahend,
+   UINT_PTR *puResult
 );
 
 NTSTATUS RtlUIntPtrToChar(
@@ -685,235 +685,235 @@ NTSTATUS RtlUIntPtrToChar(
 );
 
 NTSTATUS RtlUIntPtrToInt(
-  _In_  UINT_PTR uOperand,
-  _Out_ INT      *piResult
+    UINT_PTR uOperand,
+   INT      *piResult
 );
 
 NTSTATUS RtlUIntPtrToInt16(
-  _In_  UINT_PTR uOperand,
-  _Out_ INT16    *pi16Result
+    UINT_PTR uOperand,
+   INT16    *pi16Result
 );
 
 NTSTATUS RtlUIntPtrToInt8(
-  _In_  UINT_PTR uOperand,
-  _Out_ INT8     *pi8Result
+    UINT_PTR uOperand,
+   INT8     *pi8Result
 );
 
 NTSTATUS RtlUIntPtrToIntPtr(
-  _In_  UINT_PTR uOperand,
-  _Out_ INT_PTR  *piResult
+    UINT_PTR uOperand,
+   INT_PTR  *piResult
 );
 
 NTSTATUS RtlUIntPtrToLong(
         UINT_PTR uOperand,
-  _Out_ LONG     *plResult
+   LONG     *plResult
 );
 
 NTSTATUS RtlUIntPtrToLongLong(
-  _In_  UINT_PTR uOperand,
-  _Out_ LONGLONG *pllResult
+    UINT_PTR uOperand,
+   LONGLONG *pllResult
 );
 
 NTSTATUS RtlUIntPtrToLongPtr(
-  _In_  UINT_PTR uOperand,
-  _Out_ LONG_PTR *plResult
+    UINT_PTR uOperand,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlUIntPtrToShort(
-  _In_  UINT_PTR uOperand,
-  _Out_ SHORT    *psResult
+    UINT_PTR uOperand,
+   SHORT    *psResult
 );
 
 NTSTATUS RtlUIntPtrToUChar(
-  _In_  UINT_PTR uOperand,
-  _Out_ UCHAR    *pch
+    UINT_PTR uOperand,
+   UCHAR    *pch
 );
 
 NTSTATUS RtlUIntPtrToUInt(
         UINT_PTR uOperand,
-  _Out_ UINT     *puResult
+   UINT     *puResult
 );
 
 NTSTATUS RtlUIntPtrToUInt16(
-  _In_  UINT_PTR uOperand,
-  _Out_ UINT16   *pu16Result
+    UINT_PTR uOperand,
+   UINT16   *pu16Result
 );
 
 NTSTATUS RtlUIntPtrToUInt8(
-  _In_  UINT_PTR uOperand,
-  _Out_ UINT8    *pu8Result
+    UINT_PTR uOperand,
+   UINT8    *pu8Result
 );
 
 NTSTATUS RtlUIntPtrToULong(
-  _In_  UINT_PTR uOperand,
-  _Out_ ULONG    *pulResult
+    UINT_PTR uOperand,
+   ULONG    *pulResult
 );
 
 NTSTATUS RtlUIntPtrToUShort(
-  _In_  UINT_PTR uOperand,
-  _Out_ USHORT   *pusResult
+    UINT_PTR uOperand,
+   USHORT   *pusResult
 );
 
 NTSTATUS RtlUIntSub(
-  _In_  UINT uMinuend,
-  _In_  UINT uSubtrahend,
-  _Out_ UINT *puResult
+    UINT uMinuend,
+    UINT uSubtrahend,
+   UINT *puResult
 );
 
 NTSTATUS RtlUIntToChar(
-  _In_  UINT uOperand,
-  _Out_ CHAR *pch
+    UINT uOperand,
+   CHAR *pch
 );
 
 NTSTATUS RtlUIntToInt(
-  _In_  UINT uOperand,
-  _Out_ INT  *piResult
+    UINT uOperand,
+   INT  *piResult
 );
 
 NTSTATUS RtlUIntToInt8(
-  _In_  UINT uOperand,
-  _Out_ INT8 *pi8Result
+    UINT uOperand,
+   INT8 *pi8Result
 );
 
 NTSTATUS RtlUIntToIntPtr(
-  _In_  UINT    uOperand,
-  _Out_ INT_PTR *piResult
+    UINT    uOperand,
+   INT_PTR *piResult
 );
 
 NTSTATUS RtlUIntToLong(
-  _In_  UINT uOperand,
-  _Out_ LONG *plResult
+    UINT uOperand,
+   LONG *plResult
 );
 
 NTSTATUS RtlUIntToLongPtr(
-  _In_  UINT     uOperand,
-  _Out_ LONG_PTR *plResult
+    UINT     uOperand,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlUIntToShort(
-  _In_  UINT  uOperand,
-  _Out_ SHORT *psResult
+    UINT  uOperand,
+   SHORT *psResult
 );
 
 NTSTATUS RtlUIntToUChar(
-  _In_  UINT  uOperand,
-  _Out_ UCHAR *pch
+    UINT  uOperand,
+   UCHAR *pch
 );
 
 NTSTATUS RtlUIntToUInt8(
-  _In_  UINT  uOperand,
-  _Out_ UINT8 *pui8Result
+    UINT  uOperand,
+   UINT8 *pui8Result
 );
 
 NTSTATUS RtlUIntToUShort(
-  _In_  UINT   uOperand,
-  _Out_ USHORT *pusResult
+    UINT   uOperand,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlULongAdd(
-  _In_  ULONG ulAugend,
-  _In_  ULONG ulAddend,
-  _Out_ ULONG *pulResult
+    ULONG ulAugend,
+    ULONG ulAddend,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlULongLongAdd(
-  _In_ ULONGLONG ullAugend,
-  _In_ ULONGLONG ullAddend,
+   ULONGLONG ullAugend,
+   ULONGLONG ullAddend,
        ULONGLONG *pullResult
 );
 
 NTSTATUS RtlULongLongMult(
-  _In_  ULONGLONG ullMultiplicand,
-  _In_  ULONGLONG ullMultiplier,
-  _Out_ ULONGLONG *pullResult
+    ULONGLONG ullMultiplicand,
+    ULONGLONG ullMultiplier,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlULongLongSub(
-  _In_  ULONGLONG ullMinuend,
-  _In_  ULONGLONG ullSubtrahend,
-  _Out_ ULONGLONG *pullResult
+    ULONGLONG ullMinuend,
+    ULONGLONG ullSubtrahend,
+   ULONGLONG *pullResult
 );
 
 NTSTATUS RtlULongLongToChar(
-  _In_  ULONGLONG ullOperand,
-  _Out_ CHAR      *pch
+    ULONGLONG ullOperand,
+   CHAR      *pch
 );
 
 NTSTATUS RtlULongLongToInt(
-  _In_  ULONGLONG ullOperand,
-  _Out_ INT       *piResult
+    ULONGLONG ullOperand,
+   INT       *piResult
 );
 
 NTSTATUS RtlULongLongToInt8(
-  _In_  ULONGLONG ullOperand,
-  _Out_ INT8      *pi8Result
+    ULONGLONG ullOperand,
+   INT8      *pi8Result
 );
 
 NTSTATUS RtlULongLongToLong(
-  _In_  ULONGLONG ullOperand,
-  _Out_ LONG      *plResult
+    ULONGLONG ullOperand,
+   LONG      *plResult
 );
 
 NTSTATUS RtlULongLongToLongLong(
-  _In_  ULONGLONG ullOperand,
-  _Out_ LONGLONG  *pllResult
+    ULONGLONG ullOperand,
+   LONGLONG  *pllResult
 );
 
 NTSTATUS RtlULongLongToLongPtr(
-  _In_  ULONGLONG ullOperand,
-  _Out_ LONG_PTR  *plResult
+    ULONGLONG ullOperand,
+   LONG_PTR  *plResult
 );
 
 NTSTATUS RtlULongLongToShort(
-  _In_  ULONGLONG ullOperand,
-  _Out_ SHORT     *psResult
+    ULONGLONG ullOperand,
+   SHORT     *psResult
 );
 
 NTSTATUS RtlULongLongToUChar(
-  _In_  ULONGLONG ullOperand,
-  _Out_ UCHAR     *pch
+    ULONGLONG ullOperand,
+   UCHAR     *pch
 );
 
 NTSTATUS RtlULongLongToUInt(
-  _In_  ULONGLONG ullOperand,
-  _Out_ UINT      *puResult
+    ULONGLONG ullOperand,
+   UINT      *puResult
 );
 
 NTSTATUS RtlULongLongToUInt8(
-  _In_  ULONGLONG ullOperand,
-  _Out_ UINT8     *pu8Result
+    ULONGLONG ullOperand,
+   UINT8     *pu8Result
 );
 
 NTSTATUS RtlULongLongToUIntPtr(
-  _In_  ULONGLONG ullOperand,
-  _Out_ UINT_PTR  *puResult
+    ULONGLONG ullOperand,
+   UINT_PTR  *puResult
 );
 
 NTSTATUS RtlULongLongToULong(
-  _In_ ULONGLONG ullOperand,
+   ULONGLONG ullOperand,
        ULONG     *pulResult
 );
 
 NTSTATUS RtlULongLongToULongPtr(
-  _In_ ULONGLONG ullOperand,
+   ULONGLONG ullOperand,
        ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlULongLongToUShort(
-  _In_  ULONGLONG ullOperand,
-  _Out_ USHORT    *pusResult
+    ULONGLONG ullOperand,
+   USHORT    *pusResult
 );
 
 NTSTATUS RtlULongMult(
-  _In_  ULONG ulMultiplicand,
-  _In_  ULONG ulMultiplier,
-  _Out_ ULONG *pulResult
+    ULONG ulMultiplicand,
+    ULONG ulMultiplier,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlULongPtrAdd(
-  _In_  ULONG_PTR ulAugend,
-  _In_  ULONG_PTR ulAddend,
-  _Out_ ULONG_PTR *pulResult
+    ULONG_PTR ulAugend,
+    ULONG_PTR ulAddend,
+   ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlULongPtrMult(
@@ -923,194 +923,194 @@ NTSTATUS RtlULongPtrMult(
 );
 
 NTSTATUS RtlULongPtrSub(
-  _In_  ULONG_PTR ulMinuend,
-  _In_  ULONG_PTR ulSubtrahend,
-  _Out_ ULONG_PTR *pulResult
+    ULONG_PTR ulMinuend,
+    ULONG_PTR ulSubtrahend,
+   ULONG_PTR *pulResult
 );
 
 NTSTATUS RtlULongPtrToChar(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ CHAR      *pch
+    ULONG_PTR ulOperand,
+   CHAR      *pch
 );
 
 NTSTATUS RtlULongPtrToInt(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ INT       *piResult
+    ULONG_PTR ulOperand,
+   INT       *piResult
 );
 
 NTSTATUS RtlULongPtrToInt8(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ INT8      *pi8Result
+    ULONG_PTR ulOperand,
+   INT8      *pi8Result
 );
 
 NTSTATUS RtlULongPtrToIntPtr(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ INT_PTR   *piResult
+    ULONG_PTR ulOperand,
+   INT_PTR   *piResult
 );
 
 NTSTATUS RtlULongPtrToLong(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ LONG      *plResult
+    ULONG_PTR ulOperand,
+   LONG      *plResult
 );
 
 NTSTATUS RtlULongPtrToLongLong(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ LONGLONG  *pllResult
+    ULONG_PTR ulOperand,
+   LONGLONG  *pllResult
 );
 
 NTSTATUS RtlULongPtrToLongPtr(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ LONG_PTR  *plResult
+    ULONG_PTR ulOperand,
+   LONG_PTR  *plResult
 );
 
 NTSTATUS RtlULongPtrToShort(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ SHORT     *psResult
+    ULONG_PTR ulOperand,
+   SHORT     *psResult
 );
 
 NTSTATUS RtlULongPtrToShort(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ SHORT     *psResult
+    ULONG_PTR ulOperand,
+   SHORT     *psResult
 );
 
 NTSTATUS RtlULongPtrToUInt(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ UINT      *puResult
+    ULONG_PTR ulOperand,
+   UINT      *puResult
 );
 
 NTSTATUS RtlULongPtrToUInt8(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ UINT8     *pui8Result
+    ULONG_PTR ulOperand,
+   UINT8     *pui8Result
 );
 
 NTSTATUS RtlULongPtrToUIntPtr(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ UINT_PTR  *puResult
+    ULONG_PTR ulOperand,
+   UINT_PTR  *puResult
 );
 
 NTSTATUS RtlULongPtrToULong(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ ULONG     *pulResult
+    ULONG_PTR ulOperand,
+   ULONG     *pulResult
 );
 
 NTSTATUS RtlULongPtrToUShort(
-  _In_  ULONG_PTR ulOperand,
-  _Out_ USHORT    *pusResult
+    ULONG_PTR ulOperand,
+   USHORT    *pusResult
 );
 
 NTSTATUS RtlULongSub(
-  _In_  ULONG ulMinuend,
-  _In_  ULONG ulSubtrahend,
-  _Out_ ULONG *pulResult
+    ULONG ulMinuend,
+    ULONG ulSubtrahend,
+   ULONG *pulResult
 );
 
 NTSTATUS RtlULongToChar(
-  _In_  ULONG ulOperand,
-  _Out_ CHAR  *pch
+    ULONG ulOperand,
+   CHAR  *pch
 );
 
 NTSTATUS RtlULongToInt(
-  _In_  ULONG ulOperand,
-  _Out_ INT   *piResult
+    ULONG ulOperand,
+   INT   *piResult
 );
 
 NTSTATUS RtlULongToInt8(
-  _In_  ULONG ulOperand,
-  _Out_ INT8  *pi8Result
+    ULONG ulOperand,
+   INT8  *pi8Result
 );
 
 NTSTATUS RtlULongToIntPtr(
-  _In_  ULONG   ulOperand,
-  _Out_ INT_PTR *piResult
+    ULONG   ulOperand,
+   INT_PTR *piResult
 );
 
 NTSTATUS RtlULongToLong(
-  _In_  ULONG ulOperand,
-  _Out_ LONG  *plResult
+    ULONG ulOperand,
+   LONG  *plResult
 );
 
 NTSTATUS RtlULongToLongPtr(
-  _In_  ULONG    ulOperand,
-  _Out_ LONG_PTR *plResult
+    ULONG    ulOperand,
+   LONG_PTR *plResult
 );
 
 NTSTATUS RtlULongToShort(
-  _In_  ULONG ulOperand,
-  _Out_ SHORT *psResult
+    ULONG ulOperand,
+   SHORT *psResult
 );
 
 NTSTATUS RtlULongToUChar(
-  _In_  ULONG ulOperand,
-  _Out_ UCHAR *pch
+    ULONG ulOperand,
+   UCHAR *pch
 );
 
 NTSTATUS RtlULongToUInt(
-  _In_  ULONG ulOperand,
-  _Out_ UINT  *puResult
+    ULONG ulOperand,
+   UINT  *puResult
 );
 
 NTSTATUS RtlULongToUInt8(
-  _In_  ULONG ulOperand,
-  _Out_ UINT8 *pui8Result
+    ULONG ulOperand,
+   UINT8 *pui8Result
 );
 
 NTSTATUS RtlULongToUIntPtr(
-  _In_  ULONG    ulOperand,
-  _Out_ UINT_PTR *puiResult
+    ULONG    ulOperand,
+   UINT_PTR *puiResult
 );
 
 NTSTATUS RtlULongToUShort(
-  _In_  ULONG  ulOperand,
-  _Out_ USHORT *pusResult
+    ULONG  ulOperand,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlUShortAdd(
-  _In_  USHORT usAugend,
-  _In_  USHORT usAddend,
-  _Out_ USHORT *pusResult
+    USHORT usAugend,
+    USHORT usAddend,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlUShortAdd(
-  _In_  USHORT usAugend,
-  _In_  USHORT usAddend,
-  _Out_ USHORT *pusResult
+    USHORT usAugend,
+    USHORT usAddend,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlUShortMult(
-  _In_  USHORT usMultiplicand,
-  _In_  USHORT usMultiplier,
-  _Out_ USHORT *pusResult
+    USHORT usMultiplicand,
+    USHORT usMultiplier,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlUShortSub(
-  _In_  USHORT usMinuend,
-  _In_  USHORT usSubtrahend,
-  _Out_ USHORT *pusResult
+    USHORT usMinuend,
+    USHORT usSubtrahend,
+   USHORT *pusResult
 );
 
 NTSTATUS RtlUShortToChar(
-  _In_  USHORT usOperand,
-  _Out_ CHAR   *pch
+    USHORT usOperand,
+   CHAR   *pch
 );
 
 NTSTATUS RtlUShortToInt8(
-  _In_  USHORT usOperand,
-  _Out_ INT8   *pi8Result
+    USHORT usOperand,
+   INT8   *pi8Result
 );
 
 NTSTATUS RtlUShortToShort(
-  _In_  USHORT usOperand,
-  _Out_ SHORT  *psResult
+    USHORT usOperand,
+   SHORT  *psResult
 );
 
 NTSTATUS RtlUShortToUChar(
-  _In_  USHORT usOperand,
-  _Out_ UCHAR  *pch
+    USHORT usOperand,
+   UCHAR  *pch
 );
 
 NTSTATUS RtlUShortToUInt8(
-  _In_  USHORT usOperand,
-  _Out_ UINT8  *pui8Result
+    USHORT usOperand,
+   UINT8  *pui8Result
 );
 
 #endif

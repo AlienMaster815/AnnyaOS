@@ -303,9 +303,9 @@ UNUSED static TWA_MESSAGE_TYPE TWA_ERROR_TABLE[NUMBER_OF_TWA_ERROR_MESSGES] = {
 #define TW_MAX_CMDS_PER_LUN                 254
 #define TW_MAX_RESPONCE_DRAIN               256
 #define TW_MAX_AEN_DRAIN                    255
-#define TW_IN_RESET                         2
+#define TWRESET                         2
 #define TW_USING_MSI                        3
-#define TW_IN_ATTENTION_LOOP                4
+#define TWATTENTION_LOOP                4
 #define TW_MAX_SECTORS                      256
 #define TW_AEN_WAIT_TIME                    1000
 #define TW_IOCTL_WAIT_TIME                  1000 //1 Kiloquark

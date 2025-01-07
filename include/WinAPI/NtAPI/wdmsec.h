@@ -5,25 +5,25 @@
 #include "../WinAPITypes/CommonTypes.h"
 
 NTSTATUS WdmlibIoCreateDeviceSecure(
-  _In_           PDRIVER_OBJECT   DriverObject,
-  _In_           ULONG            DeviceExtensionSize,
-  _In_opt_ PUNICODE_STRING  DeviceName,
-  _In_           DEVICE_TYPE      DeviceType,
-  _In_           ULONG            DeviceCharacteristics,
-  _In_           BOOLEAN          Exclusive,
-  _In_           PCUNICODE_STRING DefaultSDDLString,
-  _In_opt_ LPCGUID          DeviceClassGuid,
+             PDRIVER_OBJECT   DriverObject,
+             ULONG            DeviceExtensionSize,
+   PUNICODE_STRING  DeviceName,
+             DEVICE_TYPE      DeviceType,
+             ULONG            DeviceCharacteristics,
+             BOOLEAN          Exclusive,
+             PCUNICODE_STRING DefaultSDDLString,
+   LPCGUID          DeviceClassGuid,
                  PDEVICE_OBJECT   *DeviceObject
 );
 
 NTSTATUS WdmlibIoValidateDeviceIoControlAccess(
-  _In_ PIRP  Irp,
-  _In_ ULONG RequiredAccess
+   PIRP  Irp,
+   ULONG RequiredAccess
 );
 
 NTSTATUS WdmlibRtlInitUnicodeStringEx(
-  _Out_          PUNICODE_STRING DestinationString,
-  _In_opt_ PCWSTR          SourceString
+            PUNICODE_STRING DestinationString,
+   PCWSTR          SourceString
 );
 
 #ifndef _WMI_CHANGER_PROBLEM_DEVICE_ERROR
