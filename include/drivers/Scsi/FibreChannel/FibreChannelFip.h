@@ -1,6 +1,8 @@
 #ifndef _FIBRE_CHANNEL_FIP_H
 #define _FIBRE_CHANNEL_FIP_H
 
+#include "FibreChannelNs.h"
+
 #pragma pack(push,1)
 
 #define FIP_DEF_PRIORITY        128
@@ -168,10 +170,10 @@ typedef struct _FIP_VLAN_DESCRIPTOR{
 }FIP_VLAN_DESCRIPTOR, * PFIP_VLAN_DESCRIPTOR;
 
 typedef struct _FIP_FC4_DESCRIPTOR{
-    FIP_DESCRIPTOR  FdDescriptor;
-    uint8_t         FdReserved[2];
-    //FC_NS_FTS       FdFts;
-    //FC_NS_FF        FdFF;
+    FIP_DESCRIPTOR          FdDescriptor;
+    uint8_t                 FdReserved[2];
+    FIBRE_CHANNEL_NS_FTS    FdFts;
+    FIBRE_CHANNEL_NS_FF     FdFF;
 }FIP_FC4_DESCRIPTOR, * PFIP_FC4_DESCRIPTOR;
 
 typedef struct _FIP_VENDOR_DESCRIPTOR{  
