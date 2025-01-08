@@ -325,6 +325,16 @@ bool RangeDoesNotInterfere(
     return true;
 }
 
+
+uint64_t LouKeVirtualAddresToPageValue(
+    uint64_t VAddress
+);
+
+uint64_t LouKeGetOffsetInPage(
+    uint64_t VAddress
+);
+
+
 #endif
 #ifdef __cplusplus
 }

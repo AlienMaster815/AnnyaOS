@@ -51,9 +51,7 @@ static inline
 uint64_t* LouKeCreatePageDirectory(
     uint64_t TableFlags
 ){
-    
     uint64_t* Result = LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
-
     for(uint16_t i = 0 ; i < 512; i++){
         Result[i] = PAGE_WRITE | (TableFlags & (PAGE_USER | (1 << 4) | (1 << 3)));
     }
@@ -280,4 +278,79 @@ bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize) {
 uint64_t GetPageOfFaultValue(uint64_t VAddress) {
 
     return 0;
+}
+
+uint64_t LouKeVirtualAddresToPageValue(
+    uint64_t VAddress
+){
+    // Calculate the entries for each page level
+    uint64_t L4Entry = 0;
+    uint64_t L3Entry = 0;
+    uint64_t L2Entry = 0;
+    uint64_t L1Entry = 0;
+    CalculateTableMarks(
+        VAddress,
+        &L4Entry,
+        &L3Entry,
+        &L2Entry,
+        &L1Entry
+    );
+    PML* PML4 = GetPageBase();
+    if(!PML4)return 0x00;
+    uint64_t* LBase = (uint64_t*)&PML4->PML4.entries[0];
+    if(!LBase)return 0x00;
+    uint64_t TMP = LBase[L4Entry];
+    TMP  &= ~(KILOBYTE_PAGE);   
+    LBase = (uint64_t*)TMP;
+    if(!LBase)return 0x00;
+    TMP = LBase[L3Entry];
+    TMP &= ~(KILOBYTE_PAGE);
+    LBase = (uint64_t*)TMP;
+    if(!LBase)return 0x00;
+    if(IsMegabytePage(&LBase[L2Entry])){
+        return LBase[L2Entry];
+    }
+    TMP = LBase[L2Entry];
+    TMP &= ~(KILOBYTE_PAGE);
+    LBase = (uint64_t*)TMP;
+    if(!LBase)return 0x00;
+    return LBase[L1Entry];
+}
+
+uint64_t LouKeGetOffsetInPage(
+    uint64_t VAddress
+){
+// Calculate the entries for each page level
+    uint64_t L4Entry = 0;
+    uint64_t L3Entry = 0;
+    uint64_t L2Entry = 0;
+    uint64_t L1Entry = 0;
+    CalculateTableMarks(
+        VAddress,
+        &L4Entry,
+        &L3Entry,
+        &L2Entry,
+        &L1Entry
+    );
+    PML* PML4 = GetPageBase();
+    if(!PML4)return 0x00;
+    uint64_t* LBase = (uint64_t*)&PML4->PML4.entries[0];
+    if(!LBase)return 0x00;
+    uint64_t TMP = LBase[L4Entry];
+    TMP  &= ~(KILOBYTE_PAGE);   
+    LBase = (uint64_t*)TMP;
+    if(!LBase)return 0x00;
+    TMP = LBase[L3Entry];
+    TMP &= ~(KILOBYTE_PAGE);
+    LBase = (uint64_t*)TMP;
+    if(!LBase)return 0x00;
+    uint64_t PageBase;
+    if(IsMegabytePage(&LBase[L2Entry])){
+        PageBase = VAddress & ~(MEGABYTE_PAGE);
+    }else {
+        PageBase = VAddress & ~(KILOBYTE_PAGE);
+    }
+
+    if(!PageBase)return 0x00;//sanity check
+    return VAddress - PageBase;
 }

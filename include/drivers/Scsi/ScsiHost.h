@@ -8,6 +8,7 @@ typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 #endif
 
+#include "../ScatterList.h"
 
 #include "FibreChannel/FibreChannelFrame.h"
 #include "CxlFlashIoCtl.h"
