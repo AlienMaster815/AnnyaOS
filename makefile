@@ -60,10 +60,10 @@ Drivers64 := $(shell awk -F '[<>]' '/<DRIVERTOCPY64>/{print " " $$3 ";"}' $(Driv
 EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
 
 ifeq ($(HOST_ARCH),x86_64)
-    CC = x86_64-w64-mingw32-gcc
-    CP = x86_64-w64-mingw32-g++
+    CC = x86_64-w64-mingw32-gcc -mms-bitfields
+    CP = x86_64-w64-mingw32-g++ -mms-bitfields
     LD = ld
-
+	PELD = x86_64-w64-mingw32-ld
 endif
 
 ifeq ($(HOST_ARCH),ARM)
@@ -159,7 +159,7 @@ x86_64_API_asm_source_files := $(shell find API -name *.asm)
 x86_64_API_asm_object_files := $(patsubst API/%.asm, build/x86_64/asm/API/%.o, $(x86_64_API_asm_source_files))
 
 kernel_s_source_files := $(shell find kernel -name *.s)
-kernel_s_object_files := $(patsubst kernel/%.s, build/kernel/%.o, $(kernel_s_source_files))
+kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
 
 ifeq ($(TARGET_ARCH), x86_64)
@@ -179,7 +179,7 @@ kernel_asm_source_files := $(shell find kernel -name *.asm)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
 ifeq ($(FIRMWARE_TARGET),BIOS)
-x86_64_object_files := $(kernel_object_files) $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
+x86_64_object_files := $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
 endif
 
 
@@ -187,26 +187,31 @@ endif
 
 $(kernel_object_files): build/kernel/%.o : kernel/%.c
 	mkdir -p $(dir $@) && \
-	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/kernel/%.o, kernel/%.c, $@) -o $@
+	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) -o $(patsubst %.o, %.temp, $@) $< && \
+	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $(patsubst %.o, %.temp, $@) $@ && \
+	rm -f $(patsubst %.o, %.temp, $@)
 
 $(x86_64_c_object_files): build/x86_64/init/%.o : init/%.c
 	mkdir -p $(dir $@) && \
-	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/x86_64/init/%.o, init/%.c, $@) -o $@
+	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/x86_64/init/%.o, init/%.c, $@) -o $@.tmp && \
+	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
+	rm -f $@.tmp
 
 $(driver_cpp_object_files): build/drivers/%.o : drivers/%.cpp
 	mkdir -p $(dir $@) && \
-	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/drivers/%.o, drivers/%.cpp, $@) -o $@ -lc
-	
-
+	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/drivers/%.o, drivers/%.cpp, $@) -o $@.tmp && \
+	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
+	rm -f $@.tmp
 
 $(x86_64_API_cpp_object_files): build/x86_64/API/%.o : API/%.cpp
 	mkdir -p $(dir $@) && \
-	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/x86_64/API/%.o, API/%.cpp, $@) -o $@ -lc
+	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/x86_64/API/%.o, API/%.cpp, $@) -o $@.tmp && \
+	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
+	rm -f $@.tmp
 
 $(x86_64_API_asm_object_files): build/x86_64/asm/API/%.o : API/%.asm
 	mkdir -p $(dir $@) && \
 	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/x86_64/asm/API/%.o, API/%.asm, $@) -o $@
-
 
 $(x86_64_asm_object_files): $(x86_64_asm_source_files)
 	mkdir -p $(dir $@) && \
@@ -216,11 +221,11 @@ $(kernel_asm_object_files): build/x86_64/kernelasm/%.o : kernel/%.asm
 	mkdir -p $(dir $@) && \
 	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/x86_64/kernelasm/%.o, kernel/%.asm, $@) -o $@
 
-
 $(kernel_s_object_files): build/kernel/%.o : kernel/%.s
 	mkdir -p $(dir $@) && \
-	$(CC) -c $(C_COMPILE_FLAGS) $(patsubst build/kernel/%.o, kernel/%.s, $@) -o $@
-
+	$(CC) -c $(C_COMPILE_FLAGS) $(patsubst build/kernel/%.o, kernel/%.s, $@) -o $@.tmp && \
+	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
+	rm -f $@.tmp
 
 
 
@@ -229,9 +234,9 @@ clean:
 
 
 ifeq ($(TARGET_ARCH), x86_64)
-lou.exe: $(x86_64_object_files)
-	mkdir -p dist/x86_64 && \
-	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
+lou.exe: $(x86_64_object_files) $(kernel_object_files)
+	mkdir -p dist/x86_64
+	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(kernel_object_files) $(x86_64_object_files)
 	rm -r build
 endif
 
@@ -247,8 +252,6 @@ ifeq ($(TARGET_ARCH), x86_64)
 release: lou.exe
 	mkdir -p release/x86_64 && \
 	cp dist/x86_64/LOUOSKRNL.bin release/x86_64/LOUOSKRNL.exe
-	strip $(EXPORT) \
-	release/x86_64/LOUOSKRNL.exe
 endif
 
 
