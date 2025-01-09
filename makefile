@@ -187,31 +187,26 @@ endif
 
 $(kernel_object_files): build/kernel/%.o : kernel/%.c
 	mkdir -p $(dir $@) && \
-	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) -o $(patsubst %.o, %.temp, $@) $< && \
-	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $(patsubst %.o, %.temp, $@) $@ && \
-	rm -f $(patsubst %.o, %.temp, $@)
+	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/kernel/%.o, kernel/%.c, $@) -o $@
 
 $(x86_64_c_object_files): build/x86_64/init/%.o : init/%.c
 	mkdir -p $(dir $@) && \
-	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/x86_64/init/%.o, init/%.c, $@) -o $@.tmp && \
-	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
-	rm -f $@.tmp
+	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/x86_64/init/%.o, init/%.c, $@) -o $@
 
 $(driver_cpp_object_files): build/drivers/%.o : drivers/%.cpp
 	mkdir -p $(dir $@) && \
-	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/drivers/%.o, drivers/%.cpp, $@) -o $@.tmp && \
-	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
-	rm -f $@.tmp
+	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/drivers/%.o, drivers/%.cpp, $@) -o $@ -lc
+	
+
 
 $(x86_64_API_cpp_object_files): build/x86_64/API/%.o : API/%.cpp
 	mkdir -p $(dir $@) && \
-	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/x86_64/API/%.o, API/%.cpp, $@) -o $@.tmp && \
-	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
-	rm -f $@.tmp
+	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/x86_64/API/%.o, API/%.cpp, $@) -o $@ -lc
 
 $(x86_64_API_asm_object_files): build/x86_64/asm/API/%.o : API/%.asm
 	mkdir -p $(dir $@) && \
 	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/x86_64/asm/API/%.o, API/%.asm, $@) -o $@
+
 
 $(x86_64_asm_object_files): $(x86_64_asm_source_files)
 	mkdir -p $(dir $@) && \
@@ -221,11 +216,10 @@ $(kernel_asm_object_files): build/x86_64/kernelasm/%.o : kernel/%.asm
 	mkdir -p $(dir $@) && \
 	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/x86_64/kernelasm/%.o, kernel/%.asm, $@) -o $@
 
+
 $(kernel_s_object_files): build/kernel/%.o : kernel/%.s
 	mkdir -p $(dir $@) && \
-	$(CC) -c $(C_COMPILE_FLAGS) $(patsubst build/kernel/%.o, kernel/%.s, $@) -o $@.tmp && \
-	llvm-objcopy --input-target=coff-x86-64 --output-target=elf64-x86-64 $@.tmp $@ && \
-	rm -f $@.tmp
+	$(CC) -c $(C_COMPILE_FLAGS) $(patsubst build/kernel/%.o, kernel/%.s, $@) -o $@
 
 
 
