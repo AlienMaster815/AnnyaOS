@@ -97,6 +97,25 @@ static inline void ScatterGatherSetBuffer(
     );
 }
 
+#define ForEachScatterGatherList(ScatterList, ScaterGather, Nr, i) \
+    for(i = 0, ScaterGather = (ScatterList); i < (Nr); i++, ScaterGather = ScatterGatherNext(ScatterGather))
+
+#define ForEachScatterGatherTable(ScatterGatherTable, ScatterGather, i) \
+    ForEachScatterGatherList((ScatterGatherTable)-ScatterGatherList, ScatterGather, i)
+
+#define ForEachScatterGatherTableDma(ScatterGatherTable, ScatterGather, i)  \
+    ForEachScatterGatherList((ScatterGatherTable)->ScatterGatherList, ScatterGather, (ScatterGatherTable)->ElementCount, i)
+
+
+static inline void ScatterGatherChain(
+    PSCATTER_LIST    ScatterListChain, 
+    PSCATTER_LIST    ScatterGatherList
+){
+    ScatterListChain->Offset = 0;
+    ScatterListChain->Length = 0;
+    ScatterListChain->PageLink = (((unsigned long)(uint64_t)ScatterGatherList | SCATTER_GATHER_CHAIN) & ~SCATTER_GATHER_END);
+}
+
 
 
 #ifdef __cplusplus
