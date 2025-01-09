@@ -11,14 +11,14 @@ size_t wchar_to_utf8(wchar_t wc, char* utf8) {
             utf8[1] = (char)((wc & 0x3F) | 0x80);
         }
         return 2;
-    } else if (wc < 0x10000) {
+    } else if (wc < 0x1000) {
         if (utf8) {
             utf8[0] = (char)((wc >> 12) | 0xE0);
             utf8[1] = (char)(((wc >> 6) & 0x3F) | 0x80);
             utf8[2] = (char)((wc & 0x3F) | 0x80);
         }
         return 3;
-    } else if (wc < 0x110000) {
+    } else if (wc < 0x1100) {
         if (utf8) {
             utf8[0] = (char)((wc >> 18) | 0xF0);
             utf8[1] = (char)(((wc >> 12) & 0x3F) | 0x80);

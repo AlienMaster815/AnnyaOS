@@ -5,6 +5,7 @@
 
 #ifndef _GDT_H
 #define _GDT_H
+#pragma pack(push, 1)
 
 //User Data Segment Types
 #define ReadWrite 0x92
@@ -29,7 +30,6 @@
 
 #if __x86_64__
 
-#pragma pack(push, 1)
 
 typedef struct {
     unsigned int limit_low              : 16;
@@ -163,7 +163,6 @@ typedef struct {
     uint32_t base;         // 48-bit base address
 }GDTP;
 
-#pragma pack(pop)
 #ifndef _KERNEL_MODULE_
 LOUSTATUS Initialize_Gdt();
 
@@ -192,5 +191,5 @@ LOUSTATUS Load_Gdt(GDT* gdt);
 
 #endif
 
-
+#pragma pack(pop)
 #endif

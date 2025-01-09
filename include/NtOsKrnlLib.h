@@ -6,17 +6,7 @@ extern "C" {
 #endif
 
 #ifndef _KERNEL_MODULE_
-
-static inline unsigned __int64 __readgsqword(unsigned long Offset) {
-    unsigned __int64 value;
-    __asm__ __volatile__ (
-        "movq %%gs:%1, %0"
-        : "=r" (value)
-        : "m" (*(const unsigned __int64 *) (unsigned __int64) Offset)
-    );
-    return value;
-}
-
+#include <stdarg.h>
 
 //well start with defining the Runtimes
 int64_t RtlUnicodeToMultiByteSize(uint32_t* size, wchar_t* src, int32_t length);

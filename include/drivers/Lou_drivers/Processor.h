@@ -1,5 +1,5 @@
-#ifndef _Processor_H
-#define _Processor_h
+#ifndef _PROCESSOR_H
+#define _PROCESSOR_H
 
 
 #ifdef __cplusplus
@@ -147,4 +147,4 @@ KERNEL_IMPORT uint64_t GetCPUCoreGeneration();
 #endif
 
 
-#endif
+#endif //_PROCESSOR_H

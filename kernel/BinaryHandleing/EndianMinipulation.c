@@ -1,11 +1,11 @@
 #include <LouAPI.h>
 
-static inline
-wchar_t LittleEndianTransfer(wchar_t LittleEndianWord){
-    wchar_t Result = (wchar_t)((LittleEndianWord & (wchar_t)0xFF) << (wchar_t)8);
-    Result |= (wchar_t)((LittleEndianWord >> 8) & (wchar_t)0xFF); 
-    return Result;
-}
+//static inline
+//wchar_t LittleEndianTransfer(wchar_t LittleEndianWord){
+//    wchar_t Result = (wchar_t)((LittleEndianWord & (wchar_t)0xFF) << (wchar_t)8);
+//    Result |= (wchar_t)((LittleEndianWord >> 8) & (wchar_t)0xFF); 
+//    return Result;
+//}
 
 
 wchar_t* LookForUTF16LEBuffer(wchar_t* BufferOfSearch ,wchar_t* UTF16LEString, size_t BufferSize, size_t StringSize){

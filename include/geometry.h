@@ -1,7 +1,6 @@
 #ifndef _GEOMETRY_H
 #define _GEOMETRY_H
 #include <LouAPI.h>
-#include <assert.h>
 
 #ifndef _KERNEL_MODULE_
 void circle (int cx, int cy, int radius, uint8_t r,uint8_t g,uint8_t b);

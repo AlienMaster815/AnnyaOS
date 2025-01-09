@@ -60,8 +60,8 @@ Drivers64 := $(shell awk -F '[<>]' '/<DRIVERTOCPY64>/{print " " $$3 ";"}' $(Driv
 EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
 
 ifeq ($(HOST_ARCH),x86_64)
-    CC = x86_64-w64-mingw32-gcc -mms-bitfields
-    CP = x86_64-w64-mingw32-g++ -mms-bitfields
+    CC = x86_64-w64-mingw32-gcc
+    CP = x86_64-w64-mingw32-g++
     LD = ld
 	PELD = x86_64-w64-mingw32-ld
 endif
@@ -179,7 +179,7 @@ kernel_asm_source_files := $(shell find kernel -name *.asm)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
 ifeq ($(FIRMWARE_TARGET),BIOS)
-x86_64_object_files := $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
+x86_64_object_files := $(kernel_object_files) $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
 endif
 
 
@@ -230,7 +230,7 @@ clean:
 ifeq ($(TARGET_ARCH), x86_64)
 lou.exe: $(x86_64_object_files) $(kernel_object_files)
 	mkdir -p dist/x86_64
-	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(kernel_object_files) $(x86_64_object_files)
+	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
 	rm -r build
 endif
 

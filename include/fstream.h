@@ -1,5 +1,5 @@
 #ifndef _FSTREAM_H
-#define _FSTREAN_H
+#define _FSTREAM_H
 
 
 #ifdef __cplusplus

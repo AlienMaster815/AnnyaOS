@@ -47,21 +47,7 @@ void InitializePageTableWithIndex(uint64_t* PageTable, uint64_t StartIndex, uint
 #define PAGE_TABLE_ALIGNMENT 4096
 #define nullptr 0x00
 
-static inline
-uint64_t* LouKeCreatePageDirectory(
-    uint64_t TableFlags
-){
-    uint64_t* Result = LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
-    for(uint16_t i = 0 ; i < 512; i++){
-        Result[i] = PAGE_WRITE | (TableFlags & (PAGE_USER | (1 << 4) | (1 << 3)));
-    }
-    return Result;
-}
 
-static inline
-void ConfigureFlags(uint64_t* Entry, uint64_t Flags){
-    *Entry |= (Flags & (PAGE_USER | (1 << 4) | (1 << 3)));
-}
 
 void CalculateTableMarks(
     uint64_t VAddress, 

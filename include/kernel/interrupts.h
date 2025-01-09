@@ -1,8 +1,8 @@
-#pragma pack(push, 1)
 #include <SharedTypes.h>
 
 #ifndef _INTERRUPTS_H
 #define _INTERRUPTS_H
+#pragma pack(push, 1)
 
 #define DEBUG_TRAP asm ("int $0x03");
 

@@ -2,10 +2,8 @@
 #include <bootloader/grub/multiboot2.h>
 
 
-#define ACPI 1094930505
-#define SMBIOS_S 837766737983
-#define APM_S 658077
-#define FACP 70656780
+#define SMB_SIGNATURE 0x424D53 // 'S', 'M', 'B' in little-endian
+#define APM_SIGNATURE 0x4D5041 // 'A', 'P', 'M' in little-endian
 
 static uintptr_t EFI_TABLE = 0x00;
 static uintptr_t RSDP_MASTER = 0x00;
@@ -172,7 +170,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 			}
 		}
 	}
-	else if ('SMB' == FirmwareTableProviderSignature) {
+	else if (SMB_SIGNATURE == FirmwareTableProviderSignature) {
 		*TablePointer = (uintptr_t)SMBIOS_MASTER;
 		*Type = 0;
 		if (*TablePointer != 0) {
@@ -180,7 +178,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 		}
 
 	}
-	else if ('APM' == FirmwareTableProviderSignature) {
+	else if (APM_SIGNATURE == FirmwareTableProviderSignature) {
 		*TablePointer = (uintptr_t)APM_MASTER;
 		*Type = 0;
 		if (*TablePointer != 0) {
@@ -268,10 +266,10 @@ LOUSTATUS LouKeGetSystemFirmwareTableId(
 			}
 		}
 	}
-	else if (FirmwareTableProviderSignature == 'SMB') {
+	else if (FirmwareTableProviderSignature == SMB_SIGNATURE) {
 		// Handle SMBIOS signatures
 	}
-	else if (FirmwareTableProviderSignature == 'APM') {
+	else if (FirmwareTableProviderSignature == APM_SIGNATURE) {
 		// Handle APM signatures
 	}
 	LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);

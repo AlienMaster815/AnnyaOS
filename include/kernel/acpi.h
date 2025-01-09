@@ -1,6 +1,7 @@
 
 #ifndef _ACPI_H
 #define _ACPI_H
+#pragma pack(push,1)
 
 #include <stddef.h>
 #include <stdint.h>
@@ -91,7 +92,6 @@ typedef struct {
 	// Depending on the version (revision), additional fields may be present
 }RSDP;
 
-#pragma pack(1)
 
 // MADT Header
 typedef struct {
@@ -133,7 +133,6 @@ typedef struct  {
 }acpi_madt_io_apic;
 
 
-#pragma pack()
 
 #ifndef _KERNEL_MODULE_
 RSDP* PROBE_RSDP(uintptr_t memory_base, uintptr_t memory_limit);
@@ -234,9 +233,6 @@ typedef struct {
     // Depending on the version (revision), additional fields may be present
 }RSDP;
 
-#pragma pack(pop)
-
-#pragma pack(1)
 
 // MADT Header
 typedef struct {
@@ -278,8 +274,6 @@ typedef struct  {
 }acpi_madt_io_apic;
 
 
-#pragma pack()
-
 #ifndef _KERNEL_MODULE_
 RSDP* PROBE_RSDP(uintptr_t memory_base, uintptr_t memory_limit);
 STATUS ACPI_PARSE(RSDP* rsdp);
@@ -289,5 +283,5 @@ uint8_t FIND_ACPI_VERSION(RSDP* rsdp);
 #endif
 
 #endif
-
+#pragma pack(pop)
 #endif
