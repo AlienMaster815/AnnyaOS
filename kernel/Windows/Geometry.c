@@ -1,4 +1,4 @@
-#include <LouApi.h>
+#include <LouAPI.h>
 // 'cx' and 'cy' denote the offset of the circle centre from the origin.
 void
 circle (int cx, int cy, int radius,uint8_t r,uint8_t g,uint8_t b)

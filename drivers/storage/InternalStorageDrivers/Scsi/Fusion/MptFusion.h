@@ -5,7 +5,7 @@
 #include "Lsi/MpiFibreChannel.h"
 #include "Lsi/MpiFibreChannelLog.h"
 #include "Lsi/MpiInitialization.h"
-#include "Lsi/Mpiioc.h"
+#include "Lsi/MpiIoc.h"
 #include "Lsi/MpiLAN.h"
 #include "Lsi/MpiRaid.h"
 #include "Lsi/MpiSas.h"

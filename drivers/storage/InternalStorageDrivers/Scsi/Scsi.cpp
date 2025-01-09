@@ -1,6 +1,6 @@
 #include <LouDDK.h>
 #include <Hal.h>
-#include "scsi.h"
+#include "Scsi.h"
 
 LOUSTATUS InitializeScsiDevice(P_PCI_DEVICE_OBJECT PDEV){
 

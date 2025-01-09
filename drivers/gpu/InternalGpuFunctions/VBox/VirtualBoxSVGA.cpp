@@ -1,7 +1,7 @@
 #include "VBoxVGA.h"
 #include "VBoxAceleration/vbox_drv.h"
 #include <bootloader/grub/multiboot2.h>
-#include <hal.h>
+#include <Hal.h>
 
 extern struct multiboot_tag_vbe VBE_INFO;
 

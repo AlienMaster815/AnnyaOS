@@ -56,11 +56,11 @@ typedef void* PVOID;
 #include <stdio.h>
 #include <KernelAPI/BitCheck.h>
 
-#include <Kernel/interrupts.h>
-#include <Kernel/threads.h>
+#include <kernel/interrupts.h>
+#include <kernel/threads.h>
 #include <SharedTypes.h>
-#include <Kernel/DRSD.h>
-#include <Kernel/LouQs.h>
+#include <kernel/DRSD.h>
+#include <kernel/LouQs.h>
 #include "NtOsKrnlLib.h"
 #include <HashTables.h>
 
@@ -145,7 +145,7 @@ KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uin
 #include <fstream.h>
 #include <KernelAPI/Devices.h>
 #include <Time.h>
-#include <Kernel/exec.h>
+#include <kernel/exec.h>
 #include <Random.h>
 
 

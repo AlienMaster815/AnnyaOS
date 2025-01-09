@@ -8,7 +8,7 @@
 #pragma pack(push,1)
 
 #include "MpiTypes.h"
-#include "mpi.h"
+#include "Mpi.h"
 
 //Crazy, I Was Crazy Once.
 //I Locked Myself In A Room.

@@ -13,7 +13,7 @@
 #include <Time.h>
 #include <fstream.h>
 #include <KernelAPI/KernelAPI.h>
-#include <Kernel/kernel.h>
+#include <kernel/kernel.h>
 #include <drivers/drivers.h>
 #include <bootloader/grub/multiboot.h>
 #include <CPUInstructionSet/CPURegisters.h>

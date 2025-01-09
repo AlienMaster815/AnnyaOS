@@ -1,4 +1,4 @@
-#include "VBOX/VBoxVGA.h"
+#include "VBox/VBoxVGA.h"
 #include <Hal.h>
 
 void InitializeAmdGpu(P_PCI_DEVICE_OBJECT PDEV);
