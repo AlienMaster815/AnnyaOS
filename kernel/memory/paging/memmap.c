@@ -360,3 +360,101 @@ uint64_t LouKePageToPhysicalAddres(uint64_t* Page){
     ResultAddress &= ~(KILOBYTE_PAGE);
     return  ResultAddress;
 }
+
+//this is a messy function but its required for 
+//the type of page directory system i have set up
+//Sory -Tyler Grenier
+uint64_t ScanPageEntries(uint64_t* SearchingPage, bool MegabytPage){
+    UNUSED uint64_t L4, L3, L2, L1,Page4V,Page3V,Page2V, Page1V, Result;
+
+    PML* PML4 = GetPageBase();
+    UNUSED const uint64_t* Page4 = &PML4->PML4.entries[0];
+    UNUSED uint64_t* Page3;
+    UNUSED uint64_t* Page2;
+    UNUSED uint64_t* Page1;
+    
+    if(MegabytPage){
+        for(L4 = 0;L4 < 512; L4++){
+            //Get L4 Value
+            Page4V = Page4[L4];
+            //cut the botom bits off
+            Page4V &= ~(PAGE_TABLE_ALIGNMENT);
+            //Get Page3 Addres
+            if(!Page4V)continue;
+            Page3 = (uint64_t*)Page4V;
+            for(L3 = 0;L3 < 512; L3++){   
+                //Get L3 Value
+                Page3V = Page3[L3];
+                //Cut the bottom bits off
+                Page3V &= ~(PAGE_TABLE_ALIGNMENT);  
+                //get Page 2
+                if(!Page3V)continue;
+                Page2 = (uint64_t*)Page3V;
+                for(L2 = 0;L2 < 512; L2++){
+                    //page 2 value for megabyte pages will be the 
+                    //actual pointer to the page
+                    Page2V = (uint64_t)&Page2[L2];
+                    Page2V &= ~(PAGE_TABLE_ALIGNMENT);
+                    if(!Page2V)continue;
+                    if(Page2V == (uint64_t)SearchingPage){
+                        //Add the sum of the Virtual Address
+                        Result = L4 * (512ULL * GIGABYTE);
+                        Result += L3 * (GIGABYTE);
+                        Result += L2 * MEGABYTE_PAGE;
+                        //return the virtual Address
+                        return Result; 
+                    }
+                } 
+            }
+        }
+    }else{
+        for(L4 = 0;L4 < 512; L4++){
+            //Get L4 Value
+            Page4V = Page4[L4];
+            //cut the botom bits off
+            Page4V &= ~(PAGE_TABLE_ALIGNMENT);
+            //Get Page3 Addres
+            if(!Page4V)continue;
+            Page3 = (uint64_t*)Page4V;
+            for(L3 = 0;L3 < 512; L3++){   
+                //Get L3 Value
+                Page3V = Page3[L3];
+                //Cut the bottom bits off
+                Page3V &= ~(PAGE_TABLE_ALIGNMENT);  
+                //get Page 2
+                if(!Page3V)continue;
+                Page2 = (uint64_t*)Page3V;
+                for(L2 = 0;L2 < 512; L2++){
+                    //Get L2 Value
+                    Page2V = Page2[L2];
+                    //Cut the bottom bits off
+                    Page2V &= ~(PAGE_TABLE_ALIGNMENT);
+                    //get page 1
+                    if(!Page2V)continue;
+                    Page1 = (uint64_t*)Page2V;
+                    for(L1 = 0 ; L1 < 512 ; L1++){
+                        //Page 1 Value will be the pointer 
+                        //to the page one value
+                        Page1V = (uint64_t)&Page1[L1];
+                        Page1V &= ~(PAGE_TABLE_ALIGNMENT);
+                        if(!Page1V)continue;
+                        if(Page1V == (uint64_t)SearchingPage){
+                            //Add the sum of the Virtual Address
+                            Result = L4 * (512ULL * GIGABYTE);
+                            Result += L3 * (GIGABYTE);
+                            Result += L2 * MEGABYTE_PAGE;
+                            Result += L1 * KILOBYTE_PAGE;
+                            //return the virtual Address
+                            return Result;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+} 
+
+uint64_t LouKeGetPageAddress(uint64_t* Page){
+    return ScanPageEntries(Page, IsMegabytePage(Page));
+}

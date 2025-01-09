@@ -71,7 +71,7 @@ static inline void ScatterGatherSetPage(
     ScatterGatherList->Length = Length;
 }
 
-static inline uint64_t* ScaterGatherPage(PSCATTER_LIST ScatterGatherList){
+static inline uint64_t* ScatterGatherPage(PSCATTER_LIST ScatterGatherList){
     return (uint64_t*)((uint64_t)ScatterGatherList->PageLink & ~(SCATTER_GATHER_PAGE_BITS));
 }
 
@@ -180,7 +180,18 @@ static inline void ScatterGatherDmaUnmarkSwioTbl(PSCATTER_LIST ScatterGather){
 #endif
 
 static inline uint64_t ScatterGatherPhysicalAddress(PSCATTER_LIST ScatterGather){
-    return (LouKePageToPhysicalAddres(ScaterGatherPage(ScatterGather)) + ScatterGather->Offset);
+    return (LouKePageToPhysicalAddres(ScatterGatherPage(ScatterGather)) + ScatterGather->Offset);
+}
+
+static inline uint64_t ScatterGatherVirtualAddress(PSCATTER_LIST ScatterGather){
+    return (LouKePageToPhysicalAddres(ScatterGatherPage(ScatterGather)) + ScatterGather->Offset);
+}
+
+static inline void ScatterGatherInitializeMarker(
+    PSCATTER_LIST ScatterGatherList,
+    unsigned int EntryCount
+){
+    ScatterGatherMarkEnd(&ScatterGatherList[EntryCount - 1]);
 }
 
 #ifdef __cplusplus
