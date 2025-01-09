@@ -54,15 +54,15 @@ typedef struct _SCATTER_GATHER_APPENED_TABLE{
 
 static inline void ScatterGatherAssignPage(
     PSCATTER_LIST   ScatterGatherList,
-    uint64_t        Page          
+    uint64_t*        Page          
 ){
     uint64_t TmpPageLink = ScatterGatherList->PageLink & SCATTER_GATHER_PAGE_BITS;    
-    ScatterGatherList->PageLink = TmpPageLink | Page;
+    ScatterGatherList->PageLink = TmpPageLink | (uint64_t)Page;
 }
 
 static inline void ScatterGatherSetPage(
     PSCATTER_LIST   ScatterGatherList, 
-    uint64_t Page,
+    uint64_t* Page,
     unsigned int Length,
     unsigned int Offset
 ){
@@ -71,18 +71,20 @@ static inline void ScatterGatherSetPage(
     ScatterGatherList->Length = Length;
 }
 
-static inline uint64_t ScaterGatherPage(PSCATTER_LIST ScatterGatherList){
-    return (uint64_t)ScatterGatherList->PageLink & ~(SCATTER_GATHER_PAGE_BITS);
+static inline uint64_t* ScaterGatherPage(PSCATTER_LIST ScatterGatherList){
+    return (uint64_t*)((uint64_t)ScatterGatherList->PageLink & ~(SCATTER_GATHER_PAGE_BITS));
 }
 
 
-uint64_t LouKeVirtualAddresToPageValue(
+uint64_t* LouKeVirtualAddresToPageValue(
     uint64_t VAddress
 );
 
 uint64_t LouKeGetOffsetInPage(
     uint64_t VAddress
 );
+
+uint64_t LouKePageToPhysicalAddres(uint64_t* Page);
 
 static inline void ScatterGatherSetBuffer(
     PSCATTER_LIST   ScatterGatherList,
@@ -116,7 +118,70 @@ static inline void ScatterGatherChain(
     ScatterListChain->PageLink = (((unsigned long)(uint64_t)ScatterGatherList | SCATTER_GATHER_CHAIN) & ~SCATTER_GATHER_END);
 }
 
+static inline void ScatterGatherMarkEnd(PSCATTER_LIST ScatterGather){
+    ScatterGather->PageLink |= SCATTER_GATHER_END;
+    ScatterGather->PageLink &= ~(SCATTER_GATHER_CHAIN);
+}
 
+static inline void ScatterGatherUnmarkEnd(PSCATTER_LIST ScatterGather){
+    ScatterGather->PageLink &= ~(SCATTER_GATHER_END);
+}
+
+#ifdef CONFIGURATION_NEED_SCATTER_GATHER_DMA_FLAGS
+
+#define SCATTER_GATHER_DMA_BUS_ADDRESS  1 << 0
+#define SCATTER_GATHER_DMA_SWIOTLB      1 << 1
+
+static inline bool ScatterGatherDmaIsBusAddress(PSCATTER_LIST ScatterGather){
+    return (ScatterGather->DmaFlags & SCATTER_GATHER_DMA_BUS_ADDRESS) ? true : false;
+}
+
+static inline void ScatterGatherMarkBusAddress(PSCATTER_LIST ScatterGather){
+    ScatterGather->DmaFlags |= SCATTER_GATHER_DMA_BUS_ADDRESS;
+}
+
+static inline void ScatterGatherDmaUnmarkBusAddress(PSCATTER_LIST ScatterGather){
+    ScatterGather->DmaFlags &= ~(SCATTER_GATHER_DMA_BUS_ADDRESS);
+}
+
+static inline bool ScatterGatherIsSwioTbl(PSCATTER_LIST ScatterGather){
+    return (ScaterGather->DmaFlags & SCATTER_GATHER_DMA_SWIOTLB) ? true : false;
+}
+
+static inline void ScatterGatherDmaMarkSwioTbl(PSCATTER_LIST ScatterGather){
+    ScatterGather->DmaFlags |= SCATTER_GATHER_DMA_SWIOTLB;
+}
+
+static inline void ScatterGatherDmaUnmarkSwioTbl(PSCATTER_LIST ScatterGather){
+    ScaterGather->DmaFlags &= ~(SCATTER_GATHER_DMA_SWIOTLB);
+}
+#else
+
+static inline bool ScatterGatherDmaIsBusAddress(PSCATTER_LIST ScatterGather){
+    return false;
+}
+
+static inline void ScatterGatherMarkBusAddress(PSCATTER_LIST ScatterGather){
+}
+
+static inline void ScatterGatherDmaUnmarkBusAddress(PSCATTER_LIST ScatterGather){
+}
+
+static inline bool ScatterGatherIsSwioTbl(PSCATTER_LIST ScatterGather){
+    return false;
+}
+
+static inline void ScatterGatherDmaMarkSwioTbl(PSCATTER_LIST ScatterGather){
+}
+
+static inline void ScatterGatherDmaUnmarkSwioTbl(PSCATTER_LIST ScatterGather){
+}
+
+#endif
+
+static inline uint64_t ScatterGatherPhysicalAddress(PSCATTER_LIST ScatterGather){
+    return (LouKePageToPhysicalAddres(ScaterGatherPage(ScatterGather)) + ScatterGather->Offset);
+}
 
 #ifdef __cplusplus
 }

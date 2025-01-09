@@ -1,6 +1,7 @@
 #ifndef _MEMMORY_H
 #define _MEMMORY_H
 
+
 // Tyler Grenier 9/21/23 9:38 PM
 // added Section 1:1 RAM ADDRESS
 
@@ -326,13 +327,15 @@ bool RangeDoesNotInterfere(
 }
 
 
-uint64_t LouKeVirtualAddresToPageValue(
+uint64_t* LouKeVirtualAddresToPageValue(
     uint64_t VAddress
 );
 
 uint64_t LouKeGetOffsetInPage(
     uint64_t VAddress
 );
+
+uint64_t LouKePageToPhysicalAddres(uint64_t* Page);
 
 
 #endif

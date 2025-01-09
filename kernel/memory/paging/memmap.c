@@ -280,7 +280,7 @@ uint64_t GetPageOfFaultValue(uint64_t VAddress) {
     return 0;
 }
 
-uint64_t LouKeVirtualAddresToPageValue(
+uint64_t* LouKeVirtualAddresToPageValue(
     uint64_t VAddress
 ){
     // Calculate the entries for each page level
@@ -308,13 +308,13 @@ uint64_t LouKeVirtualAddresToPageValue(
     LBase = (uint64_t*)TMP;
     if(!LBase)return 0x00;
     if(IsMegabytePage(&LBase[L2Entry])){
-        return LBase[L2Entry];
+        return &LBase[L2Entry];
     }
     TMP = LBase[L2Entry];
     TMP &= ~(KILOBYTE_PAGE);
     LBase = (uint64_t*)TMP;
     if(!LBase)return 0x00;
-    return LBase[L1Entry];
+    return &LBase[L1Entry];
 }
 
 uint64_t LouKeGetOffsetInPage(
@@ -353,4 +353,10 @@ uint64_t LouKeGetOffsetInPage(
 
     if(!PageBase)return 0x00;//sanity check
     return VAddress - PageBase;
+}
+
+uint64_t LouKePageToPhysicalAddres(uint64_t* Page){
+    uint64_t ResultAddress = *Page;
+    ResultAddress &= ~(KILOBYTE_PAGE);
+    return  ResultAddress;
 }
