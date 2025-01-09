@@ -36,8 +36,10 @@
 #AnnyaExp Compile Line
 #x86_64-w64-mingw32-gcc -shared -ffreestanding -nostdlib -nostartfiles -o AnnyaExp.exe AnnyaExp.c -L/path/to/library -lname
 
+#target OS can be WINDOWS or LINUX
 
 TARGET_ARCH = x86_64
+TARGET_OS = WINDOWS
 HOST_ARCH = x86_64
 FIRMWARE_TARGET = BIOS
 
@@ -230,7 +232,7 @@ clean:
 ifeq ($(TARGET_ARCH), x86_64)
 lou.exe: $(x86_64_object_files) $(kernel_object_files)
 	mkdir -p dist/x86_64
-	$(LD) -n --no-warn-rwx-segment -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
+	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
 	rm -r build
 endif
 
