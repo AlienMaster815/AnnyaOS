@@ -25,7 +25,7 @@ uint64_t GetCPUCoreGeneration() {
 string GetVenString(){
     
     unsigned int eax, ebx, ecx, edx;
-    char brand[49]; // Enough space for the 48-character brand string + null terminator
+    string brand = LouMallocEx(49, 1); // Enough space for the 48-character brand string + null terminator
 
     LouPrint("Detecting CPU\n");
 

@@ -4,7 +4,7 @@
 #define _USER_MODE_CODE_
 
 //#include "USRSPC/API/WinAPItypes.h"
-#include "Kernel/SystemCalls.h"
+#include "kernel/SystemCalls.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <USRSPC/UserThreads.h>

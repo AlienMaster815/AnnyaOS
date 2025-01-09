@@ -21,6 +21,8 @@ SECTIONS
      .data : {
         *(.data)/* Your initialized data sections go here */
     }
+    
+    .data : { __ImageBase = .; *(.data) }
 
     /* .bss section for uninitialized data */
     .bss : {

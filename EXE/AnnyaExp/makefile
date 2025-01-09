@@ -4,7 +4,7 @@ CFLAGS = -shared -m64 -nostdlib -nodefaultlibs
 
 # Paths
 LDFLAGS = -L../../UserLibraries
-INCLUDES = -I../../Include
+INCLUDES = -I../../include
 LIBS = -lLouDll -luser32 -l/PreCompiledHeaders/ExeCrtc
 
 # Source and target

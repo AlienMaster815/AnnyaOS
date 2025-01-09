@@ -9,7 +9,7 @@
     <64Targets>
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/Annya/System64/LOUOSKRNL.exe</FILETOCPY64>
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/Annya/System64/user32.dll</FILETOCPY64>
-        <FILETOCPY64>cp DLL/LouDLLs/LouDll/LouDll.dll ISO/Annya/System64/LouDll.dll</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/Annya/System64/LouDll.dll</FILETOCPY64>
         <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/Annya/System64/ntdll.dll</FILETOCPY64>
         <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/Annya/System64/CRT140.dll</FILETOCPY64>
         <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/Annya/AnnyaExp.exe</FILETOCPY64>

@@ -7,7 +7,7 @@ CFILE = ExeCrtcs.c
 LIB_FILE = ../ExeCrtc.lib  # Output directory is set to the parent directory
 OBJ_FILE = ExeCrtcs.o     # Intermediate object file
 
-INCLUDES = -I../../../Include
+INCLUDES = -I../../../include
 
 # Additional Libraries
 LIBRARIES = -L../../../UserLibraries -lLouDll -luser32

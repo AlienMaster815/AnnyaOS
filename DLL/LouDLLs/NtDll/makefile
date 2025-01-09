@@ -3,12 +3,12 @@ CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -nostdlib -nodefaultlibs
 
 # Paths
-INCLUDES = -I../../../Include
+INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
 LIBS = -lLouDll
 
 # Source and Target
-SRC = ntdll.c
+SRC = NtDll.c
 TARGET = ntdll.dll
 
 # Default Rule

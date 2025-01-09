@@ -1,4 +1,4 @@
-# G++ Gcc make NASM grub xorriso gnu-efi
+# mingw-w64 nasm grub-common grub2-common grub-pc grub-efi-amd64 xorriso
 #binutils-common:amd64                           install
 #binutils-mingw-w64-i686                         install
 #binutils-mingw-w64-x86-64                       install
@@ -230,7 +230,7 @@ clean:
 ifeq ($(TARGET_ARCH), x86_64)
 lou.exe: $(x86_64_object_files) $(kernel_object_files)
 	mkdir -p dist/x86_64
-	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
+	$(LD) -n --no-warn-rwx-segment -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
 	rm -r build
 endif
 
