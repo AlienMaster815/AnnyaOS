@@ -84,3 +84,118 @@ int ScatterGatherSplit(
 
     return 0;
 }
+
+void ScatterGatherFreeTableEx(
+    PSCATTER_GATHER_TABLE       ScatterGatherTable, 
+    unsigned int                MaximumEntries, 
+    unsigned int                FirstChunkElements, 
+    ScatterGatherFreeCallback   ScatterGatherFree, 
+    unsigned int                ElementCount
+){
+
+}
+
+void ScatterGatherFreeTable(
+    PSCATTER_GATHER_TABLE ScatterGatherTable
+){
+
+}
+
+
+void ScatterGatherFreeAppendTable(
+    PSCATTER_GATHER_APPENED_TABLE CcatterGatherAppendTable
+){
+
+}
+
+int ScatterGatherAllocTableEx(
+    PSCATTER_GATHER_TABLE           ScatterGatherTable,
+    unsigned int                    ElementCount, 
+    unsigned int                    MaximumEntries, 
+    PSCATTER_LIST                   FirstChunk,
+    unsigned int                    FirstChunkElementCount, 
+    uint64_t                        AllocationFlags, 
+    ScatterGatherAllocCallback      ScatterGatherAlloc
+){
+
+    return 0;
+}
+
+int ScatterGatherAllocTable(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
+    unsigned int            ElementCount, 
+    uint64_t                AllocationFlags
+){
+
+    return 0;
+}
+
+
+int ScatterGatherAllocApendTableFromPages(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
+    uint64_t**              PageReference,
+    unsigned int            PageCount, 
+    unsigned int            Offset, 
+    uint64_t                Size,
+    uint64_t                MaximumSegments, 
+    uint64_t                LeftPages,
+    uint64_t                AllocationFlags
+){
+
+    return 0;
+}
+
+int ScatterGatherAllocTableFromPagesSegment(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
+    uint64_t**              PageReference,
+    unsigned int            PageCount,
+    unsigned int            Offset,
+    uint64_t                Size, 
+    uint64_t                MaximumSegments,
+    uint64_t                AllocationFlags
+){
+
+    return 0;
+}
+
+
+PSCATTER_LIST ScatterGatherAllocOrder(
+    uint64_t        Length,
+    unsigned int    Order,
+    bool            ChainAble,
+    uint64_t        AllocationFlags,
+    uint64_t*       ElementCountReference
+){
+
+    return 0x00;
+}
+
+PSCATTER_LIST ScatterGatherAlloc(
+    uint64_t        Length,
+    uint64_t        AllocationFlags,
+    unsigned int*   ElementCountReference
+){
+
+    return 0x00;
+}
+
+void ScatterGatherFreeCountOrder(
+    PSCATTER_LIST   ScatterGatherList,
+    int             ElementCount,
+    int             Order
+){
+
+}
+
+void ScatterGatherFreeOrder(
+    PSCATTER_LIST   ScatterGatherList,
+    int             Order
+){
+
+}
+
+void ScatterGatherFree(
+    PSCATTER_LIST   ScatterGatherList
+){
+
+}

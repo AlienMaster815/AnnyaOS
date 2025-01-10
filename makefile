@@ -1,29 +1,4 @@
 # mingw-w64 nasm grub-common grub2-common grub-pc grub-efi-amd64 xorriso
-#binutils-common:amd64                           install
-#binutils-mingw-w64-i686                         install
-#binutils-mingw-w64-x86-64                       install
-#binutils-x86-64-linux-gnu                       install
-#g++                                             install
-#g++-9                                           install
-#g++-mingw-w64                                   install
-#g++-mingw-w64-i686                              install
-#g++-mingw-w64-x86-64                            install
-#gcc                                             install
-#gcc-10-base:amd64                               install
-#gcc-9                                           install
-#gcc-9-base:amd64                                install
-#gcc-mingw-w64                                   install
-#gcc-mingw-w64-base                              install
-#gcc-mingw-w64-i686                              install
-#gcc-mingw-w64-x86-64                            install
-#grub-common                                     install
-#grub-efi-amd64                                  deinstall
-#grub-efi-ia32                                   deinstall
-#grub-gfxpayload-lists                           install
-#grub-pc                                         install
-#grub-pc-bin                                     install
-#grub2                                           deinstall
-#grub2-common                                    install
 
 # Target Architecture Supported x86_64 ARM 
 

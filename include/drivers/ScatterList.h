@@ -205,13 +205,101 @@ int ScatterGatherSplit(PSCATTER_LIST InputList,int InputElementCount, uint64_t S
 typedef SCATTER_LIST (*ScatterGatherAllocCallback)(uint64_t BlockSize, uint64_t AllocationFlags);
 typedef void (*ScatterGatherFreeCallback)(PSCATTER_LIST ScatterList, uint64_t Size);
 
-void ScatterGatherFreeTableEx(PSCATTER_GATHER_TABLE ScatterGatherTable, unsigned int, unsigned int, ScatterGatherFreeCallback, unsigned int);
-void ScatterGatherFreeTable(PSCATTER_GATHER_TABLE);
-void ScatterGatherFreeAppendTable(PSCATTER_GATHER_APPENED_TABLE);
-int ScatterGatherAllocTableEx(PSCATTER_GATHER_TABLE,unsigned int, unsigned int, PSCATTER_LIST,unsigned int, uint64_t AllocationFlags, ScatterGatherAllocCallback);
-int ScatterGatherAllocTable(PSCATTER_GATHER_TABLE, unsigned int, uint64_t);
-int ScatterGatherAllocApendTableFromPages(PSCATTER_GATHER_TABLE, uint64_t**, unsigned int, unsigned int, uint64_t ,uint64_t, uint64_t);
-int ScatterGatherAllocTableFromPagesSegment(PSCATTER_GATHER_TABLE, uint64_t**,unsigned int,unsigned int,uint64_t, uint64_t,uint64_t);
+void ScatterGatherFreeTableEx(
+    PSCATTER_GATHER_TABLE       ScatterGatherTable, 
+    unsigned int                MaximumEntries, 
+    unsigned int                FirstChunkElements, 
+    ScatterGatherFreeCallback   ScatterGatherFree, 
+    unsigned int                ElementCount
+);
+void ScatterGatherFreeTable(
+    PSCATTER_GATHER_TABLE ScatterGatherTable
+);
+void ScatterGatherFreeAppendTable(
+    PSCATTER_GATHER_APPENED_TABLE CcatterGatherAppendTable
+);
+int ScatterGatherAllocTableEx(
+    PSCATTER_GATHER_TABLE           ScatterGatherTable,
+    unsigned int                    ElementCount, 
+    unsigned int                    MaximumEntries, 
+    PSCATTER_LIST                   FirstChunk,
+    unsigned int                    FirstChunkElementCount, 
+    uint64_t                        AllocationFlags, 
+    ScatterGatherAllocCallback      ScatterGatherAlloc
+);
+int ScatterGatherAllocTable(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
+    unsigned int            ElementCount, 
+    uint64_t                AllocationFlags
+);
+int ScatterGatherAllocApendTableFromPages(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
+    uint64_t**              PageReference,
+    unsigned int            PageCount, 
+    unsigned int            Offset, 
+    uint64_t                Size,
+    uint64_t                MaximumSegments, 
+    uint64_t                LeftPages,
+    uint64_t                AllocationFlags
+);
+int ScatterGatherAllocTableFromPagesSegment(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
+    uint64_t**              PageReference,
+    unsigned int            PageCount,
+    unsigned int            Offset,
+    uint64_t                Size, 
+    uint64_t                MaximumSegments,
+    uint64_t                AllocationFlags
+);
+
+static inline int ScatterGatherAllocTableFromPages(
+    PSCATTER_GATHER_TABLE   ScatterGatherTable,
+    uint64_t**              PageReference,
+    unsigned int            PageCount,
+    unsigned int            Offset,
+    uint64_t                Size,
+    uint64_t                AllocationFlags
+){
+    return ScatterGatherAllocTableFromPagesSegment(
+        ScatterGatherTable,
+        PageReference,
+        PageCount,
+        Offset,
+        Size,
+        0xFFFFFFFF,
+        AllocationFlags
+    );
+}
+
+PSCATTER_LIST ScatterGatherAllocOrder(
+    uint64_t        Length,
+    unsigned int    Order,
+    bool            ChainAble,
+    uint64_t        AllocationFlags,
+    uint64_t*       ElementCountReference
+);
+
+PSCATTER_LIST ScatterGatherAlloc(
+    uint64_t        Length,
+    uint64_t        AllocationFlags,
+    unsigned int*   ElementCountReference
+);
+
+void ScatterGatherFreeCountOrder(
+    PSCATTER_LIST   ScatterGatherList,
+    int             ElementCount,
+    int             Order
+);
+
+void ScatterGatherFreeOrder(
+    PSCATTER_LIST   ScatterGatherList,
+    int             Order
+);
+
+void ScatterGatherFree(
+    PSCATTER_LIST   ScatterGatherList
+);
+
 
 
 #ifdef __cplusplus
