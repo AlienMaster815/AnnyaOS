@@ -4,29 +4,56 @@
 int ScatterGatherElementCount(
     PSCATTER_LIST ScatterGather
 ){
-
-    return 0;
+    int Result = 0;
+    for(; ScatterGather; ScatterGather = ScatterGatherGetNext(ScatterGather)){
+        Result++;
+    }
+    return Result;
 }
+
 int ScatterGatherElementCountForLength(
     PSCATTER_LIST ScatterGather, 
     uint64_t Length
 ){
 
+
     return 0;
 }
 
 PSCATTER_LIST ScatterGatherGetNext(
-    PSCATTER_LIST ScaterGatherCurrent
+    PSCATTER_LIST ScatterGatherCurrent
 ){
 
-    return 0x00;
+    if(ScatterGatherIsEnd(ScatterGatherCurrent)){
+        return 0;
+    }
+    //plus sizeof for packing and -O0
+    ScatterGatherCurrent += sizeof(SCATTER_LIST);
+
+    if(ScatterGatherIsChain(ScatterGatherCurrent)){
+        ScatterGatherCurrent = (PSCATTER_LIST)(uintptr_t)ScatterGatherChainPointer(ScatterGatherCurrent);
+    }
+
+    return ScatterGatherCurrent;
 }
 
-PSCATTER_LIST ScatterGatheLast(
-    PSCATTER_LIST ScaterGatherCurrent
+PSCATTER_LIST ScatterGatherLast(
+    PSCATTER_LIST ScaterGatherCurrent,
+    unsigned int ElementCount
 ){
+    UNUSED PSCATTER_LIST TmpList, Result = NULL;
+    UNUSED size_t Index = 0;
 
-    return 0x00;
+    ForEachScatterGatherList(
+        ScaterGatherCurrent, 
+        TmpList, 
+        ElementCount, 
+        Index
+    ){
+        Result = TmpList;
+    }
+
+    return Result;
 }
 
 void ScatterGatherInitializeTable(
