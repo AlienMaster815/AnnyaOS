@@ -301,6 +301,14 @@ void ScatterGatherFree(
 );
 
 
+uint64_t ScatterGatherCopyBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength
+);
+
+
 
 #ifdef __cplusplus
 }
