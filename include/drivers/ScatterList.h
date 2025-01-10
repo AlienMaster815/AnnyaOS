@@ -205,6 +205,13 @@ int ScatterGatherSplit(PSCATTER_LIST InputList,int InputElementCount, uint64_t S
 typedef SCATTER_LIST (*ScatterGatherAllocCallback)(uint64_t BlockSize, uint64_t AllocationFlags);
 typedef void (*ScatterGatherFreeCallback)(PSCATTER_LIST ScatterList, uint64_t Size);
 
+void ScatterGatherFreeTableEx(PSCATTER_GATHER_TABLE ScatterGatherTable, unsigned int, unsigned int, ScatterGatherFreeCallback, unsigned int);
+void ScatterGatherFreeTable(PSCATTER_GATHER_TABLE);
+void ScatterGatherFreeAppendTable(PSCATTER_GATHER_APPENED_TABLE);
+int ScatterGatherAllocTableEx(PSCATTER_GATHER_TABLE,unsigned int, unsigned int, PSCATTER_LIST,unsigned int, uint64_t AllocationFlags, ScatterGatherAllocCallback);
+int ScatterGatherAllocTable(PSCATTER_GATHER_TABLE, unsigned int, uint64_t);
+int ScatterGatherAllocApendTableFromPages(PSCATTER_GATHER_TABLE, uint64_t**, unsigned int, unsigned int, uint64_t ,uint64_t, uint64_t);
+int ScatterGatherAllocTableFromPagesSegment(PSCATTER_GATHER_TABLE, uint64_t**,unsigned int,unsigned int,uint64_t, uint64_t,uint64_t);
 
 
 #ifdef __cplusplus
