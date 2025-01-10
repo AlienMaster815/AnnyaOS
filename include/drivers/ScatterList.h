@@ -194,6 +194,19 @@ static inline void ScatterGatherInitializeMarker(
     ScatterGatherMarkEnd(&ScatterGatherList[EntryCount - 1]);
 }
 
+int ScatterGatherElementCount(PSCATTER_LIST ScatterGather);
+int ScatterGatherElementCountForLength(PSCATTER_LIST ScatterGather, uint64_t Length);
+PSCATTER_LIST ScatterGatherGetNext(PSCATTER_LIST ScaterGatherCurrent);
+PSCATTER_LIST ScatterGatheLast(PSCATTER_LIST ScaterGatherCurrent);
+void ScatterGatherInitializeTable(PSCATTER_LIST ScatterGatherList, uint64_t Size);
+void ScatterGatherInitializeObject(PSCATTER_LIST ScatterGatherList, void* Element, uint64_t Size);
+int ScatterGatherSplit(PSCATTER_LIST InputList,int InputElementCount, uint64_t SkipToOffset, int NbSplits, uint64_t* SplitSizes, PSCATTER_LIST* OutputList, int* OutputElementCount, uint64_t AllocationFlags);
+
+typedef SCATTER_LIST (*ScatterGatherAllocCallback)(uint64_t BlockSize, uint64_t AllocationFlags);
+typedef void (*ScatterGatherFreeCallback)(PSCATTER_LIST ScatterList, uint64_t Size);
+
+
+
 #ifdef __cplusplus
 }
 #endif
