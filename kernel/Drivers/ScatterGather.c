@@ -199,3 +199,130 @@ void ScatterGatherFree(
 ){
 
 }
+
+
+
+uint64_t ScatterGatherCopyBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength
+){
+
+    return 0;
+}
+
+uint64_t ScatterGatherCopyFromBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength
+){
+
+    return 0;
+}
+
+uint64_t ScatterGatherCopyToBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength
+){
+
+    return 0;
+}
+
+uint64_t ScatterGatherPCopyFromBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength,
+    uint64_t        Offset
+){
+
+    return 0;
+}
+
+uint64_t ScatterGatherPCopyToBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength,
+    uint64_t        Offset
+){
+
+    return 0;
+}
+
+uint64_t ScatterGatherZeroBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    uint64_t        BufferLength,
+    uint64_t        Offset
+){
+
+    return 0;
+}
+
+void ScatterGatherFreeTableChained(
+    PSCATTER_LIST   ScatterGatherTable,
+    uint64_t        ElementsInFirstChunk
+){
+
+}
+
+void ScatterGatherAllocTableChained(
+    PSCATTER_LIST   ScatterGatherTable,
+    int             ElementCount,
+    PSCATTER_LIST   FirstChunk,
+    uint64_t        FirstChunkElementCount
+){
+
+}
+
+bool ScatterGatherPageIterateNextEx(
+    PSCATTER_GATHER_PAGE_ITERATOR PageIterator
+){
+
+    return false;
+}
+bool ScatterGatherPageIterateDmaNextEx(
+    PSCATTER_GATHER_DMA_PAGE_ITERATOR DmaIterator
+){
+
+    return false;
+}
+void ScatterGatherPageIterateStartEx(
+    PSCATTER_GATHER_PAGE_ITERATOR   PageIterator, 
+    PSCATTER_LIST                   ScatterGatherList,
+    unsigned int                    ElementCount,
+    uint64_t                        PageOffset
+){
+    
+}
+
+
+void ScatterGatherMappingIterationStart(
+    SCATTER_GATHER_MAPPING_ITERATION MappingIteration, 
+    PSCATTER_LIST ScatterGatherList, 
+    unsigned int ElementCount, 
+    unsigned int Flags
+){
+
+}
+void ScatterGatherMappingIterationSkip(
+    SCATTER_GATHER_MAPPING_ITERATION MappingIteration, 
+    uint64_t Offset
+){
+    
+}
+void ScatterGatherMappingIterationNext(
+    SCATTER_GATHER_MAPPING_ITERATION MappingIteration
+){
+
+}
+void ScatterGatherMappingIterationStop(
+    SCATTER_GATHER_MAPPING_ITERATION MappingIteration
+){
+
+}

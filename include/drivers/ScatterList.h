@@ -84,6 +84,8 @@ uint64_t LouKeGetOffsetInPage(
     uint64_t VAddress
 );
 
+uint64_t LouKeGetPageAddress(uint64_t* Page);
+
 uint64_t LouKePageToPhysicalAddres(uint64_t* Page);
 
 static inline void ScatterGatherSetBuffer(
@@ -184,7 +186,7 @@ static inline uint64_t ScatterGatherPhysicalAddress(PSCATTER_LIST ScatterGather)
 }
 
 static inline uint64_t ScatterGatherVirtualAddress(PSCATTER_LIST ScatterGather){
-    return (LouKePageToPhysicalAddres(ScatterGatherPage(ScatterGather)) + ScatterGather->Offset);
+    return (LouKeGetPageAddress(ScatterGatherPage(ScatterGather)) + ScatterGather->Offset);
 }
 
 static inline void ScatterGatherInitializeMarker(
@@ -308,7 +310,123 @@ uint64_t ScatterGatherCopyBuffer(
     uint64_t        BufferLength
 );
 
+uint64_t ScatterGatherCopyFromBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength
+);
 
+uint64_t ScatterGatherCopyToBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength
+);
+
+uint64_t ScatterGatherPCopyFromBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength,
+    uint64_t        Offset
+);
+
+uint64_t ScatterGatherPCopyToBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    void*           Buffer,
+    uint64_t        BufferLength,
+    uint64_t        Offset
+);
+
+uint64_t ScatterGatherZeroBuffer(
+    PSCATTER_LIST   ScatterGatherList,
+    unsigned int    ElementCount,
+    uint64_t        BufferLength,
+    uint64_t        Offset
+);
+
+#define SCATTER_GATHER_MAXIMUM_SINGLE_ALLOCATION    (MEGABYTE_PAGE / sizeof(SCATTER_LIST))
+
+#define SCATTER_GATHER_CHINL_SIZE       128
+
+#ifdef CONFIGURATION_ARHCITECTURE_NO_SCATTER_GATHER_CHAIN
+#define SCATTER_GATHER_MAX_SEGMENTS     SCATTER_GATHER_CHINL_SIZE
+#else
+#define SCATTER_GATHER_MAX_SEGMENTS     2048
+#endif
+
+void ScatterGatherFreeTableChained(
+    PSCATTER_LIST   ScatterGatherTable,
+    uint64_t        ElementsInFirstChunk
+);
+
+void ScatterGatherAllocTableChained(
+    PSCATTER_LIST   ScatterGatherTable,
+    int             ElementCount,
+    PSCATTER_LIST   FirstChunk,
+    uint64_t        FirstChunkElementCount
+);
+
+typedef struct _SCATTER_GATHER_PAGE_ITERATOR{
+    PSCATTER_LIST   ScatterGatherList;
+    unsigned int    PageOffset;
+    unsigned int    ElementCount;
+    int             PageAdvancement;
+}SCATTER_GATHER_PAGE_ITERATOR, * PSCATTER_GATHER_PAGE_ITERATOR;
+
+typedef struct _SCATTER_GATHER_DMA_PAGE_ITERATOR{
+    SCATTER_GATHER_PAGE_ITERATOR Base;
+}SCATTER_GATHER_DMA_PAGE_ITERATOR, * PSCATTER_GATHER_DMA_PAGE_ITERATOR;
+
+bool ScatterGatherPageIterateNextEx(PSCATTER_GATHER_PAGE_ITERATOR PageIterator);
+bool ScatterGatherPageIterateDmaNextEx(PSCATTER_GATHER_DMA_PAGE_ITERATOR DmaIterator);
+void ScatterGatherPageIterateStartEx(
+    PSCATTER_GATHER_PAGE_ITERATOR   PageIterator, 
+    PSCATTER_LIST                   ScatterGatherList,
+    unsigned int                    ElementCount,
+    uint64_t                        PageOffset
+);
+
+static inline uint64_t ScatterGatherPageIteratePage(
+    PSCATTER_GATHER_PAGE_ITERATOR   PageIterator
+){
+    //scatter driver uses megabte pages
+    return ((uint64_t)ScatterGatherPage(PageIterator->ScatterGatherList) + ((2 * (1024 * 1024)) * PageIterator->PageOffset));
+}
+
+static inline uint64_t ScatterGatherPageIterateDmaAddres(PSCATTER_GATHER_DMA_PAGE_ITERATOR  DmaIterator){
+    return (SCATTER_GATHER_DMA_ADDRESS(DmaIterator->Base.ScatterGatherList) + (DmaIterator->Base.PageAdvancement * (2 * (1024 * 1024))));
+}
+
+#define ForEachScatterGatherPage(ScatterGatherList, PageIteration, ElementCount, PageOffset)    \
+    for(ScatterGatherPageIterateStartEx((PageIteration), (ScatterGatherList), (ElementCount), (PageOffset)); ScatterGatherPageIterateNextEx(PageIteration);)
+
+#define ForEachScatterGatherDmaPage(ScatterGatherList, DmaIteration, DmaElementCount, PageOffset)   \
+    for(ScatterGatherPageIterateStartEx(&(DmaIteration)->Base, (ScatterGatherList), (ElementCount), (PageOffset)); ScatterGatherPageIterateDmaNextEx(DmaIteration);)
+    
+#define ForEachScatterGatherTableDmaPage(Sgt,DmaIteration,PageOffset) ForEachScatterGatherDmaPage((Sgt)->ScatterGatherList, DmaIteration, (Sgt)->ElementCount, PageOffset)
+
+#define SCATTER_GATHER_MAPPING_ITERATION_ATOMIC     1 << 0
+#define SCATTER_GATHER_MAPPING_ITERATION_TO_SG      1 << 1
+#define SCATTER_GATHER_MAPPING_ITERATION_FROM_SG    1 << 2
+
+typedef struct _SCATTER_GATHER_MAPPING_ITERATION{
+    uint64_t*                       Page;
+    void*                           Address;
+    uint64_t                        Length;
+    uint64_t                        Consumed;
+    SCATTER_GATHER_PAGE_ITERATOR    PageInterations;
+    unsigned int                    Offset;
+    unsigned int                    Remaining;
+    unsigned int                    Flags;
+}SCATTER_GATHER_MAPPING_ITERATION, * PSCATTER_GATHER_MAPPING_ITERATION;
+
+void ScatterGatherMappingIterationStart(SCATTER_GATHER_MAPPING_ITERATION MappingIteration, PSCATTER_LIST ScatterGatherList, unsigned int ElementCount, unsigned int Flags);
+void ScatterGatherMappingIterationSkip(SCATTER_GATHER_MAPPING_ITERATION MappingIteration, uint64_t Offset);
+void ScatterGatherMappingIterationNext(SCATTER_GATHER_MAPPING_ITERATION MappingIteration);
+void ScatterGatherMappingIterationStop(SCATTER_GATHER_MAPPING_ITERATION MappingIteration);
 
 #ifdef __cplusplus
 }
