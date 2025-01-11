@@ -510,3 +510,37 @@ void LouFree(RAMADD Addr) {
     }
     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
 }
+
+typedef struct _LOU_MALLOC_ARRAY_TRACKER{
+    ListHeader      List;
+    uint64_t        BaseAddress;
+    uint64_t        MemberAddress;
+}LOU_MALLOC_ARRAY_TRACKER, * PLOU_MALLOC_ARRAY_TRACKER;
+
+static PLOU_MALLOC_ARRAY_TRACKER ArrayTracker = 0;
+static uint64_t ArrayTrackerCount = 0;
+
+void* LouMallocArray(size_t Members, size_t MemberSize){
+    if(!ArrayTrackerCount){
+        ArrayTracker = (PLOU_MALLOC_ARRAY_TRACKER)LouMalloc(sizeof(LOU_MALLOC_ARRAY_TRACKER));
+    }
+
+    PLOU_MALLOC_ARRAY_TRACKER TmpTracker = ArrayTracker;
+
+    for(uint64_t i = 0 ; i < ArrayTrackerCount;i++){
+        if(TmpTracker->List.NextHeader){
+            TmpTracker = (PLOU_MALLOC_ARRAY_TRACKER)TmpTracker->List.NextHeader;
+        }
+    }
+    uint64_t BaseAddress = (uint64_t)LouMalloc(MemberSize); 
+    TmpTracker->BaseAddress = BaseAddress; 
+    for(uint64_t i = 1 ; i < (Members); i++){
+        if(!TmpTracker->List.NextHeader){
+            TmpTracker->List.NextHeader = (PListHeader)LouMalloc(sizeof(LOU_MALLOC_ARRAY_TRACKER));
+        }
+        TmpTracker = (PLOU_MALLOC_ARRAY_TRACKER)TmpTracker->List.NextHeader;
+        TmpTracker->BaseAddress = BaseAddress;
+        TmpTracker->MemberAddress = (uint64_t)LouMalloc(MemberSize);
+    }
+    return (void*)BaseAddress;
+}
