@@ -85,7 +85,22 @@ void ScatterGatherInitializeObject(
     ScatterGatherSetBuffer(ScatterGatherList,Buffer,BufferLength);
 }
 
+//TODO:This
+static int ScatterGatherSplitPhysical(
+    PSCATTER_GATHER_SPLITTER    Splitters,
+    uint64_t                    SplitterCount
+){
 
+    return 0;
+}
+
+//TODO:This
+static void ScatterGatherSplitMapped(
+    PSCATTER_GATHER_SPLITTER    Splitters,
+    int                         SplitterCount
+){
+
+}
 
 int ScatterGatherCalculateSplit(
     PSCATTER_LIST               InputList,
@@ -163,10 +178,11 @@ int ScatterGatherSplit(
     uint64_t AllocationFlags
 ){
     int Result = 0;
-    UNUSED int i = 0;
+    int i = 0;
 
     PSCATTER_GATHER_SPLITTER Splitters;
-    Splitters = (PSCATTER_GATHER_SPLITTER)LouMalloc(NbSplits * sizeof(SCATTER_GATHER_SPLITTER));
+    //my array is packed so just use LouMalloc
+    Splitters = (PSCATTER_GATHER_SPLITTER)LouMallocEx(NbSplits * sizeof(SCATTER_GATHER_SPLITTER),sizeof(SCATTER_GATHER_SPLITTER));
 
     Result = ScatterGatherCalculateSplit(
         InputList,
@@ -177,7 +193,59 @@ int ScatterGatherSplit(
         Splitters,
         false                
     );    
+    if(Result < 0){
+        goto _SCATTER_GATHER_SPLIT_ERROR;
+    }
 
+    Result = -2;
+    for(i = 0; i < NbSplits; i++){
+        //my array is packed so just use LouMalloc
+        Splitters[i].OutputScatterGather = (PSCATTER_LIST)LouMallocEx(Splitters[i].ElementCount,sizeof(PSCATTER_LIST));
+        if(!Splitters[i].OutputScatterGather){
+            goto _SCATTER_GATHER_SPLIT_ERROR;
+        }
+    }
+
+    ScatterGatherSplitPhysical(
+        Splitters, 
+        NbSplits
+    );
+    if(InputElementCount){
+        Result = ScatterGatherCalculateSplit(
+            InputList,
+            InputElementCount,
+            NbSplits,
+            SkipToOffset,
+            SplitSizes, 
+            Splitters,
+            true
+        );
+
+        if(Result < 0){
+            goto _SCATTER_GATHER_SPLIT_ERROR;
+        }
+        ScatterGatherSplitMapped(
+            Splitters,
+            SkipToOffset
+        );
+    }
+
+    for(i = 0;i < NbSplits;i++){
+        OutputList[i] = Splitters[i].OutputScatterGather;
+        if(OutputElementCount){
+            OutputElementCount[i] = Splitters[i].ElementCount;
+        }
+    }
+
+    LouFree((RAMADD)Splitters);
+    return 0;
+
+    _SCATTER_GATHER_SPLIT_ERROR:
+
+        for(i = 0 ; i < NbSplits; i++){
+            LouFree((RAMADD)Splitters[i].OutputScatterGather);
+        }
+        LouFree((RAMADD)Splitters);
     return Result;
 }
 

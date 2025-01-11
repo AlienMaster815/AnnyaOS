@@ -105,7 +105,7 @@ struct master_multiboot_mmap_entry* LouKeGetMemoryMapTable(){
 #define BitMapDivisor 1
 
 UNUSED static uint64_t* BitMap;
-#define StartMap (35ULL * MEGABYTE)
+#define StartMap (30ULL * MEGABYTE)
 
 
 

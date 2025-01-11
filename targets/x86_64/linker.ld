@@ -29,7 +29,7 @@ SECTIONS
         *(.bss)/* Your uninitialized data sections go here */
     }
 
-    . = 30M;
+    . = 25M;
 
     .User : 
     {
