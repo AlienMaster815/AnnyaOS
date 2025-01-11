@@ -40,6 +40,10 @@ typedef struct _Fixed20_12{
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
+#define MinimumOfTwo(type, x, y) \
+    ({ type __min1 = (x); type __min2 = (y); __min1 < __min2 ? __min1 : __min2; })
+
+
 #ifndef _KERNEL_MODULE_
 static inline int
 RoundUpPowerOf2(int x)

@@ -40,7 +40,7 @@ PSCATTER_LIST ScatterGatherGetNext(
         return 0;
     }
     //plus sizeof for packing and -O0
-    ScatterGatherCurrent += sizeof(SCATTER_LIST);
+    ScatterGatherCurrent++;
 
     if(ScatterGatherIsChain(ScatterGatherCurrent)){
         ScatterGatherCurrent = (PSCATTER_LIST)(uintptr_t)ScatterGatherChainPointer(ScatterGatherCurrent);
@@ -85,19 +85,72 @@ void ScatterGatherInitializeObject(
     ScatterGatherSetBuffer(ScatterGatherList,Buffer,BufferLength);
 }
 
-//static int ScatterGatherCalculateSplit(
-//    PSCATTER_LIST               InputList,
-//    int                         ElementCount,
-//    uint64_t                    NumberOfSplits,
-//    uint64_t                    Offset,
-//    uint64_t*                   SizesReference,
-//    PSCATTER_GATHER_SPLITER     Splitters,
-//    bool                        Mapped
-//){
 
 
-//    return 0;  
-//}
+int ScatterGatherCalculateSplit(
+    PSCATTER_LIST               InputList,
+    int                         ElementCount,
+    uint64_t                    NumberOfSplits,
+    uint64_t                    Offset,
+    uint64_t*                   SizesReference,
+    PSCATTER_GATHER_SPLITTER    Splitters,
+    bool                        Mapped
+){
+    int             i = 0;
+    unsigned int    ScatterGatherLength = 0;
+    uint64_t size = SizesReference[0], Length;
+    PSCATTER_GATHER_SPLITTER     Current = Splitters;
+    PSCATTER_LIST                ScatterGather;
+
+    for(i = 0 ; i < NumberOfSplits; i++){
+        Splitters[i].InputScatterGather0 = 0x00;
+        Splitters[i].ElementCount = 0;
+    }
+
+    ForEachScatterGatherList(InputList, ScatterGather, NumberOfSplits, i){
+        ScatterGatherLength = Mapped ? SCATTER_GATHER_DMA_LENGTH(ScatterGather) : ScatterGather->Length;
+    
+        if(ScatterGatherLength < Offset){
+            Offset -= ScatterGatherLength;
+        }
+
+        Length = MinimumOfTwo(uint64_t, size, ScatterGatherLength - Offset);
+        if(!Current->InputScatterGather0){
+            Current->InputScatterGather0 = ScatterGather;
+            Current->OffsetSg0 = Offset;        
+        }
+        
+        size -= Length;
+        Current->ElementCount++;
+        Current->LengthOfLastSg = Length;
+       
+        while(!size && ((Offset + Length) < ScatterGatherLength) && (--NumberOfSplits > 0)){
+            Current++;
+            size = *(++SizesReference);
+            Offset += Length;
+            Length = MinimumOfTwo(uint64_t, size, ScatterGatherLength - Offset);
+            Current->InputScatterGather0 = ScatterGather;
+            Current->OffsetSg0 = Offset;      
+            Current->ElementCount = 1;
+            Current->LengthOfLastSg = Length;
+            size -= Length;
+        }
+
+        Offset = 0;
+        
+        if((!size) && (--NumberOfSplits > 0)){
+            Current++;
+            size= *(++SizesReference);   
+        }
+        
+        if(!NumberOfSplits){
+            break;            
+        }
+
+    }
+
+    return (size || !Splitters[0].InputScatterGather0) ? -1 : 0;  
+}
 
 int ScatterGatherSplit(
     PSCATTER_LIST InputList,
@@ -110,6 +163,20 @@ int ScatterGatherSplit(
     uint64_t AllocationFlags
 ){
     int Result = 0;
+    UNUSED int i = 0;
+
+    PSCATTER_GATHER_SPLITTER Splitters;
+    Splitters = (PSCATTER_GATHER_SPLITTER)LouMalloc(NbSplits * sizeof(SCATTER_GATHER_SPLITTER));
+
+    Result = ScatterGatherCalculateSplit(
+        InputList,
+        ScatterGatherElementCount(InputList),
+        NbSplits,        
+        SkipToOffset,
+        SplitSizes,
+        Splitters,
+        false                
+    );    
 
     return Result;
 }

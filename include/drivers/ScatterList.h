@@ -437,13 +437,13 @@ void ScatterGatherMappingIterationSkip(SCATTER_GATHER_MAPPING_ITERATION MappingI
 void ScatterGatherMappingIterationNext(SCATTER_GATHER_MAPPING_ITERATION MappingIteration);
 void ScatterGatherMappingIterationStop(SCATTER_GATHER_MAPPING_ITERATION MappingIteration);
 
-typedef struct _SCATTER_GATHER_SPLITER{
+typedef struct _SCATTER_GATHER_SPLITTER{
     PSCATTER_LIST   InputScatterGather0;
     int             ElementCount;
     uint64_t        OffsetSg0;
     unsigned int    LengthOfLastSg;
     PSCATTER_LIST   OutputScatterGather;
-}SCATTER_GATHER_SPLITER, * PSCATTER_GATHER_SPLITER;
+}SCATTER_GATHER_SPLITTER, * PSCATTER_GATHER_SPLITTER;
 
 #ifdef __cplusplus
 }
