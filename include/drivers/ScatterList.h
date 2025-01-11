@@ -202,7 +202,16 @@ PSCATTER_LIST ScatterGatherGetNext(PSCATTER_LIST ScatterGatherCurrent);
 PSCATTER_LIST ScatterGatherLast(PSCATTER_LIST ScatterGatherCurrent, unsigned int ElementCount);
 void ScatterGatherInitializeTable(PSCATTER_LIST ScatterGatherList, uint64_t ElementCount);
 void ScatterGatherInitializeObject(PSCATTER_LIST ScatterGatherList, void* Buffer, uint64_t BufferLength);
-int ScatterGatherSplit(PSCATTER_LIST InputList,int InputElementCount, uint64_t SkipToOffset, int NbSplits, uint64_t* SplitSizes, PSCATTER_LIST* OutputList, int* OutputElementCount, uint64_t AllocationFlags);
+int ScatterGatherSplit(
+    PSCATTER_LIST InputList,
+    int InputElementCount, 
+    int NbSplits, 
+    uint64_t SkipToOffset, 
+    uint64_t* SplitSizes, 
+    PSCATTER_LIST* OutputList, 
+    int* OutputElementCount, 
+    uint64_t AllocationFlags
+);
 
 typedef SCATTER_LIST (*ScatterGatherAllocCallback)(uint64_t BlockSize, uint64_t AllocationFlags);
 typedef void (*ScatterGatherFreeCallback)(PSCATTER_LIST ScatterList, uint64_t Size);
@@ -428,7 +437,13 @@ void ScatterGatherMappingIterationSkip(SCATTER_GATHER_MAPPING_ITERATION MappingI
 void ScatterGatherMappingIterationNext(SCATTER_GATHER_MAPPING_ITERATION MappingIteration);
 void ScatterGatherMappingIterationStop(SCATTER_GATHER_MAPPING_ITERATION MappingIteration);
 
-
+typedef struct _SCATTER_GATHER_SPLITER{
+    PSCATTER_LIST   InputScatterGather0;
+    int             ElementCount;
+    uint64_t        OffsetSg0;
+    unsigned int    LengthOfLastSg;
+    PSCATTER_LIST   OutputScatterGather;
+}SCATTER_GATHER_SPLITER, * PSCATTER_GATHER_SPLITER;
 
 #ifdef __cplusplus
 }

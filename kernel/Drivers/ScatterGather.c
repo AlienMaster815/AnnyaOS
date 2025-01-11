@@ -85,18 +85,33 @@ void ScatterGatherInitializeObject(
     ScatterGatherSetBuffer(ScatterGatherList,Buffer,BufferLength);
 }
 
+//static int ScatterGatherCalculateSplit(
+//    PSCATTER_LIST               InputList,
+//    int                         ElementCount,
+//    uint64_t                    NumberOfSplits,
+//    uint64_t                    Offset,
+//    uint64_t*                   SizesReference,
+//    PSCATTER_GATHER_SPLITER     Splitters,
+//    bool                        Mapped
+//){
+
+
+//    return 0;  
+//}
+
 int ScatterGatherSplit(
     PSCATTER_LIST InputList,
     int InputElementCount, 
-    uint64_t SkipToOffset, 
     int NbSplits, 
+    uint64_t SkipToOffset, 
     uint64_t* SplitSizes, 
     PSCATTER_LIST* OutputList, 
     int* OutputElementCount, 
     uint64_t AllocationFlags
 ){
+    int Result = 0;
 
-    return 0;
+    return Result;
 }
 
 void ScatterGatherFreeTableEx(
