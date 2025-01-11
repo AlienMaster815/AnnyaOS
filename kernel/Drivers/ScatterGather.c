@@ -15,9 +15,21 @@ int ScatterGatherElementCountForLength(
     PSCATTER_LIST ScatterGather, 
     uint64_t Length
 ){
+    if(!Length){
+        return 0;
+    }
 
+    uint64_t Total = 0;
+    int ElementCount = 0;
+    for(; ScatterGather ;ScatterGather = ScatterGatherGetNext(ScatterGather)){
+        ElementCount++;
+        Total += ScatterGather->Length;
+        if(Total >= Length){
+            return ElementCount;
+        }
+    }
 
-    return 0;
+    return -1;
 }
 
 PSCATTER_LIST ScatterGatherGetNext(
@@ -58,17 +70,19 @@ PSCATTER_LIST ScatterGatherLast(
 
 void ScatterGatherInitializeTable(
     PSCATTER_LIST ScatterGatherList, 
-    uint64_t Size
+    uint64_t ElementCount
 ){
-
+    memset((void*)ScatterGatherList, 0, sizeof(SCATTER_LIST) * ElementCount);
+    ScatterGatherInitializeMarker(ScatterGatherList, ElementCount);
 }
 
 void ScatterGatherInitializeObject(
     PSCATTER_LIST ScatterGatherList, 
-    void* Element, 
-    uint64_t Size
+    void* Buffer, 
+    uint64_t BufferLength
 ){
-
+    ScatterGatherInitializeTable(ScatterGatherList, 1);
+    ScatterGatherSetBuffer(ScatterGatherList,Buffer,BufferLength);
 }
 
 int ScatterGatherSplit(

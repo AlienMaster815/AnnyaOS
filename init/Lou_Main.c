@@ -344,6 +344,7 @@ KERNEL_ENTRY Lou_kernel_start(
     }
 
     LouKeMapPciMemory();
+
     SetupInitialVideoDevices();
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
