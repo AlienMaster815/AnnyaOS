@@ -85,7 +85,6 @@ void ScatterGatherInitializeObject(
     ScatterGatherSetBuffer(ScatterGatherList,Buffer,BufferLength);
 }
 
-//TODO:This
 static int ScatterGatherSplitPhysical(
     PSCATTER_GATHER_SPLITTER    Splitters,
     uint64_t                    SplitterCount
@@ -221,7 +220,7 @@ int ScatterGatherSplit(
 
     PSCATTER_GATHER_SPLITTER Splitters;
     //my array is packed so just use LouMalloc
-    Splitters = (PSCATTER_GATHER_SPLITTER)LouMallocEx(NbSplits * sizeof(SCATTER_GATHER_SPLITTER),sizeof(SCATTER_GATHER_SPLITTER));
+    Splitters = (PSCATTER_GATHER_SPLITTER)LouKeMallocWithFlagsEx(NbSplits * sizeof(SCATTER_GATHER_SPLITTER),sizeof(SCATTER_GATHER_SPLITTER), AllocationFlags);
 
     Result = ScatterGatherCalculateSplit(
         InputList,
@@ -239,7 +238,7 @@ int ScatterGatherSplit(
     Result = -2;
     for(i = 0; i < NbSplits; i++){
         //my array is packed so just use LouMalloc
-        Splitters[i].OutputScatterGather = (PSCATTER_LIST)LouMallocEx(Splitters[i].ElementCount,sizeof(PSCATTER_LIST));
+        Splitters[i].OutputScatterGather = (PSCATTER_LIST)LouKeMallocWithFlagsEx(Splitters[i].ElementCount,sizeof(PSCATTER_LIST), AllocationFlags);
         if(!Splitters[i].OutputScatterGather){
             goto _SCATTER_GATHER_SPLIT_ERROR;
         }
@@ -364,8 +363,11 @@ static PSCATTER_LIST ScatterGatherLouMalloc(
     uint64_t        ElementCount,
     uint64_t        AllocationFlags
 ){
+    if(ElementCount == SCATTER_GATHER_MAXIMUM_SINGLE_ALLOCATION){
+        return LouKeMallocWithFlagsEx(MEGABYTE_PAGE, MEGABYTE_PAGE, AllocationFlags);
+    }
 
-    return 0x00;
+    return LouKeMallocWithFlagsEx(ElementCount * sizeof(SCATTER_LIST),sizeof(SCATTER_LIST), AllocationFlags);
 }
 
 int ScatterGatherAllocTableEx(

@@ -9,19 +9,20 @@ typedef struct _USER_MODE_VMEM_TRACK{
 
 //static spinlock_t UserAllocLock;
 
-uint64_t LouKeMallocFromMap(
+uint64_t LouKeMallocFromMapEx(
     uint64_t BytesNeeded,
+    uint64_t Alignement,
     uint64_t MapStart,
     uint64_t MapEnd,
     uint64_t MappedTrack,
     PUSER_MODE_VMEM_TRACK MappedAddresses
 ){
 
-    uint64_t AlignedAddress = MapStart & ~(BytesNeeded - 1);
+    uint64_t AlignedAddress = MapStart & ~(Alignement - 1);
     AlignedAddress += BytesNeeded;
     bool AddressValid = false;
 
-    while((AlignedAddress + BytesNeeded) <= MapEnd){
+    while((AlignedAddress + Alignement) <= MapEnd){
         PUSER_MODE_VMEM_TRACK Tmp = MappedAddresses;
 
         for(uint64_t i = 0 ; i <= MappedTrack; i++){
@@ -54,7 +55,24 @@ uint64_t LouKeMallocFromMap(
             Tmp->size = BytesNeeded;
             return AlignedAddress; 
         }
-        AlignedAddress += BytesNeeded;
+        AlignedAddress += Alignement;
     }
     return 0x00;
+}
+
+uint64_t LouKeMallocFromMap(
+    uint64_t BytesNeeded,
+    uint64_t MapStart,
+    uint64_t MapEnd,
+    uint64_t MappedTrack,
+    PUSER_MODE_VMEM_TRACK MappedAddresses
+){
+    return LouKeMallocFromMapEx(
+        BytesNeeded,
+        BytesNeeded,
+        MapStart,
+        MapEnd,
+        MappedTrack,
+        MappedAddresses
+    );
 }

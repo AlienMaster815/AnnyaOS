@@ -60,7 +60,7 @@ void LouUserMalloc(uint64_t DataP){
     while(!Pointer){
         Pointer = LouKeMallocFromMap(
             *Data, MasterChunk.VAddress,
-            TmpChunk->VAddress + ((2 * MEGABYTE_PAGE) * TmpChunk->NumPages),
+            TmpChunk->VAddress + ((MEGABYTE_PAGE) * TmpChunk->NumPages),
             AllocationTracks,
             &MasterTrack
         );

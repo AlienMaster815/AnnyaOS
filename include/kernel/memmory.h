@@ -120,7 +120,15 @@ bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 );
-
+void* LouKeMallocWithFlags(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
+void* LouKeMallocWithFlagsEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
 void MapIoMemory(
     uint64_t Address,
     uint64_t MapSize
@@ -178,6 +186,15 @@ KERNEL_IMPORT bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
 KERNEL_IMPORT bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
+);
+KERNEL_IMPORT void* LouKeMallocWithFlags(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
+KERNEL_IMPORT void* LouKeMallocWithFlagsEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
 );
 KERNEL_IMPORT void LouUserFree(uint64_t DataP);
 KERNEL_IMPORT void LouKeUserFree(void* AddressToFree);
