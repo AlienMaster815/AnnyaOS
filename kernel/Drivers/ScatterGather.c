@@ -287,6 +287,13 @@ int ScatterGatherSplit(
         LouFree((RAMADD)Splitters);
     return Result;
 }
+ 
+void ScatterGatherLouFree(
+    PSCATTER_LIST   ScatterGather,
+    uint64_t        ElementCount
+){
+
+}
 
 void ScatterGatherFreeTableEx(
     PSCATTER_GATHER_TABLE       ScatterGatherTable, 
@@ -295,20 +302,62 @@ void ScatterGatherFreeTableEx(
     ScatterGatherFreeCallback   ScatterGatherFree, 
     unsigned int                ElementCount
 ){
+    if(!ScatterGatherTable->ScatterGatherList){
+        return;
+    }
+    unsigned int CurrentMaxEntries = FirstChunkElements ?: MaximumEntries;
+    PSCATTER_LIST ScatterGatherList = ScatterGatherTable->ScatterGatherList, NextList;
 
+    while(ElementCount){
+        unsigned int AllocationSize = ElementCount;
+        unsigned int ScatterGatherSize;
+
+        if(AllocationSize > CurrentMaxEntries){
+            NextList = (PSCATTER_LIST)(uintptr_t)ScatterGatherChainPointer(&ScatterGatherList[CurrentMaxEntries - 1]);
+            AllocationSize = CurrentMaxEntries;
+            ScatterGatherSize = AllocationSize - 1;   
+        } 
+        else {
+            ScatterGatherSize = AllocationSize;
+            NextList = 0x00;
+        }
+
+        ElementCount -= ScatterGatherSize;
+        if(FirstChunkElements){
+            FirstChunkElements = 0;
+        }
+        else{
+            ScatterGatherFree(ScatterGatherList, AllocationSize);
+        }
+        ScatterGatherList = NextList;
+        CurrentMaxEntries = MaximumEntries;
+    }
+    ScatterGatherTable->ScatterGatherList = 0x00;
 }
 
 void ScatterGatherFreeTable(
     PSCATTER_GATHER_TABLE ScatterGatherTable
 ){
-
+    ScatterGatherFreeTableEx(
+        ScatterGatherTable, 
+        SCATTER_GATHER_MAXIMUM_SINGLE_ALLOCATION,
+        0, 
+        ScatterGatherLouFree,
+        ScatterGatherTable->OriginalEntryCount
+    );
 }
 
 
 void ScatterGatherFreeAppendTable(
-    PSCATTER_GATHER_APPENED_TABLE CcatterGatherAppendTable
+    PSCATTER_GATHER_APPENED_TABLE ScatterGatherAppendTable
 ){
-
+    ScatterGatherFreeTableEx(
+        &ScatterGatherAppendTable->ScatterGatherTable, 
+        SCATTER_GATHER_MAXIMUM_SINGLE_ALLOCATION,
+        0, 
+        ScatterGatherLouFree,
+        ScatterGatherAppendTable->TotalEntries
+    );
 }
 
 int ScatterGatherAllocTableEx(
