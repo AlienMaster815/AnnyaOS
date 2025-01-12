@@ -9,7 +9,20 @@
 #include "FibreChannelGs.h"
 #include "FibreChannelNs.h"
 #include "FibreChannelMs.h"
+#include "FibreChannelOE.h"
 
+#ifdef __cplusplus
+    #include <LouDDK.h>
+    extern "C"{
+#else
+#include <LouAPI.h>
+#endif
 
+#include "../../ScatterList.h"
+#include "../ScsiCommand.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //_FIBRE_CHANNEL_H

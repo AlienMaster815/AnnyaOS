@@ -18,6 +18,10 @@ typedef struct  _LOUQ{
     spinlock_t LOUQLock;
 }LOUQ, * PLOUQ;
 
+typedef struct _LOUQ_WORK{
+    LOUQ                LouQHeader;
+    DELAYED_FUNCTION    Work;
+}LOUQ_WORK, * PLOUQ_WORK;
 
 typedef struct  _LOUQ_INTEFACE{
     PLOUQ NextInLine;

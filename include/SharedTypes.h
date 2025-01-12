@@ -101,6 +101,10 @@ typedef struct  _ListHeader{
 #define GetStackVariable(offset) (*(uintptr_t*)((uintptr_t)__builtin_frame_address(0) - (offset)))
 #define SetStackVariable(offset, value) (*(uintptr_t*)((uintptr_t)__builtin_frame_address(0) - (offset)) = (uintptr_t)(value))
 
+typedef struct _DELAYED_FUNCTION{
+    void    (*DelayedFunction)(void* WorkData);
+    void*   WorkData;
+}DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 
 #pragma pack(pop)
 #endif
