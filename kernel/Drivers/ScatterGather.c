@@ -40,7 +40,7 @@ PSCATTER_LIST ScatterGatherGetNext(
         return 0;
     }
     //plus sizeof for packing and -O0
-    ScatterGatherCurrent++;
+    ScatterGatherCurrent = &ScatterGatherCurrent[1];
 
     if(ScatterGatherIsChain(ScatterGatherCurrent)){
         ScatterGatherCurrent = (PSCATTER_LIST)(uintptr_t)ScatterGatherChainPointer(ScatterGatherCurrent);
@@ -90,16 +90,55 @@ static int ScatterGatherSplitPhysical(
     PSCATTER_GATHER_SPLITTER    Splitters,
     uint64_t                    SplitterCount
 ){
+    int i = 0, j = 0;
+    PSCATTER_LIST InputScatterGather, OutputScatterGather;
+    PSCATTER_GATHER_SPLITTER    Splitter;
+
+    for(i = 0, Splitter = Splitters; i < SplitterCount; i++, Splitter = &Splitter[1]){
+        InputScatterGather = Splitter->InputScatterGather0;
+        OutputScatterGather = Splitter->OutputScatterGather;
+        for(j = 0; j < Splitter->ElementCount; j++, OutputScatterGather = &OutputScatterGather[1]){
+            *OutputScatterGather = *InputScatterGather;
+            if(!j){
+                OutputScatterGather->Offset += Splitter->OffsetSg0;
+                OutputScatterGather->Length -= Splitter->OffsetSg0;
+            }
+            else{
+                OutputScatterGather->Offset = 0;
+            }
+            SCATTER_GATHER_DMA_ADDRESS(OutputScatterGather) = 0;
+            SCATTER_GATHER_DMA_LENGTH(OutputScatterGather) = 0;
+            InputScatterGather = ScatterGatherGetNext(InputScatterGather);
+        }
+        OutputScatterGather[-1].Length = Splitter->LengthOfLastSg;
+        ScatterGatherMarkEnd(&OutputScatterGather[-1]);
+    }
 
     return 0;
 }
 
-//TODO:This
+
 static void ScatterGatherSplitMapped(
     PSCATTER_GATHER_SPLITTER    Splitters,
     int                         SplitterCount
 ){
+    int i = 0, j = 0;
+    PSCATTER_LIST InputScatterGather, OutputScatterGather;
+    PSCATTER_GATHER_SPLITTER    Splitter;
 
+    for(i = 0 , Splitter = Splitters; i < SplitterCount;i++){
+        InputScatterGather = Splitter->InputScatterGather0;
+        OutputScatterGather = Splitter->OutputScatterGather;
+        for(j = 0; j < Splitter->ElementCount; j++, OutputScatterGather = &OutputScatterGather[1]){
+            SCATTER_GATHER_DMA_ADDRESS(OutputScatterGather) = SCATTER_GATHER_DMA_ADDRESS(InputScatterGather);
+            SCATTER_GATHER_DMA_LENGTH(OutputScatterGather) = SCATTER_GATHER_DMA_LENGTH(InputScatterGather);
+            if(!j){
+                SCATTER_GATHER_DMA_ADDRESS(OutputScatterGather) += Splitter->OffsetSg0;
+                SCATTER_GATHER_DMA_LENGTH(OutputScatterGather) -= Splitter->OffsetSg0;
+            }
+            InputScatterGather = ScatterGatherGetNext(InputScatterGather);
+        }
+    }
 }
 
 int ScatterGatherCalculateSplit(
