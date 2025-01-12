@@ -37,7 +37,7 @@ typedef struct _SCATTER_GATHER_TABLE{
 
 typedef struct _SCATTER_GATHER_APPENED_TABLE{
     SCATTER_GATHER_TABLE    ScatterGatherTable;
-    PSCATTER_LIST           Private;
+    PSCATTER_LIST           PreviousScatterGather;
     unsigned int            TotalEntries;
 }SCATTER_GATHER_APPENED_TABLE, * PSCATTER_GATHER_APPENED_TABLE;
 
@@ -252,14 +252,14 @@ int ScatterGatherAllocTable(
     uint64_t                AllocationFlags
 );
 int ScatterGatherAllocApendTableFromPages(
-    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
-    uint64_t**              PageReference,
-    unsigned int            PageCount, 
-    unsigned int            Offset, 
-    uint64_t                Size,
-    uint64_t                MaximumSegments, 
-    uint64_t                LeftPages,
-    uint64_t                AllocationFlags
+    PSCATTER_GATHER_APPENED_TABLE    ScatterGatherTable, 
+    uint64_t**                      PageReference,
+    unsigned int                    PageCount, 
+    unsigned int                    Offset, 
+    uint64_t                        Size,
+    uint64_t                        MaximumSegments, 
+    uint64_t                        LeftPages,
+    uint64_t                        AllocationFlags
 );
 int ScatterGatherAllocTableFromPagesSegment(
     PSCATTER_GATHER_TABLE   ScatterGatherTable, 
@@ -452,6 +452,10 @@ typedef struct _SCATTER_GATHER_SPLITTER{
     unsigned int    LengthOfLastSg;
     PSCATTER_LIST   OutputScatterGather;
 }SCATTER_GATHER_SPLITTER, * PSCATTER_GATHER_SPLITTER;
+
+#define SGEINVAL 1
+#define SGEOPNOTSUPPORTED 3
+#define SGENOMEM 2
 
 #ifdef __cplusplus
 }

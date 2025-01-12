@@ -29,7 +29,7 @@ int ScatterGatherElementCountForLength(
         }
     }
 
-    return -1;
+    return -SGEINVAL;
 }
 
 PSCATTER_LIST ScatterGatherGetNext(
@@ -472,16 +472,17 @@ int ScatterGatherAllocTable(
 
 
 int ScatterGatherAllocApendTableFromPages(
-    PSCATTER_GATHER_TABLE   ScatterGatherTable, 
-    uint64_t**              PageReference,
-    unsigned int            PageCount, 
-    unsigned int            Offset, 
-    uint64_t                Size,
-    uint64_t                MaximumSegments, 
-    uint64_t                LeftPages,
-    uint64_t                AllocationFlags
+    PSCATTER_GATHER_APPENED_TABLE   ScatterGatherTable, 
+    uint64_t**                      PageReference,
+    unsigned int                    PageCount, 
+    unsigned int                    Offset, 
+    uint64_t                        Size,
+    uint64_t                        MaximumSegments, 
+    uint64_t                        LeftPages,
+    uint64_t                        AllocationFlags
 ){
-
+    LouPrint("ScatterGatherAllocApendTableFromPages\n");
+    while(1);
     return 0;
 }
 
@@ -494,7 +495,8 @@ int ScatterGatherAllocTableFromPagesSegment(
     uint64_t                MaximumSegments,
     uint64_t                AllocationFlags
 ){
-
+    LouPrint("ScatterGatherAllocTableFromPagesSegment");
+    while(1);
     return 0;
 }
 
@@ -507,6 +509,8 @@ PSCATTER_LIST ScatterGatherAllocOrder(
     uint64_t*       ElementCountReference
 ){
 
+    LouPrint("ScatterGatherAllocOrder\n");
+    while(1);
     return 0x00;
 }
 
@@ -515,7 +519,8 @@ PSCATTER_LIST ScatterGatherAlloc(
     uint64_t        AllocationFlags,
     unsigned int*   ElementCountReference
 ){
-
+    LouPrint("ScatterGatherAlloc\n");
+    while(1);
     return 0x00;
 }
 
@@ -524,20 +529,23 @@ void ScatterGatherFreeCountOrder(
     int             ElementCount,
     int             Order
 ){
-
+    LouPrint("ScatterGatherFreeCountOrder\n");
+    while(1);
 }
 
 void ScatterGatherFreeOrder(
     PSCATTER_LIST   ScatterGatherList,
     int             Order
 ){
-
+    LouPrint("ScatterGatherFreeOrder\n");
+    while(1);
 }
 
 void ScatterGatherFree(
     PSCATTER_LIST   ScatterGatherList
 ){
-
+    LouPrint("ScatterGatherFree\n");
+    while(1);
 }
 
 
@@ -548,7 +556,8 @@ uint64_t ScatterGatherCopyBuffer(
     void*           Buffer,
     uint64_t        BufferLength
 ){
-
+    LouPrint("ScatterGatherCooyBuffer\n");
+    while(1);
     return 0;
 }
 
@@ -557,8 +566,9 @@ uint64_t ScatterGatherCopyFromBuffer(
     unsigned int    ElementCount,
     void*           Buffer,
     uint64_t        BufferLength
-){
-
+){  
+    LouPrint("ScatterGatherCopyFromBuffer\n");
+    while(1);
     return 0;
 }
 
@@ -568,7 +578,8 @@ uint64_t ScatterGatherCopyToBuffer(
     void*           Buffer,
     uint64_t        BufferLength
 ){
-
+    LouPrint("ScatterGatherCopyToBuffer\n");
+    while(1);
     return 0;
 }
 
@@ -579,7 +590,8 @@ uint64_t ScatterGatherPCopyFromBuffer(
     uint64_t        BufferLength,
     uint64_t        Offset
 ){
-
+    LouPrint("ScatterGatherPCopyFromBuffer\n");
+    while(1);
     return 0;
 }
 
@@ -590,7 +602,8 @@ uint64_t ScatterGatherPCopyToBuffer(
     uint64_t        BufferLength,
     uint64_t        Offset
 ){
-
+    LouPrint("ScatterGatherPCopyToBuffer\n");
+    while(1);
     return 0;
 }
 
@@ -600,7 +613,8 @@ uint64_t ScatterGatherZeroBuffer(
     uint64_t        BufferLength,
     uint64_t        Offset
 ){
-
+    LouPrint("ScatterGatherZeroBuffer\n");
+    while(1);
     return 0;
 }
 
@@ -608,7 +622,7 @@ void ScatterGatherFreeTableChained(
     PSCATTER_LIST   ScatterGatherTable,
     uint64_t        ElementsInFirstChunk
 ){
-
+    LouPrint("ScatterGatherFreeTableChained\n");
 }
 
 void ScatterGatherAllocTableChained(
@@ -617,19 +631,22 @@ void ScatterGatherAllocTableChained(
     PSCATTER_LIST   FirstChunk,
     uint64_t        FirstChunkElementCount
 ){
-
+    LouPrint("ScatterGatherAllocTableChained\n");
+    while(1);
 }
 
 bool ScatterGatherPageIterateNextEx(
     PSCATTER_GATHER_PAGE_ITERATOR PageIterator
 ){
-
+    LouPrint("ScatterGatherPageIterateNextEx\n");
+    while(1);
     return false;
 }
 bool ScatterGatherPageIterateDmaNextEx(
     PSCATTER_GATHER_DMA_PAGE_ITERATOR DmaIterator
 ){
-
+    LouPrint("ScatterGatherPageIterationDmaNextEx\n");
+    while(1);
     return false;
 }
 void ScatterGatherPageIterateStartEx(
@@ -638,8 +655,9 @@ void ScatterGatherPageIterateStartEx(
     unsigned int                    ElementCount,
     uint64_t                        PageOffset
 ){
-    
-}
+    LouPrint("ScatterGatherPPageIterateStartEx\n");
+    while(1);
+}   
 
 
 void ScatterGatherMappingIterationStart(
@@ -648,21 +666,24 @@ void ScatterGatherMappingIterationStart(
     unsigned int ElementCount, 
     unsigned int Flags
 ){
-
+    LouPrint("ScatterGatherMappingIterationStart\n");
+    while(1);
 }
 void ScatterGatherMappingIterationSkip(
     SCATTER_GATHER_MAPPING_ITERATION MappingIteration, 
     uint64_t Offset
 ){
-    
+    LouPrint("ScatterGatherMappingIterationSkip\n");
+    while(1);
 }
 void ScatterGatherMappingIterationNext(
     SCATTER_GATHER_MAPPING_ITERATION MappingIteration
 ){
-
+    LouPrint("ScatterGatherMappingIterationNext\n");
 }
 void ScatterGatherMappingIterationStop(
     SCATTER_GATHER_MAPPING_ITERATION MappingIteration
 ){
-
+    LouPrint("ScatterGatherMappingIterationStop\n");
+    while(1);
 }

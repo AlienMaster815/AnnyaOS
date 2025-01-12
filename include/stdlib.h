@@ -32,6 +32,9 @@
 #define ROUND_UP64(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))
 
+#define ROUND_DOWN64(value, multiple) \
+    ((value) / (multiple) * (multiple))
+
 #define ABS(x) \
     (((x) < 0) ? -(x) : (x))
 int abs(int x);

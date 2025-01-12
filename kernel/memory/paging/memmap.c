@@ -2,6 +2,104 @@
 #include "PageDefinitions.h"
 #include <stdint.h>
 
+//LouKe PFN Architecture
+
+
+static LOU_PFN_TABLE_ENTRY PfnDatabase = {0};
+static size_t PageFrameCount = 0;
+
+void LouKeMallocPageFrameNumber(
+    uint64_t Virtual,
+    uint64_t Physical,
+    bool     LargePage,
+    uint64_t Flags,
+    uint64_t PageAddress
+){
+    PLOU_PFN_TABLE_ENTRY CurrentEntry = &PfnDatabase, LastEntry;
+
+    for(size_t i = 0; i < PageFrameCount; i++){
+        if(CurrentEntry->Chain.NextHeader){
+            LastEntry = CurrentEntry;
+            CurrentEntry = (PLOU_PFN_TABLE_ENTRY)CurrentEntry->Chain.NextHeader;
+        }else{ //Unlikely
+            //TODO:Bluescreen for Data Leak, Memory manager is compromised use panic KCall
+            while(1);
+        }
+    }
+    
+    CurrentEntry->Chain.LastHeader  = (PListHeader)LastEntry;
+    CurrentEntry->VirtualAddress    = Virtual;
+    CurrentEntry->PhysicalAddres    = Physical;
+    CurrentEntry->LargePage         = LargePage;
+    CurrentEntry->PresentPage       = true;
+    CurrentEntry->Flags             = Flags;
+    CurrentEntry->PageAddress       = PageAddress;
+    CurrentEntry->Chain.NextHeader  = (PListHeader)LouMalloc(sizeof(LOU_PFN_TABLE_ENTRY));
+    PageFrameCount++;
+}
+
+static inline bool IsPfnPhysicalCompatible(
+    PLOU_PFN_TABLE_ENTRY    Pfn,
+    uint64_t                Physical
+){
+    if(
+        (Pfn->PhysicalAddres == Physical) && 
+        (Pfn->PresentPage == true) 
+    )return  true;
+    return false;
+}
+
+PLOU_PFN_TABLE_ENTRY LouKePageToPFNIndex(
+    uint64_t PAddress,
+    PLOU_PFN_TABLE_ENTRY PfnIndex
+){
+    PLOU_PFN_TABLE_ENTRY CurrentEntry = &PfnDatabase;
+    size_t i = 0;
+    for(; i < PageFrameCount; i++){
+        if(CurrentEntry == PfnIndex){
+            break;
+        }
+        if(CurrentEntry->Chain.NextHeader){
+            CurrentEntry = (PLOU_PFN_TABLE_ENTRY)CurrentEntry->Chain.NextHeader;
+        }
+        else{ //Unlikely
+            CurrentEntry = &PfnDatabase;
+        }
+    }
+
+    for(; i < PageFrameCount; i++){
+        if(IsPfnPhysicalCompatible(
+            CurrentEntry,
+            PAddress
+        )){
+            return CurrentEntry;
+        }
+        if(CurrentEntry->Chain.NextHeader){
+            CurrentEntry = (PLOU_PFN_TABLE_ENTRY)CurrentEntry->Chain.NextHeader;
+        }else if(i == (PageFrameCount - 1)){
+            if(&PfnDatabase == PfnIndex){
+                return PfnIndex;
+            }else{
+                CurrentEntry = &PfnDatabase;
+                i = 0; 
+            }
+        }else {
+            if((uint64_t)CurrentEntry->Chain.NextHeader == (uint64_t)PfnIndex){
+                return PfnIndex;
+            }
+        }
+    }
+    return 0x00;
+}
+
+PLOU_PFN_TABLE_ENTRY LouKePageToPFN(
+    uint64_t PAddress
+){
+    return  LouKePageToPFNIndex(PAddress, &PfnDatabase);
+}
+
+//Endof LouKe PFN Architecture
+
 #define StartMap (10ULL * MEGABYTE)
 
 uint64_t GetCr3() {

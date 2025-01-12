@@ -354,6 +354,19 @@ uint64_t LouKeGetOffsetInPage(
 
 uint64_t LouKePageToPhysicalAddres(uint64_t* Page);
 
+typedef struct _LOU_PFN_TABLE_ENTRY{
+    ListHeader  Chain;
+    uint64_t    VirtualAddress;
+    uint64_t    PhysicalAddres;
+    bool        LargePage;
+    bool        PresentPage;
+    uint64_t    Flags;
+    uint64_t    PageAddress;
+}LOU_PFN_TABLE_ENTRY, * PLOU_PFN_TABLE_ENTRY;
+
+PLOU_PFN_TABLE_ENTRY LouKePageToPFN(
+    uint64_t PAddress
+);
 
 #endif
 #ifdef __cplusplus
@@ -362,9 +375,10 @@ uint64_t LouKePageToPhysicalAddres(uint64_t* Page);
 
 //typedef __uint128_t uint128_t;
 
+
+
+
 #endif
-
-
 #ifdef _KERNEL_MODULE_
 
 KERNEL_EXPORT void LouFree(uint8_t* Addr);
