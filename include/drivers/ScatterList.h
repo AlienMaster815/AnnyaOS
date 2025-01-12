@@ -111,13 +111,21 @@ static inline void ScatterGatherSetBuffer(
     ForEachScatterGatherList((ScatterGatherTable)->ScatterGatherList, ScatterGather, (ScatterGatherTable)->ElementCount, i)
 
 
-static inline void ScatterGatherChain(
+static inline void ScatterGatherChainEx(
     PSCATTER_LIST    ScatterListChain, 
     PSCATTER_LIST    ScatterGatherList
 ){
     ScatterListChain->Offset = 0;
     ScatterListChain->Length = 0;
     ScatterListChain->PageLink = (((unsigned long)(uint64_t)ScatterGatherList | SCATTER_GATHER_CHAIN) & ~SCATTER_GATHER_END);
+}
+
+static inline void ScatterGatherChain(
+    PSCATTER_LIST   ScatterPrevious,
+    unsigned int    PreviousSize,
+    PSCATTER_LIST   CurrentList
+){
+    ScatterGatherChainEx(&ScatterPrevious[PreviousSize - 1], CurrentList);
 }
 
 static inline void ScatterGatherMarkEnd(PSCATTER_LIST ScatterGather){
@@ -213,7 +221,7 @@ int ScatterGatherSplit(
     uint64_t AllocationFlags
 );
 
-typedef SCATTER_LIST (*ScatterGatherAllocCallback)(uint64_t BlockSize, uint64_t AllocationFlags);
+typedef PSCATTER_LIST (*ScatterGatherAllocCallback)(uint64_t BlockSize, uint64_t AllocationFlags);
 typedef void (*ScatterGatherFreeCallback)(PSCATTER_LIST ScatterList, uint64_t Size);
 
 void ScatterGatherFreeTableEx(

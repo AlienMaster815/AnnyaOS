@@ -360,6 +360,14 @@ void ScatterGatherFreeAppendTable(
     );
 }
 
+static PSCATTER_LIST ScatterGatherLouMalloc(
+    uint64_t        ElementCount,
+    uint64_t        AllocationFlags
+){
+
+    return 0x00;
+}
+
 int ScatterGatherAllocTableEx(
     PSCATTER_GATHER_TABLE           ScatterGatherTable,
     unsigned int                    ElementCount, 
@@ -370,6 +378,72 @@ int ScatterGatherAllocTableEx(
     ScatterGatherAllocCallback      ScatterGatherAlloc
 ){
 
+    PSCATTER_LIST ScatterGather, PreviousScatterGather;
+    unsigned int Left;
+    uint64_t CurrentMaxEntries = FirstChunkElementCount ?: MaximumEntries;
+    uint64_t PreviousMaximumEntries;
+
+    memset(ScatterGatherTable, 0, sizeof(SCATTER_GATHER_TABLE));
+
+    if(ElementCount == 0){
+        return -1;
+    }
+
+    #ifdef CONFIGURATION_ARHCITECTURE_NO_SCATTER_GATHER_CHAIN
+        if(ElementCount > MaximumEntries){
+            return -1;
+        }
+    #endif
+
+    Left = ElementCount;
+    PreviousScatterGather = 0x00;
+    do{
+        uint64_t ScatterGatherSize, AllocationSize = Left;
+        if(AllocationSize > CurrentMaxEntries){
+            AllocationSize  = CurrentMaxEntries;
+            ScatterGatherSize = AllocationSize - 1;
+        }
+        else{
+            ScatterGatherSize = AllocationSize;
+        }
+
+        Left -= ScatterGatherSize;
+
+        if(FirstChunk){
+            ScatterGather = FirstChunk;
+            FirstChunk = 0x00;
+        }
+        else {
+            ScatterGather = ScatterGatherAlloc(AllocationSize, AllocationFlags);
+        }
+
+        if(!ScatterGather){
+            if(PreviousScatterGather){
+                ScatterGatherTable->EntryCount = ++ScatterGatherTable->OriginalEntryCount;
+            }
+
+            return -2;
+        }
+
+        ScatterGatherInitializeTable(ScatterGather, AllocationSize);
+        ScatterGatherTable->EntryCount = ScatterGatherTable->OriginalEntryCount += ScatterGatherSize;
+
+        if(PreviousMaximumEntries){
+            ScatterGatherChain(PreviousScatterGather, PreviousMaximumEntries, ScatterGather);
+        }
+        else{
+            ScatterGatherTable->ScatterGatherList = ScatterGather;
+        }
+
+        if(!Left){
+            ScatterGatherMarkEnd(&ScatterGather[ScatterGatherSize - 1]);
+        }
+
+        PreviousScatterGather = ScatterGather;
+        PreviousMaximumEntries = CurrentMaxEntries;
+        CurrentMaxEntries = MaximumEntries;
+    }while(Left);
+
     return 0;
 }
 
@@ -378,8 +452,20 @@ int ScatterGatherAllocTable(
     unsigned int            ElementCount, 
     uint64_t                AllocationFlags
 ){
-
-    return 0;
+    int Result;
+    Result = ScatterGatherAllocTableEx(
+        ScatterGatherTable, 
+        ElementCount, 
+        SCATTER_GATHER_MAXIMUM_SINGLE_ALLOCATION, 
+        0x00, 
+        0, 
+        AllocationFlags, 
+        ScatterGatherLouMalloc
+    );
+    if(Result){
+        ScatterGatherFreeTable(ScatterGatherTable);
+    }
+    return Result;
 }
 
 
