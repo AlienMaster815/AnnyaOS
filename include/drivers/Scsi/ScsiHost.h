@@ -17,6 +17,6 @@ typedef unsigned long long uint64_t;
 #include "ScsiFibreChannelNetlink.h"
 #include "ScsiProtocol.h"
 #include "ScsiCommon.h"
-#include "Iscsiif.h"
+#include "IscsiIf.h"
 
 #endif //_SCSI_HOST_H
