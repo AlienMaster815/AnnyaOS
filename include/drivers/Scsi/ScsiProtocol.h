@@ -103,7 +103,7 @@ typedef struct _ISCSI_SCSI_REQUEST{
     uint32_t        DataLength;
     uint32_t        CommandSn;
     uint32_t        ExpStatSn;
-    uint8_t         CommandDataBuffer[ISCSI_COMMAND_BUFFER_SIZE]
+    uint8_t         CommandDataBuffer[ISCSI_COMMAND_BUFFER_SIZE];
 }ISCSI_SCSI_REQUEST, * PISCSI_SCSI_REQUEST;
 
 #define ISCSI_FLAG_COMMON_FINAL         0x80
@@ -130,7 +130,7 @@ typedef struct _ISCSI_ECDB_AHDR{
     uint16_t    AhsLength;
     uint8_t     AhsType;
     uint8_t     Reserved;
-    uint8_t     ExtendedCommandDataBuffer[SCSI_MAX_VARLEN_CDB_SIZE - ISCSI_COMMAND_BUFFER_SIZE];
+    //uint8_t     ExtendedCommandDataBuffer[SCSI_MAX_VARLEN_CDB_SIZE - ISCSI_COMMAND_BUFFER_SIZE];
 }ISCSI_ECDB_AHDR, * PISCSI_ECDB_AHDR;
 
 //Big Endian
@@ -441,7 +441,7 @@ typedef struct _ISCSI_LOGIN_RESPONCE{
 #define ISCSI_LOGIN_STATUS_MISSING_FIELD            0x07
 #define ISCSI_LOGIN_STATUS_CONNECTION_ADD_FAILED    0x08
 #define ISCSI_LOGIN_STATUS_NO_SESSION_TYPE          0x09
-#define ISCSI_LOGIN_STATUS_NO_SESSION_TYPE          0x0A
+#define ISCSI_LOGIN_STATUS_NO_SESSION               0x0A
 #define ISCSI_LOGIN_STATUS_INVALID_REQUEST          0x0B
 
 #define ISCSI_LOGIN_STATUS_TARGET_ERROR             0x00
@@ -508,7 +508,7 @@ typedef struct _ISCSI_REJECT{
     uint32_t        ExpCommandSn;
     uint32_t        MaxCommandSn;
     uint32_t        DataSn;
-    uint8_t         Reserved4[5]
+    uint8_t         Reserved4[5];
 }ISCSI_REJECT, * PISCSI_REJECT;
 
 #define ISCSI_REASON_COMMAND_BEFORE_LOGIN       1
@@ -548,4 +548,4 @@ typedef struct _ISCSI_REJECT{
 #ifdef __cplusplus
 }
 #endif
-#ifdef //_ISCSI_PROTOCOL_H
+#endif //_ISCSI_PROTOCOL_H
