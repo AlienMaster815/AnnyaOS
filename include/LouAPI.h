@@ -31,6 +31,7 @@
 //#include <Hal.h>
 #include <math.h>
 #include "drivers/Scsi/ScsiHost.h"
+#include "drivers/ata/ata.h"
 
 
 #define ACPIBUFFER 512

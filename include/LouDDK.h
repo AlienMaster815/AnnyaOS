@@ -4,6 +4,7 @@
 #include <drivers/Lou_drivers/PciIds.h>
 
 #include "drivers/Scsi/ScsiHost.h"
+#include "drivers/ata/ata.h"
 
 typedef void* EventHandle;
 
