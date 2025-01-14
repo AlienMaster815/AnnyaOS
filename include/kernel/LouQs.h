@@ -18,6 +18,10 @@ typedef struct  _LOUQ{
     spinlock_t LOUQLock;
 }LOUQ, * PLOUQ;
 
+typedef struct _LOUQ_WAIT{
+    LOUQ    LouQHeader;
+}LOUQ_WAIT, * PLOUQ_WAIT;
+
 typedef struct _LOUQ_WORK{
     LOUQ                LouQHeader;
     DELAYED_FUNCTION    Work;
@@ -27,6 +31,8 @@ typedef struct  _LOUQ_INTEFACE{
     PLOUQ NextInLine;
     PLOUQ InFront;
 }LOUQ_INTEFACE, *PLOUQ_INTEFACE;
+
+
 
 #pragma pack(pop)
 

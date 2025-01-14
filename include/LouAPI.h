@@ -31,6 +31,8 @@
 //#include <Hal.h>
 #include <math.h>
 #include "drivers/Scsi/ScsiHost.h"
+#include <kernel/threads.h>
+#include <kernel/LouQs.h>
 #include "drivers/ata/ata.h"
 
 

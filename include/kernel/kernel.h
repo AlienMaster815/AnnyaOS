@@ -31,7 +31,6 @@
 #include <kernel/Binarys.h>
 #include "threads.h"
 #include "exec.h"
-#include "LouQs.h"
 #include "DRSD.h"
 #include "Process.h"
 
