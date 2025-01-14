@@ -44,11 +44,11 @@
 #define ICH8_2PORT_SATA_BYT     15
 
 
-typedef struct _PIIX_MAP_DB{
+typedef struct _PIIX_MAP_DATA_BUFFER{
     uint32_t Mask;
     uint16_t Pe;
     int      Map[][4];
-}PIIX_MAP_DB, * PPIIX_MAP_DB;
+}PIIX_MAP_DATA_BUFFER, * PPIIX_MAP_DATA_BUFFER;
 
 typedef struct _PIIX_HOST_PRIVATE_DATA{
     int*        map;
@@ -76,10 +76,127 @@ typedef struct _PIIX_DRIVER_DEVICE_LIST{
     uint8_t  ProprietaryID;
 }PIIX_DRIVER_DEVICE_LIST, * PPIIX_DRIVER_DEVICE_LIST;
 
+typedef struct _PCI_PIIX_ENABLE_BITS{
+    unsigned long EnableData[4];
+}PCI_PIIX_ENABLE_BITS, * PPCI_PIIX_ENABLE_BITS;
+
 static const PIIX_DRIVER_DEVICE_LIST PiixTable[DEVICE_LIST_MEMBERS]{
     {0x8086, 0x7010, ANY_PCI_ID,ANY_PCI_ID,ANY_PCI_CLASS,ANY_PCI_CLASS,PIIX_PATA_MWDMA},
     {0x8086, 0x7111, 0x15AD,0x1976,ANY_PCI_CLASS,ANY_PCI_CLASS,PIIX_PATA_VMW},
     {0x8086, 0x7111, ANY_PCI_ID,ANY_PCI_ID,ANY_PCI_CLASS,ANY_PCI_CLASS,PIIX_PATA33},
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER Ich5MapDataBuffer = {
+    .Mask   = 0x07,
+    .Pe     = 0x03,
+    .Map    = {
+        {P0, NA, P1, NA},
+        {P1, NA, P0, NA},
+        {RV, RV, RV, RV},
+        {RV, RV, RV, RV},
+        {RV, RV, RV, RV},
+        {P0, P1, IDE, IDE},
+        {P1, P0, IDE, IDE},
+        {IDE, IDE, P0, P1},
+        {IDE, IDE, P1, P0},
+    },
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER Ich6MapDataBuffer = {
+    .Mask   = 0x03,
+    .Pe     = 0x0F,
+    .Map    = {
+        {P0, P2, P1,P3},
+        {IDE, IDE, P1, P3},
+        {P0, P2, IDE, IDE},
+        {RV, RV, RV, RV},
+    },
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER Ich6MobileMapDataBuffer = {
+    .Mask   = 0x03,
+    .Pe     = 0x05,
+    .Map    = {
+        {P0, P2, NA, NA},
+        {IDE, IDE, P1, P3},
+        {P0, P2, IDE, IDE},
+        {RV, RV, RV, RV},
+    },
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER Ich8MapDataBuffer = {
+    .Mask   = 0x03,
+    .Pe     = 0x0F,
+    .Map = {
+        {P0, P2, NA, NA},
+        {IDE, IDE, P1, P3},
+        {P0, P2, IDE, IDE},
+        {RV, RV, RV, RV},
+    },
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER Ich82PortMapDataBuffer = {
+    .Mask   = 0x03,
+    .Pe     = 0x03,
+    .Map    = {
+        {P0, NA, NA, NA},
+        {RV, RV, RV, RV},
+        {P0, P2, IDE, IDE},
+        {RV, RV ,RV, RV},
+    },
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER Ich8MoblieAppleMabDataBuffer = {
+    .Mask   = 0x03,
+    .Pe     = 0x01,
+    .Map    = {
+        {P0, NA, NA, NA},
+        {RV, RV, RV, RV},
+        {P0, P2, IDE, IDE},
+        {RV, RV, RV, RV},
+    },
+};
+
+UNUSED static const PIIX_MAP_DATA_BUFFER TolapaiMapDataBuffer = { 
+    .Mask   = 0x03,
+    .Pe     = 0x03,
+    .Map    ={
+        {P0, NA, P1, NA},
+        {RV, RV, RV, RV},
+        {RV, RV, RV, RV},
+        {RV, RV, RV, RV},
+    },
+};
+
+UNUSED static PCI_PIIX_ENABLE_BITS Bits[]{
+    {0x41, 1, 0x80, 0x80},
+    {0x41, 1, 0x80, 0x80},
+};
+
+typedef struct _ICH_LAPTOP_DEVICE{
+    uint16_t DeviceID;
+    uint16_t SubVendorID;
+    uint16_t SubDeviceID;
+}ICH_LAPTOP_DEVICE, * PICH_LAPTOP_DEVICE;
+
+#define SUPPORTED_ICH_LAPTOPS 15
+
+static const ICH_LAPTOP_DEVICE IchLaptops[SUPPORTED_ICH_LAPTOPS] = {
+    {0x27DF, 0x0005, 0x0280},
+    {0x27DF, 0x1025, 0x0102},
+    {0x27DF, 0x1025, 0x0110},
+    {0x27DF, 0x1028, 0x02B0},
+    {0x27DF, 0x1043, 0x1267},
+    {0x27DF, 0x103C, 0x30A1},
+    {0x27DF, 0x103C, 0x361A},
+    {0x27DF, 0x1071, 0xD221},
+    {0x27DF, 0x152D, 0x0778},
+    {0x24CA, 0x1025, 0x0061},
+    {0x24CA, 0x1025, 0x003D},
+    {0x24CA, 0x10Cf, 0x11AB},
+    {0x266F, 0x1025, 0x0066},
+    {0x2653, 0x1043, 0x82D8},
+    {0x27DF, 0x1043, 0x900E},
 };
 
 bool IsDeviceCompatible(PPCI_COMMON_CONFIG CommonConfig, uint8_t ProprietaryID){
