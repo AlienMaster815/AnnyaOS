@@ -1,6 +1,13 @@
 #ifndef _LOUQS_H
 #define _LOUQS_H
 #pragma pack(push, 1)
+
+#ifdef __cplusplus
+#include <LouDDK.h>
+extern "C" {
+#else 
+#include <LouAPI.h>
+#endif
  
 typedef struct  _LOUQ{
     void* QueueData;
@@ -32,8 +39,14 @@ typedef struct  _LOUQ_INTEFACE{
     PLOUQ InFront;
 }LOUQ_INTEFACE, *PLOUQ_INTEFACE;
 
-
+typedef struct _LOUQ_COMPLETION{
+    ListHeader      Neighbors;
+    void*           CompletedDataStructure;
+}LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
 #pragma pack(pop)
 
+#ifdef __cplusplus
+}
+#endif
 #endif 

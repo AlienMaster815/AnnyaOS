@@ -527,6 +527,7 @@ void LouCALL(
 #endif
 #endif
 
+//Original Great 18
 #define LOUVMALLOC          0
 #define LOUCREATETHREAD     1
 #define LOURESETMONITOR     2
@@ -545,6 +546,45 @@ void LouCALL(
 #define LOUUPDATEBUTTON     16
 #define LOUVFREE            17
 #define LOUDESTROYTHREAD    18
+
+//User System Calls
+#define LOU_KE_ISCSI_CREATE_SESSION             19
+#define LOU_KE_ISCSI_DESTROY_SESSION            20
+#define LOU_KE_ISCSI_CREATE_CONNECTION          21
+#define LOU_KE_ISCSI_DESTORY_CONNECTION         22
+#define LOU_KE_ISCSI_BIND_CONNECTION            23
+#define LOU_KE_ISCSI_SET_PARAMETER              24
+#define LOU_KE_ISCSI_START_CONNECTION           25
+#define LOU_KE_ISCSI_STOP_CONNECTION            26
+#define LOU_KE_ISCSI_SEND_PDU                   27
+#define LOU_KE_ISCSI_GET_STATUS                 28
+#define LOU_KE_ISCSI_GET_PARAMETER              29
+#define LOU_KE_ISCSI_TRANSPORT_EP_CONNECT       30
+#define LOU_KE_ISCSI_TRANSPORT_EP_POLL          31
+#define LOU_KE_ISCSI_TRANSPORT_EP_DISCONNECT    32
+#define LOU_KE_ISCSI_TARGET_DISCOVER            33
+#define LOU_KE_ISCSI_SET_HOST_PARAMETER         34
+#define LOU_KE_ISCSI_UNBIND_SESSION             35
+#define LOU_KE_ISCSI_CREATE_BOUND_SESSION       36
+#define LOU_KE_ISCSI_TRANSPORT_EP_CONNECTION_TH 37
+#define LOU_KE_ISCSI_PATH_UPDATE                38
+#define LOU_KE_ISCSI_SET_INTERFACE_PARAMETERS   39
+#define LOU_KE_ISCSI_PING                       40
+#define LOU_KE_ISCSI_GET_CHAP                   41
+#define LOU_KE_ISCSI_DELETE_CHAP                42
+#define LOU_KE_ISCSI_SET_FLASHNODE_PRAMETERS    43
+#define LOU_KE_ISCSI_NEW_FLASHNODE              44
+#define LOU_KE_ISCSI_DELETE_FLASHNODE           45
+#define LOU_KE_ISCSI_LOGIN_FLASHNODE            46
+#define LOU_KE_ISCSI_LOGOUT_FLASHNODE           47
+#define LOU_KE_ISCSI_LOGOUT_FLASHNODE_SID       48
+#define LOU_KE_ISCSI_SET_CHAP                   49
+#define LOU_KE_ISCSI_GET_HOST_STATUS            50
+#define LOU_KE_ISCSI_DESTROY_SESSION_ASYNC      51
+
+//Kernel SystemCalls
+
+
 
 
 #endif
