@@ -43,9 +43,9 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     DELAYED_FUNCTION                HotplugTask;
     DELAYED_FUNCTION                ScsiRescanTask;
     unsigned int                    HsmTaskState;
-    ListHeader                      EhDoneQueue;
-    LOUQ_WAIT                       EhWaitQueue;
-    int                             EhTries;
+    ListHeader                      IoStackDoneQueue;
+    LOUQ_WAIT                       IoStackWaitQueue;
+    int                             IoStackTries;
     //LOUQ_COMPLETION               ParkRequestPending;
     //POWER_MANAGEMENT_MESSAGE      PowerMessgae
     uint32_t                        LpmPolicy;

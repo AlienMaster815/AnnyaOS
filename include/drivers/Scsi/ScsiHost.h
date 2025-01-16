@@ -32,9 +32,9 @@ typedef unsigned long long uint64_t;
 #define MODE_INITIATOR          0x01
 #define MODE_TARGET             0x02
 
-#define SCSI_EH_DONE            0
-#define SCSI_EH_RESET_TIMER     1
-#define SCSI_EH_NOT_HANDLED     2
+#define SCSI_IO_STACK_REQUEST_DONE          0
+#define SCSI_IO_STACK_REQUEST_RESET_TIMER   1
+#define SCSI_IO_STACK_REQUEST_NOT_HANDLED   2
 
 #define SCSI_HOST_STATE_CREATED             1
 #define SCSI_HOST_STATE_RUNNING             2
@@ -67,10 +67,10 @@ typedef struct _LOUSINE_SCSI_HOST{
     spinlock_t          DeviceLock;
     spinlock_t*         HostLock;
     mutex_t             ScanningMutex;
-    ListHeader          EhAbortList;
-    ListHeader          EhCommandList;
+    ListHeader          IoStackAbortList;
+    ListHeader          IoStackCommandList;
     uint32_t            (*ErrorHandler)(void* ErrorHandleingData);
-    PLOUQ_COMPLETION    EhAction;
+    PLOUQ_COMPLETION    IoStackAction;
     LOUQ_WAIT           HostWait;
     
 }LOUSINE_SCSI_HOST, * PLOUSINE_SCSI_HOST;

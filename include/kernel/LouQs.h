@@ -44,6 +44,11 @@ typedef struct _LOUQ_COMPLETION{
     void*           CompletedDataStructure;
 }LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
+typedef struct _LOUQ_REQUEST{
+    LOUQ    LouQHeader;
+    void*   RequestData;
+}LOUQ_REQUEST, * PLOUQ_REQUEST;
+
 #pragma pack(pop)
 
 #ifdef __cplusplus

@@ -106,5 +106,8 @@ typedef struct _DELAYED_FUNCTION{
     void*   WorkData;
 }DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 
+typedef int         LOU_TOKEN;
+typedef uint64_t    COUNTER;
+
 #pragma pack(pop)
 #endif
