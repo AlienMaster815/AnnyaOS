@@ -223,6 +223,36 @@ uint8_t GetDeviceListNumber(PPCI_COMMON_CONFIG CommonConfig){
     return DEVICE_LIST_MEMBERS;
 }
 
+int PiixPortStart(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort){
+    if(!(AtaPort->AtaFlags & PIIX_FLAG_PIO16)){
+        AtaPort->AtaPFlags |= ATA_PFLAG_PIO32 | ATA_PFLAG_PIO32_CHANGE;
+    }
+    return AtaBmdaPortStart(AtaPort);
+}
+
+int IchPataCableDetect(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort){
+    P_PCI_DEVICE_OBJECT PDEV = AtaPort->PDEV;
+    PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig; 
+    PPIIX_HOST_PRIVATE_DATA HostPrivate = (PPIIX_HOST_PRIVATE_DATA)AtaPort->PrivateExtendedData;
+    uint8_t Mask, Index;
+    for(Index = 0 ; Index < SUPPORTED_ICH_LAPTOPS; Index++){
+        if(
+            IchLaptops[Index].DeviceID == CommonConfig->Header.DeviceID && 
+            IchLaptops[Index].SubVendorID == CommonConfig->Header.u.type0.SubVendorID && 
+            IchLaptops[Index].SubDeviceID == CommonConfig->Header.u.type0.SubSystemID
+        ){
+            return ATA_CABLE_TYPE_PATA40_SHORT;
+        }
+    }
+    Mask = AtaPort->PortNumber == 0 ? PIIX_80C_PRIMARY : PIIX_80C_SECONDARY;
+    if((HostPrivate->SavedIocConfig & Mask) == 0){
+        return ATA_CABLE_TYPE_PATA40;
+    }
+    return ATA_CABLE_TYPE_PATA80;
+}
+
+//538
+
 LOUSTATUS ProbePiixDevice(P_PCI_DEVICE_OBJECT PDEV){
     
     PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
