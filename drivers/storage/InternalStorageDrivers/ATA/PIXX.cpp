@@ -251,7 +251,6 @@ int IchPataCableDetect(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort){
     return ATA_CABLE_TYPE_PATA80;
 }
 
-//538
 
 LOUSTATUS ProbePiixDevice(P_PCI_DEVICE_OBJECT PDEV){
     
