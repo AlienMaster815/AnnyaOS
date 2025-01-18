@@ -68,7 +68,7 @@ extern "C" {
 #define UNIVERSAL_ATA_ID_WWN                    108
 #define UNIVERSAL_ATA_ID_LOGICAL_SECTOR_SIZE    117
 #define UNIVERSAL_ATA_ID_COMMAND_SET_3          119
-#define UNIVERSAL_ATA_ID_COMMAND_SET_5          120
+#define UNIVERSAL_ATA_ID_COMMAND_SET_4          120
 #define UNIVERSAL_ATA_ID_LAST_LUN               126
 #define UNIVERSAL_ATA_ID_DLF                    128
 #define UNIVERSAL_ATA_ID_CSFO                   129
@@ -337,7 +337,81 @@ extern "C" {
 #define XFER_UDMA2                                              0x42
 #define XFER_UDMA1                                              0x41
 #define XFER_UDMA0                                              0x40
+#define XFER_MW_UDMA4                                           0x24
+#define XFER_MW_UDMA3                                           0x23
+#define XFER_MW_UDMA2                                           0x22
+#define XFER_MW_UDMA1                                           0x21
+#define XFER_MW_UDMA0                                           0x20
+#define XFER_SW_DMA2                                            0x12
+#define XFER_SW_DMA1                                            0x11
+#define XFER_SW_DMA0                                            0x10
+#define XFER_PIO6                                               0x0E
+#define XFER_PIO5                                               0x0D
+#define XFER_PIO4                                               0x0C
+#define XFER_PIO3                                               0x0B
+#define XFER_PIO2                                               0x0A
+#define XFER_PIO1                                               0x09
+#define XFER_PIO0                                               0x08
+#define XFER_PIO_SLOW                                           0x00
+#define SET_FEATURES_WRITE_CACHE_ENABLE                         0x02
+#define SET_FEATURES_WRITE_CACHE_DISABLE                        0x82
+#define SET_FEATURES_READ_AHEAD_ENABLE                          0xAA
+#define SET_FEATURES_READ_AHEAD_DISABLE                         0x55
+#define SET_FEATURES_AAM_ENABLE                                 0x42
+#define SET_FEATURES_AAM_DISABLE                                0xC2
+#define SET_FEATURES_SPINUP                                     0x07
+#define SET_FEATURES_SPINUP_TIMEOUT                             30000
+#define SET_FEATURES_SATA_ENABLE                                0x10
+#define SET_FEATURES_SATA_DISABLE                               0x90
+#define SET_FEATURES_CDL                                        0x0D
+#define SATA_FPDMA_OFFSET                                       0x01
+#define SATA_FPDMA_AA                                           0x02
+#define SATA_DIPM                                               0x03
+#define SATA_FPDMA_IN_ORDER                                     0x04
+#define SATA_AN                                                 0x05
+#define SATA_SSP                                                0x06
+#define SATA_DEVSLP                                             0x09
+#define SET_FEATURES_SENCT_DATA                                 0xC3
+#define SET_FEATURES_SENCT_DATA_SUCCESSFULL_NCQ                 0xC4
+#define UNIVERSAL_ATA_MAX_ADDRESS                               0x00
+#define UNIVERSAL_ATA_MAX_PASWORD                               0x01
+#define UNIVERSAL_ATA_MAX_LOCK                                  0x02
+#define UNIVERSAL_ATA_MAX_UNLOCK                                0x03    
+#define UNIVERSAL_ATA_MAX_FREEZE_LOCK                           0x04
+#define UNIVERSAL_ATA_MAX_PASSWORD_DMA                          0x05
+#define UNIVERSAL_ATA_MAX_UNLOCK_DMA                            0x06
+#define UNIVERSAL_ATA_DEVICE_CONFIGURE_OVERLAY_RESTORE          0xC0
+#define UNIVERSAL_ATA_DEVICE_CONFIGURE_OVERLAY_FREEZE_LOCK      0xC1
+#define UNIVERSAL_ATA_DEVICE_CONFIGURE_OVERLAY_IDENTIFY         0xC2
+#define UNIVERSAL_ATA_DEVICE_CONFIGURE_OVERLAY_SET              0xC3
+#define UNIVERSAL_ATA_SMART_ENABLE                              0xD8
+#define UNIVERSAL_ATA_SMART_READ_VALUES                         0xD0
+#define UNIVERSAL_ATA_SMART_READ_THRESHOLD                      0xD1
+#define UNIVERSAL_ATA_DSM_TRIM                                  0x01
+#define UNIVERSAL_ATA_SMART_LBAM_PASS                           0x4F
+#define UNIVERSAL_ATA_SMART_LBAH_PASS                           0xC2
+#define UNIVERSAL_ATAPI_PACKET_DMA                              1
+#define UNIVERSAL_ATAPI_DMA_DIRECTORY                           1 << 2
+#define UNIVERSAL_ATAPI_COMMAND_DATA_BUFFER_LENGTH              16
+#define SATA_PMP_MAX_PORTS                                      15
+#define SATA_PMP_CONTROL_PORTS                                  15
+#define SATA_PMP_GSCR_DWORDS                                    128
+#define SATA_PMP_GSCR_PRODUCT_ID                                0
+#define SATA_PMP_GSCR_REVISION                                  1
+#define SATA_PMP_GSCR_PORT_INFORMATION                          2
+#define SATA_PMP_GSCR_ERROR                                     32
+#define SATA_PMP_GSCR_ERROR_ENABLE                              33
+#define SATA_PMP_GSCR_FEATURE                                   64
+#define SATA_PMP_GSCR_FEATURE_ENABLE                            96
 
+#define SATA_PMP_PSCR_STATUS                                    0
+#define SATA_PMP_PSCR_ERROR                                     1
+#define SATA_PMP_PSCR_CONTROL                                   2
+
+#define SATA_PMP_FEATURE_BIST                                   1
+#define SATA_PMP_FEATURE_PM_REQUIRED                            1 << 1
+#define SATA_PMP_FEATURE_DYNSSC                                 1 << 2
+#define SATA_PMP_FEATURE_NOTIFY                                 1 << 3
 
 #define ATA_CABLE_TYPE_NONE                     0
 #define ATA_CABLE_TYPE_PATA40                   1
@@ -346,6 +420,264 @@ extern "C" {
 #define ATA_CABLE_TYPE_PATA40_UNKONW            4
 #define ATA_CABLE_TYPE_PATA40_IGNORE_CABLE      5
 #define ATA_CABLE_TYPE_PATA40_SATA              6
+
+#define SATA_STATUS_CONTROL_STATUS              0
+#define SATA_STATUS_CONTROL_ERROR               1
+#define SATA_STATUS_CONTROL_CONTROL             2
+#define SATA_STATUS_CONTROL_ACTIVE              3
+#define SATA_STATUS_CONTROL_NOTIFICATION        4
+
+#define UNIVERSAL_ATA_SEVERITY_DATA_RECOVERED               1 << 0
+#define UNIVERSAL_ATA_SEVERITY_COMM_RECOVERED               1 << 1
+#define UNIVERSAL_ATA_SEVERITY_DATA                         1 << 8
+#define UNIVERSAL_ATA_SEVERITY_PERSISTANT                   1 << 9
+#define UNIVERSAL_ATA_SEVERITY_PROTOCOL                     1 << 10
+#define UNIVERSAL_ATA_SEVERITY_INTERNAL                     1 << 11
+#define UNIVERSAL_ATA_SEVERITY_PHT_READY                    1 << 16
+#define UNIVERSAL_ATA_SEVERITY_PHY_INTERNAL                 1 << 17
+#define UNIVERSAL_ATA_SEVERITY_COMM_WAKE                    1 << 18
+#define UNIVERSAL_ATA_SEVERITY_10B_8B_ERORO                 1 << 19
+#define UNIVERSAL_ATA_SEVERITY_DISPARITY                    1 << 20
+#define UNIVERSAL_ATA_SEVERITY_CRC                          1 << 21
+#define UNIVERSAL_ATA_SEVERITY_HANDSHAKE                    1 << 22
+#define UNIVERSAL_ATA_SEVERITY_LINK_SEQUENCE_ERROR          1 << 23
+#define UNIVERSAL_ATA_SEVERITY_TRANSPORT_STATE_ERROR        1 << 24
+#define UNIVERSAL_ATA_SEVERITY_UNRECOGNIZED_FIS             1 << 25
+#define UNIVERSAL_ATA_SEVERITY_DEVICE_EXCHANGE              1 << 26
+
+#define UNIVERSAL_ATA_PROTOCOL_FLAGS_PIO                    1
+#define UNIVERSAL_ATA_PROTOCOL_FLAGS_DMA                    1 << 1
+#define UNIVERSAL_ATA_PROTOCOL_FLAGS_NCQ                    1 << 2
+#define UNIVERSAL_ATA_PROTOCOL_FLAGS_ATAPI                  1 << 3
+#define UNIVERSAL_ATA_PROTOCOL_UNKOWN                       (uint8_t)-1
+#define UNIVERSAL_ATA_PROTOCOL_NO_DATA                      0
+#define UNIVERSAL_ATA_PROTOCOL_PIO                          UNIVERSAL_ATA_PROTOCOL_FLAGS_PIO
+#define UNIVERSAL_ATA_PROTOCOL_DMA                          UNIVERSAL_ATA_PROTOCOL_DMA
+#define UNIVERSAL_ATA_PROTOCOL_NCQ_NO_DATA                  UNIVERSAL_ATA_PROTOCOL_FLAGS_NCQ
+#define UNIVERSAL_ATA_PROTOCOL_NCQ                          UNIVERSAL_ATA_PROTOCOL_DMA | UNIVERSAL_ATA_PROTOCOL_FLAGS_NCQ
+#define UNIVERSAL_ATAPI_PROTOCOL_NO_DATA                    UNIVERSAL_ATA_PROTOCOL_FLAGS_ATAPI
+#define UNIVERSAL_ATAPI_PROTOCOL_PIO                        UNIVERSAL_ATA_PROTOCOL_FLAGS_ATAPI | UNIVERSAL_ATA_PROTOCOL_FLAGS_PIO
+#define UNIVERSAL_ATAPI_PROTOCOL_DMA                        UNIVERSAL_ATA_PROTOCOL_FLAGS_ATAPI | UNIVERSAL_ATA_PROTOCOL_DMA
+
+#define UNIVERSAL_ATA_IO_CONTROL_GET_IO32                   0x309
+#define UNIVERSAL_ATA_IO_CONTROL_SET_IO32                   0x324
+
+typedef struct _ATA_BMDMA_PRD{
+    uint32_t    Address;
+    uint32_t    FlagsAndLength;
+}ATA_BMDMA_PRD, * PATA_BMDMA_PRD;
+
+#define IsAtaIdentifcatiionAta(Identification)                              (((Identification)[UNIVERSAL_ATA_ID_CONFIGURATION] & (1 << 15)) == 0)
+#define DoesAtaIdentificationHaveLba(Identification)                        ((Identification)[UNIVERSAL_ATA_ID_CAPABILITIES] & (1 << 9))
+#define DoesAtaIdentificationHaveDma(Identification)                        ((Identification)[UNIVERSAL_ATA_ID_CAPABILITIES] & (1 << 8))
+#define DoesAtaIdentificationHaveNcq(Identification)                        ((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] & (1 << 8))
+#define AtaIdentificationGetQueueDepth(Identification)                      (((Identification)[UNIVERSAL_ATA_ID_QUEUE_DEPTH]  & 0x1F) + 1)
+#define DoesAtaIdentificationAllowDeviceRemoval(Identification)             ((Identification)[UNIVERSAL_ATA_ID_CONFIGURATION] & (1 << 7))
+#define DoesAtaIdnetificationHaveAtapi(Identification)                      ((((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0x0000) && ((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0xFFFF)) && ((Identification)[UNIVERSAL_ATA_ID_FEATURE_SUPPORT] & (1 << 5)))
+#define DoesAtaIdnetificationHaveFpDmaAa(Identification)                    ((((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0x0000) && ((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0xFFFF)) && ((Identification)[UNIVERSAL_ATA_ID_FEATURE_SUPPORT] & (1 << 2)))
+#define DoesAtaIdnetificationHaveDevslp(Identification)                     ((((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0x0000) && ((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0xFFFF)) && ((Identification)[UNIVERSAL_ATA_ID_FEATURE_SUPPORT] & (1 << 8)))
+#define DoesAtaIdnetificationHaveNcqAutosence(Identification)               ((((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0x0000) && ((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0xFFFF)) && ((Identification)[UNIVERSAL_ATA_ID_FEATURE_SUPPORT] & (1 << 7)))
+#define DoesAtaIdnetificationHaveDipm(Identification)                       ((((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0x0000) && ((Identification)[UNIVERSAL_ATA_ID_SATA_CAPABLE] != 0xFFFF)) && ((Identification)[UNIVERSAL_ATA_ID_FEATURE_SUPPORT] & (1 << 3)))
+#define IsAtaIdentificationIoReadyDisable(Identification)                   ((Identification)[UNIVERSAL_ATA_ID_CAPABILITIES] & (1 << 10))
+#define DoesAtaIdentificationHaveIoReady(Identification)                    ((Identification)[UNIVERSAL_ATA_ID_CAPABILITIES] & (1 << 11))
+#define AtaIdentification32Bit(Identification,Offset)                       (((uint32_t)(Identification)[(Offset) + 1] << 16) | ((uint32_t)(Identification)[Offset]))
+#define AtaIdentification64Bit(Identification,Offset)                       (((uint64_t)(Identification)[(Offset) + 3] << 48) | ((uint64_t)(Identification)[(Offset) + 2] << 32) | ((uint64_t)(Identification)[(Offset) + 1] << 16) | ((uint64_t)(Identification)[Offset]))
+#define DoesAtaIdentificationHaveCommandCompletionInterrupt(Identification) (((Identification)[UNIVERSAL_ATA_ID_CONFIGURATION] & 0x60) == 0x20)
+#define DoesAtaIdentificationHaveDataAttention(Identification)              ((Identification)[UNIVERSAL_ATA_ID_SATA2_CAPABLE] & (1 << 4))
+
+static inline bool DoesAtaIdentificationHaveHipm(uint16_t* Identification){
+    uint16_t Result = Identification[UNIVERSAL_ATA_ID_CAPABILITIES];
+
+    if((Result == 0) || (Result == 0xFFFF)){
+        return false;
+    }
+
+    return (Result & (1 << 9));
+}
+
+static inline bool DoesAtaIdentificationHaveFua(uint16_t* Identification){
+    uint16_t Result = Identification[UNIVERSAL_ATA_ID_CFSSE];
+    if((Result & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Result & (1 << 6));
+}
+
+static inline bool DoesAtaIdentificationHaveFlush(uint16_t* Identification){
+    uint16_t Result = Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2];
+    if((Result & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Result & (1 << 12));
+}
+
+static inline bool DoesAtaIdentificationHaveFlushExt(uint16_t* Identification){
+    uint16_t Result = Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2];
+    if((Result & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Result & (1 << 13));
+}
+
+static inline uint32_t GetAtaIdentificationLogicalSectorSize(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_SECTOR_SIZE] & 0xD000) == 0x5000){
+        return (((Identification[UNIVERSAL_ATA_ID_LOGICAL_SECTOR_SIZE+1] << 16) + Identification[UNIVERSAL_ATA_ID_LOGICAL_SECTOR_SIZE]) * sizeof(uint16_t));
+    }
+    return UNIVERSAL_ATA_SECTOR_SIZE;
+}
+
+static inline uint8_t AtaIdentificationLog2PerPhysicalSector(uint16_t* Identification){
+    uint16_t Result = Identification[UNIVERSAL_ATA_ID_SECTOR_SIZE];
+    if((Result & 0xE000) == 0x6000){
+        return Result & 0x0F;
+    }
+    return 0;
+}
+
+static inline uint16_t GetAtaIdentificationLogicalSectorOffset(uint16_t* Identification, uint8_t Log2PerPhysical){
+    uint16_t Word209 = Identification[209];
+    if((Log2PerPhysical > 1) && (Word209 & 0xC000) == 0x4000){
+        uint16_t FirstSector = (Word209 & 0x3FFF);
+        if(FirstSector > 0){
+            return ((1 << Log2PerPhysical) - FirstSector);
+        }
+    }
+    return 0;
+}
+
+static inline bool DoesAtaIdentificationHaveLba48(uint16_t* Identification){
+    uint16_t CommandSet2 = Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2];
+    if((CommandSet2 & 0xC000) != 0x4000){
+        return false;
+    }
+    if(!AtaIdentification64Bit(Identification, UNIVERSAL_ATA_ID_LBA_CAPACITY_2)){
+        return false;
+    }
+    return (CommandSet2 & (1 << 10));
+}
+
+static inline bool IsAtaIdentificationHpaEnabled(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2] & 0xC000) != 0x4000){
+        return false;
+    }
+    if((Identification[UNIVERSAL_ATA_ID_CSF_DEFAULT] & 0xC000) != 0x4000){
+        return false;
+    }
+    if((Identification[UNIVERSAL_ATA_ID_CFS_ENABLE_1] & (1 << 10)) == 0){
+        return false;
+    } 
+    return (Identification[UNIVERSAL_ATA_ID_COMMAND_SET_1] & (1 << 10));
+}
+
+static inline bool DoesAtaIdentificationHaveWCache(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2] & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_COMMAND_SET_1] & (1 << 5));
+}
+
+static inline bool DoesAtaIdentificationHavePowerManagement(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2] & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_COMMAND_SET_1] & (1 << 3));
+}
+
+static inline bool IsAtaIdentificationReadAheadEnabled(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_CSF_DEFAULT] & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_CFS_ENABLE_1] & (1 << 6));
+}
+
+static inline bool AtaIdentificationWCacheEnabled(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_CSF_DEFAULT] & 0xC000) != 0x4000){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_CFS_ENABLE_1] & (1 << 5));
+}
+
+static inline bool DoesAtaIdentificationHaveLogDmaExt(uint16_t* Identification){
+    if(!(Identification[UNIVERSAL_ATA_ID_CFS_ENABLE_2] & (1 << 15))){
+        return false;
+    }
+    if(((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_3] & 0xC008) == 0x4008) || ((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_4] & 0xC008) == 0x4008)){
+        return true;
+    }
+    return false;
+}
+
+static inline bool DoesAtaIdentificationHaveSenceReporting(uint16_t* Identification){
+    if(!(Identification[UNIVERSAL_ATA_ID_CFS_ENABLE_2] & (1 << 15))){
+        return false;
+    }
+    if((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_3] & ((1 << 15) | (1 << 14))) != (1 << 14)){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_COMMAND_SET_3] & (1 << 6));
+}
+
+static inline bool IsAtaIdentificationSenceReportingEnabled(uint16_t* Identification){
+    if(!IsAtaIdentificationSenceReportingEnabled(Identification)){
+        return false;
+    }
+    if((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_4] & ((1 << 15) | (1 << 14))) != (1 << 14)){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_COMMAND_SET_4] & (1 << 6));
+}
+
+static inline bool AtaIdentificationSctDataTable(uint16_t* Identification){
+    return ((Identification[UNIVERSAL_ATA_ID_SCT_COMMAND_XPORT] & (1 << 5)) ? true : false);
+}
+
+static inline bool AtaIdentificationSctFeaturesControl(uint16_t* Identification){
+    return ((Identification[UNIVERSAL_ATA_ID_SCT_COMMAND_XPORT] & (1 << 4)) ? true : false);
+}
+
+static inline bool AtaIdentificationSctErrorRecoveryControl(uint16_t* Identification){
+    return ((Identification[UNIVERSAL_ATA_ID_SCT_COMMAND_XPORT] & (1 << 1)) ? true : false);
+}
+
+static inline bool AtaIdentificationSctSupported(uint16_t* Identification){
+    return ((Identification[UNIVERSAL_ATA_ID_SCT_COMMAND_XPORT] & (1)) ? true : false);
+}
+
+static uint32_t AtaIdentificationGetMajorVersion(uint16_t* Identification){
+    uint32_t Version;
+    if(Identification[UNIVERSAL_ATA_ID_MAJOR_VERSION] == 0xFFFF){
+        return 0;
+    }
+    for(Version = 14; Version >= 1; Version--){
+        if(Identification[UNIVERSAL_ATA_ID_MAJOR_VERSION] & (1 << Version)){
+            break;
+        }
+    }
+    return Version;
+}
+
+static inline bool DoeAtaIdentificationHaveSata(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_HARWARE_CONFIGURATION] == 0) && ((uint16_t)Identification[UNIVERSAL_ATA_ID_MAJOR_VERSION] > 0x20)){
+        return true;
+    }
+    return false;
+}
+
+static inline bool DoesAtaIdentificationHaveDwordIo(uint16_t* Identification){
+    if(AtaIdentificationGetMajorVersion(Identification) > 7){
+        return false;
+    }
+    return (Identification[UNIVERSAL_ATA_ID_DWORD_IO] & (1 << 0));
+}
+
+static inline bool DoesAtaIdentificationHaveTrust(uint16_t* Identification){
+    if((AtaIdentificationGetMajorVersion(Identification) >= 7) && ((Identification[UNIVERSAL_ATA_ID_CFSSE] & 0xC000) ==  0x4000) && (Identification[UNIVERSAL_ATA_ID_CFSSE] & (1 << 13))){
+        return true;
+    }
+    return false;
+}
+
+
 
 #define ATA_PFLAG_IO_REQUEST_PENDING            1
 #define ATA_PFLAG_IO_REQUEST_IN_PROGGRESS       1 << 1
@@ -396,8 +728,6 @@ extern "C" {
 
 #define ATA_IRQ_1 14
 #define ATA_IRQ_2 15
-
-
 
 struct _ATA_QUEUED_COMMAND;
 
