@@ -272,10 +272,72 @@ extern "C" {
 
 #define ATA_COMMAND_RESTORE                     0x10
 
-#define ATA_SUB_COMMAND_FPDMA_RECOVERY_RD_LOG_DMA_EXT   0x01
-#define ATA_SUB_COMMAND_FPDMA_ZAC_MANAGEMENT_IN         0x02
+#define ATA_SUB_COMMAND_FPDMA_RECIVE_RD_LOG_DMA_EXT             0x01
+#define ATA_SUB_COMMAND_FPDMA_RECIEV_ZAC_MANAGEMENT_IN          0x02
 
-//#define ATA_SUB_COMMAND_
+#define ATA_SUB_COMMAND_FPDMA_SEND_DSM                          0x00
+#define ATA_SUB_COMMAND_FPDMA_SEND_WR_LOG_DMA_EXT               0x02
+
+#define ATA_SUB_COMMAND_NCQ_NON_DATA_ABORT_QUEUE                0x00
+#define ATA_SUB_COMMAND_NCQ_NON_DATA_SET_FEATURES               0x05
+#define ATA_SUB_COMMAND_NCQ_NON_DATA_ZERO_EXT                   0x06
+#define ATA_SUB_COMMAND_NCQ_NON_DATA_ZAC_MANAGEMENT_OUT         0x07
+
+#define ATA_SUB_COMMAND_ZAC_MANAGEMENT_IN_REPORT_ZONES          0x00
+#define ATA_SUB_COMMAND_ZAC_MANAGEMENT_OUT_CLOSED_ZONE          0x01
+#define ATA_SUB_COMMAND_ZAC_MANAGEMENT_OUT_FINISH_ZONE          0x02
+#define ATA_SUB_COMMAND_ZAC_MANAGEMENT_OUT_OPEN_ZONE            0x03
+#define ATA_SUB_COMMAND_ZAC_MANAGEMENT_OUT_RESET_WRITE_POINTER  0x04
+
+#define UNIVERSAL_ATA_LOG_DIRECTORY                             0x00
+#define UNIVERSAL_ATA_LOG_SATA_NCQ                              0x10
+#define UNIVERSAL_ATA_LOG_NCQ_NON_DATA                          0x12
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV                         0x13
+#define UNIVERSAL_ATA_LOG_CDL                                   0x18
+#define UNIVERSAL_ATA_LOG_CDL_SIZE                              UNIVERSAL_ATA_SECTOR_SIZE
+#define UNIVERSAL_ATA_LOG_IDENTIFY_DEVICE                       0x30
+#define UNIVERSAL_ATA_LOG_SENCE_NCQ                             0x0F
+#define UNIVERSAL_ATA_LOG_SENCE_NCQ_SIZE                        UNIVERSAL_ATA_SECTOR_SIZE * 2
+#define UNIVERSAL_ATA_LOG_CONCURRENT_POSITIONING_RANGES         0x47
+#define UNIVERSAL_ATA_LOG_SUPPORTED_CAPABILITES                 0x03
+#define UNIVERSAL_ATA_LOG_CURRENT_SETTINGS                      0x04
+#define UNIVERSAL_ATA_LOG_SECURITY                              0x06
+#define UNIVERSAL_ATA_LOG_SATA_SETTINGS                         0x08
+#define UNIVERSAL_ATA_LOG_ZONED_INFORMATION                     0x09
+#define UNIVERSAL_ATA_LOG_DEVSLP_OFFSET                         0x30
+#define UNIVERSAL_ATA_LOG_DEVSLP_SIZE                           0x08
+#define UNIVERSAL_ATA_LOG_DEVSLP_MDAT                           0x00
+#define UNIVERSAL_ATA_LOG_DEVSLP_MDAT_MASK                      0x1F
+#define UNIVERSAL_ATA_LOG_DEVSLP_DETO                           0x01
+#define UNIVERSAL_ATA_LOG_DEVSLP_VALID                          0x07
+#define UNIVERSAL_ATA_LOG_DEVSLP_VALID_MASK                     0x80
+#define UNIVERSAL_ATA_LOG_NCQ_PRIO_OFFSET                       0x09
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_SUB_COMMAND_OFFSET      0x00
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_SUB_COMMAND_DSM         1
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_DSM_OFFSET              0x04
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_DSM_TRIM                1
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_READ_LOG_OFFSET         0x08
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_READ_LOG_SUPPORTED      1
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_WRITE_LOG_OFFSET        0x0C
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_WRITE_LOG_SUPORTED      1
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_ZAC_MANAGEMENT_OFFSET   0x10
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_ZAC_MANAGEMENT_OUT_SUPPORTED    1
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_ZAC_MANAGEMENT_IN_SUPPORTED     1 << 1
+#define UNIVERSAL_ATA_LOG_NCQ_SEND_RECV_ZAC_SIZE                0x14
+#define ATA_OBSOLETE_COMMAND_READ_LONG                          0x22
+#define ATA_OBSOLETE_COMMAND_READ_LONG_ONCE                     0x23
+#define ATA_OBSOLETE_COMMAND_WRITE_LONG                         0x32
+#define ATA_OBSOLETE_COMMAND_WRITE_LONG_ONCE                    0x33
+#define SET_FEATURES_XFER                                       0x03
+#define XFER_UDMA7                                              0x47
+#define XFER_UDMA6                                              0x46
+#define XFER_UDMA5                                              0x45
+#define XFER_UDMA4                                              0x44
+#define XFER_UDMA3                                              0x43
+#define XFER_UDMA2                                              0x42
+#define XFER_UDMA1                                              0x41
+#define XFER_UDMA0                                              0x40
+
 
 #define ATA_CABLE_TYPE_NONE                     0
 #define ATA_CABLE_TYPE_PATA40                   1

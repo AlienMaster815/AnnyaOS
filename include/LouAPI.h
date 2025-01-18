@@ -33,7 +33,7 @@
 #include <kernel/threads.h>
 #include <kernel/LouQs.h>
 #include "drivers/Scsi/ScsiHost.h"
-#include "drivers/ata/ata.h"
+#include "drivers/ata.h"
 
 
 #define ACPIBUFFER 512
