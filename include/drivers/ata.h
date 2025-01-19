@@ -48,7 +48,7 @@ extern "C" {
 #define UNIVERSAL_ATA_ID_EIDE_DMA_TIME          66
 #define UNIVERSAL_ATA_ID_EIDE_PIO               67
 #define UNIVERSAL_ATA_ID_EIDE_PIO_IO_READY      68
-#define UNIVERSAL_ATA_ID_ADDITIONAL_SUPPLY      69
+#define UNIVERSAL_ATA_ID_ADDITIONAL_SUPPORT     69
 #define UNIVERSAL_ATA_ID_QUEUE_DEPTH            75
 #define UNIVERSAL_ATA_ID_SATA_CAPABLE           76
 #define UNIVERSAL_ATA_ID_SATA2_CAPABLE          77
@@ -671,11 +671,151 @@ static inline bool DoesAtaIdentificationHaveDwordIo(uint16_t* Identification){
 }
 
 static inline bool DoesAtaIdentificationHaveTrust(uint16_t* Identification){
-    if((AtaIdentificationGetMajorVersion(Identification) >= 7) && ((Identification[UNIVERSAL_ATA_ID_CFSSE] & 0xC000) ==  0x4000) && (Identification[UNIVERSAL_ATA_ID_CFSSE] & (1 << 13))){
+    if((AtaIdentificationGetMajorVersion(Identification) <= 7) && ((Identification[UNIVERSAL_ATA_ID_CFSSE] & 0xC000) ==  0x4000) && (Identification[UNIVERSAL_ATA_ID_CFSSE] & (1 << 13))){
         return true;
     }
     return false;
 }
+
+static inline bool DoesAtaIdentificationHaveUnloading(uint16_t* Identification){
+    if((AtaIdentificationGetMajorVersion(Identification) >= 7) && (Identification[UNIVERSAL_ATA_ID_CFSSE] & (1 << 13)) && (Identification[UNIVERSAL_ATA_ID_CFSSE] & 0xC000) == 0x4000){
+        return true;
+    }
+    return false;
+}
+
+static inline bool DoesAtaIdentificationHaveWwn(uint16_t* Identification){
+    return ((Identification[UNIVERSAL_ATA_ID_CSF_DEFAULT] & 0xC100) == 0x4100);
+}
+
+static inline int WhatAtaIdentificationFormFactor(uint16_t* Identification){
+    uint16_t Result = Identification[168];
+    if((AtaIdentificationGetMajorVersion(Identification) < 7) || (Result == 0) || (Result == 0xFFFF)){
+        return 0;
+    } 
+    Result &= 0x0F;
+    if(Result > 5){
+        return 0;
+    }
+    return Result;
+}
+
+static inline int WhatAtaIdentificationRotationRate(uint16_t* Identification){
+    uint16_t Result = Identification[217];
+    if((AtaIdentificationGetMajorVersion(Identification) < 7) || (Result == 0) || (Result == 0xFFFF)){
+        return 0;
+    }
+    if((Result > 1) && (Result < 0x401)){
+        return 0;
+    }
+    return Result;
+} 
+
+static inline bool DoesAtaIdentificationHaveNcqSendAndRecive(uint16_t* Identification){
+    return (Identification[UNIVERSAL_ATA_ID_SATA2_CAPABLE] & (1 << 6));
+}
+
+static inline bool DoesAtaIdentificationHaveNcqNonData(uint16_t* Identification){
+    return (Identification[UNIVERSAL_ATA_ID_SATA2_CAPABLE] & (1 << 5));
+}
+
+static inline bool DoesAtaIdentificationHaveNcqPriority(uint16_t* Identification){
+    return (Identification[UNIVERSAL_ATA_ID_SATA_CAPABLE] & (1 << 12));
+}
+
+static inline bool DoesAtaIdentificationHaveTrim(uint16_t* Identification){
+    if((AtaIdentificationGetMajorVersion(Identification) >= 7) && (Identification[UNIVERSAL_ATA_ID_DATA_SET_MANAGEMENT] & 0x01)){
+        return true;
+    }
+    return false;
+}
+
+static inline bool DoesAtaIdentificationHaveZeroAfterTrim(uint16_t* Identification){
+    if((DoesAtaIdentificationHaveTrim(Identification)) && ((Identification[UNIVERSAL_ATA_ID_ADDITIONAL_SUPPORT] & 0x4020) == 0x4020)){
+        return true;
+    }
+    return false;
+}
+
+static inline bool IsAtaIdentificationCurrentChecksumValid(uint16_t* Identification){
+    return ((Identification[UNIVERSAL_ATA_ID_FIELD_VALID] & 0x01) && (Identification[UNIVERSAL_ATA_ID_CURRENT_CYCLES]) && (Identification[UNIVERSAL_ATA_ID_CURRENT_HEADS]) && (Identification[UNIVERSAL_ATA_ID_CURRENT_HEADS] <= 0x0F) && (Identification[UNIVERSAL_ATA_ID_CURRENT_SECTORS]));
+}
+
+static inline bool IsAtaIdentificationCfa(uint16_t* Identification){
+    if((Identification[UNIVERSAL_ATA_ID_CONFIGURATION] == 0x848A) || (Identification[UNIVERSAL_ATA_ID_CONFIGURATION] == 0x844A)){
+        return true;
+    }
+    return ((Identification[UNIVERSAL_ATA_ID_COMMAND_SET_2] & 0xC004) == 0x4004);
+}
+
+static inline bool IsAtaIdentificationSsd(uint16_t* Identification){
+    return (Identification[UNIVERSAL_ATA_ID_ROTATION_SPEED] == 0x01);
+}
+
+static inline uint8_t IsAtaIdentificationZonedCap(uint16_t* Identification){
+    return (Identification[UNIVERSAL_ATA_ID_ADDITIONAL_SUPPORT] & 0x03);
+}
+
+static inline bool DoesAtaIdentificationNeedIoReady(uint16_t* Identification, uint8_t Pio){
+    if((Pio > 4) && (IsAtaIdentificationCfa(Identification))){
+        return false;
+    }
+    if(Pio > 2){
+        return true;
+    }
+    return DoesAtaIdentificationHaveIoReady(Identification);
+}
+
+static inline bool IsAtaDrive40Wire(uint16_t* DeviceIdentification){
+    if(DoeAtaIdentificationHaveSata(DeviceIdentification)){
+        return false;
+    }
+    if((DeviceIdentification[UNIVERSAL_ATA_ID_HARWARE_CONFIGURATION] & 0xE000) == 0x6000){
+        return false;
+    }
+    return true;
+}
+
+static inline bool IsAtaDrive40WireReleaxed(uint16_t* DeviceIdentification){
+    if((DeviceIdentification[UNIVERSAL_ATA_ID_HARWARE_CONFIGURATION] & 0x2000) == 0x2000){
+        return false;
+    }
+    return true;
+}
+
+static inline int AtapiCommandDataBufferLength(uint16_t* DeviceIdentification){
+    uint16_t Result = (DeviceIdentification[UNIVERSAL_ATA_ID_CONFIGURATION] & 0x03);
+    switch(Result){
+        case 0:     return 12;
+        case 1:     return 10;
+    }
+    return -1;
+}
+
+static inline int AtapiCommandPacketSet(uint16_t* DeviceIdentification){
+    return ((DeviceIdentification[UNIVERSAL_ATA_ID_CONFIGURATION] >> 8) & 0x1F);
+}
+
+static inline bool IdAtapiIdentificationGetDmaDirectory(uint16_t* DeviceIdentification){
+    return ((AtaIdentificationGetMajorVersion(DeviceIdentification) >= 7) && (DeviceIdentification[62] & 0x8000));
+}
+
+static inline bool AtaStatusOk(uint8_t Status){
+    return ((Status & (UNIVERSAL_ATA_BUSY | UNIVERSAL_ATA_DRDY | UNIVERSAL_ATA_DF | UNIVERSAL_ATA_DRQ | UNIVERSAL_ATA_ERROR)) == UNIVERSAL_ATA_DRDY);
+}
+
+static inline bool Lba28Ok(uint64_t Block, uint64_t BlockCount){
+    return (((Block + BlockCount - 1) < ((uint64_t)1 << 28)) && (BlockCount <= UNIVERSAL_ATA_MAX_SECTORS));
+}
+
+static inline bool Lba48Ok(uint64_t Block, uint64_t BlockCount){
+    return (((Block + BlockCount - 1) < ((uint64_t)1 << 48)) & (BlockCount <= UNIVERSAL_ATA_MAX_SECTORS_LBA_48));
+}
+
+#define SataPmpGscrVendorID(GSCR)   ((GSCR)[SATA_PMP_GSCR_PRODUCT_ID] & 0xFFFF)
+#define SataPmpGscrDeviceID(GSCR)   ((GSCR)[SATA_PMP_GSCR_PRODUCT_ID] >> 16)
+#define SataPmpGscrRevision(GSCR)   (((GSCR)[SATA_PMP_GSCR_REVISION] >> 8) & 0xFF)
+#define SataPmpGscrPortData(GSCR)   ((GSCR)[SATA_PMP_GSCR_PORT_INFORMATION] & 0x0F)
 
 
 
