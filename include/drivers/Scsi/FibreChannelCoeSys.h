@@ -16,6 +16,8 @@ extern "C" {
 #define FIBRE_CHANNEL_OE_CONTROLER_ENEABLED_STATE_DISABLED      1
 #define FIBRE_CHANNEL_OE_CONTROLER_ENEABLED_STATE_UNUSED        2
 
+
+
 typedef struct _FIBRE_CHANNEL_COTROLER_DEVICE{
     uint32_t                                        Identification;
     struct _FIBRE_CHANNEL_OE_FUNCTION_TEMPLATE*     SystemOperations;

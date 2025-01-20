@@ -166,6 +166,8 @@ void FindAnyHiddenUsbSystems();
 
 LOUSTATUS ProbePiixDevice(P_PCI_DEVICE_OBJECT PDEV);
 
+LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV);
+
 LOUDDK_API_ENTRY 
 LOUSTATUS LookForStorageDevices(){
     LouPrint("Scanning For Storage Devices\n");
@@ -191,8 +193,7 @@ LOUSTATUS LookForStorageDevices(){
             PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
 
             if(PConfig->Header.SubClass == 0x01){
-                //InitializeAtaDevice();
-                ProbePiixDevice(PDEV);
+                InitializeGenericAtaDevice(PDEV);
             }
 
             if((PConfig->Header.SubClass == 0x00) || (PConfig->Header.SubClass == 0x07)){

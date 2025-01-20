@@ -930,6 +930,7 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
 
 
 
+
 int AtaBmdaPortStart(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
 
 #ifdef __cplusplus

@@ -49,6 +49,12 @@ typedef struct _LOUQ_REQUEST{
     void*   RequestData;
 }LOUQ_REQUEST, * PLOUQ_REQUEST;
 
+typedef struct _LOUQ_LIMITS{
+    PLOUQ    LouQReference;
+    uint64_t NumberOfQues;
+    uint64_t OperationLimitFlags;
+}LOUQ_LIMITS, * PLOUQ_LIMITS;
+
 #pragma pack(pop)
 
 #ifdef __cplusplus
