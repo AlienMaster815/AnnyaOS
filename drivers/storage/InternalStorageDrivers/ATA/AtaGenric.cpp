@@ -40,15 +40,13 @@ LOUSTATUS AtaGenricPIOPrepCommand(
     if(QueuedCommand->PacketCommand){
         if(Port->CommandLengthFlags & (COMMAND_LENGTH_FLAG_LBA48)){
             COMMAND_WRITE_FEATURE_PORT_LBA48(QueuedCommand->DmaCommand ? 1 : 0); //Using operand for C++ Mangling
-            COMMAND_WRITE_LBAL_PORT_LBA48(0);
-            COMMAND_WRITE_LBAM_PORT_LBA48(2048 & 0xFF);
-            COMMAND_WRITE_LBAH_PORT_LBA48(2048 >> 8);
+            COMMAND_WRITE_LBAM_PORT_LBA48(QueuedCommand->Lbam & 0xFF);
+            COMMAND_WRITE_LBAH_PORT_LBA48(QueuedCommand->Lbah >> 8);
 
         }else{
             COMMAND_WRITE_FEATURE_PORT_LBA28(QueuedCommand->DmaCommand ? 1 : 0); //Using operand for C++ Mangling
-            COMMAND_WRITE_LBAL_PORT_LBA28(0);
-            COMMAND_WRITE_LBAM_PORT_LBA28(2048 & 0xFF);
-            COMMAND_WRITE_LBAH_PORT_LBA28(2048 >> 8);
+            COMMAND_WRITE_LBAM_PORT_LBA28(QueuedCommand->Lbam & 0xFF);
+            COMMAND_WRITE_LBAH_PORT_LBA28(QueuedCommand->Lbah >> 8);
         }
         LouPrint("Ata Generic Command Successfully preped\n");
         return STATUS_SUCCESS;
@@ -83,7 +81,22 @@ LOUSTATUS AtaGenricPIOIssueCommand(
     COMMAND_WRITE_COMMAND_PORT(QueuedCommand->Command);
     AtaIoWait400ns(ControlPort);
     if(QueuedCommand->PacketCommand){
-        COMMAND_WRITE_DATA_PORT_BUFFER(QueuedCommand->ScsiCommand, QueuedCommand->ScsiCommandLength / 2);
+        while (PollClock <= Port->PollTimer){
+            uint8_t Status = COMMAND_READ_SATUS_PORT;
+            if(Status & 0x01){
+                return STATUS_SUCCESS;
+            }
+            if(!(Status & 0x80) && (Status & 0x08)){
+                break;
+            }
+            sleep(100);
+            PollClock += 100;
+        }
+        AtaIoWait400ns(ControlPort);
+        PollClock = 0;
+        COMMAND_WRITE_DATA_PORT_BUFFER(&QueuedCommand->ScsiCommand[0], QueuedCommand->ScsiCommandLength / 2);
+        AtaIoWait400ns(ControlPort);
+        
         if(QueuedCommand->WriteCommand){
 
         }else{
@@ -102,32 +115,39 @@ LOUSTATUS AtaGenricPIOIssueCommand(
                 if(PollClock >= Port->PollTimer){
                     return STATUS_UNSUCCESSFUL;
                 }
-                COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)DataAddress), Port->SectorSize / 2);
+                uint16_t Size = COMMAND_READ_LBAL_PORT_LBA28 | (COMMAND_READ_LBAH_PORT_LBA28 << 8);
+                COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)DataAddress + ((uint64_t)i * Port->SectorSize)), Size / 2);
             }
         }
         AtaIoWait400ns(ControlPort);
+        QueuedCommand->CommandCompleted = true;
+        LouPrint("Packet Command Completed\n");
         return STATUS_SUCCESS;
     } 
     if(QueuedCommand->WriteCommand){
 
     }else{
-        while(PollClock <= Port->PollTimer){
-            uint8_t Status = COMMAND_READ_SATUS_PORT;
-            if(Status & 0x01){
+        for(uint32_t i = 0 ; i < QueuedCommand->SectorCount; i++){
+            while(PollClock <= Port->PollTimer){
+                uint8_t Status = COMMAND_READ_SATUS_PORT;
+                if(Status & 0x01){
+                    return STATUS_UNSUCCESSFUL;
+                }
+                if((!(Status & 0x80)) && (Status & 0x08)){
+                    break;
+                }
+                sleep(100);
+                PollClock += 100;
+            }
+            if(PollClock >= Port->PollTimer){
                 return STATUS_UNSUCCESSFUL;
             }
-            if(!(Status & 0x80) && (Status & 0x08)){
-                break;
-            }
-            sleep(100);
-            PollClock += 100;
+            COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)DataAddress + ((uint64_t)i * Port->SectorSize)), Port->SectorSize / 2);
         }
-        if(PollClock >= Port->PollTimer){
-            return STATUS_UNSUCCESSFUL;
-        }
-        COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)DataAddress), Port->SectorSize / 2);
     }
     AtaIoWait400ns(ControlPort);
+    QueuedCommand->CommandCompleted = true;
+    LouPrint("Standard Command Completed\n");
     return STATUS_SUCCESS;
 }
 

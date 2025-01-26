@@ -22,13 +22,6 @@ LouMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
     return NewHost;
 }
 
-void* ReadPata(uint8_t DriveNum, uint64_t LBA, uint64_t* BufferSize){
-    void* Buffer = LouMalloc(*BufferSize);
-
-    
-
-    return Buffer;
-}
 
 
 bool IsAtaController(P_PCI_DEVICE_OBJECT PDEV){
@@ -84,6 +77,5 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     if(AtapiPort->Operations->IssueCommand){
         Result = AtapiPort->Operations->IssueCommand(&Command);
     }
-
     return Result;
 }
