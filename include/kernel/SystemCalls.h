@@ -582,6 +582,56 @@ void LouCALL(
 #define LOU_KE_ISCSI_GET_HOST_STATUS            50
 #define LOU_KE_ISCSI_DESTROY_SESSION_ASYNC      51
 
+#define LOU_KE_CDROM_PAUSE_AUDIO                52
+#define LOU_KE_CDROM_RESUME_AUDIO               53
+#define LOU_KE_CDROM_PLAY_MSF                   54
+#define LOU_KE_CDROM_PLAY_TRACK                 55
+#define LOU_KE_CDROM_READ_TOC_HEADER            56
+#define LOU_KE_CDROM_READ_TOC_ENTRY             57
+#define LOU_KE_CDROM_STOP                       58
+#define LOU_KE_CDROM_START                      59
+#define LOU_KE_CDROM_EJECT                      60
+#define LOU_KE_CDROM_VOLUME_CONTROL             61
+#define LOU_KE_CDROM_SUB_CHANNEL                62
+#define LOU_KE_CDROM_READ_MODE2                 63  
+#define LOU_KE_CDROM_READ_MODE1                 64
+#define LOU_KE_CDROM_READ_AUDIO                 65
+#define LOU_KE_CDROM_EJECT_SW                   66
+#define LOU_KE_CDROM_MULTI_SESSION              67
+#define LOU_KE_CDROM_GET_MCN                    68
+#define LOU_KE_CDROM_GET_UPC                    69
+#define LOU_KE_CDROM_RESET                      70
+#define LOU_KE_CDROM_VOLUME_READ                71
+#define LOU_KE_CDROM_READ_RAW_MODE              72
+#define LOU_KE_CDROM_READ_COOKED                73
+#define LOU_KE_CDROM_SEEK                       74
+#define LOU_KE_CDROM_PLAY_BLOCK                 75
+#define LOU_KE_CDROM_READ_ALL                   76
+#define LOU_KE_CDROM_GET_SPINDOWN               77
+#define LOU_KE_CDROM_SET_SPINDOWN               78
+#define LOU_KE_CDROM_CLOSE_TRAY                 79
+#define LOU_KE_CDROM_SET_OPTIONS                80
+#define LOU_KE_CDROM_CLEAR_OPTIONS              81
+#define LOU_KE_CDROM_SELECT_SPEED               82
+#define LOU_KE_CDROM_SELECT_DISKS               83
+#define LOU_KE_CDROM_MEDIA_CHANGED              84
+#define LOU_KE_CDROM_DRIVE_STATUS               85
+#define LOU_KE_CDROM_DISC_STATUS                86
+#define LOU_KE_CDROM_GET_SLOTS                  87
+#define LOU_KE_CDROM_LOCK_DOOR                  88
+#define LOU_KE_CDROM_DEBUG                      89
+#define LOU_KE_CDROM_GET_CAPABILITIES           90
+#define LOU_KE_CDROM_AUDIO_BUFFER_SIZE          91
+#define LOU_KE_CDROM_DVD_READ_STRUCTURE         92
+#define LOU_KE_CDROM_DVD_WRITE_STRUCTURE        93
+#define LOU_KE_DVD_AUTHENTICATION               94
+#define LOU_KE_CDROM_SEND_PACKET                95
+#define LOU_KE_CDROM_NEXT_WRITEABLE             96
+#define LOU_KE_CDROM_LAST_WRITTEN               97
+#define LOU_KE_CDROM_TIMED_MEDIA_CHANGE         98
+
+
+
 //Kernel SystemCalls
 
 

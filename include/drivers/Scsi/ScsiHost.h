@@ -199,6 +199,15 @@ static inline void* ScsiHostGetPrivateData(PLOUSINE_SCSI_HOST ScsiHost){
     return ScsiHost->HostData;
 }
 
+static inline int SiScsiHostInRecovery(PLOUSINE_SCSI_HOST ScsiHost){
+    return ((ScsiHost->ScsiHostState == SCSI_HOST_STATE_RECOVERY) || (ScsiHost->ScsiHostState == SCSI_HOST_STATE_CANCEL_RECOVERY) || (ScsiHost->ScsiHostState == SCSI_HOST_STATE_DELET_RECOVERY) || (ScsiHost->TaskManagementOperating));
+}
+
+static inline int IsScsiHostScanAllowed(PLOUSINE_SCSI_HOST ScsiHost){
+    return ((ScsiHost->ScsiHostState == SCSI_HOST_STATE_RUNNING) || (SCSI_HOST_STATE_RECOVERY));
+}
+
+
 
 #ifdef __cplusplus
 }

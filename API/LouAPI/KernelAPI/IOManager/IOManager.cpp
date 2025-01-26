@@ -80,7 +80,7 @@ KERNEL_IMPORT
 uint8_t LouKeGetNumberOfStorageDevices();
 
 LOUDDK_API_ENTRY void FileSystemSetup(){        
-
+    LouPrint("Looking For Filesystems\n");
     for(uint8_t i = 0; i < LouKeGetNumberOfStorageDevices(); i++){ 
         Fss = iso.ISOFileSystemScan(i);
         if(Fss.FSType == ISO){

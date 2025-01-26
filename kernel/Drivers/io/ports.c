@@ -100,6 +100,21 @@ void outsw(uint16_t port, const void *buf, unsigned long count) {
                          : "memory");
 }
 
+void insb(uint16_t port, void *buf, unsigned long count) {
+    __asm__ __volatile__("cld; rep; insb"
+                         : "+D"(buf), "+c"(count)
+                         : "d"(port)
+                         : "memory");
+}
+
+void outsb(uint16_t port, const void *buf, unsigned long count) {
+    __asm__ __volatile__("cld; rep; outsb"
+                         : "+S"(buf), "+c"(count)
+                         : "d"(port)
+                         : "memory");
+}
+
+
 extern uint64_t LouKeMachineLevelReadRegisterUlong(uint64_t AddressOfRegister);
 extern uint64_t LouKeMachineLevelWriteRegisterUlong(uint64_t AddressOfRegister,uint64_t Data);
 

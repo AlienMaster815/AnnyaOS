@@ -32,6 +32,7 @@ typedef __int128 int128_t;
 
 #define WRITE_THROUGH_PAGE  0b1000
 #define CACHE_DISABLED_PAGE 0b10000
+#define UNCACHEABLE_PAGE    0b10000
 
 #define PAGE_PRESENT        (1 << 0)
 #define PAGE_WRITE          (1 << 1)

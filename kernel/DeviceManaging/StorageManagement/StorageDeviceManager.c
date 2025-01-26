@@ -59,7 +59,7 @@ SYSTEM_DEVICE_IDENTIFIER LouKeGetStorageDeviceSystemIdentifier(uint8_t DriveNumb
 //}
 
 
-uint8_t LouKeGetLegacyAtaPort(uint8_t DriveNumber){
+uint8_t LouKeGetStorPort(uint8_t DriveNumber){
     return (uint8_t)(uintptr_t)StorageManagerDataPointers[DriveNumber]->Table->KeyData;
 }
 

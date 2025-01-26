@@ -36,6 +36,9 @@ void LouRegisterFileSystemDevice(
     void* DevicePrivateData
 );
 
+LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
+
+
 LOUSTATUS LouKeRegisterDevice(
     P_PCI_DEVICE_OBJECT PDEV, 
     SYSTEM_DEVICE_IDENTIFIER Sdi,
@@ -78,17 +81,15 @@ LOUSTATUS LouKeRegisterDevice(
         TmpDevice->TableStart.NextHeader = LouMalloc(sizeof(DEVICE_DIRECTORY_TABLE));
         TmpDevice = (PDEVICE_DIRECTORY_TABLE)TmpDevice->TableStart.NextHeader;
     }
+    TmpDevice->PDEV = PDEV;
+    TmpDevice->Sdi = Sdi;
+    TmpDevice->LOUSINE_REGISTRATION_ENTRY = LRE;
+    TmpDevice->KeyData = KeyData;
+    TmpDevice->DevicePrivateData = DevicePrivateData;
 
     switch(Sdi){
         case ATA_DEVICE_T:{
-            return LouRegisterAtaDeviceToInformationTable(
-                TmpDevice,
-                PDEV,
-                Sdi,
-                LRE,
-                KeyData,
-                DevicePrivateData
-            );
+            return DeviceManagerInitializeAtaHostDevice(TmpDevice);
         }
         case GRAPHICS_DEVICE_T:{
             return LouRegisterDrsdGraphicsDevice(
@@ -153,15 +154,6 @@ LOUSTATUS LouKeRegisterDevice(
         }
         case WIFI_DEVICE_T:{
 
-            break;
-        }
-        case ATA_LEGACY_DEVICE_T:{
-            TmpDevice->PDEV = PDEV;
-            TmpDevice->Sdi = Sdi;
-            TmpDevice->LOUSINE_REGISTRATION_ENTRY = LRE;
-            TmpDevice->KeyData = KeyData;
-            TmpDevice->DevicePrivateData = DevicePrivateData;
-            LouRegisterStorageDevice(TmpDevice);
             break;
         }    
         case FILESYSTEM_DEVICE_T:{

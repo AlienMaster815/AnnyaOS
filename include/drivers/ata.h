@@ -8,6 +8,8 @@ extern "C" {
 #include <LouAPI.h>
 #endif
 
+#include "CdRom.h"
+
 #define ATA_DMA_BOUNDS                          0xFFFF
 #define ATA_DMA_MASK                            0xFFFFFFFF
 
@@ -869,69 +871,170 @@ static inline bool Lba48Ok(uint64_t Block, uint64_t BlockCount){
 #define ATA_IRQ_1 14
 #define ATA_IRQ_2 15
 
-struct _ATA_QUEUED_COMMAND;
+typedef struct _ATA_QUEUED_COMMAND{
+    struct _LOUSINE_KERNEL_DEVICE_ATA_PORT* Port;
+    bool     WriteCommand;
+    bool     CommandCompleted;
+    uint32_t Command;
+    uint32_t Lbal;
+    uint32_t Lbam;
+    uint32_t Lbah;
+    uint32_t SectorCount;
+    uint64_t DataAddress;
+    bool     PacketCommand;
+    uint8_t  ScsiCommandLength;
+    bool     DmaCommand;
+    //PioData
+    uint16_t MaxByteSize;
+    uint8_t  ScsiCommand[16];
+}ATA_QUEUED_COMMAND, * PATA_QUEUED_COMMAND;
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
-    struct _LOUSINE_SCSI_HOST*      ScsiHost;
-    //PATA_PORT_OPERATION           Operations;
-    spinlock_t                      PortLock;
-    unsigned long                   AtaFlags;
-    unsigned int                    AtaPFlags;
-    unsigned int                    UserPortID;
-    unsigned int                    PortNumber;
-    //ATA_IO_PORT                   IoAddress;
-    uint8_t                         ControlRegisterCahce;
-    uint8_t                         LastWritenControlRegisterCache;
-    //PATA_LINK                     SffPioTaskLink;
-    DELAYED_FUNCTION                SffPioTask;
-    //PATA_BMDMA_PRD                BmDmaPrd;
-    uintptr_t                       DmaAddress;
-    unsigned int                    PioBits;
-    unsigned int                    MwDmaBits;
-    unsigned int                    UDmaBits;
-    unsigned int                    CableType;
-    //PATA_QUEUED_COMMAND           QueuedCommand[ATA_MAX_QUEUE_COMMANDS + 1];
-    uint64_t                        QueueCommandActive;
-    int                             ActiveQcsLinks;
-    //ATA_LINK                      HostDefaultLink;
-    //PATA_LINK                     HostSlaveLink;
-    int                             AvailablePmpLinks;
-    //PATA_LINK                     PmpLink;
-    //PATA_LINK                     PmpQcExclusionLink;
-    //ATA_PORT_STATUS               PortStatus;
-    //PATA_HOST                     AtaHost;
-    P_PCI_DEVICE_OBJECT             PDEV;
-    mutex_t                         ScsiScanMutex;
-    DELAYED_FUNCTION                HotplugTask;
-    DELAYED_FUNCTION                ScsiRescanTask;
-    unsigned int                    HsmTaskState;
-    ListHeader                      IoStackDoneQueue;
-    LOUQ_WAIT                       IoStackWaitQueue;
-    int                             IoStackTries;
-    //LOUQ_COMPLETION               ParkRequestPending;
-    //POWER_MANAGEMENT_MESSAGE      PowerMessgae
-    uint32_t                        LpmPolicy;
-    //TIMER_LIST                      FastdrainTimer;
-    unsigned int                    FastdrainCount;
-    //ASYNC_COOKIE                    AsyncCookie;
-    int                             EclosuerManagementMessage;
-    void*                           PrivateExtendedData;
-    //ATA_ACPI_GTM                    AcpiInitializationGTM;
+    struct _LOUSINE_SCSI_HOST*              ScsiHost;
+    struct _LOUSINE_ATA_PORT_OPERATIONS*    Operations;
+    uint32_t                                PollTimer;
+    spinlock_t                              PortLock;
+    unsigned long                           AtaFlags;
+    unsigned int                            AtaPFlags;
+    char                                    UserPortID;
+    unsigned int                            PortNumber;
+    void*                                   CommandIoAddress;
+    void*                                   ControlIoAddress;
+    uint32_t                                SectorSize;
+    bool                                    Ahci;
+    void*                                   Abar;
+    void*                                   PortMmIo;
+    PATA_QUEUED_COMMAND*                    CurrentQueuedCommand;
+    struct _LOUSINE_KERNEL_DEVICE_ATA_HOST* AtaHost;
+    P_PCI_DEVICE_OBJECT                     PDEV;
+    void*                                   PrivateExtendedData;
+    uint8_t                                 Siblings;
+    bool                                    PortScsiDevice;
+    bool                                    SerialDevice;
+    uint8_t                                 ScsiMaxCommandLength;
+    bool                                    InNativeMode;
+    bool                                    NativeSupported;
+    uint8_t                                 CommandLengthFlags;
 }LOUSINE_KERNEL_DEVICE_ATA_PORT, * PLOUSINE_KERNEL_DEVICE_ATA_PORT;
 
 typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
-    int         (*DelayQueuedCommand)       (struct _ATA_QUEUED_COMMAND* QueuedCommand);
-    int         (*CheckAtapiDma)            (struct _ATA_QUEUED_COMMAND* QueuedCommand);
-    uint32_t    (*PrepCommand)              (struct _ATA_QUEUED_COMMAND* QueuedCommand);
-    uint32_t    (*IssueCommand)             (struct _ATA_QUEUED_COMMAND* QueuedCommand);
-    void        (*FillRtf)                  (struct _ATA_QUEUED_COMMAND* QueuedCommand);
+    int         (*DelayQueuedCommand)       (PATA_QUEUED_COMMAND QueuedCommand);
+    int         (*CheckAtapiDma)            (PATA_QUEUED_COMMAND QueuedCommand);
+    LOUSTATUS   (*PrepCommand)              (PATA_QUEUED_COMMAND QueuedCommand);
+    LOUSTATUS   (*IssueCommand)             (PATA_QUEUED_COMMAND QueuedCommand);
+    LOUSTATUS   (*ResetPort)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    void        (*FillRtf)                  (PATA_QUEUED_COMMAND QueuedCommand);
     void        (*FillNcqRtf)               (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort, uint64_t DoneMask);                  
 }LOUSINE_ATA_PORT_OPERATIONS, * PLOUSINE_ATA_PORT_OPERATIONS;
 
 
+typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
+    P_PCI_DEVICE_OBJECT                         PDEV;
+    uint8_t                                     PortCount;
+    spinlock_t                                  HostLock;
+    void*                                       HostIoAddress;
+    LOUSINE_KERNEL_DEVICE_ATA_PORT              Ports[];
+}LOUSINE_KERNEL_DEVICE_ATA_HOST, * PLOUSINE_KERNEL_DEVICE_ATA_HOST;
+
+#define COMMAND_LENGTH_FLAG_LBA48 1 
 
 
-int AtaBmdaPortStart(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+
+#define PRIMARY_COMMAND_REGISTER_OFFSET         0x10
+#define PRIMARY_CONTROL_REGISTER_OFFSET         0x14
+#define SECONDARY_COMMAND_REGISTER_OFFSET       0x18
+#define SECONDARY_CONTROL_REGISTER_OFFSET       0x1C
+#define ALTERNATE_STATUS_DEVICE_OFFSET          0x02
+#define PRIMARY_CHANNEL_SUPPORTS_NATIVE         1 << 1
+#define SECONDARY_CHANNEL_SUPPORTS_NATIVE       1 << 3
+#define PRIMARY_CHANNEL_NATIVE_ENABLE           1
+#define SECONDARY_CHANNEL_NATIVE_ENABLE         1 << 2
+
+#define COMPATIBILITY_PRIMARY_CONTROL_BASE      (void*)0x3F6
+#define COMPATIBILITY_SECONDARY_CONTROL_BASE    (void*)0x376
+
+#define COMPATIBILITY_PRIMARY_COMMAND_BASE      (void*)0x1F0
+#define COMPATIBILITY_SECONDARY_COMMAND_BASE    (void*)0x170
+
+#define COMPATIBILITY_PRIMARY_IRQ               14
+#define COMPATIBILITY_SECONDARY_IRQ             15
+
+//Command Port Offsets
+#define COMMAND_DATA_PORT_OFFSET                0 //RW : PIO Data Bytes 16 bit
+#define COMMAND_ERROR_PORT_OFFSET               1 //R  : Used To Retrive Errors
+#define COMMAND_FEATURE_PORT_OFFSET             1 //W  : Used To Controll Comand Specific Features
+#define COMMAND_SECTOR_COUNT_PORT_OFFSET        2 //RW : Used to Controll Hosw Many Sectors Are Read
+#define COMMAND_LBAL_PORT_OFFSET                3 //RW : Used to Select Sector To Read Or Write
+#define COMMAND_LBAM_PORT_OFFSET                4 //RW
+#define COMMAND_LBAH_PORT_OFFSET                5 //RW
+#define COMMAND_DRIVE_HEAD_PORT_OFFSET          6 //RW
+#define COMMAND_STATUS_PORT_OFFSET              7 //R
+#define COMMAND_COMMAND_PORT_OFFSET             7 //W
+
+//Command Port Manipulation
+#define COMMAND_READ_DATA_PORT                      inw(CommandPort + COMMAND_DATA_PORT_OFFSET)
+#define COMMAND_WRITE_DATA_PORT(x)                  outw(CommandPort + COMMAND_DATA_PORT_OFFSET, (x))
+#define COMMAND_WRITE_DATA_PORT_BUFFER(x,y)         outsw(CommandPort + COMMAND_DATA_PORT_OFFSET, (x), (y))
+#define COMMAND_READ_DATA_PORT_BUFFER(x,y)          insw(CommandPort + COMMAND_DATA_PORT_OFFSET, (x), (y))
+#define COMMAND_READ_ERROR_PORT_LBA28               inb(CommandPort + COMMAND_ERROR_PORT_OFFSET)
+#define COMMAND_READ_ERROR_PORT_LBA48               inw(CommandPort + COMMAND_ERROR_PORT_OFFSET)
+#define COMMAND_WRITE_FEATURE_PORT_LBA28(x)         outb(CommandPort + COMMAND_FEATURE_PORT_OFFSET, (x))
+#define COMMAND_WRITE_FEATURE_PORT_LBA48(x)         outw(CommandPort + COMMAND_FEATURE_PORT_OFFSET, (x))
+#define COMMAND_READ_SECTOR_COUNT_PORT_LBA28        inb(CommandPort + COMMAND_SECTOR_COUNT_PORT_OFFSET)
+#define COMMAND_READ_SECTOR_COUNT_PORT_LBA48        inw(CommandPort + COMMAND_SECTOR_COUNT_PORT_OFFSET)
+#define COMMAND_WRITE_SECTOR_COUNT_PORT_LBA28(x)    outb(CommandPort + COMMAND_SECTOR_COUNT_PORT_OFFSET, (x))
+#define COMMAND_WRITE_SECTOR_COUNT_PORT_LBA48(x)    outw(CommandPort + COMMAND_SECTOR_COUNT_PORT_OFFSET, (x))
+#define COMMAND_READ_LBAL_PORT_LBA28                inb(CommandPort + COMMAND_LBAL_PORT_OFFSET)
+#define COMMAND_READ_LBAL_PORT_LBA48                inw(CommandPort + COMMAND_LBAL_PORT_OFFSET)
+#define COMMAND_WRITE_LBAL_PORT_LBA28(x)            outb(CommandPort + COMMAND_LBAL_PORT_OFFSET, (x))
+#define COMMAND_WRITE_LBAL_PORT_LBA48(x)            outw(CommandPort + COMMAND_LBAL_PORT_OFFSET, (x))
+#define COMMAND_READ_LBAM_PORT_LBA28                inb(CommandPort + COMMAND_LBAM_PORT_OFFSET)
+#define COMMAND_READ_LBAM_PORT_LBA48                inw(CommandPort + COMMAND_LBAM_PORT_OFFSET)
+#define COMMAND_WRITE_LBAM_PORT_LBA28(x)            outb(CommandPort + COMMAND_LBAM_PORT_OFFSET, (x))
+#define COMMAND_WRITE_LBAM_PORT_LBA48(x)            outw(CommandPort + COMMAND_LBAM_PORT_OFFSET, (x))
+#define COMMAND_READ_LBAH_PORT_LBA28                inb(CommandPort + COMMAND_LBAH_PORT_OFFSET)
+#define COMMAND_READ_LBAH_PORT_LBA48                inw(CommandPort + COMMAND_LBAH_PORT_OFFSET)
+#define COMMAND_WRITE_LBAH_PORT_LBA28(x)            outb(CommandPort + COMMAND_LBAH_PORT_OFFSET, (x))
+#define COMMAND_WRITE_LBAH_PORT_LBA48(x)            outw(CommandPort + COMMAND_LBAH_PORT_OFFSET, (x))
+#define COMMAND_READ_DRIVE_HEAD_PORT                inb(CommandPort + COMMAND_DRIVE_HEAD_PORT_OFFSET)
+#define COMMAND_WRITE_DRIVE_HEAD_PORT(x)            outb(CommandPort + COMMAND_DRIVE_HEAD_PORT_OFFSET, (x))
+#define COMMAND_READ_SATUS_PORT                     inb(CommandPort + COMMAND_STATUS_PORT_OFFSET)
+#define COMMAND_WRITE_COMMAND_PORT(x)               outb(CommandPort + COMMAND_COMMAND_PORT_OFFSET, (x))
+
+//Control Port data
+#define CONTROL_ALTERNATE_STATUS_PORT_OFFSET    0 //R
+#define CONTROL_DEVICE_CONTROL_PORT_OFFSET      0 //W
+#define CONTROL_DRIVE_ADDRESS_PORT_OFFSET       1 //RW
+
+//Control Operations 
+#define CONTROL_READ_ALTERNATE_STATUS_PORT          inb(ControlPort + CONTROL_ALTERNATE_STATUS_PORT_OFFSET)
+#define CONTROL_WRITE_DEVICE_CONTROL_PORT(x)        outb(ControlPort + CONTROL_DEVICE_CONTROL_PORT_OFFSET, (x))
+#define CONTROL_READ_DRIVE_ADDRESS_PORT             inb(ControlPort + CONTROL_DRIVE_ADDRESS_PORT_OFFSET)
+
+//Error Register Bits
+#define ERROR_REGISTER_ADDRESS_MARK_NOT_FOUND   1
+#define ERROR_REGISTER_TRACK_ZERO_NOT_FOUND     1 << 1
+#define ERROR_REGISTER_ABORTED_COMMAND          1 << 2
+#define ERROR_REGISTER_MEDIA_CHANGE_REQUEST     1 << 3
+#define ERROR_REGISTER_ID_NOT_FOUND             1 << 4
+#define ERROR_REGISTER_MEDIA_CHANGE             1 << 5
+#define ERROR_REGISTER_UNCORECTABLE_DATA_ERROR  1 << 6
+#define ERROR_REGISTER_BAD_BLOCK_DETECTED       1 << 7
+
+//Drive Head Bits
+#define DRIVE_HEAD_REGISTER_GET_CHS_ADDRESSING(x)   (x & 0xF)
+#define DRIVE_HEAD_REGISTER_SET_CHS_ADDRESSING(x,y) (x | (y & 0xF))
+#define DRIVE_HEAD_REGISTER_GET_DRIVE(x)            ((x >> 3) & 0x01)
+#define DRIVE_HEAD_REGISTER_SET_DRIVE(x)            (x | (1 << 4))
+#define DRIVE_HEAD_REGISTER_UNSET_DRIVE(x)          (x & ~(1 << 4))
+#define DRIVE_HEAD_REGISTER_GET_LBA_BIT(x)          ((x >> 5) & 0x01)
+#define DRIVE_HEAD_REGISTER_SET_LBA_BIT(x)          (x | (1 << 6))
+#define DRIVE_HEAD_REGISTER_UNSET_LBA_BIT(x)        (x & ~(1 << 6))
+
+
+PLOUSINE_KERNEL_DEVICE_ATA_HOST
+LouMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
+
 
 #ifdef __cplusplus
 }
