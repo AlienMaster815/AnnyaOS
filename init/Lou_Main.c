@@ -178,14 +178,7 @@ void StorPortInitializeAllDevices();
 int InitKThread();
 int TestLoop2();
 
-LOUSTATUS Set_Up_Devices(){
-    //initialize_ps2_keyboard();
-    //InitializePs2Mouse();
-    //PCI_Setup();
-    //FileSystemSetup();
 
-    return LOUSTATUS_GOOD;
-}
 void InitializeDeviceManager();
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 
@@ -287,9 +280,9 @@ KERNEL_ENTRY LouKernelSmpStart(){
 
 LOUSTATUS InitilaizeUserMode(){
 
-    LouKeLoadUserModule("C:/Annya/System64/LouDll.dll");
-    LouKeLoadUserModule("C:/Annya/System64/user32.dll");
-    LouKeLoadUserModule("C:/Annya/System64/CRT140.dll");
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL");
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL");
+    LouKeLoadUserModule("C:/Annya/SYSTEM64/CRT140.DLL");
     
     return STATUS_SUCCESS;
 }
@@ -373,7 +366,7 @@ KERNEL_ENTRY Lou_kernel_start(
     ScanTheRestOfHarware();
 
     //SMPInit();
-
+    LouPrint("Initializing User Mode\n");
     LouKeRunOnNewUserStack(InitializeUserSpace,0x00, 512);
 
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
@@ -395,11 +388,9 @@ uint64_t GetUsedMemory();
 void InitializeUserSpace(){
 
     InitilaizeUserMode();
-    uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/Annya/AnnyaExp.exe");
-    //uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/Annya/LP.exe");
+    uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
-    LouPrint("Hello World\n");
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
     LouUpdateWindow(
@@ -408,7 +399,6 @@ void InitializeUserSpace(){
         HWind
     );
     LouPrint("Hello World\n");
-    while(1);
     UsrJmp(InitEntry);
 }
 

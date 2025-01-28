@@ -54,7 +54,7 @@ void InitializePs2Mouse(){
     inb(0x60);
 
     LouPrint("PS/2 Mouse Initialized Successfully\n");
-    //while(1);
+
 }
 
 void LouKeMouseClickEventUpdate(bool Right, bool Left);

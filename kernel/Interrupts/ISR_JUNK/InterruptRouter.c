@@ -31,7 +31,7 @@ typedef struct  __attribute__((packed)) _CPUContext{
 void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size);
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 
-void(*InterruptHandler[256])(uint64_t);
+static void(*InterruptHandler[256])(uint64_t);
 
 void local_apic_send_eoi();
 bool GetAPICStatus();

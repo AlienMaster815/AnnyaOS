@@ -8,7 +8,7 @@ extern "C" {
 #include <LouAPI.h>
 #endif
 
-#include "CdRom.h"
+#include "../CdRom.h"
 
 #define ATA_DMA_BOUNDS                          0xFFFF
 #define ATA_DMA_MASK                            0xFFFFFFFF
@@ -881,9 +881,9 @@ typedef struct _ATA_QUEUED_COMMAND{
     uint32_t Lbah;
     uint32_t SectorCount;
     uint64_t DataAddress;
+    uint64_t DataSize;
     bool     PacketCommand;
     uint8_t  ScsiCommandLength;
-    bool     DmaCommand;
     //PioData
     uint16_t MaxByteSize;
     uint8_t  ScsiCommand[16];
@@ -894,12 +894,16 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     struct _LOUSINE_ATA_PORT_OPERATIONS*    Operations;
     uint32_t                                PollTimer;
     spinlock_t                              PortLock;
+    mutex_t                                 OperaionLock;
     unsigned long                           AtaFlags;
     unsigned int                            AtaPFlags;
     char                                    UserPortID;
     unsigned int                            PortNumber;
     void*                                   CommandIoAddress;
     void*                                   ControlIoAddress;
+    void*                                   DmaIoAddress;
+    void*                                   PrdtAddress;
+    uint32_t                                PrdtBoundry;
     uint32_t                                SectorSize;
     bool                                    Ahci;
     void*                                   Abar;
@@ -998,7 +1002,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
 #define COMMAND_WRITE_LBAH_PORT_LBA48(x)            outw(CommandPort + COMMAND_LBAH_PORT_OFFSET, (x))
 #define COMMAND_READ_DRIVE_HEAD_PORT                inb(CommandPort + COMMAND_DRIVE_HEAD_PORT_OFFSET)
 #define COMMAND_WRITE_DRIVE_HEAD_PORT(x)            outb(CommandPort + COMMAND_DRIVE_HEAD_PORT_OFFSET, (x))
-#define COMMAND_READ_SATUS_PORT                     inb(CommandPort + COMMAND_STATUS_PORT_OFFSET)
+#define COMMAND_READ_STATUS_PORT                     inb(CommandPort + COMMAND_STATUS_PORT_OFFSET)
 #define COMMAND_WRITE_COMMAND_PORT(x)               outb(CommandPort + COMMAND_COMMAND_PORT_OFFSET, (x))
 
 //Control Port data
@@ -1031,6 +1035,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
 #define DRIVE_HEAD_REGISTER_SET_LBA_BIT(x)          (x | (1 << 6))
 #define DRIVE_HEAD_REGISTER_UNSET_LBA_BIT(x)        (x & ~(1 << 6))
 
+#include "AtaDma.h"
 
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
 LouMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount);

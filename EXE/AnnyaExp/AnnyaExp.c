@@ -127,7 +127,7 @@ DWORD ClockThread(PVOID Args){
 
 void StartDesktop(){
    
-    Background = AnnyaOpenBitmapImage("C:/Annya/Profiles/Default/BG/Annya.bmp");
+    Background = AnnyaOpenBitmapImage("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
 
     DrawDesktopBackground((FILE*)Background, 0);
 

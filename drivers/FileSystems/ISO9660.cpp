@@ -213,7 +213,7 @@ FSStruct ISO9660::DetectFileSystems(uint8_t DrvNum){
 
         FSS.FSNum = VolumeSize;
         FSS.FSType = ISO;
-        FILE* Kernel = ISOLouKefopen(DrvNum, "/Annya/System64/LOUOSKRNL.EXE");
+        FILE* Kernel = ISOLouKefopen(DrvNum, "/ANNYA/SYSTEM64/LOUOSKRN.EXE");
 
         if(Kernel != 0x00){
             LouPrint("Kernel Found This Is A System Disk\n");

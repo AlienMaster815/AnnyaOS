@@ -4,6 +4,8 @@
 
 //include headers from freestanding
 
+#define StartMap (60ULL * MEGABYTE)
+
 #include <LouAPI.h>
 // define constants
 #include <bootloader/grub/multiboot2.h>
@@ -105,7 +107,6 @@ struct master_multiboot_mmap_entry* LouKeGetMemoryMapTable(){
 #define BitMapDivisor 1
 
 UNUSED static uint64_t* BitMap;
-#define StartMap (30ULL * MEGABYTE)
 
 
 
@@ -464,6 +465,7 @@ typedef struct _LOU_MALLOC_ARRAY_TRACKER{
 static PLOU_MALLOC_ARRAY_TRACKER ArrayTracker = 0;
 static uint64_t ArrayTrackerCount = 0;
 
+
 void* LouMallocArray(size_t Members, size_t MemberSize){
     if(!ArrayTrackerCount){
         ArrayTracker = (PLOU_MALLOC_ARRAY_TRACKER)LouMalloc(sizeof(LOU_MALLOC_ARRAY_TRACKER));
@@ -497,7 +499,6 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
     while (1) {
         AlignmentCheck += Alignment;
         bool addrssSpaceCheck = true;
-
         for (uint32_t i = 0; i < AddressesLogged; i++) {
             uint64_t start = AddressBlock[i].Address;
             uint64_t end = start + AddressBlock[i].size;
@@ -519,15 +520,15 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                 uint64_t end = start + AllocationBlocks[k][i].size;
 
                 // Check if the new allocation overlaps with an existing block
-                if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
-                    ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
-                    (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
+            if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
+                ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+                 (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
                     addrssSpaceCheck = false;
                     break;
                 }
             }
         }
-        if(!addrssSpaceCheck){
+        if(!addrssSpaceCheck){       
             continue;
         }
         for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
@@ -598,35 +599,37 @@ uint64_t LouKeMallocFromMapEx(
     PKMALLOC_VMEM_TRACK MappedAddresses
 );
 
-void* LouKeMallocWithFlagsEx(
+void* LouKeMallocEx(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 ){
 
-    UNUSED PKMALLOC_PAGE_TRACK TmpTracker = &PageTracks, CompatibleBlock = 0x00; 
-    uint8_t NeededPages = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
+    PKMALLOC_PAGE_TRACK TmpTracker = &PageTracks; 
+    uint64_t RoundedSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     uint64_t Pointer = 0;
+    size_t i = 0;
+    RoundedSize /= MEGABYTE_PAGE;
+    uint8_t NeededPages = (uint8_t)RoundedSize;
+
     while(!Pointer){
-        size_t i = 0;
         for(; i < PageTracksCount; i++){
             if(TmpTracker->Flags == AllocationFlags){
-                CompatibleBlock = TmpTracker;
-                break;
+                goto _LOU_KE_MALLOC_WITH_FLAGS_EX_COMPATIBLE_BLOCK_FOUND;
             }
             if(TmpTracker->Chain.NextHeader){
                 TmpTracker = (PKMALLOC_PAGE_TRACK)TmpTracker->Chain.NextHeader;
             }
         }
-        if(i == (PageTracksCount-1)){
-            TmpTracker->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
-            TmpTracker = (PKMALLOC_PAGE_TRACK)TmpTracker->Chain.NextHeader;
-
-            TmpTracker->Chunk.PAddress = (uint64_t)LouMallocEx(NeededPages * MEGABYTE_PAGE, MEGABYTE_PAGE);
-            TmpTracker->Chunk.VAddress = (uint64_t)LouVMallocEx(NeededPages * MEGABYTE_PAGE, MEGABYTE_PAGE);
-            TmpTracker->Chunk.NumPages = NeededPages;
-            CompatibleBlock = TmpTracker;
-        }
+        TmpTracker->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
+        TmpTracker = (PKMALLOC_PAGE_TRACK)TmpTracker->Chain.NextHeader;
+        
+        TmpTracker->Chunk.PAddress = (uint64_t)LouMalloc(NeededPages * MEGABYTE_PAGE);
+        TmpTracker->Chunk.VAddress = (uint64_t)LouVMalloc(NeededPages * MEGABYTE_PAGE);
+        TmpTracker->Chunk.NumPages = NeededPages;
+        LouKeMapContinuousMemoryBlock(TmpTracker->Chunk.PAddress, TmpTracker->Chunk.VAddress,NeededPages * MEGABYTE_PAGE, AllocationFlags);
+        PageTracksCount++;
+        _LOU_KE_MALLOC_WITH_FLAGS_EX_COMPATIBLE_BLOCK_FOUND:
 
         Pointer = LouKeMallocFromMapEx(
             AllocationSize,
@@ -636,14 +639,14 @@ void* LouKeMallocWithFlagsEx(
             VMemTracksCount,
             &VMemTracks
         );
-
     }
+    VMemTracksCount++;
     return (void*)Pointer;
 }
 
-void* LouKeMallocWithFlags(
+void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 ){
-    return LouKeMallocWithFlagsEx(AllocationSize, AllocationSize, AllocationFlags);
+    return LouKeMallocEx(AllocationSize, AllocationSize, AllocationFlags);
 }

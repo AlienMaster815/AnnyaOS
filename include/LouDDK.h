@@ -147,7 +147,7 @@ KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uin
 #include <kernel/exec.h>
 #include <Random.h>
 
-#include "drivers/ata.h"
+#include "drivers/Ata/ata.h"
 #include "drivers/Scsi/ScsiHost.h"
 
 #ifndef _KERNEL_MODULE_

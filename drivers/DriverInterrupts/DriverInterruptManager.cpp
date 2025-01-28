@@ -84,7 +84,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitializeDynamicHardwareInterruptHandleing(){
 
     uint8_t TotalHardwareInterrupts = GetTotalHardwareInterrupts();
 
-    hwilms = (HWILM*)LouMallocEx(sizeof(HWILM) * TotalHardwareInterrupts, 1);
+    hwilms = (HWILM*)LouMallocEx(sizeof(HWILM) * TotalHardwareInterrupts, sizeof(HWILM));
 
 	return STATUS_SUCCESS;
 }

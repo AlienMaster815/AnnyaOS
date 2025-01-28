@@ -121,11 +121,11 @@ bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 );
-void* LouKeMallocWithFlags(
+void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-void* LouKeMallocWithFlagsEx(
+void* LouKeMallocEx(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
@@ -188,11 +188,11 @@ KERNEL_IMPORT bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 );
-KERNEL_IMPORT void* LouKeMallocWithFlags(
+KERNEL_IMPORT void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT void* LouKeMallocWithFlagsEx(
+KERNEL_IMPORT void* LouKeMallocEx(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
