@@ -18,10 +18,10 @@ static inline void AtaIoWait400ns(uint16_t ControlPort){
 }
 
 
-LOUSTATUS AtaGenricDMAPrepCommand(
+static LOUSTATUS AtaGenricDMAPrepCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
-    LouPrint("Ata Generic DMA Prep Comman\n");
+    //LouPrint("Ata Generic DMA Prep Comman\n");
     //PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
     //MutexLock(&AtaPort->OperaionLock);
     //PATA_PRDT_ENTRY Prdt = (PATA_PRDT_ENTRY)AtaPort->PrdtAddress;
@@ -34,10 +34,10 @@ LOUSTATUS AtaGenricDMAPrepCommand(
     return STATUS_SUCCESS;
 }   
 
-LOUSTATUS AtaGenricDMAIssueCommand(
+static LOUSTATUS AtaGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
-    LouPrint("Ata Genric DMA Issue Command\n");
+    //LouPrint("Ata Genric DMA Issue Command\n");
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
     
     uint16_t CommandPort    = (uint16_t)(uintptr_t)AtaPort->CommandIoAddress;
@@ -54,7 +54,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         (QueuedCommand->Command == ATA_COMMAND_IDENTIFY_ATA) || 
         (QueuedCommand->Command == ATA_COMMAND_IDENTIFY_ATAPI)
     ){
-        LouPrint("Handleing ATA/ATAPI Identification Command\n");
+        //LouPrint("Handleing ATA/ATAPI Identification Command\n");
 
         if(AtaPort->PortNumber < 2){
             //Primary Bus
@@ -80,7 +80,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             MutexUnlock(&AtaPort->OperaionLock);
             return STATUS_NO_SUCH_DEVICE;
         }
-        LouPrint("Waiting On Device\n");
+        //LouPrint("Waiting On Device\n");
         
         Status = COMMAND_READ_STATUS_PORT;
 
@@ -103,7 +103,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             MutexUnlock(&AtaPort->OperaionLock);
             return STATUS_IO_DEVICE_ERROR;
         }
-        LouPrint("Command Completed Successfully\n");
+        //LouPrint("Command Completed Successfully\n");
 
         for(uint16_t i = 0 ; i < 256; i++){
             Data[i] = COMMAND_READ_DATA_PORT;
@@ -131,7 +131,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             //Send Command
             COMMAND_WRITE_COMMAND_PORT(QueuedCommand->Command);
             AtaIoWait400ns(ControlPort);
-            LouPrint("Waiting On Device\n");
+            //LouPrint("Waiting On Device\n");
             Status = COMMAND_READ_STATUS_PORT;
             while(AtaPort->PollTimer >= PollCount){
                 if((!(Status & 0x80) && (Status & 0x08)) || (Status & 0x01)){
@@ -173,13 +173,13 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             }
 
         }
-        LouPrint("Command Completed Successfully\n");
+        //LouPrint("Command Completed Successfully\n");
     }
     MutexUnlock(&AtaPort->OperaionLock);
     return STATUS_INVALID_PARAMETER;
 }
 
-LOUSINE_ATA_PORT_OPERATIONS IdeGenericOperations;
+static LOUSINE_ATA_PORT_OPERATIONS IdeGenericOperations;
 
 static inline void AtaGenericResetDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT Port){
     LouPrint("Ata Generic Reset Device\n");

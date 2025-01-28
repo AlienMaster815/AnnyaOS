@@ -30,7 +30,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.4.06 Build-1";
+string KERNEL_VERSION = "0.4.06 Build-2";
 
 #ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";
@@ -105,26 +105,7 @@ void LouKeDrsdDrawDesktopBackground(
     uint16_t DrsdFileType
 );
 
-/*
 
-typedef struct {
-    uint16_t limit_low;      // The lower 16 bits of the limit
-    uint16_t base_low;       // The lower 16 bits of the base address
-    uint8_t base_middle;     // The next 8 bits of the base address
-    uint8_t access;          // Access flags and type
-    uint8_t granularity;     // Granularity flags and the upper 4 bits of the limit
-    uint8_t base_high;       // The upper 8 bits of the base address
-}GDT_ENTRY;
-
-typedef struct {
-    GDT_ENTRY NULL_DATA;
-    GDT_ENTRY KERNEL_CODE;
-    GDT_ENTRY KERNEL_DATA;
-    GDT_ENTRY USER_CODE;
-    GDT_ENTRY USER_DATA;
-    GDT_ENTRY TSS;
-}GDT;
-*/
 void SetupGDT();
 extern void ReloadGdt();
 extern void LoadTaskRegister();
@@ -150,7 +131,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
     RegisterInterruptHandler(SegmentNotPresent, INTERRUPT_SERVICE_ROUTINE_11);
     RegisterInterruptHandler(StackSegmentFault, INTERRUPT_SERVICE_ROUTINE_12);
     RegisterInterruptHandler(GPF, INTERRUPT_SERVICE_ROUTINE_13);
-    RegisterInterruptHandler(PageFault, INTERRUPT_SERVICE_ROUTINE_14);
+    //RegisterInterruptHandler(PageFault, INTERRUPT_SERVICE_ROUTINE_14);
     RegisterInterruptHandler(x87FloatPointError, INTERRUPT_SERVICE_ROUTINE_16);
     RegisterInterruptHandler(AlignmentCheck, INTERRUPT_SERVICE_ROUTINE_17);
     RegisterInterruptHandler(MachineCheck, INTERRUPT_SERVICE_ROUTINE_18);

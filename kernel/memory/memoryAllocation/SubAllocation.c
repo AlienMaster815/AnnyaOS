@@ -44,6 +44,9 @@ uint64_t LouKeMallocFromMapEx(
             //found a new allocation Register it now
             PUSER_MODE_VMEM_TRACK Tmp = MappedAddresses;
             for(uint64_t i = 0 ; i <= MappedTrack; i++){
+                if(Tmp->VAddress == 0x00){
+                    break;
+                }
                 if(Tmp->TrackLink.NextHeader){
                     Tmp = (PUSER_MODE_VMEM_TRACK)Tmp->TrackLink.NextHeader; 
                 }
@@ -75,4 +78,35 @@ uint64_t LouKeMallocFromMap(
         MappedTrack,
         MappedAddresses
     );
+}
+
+void LouKeFreeFromMap(
+    uint64_t                Address,
+    uint64_t*               MappedTrack,
+    PUSER_MODE_VMEM_TRACK   MappedAddresses
+){
+    PUSER_MODE_VMEM_TRACK Tmp = MappedAddresses;
+    PUSER_MODE_VMEM_TRACK Tmp2 = MappedAddresses;
+    uint64_t TmpTrack = *MappedTrack;
+    for(uint64_t i = 0 ; i <= TmpTrack; i++){
+        if(Tmp->VAddress == Address){
+            if(TmpTrack <= 1){
+                Tmp->VAddress = 0x00;
+                return;
+            }
+            for(uint64_t j = 0; j < i; j++){
+                if(Tmp2->TrackLink.NextHeader){
+                    Tmp2 = (PUSER_MODE_VMEM_TRACK)Tmp2->TrackLink.NextHeader; 
+                }    
+                Tmp2->TrackLink.NextHeader = (PListHeader)Tmp->TrackLink.NextHeader;
+                LouFree((uint8_t*)Tmp);
+                *MappedTrack = TmpTrack - 1;;
+                return;
+            }
+        }
+        if(Tmp->TrackLink.NextHeader){
+            Tmp = (PUSER_MODE_VMEM_TRACK)Tmp->TrackLink.NextHeader; 
+        }
+    }
+
 }

@@ -130,6 +130,9 @@ void* LouKeMallocEx(
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
+
+void LouKeFree(void* AddressToFree);
+
 void MapIoMemory(
     uint64_t Address,
     uint64_t MapSize
@@ -197,6 +200,7 @@ KERNEL_IMPORT void* LouKeMallocEx(
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
+KERNEL_IMPORT void LouKeFree(void* AddressToFree);
 KERNEL_IMPORT void LouUserFree(uint64_t DataP);
 KERNEL_IMPORT void LouKeUserFree(void* AddressToFree);
 #else 

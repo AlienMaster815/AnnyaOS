@@ -640,6 +640,7 @@ void* LouKeMallocEx(
             &VMemTracks
         );
     }
+    memset((void*)Pointer,0, AllocationSize);
     VMemTracksCount++;
     return (void*)Pointer;
 }
@@ -649,4 +650,18 @@ void* LouKeMalloc(
     uint64_t    AllocationFlags
 ){
     return LouKeMallocEx(AllocationSize, AllocationSize, AllocationFlags);
+}
+
+void LouKeFreeFromMap(
+    uint64_t                Address,
+    uint64_t*               MappedTrack,
+    PKMALLOC_VMEM_TRACK     MappedAddresses
+);
+
+void LouKeFree(void* AddressToFree){
+    LouKeFreeFromMap(
+        (uint64_t)AddressToFree,
+        &VMemTracksCount,
+        &VMemTracks
+    );
 }
