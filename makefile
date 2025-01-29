@@ -247,6 +247,9 @@ annya.iso: release
 
 ifeq ($(TARGET_ARCH),x86_64)
 
+	$(MAKE) -C KernelLibraries/LouDDK clean
+	$(MAKE) -C KernelLibraries/LouDDK all
+
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
 
@@ -255,6 +258,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
+
+	$(MAKE) -C Drivers/Networking/PCNET2 clean
+	$(MAKE) -C Drivers/Networking/PCNET2 all
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
@@ -313,3 +319,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
+	$(MAKE) -C KernelLibraries/LouDDK clean
+	$(MAKE) -C Drivers/Networking/PCNET2 clean
+	$(MAKE) -C KernelLibraries/louoskrnl clean
+

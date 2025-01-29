@@ -1,0 +1,24 @@
+
+#include <LouAPI.h>
+
+typedef void* PDRIVER_OBJECT;
+typedef void* PUNICODE_STRING;
+typedef bool BOOL;
+
+extern LOUSTATUS DriverEntry(PDRIVER_OBJECT DrvObj, PUNICODE_STRING RegistryEntry);
+
+LOUSTATUS _DriverEntry(PDRIVER_OBJECT _DrvObj, PUNICODE_STRING _RegistryEntry){
+    return DriverEntry(_DrvObj, _RegistryEntry);
+}
+
+BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    uint64_t a, b; //, c, d;
+    asm volatile (
+        "movq %%rcx, %0\n\t"
+        "movq %%rdx, %1\n\t"
+        : "=r"(a), "=r"(b)                   // Outputs
+        :                                    // Inputs
+        : "rcx", "rdx", "r8", "r9"           // Clobbered registers
+    );
+    _DriverEntry((PDRIVER_OBJECT)a, (PUNICODE_STRING)b);
+}

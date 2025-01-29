@@ -384,3 +384,18 @@ void InitializeUserSpace(){
 }
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
+
+
+/*	
+AMD PCNet-PCI II	Easy Am79C970A	
+USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).
+PCI Sound Cards	Moderate	
+Intel 8254x NIC	Moderate	
+USB 2.0 (EHCI)	Moderate-to-Hard	Fits here (periodic/asynchronous queues).
+PCI Storage (AHCI)	Hard	
+USB 3.0+ (xHCI)	Harder	Fits here (TRBs, ring buffers).
+PCI Storage (NVMe)	Harder	
+GPUs	Hardest	
+PCIe FPGA Cards	Hardest	
+High-Performance NICs	Hardest
+*/

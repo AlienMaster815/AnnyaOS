@@ -35,6 +35,7 @@
 #include "drivers/Scsi/ScsiHost.h"
 #include "drivers/Ata/ata.h"
 
+#ifndef _KERNEL_MODULE_
 
 #define ACPIBUFFER 512
 #define ERRMAPPINGIO -1
@@ -52,6 +53,7 @@ void HardwareInterruptManager();
 
 typedef void* EventHandle;
 
+#else //Kernel Module
 
-
+#endif
 #endif
