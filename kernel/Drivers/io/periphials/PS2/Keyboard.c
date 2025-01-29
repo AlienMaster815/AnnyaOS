@@ -243,8 +243,8 @@ void PS2KeyboardHandler(uint64_t Rsp){
     if(!(keyData & 0x01)){
         return;
     }
-    char Charecter = GetPS2CharecterData(QWERTY, keyData);
-    if(Charecter >= 0)SendCharecterToUserSpace(Charecter);
+    //char Charecter = GetPS2CharecterData(QWERTY, keyData);
+    //if(Charecter >= 0)SendCharecterToUserSpace(Charecter);
 }
 
 

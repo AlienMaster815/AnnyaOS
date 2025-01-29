@@ -30,7 +30,8 @@ typedef struct _FIS_REGISTER_HOST_TO_DEVICE{
     uint8_t FisType;
     uint8_t PortMultiplyer  : 4;
     uint8_t Reserved1       : 3;
-    uint8_t CommandFis      : 1;
+    uint8_t CommandControl  : 1;
+    uint8_t Command;
     uint8_t FeatureLow;
     //uint32_t 1
     uint8_t LBAL1;

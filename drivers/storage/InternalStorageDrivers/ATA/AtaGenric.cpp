@@ -18,7 +18,7 @@ static inline void AtaIoWait400ns(uint16_t ControlPort){
 }
 
 
-static LOUSTATUS AtaGenricDMAPrepCommand(
+LOUSTATUS AtaGenricDMAPrepCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
     //LouPrint("Ata Generic DMA Prep Comman\n");
@@ -34,7 +34,7 @@ static LOUSTATUS AtaGenricDMAPrepCommand(
     return STATUS_SUCCESS;
 }   
 
-static LOUSTATUS AtaGenricDMAIssueCommand(
+LOUSTATUS AtaGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
     //LouPrint("Ata Genric DMA Issue Command\n");
@@ -294,24 +294,6 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[2].PrdtBoundry = 64 * KILOBYTE;
     LegacyAtaHost->Ports[3].DmaIoAddress = (void*)(uintptr_t)Config->Header.u.type0.BaseAddresses[4];
     LegacyAtaHost->Ports[3].PrdtBoundry = 64 * KILOBYTE;
-
-    LegacyAtaHost->Ports[0].PrdtAddress = LouKeMalloc(65 * KILOBYTE, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
-    LegacyAtaHost->Ports[1].PrdtAddress = LegacyAtaHost->Ports[0].PrdtAddress;
-    LegacyAtaHost->Ports[2].PrdtAddress = LouKeMalloc(65 * KILOBYTE, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
-    LegacyAtaHost->Ports[3].PrdtAddress = LegacyAtaHost->Ports[2].PrdtAddress;
-
-    uint64_t Prdt1, Prdt2;
-
-    RequestPhysicalAddress((uint64_t)LegacyAtaHost->Ports[0].PrdtAddress, &Prdt1);
-    RequestPhysicalAddress((uint64_t)LegacyAtaHost->Ports[2].PrdtAddress, & Prdt2);
-    
-    LouKeHalEnablePciDevice(PDEV);
-
-    LouPrint("Prdt1:%h\n",Prdt1);
-    LouPrint("Prdt2:%h\n",Prdt2);
-
-    ATA_WRITE_PRIMARY_DMA_PRDT_PORT(Prdt1);
-    ATA_WRITE_SECONDARY_DMA_PRDT_PORT(Prdt2);
 
     LouPrint("Adding Ata Device To Device Manager\n");    
     LouKeRegisterDevice(

@@ -932,6 +932,7 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
     P_PCI_DEVICE_OBJECT                         PDEV;
     uint8_t                                     PortCount;
+    uint32_t                                    PortMap;
     spinlock_t                                  HostLock;
     void*                                       HostIoAddress;
     void*                                       HostPrivateData;
