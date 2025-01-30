@@ -1,13 +1,5 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
-PLOUSINE_KERNEL_DEVICE_ATA_HOST
-LouMallocAtaDeviceWitPortMap(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount, uint32_t PortMap){
-    PLOUSINE_KERNEL_DEVICE_ATA_HOST NewHost = LouMallocAtaDevice(PDEV, PortCount);
-    NewHost->PortMap = PortMap;
-    return NewHost;
-}
-
 
 LOUDDK_API_ENTRY
 PLOUSINE_KERNEL_DEVICE_ATA_HOST

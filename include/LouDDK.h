@@ -109,10 +109,10 @@ typedef void* DEVICE;
 //Printing And Debugging
 #ifndef _KERNEL_MODULE_
 KERNEL_IMPORT int LouPrint(char *format, ...);
-KERNEL_IMPORT LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
 
 #else
 KERNEL_EXPORT int LouPrint(char *format, ...);
+KERNEL_EXPORT LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
 KERNEL_EXPORT void* memcpy(void* dest, const void* src, size_t n);
 KERNEL_EXPORT int strncmp(const char* str1, const char* str2, size_t n);
 KERNEL_EXPORT int strcmp(const char* str1, const char* str2);
@@ -168,6 +168,7 @@ KERNEL_IMPORT void LouPanic(char*,STATUS);
 //STD Library
 KERNEL_IMPORT void* memset(void* dest, int value, size_t count);
 
+
 KERNEL_IMPORT void* memcpy(void* dest, const void* src, size_t n);
 KERNEL_IMPORT int strncmp(const char* str1, const char* str2, size_t n);
 KERNEL_IMPORT int strcmp(const char* str1, const char* str2);
@@ -183,6 +184,7 @@ KERNEL_IMPORT void sleep(uint64_t Time);
 
 #define ERRMAPPINGIO -1
 
+LOUDDK_API_ENTRY LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
 
 #else 
 

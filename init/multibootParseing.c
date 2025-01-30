@@ -63,8 +63,8 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
         }
         case (MULTIBOOT_TAG_TYPE_MODULE): {
             struct multiboot_tag_module *mod = (struct multiboot_tag_module *) MBOOT;
+            //this shouldent run but map memory in case
             EnforceSystemMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
-            handle_module(mod->mod_start, mod->mod_end);
             break;
         }
         case (MULTIBOOT_TAG_TYPE_FRAMEBUFFER):{

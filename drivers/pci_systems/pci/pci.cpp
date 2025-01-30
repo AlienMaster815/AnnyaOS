@@ -184,6 +184,27 @@ void ScanTheRestOfHarware(){
 
     InitializePs2Mouse();
 
+    //PCI_COMMON_CONFIG Config;
+	//Config.Header.VendorID = ANY_PCI_ID;
+	//Config.Header.DeviceID = ANY_PCI_ID;
+	//Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
+	//Config.Header.u.type0.SubSystemID = ANY_PCI_ID;
+	//Config.Header.BaseClass = 0x02;
+	//Config.Header.SubClass = 0;
+	//Config.Header.ProgIf = ANY_PCI_CLASS;
+
+	//uint8_t NumberOfPciDevices = LouKeGetPciCountByType(&Config);
+
+	//UNUSED PPCI_DEVICE_GROUP NetDev = LouKeOpenPciDeviceGroup(&Config);
+
+    //PDRIVER_OBJECT DrvObj = (PDRIVER_OBJECT)LouMalloc(sizeof(DRIVER_OBJECT));
+
+    //DrvObj->PDEV = (uintptr_t)NetDev->PDEV;
+
+    //DRIVER_MODULE_ENTRY DriverEntry = LouKeLoadKernelModule("C:/ANNYA/SYSTEM64/DRIVERS/PCNET2.SYS");
+    //DriverEntry(DrvObj, 0x00);
+    //while(1);
+
     LouKeReleaseSpinLock(&ScanLock, &Irql);
     
 }

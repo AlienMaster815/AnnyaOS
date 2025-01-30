@@ -989,7 +989,7 @@ typedef struct _DEVICE_OBJECT {
   PVPB          Vpb;
   PVOID                    DeviceExtension;
   DEVICE_TYPE              DeviceType;
-  CHAR                    StackSize;
+  CHAR                     StackSize;
   union {
     LIST_ENTRY         ListEntry;
     WAIT_CONTEXT_BLOCK Wcb;
@@ -1004,6 +1004,9 @@ typedef struct _DEVICE_OBJECT {
   USHORT                   Spare1;
   struct _DEVOBJ_EXTENSION *DeviceObjectExtension;
   PVOID                    Reserved;
+  //LDM
+  struct _PCI_DEVICE_OBJECT*    PDEV;
+  uint64_t                      DeviceID;
 } DEVICE_OBJECT, *PDEVICE_OBJECT;
 
 
@@ -1039,14 +1042,14 @@ typedef struct _DEVOBJ_EXTENSION {
 
 
 typedef struct _DRIVER_OBJECT {
-  SHORT             Type;
-  SHORT             Size;
+  SHORT              Type;
+  SHORT              Size;
   PDEVICE_OBJECT     DeviceObject;
   ULONG              Flags;
   PVOID              DriverStart;
   ULONG              DriverSize;
   PVOID              DriverSection;
-  PDRIVER_EXTENSION  DriverExtension; //Done
+  PDRIVER_EXTENSION  DriverExtension;
   UNICODE_STRING     DriverName;
   PUNICODE_STRING    HardwareDatabase;
   PFAST_IO_DISPATCH  FastIoDispatch;
@@ -1055,9 +1058,8 @@ typedef struct _DRIVER_OBJECT {
   PDRIVER_UNLOAD     DriverUnload;
   PDRIVER_DISPATCH   MajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
   //DriverObjectModificationss for ldm
-  uintptr_t PDEV; //uintptr_t For Definitions Issues
-  bool (*PciScanBus)(struct _PCI_DEVICE_OBJECT*, struct _DRIVER_OBJECT* , struct _UNICODE_STRING*);
-  LOUSTATUS (*InitializePciDevice)(struct _PCI_DEVICE_OBJECT*, struct _DRIVER_OBJECT*, struct _UNICODE_STRING*);
+  bool              DriverUsingLdm;
+  uintptr_t         DeviceTable;
 } DRIVER_OBJECT, *PDRIVER_OBJECT;
 
 

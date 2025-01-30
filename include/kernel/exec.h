@@ -217,9 +217,13 @@ typedef void* HMODULE;
 typedef void* LPVOID;
 typedef uint32_t DWORD;
 
+typedef LOUSTATUS (*DRIVER_MODULE_ENTRY)(void* DriverObject, void* RegistryPath);
+
 typedef bool(*DllModuleEntry)(HMODULE, DWORD, LPVOID);
 DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath);
 void* LouKeLoadPeExecutable(string ExecutablePath);
+DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath);
+
 
 #ifdef __cplusplus
 }

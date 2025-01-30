@@ -1,6 +1,0 @@
-<Target32>
-    <DRIVERTOCPY32>cp SYS/X86/KModeDrvRevEng.sys ISO/Annya/System32/Drivers/KModeDrvRevEng.sys</DRIVERTOCPY32>
-</Target32>
-<Target64>
-
-</Target64>

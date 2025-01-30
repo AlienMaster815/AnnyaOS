@@ -16,7 +16,11 @@ void FindAnyHiddenUsbSystems();
 
 LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV);
 
-LOUSTATUS InitializeAhciDevice(P_PCI_DEVICE_OBJECT PDEV);
+static bool AhciDriverLoaded = false;
+static PDRIVER_OBJECT AhciDriverObject = 0x00;
+
+NTSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
+uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 
 LOUDDK_API_ENTRY 
 LOUSTATUS LookForStorageDevices(){
@@ -41,7 +45,29 @@ LOUSTATUS LookForStorageDevices(){
             PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
 
             if(PConfig->Header.SubClass == 0x06){
-                InitializeAhciDevice(PDEV);
+                if(!AhciDriverLoaded){
+                    AhciDriverObject = (PDRIVER_OBJECT)LouMalloc(sizeof(DRIVER_OBJECT));
+                    AhciDriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMalloc(sizeof(DRIVER_EXTENSION));
+                    AhciDriverEntry(AhciDriverObject, 0x00);
+                }
+
+                uint64_t Device = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)AhciDriverObject->DeviceTable);
+                if(Device == (uint64_t)-1){
+                    LouPrint("Ahci Device Not Supported\n");
+                    continue;
+                }
+
+                PDEVICE_OBJECT NtPdev = (PDEVICE_OBJECT)LouMalloc(sizeof(PDEVICE_OBJECT));
+                //by default Ahci uses LDM
+                NtPdev->PDEV = PDEV;
+                NtPdev->DeviceID = Device;
+
+                if(AhciDriverObject->DriverExtension->AddDevice){
+                    AhciDriverObject->DriverExtension->AddDevice(AhciDriverObject, NtPdev);
+                }
+            
+                //todo add module to module list
+                while(1);    
             }
 
             if(PConfig->Header.SubClass == 0x01){

@@ -1,7 +1,6 @@
 #ifndef _HAL_H
 #define _HAL_H
 
-#define ANY_PCI_CLASS 255
 
 #pragma pack(push, 1)
 typedef struct _PCI_MANAGER_DATA{

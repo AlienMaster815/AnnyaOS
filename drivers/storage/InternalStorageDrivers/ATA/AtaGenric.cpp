@@ -306,4 +306,3 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
 
     return STATUS_SUCCESS;
 }
-

@@ -263,7 +263,7 @@ LOUSTATUS InitilaizeUserMode(){
 
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL");
-    LouKeLoadUserModule("C:/Annya/SYSTEM64/CRT140.DLL");
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/CRT140.DLL");
     
     return STATUS_SUCCESS;
 }
@@ -379,6 +379,7 @@ void InitializeUserSpace(){
         GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
         HWind
     );
+    
     LouPrint("Hello World\n");
     UsrJmp(InitEntry);
 }

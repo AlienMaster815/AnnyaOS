@@ -18,7 +18,6 @@ TARGET_OS = WINDOWS
 HOST_ARCH = x86_64
 FIRMWARE_TARGET = BIOS
 
-DriverTable = Config/System_Config/drivers.xml
 FileStructureTable = Config/System_Config/FileStructure.xml
 SystemFileTable = Config/System_Config/SystemFiles.xml
 
@@ -30,9 +29,6 @@ MAKEDIR64 := $(shell awk -F '[<>]' '/<MainDirectoryStructure64>/{print " " $$3 "
 
 CPY32 := $(shell awk -F '[<>]' '/<FILETOCPY32>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 CPY64 := $(shell awk -F '[<>]' '/<FILETOCPY64>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
-
-Drivers32 := $(shell awk -F '[<>]' '/<DRIVERTOCPY32>/{print " " $$3 ";"}' $(DriverTable) | tr '\n' ' ')
-Drivers64 := $(shell awk -F '[<>]' '/<DRIVERTOCPY64>/{print " " $$3 ";"}' $(DriverTable) | tr '\n' ' ')
 
 EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
 
@@ -247,6 +243,9 @@ annya.iso: release
 
 ifeq ($(TARGET_ARCH),x86_64)
 
+	$(MAKE) -C KernelLibraries/louoskrnl clean
+	$(MAKE) -C KernelLibraries/louoskrnl all
+
 	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C KernelLibraries/LouDDK all
 
@@ -259,8 +258,8 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
 
-	$(MAKE) -C Drivers/Networking/PCNET2 clean
-	$(MAKE) -C Drivers/Networking/PCNET2 all
+	$(MAKE) -C Drivers/Networking/PCNET32 clean
+	$(MAKE) -C Drivers/Networking/PCNET32 all
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
@@ -281,7 +280,6 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKEDIR64)
 	#Copy System Files To The Appropriate Directories
 	$(CPY64)
-	$(Drivers64)
 	#Build The Image In One Shabang
 	$(OSBUILDX64)
 
@@ -291,7 +289,6 @@ ifeq ($(TARGET_ARCH),x86)
 
 	#Copy System Files To The Appropriate Directories
 	$(CPY32)
-	#$(Drivers32)
 	#Build The Image In One Shabang
 	$(OSBUILDX86)
 
@@ -320,6 +317,5 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C KernelLibraries/LouDDK clean
-	$(MAKE) -C Drivers/Networking/PCNET2 clean
+	$(MAKE) -C Drivers/Networking/PCNET32 clean
 	$(MAKE) -C KernelLibraries/louoskrnl clean
-

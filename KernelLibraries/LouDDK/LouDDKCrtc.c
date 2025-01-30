@@ -1,9 +1,15 @@
 
-#include <LouAPI.h>
+//#include <LouAPI.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef void* PDRIVER_OBJECT;
 typedef void* PUNICODE_STRING;
 typedef bool BOOL;
+typedef void* HMODULE;
+typedef void* LPVOID;
+typedef uint32_t DWORD;
+typedef uint64_t LOUSTATUS;
 
 extern LOUSTATUS DriverEntry(PDRIVER_OBJECT DrvObj, PUNICODE_STRING RegistryEntry);
 
@@ -20,5 +26,5 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         :                                    // Inputs
         : "rcx", "rdx", "r8", "r9"           // Clobbered registers
     );
-    _DriverEntry((PDRIVER_OBJECT)a, (PUNICODE_STRING)b);
+    _DriverEntry((PDRIVER_OBJECT)(uintptr_t)a, (PUNICODE_STRING)(uintptr_t)b);
 }

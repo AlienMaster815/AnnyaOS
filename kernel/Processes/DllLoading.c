@@ -7,3 +7,10 @@ DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath){
     FILE* ModuleHandle = fopen(ModuleNameAndPath);
     return LoadUserDllModule((uintptr_t)ModuleHandle, ModuleNameAndPath); 
 }
+
+PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath);
+
+DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath){
+    FILE* ModuleHandle = fopen(ModuleNameAndPath);
+    return (DRIVER_MODULE_ENTRY)LoadKernelModule((uintptr_t)ModuleHandle, ModuleNameAndPath);
+}

@@ -375,7 +375,7 @@ extern "C" {
 #define SATA_DEVSLP                                             0x09
 #define SET_FEATURES_SENCT_DATA                                 0xC3
 #define SET_FEATURES_SENCT_DATA_SUCCESSFULL_NCQ                 0xC4
-#define UNIVERSAL_ATA_MAX_ADDRESS                               0x00
+#define UNIVERSAL_ATA_MAX_ADDRESS                                0x00
 #define UNIVERSAL_ATA_MAX_PASWORD                               0x01
 #define UNIVERSAL_ATA_MAX_LOCK                                  0x02
 #define UNIVERSAL_ATA_MAX_UNLOCK                                0x03    
@@ -463,6 +463,12 @@ extern "C" {
 
 #define UNIVERSAL_ATA_IO_CONTROL_GET_IO32                   0x309
 #define UNIVERSAL_ATA_IO_CONTROL_SET_IO32                   0x324
+
+#define ATA_FLAG_COMMON         1
+#define ATA_FLAG_NO_DIPM        1 << 1
+#define ATA_FLAG_SATA           1 << 2
+#define ATA_FLAG_PIO_DMA        1 << 3
+
 
 typedef struct _ATA_BMDMA_PRD{
     uint32_t    Address;
@@ -926,13 +932,13 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
     LOUSTATUS   (*ResetPort)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     void        (*FillRtf)                  (PATA_QUEUED_COMMAND QueuedCommand);
     void        (*FillNcqRtf)               (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort, uint64_t DoneMask);                  
+    LOUSTATUS   (*HardReset)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
 }LOUSINE_ATA_PORT_OPERATIONS, * PLOUSINE_ATA_PORT_OPERATIONS;
 
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
     P_PCI_DEVICE_OBJECT                         PDEV;
     uint8_t                                     PortCount;
-    uint32_t                                    PortMap;
     spinlock_t                                  HostLock;
     void*                                       HostIoAddress;
     void*                                       HostPrivateData;

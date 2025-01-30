@@ -5,6 +5,38 @@
 
 //Define the Lou Driver Kit For Our Constants
 
+
+#ifndef _PCI_MODULES_H
+#define _PCI_MODULES_H
+
+#ifdef __cplusplus
+#include <LouDDK.h>
+extern "C"{
+#else
+#include <LouAPI.h>
+#endif
+
+
+typedef struct _LOUSINE_PCI_DEVICE_TABLE{
+	uint16_t VendorID;
+	uint16_t DeviceID;
+	uint16_t SubVendorID;
+	uint16_t SubDeviceID;
+	uint8_t  BaseClass;
+	uint8_t  SubClass;
+	uint64_t BoardID;
+	bool     SimpleEntry;
+	bool     AdvancedEntry;
+	bool 	 SimpleWithClass;
+	bool 	 GenericEntry;
+}LOUSINE_PCI_DEVICE_TABLE, * PLOUSINE_PCI_DEVICE_TABLE;;
+
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 #ifndef _PCI_H
 #define _PCI_H
 #include "PciIds.h"
@@ -88,6 +120,8 @@ typedef struct _AGP_BRIDGE_DATA{
 #define PCI_POWER_ERROR	((pci_power_t) -1)
 
 #define ANY_PCI_ID 0xFFFF
+#define ANY_PCI_CLASS 255
+
 
 #define PCI_STATUS_CAP_LIST 0x10
 #define PCI_CAP_ID_AGP	0x02
