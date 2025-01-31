@@ -44,29 +44,34 @@
 
 #include "AhciMod.h"
 
+
 //ATA Module Structured Operations
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciGenericHardReset,
+    .HostReset = ResetAhcPciController,
 };
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciVt8251HardReset,
+    .HostReset = ResetAhcPciController,
 };
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciP5wdhHardReset,
+    .HostReset = ResetAhcPciController,
 };
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
     .PrepCommand = AhciGenricDMAIssueCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciAvnHardReset,
+    .HostReset = ResetAhcPciController,
 };
 
 
@@ -74,6 +79,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
     .PrepCommand = AhciGenricDMAIssueCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciGenericHardReset,
+    .HostReset = ResetAhcPciController, 
 };
 //endof ATA Module Structured Operations
 
@@ -484,17 +490,17 @@ static void AhciIntelPcs(P_PCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA Pri
 
 }
 
-static NTSTATUS ResetAhciHba(PAHCI_GENERIC_HOST_CONTROL Ghc){
+static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 
 
     return STATUS_SUCCESS;
 }
 
-static NTSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     NTSTATUS Status = STATUS_SUCCESS;
     P_PCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
-    Status = ResetAhciHba(PrivateData->GenericHostController);
+    Status = ResetAhciHba(AtaHost);
     if(!NT_SUCCESS(Status)){
         return Status;
     }
@@ -729,9 +735,10 @@ AddAhciDevice(
         }
     }
 
+
     ResetAhcPciController(AtaHost);
 
-    LouKeHalPciSetMaster(PDEV);    
+    LouKeHalPciSetMaster(PDEV);
 
     DbgPrint("Adding AHCI Device To Device Manager\n");    
     LouKeRegisterDevice(
