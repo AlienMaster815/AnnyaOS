@@ -54,8 +54,6 @@ uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVIC
                 (DeviceTable[DeviceNumber].SubClass == SubClass || DeviceTable[DeviceNumber].SubClass == ANY_PCI_CLASS)
             )
         ){
-            LouPrint("Device Number:%d\n", DeviceNumber);
-            while(1);
             return DeviceNumber;
         }
 

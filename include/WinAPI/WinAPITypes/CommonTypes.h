@@ -1058,7 +1058,7 @@ typedef struct _DRIVER_OBJECT {
   PDRIVER_UNLOAD     DriverUnload;
   PDRIVER_DISPATCH   MajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
   //DriverObjectModificationss for ldm
-  bool              DriverUsingLdm;
+  bool              DriverUsingLkdm;
   uintptr_t         DeviceTable;
 } DRIVER_OBJECT, *PDRIVER_OBJECT;
 

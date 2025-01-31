@@ -468,7 +468,12 @@ extern "C" {
 #define ATA_FLAG_NO_DIPM        1 << 1
 #define ATA_FLAG_SATA           1 << 2
 #define ATA_FLAG_PIO_DMA        1 << 3
-
+#define ATA_FLAG_NCQ            1 << 4
+#define ATA_FLAG_FPDMA_AA       1 << 5
+#define ATA_FLAG_FPDMA_AUXILERY 1 << 6
+#define ATA_FLAG_PMP            1 << 7
+#define ATA_FLAG_NO_SSC         1 << 8
+#define ATA_FLAG_NO_DEV_SLP     1 << 9
 
 typedef struct _ATA_BMDMA_PRD{
     uint32_t    Address;
@@ -901,7 +906,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     uint32_t                                PollTimer;
     spinlock_t                              PortLock;
     mutex_t                                 OperaionLock;
-    unsigned long                           AtaFlags;
+    uint64_t                                AtaFlags;
     unsigned int                            AtaPFlags;
     char                                    UserPortID;
     unsigned int                            PortNumber;
@@ -942,6 +947,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
     spinlock_t                                  HostLock;
     void*                                       HostIoAddress;
     void*                                       HostPrivateData;
+    uint64_t                                    PrivateDataSize;
     LOUSINE_KERNEL_DEVICE_ATA_PORT              Ports[];
 }LOUSINE_KERNEL_DEVICE_ATA_HOST, * PLOUSINE_KERNEL_DEVICE_ATA_HOST;
 
@@ -1044,8 +1050,17 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
 #include "Ahci.h"
 
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
-LouMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
+LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
 
+void 
+LouKeMallocAtaPrivateData(
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
+    uint64_t SizeofPrivateData
+);
+
+void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
+
+#define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
 
 #ifdef __cplusplus
 }

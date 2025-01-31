@@ -1,9 +1,32 @@
 #include <LouDDK.h>
 
+LOUDDK_API_ENTRY
+void 
+LouKeMallocAtaPrivateData(
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
+    uint64_t SizeofPrivateData
+){
+    AtaHost->PrivateDataSize = SizeofPrivateData;
+    AtaHost->HostPrivateData = LouMalloc(SizeofPrivateData);
+    for(uint8_t i = 0; i < AtaHost->PortCount; i++){
+        AtaHost->Ports[i].PortPrivateData = LouMalloc(SizeofPrivateData);
+    }
+}
+
+LOUDDK_API_ENTRY
+void 
+LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    void* AtaHostPrivateData = (void*)AtaHost->HostPrivateData;    
+    uint64_t DataSize = AtaHost->PrivateDataSize;
+
+    for(uint8_t i = 0; i < AtaHost->PortCount; i++){
+        memcpy(AtaHostPrivateData, AtaHost->Ports[i].PortPrivateData, DataSize);
+    }
+}
 
 LOUDDK_API_ENTRY
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
-LouMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
+LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
 
     PLOUSINE_KERNEL_DEVICE_ATA_HOST NewHost;
 

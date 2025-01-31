@@ -35,7 +35,7 @@ typedef struct _AHCI_GENERIC_HOST_CONTROL{
 #define AHCI_SUPPORTS_SAM(Capabilities)     ((Capabilities & (1 << 18)) ? 1 : 0)
 #define AHCI_SUPPORTS_SPM(Capabilities)     ((Capabilities & (1 << 17)) ? 1 : 0)
 #define AHCI_SUPPORTS_FBSS(Capabilities)    ((Capabilities & (1 << 16)) ? 1 : 0)
-#define AHCI_SUPPORTS_PMD(Capabilities)     ((Capabilities & (1 << 15)) ? 1 : 0)
+#define AHCI_SUPPORTS_PMP(Capabilities)     ((Capabilities & (1 << 15)) ? 1 : 0)
 #define AHCI_SUPPORTS_SSC(Capabilities)     ((Capabilities & (1 << 14)) ? 1 : 0)
 #define AHCI_SUPPORTS_PSC(Capabilities)     ((Capabilities & (1 << 13)) ? 1 : 0)
 #define AHCI_GET_NCS(Capabilities)          ((Capabilities >> 8) & 0x1F)
@@ -186,53 +186,19 @@ void LouKeAhciFreeCommandTable(PHBA_COMMAND_TABLE Table);
 #define AHCI_FLAG_SECTOR255             1 << 16
 
 
-/*
-    PrivateData->HostCapabilities.Supports64BitAddressing = AHCI_SUPPORTS_S64A(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsNativeCommandQueueing = AHCI_SUPPORTS_SNCQ(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsSNotificationRegister = AHCI_SUPPORTS_SSNTF(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsMechanicalPresenceSwitch = AHCI_SUPPORTS_SMPS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsStaggeredSpinup = AHCI_SUPPORTS_SSS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsAggresiveLinkPowerManagement = AHCI_SUPPORTS_SALP(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsActivityLED = AHCI_SUPPORTS_SAL(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsCommandListOveride = AHCI_SUPPORTS_SCLO(Ghc->Capabilities);
-    PrivateData->HostCapabilities.MaximumInterfaceSpeedSupport = AHCI_GET_ISS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.IsAnAhciOnlyDevice = AHCI_SUPPORTS_SAM(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsPortMultiplier = AHCI_SUPPORTS_SPM(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsFisBasedSwitching = AHCI_SUPPORTS_FBSS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsMultiplePioDRQBlock = AHCI_SUPPORTS_PMD(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsSlumberState = AHCI_SUPPORTS_SSC(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsPartialState = AHCI_SUPPORTS_PSC(Ghc->Capabilities);
-    PrivateData->HostCapabilities.NumberOfCommandSlots = AHCI_GET_NCS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsCommandCoalesing = AHCI_SUPPORTS_CCCS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsEnclosureManagement = AHCI_SUPPORTS_EMS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.SupportsExternalSata = AHCI_SUPPORTS_SXS(Ghc->Capabilities);
-    PrivateData->HostCapabilities.ImplementedPorts = AHCI_GET_NP(Ghc->Capabilities);
+typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
+    uint32_t                        AhciFlags;
+    uint32_t                        AtaFlags;
+    uint32_t                        PioFlags;
+    uint32_t                        DmaFlags;
+    PLOUSINE_ATA_PORT_OPERATIONS    DevicesPortOperations;
+}AHCI_DRIVER_BOARD_INFORMATION_TABLE, * PAHCI_DRIVER_BOARD_INFORMATION_TABLE,
+ AHCI_DRIVER_BOARD_INFORMATION ,* PAHCI_DRIVER_BOARD_INFORMATION;
 
-    for(i = 0 ; i < AhciHost->PortCount; i++){
-        AhciHost->Ports[i].PortPrivateData = (void*)LouMalloc(sizeof(AHCI_GENERIC_HOST_CONTROL));
-        PrivateData = (PAHCI_GENERIC_PORT_PRIVATE_DATA)AhciHost->Ports[i].PortPrivateData;
-        PrivateData->HostCapabilities.Supports64BitAddressing = AHCI_SUPPORTS_S64A(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsNativeCommandQueueing = AHCI_SUPPORTS_SNCQ(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsSNotificationRegister = AHCI_SUPPORTS_SSNTF(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsMechanicalPresenceSwitch = AHCI_SUPPORTS_SMPS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsStaggeredSpinup = AHCI_SUPPORTS_SSS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsAggresiveLinkPowerManagement = AHCI_SUPPORTS_SALP(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsActivityLED = AHCI_SUPPORTS_SAL(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsCommandListOveride = AHCI_SUPPORTS_SCLO(Ghc->Capabilities);
-        PrivateData->HostCapabilities.MaximumInterfaceSpeedSupport = AHCI_GET_ISS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.IsAnAhciOnlyDevice = AHCI_SUPPORTS_SAM(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsPortMultiplier = AHCI_SUPPORTS_SPM(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsFisBasedSwitching = AHCI_SUPPORTS_FBSS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsMultiplePioDRQBlock = AHCI_SUPPORTS_PMD(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsSlumberState = AHCI_SUPPORTS_SSC(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsPartialState = AHCI_SUPPORTS_PSC(Ghc->Capabilities);
-        PrivateData->HostCapabilities.NumberOfCommandSlots = AHCI_GET_NCS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsCommandCoalesing = AHCI_SUPPORTS_CCCS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsEnclosureManagement = AHCI_SUPPORTS_EMS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.SupportsExternalSata = AHCI_SUPPORTS_SXS(Ghc->Capabilities);
-        PrivateData->HostCapabilities.ImplementedPorts = AHCI_GET_NP(Ghc->Capabilities);
-    }
-*/
+
+
+#define ICH_PCI_MAP_REGISTER 0x90
+#define PCS6_PCI_REGISTER    0x92
 
 #pragma pack(pop)
 

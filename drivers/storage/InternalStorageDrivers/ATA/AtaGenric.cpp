@@ -245,7 +245,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
 
     //Allocate 4 Ports For The Ata Host
     LouPrint("Allocating Ata Device Data\n");
-    PLOUSINE_KERNEL_DEVICE_ATA_HOST LegacyAtaHost = LouMallocAtaDevice(PDEV, 4); 
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST LegacyAtaHost = LouKeMallocAtaDevice(PDEV, 4); 
     LouPrint("Initializing Generic Ata Device\n");
     UNUSED uint8_t PortDeviceIdValue = 0;
     //Fill Port 1
@@ -299,7 +299,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LouKeRegisterDevice(
         PDEV, 
         ATA_DEVICE_T,
-        "Annya/System64/Drivers/IDEGeneric.sys",
+        "Annya/System64/Drivers/IDEGen.sys",
         (void*)LegacyAtaHost,
         0x00
     );

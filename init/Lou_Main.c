@@ -30,7 +30,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.4.06 Build-2";
+string KERNEL_VERSION = "0.4.07 Build-30";
 
 #ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";

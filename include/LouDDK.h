@@ -67,6 +67,8 @@ typedef void* PVOID;
 
 #include <math.h>
 
+#include <LKDM.h>
+
 typedef void* FILE;
 
 typedef void* DEVICE;
@@ -149,6 +151,8 @@ KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uin
 
 #include "drivers/Ata/ata.h"
 #include "drivers/Scsi/ScsiHost.h"
+#include <LKDM.h>
+
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

@@ -61,11 +61,13 @@ LOUSTATUS LookForStorageDevices(){
                 //by default Ahci uses LDM
                 NtPdev->PDEV = PDEV;
                 NtPdev->DeviceID = Device;
-
+                NTSTATUS ReturnStatus = STATUS_NO_SUCH_DEVICE;
                 if(AhciDriverObject->DriverExtension->AddDevice){
-                    AhciDriverObject->DriverExtension->AddDevice(AhciDriverObject, NtPdev);
+                    ReturnStatus = AhciDriverObject->DriverExtension->AddDevice(AhciDriverObject, NtPdev);
                 }
-            
+                if(ReturnStatus == STATUS_NO_SUCH_DEVICE){
+                    LouFree((RAMADD)NtPdev);
+                }
                 //todo add module to module list
                 while(1);    
             }
