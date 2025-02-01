@@ -46,6 +46,7 @@
 
 
 //ATA Module Structured Operations
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -53,6 +54,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     .HostReset = ResetAhcPciController,
 };
 
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -60,6 +62,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
     .HostReset = ResetAhcPciController,
 };
 
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -67,6 +70,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
     .HostReset = ResetAhcPciController,
 };
 
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
     .PrepCommand = AhciGenricDMAIssueCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -75,6 +79,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
 };
 
 
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
     .PrepCommand = AhciGenricDMAIssueCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -83,6 +88,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
 };
 //endof ATA Module Structured Operations
 
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static AHCI_DRIVER_BOARD_INFORMATION_TABLE AhciBoardInfomationTable[] = {
     [AHCI_BOARD_NORMAL_AHCI] = {
         .AhciFlags              = AHCI_FLAG_COMMON,
@@ -196,6 +202,7 @@ UNUSED static AHCI_DRIVER_BOARD_INFORMATION_TABLE AhciBoardInfomationTable[] = {
     },
 };  
 
+SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     //Intel Ahci Devices
     {.VendorID = PCI_VENDOR_ID_INTEL, .DeviceID = 0x06D6, .BoardID = AHCI_BOARD_INTEL_PCS, .SimpleEntry = true},        //Commet Lake PCH-H Raid
@@ -460,10 +467,9 @@ UNUSED static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     {0},
 };
 
-static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig);
 
-VOID 
-AhciUnloadDriver(
+SECTIONED_CODE(".Ahci.Code") 
+VOID AhciUnloadDriver(
     PDRIVER_OBJECT DriverObject
 ){
     DbgPrint("AhciUnloadDriver()\r\n");
@@ -472,6 +478,7 @@ AhciUnloadDriver(
     DbgPrint("AhciUnloadDriver() RETURN\r\n");
 }
 
+SECTIONED_CODE(".Ahci.Code") 
 static void AhciIntelPcs(P_PCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
     uint16_t Tmp;
 
@@ -490,12 +497,57 @@ static void AhciIntelPcs(P_PCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA Pri
 
 }
 
+SECTIONED_CODE(".Ahci.Code") 
 static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    UNUSED PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;    
+    UNUSED AHCI_GENERIC_HOST_CONTROL TmpGhc = *Ghc;
+    UNUSED uint32_t Tmp;
 
+    Tmp = Ghc->GlobalHostControl;
+    if(!(Tmp & (1 << 31))){
+        Tmp |= (1 << 31);
+        for(uint8_t i = 0 ; i < 5; i++){
+            //wack Ae 5 times to make sure it works
+            Ghc->GlobalHostControl = Tmp;
+        }
+        sleep(1000);
+    }
+
+    if(!(Tmp & (1 << 31))){
+        DbgPrint("AHCIMOD:Unable To Enable Ahci Conroller :: AE could not be set\r\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+    Tmp = Ghc->GlobalHostControl;
+    Tmp |= 1;
+    Ghc->GlobalHostControl = Tmp;
+    
+    //flush
+    Tmp = Ghc->GlobalHostControl;
+
+    sleep(1000);
+
+    if(Ghc->GlobalHostControl & 1){
+        DbgPrint("AHCIMOD:Unable To Enable Ahci Conroller :: HC Didnt Reset\r\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    Tmp = Ghc->GlobalHostControl;
+    if(!(Tmp & (1 << 31))){
+        Tmp |= (1 << 31);
+        for(uint8_t i = 0 ; i < 5; i++){
+            //wack Ae 5 times to make sure it works
+            Ghc->GlobalHostControl = Tmp;
+        }
+        sleep(1000);
+    }
+
+    *Ghc = TmpGhc;
 
     return STATUS_SUCCESS;
 }
 
+SECTIONED_CODE(".Ahci.Code") 
 LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     NTSTATUS Status = STATUS_SUCCESS;
     P_PCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
@@ -510,6 +562,7 @@ LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     return STATUS_SUCCESS;
 }
 
+SECTIONED_CODE(".Ahci.Code") 
 static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig){
     return (
         PciConfig->Header.VendorID == PCI_VENDOR_ID_NVIDIA && 
@@ -519,6 +572,7 @@ static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig){
     ) ? true : false;
 }
 
+SECTIONED_CODE(".Ahci.Code") 
 static void NvidiaMcp89AppleBiosUnlockAhciChip(P_PCI_DEVICE_OBJECT PDEV){
     uint32_t Tmp;
 
@@ -556,8 +610,47 @@ static void NvidiaMcp89AppleBiosUnlockAhciChip(P_PCI_DEVICE_OBJECT PDEV){
     //Ahci On Apple Bios Should Now Be Unlocked
 }
 
-NTSTATUS 
-AddAhciDevice(
+SECTIONED_CODE(".Ahci.Code") 
+static void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort){
+
+}
+
+SECTIONED_CODE(".Ahci.Code") 
+static void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    uint32_t TmpControl;
+
+    ForEachAtaPort(AtaHost){
+        //skip port uinitialization if the port is a dummy port
+        if(!AtaHost->Ports[AtaPortIndex].Operations){
+            continue;
+        }
+        //otherwise intilaize the port
+        AhciInitializePort(&AtaHost->Ports[AtaPortIndex]);
+    }
+
+    TmpControl = Ghc->GlobalHostControl;
+    TmpControl |= (1 << 1);
+    Ghc->GlobalHostControl = TmpControl;
+    TmpControl = Ghc->GlobalHostControl;
+    if(TmpControl & (1 << 1)){
+        DbgPrint("Interrupts Are Now Active On The Host Controller\r\n");
+    }
+    else{
+        DbgPrint("Interrupts Were Unable Activate On The Host Controller\r\n");
+    }
+}
+
+SECTIONED_CODE(".Ahci.Code") 
+static void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    //TODO Initialize MV PATA
+
+    AhciInitializeController(AtaHost);
+}
+
+SECTIONED_CODE(".Ahci.Code") 
+NTSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     PDEVICE_OBJECT Device
 ){
@@ -732,11 +825,15 @@ AddAhciDevice(
         PrivateAhciData->GenericPort = (PAHCI_GENERIC_PORT)(uintptr_t)(0x100 + AtaPortIndex * 0x80);
         if(Ghc->PortsImplemented & (1 << AtaPortIndex)){
             AtaHost->Ports[AtaPortIndex].Operations = BoardInformation[BoardID].DevicesPortOperations;
+        }else{
+            AtaHost->Ports[AtaPortIndex].Operations = 0x00;
         }
     }
 
 
     ResetAhcPciController(AtaHost);
+
+    AhciPciInitializeController(AtaHost);
 
     LouKeHalPciSetMaster(PDEV);
 
@@ -752,12 +849,20 @@ AddAhciDevice(
     return Status;
 }
 
+//    uint32_t ImportLookupRva;
+//    uint32_t TimeDateStamp;
+//    uint32_t ForwarderChain;
+//    uint32_t NameRva;
+//    uint32_t ImportAddressTableRva;
+
+
+
 
 //Unique name for AhciDriver due to the driver being built into the kernels binary
 //And we will be using the (LOUSINE SUBSYSTEM FOR NT DRIVERS) with Lousine function
 //for streamlineing certain things 
-NTSTATUS 
-AhciDriverEntry(
+SECTIONED_CODE(".Ahci.Code") 
+NTSTATUS AhciDriverEntry(
     PDRIVER_OBJECT DriverObject, 
     PUNICODE_STRING RegistryEntry
 ){
@@ -777,3 +882,18 @@ AhciDriverEntry(
     DbgPrint("DriverEntry() STATUS_SUCCESS\r\n");
     return STATUS_SUCCESS;
 }
+
+SECTIONED_CODE(".JitlDirectory") 
+JITL_DIRECTORY AhciJitlDirectory = {
+    .SectionName = ".Ahci",
+    .JitlEntries = {
+        {
+            .Name = "DriverEntry",
+            .Location = (uint64_t)AhciDriverEntry,
+        },
+        {
+            0,
+        },
+    },
+};
+

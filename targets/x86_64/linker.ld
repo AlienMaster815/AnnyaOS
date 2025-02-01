@@ -29,10 +29,17 @@ SECTIONS
         *(.bss)/* Your uninitialized data sections go here */
     }
 
-    . = 40M;
-
     .User : 
     {
         *(.User)  /* User-mode stub code */
+    }
+
+    .JitlDirectory : {
+        *(.JitlDirectory)
+    }
+
+    .Ahci : {
+        KEEP(*(.Data))
+        KEEP(*(.Code))
     }
 }

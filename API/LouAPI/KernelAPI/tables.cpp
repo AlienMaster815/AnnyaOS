@@ -46,7 +46,47 @@ typedef void* PEXCEPTION_RECORD;
 
 ULONG KeNumberProcessors();
 
+//define JITL Section data
+#define CURRENT_JITLS   1
 
+//Jitl list
+extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
+
+static PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
+
+LOUDDK_API_ENTRY
+DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName){
+    for(uint8_t i = 0; i < CURRENT_JITLS; i++){
+        if(strcmp(SectionName, SystemSections[i]->SectionName) == 0){
+            for(uint8_t j = 0 ; SystemSections[i]->JitlEntries->Name != 0; j++){
+                if(strcmp(FunctionName, SystemSections[i]->JitlEntries->Name) == 0){
+                    return (DRIVER_MODULE_ENTRY)SystemSections[i]->JitlEntries->Location;
+                }
+            }
+        }
+
+    }
+    return 0x00;
+};
+
+LOUDDK_API_ENTRY
+void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName){
+    for(uint8_t i = 0; i < CURRENT_JITLS; i++){
+        if(strcmp(SectionName, SystemSections[i]->SectionName) == 0){
+            if(SystemSections[i]->Detached){
+                return 0x00;
+            }
+            for(uint8_t j = 0 ; SystemSections[i]->JitlEntries->Name != 0; j++){
+                if(strcmp(FunctionName, SystemSections[i]->JitlEntries->Name) == 0){
+                    SystemSections[i]->BeingUsed = true;
+                    return (void*)SystemSections[i]->JitlEntries->Location;
+                }
+            }
+        }
+
+    }
+    return 0x00;
+};
 
 VOID
 RtlUnwind(
@@ -708,6 +748,11 @@ void InitializeStorePort_SYS(){
 
 }
 
+void InitializeJitlTables(){
+    //Ahci Function
+    SystemSections[0] = &AhciJitlDirectory;
+}
+
 LOUDDK_API_ENTRY void InitializeGenericTables(){
     
     InitializeNtKernelTable();
@@ -715,6 +760,7 @@ LOUDDK_API_ENTRY void InitializeGenericTables(){
     InitializeWDFLDR_SYS();
     InitializeStorePort_SYS();
     InitializeLousineKernelTables();
+    InitializeJitlTables();
 
 }
 

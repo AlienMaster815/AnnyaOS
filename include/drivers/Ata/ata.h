@@ -1062,7 +1062,7 @@ LouKeMallocAtaPrivateData(
 
 void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
-#define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
+#define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex = 0; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
 
 #ifdef __cplusplus
 }

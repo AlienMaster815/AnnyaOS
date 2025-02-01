@@ -14,3 +14,4 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath){
     FILE* ModuleHandle = fopen(ModuleNameAndPath);
     return (DRIVER_MODULE_ENTRY)LoadKernelModule((uintptr_t)ModuleHandle, ModuleNameAndPath);
 }
+

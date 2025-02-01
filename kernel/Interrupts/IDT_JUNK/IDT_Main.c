@@ -485,6 +485,7 @@ LOUSTATUS SetBasicInterrupts(bool Init){
             set_idt_gate(i, Handler[i], cs_value, 0, 0x8E);
         }
         set_idt_gate(0x80, Handler[0x80], cs_value, 1, 0xEE);
+        set_idt_gate(0x81, Handler[0x81], cs_value, 1, 0xEE);
 
         return 0;
     }

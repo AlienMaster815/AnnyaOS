@@ -19,7 +19,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV);
 static bool AhciDriverLoaded = false;
 static PDRIVER_OBJECT AhciDriverObject = 0x00;
 
-NTSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
+//NTSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 
 LOUDDK_API_ENTRY 
@@ -46,9 +46,13 @@ LOUSTATUS LookForStorageDevices(){
 
             if(PConfig->Header.SubClass == 0x06){
                 if(!AhciDriverLoaded){
+                    DRIVER_MODULE_ENTRY AhciDriverEntryPoint = LouKeGetJitlManagedFunction(".Ahci", "DriverEntry");
+                    if(!AhciDriverEntryPoint){
+                        continue;
+                    }
                     AhciDriverObject = (PDRIVER_OBJECT)LouMalloc(sizeof(DRIVER_OBJECT));
                     AhciDriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMalloc(sizeof(DRIVER_EXTENSION));
-                    AhciDriverEntry(AhciDriverObject, 0x00);
+                    AhciDriverEntryPoint(AhciDriverObject, 0x00);
                 }
 
                 uint64_t Device = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)AhciDriverObject->DeviceTable);

@@ -1,4 +1,7 @@
 
+#include <LouDDK.h>
+
+
 #define SATA_SIGNATURE_ATA      0x101
 #define SATA_SIGNATURE_ATAPI    0xEB140101
 #define SATA_SIGNATURE_SEMB     0xC33C0101
@@ -43,6 +46,7 @@
 #define AHCI_CAVIUM_ABAR                    0
 #define AHCI_GENERATION_5_CAVIUM_ABAR       4
 #define AHCI_LOONGSON_ABAR                  0
+
 
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_HOST_CONTROL  GenericHostController;

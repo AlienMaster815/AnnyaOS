@@ -1357,12 +1357,17 @@ ISR128:
 	iretq
 
 ISR129:
-	;hlt
 	pusha
-	push 129
-	mov [InterruptNum], ah
-	Handle
-	hlt
+	push rdx
+	push rsi
+	push rdi
+	pop rcx
+	pop rdx
+	pop r8
+	mov r9, rsp
+	call SYSCALLS
+	popa
+	iretq
 
 ISR130:
 	;hlt

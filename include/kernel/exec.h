@@ -224,6 +224,24 @@ DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath);
 void* LouKeLoadPeExecutable(string ExecutablePath);
 DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath);
 
+typedef struct _JITL_TABLE{
+    string      Name;
+    uint64_t    Location;
+}JITL_TABLE, * PJITL_TABLE;
+
+typedef struct _JITL_DIRECTORY {
+    string      SectionName;
+    void*       SectionStart;
+    void*       SectionEnd;
+    bool        Detached;
+    bool        BeingUsed;
+    JITL_TABLE  JitlEntries[];
+}JITL_DIRECTORY, * PJITL_DIRECTORY;
+
+#define SECTIONED_CODE(x) __attribute__((section(x)))
+
+DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName);
+void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName);
 
 #ifdef __cplusplus
 }
