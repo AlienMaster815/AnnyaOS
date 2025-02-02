@@ -108,7 +108,7 @@ spinlock_t* LouKeGetInterruptGlobalLock(){
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
     if(Interrupt < 32){
-        asm ("cli");
+        LouKeSetIrql(HIGH_LEVEL ,0x00);
 		InterruptHandler[Interrupt](Args);
         while(1);
     }

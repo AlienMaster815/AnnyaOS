@@ -205,6 +205,14 @@ void LouKeSetPanicInfo(
 		255
 	);
 	 
+	if(strcmp(DynamicErrorMessage, "Page Fault Protection Violation") == 0){
+		goto _PAGE_FUALT_PANIC;
+	}else {
+		goto _GENERIC_FUALT_PANIC;
+	}
+
+	_PAGE_FUALT_PANIC:
+
 	CurrentY += 28;
 	_vsnprintf((string)TmpString, 256, "Page Fault At Address:%h", PageFaultData);
 	PlaceFloatingString(
@@ -217,6 +225,7 @@ void LouKeSetPanicInfo(
 		255
 	);
 
+	_GENERIC_FUALT_PANIC:
 	while(1);
 }
 

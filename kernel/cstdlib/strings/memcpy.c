@@ -9,12 +9,12 @@ void* memcpy(void* destination, const void* source, size_t num) {
     // Check if the source and destination overlap
     if (dest > src && dest < src + num) {
         // Copy backwards if there's overlap to prevent data corruption
-        for (size_t i = num; i > 0; --i) {
+        for (size_t i = num; i > 0; i--) {
             dest[i - 1] = src[i - 1];
         }
     } else {
         // Standard forward copy
-        for (size_t i = 0; i < num; ++i) {
+        for (size_t i = 0; i < num; i++) {
             dest[i] = src[i];
         }
     }

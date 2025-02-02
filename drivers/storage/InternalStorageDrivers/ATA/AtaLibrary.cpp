@@ -20,7 +20,7 @@ LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     uint64_t DataSize = AtaHost->PrivateDataSize;
 
     for(uint8_t i = 0; i < AtaHost->PortCount; i++){
-        memcpy(AtaHostPrivateData, AtaHost->Ports[i].PortPrivateData, DataSize);
+        memcpy(AtaHost->Ports[i].PortPrivateData,AtaHostPrivateData, DataSize);
     }
 }
 

@@ -41,6 +41,13 @@
  * https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
+/*
+ * because this file in particular was created with a reference to the linux 
+ * kernels initialization of the AHCI controller for hardware compatibility
+ * it may be considered a derivative therfore for leagal reasons im am going to
+ * include a copy of the Linux SPDX Reference below
+ */
+
 
 #include "AhciMod.h"
 
@@ -504,6 +511,7 @@ static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     UNUSED AHCI_GENERIC_HOST_CONTROL TmpGhc = *Ghc;
     UNUSED uint32_t Tmp;
 
+
     Tmp = Ghc->GlobalHostControl;
     if(!(Tmp & (1 << 31))){
         Tmp |= (1 << 31);
@@ -513,6 +521,8 @@ static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         }
         sleep(1000);
     }
+
+    Tmp = Ghc->GlobalHostControl;
 
     if(!(Tmp & (1 << 31))){
         DbgPrint("AHCIMOD:Unable To Enable Ahci Conroller :: AE could not be set\r\n");
@@ -552,6 +562,8 @@ LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     NTSTATUS Status = STATUS_SUCCESS;
     P_PCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+
+    
     Status = ResetAhciHba(AtaHost);
     if(!NT_SUCCESS(Status)){
         return Status;
@@ -610,44 +622,13 @@ static void NvidiaMcp89AppleBiosUnlockAhciChip(P_PCI_DEVICE_OBJECT PDEV){
     //Ahci On Apple Bios Should Now Be Unlocked
 }
 
-SECTIONED_CODE(".Ahci.Code") 
-static void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort){
 
-}
-
-SECTIONED_CODE(".Ahci.Code") 
-static void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
-    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
-    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
-    uint32_t TmpControl;
-
-    ForEachAtaPort(AtaHost){
-        //skip port uinitialization if the port is a dummy port
-        if(!AtaHost->Ports[AtaPortIndex].Operations){
-            continue;
-        }
-        //otherwise intilaize the port
-        AhciInitializePort(&AtaHost->Ports[AtaPortIndex]);
-    }
-
-    TmpControl = Ghc->GlobalHostControl;
-    TmpControl |= (1 << 1);
-    Ghc->GlobalHostControl = TmpControl;
-    TmpControl = Ghc->GlobalHostControl;
-    if(TmpControl & (1 << 1)){
-        DbgPrint("Interrupts Are Now Active On The Host Controller\r\n");
-    }
-    else{
-        DbgPrint("Interrupts Were Unable Activate On The Host Controller\r\n");
-    }
-}
-
-SECTIONED_CODE(".Ahci.Code") 
-static void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
-    //TODO Initialize MV PATA
-
-    AhciInitializeController(AtaHost);
-}
+SECTIONED_CODE(".Ahci.Data")
+LOUSTATUS AhciStopCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
+SECTIONED_CODE(".Ahci.Data")
+void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
+SECTIONED_CODE(".Ahci.Data") 
+void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
 SECTIONED_CODE(".Ahci.Code") 
 NTSTATUS AddAhciDevice(
@@ -662,8 +643,8 @@ NTSTATUS AddAhciDevice(
     uint8_t BoardID = AhciDevices[AhciDeviceID].BoardID;
     P_PCI_DEVICE_OBJECT PDEV = LkdmDeviceObjectToPciDevice(Device);    
     UNUSED PAHCI_DRIVER_BOARD_INFORMATION BoardInformation = &AhciBoardInfomationTable[BoardID];
-    UNUSED int Abar = AHCI_STANDARD_ABAR;
-    UNUSED uint8_t PortCount;
+    int Abar = AHCI_STANDARD_ABAR;
+    uint8_t PortCount;
     //Get Pci Config Handle and update the handle
     PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
     LouKeHalGetPciConfiguration(PDEV, PciConfig);
@@ -745,17 +726,26 @@ NTSTATUS AddAhciDevice(
 
     //At this point we are able to grab the host and start filling out
     //private data from the information on the controller
-    UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKeHalGetPciVirtualBaseAddress(PciConfig, Abar);
-    PortCount = AHCI_GET_NP(Ghc->Capabilities);
+    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKeHalGetPciVirtualBaseAddress(PciConfig, Abar);
+   
+    PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
+
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeMallocAtaDevice(PDEV, PortCount);
     LouKeMallocAtaPrivateData(AtaHost, sizeof(AHCI_DRIVER_PRIVATE_DATA));
     PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
-        
+
+    PrivateAhciData->PortMap = (uint16_t)Ghc->PortsImplemented;
+
+    PrivateAhciData->StopCommandEngine = AhciStopCommandEngine;
+    PrivateAhciData->StartCommandEngine = AhciStartCommandEngine;
+
+    //Store the host Mmio into private data
+    PrivateAhciData->GenericHostController = Ghc;
     PrivateAhciData->AhciFlags |= (uint64_t)BoardInformation->AhciFlags;
     PrivateAhciData->AtaFlags |= (uint64_t)BoardInformation->AtaFlags;
     PrivateAhciData->PioFlags |= (uint64_t)BoardInformation->PioFlags;
     PrivateAhciData->DmaFlags |= (uint64_t)BoardInformation->DmaFlags;
-
+    
     //Nvidia MCP65 Chip Revisions 0xA1 and 0xA2 do not support
     //MSI so we should take note of this however the losuine
     //currently dosent support interrupts for storage devices
@@ -775,9 +765,6 @@ NTSTATUS AddAhciDevice(
     }
 
     //TODO: Enable SB600 64 bit and loose the restriction
-
-    //Store the host Mmio into private data
-    PrivateAhciData->GenericHostController = Ghc;
 
     if(AHCI_SUPPORTS_SNCQ(Ghc->Capabilities)){
         PrivateAhciData->AtaFlags |= ATA_FLAG_NCQ;
@@ -816,13 +803,12 @@ NTSTATUS AddAhciDevice(
         PrivateAhciData->DmaBits = 32;    
     }
 
-    PrivateAhciData->PortMap = (uint16_t)Ghc->PortsImplemented;
-
     LouKeForkAtaHostPrivateDataToPorts(AtaHost);
 
     ForEachAtaPort(AtaHost){
         PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[AtaPortIndex].PortPrivateData;
-        PrivateAhciData->GenericPort = (PAHCI_GENERIC_PORT)(uintptr_t)(0x100 + AtaPortIndex * 0x80);
+        PrivateAhciData->GenericPort = (PAHCI_GENERIC_PORT)(uintptr_t)((uintptr_t)Ghc + 0x100 + AtaPortIndex * 0x80);
+
         if(Ghc->PortsImplemented & (1 << AtaPortIndex)){
             AtaHost->Ports[AtaPortIndex].Operations = BoardInformation[BoardID].DevicesPortOperations;
         }else{
@@ -832,7 +818,6 @@ NTSTATUS AddAhciDevice(
 
 
     ResetAhcPciController(AtaHost);
-
     AhciPciInitializeController(AtaHost);
 
     LouKeHalPciSetMaster(PDEV);
@@ -848,15 +833,6 @@ NTSTATUS AddAhciDevice(
     DbgPrint("AddAhciDevice() STATUS_SUCCESS\r\n");
     return Status;
 }
-
-//    uint32_t ImportLookupRva;
-//    uint32_t TimeDateStamp;
-//    uint32_t ForwarderChain;
-//    uint32_t NameRva;
-//    uint32_t ImportAddressTableRva;
-
-
-
 
 //Unique name for AhciDriver due to the driver being built into the kernels binary
 //And we will be using the (LOUSINE SUBSYSTEM FOR NT DRIVERS) with Lousine function
@@ -883,7 +859,7 @@ NTSTATUS AhciDriverEntry(
     return STATUS_SUCCESS;
 }
 
-SECTIONED_CODE(".JitlDirectory") 
+SECTIONED_CODE(".JitlDirectory")
 JITL_DIRECTORY AhciJitlDirectory = {
     .SectionName = ".Ahci",
     .JitlEntries = {
