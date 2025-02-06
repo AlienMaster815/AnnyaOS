@@ -118,7 +118,7 @@ static inline void PageFlush(uint64_t addr) {
 }
 
 bool IsMegabytePage(uint64_t* PageAddress){
-    if((*PageAddress >> 7) & 0x01){
+    if(*PageAddress & (1 << 7)){
         return true;
     }
     return false;
@@ -267,7 +267,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
         if (L4Entry == 0 && L3Entry == 0) {
             // Case: Small page (4KB) in L2
             uint64_t oldL2 = PML4->PML2.entries[L2Entry];
-            if (((oldL2 >> 7) & 0x01) == 1) {
+            if (oldL2 & (1 << 7)) {
                 PageDirectoryL1 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                 if (!PageDirectoryL1) return false;
                 uint64_t PageIndex = oldL2 & ~(FLAGSSPACE);

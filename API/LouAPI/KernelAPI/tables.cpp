@@ -58,6 +58,9 @@ LOUDDK_API_ENTRY
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName){
     for(uint8_t i = 0; i < CURRENT_JITLS; i++){
         if(strcmp(SectionName, SystemSections[i]->SectionName) == 0){
+            if(SystemSections[i]->Detached){
+                return 0x00;
+            }
             for(uint8_t j = 0 ; SystemSections[i]->JitlEntries->Name != 0; j++){
                 if(strcmp(FunctionName, SystemSections[i]->JitlEntries->Name) == 0){
                     return (DRIVER_MODULE_ENTRY)SystemSections[i]->JitlEntries->Location;

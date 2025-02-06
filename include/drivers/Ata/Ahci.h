@@ -68,7 +68,6 @@ typedef struct _AHCI_PRIVATE_DATA_TEMPLATE_HEADER{
 }AHCI_PRIVATE_DATA_TEMPLATE_HEADER, * PAHCI_PRIVATE_DATA_TEMPLATE_HEADER;
 
 typedef struct _AHCI_GENERIC_PORT{
-    //CLB Address Must Be 1KB Aligned
     uint32_t PxCLB;
     uint32_t PxCLBU;
     uint32_t PxFB;
@@ -199,6 +198,15 @@ typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
 
 #define ICH_PCI_MAP_REGISTER 0x90
 #define PCS6_PCI_REGISTER    0x92
+
+#define AHCI_COMMAND_TABLE_HEADER_SIZE 0x80
+
+#define AHCI_COMMAND_TABLE_CDB_OFFSET 0x40
+
+#define AHCI_COMMAND_WRITE 1 << 5
+#define AHCI_COMMAND_ATAPI 1 << 9
+
+
 
 #pragma pack(pop)
 

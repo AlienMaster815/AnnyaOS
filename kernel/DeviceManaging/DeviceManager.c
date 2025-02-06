@@ -156,17 +156,6 @@ LOUSTATUS LouKeRegisterDevice(
 
             break;
         }    
-        case FILESYSTEM_DEVICE_T:{
-            LouRegisterFileSystemDevice(
-                TmpDevice,
-                PDEV,
-                Sdi,
-                LRE,
-                KeyData,
-                DevicePrivateData
-            );
-            break;
-        }
         default:
             Status = STATUS_UNSUCCESSFUL;
     }

@@ -9,7 +9,7 @@
 
 
 #include <LouDDK.h>
-
+/*
 [[maybe_unused]] static VolumeDescriptor PriVolDesc;
 [[maybe_unused]] static DirectoryTable CDT;
 
@@ -21,11 +21,10 @@ uint16_t convert_endian(uint16_t data) {
 }
 
 FSStruct ISO9660::ISOFileSystemScan(uint8_t DrvNum){
-    //Allocate Memory For Our Structures   
+    Allocate Memory For Our Structures   
 
     FSStruct FSS = DetectFileSystems(DrvNum);
-    
-    //Return The Pointer To Our Defined FS MAP
+    Return The Pointer To Our Defined FS MAP
     return FSS;
 }
 
@@ -34,8 +33,8 @@ void ISO9660::ISOReadDirectoryStructure(uint8_t DrvNum){
     VolumeDescriptor VD = ReadVolumeDescriptor(DrvNum);
 
     if ((VD.Identifier == 0x0000) && (VD.Type == 0) && (VD.Version == 0)) {
-                //LouPrint("No FileSystem On Device\n");
-                //At this point unmount/eject the drive or if its a burner burn it
+                LouPrint("No FileSystem On Device\n");
+                At this point unmount/eject the drive or if its a burner burn it
         return;
     }
 
@@ -146,9 +145,9 @@ VolumeDescriptor ISO9660::ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector, u
 
 
 
-        //LouPrint("Type is: %d\n", VD.Type);
-        //LouPrint("Identifier is: %s \n",VD.Identifier);
-        //LouPrint("Version is: %d\n", VD.Version);
+        LouPrint("Type is: %d\n", VD.Type);
+        LouPrint("Identifier is: %s \n",VD.Identifier);
+        LouPrint("Version is: %d\n", VD.Version);
 
 
         if ((VD.Type != 1) || (strcmp(VD.Identifier, "CD001") != 0) || (VD.Version != 1)) {
@@ -161,14 +160,14 @@ VolumeDescriptor ISO9660::ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector, u
             return VD;
         }
             
-        //If We are here we have successfully found an ISO Filesystem
+        If We are here we have successfully found an ISO Filesystem
 
-        //LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
+        LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
 
         uint16_t i = 0, BufferSelector = 0;
         bool condition = false;
 
-        //Parse Through The Rest Of The Data Buffer
+        Parse Through The Rest Of The Data Buffer
         do{
             if (false == condition) {
                 VD.Data[BufferSelector] = (uint8_t)(Test[i + 3] >> 8);
@@ -184,14 +183,14 @@ VolumeDescriptor ISO9660::ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector, u
         } while (i < ((2041 - 7) / 2));
 
 
-        //LouPrint("VD Parsed\n");
+        LouPrint("VD Parsed\n");
 
         LouFree((RAMADD)Test);
 
         return VD;
 }
 
-//Private Classes
+Private Classes
 
 FSStruct ISO9660::DetectFileSystems(uint8_t DrvNum){
     FSStruct FSS;
@@ -199,7 +198,7 @@ FSStruct ISO9660::DetectFileSystems(uint8_t DrvNum){
     
 
 
-    // Create A File System Structure
+     Create A File System Structure
     if((PVD.Type == ISO_PrimaryVolumeDescriptor) && (strncmp(PVD.Identifier, "CD001", 5) == 0) && (PVD.Version == 0x01)){
         int16_LSB_MSB VolumeSetSize;
         VolumeSetSize.LSB = (PVD.Data[120] << 8) | PVD.Data[121];
@@ -259,15 +258,15 @@ FILE* ISO9660::ISOLouKeFindDirectory(
 
     UNUSED uint8_t* FOO = (uint8_t*)(uint64_t)Test;
     
-    //Dir = GetNextDirectoryName(Dir);
+    Dir = GetNextDirectoryName(Dir);
     string NewDir = GetNextDirectoryName(Dir);
 
     string SearchDirectory = NewDir;
 
     bool FinalRecurse = false;
     while(1){
-        //LouPrint("String Length:%d\n", FOO[32]);
-        //LouPrint("String Value :%s\n", &FOO[33]);
+        LouPrint("String Length:%d\n", FOO[32]);
+        LouPrint("String Value :%s\n", &FOO[33]);
 
         if (FOO[32] == CurrenDirectoryStringLength(SearchDirectory) || FinalRecurse){
             if(strncmp((const char*)SearchDirectory, (const char*)&FOO[33], CurrenDirectoryStringLength(SearchDirectory)) == 0){
@@ -296,7 +295,7 @@ FILE* ISO9660::ISOLouKeFindDirectory(
                     FILE* Handle = (FILE*)LouMallocEx(RootSize, KILOBYTE_PAGE);
                     memcpy(Handle, FOO, RootSize);
                     LouPrint("Done With Recursion: Found File : FileSize:%h\n", RootSize);
-                    LouFree((RAMADD)Test); // Free before exiting
+                    LouFree((RAMADD)Test);  Free before exiting
                     return Handle;
                 }
                 else if(*(char*)(SearchDirectory + CurrenDirectoryStringLength(SearchDirectory)) == '.'){
@@ -314,7 +313,7 @@ FILE* ISO9660::ISOLouKeFindDirectory(
     }
 
     LouPrint("Done With Recursion: Could Not Find File\n");
-    LouFree((RAMADD)Test); // Free before exiting
+    LouFree((RAMADD)Test);  Free before exiting
     return 0;
 }
 
@@ -340,12 +339,12 @@ FILE* ISO9660::ISOLouKefopen(uint8_t DrvNum,string Path){
     LouKeAcquireSpinLock(&IsoLock, &LouIrql);
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(DrvNum);
 
-    //:/Dir/dir/.../file
+    :/Dir/dir/.../file
     LouPrint("Opening File:%s\n", Path);
 
-    //for(uint32_t i = (ROOT_DIRECTORY_START); i < (ROOT_DIRECTORY_END); i++){
-    //    LouPrint("DATA:%d ",VD.Data[i]);
-    //}
+    for(uint32_t i = (ROOT_DIRECTORY_START); i < (ROOT_DIRECTORY_END); i++){
+        LouPrint("DATA:%d ",VD.Data[i]);
+    }
 
     uint64_t LBA = 0;
     uint64_t DATA_LEN = 0;
@@ -371,7 +370,7 @@ FILE* ISO9660::ISOLouKefopen(uint8_t DrvNum,string Path){
 
 FILE* ISO9660::ISOLouKefclose(FILE* File){
 
-    //uint64_t FOO = *(uint64_t*)File;
+    uint64_t FOO = *(uint64_t*)File;
 
     LouFree((RAMADD)File);
 
@@ -402,3 +401,4 @@ uint32_t ISO9660::ISOGetDirecotrySize(uint8_t* DirectoryEntry){
 
     return DATA_LEN;
 }
+*/

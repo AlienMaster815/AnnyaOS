@@ -886,11 +886,20 @@ typedef struct _ATA_QUEUED_COMMAND{
     struct _LOUSINE_KERNEL_DEVICE_ATA_PORT* Port;
     bool     WriteCommand;
     bool     CommandCompleted;
+    uint8_t  Device;
+    uint32_t Auxillery;
     uint32_t Command;
     uint32_t Lbal;
     uint32_t Lbam;
     uint32_t Lbah;
+    uint8_t  Feature;
+    uint32_t HobLbal;
+    uint32_t HobLbam;
+    uint32_t HobLbah;
+    uint8_t  HobFeature;
     uint32_t SectorCount;
+    uint32_t HobSectorCount;
+    uint8_t  Control;
     uint64_t DataAddress;
     uint64_t DataSize;
     bool     PacketCommand;
@@ -898,6 +907,7 @@ typedef struct _ATA_QUEUED_COMMAND{
     //PioData
     uint16_t MaxByteSize;
     uint8_t  ScsiCommand[16];
+    uint8_t  HardwareTag;
 }ATA_QUEUED_COMMAND, * PATA_QUEUED_COMMAND;
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
@@ -926,6 +936,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     uint8_t                                 ScsiMaxCommandLength;
     bool                                    InNativeMode;
     bool                                    NativeSupported;
+    bool                                    DeviceAttached;
     uint8_t                                 CommandLengthFlags;
 }LOUSINE_KERNEL_DEVICE_ATA_PORT, * PLOUSINE_KERNEL_DEVICE_ATA_PORT;
 
@@ -945,11 +956,14 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
     int         (*CheckAtapiDma)            (PATA_QUEUED_COMMAND QueuedCommand);
     LOUSTATUS   (*PrepCommand)              (PATA_QUEUED_COMMAND QueuedCommand);
     LOUSTATUS   (*IssueCommand)             (PATA_QUEUED_COMMAND QueuedCommand);
+    void        (*CleanupCommand)           (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     LOUSTATUS   (*ResetPort)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     void        (*FillRtf)                  (PATA_QUEUED_COMMAND QueuedCommand);
     void        (*FillNcqRtf)               (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort, uint64_t DoneMask);                  
     LOUSTATUS   (*HardReset)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     LOUSTATUS   (*HostReset)                (PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
+    void        (*PortStart)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    void        (*PortStop)                 (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
 }LOUSINE_ATA_PORT_OPERATIONS, * PLOUSINE_ATA_PORT_OPERATIONS;
 
 
@@ -1063,6 +1077,8 @@ LouKeMallocAtaPrivateData(
 void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
 #define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex = 0; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
+
+void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis);
 
 #ifdef __cplusplus
 }

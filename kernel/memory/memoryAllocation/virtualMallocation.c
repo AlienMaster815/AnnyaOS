@@ -55,7 +55,7 @@ void LouKeMapContinuousMemoryBlock(
     uint64_t i = 0;
 
     while(i < size){
-        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) < size)){
+        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
             LouMapAddress(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE);
             i += MEGABYTE_PAGE;
         }

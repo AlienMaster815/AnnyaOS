@@ -302,6 +302,7 @@ void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_
 void CheckForPs2Mouse();
 void InitializeInternalChipsetHostDriver();
 uint8_t LouKeGetNumberOfStorageDevices();
+void InitializeFileSystemManager();
 
 static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
@@ -343,7 +344,24 @@ KERNEL_ENTRY Lou_kernel_start(
         while(1);
     }
 
-    FileSystemSetup();
+    //void* 
+    //ReadDrive(
+    //    uint8_t Drive,
+    //    uint64_t LBA,
+    //    uint32_t SectorCount,
+    //    uint64_t* BufferSize,
+    //    LOUSTATUS* State
+    //);
+
+    //uint64_t BufferSize = 2048;
+    //LOUSTATUS Current = STATUS_SUCCESS;
+    //UNUSED uint8_t* Foo = (uint8_t*)ReadDrive(0, 1,1,&BufferSize, &Current);
+
+    //LouPrint("Foo:%h\n",Foo[0]);
+
+    //InitializeFileSystemManager();
+    while(1);
+    
     ScanTheRestOfHarware();
 
     //SMPInit();

@@ -36,7 +36,7 @@ LOUSTATUS* State
 			SectorCount = BufferChecksum;
 			BufferChecksum = BufferChecksum * 2048;
 		}
-		Result = LouMalloc(BufferChecksum);//, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
+		Result = LouKeMalloc(BufferChecksum, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 		PLOUSINE_KERNEL_DEVICE_ATA_PORT Port = LouKeGetAtaStoragePortObject(Drive);
 		*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result);
 	}

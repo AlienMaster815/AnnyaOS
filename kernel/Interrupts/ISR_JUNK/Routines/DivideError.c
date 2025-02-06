@@ -58,7 +58,7 @@ void DivideByZero(uint64_t FaultingStackP) {
 
     PWINDHANDLE Bsod = SetBlueScreenPannel();
 
-    CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP + 8);
+    CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP);
 
 
     LouKeSetPanicInfo(

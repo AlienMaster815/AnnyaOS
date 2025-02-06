@@ -59,6 +59,8 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciGenericHardReset,
     .HostReset = ResetAhcPciController,
+    .PortStart = AhciStartPort,
+    .PortStop = AhciStopPort,
 };
 
 SECTIONED_CODE(".Ahci.Data") 
@@ -67,6 +69,8 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciVt8251HardReset,
     .HostReset = ResetAhcPciController,
+    .PortStart = AhciStartPort,
+    .PortStop = AhciStopPort,
 };
 
 SECTIONED_CODE(".Ahci.Data") 
@@ -75,24 +79,29 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciP5wdhHardReset,
     .HostReset = ResetAhcPciController,
+    .PortStart = AhciStartPort,
+    .PortStop = AhciStopPort,
 };
 
 SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
-    .PrepCommand = AhciGenricDMAIssueCommand,
+    .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciAvnHardReset,
     .HostReset = ResetAhcPciController,
+    .PortStart = AhciStartPort,
+    .PortStop = AhciStopPort,
 };
 
 
 SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
-    .PrepCommand = AhciGenricDMAIssueCommand,
+    .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciGenericHardReset,
     .HostReset = ResetAhcPciController, 
 };
+
 //endof ATA Module Structured Operations
 
 SECTIONED_CODE(".Ahci.Data") 

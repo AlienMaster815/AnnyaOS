@@ -45,6 +45,8 @@ LOUSTATUS LookForStorageDevices(){
             PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
 
             if(PConfig->Header.SubClass == 0x06){
+                //Continue for now
+                continue;
                 if(!AhciDriverLoaded){
                     DRIVER_MODULE_ENTRY AhciDriverEntryPoint = LouKeGetJitlManagedFunction(".Ahci", "DriverEntry");
                     if(!AhciDriverEntryPoint){
@@ -73,7 +75,6 @@ LOUSTATUS LookForStorageDevices(){
                     LouFree((RAMADD)NtPdev);
                 }
                 //todo add module to module list
-                while(1);    
             }
 
             if(PConfig->Header.SubClass == 0x01){
@@ -89,21 +90,20 @@ LOUSTATUS LookForStorageDevices(){
 
     LouKeClosePciDeviceGroup(StorageDevices);
 
-    Config.Header.BaseClass = 0x0C;
-    Config.Header.SubClass = 0x03;
+    //Config.Header.BaseClass = 0x0C;
+    //Config.Header.SubClass = 0x03;
 
-    NumberOfPciDevices = LouKeGetPciCountByType(&Config);
-    StorageDevices = LouKeOpenPciDeviceGroup(&Config);
-	if(StorageDevices){
-        for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-            //P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i].PDEV;
-            //LOUSB_DRIVER_INIT(PDEV);
-        }
-    }
+    //NumberOfPciDevices = LouKeGetPciCountByType(&Config);
+    //StorageDevices = LouKeOpenPciDeviceGroup(&Config);
+	//if(StorageDevices){
+    //    for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
+    //        //P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i].PDEV;
+    //        //LOUSB_DRIVER_INIT(PDEV);
+    //    }
+    //}
 
-    LouKeClosePciDeviceGroup(StorageDevices);
+    //LouKeClosePciDeviceGroup(StorageDevices);
 
     LouPrint("Done Scanning For Storage Devices\n");
-
     return STATUS_SUCCESS;
 }

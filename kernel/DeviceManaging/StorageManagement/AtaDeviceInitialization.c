@@ -27,24 +27,14 @@ uint8_t LouKeAtaGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtapiPort);
 LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable){
     UNUSED PLOUSINE_KERNEL_DEVICE_ATA_PORT PortToInitialize = PortTable->KeyData;
     LOUSTATUS Status = STATUS_SUCCESS;
-    if(!PortToInitialize->Operations){
-        LouPrint("ERROR: Port Has No Or Invalid Operations\n");
-        return STATUS_UNSUCCESSFUL;
-    }
-    if(!PortToInitialize->Operations->IssueCommand){
-        LouPrint("ERROR: Port Does Not Have A Issue Command\n");
-        return STATUS_UNSUCCESSFUL;
+
+    if(PortToInitialize->Operations->PortStart){
+        PortToInitialize->Operations->PortStart(PortToInitialize);
     }
 
-    void* IdBuffer = LouKeMalloc(512, WRITEABLE_PAGE | PRESENT_PAGE | UNCACHEABLE_PAGE);
 
-    if(PortToInitialize->PortScsiDevice){
-       Status = LouKeAtaSendAtapiIdentifyCommand(PortToInitialize, IdBuffer);
-    }
 
     LouPrint("Initialization Of ATA Port Successfull\n");
-
-    while(1);
     return Status;
 }
 
@@ -72,15 +62,15 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
         *PortTable = *DeviceDirectoryTable;
         PortTable->KeyData = &AtaHost->Ports[i];
         PortTable->DevicePrivateData = &AtaHost->Ports[i];
-        //Result = DeviceManagerInitializeAtaPortDevice(PortTable);
-        //if(Result != STATUS_SUCCESS){
-        //    return Result;
-        //}
+        Result = DeviceManagerInitializeAtaPortDevice(PortTable);
+        if(Result != STATUS_SUCCESS){
+            return Result;
+        }
         Result = LouRegisterStorageDevice(PortTable);
         if(Result != STATUS_SUCCESS){
             return Result;
         }
     }
-
+    
     return Result;
 }

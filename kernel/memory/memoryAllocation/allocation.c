@@ -630,7 +630,7 @@ void* LouKeMallocEx(
         LouKeMapContinuousMemoryBlock(TmpTracker->Chunk.PAddress, TmpTracker->Chunk.VAddress,NeededPages * MEGABYTE_PAGE, AllocationFlags);
         PageTracksCount++;
         _LOU_KE_MALLOC_WITH_FLAGS_EX_COMPATIBLE_BLOCK_FOUND:
-
+        
         Pointer = LouKeMallocFromMapEx(
             AllocationSize,
             Alignment,
@@ -640,6 +640,8 @@ void* LouKeMallocEx(
             &VMemTracks
         );
     }
+    
+
     memset((void*)Pointer,0, AllocationSize);
     VMemTracksCount++;
     return (void*)Pointer;
