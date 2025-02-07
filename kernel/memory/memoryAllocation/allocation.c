@@ -237,8 +237,8 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
                             uint64_t end = start + AddressBlock[i].size;
 
                             // Check if the new allocation overlaps with an existing block
-                            if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
-                                ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+                            if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
+                                ((AlignmentCheck + BytesToAllocate) >= start&& (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
                                 (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
                                 addrssSpaceCheck = false;
                                 break;
@@ -365,8 +365,8 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                         uint64_t end = start + AddressBlock[i].size;
 
                         // Check if the new allocation overlaps with an existing block
-                        if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
-                            ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+                        if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
+                            ((AlignmentCheck + BytesToAllocate) >= start&& (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
                             (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
                             addrssSpaceCheck = false;
                             break;
@@ -381,8 +381,8 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                             uint64_t end = start + AllocationBlocks[k][i].size;
 
                             // Check if the new allocation overlaps with an existing block
-                            if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
-                                ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+                            if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
+                                ((AlignmentCheck + BytesToAllocate) >= start&& (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
                                 (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
                                 addrssSpaceCheck = false;
                                 break;
@@ -504,8 +504,8 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
             uint64_t end = start + AddressBlock[i].size;
 
             // Check if the new allocation overlaps with an existing block
-            if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
-                ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+            if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
+                ((AlignmentCheck + BytesToAllocate) >= start&& (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
                  (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
                 addrssSpaceCheck = false;
                 break;
@@ -520,8 +520,8 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                 uint64_t end = start + AllocationBlocks[k][i].size;
 
                 // Check if the new allocation overlaps with an existing block
-            if ((AlignmentCheck >= start && AlignmentCheck < end) ||  // Start within an existing block
-                ((AlignmentCheck + BytesToAllocate) > start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+            if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
+                ((AlignmentCheck + BytesToAllocate) >= start&& (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
                  (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
                     addrssSpaceCheck = false;
                     break;
@@ -630,7 +630,7 @@ void* LouKeMallocEx(
         LouKeMapContinuousMemoryBlock(TmpTracker->Chunk.PAddress, TmpTracker->Chunk.VAddress,NeededPages * MEGABYTE_PAGE, AllocationFlags);
         PageTracksCount++;
         _LOU_KE_MALLOC_WITH_FLAGS_EX_COMPATIBLE_BLOCK_FOUND:
-        
+
         Pointer = LouKeMallocFromMapEx(
             AllocationSize,
             Alignment,
@@ -640,8 +640,6 @@ void* LouKeMallocEx(
             &VMemTracks
         );
     }
-    
-
     memset((void*)Pointer,0, AllocationSize);
     VMemTracksCount++;
     return (void*)Pointer;

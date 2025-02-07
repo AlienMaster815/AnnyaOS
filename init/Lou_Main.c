@@ -358,8 +358,9 @@ KERNEL_ENTRY Lou_kernel_start(
     //UNUSED uint8_t* Foo = (uint8_t*)ReadDrive(0, 1,1,&BufferSize, &Current);
 
     //LouPrint("Foo:%h\n",Foo[0]);
-
-    //InitializeFileSystemManager();
+    InitializeFileSystemManager();
+    
+    
     while(1);
     
     ScanTheRestOfHarware();

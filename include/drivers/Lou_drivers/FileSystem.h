@@ -9,10 +9,11 @@ typedef uint8_t LOUSINE_KERNEL_STORAGE_DEVICE_ID;
 typedef struct _LOUSINE_KERNEL_FILESYSTEM{
     LOUSINE_KERNEL_DRIVE_ID                     DriveID;
     uint8_t                                     PortID;
-    struct _LOUSINE_KERNEL_FILESYSTEM*          (*FileSystemScan)(LOUSINE_KERNEL_STORAGE_DEVICE_ID DriveNumber);
+    bool                                        SystemDisk;
+    struct _LOUSINE_KERNEL_FILESYSTEM*          (*FileSystemScan)(uint8_t PortNumber);
     LOUSTATUS                                   (*FileSystemFormatDisk)(LOUSINE_KERNEL_STORAGE_DEVICE_ID DriveNumber, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
-    void*                                       (*FileSystemOpen)(int16_t* FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
-    void                                        (*FileSystemClos)(int16_t* FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
+    FILE*                                       (*FileSystemOpen)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
+    void                                        (*FileSystemClose)(string FilePath, FILE* File, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
     uint64_t                                    FileAllocationTableSector;
 }LOUSINE_KERNEL_FILESYSTEM, * PLOUSINE_KERNEL_FILESYSTEM;
 

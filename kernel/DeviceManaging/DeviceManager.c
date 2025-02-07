@@ -27,17 +27,10 @@ LOUSTATUS LouRegisterStorageDevice(
     PDEVICE_DIRECTORY_TABLE Table
 );
 
-void LouRegisterFileSystemDevice(
-    PDEVICE_DIRECTORY_TABLE Table,
-    P_PCI_DEVICE_OBJECT PDEV, 
-    SYSTEM_DEVICE_IDENTIFIER Sdi,
-    string LRE,
-    void* KeyData,
-    void* DevicePrivateData
-);
 
 LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
 
+LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem);
 
 LOUSTATUS LouKeRegisterDevice(
     P_PCI_DEVICE_OBJECT PDEV, 
@@ -156,6 +149,10 @@ LOUSTATUS LouKeRegisterDevice(
 
             break;
         }    
+        case FILESYSTEM_DEVICE_T:{
+            Status = LouRegisterFileSystemDevice(TmpDevice);
+            break;
+        }
         default:
             Status = STATUS_UNSUCCESSFUL;
     }

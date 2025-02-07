@@ -340,8 +340,8 @@ bool RangeDoesNotInterfere(
 ){   
     uint64_t end = AddressOfBlock + SizeOfBlock;
 
-    if ((AddressForCheck >= AddressOfBlock && AddressForCheck < end) ||  
-       ((AddressForCheck + SizeOfCheck) > AddressOfBlock && (AddressForCheck + SizeOfCheck) <= end) ||
+    if ((AddressForCheck >= AddressOfBlock && AddressForCheck <= end) ||  
+       ((AddressForCheck + SizeOfCheck) >= AddressOfBlock && (AddressForCheck + SizeOfCheck) <= end) ||
        (AddressForCheck <= AddressOfBlock && (AddressForCheck + SizeOfCheck) >= end)) { 
         return false;
     }

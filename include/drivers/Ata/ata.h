@@ -937,6 +937,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     bool                                    InNativeMode;
     bool                                    NativeSupported;
     bool                                    DeviceAttached;
+    bool                                    UsingDma;
     uint8_t                                 CommandLengthFlags;
 }LOUSINE_KERNEL_DEVICE_ATA_PORT, * PLOUSINE_KERNEL_DEVICE_ATA_PORT;
 
