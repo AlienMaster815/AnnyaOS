@@ -454,7 +454,6 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     //before we intitalize completly lets find if the port
     //is a packet device before we might end up creating 
     //errors
-    AhciPort->UsingDma = true;
     AhciPort->PortScsiDevice = AhciDetectAttachedDevice(AhciPort);
     //TODP: safeguard 32 bit only systems
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;

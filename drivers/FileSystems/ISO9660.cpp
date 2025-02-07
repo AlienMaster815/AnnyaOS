@@ -65,8 +65,8 @@ static FILE* ISOLouKeFindDirectory(
 
     bool FinalRecurse = false;
     while(1){
-        LouPrint("String Length:%d\n", FOO[32]);
-        LouPrint("String Value :%s\n", &FOO[33]);
+        //LouPrint("String Length:%d\n", FOO[32]);
+        //LouPrint("String Value :%s\n", &FOO[33]);
 
         if (FOO[32] == CurrenDirectoryStringLength(SearchDirectory) || FinalRecurse){
             if(strncmp((const char*)SearchDirectory, (const char*)&FOO[33], CurrenDirectoryStringLength(SearchDirectory)) == 0){
@@ -80,7 +80,7 @@ static FILE* ISOLouKeFindDirectory(
                 if(RootSize){
                     BufferSize = ((RootSize + 2047) / 2048) * 2048;
                 }
-
+                //LouPrint("BufferSize:%h\n", BufferSize);
                 LouKeFree((RAMADD)Test);
                 uint16_t* Test = (uint16_t*)ReadDrive(
                     DrvNum,
@@ -94,7 +94,7 @@ static FILE* ISOLouKeFindDirectory(
                 if((FinalRecurse) && (RootSize)){
                     FILE* Handle = (FILE*)LouMallocEx(RootSize, KILOBYTE_PAGE);
                     memcpy(Handle, FOO, RootSize);
-                    LouPrint("Done With Recursion: Found File : FileSize:%h\n", RootSize);
+                    //LouPrint("Done With Recursion: Found File : FileSize:%h\n", RootSize);
                     LouKeFree((RAMADD)Test);  //Free before exiting
                     return Handle;
                 }
@@ -112,7 +112,7 @@ static FILE* ISOLouKeFindDirectory(
         }
     }
 
-    LouPrint("Done With Recursion: Could Not Find File\n");
+    //LouPrint("Done With Recursion: Could Not Find File\n");
     LouKeFree((RAMADD)Test);  //Free before exiting
     return 0;
 }

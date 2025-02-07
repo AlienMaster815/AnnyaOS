@@ -30,7 +30,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.4.07 Build-35";
+string KERNEL_VERSION = "0.4.08 Build-212";
 
 #ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";
@@ -359,10 +359,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     //LouPrint("Foo:%h\n",Foo[0]);
     InitializeFileSystemManager();
-    
-    
-    while(1);
-    
+        
     ScanTheRestOfHarware();
 
     //SMPInit();
@@ -392,6 +389,7 @@ void InitializeUserSpace(){
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
+    while(1);
 
     LouUpdateWindow(
         GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,

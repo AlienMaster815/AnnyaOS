@@ -126,6 +126,12 @@ LOUSTATUS LouKeAtaReadDevice(
     LouPrint("LOUSINE ATA LIB:Preparing To Read Ata Device\n");
     LOUSTATUS Result = STATUS_SUCCESS;
     ATA_QUEUED_COMMAND Command;
+
+    if(SectorCount > AtaPort->SectorCountLimit){
+        //LouPrint("Sector Count Exceeds Device Limitations Runing Multiple Commands\n");
+        //SectorCount = AtaPort->SectorCountLimit;
+    }
+
     Command.WriteCommand= false;
     Command.DataAddress = (uint64_t)DataBuffer;
     Command.DataSize    = BufferSize;

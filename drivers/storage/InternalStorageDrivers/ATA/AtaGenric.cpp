@@ -134,7 +134,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             //LouPrint("Waiting On Device\n");
             Status = COMMAND_READ_STATUS_PORT;
             while(AtaPort->PollTimer >= PollCount){
-                if((!(Status & 0x80) && (Status & 0x08)) || (Status & 0x01)){
+                if((((!(Status & 0x80)) && (Status & 0x08)) || (Status & 0x01))){
                     break;
                 }
                 Status = COMMAND_READ_STATUS_PORT;
@@ -143,12 +143,12 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             }
 
             if(PollCount >= AtaPort->PollTimer){
-                LouPrint("Error Timeout Occoured\n");
+                //LouPrint("Error Timeout Occoured\n");
                 MutexUnlock(&AtaPort->OperaionLock);
                 return STATUS_TIMEOUT;
             }
             if(Status & 0x01){
-                LouPrint("Device Error\n");
+                //LouPrint("Device Error\n");
                 MutexUnlock(&AtaPort->OperaionLock);
                 return STATUS_IO_DEVICE_ERROR;
             }
@@ -156,17 +156,17 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             PollCount = 0;
             //Output the Packet Command
             COMMAND_WRITE_DATA_PORT_BUFFER((uint8_t*)&QueuedCommand->ScsiCommand[0], 6);
-            
+
             for(uint32_t i = 0 ; i < QueuedCommand->SectorCount; i++){
                 while(1){
                     Status = COMMAND_READ_STATUS_PORT;
                     if(Status & 0x01){
                         return STATUS_IO_DEVICE_ERROR;
                     }
-                    if(!(Status & 0x80) && (Status & 0x08)){
+                    if((!(Status & 0x80)) && (Status & 0x08)){
                         break;
                     }
-                    sleep(100);
+                    AtaIoWait400ns(ControlPort);
                 }
                 int DataSize = COMMAND_READ_LBAM_PORT_LBA28 | (COMMAND_READ_LBAH_PORT_LBA28 << 8);
                 COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)Data + (i * 0x800)), DataSize / 2);
@@ -253,6 +253,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[0].CommandIoAddress = COMPATIBILITY_PRIMARY_COMMAND_BASE;
     LegacyAtaHost->Ports[0].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[0].PollTimer        = 10000;//Ten Second Timer
+    LegacyAtaHost->Ports[0].SectorCountLimit = 1;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[0]);
     
     //Fill Port 2
@@ -260,6 +261,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[1].CommandIoAddress = COMPATIBILITY_PRIMARY_COMMAND_BASE;
     LegacyAtaHost->Ports[1].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[1].PollTimer        = 10000;//Ten Second Timer
+    LegacyAtaHost->Ports[1].SectorCountLimit = 1; 
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[1]);
 
     //Fill Port 3
@@ -267,6 +269,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[2].CommandIoAddress = COMPATIBILITY_SECONDARY_COMMAND_BASE;
     LegacyAtaHost->Ports[2].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[2].PollTimer        = 10000;//Ten Second Timer
+    LegacyAtaHost->Ports[2].SectorCountLimit = 1; 
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[2]);
     
     //Fill Port 4
@@ -274,6 +277,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[3].CommandIoAddress = COMPATIBILITY_SECONDARY_COMMAND_BASE;
     LegacyAtaHost->Ports[3].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[3].PollTimer        = 10000;//Ten Second Timer
+    LegacyAtaHost->Ports[3].SectorCountLimit = 1; 
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[3]);
 
 
