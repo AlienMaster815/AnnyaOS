@@ -128,9 +128,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             FuckItSaveEverything(&ContextHandle);
         }
-
         for(uint32_t i = 0 ; i < InterruptRouterTable[Interrupt].ListCount; i++){
-
             if(TmpEntry->InterruptHandler){
                 if(TmpEntry->OverideData){
                     TmpEntry->InterruptHandler(TmpEntry->OverideData);
@@ -139,18 +137,16 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
                     TmpEntry->InterruptHandler(Args);
                 }
             }
-
             if(TmpEntry->List.NextHeader){
                 TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
             }
         }
-
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             FuckItRestoreEverything(&ContextHandle);
         }
         local_apic_send_eoi();
         MutexUnlock(&InterruptRouterTable[Interrupt].InterruptMutex);
-        LouKeSetIrql(PASSIVE_LEVEL, &Irql);    
+        LouKeSetIrql(Irql, 0x00);    
         return;
     }
 

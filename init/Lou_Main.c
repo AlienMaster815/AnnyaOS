@@ -105,6 +105,7 @@ void LouKeDrsdDrawDesktopBackground(
     uint16_t DrsdFileType
 );
 
+void UpdateThreadManager(uint64_t Rsp);
 
 void SetupGDT();
 extern void ReloadGdt();
@@ -131,7 +132,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
     RegisterInterruptHandler(SegmentNotPresent, INTERRUPT_SERVICE_ROUTINE_11, false, 0);
     RegisterInterruptHandler(StackSegmentFault, INTERRUPT_SERVICE_ROUTINE_12, false, 0);
     RegisterInterruptHandler(GPF, INTERRUPT_SERVICE_ROUTINE_13, false, 0);
-    //RegisterInterruptHandler(PageFault, INTERRUPT_SERVICE_ROUTINE_14, false, 0);
+    RegisterInterruptHandler(PageFault, INTERRUPT_SERVICE_ROUTINE_14, false, 0);
     RegisterInterruptHandler(x87FloatPointError, INTERRUPT_SERVICE_ROUTINE_16, false, 0);
     RegisterInterruptHandler(AlignmentCheck, INTERRUPT_SERVICE_ROUTINE_17, false, 0);
     RegisterInterruptHandler(MachineCheck, INTERRUPT_SERVICE_ROUTINE_18, false, 0);
@@ -139,7 +140,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
     RegisterInterruptHandler(VirtualizationException, INTERRUPT_SERVICE_ROUTINE_20, false, 0);
     RegisterInterruptHandler(ControlProtectionException, INTERRUPT_SERVICE_ROUTINE_21, false, 0);
     RegisterInterruptHandler(SYSCALLS, 0x80, false, 0);
-    RegisterInterruptHandler(Clock, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
+    RegisterInterruptHandler(UpdateThreadManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
     RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
 

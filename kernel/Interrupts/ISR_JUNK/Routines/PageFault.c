@@ -82,13 +82,13 @@ void PageFault(uint64_t FaultingStackP) {
 
     
     uint64_t VAddress = get_cr2();
-    uint64_t PAddress = 0x00;
-    LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
+    //uint64_t PAddress = 0x00;
+    //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
      
-    RequestPhysicalAddress(VAddress, &PAddress);
+    //RequestPhysicalAddress(VAddress, &PAddress);
 
     // Check for specific error causes, e.g.:
-    if (InterruptCode & 0x1) {
+    //if (InterruptCode & 0x1) {
         PWINDHANDLE Bsod = SetBlueScreenPannel();
 
         CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP);
@@ -118,22 +118,22 @@ void PageFault(uint64_t FaultingStackP) {
             FaultData->ss,
             VAddress
         );
-        while(1);
-    } else {
-        if(PAddress != 0x00){
-            //PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
-            LouPrintPanic("Physicall Address Is:%h\n", PAddress);
-            LouKeMapContinuousMemoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
-        }
-        else{
-            LouPrintPanic("Allocateing New Page\n");
-            PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
-            //LouKeMapcontinuousMemmoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
-            LouKeMapContinuousMemoryBlock(VAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
-        }
-    }
+        //while(1);
+    //} else {
+    //    if(PAddress != 0x00){
+    //        //PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
+    //        LouPrintPanic("Physicall Address Is:%h\n", PAddress);
+    //        LouKeMapContinuousMemoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
+    //    }
+    //    else{
+    //        LouPrintPanic("Allocateing New Page\n");
+    //        PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
+    //        //LouKeMapcontinuousMemmoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
+    //        LouKeMapContinuousMemoryBlock(VAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
+    //    }
+    //}
 
-    clear_cr2();
+    //clear_cr2();
 }
 
 

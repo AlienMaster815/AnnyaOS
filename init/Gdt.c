@@ -139,6 +139,12 @@ void SetupGDT(){
     void* SStack = LouMallocEx(64 * KILOBYTE, 16);
     Tss->IST1 = (uintptr_t)SStack + (64 * KILOBYTE);
 
+    SStack = LouMallocEx(64 * KILOBYTE, 16);
+    Tss->IST2 = (uintptr_t)SStack + (64 * KILOBYTE);
+
+    SStack = LouMallocEx(64 * KILOBYTE, 16);
+    Tss->IST3 = (uintptr_t)SStack + (64 * KILOBYTE);
+
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
         (uintptr_t)Tss, sizeof(TSS) - 1,

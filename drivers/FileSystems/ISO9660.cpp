@@ -127,19 +127,16 @@ static FILE* ISOLouKeFindDirectory(
     while(1){
         if (IsIso9660ItemOfSearch(FOO, SearchDirectory)){
             
-            LouPrint("String Length:%d\n", FOO[32]);
-            LouPrint("String Value :%s\n", &FOO[33]);
+            //LouPrint("String Length:%d\n", FOO[32]);
+            //LouPrint("String Value :%s\n", &FOO[33]);
             
             //First We are going to look at the LBA
             //to see where the Directory Exists in
             //memory
             RootLBA = ISOGetLBA(FOO);
-            LouPrint("LBA:%d\n", RootLBA);
             //Theen we are going to get the root 
             //size from the directory structure
-            RootSize = ISOGetDirecotrySize(FOO);
-            LouPrint("Size:%d\n", RootSize);
-            
+            RootSize = ISOGetDirecotrySize(FOO);            
             //now if the root size is not 0
             //because some entries will be we
             //are going to round up the data 
@@ -156,7 +153,7 @@ static FILE* ISOLouKeFindDirectory(
             
             //before we read the Next sector 
             //we need to return if this is a
-            //seek friom the OS otherwise we
+            //seek from the OS otherwise we
             //will just waste time reading if
             //we are just looking for a file
             //or Directory
@@ -181,8 +178,8 @@ static FILE* ISOLouKeFindDirectory(
                 //if the end of the path
                 //is reached then the file
                 //is loaded and can be return
-                FILE* LoadedFile = (FILE*)LouMallocEx(RootSize, KILOBYTE_PAGE);
-                memcpy(LoadedFile, FOO, RootSize);
+                FILE* LoadedFile = (FILE*)LouMallocEx(BufferSize, KILOBYTE_PAGE);
+                memcpy(LoadedFile, FOO, BufferSize);
                 LouKeFree(FOO);
                 return LoadedFile;
             }

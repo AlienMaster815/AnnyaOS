@@ -293,30 +293,22 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             &SectionHeader,
             0x00
         );
-        UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
-        LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
+        //UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
+        //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
-        LouKeLogKernelBinary(BinaryObject, true);
+        //LouKeLogKernelBinary(BinaryObject, true);
 
         uint64_t allocatedModuleVirtualAddress =
-        (uint64_t)LouMallocEx(
+        (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE
+            KILOBYTE_PAGE,
+            KERNEL_PAGE_WRITE_PRESENT
         );
-        LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
-
-        for (uint32_t i = 0; i < TotalNeededVM; i += KILOBYTE_PAGE) {
-            LouMapAddress(
-                allocatedModuleVirtualAddress + i,
-                allocatedModuleVirtualAddress + i,
-                KERNEL_PAGE_WRITE_PRESENT,
-                KILOBYTE_PAGE
-            );
-        }
+        //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
 
 
         memset((void*)allocatedModuleVirtualAddress, 0, TotalNeededVM);
-        LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
+        //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
 
         // Align section addresses
         uint64_t sectionAlignment = PE64Header->sectionAlignment;
@@ -325,11 +317,11 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress + sectionAlignment - 1) & ~(sectionAlignment - 1);
 
             //LouPrint("Section %s: aligned address %h\n", SectionHeader[i].name, alignedVirtualAddress);
-            LouKeLogBinarySection(
-                BinaryObject,
-                i,
-                &SectionHeader[i]
-            );
+            //LouKeLogBinarySection(
+            //    BinaryObject,
+            //    i,
+            //    &SectionHeader[i]
+            //);
 
             memcpy(
                 (void*)alignedVirtualAddress,
@@ -402,30 +394,18 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
             0x00
         );
 
-        UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
-        LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
-
-        uint64_t allocatedModulePhysicalAddress =
-        (uint64_t)LouMallocEx(
-            TotalNeededVM,
-            KILOBYTE_PAGE
-        );
-        LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
+        //UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
+        //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
         uint64_t allocatedModuleVirtualAddress = 
-        (uint64_t)LouVMallocEx(
+        (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE
+            KILOBYTE_PAGE,
+            KERNEL_PAGE_WRITE_PRESENT
         );
-        LouKeLogBinaryVirtualAddress(BinaryObject, allocatedModuleVirtualAddress);
+        //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
-        LouKeMapContinuousMemoryBlock(
-            allocatedModulePhysicalAddress,
-            allocatedModuleVirtualAddress,
-            TotalNeededVM,
-            USER_PAGE | WRITEABLE_PAGE | PAGE_PRESENT
-        );
-        LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
+        //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
 
         // Align section addresses
         uint64_t sectionAlignment = PE64Header->sectionAlignment;
@@ -433,11 +413,11 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         for (uint16_t i = 0; i < CoffHeader->numberOfSections; i++) {
             uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress + sectionAlignment - 1) & ~(sectionAlignment - 1);
 
-            LouKeLogBinarySection(
-                BinaryObject,
-                i,
-                &SectionHeader[i]
-            );
+            //LouKeLogBinarySection(
+            //    BinaryObject,
+            //    i,
+            //    &SectionHeader[i]
+            //);
 
            // LouPrint("Section %s: aligned address %h\n", SectionHeader[i].name, alignedVirtualAddress);
             memcpy(
@@ -512,43 +492,34 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
             0x00
         );
 
-        UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
-        LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
+        //UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
+        //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
-        uint64_t allocatedModulePhysicalAddress =
-        (uint64_t)LouMallocEx(
-            TotalNeededVM,
-            KILOBYTE_PAGE
-        );
-        LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
         uint64_t allocatedModuleVirtualAddress = 
-        (uint64_t)LouVMallocEx(
+        (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE
+            KILOBYTE_PAGE,
+            KERNEL_PAGE_WRITE_PRESENT
         );
-        LouKeLogBinaryVirtualAddress(BinaryObject, allocatedModuleVirtualAddress);
 
-        LouKeMapContinuousMemoryBlock(
-            allocatedModulePhysicalAddress,
-            allocatedModuleVirtualAddress,
-            TotalNeededVM,
-            USER_PAGE | WRITEABLE_PAGE | PAGE_PRESENT
-        );
+        // /LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
+
+        //LouKeLogBinaryVirtualAddress(BinaryObject, allocatedModuleVirtualAddress);
 
         // Align section addresses
         uint64_t sectionAlignment = PE64Header->sectionAlignment;
 
-        LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
+        //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
 
         for (uint16_t i = 0; i < CoffHeader->numberOfSections; i++) {
             uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress + sectionAlignment - 1) & ~(sectionAlignment - 1);
 
-            LouKeLogBinarySection(
-                BinaryObject,
-                i,
-                &SectionHeader[i]
-            );
+            //LouKeLogBinarySection(
+            //    BinaryObject,
+            //    i,
+            //    &SectionHeader[i]
+            //);
 
            // LouPrint("Section %s: aligned address %h\n", SectionHeader[i].name, alignedVirtualAddress);
             memcpy(

@@ -154,7 +154,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     }
 
     LouKIRQL Irql;
-    LouKeAcquireSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
+    LouKeSetIrql(HIGH_LEVEL, &Irql);  
 
     uint8_t ProcessorID = get_processor_id();
     thread_t* CurrentThread = current_thread[ProcessorID];
@@ -193,7 +193,8 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     current_thread[ProcessorID] = NextThread;
 
     local_apic_send_eoi();
-    LouKeReleaseSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
+    LouKeSetIrql(Irql, 0x00);  
+
     return CpuCurrentState;
 }
 

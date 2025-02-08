@@ -34,14 +34,7 @@ spinlock_t* LouKeGetInterruptGlobalLock();
 
 
 void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t StackPointer){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
-
-
     if(!SystemEmulation){
         CheckLouCallTables(Call, Data);
     }
-
-    LouKeReleaseSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
-
 }

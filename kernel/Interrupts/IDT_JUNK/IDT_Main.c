@@ -482,10 +482,11 @@ LOUSTATUS SetBasicInterrupts(bool Init){
     if(Init){
 
         for (uint8_t i = 0; i <= 200; i++ ) {
-            set_idt_gate(i, Handler[i], cs_value, 0, 0x8E);
+            set_idt_gate(i, Handler[i], cs_value, 0, 0x8E);   //Everything else
         }
-        set_idt_gate(0x80, Handler[0x80], cs_value, 1, 0xEE);
-        set_idt_gate(0x81, Handler[0x81], cs_value, 1, 0xEE);
+        set_idt_gate(0x80, Handler[0x80], cs_value, 1, 0xEE); //MSVC Systemcall Stack
+        set_idt_gate(0x81, Handler[0x81], cs_value, 2, 0xEE); //System V Systemcall Stacl
+        set_idt_gate(0x20, Handler[0x20], cs_value, 3, 0x8E); //Timer Interrupt
 
         return 0;
     }

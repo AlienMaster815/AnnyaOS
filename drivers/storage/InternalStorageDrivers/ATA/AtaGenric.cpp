@@ -37,9 +37,10 @@ LOUSTATUS AtaGenricDMAPrepCommand(
 LOUSTATUS AtaGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
+    LouKIRQL Irql;
     //LouPrint("Ata Genric DMA Issue Command\n");
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
-    
+    LouKeAcquireSpinLock(&AtaPort->PortLock, &Irql);
     uint16_t CommandPort    = (uint16_t)(uintptr_t)AtaPort->CommandIoAddress;
     uint16_t ControlPort    = (uint16_t)(uintptr_t)AtaPort->ControlIoAddress;
     UNUSED uint16_t DmaPort        = (uint16_t)(uintptr_t)AtaPort->DmaIoAddress;
@@ -78,6 +79,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         if(COMMAND_READ_STATUS_PORT == 0){
             LouPrint("Error: Detected Drive Is A Ghost Drive Quirk\n");
             MutexUnlock(&AtaPort->OperaionLock);
+            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
             return STATUS_NO_SUCH_DEVICE;
         }
         //LouPrint("Waiting On Device\n");
@@ -96,11 +98,13 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         if(PollCount >= AtaPort->PollTimer){
             LouPrint("Error Timeout Occoured\n");
             MutexUnlock(&AtaPort->OperaionLock);
+            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
             return STATUS_TIMEOUT;
         }
         if(Status & 0x01){
             LouPrint("Device Error\n");
             MutexUnlock(&AtaPort->OperaionLock);
+            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
             return STATUS_IO_DEVICE_ERROR;
         }
         //LouPrint("Command Completed Successfully\n");
@@ -110,6 +114,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         }
 
         MutexUnlock(&AtaPort->OperaionLock);
+        LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
         return STATUS_SUCCESS;
     }
 
@@ -145,11 +150,13 @@ LOUSTATUS AtaGenricDMAIssueCommand(
             if(PollCount >= AtaPort->PollTimer){
                 //LouPrint("Error Timeout Occoured\n");
                 MutexUnlock(&AtaPort->OperaionLock);
+                LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
                 return STATUS_TIMEOUT;
             }
             if(Status & 0x01){
                 //LouPrint("Device Error\n");
                 MutexUnlock(&AtaPort->OperaionLock);
+                LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
                 return STATUS_IO_DEVICE_ERROR;
             }
             //Reset Poll For the next Poll
@@ -171,11 +178,14 @@ LOUSTATUS AtaGenricDMAIssueCommand(
                 int DataSize = COMMAND_READ_LBAM_PORT_LBA28 | (COMMAND_READ_LBAH_PORT_LBA28 << 8);
                 COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)Data + (i * 0x800)), DataSize / 2);
             }
-
+            MutexUnlock(&AtaPort->OperaionLock);
+            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
+            return STATUS_SUCCESS;
         }
         //LouPrint("Command Completed Successfully\n");
     }
     MutexUnlock(&AtaPort->OperaionLock);
+    LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
     return STATUS_INVALID_PARAMETER;
 }
 
