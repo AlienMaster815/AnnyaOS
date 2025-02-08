@@ -321,39 +321,38 @@ uintptr_t RetriveThreadStubAddress(){
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, uint32_t Pages) {
     //allocate New Stack
-    void* NewStack = LouMallocEx(Pages * KILOBYTE_PAGE,KILOBYTE_PAGE);
-    //Map the page 
-    LouKeMapContinuousMemoryBlock((uint64_t)NewStack,(uint64_t)NewStack , KILOBYTE_PAGE * Pages, USER_PAGE | WRITEABLE_PAGE);
+    //void* NewStack = LouKeMallocEx(Pages * KILOBYTE_PAGE,KILOBYTE_PAGE, WRITABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    
     //Allocate New Thread
-    thread_t* NewThread = CreateThreadHandle();
-    if(!NewThread){
-        return 0x00;
-    }
+    //thread_t* NewThread = CreateThreadHandle();
+    //if(!NewThread){
+    //    return 0x00;
+    //}
     //store the top of the stack
-    NewThread->StackTop = NewStack;
+    //NewThread->StackTop = NewStack;
     //set the context pointer
-    CPUContext* NewContext = (CPUContext*)NewStack + (KILOBYTE_PAGE * Pages) - KILOBYTE; //leave a kilobyte for wiggle room
+    //CPUContext* NewContext = (CPUContext*)NewStack + (KILOBYTE_PAGE * Pages) - KILOBYTE; //leave a kilobyte for wiggle room
     //set the New Threads Context
-    NewThread->cpu_state = NewContext;
+    //NewThread->cpu_state = NewContext;
     //Allocate Space For XSAVE and XRSTOR
-    NewThread->AdvancedRegisterStorage = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    //NewThread->AdvancedRegisterStorage = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
     //Mark the Register Storage As Clean
-    NewThread->NewTask = true;
+    //NewThread->NewTask = true;
     //Get the Stub Address
-    uintptr_t StubAddress = RetriveThreadStubAddress();
+    //uintptr_t StubAddress = RetriveThreadStubAddress();
     //fill the Context...
-    NewContext->rcx = (uint64_t)Function;           //first parameter  MSVC
-    NewContext->rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
-    NewContext->r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
-    NewContext->rip = (uint64_t)StubAddress;        //Liftoff Address  
-    NewContext->rbp = (uint64_t)NewContext;         //Base Pointer
-    NewContext->rsp = (uint64_t)NewContext;         //Current Pointer
+    //NewContext->rcx = (uint64_t)Function;           //first parameter  MSVC
+    //NewContext->rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
+    //NewContext->r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
+    //NewContext->rip = (uint64_t)StubAddress;        //Liftoff Address  
+    //NewContext->rbp = (uint64_t)NewContext;         //Base Pointer
+    //NewContext->rsp = (uint64_t)NewContext;         //Current Pointer
     //Fill Segments and flags
-    NewContext->cs  = 0x08;
-    NewContext->ss  = 0x10;  
-    NewContext->rflags = 0x202;  
+    //NewContext->cs  = 0x08;
+    //NewContext->ss  = 0x10;  
+    //NewContext->rflags = 0x202;  
     //Increment Thread Counter
-    NumberOfThreads++;
+    //NumberOfThreads++;
     //return the handle to the new thread
-    return (uintptr_t)NewThread;
+    return (uintptr_t)0;//NewThread;
 }

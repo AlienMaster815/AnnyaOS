@@ -13,6 +13,16 @@ PBITMAP_HANDLE UnpackBitmap(FILE* FileToUnpack){
         return MapHandle;
     }
 
+    FILE* NewUserAddress = LouKeMalloc(BitmapFile->BFSize, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+
+    memcpy((void*)NewUserAddress, (void*)FileToUnpack, BitmapFile->BFSize);
+    LouFree((RAMADD)FileToUnpack);
+
+    FileToUnpack = NewUserAddress;    
+    BitmapFile = (PBITMAP_FILE_HEADER)FileToUnpack;
+    BIH = (PBITMAP_INFORMATION_HEADER)((uint64_t)FileToUnpack + sizeof(BITMAP_FILE_HEADER));
+    
+
     LouPrint("File Size:%h\n", BitmapFile->BFSize);
     LouPrint("Pixel Data Offset:%h\n", BitmapFile->BFOffBits);
 
@@ -25,7 +35,7 @@ PBITMAP_HANDLE UnpackBitmap(FILE* FileToUnpack){
     LouPrint("FileToUnp:%h\n", FileToUnpack);
     LouPrint("PixelData:%h\n", PixelData);
 
-    MapHandle = (PBITMAP_HANDLE)LouMalloc(sizeof(BITMAP_HANDLE));
+    MapHandle = (PBITMAP_HANDLE)LouKeMalloc(sizeof(BITMAP_HANDLE), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
 
     MapHandle->Width = BIH->BIWidth;
     MapHandle->Height = BIH->BIHeight;

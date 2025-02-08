@@ -337,15 +337,24 @@ bool RangeDoesNotInterfere(
     uint64_t SizeOfCheck,
     uint64_t AddressOfBlock, 
     uint64_t SizeOfBlock
-){   
-    uint64_t end = AddressOfBlock + SizeOfBlock;
+) {   
+    uint64_t Start = AddressOfBlock;
+    uint64_t End = AddressOfBlock + SizeOfBlock;
 
-    if ((AddressForCheck >= AddressOfBlock && AddressForCheck <= end) ||  
-       ((AddressForCheck + SizeOfCheck) >= AddressOfBlock && (AddressForCheck + SizeOfCheck) <= end) ||
-       (AddressForCheck <= AddressOfBlock && (AddressForCheck + SizeOfCheck) >= end)) { 
-        return false;
+    // Check for overlap or swallowing
+    if (
+        // Case 1: Check starts inside the block
+        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
+
+        // Case 2: Check ends inside the block
+        (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
+
+        // Case 3: Check completely swallows the block
+        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
+    ) {
+        return false;  // Overlap detected
     }
-    return true;
+    return true;       // No overlap
 }
 
 

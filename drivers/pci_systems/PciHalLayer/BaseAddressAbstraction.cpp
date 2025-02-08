@@ -172,6 +172,7 @@ void LouKeHalRegisterPciDevice(
                                 Config->Header.u.type0.BaseAddresses[i] & 0xFFFFFFF0,
                                 BarSize
                             );
+                            LouKeMapContinuousMemoryBlock(0, Config->Header.u.type0.BaseAddresses[i] & 0xFFFFFFF0, BarSize, 0);
                             LouKeMallocVMmIO(Config->Header.u.type0.BaseAddresses[i] & 0xFFFFFFF0, BarSize, KERNEL_PAGE_WRITE_PRESENT);
                         }
                         else{
@@ -184,6 +185,7 @@ void LouKeHalRegisterPciDevice(
                                 Config->Header.u.type0.BaseAddresses[i] & 0xFFFFFFF0,
                                 BarSize
                             );
+                            LouKeMapContinuousMemoryBlock(0, Config->Header.u.type0.BaseAddresses[i] & 0xFFFFFFF0, BarSize, 0);
                             LouKeMallocVMmIO(Config->Header.u.type0.BaseAddresses[i] & 0xFFFFFFF0, BarSize, KERNEL_PAGE_WRITE_PRESENT | CACHE_DISABLED_PAGE);
                         }
                     }

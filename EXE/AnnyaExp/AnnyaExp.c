@@ -126,12 +126,12 @@ DWORD ClockThread(PVOID Args){
 }
 
 void StartDesktop(){
-   
     Background = AnnyaOpenBitmapImage("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
 
     DrawDesktopBackground((FILE*)Background, 0);
 
     LouPrint("Background Drawn : Creating Taskbar\n");
+    while(1);
 
 
     WINDOW_CHARECTERISTICS TaskbarCharecteristics;

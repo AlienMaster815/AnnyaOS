@@ -19,12 +19,11 @@ uint64_t LouKeMallocFromMapEx(
 ){
 
     uint64_t AlignedAddress = MapStart & ~(Alignement - 1);
-    AlignedAddress += BytesNeeded;
     bool AddressValid = false;
 
-    while((AlignedAddress + Alignement) <= MapEnd){
+    while((AlignedAddress + BytesNeeded) <= MapEnd){
+        AlignedAddress += Alignement;
         PUSER_MODE_VMEM_TRACK Tmp = MappedAddresses;
-
         for(uint64_t i = 0 ; i <= MappedTrack; i++){
             AddressValid = RangeDoesNotInterfere(
                 AlignedAddress, 
@@ -58,7 +57,6 @@ uint64_t LouKeMallocFromMapEx(
             Tmp->size = BytesNeeded;
             return AlignedAddress; 
         }
-        AlignedAddress += Alignement;
     }
     return 0x00;
 }

@@ -401,7 +401,7 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         (uint64_t)LouKeMallocEx(
             TotalNeededVM,
             KILOBYTE_PAGE,
-            KERNEL_PAGE_WRITE_PRESENT
+            KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
         );
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
@@ -500,7 +500,7 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         (uint64_t)LouKeMallocEx(
             TotalNeededVM,
             KILOBYTE_PAGE,
-            KERNEL_PAGE_WRITE_PRESENT
+            KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
         );
 
         // /LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
