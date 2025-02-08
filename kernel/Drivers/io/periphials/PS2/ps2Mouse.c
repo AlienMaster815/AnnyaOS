@@ -40,7 +40,7 @@ typedef struct  __attribute__((packed)) _CPUContext{
 
 void InitializePs2Mouse(){
     LouPrint("Initializing PS/2 Mouse (If There Is One)\n");
-    RegisterHardwareInterruptHandler(PS2MouseHandler, 12, false);
+    RegisterInterruptHandler(PS2MouseHandler, 32 + 12, false, 0x00);
     
     outb(0x64, 0xA8);
     outb(0x64, 0x20);
@@ -54,7 +54,7 @@ void InitializePs2Mouse(){
     inb(0x60);
 
     LouPrint("PS/2 Mouse Initialized Successfully\n");
-
+    
 }
 
 void LouKeMouseClickEventUpdate(bool Right, bool Left);

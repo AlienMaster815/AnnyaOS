@@ -4,7 +4,7 @@
 void IoDisconnectInterrupt(
    PKINTERRUPT InterruptObject
 ){
-    RegisterInterruptHandler(0x00, InterruptObject->Vector);
+
 }
 
 NTSTATUS IoConnectInterrupt(
@@ -21,7 +21,7 @@ NTSTATUS IoConnectInterrupt(
              BOOLEAN            FloatingSave
 ){
     //we will do more later
-    RegisterInterruptHandler((void(*)())ServiceRoutine ,Vector);
+    RegisterInterruptHandler((void(*)(uint64_t))ServiceRoutine ,Vector, FloatingSave, (uintptr_t)ServiceContext);
 
     return STATUS_SUCCESS;
 }

@@ -208,7 +208,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName = LouOsKrnlFunctionNames;   
     
     ImportTables[4].FunctionName[0] = "LouPrint";
-    ImportTables[4].FunctionName[1] = "RegisterHardwareInterruptHandler";
+    ImportTables[4].FunctionName[1] = "RegisterInterruptHandler";
     ImportTables[4].FunctionName[2] = "memcpy";
     ImportTables[4].FunctionName[3] = "strncmp";
     ImportTables[4].FunctionName[4] = "strcmp";
@@ -314,7 +314,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
     ImportTables[4].VirtualAddress[0] = (uint64_t)LouPrint;
-    ImportTables[4].VirtualAddress[1] = (uint64_t)RegisterHardwareInterruptHandler;
+    ImportTables[4].VirtualAddress[1] = (uint64_t)RegisterInterruptHandler;
     ImportTables[4].VirtualAddress[2] = (uint64_t)memcpy;
     ImportTables[4].VirtualAddress[3] = (uint64_t)strncmp;
     ImportTables[4].VirtualAddress[4] = (uint64_t)strcmp;

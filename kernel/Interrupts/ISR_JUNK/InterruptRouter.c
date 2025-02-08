@@ -31,36 +31,53 @@ typedef struct  __attribute__((packed)) _CPUContext{
 void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size);
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 
-static void(*InterruptHandler[256])(uint64_t);
 
 void local_apic_send_eoi();
 bool GetAPICStatus();
 
-void initializeInterruptRouter(){
-	for(uint8_t i = 0 ; i < 255 ; i ++){
-		InterruptHandler[i] = 0x00;
-	}
+typedef struct _INTERRUPT_ROUTER_ENTRY{
+    ListHeader List;
+    uint32_t    ListCount;
+    bool        NeedFlotationSave;
+    void        (*InterruptHandler)(uint64_t);
+    uint64_t    OverideData;
+    bool        InterruptUnMasked;
+    mutex_t     InterruptMutex;
+}INTERRUPT_ROUTER_ENTRY, * PINTERRUPT_ROUTER_ENTRY;
+
+static INTERRUPT_ROUTER_ENTRY InterruptRouterTable[256] = {0};
+
+
+void ioapic_unmask_irq(uint8_t irq);
+
+void InterruptWrapper(uint64_t Handler,uint8_t InterruptNumber, bool NeedFlotationSave, uintptr_t OverideData) {
+	RegisterInterruptHandler((void(*)(uint64_t))Handler, InterruptNumber, NeedFlotationSave, OverideData);
 }
 
-void InterruptWrapper(uint64_t Handler, uint8_t InterruptNumber) {
-	RegisterInterruptHandler((void(*)())Handler, InterruptNumber);
+void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData) {
+	const uint32_t ListCount = InterruptRouterTable[InterruptNumber].ListCount;
+    PINTERRUPT_ROUTER_ENTRY TmpRouter = &InterruptRouterTable[InterruptNumber]; 
+	if(NeedFlotationSave){
+        InterruptRouterTable[InterruptNumber].NeedFlotationSave = true;
+    }
+    for(uint32_t i = 0 ; i < ListCount; i++){
+        if(TmpRouter->List.NextHeader){
+            TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
+        }else{
+            TmpRouter->List.NextHeader = (PListHeader)LouMalloc(sizeof(INTERRUPT_ROUTER_ENTRY));
+            TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
+        }
+    }
+    TmpRouter->InterruptHandler = Handler;
+    TmpRouter->OverideData = OverideData;
+	InterruptRouterTable[InterruptNumber].ListCount++;
+    if((InterruptNumber > 32) && (!InterruptRouterTable[InterruptNumber].InterruptUnMasked)){
+        InterruptNumber -= 32;
+        ioapic_unmask_irq(InterruptNumber);
+        InterruptRouterTable[InterruptNumber].InterruptUnMasked = true;
+    }
 }
 
-void RegisterInterruptHandler(void(*Handler),uint8_t InterruptNumber) {
-	
-	InterruptHandler[InterruptNumber] = Handler;
-
-}
-
-void UnRegisterInterruptHandler(uint8_t InterruptNumber) {
-	InterruptHandler[InterruptNumber] = 0x00;
-}
-
-static uint8_t InterruptGlobalCheck;
-
-uint8_t GetGlobalInterrupt(){
-	return InterruptGlobalCheck;
-}
 
 LouKIRQL InterruptSwitch(LouKIRQL New);
 
@@ -77,10 +94,7 @@ uint8_t GetTotalHardwareInterrupts();
 //    uint32_t processor_id = ebx >> 24;
 //    return processor_id;
 //}
-
-void IfYouCanReadThisGetOutOfMyFuckingKernelBinary(){
-
-}
+int LouPrintPanic(char* format, ...);
 
 void StoreAdvancedRegisters(uint64_t ContextHandle);
 void RestoreAdvancedRegisters(uint64_t ContextHandle);
@@ -97,8 +111,6 @@ void FuckItRestoreEverything(uint64_t* ContextHandle){
     LouFree((RAMADD)*ContextHandle);
 }
 
-bool DoesHardwareInterruptNeedFloatPointSaves(uint8_t InterruptNumber);
-
 static spinlock_t InterruptLock;
 
 spinlock_t* LouKeGetInterruptGlobalLock(){
@@ -107,46 +119,40 @@ spinlock_t* LouKeGetInterruptGlobalLock(){
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
-    if(Interrupt < 32){
-        LouKeSetIrql(HIGH_LEVEL ,0x00);
-		InterruptHandler[Interrupt](Args);
-        while(1);
-    }
-
-	LouKIRQL PreInterruptIrql;
-    LouKeAcquireSpinLock(&InterruptLock, &PreInterruptIrql);
-
-
+    LouKIRQL Irql;
+    LouKeSetIrql(HIGH_LEVEL, &Irql);    
+    MutexLock(&InterruptRouterTable[Interrupt].InterruptMutex);
     uint64_t ContextHandle;
-
-	if (0x00 != InterruptHandler[Interrupt]) {
-
-        if(HardwareInterruptManager == InterruptHandler[Interrupt]){
-            void (*HardwareHandler)(uint64_t Interrupt, uint64_t Rsp) = (void (*)(uint64_t Interrupt, uint64_t Rsp))InterruptHandler[Interrupt];
-            bool SlowSave = DoesHardwareInterruptNeedFloatPointSaves(Interrupt);
-
-            if(SlowSave){
-                FuckItSaveEverything(&ContextHandle);
-            }
-
-            HardwareHandler(Interrupt, Args);
-
-            if(SlowSave){
-                FuckItRestoreEverything(&ContextHandle);
-            }
-
-            local_apic_send_eoi();
-            LouKeReleaseSpinLock(&InterruptLock, &PreInterruptIrql);
-            return;
+    PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
+    if(InterruptRouterTable[Interrupt].ListCount){
+        if(InterruptRouterTable[Interrupt].NeedFlotationSave){
+            FuckItSaveEverything(&ContextHandle);
         }
 
-        FuckItSaveEverything(&ContextHandle);
-		InterruptHandler[Interrupt](Args);
-        FuckItRestoreEverything(&ContextHandle);
-		local_apic_send_eoi();
-		LouKeReleaseSpinLock(&InterruptLock, &PreInterruptIrql);
-		return;
-	}
+        for(uint32_t i = 0 ; i < InterruptRouterTable[Interrupt].ListCount; i++){
+
+            if(TmpEntry->InterruptHandler){
+                if(TmpEntry->OverideData){
+                    TmpEntry->InterruptHandler(TmpEntry->OverideData);
+                }
+                else{
+                    TmpEntry->InterruptHandler(Args);
+                }
+            }
+
+            if(TmpEntry->List.NextHeader){
+                TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
+            }
+        }
+
+        if(InterruptRouterTable[Interrupt].NeedFlotationSave){
+            FuckItRestoreEverything(&ContextHandle);
+        }
+        local_apic_send_eoi();
+        MutexUnlock(&InterruptRouterTable[Interrupt].InterruptMutex);
+        LouKeSetIrql(PASSIVE_LEVEL, &Irql);    
+        return;
+    }
 
 	LouPrint("Interrupt Number: %d Was Called\n",Interrupt);
 	CPUContext* FaultData = (CPUContext*)((uint64_t)Args);

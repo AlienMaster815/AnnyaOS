@@ -250,6 +250,6 @@ void PS2KeyboardHandler(uint64_t Rsp){
 
 void EnablePs2Keyboard(){
     
-    RegisterHardwareInterruptHandler(PS2KeyboardHandler, 1, false);
+    RegisterInterruptHandler(PS2KeyboardHandler, 32 + 1, false, 0x00);
 
 }

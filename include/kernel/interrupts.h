@@ -119,8 +119,7 @@ LOUSTATUS SetBasicInterrupts(bool init);
 
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
 
-void RegisterInterruptHandler(void(*Handler), uint8_t InterruptNumber);
-void UnRegisterInterruptHandler(uint8_t InterruptNumber);
+void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 
 LOUSTATUS InitializeMainInterruptHandleing();
 LOUSTATUS InitializeStartupInterruptHandleing();

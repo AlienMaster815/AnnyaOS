@@ -179,7 +179,7 @@ KERNEL_IMPORT int strcmp(const char* str1, const char* str2);
 KERNEL_IMPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_IMPORT char* strncpy(char* dest, const char* src, size_t n);
 
-void RegisterInterruptHandler(void(*HANDLER)(), uint8_t InterruptNumber);
+void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 //KERNEL_IMPORT void INTERRUPT(uint8_t InterruptNumber);
 
 KERNEL_IMPORT void sleep(uint64_t Time);
@@ -188,7 +188,7 @@ KERNEL_IMPORT void sleep(uint64_t Time);
 
 #define ERRMAPPINGIO -1
 
-LOUDDK_API_ENTRY LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
+
 
 #else 
 
