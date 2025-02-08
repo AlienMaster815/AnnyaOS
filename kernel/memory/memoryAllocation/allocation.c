@@ -605,6 +605,8 @@ void* LouKeMallocEx(
     uint64_t    AllocationFlags
 ){
 
+    return LouMallocEx(AllocationSize, Alignment);
+    while(1);
     PKMALLOC_PAGE_TRACK TmpTracker = &PageTracks; 
     uint64_t RoundedSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     uint64_t Pointer = 0;
@@ -659,6 +661,8 @@ void LouKeFreeFromMap(
 );
 
 void LouKeFree(void* AddressToFree){
+    LouFree((RAMADD)AddressToFree);
+    return;
     LouKeFreeFromMap(
         (uint64_t)AddressToFree,
         &VMemTracksCount,

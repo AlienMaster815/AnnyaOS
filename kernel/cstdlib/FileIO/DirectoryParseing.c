@@ -2,24 +2,7 @@
 
 void* LouKeForkToUserModeSection(uint64_t OriginalLocation);
 
-string GetNextDirectoryName(string PATH){
-
-
-    if(PATH[0] == '/'){
-        PATH++; //takes away the / charecter
-        LouPrint("Path is:%s\n", PATH);
-        return PATH;
-    }
-    else {
-        PATH = PATH + CurrenDirectoryStringLength(PATH) + 1;
-        LouPrint("Path is:%s\n", PATH);
-        return PATH;
-        
-    }
-}
-
-
-uint8_t CurrenDirectoryStringLength(string Dir){
+uint8_t CurrentDirectoryStringLength(string Dir){
     for(uint8_t i = 0; i < 255; i++){
         if(Dir[i] == '/')return i;
         else if(Dir[i] == '.')return i;
@@ -27,6 +10,23 @@ uint8_t CurrenDirectoryStringLength(string Dir){
     }
     return 0x00;
 }
+
+string GetNextDirectoryName(string PATH){
+
+
+    if(PATH[0] == '/'){
+        PATH++; //takes away the / charecter
+        //LouPrint("Path is:%s\n", PATH);
+        return PATH;
+    }
+    else {
+        PATH = PATH + CurrentDirectoryStringLength(PATH) + 1;
+        //LouPrint("Path is:%s\n", PATH);
+        return PATH;
+        
+    }
+}
+
 
 void LouKeFOpenCall(uint64_t* Data){
     string PathToFile = (string)*Data;

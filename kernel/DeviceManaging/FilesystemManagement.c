@@ -4,7 +4,6 @@ LOUSTATUS Iso9660DriverEntry();
 uint8_t LouKeGetNumberOfStorageDevices();
 
 
-
 typedef struct _LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE{
     ListHeader                   List;
     PDEVICE_DIRECTORY_TABLE      FileSystem;
@@ -12,11 +11,6 @@ typedef struct _LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE{
 
 static LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE FileSystemTable;
 static size_t FileSystemTableMembers = 0;
-
-typedef struct _LOUSINE_KERNEL_MOUNTED_FILESYSTEMS{
-    ListHeader                  List;
-    PLOUSINE_KERNEL_FILESYSTEM  FileSystem;
-}LOUSINE_KERNEL_MOUNTED_FILESYSTEMS, * PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS;
 
 static LOUSINE_KERNEL_MOUNTED_FILESYSTEMS   MountedFileSystemTable;
 static size_t                               MountedFileSystemTableMembers;
@@ -59,7 +53,38 @@ LOUSTATUS LouUnRegisterFileSystemDevice(PDEVICE_INFORMATION_TABLE FileSystem){
     return STATUS_UNSUCCESSFUL;
 }
 
+typedef struct _DRIVE_ID_TABLE{
+    LOUSINE_KERNEL_DRIVE_ID     DriveID;
+    bool                        DriveTaken;
+}DRIVE_ID_TABLE, * PDRIVE_ID_TABLE;
 
+static DRIVE_ID_TABLE DriveIdTable[25] = {
+    {'A', false},
+    {'B', false},
+    {'D', false},
+    {'E', false},
+    {'F', false},
+    {'G', false},
+    {'H', false},
+    {'I', false},
+    {'J', false},
+    {'K', false},
+    {'L', false},
+    {'M', false},
+    {'N', false},
+    {'O', false},
+    {'P', false},
+    {'Q', false},
+    {'R', false},
+    {'S', false},
+    {'T', false},
+    {'U', false},
+    {'V', false},
+    {'W', false},
+    {'X', false},
+    {'Y', false},
+    {'Z', false},
+};
 
 void InitializeFileSystemManager(){
     Iso9660DriverEntry();       
@@ -80,17 +105,36 @@ void InitializeFileSystemManager(){
                 TmpMfs->List.NextHeader = (PListHeader)LouMalloc(sizeof(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS));
                 TmpMfs = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)TmpMfs->List.NextHeader;
                 TmpMfs->FileSystem = NewMountedFileSystem;
-                if(NewMountedFileSystem->FileSystemOpen){
-                    FILE* KernelImage = NewMountedFileSystem->FileSystemOpen("/ANNYA/SYSTEM64/LOUOSKRN.EXE", NewMountedFileSystem);
+                if(NewMountedFileSystem->FileSystemSeek){
+                    //Seek Kernel Image tto identify if its a system disk
+                    bool KernelImage = NewMountedFileSystem->FileSystemSeek("/ANNYA/SYSTEM64/LOUOSKRN.EXE", NewMountedFileSystem);
                     if(KernelImage){
                         LouPrint("Storage Device Is A System Disk\n");
                         NewMountedFileSystem->SystemDisk = true;
+                        NewMountedFileSystem->DriveID = 'C';
+                        MountedFileSystemTableMembers++;
+                        continue;
                     }
                 }
+                for(uint8_t Drive = 0; Drive < 25; Drive++){
+                    if(DriveIdTable[Drive].DriveTaken){
+                        DriveIdTable[Drive].DriveTaken = true;
+                        NewMountedFileSystem->DriveID = DriveIdTable[Drive].DriveID;
+                    }
+                }
+                MountedFileSystemTableMembers++;
             }
         }  
         if(Tmp->List.NextHeader){
             Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
         }
     }
+}
+
+PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable(){
+    return &MountedFileSystemTable;
+}
+
+size_t GetMountedFileSystemTableMembers(){
+    return MountedFileSystemTableMembers;
 }

@@ -389,7 +389,6 @@ void InitializeUserSpace(){
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
-    while(1);
 
     LouUpdateWindow(
         GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,

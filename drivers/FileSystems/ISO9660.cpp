@@ -15,7 +15,66 @@
 #define DL_MSB_LO32 DL_LSB_HI32 + 1
 #define DL_MSB DL_MSB_LO32 + 1
 
-static uint32_t ISOGetLBA(uint8_t* DirectoryEntry){
+static bool IsIsoFileSystemEntryFileToken(string Entry, size_t EntrySize){
+    //the iso Filesystem has two different entryies
+    //it has a directory entry and a file entry the 
+    //to determine the difference the files have a 
+    //;1 at the end of the files string 
+    // so add theentry size
+    Entry += EntrySize;
+    //Subtract two
+    Entry -= 2;
+    //compare for a ;1
+    return (strncmp(Entry, ";1", 1) == 0);
+}
+
+
+static bool IsPathAFileToken(string Path){
+    //The Losuine Kernel's Path system follows 
+    //a c string style path it should be noted
+    //that a file token is a path with and null
+    //terminator or a dot terminator therfore
+    //we 1st get the path length
+    uint8_t PathLength = CurrentDirectoryStringLength(Path);
+    //we then add the path length 
+    //to get the Terminator charecter
+    Path += PathLength;
+    //then we comare the string to known
+    //file tokens and return the results
+    switch(Path[0]){
+        case '.':
+        case '\0':
+            return true;
+        default:
+            return false;
+    }
+}
+
+static bool IsIso9660ItemOfSearch(uint8_t* FOO, string SearchDirectory){
+    bool SearchDirectoryIsFileToken = IsPathAFileToken(SearchDirectory);
+    bool DirectoryEntryIsFileToken = IsIsoFileSystemEntryFileToken((string)&FOO[33], FOO[32]);
+    //if the value in Directory length is less 
+    //than what we are searching for thats a 
+    //tale that its not the filesystem 
+    if(CurrentDirectoryStringLength(SearchDirectory) > FOO[32])return false;
+    //because iso filesystems have file tokens 
+    //";1" the best way to handle is when
+    //looking for a file make sure the search
+    //and directory are tokens and compare
+    //the entry length-2 (FOO[32] - 2)
+    if(((SearchDirectoryIsFileToken) && (DirectoryEntryIsFileToken)) && (strncmp((string)&FOO[33], SearchDirectory ,FOO[32] - 2) == 0))return true;
+    //other wise check for if both entries are
+    //Directories the actual value of the entry
+    //length is to be compared
+    else if(((!SearchDirectoryIsFileToken) && (!DirectoryEntryIsFileToken)) && (strncmp((string)&FOO[33], SearchDirectory ,FOO[32]) == 0))return true;
+    //if niether of these two scenarios this isnt
+    //the Directory we are looking for
+    //https://www.youtube.com/watch?v=ihyjXd2C-E8
+    else return false;
+}
+
+
+uint32_t ISOGetLBA(uint8_t* DirectoryEntry){
 
     uint32_t LBA = 0;
 
@@ -27,7 +86,7 @@ static uint32_t ISOGetLBA(uint8_t* DirectoryEntry){
     return LBA;
 }
 
-static uint32_t ISOGetDirecotrySize(uint8_t* DirectoryEntry){
+uint32_t ISOGetDirecotrySize(uint8_t* DirectoryEntry){
 
     uint32_t DATA_LEN = 0;
 
@@ -43,13 +102,14 @@ static FILE* ISOLouKeFindDirectory(
     uint32_t RootLBA,
     uint32_t RootSize, 
     uint8_t DrvNum, 
-    string Dir
+    string Dir,
+    bool Seek
     ){
 
-    LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint64_t BufferSize = RootSize;
+    UNUSED LOUSTATUS Status = LOUSTATUS_GOOD;
+    UNUSED uint64_t BufferSize = RootSize;
 
-    uint16_t* Test = (uint16_t*)ReadDrive(
+    UNUSED uint16_t* Test = (uint16_t*)ReadDrive(
         DrvNum,
         RootLBA,
         1,
@@ -59,50 +119,75 @@ static FILE* ISOLouKeFindDirectory(
 
     UNUSED uint8_t* FOO = (uint8_t*)(uint64_t)Test;
     
-    string NewDir = GetNextDirectoryName(Dir);
+    UNUSED string NewDir = GetNextDirectoryName(Dir);
 
-    string SearchDirectory = NewDir;
+    UNUSED string SearchDirectory = NewDir;
 
-    bool FinalRecurse = false;
+    UNUSED bool FinalRecurse = false;
     while(1){
-        //LouPrint("String Length:%d\n", FOO[32]);
-        //LouPrint("String Value :%s\n", &FOO[33]);
-
-        if (FOO[32] == CurrenDirectoryStringLength(SearchDirectory) || FinalRecurse){
-            if(strncmp((const char*)SearchDirectory, (const char*)&FOO[33], CurrenDirectoryStringLength(SearchDirectory)) == 0){
-
-                if(FinalRecurse != true){
-                   SearchDirectory = GetNextDirectoryName(SearchDirectory);
-                }            
-                RootLBA = ISOGetLBA(FOO);
-                RootSize = ISOGetDirecotrySize(FOO);
-
-                if(RootSize){
-                    BufferSize = ((RootSize + 2047) / 2048) * 2048;
-                }
-                //LouPrint("BufferSize:%h\n", BufferSize);
-                LouKeFree((RAMADD)Test);
-                uint16_t* Test = (uint16_t*)ReadDrive(
-                    DrvNum,
-                    RootLBA,
-                    1,
-                    &BufferSize,
-                    &Status
-                );
-                FOO = (uint8_t*)(uint64_t)Test;
-
-                if((FinalRecurse) && (RootSize)){
-                    FILE* Handle = (FILE*)LouMallocEx(RootSize, KILOBYTE_PAGE);
-                    memcpy(Handle, FOO, RootSize);
-                    //LouPrint("Done With Recursion: Found File : FileSize:%h\n", RootSize);
-                    LouKeFree((RAMADD)Test);  //Free before exiting
-                    return Handle;
-                }
-                else if(*(char*)(SearchDirectory + CurrenDirectoryStringLength(SearchDirectory)) == '.'){
-                    FinalRecurse = true;
-                }
-
+        if (IsIso9660ItemOfSearch(FOO, SearchDirectory)){
+            
+            LouPrint("String Length:%d\n", FOO[32]);
+            LouPrint("String Value :%s\n", &FOO[33]);
+            
+            //First We are going to look at the LBA
+            //to see where the Directory Exists in
+            //memory
+            RootLBA = ISOGetLBA(FOO);
+            LouPrint("LBA:%d\n", RootLBA);
+            //Theen we are going to get the root 
+            //size from the directory structure
+            RootSize = ISOGetDirecotrySize(FOO);
+            LouPrint("Size:%d\n", RootSize);
+            
+            //now if the root size is not 0
+            //because some entries will be we
+            //are going to round up the data 
+            //to the nearest 2048 sector for
+            //the sake of the drive 
+            if(RootSize){
+                BufferSize = ROUND_UP64(RootSize, 2048);
             }
+            //now we can free the memory read
+            //from the last sector to get ready
+            //to allocate memory from the new
+            //sector we are about to read
+            LouKeFree((RAMADD)Test);
+            
+            //before we read the Next sector 
+            //we need to return if this is a
+            //seek friom the OS otherwise we
+            //will just waste time reading if
+            //we are just looking for a file
+            //or Directory
+            if(IsPathAFileToken(SearchDirectory) && Seek){
+                return (FILE*)1;
+            }
+
+            //Now We Can read the next sector
+            //now that we cleaned up the last 
+            //sector
+            uint16_t* Test = (uint16_t*)ReadDrive(
+                DrvNum,
+                RootLBA,
+                1,
+                &BufferSize,
+                &Status
+            );
+            //now cast from Test to FOO and 
+            //then get the next directory
+            FOO = (uint8_t*)Test;
+            if(IsPathAFileToken(SearchDirectory)){
+                //if the end of the path
+                //is reached then the file
+                //is loaded and can be return
+                FILE* LoadedFile = (FILE*)LouMallocEx(RootSize, KILOBYTE_PAGE);
+                memcpy(LoadedFile, FOO, RootSize);
+                LouKeFree(FOO);
+                return LoadedFile;
+            }
+            SearchDirectory = GetNextDirectoryName(SearchDirectory);
+
         }
         if(FOO[0] == 0){
             break;
@@ -112,7 +197,7 @@ static FILE* ISOLouKeFindDirectory(
         }
     }
 
-    //LouPrint("Done With Recursion: Could Not Find File\n");
+    LouPrint("Done With Recursion: Could Not Find File\n");
     LouKeFree((RAMADD)Test);  //Free before exiting
     return 0;
 }
@@ -233,7 +318,36 @@ FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
         LBA, 
         DATA_LEN, 
         FilesystemHandle->PortID, 
-        FilePath
+        FilePath,
+        false
+    );
+}
+
+LOUDDK_API_ENTRY
+bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+    UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
+
+    //:/Dir/dir/.../file
+    //LouPrint("Opening File:%s\n", Path);
+
+    uint64_t LBA = 0;
+    uint64_t DATA_LEN = 0;
+    LBA |= VD.Data[LBA_LSB32];    
+    LBA |= (VD.Data[LBA_LSB_HI32] << 8);
+    LBA |= (VD.Data[LBA_MSB_LO32] << 16);
+    LBA |= (VD.Data[LBA_MSB32] << 24);
+
+    DATA_LEN |= VD.Data[DL_LSB32];
+    DATA_LEN |= (VD.Data[DL_LSB_HI32] << 8);
+    DATA_LEN |= (VD.Data[DL_MSB_LO32] << 16);
+    DATA_LEN |= (VD.Data[DL_MSB] << 24);        
+            
+    return (bool)ISOLouKeFindDirectory(
+        LBA, 
+        DATA_LEN, 
+        FilesystemHandle->PortID, 
+        FilePath,
+        true
     );
 }
 
@@ -248,6 +362,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
         Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
         Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
         Iso9660FileSystem->FileSystemOpen = Iso9660FileSystemOpen;
+        Iso9660FileSystem->FileSystemSeek = Iso9660FileSystemSeek;
         return Iso9660FileSystem;
     }
     return 0x00;
