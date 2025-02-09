@@ -375,6 +375,8 @@ void TrampolineFinalInit(){
 }
 
 uint64_t GetUsedMemory();
+uint32_t Random32(uint32_t Seed);
+;
 
 void InitializeUserSpace(){
 
@@ -392,9 +394,6 @@ void InitializeUserSpace(){
         HWind
     );    
     LouPrint("Hello World\n");
-    //void (*Entry)();
-    //Entry = (void (*)())InitEntry;
-    //Entry();
     UsrJmp(InitEntry);
 }
 

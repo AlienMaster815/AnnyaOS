@@ -626,8 +626,8 @@ void* LouKeMallocEx(
         PageTracksCount++;
         _LOU_KE_MALLOC_FOUND_FREE_PAGE:
         const size_t Limit = TmpPageTrack->Chunk.VAddress + TmpPageTrack->Chunk.ChunkSize;
-        
         size_t Pointer = TmpPageTrack->Chunk.VAddress;
+
         Pointer &= ~(Alignment - 1);
         size_t start, end;
         while((Pointer + AllocationSize) <= Limit){
