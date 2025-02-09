@@ -185,6 +185,9 @@ bool EnforceSystemMemoryMap(
     return true;
 }
 
+static bool IsEarlyMallocation = true;
+
+
 
 void* LouVMalloc(size_t BytesToAllocate){
     return LouVMallocEx(BytesToAllocate, BytesToAllocate);
@@ -209,64 +212,71 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
                 }
 
                 uint64_t AlignmentCheck = (address & ~(Alignment - 1));
-                
+                LouKIRQL OldIrql;
+                LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
+                if(IsEarlyMallocation == true){
                     if (AddressesLogged == 0) {
-                    AddressBlock[0].Address = AlignmentCheck;
-                    AddressBlock[0].size = BytesToAllocate;
-                    AddressesLogged++; // Increment after logging the first address
-                    memset((void*)AlignmentCheck, 0 , BytesToAllocate);
-                    return (void*)AlignmentCheck;
-                }
-
-                while (1) {
-                    if (((AlignmentCheck + Alignment) > limit) || ((AlignmentCheck + BytesToAllocate + Alignment) > limit)) {
-                        break;
+                        AddressBlock[0].Address = AlignmentCheck;
+                        AddressBlock[0].size = BytesToAllocate;
+                        AddressesLogged++; // Increment after logging the first address
+                        memset((void*)AlignmentCheck, 0 , BytesToAllocate);
+                        LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                        return (void*)AlignmentCheck;
                     }
-                    AlignmentCheck += Alignment;
 
-                    bool addrssSpaceCheck = true;
-
-                    for (uint32_t i = 0; i < AddressesLogged; i++) {
-                        uint64_t start = AddressBlock[i].Address;
-                        uint64_t end = start + AddressBlock[i].size;
-
-                         // Check if the new allocation overlaps with an existing block
-                        if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
-                            ((AlignmentCheck + BytesToAllocate) >= start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
-                            (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
-                            addrssSpaceCheck = false;
+                    while (1) {
+                        if (((AlignmentCheck + Alignment) > limit) || ((AlignmentCheck + BytesToAllocate + Alignment) > limit)) {
                             break;
                         }
-                    }
+                        AlignmentCheck += Alignment;
+
+                        bool addrssSpaceCheck = true;
+
+                        for (uint32_t i = 0; i < AddressesLogged; i++) {
+                            uint64_t start = AddressBlock[i].Address;
+                            uint64_t end = start + AddressBlock[i].size;
+
+                            // Check if the new allocation overlaps with an existing block
+                            if ((AlignmentCheck >= start && AlignmentCheck <= end) ||  // Start within an existing block
+                                ((AlignmentCheck + BytesToAllocate) >= start && (AlignmentCheck + BytesToAllocate) <= end) || // End within an existing block
+                                (AlignmentCheck <= start && (AlignmentCheck + BytesToAllocate) >= end)) { // Encompasses an existing block
+                                addrssSpaceCheck = false;
+                                break;
+                            }
+                        }
 
 
-                    if (!addrssSpaceCheck) {
-                        continue;
-                    }
+                        if (!addrssSpaceCheck) {
+                            continue;
+                        }
 
                         // Found an address
-                    for (uint32_t i = 0; i < AddressesLogged; i++) {
-                        if (AddressBlock[i].Address == 0x00) {
-                            AddressBlock[i].Address = AlignmentCheck;
-                            AddressBlock[i].size = BytesToAllocate;
-                            //LouPrint("Address:%h\n", AlignmentCheck);
-                            memset((void*)AlignmentCheck, 0 , BytesToAllocate);
-                            return (void*)AlignmentCheck;
+                        for (uint32_t i = 0; i < AddressesLogged; i++) {
+                            if (AddressBlock[i].Address == 0x00) {
+                                AddressBlock[i].Address = AlignmentCheck;
+                                AddressBlock[i].size = BytesToAllocate;
+                                //LouPrint("Address:%h\n", AlignmentCheck);
+                                memset((void*)AlignmentCheck, 0 , BytesToAllocate);
+                                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                                return (void*)AlignmentCheck;
+                            }
                         }
-                    }
 
-                    if (AddressesLogged >= (512)) {
-                        // System overload
-                        while(1);                           
-                        return NULL;
-                    }
+                        if (AddressesLogged >= (786432)) {
+                            // System overload
+                            LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);     
+                            while(1);                           
+                            return NULL;
+                        }
 
-                    AddressBlock[AddressesLogged].Address = AlignmentCheck;
-                    AddressBlock[AddressesLogged].size = BytesToAllocate;
-                    AddressesLogged++; // Increment after logging the new address
-                    //LouPrint("Address:%h\n", AlignmentCheck);
-                    memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
-                    return (void*)AlignmentCheck;
+                        AddressBlock[AddressesLogged].Address = AlignmentCheck;
+                        AddressBlock[AddressesLogged].size = BytesToAllocate;
+                        AddressesLogged++; // Increment after logging the new address
+                        //LouPrint("Address:%h\n", AlignmentCheck);
+                        memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
+                        LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                        return (void*)AlignmentCheck;
+                    }
                 }
             }
             else if (mmap_entry->type == 2) continue;
@@ -388,8 +398,8 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
                                 //LouPrint("Address:%h\n", AlignmentCheck);
-                                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
                                 memset((void*)AlignmentCheck, 0 , BytesToAllocate);
+                                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
                                 return (void*)AlignmentCheck;
                             }
                         }
@@ -406,8 +416,8 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
-                    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
                     memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
                     return (void*)AlignmentCheck;
                 }
 
@@ -593,66 +603,69 @@ void* LouKeMallocEx(
     size_t      Alignment,
     uint64_t    AllocationFlags
 ){
-    //UNUSED size_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
-    //UNUSED size_t PageCount = 0;
-    //UNUSED PKMALLOC_VMEM_TRACK TmpVMemTrack; //defineing it here for stack consumption
-    //UNUSED bool ValidAddress; 
-    //while(1){
-        //PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracks;
-        //for(; PageCount; PageCount++){
-        //    if(TmpPageTrack->Flags == AllocationFlags){
-        //        goto _LOU_KE_MALLOC_FOUND_FREE_PAGE;
-        //    }
-        //    if(TmpPageTrack->Chain.NextHeader){
-        //        TmpPageTrack = (PKMALLOC_PAGE_TRACK)TmpPageTrack->Chain.NextHeader;
-        //    }
-        //}
-        //TmpPageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundUpSize);
-        //TmpPageTrack->Chunk.VAddress = TmpPageTrack->Chunk.PAddress;//(uint64_t)LouVMalloc(RoundUpSize);
-        //TmpPageTrack->Chunk.ChunkSize = RoundUpSize;
-        //TmpPageTrack->Flags = AllocationFlags;
-        //TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
-        //PageTracksCount++;
-        //_LOU_KE_MALLOC_FOUND_FREE_PAGE:
-        //const size_t end = TmpPageTrack->Chunk.VAddress + TmpPageTrack->Chunk.ChunkSize;
-        //const size_t start = TmpPageTrack->Chunk.VAddress;
+    size_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
+    size_t PageCount = 0;
+    PKMALLOC_VMEM_TRACK TmpVMemTrack; //defineing it here for stack consumption
+    bool ValidAddress; 
+    while(1){
+        PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracks;
+        for(; PageCount < PageTracksCount; PageCount++){
+            if(TmpPageTrack->Flags == AllocationFlags){
+                goto _LOU_KE_MALLOC_FOUND_FREE_PAGE;
+            }
+            if(TmpPageTrack->Chain.NextHeader){
+                TmpPageTrack = (PKMALLOC_PAGE_TRACK)TmpPageTrack->Chain.NextHeader;
+            }
+        }
+        TmpPageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundUpSize);
+        TmpPageTrack->Chunk.VAddress = TmpPageTrack->Chunk.PAddress;//(uint64_t)LouVMalloc(RoundUpSize);
+        TmpPageTrack->Chunk.ChunkSize = RoundUpSize;
+        TmpPageTrack->Flags = AllocationFlags;
+        TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
+        LouKeMapContinuousMemoryBlock(TmpPageTrack->Chunk.PAddress, TmpPageTrack->Chunk.VAddress, RoundUpSize, AllocationFlags);
+        PageTracksCount++;
+        _LOU_KE_MALLOC_FOUND_FREE_PAGE:
+        const size_t Limit = TmpPageTrack->Chunk.VAddress + TmpPageTrack->Chunk.ChunkSize;
         
-        //size_t Pointer = TmpPageTrack->Chunk.VAddress;
-        //Pointer &= ~(Alignment - 1);
-    
-        //while((Pointer + AllocationSize) <= end){
-            //Pointer += Alignment;
-            //TmpVMemTrack = &VMemTracks;
-            //ValidAddress = true;
-            //for(size_t i = 0 ; i < VMemTracksCount; i++){
+        size_t Pointer = TmpPageTrack->Chunk.VAddress;
+        Pointer &= ~(Alignment - 1);
+        size_t start, end;
+        while((Pointer + AllocationSize) <= Limit){
+            Pointer += Alignment;
+            TmpVMemTrack = &VMemTracks;
+            ValidAddress = true;
+            for(size_t i = 0 ; i < VMemTracksCount; i++){
                 // Check if the new allocation overlaps with an existing block
-            //    if ((Pointer >= start && Pointer <= end) ||  // Start within an existing block
-            //        ((Pointer + AllocationSize) >= start && (Pointer + AllocationSize) <= end) || // End within an existing block
-            //        (Pointer <= start && (Pointer + AllocationSize) >= end)) { // Encompasses an existing block
-            //        ValidAddress = false;
-            //        break;
-            //    }
+                start = TmpVMemTrack->VAddress;
+                end = TmpVMemTrack->size + start;
+                if ((Pointer >= start && Pointer <= end) ||  // Start within an existing block
+                    ((Pointer + AllocationSize) >= start && (Pointer + AllocationSize) <= end) || // End within an existing block
+                    (Pointer <= start && (Pointer + AllocationSize) >= end)) { // Encompasses an existing block
+                    ValidAddress = false;
+                    break;
+                }
                 
-            //    if(TmpVMemTrack->Chain.NextHeader){
-            //        TmpVMemTrack = (PKMALLOC_VMEM_TRACK)TmpVMemTrack->Chain.NextHeader;
-            //    }
-            //}
-            //if(!ValidAddress){
-            //    continue;
-            //}
+                if(TmpVMemTrack->Chain.NextHeader){
+                    TmpVMemTrack = (PKMALLOC_VMEM_TRACK)TmpVMemTrack->Chain.NextHeader;
+                }
+            }
+            if(!ValidAddress){
+                continue;
+            }
 
             //Handles Condition for a "Memory Slip"
-            //if(TmpVMemTrack->VAddress){
-            //    TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
-            //    TmpVMemTrack = (PKMALLOC_VMEM_TRACK)TmpVMemTrack->Chain.NextHeader;
-            //}
-            //TmpVMemTrack->VAddress = Pointer;
-            //TmpVMemTrack->size = AllocationSize;
-            //TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
-            //VMemTracksCount++;
-            return LouMallocEx(AllocationSize , Alignment);
-        //}
-    //}
+            if(TmpVMemTrack->VAddress){
+                TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
+                TmpVMemTrack = (PKMALLOC_VMEM_TRACK)TmpVMemTrack->Chain.NextHeader;
+            }
+            TmpVMemTrack->VAddress = Pointer;
+            TmpVMemTrack->size = AllocationSize;
+            TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
+            VMemTracksCount++;
+            memset((void*)Pointer, 0 , AllocationSize);
+            return (void*)Pointer;
+        }
+    }
 }
 
 void* LouKeMalloc(

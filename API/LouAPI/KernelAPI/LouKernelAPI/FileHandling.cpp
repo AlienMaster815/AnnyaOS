@@ -13,6 +13,7 @@ LOUDDK_API_ENTRY
 FILE* fopen(string FileName){
 
     PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
+
     size_t FileSystemsToCheck = GetMountedFileSystemTableMembers();
     char DriveString[2] = {
         0, '\0',
@@ -31,7 +32,12 @@ FILE* fopen(string FileName){
         if(strncmp(DriveString, FileName, 1) == 0){
             //Appends the string + 2 for Drive Letter And ':' to get to /FilePath
             string FilePath = (string)(uintptr_t)FileName + 2;
-            Result = MountedSystems->FileSystem->FileSystemOpen(FilePath, MountedSystems->FileSystem);
+            if(MountedSystems->FileSystem->FileSystemOpen){
+                Result = MountedSystems->FileSystem->FileSystemOpen(FilePath, MountedSystems->FileSystem);
+            }else{
+                LouPrint("Error Reading From Mounted Disk::REASON::No Open Function\n");
+                while(1);
+            }
             if(Result){
                 return Result;
             }

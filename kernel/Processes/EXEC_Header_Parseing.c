@@ -301,9 +301,10 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
         uint64_t allocatedModuleVirtualAddress =
         (uint64_t)LouMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE//,
+            KILOBYTE_PAGE
             //KERNEL_PAGE_WRITE_PRESENT
         );
+        LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, PRESENT_PAGE | WRITEABLE_PAGE);
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
 
 
@@ -397,12 +398,14 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         //UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
         //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
-        uint64_t allocatedModuleVirtualAddress = 
+        uint64_t allocatedModuleVirtualAddress =
         (uint64_t)LouMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE//,
-            //KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
+            KILOBYTE_PAGE
+            //KERNEL_PAGE_WRITE_PRESENT
         );
+        LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+        
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
         //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
@@ -496,13 +499,14 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
 
-        uint64_t allocatedModuleVirtualAddress = 
+        uint64_t allocatedModuleVirtualAddress =
         (uint64_t)LouMallocEx(
             TotalNeededVM,
             KILOBYTE_PAGE
-            //KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
+            //KERNEL_PAGE_WRITE_PRESENT
         );
-
+        LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+        
         // /LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
         //LouKeLogBinaryVirtualAddress(BinaryObject, allocatedModuleVirtualAddress);

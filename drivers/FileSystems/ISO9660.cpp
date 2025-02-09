@@ -295,7 +295,6 @@ void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYS
 LOUDDK_API_ENTRY
 FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
-
     //:/Dir/dir/.../file
     //LouPrint("Opening File:%s\n", Path);
 
@@ -371,8 +370,6 @@ LOUSTATUS Iso9660DriverEntry(){
     PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMalloc(sizeof(LOUSINE_KERNEL_FILESYSTEM));
 
     Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
-    Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
-    Iso9660FileSystem->FileSystemOpen = Iso9660FileSystemOpen;
 
     return LouKeRegisterDevice(
         0x00, 

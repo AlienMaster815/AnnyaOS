@@ -5,6 +5,7 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
 
 DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath){
     FILE* ModuleHandle = fopen(ModuleNameAndPath);
+
     if(!ModuleHandle){
         return 0x00;
     }

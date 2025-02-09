@@ -53,7 +53,8 @@ void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t st
 
 // Function to create a new stack and call the specified function
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t Pages) {
-    void* NewStack = LouMallocEx(Pages * KILOBYTE_PAGE, KILOBYTE_PAGE);//, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    void* NewStack = LouMallocEx(Pages * KILOBYTE_PAGE, KILOBYTE_PAGE);
+    LouKeMapContinuousMemoryBlock((uint64_t)NewStack, (uint64_t)NewStack, Pages * KILOBYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     UNUSED uint64_t StackTop = (uint64_t)NewStack + (Pages * KILOBYTE_PAGE);
     StackTop &= ~(15);

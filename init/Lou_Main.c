@@ -379,6 +379,7 @@ uint64_t GetUsedMemory();
 void InitializeUserSpace(){
 
     InitilaizeUserMode();
+
     uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
@@ -391,10 +392,9 @@ void InitializeUserSpace(){
         HWind
     );    
     LouPrint("Hello World\n");
-    void (*Entry)();
-    Entry = (void (*)())InitEntry;
-    Entry();
-    while(1);
+    //void (*Entry)();
+    //Entry = (void (*)())InitEntry;
+    //Entry();
     UsrJmp(InitEntry);
 }
 
