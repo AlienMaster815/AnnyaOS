@@ -46,7 +46,7 @@ typedef struct _INTERRUPT_ROUTER_ENTRY{
 }INTERRUPT_ROUTER_ENTRY, * PINTERRUPT_ROUTER_ENTRY;
 
 static INTERRUPT_ROUTER_ENTRY InterruptRouterTable[256] = {0};
-
+uint64_t GetAdvancedRegisterInterruptsStorage();
 
 void ioapic_unmask_irq(uint8_t irq);
 
@@ -100,12 +100,12 @@ void StoreAdvancedRegisters(uint64_t ContextHandle);
 void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
 //Fuck It Well do it live
-void FuckItSaveEverything(uint64_t* ContextHandle){
-    *ContextHandle = (uint64_t)LouMallocEx(2688, 64);
+void SaveEverything(uint64_t* ContextHandle){
+    *ContextHandle = GetAdvancedRegisterInterruptsStorage();
     StoreAdvancedRegisters(*ContextHandle);
 }
 
-void FuckItRestoreEverything(uint64_t* ContextHandle){
+void RestoreEverything(uint64_t* ContextHandle){
     if(!(*ContextHandle))return;
     RestoreAdvancedRegisters(*ContextHandle);
     LouFree((RAMADD)*ContextHandle);
@@ -126,7 +126,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
-            FuckItSaveEverything(&ContextHandle);
+            SaveEverything(&ContextHandle);
         }
         for(uint32_t i = 0 ; i < InterruptRouterTable[Interrupt].ListCount; i++){
             if(TmpEntry->InterruptHandler){
@@ -142,7 +142,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
             }
         }
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
-            FuckItRestoreEverything(&ContextHandle);
+            RestoreEverything(&ContextHandle);
         }
         local_apic_send_eoi();
         MutexUnlock(&InterruptRouterTable[Interrupt].InterruptMutex);

@@ -131,8 +131,6 @@ void StartDesktop(){
     DrawDesktopBackground((FILE*)Background, 0);
 
     LouPrint("Background Drawn : Creating Taskbar\n");
-    while(1);
-
 
     WINDOW_CHARECTERISTICS TaskbarCharecteristics;
     TaskbarCharecteristics.Type = CANVAS_WINDOW;

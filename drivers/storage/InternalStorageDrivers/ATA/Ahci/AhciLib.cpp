@@ -47,7 +47,7 @@ PHBA_COMMAND_TABLE LouKeAhciMallocCommandTable(uint16_t TableEntries){
         return 0x00;
     }
 
-    return (PHBA_COMMAND_TABLE)LouKeMallocEx(sizeof(HBA_COMMAND_TABLE) + (TableEntries * sizeof(HBA_PRDT_ENTRY)), 128, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
+    return (PHBA_COMMAND_TABLE)LouMallocEx(sizeof(HBA_COMMAND_TABLE) + (TableEntries * sizeof(HBA_PRDT_ENTRY)), 128);//, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 }
 
 SECTIONED_CODE(".Ahci.Code")
@@ -458,8 +458,8 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     //TODP: safeguard 32 bit only systems
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     //PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateAhciData->GenericHostController;
-    PrivateData->FisDma = (uintptr_t)LouKeMalloc(256, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
-    PrivateData->CommandDma = (uintptr_t)LouKeMalloc(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    PrivateData->FisDma = (uintptr_t)LouMalloc(256);//, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    PrivateData->CommandDma = (uintptr_t)LouMalloc(1 * KILOBYTE);//, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
 
 
     LOUSTATUS Status = AhciDeInitalizePort(AhciPort);

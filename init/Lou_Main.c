@@ -391,6 +391,10 @@ void InitializeUserSpace(){
         HWind
     );    
     LouPrint("Hello World\n");
+    void (*Entry)();
+    Entry = (void (*)())InitEntry;
+    Entry();
+    while(1);
     UsrJmp(InitEntry);
 }
 

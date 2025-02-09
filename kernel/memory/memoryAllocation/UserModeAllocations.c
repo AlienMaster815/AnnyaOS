@@ -7,7 +7,7 @@ void LouUserMalloc(uint64_t DataP){
     LouKIRQL LouIrql;
     LouKeAcquireSpinLock(&UserMallocLock, &LouIrql);
     uint64_t size = *(uint64_t*)DataP;
-    *(uint64_t*)DataP = (uint64_t)LouKeMalloc(size, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    *(uint64_t*)DataP = (uint64_t)LouMalloc(size);//, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     
     LouKeReleaseSpinLock(&UserMallocLock, &LouIrql);
     return;//Endof SYSTEMCALL

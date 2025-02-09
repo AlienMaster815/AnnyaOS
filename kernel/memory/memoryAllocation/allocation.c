@@ -635,72 +635,14 @@ PKMALLOC_PAGE_TRACK LouKeMmGetFreePage(size_t* Index, uint64_t Flags) {
     return 0x00;
 }
 
-static spinlock_t LouKeMallocLock;
+//static spinlock_t LouKeMallocLock;
 
 void* LouKeMallocEx(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 ){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&LouKeMallocLock, &Irql);
-    UNUSED uint64_t RoundedSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
-    UNUSED uint64_t Pointer = 0;
-    UNUSED size_t i = 0;
-    UNUSED PKMALLOC_PAGE_TRACK PageTrack;
-
-    while(!Pointer){
-        PageTrack = LouKeMmGetFreePage(&i, AllocationFlags);
-        if(!PageTrack){
-            PageTrack = &PageTracks;
-            for (size_t i = 0; i < PageTracksCount  && PageTrack->Chain.NextHeader; i++) {
-                PageTrack = (PKMALLOC_PAGE_TRACK)PageTrack->Chain.NextHeader;
-            }            
-            PageTrack->Chain.NextHeader = LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
-            PageTrack = (PKMALLOC_PAGE_TRACK)PageTrack->Chain.NextHeader;
-            PageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundedSize);
-            PageTrack->Chunk.VAddress = PageTrack->Chunk.PAddress;//(uint64_t)LouVMalloc(RoundedSize);
-            PageTrack->Chunk.ChunkSize = RoundedSize;
-            LouKeMapContinuousMemoryBlock(PageTrack->Chunk.PAddress, PageTrack->Chunk.VAddress, RoundedSize ,AllocationFlags);
-        }
-
-        Pointer = PageTrack->Chunk.VAddress;
-        
-        bool AddressFound = true;
-        PKMALLOC_VMEM_TRACK VMemoryTrack = &VMemTracks;
-        for(size_t i = 0; i < VMemTracksCount; i++){
-
-            if(!RangeDoesNotInterfere(
-                Pointer,
-                AllocationSize,
-                VMemoryTrack->VAddress,
-                VMemoryTrack->size
-            )){
-                AddressFound = false;
-                break;
-            }
-
-            if(VMemoryTrack->Chain.NextHeader){
-                VMemoryTrack = (PKMALLOC_VMEM_TRACK)VMemoryTrack->Chain.NextHeader;
-            }
-        }
-        
-        if(AddressFound){
-            //LouPrint("Address Found:%h\n", Pointer);
-            VMemoryTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
-            VMemoryTrack = (PKMALLOC_VMEM_TRACK)VMemoryTrack->Chain.NextHeader;
-            VMemoryTrack->VAddress = Pointer;
-            VMemoryTrack->size = AllocationSize;
-            VMemTracksCount++;
-            memset((void*)Pointer,0, AllocationSize);            
-            LouKeReleaseSpinLock(&LouKeMallocLock, &Irql);
-            return (void*)Pointer;
-        }
-
-        LouPrint("Here\n");
-        while(1);
-    }
-    return (void*)0x00;
+    return LouMallocEx(AllocationSize , Alignment);
 }
 
 void* LouKeMalloc(

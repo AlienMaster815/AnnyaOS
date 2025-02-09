@@ -299,10 +299,10 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
         //LouKeLogKernelBinary(BinaryObject, true);
 
         uint64_t allocatedModuleVirtualAddress =
-        (uint64_t)LouKeMallocEx(
+        (uint64_t)LouMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE,
-            KERNEL_PAGE_WRITE_PRESENT
+            KILOBYTE_PAGE//,
+            //KERNEL_PAGE_WRITE_PRESENT
         );
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
 
@@ -398,10 +398,10 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
         uint64_t allocatedModuleVirtualAddress = 
-        (uint64_t)LouKeMallocEx(
+        (uint64_t)LouMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE,
-            KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
+            KILOBYTE_PAGE//,
+            //KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
         );
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
@@ -497,10 +497,10 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
 
 
         uint64_t allocatedModuleVirtualAddress = 
-        (uint64_t)LouKeMallocEx(
+        (uint64_t)LouMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE,
-            KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
+            KILOBYTE_PAGE
+            //KERNEL_PAGE_WRITE_PRESENT | USER_PAGE
         );
 
         // /LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);

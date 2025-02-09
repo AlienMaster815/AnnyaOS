@@ -54,6 +54,7 @@ typedef struct {
     thread_state_t state;
     void* StackTop;
     uint64_t AdvancedRegisterStorage;
+    uint64_t AdvancedRegisterInterruptsStorage;
 } thread_t;
 
 static thread_t MasterThreadTable;
@@ -137,6 +138,10 @@ KERNEL_IMPORT void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
 KERNEL_IMPORT spinlock_t* LouKeGetInterruptGlobalLock();
 
+LOUDDK_API_ENTRY
+uint64_t GetAdvancedRegisterInterruptsStorage(){
+    return current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage;
+}
 
 //static mutex_t FOO;
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
