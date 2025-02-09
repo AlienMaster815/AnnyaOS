@@ -1,5 +1,8 @@
 global SetUpSmpPageing
 
+global StoreAdvancedRegisters
+global RestoreAdvancedRegisters
+
 section .rodata
 gdt64:
     dq 0 ; Null segment
@@ -92,3 +95,32 @@ GetWakeTheFuckUpBoysEnd:
     ret
 
 
+GetCr4:
+    mov rax, cr4
+    ret
+
+
+
+StoreAdvancedRegisters:
+	XSAVE [RCX]
+	ret
+
+RestoreAdvancedRegisters:
+	XRSTOR [RCX]
+	ret
+
+global InitializeXSave
+
+InitializeXSave:
+    mov rax, cr4       ; Read CR4
+    or rax, (1 << 18)  ; Set OSXSAVE bit (bit 18)
+    mov cr4, rax       ; Write back to CR4
+
+    ; XSAVE is supported, now you can use XGETBV safely
+    mov ecx, 0
+    xgetbv
+    or eax, 0b111
+    mov ecx, 0
+    xsetbv
+
+    

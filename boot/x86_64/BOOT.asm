@@ -139,17 +139,6 @@ long_mode_start:
     mov gs, ax
     mov ss, ax
 
-    ;mov rax, cr4       ; Read CR4
-    ;or rax, (1 << 18)  ; Set OSXSAVE bit (bit 18)
-    ;mov cr4, rax       ; Write back to CR4
-
-    ; XSAVE is supported, now you can use XGETBV safely
-    ;mov ecx, 0
-    ;xgetbv
-    ;or eax, 0b111
-    ;mov ecx, 0
-    ;xsetbv
-
     mov rcx, [multiboot_info_ptr] ; Load multiboot info
     mov rdx, [FOO]                ; Load FOO (if needed)
     call Lou_kernel_start         ; Start the kernel

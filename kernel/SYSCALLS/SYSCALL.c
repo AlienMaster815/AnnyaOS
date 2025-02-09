@@ -28,13 +28,19 @@ typedef struct  __attribute__((packed)) _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-void CheckLouCallTables(uint64_t Call, uint64_t Data);
-
+void CheckLouCallTables(int64_t Call, uint64_t Data);
 spinlock_t* LouKeGetInterruptGlobalLock();
-
+void RestoreEverything(uint64_t* ContextHandle);
+void SaveEverything(uint64_t* ContextHandle);
 
 void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t StackPointer){
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
+    uint64_t RegisterHandle;
+    SaveEverything(&RegisterHandle);
     if(!SystemEmulation){
         CheckLouCallTables(Call, Data);
     }
+    RestoreEverything(&RegisterHandle);
+    LouKeReleaseSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
 }

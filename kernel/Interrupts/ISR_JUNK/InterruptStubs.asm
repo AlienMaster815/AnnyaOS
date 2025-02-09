@@ -44,19 +44,6 @@ TURN_FPU_ON:
 	mov [FPU_ON], rax
 	ret
 
-
-global StoreAdvancedRegisters
-global RestoreAdvancedRegisters
-
-StoreAdvancedRegisters:
-	XSAVE [RCX]
-	ret
-
-RestoreAdvancedRegisters:
-	XRSTOR [RCX]
-	ret
-
-
 %macro pusha 0	
 
 	push r15

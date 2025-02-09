@@ -221,6 +221,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
 
     current_thread[get_processor_id()] = &MasterThreadTable;
     current_thread[get_processor_id()]->AdvancedRegisterStorage = (uintptr_t)LouMallocEx(2688, 64);
+    current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouMallocEx(2688, 64);
     current_thread[get_processor_id()]->NewTask = false;
     current_thread[get_processor_id()]->state = THREAD_RUNNING;
 

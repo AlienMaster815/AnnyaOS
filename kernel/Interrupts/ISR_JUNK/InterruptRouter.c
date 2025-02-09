@@ -99,16 +99,27 @@ int LouPrintPanic(char* format, ...);
 void StoreAdvancedRegisters(uint64_t ContextHandle);
 void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
+typedef struct _PROCESSOR_CALLBACKS{
+    void (*SaveHandler)(uint8_t*);
+    void (*RestoreHandler)(const uint8_t*);
+}PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
+
+static PPROCESSOR_CALLBACKS ProcessorCallbacks;
+
+void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback){
+    ProcessorCallbacks = Callback;
+}
+
 //Fuck It Well do it live
 void SaveEverything(uint64_t* ContextHandle){
     *ContextHandle = GetAdvancedRegisterInterruptsStorage();
-    StoreAdvancedRegisters(*ContextHandle);
+    if(!(*ContextHandle))return;
+    ProcessorCallbacks->SaveHandler((uint8_t*)(*ContextHandle));
 }
 
 void RestoreEverything(uint64_t* ContextHandle){
     if(!(*ContextHandle))return;
-    RestoreAdvancedRegisters(*ContextHandle);
-    LouFree((RAMADD)*ContextHandle);
+    ProcessorCallbacks->RestoreHandler((const uint8_t*)(*ContextHandle));
 }
 
 static spinlock_t InterruptLock;
@@ -120,8 +131,7 @@ spinlock_t* LouKeGetInterruptGlobalLock(){
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
     LouKIRQL Irql;
-    LouKeSetIrql(HIGH_LEVEL, &Irql);    
-    MutexLock(&InterruptRouterTable[Interrupt].InterruptMutex);
+    LouKeAcquireSpinLock(&InterruptLock, &Irql);
     uint64_t ContextHandle;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
@@ -145,8 +155,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
             RestoreEverything(&ContextHandle);
         }
         local_apic_send_eoi();
-        MutexUnlock(&InterruptRouterTable[Interrupt].InterruptMutex);
-        LouKeSetIrql(Irql, 0x00);    
+        LouKeReleaseSpinLock(&InterruptLock, &Irql);
         return;
     }
 

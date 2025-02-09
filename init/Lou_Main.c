@@ -163,6 +163,7 @@ void InitializeDeviceManager();
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 
 void LouKeInitializeFirmwareDeviceParseing();
+void HandleProccessorInitialization();
 
 void Advanced_Kernel_Initialization(){
     //if(LOUSTATUS_GOOD != InitFADT())LouPrint("Unable To Start FADT Handleing\n");
@@ -175,9 +176,8 @@ void Advanced_Kernel_Initialization(){
     //if(LOUSTATUS_GOOD != InitSLIT())LouPrint("Unable To Start SLIT Handleing\n");
     //if(LOUSTATUS_GOOD != InitMCFG())LouPrint("Unable To Start MCFG Handleing\n");
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
-
-
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
+    HandleProccessorInitialization();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
     InitializeAllProcessorFeatures();
 }

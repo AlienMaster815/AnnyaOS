@@ -45,6 +45,13 @@ static inline void MutexLock(mutex_t* m){
     m->locked = true;
 }
 
+static inline void MutexSyncronize(mutex_t* m){
+    while(m->locked){
+        //spinlock
+    }
+}
+
+
 static inline void MutexUnlock(mutex_t* m){
     m->locked = false;
 }
@@ -74,6 +81,12 @@ static inline void MutexPriorityUnlock(mutex_t* m){
 typedef struct {
     mutex_t Lock;
 }spinlock_t;
+
+static inline void SpinlockSyncronize(spinlock_t* s){
+    while(s->Lock.locked){
+
+    }
+}
 
 #ifndef _KERNEL_MODULE_
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);

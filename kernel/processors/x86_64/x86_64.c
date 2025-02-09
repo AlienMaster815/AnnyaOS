@@ -236,3 +236,38 @@ extern uint64_t CheckApCompletionTailCall();
 uint64_t CheckApCompletion(){   
     return CheckApCompletionTailCall();
 }
+
+
+
+void restore_fpu_state(const uint8_t* buffer) {
+    __asm__ volatile (
+        "frstor (%0)"    // Restore FPU/MMX state from buffer
+        :
+        : "r" (buffer)   // Input operand: buffer address
+        : "memory"
+    );
+}
+
+
+#define FPU_STATE_SIZE 108  // 108 bytes for x86_64 in 32-bit mode
+
+void save_fpu_state(uint8_t* buffer) {
+    // Clear the buffer to avoid residual data
+    memset(buffer, 0, FPU_STATE_SIZE);
+
+    __asm__ volatile (
+        "fnsave (%0)"    // Save FPU/MMX state to buffer
+        :                // No output operands
+        : "r" (buffer)   // Input operand: buffer address
+        : "memory"       // Clobber list: tells the compiler memory is modified
+    );
+}
+
+void fxsave_handler(uint8_t* buffer) {
+    __asm__ volatile ("fxsave (%0)" : : "r" (buffer) : "memory");
+}
+
+// Restore function
+void fxrstor_handler(const uint8_t* buffer) {
+    __asm__ volatile ("fxrstor (%0)" : : "r" (buffer) : "memory");
+}
