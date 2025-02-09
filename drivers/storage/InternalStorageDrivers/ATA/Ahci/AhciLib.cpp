@@ -52,7 +52,7 @@ PHBA_COMMAND_TABLE LouKeAhciMallocCommandTable(uint16_t TableEntries){
 
 SECTIONED_CODE(".Ahci.Code")
 void LouKeAhciFreeCommandTable(PHBA_COMMAND_TABLE Table){
-    LouKeFree((void*)Table);
+    LouFree((RAMADD)Table);
 }
 
 SECTIONED_CODE(".Ahci.Code")

@@ -149,7 +149,7 @@ static FILE* ISOLouKeFindDirectory(
             //from the last sector to get ready
             //to allocate memory from the new
             //sector we are about to read
-            LouKeFree((RAMADD)Test);
+            LouFree((RAMADD)Test);
             
             //before we read the Next sector 
             //we need to return if this is a
@@ -180,7 +180,7 @@ static FILE* ISOLouKeFindDirectory(
                 //is loaded and can be return
                 FILE* LoadedFile = (FILE*)LouMallocEx(BufferSize, KILOBYTE_PAGE);
                 memcpy(LoadedFile, FOO, BufferSize);
-                LouKeFree(FOO);
+                LouFree(FOO);
                 return LoadedFile;
             }
             SearchDirectory = GetNextDirectoryName(SearchDirectory);
@@ -195,7 +195,7 @@ static FILE* ISOLouKeFindDirectory(
     }
 
     LouPrint("Done With Recursion: Could Not Find File\n");
-    LouKeFree((RAMADD)Test);  //Free before exiting
+    LouFree((RAMADD)Test);  //Free before exiting
     return 0;
 }
 
@@ -220,7 +220,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             VD.Identifier = 0x0000;
             VD.Version = 0;
             //LouPrint("VD Parsed\n");
-            LouKeFree((RAMADD)Test);
+            LouFree((RAMADD)Test);
             return VD;
         }
         
@@ -250,7 +250,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             VD.Identifier = 0x0000;
             VD.Version = 0;
             //LouPrint("VD Parsed\n");
-            LouKeFree((RAMADD)Test);
+            LouFree((RAMADD)Test);
             return VD;
         }
             
@@ -279,7 +279,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
 
         //LouPrint("VD Parsed\n");
 
-        LouKeFree((RAMADD)Test);
+        LouFree((RAMADD)Test);
 
         return VD;
 }
@@ -288,7 +288,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
 LOUDDK_API_ENTRY
 void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
-    LouKeFree((RAMADD)File);
+    LouFree((RAMADD)File);
 
 }
 

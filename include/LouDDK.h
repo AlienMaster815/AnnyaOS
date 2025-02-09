@@ -62,6 +62,7 @@ typedef void* PVOID;
 #include <kernel/LouQs.h>
 #include "NtOsKrnlLib.h"
 #include <HashTables.h>
+#include <drivers/Networking/IpV4.h>
 
 #include <WinAPI/Win32/Win32API.h>
 
@@ -152,7 +153,7 @@ KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uin
 #include "drivers/Ata/ata.h"
 #include "drivers/Scsi/ScsiHost.h"
 #include <LKDM.h>
-
+#include <drivers/Networking/IpV4.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"
