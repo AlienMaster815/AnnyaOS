@@ -10,3 +10,4 @@ EXPORTS
     AnnyaChangeCanvasBufferColor
     AnnyaCreateButton
     AnnyaRegisterCallbackProcedure
+    malloc

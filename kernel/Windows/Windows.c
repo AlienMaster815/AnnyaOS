@@ -24,7 +24,7 @@ static inline PWINDHANDLE CreateWindowHandle(){
 
     TmpList->Neighbors.NextHeader = (PListHeader)LouMalloc(sizeof(OPEN_WINDOW_LIST));
     TmpList = (POPEN_WINDOW_LIST)TmpList->Neighbors.NextHeader;
-    TmpList->WindowHandle = LouKeUserMalloc(sizeof(WINDHANDLE));
+    TmpList->WindowHandle = LouKeMalloc(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     LouKeReleaseSpinLock(&WindowHandleLock, &Irql);
     
     return TmpList->WindowHandle;

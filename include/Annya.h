@@ -56,6 +56,9 @@ typedef struct _TIME_T{
 //);
 
 __declspec(dllimport)
+void* malloc(size_t BytesNeeded);
+
+__declspec(dllimport)
 PBITMAP_HANDLE AnnyaOpenBitmapImage(
     string FileName
 );

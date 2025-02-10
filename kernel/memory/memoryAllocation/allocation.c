@@ -606,11 +606,11 @@ void* LouKeMallocEx(
     size_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     size_t PageCount = 0;
     PKMALLOC_VMEM_TRACK TmpVMemTrack; //defineing it here for stack consumption
-    bool ValidAddress; 
+    bool ValidAddress;   
     while(1){
         PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracks;
         for(; PageCount < PageTracksCount; PageCount++){
-            if(TmpPageTrack->Flags == AllocationFlags){
+            if((TmpPageTrack->Flags == AllocationFlags) && (RoundUpSize != AllocationSize)){
                 goto _LOU_KE_MALLOC_FOUND_FREE_PAGE;
             }
             if(TmpPageTrack->Chain.NextHeader){
@@ -618,7 +618,7 @@ void* LouKeMallocEx(
             }
         }
         TmpPageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundUpSize);
-        TmpPageTrack->Chunk.VAddress = TmpPageTrack->Chunk.PAddress;//(uint64_t)LouVMalloc(RoundUpSize);
+        TmpPageTrack->Chunk.VAddress = (uint64_t)LouVMalloc(RoundUpSize);
         TmpPageTrack->Chunk.ChunkSize = RoundUpSize;
         TmpPageTrack->Flags = AllocationFlags;
         TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
@@ -627,11 +627,14 @@ void* LouKeMallocEx(
         _LOU_KE_MALLOC_FOUND_FREE_PAGE:
         const size_t Limit = TmpPageTrack->Chunk.VAddress + TmpPageTrack->Chunk.ChunkSize;
         size_t Pointer = TmpPageTrack->Chunk.VAddress;
-
-        Pointer &= ~(Alignment - 1);
+        if(RoundUpSize != AllocationSize){
+            Pointer &= ~(Alignment - 1);
+        }
         size_t start, end;
         while((Pointer + AllocationSize) <= Limit){
-            Pointer += Alignment;
+            if(RoundUpSize != AllocationSize){
+                Pointer += Alignment;
+            }
             TmpVMemTrack = &VMemTracks;
             ValidAddress = true;
             for(size_t i = 0 ; i < VMemTracksCount; i++){
@@ -682,5 +685,20 @@ void LouKeFreeFromMap(
 );
 
 void LouKeFree(void* AddressToFree){
-    
+    PKMALLOC_VMEM_TRACK VMemTrack1 = &VMemTracks, VMemTrack2 = &VMemTracks;
+    for(size_t i = 0; i < VMemTracksCount; i++){
+        if(VMemTrack1->VAddress == (uintptr_t)AddressToFree){
+            for(size_t j = 0 ; j < i; j++){
+                if(VMemTrack1->Chain.NextHeader){
+                    VMemTrack2 = (PKMALLOC_VMEM_TRACK)VMemTrack2->Chain.NextHeader;
+                }        
+                VMemTrack2->Chain.NextHeader = VMemTrack1->Chain.NextHeader;
+                LouFree((RAMADD)VMemTrack1);
+                return;
+            }
+        }
+        if(VMemTrack1->Chain.NextHeader){
+            VMemTrack1 = (PKMALLOC_VMEM_TRACK)VMemTrack1->Chain.NextHeader;
+        }
+    }
 }

@@ -52,19 +52,18 @@ void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t st
 
 
 // Function to create a new stack and call the specified function
-void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t Pages) {
-    void* NewStack = LouMallocEx(Pages * KILOBYTE_PAGE, KILOBYTE_PAGE);
-    LouKeMapContinuousMemoryBlock((uint64_t)NewStack, (uint64_t)NewStack, Pages * KILOBYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize) {
+    void* NewStack = LouKeMalloc(StackSize, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
-    UNUSED uint64_t StackTop = (uint64_t)NewStack + (Pages * KILOBYTE_PAGE);
+    UNUSED uint64_t StackTop = (uint64_t)NewStack + (StackSize);
     StackTop &= ~(15);
 
-    memset((void*)NewStack, 0, (Pages * KILOBYTE_PAGE));
+    memset((void*)NewStack, 0, (StackSize));
 
     new_stack[get_processor_id()] = NewStack;
 
     // Calculate the stack pointer, assuming the stack grows downwards
-    void* stack_top = (char*)new_stack[get_processor_id()] + ((Pages * KILOBYTE_PAGE) - 1024);
+    void* stack_top = (char*)new_stack[get_processor_id()] + ((StackSize) - 1024);
 
     // Inline assembly to switch stack, call the function, and return to the original context
     __asm__ volatile (

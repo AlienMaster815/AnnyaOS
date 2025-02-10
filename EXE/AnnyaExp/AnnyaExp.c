@@ -126,6 +126,9 @@ DWORD ClockThread(PVOID Args){
 }
 
 void StartDesktop(){
+ 
+    LouPrint("Hello UserMode Im Annya :) :: Starting Desktop\n");
+
     Background = AnnyaOpenBitmapImage("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
 
     DrawDesktopBackground((FILE*)Background, 0);
@@ -182,7 +185,6 @@ int WinMain(
     Time[0] = '\0';
 
     // Main message loop:
-    LouPrint("Hello UserMode Im Annya :)\n");
     
     Width = AnnyaGetScreenBufferWidth();
     Height = AnnyaGetScreenBufferHeight();
@@ -196,7 +198,7 @@ int WinMain(
     //LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
 
     LouPrint("Shell Initialization Complete\n");
-    ClockThread(0x00);
+    //ClockThread(0x00);
     while(1){
         
     }

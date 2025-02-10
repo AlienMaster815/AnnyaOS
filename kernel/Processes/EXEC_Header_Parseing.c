@@ -399,12 +399,12 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
 
         uint64_t allocatedModuleVirtualAddress =
-        (uint64_t)LouMallocEx(
+        (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE
-            //KERNEL_PAGE_WRITE_PRESENT
+            KILOBYTE_PAGE,
+            USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
-        LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+        //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
         
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
@@ -500,12 +500,12 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
 
 
         uint64_t allocatedModuleVirtualAddress =
-        (uint64_t)LouMallocEx(
+        (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE
-            //KERNEL_PAGE_WRITE_PRESENT
+            KILOBYTE_PAGE,
+            USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
-        LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+        //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
         
         // /LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 

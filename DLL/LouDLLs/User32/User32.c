@@ -17,6 +17,11 @@ void* AnnyaAPIVMalloc(uint64_t BytesNeeded){
     return (void*)CallData;
 }
 
+USER32_API
+void* malloc(size_t BytesNeeded){
+    return AnnyaAPIVMalloc(BytesNeeded);
+}
+
 //USER32_API
 //void AnnyaAPIVFree(uint64_t FreeHandle){
 //    uint64_t Data = FreeHandle;

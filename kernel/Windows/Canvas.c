@@ -23,7 +23,7 @@ PWINDHANDLE LouCreateCanvasBuffer(
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
 ){
-    PWINDHANDLE WindHandle = LouKeUserMalloc(sizeof(WINDHANDLE));
+    PWINDHANDLE WindHandle = LouKeMalloc(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     WindHandle->CurrentX = x;
     WindHandle->CurrentY = y;

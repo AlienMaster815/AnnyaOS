@@ -98,6 +98,7 @@ uint64_t GetGdtBase();
 void FlushTss();
 LOUSTATUS SetupInitialVideoDevices();
 void InitializeAllProcessorFeatures();
+void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 
 
 void LouKeDrsdDrawDesktopBackground(
@@ -292,7 +293,6 @@ typedef struct  __attribute__((packed)) _CPUContext{
 void SMPInit();
 void InitializeUserSpace();
 
-void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t Pages);
 void CheckForPs2Mouse();
 void InitializeInternalChipsetHostDriver();
 uint8_t LouKeGetNumberOfStorageDevices();
@@ -358,8 +358,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     //SMPInit();
     LouPrint("Initializing User Mode\n");
-    LouKeRunOnNewUserStack(InitializeUserSpace,0x00, 512);
-
+    LouKeRunOnNewUserStack(InitializeUserSpace,0x00, 2 * MEGABYTE);
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
 	// IF the Kernel returns from this
 	// the whole thing crashes

@@ -1,11 +1,10 @@
 #include <LouAPI.h>
 
-void LouUserMalloc(uint64_t DataP);
 uint64_t GetAllocationBlockSize(uint64_t Address);
 
 void* LouKeForkToUserModeSection(uint64_t OriginalLocation){
     uint64_t AllocationSize = GetAllocationBlockSize(OriginalLocation);    
-    LouUserMalloc((uint64_t)&AllocationSize);
+    LouKeMalloc((uint64_t)&AllocationSize, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     //Allocation Size Now Has the allocated Buffer
     if(!AllocationSize){
         return 0x00;

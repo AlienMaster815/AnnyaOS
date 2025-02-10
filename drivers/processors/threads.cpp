@@ -61,9 +61,6 @@ static thread_t MasterThreadTable;
 static uint64_t NumberOfThreads = 0;
 //static uint64_t CurrentRoundRobin = 0;
 
-KERNEL_IMPORT
-void* LouKeUserMalloc(size_t NumberOfBytes);
-
 static inline thread_t* CreateThreadHandle(){
     thread_t* TmpThreadHandle = &MasterThreadTable;
     for(uint64_t i = 0 ; i < NumberOfThreads;i++){
@@ -71,7 +68,7 @@ static inline thread_t* CreateThreadHandle(){
             TmpThreadHandle = (thread_t*)TmpThreadHandle->Neighbors.NextHeader;
         }
     }
-    TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeUserMalloc(sizeof(thread_t));
+    TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeMalloc(sizeof(thread_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     return(thread_t*)TmpThreadHandle->Neighbors.NextHeader;
 }
 

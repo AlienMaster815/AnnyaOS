@@ -1,7 +1,5 @@
 #include <LouAPI.h>
 
-
-void LouUserMalloc(uint64_t Data);
 void LouKeDrsdResetFBDEV(uint64_t* FBDEV);
 void LouKeFOpenCall(uint64_t* Data);
 void LouKeDrsdDrawDesktopBackground(
@@ -44,7 +42,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t Data){
 
     switch (Call){
         case LOUVMALLOC:{
-            LouUserMalloc(Data);
+            *(uint64_t*)Data = (uint64_t)LouKeMalloc(*(uint64_t*)Data, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
             return;
         } 
         case LOUCREATETHREAD:{

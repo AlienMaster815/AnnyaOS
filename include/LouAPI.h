@@ -52,7 +52,6 @@ typedef void* FILE;
 
 LOUSTATUS RegisterHardwareInterruptHandler(void(*InterruptHandler)(uint64_t), uint8_t PIN, bool ExtraRegisterSave);
 void HardwareInterruptManager();
-
 typedef void* EventHandle;
 
 #else //Kernel Module

@@ -82,9 +82,6 @@ void LouFree(RAMADD Addr);
 void* LouMalloc(size_t BytesToAllocate);
 void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
 uint64_t GetStackBackset(uint64_t Offset);
-void* LouKeUserMalloc(size_t NumberOfBytes);
-void LouUserFree(uint64_t DataP);
-void LouKeUserFree(void* AddressToFree);
 #endif
 
 

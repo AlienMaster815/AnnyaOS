@@ -106,7 +106,7 @@ PBUTTONHANDLE LouCreateButton(
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ButtonLock, &Irql);
 
-    PBUTTONHANDLE HBUTTON = LouKeUserMalloc(sizeof(BUTTONHANDLE));
+    PBUTTONHANDLE HBUTTON = LouKeMalloc(sizeof(BUTTONHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     //fill out the basic information
     HBUTTON->CurrentX = x;
