@@ -50,10 +50,14 @@ void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t st
     //MutexUnlock(&FuckThis);
 }
 
+void* LouKeMallocPhysical(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
 
 // Function to create a new stack and call the specified function
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize) {
-    void* NewStack = LouKeMalloc(StackSize, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    void* NewStack = LouKeMallocPhysical(StackSize, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     UNUSED uint64_t StackTop = (uint64_t)NewStack + (StackSize);
     StackTop &= ~(15);

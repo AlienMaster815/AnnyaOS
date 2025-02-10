@@ -596,6 +596,11 @@ UNUSED static size_t                PageTracksCount = 0;
 UNUSED static KMALLOC_VMEM_TRACK    VMemTracks;
 UNUSED static size_t                VMemTracksCount = 0;
 
+UNUSED static KMALLOC_PAGE_TRACK    PageTracksPhy;
+UNUSED static size_t                PageTracksCountPhy = 0;
+UNUSED static KMALLOC_VMEM_TRACK    VMemTracksPhy;
+UNUSED static size_t                VMemTracksCountPhy = 0;
+
 //static spinlock_t LouKeMallocLock;
 
 void* LouKeMallocEx(
@@ -669,6 +674,86 @@ void* LouKeMallocEx(
             return (void*)Pointer;
         }
     }
+}
+
+void* LouKeMallocPhysicalEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+){
+    size_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
+    size_t PageCount = 0;
+    PKMALLOC_VMEM_TRACK TmpVMemTrack; //defineing it here for stack consumption
+    bool ValidAddress;   
+    while(1){
+        PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracksPhy;
+        for(; PageCount < PageTracksCountPhy; PageCount++){
+            if((TmpPageTrack->Flags == AllocationFlags) && (RoundUpSize != AllocationSize)){
+                goto _LOU_KE_MALLOC_FOUND_FREE_PAGE;
+            }
+            if(TmpPageTrack->Chain.NextHeader){
+                TmpPageTrack = (PKMALLOC_PAGE_TRACK)TmpPageTrack->Chain.NextHeader;
+            }
+        }
+        TmpPageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundUpSize);
+        TmpPageTrack->Chunk.VAddress = TmpPageTrack->Chunk.PAddress;//(uint64_t)LouVMalloc(RoundUpSize);
+        TmpPageTrack->Chunk.ChunkSize = RoundUpSize;
+        TmpPageTrack->Flags = AllocationFlags;
+        TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
+        LouKeMapContinuousMemoryBlock(TmpPageTrack->Chunk.PAddress, TmpPageTrack->Chunk.VAddress, RoundUpSize, AllocationFlags);
+        PageTracksCountPhy++;
+        _LOU_KE_MALLOC_FOUND_FREE_PAGE:
+        const size_t Limit = TmpPageTrack->Chunk.VAddress + TmpPageTrack->Chunk.ChunkSize;
+        size_t Pointer = TmpPageTrack->Chunk.VAddress;
+        if(RoundUpSize != AllocationSize){
+            Pointer &= ~(Alignment - 1);
+        }
+        size_t start, end;
+        while((Pointer + AllocationSize) <= Limit){
+            if(RoundUpSize != AllocationSize){
+                Pointer += Alignment;
+            }
+            TmpVMemTrack = &VMemTracksPhy;
+            ValidAddress = true;
+            for(size_t i = 0 ; i < VMemTracksCountPhy; i++){
+                // Check if the new allocation overlaps with an existing block
+                start = TmpVMemTrack->VAddress;
+                end = TmpVMemTrack->size + start;
+                if ((Pointer >= start && Pointer <= end) ||  // Start within an existing block
+                    ((Pointer + AllocationSize) >= start && (Pointer + AllocationSize) <= end) || // End within an existing block
+                    (Pointer <= start && (Pointer + AllocationSize) >= end)) { // Encompasses an existing block
+                    ValidAddress = false;
+                    break;
+                }
+                
+                if(TmpVMemTrack->Chain.NextHeader){
+                    TmpVMemTrack = (PKMALLOC_VMEM_TRACK)TmpVMemTrack->Chain.NextHeader;
+                }
+            }
+            if(!ValidAddress){
+                continue;
+            }
+
+            //Handles Condition for a "Memory Slip"
+            if(TmpVMemTrack->VAddress){
+                TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
+                TmpVMemTrack = (PKMALLOC_VMEM_TRACK)TmpVMemTrack->Chain.NextHeader;
+            }
+            TmpVMemTrack->VAddress = Pointer;
+            TmpVMemTrack->size = AllocationSize;
+            TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
+            VMemTracksCountPhy++;
+            memset((void*)Pointer, 0 , AllocationSize);
+            return (void*)Pointer;
+        }
+    }
+}
+
+void* LouKeMallocPhysical(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+){
+    return LouKeMallocPhysicalEx(AllocationSize, AllocationSize, AllocationFlags);
 }
 
 void* LouKeMalloc(
