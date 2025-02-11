@@ -2,7 +2,7 @@
 
 LOUSTATUS Iso9660DriverEntry();
 uint8_t LouKeGetNumberOfStorageDevices();
-
+LOUSTATUS FatDriverEntry();
 
 typedef struct _LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE{
     ListHeader                   List;
@@ -87,7 +87,8 @@ static DRIVE_ID_TABLE DriveIdTable[25] = {
 };
 
 void InitializeFileSystemManager(){
-    Iso9660DriverEntry();       
+    Iso9660DriverEntry();
+    FatDriverEntry();       
     uint8_t PortCount = LouKeGetNumberOfStorageDevices();
     PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
     for(size_t FileSystemIndex = 0 ; FileSystemIndex < FileSystemTableMembers; FileSystemIndex++){

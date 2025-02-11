@@ -227,13 +227,13 @@ LOUSTATUS AhciGenricDMAIssueCommand(
 
 
     
-    //LouPrint("PxIS:%h\n", Port->PxIS);
-    //LouPrint("PxSERR:%h\n", Port->PxSERR);
+    LouPrint("PxIS:%h\n", Port->PxIS);
+    LouPrint("PxSERR:%h\n", Port->PxSERR);
 
-    //uint32_t* fisPtr = (uint32_t*)PrivateData->FisDma;
-    //for (int i = 0; i < 8; i++) {
-    //    LouPrint("FIS[%d] = %h\n", i, fisPtr[i]);
-    //}
+    uint32_t* fisPtr = (uint32_t*)PrivateData->FisDma;
+    for (int i = 0; i < 8; i++) {
+        LouPrint("FIS[%d] = %h\n", i, fisPtr[i]);
+    }
     while(1);
     return STATUS_SUCCESS;
 }

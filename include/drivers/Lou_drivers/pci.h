@@ -87,6 +87,8 @@ typedef struct _PCI_DEVICE_OBJECT {
 	pci_power_t CurrentState;
 	uint8_t PmCap;
 	atomic_t enable_cnt;
+	uint8_t	  InterruptLine;
+	uint8_t	  InterruptPin;
 	uintptr_t DeviceExtendedObject; 
 	uintptr_t DevicePrivateData;
 	uintptr_t VgaDecode; //only video devces

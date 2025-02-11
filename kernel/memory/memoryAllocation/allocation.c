@@ -787,3 +787,22 @@ void LouKeFree(void* AddressToFree){
         }
     }
 }
+
+void LouKeFreePhysical(void* AddressToFree){
+    PKMALLOC_VMEM_TRACK VMemTrack1 = &VMemTracksPhy, VMemTrack2 = &VMemTracksPhy;
+    for(size_t i = 0; i < VMemTracksCount; i++){
+        if(VMemTrack1->VAddress == (uintptr_t)AddressToFree){
+            for(size_t j = 0 ; j < i; j++){
+                if(VMemTrack1->Chain.NextHeader){
+                    VMemTrack2 = (PKMALLOC_VMEM_TRACK)VMemTrack2->Chain.NextHeader;
+                }        
+                VMemTrack2->Chain.NextHeader = VMemTrack1->Chain.NextHeader;
+                LouFree((RAMADD)VMemTrack1);
+                return;
+            }
+        }
+        if(VMemTrack1->Chain.NextHeader){
+            VMemTrack1 = (PKMALLOC_VMEM_TRACK)VMemTrack1->Chain.NextHeader;
+        }
+    }
+}

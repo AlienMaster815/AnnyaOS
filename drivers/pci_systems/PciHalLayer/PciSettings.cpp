@@ -3,7 +3,9 @@
 #include <Hal.h>
 
 LOUSTATUS LouKeHalEnablePciDevice(P_PCI_DEVICE_OBJECT PDEV){
-    LouKeWritePciCommandRegister(PDEV, MEMORY_SPACE_ENABLE | IO_SPACE_ENABLE);
+    uint16_t Command = LouKeReadPciCommandRegister(PDEV);
+    Command &= ~(1 << 10); 
+    LouKeWritePciCommandRegister(PDEV, Command | MEMORY_SPACE_ENABLE | IO_SPACE_ENABLE);
     if(!(LouKeReadPciCommandRegister(PDEV) & (MEMORY_SPACE_ENABLE | IO_SPACE_ENABLE))){
         LouPrint("Pci Device Error : Error Enableing Pci Device Bus:%d :: Slot:%d :: Function:%d\n", PDEV->bus, PDEV->slot, PDEV->func);
         return STATUS_IO_DEVICE_ERROR;

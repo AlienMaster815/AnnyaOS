@@ -72,7 +72,7 @@ extern void Write64BitValueToAddress(uint64_t Address, uint64_t Value);
 extern uint64_t Get64BitValueFromAddress(uint64_t Address);
 
 
-
+void LouKeFreePhysical(void* AddressToFree);
 
 RAMADD Lou_Alloc_Mem(SIZE size);
 STATUS Lou_Free_Mem(RAMADD Addr, SIZE size);
@@ -129,6 +129,16 @@ void* LouKeMallocEx(
 );
 
 void LouKeFree(void* AddressToFree);
+
+void* LouKeMallocPhysical(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
+void* LouKeMallocPhysicalEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
 
 void MapIoMemory(
     uint64_t Address,
@@ -200,6 +210,16 @@ KERNEL_IMPORT void* LouKeMallocEx(
 KERNEL_IMPORT void LouKeFree(void* AddressToFree);
 KERNEL_IMPORT void LouUserFree(uint64_t DataP);
 KERNEL_IMPORT void LouKeUserFree(void* AddressToFree);
+KERNEL_IMPORT void LouKeFreePhysical(void* AddressToFree);
+KERNEL_IMPORT void* LouKeMallocPhysical(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
+KERNEL_IMPORT void* LouKeMallocPhysicalEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
 #else 
 KERNEL_EXPORT void* LouMalloc(size_t BytesToAllocate);
 KERNEL_EXPORT void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);

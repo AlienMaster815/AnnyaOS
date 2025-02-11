@@ -63,6 +63,8 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
                     PDev->bus = bus;
                     PDev->slot = device;
                     PDev->func = function;
+                    PDev->InterruptLine = LouKeGetPciInterruptLine(PDev);
+                    PDev->InterruptPin = LouKeGetPciInterruptPin(PDev);
                     LouKeHalRegisterPciDevice(
                         PDev
                     );
@@ -76,6 +78,8 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
         PDev->bus = bus;
         PDev->slot = device;
         PDev->func = function;
+        PDev->InterruptLine = LouKeGetPciInterruptLine(PDev);
+        PDev->InterruptPin = LouKeGetPciInterruptPin(PDev);
         LouKeHalRegisterPciDevice(
             PDev
         );
@@ -173,6 +177,8 @@ void InitializePs2Mouse();
 KERNEL_IMPORT
 void EnablePs2Keyboard();
 
+uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
+
 LOUDDK_API_ENTRY
 void ScanTheRestOfHarware(){
     //LouPrint("Scanning For All Other Hardware\n");
@@ -197,12 +203,11 @@ void ScanTheRestOfHarware(){
 
 	//UNUSED PPCI_DEVICE_GROUP NetDev = LouKeOpenPciDeviceGroup(&Config);
 
-    //PDRIVER_OBJECT DrvObj = (PDRIVER_OBJECT)LouMalloc(sizeof(DRIVER_OBJECT));
+    //PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)NetDev->PDEV->CommonConfig;
 
-    //DrvObj->PDEV = (uintptr_t)NetDev->PDEV;
+    //LouPrint("Vendor:%h\n", CommonConfig->Header.VendorID);
+    //LouPrint("Device:%h\n", CommonConfig->Header.DeviceID);
 
-    //DRIVER_MODULE_ENTRY DriverEntry = LouKeLoadKernelModule("C:/ANNYA/SYSTEM64/DRIVERS/PCNET2.SYS");
-    //DriverEntry(DrvObj, 0x00);
     //while(1);
 
     LouKeReleaseSpinLock(&ScanLock, &Irql);

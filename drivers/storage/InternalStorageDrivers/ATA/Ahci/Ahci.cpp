@@ -555,7 +555,6 @@ static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     if(!(Tmp & (1 << 31))){
         Tmp |= (1 << 31);
         for(uint8_t i = 0 ; i < 5; i++){
-            //wack Ae 5 times to make sure it works
             Ghc->GlobalHostControl = Tmp;
         }
         sleep(1000);
@@ -638,6 +637,12 @@ SECTIONED_CODE(".Ahci.Data")
 void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 SECTIONED_CODE(".Ahci.Data") 
 void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
+
+void AhciInterruptHandler(uint64_t Rsp){
+
+    LouPrint("Ahci Interrupt Handler\n");
+    while(1);
+}
 
 SECTIONED_CODE(".Ahci.Code") 
 NTSTATUS AddAhciDevice(
@@ -825,6 +830,7 @@ NTSTATUS AddAhciDevice(
         }
     }
 
+    RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine, false, (uint64_t)AtaHost);
 
     ResetAhcPciController(AtaHost);
     AhciPciInitializeController(AtaHost);

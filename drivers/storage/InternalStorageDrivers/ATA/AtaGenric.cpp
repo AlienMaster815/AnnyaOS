@@ -184,6 +184,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         }
         //LouPrint("Command Completed Successfully\n");
     }
+
     MutexUnlock(&AtaPort->OperaionLock);
     LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
     return STATUS_INVALID_PARAMETER;

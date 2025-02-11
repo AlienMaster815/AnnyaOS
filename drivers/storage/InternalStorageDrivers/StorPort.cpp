@@ -46,7 +46,6 @@ LOUSTATUS LookForStorageDevices(){
 
             if(PConfig->Header.SubClass == 0x06){
                 //Continue for now
-                continue;
                 if(!AhciDriverLoaded){
                     DRIVER_MODULE_ENTRY AhciDriverEntryPoint = LouKeGetJitlManagedFunction(".Ahci", "DriverEntry");
                     if(!AhciDriverEntryPoint){

@@ -123,7 +123,6 @@ LOUSTATUS LouKeAtaReadDevice(
     uint64_t BufferSize,
     void* DataBuffer
 ){
-    LouPrint("LOUSINE ATA LIB:Preparing To Read Ata Device\n");
     LOUSTATUS Result = STATUS_SUCCESS;
     ATA_QUEUED_COMMAND Command;
 
@@ -145,8 +144,11 @@ LOUSTATUS LouKeAtaReadDevice(
     Command.HobSectorCount = (SectorCount >> 8) & 0xFF;
     Command.Control = 0x08;
     Command.Auxillery = 0;
+    Command.Command = ATA_COMMAND_PIO_READ;
 
     if(AtaPort->PortScsiDevice){
+        LouPrint("LOUSINE ATA LIB:Preparing To Read Atapi Device\n");
+
         Command.PacketCommand   = true;
         Command.Command         = ATA_COMMAND_PACKET;
         volatile uint8_t Read12[12] = {     0xA8, 0,
@@ -165,7 +167,7 @@ LOUSTATUS LouKeAtaReadDevice(
             Command.ScsiCommand[i] = Read12[i];
         }
     }else{
-        
+        LouPrint("LOUSINE ATA LIB:Preparing To Read Ata Device\n");
     }
 
     Result = AtaPort->Operations->PrepCommand(&Command);

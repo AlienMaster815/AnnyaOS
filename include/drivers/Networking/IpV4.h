@@ -56,9 +56,23 @@ extern "C"{
 #define IPV4_OPTION_SECURITY_LENGTH         11
 #define IPV4_OPTION_STREAM_ID_LENGTH        4
 
+#define IPV4_INTERNET_HEADER_FOMRAT_SIZE (sizeof(uint32_t) * 6)
 
+#define IPV4_SECURITY_S_FEILD_UNCLASIFIED       0b0000000000000000
+#define IPV4_SECURUTY_S_FEILD_CONFIDENTIAL      0b1111000100110101
+#define IPV4_SECURITY_S_FIELD_EFTO              0b1011110001001101
+#define IPV4_SECURITY_S_FEILD_MMMM              0b1011110001001101
+#define IPV4_SECURITY_S_FEILD_PROG              0b0101111000100110
+#define IPV4_SECURITY_S_FEILD_RESTRICTED        0b1010111100010011
+#define IPV4_SECURITY_S_FEILD_SECRET            0b1101011110001000
+#define IPV4_SECURITY_S_FIELD_TOP_SECRET        0b0110101111000101
 
-typedef struct IPV4_SERVICE_TYPE{
+#define IPV4_TIMESTAMP_TIMESTAMP_ONLY   0
+#define IPV4_TIMESTAMP_IARE             1
+#define IPV4_TIMESTAMP_IAFAP            3
+
+#pragma pack(push, 1)
+typedef struct _IPV4_SERVICE_TYPE{
     uint8_t     Precedence  : 3;
     uint8_t     Delay       : 1;
     uint8_t     Throughput  : 1;
@@ -72,23 +86,57 @@ typedef struct _IPV4_INTERNET_HEADER_FORMAT_FLAGS{
 }IPV4_INTERNET_HEADER_FORMAT_FLAGS, * PIPV4_INTERNET_HEADER_FORMAT_FLAGS;
 
 typedef struct _IPV4_INTERNET_HEADER_FORMAT{
-    uint32_t    Version                 : 4;
-    uint32_t    InternetHeaderLength    : 4;
-    uint32_t    ServiceType             : 8;
-    uint32_t    TotalLength             : 16;
-    uint32_t    Identification          : 16;
-    uint32_t    Flags                   : 3;
-    uint32_t    FragmentOffset          : 13;
-    uint32_t    TimeToLive              : 8;
-    uint32_t    Protocol                : 8;
-    uint32_t    HeaderChecksum          : 16;
-    uint32_t    SourceAddress           : 32;
-    uint32_t    DestinationAddress      : 32;
-    uint32_t    Options                 : 24;
-    uint32_t    Padding                 : 8;
+    uint8_t     VersionAndIHL;
+    uint8_t     ServiceType;
+    uint16_t    TotalLength;
+    uint16_t    Identification;
+    uint16_t    FlagsAndFrameOffset;
+    uint8_t     TimeToLive;
+    uint8_t     Protocol;
+    uint16_t    HeaderChecksum;
+    uint32_t    SourceAddress;
+    uint32_t    DestinationAddress;
+    uint32_t    OptionsAndPadding;
 }IPV4_INTERNET_HEADER_FORMAT, * PIPV4_INTERNET_HEADER_FORMAT;
 
-#define IPV4_INTERNET_HEADER_FOMRAT_SIZE (sizeof(uint32_t) * 6)
+
+typedef struct _IPV4_NO_OPERATION{
+    uint8_t Type; //1
+}IPV4_NO_OPERATION, * PIPV4_NO_OPERATION;
+
+typedef struct _IPV4_SECURITY{
+    uint8_t     Type; //130
+    uint8_t     Length; //11
+    uint16_t    Security;
+    uint16_t    Compartment;
+    uint16_t    HandleingRestriction;
+    uint32_t    TransmissionControlCode; //24 bits
+}IPV4_SECURITY, * PIPV4_SECURITY;
+
+typedef struct _IPV4_LOOSE_SOURCE_AND_RECORD_ROUTE{
+    uint8_t     Type;
+    uint8_t     Length;
+    uint8_t     Pointer;
+    uint32_t    RouteData[];
+}IPV4_LOOSE_SOURCE_AND_RECORD_ROUTE, * PIPV4_LOOSE_SOURCE_AND_RECORD_ROUTE;
+
+typedef struct _IPV4_STREAM_ID{
+    uint8_t     Type; //136
+    uint8_t     Length;
+    uint16_t    StreamId;
+}IPV4_STREAM_ID,  * PIPV4_STREAM_ID;
+
+typedef struct _IPV4_INTERNET_TIMESTAMP{
+    uint8_t     Type; //68
+    uint8_t     Length;
+    uint8_t     Pointer;
+    uint8_t     OverFlowAndFlags;
+    uint32_t    InternetAddress;
+    uint32_t    TimeStamp;
+    uint32_t    Padding[];
+}IPV4_INTERNET_TIMESTAMP, * PIPV4_INTERNET_TIMESTAMP;
+
+#pragma pack(pop)
 
 #ifdef __cplusplus
 }

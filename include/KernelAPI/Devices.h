@@ -176,6 +176,8 @@ uint64_t* BufferSize,
 LOUSTATUS* State
 );
 
+void ReleaseDriveHandle(void* DriveHandle);
+
 #ifdef __cplusplus
 }
 #endif
