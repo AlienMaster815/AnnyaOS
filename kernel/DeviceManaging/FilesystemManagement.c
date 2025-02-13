@@ -87,14 +87,15 @@ static DRIVE_ID_TABLE DriveIdTable[25] = {
 };
 
 void InitializeFileSystemManager(){
-    Iso9660DriverEntry();
-    FatDriverEntry();       
+    Iso9660DriverEntry(); 
+    FatDriverEntry();      
     uint8_t PortCount = LouKeGetNumberOfStorageDevices();
     PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
     for(size_t FileSystemIndex = 0 ; FileSystemIndex < FileSystemTableMembers; FileSystemIndex++){
         PLOUSINE_KERNEL_FILESYSTEM FileSystemHandle = Tmp->FileSystem->KeyData;
         if(!FileSystemHandle->FileSystemScan)continue;
         for(uint8_t i = 0 ; i < PortCount; i ++){
+            LouPrint("Scanning Port:%d\n", i);
             PLOUSINE_KERNEL_FILESYSTEM NewMountedFileSystem = FileSystemHandle->FileSystemScan(i);
             if(NewMountedFileSystem){
                 PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS TmpMfs = &MountedFileSystemTable;

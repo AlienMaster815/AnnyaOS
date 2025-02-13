@@ -517,51 +517,67 @@ SECTIONED_CODE(".Ahci.Code")
 static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     UNUSED PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
     UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;    
-    UNUSED AHCI_GENERIC_HOST_CONTROL TmpGhc = *Ghc;
     UNUSED uint32_t Tmp;
-
+    uint32_t Poll = 0;
+    LouPrint("ResetAhciHba()\n");
 
     Tmp = Ghc->GlobalHostControl;
     if(!(Tmp & (1 << 31))){
         Tmp |= (1 << 31);
-        for(uint8_t i = 0 ; i < 5; i++){
-            //wack Ae 5 times to make sure it works
-            Ghc->GlobalHostControl = Tmp;
+        Ghc->GlobalHostControl = Tmp;
+        sleep(100);
+        Tmp = Ghc->GlobalHostControl;
+        if(!(Tmp & (1 << 31))){
+            Tmp |= (1 << 31);
+            for(uint8_t i = 0 ; i < 5; i = 0){
+                Ghc->GlobalHostControl = Tmp;
+            }
+            sleep(100);
+            if(!(Tmp & (1 << 31))){
+                LouPrint("ERROR Setting AE\n");
+                return STATUS_IO_DEVICE_ERROR;
+            }
         }
-        sleep(1000);
     }
 
-    Tmp = Ghc->GlobalHostControl;
-
-    if(!(Tmp & (1 << 31))){
-        DbgPrint("AHCIMOD:Unable To Enable Ahci Conroller :: AE could not be set\r\n");
-        return STATUS_IO_DEVICE_ERROR;
-    }
     Tmp = Ghc->GlobalHostControl;
     Tmp |= 1;
     Ghc->GlobalHostControl = Tmp;
-    
-    //flush
-    Tmp = Ghc->GlobalHostControl;
 
-    sleep(1000);
+    while(Poll >= 1000){
+        Tmp = Ghc->GlobalHostControl;
+        if(!(Tmp & 0x01)){
+            break;
+        }
+        Poll += 100;
+        sleep(100);
+    }
 
-    if(Ghc->GlobalHostControl & 1){
-        DbgPrint("AHCIMOD:Unable To Enable Ahci Conroller :: HC Didnt Reset\r\n");
+    if(Poll >= 1000){
+        LouPrint("Timeout HC Reset HBA Is Stuck\n");
         return STATUS_IO_DEVICE_ERROR;
     }
 
     Tmp = Ghc->GlobalHostControl;
     if(!(Tmp & (1 << 31))){
         Tmp |= (1 << 31);
-        for(uint8_t i = 0 ; i < 5; i++){
-            Ghc->GlobalHostControl = Tmp;
+        Ghc->GlobalHostControl = Tmp;
+        sleep(100);
+        Tmp = Ghc->GlobalHostControl;
+        if(!(Tmp & (1 << 31))){
+            Tmp |= (1 << 31);
+            for(uint8_t i = 0 ; i < 5; i = 0){
+                Ghc->GlobalHostControl = Tmp;
+            }
+            sleep(100);
+            if(!(Tmp & (1 << 31))){
+                LouPrint("ERROR Setting AE\n");
+                return STATUS_IO_DEVICE_ERROR;
+            }
         }
-        sleep(1000);
     }
 
-    *Ghc = TmpGhc;
-
+    LouPrint("ResetAhciHba() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -741,7 +757,7 @@ NTSTATUS AddAhciDevice(
     //At this point we are able to grab the host and start filling out
     //private data from the information on the controller
     PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKeHalGetPciVirtualBaseAddress(PciConfig, Abar);
-   
+    
     PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
 
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeMallocAtaDevice(PDEV, PortCount);
@@ -825,6 +841,7 @@ NTSTATUS AddAhciDevice(
 
         if(Ghc->PortsImplemented & (1 << AtaPortIndex)){
             AtaHost->Ports[AtaPortIndex].Operations = BoardInformation[BoardID].DevicesPortOperations;
+            AtaHost->Ports[AtaPortIndex].SerialDevice = true;
         }else{
             AtaHost->Ports[AtaPortIndex].Operations = 0x00;
         }
@@ -833,8 +850,8 @@ NTSTATUS AddAhciDevice(
     RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine, false, (uint64_t)AtaHost);
 
     ResetAhcPciController(AtaHost);
-    AhciPciInitializeController(AtaHost);
 
+    AhciPciInitializeController(AtaHost);
     LouKeHalPciSetMaster(PDEV);
 
     DbgPrint("Adding AHCI Device To Device Manager\n");    

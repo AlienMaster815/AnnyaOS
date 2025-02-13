@@ -29,6 +29,9 @@ LOUSTATUS* State
 	SYSTEM_DEVICE_IDENTIFIER DevID = LouKeGetStorageDeviceSystemIdentifier(Drive);
 	if(DevID == ATA_DEVICE_T){
 		PLOUSINE_KERNEL_DEVICE_ATA_PORT Port = LouKeGetAtaStoragePortObject(Drive);
+		if(!Port->PortFunctioning){
+			return 0x00;
+		}
 		if(Port->PortScsiDevice){
 			BufferChecksum = ROUND_UP64(*BufferSize, 2048);
 			BufferChecksum /= 2048;

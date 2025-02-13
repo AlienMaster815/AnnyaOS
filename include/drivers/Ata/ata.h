@@ -907,6 +907,7 @@ typedef struct _ATA_QUEUED_COMMAND{
     uint16_t MaxByteSize;
     uint8_t  ScsiCommand[16];
     uint8_t  HardwareTag;
+    uintptr_t PrdtLocation;
 }ATA_QUEUED_COMMAND, * PATA_QUEUED_COMMAND;
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
@@ -931,6 +932,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     void*                                   PortPrivateData;
     uint8_t                                 Siblings;
     bool                                    PortScsiDevice;
+    bool                                    PortFunctioning;
     bool                                    SerialDevice;
     uint8_t                                 ScsiMaxCommandLength;
     bool                                    InNativeMode;
@@ -964,6 +966,10 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
     LOUSTATUS   (*HostReset)                (PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
     void        (*PortStart)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     void        (*PortStop)                 (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    void        (*PortSleep)                (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    void        (*PortWake)                 (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    void        (*PortPowerOff)             (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    void        (*PortPowerOn)              (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
 }LOUSINE_ATA_PORT_OPERATIONS, * PLOUSINE_ATA_PORT_OPERATIONS;
 
 
@@ -1078,7 +1084,7 @@ void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost)
 
 #define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex = 0; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
 
-void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis);
+void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq);
 
 #ifdef __cplusplus
 }

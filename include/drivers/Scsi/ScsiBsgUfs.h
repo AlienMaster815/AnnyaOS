@@ -39,7 +39,7 @@ typedef struct _UTP_UPIU_HEADER{
             uint8_t Flags;
             uint8_t Lun;
             uint8_t TaskTag;
-        #if defined(__BIG_ENDIAN)
+        #if defined(__BIG_)
             uint8_t Iif : 4;
             uint8_t CommandSetType : 4;
         #elif defined(_LITTLE_ENDIAN)

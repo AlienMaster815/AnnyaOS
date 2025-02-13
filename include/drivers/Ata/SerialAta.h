@@ -22,134 +22,82 @@ extern "C"{
 #define FIS_TYPE_BIST                       0x58
 #define FIS_TYPE_PIO_SETUP                  0x5F
 #define FIS_TYPE_DEVICE_BITS                0xA1
-
 #pragma pack(push, 1)
 
-typedef struct _FIS_REGISTER_HOST_TO_DEVICE{
-    //uint32_t 0
-    uint8_t FisType;
-    uint8_t PortMultiplyer  : 4;
-    uint8_t Reserved1       : 3;
-    uint8_t CommandControl  : 1;
-    uint8_t Command;
-    uint8_t FeatureLow;
-    //uint32_t 1
-    uint8_t LBAL1;
-    uint8_t LBAL2;
-    uint8_t LBAM1;
-    uint8_t Device;
-    //uint32_t 2
-    uint8_t LBAM2;
-    uint8_t LBAH1;
-    uint8_t LBAH2;
-    uint8_t FeatureHigh;
-    //uint32_t 3
-    uint8_t SectorCountLow;
-    uint8_t SectorCountHigh;
-    uint8_t IsyncCompleted;
-    uint8_t ControlRegister;
-    //uint32_t 4
-    uint8_t Reserved2[4];
-}FIS_REGISTER_HOST_TO_DEVICE, * PFIS_REGISTER_HOST_TO_DEVICE;
+typedef struct _RECIEVED_FIS_ORGINIZATION{
+    uint8_t FIS_DATA[0xFF];
+}AHCI_RECIEVED_FIS_ORGINIZATION, * PAHCI_RECIEVED_FIS_ORGINIZATION;
 
-typedef struct _FIS_REGISTER_DEVICE_TO_HOST{
-    //uint32_t 0
-    uint8_t FisType;
-    uint8_t PortMultiplyer  : 4;
-    uint8_t Reserved0       : 2;
-    uint8_t InterruptBit    : 1;
-    uint8_t Reserved1       : 1;
-    uint8_t Status;
-    uint8_t Error;
-    //uint32_t 1
-    uint8_t LBAL1;
-    uint8_t LBAL2;
-    uint8_t LBAM1;
-    uint8_t Device;
-    //uint32_t 2
-    uint8_t LBAM2;
-    uint8_t LBAH1;
-    uint8_t LBAH2;
-    uint8_t Reserved2;
-    //uint32_t 3
-    uint8_t SectorCountLow;
-    uint8_t SectorCountHigh;
-    uint8_t Reserved3[2];
-    //uint32_t 4
-    uint8_t Reserved4[4];
-}FIS_REGISTER_DEVICE_TO_HOST, * PFIS_REGISTER_DEVICE_TO_HOST;
+typedef struct _COMMAND_LIST_STRUCTURE{
+    uint8_t  CFL_A_W_P;
+    uint8_t  R_B_C_R_PMP;
+    uint16_t PRDTL;
+    uint32_t PRDTByteCount;
+    uint32_t CommandTableBaseLow; //7 bits aligned
+    uint32_t CommandTableBaseHigh;
+    uint32_t Reserved[4];
+}AHCI_COMMAND_LIST_STRUCTURE, * PAHCI_COMMAND_LIST_STRUCTURE;
 
-typedef struct _DATA_FIS{
-    //uint32_t 0
-    uint8_t FisType;
-    uint8_t PortMultiplyer  : 4;
-    uint8_t Reserved0       : 4;
-    uint8_t Reserved1[2];
-    //uint32_t 1
-    uint32_t PayloadData[1];
-}DATA_FIS, * PDATA_FIS;
+typedef struct _COMMAND_TABLE_ENTRY{
+    uint8_t CommandFis[0x40];
+    uint8_t AtapiCommand[0x50 - 0x40];
+    uint8_t Reserved[0x80 - 0x50];
+}AHCI_COMMAND_TABLE_ENTRY, * PAHCI_COMMAND_TABLE_ENTRY;
 
-typedef struct _PIO_SETUP_FIS{
-    //uint32_t 0
-    uint8_t FisType;
-    uint8_t PortMultiplyer  : 4;
-    uint8_t Reserved0       : 1;
-    uint8_t DataDirection   : 1; //1 is incoming
-    uint8_t InterruptBit    : 1;
-    uint8_t Reserved1       : 1;
-    uint8_t ErrorValue;
-    uint8_t Error;
-    //uint32_t 1
-    uint8_t LBAL1;
-    uint8_t LBAL2;
-    uint8_t LBAM1;
-    uint8_t Device;
-    //uint32_t 2
-    uint8_t LBAM2;
-    uint8_t LBAH1;
-    uint8_t LBAH2;
-    uint8_t Reserved2;
-    //uint32_t 3
-    uint8_t SectorCountLow;
-    uint8_t SectorCountHigh;
-    uint8_t Reserved3;
-    uint8_t Status;
-    //uint32_t 4
-    uint16_t TransferCount;
-    uint8_t  Reserved4[2];
-}PIO_SETUP_FIS, * PPIO_SETUP_FIS;
+typedef struct _AHCI_PRDT_ENTRY{
+    uint32_t    DataBaseAdrressLow;
+    uint32_t    DataBaseAddressHigh;
+    uint32_t    Reserved;
+    uint32_t    ByteCount;
+}AHCI_PRDT_ENTRY,* PAHCI_PRDT_ENTRY;
 
-typedef struct _DMA_SETUP_FIS{
-    //uint32_t 0
-    uint8_t FisType;
-    uint8_t PortMultiplyer  : 4;
-    uint8_t Reserved0       : 1;
-    uint8_t DataDirection   : 1; //1 is device to host
-    uint8_t InterruptBit    : 1;
-    uint8_t AutoActivate    : 1;
-    uint8_t Reserved1[2];
-    //uint32_t 1 & 2
-    uint64_t DmaBufferId;
-    //uint32_t 3
-    uint32_t Reserved2;
-    //uint32_t 4
-    uint32_t DmaBufferOffset;
-    //uint32_t 5
-    uint32_t TransferCount;
-    //uint32_t 6
-    uint32_t Reserved3;
-}DMA_SETUP_FIS, * PDMA_SETUP_FIS;
 
-typedef union _FIS_COMMAND{
-    FIS_REGISTER_HOST_TO_DEVICE HostToDevice;
-    FIS_REGISTER_DEVICE_TO_HOST DeviceToHost;
-    DATA_FIS                    Data;
-    PIO_SETUP_FIS               PioSetup;
-    DMA_SETUP_FIS               DmaSetup;
-}FIS_COMMAND, * PFIS_COMMAND;
+static inline void FillOutCommandTableStructure(
+    PAHCI_PRDT_ENTRY PrdtEntry,
+    uint64_t    DataBaseAddress,
+    uint32_t    DataCount
+){
+    PrdtEntry->DataBaseAdrressLow = DataBaseAddress & 0xFFFFFFFF;
+    PrdtEntry->DataBaseAddressHigh = DataBaseAddress >> 32;
+    PrdtEntry->Reserved = 0;
+    PrdtEntry->ByteCount = DataCount;
+}
+
+static inline void FillOutCommandListStructure(
+    PAHCI_COMMAND_LIST_STRUCTURE PCLS,
+    uint8_t CFL,
+    bool AtapiCommand,
+    bool WriteCommand,
+    bool Prefetchable,
+    bool Reset,
+    bool Bist,
+    bool ClearBusyOnRok,
+    uint8_t PMP,
+    uint16_t Prdtl,
+    uint32_t PRDTByteCount,
+    uint64_t CommandTableBase
+){
+
+    PCLS->CFL_A_W_P      = CFL & 0x1F;
+    PCLS->CFL_A_W_P     |= AtapiCommand     ? (1 << 5) : 0;
+    PCLS->CFL_A_W_P     |= WriteCommand     ? (1 << 6) : 0;
+    PCLS->CFL_A_W_P     |= Prefetchable     ? (1 << 7) : 0;
+    PCLS->R_B_C_R_PMP    = Reset            ? (1 << 0) : 0;
+    PCLS->R_B_C_R_PMP   |= Bist             ? (1 << 1) : 0;
+    PCLS->R_B_C_R_PMP   |= ClearBusyOnRok   ? (1 << 3) : 0;
+    PCLS->R_B_C_R_PMP   |= (PMP & 0xF)           << 4;
+    PCLS->PRDTL          = Prdtl;
+    PCLS->PRDTByteCount  = PRDTByteCount;
+    PCLS->CommandTableBaseLow = CommandTableBase & 0xFFFFFF80;
+    PCLS->CommandTableBaseHigh= CommandTableBase >> 32;
+
+    //clear the reserved
+    for(uint8_t i = 0 ; i < 4; i++){
+        PCLS->Reserved[i] = 0;
+    }
+}
 
 #pragma pack(pop)
-
 #ifdef __cplusplus
 }
 #endif

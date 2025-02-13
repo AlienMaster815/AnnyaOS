@@ -19,6 +19,7 @@ typedef struct _AHCI_GENERIC_HOST_CONTROL{
     uint32_t CCC_Control;
     uint32_t CccPorts;
     uint32_t EmLocation;
+    uint32_t EmControl;
     uint32_t Capabilities2;
     uint32_t BiosHandoff;
 }AHCI_GENERIC_HOST_CONTROL, * PAHCI_GENERIC_HOST_CONTROL;
@@ -117,54 +118,8 @@ typedef struct _AHCI_GENERIC_PORT{
 #define AHCI_PxCMD_ST   1
 
 #pragma pack(push, 1)
-typedef struct  _HBA_FIS{
-    DMA_SETUP_FIS                   DmaFis;
-    uint8_t                         Padding0[4];
-    PIO_SETUP_FIS                   PioFis;
-    uint8_t                         Padding1[4];
-    FIS_REGISTER_DEVICE_TO_HOST     RegisterFis;
-    uint8_t                         Padding2[4];
-    uint64_t                        DeviceBits;
-    uint8_t                         UFis[64];
-    uint8_t                         Reserved[0x100-0xA0];
-}HBA_FIS, * PHBA_FIS;
 
-typedef struct _HBA_COMMAND_HEADER{
-    uint8_t     CommandFisLength    :   5;
-    uint8_t     PacketCommand       :   1;
-    uint8_t     WriteCommand        :   1;
-    uint8_t     Prefetchable        :   1;
-    uint8_t     Reset               :   1;
-    uint8_t     Bist                :   1;
-    uint8_t     ClearBusyOnR_OK     :   1;
-    uint8_t     Reserved0           :   1;
-    uint8_t     PortMultiplyer      :   4;
-    uint16_t    PhyRegionLength;
-    volatile
-    uint32_t    PhyRegionDescriptorByteCount;
-    uint32_t    CommandTableDescriptorBaseAddrressL;
-    uint32_t    CommandTableDescriptorBaseAddrressU;
-    uint32_t    Reserved1[4];
-}HBA_COMMAND_HEADER, * PHBA_COMMAND_HEADER;
 
-typedef struct _HBA_PRDT_ENTRY{
-    uint32_t DataBaseAddressL;
-    uint32_t DataBaseAddressU;
-    uint32_t Reserved0;
-    uint32_t DataByteCount  : 22;
-    uint32_t Reserved1      : 9;
-    uint32_t Interrupt      : 1;
-}HBA_PRDT_ENTRY, * PHBA_PRDT_ENTRY;
-
-typedef struct _HBA_COMMAND_TABLE{
-    uint8_t             CommandFis[64];
-    uint8_t             PacketCommand[16];
-    uint8_t             Reserved[48];
-    HBA_PRDT_ENTRY      PrdtEntries[];
-}HBA_COMMAND_TABLE, * PHBA_COMMAND_TABLE;
-
-PHBA_COMMAND_TABLE LouKeAhciMallocCommandTable(uint16_t TableEntries);
-void LouKeAhciFreeCommandTable(PHBA_COMMAND_TABLE Table);
 
 #define AHCI_FLAG_COMMON                1
 #define AHCI_FLAG_43BIT_DMA_ONLY        1 << 1
@@ -191,6 +146,7 @@ typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
     uint32_t                        PioFlags;
     uint32_t                        DmaFlags;
     PLOUSINE_ATA_PORT_OPERATIONS    DevicesPortOperations;
+    uint64_t                        Padding[4];
 }AHCI_DRIVER_BOARD_INFORMATION_TABLE, * PAHCI_DRIVER_BOARD_INFORMATION_TABLE,
  AHCI_DRIVER_BOARD_INFORMATION ,* PAHCI_DRIVER_BOARD_INFORMATION;
 

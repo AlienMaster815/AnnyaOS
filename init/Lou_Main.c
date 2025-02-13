@@ -338,25 +338,8 @@ KERNEL_ENTRY Lou_kernel_start(
         while(1);
     }
 
-    //void* 
-    //ReadDrive(
-    //    uint8_t Drive,
-    //    uint64_t LBA,
-    //    uint32_t SectorCount,
-    //    uint64_t* BufferSize,
-    //    LOUSTATUS* State
-    //);
-
-    //uint64_t BufferSize = 512;
-    //LOUSTATUS Current = STATUS_SUCCESS;
-    //UNUSED uint8_t* Foo = (uint8_t*)ReadDrive(0, 0,1,&BufferSize, &Current);
-    //for(uint8_t i = 0 ; i < 12; i++){
-    //    LouPrint("FOO:%h\n", Foo[i]);
-    //}
-    //while(1);
-    //LouPrint("Foo:%h\n",Foo[0]);
     InitializeFileSystemManager();
-        
+            
     ScanTheRestOfHarware();
 
     //SMPInit();

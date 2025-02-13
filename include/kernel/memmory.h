@@ -134,7 +134,7 @@ void* LouKeMallocPhysical(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-void* LouKeMallocPhysicalEx(
+void* Ex(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags

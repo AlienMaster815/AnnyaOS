@@ -41,18 +41,12 @@
  * https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
-SECTIONED_CODE(".Ahci.Code")
-PHBA_COMMAND_TABLE LouKeAhciMallocCommandTable(uint16_t TableEntries){
-    if(!TableEntries){
-        return 0x00;
-    }
-
-    return (PHBA_COMMAND_TABLE)LouMallocEx(sizeof(HBA_COMMAND_TABLE) + (TableEntries * sizeof(HBA_PRDT_ENTRY)), 128);//, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
+void* LouKeMallocAhciCommandTable(uint16_t Entries){
+    return LouKeMallocEx( 0x80 * ((sizeof(uint32_t) * 4) * Entries), 128, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 }
 
-SECTIONED_CODE(".Ahci.Code")
-void LouKeAhciFreeCommandTable(PHBA_COMMAND_TABLE Table){
-    LouFree((RAMADD)Table);
+void LouKeFreeAhciCommandTable(void* Table){
+    LouKeFree(Table);
 }
 
 SECTIONED_CODE(".Ahci.Code")
@@ -71,115 +65,67 @@ int8_t AhciPortGetFreeCommandSlot(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     return -1;
 }
 
-
-typedef struct __attribute__((packed)) _AHCI_PRDT_ENTRY{
-	uint32_t	    AddressLow;
-	uint32_t        AddressHigh;
-	uint32_t        Reserved;
-	uint32_t		FlagsAndSize;
-}AHCI_PRDT_ENTRY, * PAHCI_PRDT_ENTRY;
-
-typedef struct __attribute__((packed)) _AHCI_COMMAND_LIST_ENTRY{
-    uint16_t        Flags;
-    uint16_t        PrdtLength;
-    uint32_t        TotalTransfer;
-    uint32_t        CommandTableBaseLow;
-    uint32_t        CommandTableBaseHigh;
-    uint32_t        Reserved[4];
-}AHCI_COMMAND_LIST_ENTRY, * PAHCI_COMMAND_LIST_ENTRY;
-
-#define CALCULATE_DMA_ADDRESS (DmaAddress + (i * (4 * MEGABYTE)))
-
 SECTIONED_CODE(".Ahci.Code")
 LOUSTATUS AhciGenricDMAPrepCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){  
-    LouPrint("AhciGenricDMAPrepCommand\n");
     UNUSED PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort = QueuedCommand->Port;
     UNUSED PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
-    Port->PxSERR = 0xFFFFFFFF;  // Clear all errors
-    while(Port->PxSERR){
-        sleep(10);
+    UNUSED uint64_t PrdtEntries = ROUND_UP64(QueuedCommand->DataSize, 4 * MEGABYTE) / (4 * MEGABYTE);
+    UNUSED void* NewCommandTable = LouKeMallocAhciCommandTable(PrdtEntries);    
+    UNUSED int8_t FreeSlot = AhciPortGetFreeCommandSlot(AhciPort);
+    if(FreeSlot == -1){
+        return STATUS_IO_DEVICE_ERROR;
     }
+    UNUSED PAHCI_COMMAND_LIST_STRUCTURE CommandHeaders = (PAHCI_COMMAND_LIST_STRUCTURE)PrivateData->CommandDma;
 
-    bool IsAtapi = QueuedCommand->PacketCommand;
-    uint16_t CommandTableEntries;
-    if(QueuedCommand->DataSize > (4 * MEGABYTE)){
-        CommandTableEntries = ((QueuedCommand->DataSize / (4 * MEGABYTE))) + 1;
-    }else{
-        CommandTableEntries = 1;
-    }
-    uint64_t Crums;
-    void* CommandTable = LouKeAhciMallocCommandTable(CommandTableEntries);
-    uint32_t Options = (CommandTableEntries & 0x1F) | (1 << 6); 
-    uint8_t Slot = AhciPortGetFreeCommandSlot(AhciPort);
-
-    DbgPrint("Using Command Slot:%d For Command\n", Slot);
-
-    QueuedCommandToFis(QueuedCommand, 0, 1, (uint8_t*)CommandTable);
-
-    if(IsAtapi){
-        memset((void*)((uintptr_t)CommandTable + AHCI_COMMAND_TABLE_CDB_OFFSET), 0, 32);
-        memcpy((void*)((uintptr_t)CommandTable + AHCI_COMMAND_TABLE_CDB_OFFSET), QueuedCommand->ScsiCommand, QueuedCommand->ScsiCommandLength);
-    }
-
-    PAHCI_PRDT_ENTRY Prdt = (PAHCI_PRDT_ENTRY)((uintptr_t)CommandTable + AHCI_COMMAND_TABLE_HEADER_SIZE); 
-
-    uint64_t DmaAddress;
-    RequestPhysicalAddress(QueuedCommand->DataAddress ,&DmaAddress);
-
-    if(CommandTableEntries > 1){
-        Crums = QueuedCommand->DataSize % ((CommandTableEntries - 1) * (4 * MEGABYTE));
-    }else {
-        Crums = QueuedCommand->DataSize;
-    }
-
-    DbgPrint("Setting Up Prdt Entries\n");
-    for(uint8_t i = 0; i < CommandTableEntries; i++) {
-        if(i == (CommandTableEntries - 1)) {
-            Prdt[i].AddressLow = CALCULATE_DMA_ADDRESS & 0xFFFFFFFF;
-            Prdt[i].AddressHigh = CALCULATE_DMA_ADDRESS >> 32;
-            Prdt[i].FlagsAndSize = (uint32_t)((Crums - 1) & 0x3FFFFFFF) | (1 << 31); // Ensuring correct transfer size format
-            break;
+    QueuedCommandToFis(QueuedCommand, 0, 1, (uint8_t*)NewCommandTable, 0);
+    
+    if(QueuedCommand->PacketCommand){
+        uint8_t PacketLength = QueuedCommand->ScsiCommandLength;
+        uint8_t* ACMDp = (uint8_t*)(uintptr_t)NewCommandTable + 0x40; 
+        for(uint8_t i = 0 ; i < 16; i++){
+            if(i < PacketLength){
+                ACMDp[i] = QueuedCommand->ScsiCommand[i];
+            }else{
+                ACMDp[i] = 0;
+            }
         }
-
-        Prdt[i].AddressLow = CALCULATE_DMA_ADDRESS & 0xFFFFFFFF;
-        Prdt[i].AddressHigh = CALCULATE_DMA_ADDRESS >> 32;
-        Prdt[i].FlagsAndSize = (4 * MEGABYTE) - 1; // AHCI expects size to be size-1
-    }
-    DbgPrint("Done Setting Up Prdt Entries\n");
-
-    if(QueuedCommand->WriteCommand){
-        Options |= AHCI_COMMAND_WRITE;
     }
 
-    if(IsAtapi){
-        Options |= AHCI_COMMAND_ATAPI;
+    uint64_t DataAddress;
+    RequestPhysicalAddress(QueuedCommand->DataAddress, &DataAddress);
+
+    PAHCI_PRDT_ENTRY PrdtTable = (PAHCI_PRDT_ENTRY)(uintptr_t)NewCommandTable + 0x80; 
+    for(uint8_t i = 0 ; i < (PrdtEntries - 1); i++){
+        FillOutCommandTableStructure(&PrdtTable[i], DataAddress + (i) * (4 * MEGABYTE), (4 * MEGABYTE) - 1);
     }
+    uint64_t Crums = QueuedCommand->DataSize;
+    Crums -= (4 * MEGABYTE) * PrdtEntries;
+
+    FillOutCommandTableStructure(&PrdtTable[PrdtEntries - 1], DataAddress + (PrdtEntries - 1) * (4 * MEGABYTE), Crums - 1);
+
+    uint64_t CommandTableBase;
+    RequestPhysicalAddress((uint64_t)NewCommandTable, &CommandTableBase);
+    QueuedCommand->PrdtLocation = (uintptr_t)NewCommandTable;
+
+    FillOutCommandListStructure(
+        &CommandHeaders[FreeSlot], 
+        20, 
+        QueuedCommand->PacketCommand, 
+        QueuedCommand->WriteCommand, 
+        false,
+        false,
+        false,
+        true,
+        0,
+        PrdtEntries,
+        sizeof(AHCI_PRDT_ENTRY) * PrdtEntries,
+        CommandTableBase
+    );
 
 
-    PAHCI_COMMAND_LIST_ENTRY CommandList = (PAHCI_COMMAND_LIST_ENTRY)PrivateData->CommandDma;
-    CommandList = &CommandList[Slot];
-
-    RequestPhysicalAddress((uint64_t)CommandTable, &DmaAddress);
-
-    CommandList->CommandTableBaseLow = DmaAddress & 0xFFFFFFFF;
-    CommandList->CommandTableBaseHigh = DmaAddress >> 32;
-    CommandList->Flags = Options;
-    CommandList->TotalTransfer = QueuedCommand->DataSize;
-    QueuedCommand->HardwareTag = Slot;
-
-    //LouPrint("Dma Virtual:%h\n", (uint64_t)CommandList);
-    //LouPrint("Dma Physical:%h\n", (uint64_t)DmaAddress);
-
-    //LouPrint("Command Lsit Address Low:%h\n", CommandList->CommandTableBaseLow);
-    //LouPrint("Command Lsit Address High:%h\n", CommandList->CommandTableBaseHigh);
-    //LouPrint("Command Lsit Flags:%h\n", CommandList->Flags);
-    //LouPrint("Command Lsit Total:%h\n", CommandList->TotalTransfer);
-
-    //while(1);
+    QueuedCommand->HardwareTag = FreeSlot;
 
     return STATUS_SUCCESS;  
 }
@@ -189,51 +135,9 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
     LouPrint("AhciaGenricDMAIssueCommand\n");
-    PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort = QueuedCommand->Port;
-    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;     
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
-    uint32_t Poll = 0;
-
-    Port->PxIS = 0xFFFFFFFF;  // Clear all interrupts
-    while(Port->PxIS){
-        sleep(10);
-    }
-
-    while(Port->PxTFD & (0x80 | 0x08)){
-        sleep(100);
-    }
-
-    Port->PxCI |= (1 << QueuedCommand->HardwareTag);
-
-    DbgPrint("AHCI Command Issued!\n");
-    
-    while(Poll <= 10000){
-        if(IS_INTERRUPT_TFES(Port->PxIS)){
-            DbgPrint("TFES\n");
-            while(1);
-        }
-        if(!(Port->PxCI & (1 << QueuedCommand->HardwareTag))){
-            break;
-        }
-        sleep(100);
-        Poll += 100;
-    }
-
-    if(IS_INTERRUPT_TFES(Port->PxIS)){
-        DbgPrint("TFES\n");
-        while(1);
-    }
 
 
 
-    
-    LouPrint("PxIS:%h\n", Port->PxIS);
-    LouPrint("PxSERR:%h\n", Port->PxSERR);
-
-    uint32_t* fisPtr = (uint32_t*)PrivateData->FisDma;
-    for (int i = 0; i < 8; i++) {
-        LouPrint("FIS[%d] = %h\n", i, fisPtr[i]);
-    }
     while(1);
     return STATUS_SUCCESS;
 }
@@ -305,6 +209,7 @@ void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
             return;
         }
     }
+    LouPrint("Ahci Command Engine Started\n");
 }
 
 SECTIONED_CODE(".Ahci.Code") 
@@ -327,6 +232,7 @@ static LOUSTATUS AhciStopFisReception(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     if(Tmp >= 10000){
         return STATUS_IO_DEVICE_ERROR;
     }
+    LouPrint("Fis Reception Stopped\n");
     return STATUS_SUCCESS;
 }
 
@@ -346,11 +252,16 @@ void AhciStartFisReception(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
     if(HighMem){
         Port->PxCLBU = (CommandDmaPhy >> 32);
+    }else{
+        Port->PxCLBU = 0;
     }
+
     Port->PxCLB = (CommandDmaPhy & 0xFFFFFFFF);
 
     if(HighMem){
         Port->PxFBU = (FisDmaPhy >> 32);
+    }else{
+        Port->PxFBU = 0;
     }
     Port->PxFB = (FisDmaPhy & 0xFFFFFFFF);
 
@@ -368,6 +279,7 @@ void AhciStartFisReception(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
             return;
         }
     }
+    LouPrint("Fis Reception Started\n");
 }
 
 SECTIONED_CODE(".Ahci.Code") 
@@ -392,7 +304,7 @@ static LOUSTATUS AhciDeInitalizePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 }
 
 SECTIONED_CODE(".Ahci.Code") 
-static void AhciClearPortPendingIrq(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
+UNUSED static void AhciClearPortPendingIrq(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
 
@@ -423,6 +335,9 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     uint8_t Det = PxSSTS & 0x0F; 
     uint8_t Ipm = (PxSSTS >> 8) & 0x0F;
 
+
+
+
     if(Det != 0x03){
         LouPrint("PxSTSS DET != 0x03:%h\n", Det);
         return false;
@@ -433,6 +348,7 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         case 0x06:
         case 0x02:
         case 0x01:
+            //LouPrint("IPM:%d\n", Ipm);
             break;
         default:
             LouPrint("PxSTSS IPM Invalid:%h\n",Ipm);
@@ -448,30 +364,46 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     return false;
 }
 
+
 SECTIONED_CODE(".Ahci.Code") 
 void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    
-    //before we intitalize completly lets find if the port
-    //is a packet device before we might end up creating 
-    //errors
-    AhciPort->PortScsiDevice = AhciDetectAttachedDevice(AhciPort);
-    //TODP: safeguard 32 bit only systems
+    LouPrint("AhciInitializePort()\n");
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-    //PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateAhciData->GenericHostController;
-    PrivateData->FisDma = (uintptr_t)LouMalloc(256);//, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
-    PrivateData->CommandDma = (uintptr_t)LouMalloc(1 * KILOBYTE);//, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    
+    PrivateData->FisDma = (uintptr_t)LouKeMalloc(256, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    PrivateData->CommandDma = (uintptr_t)LouKeMalloc(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
 
+    if(Port->PxCMD & (1 << 2)){
+        LouPrint("Port Is Powered On\n");
+    }
+    if((Port->PxSCTL & 0x0F) != 3){
+        sleep(10);
+    }
+    LouPrint("Communication Is Up\n");
 
-    LOUSTATUS Status = AhciDeInitalizePort(AhciPort);
-    if(Status != STATUS_SUCCESS){
+    AhciDetectAttachedDevice(AhciPort);
+
+    if(!AhciPort->DeviceAttached){
         return;
     }
-    AhciClearPortPendingIrq(AhciPort);
+
+    AhciStartFisReception(AhciPort);
+    
+    PrivateData->StartCommandEngine(AhciPort);
+    
+    while((Port->PxTFD & (1 << 7)) && (Port->PxTFD & (1 << 3))){
+        sleep(10);
+    }
+
+    LouPrint("Port Is Now Idle\n");
+
 }
 
 
 SECTIONED_CODE(".Ahci.Code") 
 void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    LouPrint("AhciInitializeController\n");
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
     PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
     uint32_t TmpControl;
@@ -481,7 +413,6 @@ void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         if(!AtaHost->Ports[AtaPortIndex].Operations){
             continue;
         }
-
         //otherwise intilaize the port
         AhciInitializePort(&AtaHost->Ports[AtaPortIndex]);
     }
@@ -509,9 +440,6 @@ void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 SECTIONED_CODE(".Ahci.Code") 
 void AhciStartPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
-
-    DbgPrint("Ahci Port Started\n");
 
     if(!AhciPort->DeviceAttached){
         DbgPrint("No Device On Port Cannot Start Port\n");
@@ -525,16 +453,7 @@ void AhciStartPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
     //TODO Turn On LED's adn activate witch activity
 
-    //Rest Device On Port
-    if(AhciPort->PortScsiDevice){
-        Port->PxSCTL = 0x301;
-        sleep(10);
-        Port->PxSCTL = 0x300;
-        while (Port->PxTFD & (0x80 | 0x01)) {
-            sleep(10);
-        }
-    }
-
+    DbgPrint("Ahci Port Started\n");
 }
 
 SECTIONED_CODE(".Ahci.Code")

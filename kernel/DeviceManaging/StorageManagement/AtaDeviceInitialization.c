@@ -24,15 +24,34 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
 
 uint8_t LouKeAtaGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtapiPort);
 
+LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
+    void* IdBuffer
+);
+
 LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable){
     UNUSED PLOUSINE_KERNEL_DEVICE_ATA_PORT PortToInitialize = PortTable->KeyData;
     LOUSTATUS Status = STATUS_SUCCESS;
 
-    if(PortToInitialize->Operations->PortStart){
-        PortToInitialize->Operations->PortStart(PortToInitialize);
+    void* AtaIdBuffer;
+    if(PortToInitialize->PortScsiDevice){
+        PortToInitialize->PortFunctioning = true;
+        return Status;
+    }else{
+        AtaIdBuffer = LouKeMallocPhysical(512, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+        Status = LouKeAtaSendAtaIdentifyCommand(
+            PortToInitialize,
+            AtaIdBuffer
+        );
+        LouKeFreePhysical(AtaIdBuffer);
+        if(Status != STATUS_SUCCESS){
+            PortToInitialize->PortFunctioning = false;
+            return Status;
+        }
+        else{
+            PortToInitialize->PortFunctioning = true;
+        }
     }
-
-
 
     LouPrint("Initialization Of ATA Port Successfull\n");
     return Status;
@@ -54,7 +73,6 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)DeviceDirectoryTable->KeyData;
     TmpHostList->AtaHostDevices = AtaHost;
     
-    LOUSTATUS Result = STATUS_SUCCESS;
 
     for(uint8_t i = 0 ; i < AtaHost->PortCount; i++){
         LouPrint("Registering Ata Port To Device Manager\n");
@@ -62,15 +80,9 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
         *PortTable = *DeviceDirectoryTable;
         PortTable->KeyData = &AtaHost->Ports[i];
         PortTable->DevicePrivateData = &AtaHost->Ports[i];
-        Result = DeviceManagerInitializeAtaPortDevice(PortTable);
-        if(Result != STATUS_SUCCESS){
-            return Result;
-        }
-        Result = LouRegisterStorageDevice(PortTable);
-        if(Result != STATUS_SUCCESS){
-            return Result;
-        }
+        DeviceManagerInitializeAtaPortDevice(PortTable);
+        LouRegisterStorageDevice(PortTable);
     }
     
-    return Result;
+    return STATUS_SUCCESS;
 }

@@ -122,3 +122,53 @@ void AhciStartPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 void AhciStopPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 //Endof Driver Operations
 
+static inline void DumpPort(PAHCI_GENERIC_PORT AhciPort){
+    LouPrint("PxCLB   :%h\n", AhciPort->PxCLB);
+    LouPrint("PxCLBU  :%h\n", AhciPort->PxCLBU);
+    LouPrint("PxFB    :%h\n", AhciPort->PxFB);
+    LouPrint("PxFBU   :%h\n", AhciPort->PxFBU);
+    LouPrint("PxIS    :%h\n", AhciPort->PxIS);
+    LouPrint("PxIE    :%h\n", AhciPort->PxIE);
+    LouPrint("PxCMD   :%h\n", AhciPort->PxCMD);
+    LouPrint("PxTFD   :%h\n", AhciPort->PxTFD);
+    LouPrint("PxSIG   :%h\n", AhciPort->PxSIG);
+    LouPrint("PxSSTS  :%h\n", AhciPort->PxSSTS);
+    LouPrint("PxSCTL  :%h\n", AhciPort->PxSCTL);
+    LouPrint("PxSERR  :%h\n", AhciPort->PxSERR);
+    LouPrint("PxSACT  :%h\n", AhciPort->PxSACT);
+    LouPrint("PxCI    :%h\n", AhciPort->PxCI);
+    LouPrint("PxSNTF  :%h\n", AhciPort->PxSNTF);
+    LouPrint("PxFBS   :%h\n", AhciPort->PxFBS);
+    LouPrint("PxDEVSLP:%h\n", AhciPort->PxDEVSLP);
+    LouPrint("PxVS    :%h\n", AhciPort->PxVS);
+}
+
+static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
+    LouPrint("CAP     :%h\n", Ghc->Capabilities);
+    LouPrint("GHC     :%h\n", Ghc->GlobalHostControl);
+    LouPrint("IS      :%h\n", Ghc->InterruptStatus);
+    LouPrint("PI      :%h\n", Ghc->PortsImplemented);
+    LouPrint("VS      :%h\n", Ghc->Version);
+    LouPrint("CC_CTL  :%h\n", Ghc->CCC_Control);
+    LouPrint("CC_PORTS:%h\n", Ghc->CccPorts);
+    LouPrint("EM_LOC  :%h\n", Ghc->EmLocation);
+    LouPrint("EM_CTL  :%h\n", Ghc->EmControl);
+    LouPrint("CAP2    :%h\n", Ghc->Capabilities2);
+    LouPrint("BIHC    :%h\n", Ghc->BiosHandoff);
+}
+
+//port States
+#define PORT_STATE_UNDEFINED                0
+#define PORT_STATE_RESET                    1
+#define PORT_STATE_INIT                     2
+#define PORT_STATE_NOT_RUNNING              3
+#define PORT_STATE_POWER_ON                 4
+#define PORT_STATE_POWER_OFF                5
+#define PORT_STATE_OFFLINE                  6
+#define PORT_STATE_START_COM                7
+#define PORT_STATE_PHY_LISTENING            8
+#define PORT_STATE_REG_FIS_POST_TO_MEM      9
+#define PORT_STATE_LOW_POWER                10
+#define PORT_STATE_DEVICE_SLEEP             11
+#define PORT_STATE_IDLE                     12
+#define PORT_STATE_NDR_ENTRY                13

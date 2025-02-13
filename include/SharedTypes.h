@@ -109,5 +109,38 @@ typedef struct _DELAYED_FUNCTION{
 typedef int         LOU_TOKEN;
 typedef uint64_t    COUNTER;
 
+static inline
+uint16_t ConvertBeToLeU16(uint16_t Foo){
+    uint16_t Tmp1, Tmp2;
+    Tmp1 = Foo & 0xFF;
+    Tmp2 = Foo >> 8;
+    return (Tmp1 << 8) | Tmp2;
+}
+
+static inline
+uint32_t ConvertBeToLeU32(uint32_t Foo) {
+    uint32_t Tmp1, Tmp2, Tmp3, Tmp4;
+    Tmp1 = Foo & 0xFF;
+    Tmp2 = (Foo >> 8) & 0xFF;
+    Tmp3 = (Foo >> 16) & 0xFF;
+    Tmp4 = (Foo >> 24) & 0xFF;    
+    return (Tmp1 << 24) | (Tmp2 << 16) | (Tmp3 << 8) | Tmp4;
+}
+
+static inline
+uint64_t ConvertBeToLeU64(uint64_t Foo) {
+    uint64_t Tmp1, Tmp2, Tmp3, Tmp4, Tmp5, Tmp6, Tmp7, Tmp8;
+    Tmp1 = Foo & 0xFF;
+    Tmp2 = (Foo >> 8) & 0xFF;
+    Tmp3 = (Foo >> 16) & 0xFF;
+    Tmp4 = (Foo >> 24) & 0xFF;
+    Tmp5 = (Foo >> 32) & 0xFF;
+    Tmp6 = (Foo >> 40) & 0xFF;
+    Tmp7 = (Foo >> 48) & 0xFF;
+    Tmp8 = (Foo >> 56) & 0xFF;
+    return (Tmp1 << 56) | (Tmp2 << 48) | (Tmp3 << 40) | (Tmp4 << 32) | (Tmp5 << 24) | (Tmp6 << 16) | (Tmp7 << 8)  | Tmp8;
+}
+
+
 #pragma pack(pop)
 #endif

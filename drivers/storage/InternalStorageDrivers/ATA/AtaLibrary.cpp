@@ -64,10 +64,43 @@ LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
     void* IdBuffer
 ){
+    LOUSTATUS Result = STATUS_SUCCESS;
+    LouPrint("LOUSINE ATA LIB:Creating Ata Identify Command\n");
+    UNUSED ATA_QUEUED_COMMAND Command;
+    Command.Command     = ATA_COMMAND_IDENTIFY_ATA;
+    Command.WriteCommand= false;
+    Command.DataAddress = (uint64_t)IdBuffer;
+    Command.DataSize    = 512;
+    Command.Port        = AtaPort;
+    Command.WriteCommand= false;
+    Command.Lbal        = 0;
+    Command.Lbam        = 0;
+    Command.Lbah        = 0;
+    Command.SectorCount = 0;
+    Command.ScsiCommandLength = 0;
+    Command.PacketCommand = false;
+    Command.Feature = 0;
+    Command.Device = 0xE0;
+    Command.HobLbal        = 0;
+    Command.HobLbam        = 0;
+    Command.HobLbah        = 0;
+    Command.HobSectorCount = 0;
+    Command.Control = 0x08;
+    Command.Auxillery = 0;
 
-
-
-    return STATUS_SUCCESS;
+    memset((void*)Command.ScsiCommand, 0 , 16);
+    LouPrint("LOUSINE ATA_LIB:Preping Ata Identify Command\n");
+    if(AtaPort->Operations->PrepCommand){
+        Result = AtaPort->Operations->PrepCommand(&Command);
+        if(Result != STATUS_SUCCESS){
+            return Result;
+        }
+    }
+    LouPrint("LOUSINE ATA_LIB:Issueing Ata Identify Command\n");
+    if(AtaPort->Operations->IssueCommand){
+        Result = AtaPort->Operations->IssueCommand(&Command);
+    }
+    return Result;  
 }
 
 LOUDDK_API_ENTRY 
@@ -146,6 +179,10 @@ LOUSTATUS LouKeAtaReadDevice(
     Command.Auxillery = 0;
     Command.Command = ATA_COMMAND_PIO_READ;
 
+    if(AtaPort->SerialDevice){
+        Command.Device = 0x40;
+    }  
+
     if(AtaPort->PortScsiDevice){
         LouPrint("LOUSINE ATA LIB:Preparing To Read Atapi Device\n");
 
@@ -168,6 +205,7 @@ LOUSTATUS LouKeAtaReadDevice(
         }
     }else{
         LouPrint("LOUSINE ATA LIB:Preparing To Read Ata Device\n");
+        //while(1);
     }
 
     Result = AtaPort->Operations->PrepCommand(&Command);
@@ -177,39 +215,32 @@ LOUSTATUS LouKeAtaReadDevice(
     Result = AtaPort->Operations->IssueCommand(&Command);
     return Result;
 }
-void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis) {
+void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq) {
     Fis[0] = 0x27;  // Host-to-Device Register FIS
     Fis[1] = PortMultiplier & 0x0F;
     if (IsCommand) {
         Fis[1] |= (1 << 7);
     }
-
-    // **SET THE CORRECT COMMAND**
-    if (QueuedCommand->PacketCommand) {
-        Fis[2] = ATA_COMMAND_PACKET;  // ATAPI Command (ATA_COMMAND_PACKET)
-    } else if (QueuedCommand->WriteCommand) {
-        Fis[2] = (QueuedCommand->HobLbal || QueuedCommand->HobLbam || QueuedCommand->HobLbah) ? 0x35 : 0xCA;  // WRITE DMA EXT (LBA48) / WRITE DMA (LBA28)
-    } else {
-        Fis[2] = (QueuedCommand->HobLbal || QueuedCommand->HobLbam || QueuedCommand->HobLbah) ? 0x25 : 0xC8;  // READ DMA EXT (LBA48) / READ DMA (LBA28)
-    }
-
+    Fis[2] = QueuedCommand->Command;
     Fis[3] = QueuedCommand->Feature;
     Fis[4] = QueuedCommand->Lbal;
     Fis[5] = QueuedCommand->Lbam;
     Fis[6] = QueuedCommand->Lbah;
-    Fis[7] = QueuedCommand->Device;
+    Fis[7] = (1 << 6);//QueuedCommand->Device;
     Fis[8] = QueuedCommand->HobLbal;
     Fis[9] = QueuedCommand->HobLbam;
     Fis[10] = QueuedCommand->HobLbah;
     Fis[11] = QueuedCommand->HobFeature;
     Fis[12] = QueuedCommand->SectorCount;
     Fis[13] = QueuedCommand->HobSectorCount;
+    if(IsNcq){
+        Fis[13] |= (1 << 3);
+    }
     Fis[14] = 0;
     Fis[15] = QueuedCommand->Control;
     Fis[16] = QueuedCommand->Auxillery & 0xFF;
     Fis[17] = (QueuedCommand->Auxillery >> 8) & 0xFF;
     Fis[18] = (QueuedCommand->Auxillery >> 16) & 0xFF;
     Fis[19] = (QueuedCommand->Auxillery >> 24) & 0xFF;
-
 }
 

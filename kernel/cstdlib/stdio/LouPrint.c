@@ -76,6 +76,48 @@ static spinlock_t PrintPanicLock;
 
 int LouPrintEGA(string Str, va_list Args);
 
+void print_binary64(uint64_t number) {
+    for(uint8_t BitMask = 0; BitMask < 64; BitMask++){
+        if(number & (1 << (63 - BitMask))){
+            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+        }else{
+            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+        }
+    }
+}
+
+void print_binary32(uint32_t number) {
+    for(uint8_t BitMask = 0; BitMask < 32; BitMask++){
+        if(number & (1 << (31 - BitMask))){
+            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+        }else{
+            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+        }
+    }
+}
+
+void print_binary16(uint16_t number) {
+    for(uint8_t BitMask = 0; BitMask < 16; BitMask++){
+        if(number & (1 << (15 - BitMask))){
+            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+        }else{
+            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+        }
+    }
+}
+
+
+void print_binary8(uint8_t number) {
+    for(uint8_t BitMask = 0; BitMask < 8; BitMask++){
+        if(number & (1 << (7 - BitMask))){
+            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+        }else{
+            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+        }
+    }
+}
+
+
 __stdcall
 int LouPrint_s(char* format, va_list args){
     

@@ -34,60 +34,100 @@ LOUSTATUS AtaGenricDMAPrepCommand(
     return STATUS_SUCCESS;
 }   
 
-LOUSTATUS AtaGenricDMAIssueCommand(
-    PATA_QUEUED_COMMAND QueuedCommand
+static LOUSTATUS IdLegacyDrive(
+    PATA_QUEUED_COMMAND             QueuedCommand,
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort
 ){
-    LouKIRQL Irql;
-    //LouPrint("Ata Genric DMA Issue Command\n");
-    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
-    LouKeAcquireSpinLock(&AtaPort->PortLock, &Irql);
     uint16_t CommandPort    = (uint16_t)(uintptr_t)AtaPort->CommandIoAddress;
     uint16_t ControlPort    = (uint16_t)(uintptr_t)AtaPort->ControlIoAddress;
-    UNUSED uint16_t DmaPort        = (uint16_t)(uintptr_t)AtaPort->DmaIoAddress;
+    uint32_t PollCount             = 0;
+    uint16_t* Data = (uint16_t*)QueuedCommand->DataAddress;
+    uint8_t Status;
+    if((AtaPort->PortNumber == 1) || (AtaPort->PortNumber == 3)){
+        //Primary Bus
+        COMMAND_WRITE_DRIVE_HEAD_PORT(0xA0);
+    }else {
+        //Secondary Bus
+        COMMAND_WRITE_DRIVE_HEAD_PORT(0xB0);
+    }
+    //wait for the controllers Selector IC
+    AtaIoWait400ns(ControlPort);
+    //Zero Out
+    COMMAND_WRITE_SECTOR_COUNT_PORT_LBA28(0);
+    COMMAND_WRITE_LBAL_PORT_LBA28(0);
+    COMMAND_WRITE_LBAM_PORT_LBA28(0);
+    COMMAND_WRITE_LBAH_PORT_LBA28(0);
+    //Wait For The Designator IC
+    AtaIoWait400ns(ControlPort);
+    //Send Command
+    COMMAND_WRITE_COMMAND_PORT(QueuedCommand->Command);
+
+    if(COMMAND_READ_STATUS_PORT == 0){
+        LouPrint("Error: Detected Drive Is A Ghost Drive Quirk\n");
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    //LouPrint("Waiting On Device\n");
+    
+    Status = COMMAND_READ_STATUS_PORT;
+
+    while(10000 >= PollCount){
+        if((!(Status & 0x80)) || (Status & 0x01)){
+            break;
+        }
+        Status = COMMAND_READ_STATUS_PORT;
+        sleep(100);
+        PollCount += 100;
+    }
+
+    if(PollCount >= AtaPort->PollTimer){
+        LouPrint("Error Timeout Occoured\n");
+        return STATUS_TIMEOUT;
+    }
+    if(Status & 0x01){
+        LouPrint("Device Error\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+    //LouPrint("Command Completed Successfully\n");
+
+    for(uint16_t i = 0 ; i < 256; i++){
+        Data[i] = COMMAND_READ_DATA_PORT;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+static LOUSTATUS ReadLegacyAtapi(
+    PATA_QUEUED_COMMAND             QueuedCommand,
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort
+){
+    uint16_t CommandPort    = (uint16_t)(uintptr_t)AtaPort->CommandIoAddress;
+    uint16_t ControlPort    = (uint16_t)(uintptr_t)AtaPort->ControlIoAddress;
     uint32_t PollCount             = 0;
     uint16_t* Data = (uint16_t*)QueuedCommand->DataAddress;
     bool WriteCommand = QueuedCommand->WriteCommand;
     uint8_t Status;
-    //There 2 types of different Drives for 
-    //Commands the identify drive and read write drives
-    //first well do ther identify commands
-    if(
-        (QueuedCommand->Command == ATA_COMMAND_IDENTIFY_ATA) || 
-        (QueuedCommand->Command == ATA_COMMAND_IDENTIFY_ATAPI)
-    ){
-        //LouPrint("Handleing ATA/ATAPI Identification Command\n");
 
-        if(AtaPort->PortNumber < 2){
-            //Primary Bus
+    if(WriteCommand){
+        //curently there is no read
+    }else{
+        if((AtaPort->PortNumber == 1) || (AtaPort->PortNumber == 3)){
             COMMAND_WRITE_DRIVE_HEAD_PORT(0xA0);
-        }else {
-            //Secondary Bus
+        }else{
             COMMAND_WRITE_DRIVE_HEAD_PORT(0xB0);
         }
         //wait for the controllers Selector IC
         AtaIoWait400ns(ControlPort);
-        //Zero Out
-        COMMAND_WRITE_SECTOR_COUNT_PORT_LBA28(0);
-        COMMAND_WRITE_LBAL_PORT_LBA28(0);
-        COMMAND_WRITE_LBAM_PORT_LBA28(0);
-        COMMAND_WRITE_LBAH_PORT_LBA28(0);
-        //Wait For The Designator IC
-        AtaIoWait400ns(ControlPort);
+        //Fill the Command Data
+        COMMAND_WRITE_FEATURE_PORT_LBA28(0);
+        COMMAND_WRITE_LBAM_PORT_LBA28(2048 & 0xFF);
+        COMMAND_WRITE_LBAH_PORT_LBA28(2048 >> 8);
         //Send Command
         COMMAND_WRITE_COMMAND_PORT(QueuedCommand->Command);
-
-        if(COMMAND_READ_STATUS_PORT == 0){
-            LouPrint("Error: Detected Drive Is A Ghost Drive Quirk\n");
-            MutexUnlock(&AtaPort->OperaionLock);
-            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
-            return STATUS_NO_SUCH_DEVICE;
-        }
+        AtaIoWait400ns(ControlPort);
         //LouPrint("Waiting On Device\n");
-        
         Status = COMMAND_READ_STATUS_PORT;
-
         while(AtaPort->PollTimer >= PollCount){
-            if((!(Status & 0x80)) || (Status & 0x01)){
+            if((((!(Status & 0x80)) && (Status & 0x08)) || (Status & 0x01))){
                 break;
             }
             Status = COMMAND_READ_STATUS_PORT;
@@ -96,98 +136,122 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         }
 
         if(PollCount >= AtaPort->PollTimer){
-            LouPrint("Error Timeout Occoured\n");
-            MutexUnlock(&AtaPort->OperaionLock);
-            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
+            //LouPrint("Error Timeout Occoured\n");
             return STATUS_TIMEOUT;
         }
         if(Status & 0x01){
-            LouPrint("Device Error\n");
-            MutexUnlock(&AtaPort->OperaionLock);
-            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
+            //LouPrint("Device Error\n");
             return STATUS_IO_DEVICE_ERROR;
         }
-        //LouPrint("Command Completed Successfully\n");
+        //Reset Poll For the next Poll
+        PollCount = 0;
+        //Output the Packet Command
+        COMMAND_WRITE_DATA_PORT_BUFFER((uint8_t*)&QueuedCommand->ScsiCommand[0], 6);
 
-        for(uint16_t i = 0 ; i < 256; i++){
-            Data[i] = COMMAND_READ_DATA_PORT;
+        for(uint32_t i = 0 ; i < QueuedCommand->SectorCount; i++){
+            while(1){
+                Status = COMMAND_READ_STATUS_PORT;
+                if(Status & 0x01){
+                    return STATUS_IO_DEVICE_ERROR;
+                }
+                if((!(Status & 0x80)) && (Status & 0x08)){
+                    break;
+                }
+                AtaIoWait400ns(ControlPort);
+            }
+            int DataSize = COMMAND_READ_LBAM_PORT_LBA28 | (COMMAND_READ_LBAH_PORT_LBA28 << 8);
+            COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)Data + (i * 0x800)), DataSize / 2);
         }
+        return STATUS_SUCCESS;
+    }
+    //LouPrint("Command Completed Successfully\n");
+    return STATUS_INVALID_PARAMETER;
+}
 
+static LOUSTATUS ReadLegacyAta(
+    PATA_QUEUED_COMMAND             QueuedCommand,
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort
+){
+    UNUSED uint16_t CommandPort    = (uint16_t)(uintptr_t)AtaPort->CommandIoAddress;
+    UNUSED uint16_t ControlPort    = (uint16_t)(uintptr_t)AtaPort->ControlIoAddress;
+    UNUSED uint32_t PollCount             = 0;
+    UNUSED uint16_t* Data = (uint16_t*)QueuedCommand->DataAddress;
+    UNUSED bool WriteCommand = QueuedCommand->WriteCommand;
+    UNUSED uint8_t Status;
+
+    if(WriteCommand){
+        //curently there is no read
+    }else{
+        if((AtaPort->PortNumber == 1) || (AtaPort->PortNumber == 3)){
+            COMMAND_WRITE_DRIVE_HEAD_PORT(0xE0);
+        }else{
+            COMMAND_WRITE_DRIVE_HEAD_PORT(0xF0);
+        }
+        //wait for the controllers Selector IC
+        AtaIoWait400ns(ControlPort);
+        //Fill the Command Data
+        COMMAND_WRITE_FEATURE_PORT_LBA28(0);
+        COMMAND_WRITE_SECTOR_COUNT_PORT_LBA28(QueuedCommand->SectorCount);
+
+        COMMAND_WRITE_LBAL_PORT_LBA28(QueuedCommand->Lbal);
+        COMMAND_WRITE_LBAM_PORT_LBA28(QueuedCommand->Lbam);
+        COMMAND_WRITE_LBAH_PORT_LBA28(QueuedCommand->Lbah);
+        //Send Command
+        COMMAND_WRITE_COMMAND_PORT(0x20);
+        AtaIoWait400ns(ControlPort);
+        //LouPrint("Waiting On Device\n");
+        Status = COMMAND_READ_STATUS_PORT;
+        for(uint32_t i = 0 ; i < QueuedCommand->SectorCount; i++){
+            while(1){
+                Status = COMMAND_READ_STATUS_PORT;
+                if(Status & 0x01){
+                    return STATUS_IO_DEVICE_ERROR;
+                }
+                if((!(Status & 0x80)) && (Status & 0x08)){
+                    break;
+                }
+                AtaIoWait400ns(ControlPort);
+            }
+            COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)Data + (i * 512)), 256);
+        }
+        return STATUS_SUCCESS;
+    }
+    return STATUS_INVALID_PARAMETER;
+}
+
+LOUSTATUS AtaGenricDMAIssueCommand(
+    PATA_QUEUED_COMMAND QueuedCommand
+){
+    LouKIRQL Irql;
+    LOUSTATUS Result = STATUS_SUCCESS;
+    //LouPrint("Ata Genric DMA Issue Command\n");
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
+    LouKeAcquireSpinLock(&AtaPort->PortLock, &Irql);
+
+    //There 2 types of different Drives for 
+    //Commands the identify drive and read write drives
+    //first well do ther identify commands
+    if(
+        (QueuedCommand->Command == ATA_COMMAND_IDENTIFY_ATA) || 
+        (QueuedCommand->Command == ATA_COMMAND_IDENTIFY_ATAPI)
+    ){
+        //LouPrint("Handleing ATA/ATAPI Identification Command\n");
+        Result = IdLegacyDrive(QueuedCommand, AtaPort);
         MutexUnlock(&AtaPort->OperaionLock);
         LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
-        return STATUS_SUCCESS;
+        return Result;
     }
 
     if(QueuedCommand->PacketCommand){
-        if(WriteCommand){
-
-        }else{
-            if(AtaPort->PortNumber < 2){
-                COMMAND_WRITE_DRIVE_HEAD_PORT(0xA0);
-            }else{
-                COMMAND_WRITE_DRIVE_HEAD_PORT(0xB0);
-            }
-            //wait for the controllers Selector IC
-            AtaIoWait400ns(ControlPort);
-            //Fill the Command Data
-            COMMAND_WRITE_FEATURE_PORT_LBA28(0);
-            COMMAND_WRITE_LBAM_PORT_LBA28(2048 & 0xFF);
-            COMMAND_WRITE_LBAH_PORT_LBA28(2048 >> 8);
-            //Send Command
-            COMMAND_WRITE_COMMAND_PORT(QueuedCommand->Command);
-            AtaIoWait400ns(ControlPort);
-            //LouPrint("Waiting On Device\n");
-            Status = COMMAND_READ_STATUS_PORT;
-            while(AtaPort->PollTimer >= PollCount){
-                if((((!(Status & 0x80)) && (Status & 0x08)) || (Status & 0x01))){
-                    break;
-                }
-                Status = COMMAND_READ_STATUS_PORT;
-                sleep(100);
-                PollCount += 100;
-            }
-
-            if(PollCount >= AtaPort->PollTimer){
-                //LouPrint("Error Timeout Occoured\n");
-                MutexUnlock(&AtaPort->OperaionLock);
-                LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
-                return STATUS_TIMEOUT;
-            }
-            if(Status & 0x01){
-                //LouPrint("Device Error\n");
-                MutexUnlock(&AtaPort->OperaionLock);
-                LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
-                return STATUS_IO_DEVICE_ERROR;
-            }
-            //Reset Poll For the next Poll
-            PollCount = 0;
-            //Output the Packet Command
-            COMMAND_WRITE_DATA_PORT_BUFFER((uint8_t*)&QueuedCommand->ScsiCommand[0], 6);
-
-            for(uint32_t i = 0 ; i < QueuedCommand->SectorCount; i++){
-                while(1){
-                    Status = COMMAND_READ_STATUS_PORT;
-                    if(Status & 0x01){
-                        return STATUS_IO_DEVICE_ERROR;
-                    }
-                    if((!(Status & 0x80)) && (Status & 0x08)){
-                        break;
-                    }
-                    AtaIoWait400ns(ControlPort);
-                }
-                int DataSize = COMMAND_READ_LBAM_PORT_LBA28 | (COMMAND_READ_LBAH_PORT_LBA28 << 8);
-                COMMAND_READ_DATA_PORT_BUFFER((uint16_t*)((uint8_t*)Data + (i * 0x800)), DataSize / 2);
-            }
-            MutexUnlock(&AtaPort->OperaionLock);
-            LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
-            return STATUS_SUCCESS;
-        }
-        //LouPrint("Command Completed Successfully\n");
+        Result = ReadLegacyAtapi(QueuedCommand, AtaPort);
+        MutexUnlock(&AtaPort->OperaionLock);
+        LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
     }
 
+    Result = ReadLegacyAta(QueuedCommand, AtaPort);
     MutexUnlock(&AtaPort->OperaionLock);
     LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
-    return STATUS_INVALID_PARAMETER;
+    return Result;
 }
 
 static LOUSINE_ATA_PORT_OPERATIONS IdeGenericOperations;
