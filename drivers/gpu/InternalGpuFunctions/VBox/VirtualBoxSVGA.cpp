@@ -87,11 +87,78 @@ void VBoxPutPixelRgbEx(
 
 }
 
+
+
+void VBoxPutPixelRgbExBasicAcceleration(
+    PDrsdVRamObject FBDEV,
+    uint16_t x, 
+    uint16_t y, 
+    uint8_t r, uint8_t g, uint8_t b, uint8_t a
+){
+    
+        // Calculate the offset in the framebuffer
+    uint32_t bytes_per_pixel = FBDEV->FrameBuffer.Bpp / 8;
+    uint8_t* framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.SecondaryFrameBufferBase;
+
+    // Ensure x and y are within the screen bounds
+    if (x >= FBDEV->FrameBuffer.Width || y >= FBDEV->FrameBuffer.Height) {
+        return; // Out of bounds, do nothing
+    }
+
+    // Calculate the position in the framebuffer
+    uint32_t pixel_offset = (y * FBDEV->FrameBuffer.Pitch) + (x * bytes_per_pixel);
+
+    // Set the pixel value based on the framebuffer format
+    if (FBDEV->FrameBuffer.Bpp == 32) {
+        // 32-bit color (RGBA)
+        framebuffer[pixel_offset] = b;        // Blue
+        framebuffer[pixel_offset + 1] = g;    // Green
+        framebuffer[pixel_offset + 2] = r;    // Red
+        framebuffer[pixel_offset + 3] = a;    // Alpha (or reserved)
+    } else if (FBDEV->FrameBuffer.Bpp == 24) {
+        // 24-bit color (RGB)
+        framebuffer[pixel_offset] = b;        // Blue
+        framebuffer[pixel_offset + 1] = g;    // Green
+        framebuffer[pixel_offset + 2] = r;    // Red
+    } else if (FBDEV->FrameBuffer.Bpp == 16) {
+        // 16-bit color (5-6-5 RGB)
+        uint16_t color = ((r & 0x1F) << 11) | ((g & 0x3F) << 5) | (b & 0x1F);
+        *((uint16_t*)(framebuffer + pixel_offset)) = color;
+    }
+
+}
+
 KERNEL_IMPORT
 void LouKeDrsdPutPixelMirrored(
     uint16_t x, uint16_t y, 
     uint8_t r, uint8_t g, uint8_t b
 );
+
+void VirtualBoxSvgaBlitCopy(void* Destination, void* Source, uint64_t Size){
+    //Virtualbox as far as i know does not support DMA 
+    //unless 3D Acelleration however i don know enough
+    //to make this assumption on all set ups so the 
+    //internal kernel driver is just going to use a
+    //CPU transfer and when i write the external modual
+    //i will include all advanced features because ther
+    //are some tricks up VBox's sleeve even impressive 
+    //even for actuall SVGA video hardware
+    uint64_t CurrentIndex = 0;
+    while(CurrentIndex < Size){
+        //this looks stupid but its a 64 byte fast copy it looks dumb but its faster than copying one byte at a time
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex) = *(uint64_t*)((uintptr_t)Source + CurrentIndex); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 8) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 8); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 16) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 16); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 24) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 24); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 32) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 32); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 40) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 40); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 48) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 48); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 48) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 48); 
+        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 56) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 56); 
+        CurrentIndex += 64;
+    }
+
+}
 
 void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
 
@@ -106,8 +173,6 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
 
     VirtualboxVGAC->VRamTotalSize = inl(VBE_DISPI_IOPORT_DATA);
 
-    LouPrint("Total VRam:%h\n",VirtualboxVGAC->VRamTotalSize);
-
     GetPciConfiguration(PDEV->bus, PDEV->slot, PDEV->func, PciConfig);
 
     VirtualBoxChangeResolution(1920, 1080);
@@ -120,24 +185,39 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
     SupportedModes->Pitch = (1920 * (32 / 8));
     SupportedModes->FrameBufferType = RGB_DRSD_FRAMEBUFFER;
 
-    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouMalloc(sizeof(DrsdStandardFrameworkObject));
+    uint64_t FrameBufferAdress = (uint64_t)LouKeHalGetPciVirtualBaseAddress(PciConfig, 0);
 
+    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouMalloc(sizeof(DrsdStandardFrameworkObject));
     DrsdFrameWork->RgbPutPixel = VBoxPutPixelRgbEx;
+    DrsdFrameWork->VRamSize = VirtualboxVGAC->VRamTotalSize;
+    
+    if((1920 * 1080 * 4) * 2 <= VirtualboxVGAC->VRamTotalSize){
+        DrsdFrameWork->SecondaryFrameBuffer = FrameBufferAdress + (1920 * 1080 * 4);
+        DrsdFrameWork->BlitCopy = VirtualBoxSvgaBlitCopy;
+        DrsdFrameWork->RgbPutPixel = VBoxPutPixelRgbExBasicAcceleration;
+    }
+
+    memset((void*)FrameBufferAdress, 0 , DrsdFrameWork->VRamSize);
 
     LouKeRegisterFrameBufferDevice(
         (void*)PDEV, 
-        (uint64_t)LouKeHalGetPciVirtualBaseAddress(PciConfig, 0), 
-        VirtualboxVGAC->VRamTotalSize, 
+        FrameBufferAdress,
+        DrsdFrameWork->SecondaryFrameBuffer, 
+        0x00,
+        (1920 * 1080 * 4),
         1920, 1080,
         32, 
         RGB_DRSD_FRAMEBUFFER,
         SupportedModes,
         DrsdFrameWork
     );
+
     LouKeDrsdPciResetScreen(PDEV);
 
     StartDebugger();
 
+    LouPrint("Hello World\n");
+    LouPrint("Total VRam:%h\n",VirtualboxVGAC->VRamTotalSize);
+
     LouFree((RAMADD)PciConfig);
-    //while(1);
 }

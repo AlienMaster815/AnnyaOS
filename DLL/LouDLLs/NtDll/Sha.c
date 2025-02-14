@@ -35,8 +35,8 @@ int64_t A_SHAUpdate(
     int32_t* ShaSourceHandle,
     int32_t  ShaChecksum
 ){
-    int32_t Alpha = ShaDestinationHandle[0x16], Bravo = ShaChecksum, Result = Alpha + Bravo, Romeo15 = Alpha & 0x3F;  
-    int32_t* DeltaI;
+    register int32_t Alpha = ShaDestinationHandle[0x16], Bravo = ShaChecksum, Result = Alpha + Bravo, Romeo15 = Alpha & 0x3F;  
+    register int32_t* DeltaI;
 
     ShaDestinationHandle[0x16] = Result;
 

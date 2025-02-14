@@ -244,9 +244,9 @@ int LouPrint_s(char* format, va_list args){
             VgaPutCharecterRgb(*format++, DebugWindow, 0, 255, 0);
         }
     }
+    LouKeDrsdSyncScreens();
     LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
     }
-
     return 0;
 }
 

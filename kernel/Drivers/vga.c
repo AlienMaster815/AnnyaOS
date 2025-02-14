@@ -146,8 +146,12 @@ void* GetFrameBufferAddress(
 
     // Calculate the offset in the framebuffer
     uint32_t bytes_per_pixel = FBDEV->FrameBuffer.Bpp / 8;
-    uint8_t* framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.FramebufferBase;
-
+    uint8_t* framebuffer;
+    if(FBDEV->FrameBuffer.SecondaryFrameBufferBase){
+        framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.SecondaryFrameBufferBase;
+    }else{
+        framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.FramebufferBase;
+    }
     // Ensure x and y are within the screen bounds
     if (x >= FBDEV->FrameBuffer.Width || y >= FBDEV->FrameBuffer.Height) {
         return false; // Out of bounds, do nothing

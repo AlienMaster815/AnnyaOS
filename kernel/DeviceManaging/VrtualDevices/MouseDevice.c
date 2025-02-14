@@ -97,6 +97,7 @@ void LouKeMouseMoveEventUpdate(int32_t X, int32_t Y){
     }
 
     DrawMouse(MouseXCursor, MouseYCursor);
+    LouKeDrsdSyncScreens();
     //LouPrint("MouseX:%d :: MouseY:%d\n", MouseXCursor, MouseYCursor);
 }
 

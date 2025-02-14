@@ -17,6 +17,8 @@ typedef struct _DrsdFomat{
 
 typedef struct _DrsdFramebuffer{
     uint64_t FramebufferBase;
+    uint64_t SecondaryFrameBufferBase;
+    uint64_t TrimaryFrameBufferBase;
     uint64_t FramebufferSize;
     PDrsdFormat Format;
     uint16_t Width;
@@ -69,6 +71,10 @@ typedef struct _DrsdVRamObject{
 typedef struct _DrsdStandardFrameworkObject{
     void (*RgbPutPixel)(struct _DrsdVRamObject* FBDEV, uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
     void (*DeviceSetFramebufferMode)(struct _DrsdVRamObject* FBDEV, uint16_t Width, uint16_t Height);
+    void (*BlitCopy)(void* Destination, void* Source, uint64_t Size);
+    uint64_t VRamSize;
+    uint64_t SecondaryFrameBuffer;
+    uint64_t TrimaryFrameBuffer;
 }DrsdStandardFrameworkObject, * PDrsdStandardFrameworkObject;
 
 typedef struct _DrsdEncoder{
@@ -93,7 +99,9 @@ typedef struct _DrsdDevice{
 
 LOUSTATUS LouKeRegisterFrameBufferDevice(
     void* Device, 
-    uint64_t VRamBase, 
+    uint64_t VRamBase,
+    uint64_t VRamBase2,
+    uint64_t VRamBase3,
     uint64_t VRamSize,
     uint16_t Width,
     uint16_t Height,
@@ -113,6 +121,8 @@ void* GetFrameBufferAddress(
 );
 
 PDrsdVRamObject LouKeDeviceManagerGetFBDEV(uint8_t Gpu);
+
+void LouKeDrsdSyncScreens();
 
 #ifdef __cplusplus
 }

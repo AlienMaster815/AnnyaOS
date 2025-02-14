@@ -257,7 +257,10 @@ LOUSTATUS InitVMWareSVGA(P_PCI_DEVICE_OBJECT PDEV){
 
     LouKeRegisterFrameBufferDevice(
         (void*)PDEV, 
-        VmwPrivate->VRamStart, VmwPrivate->VRamLimit, 
+        VmwPrivate->VRamStart, 
+        0x00,
+        0x00,
+        VmwPrivate->VRamLimit, 
         1920, 1080,
         32, 
         RGB_DRSD_FRAMEBUFFER,

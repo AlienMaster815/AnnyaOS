@@ -18,7 +18,8 @@ UNUSED static uint8_t NumberOfActiveVRamManagers = 0;
 static inline void InitializeVRamManagerObject(
     PDrsdVRamObject Obj,
     PListHeader LastHeader,
-    uint64_t Base, uint64_t Height,
+    uint64_t Base, uint64_t Base2, uint64_t Base3,
+    uint64_t Height,
     uint16_t x,
     uint16_t y,
     uint8_t Bpp,
@@ -32,6 +33,8 @@ static inline void InitializeVRamManagerObject(
     Obj->Base = Base;
     Obj->Height = Height;
     Obj->FrameBuffer.FramebufferBase = Base;
+    Obj->FrameBuffer.SecondaryFrameBufferBase = Base2;
+    Obj->FrameBuffer.TrimaryFrameBufferBase = Base3;
     Obj->FrameBuffer.FramebufferSize = Height;   
     Obj->FrameBuffer.Width = x;
     Obj->FrameBuffer.Height = y;
@@ -45,28 +48,31 @@ static inline void InitializeVRamManagerObject(
 static inline void ReuseVRamManagerObject(
     PDrsdVRamObject Obj,
     PListHeader LastHeader,
-    uint64_t Base, uint64_t Height,
-    uint8_t x,
-    uint8_t y,
+    uint64_t Base, uint64_t Base2, uint64_t Base3,
+    uint64_t Height,
+    uint16_t x,
+    uint16_t y,
     uint8_t Bpp,
     uint8_t FramebufferType,
     PFrameBufferModeDefinition SupportedModes,
     PDrsdStandardFrameworkObject FrameWorkReference,
     void* DeviceObject
 ){
-    //Obj->Header.LastHeader = LastHeader; headers are not changed
+    //Obj->Header.LastHeader = LastHeader;
     //Obj->Header.NextHeader = 0x00;
     Obj->Base = Base;
     Obj->Height = Height;
     Obj->FrameBuffer.FramebufferBase = Base;
-    Obj->FrameBuffer.FramebufferSize = Height;
+    Obj->FrameBuffer.SecondaryFrameBufferBase = Base2;
+    Obj->FrameBuffer.TrimaryFrameBufferBase = Base3;
+    Obj->FrameBuffer.FramebufferSize = Height;   
     Obj->FrameBuffer.Width = x;
     Obj->FrameBuffer.Height = y;
     Obj->FrameBuffer.Pitch = (x * (Bpp/8));
     Obj->FrameBuffer.Bpp = Bpp;
-    Obj->DeviceObject = DeviceObject;
-    Obj->SupportedModes = SupportedModes;  
-    Obj->FrameWorkReference = FrameWorkReference;     
+    Obj->DeviceObject = DeviceObject; 
+    Obj->SupportedModes = SupportedModes;     
+    Obj->FrameWorkReference = FrameWorkReference;         
 }
 
 void DRSD_EGA_RELEASE();
@@ -75,7 +81,9 @@ static spinlock_t VRamRegistrationLock;
 //Registers a VRam Object To Tables
 LOUSTATUS LouKeRegisterFrameBufferDevice(
     void* Device, 
-    uint64_t VRamBase, 
+    uint64_t VRamBase,
+    uint64_t VRamBase2,
+    uint64_t VRamBase3,
     uint64_t VRamSize,
     uint16_t Width,
     uint16_t Height,
@@ -97,6 +105,8 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
             DrsdVramManager, 
             0x00, 
             VRamBase, 
+            VRamBase2, 
+            VRamBase3, 
             VRamSize, 
             Width,
             Height,
@@ -133,13 +143,15 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
             (PDrsdVRamObject)tmp->Header.NextHeader, 
             (PListHeader)tmp, 
             VRamBase, 
+            VRamBase2, 
+            VRamBase3, 
             VRamSize, 
             Width,
             Height,
             Bpp,
             FramebufferType,
             SupportedModes,
-            FrameWorkReference,
+            FrameWorkReference, 
             Device
             );
             LouKeRegisterDevice(
@@ -161,13 +173,15 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
         (PDrsdVRamObject)tmp->Header.NextHeader, 
         (PListHeader)tmp, 
         VRamBase, 
+        VRamBase2, 
+        VRamBase3, 
         VRamSize, 
         Width,
         Height,
         Bpp,
         FramebufferType,
         SupportedModes,
-        FrameWorkReference,
+        FrameWorkReference, 
         Device
     );   
     LouKeRegisterDevice(

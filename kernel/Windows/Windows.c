@@ -493,9 +493,8 @@ bool LouUpdateWindow(
         LouKeReleaseSpinLock(&WindowUpdateLock, &Irql);
         return false;
     }
-
-
     LouKeReleaseSpinLock(&WindowUpdateLock, &Irql);
+    LouKeDrsdSyncScreens();
     return true;
 }
 
@@ -575,6 +574,7 @@ bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
         }
     }
     LouKeReleaseSpinLock(&LouUpdtateTextWindowLock, &Irql);    
+    
     return true;
 }
 

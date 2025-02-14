@@ -72,7 +72,7 @@ void DrawButton(
         ButtonHandle->ButtonTextColor.g,
         ButtonHandle->ButtonTextColor.b
     );  
-    
+    LouKeDrsdSyncScreens();
 }
 
 

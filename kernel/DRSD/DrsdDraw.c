@@ -52,6 +52,9 @@ void LouKeDrsdPciResetScreen(P_PCI_DEVICE_OBJECT PDEV){
            }   
         }
     }
+    if(FBDEV->FrameWorkReference->BlitCopy){
+        FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
+    }
 }
 
 
@@ -82,7 +85,16 @@ void LouKeDrsdPutPixelMirrored(
     );
 }
 
-
+void LouKeDrsdSyncScreens(){
+    uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
+    PDrsdVRamObject FBDEV;
+    for(uint8_t i = 0 ; i < GpuCount; i++){
+        FBDEV = LouKeDeviceManagerGetFBDEV(i);
+        if(FBDEV->FrameWorkReference->BlitCopy){
+            FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
+        }
+    }
+}
 
 void LouKeDsrdFBDEVFrameBufferMemMov(
     uint8_t Gpu,
@@ -126,6 +138,10 @@ void LouKeDsrdFBDEVFrameBufferMemMov(
             }
 
         }
+    }
+
+    if(FBDEV->FrameWorkReference->BlitCopy){
+        FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
     }
 
 }
@@ -307,6 +323,7 @@ void LouKeDrsdHandleWindowUpdate(
                     // Ensure the handle is valid
                 if (!BitHandle || !BitHandle->UnpackedData) {
                     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+                    //LouKeDrsdSyncScreens();
                     return;
                 }
 
@@ -318,6 +335,7 @@ void LouKeDrsdHandleWindowUpdate(
 
                 if((!GetScreenBufferWidth()) || (!Width) || (!GetScreenBufferHeight()) || (!Height)){
                     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+                    //LouKeDrsdSyncScreens();
                     return;
                 }
 
@@ -335,6 +353,7 @@ void LouKeDrsdHandleWindowUpdate(
                 if (Bpp != 32) {
                     LouPrint("Unsupported bitmap bit depth: %d\n", Bpp);
                     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+                    //LouKeDrsdSyncScreens();
                     return;
                 }
 
@@ -381,7 +400,8 @@ void LouKeDrsdHandleWindowUpdate(
 
         }
         */
-        return;
+        //LouKeDrsdSyncScreens();
+        //return;
     }
 
     uint16_t CurrentX = WindowHandle->CurrentX;
@@ -401,6 +421,7 @@ void LouKeDrsdHandleWindowUpdate(
                 // Ensure the handle is valid
             if (!BitHandle || !BitHandle->UnpackedData) {
                 LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+                //LouKeDrsdSyncScreens();
                 return;
             }
 
@@ -412,6 +433,7 @@ void LouKeDrsdHandleWindowUpdate(
 
             if((!GetScreenBufferWidth()) || (!Width) || (!GetScreenBufferHeight()) || (!Height)){
                 LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+                //LouKeDrsdSyncScreens();
                 return;
             }
 
@@ -429,6 +451,7 @@ void LouKeDrsdHandleWindowUpdate(
             if (Bpp != 32) {
                 LouPrint("Unsupported bitmap bit depth: %d\n", Bpp);
                 LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+                //LouKeDrsdSyncScreens();
                 return;
             }
 
@@ -480,5 +503,5 @@ void LouKeDrsdHandleWindowUpdate(
 
     }
     */
-
+    //LouKeDrsdSyncScreens();
 }

@@ -433,6 +433,7 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         sleep(10);
     }
 
+    while(1);
     AhciPort->DmaPort = true;
 
 }

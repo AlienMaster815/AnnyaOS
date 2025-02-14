@@ -185,7 +185,10 @@ LOUSTATUS InitializeStandardVga(
 
     LouKeRegisterFrameBufferDevice(
         (void*)PDEV, 
-        (uint64_t)FrameBuffer, ((640 * 480) / 2), 
+        (uint64_t)FrameBuffer, 
+        0x00, 
+        0x00,
+        ((640 * 480) / 2), 
         640, 480,
         4, 
         RGB_DRSD_FRAMEBUFFER,
