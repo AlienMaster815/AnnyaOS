@@ -8,7 +8,9 @@ LDFLAGS = -L../../../UserLibraries
 LIBS = -lLouDll
 
 # Source and Target
-SRC = NtDll.c
+SRC = 	NtDll.c \
+		Sha.c
+		
 TARGET = ntdll.dll
 
 # Default Rule

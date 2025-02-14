@@ -135,9 +135,24 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
     LouPrint("AhciaGenricDMAIssueCommand\n");
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaPort->PortPrivateData;
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    Port->PxCI |= (1 << QueuedCommand->HardwareTag);
 
 
+    while(1){
+        if(!(Port->PxCI & (1 << QueuedCommand->HardwareTag))){
+            break;
+        }
+        if(IS_INTERRUPT_TFES(Port->PxIS)){
+            return STATUS_IO_DEVICE_ERROR;
+        }
+        sleep(10);
+    }    
 
+
+    LouPrint("Here\n");
     while(1);
     return STATUS_SUCCESS;
 }
@@ -364,6 +379,28 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     return false;
 }
 
+typedef struct _FIS_REG_D2H {
+    uint8_t  FIS_Type;       // 0x34 (D2H Register FIS)
+    uint8_t  PMPort : 4;     // Port multiplier
+    uint8_t  Reserved0 : 2;
+    uint8_t  I : 1;          // Interrupt bit
+    uint8_t  Reserved1 : 1;
+    uint8_t  Status;         // ATA Status Register
+    uint8_t  Error;          // ATA Error Register
+    uint8_t  LBA0;
+    uint8_t  LBA1;
+    uint8_t  LBA2;
+    uint8_t  Device;
+    uint8_t  LBA3;
+    uint8_t  LBA4;
+    uint8_t  LBA5;
+    uint8_t  Reserved2;
+    uint8_t  CountLow;
+    uint8_t  CountHigh;
+    uint8_t  Reserved3[2];
+    uint8_t  Reserved4[4];
+} __attribute__((packed)) FIS_REG_D2H, *PFIS_REG_D2H;
+
 
 SECTIONED_CODE(".Ahci.Code") 
 void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
@@ -396,7 +433,7 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         sleep(10);
     }
 
-    LouPrint("Port Is Now Idle\n");
+    AhciPort->DmaPort = true;
 
 }
 

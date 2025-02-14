@@ -177,7 +177,11 @@ LOUSTATUS LouKeAtaReadDevice(
     Command.HobSectorCount = (SectorCount >> 8) & 0xFF;
     Command.Control = 0x08;
     Command.Auxillery = 0;
-    Command.Command = ATA_COMMAND_PIO_READ;
+    if(AtaPort->DmaPort){
+        Command.Command = ATA_COMMAND_READ_EXT;
+    }else{
+        Command.Command = ATA_COMMAND_PIO_READ;
+    }
 
     if(AtaPort->SerialDevice){
         Command.Device = 0x40;
@@ -200,7 +204,7 @@ LOUSTATUS LouKeAtaReadDevice(
                                             0, 0};
         
         memset((void*)Command.ScsiCommand, 0 , 16);
-        for(uint8_t i; i < 12; i++){
+        for(uint8_t i = 0; i < 12; i++){
             Command.ScsiCommand[i] = Read12[i];
         }
     }else{
@@ -215,6 +219,7 @@ LOUSTATUS LouKeAtaReadDevice(
     Result = AtaPort->Operations->IssueCommand(&Command);
     return Result;
 }
+
 void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq) {
     Fis[0] = 0x27;  // Host-to-Device Register FIS
     Fis[1] = PortMultiplier & 0x0F;

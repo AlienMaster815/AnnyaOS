@@ -1,9 +1,4 @@
-//x86_64-w64-mingw32-gcc -shared -o ntdll.dll ntdll.c -nostdlib -nodefaultlibs -I../../../Include -I../../../Include -L../../../UserLibraries -lLouDll
-
-#define NTDLL_API __declspec(dllexport)
-
-#include <Annya.h>
-
+#include "ntdll.h"
 
 NTDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -12,14 +7,6 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 
 //NtDll Functions
 
-NTDLL_API
-uint64_t A_SHAFinal(){LouPrint("A_SHAFinal()\n");while(1);return 0;}
-
-NTDLL_API
-void A_SHAInit(){LouPrint("A_SHAInit()\n");while(1);}
-
-NTDLL_API
-void A_SHAUpdate(){LouPrint("Hello NT DLL\n"); while(1);}
 
 NTDLL_API 
 void AlpcAdjustCompletionListConcurrencyCount(){LouPrint("Hello NT DLL\n"); while(1);}
