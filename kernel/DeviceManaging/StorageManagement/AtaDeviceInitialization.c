@@ -33,6 +33,11 @@ LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable
     UNUSED PLOUSINE_KERNEL_DEVICE_ATA_PORT PortToInitialize = PortTable->KeyData;
     LOUSTATUS Status = STATUS_SUCCESS;
 
+    if(!PortToInitialize->DeviceAttached){
+        PortToInitialize->PortFunctioning = false;
+        return STATUS_SUCCESS;
+    }
+    
     void* AtaIdBuffer;
     if(PortToInitialize->PortScsiDevice){
         PortToInitialize->PortFunctioning = true;

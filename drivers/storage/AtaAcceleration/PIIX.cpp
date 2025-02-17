@@ -2,6 +2,7 @@
 #include "PIIX.h"
 
 static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
+    //PATA Devices
     {.VendorID = 0x8086, .DeviceID = 0x7010 , .BoardID = PIIX_CONTROLLER_ID_PATA_MWDMA, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x7111 , .SubVendorID = 0x15AD, .SubDeviceID = 0x1976, .BoardID = PIIX_CONTROLLER_ID_VMWARE, .AdvancedEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x7111 , .BoardID = PIIX_CONTROLLER_ID_PATA_33, .SimpleEntry = true},
@@ -24,6 +25,32 @@ static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     {.VendorID = 0x8086, .DeviceID = 0x2850 , .BoardID = ICH_CONTROLLER_ID_PATA_100, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x27DF , .BoardID = ICH_CONTROLLER_ID_PATA_100_NO_MWDMA, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x269E , .BoardID = ICH_CONTROLLER_ID_PATA_100_NO_MWDMA, .SimpleEntry = true},
+    //SATA Devices
+    {.VendorID = 0x8086, .DeviceID = 0x24D1 , .BoardID = ICH5_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x24DF , .BoardID = ICH5_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x25A3 , .BoardID = ICH5_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x25B0 , .BoardID = ICH5_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2651 , .BoardID = ICH6_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2652 , .BoardID = ICH6_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x27C0 , .BoardID = ICH6_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2680 , .BoardID = ICH6_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2653 , .BoardID = ICH6M_CONTROLLER_ID_SATA, .SimpleEntry = true}, //simple entry because the maniges already handles the class
+    {.VendorID = 0x8086, .DeviceID = 0x27C4 , .BoardID = ICH6M_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2820 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2825 , .BoardID = ICH8_2P_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2828 , .SubVendorID = 0x106B, .SubDeviceID = 0x00A0, .BoardID = ICH8M_APPLE_CONTROLLER_ID_SATA, .AdvancedEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2828 , .SubVendorID = 0x106B, .SubDeviceID = 0x00A1, .BoardID = ICH8M_APPLE_CONTROLLER_ID_SATA, .AdvancedEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2828 , .SubVendorID = 0x106B, .SubDeviceID = 0x00A3, .BoardID = ICH8M_APPLE_CONTROLLER_ID_SATA, .AdvancedEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2828 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2920 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2921 , .BoardID = ICH8_2P_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2926 , .BoardID = ICH8_2P_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x2928 , .BoardID = ICH8_2P_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x292E , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x5028 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x3A00 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x3A06 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x3A20 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
     {0},
 };
 
@@ -46,6 +73,7 @@ NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
 
 
     LouPrint("AddDevice() STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 

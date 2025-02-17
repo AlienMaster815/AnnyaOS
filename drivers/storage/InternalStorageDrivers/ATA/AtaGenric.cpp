@@ -329,6 +329,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[0].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[0].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[0].SectorCountLimit = 1;
+    LegacyAtaHost->Ports[0].DeviceAttached   = true;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[0]);
     
     //Fill Port 2
@@ -337,6 +338,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[1].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[1].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[1].SectorCountLimit = 1; 
+    LegacyAtaHost->Ports[1].DeviceAttached   = true;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[1]);
 
     //Fill Port 3
@@ -345,6 +347,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[2].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[2].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[2].SectorCountLimit = 1; 
+    LegacyAtaHost->Ports[2].DeviceAttached   = true;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[2]);
     
     //Fill Port 4
@@ -353,6 +356,7 @@ LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[3].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[3].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[3].SectorCountLimit = 1; 
+    LegacyAtaHost->Ports[3].DeviceAttached   = true;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[3]);
 
 

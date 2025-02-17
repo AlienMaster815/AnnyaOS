@@ -145,9 +145,7 @@ FILE* Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesys
 
 LOUDDK_API_ENTRY
 bool Fat32ExtFileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-    LouPrint("WOOOOHOOOO\n");
 
-    while(1);
     return false;
 }
 
@@ -155,6 +153,7 @@ bool Fat32ExtFileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
 LOUDDK_API_ENTRY
 PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
     LouPrint("Searching For Fat FileSystem\n");
+    
     LOUSTATUS Status = STATUS_SUCCESS;
     uint64_t BufferSize = 512;
     FINAL_VERDICT FinalVerdict = NOT_FAT;

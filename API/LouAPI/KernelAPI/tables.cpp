@@ -804,8 +804,8 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
         for(uint32_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
             if(strncmp(Tmp->Table.FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
-                LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
-                LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
+                //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
+                //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
                 return Tmp->Table.VirtualAddress[j];
             }
         }

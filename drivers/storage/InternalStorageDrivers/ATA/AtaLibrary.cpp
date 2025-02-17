@@ -157,7 +157,7 @@ LOUSTATUS LouKeAtaReadDevice(
     void* DataBuffer
 ){
     LOUSTATUS Result = STATUS_SUCCESS;
-    ATA_QUEUED_COMMAND Command;
+    ATA_QUEUED_COMMAND Command = {0};
 
     Command.WriteCommand= false;
     Command.DataAddress = (uint64_t)DataBuffer;
@@ -178,14 +178,10 @@ LOUSTATUS LouKeAtaReadDevice(
     Command.Control = 0x08;
     Command.Auxillery = 0;
     if(AtaPort->DmaPort){
-        Command.Command = ATA_COMMAND_READ_EXT;
+        Command.Command = ATA_COMMAND_READ;
     }else{
         Command.Command = ATA_COMMAND_PIO_READ;
     }
-
-    if(AtaPort->SerialDevice){
-        Command.Device = 0x40;
-    }  
 
     if(AtaPort->PortScsiDevice){
         LouPrint("LOUSINE ATA LIB:Preparing To Read Atapi Device\n");
@@ -231,7 +227,7 @@ void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplie
     Fis[4] = QueuedCommand->Lbal;
     Fis[5] = QueuedCommand->Lbam;
     Fis[6] = QueuedCommand->Lbah;
-    Fis[7] = (1 << 6);//QueuedCommand->Device;
+    Fis[7] = QueuedCommand->Device;
     Fis[8] = QueuedCommand->HobLbal;
     Fis[9] = QueuedCommand->HobLbam;
     Fis[10] = QueuedCommand->HobLbah;

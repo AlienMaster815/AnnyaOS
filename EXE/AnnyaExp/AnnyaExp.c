@@ -198,7 +198,7 @@ int WinMain(
     //LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
 
     LouPrint("Shell Initialization Complete\n");
-    ClockThread(0x00);
+    //ClockThread(0x00);
     while(1){
         
     }
