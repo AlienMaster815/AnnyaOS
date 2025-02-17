@@ -13,11 +13,11 @@ LOUSTATUS RadeonInitializeAgpHeader(
     PRADEON_DEVICE RDEV
 ){
     LOUSTATUS Status = STATUS_SUCCESS;
-    P_PCI_DEVICE_OBJECT PDEV = (P_PCI_DEVICE_OBJECT)RDEV->PDEV;
+    //P_PCI_DEVICE_OBJECT PDEV = (P_PCI_DEVICE_OBJECT)RDEV->PDEV;
     PRADEON_AGP_HEADER AgpHeader;
 
-    AgpHeader = (PRADEON_AGP_HEADER)LouMalloc(sizeof(RADEON_AGP_HEADER));
-    AgpHeader->Bridge = LouKeHalPciFindAgpBridge(PDEV);
+    //AgpHeader = (PRADEON_AGP_HEADER)LouMalloc(sizeof(RADEON_AGP_HEADER));
+    //AgpHeader->Bridge = LouKeHalPciFindAgpBridge(PDEV);
 
     LouPrint("Trap For Incomplete Function RadeonInitializeAgpHeader\n");
     while(1);
@@ -35,7 +35,7 @@ LOUSTATUS RadeonLoadKernelSettings(
     LOUSTATUS Status = STATUS_SUCCESS;
 
     if(LouKeHalFindCompatibility(PDEV, PCI_CAP_ID_AGP)){
-        RadeonInitializeAgpHeader(RDEV);
+        //RadeonInitializeAgpHeader(RDEV);
         RDEV->RadeonFlags |= RADEON_IS_AGP;
     }
     if(LouKeHalIsDevicePcie(PDEV)){

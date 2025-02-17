@@ -13,7 +13,20 @@ typedef struct _PROCESSOR_CALLBACKS{
     void (*RestoreHandler)(const uint8_t*);
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
+typedef struct _PROCESSOR_FEATURES{
+    bool    Sse1Supported;
+    bool    Sse2Supported;
+    bool    Sse3Supported;
+    bool    Ssse3Supported;
+    bool    Sse41Supported;
+    bool    Sse42Supported;
+    bool    Avx1Supported;
+    bool    Avx2Supported;
+    bool    Avx512Supported;
+}PROCESSOR_FEATURES, * PPROCESSOR_FEATURES;
+
 void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback);
+void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures);
 
 static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
     {
@@ -30,6 +43,8 @@ static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
     },
     { 0 },
 };
+
+static PROCESSOR_FEATURES ProcessorFeatures;
 
 void enable_fxsave() {
     uint64_t cr4;
@@ -77,5 +92,21 @@ void HandleProccessorInitialization(){
         LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[0]);
     }
 
+    ProcessorFeatures.Sse1Supported = (rdx & (1 << 25)) ? true : false; 
+    ProcessorFeatures.Sse2Supported = (rdx & (1 << 26)) ? true : false; 
+    ProcessorFeatures.Sse3Supported = (rcx & (1 <<  0)) ? true : false; 
+    ProcessorFeatures.Ssse3Supported = (rcx & (1 << 9)) ? true : false; 
+    ProcessorFeatures.Sse41Supported = (rcx & (1 << 20)) ? true : false; 
+    ProcessorFeatures.Avx1Supported = (rcx & (1 << 28)) ? true : false; 
 
+    if(ProcessorFeatures.Avx1Supported){
+        cpuid(7, &rax, &rbx, &rcx, &rdx);
+        ProcessorFeatures.Avx2Supported = (rbx & (1 << 5)) ? true : false; 
+        ProcessorFeatures.Avx512Supported = (rbx & (1 << 16)) ? true : false; 
+    }else{
+        ProcessorFeatures.Avx2Supported = false; 
+        ProcessorFeatures.Avx512Supported = false; 
+    }
+
+    SendProcessorFeaturesToMemCpy(&ProcessorFeatures);
 }

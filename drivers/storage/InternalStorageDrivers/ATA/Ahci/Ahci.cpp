@@ -34,18 +34,13 @@
  * - AhciLib.cpp
  * - Ahci-P5wdh.cpp
  * - Ahci-Avn.cpp
+ * - AhciPowerManagement.cpp
+ * - AhciPhyLayer.cpp
  *
  * LICENSE:
  * This module is licensed under the GNU General Public License v2 (GPLv2).
  * You may obtain a copy of the GPLv2 at:
  * https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- */
-
-/*
- * because this file in particular was created with a reference to the linux 
- * kernels initialization of the AHCI controller for hardware compatibility
- * it may be considered a derivative therfore for leagal reasons im am going to
- * include a copy of the Linux SPDX Reference below
  */
 
 
@@ -847,7 +842,7 @@ NTSTATUS AddAhciDevice(
         }
     }
 
-    RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine, false, (uint64_t)AtaHost);
+    //RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine, false, (uint64_t)AtaHost);
 
     ResetAhcPciController(AtaHost);
 

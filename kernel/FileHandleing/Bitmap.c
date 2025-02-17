@@ -57,3 +57,27 @@ void LouKeCloseBitmapImage(PBITMAP_HANDLE BitHandle){
     }
     LouFree((RAMADD)BitHandle);
 }
+
+static spinlock_t BitMapDrawLock;
+
+void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, uint16_t x, uint16_t y){
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&BitMapDrawLock, &Irql);
+    uint8_t* PixelData = (uint8_t*)BitmapHandle->UnpackedData;
+    uint8_t* Anchor = PixelData;
+    uint16_t Height = BitmapHandle->Height;
+    uint16_t Width = BitmapHandle->Width;
+    //uint16_t Bpp = BitmapHandle->Bpp;
+    // Rendering for top-left origin framebuffer
+    for(uint64_t yz = 0; yz < Height; yz++){
+        for(uint64_t xz = 0; xz < Width; xz++){    
+            PixelData = &Anchor[(y * Width + x) * 4];
+            uint8_t b = PixelData[0];
+            uint8_t g = PixelData[1];
+            uint8_t r = PixelData[2];
+            LouKeDrsdPutPixelMirrored(x + xz, y + yz, r, g, b);                 
+        }
+    }
+    LouKeDrsdSyncScreens();
+    LouKeReleaseSpinLock(&BitMapDrawLock, &Irql);
+}

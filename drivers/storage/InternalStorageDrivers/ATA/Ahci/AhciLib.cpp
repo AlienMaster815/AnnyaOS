@@ -34,6 +34,8 @@
  * - AhciLib.cpp
  * - Ahci-P5wdh.cpp
  * - Ahci-Avn.cpp
+ * - AhciPowerManagement.cpp
+ * - AhciPhyLayer.cpp
  *
  * LICENSE:
  * This module is licensed under the GNU General Public License v2 (GPLv2).
@@ -42,12 +44,13 @@
  */
 
 void* LouKeMallocAhciCommandTable(uint16_t Entries){
-    return LouKeMallocEx( 0x80 * ((sizeof(uint32_t) * 4) * Entries), 128, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
+    return LouKeMallocEx( 0x80 + ((sizeof(uint32_t) * 4) * Entries), 128, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 }
 
 void LouKeFreeAhciCommandTable(void* Table){
     LouKeFree(Table);
 }
+
 
 SECTIONED_CODE(".Ahci.Code")
 int8_t AhciPortGetFreeCommandSlot(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
@@ -84,13 +87,8 @@ LOUSTATUS AhciGenricDMAPrepCommand(
     if(QueuedCommand->PacketCommand){
         uint8_t PacketLength = QueuedCommand->ScsiCommandLength;
         uint8_t* ACMDp = (uint8_t*)(uintptr_t)NewCommandTable + 0x40; 
-        for(uint8_t i = 0 ; i < 16; i++){
-            if(i < PacketLength){
-                ACMDp[i] = QueuedCommand->ScsiCommand[i];
-            }else{
-                ACMDp[i] = 0;
-            }
-        }
+        memset((void*)ACMDp, 0, 16);
+        memcpy((void*)ACMDp, (const void*)(uintptr_t)&QueuedCommand->ScsiCommand[0], PacketLength);
     }
 
     uint64_t DataAddress;
@@ -111,13 +109,13 @@ LOUSTATUS AhciGenricDMAPrepCommand(
 
     FillOutCommandListStructure(
         &CommandHeaders[FreeSlot], 
-        20, 
+        5, 
         QueuedCommand->PacketCommand, 
         QueuedCommand->WriteCommand, 
         false,
         false,
         false,
-        true,
+        false,
         0,
         PrdtEntries,
         sizeof(AHCI_PRDT_ENTRY) * PrdtEntries,
@@ -137,22 +135,27 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     LouPrint("AhciaGenricDMAIssueCommand\n");
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaPort->PortPrivateData;
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
-    Port->PxCI |= (1 << QueuedCommand->HardwareTag);
+    UNUSED PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
 
+    while(Port->PxTFD & ((1 << 7 )| (1 << 3))){
+        sleep(10);
+    }
+
+    Port->PxCI |= (1 << QueuedCommand->HardwareTag);
 
     while(1){
         if(!(Port->PxCI & (1 << QueuedCommand->HardwareTag))){
             break;
         }
         if(IS_INTERRUPT_TFES(Port->PxIS)){
-            return STATUS_IO_DEVICE_ERROR;
+            break;
         }
-        sleep(10);
-    }    
+    }
 
+    
 
-    LouPrint("Here\n");
+    DumpPort(Port);
+    //LouPrint("Here\n");
     while(1);
     return STATUS_SUCCESS;
 }
@@ -192,8 +195,10 @@ LOUSTATUS AhciStopCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         break;
     }
     if(Tmp >= 10000){
+        LouPrint("AHCI_LIB:Ahci Controller Command Engine Timeout Occoured\n");
         return STATUS_IO_DEVICE_ERROR;
     }
+    LouPrint("AHCI_LIB:Ahci Controller Command Engine Stopped\n");
     return STATUS_SUCCESS;
 }
 
@@ -336,9 +341,10 @@ UNUSED static void AhciClearPortPendingIrq(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciP
 SECTIONED_CODE(".Ahci.Code")
 static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    volatile PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     //the value below is copied from OSDEV from ahci section 
     //"Dettecting Attached Sata Device's" for the SATAPI signature
+    AhciPort->DeviceAttached = false;
     
     //PxTFD cannot be set at the time of running this
     if(Port->PxTFD & (0x80 | 0x08)){
@@ -349,8 +355,6 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     uint32_t PxSSTS = Port->PxSSTS;
     uint8_t Det = PxSSTS & 0x0F; 
     uint8_t Ipm = (PxSSTS >> 8) & 0x0F;
-
-
 
 
     if(Det != 0x03){
@@ -379,35 +383,18 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     return false;
 }
 
-typedef struct _FIS_REG_D2H {
-    uint8_t  FIS_Type;       // 0x34 (D2H Register FIS)
-    uint8_t  PMPort : 4;     // Port multiplier
-    uint8_t  Reserved0 : 2;
-    uint8_t  I : 1;          // Interrupt bit
-    uint8_t  Reserved1 : 1;
-    uint8_t  Status;         // ATA Status Register
-    uint8_t  Error;          // ATA Error Register
-    uint8_t  LBA0;
-    uint8_t  LBA1;
-    uint8_t  LBA2;
-    uint8_t  Device;
-    uint8_t  LBA3;
-    uint8_t  LBA4;
-    uint8_t  LBA5;
-    uint8_t  Reserved2;
-    uint8_t  CountLow;
-    uint8_t  CountHigh;
-    uint8_t  Reserved3[2];
-    uint8_t  Reserved4[4];
-} __attribute__((packed)) FIS_REG_D2H, *PFIS_REG_D2H;
-
 
 SECTIONED_CODE(".Ahci.Code") 
 void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     LouPrint("AhciInitializePort()\n");
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    volatile PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     
+    AhciPort->PortScsiDevice = AhciDetectAttachedDevice(AhciPort);
+    if(!AhciPort->DeviceAttached){
+        return;
+    }
+
     PrivateData->FisDma = (uintptr_t)LouKeMalloc(256, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
     PrivateData->CommandDma = (uintptr_t)LouKeMalloc(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
 
@@ -419,11 +406,7 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     }
     LouPrint("Communication Is Up\n");
 
-    AhciDetectAttachedDevice(AhciPort);
 
-    if(!AhciPort->DeviceAttached){
-        return;
-    }
 
     AhciStartFisReception(AhciPort);
     
@@ -432,8 +415,7 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     while((Port->PxTFD & (1 << 7)) && (Port->PxTFD & (1 << 3))){
         sleep(10);
     }
-
-    while(1);
+    
     AhciPort->DmaPort = true;
 
 }
@@ -442,9 +424,9 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 SECTIONED_CODE(".Ahci.Code") 
 void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     LouPrint("AhciInitializeController\n");
-    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
-    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
-    uint32_t TmpControl;
+    //PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    //PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    //uint32_t TmpControl;
 
     ForEachAtaPort(AtaHost){
         //skip port uinitialization if the port is a dummy port
@@ -455,16 +437,16 @@ void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         AhciInitializePort(&AtaHost->Ports[AtaPortIndex]);
     }
 
-    TmpControl = Ghc->GlobalHostControl;
-    TmpControl |= (1 << 1);
-    Ghc->GlobalHostControl = TmpControl;
-    TmpControl = Ghc->GlobalHostControl;
-    if(TmpControl & (1 << 1)){
-        DbgPrint("Interrupts Are Now Active On The Host Controller\r\n");
-    }
-    else{
-        DbgPrint("Interrupts Were Unable Activate On The Host Controller\r\n");
-    }
+    //TmpControl = Ghc->GlobalHostControl;
+    //TmpControl |= (1 << 1);
+    //Ghc->GlobalHostControl = TmpControl;
+    //TmpControl = Ghc->GlobalHostControl;
+    //if(TmpControl & (1 << 1)){
+    //    DbgPrint("Interrupts Are Now Active On The Host Controller\r\n");
+    //}
+    //else{
+    //    DbgPrint("Interrupts Were Unable Activate On The Host Controller\r\n");
+    //}
 }
 
 SECTIONED_CODE(".Ahci.Code") 

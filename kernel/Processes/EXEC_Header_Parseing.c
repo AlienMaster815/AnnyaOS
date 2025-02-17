@@ -22,9 +22,9 @@ void ParseExportTables(
     uint64_t* FunctionPointers = LouMalloc(ExportTable->numberOfNamePointers * sizeof(uint64_t));
     string* FunctionNames = LouMalloc(sizeof(string*) * ExportTable->numberOfNamePointers);
 
-    LouPrint("ATR:%h\n",ExportTable->exportAddressTableRva);
-    LouPrint("NPR:%h\n",ExportTable->namePointerRva);
-    LouPrint("OTR:%h\n",ExportTable->ordinalTableRva);
+    //LouPrint("ATR:%h\n",ExportTable->exportAddressTableRva);
+    //LouPrint("NPR:%h\n",ExportTable->namePointerRva);
+    //LouPrint("OTR:%h\n",ExportTable->ordinalTableRva);
 
     uint16_t* OTR = (uint16_t*)(ModuleStart + ExportTable->ordinalTableRva);
     uint32_t* NPR = (uint32_t*)(ModuleStart + ExportTable->namePointerRva);
@@ -128,7 +128,7 @@ void ParseImportTables(
             FunctionName = (string)(TableEntry + ModuleStart + sizeof(uint16_t));
             SYSName = (string)(ModuleStart + ImportTable[j].NameRva);
 
-            LouPrint("Function Requested:%s\n", FunctionName);
+            //LouPrint("Function Requested:%s\n", FunctionName);
 
             
 
@@ -285,7 +285,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
 
 
     if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
-        LouPrint("Found A Valid Module\n");
+        LouPrint("Found A Valid Kernel Module\n");
         GetAllPEHeaders(
             (PDOS_HEADER)Start,
             &CoffHeader,

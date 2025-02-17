@@ -158,6 +158,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         LouKeReleaseSpinLock(&InterruptLock, &Irql);
         return;
     }
+    return;
 
 	LouPrint("Interrupt Number: %d Was Called\n",Interrupt);
 	CPUContext* FaultData = (CPUContext*)((uint64_t)Args);

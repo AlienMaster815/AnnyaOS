@@ -46,6 +46,7 @@ LOUSTATUS LookForStorageDevices(){
 
             if(PConfig->Header.SubClass == 0x06){
                 //Continue for now
+                //continue;
                 if(!AhciDriverLoaded){
                     DRIVER_MODULE_ENTRY AhciDriverEntryPoint = LouKeGetJitlManagedFunction(".Ahci", "DriverEntry");
                     if(!AhciDriverEntryPoint){
@@ -89,17 +90,23 @@ LOUSTATUS LookForStorageDevices(){
 
     LouKeClosePciDeviceGroup(StorageDevices);
 
-    //Config.Header.BaseClass = 0x0C;
-    //Config.Header.SubClass = 0x03;
+    //althougt USB HOSTS are not Storage they can be
+    //and neither are hubs or devices... but a one
+    //of the functions attached to the device can be
+    //a storage device so were going to go through
+    //the USB internal drivers consisting of the
+    //LOUSB Host LOUSB Hub and LOUSB Storage Drivers
+    Config.Header.BaseClass = 0x0C;
+    Config.Header.SubClass = 0x03;
 
-    //NumberOfPciDevices = LouKeGetPciCountByType(&Config);
-    //StorageDevices = LouKeOpenPciDeviceGroup(&Config);
-	//if(StorageDevices){
-    //    for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-    //        //P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i].PDEV;
-    //        //LOUSB_DRIVER_INIT(PDEV);
-    //    }
-    //}
+    NumberOfPciDevices = LouKeGetPciCountByType(&Config);
+    StorageDevices = LouKeOpenPciDeviceGroup(&Config);
+	if(StorageDevices){
+        for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
+            P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i].PDEV;
+            LOUSB_DRIVER_INIT(PDEV);
+        }
+    }
 
     //LouKeClosePciDeviceGroup(StorageDevices);
 

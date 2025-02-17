@@ -222,7 +222,8 @@ typedef LOUSTATUS (*DRIVER_MODULE_ENTRY)(void* DriverObject, void* RegistryPath)
 typedef bool(*DllModuleEntry)(HMODULE, DWORD, LPVOID);
 DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath);
 void* LouKeLoadPeExecutable(string ExecutablePath);
-DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath);
+
+DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize);
 
 typedef struct _JITL_TABLE{
     string      Name;

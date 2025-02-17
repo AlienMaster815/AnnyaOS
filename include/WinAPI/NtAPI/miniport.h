@@ -102,6 +102,7 @@ typedef enum {
 #define PCI_TYPE1_ADDRESSES             2
 #define PCI_TYPE2_ADDRESSES             5
 
+
 typedef struct _PCI_COMMON_HEADER {
     USHORT  VendorID;                   // (ro)
     USHORT  DeviceID;                   // (ro)

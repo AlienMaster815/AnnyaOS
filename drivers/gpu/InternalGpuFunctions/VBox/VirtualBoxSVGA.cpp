@@ -143,21 +143,7 @@ void VirtualBoxSvgaBlitCopy(void* Destination, void* Source, uint64_t Size){
     //i will include all advanced features because ther
     //are some tricks up VBox's sleeve even impressive 
     //even for actuall SVGA video hardware
-    uint64_t CurrentIndex = 0;
-    while(CurrentIndex < Size){
-        //this looks stupid but its a 64 byte fast copy it looks dumb but its faster than copying one byte at a time
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex) = *(uint64_t*)((uintptr_t)Source + CurrentIndex); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 8) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 8); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 16) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 16); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 24) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 24); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 32) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 32); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 40) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 40); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 48) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 48); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 48) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 48); 
-        *(uint64_t*)((uintptr_t)Destination + CurrentIndex + 56) = *(uint64_t*)((uintptr_t)Source + CurrentIndex + 56); 
-        CurrentIndex += 64;
-    }
-
+    memcpy(Destination, Source, Size);
 }
 
 void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){

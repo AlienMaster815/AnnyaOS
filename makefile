@@ -109,7 +109,7 @@ driver_cpp_source_files += $(shell find drivers/PnP -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/processors -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/Serial -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/storage/InternalStorageDrivers -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/USB -name *.cpp)
+driver_cpp_source_files += $(shell find drivers/USB/HostDrivers -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/virtualization -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/PowerManagement/InternalPowerManagement -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/Networking/InternalNetworking -name *.cpp)
@@ -260,6 +260,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C Drivers/Networking/PCNET32 clean
 	$(MAKE) -C Drivers/Networking/PCNET32 all
+
+	$(MAKE) -C Drivers/storage/AtaAcceleration clean_piix
+	$(MAKE) -C Drivers/storage/AtaAcceleration piix
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all

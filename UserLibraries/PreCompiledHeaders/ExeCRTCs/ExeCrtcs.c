@@ -63,6 +63,13 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         :                                    // Inputs
         : "rcx", "rdx", "r8", "r9"           // Clobbered registers
     );
-    __WinMainCrtc(a,b,c,d);
-    return TRUE;
+    
+    a = __WinMainCrtc(a,b,c,d);
+    
+    asm volatile (
+        "movq %0, %%rax\n\t"
+        :
+        : "r"(a)  // Corrected Input
+        : "rax"   // Mark `rax` as clobbered
+    );
 }

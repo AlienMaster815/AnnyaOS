@@ -181,8 +181,6 @@ uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVIC
 
 LOUDDK_API_ENTRY
 void ScanTheRestOfHarware(){
-    //LouPrint("Scanning For All Other Hardware\n");
-    //LouKeInitializeNetworkManager();
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ScanLock, &Irql);
    
@@ -190,28 +188,41 @@ void ScanTheRestOfHarware(){
 
     InitializePs2Mouse();
 
-    //PCI_COMMON_CONFIG Config;
-	//Config.Header.VendorID = ANY_PCI_ID;
-	//Config.Header.DeviceID = ANY_PCI_ID;
-	//Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
-	//Config.Header.u.type0.SubSystemID = ANY_PCI_ID;
-	//Config.Header.BaseClass = 0x02;
-	//Config.Header.SubClass = 0;
-	//Config.Header.ProgIf = ANY_PCI_CLASS;
+	PCI_COMMON_CONFIG Config;
+	Config.Header.VendorID = ANY_PCI_ID;
+	Config.Header.DeviceID = ANY_PCI_ID;
+	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
+	Config.Header.u.type0.SubSystemID = ANY_PCI_ID;
+	Config.Header.BaseClass = ANY_PCI_CLASS;
+	Config.Header.SubClass = ANY_PCI_CLASS;
+	Config.Header.ProgIf = ANY_PCI_CLASS;
 
-	//uint8_t NumberOfPciDevices = LouKeGetPciCountByType(&Config);
+	uint8_t NumberOfPciDevices = LouKeGetPciCountByType(&Config);
 
-	//UNUSED PPCI_DEVICE_GROUP NetDev = LouKeOpenPciDeviceGroup(&Config);
-
-    //PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)NetDev->PDEV->CommonConfig;
-
-    //LouPrint("Vendor:%h\n", CommonConfig->Header.VendorID);
-    //LouPrint("Device:%h\n", CommonConfig->Header.DeviceID);
-
-    //while(1);
-
-    LouKeReleaseSpinLock(&ScanLock, &Irql);
-    
+	UNUSED PPCI_DEVICE_GROUP SecondWaveDevices = LouKeOpenPciDeviceGroup(&Config);
+    for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
+        P_PCI_DEVICE_OBJECT PDEV = SecondWaveDevices[i].PDEV;
+        PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+        string DriverPath = ParseLousineDriverManifestForCompatibleDriver(PConfig);
+        if(!DriverPath){
+            continue;
+        }
+        PDRIVER_OBJECT DriverObject;
+        DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
+        if(!DriverObject->DriverExtension){
+            DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMalloc(sizeof(DRIVER_EXTENSION));
+            Driver(DriverObject, (PUNICODE_STRING)DriverPath);
+        }
+        PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouMalloc(sizeof(DEVICE_OBJECT));
+        if(DriverObject->DriverUsingLkdm){
+            PlatformDevice->PDEV = PDEV;
+            if(DriverObject->DeviceTable){ 
+                PlatformDevice->DeviceID = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)DriverObject->DeviceTable);
+            }
+        }
+        DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
+    }
+    LouKeReleaseSpinLock(&ScanLock, &Irql);    
 }
 
 KERNEL_IMPORT

@@ -5,7 +5,7 @@
 #include <LouDDK.h>
 extern "C" {
 #else
-#include <LouAPI.c>
+#include <LouAPI.h>
 #endif 
 
 #define LkdmDeviceObjectToPciDevice(DevObj) (DevObj)->PDEV

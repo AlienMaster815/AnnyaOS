@@ -155,6 +155,8 @@ KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uin
 #include <LKDM.h>
 #include <drivers/Networking/IpV4.h>
 
+#include <FileHandleing/LDDDS.h>
+
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"
 

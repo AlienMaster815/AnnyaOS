@@ -248,4 +248,3 @@ void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplie
     Fis[18] = (QueuedCommand->Auxillery >> 16) & 0xFF;
     Fis[19] = (QueuedCommand->Auxillery >> 24) & 0xFF;
 }
-

@@ -19,12 +19,21 @@ LOUSTATUS _DriverEntry(PDRIVER_OBJECT _DrvObj, PUNICODE_STRING _RegistryEntry){
 
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     uint64_t a, b; //, c, d;
+    
     asm volatile (
         "movq %%rcx, %0\n\t"
         "movq %%rdx, %1\n\t"
-        : "=r"(a), "=r"(b)                   // Outputs
-        :                                    // Inputs
-        : "rcx", "rdx", "r8", "r9"           // Clobbered registers
+        : "=r"(a), "=r"(b)  // Outputs
+        :                   // Inputs
+        : "rcx", "rdx", "r8", "r9" // Clobbered registers
     );
-    _DriverEntry((PDRIVER_OBJECT)(uintptr_t)a, (PUNICODE_STRING)(uintptr_t)b);
+
+    a = _DriverEntry((PDRIVER_OBJECT)(uintptr_t)a, (PUNICODE_STRING)(uintptr_t)b);
+
+    asm volatile (
+        "movq %0, %%rax\n\t"
+        :
+        : "r"(a)  // Corrected Input
+        : "rax"   // Mark `rax` as clobbered
+    );
 }

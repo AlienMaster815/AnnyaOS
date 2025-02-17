@@ -1,13 +1,11 @@
 #include <LouDDK.h>
 #include <NtAPI.h> 
 
-LOUSTATUS InitializeOhciHostController(
-    P_PCI_DEVICE_OBJECT PDEV
-);
-
 LOUSTATUS InitializeXhciDevice(
     P_PCI_DEVICE_OBJECT PDEV
 );
+
+void InitializeOhciDevice(P_PCI_DEVICE_OBJECT PDEV);
 
 LOUDDK_API_ENTRY
 void LOUSB_DRIVER_INIT(
@@ -19,9 +17,8 @@ void LOUSB_DRIVER_INIT(
 
 	switch(Config->Header.ProgIf){
 
-		case 0x10:
-
-
+		case 0x10:  
+            InitializeOhciDevice(USB_DEV);
 			return;
 		case 0x20:
             LouPrint("Initializing EHCI Device\n");

@@ -521,15 +521,15 @@ bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
             PDrsdVRamObject FBDEV;
             for(uint8_t i = 0; i < GpuCount; i++){
                 FBDEV = LouKeDeviceManagerGetFBDEV(i);        
-                for(uint16_t x = 0; x < (Width - 1); x++){
-                    for(uint16_t y = 18; y < (Height - 3); y++){         
+                for(uint16_t x = 0; x < (Width - 5); x++){
+                    for(uint16_t y = 18; y < (Height - 5); y++){         
                         uint32_t* dest = GetFrameBufferAddress(FBDEV ,StartX + x, StartY + y - 18);
                         *dest = WindowHandle->InnerWindowData[x + ScreenWidth * y];
                     }
                 }
             }
-            for(uint16_t x = 0; x < (Width - 1); x++){
-                for(uint16_t y = 18; y < (Height - 3); y++){  
+            for(uint16_t x = 0; x < (Width - 5); x++){
+                for(uint16_t y = 18; y < (Height - 5); y++){  
                     WindowHandle->InnerWindowData[x + ScreenWidth * (y - 18)] = WindowHandle->InnerWindowData[x + ScreenWidth * y];
                 }
             }

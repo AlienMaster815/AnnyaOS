@@ -1,6 +1,5 @@
 
 #include <LouDDK.h>
-
 /*
  * This software is provided under the GNU General Public License (GPL) v2.
  * Copyright (C) 2025 Tyler Grenier.
@@ -34,6 +33,8 @@
  * - AhciLib.cpp
  * - Ahci-P5wdh.cpp
  * - Ahci-Avn.cpp
+ * - AhciPowerManagement.cpp
+ * - AhciPhyLayer.cpp
  *
  * LICENSE:
  * This module is licensed under the GNU General Public License v2 (GPLv2).

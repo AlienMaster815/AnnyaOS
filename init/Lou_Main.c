@@ -99,7 +99,7 @@ void FlushTss();
 LOUSTATUS SetupInitialVideoDevices();
 void InitializeAllProcessorFeatures();
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
-
+void InitializeBasicMemcpy();
 
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
@@ -114,7 +114,6 @@ extern void LoadTaskRegister();
 LOUSTATUS Lou_kernel_early_initialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
-
     SetupGDT();
 
     InitializeStartupInterruptHandleing();
@@ -311,8 +310,8 @@ KERNEL_ENTRY Lou_kernel_start(
     }else {
         SystemIsEfi = true;
     }
-
     LouKeMapPciMemory();
+    InitializeBasicMemcpy();
 
     SetupInitialVideoDevices();
 
@@ -323,9 +322,8 @@ KERNEL_ENTRY Lou_kernel_start(
 
 	LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-        
+    
     Advanced_Kernel_Initialization();
-
 
     InitializeInternalChipsetHostDriver();
 
@@ -339,7 +337,7 @@ KERNEL_ENTRY Lou_kernel_start(
     }
 
     InitializeFileSystemManager();
-            
+
     ScanTheRestOfHarware();
 
     //SMPInit();
@@ -371,7 +369,6 @@ void InitializeUserSpace(){
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
-
 
     LouUpdateWindow(
         GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,

@@ -47,6 +47,10 @@ typedef struct _BITMAP_HANDLE{
 #pragma pack(pop)
 
 PBITMAP_HANDLE LouKeOpenBitmapImage(string FilePath);
+void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, uint16_t x, uint16_t y);
+
+#include "png.h"
+
 
 #ifdef __cplusplus
 }

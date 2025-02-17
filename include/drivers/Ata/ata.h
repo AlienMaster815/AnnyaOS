@@ -473,6 +473,7 @@ extern "C" {
 #define ATA_FLAG_PMP            1 << 7
 #define ATA_FLAG_NO_SSC         1 << 8
 #define ATA_FLAG_NO_DEV_SLP     1 << 9
+#define ATA_FLAG_SLAVE_POSS     1 << 10
 
 typedef struct _ATA_BMDMA_PRD{
     uint32_t    Address;

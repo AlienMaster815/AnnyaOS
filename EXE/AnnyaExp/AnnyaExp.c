@@ -21,7 +21,7 @@ static uint64_t i = 0;
 
 static TIME_T TimeStruct = {0};
 
-static inline void UpdateClockTime(){
+static void UpdateClockTime(){
             if(TimeStruct.Hour > 12){
                 if((TimeStruct.Hour - 12) < 10){
                     if(TimeStruct.Minute < 10){
@@ -191,14 +191,14 @@ int WinMain(
 
     StartDesktop();
 
-    LouPrint("Desktop created : Starting Clock Thread\n");
+    //LouPrint("Desktop created : Starting Clock Thread\n");
     
     //PTHREAD PTClock = AnnyaCreateThread(ClockThread, 0x00);
 
     //LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
 
     LouPrint("Shell Initialization Complete\n");
-    //ClockThread(0x00);
+    ClockThread(0x00);
     while(1){
         
     }
