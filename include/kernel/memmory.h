@@ -11,7 +11,9 @@
 #include <stdlib.h>
 #include <bootloader/grub/multiboot.h>
 #include <SharedTypes.h>
+#include <stdalign.h>
 
+#define GET_ALIGNMENT(x) (alignof(x))
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
 
 #pragma GCC diagnostic push

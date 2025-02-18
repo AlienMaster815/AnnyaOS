@@ -49,10 +49,10 @@ typedef struct  __attribute__((packed)) _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-PWINDHANDLE SetBlueScreenPannel();
+volatile PWINDHANDLE SetBlueScreenPannel();
 
 void LouKeSetPanicInfo(
-	PWINDHANDLE BsodHandle, string DynamicErrorMessage,
+	volatile PWINDHANDLE BsodHandle, string DynamicErrorMessage,
 	uint64_t rax,
 	uint64_t rbx,
 	uint64_t rcx,
@@ -89,7 +89,7 @@ void PageFault(uint64_t FaultingStackP) {
 
     // Check for specific error causes, e.g.:
     //if (InterruptCode & 0x1) {
-        PWINDHANDLE Bsod = SetBlueScreenPannel();
+        volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
 
         CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP);
 

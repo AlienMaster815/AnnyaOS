@@ -30,7 +30,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.4.08 Build-212";
+string KERNEL_VERSION = "0.5.01";
 
 #ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";
@@ -91,7 +91,7 @@ void InitializeGenericTables();
 void InitializeVesaSystem();
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
-PWINDHANDLE HWind;
+volatile PWINDHANDLE HWind;
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
@@ -146,7 +146,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
 
 
     SetUpTimers();
-    DeterminCPU();
+    //DeterminCPU();
 
     LouPrint("Finished\n");
 
@@ -189,25 +189,24 @@ void LouKeDestroyThread();
 void TestFontFunction();
 extern void MachineCodeDebug(uint64_t FOO);
 
-bool DetatchWindowToKrnlDebug(PWINDHANDLE WindowSecurityCheck);
+bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck);
 
 void StartDebugger(){
     
-    WINDOW_CHARECTERISTICS Charecteristics;
+    //WINDOW_CHARECTERISTICS Charecteristics;
 
-    Charecteristics.Type = TEXT_WINDOW;
-    Charecteristics.WindowName = "louoskrnl.exe";
+    //Charecteristics.Type = TEXT_WINDOW;
+    //Charecteristics.WindowName = "louoskrnl.exe";
 
-    HWind = LouCreateWindow(
-        0, 0,
-        //30, 30,
-        //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
-        1024, 768,
-        0x00, 
-        &Charecteristics
-    );
-    AttatchWindowToKrnlDebug(HWind);
-    
+    //HWind = LouCreateWindow(
+    //    0, 0,
+    //    //30, 30,
+    //    //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
+    //    1024, 768,
+    //    0x00, 
+    //    &Charecteristics
+    //);
+    //AttatchWindowToKrnlDebug(HWind);    
 }
 
 void KillDebuger(){
@@ -302,15 +301,17 @@ KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
 ){
     struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
-
     ParseMBootTags(mboot);
+
     //vga set for debug
     if(!LouKeMapEfiMemory()){
         LouKeHandleSystemIsBios();
     }else {
         SystemIsEfi = true;
     }
+
     LouKeMapPciMemory();
+
     InitializeBasicMemcpy();
 
     SetupInitialVideoDevices();
@@ -320,9 +321,8 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeGenericTables();
 
-	LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
-    LouPrint("Hello Im Lousine Getting Things Ready\n");
-    
+
+
     Advanced_Kernel_Initialization();
 
     InitializeInternalChipsetHostDriver();
@@ -339,7 +339,10 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeFileSystemManager();
 
     ScanTheRestOfHarware();
-
+	
+    LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
+    LouPrint("Hello Im Lousine Getting Things Ready\n");
+    
     //SMPInit();
     LouPrint("Initializing User Mode\n");
     LouKeRunOnNewUserStack(InitializeUserSpace,0x00, 2 * MEGABYTE);
@@ -359,7 +362,7 @@ void TrampolineFinalInit(){
 
 uint64_t GetUsedMemory();
 uint32_t Random32(uint32_t Seed);
-;
+
 
 void InitializeUserSpace(){
 
@@ -370,11 +373,11 @@ void InitializeUserSpace(){
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
-    LouUpdateWindow(
-        GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
-        GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
-        HWind
-    );    
+    //LouUpdateWindow(
+    //    GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
+    //    GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
+    //    HWind
+    //);    
     LouPrint("Hello World\n");
     UsrJmp(InitEntry);
 }

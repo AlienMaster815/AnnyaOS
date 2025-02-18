@@ -3,7 +3,7 @@
 
 void PrintStringToWindow(
     string Str, 
-    PWINDHANDLE Handle, 
+    volatile PWINDHANDLE Handle, 
     uint8_t r , 
     uint8_t g, 
     uint8_t b
@@ -21,7 +21,7 @@ static spinlock_t ButtonLock;
 static spinlock_t ButtonUpdateLock;
 
 void DrawButton(
-    PBUTTONHANDLE ButtonHandle
+    volatile PBUTTONHANDLE ButtonHandle
 ){
 
     //ButtonRectangleShape
@@ -72,6 +72,7 @@ void DrawButton(
         ButtonHandle->ButtonTextColor.g,
         ButtonHandle->ButtonTextColor.b
     );  
+
     LouKeDrsdSyncScreens();
 }
 
@@ -80,7 +81,7 @@ void DrawButton(
 void LouUpdateButton(
     uint16_t x, uint16_t y,
     uint16_t Width, uint16_t Height,
-    PBUTTONHANDLE HBUTTON
+    volatile PBUTTONHANDLE HBUTTON
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ButtonUpdateLock, &Irql);
@@ -97,17 +98,20 @@ void LouUpdateButton(
 
 
 
-PBUTTONHANDLE LouCreateButton(
+volatile PBUTTONHANDLE LouCreateButton(
     uint16_t x, uint16_t y,
     uint16_t Width, uint16_t Height,
     uintptr_t ParentWindow,
-    PBUTTON_CHARECTERISTICS Charecteristics
+    uint64_t CharecteristicAligned
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ButtonLock, &Irql);
 
-    PBUTTONHANDLE HBUTTON = LouKeMalloc(sizeof(BUTTONHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
-
+    PBUTTON_CHARECTERISTICS Charecteristics = (volatile PBUTTON_CHARECTERISTICS)(uint8_t*)CharecteristicAligned;
+    volatile PBUTTONHANDLE HBUTTON = LouKeMalloc(sizeof(BUTTONHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    uint64_t* StringLoaction = (uint64_t*)CharecteristicAligned;
+    //uint64_t* IsInverted = (volatile uint64_t*)CharecteristicAligned + 16;
+    //volatile uint64_t* Is3d = (volatile uint64_t*)CharecteristicAligned + 24;
     //fill out the basic information
     HBUTTON->CurrentX = x;
     HBUTTON->CurrentY = y;
@@ -135,13 +139,14 @@ PBUTTONHANDLE LouCreateButton(
     HBUTTON->ParentWindow = ParentWindow;
     HBUTTON->ChildWindow = 0x00;
     HBUTTON->NumberOfChildWindows = 0x00;
-
     //Fill Out Charecteristics
     HBUTTON->Charecteristics.Type       = Charecteristics->Type;
     HBUTTON->Charecteristics.ButtonName = Charecteristics->ButtonName;
-    HBUTTON->Charecteristics.ButtonText = Charecteristics->ButtonText;
-    HBUTTON->Charecteristics.IsButton3D = Charecteristics->IsButton3D;
-    HBUTTON->Charecteristics.Inverted3D = Charecteristics->Inverted3D;
+    HBUTTON->Charecteristics.ButtonText = (string)*StringLoaction;
+    StringLoaction += 2;
+    HBUTTON->Charecteristics.IsButton3D = *StringLoaction;
+    StringLoaction++;
+    HBUTTON->Charecteristics.Inverted3D = *StringLoaction;
 
     HBUTTON->XScaleing = 1;
     HBUTTON->YScaleing = 1;

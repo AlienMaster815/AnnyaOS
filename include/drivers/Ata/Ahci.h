@@ -11,17 +11,17 @@ extern "C"{
 #include "SerialAta.h"
 
 typedef struct _AHCI_GENERIC_HOST_CONTROL{
-    uint32_t Capabilities;
-    uint32_t GlobalHostControl;
-    uint32_t InterruptStatus;
-    uint32_t PortsImplemented;
-    uint32_t Version;
-    uint32_t CCC_Control;
-    uint32_t CccPorts;
-    uint32_t EmLocation;
-    uint32_t EmControl;
-    uint32_t Capabilities2;
-    uint32_t BiosHandoff;
+    volatile uint32_t Capabilities;
+    volatile uint32_t GlobalHostControl;
+    volatile uint32_t InterruptStatus;
+    volatile uint32_t PortsImplemented;
+    volatile uint32_t Version;
+    volatile uint32_t CCC_Control;
+    volatile uint32_t CccPorts;
+    volatile uint32_t EmLocation;
+    volatile uint32_t EmControl;
+    volatile uint32_t Capabilities2;
+    volatile uint32_t BiosHandoff;
 }AHCI_GENERIC_HOST_CONTROL, * PAHCI_GENERIC_HOST_CONTROL;
 
 #define AHCI_SUPPORTS_S64A(Capabilities)    ((Capabilities & (1 << 31)) ? 1 : 0)
@@ -69,26 +69,26 @@ typedef struct _AHCI_PRIVATE_DATA_TEMPLATE_HEADER{
 }AHCI_PRIVATE_DATA_TEMPLATE_HEADER, * PAHCI_PRIVATE_DATA_TEMPLATE_HEADER;
 
 typedef struct _AHCI_GENERIC_PORT{
-    uint32_t PxCLB;
-    uint32_t PxCLBU;
-    uint32_t PxFB;
-    uint32_t PxFBU;
-    uint32_t PxIS;
-    uint32_t PxIE;
-    uint32_t PxCMD;
-    uint32_t Reserved0;
-    uint32_t PxTFD;
-    uint32_t PxSIG;
-    uint32_t PxSSTS;
-    uint32_t PxSCTL;
-    uint32_t PxSERR;
-    uint32_t PxSACT;
-    uint32_t PxCI;
-    uint32_t PxSNTF;
-    uint32_t PxFBS;
-    uint32_t PxDEVSLP;
-    uint32_t Reserved1;
-    uint32_t PxVS;
+    volatile uint32_t PxCLB;
+    volatile uint32_t PxCLBU;
+    volatile uint32_t PxFB;
+    volatile uint32_t PxFBU;
+    volatile uint32_t PxIS;
+    volatile uint32_t PxIE;
+    volatile uint32_t PxCMD;
+    volatile uint32_t Reserved0;
+    volatile uint32_t PxTFD;
+    volatile uint32_t PxSIG;
+    volatile uint32_t PxSSTS;
+    volatile uint32_t PxSCTL;
+    volatile uint32_t PxSERR;
+    volatile uint32_t PxSACT;
+    volatile uint32_t PxCI;
+    volatile uint32_t PxSNTF;
+    volatile uint32_t PxFBS;
+    volatile uint32_t PxDEVSLP;
+    volatile uint32_t Reserved1;
+    volatile uint32_t PxVS;
 }AHCI_GENERIC_PORT, * PAHCI_GENERIC_PORT;
 
 #define GET_PxCLB_ADDRESS(PxCLB)    ((PxCLB) & ~(0b111111111))

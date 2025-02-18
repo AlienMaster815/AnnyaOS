@@ -50,7 +50,7 @@ typedef struct _UTP_UPIU_HEADER{
         union{
             uint8_t TmFunction;
             uint8_t QueryFunction;
-        }__attribute__((packed));
+        }__;
             uint8_t Responce;
             uint8_t Status;
             uint8_t EhsLength;

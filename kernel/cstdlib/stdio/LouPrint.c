@@ -13,11 +13,11 @@
 #include <stdint.h>
 #include <drivers/display/vga.h>
 
-void VgaPutCharecterRgb(char Charecter, PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
-bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
+void VgaPutCharecterRgb(char Charecter, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
+bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
 
 int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
-static PWINDHANDLE DebugWindow = 0x00; 
+static volatile PWINDHANDLE DebugWindow = 0x00; 
 
 #define INCREASE_Y 16+1
 #define INCREASE_X 16+1
@@ -33,7 +33,7 @@ void DRSD_EGA_RELEASE(){
 }
 
 bool AttatchWindowToKrnlDebug(
-    PWINDHANDLE WindowToAtttch
+    volatile PWINDHANDLE WindowToAtttch
 ){
 
     if(DebugWindow != 0x00){
@@ -53,7 +53,7 @@ bool AttatchWindowToKrnlDebug(
     return true;
 }
 
-bool DetatchWindowToKrnlDebug(PWINDHANDLE WindowSecurityCheck){
+bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck){
     if(WindowSecurityCheck != DebugWindow){
         LouPrint("ERROR COULD NOT DETATCH :: ACCESS DENIED TO WINDOW HANDLE:%h", WindowSecurityCheck);
         return false;
@@ -117,6 +117,7 @@ void print_binary8(uint8_t number) {
     }
 }
 
+//static uint8_t Bullshit = 0;
 
 __stdcall
 int LouPrint_s(char* format, va_list args){
@@ -127,19 +128,18 @@ int LouPrint_s(char* format, va_list args){
     if(DebugWindow != 0x00){
     LouKIRQL OldLevel;
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
+    char PrintString[21] = {0};
     while (*format) {
         if (*format == '%') {
             format++; // Move past '%'
             switch (*format) {
                 case 'd': {
                     int64_t num = va_arg(args, int64_t);
-                    char* str = (char*)LouMalloc(21);
-                    intToString((uint64_t)num, str);
-                    char* p = str;
+                    intToString((uint64_t)num, PrintString);
+                    char* p = PrintString;
                     while (*p != '\0') {
                         VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
                     }
-                    LouFree((RAMADD)str);
                     break;
                 }
                 case 's': {
@@ -154,15 +154,14 @@ int LouPrint_s(char* format, va_list args){
                     VgaPutCharecterRgb(c, DebugWindow, 0, 255, 0);
                     break;
                 }
-                case 'h': {
-                    int64_t num = va_arg(args, uint64_t);
-                    char* hexString = (char*)LouMalloc(21);
-                    uintToHexString((uint64_t)num, hexString);
-                    char* p = hexString;
+                case 'h': {                 
+                    int64_t num = va_arg(args, uint64_t);                    
+                    uintToHexString((uint64_t)num, PrintString);
+                    char* p = PrintString;
                     while (*p  != '\0') {
                         VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
                     }
-                    LouFree((RAMADD)hexString);
+
                     break;
                 }
                 case 'b': {
@@ -247,6 +246,7 @@ int LouPrint_s(char* format, va_list args){
     LouKeDrsdSyncScreens();
     LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
     }
+
     return 0;
 }
 

@@ -220,50 +220,50 @@ LOUDDK_API_ENTRY
 float sqrtf(
     float x
 ) {
-    if (x < 0.0f) {
-        // Handle negative input (NaN or an error in your system)
-        return -1.0f; // Or define a specific error value
-    }
+    //if (x < 0.0f) {
+    //    // Handle negative input (NaN or an error in your system)
+    //    return -1.0f; // Or define a specific error value
+    //}
 
-    float result = x;
-    float half = 0.5f * x;
+    //float result = x;
+    //float half = 0.5f * x;
 
     // Use the Newton-Raphson method for approximation
     // Initial guess
-    int32_t i = *(int32_t*)&result;          // Interpret float bits as int
-    i = 0x5f3759df - (i >> 1);               // Initial magic number
-    result = *(float*)&i;                    // Convert bits back to float
-    result = result * (1.5f - (half * result * result)); 
-    result = result * (1.5f - (half * result * result)); 
-    result = result * (1.5f - (half * result * result)); 
-    result = result * (1.5f - (half * result * result)); 
-    result = result * (1.5f - (half * result * result)); 
+    //int32_t i = *(int32_t*)&result;          // Interpret float bits as int
+    //i = 0x5f3759df - (i >> 1);               // Initial magic number
+    //result = *(float*)&i;                    // Convert bits back to float
+    //result = result * (1.5f - (half * result * result)); 
+    //result = result * (1.5f - (half * result * result)); 
+    //result = result * (1.5f - (half * result * result)); 
+    //result = result * (1.5f - (half * result * result)); 
+    //result = result * (1.5f - (half * result * result)); 
 
-    return x * result;
+    return 0;//x * result;
 }
 
 LOUDDK_API_ENTRY
 double sqrt(
     double x
 ) {
-    if (x < 0.0) {
-        // Handle negative input (NaN or error)
-        return -1.0; // Or return an appropriate error code or NaN
-    }
+    //if (x < 0.0) {
+    //    // Handle negative input (NaN or error)
+    //    return -1.0; // Or return an appropriate error code or NaN
+    //}
 
-    double result = x;
-    double half = 0.5 * x;
+    //double result = x;
+    //double half = 0.5 * x;
 
     // Use the Newton-Raphson method for approximation
     // Initial guess
-    int64_t i = *(int64_t*)&result;          // Interpret double bits as int
-    i = 0x5fe6ec85e7de30da - (i >> 1);       // Initial magic number
-    result = *(double*)&i;                   // Convert bits back to double
-    result = result * (1.5 - (half * result * result)); // First iteration
-    result = result * (1.5 - (half * result * result)); // Second iteration
+    //int64_t i = *(int64_t*)&result;          // Interpret double bits as int
+    //i = 0x5fe6ec85e7de30da - (i >> 1);       // Initial magic number
+    //result = *(double*)&i;                   // Convert bits back to double
+    //result = result * (1.5 - (half * result * result)); // First iteration
+    //result = result * (1.5 - (half * result * result)); // Second iteration
 
     // Refine the result
-    return x * result;
+    return 0;//x * result;
 }
 
 LOUDDK_API_ENTRY

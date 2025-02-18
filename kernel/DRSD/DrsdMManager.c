@@ -8,12 +8,9 @@ LOUSTATUS LouKeRegisterDevice(
     void* DevicePrivateData
 );
 
-//manager for the object
-UNUSED static PDrsdBufferObjects DrsdObjectanager;
-UNUSED static uint16_t NumberOfActiveObjectManagers = 0;
 //manager for VRam
-UNUSED static PDrsdVRamObject DrsdVramManager;
-UNUSED static uint8_t NumberOfActiveVRamManagers = 0;
+static PDrsdVRamObject DrsdVramManager;
+static uint8_t NumberOfActiveVRamManagers = 0;
 
 static inline void InitializeVRamManagerObject(
     PDrsdVRamObject Obj,
@@ -29,7 +26,6 @@ static inline void InitializeVRamManagerObject(
     void* DeviceObject
 ){
     Obj->Header.LastHeader = LastHeader;
-    Obj->Header.NextHeader = 0x00;
     Obj->Base = Base;
     Obj->Height = Height;
     Obj->FrameBuffer.FramebufferBase = Base;
@@ -42,7 +38,7 @@ static inline void InitializeVRamManagerObject(
     Obj->FrameBuffer.Bpp = Bpp;
     Obj->DeviceObject = DeviceObject; 
     Obj->SupportedModes = SupportedModes;     
-    Obj->FrameWorkReference = FrameWorkReference;     
+    Obj->FrameWorkReference = FrameWorkReference;    
 }
 
 static inline void ReuseVRamManagerObject(
@@ -77,7 +73,6 @@ static inline void ReuseVRamManagerObject(
 
 void DRSD_EGA_RELEASE();
 
-static spinlock_t VRamRegistrationLock;
 //Registers a VRam Object To Tables
 LOUSTATUS LouKeRegisterFrameBufferDevice(
     void* Device, 
@@ -93,12 +88,9 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
     PDrsdStandardFrameworkObject FrameWorkReference
 ){
     DRSD_EGA_RELEASE();
-    LouKIRQL OldIrql;
-    //LouKeAcquireSpinLock(&VRamRegistrationLock, &OldIrql);
     if(NumberOfActiveVRamManagers == 0){
         DrsdVramManager = (PDrsdVRamObject)LouMalloc(sizeof(DrsdVRamObject));
         if(!DrsdVramManager){
-            LouKeReleaseSpinLock(&VRamRegistrationLock, &OldIrql);
             return STATUS_INSUFFICIENT_RESOURCES;
         }
         InitializeVRamManagerObject(
@@ -124,7 +116,6 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
             (void*)DrsdVramManager, 
             (void*)DrsdVramManager
         );
-        LouKeReleaseSpinLock(&VRamRegistrationLock, &OldIrql);
         return STATUS_SUCCESS;
     }
 
@@ -161,7 +152,6 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
                 (void*)tmp, 
                 (void*)tmp
             );
-            LouKeReleaseSpinLock(&VRamRegistrationLock, &OldIrql);
             return STATUS_SUCCESS;   
         }
         tmp = (PDrsdVRamObject)tmp->Header.NextHeader;
@@ -192,6 +182,5 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
         (void*)tmp
     );
     NumberOfActiveVRamManagers++;
-    LouKeReleaseSpinLock(&VRamRegistrationLock, &OldIrql);
     return STATUS_SUCCESS;
 }

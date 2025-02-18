@@ -2,7 +2,8 @@
 #define _OHCI_H
 #include <LouDDK.h>
 
-typedef struct __attribute__((packed)) _OPEN_HOST_CONTROLLER{
+#pragma pack(push, 1)
+typedef struct _OPEN_HOST_CONTROLLER{
     uint32_t Revision;
     uint32_t Control;
     uint32_t CommandStatus;
@@ -25,7 +26,6 @@ typedef struct __attribute__((packed)) _OPEN_HOST_CONTROLLER{
     uint32_t RhStatus;
 }OPEN_HOST_CONTROLLER, * POPEN_HOST_CONTROLLER;
 
-#pragma pack(push, 1)
 typedef struct _OHCI_ENDPOINT_DESCRIPTOR{
     uint32_t FA_EN_D_S_K_F_MPS;
     uint32_t TDQueuedTailPointer;

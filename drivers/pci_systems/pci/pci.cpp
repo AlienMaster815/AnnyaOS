@@ -58,7 +58,7 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
                 checkFunction(bus, device, function);
                 if (PciGetDeviceID(bus,device,function) == NOT_A_PCI_DEVICE) continue;
                 else {
-                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouMalloc(sizeof(PCI_DEVICE_OBJECT));
+                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT));
                     LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(bus, device, function));
                     PDev->bus = bus;
                     PDev->slot = device;
@@ -73,7 +73,7 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
         }
     }
     else{
-        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouMalloc(sizeof(PCI_DEVICE_OBJECT));
+        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT));
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(bus, device, function));
         PDev->bus = bus;
         PDev->slot = device;
@@ -199,9 +199,9 @@ void ScanTheRestOfHarware(){
 
 	uint8_t NumberOfPciDevices = LouKeGetPciCountByType(&Config);
 
-	UNUSED PPCI_DEVICE_GROUP SecondWaveDevices = LouKeOpenPciDeviceGroup(&Config);
+	UNUSED PPCI_DEVICE_GROUP* SecondWaveDevices = LouKeOpenPciDeviceGroup(&Config);
     for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-        P_PCI_DEVICE_OBJECT PDEV = SecondWaveDevices[i].PDEV;
+        P_PCI_DEVICE_OBJECT PDEV = SecondWaveDevices[i]->PDEV;
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
         string DriverPath = ParseLousineDriverManifestForCompatibleDriver(PConfig);
         if(!DriverPath){

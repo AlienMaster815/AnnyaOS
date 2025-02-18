@@ -83,7 +83,7 @@ typedef struct __attribute__((packed)) _SMBIOSEntryPoint{
 } SMBIOSEntryPoint, * PSMBIOSEntryPoint;
 
 // SMBIOS Structure Header
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed)) _SMBIOSGenericHeader{
     uint8_t  Type;          // Structure Type (e.g., 0 for BIOS Information, 1 for System Information)
     uint8_t  Length;        // Length of the formatted area (not including the string-set)
     uint16_t Handle;        // Handle, a unique identifier for the structure

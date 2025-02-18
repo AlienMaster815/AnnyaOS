@@ -1,6 +1,5 @@
 #ifndef _WINDOWS_H
 #define _WINDOWS_H
-#pragma pack(push, 1)
 
 #ifndef _USER_MODE_CODE_
 #include <LouAPI.h>
@@ -44,13 +43,15 @@ typedef enum{
     MENU_TEXT_BUTTON = 2,
 }BUTTON_TYPE;
 
-typedef struct  _BUTTON_CHARECTERISTICS{
-    bool IsButton3D;
-    bool Inverted3D;
-    BUTTON_TYPE Type;
-    string ButtonName;
-    string ButtonText;
+
+typedef struct __attribute__((packed))  _BUTTON_CHARECTERISTICS{
+    uint64_t ButtonText;   // 0
+    uint64_t ButtonName;   // 8
+    uint64_t IsButton3D;   // 16
+    uint64_t Inverted3D;   // 24
+    uint64_t Type;         // somthing idgaf
 }BUTTON_CHARECTERISTICS, * PBUTTON_CHARECTERISTICS;
+
 
 typedef struct  _WINDOW_CHARECTERISTICS{
     WINDOW_TYPE Type;
@@ -59,12 +60,12 @@ typedef struct  _WINDOW_CHARECTERISTICS{
 }WINDOW_CHARECTERISTICS, * PWINDOW_CHARECTERISTICS;
 
 typedef struct  _WINDHANDLE{
-    COLOR_MAP ForgroundColor;
-    COLOR_MAP BackgroundColor;
-    COLOR_MAP BorderFront;
-    COLOR_MAP BorderBack;
-    COLOR_MAP ForwardHighLite;
-    COLOR_MAP AftHighLight;
+    volatile COLOR_MAP ForgroundColor;
+    volatile COLOR_MAP BackgroundColor;
+    volatile COLOR_MAP BorderFront;
+    volatile COLOR_MAP BorderBack;
+    volatile COLOR_MAP ForwardHighLite;
+    volatile COLOR_MAP AftHighLight;
     WINDOW_CHARECTERISTICS Charecteristics;
     WINDOW_CURSOR Cursor;
     string WindowName;
@@ -77,8 +78,7 @@ typedef struct  _WINDHANDLE{
     uint16_t NumberOfChildWindows;
     volatile uint32_t* InnerWindowData;
     COLOR_MAP WindowDataColor;
-} WINDHANDLE, * PWINDHANDLE;
-
+} WINDHANDLE, * volatile PWINDHANDLE;
 
 typedef struct  _BUTTONHANDLE{
     COLOR_MAP Letters;
@@ -129,21 +129,21 @@ void Draw2DBorder(
     uint8_t b
 );
 
-PWINDHANDLE LouCreateWindow(
+volatile PWINDHANDLE LouCreateWindow(
     const uint16_t x, const uint16_t y,
     const uint16_t width, const uint16_t height, 
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
     );
 
-void LouDestroyWindow(PWINDHANDLE WindowToDestroy);
+void LouDestroyWindow(volatile PWINDHANDLE WindowToDestroy);
 
 bool LouUpdateWindow(
     uint16_t NewX, 
     uint16_t NewY, 
     uint16_t NewWidth,
     uint16_t NewHeight,
-    PWINDHANDLE WindHandle
+    volatile PWINDHANDLE WindHandle
 );
 
 void DrawRectangle(
@@ -158,7 +158,7 @@ void DrawRectangle(
 
 
 bool AttatchWindowToKrnlDebug(
-    PWINDHANDLE WindowToAtttch
+    volatile PWINDHANDLE WindowToAtttch
 );
 #endif
 
@@ -177,7 +177,7 @@ typedef struct  _FramebufferHandle{
 #ifdef _USER_MODE_CODE_
 #ifndef _USER_32_
 __declspec(dllimport)
-PWINDHANDLE AnnyaCreateWindow(
+volatile PWINDHANDLE AnnyaCreateWindow(
     const uint16_t x, const uint16_t y,
     const uint16_t width, const uint16_t height, 
     uintptr_t ParentWindow,
@@ -191,15 +191,15 @@ PWINDHANDLE AnnyaCreateWindow(
 
 void LouKeDsrdMirrorFrameBufferMemMov(
     PFRAME_BUFFER_HANDLE FrameHandle, 
-    PWINDHANDLE WindowOfCopy,
+    volatile PWINDHANDLE WindowOfCopy,
     uint64_t xDest, 
     uint64_t yDest,
     COLOR_MAP Background
 ); 
 
-bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
+bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
 
-PWINDHANDLE LouCreateCanvasBuffer(
+volatile PWINDHANDLE LouCreateCanvasBuffer(
     uint16_t x, uint16_t y,
     uint16_t width, uint16_t height,
     uintptr_t ParentWindow,
@@ -207,7 +207,7 @@ PWINDHANDLE LouCreateCanvasBuffer(
 );
 
 void LouChangeCanvasBufferColor(
-    PWINDHANDLE WindHandle,
+    volatile PWINDHANDLE WindHandle,
     uint8_t r,
     uint8_t g,
     uint8_t b
@@ -217,9 +217,9 @@ PBUTTONHANDLE LouCreateButton(
     uint16_t x, uint16_t y,
     uint16_t Width, uint16_t Height,
     uintptr_t ParentWindow,
-    PBUTTON_CHARECTERISTICS Charecteristics
+    uint64_t Charecteristics
 );
 
 #endif
 #endif
-#pragma pack(pop)
+

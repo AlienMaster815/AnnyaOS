@@ -11,8 +11,10 @@
 
 #ifdef __cplusplus
 #define UNUSED [[maybe_unused]]
+#define UNINIT [[uninitialized]]
 #else
 #define UNUSED __attribute__((unused))
+#define UNINIT __attribute__((uninitialized))
 #endif
 
 #define VOID void

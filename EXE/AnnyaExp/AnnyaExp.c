@@ -5,17 +5,17 @@
 #include <Annya.h>
 
 
-static PWINDHANDLE TaskBarHandle = 0;
+static volatile PWINDHANDLE TaskBarHandle = 0;
 static PBUTTONHANDLE StartButton = 0;
 static PBUTTONHANDLE ClockButton = 0;
 static PBITMAP_HANDLE Background = 0;
 
-static uint16_t Width;
-static uint16_t Height;
+static uint16_t Width = 0;
+static uint16_t Height = 0;
 
 static char Time[25];
-static uint8_t Hour;
-static uint8_t Minute;
+static uint8_t Hour = 0;
+static uint8_t Minute = 0;
 
 static uint64_t i = 0;
 
@@ -68,8 +68,8 @@ DWORD ClockThread(PVOID Args){
     ButtonCharecteristics.IsButton3D = true;
     ButtonCharecteristics.Inverted3D = true;
     
-    ButtonCharecteristics.ButtonName = "Clock";
-    ButtonCharecteristics.ButtonText = Time;
+    ButtonCharecteristics.ButtonName = (uint64_t)"Clock";
+    ButtonCharecteristics.ButtonText = (uint64_t)Time;
 
     GetRtcTimeData(&TimeStruct);    
     Minute = TimeStruct.Minute;
@@ -110,7 +110,7 @@ DWORD ClockThread(PVOID Args){
         Width - 87, Height - 28, 
         87 - 2, 25,
         (uintptr_t)TaskBarHandle,
-        &ButtonCharecteristics
+        (uintptr_t)&ButtonCharecteristics
     );
 
     LouPrint("Clock Thread Created Entring Main Loop\n");
@@ -139,12 +139,13 @@ void StartDesktop(){
     TaskbarCharecteristics.Type = CANVAS_WINDOW;
     TaskbarCharecteristics.WindowName = "TaskBar";
 
-    BUTTON_CHARECTERISTICS ButtonCharecteristics;
+    BUTTON_CHARECTERISTICS ButtonCharecteristics = {0};
     ButtonCharecteristics.Type = PUSH_TEXT_BUTTON;
     ButtonCharecteristics.IsButton3D = true;
     ButtonCharecteristics.Inverted3D = false;
-    ButtonCharecteristics.ButtonName = "StartButton";
-    ButtonCharecteristics.ButtonText = "Start";
+    ButtonCharecteristics.ButtonName = (uint64_t)"StartButton";
+    ButtonCharecteristics.ButtonText = (uint64_t)"Start";
+    
 
     TaskBarHandle = AnnyaCreateCanvasBuffer(
         0 , AnnyaGetScreenBufferHeight() - 30, 
@@ -165,7 +166,7 @@ void StartDesktop(){
         0 + 2, Height - 28, 
         50 - 2, 25,
         (uintptr_t)TaskBarHandle,
-        &ButtonCharecteristics
+        (uintptr_t)&ButtonCharecteristics
     );
 
     LouPrint("Desktop Drawn\n");

@@ -76,10 +76,16 @@ ifeq ($(TARGET_ARCH),x86)
 endif
 
 ifeq ($(TARGET_ARCH),x86_64)
-CFLAGS = -c -ffreestanding -Werror -I include -Wno-multichar -fno-omit-frame-pointer -O0 -Wall
-#CFLAGS = -c  -Wextra -Werror -Wshadow -Wconversion -Wpointer-arith -pedantic -O0 -fno-common -fno-builtin -fno-asynchronous-unwind-tables -fno-omit-frame-pointer -nostdlib -ffreestanding -nostartfiles -fshort-enums -I include -Wno-pedantic
-CPPFLAGS = -c -ffreestanding -Wall -fno-exceptions -fno-rtti -Werror -Wno-write-strings -fno-use-cxa-atexit -I include -Wno-multichar -fno-omit-frame-pointer -O0
-#CPPFLAGS = -c -Wall -Wextra -Werror -Wshadow -Wconversion -Wpointer-arith -pedantic -O0 -fno-common -fno-builtin -fno-exceptions -fno-asynchronous-unwind-tables -fno-omit-frame-pointer -nostdlib -ffreestanding -nostartfiles -fshort-enums -fno-threadsafe-statics -nostdinc++ -I include -Wno-pedantic
+#Wextra
+CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
+         -fno-omit-frame-pointer -O2 -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
+         -fstrict-aliasing -I include
+
+#Wextra
+CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
+           -fno-use-cxa-atexit -fno-threadsafe-statics -fno-common \
+           -fno-builtin -fstrict-aliasing -O2 -I include \
+		   -Wno-write-strings -Wno-multichar
 
 endif
 

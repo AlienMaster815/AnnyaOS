@@ -3,7 +3,7 @@
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment);
 void* LouVMalloc(size_t BytesToAllocate);
 
-typedef struct __attribute__((packed)) _AllocationBlock{
+typedef struct _AllocationBlock{
     uint64_t VAddress;
     uint64_t PAddress;
     uint64_t size;

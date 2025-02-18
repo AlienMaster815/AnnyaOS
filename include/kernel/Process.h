@@ -70,7 +70,7 @@ typedef struct  _BUTTON_CHARECTERISTICS{
     BUTTON_TYPE Type;
     string ButtonName;
     string ButtonText;
-}BUTTON_CHARECTERISTICS, * PBUTTON_CHARECTERISTICS;
+}BUTTON_CHARECTERISTICS, * volatile  PBUTTON_CHARECTERISTICS;
 
 typedef struct  _WINDOW_CHARECTERISTICS{
     WINDOW_TYPE Type;
@@ -97,7 +97,7 @@ typedef struct  _WINDHANDLE{
     uint16_t NumberOfChildWindows;
     volatile uint32_t* InnerWindowData;
     COLOR_MAP WindowDataColor;
-} WINDHANDLE, * PWINDHANDLE;
+} WINDHANDLE, * volatile PWINDHANDLE;
 
 
 typedef struct  _BUTTONHANDLE{
@@ -127,7 +127,7 @@ typedef struct  _BUTTONHANDLE{
 
 typedef struct _WINDOW_BINARY_LOG{
     ListHeader Neighbors;
-    PWINDHANDLE ButtonHandle;
+    volatile PWINDHANDLE ButtonHandle;
 }WINDOW_BINARY_LOG, * PWINDOW_BINARY_LOG;
 
 typedef struct _BUTTON_BINARY_LOG{
@@ -151,7 +151,7 @@ typedef struct _PROCESS_EVENT_LOUQ{
     void*       LParam;
 }PROCESS_EVENT_LOUQ, * PPROCESS_EVENT_LOUQ;
 
-typedef struct __attribute__((packed)) _LOADED_WIN32_BINARY_OBJECT{
+typedef struct _LOADED_WIN32_BINARY_OBJECT{
     ListHeader              Neighbors;                  //Neighbors in the master object list
     uintptr_t               VirtualLoadedAddress;       //Virtual Address Of the UnPacked Module
     uintptr_t               PhysicalLoadedAddress;      //Physical Address Of The UnPacked Module;

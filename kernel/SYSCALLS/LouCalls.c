@@ -107,7 +107,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t Data){
         }
         case LOUCREATECANVASBUFF:{
             uint64_t* Tmp = (uint64_t*)Data;
-            PWINDHANDLE Return = LouCreateCanvasBuffer(
+            volatile PWINDHANDLE Return = LouCreateCanvasBuffer(
                 (uint16_t)Tmp[0], (uint16_t)Tmp[1],
                 (uint16_t)Tmp[2], (uint16_t)Tmp[3],
                 (uintptr_t)Tmp[4],
@@ -119,7 +119,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t Data){
         case LOUCHAGECANVASCOLOR:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouChangeCanvasBufferColor(
-                (PWINDHANDLE)Tmp[0],
+                (volatile PWINDHANDLE)Tmp[0],
                 (uint8_t)Tmp[1],
                 (uint8_t)Tmp[2],
                 (uint8_t)Tmp[3]
@@ -132,7 +132,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t Data){
                 (uint16_t)Tmp[0], (uint16_t)Tmp[1],
                 (uint16_t)Tmp[2], (uint16_t)Tmp[3],
                 (uintptr_t)Tmp[4],
-                (PBUTTON_CHARECTERISTICS)Tmp[5]
+                (uint64_t)Tmp[5]
             );
             Tmp[0] = (uint64_t)Return;
             return;

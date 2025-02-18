@@ -1,46 +1,30 @@
 #include <LouAPI.h>
 
-static POOL DrsdGpuManagmentPool = 0x00;
 
 static uint8_t GpuDevicesCount = 0x00; 
 
 typedef struct _DrsdGpuKeyData{
+    ListHeader              Neighbors;
     PDEVICE_DIRECTORY_TABLE Table;
-}DrsdGpuManagementData, * PDrsdGpuManagmentData;
+}DrsdGpuManagmentData, * PDrsdGpuManagmentData;
 
-static PDrsdGpuManagmentData gpus[16] ={0};
+static DrsdGpuManagmentData gpus = {0};
 
 LOUSTATUS LouRegisterDrsdGraphicsDevice(
-    PDEVICE_DIRECTORY_TABLE Table,
-    P_PCI_DEVICE_OBJECT PDEV, 
-    SYSTEM_DEVICE_IDENTIFIER Sdi,
-    string LRE, //optional
-    void* KeyData, //optional
-    void* DevicePrivateData
+    PDEVICE_DIRECTORY_TABLE Table
 ){
+    PDrsdGpuManagmentData Tmp = &gpus;
 
-    if(DrsdGpuManagmentPool == 0x00){
-        DrsdGpuManagmentPool = LouKeCreateMemoryPool(
-            16, sizeof(DrsdGpuManagementData),
-            "DRSD_MANAGEMENT_DATA_POOL",
-            0, KERNEL_PAGE_WRITE_PRESENT
-        );
-    }
-
-    for(uint8_t i = 0 ; i < 16; i++){
-        if(gpus[i] == 0x00){
-            gpus[i] = (PDrsdGpuManagmentData)LouKeMallocFromPool(DrsdGpuManagmentPool ,sizeof(DrsdGpuManagementData), 0x00);
-            gpus[i]->Table = Table;
-            break;
+    for(uint8_t i = 0 ; i < GpuDevicesCount; i++){
+        if(Tmp->Neighbors.NextHeader){
+            Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
+        }else{
+            Tmp->Neighbors.NextHeader = (PListHeader)LouMalloc(sizeof(DrsdGpuManagmentData));
+            Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
         }
     }
-
-    Table->PDEV = PDEV;
-    Table->Sdi = Sdi;
-    Table->LOUSINE_REGISTRATION_ENTRY = LRE;
-    Table->KeyData = KeyData;    
-    Table->DevicePrivateData = DevicePrivateData;
     GpuDevicesCount++;
+    Tmp->Table = Table;
     return STATUS_SUCCESS;
 }
 
@@ -49,5 +33,12 @@ uint8_t LouKeDeviceManagerGetGpuCount(){
 }
 
 PDrsdVRamObject LouKeDeviceManagerGetFBDEV(uint8_t Gpu){
-    return (PDrsdVRamObject)gpus[Gpu]->Table->KeyData;
+    if(Gpu >= GpuDevicesCount){
+        return 0x00;
+    }
+    PDrsdGpuManagmentData Tmp = &gpus;
+    for(uint8_t i = 0 ; i < Gpu; i++){
+        Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
+    }
+    return Tmp->Table->KeyData;
 }

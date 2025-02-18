@@ -26,8 +26,8 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
     Tmp = (PPCI_MANAGER_DATA)Tmp->Neigbors.NextHeader;
 
     Tmp->PDEV = PDEV;
-    Tmp->RegistryEntry = RegistryEntry;
-    Tmp->DeviceManagerString = DeviceManagerString;
+    Tmp->RegistryEntry = (string)RegistryEntry;
+    Tmp->DeviceManagerString = (string)DeviceManagerString;
 
     RegisteredPciDevices++;
 

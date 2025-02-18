@@ -17,4 +17,5 @@ void PreVBoxVGAInit(P_PCI_DEVICE_OBJECT PDEV){
     // Enable the adapter
     outw(VBE_DISPI_IOPORT_DATA, VBE_DISPI_ENABLED | VBE_DISPI_LFB_ENABLED);
     LouPrint("Done With Early Initialization\n");
+
 }

@@ -4,16 +4,16 @@
 
 #pragma pack(push, 1)
 typedef struct _TABLE_ENTRY{
-    FILE_NAME        ModuleName;
-    uint32_t         NumberOfFunctions;
-    FUNCTION_NAME*   FunctionName;
-    uint64_t*        VirtualAddress;
+    volatile FILE_NAME        ModuleName;
+    volatile uint32_t         NumberOfFunctions;
+    volatile FUNCTION_NAME*   FunctionName;
+    volatile uint64_t*        VirtualAddress;
 }TABLE_ENTRY, * PTABLE_ENTRY;
 
-typedef struct __attribute__((packed)) _TableTracks{
-    ListHeader Neighbors;
-    TABLE_ENTRY Table;
-    bool LongModeEntry;
+typedef struct _TableTracks{
+    volatile ListHeader Neighbors;
+    volatile TABLE_ENTRY Table;
+    volatile bool LongModeEntry;
 }TableTracks, * PTableTracks;
 #pragma pack(pop)
 
@@ -25,22 +25,22 @@ typedef struct __attribute__((packed)) _TableTracks{
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
 #define PRE_LOADED_LOUOSKRNL_FUNCTIONS 103
 
-static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-static uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-static FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-static uint64_t UnkownFunctionAddresses[PRE_LOADED_UNKOWN_FUNCTIONS];
-static FUNCTION_NAME UnkownFunctionNames[PRE_LOADED_UNKOWN_FUNCTIONS];
-static uint64_t WDFLDRFunctionAddresses[PRE_LOADED_WDFLDR_FUNCTIONS];
-static FUNCTION_NAME WDFLDRFunctionNames[PRE_LOADED_WDFLDR_FUNCTIONS];
-static uint64_t StorportFunctionAddresses[PRE_LOADED_STORPORT_FUNCTIONS];
-static FUNCTION_NAME StorportFunctionNames[PRE_LOADED_STORPORT_FUNCTIONS];
+static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
+static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
+static volatile uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
+static volatile FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
+static volatile uint64_t UnkownFunctionAddresses[PRE_LOADED_UNKOWN_FUNCTIONS];
+static volatile FUNCTION_NAME UnkownFunctionNames[PRE_LOADED_UNKOWN_FUNCTIONS];
+static volatile uint64_t WDFLDRFunctionAddresses[PRE_LOADED_WDFLDR_FUNCTIONS];
+static volatile FUNCTION_NAME WDFLDRFunctionNames[PRE_LOADED_WDFLDR_FUNCTIONS];
+static volatile uint64_t StorportFunctionAddresses[PRE_LOADED_STORPORT_FUNCTIONS];
+static volatile FUNCTION_NAME StorportFunctionNames[PRE_LOADED_STORPORT_FUNCTIONS];
 
-static TableTracks  DynamicLoadedLibraries;
-static uint16_t DynamicLoadedLibrarieCount = 0x00;
+static volatile TableTracks  DynamicLoadedLibraries;
+static volatile uint16_t DynamicLoadedLibrarieCount = 0x00;
 
-static TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
-static PTABLE_ENTRY ImportTables = GenericTable;
+static volatile TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
+static volatile PTABLE_ENTRY ImportTables = (volatile PTABLE_ENTRY)GenericTable;
 
 typedef void* PEXCEPTION_RECORD;
 
@@ -52,7 +52,7 @@ ULONG KeNumberProcessors();
 //Jitl list
 extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
 
-static PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
+static volatile PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
 
 LOUDDK_API_ENTRY
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName){
@@ -170,7 +170,7 @@ void LouKeInitializeLibraryLookup(
 ){
 
 
-    PTableTracks Tmp = &DynamicLoadedLibraries;
+    volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries;
     for(uint16_t i = 0; i <= DynamicLoadedLibrarieCount; i++){
 
         if(!Tmp->Table.ModuleName){
@@ -757,7 +757,7 @@ void InitializeJitlTables(){
 }
 
 LOUDDK_API_ENTRY void InitializeGenericTables(){
-    
+
     InitializeNtKernelTable();
     InitializeUnKownTable();
     InitializeWDFLDR_SYS();
@@ -800,7 +800,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     }
 
     //last resourt but most likely here
-    PTableTracks Tmp = &DynamicLoadedLibraries; 
+    volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries; 
     for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
         for(uint32_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
             if(strncmp(Tmp->Table.FunctionName[j], FunctionName, strlen(FunctionName)) == 0){

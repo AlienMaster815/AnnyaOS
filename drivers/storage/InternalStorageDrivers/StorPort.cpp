@@ -37,11 +37,11 @@ LOUSTATUS LookForStorageDevices(){
 
 	uint8_t NumberOfPciDevices = LouKeGetPciCountByType(&Config);
 
-	UNUSED PPCI_DEVICE_GROUP StorageDevices = LouKeOpenPciDeviceGroup(&Config);
+	UNUSED PPCI_DEVICE_GROUP* StorageDevices = LouKeOpenPciDeviceGroup(&Config);
 	if(StorageDevices){
 
         for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-            P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i].PDEV;
+            P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i]->PDEV;
             PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
 
             if(PConfig->Header.SubClass == 0x06){
@@ -103,7 +103,7 @@ LOUSTATUS LookForStorageDevices(){
     StorageDevices = LouKeOpenPciDeviceGroup(&Config);
 	if(StorageDevices){
         for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-            P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i].PDEV;
+            P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i]->PDEV;
             LOUSB_DRIVER_INIT(PDEV);
         }
     }

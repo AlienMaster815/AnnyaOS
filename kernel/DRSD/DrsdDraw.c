@@ -5,7 +5,7 @@ static uint16_t BackgroundFileType = 0x00;
 
 PDrsdVRamObject LouKeDeviceManagerGetFBDEV(uint8_t Gpu);
 
-PWINDHANDLE 
+volatile PWINDHANDLE 
 GetWindowHandleByNumber(
     uint16_t HandleNumber
 );
@@ -37,7 +37,10 @@ void LouKeDrsdResetFBDEV(uint64_t* FBDEV){
 
 void LouKeDrsdPciResetScreen(P_PCI_DEVICE_OBJECT PDEV){
     uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-    PDrsdVRamObject FBDEV;
+    if(!GpuCount){
+        return ;
+    }
+    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);
     for(uint8_t i = 0 ; i < GpuCount; i++){
         FBDEV = LouKeDeviceManagerGetFBDEV(i);
         if(FBDEV->DeviceObject == (void*)PDEV)break;
@@ -85,9 +88,10 @@ void LouKeDrsdPutPixelMirrored(
     );
 }
 
+
 void LouKeDrsdSyncScreens(){
     uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-    PDrsdVRamObject FBDEV;
+    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);;
     for(uint8_t i = 0 ; i < GpuCount; i++){
         FBDEV = LouKeDeviceManagerGetFBDEV(i);
         if(FBDEV->FrameWorkReference->BlitCopy){
@@ -99,7 +103,7 @@ void LouKeDrsdSyncScreens(){
 void LouKeDsrdFBDEVFrameBufferMemMov(
     uint8_t Gpu,
     PFRAME_BUFFER_HANDLE FrameHandle, 
-    PWINDHANDLE WindowOfCopy,
+    volatile PWINDHANDLE WindowOfCopy,
     uint64_t xDest, 
     uint64_t yDest,
     COLOR_MAP Background
@@ -148,7 +152,7 @@ void LouKeDsrdFBDEVFrameBufferMemMov(
 
 void LouKeDsrdMirrorFrameBufferMemMov(
     PFRAME_BUFFER_HANDLE FrameHandle, 
-    PWINDHANDLE WindowOfCopy,
+    volatile PWINDHANDLE WindowOfCopy,
     uint64_t xDest, 
     uint64_t yDest,
     COLOR_MAP BackGround
@@ -201,7 +205,7 @@ void FillPixelsWithStepping(
         for(uint16_t y2 = 0; y2 < YStepping; y2++){
             bool PixelOverlap = false;
             for(uint8_t i = 0 ; i < WindowCount; i++){
-                PWINDHANDLE WindowHandle = GetWindowHandleByNumber(i);
+                volatile PWINDHANDLE WindowHandle = GetWindowHandleByNumber(i);
                 if(DoesPixelOverlap(
                     WindowHandle->CurrentX,
                     WindowHandle->CurrentY,
@@ -298,7 +302,7 @@ void LouKeDrsdDrawDesktopBackground(
 
 
 void LouKeDrsdHandleWindowUpdate(
-    PWINDHANDLE WindowHandle,
+    volatile PWINDHANDLE WindowHandle,
     uint16_t NewX,
     uint16_t NewY,
     uint16_t NewWidth,
@@ -384,7 +388,7 @@ void LouKeDrsdHandleWindowUpdate(
         }
         /*
         uint16_t WindowsToCheck = GetAmmountOfOpenWindows();
-        PWINDHANDLE WindowParseHandle;
+        volatile PWINDHANDLE WindowParseHandle;
 
         for(uint16_t i = 0 ; i < WindowsToCheck; i++){
             WindowParseHandle = GetWindowHandleByNumber(i);
@@ -487,7 +491,7 @@ void LouKeDrsdHandleWindowUpdate(
     }
     /*
     uint16_t WindowsToCheck = GetAmmountOfOpenWindows();
-    PWINDHANDLE WindowParseHandle;
+    volatile PWINDHANDLE WindowParseHandle;
 
     for(uint16_t i = 0 ; i < WindowsToCheck; i++){
         WindowParseHandle = GetWindowHandleByNumber(i);

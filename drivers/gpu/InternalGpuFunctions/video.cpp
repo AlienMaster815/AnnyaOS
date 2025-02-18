@@ -60,9 +60,8 @@ LOUSTATUS AmdGpuInit(P_PCI_DEVICE_OBJECT PDEV);
 
 LOUDDK_API_ENTRY
 LOUSTATUS SetupInitialVideoDevices(){
-
 	LouPrint("Setting Up Video Devices\n");
-	PCI_COMMON_CONFIG Config;
+	PCI_COMMON_CONFIG Config = {0};
 	Config.Header.VendorID = ANY_PCI_ID;
 	Config.Header.DeviceID = ANY_PCI_ID;
 	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
@@ -71,15 +70,15 @@ LOUSTATUS SetupInitialVideoDevices(){
 	Config.Header.SubClass = ANY_PCI_CLASS;
 	Config.Header.ProgIf = ANY_PCI_CLASS;
 
-	uint8_t NumberOfPciDevices;
+	uint8_t NumberOfPciDevices = 0;
 
 
-	UNUSED PPCI_DEVICE_GROUP VideoDevices = LouKeOpenPciDeviceGroup(&Config);
+	UNUSED PPCI_DEVICE_GROUP* VideoDevices = LouKeOpenPciDeviceGroup(&Config);
 
 	if(VideoDevices){
 		NumberOfPciDevices = LouKeGetPciCountByType(&Config);
 		for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-			P_PCI_DEVICE_OBJECT PDEV = VideoDevices[i].PDEV;
+			P_PCI_DEVICE_OBJECT PDEV = VideoDevices[i]->PDEV;
 			UNUSED PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
 
 			switch(PConfig->Header.VendorID){
@@ -100,25 +99,6 @@ LOUSTATUS SetupInitialVideoDevices(){
 		LouKeClosePciDeviceGroup(VideoDevices);
 		VideoDevices = 0x00;
 	}
-
-
-	Config.Header.VendorID = 0x1002;
-	Config.Header.DeviceID = ANY_PCI_ID;
-	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
-	Config.Header.u.type0.SubSystemID = ANY_PCI_ID;
-	Config.Header.BaseClass = 0x12;
-	Config.Header.SubClass = ANY_PCI_CLASS;
-	Config.Header.ProgIf = ANY_PCI_CLASS;
-
-	VideoDevices = LouKeOpenPciDeviceGroup(&Config);
-	if(VideoDevices){
-		NumberOfPciDevices = LouKeGetPciCountByType(&Config);
-		for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-			//P_PCI_DEVICE_OBJECT PDEV = VideoDevices[i].PDEV;
-			//AmdGpuInit(PDEV);
-		}
-		LouKeClosePciDeviceGroup(VideoDevices);
-	}	
 
 	return STATUS_SUCCESS;
 }

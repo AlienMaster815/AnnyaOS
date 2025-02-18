@@ -1,15 +1,13 @@
 #ifndef _HAL_H
 #define _HAL_H
 
-
-#pragma pack(push, 1)
 typedef struct _PCI_MANAGER_DATA{
     ListHeader Neigbors;
     P_PCI_DEVICE_OBJECT PDEV;
     string RegistryEntry;
     string DeviceManagerString;
 }PCI_MANAGER_DATA, * PPCI_MANAGER_DATA, PCI_DEVICE_GROUP,* PPCI_DEVICE_GROUP;
-#pragma pack(pop)
+
 
     #ifdef __cplusplus
 
@@ -46,7 +44,7 @@ typedef struct _PCI_MANAGER_DATA{
             );
 
             LOUDDK_API_ENTRY 
-            PPCI_DEVICE_GROUP LouKeOpenPciDeviceGroup(
+            PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
                 PPCI_COMMON_CONFIG PciConfig
             ); 
 

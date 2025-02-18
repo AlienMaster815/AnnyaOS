@@ -4,14 +4,14 @@ uint64_t OpenWindows = 0;
 
 typedef struct _OPEN_WINDOW_LIST{
     ListHeader Neighbors;
-    PWINDHANDLE WindowHandle;
+    volatile PWINDHANDLE WindowHandle;
 }OPEN_WINDOW_LIST, * POPEN_WINDOW_LIST;
 
 OPEN_WINDOW_LIST MasterWindowList;
 
 static spinlock_t WindowHandleLock;
 
-static inline PWINDHANDLE CreateWindowHandle(){
+static inline volatile PWINDHANDLE CreateWindowHandle(){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&WindowHandleLock, &Irql);
     POPEN_WINDOW_LIST TmpList = &MasterWindowList;
@@ -24,14 +24,14 @@ static inline PWINDHANDLE CreateWindowHandle(){
 
     TmpList->Neighbors.NextHeader = (PListHeader)LouMalloc(sizeof(OPEN_WINDOW_LIST));
     TmpList = (POPEN_WINDOW_LIST)TmpList->Neighbors.NextHeader;
-    TmpList->WindowHandle = LouKeMalloc(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    TmpList->WindowHandle = (volatile PWINDHANDLE)LouKeMallocEx(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE, GET_ALIGNMENT(WINDHANDLE));
     LouKeReleaseSpinLock(&WindowHandleLock, &Irql);
     
     return TmpList->WindowHandle;
 }
 
 static inline void DestroyWindowHandle(
-    PWINDHANDLE WindowToDestroy
+    volatile PWINDHANDLE WindowToDestroy
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&WindowHandleLock, &Irql);
@@ -54,7 +54,7 @@ static inline void DestroyWindowHandle(
 }
 
 void LouKeDrsdHandleWindowUpdate(
-    PWINDHANDLE WindowHandles,
+    volatile PWINDHANDLE WindowHandles,
     uint16_t x,
     uint16_t y,
     uint16_t Width,
@@ -66,7 +66,7 @@ void LouKeDrsdDrawDesktopBackground(
     uint16_t DrsdFileType
 );
 
-PWINDHANDLE 
+volatile PWINDHANDLE 
 GetWindowHandleByNumber(
     uint16_t HandleNumber
 ){
@@ -87,7 +87,7 @@ uint16_t GetAmmountOfOpenWindows(){
 }
 
 void print_clear();
-void VgaPutCharecterRgb(char Character, PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
+void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
 
 void DrawRectangle(
     uint16_t x, 
@@ -140,7 +140,7 @@ void Draw3DBorder(
 
 static inline
 void DrawWindowTitle(
-    PWINDHANDLE WindowHandle
+    volatile PWINDHANDLE WindowHandle
 ){
     WINDHANDLE Title;
     
@@ -166,7 +166,7 @@ bool DrawWindow(
     uint16_t y,
     uint16_t width,
     uint16_t height,
-    PWINDHANDLE WindHandle
+    volatile PWINDHANDLE WindHandle
 );
 
 bool DrawWindowEx(
@@ -174,7 +174,7 @@ bool DrawWindowEx(
     uint16_t y,
     uint16_t width,
     uint16_t height,
-    PWINDHANDLE WindHandle,
+    volatile PWINDHANDLE WindHandle,
     bool SkipInnerWindow
 ){
     if((width < 50) || (height < 50)){
@@ -462,7 +462,7 @@ bool DrawWindow(
     uint16_t y,
     uint16_t width,
     uint16_t height,
-    PWINDHANDLE WindHandle
+    volatile PWINDHANDLE WindHandle
 ){
     return DrawWindowEx(x,y,width,height,WindHandle, false);
 }
@@ -475,7 +475,7 @@ bool LouUpdateWindow(
     uint16_t y, 
     uint16_t width,
     uint16_t height,
-    PWINDHANDLE WindHandle
+    volatile PWINDHANDLE WindHandle
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&WindowUpdateLock, &Irql);
@@ -501,7 +501,7 @@ bool LouUpdateWindow(
 
 static spinlock_t LouUpdtateTextWindowLock;
 
-bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
+bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&LouUpdtateTextWindowLock, &Irql);    
     const uint16_t Width = WindowHandle->Charecteristics.Dimentions.width;
@@ -580,7 +580,7 @@ bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
 
 static spinlock_t WindowCreationLock;
 
-PWINDHANDLE LouCreateWindow(
+volatile PWINDHANDLE LouCreateWindow(
     const uint16_t x, const uint16_t y,
     const uint16_t width, const uint16_t height, 
     uintptr_t ParentWindow,
@@ -588,37 +588,41 @@ PWINDHANDLE LouCreateWindow(
     ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&WindowCreationLock, &Irql);
-    UNUSED static uint16_t yT;
-    UNUSED static uint16_t xT;
 
-    PWINDHANDLE WindHandle = CreateWindowHandle();
 
-    
-    WindHandle->ParentWindow = ParentWindow;
-    WindHandle->ChildWindows = 0x00; //null until assigned 
+    volatile PWINDHANDLE WindHandle = CreateWindowHandle();
+    if(!WindHandle){
+        return 0x00;
+    }
+    WindHandle->ParentWindow = ParentWindow; 
     WindHandle->CurrentX = x;
     WindHandle->CurrentY = y;
     WindHandle->CurrentWidth = width;
     WindHandle->CurrentHeight = height;
+    
     WindHandle->ForgroundColor.r = 255;
     WindHandle->ForgroundColor.g = 255;
     WindHandle->ForgroundColor.b = 255;
+    
     WindHandle->BackgroundColor.r = 198;
     WindHandle->BackgroundColor.g = 198;
     WindHandle->BackgroundColor.b = 198;
+    
     WindHandle->BorderFront.r = 198;
     WindHandle->BorderFront.g = 198;
     WindHandle->BorderFront.b = 198;
+    
     WindHandle->BorderBack.r = 192;
     WindHandle->BorderBack.g = 192;
     WindHandle->BorderBack.b = 192;
+
     WindHandle->ForwardHighLite.r = 255;
     WindHandle->ForwardHighLite.g = 255;
     WindHandle->ForwardHighLite.b = 255;
+
     WindHandle->AftHighLight.r = 64;
     WindHandle->AftHighLight.g = 64;
     WindHandle->AftHighLight.b = 64;
-    WindHandle->NumberOfChildWindows = 0;
 
     WindHandle->WindowDataColor.r = WindHandle->ForgroundColor.r;
     WindHandle->WindowDataColor.g = WindHandle->ForgroundColor.g;
@@ -635,7 +639,6 @@ PWINDHANDLE LouCreateWindow(
     WindHandle->Cursor.y = 0;
 
     WindHandle->WindowName = Charecteristics->WindowName;
-
     WindHandle->InnerWindowData = LouMallocEx(    
         GetScreenBufferHeight() * GetScreenBufferWidth() * 4, 4
     );
@@ -657,12 +660,12 @@ PWINDHANDLE LouCreateWindow(
         width, height,
         WindHandle
     );
-
     LouKeReleaseSpinLock(&WindowCreationLock, &Irql);
+ 
     return WindHandle;
 }
 
-void LouDestroyWindow(PWINDHANDLE WindowToDestroy){
+void LouDestroyWindow(volatile PWINDHANDLE WindowToDestroy){
     LouKeDrsdHandleWindowUpdate(
         0x00,
         WindowToDestroy->CurrentX,

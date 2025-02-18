@@ -57,58 +57,6 @@ bool IsConfigValid(
 }
 
 LOUDDK_API_ENTRY 
-PPCI_DEVICE_GROUP LouKeOpenPciDeviceGroup(
-    PPCI_COMMON_CONFIG PciConfig
-) {
-    PPCI_MANAGER_DATA PciData = LouKeGetPciDataTable();
-    uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
-    uint8_t LocalMembers = 0;
-
-    LouPrint("Global Members:%d\n", GlobalMembers);
-
-    // First pass: Count matching devices
-    for (uint8_t i = 0; i < GlobalMembers; i++) {
-        if (PciData->Neigbors.NextHeader) {
-            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
-        } else {
-            break;
-        }
-
-        if (IsConfigValid(PciConfig, (PPCI_COMMON_CONFIG)PciData->PDEV->CommonConfig)) {
-            LocalMembers++;
-        }
-    }
-
-    LouPrint("Local Members:%d\n", LocalMembers);
-
-    // Allocate memory for result group based on number of matching devices
-    if(!LocalMembers){
-        return 0x00;
-    }
-    PciData = LouKeGetPciDataTable();
-
-    PPCI_DEVICE_GROUP Result = (PPCI_DEVICE_GROUP)LouMalloc(sizeof(PCI_DEVICE_GROUP) * LocalMembers);
-
-    // Second pass: Populate Result with matching devices
-    uint8_t index = 0;
-    for (uint8_t i = 0; i < GlobalMembers && index < LocalMembers; i++) {
-        if (PciData->Neigbors.NextHeader) {
-            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
-        } else {
-            break;
-        }        
-        if (IsConfigValid(PciConfig, (PPCI_COMMON_CONFIG)PciData->PDEV->CommonConfig)) {
-            Result[index].PDEV = PciData->PDEV;
-            Result[index].RegistryEntry = PciData->RegistryEntry;
-            Result[index].DeviceManagerString = PciData->DeviceManagerString;
-            index++;
-        }
-    }
-
-    return Result;
-}
-
-LOUDDK_API_ENTRY 
 uint8_t LouKeGetPciCountByType(
     PPCI_COMMON_CONFIG PciConfig
 ) {
@@ -130,6 +78,45 @@ uint8_t LouKeGetPciCountByType(
 
     return LocalMembers;
 }
+
+
+LOUDDK_API_ENTRY 
+PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
+    PPCI_COMMON_CONFIG PciConfig
+) {
+
+    PPCI_MANAGER_DATA PciData = LouKeGetPciDataTable();
+    uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
+    uint8_t LocalMembers = LouKeGetPciCountByType(PciConfig);
+
+    LouPrint("Global Members:%d\n", GlobalMembers);
+    LouPrint("Local Members:%d\n", LocalMembers);
+
+    // Allocate memory for result group based on number of matching devices
+    if(!LocalMembers){
+        return 0x00;
+    }
+    PciData = LouKeGetPciDataTable();
+
+    PPCI_DEVICE_GROUP* Result = (PPCI_DEVICE_GROUP*)LouMalloc(sizeof(PPCI_DEVICE_GROUP) * LocalMembers);
+
+    // Second pass: Populate Result with matching devices
+    uint8_t index = 0;
+    for (uint8_t i = 0; i < GlobalMembers && index < LocalMembers; i++) {
+        if (PciData->Neigbors.NextHeader) {
+            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
+        } else {
+            break;
+        }        
+        if (IsConfigValid(PciConfig, (PPCI_COMMON_CONFIG)PciData->PDEV->CommonConfig)) {
+            Result[index] = PciData;
+            index++;
+        }
+    }
+
+    return Result;
+}
+
 
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon){
 

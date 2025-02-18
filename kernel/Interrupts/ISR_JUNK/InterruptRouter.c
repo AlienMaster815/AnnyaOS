@@ -118,6 +118,7 @@ void SaveEverything(uint64_t* ContextHandle){
 }
 
 void RestoreEverything(uint64_t* ContextHandle){
+    if(!ContextHandle)return;
     if(!(*ContextHandle))return;
     ProcessorCallbacks->RestoreHandler((const uint8_t*)(*ContextHandle));
 }
@@ -130,9 +131,15 @@ spinlock_t* LouKeGetInterruptGlobalLock(){
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
+    if(Interrupt < 0x20){
+        //InterruptRouterTable[Interrupt].InterruptHandler(Args);
+        //local_apic_send_eoi();
+        //return;
+    }
+
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&InterruptLock, &Irql);
-    uint64_t ContextHandle;
+    uint64_t ContextHandle = 0;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){

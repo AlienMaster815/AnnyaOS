@@ -661,7 +661,7 @@ NTSTATUS AddAhciDevice(
     PDEVICE_OBJECT Device
 ){
     DbgPrint("AddAhciDevice()\r\n");
-    LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
+    //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
     NTSTATUS Status = STATUS_SUCCESS;
     //get the device ID and Pci Device from the LKDM
     uint64_t AhciDeviceID = Device->DeviceID;

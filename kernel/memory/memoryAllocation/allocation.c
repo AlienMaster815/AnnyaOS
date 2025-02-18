@@ -125,14 +125,14 @@ bool GetNextAllignedBitmap(){
     return true;
 }
 
-typedef struct __attribute__((packed)) _AllocationBlock{
+typedef struct _AllocationBlock{
     uint64_t Address;
     uint64_t size;
 }AllocationBlock;
 
 static uint8_t DataSlab[sizeof(AllocationBlock) * 512];
 
-static AllocationBlock* AddressBlock = (AllocationBlock*)&DataSlab;
+static volatile AllocationBlock* AddressBlock = (AllocationBlock*)&DataSlab;
 
 static uint32_t AddressesLogged = 0;
 
@@ -317,9 +317,9 @@ typedef struct _LOU_MALLOC_TRACKER{
     uint64_t    size;
 }LOU_MALLOC_TRACKER, * PLOU_MALLOC_TRACKER;
 
-UNUSED PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
-UNUSED static uint64_t      AllocationBlocksConfigured = 0; 
-UNUSED static uint32_t      TotalAllocations[100] = {0};
+UNUSED volatile PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
+UNUSED static volatile uint64_t      AllocationBlocksConfigured = 0; 
+UNUSED static volatile uint32_t      TotalAllocations[100] = {0};
 #define CURRENT_ALLOCATION_BLOCK AllocationBlocksConfigured - 1
 
 void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {

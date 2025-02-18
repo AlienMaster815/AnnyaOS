@@ -4,7 +4,7 @@
 
 KERNEL_IMPORT void StartDebugger();
 
-typedef struct __attribute__((packed)) _VMW_PRIVATE{
+typedef struct _VMW_PRIVATE{
     P_PCI_DEVICE_OBJECT PDEV;
     void* Context;
     mutex_t CmdBuffMutex;

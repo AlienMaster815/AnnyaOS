@@ -15,12 +15,7 @@ LOUSTATUS LouRegisterAtaDeviceToInformationTable(
 );
 
 LOUSTATUS LouRegisterDrsdGraphicsDevice(
-    PDEVICE_DIRECTORY_TABLE Table,
-    P_PCI_DEVICE_OBJECT PDEV, 
-    SYSTEM_DEVICE_IDENTIFIER Sdi,
-    string LRE, //optional
-    void* KeyData, //optional
-    void* DevicePrivateData
+    PDEVICE_DIRECTORY_TABLE Table
 );
 
 LOUSTATUS LouRegisterStorageDevice(
@@ -86,12 +81,7 @@ LOUSTATUS LouKeRegisterDevice(
         }
         case GRAPHICS_DEVICE_T:{
             return LouRegisterDrsdGraphicsDevice(
-                TmpDevice,
-                PDEV,
-                Sdi,
-                LRE,
-                KeyData,
-                DevicePrivateData
+                TmpDevice
             );
         }
         case NETWORK_DEVICE_T:{

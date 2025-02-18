@@ -9,7 +9,7 @@
 extern struct multiboot_tag_vbe VBE_INFO;
 CharMapping* GetCharecterMap(char Charecter);
 
-PWINDHANDLE 
+volatile PWINDHANDLE 
 GetWindowHandleByNumber(
     uint16_t HandleNumber
 );
@@ -37,7 +37,7 @@ void print_set_color(uint8_t foreground, uint8_t background) {
     color = foreground + (background << 4);
 }
 
-bool LouUpdateTextWindow(PWINDHANDLE WindowHandle, TEXT_WINDOW_EVENT Update);
+bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle, TEXT_WINDOW_EVENT Update);
 
 static spinlock_t VgaPutCharecterRgbLock;
 
@@ -46,10 +46,10 @@ bool DrawWindow(
     uint16_t y,
     uint16_t width,
     uint16_t height,
-    PWINDHANDLE WindHandle
+    volatile PWINDHANDLE WindHandle
 );
 
-void VgaPutCharecterRgb(char Character, PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b) {
+void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b) {
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&VgaPutCharecterRgbLock, &Irql);
     static uint16_t xz, yz;
@@ -97,7 +97,7 @@ void VgaPutCharecterRgb(char Character, PWINDHANDLE Handle, uint8_t r, uint8_t g
             if ((Ybyte >> (15 - xz)) & 0x01) {
                 if(Handle->InnerWindowData){
                     for(uint8_t i = 0; i < GetAmmountOfOpenWindows();i++){
-                        PWINDHANDLE TempHandle = GetWindowHandleByNumber(i);
+                        volatile PWINDHANDLE TempHandle = GetWindowHandleByNumber(i);
                         if(Handle == TempHandle){
                             uint8_t* PIXEL_DATA = (uint8_t*)&Handle->InnerWindowData[(Handle->Cursor.x + xz) + GetScreenBufferWidth() * (Handle->Cursor.y + yz)];
                             PIXEL_DATA[0] = b;
@@ -123,7 +123,7 @@ static spinlock_t PrintStringToWindowLock;
 
 void PrintStringToWindow(
     string Str, 
-    PWINDHANDLE Handle, 
+    volatile PWINDHANDLE Handle, 
     uint8_t r , 
     uint8_t g, 
     uint8_t b

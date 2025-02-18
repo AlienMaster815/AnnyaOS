@@ -13,18 +13,18 @@ void InitializeInternalChipsetHostDriver(){
     Config.Header.BaseClass = 0x06;
 
     UNUSED uint8_t ChipsetCount = LouKeGetPciCountByType(&Config);
-    UNUSED PPCI_DEVICE_GROUP ChipsetGroup = LouKeOpenPciDeviceGroup(&Config);
+    PPCI_DEVICE_GROUP* ChipsetGroup = LouKeOpenPciDeviceGroup(&Config);
 
     if(!ChipsetGroup){
         return;
     }
 
-    P_PCI_DEVICE_OBJECT PDEV = ChipsetGroup[0].PDEV;
+    P_PCI_DEVICE_OBJECT PDEV = ChipsetGroup[0]->PDEV;
     PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
     
     switch(PConfig->Header.VendorID){
         case 0x1002:
-            InitializeAmdVendorChipset(ChipsetGroup);
+            InitializeAmdVendorChipset(ChipsetGroup[0]);
             break;
         default:
             break;

@@ -3,6 +3,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+static uint64_t SavedState = 0;
+
+uint8_t* LouMallocEx(size_t x, size_t y);
+
+//Fuck It Well do it live
+void SaveEverything(uint64_t* ContextHandle);
+void RestoreEverything(uint64_t* ContextHandle);
+
 typedef struct _PROCESSOR_FEATURES{
     bool    Sse1Supported;
     bool    Sse2Supported;
@@ -20,8 +28,8 @@ static void* (*MemcopyHandler)(void*, const void*, size_t);
 void simd_copy(uint64_t Destination, uint64_t Source);
 
 static void* memcpy_basic(void* destination, const void* source, size_t num) {
-    char* dest = (char*)destination;
-    const char* src = (const char*)source;
+    volatile char* dest = (char*)destination;
+    volatile const char* src = (const char*)source;
 
     // Handle overlapping memory regions (copy backward)
     if (dest > src && dest < src + num) {
@@ -79,6 +87,7 @@ static void* memcpy_basic(void* destination, const void* source, size_t num) {
  
 static void* memcpy_sse(void* destination, const void* source, size_t num) {
     // Check for overlapping regions (Backward Copy Case)
+    SaveEverything(&SavedState);
     if (destination > source && destination < (void*)((uintptr_t)source + num)) {
         uintptr_t CurrentIndex = num;
 
@@ -134,7 +143,7 @@ static void* memcpy_sse(void* destination, const void* source, size_t num) {
                          (void*)((uintptr_t)source + CurrentIndex), num - CurrentIndex);
         }
     }
-
+    RestoreEverything(&SavedState);
     return destination;
 }
 
@@ -184,6 +193,7 @@ void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
 }
 
 void InitializeBasicMemcpy(){
+    SavedState = (uintptr_t)LouMallocEx(2688, 64);
     MemcopyHandler = memcpy_basic;
 }
 

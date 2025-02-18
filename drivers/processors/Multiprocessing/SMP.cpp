@@ -7,7 +7,7 @@ UNUSED static uint64_t IDTPointer;
 struct DescriptorTablePointer {
     uint16_t limit;
     uint64_t base;
-} __attribute__((packed));
+} __;
 
 void get_gdt_pointer(DescriptorTablePointer& gdtp) {
     asm volatile("sgdt %0" : "=m"(gdtp) : : "memory");

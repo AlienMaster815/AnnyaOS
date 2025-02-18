@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 int LouPrintPanic(char* format, ...);
-PWINDHANDLE SetBlueScreenPannel();
+volatile PWINDHANDLE SetBlueScreenPannel();
 typedef struct  __attribute__((packed)) _CPUContext{
     // General-Purpose Registers    
     uint64_t rax;
@@ -30,7 +30,7 @@ typedef struct  __attribute__((packed)) _CPUContext{
 } CPUContext;
 
 void LouKeSetPanicInfo(
-	PWINDHANDLE BsodHandle, string DynamicErrorMessage,
+	volatile PWINDHANDLE BsodHandle, string DynamicErrorMessage,
 	uint64_t rax,
 	uint64_t rbx,
 	uint64_t rcx,
@@ -55,7 +55,7 @@ void LouKeSetPanicInfo(
 
 void FloatDeviceNotAvailable(uint64_t FaultingStackP) {
 
-    PWINDHANDLE Bsod = SetBlueScreenPannel();
+    volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
 
     CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP + 8);
 

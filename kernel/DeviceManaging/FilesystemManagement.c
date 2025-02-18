@@ -21,7 +21,7 @@ LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem){
         if(Tmp->List.NextHeader){
             Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
         }else{
-            Tmp->List.NextHeader = (PListHeader)LouMalloc(sizeof(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE));
+            Tmp->List.NextHeader = (PListHeader)LouMallocEx(sizeof(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE), GET_ALIGNMENT(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE));
             Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
         }
     }
@@ -88,7 +88,7 @@ static DRIVE_ID_TABLE DriveIdTable[25] = {
 
 void InitializeFileSystemManager(){
     Iso9660DriverEntry(); 
-    FatDriverEntry();      
+    //FatDriverEntry();      
     uint8_t PortCount = LouKeGetNumberOfStorageDevices();
     PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
     for(size_t FileSystemIndex = 0 ; FileSystemIndex < FileSystemTableMembers; FileSystemIndex++){
@@ -104,7 +104,7 @@ void InitializeFileSystemManager(){
                         TmpMfs = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)TmpMfs->List.NextHeader;
                     }
                 }
-                TmpMfs->List.NextHeader = (PListHeader)LouMalloc(sizeof(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS));
+                TmpMfs->List.NextHeader = (PListHeader)LouMallocEx(sizeof(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS), GET_ALIGNMENT(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS));
                 TmpMfs = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)TmpMfs->List.NextHeader;
                 TmpMfs->FileSystem = NewMountedFileSystem;
                 if(NewMountedFileSystem->FileSystemSeek){

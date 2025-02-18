@@ -71,12 +71,12 @@ PBUTTONHANDLE AnnyaCreateButton(
     uint16_t x, uint16_t y,
     uint16_t Width, uint16_t Height,
     uintptr_t ParentWindow,
-    PBUTTON_CHARECTERISTICS Charecteristics
+    uintptr_t Charecteristics
 );
 
 __declspec(dllimport)
 void AnnyaChangeCanvasBufferColor(
-    PWINDHANDLE WindowHandle,
+    volatile PWINDHANDLE WindowHandle,
     uint16_t r,
     uint16_t g,
     uint16_t b,
@@ -84,7 +84,7 @@ void AnnyaChangeCanvasBufferColor(
 );
 
 __declspec(dllimport)
-PWINDHANDLE AnnyaCreateCanvasBuffer(
+volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
     uint16_t x, uint16_t y,
     uint16_t Width, uint16_t Height,
     uintptr_t ParentWindow,

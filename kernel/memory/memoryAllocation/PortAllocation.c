@@ -2,7 +2,7 @@
 
 static spinlock_t PortBlockLock;
 
-typedef struct __attribute__((packed)) _PortBlock{
+typedef struct _PortBlock{
     uint16_t Base;
     uint16_t size;
 }PortBlock, * PPortBlock;

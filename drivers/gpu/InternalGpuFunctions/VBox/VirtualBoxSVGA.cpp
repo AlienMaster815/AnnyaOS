@@ -5,7 +5,7 @@
 
 extern struct multiboot_tag_vbe VBE_INFO;
 
-typedef struct __attribute__((packed)) _VBoxVideoControllerData{
+typedef struct _VBoxVideoControllerData{
     uint32_t VRamTotalSize;
 }VBVCD, * PVBVCD;    
 
@@ -155,11 +155,9 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
         VirtualboxVGAC = (PVBVCD)LouMalloc(sizeof(VBVCD));
     }
 
-    PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)LouMalloc(sizeof(PCI_COMMON_CONFIG));
+    PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
 
     VirtualboxVGAC->VRamTotalSize = inl(VBE_DISPI_IOPORT_DATA);
-
-    GetPciConfiguration(PDEV->bus, PDEV->slot, PDEV->func, PciConfig);
 
     VirtualBoxChangeResolution(1920, 1080);
 
@@ -183,7 +181,7 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
         DrsdFrameWork->RgbPutPixel = VBoxPutPixelRgbExBasicAcceleration;
     }
 
-    memset((void*)FrameBufferAdress, 0 , DrsdFrameWork->VRamSize);
+    memset((void*)FrameBufferAdress, 0, DrsdFrameWork->VRamSize);
 
     LouKeRegisterFrameBufferDevice(
         (void*)PDEV, 
@@ -205,5 +203,4 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
     LouPrint("Hello World\n");
     LouPrint("Total VRam:%h\n",VirtualboxVGAC->VRamTotalSize);
 
-    LouFree((RAMADD)PciConfig);
 }

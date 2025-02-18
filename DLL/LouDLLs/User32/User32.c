@@ -58,7 +58,7 @@ void DrawDesktopBackground(FILE* FileHandle, uint16_t FileType){
 }
 
 USER32_API
-PWINDHANDLE AnnyaCreateWindow(
+volatile PWINDHANDLE AnnyaCreateWindow(
     const uint16_t x, const uint16_t y,
     const uint16_t width, const uint16_t height, 
     uintptr_t ParentWindow,
@@ -72,11 +72,11 @@ PWINDHANDLE AnnyaCreateWindow(
     Data[4] = (uint64_t)ParentWindow;
     Data[5] = (uint64_t)Charecteristics;
     LouCALL(LOUCREATEWINDOW, (uint64_t)&Data, 0);
-    return (PWINDHANDLE)Data[0];
+    return (volatile PWINDHANDLE)Data[0];
 }
 
 USER32_API
-PWINDHANDLE AnnyaCreateCanvasBuffer(
+volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
     uint16_t x, uint16_t y,
     uint16_t Width, uint16_t Height,
     uintptr_t ParentWindow,
@@ -90,12 +90,12 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
     Data[4] = (uint64_t)ParentWindow;
     Data[5] = (uint64_t)Charecteristics;
     LouCALL(LOUCREATECANVASBUFF, (uint64_t)&Data, 0);
-    return (PWINDHANDLE)Data[0];
+    return (volatile PWINDHANDLE)Data[0];
 }
 
 USER32_API
 void AnnyaChangeCanvasBufferColor(
-    PWINDHANDLE WindowHandle,
+    volatile PWINDHANDLE WindowHandle,
     uint16_t r,
     uint16_t g,
     uint16_t b,

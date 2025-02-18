@@ -15,7 +15,7 @@ void LouKeMallocPageFrameNumber(
     uint64_t Flags,
     uint64_t PageAddress
 ){
-    PLOU_PFN_TABLE_ENTRY CurrentEntry = &PfnDatabase, LastEntry;
+    PLOU_PFN_TABLE_ENTRY CurrentEntry = &PfnDatabase, LastEntry = 0;
 
     for(size_t i = 0; i < PageFrameCount; i++){
         if(CurrentEntry->Chain.NextHeader){

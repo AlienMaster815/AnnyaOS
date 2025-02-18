@@ -91,6 +91,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     int8_t FreeSlot = AhciPortGetFreeCommandSlot(AhciPort);
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     Port->PxIS = 0xFFFFFFFF;
+    Port->PxSERR = 0xFFFFFFFF;
     if(FreeSlot == -1){
         LouPrint("AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
         LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
@@ -154,6 +155,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
             return STATUS_IO_DEVICE_ERROR;
         }
     }
+    
     LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
     return STATUS_SUCCESS;
 }

@@ -30,10 +30,10 @@ typedef struct  __attribute__((packed)) _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-PWINDHANDLE SetBlueScreenPannel();
+volatile PWINDHANDLE SetBlueScreenPannel();
 
 void LouKeSetPanicInfo(
-	PWINDHANDLE BsodHandle, string DynamicErrorMessage,
+	volatile PWINDHANDLE BsodHandle, string DynamicErrorMessage,
 	uint64_t rax,
 	uint64_t rbx,
 	uint64_t rcx,
@@ -59,7 +59,7 @@ void LouKeSetPanicInfo(
 
 void SIMDFloatPointException(uint64_t FaultingStackP) {
 
-    PWINDHANDLE Bsod = SetBlueScreenPannel();
+    volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
 
     CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP + 8);
 

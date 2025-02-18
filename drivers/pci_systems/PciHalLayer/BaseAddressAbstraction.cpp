@@ -135,7 +135,7 @@ void LouKeHalRegisterPciDevice(
 
     LouPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
 
-    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouMalloc(sizeof(PCI_COMMON_CONFIG));
+    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_DEVICE_OBJECT));
     UNUSED uint32_t BarSize = 0x00;
     UNUSED uint8_t Flags;
     UNUSED LouKIRQL OldIrql;
