@@ -8,50 +8,6 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 //NtDll Functions
 
 
-NTDLL_API 
-void AlpcAdjustCompletionListConcurrencyCount(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcFreeCompletionListMessage(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcGetCompletionListLastMessageInformation(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcGetCompletionListMessageAttributes(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcGetHeaderSize(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcGetMessageAttribute(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcGetMessageFromCompletionList(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcGetOutstandingCompletionListMessageCount(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcInitializeMessageAttribute(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcMaxAllowedMessageLength(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcRegisterCompletionList(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcRegisterCompletionListWorkerThread(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcRundownCompletionList(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcUnregisterCompletionList(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void AlpcUnregisterCompletionListWorkerThread(){LouPrint("Hello NT DLL\n"); while(1);}
 
 NTDLL_API
 void ApiSetQueryApiSetPresence(){LouPrint("Hello NT DLL\n"); while(1);}

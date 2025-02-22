@@ -565,8 +565,10 @@ ISR31:
 ISR32:
 	;hlt
 	pusha
-	call UpdateThreadManager
-	popa
+	mov rcx, rsp
+	call UpdateThreadManager  
+	mov rsp, rax 
+	popa                                                                                              
 	iretq
 
 ISR33:

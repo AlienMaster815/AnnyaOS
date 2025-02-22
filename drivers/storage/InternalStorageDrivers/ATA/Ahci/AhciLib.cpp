@@ -94,6 +94,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     Port->PxSERR = 0xFFFFFFFF;
     if(FreeSlot == -1){
         LouPrint("AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
+        LouKeFreeAhciCommandTable(NewCommandTable);
         LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
         return STATUS_IO_DEVICE_ERROR;
     }
@@ -152,10 +153,11 @@ LOUSTATUS AhciGenricDMAIssueCommand(
         if(IS_INTERRUPT_TFES(Port->PxIS)){
             LouPrint("AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
             LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
+            LouKeFreeAhciCommandTable(NewCommandTable);
             return STATUS_IO_DEVICE_ERROR;
         }
     }
-    
+    LouKeFreeAhciCommandTable(NewCommandTable);
     LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
     return STATUS_SUCCESS;
 }

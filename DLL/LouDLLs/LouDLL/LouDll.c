@@ -18,27 +18,36 @@ int LouPrint(char* Str, ...){
     MutexLock(&PrintLock);
     va_list Arg;
     va_start(Arg, Str);
-    uint64_t Data[2];
-    Data[0] = (uint64_t)Str;
-    Data[1] = (uint64_t)&Arg;
-    LouCALL(LOUPRINTCALL, (uint64_t)&Data, 0);
+    uint64_t Data[3];
+    Data[0] = 0;
+    Data[1] = (uint64_t)Str;
+    Data[2] = (uint64_t)&Arg;
+    while(Data[0] != 1){
+        LouCALL(LOUPRINTCALL, (uint64_t)&Data, 0);
+    }
     va_end(Arg);
     MutexUnlock(&PrintLock);
-    return Data[0];
+    return Data[1];
 }
 
 LOUDLL_API
 uint16_t AnnyaGetScreenBufferHeight(){
-    uint64_t Data;
-    LouCALL(GETSCREENHEIGHT, (uint64_t)&Data, 0);
-    return (uint16_t)Data;
+    uint64_t Data[2];
+    Data[0] = 0;
+    while(Data[0] != 1){
+        LouCALL(GETSCREENHEIGHT, (uint64_t)&Data, 0);
+    }
+    return (uint16_t)Data[1];
 }
 
 LOUDLL_API
 uint16_t AnnyaGetScreenBufferWidth(){
-    uint64_t Data;
-    LouCALL(GETSCREENWIDTH, (uint64_t)&Data, 0);
-    return (uint16_t)Data;
+    uint64_t Data[2];
+    Data[0] = 0;
+    while(Data[0] != 1){
+        LouCALL(GETSCREENWIDTH, (uint64_t)&Data, 0);
+    }
+    return (uint16_t)Data[1];
 }
 
 LOUDLL_API
@@ -47,11 +56,14 @@ PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
         return 0x00;
     }
     //uint64_t Result;
-    uint64_t Data[2];
-    Data[0] = (uint64_t)Function;
-    Data[1] = (uint64_t)FunctionParameters;
-    LouCALL(LOUCREATETHREAD, (uint64_t)&Data ,0);
-    return (PTHREAD)Data[0];
+    uint64_t Data[3];
+    Data[0] = 0;
+    Data[1] = (uint64_t)Function;
+    Data[2] = (uint64_t)FunctionParameters;
+    while(Data[0] != 1){
+        LouCALL(LOUCREATETHREAD, (uint64_t)&Data ,0);
+    }
+    return (PTHREAD)Data[1];
 }
 
 
@@ -259,8 +271,12 @@ int _vsprintf(char* Buffer, size_t BufferCount, const char* Format, ...) {
 
 LOUDLL_API
 void GetRtcTimeData(TIME_T* PTIME){
-    uint64_t Data = (uint64_t)PTIME;
-    LouCALL(LOUGETRTCDATA,(uint64_t)&Data,0);
+    uint64_t Data[2];
+    Data[0] = 0;
+    Data[1] = (uint64_t)PTIME;
+    while(Data[0] != 1){
+        LouCALL(LOUGETRTCDATA,(uint64_t)&Data,0);
+    }
 }
 
 LOUDLL_API
@@ -269,13 +285,16 @@ void AnnyaUpdateButton(
     uint16_t Width, uint16_t Height,
     PBUTTONHANDLE HBUTTON
 ){
-    uint64_t Data[5];
-    Data[0] = (uint64_t)x;
-    Data[1] = (uint64_t)y;
-    Data[2] = (uint64_t)Width;
-    Data[3] = (uint64_t)Height;
-    Data[4] = (uint64_t)HBUTTON;
-    LouCALL(LOUUPDATEBUTTON, (uint64_t)&Data, 0);
+    uint64_t Data[6];
+    Data[0] = 0;
+    Data[1] = (uint64_t)x;
+    Data[2] = (uint64_t)y;
+    Data[3] = (uint64_t)Width;
+    Data[4] = (uint64_t)Height;
+    Data[5] = (uint64_t)HBUTTON;
+    while(Data[0] != 1){
+        LouCALL(LOUUPDATEBUTTON, (uint64_t)&Data, 0);
+    }
 }
 
 static mutex_t LouCallLock;

@@ -2,16 +2,16 @@
 <MainDirectoryStructure>mkdir ISO</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/boot</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/boot/grub</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya/Profiles</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya/Profiles/Default</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya/Profiles/Default/BG</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya/System32</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya/System32/Drivers</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/Annya/System32/Config</MainDirectoryStructure>
-<MainDirectoryStructure64>mkdir ISO/Annya/System64</MainDirectoryStructure64>
-<MainDirectoryStructure64>mkdir ISO/Annya/System64/Drivers</MainDirectoryStructure64>
-<MainDirectoryStructure64>mkdir ISO/Annya/System64/Config</MainDirectoryStructure64>
+<MainDirectoryStructure>mkdir ISO/ANNYA</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES/DEFAULT</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES/DEFAULT/BG</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/ANNYA/SYSTEM32</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/ANNYA/SYSTEM32/DRIVERS</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/ANNYA/SYSTEM32/CONFIG</MainDirectoryStructure>
+<MainDirectoryStructure64>mkdir ISO/ANNYA/SYSTEM64</MainDirectoryStructure64>
+<MainDirectoryStructure64>mkdir ISO/ANNYA/SYSTEM64/DRIVERS</MainDirectoryStructure64>
+<MainDirectoryStructure64>mkdir ISO/ANNYA/SYSTEM64/CONFIG</MainDirectoryStructure64>
 
     
 

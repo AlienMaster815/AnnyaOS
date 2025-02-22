@@ -8,19 +8,19 @@ typedef void* PTHREAD_DATA;
 #include <LouDDK.h>
 #ifndef _KERNEL_MODULE_
 LOUDDK_API_ENTRY LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
-LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
+LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 KERNEL_IMPORT uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
 #else
-KERNEL_EXPORT LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
+KERNEL_EXPORT LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 
 #endif
 extern "C" {
 #else
 #include <LouAPI.h>
 typedef void* PVOID; 
-LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
-uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
-uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
+LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
+uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
+uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 #endif
 
 #define MUTEX_FREE 0
@@ -50,6 +50,12 @@ static inline void MutexSyncronize(mutex_t* m){
         //spinlock
     }
 }
+
+static inline bool MutexIsLocked(mutex_t* m){
+    if(m->locked)return true;
+    return false;
+}
+
 
 
 static inline void MutexUnlock(mutex_t* m){
@@ -86,6 +92,11 @@ static inline void SpinlockSyncronize(spinlock_t* s){
     while(s->Lock.locked){
 
     }
+}
+
+static inline bool SpinlockIsLocked(spinlock_t* s){
+    if(s->Lock.locked)return true;
+    return false;
 }
 
 #ifndef _KERNEL_MODULE_

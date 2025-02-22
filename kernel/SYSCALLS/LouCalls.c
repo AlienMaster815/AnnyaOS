@@ -10,7 +10,7 @@ void LouKeDrsdDrawDesktopBackground(
 uintptr_t LouKeCreateUserStackThread(
     void (*Function)(), 
     PVOID FunctionParameters, 
-    uint32_t Pages
+    size_t StackSize
 );
 
 uint8_t LouKeGetCurrentTimeMinute();
@@ -38,8 +38,9 @@ void LouKeDestroyThread(uint64_t Thread);
 extern uint64_t RSPPoint;
 
 
-void CheckLouCallTables(uint64_t Call, uint64_t Data){
-
+void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
+    uint64_t* Tmp2 = (uint64_t*)DataTmp;
+    uint64_t Data = (uint64_t)&Tmp2[1];
     switch (Call){
         case LOUVMALLOC:{
             *(uint64_t*)Data = (uint64_t)LouKeMalloc(*(uint64_t*)Data, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
@@ -47,7 +48,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t Data){
         } 
         case LOUCREATETHREAD:{
             uint64_t* Tmp = (uint64_t*)Data;
-            UNUSED uintptr_t Result = LouKeCreateUserStackThread((void(*)(PVOID))Tmp[0], (PVOID)Tmp[1], 256);
+            UNUSED uintptr_t Result = LouKeCreateUserStackThread((void(*)(PVOID))Tmp[0], (PVOID)Tmp[1], 2 * MEGABYTE);
             Tmp[0] = Result;
             return;
         }

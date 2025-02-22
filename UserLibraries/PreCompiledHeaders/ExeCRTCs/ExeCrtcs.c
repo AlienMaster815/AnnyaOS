@@ -26,10 +26,13 @@ void LouCALLcrtc(
 uint64_t AnnyaRegisterCallbackProcedure(
     void* CallbackHandler
 ){
-    uint64_t Data;
-    Data = (uint64_t)CallbackHandler; 
-    LouCALLcrtc(LOUREGISTERCALLBACK, (uint64_t)&Data, 0);
-    return Data;
+    uint64_t Data[2];
+    Data[0] = 0;
+    Data[1] = (uint64_t)CallbackHandler; 
+    while(Data[0] != 1){
+        LouCALLcrtc(LOUREGISTERCALLBACK, (uint64_t)&Data, 0);
+    }
+    return Data[1];
 }
 
 

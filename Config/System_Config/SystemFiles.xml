@@ -2,22 +2,20 @@
 <!--File Map For Operating System-->
 <FILESBEFORECOPY>
     <32Targets>
-        <FILETOCPY32>cp Registry/System32/Config/SYSTEM ISO/Annya/System32/Config/SYSTEM</FILETOCPY32>
-        <FILETOCPY32>cp release/x86/LOUOSKRNL.exe ISO/Annya/System32/LOUOSKRNL.exe</FILETOCPY32>
-        <FILETOCPY32>cp Registry/Profiles/Username ISO/Annya/Profiles/Username</FILETOCPY32>
+        <FILETOCPY32>cp </FILETOCPY32>
     </32Targets>
     <64Targets>
-        <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/Annya/System64/LOUOSKRNL.exe</FILETOCPY64>
-        <FILETOCPY64>cp drivers/Networking/PCNET32/PCNET32.SYS ISO/Annya/System64/Drivers/PCNET32.SYS</FILETOCPY64>
-        <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/Annya/System64/Drivers/PIIX.SYS</FILETOCPY64>
-        <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/Annya/System64/user32.dll</FILETOCPY64>
-        <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/Annya/System64/LouDll.dll</FILETOCPY64>
-        <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/Annya/System64/ntdll.dll</FILETOCPY64>
-        <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/Annya/System64/CRT140.dll</FILETOCPY64>
-        <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/Annya/AnnyaExp.exe</FILETOCPY64>
-        <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/Annya/Profiles/Default/BG/Annya.bmp</FILETOCPY64>
-        <FILETOCPY64>cp SpriteAssets/AOSC.png ISO/Annya/AOSC.png</FILETOCPY64>
-        <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/Annya/AOSMC.png</FILETOCPY64>
-        <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/Annya/System64/Drivers/DRIVERS.cfg</FILETOCPY64>
+        <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>
+        <FILETOCPY64>cp drivers/Networking/PCNET32/PCNET32.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCNET32.SYS</FILETOCPY64>
+        <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/ANNYA/SYSTEM64/LOUDLL.DLL</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/ANNYA/SYSTEM64/NTDLL.DLL</FILETOCPY64>
+        <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/ANNYA/SYSTEM64/CRT140.DLL</FILETOCPY64>
+        <FILETOCPY64>cp EXE/ANNYAExp/ANNYAExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>
+        <FILETOCPY64>cp BackgroundImages/ANNYA.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>
+        <FILETOCPY64>cp SpriteAssets/AOSC.png ISO/ANNYA/AOSC.PNGg</FILETOCPY64>
+        <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>
+        <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/DRIVERS/DRIVERS.CFG</FILETOCPY64>
     </64Targets>
 </FILESBEFORECOPY>

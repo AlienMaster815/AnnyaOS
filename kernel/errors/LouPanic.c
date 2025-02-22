@@ -41,6 +41,7 @@ volatile PWINDHANDLE SetBlueScreenPannel(){
     BSODCharecteristics.Type = CANVAS_WINDOW;
     BSODCharecteristics.WindowName = "BSOD";
 
+
 	volatile PWINDHANDLE Result = LouCreateCanvasBuffer(
 		0,0,
 		GetScreenBufferWidth(), GetScreenBufferHeight(),
@@ -97,6 +98,8 @@ void LouKeSetPanicInfo(
 	uint64_t PageFaultData
 ){
 
+
+
 	UNUSED uint16_t CurrentX = 0, CurrentY = 0;
 	UNUSED uint16_t CurrentW = 0, CurrentH = 0;
 
@@ -105,7 +108,9 @@ void LouKeSetPanicInfo(
 
 	CurrentX = (CurrentW / 16);	
 	CurrentY = (CurrentH / 8);
+	
 
+	
 	PlaceFloatingString(
 		":(", 
 		CurrentX, 
@@ -127,11 +132,14 @@ void LouKeSetPanicInfo(
 		255,
 		255
 	);
+	
+
 
 	CurrentY += 28;
 	size_t ErrorMessageSize = (strlen("The Fault Was Caused By A:%s") * strlen(DynamicErrorMessage));
 	string ErrorMessage = (string)LouMallocEx(ErrorMessageSize, 1);
 	_vsnprintf(ErrorMessage, ErrorMessageSize, "The Fault Was Caused By A:%s", DynamicErrorMessage);
+	
 
 	PlaceFloatingString(
 		ErrorMessage,
@@ -143,7 +151,7 @@ void LouKeSetPanicInfo(
 		255
 	);
 
-	UNUSED string TmpString[256];
+	char TmpString[256];
 
 	CurrentY += 28;
 	_vsnprintf((string)TmpString, 256, "RAX:%h :: RBX:%h :: RCX:%h :: RDX:%h", rax, rbx,rcx, rdx);
@@ -226,6 +234,7 @@ void LouKeSetPanicInfo(
 	);
 
 	_GENERIC_FUALT_PANIC:
+	LouKeDrsdSyncScreens();
 	while(1);
 }
 

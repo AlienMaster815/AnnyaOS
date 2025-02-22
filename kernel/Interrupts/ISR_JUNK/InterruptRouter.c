@@ -132,9 +132,10 @@ spinlock_t* LouKeGetInterruptGlobalLock(){
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
     if(Interrupt < 0x20){
-        //InterruptRouterTable[Interrupt].InterruptHandler(Args);
-        //local_apic_send_eoi();
-        //return;
+        LouKIRQL Irql;
+        LouKeSetIrql(HIGH_LEVEL, &Irql);  
+        InterruptRouterTable[Interrupt].InterruptHandler(Args);
+        while(1);
     }
 
     LouKIRQL Irql;

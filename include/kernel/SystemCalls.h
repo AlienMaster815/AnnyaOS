@@ -53,8 +53,8 @@
 #define LouAlpcQueryInformationMessage 0x008a
 #define LouAlpcRevokeSecurityContext 0x008b
 #define LouAlpcSendWaitReceivePort 0x008c
-#define LouAlpcSetInformation 0x008d
-#define LouApphelpCacheControl 0x004c
+#define LouAlpcSetInformationCall 0x008d
+#define LouApphelpCacheControlC 0x004c
 #define LouAreMappedFilesTheSame 0x008e
 #define LouAssignProcessToJobObject 0x008f
 #define LouAssociateWaitCompletionPacket 0x0090
@@ -526,6 +526,10 @@ void LouCALL(
 
 #endif
 #endif
+
+
+#define LOUCALL_WIN64_EMU 1
+
 
 //Original Great 18
 #define LOUVMALLOC          0

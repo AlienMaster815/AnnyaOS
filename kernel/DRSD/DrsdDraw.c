@@ -297,6 +297,7 @@ void LouKeDrsdDrawDesktopBackground(
     }
     //Other file types
     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
+    LouKeDrsdSyncScreens();
 }
 
 

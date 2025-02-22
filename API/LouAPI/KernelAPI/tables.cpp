@@ -37,7 +37,7 @@ static volatile uint64_t StorportFunctionAddresses[PRE_LOADED_STORPORT_FUNCTIONS
 static volatile FUNCTION_NAME StorportFunctionNames[PRE_LOADED_STORPORT_FUNCTIONS];
 
 static volatile TableTracks  DynamicLoadedLibraries;
-static volatile uint16_t DynamicLoadedLibrarieCount = 0x00;
+static uint16_t DynamicLoadedLibrarieCount = 0x00;
 
 static volatile TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
 static volatile PTABLE_ENTRY ImportTables = (volatile PTABLE_ENTRY)GenericTable;
@@ -168,28 +168,14 @@ void LouKeInitializeLibraryLookup(
     uint64_t* FunctionAddresses,
     bool IsNativeLongmode
 ){
-
-
+    uint16_t i;
     volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries;
-    for(uint16_t i = 0; i <= DynamicLoadedLibrarieCount; i++){
-
-        if(!Tmp->Table.ModuleName){
-            Tmp->LongModeEntry = IsNativeLongmode;
-            Tmp->Table.ModuleName = ModuleName;
-            Tmp->Table.NumberOfFunctions = NumberOfFunctions;
-            Tmp->Table.FunctionName = FunctionNames;
-            Tmp->Table.VirtualAddress = FunctionAddresses;
-            DynamicLoadedLibrarieCount++;
-            return;
+    for(i = 0; i < DynamicLoadedLibrarieCount; i++){
+        if(!Tmp->Neighbors.NextHeader){
+            Tmp->Neighbors.NextHeader = (ListHeader*)LouMalloc(sizeof(TableTracks));
         }
-
-        if(Tmp->Neighbors.NextHeader){
-            Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
-        }
+        Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
     }
-
-    Tmp->Neighbors.NextHeader = (ListHeader*)LouMalloc(sizeof(TableTracks));
-    Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
 
     Tmp->LongModeEntry = IsNativeLongmode;
     Tmp->Table.ModuleName = ModuleName;
@@ -809,7 +795,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
                 return Tmp->Table.VirtualAddress[j];
             }
         }
-
+        LouPrint("Module:%s\n",Tmp->Table.ModuleName);
         if(Tmp->Neighbors.NextHeader){
             Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
         }

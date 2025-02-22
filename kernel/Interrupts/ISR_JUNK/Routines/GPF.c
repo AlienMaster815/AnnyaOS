@@ -58,7 +58,6 @@ void LouKeSetPanicInfo(
 );
 
 void GPF(uint64_t FaultingStackP) {
-
     volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
 
     CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP + 8);

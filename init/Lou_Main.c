@@ -193,20 +193,20 @@ bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck);
 
 void StartDebugger(){
     
-    //WINDOW_CHARECTERISTICS Charecteristics;
+    WINDOW_CHARECTERISTICS Charecteristics;
 
-    //Charecteristics.Type = TEXT_WINDOW;
-    //Charecteristics.WindowName = "louoskrnl.exe";
+    Charecteristics.Type = TEXT_WINDOW;
+    Charecteristics.WindowName = "louoskrnl.exe";
 
-    //HWind = LouCreateWindow(
-    //    0, 0,
-    //    //30, 30,
-    //    //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
-    //    1024, 768,
-    //    0x00, 
-    //    &Charecteristics
-    //);
-    //AttatchWindowToKrnlDebug(HWind);    
+    HWind = LouCreateWindow(
+        0, 0,
+        //30, 30,
+        //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
+        1024, 768,
+        0x00, 
+        &Charecteristics
+    );
+    AttatchWindowToKrnlDebug(HWind);    
 }
 
 void KillDebuger(){
@@ -373,12 +373,16 @@ void InitializeUserSpace(){
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
-    //LouUpdateWindow(
-    //    GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
-    //    GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
-    //    HWind
-    //);    
+    LouUpdateWindow(
+        GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
+        GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
+        HWind
+    );    
     LouPrint("Hello World\n");
+    
+    LouKeOpenPngImage("C:/ANNYA/AOSMC.PNG");
+    
+    while(1);
     UsrJmp(InitEntry);
 }
 
@@ -391,7 +395,6 @@ USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).
 PCI Sound Cards	Moderate	
 Intel 8254x NIC	Moderate	
 USB 2.0 (EHCI)	Moderate-to-Hard	Fits here (periodic/asynchronous queues).
-PCI Storage (AHCI)	Hard	
 USB 3.0+ (xHCI)	Harder	Fits here (TRBs, ring buffers).
 PCI Storage (NVMe)	Harder	
 GPUs	Hardest	

@@ -17,34 +17,30 @@ typedef struct  __attribute__((packed)) _CPUContext{
     uint64_t rbx;
     uint64_t rcx;
     uint64_t rdx;
-    
+
     uint64_t rbp;
     uint64_t rsi;
     uint64_t rdi;
-
     uint64_t r8;
+
     uint64_t r9;
     uint64_t r10;
     uint64_t r11;
     uint64_t r12;
+
     uint64_t r13;
     uint64_t r14;
     uint64_t r15;
+    uint64_t rip;
 
-
-
-    uint64_t rip;      // Instruction Pointer
-    uint64_t cs;       // Code Segment
-    uint64_t rflags;   // Flags Register
-    uint64_t rsp;      // Stack Pointer
-    uint64_t ss;       // Stack Segment
-    //uint64_t error;    // Error Code (only if applicable)
+    uint64_t cs;
+    uint64_t rflags;
+    uint64_t rsp;
+    uint64_t ss;
 } CPUContext;
 
-KERNEL_IMPORT
-void FuckItRestoreEverything(uint64_t* ContextHandle);
-KERNEL_IMPORT
-void FuckItSaveEverything(uint64_t* ContextHandle);
+KERNEL_IMPORT void SaveEverything(uint64_t* ContextHandle);
+KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
 
 typedef struct {
     ListHeader Neighbors;
@@ -68,7 +64,7 @@ static inline thread_t* CreateThreadHandle(){
             TmpThreadHandle = (thread_t*)TmpThreadHandle->Neighbors.NextHeader;
         }
     }
-    TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeMalloc(sizeof(thread_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(thread_t), GET_ALIGNMENT(thread_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     return(thread_t*)TmpThreadHandle->Neighbors.NextHeader;
 }
 
@@ -130,9 +126,6 @@ static inline int find_next_thread(int CurrentThread) {
 
 LOUDDK_API_ENTRY void local_apic_send_eoi();
 
-KERNEL_IMPORT void StoreAdvancedRegisters(uint64_t ContextHandle);
-KERNEL_IMPORT void RestoreAdvancedRegisters(uint64_t ContextHandle);
-
 KERNEL_IMPORT spinlock_t* LouKeGetInterruptGlobalLock();
 
 LOUDDK_API_ENTRY
@@ -140,63 +133,80 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
     return current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage;
 }
 
-//static mutex_t FOO;
-LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
+static mutex_t FUBAR;
 
+LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
+    uint8_t ProcessorID = 0;
+    thread_t* CurrentThread = 0;
+    thread_t* NextThread = 0;
+    CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
     if(NumberOfThreads < 1){
         if((uint64_t)current_thread[get_processor_id()] != (uint64_t)&MasterThreadTable){
-            RestoreAdvancedRegisters(MasterThreadTable.AdvancedRegisterStorage);
+            RestoreEverything(&MasterThreadTable.AdvancedRegisterStorage);
             current_thread[get_processor_id()] = &MasterThreadTable;
-            local_apic_send_eoi();
-            return (uint64_t)MasterThreadTable.cpu_state;
+            CpuCurrentState = (uintptr_t)MasterThreadTable.cpu_state;
+            goto _UPDATE_THREAD_MANAGER_FINISHED;
         }else{
-            local_apic_send_eoi();
-            return CpuCurrentState;
+            current_thread[get_processor_id()]->cpu_state = (CPUContext*)(uint8_t*)CpuCurrentState; 
+            goto _UPDATE_THREAD_MANAGER_FINISHED;
         }
     }
 
-    LouKIRQL Irql;
-    LouKeSetIrql(HIGH_LEVEL, &Irql);  
+    if(CurrentContext->cs == 0x08){
+        //tasks shall not switch when running
+        //in the kernel segment to eliminate
+        //stack curruoption and add better 
+        //prediction to switching states
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
+    }
 
-    uint8_t ProcessorID = get_processor_id();
-    thread_t* CurrentThread = current_thread[ProcessorID];
+    // if the system is currently handling an
+    // interupt the system shall not be 
+    // interrupted for stability and reliability
+    if(SpinlockIsLocked(LouKeGetInterruptGlobalLock())){
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
+    }
+    MutexLock(&FUBAR);
 
     if(timeQuantum[ProcessorID] < 5){
         timeQuantum[ProcessorID]++;
-        local_apic_send_eoi();
-        LouKeReleaseSpinLock(LouKeGetInterruptGlobalLock(), &Irql);
-        return CpuCurrentState;
+        MutexUnlock(&FUBAR);
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
 
+
+    ProcessorID = get_processor_id();
+    CurrentThread = current_thread[ProcessorID];
+
     timeQuantum[ProcessorID] = 0;
+
+    NextThread = GetNextThread(CurrentThread);
+    if((uintptr_t)NextThread == (uintptr_t)CurrentThread){
+        MutexUnlock(&FUBAR);
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
+    }
 
     if(IsThreadInThreadTable(CurrentThread)){
         CurrentThread->cpu_state = (CPUContext*)CpuCurrentState;
         CurrentThread->state = THREAD_READY;
-        StoreAdvancedRegisters(CurrentThread->AdvancedRegisterStorage);
+        SaveEverything(&CurrentThread->AdvancedRegisterStorage);
     }
 
 
-
-    thread_t* NextThread = GetNextThread(CurrentThread);
-    while((!IsThreadInThreadTable(NextThread)) && (NextThread->state == THREAD_READY)){
+    while((!IsThreadInThreadTable(NextThread)) && (NextThread->state != THREAD_READY)){
         NextThread = GetNextThread(NextThread);
     }
 
-
-    if(!NextThread->NewTask){
-        RestoreAdvancedRegisters(NextThread->AdvancedRegisterStorage);
-        NextThread->NewTask = false;
-    }
+    RestoreEverything(&NextThread->AdvancedRegisterStorage);
 
     NextThread->state = THREAD_RUNNING;
     CpuCurrentState = (uint64_t)NextThread->cpu_state;
 
     current_thread[ProcessorID] = NextThread;
-
+    
+    MutexUnlock(&FUBAR);
+    _UPDATE_THREAD_MANAGER_FINISHED:
     local_apic_send_eoi();
-    LouKeSetIrql(Irql, 0x00);  
-
     return CpuCurrentState;
 }
 
@@ -322,40 +332,42 @@ uintptr_t RetriveThreadStubAddress(){
 }
 
 
-LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, uint32_t Pages) {
+LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
     //allocate New Stack
-    //void* NewStack = LouKeMallocEx(Pages * KILOBYTE_PAGE,KILOBYTE_PAGE, WRITABLE_PAGE | PRESENT_PAGE | USER_PAGE);
-    
+    void* NewStack = LouKeMallocPhysicalEx(StackSize , 16, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     //Allocate New Thread
-    //thread_t* NewThread = CreateThreadHandle();
-    //if(!NewThread){
-    //    return 0x00;
-    //}
+    thread_t* NewThread = CreateThreadHandle();
+    if(!NewThread){
+        LouKeFree(NewStack);
+        return 0x00;
+    }
     //store the top of the stack
-    //NewThread->StackTop = NewStack;
+    NewThread->StackTop = NewStack;
     //set the context pointer
-    //CPUContext* NewContext = (CPUContext*)NewStack + (KILOBYTE_PAGE * Pages) - KILOBYTE; //leave a kilobyte for wiggle room
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)((uint8_t*)NewStack) + StackSize) - KILOBYTE); //leave a kilobyte for wiggle room
     //set the New Threads Context
-    //NewThread->cpu_state = NewContext;
-    //Allocate Space For XSAVE and XRSTOR
-    //NewThread->AdvancedRegisterStorage = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->cpu_state = NewContext;
+    //Allocate Space For Safe Context Handling
+    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
     //Mark the Register Storage As Clean
-    //NewThread->NewTask = true;
+    NewThread->NewTask = true;
+    NewThread->state = THREAD_READY;
     //Get the Stub Address
-    //uintptr_t StubAddress = RetriveThreadStubAddress();
+    uintptr_t StubAddress = RetriveThreadStubAddress();
     //fill the Context...
-    //NewContext->rcx = (uint64_t)Function;           //first parameter  MSVC
-    //NewContext->rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
-    //NewContext->r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
-    //NewContext->rip = (uint64_t)StubAddress;        //Liftoff Address  
-    //NewContext->rbp = (uint64_t)NewContext;         //Base Pointer
-    //NewContext->rsp = (uint64_t)NewContext;         //Current Pointer
+    NewContext->rcx = (uint64_t)Function;           //first parameter  MSVC
+    NewContext->rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
+    NewContext->r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
+    NewContext->rip = (uint64_t)StubAddress;        //Liftoff Address  
+    NewContext->rbp = (uint64_t)NewContext;         //Base Pointer
+    NewContext->rsp = (uint64_t)NewContext;         //Current Pointer
     //Fill Segments and flags
-    //NewContext->cs  = 0x08;
-    //NewContext->ss  = 0x10;  
-    //NewContext->rflags = 0x202;  
+    NewContext->cs  = 0x08;
+    NewContext->ss  = 0x10;  
+    NewContext->rflags = 0x202;  
     //Increment Thread Counter
-    //NumberOfThreads++;
+    NumberOfThreads++;
     //return the handle to the new thread
-    return (uintptr_t)0;//NewThread;
+    return (uintptr_t)NewThread;//NewThread;
 }
