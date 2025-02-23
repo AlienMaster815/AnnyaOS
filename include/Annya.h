@@ -30,6 +30,8 @@ typedef void* PTHREAD;
 #include <FileHandleing/Bitmap.h>
 #include <windows.h>
 
+#include "WinAPI/Win32/wmsdk/wmfsdk/wmfsdk.h"
+
 typedef void*    HWND;
 typedef uint16_t MSG;
 
@@ -138,5 +140,11 @@ void AnnyaUpdateButton(
 
 typedef void* HINSTANCE;
 
+#include <stdint.h>
 
+#ifdef IS_X86_64
+
+#else
+
+#endif
 #endif

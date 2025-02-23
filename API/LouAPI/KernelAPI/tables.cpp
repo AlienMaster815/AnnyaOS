@@ -19,7 +19,7 @@ typedef struct _TableTracks{
 
 
 #define PRE_LOADED_MODULES 5
-#define PRE_LOADED_NTOSKRNL_FUNCTIONS 70
+#define PRE_LOADED_NTOSKRNL_FUNCTIONS 71
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
@@ -510,6 +510,7 @@ void InitializeNtKernelTable(){
     ImportTables[0].FunctionName[67] = "NtClose";
     ImportTables[0].FunctionName[68] = "NtCommitComplete";
     ImportTables[0].FunctionName[69] = "NtCommitEnlistment";
+    ImportTables[0].FunctionName[70] = "RtlUpcaseUnicodeChar";
     
     ImportTables[0].VirtualAddress = NTFunctionAddresses;
 
@@ -585,6 +586,7 @@ void InitializeNtKernelTable(){
     ImportTables[0].VirtualAddress[67] = (uint64_t)NtClose;
     ImportTables[0].VirtualAddress[68] = (uint64_t)NtCommitComplete;
     ImportTables[0].VirtualAddress[69] = (uint64_t)NtCommitEnlistment;
+    ImportTables[0].VirtualAddress[70] = (uint64_t)RtlUpcaseUnicodeChar;
 
 
 }

@@ -17,11 +17,10 @@ int64_t LouAlpcSetInformation(
     return KulaPacket[1];
 }
 
-int64_t NtLowLouAplcSetInformation();
 
 NTDLL_API 
-int64_t AlpcAdjustCompletionListConcurrencyCount(){
-    return NtLowLouAplcSetInformation(); 
+void AlpcAdjustCompletionListConcurrencyCount(){
+    LouPrint("Hello NT DLL\n"); while(1);
 }
 
 NTDLL_API

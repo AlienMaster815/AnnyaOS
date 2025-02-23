@@ -338,7 +338,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeFileSystemManager();
 
-    ScanTheRestOfHarware();
+    //ScanTheRestOfHarware();
 	
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
@@ -380,14 +380,15 @@ void InitializeUserSpace(){
     );    
     LouPrint("Hello World\n");
     
-    LouKeOpenPngImage("C:/ANNYA/AOSMC.PNG");
+    //LouKeOpenPngImage("C:/ANNYA/AOSMC.PNG");
     
-    while(1);
+    //while(1);
     UsrJmp(InitEntry);
 }
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 
+//007e8000
 
 /*	
 AMD PCNet-PCI II	Easy Am79C970A	

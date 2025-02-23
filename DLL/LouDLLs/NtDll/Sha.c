@@ -1,76 +1,110 @@
 #include "ntdll.h"
 
-#pragma pack(push, 1)
-static uint8_t ShaInitializationBuffer[] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10, 0xF0, 0xE1, 0xD2, 0xC3};
-#pragma pack(pop)
-
+/*---------------------------------------
+//
+//  Module Lousine Kernel NT DLL 
+//
+//  BELL Layer For The Lousine KULA Arch
+//
+//  File :: Sha.c
+//
+//  Lousine Kernel Sha Library
+//
+//  Copyright (C) Tyler Grenier 2025
+//  
+----------------------------------------*/
 
 static 
-int64_t 
-SHATransform(int32_t* ShaDestinationHandle, int32_t* ShaSourceHandle){
-
-    return 0;
-}
-
-
-
-NTDLL_API
-int64_t A_SHAFinal(
-
+uintptr_t 
+SHATransform(
+    uint32_t* State, 
+    uint32_t* InputBuffer
 ){
-    LouPrint("A_SHAFinal()\n");
-    while(1);
-    return 0;
+
+    return 0x00;
 }
 
 NTDLL_API
-void A_SHAInit(void* ShaHandle){
-    __builtin_memcpy((void*)((uintptr_t)ShaHandle + 0x40), (void*)ShaInitializationBuffer, 0x14);
-    *(uint8_t*)((uintptr_t)ShaHandle + 0x54) = 0;
-}
-
-NTDLL_API
-int64_t A_SHAUpdate(
-    int32_t* ShaDestinationHandle,
-    int32_t* ShaSourceHandle,
-    int32_t  ShaChecksum
+void 
+RSA32_API 
+A_SHAInit(
+    A_SHA_CONTEXT* ShaContext
 ){
-    register int32_t Alpha = ShaDestinationHandle[0x16], Bravo = ShaChecksum, Result = Alpha + Bravo, Romeo15 = Alpha & 0x3F;  
-    register int32_t* DeltaI;
-
-    ShaDestinationHandle[0x16] = Result;
-
-    if(Result < ShaChecksum){
-        ShaDestinationHandle[0x15] += 1;
+    if(!ShaContext){
+        return;
     }
+    *(uint64_t*)((uint8_t*)ShaContext + 0x50) = 0;
+    uint32_t* Tmp = (uint32_t*)((uint8_t*)ShaContext + 0x40);
+    Tmp[0] = 0x67452301;
+    Tmp[1] = 0xefcdab89;
+    Tmp[2] = 0x98badcfe;
+    Tmp[3] = 0x10325476;
+    Tmp[4] = 0xc3d2e1f0;
+}
 
-    if(Romeo15 != 0){
-        int32_t Santa = Romeo15 + ShaChecksum;
-        if(Santa >= 0x40){
-            __builtin_memcpy((void*)(uintptr_t)Romeo15 + (uintptr_t)ShaDestinationHandle, (void*)ShaSourceHandle, (U64)(0x40 - Romeo15));
-            DeltaI = (int32_t*)(U64)DeltaI + (U64)(0x40 - Romeo15);
-            Bravo = Santa - 0x40;
-            Result = SHATransform(&ShaDestinationHandle[0x10], ShaDestinationHandle);
-            Romeo15 = 0; 
+NTDLL_API
+uintptr_t 
+RSA32_API 
+A_SHAUpdate(
+    A_SHA_CONTEXT* ShaContext, 
+    uint8_t* InputBuffer, 
+    size_t InputLength
+){
+    if(!ShaContext){
+        return 0x00;
+    }
+    register uint32_t    HashOffsetX16R = ((uint32_t*)ShaContext)[0x16];
+    register uint32_t    InputLengthR = InputLength;
+    register uint32_t*   InputBufferR = (uint32_t*)InputBuffer;
+    uint32_t             Result = HashOffsetX16R + InputLength;
+    register uint32_t    Checksum = HashOffsetX16R & 0x3F;
+    ((uint32_t*)ShaContext)[0x16] = Result;
+
+    if(Result < InputLength){
+        ((uint32_t*)ShaContext)[0x15] += 1;
+    }
+    if(Checksum){
+        register uint32_t Index = Checksum + InputLength;
+        if(Index >= 0x40){
+            __builtin_memcpy((void*)(Index + (uintptr_t)ShaContext), (void*)InputBuffer, (size_t)(0x40 - Checksum));
+            InputBufferR = (uint32_t*)(uint8_t*)((uintptr_t)InputBufferR + (uintptr_t)(0x40 - Checksum)); 
+            InputLengthR = Index - 0x40;
+            Result = SHATransform(&ShaContext->State[1], InputBufferR); 
+            Index = 0;
         }
     }
-
-    if(Bravo >= 0x40){
-        U64 Index2 = ((U64)Bravo >> 6);
-        U64 Index1 = 0;
-    
-        do {
-            Result = SHATransform(&ShaDestinationHandle[0x10], DeltaI);
-            DeltaI = &DeltaI[0x10];
-            Bravo -= 0x40;
-            Index1 = Index2;
-            Index2 -= 1; 
-        }while(Index1 != 1);
+    if(InputLengthR >= 0x40){
+        size_t i1 = (size_t)InputLengthR;
+        size_t i2;
+        do{
+            Result = SHATransform(&ShaContext->State[1], InputBufferR);
+            InputBufferR = &InputBufferR[0x10];
+            InputLengthR -= 0x40;
+            i1 = i2;
+            i2 -= 1;
+        }while (i1 != 12);
     }
-
-    if(Bravo == 0){
+    if(!InputLengthR){
         return Result;
     }
-
-    return (uintptr_t)__builtin_memcpy((void*)(uintptr_t)((uintptr_t)Romeo15 + (uintptr_t)ShaDestinationHandle), (void*)(uintptr_t)DeltaI, (U64)Bravo);
+    return (uintptr_t)__builtin_memcpy((void*)((uintptr_t)Checksum + (uintptr_t)ShaContext), InputBufferR, InputLengthR);
 }
+
+NTDLL_API
+void 
+RSA32_API 
+A_SHAFinal(
+    A_SHA_CONTEXT* ShaContext, 
+    uint8_t InputBuffer[A_SHA_DIGEST_LENGTH]
+){
+    //register uint32_t    HashOffsetX16R = ((uint32_t*)ShaContext)[0x16];
+    //register uint32_t    CheckSum = (0x40 * 2) - (HashOffsetX16R & 0x3F);
+    //if((0x40 - (CheckSum & 0x3F)) > 8){
+    //    Checksum = (0x40 - (CheckSum & 0x3F));
+    //}
+    //register TmpChecksum = Checksum;
+
+
+
+}
+

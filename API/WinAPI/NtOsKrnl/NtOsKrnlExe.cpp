@@ -2637,7 +2637,7 @@ void RtlRaiseStatus(LOUSTATUS Status){
 // RtlUnsignedMultiplyHigh
 // RtlUnwind
 // RtlUnwindEx
-// RtlUpcaseUnicodeChar
+// RtlUpcaseUnicodeChar IMPLEMENTED
 // RtlUpcaseUnicodeString
 // RtlUpcaseUnicodeStringToAnsiString
 // RtlUpcaseUnicodeStringToCountedOemString
@@ -3290,37 +3290,37 @@ void RtlRaiseStatus(LOUSTATUS Status){
 // memset     IMPLEMENTED
 // psMUITest
 // qsort      DEFINED
-// qsort_s    DEFINED
-// rand       IMPLEMENTED
-// sprintf    IMPLEMENTED
-// sprintf_s  IMPLEMENTED
-// sqrt       IMPLEMENTED
-// sqrtf      IMPLEMENTED
-// srand      IMPLEMENTED
-// sscanf_s   DEFINED
-// strcat     IMPLEMENTED
-// strcat_s   IMPLEMENTED
-// strchr     IMPLEMENTED
-// strcmp     IMPLEMENTED
-// strcpy     IMPLEMENTED
-// strcpy_s   IMPLEMENTED
-// strlen     IMPLEMENTED
-// strncat    IMPLEMENTED
-// strncat_s  DEFINED
-// strncmp    IMPLEMENTED
-// strncpy    IMPLEMENTED
-// strncpy_s  IMPLEMENTED
-// strnlen    IMPLEMENTED
-// strrchr    IMPLEMENTED
-// strspn     IMPLEMENTED
-// strstr     IMPLEMENTED
-// strtok_s   IMPLEMENTED
-// swprintf   IMPLEMENTED
-// swprintf_s IMPLEMENTED
-// swscanf_s  DEFINED
-// tolower    IMPLEMENTED
-// toupper    IMPLEMENTED
-// towlower   IMPLEMENTED
+// qsort_s    
+// rand       
+// sprintf    
+// sprintf_s  
+// sqrt       
+// sqrtf      
+// srand      
+// sscanf_s   
+// strcat     
+// strcat_s   
+// strchr     
+// strcmp     
+// strcpy     
+// strcpy_s   
+// strlen     
+// strncat    
+// strncat_s  
+// strncmp    
+// strncpy    
+// strncpy_s  
+// strnlen    
+// strrchr    
+// strspn     
+// strstr     
+// strtok_s   
+// swprintf   
+// swprintf_s 
+// swscanf_s  
+// tolower    
+// toupper    
+// towlower   IMPLEMENTED   
 // towupper   IMPLEMENTED
 
 // vsprintf   IMPLEMENTED

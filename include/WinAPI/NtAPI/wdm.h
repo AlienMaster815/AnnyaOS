@@ -7099,8 +7099,8 @@ void RtlUnicodeStringToAnsiSize(
 );
 
 
-
- WCHAR RtlUpcaseUnicodeChar(
+LOUDDK_API_ENTRY
+WCHAR RtlUpcaseUnicodeChar(
    WCHAR SourceCharacter
 );
 

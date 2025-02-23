@@ -8,6 +8,7 @@ extern "C"{
 
 #include "WindowsControll/WindowsControll.h"
 #include "Dispatch.h"
+#include "wmsdk/wmfsdk/sha.h"
 
 #ifdef __cplusplus
 }

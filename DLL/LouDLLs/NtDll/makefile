@@ -9,7 +9,7 @@ ASFLAGS = -f win64  # Ensure 64-bit output for Windows
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll
+LIBS = -lLouDll -lmingw32
 
 # Source and Target
 SRC = 	NtDll.c \
@@ -18,22 +18,15 @@ SRC = 	NtDll.c \
 
 ASM_SRC = 	NtLow.asm 
 
-ASM_OBJ = 	NtLow.o 
-
 TARGET = ntdll.dll
 
 # Default Rule
 all: $(TARGET)
 
-# Assemble the ASM file
-$(ASM_OBJ): $(ASM_SRC)
-	@echo "Assembling $(ASM_SRC)..."
-	$(NASM) $(ASFLAGS) -o $(ASM_OBJ) $(ASM_SRC)
-
 # Build Rule (Compiles C files and links with ASM object)
-$(TARGET): $(SRC) $(ASM_OBJ)
+$(TARGET): $(SRC) 
 	@echo "Building $(TARGET)..."
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(ASM_OBJ) $(INCLUDES) $(LDFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(INCLUDES) $(LDFLAGS) $(LIBS)
 
 # Clean Rule
 clean:
