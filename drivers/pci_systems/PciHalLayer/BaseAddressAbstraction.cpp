@@ -197,8 +197,7 @@ void LouKeHalRegisterPciDevice(
                             continue;
                         }
 
-
-                    //while(1);    
+    
                     i++;
                 }
             }

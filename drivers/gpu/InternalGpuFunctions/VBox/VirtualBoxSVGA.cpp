@@ -55,7 +55,7 @@ void VBoxPutPixelRgbEx(
     uint8_t r, uint8_t g, uint8_t b, uint8_t a
 ){
     
-        // Calculate the offset in the framebuffer
+    // Calculate the offset in the framebuffer
     uint32_t bytes_per_pixel = FBDEV->FrameBuffer.Bpp / 8;
     uint8_t* framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.FramebufferBase;
 
@@ -152,7 +152,7 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
 
 
     if(VirtualboxVGAC == 0x00){
-        VirtualboxVGAC = (PVBVCD)LouMalloc(sizeof(VBVCD));
+        VirtualboxVGAC = (PVBVCD)LouMallocEx(sizeof(VBVCD), GET_ALIGNMENT(VBVCD));
     }
 
     PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
@@ -161,7 +161,7 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
 
     VirtualBoxChangeResolution(1920, 1080);
 
-    PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouMalloc(sizeof(FrameBufferModeDefinition));
+    PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
 
     SupportedModes->Width = 1920;
     SupportedModes->Height = 1080;
@@ -171,7 +171,7 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
 
     uint64_t FrameBufferAdress = (uint64_t)LouKeHalGetPciVirtualBaseAddress(PciConfig, 0);
 
-    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouMalloc(sizeof(DrsdStandardFrameworkObject));
+    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
     DrsdFrameWork->RgbPutPixel = VBoxPutPixelRgbEx;
     DrsdFrameWork->VRamSize = VirtualboxVGAC->VRamTotalSize;
     

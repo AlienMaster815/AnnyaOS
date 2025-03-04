@@ -55,7 +55,7 @@ FILE* DecodePngFile(FILE* PngLoaction){
 
         if(strncmp(ChunkType, "IDAT" , strlen("IDAT")) == 0){
             TmpZlibBuffer = (uint8_t*)(((uintptr_t)(uint8_t*)TmpChunk) + 8);      
-            LouPrint("Buffer Offset:%h\n", (uintptr_t)TmpZlibBuffer - (uintptr_t)PngLoaction);
+            //LouPrint("Buffer Offset:%h\n", (uintptr_t)TmpZlibBuffer - (uintptr_t)PngLoaction);
             TmpUncompressesdSize = LouKeGetZlibUnCompressedSize(TmpZlibBuffer, U32_TO_NETWORK_BYTE_ORDER(TmpChunk->Length));
             if((TmpUncompressesdSize == 0xFFFFFFFF) || (!TmpUncompressesdSize)){
                 ZlibUnpackedBuffers[IdatIndex] = (uint8_t*)LouMalloc(U32_TO_NETWORK_BYTE_ORDER(TmpChunk->Length) * 4);

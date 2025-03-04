@@ -140,6 +140,8 @@ static inline void LouKeZlibSyncStreamWithHuffmanData(
     memcpy(HuffmanStream, ZlibStream, sizeof(HUFFMAN_STREAM));
 }
 
+
+
 #ifdef __cplusplus
 }
 #endif

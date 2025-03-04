@@ -14,6 +14,13 @@
 
 #target OS can be WINDOWS or LINUX
 
+#echo 'insmod efi_gop' >> ISO/boot/grub/grub.cfg ;
+#echo 'insmod efi_uga' >> ISO/boot/grub/grub.cfg ;
+#echo 'insmod gfxterm' >> ISO/boot/grub/grub.cfg ;
+#echo 'insmod gfxmenu' >> ISO/boot/grub/grub.cfg ;
+#echo 'insmod vbe' >> ISO/boot/grub/grub.cfg ;
+#echo 'insmod all_video' >> ISO/boot/grub/grub.cfg ;
+
 TARGET_ARCH = x86_64
 TARGET_OS = WINDOWS
 HOST_ARCH = x86_64

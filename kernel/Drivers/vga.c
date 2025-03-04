@@ -39,7 +39,6 @@ void print_set_color(uint8_t foreground, uint8_t background) {
 
 bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle, TEXT_WINDOW_EVENT Update);
 
-static spinlock_t VgaPutCharecterRgbLock;
 
 bool DrawWindow(
     uint16_t x,
@@ -50,8 +49,6 @@ bool DrawWindow(
 );
 
 void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b) {
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&VgaPutCharecterRgbLock, &Irql);
     static uint16_t xz, yz;
 
     if(Handle->Cursor.y > (Handle->Charecteristics.Dimentions.height + 64)){
@@ -67,22 +64,19 @@ void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, 
             }else{
             Handle->Cursor.y += 17;
         }
-        LouKeReleaseSpinLock(&VgaPutCharecterRgbLock, &Irql);
         return;
     } else if (Character == ' ') {
         Handle->Cursor.x += 8;
-        LouKeReleaseSpinLock(&VgaPutCharecterRgbLock, &Irql);
         return;
     }
 
     CharMapping* Map = GetCharecterMap(Character);
 
     if (Map == 0x00) {
-        LouKeReleaseSpinLock(&VgaPutCharecterRgbLock, &Irql);
         return;
     }
 
-    if ((Handle->Cursor.x + Map->width + 8) > Handle->Charecteristics.Dimentions.width) {
+    if ((Handle->Cursor.x + Map->width + 17) > Handle->Charecteristics.Dimentions.width) {
         VgaPutCharecterRgb('\n', Handle , 0, 0, 0);
     }
     static uint16_t x;
@@ -114,7 +108,6 @@ void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, 
     }
 
     Handle->Cursor.x += Map->width;
-    LouKeReleaseSpinLock(&VgaPutCharecterRgbLock, &Irql);
 }
 
 //static spinlock_t VgaPutCharecterRgbButtonsLock;

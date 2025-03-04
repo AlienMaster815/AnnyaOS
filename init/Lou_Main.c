@@ -97,7 +97,6 @@ uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
 void FlushTss();
 LOUSTATUS SetupInitialVideoDevices();
-void InitializeAllProcessorFeatures();
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 void InitializeBasicMemcpy();
 
@@ -179,8 +178,7 @@ void Advanced_Kernel_Initialization(){
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
     HandleProccessorInitialization();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    InitializeAllProcessorFeatures();
-}
+ }
 
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
 
@@ -203,6 +201,7 @@ void StartDebugger(){
         //30, 30,
         //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
         1024, 768,
+        //640, 480,
         0x00, 
         &Charecteristics
     );
@@ -295,13 +294,15 @@ void CheckForPs2Mouse();
 void InitializeInternalChipsetHostDriver();
 uint8_t LouKeGetNumberOfStorageDevices();
 void InitializeFileSystemManager();
+void GenericVideoProtocolInitialize();
 
 static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
-){
+){    
     struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
     ParseMBootTags(mboot);
+    InitializeBasicMemcpy();
 
     //vga set for debug
     if(!LouKeMapEfiMemory()){
@@ -312,21 +313,15 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeMapPciMemory();
 
-    InitializeBasicMemcpy();
-
     SetupInitialVideoDevices();
-
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     Lou_kernel_early_initialization();
 
     InitializeGenericTables();
 
-
-
     Advanced_Kernel_Initialization();
 
     InitializeInternalChipsetHostDriver();
-
     //SETUP DEVICES AND DRIVERS
     LookForStorageDevices();
 
@@ -338,7 +333,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeFileSystemManager();
 
-    //ScanTheRestOfHarware();
+    ScanTheRestOfHarware();
 	
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
@@ -373,16 +368,15 @@ void InitializeUserSpace(){
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
-    LouUpdateWindow(
-        GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
-        GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
-        HWind
-    );    
+    //LouUpdateWindow(
+    //    GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
+    //    GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
+    //    HWind
+    //);    
     LouPrint("Hello World\n");
     
     //LouKeOpenPngImage("C:/ANNYA/AOSMC.PNG");
     
-    //while(1);
     UsrJmp(InitEntry);
 }
 

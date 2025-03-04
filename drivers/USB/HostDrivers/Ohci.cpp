@@ -160,12 +160,29 @@ functions and the host.
 
 
 void InitializeOhciDevice(P_PCI_DEVICE_OBJECT PDEV){
-    LouPrint("Initializing Ohci Devic\n");
+    return;
+    LouPrint("Initializing Ohci Device\n");
     PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
-    POPEN_HOST_CONTROLLER OhciDevice = (POPEN_HOST_CONTROLLER)LouKeHalGetPciVirtualBaseAddress(CommonConfig, 0);
+    POPEN_HOST_CONTROLLER_INTERFACE OhciDevice = (POPEN_HOST_CONTROLLER_INTERFACE)LouKeHalGetPciVirtualBaseAddress(CommonConfig, 0);
+
+    PLOUSB_HCD OhciHcd = LouKeMallocLousbHcd(1, sizeof(OHCI_HCD_PRIVATE_DATA), GET_ALIGNMENT(OHCI_HCD_PRIVATE_DATA));
+    POHCI_HCD_PRIVATE_DATA PrivateData = LousbHcdPrivToOhciPriv(OhciHcd);
+    PrivateData->Ohci = OhciDevice;
+    OhciHcd->HcdPollTimer = 100000;
 
     LouPrint("OHCI Is At Address:%h\n", OhciDevice);
 
+    LouPrint("OHCI Revision:%h\n", GET_OHCI_REVISION(OhciDevice));
 
-    //while(1);
+    PHCCA_PARTITION Hcca = (PHCCA_PARTITION)LouKeMallocEx(256, 256, WRITEABLE_PAGE | PRESENT_PAGE | UNCACHEABLE_PAGE);
+    uint64_t HccaPhysical = 0;
+
+    RequestPhysicalAddress((uint64_t)Hcca, &HccaPhysical);
+
+    OhciDevice->HcHCCA = HccaPhysical;
+
+
+
+    LouPrint("OHCI Initialization Success\n");
+    while(1);
 }

@@ -25,7 +25,7 @@ uint16_t CPU::CPUID::GetNumberOfProcessors(){
 
 CPU::CPUID::CPUID(){
 
-    CpuIdPacket = (PCPUID_PACKET)LouMalloc(sizeof(CPUID_PACKET));
+    CpuIdPacket = (PCPUID_PACKET)LouMallocEx(sizeof(CPUID_PACKET), GET_ALIGNMENT(CPUID_PACKET));
 
     CpuIdPacket->ProccessorId = UNKNOWNProc;
     CpuIdPacket->CpuVenId = UNKNOWNVen;
@@ -185,9 +185,3 @@ bool CPU::CPUID::IsFeatureSupported(FEATURE Feature){
 
 }
 
-LOUDDK_API_ENTRY
-void InitializeAllProcessorFeatures(){
-
-    
-
-}

@@ -37,7 +37,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
         if(TmpHandle->Neighbors.NextHeader){
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }else{
-            TmpHandle->Neighbors.NextHeader = (PListHeader)LouMalloc(sizeof(DRIVER_MODULE_HANDLES));
+            TmpHandle->Neighbors.NextHeader = (PListHeader)LouMallocEx(sizeof(DRIVER_MODULE_HANDLES), GET_ALIGNMENT(DRIVER_MODULE_HANDLES));
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }
     }

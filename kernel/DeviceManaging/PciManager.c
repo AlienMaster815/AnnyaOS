@@ -21,7 +21,7 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
         }
     }
 
-    Tmp->Neigbors.NextHeader = (PListHeader)LouMalloc(sizeof(PCI_MANAGER_DATA));
+    Tmp->Neigbors.NextHeader = (PListHeader)LouMallocEx(sizeof(PCI_MANAGER_DATA), GET_ALIGNMENT(PCI_MANAGER_DATA));
 
     Tmp = (PPCI_MANAGER_DATA)Tmp->Neigbors.NextHeader;
 

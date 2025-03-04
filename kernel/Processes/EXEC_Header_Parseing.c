@@ -19,8 +19,8 @@ void ParseExportTables(
 ){
 
     string ModuleName = (string)(ModuleStart + ExportTable->nameRva);
-    uint64_t* FunctionPointers = LouMalloc(ExportTable->numberOfNamePointers * sizeof(uint64_t));
-    string* FunctionNames = LouMalloc(sizeof(string*) * ExportTable->numberOfNamePointers);
+    uint64_t* FunctionPointers = LouMallocEx(ExportTable->numberOfNamePointers * sizeof(uint64_t), GET_ALIGNMENT(uint64_t));
+    string* FunctionNames = LouMallocEx(sizeof(string*) * ExportTable->numberOfNamePointers, GET_ALIGNMENT(string*));
 
     //LouPrint("ATR:%h\n",ExportTable->exportAddressTableRva);
     //LouPrint("NPR:%h\n",ExportTable->namePointerRva);

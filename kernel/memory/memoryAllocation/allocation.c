@@ -19,77 +19,6 @@ uint64_t GetRamSize();
 
 static spinlock_t MemmoryMapLock;
 
-RAMADD Lou_Alloc_Mem(SIZE size) {
-    return (RAMADD)LouMalloc(size);
-}
-
-STATUS Lou_Free_Mem(RAMADD Addr, SIZE size) {
-    LouFree(Addr);
-    return GOOD;
-}
-
-void* Lou_Calloc_Mem(size_t numElements, size_t sizeOfElement) {
-    // Check for overflow in the multiplication
-    if (numElements == 0 || sizeOfElement == 0 || SIZE_MAX / numElements < sizeOfElement) {
-        return NULL; // Overflow occurred, return NULL
-    }
-
-    // Calculate the total size needed
-    size_t totalSize = numElements * sizeOfElement;
-
-    // Allocate memory using malloc
-    void* ptr = Lou_Alloc_Mem(totalSize);
-
-    // Check if memory allocation was successful
-    if (ptr != NULL) {
-        // Clear the allocated memory by setting all bytes to zero
-        memset(ptr, 0, totalSize);
-    }
-
-    return ptr;
-}
-
-RAMADD Lou_Alloc_Mem_Alligned(SIZE size, uint64_t alignment) {
-    // Ensure the alignment is at least the size of a pointer and is a power of 2
-    if (alignment < sizeof(void*) || (alignment & (alignment - 1)) != 0) {
-        alignment = sizeof(void*); // Set minimum alignment to pointer size
-    }
-
-    // Allocate extra memory to ensure we can align properly within it
-    SIZE totalSize = size + alignment - 1 + sizeof(uintptr_t); // Include space to store the base address
-    uintptr_t rawAddress = (uintptr_t)Lou_Alloc_Mem(totalSize);
-
-    if (!rawAddress) {
-        return NULL; // Allocation failed
-    }
-
-    // Calculate the aligned memory address
-    uintptr_t alignedAddress = (rawAddress + sizeof(uintptr_t) + alignment - 1) & ~(alignment - 1);
-
-    // Store the original address just before the aligned address
-    *((uintptr_t*)(alignedAddress - sizeof(uintptr_t))) = rawAddress;
-
-    return (RAMADD)alignedAddress;
-}
-
-
-void LouFreeAlignedMemory(RAMADD alignedAddr, SIZE size) {
-    // Retrieve the original address stored just before the aligned address
-    uintptr_t originalAddress = *((uintptr_t*)((uintptr_t)alignedAddr - sizeof(uintptr_t)));
-
-    // Calculate the total size allocated originally
-    uintptr_t alignmentOffset = (uintptr_t)alignedAddr - originalAddress;
-    SIZE totalSize = size + alignmentOffset + sizeof(uintptr_t);
-
-    // Free the original memory block
-    Lou_Free_Mem((void*)originalAddress, totalSize);
-}
-
-void* LouMallocAlligned(SIZE size, uint64_t allignment){
-    return (void*)Lou_Alloc_Mem_Alligned(size,allignment);
-}
-
-
 struct master_multiboot_mmap_entry* LousineMemoryMapTable;
 
 void SendMapToAllocation(struct master_multiboot_mmap_entry* mmap) {
@@ -99,6 +28,47 @@ void SendMapToAllocation(struct master_multiboot_mmap_entry* mmap) {
 struct master_multiboot_mmap_entry* LouKeGetMemoryMapTable(){
     return LousineMemoryMapTable;
 }
+
+typedef struct _LOU_MALLOC_TRACKER{
+    uint64_t    Address;
+    uint64_t    size;
+}LOU_MALLOC_TRACKER, * PLOU_MALLOC_TRACKER;
+
+typedef struct _MEMORY_CHUNK{
+    ListHeader TrackLink;
+    uint64_t PAddress;
+    uint64_t VAddress;
+    uint64_t ChunkSize;
+}MEMORY_CHUNK, * PMEMORY_CHUNK;
+
+typedef struct _KMALLOC_PAGE_TRACK{
+    ListHeader      Chain;
+    uint64_t        Flags;
+    MEMORY_CHUNK    Chunk;
+}KMALLOC_PAGE_TRACK, * PKMALLOC_PAGE_TRACK;
+
+typedef struct _KMALLOC_VMEM_TRACK{
+    ListHeader  Chain;
+    uint64_t    VAddress;
+    uint64_t    size;
+}KMALLOC_VMEM_TRACK, * PKMALLOC_VMEM_TRACK;
+
+
+UNUSED static KMALLOC_PAGE_TRACK    PageTracks;
+UNUSED static size_t                PageTracksCount = 0;
+UNUSED static KMALLOC_VMEM_TRACK    VMemTracks;
+UNUSED static size_t                VMemTracksCount = 0;
+
+UNUSED static KMALLOC_PAGE_TRACK    PageTracksPhy;
+UNUSED static size_t                PageTracksCountPhy = 0;
+UNUSED static KMALLOC_VMEM_TRACK    VMemTracksPhy;
+UNUSED static size_t                VMemTracksCountPhy = 0;
+
+UNUSED volatile PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
+UNUSED static volatile uint64_t      AllocationBlocksConfigured = 0; 
+UNUSED static volatile uint32_t      TotalAllocations[100] = {0};
+#define CURRENT_ALLOCATION_BLOCK AllocationBlocksConfigured - 1
+
 
 #define LongLongBitDemention 64
 #define LongLongBitDimension 64
@@ -150,9 +120,17 @@ uint64_t GetAllocationBlockSize(uint64_t Address){
     LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
     for(uint16_t i = 0; i < AddressesLogged; i++){
-        if((AddressBlock[i].Address <= Address) && ((AddressBlock[i].Address + AddressBlock[i].size) > Address)){
+        if(AddressBlock[i].Address == Address){
             LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-            return AddressBlock[i].size - (Address - AddressBlock[i].Address);
+            return AddressBlock[i].size;
+        }
+    }
+    for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
+        for (uint32_t i = 0; i < TotalAllocations[k]; i++) {
+            if(AllocationBlocks[k][i].Address == Address){
+                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                return AllocationBlocks[k][i].size;
+            }
         }
     }
     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
@@ -299,28 +277,8 @@ void ListUsedAddresses(){
 }
 
 uint64_t SearchForMappedAddressSize(uint64_t Address){
-    LouKIRQL OldIrql;
-    LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
-    for(uint32_t i = 0; i < AddressesLogged; i++){
-        if(Address == AddressBlock[i].Address){
-            uint64_t size = AddressBlock[i].size; 
-            LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-            return size;
-        }
-    }
-    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-    return 0x00;
+    return GetAllocationBlockSize(Address);
 }
-
-typedef struct _LOU_MALLOC_TRACKER{
-    uint64_t    Address;
-    uint64_t    size;
-}LOU_MALLOC_TRACKER, * PLOU_MALLOC_TRACKER;
-
-UNUSED volatile PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
-UNUSED static volatile uint64_t      AllocationBlocksConfigured = 0; 
-UNUSED static volatile uint32_t      TotalAllocations[100] = {0};
-#define CURRENT_ALLOCATION_BLOCK AllocationBlocksConfigured - 1
 
 void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
     uint16_t Number_Of_Entries = (LousineMemoryMapTable->tag.size - sizeof(struct master_multiboot_mmap_entry)) / LousineMemoryMapTable->entry_size;
@@ -570,36 +528,6 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
     return NULL;
 }
 
-
-typedef struct _MEMORY_CHUNK{
-    ListHeader TrackLink;
-    uint64_t PAddress;
-    uint64_t VAddress;
-    uint64_t ChunkSize;
-}MEMORY_CHUNK, * PMEMORY_CHUNK;
-
-typedef struct _KMALLOC_PAGE_TRACK{
-    ListHeader      Chain;
-    uint64_t        Flags;
-    MEMORY_CHUNK    Chunk;
-}KMALLOC_PAGE_TRACK, * PKMALLOC_PAGE_TRACK;
-
-typedef struct _KMALLOC_VMEM_TRACK{
-    ListHeader  Chain;
-    uint64_t    VAddress;
-    uint64_t    size;
-}KMALLOC_VMEM_TRACK, * PKMALLOC_VMEM_TRACK;
-
-
-UNUSED static KMALLOC_PAGE_TRACK    PageTracks;
-UNUSED static size_t                PageTracksCount = 0;
-UNUSED static KMALLOC_VMEM_TRACK    VMemTracks;
-UNUSED static size_t                VMemTracksCount = 0;
-
-UNUSED static KMALLOC_PAGE_TRACK    PageTracksPhy;
-UNUSED static size_t                PageTracksCountPhy = 0;
-UNUSED static KMALLOC_VMEM_TRACK    VMemTracksPhy;
-UNUSED static size_t                VMemTracksCountPhy = 0;
 
 //static spinlock_t LouKeMallocLock;
 

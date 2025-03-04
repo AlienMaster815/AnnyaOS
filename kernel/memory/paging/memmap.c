@@ -34,7 +34,7 @@ void LouKeMallocPageFrameNumber(
     CurrentEntry->PresentPage       = true;
     CurrentEntry->Flags             = Flags;
     CurrentEntry->PageAddress       = PageAddress;
-    CurrentEntry->Chain.NextHeader  = (PListHeader)LouMalloc(sizeof(LOU_PFN_TABLE_ENTRY));
+    CurrentEntry->Chain.NextHeader  = (PListHeader)LouMallocEx(sizeof(LOU_PFN_TABLE_ENTRY), GET_ALIGNMENT(LOU_PFN_TABLE_ENTRY));
     PageFrameCount++;
 }
 

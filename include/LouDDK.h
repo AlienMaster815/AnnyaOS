@@ -168,9 +168,6 @@ KERNEL_IMPORT uint32_t inl(uint64_t port);
 KERNEL_IMPORT void outl(uint64_t port, uint32_t data);
 KERNEL_IMPORT void outbSlow(uint64_t port,uint8_t data);
 //MEMMORY ALLOCATION
-KERNEL_IMPORT RAMADD Lou_Alloc_Mem(SIZE size);
-KERNEL_IMPORT STATUS Lou_Free_Mem(RAMADD Addr, SIZE size);
-//Errors
 KERNEL_IMPORT void LouPanic(char*,STATUS);
 //STD Library
 KERNEL_IMPORT void* memset(void* dest, int value, size_t count);

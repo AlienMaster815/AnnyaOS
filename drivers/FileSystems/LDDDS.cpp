@@ -203,7 +203,7 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
 
         CurrentDevice -= i;
         i++; //add room for null terminator
-        string NewString = (string)LouMalloc(i);
+        string NewString = (string)LouMallocEx(i, GET_ALIGNMENT(char));
 
         for(size_t j = 0 ; j < i; j++){
             if(j == (i - 1)){

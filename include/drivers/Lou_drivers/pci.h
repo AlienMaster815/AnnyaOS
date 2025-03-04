@@ -181,15 +181,7 @@ LOUDDK_API_ENTRY void checkFunction(uint8_t bus, uint8_t device, uint8_t functio
 LOUDDK_API_ENTRY void PCI_Scan_Bus();
 LOUDDK_API_ENTRY void Sata_init(P_PCI_DEVICE_OBJECT PDEV);
 
-class PCI{
 
-	public:
-		P_PCIBuffer PCI_Read(P_PCIDEV Device);
-		void PCI_Write(P_PCIDEV Device, P_PCIBuffer buffer);
-
-	private:
-
-};
 
 
 class BaseAddressRegister {
@@ -218,8 +210,6 @@ BaseAddressRegister GetAllIoSpaces(P_PCI_DEVICE_OBJECT PDEV);
 
 
 //Is C Land
-P_PCIBuffer PCI_Read(P_PCIDEV Device);
-void PCI_Write(P_PCIDEV Device, P_PCIBuffer buffer);
 void PCI_Setup();
 
 bool PciEnableDevice(uint8_t bus, uint8_t slot, uint8_t function);
@@ -230,8 +220,6 @@ uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_
 
 uint8_t pciConfigReadByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
 
-P_PCIBuffer PCI_Read(P_PCIDEV Device);
-void PCI_Write(P_PCIDEV Device, P_PCIBuffer buffer);
 
 uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
 

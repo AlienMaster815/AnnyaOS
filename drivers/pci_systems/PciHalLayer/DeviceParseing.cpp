@@ -98,7 +98,7 @@ PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
     }
     PciData = LouKeGetPciDataTable();
 
-    PPCI_DEVICE_GROUP* Result = (PPCI_DEVICE_GROUP*)LouMalloc(sizeof(PPCI_DEVICE_GROUP) * LocalMembers);
+    PPCI_DEVICE_GROUP* Result = (PPCI_DEVICE_GROUP*)LouMallocEx(sizeof(PPCI_DEVICE_GROUP) * LocalMembers, GET_ALIGNMENT(PPCI_DEVICE_GROUP));
 
     // Second pass: Populate Result with matching devices
     uint8_t index = 0;

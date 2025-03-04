@@ -64,7 +64,7 @@ void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, 
         if(TmpRouter->List.NextHeader){
             TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
         }else{
-            TmpRouter->List.NextHeader = (PListHeader)LouMalloc(sizeof(INTERRUPT_ROUTER_ENTRY));
+            TmpRouter->List.NextHeader = (PListHeader)LouMallocEx(sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY));
             TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
         }
     }
@@ -166,6 +166,8 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         LouKeReleaseSpinLock(&InterruptLock, &Irql);
         return;
     }
+    local_apic_send_eoi();
+    LouKeReleaseSpinLock(&InterruptLock, &Irql);
     return;
 
 	LouPrint("Interrupt Number: %d Was Called\n",Interrupt);

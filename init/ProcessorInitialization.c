@@ -76,14 +76,16 @@ void InitializeXSave();
 void HandleProccessorInitialization(){
     //the processor should be up by now
     //for apic however now we need to 
-    //register our processor core feats
+    //register our processor core
+    //features
     unsigned int  rax, rbx, rcx, rdx;
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
-    if(rcx & (1 << 26)){
-        InitializeXSave();
-        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
-    }
+    //if(rcx & (1 << 26)){
+    //    InitializeXSave();
+    //    LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
+    //    while(1);
+    //}
     if(rdx & (1 << 24)){
         enable_fxsave();
         LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);        

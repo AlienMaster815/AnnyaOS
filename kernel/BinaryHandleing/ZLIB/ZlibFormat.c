@@ -70,7 +70,7 @@ uint32_t LouKeZlibReadBits(PZLIB_STREAM Stream, int Count, uint8_t DataTypeNibbl
         Stream->BitBuffer = 0;
         Stream->BitIndex = 0;
         for(uint8_t j = 0; j < 4; j++){
-            Stream->BitBuffer |= Stream->Input[j + Stream->InputPosition] << (j * 8);
+            Stream->BitBuffer |= (Stream->Input[j + Stream->InputPosition] << (j * 8));
         }
         Stream->InputPosition += 4;
     }
@@ -117,11 +117,14 @@ uint32_t LouKeZlibReadBits(PZLIB_STREAM Stream, int Count, uint8_t DataTypeNibbl
 
 
 void LouKeZlibSetStreamIndex(PZLIB_STREAM Stream, size_t StartOffset, uint8_t BitIndex) {
+    if(StartOffset > 0){
+        StartOffset -= 1;
+    }
     Stream->BitBuffer = 0;
     Stream->BitIndex = BitIndex;
     Stream->InputPosition = StartOffset + 4;
     for(uint8_t i = 0; i < 4; i++){
-        Stream->BitBuffer |= Stream->Input[i + StartOffset] << (i * 8);
+        Stream->BitBuffer |= (Stream->Input[i + StartOffset] << (i * 8));
     }
 }
 

@@ -9,7 +9,6 @@ LOUSTATUS LouKeSetRsdp(uintptr_t RSDP, uint8_t Type);
 LOUSTATUS LouKeSetApm(struct multiboot_tag_apm* APM);
 void SetEfiMap(uint64_t Map);
 
-struct multiboot_tag_vbe VBE_INFO;
 
 void handle_module(
     uintptr_t ModuleStart,
@@ -17,6 +16,8 @@ void handle_module(
 );
 
 extern bool GOPIsUnsable;
+
+void SetBootVbe(struct multiboot_tag_vbe VbeInfo);
 
 void ParseMBootTags(struct multiboot_tag* MBOOT) {
 
@@ -48,12 +49,9 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
             break;
         }
         case (MULTIBOOT_TAG_TYPE_VBE): {
-            //struct multiboot_tag_vbe* vbe_tag = (struct multiboot_tag_vbe*)MBOOT;
-            // Access VBE information from vbe_tag
-            // Example: uint16_t vbe_mode = vbe_tag->vbe_mode;
-            //VBE_INFO = vbe_tag;
-
-            while(1);
+            struct multiboot_tag_vbe* vbe_tag = (struct multiboot_tag_vbe*)MBOOT;
+            EnforceSystemMemoryMap(vbe_tag->vbe_mode_info.framebuffer, ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE));
+            SetBootVbe(*vbe_tag);
             break;
         }
         case (MULTIBOOT_TAG_TYPE_APM): {

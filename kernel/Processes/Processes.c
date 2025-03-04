@@ -77,7 +77,7 @@ LouKeCreateBinaryObjectLog(
         (size_t)      ActiveWin32Binaries
     );
     //Create A New Object
-    NewObject = (PLOADED_WIN32_BINARY_OBJECT)LouMallocEx(sizeof(LOADED_WIN32_BINARY_OBJECT) ,1);
+    NewObject = (PLOADED_WIN32_BINARY_OBJECT)LouMallocEx(sizeof(LOADED_WIN32_BINARY_OBJECT) ,GET_ALIGNMENT(LOADED_WIN32_BINARY_OBJECT));
     CurrentListEnd->Neighbors.NextHeader = (PListHeader)NewObject;
     ActiveWin32Binaries++;
     LouKeReleaseSpinLock(
@@ -108,7 +108,7 @@ LOUSTATUS LouKeMallocBinarySectionLogs(
     }
 
     BinaryObject->SectionCount = NumberOfLogs;
-    BinaryObject->SectionObject = (PSECTION_HEADER)LouMallocEx((sizeof(SECTION_HEADER) * NumberOfLogs), 1); 
+    BinaryObject->SectionObject = (PSECTION_HEADER)LouMallocEx((sizeof(SECTION_HEADER) * NumberOfLogs), GET_ALIGNMENT(SECTION_HEADER)); 
     return STATUS_SUCCESS;
 }
 
@@ -166,7 +166,7 @@ static inline PBUTTON_BINARY_LOG CreateButtonLog(PLOADED_WIN32_BINARY_OBJECT Bin
         }
     }   
 
-    PBUTTON_BINARY_LOG NewLog = LouMalloc(sizeof(BUTTON_BINARY_LOG));
+    PBUTTON_BINARY_LOG NewLog = LouMallocEx(sizeof(BUTTON_BINARY_LOG), GET_ALIGNMENT(BUTTON_BINARY_LOG));
     TmpLog->Neighbors.NextHeader = (PListHeader)NewLog;
     return NewLog;
 }

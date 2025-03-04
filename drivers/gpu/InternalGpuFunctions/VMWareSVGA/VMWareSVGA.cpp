@@ -97,7 +97,6 @@ LOUSTATUS VmwSetupPciResources(
 ){
     P_PCI_DEVICE_OBJECT PDEV = VmwPrivate->PDEV;
     PPCI_COMMON_CONFIG PciConfig = &VmwPrivate->PrivatePciConfig;
-
     LouKeHalPciSetMaster(PDEV);
 
     if(PciConfig->Header.DeviceID == VMWSVGA_SVGA_III_ID){
@@ -126,6 +125,26 @@ LOUSTATUS VmwSetupPciResources(
          (!VmwPrivate->VRamLimit) || 
          (!VmwPrivate->FifoBase) || 
          (!VmwPrivate->FifoLimit)){
+
+            LouPrint("ERROR Getting PciRecources For VMWSVGA II\n");
+
+            if(!VmwPrivate->IoStart){
+                LouPrint("ERROR BAR:0\n");
+            }
+            if(!VmwPrivate->VRamStart){
+                LouPrint("ERROR BAR:1 Address\n");
+            }
+            if(!VmwPrivate->VRamLimit){
+                LouPrint("ERROR BAR:1 Size\n");
+            }
+            if(!VmwPrivate->FifoBase){
+                LouPrint("ERROR BAR:2 Address\n");
+            }
+            if(!VmwPrivate->FifoLimit){
+                LouPrint("ERROR BAR:2 Size\n");
+            }
+
+            while(1);
             DEBUG_TRAP;
             return STATUS_NO_SUCH_DEVICE;
         }
@@ -183,11 +202,10 @@ LOUSTATUS VMWLoadDriver(PVMW_PRIVATE VmwPrivate){
 }
 
 LOUSTATUS VmwSetMode(PVMW_PRIVATE VmwPrivate, uint32_t Width, uint32_t Height) {
-    uint32_t Bpp = 32;
     // Set the mode width, height, and bits per pixel
     VmwWrite(VmwPrivate, SVGA_REG_WIDTH, Width);
     VmwWrite(VmwPrivate, SVGA_REG_HEIGHT, Height);
-    VmwWrite(VmwPrivate, SVGA_REG_BITS_PER_PIXEL, Bpp);
+    VmwWrite(VmwPrivate, SVGA_REG_BITS_PER_PIXEL, 32);
 
     // Store the framebuffer width and height in the private structure for later use
     VmwPrivate->FbWidth = Width;
@@ -199,6 +217,10 @@ LOUSTATUS VmwSetMode(PVMW_PRIVATE VmwPrivate, uint32_t Width, uint32_t Height) {
     return STATUS_SUCCESS;
 }
 
+void VmwBoxSvgaBlitCopy(void* Destination, void* Source, uint64_t Size){
+    //TODO: Set up the 3d Acelleration
+    memcpy(Destination, Source, Size);
+}
 
 void VmwPutPixelRgbEx(
     PDrsdVRamObject FBDEV,
@@ -208,7 +230,7 @@ void VmwPutPixelRgbEx(
 ) {
     // Calculate bytes per pixel from the bits per pixel setting
     uint32_t bytes_per_pixel = FBDEV->FrameBuffer.Bpp / 8;
-    uint8_t* framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.FramebufferBase;
+    uint8_t* framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.SecondaryFrameBufferBase;
 
     // Ensure x and y are within the screen bounds
     if (x >= FBDEV->FrameBuffer.Width || y >= FBDEV->FrameBuffer.Height) {
@@ -242,25 +264,31 @@ LOUSTATUS InitVMWareSVGA(P_PCI_DEVICE_OBJECT PDEV){
 
     //DEBUG_TRAP;
     LouKeHalEnablePciDevice(PDEV);
-    PVMW_PRIVATE VmwPrivate = (PVMW_PRIVATE)LouMalloc(sizeof(VMW_PRIVATE));
+
+    PVMW_PRIVATE VmwPrivate = (PVMW_PRIVATE)LouKeMallocEx(sizeof(VMW_PRIVATE), GET_ALIGNMENT(VMW_PRIVATE), WRITEABLE_PAGE | PRESENT_PAGE);
+    
     LouKeHalGetPciConfiguration(PDEV, &VmwPrivate->PrivatePciConfig);
+    
     VmwPrivate->PDEV = PDEV;
     VMWLoadDriver(VmwPrivate);
 
     VmwSetMode(VmwPrivate, 1920, 1080);
 
+
     PDEV->DeviceExtendedObject = (uintptr_t)VmwPrivate;
 
-    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouMalloc(sizeof(DrsdStandardFrameworkObject));
+    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(DrsdStandardFrameworkObject), WRITEABLE_PAGE | PRESENT_PAGE);
 
     DrsdFrameWork->RgbPutPixel = VmwPutPixelRgbEx;
+    DrsdFrameWork->SecondaryFrameBuffer = VmwPrivate->VRamStart + (1920 * 1080 * 4);
+    DrsdFrameWork->BlitCopy = VmwBoxSvgaBlitCopy;
 
     LouKeRegisterFrameBufferDevice(
         (void*)PDEV, 
         VmwPrivate->VRamStart, 
+        DrsdFrameWork->SecondaryFrameBuffer,
         0x00,
-        0x00,
-        VmwPrivate->VRamLimit, 
+        (1920 * 1080 * 4), 
         1920, 1080,
         32, 
         RGB_DRSD_FRAMEBUFFER,
@@ -269,7 +297,7 @@ LOUSTATUS InitVMWareSVGA(P_PCI_DEVICE_OBJECT PDEV){
     );
 
     LouKeDrsdPciResetScreen(PDEV);
-    
+
     StartDebugger();
 
     LouPrint("Done Initializing VMWareSVGA Adapter\n");

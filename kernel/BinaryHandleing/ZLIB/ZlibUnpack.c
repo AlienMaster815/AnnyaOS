@@ -12,7 +12,8 @@ LOUSTATUS LouKeZlibUnpackStream(uint8_t* OutputStream, size_t* OutputStreamSize,
     }
 
     ZLIB_STREAM DataStream = {InputStream, InputLength, 0};
-    LouKeZlibSetStreamIndex(&DataStream, 2, 0);
+    LouKeZlibSetStreamIndex(&DataStream, 3, 0); //hufman information starts at byte 3
+
     do {
         FinalBlock = (LouKeZlibReadBits(&DataStream, 1, ZLIB_LE)) ? 1  : 0;
         BlockType = (uint8_t)LouKeZlibReadBits(&DataStream, 2, ZLIB_LE);
@@ -32,6 +33,8 @@ LOUSTATUS LouKeZlibUnpackStream(uint8_t* OutputStream, size_t* OutputStreamSize,
                 Status = LouKeZlibUnpackDynamicHuffman(&DataStream, &OutputPosition, OutputStream);
                 break;
             default:
+                LouPrint("STATUS_UNSUCCESSFUL\n");
+                while(1);
                 return STATUS_UNSUCCESSFUL;   
         }
     

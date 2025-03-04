@@ -76,10 +76,7 @@ extern uint64_t Get64BitValueFromAddress(uint64_t Address);
 
 void LouKeFreePhysical(void* AddressToFree);
 
-RAMADD Lou_Alloc_Mem(SIZE size);
-STATUS Lou_Free_Mem(RAMADD Addr, SIZE size);
-void* Lou_Calloc_Mem(size_t numElements, size_t sizeOfElement);
-RAMADD Lou_Alloc_Mem_Alligned(SIZE size,uint64_t allignment);
+
 void LouFree(RAMADD Addr);
 void* LouMalloc(size_t BytesToAllocate);
 void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);

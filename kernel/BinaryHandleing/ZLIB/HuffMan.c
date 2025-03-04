@@ -223,12 +223,18 @@ LOUSTATUS LouKeZlibUnpackDynamicHuffman(
         memset(&TreeData[i], 0, sizeof(HUFFMAN_TREE));
     }
 
-    LouKeZlibSetStreamIndex(Stream, 2, 3);
-    uint16_t HILT  = (uint16_t)(LouKeZlibReadBits(Stream, 5, ZLIB_LE) + 257);
+    LouKeZlibSetStreamIndex(Stream, 4, 0);
+    uint16_t HLIT  = (uint16_t)(LouKeZlibReadBits(Stream, 5, ZLIB_LE) + 257);
     uint16_t HDIST = (uint16_t)(LouKeZlibReadBits(Stream, 5, ZLIB_LE) + 1);
     uint16_t HCLEN = (uint16_t)(LouKeZlibReadBits(Stream, 4, ZLIB_LE) + 4);
     uint16_t Symbol = 0;
     
+    LouPrint("HLIT :%d\n",   HLIT);
+    LouPrint("HDIST:%d\n",  HDIST);
+    LouPrint("HCLEN:%d\n",  HCLEN);
+    LouPrint("Here\n");
+    while(1);
+
     for(i = 0; i < HCLEN; i++){
         CodeLengths[CodeLengthsOrder[i]] = LouKeZlibReadBits(Stream, 3, ZLIB_LE);
     }
@@ -239,53 +245,52 @@ LOUSTATUS LouKeZlibUnpackDynamicHuffman(
 
     i = 0;
 
-    while(i < (HILT + HDIST)){
+    while(i < (HLIT + HDIST)){
         Symbol = HuffmanDecode(Stream, &TreeData[CODE_LENGTH_TREE]);
     
         //LouPrint("Symbol i:%d :: %h\n",i, Symbol);
 
         if(Symbol <= 15){
-            if(i < HILT){
+            if(i < HLIT){
                 LitLenCodeLengths[i++] = Symbol;
             } else {
-                DistCodeLengths[i++ - HILT] = Symbol;
+                DistCodeLengths[i++ - HLIT] = Symbol;
             }
         } else if(Symbol == 16) {
             RepeatCount = LouKeZlibReadBits(Stream, 2, ZLIB_LE) + 3;
             LastValue = (i == 0) ? 0 : LitLenCodeLengths[i - 1];
-            for(j = 0; j < RepeatCount && i < (HILT + HDIST); j++){
-                if(i < HILT){
+            for(j = 0; j < RepeatCount && i < (HLIT + HDIST); j++){
+                if(i < HLIT){
                     LitLenCodeLengths[i++] = LastValue;
                 } else {
-                    DistCodeLengths[i++ - HILT] = LastValue;
+                    DistCodeLengths[i++ - HLIT] = LastValue;
                 }
             }
         } else if(Symbol == 17) {
             RepeatCount = LouKeZlibReadBits(Stream, 3, ZLIB_LE) + 3;
-            for(j = 0; j < RepeatCount && i < (HILT + HDIST); j++){
-                if(i < HILT){
+            for(j = 0; j < RepeatCount && i < (HLIT + HDIST); j++){
+                if(i < HLIT){
                     LitLenCodeLengths[i++] = 0;
                 } else {
-                    DistCodeLengths[i++ - HILT] = 0;
+                    DistCodeLengths[i++ - HLIT] = 0;
                 }
             }
         } else if(Symbol == 18) {
             RepeatCount = LouKeZlibReadBits(Stream, 7, ZLIB_LE) + 11;
-            for(j = 0; j < RepeatCount && i < (HILT + HDIST); j++){
-                if(i < HILT){
+            for(j = 0; j < RepeatCount && i < (HLIT + HDIST); j++){
+                if(i < HLIT){
                     LitLenCodeLengths[i++] = 0;
                 } else {
-                    DistCodeLengths[i++ - HILT] = 0;
+                    DistCodeLengths[i++ - HLIT] = 0;
                 }
             }           
         }
     }
 
-    BuildHuffmanTree(&TreeData[LITLEN_TREE],LitLenCodeLengths, HILT);
-    while(1);
+    BuildHuffmanTree(&TreeData[LITLEN_TREE],LitLenCodeLengths, HLIT);
 
     if(
-        (BuildHuffmanTree(&TreeData[LITLEN_TREE],LitLenCodeLengths, HILT) != STATUS_SUCCESS) ||
+        (BuildHuffmanTree(&TreeData[LITLEN_TREE],LitLenCodeLengths, HLIT) != STATUS_SUCCESS) ||
         (BuildHuffmanTree(&TreeData[DIST_TREE], DistCodeLengths, HDIST) != STATUS_SUCCESS)
     ){
         goto _ZLIB_HUFFMAN_DYNAMIC_UNPACK_FAILED;

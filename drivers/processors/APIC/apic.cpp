@@ -250,7 +250,6 @@ void cpu_set_apic_base(uintptr_t apic) {
    write_msr(IA32_APIC_BASE_MSR, msr_value);
 }
 
-LOUDDK_API_ENTRY void InitializeAllProcessorFeatures();
 
 LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     LOUSTATUS Status = LOUSTATUS_GOOD;
@@ -291,8 +290,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
         HeaderEndAddress
     );
 
-    Cpu = (CPU::CPUID*)LouMalloc(sizeof(CPU::CPUID));
-    Lapic = (APIC::LAPIC*)LouMalloc(sizeof(APIC::LAPIC));
+    Cpu = (CPU::CPUID*)LouMallocEx(sizeof(CPU::CPUID), GET_ALIGNMENT(CPU::CPUID));
+    Lapic = (APIC::LAPIC*)LouMallocEx(sizeof(APIC::LAPIC), GET_ALIGNMENT(APIC::LAPIC));
 
     if(Lapic->InitializeApic())LouPrint("APIC ENABLED SUCCESSFULLY\n");
 
@@ -311,8 +310,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
             return false;
         }
     }
-
-    InitializeAllProcessorFeatures();
 
 
     LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);

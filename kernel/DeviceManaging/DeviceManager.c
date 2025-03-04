@@ -66,7 +66,7 @@ LOUSTATUS LouKeRegisterDevice(
     }
     
     if(!FoundTable){
-        TmpDevice->TableStart.NextHeader = LouMalloc(sizeof(DEVICE_DIRECTORY_TABLE));
+        TmpDevice->TableStart.NextHeader = LouMallocEx(sizeof(DEVICE_DIRECTORY_TABLE), GET_ALIGNMENT(DEVICE_DIRECTORY_TABLE));
         TmpDevice = (PDEVICE_DIRECTORY_TABLE)TmpDevice->TableStart.NextHeader;
     }
     TmpDevice->PDEV = PDEV;

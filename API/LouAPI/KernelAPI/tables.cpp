@@ -172,7 +172,7 @@ void LouKeInitializeLibraryLookup(
     volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries;
     for(i = 0; i < DynamicLoadedLibrarieCount; i++){
         if(!Tmp->Neighbors.NextHeader){
-            Tmp->Neighbors.NextHeader = (ListHeader*)LouMalloc(sizeof(TableTracks));
+            Tmp->Neighbors.NextHeader = (ListHeader*)LouMallocEx(sizeof(TableTracks), GET_ALIGNMENT(TableTracks));
         }
         Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
     }
@@ -797,7 +797,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
                 return Tmp->Table.VirtualAddress[j];
             }
         }
-        LouPrint("Module:%s\n",Tmp->Table.ModuleName);
+        //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
         if(Tmp->Neighbors.NextHeader){
             Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
         }

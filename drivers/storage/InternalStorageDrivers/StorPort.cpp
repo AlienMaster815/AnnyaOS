@@ -52,9 +52,10 @@ LOUSTATUS LookForStorageDevices(){
                     if(!AhciDriverEntryPoint){
                         continue;
                     }
-                    AhciDriverObject = (PDRIVER_OBJECT)LouMalloc(sizeof(DRIVER_OBJECT));
-                    AhciDriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMalloc(sizeof(DRIVER_EXTENSION));
+                    AhciDriverObject = (PDRIVER_OBJECT)LouMallocEx(sizeof(DRIVER_OBJECT), GET_ALIGNMENT(DRIVER_OBJECT));
+                    AhciDriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION));
                     AhciDriverEntryPoint(AhciDriverObject, 0x00);
+                    AhciDriverLoaded = true;
                 }
 
                 uint64_t Device = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)AhciDriverObject->DeviceTable);
@@ -63,16 +64,18 @@ LOUSTATUS LookForStorageDevices(){
                     continue;
                 }
 
-                PDEVICE_OBJECT NtPdev = (PDEVICE_OBJECT)LouMalloc(sizeof(PDEVICE_OBJECT));
+                PDEVICE_OBJECT NtPdev = (PDEVICE_OBJECT)LouKeMallocEx(sizeof(PDEVICE_OBJECT), GET_ALIGNMENT(PDEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
                 //by default Ahci uses LDM
+
                 NtPdev->PDEV = PDEV;
                 NtPdev->DeviceID = Device;
                 NTSTATUS ReturnStatus = STATUS_NO_SUCH_DEVICE;
+
                 if(AhciDriverObject->DriverExtension->AddDevice){
                     ReturnStatus = AhciDriverObject->DriverExtension->AddDevice(AhciDriverObject, NtPdev);
                 }
                 if(ReturnStatus == STATUS_NO_SUCH_DEVICE){
-                    LouFree((RAMADD)NtPdev);
+                    LouKeFree((RAMADD)NtPdev);
                 }
                 //todo add module to module list
             }

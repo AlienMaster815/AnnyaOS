@@ -18,16 +18,6 @@ bool PciExternalModuleScan(uint8_t bus, uint8_t slot, uint8_t func);
 
 LOUDDK_API_ENTRY void scan_pci_bridges();
 
-DRIVER_IO_FUNCTION P_PCIBuffer PCI::PCI_Read(P_PCIDEV Device) {
-    P_PCIBuffer PCIBuff = (P_PCIBuffer)Lou_Alloc_Mem(sizeof(PCIBuffer));
-
-
-    return PCIBuff;
-}
-
-DRIVER_IO_FUNCTION void PCI::PCI_Write(P_PCIDEV Device, P_PCIBuffer buffer) {
-
-}
 
 bool IsPciBus(uint8_t bus, uint8_t slot, uint8_t func);
 
@@ -112,18 +102,6 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 }
 
 // C Land
-
-P_PCIBuffer PCI_Read(P_PCIDEV Device) {
-    P_PCIBuffer PCIBuff;
-    PCI Read;
-    PCIBuff = Read.PCI_Read(Device);
-    return PCIBuff;
-}
-
-void PCI_Write(P_PCIDEV Device, P_PCIBuffer buffer) {
-    PCI Write;
-    Write.PCI_Write(Device, buffer);
-}
 
 LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     return pciConfigReadByte(PDEV->bus,PDEV->slot,PDEV->func, Offset);
@@ -210,10 +188,10 @@ void ScanTheRestOfHarware(){
         PDRIVER_OBJECT DriverObject;
         DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
         if(!DriverObject->DriverExtension){
-            DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMalloc(sizeof(DRIVER_EXTENSION));
+            DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION));
             Driver(DriverObject, (PUNICODE_STRING)DriverPath);
         }
-        PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouMalloc(sizeof(DEVICE_OBJECT));
+        PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouMallocEx(sizeof(DEVICE_OBJECT), GET_ALIGNMENT(DEVICE_OBJECT));
         if(DriverObject->DriverUsingLkdm){
             PlatformDevice->PDEV = PDEV;
             if(DriverObject->DeviceTable){ 

@@ -72,7 +72,7 @@ PLMPOOL_DIRECTORY LouKeMapPool(
         }
     }
 
-    PLMPOOL_DIRECTORY NewDir = (PLMPOOL_DIRECTORY)LouMalloc(sizeof(LMPOOL_DIRECTORY));
+    PLMPOOL_DIRECTORY NewDir = (PLMPOOL_DIRECTORY)LouMallocEx(sizeof(LMPOOL_DIRECTORY), GET_ALIGNMENT(LMPOOL_DIRECTORY));
 
     InitializePool(
                 (uint64_t)Tmp,

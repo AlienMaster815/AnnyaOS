@@ -24,6 +24,9 @@ void LouKeDrsdResetScreen(uint8_t Gpu){
            }   
         }
     }
+    if(FBDEV->FrameWorkReference->BlitCopy){
+        FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
+    }
 }
 
 void LouKeDrsdResetFBDEV(uint64_t* FBDEV){
@@ -59,7 +62,6 @@ void LouKeDrsdPciResetScreen(P_PCI_DEVICE_OBJECT PDEV){
         FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
     }
 }
-
 
 void LouKeDrsdPutPixelMirroredEx(
     uint16_t x, uint16_t y, 

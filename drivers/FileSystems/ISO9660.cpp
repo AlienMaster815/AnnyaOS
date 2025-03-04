@@ -353,7 +353,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
     //Create A File System Structure
     if((PVD.Type == ISO_PrimaryVolumeDescriptor) && (strncmp(PVD.Identifier, "CD001", 5) == 0) && (PVD.Version == 0x01)){
-        PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMalloc(sizeof(LOUSINE_KERNEL_FILESYSTEM));
+        PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM));
         Iso9660FileSystem->PortID = PortID;
         Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
         Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
@@ -367,7 +367,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
 LOUDDK_API_ENTRY
 LOUSTATUS Iso9660DriverEntry(){
 
-    PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMalloc(sizeof(LOUSINE_KERNEL_FILESYSTEM));
+    PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM));
 
     Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
 

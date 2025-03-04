@@ -9,7 +9,7 @@ typedef struct {
 LOUSTATUS LouKeCreateStack(Stack* stack,uint64_t StackSize) {
     LOUSTATUS Status = LOUSTATUS_GOOD;
 
-    uint8_t* Address = (uint8_t*)LouMalloc(StackSize);
+    uint8_t* Address = (uint8_t*)LouMallocEx(StackSize, 64);
 
     if (Address == 0x0000)return (!LOUSTATUS_GOOD);
 
