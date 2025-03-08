@@ -24,7 +24,6 @@ LOUSTATUS* State
 ){	
 
 	uint64_t BufferChecksum;
-
 	void* Result = 0x00;
 	SYSTEM_DEVICE_IDENTIFIER DevID = LouKeGetStorageDeviceSystemIdentifier(Drive);
 	if(DevID == ATA_DEVICE_T){
@@ -42,7 +41,7 @@ LOUSTATUS* State
 				BufferChecksum = BufferChecksum * 2048;
 			}
 		
-			Result = LouMallocEx(BufferChecksum, 2048);//, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
+			Result = LouKeMallocEx(BufferChecksum, 2048, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 			*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result);
 		}else{
 			BufferChecksum = ROUND_UP64(*BufferSize, 512);
@@ -53,7 +52,7 @@ LOUSTATUS* State
 				SectorCount = BufferChecksum;
 				BufferChecksum = BufferChecksum * 512;
 			}
-			Result = LouMallocEx(BufferChecksum, 512);
+			Result = LouKeMallocEx(BufferChecksum, 512, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 			*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result);
 		}
 	}
@@ -75,5 +74,5 @@ void* Data
 
 LOUDDK_API_ENTRY
 void ReleaseDriveHandle(void* DriveHandle){
-	LouFree((RAMADD)DriveHandle);
+	LouKeFree((RAMADD)DriveHandle);
 }

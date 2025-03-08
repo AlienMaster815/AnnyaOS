@@ -30,13 +30,11 @@ uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameter
 #define INACTIVE_THREAD 1
 
 
-#pragma pack(push,1)
 typedef struct {
     bool locked;
     uintptr_t Handle;
     uint64_t  PrivaledgeLevel;
 } mutex_t;
-#pragma pack(pop)
 
 static inline void MutexLock(mutex_t* m){
     while(m->locked == true){

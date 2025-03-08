@@ -44,7 +44,7 @@ typedef enum{
 }BUTTON_TYPE;
 
 
-typedef struct __attribute__((packed))  _BUTTON_CHARECTERISTICS{
+typedef struct _BUTTON_CHARECTERISTICS{
     uint64_t ButtonText;   // 0
     uint64_t ButtonName;   // 8
     uint64_t IsButton3D;   // 16

@@ -152,7 +152,7 @@ void InitializeVirtualBoxVgaAdapter(P_PCI_DEVICE_OBJECT PDEV){
 
 
     if(VirtualboxVGAC == 0x00){
-        VirtualboxVGAC = (PVBVCD)LouMallocEx(sizeof(VBVCD), GET_ALIGNMENT(VBVCD));
+        VirtualboxVGAC = (PVBVCD)LouKeMallocEx(sizeof(VBVCD), GET_ALIGNMENT(VBVCD), WRITEABLE_PAGE | PRESENT_PAGE);
     }
 
     PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;

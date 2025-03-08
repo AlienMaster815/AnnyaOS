@@ -34,7 +34,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitSSDT() {
 
     LOUSTATUS Status = STATUS_UNSUCCESSFUL;
 
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x0000;
 
     Status = AuxKlibGetSystemFirmwareTable(
@@ -53,11 +53,11 @@ LOUDDK_API_ENTRY LOUSTATUS InitSSDT() {
 
     }
     else {
-        LouFree(Buffer);
+        LouKeFree(Buffer);
         return STATUS_UNSUCCESSFUL;
     }
 
-    LouFree(Buffer);
+    LouKeFree(Buffer);
 
     while(1);
 

@@ -203,7 +203,7 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
 
         CurrentDevice -= i;
         i++; //add room for null terminator
-        string NewString = (string)LouMallocEx(i, GET_ALIGNMENT(char));
+        string NewString = (string)LouKeMallocEx(i, GET_ALIGNMENT(char), WRITEABLE_PAGE | PRESENT_PAGE);
 
         for(size_t j = 0 ; j < i; j++){
             if(j == (i - 1)){
@@ -218,7 +218,7 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
     return 0x00;
 }
 
-string ParseLousineDriverManifestForCompatibleDriver(void* Config){
+string ParseLousineDriverManifestForCompatibleDriver(void* Config, string Index){
 
     UNUSED PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)Config;
 
@@ -229,14 +229,17 @@ string ParseLousineDriverManifestForCompatibleDriver(void* Config){
         return 0x00;
     }
     string Tmp = LDDDS;
+    if(Index){
+        Tmp = (string)((uint64_t)Index + 1);
+    }
     if(strncmp(Tmp, "DRIVERS", strlen("DRIVERS")) == 0){
-        LouPrint("Parsing Driver Manifest\n");
+        //LouPrint("Parsing Driver Manifest\n");
         while(1){        
             Tmp = LousineDriverManifestGetNextDevice(Tmp);
             if(!Tmp){
                 return 0x00;
             }
-            LouPrint("Checking If Device Matches The Table Member\n");
+            //LouPrint("Checking If Device Matches The Table Member\n");
             
             string FilePath = DoesDeviceMatch(Tmp, CommonConfig);
             if(!FilePath){

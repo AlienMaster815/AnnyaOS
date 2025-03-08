@@ -3,6 +3,11 @@
 
 #define NOT_A_PCI_DEVICE 0xFFFF 
 
+static bool UsingPCIe = false;
+
+void SetPCIeMode(){
+    UsingPCIe = true;
+}
 
 bool isUsb(uint8_t bus, uint8_t slot, uint8_t function);
 bool IsVGA(uint8_t bus, uint8_t slot, uint8_t function);
@@ -46,9 +51,9 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
         for (function = 0; function < 8; function++) {
             if (PciGetVendorID(bus, device) != NOT_A_PCI_DEVICE) {
                 checkFunction(bus, device, function);
-                if (PciGetDeviceID(bus,device,function) == NOT_A_PCI_DEVICE) continue;
+                if (PciGetDeviceID( bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
-                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT));
+                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
                     LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(bus, device, function));
                     PDev->bus = bus;
                     PDev->slot = device;
@@ -63,7 +68,7 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
         }
     }
     else{
-        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT));
+        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(bus, device, function));
         PDev->bus = bus;
         PDev->slot = device;
@@ -82,8 +87,6 @@ LOUDDK_API_ENTRY void checkFunction(uint8_t bus, uint8_t device, uint8_t functio
     uint8_t baseClass;
     uint8_t subClass;
     uint8_t secondaryBus;
-
-
 
     baseClass = getBaseClass(bus, device, function);
     subClass = getSubClass(bus, device, function);
@@ -149,11 +152,6 @@ void LouKePs2Parse();
 
 static spinlock_t ScanLock;
 
-KERNEL_IMPORT
-void InitializePs2Mouse();
-
-KERNEL_IMPORT
-void EnablePs2Keyboard();
 
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 
@@ -161,12 +159,8 @@ LOUDDK_API_ENTRY
 void ScanTheRestOfHarware(){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ScanLock, &Irql);
-   
-    EnablePs2Keyboard();
 
-    InitializePs2Mouse();
-
-	PCI_COMMON_CONFIG Config;
+    PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
 	Config.Header.DeviceID = ANY_PCI_ID;
 	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
@@ -181,24 +175,32 @@ void ScanTheRestOfHarware(){
     for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
         P_PCI_DEVICE_OBJECT PDEV = SecondWaveDevices[i]->PDEV;
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
-        string DriverPath = ParseLousineDriverManifestForCompatibleDriver(PConfig);
-        if(!DriverPath){
-            continue;
+
+        if(PConfig->Header.VendorID == 0x1102){
+            LouPrint("Device ID:%h\n", PConfig->Header.DeviceID);
+            while(1);
         }
-        PDRIVER_OBJECT DriverObject;
-        DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
-        if(!DriverObject->DriverExtension){
-            DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION));
-            Driver(DriverObject, (PUNICODE_STRING)DriverPath);
-        }
-        PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouMallocEx(sizeof(DEVICE_OBJECT), GET_ALIGNMENT(DEVICE_OBJECT));
-        if(DriverObject->DriverUsingLkdm){
-            PlatformDevice->PDEV = PDEV;
-            if(DriverObject->DeviceTable){ 
-                PlatformDevice->DeviceID = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)DriverObject->DeviceTable);
+        string DriverPath = 0x00;
+        while(1){
+            DriverPath = ParseLousineDriverManifestForCompatibleDriver(PConfig, DriverPath);
+            if(!DriverPath){
+                break;
             }
+            PDRIVER_OBJECT DriverObject;
+            DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
+            if(!DriverObject->DriverExtension){
+                DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION), WRITEABLE_PAGE | PRESENT_PAGE);
+                Driver(DriverObject, (PUNICODE_STRING)DriverPath);
+            }
+            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocEx(sizeof(DEVICE_OBJECT), GET_ALIGNMENT(DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+            if(DriverObject->DriverUsingLkdm){
+                PlatformDevice->PDEV = PDEV;
+                if(DriverObject->DeviceTable){ 
+                    PlatformDevice->DeviceID = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)DriverObject->DeviceTable);
+                }
+            }
+            DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
         }
-        DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
     }
     LouKeReleaseSpinLock(&ScanLock, &Irql);    
 }

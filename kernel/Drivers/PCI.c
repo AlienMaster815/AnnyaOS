@@ -1,10 +1,29 @@
 #include <LouAPI.h>
 
-uint32_t pci_read(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
+typedef struct _PCIE_SYSTEM_MANAGER{
+    ListHeader  Neighbors;
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+}PCIE_SYSTEM_MANAGER, * PPCIE_SYSTEM_MANAGER;
+
+UNUSED static uint16_t MaxGroupCount = 1;
+UNUSED static PCIE_SYSTEM_MANAGER Psm;
+
+void AddGroupCount(PACPI_MCFG_ALLOCATION PciManagerData){
+
+
+
+}
+
+uint32_t pci_read( uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
     uint32_t lfunc = (uint32_t)func;
+
+
 
     // Create the PCI configuration address
     address = (uint32_t)((lbus << 16) | (lslot << 11) |
@@ -151,7 +170,7 @@ uint16_t PciGetVendorID(uint8_t bus, uint8_t slot) {
 }
 
 
-bool CheckPciDeviceID(uint16_t device_id, uint8_t bus, uint8_t slot,uint8_t func) {
+bool CheckPciDeviceID(uint16_t device_id,  uint8_t bus, uint8_t slot,uint8_t func) {
     // Read the vendor ID and device ID from the PCI configuration space
     uint32_t data = pci_read(bus, slot, func, 0x00);
     //uint16_t vendor_id = data & 0xFFFF;
@@ -167,7 +186,7 @@ bool CheckPciDeviceID(uint16_t device_id, uint8_t bus, uint8_t slot,uint8_t func
 
 
 // Function to retrieve the device ID of a PCI device
-uint16_t PciGetDeviceID(uint8_t bus ,uint8_t slot,uint8_t func) {
+uint16_t PciGetDeviceID( uint8_t bus ,uint8_t slot,uint8_t func) {
     // Read the vendor ID from the PCI configuration space
     uint32_t data = pci_read(bus, slot, func, 0x00);
     // Extract and return the vendor ID

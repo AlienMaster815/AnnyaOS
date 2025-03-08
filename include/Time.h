@@ -1,4 +1,3 @@
-#pragma pack(push, 1)
 #ifndef TIME_H
 #define TIME_H
 #ifdef __x86_64__
@@ -64,4 +63,3 @@ void LouKeGetRtcData(TIME_T* pTime);
 #ifdef __cplusplus
 }
 #endif
-#pragma pack(pop)

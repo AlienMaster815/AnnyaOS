@@ -883,7 +883,8 @@ ISR71:
 	push 71
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa
+	iretq
 
 ISR72:
 	;hlt

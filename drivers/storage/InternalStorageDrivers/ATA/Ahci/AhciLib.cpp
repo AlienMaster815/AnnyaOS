@@ -208,6 +208,7 @@ SECTIONED_CODE(".Ahci.Code")
 void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort); 
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+
     if(Port->PxCMD & AHCI_PxCMD_CR){
         AhciStopCommandEngine(AhciPort);
     }
@@ -408,12 +409,12 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     }
     LouPrint("Communication Is Up\n");
 
-
-
     AhciStartFisReception(AhciPort);
-    
+
+    LouPrint("PrivateData->StartCommandEngine:%h\n", PrivateData->StartCommandEngine);
+
     PrivateData->StartCommandEngine(AhciPort);
-    
+
     while((Port->PxTFD & (1 << 7)) && (Port->PxTFD & (1 << 3))){
         sleep(10);
     }

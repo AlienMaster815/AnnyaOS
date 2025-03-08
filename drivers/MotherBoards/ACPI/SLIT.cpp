@@ -34,7 +34,7 @@ void parseSLIT(ACPI_SLIT* slit) {
 
 LOUDDK_API_ENTRY LOUSTATUS InitSLIT() {
     LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x000;
     Status = AuxKlibGetSystemFirmwareTable(
         'ACPI',
@@ -49,6 +49,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitSLIT() {
         parseSLIT(slit);
     }
 
-    LouFree(Buffer);
+    LouKeFree(Buffer);
     return Status;
 }

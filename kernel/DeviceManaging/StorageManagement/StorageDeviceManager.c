@@ -1,66 +1,55 @@
 #include <LouAPI.h>
 
-static uint8_t NumberOfStorageDevice = 0x00;
-static PLMPOOL_DIRECTORY StoragePool = 0x00;
+static size_t NumberOfStorageDevice = 0x00;
 
-#pragma pack(push, 1)
 typedef struct _STORAGE_DEVICE_MANAGER_DATA{
-    uint8_t StorageDeviceNumber;
-    PDEVICE_DIRECTORY_TABLE Table;
+    ListHeader                  Neighbors;
+    PDEVICE_DIRECTORY_TABLE     Table;
 }STORAGE_DEVICE_MANAGER_DATA, * PSTORAGE_DEVICE_MANAGER_DATA;
-#pragma pack(pop)
 
-PSTORAGE_DEVICE_MANAGER_DATA StorageManagerDataPointers[36] = {0x00};
+static STORAGE_DEVICE_MANAGER_DATA StorageDevices;
+
+static spinlock_t StorgaeDeviceManagerLock;
 
 LOUSTATUS LouRegisterStorageDevice(
     PDEVICE_DIRECTORY_TABLE Table
 ){
     LouPrint("Registering Storage Device\n");
-    if(StoragePool == 0x00){
-        StoragePool = LouKeCreateMemoryPool(
-            36,
-            sizeof(STORAGE_DEVICE_MANAGER_DATA),
-            "HostKeyData:Annya/System64/SOTRAGE_MANAGER_DATA",
-            0,
-            KERNEL_PAGE_WRITE_PRESENT
-        );
-    }
-
-    for(uint8_t i = 0 ; i < NumberOfStorageDevice; i++){
-        if((StorageManagerDataPointers[i]->Table == 0x00) && (StorageManagerDataPointers[i])){ //reuse unregistered tables
-            StorageManagerDataPointers[i]->Table = Table;
-            return STATUS_SUCCESS;
+    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
+    for(size_t i = 0 ; i < NumberOfStorageDevice; i++){
+        if(!TmpStorageDrivers->Neighbors.NextHeader){
+            TmpStorageDrivers->Neighbors.NextHeader = LouKeMallocEx(sizeof(STORAGE_DEVICE_MANAGER_DATA), GET_ALIGNMENT(STORAGE_DEVICE_MANAGER_DATA), WRITEABLE_PAGE | PRESENT_PAGE);
         }
+        TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
     }
-
-    StorageManagerDataPointers[NumberOfStorageDevice] = LouKeMallocFromPool(
-            StoragePool,
-            sizeof(STORAGE_DEVICE_MANAGER_DATA),
-            0x00
-    );
-
-
-    if(!StorageManagerDataPointers[NumberOfStorageDevice]){
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    StorageManagerDataPointers[NumberOfStorageDevice]->StorageDeviceNumber = NumberOfStorageDevice;
-    StorageManagerDataPointers[NumberOfStorageDevice]->Table = Table;
+    TmpStorageDrivers->Table = Table;
     NumberOfStorageDevice++;
+    LouKeReleaseSpinLock(&StorgaeDeviceManagerLock, &Irql);
     return STATUS_SUCCESS;
 }
 
 SYSTEM_DEVICE_IDENTIFIER LouKeGetStorageDeviceSystemIdentifier(uint8_t DriveNumber){
-    return StorageManagerDataPointers[DriveNumber]->Table->Sdi;
+    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
+    for(size_t i = 0 ; i < DriveNumber; i++){
+        TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
+    }
+    LouKeReleaseSpinLock(&StorgaeDeviceManagerLock, &Irql);
+    return TmpStorageDrivers->Table->Sdi;
 }
 
 PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber){
-    return (PLOUSINE_KERNEL_DEVICE_ATA_PORT)StorageManagerDataPointers[DriveNumber]->Table->DevicePrivateData;
-}
-
-
-uint8_t LouKeGetStorPort(uint8_t DriveNumber){
-    return (uint8_t)(uintptr_t)StorageManagerDataPointers[DriveNumber]->Table->KeyData;
+    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
+    for(size_t i = 0 ; i < DriveNumber; i++){
+        TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
+    }
+    LouKeReleaseSpinLock(&StorgaeDeviceManagerLock, &Irql);
+    return TmpStorageDrivers->Table->DevicePrivateData;
 }
 
 uint8_t LouKeGetNumberOfStorageDevices(){

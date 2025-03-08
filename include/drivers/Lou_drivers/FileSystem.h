@@ -27,14 +27,14 @@ typedef struct _LOUSINE_KERNEL_MOUNTED_FILESYSTEMS{
 #define ISO 0x01
 #define FAT_SYS 0x02
 
-#pragma pack(push, 1)
+
 typedef struct _FSStruct{
     bool SystemDisk;
     uint8_t FSType;
     uint32_t FSNum;
     uintptr_t ExtendedFilesystemParameters;
 } FSStruct, *PFSStruct;
-#pragma pack(pop)
+
 
 #ifdef __cplusplus
 

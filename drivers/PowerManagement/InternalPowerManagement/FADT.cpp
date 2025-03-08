@@ -90,7 +90,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitFADT(){
     LOUSTATUS Status = STATUS_UNSUCCESSFUL;
 
 
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x0000;
 
     Status = AuxKlibGetSystemFirmwareTable(
@@ -114,12 +114,12 @@ LOUDDK_API_ENTRY LOUSTATUS InitFADT(){
     // Assuming Buffer now contains the FADT table
     if (Status == LOUSTATUS_GOOD) {
         ACPI_FADT* fadt = (ACPI_FADT*)Buffer;
-        FadtCopy = (ACPI_FADT*)LouMalloc(ReturnLength);
+        FadtCopy = (ACPI_FADT*)LouKeMallocEx(ReturnLength, KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
         memcpy((void*)FadtCopy,(void*)fadt, ReturnLength);
-        LouFree((RAMADD)fadt);
+        LouKeFree((RAMADD)fadt);
     }
     else {
-        LouFree(Buffer);
+        LouKeFree(Buffer);
         return STATUS_UNSUCCESSFUL;
     }
 

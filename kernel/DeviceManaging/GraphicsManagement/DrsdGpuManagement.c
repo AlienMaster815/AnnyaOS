@@ -19,7 +19,7 @@ LOUSTATUS LouRegisterDrsdGraphicsDevice(
         if(Tmp->Neighbors.NextHeader){
             Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
         }else{
-            Tmp->Neighbors.NextHeader = (PListHeader)LouMallocEx(sizeof(DrsdGpuManagmentData), GET_ALIGNMENT(DrsdGpuManagmentData));
+            Tmp->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(DrsdGpuManagmentData), GET_ALIGNMENT(DrsdGpuManagmentData), WRITEABLE_PAGE | PRESENT_PAGE);
             Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
         }
     }

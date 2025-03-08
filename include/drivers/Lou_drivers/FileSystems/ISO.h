@@ -27,7 +27,7 @@ typedef char* strD;
 
 // Pack The Structures For Pointers In memory Tho Later We Might Align It For More Acurate Readings
 
-#pragma pack(1)
+
 typedef struct _int16_LSB_MSB{
     int16_LSB LSB;
     int16_MSB MSB;
@@ -79,29 +79,7 @@ typedef struct _DirectoryTable {
 #ifndef _KERNEL_MODULE_
 
 
-
-//class ISO9660{
-    
-//    public:
-//        FSStruct ISOFileSystemScan(uint8_t DrvNum);
-//        void ISOReadDirectoryStructure(uint8_t DrvNum);
-//        void ISOFormatDevice(uint8_t DrvNum,uintptr_t Base, uintptr_t height);
-//        FILE* ISOLouKefopen(uint8_t DrvNum,string Path);
-//        FILE* ISOLouKefclose(FILE* File);
-
-//        ISO9660();
-//        ~ISO9660();
-
-//    private:
-//        FSStruct FSS;
-//        FSStruct DetectFileSystems(uint8_t DrvNum);
-//        VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum, uint32_t sector = 0x10, uint32_t buffer = 2048);
-//        uint32_t ISOGetLBA(uint8_t* DirectoryEntry);
-//        uint32_t ISOGetDirecotrySize(uint8_t* DirectoryEntry);
-//        FILE* ISOLouKeFindDirectory(uint32_t RootLBA, uint32_t RootSize, uint8_t DrvNum, string Dir);
-
-//};
 #endif //kernel mod
 
 #endif
-#pragma pack(0)
+

@@ -22,7 +22,7 @@ extern "C"{
 #define FIS_TYPE_BIST                       0x58
 #define FIS_TYPE_PIO_SETUP                  0x5F
 #define FIS_TYPE_DEVICE_BITS                0xA1
-#pragma pack(push, 1)
+
 
 typedef struct _RECIEVED_FIS_ORGINIZATION{
     uint8_t FIS_DATA[0xFF];
@@ -97,7 +97,6 @@ static inline void FillOutCommandListStructure(
     }
 }
 
-#pragma pack(pop)
 #ifdef __cplusplus
 }
 #endif

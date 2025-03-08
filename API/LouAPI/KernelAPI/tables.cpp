@@ -2,7 +2,7 @@
 #include <NtAPI.h>
 #include <Hal.h>
 
-#pragma pack(push, 1)
+
 typedef struct _TABLE_ENTRY{
     volatile FILE_NAME        ModuleName;
     volatile uint32_t         NumberOfFunctions;
@@ -15,8 +15,6 @@ typedef struct _TableTracks{
     volatile TABLE_ENTRY Table;
     volatile bool LongModeEntry;
 }TableTracks, * PTableTracks;
-#pragma pack(pop)
-
 
 #define PRE_LOADED_MODULES 5
 #define PRE_LOADED_NTOSKRNL_FUNCTIONS 71
@@ -172,7 +170,7 @@ void LouKeInitializeLibraryLookup(
     volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries;
     for(i = 0; i < DynamicLoadedLibrarieCount; i++){
         if(!Tmp->Neighbors.NextHeader){
-            Tmp->Neighbors.NextHeader = (ListHeader*)LouMallocEx(sizeof(TableTracks), GET_ALIGNMENT(TableTracks));
+            Tmp->Neighbors.NextHeader = (ListHeader*)LouKeMallocEx(sizeof(TableTracks), GET_ALIGNMENT(TableTracks), WRITEABLE_PAGE | PRESENT_PAGE);
         }
         Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
     }

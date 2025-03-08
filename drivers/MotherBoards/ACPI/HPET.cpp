@@ -44,7 +44,7 @@ void parseHPET(ACPI_HPET* hpet) {
 LOUDDK_API_ENTRY LOUSTATUS InitHPET() {
 
     LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x000;
     Status = AuxKlibGetSystemFirmwareTable(
         'ACPI',
@@ -59,6 +59,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitHPET() {
         parseHPET(hpet);
     }
 
-    LouFree(Buffer);
+    LouKeFree(Buffer);
 	return Status;
 }

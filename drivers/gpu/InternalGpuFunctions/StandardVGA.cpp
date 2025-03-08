@@ -172,14 +172,14 @@ LOUSTATUS InitializeStandardVga(
 
     uint8_t* FrameBuffer = (uint8_t*)LouKeHalGetPciVirtualBaseAddress(PciConfig, 0);
 
-    PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition));
+    PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
 
     SupportedModes->Width = 640;
     SupportedModes->Height = 480;
     SupportedModes->Bpp = 4;
     SupportedModes->FrameBufferType = RGB_DRSD_FRAMEBUFFER;
 
-    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition));
+    PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
 
     DrsdFrameWork->RgbPutPixel = VgaPutPixel640x480x16;
 
@@ -202,7 +202,7 @@ LOUSTATUS InitializeStandardVga(
 LOUSTATUS InitializeGenericVgaDriver(P_PCI_DEVICE_OBJECT PDEV){
     //LouPrint("Initializing VGA Controller\n");
     //initialize the controler as a standard
-    PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)LouMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG));
+    PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)LouKeMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG), WRITEABLE_PAGE | PRESENT_PAGE);
     LouKeHalGetPciConfiguration(PDEV, PciConfig);
     
     if(PciConfig->Header.SubClass == 0x00){
@@ -221,6 +221,6 @@ LOUSTATUS InitializeGenericVgaDriver(P_PCI_DEVICE_OBJECT PDEV){
     
     
     while(1);
-    LouFree((RAMADD)PciConfig);
+    LouKeFree((RAMADD)PciConfig);
     return STATUS_SUCCESS;
 }

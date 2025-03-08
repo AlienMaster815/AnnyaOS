@@ -40,7 +40,7 @@ void parseECDT(ACPI_ECDT* ecdt) {
 
 LOUDDK_API_ENTRY LOUSTATUS InitECDT() {
     LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x000;
     Status = AuxKlibGetSystemFirmwareTable(
         'ACPI',
@@ -55,6 +55,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitECDT() {
         parseECDT(ecdt);
     }
 
-    LouFree(Buffer);
+    LouKeFree(Buffer);
     return Status;
 }

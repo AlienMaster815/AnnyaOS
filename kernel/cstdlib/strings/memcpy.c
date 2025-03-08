@@ -33,59 +33,21 @@ static void* memcpy_basic(void* destination, const void* source, size_t num) {
 
     // Handle overlapping memory regions (copy backward)
     if (dest > src && dest < src + num) {
-        dest += num;
-        src += num;
-        while (num >= 8) {
-            dest -= 8;
-            src -= 8;
-            *(uint64_t*)dest = *(const uint64_t*)src;
-            num -= 8;
-        }
-        if (num >= 4) {
-            dest -= 4;
-            src -= 4;
-            *(uint32_t*)dest = *(const uint32_t*)src;
-            num -= 4;
-        }
-        if (num >= 2) {
-            dest -= 2;
-            src -= 2;
-            *(uint16_t*)dest = *(const uint16_t*)src;
-            num -= 2;
-        }
-        if (num >= 1) {
-            dest -= 1;
-            src -= 1;
-            *dest = *src;
+        for(size_t i = num; i > 0;){
+            dest[i] = src[i];
+            i -= 1;
         }
     } else {
         // Normal forward copy (non-overlapping memory)
-        while (num >= 8) {
-            *(uint64_t*)dest = *(const uint64_t*)src;
-            dest += 8;
-            src += 8;
-            num -= 8;
-        }
-        if (num >= 4) {
-            *(uint32_t*)dest = *(const uint32_t*)src;
-            dest += 4;
-            src += 4;
-            num -= 4;
-        }
-        if (num >= 2) {
-            *(uint16_t*)dest = *(const uint16_t*)src;
-            dest += 2;
-            src += 2;
-            num -= 2;
-        }
-        if (num >= 1) {
-            *dest = *src;
+        for(size_t i = 0; i < num;){
+            dest[i] = src[i];
+            i += 1;
         }
     }
     return destination;
 }
  
-static void* memcpy_sse(void* destination, const void* source, size_t num) {
+void* memcpy_sse(void* destination, const void* source, size_t num) {
     // Check for overlapping regions (Backward Copy Case)
     SaveEverything(&SavedState);
     if (destination > source && destination < (void*)((uintptr_t)source + num)) {
@@ -154,6 +116,7 @@ static void* memcpy_sse(void* destination, const void* source, size_t num) {
 //}
 
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
+    /*
     if(ProcessorFeatures->Avx512Supported){
         MemcopyHandler = memcpy_sse;
         //MemcopyHandler = memcpy_avx256;
@@ -189,6 +152,7 @@ void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
         MemcopyHandler = memcpy_sse;
         return;
     }
+    */
     MemcopyHandler = memcpy_basic;
 }
 

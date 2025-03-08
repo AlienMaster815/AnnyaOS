@@ -1076,10 +1076,11 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
 LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
 
-void 
+void
 LouKeMallocAtaPrivateData(
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
-    uint64_t SizeofPrivateData
+    uint64_t SizeofPrivateData,
+    uint64_t AlignmentOfPrivateData
 );
 
 void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);

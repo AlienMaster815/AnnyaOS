@@ -12,7 +12,7 @@
 
 uint64_t* ProbeBinary64Bit(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType uint64_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);
@@ -23,7 +23,7 @@ uint64_t* ProbeBinary64Bit(uint64_t Address, uint64_t Buffer) {
 
 uint32_t* ProbeBinary32Bit(uint64_t Address,uint64_t Buffer) {
 	#define BufferDataType uint32_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);
@@ -34,7 +34,7 @@ uint32_t* ProbeBinary32Bit(uint64_t Address,uint64_t Buffer) {
 
 uint16_t* ProbeBinary16Bit(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType uint16_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);
@@ -45,7 +45,7 @@ uint16_t* ProbeBinary16Bit(uint64_t Address, uint64_t Buffer) {
 
 uint8_t* ProbeBinary8Bit(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType uint8_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);
@@ -56,7 +56,7 @@ uint8_t* ProbeBinary8Bit(uint64_t Address, uint64_t Buffer) {
 
 int64_t* ProbeBinary64BitSigned(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType int64_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);
@@ -67,7 +67,7 @@ int64_t* ProbeBinary64BitSigned(uint64_t Address, uint64_t Buffer) {
 
 int32_t* ProbeBinary32BitSinged(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType int32_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);
@@ -78,7 +78,7 @@ int32_t* ProbeBinary32BitSinged(uint64_t Address, uint64_t Buffer) {
 
 int16_t* ProbeBinary16BitSigned(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType int16_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray,(void*)AddressCasted,Buffer);
@@ -89,7 +89,7 @@ int16_t* ProbeBinary16BitSigned(uint64_t Address, uint64_t Buffer) {
 
 int8_t* ProbeBinary8BitSigned(uint64_t Address, uint64_t Buffer) {
 	#define BufferDataType int8_t
-	BufferDataType* ReturnBufferArray = (BufferDataType*)LouMalloc(sizeof(BufferDataType) * Buffer);
+	BufferDataType* ReturnBufferArray = (BufferDataType*)LouKeMalloc(sizeof(BufferDataType) * Buffer, WRITEABLE_PAGE | PRESENT_PAGE);
 	BufferDataType* AddressCasted = (BufferDataType*)Address;
 
 	memcpy((void*)ReturnBufferArray, (void*)AddressCasted, Buffer);

@@ -7,7 +7,7 @@
 #include <LouDDK.h>
 
 
-string ParseLousineDriverManifestForCompatibleDriver(void* Config);
+string ParseLousineDriverManifestForCompatibleDriver(void* Config, string Index);
 
 
 #else //user code

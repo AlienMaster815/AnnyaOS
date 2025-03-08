@@ -1,7 +1,6 @@
 #ifndef _DEVICES_API_H
 #define _DEVICES_API_H
 
-#pragma pack(push, 1)
 #ifndef __cplusplus
 #include <LouAPI.h>
 #endif
@@ -181,5 +180,4 @@ void ReleaseDriveHandle(void* DriveHandle);
 #ifdef __cplusplus
 }
 #endif
-#pragma pack(pop)
 #endif

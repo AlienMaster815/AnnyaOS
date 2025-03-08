@@ -238,7 +238,6 @@ KERNEL_IMPORT{
     __val < __min ? __min : __val > __max ? __max : __val; \
 })
 
-#pragma pack(push, 1)
 typedef struct LMPOOL_DIRECTORY{
     ListHeader List;
     string Tag;
@@ -259,7 +258,6 @@ typedef struct _BO{
     int ReferenceCount;
     bool BufferIsInVRam;
 }BO, *PBO;
-#pragma pack(pop)
 
 #ifndef _KERNEL_MODULE_
 void* MallocVariacHeap(size_t InitialSize);

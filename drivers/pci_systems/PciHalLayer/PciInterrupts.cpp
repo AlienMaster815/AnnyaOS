@@ -48,71 +48,16 @@ int LouKeHalMallocPciIrqVectors(
     int RequestedVectors, 
     uint64_t Flags
 ){
-
-    
-    
-    LouPrint("Checking For MSI Compatibility\n");
-
-    uint16_t StatusRegister = LouKeReadPciUint16(PDEV, 0x06);
-    if(!((StatusRegister >> 4) & 0x01)){
-        LouPrint("Pci Device Does Not Support MSI\n");
-        return 0;
-    }   
-    LouPrint("Pci Device Support MSI Compatibility\n");
-
-    UNUSED int SupportedVectors = GetSupportedMsiVectors(PDEV, Flags);
-
-    if(SupportedVectors < RequestedVectors){
-        LouPrint("Pci Device Does Not Support Enough Vectors\n");
-        return 0;
-    }
-
-
-    PDEV->InterruptVectors = (uint64_t*)LouMalloc(sizeof(uint64_t) * RequestedVectors);
-    
-    for(int i = 0; i < RequestedVectors; i++){
-        for(int j = 0; j < NumberOfInterruptHandlers; j++){
-            if(AdvancedInterruptRouterData[j] == 0){
-                AdvancedInterruptRouterData[j] = 1;
-                PDEV->InterruptVectors[i] = j;
-                break;
-            }
-        }
-    }
-
-    return RequestedVectors;
+    return 0;
 }
 
 LOUDDK_API_ENTRY 
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing(){
-
-    uint64_t* Tmp = (uint64_t*)LouMalloc(sizeof(uint64_t) * ((256 - GetTotalHardwareInterrupts() - 32) * GetNPROC()));
-    if(!Tmp){
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    AdvancedInterruptRouterData = Tmp;
-    NumberOfInterruptHandlers = ((256 - GetTotalHardwareInterrupts() - 32) * GetNPROC());
-    HandlersPerCore = NumberOfInterruptHandlers / GetNPROC();
-
-    LouPrint("InterruptHandles Set Up:%d\n", NumberOfInterruptHandlers);
-    LouPrint("Handlers Per Core:%d\n", HandlersPerCore);
-
     return STATUS_SUCCESS;
 }
 
 
 LOUDDK_API_ENTRY
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args){
-    LOUSTATUS (*Handler)();
 
-    if((AdvancedInterruptRouterData[InterruptNumber] != 0x00)
-    && (AdvancedInterruptRouterData[InterruptNumber] != 0x01)){
-        Handler = (LOUSTATUS (*)())AdvancedInterruptRouterData[InterruptNumber];
-        Handler();
-        return;
-    }
-
-    LouPrint("Interrupt:%d Was Called\n", InterruptNumber);
-    while(1);
 }

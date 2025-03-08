@@ -106,10 +106,10 @@ static FILE* ISOLouKeFindDirectory(
     bool Seek
     ){
 
-    UNUSED LOUSTATUS Status = LOUSTATUS_GOOD;
-    UNUSED uint64_t BufferSize = RootSize;
+    LOUSTATUS Status = LOUSTATUS_GOOD;
+    uint64_t BufferSize = RootSize;
 
-    UNUSED uint16_t* Test = (uint16_t*)ReadDrive(
+    uint16_t* Test = (uint16_t*)ReadDrive(
         DrvNum,
         RootLBA,
         1,
@@ -117,13 +117,17 @@ static FILE* ISOLouKeFindDirectory(
         &Status
     );
 
-    UNUSED uint8_t* FOO = (uint8_t*)(uint64_t)Test;
+    if(Status != STATUS_SUCCESS){
+        ReleaseDriveHandle((RAMADD)Test);
+        return 0x00;
+    }
+
+    uint8_t* FOO = (uint8_t*)(uint64_t)Test;
     
-    UNUSED string NewDir = GetNextDirectoryName(Dir);
+    string NewDir = GetNextDirectoryName(Dir);
 
-    UNUSED string SearchDirectory = NewDir;
+    string SearchDirectory = NewDir;
 
-    UNUSED bool FinalRecurse = false;
     while(1){
         if (IsIso9660ItemOfSearch(FOO, SearchDirectory)){
             
@@ -171,6 +175,12 @@ static FILE* ISOLouKeFindDirectory(
                 &BufferSize,
                 &Status
             );
+            
+            if(Status != STATUS_SUCCESS){
+                ReleaseDriveHandle((RAMADD)Test);
+                return 0x00;
+            }
+
             //now cast from Test to FOO and 
             //then get the next directory
             FOO = (uint8_t*)Test;
@@ -178,7 +188,7 @@ static FILE* ISOLouKeFindDirectory(
                 //if the end of the path
                 //is reached then the file
                 //is loaded and can be return
-                FILE* LoadedFile = (FILE*)LouMallocEx(BufferSize, KILOBYTE_PAGE);
+                FILE* LoadedFile = (FILE*)LouKeMallocFileData(BufferSize, KILOBYTE_PAGE);
                 memcpy(LoadedFile, FOO, BufferSize);
                 ReleaseDriveHandle(FOO);
                 return LoadedFile;
@@ -287,13 +297,12 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
 
 LOUDDK_API_ENTRY
 void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-
-    ReleaseDriveHandle((RAMADD)File);
-
+    LouKeFreeFileData(File);
 }
 
 LOUDDK_API_ENTRY
 FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
     //:/Dir/dir/.../file
@@ -310,7 +319,8 @@ FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
     DATA_LEN |= (VD.Data[DL_LSB_HI32] << 8);
     DATA_LEN |= (VD.Data[DL_MSB_LO32] << 16);
     DATA_LEN |= (VD.Data[DL_MSB] << 24);        
-            
+    
+
     return ISOLouKeFindDirectory(
         LBA, 
         DATA_LEN, 
@@ -353,7 +363,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
     //Create A File System Structure
     if((PVD.Type == ISO_PrimaryVolumeDescriptor) && (strncmp(PVD.Identifier, "CD001", 5) == 0) && (PVD.Version == 0x01)){
-        PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM));
+        PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
         Iso9660FileSystem->PortID = PortID;
         Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
         Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
@@ -367,7 +377,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
 LOUDDK_API_ENTRY
 LOUSTATUS Iso9660DriverEntry(){
 
-    PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM));
+    PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
 
     Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
 

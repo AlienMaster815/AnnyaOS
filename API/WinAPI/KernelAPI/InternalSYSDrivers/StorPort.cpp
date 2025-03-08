@@ -131,7 +131,7 @@ NTSTATUS StorPortInitialize(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    StorPortStack[i] = (PSTOR_PORT_STACK_OBJECT)LouMallocEx(sizeof(STOR_PORT_STACK_OBJECT), 1); //BUG BUG alignment required or buffer overflow look into that fixes a buffer overflow
+    StorPortStack[i] = (PSTOR_PORT_STACK_OBJECT)LouKeMallocEx(sizeof(STOR_PORT_STACK_OBJECT), GET_ALIGNMENT(STOR_PORT_STACK_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE); //BUG BUG alignment required or buffer overflow look into that fixes a buffer overflow
 
     if(StorPortStack[i] == 0x00){
         LouPrint("NTSTATUS StorPortInitialize() STATUS_INSUFFICIENT_RESOURCES\n");

@@ -1,5 +1,4 @@
 
-#pragma pack(push, 1)
 
 #ifndef GLOBAL_HARDRIVE_VARIABLES
 #define GLOBAL_HARDRIVE_VARIABLES
@@ -161,4 +160,3 @@ void pata_device_scanc();
 
 #endif
 #endif
-#pragma pack(pop)

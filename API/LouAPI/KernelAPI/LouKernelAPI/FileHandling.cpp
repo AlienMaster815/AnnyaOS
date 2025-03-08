@@ -11,7 +11,7 @@ KERNEL_IMPORT size_t GetMountedFileSystemTableMembers();
 
 LOUDDK_API_ENTRY
 FILE* fopen(string FileName){
-
+    
     PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
 
     size_t FileSystemsToCheck = GetMountedFileSystemTableMembers();
@@ -22,20 +22,18 @@ FILE* fopen(string FileName){
 
     for(size_t i = 0 ; i < FileSystemsToCheck; i++){
         //the first real filesystem starts after the ancor
-        if(MountedSystems->List.NextHeader){
-            MountedSystems = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)MountedSystems->List.NextHeader;
-        }
 
         DriveString[0] = MountedSystems->FileSystem->DriveID;
                 
         //Checks the Firs Charecter of the string for the drive letter
         if(strncmp(DriveString, FileName, 1) == 0){
             //Appends the string + 2 for Drive Letter And ':' to get to /FilePath
+
             string FilePath = (string)(uintptr_t)FileName + 2;
             if(MountedSystems->FileSystem->FileSystemOpen){
                 Result = MountedSystems->FileSystem->FileSystemOpen(FilePath, MountedSystems->FileSystem);
             }else{
-                LouPrint("Error Reading From Mounted Disk::REASON::No Open Function\n");
+                LouPrint("Error Reading From Mounted Disk");
                 while(1);
             }
             if(Result){
@@ -47,8 +45,15 @@ FILE* fopen(string FileName){
             //because the system disks are linked to one letter 
             //well loop back
         }
-
+        if(MountedSystems->List.NextHeader){
+            MountedSystems = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)MountedSystems->List.NextHeader;
+        }
     }
 
     return 0x00;
+}
+
+LOUDDK_API_ENTRY
+void fclose(FILE* File){
+    LouKeFreeFileData(File);
 }

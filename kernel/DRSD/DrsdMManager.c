@@ -89,7 +89,7 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
 ){
     DRSD_EGA_RELEASE();
     if(NumberOfActiveVRamManagers == 0){
-        DrsdVramManager = (PDrsdVRamObject)LouMallocEx(sizeof(DrsdVRamObject), GET_ALIGNMENT(DrsdVRamObject));
+        DrsdVramManager = (PDrsdVRamObject)LouKeMallocEx(sizeof(DrsdVRamObject), GET_ALIGNMENT(DrsdVRamObject), WRITEABLE_PAGE | PRESENT_PAGE);
         if(!DrsdVramManager){
             return STATUS_INSUFFICIENT_RESOURCES;
         }
@@ -158,7 +158,7 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
 
     }
     //else allocate a new system
-    tmp->Header.NextHeader = (ListHeader*)LouMallocEx(sizeof(PDrsdVRamObject), GET_ALIGNMENT(PDrsdVRamObject));
+    tmp->Header.NextHeader = (ListHeader*)LouKeMallocEx(sizeof(PDrsdVRamObject), GET_ALIGNMENT(PDrsdVRamObject), WRITEABLE_PAGE | PRESENT_PAGE);
     InitializeVRamManagerObject(
         (PDrsdVRamObject)tmp->Header.NextHeader, 
         (PListHeader)tmp, 

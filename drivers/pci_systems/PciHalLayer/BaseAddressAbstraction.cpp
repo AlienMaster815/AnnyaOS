@@ -30,17 +30,17 @@ KERNEL_IMPORT void GetPciConfiguration(ULONG SystemIoBusNumber,ULONG SlotNumber,
     ConfigBuffer->Header.BIST = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x0F);
 
     if(ConfigBuffer->Header.HeaderType == 0x00){
-        ConfigBuffer->Header.u.type0.BaseAddresses[0] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x10);
-        ConfigBuffer->Header.u.type0.BaseAddresses[1] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x14);
-        ConfigBuffer->Header.u.type0.BaseAddresses[2] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x18);
-        ConfigBuffer->Header.u.type0.BaseAddresses[3] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x1C);
-        ConfigBuffer->Header.u.type0.BaseAddresses[4] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x20);
-        ConfigBuffer->Header.u.type0.BaseAddresses[5] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x24);
+        ConfigBuffer->Header.u.type0.BaseAddresses[0] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x10);
+        ConfigBuffer->Header.u.type0.BaseAddresses[1] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x14);
+        ConfigBuffer->Header.u.type0.BaseAddresses[2] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x18);
+        ConfigBuffer->Header.u.type0.BaseAddresses[3] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x1C);
+        ConfigBuffer->Header.u.type0.BaseAddresses[4] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x20);
+        ConfigBuffer->Header.u.type0.BaseAddresses[5] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x24);
 
-        ConfigBuffer->Header.u.type0.CIS = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x28);
+        ConfigBuffer->Header.u.type0.CIS = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x28);
         ConfigBuffer->Header.u.type0.SubVendorID = pciConfigReadWord(SystemIoBusNumber, SlotNumber, Function, 0x2C);
         ConfigBuffer->Header.u.type0.SubSystemID = pciConfigReadWord(SystemIoBusNumber, SlotNumber, Function, 0x2E);
-        ConfigBuffer->Header.u.type0.ROMBaseAddress = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x30);
+        ConfigBuffer->Header.u.type0.ROMBaseAddress = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x30);
             
         ConfigBuffer->Header.u.type0.CapabilitiesPtr = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x34);            
         ConfigBuffer->Header.u.type0.InterruptLine = pciConfigReadByte(SystemIoBusNumber, SlotNumber, 0, 0x3C);
@@ -49,8 +49,8 @@ KERNEL_IMPORT void GetPciConfiguration(ULONG SystemIoBusNumber,ULONG SlotNumber,
         ConfigBuffer->Header.u.type0.MaximumLatency = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x3F);
     }
     else if(ConfigBuffer->Header.HeaderType == 0x01){
-        ConfigBuffer->Header.u.type1.BaseAddresses[0] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x10);
-        ConfigBuffer->Header.u.type1.BaseAddresses[1] = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x14);
+        ConfigBuffer->Header.u.type1.BaseAddresses[0] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x10);
+        ConfigBuffer->Header.u.type1.BaseAddresses[1] = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x14);
 
         ConfigBuffer->Header.u.type1.PrimaryBus = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x18);
         ConfigBuffer->Header.u.type1.SecondaryBus = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x19);
@@ -66,15 +66,15 @@ KERNEL_IMPORT void GetPciConfiguration(ULONG SystemIoBusNumber,ULONG SlotNumber,
         ConfigBuffer->Header.u.type1.PrefetchBase = pciConfigReadWord(SystemIoBusNumber, SlotNumber, Function, 0x24);
         ConfigBuffer->Header.u.type1.PrefetchLimit = pciConfigReadWord(SystemIoBusNumber, SlotNumber, Function, 0x26);
           
-        ConfigBuffer->Header.u.type1.PrefetchBaseUpper32 = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x28);
-        ConfigBuffer->Header.u.type1.PrefetchLimitUpper32 = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x2C);
+        ConfigBuffer->Header.u.type1.PrefetchBaseUpper32 = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x28);
+        ConfigBuffer->Header.u.type1.PrefetchLimitUpper32 = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x2C);
 
         ConfigBuffer->Header.u.type1.IOBaseUpper16 = pciConfigReadWord(SystemIoBusNumber, SlotNumber,Function, 0x30);
         ConfigBuffer->Header.u.type1.IOLimitUpper16 = pciConfigReadWord(SystemIoBusNumber, SlotNumber, Function, 0x32);
 
         ConfigBuffer->Header.u.type1.CapabilitiesPtr = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x34);
 
-        ConfigBuffer->Header.u.type1.ROMBaseAddress = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x38);
+        ConfigBuffer->Header.u.type1.ROMBaseAddress = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x38);
 
         ConfigBuffer->Header.u.type1.InterruptLine = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x3C);
         ConfigBuffer->Header.u.type1.InterruptPin = pciConfigReadByte(SystemIoBusNumber, SlotNumber, Function, 0x3D);
@@ -83,7 +83,7 @@ KERNEL_IMPORT void GetPciConfiguration(ULONG SystemIoBusNumber,ULONG SlotNumber,
 
     }
     else if(ConfigBuffer->Header.HeaderType == 0x02){
-        ConfigBuffer->Header.u.type2.SocketRegistersBaseAddress = pci_read(SystemIoBusNumber, SlotNumber, Function, 0x10);
+        ConfigBuffer->Header.u.type2.SocketRegistersBaseAddress = pci_read( SystemIoBusNumber, SlotNumber, Function, 0x10);
 
         //TODO: Finish this            
 
@@ -135,7 +135,7 @@ void LouKeHalRegisterPciDevice(
 
     LouPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
 
-    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_DEVICE_OBJECT));
+    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouKeMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
     UNUSED uint32_t BarSize = 0x00;
     UNUSED uint8_t Flags;
     UNUSED LouKIRQL OldIrql;
@@ -164,7 +164,7 @@ void LouKeHalRegisterPciDevice(
                         if(Flags == 1){
                             LouPrint("Device Caheable\n");
                             LouKeWriteBarValue(PDEV, i , 0xFFFFFFFF);
-                            BarSize = pci_read(PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & 0xFFFFFFF0;
+                            BarSize = pci_read( PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & 0xFFFFFFF0;
                             BarSize = (~(BarSize & 0xFFFFFFF0)) + 1;
                             LouKeWriteBarValue(PDEV, i , Config->Header.u.type0.BaseAddresses[i]);
                             EnforceSystemMemoryMap(
@@ -177,7 +177,7 @@ void LouKeHalRegisterPciDevice(
                         else{
                             LouPrint("Device Uncaheable\n");
                             LouKeWriteBarValue(PDEV, i , 0xFFFFFFFF);
-                            BarSize = pci_read(PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & 0xFFFFFFF0;
+                            BarSize = pci_read( PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & 0xFFFFFFF0;
                             BarSize = (~(BarSize & 0xFFFFFFF0)) + 1;
                             LouKeWriteBarValue(PDEV, i , Config->Header.u.type0.BaseAddresses[i]);
                             EnforceSystemMemoryMap(

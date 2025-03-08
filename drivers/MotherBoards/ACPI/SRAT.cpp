@@ -99,7 +99,7 @@ void parseSRAT(ACPI_SRAT* srat) {
 
 LOUDDK_API_ENTRY LOUSTATUS InitSRAT() {
 	LOUSTATUS Status = LOUSTATUS_GOOD;
-	uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+	uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
 	ULONG ReturnLength = 0x0000;
 
 	Status = AuxKlibGetSystemFirmwareTable(
@@ -116,6 +116,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitSRAT() {
 
 	}
 
-	LouFree(Buffer);
+	LouKeFree(Buffer);
 	return Status;
 }

@@ -88,7 +88,6 @@ typedef struct _INT_512{
 
 
 #endif
-#pragma pack(push, 1)
 typedef struct  _ListHeader{
     struct _ListHeader* LastHeader;
     struct _ListHeader* NextHeader;
@@ -142,5 +141,4 @@ uint64_t ConvertBeToLeU64(uint64_t Foo) {
 }
 
 
-#pragma pack(pop)
 #endif

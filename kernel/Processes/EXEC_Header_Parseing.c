@@ -19,8 +19,8 @@ void ParseExportTables(
 ){
 
     string ModuleName = (string)(ModuleStart + ExportTable->nameRva);
-    uint64_t* FunctionPointers = LouMallocEx(ExportTable->numberOfNamePointers * sizeof(uint64_t), GET_ALIGNMENT(uint64_t));
-    string* FunctionNames = LouMallocEx(sizeof(string*) * ExportTable->numberOfNamePointers, GET_ALIGNMENT(string*));
+    uint64_t* FunctionPointers = LouKeMallocEx(ExportTable->numberOfNamePointers * sizeof(uint64_t), GET_ALIGNMENT(uint64_t), WRITEABLE_PAGE | PRESENT_PAGE);
+    string* FunctionNames = LouKeMallocEx(sizeof(string*) * ExportTable->numberOfNamePointers, GET_ALIGNMENT(string*), WRITEABLE_PAGE | PRESENT_PAGE);
 
     //LouPrint("ATR:%h\n",ExportTable->exportAddressTableRva);
     //LouPrint("NPR:%h\n",ExportTable->namePointerRva);
@@ -54,8 +54,8 @@ void ParseExportTables(
 
 
 bool CheckDosHeaderValidity(PDOS_HEADER PHeader) {
-    LouPrint("PHEADER:%h\n", PHeader);
-    LouPrint("Magic Value:%c%c\n", PHeader->e_magic[0], PHeader->e_magic[1]);
+    //LouPrint("PHEADER:%h\n", PHeader);
+    //LouPrint("Magic Value:%c%c\n", PHeader->e_magic[0], PHeader->e_magic[1]);
 
     if ((PHeader->e_magic[0] == 'M') && (PHeader->e_magic[1] == 'Z')) return true;
     return false;
@@ -285,7 +285,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
 
 
     if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
-        LouPrint("Found A Valid Kernel Module\n");
+        //LouPrint("Found A Valid Kernel Module\n");
         GetAllPEHeaders(
             (PDOS_HEADER)Start,
             &CoffHeader,
@@ -299,12 +299,12 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
         //LouKeLogKernelBinary(BinaryObject, true);
 
         uint64_t allocatedModuleVirtualAddress =
-        (uint64_t)LouMallocEx(
+        (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE
-            //KERNEL_PAGE_WRITE_PRESENT
+            KILOBYTE_PAGE,
+            KERNEL_PAGE_WRITE_PRESENT
         );
-        LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, PRESENT_PAGE | WRITEABLE_PAGE);
+        //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, PRESENT_PAGE | WRITEABLE_PAGE);
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
 
 
@@ -386,7 +386,7 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
     PSECTION_HEADER SectionHeader;
 
     if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
-        LouPrint("Found A Valid Module\n");
+        //LouPrint("Found A Valid Module\n");
         GetAllPEHeaders(
             (PDOS_HEADER)Start,
             &CoffHeader,
@@ -486,7 +486,7 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
 
 
     if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
-        LouPrint("Found A Valid Executeable\n");
+        //LouPrint("Found A Valid Executeable\n");
         GetAllPEHeaders(
             (PDOS_HEADER)Start,
             &CoffHeader,

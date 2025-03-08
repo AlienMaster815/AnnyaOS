@@ -38,7 +38,7 @@ void parseBGRT(ACPI_BGRT* bgrt) {
 LOUDDK_API_ENTRY LOUSTATUS InitBGRT() {
 
     LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x000;
     Status = AuxKlibGetSystemFirmwareTable(
         'ACPI',
@@ -53,6 +53,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitBGRT() {
         parseBGRT(bgrt);
     }
 
-    LouFree(Buffer);
+    LouKeFree(Buffer);
     return Status;
 }

@@ -9,14 +9,14 @@ PBITMAP_HANDLE UnpackBitmap(FILE* FileToUnpack){
     
     if(BitmapFile->BFType != 0x4D42){
         LouPrint("Error: File Is Not Bitmap Type\n");
-        LouFree((RAMADD)FileToUnpack);
+        fclose(FileToUnpack);
         return MapHandle;
     }
 
-    FILE* NewUserAddress = LouMalloc(BitmapFile->BFSize);//, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    FILE* NewUserAddress = LouKeMalloc(BitmapFile->BFSize, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     memcpy((void*)NewUserAddress, (void*)FileToUnpack, BitmapFile->BFSize);
-    LouFree((RAMADD)FileToUnpack);
+    fclose(FileToUnpack);
 
     FileToUnpack = NewUserAddress;    
     BitmapFile = (PBITMAP_FILE_HEADER)FileToUnpack;
@@ -35,7 +35,7 @@ PBITMAP_HANDLE UnpackBitmap(FILE* FileToUnpack){
     LouPrint("FileToUnp:%h\n", FileToUnpack);
     LouPrint("PixelData:%h\n", PixelData);
 
-    MapHandle = (PBITMAP_HANDLE)LouMalloc(sizeof(BITMAP_HANDLE));//, WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
+    MapHandle = (PBITMAP_HANDLE)LouKeMalloc(sizeof(BITMAP_HANDLE), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
 
     MapHandle->Width = BIH->BIWidth;
     MapHandle->Height = BIH->BIHeight;
@@ -53,9 +53,9 @@ PBITMAP_HANDLE LouKeOpenBitmapImage(string FilePath){
 
 void LouKeCloseBitmapImage(PBITMAP_HANDLE BitHandle){
     if(BitHandle->FileHandle){
-        LouFree((RAMADD)BitHandle->FileHandle);
+        LouKeFree(BitHandle->FileHandle);
     }
-    LouFree((RAMADD)BitHandle);
+    LouKeFree(BitHandle);
 }
 
 static spinlock_t BitMapDrawLock;

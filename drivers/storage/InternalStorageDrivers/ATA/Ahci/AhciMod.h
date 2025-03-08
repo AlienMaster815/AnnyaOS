@@ -86,7 +86,7 @@
 #define AHCI_GENERATION_5_CAVIUM_ABAR       4
 #define AHCI_LOONGSON_ABAR                  0
 
-#pragma pack(push, 1)
+//#pragma pack(push, 1)
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_HOST_CONTROL  GenericHostController;
     PAHCI_GENERIC_PORT          GenericPort;
@@ -96,16 +96,15 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                    PioFlags;
     uint64_t                    DmaFlags;
     uint64_t                    PrivateFlags;
-    uint8_t                     InterruptRequestVector;
-    uint8_t                     DmaBits;
-    uint16_t                    PortMap;
     void                        (*StartCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
-    LOUSTATUS                   (*StopCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);\
+    LOUSTATUS                   (*StopCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     uintptr_t                   FisDma;
     uintptr_t                   CommandDma;
-    bool                        PortNeedsSanatized[32];
+    uint16_t                    PortMap;
+    uint8_t                     InterruptRequestVector;
+    uint8_t                     DmaBits;
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
-#pragma pack(pop)
+//#pragma pack(pop)
 
 //Driver Operations
 LOUSTATUS AhciGenricDMAPrepCommand(

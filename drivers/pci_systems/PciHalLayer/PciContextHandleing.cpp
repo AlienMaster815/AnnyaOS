@@ -77,7 +77,7 @@ void SetPciConfiguration(ULONG SystemIoBusNumber, ULONG SlotNumber, ULONG Functi
 
 PPCI_CONTEXT LouKeHalPciSaveContext(P_PCI_DEVICE_OBJECT PDEV){
 
-    PPCI_CONTEXT SavedContext = (PPCI_CONTEXT)LouMalloc(sizeof(PCI_CONTEXT));
+    PPCI_CONTEXT SavedContext = (PPCI_CONTEXT)LouKeMallocEx(sizeof(PCI_CONTEXT), GET_ALIGNMENT(PCI_CONTEXT), WRITEABLE_PAGE | PRESENT_PAGE);
     GetPciConfiguration(PDEV->bus,PDEV->slot, PDEV->func, (PPCI_COMMON_CONFIG)LouKeCastToUnalignedPointer(&SavedContext->PciConfig));
     SavedContext->PDEV = (void*)PDEV;
 

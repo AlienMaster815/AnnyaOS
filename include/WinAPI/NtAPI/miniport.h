@@ -1,6 +1,5 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
-#pragma pack(push, 1)
 
 #ifndef _MINIPORT_H
 #define _MINIPORT_H
@@ -1061,4 +1060,3 @@ typedef struct _AHCI_SRB_EXTENSION {
 
 
 #endif
-#pragma pack(pop)

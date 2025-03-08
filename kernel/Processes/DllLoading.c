@@ -3,6 +3,7 @@
 DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
 
 DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath){
+    
     FILE* ModuleHandle = fopen(ModuleNameAndPath);
 
     if(!ModuleHandle){
@@ -37,7 +38,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
         if(TmpHandle->Neighbors.NextHeader){
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }else{
-            TmpHandle->Neighbors.NextHeader = (PListHeader)LouMallocEx(sizeof(DRIVER_MODULE_HANDLES), GET_ALIGNMENT(DRIVER_MODULE_HANDLES));
+            TmpHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(DRIVER_MODULE_HANDLES), GET_ALIGNMENT(DRIVER_MODULE_HANDLES), WRITEABLE_PAGE | PRESENT_PAGE);
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }
     }
@@ -51,7 +52,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
     TmpHandle->Paths = ModuleNameAndPath;
     Entry = (DRIVER_MODULE_ENTRY)LoadKernelModule((uintptr_t)ModuleHandle, ModuleNameAndPath);
     TmpHandle->ModuleEntry = Entry;
-    TmpHandle->DriverObject = LouMalloc(DriverObjectSize);
+    TmpHandle->DriverObject = LouKeMalloc(DriverObjectSize, WRITEABLE_PAGE | PRESENT_PAGE);
     *DriverObject = TmpHandle->DriverObject;
     DriveHandlesCount++;
     return (DRIVER_MODULE_ENTRY)Entry;

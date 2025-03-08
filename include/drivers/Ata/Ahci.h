@@ -117,7 +117,6 @@ typedef struct _AHCI_GENERIC_PORT{
 #define AHCI_PxCMD_FRE  (1 << 4)
 #define AHCI_PxCMD_ST   1
 
-#pragma pack(push, 1)
 
 
 
@@ -162,9 +161,6 @@ typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
 #define AHCI_COMMAND_WRITE 1 << 5
 #define AHCI_COMMAND_ATAPI 1 << 9
 
-
-
-#pragma pack(pop)
 
 #ifdef __cplusplus
 }

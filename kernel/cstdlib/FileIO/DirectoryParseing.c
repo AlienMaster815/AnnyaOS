@@ -33,5 +33,5 @@ void LouKeFOpenCall(uint64_t* Data){
     *Data = (uint64_t)fopen(PathToFile);   
     uint64_t KData = *Data;
     *Data = (uint64_t)LouKeForkToUserModeSection(KData);
-    LouFree((RAMADD)KData);
+    fclose((FILE*)KData);
 }

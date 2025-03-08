@@ -256,7 +256,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     LouPrint(DRV_VERSION_APIC);
     disable_pic();
 
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x0000;
 
     Status = AuxKlibGetSystemFirmwareTable(
@@ -290,8 +290,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
         HeaderEndAddress
     );
 
-    Cpu = (CPU::CPUID*)LouMallocEx(sizeof(CPU::CPUID), GET_ALIGNMENT(CPU::CPUID));
-    Lapic = (APIC::LAPIC*)LouMallocEx(sizeof(APIC::LAPIC), GET_ALIGNMENT(APIC::LAPIC));
+    Cpu = (CPU::CPUID*)LouKeMallocEx(sizeof(CPU::CPUID), GET_ALIGNMENT(CPU::CPUID), WRITEABLE_PAGE | PRESENT_PAGE);
+    Lapic = (APIC::LAPIC*)LouKeMallocEx(sizeof(APIC::LAPIC), GET_ALIGNMENT(APIC::LAPIC), WRITEABLE_PAGE | PRESENT_PAGE);
 
     if(Lapic->InitializeApic())LouPrint("APIC ENABLED SUCCESSFULLY\n");
 
@@ -301,8 +301,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     
     ApicSet = true;
 
-    LouFree((RAMADD)Cpu);
-    LouFree((RAMADD)Buffer);
+    LouKeFree((RAMADD)Cpu);
+    LouKeFree((RAMADD)Buffer);
 
     for(uint8_t i = 0 ; i < ioapic_count; i++){
         if(!InitializeIoApic(i,ApicBase)){
@@ -358,7 +358,7 @@ bool APIC::LAPIC::InitializeBspLapic(){
         //initiailize x2 standard
         LouPrint("Using X2 Standard\n");
         //Set the Spurious Interrupt Vector Register bit 8 to start receiving interrupts
-        WRITE_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER, READ_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER) | APIC_ENABLE);
+        WRITE_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER, (READ_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER) & 0xFFFFFF00) | APIC_ENABLE | 0xFF);
         
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010); //divide by 128
         WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, 0xFFFFFFFF);
@@ -371,13 +371,14 @@ bool APIC::LAPIC::InitializeBspLapic(){
         WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32 | 0x20000);
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010);
         WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC);
+        
     }
     else if (Cpu->IsFeatureSupported(CPU::XAPIC)){
         //initialize x1 standard
         LouPrint("Using X1 Standard\n");
 
         //Set the Spurious Register
-        WRITE_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER, READ_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER) | APIC_ENABLE);
+        WRITE_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER, (READ_REGISTER_ULONG(SPURRIOUS_INTERRUPT_REGISTER) & 0xFFFFFF00) | APIC_ENABLE | 0xFF);
         WRITE_REGISTER_ULONG(TPR_REGISTER, 0x00);
         
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010); //divide by 128
@@ -391,6 +392,7 @@ bool APIC::LAPIC::InitializeBspLapic(){
         WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32 | 0x20000);
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010);
         WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC);
+
     }
     else{
         //determine Discreet or integrated chip
@@ -412,10 +414,13 @@ bool APIC::LAPIC::InitializeBspLapic(){
             case 0x15:
                 LouPrint("Integrated Apic Found\n");
                 // Set the Spurious Interrupt Vector Register bit 8 to start receiving interrupts
+                
+                while(1);    
                 break;
 
             default:{
                 LouPrint("Unkown APIC CHIP\n");
+                while(1);
                 return false;
             }
         }

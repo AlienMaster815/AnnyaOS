@@ -12,8 +12,6 @@ typedef struct _PCI_MANAGER_DATA{
     #ifdef __cplusplus
 
         #include <LouDDK.h>
-
-        #pragma pack(push, 1)
         #ifndef _KERNEL_MODULE_
 
             typedef struct _LINUX_PCI_DEVICE_ID {
@@ -170,7 +168,6 @@ typedef struct _PCI_MANAGER_DATA{
 
             KERNEL_EXPORT void LouKeHalAcpiShutdown();
 
-            #pragma pack(pop)
         #endif
     #else
 

@@ -52,8 +52,8 @@ LOUSTATUS LookForStorageDevices(){
                     if(!AhciDriverEntryPoint){
                         continue;
                     }
-                    AhciDriverObject = (PDRIVER_OBJECT)LouMallocEx(sizeof(DRIVER_OBJECT), GET_ALIGNMENT(DRIVER_OBJECT));
-                    AhciDriverObject->DriverExtension = (PDRIVER_EXTENSION)LouMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION));
+                    AhciDriverObject = (PDRIVER_OBJECT)LouKeMallocEx(sizeof(DRIVER_OBJECT), GET_ALIGNMENT(DRIVER_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+                    AhciDriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION), WRITEABLE_PAGE | PRESENT_PAGE);
                     AhciDriverEntryPoint(AhciDriverObject, 0x00);
                     AhciDriverLoaded = true;
                 }
@@ -65,7 +65,7 @@ LOUSTATUS LookForStorageDevices(){
                 }
 
                 PDEVICE_OBJECT NtPdev = (PDEVICE_OBJECT)LouKeMallocEx(sizeof(PDEVICE_OBJECT), GET_ALIGNMENT(PDEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
-                //by default Ahci uses LDM
+                //by default Ahci uses LKDM
 
                 NtPdev->PDEV = PDEV;
                 NtPdev->DeviceID = Device;

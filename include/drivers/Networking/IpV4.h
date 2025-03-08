@@ -71,7 +71,6 @@ extern "C"{
 #define IPV4_TIMESTAMP_IARE             1
 #define IPV4_TIMESTAMP_IAFAP            3
 
-#pragma pack(push, 1)
 typedef struct _IPV4_SERVICE_TYPE{
     uint8_t     Precedence  : 3;
     uint8_t     Delay       : 1;
@@ -136,7 +135,6 @@ typedef struct _IPV4_INTERNET_TIMESTAMP{
     uint32_t    Padding[];
 }IPV4_INTERNET_TIMESTAMP, * PIPV4_INTERNET_TIMESTAMP;
 
-#pragma pack(pop)
 
 #ifdef __cplusplus
 }

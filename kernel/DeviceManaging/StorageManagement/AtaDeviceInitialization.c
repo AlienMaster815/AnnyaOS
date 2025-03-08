@@ -64,7 +64,7 @@ LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable
 
 LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable){
     LouPrint("Lousine Kernel Device Manager Initializing ATA Host Device\n");
-
+    
     PATA_HOST_DEVICE_LIST TmpHostList = &AtaHostDeviceList;
 
     //Run Through the Host List And Allocate A Host For The Next Time This Function Used
@@ -72,7 +72,7 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
         if(TmpHostList->Neighbors.NextHeader){
             TmpHostList = (PATA_HOST_DEVICE_LIST)TmpHostList->Neighbors.NextHeader;
         }else {
-            TmpHostList->Neighbors.NextHeader = (PListHeader)LouMalloc(sizeof(ATA_HOST_DEVICE_LIST));
+            TmpHostList->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(ATA_HOST_DEVICE_LIST), GET_ALIGNMENT(ATA_HOST_DEVICE_LIST), PRESENT_PAGE | WRITEABLE_PAGE);
         }
     }
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)DeviceDirectoryTable->KeyData;
@@ -81,13 +81,15 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
 
     for(uint8_t i = 0 ; i < AtaHost->PortCount; i++){
         LouPrint("Registering Ata Port To Device Manager\n");
-        PDEVICE_DIRECTORY_TABLE PortTable = (PDEVICE_DIRECTORY_TABLE)LouMalloc(sizeof(DEVICE_DIRECTORY_TABLE));
+        PDEVICE_DIRECTORY_TABLE PortTable = (PDEVICE_DIRECTORY_TABLE)LouKeMallocEx(sizeof(DEVICE_DIRECTORY_TABLE), GET_ALIGNMENT(DEVICE_DIRECTORY_TABLE), PRESENT_PAGE | WRITEABLE_PAGE);
         *PortTable = *DeviceDirectoryTable;
         PortTable->KeyData = &AtaHost->Ports[i];
         PortTable->DevicePrivateData = &AtaHost->Ports[i];
-        DeviceManagerInitializeAtaPortDevice(PortTable);
+        if(DeviceManagerInitializeAtaPortDevice(PortTable) != STATUS_SUCCESS){
+            LouKeFree(PortTable);
+            continue;
+        }
         LouRegisterStorageDevice(PortTable);
     }
-    
     return STATUS_SUCCESS;
 }

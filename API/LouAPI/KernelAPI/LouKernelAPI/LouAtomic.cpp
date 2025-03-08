@@ -30,13 +30,13 @@ LOUSTATUS LouKeAddAtomEx(
             TmpAtomTable = (PLOU_KE_ATOM_TABLE_ENTRY)TmpAtomTable->Neighbors.NextHeader;
         }
         else{
-            TmpAtomTable->Neighbors.NextHeader = (PListHeader)LouMallocEx(sizeof(LOU_KE_ATOM_TABLE_ENTRY) , GET_ALIGNMENT(LOU_KE_ATOM_TABLE_ENTRY));
+            TmpAtomTable->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(LOU_KE_ATOM_TABLE_ENTRY) , GET_ALIGNMENT(LOU_KE_ATOM_TABLE_ENTRY), WRITEABLE_PAGE | PRESENT_PAGE);
             TmpAtomTable = (PLOU_KE_ATOM_TABLE_ENTRY)TmpAtomTable->Neighbors.NextHeader;
         }
     }
 
     //allocate Atom name
-    TmpAtomTable->AtomName = (wchar_t*)LouMallocEx(sizeof(WCHAR) * Length, GET_ALIGNMENT(WCHAR));
+    TmpAtomTable->AtomName = (wchar_t*)LouKeMallocEx(sizeof(WCHAR) * Length, GET_ALIGNMENT(WCHAR), WRITEABLE_PAGE | PRESENT_PAGE);
     //copy atom name
     LouWStrnCpy(TmpAtomTable->AtomName, (ULONG)Length, AtomName);
     //place Atom

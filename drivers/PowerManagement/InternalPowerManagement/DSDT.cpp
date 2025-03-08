@@ -96,7 +96,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitDSDT() {
 
     LOUSTATUS Status = STATUS_UNSUCCESSFUL;
 
-    uint8_t* Buffer = (uint8_t*)LouMalloc(sizeof(uint8_t*) * 256);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(sizeof(uint8_t*) * 256, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x0000;
 
     Status = AuxKlibGetSystemFirmwareTable(
@@ -124,10 +124,10 @@ LOUDDK_API_ENTRY LOUSTATUS InitDSDT() {
         parseDSDT(dsdt);
     }
     else {
-        LouFree(Buffer);
+        LouKeFree(Buffer);
         return STATUS_UNSUCCESSFUL;
     }
-    LouFree(Buffer);
+    LouKeFree(Buffer);
 
     return Status;
 }

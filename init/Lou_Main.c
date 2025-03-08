@@ -30,7 +30,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.5.01";
+string KERNEL_VERSION = "0.5.02";
 
 #ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";
@@ -99,6 +99,7 @@ void FlushTss();
 LOUSTATUS SetupInitialVideoDevices();
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 void InitializeBasicMemcpy();
+void Spurious(uint64_t FaultingStackP);
 
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
@@ -141,8 +142,8 @@ LOUSTATUS Lou_kernel_early_initialization(){
     RegisterInterruptHandler(SYSCALLS, 0x80, false, 0);
     RegisterInterruptHandler(UpdateThreadManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
     RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
-    RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
-
+    //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
+    RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);
 
     SetUpTimers();
     //DeterminCPU();
@@ -173,7 +174,6 @@ void Advanced_Kernel_Initialization(){
     //if(LOUSTATUS_GOOD != InitBGRT())LouPrint("Unable To Start BGRT Handleing\n");
     //if(LOUSTATUS_GOOD != InitECDT())LouPrint("Unable To Start ECDT Handleing\n");
     //if(LOUSTATUS_GOOD != InitSLIT())LouPrint("Unable To Start SLIT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitMCFG())LouPrint("Unable To Start MCFG Handleing\n");
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
     HandleProccessorInitialization();
@@ -295,6 +295,8 @@ void InitializeInternalChipsetHostDriver();
 uint8_t LouKeGetNumberOfStorageDevices();
 void InitializeFileSystemManager();
 void GenericVideoProtocolInitialize();
+void InitializePs2Mouse();
+void EnablePs2Keyboard();
 
 static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
@@ -311,9 +313,10 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfi = true;
     }
 
+    //InitMCFG();
+
     LouKeMapPciMemory();
 
-    SetupInitialVideoDevices();
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     Lou_kernel_early_initialization();
 
@@ -321,6 +324,9 @@ KERNEL_ENTRY Lou_kernel_start(
 
     Advanced_Kernel_Initialization();
 
+    LouPrint("HERE\n");
+    while(1);
+                                                           
     InitializeInternalChipsetHostDriver();
     //SETUP DEVICES AND DRIVERS
     LookForStorageDevices();
@@ -333,7 +339,13 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeFileSystemManager();
 
-    ScanTheRestOfHarware();
+    SetupInitialVideoDevices();
+
+    EnablePs2Keyboard();
+
+    InitializePs2Mouse();
+
+    //ScanTheRestOfHarware();
 	
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
@@ -376,9 +388,16 @@ void InitializeUserSpace(){
     LouPrint("Hello World\n");
     
     //LouKeOpenPngImage("C:/ANNYA/AOSMC.PNG");
-    
+    if(!InitEntry){
+        LouPrint("ERROR Could Not Jump To Usermode\n");
+        while(1);
+    }
     UsrJmp(InitEntry);
 }
+
+
+//BUGS TO FIX:
+//memcpy doesent use SSE correctly
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 

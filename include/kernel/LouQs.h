@@ -1,6 +1,5 @@
 #ifndef _LOUQS_H
 #define _LOUQS_H
-#pragma pack(push, 1)
 
 #ifdef __cplusplus
 #include <LouDDK.h>
@@ -55,7 +54,6 @@ typedef struct _LOUQ_LIMITS{
     uint64_t OperationLimitFlags;
 }LOUQ_LIMITS, * PLOUQ_LIMITS;
 
-#pragma pack(pop)
 
 #ifdef __cplusplus
 }

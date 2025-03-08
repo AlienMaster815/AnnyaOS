@@ -13,39 +13,16 @@ typedef struct {
     uint32_t CreatorRevision;
 } ACPI_TABLE_HEADER;
 
-typedef struct {
+typedef struct _ACPI_MCFG{
     ACPI_TABLE_HEADER Header;
     uint64_t Reserved;
     // Followed by a variable number of MCFG Configuration Base Address Allocation structures
-} ACPI_MCFG;
-
-typedef struct {
-    uint64_t BaseAddress;
-    uint16_t PCISegmentGroupNumber;
-    uint8_t StartBusNumber;
-    uint8_t EndBusNumber;
-    uint32_t Reserved;
-} ACPI_MCFG_ALLOCATION;
-
-void parseMCFG(ACPI_MCFG* mcfg) {
-    LouPrint("MCFG Length:%d\n", mcfg->Header.Length);
-    LouPrint("Reserved: 0x%lx\n", mcfg->Reserved);
-
-    uint32_t numAllocations = (mcfg->Header.Length - sizeof(ACPI_MCFG)) / sizeof(ACPI_MCFG_ALLOCATION);
-    ACPI_MCFG_ALLOCATION* allocation = (ACPI_MCFG_ALLOCATION*)((uint8_t*)mcfg + sizeof(ACPI_MCFG));
-
-    for (uint32_t i = 0; i < numAllocations; i++) {
-        LouPrint("Base Address: 0x%lx\n", allocation->BaseAddress);
-        LouPrint("PCI Segment Group Number: %d\n", allocation->PCISegmentGroupNumber);
-        LouPrint("Start Bus Number: %d\n", allocation->StartBusNumber);
-        LouPrint("End Bus Number: %d\n", allocation->EndBusNumber);
-        allocation++;
-    }
-}
+    ACPI_MCFG_ALLOCATION Allocations[];
+} ACPI_MCFG, * PACPI_MCFG;
 
 LOUDDK_API_ENTRY LOUSTATUS InitMCFG() {
     LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x000;
     Status = AuxKlibGetSystemFirmwareTable(
         'ACPI',
@@ -56,10 +33,15 @@ LOUDDK_API_ENTRY LOUSTATUS InitMCFG() {
     );
 
     if (Status == LOUSTATUS_GOOD) {
-        ACPI_MCFG* mcfg = (ACPI_MCFG*)Buffer;
-        parseMCFG(mcfg);
+        LouPrint("PCIe Supported Initializing PCIe systems\n");
+        PACPI_MCFG Mcfg = (PACPI_MCFG)Buffer;
+        size_t NumberOfEntries = (Mcfg->Header.Length - 44) / sizeof(ACPI_MCFG_ALLOCATION);
+        LouPrint("Number Of MCFG Entries:%d\n", NumberOfEntries);
+
+
     }
 
-    LouFree(Buffer);
+
+    LouKeFree(Buffer);
     return Status;
 }

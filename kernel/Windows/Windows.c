@@ -22,9 +22,9 @@ static inline volatile PWINDHANDLE CreateWindowHandle(){
     }
     OpenWindows++;
 
-    TmpList->Neighbors.NextHeader = (PListHeader)LouMallocEx(sizeof(OPEN_WINDOW_LIST), GET_ALIGNMENT(OPEN_WINDOW_LIST));
+    TmpList->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(OPEN_WINDOW_LIST), GET_ALIGNMENT(OPEN_WINDOW_LIST), WRITEABLE_PAGE | PRESENT_PAGE);
     TmpList = (POPEN_WINDOW_LIST)TmpList->Neighbors.NextHeader;
-    TmpList->WindowHandle = (volatile PWINDHANDLE)LouKeMallocEx(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE, GET_ALIGNMENT(WINDHANDLE));
+    TmpList->WindowHandle = (volatile PWINDHANDLE)LouKeMallocEx(sizeof(WINDHANDLE), GET_ALIGNMENT(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     LouKeReleaseSpinLock(&WindowHandleLock, &Irql);
     
     return TmpList->WindowHandle;
@@ -45,7 +45,7 @@ static inline void DestroyWindowHandle(
             }
             TmpList2->Neighbors.NextHeader = TmpList->Neighbors.NextHeader;  
             OpenWindows--;
-            LouFree((RAMADD)TmpList->WindowHandle);
+            LouKeFree((RAMADD)TmpList->WindowHandle);
             LouKeReleaseSpinLock(&WindowHandleLock, &Irql);
             return;
        }
@@ -639,8 +639,8 @@ volatile PWINDHANDLE LouCreateWindow(
     WindHandle->Cursor.y = 0;
 
     WindHandle->WindowName = Charecteristics->WindowName;
-    WindHandle->InnerWindowData = LouMallocEx(    
-        GetScreenBufferHeight() * GetScreenBufferWidth() * 4, 4
+    WindHandle->InnerWindowData = LouKeMallocEx(    
+        64 * MEGABYTE, MEGABYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE
     );
 
     for(

@@ -663,6 +663,7 @@ NTSTATUS AddAhciDevice(
     DbgPrint("AddAhciDevice()\r\n");
     //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
     NTSTATUS Status = STATUS_SUCCESS;
+
     //get the device ID and Pci Device from the LKDM
     uint64_t AhciDeviceID = Device->DeviceID;
     uint8_t BoardID = AhciDevices[AhciDeviceID].BoardID;
@@ -756,7 +757,7 @@ NTSTATUS AddAhciDevice(
     PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
 
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeMallocAtaDevice(PDEV, PortCount);
-    LouKeMallocAtaPrivateData(AtaHost, sizeof(AHCI_DRIVER_PRIVATE_DATA));
+    LouKeMallocAtaPrivateData(AtaHost, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));
     PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
 
     PrivateAhciData->PortMap = (uint16_t)Ghc->PortsImplemented;
@@ -829,7 +830,7 @@ NTSTATUS AddAhciDevice(
     }
 
     LouKeForkAtaHostPrivateDataToPorts(AtaHost);
-
+    
     ForEachAtaPort(AtaHost){
         PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[AtaPortIndex].PortPrivateData;
         PrivateAhciData->GenericPort = (PAHCI_GENERIC_PORT)(uintptr_t)((uintptr_t)Ghc + 0x100 + AtaPortIndex * 0x80);
@@ -849,7 +850,7 @@ NTSTATUS AddAhciDevice(
     AhciPciInitializeController(AtaHost);
     LouKeHalPciSetMaster(PDEV);
 
-    DbgPrint("Adding AHCI Device To Device Manager\n");    
+    LouPrint("Adding AHCI Device To Device Manager\n");    
     LouKeRegisterDevice(
         PDEV, 
         ATA_DEVICE_T,

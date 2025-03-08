@@ -29,7 +29,7 @@ void parseSBST(ACPI_SBST* sbst) {
 
 LOUDDK_API_ENTRY LOUSTATUS InitSBST() {
 	LOUSTATUS Status = LOUSTATUS_GOOD;
-	uint8_t* Buffer = (uint8_t*)LouMalloc(ACPIBUFFER);
+	uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
 	ULONG ReturnLength = 0x0000;
 
 	Status = AuxKlibGetSystemFirmwareTable(
@@ -45,6 +45,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitSBST() {
 		parseSBST(sbst);
 	}
 
-	LouFree(Buffer);
+	LouKeFree(Buffer);
 	return Status;
 }

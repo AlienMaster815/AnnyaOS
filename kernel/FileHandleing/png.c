@@ -46,7 +46,7 @@ FILE* DecodePngFile(FILE* PngLoaction){
     size_t IDATCount = PngGetIdatDataCount(TmpChunk);
     uint8_t* TmpZlibBuffer = 0;
     size_t TmpUncompressesdSize = 0;
-    UNUSED uint8_t** ZlibUnpackedBuffers = (uint8_t**)LouMalloc(sizeof(uint8_t*) * IDATCount);
+    UNUSED uint8_t** ZlibUnpackedBuffers = (uint8_t**)LouKeMallocEx(sizeof(uint8_t*) * IDATCount, GET_ALIGNMENT(uint8_t*), WRITEABLE_PAGE | PRESENT_PAGE);
     uint8_t IdatIndex = 0;
     while(strncmp(ChunkType, "IEND" , strlen("IEND")) != 0){
 
@@ -58,9 +58,9 @@ FILE* DecodePngFile(FILE* PngLoaction){
             //LouPrint("Buffer Offset:%h\n", (uintptr_t)TmpZlibBuffer - (uintptr_t)PngLoaction);
             TmpUncompressesdSize = LouKeGetZlibUnCompressedSize(TmpZlibBuffer, U32_TO_NETWORK_BYTE_ORDER(TmpChunk->Length));
             if((TmpUncompressesdSize == 0xFFFFFFFF) || (!TmpUncompressesdSize)){
-                ZlibUnpackedBuffers[IdatIndex] = (uint8_t*)LouMalloc(U32_TO_NETWORK_BYTE_ORDER(TmpChunk->Length) * 4);
+                ZlibUnpackedBuffers[IdatIndex] = (uint8_t*)LouKeMalloc(U32_TO_NETWORK_BYTE_ORDER(TmpChunk->Length) * 4, WRITEABLE_PAGE | PRESENT_PAGE);
             }else{
-                ZlibUnpackedBuffers[IdatIndex] = (uint8_t*)LouMalloc(TmpUncompressesdSize);
+                ZlibUnpackedBuffers[IdatIndex] = (uint8_t*)LouKeMalloc(TmpUncompressesdSize, WRITEABLE_PAGE | PRESENT_PAGE);
             }
             //LOUSTATUS LouKeZlibUnpackStream(uint8_t* OutputStream, size_t* OutputStreamSize, uint8_t* InputStream, size_t InputLength)
             LouKeZlibUnpackStream(ZlibUnpackedBuffers[IdatIndex], &TmpUncompressesdSize, TmpZlibBuffer, U32_TO_NETWORK_BYTE_ORDER(TmpChunk->Length));

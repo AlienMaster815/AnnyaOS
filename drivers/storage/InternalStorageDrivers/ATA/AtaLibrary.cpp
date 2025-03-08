@@ -4,18 +4,20 @@ LOUDDK_API_ENTRY
 void 
 LouKeMallocAtaPrivateData(
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
-    uint64_t SizeofPrivateData
+    uint64_t SizeofPrivateData,
+    uint64_t AlignmentOfPrivateData
 ){
     AtaHost->PrivateDataSize = SizeofPrivateData;
-    AtaHost->HostPrivateData = LouMalloc(SizeofPrivateData);
+    AtaHost->HostPrivateData = LouKeMallocEx(SizeofPrivateData, AlignmentOfPrivateData, WRITEABLE_PAGE | PRESENT_PAGE);
     for(uint8_t i = 0; i < AtaHost->PortCount; i++){
-        AtaHost->Ports[i].PortPrivateData = LouMalloc(SizeofPrivateData);
+        AtaHost->Ports[i].PortPrivateData = LouKeMallocEx(SizeofPrivateData, AlignmentOfPrivateData, WRITEABLE_PAGE | PRESENT_PAGE);
     }
 }
 
 LOUDDK_API_ENTRY
 void 
 LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    
     void* AtaHostPrivateData = (void*)AtaHost->HostPrivateData;    
     uint64_t DataSize = AtaHost->PrivateDataSize;
 
@@ -31,7 +33,7 @@ LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
 
     PLOUSINE_KERNEL_DEVICE_ATA_HOST NewHost;
 
-    NewHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)LouMallocEx((sizeof(LOUSINE_KERNEL_DEVICE_ATA_HOST) + (sizeof(LOUSINE_KERNEL_DEVICE_ATA_PORT) * PortCount)), sizeof(LOUSINE_KERNEL_DEVICE_ATA_HOST));
+    NewHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)LouKeMallocEx((sizeof(LOUSINE_KERNEL_DEVICE_ATA_HOST) + (sizeof(LOUSINE_KERNEL_DEVICE_ATA_PORT) * PortCount)), GET_ALIGNMENT(LOUSINE_KERNEL_DEVICE_ATA_HOST), WRITEABLE_PAGE | PRESENT_PAGE);
     NewHost->PDEV = PDEV;
     NewHost->PortCount = PortCount;
     
@@ -65,7 +67,7 @@ LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     void* IdBuffer
 ){
     LOUSTATUS Result = STATUS_SUCCESS;
-    LouPrint("LOUSINE ATA LIB:Creating Ata Identify Command\n");
+    //LouPrint("LOUSINE ATA LIB:Creating Ata Identify Command\n");
     UNUSED ATA_QUEUED_COMMAND Command;
     Command.Command     = ATA_COMMAND_IDENTIFY_ATA;
     Command.WriteCommand= false;
@@ -89,14 +91,14 @@ LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     Command.Auxillery = 0;
 
     memset((void*)Command.ScsiCommand, 0 , 16);
-    LouPrint("LOUSINE ATA_LIB:Preping Ata Identify Command\n");
+    //LouPrint("LOUSINE ATA_LIB:Preping Ata Identify Command\n");
     if(AtaPort->Operations->PrepCommand){
         Result = AtaPort->Operations->PrepCommand(&Command);
         if(Result != STATUS_SUCCESS){
             return Result;
         }
     }
-    LouPrint("LOUSINE ATA_LIB:Issueing Ata Identify Command\n");
+    //LouPrint("LOUSINE ATA_LIB:Issueing Ata Identify Command\n");
     if(AtaPort->Operations->IssueCommand){
         Result = AtaPort->Operations->IssueCommand(&Command);
     }
@@ -109,7 +111,7 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     void*                            IdBuffer
 ){
     LOUSTATUS Result = STATUS_SUCCESS;
-    LouPrint("LOUSINE ATA LIB:Creating Atapi Identify Command\n");
+    //LouPrint("LOUSINE ATA LIB:Creating Atapi Identify Command\n");
     UNUSED ATA_QUEUED_COMMAND Command;
     Command.Command     = ATA_COMMAND_IDENTIFY_ATAPI;
     Command.WriteCommand= false;
@@ -133,14 +135,14 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     Command.Auxillery = 0;
 
     memset((void*)Command.ScsiCommand, 0 , 16);
-    LouPrint("LOUSINE ATA_LIB:Preping Atapi Identify Command\n");
+    //LouPrint("LOUSINE ATA_LIB:Preping Atapi Identify Command\n");
     if(AtapiPort->Operations->PrepCommand){
         Result = AtapiPort->Operations->PrepCommand(&Command);
         if(Result != STATUS_SUCCESS){
             return Result;
         }
     }
-    LouPrint("LOUSINE ATA_LIB:Issueing Atapi Identify Command\n");
+    //LouPrint("LOUSINE ATA_LIB:Issueing Atapi Identify Command\n");
     if(AtapiPort->Operations->IssueCommand){
         Result = AtapiPort->Operations->IssueCommand(&Command);
     }
@@ -184,7 +186,7 @@ LOUSTATUS LouKeAtaReadDevice(
     }
 
     if(AtaPort->PortScsiDevice){
-        LouPrint("LOUSINE ATA LIB:Preparing To Read Atapi Device\n");
+        //LouPrint("LOUSINE ATA LIB:Preparing To Read Atapi Device\n");
 
         Command.PacketCommand   = true;
         Command.Command         = ATA_COMMAND_PACKET;
@@ -204,7 +206,7 @@ LOUSTATUS LouKeAtaReadDevice(
             Command.ScsiCommand[i] = Read12[i];
         }
     }else{
-        LouPrint("LOUSINE ATA LIB:Preparing To Read Ata Device\n");
+        //LouPrint("LOUSINE ATA LIB:Preparing To Read Ata Device\n");
         //while(1);
     }
 

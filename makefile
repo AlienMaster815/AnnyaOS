@@ -21,6 +21,8 @@
 #echo 'insmod vbe' >> ISO/boot/grub/grub.cfg ;
 #echo 'insmod all_video' >> ISO/boot/grub/grub.cfg ;
 
+#qemu-system-x86_64 -m 8192M -cdrom annya.iso
+
 TARGET_ARCH = x86_64
 TARGET_OS = WINDOWS
 HOST_ARCH = x86_64
@@ -111,7 +113,6 @@ x86_64_c_object_files := $(patsubst init/%.c, build/x86_64/init/%.o, $(x86_64_c_
 
 driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
 driver_cpp_source_files := $(shell find drivers/Chipsets -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/Audio -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/DriverInterrupts -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/FileSystems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/gpu/InternalGpuFunctions -name *.cpp)
@@ -274,6 +275,15 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C Drivers/Networking/PCNET32 clean
 	$(MAKE) -C Drivers/Networking/PCNET32 all
+
+	$(MAKE) -C Drivers/Audio/SoundBlaster clean
+	$(MAKE) -C Drivers/Audio/SoundBlaster all
+
+	$(MAKE) -C Drivers/Audio/AC97 clean
+	$(MAKE) -C Drivers/Audio/AC97 all
+
+	$(MAKE) -C Drivers/Audio/HDA clean
+	$(MAKE) -C Drivers/Audio/HDA all
 
 	$(MAKE) -C Drivers/storage/AtaAcceleration clean_piix
 	$(MAKE) -C Drivers/storage/AtaAcceleration piix

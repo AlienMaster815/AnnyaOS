@@ -10,7 +10,7 @@ extern "C" {
 #include <LouAPI.h>
 #endif
 
-#pragma pack(push, 1)
+
 typedef struct _DrsdFomat{
     uint32_t* Cpp;
 }DrsdFormat, * PDrsdFormat;
@@ -90,8 +90,6 @@ typedef struct _DrsdDevice{
 }DrsdDevice, * PDrsdDevice;
 
 
-
-#pragma pack(pop)
 
 #define RGB_DRSD_FRAMEBUFFER 1
 #define EGA_DRSD_FRAMEBUFFER 2

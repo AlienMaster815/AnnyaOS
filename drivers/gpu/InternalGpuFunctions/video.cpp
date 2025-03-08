@@ -158,7 +158,7 @@ void GenericVideoProtocolBlitCopy(void* Destination, void* Source, uint64_t Size
 LOUDDK_API_ENTRY
 void GenericVideoProtocolInitialize(){
 
-	PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition));
+	PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
 	uintptr_t FramebufferAddress = VBE_INFO.vbe_mode_info.framebuffer;
     SupportedModes->Width = 640;
     SupportedModes->Height = 480;
@@ -166,7 +166,7 @@ void GenericVideoProtocolInitialize(){
     SupportedModes->Pitch = (640 * (32 / 8));
     SupportedModes->FrameBufferType = RGB_DRSD_FRAMEBUFFER;
 
-	PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition));
+	PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
     DrsdFrameWork->RgbPutPixel = GenericVideoProtocolPutPixelEx;
     DrsdFrameWork->VRamSize = 640 * 480 * (32 / 8);
         
@@ -175,7 +175,7 @@ void GenericVideoProtocolInitialize(){
 	uintptr_t VMemFramebuffer = (uintptr_t)LouVMalloc(ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE));
 
 	LouKeMapContinuousMemoryBlock(FramebufferAddress, VMemFramebuffer, ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE), WRITEABLE_PAGE | PRESENT_PAGE);
-	DrsdFrameWork->SecondaryFrameBuffer = (uintptr_t)LouMallocEx(ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE), KILOBYTE_PAGE);
+	DrsdFrameWork->SecondaryFrameBuffer = (uintptr_t)LouKeMallocEx(ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE), KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
 
     LouKeRegisterFrameBufferDevice(
 		(void*)0x01,

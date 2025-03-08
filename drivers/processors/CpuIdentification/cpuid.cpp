@@ -25,7 +25,7 @@ uint16_t CPU::CPUID::GetNumberOfProcessors(){
 
 CPU::CPUID::CPUID(){
 
-    CpuIdPacket = (PCPUID_PACKET)LouMallocEx(sizeof(CPUID_PACKET), GET_ALIGNMENT(CPUID_PACKET));
+    CpuIdPacket = (PCPUID_PACKET)LouKeMallocEx(sizeof(CPUID_PACKET), GET_ALIGNMENT(CPUID_PACKET), WRITEABLE_PAGE | PRESENT_PAGE);
 
     CpuIdPacket->ProccessorId = UNKNOWNProc;
     CpuIdPacket->CpuVenId = UNKNOWNVen;
@@ -120,7 +120,7 @@ CPU::CPUID::CPUID(){
 
 CPU::CPUID::~CPUID(){
 
-    LouFree((RAMADD)CpuIdPacket);
+    LouKeFree(CpuIdPacket);
 
 }
 

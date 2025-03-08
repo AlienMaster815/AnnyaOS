@@ -110,8 +110,8 @@ extern ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* ISOPointer[];
 extern int ioapic_count;
 extern int OverideCount;
 
-uint64_t IoApicBase;
-uint64_t NumberOfInterrupts;
+static uint64_t IoApicBase;
+static uint64_t NumberOfInterrupts;
 
 #define IOAPIC_REGSEL  0x00  // IOAPIC Register Select
 #define IOAPIC_WIN     0x10  // IOAPIC Window

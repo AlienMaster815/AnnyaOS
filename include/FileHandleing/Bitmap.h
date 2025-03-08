@@ -34,6 +34,7 @@ typedef struct _BITMAP_INFORMATION_HEADER{
     uint32_t BIClrUsed;
     uint32_t BIImpClrUsed;
 }BITMAP_INFORMATION_HEADER, * PBITMAP_INFORMATION_HEADER;
+#pragma pack(pop)
 
 typedef struct _BITMAP_HANDLE{
     uint8_t* UnpackedData;
@@ -44,7 +45,6 @@ typedef struct _BITMAP_HANDLE{
     FILE* FileHandle;
 }BITMAP_HANDLE, * PBITMAP_HANDLE;
 
-#pragma pack(pop)
 
 PBITMAP_HANDLE LouKeOpenBitmapImage(string FilePath);
 void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, uint16_t x, uint16_t y);

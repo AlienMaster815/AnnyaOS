@@ -16,9 +16,12 @@ typedef char* FILE_NAME;
 string GetNextDirectoryName(string PATH);
 uint8_t CurrentDirectoryStringLength(string Dir);
 
-
 FILE* fopen(string PATH);
-void fclose(FILE* FileHandle);
+void fclose(FILE* File);
+
+#define LouKeMallocFileData(x, y)  LouKeMallocEx(x, y, WRITEABLE_PAGE | PRESENT_PAGE)
+#define LouKeFreeFileData(x)    LouKeFree(x)
+
 #endif
 
 #ifdef __cplusplus
