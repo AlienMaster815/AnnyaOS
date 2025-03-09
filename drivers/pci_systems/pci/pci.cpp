@@ -26,35 +26,35 @@ LOUDDK_API_ENTRY void scan_pci_bridges();
 
 bool IsPciBus(uint8_t bus, uint8_t slot, uint8_t func);
 
-LOUDDK_API_ENTRY void checkBus(uint8_t bus) {
+LOUDDK_API_ENTRY void checkBus(uint16_t Group, uint8_t bus) {
     uint8_t device;
 
     for (device = 0; device < 32; device++) {
-        checkDevice(bus, device);
+        checkDevice(Group, bus, device);
     }
 }
 
 
-LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
+LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
 
     uint8_t function = 0;
-    uint16_t vendorID = PciGetVendorID(bus, device);
+    uint16_t vendorID = PciGetVendorID(Group, bus, device);
 
     if (vendorID == NOT_A_PCI_DEVICE) return; // Device doesn't exist
-    checkFunction(bus, device, function);
+    checkFunction(Group, bus, device, function);
     //LouPrint("PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID( bus , device, function));
-    uint8_t headerType = getHeaderType(bus, device, function);
+    uint8_t headerType = getHeaderType(Group, bus, device, function);
 
     if ((headerType & 0x80) != 0) {
         LouPrint("Device Is MultiFunction\n");
         // It's a multi-function device, so check remaining functions
         for (function = 0; function < 8; function++) {
-            if (PciGetVendorID(bus, device) != NOT_A_PCI_DEVICE) {
-                checkFunction(bus, device, function);
-                if (PciGetDeviceID( bus, device, function) == NOT_A_PCI_DEVICE) continue;
+            if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
+                checkFunction(Group, bus, device, function);
+                if (PciGetDeviceID(Group, bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
                     P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
-                    LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(bus, device, function));
+                    LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
                     PDev->bus = bus;
                     PDev->slot = device;
                     PDev->func = function;
@@ -69,7 +69,7 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
     }
     else{
         P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
-        LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(bus, device, function));
+        LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
         PDev->bus = bus;
         PDev->slot = device;
         PDev->func = function;
@@ -83,16 +83,16 @@ LOUDDK_API_ENTRY void checkDevice(uint8_t bus, uint8_t device) {
 
 
 
-LOUDDK_API_ENTRY void checkFunction(uint8_t bus, uint8_t device, uint8_t function) {
+LOUDDK_API_ENTRY void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function) {
     uint8_t baseClass;
     uint8_t subClass;
     uint8_t secondaryBus;
 
-    baseClass = getBaseClass(bus, device, function);
-    subClass = getSubClass(bus, device, function);
+    baseClass = getBaseClass(Group, bus, device, function);
+    subClass = getSubClass(Group, bus, device, function);
     if ((baseClass == 0x6) && (subClass == 0x4)) {
-        secondaryBus = getSecondaryBus(bus, device, function);
-        checkBus(secondaryBus);
+        secondaryBus = getSecondaryBus(Group, bus, device, function);
+        checkBus(Group, secondaryBus);
     }
 }
 
@@ -100,36 +100,36 @@ LOUDDK_API_ENTRY void checkFunction(uint8_t bus, uint8_t device, uint8_t functio
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
     LouPrint("Scanning PCI Bus\n");
     for(uint8_t i = 0 ; i < 255; i++){
-        checkBus(i);
+        checkBus(0, i);
     }
 }
 
 // C Land
 
 LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
-    return pciConfigReadByte(PDEV->bus,PDEV->slot,PDEV->func, Offset);
+    return pciConfigReadByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
 LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
-    return pciConfigReadWord(PDEV->bus,PDEV->slot,PDEV->func, Offset);
+    return pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Offset);
 
 }
 
 LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
-    return pci_read(PDEV->bus,PDEV->slot,PDEV->func, Offset);
+    return pci_read(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
 
 LOUDDK_API_ENTRY void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value){
-    pciConfigWriteByte(PDEV->bus,PDEV->slot,PDEV->func,Offset,Value);
+    pciConfigWriteByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func,Offset,Value);
 }
 
 LOUDDK_API_ENTRY void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value){
-    pciConfigWriteWord(PDEV->bus, PDEV->slot,PDEV->func,Offset,Value);
+    pciConfigWriteWord(PDEV->Group, PDEV->bus, PDEV->slot,PDEV->func,Offset,Value);
 }
 
 LOUDDK_API_ENTRY void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value){
-    write_pci(PDEV->bus,PDEV->slot,PDEV->func, Offset, Value);
+    write_pci(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset, Value);
 }
 
 LOUDDK_API_ENTRY void ScanForVideoHardware(){

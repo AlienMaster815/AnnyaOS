@@ -8,22 +8,22 @@ typedef struct _PCIE_SYSTEM_MANAGER{
     uint8_t     EndBusNumber;
 }PCIE_SYSTEM_MANAGER, * PPCIE_SYSTEM_MANAGER;
 
-UNUSED static uint16_t MaxGroupCount = 1;
+UNUSED static uint16_t MaxGroupCount = 0;
 UNUSED static PCIE_SYSTEM_MANAGER Psm;
+UNUSED static mutex_t PsmLock; 
+UNUSED static bool UsingPCIE = false;
 
-void AddGroupCount(PACPI_MCFG_ALLOCATION PciManagerData){
+void AddPcieGroup(PACPI_MCFG_ALLOCATION PciManagerData){
 
 
 
 }
 
-uint32_t pci_read( uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
+uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
     uint32_t lfunc = (uint32_t)func;
-
-
 
     // Create the PCI configuration address
     address = (uint32_t)((lbus << 16) | (lslot << 11) |
@@ -35,14 +35,14 @@ uint32_t pci_read( uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
     return inl(PCI_CONFIG_DATA_PORT);
 }
 
-void write_pci(uint8_t bus, uint8_t slot, uint8_t function, uint32_t offset, uint32_t value) {
+void write_pci(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function, uint32_t offset, uint32_t value) {
     // Calculate the address based on bus, device, function, and offset
     uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)slot << 11) | ((uint32_t)function << 8) | (offset & 0xFC);
     // Write to PCI configuration space
     outl(address, value);
 }
 
-uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
+uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
@@ -61,7 +61,7 @@ uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t off
     return tmp;
 }
 
-void pciConfigWriteWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value) {
+void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value) {
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
@@ -94,7 +94,26 @@ uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_
     return (1U << 31) | (bus << 16) | (device << 11) | (function << 8) | (reg & 0xFC);
 }
 
-uint8_t pciConfigReadByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg) {
+uintptr_t PcieConfigAddress(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg) {
+    MutexLock(&PsmLock);
+    PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
+    for(size_t i = 0; i < MaxGroupCount; i++){
+        if((TmpPsm->PCISegmentGroupNumber == Group) && (TmpPsm->StartBusNumber <= bus) && (TmpPsm->EndBusNumber >= bus)){
+            uintptr_t BaseAddress = TmpPsm->BaseAddress;
+            MutexUnlock(&PsmLock);
+            if(BaseAddress == 0x00){
+                return (uintptr_t)-1;        
+            }
+            return BaseAddress + ((((bus * 256) + (device * 8) + function) * 4096) + reg);
+        }else if(TmpPsm->Neighbors.NextHeader){
+            TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
+        }
+    }
+    MutexUnlock(&PsmLock);
+    return (uintptr_t)-1;
+}
+
+uint8_t pciConfigReadByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg) {
     // Calculate the address for PCI configuration space access
     uint32_t address = pciConfigAddress(bus, device, function, reg);
 
@@ -105,7 +124,7 @@ uint8_t pciConfigReadByte(uint8_t bus, uint8_t device, uint8_t function, uint32_
     return inb(PCI_CONFIG_DATA_PORT + (reg & 3));
 }
 
-void pciConfigWriteByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value) {
+void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value) {
     // Calculate the address for PCI configuration space access
     uint32_t address = pciConfigAddress(bus, device, function, reg);
 
@@ -126,69 +145,54 @@ void pciConfigWriteByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t 
 }
 
 
-uint8_t getBaseClass(uint8_t bus, uint8_t device, uint8_t function) {
+uint8_t getBaseClass(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function) {
     // Offset 0xB in the PCI configuration space contains the base class
-    return pciConfigReadByte(bus, device, function, 0xB);
+    return pciConfigReadByte(Group, bus, device, function, 0xB);
 }
 
-uint8_t getSubClass(uint8_t bus, uint8_t device, uint8_t function) {
+uint8_t getSubClass(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function) {
     // Offset 0xA in the PCI configuration space contains the subclass
-    return pciConfigReadByte(bus, device, function, 0xA);
+    return pciConfigReadByte(Group, bus, device, function, 0xA);
 }
 
-uint8_t getSecondaryBus(uint8_t bus, uint8_t device, uint8_t function) {
+uint8_t getSecondaryBus(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function) {
     // Offset 0x19 in the PCI configuration space contains the Secondary Bus Number
-    return pciConfigReadByte(bus, device, function, 0x19);
+    return pciConfigReadByte(Group, bus, device, function, 0x19);
 }
 
 
-uint8_t getHeaderType(uint8_t bus, uint8_t device, uint8_t function) {
+uint8_t getHeaderType(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function) {
     // Assuming pciConfigReadByte is a function to read a byte from PCI configuration space
     // You might need to replace it with the appropriate function from your hardware access library
     uint8_t headerType;
 
     if (function == 0) {
         // For function 0, directly read the header type from offset 0xE
-        headerType = pciConfigReadByte(bus, device, function, 0xE); // Offset 0xE contains header type
+        headerType = pciConfigReadByte(Group, bus, device, function, 0xE); // Offset 0xE contains header type
     }
     else {
         // For non-function 0, read the header type from offset 0x0E in the multi-function header
-        headerType = pciConfigReadByte(bus, device, 0, 0xE); // Offset 0xE contains header type
+        headerType = pciConfigReadByte(Group, bus, device, 0, 0xE); // Offset 0xE contains header type
     }
 
     return headerType;
 }
 
-uint16_t PciGetVendorID(uint8_t bus, uint8_t slot) {
+uint16_t PciGetVendorID(uint16_t Group, uint8_t bus, uint8_t slot) {
     UNUSED uint16_t vendor, device;
     /* Try and read the first configuration register. Since there are no
      * vendors that == 0xFFFF, it must be a non-existent device. */
-    if ((vendor = pciConfigReadWord(bus, slot, 0, 0)) != 0xFFFF) {
-        device = pciConfigReadWord(bus, slot, 0, 2);
+    if ((vendor = pciConfigReadWord(Group, bus, slot, 0, 0)) != 0xFFFF) {
+        device = pciConfigReadWord(Group, bus, slot, 0, 2);
         //TODO: Is Vendor Part Of System
     } return (vendor);
 }
 
 
-bool CheckPciDeviceID(uint16_t device_id,  uint8_t bus, uint8_t slot,uint8_t func) {
-    // Read the vendor ID and device ID from the PCI configuration space
-    uint32_t data = pci_read(bus, slot, func, 0x00);
-    //uint16_t vendor_id = data & 0xFFFF;
-    uint16_t dev_id = (data >> 16) & 0xFFFF;
-
-    // Check if the device ID matches
-    if (dev_id == device_id) {
-        return true;  // Match found
-    }
-    return false;  // No match found
-}
-
-
-
 // Function to retrieve the device ID of a PCI device
-uint16_t PciGetDeviceID( uint8_t bus ,uint8_t slot,uint8_t func) {
+uint16_t PciGetDeviceID(uint16_t Group, uint8_t bus ,uint8_t slot,uint8_t func) {
     // Read the vendor ID from the PCI configuration space
-    uint32_t data = pci_read(bus, slot, func, 0x00);
+    uint32_t data = pci_read(Group, bus, slot, func, 0x00);
     // Extract and return the vendor ID
     return (data >> 16) & 0xFFFF;
 }
@@ -230,39 +234,3 @@ bool EnablePciDevice(P_PCI_DEVICE_OBJECT PDEV, unsigned long flags) {
     }
 }
 
-bool IsPciEnable(uint8_t bus, uint8_t slot, uint8_t func) {
-    uint32_t address;
-    uint16_t command;
-
-    // Construct the configuration address
-    address = (1U << 31) | (bus << 16) | (slot << 11) | (func << 8);
-
-    // Write the configuration address to the address port
-    outl(PCI_CONFIG_ADDRESS_PORT, address);
-
-    // Read the device's command register
-    command = inw(PCI_CONFIG_DATA_PORT);
-
-    // Check if the enable bit is set
-    return (command & (1 << 0)) != 0;
-}
-
-LOUSTATUS LouEnablePciFlags(P_PCI_DEVICE_OBJECT PDEV, unsigned long Flags);
-
-
-LOUSTATUS LouEnablePciDevice(P_PCI_DEVICE_OBJECT PDEV) {
-    return LouEnablePciFlags(PDEV, IORESOURCE_MEM | IORESOURCE_IO);
-}
-
-
-
-
-LOUSTATUS LouEnablePciFlags(P_PCI_DEVICE_OBJECT PDEV, unsigned long Flags ) {
-
-    if (IsPciEnable(PDEV->bus, PDEV->slot, PDEV->func))
-        return 0;//already enabled
-
-    if(EnablePciDevice(PDEV, Flags))LouPrint("PCI Device Enabled\n");
-
-    return 0;
-}

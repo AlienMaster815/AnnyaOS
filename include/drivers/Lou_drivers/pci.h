@@ -4,7 +4,7 @@
 
 //Define the Lou Driver Kit For Our Constants
 
-
+#ifndef _KERNEL_MODULE_
 #ifndef _PCI_MODULES_H
 #define _PCI_MODULES_H
 
@@ -14,7 +14,8 @@ extern "C"{
 #else
 #include <LouAPI.h>
 #endif
-
+#include "PciIds.h"
+#include <kernel/atomic.h>
 typedef struct _ACPI_MCFG_ALLOCATION{
     uint64_t    BaseAddress;
     uint16_t    PCISegmentGroupNumber;
@@ -39,15 +40,6 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 }LOUSINE_PCI_DEVICE_TABLE, * PLOUSINE_PCI_DEVICE_TABLE;;
 
 
-#ifdef __cplusplus
-}
-#endif
-#endif
-
-#ifndef _PCI_H
-#define _PCI_H
-#include "PciIds.h"
-
 #define PROGIF 9
 
 #define PCI_INTERRUPT_DISABLE (1 << 10)
@@ -65,10 +57,6 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 #define PCI_IRQ_MSI (1 << 0)
 #define PCI_IRQ_MSIX (1 << 1)
 
-#include "pcireg.h"
-#include <kernel/atomic.h>
-//Define World Wide Constant
-
 typedef struct _PCIDev {
 
 }PCIDev, * P_PCIDEV;
@@ -77,7 +65,8 @@ typedef struct _PCIBuffer {
 
 }PCIBuffer, * P_PCIBuffer;
 
-typedef int pci_power_t;
+
+typedef volatile int pci_power_t;
 
 #ifndef _PCI_DEVICE_OBJECT_
 #define _PCI_DEVICE_OBJECT_
@@ -100,6 +89,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uintptr_t 	DeviceExtendedObject; 
 	uintptr_t 	DevicePrivateData;
 	uintptr_t 	VgaDecode; //only video devces
+	bool 		ExpressDevice;
 }PCI_DEVICE_OBJECT, * P_PCI_DEVICE_OBJECT;
 #endif
 
@@ -141,10 +131,32 @@ enum BaseAddressRegisterType {
 	InputOutPut = 1
 };
 
-#ifdef __cplusplus
-#include <LouDDK.h>
+//Is C Land
+void PCI_Setup();
 
-#ifndef _KERNEL_MODULE_
+bool PciEnableDevice(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function);
+
+uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
+
+
+uint8_t pciConfigReadByte(uint16_t Greoup, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
+
+
+uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
+
+void PCI_Scan_Bus();
+uint16_t PciGetVendorID(uint16_t Group, uint8_t bus, uint8_t slot);
+void checkDevice(uint16_t Group, uint8_t bus, uint8_t device);
+void checkBus(uint16_t Group, uint8_t bus);
+void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
+void PCI_Scan_Bus();
+uint16_t PciGetDeviceID(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
+bool IsPciEnable(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
+
+void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value);
+void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
+
+
 uint8_t LouKePciReadHeaderType(P_PCI_DEVICE_OBJECT PDEV);
 uint32_t LouKeReadPciVendorId(P_PCI_DEVICE_OBJECT PDEV);
 uint32_t LouKeReadPciDeviceId(P_PCI_DEVICE_OBJECT PDEV);
@@ -156,111 +168,105 @@ void LouKeConfigureInterrupt(P_PCI_DEVICE_OBJECT PDEV,  bool Mask, uint8_t Pin, 
 void LouKeWritePciCommandRegister(P_PCI_DEVICE_OBJECT PDEV,uint16_t Value);
 uint16_t LouKeReadPciCommandRegister(P_PCI_DEVICE_OBJECT PDEV);
 
-LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-LOUDDK_API_ENTRY void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
-LOUDDK_API_ENTRY void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
-LOUDDK_API_ENTRY void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
+uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
+void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
+void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 
-KERNEL_IMPORT uint32_t pci_read( uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
-KERNEL_IMPORT void write_pci(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset,uint32_t Value);
-KERNEL_IMPORT uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
-KERNEL_IMPORT uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-KERNEL_IMPORT uint8_t pciConfigReadByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-KERNEL_IMPORT uint8_t getBaseClass(uint8_t bus, uint8_t device, uint8_t function);
-KERNEL_IMPORT uint8_t getSubClass(uint8_t bus, uint8_t device, uint8_t function);
-KERNEL_IMPORT uint8_t getSecondaryBus(uint8_t bus, uint8_t device, uint8_t function);
-KERNEL_IMPORT uint16_t PciGetVendorID(uint8_t bus, uint8_t slot);
-KERNEL_IMPORT uint8_t getHeaderType(uint8_t bus, uint8_t device, uint8_t function);
-KERNEL_IMPORT bool CheckPciDeviceID(uint16_t device_id,  uint8_t bus, uint8_t slot, uint8_t func);
-KERNEL_IMPORT uint16_t PciGetDeviceID( uint8_t bus, uint8_t slot, uint8_t func);
-KERNEL_IMPORT bool PciEnableDevice(uint8_t bus, uint8_t slot, uint8_t function);
-KERNEL_IMPORT bool IsPciEnable(uint8_t bus, uint8_t slot, uint8_t func);
-KERNEL_IMPORT void pciConfigWriteByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value);
-KERNEL_IMPORT void pciConfigWriteWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
-
-
-
-LOUDDK_API_ENTRY void PCI_Scan_Bus();
-LOUDDK_API_ENTRY void checkDevice( uint8_t bus, uint8_t device);
-LOUDDK_API_ENTRY void checkBus(uint8_t bus);
-LOUDDK_API_ENTRY void checkFunction(uint8_t bus, uint8_t device, uint8_t function);
-LOUDDK_API_ENTRY void PCI_Scan_Bus();
-LOUDDK_API_ENTRY void Sata_init(P_PCI_DEVICE_OBJECT PDEV);
-
-
-
-
-class BaseAddressRegister {
-public:
-	bool prefetchable[6];
-	uint8_t* address[6];
-	uint32_t size[6];
-	bool MMIO[6];
-	BaseAddressRegisterType type[6];
-
-	BaseAddressRegister(P_PCI_DEVICE_OBJECT PDEV);
-	~BaseAddressRegister();
-
-private:
-	bool DisableChildProofing(P_PCI_DEVICE_OBJECT PDEV);
-	bool EnableChildProofing(P_PCI_DEVICE_OBJECT PDEV);
-	uint16_t command;
-};
-
-BaseAddressRegister GetAllIoSpaces(P_PCI_DEVICE_OBJECT PDEV);
-
-#else
-
-#include <LouAPI.h>
-
-
-
-//Is C Land
-void PCI_Setup();
-
-bool PciEnableDevice(uint8_t bus, uint8_t slot, uint8_t function);
-
-uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
+uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
+void write_pci(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset,uint32_t Value);
+uint16_t pciConfigReadWord(uint16_t Group,uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
+uint8_t pciConfigReadByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
+uint8_t getBaseClass(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
+uint8_t getSubClass(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
+uint8_t getSecondaryBus(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
+uint16_t PciGetVendorID(uint16_t Group, uint8_t bus, uint8_t slot);
+uint8_t getHeaderType(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
+uint16_t PciGetDeviceID(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
+bool PciEnableDevice(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function);
+bool IsPciEnable(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
+void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value);
+void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
+void PCI_Scan_Bus();
+void checkDevice(uint16_t Group, uint8_t bus, uint8_t device);
+void checkBus(uint16_t Group, uint8_t bus);
+void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
+void PCI_Scan_Bus();
 
 uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
+uintptr_t PcieConfigAddress(uint16_t Group,uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
 
-uint8_t pciConfigReadByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-
-
-uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
-
-void PCI_Scan_Bus();
-uint16_t PciGetVendorID(uint8_t bus, uint8_t slot);
-void checkDevice( uint8_t bus, uint8_t device);
-void checkBus(uint8_t bus);
-void checkFunction(uint8_t bus, uint8_t device, uint8_t function);
-void PCI_Scan_Bus();
-bool CheckPciDeviceID(uint16_t device_id,  uint8_t bus, uint8_t slot, uint8_t func);
-uint16_t PciGetDeviceID( uint8_t bus, uint8_t slot, uint8_t func);
-bool IsPciEnable(uint8_t bus, uint8_t slot, uint8_t func);
-
-void pciConfigWriteByte(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value);
-void pciConfigWriteWord(uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
+#ifdef __cplusplus
+}
+#endif
 #endif
 
+#else //_KERNEL_MODULE_
+#ifndef _PCI_MODULES_H
+#define _PCI_MODULES_H
+
+#include <LouDDK.h>
+#include <kernel/atomic.h>
+
+typedef struct _ACPI_MCFG_ALLOCATION{
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+    uint32_t    Reserved;
+} ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
+
+typedef struct _LOUSINE_PCI_DEVICE_TABLE{
+	uint16_t VendorID;
+	uint16_t DeviceID;
+	uint16_t SubVendorID;
+	uint16_t SubDeviceID;
+	uint8_t  BaseClass;
+	uint8_t  SubClass;
+	uint64_t BoardID;
+	uint64_t DriverData;
+	bool     SimpleEntry;
+	bool     AdvancedEntry;
+	bool 	 SimpleWithClass;
+	bool 	 GenericEntry;
+}LOUSINE_PCI_DEVICE_TABLE, * PLOUSINE_PCI_DEVICE_TABLE;;
+
+typedef struct _PCIDev {
+
+}PCIDev, * P_PCIDEV;
+
+typedef struct _PCIBuffer {
+
+}PCIBuffer, * P_PCIBuffer;
+
+
+typedef volatile int pci_power_t;
+
+#ifndef _PCI_DEVICE_OBJECT_
+#define _PCI_DEVICE_OBJECT_
+typedef struct _PCI_DEVICE_OBJECT {
+	uint16_t 	VendorID;
+	uint16_t 	DeviceID;
+	uint16_t 	Group;
+	uint8_t 	bus;
+	uint8_t 	slot;
+	uint8_t 	func;
+	int 		NumberOfSAssignedVectors;
+	uint64_t* 	InterruptVectors;
+	void* 		Dev;
+	void* 		CommonConfig;
+	pci_power_t CurrentState;
+	uint8_t 	PmCap;
+	atomic_t 	enable_cnt;
+	uint8_t	  	InterruptLine;
+	uint8_t	  	InterruptPin;
+	uintptr_t 	DeviceExtendedObject; 
+	uintptr_t 	DevicePrivateData;
+	uintptr_t 	VgaDecode; //only video devces
+}PCI_DEVICE_OBJECT, * P_PCI_DEVICE_OBJECT;
 #endif
-
-#ifndef PCI_GLOBAL_VAR
-#define PCI_GLOBAL_VAR
-
-#endif
-
-
-#endif
-
-
-#ifdef _KERNEL_MODULE_
-
-
-KERNEL_EXPORT uint32_t pci_read( uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
-KERNEL_EXPORT void write_pci(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset,uint32_t Value);
 
 KERNEL_EXPORT uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
 KERNEL_EXPORT uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
@@ -269,5 +275,5 @@ KERNEL_EXPORT void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset,
 KERNEL_EXPORT void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
 KERNEL_EXPORT void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 
-
+#endif
 #endif

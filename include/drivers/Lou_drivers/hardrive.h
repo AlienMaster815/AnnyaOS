@@ -151,8 +151,6 @@ LOUDDK_API_ENTRY bool IsSataCheck(uint8_t bus, uint8_t slot, uint8_t func);
 #define READ_ERROR 0x00
 
 #ifndef _KERNEL_MODULE_
-void Sata_init(uint8_t bus, uint8_t slot, uint8_t func);
-void IsSataCheck(uint8_t bus, uint8_t slot, uint8_t func);
 
 void pata_device_scanc();
 #endif

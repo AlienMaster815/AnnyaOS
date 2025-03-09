@@ -112,7 +112,6 @@ x86_64_c_source_files := $(shell find init -name *.c)
 x86_64_c_object_files := $(patsubst init/%.c, build/x86_64/init/%.o, $(x86_64_c_source_files))
 
 driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
-driver_cpp_source_files := $(shell find drivers/Chipsets -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/DriverInterrupts -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/FileSystems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/gpu/InternalGpuFunctions -name *.cpp)

@@ -24,7 +24,7 @@ LOUSTATUS LouKeHalPciSetMmio(P_PCI_DEVICE_OBJECT PDEV){
 
 uint8_t PciFindCapStart(P_PCI_DEVICE_OBJECT PDEV){
 
-    uint16_t Header = getHeaderType(PDEV->bus, PDEV->slot, PDEV->func);
+    uint16_t Header = getHeaderType(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func);
 
     uint16_t DeviceStatus = LouKeReadPciUint16(PDEV, PCI_STATUS);
     if(!(DeviceStatus & PCI_STATUS_CAP_LIST)){

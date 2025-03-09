@@ -313,7 +313,7 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfi = true;
     }
 
-    //InitMCFG();
+    InitMCFG();
 
     LouKeMapPciMemory();
 
@@ -323,11 +323,7 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeGenericTables();
 
     Advanced_Kernel_Initialization();
-
-    LouPrint("HERE\n");
-    while(1);
                                                            
-    InitializeInternalChipsetHostDriver();
     //SETUP DEVICES AND DRIVERS
     LookForStorageDevices();
 
@@ -346,13 +342,14 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializePs2Mouse();
 
     //ScanTheRestOfHarware();
+    
+    //SMPInit();
 	
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    //SMPInit();
     LouPrint("Initializing User Mode\n");
-    LouKeRunOnNewUserStack(InitializeUserSpace,0x00, 2 * MEGABYTE);
+    LouKeRunOnNewUserStack(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
 	// IF the Kernel returns from this
 	// the whole thing crashes
@@ -398,6 +395,7 @@ void InitializeUserSpace(){
 
 //BUGS TO FIX:
 //memcpy doesent use SSE correctly
+
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 

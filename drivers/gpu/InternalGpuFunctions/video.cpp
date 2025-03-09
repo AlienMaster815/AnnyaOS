@@ -39,8 +39,8 @@ void InitializeVgaDevice(P_PCI_DEVICE_OBJECT PDEV) {
 	
 	LouPrint("Found A Video Controller\n");
 
-	uint16_t VendorID = PciGetVendorID(PDEV->bus, PDEV->slot);
-	uint16_t DeviceID = PciGetDeviceID(PDEV->bus, PDEV->slot, PDEV->func);
+	uint16_t VendorID = PciGetVendorID(PDEV->Group, PDEV->bus, PDEV->slot);
+	uint16_t DeviceID = PciGetDeviceID(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func);
 
 	PDEV->VendorID = VendorID;
 	PDEV->DeviceID = DeviceID;
