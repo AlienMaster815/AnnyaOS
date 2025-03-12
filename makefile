@@ -354,3 +354,7 @@ cleanall:
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
+	$(MAKE) -C Drivers/storage/AtaAcceleration clean_piix
+	$(MAKE) -C Drivers/Audio/HDA clean
+	$(MAKE) -C Drivers/Audio/AC97 clean
+	$(MAKE) -C Drivers/Audio/SoundBlaster clean

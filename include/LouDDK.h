@@ -188,6 +188,13 @@ KERNEL_IMPORT void sleep(uint64_t Time);
 
 #define ERRMAPPINGIO -1
 
+#ifndef _ANNYA_DLL_CALL_REASONS
+#define _ANNYA_DLL_CALL_REASONS
+    #define DLL_PROCESS_ATTACH 1
+    #define DLL_PROCESS_DETACH 0
+    #define DLL_THREAD_ATTACH  2
+    #define DLL_THREAD_DETACH  3
+#endif
 
 
 #else 

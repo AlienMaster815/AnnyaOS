@@ -6,11 +6,13 @@ DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath){
 
     FILE* ModuleHandle = fopen(ModuleNameAndPath);
     
+    
     if(!ModuleHandle){
         LouPrint("Could Not Load Module:%s\n", ModuleNameAndPath);
         while(1);
         return 0x00;
     }
+
     return LoadUserDllModule((uintptr_t)ModuleHandle, ModuleNameAndPath); 
 }
 
@@ -76,7 +78,6 @@ static size_t           LibHandlesCount = 0;
 static mutex_t          LoadLibMutex;
 
 HANDLE LouKeLoadLibraryA(string LibraryName){
-
     MutexLock(&LoadLibMutex);
 
     bool IsLibraryAPath = false; 
@@ -109,6 +110,8 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
         TmpLibHandle->Paths = NewMod;
         TmpLibHandle->LibraryEntry = LouKeLoadUserModule(LibraryName);
         //TODO: Apend the string for the Lib name
+
+
     }
     else{
         TmpLibHandle->LibraryName = LibraryName;
@@ -119,8 +122,11 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
     //TODO: Look at the registery and 
     //find the reciprical of the above
 
-
     TmpLibHandle->LibraryHandle = (HANDLE)LouKeMallocEx(sizeof(atomic_t), GET_ALIGNMENT(atomic_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+
+    //TODO: Manage Processes Loading the DLL
+    //TmpLibHandle->LibraryEntry(TmpLibHandle->LibraryHandle, DLL_PROCESS_ATTACH, 0x00);
+    
     LibHandlesCount++;
     MutexUnlock(&LoadLibMutex);
     return TmpLibHandle->LibraryHandle;

@@ -166,6 +166,14 @@ typedef void* HINSTANCE;
 
 #include <stdint.h>
 
+#ifndef _ANNYA_DLL_CALL_REASONS
+#define _ANNYA_DLL_CALL_REASONS
+    #define DLL_PROCESS_ATTACH 1
+    #define DLL_PROCESS_DETACH 0
+    #define DLL_THREAD_ATTACH  2
+    #define DLL_THREAD_DETACH  3
+#endif
+
 
 #ifdef IS_X86_64
 

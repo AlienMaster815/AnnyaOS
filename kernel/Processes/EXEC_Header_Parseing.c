@@ -109,17 +109,19 @@ void ParseImportTables(
     uint64_t ModuleStart,
     PIMPORT_DIRECTORY_ENTRY ImportTable
 ) {
-    uint8_t i = 0;
-    uint8_t j = 0;
+    uint64_t i = 0;
+    uint64_t j = 0;
     uint64_t TableEntry;
     uint64_t TableOffset;
     string FunctionName;
     string SYSName;
+
     while (1) {
         if (ImportTable[j].ImportLookupRva == 0x00) {
             break;
         }
         while (1) {
+
             TableEntry = *(uint64_t*)(uintptr_t)(ModuleStart + ImportTable[j].ImportLookupRva + i);
             if (TableEntry == 0) {
                 break;
@@ -130,8 +132,6 @@ void ParseImportTables(
 
             //LouPrint("Function Requested:%s\n", FunctionName);
 
-            
-
             uint64_t AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
 
             //TODO: Verify this logic works
@@ -139,6 +139,7 @@ void ParseImportTables(
                 
                 if(strncmp("_errno",FunctionName, strlen("_errno")) == 0){
                     FunctionName = "_errnoNT";
+                    AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
                     goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
                 }
                 goto _NULL_LINKER_ADDRESS_ERROR_LABEL;
@@ -158,6 +159,7 @@ void ParseImportTables(
         i = 0;
         j++;
     }
+
 }
 
 #define IMAGE_REL_BASED_ABSOLUTE        0x00
@@ -401,7 +403,7 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         uint64_t allocatedModuleVirtualAddress =
         (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE,
+            PE64Header->sectionAlignment,
             USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
@@ -409,12 +411,8 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
 
         //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
-
-        // Align section addresses
-        uint64_t sectionAlignment = PE64Header->sectionAlignment;
-
         for (uint16_t i = 0; i < CoffHeader->numberOfSections; i++) {
-            uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress + sectionAlignment - 1) & ~(sectionAlignment - 1);
+            uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress);
 
             //LouKeLogBinarySection(
             //    BinaryObject,
@@ -435,16 +433,20 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
         PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
 
-        ParseImportTables(
-            allocatedModuleVirtualAddress,
-            ImportTable
-        );
+        if(PE64Header->PE_Data_Directory_Entries[1].VirtualAddress){
+            ParseImportTables(
+                allocatedModuleVirtualAddress,
+                ImportTable
+            );
+        }
 
-        ParseExportTables(
-            allocatedModuleVirtualAddress,  
-            ExportTable,
-            true
-        );
+        if(PE64Header->PE_Data_Directory_Entries[0].VirtualAddress){
+            ParseExportTables(
+                allocatedModuleVirtualAddress,  
+                ExportTable,
+                true
+            );
+        }
 
         // Locate the relocation table
         uint64_t relocationTable = (uint64_t)((uint64_t)allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[5].VirtualAddress);
@@ -502,7 +504,7 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         uint64_t allocatedModuleVirtualAddress =
         (uint64_t)LouKeMallocEx(
             TotalNeededVM,
-            KILOBYTE_PAGE,
+            PE64Header->sectionAlignment,
             USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
@@ -511,13 +513,10 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
 
         //LouKeLogBinaryVirtualAddress(BinaryObject, allocatedModuleVirtualAddress);
 
-        // Align section addresses
-        uint64_t sectionAlignment = PE64Header->sectionAlignment;
-
         //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
 
         for (uint16_t i = 0; i < CoffHeader->numberOfSections; i++) {
-            uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress + sectionAlignment - 1) & ~(sectionAlignment - 1);
+            uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress); 
 
             //LouKeLogBinarySection(
             //    BinaryObject,
@@ -565,9 +564,9 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
             relocationTableSize
         );
 
-        LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
+        //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
-        LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
+        //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
         LouKeReleaseSpinLock(&LoadPeLock, &Irql);
         return (void*)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
     } else {
