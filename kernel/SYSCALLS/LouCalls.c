@@ -1,7 +1,7 @@
 #include <LouAPI.h>
 
 void LouKeDrsdResetFBDEV(uint64_t* FBDEV);
-void LouKeFOpenCall(uint64_t* Data);
+void LouKeLoadFileCall(uint64_t* Data);
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
     uint16_t DrsdFileType
@@ -37,6 +37,7 @@ void LouKeDestroyThread(uint64_t Thread);
 
 extern uint64_t RSPPoint;
 
+HANDLE LouKeLoadLibraryA(string Name);
 
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
@@ -57,7 +58,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOULOADFILE:{
-            LouKeFOpenCall((uint64_t*)Data);
+            LouKeLoadFileCall((uint64_t*)Data);
             return;
         }
         case LOUPRINTCALL:{
@@ -165,7 +166,6 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUVFREE:{
-
             LouPrint("LouVFREE\n");
             while(1);
         }
@@ -174,6 +174,26 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             LouKeDestroyThread(*(uint64_t*)Data);
             return;
         }
+
+        case LOULOADLIBRARYA:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[1] = (uint64_t)LouKeLoadLibraryA((string)Tmp[0]);
+            return;
+        }
+        case LOULOADLIBRARYW:{
+
+            LouPrint("LOULOADLIBRARYW SYSCALL\n");
+            while(1);
+        }
+        case LOULOADLIBRARYEXA:{
+            LouPrint("LOULOADLIBRARYEXA SYSCALL\n");
+            while(1);
+        }
+        case LOULOADLIBRARYEXW:{
+            LouPrint("LOULOADLIBRARYEXW SYSCALL\n");
+            while(1);
+        }
+
         default:
         LouPrint("Unkown Call:%d\n", Call);
     }

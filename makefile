@@ -14,13 +14,6 @@
 
 #target OS can be WINDOWS or LINUX
 
-#echo 'insmod efi_gop' >> ISO/boot/grub/grub.cfg ;
-#echo 'insmod efi_uga' >> ISO/boot/grub/grub.cfg ;
-#echo 'insmod gfxterm' >> ISO/boot/grub/grub.cfg ;
-#echo 'insmod gfxmenu' >> ISO/boot/grub/grub.cfg ;
-#echo 'insmod vbe' >> ISO/boot/grub/grub.cfg ;
-#echo 'insmod all_video' >> ISO/boot/grub/grub.cfg ;
-
 #qemu-system-x86_64 -m 8192M -cdrom annya.iso
 
 TARGET_ARCH = x86_64
@@ -127,7 +120,6 @@ driver_cpp_source_files += $(shell find drivers/USB/HostDrivers -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/virtualization -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/PowerManagement/InternalPowerManagement -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/Networking/InternalNetworking -name *.cpp)
-
 
 driver_cpp_object_files := $(patsubst drivers/%.cpp, build/drivers/%.o, $(driver_cpp_source_files))
 
@@ -263,6 +255,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C KernelLibraries/LouDDK all
 
+	$(MAKE) -C UserLibraries/Kernel32 clean
+	$(MAKE) -C UserLibraries/Kernel32 all
+
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
 
@@ -298,10 +293,21 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/NtDll all
+	
+	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
+	$(MAKE) -C DLL/LouDLLs/KERNEL32 all
+
+	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
+	$(MAKE) -C DLL/LouDLLs/MSVCRT all
 
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL all
 
+	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
+	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
+
+
+	
 	#Make 64 Bit System Directories
 	$(MAKEDIR64)
 	#Copy System Files To The Appropriate Directories
@@ -345,3 +351,6 @@ cleanall:
 	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C Drivers/Networking/PCNET32 clean
 	$(MAKE) -C KernelLibraries/louoskrnl clean
+	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
+	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
+	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean

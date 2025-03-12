@@ -3,11 +3,6 @@
 
 #define NOT_A_PCI_DEVICE 0xFFFF 
 
-static bool UsingPCIe = false;
-
-void SetPCIeMode(){
-    UsingPCIe = true;
-}
 
 bool isUsb(uint8_t bus, uint8_t slot, uint8_t function);
 bool IsVGA(uint8_t bus, uint8_t slot, uint8_t function);
@@ -36,12 +31,12 @@ LOUDDK_API_ENTRY void checkBus(uint16_t Group, uint8_t bus) {
 
 
 LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
+    //LouPrint("Here\n");
 
     uint8_t function = 0;
     uint16_t vendorID = PciGetVendorID(Group, bus, device);
 
     if (vendorID == NOT_A_PCI_DEVICE) return; // Device doesn't exist
-    checkFunction(Group, bus, device, function);
     //LouPrint("PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID( bus , device, function));
     uint8_t headerType = getHeaderType(Group, bus, device, function);
 
@@ -50,7 +45,6 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         // It's a multi-function device, so check remaining functions
         for (function = 0; function < 8; function++) {
             if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
-                checkFunction(Group, bus, device, function);
                 if (PciGetDeviceID(Group, bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
                     P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
@@ -83,24 +77,28 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
 
 
 
-LOUDDK_API_ENTRY void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function) {
-    uint8_t baseClass;
-    uint8_t subClass;
-    uint8_t secondaryBus;
+KERNEL_IMPORT
+uint16_t GetPciGroupCount();
 
-    baseClass = getBaseClass(Group, bus, device, function);
-    subClass = getSubClass(Group, bus, device, function);
-    if ((baseClass == 0x6) && (subClass == 0x4)) {
-        secondaryBus = getSecondaryBus(Group, bus, device, function);
-        checkBus(Group, secondaryBus);
-    }
-}
-
+KERNEL_IMPORT
+PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
 
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
     LouPrint("Scanning PCI Bus\n");
     for(uint8_t i = 0 ; i < 255; i++){
         checkBus(0, i);
+    }
+    uint16_t GroupIndex = 0;
+    uint16_t Count = GetPciGroupCount();
+    PPCIE_SYSTEM_MANAGER Psm = 0x00;
+    for(uint16_t i = 0 ; i < Count; i++){
+        Psm = GetPcieGroupHandle(i);
+        if(Psm->PCISegmentGroupNumber){
+            GroupIndex = Psm->PCISegmentGroupNumber;
+            for(uint8_t j = 0 ; j < 255; j++){
+                checkBus(GroupIndex, j);
+            }
+        }
     }
 }
 

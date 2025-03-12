@@ -54,14 +54,14 @@ typedef struct _KMALLOC_VMEM_TRACK{
 }KMALLOC_VMEM_TRACK, * PKMALLOC_VMEM_TRACK;
 
 
-UNUSED static KMALLOC_PAGE_TRACK    PageTracks;
-UNUSED static size_t                PageTracksCount = 0;
-UNUSED static KMALLOC_VMEM_TRACK    VMemTracks;
-UNUSED static size_t                VMemTracksCount = 0;
+static KMALLOC_PAGE_TRACK    PageTracks = {0};
+static size_t                PageTracksCount = 0;
+static KMALLOC_VMEM_TRACK    VMemTracks = {0};
+static size_t                VMemTracksCount = 0;
 
-UNUSED static KMALLOC_PAGE_TRACK    PageTracksPhy;
+UNUSED static KMALLOC_PAGE_TRACK    PageTracksPhy = {0};
 UNUSED static size_t                PageTracksCountPhy = 0;
-UNUSED static KMALLOC_VMEM_TRACK    VMemTracksPhy;
+UNUSED static KMALLOC_VMEM_TRACK    VMemTracksPhy = {0};
 UNUSED static size_t                VMemTracksCountPhy = 0;
 
 UNUSED volatile PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
@@ -540,21 +540,24 @@ void* LouKeMallocEx(
     size_t PageCount = 0;
     PKMALLOC_VMEM_TRACK TmpVMemTrack; //defineing it here for stack consumption
     bool ValidAddress;   
+    PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracks;
+
     while(1){
-        PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracks;
         for(; PageCount < PageTracksCount; PageCount++){
-            if((TmpPageTrack->Flags == AllocationFlags) && (RoundUpSize != AllocationSize)){
+            if((TmpPageTrack->Flags == AllocationFlags) && (TmpPageTrack->Chunk.ChunkSize >= AllocationSize)){
                 goto _LOU_KE_MALLOC_FOUND_FREE_PAGE;
             }
-            if(TmpPageTrack->Chain.NextHeader){
-                TmpPageTrack = (PKMALLOC_PAGE_TRACK)TmpPageTrack->Chain.NextHeader;
+            if(!TmpPageTrack->Chain.NextHeader){
+                TmpPageTrack->Chain.NextHeader = LouMallocEx(sizeof(KMALLOC_PAGE_TRACK), GET_ALIGNMENT(KMALLOC_PAGE_TRACK));
             }
+            TmpPageTrack = (PKMALLOC_PAGE_TRACK)TmpPageTrack->Chain.NextHeader;
         }
-        TmpPageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundUpSize);
-        TmpPageTrack->Chunk.VAddress = (uint64_t)LouVMalloc(RoundUpSize);
+
+        TmpPageTrack->Chunk.PAddress = (uint64_t)LouMallocEx(RoundUpSize, MEGABYTE_PAGE);
+        TmpPageTrack->Chunk.VAddress = (uint64_t)LouVMallocEx(RoundUpSize, MEGABYTE_PAGE);
         TmpPageTrack->Chunk.ChunkSize = RoundUpSize;
         TmpPageTrack->Flags = AllocationFlags;
-        TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
+        //TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
         LouKeMapContinuousMemoryBlock(TmpPageTrack->Chunk.PAddress, TmpPageTrack->Chunk.VAddress, RoundUpSize, AllocationFlags);
         PageTracksCount++;
         _LOU_KE_MALLOC_FOUND_FREE_PAGE:
@@ -567,6 +570,9 @@ void* LouKeMallocEx(
         while((Pointer + AllocationSize) <= Limit){
             if(RoundUpSize != AllocationSize){
                 Pointer += Alignment;
+            }
+            if((Pointer + AllocationSize) > Limit){
+                break;// sanity check
             }
             TmpVMemTrack = &VMemTracks;
             ValidAddress = true;
@@ -613,23 +619,25 @@ void* LouKeMallocPhysicalEx(
     size_t PageCount = 0;
     PKMALLOC_VMEM_TRACK TmpVMemTrack; //defineing it here for stack consumption
     bool ValidAddress;   
+
     while(1){
         PKMALLOC_PAGE_TRACK TmpPageTrack = &PageTracksPhy;
         for(; PageCount < PageTracksCountPhy; PageCount++){
-            if((TmpPageTrack->Flags == AllocationFlags) && (RoundUpSize != AllocationSize)){
+            if((TmpPageTrack->Flags == AllocationFlags) && (TmpPageTrack->Chunk.ChunkSize >= AllocationSize)){
                 goto _LOU_KE_MALLOC_FOUND_FREE_PAGE;
             }
             if(TmpPageTrack->Chain.NextHeader){
                 TmpPageTrack = (PKMALLOC_PAGE_TRACK)TmpPageTrack->Chain.NextHeader;
             }
         }
+
         TmpPageTrack->Chunk.PAddress = (uint64_t)LouMalloc(RoundUpSize);
         TmpPageTrack->Chunk.VAddress = TmpPageTrack->Chunk.PAddress;//(uint64_t)LouVMalloc(RoundUpSize);
         TmpPageTrack->Chunk.ChunkSize = RoundUpSize;
         TmpPageTrack->Flags = AllocationFlags;
         TmpPageTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_PAGE_TRACK));
         LouKeMapContinuousMemoryBlock(TmpPageTrack->Chunk.PAddress, TmpPageTrack->Chunk.VAddress, RoundUpSize, AllocationFlags);
-        PageTracksCountPhy++;
+        PageTracksCount++;
         _LOU_KE_MALLOC_FOUND_FREE_PAGE:
         const size_t Limit = TmpPageTrack->Chunk.VAddress + TmpPageTrack->Chunk.ChunkSize;
         size_t Pointer = TmpPageTrack->Chunk.VAddress;
@@ -640,6 +648,9 @@ void* LouKeMallocPhysicalEx(
         while((Pointer + AllocationSize) <= Limit){
             if(RoundUpSize != AllocationSize){
                 Pointer += Alignment;
+            }
+            if((Pointer + AllocationSize) > Limit){
+                break;// sanity check
             }
             TmpVMemTrack = &VMemTracksPhy;
             ValidAddress = true;
@@ -670,7 +681,7 @@ void* LouKeMallocPhysicalEx(
             TmpVMemTrack->VAddress = Pointer;
             TmpVMemTrack->size = AllocationSize;
             TmpVMemTrack->Chain.NextHeader = (PListHeader)LouMalloc(sizeof(KMALLOC_VMEM_TRACK));
-            VMemTracksCountPhy++;
+            VMemTracksCount++;
             memset((void*)Pointer, 0 , AllocationSize);
             return (void*)Pointer;
         }

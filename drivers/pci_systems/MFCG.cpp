@@ -43,7 +43,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitMCFG() {
         for(size_t i = 0 ; i < NumberOfEntries; i++){
             AddPcieGroup(&Mcfg->Allocations[i]);
         }
-        while(1);
     }
 
     LouFree(Buffer);

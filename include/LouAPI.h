@@ -36,7 +36,6 @@
 #include "drivers/Ata/ata.h"
 #include <drivers/Networking/IpV4.h>
 
-
 #ifndef _KERNEL_MODULE_
 
 #define ACPIBUFFER 512

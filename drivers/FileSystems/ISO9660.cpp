@@ -191,6 +191,7 @@ static FILE* ISOLouKeFindDirectory(
                 FILE* LoadedFile = (FILE*)LouKeMallocFileData(BufferSize, KILOBYTE_PAGE);
                 memcpy(LoadedFile, FOO, BufferSize);
                 ReleaseDriveHandle(FOO);
+
                 return LoadedFile;
             }
             SearchDirectory = GetNextDirectoryName(SearchDirectory);

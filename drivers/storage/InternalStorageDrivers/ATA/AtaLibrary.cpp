@@ -52,7 +52,7 @@ LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
 
 bool IsAtaController(P_PCI_DEVICE_OBJECT PDEV){
     PCI_COMMON_CONFIG PciConfig;
-    GetPciConfiguration(PDEV->bus, PDEV->slot, PDEV->func, &PciConfig);
+    GetPciConfiguration(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, &PciConfig);
 
     if((PciConfig.Header.BaseClass == 0x01) && PciConfig.Header.SubClass == 0x01){
         LouPrint("Found ATA Controller\n");

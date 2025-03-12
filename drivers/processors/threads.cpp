@@ -333,8 +333,10 @@ uintptr_t RetriveThreadStubAddress(){
 
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
+    
     //allocate New Stack
     void* NewStack = LouKeMallocPhysicalEx(StackSize , 16, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    
     //Allocate New Thread
     thread_t* NewThread = CreateThreadHandle();
     if(!NewThread){

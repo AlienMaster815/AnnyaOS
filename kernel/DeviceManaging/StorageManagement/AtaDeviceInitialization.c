@@ -43,12 +43,12 @@ LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable
         PortToInitialize->PortFunctioning = true;
         return Status;
     }else{
-        AtaIdBuffer = LouKeMallocPhysical(512, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+        AtaIdBuffer = LouKeMalloc(512, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
         Status = LouKeAtaSendAtaIdentifyCommand(
             PortToInitialize,
             AtaIdBuffer
         );
-        LouKeFreePhysical(AtaIdBuffer);
+        LouKeFree(AtaIdBuffer);
         if(Status != STATUS_SUCCESS){
             PortToInitialize->PortFunctioning = false;
             return Status;

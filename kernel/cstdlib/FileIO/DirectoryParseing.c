@@ -28,7 +28,7 @@ string GetNextDirectoryName(string PATH){
 }
 
 
-void LouKeFOpenCall(uint64_t* Data){
+void LouKeLoadFileCall(uint64_t* Data){
     string PathToFile = (string)*Data;
     *Data = (uint64_t)fopen(PathToFile);   
     uint64_t KData = *Data;

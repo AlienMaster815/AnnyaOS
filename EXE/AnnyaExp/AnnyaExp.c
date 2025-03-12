@@ -21,6 +21,8 @@ static uint64_t i = 0;
 
 static TIME_T TimeStruct = {0};
 
+static HMODULE ZLIBhModule = 0;
+
 static void UpdateClockTime(){
             if(TimeStruct.Hour > 12){
                 if((TimeStruct.Hour - 12) < 10){
@@ -113,7 +115,7 @@ DWORD ClockThread(PVOID Args){
         (uintptr_t)&ButtonCharecteristics
     );
 
-    LouPrint("Clock Thread Created Entring Main Loop\n");
+    LouPrint("Clock Thread Created Entering Main Loop\n");
     
     while(1){
         GetRtcTimeData(&TimeStruct);    
@@ -192,13 +194,22 @@ int WinMain(
     StartDesktop();
 
     //LouPrint("Desktop created : Starting Clock Thread\n");
-    
     PTHREAD PTClock = AnnyaCreateThread(ClockThread, 0x00);
 
     LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
 
+    LouPrint("Loading ZLIB\n");
+
+    ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
+
+    if(!ZLIBhModule){
+        LouPrint("ZLIB1.DLL Could Not Be Found\n");
+        while(1);
+    }
+
+
     LouPrint("Shell Initialization Complete\n");
-    //ClockThread(0x00);
+    
     while(1){
         
     }

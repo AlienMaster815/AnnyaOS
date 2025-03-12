@@ -1,0 +1,120 @@
+#define _KERNEL32_
+#include <Annya.h>
+
+#define KERNEL32_API __declspec(dllexport)
+
+KERNEL32_API
+void DeleteCriticalSection(){
+    LouPrint("DeleteCriticalSection()\n");
+    while(1);
+}
+
+KERNEL32_API
+void EnterCriticalSection(){
+    LouPrint("EnterCriticalSection()\n");
+    while(1);
+}
+
+KERNEL32_API
+void GetLastError(){
+    LouPrint("GetLastError()\n");
+    while(1);
+}
+
+KERNEL32_API
+void InitializeCriticalSection(){
+    LouPrint("InitializeCriticalSection()\n");
+    while(1);
+}
+
+KERNEL32_API
+void IsDBCSLeadByteEx(){
+    LouPrint("IsDBCSLeadByteEx()\n");
+    while(1);
+}
+
+KERNEL32_API
+void LeaveCriticalSection(){
+    LouPrint("LeaveCriticalSection()\n");
+    while(1);
+}
+
+KERNEL32_API
+void MultiByteToWideChar(){
+    LouPrint("MultiByteToWideChar()\n");
+    while(1);
+}
+
+KERNEL32_API
+void Sleep(){
+    LouPrint("Sleep()\n");
+    while(1);
+}
+
+KERNEL32_API
+void TlsGetValue(){
+    LouPrint("TlsGetValue()\n");
+    while(1);
+}
+
+KERNEL32_API
+void VirtualProtect(){
+    LouPrint("VirtualProtect()\n");
+    while(1);
+}
+
+KERNEL32_API
+void VirtualQuery(){
+    LouPrint("VirtualQuery()\n");
+    while(1);
+}
+
+KERNEL32_API
+void WideCharToMultiByte(){
+    LouPrint("WideCharToMultiByte()\n");
+    while(1);
+}
+
+KERNEL32_API
+HANDLE LoadLibraryA(string DllName){
+
+    uint64_t KulaPacket[3] = {0};
+    KulaPacket[1] = (uint64_t)DllName;
+    while(KulaPacket[0] == 0){
+        LouCALL(LOULOADLIBRARYA, (uint64_t)&KulaPacket, 0);
+    }
+    return (HANDLE)KulaPacket[2];
+}
+
+
+KERNEL32_API
+void LoadLibraryW(wchar_t* DllName){
+
+    LouPrint("LoadLibraryW()\n");
+    while(1);
+}
+
+
+
+KERNEL32_API
+void LoadLibraryExA(
+    string DllName, 
+    HANDLE File, 
+    DWORD Flags
+){
+
+    LouPrint("LoadLibraryExA()\n");
+    while(1);
+}
+
+
+KERNEL32_API
+void LoadLibraryExyW(
+    wchar_t* DllName, 
+    HANDLE File, 
+    DWORD Flags
+){
+
+    LouPrint("LoadLibraryExW()\n");
+    while(1);
+}

@@ -5,7 +5,7 @@ CFLAGS = -shared -m64 -nostdlib -nodefaultlibs
 # Paths
 LDFLAGS = -L../../UserLibraries
 INCLUDES = -I../../include
-LIBS = -lLouDll -luser32 -l/PreCompiledHeaders/ExeCrtc
+LIBS = -lLouDll -luser32 -l/PreCompiledHeaders/ExeCrtc -lKERNEL32
 
 # Source and target
 SRC = AnnyaExp.c

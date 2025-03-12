@@ -254,6 +254,9 @@ KERNEL_ENTRY LouKernelSmpStart(){
 LOUSTATUS InitilaizeUserMode(){
 
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL");
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL");
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL");
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/CRT140.DLL");
     
@@ -323,7 +326,9 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeGenericTables();
 
     Advanced_Kernel_Initialization();
-                                                           
+
+    //LouPrint("Perfect\n");
+    //while(1);
     //SETUP DEVICES AND DRIVERS
     LookForStorageDevices();
 
@@ -377,14 +382,12 @@ void InitializeUserSpace(){
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
-    //LouUpdateWindow(
-    //    GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
-    //    GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
-    //    HWind
-    //);    
+    LouUpdateWindow(
+        GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
+        GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
+        HWind
+    );    
     LouPrint("Hello World\n");
-    
-    //LouKeOpenPngImage("C:/ANNYA/AOSMC.PNG");
     if(!InitEntry){
         LouPrint("ERROR Could Not Jump To Usermode\n");
         while(1);
@@ -392,10 +395,11 @@ void InitializeUserSpace(){
     UsrJmp(InitEntry);
 }
 
+//TODO : Debug the PCIe driver on the Acer
 
 //BUGS TO FIX:
 //memcpy doesent use SSE correctly
-
+//86553
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 

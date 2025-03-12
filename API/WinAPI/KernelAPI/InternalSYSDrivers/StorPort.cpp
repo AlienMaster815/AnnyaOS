@@ -241,7 +241,7 @@ ULONG StorPortGetBusData(
         }
         PPCI_COMMON_CONFIG ConfigBuffer = (PPCI_COMMON_CONFIG)Buffer;
 
-        GetPciConfiguration(SystemIoBusNumber, SlotNumber, 0,ConfigBuffer);
+        GetPciConfiguration(0, SystemIoBusNumber, SlotNumber, 0,ConfigBuffer);
 
         LouPrint("void StorPortGetBusData() COMPLETE\n");
         return sizeof(PCI_COMMON_CONFIG);

@@ -141,4 +141,12 @@ uint64_t ConvertBeToLeU64(uint64_t Foo) {
 }
 
 
+typedef struct _PCIE_SYSTEM_MANAGER{
+    ListHeader  Neighbors;
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+}PCIE_SYSTEM_MANAGER, * PPCIE_SYSTEM_MANAGER;
+
 #endif

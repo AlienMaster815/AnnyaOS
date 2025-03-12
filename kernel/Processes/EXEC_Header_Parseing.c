@@ -464,9 +464,9 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
             relocationTableSize
         );
 
-        LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
+        //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
-        LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
+        //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
         LouKeReleaseSpinLock(&UserModuleLock, &Irql);
         return (void*)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
     } else {

@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-typedef unsigned ULONG;
+typedef unsigned long ULONG;
 typedef ULONG* PULONG;
 
 LOUSTATUS LouKeGetSystemFirmwareTable(

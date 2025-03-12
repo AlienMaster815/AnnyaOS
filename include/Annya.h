@@ -35,8 +35,8 @@ typedef void* PTHREAD;
 typedef void*    HWND;
 typedef uint16_t MSG;
 
-
-
+typedef void* HANDLE;
+typedef void* HMODULE;
 
 #ifndef _TIME_T_
 #define _TIME_T_
@@ -131,9 +131,33 @@ void AnnyaUpdateButton(
     PBUTTONHANDLE HBUTTON
 );
 
-
-
 #endif
+
+
+#ifndef _KERNEL32_
+
+__declspec(dllimport)
+HMODULE LoadLibraryA(string DllName);
+
+__declspec(dllimport)
+HMODULE LoadLibraryW(wchar_t* DllName);
+
+__declspec(dllimport)
+HMODULE LoadLibraryExA(
+    string DllName, 
+    HANDLE File, 
+    DWORD Flags
+);
+
+__declspec(dllimport)
+HMODULE LoadLibraryExyW(
+    wchar_t* DllName, 
+    HANDLE File, 
+    DWORD Flags
+);
+#endif
+
+
 #ifdef __cplusplus    
 }
 #endif
@@ -141,6 +165,7 @@ void AnnyaUpdateButton(
 typedef void* HINSTANCE;
 
 #include <stdint.h>
+
 
 #ifdef IS_X86_64
 

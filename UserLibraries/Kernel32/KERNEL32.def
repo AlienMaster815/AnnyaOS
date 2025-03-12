@@ -1,0 +1,7 @@
+LIBRARY KERNEL32.dll
+
+EXPORTS	
+    LoadLibraryExA
+    LoadLibraryW
+    LoadLibraryExyW
+    LoadLibraryA

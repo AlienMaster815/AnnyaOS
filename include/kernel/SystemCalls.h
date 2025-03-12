@@ -634,7 +634,10 @@ void LouCALL(
 #define LOU_KE_CDROM_LAST_WRITTEN               97
 #define LOU_KE_CDROM_TIMED_MEDIA_CHANGE         98
 
-
+#define LOULOADLIBRARYA                         99
+#define LOULOADLIBRARYW                         100
+#define LOULOADLIBRARYEXA                       101
+#define LOULOADLIBRARYEXW                       102
 
 //Kernel SystemCalls
 
