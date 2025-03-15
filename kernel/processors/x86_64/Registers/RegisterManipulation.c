@@ -218,8 +218,27 @@ void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int
         : "a" (code));
 }
 
+uint64_t GetGSBase() {
+    uint32_t low, high;
+    asm volatile("rdmsr" : "=a"(low), "=d"(high) : "c"(0xC0000101)); // IA32_GS_BASE
+    return ((uint64_t)high << 32) | low;
+}
+
+uint64_t GetGSSwapBase() {
+    uint32_t low, high;
+    asm volatile("rdmsr" : "=a"(low), "=d"(high) : "c"(0xC0000102)); // IA32_KERNEL_GS_BASE
+    return ((uint64_t)high << 32) | low;
+}
+
+void SetGSBase(uint64_t gs_base) {
+    asm volatile("wrmsr" : : "c"(0xC0000101), "A"(gs_base));
+}
+
+void SetGSSwapBase(uint64_t kernel_gs_base) {
+    asm volatile("wrmsr" : : "c"(0xC0000102), "A"(kernel_gs_base));
+}
+
+
 #endif
-
-
 
 //TODO: Add\ Registers As Needed By The System

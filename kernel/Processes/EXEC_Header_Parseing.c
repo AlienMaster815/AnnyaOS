@@ -370,7 +370,9 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
         //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
         //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
-        
+        if(!PE64Header->addressOfEntryPoint){
+            return 0x00;
+        }
         return (PHANDLE)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
     } else {
         return 0x00;
@@ -470,7 +472,10 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         // Print function address debug info
         //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
         LouKeReleaseSpinLock(&UserModuleLock, &Irql);
-        return (void*)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
+        if(!PE64Header->addressOfEntryPoint){
+            return 0x00;
+        }
+        return (DllModuleEntry)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
     } else {
         LouKeReleaseSpinLock(&UserModuleLock, &Irql);
         return 0x00;

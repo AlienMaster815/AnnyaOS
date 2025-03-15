@@ -372,8 +372,25 @@ void TrampolineFinalInit(){
 uint64_t GetUsedMemory();
 uint32_t Random32(uint32_t Seed);
 
+void SetGSBase(uint64_t gs_base);
+uint64_t GetGSBase();
+
+extern uint64_t GetRBP();
+
+extern uint64_t RecreateDisasemblyIssue();
+extern void SetTEB();
 
 void InitializeUserSpace(){
+
+
+    uint64_t GsBase = (uint64_t)LouMalloc(2 * MEGABYTE);
+    
+    SetGSBase(GsBase);
+
+    PWIN_TEB Teb = (PWIN_TEB)LouKeMallocEx(sizeof(WIN_TEB), GET_ALIGNMENT(WIN_TEB), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
+    Teb->TebNtTibStackBase = GetRBP();
+    Teb->TebNtTibStackLimit = GetRBP() - (2 * MEGABYTE); //this thread is 2 Megs
+    SetTEB((uint64_t)Teb);
 
     InitilaizeUserMode();
 
@@ -392,8 +409,11 @@ void InitializeUserSpace(){
         LouPrint("ERROR Could Not Jump To Usermode\n");
         while(1);
     }
+
     UsrJmp(InitEntry);
 }
+
+//0x220B21030
 
 //TODO : Debug the PCIe driver on the Acer
 

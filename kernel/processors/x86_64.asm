@@ -2,6 +2,11 @@ global SetUpSmpPageing
 
 global StoreAdvancedRegisters
 global RestoreAdvancedRegisters
+global SetGS
+global GetRBP
+global GetGS
+global RecreateDisasemblyIssue
+global SetTEB
 
 section .rodata
 gdt64:
@@ -123,4 +128,15 @@ InitializeXSave:
     mov ecx, 0
     xsetbv
 
-    
+
+GetRBP:
+    mov rax, rbp
+    ret
+
+RecreateDisasemblyIssue:
+    ret
+
+SetTEB:
+    mov qword[gs:0x30], RCX
+    ret
+

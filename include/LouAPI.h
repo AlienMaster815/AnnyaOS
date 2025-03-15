@@ -35,6 +35,8 @@
 #include "drivers/Scsi/ScsiHost.h"
 #include "drivers/Ata/ata.h"
 #include <drivers/Networking/IpV4.h>
+#include <WinTEB.h>
+
 
 #ifndef _KERNEL_MODULE_
 

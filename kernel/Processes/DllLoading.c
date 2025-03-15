@@ -77,6 +77,19 @@ static LIBRARY_HANDLES  LibHandles = {0};
 static size_t           LibHandlesCount = 0;
 static mutex_t          LoadLibMutex;
 
+typedef struct _ATTACH_THREAD_DATA{
+    uint64_t DllEntry;
+    uint64_t DllHandle;
+    uint64_t DllCallReason;
+    uint64_t DllReserved;
+}ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
+
+
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
+
 HANDLE LouKeLoadLibraryA(string LibraryName){
     MutexLock(&LoadLibMutex);
 
@@ -124,9 +137,22 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
 
     TmpLibHandle->LibraryHandle = (HANDLE)LouKeMallocEx(sizeof(atomic_t), GET_ALIGNMENT(atomic_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
+    //LouPrint("TmpLibHandle->LibraryEntry:%h\n", TmpLibHandle->LibraryEntry);
     //TODO: Manage Processes Loading the DLL
-    //TmpLibHandle->LibraryEntry(TmpLibHandle->LibraryHandle, DLL_PROCESS_ATTACH, 0x00);
-    
+
+
+    if(TmpLibHandle->LibraryEntry){
+        UNUSED PATTACH_THREAD_DATA DllAttachProcessData = (PATTACH_THREAD_DATA)LouKeMallocEx(sizeof(ATTACH_THREAD_DATA), GET_ALIGNMENT(ATTACH_THREAD_DATA) , USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+        DllAttachProcessData->DllEntry = (uint64_t)TmpLibHandle->LibraryEntry;
+        DllAttachProcessData->DllHandle = (uint64_t)TmpLibHandle->LibraryHandle;
+        DllAttachProcessData->DllCallReason = (uint64_t)DLL_PROCESS_ATTACH;
+        DllAttachProcessData->DllReserved = 0;
+        UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDLL.dll", "AnnyaAttachDllToProcess");
+        
+        //LouKeCreateUserStackThread((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE);
+        //LouKeFree(DllAttachProcessData);
+    }
+    //LouPrint("HERE\n");
     LibHandlesCount++;
     MutexUnlock(&LoadLibMutex);
     return TmpLibHandle->LibraryHandle;
