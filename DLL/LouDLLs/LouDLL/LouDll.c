@@ -15,7 +15,6 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 static mutex_t PrintLock;
 LOUDLL_API
 int LouPrint(char* Str, ...){
-    MutexLock(&PrintLock);
     va_list Arg;
     va_start(Arg, Str);
     uint64_t Data[3];
@@ -26,7 +25,6 @@ int LouPrint(char* Str, ...){
         LouCALL(LOUPRINTCALL, (uint64_t)&Data, 0);
     }
     va_end(Arg);
-    MutexUnlock(&PrintLock);
     return Data[1];
 }
 
@@ -307,7 +305,12 @@ static inline void TailLouCall(
     asm("INT $0x80");
 }
 
-
+static void LouSpin(){
+    uint16_t i = 0;
+    while(i != (uint16_t)-1){
+        i++;
+    }
+}
 
 LOUDLL_API
 void LouCALL(
@@ -318,6 +321,7 @@ void LouCALL(
     MutexLock(&LouCallLock);
     TailLouCall(Call, Data, SystemEmulation);
     MutexUnlock(&LouCallLock);
+    LouSpin();
 }
 
 
@@ -327,5 +331,21 @@ void AnnyaUserThreadStub(void* PTHREAD, void* THREAD_DATA, uintptr_t ThreadHandl
     DWORD Result = NewThread(THREAD_DATA);    
     LouPrint("Thread:%h :: Exited With Value:%h\n", PTHREAD, Result);
     AnnyaDestroyThread((void*)ThreadHandle);
+    while(1);
+}
+
+typedef struct _ATTACH_THREAD_DATA{
+    uint64_t DllEntry;
+    uint64_t DllHandle;
+    uint64_t DllCallReason;
+    uint64_t DllReserved;
+}ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
+
+LOUDLL_API
+void AnnyaAttachDllToProcess(PVOID ThreadData){
+
+
+
+    LouPrint("Here\n");
     while(1);
 }

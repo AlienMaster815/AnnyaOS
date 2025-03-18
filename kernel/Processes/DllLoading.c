@@ -82,6 +82,7 @@ typedef struct _ATTACH_THREAD_DATA{
     uint64_t DllHandle;
     uint64_t DllCallReason;
     uint64_t DllReserved;
+    uint64_t TebPointer;
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
 
 
@@ -148,8 +149,9 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
         DllAttachProcessData->DllCallReason = (uint64_t)DLL_PROCESS_ATTACH;
         DllAttachProcessData->DllReserved = 0;
         UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDLL.dll", "AnnyaAttachDllToProcess");
+
+        LouKeCreateUserStackThread((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE);
         
-        //LouKeCreateUserStackThread((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE);
         //LouKeFree(DllAttachProcessData);
     }
     //LouPrint("HERE\n");

@@ -563,7 +563,6 @@ ISR31:
 
 
 ISR32:
-	;hlt
 	pusha
 	mov rcx, rsp
 	call UpdateThreadManager  

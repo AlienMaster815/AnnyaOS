@@ -51,6 +51,7 @@ typedef struct {
     void* StackTop;
     uint64_t AdvancedRegisterStorage;
     uint64_t AdvancedRegisterInterruptsStorage;
+    CPUContext SavedContext;
 } thread_t;
 
 static thread_t MasterThreadTable;
@@ -133,26 +134,72 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
     return current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage;
 }
 
-static mutex_t FUBAR;
+
+static void SaveContext(CPUContext* TMContext, CPUContext* ProgramContext){
+
+    ProgramContext->rax = TMContext->rax;
+    ProgramContext->rbx = TMContext->rbx;
+    ProgramContext->rcx = TMContext->rcx;
+    ProgramContext->rdx = TMContext->rdx;
+
+    ProgramContext->rbp = TMContext->rbp;
+    ProgramContext->rsi = TMContext->rsi;
+    ProgramContext->rdi = TMContext->rdi;
+    ProgramContext->r8 = TMContext->r8;
+
+    ProgramContext->r9 = TMContext->r9;
+    ProgramContext->r10 = TMContext->r10;
+    ProgramContext->r11 = TMContext->r11;
+    ProgramContext->r12 = TMContext->r12;
+
+    ProgramContext->r13 = TMContext->r13;
+    ProgramContext->r14 = TMContext->r14;
+    ProgramContext->r15 = TMContext->r15;
+    ProgramContext->rip = TMContext->rip;
+
+    ProgramContext->cs = TMContext->cs;
+    ProgramContext->rflags = TMContext->rflags;
+    ProgramContext->rsp = TMContext->rsp;
+    ProgramContext->ss = TMContext->ss;
+
+}
+
+static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext){
+
+    TMContext->rax = ProgramContext->rax;
+    TMContext->rbx = ProgramContext->rbx;
+    TMContext->rcx = ProgramContext->rcx;
+    TMContext->rdx = ProgramContext->rdx;
+
+    TMContext->rbp = ProgramContext->rbp;
+    TMContext->rsi = ProgramContext->rsi; 
+    TMContext->rdi = ProgramContext->rdi;
+    TMContext->r8 = ProgramContext->r8;
+
+    TMContext->r9 = ProgramContext->r9;
+    TMContext->r10 = ProgramContext->r10;
+    TMContext->r11 = ProgramContext->r11;
+    TMContext->r12 = ProgramContext->r12;
+
+    TMContext->r13 = ProgramContext->r13;
+    TMContext->r14 = ProgramContext->r14;
+    TMContext->r15 = ProgramContext->r15;
+    TMContext->rip = ProgramContext->rip;
+
+    TMContext->cs = ProgramContext->cs;
+    TMContext->rflags = ProgramContext->rflags;
+    TMContext->rsp = ProgramContext->rsp;
+    TMContext->ss = ProgramContext->ss;
+
+}
 
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
-    uint8_t ProcessorID = 0;
-    thread_t* CurrentThread = 0;
+    uint8_t ProcessorID = get_processor_id();
+    thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
     CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
-    if(NumberOfThreads < 1){
-        if((uint64_t)current_thread[get_processor_id()] != (uint64_t)&MasterThreadTable){
-            RestoreEverything(&MasterThreadTable.AdvancedRegisterStorage);
-            current_thread[get_processor_id()] = &MasterThreadTable;
-            CpuCurrentState = (uintptr_t)MasterThreadTable.cpu_state;
-            goto _UPDATE_THREAD_MANAGER_FINISHED;
-        }else{
-            current_thread[get_processor_id()]->cpu_state = (CPUContext*)(uint8_t*)CpuCurrentState; 
-            goto _UPDATE_THREAD_MANAGER_FINISHED;
-        }
-    }
 
-    if(CurrentContext->cs == 0x08){
+    if((CurrentContext->cs & 0b11) == 0){
         //tasks shall not switch when running
         //in the kernel segment to eliminate
         //stack curruoption and add better 
@@ -160,20 +207,10 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
 
-    // if the system is currently handling an
-    // interupt the system shall not be 
-    // interrupted for stability and reliability
-    if(SpinlockIsLocked(LouKeGetInterruptGlobalLock())){
-        goto _UPDATE_THREAD_MANAGER_FINISHED;
-    }
-    MutexLock(&FUBAR);
-
     if(timeQuantum[ProcessorID] < 5){
         timeQuantum[ProcessorID]++;
-        MutexUnlock(&FUBAR);
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
-
 
     ProcessorID = get_processor_id();
     CurrentThread = current_thread[ProcessorID];
@@ -182,16 +219,19 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
 
     NextThread = GetNextThread(CurrentThread);
     if((uintptr_t)NextThread == (uintptr_t)CurrentThread){
-        MutexUnlock(&FUBAR);
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
 
     if(IsThreadInThreadTable(CurrentThread)){
-        CurrentThread->cpu_state = (CPUContext*)CpuCurrentState;
+        SaveContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&CurrentThread->SavedContext));
         CurrentThread->state = THREAD_READY;
         SaveEverything(&CurrentThread->AdvancedRegisterStorage);
     }
 
+    //if((NextThread == &MasterThreadTable) && (NumberOfThreads == 1)){
+        //ouPrint("HERE\n");
+        //while(1);
+    //}
 
     while((!IsThreadInThreadTable(NextThread)) && (NextThread->state != THREAD_READY)){
         NextThread = GetNextThread(NextThread);
@@ -200,11 +240,10 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     RestoreEverything(&NextThread->AdvancedRegisterStorage);
 
     NextThread->state = THREAD_RUNNING;
-    CpuCurrentState = (uint64_t)NextThread->cpu_state;
+    RestoreContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&NextThread->SavedContext));
 
     current_thread[ProcessorID] = NextThread;
     
-    MutexUnlock(&FUBAR);
     _UPDATE_THREAD_MANAGER_FINISHED:
     local_apic_send_eoi();
     return CpuCurrentState;
@@ -358,16 +397,16 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //Get the Stub Address
     uintptr_t StubAddress = RetriveThreadStubAddress();
     //fill the Context...
-    NewContext->rcx = (uint64_t)Function;           //first parameter  MSVC
-    NewContext->rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
-    NewContext->r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
-    NewContext->rip = (uint64_t)StubAddress;        //Liftoff Address  
-    NewContext->rbp = (uint64_t)NewContext;         //Base Pointer
-    NewContext->rsp = (uint64_t)NewContext;         //Current Pointer
+    NewThread->SavedContext.rcx = (uint64_t)Function;           //first parameter  MSVC
+    NewThread->SavedContext.rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
+    NewThread->SavedContext.r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
+    NewThread->SavedContext.rip = (uint64_t)StubAddress;        //Liftoff Address  
+    NewThread->SavedContext.rbp = (uint64_t)NewContext;         //Base Pointer
+    NewThread->SavedContext.rsp = (uint64_t)NewContext;         //Current Pointer
     //Fill Segments and flags
-    NewContext->cs  = 0x08;
-    NewContext->ss  = 0x10;  
-    NewContext->rflags = 0x202;  
+    NewThread->SavedContext.cs  = 0x1B;
+    NewThread->SavedContext.ss  = 0x23;  
+    NewThread->SavedContext.rflags = 0x202;  
     //Increment Thread Counter
     NumberOfThreads++;
     //return the handle to the new thread
