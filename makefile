@@ -342,6 +342,7 @@ cleanall:
 	rm -rd dist
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/User32 clean
+	$(MAKE) -C UserLibraries/Kernel32 clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean
