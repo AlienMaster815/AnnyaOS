@@ -51,6 +51,7 @@ typedef struct {
     void* StackTop;
     uint64_t AdvancedRegisterStorage;
     uint64_t AdvancedRegisterInterruptsStorage;
+    uint64_t WinTEBData;
     CPUContext SavedContext;
 } thread_t;
 
@@ -193,6 +194,9 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext){
 
 }
 
+KERNEL_IMPORT
+void SetTEB(uint64_t Teb);
+
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     uint8_t ProcessorID = get_processor_id();
     thread_t* CurrentThread = current_thread[ProcessorID];
@@ -228,11 +232,6 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
         SaveEverything(&CurrentThread->AdvancedRegisterStorage);
     }
 
-    //if((NextThread == &MasterThreadTable) && (NumberOfThreads == 1)){
-        //ouPrint("HERE\n");
-        //while(1);
-    //}
-
     while((!IsThreadInThreadTable(NextThread)) && (NextThread->state != THREAD_READY)){
         NextThread = GetNextThread(NextThread);
     }
@@ -241,6 +240,10 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
 
     NextThread->state = THREAD_RUNNING;
     RestoreContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&NextThread->SavedContext));
+
+    if(NextThread->WinTEBData){
+        SetTEB(NextThread->WinTEBData);
+    }
 
     current_thread[ProcessorID] = NextThread;
     
@@ -371,8 +374,54 @@ uintptr_t RetriveThreadStubAddress(){
 }
 
 
-LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
+LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer) {
     
+    //allocate New Stack
+    void* NewStack = LouKeMallocPhysicalEx(StackSize , 16, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    
+    //Allocate New Thread
+    thread_t* NewThread = CreateThreadHandle();
+    if(!NewThread){
+        LouKeFree(NewStack);
+        return 0x00;
+    }
+    //store the top of the stack
+    NewThread->StackTop = NewStack;
+    //set the context pointer
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)((uint8_t*)NewStack) + StackSize) - KILOBYTE); //leave a kilobyte for wiggle room
+    //set the New Threads Context
+    NewThread->cpu_state = NewContext;
+    //Allocate Space For Safe Context Handling
+    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    //Mark the Register Storage As Clean
+    NewThread->NewTask = true;
+    NewThread->state = THREAD_READY;
+    //Get the Stub Address
+    uintptr_t StubAddress = RetriveThreadStubAddress();
+    //fill the Context...
+    NewThread->SavedContext.rcx = (uint64_t)Function;           //first parameter  MSVC
+    NewThread->SavedContext.rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
+    NewThread->SavedContext.r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
+    NewThread->SavedContext.rip = (uint64_t)StubAddress;        //Liftoff Address  
+    NewThread->SavedContext.rbp = (uint64_t)NewContext;         //Base Pointer
+    NewThread->SavedContext.rsp = (uint64_t)NewContext;         //Current Pointer
+    //Fill Segments and flags
+    NewThread->SavedContext.cs  = 0x1B;
+    NewThread->SavedContext.ss  = 0x23;  
+    NewThread->SavedContext.rflags = 0x202;  
+    NewThread->WinTEBData = TEBPointer; 
+    PWIN_TEB Teb = (PWIN_TEB)(uint8_t*)TEBPointer;
+    Teb->TebNtTibStackBase = (uint64_t)NewContext;
+    Teb->TebNtTibStackLimit = (uint64_t)NewContext - (2 * MEGABYTE); //this thread is 2 Megs
+    //Increment Thread Counter
+    NumberOfThreads++;
+    //return the handle to the new thread
+    return (uintptr_t)NewThread;//NewThread;
+}
+
+LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
+     
     //allocate New Stack
     void* NewStack = LouKeMallocPhysicalEx(StackSize , 16, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     

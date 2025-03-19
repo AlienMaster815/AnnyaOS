@@ -1327,9 +1327,7 @@ NTDLL_API void RtlInitializeBitMapEx() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeConditionVariable() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeContext() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeCorrelationVector() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlInitializeCriticalSection() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeCriticalSectionAndSpinCount() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlInitializeCriticalSectionEx() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeExtendedContext() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeExtendedContext2() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlInitializeGenericTable() {LouPrint("Hello nt Dll\n"); while(1);}

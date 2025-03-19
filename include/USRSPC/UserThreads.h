@@ -21,6 +21,19 @@ static inline void MutexUnlock(mutex_t* m){
     m->locked = false;
 }
 
+static inline void MutexSyncronize(mutex_t* m){
+    while(m->locked){
+        //spinlock
+    }
+}
+
+static inline bool MutexIsLocked(mutex_t* m){
+    if(m->locked)return true;
+    return false;
+}
+
+
+
 
 #ifdef __cplusplus
 }

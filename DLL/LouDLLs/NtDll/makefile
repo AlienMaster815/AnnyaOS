@@ -14,7 +14,8 @@ LIBS = -lLouDll -lmingw32
 # Source and Target
 SRC = 	NtDll.c \
 		Sha.c \
-		Alpc.c 
+		Alpc.c \
+		Syncronization.c
 
 ASM_SRC = 	NtLow.asm 
 

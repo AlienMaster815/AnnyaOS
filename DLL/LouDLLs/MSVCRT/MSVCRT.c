@@ -1,10 +1,14 @@
-#define _MSVCRT_
-//#include <Annya.h>
+#include "MSVCRT.h"
 
-#define MSVCRT_API __declspec(dllexport)
 
-__declspec(dllimport)
-int LouPrint(char* Str, ...);
+void MsvcInitializeLockSystem();
+
+MSVCRT_API
+BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    MsvcInitializeLockSystem();
+    return TRUE;
+}
+
 
 MSVCRT_API
 void ___lc_codepage_func(){
@@ -37,17 +41,20 @@ void _errno(){
 }
 
 MSVCRT_API
-void _initterm(){
-    LouPrint("_initterm()\n");
-    while(1);
+void _initterm(FunctionVector Begining, FunctionVector End){
+    //LouPrint("_initterm()\n");
+    void (**Functions)() = (void (**)())Begining;
+
+    while (Functions < (void (**)())End) { 
+        if (*Functions) {
+            (*Functions)();
+        }
+        Functions++; 
+    }
+    //LouPrint("_initterm() STATUS_SUCCESS\n");
 }
 
 
-MSVCRT_API 
-void _lock(){
-    LouPrint("_lock()\n");
-    while(1);
-}
 
 MSVCRT_API
 void _lseeki64(){
@@ -55,11 +62,6 @@ void _lseeki64(){
     while(1);
 }
 
-MSVCRT_API
-void _unlock(){
-    LouPrint("_unlock()\n");
-    while(1);
-}
 
 MSVCRT_API
 void _wopen(){

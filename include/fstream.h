@@ -16,6 +16,7 @@ typedef char* FILE_NAME;
 string GetNextDirectoryName(string PATH);
 uint8_t CurrentDirectoryStringLength(string Dir);
 
+bool fseek(string FileName);
 FILE* fopen(string PATH);
 void fclose(FILE* File);
 

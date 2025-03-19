@@ -5,7 +5,7 @@ CFLAGS = -shared -nostdlib -nodefaultlibs
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll
+LIBS = -lLouDll -lkernbase
 
 # Source and Target
 SRC = Kernel32.c

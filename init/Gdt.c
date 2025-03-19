@@ -28,6 +28,7 @@ typedef struct __attribute__((packed)) _LongModeGdt{
     uint64_t                           UDATA;
     uint64_t                           TSSLo;
     uint64_t                           TSSHi;
+    uint64_t                           KPCR;
 }LongModeGdt, * PLongModeGdt;
 
 void SetGDTSegmentEntry(
@@ -89,6 +90,9 @@ typedef struct __attribute__((packed)) _GDTREntry{
 }GDTREntry, * PGDTREntry;
 
 extern void InstallGDT(uint64_t GDT);
+uint16_t GetNPROC();
+void SetGSBase(uint64_t gs_base);
+
 
 void SetupGDT(){
     LouPrint("Setting Up GDT\n");
@@ -152,10 +156,31 @@ void SetupGDT(){
         0x00
     );
 
+
+    uint64_t GsBase = (uint64_t)LouMalloc(KILOBYTE_PAGE);
+
+    if(GsBase >= 0xFFFFFFFFFFFF){
+        LouPrint("PANIC GsBase Over GDT Limit\n");
+        while(1);
+    }
+    
+    SetGDTSegmentEntry(
+        (uint8_t*)&GDT->KPCR,
+        GsBase,
+        0xFFFFF,
+        0xF2,
+        0xC
+    );
+
     GDTREntry Gdtr;
     Gdtr.Length = sizeof(LongModeGdt) - 1;
     Gdtr.Base   = (uint64_t)GDT;
 
     InstallGDT((uint64_t)&Gdtr);
+
+    SetGSBase(GsBase);
+
+    LouKeMapContinuousMemoryBlock(GsBase, GsBase, KILOBYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+
     LouPrint("Done Setting Up GDT\n");
 }

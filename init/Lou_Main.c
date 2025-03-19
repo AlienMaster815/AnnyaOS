@@ -251,18 +251,6 @@ KERNEL_ENTRY LouKernelSmpStart(){
     }
 }
 
-LOUSTATUS InitilaizeUserMode(){
-
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/CRT140.DLL");
-    
-    return STATUS_SUCCESS;
-}
-
 void UsrJmp(uint64_t Entry);
 
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, bool LargePage);
@@ -380,20 +368,32 @@ extern uint64_t GetRBP();
 extern uint64_t RecreateDisasemblyIssue();
 extern void SetTEB();
 
+bool LouKeCreateProcessA(
+    string                          ApplicationName,
+    string                          CommandLine,
+    PWIN_API_SECUTIY_ATTRIBUTES     ProcessAttributes,
+    PWIN_API_SECUTIY_ATTRIBUTES     ThreadAttributes,
+    bool                            Inherited,
+    uint32_t                        Flags,
+    void*                           Enviornment,
+    string                          CurrentDirectory,
+    PWIN_API_STARTUP_INFOA          StartupInformation,
+    PWIN_API_PROCESS_INFORMATION    ProcessInformation,
+    bool                            AnnyaAPIProcess //AnnyaAPI uses different flags and setups
+);
+
 void InitializeUserSpace(){
-
-
-    uint64_t GsBase = (uint64_t)LouMalloc(2 * MEGABYTE);
     
-    SetGSBase(GsBase);
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL"); //KERNEL32 is required for loading dlls
 
-    PWIN_TEB Teb = (PWIN_TEB)LouKeMallocEx(sizeof(WIN_TEB), GET_ALIGNMENT(WIN_TEB), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
-    Teb->TebNtTibStackBase = GetRBP();
-    Teb->TebNtTibStackLimit = GetRBP() - (2 * MEGABYTE); //this thread is 2 Megs
-    SetTEB((uint64_t)Teb);
+    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL");
+    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNBASE.DLL");
+    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL");
 
-    InitilaizeUserMode();
-
+    //bool (*MsvcrtEntry)(uint64_t, uint64_t , uint64_t) = (bool (*)(uint64_t, uint64_t , uint64_t))LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL");
+    //MsvcrtEntry(0,0,0); //initialize common data
+    
     uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());

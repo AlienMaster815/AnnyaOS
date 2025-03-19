@@ -1,17 +1,16 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -nostdlib -nodefaultlibs -ffreestanding -Wno-builtin-declaration-mismatch
+CFLAGS = -shared -nostdlib -nodefaultlibs
 
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll -lKERNEL32 -lkernelbase
+LIBS = -lLouDll -lntdll
 
 # Source and Target
-SRC = MSVCRT.c \
-      MsvcLock.c
-
-TARGET = msvcrt.dll
+SRC = kernbase.c \
+	  Syncronization.c
+TARGET = kernbase.dll
 
 # Default Rule
 all: $(TARGET)

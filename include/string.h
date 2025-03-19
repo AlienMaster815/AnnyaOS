@@ -32,10 +32,12 @@ void float_to_string(string Buffer, float value);
 void long_double_to_string(string Buffer, long double value);
 char* ConvertWCharToChar(const wchar_t* wstr);
 int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
+void LouKeStrLowerToUpper(string Format);
 #endif
 #else
 #include <LouDDK.h>
 #ifndef _KERNEL_MODULE_
+KERNEL_IMPORT void LouKeStrLowerToUpper(string Format);
 KERNEL_IMPORT void* memcpy(void* destination, const void* source, size_t num);
 KERNEL_IMPORT int strncmp(const char* str1, const char* str2, size_t n);
 KERNEL_IMPORT int strcmp(const char* str1, const char* str2);

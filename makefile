@@ -255,11 +255,17 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C KernelLibraries/LouDDK all
 
+	$(MAKE) -C UserLibraries/KernelBase clean
+	$(MAKE) -C UserLibraries/KernelBase all
+
 	$(MAKE) -C UserLibraries/Kernel32 clean
 	$(MAKE) -C UserLibraries/Kernel32 all
 
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
+
+	$(MAKE) -C UserLibraries/ntdll clean
+	$(MAKE) -C UserLibraries/ntdll all
 
 	$(MAKE) -C UserLibraries/User32 clean
 	$(MAKE) -C UserLibraries/User32 all
@@ -293,7 +299,10 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/NtDll all
-	
+
+	$(MAKE) -C DLL/LouDLLs/kernelbase clean
+	$(MAKE) -C DLL/LouDLLs/kernelbase all
+
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 all
 
@@ -340,7 +349,9 @@ cleanall:
 	rm -rf release
 	rm -rf ISO
 	rm -rd dist
+	$(MAKE) -C UserLibraries/KernelBase clean
 	$(MAKE) -C UserLibraries/LouDll clean
+	$(MAKE) -C UserLibraries/ntdll clean
 	$(MAKE) -C UserLibraries/User32 clean
 	$(MAKE) -C UserLibraries/Kernel32 clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
@@ -359,3 +370,4 @@ cleanall:
 	$(MAKE) -C Drivers/Audio/HDA clean
 	$(MAKE) -C Drivers/Audio/AC97 clean
 	$(MAKE) -C Drivers/Audio/SoundBlaster clean
+	$(MAKE) -C DLL/LouDLLs/kernelbase clean

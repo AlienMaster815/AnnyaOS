@@ -22,6 +22,10 @@ void ParseExportTables(
     uint64_t* FunctionPointers = LouKeMallocEx(ExportTable->numberOfNamePointers * sizeof(uint64_t), GET_ALIGNMENT(uint64_t), WRITEABLE_PAGE | PRESENT_PAGE);
     string* FunctionNames = LouKeMallocEx(sizeof(string*) * ExportTable->numberOfNamePointers, GET_ALIGNMENT(string*), WRITEABLE_PAGE | PRESENT_PAGE);
 
+    if(strcmp(ModuleName, "kernbase.dll") == 0){
+        ModuleName = "kernelbase.dll"; 
+    }
+
     //LouPrint("ATR:%h\n",ExportTable->exportAddressTableRva);
     //LouPrint("NPR:%h\n",ExportTable->namePointerRva);
     //LouPrint("OTR:%h\n",ExportTable->ordinalTableRva);
@@ -105,9 +109,27 @@ void GetAllPEHeaders(
     }
 }
 
+DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
+
+static inline uint8_t FilePathCountBackToDirectory(string FilePath){
+    uint16_t i = strlen(FilePath);
+    //i know this looks weird this is not
+    //my first implementation i couldent 
+    //make it work otherwise
+    while(*(volatile char*)((uintptr_t)FilePath + i) != '/'){
+        i--;
+    }
+    return i + 1;
+}
+
+HANDLE LouKeLoadLibraryA(string LibraryName);
+bool LouKeLinkerCheckLibraryPresence(string SystemName);
+HANDLE LouKeLoadLibraryA(string LibraryName);
+
 void ParseImportTables(
     uint64_t ModuleStart,
-    PIMPORT_DIRECTORY_ENTRY ImportTable
+    PIMPORT_DIRECTORY_ENTRY ImportTable,
+    string FilePath 
 ) {
     uint64_t i = 0;
     uint64_t j = 0;
@@ -115,6 +137,9 @@ void ParseImportTables(
     uint64_t TableOffset;
     string FunctionName;
     string SYSName;
+    size_t DirectoryLength;
+    string Directory;
+    string BackupDirectory;
 
     while (1) {
         if (ImportTable[j].ImportLookupRva == 0x00) {
@@ -146,6 +171,51 @@ void ParseImportTables(
             }
             else if (!AddressOfPeFunction){
                 _NULL_LINKER_ADDRESS_ERROR_LABEL:
+                DirectoryLength = FilePathCountBackToDirectory(FilePath);
+                Directory = (string)LouKeMalloc(DirectoryLength + strlen(SYSName) + 2, WRITEABLE_PAGE | PRESENT_PAGE);//apending two null strings
+                BackupDirectory = (string)LouKeMalloc(DirectoryLength + strlen(SYSName) + 2, WRITEABLE_PAGE | PRESENT_PAGE);//apending two null strings
+                
+                strncpy(BackupDirectory, "C:/ANNYA/SYSTEM64/", strlen("C:/ANNYA/SYSTEM64/"));
+                strncpy((string)((uintptr_t)BackupDirectory + strlen("C:/ANNYA/SYSTEM64/")), SYSName, strlen(SYSName));
+
+                strncpy(Directory, FilePath, DirectoryLength);
+                strncpy((string)((uintptr_t)Directory + DirectoryLength), SYSName, strlen(SYSName));
+
+                if(!LouKeLinkerCheckLibraryPresence(SYSName)){
+                    if(fseek(Directory)){
+                        LouKeLoadLibraryA(Directory);
+                        goto _LINKER_LOADED_A_MODULE;
+                    }
+
+                    //Lousine Kernel some Files systems Are all uppercase
+                    LouKeStrLowerToUpper(Directory);
+                    
+                    if(fseek(Directory)){
+                        LouKeLoadLibraryA(Directory);
+                        goto _LINKER_LOADED_A_MODULE;
+                    }
+
+                    if(fseek(BackupDirectory)){
+                        LouKeLoadLibraryA(BackupDirectory);
+                        goto _LINKER_LOADED_A_MODULE;
+                    }
+                    
+                    //Lousine Kernel some Files systems Are all uppercase
+                    LouKeStrLowerToUpper(BackupDirectory);
+                    
+                    if(fseek(BackupDirectory)){
+                        LouKeLoadLibraryA( BackupDirectory);
+                    }
+
+                    _LINKER_LOADED_A_MODULE:
+                    LouPrint("Directory:%s\n", Directory);
+                    AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
+                    if(AddressOfPeFunction){
+                        LouKeFree((void*)Directory);
+                        LouKeFree((void*)BackupDirectory);
+                        goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
+                    }
+                }   
                 LouPrint("ERROR M:E is 0 :: %s:%s\n", SYSName, FunctionName);
                 while(1);
             }
@@ -337,16 +407,17 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
 
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
         PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
-
-        ParseImportTables(
-            allocatedModuleVirtualAddress,
-            ImportTable
-        );
-
+        
         ParseExportTables(
             allocatedModuleVirtualAddress,  
             ExportTable,
             true
+        );
+
+        ParseImportTables(
+            allocatedModuleVirtualAddress,
+            ImportTable,
+            ExecutablePath
         );
 
         // Locate the relocation table
@@ -380,11 +451,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
 }
 
 
-static spinlock_t UserModuleLock;
-
 DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&UserModuleLock, &Irql);
     PCOFF_HEADER CoffHeader;
     PPE64_OPTIONAL_HEADER PE64Header;
     PSECTION_HEADER SectionHeader;
@@ -435,18 +502,19 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
         PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
 
-        if(PE64Header->PE_Data_Directory_Entries[1].VirtualAddress){
-            ParseImportTables(
-                allocatedModuleVirtualAddress,
-                ImportTable
-            );
-        }
-
         if(PE64Header->PE_Data_Directory_Entries[0].VirtualAddress){
             ParseExportTables(
                 allocatedModuleVirtualAddress,  
                 ExportTable,
                 true
+            );
+        }
+
+        if(PE64Header->PE_Data_Directory_Entries[1].VirtualAddress){
+            ParseImportTables(
+                allocatedModuleVirtualAddress,
+                ImportTable,
+                ExecutablePath
             );
         }
 
@@ -471,22 +539,16 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
         //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
-        LouKeReleaseSpinLock(&UserModuleLock, &Irql);
         if(!PE64Header->addressOfEntryPoint){
             return 0x00;
         }
         return (DllModuleEntry)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
     } else {
-        LouKeReleaseSpinLock(&UserModuleLock, &Irql);
         return 0x00;
     }
 }
 
-static spinlock_t LoadPeLock;
-
 void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&LoadPeLock, &Irql);
     PCOFF_HEADER CoffHeader;
     PPE64_OPTIONAL_HEADER PE64Header;
     PSECTION_HEADER SectionHeader;
@@ -540,16 +602,19 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         }
 
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
-
-        ParseImportTables(
-            allocatedModuleVirtualAddress,
-            ImportTable
-        );
-
+        
         //ParseExportTables(
         //    allocatedModuleVirtualAddress,  
         //    ExportTable
         //);
+
+        ParseImportTables(
+            allocatedModuleVirtualAddress,
+            ImportTable,
+            ExecutablePath
+        );
+
+ 
 
         // Locate the relocation table
         uint64_t relocationTable = (uint64_t)((uint64_t)allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[5].VirtualAddress);
@@ -572,10 +637,8 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
         //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
-        LouKeReleaseSpinLock(&LoadPeLock, &Irql);
         return (void*)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
     } else {
-        LouKeReleaseSpinLock(&LoadPeLock, &Irql);
         return 0x00;
     }
 }

@@ -9,6 +9,7 @@ UsrJmp:
     mov ds, ax
     mov es, ax
     mov fs, ax
+    mov ax, 0x38 | 3
     mov gs, ax
 
     mov rax, rsp 

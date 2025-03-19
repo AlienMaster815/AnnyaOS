@@ -4,7 +4,13 @@
 #define KERNEL32_API __declspec(dllexport)
 
 KERNEL32_API
-void DeleteCriticalSection(){
+BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    return TRUE;
+}
+
+
+KERNEL32_API
+void DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection){
     LouPrint("DeleteCriticalSection()\n");
     while(1);
 }
@@ -20,6 +26,10 @@ void GetLastError(){
     LouPrint("GetLastError()\n");
     while(1);
 }
+
+__declspec(dllimport)
+void InitializeCriticalSectionEx(PMSVC_CRITICAL_SECTION CriticalSection, uint32_t Reserved, uint32_t Flags);
+
 
 KERNEL32_API
 void InitializeCriticalSection(){
@@ -75,17 +85,24 @@ void WideCharToMultiByte(){
     while(1);
 }
 
+static mutex_t LoadLibraryAMutex;
+
 KERNEL32_API
 HANDLE LoadLibraryA(string DllName){
-
+    MutexLock(&LoadLibraryAMutex);
     uint64_t KulaPacket[3] = {0};
     KulaPacket[1] = (uint64_t)DllName;
     while(KulaPacket[0] == 0){
         LouCALL(LOULOADLIBRARYA, (uint64_t)&KulaPacket, 0);
     }
+    MutexSyncronize(&LoadLibraryAMutex);
     return (HANDLE)KulaPacket[2];
 }
 
+KERNEL32_API 
+void ReleaseLoadLibraryALock(){
+    MutexUnlock(&LoadLibraryAMutex);
+}
 
 KERNEL32_API
 void LoadLibraryW(wchar_t* DllName){

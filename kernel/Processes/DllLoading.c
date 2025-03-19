@@ -75,24 +75,27 @@ typedef struct _LIBRARY_HANDLES{
 
 static LIBRARY_HANDLES  LibHandles = {0};
 static size_t           LibHandlesCount = 0;
-static mutex_t          LoadLibMutex;
+// static mutex_t          LoadLibMutex;
+
 
 typedef struct _ATTACH_THREAD_DATA{
-    uint64_t DllEntry;
+    bool   (*DllEntry)(uint64_t, uint64_t, uint64_t);
     uint64_t DllHandle;
     uint64_t DllCallReason;
     uint64_t DllReserved;
-    uint64_t TebPointer;
+    void   (*LockRelease)();
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
-
 
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
 
+extern uint64_t GetRBP();
+extern void SetTEB();
+uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer);
+
 HANDLE LouKeLoadLibraryA(string LibraryName){
-    MutexLock(&LoadLibMutex);
 
     bool IsLibraryAPath = false; 
     if(LibraryName[1] == ':'){
@@ -143,19 +146,18 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
 
 
     if(TmpLibHandle->LibraryEntry){
+        PWIN_TEB Teb = (PWIN_TEB)LouKeMallocEx(sizeof(WIN_TEB), GET_ALIGNMENT(WIN_TEB), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
+    
         UNUSED PATTACH_THREAD_DATA DllAttachProcessData = (PATTACH_THREAD_DATA)LouKeMallocEx(sizeof(ATTACH_THREAD_DATA), GET_ALIGNMENT(ATTACH_THREAD_DATA) , USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
-        DllAttachProcessData->DllEntry = (uint64_t)TmpLibHandle->LibraryEntry;
+        DllAttachProcessData->DllEntry = (bool(*)(uint64_t, uint64_t, uint64_t))TmpLibHandle->LibraryEntry;
         DllAttachProcessData->DllHandle = (uint64_t)TmpLibHandle->LibraryHandle;
         DllAttachProcessData->DllCallReason = (uint64_t)DLL_PROCESS_ATTACH;
         DllAttachProcessData->DllReserved = 0;
-        UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDLL.dll", "AnnyaAttachDllToProcess");
+        DllAttachProcessData->LockRelease = (void(*)())(uint8_t*)LouKeLinkerGetAddress("KERNEL32.dll", "ReleaseLoadLibraryALock");//ReleaseLoadLibraryALock
 
-        LouKeCreateUserStackThread((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE);
-        
-        //LouKeFree(DllAttachProcessData);
+        UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDLL.dll", "AnnyaAttachDllToProcess");
+        LouKeCreateUserStackThreadWin((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE, (uint64_t)(uint8_t*)Teb);
     }
-    //LouPrint("HERE\n");
     LibHandlesCount++;
-    MutexUnlock(&LoadLibMutex);
     return TmpLibHandle->LibraryHandle;
 }

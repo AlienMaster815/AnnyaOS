@@ -184,9 +184,16 @@ int WinMain(
 ){
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
 
-    Time[0] = '\0';
+    //LouPrint("Loading ZLIB\n");
 
-    // Main message loop:
+    //ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
+
+    //if(!ZLIBhModule){
+    //    LouPrint("ZLIB1.DLL Could Not Be Found\n");
+    //    while(1);
+    //}
+
+    Time[0] = '\0';
     
     Width = AnnyaGetScreenBufferWidth();
     Height = AnnyaGetScreenBufferHeight();
@@ -197,16 +204,6 @@ int WinMain(
     PTHREAD PTClock = AnnyaCreateThread(ClockThread, 0x00);
 
     LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
-
-    LouPrint("Loading ZLIB\n");
-
-    ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
-
-    if(!ZLIBhModule){
-        LouPrint("ZLIB1.DLL Could Not Be Found\n");
-        while(1);
-    }
-
 
     LouPrint("Shell Initialization Complete\n");
     

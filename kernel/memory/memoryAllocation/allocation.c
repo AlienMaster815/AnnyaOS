@@ -712,10 +712,12 @@ void LouKeFree(void* AddressToFree){
     PKMALLOC_VMEM_TRACK VMemTrack1 = &VMemTracks, VMemTrack2 = &VMemTracks;
     for(size_t i = 0; i < VMemTracksCount; i++){
         if(VMemTrack1->VAddress == (uintptr_t)AddressToFree){
+            memset((void*)VMemTrack1->VAddress, 0 , VMemTrack1->size);
             while(((uintptr_t)VMemTrack2->Chain.NextHeader != (uintptr_t)VMemTrack1) && (VMemTrack2->Chain.NextHeader)){
                 VMemTrack2 = (PKMALLOC_VMEM_TRACK)VMemTrack2->Chain.NextHeader;
             }
             VMemTrack2->Chain.NextHeader = VMemTrack1->Chain.NextHeader;
+            memset((void*)VMemTrack1, 0 , sizeof(KMALLOC_VMEM_TRACK));
             LouFree((RAMADD)VMemTrack1);
             VMemTracksCount--;
             return;
@@ -730,10 +732,12 @@ void LouKeFreePhysical(void* AddressToFree){
     PKMALLOC_VMEM_TRACK VMemTrack1 = &VMemTracksPhy, VMemTrack2 = &VMemTracksPhy;
     for(size_t i = 0; i < VMemTracksCountPhy; i++){
         if(VMemTrack1->VAddress == (uintptr_t)AddressToFree){
+            memset((void*)VMemTrack1->VAddress, 0 , VMemTrack1->size);
             while(((uintptr_t)VMemTrack2->Chain.NextHeader != (uintptr_t)VMemTrack1) && (VMemTrack2->Chain.NextHeader)){
                 VMemTrack2 = (PKMALLOC_VMEM_TRACK)VMemTrack2->Chain.NextHeader;
             }
             VMemTrack2->Chain.NextHeader = VMemTrack1->Chain.NextHeader;
+            memset((void*)VMemTrack1, 0 , sizeof(KMALLOC_VMEM_TRACK));
             LouFree((RAMADD)VMemTrack1);
             VMemTracksCountPhy--;
             return;

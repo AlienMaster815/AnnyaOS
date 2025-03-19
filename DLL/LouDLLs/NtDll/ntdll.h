@@ -1,5 +1,5 @@
-#ifndef _NTDLL_H
-#define _NTDLL_H
+#ifndef NTDLL_H
+#define NTDLL_H
 
 #define NTDLL_API __declspec(dllexport)
 

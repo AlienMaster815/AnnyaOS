@@ -1,10 +1,14 @@
 #ifndef _NT_STATUS_H
 #define _NT_STATUS_H
 
+#ifndef _USER_MODE_CODE_
 #ifdef __cplusplus
 #include <NtAPI.h>
 #else
 #include <LouAPI.h>
+#endif
+#else //usermode code
+#include <Annya.h>
 #endif
 
 // MessageId: STATUS_UNSUCCESSFUL
