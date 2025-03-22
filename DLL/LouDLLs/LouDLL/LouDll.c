@@ -349,3 +349,25 @@ void AnnyaAttachDllToProcess(PVOID ThreadData){
     DllAttachData->LockRelease();
     while(1);
 }
+
+LOUDLL_API
+void LouTrashAndDumpProcess(){
+    LouPrint("LouTrashAndDumpProcess()\n");
+    while(1);
+}
+
+LOUDLL_API
+void* LouGenericAllocateHeapEx(
+    void* Heap, 
+    size_t AllocationSize,
+    size_t Alginment
+){
+    uint64_t KulaPacket[4] = {0};
+    KulaPacket[1] = (uint64_t)Heap;
+    KulaPacket[2] = (uint64_t)AllocationSize;
+    KulaPacket[3] = (uint64_t)Alginment;
+    while(!KulaPacket[0]){
+        LouCALL(LOUALLOCHEAPGENERICEX, (uint64_t)&KulaPacket[0], 0);
+    }
+    return (void*)KulaPacket[4];
+}

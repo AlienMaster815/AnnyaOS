@@ -7,6 +7,8 @@ global GetRBP
 global GetGS
 global RecreateDisasemblyIssue
 global SetTEB
+global SetPEB
+global GetPEB
 
 section .rodata
 gdt64:
@@ -140,3 +142,10 @@ SetTEB:
     mov qword[gs:0x30], RCX
     ret
 
+SetPEB:
+    mov qword[gs:0x60], RCX
+    ret
+
+GetPEB:
+    mov rax, qword[gs:0x60]
+    ret

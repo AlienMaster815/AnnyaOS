@@ -2,34 +2,37 @@
 CC = x86_64-w64-mingw32-gcc
 NASM = nasm
 
-# Compiler and Assembler Flags
+# Flags
 CFLAGS = -shared -nostdlib -nodefaultlibs
-ASFLAGS = -f win64  # Ensure 64-bit output for Windows
+ASFLAGS = -f win64
 
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
 LIBS = -lLouDll -lmingw32
 
-# Source and Target
+# Sources
 SRC = 	NtDll.c \
 		Sha.c \
 		Alpc.c \
-		Syncronization.c
+		Syncronization.c \
+		Allocation.c
 
-ASM_SRC = 	NtLow.asm 
+ASM_SRC = ntdll.asm
+ASM_OBJ = ntdll.o
 
 TARGET = ntdll.dll
 
-# Default Rule
+# Rules
 all: $(TARGET)
 
-# Build Rule (Compiles C files and links with ASM object)
-$(TARGET): $(SRC) 
-	@echo "Building $(TARGET)..."
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(INCLUDES) $(LDFLAGS) $(LIBS)
+$(ASM_OBJ): $(ASM_SRC)
+	$(NASM) $(ASFLAGS) -o $@ $<
 
-# Clean Rule
+$(TARGET): $(SRC) $(ASM_OBJ)
+	@echo "Building $(TARGET)..."
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(ASM_OBJ) $(INCLUDES) $(LDFLAGS) $(LIBS)
+
 clean:
 	@echo "Cleaning up..."
 	rm -f $(TARGET) $(ASM_OBJ)

@@ -13,6 +13,4 @@ NTSTATUS InitializeCriticalSectionEx(
         Flags
     );
  
-    LouPrint("InitializeCriticalSectionEx()\n");
-    while(1);
 }

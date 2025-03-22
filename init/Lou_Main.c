@@ -382,17 +382,30 @@ bool LouKeCreateProcessA(
     bool                            AnnyaAPIProcess //AnnyaAPI uses different flags and setups
 );
 
+void* LouKeVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+);
+
+extern void SetPEB(uint64_t PEB);
+uint16_t GetNPROC();
+
 void InitializeUserSpace(){
     
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL"); //KERNEL32 is required for loading dlls
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL", 0x00);
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNBASE.DLL", 0x00);
+    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
 
-    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL");
-    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNBASE.DLL");
-    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL");
+    PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocEx(sizeof(WIN_PEB), GET_ALIGNMENT(WIN_PEB), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    ProcessExecutionBlock->ProcessHeap = (uint64_t)LouKeVirtualAllocUser(KILOBYTE_PAGE, MEGABYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
+    SetPEB((uint64_t)(uint8_t*)ProcessExecutionBlock); 
 
-    //bool (*MsvcrtEntry)(uint64_t, uint64_t , uint64_t) = (bool (*)(uint64_t, uint64_t , uint64_t))LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL");
-    //MsvcrtEntry(0,0,0); //initialize common data
+    bool (*MsvcrtEntry)(uint64_t, uint64_t , uint64_t) = (bool (*)(uint64_t, uint64_t , uint64_t))LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL", 0x00);
+    MsvcrtEntry(0,0,0); //initialize common data
     
     uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 

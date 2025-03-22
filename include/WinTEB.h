@@ -1,11 +1,15 @@
 #ifndef _WINTEB_H
 #define _WINTEB_H
 
+#ifndef _USER_MODE_CODE_
 #ifndef __cplusplus
 #include <LouAPI.h>
 #else
 #include <LouDDK.h>
 extern "C" {
+#endif
+#else
+#include <Annya.h>
 #endif
 
 typedef struct __attribute__((packed, aligned(8))) _WIN_TEB {

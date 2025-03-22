@@ -41,10 +41,6 @@ EXECUTE_THREAD_JUMP:
     push r9
     iretq
 
-FuckThreads:
-    hlt
-    jmp $
-
 TestUserFunction:
 
     jmp $

@@ -638,6 +638,7 @@ void LouCALL(
 #define LOULOADLIBRARYW                         100
 #define LOULOADLIBRARYEXA                       101
 #define LOULOADLIBRARYEXW                       102
+#define LOUALLOCHEAPGENERICEX                   103
 
 //Kernel SystemCalls
 

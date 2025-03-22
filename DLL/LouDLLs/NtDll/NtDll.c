@@ -891,7 +891,6 @@ NTDLL_API void RtlAllocateActivationContextStack() {LouPrint("Hello nt Dll\n"); 
 NTDLL_API void RtlAllocateAndInitializeSid() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateAndInitializeSidEx() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateHandle() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlAllocateHeap() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateMemoryBlockLookaside() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateMemoryZone() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateWnfSerializationGroup() {LouPrint("Hello nt Dll\n"); while(1);}

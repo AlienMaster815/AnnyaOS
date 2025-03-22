@@ -4,6 +4,9 @@
 #define NTDLL_API __declspec(dllexport)
 
 #include <Annya.h>
+#include <WinTEB.h>
+#include <stdalign.h>
+#define GET_ALIGNMENT(x) (alignof(x))
 
 typedef long long unsigned int U64;
 

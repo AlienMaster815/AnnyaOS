@@ -373,6 +373,7 @@ uintptr_t RetriveThreadStubAddress(){
     return FunctionAddress;
 }
 
+KERNEL_IMPORT uint64_t GetPEB();
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer) {
     
@@ -410,10 +411,12 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     NewThread->SavedContext.cs  = 0x1B;
     NewThread->SavedContext.ss  = 0x23;  
     NewThread->SavedContext.rflags = 0x202;  
-    NewThread->WinTEBData = TEBPointer; 
+    NewThread->WinTEBData = TEBPointer;
+
     PWIN_TEB Teb = (PWIN_TEB)(uint8_t*)TEBPointer;
     Teb->TebNtTibStackBase = (uint64_t)NewContext;
     Teb->TebNtTibStackLimit = (uint64_t)NewContext - (2 * MEGABYTE); //this thread is 2 Megs
+    Teb->TebProcessEnvironmentBlock = GetPEB();
     //Increment Thread Counter
     NumberOfThreads++;
     //return the handle to the new thread

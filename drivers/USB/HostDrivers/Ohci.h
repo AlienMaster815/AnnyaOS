@@ -1,6 +1,6 @@
 #ifndef _OHCI_H
 #define _OHCI_H
-#include "usb.h"
+#include <usb.h>
 
 typedef struct _OPEN_HOST_CONTROLLER_INTERFACE{
     uint32_t HcRevision;

@@ -209,6 +209,12 @@ void AnnyaUpdateButton(
     PBUTTONHANDLE HBUTTON
 );
 
+__declspec(dllimport)
+void LouTrashAndDumpProcess();
+
+__declspec(dllimport)
+void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
+
 #endif
 
 

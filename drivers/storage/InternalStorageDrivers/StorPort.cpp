@@ -85,7 +85,7 @@ LOUSTATUS LookForStorageDevices(){
             }
 
             if((PConfig->Header.SubClass == 0x00) || (PConfig->Header.SubClass == 0x07)){
-                InitializeScsiDevice(PDEV);
+                //InitializeScsiDevice(PDEV);
             }
         }
 
@@ -94,10 +94,10 @@ LOUSTATUS LookForStorageDevices(){
     LouKeClosePciDeviceGroup(StorageDevices);
 
     //althougt USB HOSTS are not Storage they can be
-    //and neither are hubs or devices... but a one
+    //and neither are hubs or devices... but one
     //of the functions attached to the device can be
     //a storage device so were going to go through
-    //the USB internal drivers consisting of the
+    //the LoUSB internal drivers consisting of the
     //LOUSB Host LOUSB Hub and LOUSB Storage Drivers
     Config.Header.BaseClass = 0x0C;
     Config.Header.SubClass = 0x03;

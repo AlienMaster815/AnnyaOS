@@ -139,7 +139,6 @@ void ParseImportTables(
     string SYSName;
     size_t DirectoryLength;
     string Directory;
-    string BackupDirectory;
 
     while (1) {
         if (ImportTable[j].ImportLookupRva == 0x00) {
@@ -154,6 +153,9 @@ void ParseImportTables(
             TableOffset = (i + ImportTable[j].ImportAddressTableRva + ModuleStart);
             FunctionName = (string)(TableEntry + ModuleStart + sizeof(uint16_t));
             SYSName = (string)(ModuleStart + ImportTable[j].NameRva);
+            if(strcmp(SYSName, "kernelbase.dll") == 0){
+                SYSName = "KERNBASE.DLL";
+            }
 
             //LouPrint("Function Requested:%s\n", FunctionName);
 
@@ -173,10 +175,7 @@ void ParseImportTables(
                 _NULL_LINKER_ADDRESS_ERROR_LABEL:
                 DirectoryLength = FilePathCountBackToDirectory(FilePath);
                 Directory = (string)LouKeMalloc(DirectoryLength + strlen(SYSName) + 2, WRITEABLE_PAGE | PRESENT_PAGE);//apending two null strings
-                BackupDirectory = (string)LouKeMalloc(DirectoryLength + strlen(SYSName) + 2, WRITEABLE_PAGE | PRESENT_PAGE);//apending two null strings
                 
-                strncpy(BackupDirectory, "C:/ANNYA/SYSTEM64/", strlen("C:/ANNYA/SYSTEM64/"));
-                strncpy((string)((uintptr_t)BackupDirectory + strlen("C:/ANNYA/SYSTEM64/")), SYSName, strlen(SYSName));
 
                 strncpy(Directory, FilePath, DirectoryLength);
                 strncpy((string)((uintptr_t)Directory + DirectoryLength), SYSName, strlen(SYSName));
@@ -194,25 +193,29 @@ void ParseImportTables(
                         LouKeLoadLibraryA(Directory);
                         goto _LINKER_LOADED_A_MODULE;
                     }
+                    
+                    LouKeFree(Directory);
 
-                    if(fseek(BackupDirectory)){
-                        LouKeLoadLibraryA(BackupDirectory);
+                    Directory = LouKeMalloc(strlen("C:/ANNYA/SYSTEM64/") + strlen(SYSName), WRITEABLE_PAGE | PRESENT_PAGE);
+                    strncpy(Directory, "C:/ANNYA/SYSTEM64/", strlen("C:/ANNYA/SYSTEM64/"));
+                    strncpy((string)((uint64_t)Directory + strlen("C:/ANNYA/SYSTEM64/")), SYSName, strlen(SYSName));    
+                    if(fseek(Directory)){
+                        LouKeLoadLibraryA(Directory);
+                        goto _LINKER_LOADED_A_MODULE;
+                    }
+                    LouKeStrLowerToUpper(Directory);
+                    
+                    if(fseek(Directory)){
+                        LouKeLoadLibraryA(Directory);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     
-                    //Lousine Kernel some Files systems Are all uppercase
-                    LouKeStrLowerToUpper(BackupDirectory);
-                    
-                    if(fseek(BackupDirectory)){
-                        LouKeLoadLibraryA( BackupDirectory);
-                    }
 
                     _LINKER_LOADED_A_MODULE:
                     LouPrint("Directory:%s\n", Directory);
                     AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
                     if(AddressOfPeFunction){
                         LouKeFree((void*)Directory);
-                        LouKeFree((void*)BackupDirectory);
                         goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
                     }
                 }   
@@ -641,4 +644,38 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
     } else {
         return 0x00;
     }
+}
+
+
+PPE32_PROCESS_EXECUTION_DATA InitializeProcessData(uintptr_t Start, string ExecutablePath){
+    PPE32_PROCESS_EXECUTION_DATA ExecutionData = (PPE32_PROCESS_EXECUTION_DATA)LouKeMallocEx(sizeof(PE32_PROCESS_EXECUTION_DATA), GET_ALIGNMENT(PE32_PROCESS_EXECUTION_DATA), WRITEABLE_PAGE | PRESENT_PAGE);
+    PCOFF_HEADER CoffHeader;
+    PPE64_OPTIONAL_HEADER PE64Header;
+    PSECTION_HEADER SectionHeader;
+
+    if(Start == 0){
+        return 0x00;
+    }
+
+    LouPrint("Initializing Process Data\n");
+
+    //at this point in the library 
+    //mounting the library has 
+    //already Verified that this
+    //is a PE32 so no checking
+    //is required now
+    GetAllPEHeaders(
+        (PDOS_HEADER)Start,
+        &CoffHeader,
+        &PE64Header,
+        &SectionHeader,
+        0x00
+    );
+
+    LouPrint("Using Annya Subsystem For Windows (ASL) Version:%d:%d\n", 
+        PE64Header->majorOperatingSystemVersion, PE64Header->minorOperatingSystemVersion);
+
+    //ExecutionData->HeapCommit;
+
+    return ExecutionData;
 }

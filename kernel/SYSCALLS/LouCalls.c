@@ -39,6 +39,8 @@ extern uint64_t RSPPoint;
 
 HANDLE LouKeLoadLibraryA(string Name);
 
+void* LouKeGenericAllocateHeapEx();
+
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
     uint64_t Data = (uint64_t)&Tmp2[1];
@@ -192,6 +194,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOULOADLIBRARYEXW:{
             LouPrint("LOULOADLIBRARYEXW SYSCALL\n");
             while(1);
+        }
+        case LOUALLOCHEAPGENERICEX:{
+            uint64_t* tmp = (uint64_t*)Data;
+            tmp[3] = (uint64_t)LouKeGenericAllocateHeapEx(tmp[0], tmp[1], tmp[2]);
+            return;
         }
 
         default:

@@ -220,7 +220,7 @@ typedef uint32_t DWORD;
 typedef LOUSTATUS (*DRIVER_MODULE_ENTRY)(void* DriverObject, void* RegistryPath);
 
 typedef bool(*DllModuleEntry)(HMODULE, DWORD, LPVOID);
-DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath);
+DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* ImageBase);
 void* LouKeLoadPeExecutable(string ExecutablePath);
 
 DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize);
@@ -243,6 +243,16 @@ typedef struct _JITL_DIRECTORY {
 
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName);
 void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName);
+
+
+typedef struct _PE32_PROCESS_EXECUTION_DATA{
+    size_t      ProcessHeapCommit;
+    size_t      ProccesHeapReserved;
+    size_t      ProcessStackCommit;
+    size_t      ProcessStackReserved;
+}PE32_PROCESS_EXECUTION_DATA, * PPE32_PROCESS_EXECUTION_DATA;
+
+PPE32_PROCESS_EXECUTION_DATA InitializeProcessData(uintptr_t Start, string ExecutablePath);
 
 #ifdef __cplusplus
 }

@@ -8,6 +8,9 @@ extern "C" {
 #endif
 
 #include "../CdRom.h"
+#include "../Notifications.h"
+#include "../ExternalDevices.h"
+#include "../usb/usb.h"
 
 #define ATA_DMA_BOUNDS                          0xFFFF
 #define ATA_DMA_MASK                            0xFFFFFFFF

@@ -2,7 +2,7 @@
 
 DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
 
-DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath){
+DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* BaseOfImage){
 
     FILE* ModuleHandle = fopen(ModuleNameAndPath);
     
@@ -66,11 +66,13 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
 }
 
 typedef struct _LIBRARY_HANDLES{
-    ListHeader          Neighbors;
-    string              Paths;
-    string              LibraryName;
-    DllModuleEntry      LibraryEntry;
-    HANDLE              LibraryHandle;
+    ListHeader                      Neighbors;
+    string                          Paths;
+    string                          LibraryName;
+    DllModuleEntry                  LibraryEntry;
+    HANDLE                          LibraryHandle;
+    uintptr_t                       ImageBase;
+    PPE32_PROCESS_EXECUTION_DATA    ProcessInformation;
 }LIBRARY_HANDLES, * PLIBRARY_HANDLES;
 
 static LIBRARY_HANDLES  LibHandles = {0};
@@ -125,7 +127,7 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
         string NewMod = (string)LouKeMallocEx(strlen(LibraryName), GET_ALIGNMENT(string), WRITEABLE_PAGE | PRESENT_PAGE);
         strncpy(NewMod, LibraryName, strlen(LibraryName));
         TmpLibHandle->Paths = NewMod;
-        TmpLibHandle->LibraryEntry = LouKeLoadUserModule(LibraryName);
+        TmpLibHandle->LibraryEntry = LouKeLoadUserModule(LibraryName, &TmpLibHandle->ImageBase);
         //TODO: Apend the string for the Lib name
 
 
@@ -143,7 +145,7 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
 
     //LouPrint("TmpLibHandle->LibraryEntry:%h\n", TmpLibHandle->LibraryEntry);
     //TODO: Manage Processes Loading the DLL
-
+    TmpLibHandle->ProcessInformation = InitializeProcessData(TmpLibHandle->ImageBase, TmpLibHandle->Paths);
 
     if(TmpLibHandle->LibraryEntry){
         PWIN_TEB Teb = (PWIN_TEB)LouKeMallocEx(sizeof(WIN_TEB), GET_ALIGNMENT(WIN_TEB), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
