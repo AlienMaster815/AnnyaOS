@@ -25,7 +25,7 @@ static bool IsIsoFileSystemEntryFileToken(string Entry, size_t EntrySize){
     //Subtract two
     Entry -= 2;
     //compare for a ;1
-    return (strncmp(Entry, ";1", 1) == 0);
+    return (strncmp(Entry, ";1", 2) == 0);
 }
 
 
