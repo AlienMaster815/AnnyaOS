@@ -73,7 +73,7 @@ typedef struct _MSVC_CRITICAL_SECTION{
     long                                    RecusionCount;
     HANDLE                                  ThreadWithPossesion;
     HANDLE                                  Semaphore;
-    unsigned long*                          SpinCount;
+    uint32_t                                SpinCount;
 }MSVC_CRITICAL_SECTION, * PMSVC_CRITICAL_SECTION;
 
 #define MSVC_CRITICAL_SECTION_FLAG_NO_DEBUG_INFORMATION     0x01000000
@@ -85,6 +85,18 @@ typedef struct _MSVC_CRITICAL_SECTION{
 #define MSVC_CRITICAL_SECTION_FLAG_RESERVED_FLAGS           0xE0000000
 
 #define MSVC_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION_DYNAMIC_SPIN (MSVC_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION | MSVC_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN)
+
+#define HEAP_NO_SERIALIZE               0x00000001
+#define HEAP_GROWABLE                   0x00000002
+#define HEAP_GENERATE_EXCEPTIONS        0x00000004
+#define HEAP_ZERO_MEMORY                0x00000008
+#define HEAP_REALLOC_IN_PLACE_ONLY      0x00000010
+#define HEAP_TAIL_CHECKING_ENABLED      0x00000020
+#define HEAP_FREE_CHECKING_ENABLED      0x00000040
+#define HEAP_DISABLE_COALESCE_ON_FREE   0x00000080
+#define HEAP_CREATE_ALIGN_16            0x00010000
+#define HEAP_CREATE_ENABLE_TRACING      0x00020000
+#define HEAP_CREATE_ENABLE_EXECUTE      0x00040000
 
 typedef struct _WIN_API_SECUTIY_ATTRIBUTES{
     uint32_t    Length;
@@ -176,6 +188,20 @@ volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 
 #ifndef _LOUDLL_
+
+__declspec(dllimport)
+void* AnnyaGetLibraryFunctionN(string ModuleName,string FunctionName);
+
+__declspec(dllimport)
+void* AnnyaGetLibraryFunctionH(HANDLE ModuleHandle, string FunctionName);
+
+__declspec(dllimport)
+void* LouVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+);
+
 __declspec(dllimport)
 int LouPrint(char* Str, ...);
 
@@ -221,7 +247,13 @@ void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignme
 #ifndef _KERNEL32_
 
 __declspec(dllimport)
-void DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+void EnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+NTSTATUS DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+NTSTATUS LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
 HMODULE LoadLibraryA(string DllName);
@@ -263,6 +295,12 @@ NTSTATUS RtlInitializeCriticalSectionEx(
     uint32_t SpinCount,
     uint32_t Flags
 );
+
+__declspec(dllimport)
+NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+NTSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 #endif
 

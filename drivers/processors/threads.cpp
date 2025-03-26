@@ -53,6 +53,7 @@ typedef struct {
     uint64_t AdvancedRegisterInterruptsStorage;
     uint64_t WinTEBData;
     CPUContext SavedContext;
+    uint64_t ThreadIdentification;
 } thread_t;
 
 static thread_t MasterThreadTable;
@@ -273,6 +274,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
     current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouMallocEx(2688, 64);
     current_thread[get_processor_id()]->NewTask = false;
     current_thread[get_processor_id()]->state = THREAD_RUNNING;
+    current_thread[get_processor_id()]->ThreadIdentification = NumberOfThreads;
 
     LouPrint("Thread Manager Successfully Started\n");
 
@@ -411,6 +413,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     NewThread->SavedContext.cs  = 0x1B;
     NewThread->SavedContext.ss  = 0x23;  
     NewThread->SavedContext.rflags = 0x202;  
+    NewThread->ThreadIdentification = NumberOfThreads + 1;
     NewThread->WinTEBData = TEBPointer;
 
     PWIN_TEB Teb = (PWIN_TEB)(uint8_t*)TEBPointer;
@@ -446,6 +449,8 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //Mark the Register Storage As Clean
     NewThread->NewTask = true;
     NewThread->state = THREAD_READY;
+    NewThread->ThreadIdentification = NumberOfThreads + 1;
+
     //Get the Stub Address
     uintptr_t StubAddress = RetriveThreadStubAddress();
     //fill the Context...
@@ -463,4 +468,9 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     NumberOfThreads++;
     //return the handle to the new thread
     return (uintptr_t)NewThread;//NewThread;
+}
+
+LOUDDK_API_ENTRY
+uint64_t LouKeGetThreadIdentification(){
+    return current_thread[get_processor_id()]->ThreadIdentification;
 }

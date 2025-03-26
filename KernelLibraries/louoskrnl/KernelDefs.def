@@ -103,3 +103,4 @@ EXPORTS
     LouMallocEx
     LouKeWaitForMmioState
     LouKeCreateMemoryPool
+    outw

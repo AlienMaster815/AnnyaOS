@@ -5,3 +5,5 @@ EXPORTS
     LoadLibraryW
     LoadLibraryExyW
     LoadLibraryA
+    EnterCriticalSection
+    LeaveCriticalSection

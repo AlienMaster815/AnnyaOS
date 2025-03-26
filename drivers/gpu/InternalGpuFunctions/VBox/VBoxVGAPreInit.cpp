@@ -1,6 +1,4 @@
 #include "VBoxVGA.h"
-#define VBE_DISPI_INDEX_ENABLE    0x04 
-
 
 void PreVBoxVGAInit(P_PCI_DEVICE_OBJECT PDEV){
     // Set the index to the enable register

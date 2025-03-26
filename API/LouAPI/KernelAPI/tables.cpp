@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 103
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 104
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -294,6 +294,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[100] = "memset";
     ImportTables[4].FunctionName[101] = "LouKeWaitForMmioState";
     ImportTables[4].FunctionName[102] = "LouKeCreateMemoryPool";
+    ImportTables[4].FunctionName[103] = "outw";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -398,6 +399,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[100] = (uint64_t)memset;
     ImportTables[4].VirtualAddress[101] = (uint64_t)LouKeWaitForMmioState;
     ImportTables[4].VirtualAddress[102] = (uint64_t)LouKeCreateMemoryPool;
+    ImportTables[4].VirtualAddress[103] = (uint64_t)outw;
 
 }
 

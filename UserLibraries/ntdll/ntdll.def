@@ -4,3 +4,5 @@ LIBRARY ntdll.dll
 
 EXPORTS	
     RtlInitializeCriticalSectionEx
+    RtlEnterCriticalSection
+    RtlLeaveCriticalSection

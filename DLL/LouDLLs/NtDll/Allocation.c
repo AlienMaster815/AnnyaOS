@@ -23,3 +23,8 @@ void* GetProcessHeap(){
     PWIN_PEB Peb = (PWIN_PEB)(uint8_t*)NtGetPeb();
     return (void*)(uint8_t*)Peb->ProcessHeap;
 }
+
+uint16_t NtGetProcessorCount(){
+    PWIN_PEB Peb = (PWIN_PEB)(uint8_t*)NtGetPeb();
+    return Peb->NumberOfProcessors;
+}

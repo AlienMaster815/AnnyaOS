@@ -176,6 +176,14 @@ void StartDesktop(){
 
 int WndProc(void* hwnd, uint32_t uMsg, void* WParam, void* LParam);
 
+void ZlibTest(){
+    LouPrint("ZLIB Test Starting\n");
+    string (*zlibVersion)() = AnnyaGetLibraryFunctionN("zlib1.dll", "zlibVersion");
+    LouPrint("Zlib Version:%s\n", zlibVersion());
+
+    LouPrint("ZLIB Test Finished\n");
+}
+
 int WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
@@ -184,14 +192,14 @@ int WinMain(
 ){
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
 
-    //LouPrint("Loading ZLIB\n");
+    LouPrint("Loading ZLIB\n");
 
-    //ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
+    ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
 
-    //if(!ZLIBhModule){
-    //    LouPrint("ZLIB1.DLL Could Not Be Found\n");
-    //    while(1);
-    //}
+    if(!ZLIBhModule){
+        LouPrint("ZLIB1.DLL Could Not Be Found\n");
+        while(1);
+    }
 
     Time[0] = '\0';
     
@@ -206,7 +214,7 @@ int WinMain(
     LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
 
     LouPrint("Shell Initialization Complete\n");
-    
+    ZlibTest();
     while(1){
 
     }

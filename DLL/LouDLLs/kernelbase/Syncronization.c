@@ -12,5 +12,9 @@ NTSTATUS InitializeCriticalSectionEx(
         SpinCounter,
         Flags
     );
- 
+    if(Result){
+        LouPrint("RtlInitializeCriticalSectionEx STATUS:%h\n");
+        while(1);
+    }
+    return Result;
 }

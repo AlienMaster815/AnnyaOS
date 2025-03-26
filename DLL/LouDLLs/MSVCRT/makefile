@@ -9,7 +9,8 @@ LIBS = -lLouDll -lKERNEL32 -lkernelbase
 
 # Source and Target
 SRC = MSVCRT.c \
-      MsvcLock.c
+      MsvcLock.c \
+	  Allocation.c
 
 TARGET = msvcrt.dll
 

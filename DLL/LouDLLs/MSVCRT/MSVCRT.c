@@ -1,11 +1,19 @@
 #include "MSVCRT.h"
 
+void InitializeMsvcrtHeap();
+
+MSVCRT_API
+void* msvcrt_heap_alloc(
+    uint64_t AllocationFlags,
+    size_t AllocationSize
+);
 
 void MsvcInitializeLockSystem();
 
 MSVCRT_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     MsvcInitializeLockSystem();
+    InitializeMsvcrtHeap();
     return TRUE;
 }
 
@@ -35,9 +43,10 @@ void _amsg_exit(){
 }
 
 MSVCRT_API
-void _errno(){
+int* _errno(){
     LouPrint("_errno()\n");
     while(1);
+    return 0;
 }
 
 MSVCRT_API
@@ -75,11 +84,6 @@ void abort(){
     while(1);
 }
 
-MSVCRT_API
-void calloc(){
-    LouPrint("calloc()\n");
-    while(1);
-}
 
 MSVCRT_API
 void fputc(){

@@ -33,6 +33,11 @@ LOUSTATUS LouKeRegisterCallbackProcedure(
     PLOADED_WIN32_BINARY_OBJECT BinaryBind
 );
 
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
+
 void LouKeDestroyThread(uint64_t Thread);
 
 extern uint64_t RSPPoint;
@@ -40,6 +45,14 @@ extern uint64_t RSPPoint;
 HANDLE LouKeLoadLibraryA(string Name);
 
 void* LouKeGenericAllocateHeapEx();
+uint64_t LouKeGetThreadIdentification();
+
+//returns a void* to a new heap
+void* LouKeVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+);
 
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
@@ -200,7 +213,20 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             tmp[3] = (uint64_t)LouKeGenericAllocateHeapEx(tmp[0], tmp[1], tmp[2]);
             return;
         }
-
+        case LOUGETTHREADID:{
+            uint64_t* tmp = (uint64_t*)Data;
+            tmp[0] = LouKeGetThreadIdentification();
+            return;
+        }
+        case LOUVIRTUALALLOCUSER:{
+            uint64_t* tmp =(uint64_t*)Data;
+            tmp[3] = (uint64_t)LouKeVirtualAllocUser(tmp[0], tmp[1], tmp[2]);
+            return;
+        }case LOUAGLFN:{ 
+            uint64_t* tmp = (uint64_t*)Data;
+            tmp[2] = LouKeLinkerGetAddress((string)(uint8_t*)tmp[0], (string)(uint8_t*)tmp[1]);
+            return;
+        }
         default:
         LouPrint("Unkown Call:%d\n", Call);
     }

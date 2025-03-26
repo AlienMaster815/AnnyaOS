@@ -36,13 +36,13 @@ typedef struct __attribute__((packed, aligned(8))) _WIN_TEB {
     uint32_t TebFpSoftwareStatusRegister;
     uint64_t TebSystemReserved1[54];
     uint64_t TebExceptionCode;
-    uint8_t TebActivationContextStack[40];
-    uint8_t TebSpareBytes1[24];
+    uint8_t  TebActivationContextStack[40];
+    uint8_t  TebSpareBytes1[24];
     uint64_t TebSystemReserved2[26];
     uint64_t TebTlsExpansionSlots;      
     uint64_t TebDeallocationStack;
     uint64_t TebTlsSlots[64];           
-    uint8_t TebReservedForOle[8];       
+    uint8_t  TebReservedForOle[8];       
     uint64_t TebReservedForNtRpc[4];    
     uint64_t TebTlsExpansionSlotsExtra;
 } WIN_TEB, *PWIN_TEB;

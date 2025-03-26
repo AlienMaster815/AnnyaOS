@@ -10,7 +10,6 @@ extern "C" {
 #include <LouAPI.h>
 #endif
 
-
 typedef struct _DrsdFomat{
     uint32_t* Cpp;
 }DrsdFormat, * PDrsdFormat;
@@ -86,7 +85,7 @@ typedef struct _DrsdConnector{
 }DrsdConnector, * PDrsdConnector;
 
 typedef struct _DrsdDevice{
-    void* dev;
+    void*                   dev;
 }DrsdDevice, * PDrsdDevice;
 
 

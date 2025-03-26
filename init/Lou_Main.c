@@ -288,6 +288,7 @@ void InitializeFileSystemManager();
 void GenericVideoProtocolInitialize();
 void InitializePs2Mouse();
 void EnablePs2Keyboard();
+void CheckForSoundblaster16();
 
 static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
@@ -329,12 +330,13 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeFileSystemManager();
 
     SetupInitialVideoDevices();
+    CheckForSoundblaster16();
 
     EnablePs2Keyboard();
 
     InitializePs2Mouse();
 
-    //ScanTheRestOfHarware();
+    ScanTheRestOfHarware();
     
     //SMPInit();
 	

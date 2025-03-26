@@ -343,11 +343,11 @@ typedef struct _ATTACH_THREAD_DATA{
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
 
 LOUDLL_API
-void AnnyaAttachDllToProcess(PVOID ThreadData){
+DWORD AnnyaAttachDllToProcess(PVOID ThreadData){
     PATTACH_THREAD_DATA DllAttachData = (PATTACH_THREAD_DATA)ThreadData;
     DllAttachData->DllEntry(DllAttachData->DllHandle, DllAttachData->DllCallReason, DllAttachData->DllReserved);
     DllAttachData->LockRelease();
-    while(1);
+    return 0;
 }
 
 LOUDLL_API
@@ -370,4 +370,46 @@ void* LouGenericAllocateHeapEx(
         LouCALL(LOUALLOCHEAPGENERICEX, (uint64_t)&KulaPacket[0], 0);
     }
     return (void*)KulaPacket[4];
+}
+
+LOUDLL_API
+void* LouVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+){
+    uint64_t KulaPacket[5] = {0};
+    KulaPacket[1] = CommitSize;
+    KulaPacket[2] = ReservedSize;
+    KulaPacket[3] = PageFlags;
+    while(!KulaPacket[0]){
+        LouCALL(LOUVIRTUALALLOCUSER, (uint64_t)&KulaPacket[0], 0);
+    }
+    return (void*)KulaPacket[4];
+}
+
+LOUDLL_API
+void* 
+AnnyaGetLibraryFunctionN(
+    string ModuleName,
+    string FunctionName
+){
+    uint64_t KulaPacket[4] = {0};
+    KulaPacket[1] = (uint64_t)ModuleName;
+    KulaPacket[2] = (uint64_t)FunctionName;
+    while(!KulaPacket[0]){
+        LouCALL(LOUAGLFN, (uint64_t)&KulaPacket[0], 0);
+    }
+    return (void*)KulaPacket[3]; 
+}
+
+LOUDLL_API
+void* 
+AnnyaGetLibraryFunctionH(
+    HANDLE ModuleHandle, 
+    string FunctionName
+){
+
+    while(1);
+    return 0;
 }

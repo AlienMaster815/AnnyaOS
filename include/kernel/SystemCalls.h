@@ -639,7 +639,9 @@ void LouCALL(
 #define LOULOADLIBRARYEXA                       101
 #define LOULOADLIBRARYEXW                       102
 #define LOUALLOCHEAPGENERICEX                   103
-
+#define LOUGETTHREADID                          104
+#define LOUVIRTUALALLOCUSER                     105
+#define LOUAGLFN                                106
 //Kernel SystemCalls
 
 

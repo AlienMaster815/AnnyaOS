@@ -1,5 +1,4 @@
 #include "VBoxVGA.h"
-#include "VBoxAceleration/vbox_drv.h"
 #include <bootloader/grub/multiboot2.h>
 #include <Hal.h>
 

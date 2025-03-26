@@ -27,22 +27,17 @@ void MsvcInitializeLockSystem(){
 
 MSVCRT_API 
 void _lock(int LockNumber){
-
     if(!IS_MSVC_LOCK_INITIALIZED(LockNumber)){
         _lock(MSVC_LOCK_LOCK_TABLE);
-
         if(!IS_MSVC_LOCK_INITIALIZED(LockNumber)){
             LouPrint("Initializing Lock(%d)\n", LockNumber);
             MsvcInitializeLock(LockNumber);
         }
     }
-
-    LouPrint("_lock(%d)\n", LockNumber);
-    while(1);
+    EnterCriticalSection(&MsvcLockTable[LockNumber].CriticalSection);
 }
 
 MSVCRT_API
 void _unlock(int LockNumber){
-    LouPrint("_unlock()\n");
-    while(1);
+    LeaveCriticalSection(&MsvcLockTable[LockNumber].CriticalSection);
 }

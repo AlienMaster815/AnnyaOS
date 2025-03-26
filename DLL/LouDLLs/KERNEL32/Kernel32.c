@@ -16,9 +16,11 @@ void DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection){
 }
 
 KERNEL32_API
-void EnterCriticalSection(){
-    LouPrint("EnterCriticalSection()\n");
-    while(1);
+NTSTATUS 
+EnterCriticalSection(
+    PMSVC_CRITICAL_SECTION CriticalSection
+){
+    return RtlEnterCriticalSection(CriticalSection);//tailcall
 }
 
 KERNEL32_API
@@ -44,9 +46,8 @@ void IsDBCSLeadByteEx(){
 }
 
 KERNEL32_API
-void LeaveCriticalSection(){
-    LouPrint("LeaveCriticalSection()\n");
-    while(1);
+void LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection){
+    RtlLeaveCriticalSection(CriticalSection);
 }
 
 KERNEL32_API

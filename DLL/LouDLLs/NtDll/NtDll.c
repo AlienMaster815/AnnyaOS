@@ -1113,7 +1113,6 @@ NTDLL_API void RtlEncodeSystemPointer() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlEndEnumerationHashTable() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlEndStrongEnumerationHashTable() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlEndWeakEnumerationHashTable() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlEnterCriticalSection() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlEnterUmsSchedulingMode() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlEnumProcessHeaps() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlEnumerateEntryHashTable() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1416,7 +1415,6 @@ NTDLL_API void RtlKnownExceptionFilter() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLCIDToCultureName() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLargeIntegerToChar() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLcidToLocaleName() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlLeaveCriticalSection() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLengthCurrentClearRunBackwardEx() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLengthCurrentClearRunForwardEx() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLengthRequiredSid() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1722,7 +1720,6 @@ NTDLL_API void RtlTryAcquirePebLock() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlTryAcquireSRWLockExclusive() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlTryAcquireSRWLockShared() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlTryConvertSRWLockSharedToExclusiveOrRelease() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlTryEnterCriticalSection() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUTF8StringToUnicodeString() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUTF8ToUnicodeN() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUdiv128() {LouPrint("Hello nt Dll\n"); while(1);}

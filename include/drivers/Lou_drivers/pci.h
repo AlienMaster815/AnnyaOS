@@ -276,5 +276,8 @@ KERNEL_EXPORT void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset,
 KERNEL_EXPORT void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
 KERNEL_EXPORT void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 
+#define ANY_PCI_ID 0xFFFF
+#define ANY_PCI_CLASS 255
+
 #endif
 #endif

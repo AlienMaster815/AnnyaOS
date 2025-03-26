@@ -9,6 +9,11 @@ typedef void (__cdecl *FunctionVector)(void);
 #include <stdint.h>
 #include <stdbool.h>
 
+#define NTSTATUS uint64_t //fillin for Nt Status
+#define ENOMEM  12
+
+typedef uint64_t size_t;
+
 typedef void* HANDLE;
 
 typedef void*    HWND;
@@ -21,6 +26,54 @@ typedef bool  BOOL;
 #define TRUE  true
 typedef unsigned int DWORD;
 typedef void* LPVOID;
+
+#define KILOBYTE_PAGE 4096
+#define MEGABYTE_PAGE 2 * 1024 * 1024
+#define KILOBYTE 1 * 1024
+
+#define PRESENT_PAGE           0b1
+#define WRITEABLE_PAGE        0b10
+
+#define USER_PAGE           (1 << 2)
+
+#define WRITE_THROUGH_PAGE  0b1000
+#define CACHE_DISABLED_PAGE 0b10000
+#define UNCACHEABLE_PAGE    0b10000
+
+#define PAGE_PRESENT        (1 << 0)
+#define PAGE_WRITE          (1 << 1)
+#define PAGE_USER           (1 << 2)
+#define PAGE_PWT            (1 << 3)
+#define PAGE_PCD            (1 << 4)
+#define END_PAGE            (1 << 4)
+
+// Section 1:1 RAM ADDRESS
+#define MAXMEM 0xFFFFFFFFFFFFFFFFULL
+#define RAMADD unsigned char*
+#define RAMADDDATA unsigned char *
+#define BLOCK 4096
+#define SIZE unsigned long long
+
+// Constants for gigabyte and megabyte sizes
+#define GIGABYTE (1ULL << 30)  // 1 GB in bytes
+#define MEGABYTE (1ULL << 20)  // 1 MB in bytes
+#define KILOBYTE 1 * 1024
+
+#define PAGE_TABLE_ALLIGNMENT 4096
+#define PAGE_SIZE 4096
+
+#define FLAGSSPACE 0x1FF
+
+
+__declspec(dllimport)
+void* LouVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+);
+
+__declspec(dllimport)
+void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
 
 
 typedef struct  _ListHeader{
@@ -58,6 +111,15 @@ int LouPrint(char* Str, ...);
 
 __declspec(dllimport)
 void DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+void EnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+void LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
 void InitializeCriticalSectionEx(
