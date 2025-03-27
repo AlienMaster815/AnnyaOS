@@ -1,6 +1,21 @@
 #ifndef _HGSMI_DEFINITIONS_H
 #define _HGSMI_DEFINITIONS_H
 
+/*
+ * This is a clean-room reimplementation of the VirtualBox VBE/VMSVGA driver,
+ * originally developed by Oracle Corporation and released under the MIT license.
+ *
+ * This implementation is based on independent research and observation of the
+ * Linux kernel's `vboxvideo` driver and related specifications. No code was
+ * directly copied or translated.
+ *
+ * All identifiers, register names, and behavior are derived from public
+ * documentation or reverse-engineered from hardware behavior.
+ *
+ * Copyright (C) 2025 Tyler Grenier
+ * Licensed under the GNU GPLv2
+ */
+
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_BITS         0x03
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_SINGLE       0
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_START        1

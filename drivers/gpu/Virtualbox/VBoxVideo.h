@@ -1,6 +1,21 @@
 #ifndef _VBOX_VIDEO_H
 #define _VBOX_VIDEO_H
 
+/*
+ * This is a clean-room reimplementation of the VirtualBox VBE/VMSVGA driver,
+ * originally developed by Oracle Corporation and released under the MIT license.
+ *
+ * This implementation is based on independent research and observation of the
+ * Linux kernel's `vboxvideo` driver and related specifications. No code was
+ * directly copied or translated.
+ *
+ * All identifiers, register names, and behavior are derived from public
+ * documentation or reverse-engineered from hardware behavior.
+ *
+ * Copyright (C) 2025 Tyler Grenier
+ * Licensed under the GNU GPLv2
+ */
+
 #define VIRTUALBOX_VIDEO_MAX_SCREENS                                64
 #define VBVA_RING_BUFFER_SIZE                                       4194304 - 1024
 #define VBVA_MAXIMUM_RECORDS                                        64
