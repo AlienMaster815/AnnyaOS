@@ -1,11 +1,6 @@
 #ifndef _HGSMI_DEFINITIONS_H
 #define _HGSMI_DEFINITIONS_H
 
-/* SPDX-License-Identifier: MIT */
-/* Copyright (C) 2006-2017 Oracle Corporation */
-/* Copyright (C) 2025 Tyler Grenier */
-/* Rewritten keystroke-by-keystroke by Tyler Grenier for AnnyaOS */
-
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_BITS         0x03
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_SINGLE       0
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_START        1

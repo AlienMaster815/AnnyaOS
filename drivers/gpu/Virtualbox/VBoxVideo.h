@@ -1,11 +1,6 @@
 #ifndef _VBOX_VIDEO_H
 #define _VBOX_VIDEO_H
 
-/* SPDX-License-Identifier: MIT */
-/* Copyright (C) 2006-2016 Oracle Corporation */
-/* Copyright (C) 2025 Tyler Grenier */
-/* Rewritten keystroke-by-keystroke by Tyler Grenier for AnnyaOS */
-
 #define VIRTUALBOX_VIDEO_MAX_SCREENS                                64
 #define VBVA_RING_BUFFER_SIZE                                       4194304 - 1024
 #define VBVA_MAXIMUM_RECORDS                                        64

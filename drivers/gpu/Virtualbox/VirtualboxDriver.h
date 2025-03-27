@@ -1,18 +1,6 @@
 #ifndef _VIRTUALBOX_DRIVER_H
 #define _VIRTUALBOX_DRIVER_H
 
-/* SPDX-License-Identifier: MIT */
-/*
- * Copyright (C) 2013-2017 Oracle Corporation
- * This file is based on ast_drv.h
- * Copyright 2012 Red Hat Inc.
- * Authors: Dave Airlie <airlied@redhat.com>
- *          Michael Thayer <michael.thayer@oracle.com,
- *          Hans de Goede <hdegoede@redhat.com>
- */
-/* Copyright (C) 2025 Tyler Grenier */
-/* Rewritten keystroke-by-keystroke by Tyler Grenier for AnnyaOS */
-
 
 #define VIRTUALBOX_MAXIMUM_CURSOR_WIDTH     64
 #define VIRTUALBOX_MAXIMUM_CURSOR_HEIGHT    64
