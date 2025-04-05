@@ -260,4 +260,5 @@ KERNEL_EXPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_EXPORT void sleep(uint64_t Time);
 KERNEL_EXPORT void outw(uint64_t port, uint16_t data);
+KERNEL_EXPORT uint16_t inw(uint64_t port64);
 #endif

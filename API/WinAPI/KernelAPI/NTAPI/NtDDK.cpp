@@ -213,14 +213,6 @@ void IoDeleteController(
 
 }
 
-bool NT_SUCCESS(NTSTATUS Status){
-	switch(Status){
-		case 0:
-			return true;
-		default:
-			return false;
-	}
-}
 
 void IoFreeController(
    PCONTROLLER_OBJECT ControllerObject

@@ -19,7 +19,7 @@ PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem){
 }
 
 void AddPcieGroup(PACPI_MCFG_ALLOCATION PciManagerData){
-    MutexLock(&PsmLock);
+
     PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
     for(size_t i = 0 ; i < MaxGroupCount; i++){
         if(!TmpPsm->Neighbors.NextHeader){
@@ -37,10 +37,27 @@ void AddPcieGroup(PACPI_MCFG_ALLOCATION PciManagerData){
     LouPrint("PCISegmentGroupNumber:%h\n", TmpPsm->PCISegmentGroupNumber);
     LouPrint("StartBusNumber:%h\n", TmpPsm->StartBusNumber);
     LouPrint("EndBusNumber:%h\n", TmpPsm->EndBusNumber);
-    
-    while(1);
+    //place Group on stack for heavy recursion
+    uint16_t Group = TmpPsm->PCISegmentGroupNumber;
+    //same with Mapping location
+    uint64_t PcieMMIO = 0x00;
     MaxGroupCount++;
-    MutexUnlock(&PsmLock);
+
+    for(uint8_t Bus = TmpPsm->StartBusNumber ; Bus <= TmpPsm->EndBusNumber; Bus++){
+        for(uint8_t Slot = 0 ; Slot < 32; Slot++){
+            for(uint8_t Function = 0 ; Function < 8; Function++){ 
+                PcieMMIO = PcieConfigAddress(Group, Bus, Slot, Function, 0); 
+                LouPrint("PcieMMIO:%h\n", PcieMMIO);
+                if(!PcieMMIO){
+                    //TODO: add to broken entries :: But Not a problem yet
+                    continue;
+                }
+                //sanity map address
+                LouMapAddress(PcieMMIO, PcieMMIO, KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, KILOBYTE_PAGE);
+            }
+        }
+    }
+    while(1);
 }
 
 uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {

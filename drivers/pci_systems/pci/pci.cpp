@@ -85,14 +85,20 @@ PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
 
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
     LouPrint("Scanning PCI Bus\n");
-    for(uint8_t i = 0 ; i < 255; i++){
-        checkBus(0, i);
-    }
     uint16_t GroupIndex = 0;
     uint16_t Count = GetPciGroupCount();
     PPCIE_SYSTEM_MANAGER Psm = 0x00;
+    
+    for(uint8_t i = 0 ; i < 255; i++){
+        checkBus(0, i);
+    }
+    //secondary count get the rest
     for(uint16_t i = 0 ; i < Count; i++){
         Psm = GetPcieGroupHandle(i);
+        if(Psm->PCISegmentGroupNumber == 0){
+            //skip if the group is a rescan
+            continue;
+        }
         if(Psm->PCISegmentGroupNumber){
             GroupIndex = Psm->PCISegmentGroupNumber;
             for(uint8_t j = 0 ; j < 255; j++){

@@ -35,7 +35,6 @@ AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
 
     LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

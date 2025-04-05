@@ -148,8 +148,6 @@ LOUSTATUS Lou_kernel_early_initialization(){
     SetUpTimers();
     //DeterminCPU();
 
-    LouPrint("Finished\n");
-
     return LOUSTATUS_GOOD;
 }
 
@@ -305,7 +303,7 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfi = true;
     }
 
-    InitMCFG();
+    //InitMCFG();
 
     LouKeMapPciMemory();
 
@@ -316,9 +314,10 @@ KERNEL_ENTRY Lou_kernel_start(
 
     Advanced_Kernel_Initialization();
 
-    //LouPrint("Perfect\n");
-    //while(1);
     //SETUP DEVICES AND DRIVERS
+
+    SetupInitialVideoDevices();
+
     LookForStorageDevices();
 
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
@@ -327,14 +326,16 @@ KERNEL_ENTRY Lou_kernel_start(
         while(1);
     }
 
+    //LouPrint("Perfect\n");
+    //while(1);
+
     InitializeFileSystemManager();
 
-    SetupInitialVideoDevices();
-    CheckForSoundblaster16();
+    //CheckForSoundblaster16();
 
-    EnablePs2Keyboard();
+    //EnablePs2Keyboard();
 
-    InitializePs2Mouse();
+    //InitializePs2Mouse();
 
     ScanTheRestOfHarware();
     
@@ -430,18 +431,14 @@ void InitializeUserSpace(){
 
 //0x220B21030
 
-//TODO : Debug the PCIe driver on the Acer
+//TODO : 
 
 //BUGS TO FIX:
 //memcpy doesent use SSE correctly
-//86553
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 
-//007e8000
-
 /*	
-AMD PCNet-PCI II	Easy Am79C970A	
 USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).
 PCI Sound Cards	Moderate	
 Intel 8254x NIC	Moderate	

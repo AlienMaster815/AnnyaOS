@@ -43,6 +43,14 @@ typedef __int128 int128_t;
 #define PAGE_PCD            (1 << 4)
 #define END_PAGE            (1 << 4)
 
+#define KERNEL_GENERIC_MEMORY   WRITEABLE_PAGE | PRESENT_PAGE
+#define KERNEL_DMA_MEMORY       UNCACHEABLE_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
+#define USER_GENERIC_MEMORY     USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
+#define USER_DMA_MEMORY         USER_PAGE | WRITEABLE_PAGE |PRESENT_PAGE
+#define USER_RO_DMA_MEMORY      UNCACHEABLE_PAGE | USER_PAGE | PRESENT_PAGE
+#define USER_RO_GENERIC_MEMORY  USER_PAGE | PRESENT_PAGE
+ 
+
 #ifndef __cplusplus
 // Section 1:1 RAM ADDRESS
 #define MAXMEM 0xFFFFFFFFFFFFFFFFULL
@@ -473,5 +481,20 @@ KERNEL_EXPORT POOL LouKeCreateMemoryPool(
     uint64_t Flags,     //flags for alignment
     uint64_t PageFlags  //flags for Page Directory
 );
+
+KERNEL_EXPORT
+void* LouKeMalloc(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
+
+KERNEL_EXPORT
+void* LouKeMallocEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
+
+
 
 #endif

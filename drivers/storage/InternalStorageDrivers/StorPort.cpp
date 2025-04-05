@@ -22,6 +22,8 @@ static PDRIVER_OBJECT AhciDriverObject = 0x00;
 //NTSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 
+LOUSTATUS LouKeInitializeNetworkManager();
+
 LOUDDK_API_ENTRY 
 LOUSTATUS LookForStorageDevices(){
     LouPrint("Scanning For Storage Devices\n");
@@ -106,12 +108,12 @@ LOUSTATUS LookForStorageDevices(){
     StorageDevices = LouKeOpenPciDeviceGroup(&Config);
 	if(StorageDevices){
         for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-            P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i]->PDEV;
-            LOUSB_DRIVER_INIT(PDEV);
+            //P_PCI_DEVICE_OBJECT PDEV = StorageDevices[i]->PDEV;
+            //LOUSB_DRIVER_INIT(PDEV);
         }
     }
 
-    //LouKeClosePciDeviceGroup(StorageDevices);
+    LouKeClosePciDeviceGroup(StorageDevices);
 
     LouPrint("Done Scanning For Storage Devices\n");
     return STATUS_SUCCESS;

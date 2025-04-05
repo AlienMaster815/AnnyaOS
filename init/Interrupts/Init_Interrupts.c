@@ -9,7 +9,6 @@ LOUSTATUS InitApicSystems(bool LateStage);
 LOUSTATUS InitializeMainInterruptHandleing(){
     
     //if(InitializeAdvancedProgramableController() != LOUSTATUS_GOOD)LouPanic("Cunstruction Panic",BAD);
-
     LOUSTATUS Status = LOUSTATUS_GOOD;
 
     Status = InitApicSystems(true);

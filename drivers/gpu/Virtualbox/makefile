@@ -7,7 +7,14 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC = VirtualBoxMain.cpp
+SRC = VirtualBoxMain.cpp \
+      HgsmiBase.cpp \
+      VirtualboxHgsmi.cpp \
+      ModeSetting.cpp \
+	  VirtualboxInterrupts.cpp \
+	  VirtualboxMode.cpp \
+	  VirtualboxBufferObjects.cpp \
+	  VbvaBase.cpp
 
 TARGET = VBOXGPU.SYS
 

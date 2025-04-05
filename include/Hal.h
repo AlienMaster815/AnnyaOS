@@ -8,24 +8,24 @@ typedef struct _PCI_MANAGER_DATA{
     string DeviceManagerString;
 }PCI_MANAGER_DATA, * PPCI_MANAGER_DATA, PCI_DEVICE_GROUP,* PPCI_DEVICE_GROUP;
 
+typedef struct _LINUX_PCI_DEVICE_ID {
+    uint32_t vendor, device;		/* Vendor and device ID or PCI_ANY_ID*/
+    uint32_t subvendor, subdevice;	/* Subsystem ID's or PCI_ANY_ID */
+    uint32_t Class, class_mask;	/* (class,subclass,prog-if) triplet */
+    uint64_t Flags;	    /* Data private to the driver */
+}LINUX_PCI_DEVICE_ID, * PLINUX_PCI_DEVICE_ID;
+
 
     #ifdef __cplusplus
 
         #include <LouDDK.h>
-        #ifndef _KERNEL_MODULE_
 
-            typedef struct _LINUX_PCI_DEVICE_ID {
-                uint32_t vendor, device;		/* Vendor and device ID or PCI_ANY_ID*/
-                uint32_t subvendor, subdevice;	/* Subsystem ID's or PCI_ANY_ID */
-                uint32_t Class, class_mask;	/* (class,subclass,prog-if) triplet */
-                uint64_t Flags;	    /* Data private to the driver */
-            }LINUX_PCI_DEVICE_ID, * PLINUX_PCI_DEVICE_ID;
+        #ifndef _KERNEL_MODULE_
 
             void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 
             PPCI_DEVICE_GROUP LouKeHalOpenPciCompanions(
-                uint8_t Bus,
-                uint8_t Slot
+                P_PCI_DEVICE_OBJECT PDEV
             );
 
             #define LouKeHalClosePciCompanions(x) LouFree((RAMADD)x)
@@ -128,7 +128,7 @@ typedef struct _PCI_MANAGER_DATA{
                 PPCI_COMMON_CONFIG PciSearch, 
                 PLINUX_PCI_DEVICE_ID LinuxCmpatibleDirectory
             );
-            KERNEL_EXPORT void GetPciConfiguration(ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer);
+            KERNEL_EXPORT void GetPciConfiguration(ULONG DeviceGroup, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer);
             KERNEL_EXPORT LOUSTATUS LouKeHalEnablePciDevice(P_PCI_DEVICE_OBJECT PDEV);
 
             KERNEL_EXPORT void* LouKeHalGetPciVirtualBaseAddress(

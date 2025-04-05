@@ -198,20 +198,15 @@ LOUSTATUS LouKeGetSystemFirmwareTableId(
 	uint8_t* Type
 ) {
 	LOUSTATUS Status = (LOUSTATUS)STATUS_UNSUCCESSFUL;
-
+	uint64_t PhyCheck = 0;
 	char MasterString[sizeof(int)];
 
 	LouKIRQL OldIrql;
 	LouKeAcquireSpinLock(&FirmwareLock, &OldIrql);
 
 	if (FirmwareTableProviderSignature == 'ACPI') {
-
-		PACPI_STD_HEADER GenericTable = (PACPI_STD_HEADER)(*TablePointer);
-
 		UIntToString(FirmwareTableId, MasterString);
-
 		// Calculate the end address of the table
-
 
 		if (FirmwareTableId == 'XSDT') {
 			*TablePointer = *TableExtendedPointer;
@@ -236,11 +231,20 @@ LOUSTATUS LouKeGetSystemFirmwareTableId(
 				i < ((uint64_t)GenericTable2 + GenericTable2->Length) ; 
 				i+= sizeof(uint64_t)
 				) {
-				ACPI_STD_HEADER *table = (ACPI_STD_HEADER *)*(uint64_t*)i;
+				
+				if(*(uint64_t*)i == 0x00)continue;
 
-				//LouPrint("Table At:%h\n", i);
-				//LouPrint("Table Name:%s\n\n",table->Signature);
-				if ((strncmp((const string)table->Signature, (const string)MasterString, 4) == 0) && (strlen((const string)table->Signature) != 0)) {
+				ACPI_STD_HEADER* table = (ACPI_STD_HEADER*)(uint8_t*)*(uint64_t*)(uint8_t*)i;
+				RequestPhysicalAddress((uint64_t)(uintptr_t)&table->Signature[0], &PhyCheck);
+				//LouPrint("Table At:%h\n", *(uint64_t*)i);
+				//LouPrint("Signature:%h\n", &table->Signature[0]);
+				//LouPrint("PhyCheck:%h\n", PhyCheck);
+				//LouPrint("Table Name:%s\n\n",&table->Signature[0]);
+				if((uintptr_t)(uint8_t*)&table->Signature[0] != PhyCheck){
+					//some systems on real hardware faild to get detected by grub so we will map whatever data is not mapped
+					LouKeMapContinuousMemoryBlock((uint64_t)&table->Signature[0], (uint64_t)&table->Signature[0], KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
+				}
+				if ((strncmp((const string)&table->Signature[0], (const string)MasterString, 4) == 0) && (strlen((const string)&table->Signature[0]) != 0)) {
 					*TablePointer = (uintptr_t)table;
 					Status = LOUSTATUS_GOOD;
 					LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
@@ -249,21 +253,8 @@ LOUSTATUS LouKeGetSystemFirmwareTableId(
 			}
 		}
 		if(*TablePointer != 0x00){
-			for (uint16_t i = sizeof(ACPI_STD_HEADER); i < GenericTable->Size; i += sizeof(uint32_t)) {
-				uint32_t foo = *(uint32_t*)((uintptr_t)GenericTable + (uintptr_t)i);
-				PACPI_STD_HEADER Fubar = (PACPI_STD_HEADER)(uintptr_t)foo;
+			//PACPI_STD_HEADER GenericTable = (PACPI_STD_HEADER)(*TablePointer);
 
-				if ((strncmp((const string)Fubar->Signature, (const string)MasterString, 4) == 0) && (strlen((const string)Fubar->Signature) != 0)) {
-					LouPrint("Sign:%s\n", Fubar->Signature);
-					LouPrint("SignMaster:%s\n", MasterString);
-
-					*TablePointer = (uintptr_t)Fubar;
-					Status = LOUSTATUS_GOOD;
-					LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
-					return Status;
-				}
-
-			}
 		}
 	}
 	else if (FirmwareTableProviderSignature == SMB_SIGNATURE) {

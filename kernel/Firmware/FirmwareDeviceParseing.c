@@ -17,8 +17,9 @@ static void* SSDT = 0x00;
 static size_t SSDTLength = 0;
 
 void LouKeInitializeFirmwareDeviceParseing(){
+    LouPrint("Looking For System Device Table\n");
     LOUSTATUS Status = LOUSTATUS_GOOD;
-    uint8_t* Buffer = (uint8_t*)LouMalloc(512 * KILOBYTE);
+    uint8_t* Buffer = (uint8_t*)LouKeMallocEx(512 * KILOBYTE, KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
     ULONG ReturnLength = 0x000;
     Status = LouKeGetSystemFirmwareTable(
         'ACPI',
@@ -29,13 +30,15 @@ void LouKeInitializeFirmwareDeviceParseing(){
     );
 
 	if(Status != STATUS_SUCCESS){
-        LouFree(Buffer);
+        LouPrint("Lousine Kernel Failed To Find DSDT\n");
+        LouKeFree(Buffer);
 	}else{
+        LouPrint("Lousine Kernel Found DSDT\n");
         DSDT = (void*)Buffer;
         DSDTLength = ReturnLength;
     }
 
-    Buffer = (uint8_t*)LouMalloc(512 * KILOBYTE);
+    Buffer = (uint8_t*)LouKeMallocEx(512 * KILOBYTE, KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
 
     Status = LouKeGetSystemFirmwareTable(
         'ACPI',
@@ -46,12 +49,14 @@ void LouKeInitializeFirmwareDeviceParseing(){
     );
 
 	if(Status != STATUS_SUCCESS){
-        LouFree(Buffer);
+        LouPrint("Lousine Kernel Failed To Find SSDT\n");
+        LouKeFree(Buffer);
     }else {
+        LouPrint("Lousine Kernel Found SSDT\n");
         SSDT = (void*)Buffer;
         SSDTLength = ReturnLength;
     }
-
+    LouPrint("System Device Table Search Finished\n");
 }
 
 #pragma pack(push, 1)

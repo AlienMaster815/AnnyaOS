@@ -1946,6 +1946,14 @@ NTSYSAPI NTSTATUS ZwTerminateProcess(
              NTSTATUS ExitStatus
 );
 
-bool NT_SUCCESS(NTSTATUS Status);
+static inline
+bool NT_SUCCESS(NTSTATUS Status){
+	switch(Status){
+		case 0:
+			return true;
+		default:
+			return false;
+	}
+}
 
 #endif

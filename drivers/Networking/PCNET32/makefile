@@ -7,7 +7,9 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC = PcNet32Main.cpp
+SRC = PcNet32Main.cpp \
+	  PCNET2.cpp
+	  
 TARGET = PCNET32.SYS
 
 # Build rule

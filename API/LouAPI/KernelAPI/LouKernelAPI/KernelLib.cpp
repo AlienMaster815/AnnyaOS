@@ -30,7 +30,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 	PVOID FirmwareTableBuffer,
 	ULONG BufferLength,
 	PULONG ReturnLength) {
-
+		
 	LOUSTATUS Status = LOUSTATUS_GOOD;
 	uintptr_t TablePointer = 0x0000, TableExtendedPointer = 0x0000;
 	uint8_t Type;
@@ -59,6 +59,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 		LouPrint("Firmware Table Id Could Not Be Found:ID NUMBER:%d\n",FirmwareTabeId);
 		return Status;
 	}
+
 
 
 	Status = LouKeGetSystemFirmwareTableBuffer(
