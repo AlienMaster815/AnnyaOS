@@ -108,3 +108,4 @@ EXPORTS
     LouKeMallocEx
     inw
     outw
+    LouKeHalPciAllocateInterrupt

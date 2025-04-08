@@ -183,6 +183,16 @@ KERNEL_IMPORT char* strncpy(char* dest, const char* src, size_t n);
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 //KERNEL_IMPORT void INTERRUPT(uint8_t InterruptNumber);
 
+KERNEL_IMPORT
+uint8_t LouKeHalPciAllocateInterrupt(
+    P_PCI_DEVICE_OBJECT PDEV, 
+    void(*Handler)(uint64_t), 
+    bool NeedFlotationSave, 
+    uintptr_t OverideData,
+    uint8_t UsingInterrupt,
+    uint64_t Flags
+);
+
 KERNEL_IMPORT void sleep(uint64_t Time);
 
 #define ACPIBUFFER 256
@@ -261,4 +271,6 @@ KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_EXPORT void sleep(uint64_t Time);
 KERNEL_EXPORT void outw(uint64_t port, uint16_t data);
 KERNEL_EXPORT uint16_t inw(uint64_t port64);
+KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
+
 #endif
