@@ -146,7 +146,7 @@ static inline uint8_t IoApicGetVector(uint8_t irq) {
 
 bool InitializeIoApic(uint64_t IoApicNumber, uint64_t MappedArea){
 
-    LouPrint("Starting IO/APIC:%d At Address:%h\n",ioapics[IoApicNumber].ioapic_id, ioapics[IoApicNumber].ioapic_address);
+    LouPrint("Starting IO/APIC:%d At Address:%h\n", ioapics[IoApicNumber].ioapic_id, ioapics[IoApicNumber].ioapic_address);
     LouPrint("Calculating Address In Virtual Memory\n");
 
     IoApicBase = (uint64_t)LouMalloc(KILOBYTE_PAGE);
@@ -176,12 +176,25 @@ bool InitializeIoApic(uint64_t IoApicNumber, uint64_t MappedArea){
         ioapic_write(high_index, high);
 
         // Set the low 32 bits of the redirection table entry
-        uint32_t low = (irq + 0x20) | 0x10000;  // Vector number + masked (initially masked)
+        int32_t low = 0;
+        low = (irq + 0x20) | 0x10000;  // Vector number + masked (initially masked)
+
         ioapic_write(index, low);
 
         //LouPrint("Irq number:%d: uses Vector:%d\n", irq, IoApicGetVector(irq));
 
     }
+
+    
+    //InitializeIoApicIRQ(
+    //    0x02,
+    //    0x22,
+    //    0,
+    //    0, 
+    //    0,
+    //    0,
+    //    0
+    //);
 
     return true;
 }
@@ -246,7 +259,7 @@ uint8_t GetIoApicNumber(uint8_t PIN){
 KERNEL_IMPORT uint8_t FindTrueIRQ(uint8_t IRQ){
     for(uint8_t i = 0 ; i < OverideCount; i++){
         if(ISOPointer[i]->Source == IRQ){
-            if(ISOPointer[i]->Flags & 0x03) return ISOPointer[i]->GlobalSystemInterrupt;
+            return ISOPointer[i]->GlobalSystemInterrupt;
         }
     }
     return IRQ;
@@ -281,6 +294,21 @@ KERNEL_IMPORT void ioapic_unmask_irq(uint8_t irq) {
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);
 }
 
+LOUDDK_API_ENTRY
+void DumpIoApicEntry(uint8_t irq) {
+    uint8_t ioapic = GetIoApicNumber(irq);
+    uint32_t local_irq = irq - ioapics[ioapic].gsi_base;
+
+    uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + 2 * local_irq;
+    uint32_t high_index = index + 1;
+
+    uint32_t low = ioapic_advanced_read(ioapics[ioapic].ioapic_vaddress, index);
+    uint32_t high = ioapic_advanced_read(ioapics[ioapic].ioapic_vaddress, high_index);
+
+    LouPrint("IOAPIC IRQ %d: LOW=%h HIGH=%h\n", irq, low, high);
+
+}
+
 
 // Function to mask a given IRQ in the I/O APIC
 KERNEL_IMPORT void ioapic_mask_irq(uint8_t irq) {
@@ -307,3 +335,34 @@ KERNEL_IMPORT void ioapic_mask_irq(uint8_t irq) {
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);
 }
 
+LOUDDK_API_ENTRY
+void InitializeIoApicIRQ(
+    uint8_t IRQ,
+    uint8_t Vector,
+    uint8_t DeliveryMode,
+    uint8_t Destination, 
+    uint8_t Polarity,
+    uint8_t TriggerMode,
+    uint8_t DestinationUnit
+){
+    IRQ = FindTrueIRQ(IRQ); //finds the interrupt based on if there is a overide
+    uint8_t IoApicNum = GetIoApicNumber(IRQ); //gets the actual ioapic the irq belogs to based on the 
+
+    IRQ = IRQ - ioapics[IoApicNum].gsi_base;
+
+    uint32_t LowIndex = IOAPIC_REDIRECTION_TABLE_BASE + 2 * IRQ;
+    uint32_t HighIndex = LowIndex + 1;
+
+    uint32_t Low = 0;
+    uint32_t High = 0;
+
+    Low |= Vector;
+    Low |= (DeliveryMode & 0b111) << APIC_DELIVERY_SHIFT;
+    Low |= (Destination & 1) ? APIC_DESTINATION_BIT : 0;
+    Low |= (Polarity & 1) ? APIC_POLARITY_BIT : 0;
+    Low |= (TriggerMode & 1) ? TRIGGER_MODE_BIT : 0;
+    High = DestinationUnit << 24;
+
+    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, LowIndex, Low);
+    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, HighIndex, High);
+}

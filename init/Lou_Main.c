@@ -100,6 +100,7 @@ LOUSTATUS SetupInitialVideoDevices();
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
+void SMPInit();
 
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
@@ -175,6 +176,7 @@ void Advanced_Kernel_Initialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
     HandleProccessorInitialization();
+    //SMPInit();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
  }
 
@@ -240,9 +242,9 @@ void LouKeHandleSystemIsBios();
 
 KERNEL_ENTRY LouKernelSmpStart(){
 
-    SetupGDT();
-    InitializeStartupInterruptHandleing();
-    LouPrint("Processor Succesfully Idleing\n");
+    //SetupGDT();
+    //InitializeStartupInterruptHandleing();
+    //LouPrint("Processor Succesfully Idleing\n");
 
     while(1){
         asm ("hlt"); //spin the cpus untill context assignement
@@ -276,7 +278,6 @@ typedef struct  __attribute__((packed)) _CPUContext{
 } CPUContext;
 
 
-void SMPInit();
 void InitializeUserSpace();
 
 void CheckForPs2Mouse();
@@ -339,7 +340,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     ScanTheRestOfHarware();
     
-    //SMPInit();
 	
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");

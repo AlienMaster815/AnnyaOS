@@ -40,8 +40,18 @@ typedef struct  __attribute__((packed)) _CPUContext{
 
 void InitializePs2Mouse(){
     LouPrint("Initializing PS/2 Mouse (If There Is One)\n");
-    RegisterInterruptHandler(PS2MouseHandler, 32 + 12, false, 0x00);
+    RegisterInterruptHandler(PS2MouseHandler, 0x30 + 12, false, 0x00);
     
+    InitializeIoApicIRQ(
+        12,
+        0x30 + 12,
+        0,
+        0, 
+        1,
+        0,
+        0
+    );
+
     outb(0x64, 0xA8);
     outb(0x64, 0x20);
 

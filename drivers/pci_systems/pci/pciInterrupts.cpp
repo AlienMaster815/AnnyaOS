@@ -42,7 +42,6 @@ uint8_t LouKeHalPciAllocateInterrupt(
     void(*Handler)(uint64_t), 
     bool NeedFlotationSave, 
     uintptr_t OverideData,
-    uint8_t UsingInterrupt,
     uint64_t Flags
 ){
     if(Flags){
@@ -50,19 +49,16 @@ uint8_t LouKeHalPciAllocateInterrupt(
         
 
     }
-    //no flags uses intx    
-    //ioapic_configure_irq(
-    //    PDEV->InterruptLine,                       
-    //    UsingInterrupt,
-    //    0,
-    //    IOAPIC_DELIVERY_MODE_FIXED,
-    //    IOAPIC_DEST_MODE_PHYSICAL,
-    //    IOAPIC_POLARITY_ACTIVE_LOW,
-    //    IOAPIC_TRIGGER_MODE_LEVEL
-    //);
-    LouKeHalPciEnableInterrupts(PDEV);
-    ioapic_unmask_irq(PDEV->InterruptLine);
-    //_INTERRUPT_ALLOCATED:
-    //RegisterInterruptHandler(Handler, UsingInterrupt, false, (uint64_t)OverideData);
-    return UsingInterrupt;
+    //no flags uses intx
+    RegisterInterruptHandler(Handler, 0x30 + PDEV->InterruptLine, false, (uint64_t)OverideData);
+    InitializeIoApicIRQ(
+        PDEV->InterruptLine,         
+        0x30 + PDEV->InterruptLine,      
+        0,        
+        0,         
+        1,         
+        1,         
+        0          
+    );
+    return PDEV->InterruptLine;
 }

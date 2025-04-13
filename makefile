@@ -274,8 +274,8 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
 
-	$(MAKE) -C Drivers/Networking/PCNET32 clean
-	$(MAKE) -C Drivers/Networking/PCNET32 all
+	$(MAKE) -C Drivers/Networking/ethernet/AdvancedMicroDevices/PCNET32 clean
+	$(MAKE) -C Drivers/Networking/ethernet/AdvancedMicroDevices/PCNET32 all
 
 	$(MAKE) -C Drivers/Audio/SoundBlaster clean
 	$(MAKE) -C Drivers/Audio/SoundBlaster all
@@ -366,7 +366,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C KernelLibraries/LouDDK clean
-	$(MAKE) -C Drivers/Networking/PCNET32 clean
+	$(MAKE) -C Drivers/Networking/ethernet/AdvancedMicroDevices/PCNET32 clean
 	$(MAKE) -C KernelLibraries/louoskrnl clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean

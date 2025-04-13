@@ -189,7 +189,6 @@ uint8_t LouKeHalPciAllocateInterrupt(
     void(*Handler)(uint64_t), 
     bool NeedFlotationSave, 
     uintptr_t OverideData,
-    uint8_t UsingInterrupt,
     uint64_t Flags
 );
 

@@ -843,7 +843,7 @@ NTSTATUS AddAhciDevice(
         }
     }
 
-    //RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine, false, (uint64_t)AtaHost);
+    //RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine + 0x30, false, (uint64_t)AtaHost);
 
     ResetAhcPciController(AtaHost);
 
