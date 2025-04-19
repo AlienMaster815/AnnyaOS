@@ -14,11 +14,6 @@ uint8_t LouKeGetPciInterruptLine(P_PCI_DEVICE_OBJECT PDEV){
     return LINE;
 }
 
-#define IOAPIC_DELIVERY_MODE_FIXED    0x0
-#define IOAPIC_DEST_MODE_PHYSICAL     0x0
-#define IOAPIC_POLARITY_ACTIVE_LOW    0x1
-#define IOAPIC_TRIGGER_MODE_LEVEL     0x1
-
 void ioapic_configure_irq(
     uint8_t irq, 
     uint8_t vector, 
@@ -36,6 +31,9 @@ LOUDDK_API_ENTRY void LouKeHalPciEnableInterrupts(P_PCI_DEVICE_OBJECT PDEV);
 
 KERNEL_IMPORT void IRQ_Pic_clear_mask(unsigned char IRQline);
 KERNEL_IMPORT void Mask_All_Programable_Interrupts();
+
+KERNEL_IMPORT uint8_t LouKeGetPciGsi(P_PCI_DEVICE_OBJECT PDEV);
+
 LOUDDK_API_ENTRY
 uint8_t LouKeHalPciAllocateInterrupt(
     P_PCI_DEVICE_OBJECT PDEV, 
@@ -49,6 +47,12 @@ uint8_t LouKeHalPciAllocateInterrupt(
         
 
     }
+
+    uint8_t INTxInterrupt = 0;//LouKeGetPciGsi(PDEV);
+
+    LouPrint("PCI INTx Interrupt Is:%d\n", INTxInterrupt);
+
+    while(1);
     //no flags uses intx
     RegisterInterruptHandler(Handler, 0x30 + PDEV->InterruptLine, false, (uint64_t)OverideData);
     InitializeIoApicIRQ(
