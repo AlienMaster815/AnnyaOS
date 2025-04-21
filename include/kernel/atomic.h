@@ -24,7 +24,6 @@
 #ifndef _ATOMIC_STRUCTURE
 #define _ATOMIC_STRUCTURE
 typedef volatile uint32_t atomic_t;
-
 typedef atomic_t* p_atomic_t;
 
 static inline void SetAtomic(atomic_t* Lock) {
@@ -39,6 +38,17 @@ static inline void SetAtomic(atomic_t* Lock) {
     } while (Old != 0);
 }
 
+
+static inline void SetAtomicValue(atomic_t* Target, atomic_t Value) {
+    atomic_t Old;
+    __asm__ volatile (
+        "xchg %0, %1"
+        : "=r"(Old), "+m"(*Target)
+        : "0"(Value)
+        : "memory"
+    );
+}
+
 static inline atomic_t TestAtomic(atomic_t* Lock) {
 	__asm__ volatile ("" ::: "memory");
 	return *Lock; 
@@ -47,6 +57,27 @@ static inline atomic_t TestAtomic(atomic_t* Lock) {
 static inline void UnsetAtomic(atomic_t* Lock){
 	__asm__ volatile ("" ::: "memory");
     *Lock = 0;
+}
+
+static inline atomic_t AtomicFetchAdd(atomic_t* Target, atomic_t Value) {
+    __asm__ volatile (
+        "lock xaddl %0, %1"
+        : "+r"(Value), "+m"(*Target)
+        :
+        : "memory"
+    );
+    return Value; // original value before add
+}
+
+static inline atomic_t AtomicFetchSub(atomic_t* Target, atomic_t Value) {
+    Value = -Value;
+    __asm__ volatile (
+        "lock xaddl %0, %1"
+        : "+r"(Value), "+m"(*Target)
+        :
+        : "memory"
+    );
+    return Value; // original value before sub
 }
 
 #endif

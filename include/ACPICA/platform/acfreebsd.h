@@ -213,7 +213,7 @@
 #else /* _KERNEL */
 
 #if __STDC_HOSTED__
-#include <ctype.h>
+//#include <ctype.h>
 #include <unistd.h>
 #endif
 

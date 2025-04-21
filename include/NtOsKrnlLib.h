@@ -98,7 +98,7 @@ int strncpy_s(
 
 string strcpy(
     string Destination,
-    string Source
+    const string Source
 );
 
 int strncat_s(
@@ -128,7 +128,7 @@ int strcat_s(
 
 string strcat(
     string Destination,
-    string Source
+    const string Source
 );
 
 

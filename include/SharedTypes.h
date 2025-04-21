@@ -10,7 +10,9 @@
 #define INT_MAX 2147483647
 #endif
 
-typedef uint8_t LouKIRQL;
+#include <kernel/atomic.h>
+
+typedef atomic_t LouKIRQL;
 
 typedef struct _Fixed20_12{
     int32_t FULL;

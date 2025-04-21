@@ -160,18 +160,13 @@ int TestLoop2();
 
 void InitializeDeviceManager();
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
-
+LOUSTATUS AcpiInitializeSubsystem();
 void HandleProccessorInitialization();
+LOUSTATUS AcpiInitializeObjects(uint32_t Flags);
+
+void InitializeLouACPICA();
 
 void Advanced_Kernel_Initialization(){
-    //if(LOUSTATUS_GOOD != InitFADT())LouPrint("Unable To Start FADT Handleing\n");
-
-    //if(LOUSTATUS_GOOD != InitSSDT())LouPrint("Unable To Start SSDT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSBST())LouPrint("Unable To Start SBST Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSRAT())LouPrint("Unable To Start SRAT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitBGRT())LouPrint("Unable To Start BGRT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitECDT())LouPrint("Unable To Start ECDT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSLIT())LouPrint("Unable To Start SLIT Handleing\n");
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
     HandleProccessorInitialization();
@@ -315,6 +310,7 @@ KERNEL_ENTRY Lou_kernel_start(
     Advanced_Kernel_Initialization();
 
     //SETUP DEVICES AND DRIVERS
+    InitializeLouACPICA();
 
     SetupInitialVideoDevices();
 
@@ -337,7 +333,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializePs2Mouse();
 
-    ScanTheRestOfHarware();
+    //ScanTheRestOfHarware();
     
 	
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);

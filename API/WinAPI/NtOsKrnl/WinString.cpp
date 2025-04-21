@@ -143,23 +143,6 @@ int strncpy_s(
 }
 
 LOUDDK_API_ENTRY
-string strcpy(
-    string Destination,
-    string Source
-){
-
-    if((!Source) || (!Destination)){
-        return Destination;
-    }
-
-    for(size_t Index = 0 ; Index < strlen(Source); Index++){
-        Destination[Index] = Source[Index]; 
-    }
-
-    return Destination;
-}
-
-LOUDDK_API_ENTRY
 int strncat_s(
     string Destination,
     size_t NumElements,
@@ -281,32 +264,6 @@ int strcat_s(
     return 0; // Success
 }
 
-LOUDDK_API_ENTRY
-string strcat(
-    string Destination,
-    string Source
-) {
-    // Validate inputs
-    if (!Destination || !Source)
-        return 0x00; // Return NULL if inputs are invalid
-
-    size_t destLen = 0, srcLen = 0;
-
-    // Find the end of the Destination string
-    while (Destination[destLen] != '\0') {
-        destLen++;
-    }
-
-    // Append Source to Destination
-    while (Source[srcLen] != '\0') {
-        Destination[destLen++] = Source[srcLen++];
-    }
-
-    // Null-terminate the result
-    Destination[destLen] = '\0';
-
-    return Destination; // Return the concatenated string
-}
 
 KERNEL_IMPORT
 void SetRANDSeed(uint32_t NewSeed);

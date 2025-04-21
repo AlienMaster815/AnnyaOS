@@ -67,6 +67,28 @@ void LouKeMapContinuousMemoryBlock(
     }
 }
 
+bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
+
+void LouKeUnMapContinuousMemoryBlock(
+    uint64_t VAddress,
+    uint64_t size 
+    ){
+    uint64_t i = 0;
+
+    while(i < size){
+        if(((VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+            LouUnMapAddress(VAddress + i, MEGABYTE_PAGE);
+            i += MEGABYTE_PAGE;
+        }
+        else{
+            LouUnMapAddress(VAddress + i, KILOBYTE_PAGE);
+            i += KILOBYTE_PAGE;
+        }
+        //LouPrint("I:%h : Size:%h\n",i, size);
+    }
+}
+
+
 //allocates Virtual Page 
 void* LouKeMallocVirtualPage(
     uint64_t PAddress, //in opt

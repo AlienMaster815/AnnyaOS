@@ -497,7 +497,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+//#include <ctype.h>
 #if defined (ACPI_APPLICATION) || defined(ACPI_LIBRARY)
 #include <stdio.h>
 #include <fcntl.h>

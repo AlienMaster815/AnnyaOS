@@ -82,19 +82,19 @@ ifeq ($(TARGET_ARCH),x86_64)
 #Wextra
 CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -O2 -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
-         -fstrict-aliasing -I include
+         -fstrict-aliasing -I include -Wno-unknown-pragmas
 
 #Wextra
 CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
            -fno-use-cxa-atexit -fno-threadsafe-statics -fno-common \
            -fno-builtin -fstrict-aliasing -O2 -I include \
-		   -Wno-write-strings -Wno-multichar
+		   -Wno-write-strings -Wno-multichar -Wno-unknown-pragmas
 
 endif
 
 ifeq ($(TARGET_ARCH),x86)
 CFLAGS = -c -ffreestanding -Werror -I include -Wno-multichar -mmmx -msse
-CPPFLAGS = -c -ffreestanding -O2 -Wall -fno-exceptions -fno-rtti -msse -mmmx -Werror -Wno-write-strings -fno-use-cxa-atexit -I include -Wno-multichar
+CPPFLAGS = -c -ffreestanding -O2 -Wall -fno-exceptions -fno-rtti -msse -mmmx -Werror -Wno-write-strings -fno-use-cxa-atexit -I include -Wno-multichar 
 endif
 
 

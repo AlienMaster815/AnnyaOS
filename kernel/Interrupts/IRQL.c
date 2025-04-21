@@ -39,13 +39,13 @@ void LouKeSetIrql(
 ){
     if(GetAPICStatus()){
         if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-            *OldIrql = SystemInterruptLevel; // save the old irql1
+            SetAtomicValue(OldIrql, SystemInterruptLevel); // save the old irql1
         }
         //TODO: Once User Mode Gets hacked up a bit will implement user things and drivers when drivers are hacked up
 
         switch (NewIrql){
             case PASSIVE_LEVEL:{
-                SystemInterruptLevel = PASSIVE_LEVEL;
+                SetAtomicValue(&SystemInterruptLevel, PASSIVE_LEVEL);
                 SetAllInterrupts(true);
                 return;
             }
@@ -66,7 +66,7 @@ void LouKeSetIrql(
                 return;
             }
             case HIGH_LEVEL:{
-                SystemInterruptLevel = HIGH_LEVEL;
+                SetAtomicValue(&SystemInterruptLevel, HIGH_LEVEL);
                 SetAllInterrupts(false);
             }
             default: // error case
@@ -79,7 +79,7 @@ void KeRaiseIrql( // for wdk compatibility
     LouKIRQL DispatchLevel, 
     LouKIRQL* OldIrql
 ){
-    if(*OldIrql >= DispatchLevel)return;
+    if(TestAtomic(OldIrql) >= DispatchLevel)return;
     LouKeSetIrql(DispatchLevel, OldIrql);
 }
 
