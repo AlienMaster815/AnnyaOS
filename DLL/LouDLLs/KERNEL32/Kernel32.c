@@ -96,7 +96,7 @@ HANDLE LoadLibraryA(string DllName){
     while(KulaPacket[0] == 0){
         LouCALL(LOULOADLIBRARYA, (uint64_t)&KulaPacket, 0);
     }
-    MutexSyncronize(&LoadLibraryAMutex);
+    MutexSynchronize(&LoadLibraryAMutex);
     return (HANDLE)KulaPacket[2];
 }
 

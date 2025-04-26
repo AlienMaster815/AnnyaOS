@@ -29,47 +29,43 @@ uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameter
 #define ACTIVE_THREAD 0
 #define INACTIVE_THREAD 1
 
+#include "atomic.h"
 
-typedef struct {
-    bool locked;
-    uintptr_t Handle;
-    uint64_t  PrivaledgeLevel;
+typedef struct _mutex_t{
+    atomic_t locked;
+    atomic_t Handle;
+    atomic_t PrivaledgeLevel;
 } mutex_t;
 
 static inline void MutexLock(mutex_t* m){
-    while(m->locked == true){
-        //spinlock
+    while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
+        // spin
     }
-    m->locked = true;
 }
 
-static inline void MutexSyncronize(mutex_t* m){
-    while(m->locked){
-        //spinlock
+static inline void MutexSynchronize(mutex_t* m){
+    while (m->locked.counter) {
+        // spin until it's unlocked
     }
 }
 
 static inline bool MutexIsLocked(mutex_t* m){
-    if(m->locked)return true;
-    return false;
+    return m->locked.counter;
 }
 
-
-
 static inline void MutexUnlock(mutex_t* m){
-    m->locked = false;
+    __atomic_clear(&m->locked.counter, __ATOMIC_RELEASE);
 }
 
 static inline uintptr_t MutexPriorityLock(
     mutex_t* m, 
     uintptr_t Handle, 
-    uint64_t Privaledge
+    int Privaledge
 ){
-
-    if((m->locked) && (m->PrivaledgeLevel < Privaledge)){
-        uintptr_t OldHandle = m->Handle;
-        m->Handle = Handle;
-        m->PrivaledgeLevel = Privaledge;
+    if((m->locked.counter) && (m->PrivaledgeLevel.counter < Privaledge)){
+        uintptr_t OldHandle = m->Handle.counter;
+        m->Handle.counter = Handle;
+        m->PrivaledgeLevel.counter = Privaledge;
         return OldHandle;
     }
     MutexLock(m);
@@ -77,25 +73,26 @@ static inline uintptr_t MutexPriorityLock(
 }
 
 static inline void MutexPriorityUnlock(mutex_t* m){
-    m->Handle = 0x00;
-    m->PrivaledgeLevel = 0x00;
+    m->Handle.counter = 0x00;
+    m->PrivaledgeLevel.counter = 0x00;
     MutexUnlock(m);
 }
+
 
 typedef struct {
     mutex_t Lock;
 }spinlock_t;
 
 static inline void SpinlockSyncronize(spinlock_t* s){
-    while(s->Lock.locked){
-
+    while (s->Lock.locked.counter){
+        // spin until unlocked
     }
 }
 
 static inline bool SpinlockIsLocked(spinlock_t* s){
-    if(s->Lock.locked)return true;
-    return false;
+    return s->Lock.locked.counter;
 }
+
 
 #ifndef _KERNEL_MODULE_
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);

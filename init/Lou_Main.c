@@ -335,9 +335,9 @@ KERNEL_ENTRY Lou_kernel_start(
 
     //EnablePs2Keyboard();
 
-    //InitializePs2Mouse();
+    InitializePs2Mouse();
 
-    ScanTheRestOfHarware();
+    //ScanTheRestOfHarware();
     
     //SMPInit();
 	

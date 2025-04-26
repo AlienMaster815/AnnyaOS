@@ -76,16 +76,6 @@ void start_aps() {
     LouPrint("Tailcall Is At:%h\n", getTrampolineAddressTailCall());
     for(uint16_t i = 1; i < NumberOfProcessors; i++){
 
-        EventHandle SmpWakeEvent = LouKeInitiateStartSmpEvent(i);
-        
-        LouPrint("Waking Up Processor: ProcID:%d\n", i);
-        send_ipi(i, ICR_INIT | IPI_DEST_ALL_EXCLUDING_SELF);
-
-        uint32_t vectorAddress = (uint32_t)getTrampolineAddressTailCall() >> 12; // Shift right by 12 to fit into the vector field
-
-        send_ipi(i, ICR_STARTUP | vectorAddress);
-
-        LouKeWaitForSmpEventToFinish(SmpWakeEvent);
 
         LouPrint("Processor: ProcID:%d : Successfully Started\n", i);
 

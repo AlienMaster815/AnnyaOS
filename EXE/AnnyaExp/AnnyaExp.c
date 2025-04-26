@@ -128,7 +128,7 @@ DWORD ClockThread(PVOID Args){
 }
 
 void StartDesktop(){
- 
+    
     LouPrint("Hello UserMode Im Annya :) :: Starting Desktop\n");
     Background = AnnyaOpenBitmapImage("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
 
@@ -191,7 +191,6 @@ int WinMain(
     int       CmdShow 
 ){
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
-
     LouPrint("Loading ZLIB\n");
 
     ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");

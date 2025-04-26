@@ -22,6 +22,9 @@
 
 #ifndef _ATOMIC_STRUCTURE
 #define _ATOMIC_STRUCTURE
+
+#include <stdatomic.h>
+
 typedef struct {
 	int counter;
 }atomic_t;
