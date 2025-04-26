@@ -172,6 +172,4 @@
 #include "acpiosxf.h"           /* OSL interfaces (ACPICA-to-OS) */
 #include "acpixf.h"             /* ACPI core subsystem external interfaces */
 
-int LouPrint(string Format, ...);
-
 #endif /* __ACPI_H__ */

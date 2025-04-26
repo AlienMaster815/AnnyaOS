@@ -179,7 +179,7 @@
  */
 #define ACPI_UNUSED_VAR
 
-//#include <io.h>
+#include <io.h>
 
 #define ACPI_FLUSH_CPU_CACHE() Wbinvd()
 void Wbinvd(void);

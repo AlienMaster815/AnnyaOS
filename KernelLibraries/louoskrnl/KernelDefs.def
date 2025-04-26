@@ -102,7 +102,7 @@ EXPORTS
     AtaStdQcDefer
     LouMallocEx
     LouKeWaitForMmioState
-    LouKeCreateFixedMemoryPool
+    LouKeCreateMemoryPool
     outw
     LouKeMalloc
     LouKeMallocEx

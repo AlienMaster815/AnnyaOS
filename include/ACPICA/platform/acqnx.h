@@ -165,7 +165,7 @@
 #define COMPILER_DEPENDENT_INT64  int64_t
 #define COMPILER_DEPENDENT_UINT64 uint64_t
 
-//#include <ctype.h>
+#include <ctype.h>
 #include <stdint.h>
 #include <sys/neutrino.h>
 

@@ -199,10 +199,10 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[5] = "memcmp";
     ImportTables[4].FunctionName[6] = "strncpy";
     ImportTables[4].FunctionName[7] = "insw";
-    ImportTables[4].FunctionName[8] = "LouKeFreeFromFixedPool";
-    ImportTables[4].FunctionName[9] = "LouKeMallocFromFixedPool";
-    ImportTables[4].FunctionName[10] = "LouKeFreeFixedPool";
-    ImportTables[4].FunctionName[11] = "LouKeMapFixedPool";
+    ImportTables[4].FunctionName[8] = "LouKeFreeFromPool";
+    ImportTables[4].FunctionName[9] = "LouKeMallocFromPool";
+    ImportTables[4].FunctionName[10] = "LouKeFreePool";
+    ImportTables[4].FunctionName[11] = "LouKeMapPool";
     ImportTables[4].FunctionName[12] = "RequestPhysicalAddress";
     ImportTables[4].FunctionName[13] = "LouKeVMemmoryGetSize";
     ImportTables[4].FunctionName[14] = "LouKeMapContinuousMemoryBlock";
@@ -293,7 +293,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[99] = "LouMallocEx";
     ImportTables[4].FunctionName[100] = "memset";
     ImportTables[4].FunctionName[101] = "LouKeWaitForMmioState";
-    ImportTables[4].FunctionName[102] = "LouKeCreateFixedPool";
+    ImportTables[4].FunctionName[102] = "LouKeCreateMemoryPool";
     ImportTables[4].FunctionName[103] = "outw";
     ImportTables[4].FunctionName[104] = "LouKeMallocEx";
     ImportTables[4].FunctionName[105] = "LouKeMalloc";
@@ -313,9 +313,9 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[6] = (uint64_t)strncpy;
     ImportTables[4].VirtualAddress[7] = (uint64_t)insw;
     ImportTables[4].VirtualAddress[8] = (uint64_t)outsw;
-    ImportTables[4].VirtualAddress[9] = (uint64_t)LouKeFreeFromFixedPool;
-    ImportTables[4].VirtualAddress[10] = (uint64_t)LouKeMallocFromFixedPool;
-    ImportTables[4].VirtualAddress[11] = (uint64_t)LouKeMapFixedPool;
+    ImportTables[4].VirtualAddress[9] = (uint64_t)LouKeFreeFromPool;
+    ImportTables[4].VirtualAddress[10] = (uint64_t)LouKeMallocFromPool;
+    ImportTables[4].VirtualAddress[11] = (uint64_t)LouKeMapPool;
     ImportTables[4].VirtualAddress[12] = (uint64_t)RequestPhysicalAddress;
     ImportTables[4].VirtualAddress[13] = (uint64_t)LouKeVMemmoryGetSize;
     ImportTables[4].VirtualAddress[14] = (uint64_t)LouKeMapContinuousMemoryBlock;
@@ -404,7 +404,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[99] = (uint64_t)LouMallocEx;
     ImportTables[4].VirtualAddress[100] = (uint64_t)memset;
     ImportTables[4].VirtualAddress[101] = (uint64_t)LouKeWaitForMmioState;
-    ImportTables[4].VirtualAddress[102] = (uint64_t)LouKeCreateFixedPool;
+    ImportTables[4].VirtualAddress[102] = (uint64_t)LouKeCreateMemoryPool;
     ImportTables[4].VirtualAddress[103] = (uint64_t)outw; 
     ImportTables[4].VirtualAddress[104] = (uint64_t)LouKeMallocEx;
     ImportTables[4].VirtualAddress[105] = (uint64_t)LouKeMalloc;

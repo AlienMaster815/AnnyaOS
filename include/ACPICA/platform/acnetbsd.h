@@ -201,7 +201,7 @@
 
 #else /* defined(_KERNEL) || defined(_STANDALONE) */
 
-//#include <ctype.h>
+#include <ctype.h>
 #include <stdint.h>
 
 /* Not building kernel code, so use libc */

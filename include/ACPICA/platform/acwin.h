@@ -152,7 +152,7 @@
 #ifndef __ACWIN_H__
 #define __ACWIN_H__
 
-//#include <io.h>
+#include <io.h>
 
 #define ACPI_USE_STANDARD_HEADERS
 #define ACPI_USE_SYSTEM_CLIBRARY
@@ -220,7 +220,7 @@ typedef COMPILER_DEPENDENT_UINT64       u64;
 #define isatty          _isatty
 
 #if _MSC_VER <= 1200 /* Versions below VC++ 6 */
-//#define vsnprintf       _vsnprintf
+#define vsnprintf       _vsnprintf
 #endif
 #define O_RDONLY        _O_RDONLY
 #define O_BINARY        _O_BINARY
@@ -245,7 +245,11 @@ typedef COMPILER_DEPENDENT_UINT64       u64;
 
 /*! [Begin] no source code translation  */
 
+#ifdef ACPI_APPLICATION
 #define ACPI_FLUSH_CPU_CACHE()
+#else
+#define ACPI_FLUSH_CPU_CACHE()  __asm {WBINVD}
+#endif
 
 #ifdef _DEBUG
 #define ACPI_SIMPLE_RETURN_MACROS
@@ -258,5 +262,50 @@ typedef COMPILER_DEPENDENT_UINT64       u64;
  *
  * Note: Handles case where the FACS pointer is null
  */
+#define ACPI_ACQUIRE_GLOBAL_LOCK(FacsPtr, Acq)  __asm \
+{                                                   \
+        __asm mov           eax, 0xFF               \
+        __asm mov           ecx, FacsPtr            \
+        __asm or            ecx, ecx                \
+        __asm jz            exit_acq                \
+        __asm lea           ecx, [ecx].GlobalLock   \
+                                                    \
+        __asm acq10:                                \
+        __asm mov           eax, [ecx]              \
+        __asm mov           edx, eax                \
+        __asm and           edx, 0xFFFFFFFE         \
+        __asm bts           edx, 1                  \
+        __asm adc           edx, 0                  \
+        __asm lock cmpxchg  dword ptr [ecx], edx    \
+        __asm jnz           acq10                   \
+                                                    \
+        __asm cmp           dl, 3                   \
+        __asm sbb           eax, eax                \
+                                                    \
+        __asm exit_acq:                             \
+        __asm mov           Acq, al                 \
+}
+
+#define ACPI_RELEASE_GLOBAL_LOCK(FacsPtr, Pnd) __asm \
+{                                                   \
+        __asm xor           eax, eax                \
+        __asm mov           ecx, FacsPtr            \
+        __asm or            ecx, ecx                \
+        __asm jz            exit_rel                \
+        __asm lea           ecx, [ecx].GlobalLock   \
+                                                    \
+        __asm Rel10:                                \
+        __asm mov           eax, [ecx]              \
+        __asm mov           edx, eax                \
+        __asm and           edx, 0xFFFFFFFC         \
+        __asm lock cmpxchg  dword ptr [ecx], edx    \
+        __asm jnz           Rel10                   \
+                                                    \
+        __asm cmp           dl, 3                   \
+        __asm and           eax, 1                  \
+                                                    \
+        __asm exit_rel:                             \
+        __asm mov           Pnd, al                 \
+}
 
 #endif /* __ACWIN_H__ */

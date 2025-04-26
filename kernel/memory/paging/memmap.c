@@ -351,6 +351,14 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
 
 
 
+
+bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize) {
+
+    return true;    
+}
+
+
+
 uint64_t GetPageOfFaultValue(uint64_t VAddress) {
 
     return 0;
@@ -533,49 +541,4 @@ uint64_t ScanPageEntries(uint64_t* SearchingPage, bool MegabytPage){
 
 uint64_t LouKeGetPageAddress(uint64_t* Page){
     return ScanPageEntries(Page, IsMegabytePage(Page));
-}
-
-bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize) {
-    // Align virtual address
-    if (PageSize == MEGABYTE_PAGE) {
-        VAddress &= ~(MEGABYTE_PAGE - 1);
-    } else if (PageSize == KILOBYTE_PAGE) {
-        VAddress &= ~(KILOBYTE_PAGE - 1);
-    } else {
-        return false; // Unsupported page size
-    }
-
-    // Step 1: Get page table entries
-    uint64_t L4Entry = 0, L3Entry = 0, L2Entry = 0, L1Entry = 0;
-    CalculateTableMarks(VAddress, &L4Entry, &L3Entry, &L2Entry, &L1Entry);
-
-    PML* PML4 = GetPageBase();
-    if (!PML4) return false;
-
-    // Level 4: PML4 -> PDPT (L3)
-    uint64_t* PDPT = (uint64_t*)(PML4->PML4.entries[L4Entry] & ~(PAGE_TABLE_ALIGNMENT - 1));
-    if (!PDPT) return false;
-
-    // Level 3: PDPT -> PD (L2)
-    uint64_t* PD = (uint64_t*)(PDPT[L3Entry] & ~(PAGE_TABLE_ALIGNMENT - 1));
-    if (!PD) return false;
-
-    if (PageSize == MEGABYTE_PAGE) {
-        // Check if the entry is valid and large
-        if (PD[L2Entry] & (1 << 7)) {
-            PD[L2Entry] = 0x00;                // Clear the 2MB mapping
-            PageFlush(VAddress);               // Invalidate
-            return true;
-        }
-        return false;
-    }
-
-    // Level 2: PD -> PT (L1)
-    uint64_t* PT = (uint64_t*)(PD[L2Entry] & ~(PAGE_TABLE_ALIGNMENT - 1));
-    if (!PT) return false;
-
-    // Level 1: Unmap 4KB entry
-    PT[L1Entry] = 0x00;
-    PageFlush(VAddress);
-    return true;
 }

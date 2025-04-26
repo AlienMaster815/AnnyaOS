@@ -473,7 +473,3 @@ void LouKeHandleSystemIsBios(){
 void* GetEfiTable(){
 	return (void*)EFI_TABLE;
 }
-
-uintptr_t GetRsdpMaster(){
-	return RSDP_MASTER;
-}

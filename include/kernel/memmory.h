@@ -113,10 +113,6 @@ typedef struct __attribute__((packed, aligned(4096))) _PML {
 
 #ifndef _KERNEL_MODULE_
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-void LouKeUnMapContinuousMemoryBlock(
-    uint64_t VAddress,
-    uint64_t size 
-);
 bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
 uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
@@ -194,10 +190,6 @@ KERNEL_IMPORT void MapIoMemory(
 
 #ifndef _KERNEL_MODULE_
 KERNEL_IMPORT bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-KERNEL_IMPORT void LouKeUnMapContinuousMemoryBlock(
-    uint64_t VAddress,
-    uint64_t size 
-);
 KERNEL_IMPORT void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
 KERNEL_IMPORT void LouFree(uint8_t* Addr);
 KERNEL_IMPORT void* LouMalloc(size_t BytesToAllocate);
@@ -254,30 +246,16 @@ KERNEL_IMPORT{
     __val < __min ? __min : __val > __max ? __max : __val; \
 })
 
-static inline size_t CALCULATE_ARAY_ADDRESS(size_t Member, size_t Size, size_t Alignement){
-    //calculates raw offset of an array memeber
-    size_t Result = 0;
-    for(size_t i = 0 ; i < Member; i++){
-        Result += Size;
-        Result = ROUND_UP64(Result, Alignement);
-    }
-    return Result;
-}
-
-
 typedef struct LMPOOL_DIRECTORY{
-    ListHeader                  List;
-    string                      Tag;
-    struct _spinlock_t*         PoolLock; //pointer because i cant seem to adjust the headers right
-    bool                        FixedSizePool;
-    uint64_t                    Location;
-    uint64_t                    VLocation;
-    uint64_t                    PoolSize;
-    uint64_t                    ObjectSize;
-    uint64_t                    Flags;
-    uint8_t*                    PoolBitMap;
+    ListHeader List;
+    string Tag;
+    uint64_t Location;
+    uint64_t VLocation;
+    uint64_t PoolSize;
+    uint64_t ObjectSize;
+    uint64_t Flags;
+    uint8_t* PoolBitMap;
 }LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
-
 
 typedef struct _BO{
     ListHeader Header;
@@ -348,7 +326,7 @@ LOUSTATUS RequestPhysicalAddress(
     uint64_t* PAddress
 );
 
-PLMPOOL_DIRECTORY LouKeMapFixedPool(
+PLMPOOL_DIRECTORY LouKeMapPool(
     uint64_t LocationOfPool,
     uint64_t LocationOf,
     uint64_t PoolSize,
@@ -357,7 +335,7 @@ PLMPOOL_DIRECTORY LouKeMapFixedPool(
     uint64_t Flags
 );
 
-PLMPOOL_DIRECTORY LouKeCreateFixedPool(
+PLMPOOL_DIRECTORY LouKeCreateMemoryPool(
     uint64_t NumberOfPoolMembers,
     uint64_t ObjectSize,
     string Tag,
@@ -365,13 +343,15 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     uint64_t PageFlags
 );
 
-void LouKeFreeFixedPool(PLMPOOL_DIRECTORY PoolToFree);
+void LouKeFreePool(PLMPOOL_DIRECTORY PoolToFree);
 
-void* LouKeMallocFromFixedPool(
-    PLMPOOL_DIRECTORY Pool
+void* LouKeMallocFromPool(
+    PLMPOOL_DIRECTORY Pool, 
+    uint64_t size, 
+    uint64_t* Offset
 );
 
-void LouKeFreeFromFixedPool(PLMPOOL_DIRECTORY Pool, void* Address);
+void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 
 static inline
 bool RangeDoesNotInterfere(
@@ -494,7 +474,7 @@ KERNEL_EXPORT void* LouKeMallocFromPool(
 );
 KERNEL_EXPORT void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 
-KERNEL_EXPORT POOL LouKeCreateFixedMemoryPool(
+KERNEL_EXPORT POOL LouKeCreateMemoryPool(
     uint64_t NumberOfPoolMembers,
     uint64_t ObjectSize,
     string Tag,

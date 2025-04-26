@@ -176,7 +176,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <ctype.h>
+#include <ctype.h>
 #include <zephyr/fs/fs.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/sys/__assert.h>

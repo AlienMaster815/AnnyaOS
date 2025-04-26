@@ -4,7 +4,6 @@
 typedef void* PTHREAD;
 typedef void* PTHREAD_DATA;
 
-
 #ifdef __cplusplus
 #include <LouDDK.h>
 #ifndef _KERNEL_MODULE_
@@ -38,8 +37,6 @@ typedef struct {
     uint64_t  PrivaledgeLevel;
 } mutex_t;
 
-
-
 static inline void MutexLock(mutex_t* m){
     SetAtomic(&m->locked);
 }
@@ -61,9 +58,8 @@ static inline void MutexUnlock(mutex_t* m){
     UnsetAtomic(&m->locked);
 }
 
-typedef struct _spinlock_t{
-    mutex_t     Lock;
-    LouKIRQL    Irql;
+typedef struct {
+    mutex_t Lock;
 }spinlock_t;
 
 static inline void SpinlockSyncronize(spinlock_t* s){
@@ -75,31 +71,6 @@ static inline void SpinlockSyncronize(spinlock_t* s){
 static inline bool SpinlockIsLocked(spinlock_t* s){
     if(TestAtomic(&s->Lock.locked))return true;
     return false;
-}
-
-typedef struct {
-    atomic_t    Count;
-    atomic_t    Limit; 
-    mutex_t     Lock;
-}semaphore_t;
-
-static inline void SemaphoreLock(semaphore_t* S){
-    atomic_t old = AtomicFetchAdd(&S->Count, 1);
-    if (old >= S->Limit) {
-        MutexLock(&S->Lock);
-    }    
-}
-
-static inline void SemaphoreUnlock(semaphore_t* S){
-    atomic_t old = AtomicFetchSub(&S->Count, 1);
-    if (old > S->Limit) {
-        MutexUnlock(&S->Lock);
-    }    
-}
-
-static inline void SemaphoreInitialize(semaphore_t* S, atomic_t Limit){
-    SetAtomicValue(&S->Limit, Limit);
-    SetAtomicValue(&S->Count, 0);
 }
 
 #ifndef _KERNEL_MODULE_
@@ -118,6 +89,5 @@ typedef enum{
     KERNEL_THREAD = 1,
     USER_THREAD = 2,
 }THREAD_TYPE;
-
 
 #endif
