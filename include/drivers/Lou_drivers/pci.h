@@ -103,7 +103,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uintptr_t 	DeviceExtendedObject; 
 	uintptr_t 	DevicePrivateData;
 	uintptr_t 	VgaDecode; //only video devces
-	uint8_t		ExpressDevice;
+	bool 		ExpressDevice;
 }PCI_DEVICE_OBJECT, * P_PCI_DEVICE_OBJECT;
 #endif
 
@@ -280,7 +280,6 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uintptr_t 	DeviceExtendedObject; 
 	uintptr_t 	DevicePrivateData;
 	uintptr_t 	VgaDecode; //only video devces
-	uint8_t		ExpressDevice;
 }PCI_DEVICE_OBJECT, * P_PCI_DEVICE_OBJECT;
 #endif
 

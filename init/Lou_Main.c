@@ -161,11 +161,12 @@ int TestLoop2();
 void InitializeDeviceManager();
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 
+void LouKeInitializeFirmwareDeviceParseing();
 void HandleProccessorInitialization();
 
 void Advanced_Kernel_Initialization(){
     //if(LOUSTATUS_GOOD != InitFADT())LouPrint("Unable To Start FADT Handleing\n");
-
+    LouKeInitializeFirmwareDeviceParseing();
     //if(LOUSTATUS_GOOD != InitSSDT())LouPrint("Unable To Start SSDT Handleing\n");
     //if(LOUSTATUS_GOOD != InitSBST())LouPrint("Unable To Start SBST Handleing\n");
     //if(LOUSTATUS_GOOD != InitSRAT())LouPrint("Unable To Start SRAT Handleing\n");

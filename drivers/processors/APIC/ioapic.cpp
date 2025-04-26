@@ -185,6 +185,17 @@ bool InitializeIoApic(uint64_t IoApicNumber, uint64_t MappedArea){
 
     }
 
+    
+    //InitializeIoApicIRQ(
+    //    0x02,
+    //    0x22,
+    //    0,
+    //    0, 
+    //    0,
+    //    0,
+    //    0
+    //);
+
     return true;
 }
 
