@@ -2,28 +2,6 @@
 
 #ifndef _INTERRUPTS_H
 #define _INTERRUPTS_H
-
-#ifndef __cplusplus
-//#include <LouDDK.h>
-#else
-//#include <LouDDK.h>
-extern "C"{
-#endif
-
-void InitializeIoApicIRQ(
-    uint8_t IRQ,
-    uint8_t Vector,
-    uint8_t DeliveryMode,
-    uint8_t Destination, 
-    uint8_t Polarity,
-    uint8_t TriggerMode,
-    uint8_t DestinationUnit
-);
-
-#ifdef __cplusplus
-}
-#endif
-
 #pragma pack(push, 1)
 
 #define DEBUG_TRAP asm ("int $0x03");
@@ -91,27 +69,6 @@ void InitializeIoApicIRQ(
 #define INTERRUPT_SERVICE_ROUTINE_46 46
 #define INTERRUPT_SERVICE_ROUTINE_47 47
 
-#define APIC_FIXED_DESTINATION  0b000
-#define APIC_SMI_DESTINATION    0b010
-#define APIC_NMI_DESTINATION    0b100
-#define APIC_INIT_DESTINATION   0b101
-#define APIC_EXTINT_DESTINATION 0b111
-
-#define APIC_POLARITY_5V_HIGH   0
-#define APIC_POLARITY_3V_LOW    1
-
-#define APIC_TRIGGER_EDGE_SENSITIVE  0
-#define APIC_TRIGGER_LEVEL_SENSITIVE 1
-
-#define APIC_MASK_BIT                1 << 16
-
-#define APIC_PHYSICAL_MODE          0
-#define APIC_LOGICAL_MODE           1
-
-#define APIC_DESTINATION_BIT        1 << 11
-#define TRIGGER_MODE_BIT            1 << 15
-#define APIC_POLARITY_BIT           1 << 13
-#define APIC_DELIVERY_SHIFT         8
 
 
 #define PASSIVE_LEVEL 0
@@ -224,7 +181,14 @@ LOUSTATUS UpdateIDT(bool Init);
 void SetInterruptFlags();
 void UnSetInterruptFlags();
 
-
+struct interrupt_frame
+{
+    uint32_t ip;
+    uint32_t cs;
+    uint32_t flags;
+    uint32_t sp;
+    uint32_t ss;
+};
 
 void LouKeSetIrql(
     LouKIRQL  NewIrql,
@@ -241,11 +205,8 @@ KERNEL_IMPORT void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );
-
 #endif
 #endif
 
 #pragma pack(pop)
 #endif
-
-

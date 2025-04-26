@@ -225,63 +225,9 @@ extern void ISR197();
 extern void ISR198();
 extern void ISR199();
 extern void ISR200();
-extern void ISR201();
-extern void ISR202();
-extern void ISR203();
-extern void ISR204();
-extern void ISR205();
-extern void ISR206();
-extern void ISR207();
-extern void ISR208();
-extern void ISR209();
-extern void ISR210();
-extern void ISR211();
-extern void ISR212();
-extern void ISR213();
-extern void ISR214();
-extern void ISR215();
-extern void ISR216();
-extern void ISR217();
-extern void ISR218();
-extern void ISR219();
-extern void ISR220();
-extern void ISR221();
-extern void ISR222();
-extern void ISR223();
-extern void ISR224();
-extern void ISR225();
-extern void ISR226();
-extern void ISR227();
-extern void ISR228();
-extern void ISR229();
-extern void ISR230();
-extern void ISR231();
-extern void ISR232();
-extern void ISR233();
-extern void ISR234();
-extern void ISR235();
-extern void ISR236();
-extern void ISR237();
-extern void ISR238();
-extern void ISR239();
-extern void ISR240();
-extern void ISR241();
-extern void ISR242();
-extern void ISR243();
-extern void ISR244();
-extern void ISR245();
-extern void ISR246();
-extern void ISR247();
-extern void ISR248();
-extern void ISR249();
-extern void ISR250();
-extern void ISR251();
-extern void ISR252();
-extern void ISR253();
-extern void ISR254();
 
 
-void(*Handler[255])() = {
+void(*Handler[201])() = {
     ISR0,
     ISR1,
     ISR2,
@@ -483,61 +429,7 @@ void(*Handler[255])() = {
     ISR197,
     ISR198,
     ISR199,
-    ISR200,
-    ISR201,
-    ISR202,
-    ISR203,
-    ISR204,
-    ISR205,
-    ISR206,
-    ISR207,
-    ISR208,
-    ISR209,
-    ISR210,
-    ISR211,
-    ISR212,
-    ISR213,
-    ISR214,
-    ISR215,
-    ISR216,
-    ISR217,
-    ISR218,
-    ISR219,
-    ISR220,
-    ISR221,
-    ISR222,
-    ISR223,
-    ISR224,
-    ISR225,
-    ISR226,
-    ISR227,
-    ISR228,
-    ISR229,
-    ISR230,
-    ISR231,
-    ISR232,
-    ISR233,
-    ISR234,
-    ISR235,
-    ISR236,
-    ISR237,
-    ISR238,
-    ISR239,
-    ISR240,
-    ISR241,
-    ISR242,
-    ISR243,
-    ISR244,
-    ISR245,
-    ISR246,
-    ISR247,
-    ISR248,
-    ISR249,
-    ISR250,
-    ISR251,
-    ISR252,
-    ISR253,
-    ISR254,
+    ISR200
 }; 
 
 extern void HandleSwitch();
@@ -589,7 +481,7 @@ LOUSTATUS SetBasicInterrupts(bool Init){
     #ifdef __x86_64__
     if(Init){
 
-        for (uint8_t i = 0; i < 255; i++ ) {
+        for (uint8_t i = 0; i <= 200; i++ ) {
             set_idt_gate(i, Handler[i], cs_value, 0, 0x8E);   //Everything else
         }
         set_idt_gate(0x80, Handler[0x80], cs_value, 1, 0xEE); //MSVC Systemcall Stack
@@ -605,7 +497,7 @@ LOUSTATUS SetBasicInterrupts(bool Init){
     #endif
     #ifdef __i386__
     if(Init){
-        for (uint8_t i = 0; i < 255; i++) {
+        for (uint8_t i = 0; i <= 200; i++) {
             SetPicIDTGate(i, Handler[i]);
         }
         return 0;

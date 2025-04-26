@@ -29,33 +29,57 @@ uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameter
 #define ACTIVE_THREAD 0
 #define INACTIVE_THREAD 1
 
-#include "atomic.h"
 
 typedef struct {
-    atomic_t  locked;
+    bool locked;
     uintptr_t Handle;
     uint64_t  PrivaledgeLevel;
 } mutex_t;
 
 static inline void MutexLock(mutex_t* m){
-    SetAtomic(&m->locked);
+    while(m->locked == true){
+        //spinlock
+    }
+    m->locked = true;
 }
 
 static inline void MutexSyncronize(mutex_t* m){
-    while(TestAtomic(&m->locked)){
+    while(m->locked){
         //spinlock
     }
 }
 
 static inline bool MutexIsLocked(mutex_t* m){
-    if(TestAtomic(&m->locked))return true;
+    if(m->locked)return true;
     return false;
 }
 
 
 
 static inline void MutexUnlock(mutex_t* m){
-    UnsetAtomic(&m->locked);
+    m->locked = false;
+}
+
+static inline uintptr_t MutexPriorityLock(
+    mutex_t* m, 
+    uintptr_t Handle, 
+    uint64_t Privaledge
+){
+
+    if((m->locked) && (m->PrivaledgeLevel < Privaledge)){
+        uintptr_t OldHandle = m->Handle;
+        m->Handle = Handle;
+        m->PrivaledgeLevel = Privaledge;
+        return OldHandle;
+    }
+    MutexLock(m);
+    return 0;
+}
+
+static inline void MutexPriorityUnlock(mutex_t* m){
+    m->Handle = 0x00;
+    m->PrivaledgeLevel = 0x00;
+    MutexUnlock(m);
 }
 
 typedef struct {
@@ -63,13 +87,13 @@ typedef struct {
 }spinlock_t;
 
 static inline void SpinlockSyncronize(spinlock_t* s){
-    while(TestAtomic(&s->Lock.locked)){
+    while(s->Lock.locked){
 
     }
 }
 
 static inline bool SpinlockIsLocked(spinlock_t* s){
-    if(TestAtomic(&s->Lock.locked))return true;
+    if(s->Lock.locked)return true;
     return false;
 }
 

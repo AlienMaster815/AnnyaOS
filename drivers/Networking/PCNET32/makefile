@@ -3,7 +3,7 @@ CC = x86_64-w64-mingw32-g++
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings
 
 # Paths
-INCLUDES = -I../../../../../include
+INCLUDES = -I../../../include
 
 
 # Source and target
@@ -16,7 +16,7 @@ TARGET = PCNET32.SYS
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
 
 # Clean rule
 clean:

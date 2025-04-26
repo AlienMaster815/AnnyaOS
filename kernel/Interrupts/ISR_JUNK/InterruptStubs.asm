@@ -302,61 +302,6 @@ global ISR197
 global ISR198
 global ISR199
 global ISR200
-global ISR201
-global ISR202
-global ISR203
-global ISR204
-global ISR205
-global ISR206
-global ISR207
-global ISR208
-global ISR209
-global ISR210
-global ISR211
-global ISR212
-global ISR213
-global ISR214
-global ISR215
-global ISR216
-global ISR217
-global ISR218
-global ISR219
-global ISR220
-global ISR221
-global ISR222
-global ISR223
-global ISR224
-global ISR225
-global ISR226
-global ISR227
-global ISR228
-global ISR229
-global ISR230
-global ISR231
-global ISR232
-global ISR233
-global ISR234
-global ISR235
-global ISR236
-global ISR237
-global ISR238
-global ISR239
-global ISR240
-global ISR241
-global ISR242
-global ISR243
-global ISR244
-global ISR245
-global ISR246
-global ISR247
-global ISR248
-global ISR249
-global ISR250
-global ISR251
-global ISR252
-global ISR253
-global ISR254
-global ISR255
 
 global HandleSwitch
 global StoreContext 
@@ -380,166 +325,242 @@ ThreadStart:
 	hlt
 
 ISR0:
+	;hlt
 	pusha
 	push 0
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR1:
+	;hlt
 	pusha
 	push 1
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	popa
+	ret
 
 ISR2:
+	;hlt
 	pusha
 	push 2
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR3:
+	;hlt
 	pusha
 	push 3
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR4:
+	;hlt
 	pusha
 	push 4
-	jmp HANDLE_FUNCTION
-
+	mov [InterruptNum], ah
+	Handle
 
 ISR5:
+	;hlt
 	pusha
 	push 5
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR6:
+	;hlt
 	pusha
 	push 6
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR7:
+	;hlt
 	pusha
 	push 7
-	jmp HANDLE_FUNCTION
-
-
+	mov [InterruptNum], ah
+	Handle
+	hlt
 ISR8:
+	;hlt
 	pusha
 	push 8
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR9:
+	;hlt
 	pusha
 	push 9
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR10:
+	;hlt
 	pusha
 	push 10
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR11:
+	;hlt
 	pusha
 	push 11
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR12:
+	;hlt
 	pusha
 	push 12
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR13:
-	pusha 
+	;GPF
+	pusha
 	push 13
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	popa
+	iretq
 
 ISR14:
-	pusha 
-	push 14
-	jmp HANDLE_FUNCTION
+	;hlt
+	mov [raxp], rax
+    pop rax
+    mov [InterruptCode], rax
+    xor rax, rax
+    mov rax, [raxp]
+    pusha
+    push 14
+    mov [InterruptNum], ah
+    Handle
+    popa
+    iretq
 
 ISR15:
+	;hlt
 	pusha
 	push 15
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR16:
+	;hlt
 	pusha
 	push 16
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR17:
+	;hlt
 	pusha
 	push 17
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR18:
-	pusha 
+	;hlt
+	pusha
 	push 18
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR19:
+	;hlt
 	pusha
 	push 19
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	jmp Handle
 
 ISR20:
+	;hlt
 	pusha
 	push 20
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR21:
+	;hlt
 	pusha
 	push 21
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
-ISR22
+ISR22:
+	;hlt
 	pusha
 	push 22
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR23:
+	;hlt
 	pusha
 	push 23
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR24:
+	;hlt
 	pusha
 	push 24
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR25:
+	;hlt
 	pusha
 	push 25
-	jmp  HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR26:
+	;hlt
 	pusha
 	push 26
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR27:
+	;hlt
 	pusha
 	push 27
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR28:
+	;hlt
 	pusha
 	push 28
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR29:
+	;hlt
 	pusha
 	push 29
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
 
 ISR30:
+	;hlt
 	pusha
 	push 30
-	jmp HANDLE_FUNCTION
-	
+	mov [InterruptNum], ah
+	Handle
+
 ISR31:
+	;hlt
 	pusha
 	push 31
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+
+
+
+
 
 ISR32:
 	pusha
@@ -549,483 +570,772 @@ ISR32:
 	popa                                                                                              
 	iretq
 
-ISR33
+ISR33:
+	;hlt
 	pusha
 	push 33
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	popa
+	iretq
 
 ISR34:
+	;hlt
 	pusha
 	push 34
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR35:
+	;hlt
 	pusha
 	push 35
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR36:
+	;hlt
 	pusha
 	push 36
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR37:
+	;hlt
 	pusha
 	push 37
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR38:
+	;hlt
 	pusha
 	push 38
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR39:
+	;hlt
 	pusha
 	push 39
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR40:
-	pusha
+	;hlt
+	pusha	
 	push 40
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR41:
+	;hlt
 	pusha
 	push 41
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR42:
+	;hlt
 	pusha
 	push 42
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR43:
-	pusha
+	;hlt
+	pusha	
 	push 43
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR44:
-	pusha
+	;hlt
+	pusha	
 	push 44
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	popa
+	iretq
 
 ISR45:
+	;hlt
 	pusha
 	push 45
-	jmp HANDLE_FUNCTION
-	
+	mov [InterruptNum], ah
+	Handle
+	hlt
+
 ISR46:
+	;hlt
 	pusha
 	push 46
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR47:
+	;hlt
 	pusha
 	push 47
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR48:
+	;hlt
 	pusha
 	push 48
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR49:
+	;hlt
 	pusha
 	push 49
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
-ISR50: 
+ISR50:
+	;hlt
 	pusha
 	push 50
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR51:
+	;hlt
 	pusha
 	push 51
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR52:
-	pusha:
+	;hlt
+	pusha
 	push 52
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR53:
+	;hlt
 	pusha
 	push 53
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR54:
+	;hlt
 	pusha
 	push 54
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR55:
+	;hlt
 	pusha
 	push 55
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR56:
-	pusha 
+	;hlt
+	pusha
 	push 56
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR57:
+	;hlt
 	pusha
 	push 57
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR58:
+	;hlt
 	pusha
 	push 58
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR59:
+	;hlt
 	pusha
 	push 59
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR60:
-	pusha 
+	;hlt
+	pusha
 	push 60
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR61:
+	;hlt
 	pusha
 	push 61
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR62:
+	;hlt
 	pusha
 	push 62
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR63:
+	;hlt
 	pusha
 	push 63
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR64:
+	;hlt
 	pusha
 	push 64
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR65:
+	;hlt
 	pusha
 	push 65
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR66:
+	;hlt
 	pusha
 	push 66
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR67:
+	;hlt
 	pusha
 	push 67
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR68:
-	pusha 
+	;hlt
+	pusha
 	push 68
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR69:
+	;hlt
 	pusha
 	push 69
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR70:
-	pusha 
+	;hlt
+	pusha
 	push 70
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR71:
+	;hlt ;This is an issue
 	pusha
 	push 71
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	popa
+	iretq
 
 ISR72:
+	;hlt
 	pusha
 	push 72
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR73:
+	;hlt
 	pusha
 	push 73
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR74:
+	;hlt
 	pusha
 	push 74
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR75:
+	;hlt
 	pusha
 	push 75
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR76:
+	;hlt
 	pusha
 	push 76
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR77:
+	;hlt
 	pusha
 	push 77
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR78:
-	pusha 
+	;hlt
+	pusha
 	push 78
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
-ISR79: 
+ISR79:
+	;hlt
 	pusha
 	push 79
-	jmp HANDLE_FUNCTION
-	
+	mov [InterruptNum], ah
+	Handle
+	hlt
+
 ISR80:
+	;hlt
 	pusha
 	push 80
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR81:
-	pusha 
+	;hlt
+	pusha
 	push 81
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR82:
+	;hlt
 	pusha
 	push 82
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR83:
+	;hlt
 	pusha
 	push 83
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR84:
+	;hlt
 	pusha
 	push 84
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR85:
+	;hlt
 	pusha
 	push 85
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR86:
+	;hlt
 	pusha
 	push 86
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR87:
+	;hlt
 	pusha
 	push 87
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR88:
+	;hlt
 	pusha
 	push 88
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR89:
+	;hlt
 	pusha
 	push 89
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR90:
+	;hlt
 	pusha
 	push 90
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR91:
+	;hlt
 	pusha
 	push 91
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR92:
+	;hlt
 	pusha
 	push 92
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR93:
+	;hlt
 	pusha
 	push 93
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR94:
+	;hlt
 	pusha
 	push 94
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR95:
+	;hlt
 	pusha
 	push 95
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR96:
+	;hlt
 	pusha
 	push 96
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR97:
+	;hlt
 	pusha
 	push 97
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR98:
-	pusha 
+	;hlt
+	pusha
 	push 98
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR99:
+	;hlt
 	pusha
 	push 99
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR100:
-	pusha 
+	;hlt
+	pusha
 	push 100
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR101:
+	;hlt
 	pusha
 	push 101
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR102:
+	;hlt
 	pusha
 	push 102
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR103:
+	;hlt
 	pusha
 	push 103
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR104:
+	;hlt
 	pusha
 	push 104
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR105:
+	;hlt
 	pusha
 	push 105
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR106:
+	;hlt
 	pusha
 	push 106
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR107:
+	;hlt
 	pusha
 	push 107
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR108:
+	;hlt
 	pusha
 	push 108
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR109:
-	pusha 
+	;hlt
+	pusha
 	push 109
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR110:
+	;hlt
 	pusha
 	push 110
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR111:
+	;hlt
 	pusha
 	push 111
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR112:
+	;hlt
 	pusha
 	push 112
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR113:
+	;hlt
 	pusha
 	push 113
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR114:
+	;hlt
 	pusha
 	push 114
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR115:
+	;hlt
 	pusha
 	push 115
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR116:
+	;hlt
 	pusha
 	push 116
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR117:
+	;hlt
 	pusha
 	push 117
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR118:
+	;hlt
 	pusha
 	push 118
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR119:
+	;hlt
 	pusha
 	push 119
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR120:
+	;hlt
 	pusha
 	push 120
-	jmp HANDLE_FUNCTION
-
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR121:
+	;hlt
 	pusha
 	push 121
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR122:
+	;hlt
 	pusha
 	push 122
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR123:
+	;hlt
 	pusha
 	push 123
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR124:
+	;hlt
 	pusha
 	push 124
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR125:
+	;hlt
 	pusha
 	push 125
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR126:
+	;hlt
 	pusha
 	push 126
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
+;Smp Interrupts
 ISR127:
+	;hlt
 	pusha
 	push 127
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 extern SYSCALLS
+
 ISR128:
 	pusha
 	mov r9, rsp
@@ -1047,634 +1357,569 @@ ISR129:
 	iretq
 
 ISR130:
+	;hlt
 	pusha
 	push 130
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR131:
-	pusha 
+	;hlt
+	pusha
 	push 131
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR132:
+	;hlt
 	pusha
 	push 132
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR133:
+	;hlt
 	pusha
 	push 133
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR134:
+	;hlt
 	pusha
 	push 134
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR135:
+	;hlt
 	pusha
 	push 135
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR136:
+	;hlt
 	pusha
 	push 136
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR137:
+	;hlt
 	pusha
 	push 137
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR138:
+	;hlt
 	pusha
 	push 138
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR139:
+	;hlt
 	pusha
 	push 139
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR140:
+	;hlt
 	pusha
 	push 140
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR141:
+	;hlt
 	pusha
-	jmp HANDLE_FUNCTION
+	push 141
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR142:
+	;hlt
 	pusha
 	push 142
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR143:
+	;hlt
 	pusha
 	push 143
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR144:
+	;hlt
 	pusha
 	push 144
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR145:
+	;hlt 
 	pusha
 	push 145
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR146:
+	;hlt 
 	pusha
 	push 146
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR147:
+	;hlt 
 	pusha
 	push 147
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR148:
+	;hlt 
 	pusha
 	push 148
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR149:
+	;hlt 
 	pusha
 	push 149
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR150:
+	;hlt 
 	pusha
 	push 150
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR151:
+	;hlt 
 	pusha
 	push 151
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR152:
+	;hlt 
 	pusha
 	push 152
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR153:
+	;hlt 
 	pusha
 	push 153
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR154:
+	;hlt 
 	pusha
 	push 154
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR155:
+	;hlt 
 	pusha
 	push 155
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR156:
+	;hlt 
 	pusha
 	push 156
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR157:
+	;hlt 
 	pusha
 	push 157
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR158:
+;	hlt 
 	pusha
 	push 158
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR159:
+;	hlt 
 	pusha
 	push 159
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR160:
+;	hlt 
 	pusha
 	push 160
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR161:
+;	hlt 
 	pusha
 	push 161
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR162:
+;	hlt
 	pusha
 	push 162
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR163:
+;	hlt
 	pusha
 	push 163
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR164:
+;	hlt 
 	pusha
 	push 164
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR165:
+;	hlt 
 	pusha
 	push 165
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR166:
+;	hlt 
 	pusha
 	push 166
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR167:
+;	hlt 
 	pusha
 	push 167
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR168:
+;	hlt 
 	pusha
 	push 168
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR169:
+;	hlt 
 	pusha
 	push 169
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR170:
+;	hlt 
 	pusha
 	push 170
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR171:
+;	hlt 
 	pusha
 	push 171
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR172:
+;	hlt 
 	pusha
 	push 172
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR173:
+;	hlt 
 	pusha
 	push 173
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR174:
+;	hlt 
 	pusha
 	push 174
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR175:
+;	hlt 
 	pusha
 	push 175
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR176:
+;	hlt 
 	pusha
 	push 176
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR177:
+;	hlt 
 	pusha
 	push 177
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR178:
+;	hlt 
 	pusha
-	push 178
-	jmp HANDLE_FUNCTION
+	push 8
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR179:
+;	hlt 
 	pusha
 	push 179
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR180:
+;	hlt 
 	pusha
 	push 180
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR181:
+;	hlt 
 	pusha
 	push 181
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR182:
+;	hlt 
 	pusha
 	push 182
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR183:
+;	hlt 
 	pusha
 	push 183
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR184:
+;	hlt 
 	pusha
 	push 184
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR185:
+;	hlt 
 	pusha
 	push 185
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR186:
+;	hlt 
 	pusha
 	push 186
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR187:
+;	hlt 
 	pusha
 	push 187
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR188:
+;	hlt 
 	pusha
 	push 188
-	jmp HANDLE_FUNCTION
+ 	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR189:
+;	hlt 
 	pusha
 	push 189
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR190:
+;	hlt 
 	pusha
 	push 190
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR191:
+;	hlt 
 	pusha
 	push 191
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR192:
+;	hlt
 	pusha
 	push 192
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR193:
+;	hlt 
 	pusha
 	push 193
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR194:
+;	hlt 
 	pusha
 	push 194
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR195:
+;	hlt 
 	pusha
 	push 195
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR196:
+;	hlt 
 	pusha
 	push 196
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR197:
+;	hlt 
 	pusha
 	push 197
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR198:
+;	hlt 
 	pusha
 	push 198
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR199:
+;	hlt 
 	pusha
 	push 199
-	jmp HANDLE_FUNCTION
+	mov [InterruptNum], ah
+	Handle
+	hlt
 
 ISR200:
+;	hlt
 	pusha
 	push 200
-	jmp HANDLE_FUNCTION
-
-ISR201:
-	pusha
-	push 201
-	jmp HANDLE_FUNCTION
-
-ISR202:
-	pusha
-	push 202
-	jmp HANDLE_FUNCTION
-
-ISR203:
-	pusha
-	push 203
-	jmp HANDLE_FUNCTION
-
-ISR204:
-	pusha
-	push 204
-	jmp HANDLE_FUNCTION
-
-ISR205:
-	pusha
-	push 205
-	jmp HANDLE_FUNCTION
-
-ISR206:
-	pusha
-	push 206
-	jmp HANDLE_FUNCTION
-
-ISR207:
-	pusha
-	push 207
-	jmp HANDLE_FUNCTION
-
-ISR208:
-	pusha
-	push 208
-	jmp HANDLE_FUNCTION
-
-ISR209:
-	pusha
-	push 209
-	jmp HANDLE_FUNCTION
-
-ISR210:
-	pusha
-	push 210
-	jmp HANDLE_FUNCTION
-
-ISR211:
-	pusha
-	push 211
-	jmp HANDLE_FUNCTION
-
-ISR212:
-	pusha
-	push 212
-	jmp HANDLE_FUNCTION
-
-ISR213:
-	pusha
-	push 213
-	jmp HANDLE_FUNCTION
-
-ISR214:
-	pusha
-	push 214
-	jmp HANDLE_FUNCTION
-
-ISR215:
-	pusha
-	push 215
-	jmp HANDLE_FUNCTION
-
-ISR216:
-	pusha
-	push 216
-	jmp HANDLE_FUNCTION
-
-ISR217:
-	pusha
-	push 217
-	jmp HANDLE_FUNCTION
-
-ISR218:
-	pusha
-	push 218
-	jmp HANDLE_FUNCTION
-
-ISR219:
-	pusha
-	push 219
-	jmp HANDLE_FUNCTION
-
-ISR220:
-	pusha
-	push 220
-	jmp HANDLE_FUNCTION
-
-ISR221:
-	pusha
-	push 221
-	jmp HANDLE_FUNCTION
-
-ISR222:
-	pusha
-	push 222
-	jmp HANDLE_FUNCTION
-
-ISR223:
-	pusha
-	push 223
-	jmp HANDLE_FUNCTION
-
-ISR224:
-	pusha
-	push 224
-	jmp HANDLE_FUNCTION
-
-ISR225:
-	pusha
-	push 225
-	jmp HANDLE_FUNCTION
-
-ISR226:
-	pusha
-	push 226
-	jmp HANDLE_FUNCTION
-
-ISR227:
-	pusha
-	push 227
-	jmp HANDLE_FUNCTION
-
-ISR228:
-	pusha
-	push 228
-	jmp HANDLE_FUNCTION
-
-ISR229:
-	pusha
-	push 229
-	jmp HANDLE_FUNCTION
-
-ISR230:
-	pusha
-	push 230
-	jmp HANDLE_FUNCTION
-
-ISR231:
-	pusha
-	push 231
-	jmp HANDLE_FUNCTION
-
-ISR232:
-	pusha
-	push 232
-	jmp HANDLE_FUNCTION
-
-ISR233:
-	pusha
-	push 233
-	jmp HANDLE_FUNCTION
-
-ISR234:
-	pusha
-	push 234
-	jmp HANDLE_FUNCTION
-
-ISR235:
-	pusha
-	push 235
-	jmp HANDLE_FUNCTION
-
-ISR236:
-	pusha
-	push 236
-	jmp HANDLE_FUNCTION
-
-ISR237:
-	pusha
-	push 237
-	jmp HANDLE_FUNCTION
-
-ISR238:
-	pusha
-	push 238
-	jmp HANDLE_FUNCTION
-
-ISR239:
-	pusha
-	push 239
-	jmp HANDLE_FUNCTION
-
-ISR240:
-	pusha
-	push 240
-	jmp HANDLE_FUNCTION
-
-ISR241:
-	pusha
-	push 241
-	jmp HANDLE_FUNCTION
-
-ISR242:
-	pusha
-	push 242
-	jmp HANDLE_FUNCTION
-
-ISR243:
-	pusha
-	push 243
-	jmp HANDLE_FUNCTION
-
-ISR244:
-	pusha
-	push 244
-	jmp HANDLE_FUNCTION
-
-ISR245:
-	pusha
-	push 245
-	jmp HANDLE_FUNCTION
-
-ISR246:
-	pusha
-	push 246
-	jmp HANDLE_FUNCTION
-
-ISR247:
-	pusha
-	push 247
-	jmp HANDLE_FUNCTION
-
-ISR248:
-	pusha
-	push 248
-	jmp HANDLE_FUNCTION
-
-ISR249:
-	pusha
-	push 249
-	jmp HANDLE_FUNCTION
-
-ISR250:
-	pusha
-	push 250
-	jmp HANDLE_FUNCTION
-
-ISR251:
-	pusha
-	push 251
-	jmp HANDLE_FUNCTION
-
-ISR252:
-	pusha
-	push 252
-	jmp HANDLE_FUNCTION
-
-ISR253:
-	pusha
-	push 253
-	jmp HANDLE_FUNCTION
-
-ISR254:
-	pusha
-	push 254
-	jmp HANDLE_FUNCTION
-
-ISR255:
-	pusha
-	push 255
-
-HANDLE_FUNCTION:
+	mov [InterruptNum], ah
 	Handle
-	popa
-	iretq
+	hlt

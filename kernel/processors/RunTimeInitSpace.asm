@@ -44,6 +44,8 @@ gdt_descriptor:         ; GDT descriptor (pointer to GDT)
 ALIGN 4096
 SmpWakeUp:
 
+    jmp $
+
     lgdt [gdt_descriptor]
     
     mov eax, cr0

@@ -209,6 +209,7 @@ NTSTATUS InitializePcNetIIDevice(
         PcNetIIHardwareInterruptHandler, 
         false, 
         (uintptr_t)HardwareDriver,
+        0x31 + PDEV->InterruptLine,
         0
     );
 

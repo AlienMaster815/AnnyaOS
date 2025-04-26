@@ -231,7 +231,11 @@ uint64_t GetWakeTheFuckUpBoysEndTailCall(){
     return GetWakeTheFuckUpBoysEnd();
 }
 
+extern uint64_t CheckApCompletionTailCall();
 
+uint64_t CheckApCompletion(){   
+    return CheckApCompletionTailCall();
+}
 
 
 

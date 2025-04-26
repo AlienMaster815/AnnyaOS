@@ -173,6 +173,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 void(*Handler)(uint64_t), 
                 bool NeedFlotationSave, 
                 uintptr_t OverideData,
+                uint8_t UsingInterrupt,
                 uint64_t Flags
             );
 

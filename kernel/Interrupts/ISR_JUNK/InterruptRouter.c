@@ -71,11 +71,11 @@ void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, 
     TmpRouter->InterruptHandler = Handler;
     TmpRouter->OverideData = OverideData;
 	InterruptRouterTable[InterruptNumber].ListCount++;
-    //if((InterruptNumber > 32) && (!InterruptRouterTable[InterruptNumber].InterruptUnMasked)){
-    //    InterruptNumber -= 32;
-    //    ioapic_unmask_irq(InterruptNumber);
-    //    InterruptRouterTable[InterruptNumber].InterruptUnMasked = true;
-    //}
+    if((InterruptNumber > 32) && (!InterruptRouterTable[InterruptNumber].InterruptUnMasked)){
+        InterruptNumber -= 32;
+        ioapic_unmask_irq(InterruptNumber);
+        InterruptRouterTable[InterruptNumber].InterruptUnMasked = true;
+    }
 }
 
 
@@ -166,8 +166,6 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         LouKeReleaseSpinLock(&InterruptLock, &Irql);
         return;
     }
-    LouPrint("Unhandled Interrupt:%h\n", Interrupt);
-    while(1);
     local_apic_send_eoi();
     LouKeReleaseSpinLock(&InterruptLock, &Irql);
     return;
