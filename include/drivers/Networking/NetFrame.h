@@ -19,7 +19,7 @@ typedef struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER{
     void*                   DriverObject;
     void*                   PlatformDevice;
     #endif
-    uint16_t                MacAddress[6]; //16 for added padding for print
+    uint8_t                 MacAddress[6];
     void*                   DriverPrivateData;
     void                    (*HardwareActivate)(struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER* DriverData);
     LOUSTATUS               (*HardwareReset)(struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER* DriverData);

@@ -24,9 +24,8 @@ LOUSTATUS LouRegisterStorageDevice(
 
 
 LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
-LOUSTATUS LouRegisterNetFrameDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem);
+
 LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem);
-void DumpIoApicEntry(uint8_t irq);
 
 LOUSTATUS LouKeRegisterDevice(
     P_PCI_DEVICE_OBJECT PDEV, 
@@ -86,7 +85,7 @@ LOUSTATUS LouKeRegisterDevice(
             );
         }
         case NETWORK_DEVICE_T:{
-            return LouRegisterNetFrameDevice(TmpDevice);
+            break;
         }
         case SOUND_DEVICE_T:{
             break;

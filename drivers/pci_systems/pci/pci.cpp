@@ -145,12 +145,9 @@ LOUDDK_API_ENTRY void ScanForVideoHardware(){
 KERNEL_IMPORT 
 void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size) ;
 
-void ScanSystemForBusses();
-
 LOUDDK_API_ENTRY 
 void LouKeMapPciMemory(){
     PCI_Scan_Bus();
-    ScanSystemForBusses();
 }
 
 LOUSTATUS LouKeInitializeNetworkManager();
@@ -158,6 +155,7 @@ LOUSTATUS LouKeInitializeNetworkManager();
 void LouKePs2Parse();
 
 static spinlock_t ScanLock;
+
 
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 

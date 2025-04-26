@@ -168,15 +168,6 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
             KERNEL_EXPORT void LouKeHalAcpiShutdown();
 
-            KERNEL_EXPORT uint8_t LouKeHalPciAllocateInterrupt(
-                P_PCI_DEVICE_OBJECT PDEV, 
-                void(*Handler)(uint64_t), 
-                bool NeedFlotationSave, 
-                uintptr_t OverideData,
-                uint8_t UsingInterrupt,
-                uint64_t Flags
-            );
-
         #endif
     #else
 

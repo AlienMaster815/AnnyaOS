@@ -1,8 +1,6 @@
 // im following the WYOOS tutorial for Device infomration
-// all credit for hardware manipulation Knoledge
-// should go to the WYOOS creator
-// code written by Tyler Grenier and is under GPL2
-
+// all credit for hardware manipulation should go to the
+// WYOOS creator
 #ifndef _PCI_NET_32_H
 #define _PCI_NET_32_H
 
@@ -29,18 +27,16 @@ typedef struct __attribute__((packed)) _PCNET2_BUFFER_DESCRIPTOR{
 typedef struct _PCNET_II_DRIVER_DATA{
     PDEVICE_OBJECT                      PlatformDevice;
     PDRIVER_OBJECT                      DriverObject;
-    uint8_t                             Interrupt;
     uint16_t                            MacAddressPortWord0;
     uint16_t                            MacAddressPortWord1;
     uint16_t                            MacAddressPortWord2;
     uint16_t                            RegisterAddressPort;
-    uint16_t                            RegisterDataPort;
     uint16_t                            ResetPort;
     uint16_t                            BusControllRegisterDataPort;
     uintptr_t                           SendComBuffers[8];
     uintptr_t                           ReciveComBuffers[8];
-    PPCNET2_BUFFER_DESCRIPTOR           SendDescriptors;
-    PPCNET2_BUFFER_DESCRIPTOR           ReciveDescriptors;
+    uintptr_t                           SendDescriptors;
+    uintptr_t                           ReciveDescriptors;
     PCNET2_INITIALIZATION_BLOCK         InitializationBlock;
     uint8_t                             ActiveSendBuffer;       //bitmask
     uint8_t                             ActiveRecieveBuffer;    //bitmask
