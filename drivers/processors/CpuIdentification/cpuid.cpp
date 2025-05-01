@@ -119,9 +119,7 @@ CPU::CPUID::CPUID(){
 }
 
 CPU::CPUID::~CPUID(){
-
     LouKeFree(CpuIdPacket);
-
 }
 
 bool CPU::CPUID::IsFeatureSupported(FEATURE Feature){

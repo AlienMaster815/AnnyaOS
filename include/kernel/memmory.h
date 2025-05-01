@@ -16,6 +16,8 @@
 #define GET_ALIGNMENT(x) (alignof(x))
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
 
+#define STRIP_OPTIMIZATION __attribute__((optimize(0))) 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
@@ -23,9 +25,9 @@ typedef __int128 int128_t;
 
 #pragma GCC diagnostic pop
 
-#define KILOBYTE_PAGE 4096
-#define MEGABYTE_PAGE 2 * 1024 * 1024
-#define KILOBYTE 1 * 1024
+#define KILOBYTE_PAGE 4096ULL
+#define MEGABYTE_PAGE 2 * 1024 * 1024ULL
+#define KILOBYTE 1 * 1024ULL
 
 #define PRESENT_PAGE           0b1
 #define WRITEABLE_PAGE        0b10
@@ -62,7 +64,7 @@ typedef __int128 int128_t;
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes
 #define MEGABYTE (1ULL << 20)  // 1 MB in bytes
-#define KILOBYTE 1 * 1024
+#define KILOBYTE 1 * 1024ULL
 
 #define PAGE_TABLE_ALLIGNMENT 4096
 #define PAGE_SIZE 4096
@@ -112,8 +114,10 @@ typedef struct __attribute__((packed, aligned(4096))) _PML {
 #endif
 
 #ifndef _KERNEL_MODULE_
+void LouKeFreePage(void* PageAddress);
+void LouKeFreePage32(void* PageAddress);
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
+void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags);
 uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
 uint64_t GetRamSize();
@@ -181,9 +185,9 @@ KERNEL_IMPORT void MapIoMemory(
 );
 #endif
 
-#define GIGABYTE 0x40000000
-#define MEGABYTE 0x100000
-#define KILOBYTE 1 * 1024
+#define GIGABYTE 0x40000000ULL
+#define MEGABYTE 0x100000ULL
+#define KILOBYTE 1 * 1024ULL
 
 #define KERNEL_PAGE_WRITE_PRESENT 0b10000011
 #define KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT 0b10010011
@@ -319,6 +323,17 @@ void LouKeMapContinuousMemoryBlock(
     uint64_t FLAGS
 );
 
+void LouKeUnMapContinuousMemoryBlock(
+    uint64_t VAddress,
+    uint64_t size
+);
+
+
+void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
+void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
+void* LouKeMallocPageEx32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
+void* LouKeMallocPage32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
+
 uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);
 
 LOUSTATUS RequestPhysicalAddress(
@@ -363,22 +378,49 @@ bool RangeDoesNotInterfere(
     uint64_t Start = AddressOfBlock;
     uint64_t End = AddressOfBlock + SizeOfBlock;
 
-    // Check for overlap or swallowing
     if (
-        // Case 1: Check starts inside the block
         ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
-
-        // Case 2: Check ends inside the block
         (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
-
-        // Case 3: Check completely swallows the block
         ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
     ) {
-        return false;  // Overlap detected
+        return false;
     }
-    return true;       // No overlap
+    return true;
 }
 
+static inline
+bool RangeInterferes(
+    uint64_t AddressForCheck, 
+    uint64_t SizeOfCheck,
+    uint64_t AddressOfBlock, 
+    uint64_t SizeOfBlock
+) {   
+    uint64_t Start = AddressOfBlock;
+    uint64_t End = AddressOfBlock + SizeOfBlock;
+    if (
+        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
+        (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
+        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
+    ) {
+        return true;
+    }
+    return false;
+}
+
+static inline size_t GetAlignmentBySize(size_t Size){
+    if(Size <= 2)    return 2;
+    if(Size <= 4)    return 4;
+    if(Size <= 8)    return 8;
+    if(Size <= 16)   return 16;
+    if(Size <= 32)   return 32;
+    if(Size <= 64)   return 64;
+    if(Size <= 128)  return 128;
+    if(Size <= 256)  return 256;
+    if(Size <= 512)  return 512;
+    if(Size <= 1024) return 1024;
+    if(Size <= 2048) return 2048;
+    return 4096;
+}
 
 uint64_t* LouKeVirtualAddresToPageValue(
     uint64_t VAddress
@@ -448,6 +490,11 @@ KERNEL_EXPORT void LouKeMapContinuousMemoryBlock(
     uint64_t VAddress,
     uint64_t size, 
     uint64_t FLAGS
+);
+
+KERNEL_EXPORT void LouKeUnMapContinuousMemoryBlock(
+    uint64_t VAddress,
+    uint64_t size
 );
 
 KERNEL_EXPORT uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);

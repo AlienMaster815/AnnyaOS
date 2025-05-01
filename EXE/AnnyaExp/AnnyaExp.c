@@ -193,12 +193,12 @@ int WinMain(
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
     LouPrint("Loading ZLIB\n");
 
-    ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
+    //ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
 
-    if(!ZLIBhModule){
-        LouPrint("ZLIB1.DLL Could Not Be Found\n");
-        while(1);
-    }
+    //if(!ZLIBhModule){
+    //    LouPrint("ZLIB1.DLL Could Not Be Found\n");
+    //    while(1);
+    //}
 
     Time[0] = '\0';
     
@@ -213,7 +213,7 @@ int WinMain(
     LouPrint("Clock Thread Running As Thread:%h\n", PTClock);
 
     LouPrint("Shell Initialization Complete\n");
-    ZlibTest();
+    //ZlibTest();
     while(1){
 
     }

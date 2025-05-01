@@ -380,7 +380,7 @@ KERNEL_IMPORT uint64_t GetPEB();
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer) {
     
     //allocate New Stack
-    void* NewStack = LouKeMallocPhysicalEx(StackSize , 16, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     
     //Allocate New Thread
     thread_t* NewThread = CreateThreadHandle();
@@ -429,7 +429,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
      
     //allocate New Stack
-    void* NewStack = LouKeMallocPhysicalEx(StackSize , 16, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     
     //Allocate New Thread
     thread_t* NewThread = CreateThreadHandle();

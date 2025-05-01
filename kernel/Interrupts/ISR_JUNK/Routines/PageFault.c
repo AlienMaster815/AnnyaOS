@@ -79,8 +79,8 @@ void LouKeSetPanicInfo(
 
 void PageFault(uint64_t FaultingStackP) {
     
-
-    //while(1);
+    LouPrint("PAGE FUALT\n");
+    while(1);
     uint64_t VAddress = get_cr2();
     //uint64_t PAddress = 0x00;
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
@@ -92,7 +92,6 @@ void PageFault(uint64_t FaultingStackP) {
         volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
 
         CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP);
-
 
         LouKeSetPanicInfo(
             Bsod, "Page Fault Protection Violation",

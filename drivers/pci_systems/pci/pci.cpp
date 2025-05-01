@@ -30,6 +30,7 @@ LOUDDK_API_ENTRY void checkBus(uint16_t Group, uint8_t bus) {
 }
 
 
+
 LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
     //LouPrint("Here\n");
 
@@ -40,6 +41,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
     //LouPrint("PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID( bus , device, function));
     uint8_t headerType = getHeaderType(Group, bus, device, function);
 
+
     if ((headerType & 0x80) != 0) {
         LouPrint("Device Is MultiFunction\n");
         // It's a multi-function device, so check remaining functions
@@ -47,7 +49,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
             if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
                 if (PciGetDeviceID(Group, bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
-                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);
                     LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
                     PDev->bus = bus;
                     PDev->slot = device;
@@ -62,7 +64,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         }
     }
     else{
-        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
         PDev->bus = bus;
         PDev->slot = device;
@@ -84,7 +86,9 @@ KERNEL_IMPORT
 PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
 
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
+
     LouPrint("Scanning PCI Bus\n");
+    
     uint16_t GroupIndex = 0;
     uint16_t Count = GetPciGroupCount();
     PPCIE_SYSTEM_MANAGER Psm = 0x00;

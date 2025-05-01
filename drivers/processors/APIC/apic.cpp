@@ -297,8 +297,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
 
     //configure FPU for BSP
     EnableAdvancedBspFeatures(CPU::FPU);
+
     Cpu->~CPUID();
-    
     ApicSet = true;
 
     LouKeFree((RAMADD)Cpu);
@@ -350,9 +350,11 @@ bool APIC::LAPIC::InitializeBspLapic(){
     disable_pic();
     LouPrint("Pic Has Been Disabled\n");
 
-    ApicBase = (uint64_t)LouMalloc(KILOBYTE_PAGE);
+    ApicBase = (uint64_t)LouKeMallocPageEx32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
+    
+    //ApicBase = (uint64_t)LouMallocEx(KILOBYTE_PAGE, KILOBYTE_PAGE);
 
-    LouMapAddress(GetLocalApicBase(), ApicBase, KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT,KILOBYTE_PAGE);
+    //LouMapAddress(GetLocalApicBase(), ApicBase, KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT,KILOBYTE_PAGE);
 
     if(Cpu->IsFeatureSupported(CPU::X2APIC)){
         //initiailize x2 standard

@@ -29,9 +29,7 @@ LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature){
             }
         }
 
-
     cpu.~CPUID();
-    
 
     //while(1);
     return Status;

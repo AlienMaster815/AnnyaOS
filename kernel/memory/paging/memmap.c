@@ -4,9 +4,38 @@
 
 //LouKe PFN Architecture
 
+static uint64_t SafePage = 0x00;
+
+void CacheFlush(void* addr) {
+    asm volatile ("clflush (%0)" :: "r"(addr) : "memory");
+    asm volatile ("mfence");
+}
+
+static inline void ReloadCR3() {
+    uint64_t cr3;
+    asm volatile ("mov %%cr3, %0" : "=r"(cr3));
+    asm volatile ("mov %0, %%cr3" :: "r"(cr3));
+}
+
+void CalculateTableMarks(
+    uint64_t VAddress,
+    uint64_t* L4Entry,
+    uint64_t* L3Entry,
+    uint64_t* L2Entry,
+    uint64_t* L1Entry
+){
+    *L4Entry = (VAddress >> 39) & 0x1FF;
+    *L3Entry = (VAddress >> 30) & 0x1FF;
+    *L2Entry = (VAddress >> 21) & 0x1FF;
+    *L1Entry = (VAddress >> 12) & 0x1FF;
+}
 
 static LOU_PFN_TABLE_ENTRY PfnDatabase = {0};
 static size_t PageFrameCount = 0;
+
+void InitializeSafePage(){
+    SafePage = (uint64_t)LouMallocEx(MEGABYTE_PAGE, MEGABYTE_PAGE);
+}
 
 void LouKeMallocPageFrameNumber(
     uint64_t Virtual,
@@ -117,6 +146,7 @@ static inline void PageFlush(uint64_t addr) {
     asm("mfence");
 }
 
+
 bool IsMegabytePage(uint64_t* PageAddress){
     if(*PageAddress & (1 << 7)){
         return true;
@@ -131,45 +161,25 @@ void InitializePageTable(uint64_t* PageTable) {
 }
 
 void InitializePageTableWithIndex(uint64_t* PageTable, uint64_t StartIndex, uint64_t PageSize) {
-    static uint64_t Tmp;
     for (uint16_t i = 0; i < 512; i++) {
-        Tmp =  PageTable[i];
         PageTable[i] = GetPageValue(StartIndex, 0b111);
         StartIndex += PageSize;
-        if(Tmp != 0x00){
-            PageFlush(Tmp);
-        }
     }
 }
 
 #define PAGE_TABLE_ALIGNMENT 4096
 #define nullptr 0x00
 
-
-
-void CalculateTableMarks(
-    uint64_t VAddress, 
-    uint64_t* L4Entry,
-    uint64_t* L3Entry,
-    uint64_t* L2Entry,
-    uint64_t* L1Entry
-){
-    *L4Entry = VAddress / (512ULL * GIGABYTE);
-    *L3Entry = (VAddress % (512ULL * GIGABYTE)) / GIGABYTE;
-    *L2Entry = (VAddress % GIGABYTE) / (2ULL * MEGABYTE);
-    *L1Entry = (VAddress % (2ULL * MEGABYTE)) / KILOBYTE_PAGE;
-}
-
 void CalculateInvalidationEntries(
-    uint64_t* PML4,
-    uint64_t L4Entry,
-    uint64_t L3Entry,
-    uint64_t L2Entry,
-    uint64_t L1Entry,
-    uint64_t* L4Table,
-    uint64_t* L3Table,
-    uint64_t* L2Table,
-    uint64_t* L1Table
+    uint64_t*   PML4,
+    uint64_t    L4Entry,
+    uint64_t    L3Entry,
+    uint64_t    L2Entry,
+    uint64_t    L1Entry,
+    uint64_t*   L4Table,
+    uint64_t*   L3Table,
+    uint64_t*   L2Table,
+    uint64_t*   L1Table
 ){
     *L4Table = (uint64_t)PML4;
     *L3Table = L4Table[L3Entry] & ~(PAGE_TABLE_ALIGNMENT - 1); 
@@ -179,17 +189,105 @@ void CalculateInvalidationEntries(
     *L1Table = L2Table[L1Entry] & ~(PAGE_TABLE_ALIGNMENT - 1); 
 }
 
-bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize) {
-    //LouKIRQL OldLevel;
+static inline bool PageFrameL2MbSanityCheck(uint64_t old2){
+    return (old2 & (1 << 7));
+}
 
-    // Align addresses according to page size
-    if (PageSize == MEGABYTE_PAGE) {
-        PAddress &= ~(MEGABYTE_PAGE - 1);
-        VAddress &= ~(MEGABYTE_PAGE - 1);
-    } else if (PageSize == KILOBYTE_PAGE) {
-        PAddress &= ~(KILOBYTE_PAGE - 1);
-        VAddress &= ~(KILOBYTE_PAGE - 1);
+static inline bool PageFrameL2SanityCheck(uint64_t oldL2){
+    if(!(oldL2 & (1 << 7)) && (oldL2 & (UINT64_MAX & ~(FLAGSSPACE)))){
+        uint64_t* PageCheck = (uint64_t*)(oldL2 & ~(FLAGSSPACE));
+        //sanity check all page frames for active pages
+        for(size_t i = 0; i < 512; i++){
+            if(PageCheck[i] & PRESENT_PAGE){
+                //a higher function will check this
+                return false;
+            } 
+        }
     }
+    return true;
+}
+
+
+void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags){
+
+    VAddress &= ~(KILOBYTE_PAGE - 1);
+
+    // Calculate the entries for each page level
+    uint64_t L4Entry = 0;
+    uint64_t L3Entry = 0;
+    uint64_t L2Entry = 0;
+    uint64_t L1Entry = 0;
+    
+    CalculateTableMarks(
+        VAddress,
+        &L4Entry,
+        &L3Entry,
+        &L2Entry,
+        &L1Entry
+    );
+    
+    UNUSED PML* PML4 = GetPageBase();
+
+    uint64_t* PML3Directory = (uint64_t*)(PML4->PML4.entries[L4Entry] & ~(FLAGSSPACE));
+    if(!PML3Directory){
+        return;
+    }
+    uint64_t* PML2Directory = (uint64_t*)(PML3Directory[L3Entry] & ~(FLAGSSPACE));
+    if(!PML2Directory){
+        return;
+    }
+    if(PML2Directory[L2Entry] & (1 << 7)){
+        if((PML2Directory[L2Entry] & ~(FLAGSSPACE)) == SafePage){
+            return;
+        }
+        if(PAddress){
+            *PAddress = PML2Directory[L2Entry] & ~(FLAGSSPACE);
+        }
+        if(UnmapedLength){
+            *UnmapedLength = MEGABYTE_PAGE;
+        }
+        if(PageFlags){
+            *PageFlags = PML2Directory[L2Entry] & (FLAGSSPACE);
+        }
+        PML2Directory[L2Entry] = GetPageValue(SafePage, (1 << 7));
+
+    }else{
+        uint64_t* PML1Directory = (uint64_t*)(PML2Directory[L2Entry] & ~(FLAGSSPACE));
+        if((PML1Directory[L1Entry] & ~(FLAGSSPACE)) == SafePage){
+            return;
+        }
+        if(PAddress){
+            *PAddress = PML1Directory[L1Entry] & ~(FLAGSSPACE);
+        }
+        if(UnmapedLength){
+            *UnmapedLength = KILOBYTE_PAGE;
+        }
+        if(PageFlags){
+            *PageFlags = PML1Directory[L1Entry] & (FLAGSSPACE);
+        }
+
+        PML1Directory[L1Entry] = GetPageValue(SafePage, 0);
+        CacheFlush(&PML1Directory[L1Entry]);
+
+        if(PageFrameL2SanityCheck(PML2Directory[L2Entry])){
+            PML2Directory[L2Entry] = GetPageValue(SafePage, 1 << 7);
+            LouFree((RAMADD)PML1Directory);
+        }
+
+    }
+    CacheFlush(&PML2Directory[L2Entry]);
+    CacheFlush(&PML3Directory[L3Entry]);
+    CacheFlush(&PML4->PML4.entries[L4Entry]);
+    
+    PageFlush(VAddress);
+    ReloadCR3();
+}
+
+
+bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize) {
+
+    PAddress &= ~(KILOBYTE_PAGE - 1);
+    VAddress &= ~(KILOBYTE_PAGE - 1);
 
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
@@ -211,30 +309,35 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
         if (L4Entry == 0 && L3Entry == 0) {
             // Case: 1 GB page
             uint64_t oldL2 = PML4->PML2.entries[L2Entry];
+            oldL2 &= ~(FLAGSSPACE);
             PML4->PML2.entries[L2Entry] = GetPageValue(PAddress, (1 << 7) | FLAGS);
-            PageFlush(oldL2);  // Flush the old address
+            CacheFlush(&PML4->PML2.entries[L2Entry]);
         } else {
             uint64_t* PageDirectoryL2 = nullptr;
             uint64_t* PageDirectoryL3 = nullptr;
 
             if (L4Entry == 0) {
+                UNUSED uint64_t oldL2;
                 // Case: 512 MB page
-                uint64_t oldL3 = PML4->PML3.entries[L3Entry];
+                UNUSED uint64_t oldL3 = PML4->PML3.entries[L3Entry];
                 if ((oldL3 & ~(FLAGSSPACE)) == 0) {
                     PageDirectoryL2 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL2) return false;
                     InitializePageTable(PageDirectoryL2);
                 } else {
                     PageDirectoryL2 = (uint64_t*)(oldL3 & ~(FLAGSSPACE));
+                    oldL2 = PageDirectoryL2[L2Entry];
                 }
-                uint64_t oldL2 = PageDirectoryL2[L2Entry];
+                oldL2 = PageDirectoryL2[L2Entry];
                 PageDirectoryL2[L2Entry] = GetPageValue(PAddress, (1 << 7) | FLAGS);
                 PML4->PML3.entries[L3Entry] = GetPageValue((uint64_t)PageDirectoryL2, 0b111);
-                PageFlush(oldL2);  // Flush the old address
-                PageFlush(oldL3);  // Flush the old address
+                CacheFlush(&PageDirectoryL2[L2Entry]);
+                CacheFlush(&PML4->PML3.entries[L3Entry]);
             } else {
                 // Case: 256 MB page
-                uint64_t oldL4 = PML4->PML4.entries[L4Entry];
+                UNUSED uint64_t oldL4 = PML4->PML4.entries[L4Entry];
+                UNUSED uint64_t oldL2;
+
                 if ((oldL4 & ~(FLAGSSPACE)) == 0) {
                     PageDirectoryL3 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL3) return false;
@@ -249,14 +352,16 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                     InitializePageTable(PageDirectoryL2);
                 } else {
                     PageDirectoryL2 = (uint64_t*)(oldL3 & ~(FLAGSSPACE));
+                    oldL2 = PageDirectoryL2[L2Entry];
                 }
-                uint64_t oldL2 = PageDirectoryL2[L2Entry];
+                oldL2 = PageDirectoryL2[L2Entry];
                 PageDirectoryL2[L2Entry] = GetPageValue(PAddress, (1 << 7) | FLAGS);
                 PageDirectoryL3[L3Entry] = GetPageValue((uint64_t)PageDirectoryL2, 0b111);
                 PML4->PML4.entries[L4Entry] = GetPageValue((uint64_t)PageDirectoryL3, 0b111);
-                PageFlush(oldL2);  // Flush the old address
-                PageFlush(oldL3);  // Flush the old address
-                PageFlush(oldL4);  // Flush the old address
+                CacheFlush(&PageDirectoryL2[L2Entry]);
+                CacheFlush(&PageDirectoryL3[L3Entry]);
+                CacheFlush(&PML4->PML4.entries[L4Entry]);
+
             }
         }
     } else if (PageSize == KILOBYTE_PAGE) {
@@ -275,11 +380,10 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
             } else {
                 PageDirectoryL1 = (uint64_t*)(oldL2 & ~(FLAGSSPACE));
             }
-            uint64_t oldL1 = PageDirectoryL1[L1Entry];
             PageDirectoryL1[L1Entry] = GetPageValue(PAddress, FLAGS);
             PML4->PML2.entries[L2Entry] = GetPageValue((uint64_t)PageDirectoryL1, 0b111);
-            PageFlush(oldL1);  // Flush the old address
-            PageFlush(oldL2);  // Flush the old address
+            CacheFlush(&PageDirectoryL1[L1Entry]);
+            CacheFlush(&PML4->PML2.entries[L2Entry]);
         } else {
             // Case: Small page (4KB) in L3 or L4
             if (L4Entry == 0) {
@@ -299,13 +403,12 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 } else {
                     PageDirectoryL1 = (uint64_t*)(oldL2 & ~(FLAGSSPACE));
                 }
-                uint64_t oldL1 = PageDirectoryL1[L1Entry];
                 PageDirectoryL1[L1Entry] = GetPageValue(PAddress, FLAGS);
                 PageDirectoryL2[L2Entry] = GetPageValue((uint64_t)PageDirectoryL1, FLAGS & ~(1 << 7));
                 PML4->PML3.entries[L3Entry] = GetPageValue((uint64_t)PageDirectoryL2, 0b111);
-                PageFlush(oldL1);  // Flush the old address
-                PageFlush(oldL2);  // Flush the old address
-                PageFlush(oldL3);  // Flush the old address
+                CacheFlush(&PageDirectoryL1[L1Entry]);
+                CacheFlush(&PageDirectoryL2[L2Entry]);
+                CacheFlush(&PML4->PML3.entries[L3Entry]);
             } else {
                 uint64_t oldL4 = PML4->PML4.entries[L4Entry];
                 if ((oldL4 & ~(FLAGSSPACE)) == 0) {
@@ -331,32 +434,25 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 } else {
                     PageDirectoryL1 = (uint64_t*)(oldL2 & ~(FLAGSSPACE));
                 }
-                uint64_t oldL1 = PageDirectoryL1[L1Entry];
                 PageDirectoryL1[L1Entry] = GetPageValue(PAddress, FLAGS);
                 PageDirectoryL2[L2Entry] = GetPageValue((uint64_t)PageDirectoryL1, FLAGS & ~(1 << 7));
                 PageDirectoryL3[L3Entry] = GetPageValue((uint64_t)PageDirectoryL2, 0b111);
                 PML4->PML4.entries[L4Entry] = GetPageValue((uint64_t)PageDirectoryL3, 0b111);
-                PageFlush(oldL1);  // Flush the old address
-                PageFlush(oldL2);  // Flush the old address
-                PageFlush(oldL3);  // Flush the old address
-                PageFlush(oldL4);  // Flush the old address
+                CacheFlush(&PageDirectoryL1[L1Entry]);
+                CacheFlush(&PageDirectoryL2[L2Entry]);
+                CacheFlush(&PageDirectoryL3[L3Entry]);
+                CacheFlush(&PML4->PML4.entries[L4Entry]);
             }
         }
     } else {
         LouPrint("Could Not Map Memory\n");
         return false;
     }
+    
+    PageFlush(VAddress);
+    ReloadCR3();
     return true;
 }
-
-
-
-
-bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize) {
-
-    return true;    
-}
-
 
 
 uint64_t GetPageOfFaultValue(uint64_t VAddress) {

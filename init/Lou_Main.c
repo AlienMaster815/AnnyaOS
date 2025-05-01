@@ -160,12 +160,10 @@ int TestLoop2();
 void InitializeDeviceManager();
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 
-void LouKeInitializeFirmwareDeviceParseing();
 void HandleProccessorInitialization();
 
 void Advanced_Kernel_Initialization(){
     //if(LOUSTATUS_GOOD != InitFADT())LouPrint("Unable To Start FADT Handleing\n");
-    LouKeInitializeFirmwareDeviceParseing();
     //if(LOUSTATUS_GOOD != InitSSDT())LouPrint("Unable To Start SSDT Handleing\n");
     //if(LOUSTATUS_GOOD != InitSBST())LouPrint("Unable To Start SBST Handleing\n");
     //if(LOUSTATUS_GOOD != InitSRAT())LouPrint("Unable To Start SRAT Handleing\n");
@@ -287,6 +285,28 @@ void GenericVideoProtocolInitialize();
 void InitializePs2Mouse();
 void EnablePs2Keyboard();
 void CheckForSoundblaster16();
+void InitializeSafePage();
+void* LouKeMallocEx2(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
+
+void LouKeFree2(void* Address);
+
+void EnableCR0WriteProtection() {
+    uint64_t cr0;
+    asm volatile ("mov %%cr0, %0" : "=r"(cr0));
+    cr0 |= (1ULL << 16); // Set WP bit
+    asm volatile ("mov %0, %%cr0" :: "r"(cr0));
+}
+
+void DisableCR0WriteProtection() {
+    uint64_t cr0;
+    asm volatile ("mov %%cr0, %0" : "=r"(cr0));
+    cr0 &= ~(1ULL << 16); // Set WP bit
+    asm volatile ("mov %0, %%cr0" :: "r"(cr0));
+}
 
 static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
@@ -314,8 +334,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     Advanced_Kernel_Initialization();
 
-    //SETUP DEVICES AND DRIVERS
-
     SetupInitialVideoDevices();
 
     LookForStorageDevices();
@@ -327,7 +345,6 @@ KERNEL_ENTRY Lou_kernel_start(
     }
 
     //LouPrint("Perfect\n");
-    //while(1);
 
     InitializeFileSystemManager();
 
@@ -344,7 +361,6 @@ KERNEL_ENTRY Lou_kernel_start(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    LouPrint("Initializing User Mode\n");
     LouKeRunOnNewUserStack(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
 	// IF the Kernel returns from this
@@ -395,6 +411,7 @@ extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
 
 void InitializeUserSpace(){
+    LouPrint("Initializing User Mode\n");
     
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL", 0x00);
