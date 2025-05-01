@@ -361,7 +361,7 @@ KERNEL_ENTRY Lou_kernel_start(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    LouKeRunOnNewUserStack(InitializeUserSpace, 0x00, 2 * MEGABYTE);
+    LouKeRunOnNewUserStack(InitializeUserSpace, 0x00, 8 * MEGABYTE);
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
 	// IF the Kernel returns from this
 	// the whole thing crashes
@@ -412,16 +412,25 @@ uint16_t GetNPROC();
 
 void InitializeUserSpace(){
     LouPrint("Initializing User Mode\n");
-    
+
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
+    LouPrint("LOUDLL.DLL Has Loaded\n");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL", 0x00);
+    LouPrint("NTDLL.DLL Has Loaded\n");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
+    LouPrint("KERNEL32.DLL Has Loaded\n");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNBASE.DLL", 0x00);
+    LouPrint("KERNBASE.DLL Has Loaded\n");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
+    LouPrint("USER32.DLL Has Loaded\n");
 
     PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocEx(sizeof(WIN_PEB), GET_ALIGNMENT(WIN_PEB), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
+
     ProcessExecutionBlock->ProcessHeap = (uint64_t)LouKeVirtualAllocUser(KILOBYTE_PAGE, MEGABYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    LouPrint("Process Heap:%h\n", ProcessExecutionBlock->ProcessHeap);
     ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
+    LouPrint("Processor Count:%d\n", ProcessExecutionBlock->NumberOfProcessors);
     SetPEB((uint64_t)(uint8_t*)ProcessExecutionBlock); 
 
     bool (*MsvcrtEntry)(uint64_t, uint64_t , uint64_t) = (bool (*)(uint64_t, uint64_t , uint64_t))LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL", 0x00);

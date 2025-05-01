@@ -231,7 +231,14 @@ uint64_t GetGSSwapBase() {
 }
 
 void SetGSBase(uint64_t gs_base) {
-    asm volatile("wrmsr" : : "c"(0xC0000101), "A"(gs_base));
+    uint32_t low  = (uint32_t)(gs_base & 0xFFFFFFFF);
+    uint32_t high = (uint32_t)(gs_base >> 32);
+
+    asm volatile (
+        "wrmsr"
+        :
+        : "c"(0xC0000101), "a"(low), "d"(high)
+    );
 }
 
 void SetGSSwapBase(uint64_t kernel_gs_base) {

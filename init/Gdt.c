@@ -93,6 +93,7 @@ extern void InstallGDT(uint64_t GDT);
 uint16_t GetNPROC();
 void SetGSBase(uint64_t gs_base);
 
+extern void SetPEB(uint64_t PEB);
 
 void SetupGDT(){
     LouPrint("Setting Up GDT\n");
