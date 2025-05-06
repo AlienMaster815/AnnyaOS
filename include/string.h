@@ -14,7 +14,11 @@ int strncmp(const char* str1, const char* str2, size_t n);
 int strcmp(const char* str1, const char* str2);
 int memcmp(const void* ptr1, const void* ptr2, size_t num);
 char* strncpy(char* dest, const char* src, size_t n);
+char* strcpy(char* dest, const char* src);
+char* strcat(char* dest, const char* src);
 size_t strlen(const char* str);
+size_t wstrlen(const wchar_t* str);
+unsigned long strtoul(const char* nptr, char** endptr, int base);
 
 int32_t stringToInt32(const char* str);
 uint32_t stringToUnsignedInt32(const char* str);
@@ -31,8 +35,22 @@ void double_to_string(string Buffer, long double value);
 void float_to_string(string Buffer, float value);
 void long_double_to_string(string Buffer, long double value);
 char* ConvertWCharToChar(const wchar_t* wstr);
-int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
 void LouKeStrLowerToUpper(string Format);
+int isprint(int ch);
+int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
+int toupper(int c);
+int tolower(int c);
+int isxdigit(int c);
+int isspace(int c);
+int isdigit(int c);
+
+int StdIoPrintf(const char* Format, ...);
+int StdIoSPrintf(char* Buffer, const char* Format, ...);
+int StdIoSnPrintf(char* Buffer, size_t Count, const char* Format, ...);
+int StdIoVsnPrintf(char* Buffer, size_t Count, const char* Format, va_list Arguments);
+int StdIoVPrintf(const char* Format, va_list Arguments);
+
+
 #endif
 #else
 #include <LouDDK.h>
@@ -44,7 +62,7 @@ KERNEL_IMPORT int strcmp(const char* str1, const char* str2);
 KERNEL_IMPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_IMPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_IMPORT size_t strlen(const char* str);
-
+KERNEL_IMPORT size_t wstrlen(const wchar_t* str);
 KERNEL_IMPORT int32_t stringToInt32(const char* str);
 KERNEL_IMPORT uint32_t stringToUnsignedInt32(const char* str);
 KERNEL_IMPORT int16_t stringToInt16(const char* str);

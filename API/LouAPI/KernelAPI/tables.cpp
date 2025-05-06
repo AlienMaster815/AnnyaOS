@@ -17,11 +17,11 @@ typedef struct _TableTracks{
 }TableTracks, * PTableTracks;
 
 #define PRE_LOADED_MODULES 5
-#define PRE_LOADED_NTOSKRNL_FUNCTIONS 71
+#define PRE_LOADED_NTOSKRNL_FUNCTIONS 75
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 108
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 109
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -51,6 +51,9 @@ ULONG KeNumberProcessors();
 extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
 
 static volatile PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
+
+LOUDDK_API_ENTRY char* strcpy(char* dest, const char* src);
+LOUDDK_API_ENTRY char* strcat(char* dest, const char* src);
 
 LOUDDK_API_ENTRY
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName){
@@ -184,6 +187,11 @@ void LouKeInitializeLibraryLookup(
     DynamicLoadedLibrarieCount++;
 }
 
+LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
+
 static inline 
 void InitializeLousineKernelTables(){
     ImportTables[4].ModuleName = "louoskrnl.exe";
@@ -299,7 +307,8 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[105] = "LouKeMalloc";
     ImportTables[4].FunctionName[106] = "inw";
     ImportTables[4].FunctionName[107] = "outw";
-
+    ImportTables[4].FunctionName[108] = "LouKeLinkerGetAddress";
+    
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
     ImportTables[4].VirtualAddress[0] = (uint64_t)LouPrint;
@@ -408,6 +417,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[105] = (uint64_t)LouKeMalloc;
     ImportTables[4].VirtualAddress[106] = (uint64_t)inw;
     ImportTables[4].VirtualAddress[107] = (uint64_t)outw;
+    ImportTables[4].VirtualAddress[108] = (uint64_t)LouKeLinkerGetAddress;
 
 }
 
@@ -519,6 +529,10 @@ void InitializeNtKernelTable(){
     ImportTables[0].FunctionName[68] = "NtCommitComplete";
     ImportTables[0].FunctionName[69] = "NtCommitEnlistment";
     ImportTables[0].FunctionName[70] = "RtlUpcaseUnicodeChar";
+    ImportTables[0].FunctionName[71] = "PsGetVersion";
+    ImportTables[0].FunctionName[72] = "WmiTraceMessageVa";
+    ImportTables[0].FunctionName[73] = "WmiTraceMessage";
+    ImportTables[0].FunctionName[74] = "WmiQueryTraceInformation";
     
     ImportTables[0].VirtualAddress = NTFunctionAddresses;
 
@@ -595,7 +609,10 @@ void InitializeNtKernelTable(){
     ImportTables[0].VirtualAddress[68] = (uint64_t)NtCommitComplete;
     ImportTables[0].VirtualAddress[69] = (uint64_t)NtCommitEnlistment;
     ImportTables[0].VirtualAddress[70] = (uint64_t)RtlUpcaseUnicodeChar;
-
+    ImportTables[0].VirtualAddress[71] = (uint64_t)PsGetVersion;
+    ImportTables[0].VirtualAddress[72] = (uint64_t)WmiTraceMessageVa;
+    ImportTables[0].VirtualAddress[73] = (uint64_t)WmiTraceMessage;
+    ImportTables[0].VirtualAddress[74] = (uint64_t)WmiQueryTraceInformation;
 
 }
 

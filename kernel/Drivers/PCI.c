@@ -1,6 +1,12 @@
 #include <LouAPI.h>
 
-
+typedef struct _ACPI_MCFG_ALLOCATION{
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+    uint32_t    Reserved;
+} ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
 
 UNUSED static uint16_t MaxGroupCount = 0;
 UNUSED static PCIE_SYSTEM_MANAGER Psm = {0};
@@ -18,7 +24,7 @@ PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem){
     return Result;
 }
 
-void AddPcieGroup(PACPI_MCFG_ALLOCATION PciManagerData){
+void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
 
     PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
     for(size_t i = 0 ; i < MaxGroupCount; i++){

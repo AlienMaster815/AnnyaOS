@@ -58,6 +58,7 @@ void LouKeDrsdPutPixelMirrored(
     uint8_t r, uint8_t g, uint8_t b
 );
 
+
 #ifndef _USER_MODE_CODE_
 int LouPrint(char *format, ...);
 #endif

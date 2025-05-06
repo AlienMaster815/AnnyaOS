@@ -1,6 +1,10 @@
 #ifndef _MEMMORY_H
 #define _MEMMORY_H
 
+#define LouKeMallocArray(type, count, tag) \
+    LouKeMallocEx(ROUND_UP64(sizeof(type), GET_ALIGNMENT(type)) * (count), GET_ALIGNMENT(type), (tag))
+#define LouKeMallocType(Type, Tag) LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
+
 
 // Tyler Grenier 9/21/23 9:38 PM
 // added Section 1:1 RAM ADDRESS
@@ -26,8 +30,8 @@ typedef __int128 int128_t;
 #pragma GCC diagnostic pop
 
 #define KILOBYTE_PAGE 4096ULL
-#define MEGABYTE_PAGE 2 * 1024 * 1024ULL
-#define KILOBYTE 1 * 1024ULL
+#define MEGABYTE_PAGE (2 * 1024 * 1024ULL)
+#define KILOBYTE (1 * 1024ULL)
 
 #define PRESENT_PAGE           0b1
 #define WRITEABLE_PAGE        0b10
@@ -64,7 +68,7 @@ typedef __int128 int128_t;
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes
 #define MEGABYTE (1ULL << 20)  // 1 MB in bytes
-#define KILOBYTE 1 * 1024ULL
+#define KILOBYTE (1 * 1024ULL)
 
 #define PAGE_TABLE_ALLIGNMENT 4096
 #define PAGE_SIZE 4096
@@ -187,10 +191,11 @@ KERNEL_IMPORT void MapIoMemory(
 
 #define GIGABYTE 0x40000000ULL
 #define MEGABYTE 0x100000ULL
-#define KILOBYTE 1 * 1024ULL
+#define KILOBYTE (1 * 1024ULL)
 
 #define KERNEL_PAGE_WRITE_PRESENT 0b10000011
 #define KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT 0b10010011
+
 
 #ifndef _KERNEL_MODULE_
 KERNEL_IMPORT bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);

@@ -126,3 +126,9 @@ uint8_t LouKeGetCurrentTimeMinute(){
 
     return 15;
 }
+
+uint64_t GetCurrentTimeIn100ns() {
+    uint64_t current_tsc = read_tsc();
+    uint64_t tsc_frequency = GetTscMaster(); // in Hz (ticks per second)
+    return (current_tsc * 10000000ULL) / tsc_frequency;
+}

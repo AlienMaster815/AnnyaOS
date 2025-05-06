@@ -6554,11 +6554,13 @@ void PsFreeAffinityToken(
 
 PETHREAD PsGetCurrentThread();
 
-BOOLEAN PsGetVersion(
-   PULONG          MajorVersion,
-   PULONG          MinorVersion,
-   PULONG          BuildNumber,
-   PUNICODE_STRING CSDVersion
+LOUDDK_API_ENTRY
+bool
+PsGetVersion(
+    PULONG              MajorVersion, 
+    PULONG              MinorVersion, 
+    PULONG              BuildNumber,
+    PUNICODE_STRING     CsdVersion
 );
 
 ULONG64 PsQueryTotalCycleTimeProcess(
@@ -7351,15 +7353,19 @@ NTSTATUS VslDeleteSecureSection(
 );
 
 
-NTSTATUS WmiQueryTraceInformation(
-              TRACE_INFORMATION_CLASS TraceInformationClass,
-             PVOID                   TraceInformation,
-              ULONG                   TraceInformationLength,
+LOUDDK_API_ENTRY
+NTSTATUS 
+WmiQueryTraceInformation(
+   TRACE_INFORMATION_CLASS TraceInformationClass,
+   PVOID                   TraceInformation,
+   ULONG                   TraceInformationLength,
    PULONG                  RequiredLength,
-    PVOID                   Buffer
+   PVOID                   Buffer
 );
 
-NTSTATUS WmiTraceMessage(
+LOUDDK_API_ENTRY
+NTSTATUS 
+WmiTraceMessage(
    TRACEHANDLE LoggerHandle,
    ULONG       MessageFlags,
    LPCGUID     MessageGuid,
@@ -7367,7 +7373,9 @@ NTSTATUS WmiTraceMessage(
        ...
 );
 
-NTSTATUS WmiTraceMessageVa(
+LOUDDK_API_ENTRY
+NTSTATUS 
+WmiTraceMessageVa(
    TRACEHANDLE LoggerHandle,
    ULONG       MessageFlags,
    LPCGUID     MessageGuid,

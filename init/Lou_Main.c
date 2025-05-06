@@ -100,6 +100,7 @@ LOUSTATUS SetupInitialVideoDevices();
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
+void InitializeNtKernelTransitionLayer();
 
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
@@ -307,6 +308,7 @@ void DisableCR0WriteProtection() {
     cr0 &= ~(1ULL << 16); // Set WP bit
     asm volatile ("mov %0, %%cr0" :: "r"(cr0));
 }
+void InitializeAcpiSystem();
 
 static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
@@ -344,10 +346,10 @@ KERNEL_ENTRY Lou_kernel_start(
         while(1);
     }
 
-    //LouPrint("Perfect\n");
-
     InitializeFileSystemManager();
+    InitializeNtKernelTransitionLayer();
 
+    InitializeAcpiSystem();
     //CheckForSoundblaster16();
 
     //EnablePs2Keyboard();
@@ -475,3 +477,4 @@ GPUs	Hardest
 PCIe FPGA Cards	Hardest	
 High-Performance NICs	Hardest
 */
+//TODO finish Ps an WMI

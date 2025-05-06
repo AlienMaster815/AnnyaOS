@@ -96,11 +96,6 @@ int strncpy_s(
     size_t Count
 );
 
-string strcpy(
-    string Destination,
-    string Source
-);
-
 int strncat_s(
     string Destination,
     size_t NumElements,
@@ -125,12 +120,6 @@ int strcat_s(
     size_t Elements,
     string Source
 );
-
-string strcat(
-    string Destination,
-    string Source
-);
-
 
 void *memmove(void *dest, const void *src, size_t n);
 

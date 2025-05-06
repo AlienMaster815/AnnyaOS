@@ -30,6 +30,24 @@ typedef struct {
 }atomic_t;
 
 typedef atomic_t* p_atomic_t;
+
+
+static inline int atomic_read(atomic_t* v) {
+    return __atomic_load_n(&v->counter, __ATOMIC_SEQ_CST);
+}
+
+static inline void atomic_set(atomic_t* v, int i) {
+    __atomic_store_n(&v->counter, i, __ATOMIC_SEQ_CST);
+}
+
+static inline void atomic_write(atomic_t* v, int i) {
+    __atomic_store_n(&v->counter, i, __ATOMIC_SEQ_CST);
+}
+
+static inline bool atomic_cmpxchg(atomic_t* v, int old, int newv) {
+    return __atomic_compare_exchange_n(&v->counter, &old, newv, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+
 #endif
 
 #define BITMASK(bit) (1 << bit)

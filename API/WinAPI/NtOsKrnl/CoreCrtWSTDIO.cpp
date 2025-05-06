@@ -386,23 +386,6 @@ int vsprintf(char *buffer, const char *format, va_list args) {
     return _vsnprintf(buffer, (size_t)-1, format, args);
 }
 
-LOUDDK_API_ENTRY
-int sprintf(char *buffer, const char *format, ...) {
-    if ((buffer == 0x00) || (format == 0x00)) {
-        return -1; // Error: Invalid arguments
-    }
-
-    va_list args;
-    va_start(args, format);
-
-    // Use vsprintf to format the string into the buffer
-    int result = vsprintf(buffer, format, args);
-
-    va_end(args);
-
-    return result; // Return the number of characters written
-}
-
 
 LOUDDK_API_ENTRY
 void *memmove(void *dest, const void *src, size_t n) {

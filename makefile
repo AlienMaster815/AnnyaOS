@@ -256,6 +256,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C KernelLibraries/LouDDK all
 
+	$(MAKE) -C KernelLibraries/wprecorder clean
+	$(MAKE) -C KernelLibraries/wprecorder all
+
 	$(MAKE) -C UserLibraries/KernelBase clean
 	$(MAKE) -C UserLibraries/KernelBase all
 
@@ -292,7 +295,6 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C Drivers/gpu/Virtualbox clean
 	$(MAKE) -C Drivers/gpu/Virtualbox all
 
-
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
 
@@ -319,8 +321,6 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
-
-
 	
 	#Make 64 Bit System Directories
 	$(MAKEDIR64)
@@ -376,3 +376,4 @@ cleanall:
 	$(MAKE) -C Drivers/Audio/AC97 clean
 	$(MAKE) -C Drivers/Audio/SoundBlaster clean
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
+	$(MAKE) -C KernelLibraries/wprecorder clean

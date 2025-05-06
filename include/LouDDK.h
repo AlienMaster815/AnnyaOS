@@ -3,6 +3,8 @@
 
 #include <drivers/Lou_drivers/PciIds.h>
 
+#define SYSV_CONVENTION __attribute__((sysv_abi))
+#define NAKED_FUNCTION __attribute__((naked))
 
 typedef void* EventHandle;
 
@@ -123,6 +125,10 @@ KERNEL_EXPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_EXPORT void sleep(uint64_t Time);
 KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uint32_t Mask, uint64_t MsTimeout);
+KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
 #endif
 // PORTS Stuff
 

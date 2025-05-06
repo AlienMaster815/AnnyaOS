@@ -267,14 +267,14 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
 
     LouPrint("Thread Manager Starting\nNumber Of Processors: %d\n", GetNPROC());
 
-    LouPrint("Initialized Processor:%d as Thread 0\n", get_processor_id());
+    LouPrint("Initialized Processor:%d as Thread 1\n", get_processor_id());
 
     current_thread[get_processor_id()] = &MasterThreadTable;
     current_thread[get_processor_id()]->AdvancedRegisterStorage = (uintptr_t)LouMallocEx(2688, 64);
     current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouMallocEx(2688, 64);
     current_thread[get_processor_id()]->NewTask = false;
     current_thread[get_processor_id()]->state = THREAD_RUNNING;
-    current_thread[get_processor_id()]->ThreadIdentification = NumberOfThreads;
+    current_thread[get_processor_id()]->ThreadIdentification = NumberOfThreads + 1;
 
     LouPrint("Thread Manager Successfully Started\n");
 
@@ -449,7 +449,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //Mark the Register Storage As Clean
     NewThread->NewTask = true;
     NewThread->state = THREAD_READY;
-    NewThread->ThreadIdentification = NumberOfThreads + 1;
+    NewThread->ThreadIdentification = NumberOfThreads + 2;
 
     //Get the Stub Address
     uintptr_t StubAddress = RetriveThreadStubAddress();
@@ -473,4 +473,11 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
 LOUDDK_API_ENTRY
 uint64_t LouKeGetThreadIdentification(){
     return current_thread[get_processor_id()]->ThreadIdentification;
+}
+
+LOUDDK_API_ENTRY
+semaphore_t* LouKeCreateSemaphore(int initial, int limit){
+    semaphore_t* NewSemaphore = (semaphore_t*)LouKeMallocType(semaphore_t, KERNEL_GENERIC_MEMORY);
+    SemaphoreInitialize(NewSemaphore, initial, limit);
+    return NewSemaphore;
 }

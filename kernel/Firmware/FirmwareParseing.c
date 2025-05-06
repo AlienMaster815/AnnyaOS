@@ -11,6 +11,10 @@ static uint8_t TYPE_MASTER = 0x00;
 
 static spinlock_t FirmwareLock;
 
+uintptr_t LouKeGetRsdp(){
+	return RSDP_MASTER;
+}
+
 typedef struct __attribute__((packed)) _ACPI_STD_HEADER {
 	char Signature[4];
 	uint32_t Size;

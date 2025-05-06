@@ -93,6 +93,7 @@ void LouKeSetIrql(
 
 #ifdef __x86_64__
 
+typedef uint8_t LOUSINE_INTERRUPT_MODE;
 
 typedef struct {
     uint16_t base_low;      // Lower 16 bits of the handler function's address
@@ -201,6 +202,10 @@ void LouKeSetIrql(
 
 #ifdef __cplusplus
 #ifndef _KERNEL_MODULE_
+
+typedef uint8_t LOUSINE_INTERRUPT_LEVEL;
+
+
 KERNEL_IMPORT void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql

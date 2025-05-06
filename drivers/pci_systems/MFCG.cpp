@@ -1,6 +1,14 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
+typedef struct _ACPI_MCFG_ALLOCATION{
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+    uint32_t    Reserved;
+} ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
+
 typedef struct {
     char Signature[4];        // Table identifier (e.g., "MCFG")
     uint32_t Length;          // Length of the table, including the header

@@ -78,14 +78,19 @@ void LouKeSetPanicInfo(
 
 
 void PageFault(uint64_t FaultingStackP) {
+    uint64_t VAddress = get_cr2();
+    uint64_t PAddress = 0x00;
     
     LouPrint("PAGE FUALT\n");
-    while(1);
-    uint64_t VAddress = get_cr2();
-    //uint64_t PAddress = 0x00;
+    RequestPhysicalAddress(VAddress, &PAddress);
+
+    LouPrint("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
+    LouPrint("Physical Address:%h\n", PAddress);
+    while(1){
+
+    }
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
      
-    //RequestPhysicalAddress(VAddress, &PAddress);
 
     // Check for specific error causes, e.g.:
     //if (InterruptCode & 0x1) {

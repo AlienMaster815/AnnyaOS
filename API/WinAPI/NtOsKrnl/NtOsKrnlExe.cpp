@@ -97,9 +97,11 @@ int64_t InterlockedPushListSList(
     return Result;
 }
 
-UNUSED const uint32_t NtBuildNumber = (uint32_t)-0xfff9A0C;
+UNUSED const uint32_t NtBuildNumber = (uint32_t)-0xffff132;
 
-
+uint32_t GetNtEmualationBuild(){
+    return NtBuildNumber;
+}
 
 // NtBuildGUID
 // NtBuildLab
@@ -2246,7 +2248,7 @@ NtClose(
 // RtlDelete
 // RtlDeleteAce
 // RtlDeleteAtomFromAtomTable
-// RtlDeleteElementGenericTable
+// RtlDeleteElementGenericTable             IMPLEMENTED
 // RtlDeleteElementGenericTableAvl
 // RtlDeleteElementGenericTableAvlEx
 // RtlDeleteHashTable
@@ -3318,8 +3320,8 @@ void RtlRaiseStatus(LOUSTATUS Status){
 // swprintf   
 // swprintf_s 
 // swscanf_s  
-// tolower    
-// toupper    
+// tolower    IMPLEMENTED
+// toupper    IMPLEMENTED
 // towlower   IMPLEMENTED   
 // towupper   IMPLEMENTED
 
@@ -3331,3 +3333,11 @@ void RtlRaiseStatus(LOUSTATUS Status){
 // x86BiosFreeBuffer
 // x86BiosReadMemory
 // x86BiosWriteMemory
+
+void NtTransitionLayerInitMessageTraceStack();
+
+LOUDDK_API_ENTRY
+void InitializeNtKernelTransitionLayer(){
+
+    NtTransitionLayerInitMessageTraceStack();
+}

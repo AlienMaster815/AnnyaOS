@@ -16,13 +16,6 @@ extern "C"{
 #endif
 #include "PciIds.h"
 #include <kernel/atomic.h>
-typedef struct _ACPI_MCFG_ALLOCATION{
-    uint64_t    BaseAddress;
-    uint16_t    PCISegmentGroupNumber;
-    uint8_t     StartBusNumber;
-    uint8_t     EndBusNumber;
-    uint32_t    Reserved;
-} ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
 
 typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 	uint16_t VendorID;

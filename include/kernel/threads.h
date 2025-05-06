@@ -93,6 +93,41 @@ static inline bool SpinlockIsLocked(spinlock_t* s){
     return s->Lock.locked.counter;
 }
 
+typedef struct {
+    atomic_t Lock;
+    atomic_t Counter;
+    atomic_t Limit;
+}semaphore_t;
+
+static inline void SemaphoreLock(semaphore_t* sem) {
+    while (1) {
+        int val = atomic_read(&sem->Counter);
+        if (val <= 0)
+            continue;
+        if (atomic_cmpxchg(&sem->Counter, val, val - 1))
+            break;
+    }
+}
+
+
+static inline void SemaphoreUnlock(semaphore_t* sem) {
+    while (1) {
+        int val = atomic_read(&sem->Counter);
+        int lim = atomic_read(&sem->Limit);
+        if (val >= lim)
+            break;
+        if (atomic_cmpxchg(&sem->Counter, val, val + 1))
+            break;
+    }
+}
+
+static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit) {
+    if (!sem) return;
+    atomic_set(&sem->Lock, 0);
+    atomic_set(&sem->Counter, initial);
+    atomic_set(&sem->Limit, limit);
+}
+semaphore_t* LouKeCreateSemaphore(int initial, int limit);
 
 #ifndef _KERNEL_MODULE_
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
