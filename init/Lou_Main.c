@@ -349,7 +349,6 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeFileSystemManager();
     InitializeNtKernelTransitionLayer();
 
-    InitializeAcpiSystem();
     //CheckForSoundblaster16();
 
     //EnablePs2Keyboard();

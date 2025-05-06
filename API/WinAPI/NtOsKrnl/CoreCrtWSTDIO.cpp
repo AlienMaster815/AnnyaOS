@@ -100,6 +100,24 @@ LOUDDK_API_ENTRY
 void uintToHexString(uint64_t number, char* hexString);
 
 
+LOUDDK_API_ENTRY
+int sprintf(char *buffer, const char *format, ...) {
+    if ((buffer == 0x00) || (format == 0x00)) {
+        return -1; // Error: Invalid arguments
+    }
+
+    va_list args;
+    va_start(args, format);
+
+    // Use vsprintf to format the string into the buffer
+    int result = vsprintf(buffer, format, args);
+
+    va_end(args);
+
+    return result; // Return the number of characters written
+}
+
+
 
 LOUDDK_API_ENTRY
 int vswprintf_s(wchar_t* Buffer, size_t BufferCount, wchar_t* Format, va_list args);
