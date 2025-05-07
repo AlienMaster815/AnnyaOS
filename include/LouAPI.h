@@ -36,7 +36,7 @@
 #include "drivers/Ata/ata.h"
 #include <drivers/Networking/IpV4.h>
 #include <WinTEB.h>
-
+#include <drivers/acpi/acpi.h>
 
 #ifndef _KERNEL_MODULE_
 

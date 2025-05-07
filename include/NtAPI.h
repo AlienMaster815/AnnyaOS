@@ -16,6 +16,12 @@
 #pragma warning(disable: 5051) // Disable C5051 warning
 #endif
 
+#include <stdint.h>
+typedef struct _GUID {
+	uint64_t Data[128 / 64];
+} GUID,* LPGUID, UUID, * PGUID, * PUUID;
+
+
 #include <WDKSubsystem/Debuging/debuging.h>
 #include <WDKSubsystem/Types/DebugTypes.h>
 #include <WinAPI/WinAPITypes/CommonTypes.h>

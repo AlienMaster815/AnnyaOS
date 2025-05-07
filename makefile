@@ -377,3 +377,4 @@ cleanall:
 	$(MAKE) -C Drivers/Audio/SoundBlaster clean
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C KernelLibraries/wprecorder clean
+	$(MAKE) -C Drivers/gpu/Virtualbox clean

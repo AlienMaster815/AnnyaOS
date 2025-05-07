@@ -163,6 +163,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #include <FileHandleing/LDDDS.h>
 #include <WinTEB.h>
+#include <drivers/acpi/acpi.h>
+
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"
