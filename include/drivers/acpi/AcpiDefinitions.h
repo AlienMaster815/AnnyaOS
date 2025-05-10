@@ -224,6 +224,97 @@ extern "C" {
 #define MADT_ICS_LPC_PIC_VERSION_INVLAID            0
 #define MADT_ICS_LPC_PIC_VERSION_V1                 1
 
+#define SRAT_LOCAL_APIC_AFFINITY_TYPE               0
+#define SRAT_MEMORY_AFFINITY_TYPE                   1
+#define SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_TYPE  2
+#define SRAT_PROCESSOR_GICC_AFFINITY_TYPE           3
+#define SRAT_GIC_ITS_AFFINITY_TYPE                  4
+#define SRAT_GENERIC_INITIATOR_TYPE                 5
+#define SRAT_GENERIC_PORT_TYPE                      6
+
+#define PSRAT_LOCAL_APIC_AFFINITY_READ_PROXIMITY_DOMAIN(LAA)     (LAA->ProximityDomainLow | (LAA->ProximityDomainHigh[0] << 8) | (LAA->ProximityDomainHigh[1] << 16) | (LAA->ProximityDomainHigh[2] << 24))
+#define SRAT_LOCAL_APIC_AFFINITY_READ_PROXIMITY_DOMAIN(LAA)      (LAA.ProximityDomainLow | (LAA.ProximityDomainHigh[0] << 8) | (LAA.ProximityDomainHigh[1] << 16) | (LAA.ProximityDomainHigh[2] << 24))
+
+#define SRAT_LOCAL_APIC_AFFINITY_FLA_ENABLED    (1 << 0)
+
+#define SRAT_MEMORY_AFFINITY_FLAG_ENABLED       (1 << 0)
+#define SRAT_MEMORY_AFFINITY_FLAG_HOT_PLUGGABLE (1 << 1)
+#define SRAT_MEMORY_AFFINIRT_FLAG_NON_VOLATILE  (1 << 3)
+
+#define SRAT_GICC_AFFINITY_FLAG_ENABLED         (1 << 0)
+
+#define SRAT_GENERIC_INITIATOR_AFFINITY_HANDLE_TYPE_ACPI_DEVICE_HANDLE  0
+#define SRAT_GENERIC_INITIATOR_AFFINITY_HANDLE_TYPE_PCI_DEVICE_HANDLE   1
+
+#define SRAT_GENERIC_PORT_AFFINITY_FLAG_ENABLED             (1 << 0)
+#define SRAT_GENERIC_PORT_AFFINITY_FLAG_ACRH_TRANSACTION    (1 << 1)
+
+#define RASF_MEMORY_REGION_SIGATURE 0x52415346
+
+#define RASF_SET_RAS_CAPABILITIES_STATUS_SUCCESS            0  
+#define RASF_SET_RAS_CAPABILITIES_STATUS_NOT_VALID          1
+#define RASF_SET_RAS_CAPABILITIES_STATUS_NOT_SUPPORTED      2
+#define RASF_SET_RAS_CAPABILITIES_STATUS_BUSY               3
+#define RASF_SET_RAS_CAPABILITIES_STATUS_FAILED_F           4
+#define RASF_SET_RAS_CAPABILITIES_STATUS_ABORTED            5
+#define RASF_SET_RAS_CAPABILITIES_STATUS_INVALID            6
+
+#define RASF_PCC_COMMAND_CODE_RESERVED                      0
+#define RASF_PCC_COMMAND_CODE_EXECUTE_RASF_COMMAND          1
+
+#define RASF_PLATFORM_RAS_CAPABILITIES_HBPS_SUPPORTED       (1 << 0)    //HBPS: Hardware Based Patrol Scrub
+#define RASF_PLATFORM_RAS_CAPABILITIES_HBPS_ETS             (1 << 1)
+
+#define RASF_PATROL_SCRUB_COMMAND_GET_PATROL_PARAMTERS      0x01
+#define RASF_PATROL_SCRUB_COMMAND_START_PATROL_SCRUBBER     0x02
+#define RASF_PATROL_SCRUB_COMMAND_STOP_PATROL_SCRUBBER      0x03
+
+#define RASF_PATROL_SCRUB_FLAG_SET_SPEED_SLOW               0
+#define RASF_PATROL_SCRUB_FLAG_SET_SPEED_MEDIUM             0b100 //im lazy im not translating the bits
+#define RASF_PATROL_SCRUB_FLAG_SET_SPEED_FAST               0b111 //im lazy im not translating the bits
+
+#define RAS2_FEATURE_TYPE_MEMORY                            0x00
+
+#define RAS2_PCC_SIGNATURE(SignatureID) (0x50434300 | SignatureID)
+#define MPST_PCC_SIGNATURE(SignatureID) (0x50434300 | SignatureID)
+
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_SUCCESS            0b0000
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_NOT_VALID          0b0001
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_NOT_SUPPORTED      0b0010
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_BUSY               0b0011
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_FAILED             0b0100
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_ABORTED            0b0101
+#define RAS2_SET_RAS_CAPABILITIES_STATUS_INVALID_DATA       0b0110
+
+#define RAS2_FEATURE_PATROL_SCRUB                           0
+#define RAS2_FEATURE_LA2PA_TRANSLATION                      1
+
+#define MPST_COMMAND_CODE_EXECUTE_MPST_COMMAND              0x03
+
+#define MPST_COMMAND_STATUS_COMMAND_COMPLETE    (1 << 0)
+#define MPST_COMMAND_STATUS_SCI_DOORBELL        (1 << 1)
+#define MPST_COMMAND_STATUS_ERROR               (1 << 2)
+#define MPST_COMMAND_STATUS_PLATFORM_NOTIF      (1 << 3)
+
+#define MPST_MEMORY_POWER_NODE_FLAG_ENABLED             (1 << 0)
+#define MPST_MEMORY_POWER_NODE_FLAG_POWER_MANAFED       (1 << 1)
+#define MPST_MEMORY_POWER_NODE_FLAG_HOT_PLUGABLE        (1 << 2)
+
+#define MPST_MPSC_FLAG_MEMORY_CONTENT_PRESERVED                 (1 << 0)
+#define MPST_MPSC_FLAG_AUTONOMUS_MEMORY_POWER_STATE_ENTRY       (1 << 1)
+#define MPST_MPSC_FLAG_AUTONOMUS_MEMORY_POWER_STATE_EXIT        (1 << 2)
+
+#define PMTT_COMMON_MEMORY_DEVICE_TYPE_SOCKET               0
+#define PMTT_COMMON_MEMORY_DEVICE_TYPE_MEMORY_CONTROLLER    1
+#define PMTT_COMMON_MEMORY_DEVICE_TYPE_DIMM                 2
+
+#define FPDT_PERFORMANCE_RECORD_TYPE_BASIC_BOOT_PERFORMANCE_POINTER     0
+#define FPDT_PERFORMANCE_RECORD_TYPE_BASIC_S3_PERFORMANCE_POINTER       1
+
+#define RUNTIME_PERFORMANCE_RECORD_S3_RESUME        0
+#define RUNTIME_PERFORMANCE_RECORD_S3_SUSPEND       1
+#define RUNTIME_PERFORMANCE_RECORD_BASIC            2
+
 
 
 //im putting these in because you never know when you
@@ -669,7 +760,431 @@ typedef struct __attribute__((packed)) _MADT_ICS_LPC_PIC_STRUCTURE{
     uint16_t                                                CascadeVector;
 }MADT_ICS_LPC_PIC_STRUCTURE, * PMADT_ICS_LPC_PIC_STRUCTURE;
 
+typedef struct __attribute__((packed)) _SMART_BATTER_TABLE{
+    TABLE_DESCRIPTION_HEADER                                SbstHeader;
+    uint32_t                                                WarningEnergyLevel;
+    uint32_t                                                LowEnergyLevel;
+    uint32_t                                                CriticalEnergyLevel;
+}SMART_BATTER_TABLE, * PSMART_BATTER_TABLE;
 
+typedef struct __attribute__((packed)) _EMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE{
+    TABLE_DESCRIPTION_HEADER                                EcdtHeader;
+    uint8_t                                                 EccControl[12];
+    uint8_t                                                 EccData[12];
+    uint32_t                                                Uid;
+    uint8_t                                                 GpeBit;
+    uint8_t                                                 EcId[];
+}EMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE, * PEMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE;
+
+typedef struct __attribute__((packed)) _STATIC_RESOURCE_AFINITY_TABLE{
+    TABLE_DESCRIPTION_HEADER                                SratHeader;
+    uint8_t                                                 Reserved[12];
+    uint8_t                                                 SratBuffer[];    
+}STATIC_RESOURCE_AFINITY_TABLE, * PSTATIC_RESOURCE_AFINITY_TABLE;
+
+typedef struct __attribute__((packed)) _SRAT_LOCAL_APIC_AFFINITY_STRUCTURE{
+    uint8_t                                                 Type;//0
+    uint8_t                                                 Length;//16
+    uint8_t                                                 ProximityDomainLow;
+    uint8_t                                                 ApicID;
+    uint32_t                                                Flags;
+    uint8_t                                                 LocalSapicEID;
+    uint8_t                                                 ProximityDomainHigh;
+    uint32_t                                                ClockDomain;
+}SRAT_LOCAL_APIC_AFFINITY_STRUCTURE, * PSRAT_LOCAL_APIC_AFFINITY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _SRAT_MEMORY_AFFINITY_STRUTURE{
+    uint8_t                                                 Type;//1
+    uint8_t                                                 Length;//40
+    uint32_t                                                ProximityDomain;
+    uint16_t                                                Reserved1;
+    uint32_t                                                BaseAddressLow;
+    uint32_t                                                BaseAddressHigh;
+    uint32_t                                                LengthLow;
+    uint32_t                                                LengthHigh;
+    uint32_t                                                Reserved2;
+    uint32_t                                                Flags;
+    uint64_t                                                Reserved3;
+}SRAT_MEMORY_AFFINITY_STRUTURE, * PSRAT_MEMORY_AFFINITY_STRUTURE;
+
+typedef struct __attribute__((packed)) _SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE{
+    uint8_t                                                 Type;//2
+    uint8_t                                                 Length;//24
+    uint16_t                                                Reserved1;
+    uint32_t                                                ProximityDomain;
+    uint32_t                                                X2ApicId;
+    uint32_t                                                Flags;
+    uint32_t                                                ClockDomain;
+    uint32_t                                                Reserved2;
+}SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE, * PSRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _SRAT_GICC_AFFINITY_STRUCTURE{
+    uint8_t                                                 Type;//3
+    uint8_t                                                 ProximityDomain;
+    uint32_t                                                ProcessorUID;
+    uint32_t                                                Flags;
+    uint32_t                                                ClockDomain;
+}SRAT_GICC_AFFINITY_STRUCTURE, * PSRAT_GICC_AFFINITY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _SRAT_GIC_ITS_AFFINITY_STRUCTURE{
+    uint8_t                                                 Type;//4;
+    uint8_t                                                 Length;// 12
+    uint32_t                                                ProximityDomain;
+    uint16_t                                                Reserved;
+    uint32_t                                                ItsID;
+}SRAT_GIC_ITS_AFFINITY_STRUCTURE, * PSRAT_GIC_ITS_AFFINITY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _SRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE{
+    uint8_t                                                 Type;//5
+    uint8_t                                                 Length;//32
+    uint8_t                                                 Reserved1;
+    uint8_t                                                 DeviceHandleType;
+    uint32_t                                                ProximityDomain;
+    uint8_t                                                 DeviceHandle[16];
+    uint32_t                                                Flags;
+    uint32_t                                                Reserved2;
+}SRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE, * PSRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _ACPI_SPEC_ACPI_DEVICE_HANDLE{
+    uint64_t                                                AcpiHID;
+    uint32_t                                                AcpiUID;
+    uint32_t                                                Reserved;
+}ACPI_SPEC_ACPI_DEVICE_HANDLE, * PACPI_SPEC_ACPI_DEVICE_HANDLE;
+
+typedef struct __attribute__((packed)) _ACPI_BDF_STRUCTURE{
+    uint8_t     Reserved;
+    uint8_t     BusNumber;
+    //split bit LE bit 0 first
+    uint8_t    FunctionNumber   : 2;
+    uint8_t    DeviceNumber     : 6;
+}ACPI_BDF_STRUCTURE, * PACPI_BDF_STRUCTURE;
+
+typedef union __attribute__((packed)) _ACPI_BDF{
+    uint16_t            FlatValue;
+    ACPI_BDF_STRUCTURE  BdfMembers;
+}ACPI_BDF, * PACPI_BDF;
+
+typedef struct __attribute__((packed)) _ACPI_SPEC_PCI_DEVICE_HANDLE{
+    uint16_t                                                PciSegment;
+    ACPI_BDF                                                BdfNumber;
+    uint8_t                                                 Reserved;
+}ACPI_SPEC_PCI_DEVICE_HANDLE, * PACPI_SPEC_PCI_DEVICE_HANDLE;
+
+typedef struct __attribute__((packed)) _SRAT_GENERIC_PORT_AFFINITY_STRUCTURE{
+    uint8_t                                                 Type;//6
+    uint8_t                                                 Length;//32
+    uint8_t                                                 Reserved1;
+    uint8_t                                                 DeviceHandleType;
+    uint32_t                                                ProximityDomain;
+    uint8_t                                                 DeviceHandle[16];
+    uint32_t                                                Flags;
+    uint32_t                                                Reserved2;
+}SRAT_GENERIC_PORT_AFFINITY_STRUCTURE, * PSRAT_GENERIC_PORT_AFFINITY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _SYSTEM_LOCALITY_INFORMATION_TABLE{
+    TABLE_DESCRIPTION_HEADER    SlitHeader;
+    uint64_t                    NumberOfSystemLocality;
+    uint8_t                     Entries[];//the matrix entries 00 and 10 = 10
+}SYSTEM_LOCALITY_INFORMATION_TABLE, * PSYSTEM_LOCALITY_INFORMATION_TABLE;
+
+typedef struct __attribute__((packed)) _CPEP_PROCESSOR_STRUCUTRE{
+    uint8_t                     Type; //0
+    uint8_t                     Length;//8
+    uint8_t                     ProcessorID;
+    uint8_t                     ProcessorEID;
+    uint32_t                    PollingInterval;
+}CPEP_PROCESSOR_STRUCUTRE, * PCPEP_PROCESSOR_STRUCUTRE;
+
+typedef struct __attribute__((packed)) _CORRECTED_PLATFORM_ERROR_POLLING_TABLE{
+    TABLE_DESCRIPTION_HEADER    CpepHeader;
+    uint64_t                    Reserved1;
+    CPEP_PROCESSOR_STRUCUTRE    ProcessorStructure[];
+}CORRECTED_PLATFORM_ERROR_POLLING_TABLE, * PCORRECTED_PLATFORM_ERROR_POLLING_TABLE;
+
+typedef struct __attribute__((packed)) _MAXIMUM_SYSTEM_CHARECTERISTICS_TABLE{
+    TABLE_DESCRIPTION_HEADER    MsctHeader;
+    uint32_t                    ProximityDomainInfoOffset;
+    uint32_t                    MaximumProximityDomains;
+    uint32_t                    MaximumClockDomains;
+    uint64_t                    MaximumPhysicalAddresses;
+    uint8_t                     TableBuffer[]; //starts at MaximumProximityDomains
+}MAXIMUM_SYSTEM_CHARECTERISTICS_TABLE, * PMAXIMUM_SYSTEM_CHARECTERISTICS_TABLE;
+
+typedef struct __attribute__((packed)) _MAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE{
+    uint8_t                     Revision;//1
+    uint8_t                     Length;//22
+    uint32_t                    ProximityDomainLow;
+    uint32_t                    ProximityDomainHigh;
+    uint32_t                    MaximumProcessorCapacity;
+    uint64_t                    MaximumMemoryCapacity;
+}MAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE, *  PMAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE;
+
+typedef struct __attribute__((packed)) _RAS_FEATURE_TABLE{
+    TABLE_DESCRIPTION_HEADER    RasfHeader;
+    uint8_t                     RasfPlatformCommunicationChannelID[12];
+}RAS_FEATURE_TABLE, * PRAS_FEATURE_TABLE;
+
+typedef struct __attribute__((packed)) _RASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION{
+    uint32_t                    Signature;
+    uint16_t                    Command;
+    uint16_t                    Status;
+    uint16_t                    Version;
+    uint8_t                     RasCapabilities[16];
+    uint8_t                     SetRasCapabilities[16];
+    uint16_t                    NumberOfRasfParameterBlocks;
+    uint32_t                    SetRasCapabilitiesStatus;
+    uint8_t                     ParameterBlocks[];
+}RASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION, * PRASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION;
+
+typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB_FLAGS_STRCUTRE{
+    uint8_t     CurrentPatrolSpeed : 3;
+    uint8_t     ReservedLow        : 5;
+    uint16_t    ReservedHigh;
+}RASF_PATROL_SCRUB_FLAGS_STRCUTRE, * PRASF_PATROL_SCRUB_FLAGS_STRCUTRE;
+
+typedef union __attribute__((packed)) _RASF_PATROL_SCRUB_FLAGS{
+    uint16_t                            FlatValue;
+    RASF_PATROL_SCRUB_FLAGS_STRCUTRE    SpecFlags;
+}RASF_PATROL_SCRUB_FLAGS, * PRASF_PATROL_SCRUB_FLAGS;
+
+typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE{
+    uint8_t     Speed       : 2;
+    uint8_t     Reserved    : 6;
+}RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE, * PRASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE;
+
+typedef union __attribute__((packed)) _RASF_PATROL_SCRUB_REQUEST_SPEED{
+    uint8_t                                     FlatValue;
+    RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE   Speed;
+}RASF_PATROL_SCRUB_REQUEST_SPEED, * PRASF_PATROL_SCRUB_REQUEST_SPEED;
+
+typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB{
+    uint16_t                            Type;   
+    uint16_t                            Version;
+    uint16_t                            Length;
+    uint16_t                            PatrolScrubCommand;
+    uint8_t                             RequestedRange[16];
+    uint8_t                             ActualAddressRange[16];
+    RASF_PATROL_SCRUB_FLAGS             Flags;
+    RASF_PATROL_SCRUB_REQUEST_SPEED     RequestSpeed;
+}RASF_PATROL_SCRUB, * PRASF_PATROL_SCRUB;
+
+typedef struct __attribute__((packed)) _RAS2_PCC_DESCRIPTOR{
+    uint8_t                             PccID;
+    uint16_t                            Reserved;
+    uint8_t                             FeatureType;
+    uint32_t                            Instance;
+}RAS2_PCC_DESCRIPTOR, * PRAS2_PCC_DESCRIPTOR;
+
+typedef struct __attribute__((packed)) _RAS_FEATURE_2_TABLE{
+    TABLE_DESCRIPTION_HEADER            Ras2Header;
+    uint16_t                            Reserved1;
+    uint16_t                            PccDescriptors;
+    RAS2_PCC_DESCRIPTOR                 Ras2PCCDescriptorList[];
+}RAS_FEATURE_2_TABLE, * PRAS_FEATURE_2_TABLE;
+
+typedef struct __attribute__((packed)) _RAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION{
+    uint32_t                            Signature;
+    uint16_t                            Command;
+    uint16_t                            Status;
+    uint16_t                            Version;
+    uint8_t                             RasFeatures[16];
+    uint8_t                             SetRasCapabilities[16];
+    uint16_t                            Ras2ParameterBlocks;
+    uint32_t                            SetRasCapabilitiesStatus;
+    uint8_t                             ParameterBlocks[];
+}RAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION, * PRAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION;
+
+typedef struct __attribute__((packed)) _RAS2_FEATURE_TYPE_0{
+    uint8_t                             PccIdentifier;
+    uint16_t                            Reserved;
+    uint8_t                             FeatureType;
+    uint32_t                            Instance;
+}RAS2_FEATURE_TYPE_0, * PRAS2_FEATURE_TYPE_0;
+
+typedef struct __attribute__((packed)) _RAS2_PATROL_SCRUB_PARAMETER_BLOCK{
+    uint16_t                            Type;
+    uint16_t                            Version;
+    uint16_t                            Length;
+    uint16_t                            PatrolScrubCommand;
+    uint8_t                             RequestedRange[16];
+    uint8_t                             ActualAddressRange[16];
+    uint32_t                            Flags;
+    uint32_t                            ScrubParameters;
+}RAS2_PATROL_SCRUB_PARAMETER_BLOCK, * PRAS2_PATROL_SCRUB_PARAMETER_BLOCK;
+
+typedef struct __attribute__((packed)) _RAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK{
+    uint16_t        Type;
+    uint16_t        Version;
+    uint16_t        Length;
+    uint16_t        AddressTranslation;
+    uint64_t        SubInstanceIdentifier;
+    uint64_t        LogicalAddress;
+    uint64_t        PhysicalAddress;
+    uint32_t        Status;
+}RAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK, * PRAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK;
+
+typedef struct __attribute__((packed)) _MEMORY_POWER_STATE_TABLE{
+    TABLE_DESCRIPTION_HEADER            MpstHeader;
+    uint8_t                             MpstPccID;
+    uint8_t                             Reserved1[3];
+    uint16_t                            MemoryPowerNodeCount;
+    uint16_t                            Reserved2;
+    uint8_t                             MemoryPowerNodeBuffer[];
+}MEMORY_POWER_STATE_TABLE, * PMEMORY_POWER_STATE_TABLE;
+
+typedef struct __attribute__((packed)) _MPST_PCC_SHARED_MEMORY_REGION{
+    uint32_t    Signature;
+    uint16_t    Command;
+    uint16_t    Status;
+    uint32_t    MemoryPowerCommandRegister;
+    uint32_t    MemoryPowerStatusRegister;
+    uint32_t    PowerStateID;
+    uint32_t    MemoryPowerNodeID;
+    uint64_t    MemoryEnergyConsumed;
+    uint64_t    ExpectedAveragePowerConsumed;
+}MPST_PCC_SHARED_MEMORY_REGION, * PMPST_PCC_SHARED_MEMORY_REGION;
+
+typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_NODE{
+    uint8_t     Flag;
+    uint8_t     Reserved;
+    uint16_t    MemoryPowerNodeID;
+    uint32_t    Length;
+    uint32_t    BaseAddressLow;
+    uint32_t    BaseAddressHigh;
+    uint32_t    LengthLow;
+    uint32_t    LengthHigh;
+    uint32_t    NumberOfPowerState;
+    uint32_t    NumberOfPhysicalComponents;
+    uint8_t     MPNBuffer[];
+}MPST_MEMORY_POWER_NODE, * PMPST_MEMORY_POWER_NODE;
+
+typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_STATE{
+    uint8_t     PowerStateValue;
+    uint8_t     PowerStateInformationIndex;
+}MPST_MEMORY_POWER_STATE, * PMPST_MEMORY_POWER_STATE;
+
+typedef struct __attribute__((packed)) _MPST_MPSC_POWER_STATE_ID_STRCUTURE{
+    uint8_t     FormatID            : 6;
+    uint8_t     StrucutreRevision   : 2;
+}MPST_MPSC_POWER_STATE_ID_STRCUTURE, * PMPST_MPSC_POWER_STATE_ID_STRCUTURE;
+
+typedef union __attribute__((packed)) _MPST_MPSC_POWER_STATE_ID{
+    uint8_t                                 FlatValue;
+    MPST_MPSC_POWER_STATE_ID_STRCUTURE      SpecValue;
+}MPST_MPSC_POWER_STATE_ID, * PMPST_MPSC_POWER_STATE_ID;
+
+typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_STATE_CHARECTERISTICS{
+    MPST_MPSC_POWER_STATE_ID        PowerStateID;
+    uint8_t                         Flags;
+    uint16_t                        Reserved1;
+    uint32_t                        APC;
+    uint32_t                        RelativePowerSaving;
+    uint64_t                        ExitLatency;
+    uint64_t                        Reserved2;
+}MPST_MEMORY_POWER_STATE_CHARECTERISTICS, * PMPST_MEMORY_POWER_STATE_CHARECTERISTICS;
+
+typedef struct __attribute__((packed)) _PLATFORM_MEMORY_TOPOLOGY_TABLE{
+    TABLE_DESCRIPTION_HEADER        PmttHeader;
+    uint32_t                        NumberOfMemoryDevices;
+    uint8_t                         MemoryDeviceBuffer[];
+}PLATFORM_MEMORY_TOPOLOGY_TABLE, * PPLATFORM_MEMORY_TOPOLOGY_TABLE;
+
+typedef struct __attribute__((packed)) _PMTT_COMMON_MEMORY_DEVICE{
+    uint8_t     Type;
+    uint8_t     Reserved1;
+    uint16_t    Length;
+    uint16_t    Flags;
+    uint16_t    Reserved2;
+    uint32_t    NumberOfMemoryDevices;
+}PMTT_COMMON_MEMORY_DEVICE, * PPMTT_COMMON_MEMORY_DEVICE;
+
+typedef struct __attribute__((packed)) _PMTT_CMD_SOCKET_TYPE_DATA{
+    PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
+    uint16_t                    SocketIdentifier;
+    uint16_t                    Reserved1;
+    uint8_t                     MemorDeviceData[];
+}PMTT_CMD_SOCKET_TYPE_DATA, * PPMTT_CMD_SOCKET_TYPE_DATA;
+
+typedef struct __attribute__((packed)) _PMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA{
+    PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
+    uint16_t                    MemoryControllerIdentifier;
+    uint16_t                    Reserved1;
+    uint8_t                     MemorDeviceData[];
+}PMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA, * PPMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA;
+
+typedef struct __attribute__((packed)) _PMTT_CMD_DIMM_TYPE_DATA{
+    PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
+    uint32_t                    SmBiosHandle;
+}PMTT_CMD_DIMM_TYPE_DATA, * PPMTT_CMD_DIMM_TYPE_DATA;
+
+typedef struct __attribute__((packed)) _PMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA{
+    PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
+    uint8_t                     TypeUUID[16];
+    uint8_t                     VendorSpecificData[];
+}PMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA, * PPMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA;
+
+typedef struct __attribute__((packed)) _BGRT_STATUS_STRUCTURE{
+    uint8_t                     Displayed           : 1;
+    uint8_t                     OrientationOffset   : 2;
+    uint8_t                     Reserved            : 5;
+}BGRT_STATUS_STRUCTURE, * PBGRT_STATUS_STRUCTURE;
+
+typedef union __attribute__((packed)) _BGRT_STATUS{
+    uint8_t                 FlatValue;
+    BGRT_STATUS_STRUCTURE   SpecFlags;
+}BGRT_STATUS, * PBGRT_STATUS;
+
+typedef struct __attribute__((packed)) _BOOT_GRAPHICS_RESOURCE_TABLE{
+    TABLE_DESCRIPTION_HEADER    BgrtHeader;
+    uint16_t                    Version;
+    BGRT_STATUS                 Status;
+    uint8_t                     ImageType;
+    uint64_t                    ImageAddress;
+    uint32_t                    ImageOffsetX;
+    uint32_t                    ImageOffsetY;
+}BOOT_GRAPHICS_RESOURCE_TABLE, * PBOOT_GRAPHICS_RESOURCE_TABLE;
+
+typedef struct __attribute__((packed)) _FIRMWARE_PERFORMANCE_DATA_TABLE{
+    TABLE_DESCRIPTION_HEADER    FpdtHeader;
+    uint8_t                     RecordBuffer[];
+}FIRMWARE_PERFORMANCE_DATA_TABLE, * PFIRMWARE_PERFORMANCE_DATA_TABLE;
+
+typedef struct __attribute__((packed)) _FPDT_PERFORMANCE_RECORD{
+    uint16_t                    PerformanceRecord;
+    uint8_t                     RecordLength;
+    uint8_t                     Revision;
+    uint8_t                     Data[];
+}FPDT_PERFORMANCE_RECORD, * PFPDT_PERFORMANCE_RECORD;
+
+typedef struct __attribute__((packed)) _FPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER{
+    uint16_t                    PerformanceRecordType;
+    uint8_t                     RecordLength; //16
+    uint8_t                     Revision;
+    uint32_t                    Reserved;
+    uint64_t                    Pointer;
+}FPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER, * PFPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER;
+
+typedef struct __attribute__((packed)) _FPDT_S3_PERFORMANCE_TABLE_POINTER{
+    uint16_t                    PerformanceRecordType;
+    uint8_t                     RecordLength; //16
+    uint8_t                     Revision;
+    uint32_t                    Reserved;
+    uint64_t                    Pointer;
+}FPDT_S3_PERFORMANCE_TABLE_POINTER, * PFPDT_S3_PERFORMANCE_TABLE_POINTER;
+
+typedef struct __attribute__((packed)) _PFPDT_BASIC_BOOT_PERFORMANCE_TABLE{
+    char                        Signature[4];
+    uint32_t                    Length;
+    uint16_t                    PerformanceRecordType;
+    uint8_t                     RecordLength;
+    uint8_t                     Revision;
+    uint32_t                    Reserved1;
+    uint64_t                    ResetEnd;
+    uint64_t                    OsLoaderLoadImage;
+    uint64_t                    OsLoaderStartImage;
+    uint64_t                    ExitBootServiceEntry;
+    uint64_t                    ExitBootServiceExit;
+}PFPDT_BASIC_BOOT_PERFORMANCE_TABLE, * PPFPDT_BASIC_BOOT_PERFORMANCE_TABLE;
 
 
 

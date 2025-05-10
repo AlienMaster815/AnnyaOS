@@ -350,7 +350,7 @@ static inline void SetupConfigTable(
         return;
     }
 
-    *(volatile uint64_t*)Conf->SecurityCookie = 81503;//(uint64_t)Random(ImageBase);
+    *(volatile uint64_t*)Conf->SecurityCookie = 81503;
 }
 
 PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
