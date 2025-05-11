@@ -202,8 +202,8 @@ extern "C" {
 #define MADT_ICS_LOCAL_APIC_FLAG_ENABLED            (1 << 0)
 #define MADT_ICS_LOCAL_APIC_FLAG_ONLINE_CAPABLE     (1 << 1)
 
-#define MADT_ICS_ISO_MPS_INTI_FLAG_POLARITY         (2 << 0)
-#define MADT_ICS_ISO_MPS_INTI_FLAG_TRIGGER_MODE     (2 << 2)
+#define MADT_ICS_ISO_MPS_INTI_FLAG_POLARITY         (3 << 0)
+#define MADT_ICS_ISO_MPS_INTI_FLAG_TRIGGER_MODE     (3 << 2)
 
 #define MADT_ICS_PIS_FLAG_CPEI_PROC_OVERIDE         (1 << 0)
 
@@ -369,6 +369,40 @@ extern "C" {
 
 #define SDEV_SECURE_ACCESS_COMPONENT_TYPE_ID_BASED_SECURE_ACCESS_COMPONENT      0
 #define SDEV_SECURE_ACCESS_COMPONENT_TYPE_MEMORY_BASED_SECURE_ACCESS_COMPONENT  1
+
+#define HMAT_STRUCTURE_TYPE_MEMORY_PROXIMITY_DOMAIN_ATTRIBUTE   0
+#define HMAT_STRUCTURE_TYPE_SYSTEM_LOCALITY_LATENCE_BANDWITH    1
+#define HMAT_STRUCUTRE_TYPE_MEMORY_SIDE_CACHE                   2
+
+#define HMAT_SSLB_FLAG_MEMORY_PERFORMANCE       0
+#define HMAT_SSLB_FLAG_LEVEL_1_SIDE_CACHE       1
+#define HMAT_SSLB_FLAG_LEVEL_2_SIDE_CACHE       2
+#define HMAT_SSLB_FLAG_LEVEL_3_SIDE_CACHE       3
+#define HMAT_SSLB_FLAG_MINIMUM_TRANSFER_SIZE    1
+#define HMAT_SSLB_FLAG_NON_SEQENTIAL_TRANSFERS  2
+
+#define PDTT_PCC_STRUCTURE_PDTT_PCC_SUB_CHANNEL_ID      (0xFF   << 0)
+#define PDTT_PCC_STRUCTURE_RUNTIME                      (1      << 8)
+#define PDTT_PCC_STRUCTURE_WAIT_FOR_COMPLETION          (1      << 9)
+#define PDTT_PCC_STRUCTURE_TRIGGER_ORDER                (1      << 10)
+
+#define PDTT_EXECUTE_PLATFORM_DEBUG_TRIGGER_DOORBELL_ONLY       0
+#define PDTT_EXECUTE_PLATFORM_DEBUG_TRIGGER_VENDOR_SPECIFIC     1
+
+#define PPTT_PROCESSOR_STRUCTURE_FLAG_PHYSICAL_PACKAGE          (1 << 0)
+#define PPTT_PROCESSOR_STRUCTURE_FLAG_ACPI_PROCESSOR_VALID_ID   (1 << 1)
+#define PPTT_PROCESSOR_STRUCTURE_FLAG_PROCESSOR_IS_THREAD       (1 << 2)
+#define PPTT_PROCESSOR_STRUCTURE_FLAG_NODE_IS_LEAF              (1 << 3)
+#define PPTT_PROCESSOR_STRUCTURE_FLAG_IDENTICAL_IMPLEMENTATION  (1 << 4)
+
+#define PPTT_CACHE_STRUCTURE_FLAG_SIZE_PROPERTY_VALID           (1 << 0)
+#define PPTT_CACHE_STRUCTURE_FLAG_NUMBER_OF_SET_VALID           (1 << 1)
+#define PPTT_CACHE_STRUCTURE_FLAG_ASSOCIATIVITY_VALID           (1 << 2)
+#define PPTT_CACHE_STRUCTURE_FLAG_ALLOCATION_TYPE_VALID         (1 << 3)
+#define PPTT_CACHE_STRUCTURE_FLAG_CACHE_TYPE_VALID              (1 << 4)
+#define PPTT_CACHE_STRUCTURE_FLAG_WRITE_POLICY_VALID            (1 << 5)
+#define PPTT_CACHE_STRUCTURE_FLAG_LINE_POLICY_VALID             (1 << 6)
+#define PPTT_CACHE_STRUCTURE_FLAG_CACHE_ID_VALID                (1 << 7)
 
 
 
@@ -1478,6 +1512,136 @@ typedef struct __attribute__((packed)) _SDEV_PCIE_ENDPOINT_DEVICE{
     uint16_t    VendorSpecificDataOffset;
     uint16_t    VendorSpecificDataLength;
 }SDEV_PCIE_ENDPOINT_DEVICE, * PSDEV_PCIE_ENDPOINT_DEVICE;
+
+typedef struct __attribute__((packed)) _HETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE{
+    TABLE_DESCRIPTION_HEADER    HmatHeader;
+    uint32_t                    Reserved;
+    uint8_t                     HmatData[];
+}HETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE, * PHETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE;
+
+typedef struct __attribute__((packed)) _HMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE{
+    uint16_t    Type;
+    uint16_t    Reserved1;
+    uint32_t    Length;
+    uint16_t    Flags;
+    uint16_t    Reserved2;
+    uint32_t    AttachedInitiatorDomain;
+    uint32_t    MemoryDomain;
+    uint8_t     Reserved3[20];
+}HMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE, * PHMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE;
+
+typedef struct __attribute__((packed)) _HMAT_SSLB_FLAG_STRUCTURE{
+    uint8_t MemoryHierarchy     : 4;
+    uint8_t AccessAttributes    : 2;
+    uint8_t Reserved            : 2;
+}HMAT_SSLB_FLAG_STRUCTURE, * PHMAT_SSLB_FLAG_STRUCTURE;
+
+typedef union __attribute__((packed)) _HMAT_SSLB_FLAGS{
+    uint8_t                     FlatValue;
+    HMAT_SSLB_FLAG_STRUCTURE    SpecFlags;
+}HMAT_SSLB_FLAGS, * PHMAT_SSLB_FLAGS;
+
+typedef struct __attribute__((packed)) _HMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE{
+    uint16_t    Type;
+    uint16_t    Reserved1;
+    uint32_t    Length;
+    uint8_t     Flags;
+    uint8_t     DataType;
+    uint8_t     MinimumTransferSize;
+    uint8_t     Reserved2;
+    uint32_t    InitiatorProximityDomainCount;
+    uint32_t    TargetProximityDomainCount;
+    uint32_t    Reserved3;
+    uint64_t    EntryBaseUnit;
+    uint8_t     DataBuffer[];
+}HMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE, * PHMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE;
+
+typedef struct __attribute__((packed)) _HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE{
+    uint32_t    CacheLevelCount         : 4;
+    uint32_t    CacheLevel              : 4;
+    uint32_t    CacheAssociativiy       : 4;
+    uint32_t    WritePolicy             : 4;
+    uint32_t    CacheLineSize           : 16;
+}HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE, * PHMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE;
+
+typedef union __attribute__((packed)) _HMA_MSC_CACHE_ATTRIBUTES{
+    uint32_t                                FlatValue;
+    HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE      SpecFlags;
+}HMA_MSC_CACHE_ATTRIBUTES, * PHMA_MSC_CACHE_ATTRIBUTES;
+
+typedef struct __attribute__((packed)) _HMAT_MEMORY_SIDE_CACHE_STRUCTURE{
+    uint16_t                    Type;
+    uint16_t                    Reserved1;
+    uint32_t                    Length;
+    uint32_t                    MemoryProximityDomains;
+    uint32_t                    Reserved2;
+    uint64_t                    MemorySideCacheSize;
+    HMA_MSC_CACHE_ATTRIBUTES    CacheAttributes;
+    uint16_t                    SmbiosHandleCount;
+    uint8_t                     DataBuffer[];
+}HMAT_MEMORY_SIDE_CACHE_STRUCTURE, * PHMAT_MEMORY_SIDE_CACHE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _PLATFORM_DEBUG_TRIGGER_TABLE{
+    TABLE_DESCRIPTION_HEADER    PdttHeader;
+    uint8_t                     TriggerCount;
+    uint8_t                     Reserved1[3];
+    uint32_t                    TriggerIdentifierArray;
+    uint8_t                     PCCBuffer;
+}PLATFORM_DEBUG_TRIGGER_TABLE, * PPLATFORM_DEBUG_TRIGGER_TABLE;
+
+typedef struct __attribute__((packed)) _PDTT_PCC_SHARED_MEMORY_STRUCTURE{
+    uint8_t     Signature[4];
+    uint8_t     VendorSpecificData[];
+}PDTT_PCC_SHARED_MEMORY_STRUCTURE, * PPDTT_PCC_SHARED_MEMORY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _PDTT_PLATFOMR_COMMUNICATION_CHANNEL{
+    uint8_t     Signature[4];
+    uint16_t    Command;
+    uint16_t    Status;
+    uint8_t     VendorSpecific[];
+}PDTT_PLATFOMR_COMMUNICATION_CHANNEL, * PPDTT_PLATFOMR_COMMUNICATION_CHANNEL;
+
+typedef struct __attribute__((packed)) _PROCESSOR_PROPERTIES_TOPOLOGY_TABLE{
+    TABLE_DESCRIPTION_HEADER    PpttHeader;
+    uint8_t                     TableData[];
+}PROCESSOR_PROPERTIES_TOPOLOGY_TABLE, * PPROCESSOR_PROPERTIES_TOPOLOGY_TABLE;
+
+typedef struct __attribute__((packed)) _PPTT_PROCESSOR_HIERARCHY_NODE{
+    uint8_t     Type;
+    uint8_t     Length;
+    uint16_t    Reserved1;
+    uint32_t    Flags;
+    uint32_t    Parent;
+    uint32_t    AcpiProcessorID;
+    uint32_t    PrivateResourceCount;
+    uint32_t    PRivateResources[];
+}PPTT_PROCESSOR_HIERARCHY_NODE, * PPPTT_PROCESSOR_HIERARCHY_NODE;
+
+typedef struct __attribute__((packed)) _PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE{
+    uint8_t     AllocationType  : 2;
+    uint8_t     CacheType       : 2;
+    uint8_t     WritePolicy     : 1;
+    uint8_t     Reserved        : 3;
+}PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE, * PPPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE;
+
+typedef union __attribute__((packed)) _PPTT_CACHE_TYPE_ATTRIBUTE{
+    uint8_t                                 FlatValue;
+    PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE     SpecAttributes;
+}PPTT_CACHE_TYPE_ATTRIBUTE, * PPPTT_CACHE_TYPE_ATTRIBUTE;
+
+typedef struct __attribute__((packed)) _PPTT_CACHE_TYPE{
+    uint8_t                     Type;
+    uint8_t                     Length;
+    uint16_t                    Reserved1;
+    uint32_t                    Flags;
+    uint32_t                    NextLevelCache;
+    uint32_t                    Size;
+    uint32_t                    NumberOfSets;
+    uint8_t                     Associatives;
+    PPTT_CACHE_TYPE_ATTRIBUTE   Attributes;
+    uint16_t                    LineSize;
+    uint32_t                    CacheID;
+}PPTT_CACHE_TYPE, * PPPTT_CACHE_TYPE;
 
 
 
