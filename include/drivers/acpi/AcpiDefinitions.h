@@ -2,7 +2,7 @@
 #define _ACPI_DEFINITIONS_H
 
 //all definitions for the ACPI 6.5 Decemeber 2024 
-//specification release 
+//specification release written by -Tyler Grenier
 
 #ifndef __cplusplus
 #include <LouAPI.h>
@@ -314,6 +314,62 @@ extern "C" {
 #define RUNTIME_PERFORMANCE_RECORD_S3_RESUME        0
 #define RUNTIME_PERFORMANCE_RECORD_S3_SUSPEND       1
 #define RUNTIME_PERFORMANCE_RECORD_BASIC            2
+
+#define ELI_TIMER_FLAG_TIMER_INTERRUPT_MODE         (1 << 0)
+#define ELI_TIMER_INTERRUPT_MODE_EDGE               (1 << 0)
+#define ELI_TIMER_INTERRUPT_MODE_LEVEL              (0 << 0)
+
+#define ELI_TIMER_FLAG_TIMER_INTERRUPT_POLARITY     (1 << 1)
+#define ELI_TIMER_INTERRUPT_POLARITY_ACTIVE_LOW     (1 << 1)
+#define ELI_TIMER_INTERRUPT_POLARITY_ACTIVE_HIGH    (0 << 1)
+
+#define ELI_TIMER_FLAG_ALWAYS_ON_CAPABILITY         (1 << 2)
+
+#define GTDT_PLATFORM_TIMER_STRUCUTR_TYPE_GT_BLOCK                  0
+#define GTDT_PLATFORM_TIMER_STRUCUTR_TYPE_ARM_GENERIC_WATCHDOG      1
+
+#define ARM_WATCHDOG_TIMER_FLAG_INTERRUPT_MODE  (1 << 0)
+#define ARM_WATCHDOG_TIMER_INTERRUPT_MODE_EDGE  (1 << 0)
+#define ARM_WATCHDOG_TIMER_INTERRUPT_MODE_LEVEL (0 << 0)
+
+#define ARM_WATCHDOG_TIMER_FLAG_INTERRUPT_POLARITY          (1 << 1)
+#define ARM_WATCHDOG_TIMER_INTERRUPT_POLARITY_ACTIVE_LOW    (1 << 1)
+#define ARM_WATCHDOG_TIMER_INTERRUPT_POLARITY_ACTIVE_HIGH   (0 << 1)
+
+#define ARM_WATCHDOG_TIMER_FLAG_SECURE_TIMER                (1 << 2)
+#define ARM_WATCHDOG_TIMER_SECURE_TIMER_IS_SECURE           (1 << 2)
+#define ARM_WATCHDOG_TIMER_SECURE_TIMER_IS_NON_SECURE       (0 << 2)
+
+#define NFIT_STRUCUTRE_TYPE_SYSTEM_PHYSICAL_ADDRESS_RANGE   0
+#define NFIT_STRUCUTRE_TYPE_NVDIMM_REGION_MAPPING           1
+#define NFIT_STRUCUTRE_TYPE_INTERLEAVE                      2
+#define NFIT_STRUCUTRE_TYPE_SMBIOS_MANAGEMENT_INFORMATION   3
+#define NFIT_STRUCUTRE_TYPE_NVDIMM_CONTROL_REGION           4
+#define NFIT_STRUCUTRE_TYPE_NVDIMM_BLOCK_DATA_WINDOW_REGION 5
+#define NFIT_STRUCUTRE_TYPE_FLUSH_HINT_ADDRESS              6
+#define NFIT_STRUCUTRE_TYPE_PLATFORM_CAPABILITIES           7
+
+#define NVDIMM_STATE_FLAG_SAVE_FAILED                                   (1 << 0)
+#define NVDIMM_STATE_FLAG_SAVE_SUCCESS                                  (0 << 0)
+#define NVDIMM_STATE_FLAG_RESOTRE_FAILED                                (1 << 1)
+#define NVDIMM_STATE_FLAG_RESOTRE_SUCCESS                               (0 << 1)
+#define NVDIMM_STATE_FLAG_FLUSH_BEFORE_SAVE_FAILED                      (1 << 2)
+#define NVDIMM_STATE_FLAG_FLUSH_BEFORE_SAVE_SUCCESS                     (0 << 2)
+#define NVDIMM_STATE_FLAG_NVDIMM_PRECISTANT_WRITES_FAILED               (1 << 3)
+#define NVDIMM_STATE_FLAG_NVDIMM_REGION_ARMED                           (0 << 3)
+#define NVDIMM_STATE_FLAG_SMART_HEALTH_EVENT_PRIOR_TO_OSPM              (1 << 4)
+#define NVDIMM_STATE_FLAG_SMART_HEALTH_PRE_OSPM_DETECTION_ENABLED       (1 << 5)
+#define NVDIMM_STATE_FLAG_FIRMWARE_DID_NOT_MAP_NVDIMM                   (1 << 6)
+
+#define SDEV_ACPI_NAMESPACE_DEVICE  0
+#define SDEV_PCIE_ENDPOINT          1
+
+#define SDEV_ACPI_NAMESPACE_DEVICE_FLAG_ALLOW_NONSECURE_HANDOFF             (1 << 0)
+#define SDEV_ACPI_NAMESPACE_DEVICE_FLAG_SECURE_ACCESS_COMPONENTS_PRESETN    (1 << 1)
+
+#define SDEV_SECURE_ACCESS_COMPONENT_TYPE_ID_BASED_SECURE_ACCESS_COMPONENT      0
+#define SDEV_SECURE_ACCESS_COMPONENT_TYPE_MEMORY_BASED_SECURE_ACCESS_COMPONENT  1
+
 
 
 //im putting these in because you never know when you
@@ -1185,6 +1241,243 @@ typedef struct __attribute__((packed)) _PFPDT_BASIC_BOOT_PERFORMANCE_TABLE{
     uint64_t                    ExitBootServiceEntry;
     uint64_t                    ExitBootServiceExit;
 }PFPDT_BASIC_BOOT_PERFORMANCE_TABLE, * PPFPDT_BASIC_BOOT_PERFORMANCE_TABLE;
+
+typedef struct __attribute__((packed)) _S3_PERFROMANCE_TABLE_HEADER{
+    char                        Signature[4];
+    uint32_t                    Length;
+}S3_PERFROMANCE_TABLE_HEADER, * PS3_PERFROMANCE_TABLE_HEADER;
+
+typedef struct __attribute__((packed)) _BASIC_S3_RESUME_PERFORMANCE_RECORD{
+    uint16_t                    RuntimePerformanceRecord;
+    uint8_t                     RecordLength;
+    uint8_t                     Revision;
+    uint32_t                    ResumeCount;
+    uint64_t                    FullResume;
+    uint64_t                    AverageResume;
+}BASIC_S3_RESUME_PERFORMANCE_RECORD, * PBASIC_S3_RESUME_PERFORMANCE_RECORD; 
+
+typedef struct __attribute__((packed)) _BASIC_S3_SUSPEND_PERFORMANCE_RECORD{
+    uint16_t                    RuntimePerformanceRecord;
+    uint8_t                     RecordLength;
+    uint8_t                     Revision;
+    uint64_t                    SuspendStart;
+    uint64_t                    SuspendEnd;
+}BASIC_S3_SUSPEND_PERFORMANCE_RECORD, * PBASIC_S3_SUSPEND_PERFORMANCE_RECORD;
+
+typedef struct __attribute__((packed)) _GENERIC_TIMER_DESCRIPTION_TABLE{
+    TABLE_DESCRIPTION_HEADER    GtdtHeader;
+    uint64_t                    CounterControlBase;
+    uint32_t                    Reserved;
+    uint32_t                    SecureELITimerGsi;
+    uint32_t                    SecureELITimerFlags;
+    uint32_t                    NonSecureELITimerGsi;
+    uint32_t                    NonSecureELITimerFlags;
+    uint32_t                    VirtualELITimerGsi;
+    uint32_t                    VirtualELITimerFlags;
+    uint32_t                    EL2TimerGsi;
+    uint32_t                    EL2TimerFlags;
+    uint64_t                    CounterReadBase;
+    uint32_t                    PlatformTimerCount;
+    uint32_t                    PlatformTimerOffset;
+    uint32_t                    VirtualEL2TimerGsi;
+    uint32_t                    VirtualEL2TimeFlags;
+    uint8_t                     PlatformTimerStruct[];
+}GENERIC_TIMER_DESCRIPTION_TABLE, * PGENERIC_TIMER_DESCRIPTION_TABLE;
+
+typedef struct __attribute__((packed)) _GTDT_GT_BLOCK_TIMER_STRUCTURE{
+    uint8_t     GtFrameNumber;
+    uint8_t     Reserved1[3];
+    uint64_t    CountControlBaseX;
+    uint64_t    CountEL0BaseX;
+    uint32_t    GTxPhysicalTimerGsi;
+}GTDT_GT_BLOCK_TIMER_STRUCTURE, * PGTDT_GT_BLOCK_TIMER_STRUCTURE;
+
+typedef struct __attribute__((packed)) _GTDT_GT_BLOCK_STRUCUTRE{
+    uint8_t                         Type;
+    uint16_t                        Length;
+    uint8_t                         Reserved;
+    uint64_t                        CountControlBase;
+    uint32_t                        GtBlobkTimerCount;
+    uint32_t                        GtBlovkTimerOffset;
+    GTDT_GT_BLOCK_TIMER_STRUCTURE   GtBlockTimerData[];
+}GTDT_GT_BLOCK_STRUCUTRE, * PGTDT_GT_BLOCK_STRUCUTRE;
+
+typedef struct __attribute__((packed)) _GTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE{
+    uint8_t     Type;
+    uint16_t    Length;
+    uint8_t     Reserved1;
+    uint64_t    RefreshFramePhyAddress;
+    uint64_t    WatchdogControlFramePhyAddress;
+    uint32_t    WatchdogTimerGsi;
+    uint32_t    WatchdogTimerFlags;
+}GTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE, * PGTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE;
+
+typedef struct __attribute__((packed)) _NVDIMM_FIRMWARE_INTERFACE_TABLE{
+    TABLE_DESCRIPTION_HEADER        NFitHeader;
+    uint32_t                        Reserved;
+    uint8_t                         NFitBuffer[];
+}NVDIMM_FIRMWARE_INTERFACE_TABLE, * PNVDIMM_FIRMWARE_INTERFACE_TABLE;
+
+typedef struct __attribute__((packed)) _NFIT_SPA_RANGE_STRUCTURE{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint16_t    SPARangeIndex;
+    uint16_t    Flags;
+    uint32_t    Reserved1;
+    uint32_t    ProximityDomain;
+    uint8_t     AddressRangeTypeGUID[16];
+    uint64_t    SystemPhysicalAddressRangeBase;
+    uint64_t    SystemPhysicalAddressRangeLength;
+    uint64_t    AddressRangeMemoryMappingAttribute;
+    uint64_t    SpaLocationCookie;
+}NFIT_SPA_RANGE_STRUCTURE, * PNFIT_SPA_RANGE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _NFIT_NVDIMM_REGION_MAPPING{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint32_t    NFITDeviceHandle;
+    uint16_t    NVDIMMPhysicalID;
+    uint16_t    NVDIMMRegionID;
+    uint16_t    SpaRangeStructureIndex;
+    uint16_t    NVDIMMControlRegionIndex;
+    uint64_t    NVDIMMRegionSize;
+    uint64_t    RegionOffset;
+    uint64_t    NVDIMMPhysicalAddressRegionBase;
+    uint16_t    InterleaveStructureINdex;
+    uint16_t    InterleaveWays;
+    uint16_t    NVDIMMStateFlags;
+    uint16_t    Reserved2;
+}NFIT_NVDIMM_REGION_MAPPING, * PNFIT_NVDIMM_REGION_MAPPING;
+
+typedef struct __attribute__((packed)) _NFIT_INTERLEAVE_STRUCTURE{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint16_t    InterleaveIndex;
+    uint16_t    Reserved1;
+    uint32_t    NumberOfLines;
+    uint32_t    LineSize;
+    uint32_t    Line1Offset;
+    uint32_t    FOOBAR;
+    uint32_t    LineMOffset[];
+}NFIT_INTERLEAVE_STRUCTURE, * PNFIT_INTERLEAVE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _NFIT_SMBIOS_INFORMATION_STRUCTURE{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint32_t    Reserved1;
+    uint8_t     Data[];
+}NFIT_SMBIOS_INFORMATION_STRUCTURE, * PNFIT_SMBIOS_INFORMATION_STRUCTURE;
+
+typedef struct __attribute__((packed)) _NFIT_NVDIMM_CONTROL_REGION_STRUCTURE{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint16_t    NVDIMMControlRegionIndex;
+    uint16_t    VendorID;
+    uint16_t    DeviceID;
+    uint16_t    RevsionID;
+    uint16_t    SubVendorID;
+    uint16_t    SubDeviceID;
+    uint16_t    SubRevionID;
+    uint8_t     ValidFeilds;
+    uint8_t     ManufacturingLocations;
+    uint16_t    ManufacturingDate;
+    uint16_t    Reserved1;
+    uint32_t    SerialNumber;
+    uint16_t    RegionFormatInterfaceCode;
+    uint16_t    NumberOfBlockControlWindows;
+    uint64_t    SizeOfBlockControlWindow;
+    uint64_t    CommandRegisterOffset;
+    uint64_t    CommandRegisterSize;
+    uint64_t    StatusRegisterOffset;
+    uint64_t    StatusRegisterSize;
+    uint16_t    NVDIMMControlRegionFlag;
+    uint8_t     Reserved2[6];
+}NFIT_NVDIMM_CONTROL_REGION_STRUCTURE, * PNFIT_NVDIMM_CONTROL_REGION_STRUCTURE;
+
+typedef struct __attribute__((packed)) _NFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint16_t    NVDIMMControlRegionIndex;
+    uint16_t    NumberOfBlockDataWindows;
+    uint64_t    BlockDataWindowStartOffset;
+    uint64_t    BlockDataWindowsSize;
+    uint64_t    BlockAccessableMemoryCapacity;
+    uint64_t    AddressOfFirstBlock;
+}NFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION, * PNFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION;
+
+typedef struct __attribute__((packed)) _NFIT_FLUSH_HINT_ADDRESS{
+    uint16_t    Type;
+    uint16_t    Length;
+    uint32_t    NFITDeviceHandle;
+    uint16_t    FluchHintAddressCount;
+    uint8_t     Reserved1[6];
+    uint64_t    HintAddress1;
+    uint64_t    FOOBAR;
+    uint64_t    FlushHintM[];
+}NFIT_FLUSH_HINT_ADDRESS, * PNFIT_FLUSH_HINT_ADDRESS;
+
+typedef struct __attribute__((packed)) _NFIT_PLATFORM_CAPABILITIES{
+    uint16_t Type;
+    uint16_t Length;
+    uint8_t  HighValidCap;
+    uint8_t  Reserved1[3];
+    uint32_t Capabilities;
+    uint32_t Reserved2;
+}NFIT_PLATFORM_CAPABILITIES, * PNFIT_PLATFORM_CAPABILITIES;
+
+typedef struct __attribute__((packed)) _SECURE_DEVICES_TABLE{
+    TABLE_DESCRIPTION_HEADER    SdevHeader;
+    uint8_t                     SecureDeviceData[];
+}SECURE_DEVICES_TABLE, * PSECURE_DEVICES_TABLE;
+
+typedef struct __attribute__((packed)) _SDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE{
+    uint8_t                     Type;
+    uint8_t                     Flags;
+    uint16_t                    Length;
+    uint16_t                    DeviceIdentifierOffset;
+    uint16_t                    DeviceIdentifierLength;
+    uint16_t                    VendorSpecificDataOffset;
+    uint16_t                    VendorSpecificDataLength;
+    uint16_t                    SecureAccessComponentOffset;
+    uint16_t                    SecureAccessComponentLength;
+}SDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE, * PSDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE;
+
+typedef struct __attribute__((packed)) _SDEV_SECURE_ACCESS_COMPONENT_ID_BASED{
+    uint8_t                     Type;
+    uint8_t                     Flags;
+    uint16_t                    Length;
+    uint16_t                    HardwareIDOffset;
+    uint16_t                    HardwareIDLength;
+    uint16_t                    SusbsystemIDOffset;
+    uint16_t                    SusbsystemIDLength;
+    uint16_t                    HardwareRevision;
+    uint8_t                     HardwareRevisionPresent;
+    uint8_t                     ClassCodePresent;
+    uint8_t                     PciCompatibleBaseClass;
+    uint8_t                     PciCompatibleSubClass;
+    uint8_t                     PciCompatibleProgIF;
+}SDEV_SECURE_ACCESS_COMPONENT_ID_BASED, * PSDEV_SECURE_ACCESS_COMPONENT_ID_BASED;
+
+typedef struct __attribute__((packed)) _SDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED{ 
+    uint8_t     Type;
+    uint8_t     Flags;
+    uint16_t    Length;
+    uint32_t    Reserved1;
+    uint64_t    MemoryBaseAddress;
+    uint64_t    MemoryLength;
+}SDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED, * PSDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED;
+
+typedef struct __attribute__((packed)) _SDEV_PCIE_ENDPOINT_DEVICE{
+    uint8_t     Type;
+    uint8_t     Flags;
+    uint16_t    Length;
+    uint16_t    PciGroup;
+    uint16_t    PciBus;
+    uint16_t    PciPathOffset;
+    uint16_t    PciPathLength;
+    uint16_t    VendorSpecificDataOffset;
+    uint16_t    VendorSpecificDataLength;
+}SDEV_PCIE_ENDPOINT_DEVICE, * PSDEV_PCIE_ENDPOINT_DEVICE;
 
 
 
