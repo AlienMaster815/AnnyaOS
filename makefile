@@ -21,6 +21,8 @@ TARGET_OS = WINDOWS
 HOST_ARCH = x86_64
 FIRMWARE_TARGET = BIOS
 
+INCLUDE = -I include -I include/drivers/acpi
+
 FileStructureTable = Config/System_Config/FileStructure.xml
 SystemFileTable = Config/System_Config/SystemFiles.xml
 
@@ -82,13 +84,13 @@ ifeq ($(TARGET_ARCH),x86_64)
 #Wextra
 CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -O2 -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
-         -fstrict-aliasing -I include
+         -fstrict-aliasing $(INCLUDE)
 
 #Wextra
 CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
            -fno-use-cxa-atexit -fno-threadsafe-statics -fno-common \
            -fno-builtin -fstrict-aliasing -O2 -I include \
-		   -Wno-write-strings -Wno-multichar
+		   -Wno-write-strings -Wno-multichar $(INCLUDE)
 
 endif
 

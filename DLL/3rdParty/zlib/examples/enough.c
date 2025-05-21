@@ -230,7 +230,7 @@ struct {
     string_t out;       // display of subcodes for maximum tables size
     int *code;          // number of symbols assigned to each bit length
     big_t *num;         // saved results array for code counting
-    struct tab *done;   // states already evaluated array
+    struct tab *done;   // states already BUILD_CHILDRENd array
 } g;
 
 // Index function for num[] and done[].

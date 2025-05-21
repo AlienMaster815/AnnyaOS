@@ -301,7 +301,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[99] = "LouMallocEx";
     ImportTables[4].FunctionName[100] = "memset";
     ImportTables[4].FunctionName[101] = "LouKeWaitForMmioState";
-    ImportTables[4].FunctionName[102] = "LouKeCreateMemoryPool";
+    ImportTables[4].FunctionName[102] = "LouKeCreateFixedPool";
     ImportTables[4].FunctionName[103] = "outw";
     ImportTables[4].FunctionName[104] = "LouKeMallocEx";
     ImportTables[4].FunctionName[105] = "LouKeMalloc";
@@ -411,7 +411,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[99] = (uint64_t)LouMallocEx;
     ImportTables[4].VirtualAddress[100] = (uint64_t)memset;
     ImportTables[4].VirtualAddress[101] = (uint64_t)LouKeWaitForMmioState;
-    ImportTables[4].VirtualAddress[102] = (uint64_t)LouKeCreateMemoryPool;
+    ImportTables[4].VirtualAddress[102] = (uint64_t)LouKeCreateFixedPool;
     ImportTables[4].VirtualAddress[103] = (uint64_t)outw; 
     ImportTables[4].VirtualAddress[104] = (uint64_t)LouKeMallocEx;
     ImportTables[4].VirtualAddress[105] = (uint64_t)LouKeMalloc;

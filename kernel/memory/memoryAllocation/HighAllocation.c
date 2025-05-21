@@ -103,7 +103,7 @@ LouKeMallocEx(
                     ZeroMem(Base, AllocationSize);
                     return (void*)Base;
                 }
-                Base += Alignment;
+                Base += ROUND_UP64(VMEM_TRACK_DEREFERENCE_READ_SIZE(TmpVMemTrackBase), Alignment);
             }
         }
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value

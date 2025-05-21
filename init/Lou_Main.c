@@ -10,6 +10,7 @@
 #include <drivers/Lou_drivers/FileSystem.h>
 #include <stdio.h>
 #include <drivers/display/vga.h>
+#include <LouACPI.h>
 
 extern LOUSTATUS InitializeStartupInterruptHandleing();
 
@@ -101,6 +102,7 @@ void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_
 void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
 void InitializeNtKernelTransitionLayer();
+void LouKeInitializeLouACPISubsystem();
 
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
@@ -164,13 +166,6 @@ LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 void HandleProccessorInitialization();
 
 void Advanced_Kernel_Initialization(){
-    //if(LOUSTATUS_GOOD != InitFADT())LouPrint("Unable To Start FADT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSSDT())LouPrint("Unable To Start SSDT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSBST())LouPrint("Unable To Start SBST Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSRAT())LouPrint("Unable To Start SRAT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitBGRT())LouPrint("Unable To Start BGRT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitECDT())LouPrint("Unable To Start ECDT Handleing\n");
-    //if(LOUSTATUS_GOOD != InitSLIT())LouPrint("Unable To Start SLIT Handleing\n");
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
     HandleProccessorInitialization();
@@ -323,9 +318,8 @@ KERNEL_ENTRY Lou_kernel_start(
         LouKeHandleSystemIsBios();
     }else {
         SystemIsEfi = true;
-    }
-
-    //InitMCFG();
+    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    LouKeInitializeLouACPISubsystem();
 
     LouKeMapPciMemory();
 

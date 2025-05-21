@@ -48,7 +48,7 @@ typedef enum _PEP_WORK_TYPE {
     PepWorkCompleteIdleState,
     PepWorkCompletePerfState,
     PepWorkAcpiNotify,
-    PepWorkAcpiEvaluateControlMethodComplete,
+    PepWorkAcpiBUILD_CHILDRENControlMethodComplete,
     PepWorkMax
 } PEP_WORK_TYPE, * PPEP_WORK_TYPE;
 
@@ -134,7 +134,7 @@ typedef struct _PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE {
 } PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE, *PPEP_ACPI_ENUMERATE_DEVICE_NAMESPACE;
 
 
-typedef struct _PEP_ACPI_EVALUATE_CONTROL_METHOD {
+typedef struct _PEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD {
   PEPHANDLE             DeviceHandle;
   ULONG                 RequestFlags;
   union {
@@ -149,7 +149,7 @@ typedef struct _PEP_ACPI_EVALUATE_CONTROL_METHOD {
   ULONG                 OutputArgumentCount;
   SIZE_T                OutputArgumentSize;
   PACPI_METHOD_ARGUMENT OutputArguments;
-} PEP_ACPI_EVALUATE_CONTROL_METHOD, *PPEP_ACPI_EVALUATE_CONTROL_METHOD;
+} PEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD, *PPEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD;
 
 
 typedef struct _PEP_ACPI_EXTENDED_ADDRESS {
@@ -1024,14 +1024,14 @@ typedef struct _PEP_UNREGISTER_DEVICE {
 
 
 
-typedef struct _PEP_WORK_ACPI_EVALUATE_CONTROL_METHOD_COMPLETE {
+typedef struct _PEP_WORK_ACPI_BUILD_CHILDREN_CONTROL_METHOD_COMPLETE {
   POHANDLE              DeviceHandle;
   ULONG                 CompletionFlags;
   NTSTATUS              MethodStatus;
   PVOID                 CompletionContext;
   SIZE_T                OutputArgumentSize;
   PACPI_METHOD_ARGUMENT OutputArguments;
-} PEP_WORK_ACPI_EVALUATE_CONTROL_METHOD_COMPLETE, *PPEP_WORK_ACPI_EVALUATE_CONTROL_METHOD_COMPLETE;
+} PEP_WORK_ACPI_BUILD_CHILDREN_CONTROL_METHOD_COMPLETE, *PPEP_WORK_ACPI_BUILD_CHILDREN_CONTROL_METHOD_COMPLETE;
 
 
 typedef struct _PEP_WORK_ACPI_NOTIFY {
@@ -1090,7 +1090,7 @@ typedef struct _PEP_WORK_INFORMATION {
         PEP_WORK_COMPLETE_IDLE_STATE                   CompleteIdleState;
         PEP_WORK_COMPLETE_PERF_STATE                   CompletePerfState;
         PEP_WORK_ACPI_NOTIFY                           AcpiNotify;
-        PEP_WORK_ACPI_EVALUATE_CONTROL_METHOD_COMPLETE ControlMethodComplete;
+        PEP_WORK_ACPI_BUILD_CHILDREN_CONTROL_METHOD_COMPLETE ControlMethodComplete;
     };
 } PEP_WORK_INFORMATION, * PPEP_WORK_INFORMATION;
 

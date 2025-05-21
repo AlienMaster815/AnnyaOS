@@ -60,7 +60,7 @@ void Spurious(uint64_t FaultingStackP) {
 
     CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP + 8);
 
-    LouPrint("HERE\n");
+    LouPrint("Spurious\n");
     while(1);
     LouKeSetPanicInfo(
         Bsod, "Spurious Fault",

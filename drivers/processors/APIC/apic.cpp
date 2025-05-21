@@ -2,6 +2,7 @@
 #include <NtAPI.h>
 #include "../Processors.h"
 #include "apic.h"
+#include <LouACPI.h>
 
 //I appologise if this is messy but at this point i just need this to work
 // I WILL FIX IT LATER BEFORE 1.0
@@ -176,7 +177,6 @@ LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature);
 void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
     while (entryAddress < endAddress) {
         ACPI_MADT_ENTRY_HEADER* header = (ACPI_MADT_ENTRY_HEADER*)entryAddress;
-        LouPrint("EntryAddress\n");
         switch (header->Type) {
         case 0: {
             UpgradeNPROC();
@@ -256,34 +256,17 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     LouPrint(DRV_VERSION_APIC);
     disable_pic();
 
-    uint8_t* Buffer = (uint8_t*)LouKeMalloc(ACPIBUFFER, WRITEABLE_PAGE | PRESENT_PAGE);
-    ULONG ReturnLength = 0x0000;
+    PACPI_MADT ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("APIC");
 
-    Status = AuxKlibGetSystemFirmwareTable(
-        'ACPI', 
-        'APIC', 
-        Buffer, 
-        ACPIBUFFER, 
-        &ReturnLength
-    );
-
-    if (Status != LOUSTATUS_GOOD) {
-        Status = AuxKlibGetSystemFirmwareTable(
-            'ACPI', 
-            'MADT', 
-            Buffer, 
-            ACPIBUFFER, 
-            &ReturnLength
-        );
+    if(!ApicTable){
+        ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("MADT");
+    }
+    if(!ApicTable){
+        while(1);
     }
 
-    if (Status != LOUSTATUS_GOOD) return STATUS_UNSUCCESSFUL;
-
-    PACPI_MADT ApicTable = (PACPI_MADT)Buffer;
-
-
-    uint8_t* EntryHeaderAddress = ((uint8_t*)Buffer + sizeof(ACPI_MADT));
-    uint8_t* HeaderEndAddress = ((uint8_t*)Buffer + ApicTable->Header.Length);
+    uint8_t* EntryHeaderAddress = ((uint8_t*)ApicTable + sizeof(ACPI_MADT));
+    uint8_t* HeaderEndAddress = ((uint8_t*)ApicTable + ApicTable->Header.Length);
 
     ParseAPIC(
         EntryHeaderAddress,
@@ -302,7 +285,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     ApicSet = true;
 
     LouKeFree((RAMADD)Cpu);
-    LouKeFree((RAMADD)Buffer);
 
     for(uint8_t i = 0 ; i < ioapic_count; i++){
         if(!InitializeIoApic(i,ApicBase)){

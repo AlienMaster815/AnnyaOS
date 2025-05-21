@@ -26,9 +26,9 @@ typedef struct __attribute__((packed)) _LongModeGdt{
     uint64_t                           KDATA;
     uint64_t                           UCODE;
     uint64_t                           UDATA;
+    uint64_t                           KPCR;
     uint64_t                           TSSLo;
     uint64_t                           TSSHi;
-    uint64_t                           KPCR;
 }LongModeGdt, * PLongModeGdt;
 
 void SetGDTSegmentEntry(
@@ -98,12 +98,13 @@ extern void SetPEB(uint64_t PEB);
 void SetupGDT(){
     LouPrint("Setting Up GDT\n");
 
-    PLongModeGdt GDT = (PLongModeGdt)LouMalloc(sizeof(LongModeGdt));
+    PLongModeGdt GDT = (PLongModeGdt)LouMallocEx(sizeof(LongModeGdt), 16);
+    memset(GDT,0, sizeof(LongModeGdt));
 
     SetGDTSegmentEntry(
             (uint8_t*)&GDT->KCODE,
             0,
-            0xFFFFF,
+            0xFFFFF,                                              
             0x9A,
             0xA
         );
@@ -130,7 +131,8 @@ void SetupGDT(){
             0xC
         );
 
-    PTSS Tss = (PTSS)LouMalloc(sizeof(TSS));
+    PTSS Tss = (PTSS)LouMallocEx(sizeof(TSS), 16);
+    memset(Tss,0, sizeof(TSS));
 
     void* KStack = LouMallocEx(64 * KILOBYTE, 16);
     Tss->RSP0 = (uintptr_t)KStack + (64 * KILOBYTE);
@@ -177,6 +179,7 @@ void SetupGDT(){
     Gdtr.Length = sizeof(LongModeGdt) - 1;
     Gdtr.Base   = (uint64_t)GDT;
 
+    LouPrint("Installing GDT:%h\n", GDT);
     InstallGDT((uint64_t)&Gdtr);
 
     SetGSBase(GsBase);
@@ -184,4 +187,5 @@ void SetupGDT(){
     LouKeMapContinuousMemoryBlock(GsBase, GsBase, KILOBYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     LouPrint("Done Setting Up GDT\n");
+
 }

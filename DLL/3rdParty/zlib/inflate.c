@@ -523,7 +523,7 @@ local int updatewindow(z_streamp strm, const Bytef *end, unsigned copy) {
 
    so when inflate() is called again, the same case is attempted again, and
    if the appropriate resources are provided, the machine proceeds to the
-   next state.  The NEEDBITS() macro is usually the way the state evaluates
+   next state.  The NEEDBITS() macro is usually the way the state BUILD_CHILDRENs
    whether it can proceed or should return.  NEEDBITS() does the return if
    the requested bits are not available.  The typical use of the BITS macros
    is:

@@ -34,7 +34,7 @@ global gdt64.pointer
 global gdt64.code_segment
 global gdt64.data_segment
 
-start:
+start:  
     mov [multiboot_info_ptr], ebx  ; Store Multiboot info pointer
 
     mov esp, stack_top             ; Set up the stack
@@ -168,11 +168,11 @@ global InstallGDT
 
 InstallGDT:
     lgdt [rcx]
-    mov ax, 0x28
+    mov ax, 0x30
     ltr ax
     push 0x08
     lea rax, [rel .reload_CS]
-    push rax
+    push rax   
     retfq
 
 .reload_CS:

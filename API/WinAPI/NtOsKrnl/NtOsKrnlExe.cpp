@@ -2011,7 +2011,7 @@ NtClose(
 //EtwpReenableStackWalkApc
 //EmClientQueryRuleState
 //EmClientRuleDeregisterNotification
-//EmClientRuleEvaluate
+//EmClientRuleBUILD_CHILDREN
 //EmClientRuleRegisterNotification
 //EmProviderDeregister
 //EmProviderRegiter

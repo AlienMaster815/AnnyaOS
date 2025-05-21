@@ -1,6 +1,14 @@
 #ifndef _LOUDDK_H
 #define _LOUDDK_H
 
+#ifndef _GUID_TYPE
+#define _GUID_TYPE
+typedef struct _GUID {
+	unsigned char DataByte[16];
+} GUID,* LPGUID, UUID, * PGUID, * PUUID;
+#endif
+
+
 #include <drivers/Lou_drivers/PciIds.h>
 
 #define SYSV_CONVENTION __attribute__((sysv_abi))
@@ -163,7 +171,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #include <FileHandleing/LDDDS.h>
 #include <WinTEB.h>
-#include <drivers/acpi/acpi.h>
 
 
 #ifndef _KERNEL_MODULE_

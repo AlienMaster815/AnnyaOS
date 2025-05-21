@@ -1,8 +1,18 @@
 #ifndef _ACPI_DEFINITIONS_H
 #define _ACPI_DEFINITIONS_H
 
-//all definitions for the ACPI 6.5 Decemeber 2024 
-//specification release written by -Tyler Grenier
+//all structure definitions for the ACPI 6.5 Decemeber 
+//2024 specification release written by -Tyler Grenier
+
+#ifndef _GUID_TYPE 
+#define _GUID_TYPE
+//im in a blind spot and im 
+//lazy so i just stuck this here
+typedef struct _GUID {
+	unsigned char DataByte[16];
+} GUID,* LPGUID, UUID, * PGUID, * PUUID;
+#endif
+
 
 #ifndef __cplusplus
 #include <LouAPI.h>
@@ -121,8 +131,8 @@ extern "C" {
 #define WINDOWS_SECURITY_MITIGATIONS                "WSMT"
 #define XEN_PROJECT                                 "XENV"
 
-#define FOR_EACH_PRSDT_ENTRY(DSDT) for(size_t RsdtEntry = 0 ; RsdtEntry < ((RSDT->RsdtHeader.Length - sizeof(TABLE_DESCRIPTION_HEADER)) / 4); RsdtEntry++)
-#define FOR_EACH_RSDT_ENTRY(DSDT) for(size_t RsdtEntry = 0 ; RsdtEntry < ((RSDT.RsdtHeader.Length - sizeof(TABLE_DESCRIPTION_HEADER)) / 4); RsdtEntry++)
+#define FOR_EACH_PRSDT_ENTRY(RSDT) for(size_t RsdtEntry = 0 ; RsdtEntry < ((RSDT->RsdtHeader.Length - sizeof(TABLE_DESCRIPTION_HEADER)) / 4); RsdtEntry++)
+#define FOR_EACH_RSDT_ENTRY(RSDT) for(size_t RsdtEntry = 0 ; RsdtEntry < ((RSDT.RsdtHeader.Length - sizeof(TABLE_DESCRIPTION_HEADER)) / 4); RsdtEntry++)
 
 #define FOR_EACH_PXSDT_ENTRY(XSDT) for(size_t XsdtEntry = 0 ; XsdtEntry < ((XSDT->XsdtHeader.Length - sizeof(TABLE_DESCRIPTION_HEADER)) / 8); XsdtEntry++)
 #define FOR_EACH_XSDT_ENTRY(XSDT) for(size_t XsdtEntry = 0 ; XsdtEntry < ((XSDT.XsdtHeader.Length - sizeof(TABLE_DESCRIPTION_HEADER)) / 8); XsdtEntry++)
@@ -404,6 +414,26 @@ extern "C" {
 #define PPTT_CACHE_STRUCTURE_FLAG_LINE_POLICY_VALID             (1 << 6)
 #define PPTT_CACHE_STRUCTURE_FLAG_CACHE_ID_VALID                (1 << 7)
 
+#define PHAT_PHAR_FIRMWARE_VERSION_SATA_RECORD  0
+#define PHAT_PHAR_FIRMWARE_HEALTH_DATA_RECORD   1
+
+#define PHAT_FHDR_AM_HEALTHY_ERRORS_FOUND       0
+#define PHAT_FHDR_AM_HEALTHY_NO_ERRORS_FOUND    1
+#define PHAT_FHDR_AM_HEALTHY_UNKOWN             2
+#define PHAT_FHDR_AM_HEALTHY_ADVISORY           3
+
+#define PHAT_RRHR_SUPPORTED_SOURCES_UNKOWN_SOURCE       (1 << 0)
+#define PHAT_RRHR_SUPPORTED_SOURCES_HARDWARE_SOURCE     (1 << 1)
+#define PHAT_RRHR_SUPPORTED_SOURCES_FIRMWARE_SOURCE     (1 << 2)
+#define PHAT_RRHR_SUPPORTED_SOURCES_SOFTWARE_SOURCE     (1 << 3)
+#define PHAT_RRHR_SUPPORTED_SOURCES_SUPERVISOR_SOURCE   (1 << 4)
+
+#define PHAT_RRHR_SOURCE_UNKOWN_SOURCE              (1 << 0)
+#define PHAT_RRHR_SOURCE_HARDWARE_SOURCE            (1 << 1)
+#define PHAT_RRHR_SOURCE_FIRMWARE_SOURCE            (1 << 2)
+#define PHAT_RRHR_SOURCE_SOFTWARE_INITIATED_RESET   (1 << 3)
+#define PHAT_RRHR_SOURCE_SUPERVISOR_INITIATED_RESET (1 << 4)
+
 
 
 //im putting these in because you never know when you
@@ -453,7 +483,7 @@ typedef union _GAS_ADDRES_SPACE{
     }PciBarAddress;
 }GAS_ADDRES_SPACE, * PGAS_ADDRES_SPACE;
 
-typedef struct _GENERAL_ADRESS_STRUCTURE{//GAS
+typedef struct __attribute__((packed)) _GENERAL_ADRESS_STRUCTURE{//GAS
     uint8_t                                                 AddressSpaceID;
     uint8_t                                                 RegisterWidth; //bits
     uint8_t                                                 RegisterOffset;//bits
@@ -474,15 +504,15 @@ typedef struct __attribute__((packed)) _ROOT_SYSTEM_DISCRIPTION_POINTER{
 }ROOT_SYSTEM_DISCRIPTION_POINTER, * PROOT_SYSTEM_DISCRIPTION_POINTER;
 
 typedef struct __attribute__((packed)) _TABLE_DESCRIPTION_HEADER{
-    char                                                    Signature[4];
-    uint32_t                                                Length;
-    uint8_t                                                 Revision;
-    uint8_t                                                 Checksum;
-    char                                                    OemID[6];
-    char                                                    OemTableID[8];
-    uint32_t                                                OemRevision;
-    uint32_t                                                CreatorID;
-    uint32_t                                                CreatorRevision;
+    char                                                    Signature[4];   //4
+    uint32_t                                                Length;         //8
+    uint8_t                                                 Revision;       //9
+    uint8_t                                                 Checksum;       //10
+    char                                                    OemID[6];       //16
+    char                                                    OemTableID[8];  //24
+    uint32_t                                                OemRevision;    //28
+    uint32_t                                                CreatorID;      //32
+    uint32_t                                                CreatorRevision;//36
 }TABLE_DESCRIPTION_HEADER, * PTABLE_DESCRIPTION_HEADER;
 
 typedef struct __attribute__((packed)) _ROOT_SYSTEM_DISCRIPTION_TABLE{
@@ -496,60 +526,61 @@ typedef struct __attribute__((packed)) _EXTENDED_SYSTEM_DESCRIPTION_TABLE{
 }EXTENDED_SYSTEM_DESCRIPTION_TABLE, * PEXTENDED_SYSTEM_DESCRIPTION_TABLE;
 
 typedef struct __attribute__((packed)) _FIXED_ACPI_DESCRIPTION_TABLE{ //FADT
-    TABLE_DESCRIPTION_HEADER                                FadtHeader;
-    uint32_t                                                FacsTablePhyPointer; //FIRMWARE_ACPI_CONTROL_STRUCTURE
-    uint32_t                                                DsdtTablePhyPointer; 
-    uint8_t                                                 Reserved1;
-    uint8_t                                                 PreferedPowerMode;
-    uint16_t                                                Sci8259PicInt;
-    uint32_t                                                SmiCommandPort;
-    uint8_t                                                 AcpiEnable;
-    uint8_t                                                 AcpiDisable;
-    uint8_t                                                 S4BiosRequestValue;
-    uint8_t                                                 ProcessorStateControlValue;
-    uint32_t                                                Pm1AEventRegisterBlockAddress;
-    uint32_t                                                Pm1BEventRegisterBlockAddress;
-    uint32_t                                                Pm1AControlRegisterBlockAddress;
-    uint32_t                                                Pm1BControlRegisterBlockAddress;
-    uint32_t                                                Pm2ControlRegisterBlockAddress;
-    uint32_t                                                PmTimerControlRegisterBlock;
-    uint32_t                                                GeneralPurposeEventBlock0;
-    uint32_t                                                GeneralPurposeEventBlock1;
-    uint8_t                                                 Pm1EventLength;
-    uint8_t                                                 Pm1ControlLength;
-    uint8_t                                                 Pm2ControlLength;
-    uint8_t                                                 PmTimerLength;
-    uint8_t                                                 GeneralPurposeEventBlock0Length;
-    uint8_t                                                 GeneralPurposeEventBlock1Length;
-    uint8_t                                                 GeneralPorposeEventBase;
-    uint16_t                                                PmLevel2Latence;
-    uint16_t                                                PmLevel3Latence;
-    uint16_t                                                FlushSize;
-    uint16_t                                                FlushStride;
-    uint8_t                                                 DutyOffset;
-    uint8_t                                                 DutyWidth;
-    uint8_t                                                 DayAlarm;
-    uint8_t                                                 MonthAlarm;
-    uint8_t                                                 Century;
-    uint16_t                                                IAPCBootArch;
-    uint8_t                                                 Reserved2;
-    uint32_t                                                FeatureFlags;
-    uint8_t                                                 ResetRegister[12];
-    uint8_t                                                 ResetValue;
-    uint16_t                                                ArmBootArch;
-    uint8_t                                                 FadtMinorVersion; //major revision is in the Revision in the FadtHeader
-    uint64_t                                                XFirmwareControl;
-    uint64_t                                                XDsdtPhyAddress;
-    uint8_t                                                 XPm1AEventRegisterBlock[12];
-    uint8_t                                                 XPm1BEventRegisterBlock[12];
-    uint8_t                                                 XPm1AControlRegisterBlock[12];
-    uint8_t                                                 XPm1BControlRegisterBlock[12];
-    uint8_t                                                 XPm2ControlRegisterBlock[12];
-    uint8_t                                                 XPmTimerRegisterBlock[12];
-    uint8_t                                                 XGeneralPurposeEvent0[12];
-    uint8_t                                                 XGeneralPurposeEvent1[12];
-    uint8_t                                                 SleepStatusRegister[12];
-    uint64_t                                                HypervisorVendorIdentity;
+    TABLE_DESCRIPTION_HEADER    FadtHeader;
+    uint32_t                    FacsTablePhyPointer; //
+    uint32_t                    DsdtTablePhyPointer; 
+    uint8_t                     Reserved1;
+    uint8_t                     PreferedPowerMode;
+    uint16_t                    Sci8259PicInt;
+    uint32_t                    SmiCommandPort;
+    uint8_t                     AcpiEnable;
+    uint8_t                     AcpiDisable;
+    uint8_t                     S4BiosRequestValue;
+    uint8_t                     ProcessorStateControlValue;
+    uint32_t                    Pm1AEventRegisterBlockAddress;
+    uint32_t                    Pm1BEventRegisterBlockAddress;
+    uint32_t                    Pm1AControlRegisterBlockAddress;
+    uint32_t                    Pm1BControlRegisterBlockAddress;
+    uint32_t                    Pm2ControlRegisterBlockAddress;
+    uint32_t                    PmTimerControlRegisterBlock;
+    uint32_t                    GeneralPurposeEventBlock0;
+    uint32_t                    GeneralPurposeEventBlock1;
+    uint8_t                     Pm1EventLength;
+    uint8_t                     Pm1ControlLength;
+    uint8_t                     Pm2ControlLength;
+    uint8_t                     PmTimerLength;
+    uint8_t                     GeneralPurposeEventBlock0Length;
+    uint8_t                     GeneralPurposeEventBlock1Length;
+    uint8_t                     GeneralPurposeEventBase;
+    uint8_t                     CstCount;
+    uint16_t                    PmLevel2Latency;
+    uint16_t                    PmLevel3Latency;
+    uint16_t                    FlushSize;
+    uint16_t                    FlushStride;
+    uint8_t                     DutyOffset;
+    uint8_t                     DutyWidth;
+    uint8_t                     DayAlarm;
+    uint8_t                     MonthAlarm;
+    uint8_t                     Century;
+    uint16_t                    IAPCBootArch;
+    uint8_t                     Reserved2;
+    uint32_t                    FeatureFlags;
+    GENERAL_ADRESS_STRUCTURE    ResetRegister;
+    uint8_t                     ResetValue;
+    uint16_t                    ArmBootArch;
+    uint8_t                     FadtMinorVersion; //major revision is in the Revision in the FadtHeader
+    uint64_t                    XFirmwareControl;
+    uint64_t                    XDsdtPhyAddress;
+    GENERAL_ADRESS_STRUCTURE    XPm1AEventRegisterBlock;
+    GENERAL_ADRESS_STRUCTURE    XPm1BEventRegisterBlock;
+    GENERAL_ADRESS_STRUCTURE    XPm1AControlRegisterBlock;
+    GENERAL_ADRESS_STRUCTURE    XPm1BControlRegisterBlock;
+    GENERAL_ADRESS_STRUCTURE    XPm2ControlRegisterBlock;
+    GENERAL_ADRESS_STRUCTURE    XPmTimerRegisterBlock;
+    GENERAL_ADRESS_STRUCTURE    XGeneralPurposeEvent0;
+    GENERAL_ADRESS_STRUCTURE    XGeneralPurposeEvent1;
+    GENERAL_ADRESS_STRUCTURE    SleepStatusRegister;
+    uint64_t                    HypervisorVendorIdentity;
 }FIXED_ACPI_DESCRIPTION_TABLE, * PFIXED_ACPI_DESCRIPTION_TABLE;
 
 typedef struct __attribute__((packed)) _FIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE{
@@ -1643,7 +1674,160 @@ typedef struct __attribute__((packed)) _PPTT_CACHE_TYPE{
     uint32_t                    CacheID;
 }PPTT_CACHE_TYPE, * PPPTT_CACHE_TYPE;
 
+typedef struct __attribute__((packed)) _PLATFORM_HEALTH_ASSESMENT_TABLE{
+    TABLE_DESCRIPTION_HEADER    PhatHeader;
+    uint8_t                     PhatData[];
+}PLATFORM_HEALTH_ASSESMENT_TABLE, * PPLATFORM_HEALTH_ASSESMENT_TABLE;
 
+typedef struct __attribute__((packed)) _PHAT_PLATFORM_HEALTH_ASSESMENT_RECORD{
+    uint16_t                    PlatformHealthAssesmentType;
+    uint16_t                    Length;
+    uint8_t                     Revision;
+    uint8_t                     RecordData[];
+}PHAT_PLATFORM_HEALTH_ASSESMENT_RECORD, * PPHAT_PLATFORM_HEALTH_ASSESMENT_RECORD;
+
+typedef struct __attribute__((packed)) _PHAT_VERSION_ELEMENT{
+    GUID                        ComponentID;
+    uint64_t                    VersionValue;
+    uint32_t                    ProducerID;
+}PHAT_VERSION_ELEMENT, * PPHAT_VERSION_ELEMENT;
+
+typedef struct __attribute__((packed)) _PHAT_FIRMWARE_VERSION_DATA_RECORD{
+    uint16_t                    PlatformRecordType;
+    uint16_t                    RecoreLength;
+    uint8_t                     Revision;
+    uint8_t                     Reserved[3];
+    uint32_t                    RecordCount;
+    uint8_t                     PhatVersionElement[];
+}PHAT_FIRMWARE_VERSION_DATA_RECORD, * PPHAT_FIRMWARE_VERSION_DATA_RECORD;
+
+typedef struct __attribute__((packed)) _PHAT_FIRMWARE_HEALTH_DATA_RECORD{
+    uint16_t    PlatformRecordType;
+    uint16_t    RecordLength;
+    uint8_t     Revision;
+    uint16_t    Reserved;
+    uint8_t     AmHealthy;
+    GUID        DeviceStructure;
+    uint32_t    DeviceSpecificOffset;
+    uint8_t     Buffer[];
+}PHAT_FIRMWARE_HEALTH_DATA_RECORD, * PPHAT_FIRMWARE_HEALTH_DATA_RECORD; 
+
+typedef struct __attribute__((packed)) _PHAT_REASON_HEALTH_RECORD{
+    uint16_t    PlatformRecordType;
+    uint16_t    RecordLength;
+    uint8_t     Revision;
+    uint16_t    Reserved;
+    uint8_t     AmHealthy;
+    GUID        DeviceStructure;
+    uint32_t    DeviceSpecificDataPffset;
+    uint8_t     DevicePath[8];
+    uint8_t     DeviceData[];
+}PHAT_REASON_HEALTH_RECORD, * PPHAT_REASON_HEALTH_RECORD;
+
+typedef struct __attribute__((packed)) _PHAT_RESET_REASON_HEALTH_RECORD{
+    uint8_t     SupportedSources;
+    uint8_t     Source;
+    uint8_t     SubSource;
+    uint8_t     Reason;
+    uint16_t    VendorCount;
+    uint8_t     VendorSpecificData[];
+}PHAT_RESET_REASON_HEALTH_RECORD, * PPHAT_RESET_REASON_HEALTH_RECORD;
+
+typedef struct __attribute__((packed)) _PHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY{
+    GUID        VenodrDataID;
+    uint16_t    Length;
+    uint16_t    Revision;
+    uint8_t     Data[];
+}PHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY, * PPHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY;
+
+typedef struct __attribute__((packed)) _VIRTUAL_IO_TRANSLATION_TABLE{
+    TABLE_DESCRIPTION_HEADER    ViotTable;
+    uint16_t                    NodeCount;
+    uint16_t                    NodeOffset;
+    uint64_t                    Reserved;
+    uint8_t                     NodeList[];    
+}VIRTUAL_IO_TRANSLATION_TABLE, * PVIRTUAL_IO_TRANSLATION_TABLE;
+
+typedef struct __attribute__((packed)) _PCI_RANGENODE_STRUCTURE{
+    uint8_t     Type;
+    uint8_t     Reserved1;
+    uint16_t    Length;
+    uint32_t    EndpointStart;
+    uint16_t    SegmentStart;
+    uint16_t    SegmentEnd;
+    uint16_t    BDFStart;
+    uint16_t    BDFEnd;
+    uint16_t    OutputNode;
+    uint8_t     Reserved2[16];
+}PCI_RANGENODE_STRUCTURE, * PPCI_RANGENODE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _SINGLE_MMIO_ENDPOINT_NODE_STRUCTURE{
+    uint8_t     Type;
+    uint8_t     Reserved1;
+    uint16_t    Length;
+    uint32_t    EndpointID;
+    uint64_t    BaseAddress;
+    uint16_t    OutputNode;
+    uint8_t     Reserved2[6];
+}SINGLE_MMIO_ENDPOINT_NODE_STRUCTURE, * PSINGLE_MMIO_ENDPOINT_NODE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _VIRTIO_PCI_NODE_STRUCTURE{
+    uint8_t     Type;
+    uint8_t     Reserved1;
+    uint16_t    Length;
+    uint16_t    Segment;
+    uint16_t    BDFNumber;
+    uint64_t    Reserved2;
+}VIRTIO_PCI_NODE_STRUCTURE, * PVIRTIO_PCI_NODE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _VIRTIO_MMIO_NODE_STRUCTURE{
+    uint8_t     Type;
+    uint8_t     Reserved1;
+    uint16_t    Length;
+    uint32_t    Reserved2;
+    uint64_t    BaseAddress;
+}VIRTIO_MMIO_NODE_STRUCTURE, * PVIRTIO_MMIO_NODE_STRUCTURE;
+
+typedef struct __attribute__((packed)) _MISC_GUIDED_TABLE_ENTRIES{
+    TABLE_DESCRIPTION_HEADER    MiscHeader;
+    uint8_t                     Entries;
+}MISC_GUIDED_TABLE_ENTRIES, * PMISC_GUIDED_TABLE_ENTRIES;
+
+typedef struct __attribute__((packed)) _MISC_GUIDED_ENTRY_FORMAT{
+    GUID        EntryID;
+    uint32_t    EntryLength;
+    uint32_t    Revision;
+    uint32_t    ProducerID;
+    uint8_t     Data[];
+}MISC_GUIDED_ENTRY_FORMAT, * PMISC_GUIDED_ENTRY_FORMAT;
+
+typedef struct __attribute__((packed)) _CC_EVENT_LOG_ACPI_TABLE{
+    TABLE_DESCRIPTION_HEADER    CcelHeader;
+    uint8_t                     CcType;
+    uint8_t                     CcSubType;
+    uint16_t                    Reserved1;
+    uint64_t                    LogAreaMinimalLength;
+    uint64_t                    LogAreaStartAddress;
+}CC_EVENT_LOG_ACPI_TABLE, * PCC_EVENT_LOG_ACPI_TABLE;
+
+typedef struct __attribute__((packed)) _SKVL_KEY_STRUCTURE{
+    uint16_t    KeyType;
+    uint16_t    KeyFormat;
+    uint32_t    KeySize;
+    uint64_t    KeyAddress;
+}SKVL_KEY_STRUCTURE, * PSKVL_KEY_STRUCTURE;
+
+typedef struct __attribute__((packed)) _STORAGE_VOLUME_KEY_LOCATION_TABLE{
+    TABLE_DESCRIPTION_HEADER    SkvlHeader;
+    uint32_t                    KeyCount;
+    SKVL_KEY_STRUCTURE          KeyStructure[];
+}STORAGE_VOLUME_KEY_LOCATION_TABLE, * PSTORAGE_VOLUME_KEY_LOCATION_TABLE;
+ 
+typedef union _LOU_ACPI_TABLE_POINTER_UNION{
+    PFIXED_ACPI_DESCRIPTION_TABLE               Fadt;
+    PFIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE      Facs;
+    PDIFFERETIATED_SYSTEM_DESCRIPTION_TABLE     Dsdt;
+}LOU_ACPI_TABLE_POINTER_UNION, * PLOU_ACPI_TABLE_POINTER_UNION;
 
 #ifdef __cplusplus
 }

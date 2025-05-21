@@ -63,6 +63,7 @@ SmpWakeUp:
     mov es, ax
     mov fs, ax
     mov gs, ax
+    mov ax, 0x28 | 3
     mov ss, ax
 
     ;Long Mode Already passed
@@ -96,6 +97,7 @@ LongMode:
     mov ds, ax
     mov fs, ax
     mov es, ax 
+    mov ax, 0x28 | 3
     mov gs, ax 
     mov ss, ax 
 

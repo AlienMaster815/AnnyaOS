@@ -133,7 +133,8 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
     if(Interrupt < 0x20){
         LouKIRQL Irql;
-        LouKeSetIrql(HIGH_LEVEL, &Irql);  
+        LouKeSetIrql(HIGH_LEVEL, &Irql);
+        LouPrint("FAULT:%h\n", Interrupt);  
         InterruptRouterTable[Interrupt].InterruptHandler(Args);
         while(1);
     }

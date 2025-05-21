@@ -20,7 +20,8 @@
 #define GET_ALIGNMENT(x) (alignof(x))
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
 
-#define STRIP_OPTIMIZATION __attribute__((optimize(0))) 
+#define STRIP_OPTIMIZATIONS __attribute__((optimize(0))) 
+#define SET_OPTIMIZATION(x) __attribute__((optimize(x)))
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -255,15 +256,24 @@ KERNEL_IMPORT{
     __val < __min ? __min : __val > __max ? __max : __val; \
 })
 
-typedef struct LMPOOL_DIRECTORY{
-    ListHeader List;
-    string Tag;
-    uint64_t Location;
-    uint64_t VLocation;
-    uint64_t PoolSize;
-    uint64_t ObjectSize;
-    uint64_t Flags;
-    uint8_t* PoolBitMap;
+typedef struct _POOL_MEMORY_TRACKS{
+    ListHeader Peers;
+    bool AddressInUse; //used for fixed pools
+    uint64_t Address;
+    size_t MemorySize; //used if not fixed
+}POOL_MEMORY_TRACKS, * PPOOL_MEMORY_TRACKS;
+
+typedef struct _LMPOOL_DIRECTORY{
+    ListHeader          List;
+    string              Tag;
+    uint64_t            Location;
+    uint64_t            VLocation;
+    uint64_t            PoolSize;
+    uint64_t            ObjectSize;
+    uint64_t            Flags;
+    uint64_t            DirtyAllocations;
+    bool                FixedSizePool;
+    POOL_MEMORY_TRACKS  MemoryTracks;
 }LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
 
 typedef struct _BO{
@@ -355,9 +365,10 @@ PLMPOOL_DIRECTORY LouKeMapPool(
     uint64_t Flags
 );
 
-PLMPOOL_DIRECTORY LouKeCreateMemoryPool(
+PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     uint64_t NumberOfPoolMembers,
     uint64_t ObjectSize,
+    uint64_t Alignment,
     string Tag,
     uint64_t Flags,
     uint64_t PageFlags
@@ -369,6 +380,10 @@ void* LouKeMallocFromPool(
     PLMPOOL_DIRECTORY Pool, 
     uint64_t size, 
     uint64_t* Offset
+);
+
+void* LouKeMallocFromFixedPool(
+    PLMPOOL_DIRECTORY Pool
 );
 
 void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
@@ -524,11 +539,17 @@ KERNEL_EXPORT void* LouKeMallocFromPool(
     uint64_t size, 
     uint64_t* Offset
 );
+
+KERNEL_EXPORT void* LouKeMallocFromFixedPool(
+    PLMPOOL_DIRECTORY Pool
+);
+
 KERNEL_EXPORT void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 
-KERNEL_EXPORT POOL LouKeCreateMemoryPool(
+KERNEL_EXPORT POOL LouKeCreateFixedPool(
     uint64_t NumberOfPoolMembers,
     uint64_t ObjectSize,
+    uint64_t Alignment,
     string Tag,
     uint64_t Flags,     //flags for alignment
     uint64_t PageFlags  //flags for Page Directory
