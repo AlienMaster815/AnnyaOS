@@ -1,7 +1,7 @@
 #include <LouACPI.h>
 #include "AmlInternals.h"
 
-SET_OPTIMIZATION(3) LOUSTATUS LouKeAcpiInterperateData(
+ LOUSTATUS LouKeAcpiInterperateData(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     size_t TableLength;
@@ -738,7 +738,7 @@ SET_OPTIMIZATION(3) LOUSTATUS LouKeAcpiInterperateData(
     return STATUS_SUCCESS;
 }
 
-SET_OPTIMIZATION(3) bool LouKeAcpiIsByteOpcode(uint8_t byte){
+ bool LouKeAcpiIsByteOpcode(uint8_t byte){
     switch(byte){
         case AML_PREFIX_EXTENDED_OPCODE:
         case AML_OPCODE_ZERO:
@@ -826,33 +826,33 @@ SET_OPTIMIZATION(3) bool LouKeAcpiIsByteOpcode(uint8_t byte){
     }
 }
 
-SET_OPTIMIZATION(1) void LouKeAcpiExecuteSubPackageContext(
+STRIP_OPTIMIZATIONS void LouKeAcpiExecuteSubPackageContext(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context,
     NAMESPACE_HANDLE CurrentDirectory,
     size_t DataStart,
     size_t PackageLength
 ){
     //SAVE CONTEXT
-    NAMESPACE_HANDLE ReturnDirectory = Context->CurrentDirectory;
-    uint8_t* AmlStream = Context->AmlStream;
-    size_t ReturnLength = Context->Length;
-    size_t ReturnIndex = Context->Index;
+    //NAMESPACE_HANDLE ReturnDirectory = Context->CurrentDirectory;
+    //uint8_t* AmlStream = Context->AmlStream;
+    //size_t ReturnLength = Context->Length;
+    //size_t ReturnIndex = Context->Index;
     //SETUP NEW CONTEXT 
-    Context->Length = PackageLength - (DataStart - ReturnIndex);
-    Context->Index = 0;
-    Context->AmlStream = (uint8_t*)&Context->AmlStream[DataStart];
-    Context->CurrentDirectory = CurrentDirectory;
+    //Context->Length = PackageLength - (DataStart - ReturnIndex);
+    //Context->Index = 0;
+    //Context->AmlStream = (uint8_t*)&Context->AmlStream[DataStart];
+    //Context->CurrentDirectory = CurrentDirectory;
     //RUN CONTEXT
-    LouKeAcpiInterperateData(Context);
+    //LouKeAcpiInterperateData(Context);
     //RESTORE CONNTEXT
-    Context->AmlStream = AmlStream;
-    Context->Index = ReturnIndex;
-    Context->Length = ReturnLength;
-    Context->CurrentDirectory = ReturnDirectory;
+    //Context->AmlStream = AmlStream;
+    //Context->Index = ReturnIndex;
+    //Context->Length = ReturnLength;
+    //Context->CurrentDirectory = ReturnDirectory;
 }
 
 
-SET_OPTIMIZATION(3) void LouKeAcpiNameSpaceAddChild(
+ void LouKeAcpiNameSpaceAddChild(
     NAMESPACE_HANDLE CurrentDirectory,
     NAMESPACE_HANDLE NewStream
 ){
@@ -869,7 +869,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiNameSpaceAddChild(
     NewStream->AmlTree.LastHeader = (PListHeader)Tmp;
 }
 
-SET_OPTIMIZATION(3) size_t LouKeAcpiGetAmlPackageLength(uint8_t* Buffer){
+ size_t LouKeAcpiGetAmlPackageLength(uint8_t* Buffer){
     PAML_PACKAGE_LEAD_BYTE LeadByte = (PAML_PACKAGE_LEAD_BYTE)Buffer;
     if(LeadByte->ByteCount > 0){
         size_t Result = LeadByte->Length;
@@ -882,7 +882,7 @@ SET_OPTIMIZATION(3) size_t LouKeAcpiGetAmlPackageLength(uint8_t* Buffer){
     }
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePackageLength(
+ void LouKeAcpiParsePackageLength(
     uint8_t* AmlStream, 
     size_t Index, 
     string* NameHandle,

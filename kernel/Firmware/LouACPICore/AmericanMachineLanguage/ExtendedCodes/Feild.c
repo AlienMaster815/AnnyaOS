@@ -1,7 +1,7 @@
 #include <LouACPI.h>
 
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpFeild( 
+ void LouKeAcpiParseExtendedOpFeild( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;
@@ -19,7 +19,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpFeild(
             0x00
         );
 
-        //LouPrint("NewObjectName:%s EXT_FEILD_OP\n", AmlObjectName);
+        LouPrint("NewObjectName:%s EXT_FEILD_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,
@@ -51,7 +51,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpFeild(
 }
 
 
-SET_OPTIMIZATION(3)  void LouKeAcpiParseExtendedOpIndexFeild( 
+  void LouKeAcpiParseExtendedOpIndexFeild( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;
@@ -69,7 +69,7 @@ SET_OPTIMIZATION(3)  void LouKeAcpiParseExtendedOpIndexFeild(
             0x00
         );
 
-        //LouPrint("NewObjectName:%s EXT_INDEX_FEILD_OP\n", AmlObjectName);
+        LouPrint("NewObjectName:%s EXT_INDEX_FEILD_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,

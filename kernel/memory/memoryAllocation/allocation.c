@@ -363,9 +363,9 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
 
     PLOU_MALLOC_TRACKER FreeTrack = AllocationBlocks[CURRENT_ALLOCATION_BLOCK];
     FreeTrack = &FreeTrack[TotalAllocations[CURRENT_ALLOCATION_BLOCK]];
-    AlignmentCheck = (AlignmentCheck & ~(Alignment - 1));
+    AlignmentCheck = ROUND_UP64(AlignmentCheck, Alignment);    
     while (1) {
-        AlignmentCheck += Alignment;
+        //AlignmentCheck += Alignment;
         bool addrssSpaceCheck = true;
 
         for (uint32_t i = 0; i < AddressesLogged; i++) {
@@ -376,6 +376,7 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                 AddressBlock[i].Address,
                 AddressBlock[i].size
             )){
+                AlignmentCheck += ROUND_UP64(AddressBlock[i].size, Alignment);
                 addrssSpaceCheck = false;
                 break;
             }
@@ -391,6 +392,7 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                     AllocationBlocks[k][i].Address,
                     AllocationBlocks[k][i].size
                 )){
+                    AlignmentCheck += ROUND_UP64(AllocationBlocks[k][i].size, Alignment);
                     addrssSpaceCheck = false;
                     break;
                 }
@@ -408,9 +410,6 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                     return (void*)AlignmentCheck;
                 }
             }
-        }
-        if(!addrssSpaceCheck){
-            continue;
         }
         for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
             for (uint32_t j = 0; j < TotalAllocations[k]; j++) {

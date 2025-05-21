@@ -318,13 +318,15 @@ KERNEL_ENTRY Lou_kernel_start(
         LouKeHandleSystemIsBios();
     }else {
         SystemIsEfi = true;
-    }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+    }                      
+    
+    Lou_kernel_early_initialization();
+    
     LouKeInitializeLouACPISubsystem();
 
     LouKeMapPciMemory();
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
-    Lou_kernel_early_initialization();
 
     InitializeGenericTables();
 

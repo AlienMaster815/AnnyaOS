@@ -1,6 +1,6 @@
 #include <LouACPI.h>
 
-SET_OPTIMIZATION(3) bool LouKeAcpiParseExtendedOpLoad(
+ bool LouKeAcpiParseExtendedOpLoad(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
 

@@ -4,7 +4,7 @@ LOUSTATUS LouKeAcpiInterperateData(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 );
 
-SET_OPTIMIZATION(3)  static size_t CalculateAmlObjectSize(
+  static size_t CalculateAmlObjectSize(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context,
     size_t Index
 ){
@@ -43,7 +43,7 @@ SET_OPTIMIZATION(3)  static size_t CalculateAmlObjectSize(
 }
 
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpRegion(
+ void LouKeAcpiParseExtendedOpRegion(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context
 ) {
     UNUSED uint8_t* AmlStream = Context->AmlStream;
@@ -55,7 +55,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpRegion(
 
         case BUILD:   
             string AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Index + 1]);
-            //LouPrint("NewObjectName:%s EXT_REGION_OP\n", AmlObjectName);
+            LouPrint("NewObjectName:%s EXT_REGION_OP\n", AmlObjectName);
             DataIndex = AmlNameSpaceNameStringLength(&AmlStream[Index + 1]) + 2;
             ObjectSize = CalculateAmlObjectSize(Context, Index + DataIndex);
             if (Context->ExecutionState != BUILD) {

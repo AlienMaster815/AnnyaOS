@@ -1,6 +1,6 @@
 #include <LouACPI.h>
 
-void SET_OPTIMIZATION(3) LouKeAcpiParseExtendedOpBankFeild( 
+void  LouKeAcpiParseExtendedOpBankFeild( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;
@@ -17,7 +17,7 @@ void SET_OPTIMIZATION(3) LouKeAcpiParseExtendedOpBankFeild(
             0x00
         );
 
-        //LouPrint("NewObjectName:%s EXT_BANK_FEILD_OP\n", AmlObjectName);
+        LouPrint("NewObjectName:%s EXT_BANK_FEILD_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,

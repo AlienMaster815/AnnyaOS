@@ -4,7 +4,7 @@ LOUSTATUS LouKeAcpiInterperateData(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 );
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseAlias(
+ void LouKeAcpiParseAlias(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;
@@ -15,9 +15,9 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseAlias(
     Context->Index += StringLength;
     switch(Context->ExecutionState){
         case BUILD:
-            //LouPrint("NewObjectName:");
+            LouPrint("NewObjectName:");
             string AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Index + 1]);
-            //LouPrint("%s AML_HANDLE_OP_ALIAS\n", AmlObjectName);
+            LouPrint("%s AML_HANDLE_OP_ALIAS\n", AmlObjectName);
 
             LouKeAcpiCreateNameSpaceObject(
                 Context,
@@ -52,9 +52,9 @@ void LouKeAcpiParseName(
         case BUILD:
             size_t Index = Context->Index;
             uint8_t* AmlStream = Context->AmlStream;
-            //LouPrint("NewObjectName:");
+            LouPrint("NewObjectName:");
             string AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Index + 1]);
-            //LouPrint("%s NAME_OP\n", AmlObjectName);
+            LouPrint("%s NAME_OP\n", AmlObjectName);
             size_t NameLength = AmlNameSpaceNameStringLength(&AmlStream[Index + 1]);
             Context->Index = Index + NameLength + 1;
             Context->ExecutionState = SIZE_OF;
@@ -78,7 +78,7 @@ void LouKeAcpiParseName(
 }
 
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseScope(
+ void LouKeAcpiParseScope(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     UNUSED uint8_t* AmlStream = Context->AmlStream;
@@ -96,7 +96,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseScope(
             &DataStart
         );
 
-        //LouPrint("NewObjectName:%s EXT_SCOPE_OP\n", AmlObjectName);
+        LouPrint("NewObjectName:%s EXT_SCOPE_OP\n", AmlObjectName);
         LouKeAcpiCreateNameSpaceObject(
             Context,
             true,
@@ -104,7 +104,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseScope(
             AML_HANDLE_OP_SCOPE,
             Index - 1,
             Index + PackageLength + 1
-        );  
+        );
 
         LouKeAcpiExecuteSubPackageContext(
             Context,
@@ -112,6 +112,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseScope(
             DataStart,
             PackageLength
         );
+        LouPrint("Context->ExecutionState:%d\n", Context->ExecutionState);
         Context->Index = (Index + PackageLength + 1);
         return;
         case SIZE_OF:

@@ -1,6 +1,6 @@
 #include <LouACPI.h>
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseBuffer(
+ void LouKeAcpiParseBuffer(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;

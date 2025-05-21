@@ -16,7 +16,7 @@ void LouKeAcpiParseCreateQWordFeild(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseCreateWordFeild(
+ void LouKeAcpiParseCreateWordFeild(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     size_t Index = Context->Index;
@@ -27,7 +27,6 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseCreateWordFeild(
         case BUILD:
         Context->Index += AmlNameSpaceNameStringLength(&AmlStream[Context->Index + 1]) + 2;
         AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Context->Index]);
-        //LouPrint("NewObjectName:%s\n", AmlObjectName);
         Context->Index += AmlNameSpaceNameStringLength(&AmlStream[Context->Index]);
         LouKeAcpiCreateNameSpaceObject(
             Context,

@@ -40,7 +40,7 @@ void* LouKeMallocFromFixedPool(
     PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &Pool->MemoryTracks;
     TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
 
-    for(uint64_t i = 0 ; i < Pool->FixedSizePool; i++){
+    for(uint64_t i = 0 ; i < Pool->PoolSize; i++){
         if(!TmpPoolMemTrack[i].AddressInUse){
             TmpPoolMemTrack[i].AddressInUse = true;
             return (void*)TmpPoolMemTrack[i].Address;

@@ -8,10 +8,17 @@ static mutex_t NameSpace = {0};
 static PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT AcpiContext;
 
 static void LouKeAcpiBuildRootNamespace(){
-
+    /*NAMESPACE_HANDLE Tmphandle = &AcpiContext->RootDirectory;
+    Tmphandle = (NAMESPACE_HANDLE)Tmphandle->AmlTree.NextHeader;
+    
+    while(Tmphandle->AmlTree.NextHeader){
+        Tmphandle = (NAMESPACE_HANDLE)Tmphandle->AmlTree.NextHeader;
+        LouPrint("RootObjectName:%s\n", Tmphandle->Name);
+        sleep(1000);
+    }*/
 }
 
-SET_OPTIMIZATION(3) LOUSTATUS LouKeAcpiBuildNameSpace(){
+ LOUSTATUS LouKeAcpiBuildNameSpace(){
     MutexLock(&NameSpace);
 
     LOU_ACPI_TABLE_POINTER_UNION LouAcpiTable = {0};
@@ -36,8 +43,6 @@ SET_OPTIMIZATION(3) LOUSTATUS LouKeAcpiBuildNameSpace(){
     AcpiContext->RootDirectory.DataSize = TableLength;
     AcpiContext->CurrentDirectory = &AcpiContext->RootDirectory;
     AcpiContext->ExecutionState = BUILD;
-    AcpiContext->NamePool = LouKeCreateFixedPool(5000, 5, 1,  "DSDTNamePool", 0, KERNEL_GENERIC_MEMORY);
-    AcpiContext->AmlObjectPool = LouKeCreateFixedPool(5000, sizeof(LOU_ACPI_NAMESPACE_OBJECT), 1,  "DSDTAmlObjectPool", 0, KERNEL_GENERIC_MEMORY);
     Status = LouKeAcpiInterperateData(AcpiContext);
     if(Status != STATUS_SUCCESS){
         LouPrint("Status Unsuccessfull\n");
@@ -51,7 +56,7 @@ SET_OPTIMIZATION(3) LOUSTATUS LouKeAcpiBuildNameSpace(){
 }
 
 
-SET_OPTIMIZATION(3) size_t AmlNameSpaceNameStringLength(uint8_t* String){
+ size_t AmlNameSpaceNameStringLength(uint8_t* String){
     size_t StringSize = 0;
     bool PrefixesNotParsed = true;
     while(PrefixesNotParsed){
@@ -81,7 +86,7 @@ SET_OPTIMIZATION(3) size_t AmlNameSpaceNameStringLength(uint8_t* String){
     return StringSize;
 }
 
-SET_OPTIMIZATION(3) size_t AmlNameSpaceNameStringLengthToUTF8Length(uint8_t* String ){
+ size_t AmlNameSpaceNameStringLengthToUTF8Length(uint8_t* String ){
     size_t StringSize = 0;
     bool PrefixesNotParsed = true;
     while(PrefixesNotParsed){
@@ -112,7 +117,7 @@ SET_OPTIMIZATION(3) size_t AmlNameSpaceNameStringLengthToUTF8Length(uint8_t* Str
     return StringSize;
 }
 
-SET_OPTIMIZATION(3) string CreateUTF8StringFromAcpiNameString(uint8_t* AmlString) {
+ string CreateUTF8StringFromAcpiNameString(uint8_t* AmlString) {
     size_t i = 0;
     size_t out = 0;
     bool PrefixesNotParsed = true;
@@ -166,7 +171,7 @@ SET_OPTIMIZATION(3) string CreateUTF8StringFromAcpiNameString(uint8_t* AmlString
 }
 
 
-SET_OPTIMIZATION(3) void LouKeAcpiCreateNameSpaceObject(
+ void LouKeAcpiCreateNameSpaceObject(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context,
     bool AddAsSubDirectory,
     string Name,
@@ -174,13 +179,15 @@ SET_OPTIMIZATION(3) void LouKeAcpiCreateNameSpaceObject(
     size_t DataOffset,
     size_t ObjectSize
 ){
-    NAMESPACE_HANDLE NewObject = (NAMESPACE_HANDLE)LouKeMallocEx(sizeof(LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT), GET_ALIGNMENT(LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT), KERNEL_GENERIC_MEMORY);
+    NAMESPACE_HANDLE NewObject = (NAMESPACE_HANDLE)LouKeAcpiMalloc(AcpiContext, sizeof(LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT));
+    LouPrint("NewObject:%h\n", NewObject);
+
     NewObject->Name = Name;
     NewObject->Opcode = Opcode;
     NewObject->DataSize = ObjectSize;
     NewObject->Data = &Context->AmlStream[DataOffset];
     Context->ResultValue = (uint64_t)(uint8_t*)NewObject;
-    NAMESPACE_HANDLE CurrentDirectory = Context->CurrentDirectory;
+/*    NAMESPACE_HANDLE CurrentDirectory = Context->CurrentDirectory;
     if(AddAsSubDirectory){
         while(CurrentDirectory->SubTree.NextHeader){
             CurrentDirectory = (NAMESPACE_HANDLE)CurrentDirectory->SubTree.NextHeader;
@@ -193,25 +200,24 @@ SET_OPTIMIZATION(3) void LouKeAcpiCreateNameSpaceObject(
         }
         CurrentDirectory->AmlTree.NextHeader = (PListHeader)NewObject;
         NewObject->AmlTree.LastHeader = (PListHeader)CurrentDirectory;
-    }
+    }*/
 }
 
-SET_OPTIMIZATION(3) void* LouKeAcpiMalloc(
+ void* LouKeAcpiMalloc(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context, 
     size_t AllocationSize 
 ){
-    switch(AllocationSize){
-        case 5:{
-            return LouKeMallocFromFixedPool(Context->NamePool);
-        }
-        case sizeof(LOU_ACPI_NAMESPACE_OBJECT):{
-            return LouKeMallocFromFixedPool(Context->AmlObjectPool);
-        }
-        default:
-            return LouKeMalloc(AllocationSize, KERNEL_GENERIC_MEMORY);
+
+    return LouKeMalloc(AllocationSize, KERNEL_GENERIC_MEMORY);
+}
+
+NAMESPACE_HANDLE LouKeAcpiGetAcpiObjectHandle(string HandleName, NAMESPACE_HANDLE CurrentHandle){
+    if(HandleName[0] == '\\'){
+        HandleName++;
+
+        LouPrint("Here\n");
+        while(1);
     }
 
-    LouPrint("LouKeAcpiMalloc()\n");
-    while(1);
-    return 0x00;//LouKeMallocFromFixedPool(ObjectPool);
+    return 0x00;
 }

@@ -252,6 +252,7 @@ void LouKeAcpiExecuteSubPackageContext(
 
 NAMESPACE_HANDLE LouKeAcpiGetNameSpaceHandle(string ObjectName, NAMESPACE_HANDLE CurrentHandle, uint16_t Opcode);
 NAMESPACE_HANDLE LouKeAcpiSearchDeferHandles(string ObjectName);
+NAMESPACE_HANDLE LouKeAcpiGetAcpiObjectHandle(string HandleName, NAMESPACE_HANDLE CurrentHandle);
 
 #define AML_IS_ROOT  ((uint64_t)Context->CurrentDirectory == (uint64_t)&Context->RootDirectory)
 

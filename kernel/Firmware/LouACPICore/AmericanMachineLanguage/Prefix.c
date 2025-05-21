@@ -1,6 +1,6 @@
 #include <LouACPI.h>
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixQWord( 
+ void LouKeAcpiParsePrefixQWord( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     switch(Context->ExecutionState){
@@ -23,7 +23,7 @@ void LouKeAcpiParsePrefixRoot(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixWord( 
+ void LouKeAcpiParsePrefixWord( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     switch(Context->ExecutionState){
@@ -46,7 +46,7 @@ void LouKeAcpiParsePrefixParent(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixString( 
+ void LouKeAcpiParsePrefixString( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
 
@@ -62,7 +62,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixString(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixMultiName( 
+ void LouKeAcpiParsePrefixMultiName( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;
@@ -79,7 +79,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixMultiName(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixDWord( 
+ void LouKeAcpiParsePrefixDWord( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     switch(Context->ExecutionState){
@@ -94,7 +94,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixDWord(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixDualName( 
+ void LouKeAcpiParsePrefixDualName( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     uint8_t* AmlStream = Context->AmlStream;
@@ -111,7 +111,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixDualName(
     while(1);
 }
 
-SET_OPTIMIZATION(3) void LouKeAcpiParsePrefixByte( 
+ void LouKeAcpiParsePrefixByte( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     switch(Context->ExecutionState){

@@ -1,6 +1,6 @@
 #include <LouACPI.h>
 
-SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpDevice( 
+ void LouKeAcpiParseExtendedOpDevice( 
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
 ){
     UNUSED uint8_t* AmlStream = Context->AmlStream;
@@ -18,7 +18,7 @@ SET_OPTIMIZATION(3) void LouKeAcpiParseExtendedOpDevice(
             &DataStart
         );
 
-        //LouPrint("NewObjectName:%s EXT_DEVICE_OP\n", AmlObjectName);
+        LouPrint("NewObjectName:%s EXT_DEVICE_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,
