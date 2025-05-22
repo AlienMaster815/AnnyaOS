@@ -183,8 +183,16 @@
                         TableIndex = Context->Index;
                         continue;
                     }
+                    case AML_EXTENDED_OPCODE_PROCESSOR:{
+                        Context->Index = TableIndex; 
+                        LouKeAcpiParseExtendedOpProcessor(Context);
+                        TableIndex = Context->Index;
+                        continue;
+                    }
                     default:
+                        LouPrint("Op:String:%h Table Index:%d Of %d\n", DsdtAmlSpace[TableIndex], TableIndex, TableLength);
                         Context->ExecutionState = INVALID_OPCODE;
+                        LouPrint("Exection Encountered An Ivalid Extended Opcode\n");
                         return STATUS_UNSUCCESSFUL;
                 }
                 continue;
@@ -211,8 +219,11 @@
                         continue;                     
                     }
                     default:
+                        LouPrint("Op:String:%h Table Index:%d Of %d\n", &DsdtAmlSpace[TableIndex], TableIndex, TableLength);
                         Context->ExecutionState = INVALID_OPCODE;
+                        LouPrint("Exection Encountered An Ivalid LNOT Opcode\n");
                         return STATUS_UNSUCCESSFUL;
+
                 }
                 continue;
             }
@@ -728,7 +739,7 @@
                 continue;
             }
             default:
-                LouPrint("Op:%s Table Index:%d Of %d\n", &DsdtAmlSpace[TableIndex], TableIndex, TableLength);
+                LouPrint("Op:String:%s Table Index:%d Of %d\n", &DsdtAmlSpace[TableIndex], TableIndex, TableLength);
                 Context->ExecutionState = INVALID_OPCODE;
                 LouPrint("Exection Encountered An Ivalid Opcode\n");
                 return STATUS_UNSUCCESSFUL;
@@ -741,8 +752,6 @@
  bool LouKeAcpiIsByteOpcode(uint8_t byte){
     switch(byte){
         case AML_PREFIX_EXTENDED_OPCODE:
-        case AML_OPCODE_ZERO:
-        case AML_OPCODE_ONE:
         case AML_OPCODE_ALIAS:
         case AML_OPCODE_NAME:
         case AML_OPCODE_SCOPE:
@@ -819,7 +828,6 @@
         case AML_OPCODE_RETURN:
         case AML_OPCODE_BREAK:
         case AML_OPCODE_BREAK_POINT:
-        case AML_OPCODE_ONES:
             return true;
         default:
             return false;
@@ -833,22 +841,22 @@ STRIP_OPTIMIZATIONS void LouKeAcpiExecuteSubPackageContext(
     size_t PackageLength
 ){
     //SAVE CONTEXT
-    //NAMESPACE_HANDLE ReturnDirectory = Context->CurrentDirectory;
-    //uint8_t* AmlStream = Context->AmlStream;
-    //size_t ReturnLength = Context->Length;
-    //size_t ReturnIndex = Context->Index;
+    NAMESPACE_HANDLE ReturnDirectory = Context->CurrentDirectory;
+    uint8_t* AmlStream = Context->AmlStream;
+    size_t ReturnLength = Context->Length;
+    size_t ReturnIndex = Context->Index;
     //SETUP NEW CONTEXT 
-    //Context->Length = PackageLength - (DataStart - ReturnIndex);
-    //Context->Index = 0;
-    //Context->AmlStream = (uint8_t*)&Context->AmlStream[DataStart];
-    //Context->CurrentDirectory = CurrentDirectory;
+    Context->Length = PackageLength - (DataStart - ReturnIndex);
+    Context->Index = 0;
+    Context->AmlStream = (uint8_t*)&Context->AmlStream[DataStart];
+    Context->CurrentDirectory = CurrentDirectory;
     //RUN CONTEXT
-    //LouKeAcpiInterperateData(Context);
+    LouKeAcpiInterperateData(Context);
     //RESTORE CONNTEXT
-    //Context->AmlStream = AmlStream;
-    //Context->Index = ReturnIndex;
-    //Context->Length = ReturnLength;
-    //Context->CurrentDirectory = ReturnDirectory;
+    Context->AmlStream = AmlStream;
+    Context->Index = ReturnIndex;
+    Context->Length = ReturnLength;
+    Context->CurrentDirectory = ReturnDirectory;
 }
 
 

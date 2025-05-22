@@ -180,7 +180,7 @@ static void LouKeAcpiBuildRootNamespace(){
     size_t ObjectSize
 ){
     NAMESPACE_HANDLE NewObject = (NAMESPACE_HANDLE)LouKeAcpiMalloc(AcpiContext, sizeof(LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT));
-    LouPrint("NewObject:%h\n", NewObject);
+    //LouPrint("NewObject:%h\n", NewObject);
 
     NewObject->Name = Name;
     NewObject->Opcode = Opcode;

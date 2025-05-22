@@ -15,7 +15,7 @@
 
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
-#include "VirtualBoxDriver.h"
+#include "VirtualboxDriver.h"
 
 static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     //PATA Devices

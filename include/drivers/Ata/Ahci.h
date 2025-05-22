@@ -2,7 +2,7 @@
 #define _AHCI_H
 
 #ifdef __cplusplus
-#include <LouDDk.h>
+#include <LouDDK.h>
 extern "C"{
 #else 
 #include <LouAPI.h>

@@ -279,23 +279,23 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
 
-	$(MAKE) -C Drivers/Networking/PCNET32 clean
-	$(MAKE) -C Drivers/Networking/PCNET32 all
+	$(MAKE) -C drivers/Networking/PCNET32 clean
+	$(MAKE) -C drivers/Networking/PCNET32 all
 
-	$(MAKE) -C Drivers/Audio/SoundBlaster clean
-	$(MAKE) -C Drivers/Audio/SoundBlaster all
+	$(MAKE) -C drivers/Audio/SoundBlaster clean
+	$(MAKE) -C drivers/Audio/SoundBlaster all
 
-	$(MAKE) -C Drivers/Audio/AC97 clean
-	$(MAKE) -C Drivers/Audio/AC97 all
+	$(MAKE) -C drivers/Audio/AC97 clean
+	$(MAKE) -C drivers/Audio/AC97 all
 
-	$(MAKE) -C Drivers/Audio/HDA clean
-	$(MAKE) -C Drivers/Audio/HDA all
+	$(MAKE) -C drivers/Audio/HDA clean
+	$(MAKE) -C drivers/Audio/HDA all
 
-	$(MAKE) -C Drivers/storage/AtaAcceleration clean_piix
-	$(MAKE) -C Drivers/storage/AtaAcceleration piix
+	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
+	$(MAKE) -C drivers/storage/AtaAcceleration piix
 
-	$(MAKE) -C Drivers/gpu/Virtualbox clean
-	$(MAKE) -C Drivers/gpu/Virtualbox all
+	$(MAKE) -C drivers/gpu/Virtualbox clean
+	$(MAKE) -C drivers/gpu/Virtualbox all
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
@@ -368,15 +368,15 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C KernelLibraries/LouDDK clean
-	$(MAKE) -C Drivers/Networking/PCNET32 clean
+	$(MAKE) -C drivers/Networking/PCNET32 clean
 	$(MAKE) -C KernelLibraries/louoskrnl clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
-	$(MAKE) -C Drivers/storage/AtaAcceleration clean_piix
-	$(MAKE) -C Drivers/Audio/HDA clean
-	$(MAKE) -C Drivers/Audio/AC97 clean
-	$(MAKE) -C Drivers/Audio/SoundBlaster clean
+	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
+	$(MAKE) -C drivers/Audio/HDA clean
+	$(MAKE) -C drivers/Audio/AC97 clean
+	$(MAKE) -C drivers/Audio/SoundBlaster clean
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C KernelLibraries/wprecorder clean
-	$(MAKE) -C Drivers/gpu/Virtualbox clean
+	$(MAKE) -C drivers/gpu/Virtualbox clean

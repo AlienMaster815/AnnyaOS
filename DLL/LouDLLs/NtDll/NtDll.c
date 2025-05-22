@@ -2472,7 +2472,7 @@ NTDLL_API void ZwWriteVirtualMemory() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void ZwYieldExecution() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void __C_specific_handler() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void __chkstk() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void __isascii() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void __ii() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void __iscsym() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void __iscsymf() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void __misaligned_access() {LouPrint("Hello nt Dll\n"); while(1);}

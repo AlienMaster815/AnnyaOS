@@ -39,6 +39,14 @@ LOUSTATUS LouKeAcpiInterperateData(
             return ObjectSize;
         }
     }
+    while(isdigit(AmlStream[Index + ObjectSize]) 
+    || ((AmlStream[Index + ObjectSize] <= 'Z') && 
+        (AmlStream[Index + ObjectSize] >= 'A')) 
+    || (AmlStream[Index + ObjectSize] == '_')){
+        ObjectSize++;
+        if(ObjectSize > 16)break;
+    }
+
     return ObjectSize;
 }
 

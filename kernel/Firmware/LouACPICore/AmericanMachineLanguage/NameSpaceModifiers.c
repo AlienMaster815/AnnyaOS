@@ -112,7 +112,7 @@ void LouKeAcpiParseName(
             DataStart,
             PackageLength
         );
-        LouPrint("Context->ExecutionState:%d\n", Context->ExecutionState);
+        //LouPrint("Context->ExecutionState:%d\n", Context->ExecutionState);
         Context->Index = (Index + PackageLength + 1);
         return;
         case SIZE_OF:

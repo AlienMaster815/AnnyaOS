@@ -114,7 +114,7 @@ static inline void VBOX_IO_WRITE(uint16_t Index, uint16_t Data){
 #include "VBoxVideo.h"
 #include "HgsmiChSetup.h"
 #include "HgsmiChannels.h"
-#include "VirtualboxVbe.h"
+#include "VirtualBoxVbe.h"
 #include "VirtualboxGuest.h"
 
 #endif//_VIRTUALBOX_DRIVER_H
