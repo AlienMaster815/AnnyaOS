@@ -19,7 +19,7 @@
             0x00
         );
 
-        LouPrint("NewObjectName:%s EXT_FEILD_OP\n", AmlObjectName);
+        //LouPrint("NewObjectName:%s EXT_FEILD_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,
@@ -69,7 +69,7 @@
             0x00
         );
 
-        LouPrint("NewObjectName:%s EXT_INDEX_FEILD_OP\n", AmlObjectName);
+        //LouPrint("NewObjectName:%s EXT_INDEX_FEILD_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,

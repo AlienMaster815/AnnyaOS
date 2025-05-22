@@ -15,9 +15,9 @@ LOUSTATUS LouKeAcpiInterperateData(
     Context->Index += StringLength;
     switch(Context->ExecutionState){
         case BUILD:
-            LouPrint("NewObjectName:");
+            //LouPrint("NewObjectName:");
             string AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Index + 1]);
-            LouPrint("%s AML_HANDLE_OP_ALIAS\n", AmlObjectName);
+            //LouPrint("%s AML_HANDLE_OP_ALIAS\n", AmlObjectName);
 
             LouKeAcpiCreateNameSpaceObject(
                 Context,
@@ -52,9 +52,9 @@ void LouKeAcpiParseName(
         case BUILD:
             size_t Index = Context->Index;
             uint8_t* AmlStream = Context->AmlStream;
-            LouPrint("NewObjectName:");
+            //LouPrint("NewObjectName:");
             string AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Index + 1]);
-            LouPrint("%s NAME_OP\n", AmlObjectName);
+            //LouPrint("%s NAME_OP\n", AmlObjectName);
             size_t NameLength = AmlNameSpaceNameStringLength(&AmlStream[Index + 1]);
             Context->Index = Index + NameLength + 1;
             Context->ExecutionState = SIZE_OF;
@@ -96,7 +96,7 @@ void LouKeAcpiParseName(
             &DataStart
         );
 
-        LouPrint("NewObjectName:%s EXT_SCOPE_OP\n", AmlObjectName);
+        //LouPrint("NewObjectName:%s EXT_SCOPE_OP\n", AmlObjectName);
         LouKeAcpiCreateNameSpaceObject(
             Context,
             true,

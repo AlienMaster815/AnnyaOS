@@ -63,7 +63,7 @@ LOUSTATUS LouKeAcpiInterperateData(
 
         case BUILD:   
             string AmlObjectName = CreateUTF8StringFromAcpiNameString(&AmlStream[Index + 1]);
-            LouPrint("NewObjectName:%s EXT_REGION_OP\n", AmlObjectName);
+            //LouPrint("NewObjectName:%s EXT_REGION_OP\n", AmlObjectName);
             DataIndex = AmlNameSpaceNameStringLength(&AmlStream[Index + 1]) + 2;
             ObjectSize = CalculateAmlObjectSize(Context, Index + DataIndex);
             if (Context->ExecutionState != BUILD) {

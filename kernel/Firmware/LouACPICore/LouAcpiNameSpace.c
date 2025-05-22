@@ -187,7 +187,7 @@ static void LouKeAcpiBuildRootNamespace(){
     NewObject->DataSize = ObjectSize;
     NewObject->Data = &Context->AmlStream[DataOffset];
     Context->ResultValue = (uint64_t)(uint8_t*)NewObject;
-/*    NAMESPACE_HANDLE CurrentDirectory = Context->CurrentDirectory;
+    NAMESPACE_HANDLE CurrentDirectory = Context->CurrentDirectory;
     if(AddAsSubDirectory){
         while(CurrentDirectory->SubTree.NextHeader){
             CurrentDirectory = (NAMESPACE_HANDLE)CurrentDirectory->SubTree.NextHeader;
@@ -200,7 +200,7 @@ static void LouKeAcpiBuildRootNamespace(){
         }
         CurrentDirectory->AmlTree.NextHeader = (PListHeader)NewObject;
         NewObject->AmlTree.LastHeader = (PListHeader)CurrentDirectory;
-    }*/
+    }
 }
 
  void* LouKeAcpiMalloc(

@@ -85,5 +85,5 @@ void LouKeInitializeLouACPISubsystem(){
     LouKeAcpiBuildNameSpace();
 
     LouPrint("Initialization Successfull\n");
-    while(1);
+    //while(1);
 }

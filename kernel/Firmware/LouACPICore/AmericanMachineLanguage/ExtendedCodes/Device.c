@@ -18,7 +18,7 @@ void LouKeAcpiParseExtendedOpDevice(
             &DataStart
         );
 
-        LouPrint("NewObjectName:%s EXT_DEVICE_OP\n", AmlObjectName);
+        //LouPrint("NewObjectName:%s EXT_DEVICE_OP\n", AmlObjectName);
 
         LouKeAcpiCreateNameSpaceObject(
             Context,
@@ -74,7 +74,7 @@ void LouKeAcpiParseExtendedOpProcessor(
             &PackageLength,
             &DataStart
         ); 
-        LouPrint("NewObjectName:%s EXT_PROCESSOR_OP\n", AmlObjectName);
+        //LouPrint("NewObjectName:%s EXT_PROCESSOR_OP\n", AmlObjectName);
         LouKeAcpiCreateNameSpaceObject(
             Context,
             false,

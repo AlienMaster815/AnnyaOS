@@ -17,7 +17,7 @@
                 0x00
             );
 
-            LouPrint("NewObjectName:%s EXT_METHOD_OP\n", AmlObjectName);
+            //LouPrint("NewObjectName:%s EXT_METHOD_OP\n", AmlObjectName);
 
             LouKeAcpiCreateNameSpaceObject(
                 Context,

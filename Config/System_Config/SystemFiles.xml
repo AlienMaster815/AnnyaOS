@@ -20,8 +20,8 @@
         <FILETOCPY64>cp DLL/LouDLLs/kernelbase/kernbase.dll ISO/ANNYA/SYSTEM64/KERNBASE.DLL</FILETOCPY64>                   <!--Windows Legacy(9x 16 bit Kernel) Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/MSVCRT/msvcrt.dll ISO/ANNYA/SYSTEM64/MSVCRT.DLL</FILETOCPY64>                           <!--Microsoft Windows C Std Library-->
         <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/ANNYA/SYSTEM64/CRT140.DLL</FILETOCPY64>               <!--Windows C/C++ Std Library Version 1.40-->
-        <FILETOCPY64>cp EXE/ANNYAExp/ANNYAExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Init-->
-        <FILETOCPY64>cp BackgroundImages/ANNYA.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
+        <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Init-->
+        <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
         <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/DRIVERS/DRIVERS.CFG</FILETOCPY64>        <!--Annya OS Driver Manifest Registry-->
     </64Targets>
