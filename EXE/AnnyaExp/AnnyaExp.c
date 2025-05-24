@@ -192,7 +192,7 @@ int WinMain(
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
     LouPrint("Loading CODECS.DLL\n");
 
-    CODECShModule = LoadLibraryA("C:/ANNYA/CODECS.DLL");
+    CODECShModule = LoadLibraryA("C:/ANNYA/SYSTEM64/CODECS.DLL");
 
     if(!CODECShModule){
         LouPrint("CODECS.DLL Could Not Be Found\n");

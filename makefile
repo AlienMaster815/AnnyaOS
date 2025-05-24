@@ -323,7 +323,7 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
-	
+
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 

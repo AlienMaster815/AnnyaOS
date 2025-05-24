@@ -49,9 +49,7 @@ HANDLE AnnyaOpenPngA(
     for(size_t i = 0; i < PngHeaderCount; i++){
         LouPrint("Interpreting %s Png Header\n", TmpChunkData.Type);
 
-
-
-
+        
 
         ChunkData = (PPNG_CHUNK_HEADER)((uint64_t)ChunkData + TmpChunkData.Length + (sizeof(PNG_CHUNK_HEADER) + sizeof(uint32_t))); 
         LouSwapEndianess(&ChunkData->Length, &TmpChunkData.Length, sizeof(uint32_t)); 
