@@ -7,6 +7,33 @@
 
 #define LOUDLL_API __declspec(dllexport)
 
+
+LOUDLL_API
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
+){
+    volatile char* dest = (char*)OutStream;
+    volatile const char* src = (const char*)InStream;
+
+    // Handle overlapping memory regions (copy backward)
+    if (dest > src && dest < src + ByteCount) {
+        for(size_t i = ByteCount; i > 0;){
+            dest[i] = src[i];
+            i -= 1;
+        }
+    } else {
+        // Normal forward copy (non-overlapping memory)
+        for(size_t i = 0; i < ByteCount;){
+            dest[i] = src[i];
+            i += 1;
+        }
+    }
+    return OutStream;
+}
+
 LOUDLL_API 
 LOUSTATUS 
 LouSwapEndianess(
@@ -156,6 +183,7 @@ void intToString(uint64_t num, char* str) {
 #define VSPRINTF_S_OVERFLOW (((size_t)Buffer - (size_t)BufferStart) + Addition) > BufferCount
 #include <stdarg.h>
 
+LOUDLL_API
 char* strncpy(char* dest, const char* src, size_t n) {
     char* original_dest = dest;
 
@@ -174,7 +202,7 @@ char* strncpy(char* dest, const char* src, size_t n) {
     return original_dest;
 }
 
-
+LOUDLL_API
 int strncmp(const char* str1, const char* str2, size_t n) {
     // Compare characters until we reach the specified number of characters (n)
     while (n > 0) {
@@ -202,7 +230,7 @@ int strncmp(const char* str1, const char* str2, size_t n) {
     return 0;
 }
 
-
+LOUDLL_API
 size_t strlen(const char* str) {
     const char* ptr = str;
     while (*ptr != '\0') {
@@ -437,7 +465,7 @@ AnnyaGetLibraryFunctionH(
 }
 
 LOUDLL_API
-FILE 
+FILE*
 LouOpenFileA(
     string FileName
 ){
@@ -447,4 +475,16 @@ LouOpenFileA(
         LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     }
     return (void*)KulaPacket[1]; 
+}
+
+LOUDLL_API
+void
+LouCloseFile(
+    FILE* ClosingFile
+){
+    uint64_t KulaPacket[2] = {0};
+    KulaPacket[1] = (uint64_t)ClosingFile;
+    while(!KulaPacket[0]){
+        LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
+    } 
 }

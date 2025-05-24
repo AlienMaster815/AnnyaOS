@@ -32,3 +32,7 @@ void LouKeLoadFileCall(uint64_t* Data){
     string PathToFile = (string)*Data;
     *Data = (uint64_t)fopen(PathToFile, USER_GENERIC_MEMORY);   
 }
+
+void LouKeCloseFileCall(uint64_t* Data){
+    fclose((FILE*)*Data);
+}

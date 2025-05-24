@@ -20,3 +20,5 @@ EXPORTS
     AnnyaGetLibraryFunctionN
     LouOpenFileA
     LouSwapEndianess
+    LouMemCpy
+    LouCloseFile

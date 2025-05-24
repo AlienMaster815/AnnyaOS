@@ -2,6 +2,8 @@
 
 void LouKeDrsdResetFBDEV(uint64_t* FBDEV);
 void LouKeLoadFileCall(uint64_t* Data);
+void LouKeCloseFileCall(uint64_t* Data);
+
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
     uint16_t DrsdFileType
@@ -225,6 +227,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }case LOUAGLFN:{ 
             uint64_t* tmp = (uint64_t*)Data;
             tmp[2] = LouKeLinkerGetAddress((string)(uint8_t*)tmp[0], (string)(uint8_t*)tmp[1]);
+            return;
+        }
+        case LOUCLOSEFILE:{
+            LouKeCloseFileCall((uint64_t*)Data);
             return;
         }
         default:

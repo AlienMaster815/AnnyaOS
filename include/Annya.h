@@ -3,6 +3,18 @@
 
 #define _USER_MODE_CODE_
 
+#include <stdalign.h>
+#define GET_ALIGNMENT(x) (alignof(x))
+
+#define ROUND_UP(value, multiple) \
+    (((value) + (multiple) - 1) / (multiple) * (multiple))
+
+#define ROUND_UP64(value, multiple) \
+    (((value) + (multiple) - 1) / (multiple) * (multiple))
+
+#define ROUND_DOWN64(value, multiple) \
+    ((value) / (multiple) * (multiple))
+
 #define LOUSTATUS uint32_t
 
 //#include "USRSPC/API/WinAPItypes.h"
@@ -192,6 +204,23 @@ volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
 #ifndef _LOUDLL_
 
 __declspec(dllimport)
+int strncmp(const char* str1, const char* str2, size_t n);
+
+__declspec(dllimport)
+void
+LouCloseFile(
+    FILE* ClosingFile
+);
+
+__declspec(dllimport)
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
+);
+
+__declspec(dllimport)
 LOUSTATUS 
 LouSwapEndianess(
     void* InStreamTmp, 
@@ -220,7 +249,7 @@ void* LouVirtualAllocUser(
 );
 
 __declspec(dllimport)
-FILE 
+FILE*
 LouOpenFileA(
     string FileName
 );
