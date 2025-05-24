@@ -103,6 +103,7 @@ void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
 void InitializeNtKernelTransitionLayer();
 void LouKeInitializeLouACPISubsystem();
+void HandleProccessorInitialization();
 
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
@@ -118,7 +119,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
-
+    HandleProccessorInitialization();
     InitializeStartupInterruptHandleing();
 
     RegisterInterruptHandler(DivideByZero, INTERRUPT_SERVICE_ROUTINE_0, false, 0);
@@ -168,7 +169,6 @@ void HandleProccessorInitialization();
 void Advanced_Kernel_Initialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
-    HandleProccessorInitialization();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
  }
 

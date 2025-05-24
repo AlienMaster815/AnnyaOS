@@ -35,7 +35,7 @@ static void LouKeAcpiBuildRootNamespace(){
     DsdtAmlSpace = &LouAcpiTable.Dsdt->AmericanMachineLanguage[0];
 
     LouPrint("Table Length:%h\n", TableLength);
-    AcpiContext = LouKeMallocEx(sizeof(LOU_ACPI_NAMESPACE_OBJECT), GET_ALIGNMENT(LOU_ACPI_NAMESPACE_OBJECT), KERNEL_GENERIC_MEMORY);
+    AcpiContext = LouKeMallocEx(sizeof(LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT), GET_ALIGNMENT(LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT), KERNEL_GENERIC_MEMORY);
 
     AcpiContext->Length = TableLength;
     AcpiContext->Index = 0;
@@ -212,8 +212,16 @@ static void LouKeAcpiBuildRootNamespace(){
 }
 
 NAMESPACE_HANDLE LouKeAcpiGetAcpiObjectHandle(string HandleName, NAMESPACE_HANDLE CurrentHandle){
+    NAMESPACE_HANDLE Result = &AcpiContext->RootDirectory;
+    Result = (NAMESPACE_HANDLE)Result->AmlTree.NextHeader;
     if(HandleName[0] == '\\'){
         HandleName++;
+
+        while(Result){
+            LouPrint("RootObject:%s\n", Result->Name);
+            sleep(1000);
+            Result = (NAMESPACE_HANDLE)Result->AmlTree.NextHeader;
+        }
 
         LouPrint("Here\n");
         while(1);

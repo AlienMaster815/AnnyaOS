@@ -295,7 +295,8 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                             if (AllocationBlocks[k][j].Address == 0x00) {
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
-                                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
+                                memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                                 return (void*)AlignmentCheck;
                             }
                         }
@@ -313,6 +314,7 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
                     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                    memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                     return (void*)AlignmentCheck;
                 }
 

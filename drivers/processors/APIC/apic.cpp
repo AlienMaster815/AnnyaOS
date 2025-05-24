@@ -293,14 +293,15 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
         }
     }
 
-    //NAMESPACE_HANDLE _PIC_MethodHandle = LouKeAcpiGetAcpiObjectHandle("\\_PIC", 0x00);
-    //if(_PIC_MethodHandle){
-    //    LouPrint("Got _PIC Method\n");
+    NAMESPACE_HANDLE _PIC_MethodHandle = LouKeAcpiGetAcpiObjectHandle("\\_PIC", 0x00);
+    if(_PIC_MethodHandle){
+        LouPrint("Got _PIC Method\n");
 
-    //}
+    }
+
 
     LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);
-    //while(1);
+    while(1);
 
     return Status;
 
