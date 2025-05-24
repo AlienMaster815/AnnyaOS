@@ -3,6 +3,8 @@
 
 #define _USER_MODE_CODE_
 
+#define LOUSTATUS uint32_t
+
 //#include "USRSPC/API/WinAPItypes.h"
 #include "kernel/SystemCalls.h"
 #include <stdint.h>
@@ -189,7 +191,15 @@ volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 #ifndef _LOUDLL_
 
+__declspec(dllimport)
+LOUSTATUS 
+LouSwapEndianess(
+    void* InStreamTmp, 
+    void* OutStreamTmp, 
+    size_t StreamSize
+);
 
+__declspec(dllimport)
 void* LouGenericAllocateHeapEx(
     void* Heap, 
     size_t AllocationSize,

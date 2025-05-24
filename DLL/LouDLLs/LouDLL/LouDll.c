@@ -4,8 +4,28 @@
 #include <Annya.h>
 #include <stdarg.h>
 
+
 #define LOUDLL_API __declspec(dllexport)
 
+LOUDLL_API 
+LOUSTATUS 
+LouSwapEndianess(
+    void* InStreamTmp, 
+    void* OutStreamTmp, 
+    size_t StreamSize
+){
+    uint8_t* InStream = (uint8_t*)InStreamTmp; 
+    uint8_t* OutStream = (uint8_t*)OutStreamTmp;
+
+    if((!InStream) || (!OutStream) || ((uintptr_t)InStream == (uintptr_t)OutStream)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    for(size_t i = 0 ; i < StreamSize; i++){
+        OutStream[(StreamSize - 1) - i] = InStream[i]; 
+    }
+    return STATUS_SUCCESS;
+}
 
 LOUDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {

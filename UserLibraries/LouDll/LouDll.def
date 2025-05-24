@@ -19,4 +19,4 @@ EXPORTS
     LouVirtualAllocUser
     AnnyaGetLibraryFunctionN
     LouOpenFileA
-    
+    LouSwapEndianess

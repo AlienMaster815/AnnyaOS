@@ -12,7 +12,11 @@ HANDLE AnnyaOpenPngA(
 ){
     FILE NewPng = LouOpenFileA(FileName);
 
-    LouPrint("Here:%h With Value:%h\n", NewPng, *(uint64_t*)NewPng);
+    uint64_t PngSignature = 0;
+    LouSwapEndianess(NewPng, &PngSignature,sizeof(uint64_t));
+
+
+    LouPrint("Signature Value:%h ", PngSignature);
 
     while(1);
     return 0x00;
