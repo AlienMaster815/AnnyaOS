@@ -12,7 +12,7 @@ typedef struct _LOUSINE_KERNEL_FILESYSTEM{
     bool                                        SystemDisk;
     struct _LOUSINE_KERNEL_FILESYSTEM*          (*FileSystemScan)(uint8_t PortNumber);
     LOUSTATUS                                   (*FileSystemFormatDisk)(LOUSINE_KERNEL_STORAGE_DEVICE_ID DriveNumber, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
-    FILE*                                       (*FileSystemOpen)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
+    FILE*                                       (*FileSystemOpen)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem, uint64_t PageFlags);
     bool                                        (*FileSystemSeek)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
     void                                        (*FileSystemClose)(string FilePath, FILE* File, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
     uint64_t                                    FileAllocationTableSector;

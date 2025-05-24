@@ -6,3 +6,5 @@ EXPORTS
     RtlInitializeCriticalSectionEx
     RtlEnterCriticalSection
     RtlLeaveCriticalSection
+    GetProcessHeap
+    NtGetProcessorCount

@@ -4,7 +4,7 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
 
 DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* BaseOfImage){
 
-    FILE* ModuleHandle = fopen(ModuleNameAndPath);
+    FILE* ModuleHandle = fopen(ModuleNameAndPath, KERNEL_GENERIC_MEMORY);
     
     
     if(!ModuleHandle){
@@ -48,7 +48,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
     }
 
     DRIVER_MODULE_ENTRY Entry;
-    FILE* ModuleHandle = fopen(ModuleNameAndPath);
+    FILE* ModuleHandle = fopen(ModuleNameAndPath, KERNEL_GENERIC_MEMORY);
     if(!ModuleHandle){
         return 0x00;
     }

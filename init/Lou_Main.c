@@ -321,18 +321,18 @@ KERNEL_ENTRY Lou_kernel_start(
     }                      
     
     Lou_kernel_early_initialization();
-    
-    LouKeInitializeLouACPISubsystem();
 
     LouKeMapPciMemory();
+
+    SetupInitialVideoDevices();
+
+    LouKeInitializeLouACPISubsystem();
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
 
     InitializeGenericTables();
 
     Advanced_Kernel_Initialization();
-
-    SetupInitialVideoDevices();
 
     LookForStorageDevices();
 

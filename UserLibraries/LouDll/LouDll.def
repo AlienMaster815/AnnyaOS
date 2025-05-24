@@ -18,3 +18,5 @@ EXPORTS
     LouGenericAllocateHeapEx
     LouVirtualAllocUser
     AnnyaGetLibraryFunctionN
+    LouOpenFileA
+    

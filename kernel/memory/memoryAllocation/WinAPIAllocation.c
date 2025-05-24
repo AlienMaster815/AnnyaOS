@@ -36,9 +36,9 @@ void* LouKeVirtualAllocUser(
 ){
     PHEAP_TRACK TmpHeapTrack = &HeapTracks;
     uint64_t i = 0;
-    for(i = 0; i <= HeapsManaged; i++){
+    for(i = 0; i < HeapsManaged; i++){
         if(!TmpHeapTrack->Neighbors.NextHeader){
-            TmpHeapTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_TRACK), GET_ALIGNMENT(HEAP_TRACK), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+            TmpHeapTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_TRACK), GET_ALIGNMENT(HEAP_TRACK), KERNEL_GENERIC_MEMORY);
         }
         TmpHeapTrack = (PHEAP_TRACK)TmpHeapTrack->Neighbors.NextHeader;
     }
@@ -50,6 +50,7 @@ void* LouKeVirtualAllocUser(
     TmpHeapTrack->PhyTracks.PhyAddress = (uintptr_t)LouMallocEx(CommitSize, KILOBYTE_PAGE);
 
     LouKeMapContinuousMemoryBlock(TmpHeapTrack->PhyTracks.PhyAddress, TmpHeapTrack->VirtualAddress, CommitSize, PageFlags);
+    HeapsManaged++;
     return (void*)TmpHeapTrack;
 }
 
@@ -62,8 +63,7 @@ static uint64_t LouKeAllocHeapFreeAddress(
     uint64_t HeapBase = HeapTrack->VirtualAddress;
 
     uint64_t FreeAllocation = HeapBase;
-    FreeAllocation &= ~(Alignment);
-    FreeAllocation+=Alignment;
+    FreeAllocation = ROUND_UP64(FreeAllocation, Alignment);
     while((FreeAllocation + AllocationSize) <= HeapEndAddress){
         bool ValidAddress = true;
         PHEAP_ALLOCATION_TABLE_ENTRY TmpAllocationTrack = &HeapTrack->Allocations;
@@ -76,6 +76,7 @@ static uint64_t LouKeAllocHeapFreeAddress(
             ((FreeAllocation + AllocationSize) >= start && (FreeAllocation + AllocationSize) <= end) || // End within an existing block
             (FreeAllocation <= start && (FreeAllocation + AllocationSize) >= end)){
                 ValidAddress = false;
+                FreeAllocation += ROUND_UP64(Alignment, TmpAllocationTrack->size);
                 break;
             }
             if(!TmpAllocationTrack->Neighbors.NextHeader){
@@ -84,9 +85,16 @@ static uint64_t LouKeAllocHeapFreeAddress(
             TmpAllocationTrack = (PHEAP_ALLOCATION_TABLE_ENTRY)TmpAllocationTrack->Neighbors.NextHeader;
         }
         if(ValidAddress){
+            PHEAP_ALLOCATION_TABLE_ENTRY Entry = &HeapTrack->Allocations;
+            for(uint64_t i = 0; i < HeapTrack->AllocationsCount; i++) {
+                Entry = (PHEAP_ALLOCATION_TABLE_ENTRY)Entry->Neighbors.NextHeader;
+            }
+            // Create new entry
+            Entry->Address = FreeAllocation;
+            Entry->size = AllocationSize;
+            HeapTrack->AllocationsCount++;
             return FreeAllocation;
         }
-        FreeAllocation += Alignment;
     }
     return 0x00;
 }
@@ -98,7 +106,7 @@ void LouKeAllocHeapPhysical(
 ){
     
     uint64_t Offset1 = ROUND_UP64(Offset, KILOBYTE_PAGE) - KILOBYTE_PAGE;
-    uint64_t Offset2 = ROUND_UP64(size, KILOBYTE_PAGE) - KILOBYTE_PAGE;
+    uint64_t Offset2 = ROUND_UP64(Offset + size, KILOBYTE_PAGE);
 
     PHEAP_PHY_TRACK PhyTrack = &HeapTrack->PhyTracks;
     
@@ -113,17 +121,19 @@ void LouKeAllocHeapPhysical(
             return;
         }
         if(!PhyTrack->Neighbors.NextHeader){
-            PhyTrack = (PHEAP_PHY_TRACK)LouKeMallocEx(sizeof(HEAP_PHY_TRACK), GET_ALIGNMENT(HEAP_PHY_TRACK), WRITEABLE_PAGE | PRESENT_PAGE);
+            PhyTrack = (PHEAP_PHY_TRACK)LouKeMallocEx(sizeof(HEAP_PHY_TRACK), GET_ALIGNMENT(HEAP_PHY_TRACK), KERNEL_GENERIC_MEMORY);
         }
         PhyTrack = (PHEAP_PHY_TRACK)PhyTrack->Neighbors.NextHeader;
     }
     size_t NeededPhysicalSize = Offset2 - Offset1;
     for(uint64_t i = 0; i < NeededPhysicalSize; i += KILOBYTE_PAGE){
         uint64_t NewPhysical = (uint64_t)LouMallocEx(KILOBYTE_PAGE, KILOBYTE_PAGE);
-        LouKeMapContinuousMemoryBlock(NewPhysical, Offset1, KILOBYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+        LouKeMapContinuousMemoryBlock(NewPhysical, Offset1, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
         PhyTrack->PhyAddress = NewPhysical;
         PhyTrack->VirtualOffset = Offset1 + i;
-        PhyTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_PHY_TRACK), GET_ALIGNMENT(HEAP_PHY_TRACK), WRITEABLE_PAGE | PRESENT_PAGE);
+        if (!PhyTrack->Neighbors.NextHeader) {
+            PhyTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_PHY_TRACK), GET_ALIGNMENT(HEAP_PHY_TRACK), KERNEL_GENERIC_MEMORY);
+        }
         PhyTrack = (PHEAP_PHY_TRACK)PhyTrack->Neighbors.NextHeader;
         HeapTrack->PhyTracksCount++;
     }

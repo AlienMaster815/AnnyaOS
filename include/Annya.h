@@ -189,6 +189,13 @@ volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 #ifndef _LOUDLL_
 
+
+void* LouGenericAllocateHeapEx(
+    void* Heap, 
+    size_t AllocationSize,
+    size_t Alginment
+);
+
 __declspec(dllimport)
 void* AnnyaGetLibraryFunctionN(string ModuleName,string FunctionName);
 
@@ -200,6 +207,12 @@ void* LouVirtualAllocUser(
     size_t      CommitSize,     //allocated PhysicalMemory
     size_t      ReservedSize,   //AllocatedVirtual
     uint64_t    PageFlags
+);
+
+__declspec(dllimport)
+FILE 
+LouOpenFileA(
+    string FileName
 );
 
 __declspec(dllimport)
@@ -301,6 +314,20 @@ NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
 NTSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+__declspec(dllimport)
+void* GetProcessHeap();
+
+__declspec(dllimport)
+uint16_t NtGetProcessorCount();
+
+__declspec(dllimport)
+void* RtlAllocateHeapEx(
+    PVOID       HeapHandle,
+    uint64_t    HeapAllocationFlags,
+    size_t      HeapSize,
+    size_t      Alignment
+);
 
 #endif
 

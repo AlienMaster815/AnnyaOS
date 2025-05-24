@@ -103,8 +103,9 @@ static FILE* ISOLouKeFindDirectory(
     uint32_t RootSize, 
     uint8_t DrvNum, 
     string Dir,
-    bool Seek
-    ){
+    bool Seek,
+    uint64_t PageFlags
+){
 
     LOUSTATUS Status = LOUSTATUS_GOOD;
     uint64_t BufferSize = RootSize;
@@ -188,7 +189,7 @@ static FILE* ISOLouKeFindDirectory(
                 //if the end of the path
                 //is reached then the file
                 //is loaded and can be return
-                FILE* LoadedFile = (FILE*)LouKeMallocFileData(BufferSize, KILOBYTE_PAGE);
+                FILE* LoadedFile = (FILE*)LouKeMallocEx(BufferSize, KILOBYTE_PAGE, PageFlags | UNCACHEABLE_PAGE);
                 memcpy(LoadedFile, FOO, BufferSize);
                 ReleaseDriveHandle(FOO);
 
@@ -302,7 +303,7 @@ void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYS
 }
 
 LOUDDK_API_ENTRY
-FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
@@ -327,7 +328,8 @@ FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
         DATA_LEN, 
         FilesystemHandle->PortID, 
         FilePath,
-        false
+        false,
+        PageFlags
     );
 }
 
@@ -355,7 +357,8 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
         DATA_LEN, 
         FilesystemHandle->PortID, 
         FilePath,
-        true
+        true,
+        KERNEL_DMA_MEMORY
     );
 }
 

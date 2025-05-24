@@ -372,6 +372,8 @@ void* LouGenericAllocateHeapEx(
     return (void*)KulaPacket[4];
 }
 
+
+
 LOUDLL_API
 void* LouVirtualAllocUser(
     size_t      CommitSize,     //allocated PhysicalMemory
@@ -412,4 +414,17 @@ AnnyaGetLibraryFunctionH(
 
     while(1);
     return 0;
+}
+
+LOUDLL_API
+FILE 
+LouOpenFileA(
+    string FileName
+){
+    uint64_t KulaPacket[2] = {0};
+    KulaPacket[1] = (uint64_t)FileName;
+    while(!KulaPacket[0]){
+        LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
+    }
+    return (void*)KulaPacket[1]; 
 }

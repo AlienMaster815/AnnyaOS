@@ -5,11 +5,13 @@
 #include <Annya.h>
 
 
+static HANDLE (*AnnyaOpenPngA)(string);
+
 static volatile PWINDHANDLE TaskBarHandle = 0;
 static PBUTTONHANDLE StartButton = 0;
 static PBUTTONHANDLE ClockButton = 0;
 static PBITMAP_HANDLE Background = 0;
-
+static HANDLE MyComputerPng = 0x00;
 static uint16_t Width = 0;
 static uint16_t Height = 0;
 
@@ -21,7 +23,7 @@ static uint64_t i = 0;
 
 static TIME_T TimeStruct = {0};
 
-static HMODULE ZLIBhModule = 0;
+static HMODULE CODECShModule = 0;
 
 static void UpdateClockTime(){
             if(TimeStruct.Hour > 12){
@@ -170,19 +172,16 @@ void StartDesktop(){
         (uintptr_t)&ButtonCharecteristics
     );
 
+    MyComputerPng = AnnyaOpenPngA("C:/ANNYA/AOSMC.PNG");
+
+
+
     LouPrint("Desktop Drawn\n");
 
 }
 
 int WndProc(void* hwnd, uint32_t uMsg, void* WParam, void* LParam);
 
-void ZlibTest(){
-    LouPrint("ZLIB Test Starting\n");
-    string (*zlibVersion)() = AnnyaGetLibraryFunctionN("zlib1.dll", "zlibVersion");
-    LouPrint("Zlib Version:%s\n", zlibVersion());
-
-    LouPrint("ZLIB Test Finished\n");
-}
 
 int WinMain(
     HINSTANCE hInstance,
@@ -191,14 +190,16 @@ int WinMain(
     int       CmdShow 
 ){
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
-    LouPrint("Loading ZLIB\n");
+    LouPrint("Loading CODECS.DLL\n");
 
-    //ZLIBhModule = LoadLibraryA("C:/ANNYA/ZLIB1.DLL");
+    CODECShModule = LoadLibraryA("C:/ANNYA/CODECS.DLL");
 
-    //if(!ZLIBhModule){
-    //    LouPrint("ZLIB1.DLL Could Not Be Found\n");
-    //    while(1);
-    //}
+    if(!CODECShModule){
+        LouPrint("CODECS.DLL Could Not Be Found\n");
+        while(1);
+    }
+
+    AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
 
     Time[0] = '\0';
     

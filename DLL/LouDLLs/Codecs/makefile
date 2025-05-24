@@ -5,11 +5,11 @@ CFLAGS = -shared -nostdlib -nodefaultlibs
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll -lntdll
+LIBS = -lLouDll -lntdll -luser32 -lmsvcrt
 
 # Source and Target
-SRC = User32.c
-TARGET = user32.dll
+SRC = Codecs.c 
+TARGET = codecs.dll
 
 # Default Rule
 all: $(TARGET)
@@ -18,6 +18,8 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(INCLUDES) $(LDFLAGS) $(LIBS)
 
+
 # Clean Rule
 clean:
+	@echo "Cleaning up..."
 	rm -f $(TARGET)

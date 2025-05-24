@@ -23,9 +23,30 @@ void* AnnyaAPIVMalloc(uint64_t BytesNeeded){
     return (void*)CallData[1];
 }
 
+
+static inline size_t GetAlignmentBySize(size_t Size){
+    if(Size <= 2)    return 2;
+    if(Size <= 4)    return 4;
+    if(Size <= 8)    return 8;
+    if(Size <= 16)   return 16;
+    if(Size <= 32)   return 32;
+    if(Size <= 64)   return 64;
+    if(Size <= 128)  return 128;
+    if(Size <= 256)  return 256;
+    if(Size <= 512)  return 512;
+    if(Size <= 1024) return 1024;
+    if(Size <= 2048) return 2048;
+    return 4096;
+}
+
 USER32_API
 void* malloc(size_t BytesNeeded){
-    return AnnyaAPIVMalloc(BytesNeeded);
+
+    return LouGenericAllocateHeapEx(
+        GetProcessHeap(), 
+        BytesNeeded,
+        GetAlignmentBySize(BytesNeeded)
+    );
 }
 
 //USER32_API

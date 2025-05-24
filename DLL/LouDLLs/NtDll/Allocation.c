@@ -19,11 +19,13 @@ void* RtlAllocateHeapEx(
     }
 }
 
+NTDLL_API
 void* GetProcessHeap(){
     PWIN_PEB Peb = (PWIN_PEB)(uint8_t*)NtGetPeb();
     return (void*)(uint8_t*)Peb->ProcessHeap;
 }
 
+NTDLL_API
 uint16_t NtGetProcessorCount(){
     PWIN_PEB Peb = (PWIN_PEB)(uint8_t*)NtGetPeb();
     return Peb->NumberOfProcessors;

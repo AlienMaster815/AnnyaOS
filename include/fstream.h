@@ -17,7 +17,7 @@ string GetNextDirectoryName(string PATH);
 uint8_t CurrentDirectoryStringLength(string Dir);
 
 bool fseek(string FileName);
-FILE* fopen(string PATH);
+FILE* fopen(string PATH, uint64_t PageFlags);
 void fclose(FILE* File);
 
 #define LouKeMallocFileData(x, y)  LouKeMallocEx(x, y, WRITEABLE_PAGE | PRESENT_PAGE)

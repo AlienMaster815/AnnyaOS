@@ -30,8 +30,5 @@ string GetNextDirectoryName(string PATH){
 
 void LouKeLoadFileCall(uint64_t* Data){
     string PathToFile = (string)*Data;
-    *Data = (uint64_t)fopen(PathToFile);   
-    uint64_t KData = *Data;
-    *Data = (uint64_t)LouKeForkToUserModeSection(KData);
-    fclose((FILE*)KData);
+    *Data = (uint64_t)fopen(PathToFile, USER_GENERIC_MEMORY);   
 }

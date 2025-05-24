@@ -69,7 +69,7 @@ void Fat12FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTE
 }
 
 LOUDDK_API_ENTRY
-FILE* Fat12FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+FILE* Fat12FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
 
@@ -92,7 +92,7 @@ void Fat16FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTE
 }
 
 LOUDDK_API_ENTRY
-FILE* Fat16FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+FILE* Fat16FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
 
@@ -115,7 +115,7 @@ void Fat32FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTE
 }
 
 LOUDDK_API_ENTRY
-FILE* Fat32FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+FILE* Fat32FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
 
@@ -136,7 +136,7 @@ void Fat32ExtFileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESY
 }
 
 LOUDDK_API_ENTRY
-FILE* Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+FILE* Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
 

@@ -47,7 +47,7 @@ PBITMAP_HANDLE UnpackBitmap(FILE* FileToUnpack){
 }
 
 PBITMAP_HANDLE LouKeOpenBitmapImage(string FilePath){
-    FILE* File = fopen(FilePath);
+    FILE* File = fopen(FilePath, KERNEL_GENERIC_MEMORY);
     return UnpackBitmap(File);
 }
 

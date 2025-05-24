@@ -53,7 +53,7 @@ bool fseek(string FileName){
 }
 
 LOUDDK_API_ENTRY
-FILE* fopen(string FileName){
+FILE* fopen(string FileName, uint64_t PageFlags){
     
     PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
 
@@ -74,7 +74,7 @@ FILE* fopen(string FileName){
 
             string FilePath = (string)(uintptr_t)FileName + 2;
             if(MountedSystems->FileSystem->FileSystemOpen){
-                Result = MountedSystems->FileSystem->FileSystemOpen(FilePath, MountedSystems->FileSystem);
+                Result = MountedSystems->FileSystem->FileSystemOpen(FilePath, MountedSystems->FileSystem, PageFlags | UNCACHEABLE_PAGE);
             }else{
                 LouPrint("Error Reading From Mounted Disk");
                 while(1);

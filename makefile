@@ -324,6 +324,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
 	
+	$(MAKE) -C DLL/LouDLLs/Codecs clean
+	$(MAKE) -C DLL/LouDLLs/Codecs all
+
 	#Make 64 Bit System Directories
 	$(MAKEDIR64)
 	#Copy System Files To The Appropriate Directories
@@ -380,3 +383,4 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C KernelLibraries/wprecorder clean
 	$(MAKE) -C drivers/gpu/Virtualbox clean
+	$(MAKE) -C DLL/LouDLLs/Codecs clean
