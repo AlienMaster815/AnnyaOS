@@ -834,6 +834,13 @@
     }
 }
 
+ bool LouKeAcpiIsByteValidStringName(uint8_t byte){
+
+    LouPrint("ByteName:%c\n", byte);
+    while(1);
+    return false;
+ }
+
 STRIP_OPTIMIZATIONS void LouKeAcpiExecuteSubPackageContext(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context,
     NAMESPACE_HANDLE CurrentDirectory,
@@ -860,22 +867,7 @@ STRIP_OPTIMIZATIONS void LouKeAcpiExecuteSubPackageContext(
 }
 
 
- void LouKeAcpiNameSpaceAddChild(
-    NAMESPACE_HANDLE CurrentDirectory,
-    NAMESPACE_HANDLE NewStream
-){
-    NAMESPACE_HANDLE Tmp = (NAMESPACE_HANDLE)CurrentDirectory->SubTree.NextHeader;
-    if(!Tmp){
-        CurrentDirectory->SubTree.NextHeader = (PListHeader)NewStream;
-        NewStream->SubTree.LastHeader = (PListHeader)CurrentDirectory;
-        return;
-    }
-    while(Tmp->AmlTree.NextHeader){
-        Tmp = (NAMESPACE_HANDLE)Tmp->AmlTree.NextHeader;
-    }
-    Tmp->AmlTree.NextHeader = (PListHeader)NewStream;
-    NewStream->AmlTree.LastHeader = (PListHeader)Tmp;
-}
+
 
  size_t LouKeAcpiGetAmlPackageLength(uint8_t* Buffer){
     PAML_PACKAGE_LEAD_BYTE LeadByte = (PAML_PACKAGE_LEAD_BYTE)Buffer;

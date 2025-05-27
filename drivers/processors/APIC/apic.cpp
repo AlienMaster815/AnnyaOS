@@ -294,9 +294,15 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     }
 
     NAMESPACE_HANDLE _PIC_MethodHandle = LouKeAcpiGetAcpiObjectHandle("\\_PIC", 0x00);
+    NAMESPACE_HANDLE Newobject = LouKeAcpiCreateBasicAmlObject(AML_HANDLE_OP_ONE, 0x00, 0x00);
+    PAML_EXECUTION_INTERNAL_PARAMETER_PASS NewArgument = (PAML_EXECUTION_INTERNAL_PARAMETER_PASS)LouKeMallocEx(sizeof(AML_EXECUTION_INTERNAL_PARAMETER_PASS), GET_ALIGNMENT(AML_EXECUTION_INTERNAL_PARAMETER_PASS), KERNEL_GENERIC_MEMORY);
+    
+    NewArgument->Opcode = AML_NAMESPACE_HANDLE_ARGUMENT;
+    NewArgument->DataLocation = (uint64_t)Newobject;
+
     if(_PIC_MethodHandle){
         LouPrint("Got _PIC Method\n");
-
+        LouKeAcpiExecuteMethod(_PIC_MethodHandle, NewArgument, 1);
     }
 
 

@@ -13,6 +13,7 @@ LIBS = -lLouDll -lmingw32
 
 # Sources
 SRC = 	NtDll.c \
+		Csr.c \
 		Sha.c \
 		Alpc.c \
 		Syncronization.c \

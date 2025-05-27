@@ -19,6 +19,14 @@ void* RtlAllocateHeapEx(
     }
 }
 
+void* RtlAllocateHeap(
+    PVOID       HeapHandle,
+    uint64_t    HeapAllocationFlags,
+    size_t      HeapSize
+){
+    return RtlAllocateHeapEx(HeapHandle, HeapAllocationFlags, HeapSize, GetAlignmentBySize(HeapSize));
+}
+
 NTDLL_API
 void* GetProcessHeap(){
     PWIN_PEB Peb = (PWIN_PEB)(uint8_t*)NtGetPeb();

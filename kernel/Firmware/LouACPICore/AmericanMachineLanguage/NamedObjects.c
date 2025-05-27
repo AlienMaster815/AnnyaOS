@@ -65,3 +65,58 @@ void LouKeAcpiParseCreateBitFeild(
     LouPrint("LouKeAcpiParseCreateBitFeild()\n");
     while(1);
 }
+
+
+void LouKeAcpiParsePrefixRoot( 
+    PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
+){
+
+    LouPrint("LouKeAcpiParsePrefixRoot()\n");
+    while(1);
+}
+
+
+
+void LouKeAcpiParsePrefixParent( 
+    PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
+){
+
+    LouPrint("LouKeAcpiParsePrefixParent()\n");
+    while(1);
+}
+
+
+ void LouKeAcpiParsePrefixMultiName( 
+    PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
+){
+    uint8_t* AmlStream = Context->AmlStream;
+    size_t Index = Context->Index;
+    switch(Context->ExecutionState){
+        case SIZE_OF:
+            Context->ResultValue = AmlNameSpaceNameStringLength(&AmlStream[Index]);
+            Context->InterpreterReturn = true;
+            return;
+        default:
+            break;
+    }
+    LouPrint("LouKeAcpiParsePrefixMultiName()\n");
+    while(1);
+}
+
+
+ void LouKeAcpiParsePrefixDualName( 
+    PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context 
+){
+    uint8_t* AmlStream = Context->AmlStream;
+    size_t Index = Context->Index;
+    switch(Context->ExecutionState){
+        case SIZE_OF:
+            Context->ResultValue = AmlNameSpaceNameStringLength(&AmlStream[Index]);
+            Context->InterpreterReturn = true;
+            return;
+        default:
+            break;
+    }
+    LouPrint("LouKeAcpiParsePrefixDualName()\n");
+    while(1);
+}

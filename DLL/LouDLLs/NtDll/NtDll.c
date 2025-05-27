@@ -1,7 +1,15 @@
 #include "ntdll.h"
 
+
+static void* CsrPortHeap = 0x00; 
+
+void* GetCsrPortHeap(){
+    return CsrPortHeap;
+}
+
 NTDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    CsrPortHeap = LouVirtualAllocUser(2 * MEGABYTE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
     return TRUE;
 }
 
@@ -15,14 +23,6 @@ void ApiSetQueryApiSetPresence(){LouPrint("Hello NT DLL\n"); while(1);}
 NTDLL_API
 void ApiSetQueryApiSetPresenceEx(){LouPrint("Hello NT DLL\n"); while(1);}
 
-NTDLL_API
-void CsrAllocateCaptureBuffer(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void CsrAllocateMessagePointer(){LouPrint("Hello NT DLL\n"); while(1);}
-
-NTDLL_API
-void CsrCaptureMessageBuffer(){LouPrint("Hello NT DLL\n"); while(1);}
 
 NTDLL_API
 void CsrCaptureMessageMultiUnicodeStringsInPlace(){LouPrint("Hello NT DLL\n"); while(1);}

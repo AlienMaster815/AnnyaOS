@@ -183,15 +183,18 @@ static inline bool NonZeroGasValue(PGENERAL_ADRESS_STRUCTURE pGas){
 
 #include "TableParsing.h"
 
+typedef struct _AML_EXECUTION_INTERNAL_PARAMETER_PASS{
+    uint16_t    Opcode;
+    uint64_t    DataLocation;
+    uint64_t    DataSize;
+}AML_EXECUTION_INTERNAL_PARAMETER_PASS, * PAML_EXECUTION_INTERNAL_PARAMETER_PASS;
 
 
 typedef struct _LOU_ACPI_NAMESPACE_OBJECT{
     ListHeader                              AmlTree;
-    //struct _LOU_ACPI_NAMESPACE_OBJECT*      LastAmlTreeEntry;
-    ListHeader                              ApendationTree;
-    //struct _LOU_ACPI_NAMESPACE_OBJECT*      LastApendationTreeEntry;
+    struct _LOU_ACPI_NAMESPACE_OBJECT*      LastTreeEntry;
     ListHeader                              SubTree;
-    //struct _LOU_ACPI_NAMESPACE_OBJECT*      LastSubTreeEntry;
+    struct _LOU_ACPI_NAMESPACE_OBJECT*      LastSubEntry;
     string                                  Name;
     uint16_t                                Opcode;
     size_t                                  DataSize;
@@ -200,23 +203,26 @@ typedef struct _LOU_ACPI_NAMESPACE_OBJECT{
 
 typedef enum {
     BUILD = 0,
-    BUILD_CHILDREN = 1,
+    BUILD_PARAMETER_PASS = 1,
     SIZE_OF = 2,
-    INVALID_OPCODE = 3,
+    EVALUATE = 3,
+    INVALID_OPCODE = 4,
 }AML_INTERPRETER_EXECUTION_STATE;
 
 typedef struct _LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT{
-    NAMESPACE_HANDLE                    CurrentDirectory;
-    POOL                                AmlObjectPool;
-    POOL                                NamePool;
-    uint8_t*                            AmlStream;
-    size_t                              Index;
-    size_t                              Length;
-    AML_INTERPRETER_EXECUTION_STATE     ExecutionState;
-    uint64_t                            InputValue;
-    bool                                InterpreterReturn;
-    uint64_t                            ResultValue;
-    LOU_ACPI_NAMESPACE_OBJECT           RootDirectory;
+    NAMESPACE_HANDLE                            CurrentDirectory;
+    POOL                                        AmlObjectPool;
+    POOL                                        NamePool;
+    uint8_t*                                    AmlStream;
+    size_t                                      Index;
+    size_t                                      Length;
+    AML_INTERPRETER_EXECUTION_STATE             ExecutionState;
+    PAML_EXECUTION_INTERNAL_PARAMETER_PASS      InputValue;
+    uint64_t                                    InputSize;
+    bool                                        InterpreterReturn;
+    bool                                        InternalPassing;
+    uint64_t                                    ResultValue;
+    NAMESPACE_HANDLE                            RootDirectory;
 }LOU_ACPI_NAMESPACE_EXECUTION_CONTEXT, * PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT;
 
 #define LouKeAcpiFreeNameSpaceObject(x) LouKeFree(x)
@@ -260,6 +266,20 @@ void* LouKeAcpiMalloc(
     PLOU_ACPI_NAMESPACE_EXECUTION_CONTEXT Context, 
     size_t AllocationSize 
 );
+
+LOUSTATUS LouKeAcpiExecuteMethod(
+    NAMESPACE_HANDLE                        MethodHandle, 
+    PAML_EXECUTION_INTERNAL_PARAMETER_PASS  MethodArguments,
+    size_t                                  ArgCount
+);
+
+bool LouKeAcpiIsByteValidStringName(uint8_t byte);
+
+size_t LouKeAcpiGetMethodParameterCount(
+    NAMESPACE_HANDLE    MethodHandle
+);
+
+NAMESPACE_HANDLE LouKeAcpiCreateBasicAmlObject(uint16_t Opcode, uint64_t Data, size_t DataSize);
 
 #ifdef __cplusplus
 }
