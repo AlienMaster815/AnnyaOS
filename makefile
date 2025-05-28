@@ -1,4 +1,9 @@
-# mingw-w64 nasm grub-common grub2-common grub-pc xorriso mtools make
+# mingw-w64 nasm grub-common grub2-common grub-pc xorriso mtools make build-essential gcc grub-pc-bin
+#git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1
+#cd limine
+#make
+#sudo make install
+
 #EFI Systems :: grub-efi-amd64
 
 # Target Architecture Supported x86_64 ARM 

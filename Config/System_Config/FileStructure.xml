@@ -1,7 +1,6 @@
 <!--File Map For Operating System-->
 <MainDirectoryStructure>mkdir ISO</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/boot</MainDirectoryStructure>
-<MainDirectoryStructure>mkdir ISO/boot/grub</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES/DEFAULT</MainDirectoryStructure>

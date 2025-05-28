@@ -3,16 +3,13 @@ OUTPUT_FORMAT("elf64-x86-64")
 
 SECTIONS
 {
-    . = (0x8000);
-
+    . = 0x100000;
     .boot :
     {
         KEEP(*(.multiboot_header))
         *(.boot)
         *(.bootdata)
     }
-
-    . = 1M;  /* Move to 1MB */
 
     .text :
     {
