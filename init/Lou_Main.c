@@ -104,7 +104,7 @@ void Spurious(uint64_t FaultingStackP);
 void InitializeNtKernelTransitionLayer();
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
-
+void InitializeBootGraphics();
 void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
     uint16_t DrsdFileType
@@ -120,6 +120,8 @@ LOUSTATUS Lou_kernel_early_initialization(){
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
     HandleProccessorInitialization();
+    InitializeBootGraphics();
+
     InitializeStartupInterruptHandleing();
 
     RegisterInterruptHandler(DivideByZero, INTERRUPT_SERVICE_ROUTINE_0, false, 0);
@@ -148,6 +150,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
     RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
     RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);
+
 
     SetUpTimers();
     //DeterminCPU();
@@ -182,7 +185,6 @@ extern void MachineCodeDebug(uint64_t FOO);
 bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck);
 
 void StartDebugger(){
-    
     WINDOW_CHARECTERISTICS Charecteristics;
 
     Charecteristics.Type = TEXT_WINDOW;
@@ -192,11 +194,12 @@ void StartDebugger(){
         0, 0,
         //30, 30,
         //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
-        1024, 768,
-        //640, 480,
+        //1024, 768,
+        640, 480,
         0x00, 
         &Charecteristics
     );
+
     AttatchWindowToKrnlDebug(HWind);    
 }
 
@@ -324,7 +327,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeMapPciMemory();
 
-    SetupInitialVideoDevices();
+    //SetupInitialVideoDevices();
 
     LouKeInitializeLouACPISubsystem();
 

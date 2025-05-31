@@ -52,8 +52,8 @@ static uint64_t   KeMallocPageTracksPhyCount = 0;
 #define PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(x, y) (X86_64MemoryReferenceBug64Write((x), 5, (y)))
 
 static inline void ZeroMem(uint64_t Address, uint64_t Size){
-    for(;Size > 0 ; Size--){
-        *(uint8_t*)(Address + Size) = 0;
+    for(size_t i = 0 ; i < Size; i++){
+        ((uint8_t*)Address)[i] = 0;
     }
 }
 
@@ -121,6 +121,7 @@ LouKeMallocEx(
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     KeMallocPageTracksCount++;
+    ZeroMem(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase), AllocationSize);
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
 

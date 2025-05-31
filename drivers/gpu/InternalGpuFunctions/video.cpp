@@ -193,3 +193,61 @@ void GenericVideoProtocolInitialize(){
 	LouKeDrsdPciResetScreen(0x00);
 	StartDebugger();
 }
+
+static struct multiboot_tag_framebuffer_common* BootGraphics = 0x00;
+
+LOUDDK_API_ENTRY
+void LouKeDeferBootGraphics(
+	struct multiboot_tag_framebuffer_common* BootGraphicsDefer
+){
+	BootGraphics = BootGraphicsDefer;
+}
+
+LOUDDK_API_ENTRY
+void InitializeBootGraphics(){
+	if(!BootGraphics){
+		return;
+	}
+	uint16_t Width = BootGraphics->framebuffer_width;
+	uint16_t Height = BootGraphics->framebuffer_height;
+	uint16_t Bpp = BootGraphics->framebuffer_bpp;
+	size_t FrameBufferSize = Bpp;
+	FrameBufferSize /= 8;
+	FrameBufferSize *= Width * Height;
+
+
+	PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
+	uintptr_t FramebufferAddress = BootGraphics->framebuffer_addr;
+    SupportedModes->Width = Width;
+    SupportedModes->Height = Height;
+    SupportedModes->Bpp = Bpp;
+    SupportedModes->Pitch = (Width * (Bpp / 8));
+    SupportedModes->FrameBufferType = RGB_DRSD_FRAMEBUFFER;
+
+	PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
+    DrsdFrameWork->RgbPutPixel = GenericVideoProtocolPutPixelEx;
+    DrsdFrameWork->VRamSize = Width * Height * (Bpp / 8);
+        
+	DrsdFrameWork->BlitCopy = GenericVideoProtocolBlitCopy;
+
+	uintptr_t VMemFramebuffer = (uintptr_t)LouVMalloc(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE));
+
+	LouKeMapContinuousMemoryBlock(FramebufferAddress, VMemFramebuffer, ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), WRITEABLE_PAGE | PRESENT_PAGE);
+	DrsdFrameWork->SecondaryFrameBuffer = (uintptr_t)LouKeMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
+
+    LouKeRegisterFrameBufferDevice(
+		(void*)0xFFFFFFFFFFFFFFFF,
+		VMemFramebuffer,
+        DrsdFrameWork->SecondaryFrameBuffer, 
+        0x00,
+        (Width * Height * (Bpp / 8)),
+        Width, Height,
+        Bpp, 
+        RGB_DRSD_FRAMEBUFFER,
+        SupportedModes,
+        DrsdFrameWork
+    );
+
+	LouKeDrsdPciResetScreen((P_PCI_DEVICE_OBJECT)0xFFFFFFFFFFFFFFFF);
+	StartDebugger();
+}

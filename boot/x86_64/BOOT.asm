@@ -3,12 +3,15 @@ bits 32
 ;                 Multiboot Header
 section .multiboot_header
 global MBOOTHEADER
-align 4
+align 8
 MBOOTHEADER:
     dd 0xE85250D6             ; Magic number
     dd 0                      ; ARCHITECTURE (0 for i386/x86_64)
     dd MBOOTEND - MBOOTHEADER ; Header Length
     dd 0x100000000 - (0xE85250D6 + 0x00 + (MBOOTEND - MBOOTHEADER)) 
+    dw 5
+    dw 0
+    dd 8
     dw 0
     dw 0
     dd 8
