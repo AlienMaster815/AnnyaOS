@@ -11,7 +11,7 @@ static volatile PWINDHANDLE TaskBarHandle = 0;
 static PBUTTONHANDLE StartButton = 0;
 static PBUTTONHANDLE ClockButton = 0;
 static PBITMAP_HANDLE Background = 0;
-static HANDLE MyComputerPng = 0x00;
+//static HANDLE MyComputerPng = 0x00;
 static uint16_t Width = 0;
 static uint16_t Height = 0;
 
@@ -23,7 +23,7 @@ static uint64_t i = 0;
 
 static TIME_T TimeStruct = {0};
 
-static HMODULE CODECShModule = 0;
+//static HMODULE CODECShModule = 0;
 
 static void UpdateClockTime(){
             if(TimeStruct.Hour > 12){
@@ -172,7 +172,7 @@ void StartDesktop(){
         (uintptr_t)&ButtonCharecteristics
     );
 
-    MyComputerPng = AnnyaOpenPngA("C:/ANNYA/AOSMC.PNG");
+    //MyComputerPng = AnnyaOpenPngA("C:/ANNYA/AOSMC.PNG");
 
 
 
@@ -192,14 +192,14 @@ int WinMain(
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
     LouPrint("Loading CODECS.DLL\n");
 
-    CODECShModule = LoadLibraryA("C:/ANNYA/SYSTEM64/CODECS.DLL");
+    //CODECShModule = LoadLibraryA("C:/ANNYA/SYSTEM64/CODECS.DLL");
 
-    if(!CODECShModule){
-        LouPrint("CODECS.DLL Could Not Be Found\n");
-        while(1);
-    }
+    //if(!CODECShModule){
+    //    LouPrint("CODECS.DLL Could Not Be Found\n");
+    //    while(1);
+    //}
 
-    AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
+    //AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
 
     Time[0] = '\0';
     

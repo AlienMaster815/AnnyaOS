@@ -82,8 +82,6 @@ void LouKeInitializeLouACPISubsystem(){
     }
     LouACPIParseRsdt(Rsdp);
 
-    LouKeAcpiBuildNameSpace();
-
     LouPrint("Initialization Successfull\n");
     //while(1);
 }

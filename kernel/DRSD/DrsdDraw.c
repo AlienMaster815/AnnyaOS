@@ -286,14 +286,16 @@ void LouKeDrsdDrawDesktopBackground(
             return;
         }
 
-        // Rendering for top-left origin framebuffer
-        for(uint64_t y = 0; y < Height; y++){
-            for(uint64_t x = 0; x < Width; x++){    
-                PixelData = &Anchor[(y * Width + x) * 4];
-                uint8_t b = PixelData[0];
-                uint8_t g = PixelData[1];
-                uint8_t r = PixelData[2];
-                FillPixelsWithStepping(x, y, r, g, b, XStepping, YStepping);                 
+        if((Width == GetScreenBufferWidth()) && (Height == GetScreenBufferHeight())) {
+            // Rendering for top-left origin framebuffer
+            for(uint64_t y = 0; y < Height; y++){
+                for(uint64_t x = 0; x < Width; x++){    
+                    PixelData = &Anchor[(y * Width + x) * 4];
+                    uint8_t b = PixelData[0];
+                    uint8_t g = PixelData[1];
+                    uint8_t r = PixelData[2];
+                    FillPixelsWithStepping(x, y, r, g, b, XStepping, YStepping);                 
+                }
             }
         }
     }
