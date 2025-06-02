@@ -9,6 +9,10 @@ static LOU_ACPI_TABLE_TRACK TableTracks = {0};
 static size_t TableCount = 0;
 static mutex_t AcpiTableTrackMutex = {0};
 
+size_t LouKeAcpiGetTableCount(){
+    return TableCount;
+}
+
 static PLOU_ACPI_TABLE_TRACK AllocateNewTableTrack(){
     PLOU_ACPI_TABLE_TRACK TmpTrack = &TableTracks;
     for(size_t i = 0 ; i < TableCount; i++){

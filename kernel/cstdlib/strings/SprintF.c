@@ -350,7 +350,7 @@ void uint_to_wide_hex(unsigned int value, wchar_t *buffer, size_t *index, size_t
     }
 }
 
-int snprintf(char *buffer, size_t buffer_size, const char *format, ...) {
+/*int snprintf(char *buffer, size_t buffer_size, const char *format, ...) {
     va_list args;
     size_t index = 0;             // Tracks where we are in the buffer
     size_t total_chars_written = 0; // Keeps track of the total number of characters
@@ -455,7 +455,7 @@ int snprintf(char *buffer, size_t buffer_size, const char *format, ...) {
     va_end(args);  // End processing the arguments
 
     return (int)total_chars_written;  // Return the total number of characters that would have been written
-}
+}*/
 
 
 int _snwprintf(wchar_t *buffer, size_t buffer_size, const wchar_t *format, ...) {

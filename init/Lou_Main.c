@@ -168,10 +168,12 @@ void InitializeDeviceManager();
 LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 
 void HandleProccessorInitialization();
+void LouKeInitializeAcpicaSubSystem();
 
 void Advanced_Kernel_Initialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
+    LouKeInitializeAcpicaSubSystem();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
  }
 
@@ -350,8 +352,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     //CheckForSoundblaster16();
 
-    //EnablePs2Keyboard();
-
+    EnablePs2Keyboard();
     InitializePs2Mouse();
 
     //ScanTheRestOfHarware();

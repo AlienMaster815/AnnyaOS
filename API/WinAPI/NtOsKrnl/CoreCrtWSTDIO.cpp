@@ -100,22 +100,22 @@ LOUDDK_API_ENTRY
 void uintToHexString(uint64_t number, char* hexString);
 
 
-LOUDDK_API_ENTRY
-int sprintf(char *buffer, const char *format, ...) {
-    if ((buffer == 0x00) || (format == 0x00)) {
-        return -1; // Error: Invalid arguments
-    }
+//LOUDDK_API_ENTRY
+//int sprintf(char *buffer, const char *format, ...) {
+//    if ((buffer == 0x00) || (format == 0x00)) {
+//        return -1; // Error: Invalid arguments
+//    }
 
-    va_list args;
-    va_start(args, format);
+//    va_list args;
+//    va_start(args, format);
 
     // Use vsprintf to format the string into the buffer
-    int result = vsprintf(buffer, format, args);
+//    int result = vsprintf(buffer, format, args);
 
-    va_end(args);
+//    va_end(args);
 
-    return result; // Return the number of characters written
-}
+//    return result; // Return the number of characters written
+//}
 
 
 
@@ -254,21 +254,21 @@ int vswprintf_s(wchar_t* Buffer, size_t BufferCount, wchar_t* Format, va_list ar
 
 
 
-LOUDDK_API_ENTRY
-int tolower(int c) {
-    if (c >= 'A' && c <= 'Z') {
-        return c + ('a' - 'A');
-    }
-    return c;
-}
+//LOUDDK_API_ENTRY
+//int tolower(int c) {
+//    if (c >= 'A' && c <= 'Z') {
+//        return c + ('a' - 'A');
+//    }
+//    return c;
+//}
 
-LOUDDK_API_ENTRY
-int toupper(int c) {
-    if (c >= 'a' && c <= 'z') {
-        return c - ('a' - 'A');
-    }
-    return c;
-}
+//LOUDDK_API_ENTRY
+//int toupper(int c) {
+//    if (c >= 'a' && c <= 'z') {
+//        return c - ('a' - 'A');
+//    }
+//    return c;
+//}
 
 LOUDDK_API_ENTRY
 int sscanf_s(
@@ -405,29 +405,6 @@ int vsprintf(char *buffer, const char *format, va_list args) {
 }
 
 
-LOUDDK_API_ENTRY
-void *memmove(void *dest, const void *src, size_t n) {
-    if (dest == 0x00 || src == 0x00) {
-        return 0x00; // Handle invalid arguments
-    }
-
-    unsigned char *d = (unsigned char *)dest;
-    const unsigned char *s = (const unsigned char *)src;
-
-    if (d < s) {
-        // Copy forward if the destination starts before the source
-        for (size_t i = 0; i < n; i++) {
-            d[i] = s[i];
-        }
-    } else if (d > s) {
-        // Copy backward if the destination starts after the source
-        for (size_t i = n; i > 0; i--) {
-            d[i - 1] = s[i - 1];
-        }
-    }
-
-    return dest;
-}
 
 
 int LouWStrnCpy(PWSTR WString, ULONG StrLen, PWSTR StringCopy){

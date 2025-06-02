@@ -58,6 +58,7 @@ UNUSED static void LouACPIParseXsdt(
     }
 }
 
+
 void LouKeInitializeLouACPISubsystem(){
 
     LouPrint("Initializing LouACPI Subsystem\n");
@@ -81,7 +82,6 @@ void LouKeInitializeLouACPISubsystem(){
         LouACPIParseXsdt(Rsdp);
     }
     LouACPIParseRsdt(Rsdp);
-
+    
     LouPrint("Initialization Successfull\n");
-    //while(1);
 }

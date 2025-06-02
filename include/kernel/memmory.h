@@ -265,14 +265,16 @@ typedef struct _POOL_MEMORY_TRACKS{
 
 typedef struct _LMPOOL_DIRECTORY{
     ListHeader          List;
+    bool                FixedSizePool;
     string              Tag;
     uint64_t            Location;
     uint64_t            VLocation;
     uint64_t            PoolSize;
     uint64_t            ObjectSize;
     uint64_t            Flags;
+    uint64_t            CacheLimit;
     uint64_t            DirtyAllocations;
-    bool                FixedSizePool;
+    uint64_t            LastOut;
     POOL_MEMORY_TRACKS  MemoryTracks;
 }LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
 
@@ -369,6 +371,39 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     uint64_t NumberOfPoolMembers,
     uint64_t ObjectSize,
     uint64_t Alignment,
+    string Tag,
+    uint64_t Flags,
+    uint64_t PageFlags
+);
+
+PLMPOOL_DIRECTORY LouKeCreateDynamicPoolEx(
+    size_t PoolSize,
+    size_t CachedTracks,
+    size_t PagedTypeAlignement,
+    string Tag,
+    uint64_t Flags,
+    uint64_t PageFlags
+);
+
+void* LouKeMallocFromDynamicPoolEx(
+    POOL Pool, 
+    size_t AllocationSize, 
+    size_t Alignment
+);
+
+void* LouKeMallocFromDynamicPool(
+    POOL Pool, 
+    size_t AllocationSize
+);
+
+void LouKeFreeFromDynamicPool(
+    POOL Pool, 
+    void* Address
+);
+
+PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
+    size_t PoolSize,
+    size_t PagedTypeAlignement,
     string Tag,
     uint64_t Flags,
     uint64_t PageFlags

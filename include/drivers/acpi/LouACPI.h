@@ -280,6 +280,7 @@ size_t LouKeAcpiGetMethodParameterCount(
 );
 
 NAMESPACE_HANDLE LouKeAcpiCreateBasicAmlObject(uint16_t Opcode, uint64_t Data, size_t DataSize);
+size_t LouKeAcpiGetTableCount();
 
 #ifdef __cplusplus
 }

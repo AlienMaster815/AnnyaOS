@@ -52,8 +52,8 @@ extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
 
 static volatile PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
 
-LOUDDK_API_ENTRY char* strcpy(char* dest, const char* src);
-LOUDDK_API_ENTRY char* strcat(char* dest, const char* src);
+LOUDDK_API_ENTRY char* Winstrcpy(char* dest, const char* src);
+LOUDDK_API_ENTRY char* Winstrcat(char* dest, const char* src);
 
 LOUDDK_API_ENTRY
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName){
@@ -576,13 +576,13 @@ void InitializeNtKernelTable(){
     ImportTables[0].VirtualAddress[35] = (uint64_t)strncpy_s;
     ImportTables[0].VirtualAddress[36] = (uint64_t)strncpy;
     ImportTables[0].VirtualAddress[37] = (uint64_t)strncmp;
-    ImportTables[0].VirtualAddress[38] = (uint64_t)strcpy;
+    ImportTables[0].VirtualAddress[38] = (uint64_t)Winstrcpy;
     ImportTables[0].VirtualAddress[39] = (uint64_t)strcmp;
     ImportTables[0].VirtualAddress[40] = (uint64_t)strncat_s;
     ImportTables[0].VirtualAddress[41] = (uint64_t)strncat;
     ImportTables[0].VirtualAddress[42] = (uint64_t)strcpy_s;
     ImportTables[0].VirtualAddress[43] = (uint64_t)strcat_s;
-    ImportTables[0].VirtualAddress[44] = (uint64_t)strcat;
+    ImportTables[0].VirtualAddress[44] = (uint64_t)Winstrcat;
     ImportTables[0].VirtualAddress[45] = (uint64_t)srand;
     ImportTables[0].VirtualAddress[46] = (uint64_t)rand;
     ImportTables[0].VirtualAddress[47] = (uint64_t)sqrtf;

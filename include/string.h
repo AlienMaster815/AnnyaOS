@@ -49,6 +49,7 @@ int StdIoSPrintf(char* Buffer, const char* Format, ...);
 int StdIoSnPrintf(char* Buffer, size_t Count, const char* Format, ...);
 int StdIoVsnPrintf(char* Buffer, size_t Count, const char* Format, va_list Arguments);
 int StdIoVPrintf(const char* Format, va_list Arguments);
+void* memset(void* dest, int value, size_t count);
 
 
 #endif

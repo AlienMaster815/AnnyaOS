@@ -26,7 +26,7 @@ TARGET_OS = WINDOWS
 HOST_ARCH = x86_64
 FIRMWARE_TARGET = BIOS
 
-INCLUDE = -I include -I include/drivers/acpi
+INCLUDE = -I include -I include/drivers/acpi -I include/ACPICA
 
 FileStructureTable = Config/System_Config/FileStructure.xml
 SystemFileTable = Config/System_Config/SystemFiles.xml

@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 
 LOUDDK_API_ENTRY
-string strchr(
+string Winstrchr(
     string str,
     int c
 ){
@@ -29,7 +29,7 @@ string strtok_s(
     start = (str) ? str : *Context;
 
     // Skip leading delimiters
-    while (*start && strchr(Delimiters, *start)) {
+    while (*start && Winstrchr(Delimiters, *start)) {
         start++;
     }
 
@@ -43,7 +43,7 @@ string strtok_s(
     token = start;
 
     // Find the end of the token
-    while (*start && !strchr(Delimiters, *start)) {
+    while (*start && !Winstrchr(Delimiters, *start)) {
         start++;
     }
 
@@ -63,7 +63,7 @@ string strtok_s(
 }
 
 LOUDDK_API_ENTRY
-string strstr(
+string Winstrstr(
    string str,
    string strSearch
 ){
@@ -143,7 +143,7 @@ int strncpy_s(
 }
 
 LOUDDK_API_ENTRY
-string strcpy(
+string Winstrcpy(
     string Destination,
     string Source
 ){
@@ -196,7 +196,7 @@ int strncat_s(
 }
 
 LOUDDK_API_ENTRY
-string strncat(
+string Winstrncat(
     string Destination,
     string Source,
     size_t Count
@@ -235,7 +235,7 @@ int strcpy_s(
         return EINVAL;
     }
 
-    strcpy(
+    Winstrcpy(
         Destination,
         Source
     );
@@ -282,7 +282,7 @@ int strcat_s(
 }
 
 LOUDDK_API_ENTRY
-string strcat(
+string Winstrcat(
     string Destination,
     string Source
 ) {
