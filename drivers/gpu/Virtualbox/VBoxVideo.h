@@ -37,7 +37,7 @@
 #define VBVA_INFORMATION_VIEW_COMMAND                               3
 #define VBVA_INFORMATION_HEAP_COMAND                                4
 #define VBVA_FLUSH_COMMAND                                          5
-#define VBVA_INFORMATION_SCREEN_COMMAND                                     6
+#define VBVA_INFORMATION_SCREEN_COMMAND                             6
 #define VBVA_ENABLE_COMMAND                                         7
 #define VBVA_MOUSE_POINTER_SHAPE_COMMAND                            8
 #define VBVA_INFORMATION_CAPS                                       12

@@ -258,24 +258,58 @@ void AcpiOsWaitEventsComplete(){
 }
 
 ACPI_STATUS AcpiOsReadPciConfiguration(
-    ACPI_PCI_ID             *PciId,
-    UINT32                  Reg,
-    UINT64                  *Value,
-    UINT32                  Width
+    ACPI_PCI_ID *PciId,
+    UINT32 Reg,
+    UINT64 *Value,
+    UINT32 Width
 ){
-    LouPrint("AcpiOsReadPciConfiguration()\n");
-    while(1);
+    uint16_t Group      = PciId->Segment;
+    uint8_t bus         = (uint8_t)PciId->Bus;
+    uint8_t device      = (uint8_t)PciId->Device;
+    uint8_t func        = (uint8_t)PciId->Function;
+
+    switch(Width){
+        case 8:
+            *Value = pciConfigReadByte(Group, bus, device, func, Reg);
+            break;
+        case 16:
+            *Value = pciConfigReadWord(Group, bus, device, func, Reg);
+            break;
+        case 32:
+            *Value = pci_read(Group, bus, device, func, Reg);
+            break;
+        default:
+            return AE_BAD_PARAMETER;
+    }
+
     return AE_OK;
 }
 
 ACPI_STATUS AcpiOsWritePciConfiguration(
-    ACPI_PCI_ID             *PciId,
-    UINT32                  Reg,
-    UINT64                  Value,
-    UINT32                  Width
+    ACPI_PCI_ID *PciId,
+    UINT32 Reg,
+    UINT64 Value,
+    UINT32 Width
 ){
-    LouPrint("AcpiOsWritePciConfiguration()\n");
-    while(1);
+    uint16_t Group      = PciId->Segment;
+    uint8_t bus         = (uint8_t)PciId->Bus;
+    uint8_t device      = (uint8_t)PciId->Device;
+    uint8_t func        = (uint8_t)PciId->Function;
+
+    switch(Width){
+        case 8:
+            pciConfigWriteByte(Group, bus, device, func, Reg, (uint8_t)Value);
+            break;
+        case 16:
+            pciConfigWriteWord(Group, bus, device, func, Reg, (uint16_t)Value);
+            break;
+        case 32:
+            write_pci(Group, bus, device, func, Reg, (uint32_t)Value);
+            break;
+        default:
+            return AE_BAD_PARAMETER;
+    }
+
     return AE_OK;
 }
 
@@ -367,6 +401,7 @@ ACPI_STATUS AcpiOsReadMemory (
 
 void LouKeInitializeAcpicaSubSystem(){
     ACPI_STATUS Status;
+    ACPI_HANDLE PicHandle;
 
     LouPrint("Initializing Acpica Subsystem\n");
 
@@ -402,5 +437,23 @@ void LouKeInitializeAcpicaSubSystem(){
         return;
     }
 
+    Status = AcpiGetHandle(NULL, "\\_PIC", &PicHandle);
+    if(ACPI_SUCCESS(Status)) {
+        LouPrint("_PIC method located\n");
+        ACPI_OBJECT Arg;
+        Arg.Type = ACPI_TYPE_INTEGER;
+        Arg.Integer.Value = 1; // APIC mode
+
+        ACPI_OBJECT_LIST ArgList;
+        ArgList.Count = 1;
+        ArgList.Pointer = &Arg;
+
+        Status = AcpiEvaluateObject(PicHandle, NULL, &ArgList, NULL);
+        if (ACPI_FAILURE(Status)) {
+            LouPrint("Failed to evaluate _PIC method\n");
+        } else {
+            LouPrint("_PIC method executed successfully\n");
+        }
+    }
     LouPrint("LouKeInitializeAcpicaSubSystem() STATUS_SUCCESS\n");
 }    

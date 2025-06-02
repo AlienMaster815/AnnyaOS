@@ -158,15 +158,14 @@ LOUSTATUS LouKeInitializeNetworkManager();
 
 void LouKePs2Parse();
 
-static spinlock_t ScanLock;
-
+//static spinlock_t ScanLock;
 
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 
 LOUDDK_API_ENTRY
 void ScanTheRestOfHarware(){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&ScanLock, &Irql);
+    //LouKIRQL Irql;
+    //LouKeAcquireSpinLock(&ScanLock, &Irql);
 
     PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
@@ -210,7 +209,7 @@ void ScanTheRestOfHarware(){
             DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
         }
     }
-    LouKeReleaseSpinLock(&ScanLock, &Irql);    
+    //LouKeReleaseSpinLock(&ScanLock, &Irql);    
 }
 
 KERNEL_IMPORT

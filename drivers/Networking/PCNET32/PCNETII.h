@@ -31,6 +31,7 @@ typedef struct _PCNET_II_DRIVER_DATA{
     uint16_t                            MacAddressPortWord1;
     uint16_t                            MacAddressPortWord2;
     uint16_t                            RegisterAddressPort;
+    uint16_t                            RegisterDataPort;
     uint16_t                            ResetPort;
     uint16_t                            BusControllRegisterDataPort;
     uintptr_t                           SendComBuffers[8];

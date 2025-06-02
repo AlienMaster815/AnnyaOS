@@ -109,3 +109,5 @@ EXPORTS
     inw
     outw
     LouKeLinkerGetAddress
+    LoukeRegisterNetFrameHardwareDriver
+    LouKePciGetInterruptLine

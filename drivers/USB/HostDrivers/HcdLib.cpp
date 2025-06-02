@@ -105,7 +105,7 @@ LOUSTATUS LoUSBInitializeHostController(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONT
 
         //TODO: Create A IRQ Allocator
 
-        RegisterInterruptHandler(HostDriver->InterruptHandler, LouKeGetPciInterruptLine(PDEV), false, (uint64_t)HostDriver);
+        //RegisterInterruptHandler(HostDriver->InterruptHandler, LouKeGetPciInterruptLine(PDEV), false, (uint64_t)HostDriver);
 
     }
 

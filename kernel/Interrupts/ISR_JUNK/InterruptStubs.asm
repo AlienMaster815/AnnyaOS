@@ -322,95 +322,96 @@ ContextLiftoff:
 
 ThreadStart:
 
-	hlt
+	popa	
+	iretq
 
 ISR0:
-	;hlt
+	
 	pusha
 	push 0
 	mov [InterruptNum], ah
 	Handle
 
 ISR1:
-	;hlt
+	
 	pusha
 	push 1
 	mov [InterruptNum], ah
 	popa
-	ret
 
 ISR2:
-	;hlt
+	
 	pusha
 	push 2
 	mov [InterruptNum], ah
 	Handle
 
 ISR3:
-	;hlt
+	
 	pusha
 	push 3
 	mov [InterruptNum], ah
 	Handle
 
 ISR4:
-	;hlt
+	
 	pusha
 	push 4
 	mov [InterruptNum], ah
 	Handle
 
 ISR5:
-	;hlt
+	
 	pusha
 	push 5
 	mov [InterruptNum], ah
 	Handle
 
 ISR6:
-	;hlt
+	
 	pusha
 	push 6
 	mov [InterruptNum], ah
 	Handle
 
 ISR7:
-	;hlt
+	
 	pusha
 	push 7
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 ISR8:
-	;hlt
+	
 	pusha
 	push 8
 	mov [InterruptNum], ah
 	Handle
 
 ISR9:
-	;hlt
+	
 	pusha
 	push 9
 	mov [InterruptNum], ah
 	Handle
 
 ISR10:
-	;hlt
+	
 	pusha
 	push 10
 	mov [InterruptNum], ah
 	Handle
 
 ISR11:
-	;hlt
+	
 	pusha
 	push 11
 	mov [InterruptNum], ah
 	Handle
 
 ISR12:
-	;hlt
+	
 	pusha
 	push 12
 	mov [InterruptNum], ah
@@ -422,11 +423,11 @@ ISR13:
 	push 13
 	mov [InterruptNum], ah
 	Handle
-	popa
+	popa	
 	iretq
 
 ISR14:
-	;hlt
+	
 	mov [raxp], rax
     pop rax
     mov [InterruptCode], rax
@@ -440,119 +441,119 @@ ISR14:
     iretq
 
 ISR15:
-	;hlt
+	
 	pusha
 	push 15
 	mov [InterruptNum], ah
 	Handle
 
 ISR16:
-	;hlt
+	
 	pusha
 	push 16
 	mov [InterruptNum], ah
 	Handle
 
 ISR17:
-	;hlt
+	
 	pusha
 	push 17
 	mov [InterruptNum], ah
 	Handle
 
 ISR18:
-	;hlt
+	
 	pusha
 	push 18
 	mov [InterruptNum], ah
 	Handle
 
 ISR19:
-	;hlt
+	
 	pusha
 	push 19
 	mov [InterruptNum], ah
 	jmp Handle
 
 ISR20:
-	;hlt
+	
 	pusha
 	push 20
 	mov [InterruptNum], ah
 	Handle
 
 ISR21:
-	;hlt
+	
 	pusha
 	push 21
 	mov [InterruptNum], ah
 	Handle
 
 ISR22:
-	;hlt
+	
 	pusha
 	push 22
 	mov [InterruptNum], ah
 	Handle
 
 ISR23:
-	;hlt
+	
 	pusha
 	push 23
 	mov [InterruptNum], ah
 	Handle
 
 ISR24:
-	;hlt
+	
 	pusha
 	push 24
 	mov [InterruptNum], ah
 	Handle
 
 ISR25:
-	;hlt
+	
 	pusha
 	push 25
 	mov [InterruptNum], ah
 	Handle
 
 ISR26:
-	;hlt
+	
 	pusha
 	push 26
 	mov [InterruptNum], ah
 	Handle
 
 ISR27:
-	;hlt
+	
 	pusha
 	push 27
 	mov [InterruptNum], ah
 	Handle
 
 ISR28:
-	;hlt
+	
 	pusha
 	push 28
 	mov [InterruptNum], ah
 	Handle
 
 ISR29:
-	;hlt
+	
 	pusha
 	push 29
 	mov [InterruptNum], ah
 	Handle
 
 ISR30:
-	;hlt
+	
 	pusha
 	push 30
 	mov [InterruptNum], ah
 	Handle
 
 ISR31:
-	;hlt
+	
 	pusha
 	push 31
 	mov [InterruptNum], ah
@@ -571,768 +572,857 @@ ISR32:
 	iretq
 
 ISR33:
-	;hlt
+	
 	pusha
 	push 33
 	mov [InterruptNum], ah
 	Handle
-	popa
+	popa	
 	iretq
 
 ISR34:
-	;hlt
+	
 	pusha
 	push 34
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR35:
-	;hlt
 	pusha
 	push 35
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR36:
-	;hlt
+	
 	pusha
 	push 36
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR37:
-	;hlt
+	
 	pusha
 	push 37
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR38:
-	;hlt
+	
 	pusha
 	push 38
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR39:
-	;hlt
 	pusha
 	push 39
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR40:
-	;hlt
+	
 	pusha	
 	push 40
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR41:
-	;hlt
+	
 	pusha
 	push 41
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR42:
-	;hlt
+	
 	pusha
 	push 42
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR43:
-	;hlt
+	
 	pusha	
 	push 43
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR44:
-	;hlt
+	
 	pusha	
 	push 44
 	mov [InterruptNum], ah
 	Handle
-	popa
+	popa	
 	iretq
 
 ISR45:
-	;hlt
+	
 	pusha
 	push 45
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR46:
-	;hlt
 	pusha
 	push 46
 	mov [InterruptNum], ah
 	Handle
-	hlt
-
+	popa	
+	iretq
+	
 ISR47:
-	;hlt
 	pusha
 	push 47
 	mov [InterruptNum], ah
 	Handle
-	hlt
-
+	popa	
+	iretq
+	
 ISR48:
-	;hlt
 	pusha
 	push 48
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
+	
 
 ISR49:
-	;hlt
+	
 	pusha
 	push 49
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR50:
-	;hlt
+	
 	pusha
 	push 50
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR51:
-	;hlt
+	
 	pusha
 	push 51
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
+
 
 ISR52:
-	;hlt
+	
 	pusha
 	push 52
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR53:
-	;hlt
+	
 	pusha
 	push 53
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR54:
-	;hlt
+	
 	pusha
 	push 54
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR55:
-	;hlt
+	
 	pusha
 	push 55
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR56:
-	;hlt
+	
 	pusha
 	push 56
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR57:
-	;hlt
+	
 	pusha
 	push 57
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR58:
-	;hlt
+	
 	pusha
 	push 58
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR59:
-	;hlt
+	
 	pusha
 	push 59
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR60:
-	;hlt
+	
 	pusha
 	push 60
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR61:
-	;hlt
+	
 	pusha
 	push 61
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR62:
-	;hlt
+	
 	pusha
 	push 62
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR63:
-	;hlt
+	
 	pusha
 	push 63
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR64:
-	;hlt
+	
 	pusha
 	push 64
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR65:
-	;hlt
+	
 	pusha
 	push 65
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR66:
-	;hlt
+	
 	pusha
 	push 66
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR67:
-	;hlt
+	
 	pusha
 	push 67
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR68:
-	;hlt
+	
 	pusha
 	push 68
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR69:
-	;hlt
+	
 	pusha
 	push 69
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR70:
-	;hlt
+	
 	pusha
 	push 70
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR71:
-	;hlt ;This is an issue
+	 ;This is an issue
 	pusha
 	push 71
 	mov [InterruptNum], ah
 	Handle
-	popa
+	popa	
 	iretq
 
 ISR72:
-	;hlt
+	
 	pusha
 	push 72
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR73:
-	;hlt
+	
 	pusha
 	push 73
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR74:
-	;hlt
+	
 	pusha
 	push 74
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR75:
-	;hlt
+	
 	pusha
 	push 75
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR76:
-	;hlt
+	
 	pusha
 	push 76
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR77:
-	;hlt
+	
 	pusha
 	push 77
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR78:
-	;hlt
+	
 	pusha
 	push 78
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR79:
-	;hlt
+	
 	pusha
 	push 79
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR80:
-	;hlt
+	
 	pusha
 	push 80
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR81:
-	;hlt
+	
 	pusha
 	push 81
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR82:
-	;hlt
+	
 	pusha
 	push 82
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR83:
-	;hlt
+	
 	pusha
 	push 83
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR84:
-	;hlt
+	
 	pusha
 	push 84
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR85:
-	;hlt
+	
 	pusha
 	push 85
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR86:
-	;hlt
+	
 	pusha
 	push 86
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR87:
-	;hlt
+	
 	pusha
 	push 87
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR88:
-	;hlt
+	
 	pusha
 	push 88
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR89:
-	;hlt
+	
 	pusha
 	push 89
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR90:
-	;hlt
+	
 	pusha
 	push 90
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR91:
-	;hlt
+	
 	pusha
 	push 91
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR92:
-	;hlt
+	
 	pusha
 	push 92
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR93:
-	;hlt
+	
 	pusha
 	push 93
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR94:
-	;hlt
+	
 	pusha
 	push 94
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR95:
-	;hlt
+	
 	pusha
 	push 95
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR96:
-	;hlt
+	
 	pusha
 	push 96
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR97:
-	;hlt
+	
 	pusha
 	push 97
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR98:
-	;hlt
+	
 	pusha
 	push 98
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR99:
-	;hlt
+	
 	pusha
 	push 99
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR100:
-	;hlt
+	
 	pusha
 	push 100
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR101:
-	;hlt
+	
 	pusha
 	push 101
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR102:
-	;hlt
+	
 	pusha
 	push 102
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR103:
-	;hlt
+	
 	pusha
 	push 103
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR104:
-	;hlt
+	
 	pusha
 	push 104
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR105:
-	;hlt
+	
 	pusha
 	push 105
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR106:
-	;hlt
+	
 	pusha
 	push 106
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR107:
-	;hlt
+	
 	pusha
 	push 107
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR108:
-	;hlt
+	
 	pusha
 	push 108
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR109:
-	;hlt
+	
 	pusha
 	push 109
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR110:
-	;hlt
+	
 	pusha
 	push 110
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR111:
-	;hlt
+	
 	pusha
 	push 111
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR112:
-	;hlt
+	
 	pusha
 	push 112
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR113:
-	;hlt
+	
 	pusha
 	push 113
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR114:
-	;hlt
+	
 	pusha
 	push 114
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR115:
-	;hlt
+	
 	pusha
 	push 115
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR116:
-	;hlt
+	
 	pusha
 	push 116
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR117:
-	;hlt
+	
 	pusha
 	push 117
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR118:
-	;hlt
+	
 	pusha
 	push 118
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR119:
-	;hlt
+	
 	pusha
 	push 119
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR120:
-	;hlt
+	
 	pusha
 	push 120
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR121:
-	;hlt
+	
 	pusha
 	push 121
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR122:
-	;hlt
+	
 	pusha
 	push 122
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR123:
-	;hlt
+	
 	pusha
 	push 123
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR124:
-	;hlt
+	
 	pusha
 	push 124
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR125:
-	;hlt
+	
 	pusha
 	push 125
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR126:
-	;hlt
+	
 	pusha
 	push 126
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ;Smp Interrupts
 ISR127:
-	;hlt
+	
 	pusha
 	push 127
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 extern SYSCALLS
 
@@ -1340,7 +1430,7 @@ ISR128:
 	pusha
 	mov r9, rsp
 	call SYSCALLS
-	popa
+	popa	
 	iretq
 
 ISR129:
@@ -1353,573 +1443,687 @@ ISR129:
 	pop r8
 	mov r9, rsp
 	call SYSCALLS
-	popa
+	popa	
 	iretq
 
 ISR130:
-	;hlt
+	
 	pusha
 	push 130
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR131:
-	;hlt
+	
 	pusha
 	push 131
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR132:
-	;hlt
+	
 	pusha
 	push 132
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR133:
-	;hlt
+	
 	pusha
 	push 133
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR134:
-	;hlt
+	
 	pusha
 	push 134
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR135:
-	;hlt
+	
 	pusha
 	push 135
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR136:
-	;hlt
+	
 	pusha
 	push 136
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR137:
-	;hlt
+	
 	pusha
 	push 137
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR138:
-	;hlt
+	
 	pusha
 	push 138
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR139:
-	;hlt
+	
 	pusha
 	push 139
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR140:
-	;hlt
+	
 	pusha
 	push 140
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR141:
-	;hlt
+	
 	pusha
 	push 141
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR142:
-	;hlt
+	
 	pusha
 	push 142
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR143:
-	;hlt
+	
 	pusha
 	push 143
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR144:
-	;hlt
+	
 	pusha
 	push 144
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR145:
-	;hlt 
+	 
 	pusha
 	push 145
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR146:
-	;hlt 
+	 
 	pusha
 	push 146
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR147:
-	;hlt 
+	 
 	pusha
 	push 147
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR148:
-	;hlt 
+	 
 	pusha
 	push 148
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR149:
-	;hlt 
+	 
 	pusha
 	push 149
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR150:
-	;hlt 
+	 
 	pusha
 	push 150
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR151:
-	;hlt 
+	 
 	pusha
 	push 151
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR152:
-	;hlt 
+	 
 	pusha
 	push 152
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR153:
-	;hlt 
+	 
 	pusha
 	push 153
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR154:
-	;hlt 
+	 
 	pusha
 	push 154
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR155:
-	;hlt 
+	 
 	pusha
 	push 155
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR156:
-	;hlt 
+	 
 	pusha
 	push 156
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR157:
-	;hlt 
+	 
 	pusha
 	push 157
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR158:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 158
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR159:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 159
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR160:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 160
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR161:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 161
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR162:
-;	hlt
+;	popa	
+	iretq
 	pusha
 	push 162
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR163:
-;	hlt
+;	popa	
+	iretq
 	pusha
 	push 163
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR164:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 164
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR165:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 165
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR166:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 166
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR167:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 167
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR168:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 168
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR169:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 169
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR170:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 170
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR171:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 171
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR172:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 172
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR173:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 173
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR174:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 174
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR175:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 175
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR176:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 176
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR177:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 177
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR178:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 8
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR179:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 179
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR180:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 180
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR181:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 181
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR182:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 182
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR183:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 183
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR184:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 184
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR185:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 185
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR186:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 186
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR187:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 187
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR188:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 188
  	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR189:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 189
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR190:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 190
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR191:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 191
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR192:
-;	hlt
+;	popa	
+	iretq
 	pusha
 	push 192
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR193:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 193
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR194:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 194
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR195:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 195
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR196:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 196
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR197:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 197
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR198:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 198
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR199:
-;	hlt 
+;	popa	
+	iretq 
 	pusha
 	push 199
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq
 
 ISR200:
-;	hlt
+;	popa	
+	iretq
 	pusha
 	push 200
 	mov [InterruptNum], ah
 	Handle
-	hlt
+	popa	
+	iretq

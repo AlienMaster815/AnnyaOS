@@ -40,10 +40,10 @@ AddDevice(
         }
     }else{
         //PCNET 3
+        return STATUS_UNSUCCESSFUL;
     }
 
     LouPrint("PCNET32::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

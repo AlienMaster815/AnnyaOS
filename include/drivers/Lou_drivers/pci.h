@@ -70,6 +70,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uint8_t 	bus;
 	uint8_t 	slot;
 	uint8_t 	func;
+	bool		InterruptsEnabled;
 	int 		NumberOfSAssignedVectors;
 	uint64_t* 	InterruptVectors;
 	void* 		Dev;
@@ -124,6 +125,8 @@ enum BaseAddressRegisterType {
 	InputOutPut = 1
 };
 
+
+uint8_t LouKePciGetInterruptLine(P_PCI_DEVICE_OBJECT PDEV);
 
 //Is C Land
 void PCI_Setup();
@@ -188,7 +191,6 @@ void checkDevice(uint16_t Group, uint8_t bus, uint8_t device);
 void checkBus(uint16_t Group, uint8_t bus);
 void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
 void PCI_Scan_Bus();
-
 uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
 uintptr_t PcieConfigAddress(uint16_t Group,uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
 
@@ -247,6 +249,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uint8_t 	bus;
 	uint8_t 	slot;
 	uint8_t 	func;
+	bool		InterruptsEnabled;
 	int 		NumberOfSAssignedVectors;
 	uint64_t* 	InterruptVectors;
 	void* 		Dev;
@@ -268,6 +271,7 @@ KERNEL_EXPORT uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Off
 KERNEL_EXPORT void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
 KERNEL_EXPORT void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
 KERNEL_EXPORT void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
+KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(P_PCI_DEVICE_OBJECT PDEV);
 
 #define ANY_PCI_ID 0xFFFF
 #define ANY_PCI_CLASS 255

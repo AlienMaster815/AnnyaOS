@@ -351,11 +351,10 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeNtKernelTransitionLayer();
 
     //CheckForSoundblaster16();
+    ScanTheRestOfHarware();
 
     EnablePs2Keyboard();
     InitializePs2Mouse();
-
-    //ScanTheRestOfHarware();
     
     //SMPInit();
 	

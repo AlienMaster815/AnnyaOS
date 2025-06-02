@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 109
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 111
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -308,6 +308,8 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[106] = "inw";
     ImportTables[4].FunctionName[107] = "outw";
     ImportTables[4].FunctionName[108] = "LouKeLinkerGetAddress";
+    ImportTables[4].FunctionName[109] = "LoukeRegisterNetFrameHardwareDriver";
+    ImportTables[4].FunctionName[110] = "LouKePciGetInterruptLine";
     
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -418,6 +420,8 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[106] = (uint64_t)inw;
     ImportTables[4].VirtualAddress[107] = (uint64_t)outw;
     ImportTables[4].VirtualAddress[108] = (uint64_t)LouKeLinkerGetAddress;
+    ImportTables[4].VirtualAddress[109] = (uint64_t)LoukeRegisterNetFrameHardwareDriver;
+    ImportTables[4].VirtualAddress[110] = (uint64_t)LouKePciGetInterruptLine;
 
 }
 

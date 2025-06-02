@@ -139,6 +139,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         while(1);
     }
 
+
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&InterruptLock, &Irql);
     uint64_t ContextHandle = 0;
@@ -156,15 +157,16 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
                     TmpEntry->InterruptHandler(Args);
                 }
             }
+            
             if(TmpEntry->List.NextHeader){
                 TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
             }
         }
+        local_apic_send_eoi();
+        LouKeReleaseSpinLock(&InterruptLock, &Irql);
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             RestoreEverything(&ContextHandle);
         }
-        local_apic_send_eoi();
-        LouKeReleaseSpinLock(&InterruptLock, &Irql);
         return;
     }
     local_apic_send_eoi();
