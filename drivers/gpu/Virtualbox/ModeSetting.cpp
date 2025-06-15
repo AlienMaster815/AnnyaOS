@@ -19,7 +19,7 @@
  
 void      
 HgsmiProccessDisplayInformation(
-    POOL* Context, 
+    POOL Context, 
     uint32_t Display, 
     int32_t OriginX, 
     int32_t OriginY, 
@@ -37,7 +37,7 @@ HgsmiProccessDisplayInformation(
 
 LOUSTATUS 
 HgsmiUpdateInputMappings(
-    POOL* Context, 
+    POOL Context, 
     int32_t OriginX, 
     int32_t OriginY, 
     uint32_t Width, 
@@ -51,7 +51,7 @@ HgsmiUpdateInputMappings(
 
 LOUSTATUS 
 HgsmiGetModeHints(
-    POOL* Context, 
+    POOL Context, 
     uint32_t Screens, 
     PVBVA_MODE_HINT Hints
 ){

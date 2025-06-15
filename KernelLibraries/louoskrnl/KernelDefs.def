@@ -87,7 +87,6 @@ EXPORTS
     LouKeWritePciUint16
     LouKeWritePciUint32
     LouKeHalEnablePciDevice
-    LouKeHalGetPciVirtualBaseAddress
     LouKeHalPciSaveContext
     LouKeHalPciRestoreContext
     LouKeHalPciClearMaster
@@ -111,3 +110,47 @@ EXPORTS
     LouKeLinkerGetAddress
     LoukeRegisterNetFrameHardwareDriver
     LouKePciGetInterruptLine
+    inl
+    LouKeMapDynamicPool
+    LouKeMallocFromDynamicPoolEx
+    LouKeMallocFromDynamicPool
+    memset
+    outl
+    LouKeFreeFromDynamicPool
+    LouKeHalGetPciBaseAddressSize
+    LouKePciGetIoRegion
+    LouKeCreateGenericPool
+    LouKeGenricAllocateDmaPool
+    LouKeGenericPoolGetPhyAddress
+    LouKePassVramToDrsdMemoryManager
+    DrsdGxeCreateAsyncFramebuffer
+    DrsdGxeVramInternalModeValid
+    DrsdInternalAtomicCheck
+    DrsdInternalAtomicUpdate
+    DrsdInternalResetPlane
+    DrsdInternalDestroyPlane
+    DrsdInternalPlaneDisableAtomic
+    DrsdInternalPlaneUpdateAtomic
+    DrsdInternalDestroyPlaneAtomic
+    DrsdInternalDuplicateAtomicState
+    DrsdGxeInternalCleanupFrameBuffer
+    DrsdGxeInternalPrepareFrameBuffer
+    DrsdGxeInternalStartFrameBufferProcessing
+    DrsdGxeInternalStopFrameBufferProcessing
+    DrsdGxeDestroyShadowPlane
+    DrsdGxeDuplicateShadowPlaneState
+    DrsdGxeResetShadowPlane
+    DrsdInitializeGenericPlane
+    DrsdInitializeCrtcWithPlanes
+    DrsdInitializeCrtcGammaSize
+    DrsdInternalCrtcSetConfigurationAtomic
+    DrsdInternalCrtcPageFlipAtomic
+    DrsdInternalCrtcResetAtomic
+    DrsdInternalCrtcDuplicateStateAtomic
+    DrsdInternalCrtcDestroyStateAtomic
+    DrsdInitializeEncoder
+    DrsdInternalAtomicConnectorDestroyState
+    DrsdInternalAtomicConnectorDuplicateState
+    DrsdInternalResetConnector
+    DrsdConnectorInitialize
+    DrsdModeConfigurationReset

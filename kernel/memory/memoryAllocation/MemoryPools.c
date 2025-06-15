@@ -15,6 +15,46 @@ PLMPOOL_DIRECTORY LouKeMapPool(
     while(1);
 }
 
+PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
+    uint64_t    LocationOfPool,
+    size_t      PoolSize,
+    size_t      CachedTracks,
+    string      Tag,
+    uint64_t    Flags
+){
+    POOL NewPool = (POOL)LouKeMallocType(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
+    NewPool->VLocation = LocationOfPool;
+    NewPool->LastOut = NewPool->VLocation;
+    NewPool->FixedSizePool = false;
+    NewPool->Flags = Flags;
+    NewPool->Tag = Tag;
+    NewPool->ObjectSize = CachedTracks;
+    NewPool->PoolSize = PoolSize;
+    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &NewPool->MemoryTracks;
+    TmpPoolMemTrack->Peers.NextHeader = (PListHeader)LouKeMallocArray(POOL_MEMORY_TRACKS, CachedTracks, KERNEL_GENERIC_MEMORY);  
+    NewPool->FixedSizePool = false;
+    return NewPool;
+}
+
+PLMPOOL_DIRECTORY LouKeMapDynamicPool(
+    uint64_t    LocationOfPool,
+    size_t      PoolSize,
+    string      Tag,
+    uint64_t    Flags
+){
+    size_t CachedTracks = 0;
+    if(PoolSize > KILOBYTE_PAGE){
+        CachedTracks = PoolSize/KILOBYTE_PAGE;
+    }
+    return LouKeMapDynamicPoolEx(
+        LocationOfPool,
+        PoolSize,
+        CachedTracks,
+        Tag,
+        Flags
+    );  
+}
+
 void* LouKeMallocFromPool(
     PLMPOOL_DIRECTORY Pool, 
     uint64_t size, 
@@ -115,9 +155,13 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
     uint64_t Flags,
     uint64_t PageFlags
 ){
+    size_t CachedTracks = 0;
+    if(PoolSize > KILOBYTE_PAGE){
+        CachedTracks = PoolSize/KILOBYTE_PAGE;
+    }
     return LouKeCreateDynamicPoolEx(
         PoolSize,
-        PoolSize / 512, //for each 512 default one cache
+        CachedTracks, //for each kilobyte page memory expands default one cache
         PagedTypeAlignement,
         Tag,
         Flags,
@@ -155,7 +199,7 @@ void LouKeFreeFromDynamicPool(
         Node = Next;
     }
 
-    LouPrint("LouKeFreeFromDynamicPool(): ERROR - Address not found\n");
+    LouPrint("LouKeFreeFromDynamicPool(): ERROR - Address not found:%h\n", Address);
 }
 
 void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alignment)
@@ -229,7 +273,7 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
             }
         }
 
-        Node->Peers.NextHeader = LouKeMallocType(POOL_MEMORY_TRACKS, KERNEL_GENERIC_MEMORY);
+        Node->Peers.NextHeader = (PListHeader)LouKeMallocType(POOL_MEMORY_TRACKS, KERNEL_GENERIC_MEMORY);
         Node = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
         Node->Address = Result;
         Node->MemorySize = AllocationSize;
@@ -246,4 +290,43 @@ void* LouKeMallocFromDynamicPool(
     size_t AllocationSize
 ){
     return LouKeMallocFromDynamicPoolEx(Pool, AllocationSize, GetAlignmentBySize(AllocationSize));
+}
+
+POOL LouKeCreateGenericPool(
+    uint64_t VLocation,
+    uint64_t Location,
+    uint64_t size,
+    uint64_t Flags
+){
+
+    POOL NewPool = LouKeMapDynamicPoolEx(
+        VLocation,
+        size,
+        1,
+        0x00,
+        Flags
+    );
+    NewPool->Location = Location;
+    return NewPool;
+}
+
+void* LouKeGenericPoolGetPhyAddress(
+    POOL Pool,
+    void* Address
+){
+    return (void*)Pool->Location + ((uint64_t)Address - Pool->VLocation);
+}
+
+void* LouKeGenricAllocateDmaPool(
+    POOL Pool,
+    size_t size,
+    size_t* Offset
+){
+
+    uint64_t Result = (uint64_t)LouKeMallocFromDynamicPool(Pool, size);
+    if(Offset){
+        *Offset = (uint64_t)LouKeGenericPoolGetPhyAddress(Pool, (void*)Result);
+    }
+
+    return (void*)Result;
 }

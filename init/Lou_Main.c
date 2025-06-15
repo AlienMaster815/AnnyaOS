@@ -84,7 +84,8 @@ void CreateNewPageSystem();
 uint64_t GetRamSize();
 void InitializeSystemCalls();
 void SYSCALLS();
-void initialize_ps2_keyboard();
+void initialize_ps2_keyboard();    uint64_t ContextHandle = 0x00;
+
 LOUSTATUS InitializeDirecAccess();
 LOUSTATUS InitializeDynamicHardwareInterruptHandleing();
 void initializeInterruptRouter();
@@ -92,7 +93,7 @@ void InitializeGenericTables();
 void InitializeVesaSystem();
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
-volatile PWINDHANDLE HWind;
+volatile PWINDHANDLE HWind = 0x00;
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
@@ -187,6 +188,7 @@ extern void MachineCodeDebug(uint64_t FOO);
 bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck);
 
 void StartDebugger(){
+    
     WINDOW_CHARECTERISTICS Charecteristics;
 
     Charecteristics.Type = TEXT_WINDOW;
@@ -201,13 +203,13 @@ void StartDebugger(){
         0x00, 
         &Charecteristics
     );
-
     AttatchWindowToKrnlDebug(HWind);    
+    
 }
 
 void KillDebuger(){
-    DetatchWindowToKrnlDebug(HWind);
-    LouDestroyWindow(HWind);
+    //DetatchWindowToKrnlDebug(HWind);
+    //LouDestroyWindow(HWind);
 }
 
 void LouKeRunOnNewStack(void (*func)(void), void* FunctionParameters, size_t stack_size);
@@ -309,8 +311,9 @@ void DisableCR0WriteProtection() {
     asm volatile ("mov %0, %%cr0" :: "r"(cr0));
 }
 void InitializeAcpiSystem();
+void InitializeDebuggerComunications();
 
-static bool SystemIsEfi = false;
+UNUSED static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
 ){    
@@ -318,7 +321,7 @@ KERNEL_ENTRY Lou_kernel_start(
     ParseMBootTags(mboot);
     InitializeBasicMemcpy();
 
-    //vga set for debug
+    ///vga set for debug
     if(!LouKeMapEfiMemory()){
         LouKeHandleSystemIsBios();
     }else {
@@ -329,8 +332,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeMapPciMemory();
 
-    //SetupInitialVideoDevices();
-
     LouKeInitializeLouACPISubsystem();
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
@@ -338,6 +339,8 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeGenericTables();
 
     Advanced_Kernel_Initialization();
+
+    InitializeDebuggerComunications();
 
     LookForStorageDevices();
 
@@ -349,6 +352,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeFileSystemManager();
     InitializeNtKernelTransitionLayer();
+
 
     //CheckForSoundblaster16();
     ScanTheRestOfHarware();
@@ -426,26 +430,18 @@ void InitializeUserSpace(){
 
     PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocEx(sizeof(WIN_PEB), GET_ALIGNMENT(WIN_PEB), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
-
-    ProcessExecutionBlock->ProcessHeap = (uint64_t)LouKeVirtualAllocUser(KILOBYTE_PAGE, MEGABYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
-    LouPrint("Process Heap:%h\n", ProcessExecutionBlock->ProcessHeap);
-    ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
-    LouPrint("Processor Count:%d\n", ProcessExecutionBlock->NumberOfProcessors);
-    SetPEB((uint64_t)(uint8_t*)ProcessExecutionBlock); 
-
-    bool (*MsvcrtEntry)(uint64_t, uint64_t , uint64_t) = (bool (*)(uint64_t, uint64_t , uint64_t))LouKeLoadUserModule("C:/ANNYA/SYSTEM64/MSVCRT.DLL", 0x00);
-    MsvcrtEntry(0,0,0); //initialize common data
+ 
     
     uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
     LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
-    LouUpdateWindow(
-        GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
-        GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
-        HWind
-    );    
+    //LouUpdateWindow(
+    //    GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
+    //    GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
+    //    HWind
+    //);    
     LouPrint("Hello World\n");
     if(!InitEntry){
         LouPrint("ERROR Could Not Jump To Usermode\n");

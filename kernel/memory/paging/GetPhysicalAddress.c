@@ -55,7 +55,7 @@ LOUSTATUS RequestPhysicalAddress(
     if(IsMegabytePage(&Tmp[L2Entry])){
         AlteredVAddress = VAddress & ~(MEGABYTE_PAGE - 1);
         AddressToPageOffset = VAddress - AlteredVAddress;
-        *PAddress = Tmp[L2Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1);
+        *PAddress = Tmp[L2Entry] & ~((1ULL << 21) - 1);
         *PAddress += AddressToPageOffset;
         return STATUS_SUCCESS;
     }

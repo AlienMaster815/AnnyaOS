@@ -88,8 +88,10 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
     PDrsdStandardFrameworkObject FrameWorkReference
 ){
     DRSD_EGA_RELEASE();
+    DrsdVramManager = (PDrsdVRamObject)LouKeMallocEx(sizeof(DrsdVRamObject), GET_ALIGNMENT(DrsdVRamObject), WRITEABLE_PAGE | PRESENT_PAGE);
+    DrsdVramManager->FrameworkVersion = 1;
     if(NumberOfActiveVRamManagers == 0){
-        DrsdVramManager = (PDrsdVRamObject)LouKeMallocEx(sizeof(DrsdVRamObject), GET_ALIGNMENT(DrsdVRamObject), WRITEABLE_PAGE | PRESENT_PAGE);
+        
         if(!DrsdVramManager){
             return STATUS_INSUFFICIENT_RESOURCES;
         }
@@ -184,3 +186,4 @@ LOUSTATUS LouKeRegisterFrameBufferDevice(
     NumberOfActiveVRamManagers++;
     return STATUS_SUCCESS;
 }
+

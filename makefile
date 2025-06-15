@@ -302,6 +302,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C drivers/gpu/Virtualbox clean
 	$(MAKE) -C drivers/gpu/Virtualbox all
 
+	$(MAKE) -C drivers/gpu/VMWare clean
+	$(MAKE) -C drivers/gpu/VMWare all
+
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
 
@@ -389,3 +392,5 @@ cleanall:
 	$(MAKE) -C KernelLibraries/wprecorder clean
 	$(MAKE) -C drivers/gpu/Virtualbox clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
+	$(MAKE) -C drivers/gpu/VMWare clean
+

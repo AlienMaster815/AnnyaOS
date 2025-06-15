@@ -13,6 +13,7 @@
         <FILETOCPY64>cp drivers/Audio/SoundBlaster/SBMOD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/SBMOD.SYS</FILETOCPY64>             <!--Sound Blaster-->
         <FILETOCPY64>cp drivers/Audio/HDA/HDAPCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/HDAPCI.SYS</FILETOCPY64>                    <!--Intel Hd Audio-->
         <FILETOCPY64>cp drivers/gpu/Virtualbox/VBOXGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VBOXGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
+        <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
         <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
         <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX Chipset Accelleration-->
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->

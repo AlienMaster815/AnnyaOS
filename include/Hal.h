@@ -121,7 +121,14 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             );
             
             void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
+            
+            KERNEL_IMPORT void* LouKePciGetIoRegion(
+                P_PCI_DEVICE_OBJECT PDEV, 
+                uint8_t BarNumber,
+                size_t BarOffset
+            );
 
+            KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
         #else 
             KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
@@ -164,9 +171,20 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 void* KeyData, //optional
                 void* DevicePrivateData
             );
-
+            KERNEL_EXPORT size_t LouKeHalGetPciBaseAddressSize(
+                PPCI_COMMON_CONFIG PciConfig,
+                uint8_t BarNum  
+            );
 
             KERNEL_EXPORT void LouKeHalAcpiShutdown();
+
+            KERNEL_EXPORT void* LouKePciGetIoRegion(
+                P_PCI_DEVICE_OBJECT PDEV, 
+                uint8_t BarNumber,
+                size_t BarOffset
+            );
+
+            KERNEL_EXPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size , void* PAddress);
 
         #endif
     #else

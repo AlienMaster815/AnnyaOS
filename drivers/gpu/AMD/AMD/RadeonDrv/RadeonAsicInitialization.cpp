@@ -210,7 +210,7 @@ LOUSTATUS R100IrqProcess(PRADEON_DEVICE RDEV);
 LOUSTATUS R100IrqSet(PRADEON_DEVICE RDEV);
 void R100BandwithUpdate(PRADEON_DEVICE RDEV);
 uint32_t R100GetVblankCounter(PDrsdCrtc Crtc);
-void R100WaitForVblank(PDrsdDevice Dev);
+void R100WaitForVblank(PDRSD_DEVICE Dev);
 void RadeonLegacySetBackLightLevel(PRADEON_ENCODER Encoder, uint8_t Level);
 uint8_t RadeonLegacyGetBackLightLevel(PRADEON_ENCODER Encoder);
 PRADEON_FENCE R100CopyBlit(

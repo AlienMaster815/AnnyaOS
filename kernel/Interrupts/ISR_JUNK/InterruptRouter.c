@@ -123,9 +123,9 @@ void RestoreEverything(uint64_t* ContextHandle){
     ProcessorCallbacks->RestoreHandler((const uint8_t*)(*ContextHandle));
 }
 
-static spinlock_t InterruptLock;
+static mutex_t InterruptLock;
 
-spinlock_t* LouKeGetInterruptGlobalLock(){
+mutex_t* LouKeGetInterruptGlobalLock(){
     return &InterruptLock;
 }
 
@@ -138,11 +138,8 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         InterruptRouterTable[Interrupt].InterruptHandler(Args);
         while(1);
     }
-
-
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&InterruptLock, &Irql);
-    uint64_t ContextHandle = 0;
+    MutexLock(&InterruptLock);
+    uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
@@ -162,15 +159,15 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
                 TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
             }
         }
-        local_apic_send_eoi();
-        LouKeReleaseSpinLock(&InterruptLock, &Irql);
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             RestoreEverything(&ContextHandle);
         }
+        MutexUnlock(&InterruptLock);
+        local_apic_send_eoi();
         return;
     }
+    MutexUnlock(&InterruptLock);
     local_apic_send_eoi();
-    LouKeReleaseSpinLock(&InterruptLock, &Irql);
     return;
     
 	LouPrint("Interrupt Number: %d Was Called\n",Interrupt);

@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 111
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 153
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -39,6 +39,9 @@ static uint16_t DynamicLoadedLibrarieCount = 0x00;
 
 static volatile TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
 static volatile PTABLE_ENTRY ImportTables = (volatile PTABLE_ENTRY)GenericTable;
+
+KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
+
 
 typedef void* PEXCEPTION_RECORD;
 
@@ -192,6 +195,13 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
+KERNEL_IMPORT void* LouKePciGetIoRegion(
+    P_PCI_DEVICE_OBJECT PDEV, 
+    uint8_t BarNumber,
+    size_t BarOffset
+);
+
+
 static inline 
 void InitializeLousineKernelTables(){
     ImportTables[4].ModuleName = "louoskrnl.exe";
@@ -267,7 +277,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[65] = "LouKeTestAndResetBitU64";
     ImportTables[4].FunctionName[66] = "LouKeTestBitAndUnSetU64";
     ImportTables[4].FunctionName[67] = "LouKeTestBitAndSetU64";
-    ImportTables[4].FunctionName[68] = "LouKeTestBitU64";
+    ImportTables[4].FunctionName[68] = "LouKeTDrsdInternalAtomicCheckestBitU64";
     ImportTables[4].FunctionName[69] = "LouKeUnSetBitU64";
     ImportTables[4].FunctionName[70] = "LouKeSetBitU64";
     ImportTables[4].FunctionName[71] = "LouKeCreateThread";
@@ -285,7 +295,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[83] = "LouKeWritePciUint16";
     ImportTables[4].FunctionName[84] = "LouKeWritePciUint32";
     ImportTables[4].FunctionName[85] = "LouKeHalEnablePciDevice";
-    ImportTables[4].FunctionName[86] = "LouKeHalGetPciVirtualBaseAddress";
+    ImportTables[4].FunctionName[86] = "LouKePciGetIoRegion";
     ImportTables[4].FunctionName[87] = "LouKeHalPciSaveContext";
     ImportTables[4].FunctionName[88] = "LouKeHalPciRestoreContext";
     ImportTables[4].FunctionName[89] = "LouKeHalPciClearMaster";
@@ -310,7 +320,49 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[108] = "LouKeLinkerGetAddress";
     ImportTables[4].FunctionName[109] = "LoukeRegisterNetFrameHardwareDriver";
     ImportTables[4].FunctionName[110] = "LouKePciGetInterruptLine";
-    
+    ImportTables[4].FunctionName[111] = "inl";
+    ImportTables[4].FunctionName[112] = "LouKeMapDynamicPool";
+    ImportTables[4].FunctionName[113] = "LouKeMallocFromDynamicPool";
+    ImportTables[4].FunctionName[114] = "LouKeMallocFromDynamicPoolEx";
+    ImportTables[4].FunctionName[115] = "outl";
+    ImportTables[4].FunctionName[116] = "LouKeFreeFromDynamicPool";
+    ImportTables[4].FunctionName[117] = "LouKeHalGetPciBaseAddressSize";
+    ImportTables[4].FunctionName[118] = "LouKeCreateGenericPool";
+    ImportTables[4].FunctionName[119] = "LouKeGenricAllocateDmaPool";
+    ImportTables[4].FunctionName[120] = "LouKeGenericPoolGetPhyAddress";
+    ImportTables[4].FunctionName[121] = "LouKePassVramToDrsdMemoryManager";
+    ImportTables[4].FunctionName[122] = "DrsdGxeCreateAsyncFramebuffer";
+    ImportTables[4].FunctionName[123] = "DrsdGxeVramInternalModeValid";
+    ImportTables[4].FunctionName[124] = "DrsdInternalAtomicCheck";
+    ImportTables[4].FunctionName[125] = "DrsdInternalAtomicUpdate";
+    ImportTables[4].FunctionName[126] = "DrsdInternalResetPlane";
+    ImportTables[4].FunctionName[127] = "DrsdInternalDestroyPlane";
+    ImportTables[4].FunctionName[128] = "DrsdInternalPlaneDisableAtomic";
+    ImportTables[4].FunctionName[129] = "DrsdInternalPlaneUpdateAtomic";
+    ImportTables[4].FunctionName[130] = "DrsdInternalDestroyPlaneAtomic";
+    ImportTables[4].FunctionName[131] = "DrsdInternalDuplicateAtomicState";
+    ImportTables[4].FunctionName[132] = "DrsdGxeInternalPrepareFrameBuffer";
+    ImportTables[4].FunctionName[133] = "DrsdGxeInternalCleanupFrameBuffer";
+    ImportTables[4].FunctionName[134] = "DrsdGxeInternalStartFrameBufferProcessing";
+    ImportTables[4].FunctionName[135] = "DrsdGxeInternalStopFrameBufferProcessing";
+    ImportTables[4].FunctionName[136] = "DrsdGxeDestroyShadowPlane";
+    ImportTables[4].FunctionName[137] = "DrsdGxeDuplicateShadowPlaneState";
+    ImportTables[4].FunctionName[138] = "DrsdGxeResetShadowPlane";
+    ImportTables[4].FunctionName[139] = "DrsdInitializeGenericPlane";
+    ImportTables[4].FunctionName[140] = "DrsdInitializeCrtcWithPlanes";
+    ImportTables[4].FunctionName[141] = "DrsdInitializeCrtcGammaSize";
+    ImportTables[4].FunctionName[142] = "DrsdInternalCrtcSetConfigurationAtomic";
+    ImportTables[4].FunctionName[143] = "DrsdInternalCrtcPageFlipAtomic";
+    ImportTables[4].FunctionName[144] = "DrsdInternalCrtcResetAtomic";
+    ImportTables[4].FunctionName[145] = "DrsdInternalCrtcDuplicateStateAtomic";
+    ImportTables[4].FunctionName[146] = "DrsdInternalCrtcDestroyStateAtomic";
+    ImportTables[4].FunctionName[147] = "DrsdInitializeEncoder";
+    ImportTables[4].FunctionName[148] = "DrsdInternalAtomicConnectorDestroyState";
+    ImportTables[4].FunctionName[149] = "DrsdInternalAtomicConnectorDuplicateState";
+    ImportTables[4].FunctionName[150] = "DrsdInternalResetConnector";
+    ImportTables[4].FunctionName[151] = "DrsdConnectorInitialize";
+    ImportTables[4].FunctionName[152] = "DrsdModeConfigurationReset";
+
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
     ImportTables[4].VirtualAddress[0] = (uint64_t)LouPrint;
@@ -399,7 +451,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[83] = (uint64_t)LouKeWritePciUint16;
     ImportTables[4].VirtualAddress[84] = (uint64_t)LouKeWritePciUint32;
     ImportTables[4].VirtualAddress[85] = (uint64_t)LouKeHalEnablePciDevice;
-    ImportTables[4].VirtualAddress[86] = (uint64_t)LouKeHalGetPciVirtualBaseAddress;
+    ImportTables[4].VirtualAddress[86] = (uint64_t)LouKePciGetIoRegion;
     ImportTables[4].VirtualAddress[87] = (uint64_t)LouKeHalPciSaveContext;
     ImportTables[4].VirtualAddress[88] = (uint64_t)LouKeHalPciRestoreContext;
     ImportTables[4].VirtualAddress[89] = (uint64_t)LouKeHalPciClearMaster;
@@ -422,6 +474,48 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[108] = (uint64_t)LouKeLinkerGetAddress;
     ImportTables[4].VirtualAddress[109] = (uint64_t)LoukeRegisterNetFrameHardwareDriver;
     ImportTables[4].VirtualAddress[110] = (uint64_t)LouKePciGetInterruptLine;
+    ImportTables[4].VirtualAddress[111] = (uint64_t)inl;
+    ImportTables[4].VirtualAddress[112] = (uint64_t)LouKeMapDynamicPool;
+    ImportTables[4].VirtualAddress[113] = (uint64_t)LouKeMallocFromDynamicPool;
+    ImportTables[4].VirtualAddress[114] = (uint64_t)LouKeMallocFromDynamicPoolEx;
+    ImportTables[4].VirtualAddress[115] = (uint64_t)outl;
+    ImportTables[4].VirtualAddress[116] = (uint64_t)LouKeFreeFromDynamicPool;
+    ImportTables[4].VirtualAddress[117] = (uint64_t)LouKeHalGetPciBaseAddressSize;
+    ImportTables[4].VirtualAddress[118] = (uint64_t)LouKeCreateGenericPool;
+    ImportTables[4].VirtualAddress[119] = (uint64_t)LouKeGenricAllocateDmaPool;
+    ImportTables[4].VirtualAddress[120] = (uint64_t)LouKeGenericPoolGetPhyAddress;
+    ImportTables[4].VirtualAddress[121] = (uint64_t)LouKePassVramToDrsdMemoryManager;
+    ImportTables[4].VirtualAddress[122] = (uint64_t)DrsdGxeCreateAsyncFramebuffer;
+    ImportTables[4].VirtualAddress[123] = (uint64_t)DrsdGxeVramInternalModeValid;
+    ImportTables[4].VirtualAddress[124] = (uint64_t)DrsdInternalAtomicCheck;
+    ImportTables[4].VirtualAddress[125] = (uint64_t)DrsdInternalAtomicUpdate;
+    ImportTables[4].VirtualAddress[126] = (uint64_t)DrsdInternalResetPlane;
+    ImportTables[4].VirtualAddress[127] = (uint64_t)DrsdInternalDestroyPlane;
+    ImportTables[4].VirtualAddress[128] = (uint64_t)DrsdInternalPlaneDisableAtomic;
+    ImportTables[4].VirtualAddress[129] = (uint64_t)DrsdInternalPlaneUpdateAtomic;
+    ImportTables[4].VirtualAddress[130] = (uint64_t)DrsdInternalDestroyPlaneAtomic;
+    ImportTables[4].VirtualAddress[131] = (uint64_t)DrsdInternalDuplicateAtomicState;
+    ImportTables[4].VirtualAddress[132] = (uint64_t)DrsdGxeInternalPrepareFrameBuffer;
+    ImportTables[4].VirtualAddress[133] = (uint64_t)DrsdGxeInternalCleanupFrameBuffer;
+    ImportTables[4].VirtualAddress[134] = (uint64_t)DrsdGxeInternalStartFrameBufferProcessing;
+    ImportTables[4].VirtualAddress[135] = (uint64_t)DrsdGxeInternalStopFrameBufferProcessing;
+    ImportTables[4].VirtualAddress[136] = (uint64_t)DrsdGxeDestroyShadowPlane;
+    ImportTables[4].VirtualAddress[137] = (uint64_t)DrsdGxeDuplicateShadowPlaneState;
+    ImportTables[4].VirtualAddress[138] = (uint64_t)DrsdGxeResetShadowPlane;
+    ImportTables[4].VirtualAddress[139] = (uint64_t)DrsdInitializeGenericPlane;
+    ImportTables[4].VirtualAddress[140] = (uint64_t)DrsdInitializeCrtcWithPlanes;
+    ImportTables[4].VirtualAddress[141] = (uint64_t)DrsdInitializeCrtcGammaSize;
+    ImportTables[4].VirtualAddress[142] = (uint64_t)DrsdInternalCrtcSetConfigurationAtomic;
+    ImportTables[4].VirtualAddress[143] = (uint64_t)DrsdInternalCrtcPageFlipAtomic;
+    ImportTables[4].VirtualAddress[144] = (uint64_t)DrsdInternalCrtcResetAtomic;
+    ImportTables[4].VirtualAddress[145] = (uint64_t)DrsdInternalCrtcDuplicateStateAtomic;
+    ImportTables[4].VirtualAddress[146] = (uint64_t)DrsdInternalCrtcDestroyStateAtomic;
+    ImportTables[4].VirtualAddress[147] = (uint64_t)DrsdInitializeEncoder;
+    ImportTables[4].VirtualAddress[148] = (uint64_t)DrsdInternalAtomicConnectorDestroyState;
+    ImportTables[4].VirtualAddress[149] = (uint64_t)DrsdInternalAtomicConnectorDuplicateState;
+    ImportTables[4].VirtualAddress[150] = (uint64_t)DrsdInternalResetConnector;
+    ImportTables[4].VirtualAddress[151] = (uint64_t)DrsdConnectorInitialize;
+    ImportTables[4].VirtualAddress[152] = (uint64_t)DrsdModeConfigurationReset;
 
 }
 
@@ -791,6 +885,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     uint8_t i = 0;
     uint8_t j = 0;
 
+    //LouPrint("Module:%s Function:%s", ModuleName, FunctionName);
 
     for(i = 0; i < PRE_LOADED_MODULES; i++){
 
@@ -800,7 +895,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
                 //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
                 if(strncmp(ImportTables[i].FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
                     //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-
+                    //LouPrint("::%h\n", ImportTables[i].VirtualAddress[j]);
                     return ImportTables[i].VirtualAddress[j];
                 }
             }
@@ -812,6 +907,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     for(j = 0; j < ImportTables[1].NumberOfFunctions; j++){
         //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
         if(strncmp(ImportTables[1].FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
+            //LouPrint("::%h\n", ImportTables[1].VirtualAddress[j]);
             return ImportTables[1].VirtualAddress[j];
         }
     }
@@ -823,6 +919,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
             if(strncmp(Tmp->Table.FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
                 //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
                 //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
+                //LouPrint("::%h\n", Tmp->Table.VirtualAddress[j]);
                 return Tmp->Table.VirtualAddress[j];
             }
         }

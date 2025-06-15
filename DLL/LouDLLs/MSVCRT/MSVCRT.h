@@ -27,7 +27,7 @@ typedef bool  BOOL;
 typedef unsigned int DWORD;
 typedef void* LPVOID;
 
-#define KILOBYTE_PAGE 4096
+#define KILOBYTE_PAGE 4096ULL
 #define MEGABYTE_PAGE 2 * 1024 * 1024
 #define KILOBYTE 1 * 1024
 

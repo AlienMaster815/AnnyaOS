@@ -202,6 +202,7 @@ bool DrawWindowEx(
     WindHandle->Charecteristics.Dimentions.width =  width - 7;
     WindHandle->Charecteristics.Dimentions.height = height - (2+33+1+1);
 
+    
     if(!SkipInnerWindow){
 
         if(

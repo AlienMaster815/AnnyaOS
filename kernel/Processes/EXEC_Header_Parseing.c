@@ -38,8 +38,8 @@ void ParseExportTables(
 
         uint16_t OTRIndex = OTR[i];
 
-        FunctionNames[i]    = (string) (NPR[i] + ModuleStart);
-        FunctionPointers[i] = (uint64_t)(ATR[OTRIndex] + ModuleStart);
+        FunctionNames[i] = (string)(ModuleStart + (uint64_t)(uint32_t)NPR[i]);
+        FunctionPointers[i] = ModuleStart + (uint64_t)(uint32_t)ATR[OTRIndex];
 
         //LouPrint("Function Name:%s\n", FunctionNames[i]);
         //LouPrint("Function Pointer:%h\n", FunctionPointers[i]);
@@ -358,7 +358,8 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
     PPE64_OPTIONAL_HEADER PE64Header;
     PSECTION_HEADER SectionHeader;    
 
-
+    LouPrint("Here\n");
+    while(1);
     if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
         //LouPrint("Found A Valid Kernel Module\n");
         GetAllPEHeaders(
@@ -441,7 +442,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             relocationTableSize
         );
 
-        //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
+        LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
         //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
         if(!PE64Header->addressOfEntryPoint){

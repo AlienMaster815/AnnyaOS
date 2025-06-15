@@ -115,10 +115,11 @@ LOUSTATUS LoUSBInitializeHostController(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONT
     PDEV->DevicePrivateData = (uintptr_t)&HostController;
 
     //TODO: Check for Amd Resume Bug
-
+    LouPrint("LoUSBInitializeHostController\n");
+    while(1);
     if(HostDriver->DriverFlags & HCD_MEMORY){
         //OHCI and EHCI Devices Only
-        HostController->DeviceMemory = LouKeHalGetPciVirtualBaseAddress((PPCI_COMMON_CONFIG)PDEV->CommonConfig, 0);
+        HostController->DeviceMemory = 0x00;//LouKeHalGetPciVirtualBaseAddress((PPCI_COMMON_CONFIG)PDEV->CommonConfig, 0);
         HostController->IoRegionBase = (uintptr_t)HostController->DeviceMemory; 
         HostController->IoRegionLimit = (size_t)LouKeHalGetPciBaseAddressSize((PPCI_COMMON_CONFIG)PDEV->CommonConfig, 0);
         //LouPrint("Host Controller IO Base:%h\n", HostController->IoRegionBase);

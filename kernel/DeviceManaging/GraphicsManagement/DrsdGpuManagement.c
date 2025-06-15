@@ -16,6 +16,11 @@ LOUSTATUS LouRegisterDrsdGraphicsDevice(
     PDrsdGpuManagmentData Tmp = &gpus;
 
     for(uint8_t i = 0 ; i < GpuDevicesCount; i++){
+        if(((uint64_t)Tmp->Table->KeyData == 0xFFFFFFFFFFFFFFFF) || (i == 0)){
+            LouKeFree(Tmp->Table);
+            Tmp->Table = Table; 
+            return STATUS_SUCCESS;
+        }
         if(Tmp->Neighbors.NextHeader){
             Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
         }else{

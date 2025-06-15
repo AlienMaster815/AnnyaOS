@@ -4,7 +4,14 @@
 #define _INTERRUPTS_H
 #pragma pack(push, 1)
 
-#define DEBUG_TRAP asm ("int $0x03");
+#define DEBUG_TRAP \
+    struct { \
+        uint16_t limit; \
+        uint64_t base; \
+    } __attribute__((packed)) idtr = {0, 0}; \
+    __asm__ volatile("lidt %0" : : "m"(idtr)); \
+    __asm__ volatile("int $3"); \
+
 
 #define INTERRUPT_GATE 0x5
 #define TRAP_GATE 0x7

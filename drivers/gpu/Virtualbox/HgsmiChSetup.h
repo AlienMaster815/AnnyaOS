@@ -17,11 +17,11 @@
  */
 
 #define HGSMI_CC_HOST_FLAGS_LOCATION 0
-#define HGSMIHOSTFLAGS_COMMANDS_PENDING    0x01
-#define HGSMIHOSTFLAGS_IRQ                 0x02
-#define HGSMIHOSTFLAGS_VSYNC               0x10
-#define HGSMIHOSTFLAGS_HOTPLUG             0x20
-#define HGSMIHOSTFLAGS_CURSOR_CAPABILITIES 0x40
+#define HGSMIHOSTFLAGS_COMMANDS_PENDING    0x01u
+#define HGSMIHOSTFLAGS_IRQ                 0x02u
+#define HGSMIHOSTFLAGS_VSYNC               0x10u
+#define HGSMIHOSTFLAGS_HOTPLUG             0x20u
+#define HGSMIHOSTFLAGS_CURSOR_CAPABILITIES 0x40u
 
 typedef struct __attribute__((packed)) _HGSMI_BUFFER_LOCATION {
 	uint32_t BufferLocation;

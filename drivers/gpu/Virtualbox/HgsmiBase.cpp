@@ -18,7 +18,7 @@
 
 LOUSTATUS 
 HgsmiReportFlagsLocation(
-    POOL* Context, 
+    POOL Context, 
     uint32_t Location
 ){
 
@@ -29,7 +29,7 @@ HgsmiReportFlagsLocation(
 
 LOUSTATUS
 HgsmiSendCapabilityInfo(
-    POOL* Context, 
+    POOL Context, 
     uint32_t* Capabilities
 ){
 
@@ -38,32 +38,53 @@ HgsmiSendCapabilityInfo(
     return STATUS_SUCCESS;
 }
 
+
 LOUSTATUS 
 HgsmiTestQueryConfiguration(
-    POOL* Context
+    POOL Context
 ){
+    uint32_t Value = 0;
+    LOUSTATUS Result;
 
+    Result = HgsmiQueryConfiguration(
+        Context,
+        U32_MAX,
+        &Value
+    );
+    if(Result != STATUS_SUCCESS){
+        return Result;
+    }
 
-
-    return STATUS_SUCCESS;
+    return (Value == U32_MAX) ? STATUS_SUCCESS : STATUS_IO_DEVICE_ERROR;
 }
 
 
 LOUSTATUS 
 HgsmiQueryConfiguration(
-    POOL* Context, 
+    POOL Context, 
     uint32_t Index, 
     uint32_t* Result
 ){
+    PVBVA_CONFIGURATION32 Configuration = (PVBVA_CONFIGURATION32)HgsmiBufferAllocate(Context, sizeof(VBVA_CONFIGURATION32), HGSMI_CH_VBVA, VBVA_QUERY_CONFIGURATION32_COMMAND);
+    if(!Configuration){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
+    Configuration->Index = Index;
+    Configuration->Value = U32_MAX;
+    
+    HgsmiBufferSubmit(Context, Configuration);
 
-
+    *Result = Configuration->Value;
+    
+    HgsmiBufferFree(Context, Configuration);
+    
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS 
 HgsmiUpdatePointerShape(
-    POOL* Context, 
+    POOL Context, 
     uint32_t Flags, 
     uint32_t HotX, 
     uint32_t HotY, 
@@ -80,7 +101,7 @@ HgsmiUpdatePointerShape(
 
 LOUSTATUS 
 HgsmiCursorPosition(
-    POOL* Context, 
+    POOL Context, 
     bool ReportPosition, 
     uint32_t X, 
     uint32_t Y, 

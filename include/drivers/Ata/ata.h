@@ -501,6 +501,7 @@ typedef struct _ATA_BMDMA_PRD{
 #define DoesAtaIdentificationHaveCommandCompletionInterrupt(Identification) (((Identification)[UNIVERSAL_ATA_ID_CONFIGURATION] & 0x60) == 0x20)
 #define DoesAtaIdentificationHaveDataAttention(Identification)              ((Identification)[UNIVERSAL_ATA_ID_SATA2_CAPABLE] & (1 << 4))
 
+#ifdef _ATA_API
 static inline bool DoesAtaIdentificationHaveHipm(uint16_t* Identification){
     uint16_t Result = Identification[UNIVERSAL_ATA_ID_CAPABILITIES];
 
@@ -827,6 +828,8 @@ static inline bool Lba28Ok(uint64_t Block, uint64_t BlockCount){
 static inline bool Lba48Ok(uint64_t Block, uint64_t BlockCount){
     return (((Block + BlockCount - 1) < ((uint64_t)1 << 48)) & (BlockCount <= UNIVERSAL_ATA_MAX_SECTORS_LBA_48));
 }
+
+#endif
 
 #define SataPmpGscrVendorID(GSCR)   ((GSCR)[SATA_PMP_GSCR_PRODUCT_ID] & 0xFFFF)
 #define SataPmpGscrDeviceID(GSCR)   ((GSCR)[SATA_PMP_GSCR_PRODUCT_ID] >> 16)

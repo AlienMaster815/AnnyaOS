@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <drivers/display/vga.h>
 
+void LouKeDebuggerCommunicationsSendCharecter(char Charecter);
 void VgaPutCharecterRgb(char Charecter, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
 bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
 
@@ -79,9 +80,15 @@ int LouPrintEGA(string Str, va_list Args);
 void print_binary64(uint64_t number) {
     for(uint8_t BitMask = 0; BitMask < 64; BitMask++){
         if(number & (1 << (63 - BitMask))){
-            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('1');
         }else{
-            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('0');
         }
     }
 }
@@ -89,9 +96,15 @@ void print_binary64(uint64_t number) {
 void print_binary32(uint32_t number) {
     for(uint8_t BitMask = 0; BitMask < 32; BitMask++){
         if(number & (1 << (31 - BitMask))){
-            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('1');
         }else{
-            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('0');
         }
     }
 }
@@ -99,24 +112,34 @@ void print_binary32(uint32_t number) {
 void print_binary16(uint16_t number) {
     for(uint8_t BitMask = 0; BitMask < 16; BitMask++){
         if(number & (1 << (15 - BitMask))){
-            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('1');
         }else{
-            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('0');
         }
     }
 }
-
 
 void print_binary8(uint8_t number) {
     for(uint8_t BitMask = 0; BitMask < 8; BitMask++){
         if(number & (1 << (7 - BitMask))){
-            VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            if(DebugWindow){    
+                VgaPutCharecterRgb('1', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('1');
         }else{
-            VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb('0', DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter('0');
         }
     }
 }
-
 //static uint8_t Bullshit = 0;
 
 __stdcall
@@ -125,7 +148,6 @@ int LouPrint_s(char* format, va_list args){
     if(DRSD_EGA_OVERIDE){
         return LouPrintEGA(format, args);
     }
-    if(DebugWindow != 0x00){
     LouKIRQL OldLevel;
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     char PrintString[21] = {0};
@@ -138,20 +160,31 @@ int LouPrint_s(char* format, va_list args){
                     intToString((uint64_t)num, PrintString);
                     char* p = PrintString;
                     while (*p != '\0') {
-                        VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
+                        if(DebugWindow){
+                            VgaPutCharecterRgb(*p, DebugWindow, 0, 255, 0);
+                        }
+                        LouKeDebuggerCommunicationsSendCharecter(*p);
+                        p++;
                     }
                     break;
                 }
                 case 's': {
                     char* text = va_arg(args, char*);
                     while (*text != '\0') {
-                        VgaPutCharecterRgb(*text++, DebugWindow, 0, 255, 0);
+                        if(DebugWindow){
+                            VgaPutCharecterRgb(*text, DebugWindow, 0, 255, 0);
+                        }
+                        LouKeDebuggerCommunicationsSendCharecter(*text);
+                        text++;
                     }
                     break;
                 }
                 case 'c': {
                     char c = va_arg(args, int);
-                    VgaPutCharecterRgb(c, DebugWindow, 0, 255, 0);
+                    if(DebugWindow){
+                        VgaPutCharecterRgb(c, DebugWindow, 0, 255, 0);
+                    }
+                    LouKeDebuggerCommunicationsSendCharecter(c);
                     break;
                 }
                 case 'h': {                 
@@ -159,9 +192,12 @@ int LouPrint_s(char* format, va_list args){
                     uintToHexString((uint64_t)num, PrintString);
                     char* p = PrintString;
                     while (*p  != '\0') {
-                        VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
+                        if(DebugWindow){
+                            VgaPutCharecterRgb(*p, DebugWindow, 0, 255, 0);
+                        }
+                        LouKeDebuggerCommunicationsSendCharecter(*p);
+                        p++;
                     }
-
                     break;
                 }
                 case 'b': {
@@ -203,7 +239,11 @@ int LouPrint_s(char* format, va_list args){
                             long_double_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {
-                                VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
+                                if(DebugWindow){
+                                    VgaPutCharecterRgb(*p, DebugWindow, 0, 255, 0);
+                                }
+                                LouKeDebuggerCommunicationsSendCharecter(*p);
+                                p++;
                             }
                             LouFree((RAMADD)str);
                             break;
@@ -214,7 +254,11 @@ int LouPrint_s(char* format, va_list args){
                             double_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {
-                                VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
+                                if(DebugWindow){
+                                    VgaPutCharecterRgb(*p, DebugWindow, 0, 255, 0);
+                                }
+                                LouKeDebuggerCommunicationsSendCharecter(*p);
+                                p++;
                             }
                             break;
                         }
@@ -225,7 +269,11 @@ int LouPrint_s(char* format, va_list args){
                             float_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {
-                                VgaPutCharecterRgb(*p++, DebugWindow, 0, 255, 0);
+                                if(DebugWindow){
+                                    VgaPutCharecterRgb(*p, DebugWindow, 0, 255, 0);
+                                }
+                                LouKeDebuggerCommunicationsSendCharecter(*p);
+                                p++;
                             }
                             break;
                         }
@@ -233,20 +281,26 @@ int LouPrint_s(char* format, va_list args){
                     break;
                 }
                 default: {
-                    VgaPutCharecterRgb('%', DebugWindow, 0, 255, 0);
-                    VgaPutCharecterRgb(*format, DebugWindow, 0, 255, 0);
+                    if(DebugWindow){
+                        VgaPutCharecterRgb('%', DebugWindow, 0, 255, 0);
+                        VgaPutCharecterRgb(*format, DebugWindow, 0, 255, 0);
+                    }
+                    LouKeDebuggerCommunicationsSendCharecter('%');
+                    LouKeDebuggerCommunicationsSendCharecter(*format);
                     break;
                 }
             }
             format++; // Move to the next character in the format string
         } else {
-            VgaPutCharecterRgb(*format++, DebugWindow, 0, 255, 0);
+            if(DebugWindow){
+                VgaPutCharecterRgb(*format, DebugWindow, 0, 255, 0);
+            }
+            LouKeDebuggerCommunicationsSendCharecter(*format);
+            format++;
         }
     }
     LouKeDrsdSyncScreens();
     LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
-    }
-
     return 0;
 }
 

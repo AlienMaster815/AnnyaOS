@@ -86,7 +86,7 @@ void LouKeDrsdPutPixelMirrored(
 ){
     LouKeDrsdPutPixelMirroredEx(
         x, y,
-        r,g,b,0
+        r,g,b,255
     );
 }
 

@@ -2,8 +2,8 @@
 #define _MEMMORY_H
 
 #define LouKeMallocArray(type, count, tag) \
-    LouKeMallocEx(ROUND_UP64(sizeof(type), GET_ALIGNMENT(type)) * (count), GET_ALIGNMENT(type), (tag))
-#define LouKeMallocType(Type, Tag) LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
+    (type*)LouKeMallocEx(ROUND_UP64(sizeof(type), GET_ALIGNMENT(type)) * (count), GET_ALIGNMENT(type), (tag))
+#define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 
 
 // Tyler Grenier 9/21/23 9:38 PM
@@ -43,6 +43,7 @@ typedef __int128 int128_t;
 #define CACHE_DISABLED_PAGE 0b10000
 #define UNCACHEABLE_PAGE    0b10000
 
+#define PAGE_PAT         (1ULL << 7)  // PAT bit
 #define PAGE_PRESENT        (1 << 0)
 #define PAGE_WRITE          (1 << 1)
 #define PAGE_USER           (1 << 2)
@@ -289,6 +290,21 @@ typedef struct _BO{
 }BO, *PBO;
 
 #ifndef _KERNEL_MODULE_
+
+void LouKeMapDeviceMemoryBlock(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+);
+
+POOL LouKeCreateGenericPool(
+    uint64_t VLocation,
+    uint64_t Location,
+    uint64_t Size,
+    uint64_t Flags
+);
+
 void* MallocVariacHeap(size_t InitialSize);
 void FreeVariacHeap(
 void* VariacPointerToFree, 
@@ -385,6 +401,15 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPoolEx(
     uint64_t PageFlags
 );
 
+PLMPOOL_DIRECTORY LouKeMapDynamicDevicePool();
+
+PLMPOOL_DIRECTORY LouKeMapDynamicPool(
+    uint64_t    LocationOfPool,
+    size_t      PoolSize,
+    string      Tag,
+    uint64_t    Flags
+);
+
 void* LouKeMallocFromDynamicPoolEx(
     POOL Pool, 
     size_t AllocationSize, 
@@ -394,6 +419,17 @@ void* LouKeMallocFromDynamicPoolEx(
 void* LouKeMallocFromDynamicPool(
     POOL Pool, 
     size_t AllocationSize
+);
+
+void* LouKeGenricAllocateDmaPool(
+    POOL Pool,
+    size_t size,
+    size_t* Offset
+);
+
+void* LouKeGenericPoolGetPhyAddress(
+    POOL Pool,
+    void* Address
 );
 
 void LouKeFreeFromDynamicPool(
@@ -603,6 +639,52 @@ void* LouKeMallocEx(
     uint64_t    AllocationFlags
 );
 
+KERNEL_EXPORT 
+PLMPOOL_DIRECTORY LouKeMapDynamicPool(
+    uint64_t    LocationOfPool,
+    size_t      PoolSize,
+    string      Tag,
+    uint64_t    Flags
+);
 
+KERNEL_EXPORT
+void* LouKeMallocFromDynamicPoolEx(
+    POOL Pool, 
+    size_t AllocationSize, 
+    size_t Alignment
+);
+
+KERNEL_EXPORT
+void* LouKeMallocFromDynamicPool(
+    POOL Pool, 
+    size_t AllocationSize
+);
+
+KERNEL_EXPORT
+void LouKeFreeFromDynamicPool(
+    POOL Pool, 
+    void* Address
+);
+
+KERNEL_EXPORT
+POOL LouKeCreateGenericPool(
+    uint64_t VLocation,
+    uint64_t Location,
+    uint64_t Size,
+    uint64_t Flags
+);
+
+KERNEL_EXPORT
+void* LouKeGenricAllocateDmaPool(
+    POOL Pool,
+    size_t size,
+    size_t* Offset
+);
+
+KERNEL_EXPORT
+void* LouKeGenericPoolGetPhyAddress(
+    POOL Pool,
+    void* Address
+);
 
 #endif

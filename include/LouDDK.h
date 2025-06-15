@@ -277,5 +277,15 @@ KERNEL_EXPORT void sleep(uint64_t Time);
 KERNEL_EXPORT void outw(uint64_t port, uint16_t data);
 KERNEL_EXPORT uint16_t inw(uint64_t port64);
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
+KERNEL_EXPORT uint32_t inl(uint64_t Port64);
+KERNEL_EXPORT uint32_t outl(uint64_t Port64, uint32_t Data);
+
+#ifndef _MEMORY_BARRIER
+#define _MEMORY_BARRIER
+
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+
+#endif
+
 
 #endif

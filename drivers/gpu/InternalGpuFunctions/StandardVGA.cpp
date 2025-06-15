@@ -170,7 +170,9 @@ LOUSTATUS InitializeStandardVga(
 
     VgaRegisterFastWrite(g_640x480x16, VgaPortBase);
 
-    uint8_t* FrameBuffer = (uint8_t*)LouKeHalGetPciVirtualBaseAddress(PciConfig, 0);
+    LouPrint("InitializeStandardVga\n");
+    while(1);
+    uint8_t* FrameBuffer = 0x00;//(uint8_t*)LouKeHalGetPciVirtualBaseAddress(PciConfig, 0);
 
     PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
 

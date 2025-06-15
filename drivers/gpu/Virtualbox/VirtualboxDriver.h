@@ -26,32 +26,39 @@
 #define VIRTUALBOX_GUEST_HEAP_USABLE_SIZE   VBVA_ADAPTER_INFORMATION_SIZE - sizeof(HGSMI_HOST_FLAGS)
 #define VIRTUALBOX_HOST_FLAGS_OFFSET        VIRTUALBOX_GUEST_HEAP_USABLE_SIZE
 
+#include "VirtualboxGuest.h"
+
 typedef struct _VIRTUALBOX_PRIVATE_DATA{
-    PDrsdVRamObject             VirtualboxDrsdSystem;
-    PFrameBufferModeDefinition  ModeDefinitions;
-    uint8_t*                    GuestHeap;
-    uint8_t*                    VbvaBuffers;
-    POOL                        GuestPool;
-    void*                       VbvaBufferContext;
-    bool                        AnyPitch;
-    uint32_t                    CrtcCount;
-    uint32_t                    FullVRamSize;
-    uint32_t                    AvailableVramSize;
-    void*                       LastModeHints;
-    int                         FrameBufferMtrr;
-    mutex_t                     HardwareMutex;
-    LOUQ_WORK                   HotplugWork;
-    uint32_t                    InputMappingWidth;
-    uint32_t                    InputMappingHeight;
-    bool                        SingleFramebuffer;
-    uint8_t             CursorData[VIRTUALBOX_CURSOR_DATA_SIZE];
+    DRSD_DEVICE                         DrsdDevice;
+    P_PCI_DEVICE_OBJECT                 PDEV;
+    struct _VBVA_BUFFER_CONTEXT*        VbvaInformation;
+    POOL                                VramPool;
+    uint8_t*                            VbvaBuffers;
+    uint8_t*                            HgsmiHeap;
+    POOL                                HgsmiPool;
+    uint8_t*                            GuestHeap;
+    POOL                                GuestPool;
+    void*                               VbvaBufferContext;
+    bool                                AnyPitch;
+    bool                                VBoxVideo;
+    uint32_t                            CrtcCount;
+    uint32_t                            FullVRamSize;
+    uint32_t                            AvailableVramSize;
+    void*                               LastModeHints;
+    int                                 FrameBufferMtrr;
+    mutex_t                             HardwareMutex;
+    LOUQ_WORK                           HotplugWork;
+    uint32_t                            InputMappingWidth;
+    uint32_t                            InputMappingHeight;
+    bool                                SingleFramebuffer;
+    uint8_t                             CursorData[VIRTUALBOX_CURSOR_DATA_SIZE];
 }VIRTUALBOX_PRIVATE_DATA, * PVIRTUALBOX_PRIVATE_DATA;
 
 #undef VIRTUALBOX_CURSOR_PIXEL_COUNT
 #undef VIRTUALBOX_CURSOR_DATA_SIZE
 
 typedef struct _VIRTUALBOX_CONNECTOR{
-    PDrsdConnector  Base;
+    DRSD_CONNECTOR  Base;
     char            Name[32];
     void*           VBOXCrtc;
     struct{
@@ -62,7 +69,7 @@ typedef struct _VIRTUALBOX_CONNECTOR{
 }VIRTUALBOX_CONNECTOR, * PVIRTUALBOX_CONNECTOR;
 
 typedef struct _VIRTUALBOX_CRTC{
-    PDrsdCrtc   Base;
+    DRSD_CRTC   Base;
     bool        Disconnected;
     uint32_t    CrtcId;
     uint32_t    FramebufferOffset;
@@ -76,45 +83,52 @@ typedef struct _VIRTUALBOX_CRTC{
 }VIRTUALBOX_CRTC, * PVIRTUALBOX_CRTC;
 
 typedef struct _VIRTUALBOX_ENCODER{
-    DrsdEncoder Base;
+    DRSD_ENCODER    Base;
 }VIRTUALBOX_ENCODER, * PVIRTUALBOX_ENCODER;
 
-#define GET_VIRTUALBOX_CRTC(x)      container_of(x, VIRTUALBOX_CRTC, Base)
-#define GET_VIRTUALBOX_CONNECTOR(x) container_of(x, VIRTUALBOX_CONNECTOR, Base)
-#define GET_VIRTUALBOX_ENCODER(x)   container_of(x, VIRTUALBOX_ENCODER, Base)
-#define GET_VIRTUALBOX_DEVICE(x)    container_of(x, VIRTUALBOX_PRIVATE_DATA, Device)
+#define GET_VIRTUALBOX_CRTC(x)          GET_CONTAINER(x, VIRTUALBOX_CRTC, Base)
+#define GET_VIRTUALBOX_CONNECTOR(x)     GET_CONTAINER(x, VIRTUALBOX_CONNECTOR, Base)
+#define GET_VIRTUALBOX_ENCODER(x)       GET_CONTAINER(x, VIRTUALBOX_ENCODER, Base)
+#define GET_VIRTUALBOX_PRIVATE_DATA(x)  GET_CONTAINER(x, VIRTUALBOX_PRIVATE_DATA, Device)
 
 bool VirtualboxCheckSupported(uint16_t Identification);
 int VirtualboxHardwareInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxHardwareDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-int VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
+LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxModeDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxReportCaps(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 int VirtualboxMmInit(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 int VirtualboxIrqInitializeation(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxIrqDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxIrqReportHotplug(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-void* HgsmiBufferAllocate(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-void  HgsmiBufferFree(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-void  HgsmiBufferSubmit(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 
-#define VBE_DISPI_IOPORT_INDEX 0x01CE  // I/O port for setting the index register
-#define VBE_DISPI_DISABLED 0x00  // Common value used to disable the adapter
-#define VBE_DISPI_IOPORT_DATA 0x01CF  // I/O port for reading/writing data
-#define VBE_DISPI_ENABLED 0x01  // Common value used to enable the adapter
-#define VBE_DISPI_LFB_ENABLED 0x40  // Value to enable linear framebuffer mode
+void* HgsmiBufferAllocate(
+    POOL GuestPool, 
+    size_t size,
+    uint8_t Channel,
+    uint16_t ChannelInfo
+);
 
-static inline void VBOX_IO_WRITE(uint16_t Index, uint16_t Data){
-    outw(Index, VBE_DISPI_IOPORT_INDEX);
-    outw(Index, VBE_DISPI_IOPORT_DATA);
-}
+int HgsmiBufferSubmit(
+    POOL Context,
+    void* Buffer
+);
 
+void HgsmiBufferFree(
+    POOL Context,
+    void* Buffer
+);
 
 #include "HgsmiDefinitions.h"
 #include "VBoxVideo.h"
 #include "HgsmiChSetup.h"
 #include "HgsmiChannels.h"
 #include "VirtualBoxVbe.h"
-#include "VirtualboxGuest.h"
+
+
+static inline void VBOX_IO_WRITE(uint16_t Index, uint16_t Data){
+    outw(VIRTUALBOX_VBE_DISPI_IO_INDEX_PORT, Index);
+    outw(VIRTUALBOX_VBE_DISPI_IO_DATA_PORT, Data);
+}
 
 #endif//_VIRTUALBOX_DRIVER_H

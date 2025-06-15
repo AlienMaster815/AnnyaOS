@@ -14,7 +14,7 @@ SRC = VirtualBoxMain.cpp \
 	  VirtualboxInterrupts.cpp \
 	  VirtualboxMode.cpp \
 	  VirtualboxBufferObjects.cpp \
-	  VbvaBase.cpp
+	  VbvaBase.cpp 
 
 TARGET = VBOXGPU.SYS
 

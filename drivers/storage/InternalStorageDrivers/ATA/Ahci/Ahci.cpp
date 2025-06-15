@@ -752,8 +752,8 @@ NTSTATUS AddAhciDevice(
 
     //At this point we are able to grab the host and start filling out
     //private data from the information on the controller
-    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKeHalGetPciVirtualBaseAddress(PciConfig, Abar);
-    
+    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKePciGetIoRegion(PDEV, Abar, 0);
+
     PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
 
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeMallocAtaDevice(PDEV, PortCount);

@@ -286,9 +286,6 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
 
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize) {
 
-    PAddress &= ~(KILOBYTE_PAGE - 1);
-    VAddress &= ~(KILOBYTE_PAGE - 1);
-
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
     uint64_t L3Entry = 0;

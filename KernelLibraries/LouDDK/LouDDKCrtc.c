@@ -11,6 +11,8 @@ typedef void* LPVOID;
 typedef uint32_t DWORD;
 typedef uint64_t LOUSTATUS;
 
+//__declspec(dllimport) int LouPrint(char* format, ...);
+
 extern LOUSTATUS DriverEntry(PDRIVER_OBJECT DrvObj, PUNICODE_STRING RegistryEntry);
 
 LOUSTATUS _DriverEntry(PDRIVER_OBJECT _DrvObj, PUNICODE_STRING _RegistryEntry){
@@ -37,3 +39,7 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         : "rax"   // Mark `rax` as clobbered
     );
 }
+
+//void LouKeVmDebuggerPrintHex(uint64_t HexValue){
+//    LouPrint("LouKeVmDebuggerPrintHex:%h\n", HexValue);
+//}

@@ -17,20 +17,21 @@
  */
 
 #define VIRTUALBOX_VIDEO_MAX_SCREENS                                64
-#define VBVA_RING_BUFFER_SIZE                                       4194304 - 1024
-#define VBVA_MAXIMUM_RECORDS                                        64
-#define VBVA_F_MODE_ENABLED                                         0x00000001
-#define VBVA_F_MODE_VRDP                                            0x00000002
-#define VBVA_F_MODE_VRDP_RESET                                      0x00000004
-#define VBVA_F_MODE_VRDP_ORDER_BITS                                 0x00000008
-#define VBVA_F_STATE_PROCESSING                                     0x00010000
-#define VBVA_F_RECORD_PARTIAL                                       0x80000000
-#define VBVA_ADAPTER_INFORMATION_SIZE                               65536
-#define VBVA_MINIMUM_BUFFER_SIZE                                    65536
+#define VBVA_RING_BUFFER_SIZE                                       (4194304 - 1024)
+#define VBVA_RING_BUFFER_THRESHOLD                                  (4096)
+#define VBVA_MAXIMUM_RECORDS                                        (64)
+#define VBVA_F_MODE_ENABLED                                         0x00000001u
+#define VBVA_F_MODE_VRDP                                            0x00000002u
+#define VBVA_F_MODE_VRDP_RESET                                      0x00000004u
+#define VBVA_F_MODE_VRDP_ORDER_BITS                                 0x00000008u
+#define VBVA_F_STATE_PROCESSING                                     0x00010000u
+#define VBVA_F_RECORD_PARTIAL                                       0x80000000u
+#define VBVA_ADAPTER_INFORMATION_SIZE                               (65536)
+#define VBVA_MINIMUM_BUFFER_SIZE                                    (65536)
 #define VIRTUALBOX_VIDEO_DISABLE_ADAPTER_MEMORY                     0xFFFFFFFF
 #define VIRTUALBOX_VIDEO_INTERPRIT_ADAPTER_MEMORY                   0x00000000
 #define VIRTUALBOX_VIDEOP_INTERPRIT_DISPLAY_MEMORY_BASE             0x00010000
-#define VBVA_MAXIMUM_RECORD_SIZE                                    128 * 1024 * 1024 //128 MB
+#define VBVA_MAXIMUM_RECORD_SIZE                                    (128 * MEGABYTE) //128 MB
 //Guest To Host Command
 #define VBVA_QUERY_CONFIGURATION32_COMMAND                          1
 #define VBVA_SET_CONFIGURATION32_COMMAND                            2
@@ -76,21 +77,22 @@
 #define VBVA_F_DISABLE                                              0x00000002
 #define VBVA_F_EXTENDED                                             0x00000004
 #define VBVA_F_ABSOFFSET                                            0x00000008
-#define VIRTUALBOX_MOUSE_POINTER_VISIBLE                            0x0001
-#define VIRTUALBOX_MOUSE_POINTER_ALPHA                              0x0002
-#define VIRTUALBOX_MOUSE_POINTER_SHAPE                              0x0004
-#define VBVA_CAPS_COMPLETED_GUEST_COMMAND_BY_IO_READ                0x00000001
-#define VBVA_CAPS_IRQ                                               0x00000002
-#define VBVA_CAPS_VIDEO_MODE_HINTS                                  0x00000004
-#define VBVA_CAPS_DISABLE_CURSOR_INTEGRATION                        0x00000008
-#define VBVA_CAPS_USE_VBVA_ONLY                                     0x00000010
-#define VBVA_MODE_HINT_MAGIC                                        0x0801ADD9
+#define VBOX_MOUSE_POINTER_VISABLE                                  0x0001
+#define VBOX_MOUSE_POINTER_ALPHA                                    0x0002
+#define VBOX_MOUSE_POINTER_SHAPE                                    0x0004
+#define VBVACAPS_COMPLETEGCMD_BY_IOREAD		                        0x00000001
+#define VBVACAPS_IRQ				                                0x00000002
+#define VBVACAPS_VIDEO_MODE_HINTS		                            0x00000004
+#define VBVACAPS_DISABLE_CURSOR_INTEGRATION	                        0x00000008
+#define VBVACAPS_USE_VBVA_ONLY			                            0x00000010
+
+#define U32_MAX ((uint32_t)~0U)
 
 typedef struct __attribute__((packed)) _VBVA_COMMAND_HEADER{
-    int16_t X;
-    int16_t Y;
-    int16_t W;
-    int16_t H;
+    int16_t     X;
+    int16_t     Y;
+    uint16_t    W;
+    uint16_t    H;
 }VBVA_COMMAND_HEADER, * PVBVA_COMMAND_HEADER;
 
 typedef struct __attribute__((packed)) _VBVA_RECORD{

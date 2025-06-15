@@ -129,7 +129,7 @@ static inline int find_next_thread(int CurrentThread) {
 
 LOUDDK_API_ENTRY void local_apic_send_eoi();
 
-KERNEL_IMPORT spinlock_t* LouKeGetInterruptGlobalLock();
+KERNEL_IMPORT mutex_t* LouKeGetInterruptGlobalLock();
 
 LOUDDK_API_ENTRY
 uint64_t GetAdvancedRegisterInterruptsStorage(){
@@ -203,7 +203,9 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
     CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
-
+    if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
+    }
     if((CurrentContext->cs & 0b11) == 0){
         //tasks shall not switch when running
         //in the kernel segment to eliminate

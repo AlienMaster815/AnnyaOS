@@ -30,13 +30,13 @@ typedef struct  __attribute__((packed)) _CPUContext{
 
 void CheckWinCallTable(int64_t Call, uint64_t Data);
 void CheckLouCallTables(int64_t Call, uint64_t Data);
-spinlock_t* LouKeGetInterruptGlobalLock();
+mutex_t* LouKeGetInterruptGlobalLock();
 void RestoreEverything(uint64_t* ContextHandle);
 void SaveEverything(uint64_t* ContextHandle);
 
 void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t StackPointer){
     uint64_t* Status = (uint64_t*)Data;
-    if(SpinlockIsLocked(LouKeGetInterruptGlobalLock())){
+    if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
         *Status = 0;
         return;
     }

@@ -196,7 +196,10 @@ typedef struct _PCI_COMMON_HEADER {
 typedef struct _PCI_COMMON_CONFIG {
     PCI_COMMON_HEADER Header;
     UCHAR   DeviceSpecific[192];
-} PCI_COMMON_CONFIG, *PPCI_COMMON_CONFIG;
+	uint64_t BarSize[6];
+	uint64_t BarBase[6];
+	uint8_t  BarFlags[6];
+} PCI_COMMON_CONFIG, * PPCI_COMMON_CONFIG;
 
 typedef struct  _PCI_CONTEXT{
     PCI_COMMON_CONFIG PciConfig;
