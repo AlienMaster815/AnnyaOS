@@ -98,7 +98,10 @@ KERNEL_IMPORT
 void DrsdInternalResetPlane(
     PDRSD_PLANE Plane
 ){
-    LouPrint("DrsdInternalResetPlane()\n");
+
+    
+
+    LouPrint("DrsdInternalResetPlane() STATUS_SUCCESS\n");
     while(1);
 }
 
@@ -422,8 +425,7 @@ void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
     PDRSD_PLANE Plane = Device->Planes;
     while(Plane){
         if(Plane->Callbacks->ResetPlane){
-            LouPrint("Plane->Callbacks->ResetPlane():%h\n", Plane->Callbacks->ResetPlane);
-            //Plane->Callbacks->ResetPlane(Plane);
+            Plane->Callbacks->ResetPlane(Plane);
         }
         Plane = (PDRSD_PLANE)Plane->Peers.NextHeader;
     }

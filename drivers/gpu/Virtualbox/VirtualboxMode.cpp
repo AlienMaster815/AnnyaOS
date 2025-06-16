@@ -226,10 +226,6 @@ static PDRSD_PLANE VirtualboxCreatePlane(
         return 0x00;
     }
 
-    LouPrint("Functions:%h\n",&PlaneCallbacks);
-    LouPrint("Functions:%h\n",Functions);
-    LouPrint("Functions->Reset:%h\n", PlaneCallbacks.ResetPlane);
-    LouPrint("Functions->Reset:%h\n", Functions->ResetPlane);
     Status = DrsdInitializeGenericPlane(
         &VBox->DrsdDevice, 
         NewPlane,
@@ -399,9 +395,7 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
         }
 
     }
-    
-    LouPrint("DrsdResetPlane:%h\n", PlaneCallbacks.ResetPlane);
-    
+        
     DrsdModeConfigurationReset(Device);
 
     return STATUS_SUCCESS;

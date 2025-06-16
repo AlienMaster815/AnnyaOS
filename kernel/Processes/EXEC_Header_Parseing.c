@@ -306,33 +306,75 @@ void RelocateBaseAddresses(
             uint16_t offsetWithinPage = typeOffset & 0xFFF;
 
             switch (type) {
-                case IMAGE_REL_BASED_HIGH:
-                case IMAGE_REL_BASED_LOW:
-                case IMAGE_REL_BASED_HIGHLOW:
-                case IMAGE_REL_BASED_HIGHADJ:
-                case IMAGE_REL_BASED_MIPS_JMPADDR:
-                case IMAGE_REL_BASED_SECTION:
-                case IMAGE_REL_BASED_REL:
-                case IMAGE_REL_BASED_MIPS_JMPADDR16:
-                case IMAGE_REL_BASED_IA64_IMM64:
-                case IMAGE_REL_BASED_DIR64:
+                case IMAGE_REL_BASED_HIGH:{
+                    LouPrint("IMAGE_REL_BASED_HIGH\n");
+                    while(1);   
+                    continue;
+                }
+                case IMAGE_REL_BASED_LOW:{
+                    LouPrint("IMAGE_REL_BASED_LOW\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_HIGHLOW:{
+                    LouPrint("IMAGE_REL_BASED_HIGHLOW\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_HIGHADJ:{
+                    LouPrint("IMAGE_REL_BASED_HIGHADJ\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_MIPS_JMPADDR:{
+                    LouPrint("IMAGE_REL_BASED_MIPS_JMPADDR\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_SECTION:{
+                    LouPrint("IMAGE_REL_BASED_SECTION\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_REL:{
+                    LouPrint("IMAGE_REL_BASED_REL");
+                    while(1);
+                    continue;
+                }
+
+                case IMAGE_REL_BASED_MIPS_JMPADDR16:{
+                    LouPrint("IMAGE_REL_BASED_MIPS_JMPADDR16\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_IA64_IMM64:{
+                    LouPrint("IMAGE_REL_BASED_IA64_IMM64\n");
+                    while(1);
+                    continue;
+                }
+                case IMAGE_REL_BASED_DIR64:{                    
+                    uint64_t* target = (uint64_t*)((relocationBlock->VirtualAddress + offsetWithinPage) + NewBase);
+                    if(AddressDrop){
+                        *target -= BaseDelta;
+                    }else{
+                        *target += BaseDelta;
+                    }
+                    break;
+                }
                 case IMAGE_REL_BASED_HIGH3ADJ: {
-                    GetNewRelocVariableAddress(
-                        NewBase,
-                        relocationBlock->VirtualAddress,
-                        offsetWithinPage,
-                        BaseDelta,
-                        AddressDrop
-                    );
+                    LouPrint("IMAGE_REL_BASED_HIGH3ADJ\n");
+                    while(1);
                     continue;
                 }
                 case IMAGE_REL_BASED_ABSOLUTE:
+                    LouPrint("IMAGE_REL_BASED_ABSOLUTE\n");
+                    while(1);
                 default:
                     continue;
             }
         }
         offset += relocationBlock->SizeOfBlock;
-    }
+    }    
 }
 
 static inline void SetupConfigTable(
@@ -358,8 +400,6 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
     PPE64_OPTIONAL_HEADER PE64Header;
     PSECTION_HEADER SectionHeader;    
 
-    LouPrint("Here\n");
-    while(1);
     if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
         //LouPrint("Found A Valid Kernel Module\n");
         GetAllPEHeaders(
@@ -442,7 +482,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             relocationTableSize
         );
 
-        LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
+        //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
         //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
         if(!PE64Header->addressOfEntryPoint){
