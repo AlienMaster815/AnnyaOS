@@ -113,3 +113,5 @@ HgsmiCursorPosition(
 
     return STATUS_SUCCESS;
 }
+
+

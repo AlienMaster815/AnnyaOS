@@ -55,7 +55,6 @@ static uint32_t MouseTmpData[12 * 19];
 
 static inline void DrawMouse(uint16_t x, uint16_t y){
     PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);
-
     for(uint8_t yz = 0 ; yz < 19; yz++){
         uint16_t XData = Cursour[yz];
         uint16_t X2Data = CursourRim[yz];

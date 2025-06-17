@@ -1,6 +1,8 @@
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
 #include "VirtualboxDriver.h"
+ #include <drivers/VBoxError.h>
+
 
 /*
  * This is a clean-room reimplementation of the VirtualBox VBE/VMSVGA driver,
@@ -49,14 +51,47 @@ HgsmiUpdateInputMappings(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS 
-HgsmiGetModeHints(
+LOUSTATUS HgsmiGetModeHints(
     POOL Context, 
     uint32_t Screens, 
     PVBVA_MODE_HINT Hints
 ){
+    
+    PVBVA_QUERY_MODE_HINTS  Query;
+    size_t                  Size;
 
-#define _KERNEL_MODULE_
+    if(!Hints){
+        LouPrint("ERROR:VBOX_VIDEO:HgsmiGetModeHints() Hints Is NULL\n");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    
+    Size = Screens * sizeof(VBVA_MODE_HINT);
+    Query = (PVBVA_QUERY_MODE_HINTS)HgsmiBufferAllocate(
+        Context, 
+        sizeof(VBVA_QUERY_MODE_HINTS) + Size, 
+        HGSMI_CH_VBVA, 
+        VBVA_QUERY_MODE_HINTS_COMMAND
+    );
+
+    if(!Query){
+        LouPrint("ERROR:VBOX_VIDEO:HgsmiGetModeHints() Query Is Null\n");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Query->HintsQueriedCount = Screens;
+    Query->HintStructureQuestSize = sizeof(VBVA_MODE_HINT);
+    Query->Rc = VERR_NOT_SUPPORTED;
+
+    HgsmiBufferSubmit(Context, Query);
+
+    if(Query->Rc < 0){
+        LouPrint("ERROR:VBOX_VIDEO:HgsmiGetModeHints() Query Failed\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    memcpy(Hints, (uint8_t*)(uint64_t)((uint8_t*)Query) + sizeof(VBVA_QUERY_MODE_HINTS), Size);
+    
+    HgsmiBufferFree(Context, Query);
 
     return STATUS_SUCCESS;
 }

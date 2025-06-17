@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 153
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 154
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -362,6 +362,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[150] = "DrsdInternalResetConnector";
     ImportTables[4].FunctionName[151] = "DrsdConnectorInitialize";
     ImportTables[4].FunctionName[152] = "DrsdModeConfigurationReset";
+    ImportTables[4].FunctionName[153] = "DrsdInternalProbeSingleConnectorModes";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -516,6 +517,8 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[150] = (uint64_t)DrsdInternalResetConnector;
     ImportTables[4].VirtualAddress[151] = (uint64_t)DrsdConnectorInitialize;
     ImportTables[4].VirtualAddress[152] = (uint64_t)DrsdModeConfigurationReset;
+    ImportTables[4].VirtualAddress[153] = (uint64_t)DrsdInternalProbeSingleConnectorModes;
+
 
 }
 

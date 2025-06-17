@@ -14,7 +14,20 @@ static LOUSTATUS VirtualboxFillModes(
     uint32_t MaxX, 
     uint32_t MaxY
 ){
-    LouPrint("VirtualboxFillModes()\n");
+    PVIRTUALBOX_CONNECTOR VBoxConnector = (PVIRTUALBOX_CONNECTOR)Connector;
+    PDRSD_DEVICE Device = VBoxConnector->Base.Device;
+
+    //TODO: Delete Old Modes
+
+    LOUSTATUS Status = DrsdInternalProbeSingleConnectorModes(
+        Connector,
+        MaxX,
+        MaxY
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    LouPrint("VirtualboxFillModes() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;
 }
@@ -311,6 +324,8 @@ static PVIRTUALBOX_CRTC VirtualboxCrtcInitialize(
 
     VBoxCrtc->Base.AssistCallbacks = (PDRSD_CRTC_ASSIST_CALLBACK)&VBoxCrtcAssistCallbacks;
 
+    VBoxCrtc->CrtcId = i;
+
     LouPrint("VirtualboxCrtcInitialize() STATUS_SUCCESS\n");
     return VBoxCrtc;
 }
@@ -331,6 +346,7 @@ static PDRSD_ENCODER VirtualboxEncoderInitialize(
         0x00
     );
     LouPrint("VirtualboxEncoderInitialize() STATUS_SUCCESS\n");
+
     return &VBoxEncoder->Base;
 }
 
@@ -358,7 +374,10 @@ static LOUSTATUS VirtualboxConnectorInitialize(
     Connector->InterlaceAble = false;
     Connector->DoubleScanAble = false;
 
+    Device->ModeConfiguration.SuggestedX = 0;
+    Device->ModeConfiguration.SuggestedY = 0;
 
+    ((PVIRTUALBOX_CONNECTOR)Connector)->VBOXCrtc = Crtc;
 
     LouPrint("VirtualboxConnectorInitialize() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

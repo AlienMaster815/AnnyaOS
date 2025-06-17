@@ -86,6 +86,8 @@
 #define VBVACAPS_DISABLE_CURSOR_INTEGRATION	                        0x00000008
 #define VBVACAPS_USE_VBVA_ONLY			                            0x00000010
 
+#define VBVA_MODE_HINT_MAGIC                                        0x0801ADD9
+
 #define U32_MAX ((uint32_t)~0U)
 
 typedef struct __attribute__((packed)) _VBVA_COMMAND_HEADER{

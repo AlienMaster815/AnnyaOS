@@ -14,6 +14,9 @@ extern "C" {
  * No Linux kernel code has been copied. Inspired by public concepts only.
 */
 
+#define DRSD_ROTATION_MODE_0 1
+
+#define DRSD_PIXEL_BLEND_PRE_MULTI 1
 
 #define DRSD_MAXIMUM_OBJECT_PROPERTIES 64
 
@@ -139,7 +142,8 @@ typedef struct _DRSD_MODE_OBJECT{
     uint32_t                            Identification;
     uint32_t                            ModeType;
     struct _DRSD_OBJECT_PROPERTIES*     Properties;
-    size_t                              PropertiesCount;
+    atomic_t                            ReferenceCount;
+    void                                (*FreeCb)(int Reference);
 }DRSD_MODE_OBJECT, * PDRSD_MODE_OBJECT;
 
 typedef struct _DRSD_OBJECT_PROPERTIES{
@@ -199,6 +203,7 @@ typedef struct _DRSD_GXE_OBJECT{
 typedef struct _DRSD_FRAME_BUFFER{
     ListHeader                              Peers;
     struct _DRSD_DEVICE*                    Device;
+    DRSD_MODE_OBJECT                        Base;
     string                                  Comm;
     PDRSD_FORMAT_INFORMATION                FormatInfo;
     PDRSD_FRAMEBUFFER_CALLBACKS             Callbacks;
@@ -292,9 +297,23 @@ typedef struct  _DRSD_DISPLAY_MODE{
     HDMI_ASPECT_RATIO       AspectRatio;
 }DRSD_DISPLAY_MODE, * PDRSD_DISPLAY_MODE;
 
+typedef struct _DRSD_CRTC_COMMIT{
+    atomic_t        Reference;
+}DRSD_CRTC_COMMIT, * PDRSD_CRTC_COMMIT;
+
 typedef struct _DRSD_PLANE_STATE{
-    uintptr_t Foo;
+    struct _DRSD_FRAME_BUFFER*      FrameBuffer;
+    atomic_t                        Fence;
+    DRSD_CRTC_COMMIT                Commit;
+    struct _DRSD_PROPERTY_BLOB*     Base;
+    uint32_t                        Rotation;
+    uint32_t                        PixelBlend;
 }DRSD_PLANE_STATE, * PDRSD_PLANE_STATE;
+
+typedef struct _SHADOW_PLANE_STATE{
+    DRSD_PLANE_STATE Base;
+    
+}SHADOW_PLANE_STATE, * PSHADOW_PLANE_STATE;
 
 typedef struct _DRSD_PLANE_ASSIST_CALLBACKS{
     LOUSTATUS   (*PrepareFrameBuffer)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* NewState);
@@ -353,6 +372,12 @@ typedef struct _DRSD_PLANE{
     PDRSD_PLANE_ASSIST_CALLBACKS    AssistCallbacks;
     DRSD_OBJECT_PROPERTIES          Properties;
     DRSD_PLANE_TYPE                 PlaneType;
+    PDRSD_PLANE_STATE               PlaneState;
+    size_t                          ColorEncodingProperty;
+    size_t                          ColorRangeProperty;
+    size_t                          ZPositionProperty;
+    size_t                          HotSpotXProperty;
+    size_t                          HotSpotYProperty;
 }DRSD_PLANE, * PDRSD_PLANE;
 
 typedef enum{
@@ -477,7 +502,7 @@ typedef struct _DRSD_CONNECTOR_CALLBACKS{
 typedef struct _DRSD_PROPERTY_BLOB{
     ListHeader              Peers;
     struct _DRSD_DEVICE*    Device;
-    DRSD_MODE_OBJECT        ModeObject;
+    DRSD_MODE_OBJECT        Base;
     size_t                  Length;
     void*                   Data;
 }DRSD_PROPERTY_BLOB, * PDRSD_PROPERTY_BLOB;
@@ -594,7 +619,8 @@ typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
 
 
 typedef struct _DRSD_CRTC_STATE{
-    uintptr_t Foo;
+    struct _DRSD_CRTC* Crtc;
+
 }DRSD_CRTC_STATE, * PDRSD_CRTC_STATE;   
 
 
@@ -656,6 +682,7 @@ typedef struct _DRSD_CRTC{
     PDRSD_CRTC_ASSIST_CALLBACK      AssistCallbacks;
     size_t                          GammaSize;
     uint16_t*                       GammaStore;
+    PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 
 typedef struct  _DrsdBufferObjects{
@@ -705,6 +732,12 @@ typedef struct _DRSD_MODE_CONFIGURATION_CALLBACKS{
     void*                           (*ReleaseAtomic)(struct _DRSD_DEVICE* Device);
 }DRSD_MODE_CONFIGURATION_CALLBACKS, * PDRSD_MODE_CONFIGURATION_CALLBACKS;
 
+typedef struct _DRSD_VBLANK_CRTC{
+    ListHeader  Peers;
+    atomic_t    Count;
+    size_t      InModeset;
+}DRSD_VBLANK_CRTC, * PDRSD_VBLANK_CRTC;
+
 typedef struct _DRSD_MODE_CONFIGURATION{
     mutex_t                                 ConfigLock;
     mutex_t                                 ConnectionMutex;
@@ -713,6 +746,8 @@ typedef struct _DRSD_MODE_CONFIGURATION{
     size_t                                  MinimalHeight;
     size_t                                  MaximumWidth;
     size_t                                  MaximumHeight;
+    size_t                                  SuggestedX;
+    size_t                                  SuggestedY;
     uint8_t                                 PreferedDepth;
     size_t                                  TotalPlanes;
     uint32_t                                EnabledPlanes;
@@ -723,16 +758,21 @@ typedef struct _DRSD_MODE_CONFIGURATION{
 }DRSD_MODE_CONFIGURATION, * PDRSD_MODE_CONFIGURATION;
 
 typedef struct _DRSD_DEVICE{
-    DrsdVRamObject                  DrsdVramObject; //mostly depreiciated for non linear framebuffers here for legacy and basic vram
+    DrsdVRamObject                  DrsdVramObject; //mostly depreiciated for non linear framebuffers here for legacy and linear framebuffers
     struct _PCI_DEVICE_OBJECT*      PDEV;
     struct _LMPOOL_DIRECTORY*       VramPool;
     DRSD_MODE_CONFIGURATION         ModeConfiguration;
-    PDRSD_MODE_OBJECT               BaseMode;
+    DRSD_MODE_OBJECT                BaseMode;
     uint32_t                        PossibleCrtcs;
+    size_t                          CrtcCount;
     PDRSD_PLANE                     Planes;
     PDRSD_CRTC                      Crtcs;
     PDRSD_ENCODER                   Encoders;
     PDRSD_CONNECTOR                 Connectors;
+    spinlock_t                      VBlankLock;
+    size_t                          VBlankCount;
+    PDRSD_VBLANK_CRTC               VBlanks;
+    bool                            DeviceReadyForDrawing;
 }DRSD_DEVICE, * PDRSD_DEVICE;
 
 #define RGB_DRSD_FRAMEBUFFER 1
@@ -941,6 +981,12 @@ LOUSTATUS DrsdConnectorInitialize(
 
 void DrsdModeConfigurationReset(PDRSD_DEVICE Device);
 
+LOUSTATUS DrsdInternalProbeSingleConnectorModes(
+    PDRSD_CONNECTOR Connector,
+    uint32_t        MaxX,
+    uint32_t        MaxY
+);
+
 #endif
 #ifdef __cplusplus
 }
@@ -1147,6 +1193,13 @@ LOUSTATUS DrsdConnectorInitialize(
 
 KERNEL_EXPORT
 void DrsdModeConfigurationReset(PDRSD_DEVICE Device);
+
+KERNEL_EXPORT
+LOUSTATUS DrsdInternalProbeSingleConnectorModes(
+    PDRSD_CONNECTOR Connector,
+    uint32_t        MaxX,
+    uint32_t        MaxY
+);
 
 #endif
 #endif

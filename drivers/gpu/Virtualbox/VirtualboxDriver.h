@@ -44,7 +44,7 @@ typedef struct _VIRTUALBOX_PRIVATE_DATA{
     uint32_t                            CrtcCount;
     uint32_t                            FullVRamSize;
     uint32_t                            AvailableVramSize;
-    void*                               LastModeHints;
+    struct _VBVA_MODE_HINT*             LastModeHints;
     int                                 FrameBufferMtrr;
     mutex_t                             HardwareMutex;
     LOUQ_WORK                           HotplugWork;
@@ -56,17 +56,6 @@ typedef struct _VIRTUALBOX_PRIVATE_DATA{
 
 #undef VIRTUALBOX_CURSOR_PIXEL_COUNT
 #undef VIRTUALBOX_CURSOR_DATA_SIZE
-
-typedef struct _VIRTUALBOX_CONNECTOR{
-    DRSD_CONNECTOR  Base;
-    char            Name[32];
-    void*           VBOXCrtc;
-    struct{
-        uint32_t    Width;
-        uint32_t    Height;
-        bool        Disconnected;
-    }ModeHint;
-}VIRTUALBOX_CONNECTOR, * PVIRTUALBOX_CONNECTOR;
 
 typedef struct _VIRTUALBOX_CRTC{
     DRSD_CRTC   Base;
@@ -82,8 +71,21 @@ typedef struct _VIRTUALBOX_CRTC{
     uint32_t    Y;
 }VIRTUALBOX_CRTC, * PVIRTUALBOX_CRTC;
 
+typedef struct _VIRTUALBOX_CONNECTOR{
+    DRSD_CONNECTOR      Base;
+    char                Name[32];
+    PVIRTUALBOX_CRTC    VBOXCrtc;
+    struct{
+        uint32_t        Width;
+        uint32_t        Height;
+        uint32_t        X;
+        uint32_t        Y;
+        bool            Disconnected;
+    }ModeHint;
+}VIRTUALBOX_CONNECTOR, * PVIRTUALBOX_CONNECTOR;
+
 typedef struct _VIRTUALBOX_ENCODER{
-    DRSD_ENCODER    Base;
+    DRSD_ENCODER        Base;
 }VIRTUALBOX_ENCODER, * PVIRTUALBOX_ENCODER;
 
 #define GET_VIRTUALBOX_CRTC(x)          GET_CONTAINER(x, VIRTUALBOX_CRTC, Base)
@@ -98,7 +100,7 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivat
 void VirtualboxModeDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxReportCaps(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 int VirtualboxMmInit(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-int VirtualboxIrqInitializeation(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
+LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox);
 void VirtualboxIrqDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxIrqReportHotplug(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 

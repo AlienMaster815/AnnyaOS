@@ -154,3 +154,4 @@ EXPORTS
     DrsdInternalResetConnector
     DrsdConnectorInitialize
     DrsdModeConfigurationReset
+    DrsdInternalProbeSingleConnectorModes

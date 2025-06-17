@@ -129,6 +129,14 @@ static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit)
 }
 semaphore_t* LouKeCreateSemaphore(int initial, int limit);
 
+static inline void LouKeSetAtomic(atomic_t* A, int Value){
+    atomic_set(A, Value);
+}
+
+static inline int LouKeGetAtomic(atomic_t* A){
+    return atomic_read(A);
+}
+
 #ifndef _KERNEL_MODULE_
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
 void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);

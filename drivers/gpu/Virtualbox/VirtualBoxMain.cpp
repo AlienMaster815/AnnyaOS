@@ -191,6 +191,21 @@ AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
         return Status;
     }
 
+    Status = InitializeVirtualboxInterrupts(VBox);    
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    PDEV->DevicePrivateData = (uintptr_t)VBox;
+
+    LouKeRegisterDevice(
+        (P_PCI_DEVICE_OBJECT)PDEV, 
+        GRAPHICS_DEVICE_T, 
+        "HKEY:Annya/System64/Drivers/VBoxGpu", 
+        (void*)VBox, 
+        (void*)VBox
+    );
+
     LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
     while(1);
     return Status;

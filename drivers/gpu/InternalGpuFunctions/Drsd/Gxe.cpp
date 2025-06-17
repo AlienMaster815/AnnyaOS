@@ -1,4 +1,4 @@
-#include <LouDDK.h>
+#include "DrsdCore.h"
 
 KERNEL_IMPORT
 LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress){
@@ -94,15 +94,46 @@ void DrsdInternalDestroyPlane(
     while(1);
 }
 
+
+
 KERNEL_IMPORT
 void DrsdInternalResetPlane(
     PDRSD_PLANE Plane
 ){
 
-    
+    if(Plane->PlaneState){
+        DrsdAtomicDestroyPlaneState(Plane->PlaneState);
+        LouKeFree(Plane->PlaneState);
+    }
 
+    Plane->PlaneState = LouKeMallocType(DRSD_PLANE_STATE, KERNEL_GENERIC_MEMORY);
+    if(!Plane->PlaneState){
+        return;
+    }
+
+    Plane->PlaneState->Rotation = DRSD_ROTATION_MODE_0;
+    Plane->PlaneState->PixelBlend = DRSD_PIXEL_BLEND_PRE_MULTI;
+
+    if(Plane->ColorEncodingProperty){
+        LouPrint("DrsdInternalResetPlane():ColorEncodingProperty\n");
+    }
+    if(Plane->ColorRangeProperty){
+        LouPrint("DrsdInternalResetPlane():ColorRangeProperty\n");
+        while(1);   
+    }
+    if(Plane->ZPositionProperty){
+        LouPrint("DrsdInternalResetPlane():ZPositionProperty\n");
+        while(1);   
+    }
+    if(Plane->HotSpotXProperty){
+        LouPrint("DrsdInternalResetPlane():HotSpotXProperty\n");
+        while(1);   
+    }
+    if(Plane->HotSpotYProperty){
+        LouPrint("DrsdInternalResetPlane():HotSpotYProperty\n");
+        while(1);   
+    }
     LouPrint("DrsdInternalResetPlane() STATUS_SUCCESS\n");
-    while(1);
 }
 
 KERNEL_IMPORT
@@ -168,8 +199,16 @@ KERNEL_IMPORT
 void DrsdGxeResetShadowPlane(
     PDRSD_PLANE         Plane
 ){
-    LouPrint("DrsdGxeResetShadowPlane()\n");
-    while(1);
+
+    if(Plane->PlaneState){
+        DrsdGxeDestroyShadowPlane(Plane);
+    }    
+    Plane->PlaneState = (PDRSD_PLANE_STATE)LouKeMallocType(SHADOW_PLANE_STATE, KERNEL_GENERIC_MEMORY);
+    if(!Plane->PlaneState){
+        return;
+    }
+    DrsdInternalResetPlane(Plane);
+    LouPrint("DrsdGxeResetShadowPlane() STATUS_SUCCESS\n");
 }
 
 KERNEL_IMPORT
@@ -241,7 +280,11 @@ LOUSTATUS DrsdInitializeCrtcWithPlanes(
     PDRSD_CRTC_CALLBACK     CrtcCallbacks
 ){
   
+    Device->CrtcCount++;
     Crtc->CrtcCallbacks = CrtcCallbacks;
+    Crtc->Device = Device;
+
+    AddVBlankToCrtc(Device);
 
     PDRSD_PLANE Pri = Crtc->PrimaryPlanes;
     if(!Pri){
@@ -329,8 +372,17 @@ LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
 void DrsdInternalCrtcResetAtomic(
     PDRSD_CRTC          Crtc 
 ){
-    LouPrint("DrsdInternalCrtcResetAtomic()\n");
-    while(1);
+    if(Crtc->CrtcState){
+        Crtc->CrtcCallbacks->AtomicDestroyState(Crtc, Crtc->CrtcState);
+    }
+    Crtc->CrtcState = LouKeMallocType(DRSD_CRTC_STATE, KERNEL_GENERIC_MEMORY);
+    Crtc->CrtcState->Crtc = Crtc;
+    if(Crtc->Device->CrtcCount){
+        DrsdResetCrtcVBlank(
+            Crtc
+        );
+    }
+    LouPrint("DrsdInternalCrtcResetAtomic() STATUS_SUCCESS\n");
 }
 
 void* DrsdInternalCrtcDuplicateStateAtomic(
@@ -423,6 +475,10 @@ LOUSTATUS DrsdConnectorInitialize(
 void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
 
     PDRSD_PLANE Plane = Device->Planes;
+    PDRSD_CRTC  Crtc = Device->Crtcs;
+    PDRSD_ENCODER Encoder = Device->Encoders;
+    PDRSD_CONNECTOR Connector = Device->Connectors;
+
     while(Plane){
         if(Plane->Callbacks->ResetPlane){
             Plane->Callbacks->ResetPlane(Plane);
@@ -430,6 +486,25 @@ void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
         Plane = (PDRSD_PLANE)Plane->Peers.NextHeader;
     }
 
+    while(Crtc){
+        if(Crtc->CrtcCallbacks->ResetCrtc){
+            Crtc->CrtcCallbacks->ResetCrtc(Crtc);
+        }
+        Crtc = (PDRSD_CRTC)Crtc->Peers.NextHeader;
+    }   
+
+    while(Encoder){
+        if(Encoder->Callbacks->ResetEncoder){
+            Encoder->Callbacks->ResetEncoder(Encoder);
+        }
+        Encoder = (PDRSD_ENCODER)Encoder->Peers.NextHeader;
+    }
+
+    while(Connector){
+        if(Connector->Callbacks->ResetConnector){
+            Connector->Callbacks->ResetConnector(Connector);
+        }
+        Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
+    }
     LouPrint("DrsdModeConfigurationReset() STATUS_SUCCESS\n");
-    while(1);
 }
