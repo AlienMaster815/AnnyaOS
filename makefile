@@ -296,6 +296,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C drivers/Audio/HDA clean
 	$(MAKE) -C drivers/Audio/HDA all
 
+	$(MAKE) -C drivers/storage/Ahci clean
+	$(MAKE) -C drivers/storage/Ahci all
+	
 	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
 	$(MAKE) -C drivers/storage/AtaAcceleration piix
 
@@ -385,6 +388,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
 	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
+	$(MAKE) -C drivers/storage/Ahci clean
 	$(MAKE) -C drivers/Audio/HDA clean
 	$(MAKE) -C drivers/Audio/AC97 clean
 	$(MAKE) -C drivers/Audio/SoundBlaster clean

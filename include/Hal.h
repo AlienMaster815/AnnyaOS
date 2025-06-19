@@ -186,6 +186,12 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
             KERNEL_EXPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size , void* PAddress);
 
+            KERNEL_EXPORT
+            void LouKeHalGetPciConfiguration(
+                P_PCI_DEVICE_OBJECT PDEV, 
+                PPCI_COMMON_CONFIG Config
+            );
+
         #endif
     #else
 

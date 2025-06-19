@@ -80,6 +80,11 @@ string LousineDriverManifestGetNextDevice(string CurrentDevice){
     return 0x00;
 }
 
+LOUDDK_API_ENTRY
+string LouKeGetNextManifestDevice(string CurrentDevice){
+    return LousineDriverManifestGetNextDevice(CurrentDevice);
+}
+
 static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
     uint16_t DeviceID = 0;
     uint16_t VendorID = 0;
@@ -216,6 +221,11 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
         return NewString;
     }
     return 0x00;
+}
+
+LOUDDK_API_ENTRY
+string LouKeDoesManifestDeviceMatch(string CurrentDevice, void* Config){
+    return DoesDeviceMatch(CurrentDevice, (PPCI_COMMON_CONFIG)Config);
 }
 
 string ParseLousineDriverManifestForCompatibleDriver(void* Config, string Index){

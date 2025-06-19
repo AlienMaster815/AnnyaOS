@@ -36,9 +36,7 @@ static DRSD_CONNECTOR_STATUS VirtualboxConnectorDetect(
     PDRSD_CONNECTOR Connector,
     bool            Force
 ){
-    LouPrint("VirtualboxConnectorDetect()\n");
-    while(1);
-    return (DRSD_CONNECTOR_STATUS)0x00;
+    return ((PVIRTUALBOX_CONNECTOR)Connector)->ModeHint.Disconnected ? DRSD_CONNECTOR_DISCONNECTED : DRSD_CONNECTOR_CONNECTED;
 }
 
 static void VirtualboxConnectorDestroy(
@@ -376,7 +374,7 @@ static LOUSTATUS VirtualboxConnectorInitialize(
 
     Device->ModeConfiguration.SuggestedX = 0;
     Device->ModeConfiguration.SuggestedY = 0;
-
+        
     ((PVIRTUALBOX_CONNECTOR)Connector)->VBOXCrtc = Crtc;
 
     LouPrint("VirtualboxConnectorInitialize() STATUS_SUCCESS\n");

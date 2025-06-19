@@ -13,14 +13,15 @@
         <FILETOCPY64>cp drivers/Audio/SoundBlaster/SBMOD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/SBMOD.SYS</FILETOCPY64>             <!--Sound Blaster-->
         <FILETOCPY64>cp drivers/Audio/HDA/HDAPCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/HDAPCI.SYS</FILETOCPY64>                    <!--Intel Hd Audio-->
         <FILETOCPY64>cp drivers/gpu/Virtualbox/VBOXGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VBOXGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
-        <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
+        <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>                   <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
-        <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX Chipset Accelleration-->
+        <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX IDE Chipset-->
+        <FILETOCPY64>cp drivers/storage/Ahci/AHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AHCI.SYS</FILETOCPY64>                     <!--AHCI Chipset-->
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/ANNYA/SYSTEM64/LOUDLL.DLL</FILETOCPY64>                           <!--Lousine Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/ANNYA/SYSTEM64/NTDLL.DLL</FILETOCPY64>                              <!--Nt Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/3rdParty/zlib/zlib1.dll ISO/ANNYA/ZLIB1.DLL</FILETOCPY64>                                       <!--Mark Adler Zlib Userspace module for windows-->
-        <FILETOCPY64>cp DLL/LouDLLs/Codecs/codecs.dll ISO/ANNYA/SYSTEM64/CODECS.DLL</FILETOCPY64>                                       <!--Annya OS Usermode Codecs Subsystem-->
+        <FILETOCPY64>cp DLL/LouDLLs/Codecs/codecs.dll ISO/ANNYA/SYSTEM64/CODECS.DLL</FILETOCPY64>                           <!--Annya OS Usermode Codecs Subsystem-->
         <FILETOCPY64>cp DLL/LouDLLs/KERNEL32/KERNEL32.dll ISO/ANNYA/SYSTEM64/KERNEL32.DLL</FILETOCPY64>                     <!--Windows Legacy(9x 32 bit Kernel) Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/kernelbase/kernbase.dll ISO/ANNYA/SYSTEM64/KERNBASE.DLL</FILETOCPY64>                   <!--Windows Legacy(9x 16 bit Kernel) Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/MSVCRT/msvcrt.dll ISO/ANNYA/SYSTEM64/MSVCRT.DLL</FILETOCPY64>                           <!--Microsoft Windows C Std Library-->
@@ -29,5 +30,6 @@
         <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
         <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/DRIVERS/DRIVERS.CFG</FILETOCPY64>        <!--Annya OS Driver Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/BootManifest.cfg ISO/ANNYA/SYSTEM64/BOOT.CFG</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
     </64Targets>
 </FILESBEFORECOPY>

@@ -8,7 +8,7 @@ extern "C"{
 #include <stdatomic.h>
 
 typedef struct {
-	int counter;
+	uint64_t counter;
 }atomic_t;
 
 typedef atomic_t* p_atomic_t;

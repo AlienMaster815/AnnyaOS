@@ -17,9 +17,14 @@ void handle_module(
 
 extern bool GOPIsUnsable;
 
+static bool BootRegistryInitialize = false;
+
 void SetBootVbe(struct multiboot_tag_vbe VbeInfo);
+void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
+void InitializeBootRegistry(uintptr_t Base, uintptr_t Top);
 
 void ParseMBootTags(struct multiboot_tag* MBOOT) {
+    struct multiboot_tag* MBOOTp2 = MBOOT;
 
     // Iterate through tags until end tag is encountered
     while (MBOOT->type != 0) {
@@ -59,12 +64,6 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
             LouKeSetApm(apm_tag);
             break;
         }
-        case (MULTIBOOT_TAG_TYPE_MODULE): {
-            struct multiboot_tag_module *mod = (struct multiboot_tag_module *) MBOOT;
-            //this shouldent run but map memory in case
-            EnforceSystemMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
-            break;
-        }
         case (MULTIBOOT_TAG_TYPE_FRAMEBUFFER):{
             struct multiboot_tag_framebuffer* frame = (struct multiboot_tag_framebuffer*)MBOOT;
             InitializeFrameBuffer(frame);
@@ -82,6 +81,27 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
             MBOOT = (struct multiboot_tag*)((uint8_t*)MBOOT + MBOOT->size);
         else
             MBOOT = (struct multiboot_tag*)((uint8_t*)MBOOT + MBOOT->size + (8 - MBOOT->size % 8));
+    }
+    while (MBOOTp2->type != 0) {
+        switch (MBOOTp2->type) {
+            case (MULTIBOOT_TAG_TYPE_MODULE): {
+                struct multiboot_tag_module *mod = (struct multiboot_tag_module *)MBOOTp2;
+                if(mod->mod_end > (64 * MEGABYTE)){
+                    EnforceSystemMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
+                }
+                if(!BootRegistryInitialize){
+                    InitializeBootRegistry(mod->mod_start, mod->mod_end - mod->mod_start);
+                    BootRegistryInitialize = true;
+                }else{
+                    AddDriverToBootDeviceManager(mod->mod_start, mod->mod_end - mod->mod_start);   
+                }
+                break;
+            }
+        }
+        if (MBOOTp2->size % 8 == 0)
+            MBOOTp2 = (struct multiboot_tag*)((uint8_t*)MBOOTp2 + MBOOTp2->size);
+        else
+            MBOOTp2 = (struct multiboot_tag*)((uint8_t*)MBOOTp2 + MBOOTp2->size + (8 - MBOOTp2->size % 8));
     }
     //while(1);
 }

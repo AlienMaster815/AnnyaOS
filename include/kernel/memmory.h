@@ -687,4 +687,6 @@ void* LouKeGenericPoolGetPhyAddress(
     void* Address
 );
 
+KERNEL_EXPORT void LouKeFree(void* AddressToFree);
+
 #endif

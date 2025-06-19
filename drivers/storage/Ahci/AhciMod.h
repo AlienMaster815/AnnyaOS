@@ -1,4 +1,4 @@
-
+#define _KERNEL_MODULE_
 #include <LouDDK.h>
 /*
  * This software is provided under the GNU General Public License (GPL) v2.

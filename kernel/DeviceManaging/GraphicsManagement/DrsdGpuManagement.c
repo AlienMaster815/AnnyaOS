@@ -40,13 +40,13 @@ LOUSTATUS LouRegisterDrsdGraphicsDevice(
     if((uint64_t)Table->PDEV == 0xFFFFFFFFFFFFFFFF){
         LegacyGraphics = true;
     }
-
+    
     for(uint8_t i = 0 ; i < GpuDevicesCount; i++){
-        if(((uint64_t)Tmp->Table->PDEV == 0xFFFFFFFFFFFFFFFF) || (i == 0)){
+        if(((uint64_t)Tmp->Table->PDEV == 0xFFFFFFFFFFFFFFFF) && (GpuDevicesCount == 1)){
             LouKeFree(Tmp->Table);
             Tmp->Table = Table; 
             LegacyGraphics = false;
-            return STATUS_SUCCESS;
+            break;
         }
         if(Tmp->Neighbors.NextHeader){
             Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;

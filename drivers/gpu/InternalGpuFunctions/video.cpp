@@ -103,7 +103,8 @@ void LouKeDeferBootGraphics(
 
 LOUDDK_API_ENTRY
 void InitializeBootGraphics(){
-	/*if(!BootGraphics){
+	///*
+	if(!BootGraphics){
 		return;
 	}
 	uint16_t Width = BootGraphics->framebuffer_width;
@@ -146,5 +147,6 @@ void InitializeBootGraphics(){
         DrsdFrameWork
     );
 	LouKeDrsdPciResetScreen((P_PCI_DEVICE_OBJECT)0xFFFFFFFFFFFFFFFF);
-	StartDebugger();*/
+	StartDebugger();
+	//*/
 }

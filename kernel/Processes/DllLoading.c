@@ -65,6 +65,38 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
     return (DRIVER_MODULE_ENTRY)Entry;
 }
 
+DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize){
+    if(!Base){
+        return 0x00;
+    }
+
+    PDRIVER_MODULE_HANDLES TmpHandle = &DriverHandles;
+    
+    for(size_t i = 0 ; i < DriveHandlesCount; i++){
+        if(TmpHandle->Paths){
+            if(TmpHandle->Paths == (string)Base){
+                DriverObject = TmpHandle->DriverObject;
+                return TmpHandle->ModuleEntry;
+            }
+        }
+        if(TmpHandle->Neighbors.NextHeader){
+            TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
+        }else{
+            TmpHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(DRIVER_MODULE_HANDLES), GET_ALIGNMENT(DRIVER_MODULE_HANDLES), WRITEABLE_PAGE | PRESENT_PAGE);
+            TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
+        }
+    }
+    
+    DRIVER_MODULE_ENTRY Entry;
+    TmpHandle->Paths = (string)Base;
+    Entry = (DRIVER_MODULE_ENTRY)LoadKernelModule((uintptr_t)Base, 0x00);
+    TmpHandle->ModuleEntry = Entry;
+    TmpHandle->DriverObject = LouKeMalloc(DriverObjectSize, WRITEABLE_PAGE | PRESENT_PAGE);
+    *DriverObject = TmpHandle->DriverObject;
+    DriveHandlesCount++;
+    return (DRIVER_MODULE_ENTRY)Entry;
+}
+
 typedef struct _LIBRARY_HANDLES{
     ListHeader                      Neighbors;
     string                          Paths;

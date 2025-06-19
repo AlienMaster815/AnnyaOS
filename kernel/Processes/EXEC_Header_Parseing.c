@@ -367,8 +367,6 @@ void RelocateBaseAddresses(
                     continue;
                 }
                 case IMAGE_REL_BASED_ABSOLUTE:
-                    LouPrint("IMAGE_REL_BASED_ABSOLUTE\n");
-                    while(1);
                 default:
                     continue;
             }

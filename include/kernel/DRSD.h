@@ -28,6 +28,7 @@ struct _DRSD_ENCODER_ASSISTED_CALLBACKS;
 struct _DRSD_CRTC_STATE;
 struct _DRSD_CONNECTOR;
 struct _DRSD_PROPERTY;
+struct _DRSD_MODE_SET_CONTEXT;
 
 //8 bit color
 #define DRSD_COLOR_FORMAT_RGB332    "RGB8"
@@ -68,9 +69,9 @@ struct _DRSD_PROPERTY;
 //PBD 32 bit True RGB
 
 typedef enum{
-    CONNECTED = 1,
-    DISCONNECTED = 2,
-    UNKOWN = 3,
+    DRSD_CONNECTOR_CONNECTED = 1,
+    DRSD_CONNECTOR_DISCONNECTED = 2,
+    DRSD_CONNECTOR_UNKOWN = 3,
 }DRSD_CONNECTOR_STATUS;
 
 typedef enum{
@@ -120,6 +121,13 @@ typedef enum{
     DRSD_MODE_BAD = -2,
     DRSD_MODE_ERROR = -1,
 }DRSD_MODE_STATUS;
+
+typedef enum {
+    DRSD_FORCE_USPECIFIED = 0,
+    DRSD_FORCE_OFF = 1,
+    DRSD_FORCE_ON = 2,
+    DRSD_FORCE_DIGITAL = 3,
+}DRSD_CONNECTOR_FORCE;
 
 #define DRSD_ENCODER_MODE_NONE  0
 #define DRSD_ENCODER_MODE_DAC   1
@@ -330,8 +338,8 @@ typedef struct _DRSD_PLANE_ASSIST_CALLBACKS{
 }DRSD_PLANE_ASSIST_CALLBACKS, * PDRSD_PLANE_ASSIST_CALLBACKS;
 
 typedef struct _DRSD_PLANE_CALLBACKS{
-    LOUSTATUS                   (*UpdatePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int CrtcX, int CrtcY, int CrtcWidth, int CrtcHeight, uint32_t SourceX, uint32_t SourceY, uint32_t SourceWidth, uint32_t SourceHeight, void* ModeSetAquireContext);
-    LOUSTATUS                   (*DisablePlane)(struct _DRSD_PLANE* Plane, void* ModeSetAquireContext);
+    LOUSTATUS                   (*UpdatePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int CrtcX, int CrtcY, int CrtcWidth, int CrtcHeight, uint32_t SourceX, uint32_t SourceY, uint32_t SourceWidth, uint32_t SourceHeight, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*DisablePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     void                        (*DestroyPlane)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState);
     void                        (*ResetPlane)(struct _DRSD_PLANE* Plane);
     LOUSTATUS                   (*SetPlaneProperty)(struct _DRSD_PLANE* Plane, void* PropertyBuffer, uint64_t Value);
@@ -509,7 +517,8 @@ typedef struct _DRSD_PROPERTY_BLOB{
 
 typedef struct _DRSD_CONNECTOR_ASSIST_CALLBACKS{
     size_t                  (*ConnectorGetModes)(struct _DRSD_CONNECTOR* Connector);
-    LOUSTATUS               (*ConnectorDetectContext)(struct _DRSD_CONNECTOR* Connector, void*  ModeSetAquireContext, bool Force);
+    DRSD_CONNECTOR_STATUS   (*ConnectorDetectContext)(struct _DRSD_CONNECTOR* Connector, void*  ModeSetAquireContext, bool Force);
+    DRSD_CONNECTOR_STATUS   (*ConnectorDetect)(struct _DRSD_CONNECTOR* Connector, bool Force);
     DRSD_MODE_STATUS        (*ConnectorModeValid)(struct _DRSD_CONNECTOR* Connector, PDRSD_DISPLAY_MODE Mode);
     LOUSTATUS               (*ConnectorModeValidContext)(struct _DRSD_CONNECTOR* Connector, PDRSD_DISPLAY_MODE Mode, void* ModeSetAquireContext, DRSD_MODE_STATUS* Status);
     struct _DRSD_ENCODER*   (*ConnectorBestEncoder)(struct _DRSD_CONNECTOR* Connector);
@@ -554,7 +563,7 @@ typedef struct _DRSD_CONNECTOR{
     PDRSD_PROPERTY                      BroadcastRgbProperty;
     int                                 PowerMode;
     PDRSD_CONNECTOR_ASSIST_CALLBACKS    AssistCallbacks;
-
+    DRSD_CONNECTOR_FORCE                Force;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
 
 #define DRSD_CONNECTOR_MODE_UNKOWN          0
@@ -650,9 +659,9 @@ typedef struct _DRSD_CRTC_CALLBACK{
     LOUSTATUS                   (*MoveCursor)(struct _DRSD_CRTC* Crtc, int X, int Y);
     LOUSTATUS                   (*SetGamma)(struct _DRSD_CRTC* Crtc, uint16_t* R, uint16_t* G, uint16_t* B);
     void                        (*DestroyCrtc)(struct _DRSD_CRTC* Crtc);
-    LOUSTATUS                   (*SetConfiguration)(void* ModeSet, void* ModeSetAquireContext);
-    LOUSTATUS                   (*PageFlip)(struct _DRSD_CRTC* Crtc, DRSD_FRAME_BUFFER* FrameBuffer, void* VBlankEvent, uint32_t Flags, void* ModeSetAquireContext);
-    LOUSTATUS                   (*PageFlipTarget)(struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* Event, uint32_t Flags, uint32_t Target, void* ModeSetAquireContext);
+    LOUSTATUS                   (*SetConfiguration)(void* ModeSet, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*PageFlip)(struct _DRSD_CRTC* Crtc, DRSD_FRAME_BUFFER* FrameBuffer, void* VBlankEvent, uint32_t Flags, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*PageFlipTarget)(struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* Event, uint32_t Flags, uint32_t Target, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*SetProperty)(struct _DRSD_CRTC* Crtc,  struct _DRSD_PROPERTY* Property, uint64_t Value);
     struct _DRSD_CRTC_STATE*    (*AtomicDuplicateState)(struct _DRSD_CRTC* Crtc);
     void                        (*AtomicDestroyState)(struct _DRSD_CRTC* Crtc, struct _DRSD_CRTC_STATE* CrtcState);
@@ -755,7 +764,16 @@ typedef struct _DRSD_MODE_CONFIGURATION{
     struct _DRSD_PLANE*                     Planes;
     uint64_t                                ValidFormats;
     uint32_t*                               Formats;
+    bool                                    UsingPolling;
 }DRSD_MODE_CONFIGURATION, * PDRSD_MODE_CONFIGURATION;
+
+typedef struct _DRSD_MODE_SET_CONTEXT{
+    ListHeader              Peers;
+    mutex_t                 ModeSetLock;
+    bool                    Interruptable;
+    struct _DRSD_DEVICE*    Device;
+    size_t                  EpochCounter;
+}DRSD_MODE_SET_CONTEXT, * PDRSD_MODE_SET_CONTEXT;
 
 typedef struct _DRSD_DEVICE{
     DrsdVRamObject                  DrsdVramObject; //mostly depreiciated for non linear framebuffers here for legacy and linear framebuffers
@@ -832,23 +850,23 @@ LOUSTATUS DrsdInternalAtomicUpdate(
 );
 
 LOUSTATUS DrsdInternalPlaneUpdateAtomic(
-    PDRSD_PLANE             Plane,
-    PDRSD_CRTC              Crtc,
-    PDRSD_FRAME_BUFFER      FrameBuffer,
-    int                     CrtcX, 
-    int                     CrctY, 
-    int                     CrtcWidth, 
-    int                     CrtcHeight,
-    uint32_t                SourceX, 
-    uint32_t                SourceY, 
-    uint32_t                SourceWidth, 
-    uint32_t                SourceHeight,
-    void*                   ModeSetAquireContext
+    PDRSD_PLANE                     Plane,
+    PDRSD_CRTC                      Crtc,
+    PDRSD_FRAME_BUFFER              FrameBuffer,
+    int                             CrtcX, 
+    int                             CrctY, 
+    int                             CrtcWidth, 
+    int                             CrtcHeight,
+    uint32_t                        SourceX, 
+    uint32_t                        SourceY, 
+    uint32_t                        SourceWidth, 
+    uint32_t                        SourceHeight,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 );
 
 LOUSTATUS DrsdInternalPlaneDisableAtomic(
-    PDRSD_PLANE Plane,
-    void*       ModeSetAquireContext            
+    PDRSD_PLANE                     Plane,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext            
 );
 
 void DrsdInternalDestroyPlane(
@@ -942,16 +960,16 @@ void DrsdInternalCrtcResetAtomic(
 );
 
 LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
-    PDRSD_CRTC          Crtc,
-    PDRSD_FRAME_BUFFER  FrameBuffer,
-    void*               VBlankEvent,
-    uint32_t            Flags,
-    void*               ModeSetAquireContext
+    PDRSD_CRTC                      Crtc,
+    PDRSD_FRAME_BUFFER              FrameBuffer,
+    void*                           VBlankEvent,
+    uint32_t                        Flags,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 );
 
 LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
-    void*   Mode,
-    void*   ModeSetAquireContext
+    void*                           Mode,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 );
 
 LOUSTATUS DrsdInitializeEncoder(
@@ -1020,24 +1038,24 @@ LOUSTATUS DrsdInternalAtomicUpdate(
 
 KERNEL_EXPORT
 LOUSTATUS DrsdInternalPlaneUpdateAtomic(
-    PDRSD_PLANE             Plane,
-    PDRSD_CRTC              Crtc,
-    PDRSD_FRAME_BUFFER      FrameBuffer,
-    int                     CrtcX, 
-    int                     CrctY, 
-    int                     CrtcWidth, 
-    int                     CrtcHeight,
-    uint32_t                SourceX, 
-    uint32_t                SourceY, 
-    uint32_t                SourceWidth, 
-    uint32_t                SourceHeight,
-    void*                   ModeSetAquireContext
+    PDRSD_PLANE                     Plane,
+    PDRSD_CRTC                      Crtc,
+    PDRSD_FRAME_BUFFER              FrameBuffer,
+    int                             CrtcX, 
+    int                             CrctY, 
+    int                             CrtcWidth, 
+    int                             CrtcHeight,
+    uint32_t                        SourceX, 
+    uint32_t                        SourceY, 
+    uint32_t                        SourceWidth, 
+    uint32_t                        SourceHeight,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 );
 
 KERNEL_EXPORT
 LOUSTATUS DrsdInternalPlaneDisableAtomic(
-    PDRSD_PLANE Plane,
-    void*       ModeSetAquireContext            
+    PDRSD_PLANE                     Plane,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext            
 );
 
 KERNEL_EXPORT
@@ -1148,17 +1166,17 @@ void DrsdInternalCrtcResetAtomic(
 
 KERNEL_EXPORT
 LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
-    PDRSD_CRTC          Crtc,
-    PDRSD_FRAME_BUFFER  FrameBuffer,
-    void*               VBlankEvent,
-    uint32_t            Flags,
-    void*               ModeSetAquireContext
+    PDRSD_CRTC                          Crtc,
+    PDRSD_FRAME_BUFFER                  FrameBuffer,
+    void*                               VBlankEvent,
+    uint32_t                            Flags,
+    struct _DRSD_MODE_SET_CONTEXT*      ModeSetAquireContext
 );
 
 KERNEL_EXPORT
 LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
-    void*   Mode,
-    void*   ModeSetAquireContext
+    void*                               Mode,
+    struct _DRSD_MODE_SET_CONTEXT*      ModeSetAquireContext
 );
 
 KERNEL_EXPORT

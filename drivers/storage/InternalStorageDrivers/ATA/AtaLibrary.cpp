@@ -218,31 +218,3 @@ LOUSTATUS LouKeAtaReadDevice(
     return Result;
 }
 
-void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq) {
-    Fis[0] = 0x27;  // Host-to-Device Register FIS
-    Fis[1] = PortMultiplier & 0x0F;
-    if (IsCommand) {
-        Fis[1] |= (1 << 7);
-    }
-    Fis[2] = QueuedCommand->Command;
-    Fis[3] = QueuedCommand->Feature;
-    Fis[4] = QueuedCommand->Lbal;
-    Fis[5] = QueuedCommand->Lbam;
-    Fis[6] = QueuedCommand->Lbah;
-    Fis[7] = QueuedCommand->Device;
-    Fis[8] = QueuedCommand->HobLbal;
-    Fis[9] = QueuedCommand->HobLbam;
-    Fis[10] = QueuedCommand->HobLbah;
-    Fis[11] = QueuedCommand->HobFeature;
-    Fis[12] = QueuedCommand->SectorCount;
-    Fis[13] = QueuedCommand->HobSectorCount;
-    if(IsNcq){
-        Fis[13] |= (1 << 3);
-    }
-    Fis[14] = 0;
-    Fis[15] = QueuedCommand->Control;
-    Fis[16] = QueuedCommand->Auxillery & 0xFF;
-    Fis[17] = (QueuedCommand->Auxillery >> 8) & 0xFF;
-    Fis[18] = (QueuedCommand->Auxillery >> 16) & 0xFF;
-    Fis[19] = (QueuedCommand->Auxillery >> 24) & 0xFF;
-}

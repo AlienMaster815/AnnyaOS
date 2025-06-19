@@ -1,3 +1,4 @@
+#define _KERNEL_MODULE_
 #include <LouDDK.h>
 #include <Hal.h>
 
@@ -48,7 +49,6 @@
 
 
 //ATA Module Structured Operations
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -58,7 +58,6 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     .PortStop = AhciStopPort,
 };
 
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -68,7 +67,6 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
     .PortStop = AhciStopPort,
 };
 
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -78,7 +76,6 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
     .PortStop = AhciStopPort,
 };
 
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -89,7 +86,6 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
 };
 
 
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
     .PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
@@ -99,7 +95,6 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
 
 //endof ATA Module Structured Operations
 
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static AHCI_DRIVER_BOARD_INFORMATION_TABLE AhciBoardInfomationTable[] = {
     [AHCI_BOARD_NORMAL_AHCI] = {
         .AhciFlags              = AHCI_FLAG_COMMON,
@@ -213,7 +208,6 @@ UNUSED static AHCI_DRIVER_BOARD_INFORMATION_TABLE AhciBoardInfomationTable[] = {
     },
 };  
 
-SECTIONED_CODE(".Ahci.Data") 
 UNUSED static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     //Intel Ahci Devices
     {.VendorID = PCI_VENDOR_ID_INTEL, .DeviceID = 0x06D6, .BoardID = AHCI_BOARD_INTEL_PCS, .SimpleEntry = true},        //Commet Lake PCH-H Raid
@@ -479,17 +473,15 @@ UNUSED static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
 };
 
 
-SECTIONED_CODE(".Ahci.Code") 
 VOID AhciUnloadDriver(
     PDRIVER_OBJECT DriverObject
 ){
-    DbgPrint("AhciUnloadDriver()\r\n");
+    LouPrint("AhciUnloadDriver()\n");
     //this is a dummy function due to the module
     //being built in there is nothing to unload
-    DbgPrint("AhciUnloadDriver() RETURN\r\n");
+    LouPrint("AhciUnloadDriver() RETURN\n");
 }
 
-SECTIONED_CODE(".Ahci.Code") 
 static void AhciIntelPcs(P_PCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
     uint16_t Tmp;
 
@@ -508,7 +500,6 @@ static void AhciIntelPcs(P_PCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA Pri
 
 }
 
-SECTIONED_CODE(".Ahci.Code") 
 static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     UNUSED PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
     UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;    
@@ -576,7 +567,6 @@ static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     return STATUS_SUCCESS;
 }
 
-SECTIONED_CODE(".Ahci.Code") 
 LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     NTSTATUS Status = STATUS_SUCCESS;
     P_PCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
@@ -593,7 +583,6 @@ LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     return STATUS_SUCCESS;
 }
 
-SECTIONED_CODE(".Ahci.Code") 
 static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig){
     return (
         PciConfig->Header.VendorID == PCI_VENDOR_ID_NVIDIA && 
@@ -603,11 +592,10 @@ static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig){
     ) ? true : false;
 }
 
-SECTIONED_CODE(".Ahci.Code") 
 static void NvidiaMcp89AppleBiosUnlockAhciChip(P_PCI_DEVICE_OBJECT PDEV){
     uint32_t Tmp;
 
-    DbgPrint("AHCIMOD:Enableing MCP89 Ahci Mode For Macraps\r\n");
+    LouPrint("AHCIMOD:Enableing MCP89 Ahci Mode For Macraps\n");
     
     //tell the device we are going to be accessing the controllers
     //Bios Settings
@@ -642,11 +630,8 @@ static void NvidiaMcp89AppleBiosUnlockAhciChip(P_PCI_DEVICE_OBJECT PDEV){
 }
 
 
-SECTIONED_CODE(".Ahci.Data")
 LOUSTATUS AhciStopCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
-SECTIONED_CODE(".Ahci.Data")
 void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
-SECTIONED_CODE(".Ahci.Data") 
 void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
 void AhciInterruptHandler(uint64_t Rsp){
@@ -655,12 +640,11 @@ void AhciInterruptHandler(uint64_t Rsp){
     while(1);
 }
 
-SECTIONED_CODE(".Ahci.Code") 
 NTSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     PDEVICE_OBJECT Device
 ){
-    DbgPrint("AddAhciDevice()\r\n");
+    LouPrint("AddAhciDevice()\n");
     //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
     NTSTATUS Status = STATUS_SUCCESS;
 
@@ -698,7 +682,7 @@ NTSTATUS AddAhciDevice(
     //this to warn them if the need to uses the Drives Attached to the 
     //SAS platform chip
     if(PciConfig->Header.VendorID == PCI_VENDOR_ID_PROMISE){
-        DbgPrint("WARNING:PDC42819 Detected Only Stata Devices May Be Used With This Module\n");
+        LouPrint("WARNING:PDC42819 Detected Only Stata Devices May Be Used With This Module\n");
     }
 
     //acording to some proprietary information from STMicro, Cavium,
@@ -745,7 +729,7 @@ NTSTATUS AddAhciDevice(
 
         ICHMap = LouKeReadPciUint8(PDEV, ICH_PCI_MAP_REGISTER);
         if(ICHMap & 0x03){
-            DbgPrint("WARNING: Controller is in combined mode and connot enable AHCI Mode\r\n");
+            LouPrint("WARNING: Controller is in combined mode and connot enable AHCI Mode\n");
             return STATUS_NO_SUCH_DEVICE;
         }  
     }
@@ -858,19 +842,20 @@ NTSTATUS AddAhciDevice(
         (void*)AtaHost,
         0x00
     );
-    DbgPrint("AddAhciDevice() STATUS_SUCCESS\r\n");
+    LouPrint("AddAhciDevice() STATUS_SUCCESS\n");
     return Status;
 }
 
 //Unique name for AhciDriver due to the driver being built into the kernels binary
 //And we will be using the (LOUSINE SUBSYSTEM FOR NT DRIVERS) with Lousine function
 //for streamlineing certain things 
-SECTIONED_CODE(".Ahci.Code") 
-NTSTATUS AhciDriverEntry(
+LOUDDK_API_ENTRY
+NTSTATUS 
+DriverEntry(
     PDRIVER_OBJECT DriverObject, 
     PUNICODE_STRING RegistryEntry
 ){
-    DbgPrint("DriverEntry()\r\n");
+    LouPrint("DriverEntry()\n");
 
     //tell the System where are key Nt driver functions are
     DriverObject->DriverUnload = AhciUnloadDriver;
@@ -883,21 +868,6 @@ NTSTATUS AhciDriverEntry(
     //fill LDM information
     DriverObject->DeviceTable = (uintptr_t)AhciDevices;
     
-    DbgPrint("DriverEntry() STATUS_SUCCESS\r\n");
+    LouPrint("DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
-
-SECTIONED_CODE(".JitlDirectory")
-JITL_DIRECTORY AhciJitlDirectory = {
-    .SectionName = ".Ahci",
-    .JitlEntries = {
-        {
-            .Name = "DriverEntry",
-            .Location = (uint64_t)AhciDriverEntry,
-        },
-        {
-            0,
-        },
-    },
-};
-

@@ -57,18 +57,18 @@ LOUSTATUS DrsdInternalAtomicUpdate(
 
 KERNEL_IMPORT
 LOUSTATUS DrsdInternalPlaneUpdateAtomic(
-    PDRSD_PLANE             Plane,
-    PDRSD_CRTC              Crtc,
-    PDRSD_FRAME_BUFFER      FrameBuffer,
-    int                     CrtcX, 
-    int                     CrctY, 
-    int                     CrtcWidth, 
-    int                     CrtcHeight,
-    uint32_t                SourceX, 
-    uint32_t                SourceY, 
-    uint32_t                SourceWidth, 
-    uint32_t                SourceHeight,
-    void*                   ModeSetAquireContext
+    PDRSD_PLANE                     Plane,
+    PDRSD_CRTC                      Crtc,
+    PDRSD_FRAME_BUFFER              FrameBuffer,
+    int                             CrtcX, 
+    int                             CrctY, 
+    int                             CrtcWidth, 
+    int                             CrtcHeight,
+    uint32_t                        SourceX, 
+    uint32_t                        SourceY, 
+    uint32_t                        SourceWidth, 
+    uint32_t                        SourceHeight,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 ){
     LouPrint("DrsdInternalPlaneUpdateAtomic()\n");
     while(1);
@@ -77,8 +77,8 @@ LOUSTATUS DrsdInternalPlaneUpdateAtomic(
 
 KERNEL_IMPORT
 LOUSTATUS DrsdInternalPlaneDisableAtomic(
-    PDRSD_PLANE Plane,
-    void*       ModeSetAquireContext            
+    PDRSD_PLANE                     Plane,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext            
 ){
     LouPrint("DrsdInternalPlaneDisableAtomic()\n");
     while(1);
@@ -349,8 +349,8 @@ LOUSTATUS DrsdInitializeCrtcGammaSize(
 }
 
 LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
-    void*   Mode,
-    void*   ModeSetAquireContext
+    void*                            Mode,
+    struct _DRSD_MODE_SET_CONTEXT*   ModeSetAquireContext
 ){
     LouPrint("DrsdInternalSetConfigurationAtomic()\n");
     while(1);
@@ -358,11 +358,11 @@ LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
 }
 
 LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
-    PDRSD_CRTC          Crtc,
-    PDRSD_FRAME_BUFFER  FrameBuffer,
-    void*               VBlankEvent,
-    uint32_t            Flags,
-    void*               ModeSetAquireContext
+    PDRSD_CRTC                      Crtc,
+    PDRSD_FRAME_BUFFER              FrameBuffer,
+    void*                           VBlankEvent,
+    uint32_t                        Flags,
+    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 ){
     LouPrint("DrsdinternalPageFlipAtomic()\n");
     while(1);

@@ -342,6 +342,9 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeDebuggerComunications();
 
+    //TODO: Add a parser for the manifest for 
+    //loading needed modules that need to be 
+    //loaded no matter what
     LookForStorageDevices();
 
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
@@ -353,9 +356,8 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeFileSystemManager();
     InitializeNtKernelTransitionLayer();
 
-
     //CheckForSoundblaster16();
-    ScanTheRestOfHarware();
+    //ScanTheRestOfHarware();
 
     EnablePs2Keyboard();
     InitializePs2Mouse();

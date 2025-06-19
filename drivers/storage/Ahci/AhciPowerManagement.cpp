@@ -1,6 +1,4 @@
-#include <LouDDK.h>
-#include "AhciMod.h"
-
+#define _KERNEL_MODULE_
 /*
  * This software is provided under the GNU General Public License (GPL) v2.
  * Copyright (C) 2025 Tyler Grenier.
@@ -42,10 +40,3 @@
  * You may obtain a copy of the GPLv2 at:
  * https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
-
-SECTIONED_CODE(".Ahci.Code")
-LOUSTATUS AhciAvnHardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    LouPrint("AhciAvnHardReset");
-    while(1);
-    return STATUS_SUCCESS;
-}

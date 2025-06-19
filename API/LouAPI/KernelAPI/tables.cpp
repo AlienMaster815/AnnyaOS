@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 154
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 160
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -51,7 +51,7 @@ ULONG KeNumberProcessors();
 #define CURRENT_JITLS   1
 
 //Jitl list
-extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
+//extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
 
 static volatile PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
 
@@ -363,6 +363,12 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[151] = "DrsdConnectorInitialize";
     ImportTables[4].FunctionName[152] = "DrsdModeConfigurationReset";
     ImportTables[4].FunctionName[153] = "DrsdInternalProbeSingleConnectorModes";
+    ImportTables[4].FunctionName[154] = "LouKeGetThreadIdentification";
+    ImportTables[4].FunctionName[155] = "LouKeHalGetPciConfiguration";
+    ImportTables[4].FunctionName[156] = "LouKeFree";
+    ImportTables[4].FunctionName[157] = "LouKeMallocAtaDevice";
+    ImportTables[4].FunctionName[158] = "LouKeMallocAtaPrivateData";
+    ImportTables[4].FunctionName[159] = "LouKeForkAtaHostPrivateDataToPorts";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -518,7 +524,12 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[151] = (uint64_t)DrsdConnectorInitialize;
     ImportTables[4].VirtualAddress[152] = (uint64_t)DrsdModeConfigurationReset;
     ImportTables[4].VirtualAddress[153] = (uint64_t)DrsdInternalProbeSingleConnectorModes;
-
+    ImportTables[4].VirtualAddress[154] = (uint64_t)LouKeGetThreadIdentification;
+    ImportTables[4].VirtualAddress[155] = (uint64_t)LouKeHalGetPciConfiguration;
+    ImportTables[4].VirtualAddress[156] = (uint64_t)LouKeFree;
+    ImportTables[4].VirtualAddress[157] = (uint64_t)LouKeMallocAtaDevice;
+    ImportTables[4].VirtualAddress[158] = (uint64_t)LouKeMallocAtaPrivateData;
+    ImportTables[4].VirtualAddress[159] = (uint64_t)LouKeForkAtaHostPrivateDataToPorts;
 
 }
 
@@ -867,7 +878,7 @@ void InitializeStorePort_SYS(){
 
 void InitializeJitlTables(){
     //Ahci Function
-    SystemSections[0] = &AhciJitlDirectory;
+    //SystemSections[0] = &AhciJitlDirectory;
 }
 
 LOUDDK_API_ENTRY void InitializeGenericTables(){
@@ -885,20 +896,20 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 ){
-    uint8_t i = 0;
-    uint8_t j = 0;
+    size_t i = 0;
+    size_t j = 0;
 
     //LouPrint("Module:%s Function:%s", ModuleName, FunctionName);
 
     for(i = 0; i < PRE_LOADED_MODULES; i++){
 
-        if(strncmp(ImportTables[i].ModuleName, ModuleName, strlen(ModuleName)) == 0){
+        if(strcmp(ImportTables[i].ModuleName, ModuleName) == 0){
             //LouPrint("Getting A Address From Loaded Module:%s ", ModuleName);
             for(j = 0; j < ImportTables[i].NumberOfFunctions; j++){
                 //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-                if(strncmp(ImportTables[i].FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
+                if(strcmp(ImportTables[i].FunctionName[j], FunctionName) == 0){
                     //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-                    //LouPrint("::%h\n", ImportTables[i].VirtualAddress[j]);
+                    //LouPrint("::%h : i:%d j:%d\n", ImportTables[i].VirtualAddress[j], i , j);
                     return ImportTables[i].VirtualAddress[j];
                 }
             }
@@ -909,20 +920,20 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     WDK_MODULE_FALLBACK_FUNCTIONS:
     for(j = 0; j < ImportTables[1].NumberOfFunctions; j++){
         //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-        if(strncmp(ImportTables[1].FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
-            //LouPrint("::%h\n", ImportTables[1].VirtualAddress[j]);
+        if(strcmp(ImportTables[1].FunctionName[j], FunctionName) == 0){
+            //LouPrint("::%h : 2\n", ImportTables[1].VirtualAddress[j]);
             return ImportTables[1].VirtualAddress[j];
         }
     }
 
     //last resourt but most likely here
     volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries; 
-    for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        for(uint32_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
-            if(strncmp(Tmp->Table.FunctionName[j], FunctionName, strlen(FunctionName)) == 0){
+    for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
+        for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
+            if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
                 //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
                 //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
-                //LouPrint("::%h\n", Tmp->Table.VirtualAddress[j]);
+                //LouPrint("::%h : 3\n", Tmp->Table.VirtualAddress[j]);
                 return Tmp->Table.VirtualAddress[j];
             }
         }
