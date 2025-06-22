@@ -402,7 +402,7 @@ int8_t LouKeXorOperationChar(
 #endif
 
 #define STATIC_ASSERT(cond, msg) typedef char static_assertion_##msg[(cond) ? 1 : -1]
-#define TEST_BITD(base, bit) (*((volatile unsigned int *)(base)) & (1 << (bit)))
+#define TEST_BITD(base, bit) (*((unsigned int *)(base)) & (1 << (bit)))
 
 
 #endif

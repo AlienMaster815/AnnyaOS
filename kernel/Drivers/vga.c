@@ -147,7 +147,7 @@ void PrintStringToWindow(
 #include <stdint.h>
 #include <drivers/display/vga.h>
 
-#define EGA_TEXT_BUFFER ((volatile uint16_t*)0xB8000)
+#define EGA_TEXT_BUFFER ((uint16_t*)0xB8000)
 #define EGA_WIDTH 80
 #define EGA_HEIGHT 25
 #define EGA_COLOR 0x02  // Green on black

@@ -59,7 +59,7 @@ typedef struct _PCIBuffer {
 }PCIBuffer, * P_PCIBuffer;
 
 
-typedef volatile int pci_power_t;
+typedef int pci_power_t;
 
 #ifndef _PCI_DEVICE_OBJECT_
 #define _PCI_DEVICE_OBJECT_
@@ -239,7 +239,7 @@ typedef struct _PCIBuffer {
 }PCIBuffer, * P_PCIBuffer;
 
 
-typedef volatile int pci_power_t;
+typedef int pci_power_t;
 
 #ifndef _PCI_DEVICE_OBJECT_
 #define _PCI_DEVICE_OBJECT_

@@ -45,11 +45,11 @@ LOUDDK_API_ENTRY LOUSTATUS InitMCFG() {
 
     if (Status == LOUSTATUS_GOOD) {
         LouPrint("PCIe Supported Initializing PCIe systems\n");
-        volatile PACPI_MCFG Mcfg = (PACPI_MCFG)Buffer;
+        ACPI_MCFG volatile* Mcfg = (PACPI_MCFG)Buffer;
         size_t NumberOfEntries = (Mcfg->Header.Length - 44) / sizeof(ACPI_MCFG_ALLOCATION);
         LouPrint("Number Of MCFG Entries:%d\n", NumberOfEntries);
         for(size_t i = 0 ; i < NumberOfEntries; i++){
-            AddPcieGroup(&Mcfg->Allocations[i]);
+            //AddPcieGroup(&Mcfg->Allocations[i]);
         }
     }
 

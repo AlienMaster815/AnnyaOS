@@ -4,16 +4,16 @@
 
 
 typedef struct _TABLE_ENTRY{
-    volatile FILE_NAME        ModuleName;
-    volatile uint32_t         NumberOfFunctions;
-    volatile FUNCTION_NAME*   FunctionName;
-    volatile uint64_t*        VirtualAddress;
+    FILE_NAME        ModuleName;
+    uint32_t         NumberOfFunctions;
+    FUNCTION_NAME*   FunctionName;
+    uint64_t*        VirtualAddress;
 }TABLE_ENTRY, * PTABLE_ENTRY;
 
 typedef struct _TableTracks{
-    volatile ListHeader Neighbors;
-    volatile TABLE_ENTRY Table;
-    volatile bool LongModeEntry;
+    ListHeader Neighbors;
+    TABLE_ENTRY Table;
+    bool LongModeEntry;
 }TableTracks, * PTableTracks;
 
 #define PRE_LOADED_MODULES 5
@@ -23,22 +23,22 @@ typedef struct _TableTracks{
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
 #define PRE_LOADED_LOUOSKRNL_FUNCTIONS 166
 
-static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-static volatile uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-static volatile FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-static volatile uint64_t UnkownFunctionAddresses[PRE_LOADED_UNKOWN_FUNCTIONS];
-static volatile FUNCTION_NAME UnkownFunctionNames[PRE_LOADED_UNKOWN_FUNCTIONS];
-static volatile uint64_t WDFLDRFunctionAddresses[PRE_LOADED_WDFLDR_FUNCTIONS];
-static volatile FUNCTION_NAME WDFLDRFunctionNames[PRE_LOADED_WDFLDR_FUNCTIONS];
-static volatile uint64_t StorportFunctionAddresses[PRE_LOADED_STORPORT_FUNCTIONS];
-static volatile FUNCTION_NAME StorportFunctionNames[PRE_LOADED_STORPORT_FUNCTIONS];
+static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
+static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
+static uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
+static FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
+static uint64_t UnkownFunctionAddresses[PRE_LOADED_UNKOWN_FUNCTIONS];
+static FUNCTION_NAME UnkownFunctionNames[PRE_LOADED_UNKOWN_FUNCTIONS];
+static uint64_t WDFLDRFunctionAddresses[PRE_LOADED_WDFLDR_FUNCTIONS];
+static FUNCTION_NAME WDFLDRFunctionNames[PRE_LOADED_WDFLDR_FUNCTIONS];
+static uint64_t StorportFunctionAddresses[PRE_LOADED_STORPORT_FUNCTIONS];
+static FUNCTION_NAME StorportFunctionNames[PRE_LOADED_STORPORT_FUNCTIONS];
 
-static volatile TableTracks  DynamicLoadedLibraries;
-static uint16_t DynamicLoadedLibrarieCount = 0x00;
+static TableTracks  DynamicLoadedLibraries;
+static size_t DynamicLoadedLibrarieCount = 0x00;
 
-static volatile TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
-static volatile PTABLE_ENTRY ImportTables = (volatile PTABLE_ENTRY)GenericTable;
+static TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
+static PTABLE_ENTRY ImportTables = (PTABLE_ENTRY)GenericTable;
 
 KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
@@ -53,7 +53,7 @@ ULONG KeNumberProcessors();
 //Jitl list
 //extern SECTIONED_CODE(".JitlDirectory") JITL_DIRECTORY AhciJitlDirectory;
 
-static volatile PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
+static PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
 
 LOUDDK_API_ENTRY char* Winstrcpy(char* dest, const char* src);
 LOUDDK_API_ENTRY char* Winstrcat(char* dest, const char* src);
@@ -173,7 +173,7 @@ void LouKeInitializeLibraryLookup(
     bool IsNativeLongmode
 ){
     uint16_t i;
-    volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries;
+    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries;
     for(i = 0; i < DynamicLoadedLibrarieCount; i++){
         if(!Tmp->Neighbors.NextHeader){
             Tmp->Neighbors.NextHeader = (ListHeader*)LouKeMallocEx(sizeof(TableTracks), GET_ALIGNMENT(TableTracks), WRITEABLE_PAGE | PRESENT_PAGE);
@@ -939,7 +939,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     }
 
     //last resourt but most likely here
-    volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries; 
+    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
         for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
             if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
@@ -970,7 +970,7 @@ LouKeLinkerCheckLibraryPresence(string SystemName){
     }
 
     //last resourt but most likely here
-    volatile PTableTracks Tmp = (volatile PTableTracks)&DynamicLoadedLibraries; 
+    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
         if(strcmp(Tmp->Table.ModuleName, SystemName) == 0){
             return true;

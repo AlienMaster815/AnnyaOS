@@ -74,7 +74,7 @@ static LOUSTATUS VBoxAccelerationInitialize(
     PVIRTUALBOX_PRIVATE_DATA VBox
 ){
     P_PCI_DEVICE_OBJECT PDEV = VBox->PDEV;
-    volatile PVBVA_BUFFER VBva;
+    VBVA_BUFFER* VBva;
 
     VBox->VbvaInformation = LouKeMallocType(VBVA_BUFFER_CONTEXT, KERNEL_GENERIC_MEMORY);
     
@@ -91,7 +91,7 @@ static LOUSTATUS VBoxAccelerationInitialize(
             VBox->AvailableVramSize + i * VBVA_MINIMUM_BUFFER_SIZE,
             VBVA_MINIMUM_BUFFER_SIZE
         );
-        VBva = (volatile PVBVA_BUFFER)(VBox->VbvaBuffers + i * VBVA_MINIMUM_BUFFER_SIZE);
+        VBva = (VBVA_BUFFER*)(VBox->VbvaBuffers + i * VBVA_MINIMUM_BUFFER_SIZE);
         if(!VbvaEnable(&VBox->VbvaInformation[i], VBox->GuestPool, VBva, i)){
             LouPrint("VBOXVIDEO ERROR: Unable To Start Crtc:%d\n", i + 1);
         }

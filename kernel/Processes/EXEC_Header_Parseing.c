@@ -94,9 +94,9 @@ void GetAllPEHeaders(
     PSECTION_HEADER* SectionHeaders,// out opt
     PRICH_HEADER* RichHeader        // out opt
 ) {
-    volatile PCOFF_HEADER COFF = (volatile PCOFF_HEADER)GetPEHeader(DosHeader, COFF_T);
-    volatile PPE64_OPTIONAL_HEADER PE64 = (volatile PPE64_OPTIONAL_HEADER)GetPEHeader(DosHeader, PE64_T);
-    volatile PSECTION_HEADER SECTIONS = (volatile PSECTION_HEADER)GetPEHeader(DosHeader, SECTION_T);
+    PCOFF_HEADER COFF = (PCOFF_HEADER)GetPEHeader(DosHeader, COFF_T);
+    PPE64_OPTIONAL_HEADER PE64 = (PPE64_OPTIONAL_HEADER)GetPEHeader(DosHeader, PE64_T);
+    PSECTION_HEADER SECTIONS = (PSECTION_HEADER)GetPEHeader(DosHeader, SECTION_T);
 
     if (CoffHeader != 0x00) {
         *CoffHeader = COFF;
@@ -116,7 +116,7 @@ static inline uint8_t FilePathCountBackToDirectory(string FilePath){
     //i know this looks weird this is not
     //my first implementation i couldent 
     //make it work otherwise
-    while(*(volatile char*)((uintptr_t)FilePath + i) != '/'){
+    while(*(char*)((uintptr_t)FilePath + i) != '/'){
         i--;
     }
     return i + 1;
@@ -263,7 +263,7 @@ static inline void GetNewRelocVariableAddress(
     uint64_t BaseDelta,
     bool AddressDrop
 ) {
-    volatile uint32_t* address = (volatile uint32_t*)(NewBase + VirtualAddress + offsetWithinPage);
+    uint32_t* address = (uint32_t*)(NewBase + VirtualAddress + offsetWithinPage);
 
     if (ConfigCookie == *address) {
         return;
@@ -390,7 +390,7 @@ static inline void SetupConfigTable(
         return;
     }
 
-    *(volatile uint64_t*)Conf->SecurityCookie = 81503;//(uint64_t)Random(ImageBase);
+    *(uint64_t*)Conf->SecurityCookie = 81503;//(uint64_t)Random(ImageBase);
 }
 
 PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {

@@ -98,7 +98,7 @@ void LouUpdateButton(
 
 
 
-volatile PBUTTONHANDLE LouCreateButton(
+PBUTTONHANDLE LouCreateButton(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
@@ -107,11 +107,11 @@ volatile PBUTTONHANDLE LouCreateButton(
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ButtonLock, &Irql);
 
-    PBUTTON_CHARECTERISTICS Charecteristics = (volatile PBUTTON_CHARECTERISTICS)(uint8_t*)CharecteristicAligned;
-    volatile PBUTTONHANDLE HBUTTON = LouKeMalloc(sizeof(BUTTONHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    PBUTTON_CHARECTERISTICS Charecteristics = (PBUTTON_CHARECTERISTICS)(uint8_t*)CharecteristicAligned;
+    PBUTTONHANDLE HBUTTON = LouKeMalloc(sizeof(BUTTONHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     uint64_t* StringLoaction = (uint64_t*)CharecteristicAligned;
-    //uint64_t* IsInverted = (volatile uint64_t*)CharecteristicAligned + 16;
-    //volatile uint64_t* Is3d = (volatile uint64_t*)CharecteristicAligned + 24;
+    //uint64_t* IsInverted = (uint64_t*)CharecteristicAligned + 16;
+    //uint64_t* Is3d = (uint64_t*)CharecteristicAligned + 24;
     //fill out the basic information
     HBUTTON->CurrentX = x;
     HBUTTON->CurrentY = y;

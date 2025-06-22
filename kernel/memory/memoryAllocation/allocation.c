@@ -41,13 +41,13 @@ typedef struct _AllocationBlock{
 }AllocationBlock;
 
 
-static volatile PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
-static volatile uint64_t             AllocationBlocksConfigured = 0; 
-static volatile uint32_t             TotalAllocations[100] = {0};
+static PLOU_MALLOC_TRACKER  AllocationBlocks[100] = {0};
+static uint64_t             AllocationBlocksConfigured = 0; 
+static uint32_t             TotalAllocations[100] = {0};
 #define CURRENT_ALLOCATION_BLOCK AllocationBlocksConfigured - 1
 
 uint8_t TB[sizeof(AllocationBlock) * 512] = {0};
-static volatile AllocationBlock* AddressBlock = (AllocationBlock*)TB;
+static AllocationBlock* AddressBlock = (AllocationBlock*)TB;
 
 static uint32_t AddressesLogged = 0;
 

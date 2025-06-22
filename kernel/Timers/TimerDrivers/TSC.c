@@ -47,7 +47,7 @@ uint64_t calibrate_tsc() {
     start_pit = read_pit_count();
 
     // Busy-wait for a short period
-    for (volatile int i = 0; i < 10000; i++);
+    for (int i = 0; i < 10000; i++);
 
     // Read the final TSC and PIT count
     end_tsc = read_tsc();
