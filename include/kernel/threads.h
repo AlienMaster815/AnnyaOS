@@ -23,8 +23,17 @@ typedef void* PVOID;
 LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
+void LouKeInitializeDelayedWork(
+    void (*DelayedFunction)(uint64_t PrivateData),
+    uint64_t PrivateData,
+    uint64_t MsDelay
+);
+void LouKeInitializeIntervalWork(
+    void (*DelayedFunction)(uint64_t PrivateData),
+    uint64_t PrivateData,
+    uint64_t MsInterval
+);
 #endif
-
 #ifndef _KERNEL_MODULE_
 uint64_t LouKeGetThreadIdentification();
 #else

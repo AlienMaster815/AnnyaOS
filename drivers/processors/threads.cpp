@@ -39,6 +39,18 @@ typedef struct  __attribute__((packed)) _CPUContext{
     uint64_t ss;
 } CPUContext;
 
+typedef struct _LOUQ_DELAYED_WORK_TRACKER{
+    ListHeader      Peers;
+    uint64_t        PrivateData;
+    uint64_t        Timer;
+    uint64_t        Interval;
+    void            (*WorkFunction)(uint64_t PrivateData);
+}LOUQ_DELAYED_WORK_TRACKER, * PLOUQ_DELAYED_WORK_TRACKER; 
+
+static LOUQ_DELAYED_WORK_TRACKER WorkTracker[MAX_CORES] = {0};
+static size_t WorkRoundRobin = 0;
+static mutex_t WorkTrackThread = {0};
+
 KERNEL_IMPORT void SaveEverything(uint64_t* ContextHandle);
 KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
 
@@ -94,8 +106,6 @@ static inline bool IsThreadInThreadTable(thread_t* Thread){
 
 UNUSED static thread_t* current_thread[MAX_CORES] = {0}; // Track current thread per core
 UNUSED static int thread_count = 0;
-
-UNUSED static uint16_t core_count = 1;
 
 KERNEL_IMPORT void SetInterruptFlags();
 KERNEL_IMPORT void UnSetInterruptFlags();
@@ -198,11 +208,34 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext){
 KERNEL_IMPORT
 void SetTEB(uint64_t Teb);
 
+static void HanldeLouQSystem(uint8_t ProcessorID){
+    if(MutexIsLocked(&WorkTrackThread)){
+        return;
+    }
+    PLOUQ_DELAYED_WORK_TRACKER TmpQ = &WorkTracker[ProcessorID];
+    while(TmpQ->Peers.NextHeader){
+        if(TmpQ->Timer > 0){
+            TmpQ->Timer--;
+            if(!TmpQ->Timer){
+                TmpQ->WorkFunction(TmpQ->PrivateData);
+                if(TmpQ->Interval){
+                    TmpQ->Timer = TmpQ->Interval;
+                }
+            }
+        }
+        TmpQ = (PLOUQ_DELAYED_WORK_TRACKER)TmpQ->Peers.NextHeader;
+    }
+    //TODO: add an interval of 1 second to clean each core
+}
+
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     uint8_t ProcessorID = get_processor_id();
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
     CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
+    
+    HanldeLouQSystem(ProcessorID);
+    
     if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
@@ -259,15 +292,15 @@ LOUDDK_API_ENTRY void RegisterLastKnownStackLocation(CPUContext* State){
     //threads[0].cpu_state = State;
 }
 
-
+static uint8_t CpuCount;
 
 LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
     
     LOUSTATUS Status = LOUSTATUS_GOOD;
+    CpuCount = GetNPROC();
+    if (!CpuCount) return STATUS_UNSUCCESSFUL;
 
-    if (!GetNPROC()) return STATUS_UNSUCCESSFUL;
-
-    LouPrint("Thread Manager Starting\nNumber Of Processors: %d\n", GetNPROC());
+    LouPrint("Thread Manager Starting\nNumber Of Processors: %d\n", CpuCount);
 
     LouPrint("Initialized Processor:%d as Thread 1\n", get_processor_id());
 
@@ -482,4 +515,58 @@ semaphore_t* LouKeCreateSemaphore(int initial, int limit){
     semaphore_t* NewSemaphore = (semaphore_t*)LouKeMallocType(semaphore_t, KERNEL_GENERIC_MEMORY);
     SemaphoreInitialize(NewSemaphore, initial, limit);
     return NewSemaphore;
+}
+
+
+
+LOUDDK_API_ENTRY void LouKeInitializeDelayedWork(
+    void (*DelayedFunction)(uint64_t PrivateData),
+    uint64_t PrivateData,
+    uint64_t MsDelay
+) {
+    MutexLock(&WorkTrackThread);
+    PLOUQ_DELAYED_WORK_TRACKER TmpQ = &WorkTracker[WorkRoundRobin];
+
+    WorkRoundRobin++;
+    if (WorkRoundRobin >= CpuCount) {
+        WorkRoundRobin = 0;
+    }
+
+    while (TmpQ->Peers.NextHeader) {
+        TmpQ = (PLOUQ_DELAYED_WORK_TRACKER)TmpQ->Peers.NextHeader;
+    }
+
+    TmpQ->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUQ_DELAYED_WORK_TRACKER, KERNEL_GENERIC_MEMORY);
+
+    TmpQ->WorkFunction = DelayedFunction;
+    TmpQ->PrivateData = PrivateData;
+    TmpQ->Timer = MsDelay;
+
+    MutexUnlock(&WorkTrackThread);
+}
+
+LOUDDK_API_ENTRY void LouKeInitializeIntervalWork(
+    void (*DelayedFunction)(uint64_t PrivateData),
+    uint64_t PrivateData,
+    uint64_t MsInterval
+){
+    MutexLock(&WorkTrackThread);
+    PLOUQ_DELAYED_WORK_TRACKER TmpQ = &WorkTracker[WorkRoundRobin];
+
+    WorkRoundRobin++;
+    if (WorkRoundRobin >= CpuCount) {
+        WorkRoundRobin = 0;
+    }
+
+    while (TmpQ->Peers.NextHeader) {
+        TmpQ = (PLOUQ_DELAYED_WORK_TRACKER)TmpQ->Peers.NextHeader;
+    }
+
+    TmpQ->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUQ_DELAYED_WORK_TRACKER, KERNEL_GENERIC_MEMORY);
+    TmpQ->WorkFunction = DelayedFunction;
+    TmpQ->PrivateData = PrivateData;
+    TmpQ->Timer = MsInterval;
+    TmpQ->Interval = MsInterval;
+
+    MutexUnlock(&WorkTrackThread);
 }

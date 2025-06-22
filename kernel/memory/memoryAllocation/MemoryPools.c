@@ -281,7 +281,7 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
         return (void*)Result;
     }
 
-    LouPrint("LouKeMallocFromDynamicPoolEx(): Out of memory\n");
+    LouPrint("LouKeMallocFromDynamicPoolEx(): Out of memory Needed:%h\nPoolSize:%h\n", AllocationSize, Pool->PoolSize);
     return 0x00;
 }
 

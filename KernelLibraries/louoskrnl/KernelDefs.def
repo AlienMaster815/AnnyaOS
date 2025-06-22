@@ -161,3 +161,8 @@ EXPORTS
     LouKeForkAtaHostPrivateDataToPorts
     LouKeMallocAtaPrivateData
     LouKeMallocAtaDevice
+    DrsdAddModesNoEDID
+    DrsdCvtMode
+    DrsdAddProbedDisplayModeToConnector
+    DrsdUpdateEdidConnectorProperties
+    DrsdGetNewPlaneState

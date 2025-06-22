@@ -4,11 +4,14 @@ int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector){
 
     int Count = Connector->AssistCallbacks->ConnectorGetModes(Connector);
 
+    if(Count < 1){
+        LouPrint("ERROR No Modes Available\n");
+    }
 
-    LouPrint("Mode Count:%d\n", Count);
+    //TODO Add Edid Overide
 
     LouPrint("DrsdInternalProbeModes() STATUS_SUCCESS\n");
-    while(1);
+    return Count;
 }
 
 DRSD_CONNECTOR_STATUS DrsdInternalProbeDetection(

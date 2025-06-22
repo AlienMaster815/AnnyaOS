@@ -29,7 +29,7 @@ void PutFloatingCharecter(
                 wchar_t Ybyte = Map->pixels[yz];
                 for (uint16_t xz = 0; xz < 16; xz++) {
                     if ((Ybyte >> (15 - xz)) & 0x01) { 
-                        LouKeDrsdPutPixelMirrored((x + (xz * ScalingX) +  ix), (y + (yz * ScalingY) + iy), r, g, b);
+                        //LouKeDrsdPutPixelMirrored((x + (xz * ScalingX) +  ix), (y + (yz * ScalingY) + iy), r, g, b);
                     }
                 }
             }

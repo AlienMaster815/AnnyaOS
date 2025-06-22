@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 160
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 166
 
 static volatile uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static volatile FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -369,6 +369,12 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[157] = "LouKeMallocAtaDevice";
     ImportTables[4].FunctionName[158] = "LouKeMallocAtaPrivateData";
     ImportTables[4].FunctionName[159] = "LouKeForkAtaHostPrivateDataToPorts";
+    ImportTables[4].FunctionName[160] = "DrsdAddModesNoEDID";
+    ImportTables[4].FunctionName[161] = "DrsdModeVfresh";
+    ImportTables[4].FunctionName[162] = "DrsdCvtMode";
+    ImportTables[4].FunctionName[163] = "DrsdAddProbedDisplayModeToConnector";
+    ImportTables[4].FunctionName[164] = "DrsdUpdateEdidConnectorProperties";
+    ImportTables[4].FunctionName[165] = "DrsdGetNewPlaneState";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -530,6 +536,12 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[157] = (uint64_t)LouKeMallocAtaDevice;
     ImportTables[4].VirtualAddress[158] = (uint64_t)LouKeMallocAtaPrivateData;
     ImportTables[4].VirtualAddress[159] = (uint64_t)LouKeForkAtaHostPrivateDataToPorts;
+    ImportTables[4].VirtualAddress[160] = (uint64_t)DrsdAddModesNoEDID;
+    ImportTables[4].VirtualAddress[161] = (uint64_t)DrsdModeVfresh;
+    ImportTables[4].VirtualAddress[162] = (uint64_t)DrsdCvtMode;
+    ImportTables[4].VirtualAddress[163] = (uint64_t)DrsdAddProbedDisplayModeToConnector;
+    ImportTables[4].VirtualAddress[164] = (uint64_t)DrsdUpdateEdidConnectorProperties;
+    ImportTables[4].VirtualAddress[165] = (uint64_t)DrsdGetNewPlaneState;
 
 }
 

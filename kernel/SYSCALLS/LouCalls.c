@@ -1,6 +1,5 @@
 #include <LouAPI.h>
 
-void LouKeDrsdResetFBDEV(uint64_t* FBDEV);
 void LouKeLoadFileCall(uint64_t* Data);
 void LouKeCloseFileCall(uint64_t* Data);
 
@@ -71,7 +70,9 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOURESETMONITOR:{
-            LouKeDrsdResetFBDEV((uint64_t*)Data);
+            //LouKeDrsdResetFBDEV((uint64_t*)Data);
+            LouPrint("LOURESETMONITOR\n");
+            while(1);
             return;
         }
         case LOULOADFILE:{

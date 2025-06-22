@@ -75,7 +75,6 @@ void PS2MouseHandler(uint64_t Rsp){
     
     Offset = (Offset + 1) % 3;
 
-
     if(Offset == 0){
         x = (int8_t)Buffer[1];
         y = (int8_t)Buffer[2];

@@ -31,6 +31,16 @@ UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("Unloaded VBOXGPU\n");
 }
 
+void VirtualboxReportCapabilities(
+    PVIRTUALBOX_PRIVATE_DATA Vbox
+){
+    uint32_t Capabilities = VBVACAPS_DISABLE_CURSOR_INTEGRATION | VBVACAPS_IRQ | VBVACAPS_USE_VBVA_ONLY;
+
+    HgsmiSendCapabilityInfo(Vbox->GuestPool, Capabilities);
+    Capabilities |= VBVACAPS_VIDEO_MODE_HINTS;
+    HgsmiSendCapabilityInfo(Vbox->GuestPool, Capabilities);
+}
+
 static bool HaveHgsmiModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
     uint32_t HaveHint, HaveCursor;
 
@@ -207,7 +217,6 @@ AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
     );
 
     LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return Status;
 }
 

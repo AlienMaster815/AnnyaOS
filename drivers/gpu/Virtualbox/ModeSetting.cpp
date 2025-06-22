@@ -23,8 +23,8 @@ void
 HgsmiProccessDisplayInformation(
     POOL Context, 
     uint32_t Display, 
-    int32_t OriginX, 
-    int32_t OriginY, 
+    int32_t StartX, 
+    int32_t StartY, 
     uint32_t StartOffset, 
     uint32_t Pitch, 
     uint32_t Width, 
@@ -32,8 +32,27 @@ HgsmiProccessDisplayInformation(
     uint16_t Bpp, 
     uint16_t Flags
 ){
+    PVBVA_INFORMATION_SCREEN Screen = (PVBVA_INFORMATION_SCREEN)HgsmiBufferAllocate(
+                                        Context, sizeof(VBVA_INFORMATION_SCREEN), 
+                                        HGSMI_CH_VBVA, VBVA_INFORMATION_SCREEN_COMMAND
+                                    );
 
+    if(!Screen){
+        return;
+    }
 
+    Screen->ViewIndex = Display;
+    Screen->StartX = StartX;
+    Screen->StartY = StartY;
+    Screen->StartOffset = StartOffset;
+    Screen->LineSize = Pitch;
+    Screen->Width = Width;
+    Screen->Height = Height;
+    Screen->Bpp = Bpp;
+    Screen->Flags = Flags;
+    
+    HgsmiBufferSubmit(Context, Screen);
+    HgsmiBufferFree(Context, Screen);
 
 }
 

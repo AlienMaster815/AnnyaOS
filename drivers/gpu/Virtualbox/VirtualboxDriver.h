@@ -98,7 +98,7 @@ int VirtualboxHardwareInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate)
 void VirtualboxHardwareDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxModeDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-void VirtualboxReportCaps(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
+void VirtualboxReportCapabilities(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 int VirtualboxMmInit(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox);
 void VirtualboxIrqDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);

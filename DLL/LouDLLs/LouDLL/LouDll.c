@@ -86,7 +86,7 @@ uint16_t AnnyaGetScreenBufferHeight(){
 }
 
 LOUDLL_API
-uint16_t AnnyaGetScreenBufferWidth(){
+int64_t AnnyaGetScreenBufferWidth(){
     uint64_t Data[2];
     Data[0] = 0;
     while(Data[0] != 1){

@@ -27,7 +27,7 @@ typedef struct _VBVA_BUFFER_CONTEXT{
 }VBVA_BUFFER_CONTEXT, * PVBVA_BUFFER_CONTEXT;
 
 LOUSTATUS HgsmiReportFlagsLocation(POOL Context, uint32_t Location);
-LOUSTATUS HgsmiSendCapabilityInfo(POOL Context, uint32_t* Capabilities);
+LOUSTATUS HgsmiSendCapabilityInfo(POOL Context, uint32_t Capabilities);
 LOUSTATUS HgsmiTestQueryConfiguration(POOL Context);
 LOUSTATUS HgsmiQueryConfiguration(POOL Context, uint32_t Index, uint32_t* Result);
 LOUSTATUS HgsmiUpdatePointerShape(POOL Context, uint32_t Flags, uint32_t HotX, uint32_t HotY, uint32_t Width, uint32_t Height, uint8_t* Pixels, uint32_t Length);

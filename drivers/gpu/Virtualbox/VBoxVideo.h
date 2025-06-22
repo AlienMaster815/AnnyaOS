@@ -163,10 +163,10 @@ typedef struct __attribute__((packed)) _VBVA_MOUSE_POINTER_SHAPE{
     uint8_t     DataBlock[];
 }VBVA_MOUSE_POINTER_SHAPE, * PVBVA_MOUSE_POINTER_SHAPE;
 
-typedef struct __attribute__((packed)) _VBVA_CAPS{
+typedef struct __attribute__((packed)) _VBVA_CAPABILITIES{
     int32_t     Rc;
-    uint32_t    Caps;
-}VBVA_CAPS, * PVBVA_CAPS;
+    uint32_t    Capabilities;
+}VBVA_CAPABILITIES, * PVBVA_CAPABILITIES;
 
 typedef struct __attribute__((packed)) _VBVA_QUERY_MODE_HINTS{
     uint16_t    HintsQueriedCount;

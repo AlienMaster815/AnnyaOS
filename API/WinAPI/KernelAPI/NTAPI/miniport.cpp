@@ -18,6 +18,7 @@ LONG InterlockedAnd(
 }
 
 
+
 LONG 
 InterlockedCompareExchange(
 	  LONG volatile* Destination,

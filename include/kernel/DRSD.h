@@ -215,8 +215,7 @@ typedef struct _DRSD_FRAME_BUFFER{
     string                                  Comm;
     PDRSD_FORMAT_INFORMATION                FormatInfo;
     PDRSD_FRAMEBUFFER_CALLBACKS             Callbacks;
-    uint32_t                                Pitches[4];
-    uint32_t                                Offsets[4];
+    uint32_t                                Offset;
     uint64_t                                Modifier;
     uint32_t                                Width;
     uint32_t                                Height;
@@ -230,7 +229,7 @@ typedef struct _DRSD_FRAME_BUFFER{
     uint64_t                                FramebufferSize;
     PDRSD_FORMAT_INFORMATION                Format;
     uint8_t                                 Bpp;
-    uint32_t                                Pitch;
+    uint64_t                                Pitch;
     uint8_t                                 FrameBufferType;
 }DRSD_FRAME_BUFFER, * PDRSD_FRAME_BUFFER;
 
@@ -274,6 +273,22 @@ typedef enum {
     RESERVED = 5,
 }HDMI_ASPECT_RATIO;
 
+#define DRSD_MODE_TYPE_BUILTIN          (1)
+#define DRSD_MODE_TYPE_CLOCK_C          (1 << 1)
+#define DRSD_MODE_TYPE_CRTC_C           (1 << 2)
+#define DRSD_MODE_TYPE_PREFERED         (1 << 3)
+#define DRSD_MODE_TYPE_DEFAULT          (1 << 4)
+#define DRSD_MODE_TYPE_USER_DEFINED     (1 << 5)
+#define DRSD_MODE_TYPE_DRIVER           (1 << 6)
+#define DRSD_MODE_TYPE_ALL              (0b1111111)
+
+
+#define DEFINE_DRSD_MODE(Name, Type, Clock, Hd, Hss, Hse, Ht, Hsk, Vd, Vss, Vse, Vt, Vs, Flags) \
+    .ModeName = Name, .ModeStatus = (DRSD_MODE_STATUS)0, .KhzClock = Clock, .HorizontalDisplay = Hd, .HorizontalSyncStart = Hss, \
+    .HorizontalSyncEnd = Hse,  .HorizontalTotal = Ht, .HorizontalSkew = Hsk, .VirticalDisplay = Vd, \
+    .VirticalSyncStart = Vss, .VirticalSyncEnd = Vse, .VirticalTotal = Vt, .VirticalScan = Vs, .DdmFlags = Flags, .ModeType = Type
+
+
 typedef struct  _DRSD_DISPLAY_MODE{
     ListHeader              Peers;
     string                  ModeName;
@@ -316,11 +331,18 @@ typedef struct _DRSD_PLANE_STATE{
     struct _DRSD_PROPERTY_BLOB*     Base;
     uint32_t                        Rotation;
     uint32_t                        PixelBlend;
+    int32_t                         SourceX;
+    int32_t                         SourceY;
+    uint32_t                        Height;
+    uint32_t                        Width;
+    uint32_t*                       Formats;
+    size_t                          FormatCount;
+    struct _DRSD_CRTC*              Crtc;
+    string                          FormatUsed;
 }DRSD_PLANE_STATE, * PDRSD_PLANE_STATE;
 
 typedef struct _SHADOW_PLANE_STATE{
     DRSD_PLANE_STATE Base;
-    
 }SHADOW_PLANE_STATE, * PSHADOW_PLANE_STATE;
 
 typedef struct _DRSD_PLANE_ASSIST_CALLBACKS{
@@ -386,6 +408,8 @@ typedef struct _DRSD_PLANE{
     size_t                          ZPositionProperty;
     size_t                          HotSpotXProperty;
     size_t                          HotSpotYProperty;
+    bool                            PlaneInUse;
+    uint64_t                        DrsdPutPixelCase;
 }DRSD_PLANE, * PDRSD_PLANE;
 
 typedef enum{
@@ -427,6 +451,16 @@ typedef struct _DRSD_HDMI_DSC_CAPABILITIES{
     uint8_t     TotalKilobyteChunks;
 }DRSD_HDMI_DSC_CAPABILITIES,  * PDRSD_HDMI_DSC_CAPABILITIES;
 
+typedef struct _HDMI_SYNCRONIZATION_INFORMATION{
+    uint32_t MetaType;
+    struct {
+        uint8_t Eotf;
+        uint8_t MetaType;
+        uint16_t MaximumCll;
+        uint16_t MaximumFall;
+        uint16_t MinimumCall;
+    }HDR861G;
+}HDMI_SYNCRONIZATION_INFORMATION, * PHDMI_SYNCRONIZATION_INFORMATION;
 
 typedef struct _DRSD_HDMI_INFORMATION{
     DRSD_SCDC                       Scdc;
@@ -564,7 +598,45 @@ typedef struct _DRSD_CONNECTOR{
     int                                 PowerMode;
     PDRSD_CONNECTOR_ASSIST_CALLBACKS    AssistCallbacks;
     DRSD_CONNECTOR_FORCE                Force;
+    HDMI_SYNCRONIZATION_INFORMATION     HdmiSyncInformation;
+    bool                                LatencyPresent[2];
+    size_t                              AudioLatency[2];
+    size_t                              VideoLatency[2];
+    uint8_t                             Eld[128];
+    mutex_t                             EldTex;
+    size_t                              ProbeModeCount;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
+
+typedef struct _DRSD_EDID_IDENTIFICATION{
+    uint32_t    PannelIdentification;
+    string      EdidName;
+}DRSD_EDID_IDENTIFICATION, * PDRSD_EDID_IDENTIFICATION;
+
+typedef struct _EDID_QUIRK{
+    DRSD_EDID_IDENTIFICATION    Identification;
+    uint32_t                    QuirkID;
+}EDID_QUIRK, * PEDID_QUIRK;
+
+#define PREFER_LARGE_60HZ_EDID_QUIRK            (1)
+#define CLOCK_TOO_HIGH_EDID_QUIRK               (1 << 1)
+#define PREFER_LARGE_75HZ_EDID_QUIRK            (1 << 2)
+#define DETAILED_CM_EDID_QUIRK                  (1 << 3)
+#define DETAILED_USE_MAXIMUM_SIZE_EDID_QUIRK    (1 << 4)
+#define DETAILED_SYNC_PP_EDID_QUIRK             (1 << 5)
+#define FORCE_REDUCED_BLANKING_EDID_QUIRK       (1 << 6)
+#define FORCE_8BPC_EDID_QUIRK                   (1 << 7)
+#define FORCE_12BPC_EDID_QUIRK                  (1 << 8)
+#define FORCE_6BPC_EDID_QUIRK                   (1 << 9)
+#define FORCE_10BPC_EDID_QUIRK                  (1 << 10)
+#define NON_DESKTOP_EDID_QUIRK                  (1 << 11)
+#define CAP_DSC_15BPP_EDID_QUIRK                (1 << 12)
+
+#define GET_EDID_IDENTIFCATION(VenA, VenB, VenC, Product) ((((uint32_t)(VenA) - '@') & 0x1F) << 26 | (((uint32_t)(VenB) - '@') & 0x1F) << 21 | (((uint32_t)(VenC) - '@') & 0x1F) << 16 | ((uint32_t)(Product) & 0xFFFF)) 
+#define GET_EDID_PRODUCT_IDENTIFICATION(Edid) (Edid->ProductCode[0] | (Edid->ProductCode[0] << 8))
+
+#define DEFINE_EDID_QUIRK(VenA, VenB, VenC, Product, Quirk) \
+    .Identification = GET_EDID_IDENTIFCATION(VenA, VenB, VenC, Product), .QuirkID = (uint32_t)Quirk
+    
 
 #define DRSD_CONNECTOR_MODE_UNKOWN          0
 #define DRSD_CONNECTOR_MODE_VGA             1
@@ -628,15 +700,17 @@ typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
 
 
 typedef struct _DRSD_CRTC_STATE{
-    struct _DRSD_CRTC* Crtc;
-
+    struct _DRSD_CRTC*  Crtc;
+    bool                NeedsModeset;
+    bool                Enable;
+    DRSD_DISPLAY_MODE   DisplayMode;
 }DRSD_CRTC_STATE, * PDRSD_CRTC_STATE;   
 
 
 typedef struct _DRSD_CRTC_ASSIST_CALLBACK{
     void                        (*CrtcSetPowerMode)(struct _DRSD_CRTC* Crtc, int Mode);
     void                        (*PrepareCtrc)(struct _DRSD_CRTC* Crtc);
-    void                        (*ComitMode)(struct _DRSD_CRTC* Crtc);
+    void                        (*CommitMode)(struct _DRSD_CRTC* Crtc);
     DRSD_MODE_STATUS            (*ModeValid)(struct _DRSD_CRTC* Crtc, PDRSD_DISPLAY_MODE Mode);
     bool                        (*ValidateMode)(struct _DRSD_CRTC* Crtc, PDRSD_DISPLAY_MODE Mode, PDRSD_DISPLAY_MODE AdjustedMode);
     LOUSTATUS                   (*SetMode)(struct _DRSD_CRTC* Crtc, PDRSD_DISPLAY_MODE Mode, PDRSD_DISPLAY_MODE AdjustedMode, int x, int y, struct _DRSD_FRAME_BUFFER* OldFrameBuffer);
@@ -781,6 +855,7 @@ typedef struct _DRSD_DEVICE{
     struct _LMPOOL_DIRECTORY*       VramPool;
     DRSD_MODE_CONFIGURATION         ModeConfiguration;
     DRSD_MODE_OBJECT                BaseMode;
+    PDRSD_DISPLAY_MODE              DisplayModes;
     uint32_t                        PossibleCrtcs;
     size_t                          CrtcCount;
     PDRSD_PLANE                     Planes;
@@ -792,6 +867,150 @@ typedef struct _DRSD_DEVICE{
     PDRSD_VBLANK_CRTC               VBlanks;
     bool                            DeviceReadyForDrawing;
 }DRSD_DEVICE, * PDRSD_DEVICE;
+
+#define STANDARD_INTEL_CHIPSET_EDID_SIZE 128
+
+typedef struct __attribute__((packed)) _EDID_PRODUCT_IDENTIFICATION{
+    uint16_t Manufacturer;
+    uint16_t ProductCode;
+    uint32_t Serial;
+    uint8_t  WeekOfFacture;
+    uint8_t  YearOfFacture;
+}EDID_PRODUCT_IDENTIFICATION, * PEDID_PRODUCT_IDENTIFICATION;
+
+typedef struct __attribute__((packed)) _DETAILED_PIXEL_TIMING{
+    uint8_t HActiveLow;
+    uint8_t HBlankLow;
+    uint8_t HActiveHBlankHigh;
+    uint8_t VActiveLow;
+    uint8_t VBlankLow;
+    uint8_t VActiveVBlankHigh;
+    uint8_t HSyncLow;
+    uint8_t HSyncPulseWidthLow;
+    uint8_t HSyncPulseWidthHigh;
+    uint8_t WidthMetricLow;
+    uint8_t HeightMetricLow;
+    uint8_t WidthHeightMetricHigh;
+    uint8_t HBorder;
+    uint8_t VBorder;
+    uint8_t Misc;
+}DETAILED_PIXEL_TIMING, * PDETAILED_PIXEL_TIMING;   
+
+typedef struct __attribute__((packed)) _CVT_TIMING{
+    uint8_t Code[3];
+}CVT_TIMING, * PCVT_TIMING;
+
+typedef struct __attribute__((packed)) _DETAILED_WINDOWS_WP_INDEX{
+    uint8_t WhiteXyLow;
+    uint8_t WhiteXHigh;
+    uint8_t WhiteYHigh;
+    uint8_t Gamma;
+}DETAILED_WINDOWS_WP_INDEX, * PDETAILED_WINDOWS_WP_INDEX;
+
+typedef struct __attribute__((packed)) _DETAILED_DATA_MONITOR_RANGE{
+    uint8_t MinVFreq;
+    uint8_t MaxVFreq;
+    uint8_t MinHFreqKhz;
+    uint8_t MaxHFreqKhz;
+    uint8_t MhzPixelClock;
+    uint8_t Flags;
+    union {
+        struct {
+            uint8_t  Reserved;
+            uint8_t  HFreqStartKhz;
+            uint8_t  C;
+            uint16_t M;
+            uint8_t  K;
+            uint8_t  J;
+        }__attribute__((packed)) Gtf2;
+        struct {
+            uint8_t Version;
+            uint8_t Data1;
+            uint8_t Data2;
+            uint8_t SupportedAsspects;
+            uint8_t Flags;
+            uint8_t SupportedScailings;
+            uint8_t PreferedRefresh;
+        }__attribute__((packed)) Cvt;
+    }__attribute__((packed)) Form;
+}DETAILED_DATA_MONITOR_RANGE, * PDETAILED_DATA_MONITOR_RANGE;
+
+typedef struct __attribute__((packed)) _DETAILED_DATA_STRING{
+    uint8_t String[13];
+}DETAILED_DATA_STRING, * PDETAILED_DATA_STRING;
+
+typedef struct __attribute__((packed)) _DETAILED_NON_PIXEL_TIMING{
+    uint8_t Pad1;
+    uint8_t Type;
+    uint8_t Pad2;
+    union{
+        DETAILED_DATA_STRING String;
+        DETAILED_DATA_MONITOR_RANGE MonitorRange;
+        DETAILED_WINDOWS_WP_INDEX Color;
+        struct {
+            uint8_t HSize;
+            uint8_t AspectFrequenc;
+        }StdTime;
+        CVT_TIMING Cvt[4];
+    }__attribute__((packed));
+}DETAILED_NON_PIXEL_TIMING, * PDETAILED_NON_PIXEL_TIMING;
+
+typedef struct __attribute__((packed)) _DETAILED_TIMING{
+    uint16_t PixelClock;
+    union{
+        DETAILED_PIXEL_TIMING       PixelData;
+        DETAILED_NON_PIXEL_TIMING   OtherData;
+    }__attribute__((packed)) Data;
+}DETAILED_TIMING, * PDETAILED_TIMING;
+
+typedef struct __attribute__((packed)) _INTEL_STANDARD_EDID{
+    uint8_t     Header[8];
+    union {
+        EDID_PRODUCT_IDENTIFICATION ProductIdentification;
+        struct {
+            uint8_t     Manufacturer[2];
+            uint8_t     ProductCode[2];
+            uint32_t    Serial;
+            uint8_t     WeekOfFacture;
+            uint8_t     YearOfFacture;
+        }__attribute__((packed));
+    }__attribute__((packed));
+    uint8_t Version;
+    uint8_t Revision;
+    uint8_t Input;
+    uint8_t WidthMetric;
+    uint8_t HeightMetric;
+    uint8_t Gamma;
+    uint8_t Features;
+    uint8_t RedGreeLow;
+    uint8_t BlueWhiteLow;
+    uint8_t RedX;
+    uint8_t RedY;
+    uint8_t GreenX;
+    uint8_t GreenY;
+    uint8_t BlueX;
+    uint8_t BlueY;
+    uint8_t WhiteX;
+    uint8_t WhiteY;
+    struct {
+        uint8_t T1;
+        uint8_t T2;
+        uint8_t Reserved;
+    }__attribute__((packed)) EstTime[8];
+    struct {
+        uint8_t HSize;
+        uint8_t AspectFrequenc;
+    }__attribute__((packed)) Timing[4];
+    uint8_t Extentions;
+    uint8_t Checksum;
+}INTEL_STANDARD_EDID, * PINTEL_STANDARD_EDID; 
+
+typedef struct _DRSD_EDID_TRACKER{
+    ListHeader              Peers;
+    size_t                  EdidTotalSize; // 128 or more for non standard
+    PINTEL_STANDARD_EDID    EdidBase;
+}DRSD_EDID_TRACKER, * PDRSD_EDID_TRACKER;
+
 
 #define RGB_DRSD_FRAMEBUFFER 1
 #define EGA_DRSD_FRAMEBUFFER 2
@@ -1004,6 +1223,30 @@ LOUSTATUS DrsdInternalProbeSingleConnectorModes(
     uint32_t        MaxX,
     uint32_t        MaxY
 );
+
+size_t DrsdAddModesNoEDID(
+    PDRSD_CONNECTOR Connector, 
+    int32_t Width, 
+    int32_t Height
+);
+size_t DrsdModeVfresh(PDRSD_DISPLAY_MODE Mode);
+
+PDRSD_DISPLAY_MODE DrsdCvtMode(
+    PDRSD_DEVICE Device, 
+    uint32_t PreferedWidth, 
+    uint32_t PreferedHeight, 
+    uint32_t Vfresh, 
+    bool Reduced, 
+    bool Interlaced, 
+    bool Margins
+);
+void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode);
+
+LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid);
+
+PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
+
+void LouKeDrsdClearScreen(PDRSD_PLANE Plane);
 
 #endif
 #ifdef __cplusplus
@@ -1218,6 +1461,35 @@ LOUSTATUS DrsdInternalProbeSingleConnectorModes(
     uint32_t        MaxX,
     uint32_t        MaxY
 );
+
+KERNEL_EXPORT
+size_t DrsdAddModesNoEDID(
+    PDRSD_CONNECTOR Connector, 
+    int32_t Width, 
+    int32_t Height
+);
+
+KERNEL_EXPORT size_t DrsdModeVfresh(PDRSD_DISPLAY_MODE Mode);
+
+KERNEL_EXPORT
+PDRSD_DISPLAY_MODE DrsdCvtMode(
+    PDRSD_DEVICE Device, 
+    uint32_t PreferedWidth, 
+    uint32_t PreferedHeight, 
+    uint32_t Vfresh, 
+    bool Reduced, 
+    bool Interlaced, 
+    bool Margins
+);
+
+KERNEL_EXPORT
+void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode);
+
+
+KERNEL_EXPORT
+LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid);
+
+KERNEL_EXPORT PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
 
 #endif
 #endif

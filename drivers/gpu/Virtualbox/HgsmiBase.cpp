@@ -15,14 +15,31 @@
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
 #include "VirtualboxDriver.h"
+#include <drivers/VBoxError.h>
 
 LOUSTATUS 
 HgsmiReportFlagsLocation(
     POOL Context, 
     uint32_t Location
 ){
+    PHGSMI_BUFFER_LOCATION LocationBuffer; 
 
+    LocationBuffer = (PHGSMI_BUFFER_LOCATION)HgsmiBufferAllocate(
+        Context, 
+        sizeof(HGSMI_BUFFER_LOCATION), 
+        HGSMI_CH_HGSMI, 
+        HGSMI_CC_HOST_FLAGS_LOCATION
+    );
 
+    if(!LocationBuffer){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    LocationBuffer->BufferLocation = Location;
+    LocationBuffer->BufferLength = sizeof(HGSMI_HOST_FLAGS);
+
+    HgsmiBufferSubmit(Context, LocationBuffer);
+    HgsmiBufferFree(Context, LocationBuffer);
 
     return STATUS_SUCCESS;
 }
@@ -30,10 +47,23 @@ HgsmiReportFlagsLocation(
 LOUSTATUS
 HgsmiSendCapabilityInfo(
     POOL Context, 
-    uint32_t* Capabilities
+    uint32_t Capabilities
 ){
+    PVBVA_CAPABILITIES VbvaCapabilities = (PVBVA_CAPABILITIES)HgsmiBufferAllocate(Context, sizeof(VBVA_CAPABILITIES), HGSMI_CH_VBVA, VBVA_INFORMATION_CAPS);
+    if(!VbvaCapabilities){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
+    VbvaCapabilities->Rc = VERR_NOT_IMPLEMENTED;
+    VbvaCapabilities->Capabilities = Capabilities;
 
+    HgsmiBufferSubmit(Context, VbvaCapabilities);
+
+    if(VbvaCapabilities->Rc < 0){
+        LouPrint("VBOXGPU:ERROR:Error Sending HGSMI Capabilities Info\n");
+    }
+
+    HgsmiBufferFree(Context, VbvaCapabilities);
 
     return STATUS_SUCCESS;
 }

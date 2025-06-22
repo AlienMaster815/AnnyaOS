@@ -204,7 +204,7 @@ void StartDebugger(){
         &Charecteristics
     );
     AttatchWindowToKrnlDebug(HWind);    
-    
+    LouPrint("Hello Debugger\n");
 }
 
 void KillDebuger(){
@@ -312,6 +312,7 @@ void DisableCR0WriteProtection() {
 }
 void InitializeAcpiSystem();
 void InitializeDebuggerComunications();
+void LouKeInitializeMouseManagemet();
 
 UNUSED static bool SystemIsEfi = false;
 KERNEL_ENTRY Lou_kernel_start(
@@ -359,6 +360,7 @@ KERNEL_ENTRY Lou_kernel_start(
     //CheckForSoundblaster16();
     //ScanTheRestOfHarware();
 
+    LouKeInitializeMouseManagemet();
     EnablePs2Keyboard();
     InitializePs2Mouse();
     

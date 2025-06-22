@@ -53,44 +53,6 @@ void GenericVideoProtocolBlitCopy(void* Destination, void* Source, uint64_t Size
     memcpy(Destination, Source, Size);
 }
 
-LOUDDK_API_ENTRY
-void GenericVideoProtocolInitialize(){
-
-	PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
-	uintptr_t FramebufferAddress = VBE_INFO.vbe_mode_info.framebuffer;
-    SupportedModes->Width = 640;
-    SupportedModes->Height = 480;
-    SupportedModes->Bpp = 32;
-    SupportedModes->Pitch = (640 * (32 / 8));
-    SupportedModes->FrameBufferType = RGB_DRSD_FRAMEBUFFER;
-
-	PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
-    DrsdFrameWork->RgbPutPixel = GenericVideoProtocolPutPixelEx;
-    DrsdFrameWork->VRamSize = 640 * 480 * (32 / 8);
-        
-	DrsdFrameWork->BlitCopy = GenericVideoProtocolBlitCopy;
-
-	uintptr_t VMemFramebuffer = (uintptr_t)LouVMalloc(ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE));
-
-	LouKeMapContinuousMemoryBlock(FramebufferAddress, VMemFramebuffer, ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE), WRITEABLE_PAGE | PRESENT_PAGE);
-	DrsdFrameWork->SecondaryFrameBuffer = (uintptr_t)LouKeMallocEx(ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE), KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
-
-    LouKeRegisterFrameBufferDevice(
-		(void*)0x01,
-		VMemFramebuffer,
-        DrsdFrameWork->SecondaryFrameBuffer, 
-        0x00,
-        (640 * 480 * 4),
-        640, 480,
-        32, 
-        RGB_DRSD_FRAMEBUFFER,
-        SupportedModes,
-        DrsdFrameWork
-    );
-
-	LouKeDrsdPciResetScreen(0x00);
-	StartDebugger();
-}
 
 static struct multiboot_tag_framebuffer_common* BootGraphics = 0x00;
 
@@ -103,50 +65,37 @@ void LouKeDeferBootGraphics(
 
 LOUDDK_API_ENTRY
 void InitializeBootGraphics(){
-	///*
 	if(!BootGraphics){
 		return;
 	}
-	uint16_t Width = BootGraphics->framebuffer_width;
-	uint16_t Height = BootGraphics->framebuffer_height;
-	uint16_t Bpp = BootGraphics->framebuffer_bpp;
-	size_t FrameBufferSize = Bpp;
-	FrameBufferSize /= 8;
-	FrameBufferSize *= Width * Height;
+	UNUSED uint16_t Width = BootGraphics->framebuffer_width;
+	UNUSED uint16_t Height = BootGraphics->framebuffer_height;
+	UNUSED uint16_t Bpp = BootGraphics->framebuffer_bpp;
+	
+	PDRSD_DEVICE Device = LouKeMallocType(DRSD_DEVICE, KERNEL_GENERIC_MEMORY);
+	PDRSD_PLANE Plane = LouKeMallocType(DRSD_PLANE, KERNEL_GENERIC_MEMORY);
+	Plane->PlaneState = LouKeMallocType(DRSD_PLANE_STATE, KERNEL_GENERIC_MEMORY);
+	Plane->FrameBuffer = LouKeMallocType(DRSD_FRAME_BUFFER, KERNEL_GENERIC_MEMORY);
+	Plane->PlaneState->SourceX = 0;
+	Plane->PlaneState->SourceY = 0;
+	Plane->PlaneState->Width = Width;
+	Plane->PlaneState->Height = Height;
+	Plane->PlaneState->FormatUsed = DRSD_COLOR_FORMAT_XRGB8888;
+	Plane->FrameBuffer->Height = Height;
+	Plane->FrameBuffer->Width = Width;
+	Plane->FrameBuffer->Bpp = Bpp;
+	Plane->FrameBuffer->Pitch = (Width * (Bpp / 8));;
+	Plane->FrameBuffer->FramebufferSize = Width * Height * (Bpp / 8);
+	Plane->FrameBuffer->FramebufferBase = (uintptr_t)LouVMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), MEGABYTE_PAGE);
+	LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, Plane->FrameBuffer->FramebufferBase, ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), KERNEL_DMA_MEMORY);
 
+	DrsdInitializeGenericPlane(Device, Plane, 0, 0,0, 0, 0, PRIMARY_PLANE, "BOOTVID.SYS");
 
-	PFrameBufferModeDefinition SupportedModes = (PFrameBufferModeDefinition)LouKeMallocEx(sizeof(FrameBufferModeDefinition), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
-	uintptr_t FramebufferAddress = BootGraphics->framebuffer_addr;
-    SupportedModes->Width = Width;
-    SupportedModes->Height = Height;
-    SupportedModes->Bpp = Bpp;
-    SupportedModes->Pitch = (Width * (Bpp / 8));
-    SupportedModes->FrameBufferType = RGB_DRSD_FRAMEBUFFER;
+	LouKeDrsdClearScreen(Plane);
 
-	PDrsdStandardFrameworkObject DrsdFrameWork = (PDrsdStandardFrameworkObject)LouKeMallocEx(sizeof(DrsdStandardFrameworkObject), GET_ALIGNMENT(FrameBufferModeDefinition), WRITEABLE_PAGE | PRESENT_PAGE);
-    DrsdFrameWork->RgbPutPixel = GenericVideoProtocolPutPixelEx;
-    DrsdFrameWork->VRamSize = Width * Height * (Bpp / 8);
-        
-	DrsdFrameWork->BlitCopy = GenericVideoProtocolBlitCopy;
+	//LouKeDrsdClearScreen
 
-	uintptr_t VMemFramebuffer = (uintptr_t)LouVMalloc(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE));
+	LouPrint("Hello World\n");
 
-	LouKeMapContinuousMemoryBlock(FramebufferAddress, VMemFramebuffer, ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), WRITEABLE_PAGE | PRESENT_PAGE);
-	DrsdFrameWork->SecondaryFrameBuffer = (uintptr_t)LouKeMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), KILOBYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE);
-
-    LouKeRegisterFrameBufferDevice(
-		(void*)0xFFFFFFFFFFFFFFFF,
-		VMemFramebuffer,
-        DrsdFrameWork->SecondaryFrameBuffer, 
-        0x00,
-        (Width * Height * (Bpp / 8)),
-        Width, Height,
-        Bpp, 
-        RGB_DRSD_FRAMEBUFFER,
-        SupportedModes,
-        DrsdFrameWork
-    );
-	LouKeDrsdPciResetScreen((P_PCI_DEVICE_OBJECT)0xFFFFFFFFFFFFFFFF);
-	StartDebugger();
-	//*/
+	while(1);
 }

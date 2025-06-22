@@ -3,6 +3,8 @@
 
 #define VINF_SUCCESS 0
 
-#define VERR_NOT_SUPPORTED (-37)
+#define VERR_NOT_IMPLEMENTED    (-12)
+
+#define VERR_NOT_SUPPORTED      (-37)
 
 #endif

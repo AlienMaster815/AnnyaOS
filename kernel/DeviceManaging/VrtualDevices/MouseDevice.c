@@ -7,6 +7,9 @@ void LouKeDrsdUnDrawMouse(
 static int32_t MouseXCursor = 0;
 static int32_t MouseYCursor = 0;
 
+static int32_t LastMouseXCursor = 0;
+static int32_t LastMouseYCursor = 0;
+
 UNUSED static const uint16_t Cursour[19] = {
     0b100000000000000,
     0b110000000000000,
@@ -86,17 +89,11 @@ static inline void UnDrawMouse(uint16_t x, uint16_t y){
 static bool FirstDraw = true;
 
 void LouKeMouseMoveEventUpdate(int32_t X, int32_t Y){
-
-    if(!FirstDraw){
-        UnDrawMouse(MouseXCursor, MouseYCursor);    
-    }else{
-        FirstDraw = false;
-    }
-
+    
     MouseXCursor += X;
 
     if(MouseXCursor < 0){
-        MouseXCursor = 0;
+        //MouseXCursor = 0;
     }
     if(MouseXCursor >= GetScreenBufferWidth()){
         MouseXCursor = (GetScreenBufferWidth() - 1);
@@ -111,14 +108,31 @@ void LouKeMouseMoveEventUpdate(int32_t X, int32_t Y){
         MouseYCursor = (GetScreenBufferHeight() - 1);
     }
 
-    DrawMouse(MouseXCursor, MouseYCursor);
-    LouKeDrsdSyncScreens();
-    //LouPrint("MouseX:%d :: MouseY:%d\n", MouseXCursor, MouseYCursor);
 }
 
 
 void LouKeMouseClickEventUpdate(bool Right, bool Left){
 
-    
+}
 
+void MouseDrawWork(uint64_t NullDataDontUse){
+    if(!FirstDraw){
+        UnDrawMouse(LastMouseXCursor, LastMouseYCursor);    
+    }else{
+        FirstDraw = false;
+    }
+    LastMouseXCursor = MouseXCursor;
+    LastMouseYCursor = MouseYCursor;
+    DrawMouse(MouseXCursor, MouseYCursor);
+    LouKeDrsdSyncScreens();
+}
+
+void LouKeInitializeMouseManagemet(){
+ 
+    LouKeInitializeIntervalWork(
+        MouseDrawWork,
+        0x00,
+        16
+    );
+    LouPrint("Here\n");
 }
