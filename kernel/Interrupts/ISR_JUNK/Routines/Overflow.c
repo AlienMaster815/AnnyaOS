@@ -28,10 +28,10 @@ typedef struct  __attribute__((packed)) _CPUContext{
     uint64_t FaultStack;
     uint64_t ss;
 } CPUContext;
-volatile PWINDHANDLE SetBlueScreenPannel();
+PWINDHANDLE SetBlueScreenPannel();
 
 void LouKeSetPanicInfo(
-	volatile PWINDHANDLE BsodHandle, string DynamicErrorMessage,
+	PWINDHANDLE BsodHandle, string DynamicErrorMessage,
 	uint64_t rax,
 	uint64_t rbx,
 	uint64_t rcx,
@@ -57,7 +57,7 @@ void LouKeSetPanicInfo(
 
 void OverFlow(uint64_t FaultingStackP) {
 
-    volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
+    PWINDHANDLE Bsod = SetBlueScreenPannel();
 
     CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP + 8);
 

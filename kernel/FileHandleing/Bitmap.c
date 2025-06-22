@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-
+void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
 
 PBITMAP_HANDLE UnpackBitmap(FILE* FileToUnpack){
     PBITMAP_HANDLE MapHandle = 0x00;
@@ -60,7 +60,7 @@ void LouKeCloseBitmapImage(PBITMAP_HANDLE BitHandle){
 
 static spinlock_t BitMapDrawLock;
 
-void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, uint16_t x, uint16_t y){
+void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, int64_t x, int64_t y){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&BitMapDrawLock, &Irql);
     uint8_t* PixelData = (uint8_t*)BitmapHandle->UnpackedData;
@@ -75,7 +75,7 @@ void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, uint16_t x, uint16_t y){
             uint8_t b = PixelData[0];
             uint8_t g = PixelData[1];
             uint8_t r = PixelData[2];
-            LouKeDrsdPutPixelMirrored(x + xz, y + yz, r, g, b);                 
+            LouKeDrsdCorePutPixel(x + xz, y + yz, r, g, b, 0);                 
         }
     }
     LouKeDrsdSyncScreens();

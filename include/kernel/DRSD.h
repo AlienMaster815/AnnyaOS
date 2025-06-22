@@ -768,41 +768,6 @@ typedef struct _DRSD_CRTC{
     PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 
-typedef struct  _DrsdBufferObjects{
-    ListHeader Header;
-    uint64_t Base;
-    uint64_t Size;
-}DrsdBufferObjects, * PDrsdBufferObjects;
-
-typedef struct _FrameBufferModeDefinition{  
-    uint16_t Width;
-    uint16_t Height;
-    uint32_t Pitch;
-    uint8_t Bpp;
-    uint8_t FrameBufferType;
-}FrameBufferModeDefinition, * PFrameBufferModeDefinition;
-
-
-typedef struct _DrsdVRamObject{
-    ListHeader                              Header;
-    uint64_t                                Base;
-    uint64_t                                Height;
-    DRSD_FRAME_BUFFER                       FrameBuffer;
-    void*                                   DeviceObject;
-    PFrameBufferModeDefinition              SupportedModes;
-    size_t                                  FrameworkVersion;
-    struct _DrsdStandardFrameworkObject*    FrameWorkReference;
-}DrsdVRamObject, * PDrsdVRamObject;
-
-typedef struct _DrsdStandardFrameworkObject{
-    void (*RgbPutPixel)(struct _DrsdVRamObject* FBDEV, uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-    void (*DeviceSetFramebufferMode)(struct _DrsdVRamObject* FBDEV, uint16_t Width, uint16_t Height);
-    void (*BlitCopy)(void* Destination, void* Source, uint64_t Size);
-    uint64_t VRamSize;
-    uint64_t SecondaryFrameBuffer;
-    uint64_t TrimaryFrameBuffer;
-}DrsdStandardFrameworkObject, * PDrsdStandardFrameworkObject;
-
 
 typedef struct _DRSD_MODE_CONFIGURATION_CALLBACKS{
     PDRSD_FRAME_BUFFER              (*CreateFrameBuffer)(struct _DRSD_DEVICE* Device, void* DrsdBuffer, void* CommandBuffer);
@@ -850,7 +815,6 @@ typedef struct _DRSD_MODE_SET_CONTEXT{
 }DRSD_MODE_SET_CONTEXT, * PDRSD_MODE_SET_CONTEXT;
 
 typedef struct _DRSD_DEVICE{
-    DrsdVRamObject                  DrsdVramObject; //mostly depreiciated for non linear framebuffers here for legacy and linear framebuffers
     struct _PCI_DEVICE_OBJECT*      PDEV;
     struct _LMPOOL_DIRECTORY*       VramPool;
     DRSD_MODE_CONFIGURATION         ModeConfiguration;
@@ -1017,30 +981,9 @@ typedef struct _DRSD_EDID_TRACKER{
 
 #ifndef _KERNEL_MODULE_
 
-LOUSTATUS LouKeRegisterFrameBufferDevice(
-    void* Device, 
-    uint64_t VRamBase,
-    uint64_t VRamBase2,
-    uint64_t VRamBase3,
-    uint64_t VRamSize,
-    uint16_t Width,
-    uint16_t Height,
-    uint8_t Bpp,
-    uint8_t FramebufferType,
-    PFrameBufferModeDefinition SupportedModes,
-    PDrsdStandardFrameworkObject FrameWorkReference
-);
 
-void LouKeDrsdResetScreen(uint8_t Gpu);
 
 void DirectAccessDrsdHotplugEvent(PDRSD_DEVICE Device);
-
-void* GetFrameBufferAddress(
-    PDrsdVRamObject FBDEV,
-    uint16_t x, uint16_t y
-);
-
-PDrsdVRamObject LouKeDeviceManagerGetFBDEV(uint8_t Gpu);
 
 void LouKeDrsdSyncScreens();
 

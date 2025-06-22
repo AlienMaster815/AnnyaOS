@@ -92,7 +92,7 @@ int64_t AnnyaGetScreenBufferWidth(){
     while(Data[0] != 1){
         LouCALL(GETSCREENWIDTH, (uint64_t)&Data, 0);
     }
-    return (uint16_t)Data[1];
+    return (int64_t)Data[1];
 }
 
 LOUDLL_API
@@ -327,8 +327,8 @@ void GetRtcTimeData(TIME_T* PTIME){
 
 LOUDLL_API
 void AnnyaUpdateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     PBUTTONHANDLE HBUTTON
 ){
     uint64_t Data[6];

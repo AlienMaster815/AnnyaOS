@@ -4,14 +4,18 @@ uint64_t OpenWindows = 0;
 
 typedef struct _OPEN_WINDOW_LIST{
     ListHeader Neighbors;
-    volatile PWINDHANDLE WindowHandle;
+    PWINDHANDLE WindowHandle;
 }OPEN_WINDOW_LIST, * POPEN_WINDOW_LIST;
 
 OPEN_WINDOW_LIST MasterWindowList;
 
 static spinlock_t WindowHandleLock;
+void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+void* GetFrameBufferAddress(
+    int64_t x, int64_t y
+);
 
-static inline volatile PWINDHANDLE CreateWindowHandle(){
+static PWINDHANDLE CreateWindowHandle(){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&WindowHandleLock, &Irql);
     POPEN_WINDOW_LIST TmpList = &MasterWindowList;
@@ -24,14 +28,14 @@ static inline volatile PWINDHANDLE CreateWindowHandle(){
 
     TmpList->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(OPEN_WINDOW_LIST), GET_ALIGNMENT(OPEN_WINDOW_LIST), WRITEABLE_PAGE | PRESENT_PAGE);
     TmpList = (POPEN_WINDOW_LIST)TmpList->Neighbors.NextHeader;
-    TmpList->WindowHandle = (volatile PWINDHANDLE)LouKeMallocEx(sizeof(WINDHANDLE), GET_ALIGNMENT(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    TmpList->WindowHandle = (PWINDHANDLE)LouKeMallocEx(sizeof(WINDHANDLE), GET_ALIGNMENT(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
     LouKeReleaseSpinLock(&WindowHandleLock, &Irql);
     
     return TmpList->WindowHandle;
 }
 
 static inline void DestroyWindowHandle(
-    volatile PWINDHANDLE WindowToDestroy
+    PWINDHANDLE WindowToDestroy
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&WindowHandleLock, &Irql);
@@ -54,11 +58,11 @@ static inline void DestroyWindowHandle(
 }
 
 void LouKeDrsdHandleWindowUpdate(
-    volatile PWINDHANDLE WindowHandles,
-    uint16_t x,
-    uint16_t y,
-    uint16_t Width,
-    uint16_t Height
+    PWINDHANDLE WindowHandles,
+    int64_t x,
+    int64_t y,
+    uint32_t Width,
+    uint32_t Height
 );
 
 void LouKeDrsdDrawDesktopBackground(
@@ -66,7 +70,7 @@ void LouKeDrsdDrawDesktopBackground(
     uint16_t DrsdFileType
 );
 
-volatile PWINDHANDLE 
+PWINDHANDLE 
 GetWindowHandleByNumber(
     uint16_t HandleNumber
 ){
@@ -87,29 +91,29 @@ uint16_t GetAmmountOfOpenWindows(){
 }
 
 void print_clear();
-void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
+void VgaPutCharecterRgb(char Character, PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
 
 void DrawRectangle(
-    uint16_t x, 
-    uint16_t y, 
-    uint16_t width, 
-    uint16_t height,
+    int64_t x, 
+    int64_t y, 
+    uint32_t width, 
+    uint32_t height,
     uint8_t r,
     uint8_t g,
     uint8_t b
     ){
-    for(uint16_t yz = y; yz <= y+height; yz++){
-        for(uint16_t xz = x;xz <= x+width; xz++){
-            LouKeDrsdPutPixelMirrored(xz,yz,r,g,b);
+    for(int64_t yz = y; yz <= y+height; yz++){
+        for(int64_t xz = x;xz <= x+width; xz++){
+            LouKeDrsdCorePutPixel(xz,yz,r,g,b,0);
         }
     }
 }
 
 void Draw2DBorder(
-    uint16_t x, 
-    uint16_t y, 
-    uint16_t width, 
-    uint16_t height, 
+    int64_t x, 
+    int64_t y, 
+    uint32_t width, 
+    uint32_t height, 
     uint8_t r,
     uint8_t g,
     uint8_t b
@@ -121,10 +125,10 @@ void Draw2DBorder(
 }
 
 void Draw3DBorder(
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
+    int64_t x,
+    int64_t y,
+    uint32_t width,
+    uint32_t height,
     uint16_t rf,
     uint16_t gf,
     uint16_t bf,
@@ -140,7 +144,7 @@ void Draw3DBorder(
 
 static inline
 void DrawWindowTitle(
-    volatile PWINDHANDLE WindowHandle
+    PWINDHANDLE WindowHandle
 ){
     WINDHANDLE Title;
     
@@ -162,19 +166,19 @@ void DrawWindowTitle(
 }
 
 bool DrawWindow(
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    volatile PWINDHANDLE WindHandle
+    int64_t x,
+    int64_t y,
+    uint32_t width,
+    uint32_t height,
+    PWINDHANDLE WindHandle
 );
 
 bool DrawWindowEx(
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    volatile PWINDHANDLE WindHandle,
+    int64_t x,
+    int64_t y,
+    uint32_t width,
+    uint32_t height,
+    PWINDHANDLE WindHandle,
     bool SkipInnerWindow
 ){
     if((width < 50) || (height < 50)){
@@ -182,13 +186,13 @@ bool DrawWindowEx(
     }
 
     //later on we will check for somthing behind it to draw back for now though
-    UNUSED uint16_t oldX = WindHandle->CurrentX;
-    UNUSED uint16_t oldY = WindHandle->CurrentY;
-    UNUSED uint16_t oldWidth = WindHandle->CurrentWidth;
-    UNUSED uint16_t oldHeight = WindHandle->CurrentHeight;
+    UNUSED int64_t oldX = WindHandle->CurrentX;
+    UNUSED int64_t oldY = WindHandle->CurrentY;
+    UNUSED uint32_t oldWidth = WindHandle->CurrentWidth;
+    UNUSED uint32_t oldHeight = WindHandle->CurrentHeight;
 
-    UNUSED uint16_t ScreenWidth = GetScreenBufferWidth();
-    UNUSED uint16_t ScreenHeight = GetScreenBufferWidth();
+    UNUSED uint32_t ScreenWidth = GetScreenBufferWidth();
+    UNUSED uint32_t ScreenHeight = GetScreenBufferHeight();
     
 
     WindHandle->CurrentX = x;
@@ -210,8 +214,8 @@ bool DrawWindowEx(
             (WindHandle->WindowDataColor.g != WindHandle->ForgroundColor.g) &&
             (WindHandle->WindowDataColor.b != WindHandle->ForgroundColor.b)
         ){
-            for(uint16_t Buffx = 0 ; Buffx < GetScreenBufferWidth(); Buffx++){
-                for(uint16_t Buffy = 0 ; Buffy < GetScreenBufferHeight(); Buffy++){
+            for(int64_t Buffx = 0 ; Buffx < GetScreenBufferWidth(); Buffx++){
+                for(int64_t Buffy = 0 ; Buffy < GetScreenBufferHeight(); Buffy++){
                     uint8_t* FOO = (uint8_t*)&WindHandle->InnerWindowData[Buffx + GetScreenBufferWidth() * Buffy];
                     if(
                         (FOO[0] == WindHandle->WindowDataColor.b) &&
@@ -238,11 +242,11 @@ bool DrawWindowEx(
                 Buffy < WindHandle->Charecteristics.Dimentions.height;
                 Buffy++
             ){
-                uint8_t* FOO = (uint8_t*)&WindHandle->InnerWindowData[Buffx + GetScreenBufferWidth() * Buffy];
-                LouKeDrsdPutPixelMirrored(
+                uint8_t* FOO = (uint8_t*)&WindHandle->InnerWindowData[Buffx + 800 * Buffy];
+                LouKeDrsdCorePutPixel(
                     WindHandle->Charecteristics.Dimentions.x + Buffx,
                     WindHandle->Charecteristics.Dimentions.y + Buffy,
-                    FOO[2],FOO[1], FOO[0]
+                    FOO[2],FOO[1], FOO[0], 0
                 );  
             }
         }
@@ -459,28 +463,23 @@ bool DrawWindowEx(
 }
 
 bool DrawWindow(
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    volatile PWINDHANDLE WindHandle
+    int64_t x,
+    int64_t y,
+    uint32_t width,
+    uint32_t height,
+    PWINDHANDLE WindHandle
 ){
     return DrawWindowEx(x,y,width,height,WindHandle, false);
 }
 
-static spinlock_t WindowUpdateLock;
-
-
 bool LouUpdateWindow(
-    uint16_t x, 
-    uint16_t y, 
-    uint16_t width,
-    uint16_t height,
-    volatile PWINDHANDLE WindHandle
+    int64_t x, 
+    int64_t y, 
+    uint32_t width,
+    uint32_t height,
+    PWINDHANDLE WindHandle
 ){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&WindowUpdateLock, &Irql);
-    
+    MutexLock(WindHandle->Lock);
     LouKeDrsdHandleWindowUpdate(
         WindHandle,
         x,y,
@@ -491,10 +490,10 @@ bool LouUpdateWindow(
         x, y,
         width, height,
         WindHandle) != true){
-        LouKeReleaseSpinLock(&WindowUpdateLock, &Irql);
+        MutexUnlock(WindHandle->Lock);
         return false;
     }
-    LouKeReleaseSpinLock(&WindowUpdateLock, &Irql);
+    MutexUnlock(WindHandle->Lock);
     LouKeDrsdSyncScreens();
     return true;
 }
@@ -502,35 +501,31 @@ bool LouUpdateWindow(
 
 static spinlock_t LouUpdtateTextWindowLock;
 
-bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
+bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&LouUpdtateTextWindowLock, &Irql);    
-    const uint16_t Width = WindowHandle->Charecteristics.Dimentions.width;
-    const uint16_t Height = WindowHandle->Charecteristics.Dimentions.height;
-    const uint16_t StartX = WindowHandle->Charecteristics.Dimentions.x;
-    const uint16_t StartY = WindowHandle->Charecteristics.Dimentions.y;
-    const uint16_t ScreenWidth = GetScreenBufferWidth();
-    const uint16_t ScreenHeight = GetScreenBufferHeight();
+    const uint32_t Width = WindowHandle->Charecteristics.Dimentions.width;
+    const uint32_t Height = WindowHandle->Charecteristics.Dimentions.height;
+    const int64_t StartX = WindowHandle->Charecteristics.Dimentions.x;
+    const int64_t StartY = WindowHandle->Charecteristics.Dimentions.y;
+    const uint32_t ScreenWidth = GetScreenBufferWidth();
+    const uint32_t ScreenHeight = GetScreenBufferHeight();
 
     switch (Update){
         case TEXT_WINDOW_BUFFER_OVERFLOW:{
             UNUSED uint8_t r;
             UNUSED uint8_t g;
             UNUSED uint8_t b;
-            UNUSED uint8_t a;
-            UNUSED uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-            PDrsdVRamObject FBDEV;
-            for(uint8_t i = 0; i < GpuCount; i++){
-                FBDEV = LouKeDeviceManagerGetFBDEV(i);        
-                for(uint16_t x = 0; x < (Width - 5); x++){
-                    for(uint16_t y = 18; y < (Height - 5); y++){         
-                        uint32_t* dest = GetFrameBufferAddress(FBDEV ,StartX + x, StartY + y - 18);
-                        *dest = WindowHandle->InnerWindowData[x + ScreenWidth * y];
-                    }
+            UNUSED uint8_t a;      
+
+            for(int64_t x = 0; x < (Width - 5); x++){
+                for(int64_t y = 18; y < (Height - 5); y++){         
+                    uint32_t* dest = GetFrameBufferAddress(StartX + x, StartY + y - 18);
+                    *dest = WindowHandle->InnerWindowData[x + ScreenWidth * y];
                 }
             }
-            for(uint16_t x = 0; x < (Width - 5); x++){
-                for(uint16_t y = 18; y < (Height - 5); y++){  
+            for(int64_t x = 0; x < (Width - 5); x++){
+                for(int64_t y = 18; y < (Height - 5); y++){  
                     WindowHandle->InnerWindowData[x + ScreenWidth * (y - 18)] = WindowHandle->InnerWindowData[x + ScreenWidth * y];
                 }
             }
@@ -542,15 +537,10 @@ bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Upd
             UNUSED uint8_t g;
             UNUSED uint8_t b;
             UNUSED uint8_t a;
-            UNUSED uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-            PDrsdVRamObject FBDEV;
-            for(uint8_t i = 0; i < GpuCount; i++){
-                FBDEV = LouKeDeviceManagerGetFBDEV(i);        
-                for(uint16_t x = 0; x < (Width - 1); x++){
-                    for(uint16_t y = 0; y < (Height - 3); y++){         
-                        uint32_t* dest = GetFrameBufferAddress(FBDEV ,StartX + x, StartY + y);
-                        *dest = 0 ;//= WindowHandle->InnerWindowData[x + ScreenWidth * y];
-                    }
+            for(uint16_t x = 0; x < (Width - 1); x++){
+                for(uint16_t y = 0; y < (Height - 3); y++){         
+                    uint32_t* dest = GetFrameBufferAddress(StartX + x, StartY + y);
+                    *dest = 0 ;//= WindowHandle->InnerWindowData[x + ScreenWidth * y];
                 }
             }
 
@@ -560,38 +550,31 @@ bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Upd
                     WindowHandle->InnerWindowData[x + ScreenWidth * (y - HeightDifference)] = WindowHandle->InnerWindowData[x + ScreenWidth * y];
                 }
             }
-            
-
-            for(uint8_t i = 0; i < GpuCount; i++){
-                FBDEV = LouKeDeviceManagerGetFBDEV(i);        
-                for(uint16_t x = 0; x < (Width - 1); x++){
-                    for(uint16_t y = 0; y < (Height - 3); y++){         
-                        uint32_t* dest = GetFrameBufferAddress(FBDEV ,StartX + x, StartY + y);
-                        *dest = WindowHandle->InnerWindowData[x + ScreenWidth * y];
-                    }
+               
+            for(uint16_t x = 0; x < (Width - 1); x++){
+                for(uint16_t y = 0; y < (Height - 3); y++){         
+                    uint32_t* dest = GetFrameBufferAddress(StartX + x, StartY + y);
+                    *dest = WindowHandle->InnerWindowData[x + ScreenWidth * y];
                 }
             }
             WindowHandle->Cursor.y = Height - 64;
         }
     }
-    LouKeReleaseSpinLock(&LouUpdtateTextWindowLock, &Irql);    
+    LouKeReleaseSpinLock(&LouUpdtateTextWindowLock, &Irql);
     
     return true;
 }
 
-static spinlock_t WindowCreationLock;
+//static spinlock_t WindowCreationLock;
 
-volatile PWINDHANDLE LouCreateWindow(
-    const uint16_t x, const uint16_t y,
-    const uint16_t width, const uint16_t height, 
+PWINDHANDLE LouCreateWindow(
+    const int64_t x, const int64_t y,
+    const uint32_t width, const uint32_t height, 
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
     ){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&WindowCreationLock, &Irql);
 
-
-    volatile PWINDHANDLE WindHandle = CreateWindowHandle();
+    PWINDHANDLE WindHandle = CreateWindowHandle();
     if(!WindHandle){
         return 0x00;
     }
@@ -640,13 +623,11 @@ volatile PWINDHANDLE LouCreateWindow(
     WindHandle->Cursor.y = 0;
 
     WindHandle->WindowName = Charecteristics->WindowName;
-    WindHandle->InnerWindowData = LouKeMallocEx(    
-        64 * MEGABYTE, MEGABYTE_PAGE, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE
-    );
+    WindHandle->InnerWindowData = LouKeMallocArray(uint32_t, 800 * 600, KERNEL_GENERIC_MEMORY);
 
     for(
         uintptr_t InnerWindowData = 0; 
-        InnerWindowData < (GetScreenBufferHeight() * GetScreenBufferWidth()); 
+        InnerWindowData < (800 * 600); 
         InnerWindowData++
     ){
         uint8_t* Data = (uint8_t*)&WindHandle->InnerWindowData[InnerWindowData];
@@ -655,18 +636,19 @@ volatile PWINDHANDLE LouCreateWindow(
         Data[2] = WindHandle->ForgroundColor.r;
         Data[3] = 0;
     }
+    WindHandle->Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY);
 
     LouUpdateWindow(
         x, y, 
         width, height,
         WindHandle
     );
-    LouKeReleaseSpinLock(&WindowCreationLock, &Irql);
- 
+    
+
     return WindHandle;
 }
 
-void LouDestroyWindow(volatile PWINDHANDLE WindowToDestroy){
+void LouDestroyWindow(PWINDHANDLE WindowToDestroy){
     LouKeDrsdHandleWindowUpdate(
         0x00,
         WindowToDestroy->CurrentX,

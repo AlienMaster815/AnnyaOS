@@ -3,7 +3,7 @@
 
 void PrintStringToWindow(
     string Str, 
-    volatile PWINDHANDLE Handle, 
+    PWINDHANDLE Handle, 
     uint8_t r , 
     uint8_t g, 
     uint8_t b
@@ -11,7 +11,7 @@ void PrintStringToWindow(
 
 void PlaceFloatingString(
     string FloatingString,
-    uint16_t x, uint16_t y,
+    int64_t x, int64_t y,
     uint16_t ScalingX, uint16_t ScalingY,
     uint8_t r, uint8_t g, uint8_t b,
     ...
@@ -21,7 +21,7 @@ static spinlock_t ButtonLock;
 static spinlock_t ButtonUpdateLock;
 
 void DrawButton(
-    volatile PBUTTONHANDLE ButtonHandle
+    PBUTTONHANDLE ButtonHandle
 ){
 
     //ButtonRectangleShape
@@ -79,9 +79,9 @@ void DrawButton(
 
 
 void LouUpdateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
-    volatile PBUTTONHANDLE HBUTTON
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
+    PBUTTONHANDLE HBUTTON
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ButtonUpdateLock, &Irql);
@@ -99,8 +99,8 @@ void LouUpdateButton(
 
 
 volatile PBUTTONHANDLE LouCreateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
     uint64_t CharecteristicAligned
 ){

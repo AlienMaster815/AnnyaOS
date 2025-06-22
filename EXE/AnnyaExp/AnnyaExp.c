@@ -7,13 +7,13 @@
 
 static HANDLE (*AnnyaOpenPngA)(string);
 
-static volatile PWINDHANDLE TaskBarHandle = 0;
+static PWINDHANDLE TaskBarHandle = 0;
 static PBUTTONHANDLE StartButton = 0;
 static PBUTTONHANDLE ClockButton = 0;
 static PBITMAP_HANDLE Background = 0;
 //static HANDLE MyComputerPng = 0x00;
-static uint16_t Width = 0;
-static uint16_t Height = 0;
+static int64_t Width = 0;
+static int64_t Height = 0;
 
 static char Time[25];
 static uint8_t Hour = 0;

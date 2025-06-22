@@ -19,8 +19,8 @@ uint8_t LouKeGetCurrentTimeMinute();
 int LouPrint_s(char* format, va_list args);
 
 void LouUpdateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     PBUTTONHANDLE HBUTTON
 );
 
@@ -101,10 +101,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUCREATEWINDOW:{
             uint64_t* Tmp = (uint64_t*)Data;
 
-            uint16_t x = (uint16_t)Tmp[0];
-            uint16_t y = (uint16_t)Tmp[1];
-            uint16_t Width = (uint16_t)Tmp[2];
-            uint16_t Height = (uint16_t)Tmp[3];
+            int64_t x = (uint16_t)Tmp[0];
+            int64_t y = (uint16_t)Tmp[1];
+            uint32_t Width = (uint16_t)Tmp[2];
+            uint32_t Height = (uint16_t)Tmp[3];
             uintptr_t ParentWindow = (uintptr_t)Tmp[4];
             PWINDOW_CHARECTERISTICS Charecteristics = (PWINDOW_CHARECTERISTICS)Tmp[5];
             
@@ -127,7 +127,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUCREATECANVASBUFF:{
             uint64_t* Tmp = (uint64_t*)Data;
-            volatile PWINDHANDLE Return = LouCreateCanvasBuffer(
+            PWINDHANDLE Return = LouCreateCanvasBuffer(
                 (uint16_t)Tmp[0], (uint16_t)Tmp[1],
                 (uint16_t)Tmp[2], (uint16_t)Tmp[3],
                 (uintptr_t)Tmp[4],
@@ -139,7 +139,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUCHAGECANVASCOLOR:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouChangeCanvasBufferColor(
-                (volatile PWINDHANDLE)Tmp[0],
+                (PWINDHANDLE)Tmp[0],
                 (uint8_t)Tmp[1],
                 (uint8_t)Tmp[2],
                 (uint8_t)Tmp[3]

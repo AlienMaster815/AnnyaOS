@@ -14,11 +14,11 @@
 #include <drivers/display/vga.h>
 
 void LouKeDebuggerCommunicationsSendCharecter(char Charecter);
-void VgaPutCharecterRgb(char Charecter, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
-bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
+void VgaPutCharecterRgb(char Charecter, PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b);
+bool LouUpdateTextWindow(PWINDHANDLE WindowHandle,TEXT_WINDOW_EVENT Update);
 
 int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
-static volatile PWINDHANDLE DebugWindow = 0x00; 
+static PWINDHANDLE DebugWindow = 0x00; 
 
 #define INCREASE_Y 16+1
 #define INCREASE_X 16+1
@@ -34,7 +34,7 @@ void DRSD_EGA_RELEASE(){
 }
 
 bool AttatchWindowToKrnlDebug(
-    volatile PWINDHANDLE WindowToAtttch
+    PWINDHANDLE WindowToAtttch
 ){
 
     if(DebugWindow != 0x00){
@@ -54,7 +54,7 @@ bool AttatchWindowToKrnlDebug(
     return true;
 }
 
-bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck){
+bool DetatchWindowToKrnlDebug(PWINDHANDLE WindowSecurityCheck){
     if(WindowSecurityCheck != DebugWindow){
         LouPrint("ERROR COULD NOT DETATCH :: ACCESS DENIED TO WINDOW HANDLE:%h", WindowSecurityCheck);
         return false;

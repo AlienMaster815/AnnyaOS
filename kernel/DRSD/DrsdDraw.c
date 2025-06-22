@@ -2,125 +2,37 @@
 
 static FILE*    BackgroundFile     = 0x00;
 static uint16_t BackgroundFileType = 0x00;
+void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+void* GetFrameBufferAddress(
+    int64_t x, int64_t y
+);
+;
 
-PDrsdVRamObject LouKeDeviceManagerGetFBDEV(uint8_t Gpu);
-
-volatile PWINDHANDLE 
+PWINDHANDLE 
 GetWindowHandleByNumber(
     uint16_t HandleNumber
 );
 
 uint16_t GetAmmountOfOpenWindows();
 
-void LouKeDrsdResetScreen(uint8_t Gpu){
-    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(Gpu);
-    uint16_t ScreenWidth = FBDEV->FrameBuffer.Width;
-    uint16_t ScreenHeight = FBDEV->FrameBuffer.Height;
-
-    if(FBDEV->FrameWorkReference->RgbPutPixel != 0x00){
-        for(uint16_t x = 0; x < ScreenWidth; x++){
-            for(uint16_t y = 0; y < ScreenHeight; y++){
-                FBDEV->FrameWorkReference->RgbPutPixel(FBDEV, x, y, 0, 192, 192, 0);
-           }   
-        }
-    }
-    if(FBDEV->FrameWorkReference->BlitCopy){
-        FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
-    }
-}
-
-void LouKeDrsdResetFBDEV(uint64_t* FBDEV){
-    uint64_t NumFBDEV = (uint64_t)LouKeDeviceManagerGetGpuCount();
-    if(*FBDEV > NumFBDEV){
-        *FBDEV = STATUS_NO_SUCH_DEVICE;
-    }
-    LouKeDrsdResetScreen((uint8_t)*FBDEV);
-    *FBDEV = STATUS_SUCCESS;
-}
-
-void LouKeDrsdPciResetScreen(P_PCI_DEVICE_OBJECT PDEV){
-    uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-    if(!GpuCount){
-        return ;
-    }
-    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);
-    for(uint8_t i = 0 ; i < GpuCount; i++){
-        FBDEV = LouKeDeviceManagerGetFBDEV(i);
-        if(FBDEV->DeviceObject == (void*)PDEV)break;
-    }
-    uint16_t ScreenWidth = FBDEV->FrameBuffer.Width;
-    uint16_t ScreenHeight = FBDEV->FrameBuffer.Height;
-
-    if(FBDEV->FrameWorkReference->RgbPutPixel != 0x00){
-        for(uint16_t x = 0; x < ScreenWidth; x++){
-            for(uint16_t y = 0; y < ScreenHeight; y++){
-                FBDEV->FrameWorkReference->RgbPutPixel(FBDEV, x, y, 0, 192, 192, 0);
-           }   
-        }
-    }
-    if(FBDEV->FrameWorkReference->BlitCopy){
-        FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
-    }
-}
-
-void LouKeDrsdPutPixelMirroredEx(
-    uint16_t x, uint16_t y, 
-    uint8_t r, uint8_t g, uint8_t b, uint8_t a
-){
-    uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-    PDrsdVRamObject FBDEV;
-    for(uint8_t i = 0 ; i < GpuCount; i++){
-        FBDEV = LouKeDeviceManagerGetFBDEV(i);
-        uint16_t ScreenWidth = FBDEV->FrameBuffer.Width;
-        uint16_t ScreenHeight = FBDEV->FrameBuffer.Height;
-        if((x > ScreenWidth) || (y > ScreenHeight)){
-            return;
-        }
-        FBDEV->FrameWorkReference->RgbPutPixel(FBDEV, x, y, r, g, b, a);
-    }
-}
-
-void LouKeDrsdPutPixelMirrored(
-    uint16_t x, uint16_t y, 
-    uint8_t r, uint8_t g, uint8_t b
-){
-    LouKeDrsdPutPixelMirroredEx(
-        x, y,
-        r,g,b,255
-    );
-}
-
-
-void LouKeDrsdSyncScreens(){
-    uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);;
-    for(uint8_t i = 0 ; i < GpuCount; i++){
-        FBDEV = LouKeDeviceManagerGetFBDEV(i);
-        if(FBDEV->FrameWorkReference->BlitCopy){
-            FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
-        }
-    }
-}
 
 void LouKeDsrdFBDEVFrameBufferMemMov(
-    uint8_t Gpu,
     PFRAME_BUFFER_HANDLE FrameHandle, 
-    volatile PWINDHANDLE WindowOfCopy,
+    PWINDHANDLE WindowOfCopy,
     uint64_t xDest, 
     uint64_t yDest,
     COLOR_MAP Background
 ){
-    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(Gpu);
     uint16_t Width =  FrameHandle->width;
     uint16_t Height = FrameHandle->height;
     uint16_t StartX = FrameHandle->x;
     uint16_t StartY = FrameHandle->y;
-    uint8_t BytesPerPixel = FBDEV->FrameBuffer.Bpp / 8;
+    uint8_t BytesPerPixel = 4;
 
     for (uint16_t y = 0; y < Height; y++) {
         for(uint16_t x = 0 ; x < Width; x++){
-            void* dest = GetFrameBufferAddress(FBDEV ,xDest + x, yDest + y);
-            void* src = GetFrameBufferAddress(FBDEV, StartX + x, StartY + y);
+            void* dest = GetFrameBufferAddress(xDest + x, yDest + y);
+            void* src = GetFrameBufferAddress(StartX + x, StartY + y);
         
             if (BytesPerPixel == 4) {
                 *(uint8_t*)(dest) = *(uint8_t*)(src);
@@ -146,42 +58,33 @@ void LouKeDsrdFBDEVFrameBufferMemMov(
         }
     }
 
-    if(FBDEV->FrameWorkReference->BlitCopy){
-        FBDEV->FrameWorkReference->BlitCopy((void*)FBDEV->FrameBuffer.FramebufferBase, (void*)FBDEV->FrameBuffer.SecondaryFrameBufferBase, FBDEV->FrameBuffer.FramebufferSize);
-    }
-
 }
 
 void LouKeDsrdMirrorFrameBufferMemMov(
     PFRAME_BUFFER_HANDLE FrameHandle, 
-    volatile PWINDHANDLE WindowOfCopy,
+    PWINDHANDLE WindowOfCopy,
     uint64_t xDest, 
     uint64_t yDest,
     COLOR_MAP BackGround
-    ){
-    uint8_t GpuCount = LouKeDeviceManagerGetGpuCount();
-
-    for (uint8_t i = 0 ; i < GpuCount; i++){
-        LouKeDsrdFBDEVFrameBufferMemMov(
-            i,
-            FrameHandle,
-            WindowOfCopy,
-            xDest,
-            yDest,
-            BackGround
-        );
-    }
-   
+){
+    LouKeDsrdFBDEVFrameBufferMemMov(
+        FrameHandle,
+        WindowOfCopy,
+        xDest,
+        yDest,
+        BackGround
+    );
 }
+   
 
 static inline
 bool DoesPixelOverlap(
-    uint16_t x, 
-    uint16_t y, 
-    uint16_t width, 
-    uint16_t height, 
-    uint16_t PixelX,
-    uint16_t PixelY
+    int64_t x, 
+    int64_t y, 
+    uint32_t width, 
+    uint32_t height, 
+    int64_t PixelX,
+    int64_t PixelY
 ){
     return(
         (PixelX >= x) && 
@@ -194,20 +97,20 @@ bool DoesPixelOverlap(
  
 static inline
 void FillPixelsWithStepping(
-    uint16_t x, uint16_t y, 
+    int64_t x, int64_t y, 
     uint8_t r, uint8_t g, uint8_t b,
     uint16_t XStepping, uint16_t YStepping
 ){  
 
-    uint16_t X = x * XStepping;
-    uint16_t Y = y * YStepping;
+    int64_t X = x * XStepping;
+    int64_t Y = y * YStepping;
 
     uint8_t WindowCount = GetAmmountOfOpenWindows();
     for(uint16_t x2 = 0; x2 < XStepping; x2++){
         for(uint16_t y2 = 0; y2 < YStepping; y2++){
             bool PixelOverlap = false;
             for(uint8_t i = 0 ; i < WindowCount; i++){
-                volatile PWINDHANDLE WindowHandle = GetWindowHandleByNumber(i);
+                PWINDHANDLE WindowHandle = GetWindowHandleByNumber(i);
                 if(DoesPixelOverlap(
                     WindowHandle->CurrentX,
                     WindowHandle->CurrentY,
@@ -218,15 +121,14 @@ void FillPixelsWithStepping(
                 ))PixelOverlap = true;
             }
             if(!PixelOverlap){
-                LouKeDrsdPutPixelMirrored(
+                LouKeDrsdCorePutPixel(
                     X + x2,                                
                     (GetScreenBufferHeight() - 1) - (Y + y2), 
-                    r, g, b                                     
+                    r, g, b, 0                                     
                 );    
             }
         }
     }
-
 }
 
 static spinlock_t LouKeDrsdDrawDesktopBackgroundLock;
@@ -260,8 +162,8 @@ void LouKeDrsdDrawDesktopBackground(
 
         uint8_t* PixelData = (uint8_t*)BitHandle->UnpackedData;
         uint8_t* Anchor = PixelData;
-        uint16_t Height = BitHandle->Height;
-        uint16_t Width = BitHandle->Width;
+        int64_t Height = BitHandle->Height;
+        int64_t Width = BitHandle->Width;
         uint16_t Bpp = BitHandle->Bpp;
 
         if((!GetScreenBufferWidth()) || (!Width) || (!GetScreenBufferHeight()) || (!Height)){
@@ -269,8 +171,8 @@ void LouKeDrsdDrawDesktopBackground(
             return;
         }
 
-        uint16_t XStepping = (GetScreenBufferWidth() / Width);
-        uint16_t YStepping = (GetScreenBufferHeight() / Height);
+        int64_t XStepping = (GetScreenBufferWidth() / Width);
+        int64_t YStepping = (GetScreenBufferHeight() / Height);
 
         //LouPrint("XStepping:%d\n", XStepping);
         //LouPrint("YStepping:%d\n", YStepping);
@@ -305,20 +207,19 @@ void LouKeDrsdDrawDesktopBackground(
 }
 
 
-
 void LouKeDrsdHandleWindowUpdate(
-    volatile PWINDHANDLE WindowHandle,
-    uint16_t NewX,
-    uint16_t NewY,
-    uint16_t NewWidth,
-    uint16_t NewHeight
+    PWINDHANDLE WindowHandle,
+    int64_t NewX,
+    int64_t NewY,
+    uint32_t NewWidth,
+    uint32_t NewHeight
 ){
 
     if(WindowHandle == 0x00){
-        uint16_t CurrentX = NewX;
-        uint16_t CurrentY = NewY;
-        uint16_t CurrentHeight = NewHeight;
-        uint16_t CurrentWidth = NewWidth;
+        int64_t CurrentX = NewX;
+        int64_t CurrentY = NewY;
+        uint32_t CurrentHeight = NewHeight;
+        uint32_t CurrentWidth = NewWidth;
 
         if(BackgroundFile){
 
@@ -332,24 +233,24 @@ void LouKeDrsdHandleWindowUpdate(
                     // Ensure the handle is valid
                 if (!BitHandle || !BitHandle->UnpackedData) {
                     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
-                    //LouKeDrsdSyncScreens();
+                    LouKeDrsdSyncScreens();
                     return;
                 }
 
                 uint8_t* PixelData = (uint8_t*)BitHandle->UnpackedData;
                 uint8_t* Anchor = PixelData;
-                uint16_t Height = BitHandle->Height;
-                uint16_t Width = BitHandle->Width;
+                uint32_t Height = BitHandle->Height;
+                uint32_t Width = BitHandle->Width;
                 uint16_t Bpp = BitHandle->Bpp;
 
                 if((!GetScreenBufferWidth()) || (!Width) || (!GetScreenBufferHeight()) || (!Height)){
                     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
-                    //LouKeDrsdSyncScreens();
+                    LouKeDrsdSyncScreens();
                     return;
                 }
 
-                uint16_t XStepping = (GetScreenBufferWidth() / Width);
-                uint16_t YStepping = (GetScreenBufferHeight() / Height);
+                int64_t XStepping = (GetScreenBufferWidth() / Width);
+                int64_t YStepping = (GetScreenBufferHeight() / Height);
 
                 //LouPrint("XStepping:%d\n", XStepping);
                 //LouPrint("YStepping:%d\n", YStepping);
@@ -362,7 +263,7 @@ void LouKeDrsdHandleWindowUpdate(
                 if (Bpp != 32) {
                     LouPrint("Unsupported bitmap bit depth: %d\n", Bpp);
                     LouKeReleaseSpinLock(&LouKeDrsdDrawDesktopBackgroundLock, &Irql);
-                    //LouKeDrsdSyncScreens();
+                    LouKeDrsdSyncScreens();
                     return;
                 }
 
@@ -383,9 +284,9 @@ void LouKeDrsdHandleWindowUpdate(
 
         }else{
             
-            for(uint16_t x = CurrentX; x <= (CurrentX + CurrentWidth); x++){
-                for(uint16_t y = 0 ; y <= (CurrentY + CurrentHeight); y++){
-                    LouKeDrsdPutPixelMirrored(x, y,0, 192, 192);
+            for(int64_t x = CurrentX; x <= (CurrentX + CurrentWidth); x++){
+                for(int64_t y = 0 ; y <= (CurrentY + CurrentHeight); y++){
+                    LouKeDrsdCorePutPixel(x, y,0, 192, 192, 0);
                 }
             }
 
@@ -393,7 +294,7 @@ void LouKeDrsdHandleWindowUpdate(
         }
         /*
         uint16_t WindowsToCheck = GetAmmountOfOpenWindows();
-        volatile PWINDHANDLE WindowParseHandle;
+        PWINDHANDLE WindowParseHandle;
 
         for(uint16_t i = 0 ; i < WindowsToCheck; i++){
             WindowParseHandle = GetWindowHandleByNumber(i);
@@ -413,10 +314,10 @@ void LouKeDrsdHandleWindowUpdate(
         //return;
     }
 
-    uint16_t CurrentX = WindowHandle->CurrentX;
-    uint16_t CurrentY = WindowHandle->CurrentY;
-    uint16_t CurrentHeight = WindowHandle->CurrentHeight;
-    uint16_t CurrentWidth = WindowHandle->CurrentWidth;
+    int64_t CurrentX = WindowHandle->CurrentX;
+    int64_t CurrentY = WindowHandle->CurrentY;
+    uint32_t CurrentHeight = WindowHandle->CurrentHeight;
+    uint32_t CurrentWidth = WindowHandle->CurrentWidth;
 
     if(BackgroundFile){
 
@@ -436,8 +337,8 @@ void LouKeDrsdHandleWindowUpdate(
 
             uint8_t* PixelData = (uint8_t*)BitHandle->UnpackedData;
             uint8_t* Anchor = PixelData;
-            uint16_t Height = BitHandle->Height;
-            uint16_t Width = BitHandle->Width;
+            uint32_t Height = BitHandle->Height;
+            uint32_t Width = BitHandle->Width;
             uint16_t Bpp = BitHandle->Bpp;
 
             if((!GetScreenBufferWidth()) || (!Width) || (!GetScreenBufferHeight()) || (!Height)){
@@ -446,8 +347,8 @@ void LouKeDrsdHandleWindowUpdate(
                 return;
             }
 
-            uint16_t XStepping = (GetScreenBufferWidth() / Width);
-            uint16_t YStepping = (GetScreenBufferHeight() / Height);
+            int64_t XStepping = (GetScreenBufferWidth() / Width);
+            int64_t YStepping = (GetScreenBufferHeight() / Height);
 
             //LouPrint("XStepping:%d\n", XStepping);
             //LouPrint("YStepping:%d\n", YStepping);
@@ -481,14 +382,14 @@ void LouKeDrsdHandleWindowUpdate(
 
     }else{
         
-        for(uint16_t x = CurrentX; x <= (CurrentX + CurrentWidth); x++){
-            for(uint16_t y = 0 ; y <= (CurrentY + CurrentHeight); y++){
+        for(int64_t x = CurrentX; x <= (CurrentX + CurrentWidth); x++){
+            for(int64_t y = 0 ; y <= (CurrentY + CurrentHeight); y++){
                 if(!DoesPixelOverlap(
                     NewX, NewY,
                     NewWidth, NewHeight,
                     x, y
                 )){
-                    LouKeDrsdPutPixelMirrored(x, y,0, 192, 192);
+                    LouKeDrsdCorePutPixel(x, y,0, 192, 192, 0);
                 }
             }
         }
@@ -496,7 +397,7 @@ void LouKeDrsdHandleWindowUpdate(
     }
     /*
     uint16_t WindowsToCheck = GetAmmountOfOpenWindows();
-    volatile PWINDHANDLE WindowParseHandle;
+    PWINDHANDLE WindowParseHandle;
 
     for(uint16_t i = 0 ; i < WindowsToCheck; i++){
         WindowParseHandle = GetWindowHandleByNumber(i);

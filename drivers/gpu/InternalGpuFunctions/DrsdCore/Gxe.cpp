@@ -4,9 +4,7 @@
 KERNEL_IMPORT
 LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress){
 
-    Device->DrsdVramObject.Base = (uint64_t)VramBase;
-    Device->DrsdVramObject.Height = size;
-    Device->VramPool = LouKeCreateGenericPool(Device->DrsdVramObject.Base, (uint64_t)PAddress, size , 0);
+    Device->VramPool = LouKeCreateGenericPool((uint64_t)VramBase, (uint64_t)PAddress, size , 0);
 
     return STATUS_SUCCESS;
 }

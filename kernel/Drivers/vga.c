@@ -5,11 +5,12 @@
 #define VGA_RGB_FRAMEBUFFER 0xFF
 
 
+void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
 
 extern struct multiboot_tag_vbe VBE_INFO;
 CharMapping* GetCharecterMap(char Charecter);
 
-volatile PWINDHANDLE 
+PWINDHANDLE 
 GetWindowHandleByNumber(
     uint16_t HandleNumber
 );
@@ -37,19 +38,19 @@ void print_set_color(uint8_t foreground, uint8_t background) {
     color = foreground + (background << 4);
 }
 
-bool LouUpdateTextWindow(volatile PWINDHANDLE WindowHandle, TEXT_WINDOW_EVENT Update);
+bool LouUpdateTextWindow(PWINDHANDLE WindowHandle, TEXT_WINDOW_EVENT Update);
 
 
 bool DrawWindow(
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    volatile PWINDHANDLE WindHandle
+    int64_t x,
+    int64_t y,
+    uint32_t width,
+    uint32_t height,
+    PWINDHANDLE WindHandle
 );
 
-void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b) {
-    static uint16_t xz, yz;
+void VgaPutCharecterRgb(char Character, PWINDHANDLE Handle, uint8_t r, uint8_t g, uint8_t b) {
+    static int64_t xz, yz;
 
     if(Handle->Cursor.y > (Handle->Charecteristics.Dimentions.height + 64)){
             
@@ -79,8 +80,8 @@ void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, 
     if ((Handle->Cursor.x + Map->width + 17) > Handle->Charecteristics.Dimentions.width) {
         VgaPutCharecterRgb('\n', Handle , 0, 0, 0);
     }
-    static uint16_t x;
-    static uint16_t y;
+    static int64_t x;
+    static int64_t y;
 
     x = Handle->Charecteristics.Dimentions.x + Handle->Cursor.x;
     y = Handle->Charecteristics.Dimentions.y + Handle->Cursor.y;
@@ -91,7 +92,7 @@ void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, 
             if ((Ybyte >> (15 - xz)) & 0x01) {
                 if(Handle->InnerWindowData){
                     for(uint8_t i = 0; i < GetAmmountOfOpenWindows();i++){
-                        volatile PWINDHANDLE TempHandle = GetWindowHandleByNumber(i);
+                        PWINDHANDLE TempHandle = GetWindowHandleByNumber(i);
                         if(Handle == TempHandle){
                             uint8_t* PIXEL_DATA = (uint8_t*)&Handle->InnerWindowData[(Handle->Cursor.x + xz) + GetScreenBufferWidth() * (Handle->Cursor.y + yz)];
                             PIXEL_DATA[0] = b;
@@ -102,7 +103,7 @@ void VgaPutCharecterRgb(char Character, volatile PWINDHANDLE Handle, uint8_t r, 
                     }
                 }
 
-                LouKeDrsdPutPixelMirrored(x + xz, y + yz, r, g, b);
+                LouKeDrsdCorePutPixel(x + xz, y + yz, r, g, b, 0);
             }
         }
     }
@@ -116,7 +117,7 @@ static spinlock_t PrintStringToWindowLock;
 
 void PrintStringToWindow(
     string Str, 
-    volatile PWINDHANDLE Handle, 
+    PWINDHANDLE Handle, 
     uint8_t r , 
     uint8_t g, 
     uint8_t b
@@ -132,29 +133,8 @@ void PrintStringToWindow(
 
 
 
-void* GetFrameBufferAddress(
-    PDrsdVRamObject FBDEV,
-    uint16_t x, uint16_t y
-){
 
-    // Calculate the offset in the framebuffer
-    uint32_t bytes_per_pixel = FBDEV->FrameBuffer.Bpp / 8;
-    uint8_t* framebuffer;
-    if(FBDEV->FrameBuffer.SecondaryFrameBufferBase){
-        framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.SecondaryFrameBufferBase;
-    }else{
-        framebuffer = (uint8_t*)(uintptr_t)FBDEV->FrameBuffer.FramebufferBase;
-    }
-    // Ensure x and y are within the screen bounds
-    if (x >= FBDEV->FrameBuffer.Width || y >= FBDEV->FrameBuffer.Height) {
-        return false; // Out of bounds, do nothing
-    }
 
-    //Calculate the position in the framebuffer
-    uint32_t pixel_offset = (y * FBDEV->FrameBuffer.Pitch) + (x * bytes_per_pixel);
-
-    return(void*)&framebuffer[pixel_offset];
-}
 
 #ifdef __x86_64__
     #include <limits.h>

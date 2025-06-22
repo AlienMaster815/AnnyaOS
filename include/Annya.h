@@ -174,15 +174,15 @@ void DrawDesktopBackground(FILE* FileHandle, uint16_t FileType);
 
 __declspec(dllimport)
 PBUTTONHANDLE AnnyaCreateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
     uintptr_t Charecteristics
 );
 
 __declspec(dllimport)
 void AnnyaChangeCanvasBufferColor(
-    volatile PWINDHANDLE WindowHandle,
+    PWINDHANDLE WindowHandle,
     uint16_t r,
     uint16_t g,
     uint16_t b,
@@ -190,9 +190,9 @@ void AnnyaChangeCanvasBufferColor(
 );
 
 __declspec(dllimport)
-volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+PWINDHANDLE AnnyaCreateCanvasBuffer(
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
 );
@@ -258,10 +258,10 @@ __declspec(dllimport)
 int LouPrint(char* Str, ...);
 
 __declspec(dllimport)
-uint16_t AnnyaGetScreenBufferWidth();
+int64_t AnnyaGetScreenBufferWidth();
 
 __declspec(dllimport)
-uint16_t AnnyaGetScreenBufferHeight();
+int64_t AnnyaGetScreenBufferHeight();
 
 __declspec(dllimport)
 PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters);
@@ -282,8 +282,8 @@ void GetRtcTimeData(TIME_T* PTIME);
 
 __declspec(dllimport)
 void AnnyaUpdateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     PBUTTONHANDLE HBUTTON
 );
 

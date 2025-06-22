@@ -2,7 +2,7 @@
 
 
 void LouChangeCanvasBufferColor(
-    volatile PWINDHANDLE WindHandle,
+    PWINDHANDLE WindHandle,
     uint8_t r,
     uint8_t g,
     uint8_t b
@@ -18,13 +18,13 @@ void LouChangeCanvasBufferColor(
 }
 
 
-volatile PWINDHANDLE LouCreateCanvasBuffer(
-    uint16_t x, uint16_t y,
-    uint16_t width, uint16_t height,
+PWINDHANDLE LouCreateCanvasBuffer(
+    int64_t x, int64_t y,
+    uint32_t width, uint32_t height,
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
 ){
-    volatile PWINDHANDLE WindHandle = LouKeMalloc(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    PWINDHANDLE WindHandle = LouKeMalloc(sizeof(WINDHANDLE), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     WindHandle->CurrentX = x;
     WindHandle->CurrentY = y;

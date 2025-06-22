@@ -36,13 +36,13 @@ void LouPanic(char* error_message,STATUS recoverable) {
 	while (1);
 }
 
-volatile PWINDHANDLE SetBlueScreenPannel(){
+PWINDHANDLE SetBlueScreenPannel(){
 	WINDOW_CHARECTERISTICS BSODCharecteristics;
     BSODCharecteristics.Type = CANVAS_WINDOW;
     BSODCharecteristics.WindowName = "BSOD";
 
 
-	volatile PWINDHANDLE Result = LouCreateCanvasBuffer(
+	PWINDHANDLE Result = LouCreateCanvasBuffer(
 		0,0,
 		GetScreenBufferWidth(), GetScreenBufferHeight(),
 		0x00,
@@ -61,12 +61,12 @@ volatile PWINDHANDLE SetBlueScreenPannel(){
 
 
 void LouKeSetPanicMode(){
-	UNUSED volatile PWINDHANDLE Bsod = SetBlueScreenPannel();
+	UNUSED PWINDHANDLE Bsod = SetBlueScreenPannel();
 }
 
 void PlaceFloatingString(
     string FloatingString,
-    uint16_t x, uint16_t y,
+    int64_t x, int64_t y,
     uint16_t ScalingX, uint16_t ScalingY,
     uint8_t r, uint8_t g, uint8_t b,
     ...
@@ -74,7 +74,7 @@ void PlaceFloatingString(
 
 
 void LouKeSetPanicInfo(
-	volatile PWINDHANDLE BsodHandle, string DynamicErrorMessage,
+	PWINDHANDLE BsodHandle, string DynamicErrorMessage,
 	uint64_t rax,
 	uint64_t rbx,
 	uint64_t rcx,
@@ -100,8 +100,8 @@ void LouKeSetPanicInfo(
 
 
 
-	UNUSED uint16_t CurrentX = 0, CurrentY = 0;
-	UNUSED uint16_t CurrentW = 0, CurrentH = 0;
+	UNUSED int64_t CurrentX = 0, CurrentY = 0;
+	UNUSED int64_t CurrentW = 0, CurrentH = 0;
 
 	CurrentW = GetScreenBufferWidth();
 	CurrentH = GetScreenBufferHeight();

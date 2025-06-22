@@ -85,7 +85,7 @@ void LouKeDrsdCorePutPixelExXRGB8888(
     uint32_t Color = 0;
     Color = (A << 24) | (R << 16) | (G << 8) | B;
     PDRSD_FRAME_BUFFER Fb = Plane->FrameBuffer;
-    uint32_t* Base = (uint32_t*)Fb->FramebufferBase;
+    uint32_t* Base = (uint32_t*)Fb->SecondaryFrameBufferBase;
     uint32_t  YAnchor = (uint32_t)Fb->Width;
     Base[X + (YAnchor * Y)] = Color;
 }
@@ -94,6 +94,34 @@ void LouKeDrsdCorePutPixelExXRGB8888(
 
 KERNEL_IMPORT void LouKeSetScreenSurface(int64_t X, int64_t Y);
 
+LOUDDK_API_ENTRY
+void* GetFrameBufferAddress(
+    int64_t x, int64_t y
+){
+    PDRSD_PLANE Plane = GlobalPlanes->Plane;
+    if(!Plane){
+        return 0x00;
+    }
+    if(PriPlaneCount > 1){
+        return 0x00;
+    }
+
+    PDRSD_FRAME_BUFFER Fb = Plane->FrameBuffer;
+    uint32_t* Base = (uint32_t*)Fb->SecondaryFrameBufferBase;
+    uint32_t  YAnchor = (uint32_t)Fb->Width;
+    return (void*)&Base[x + (YAnchor * y)];
+}
+
+KERNEL_EXPORT void LouKeDrsdSyncScreens(){
+    PDRSD_PLANE_TRACK Tracks = GlobalPlanes;
+    while(Tracks){
+        memcpy((void*)Tracks->Plane->FrameBuffer->FramebufferBase, (void*)Tracks->Plane->FrameBuffer->SecondaryFrameBufferBase, Tracks->Plane->FrameBuffer->FramebufferSize);
+        Tracks = (PDRSD_PLANE_TRACK)Tracks->Peers.NextHeader;
+    }
+}
+
+
+LOUDDK_API_ENTRY
 void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A){
     PDRSD_PLANE Plane = GlobalPlanes->Plane;
     if(!Plane){
@@ -108,6 +136,12 @@ void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B
         return;
     }
 
+    if(!Mirrored && (!PriPlaneCount)){
+
+    }else if(!Mirrored){
+        Mirrored = false;
+    }
+
     switch(Plane->DrsdPutPixelCase){
         case DRSD_XRGB32:{
             LouKeDrsdCorePutPixelExXRGB8888(Plane, X, Y, R, G, B, A);
@@ -119,7 +153,7 @@ void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B
 
 }
 
-void LouKeSetScreenSurface(int64_t X, int64_t Y);
+KERNEL_IMPORT void SetSurfaceDimentions(int64_t X, int64_t Y, int64_t Width, int64_t Height);
 
 
 void LouKeDrsdClearScreen(PDRSD_PLANE Plane){
@@ -139,7 +173,7 @@ void LouKeDrsdClearScreen(PDRSD_PLANE Plane){
     const int64_t Width = Plane->PlaneState->Width, Height = Plane->PlaneState->Height;
 
     if(PriPlaneCount == 1){
-        //LouKeSetScreenSurface(Width, Height);
+        SetSurfaceDimentions((int64_t)Plane->PlaneState->SourceX, (int64_t)Plane->PlaneState->SourceY, Width, Height);
     }
 
     for(int64_t y = 0; y < (int64_t)Height; y++){
@@ -147,7 +181,7 @@ void LouKeDrsdClearScreen(PDRSD_PLANE Plane){
             LouKeDrsdCorePutPixel(x, y, 0, 128, 128, 0);
         }
     }
-
+    LouKeDrsdSyncScreens();
 
     LouPrint("LouKeDrsdClearScreen() STATUS_SUCCESS\n");
 }

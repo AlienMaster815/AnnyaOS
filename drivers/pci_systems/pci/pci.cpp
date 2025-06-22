@@ -41,7 +41,6 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
     //LouPrint("PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID( bus , device, function));
     uint8_t headerType = getHeaderType(Group, bus, device, function);
 
-
     if ((headerType & 0x80) != 0) {
         LouPrint("Device Is MultiFunction\n");
         // It's a multi-function device, so check remaining functions

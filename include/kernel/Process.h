@@ -44,18 +44,18 @@ typedef enum{
 }WINDOW_TYPE;
 
 typedef struct  _WINDOW_CURSOR{
-    uint16_t x;
-    uint16_t y;
+    int64_t x;
+    int64_t y;
 }WINDOW_CURSOR, * PWINDOW_CURSOR;
 
 //notice: the dementions are only for the internal window 
 //not the window itself the window itself is in the window
 //handle
 typedef struct  _WINDOW_DIMENTIONS{
-    uint16_t x;         //Current X Location
-    uint16_t y;         //Current Y Location
-    uint16_t width;     //Current Width
-    uint16_t height;    //Current height
+    int64_t x;         //Current X Location
+    int64_t y;         //Current Y Location
+    int64_t width;     //Current Width
+    int64_t height;    //Current height
 }WINDOW_DIMENTIONS, * PWINDOW_DIMENTIONS;
 
 typedef enum{
@@ -95,9 +95,10 @@ typedef struct  _WINDHANDLE{
     uintptr_t ParentWindow;
     uintptr_t ChildWindows;
     uint16_t NumberOfChildWindows;
-    volatile uint32_t* InnerWindowData;
+    uint32_t* InnerWindowData;
     COLOR_MAP WindowDataColor;
-} WINDHANDLE, * volatile PWINDHANDLE;
+    struct _mutex_t* Lock;
+} WINDHANDLE, * PWINDHANDLE;
 
 
 typedef struct  _BUTTONHANDLE{
@@ -127,7 +128,7 @@ typedef struct  _BUTTONHANDLE{
 
 typedef struct _WINDOW_BINARY_LOG{
     ListHeader Neighbors;
-    volatile PWINDHANDLE ButtonHandle;
+    PWINDHANDLE ButtonHandle;
 }WINDOW_BINARY_LOG, * PWINDOW_BINARY_LOG;
 
 typedef struct _BUTTON_BINARY_LOG{

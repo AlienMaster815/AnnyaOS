@@ -93,7 +93,7 @@ void InitializeGenericTables();
 void InitializeVesaSystem();
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
-volatile PWINDHANDLE HWind = 0x00;
+PWINDHANDLE HWind = 0x00;
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
@@ -185,7 +185,7 @@ void LouKeDestroyThread();
 void TestFontFunction();
 extern void MachineCodeDebug(uint64_t FOO);
 
-bool DetatchWindowToKrnlDebug(volatile PWINDHANDLE WindowSecurityCheck);
+bool DetatchWindowToKrnlDebug(PWINDHANDLE WindowSecurityCheck);
 
 void StartDebugger(){
     

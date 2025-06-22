@@ -3,6 +3,8 @@
 #define YINC 17
 #define XINC 8
 
+void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+
 
 void PrintWindowTitle(uint16_t StartX, uint16_t StartY, string Text){
     while(*Text != '\0'){
@@ -16,9 +18,9 @@ CharMapping* GetCharecterMap(char Charecter);
 
 void PutFloatingCharecter(
     char FloatingCharecter, 
-    uint16_t x ,uint16_t y, 
-    uint16_t AnchorX, uint16_t AnchorY,
-    uint16_t ScalingX, uint16_t ScalingY,
+    int64_t x ,int64_t y, 
+    int64_t AnchorX, int64_t AnchorY,
+    int64_t ScalingX, int64_t ScalingY,
     uint8_t r, uint8_t g, uint8_t b
 ){
     CharMapping* Map = GetCharecterMap(FloatingCharecter);
@@ -29,7 +31,7 @@ void PutFloatingCharecter(
                 wchar_t Ybyte = Map->pixels[yz];
                 for (uint16_t xz = 0; xz < 16; xz++) {
                     if ((Ybyte >> (15 - xz)) & 0x01) { 
-                        //LouKeDrsdPutPixelMirrored((x + (xz * ScalingX) +  ix), (y + (yz * ScalingY) + iy), r, g, b);
+                        LouKeDrsdCorePutPixel((x + (xz * ScalingX) +  ix), (y + (yz * ScalingY) + iy), r, g, b,0);
                     }
                 }
             }
@@ -39,7 +41,7 @@ void PutFloatingCharecter(
 
 void PlaceFloatingString(
     string FloatingString,
-    uint16_t x, uint16_t y,
+    int64_t x, int64_t y,
     uint16_t ScalingX, uint16_t ScalingY,
     uint8_t r, uint8_t g, uint8_t b, 
     ...

@@ -91,9 +91,9 @@ void DrawDesktopBackground(FILE* FileHandle, uint16_t FileType){
 }
 
 USER32_API
-volatile PWINDHANDLE AnnyaCreateWindow(
-    const uint16_t x, const uint16_t y,
-    const uint16_t width, const uint16_t height, 
+PWINDHANDLE AnnyaCreateWindow(
+    const int64_t x, const int64_t y,
+    const uint32_t width, const uint32_t height, 
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
 ){
@@ -108,13 +108,13 @@ volatile PWINDHANDLE AnnyaCreateWindow(
     while(Data[0] != 1){
         LouCALL(LOUCREATEWINDOW, (uint64_t)&Data, 0);
     }
-    return (volatile PWINDHANDLE)Data[1];
+    return (PWINDHANDLE)Data[1];
 }
 
 USER32_API
-volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+PWINDHANDLE AnnyaCreateCanvasBuffer(
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
 ){
@@ -129,12 +129,12 @@ volatile PWINDHANDLE AnnyaCreateCanvasBuffer(
     while(Data[0] != 1){
         LouCALL(LOUCREATECANVASBUFF, (uint64_t)&Data, 0);
     }
-    return (volatile PWINDHANDLE)Data[1];
+    return (PWINDHANDLE)Data[1];
 }
 
 USER32_API
 void AnnyaChangeCanvasBufferColor(
-    volatile PWINDHANDLE WindowHandle,
+    PWINDHANDLE WindowHandle,
     uint16_t r,
     uint16_t g,
     uint16_t b,
@@ -156,8 +156,8 @@ static mutex_t ButtonCreationLock;
 
 USER32_API
 PBUTTONHANDLE AnnyaCreateButton(
-    uint16_t x, uint16_t y,
-    uint16_t Width, uint16_t Height,
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
     PBUTTON_CHARECTERISTICS Charecteristics
 ){

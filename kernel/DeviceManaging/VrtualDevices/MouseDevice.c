@@ -1,14 +1,17 @@
 #include <LouAPI.h>
 
 void LouKeDrsdUnDrawMouse(
-    uint16_t x, uint16_t y
+    int64_t x, int64_t y
 );
+void* GetFrameBufferAddress(
+    int64_t x, int64_t y
+);
+void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+static int64_t MouseXCursor = 0;
+static int64_t MouseYCursor = 0;
 
-static int32_t MouseXCursor = 0;
-static int32_t MouseYCursor = 0;
-
-static int32_t LastMouseXCursor = 0;
-static int32_t LastMouseYCursor = 0;
+static int64_t LastMouseXCursor = 0;
+static int64_t LastMouseYCursor = 0;
 
 UNUSED static const uint16_t Cursour[19] = {
     0b100000000000000,
@@ -56,31 +59,29 @@ UNUSED static const uint16_t CursourRim[19] = {
 
 static uint32_t MouseTmpData[12 * 19];
 
-static inline void DrawMouse(uint16_t x, uint16_t y){
-    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);
+static inline void DrawMouse(int64_t x, int64_t y){
     for(uint8_t yz = 0 ; yz < 19; yz++){
         uint16_t XData = Cursour[yz];
         uint16_t X2Data = CursourRim[yz];
         for(uint8_t xz = 0 ; xz < 12; xz++){
             if(((x + xz) < GetScreenBufferWidth()) && ((y + yz) < GetScreenBufferHeight())){
-                MouseTmpData[xz + yz * 12] = *(uint32_t*)(GetFrameBufferAddress(FBDEV, x + xz,y + yz));
+                MouseTmpData[xz + yz * 12] = *(uint32_t*)(GetFrameBufferAddress(x + xz,y + yz));
                 if(XData & (1 << (15 - xz))){
-                    LouKeDrsdPutPixelMirrored(x + xz, y + yz, 255,255,255);
+                    LouKeDrsdCorePutPixel(x + xz, y + yz, 255,255,255, 0);
                 }
                 if(X2Data & (1 << (15 - xz))){
-                    LouKeDrsdPutPixelMirrored(x + xz, y + yz, 0,0,0);
+                    LouKeDrsdCorePutPixel(x + xz, y + yz, 0,0,0, 0);
                 }
             }
         }
     }
 }
 
-static inline void UnDrawMouse(uint16_t x, uint16_t y){
-    PDrsdVRamObject FBDEV = LouKeDeviceManagerGetFBDEV(0);
+static inline void UnDrawMouse(int64_t x, int64_t y){
     for(uint8_t yz = 0 ; yz < 19; yz++){
         for(uint8_t xz = 0 ; xz < 12; xz++){
             if(((x + xz) < GetScreenBufferWidth()) && ((y + yz) < GetScreenBufferHeight())){
-                *(uint32_t*)(GetFrameBufferAddress(FBDEV, x + xz,y + yz)) = MouseTmpData[xz + yz * 12]; 
+               *(uint32_t*)(GetFrameBufferAddress(x + xz,y + yz)) = MouseTmpData[xz + yz * 12]; 
             }
         }
     }
@@ -88,12 +89,12 @@ static inline void UnDrawMouse(uint16_t x, uint16_t y){
 
 static bool FirstDraw = true;
 
-void LouKeMouseMoveEventUpdate(int32_t X, int32_t Y){
+void LouKeMouseMoveEventUpdate(int64_t X, int64_t Y){
     
     MouseXCursor += X;
 
     if(MouseXCursor < 0){
-        //MouseXCursor = 0;
+        MouseXCursor = 0;
     }
     if(MouseXCursor >= GetScreenBufferWidth()){
         MouseXCursor = (GetScreenBufferWidth() - 1);
@@ -107,7 +108,6 @@ void LouKeMouseMoveEventUpdate(int32_t X, int32_t Y){
     if(MouseYCursor >= GetScreenBufferHeight()){
         MouseYCursor = (GetScreenBufferHeight() - 1);
     }
-
 }
 
 
@@ -128,11 +128,9 @@ void MouseDrawWork(uint64_t NullDataDontUse){
 }
 
 void LouKeInitializeMouseManagemet(){
- 
-    LouKeInitializeIntervalWork(
+     LouKeInitializeIntervalWork(
         MouseDrawWork,
         0x00,
         16
     );
-    LouPrint("Here\n");
 }

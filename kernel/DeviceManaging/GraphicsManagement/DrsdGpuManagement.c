@@ -63,6 +63,7 @@ void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STATE Stat
 
     memset((void*)State->FrameBuffer->FramebufferBase, 0, State->FrameBuffer->FramebufferSize);
 
+    while(1);
     Crtc->CrtcState->NeedsModeset = true;
     Crtc->CrtcState->Enable = true;
     Crtc->CrtcState->DisplayMode = *DisplayMode;
@@ -145,22 +146,3 @@ LOUSTATUS LouRegisterDrsdGraphicsDevice(
     return STATUS_SUCCESS;
 }
 
-uint8_t LouKeDeviceManagerGetGpuCount(){
-    return GpuDevicesCount;
-}
-
-PDrsdVRamObject LouKeDeviceManagerGetFBDEV(uint8_t Gpu){
-    if(LegacyGraphics){
-        if(Gpu >= GpuDevicesCount){
-            return 0x00;
-        }
-        PDrsdGpuManagmentData Tmp = &gpus;
-        for(uint8_t i = 0 ; i < Gpu; i++){
-            Tmp = (PDrsdGpuManagmentData)Tmp->Neighbors.NextHeader;
-        }
-        return Tmp->Table->KeyData;
-    }
-
-
-    return 0x00;
-}
