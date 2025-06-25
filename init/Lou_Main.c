@@ -358,11 +358,11 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeNtKernelTransitionLayer();
 
     //CheckForSoundblaster16();
-    //ScanTheRestOfHarware();
+    ScanTheRestOfHarware();
 
-    LouKeInitializeMouseManagemet();
-    EnablePs2Keyboard();
-    InitializePs2Mouse();
+    //LouKeInitializeMouseManagemet();
+    //EnablePs2Keyboard();
+    //InitializePs2Mouse();
     
     //SMPInit();
 	
@@ -452,6 +452,7 @@ void InitializeUserSpace(){
         while(1);
     }
 
+    while(1);
     UsrJmp(InitEntry);
 }
 

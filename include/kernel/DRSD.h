@@ -815,6 +815,7 @@ typedef struct _DRSD_MODE_SET_CONTEXT{
 }DRSD_MODE_SET_CONTEXT, * PDRSD_MODE_SET_CONTEXT;
 
 typedef struct _DRSD_DEVICE{
+    ListHeader                      Peers;
     struct _PCI_DEVICE_OBJECT*      PDEV;
     struct _LMPOOL_DIRECTORY*       VramPool;
     DRSD_MODE_CONFIGURATION         ModeConfiguration;
@@ -829,7 +830,6 @@ typedef struct _DRSD_DEVICE{
     spinlock_t                      VBlankLock;
     size_t                          VBlankCount;
     PDRSD_VBLANK_CRTC               VBlanks;
-    bool                            DeviceReadyForDrawing;
 }DRSD_DEVICE, * PDRSD_DEVICE;
 
 #define STANDARD_INTEL_CHIPSET_EDID_SIZE 128

@@ -26,6 +26,9 @@ LOUSTATUS LouRegisterStorageDevice(
 LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
 
 LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem);
+LOUSTATUS LouKeDrsdInitializeDevice(
+    PDRSD_DEVICE Device
+);
 
 LOUSTATUS LouKeRegisterDevice(
     P_PCI_DEVICE_OBJECT PDEV, 
@@ -80,8 +83,8 @@ LOUSTATUS LouKeRegisterDevice(
             return DeviceManagerInitializeAtaHostDevice(TmpDevice);
         }
         case GRAPHICS_DEVICE_T:{
-            return LouRegisterDrsdGraphicsDevice(
-                TmpDevice
+            return LouKeDrsdInitializeDevice(
+                TmpDevice->DevicePrivateData
             );
         }
         case NETWORK_DEVICE_T:{

@@ -208,6 +208,7 @@ AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
 
     PDEV->DevicePrivateData = (uintptr_t)VBox;
 
+
     LouKeRegisterDevice(
         (P_PCI_DEVICE_OBJECT)PDEV, 
         GRAPHICS_DEVICE_T, 

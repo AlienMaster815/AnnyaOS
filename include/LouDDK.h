@@ -84,6 +84,12 @@ typedef void* FILE;
 
 typedef void* DEVICE;
 
+KERNEL_IMPORT void LouKeInitializeIntervalWork(
+    void (*DelayedFunction)(uint64_t PrivateData),
+    uint64_t PrivateData,
+    uint64_t MsInterval
+);
+
 #define RAMADD unsigned char*
 #define RAMADDDATA unsigned char *
 #define BLOCK 4096
