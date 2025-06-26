@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 166
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 167
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -375,6 +375,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[163] = "DrsdAddProbedDisplayModeToConnector";
     ImportTables[4].FunctionName[164] = "DrsdUpdateEdidConnectorProperties";
     ImportTables[4].FunctionName[165] = "DrsdGetNewPlaneState";
+    ImportTables[4].FunctionName[166] = "LouKeDrsdHandleConflictingDevices";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -542,6 +543,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[163] = (uint64_t)DrsdAddProbedDisplayModeToConnector;
     ImportTables[4].VirtualAddress[164] = (uint64_t)DrsdUpdateEdidConnectorProperties;
     ImportTables[4].VirtualAddress[165] = (uint64_t)DrsdGetNewPlaneState;
+    ImportTables[4].VirtualAddress[166] = (uint64_t)LouKeDrsdHandleConflictingDevices;
 
 }
 

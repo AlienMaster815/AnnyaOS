@@ -1,6 +1,5 @@
 #include "DrsdCore.h"
 
-/*
 void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STATE State, PDRSD_CRTC Crtc){
     //DRSD_MODE_TYPE_PREFERED
     PDRSD_DISPLAY_MODE DisplayMode = (PDRSD_DISPLAY_MODE)Connector->ProbedModes.NextHeader;
@@ -17,7 +16,7 @@ void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STATE Stat
     LouPrint("DisplayMode Width : %d\n", DisplayMode->HorizontalDisplay);
     LouPrint("DisplayMode Height: %d\n", DisplayMode->VirticalDisplay);
 
-    State->SourceX = State->SourceX ? State->SourceX : DrsdPlaneInitBase; 
+    State->SourceX = State->SourceX ? State->SourceX : 0; 
     State->SourceY = State->SourceY ? State->SourceY : 0;
     State->Width = DisplayMode->HorizontalDisplay;
     State->Height = DisplayMode->VirticalDisplay;
@@ -50,15 +49,13 @@ void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STATE Stat
 
     memset((void*)State->FrameBuffer->FramebufferBase, 0, State->FrameBuffer->FramebufferSize);
 
-    while(1);
     Crtc->CrtcState->NeedsModeset = true;
     Crtc->CrtcState->Enable = true;
     Crtc->CrtcState->DisplayMode = *DisplayMode;
 
-    DrsdPlaneInitBase += DisplayMode->HorizontalDisplay;
 }
 
-static void InitializeModernGraphicsDevice(void* Device){
+void InitializeModernGraphicsDevice(void* Device){
 
     PDRSD_DEVICE DrsdDevice = (PDRSD_DEVICE)Device;
     PDRSD_CONNECTOR DrsdConnector = DrsdDevice->Connectors;
@@ -101,116 +98,38 @@ static void InitializeModernGraphicsDevice(void* Device){
     LouPrint("InitializeModernGraphicsDevice() STATUS_SUCCESS\n");
     
 }
-*/
 
-static PDRSD_DEVICE BootDevice = 0x00;
+UNUSED static PDRSD_DEVICE BootDevice = 0x00;
+UNUSED static DRSD_CLIP_CHAIN MasterClipChain = {0};
 
+void LouKeCreateScrollTerminal(PDRSD_CLIP Clip);
 
-typedef struct _DRSD_CLIP{
-    ListHeader  Peers;
-    ListHeader  Children;
-    PDRSD_PLANE Owner;
-    size_t      X;
-    size_t      Y;
-    size_t      Width;
-    size_t      Height;
-    uint32_t*   WindowBuffer;
-    bool        ClipDirty;
-}DRSD_CLIP, * PDRSD_CLIP;
+PDRSD_CLIP_CHAIN LouKeDrsdAllocateClipChainMember(PDRSD_PLANE Plane) {
 
-typedef struct _DRSD_CLIP_CHAIN{
-    ListHeader  Peers;
-    PDRSD_PLANE Owner;    
-    DRSD_CLIP   Clips;
-    bool        PlaneReady;
-}DRSD_CLIP_CHAIN, * PDRSD_CLIP_CHAIN;
-
-static DRSD_CLIP_CHAIN MasterClipChain = {0};
-
-static PDRSD_CLIP_CHAIN LouKeDrsdAllocateClipChainMember(PDRSD_PLANE Plane){
-    PDRSD_CLIP_CHAIN TmpClip = &MasterClipChain;
-    while (TmpClip->Peers.NextHeader){
-        TmpClip = (PDRSD_CLIP_CHAIN)TmpClip->Peers.NextHeader;
-        if ((!TmpClip->Owner) || (TmpClip->Owner == Plane)){
-            TmpClip->Owner = Plane;
-            return TmpClip;
-        }
-    }
-    TmpClip->Peers.NextHeader = (PListHeader)LouKeMallocType(DRSD_CLIP_CHAIN, KERNEL_GENERIC_MEMORY);
-    PDRSD_CLIP_CHAIN NewChain = (PDRSD_CLIP_CHAIN)TmpClip->Peers.NextHeader;
-    NewChain->Peers.LastHeader = (PListHeader)TmpClip;
-    NewChain->Owner = Plane;
-    NewChain->PlaneReady = false;
-    return NewChain;
-}
-static PDRSD_CLIP LouKeDrsdCreateClip(
-    PDRSD_PLANE Plane,
-    size_t X, size_t Y, 
-    size_t Width, size_t Height,
-    uint8_t R, uint8_t G, uint8_t B, uint8_t A
-){
-    PDRSD_CLIP NewClip = LouKeMallocType(DRSD_CLIP, USER_GENERIC_MEMORY);
-    NewClip->WindowBuffer = (uint32_t*)LouKeMallocEx(sizeof(uint32_t) * (Width * Height), GET_ALIGNMENT(uint32_t), USER_GENERIC_MEMORY);
-    NewClip->X = X;
-    NewClip->Y = Y;
-    NewClip->Width = Width;
-    NewClip->Height = Height;
-    NewClip->Owner = Plane;
-    PDRSD_CLIP_CHAIN TmpChain = &MasterClipChain;
-    bool ChainFound = false;
-    while (TmpChain){
-        if (TmpChain->Owner == Plane){
-            ChainFound = true;
-            break;
-        }
-        TmpChain = (PDRSD_CLIP_CHAIN)TmpChain->Peers.NextHeader;
-    }
-    if (!ChainFound){
-        TmpChain = LouKeDrsdAllocateClipChainMember(Plane);
-    }
-    uint32_t Color = (A << 24) | (R << 16) | (G << 8) | B;
-    for (size_t y = 0; y < Height; y++){
-        for (size_t x = 0; x < Width; x++){
-            NewClip->WindowBuffer[x + (y * Width)] = Color;
-        }
-    }
-    return NewClip;
+    return 0x00;
 }
 
-LOUDDK_API_ENTRY
-void LouKeUpdateClipState(PDRSD_CLIP Clip){
-    uint32_t* Fb = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
-    uint32_t* Cb = Clip->WindowBuffer;
-    size_t X = Clip->X;
-    size_t Y = Clip->Y;
-    size_t Width = Clip->Width;
-    size_t Height = Clip->Height;
+void LouKeDrsdRemoveClipChainMember(PDRSD_PLANE Plane) {
 
-    for(size_t y = 0; y < Height; y++){
-        for(size_t x = 0 ; x < Width; x++){
-            Fb[(x + X) + ((y + Y) * Width)] = Cb[x + (y * Width)];
-        }
-    }   
 }
 
-LOUDDK_API_ENTRY
-void LouKeDrsdSyncScreens(){
-    PDRSD_CLIP_CHAIN TmpChain = &MasterClipChain;
+PDRSD_CLIP LouKeDrsdCreateClip(PDRSD_PLANE Plane, size_t X, size_t Y, size_t Width, size_t Height, uint8_t R, uint8_t G, uint8_t B, uint8_t A) {
 
-    while (TmpChain){
-        if (TmpChain->PlaneReady){
-            uint32_t* Fb1 = (uint32_t*)TmpChain->Owner->FrameBuffer->FramebufferBase;
-            uint32_t* Fb2 = (uint32_t*)TmpChain->Owner->FrameBuffer->SecondaryFrameBufferBase;
-            size_t FbSize = TmpChain->Owner->FrameBuffer->FramebufferSize;
-            FbSize /= sizeof(uint32_t);
-            
-            for (size_t i = 0; i < FbSize; i++){
-                Fb1[i] = Fb2[i];
-            }
-        }
-        TmpChain = (PDRSD_CLIP_CHAIN)TmpChain->Peers.NextHeader;
-    }
+    return 0x00;
 }
+
+LOUDDK_API_ENTRY void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color) {
+
+}
+
+LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
+
+}
+
+LOUDDK_API_ENTRY void LouKeDrsdSyncScreens() {
+
+}
+
 
 LOUDDK_API_ENTRY 
 LOUSTATUS
@@ -220,8 +139,10 @@ LouKeDrsdInitializeBootDevice(
 
     BootDevice = Device;
     PDRSD_PLANE Plane = Device->Planes;
-    
+        
     PDRSD_CLIP_CHAIN NewChain = LouKeDrsdAllocateClipChainMember(Plane);
+
+    while(1);
 
     UNUSED PDRSD_CLIP Background = LouKeDrsdCreateClip(
         Plane,
@@ -236,21 +157,33 @@ LouKeDrsdInitializeBootDevice(
 
     LouKeDrsdSyncScreens();
 
+    LouKeCreateScrollTerminal(Background);
+
     LouPrint("LouKeDrsdInitializeBootDevice() STATUS_SUCCESS\n", Plane);
     return STATUS_SUCCESS;
 }
 
+
+LOUDDK_API_ENTRY 
+void LouKeDrsdHandleConflictingDevices(P_PCI_DEVICE_OBJECT PDEV){
+
+    LouPrint("LouKeDrsdHandleConflictingDevices()\n");
+    while(1);
+}
+
+LOUDDK_API_ENTRY
+void LouKeOsDosUpdateMapping();
 
 LOUDDK_API_ENTRY
 LOUSTATUS
 LouKeDrsdInitializeDevice(
     PDRSD_DEVICE Device
 ){
-    BootDevice = 0x00;
 
-
-    LouPrint("LouKeDrsdInitializeDevice()\n");
+    
+    LouPrint("LouKeDrsdInitializeDevice() STATUS_SUCCESS\n");
 
     while(1);
     return STATUS_SUCCESS;
 }
+

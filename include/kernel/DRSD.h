@@ -605,6 +605,7 @@ typedef struct _DRSD_CONNECTOR{
     uint8_t                             Eld[128];
     mutex_t                             EldTex;
     size_t                              ProbeModeCount;
+    struct _DRSD_ENCODER*               Encoder;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
 
 typedef struct _DRSD_EDID_IDENTIFICATION{
@@ -979,9 +980,67 @@ typedef struct _DRSD_EDID_TRACKER{
 #define RGB_DRSD_FRAMEBUFFER 1
 #define EGA_DRSD_FRAMEBUFFER 2
 
+#define DRSD_CORE_TRANSLATE_COLOR(R, G, B, A) ((A << 24) | (R << 16) | (G << 8) | B)
+
+typedef enum {
+    CLIP_DESTROYED = 0,
+    
+}DRSD_CLIP_UPDATE_REASON;
+
+typedef struct _DRSD_CLIP{
+    ListHeader  Peers;
+    ListHeader  Children;
+    PDRSD_PLANE Owner;
+    void        (*SignalClipChange)(struct _DRSD_CLIP*, DRSD_CLIP_UPDATE_REASON, void* UpdateData);
+    size_t      X;
+    size_t      Y;
+    size_t      Width;
+    size_t      Height;
+    size_t      DirtyX;
+    size_t      DirtyY;
+    size_t      DirtyWidth;
+    size_t      DirtyHeight;
+    uint32_t*   WindowBuffer;
+    bool        ClipDirty;
+}DRSD_CLIP, * PDRSD_CLIP;
+
+typedef struct _DRSD_CLIP_CHAIN{
+    ListHeader  Peers;
+    PDRSD_PLANE Owner;    
+    PDRSD_CLIP  Clips;
+    bool        PlaneReady;
+}DRSD_CLIP_CHAIN, * PDRSD_CLIP_CHAIN;
+
+
 #ifndef _KERNEL_MODULE_
 
+void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color);
+void LouKeUpdateClipState(PDRSD_CLIP Clip);
 
+void LouKeDrsdHandleConflictingDevices(struct _PCI_DEVICE_OBJECT* PDEV);
+void LouKeOsDosUpdateMapping();
+
+void LouKeDrsdCoreClipPlotLine(
+  PDRSD_CLIP Clip,
+  int x0, int y0, int x1, int y1,
+  uint8_t r,uint8_t g,uint8_t b
+);
+
+
+void LouKeDrsdCoreClipPlotLineDword(
+  PDRSD_CLIP Clip,
+  int x0, int y0, int x1, int y1,
+  uint32_t Color
+);
+
+void LouKeDrsdClipPutPixel(
+    PDRSD_CLIP Clip, 
+    int64_t X, 
+    int64_t Y, 
+    uint32_t Color
+);
+
+void LouKeOsDosPrintCharecter(char Character);
 
 void DirectAccessDrsdHotplugEvent(PDRSD_DEVICE Device);
 
@@ -1433,6 +1492,8 @@ KERNEL_EXPORT
 LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid);
 
 KERNEL_EXPORT PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
+
+KERNEL_EXPORT void LouKeDrsdHandleConflictingDevices(struct _PCI_DEVICE_OBJECT* PDEV);
 
 #endif
 #endif

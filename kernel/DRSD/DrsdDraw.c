@@ -1,5 +1,5 @@
 #include <LouAPI.h>
-
+/*
 static FILE*    BackgroundFile     = 0x00;
 static uint16_t BackgroundFileType = 0x00;
 void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
@@ -13,7 +13,6 @@ GetWindowHandleByNumber(
     uint16_t HandleNumber
 );
 
-uint16_t GetAmmountOfOpenWindows();
 
 
 void LouKeDsrdFBDEVFrameBufferMemMov(
@@ -94,7 +93,7 @@ bool DoesPixelOverlap(
 }
 
 //static spinlock_t FPWSLock;
- 
+
 static inline
 void FillPixelsWithStepping(
     int64_t x, int64_t y, 
@@ -292,7 +291,7 @@ void LouKeDrsdHandleWindowUpdate(
 
             
         }
-        /*
+
         uint16_t WindowsToCheck = GetAmmountOfOpenWindows();
         PWINDHANDLE WindowParseHandle;
 
@@ -309,7 +308,6 @@ void LouKeDrsdHandleWindowUpdate(
             );
 
         }
-        */
         //LouKeDrsdSyncScreens();
         //return;
     }
@@ -395,7 +393,7 @@ void LouKeDrsdHandleWindowUpdate(
         }
         
     }
-    /*
+
     uint16_t WindowsToCheck = GetAmmountOfOpenWindows();
     PWINDHANDLE WindowParseHandle;
 
@@ -412,6 +410,6 @@ void LouKeDrsdHandleWindowUpdate(
         );
 
     }
-    */
     //LouKeDrsdSyncScreens();
 }
+*/

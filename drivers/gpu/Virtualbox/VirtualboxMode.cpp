@@ -594,10 +594,10 @@ static LOUSTATUS VirtualboxConnectorInitialize(
 ){
     PVIRTUALBOX_CONNECTOR   VBoxConnector;
     PDRSD_CONNECTOR         Connector;
-
     VBoxConnector = LouKeMallocType(VIRTUALBOX_CONNECTOR, KERNEL_GENERIC_MEMORY);
 
     Connector = &VBoxConnector->Base;
+
 
     DrsdConnectorInitialize(
         Device, 
@@ -615,6 +615,7 @@ static LOUSTATUS VirtualboxConnectorInitialize(
     Device->ModeConfiguration.SuggestedY = 0;
         
     ((PVIRTUALBOX_CONNECTOR)Connector)->VBOXCrtc = Crtc;
+    Connector->Encoder = Encoder;
 
     LouPrint("VirtualboxConnectorInitialize() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

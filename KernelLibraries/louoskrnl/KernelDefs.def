@@ -166,3 +166,4 @@ EXPORTS
     DrsdAddProbedDisplayModeToConnector
     DrsdUpdateEdidConnectorProperties
     DrsdGetNewPlaneState
+    LouKeDrsdHandleConflictingDevices

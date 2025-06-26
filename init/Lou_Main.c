@@ -121,6 +121,7 @@ LOUSTATUS Lou_kernel_early_initialization(){
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
     HandleProccessorInitialization();
+    //InitializeBootGraphics();
     InitializeBootGraphics();
 
     InitializeStartupInterruptHandleing();
@@ -186,26 +187,6 @@ void TestFontFunction();
 extern void MachineCodeDebug(uint64_t FOO);
 
 bool DetatchWindowToKrnlDebug(PWINDHANDLE WindowSecurityCheck);
-
-void StartDebugger(){
-    
-    WINDOW_CHARECTERISTICS Charecteristics;
-
-    Charecteristics.Type = TEXT_WINDOW;
-    Charecteristics.WindowName = "louoskrnl.exe";
-
-    HWind = LouCreateWindow(
-        0, 0,
-        //30, 30,
-        //GetScreenBufferWidth() ,GetScreenBufferHeight() ,
-        //1024, 768,
-        640, 480,
-        0x00, 
-        &Charecteristics
-    );
-    AttatchWindowToKrnlDebug(HWind);    
-    LouPrint("Hello Debugger\n");
-}
 
 void KillDebuger(){
     //DetatchWindowToKrnlDebug(HWind);
@@ -332,6 +313,7 @@ KERNEL_ENTRY Lou_kernel_start(
     Lou_kernel_early_initialization();
 
     LouKeMapPciMemory();
+
 
     LouKeInitializeLouACPISubsystem();
 

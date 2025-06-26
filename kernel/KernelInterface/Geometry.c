@@ -1,6 +1,7 @@
 #include <LouAPI.h>
 
-void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+
+//void LouKeDrsdCorePutPixel(int64_t X, int64_t Y, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
 
 // 'cx' and 'cy' denote the offset of the circle centre from the origin.
 void
@@ -49,10 +50,10 @@ plot8points (int cx, int cy, int x, int y, uint8_t r,uint8_t g, uint8_t b)
 void
 plot4points (int cx, int cy, int x, int y, uint8_t r, uint8_t g, uint8_t b)
 {
-  LouKeDrsdCorePutPixel(cx + x, cy + y,r,g,b,0);
-  if (x != 0) LouKeDrsdCorePutPixel (cx - x, cy + y,r,g,b,0);
-  if (y != 0) LouKeDrsdCorePutPixel (cx + x, cy - y ,r,g,b,0);
-  if (x != 0 && y != 0) LouKeDrsdCorePutPixel (cx - x, cy - y,r,g,b,0);
+  //LouKeDrsdCorePutPixel(cx + x, cy + y,r,g,b,0);
+  //if (x != 0) LouKeDrsdCorePutPixel (cx - x, cy + y,r,g,b,0);
+  //if (y != 0) LouKeDrsdCorePutPixel (cx + x, cy - y ,r,g,b,0);
+  //if (x != 0 && y != 0) LouKeDrsdCorePutPixel (cx - x, cy - y,r,g,b,0);
 }
 
 void
@@ -98,7 +99,7 @@ plot_basic_bezier (int x0, int y0, int x1, int y1, int x2, int y2,uint8_t r,uint
   dy -= xy; /* error of 1.step */
   for (;;)
   { /* plot curve */
-    LouKeDrsdCorePutPixel(x0, y0,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0, y0,r,g,b,0);
     ey = 2 * ex - dy; /* save value for test of y step */
     if (2 * ex >= dx)
     { /* x step */
@@ -122,10 +123,10 @@ plot_circle (int xm, int ym, int r,uint8_t R,uint8_t g,uint8_t b)
 {
    int x = -r, y = 0, err = 2-2*r; /* II. Quadrant */ 
    do {
-      LouKeDrsdCorePutPixel (xm-x, ym+y,R,g,b,0); /*   I. Quadrant */
-      LouKeDrsdCorePutPixel (xm-y, ym-x,R,g,b,0); /*  II. Quadrant */
-      LouKeDrsdCorePutPixel (xm+x, ym-y,R,g,b,0); /* III. Quadrant */
-      LouKeDrsdCorePutPixel (xm+y, ym+x,R,g,b,0); /*  IV. Quadrant */
+      //LouKeDrsdCorePutPixel (xm-x, ym+y,R,g,b,0); /*   I. Quadrant */
+      //LouKeDrsdCorePutPixel (xm-y, ym-x,R,g,b,0); /*  II. Quadrant */
+      //LouKeDrsdCorePutPixel (xm+x, ym-y,R,g,b,0); /* III. Quadrant */
+      //LouKeDrsdCorePutPixel (xm+y, ym+x,R,g,b,0); /*  IV. Quadrant */
       r = err;
       if (r >  x) err += ++x*2+1; /* e_xy+e_x > 0 */
       if (r <= y) err += ++y*2+1; /* e_xy+e_y < 0 */
@@ -140,7 +141,7 @@ plot_Line (int x0, int y0, int x1, int y1,uint8_t r,uint8_t g,uint8_t b)
   int err = dx + dy, e2; /* error value e_xy */
  
   for (;;){  /* loop */
-    LouKeDrsdCorePutPixel(x0,y0,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0,y0,r,g,b,0);
     if (x0 == x1 && y0 == y1) break;
     e2 = 2 * err;
     if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
@@ -157,10 +158,10 @@ raster_circle (int x0, int y0, int radius,uint8_t r,uint8_t g,uint8_t b)
   int x = 0;
   int y = radius;
  
-  LouKeDrsdCorePutPixel (x0, y0 + radius,r,g,b,0);
-  LouKeDrsdCorePutPixel (x0, y0 - radius,r,g,b,0);
-  LouKeDrsdCorePutPixel (x0 + radius, y0,r,g,b,0);
-  LouKeDrsdCorePutPixel (x0 - radius, y0,r,g,b,0);
+  //LouKeDrsdCorePutPixel (x0, y0 + radius,r,g,b,0);
+  //LouKeDrsdCorePutPixel (x0, y0 - radius,r,g,b,0);
+  //LouKeDrsdCorePutPixel (x0 + radius, y0,r,g,b,0);
+  //LouKeDrsdCorePutPixel (x0 - radius, y0,r,g,b,0);
   while (x < y)
   {
     // ddF_x == 2 * x + 1;
@@ -175,14 +176,14 @@ raster_circle (int x0, int y0, int radius,uint8_t r,uint8_t g,uint8_t b)
     x++;
     ddF_x += 2;
     f += ddF_x;    
-    LouKeDrsdCorePutPixel(x0 + x, y0 + y,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 - x, y0 + y,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 + x, y0 - y,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 - x, y0 - y,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 + y, y0 + x,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 - y, y0 + x,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 + y, y0 - x,r,g,b,0);
-    LouKeDrsdCorePutPixel(x0 - y, y0 - x,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 + x, y0 + y,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 - x, y0 + y,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 + x, y0 - y,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 - x, y0 - y,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 + y, y0 + x,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 - y, y0 + x,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 + y, y0 - x,r,g,b,0);
+    //LouKeDrsdCorePutPixel(x0 - y, y0 - x,r,g,b,0);
   }
 }
 
@@ -212,4 +213,45 @@ int64_t GetScreenBufferBaseX(){
 
 int64_t GetScreenBufferBaseY(){
   return SurfaceY;
+}
+
+
+
+void LouKeDrsdCoreClipPlotLineDword(
+  PDRSD_CLIP Clip,
+  int x0, int y0, int x1, int y1,
+  uint32_t Color
+){
+  int dx =  abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+  int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1; 
+  int err = dx + dy, e2; /* error value e_xy */
+ 
+  for (;;){  /* loop */
+    LouKeDrsdClipPutPixel(Clip, x0,y0,Color);
+    if (x0 == x1 && y0 == y1) break;
+    e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+    if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+  }
+}
+
+void LouKeDrsdCoreClipPlotLine(
+  PDRSD_CLIP Clip,
+  int x0, int y0, int x1, int y1,
+  uint8_t r,uint8_t g,uint8_t b
+){
+    LouKeDrsdCoreClipPlotLineDword(
+        Clip,
+        x0, y0, x1, y1,
+        DRSD_CORE_TRANSLATE_COLOR(r, g , b, 0)
+    );
+}
+
+void LouKeDrsdClipPutPixel(
+    PDRSD_CLIP Clip, 
+    int64_t X, 
+    int64_t Y, 
+    uint32_t Color
+){
+    Clip->WindowBuffer[X + (Y * Clip->Width)] = Color;
 }

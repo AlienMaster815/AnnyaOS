@@ -21,3 +21,4 @@ DRSD_CONNECTOR_STATUS DrsdDetectConnectorStatus(
     bool                    Force
 );
 int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector);
+

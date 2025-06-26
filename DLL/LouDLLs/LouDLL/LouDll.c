@@ -331,16 +331,8 @@ void AnnyaUpdateButton(
     uint32_t Width, uint32_t Height,
     PBUTTONHANDLE HBUTTON
 ){
-    uint64_t Data[6];
-    Data[0] = 0;
-    Data[1] = (uint64_t)x;
-    Data[2] = (uint64_t)y;
-    Data[3] = (uint64_t)Width;
-    Data[4] = (uint64_t)Height;
-    Data[5] = (uint64_t)HBUTTON;
-    while(Data[0] != 1){
-        LouCALL(LOUUPDATEBUTTON, (uint64_t)&Data, 0);
-    }
+    LouPrint("AnnyaUpdateButton()\n");
+    while(1);
 }
 
 static mutex_t LouCallLock;

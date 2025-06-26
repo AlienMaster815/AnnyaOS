@@ -18,11 +18,6 @@ uint8_t LouKeGetCurrentTimeMinute();
 
 int LouPrint_s(char* format, va_list args);
 
-void LouUpdateButton(
-    int64_t x, int64_t y,
-    uint32_t Width, uint32_t Height,
-    PBUTTONHANDLE HBUTTON
-);
 
 void LogButtonToProccess(
     PBUTTONHANDLE ButtonHandle, 
@@ -92,27 +87,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUDRAWDESKBACK:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            FILE* File = (FILE*)Tmp[0];
-            uint16_t FileType = (uint16_t)Tmp[1];
-            LouKeDrsdDrawDesktopBackground(File, FileType);
+
             return;
         }
         case LOUCREATEWINDOW:{
-            uint64_t* Tmp = (uint64_t*)Data;
 
-            int64_t x = (uint16_t)Tmp[0];
-            int64_t y = (uint16_t)Tmp[1];
-            uint32_t Width = (uint16_t)Tmp[2];
-            uint32_t Height = (uint16_t)Tmp[3];
-            uintptr_t ParentWindow = (uintptr_t)Tmp[4];
-            PWINDOW_CHARECTERISTICS Charecteristics = (PWINDOW_CHARECTERISTICS)Tmp[5];
-            
-            LouCreateWindow(
-                x,y,Width,Height,
-                ParentWindow, Charecteristics
-            );
-        
             return;
         }
         case GETSCREENHEIGHT:{
@@ -126,35 +105,15 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUCREATECANVASBUFF:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            PWINDHANDLE Return = LouCreateCanvasBuffer(
-                (uint16_t)Tmp[0], (uint16_t)Tmp[1],
-                (uint16_t)Tmp[2], (uint16_t)Tmp[3],
-                (uintptr_t)Tmp[4],
-                (PWINDOW_CHARECTERISTICS)Tmp[5]
-            );
-            Tmp[0] = (uint64_t)Return;
+
             return;
         }
         case LOUCHAGECANVASCOLOR:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouChangeCanvasBufferColor(
-                (PWINDHANDLE)Tmp[0],
-                (uint8_t)Tmp[1],
-                (uint8_t)Tmp[2],
-                (uint8_t)Tmp[3]
-            );
+
             return;
         }
         case LOUCREATEBUTTON:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            PBUTTONHANDLE Return = LouCreateButton(
-                (uint16_t)Tmp[0], (uint16_t)Tmp[1],
-                (uint16_t)Tmp[2], (uint16_t)Tmp[3],
-                (uintptr_t)Tmp[4],
-                (uint64_t)Tmp[5]
-            );
-            Tmp[0] = (uint64_t)Return;
+
             return;
         }
         case LOUGETRTCDATA:{
@@ -163,14 +122,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUUPDATEBUTTON:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouUpdateButton(
-                (uint16_t)Tmp[0],
-                (uint16_t)Tmp[1],
-                (uint16_t)Tmp[2],
-                (uint16_t)Tmp[3],
-                (PBUTTONHANDLE)Tmp[4]
-            );
+
             return;
         }
         case LOUREGISTERCALLBACK:{

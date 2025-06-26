@@ -81,13 +81,8 @@ PBITMAP_HANDLE AnnyaOpenBitmapImage(
 
 USER32_API
 void DrawDesktopBackground(FILE* FileHandle, uint16_t FileType){
-    uint64_t Data[3];
-    Data[0] = 0;
-    Data[1] = (uint64_t)FileHandle;
-    Data[2] = (uint64_t)FileType;
-    while(Data[0] != 1){
-        LouCALL(LOUDRAWDESKBACK, (uint64_t)&Data, 0);
-    }
+
+    while(1);
 }
 
 USER32_API
@@ -97,18 +92,9 @@ PWINDHANDLE AnnyaCreateWindow(
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
 ){
-    uint64_t Data[7];
-    Data[0] = 0;
-    Data[1] = (uint64_t)x;
-    Data[2] = (uint64_t)y;
-    Data[3] = (uint64_t)width;   
-    Data[4] = (uint64_t)height;
-    Data[5] = (uint64_t)ParentWindow;
-    Data[6] = (uint64_t)Charecteristics;
-    while(Data[0] != 1){
-        LouCALL(LOUCREATEWINDOW, (uint64_t)&Data, 0);
-    }
-    return (PWINDHANDLE)Data[1];
+    LouPrint("AnnyaCreateWindow()\n");
+    while(1);
+    return (PWINDHANDLE)0x00;
 }
 
 USER32_API
@@ -117,19 +103,9 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
     uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
     PWINDOW_CHARECTERISTICS Charecteristics
-){
-    uint64_t Data[7];
-    Data[0] = 0;
-    Data[1] = (uint64_t)x;
-    Data[2] = (uint64_t)y;
-    Data[3] = (uint64_t)Width;   
-    Data[4] = (uint64_t)Height;
-    Data[5] = (uint64_t)ParentWindow;
-    Data[6] = (uint64_t)Charecteristics;
-    while(Data[0] != 1){
-        LouCALL(LOUCREATECANVASBUFF, (uint64_t)&Data, 0);
-    }
-    return (PWINDHANDLE)Data[1];
+){  
+    LouPrint("AnnyaCreateCanvasBuffer(n");
+    return 0x00;
 }
 
 USER32_API
@@ -140,15 +116,8 @@ void AnnyaChangeCanvasBufferColor(
     uint16_t b,
     uint16_t a //not used yet but added for futrue proof
 ){
-    uint64_t Data[6];
-    Data[0] = 0;
-    Data[1] = (uint64_t)WindowHandle;
-    Data[2] = (uint64_t)r;
-    Data[3] = (uint64_t)g;
-    Data[4] = (uint64_t)b;
-    while(Data[0] != 1){
-        LouCALL(LOUCHAGECANVASCOLOR, (uint64_t)&Data, 0);
-    }
+    LouPrint("AnnyaChangeCanvasBufferColor()\n");
+    while(1);
 }
 
 static mutex_t ButtonCreationLock;
@@ -161,20 +130,10 @@ PBUTTONHANDLE AnnyaCreateButton(
     uintptr_t ParentWindow,
     PBUTTON_CHARECTERISTICS Charecteristics
 ){
-    MutexLock(&ButtonCreationLock);
-    uint64_t Data[7];
-    Data[0] = 0;
-    Data[1] = (uint64_t)x;
-    Data[2] = (uint64_t)y;
-    Data[3] = (uint64_t)Width;   
-    Data[4] = (uint64_t)Height;
-    Data[5] = (uint64_t)ParentWindow;
-    Data[6] = (uint64_t)Charecteristics;
-    while(Data[0] != 1){
-        LouCALL(LOUCREATEBUTTON, (uint64_t)&Data, 0);
-    }
-    MutexUnlock(&ButtonCreationLock);
-    return (PBUTTONHANDLE)Data[1];
+
+    LouPrint("AnnyaCreateButton()\n");
+    while(1);
+    return (PBUTTONHANDLE)0x00;
 }
 
 

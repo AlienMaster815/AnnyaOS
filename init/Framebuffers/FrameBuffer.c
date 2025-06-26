@@ -16,10 +16,6 @@ void InitializeFrameBuffer(
 
     struct multiboot_tag_framebuffer_common* Common = &FramebufferInformation->common;
 
-    if(Common->framebuffer_type == 2){
-        DRSD_OVERIDE_EGA();        
-    }
-
     if(Common->framebuffer_type == 1){
         LouKeDeferBootGraphics(Common);
     }

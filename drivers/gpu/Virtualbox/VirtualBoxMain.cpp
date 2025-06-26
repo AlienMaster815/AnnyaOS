@@ -118,6 +118,7 @@ LOUSTATUS VBoxMemoryManagementInitialization(
 LOUSTATUS VBoxInitializeHardware(
     PVIRTUALBOX_PRIVATE_DATA VBox
 ){
+
     P_PCI_DEVICE_OBJECT PDEV = VBox->PDEV;
     LOUSTATUS Status;
     VBox->FullVRamSize = inl(VIRTUALBOX_VBE_DISPI_IO_DATA_PORT);
@@ -180,10 +181,13 @@ AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
+    LouKeDrsdHandleConflictingDevices(PDEV);
+
     Status = LouKeHalEnablePciDevice(PDEV);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
+
     VBox->PDEV = PDEV;
     VBox->DrsdDevice.PDEV = PDEV;
     Status = VBoxInitializeHardware(VBox);

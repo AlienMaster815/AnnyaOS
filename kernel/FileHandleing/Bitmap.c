@@ -72,10 +72,10 @@ void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, int64_t x, int64_t y){
     for(uint64_t yz = 0; yz < Height; yz++){
         for(uint64_t xz = 0; xz < Width; xz++){    
             PixelData = &Anchor[(y * Width + x) * 4];
-            uint8_t b = PixelData[0];
-            uint8_t g = PixelData[1];
-            uint8_t r = PixelData[2];
-            LouKeDrsdCorePutPixel(x + xz, y + yz, r, g, b, 0);                 
+            UNUSED uint8_t b = PixelData[0];
+            UNUSED uint8_t g = PixelData[1];
+            UNUSED uint8_t r = PixelData[2];
+            //LouKeDrsdCorePutPixel(x + xz, y + yz, r, g, b, 0);                 
         }
     }
     LouKeDrsdSyncScreens();

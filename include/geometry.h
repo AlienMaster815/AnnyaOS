@@ -15,6 +15,9 @@ int64_t GetScreenBufferWidth();
 int64_t GetScreenBufferHeight();
 int64_t GetScreenBufferBaseX();
 int64_t GetScreenBufferBaseY();
+
+
+
 #endif
 
 #endif

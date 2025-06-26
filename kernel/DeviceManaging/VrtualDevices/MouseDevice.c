@@ -1,5 +1,5 @@
 #include <LouAPI.h>
-
+/*
 void LouKeDrsdUnDrawMouse(
     int64_t x, int64_t y
 );
@@ -58,9 +58,9 @@ UNUSED static const uint16_t CursourRim[19] = {
 };
 
 static uint32_t MouseTmpData[12 * 19];
-
+*/
 static inline void DrawMouse(int64_t x, int64_t y){
-    for(uint8_t yz = 0 ; yz < 19; yz++){
+    /*for(uint8_t yz = 0 ; yz < 19; yz++){
         uint16_t XData = Cursour[yz];
         uint16_t X2Data = CursourRim[yz];
         for(uint8_t xz = 0 ; xz < 12; xz++){
@@ -74,23 +74,23 @@ static inline void DrawMouse(int64_t x, int64_t y){
                 }
             }
         }
-    }
+    }*/
 }
 
 static inline void UnDrawMouse(int64_t x, int64_t y){
-    for(uint8_t yz = 0 ; yz < 19; yz++){
+    /*for(uint8_t yz = 0 ; yz < 19; yz++){
         for(uint8_t xz = 0 ; xz < 12; xz++){
             if(((x + xz) < GetScreenBufferWidth()) && ((y + yz) < GetScreenBufferHeight())){
                *(uint32_t*)(GetFrameBufferAddress(x + xz,y + yz)) = MouseTmpData[xz + yz * 12]; 
             }
         }
-    }
+    }*/
 }
 
-static bool FirstDraw = true;
+//static bool FirstDraw = true;
 
 void LouKeMouseMoveEventUpdate(int64_t X, int64_t Y){
-    
+    /*
     MouseXCursor += X;
 
     if(MouseXCursor < 0){
@@ -107,7 +107,7 @@ void LouKeMouseMoveEventUpdate(int64_t X, int64_t Y){
     }
     if(MouseYCursor >= GetScreenBufferHeight()){
         MouseYCursor = (GetScreenBufferHeight() - 1);
-    }
+    }*/
 }
 
 
@@ -116,21 +116,21 @@ void LouKeMouseClickEventUpdate(bool Right, bool Left){
 }
 
 void MouseDrawWork(uint64_t NullDataDontUse){
-    if(!FirstDraw){
-        UnDrawMouse(LastMouseXCursor, LastMouseYCursor);    
-    }else{
-        FirstDraw = false;
-    }
-    LastMouseXCursor = MouseXCursor;
-    LastMouseYCursor = MouseYCursor;
-    DrawMouse(MouseXCursor, MouseYCursor);
-    LouKeDrsdSyncScreens();
+    //if(!FirstDraw){
+    //    UnDrawMouse(LastMouseXCursor, LastMouseYCursor);    
+    //}else{
+    //    FirstDraw = false;
+    //}
+    //LastMouseXCursor = MouseXCursor;
+    //LastMouseYCursor = MouseYCursor;
+    //DrawMouse(MouseXCursor, MouseYCursor);
+    //LouKeDrsdSyncScreens();
 }
 
 void LouKeInitializeMouseManagemet(){
-     LouKeInitializeIntervalWork(
-        MouseDrawWork,
-        0x00,
-        16
-    );
+    //LouKeInitializeIntervalWork(
+    //    MouseDrawWork,
+    //    0x00,
+    //    16
+    //);
 }

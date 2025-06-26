@@ -37,7 +37,7 @@ void LouPanic(char* error_message,STATUS recoverable) {
 }
 
 PWINDHANDLE SetBlueScreenPannel(){
-	WINDOW_CHARECTERISTICS BSODCharecteristics;
+	/*WINDOW_CHARECTERISTICS BSODCharecteristics;
     BSODCharecteristics.Type = CANVAS_WINDOW;
     BSODCharecteristics.WindowName = "BSOD";
 
@@ -54,9 +54,9 @@ PWINDHANDLE SetBlueScreenPannel(){
         0,
         0,
         128
-    );
+    );*/
 
-	return Result;
+	return 0x00;//Result;
 }
 
 
@@ -99,7 +99,7 @@ void LouKeSetPanicInfo(
 ){
 
 
-
+/*
 	UNUSED int64_t CurrentX = 0, CurrentY = 0;
 	UNUSED int64_t CurrentW = 0, CurrentH = 0;
 
@@ -235,6 +235,7 @@ void LouKeSetPanicInfo(
 
 	_GENERIC_FUALT_PANIC:
 	LouKeDrsdSyncScreens();
+	*/
 	while(1);
 }
 
