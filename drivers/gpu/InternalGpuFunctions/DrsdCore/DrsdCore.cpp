@@ -137,14 +137,17 @@ PDRSD_CLIP LouKeDrsdCreateClip(
     //add next queue member
     //fill the new clip information out
 
-    LouPrint("Chain:%h\n", PlaneChain);
-    LouPrint("Plane:%h\n", Plane);
-    LouPrint("Clip:%h\n", ClipQueue);
-    LouPrint("X:%d\n", X);
-    LouPrint("Y:%d\n", Y);
-    LouPrint("Width:%d\n", Width);
-    LouPrint("Height:%d\n", Height);
-
+    //LouPrint("Chain:%h\n", PlaneChain);
+    //LouPrint("Plane:%h\n", Plane);
+    //LouPrint("Clip:%h\n", ClipQueue);
+    //LouPrint("X:%d\n", X);
+    //LouPrint("Y:%d\n", Y);
+    //LouPrint("Width:%d\n", Width);
+    //LouPrint("Height:%d\n", Height);
+    ClipQueue->RedShift   = Plane->RedShift;
+    ClipQueue->BlueShift  = Plane->BlueShift;
+    ClipQueue->GreenShift = Plane->GreenShift;
+    ClipQueue->AlphaShift = Plane->AlphaShift;
     ClipQueue->WindowBuffer = LouKeMallocArray(uint32_t, Width * Height, USER_GENERIC_MEMORY);
     ClipQueue->X = X;
     ClipQueue->Y = Y;
@@ -240,6 +243,10 @@ LouKeDrsdInitializeBootDevice(
         0, 128, 128, 255
     );
 
+    Plane->AlphaShift = 24;
+    Plane->RedShift = 16;
+    Plane->GreenShift = 8;
+    Plane->BlueShift = 0;
 
     LouKeUpdateClipState(Background);
 
@@ -275,6 +282,8 @@ LouKeDrsdInitializeDevice(
     PDRSD_CONNECTOR Connector = Device->Connectors;
     PDRSD_CRTC Crtc = 0x00;
     PDRSD_PLANE PrimaryPlane = 0x00;
+    uint32_t* Formats; 
+    size_t FormatCount; 
     while(Connector){
         LouPrint("Configuring Connector:%h\n", Connector);
         
@@ -286,6 +295,16 @@ LouKeDrsdInitializeDevice(
 
         Crtc = Connector->Crtc;
         PrimaryPlane = Crtc->PrimaryPlane;
+        FormatCount = PrimaryPlane->FormatCount;
+        Formats = PrimaryPlane->PlaneState->Formats;
+        for(size_t foo = 0 ; foo < FormatCount; foo++){
+            if(memcmp(&Formats[foo] , DRSD_COLOR_FORMAT_XRGB8888, 4) == 0){
+                PrimaryPlane->AlphaShift = 24;
+                PrimaryPlane->RedShift = 16;
+                PrimaryPlane->GreenShift = 8;
+                PrimaryPlane->BlueShift = 0;
+            }
+        }
 
         PrimaryPlane->PlaneState->Formats = PrimaryPlane->Formats;
         PrimaryPlane->PlaneState->FormatCount = PrimaryPlane->FormatCount;
@@ -357,4 +376,58 @@ void* LouDrsdGetPlaneInformation(size_t* CountHandle){
     }
     MutexUnlock(&ClipLock);
     return (void*)Query;
+}
+
+static void LouKeUpdateClipSubState(
+    PDRSD_CLIP Clip, 
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+) {
+    size_t FbWidth = Clip->Owner->FrameBuffer->Width;
+    uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
+    uint32_t* Cb = Clip->WindowBuffer;
+    
+    for(size_t Ty = 0; Ty < Height; Ty++){
+        for(size_t Tx = 0; Tx < Width; Tx++){
+            Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
+        }
+    }
+}
+
+LOUDDK_API_ENTRY
+void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow) {
+    size_t X = Clip->X;
+    size_t Y = Clip->Y;
+    size_t Width = Clip->Width;
+    size_t Height = Clip->Height;
+    
+    size_t ShadowX = Shadow->X;
+    size_t ShadowY = Shadow->Y;
+    size_t ShadowWidth = Shadow->Width;
+    size_t ShadowHeight = Shadow->Height;
+    
+    size_t FbWidth = Clip->Owner->FrameBuffer->Width;
+    uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
+    uint32_t* Cb = Clip->WindowBuffer;
+
+    // Calculate relative offsets
+    size_t RelX = (X > ShadowX) ? (X - ShadowX) : 0;
+    size_t RelY = (Y > ShadowY) ? (Y - ShadowY) : 0;
+
+    // Clamp width and height to shadow bounds
+    size_t MaxWidth = ShadowWidth - RelX;
+    size_t MaxHeight = ShadowHeight - RelY;
+
+    if (Width > MaxWidth) Width = MaxWidth;
+    if (Height > MaxHeight) Height = MaxHeight;
+
+    LouKeUpdateClipSubState(Shadow, RelX, RelY, Width, Height);
+    
+    for(size_t Ty = 0; Ty < Height; Ty++){
+        for(size_t Tx = 0; Tx < Width; Tx++){
+            if(Cb[Tx + (Ty * Width)]){
+                Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
+            }
+        }
+    }
 }

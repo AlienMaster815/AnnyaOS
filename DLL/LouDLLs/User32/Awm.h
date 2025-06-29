@@ -29,6 +29,7 @@ typedef struct _WINDOW_HANDLE{
     struct _WINDOW_HANDLE*  Children;
     WINDOW_CALLBACK         WindowCallback;
     HWND                    WinApiHandleChecksum; //used for winAPI applications and to check the indegrity of the AnnyaHandle
+    DRSD_LAYERED_CLIP       Axis;
 }WINDOW_HANDLE, * PWINDOW_HANDLE;
 
 typedef struct _AWM_WINDOW_UPDATE_DATA{

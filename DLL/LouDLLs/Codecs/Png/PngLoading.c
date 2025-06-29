@@ -1,4 +1,4 @@
-#include "codecs.h"
+#include "../codecs.h"
 #include "png.h"
 #include <zlib.h>
 
@@ -8,6 +8,7 @@ static const char* (*ImpZlibVersion)(void);
 static int (*ImpInflateInit_)(z_stream*, const char*, int);
 static int (*ImpInflate)(z_stream*, int);
 static int (*ImpInflateEnd)(z_stream*);
+static size_t (*strlen)(string);
 
 #define IMP_ZLIB_VERSION ImpZlibVersion()
 
@@ -41,6 +42,11 @@ LOUSTATUS InitializePNGHandleing(){
         LouPrint("CODECS.DLL:ERROR Unable To Initialize Get inflateEnd Function\n");
         return STATUS_UNSUCCESSFUL;
     }
+    strlen = AnnyaGetLibraryFunctionN("LOUDLL.DLL", "strlen");
+    if(!strlen){
+        LouPrint("CODECS.DLL:ERROR Unable To Initialize Get strlen Function\n");
+        return STATUS_UNSUCCESSFUL;
+    }
 
     LouPrint("ZLIB Version:%s\n", ImpZlibVersion());
 
@@ -56,17 +62,26 @@ static void CreateHeaderHandle(
     LouPrint("Header Chunk Length:%d Bytes\n", HandleObject->Length);
 }
 
+static void* CreateGenericDataHandle(
+    PPNG_CHUNK_HEADER_HANDLE HandleObject,
+    PPNG_CHUNK_HEADER Header
+){
+    void* DataHandle = LouGlobalUserMallocEx(sizeof(PNG_CHUNK_HEADER) + HandleObject->Length + sizeof(uint32_t), GET_ALIGNMENT(PNG_CHUNK_HEADER));
+    LouMemCpy(DataHandle, Header, sizeof(PNG_CHUNK_HEADER) + HandleObject->Length + sizeof(uint32_t));
+    return DataHandle;
+}
+
 static void InterperateImageHeaderData(
     PPNG_CHUNK_HEADER_HANDLE HandleObject, 
     PPNG_IMAGE_CHUNK ImageHeader
 ){
     CreateHeaderHandle(HandleObject, &ImageHeader->ChunkHeader);
 
-    PPNG_IMAGE_CHUNK ImageData = LouGlobalUserMallocType(PNG_IMAGE_CHUNK);
-    LouMemCpy(ImageData, ImageHeader, sizeof(PNG_IMAGE_CHUNK));
+    HandleObject->Data = (uint8_t*)CreateGenericDataHandle(HandleObject, &ImageHeader->ChunkHeader);
+    PPNG_IMAGE_CHUNK ImageData = (PPNG_IMAGE_CHUNK)HandleObject->Data;
 
     uint32_t Tmp  = ImageData->ChunkHeader.Length;
-    LouSwapEndianess(&Tmp, &ImageData->ChunkHeader.Length, sizeof(uint64_t));
+    LouSwapEndianess(&Tmp, &ImageData->ChunkHeader.Length, sizeof(uint32_t));
     Tmp = ImageData->Width;
     LouSwapEndianess(&Tmp, &ImageData->Width, sizeof(uint32_t));
     Tmp = ImageData->Height;
@@ -76,13 +91,6 @@ static void InterperateImageHeaderData(
 
 }
 
-static void InterperatePalleteHeader(
-    PPNG_CHUNK_HEADER_HANDLE HandleObject,
-    PPNG_PALETTE_CHUNK PalleteHeader
-){
-    LouPrint("InterperatePalleteHeader()\n");
-    while(1);
-}
 
 static void InterperateImageData(   
     PPNG_CHUNK_HEADER ImageDataHeader,
@@ -93,6 +101,15 @@ static void InterperateImageData(
     void* CurrentIndex = UnpackStream->CurrentIndex;
     LouMemCpy(CurrentIndex, (uint8_t*)((uint64_t)ImageDataHeader + sizeof(PNG_CHUNK_HEADER)), Length);
     UnpackStream->CurrentIndex = (void*)((uint64_t)CurrentIndex + (uint64_t)Length); 
+}
+
+
+static void InterperatePPCPCAWPCData(
+    PPNG_CHUNK_HEADER_HANDLE HandleObject,
+    PPCAWPH PpcawpcHeader
+){
+    CreateHeaderHandle(HandleObject, &PpcawpcHeader->ChunkHeader);
+    HandleObject->Data = (uint8_t*)CreateGenericDataHandle(HandleObject, &PpcawpcHeader->ChunkHeader);
 }
 
 static void* InflatePng(void* Data, size_t* DataSize){
@@ -138,9 +155,10 @@ static void* InflatePng(void* Data, size_t* DataSize){
     }while(Result != Z_STREAM_END);
     ImpInflateEnd(&Stream);
     LouPrint("InflatePng() STATUS_SUCCESS\n");
-    *DataSize = TotalOutputSize;
+    
     return DecompData;
 }
+
 
 CODECS_API 
 HANDLE AnnyaOpenPngA(
@@ -161,12 +179,12 @@ HANDLE AnnyaOpenPngA(
 
     LouSwapEndianess(&ChunkData->Length, &TmpChunkData.Length, sizeof(uint32_t)); 
     LouMemCpy(TmpChunkData.Type, &ChunkData->Type, sizeof(uint32_t)); 
-    size_t PngDataHeaderCount = 0;
     size_t PngHeaderCount = 1;
     while(strncmp(TmpChunkData.Type, PNG_IMAGE_TRAILER_HEADER_TYPE,  sizeof(uint32_t)) != 0x00){
         LouPrint("Header:%s\n", TmpChunkData.Type);
         if(strncmp(TmpChunkData.Type, PNG_IMAGE_DATA_HEADER_TYPE, 4) == 0){
             IDATUnpacker.StreamSize += TmpChunkData.Length;
+            PngHeaderCount++;
         }else{
             PngHeaderCount++;
         }
@@ -191,28 +209,32 @@ HANDLE AnnyaOpenPngA(
 
     for(size_t i = 0; i < PngHeaderCount; i++){
         LouPrint("Interpreting %s Png Header\n", TmpChunkData.Type);
-
         if(strncmp(TmpChunkData.Type, PNG_IMAGE_HEADER_TYPE, 4) == 0){
             InterperateImageHeaderData(&PngHeaderHandles[i], (PPNG_IMAGE_CHUNK)ChunkData);
-        }else if(strncmp(TmpChunkData.Type, PNG_PALETTE_HEADER_TYPE, 4) == 0){
-            InterperatePalleteHeader(&PngHeaderHandles[i], (PPNG_PALETTE_CHUNK)ChunkData);
         }else if(strncmp(TmpChunkData.Type, PNG_IMAGE_DATA_HEADER_TYPE, 4) == 0){
+            CreateHeaderHandle(&PngHeaderHandles[i], ChunkData);
+            CreateGenericDataHandle(&PngHeaderHandles[i], ChunkData);
             InterperateImageData(ChunkData, &IDATUnpacker);
+            PngHeaderHandles[i].CompressedData = true;
+        }else{
+            CreateHeaderHandle(&PngHeaderHandles[i], ChunkData);
+            CreateGenericDataHandle(&PngHeaderHandles[i], ChunkData);
         }
-
+        
         ChunkData = (PPNG_CHUNK_HEADER)((uint64_t)ChunkData + TmpChunkData.Length + (sizeof(PNG_CHUNK_HEADER) + sizeof(uint32_t))); 
         LouSwapEndianess(&ChunkData->Length, &TmpChunkData.Length, sizeof(uint32_t)); 
         LouMemCpy(TmpChunkData.Type, &ChunkData->Type, sizeof(uint32_t));
     }
 
-    LouMemCpy(&PngHeaderHandles[0].Type, PNG_IMAGE_DATA_HEADER_TYPE, 4);
+    LouMemCpy(&PngHeaderHandles[PngHeaderCount - 1].Type, PNG_IMAGE_DATA_HEADER_TYPE, 4);
     
-    PngHeaderHandles[0].Data = InflatePng((uint8_t*)IDATUnpacker.UnpackedStream, &IDATUnpacker.StreamSize);
-    PngHeaderHandles[0].Length = IDATUnpacker.StreamSize;
+    PngHeaderHandles[PngHeaderCount - 1].Data = InflatePng((uint8_t*)IDATUnpacker.UnpackedStream, &IDATUnpacker.StreamSize);
+    PngHeaderHandles[PngHeaderCount - 1].Length = IDATUnpacker.StreamSize;
 
-
-
-    LouPrint("Here\n");
-    while(1);
-    return 0x00;
+    PPNG_HANDLE ReturnHandle = LouGlobalUserMallocType(PNG_HANDLE);
+    ReturnHandle->PngName = LouGlobalUserMallocEx(strlen(FileName), 1);
+    LouMemCpy(ReturnHandle->PngName, FileName, strlen(FileName));
+    ReturnHandle->HeaderCount = PngHeaderCount; 
+    ReturnHandle->HeaderData = (void*)PngHeaderHandles;
+    return (HANDLE)ReturnHandle;
 }

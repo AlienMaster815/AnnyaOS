@@ -156,6 +156,7 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
 }WIN_API_PROCESS_INFORMATION, * PWIN_API_PROCESS_INFORMATION;
 
 
+
 #ifndef _USER_32_
 
 //Copy Changes of the following to the Annya.h system from Awm.h
@@ -204,6 +205,13 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 
 #ifndef _LOUDLL_
+
+__declspec(dllimport)
+void 
+LouUpdateShadoClipState(
+    void* Clip, 
+    void* Shadow
+);
 
 __declspec(dllimport)
 void LouGenericFreeHeap(void* Heap, void* Address);
@@ -421,6 +429,7 @@ typedef void* HINSTANCE;
     #define DLL_THREAD_ATTACH  2
     #define DLL_THREAD_DETACH  3
 #endif
+
 
 
 #ifdef IS_X86_64

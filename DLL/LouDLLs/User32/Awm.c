@@ -30,7 +30,8 @@ static HMODULE CODECShModule = 0;
 static HANDLE (*AnnyaOpenPngA)(string);
 static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
-
+static HANDLE (*AnnyaCreateClipFromPng)(void*,HANDLE);
+static PDRSD_CLIP* MouseClips = 0x00;
 
 USER32_API
 HWND 
@@ -75,11 +76,12 @@ static void InitializeDependencies(){
     }
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
+    AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");
 
     MousePng = AnnyaOpenPngA("C:/ANNYA/MOUSE.PNG");
 
     LouPrint("InitializeDependencies() STATUS_SUCCESS\n");
-    while(1);
+
 }
 
 
@@ -93,6 +95,7 @@ AWM_STATUS InitializeAwmUserSubsystem(){
     LouPrint("Plane Count:%d\n", PlaneTracker.PlaneCount);
 
     PlaneBackgrounds = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
         PlaneBackgrounds[i] = (PDRSD_CLIP)LouDrsdCreateClip(
@@ -103,8 +106,14 @@ AWM_STATUS InitializeAwmUserSubsystem(){
             0, 128,128, 255
         );
         LouUpdateClipState((void*)PlaneBackgrounds[i]);
-        LouDrsdSyncScreen((void*)PlaneBackgrounds[i]->ChainOwner);
+        LouDrsdSyncScreen((void*)PlaneBackgrounds[i]->ChainOwner);       
+        MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
+        LouUpdateShadoClipState((void*)MouseClips[i], (void*)PlaneBackgrounds[i]);
+        LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);        
     }
 
+
+
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
+    while(1);
 }

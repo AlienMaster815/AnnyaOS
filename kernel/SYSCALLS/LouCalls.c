@@ -2,7 +2,7 @@
 
 void LouKeLoadFileCall(uint64_t* Data);
 void LouKeCloseFileCall(uint64_t* Data);
-
+void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow);
 
 uintptr_t LouKeCreateUserStackThread(
     void (*Function)(), 
@@ -138,8 +138,9 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             LouKeGetRtcData(PTIME);
             return;
         }
-        case LOUUPDATEBUTTON:{
-
+        case LOUDPDATESHADOWCLIP:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeUpdateShadowClipState((PDRSD_CLIP)Tmp[0], (PDRSD_CLIP)Tmp[1]);
             return;
         }
         case LOUREGISTERCALLBACK:{

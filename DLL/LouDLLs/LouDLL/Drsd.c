@@ -56,3 +56,17 @@ LouUpdateClipState(void* Clip){
     }
 }
 
+LOUDLL_API
+void 
+LouUpdateShadoClipState(
+    void* Clip, 
+    void* Shadow
+){
+    uint64_t KulaPacket[3] = {0};
+    KulaPacket[1] = (uint64_t)Clip;
+    KulaPacket[2] = (uint64_t)Shadow;
+    while(!KulaPacket[0]){
+        LouCALL(LOUDPDATESHADOWCLIP, (uint64_t)&KulaPacket[0], 0);
+    }
+}
+

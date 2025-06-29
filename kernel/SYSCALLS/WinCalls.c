@@ -8,7 +8,7 @@ void LouKeAlpcSetInformation(
 
 void CheckWinCallTable(int64_t Call, uint64_t Data){
     switch (Call){
-        case LouAlpcSetInformationCall:{
+        case LOUALPCSETINFORMATION:{
             LouKeAlpcSetInformation(Data);
             break;
         }

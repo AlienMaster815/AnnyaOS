@@ -3,14 +3,15 @@
 #define PNG_SIGNATURE 0x89504E470D0A1A0A
 
 typedef struct __attribute__((packed)) _PNG_CHUNK_HEADER{
-    uint32_t    Length; //BE
-    uint32_t    Type;   //LE
+    uint32_t    Length;     //BE
+    uint8_t     Type[4];    //LE
 }PNG_CHUNK_HEADER, * PPNG_CHUNK_HEADER;
 
 typedef struct _PNG_CHUNK_HEADER_HANDLE{
     uint32_t    Length;
     char        Type[5];
     uint8_t*    Data;
+    bool        CompressedData;
 }PNG_CHUNK_HEADER_HANDLE, * PPNG_CHUNK_HEADER_HANDLE;
 
 #define PNG_IMAGE_HEADER_TYPE                                               "IHDR"
@@ -20,7 +21,7 @@ typedef struct _PNG_CHUNK_HEADER_HANDLE{
 #define PNG_TRANSPARENCY_HEADER_TYPE                                        "tRNS"
 #define PNG_PRIMARY_CHROMATITIES_AND_WHITE_POINT_HEADER_TYPE                "cHRM"
 #define PNG_GAMMA_HEADER_TYPE                                               "gAMA"
-#define PNG_EMBEDDED_ICC_PROFILE_HEADER_TYPE                                "ICCP"
+#define PNG_EMBEDDED_ICC_PROFILE_HEADER_TYPE                                "iCCP"
 #define PNG_SIGNIFICANT_BIT_HEADER_TYPE                                     "sBIT"
 #define PNG_STANDARD_RGB_HEADER_TYPE                                        "sRGB"
 #define PNG_CODING_INDEPENDENT_CODE_POINTS_FOR_SIGNAL_ID_HEADER_TYPE        "cICP"
@@ -38,6 +39,10 @@ typedef struct _PNG_CHUNK_HEADER_HANDLE{
 #define PNG_ANIMATION_CONTROL_HEADER_TYPE                                   "acTL"
 #define PNG_FRAME_CONTROL_HEADER_TYPE                                       "fcTL"
 #define PNG_FRAME_DATA_HEADER_TYPE                                          "fdAT"
+
+#define PPCAWPH PPNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CHUNK
+#define PPCAWPH_T PNG_PRIMARY_CHROMATITIES_AND_WHITE_POINT_HEADER_TYPE
+
 
 typedef struct __attribute__((packed)) _PNG_IMAGE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
@@ -63,11 +68,20 @@ typedef struct __attribute__((packed)) _PNG_PALETTE_CHUNK{
 
 typedef struct __attribute__((packed)) _PNG_TRANSPARENCY_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
-    uint16_t            GraySampleValue;
-    uint16_t            RedSampleValue;
-    uint16_t            GreenSampleValue;
-    uint16_t            BlueSampleValue;
-    uint8_t             AlphaPaletteData[];
+    union {
+        struct __attribute__((packed)){ 
+            uint16_t            GraySampleValue;
+        }Type1;
+        struct __attribute__((packed)){
+            uint16_t            RedSampleValue;
+            uint16_t            GreenSampleValue;
+            uint16_t            BlueSampleValue;
+        }Type2;
+        struct __attribute__((packed)){
+            uint8_t             AlphaPaletteData1;
+            uint8_t             AlphaPaletteData[];
+        }Type3;
+    }ColorType;
 }PNG_TRANSPARENCY_CHUNK, * PPNG_TRANSPARENCY_CHUNK;
 
 typedef struct __attribute__((packed)) _PNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CHUNK{
@@ -203,3 +217,13 @@ typedef struct  _IDAT_CODECS_STREAM_UNPACKER{
     size_t  StreamSize;
     void*   UnpackedStream;
 }IDAT_CODECS_STREAM_UNPACKER, * PIDAT_CODECS_STREAM_UNPACKER;
+
+
+typedef struct _PNG_HANDLE{
+    string PngName;
+    size_t HeaderCount;
+    void*  HeaderData;
+}PNG_HANDLE, * PPNG_HANDLE;
+
+
+#define IS_HANDLE_SIGNATURE(Header, Signature) (strncmp((string)&((Header)->Type[0]), Signature, 4) == 0)

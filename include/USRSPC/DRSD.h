@@ -408,6 +408,10 @@ typedef struct _DRSD_PLANE{
     size_t                          HotSpotYProperty;
     bool                            PlaneInUse;
     uint64_t                        DrsdPutPixelCase;
+    size_t                          AlphaShift;
+    size_t                          RedShift;
+    size_t                          BlueShift;
+    size_t                          GreenShift;
 }DRSD_PLANE, * PDRSD_PLANE;
 
 typedef enum{
@@ -997,7 +1001,17 @@ typedef struct _DRSD_CLIP{
     size_t                  Width;
     size_t                  Height;
     uint32_t*               WindowBuffer;
+    size_t                  RedShift;
+    size_t                  BlueShift;
+    size_t                  GreenShift;
+    size_t                  AlphaShift;
 }DRSD_CLIP, * PDRSD_CLIP;
+
+typedef struct _DRSD_LAYERED_CLIP{
+    PDRSD_CLIP  ForwardClip;
+    PDRSD_CLIP  RearClip;
+    DRSD_CLIP   CurrentClip; 
+}DRSD_LAYERED_CLIP, * PDRSD_LAYERED_CLIP;
 
 typedef struct _DRSD_CLIP_CHAIN{
     ListHeader  Peers;

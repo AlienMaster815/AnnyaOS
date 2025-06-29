@@ -21,7 +21,7 @@ typedef struct _LOUOS_DOS_TERMINAL {
 
 static LOUOS_DOS_TERMINAL LouOsDosTerminalScreen = {
     .TerminalPlane = {0},
-    .DefaultBackground = 0x00,
+    .DefaultBackground = DRSD_CORE_TRANSLATE_COLOR(0, 0 , 0, 255),
     .DefaultForeground = DRSD_CORE_TRANSLATE_COLOR(0, 128, 0, 255),
 };
 
