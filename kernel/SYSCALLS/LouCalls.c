@@ -3,10 +3,6 @@
 void LouKeLoadFileCall(uint64_t* Data);
 void LouKeCloseFileCall(uint64_t* Data);
 
-void LouKeDrsdDrawDesktopBackground(
-    FILE* ImageFile,
-    uint16_t DrsdFileType
-);
 
 uintptr_t LouKeCreateUserStackThread(
     void (*Function)(), 
@@ -35,13 +31,21 @@ uint64_t LouKeLinkerGetAddress(
 );
 
 void LouKeDestroyThread(uint64_t Thread);
-
+void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
-
+void LouKeUpdateClipState(PDRSD_CLIP Clip);
 HANDLE LouKeLoadLibraryA(string Name);
-
+void* LouDrsdGetPlaneInformation(size_t* CountHandle);
 void* LouKeGenericAllocateHeapEx();
 uint64_t LouKeGetThreadIdentification();
+void LouKeExitDosMode();
+void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain);
+PDRSD_CLIP LouKeDrsdCreateClip(
+    PDRSD_PLANE Plane, 
+    size_t X, size_t Y, 
+    size_t Width, size_t Height, 
+    uint8_t R, uint8_t G, uint8_t B, uint8_t A
+);
 
 //returns a void* to a new heap
 void* LouKeVirtualAllocUser(
@@ -64,10 +68,8 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             Tmp[0] = Result;
             return;
         }
-        case LOURESETMONITOR:{
-            //LouKeDrsdResetFBDEV((uint64_t*)Data);
-            LouPrint("LOURESETMONITOR\n");
-            while(1);
+        case LOUEXITDOSMODE:{
+            LouKeExitDosMode();
             return;
         }
         case LOULOADFILE:{
@@ -86,34 +88,49 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             *(uint64_t*)Data = (uint64_t)BitHandle;
             return;
         }
-        case LOUDRAWDESKBACK:{
-
+        case LOUGLOBALMALLOC:{
+            uint64_t* Tmp = (uint64_t*)Data; 
+            Tmp[0] = (uint64_t)LouKeMallocEx(Tmp[1], Tmp[2], USER_GENERIC_MEMORY);
             return;
         }
-        case LOUCREATEWINDOW:{
-
+        case LOUDRSDGETPLANEINFO:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (uint64_t)LouDrsdGetPlaneInformation((size_t*)Tmp[1]);
             return;
         }
-        case GETSCREENHEIGHT:{
-            uint64_t* Datap = (uint64_t*)Data;
-            *Datap = (uint64_t)GetScreenBufferHeight();
+        case LOUDRSDCREATECLIP:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (uint64_t)LouKeDrsdCreateClip(
+                (PDRSD_PLANE)Tmp[1], //Plane
+                (size_t)Tmp[2], //X
+                (size_t)Tmp[3], //Y
+                (size_t)Tmp[4], //Width
+                (size_t)Tmp[5], //Height
+                (uint8_t)Tmp[6], //R
+                (uint8_t)Tmp[7], //G
+                (uint8_t)Tmp[8], //B
+                (uint8_t)Tmp[9] //A
+            );
             return;
         }
-        case GETSCREENWIDTH:{
-            uint64_t* Datap = (uint64_t*)Data;
-            *Datap = (uint64_t)GetScreenBufferWidth();
+        case LOUDRSDSYNCSCREEN:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeDrsdSyncScreen((PDRSD_CLIP_CHAIN)Tmp[0]);
             return;
         }
-        case LOUCREATECANVASBUFF:{
-
+        case LOUUPDTATECLIP:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeUpdateClipState((PDRSD_CLIP)Tmp[0]);
             return;
         }
-        case LOUCHAGECANVASCOLOR:{
-
+        case LOUGLOBALFREE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeFree((void*)Tmp[0]);
             return;
         }
-        case LOUCREATEBUTTON:{
-
+        case LOUFREEGENERICHEAP:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeGenericHeapFree((void*)Tmp[0], (void*)Tmp[1]);
             return;
         }
         case LOUGETRTCDATA:{

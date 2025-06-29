@@ -155,3 +155,35 @@ void* LouKeGenericAllocateHeapEx(
     LouKeAllocHeapPhysical(TmpHeapHandle, Offset, AllocationSize);
     return (void*)AllocatedHeapAddress;
 }
+
+void LouKeGenericHeapFree(void* heap, void* Address) {
+    PHEAP_TRACK TmpHeapHandle = (PHEAP_TRACK)heap;
+    uint64_t AddressToFree = (uint64_t)Address;
+
+    PHEAP_ALLOCATION_TABLE_ENTRY TmpEntry = &TmpHeapHandle->Allocations;
+    PHEAP_ALLOCATION_TABLE_ENTRY PrevEntry = NULL;
+
+    for (uint64_t i = 0; i < TmpHeapHandle->AllocationsCount; i++) {
+        
+        if (TmpEntry->Address == AddressToFree) {
+
+            // Found the allocation to free
+            if (PrevEntry) {
+                PrevEntry->Neighbors.NextHeader = TmpEntry->Neighbors.NextHeader;
+            } else {
+                if (TmpEntry->Neighbors.NextHeader) {
+                    memcpy(&TmpHeapHandle->Allocations, TmpEntry->Neighbors.NextHeader, sizeof(HEAP_ALLOCATION_TABLE_ENTRY));
+                } else {
+                    memset(&TmpHeapHandle->Allocations, 0, sizeof(HEAP_ALLOCATION_TABLE_ENTRY));
+                }
+            }
+
+            LouKeFree(TmpEntry);
+            TmpHeapHandle->AllocationsCount--;
+            return;
+        }
+
+        PrevEntry = TmpEntry;
+        TmpEntry = (PHEAP_ALLOCATION_TABLE_ENTRY)TmpEntry->Neighbors.NextHeader;
+    }
+}

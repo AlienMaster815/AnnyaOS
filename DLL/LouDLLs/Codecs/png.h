@@ -3,8 +3,8 @@
 #define PNG_SIGNATURE 0x89504E470D0A1A0A
 
 typedef struct __attribute__((packed)) _PNG_CHUNK_HEADER{
-    uint32_t    Length;
-    uint32_t    Type;
+    uint32_t    Length; //BE
+    uint32_t    Type;   //LE
 }PNG_CHUNK_HEADER, * PPNG_CHUNK_HEADER;
 
 typedef struct _PNG_CHUNK_HEADER_HANDLE{
@@ -41,8 +41,8 @@ typedef struct _PNG_CHUNK_HEADER_HANDLE{
 
 typedef struct __attribute__((packed)) _PNG_IMAGE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
-    uint32_t            Width;
-    uint32_t            Height;
+    uint32_t            Width; //BE
+    uint32_t            Height; //BE
     uint8_t             BitDepth;
     uint8_t             ColorType;
     uint8_t             CompressionMethod;
@@ -198,3 +198,8 @@ typedef union _PNG_CHUNK{
     PNG_ANIMATION_CONTROL_CHUNK                                 AnimationControlChunk;
 }PNG_CHUNK, * PPNG_CHUNK;
 
+typedef struct  _IDAT_CODECS_STREAM_UNPACKER{
+    void*   CurrentIndex;
+    size_t  StreamSize;
+    void*   UnpackedStream;
+}IDAT_CODECS_STREAM_UNPACKER, * PIDAT_CODECS_STREAM_UNPACKER;

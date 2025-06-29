@@ -1,6 +1,6 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -nostdlib -nodefaultlibs
+CFLAGS = -shared -nostdlib -nodefaultlibs -O3
 
 # Paths
 INCLUDES = -I../../../include

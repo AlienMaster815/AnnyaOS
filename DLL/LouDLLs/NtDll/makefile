@@ -3,7 +3,7 @@ CC = x86_64-w64-mingw32-gcc
 NASM = nasm
 
 # Flags
-CFLAGS = -shared -nostdlib -nodefaultlibs
+CFLAGS = -shared -nostdlib -nodefaultlibs -O3
 ASFLAGS = -f win64
 
 # Paths

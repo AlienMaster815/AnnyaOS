@@ -4,8 +4,6 @@ LIBRARY LouDll.dll
 
 EXPORTS	
     LouPrint
-    AnnyaGetScreenBufferHeight
-    AnnyaGetScreenBufferWidth
     AnnyaCreateThread
     vsprintf_s
     _vsprintf
@@ -22,3 +20,12 @@ EXPORTS
     LouSwapEndianess
     LouMemCpy
     LouCloseFile
+    LouExitDosMode
+    LouGlobalUserMallocEx
+    LouGlobalUserMalloc
+    LouDrsdGetPlaneInformation
+    LouDrsdCreateClip
+    LouDrsdSyncScreen
+    LouUpdateClipState
+    LouGlobalUserFree
+    LouGenericFreeHeap

@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = x86_64-w64-mingw32-g++
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3
 
 # Paths
 INCLUDES = -I../../../include
@@ -14,7 +14,8 @@ SRC = VirtualBoxMain.cpp \
 	  VirtualboxInterrupts.cpp \
 	  VirtualboxMode.cpp \
 	  VirtualboxBufferObjects.cpp \
-	  VbvaBase.cpp 
+	  VbvaBase.cpp \
+	  VBoxDrsd.cpp
 
 TARGET = VBOXGPU.SYS
 

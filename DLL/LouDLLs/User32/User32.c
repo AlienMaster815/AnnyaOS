@@ -1,10 +1,5 @@
-#define USER32_API __declspec(dllexport)
-#define _USER_32_
-
-#include <Annya.h>
-
-//x86_64-w64-mingw32-gcc -shared -o user32.dll User32.c -nostdlib -nodefaultlibs -I../../../Include -L../../../UserLibraries -lLouDll
-
+#include "User32.h"
+#include "Awm.h"
 
 
 USER32_API
@@ -41,13 +36,21 @@ static inline size_t GetAlignmentBySize(size_t Size){
 
 USER32_API
 void* malloc(size_t BytesNeeded){
-
     return LouGenericAllocateHeapEx(
         GetProcessHeap(), 
         BytesNeeded,
         GetAlignmentBySize(BytesNeeded)
     );
 }
+
+USER32_API
+void free(void* Address){
+    LouGenericFreeHeap(
+        GetProcessHeap(),
+        Address
+    );
+}
+
 
 //USER32_API
 //void AnnyaAPIVFree(uint64_t FreeHandle){
@@ -66,36 +69,7 @@ void AnnyaResetGpu(uint64_t Monitor){
 
 }
 
-USER32_API
-PBITMAP_HANDLE AnnyaOpenBitmapImage(
-    string FileName
-){
-    uint64_t Data[2]; 
-    Data[0] = 0;
-    Data[1] = (uint64_t)FileName;
-    while(Data[0] != 1){
-        LouCALL(LOULOADBITMAP, (uint64_t)&Data, 0);
-    }
-    return (PBITMAP_HANDLE)Data[1];
-}
 
-USER32_API
-void DrawDesktopBackground(FILE* FileHandle, uint16_t FileType){
-
-    while(1);
-}
-
-USER32_API
-PWINDHANDLE AnnyaCreateWindow(
-    const int64_t x, const int64_t y,
-    const uint32_t width, const uint32_t height, 
-    uintptr_t ParentWindow,
-    PWINDOW_CHARECTERISTICS Charecteristics
-){
-    LouPrint("AnnyaCreateWindow()\n");
-    while(1);
-    return (PWINDHANDLE)0x00;
-}
 
 USER32_API
 PWINDHANDLE AnnyaCreateCanvasBuffer(
@@ -108,33 +82,10 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
     return 0x00;
 }
 
-USER32_API
-void AnnyaChangeCanvasBufferColor(
-    PWINDHANDLE WindowHandle,
-    uint16_t r,
-    uint16_t g,
-    uint16_t b,
-    uint16_t a //not used yet but added for futrue proof
-){
-    LouPrint("AnnyaChangeCanvasBufferColor()\n");
-    while(1);
-}
 
 static mutex_t ButtonCreationLock;
 
 
-USER32_API
-PBUTTONHANDLE AnnyaCreateButton(
-    int64_t x, int64_t y,
-    uint32_t Width, uint32_t Height,
-    uintptr_t ParentWindow,
-    PBUTTON_CHARECTERISTICS Charecteristics
-){
-
-    LouPrint("AnnyaCreateButton()\n");
-    while(1);
-    return (PBUTTONHANDLE)0x00;
-}
 
 
 //USER32_API

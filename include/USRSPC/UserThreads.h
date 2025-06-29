@@ -19,6 +19,18 @@ typedef struct _mutex_t{
     atomic_t PrivaledgeLevel;
 } mutex_t;
 
+typedef struct {
+    mutex_t Lock;
+    atomic_t ThreadOwner;
+}spinlock_t;
+
+typedef struct {
+    atomic_t Lock;
+    atomic_t Counter;
+    atomic_t Limit;
+    atomic_t ThreadOwner;
+}semaphore_t;
+
 static inline void MutexLock(mutex_t* m){
     while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
         // spin

@@ -2,6 +2,7 @@
 #ifndef _DRSD_H
 #define _DRSD_H
 
+
 #ifdef __cplusplus
 #include <LouDDK.h>
 #include <NtAPI.h>
@@ -606,6 +607,7 @@ typedef struct _DRSD_CONNECTOR{
     mutex_t                             EldTex;
     size_t                              ProbeModeCount;
     struct _DRSD_ENCODER*               Encoder;
+    struct _DRSD_CRTC*                  Crtc;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
 
 typedef struct _DRSD_EDID_IDENTIFICATION{
@@ -670,7 +672,6 @@ typedef struct _DRSD_ENCODER{
     size_t                                      Index;
     uint32_t                                    CrtcLimit;
     uint32_t                                    CloneLimit;
-    struct _DRSD_CRTC*                          Crtc;
     ListHeader                                  BridgeLink;
     struct _DRSD_ENCODER_CALLBACKS*             Callbacks;
     struct _DRSD_ENCODER_ASSISTED_CALLBACKS*    AssistedCallbacks;
@@ -760,8 +761,8 @@ typedef struct _DRSD_CRTC{
     bool                            Enabled;
     PDRSD_FRAME_BUFFER              Framebuffer;
     DRSD_DISPLAY_MODE               DisplayMode;
-    PDRSD_PLANE                     PrimaryPlanes;
-    PDRSD_PLANE                     CursorPlanes;
+    PDRSD_PLANE                     PrimaryPlane;
+    PDRSD_PLANE                     CursorPlane;
     PDRSD_CRTC_CALLBACK             CrtcCallbacks;
     PDRSD_CRTC_ASSIST_CALLBACK      AssistCallbacks;
     size_t                          GammaSize;
@@ -980,39 +981,39 @@ typedef struct _DRSD_EDID_TRACKER{
 #define RGB_DRSD_FRAMEBUFFER 1
 #define EGA_DRSD_FRAMEBUFFER 2
 
-#define DRSD_CORE_TRANSLATE_COLOR(R, G, B, A) ((A << 24) | (R << 16) | (G << 8) | B)
+#define DRSD_CORE_TRANSLATE_COLOR(R, G, B, A) (uint32_t)(((uint32_t)A << 24) | ((uint32_t)R << 16) | ((uint32_t)G << 8) | (uint32_t)B)
 
 typedef enum {
     CLIP_DESTROYED = 0,
     
 }DRSD_CLIP_UPDATE_REASON;
 
+struct _DRSD_CLIP_CHAIN;
+
 typedef struct _DRSD_CLIP{
-    ListHeader  Peers;
-    ListHeader  Children;
-    PDRSD_PLANE Owner;
-    void        (*SignalClipChange)(struct _DRSD_CLIP*, DRSD_CLIP_UPDATE_REASON, void* UpdateData);
-    size_t      X;
-    size_t      Y;
-    size_t      Width;
-    size_t      Height;
-    size_t      DirtyX;
-    size_t      DirtyY;
-    size_t      DirtyWidth;
-    size_t      DirtyHeight;
-    uint32_t*   WindowBuffer;
-    bool        ClipDirty;
+    ListHeader              Peers;
+    PDRSD_PLANE             Owner;
+    struct _DRSD_CLIP_CHAIN* ChainOwner;
+    void                    (*SignalClipChange)(struct _DRSD_CLIP*, DRSD_CLIP_UPDATE_REASON, void* UpdateData);
+    size_t                  X;
+    size_t                  Y;
+    size_t                  Width;
+    size_t                  Height;
+    uint32_t*               WindowBuffer;
 }DRSD_CLIP, * PDRSD_CLIP;
 
 typedef struct _DRSD_CLIP_CHAIN{
     ListHeader  Peers;
     PDRSD_PLANE Owner;    
     PDRSD_CLIP  Clips;
+    void        (*PrimaryAtomicUpdate)(PDRSD_PLANE, void* Handle);
     bool        PlaneReady;
 }DRSD_CLIP_CHAIN, * PDRSD_CLIP_CHAIN;
 
 
 #ifndef _KERNEL_MODULE_
+
+void LouKeDestroyClip(PDRSD_CLIP Clip);
 
 void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color);
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
@@ -1043,8 +1044,6 @@ void LouKeDrsdClipPutPixel(
 void LouKeOsDosPrintCharecter(char Character);
 
 void DirectAccessDrsdHotplugEvent(PDRSD_DEVICE Device);
-
-void LouKeDrsdSyncScreens();
 
 LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
@@ -1213,6 +1212,7 @@ void DrsdInternalResetConnector(PDRSD_CONNECTOR Connector);
 
 LOUSTATUS DrsdConnectorInitialize(
     PDRSD_DEVICE                Device,
+    PDRSD_CRTC                  Crtc,
     PDRSD_CONNECTOR             Connector,
     PDRSD_CONNECTOR_CALLBACKS   Callbacks,
     int                         ConnectorType
@@ -1449,6 +1449,7 @@ void DrsdInternalResetConnector(PDRSD_CONNECTOR Connector);
 KERNEL_EXPORT
 LOUSTATUS DrsdConnectorInitialize(
     PDRSD_DEVICE                Device,
+    PDRSD_CRTC                  Crtc,
     PDRSD_CONNECTOR             Connector,
     PDRSD_CONNECTOR_CALLBACKS   Callbacks,
     int                         ConnectorType

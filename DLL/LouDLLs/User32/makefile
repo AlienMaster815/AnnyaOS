@@ -1,14 +1,16 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -nostdlib -nodefaultlibs
+CFLAGS = -shared -nostdlib -nodefaultlibs -O3
 
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll -lntdll
+LIBS = -lLouDll -lntdll -lKERNEL32
 
 # Source and Target
-SRC = User32.c
+SRC = User32.c \
+		Awm.c
+
 TARGET = user32.dll
 
 # Default Rule

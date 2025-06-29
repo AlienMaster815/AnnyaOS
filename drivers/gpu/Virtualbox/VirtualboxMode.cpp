@@ -277,7 +277,7 @@ static LOUSTATUS VBoxSetView(PDRSD_CRTC DrsdCrtc, size_t FbSize){
     View->MaximumScreenSize = FbSize;
     HgsmiBufferSubmit(VBox->GuestPool, View);
     HgsmiBufferFree(VBox->GuestPool, View);
-    LouPrint("VBoxSetView() STATUS_SUCCESS\n");
+    //LouPrint("VBoxSetView() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -315,7 +315,7 @@ static void VboxDoModeSet(
         Pitch, Width, Height, Bpp, Flags
     );
 
-    LouPrint("VboxDoModeSet() STATUS_SUCCESS\n");
+    //LouPrint("VboxDoModeSet() STATUS_SUCCESS\n");
 }
 
 static void VirtualCrtcSetBaseAndMode(
@@ -336,7 +336,7 @@ static void VirtualCrtcSetBaseAndMode(
     if(Crtc->CrtcState->Enable){
         VBoxCrtc->Width = Crtc->CrtcState->DisplayMode.HorizontalDisplay;
         VBoxCrtc->Height = Crtc->CrtcState->DisplayMode.VirticalDisplay;
-        LouPrint("VBOXGPU:Setting Width:%d And Height:%d\n", VBoxCrtc->Width, VBoxCrtc->Height);
+        //LouPrint("VBOXGPU:Setting Width:%d And Height:%d\n", VBoxCrtc->Width, VBoxCrtc->Height);
     }
 
     VBoxCrtc->X = X;
@@ -355,7 +355,7 @@ static void VirtualCrtcSetBaseAndMode(
     }
 
     MutexUnlock(&VBox->HardwareMutex);
-    LouPrint("VirtualCrtcSetBaseAndMode() STATUS_SUCCESS\n");
+    //LouPrint("VirtualCrtcSetBaseAndMode() STATUS_SUCCESS\n");
 }
 
 static void VirtualboxAtomicUpdate(
@@ -376,7 +376,7 @@ static void VirtualboxAtomicUpdate(
     );
 
 
-    LouPrint("VirtualboxAtomicUpdate() STATUS_SUCCES\n");
+    //LouPrint("VirtualboxAtomicUpdate() STATUS_SUCCES\n");
 }
 
 static LOUSTATUS VirtualboxAtomicCheck(
@@ -601,6 +601,7 @@ static LOUSTATUS VirtualboxConnectorInitialize(
 
     DrsdConnectorInitialize(
         Device, 
+        &Crtc->Base,
         Connector, 
         (PDRSD_CONNECTOR_CALLBACKS)&VirtualboxConnectorCalbacks, 
         DRSD_CONNECTOR_MODE_VGA
@@ -615,7 +616,6 @@ static LOUSTATUS VirtualboxConnectorInitialize(
     Device->ModeConfiguration.SuggestedY = 0;
         
     ((PVIRTUALBOX_CONNECTOR)Connector)->VBOXCrtc = Crtc;
-    Connector->Encoder = Encoder;
 
     LouPrint("VirtualboxConnectorInitialize() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

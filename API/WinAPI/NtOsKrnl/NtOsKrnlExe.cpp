@@ -3210,7 +3210,6 @@ void RtlRaiseStatus(LOUSTATUS Status){
 // __asan_store8_noabort
 // __asan_storeN
 // __asan_storeN_noabort
-// __chkstk
 // __misaligned_access
 // _atoi64
 // _finite

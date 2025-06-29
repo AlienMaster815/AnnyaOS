@@ -46,7 +46,10 @@ typedef void* PTHREAD;
 #include <windows.h>
 #include "WinAPI/Win32/wmsdk/wmfsdk/wmfsdk.h"
 
+
+
 typedef void*    HWND;
+typedef void*    HMENU;
 typedef uint16_t MSG;
 
 typedef void* HANDLE;
@@ -153,41 +156,40 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
 }WIN_API_PROCESS_INFORMATION, * PWIN_API_PROCESS_INFORMATION;
 
 
-
 #ifndef _USER_32_
+
+//Copy Changes of the following to the Annya.h system from Awm.h
+
+
 
 //__declspec(dllimport)
 //uint64_t AnnyaRegisterCallbackProcedure(
 //    void* CallbackHandler
 //);
 
+
+__declspec(dllimport)
+HWND 
+CreateWindowA(
+    LPCSTR      ClassName,
+    LPCSTR      WindowName,
+    DWORD       Style,
+    int64_t     X,
+    int64_t     Y,
+    uint32_t    Width,
+    uint32_t    Height,
+    HWND        ParrentHandle,
+    HMENU       Menu,
+    HINSTANCE   Instance,
+    LPVOID      Parameter
+);
+
 __declspec(dllimport)
 void* malloc(size_t BytesNeeded);
 
-__declspec(dllimport)
-PBITMAP_HANDLE AnnyaOpenBitmapImage(
-    string FileName
-);
 
-__declspec(dllimport)
-void DrawDesktopBackground(FILE* FileHandle, uint16_t FileType);
 
-__declspec(dllimport)
-PBUTTONHANDLE AnnyaCreateButton(
-    int64_t x, int64_t y,
-    uint32_t Width, uint32_t Height,
-    uintptr_t ParentWindow,
-    uintptr_t Charecteristics
-);
 
-__declspec(dllimport)
-void AnnyaChangeCanvasBufferColor(
-    PWINDHANDLE WindowHandle,
-    uint16_t r,
-    uint16_t g,
-    uint16_t b,
-    uint16_t a //not used yet but added for futrue proof
-);
 
 __declspec(dllimport)
 PWINDHANDLE AnnyaCreateCanvasBuffer(
@@ -202,6 +204,31 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 
 #ifndef _LOUDLL_
+
+__declspec(dllimport)
+void LouGenericFreeHeap(void* Heap, void* Address);
+
+__declspec(dllimport)
+void*
+LouDrsdGetPlaneInformation(size_t* CountHandle);
+
+__declspec(dllimport)
+void*
+LouGlobalUserMallocEx(size_t Size, uint64_t Alignment);
+
+__declspec(dllimport)
+void LouGlobalUserFree(void* Addr);
+
+#define LouGlobalUserMallocArray(type, count) (type*)LouGlobalUserMallocEx((ROUND_UP64(sizeof(type), GET_ALIGNMENT(type))) * (count), GET_ALIGNMENT(type))
+#define LouGlobalUserMallocType(Type) (Type*)LouGlobalUserMallocEx(sizeof(Type), GET_ALIGNMENT(Type))
+
+__declspec(dllimport)
+void*
+LouGlobalUserMalloc(size_t Size);
+
+__declspec(dllimport)
+void 
+LouExitDosMode();
 
 __declspec(dllimport)
 int strncmp(const char* str1, const char* str2, size_t n);
@@ -258,10 +285,19 @@ __declspec(dllimport)
 int LouPrint(char* Str, ...);
 
 __declspec(dllimport)
-int64_t AnnyaGetScreenBufferWidth();
+void 
+LouDrsdSyncScreen(void* Chain);
 
 __declspec(dllimport)
-int64_t AnnyaGetScreenBufferHeight();
+void LouUpdateClipState(void* Clip);
+
+__declspec(dllimport)
+void* LouDrsdCreateClip(
+    void* Plane, 
+    size_t X, size_t Y, 
+    size_t Width, size_t Height, 
+    uint8_t R, uint8_t G, uint8_t B, uint8_t A
+);
 
 __declspec(dllimport)
 PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters);

@@ -187,24 +187,12 @@ raster_circle (int x0, int y0, int radius,uint8_t r,uint8_t g,uint8_t b)
   }
 }
 
-static int64_t SurfaceWidth = 0x00;
-static int64_t SurfaceHeight = 0x00;
 static int64_t SurfaceX = 0x00;
 static int64_t SurfaceY = 0x00;
-
-int64_t GetScreenBufferWidth(){
-  return SurfaceWidth;
-}
-
-int64_t GetScreenBufferHeight(){
-  return SurfaceHeight;
-}
 
 void SetSurfaceDimentions(int64_t X, int64_t Y, int64_t Width, int64_t Height){
   SurfaceX = X;
   SurfaceY = Y;
-  SurfaceWidth = Width;
-  SurfaceHeight = Height;
 }
 
 int64_t GetScreenBufferBaseX(){
@@ -243,7 +231,7 @@ void LouKeDrsdCoreClipPlotLine(
     LouKeDrsdCoreClipPlotLineDword(
         Clip,
         x0, y0, x1, y1,
-        DRSD_CORE_TRANSLATE_COLOR(r, g , b, 0)
+        DRSD_CORE_TRANSLATE_COLOR(r, g , b, 255)
     );
 }
 

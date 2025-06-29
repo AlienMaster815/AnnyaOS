@@ -165,6 +165,9 @@ NtAllocateUuids(
 );
 
 LOUDDK_API_ENTRY
+int toupper(int c);
+
+LOUDDK_API_ENTRY
 void LouKeInitializeLibraryLookup(
     string    ModuleName,
     uint32_t  NumberOfFunctions,
@@ -183,6 +186,10 @@ void LouKeInitializeLibraryLookup(
 
     Tmp->LongModeEntry = IsNativeLongmode;
     Tmp->Table.ModuleName = ModuleName;
+    size_t koo = strlen(ModuleName);
+    for(size_t foo = 0 ; foo < koo; foo++){
+        ModuleName[foo] = toupper(ModuleName[foo]);
+    }
     Tmp->Table.NumberOfFunctions = NumberOfFunctions;
     Tmp->Table.FunctionName = FunctionNames;
     Tmp->Table.VirtualAddress = FunctionAddresses;
@@ -204,7 +211,7 @@ KERNEL_IMPORT void* LouKePciGetIoRegion(
 
 static inline 
 void InitializeLousineKernelTables(){
-    ImportTables[4].ModuleName = "louoskrnl.exe";
+    ImportTables[4].ModuleName = "LOUOSKRNL.EXE";
     ImportTables[4].NumberOfFunctions = PRE_LOADED_LOUOSKRNL_FUNCTIONS;
 
     ImportTables[4].FunctionName = LouOsKrnlFunctionNames;   
@@ -572,12 +579,11 @@ wchar_t towlower(wchar_t wc);
 LOUDDK_API_ENTRY
 int tolower(int c);
 
-LOUDDK_API_ENTRY
-int toupper(int c);
+
 
 static inline
 void InitializeNtKernelTable(){
-    ImportTables[0].ModuleName = "ntoskrnl.exe";
+    ImportTables[0].ModuleName = "NTOSKRNL.EXE";
     ImportTables[0].NumberOfFunctions = PRE_LOADED_NTOSKRNL_FUNCTIONS;
     
     ImportTables[0].FunctionName = NTFunctionNames;
@@ -906,10 +912,15 @@ LOUDDK_API_ENTRY void InitializeGenericTables(){
 
 }
 
+
 LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 ){
+    size_t koo = strlen(ModuleName);
+    for(size_t foo = 0 ; foo < koo; foo++){
+        ModuleName[foo] = toupper(ModuleName[foo]);
+    }
     size_t i = 0;
     size_t j = 0;
 
@@ -943,12 +954,14 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     //last resourt but most likely here
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
-            if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
-                //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
-                //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
-                //LouPrint("::%h : 3\n", Tmp->Table.VirtualAddress[j]);
-                return Tmp->Table.VirtualAddress[j];
+        if(strcmp(Tmp->Table.ModuleName, ModuleName) == 0){
+            for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
+                if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
+                    //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
+                    //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
+                    //LouPrint("::%h : 3\n", Tmp->Table.VirtualAddress[j]);
+                    return Tmp->Table.VirtualAddress[j];
+                }
             }
         }
         //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
@@ -963,6 +976,12 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
 LOUDDK_API_ENTRY
 bool 
 LouKeLinkerCheckLibraryPresence(string SystemName){
+    
+    size_t koo = strlen(SystemName);
+    for(size_t foo = 0 ; foo < koo; foo++){
+        SystemName[foo] = toupper(SystemName[foo]);
+    }
+    
     uint8_t i = 0;
     for(i = 0; i < PRE_LOADED_MODULES; i++){
 

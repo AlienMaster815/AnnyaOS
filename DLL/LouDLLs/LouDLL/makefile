@@ -6,7 +6,10 @@ CFLAGS = -shared -nostdlib -nodefaultlibs
 INCLUDES = -I../../../include
 
 # Source and Target
-SRC = LouDll.c
+SRC = LouDll.c \
+	Dispatch.c \
+	Drsd.c
+
 TARGET = LouDll.dll
 
 # Default Rule

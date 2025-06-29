@@ -1447,20 +1447,22 @@ ISR129:
 	iretq
 
 ISR130:
-	
 	pusha
-	push 130
-	mov [InterruptNum], ah
-	Handle
+	mov r9, rsp
+	;call SYSCALLS32 ;todo implement 32 bit syscalls
 	popa	
 	iretq
 
 ISR131:
-	
 	pusha
-	push 131
-	mov [InterruptNum], ah
-	Handle
+	push rdx
+	push rsi
+	push rdi
+	pop rcx
+	pop rdx
+	pop r8
+	mov r9, rsp
+	;call SYSCALLS32 todo Add 32 bit syscalls
 	popa	
 	iretq
 

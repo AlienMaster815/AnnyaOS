@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -O3
 
 # Paths
 LDFLAGS = -L../../UserLibraries

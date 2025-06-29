@@ -121,7 +121,6 @@ LOUSTATUS Lou_kernel_early_initialization(){
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
     HandleProccessorInitialization();
-    //InitializeBootGraphics();
     InitializeBootGraphics();
 
     InitializeStartupInterruptHandleing();
@@ -414,18 +413,19 @@ void InitializeUserSpace(){
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
     LouPrint("USER32.DLL Has Loaded\n");
 
-    PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocEx(sizeof(WIN_PEB), GET_ALIGNMENT(WIN_PEB), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocEx(sizeof(WIN_PEB), GET_ALIGNMENT(WIN_PEB), USER_GENERIC_MEMORY);
+    SetPEB((uint64_t)ProcessExecutionBlock);
     LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
- 
+    ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
+    ProcessExecutionBlock->ProcessHeap = (uint64_t)LouKeVirtualAllocUser(MEGABYTE_PAGE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
     
     uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
-    LouPrint("Lousine Kernel Video Mode:%dx%d\n", GetScreenBufferWidth(), GetScreenBufferHeight());
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
 
     //LouUpdateWindow(
-    //    GetScreenBufferWidth() / 2, GetScreenBufferHeight() / 2,
-    //    GetScreenBufferWidth() / 2, (GetScreenBufferHeight() / 2) - 62,
+    //    GetScreenBufferWidth() / 2, () / 2,
+    //    GetScreenBufferWidth() / 2, (() / 2) - 62,
     //    HWind
     //);    
     LouPrint("Hello World\n");
@@ -434,7 +434,6 @@ void InitializeUserSpace(){
         while(1);
     }
 
-    while(1);
     UsrJmp(InitEntry);
 }
 

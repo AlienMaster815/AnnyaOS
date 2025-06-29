@@ -189,7 +189,7 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
         DllAttachProcessData->DllReserved = 0;
         DllAttachProcessData->LockRelease = (void(*)())(uint8_t*)LouKeLinkerGetAddress("KERNEL32.dll", "ReleaseLoadLibraryALock");//ReleaseLoadLibraryALock
 
-        UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDLL.dll", "AnnyaAttachDllToProcess");
+        UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDll.dll", "AnnyaAttachDllToProcess");
         LouKeCreateUserStackThreadWin((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE, (uint64_t)(uint8_t*)Teb);
     }
     LibHandlesCount++;

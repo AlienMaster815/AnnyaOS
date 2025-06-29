@@ -1,11 +1,11 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -nostdlib -nodefaultlibs -ffreestanding -Wno-builtin-declaration-mismatch
+CFLAGS = -shared -nostdlib -nodefaultlibs -ffreestanding -Wno-builtin-declaration-mismatch -O3
 
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll -lKERNEL32 -lkernelbase
+LIBS = -lLouDll -lntdll -lKERNEL32 -lkernelbase
 
 # Source and Target
 SRC = MSVCRT.c \

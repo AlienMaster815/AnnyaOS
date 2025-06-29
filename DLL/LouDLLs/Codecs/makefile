@@ -1,14 +1,16 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -nostdlib -nodefaultlibs
+CFLAGS = -shared -nostdlib -nodefaultlibs -O3
 
 # Paths
-INCLUDES = -I../../../include
-LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll -lntdll -luser32 -lmsvcrt
+INCLUDES = -I../../../include -I ../../3rdParty/zlib
+LDFLAGS = -L../../../UserLibraries 
+LIBS = -lLouDll -lntdll -luser32 -lmsvcrt -lKERNEL32
 
 # Source and Target
-SRC = Codecs.c 
+SRC = Codecs.c \
+		Png.c
+
 TARGET = codecs.dll
 
 # Default Rule

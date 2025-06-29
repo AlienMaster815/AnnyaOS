@@ -1,11 +1,22 @@
 
 //x86_64-w64-mingw32-gcc -shared -o LouDll.dll LouDll.c -nostdlib -nodefaultlibs -I../../../Include
-#define _LOUDLL_
-#include <Annya.h>
-#include <stdarg.h>
+#include "LouDll.h"
 
 
-#define LOUDLL_API __declspec(dllexport)
+static inline size_t GetAlignmentBySize(size_t Size){
+    if(Size <= 2)    return 2;
+    if(Size <= 4)    return 4;
+    if(Size <= 8)    return 8;
+    if(Size <= 16)   return 16;
+    if(Size <= 32)   return 32;
+    if(Size <= 64)   return 64;
+    if(Size <= 128)  return 128;
+    if(Size <= 256)  return 256;
+    if(Size <= 512)  return 512;
+    if(Size <= 1024) return 1024;
+    if(Size <= 2048) return 2048;
+    return 4096;
+}
 
 
 LOUDLL_API
@@ -15,6 +26,9 @@ LouMemCpy(
     void* InStream,
     size_t ByteCount
 ){
+    if(OutStream == InStream){
+        return 0x00;
+    }
     volatile char* dest = (char*)OutStream;
     volatile const char* src = (const char*)InStream;
 
@@ -75,25 +89,7 @@ int LouPrint(char* Str, ...){
     return Data[1];
 }
 
-LOUDLL_API
-uint16_t AnnyaGetScreenBufferHeight(){
-    uint64_t Data[2];
-    Data[0] = 0;
-    while(Data[0] != 1){
-        LouCALL(GETSCREENHEIGHT, (uint64_t)&Data, 0);
-    }
-    return (uint16_t)Data[1];
-}
 
-LOUDLL_API
-int64_t AnnyaGetScreenBufferWidth(){
-    uint64_t Data[2];
-    Data[0] = 0;
-    while(Data[0] != 1){
-        LouCALL(GETSCREENWIDTH, (uint64_t)&Data, 0);
-    }
-    return (int64_t)Data[1];
-}
 
 LOUDLL_API
 PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
@@ -402,7 +398,8 @@ void* LouGenericAllocateHeapEx(
     size_t AllocationSize,
     size_t Alginment
 ){
-    uint64_t KulaPacket[4] = {0};
+
+    uint64_t KulaPacket[5] = {0};
     KulaPacket[1] = (uint64_t)Heap;
     KulaPacket[2] = (uint64_t)AllocationSize;
     KulaPacket[3] = (uint64_t)Alginment;
@@ -410,6 +407,16 @@ void* LouGenericAllocateHeapEx(
         LouCALL(LOUALLOCHEAPGENERICEX, (uint64_t)&KulaPacket[0], 0);
     }
     return (void*)KulaPacket[4];
+}
+
+LOUDLL_API
+void LouGenericFreeHeap(void* Heap, void* Address){
+    uint64_t KulaPacket[3] = {0};
+    KulaPacket[1] = (uint64_t)Heap;
+    KulaPacket[2] = (uint64_t)Address;
+    while(!KulaPacket){
+        LouCALL(LOUFREEGENERICHEAP, (uint64_t)&KulaPacket, 0);
+    }
 }
 
 
@@ -479,4 +486,52 @@ LouCloseFile(
     while(!KulaPacket[0]){
         LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     } 
+}
+
+LOUDLL_API
+void 
+LouExitDosMode(){
+    uint64_t KulaPacket = 0;
+    while(!KulaPacket){
+        LouCALL(LOUEXITDOSMODE, (uint64_t)&KulaPacket, 0);
+    } 
+}
+
+LOUDLL_API
+void LouGlobalUserFree(void* Addr){
+    uint64_t KulaPacket[2] = {0};
+    KulaPacket[1] = (uint64_t)Addr;
+    while(!KulaPacket[0]){
+        LouCALL(LOUGLOBALFREE, (uint64_t)&KulaPacket[0], 0);
+    }
+}
+
+LOUDLL_API 
+void*
+LouGlobalUserMallocEx(size_t Size, uint64_t Alignment){
+    uint64_t KulaPacket[4] = {0};
+    KulaPacket[2] = Size;
+    KulaPacket[3] = Alignment;
+    while(!KulaPacket[0]){
+        LouCALL(LOUGLOBALMALLOC, (uint64_t)&KulaPacket[0], 0);
+    }
+    return (void*)KulaPacket[1];
+}
+
+LOUDLL_API
+void*
+LouGlobalUserMalloc(size_t Size){
+    LouGlobalUserMallocEx(Size, GetAlignmentBySize(Size));
+}
+
+LOUDLL_API
+void* memset(void* dest, int value, size_t count) {
+    unsigned char* ptr = (unsigned char*)dest;
+    unsigned char val = (unsigned char)value;
+
+    for (size_t i = 0; i < count; i++) {
+        ptr[i] = val;
+    }
+
+    return dest;
 }

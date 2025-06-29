@@ -246,25 +246,10 @@ LOUSTATUS DrsdInitializeCrtcWithPlanes(
 
     AddVBlankToCrtc(Device);
 
-    PDRSD_PLANE Pri = Crtc->PrimaryPlanes;
-    if(!Pri){
-        Crtc->PrimaryPlanes = Primary;
-    }else{
-        while(Pri->Peers.NextHeader){
-            Pri = (PDRSD_PLANE)Pri->Peers.NextHeader;
-        }
-        Pri->Peers.NextHeader = (PListHeader)Primary;
-    }
-
-    PDRSD_PLANE Cur = Crtc->CursorPlanes;
-    if(!Cur){
-        Crtc->PrimaryPlanes = Cursor;
-    }else{
-        while(Cur->Peers.NextHeader){
-            Cur = (PDRSD_PLANE)Cur->Peers.NextHeader;
-        }
-        Cur->Peers.NextHeader = (PListHeader)Cursor;
-    }
+    Primary->Crtc = Crtc;
+    Cursor->Crtc = Crtc;
+    Crtc->PrimaryPlane = Primary;
+    Crtc->CursorPlane = Cursor;
 
     PDRSD_CRTC Tmp = Device->Crtcs;
     if(!Tmp){
@@ -410,6 +395,7 @@ void DrsdInternalAtomicConnectorDestroyState(
 
 LOUSTATUS DrsdConnectorInitialize(
     PDRSD_DEVICE                Device,
+    PDRSD_CRTC                  Crtc,
     PDRSD_CONNECTOR             Connector,
     PDRSD_CONNECTOR_CALLBACKS   Callbacks,
     int                         ConnectorType
@@ -418,6 +404,7 @@ LOUSTATUS DrsdConnectorInitialize(
     Connector->Device = Device;
     Connector->Callbacks = Callbacks;
     Connector->CType = ConnectorType;
+    Connector->Crtc = Crtc; 
 
     PDRSD_CONNECTOR Tmp = Device->Connectors;
     if(!Tmp){

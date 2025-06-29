@@ -195,7 +195,7 @@ void* LouKeMallocPhysicalEx(
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     KeMallocPageTracksPhyCount++;
-    ZeroMem(TmpVMemTrackBase, AllocationSize);
+    ZeroMem(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase), AllocationSize);
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
 

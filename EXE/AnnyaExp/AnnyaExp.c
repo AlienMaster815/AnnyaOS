@@ -1,17 +1,13 @@
 // Annya.exp.cpp : Defines the entry point for the application.
 //x86_64-w64-mingw32-gcc -shared -o AnnyaExp.exe AnnyaExp.c -m64 -nostdlib -nodefaultlibs -L../../UserLibraries -lLouDll -luser32 -I../../Include
 
+#include "AnnyaExp.h"
 
-#include <Annya.h>
-
-
-static HANDLE (*AnnyaOpenPngA)(string);
 
 static PWINDHANDLE TaskBarHandle = 0;
 static PBUTTONHANDLE StartButton = 0;
 static PBUTTONHANDLE ClockButton = 0;
 static PBITMAP_HANDLE Background = 0;
-//static HANDLE MyComputerPng = 0x00;
 static int64_t Width = 0;
 static int64_t Height = 0;
 
@@ -23,7 +19,6 @@ static uint64_t i = 0;
 
 static TIME_T TimeStruct = {0};
 
-//static HMODULE CODECShModule = 0;
 
 static void UpdateClockTime(){
             if(TimeStruct.Hour > 12){
@@ -110,12 +105,7 @@ DWORD ClockThread(PVOID Args){
             _vsprintf(Time, 25, " %d:%d PM", TimeStruct.Hour, TimeStruct.Minute);
         }
     }
-    ClockButton = AnnyaCreateButton(
-        Width - 87, Height - 28, 
-        87 - 2, 25,
-        (uintptr_t)TaskBarHandle,
-        (uintptr_t)&ButtonCharecteristics
-    );
+
 
     LouPrint("Clock Thread Created Entering Main Loop\n");
     
@@ -132,9 +122,7 @@ DWORD ClockThread(PVOID Args){
 void StartDesktop(){
     
     LouPrint("Hello UserMode Im Annya :) :: Starting Desktop\n");
-    Background = AnnyaOpenBitmapImage("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
 
-    DrawDesktopBackground((FILE*)Background, 0);
 
     LouPrint("Background Drawn : Creating Taskbar\n");
 
@@ -150,29 +138,14 @@ void StartDesktop(){
     ButtonCharecteristics.ButtonText = (uint64_t)"Start";
     
 
-    TaskBarHandle = AnnyaCreateCanvasBuffer(
-        0 , AnnyaGetScreenBufferHeight() - 30, 
-        AnnyaGetScreenBufferWidth() , 30,
-        0x00,
-        &TaskbarCharecteristics
-    );
+    //TaskBarHandle = AnnyaCreateCanvasBuffer(
+    //    0 , () - 30, 
+    //    AnnyaGetScreenBufferWidth() , 30,
+    //    0x00,
+    //    &TaskbarCharecteristics
+    //);
 
-    AnnyaChangeCanvasBufferColor(
-        TaskBarHandle,
-        198,
-        198,
-        198,
-        0
-    );
 
-    AnnyaCreateButton(
-        0 + 2, Height - 28, 
-        50 - 2, 25,
-        (uintptr_t)TaskBarHandle,
-        (uintptr_t)&ButtonCharecteristics
-    );
-
-    //MyComputerPng = AnnyaOpenPngA("C:/ANNYA/AOSMC.PNG");
 
 
 
@@ -190,21 +163,14 @@ int WinMain(
     int       CmdShow 
 ){
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
-    LouPrint("Loading CODECS.DLL\n");
 
-    //CODECShModule = LoadLibraryA("C:/ANNYA/SYSTEM64/CODECS.DLL");
-
-    //if(!CODECShModule){
-    //    LouPrint("CODECS.DLL Could Not Be Found\n");
-    //    while(1);
-    //}
-
-    //AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
 
     Time[0] = '\0';
-    
-    Width = AnnyaGetScreenBufferWidth();
-    Height = AnnyaGetScreenBufferHeight();
+
+    //LouExitDosMode();
+    InitializeAwmUserSubsystem();
+
+    while(1);
 
     StartDesktop();
 

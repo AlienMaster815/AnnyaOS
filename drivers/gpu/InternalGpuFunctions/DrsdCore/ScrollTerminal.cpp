@@ -1,14 +1,16 @@
 #include "DrsdCore.h"
 
+LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain);
+
 static bool UsingDosTerminal = true;
 
 typedef struct _TERMAINAL_PLANE {
-    ListHeader Peers;
-    PDRSD_CLIP DosClip;
-    size_t CursorX;
-    size_t CursorY;
-    uint32_t TerminalBackground;
-    uint32_t TerminalForeground;
+    ListHeader          Peers;
+    PDRSD_CLIP          DosClip;
+    size_t              CursorX;
+    size_t              CursorY;
+    uint32_t            TerminalBackground;
+    uint32_t            TerminalForeground;
 } TERMAINAL_PLANE, *PTERMAINAL_PLANE;
 
 typedef struct _LOUOS_DOS_TERMINAL {
@@ -20,7 +22,7 @@ typedef struct _LOUOS_DOS_TERMINAL {
 static LOUOS_DOS_TERMINAL LouOsDosTerminalScreen = {
     .TerminalPlane = {0},
     .DefaultBackground = 0x00,
-    .DefaultForeground = DRSD_CORE_TRANSLATE_COLOR(0, 128, 0, 0),
+    .DefaultForeground = DRSD_CORE_TRANSLATE_COLOR(0, 128, 0, 255),
 };
 
 void ScrollClipDestroyed(PDRSD_CLIP Clip) {
@@ -44,6 +46,7 @@ void ScrollTerminalClipChange(PDRSD_CLIP Clip, DRSD_CLIP_UPDATE_REASON UpdateRea
     }
 }
 
+
 void LouKeCreateScrollTerminal(PDRSD_CLIP Clip) {
     if (!UsingDosTerminal) return;
 
@@ -61,7 +64,7 @@ void LouKeCreateScrollTerminal(PDRSD_CLIP Clip) {
 
     LouKeDrsdUpdateClipColor(Clip, LouOsDosTerminalScreen.DefaultBackground);
     LouKeUpdateClipState(Clip);
-    LouKeDrsdSyncScreens();
+    LouKeDrsdSyncScreen(Clip->ChainOwner);
 
     LouPrint("Hello LouOS DOS\n");
 }
@@ -86,7 +89,7 @@ void LouOsDosScrollDown(PDRSD_CLIP Clip, size_t Pixels) {
 void _LouKeOsDosPrintCharacter(char Character, PTERMAINAL_PLANE Plane, uint32_t Color) {
     if (Character == '\n') {
         Plane->CursorX = 0;
-        if ((Plane->CursorY + 1) * 17 >= Plane->DosClip->Height) {
+        if ((Plane->CursorY + 2) * 17 >= Plane->DosClip->Height) {
             LouOsDosScrollDown(Plane->DosClip, 17);
         } else {
             Plane->CursorY++;
@@ -131,11 +134,24 @@ void LouKeOsDosPrintCharecter(char Character) {
 
 void LouKeOsDosUpdateMapping() {
     if (!UsingDosTerminal) return;
-
     PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;
     while (Plane) {
         LouKeUpdateClipState(Plane->DosClip);
+        LouKeDrsdSyncScreen(Plane->DosClip->ChainOwner);
         Plane = (PTERMAINAL_PLANE)Plane->Peers.NextHeader;
     }
-    LouKeDrsdSyncScreens();
+}
+
+LOUDDK_API_ENTRY
+void 
+LouKeExitDosMode(){
+    PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;
+
+    while (Plane) {
+        ScrollClipDestroyed(Plane->DosClip);
+        LouKeDestroyClip(Plane->DosClip);
+        Plane = (PTERMAINAL_PLANE)Plane->Peers.NextHeader;
+    }
+    UsingDosTerminal = false;
+    LouKeMemoryBarrier();
 }

@@ -91,11 +91,8 @@ void fputc(){
     while(1);
 }
 
-MSVCRT_API
-void free(){
-    LouPrint("free()\n");
-    while(1);
-}
+
+
 
 MSVCRT_API
 void fwrite(){
@@ -106,12 +103,6 @@ void fwrite(){
 MSVCRT_API 
 void localeconv(){
     LouPrint("localeconv()\n");
-    while(1);
-}
-
-MSVCRT_API
-void malloc(){
-    LouPrint("malloc()\n");
     while(1);
 }
 

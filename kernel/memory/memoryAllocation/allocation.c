@@ -324,7 +324,7 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
             else continue;
         }
     }
-    LouPrint("Out Of Memory\n");
+    LouPrint("Out Of Memory Needed:%h\n", BytesToAllocate);
     while(1);
     return NULL;    
 }

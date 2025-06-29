@@ -78,6 +78,6 @@ void LouKeDrsdDrawBitMap(PBITMAP_HANDLE BitmapHandle, int64_t x, int64_t y){
             //LouKeDrsdCorePutPixel(x + xz, y + yz, r, g, b, 0);                 
         }
     }
-    LouKeDrsdSyncScreens();
+    //LouKeDrsdSyncScreens();
     LouKeReleaseSpinLock(&BitMapDrawLock, &Irql);
 }
