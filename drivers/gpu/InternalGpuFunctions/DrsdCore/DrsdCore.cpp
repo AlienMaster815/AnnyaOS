@@ -199,10 +199,22 @@ LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
     size_t Width = Clip->Width;
     size_t Height = Clip->Height;
     size_t FbWidth = Clip->Owner->FrameBuffer->Width;
+    size_t FbHeight = Clip->Owner->FrameBuffer->Height;
     uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
     uint32_t* Cb = Clip->WindowBuffer;
-    for(size_t Ty = 0; Ty < Height; Ty++){
-        for(size_t Tx = 0 ; Tx < Width; Tx++){
+
+    size_t ClampedWidth = Width;
+    size_t ClampedHeight = Height;
+
+    if ((X + Width) > FbWidth) {
+        ClampedWidth = FbWidth > X ? FbWidth - X : 0;
+    }
+    if ((Y + Height) > FbHeight) {
+        ClampedHeight = FbHeight > Y ? FbHeight - Y : 0;
+    }
+
+    for (size_t Ty = 0; Ty < ClampedHeight; Ty++) {
+        for (size_t Tx = 0; Tx < ClampedWidth; Tx++) {
             Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
         }
     }
@@ -378,21 +390,26 @@ void* LouDrsdGetPlaneInformation(size_t* CountHandle){
     return (void*)Query;
 }
 
-static void LouKeUpdateClipSubState(
+LOUDDK_API_ENTRY
+void LouKeUpdateClipSubState(
     PDRSD_CLIP Clip, 
     size_t X, size_t Y, 
     size_t Width, size_t Height
 ) {
     size_t FbWidth = Clip->Owner->FrameBuffer->Width;
+    size_t FbHeight = Clip->Owner->FrameBuffer->Height;
     uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
     uint32_t* Cb = Clip->WindowBuffer;
-    
+
     for(size_t Ty = 0; Ty < Height; Ty++){
+        if((Ty + Y) >= FbHeight) break;
         for(size_t Tx = 0; Tx < Width; Tx++){
+            if((Tx + X) >= FbWidth) break;
             Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
         }
     }
 }
+
 
 LOUDDK_API_ENTRY
 void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow) {
@@ -407,6 +424,7 @@ void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow) {
     size_t ShadowHeight = Shadow->Height;
     
     size_t FbWidth = Clip->Owner->FrameBuffer->Width;
+    size_t FbHeight = Clip->Owner->FrameBuffer->Width;
     uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
     uint32_t* Cb = Clip->WindowBuffer;
 
@@ -424,10 +442,13 @@ void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow) {
     LouKeUpdateClipSubState(Shadow, RelX, RelY, Width, Height);
     
     for(size_t Ty = 0; Ty < Height; Ty++){
+        if((Ty + Y) >= FbHeight) break;
         for(size_t Tx = 0; Tx < Width; Tx++){
+            if((Tx + X) >= FbWidth) break;
             if(Cb[Tx + (Ty * Width)]){
                 Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
             }
         }
     }
+
 }

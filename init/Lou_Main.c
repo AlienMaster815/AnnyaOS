@@ -31,7 +31,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.5.02";
+string KERNEL_VERSION = "0.5.04 RSC-1";
 
 #ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";
@@ -341,9 +341,8 @@ KERNEL_ENTRY Lou_kernel_start(
     //CheckForSoundblaster16();
     ScanTheRestOfHarware();
 
-    //LouKeInitializeMouseManagemet();
-    //EnablePs2Keyboard();
-    //InitializePs2Mouse();
+    EnablePs2Keyboard();
+    InitializePs2Mouse();
     
     //SMPInit();
 	
@@ -435,6 +434,13 @@ void InitializeUserSpace(){
     }
 
     UsrJmp(InitEntry);
+}
+
+void LouKeUpdateMouseState(PSYSTEM_STATE_STACK State);
+
+void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
+    LouKeUpdateMouseState(Stack);
+
 }
 
 //0x220B21030

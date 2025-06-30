@@ -32,6 +32,12 @@ static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
 static HANDLE (*AnnyaCreateClipFromPng)(void*,HANDLE);
 static PDRSD_CLIP* MouseClips = 0x00;
+static int64_t MouseX;
+static int64_t MouseY;
+static int64_t DesktopCurrentX = 0;
+static int64_t DesktopCurrentY = 0;
+static int64_t DesktopCurrentWidth = 0;
+static int64_t DesktopCurrentHeight = 0;
 
 USER32_API
 HWND 
@@ -98,6 +104,12 @@ AWM_STATUS InitializeAwmUserSubsystem(){
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
+        if(PlaneTracker.PlaneInformation[i].Width > DesktopCurrentWidth){
+            DesktopCurrentWidth = PlaneTracker.PlaneInformation[i].Width; 
+        }
+        if(PlaneTracker.PlaneInformation[i].Height > DesktopCurrentHeight){
+            DesktopCurrentHeight = PlaneTracker.PlaneInformation[i].Height; 
+        }
         PlaneBackgrounds[i] = (PDRSD_CLIP)LouDrsdCreateClip(
             (void*)PlaneTracker.PlaneInformation[i].Plane,
             0, 0, 
@@ -106,14 +118,39 @@ AWM_STATUS InitializeAwmUserSubsystem(){
             0, 128,128, 255
         );
         LouUpdateClipState((void*)PlaneBackgrounds[i]);
-        LouDrsdSyncScreen((void*)PlaneBackgrounds[i]->ChainOwner);       
         MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
         LouUpdateShadoClipState((void*)MouseClips[i], (void*)PlaneBackgrounds[i]);
         LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);        
     }
-
-
-
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
-    while(1);
+}
+
+static void UpdateMouseClip(int64_t X, int64_t Y){
+    if((MouseX != X) || (MouseY != Y)){
+        
+        for(size_t i = 0 ; i < PlaneTracker.PlaneCount; i++){
+            MouseClips[i]->X = X;
+            MouseClips[i]->Y = Y;
+            LouUpdateClipSubState((void*)PlaneBackgrounds[i], MouseX, MouseY, MouseClips[i]->Width, MouseClips[i]->Height);
+            LouUpdateShadoClipState((void*)MouseClips[i], (void*)PlaneBackgrounds[i]);
+            LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);
+        }
+        MouseX = X;
+        MouseY = Y;
+    }
+}
+
+USER32_API
+void AwmUpdateState(PSYSTEM_STATE_STACK State){
+    if(State->MouseState.MouseX < DesktopCurrentX){
+        State->MouseState.MouseX = DesktopCurrentX;
+    }else if(State->MouseState.MouseX > (DesktopCurrentX + DesktopCurrentWidth)){
+        State->MouseState.MouseX = (DesktopCurrentX + DesktopCurrentWidth);
+    }
+    if(State->MouseState.MouseY < DesktopCurrentY){
+        State->MouseState.MouseY = DesktopCurrentY;
+    }else if(State->MouseState.MouseY > (DesktopCurrentY + DesktopCurrentHeight)){
+        State->MouseState.MouseY = (DesktopCurrentY + DesktopCurrentHeight);
+    }
+    UpdateMouseClip(State->MouseState.MouseX, State->MouseState.MouseY);
 }

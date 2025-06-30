@@ -70,3 +70,20 @@ LouUpdateShadoClipState(
     }
 }
 
+LOUDLL_API
+void LouUpdateClipSubState(
+    void* Clip,
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+){
+    uint64_t KulaPacket[6] = {0};
+    KulaPacket[1] = (uint64_t)Clip;
+    KulaPacket[2] = (uint64_t)X;
+    KulaPacket[3] = (uint64_t)Y;
+    KulaPacket[4] = (uint64_t)Width;
+    KulaPacket[5] = (uint64_t)Height;
+
+    while(!KulaPacket[0]){
+        LouCALL(LOUDRSDUPDATECLIPSUBSTATE, (uint64_t)&KulaPacket[0], 0);
+    }
+}

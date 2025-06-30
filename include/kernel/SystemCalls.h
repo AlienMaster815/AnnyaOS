@@ -154,6 +154,24 @@ void LouCALL(
 #define LOUAGLFN                                106
 #define LOUCLOSEFILE                            107
 #define LOUALPCSETINFORMATION                   108
+#define LOUGETSYSTEMSTATE                       109
+#define LOUDRSDUPDATECLIPSUBSTATE               110
 //Kernel SystemCalls
+
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef struct _MOUSE_STATE{
+    int64_t     MouseX;
+    int64_t     MouseY;
+    bool        RightClick;
+    bool        LeftClick;
+    int64_t     Wheel;
+    bool        WHeelButton;
+}MOUSE_STATE, * PMOUSE_STATE;
+
+typedef struct _SYSTEM_STATE_STACK{
+    MOUSE_STATE     MouseState;
+}SYSTEM_STATE_STACK, * PSYSTEM_STATE_STACK;
 
 #endif

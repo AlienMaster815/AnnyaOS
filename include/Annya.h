@@ -48,9 +48,10 @@ typedef void* PTHREAD;
 
 
 
-typedef void*    HWND;
-typedef void*    HMENU;
-typedef uint16_t MSG;
+typedef void*       HWND;
+typedef void*       HMENU;
+typedef uint16_t    MSG;
+typedef void*       LOUDISPMSG;
 
 typedef void* HANDLE;
 typedef void* HMODULE;
@@ -156,18 +157,18 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
 }WIN_API_PROCESS_INFORMATION, * PWIN_API_PROCESS_INFORMATION;
 
 
-
 #ifndef _USER_32_
 
 //Copy Changes of the following to the Annya.h system from Awm.h
 
 
+__declspec(dllexport)
+void AwmUpdateState(PSYSTEM_STATE_STACK State);
 
 //__declspec(dllimport)
 //uint64_t AnnyaRegisterCallbackProcedure(
 //    void* CallbackHandler
 //);
-
 
 __declspec(dllimport)
 HWND 
@@ -205,6 +206,17 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 
 #ifndef _LOUDLL_
+
+
+__declspec(dllexport)
+void LouUpdateClipSubState(
+    void* Clip,
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+);
+
+__declspec(dllimport)
+void LouGetSystemUpdate(PSYSTEM_STATE_STACK StateStack);
 
 __declspec(dllimport)
 void 

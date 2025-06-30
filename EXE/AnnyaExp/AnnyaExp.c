@@ -3,6 +3,8 @@
 
 #include "AnnyaExp.h"
 
+static SYSTEM_STATE_STACK StateStack = {0};
+
 int WndProc(void* hwnd, uint32_t uMsg, void* WParam, void* LParam);
 
 int WinMain(
@@ -15,9 +17,10 @@ int WinMain(
 
     LouExitDosMode();
     InitializeAwmUserSubsystem();
+    LouGetSystemUpdate(&StateStack);
 
     while(1){
-
+        AwmUpdateState(&StateStack);
     }
     return (int)-1;
 

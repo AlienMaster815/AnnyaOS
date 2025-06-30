@@ -9,3 +9,4 @@ EXPORTS
     malloc
     free
     InitializeAwmUserSubsystem
+    AwmUpdateState
