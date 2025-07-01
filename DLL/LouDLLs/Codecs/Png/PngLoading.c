@@ -59,7 +59,7 @@ static void CreateHeaderHandle(
 ){
     LouSwapEndianess(&Header->Length, &HandleObject->Length, sizeof(uint32_t)); 
     LouMemCpy(&HandleObject->Type, &Header->Type, 4);
-    LouPrint("Header Chunk Length:%d Bytes\n", HandleObject->Length);
+    //LouPrint("Header Chunk Length:%d Bytes\n", HandleObject->Length);
 }
 
 static void* CreateGenericDataHandle(
@@ -181,7 +181,7 @@ HANDLE AnnyaOpenPngA(
     LouMemCpy(TmpChunkData.Type, &ChunkData->Type, sizeof(uint32_t)); 
     size_t PngHeaderCount = 1;
     while(strncmp(TmpChunkData.Type, PNG_IMAGE_TRAILER_HEADER_TYPE,  sizeof(uint32_t)) != 0x00){
-        LouPrint("Header:%s\n", TmpChunkData.Type);
+        //LouPrint("Header:%s\n", TmpChunkData.Type);
         if(strncmp(TmpChunkData.Type, PNG_IMAGE_DATA_HEADER_TYPE, 4) == 0){
             IDATUnpacker.StreamSize += TmpChunkData.Length;
             PngHeaderCount++;
@@ -208,7 +208,7 @@ HANDLE AnnyaOpenPngA(
     LouMemCpy(TmpChunkData.Type, &ChunkData->Type, sizeof(uint32_t)); 
 
     for(size_t i = 0; i < PngHeaderCount; i++){
-        LouPrint("Interpreting %s Png Header\n", TmpChunkData.Type);
+        //LouPrint("Interpreting %s Png Header\n", TmpChunkData.Type);
         if(strncmp(TmpChunkData.Type, PNG_IMAGE_HEADER_TYPE, 4) == 0){
             InterperateImageHeaderData(&PngHeaderHandles[i], (PPNG_IMAGE_CHUNK)ChunkData);
         }else if(strncmp(TmpChunkData.Type, PNG_IMAGE_DATA_HEADER_TYPE, 4) == 0){
@@ -236,5 +236,8 @@ HANDLE AnnyaOpenPngA(
     LouMemCpy(ReturnHandle->PngName, FileName, strlen(FileName));
     ReturnHandle->HeaderCount = PngHeaderCount; 
     ReturnHandle->HeaderData = (void*)PngHeaderHandles;
-    return (HANDLE)ReturnHandle;
+    PPNG_IMAGE_CHUNK ImageHeader = (PPNG_IMAGE_CHUNK)PngHeaderHandles[0].Data;
+    ReturnHandle->Width = ImageHeader->Width;
+    ReturnHandle->Height = ImageHeader->Height;
+    return (HANDLE)AnnyaCodecsCreateHandle(IMAGE_HANDLE, PNG, ReturnHandle);
 }

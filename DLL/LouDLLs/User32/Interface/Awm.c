@@ -47,6 +47,12 @@ static int64_t DesktopCurrentWidth = 0;
 static int64_t DesktopCurrentHeight = 0;
 static PAWM_CLIP_TREE ClipTrees;
 static PDRSD_CLIP* TaskBars = 0;
+static HANDLE GenericButtonPng = 0x00;
+static PDRSD_CLIP* GenericButtonClips = 0;
+static PAWM_CLIP_TREE GenericButtonTree = 0;
+static HANDLE (*AnnyaOpenBmpA)(string);
+static HANDLE BackgroundImage = 0x00;
+static HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
 
 //192 dark greay
 //198 ligt grey
@@ -135,9 +141,12 @@ static void InitializeDependencies(){
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");
+    AnnyaOpenBmpA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenBmpA");
+    AnnyaPaintClipWithBmp = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaPaintClipWithBmp");
 
     MousePng = AnnyaOpenPngA("C:/ANNYA/MOUSE.PNG");
-
+    GenericButtonPng = AnnyaOpenPngA("C:/ANNYA/BUTTON.PNG");
+    BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
     LouPrint("InitializeDependencies() STATUS_SUCCESS\n");
 
 }
@@ -149,14 +158,17 @@ AWM_STATUS InitializeAwmUserSubsystem(){
     InitializeDependencies();
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);
-
+    size_t BgImageScalingY = 0;
+    size_t BgImageScalingX = 0;
     LouPrint("Plane Count:%d\n", PlaneTracker.PlaneCount);
-
     PlaneBackgrounds = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    GenericButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     TaskBars = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     ClipTrees = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
     PAWM_CLIP_TREE TaskBarTree = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
+    PAWM_CLIP_TREE GenericButtonTree = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
+    LouPrint("Allocation Finished\n");
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
         if(PlaneTracker.PlaneInformation[i].Width > DesktopCurrentWidth){
@@ -165,6 +177,7 @@ AWM_STATUS InitializeAwmUserSubsystem(){
         if(PlaneTracker.PlaneInformation[i].Height > DesktopCurrentHeight){
             DesktopCurrentHeight = PlaneTracker.PlaneInformation[i].Height; 
         }
+        LouPrint("Desktop Geometry Calculation:%d Of :%d\n", i + 1, PlaneTracker.PlaneCount);
         PlaneBackgrounds[i] = (PDRSD_CLIP)LouDrsdCreateClip(
             (void*)PlaneTracker.PlaneInformation[i].Plane,
             0, 0, 
@@ -175,18 +188,38 @@ AWM_STATUS InitializeAwmUserSubsystem(){
         TaskBars[i] = LouDrsdCreateClip(
             (void*)PlaneTracker.PlaneInformation[i].Plane,
             0,
-            PlaneTracker.PlaneInformation[i].Height - 30,
+            PlaneTracker.PlaneInformation[i].Height - 35,
             PlaneTracker.PlaneInformation[i].Width, 
-            30,
+            35,
             192, 192, 192, 255
+        );
+        AwmGetImageScaleingCentered(
+            ((PCODECS_TYPE_QUERY)BackgroundImage)->HandleInformation.ImageHandleData.Width, 
+            ((PCODECS_TYPE_QUERY)BackgroundImage)->HandleInformation.ImageHandleData.Height, 
+            PlaneTracker.PlaneInformation[i].Width, 
+            PlaneTracker.PlaneInformation[i].Height,
+            &BgImageScalingX, &BgImageScalingY
+        );
+        AnnyaPaintClipWithBmp(
+            BackgroundImage, PlaneBackgrounds[i], 
+            AwmGetImageCenteredX(((PCODECS_TYPE_QUERY)BackgroundImage)->HandleInformation.ImageHandleData.Width, PlaneTracker.PlaneInformation[i].Width, BgImageScalingX),
+            AwmGetImageCenteredY(((PCODECS_TYPE_QUERY)BackgroundImage)->HandleInformation.ImageHandleData.Height, PlaneTracker.PlaneInformation[i].Height, BgImageScalingY),
+            BgImageScalingX, BgImageScalingY
         );
         LouUpdateClipState((void*)PlaneBackgrounds[i]);
         LouUpdateClipState((void*)TaskBars[i]);
+        GenericButtonClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, GenericButtonPng);
+        GenericButtonClips[i]->X = 1;
+        GenericButtonClips[i]->Y = PlaneTracker.PlaneInformation[i].Height - 33;
+        LouUpdateClipState((void*)GenericButtonClips[i]);
+
         MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
         LouUpdateShadowClipState((void*)MouseClips[i]);
         TaskBarTree[i].Clip = TaskBars[i];
+        GenericButtonTree[i].Clip = GenericButtonClips[i];
         ClipTrees[i].Clip = PlaneBackgrounds[i];
         ClipTrees[i].SubPlane.NextHeader = (PListHeader)&TaskBarTree[i];
+        TaskBarTree[i].SubPlane.NextHeader = (PListHeader)&GenericButtonTree[i]; 
         LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);        
     }
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");

@@ -415,6 +415,11 @@ typedef struct _DRSD_PLANE{
     size_t                          RedShift;
     size_t                          BlueShift;
     size_t                          GreenShift;
+    bool                            IsDirty;
+    size_t                          DirtyX;
+    size_t                          DirtyY;
+    size_t                          DirtyWidth;
+    size_t                          DirtyHeight;
 }DRSD_PLANE, * PDRSD_PLANE;
 
 typedef enum{

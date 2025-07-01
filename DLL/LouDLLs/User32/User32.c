@@ -1,5 +1,5 @@
 #include "User32.h"
-#include "Awm.h"
+#include "Interface/Awm.h"
 
 
 USER32_API

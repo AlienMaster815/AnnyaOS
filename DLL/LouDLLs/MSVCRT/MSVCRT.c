@@ -112,10 +112,18 @@ void memchr(){
     while(1);
 }
 
+__declspec(dllimport)
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
+);
+
 MSVCRT_API 
-void memcpy(){
-    LouPrint("memcpy()\n");
-    while(1);
+size_t memcpy(void* To, void* From, size_t Size){
+    LouMemCpy(To, From, Size);
+    return  Size;
 }
 
 MSVCRT_API 

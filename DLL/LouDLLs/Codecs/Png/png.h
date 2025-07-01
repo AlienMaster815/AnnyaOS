@@ -223,6 +223,8 @@ typedef struct _PNG_HANDLE{
     string PngName;
     size_t HeaderCount;
     void*  HeaderData;
+    size_t Width;
+    size_t Height;
 }PNG_HANDLE, * PPNG_HANDLE;
 
 

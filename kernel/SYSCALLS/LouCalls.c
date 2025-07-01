@@ -87,9 +87,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOULOADBITMAP:{
-            string File = (string)*(uint64_t*)Data;
-            PBITMAP_HANDLE BitHandle = LouKeOpenBitmapImage(File);
-            *(uint64_t*)Data = (uint64_t)BitHandle;
+
             return;
         }
         case LOUGLOBALMALLOC:{

@@ -5,6 +5,51 @@ static DRSD_CLIP_CHAIN MasterClipChain = {0};
 static mutex_t ClipLock = {0};
 static size_t PlaneCount = 0;
 
+static void CalculateNextUpdate(PDRSD_CLIP Clip, size_t X, size_t Y, size_t Width, size_t Height){
+    PDRSD_PLANE Plane = Clip->Owner;
+    size_t Right = X + Width;
+    size_t Bottom = Y + Height;
+    if(!Plane->IsDirty){
+        Plane->DirtyX = X;
+        Plane->DirtyY = Y;
+        Plane->DirtyWidth = Width;
+        Plane->DirtyHeight = Height;
+        Plane->IsDirty = true;
+    }else{
+        size_t DirtyRight = Plane->DirtyX + Plane->DirtyWidth;
+        size_t DirtyBottom = Plane->DirtyY + Plane->DirtyHeight;
+        if(X < Plane->DirtyX){
+            Plane->DirtyX = X;
+        }
+        if(Y < Plane->DirtyY){
+            Plane->DirtyY = Y;
+        }
+        if(Right > DirtyRight){
+            DirtyRight = Right;
+        }
+        if(Bottom > DirtyBottom){
+            DirtyBottom = Bottom;
+        }
+        Plane->DirtyWidth = DirtyRight - Plane->DirtyX;
+        Plane->DirtyHeight = DirtyBottom - Plane->DirtyY;
+    }
+}
+
+
+static void DrsdFbDoUpdate(
+    PDRSD_PLANE Plane
+){
+    uint32_t* Fb1 = (uint32_t*)Plane->FrameBuffer->FramebufferBase;
+    uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
+    size_t FbWidth = Plane->FrameBuffer->Width; 
+    size_t X = Plane->DirtyX, Y = Plane->DirtyY, Width = Plane->DirtyWidth, Height = Plane->DirtyHeight;
+    for(size_t y = 0 ; y < Height; y++){
+        for(size_t x = 0 ; x < Width; x++){
+            Fb1[(x + X) + ((y + Y) * FbWidth)] = Fb2[(x + X) + ((y + Y) * FbWidth)];
+        }
+    }
+}
+
 static void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STATE State, PDRSD_CRTC Crtc){
     //DRSD_MODE_TYPE_PREFERED
     PDRSD_DISPLAY_MODE DisplayMode = (PDRSD_DISPLAY_MODE)Connector->ProbedModes.NextHeader;
@@ -126,6 +171,7 @@ PDRSD_CLIP LouKeDrsdCreateClip(
     if(!PlaneChain->Clips){
         PlaneChain->Clips = LouKeMallocType(DRSD_CLIP, USER_GENERIC_MEMORY);
         ClipQueue = PlaneChain->Clips;
+        ClipQueue->Peers.NextHeader = 0x00;
     }else {
         ClipQueue = PlaneChain->Clips;
         while(ClipQueue->Peers.NextHeader){
@@ -133,7 +179,10 @@ PDRSD_CLIP LouKeDrsdCreateClip(
         }
         ClipQueue->Peers.NextHeader = (PListHeader)LouKeMallocType(DRSD_CLIP, USER_GENERIC_MEMORY);
         ClipQueue = (PDRSD_CLIP)ClipQueue->Peers.NextHeader;
+        ClipQueue->Peers.NextHeader = 0x00;
     }
+
+
     //add next queue member
     //fill the new clip information out
 
@@ -172,6 +221,9 @@ LOUDDK_API_ENTRY void LouKeDestroyClip(PDRSD_CLIP Clip){
     while(TmpClip){
         if(TmpClip == Clip){
             TrailTmpClip->Peers.NextHeader = Clip->Peers.NextHeader;
+            if(PlaneChain->Clips == Clip){
+                PlaneChain->Clips = 0x00;
+            }
             MutexUnlock(&ClipLock);
             LouKeFree(Clip->WindowBuffer);
             LouKeFree(Clip);
@@ -217,17 +269,12 @@ LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
             Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
         }
     }
+    CalculateNextUpdate(Clip, X, Y, ClampedWidth, ClampedHeight);
 }
 
 LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain){
-    void* Fb1;
-    void* Fb2;
-    size_t Size;
-    if(Chain->PlaneReady == true){
-        Fb1 = (void*)Chain->Owner->FrameBuffer->FramebufferBase;
-        Fb2 = (void*)Chain->Owner->FrameBuffer->SecondaryFrameBufferBase;
-        Size = Chain->Owner->FrameBuffer->FramebufferSize;
-        memcpy(Fb1, Fb2, Size);
+    if((Chain->PlaneReady == true) && (Chain->Owner->IsDirty)){
+        DrsdFbDoUpdate(Chain->Owner);
         if(Chain->PrimaryAtomicUpdate){
             Chain->PrimaryAtomicUpdate(Chain->Owner, Chain->Owner->PlaneState);
         }
@@ -429,6 +476,7 @@ void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t X, size_t Y, size_t Width, 
                 Cb[(SourceX + Tx) + ((SourceY + Ty) * CbWidth)];
         }
     }
+    CalculateNextUpdate(Clip, SourceX, SourceY, DrawWidth, DrawHeight);
 }
 
 
@@ -459,6 +507,7 @@ void LouKeUpdateShadowClipState(PDRSD_CLIP Clip) {
             }
         }
     }
+    CalculateNextUpdate(Clip, X, Y, ClampedWidth, ClampedHeight);
 }
 
 LOUDDK_API_ENTRY
@@ -497,4 +546,5 @@ void LouKeUpdateShadowClipSubState(
             }
         }
     }
+    CalculateNextUpdate(Clip, DrawX, DrawY, DrawWidth, DrawHeight);
 }

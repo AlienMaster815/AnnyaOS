@@ -11,7 +11,8 @@ AnnyaCreateClipFromPng(
     void*   Plane,
     HANDLE  Handle
 ){
-    PPNG_HANDLE PngHandle = (PPNG_HANDLE)Handle;
+    PCODECS_TYPE_QUERY Type = (PCODECS_TYPE_QUERY)Handle;
+    PPNG_HANDLE PngHandle = (PPNG_HANDLE)Type->HandleInformation.ImageHandleData.PrivateDataHandle;
     PPNG_CHUNK_HEADER_HANDLE Headers = PngHandle->HeaderData; 
     PPNG_CHUNK_HEADER HeaderRaw = (PPNG_CHUNK_HEADER)Headers[0].Data;
     PPNG_CHUNK_HEADER_HANDLE UnpackedDataHandle = (PPNG_CHUNK_HEADER_HANDLE)&Headers[PngHandle->HeaderCount - 1];

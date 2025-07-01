@@ -29,6 +29,8 @@
         <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Init-->
         <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
         <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
+        <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
+        <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/DRIVERS/DRIVERS.CFG</FILETOCPY64>        <!--Annya OS Driver Manifest Registry-->
         <FILETOCPY64>cp Config/System_Config/BootManifest.cfg ISO/ANNYA/SYSTEM64/BOOT.CFG</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
     </64Targets>

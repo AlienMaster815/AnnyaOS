@@ -3,13 +3,13 @@
 #define LOUDLL_API __declspec(dllexport)
 
 LOUDLL_API
-PDRSD_CLIP LouDrsdCreateClip(
+PDRSD_CLIP 
+LouDrsdCreateClip(
     void* Plane, 
     size_t X, size_t Y, 
     size_t Width, size_t Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 ){
-
     uint64_t KulaPacket[11] = {0};
     KulaPacket[2] = (uint64_t)Plane;
     KulaPacket[3] = (uint64_t)X;

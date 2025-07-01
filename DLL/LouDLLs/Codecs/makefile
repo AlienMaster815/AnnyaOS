@@ -10,7 +10,9 @@ LIBS = -lLouDll -lntdll -luser32 -lmsvcrt -lKERNEL32
 # Source and Target
 SRC = Codecs.c \
 		Png/PngLoading.c \
-		Png/PngClips.c 
+		Png/PngClips.c  \
+		Bmp/BmpLoading.c  \
+		Bmp/BmpClips.c  
 
 TARGET = codecs.dll
 

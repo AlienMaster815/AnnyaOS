@@ -1,6 +1,6 @@
 #ifndef _ANNYAS_WINDOW_MANAGEMENT_H
 #define _ANNYAS_WINDOW_MANAGEMENT_H
-#include "User32.h"
+#include "../User32.h"
 #include <USRSPC/DRSD.h>
 
 //Copy Changes of the following to the AnnyaExp.h system from Awm.h
@@ -74,6 +74,14 @@ CreateWindowA(
     HMENU       Menu,
     HINSTANCE   Instance,
     LPVOID      Parameter
+);
+
+size_t AwmGetImageCenteredX(size_t ImageWidth, size_t ScreenHeight, size_t Scale);
+size_t AwmGetImageCenteredY(size_t ImageHeight, size_t ScreenHeight, size_t Scale);
+void AwmGetImageScaleingCentered(
+    size_t ImageWidth, size_t ImageHeight, 
+    size_t ScreenHeight, size_t ScreenWidth,
+    size_t* XScaling, size_t* YScaling
 );
 
 #define CreateWindow(Class, WindowName, Style, X, Y, Width, Height, Parrent, Menu, Instance, Param) CreateWindowA(Class, WindowName, Style, X, Y, Width, Height, Parrent, Menu, Instance, Param)
