@@ -15,6 +15,13 @@ typedef struct _DRSD_PLANE_QUERY_INFORMATION{
 }DRSD_PLANE_QUERY_INFORMATION, * PDRSD_PLANE_QUERY_INFORMATION;
 
 
+typedef struct _AWM_CLIP_TREE{
+    ListHeader  CurrentPlane;
+    ListHeader  SubPlane;
+    PDRSD_CLIP  Clip;
+}AWM_CLIP_TREE, * PAWM_CLIP_TREE;
+
+
 typedef struct _AWM_PLANE_TRACKER{
     PDRSD_PLANE_QUERY_INFORMATION   PlaneInformation;
     size_t                          PlaneCount;
@@ -32,12 +39,57 @@ static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
 static HANDLE (*AnnyaCreateClipFromPng)(void*,HANDLE);
 static PDRSD_CLIP* MouseClips = 0x00;
-static int64_t MouseX;
-static int64_t MouseY;
+static int64_t MouseX = 0;
+static int64_t MouseY = 0;
 static int64_t DesktopCurrentX = 0;
 static int64_t DesktopCurrentY = 0;
 static int64_t DesktopCurrentWidth = 0;
 static int64_t DesktopCurrentHeight = 0;
+static PAWM_CLIP_TREE ClipTrees;
+static PDRSD_CLIP* TaskBars = 0;
+
+//192 dark greay
+//198 ligt grey
+
+void RedrawClipTree(PAWM_CLIP_TREE Tree, int64_t X, int64_t Y, int64_t Width, int64_t Height) {
+    while (Tree) {
+        if (
+            (Tree->Clip->X < (X + Width)) &&
+            ((Tree->Clip->X + Tree->Clip->Width) > X) &&
+            (Tree->Clip->Y < (Y + Height)) &&
+            ((Tree->Clip->Y + Tree->Clip->Height) > Y)
+        ) {
+            LouUpdateClipSubState((void*)Tree->Clip, X, Y, Width, Height);
+        }
+        if (Tree->SubPlane.NextHeader) {
+            RedrawClipTree((PAWM_CLIP_TREE)Tree->SubPlane.NextHeader, X, Y, Width, Height);
+        }
+        Tree = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
+    }
+}
+
+void CalculateRedraws(int64_t X, int64_t Y, int64_t Width, int64_t Height){
+    /*
+    // Clip Tree Example
+    // DESKTOP ; CurrentPlane Object
+    // | 
+    // V
+    // Window1 -> Window Ornament ; SubPlane Object
+    // |                |  
+    // |                V  
+    // |           ChildOranment ; Current Plane Object 
+    // V
+    // Window2 -> Window Ornament ; Sub Plane Object
+    // CurrentPlane Object
+    */
+    
+    for (size_t i = 0; i < PlaneTracker.PlaneCount; i++) {
+        PAWM_CLIP_TREE RootTree = &ClipTrees[i];
+        if (RootTree) {
+            RedrawClipTree(RootTree, X, Y, Width, Height);
+        }
+    }
+}
 
 USER32_API
 HWND 
@@ -102,6 +154,9 @@ AWM_STATUS InitializeAwmUserSubsystem(){
 
     PlaneBackgrounds = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    TaskBars = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    ClipTrees = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
+    PAWM_CLIP_TREE TaskBarTree = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
         if(PlaneTracker.PlaneInformation[i].Width > DesktopCurrentWidth){
@@ -117,13 +172,26 @@ AWM_STATUS InitializeAwmUserSubsystem(){
             PlaneTracker.PlaneInformation[i].Height,
             0, 128,128, 255
         );
+        TaskBars[i] = LouDrsdCreateClip(
+            (void*)PlaneTracker.PlaneInformation[i].Plane,
+            0,
+            PlaneTracker.PlaneInformation[i].Height - 30,
+            PlaneTracker.PlaneInformation[i].Width, 
+            30,
+            192, 192, 192, 255
+        );
         LouUpdateClipState((void*)PlaneBackgrounds[i]);
+        LouUpdateClipState((void*)TaskBars[i]);
         MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
-        LouUpdateShadoClipState((void*)MouseClips[i], (void*)PlaneBackgrounds[i]);
+        LouUpdateShadowClipState((void*)MouseClips[i]);
+        TaskBarTree[i].Clip = TaskBars[i];
+        ClipTrees[i].Clip = PlaneBackgrounds[i];
+        ClipTrees[i].SubPlane.NextHeader = (PListHeader)&TaskBarTree[i];
         LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);        
     }
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
 }
+
 
 static void UpdateMouseClip(int64_t X, int64_t Y){
     if((MouseX != X) || (MouseY != Y)){
@@ -131,8 +199,8 @@ static void UpdateMouseClip(int64_t X, int64_t Y){
         for(size_t i = 0 ; i < PlaneTracker.PlaneCount; i++){
             MouseClips[i]->X = X;
             MouseClips[i]->Y = Y;
-            LouUpdateClipSubState((void*)PlaneBackgrounds[i], MouseX, MouseY, MouseClips[i]->Width, MouseClips[i]->Height);
-            LouUpdateShadoClipState((void*)MouseClips[i], (void*)PlaneBackgrounds[i]);
+            CalculateRedraws(MouseX, MouseY, MouseClips[i]->Width, MouseClips[i]->Height);
+            LouUpdateShadowClipState((void*)MouseClips[i]);
             LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);
         }
         MouseX = X;

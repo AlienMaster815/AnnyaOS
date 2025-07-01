@@ -2,7 +2,7 @@
 
 void LouKeLoadFileCall(uint64_t* Data);
 void LouKeCloseFileCall(uint64_t* Data);
-void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow);
+void LouKeUpdateShadowClipState(PDRSD_CLIP Clip);
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack);
 uintptr_t LouKeCreateUserStackThread(
     void (*Function)(), 
@@ -15,7 +15,7 @@ void LouKeUpdateClipSubState(
     size_t Width, size_t Height
 );
 uint8_t LouKeGetCurrentTimeMinute();
-
+void LouKeUpdateShadowClipSubState(PDRSD_CLIP Clip, size_t X, size_t Y, size_t Width, size_t Height);
 int LouPrint_s(char* format, va_list args);
 
 
@@ -144,7 +144,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUDPDATESHADOWCLIP:{
             uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateShadowClipState((PDRSD_CLIP)Tmp[0], (PDRSD_CLIP)Tmp[1]);
+            LouKeUpdateShadowClipState((PDRSD_CLIP)Tmp[0]);
             return;
         }
         case LOUREGISTERCALLBACK:{
@@ -215,6 +215,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }case LOUDRSDUPDATECLIPSUBSTATE:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (size_t)Tmp[1], (size_t)Tmp[2], (size_t)Tmp[3], (size_t)Tmp[4]);
+            return;
+        }
+        case LOUDRSDUPDATESHADOWCLIPSUBSTATE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeUpdateShadowClipSubState((PDRSD_CLIP)Tmp[0],(size_t)Tmp[1], (size_t)Tmp[2], (size_t)Tmp[3], (size_t)Tmp[4]);
             return;
         }
         default:

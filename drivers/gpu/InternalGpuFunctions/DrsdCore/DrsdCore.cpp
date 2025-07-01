@@ -212,7 +212,6 @@ LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
     if ((Y + Height) > FbHeight) {
         ClampedHeight = FbHeight > Y ? FbHeight - Y : 0;
     }
-
     for (size_t Ty = 0; Ty < ClampedHeight; Ty++) {
         for (size_t Tx = 0; Tx < ClampedWidth; Tx++) {
             Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
@@ -389,66 +388,113 @@ void* LouDrsdGetPlaneInformation(size_t* CountHandle){
     MutexUnlock(&ClipLock);
     return (void*)Query;
 }
-
 LOUDDK_API_ENTRY
-void LouKeUpdateClipSubState(
-    PDRSD_CLIP Clip, 
-    size_t X, size_t Y, 
-    size_t Width, size_t Height
-) {
+void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t X, size_t Y, size_t Width, size_t Height) {
+    if (!Clip || !Clip->Owner || !Clip->Owner->FrameBuffer) return;
+
     size_t FbWidth = Clip->Owner->FrameBuffer->Width;
     size_t FbHeight = Clip->Owner->FrameBuffer->Height;
     uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
     uint32_t* Cb = Clip->WindowBuffer;
+    size_t CbWidth = Clip->Width;
+    size_t CbHeight = Clip->Height;
 
-    for(size_t Ty = 0; Ty < Height; Ty++){
-        if((Ty + Y) >= FbHeight) break;
-        for(size_t Tx = 0; Tx < Width; Tx++){
-            if((Tx + X) >= FbWidth) break;
-            Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
+    if (!Fb2 || !Cb) return;
+
+    // Compute visible intersection of requested area and the clip
+    size_t StartX = (X > Clip->X) ? X : Clip->X;
+    size_t StartY = (Y > Clip->Y) ? Y : Clip->Y;
+    size_t EndX = ((X + Width) < (Clip->X + CbWidth)) ? (X + Width) : (Clip->X + CbWidth);
+    size_t EndY = ((Y + Height) < (Clip->Y + CbHeight)) ? (Y + Height) : (Clip->Y + CbHeight);
+
+    // If no overlap, nothing to draw
+    if (EndX <= StartX || EndY <= StartY) return;
+
+    // Clamp to framebuffer bounds
+    if (StartX >= FbWidth || StartY >= FbHeight) return;
+    if (EndX > FbWidth) EndX = FbWidth;
+    if (EndY > FbHeight) EndY = FbHeight;
+
+    size_t DrawWidth = EndX - StartX;
+    size_t DrawHeight = EndY - StartY;
+
+    // Calculate source offsets inside the clip
+    size_t SourceX = StartX - Clip->X;
+    size_t SourceY = StartY - Clip->Y;
+
+    // Draw loop
+    for (size_t Ty = 0; Ty < DrawHeight; Ty++) {
+        for (size_t Tx = 0; Tx < DrawWidth; Tx++) {
+            Fb2[(StartX + Tx) + ((StartY + Ty) * FbWidth)] =
+                Cb[(SourceX + Tx) + ((SourceY + Ty) * CbWidth)];
         }
     }
 }
 
 
 LOUDDK_API_ENTRY
-void LouKeUpdateShadowClipState(PDRSD_CLIP Clip, PDRSD_CLIP Shadow) {
+void LouKeUpdateShadowClipState(PDRSD_CLIP Clip) {
     size_t X = Clip->X;
     size_t Y = Clip->Y;
     size_t Width = Clip->Width;
     size_t Height = Clip->Height;
-    
-    size_t ShadowX = Shadow->X;
-    size_t ShadowY = Shadow->Y;
-    size_t ShadowWidth = Shadow->Width;
-    size_t ShadowHeight = Shadow->Height;
-    
     size_t FbWidth = Clip->Owner->FrameBuffer->Width;
-    size_t FbHeight = Clip->Owner->FrameBuffer->Width;
+    size_t FbHeight = Clip->Owner->FrameBuffer->Height;
     uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
     uint32_t* Cb = Clip->WindowBuffer;
 
-    // Calculate relative offsets
-    size_t RelX = (X > ShadowX) ? (X - ShadowX) : 0;
-    size_t RelY = (Y > ShadowY) ? (Y - ShadowY) : 0;
+    size_t ClampedWidth = Width;
+    size_t ClampedHeight = Height;
 
-    // Clamp width and height to shadow bounds
-    size_t MaxWidth = ShadowWidth - RelX;
-    size_t MaxHeight = ShadowHeight - RelY;
-
-    if (Width > MaxWidth) Width = MaxWidth;
-    if (Height > MaxHeight) Height = MaxHeight;
-
-    LouKeUpdateClipSubState(Shadow, RelX, RelY, Width, Height);
-    
-    for(size_t Ty = 0; Ty < Height; Ty++){
-        if((Ty + Y) >= FbHeight) break;
-        for(size_t Tx = 0; Tx < Width; Tx++){
-            if((Tx + X) >= FbWidth) break;
+    if ((X + Width) > FbWidth) {
+        ClampedWidth = FbWidth > X ? FbWidth - X : 0;
+    }
+    if ((Y + Height) > FbHeight) {
+        ClampedHeight = FbHeight > Y ? FbHeight - Y : 0;
+    }
+    for (size_t Ty = 0; Ty < ClampedHeight; Ty++) {
+        for (size_t Tx = 0; Tx < ClampedWidth; Tx++) {
             if(Cb[Tx + (Ty * Width)]){
                 Fb2[(Tx + X) + ((Ty + Y) * FbWidth)] = Cb[Tx + (Ty * Width)];
             }
         }
     }
+}
 
+LOUDDK_API_ENTRY
+void LouKeUpdateShadowClipSubState(
+    PDRSD_CLIP Clip, 
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+){
+    if (!Clip) return;
+    if (!Clip->Owner) return;
+    if (!Clip->Owner->FrameBuffer) return;
+
+    size_t FbWidth = Clip->Owner->FrameBuffer->Width;
+    size_t FbHeight = Clip->Owner->FrameBuffer->Height;
+    uint32_t* Fb2 = (uint32_t*)Clip->Owner->FrameBuffer->SecondaryFrameBufferBase;
+    uint32_t* Cb = Clip->WindowBuffer;
+
+    if (!Fb2 || !Cb) return;
+
+    size_t DrawX = X;
+    size_t DrawY = Y;
+    size_t DrawWidth = Width;
+    size_t DrawHeight = Height;
+
+    // Clamp to framebuffer edges
+    if (DrawX >= FbWidth || DrawY >= FbHeight) return;
+    if (DrawX + DrawWidth > FbWidth) DrawWidth = FbWidth - DrawX;
+    if (DrawY + DrawHeight > FbHeight) DrawHeight = FbHeight - DrawY;
+
+    for (size_t Ty = 0; Ty < DrawHeight; Ty++) {
+        size_t FbTargetY = Ty + DrawY;
+        for (size_t Tx = 0; Tx < DrawWidth; Tx++) {
+            size_t FbTargetX = Tx + DrawX;
+            if (Cb[Tx + (Ty * Clip->Width)]) {
+                Fb2[FbTargetX + (FbTargetY * FbWidth)] = Cb[Tx + (Ty * Clip->Width)];
+            }
+        }
+    }
 }

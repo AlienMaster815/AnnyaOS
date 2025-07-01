@@ -208,7 +208,14 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 #ifndef _LOUDLL_
 
 
-__declspec(dllexport)
+__declspec(dllimport)
+void LouUpdateShadowClipSubState(
+    void* Clip, 
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+);
+
+__declspec(dllimport)
 void LouUpdateClipSubState(
     void* Clip,
     size_t X, size_t Y, 
@@ -220,9 +227,8 @@ void LouGetSystemUpdate(PSYSTEM_STATE_STACK StateStack);
 
 __declspec(dllimport)
 void 
-LouUpdateShadoClipState(
-    void* Clip, 
-    void* Shadow
+LouUpdateShadowClipState(
+    void* Clip
 );
 
 __declspec(dllimport)

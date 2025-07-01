@@ -29,6 +29,7 @@ EXPORTS
     LouUpdateClipState
     LouGlobalUserFree
     LouGenericFreeHeap
-    LouUpdateShadoClipState
+    LouUpdateShadowClipState
     LouGetSystemUpdate
     LouUpdateClipSubState
+    LouUpdateShadowClipSubState

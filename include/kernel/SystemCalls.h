@@ -156,6 +156,7 @@ void LouCALL(
 #define LOUALPCSETINFORMATION                   108
 #define LOUGETSYSTEMSTATE                       109
 #define LOUDRSDUPDATECLIPSUBSTATE               110
+#define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
 //Kernel SystemCalls
 
 #include <stdbool.h>

@@ -58,13 +58,11 @@ LouUpdateClipState(void* Clip){
 
 LOUDLL_API
 void 
-LouUpdateShadoClipState(
-    void* Clip, 
-    void* Shadow
+LouUpdateShadowClipState(
+    void* Clip
 ){
-    uint64_t KulaPacket[3] = {0};
+    uint64_t KulaPacket[2] = {0};
     KulaPacket[1] = (uint64_t)Clip;
-    KulaPacket[2] = (uint64_t)Shadow;
     while(!KulaPacket[0]){
         LouCALL(LOUDPDATESHADOWCLIP, (uint64_t)&KulaPacket[0], 0);
     }
@@ -85,5 +83,25 @@ void LouUpdateClipSubState(
 
     while(!KulaPacket[0]){
         LouCALL(LOUDRSDUPDATECLIPSUBSTATE, (uint64_t)&KulaPacket[0], 0);
+    }
+}
+
+
+LOUDLL_API
+void LouUpdateShadowClipSubState(
+    void* Clip,
+    void* Shadow,
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+){
+    uint64_t KulaPacket[6] = {0};
+    KulaPacket[1] = (uint64_t)Clip;
+    KulaPacket[2] = (uint64_t)X;
+    KulaPacket[3] = (uint64_t)Y;
+    KulaPacket[4] = (uint64_t)Width;
+    KulaPacket[5] = (uint64_t)Height;
+
+    while(!KulaPacket[0]){
+        LouCALL(LOUDRSDUPDATESHADOWCLIPSUBSTATE, (uint64_t)&KulaPacket[0], 0);
     }
 }
