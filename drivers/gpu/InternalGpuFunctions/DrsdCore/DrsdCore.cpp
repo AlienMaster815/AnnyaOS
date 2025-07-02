@@ -279,7 +279,6 @@ LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain){
             Chain->PrimaryAtomicUpdate(Chain->Owner, Chain->Owner->PlaneState);
         }
     }
-    sleep(1);
 }
 
 void LouKeCreateScrollTerminal(PDRSD_CLIP Clip);

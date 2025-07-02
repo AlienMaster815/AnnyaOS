@@ -112,16 +112,20 @@ void LouKeDrsdDrawDesktopBackground(
 );
 
 void UpdateThreadManager(uint64_t Rsp);
+void InitializeInterruptRouter();
 
 void SetupGDT();
 extern void ReloadGdt();
 extern void LoadTaskRegister();
+uint64_t GetCurrentTimeIn100ns();
 LOUSTATUS Lou_kernel_early_initialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
     HandleProccessorInitialization();
     InitializeBootGraphics();
+
+    InitializeInterruptRouter();
 
     InitializeStartupInterruptHandleing();
 
@@ -313,7 +317,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeMapPciMemory();
 
-
     LouKeInitializeLouACPISubsystem();
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
@@ -324,6 +327,8 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeDebuggerComunications();
 
+    //LouPrint("Here\n");
+    //while(1);
     //TODO: Add a parser for the manifest for 
     //loading needed modules that need to be 
     //loaded no matter what
@@ -340,9 +345,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     //CheckForSoundblaster16();
     ScanTheRestOfHarware();
-
-    EnablePs2Keyboard();
-    InitializePs2Mouse();
     
     //SMPInit();
 	
@@ -440,7 +442,8 @@ void LouKeUpdateMouseState(PSYSTEM_STATE_STACK State);
 
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
     LouKeUpdateMouseState(Stack);
-
+    EnablePs2Keyboard();
+    InitializePs2Mouse();
 }
 
 //0x220B21030

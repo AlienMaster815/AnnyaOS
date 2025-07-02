@@ -36,7 +36,7 @@ void local_apic_send_eoi();
 bool GetAPICStatus();
 
 typedef struct _INTERRUPT_ROUTER_ENTRY{
-    ListHeader List;
+    ListHeader  List;
     uint32_t    ListCount;
     bool        NeedFlotationSave;
     void        (*InterruptHandler)(uint64_t);
@@ -54,20 +54,25 @@ void InterruptWrapper(uint64_t Handler,uint8_t InterruptNumber, bool NeedFlotati
 	RegisterInterruptHandler((void(*)(uint64_t))Handler, InterruptNumber, NeedFlotationSave, OverideData);
 }
 
+static POOL InterruptRouterPool = 0x00;
+
+void InitializeInterruptRouter(){
+    InterruptRouterPool = LouKeCreateFixedPool(0xFFFF, sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), "Interrupt Router Pool", 0, KERNEL_GENERIC_MEMORY);
+}
+
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData) {
-	const uint32_t ListCount = InterruptRouterTable[InterruptNumber].ListCount;
     PINTERRUPT_ROUTER_ENTRY TmpRouter = &InterruptRouterTable[InterruptNumber]; 
 	if(NeedFlotationSave){
         InterruptRouterTable[InterruptNumber].NeedFlotationSave = true;
     }
-    for(uint32_t i = 0 ; i < ListCount; i++){
-        if(TmpRouter->List.NextHeader){
-            TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
-        }else{
-            TmpRouter->List.NextHeader = (PListHeader)LouKeMallocEx(sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), WRITEABLE_PAGE | PRESENT_PAGE);
-            TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
-        }
+    while(TmpRouter->List.NextHeader){
+        TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
     }
+    TmpRouter->List.NextHeader = LouKeMallocFromFixedPool(InterruptRouterPool);
+    if(!TmpRouter->List.NextHeader){
+        TmpRouter->List.NextHeader = (PListHeader)LouKeMallocEx(sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), WRITEABLE_PAGE | PRESENT_PAGE);
+    }
+    TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
     TmpRouter->InterruptHandler = Handler;
     TmpRouter->OverideData = OverideData;
 	InterruptRouterTable[InterruptNumber].ListCount++;
@@ -145,7 +150,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             SaveEverything(&ContextHandle);
         }
-        for(uint32_t i = 0 ; i < InterruptRouterTable[Interrupt].ListCount; i++){
+        while(TmpEntry){
             if(TmpEntry->InterruptHandler){
                 if(TmpEntry->OverideData){
                     TmpEntry->InterruptHandler(TmpEntry->OverideData);
@@ -154,10 +159,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
                     TmpEntry->InterruptHandler(Args);
                 }
             }
-            
-            if(TmpEntry->List.NextHeader){
-                TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
-            }
+            TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
         }
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             RestoreEverything(&ContextHandle);
@@ -220,3 +222,4 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 void PrintRegister(uint64_t Register){
     LouPrint("Register Is :: %h\n", Register);
 }
+

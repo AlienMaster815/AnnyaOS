@@ -20,7 +20,6 @@ int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
 #define INCREASE_Y 16+1
 #define INCREASE_X 16+1
 
-
 void print_binary64(uint64_t number);
 void print_binary32(uint32_t number);
 void print_binary16(uint16_t number);

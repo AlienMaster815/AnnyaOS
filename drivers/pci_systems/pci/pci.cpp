@@ -3,6 +3,7 @@
 
 #define NOT_A_PCI_DEVICE 0xFFFF 
 
+static POOL PciDeicePool = 0x00; 
 
 bool isUsb(uint8_t bus, uint8_t slot, uint8_t function);
 bool IsVGA(uint8_t bus, uint8_t slot, uint8_t function);
@@ -48,7 +49,10 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
             if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
                 if (PciGetDeviceID(Group, bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
-                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);
+                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+                    if(!PDev){
+                        PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);                    
+                    }
                     LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
                     PDev->bus = bus;
                     PDev->slot = device;
@@ -63,7 +67,10 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         }
     }
     else{
-        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);
+        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+        if(!PDev){
+            PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);
+        }
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
         PDev->bus = bus;
         PDev->slot = device;
@@ -83,6 +90,7 @@ uint16_t GetPciGroupCount();
 
 KERNEL_IMPORT
 PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
+
 
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 
@@ -148,8 +156,12 @@ LOUDDK_API_ENTRY void ScanForVideoHardware(){
 KERNEL_IMPORT 
 void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size) ;
 
+void InitializeBARHalLayer();
+
 LOUDDK_API_ENTRY 
 void LouKeMapPciMemory(){
+    PciDeicePool = LouKeCreateFixedPool(0xFFFF, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), "PDEV Pool", 0, KERNEL_GENERIC_MEMORY);
+    InitializeBARHalLayer();
     PCI_Scan_Bus();
 }
 

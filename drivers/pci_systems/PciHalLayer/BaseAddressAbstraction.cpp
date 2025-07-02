@@ -103,13 +103,22 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
     string DeviceManagerString
 );
 
+static POOL PciConfigPool = 0x00;
+
+void InitializeBARHalLayer(){
+    PciConfigPool = LouKeCreateFixedPool(0xFFFF, sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG), "PCIConfig Pool", 0 , KERNEL_GENERIC_MEMORY);
+}
+
 void LouKeHalRegisterPciDevice(
     P_PCI_DEVICE_OBJECT PDEV
 ){
 
     LouPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
 
-    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouKeMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouKeMallocFromFixedPool(PciConfigPool);
+    if(!Config){
+        Config = (PPCI_COMMON_CONFIG)LouKeMallocEx(sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+    } 
     UNUSED uint32_t BarSize = 0x00;
     UNUSED uint8_t Flags;
     UNUSED LouKIRQL OldIrql;
