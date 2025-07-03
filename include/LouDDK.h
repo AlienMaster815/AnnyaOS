@@ -150,6 +150,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
     KERNEL_IMPORT uint64_t read_msr(uint32_t msr_id);
 #endif
 
+#include <Helpers.h>
 #include <KernelAPI/DriverAPI.h> 
 #include <drivers/Lou_drivers/hardrive.h> 
 #include <drivers/Lou_drivers/storage_struct.h>
@@ -177,7 +178,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #include <FileHandleing/LDDDS.h>
 #include <WinTEB.h>
-
+#include <drivers/cpu/IntelFamily.h>
+#include <drivers/cpu/cpu.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

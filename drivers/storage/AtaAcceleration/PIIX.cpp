@@ -73,6 +73,7 @@ NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
 
 
     LouPrint("AddDevice() STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 

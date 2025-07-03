@@ -3,7 +3,8 @@
 
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 
-#define INTEL_QUARK_X1000   ((((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->VendorID == PCI_VENDOR_ID_INTEL) && (((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->DeviceID == 0x0939))
+#define INTEL_QUARK_X1000_USB_QUIRK   ((((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->VendorID == PCI_VENDOR_ID_INTEL) && (((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->DeviceID == 0x0939))
+
 
 void EhciInterruptHandler(uint64_t HcdHandle){
 
