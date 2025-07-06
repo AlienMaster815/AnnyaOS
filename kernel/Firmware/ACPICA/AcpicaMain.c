@@ -56,27 +56,31 @@ void* AcpiOsMapMemory(
     ACPI_PHYSICAL_ADDRESS   PhyAddress,
     ACPI_SIZE               Length
 ){
-    uint64_t PhyCheck = 0x00;
-    RequestPhysicalAddress((uint64_t)PhyAddress, &PhyCheck);
-    if(PhyCheck == (uint64_t)PhyAddress){
-        return (void*)PhyAddress;
-    }
+    EnforceSystemMemoryMap(PhyAddress, Length);
+    uintptr_t AlignedAddress = ((uintptr_t)PhyAddress & ~(KILOBYTE_PAGE - 1));
+    size_t Offset = (uintptr_t)PhyAddress - AlignedAddress;
+    size_t TotalSize = ROUND_UP64(((size_t)Offset + (size_t)Length), KILOBYTE_PAGE);
 
-    LouPrint("AcpiOsMapMemory()\n");
-    while(1);
+    //LouPrint("PhysicalAddress:%h\n", PhyAddress);
+    //LouPrint("AlignedAddress :%h\n", AlignedAddress);
+    //LouPrint("Offset         :%h\n", Offset);
+    //LouPrint("TotalSize      :%h\n", TotalSize);
+
+    return (void*)((uintptr_t)LouKeMallocPageEx(
+        KILOBYTE_PAGE, 
+        TotalSize / KILOBYTE_PAGE, 
+        KERNEL_DMA_MEMORY, 
+        AlignedAddress) + Offset
+    );
 }
 
 void AcpiOsUnmapMemory(
     void*       PhyAddress,
     ACPI_SIZE   Length
 ){
-    uint64_t PhyCheck = 0x00;
-    RequestPhysicalAddress((uint64_t)PhyAddress, &PhyCheck);
-    if(PhyCheck == (uint64_t)PhyAddress){
-        return;
-    }
-    LouPrint("AcpiOsUnmapMemory()\n");
-    while(1);
+    uintptr_t AlignedAddress = ((uintptr_t)PhyAddress & ~(KILOBYTE_PAGE - 1));
+    LouKeFreePage((void*)AlignedAddress);
+    LouFree((uint8_t*)PhyAddress);
 }
 
 ACPI_STATUS AcpiOsGetPhysicalAddress(
@@ -205,6 +209,37 @@ void AcpiOsReleaseLock(
     LouKeReleaseSpinLock((spinlock_t*)Handle, &Irql);
 }
 
+typedef struct _ACPICA_INTERRUPT_TRACKER{
+    ListHeader  Peers;
+    uint8_t     Isr;
+    bool        Used;
+}ACPICA_INTERRUPT_TRACKER, * PACPICA_INTERRUPT_TRACKER;
+
+static ACPICA_INTERRUPT_TRACKER Ait = {0};
+
+static void InitializeAcpiInterruptTracker(
+    uint8_t Isr
+){
+    PACPICA_INTERRUPT_TRACKER TmpTrk = &Ait;
+    while(TmpTrk->Peers.NextHeader){
+        TmpTrk = (PACPICA_INTERRUPT_TRACKER)TmpTrk->Peers.NextHeader;
+    }
+    TmpTrk->Isr = Isr;
+    TmpTrk->Isr = true;
+    TmpTrk->Peers.NextHeader = (PListHeader)LouKeMallocType(ACPICA_INTERRUPT_TRACKER, KERNEL_GENERIC_MEMORY);
+}
+
+UNUSED static bool CheckAcpicaForInterruptManagement(uint8_t Isr){
+    PACPICA_INTERRUPT_TRACKER TmpTrk = &Ait;
+    while(TmpTrk->Peers.NextHeader){
+        if((TmpTrk->Isr == Isr) && (TmpTrk->Used)){
+            return true;
+        }
+        TmpTrk = (PACPICA_INTERRUPT_TRACKER)TmpTrk->Peers.NextHeader;
+    }
+    return false;
+}
+
 ACPI_STATUS AcpiOsInstallInterruptHandler(
     UINT32 InterruptNumber, 
     ACPI_OSD_HANDLER Handler, 
@@ -212,10 +247,11 @@ ACPI_STATUS AcpiOsInstallInterruptHandler(
 ){
     RegisterInterruptHandler(
         (void(*)(uint64_t))Handler,
-        InterruptNumber,
+        InterruptNumber + 32,
         false,
         (uint64_t)Context
     );
+    InitializeAcpiInterruptTracker(InterruptNumber);
     return AE_OK;
 }
 
@@ -267,6 +303,11 @@ ACPI_STATUS AcpiOsReadPciConfiguration(
     uint8_t bus         = (uint8_t)PciId->Bus;
     uint8_t device      = (uint8_t)PciId->Device;
     uint8_t func        = (uint8_t)PciId->Function;
+    
+    if(Group){
+        LouPrint("Group:%h\n", Group);
+        while(1);
+    }
 
     switch(Width){
         case 8:
@@ -295,6 +336,11 @@ ACPI_STATUS AcpiOsWritePciConfiguration(
     uint8_t bus         = (uint8_t)PciId->Bus;
     uint8_t device      = (uint8_t)PciId->Device;
     uint8_t func        = (uint8_t)PciId->Function;
+
+    if(Group){
+        LouPrint("Group:%h\n", Group);
+        while(1);
+    }
 
     switch(Width){
         case 8:
@@ -398,6 +444,8 @@ ACPI_STATUS AcpiOsReadMemory (
     return AE_OK;
 }
 
+void AcpiFadtSciInterruptHandler(uint64_t Context);
+
 
 void LouKeInitializeAcpicaSubSystem(){
     ACPI_STATUS Status;
@@ -425,7 +473,7 @@ void LouKeInitializeAcpicaSubSystem(){
         return;
     }
     LouPrint("Enabling System\n");
-    Status = AcpiEnableSubsystem(ACPI_FULL_INITIALIZATION);
+    Status = AcpiEnableSubsystem(ACPI_NO_ACPI_ENABLE);
     if (ACPI_FAILURE(Status)) {
         LouPrint("AcpiEnableSubsystem failed\n");
         return;
@@ -455,5 +503,9 @@ void LouKeInitializeAcpicaSubSystem(){
             LouPrint("_PIC method executed successfully\n");
         }
     }
+
+    AcpiEnable();
+
     LouPrint("LouKeInitializeAcpicaSubSystem() STATUS_SUCCESS\n");
+
 }    

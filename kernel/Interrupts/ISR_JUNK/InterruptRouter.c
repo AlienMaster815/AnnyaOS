@@ -136,6 +136,11 @@ mutex_t* LouKeGetInterruptGlobalLock(){
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
+    if(Interrupt == 41){
+        LouPrint("YAY\n");
+        while(1);
+    }
+
     if(Interrupt < 0x20){
         LouKIRQL Irql;
         LouKeSetIrql(HIGH_LEVEL, &Irql);

@@ -642,7 +642,6 @@ ISR40:
 	iretq
 
 ISR41:
-	
 	pusha
 	push 41
 	mov [InterruptNum], ah
@@ -669,7 +668,6 @@ ISR43:
 	iretq
 
 ISR44:
-	
 	pusha	
 	push 44
 	mov [InterruptNum], ah

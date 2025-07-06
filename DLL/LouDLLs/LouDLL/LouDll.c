@@ -19,35 +19,6 @@ static inline size_t GetAlignmentBySize(size_t Size){
 }
 
 
-LOUDLL_API
-void*
-LouMemCpy(
-    void* OutStream,
-    void* InStream,
-    size_t ByteCount
-){
-    if(OutStream == InStream){
-        return 0x00;
-    }
-    volatile char* dest = (char*)OutStream;
-    volatile const char* src = (const char*)InStream;
-
-    // Handle overlapping memory regions (copy backward)
-    if (dest > src && dest < src + ByteCount) {
-        for(size_t i = ByteCount; i > 0;){
-            dest[i] = src[i];
-            i -= 1;
-        }
-    } else {
-        // Normal forward copy (non-overlapping memory)
-        for(size_t i = 0; i < ByteCount;){
-            dest[i] = src[i];
-            i += 1;
-        }
-    }
-    return OutStream;
-}
-
 LOUDLL_API 
 LOUSTATUS 
 LouSwapEndianess(

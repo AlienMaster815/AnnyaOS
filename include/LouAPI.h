@@ -103,7 +103,10 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
     uint32_t    ThreadIdentification;
 }WIN_API_PROCESS_INFORMATION, * PWIN_API_PROCESS_INFORMATION;
 
-
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
 
 #else //Kernel Module
 

@@ -175,7 +175,6 @@ bool InitializeIoApic(uint64_t IoApicNumber, uint64_t MappedArea){
         //LouPrint("Irq number:%d: uses Vector:%d\n", irq, IoApicGetVector(irq));
 
     }
-
     return true;
 }
 
@@ -236,25 +235,57 @@ uint8_t GetIoApicNumber(uint8_t PIN){
     return ioapic_count + 1;
 }
 
+LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
+    uint8_t     irq,
+    uint16_t    Flags
+){
+    uint32_t Polarity = Flags & 0x03;
+    uint32_t Trigger  = (Flags >> 2) & 0x03;
+    uint8_t IoApicNum = GetIoApicNumber(irq);
+    irq = irq - ioapics[IoApicNum].gsi_base;
+    uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + 2 * irq;
+    uint32_t high_index = index + 1;
+    uint32_t low = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
+    uint32_t high = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, high_index);
+
+    //LouPrint("Polarity:%d : Trigger:%d\n", Polarity, Trigger);
+
+    if(Polarity & 0x01){
+        low &= ~(1 << 13);
+        low |= ((Polarity >> 1) << 13);
+    }
+    if (Trigger & 0x01) {
+        low &= ~(1 << 15);
+        low |= ((Trigger >> 1) << 15);
+    }
+
+    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
+    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);
+
+}
+
 KERNEL_IMPORT uint8_t FindTrueIRQ(uint8_t IRQ){
     for(uint8_t i = 0 ; i < OverideCount; i++){
         if(ISOPointer[i]->Source == IRQ){
-            if(ISOPointer[i]->Flags & 0x03) return ISOPointer[i]->GlobalSystemInterrupt;
+            IoApicConfigureEntryFlags(ISOPointer[i]->GlobalSystemInterrupt, ISOPointer[i]->Flags); //configures it weather you like it or not as a security mesure
+            return ISOPointer[i]->GlobalSystemInterrupt;
         }
     }
     return IRQ;
 }
+
 
 KERNEL_IMPORT uint8_t GetTotalHardwareInterrupts(){
     uint8_t TotalHardwareInterrupts = ioapics[ioapic_count - 1].gsi_base + (ioapic_advanced_read(ioapics[ioapic_count - 1].ioapic_vaddress,0x01) >> 16);
     return TotalHardwareInterrupts + 1;
 }
 
-KERNEL_IMPORT void ioapic_unmask_irq(uint8_t irq) {
 
-    irq = FindTrueIRQ(irq); //finds the interrupt based on if there is a overide
+KERNEL_IMPORT void ioapic_unmask_irq(uint8_t tirq) {
+
+    uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
+
     uint8_t IoApicNum = GetIoApicNumber(irq); //gets the actual ioapic the irq belogs to based on the 
-    //gsi and the number of handles
 
     //gets the offset of the irq register in the ioapic
     irq = irq - ioapics[IoApicNum].gsi_base;
@@ -268,6 +299,9 @@ KERNEL_IMPORT void ioapic_unmask_irq(uint8_t irq) {
 
     // Clear the mask bit (16th bit) to unmask the interrupt
     low &= ~0x10000;
+    
+    LouPrint("high:%bi\n", high);
+    LouPrint("low :%bi\n", low);
 
     // Write back the updated values
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
@@ -276,9 +310,9 @@ KERNEL_IMPORT void ioapic_unmask_irq(uint8_t irq) {
 
 
 // Function to mask a given IRQ in the I/O APIC
-KERNEL_IMPORT void ioapic_mask_irq(uint8_t irq) {
+KERNEL_IMPORT void ioapic_mask_irq(uint8_t tirq) {
     
-    irq = FindTrueIRQ(irq); //finds the interrupt based on if there is a overide
+    uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
     uint8_t IoApicNum = GetIoApicNumber(irq); //gets the actual ioapic the irq belogs to based on the 
     //gsi and the number of handles
     
@@ -299,4 +333,3 @@ KERNEL_IMPORT void ioapic_mask_irq(uint8_t irq) {
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);
 }
-

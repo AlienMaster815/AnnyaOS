@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <emmintrin.h> 
+#include <immintrin.h> 
 
 static uint64_t SavedState = 0;
 
@@ -27,6 +29,29 @@ static void* (*MemcopyHandler)(void*, const void*, size_t);
 
 void simd_copy(uint64_t Destination, uint64_t Source);
 
+__attribute__((target("avx2")))
+static void* memcpy_avx2(void* destination, const void* source, size_t num) {
+    SaveEverything(&SavedState);
+    uintptr_t dest_ptr = (uintptr_t)destination;
+    uintptr_t src_ptr = (uintptr_t)source;
+
+    size_t count = num / 32;
+    for(size_t i = 0; i < count; ++i){
+        __m256i tmp = _mm256_loadu_si256((const __m256i*)(src_ptr + i * 32));
+        _mm256_storeu_si256((__m256i*)(dest_ptr + i * 32), tmp);
+    }
+
+    // Copy remaining bytes
+    size_t remaining = num % 32;
+    uint8_t* c_dest = (uint8_t*)(dest_ptr + count * 32);
+    const uint8_t* c_src = (const uint8_t*)(src_ptr + count * 32);
+    for(size_t i = 0; i < remaining; ++i){
+        c_dest[i] = c_src[i];
+    }
+    RestoreEverything(&SavedState);
+    return destination;
+}
+
 static void* memcpy_basic(void* destination, const void* source, size_t num) {
     volatile char* dest = (char*)destination;
     volatile const char* src = (const char*)source;
@@ -47,112 +72,69 @@ static void* memcpy_basic(void* destination, const void* source, size_t num) {
     return destination;
 }
  
-void* memcpy_sse(void* destination, const void* source, size_t num) {
-    // Check for overlapping regions (Backward Copy Case)
+__attribute__((target("sse2")))
+UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t num) {
     SaveEverything(&SavedState);
-    if (destination > source && destination < (void*)((uintptr_t)source + num)) {
-        uintptr_t CurrentIndex = num;
+    __m128i* dest = (__m128i*)destination;
+    const __m128i* src = (const __m128i*)source;
 
-        // SSE needs 16-byte alignment
-        while (CurrentIndex > 16) { // While we can use SSE1
-            if ((((uintptr_t)destination + CurrentIndex - 16) & 0x0F) == 0 &&
-                (((uintptr_t)source + CurrentIndex - 16) & 0x0F) == 0) {
-                // Use SIMD instructions
-                while (CurrentIndex > 16) {
-                    CurrentIndex -= 16;
-                    simd_copy((uint64_t)((uintptr_t)destination + CurrentIndex), 
-                              (uint64_t)((uintptr_t)source + CurrentIndex));
-                }
-            } else {
-                register uint64_t Ts = ((uintptr_t)(destination + CurrentIndex - 16) & 0x0F) ? 
-                                       ((uintptr_t)(destination + CurrentIndex - 16) & 0x0F) : 16;
-                CurrentIndex -= Ts;
-                memcpy_basic((void*)((uintptr_t)destination + CurrentIndex), 
-                             (void*)((uintptr_t)source + CurrentIndex), Ts);
-            }
-        }
-
-        // Copy remaining bytes
-        if (CurrentIndex > 0) {
-            memcpy_basic((void*)((uintptr_t)destination + CurrentIndex - 1), 
-                         (void*)((uintptr_t)source + CurrentIndex - 1), CurrentIndex);
-        }
-    } else {
-        // Forward Copy Case
-        uintptr_t CurrentIndex = 0;
-
-        // SSE needs 16-byte alignment
-        while ((CurrentIndex + 16) <= num) { // While we can use SSE1
-            if ((((uintptr_t)destination & 0x0F) == 0) && (((uintptr_t)source & 0x0F) == 0)) {
-                // Use SIMD instructions
-                while ((CurrentIndex + 16) <= num) {
-                    simd_copy((uint64_t)((uintptr_t)destination + CurrentIndex), 
-                              (uint64_t)((uintptr_t)source + CurrentIndex));
-                    CurrentIndex += 16;
-                }
-            } else {
-                register uint64_t Ts = ((uintptr_t)destination & 0x0F) ? 
-                                       (16 - ((uintptr_t)destination & 0x0F)) : 0;
-                memcpy_basic((void*)((uintptr_t)destination + CurrentIndex), 
-                             (void*)((uintptr_t)source + CurrentIndex), Ts);
-                CurrentIndex += Ts;
-            }
-        }
-
-        // Copy remaining bytes
-        if (CurrentIndex != num) {
-            memcpy_basic((void*)((uintptr_t)destination + CurrentIndex), 
-                         (void*)((uintptr_t)source + CurrentIndex), num - CurrentIndex);
-        }
+    size_t count = num / 16;
+    for(size_t i = 0; i < count; ++i){
+        __m128i tmp = _mm_loadu_si128(&src[i]);
+        _mm_storeu_si128(&dest[i], tmp);
+    }
+    size_t remaining = num % 16;
+    char* c_dest = (char*)dest + count * 16;
+    const char* c_src = (const char*)src + count * 16;
+    for(size_t i = 0; i < remaining; ++i){
+        c_dest[i] = c_src[i];
     }
     RestoreEverything(&SavedState);
     return destination;
 }
 
-//static void* memcpy_avx256(void* destination, const void* source, size_t num){
+__attribute__((target("avx512f")))
+UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t num) {
+    uintptr_t dest_ptr = (uintptr_t)destination;
+    uintptr_t src_ptr = (uintptr_t)source;
 
-//    while(1);
-//    return 0;
-//}
+    size_t count = num / 64;
+    for(size_t i = 0; i < count; ++i){
+        __m512i tmp = _mm512_loadu_si512((const void*)(src_ptr + i * 64));
+        _mm512_storeu_si512((void*)(dest_ptr + i * 64), tmp);
+    }
+
+    // Copy remaining bytes
+    size_t remaining = num % 64;
+    uint8_t* c_dest = (uint8_t*)(dest_ptr + count * 64);
+    const uint8_t* c_src = (const uint8_t*)(src_ptr + count * 64);
+    for(size_t i = 0; i < remaining; ++i){
+        c_dest[i] = c_src[i];
+    }
+
+    return destination;
+}
+
 
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
-    /*
+    
+    if(!SavedState){
+        SavedState = (uintptr_t)LouMallocEx(2688, 64);
+    }
+
     if(ProcessorFeatures->Avx512Supported){
-        MemcopyHandler = memcpy_sse;
-        //MemcopyHandler = memcpy_avx256;
+        //MemcopyHandler = memcpy_sse;
+        MemcopyHandler = memcpy_avx512;
         return;
     }
-    if(ProcessorFeatures->Avx2Supported){
-        MemcopyHandler = memcpy_sse;
-        //MemcopyHandler = memcpy_avx256;
-        return;
-    }
-    else if(ProcessorFeatures->Avx1Supported){
-        MemcopyHandler = memcpy_sse;
-        //MemcopyHandler = memcpy_avx256;
-        return;
-    }
-    if(ProcessorFeatures->Sse42Supported){
-        MemcopyHandler = memcpy_sse;
-        return;
-    }
-    else if(ProcessorFeatures->Sse41Supported){
-        MemcopyHandler = memcpy_sse;
-        return;
-    }
-    else if(ProcessorFeatures->Sse3Supported){
-        MemcopyHandler = memcpy_sse;
+    else if(ProcessorFeatures->Avx2Supported){
+        MemcopyHandler = memcpy_avx2;
         return;
     }
     else if(ProcessorFeatures->Sse2Supported){
-        MemcopyHandler = memcpy_sse;
+        MemcopyHandler = memcpy_sse2;
         return;
     }
-    else if(ProcessorFeatures->Sse1Supported){
-        MemcopyHandler = memcpy_sse;
-        return;
-    }
-    */
     MemcopyHandler = memcpy_basic;
 }
 

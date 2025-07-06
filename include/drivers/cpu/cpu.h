@@ -8,6 +8,8 @@ extern "C" {
 #endif
 
 #include "IntelFamily.h"
+#include "Processor.h"
+
 
 typedef struct _PROCESSOR_PPIN_INFORMATION{
     int32_t     Feature;

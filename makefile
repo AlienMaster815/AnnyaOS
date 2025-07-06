@@ -89,13 +89,13 @@ ifeq ($(TARGET_ARCH),x86_64)
 #Wextra
 CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -O2 -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
-         -fstrict-aliasing $(INCLUDE)
+         -fstrict-aliasing $(INCLUDE) 
 
 #Wextra
 CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
            -fno-use-cxa-atexit -fno-threadsafe-statics -fno-common \
            -fno-builtin -fstrict-aliasing -O2 -I include \
-		   -Wno-write-strings -Wno-multichar $(INCLUDE)
+		   -Wno-write-strings -Wno-multichar $(INCLUDE) 
 
 endif
 

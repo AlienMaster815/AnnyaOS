@@ -27,6 +27,8 @@ typedef struct _PROCESSOR_FEATURES{
 
 void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback);
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures);
+void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features);
+
 
 static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
     {
@@ -81,11 +83,10 @@ void HandleProccessorInitialization(){
     unsigned int  rax, rbx, rcx, rdx;
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
-    //if(rcx & (1 << 26)){
-    //    InitializeXSave();
-    //    LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
-    //    while(1);
-    //}
+    if(rcx & (1 << 26)){
+        InitializeXSave();
+        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
+    }
     if(rdx & (1 << 24)){
         enable_fxsave();
         LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);        
@@ -111,4 +112,8 @@ void HandleProccessorInitialization(){
     }
 
     SendProcessorFeaturesToMemCpy(&ProcessorFeatures);
+    
+    PPROCESSOR_FEATURES UserCopy = LouKeMallocType(PROCESSOR_FEATURES, USER_GENERIC_MEMORY);
+    //memcpy(UserCopy, &ProcessorFeatures, sizeof(PROCESSOR_FEATURES));
+    LouKeInitProcessorAcceleratedFeaturesList(UserCopy);
 }

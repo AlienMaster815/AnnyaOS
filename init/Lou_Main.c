@@ -211,7 +211,27 @@ uint64_t GetThreadContext(
     int Thread
 );
 
+typedef struct _PROCESSOR_FEATURES{
+    bool    Sse1Supported;
+    bool    Sse2Supported;
+    bool    Sse3Supported;
+    bool    Ssse3Supported;
+    bool    Sse41Supported;
+    bool    Sse42Supported;
+    bool    Avx1Supported;
+    bool    Avx2Supported;
+    bool    Avx512Supported;
+}PROCESSOR_FEATURES, * PPROCESSOR_FEATURES;
 
+static PPROCESSOR_FEATURES ProcAcceleratedFeatures = 0;
+
+void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
+    if(!ProcAcceleratedFeatures){
+        ProcAcceleratedFeatures = Features;
+    }else{
+        *ProcAcceleratedFeatures = *Features;
+    }
+}
 
 void read_rtc();
 void ManualContextSwitch(uint64_t Context1, uint64_t Context_2);
@@ -327,8 +347,9 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeDebuggerComunications();
 
-    //LouPrint("Here\n");
-    //while(1);
+
+    LouPrint("Here\n");
+    while(1);
     //TODO: Add a parser for the manifest for 
     //loading needed modules that need to be 
     //loaded no matter what
@@ -404,6 +425,9 @@ void InitializeUserSpace(){
     LouPrint("Initializing User Mode\n");
 
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
+    void (*SendProcessorFeaturesToLouMemCpy)(PPROCESSOR_FEATURES) = (void (*)(PPROCESSOR_FEATURES))LouKeLinkerGetAddress("LOUDLL.DLL", "SendProcessorFeaturesToLouMemCpy");
+    SendProcessorFeaturesToLouMemCpy(ProcAcceleratedFeatures);
+    
     LouPrint("LOUDLL.DLL Has Loaded\n");
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL", 0x00);
     LouPrint("NTDLL.DLL Has Loaded\n");
@@ -423,12 +447,7 @@ void InitializeUserSpace(){
     uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
-
-    //LouUpdateWindow(
-    //    GetScreenBufferWidth() / 2, () / 2,
-    //    GetScreenBufferWidth() / 2, (() / 2) - 62,
-    //    HWind
-    //);    
+   
     LouPrint("Hello World\n");
     if(!InitEntry){
         LouPrint("ERROR Could Not Jump To Usermode\n");
