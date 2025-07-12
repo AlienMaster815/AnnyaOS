@@ -4,7 +4,7 @@
 #ifndef _PCI_NET_32_H
 #define _PCI_NET_32_H
 
-typedef struct __attribute__((packed)) _PCNET2_INITIALIZATION_BLOCK{
+typedef struct PACKED _PCNET2_INITIALIZATION_BLOCK{
     uint16_t        OperationMode;
     uint8_t         Reserved1           : 4;
     uint8_t         SendBufferCount     : 4;
@@ -17,7 +17,7 @@ typedef struct __attribute__((packed)) _PCNET2_INITIALIZATION_BLOCK{
     uint32_t        SendBufferDescriptorAddress;
 }PCNET2_INITIALIZATION_BLOCK, * PPCNET2_INITIALIZATION_BLOCK;
 
-typedef struct __attribute__((packed)) _PCNET2_BUFFER_DESCRIPTOR{
+typedef struct PACKED _PCNET2_BUFFER_DESCRIPTOR{
     uint32_t        Address;
     uint32_t        FlagsLow;
     uint32_t        FlagsHigh;

@@ -282,6 +282,96 @@ size_t LouKeAcpiGetMethodParameterCount(
 NAMESPACE_HANDLE LouKeAcpiCreateBasicAmlObject(uint16_t Opcode, uint64_t Data, size_t DataSize);
 size_t LouKeAcpiGetTableCount();
 
+typedef union _ACPI_SUB_TABLE_HEADERS{ 
+    //these are Sub Headers that are 
+    //used for Power Interfaces in Advanced 
+    //Configuration Power Interface specification
+    struct{
+        uint8_t Type;
+        uint8_t Length;
+    }GenericHeader;
+    HETEROGENEOUS_MEMORY_ATTRIBUTE_HEADER   HmatHeader;
+    PLATFORM_RUNTIME_MECHANISM_HEADER       PrmtHeader;
+    CXL_EARLY_DISCOVERY_HEADER              CedtHeader;
+    CDAT_COMMON_HEADER                      CdatHeader;
+}ACPI_SUB_TABLE_HEADERS, * PACPI_SUB_TABLE_HEADERS;
+
+typedef LOUSTATUS (*ACPI_TABLE_ENTRY_HANDLER)(PACPI_SUB_TABLE_HEADERS, size_t);
+typedef LOUSTATUS (*ACPI_TABLE_ENTRY_HANDLER_ARGS)(PACPI_SUB_TABLE_HEADERS, void*, size_t);
+
+typedef struct _ACPI_SUB_TABLE_PROCESSOR{
+    int                                     Id;
+    ACPI_TABLE_ENTRY_HANDLER                Handler;
+    ACPI_TABLE_ENTRY_HANDLER_ARGS           HandlerArgs;
+    void*                                   Arguments;
+    int                                     ReferenceCount;
+}ACPI_SUB_TABLE_PROCESSOR, * PACPI_SUB_TABLE_PROCESSOR;
+
+typedef union _FIRMWARE_TABLE_HEADER{
+    TABLE_DESCRIPTION_HEADER                CommonTable;
+    ACPI_CDAT_TABLE                         CdatTable;
+}FIRMWARE_TABLE_HEADER, * PFIRMWARE_TABLE_HEADER;
+
+typedef enum{
+    ACPI_SUB_TABLE_COMMON   = 0,
+    ACPI_SUB_TABLE_HMAT     = 'HMAT',
+    ACPI_SUB_TABLE_PRMT     = 'PRMT',
+    ACPI_SUB_TABLE_CEDT     = 'CEDT',
+    ACPI_CDAT_SUB_TABLE     = 'CDAT',
+}ACPI_SUB_TABLE_TYPE;
+
+typedef struct _ACPI_SUB_TABLE_ENTRY{
+    PACPI_SUB_TABLE_HEADERS     Header;
+    ACPI_SUB_TABLE_TYPE         Type;
+}ACPI_SUB_TABLE_ENTRY, * PACPI_SUB_TABLE_ENTRY;
+
+#define PACPI_ECDT_TABLE PEMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE
+#define ACPI_ECDT_TABLE  EMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE
+
+typedef struct _ACPI_EC_TRANSACTION{
+    uint8_t*        WriteData;
+    uint8_t*        ReadData;
+    uint16_t        IrqCount;
+    uint8_t         Command;
+    uint8_t         WriteIndex;
+    uint8_t         ReadIndex;
+    uint8_t         WriteLength;
+    uint8_t         ReadLength;
+    uint8_t         Flags;
+}ACPI_EC_TRANSACTION, * PACPI_EC_TRANSACTION;
+
+typedef enum{
+    EC_EVENT_READY          = 0,
+    EC_EVENT_IN_PROGRESS    = 1,
+    EC_EVENT_COMPLETE       = 2,
+}ACPI_EC_EVENT_STATE;
+
+typedef struct _ACPI_EMBEDDED_CONTROLLER{
+    void*                       Handle;
+    int                         GPE;
+    int                         Irq;
+    uint64_t                    CommandAddress;
+    uint64_t                    DataAddress;
+    bool                        GlobalLock;
+    uint64_t                    Flags;
+    uint64_t                    ReferenceCount;
+    mutex_t                     EcMutex;
+    PLOUQ_WAIT                  WaitQueue;
+    ListHeader                  List;
+    PACPI_EC_TRANSACTION        CurrentTransaction;
+    spinlock_t                  EcLock;
+    PLOUQ_WORK                  WorkQueue;
+    uint64_t                    TimeStamp;
+    ACPI_EC_EVENT_STATE         EventState;
+    uint32_t                    EventReady;
+    uint32_t                    EventsProccessing;
+    uint32_t                    EventsInProgress;
+    bool                        PollingBusy;
+    uint32_t                    PollingGuard;
+}ACPI_EMBEDDED_CONTROLLER, * PACPI_EMBEDDED_CONTROLLER;
+
+#include "Pcc.h"
+
 #ifdef __cplusplus
 }
 #endif

@@ -20,6 +20,7 @@
 #target OS can be WINDOWS or LINUX
 
 #qemu-system-x86_64 -m 8192M -cdrom annya.iso
+#VirtualBoxVM --startvm "AnnyaOS" --dbg
 
 TARGET_ARCH = x86_64
 TARGET_OS = WINDOWS
@@ -126,8 +127,6 @@ driver_cpp_source_files += $(shell find drivers/Serial -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/storage/InternalStorageDrivers -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/USB/UsbInternals -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/virtualization -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/PowerManagement/InternalPowerManagement -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/Networking/InternalNetworking -name *.cpp)
 
 driver_cpp_object_files := $(patsubst drivers/%.cpp, build/drivers/%.o, $(driver_cpp_source_files))
 

@@ -34,6 +34,13 @@
 #include "DRSD.h"
 #include "Process.h"
 
+#ifdef __cplusplus
+KERNEL_IMPORT bool IsSystemEfi();
+#else
+bool IsSystemEfi();
+#endif
+
+
 #ifndef _KERNEL_ENTRY_
 #define _KERNEL_ENTRY_
 #define KERNEL_ENTRY extern void

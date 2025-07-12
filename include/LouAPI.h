@@ -3,6 +3,7 @@
 #define LOUAPI_H
 
 //Include API Headers
+#include <cstdint.h>
 #include <Helpers.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -37,6 +38,7 @@
 #include <WinTEB.h>
 #include <drivers/cpu/IntelFamily.h>
 #include <drivers/cpu/cpu.h>
+#include <kernel/Firmware.h>
 
 #ifndef _KERNEL_MODULE_
 

@@ -134,7 +134,7 @@ typedef struct _OHCI_TRANSFER_DESCRIPTOR{
     uint32_t BufferEnd;
 }OHCI_TRANSFER_DESCRIPTOR, * POHCI_TRANSFER_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _OHCI_ISOCHRONOUS_TRANSFER_DESCRIPTOR{
+typedef struct PACKED _OHCI_ISOCHRONOUS_TRANSFER_DESCRIPTOR{
     uint32_t SF_DI_FC_CC;
     uint32_t BuferPage0;
     uint32_t NextTransferDescriptor;
@@ -213,7 +213,7 @@ static inline LOUSTATUS InitializeGeneralEndpointDescriptor(
 #define OHCI_BUFFER_UNDERRUN_ERROR  13
 #define OHCI_NOT_ACCESSED_ERROR     14
 
-typedef struct __attribute__((packed)) _HCCA_PARTITION{
+typedef struct PACKED _HCCA_PARTITION{
     uint32_t HccaIDT[128/sizeof(uint32_t)];
     uint16_t HccaFrameNumber;
     uint16_t HccaPad1;

@@ -3,6 +3,7 @@
 
 #define _USER_MODE_CODE_
 
+#include <cstdint.h>
 #include <stdalign.h>
 #define GET_ALIGNMENT(x) (alignof(x))
 

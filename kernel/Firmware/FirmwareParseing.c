@@ -1,6 +1,19 @@
+#define _EFI_CORE_C
 #include <LouAPI.h>
 #include <bootloader/grub/multiboot2.h>
 
+static LOUSINE_EFI_CORE_STRUCTURE Efi;
+
+static mutex_t EfiMasterMutex = {0};
+
+PLOUSINE_EFI_CORE_STRUCTURE LouKeAcquireEfiMaster(){
+	MutexLock(&EfiMasterMutex);
+	return &Efi;
+}
+
+void LouKeReleaseEfiMaster(){
+	MutexUnlock(&EfiMasterMutex);
+}
 
 #define SMB_SIGNATURE 0x424D53 // 'S', 'M', 'B' in little-endian
 #define APM_SIGNATURE 0x4D5041 // 'A', 'P', 'M' in little-endian
@@ -15,7 +28,7 @@ uintptr_t LouKeGetRsdp(){
 	return RSDP_MASTER;
 }
 
-typedef struct __attribute__((packed)) _ACPI_STD_HEADER {
+typedef struct PACKED _ACPI_STD_HEADER {
 	char Signature[4];
 	uint32_t Size;
 	uint8_t Revision;
@@ -26,7 +39,7 @@ typedef struct __attribute__((packed)) _ACPI_STD_HEADER {
 	uint32_t CRevision;
 }ACPI_STD_HEADER, * PACPI_STD_HEADER;
 
-typedef struct __attribute__((packed)) _XSDT_TABLE{
+typedef struct PACKED _XSDT_TABLE{
     char Signature[4];       // 'XSDT'
     uint32_t Length;         // Length of the entire XSDT, including the header and all entries
     uint8_t Revision;        // ACPI revision
@@ -39,7 +52,7 @@ typedef struct __attribute__((packed)) _XSDT_TABLE{
 } XSDT_TABLE;
 
 
-typedef struct __attribute__((packed)) _RSDP_Descriptor {
+typedef struct PACKED _RSDP_Descriptor {
 	char signature[8];          // Signature, should be "RSD PTR "
 	uint8_t checksum;           // Checksum of the first 20 bytes
 	char oem_id[6];             // OEM ID
@@ -48,7 +61,7 @@ typedef struct __attribute__((packed)) _RSDP_Descriptor {
 }RSDP_Descriptor, * PRSDP_Descriptor;
 
 
-typedef struct __attribute__((packed)) _RSDP_Descriptor2 {
+typedef struct PACKED _RSDP_Descriptor2 {
 	char signature[8];          // Signature, should be "RSD PTR "
 	uint8_t checksum;           // Checksum of the first 20 bytes
 	char oem_id[6];             // OEM ID
@@ -60,43 +73,9 @@ typedef struct __attribute__((packed)) _RSDP_Descriptor2 {
 	uint8_t reserved[3];        // Reserved, must be zero
 }RSDP_Descriptor2, * PRSDP_Descriptor2;
 
-typedef struct __attribute__((packed)) _SMBIOS_LOOKUP{
-	uint32_t Type;
-	uint32_t Size;
-	uint8_t Major;
-	uint8_t Minor;
-	uint8_t rsv[6];
-	uintptr_t SMBIOS_TabeStart;
-}SMBIOS_LOOKUP;
-
-typedef struct __attribute__((packed)) _SMBIOSEntryPoint{
-    char anchor[4];              // "_SM_"
-    uint8_t checksum;
-    uint8_t length;
-    uint8_t major_version;
-    uint8_t minor_version;
-    uint16_t max_structure_size;
-    uint8_t revision;
-    char formatted_area[5];
-    char intermediate_anchor[5];  // "_DMI_"
-    uint8_t intermediate_checksum;
-    uint16_t table_length;
-    uint32_t table_address;       // Address of the actual SMBIOS table
-    uint16_t structure_count;
-    uint8_t bcd_revision;
-} SMBIOSEntryPoint, * PSMBIOSEntryPoint;
-
-// SMBIOS Structure Header
-typedef struct __attribute__((packed)) _SMBIOSGenericHeader{
-    uint8_t  Type;          // Structure Type (e.g., 0 for BIOS Information, 1 for System Information)
-    uint8_t  Length;        // Length of the formatted area (not including the string-set)
-    uint16_t Handle;        // Handle, a unique identifier for the structure
-    // Followed by formatted area, then unformatted string area
-} SMBIOSGenericHeader, * PSMBIOSGenericHeader;
-
-static PSMBIOSGenericHeader SMBIOS_MASTER = 0x00;
 
 static struct multiboot_tag_apm* APM_MASTER = 0x00;
+
 
 LOUSTATUS LouKeSetEfiTable(uint64_t Address) {
     struct multiboot_tag_efi64* TableHeader = (struct multiboot_tag_efi64*)Address;
@@ -109,10 +88,6 @@ LOUSTATUS LouKeSetEfiTable(uint64_t Address) {
 }
 
 LOUSTATUS LouKeSetSmbios(uintptr_t SMBIOS) {
-
-	SMBIOS_MASTER = (PSMBIOSGenericHeader)SMBIOS;
-	EnforceSystemMemoryMap(SMBIOS, sizeof(struct multiboot_tag_smbios));
-	//LouPrint("SMBIOS Address Is:%d\n", SMBIOS_MASTER);
 	return LOUSTATUS_GOOD;
 }
 
@@ -175,11 +150,6 @@ LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 		}
 	}
 	else if (SMB_SIGNATURE == FirmwareTableProviderSignature) {
-		*TablePointer = (uintptr_t)SMBIOS_MASTER;
-		*Type = 0;
-		if (*TablePointer != 0) {
-			Status = LOUSTATUS_GOOD;
-		}
 
 	}
 	else if (APM_SIGNATURE == FirmwareTableProviderSignature) {
@@ -303,75 +273,31 @@ LOUSTATUS LouKeGetSystemFirmwareTableBuffer(
 }
 
 typedef struct {
-    uint32_t Signature;
-    uint32_t Length;
-    uint32_t Revision;
-    uint32_t Checksum;
-    uint32_t OEMID[6];
-    uint32_t OEMTableID[8];
-} EFI_TABLE_HEADER;
-
-typedef struct {
-    uint64_t Signature;               // Must be 0x5453595320494249 ("IBI SYST" in ASCII)
-    uint32_t Revision;                // UEFI Specification Revision
-    uint32_t HeaderSize;              // Size of the EFI_SYSTEM_TABLE structure
-    uint32_t CRC32;                   // CRC32 checksum of the entire table
-    uint32_t Reserved;                // Reserved field (must be 0)
-
-    // Firmware information
-    uint16_t* FirmwareVendor;         // Wide string (UTF-16) pointer to the vendor name
-    uint32_t FirmwareRevision;        // Firmware revision
-
-    // Handles to input/output/error devices
-    void* ConsoleInHandle;            // Handle to the console input device
-    void* ConIn;                      // Pointer to EFI_SIMPLE_TEXT_INPUT_PROTOCOL
-    void* ConsoleOutHandle;           // Handle to the console output device
-    void* ConOut;                     // Pointer to EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
-    void* StandardErrorHandle;        // Handle to the standard error device
-    void* StdErr;                     // Pointer to EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
-
-    // EFI Runtime Services table
-    void* RuntimeServices;            // Pointer to EFI_RUNTIME_SERVICES
-
-    // Configuration Table
-    uint64_t NumberOfTableEntries;    // Number of entries in the Configuration Table
-    void* ConfigurationTable;         // Pointer to array of EFI_CONFIGURATION_TABLE structures
-} EFI_SYSTEM_TABLE;
-
-
-typedef struct {
-    uint32_t Data1;
-    uint16_t Data2;
-    uint16_t Data3;
-    uint8_t  Data4[8];
-} EFI_GUID;
-
-typedef struct {
-    EFI_GUID VendorGuid;
-    void *VendorTable;
+    EFI_GUID 	VendorGuid;
+    void* 		VendorTable;
 } EFI_CONFIGURATION_TABLE;
 
 typedef struct {
-    uint64_t Signature;
-    uint8_t Checksum;
-    uint8_t OEMID[6];
-    uint8_t Revision;
-    uint32_t RsdtAddress;
-    uint32_t Length;
-    uint64_t XsdtAddress;
-    uint8_t ExtendedChecksum;
-    uint8_t Reserved[3];
+    uint64_t 	Signature;
+    uint8_t 	Checksum;
+    uint8_t 	OEMID[6];
+    uint8_t 	Revision;
+    uint32_t 	RsdtAddress;
+    uint32_t 	Length;
+    uint64_t 	XsdtAddress;
+    uint8_t 	ExtendedChecksum;
+    uint8_t 	Reserved[3];
 } RSDP_DESCRIPTOR_2;
 
 
 RSDP_DESCRIPTOR_2* find_rsdp_from_efi_table(uint64_t efi_system_table_address) {
     EFI_SYSTEM_TABLE *SystemTable = (EFI_SYSTEM_TABLE *)efi_system_table_address;
-    EFI_CONFIGURATION_TABLE *ConfigTable = (EFI_CONFIGURATION_TABLE *)SystemTable->ConfigurationTable;
+    EFI_CONFIGURATION_TABLE *ConfigTable = (EFI_CONFIGURATION_TABLE *)SystemTable->Tables;
 
     EFI_GUID Acpi20TableGuid = { 0x8868e871, 0xe4f1, 0x11d3, { 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81 } };
     EFI_GUID AcpiTableGuid = { 0xeb9d2d30, 0x2d88, 0x11d3, { 0x9a, 0x16, 0x00, 0x0c, 0x29, 0x27, 0x81, 0x98 } };
 
-    for (uint64_t i = 0; i < SystemTable->NumberOfTableEntries; i++) {
+    for (uint64_t i = 0; i < SystemTable->TableCount; i++) {
         if (memcmp(&ConfigTable[i].VendorGuid, &Acpi20TableGuid, sizeof(EFI_GUID)) == 0 ||
             memcmp(&ConfigTable[i].VendorGuid, &AcpiTableGuid, sizeof(EFI_GUID)) == 0) {
             return (RSDP_DESCRIPTOR_2 *)ConfigTable[i].VendorTable;
@@ -387,16 +313,9 @@ void SetEfiMap(uint64_t Map){
 	EfiMemMap = Map;
 }
 
-typedef struct __attribute__((packed)) _EFI_MEMORY_DESCRIPTOR{
-    uint32_t Type;
-    uint32_t Pad;
-    uint64_t PhysicalStart;
-    uint64_t VirtualStart;
-    uint64_t NumberOfPages;
-    uint64_t Attribute;
-} EFI_MEMORY_DESCRIPTOR;
 
-static EFI_GUID SMBIOS_GUID = { 0xEB9D2D31, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D } };
+
+//static EFI_GUID SMBIOS_GUID = { 0xEB9D2D31, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D } };
 
 bool LouKeMapEfiMemory(){
 
@@ -432,48 +351,29 @@ bool LouKeMapEfiMemory(){
 		}
 		LouMapAddress(EFI_TABLE, EFI_TABLE, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
 		UNUSED EFI_SYSTEM_TABLE* EfiSystemTable = (EFI_SYSTEM_TABLE*)EFI_TABLE;
-		UNUSED EFI_CONFIGURATION_TABLE* configTable = (EFI_CONFIGURATION_TABLE*)EfiSystemTable->ConfigurationTable;
+		UNUSED EFI_CONFIGURATION_TABLE* configTable = (EFI_CONFIGURATION_TABLE*)EfiSystemTable->Tables;
 
-		for (uint64_t i = 0; i < EfiSystemTable->NumberOfTableEntries; i++) {
-    		EFI_GUID tableGuid = configTable[i].VendorGuid;
-    
-    		if (memcmp(&tableGuid, &SMBIOS_GUID, sizeof(EFI_GUID)) == 0) {
-        		//SMBIOS table found, now you can access it
-        		SMBIOS_MASTER = configTable[i].VendorTable;
-    		}
-		}
 		return true;
 	}
 	return false;
 }
 #define BIOS_START 0xF0000
 #define BIOS_END   0xFFFFF
+void InitializeSmBiosSystem(void* Entry);
+void InitializeDmiSystem();
 
 void LouKeHandleSystemIsBios(){	
-
-	LouKeMapContinuousMemoryBlock(BIOS_START, BIOS_START, (BIOS_END - BIOS_START), PRESENT_PAGE);
-
-	//Identity Map Bios To Kernel Read Only
-	if(!SMBIOS_MASTER){
-		for (uint32_t* addr = (uint32_t*)BIOS_START; (uintptr_t)addr <= BIOS_END; addr += 16) {
-        	if (*addr == 0x5F4D535F) {  // "_SM_" signature
-				PSMBIOSEntryPoint smbios_entry = (PSMBIOSEntryPoint)addr;
-            	// Validate checksum
-            	uint8_t sum = 0;
-            	for (int i = 0; i < smbios_entry->length; i++) {
-                	sum += ((uint8_t*)smbios_entry)[i];
-            	}
-            	if (sum == 0) {
-                	SMBIOS_MASTER = (PSMBIOSGenericHeader)(uintptr_t)smbios_entry->table_address;  
-					return;// Valid SMBIOS entry point found
-            	}
-        	}
-    	}
-
-	}
-
+    InitializeSmBiosSystem(0x00);
+	InitializeDmiSystem();
 }
 
 void* GetEfiTable(){
 	return (void*)EFI_TABLE;
+}
+
+void InitializeEfiCore(){
+
+	//LouPrint("InitializeEfiCore()\n");
+	//while(1);
+    //InitializeSmBiosSystem(0x00);
 }

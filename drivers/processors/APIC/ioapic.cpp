@@ -300,8 +300,8 @@ KERNEL_IMPORT void ioapic_unmask_irq(uint8_t tirq) {
     // Clear the mask bit (16th bit) to unmask the interrupt
     low &= ~0x10000;
     
-    LouPrint("high:%bi\n", high);
-    LouPrint("low :%bi\n", low);
+    //LouPrint("high:%bi\n", high);
+    //LouPrint("low :%bi\n", low);
 
     // Write back the updated values
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
@@ -332,4 +332,27 @@ KERNEL_IMPORT void ioapic_mask_irq(uint8_t tirq) {
     // Write back the updated values
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
     ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);
+}
+
+KERNEL_IMPORT bool LouKePollIoApicPinForAssertion(uint8_t Pin){
+    uint8_t irq = FindTrueIRQ(Pin); //finds the interrupt based on if there is a overide
+    uint8_t IoApicNum = GetIoApicNumber(irq); //gets the actual ioapic the irq belogs to based on the 
+    //gsi and the number of handles
+    
+    //gets the offset of the irq register in the ioapic
+    irq = irq - ioapics[IoApicNum].gsi_base;
+
+    uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + 2 * irq;
+
+    // Read the current redirection entry
+    uint32_t low;// = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
+
+    while(1){
+        low = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
+        if(low & (1 << 12)){
+            return true;
+        }else if(low & (0x10000)){
+            return false;
+        }
+    }
 }

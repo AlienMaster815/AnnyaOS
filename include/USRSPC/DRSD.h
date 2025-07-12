@@ -842,7 +842,7 @@ typedef struct _DRSD_DEVICE{
 
 #define STANDARD_INTEL_CHIPSET_EDID_SIZE 128
 
-typedef struct __attribute__((packed)) _EDID_PRODUCT_IDENTIFICATION{
+typedef struct PACKED _EDID_PRODUCT_IDENTIFICATION{
     uint16_t Manufacturer;
     uint16_t ProductCode;
     uint32_t Serial;
@@ -850,7 +850,7 @@ typedef struct __attribute__((packed)) _EDID_PRODUCT_IDENTIFICATION{
     uint8_t  YearOfFacture;
 }EDID_PRODUCT_IDENTIFICATION, * PEDID_PRODUCT_IDENTIFICATION;
 
-typedef struct __attribute__((packed)) _DETAILED_PIXEL_TIMING{
+typedef struct PACKED _DETAILED_PIXEL_TIMING{
     uint8_t HActiveLow;
     uint8_t HBlankLow;
     uint8_t HActiveHBlankHigh;
@@ -868,18 +868,18 @@ typedef struct __attribute__((packed)) _DETAILED_PIXEL_TIMING{
     uint8_t Misc;
 }DETAILED_PIXEL_TIMING, * PDETAILED_PIXEL_TIMING;   
 
-typedef struct __attribute__((packed)) _CVT_TIMING{
+typedef struct PACKED _CVT_TIMING{
     uint8_t Code[3];
 }CVT_TIMING, * PCVT_TIMING;
 
-typedef struct __attribute__((packed)) _DETAILED_WINDOWS_WP_INDEX{
+typedef struct PACKED _DETAILED_WINDOWS_WP_INDEX{
     uint8_t WhiteXyLow;
     uint8_t WhiteXHigh;
     uint8_t WhiteYHigh;
     uint8_t Gamma;
 }DETAILED_WINDOWS_WP_INDEX, * PDETAILED_WINDOWS_WP_INDEX;
 
-typedef struct __attribute__((packed)) _DETAILED_DATA_MONITOR_RANGE{
+typedef struct PACKED _DETAILED_DATA_MONITOR_RANGE{
     uint8_t MinVFreq;
     uint8_t MaxVFreq;
     uint8_t MinHFreqKhz;
@@ -894,7 +894,7 @@ typedef struct __attribute__((packed)) _DETAILED_DATA_MONITOR_RANGE{
             uint16_t M;
             uint8_t  K;
             uint8_t  J;
-        }__attribute__((packed)) Gtf2;
+        }PACKED Gtf2;
         struct {
             uint8_t Version;
             uint8_t Data1;
@@ -903,15 +903,15 @@ typedef struct __attribute__((packed)) _DETAILED_DATA_MONITOR_RANGE{
             uint8_t Flags;
             uint8_t SupportedScailings;
             uint8_t PreferedRefresh;
-        }__attribute__((packed)) Cvt;
-    }__attribute__((packed)) Form;
+        }PACKED Cvt;
+    }PACKED Form;
 }DETAILED_DATA_MONITOR_RANGE, * PDETAILED_DATA_MONITOR_RANGE;
 
-typedef struct __attribute__((packed)) _DETAILED_DATA_STRING{
+typedef struct PACKED _DETAILED_DATA_STRING{
     uint8_t String[13];
 }DETAILED_DATA_STRING, * PDETAILED_DATA_STRING;
 
-typedef struct __attribute__((packed)) _DETAILED_NON_PIXEL_TIMING{
+typedef struct PACKED _DETAILED_NON_PIXEL_TIMING{
     uint8_t Pad1;
     uint8_t Type;
     uint8_t Pad2;
@@ -924,18 +924,18 @@ typedef struct __attribute__((packed)) _DETAILED_NON_PIXEL_TIMING{
             uint8_t AspectFrequenc;
         }StdTime;
         CVT_TIMING Cvt[4];
-    }__attribute__((packed));
+    }PACKED;
 }DETAILED_NON_PIXEL_TIMING, * PDETAILED_NON_PIXEL_TIMING;
 
-typedef struct __attribute__((packed)) _DETAILED_TIMING{
+typedef struct PACKED _DETAILED_TIMING{
     uint16_t PixelClock;
     union{
         DETAILED_PIXEL_TIMING       PixelData;
         DETAILED_NON_PIXEL_TIMING   OtherData;
-    }__attribute__((packed)) Data;
+    }PACKED Data;
 }DETAILED_TIMING, * PDETAILED_TIMING;
 
-typedef struct __attribute__((packed)) _INTEL_STANDARD_EDID{
+typedef struct PACKED _INTEL_STANDARD_EDID{
     uint8_t     Header[8];
     union {
         EDID_PRODUCT_IDENTIFICATION ProductIdentification;
@@ -945,8 +945,8 @@ typedef struct __attribute__((packed)) _INTEL_STANDARD_EDID{
             uint32_t    Serial;
             uint8_t     WeekOfFacture;
             uint8_t     YearOfFacture;
-        }__attribute__((packed));
-    }__attribute__((packed));
+        }PACKED;
+    }PACKED;
     uint8_t Version;
     uint8_t Revision;
     uint8_t Input;
@@ -968,11 +968,11 @@ typedef struct __attribute__((packed)) _INTEL_STANDARD_EDID{
         uint8_t T1;
         uint8_t T2;
         uint8_t Reserved;
-    }__attribute__((packed)) EstTime[8];
+    }PACKED EstTime[8];
     struct {
         uint8_t HSize;
         uint8_t AspectFrequenc;
-    }__attribute__((packed)) Timing[4];
+    }PACKED Timing[4];
     uint8_t Extentions;
     uint8_t Checksum;
 }INTEL_STANDARD_EDID, * PINTEL_STANDARD_EDID; 

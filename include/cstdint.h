@@ -1,21 +1,22 @@
-
-#ifndef CSTDINT_H
-#define CSTDINT_H
-
-#ifdef IS_X86_64
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 typedef unsigned long long uint64_t;
 
+typedef uint8_t     UINT8,  BYTE;
+typedef uint16_t    UINT16, WORD;
+typedef uint32_t    UINT32, DWORD, INTEGER;
+typedef unsigned long       ULONG;
 
+typedef char        INT8; 
+typedef short       INT16; 
+typedef int         INT32; 
+typedef long long   INT64; 
 
+typedef unsigned long long UINT64, ULONGLONG, * PULONGLONG, * PULONG64, QWORD;
+typedef long long LONGLONG, * PLONGLONG;
 
+#define PACKED __attribute__((packed))
 
-#endif
+#define SIZE_T size_t
 
-#ifdef IS_X86
-
-#endif
-
-#endif

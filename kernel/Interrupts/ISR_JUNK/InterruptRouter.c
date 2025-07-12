@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-typedef struct  __attribute__((packed)) _CPUContext{
+typedef struct  PACKED _CPUContext{
     // General-Purpose Registers    
     uint64_t rax;
     uint64_t rbx;

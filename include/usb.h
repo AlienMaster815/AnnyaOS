@@ -156,7 +156,7 @@ typedef struct _USB_PHY_LAYER_ROOTHUB_CHAIN{
     ListHeader      PhyList;
 }USB_PHY_LAYER_ROOTHUB_CHAIN, * PUSB_PHY_LAYER_ROOTHUB_CHAIN;
 
-typedef struct __attribute__((packed)) _USB_ENDPOINT_DESCRIPTOR{
+typedef struct PACKED _USB_ENDPOINT_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         Descriptor;
     uint8_t         EndpointAddress;
@@ -167,7 +167,7 @@ typedef struct __attribute__((packed)) _USB_ENDPOINT_DESCRIPTOR{
     uint8_t         SyncAddress;
 }USB_ENDPOINT_DESCRIPTOR, * PUSB_ENDPOINT_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_SS_ENDPOINT_COMP_DESCRIPTOR{
+typedef struct PACKED _USB_SS_ENDPOINT_COMP_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint8_t         MaxBurst;
@@ -175,7 +175,7 @@ typedef struct __attribute__((packed)) _USB_SS_ENDPOINT_COMP_DESCRIPTOR{
     uint16_t        BytesPerInterval;
 }USB_SS_ENDPOINT_COMP_DESCRIPTOR, * PUSB_SS_ENDPOINT_COMP_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_SSP_ISOC_ENDPOINT_COMP_DESCRIPTROR{
+typedef struct PACKED _USB_SSP_ISOC_ENDPOINT_COMP_DESCRIPTROR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint16_t        Reserved;
@@ -243,7 +243,7 @@ typedef struct _URB{
     USB_ISO_PACKET_DECRIPTOR        IsoFrameDescriptor[];
 }URB, * PURB;
 
-typedef struct __attribute__((packed)) _USB_DEVICE_DESCRIPTOR{
+typedef struct PACKED _USB_DEVICE_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint16_t        BcdUDB;
@@ -260,21 +260,21 @@ typedef struct __attribute__((packed)) _USB_DEVICE_DESCRIPTOR{
     uint8_t         ConfigurationCount;
 }USB_DEVICE_DESCRIPTOR, * PUSB_DEVICE_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_BOS_DESCRIPTOR{
+typedef struct PACKED _USB_BOS_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint16_t        TotalLength;
     uint8_t         DeviceCapCount;
 }USB_BOS_DESCRIPTOR, * PUSB_BOS_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_EXTENDED_CAP_DESCRIPTOR{
+typedef struct PACKED _USB_EXTENDED_CAP_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint8_t         DeviceCapabilityType;
     uint32_t        Attributes;
 }USB_EXTENDED_CAP_DESCRIPTOR, * PUSB_EXTENDED_CAP_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_SS_CAP_DESCRIPTOR{
+typedef struct PACKED _USB_SS_CAP_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint8_t         DeviceCapabilitiesType;
@@ -284,7 +284,7 @@ typedef struct __attribute__((packed)) _USB_SS_CAP_DESCRIPTOR{
     uint16_t        U2DeviceExitLatency;
 }USB_SS_CAP_DESCRIPTOR, * PUSB_SS_CAP_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_SSP_CAP_DESCRIPTOR{
+typedef struct PACKED _USB_SSP_CAP_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint8_t         DeviceCapabilityType;
@@ -295,13 +295,13 @@ typedef struct __attribute__((packed)) _USB_SSP_CAP_DESCRIPTOR{
     uint32_t        SublinkSpeedAttributes[];
 }USB_SSP_CAP_DESCRIPTOR, * PUSB_SSP_CAP_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_PTM_CAP_DESCRIPTOR{
+typedef struct PACKED _USB_PTM_CAP_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint8_t         DeviceCapabilityType; 
 }USB_PTM_CAP_DESCRIPTOR, * PUSB_PTM_CAP_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_SS_CONTAINER_ID_DESCRIPTOR{
+typedef struct PACKED _USB_SS_CONTAINER_ID_DESCRIPTOR{
     uint8_t         Length;
     uint8_t         DescriptorType;
     uint8_t         DeviceCapabilitiesType;
@@ -318,7 +318,7 @@ typedef struct _USB_HOST_BOS{
     PUSB_PTM_CAP_DESCRIPTOR         BosPtmCapDescriptor;
 }USB_HOST_BOS, * PUSB_HOST_BOS;
 
-typedef struct __attribute__((packed)) _USB_CONFIGURATION_DESCRIPTOR{
+typedef struct PACKED _USB_CONFIGURATION_DESCRIPTOR{
     uint8_t     Length;
     uint8_t     DescriptorType;
     uint16_t    TotalLength;
@@ -329,7 +329,7 @@ typedef struct __attribute__((packed)) _USB_CONFIGURATION_DESCRIPTOR{
     uint8_t     MaxPower;
 }USB_CONFIGURATION_DESCRIPTOR, * PUSB_CONFIGURATION_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_INTERFACE_ASSOC_DESCRIPTOR{
+typedef struct PACKED _USB_INTERFACE_ASSOC_DESCRIPTOR{
     uint8_t     Length;
     uint8_t     DescriptorType;
     uint8_t     FirstInterface;
@@ -340,7 +340,7 @@ typedef struct __attribute__((packed)) _USB_INTERFACE_ASSOC_DESCRIPTOR{
     uint8_t     Function;
 }USB_INTERFACE_ASSOC_DESCRIPTOR, * PUSB_INTERFACE_ASSOC_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _USB_INTERFACE_DESCRIPTOR{
+typedef struct PACKED _USB_INTERFACE_DESCRIPTOR{
     uint8_t     Length;
     uint8_t     DescriptorType;
     uint8_t     InterfaceID;

@@ -8,7 +8,7 @@
     struct { \
         uint16_t limit; \
         uint64_t base; \
-    } __attribute__((packed)) idtr = {0, 0}; \
+    } PACKED idtr = {0, 0}; \
     __asm__ volatile("lidt %0" : : "m"(idtr)); \
     __asm__ volatile("int $3"); \
 

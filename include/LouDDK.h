@@ -1,6 +1,9 @@
 #ifndef _LOUDDK_H
 #define _LOUDDK_H
 
+#include <cstdint.h>
+
+
 #ifndef _GUID_TYPE
 #define _GUID_TYPE
 typedef struct _GUID {
@@ -180,6 +183,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <WinTEB.h>
 #include <drivers/cpu/IntelFamily.h>
 #include <drivers/cpu/cpu.h>
+#include <kernel/Firmware.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

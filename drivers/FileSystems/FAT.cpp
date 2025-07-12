@@ -2,7 +2,7 @@
 #include <Hal.h>
 // Updateing Systems As Needed
 
-typedef struct __attribute__((packed)) _FAT_12_AND_16_EXTENDED_BLOCK{
+typedef struct PACKED _FAT_12_AND_16_EXTENDED_BLOCK{
     uint8_t     Int0x13DriveNumber;
     uint8_t     Rsv1;
     uint8_t     FatBootSignature;
@@ -14,7 +14,7 @@ typedef struct __attribute__((packed)) _FAT_12_AND_16_EXTENDED_BLOCK{
     uint8_t     NoMansLand[]; //by specification this needs to be 0 for the entire sector
 }FAT_12_AND_16_EXTENDED_BLOCK, * PFAT_12_AND_16_EXTENDED_BLOCK;
 
-typedef struct __attribute__((packed)) _FAT_32_EXTENDED_BLOCK{
+typedef struct PACKED _FAT_32_EXTENDED_BLOCK{
     uint32_t    FatSize32;
     uint16_t    ExtendedFlags;
     uint16_t    FileSystemVersion;
@@ -33,7 +33,7 @@ typedef struct __attribute__((packed)) _FAT_32_EXTENDED_BLOCK{
     uint8_t     NoMansLand[];
 }FAT_32_EXTENDED_BLOCK, * PFAT_32_EXTENDED_BLOCK;
 
-typedef struct __attribute__((packed)) _FAT_BIOS_PARAMETER_BLOCK{
+typedef struct PACKED _FAT_BIOS_PARAMETER_BLOCK{
     uint8_t     JumpBoot[3];
     char        OemName[8]; 
     uint16_t    BytesPerSector;

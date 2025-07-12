@@ -90,23 +90,23 @@
 
 #define U32_MAX ((uint32_t)~0U)
 
-typedef struct __attribute__((packed)) _VBVA_COMMAND_HEADER{
+typedef struct PACKED _VBVA_COMMAND_HEADER{
     int16_t     X;
     int16_t     Y;
     uint16_t    W;
     uint16_t    H;
 }VBVA_COMMAND_HEADER, * PVBVA_COMMAND_HEADER;
 
-typedef struct __attribute__((packed)) _VBVA_RECORD{
+typedef struct PACKED _VBVA_RECORD{
     uint32_t LengthAndFlags;
 }VBVA_RECORD, * PVBVA_RECORD;
 
-typedef struct __attribute__((packed)) _VBVA_HOST_FLAGS{
+typedef struct PACKED _VBVA_HOST_FLAGS{
     uint32_t HostEvents;
     uint32_t SupportedOrders;
 }VBVA_HOST_FLAGS, * PVBVA_HOST_FLAGS;
 
-typedef struct __attribute__((packed)) _VBVA_BUFFER{
+typedef struct PACKED _VBVA_BUFFER{
     VBVA_HOST_FLAGS     VbVaHostFlags;
     uint32_t            DataOffset;
     uint32_t            FreeOffset;
@@ -118,19 +118,19 @@ typedef struct __attribute__((packed)) _VBVA_BUFFER{
     uint8_t             DataBlock[];
 }VBVA_BUFFER, * PVBVA_BUFFER;
 
-typedef struct __attribute__((packed)) _VBVA_CONFIGURATION32{
+typedef struct PACKED _VBVA_CONFIGURATION32{
     uint32_t    Index;
     uint32_t    Value;
 }VBVA_CONFIGURATION32, * PVBVA_CONFIGURATION32;
 
-typedef struct __attribute__((packed)) _VBVA_INFORMATION_VIEW{
+typedef struct PACKED _VBVA_INFORMATION_VIEW{
     uint32_t    ViewIndex;
     uint32_t    ViewOffset;
     uint32_t    ViewSize;
     uint32_t    MaximumScreenSize;
 }VBVA_INFORMATION_VIEW, * PVBVA_INFORMATION_VIEW;
 
-typedef struct __attribute__((packed)) _VBVA_INFORMATION_SCREEN{
+typedef struct PACKED _VBVA_INFORMATION_SCREEN{
     uint32_t    ViewIndex;
     uint32_t    StartX;
     uint32_t    StartY;
@@ -142,18 +142,18 @@ typedef struct __attribute__((packed)) _VBVA_INFORMATION_SCREEN{
     uint16_t    Flags;
 }VBVA_INFORMATION_SCREEN, * PVBVA_INFORMATION_SCREEN;
 
-typedef struct __attribute__((packed)) _VBVA_ENABLE{
+typedef struct PACKED _VBVA_ENABLE{
     uint32_t    Flags;
     uint32_t    Offset;
     uint32_t    Result;
 }VBVA_ENABLE, * PVBVA_ENABLE;
 
-typedef struct __attribute__((packed)) _VBVA_ENABLE_EX{
+typedef struct PACKED _VBVA_ENABLE_EX{
     VBVA_ENABLE Base;
     uint32_t    ScreenID;
 }VBVA_ENABLE_EX, * PVBVA_ENABLE_EX;
 
-typedef struct __attribute__((packed)) _VBVA_MOUSE_POINTER_SHAPE{
+typedef struct PACKED _VBVA_MOUSE_POINTER_SHAPE{
     int32_t     Result;
     uint32_t    Flags;
     uint32_t    HotX;
@@ -163,18 +163,18 @@ typedef struct __attribute__((packed)) _VBVA_MOUSE_POINTER_SHAPE{
     uint8_t     DataBlock[];
 }VBVA_MOUSE_POINTER_SHAPE, * PVBVA_MOUSE_POINTER_SHAPE;
 
-typedef struct __attribute__((packed)) _VBVA_CAPABILITIES{
+typedef struct PACKED _VBVA_CAPABILITIES{
     int32_t     Rc;
     uint32_t    Capabilities;
 }VBVA_CAPABILITIES, * PVBVA_CAPABILITIES;
 
-typedef struct __attribute__((packed)) _VBVA_QUERY_MODE_HINTS{
+typedef struct PACKED _VBVA_QUERY_MODE_HINTS{
     uint16_t    HintsQueriedCount;
     uint16_t    HintStructureQuestSize;
     int32_t     Rc;
 }VBVA_QUERY_MODE_HINTS, * PVBVA_QUERY_MODE_HINTS;
 
-typedef struct __attribute__((packed)) _VBVA_MODE_HINT{
+typedef struct PACKED _VBVA_MODE_HINT{
     uint32_t Magic;
     uint32_t Cx;
     uint32_t Cy;
@@ -185,14 +185,14 @@ typedef struct __attribute__((packed)) _VBVA_MODE_HINT{
     uint32_t Enabled;
 }VBVA_MODE_HINT, * PVBVA_MODE_HINT;
 
-typedef struct __attribute__((packed)) _VBVA_REPORT_INPUT_MAPPING{
+typedef struct PACKED _VBVA_REPORT_INPUT_MAPPING{
     int32_t     X;
     int32_t     Y;
     uint32_t    Cx;
     uint32_t    Cy;
 }VBVA_REPORT_INPUT_MAPPING, * PVBVA_REPORT_INPUT_MAPPING;
 
-typedef struct __attribute__((packed)) _VBVA_CURSOR_POSITION{
+typedef struct PACKED _VBVA_CURSOR_POSITION{
     uint32_t ReportPosition;
     uint32_t X;
     uint32_t Y;

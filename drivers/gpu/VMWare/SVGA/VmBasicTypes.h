@@ -23,7 +23,7 @@ typedef uint64_t PPN64;
 
 #ifndef _ATOMIC_64
 #define _ATOMIC_64
-typedef struct __attribute__((packed)) _atmoic64_t{
+typedef struct PACKED _atmoic64_t{
     atomic_t LowDWord;
     atomic_t HighDWord;
 }atmoic64_t;

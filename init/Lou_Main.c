@@ -85,7 +85,7 @@ uint64_t GetRamSize();
 void InitializeSystemCalls();
 void SYSCALLS();
 void initialize_ps2_keyboard();    uint64_t ContextHandle = 0x00;
-
+void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
 LOUSTATUS InitializeDynamicHardwareInterruptHandleing();
 void initializeInterruptRouter();
@@ -118,7 +118,8 @@ void SetupGDT();
 extern void ReloadGdt();
 extern void LoadTaskRegister();
 uint64_t GetCurrentTimeIn100ns();
-LOUSTATUS Lou_kernel_early_initialization(){
+
+LOUSTATUS LousineKernelEarlyInitialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
@@ -174,11 +175,12 @@ LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
 
 void HandleProccessorInitialization();
 void LouKeInitializeAcpicaSubSystem();
+void LouKeInitializeFullLouACPISubsystem();
 
-void Advanced_Kernel_Initialization(){
+void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
     if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
-    LouKeInitializeAcpicaSubSystem();
+    LouKeInitializeFullLouACPISubsystem();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
  }
 
@@ -269,7 +271,7 @@ void PrintTest(){
 void SetContext(uint64_t Context, uint64_t Function);
 
 
-typedef struct  __attribute__((packed)) _CPUContext{
+typedef struct  PACKED _CPUContext{
 
     uint64_t rip;       // Instruction Pointer (user-mode entry point)
     uint64_t cs;        // Code Segment (should be set to user mode, typically 0x1B for x86_64)
@@ -317,8 +319,19 @@ void DisableCR0WriteProtection() {
 void InitializeAcpiSystem();
 void InitializeDebuggerComunications();
 void LouKeInitializeMouseManagemet();
+void ioapic_unmask_irq(uint8_t irq);
+void IoApicConfigureEntryFlags(
+    uint8_t     irq,
+    uint16_t    Flags
+);
+void LouKePollIoApicPinForAssertion(uint8_t Pin);
 
-UNUSED static bool SystemIsEfi = false;
+UNUSED static bool SystemIsEfiv = false;
+
+bool IsSystemEfi(){
+    return SystemIsEfiv;
+}
+
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
 ){    
@@ -330,12 +343,14 @@ KERNEL_ENTRY Lou_kernel_start(
     if(!LouKeMapEfiMemory()){
         LouKeHandleSystemIsBios();
     }else {
-        SystemIsEfi = true;
+        SystemIsEfiv = true;
     }                      
     
-    Lou_kernel_early_initialization();
+
+    LousineKernelEarlyInitialization();
 
     LouKeMapPciMemory();
+
 
     LouKeInitializeLouACPISubsystem();
 
@@ -343,13 +358,12 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeGenericTables();
 
-    Advanced_Kernel_Initialization();
+    AdvancedLousineKernelInitialization();
 
     InitializeDebuggerComunications();
 
-
-    LouPrint("Here\n");
-    while(1);
+    //LouPrint("Here\n");
+    //while(1);
     //TODO: Add a parser for the manifest for 
     //loading needed modules that need to be 
     //loaded no matter what

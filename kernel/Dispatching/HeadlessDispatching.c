@@ -414,7 +414,5 @@ LOUSTATUS LouKeHdlspDispatch(
         }
     }
 
-
-
     return Result;
 }

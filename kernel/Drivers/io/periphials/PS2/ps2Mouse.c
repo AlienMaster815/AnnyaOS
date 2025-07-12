@@ -10,7 +10,7 @@ static uint8_t Buffer[3] = {0};
 static int8_t x = 0;
 static int8_t y = 0;
 
-typedef struct  __attribute__((packed)) _CPUContext{
+typedef struct  PACKED _CPUContext{
     // General-Purpose Registers    
     uint64_t rax;
     uint64_t rbx;

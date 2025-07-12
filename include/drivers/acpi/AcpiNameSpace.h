@@ -16,7 +16,7 @@ extern "C" {
 #define SYSTEM_INDICATOR_NAMESPACE      "\\_SI"
 #define THERMAL_ZONE_NAMESPACE          "\\_TZ"
 
-typedef struct __attribute__((packed)) _AML_PACKAGE_LEAD_BYTE{
+typedef struct PACKED _AML_PACKAGE_LEAD_BYTE{
     uint8_t Length : 4;
     uint8_t Reserved : 2;
     uint8_t ByteCount : 2;

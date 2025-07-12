@@ -2,7 +2,7 @@
 
 #define PNG_SIGNATURE 0x89504E470D0A1A0A
 
-typedef struct __attribute__((packed)) _PNG_CHUNK_HEADER{
+typedef struct PACKED _PNG_CHUNK_HEADER{
     uint32_t    Length;     //BE
     uint8_t     Type[4];    //LE
 }PNG_CHUNK_HEADER, * PPNG_CHUNK_HEADER;
@@ -44,7 +44,7 @@ typedef struct _PNG_CHUNK_HEADER_HANDLE{
 #define PPCAWPH_T PNG_PRIMARY_CHROMATITIES_AND_WHITE_POINT_HEADER_TYPE
 
 
-typedef struct __attribute__((packed)) _PNG_IMAGE_CHUNK{
+typedef struct PACKED _PNG_IMAGE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint32_t            Width; //BE
     uint32_t            Height; //BE
@@ -55,36 +55,36 @@ typedef struct __attribute__((packed)) _PNG_IMAGE_CHUNK{
     uint8_t             InterlaceMethod;
 }PNG_IMAGE_CHUNK, * PPNG_IMAGE_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_PALETTE_DATA{
+typedef struct PACKED _PNG_PALETTE_DATA{
     uint8_t     Red;
     uint8_t     Green;
     uint8_t     Blue;
 }PNG_PALETTE_DATA, * PPNG_PALETTE_DATA; 
 
-typedef struct __attribute__((packed)) _PNG_PALETTE_CHUNK{
+typedef struct PACKED _PNG_PALETTE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     PNG_PALETTE_DATA    PaletteData[];
 }PNG_PALETTE_CHUNK, * PPNG_PALETTE_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_TRANSPARENCY_CHUNK{
+typedef struct PACKED _PNG_TRANSPARENCY_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     union {
-        struct __attribute__((packed)){ 
+        struct PACKED{ 
             uint16_t            GraySampleValue;
         }Type1;
-        struct __attribute__((packed)){
+        struct PACKED{
             uint16_t            RedSampleValue;
             uint16_t            GreenSampleValue;
             uint16_t            BlueSampleValue;
         }Type2;
-        struct __attribute__((packed)){
+        struct PACKED{
             uint8_t             AlphaPaletteData1;
             uint8_t             AlphaPaletteData[];
         }Type3;
     }ColorType;
 }PNG_TRANSPARENCY_CHUNK, * PPNG_TRANSPARENCY_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CHUNK{
+typedef struct PACKED _PNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint32_t            WhitePointX;
     uint32_t            WhitePointY;
@@ -96,17 +96,17 @@ typedef struct __attribute__((packed)) _PNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CH
     uint32_t            BlueY;
 }PNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CHUNK, * PPNG_PRIMARY_CHROMATIC_AND_WHITE_POINT_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_GAMMA_CHUNK{
+typedef struct PACKED _PNG_GAMMA_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint32_t            ImageGamma;
 }PNG_GAMMA_CHUNK, * PPNG_GAMMA_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_EMBEDDED_ICCP_PROFILE_CHUNK{
+typedef struct PACKED _PNG_EMBEDDED_ICCP_PROFILE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             ChunkData[];
 }PNG_EMBEDDED_ICCP_PROFILE_CHUNK, * PPNG_EMBEDDED_ICCP_PROFILE_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_STANDARD_RGB_COLOR_CHUNK{
+typedef struct PACKED _PNG_STANDARD_RGB_COLOR_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             RenderIntent;
 }PNG_STANDARD_RGB_COLOR_CHUNK, * PPNG_STANDARD_RGB_COLOR_CHUNK;
@@ -116,7 +116,7 @@ typedef struct __attribute__((packed)) _PNG_STANDARD_RGB_COLOR_CHUNK{
 #define PNG_SRGB_RENDER_INTENT_SATURATION               2
 #define PNG_SRGB_RENDER_INTENT_ABSOLUTE_COLORMETRIC     3
 
-typedef struct __attribute__((packed)) _PNG_CODING_INDEPENDENT_CODE_POINTS_FOR_SIGNAL_ID_CHUNK{
+typedef struct PACKED _PNG_CODING_INDEPENDENT_CODE_POINTS_FOR_SIGNAL_ID_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             ColorPrimatives;
     uint8_t             TransferFunction;
@@ -124,22 +124,22 @@ typedef struct __attribute__((packed)) _PNG_CODING_INDEPENDENT_CODE_POINTS_FOR_S
     uint8_t             VideFullRangeFlag;
 }PNG_CODING_INDEPENDENT_CODE_POINTS_FOR_SIGNAL_ID_CHUNK, * PPNG_CODING_INDEPENDENT_CODE_POINTS_FOR_SIGNAL_ID_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_TEXTUAL_DATA_CHUNK{
+typedef struct PACKED _PNG_TEXTUAL_DATA_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             TextData[];
 }PNG_TEXTUAL_DATA_CHUNK, * PPNG_TEXTUAL_DATA_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_COMPRESSED_TEXTUAL_DATA_CHUNK{
+typedef struct PACKED _PNG_COMPRESSED_TEXTUAL_DATA_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             Data[];
 }PNG_COMPRESSED_TEXTUAL_DATA_CHUNK, * PPNG_COMPRESSED_TEXTUAL_DATA_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_INTERNATIONAL_TEXTUAL_DATA_CHUNK{
+typedef struct PACKED _PNG_INTERNATIONAL_TEXTUAL_DATA_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             Data[];
 }PNG_INTERNATIONAL_TEXTUAL_DATA_CHUNK, * PPNG_INTERNATIONAL_TEXTUAL_DATA_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_BACKGROUND_COLOR_CHUNK{
+typedef struct PACKED _PNG_BACKGROUND_COLOR_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint16_t            GreyScale;
     uint16_t            Red;
@@ -148,12 +148,12 @@ typedef struct __attribute__((packed)) _PNG_BACKGROUND_COLOR_CHUNK{
     uint8_t             PaletteIndex;
 }PNG_BACKGROUND_COLOR_CHUNK, * PPNG_BACKGROUND_COLOR_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_IMAGE_HISTOGRAM{
+typedef struct PACKED _PNG_IMAGE_HISTOGRAM{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint16_t            FrequencyBytes[];
 }PNG_IMAGE_HISTOGRAM, * PPNG_IMAGE_HISTOGRAM;
 
-typedef struct __attribute__((packed)) _PNG_PHYSICAL_PIXEL_DIMENSION{
+typedef struct PACKED _PNG_PHYSICAL_PIXEL_DIMENSION{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint32_t            XPixels;
     uint32_t            YPixels;
@@ -163,17 +163,17 @@ typedef struct __attribute__((packed)) _PNG_PHYSICAL_PIXEL_DIMENSION{
 #define PNG_PHYS_UNIT_SPECIFIER_UNKOWN  0
 #define PNG_PHYS_UNIT_SPECIFIER_METRIC  1
 
-typedef struct __attribute__((packed)) _PNG_SUGGESTED_PALETTE_CHUNK{
+typedef struct PACKED _PNG_SUGGESTED_PALETTE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             Data[];
 }PNG_SUGGESTED_PALETTE_CHUNK, * PPNG_SUGGESTED_PALETTE_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_EXCHANGEABLE_IMAGE_FILE_CHUNK{
+typedef struct PACKED _PNG_EXCHANGEABLE_IMAGE_FILE_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint8_t             Data[];
 }PNG_EXCHANGEABLE_IMAGE_FILE_CHUNK, * PPNG_EXCHANGEABLE_IMAGE_FILE_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_TIME_STAMP_INFORMATION_CHUNK{
+typedef struct PACKED _PNG_TIME_STAMP_INFORMATION_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint16_t            YearStamp;
     uint8_t             MonthStamp;
@@ -183,7 +183,7 @@ typedef struct __attribute__((packed)) _PNG_TIME_STAMP_INFORMATION_CHUNK{
     uint8_t             SecondStamp;
 }PNG_TIME_STAMP_INFORMATION_CHUNK, * PPNG_TIME_STAMP_INFORMATION_CHUNK;
 
-typedef struct __attribute__((packed)) _PNG_ANIMATION_CONTROL_CHUNK{
+typedef struct PACKED _PNG_ANIMATION_CONTROL_CHUNK{
     PNG_CHUNK_HEADER    ChunkHeader;
     uint32_t            FrameCount;
     uint32_t            Plays;

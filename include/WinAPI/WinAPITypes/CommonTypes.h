@@ -23,8 +23,11 @@ typedef wchar_t WCHAR, * PWCHAR;
 
 typedef const short CSHORT;
 
+#ifndef _LONGLONG
+#define _LONGLONG
 typedef unsigned long long ULONGLONG, * PULONGLONG, * PULONG64;
 typedef long long LONGLONG, * PLONGLONG;
+#endif
 
 typedef unsigned long* PULONG,* PQWORD;
 typedef unsigned char* PUCHAR,* PBYTE;

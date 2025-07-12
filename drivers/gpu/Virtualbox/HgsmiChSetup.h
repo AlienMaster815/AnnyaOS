@@ -23,12 +23,12 @@
 #define HGSMIHOSTFLAGS_HOTPLUG             	0x20u
 #define HGSMIHOSTFLAGS_CURSOR_CAPABILITIES 	0x40u
 
-typedef struct __attribute__((packed)) _HGSMI_BUFFER_LOCATION {
+typedef struct PACKED _HGSMI_BUFFER_LOCATION {
 	uint32_t BufferLocation;
 	uint32_t BufferLength;
 } HGSMI_BUFFER_LOCATION, * PHGSMI_BUFFER_LOCATION;
 
-typedef struct __attribute__((packed)) _HGSMI_HOST_FLAGS {
+typedef struct PACKED _HGSMI_HOST_FLAGS {
 	uint32_t    HostFlags;
 	uint32_t    Reserved[3];
 }HGSMI_HOST_FLAGS, * PHGSMI_HOST_FLAGS;

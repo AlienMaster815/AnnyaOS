@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-typedef struct __attribute__((packed)) _TSS{
+typedef struct PACKED _TSS{
     uint32_t RESVD;
     uint64_t RSP0;
     uint64_t RSP1;
@@ -20,7 +20,7 @@ typedef struct __attribute__((packed)) _TSS{
 extern uint32_t gdt64;
 extern uint32_t tss64;
 
-typedef struct __attribute__((packed)) _LongModeGdt{
+typedef struct PACKED _LongModeGdt{
     uint64_t                           NULLSEG;
     uint64_t                           KCODE;
     uint64_t                           KDATA;
@@ -84,7 +84,7 @@ void SetGDTSystemSegmentEntry(
 
 }
 
-typedef struct __attribute__((packed)) _GDTREntry{
+typedef struct PACKED _GDTREntry{
     uint16_t Length;
     uint64_t Base;
 }GDTREntry, * PGDTREntry;

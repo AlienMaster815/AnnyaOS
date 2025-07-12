@@ -22,7 +22,7 @@
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_CONTINUE     2
 #define HGSMI_BUFFER_HEADER_F_SEQUENCE_END          3
 
-typedef struct __attribute__((packed)) _HGSMI_BUFFER_HEADER{
+typedef struct PACKED _HGSMI_BUFFER_HEADER{
     uint32_t        DataSize;
     uint8_t         Flags;
     uint8_t         Channel;
@@ -44,7 +44,7 @@ typedef struct __attribute__((packed)) _HGSMI_BUFFER_HEADER{
     }u;
 }HGSMI_BUFFER_HEADER, * PHGSMI_BUFFER_HEADER;
 
-typedef struct __attribute__((packed)) _HGSMI_BUFFER_TAIL{
+typedef struct PACKED _HGSMI_BUFFER_TAIL{
     uint32_t Reserved;
     uint32_t Checksum;
 }HGSMI_BUFFER_TAIL, * PHGSMI_BUFFER_TAIL;

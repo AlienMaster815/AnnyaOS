@@ -6,6 +6,8 @@
 #ifndef _STYPES_H
 #define _STYPES_H
 
+#include <cstdint.h>
+
 #ifndef __INT_MAX__
 #define INT_MAX 2147483647
 #endif
@@ -149,6 +151,9 @@ typedef struct _PCIE_SYSTEM_MANAGER{
     uint8_t     EndBusNumber;
 }PCIE_SYSTEM_MANAGER, * PPCIE_SYSTEM_MANAGER;
 
-
+typedef struct _RANGE{
+    UINT64  Start;
+    UINT64  End;
+}RANGE, * PRANGE;
 
 #endif

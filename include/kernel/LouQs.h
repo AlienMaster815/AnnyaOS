@@ -9,19 +9,20 @@ extern "C" {
 #endif
  
 typedef struct  _LOUQ{
-    void* QueueData;
-    uint64_t QueueDataSize;
-    bool LOUQNext;
-    bool LOUQBeingHandled;
-    bool LOUQCompleted;
-    uint64_t LOUQFlags;
-
-    uint64_t QueueTimeout;
-    uint64_t QueueDepth;
-
-    uint64_t QueuesInFront;
-    uint64_t Priority;
-    spinlock_t LOUQLock;
+    string      Identifer;
+    void*       QueueData;
+    uint64_t    QueueDataSize;
+    bool        ActiveQ;
+    bool        LOUQNext;
+    bool        LOUQBeingHandled;
+    bool        LOUQCompleted;
+    uint64_t    LOUQFlags;
+    uint64_t    QueueTimeout;
+    uint64_t    QueueDepth;
+    uint64_t    QueuesInFront;
+    uint64_t    Priority;
+    spinlock_t  LOUQLock;
+    mutex_t     LouQtex;
 }LOUQ, * PLOUQ;
 
 typedef struct _LOUQ_WAIT{
@@ -32,6 +33,19 @@ typedef struct _LOUQ_WORK{
     LOUQ                LouQHeader;
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
+
+typedef struct _LOUQ_WORK_STRUCTURE{
+    string          Identifier;
+    size_t          ActiveQCount; 
+    mutex_t         StructureLock;
+    uint64_t        StructureFlags;
+    PLOUQ_WORK      NonActiveMembers;
+    //the Non active mebers are pushed to the ActiveMembers
+    //stack and removed from non ActiveMembers so that the
+    //next worker can just grab from the ActiveMembers through
+    //an array access rather than using the Listings
+    PLOUQ_WORK       ActiveMembers;
+}LOUQ_WORK_STRUCTURE, * PLOUQ_WORK_STRUCTURE;
 
 typedef struct  _LOUQ_INTEFACE{
     PLOUQ NextInLine;
@@ -54,6 +68,11 @@ typedef struct _LOUQ_LIMITS{
     uint64_t OperationLimitFlags;
 }LOUQ_LIMITS, * PLOUQ_LIMITS;
 
+#define KERNEL_WORK_QUEUE 0
+#define USER_WORK_QUEUE   1
+
+PLOUQ_WORK_STRUCTURE LouKeMallocLouQWorkManagement(string Identifer, uint64_t StructureFlags, size_t MaxActive);
+#define LouKeMallocLouQWorkStream(Identifer, StructureFlags) LouKeMallocLouQWorkManagement(Identifer, StructureFlags, 1)
 
 #ifdef __cplusplus
 }

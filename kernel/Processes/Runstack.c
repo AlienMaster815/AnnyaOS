@@ -85,7 +85,7 @@ void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_
     //MutexUnlock(&FuckThis);
 }
 
-typedef struct  __attribute__((packed)) _CPUContext{
+typedef struct  PACKED _CPUContext{
 
     uint64_t rip;       // Instruction Pointer (user-mode entry point)
     uint64_t cs;        // Code Segment (should be set to user mode, typically 0x1B for x86_64)

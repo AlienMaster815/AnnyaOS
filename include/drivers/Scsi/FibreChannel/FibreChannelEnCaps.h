@@ -42,7 +42,7 @@ enum FIBRE_CHANNEL_SOF{
     FIBRE_CHANNEL_SOF_N2    = 0x35,
     FIBRE_CHANNEL_SOF_N3    = 0x36,
     FIBRE_CHANNEL_SOF_C4    = 0x39,
-}__attribute__((packed));//sanity pack
+}PACKED;//sanity pack
 
 enum FIBRE_CHANNEL_EOF{
     FIBRE_CHANNEL_EOF_N     = 0x41,
@@ -53,7 +53,7 @@ enum FIBRE_CHANNEL_EOF{
     FIBRE_CHANNEL_EOF_DTI   = 0x4E,
     FIBRE_CHANNEL_EOF_RTI   = 0x4F,
     FIBRE_CHANNEL_EOF_A     = 0x50,
-}__attribute__((packed));//sanity pack
+}PACKED;//sanity pack
 
 typedef enum {
     FIBRE_CHANNEL_CLASS_NONE    = 0,

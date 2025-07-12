@@ -6,6 +6,7 @@
 
 static uint64_t SafePage = 0x00;
 
+
 void CacheFlush(void* addr) {
     asm volatile ("clflush (%0)" :: "r"(addr) : "memory");
     asm volatile ("mfence");

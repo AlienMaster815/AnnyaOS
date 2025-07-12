@@ -462,7 +462,7 @@ extern "C" {
 typedef union _GAS_ADDRES_SPACE{
     uint64_t SystemMemoryAddress;
     uint64_t SystemIoAddress;
-    struct __attribute__((packed)){
+    struct PACKED{
         //x86_64 bit is LE 0 bit first 
         //and is confined by bus and group 0
         uint16_t Offset;
@@ -470,7 +470,7 @@ typedef union _GAS_ADDRES_SPACE{
         uint16_t Device;
         uint16_t Zero;
     }PciConfigAddress;
-    struct __attribute__((packed)){ 
+    struct PACKED{ 
         //this compiler has a glitch for 
         //padding bit fields so all defines 
         //are uint64_t
@@ -483,15 +483,15 @@ typedef union _GAS_ADDRES_SPACE{
     }PciBarAddress;
 }GAS_ADDRES_SPACE, * PGAS_ADDRES_SPACE;
 
-typedef struct __attribute__((packed)) _GENERAL_ADRESS_STRUCTURE{//GAS
+typedef struct PACKED _GENERAL_ADRESS_STRUCTURE{//GAS
     uint8_t                                                 AddressSpaceID;
     uint8_t                                                 RegisterWidth; //bits
     uint8_t                                                 RegisterOffset;//bits
     uint8_t                                                 AccessSize;
-    GAS_ADDRES_SPACE                                        Address;
+    uint64_t                                                Address;
 }GENERAL_ADRESS_STRUCTURE, * PGENERAL_ADRESS_STRUCTURE;
 
-typedef struct __attribute__((packed)) _ROOT_SYSTEM_DISCRIPTION_POINTER{
+typedef struct PACKED _ROOT_SYSTEM_DISCRIPTION_POINTER{
     char                                                    Signature[8];
     uint8_t                                                 Checksum;
     char                                                    OemID[6];
@@ -503,7 +503,7 @@ typedef struct __attribute__((packed)) _ROOT_SYSTEM_DISCRIPTION_POINTER{
     uint8_t                                                 Reserved[3];
 }ROOT_SYSTEM_DISCRIPTION_POINTER, * PROOT_SYSTEM_DISCRIPTION_POINTER;
 
-typedef struct __attribute__((packed)) _TABLE_DESCRIPTION_HEADER{
+typedef struct PACKED _TABLE_DESCRIPTION_HEADER{
     char                                                    Signature[4];   //4
     uint32_t                                                Length;         //8
     uint8_t                                                 Revision;       //9
@@ -515,17 +515,17 @@ typedef struct __attribute__((packed)) _TABLE_DESCRIPTION_HEADER{
     uint32_t                                                CreatorRevision;//36
 }TABLE_DESCRIPTION_HEADER, * PTABLE_DESCRIPTION_HEADER;
 
-typedef struct __attribute__((packed)) _ROOT_SYSTEM_DISCRIPTION_TABLE{
+typedef struct PACKED _ROOT_SYSTEM_DISCRIPTION_TABLE{
     TABLE_DESCRIPTION_HEADER                                RsdtHeader;//XSDT
     uint32_t                                                DescriptionHeaders[];
 }ROOT_SYSTEM_DISCRIPTION_TABLE, * PROOT_SYSTEM_DISCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _EXTENDED_SYSTEM_DESCRIPTION_TABLE{
+typedef struct PACKED _EXTENDED_SYSTEM_DESCRIPTION_TABLE{
     TABLE_DESCRIPTION_HEADER                                XsdtHeader; //XSDT
     uint64_t                                                DescriptionHeaders[];
 }EXTENDED_SYSTEM_DESCRIPTION_TABLE, * PEXTENDED_SYSTEM_DESCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _FIXED_ACPI_DESCRIPTION_TABLE{ //FADT
+typedef struct PACKED _FIXED_ACPI_DESCRIPTION_TABLE{ //FADT
     TABLE_DESCRIPTION_HEADER    FadtHeader;
     uint32_t                    FacsTablePhyPointer; //
     uint32_t                    DsdtTablePhyPointer; 
@@ -583,7 +583,7 @@ typedef struct __attribute__((packed)) _FIXED_ACPI_DESCRIPTION_TABLE{ //FADT
     uint64_t                    HypervisorVendorIdentity;
 }FIXED_ACPI_DESCRIPTION_TABLE, * PFIXED_ACPI_DESCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _FIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE{
+typedef struct PACKED _FIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE{
     char                                                    Signature[4]; //FACS
     uint32_t                                                Length;
     uint32_t                                                HardwareSignature;
@@ -597,17 +597,17 @@ typedef struct __attribute__((packed)) _FIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE{
     uint8_t                                                 Reserved2[24];
 }FIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE, * PFIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE;
 
-typedef struct __attribute__((packed)) _DIFFERETIATED_SYSTEM_DESCRIPTION_TABLE{
+typedef struct PACKED _DIFFERETIATED_SYSTEM_DESCRIPTION_TABLE{
     TABLE_DESCRIPTION_HEADER                                DsdtHeader;
     uint8_t                                                 AmericanMachineLanguage[];
 }DIFFERETIATED_SYSTEM_DESCRIPTION_TABLE, * PDIFFERETIATED_SYSTEM_DESCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _SECONDARY_SYSTEM_DESCRIPTION_TABLE{
+typedef struct PACKED _SECONDARY_SYSTEM_DESCRIPTION_TABLE{
     TABLE_DESCRIPTION_HEADER                                SsdtHeader;
     uint8_t                                                 AmericanMachineLanguage[];
 }SECONDARY_SYSTEM_DESCRIPTION_TABLE, * PSECONDARY_SYSTEM_DESCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _MULTIPLE_APIC_DESCRIPTION_TABLE{
+typedef struct PACKED _MULTIPLE_APIC_DESCRIPTION_TABLE{
     TABLE_DESCRIPTION_HEADER                                MadtHeader;
     uint32_t                                                LICAddress;
     uint32_t                                                MultipleApicFlags;
@@ -617,7 +617,7 @@ typedef struct __attribute__((packed)) _MULTIPLE_APIC_DESCRIPTION_TABLE{
     //of structures
 }MULTIPLE_APIC_DESCRIPTION_TABLE, * PMULTIPLE_APIC_DESCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE{
     uint8_t                                                 Type;  //0 
     uint8_t                                                 Length;//8
     uint8_t                                                 AcpiProcessorUID;
@@ -625,7 +625,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE{
     uint32_t                                                LocalApicFlags;
 }MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE, * PMADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_IO_APIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_IO_APIC_STRUCTURE{
     uint8_t                                                 Type;  //1
     uint8_t                                                 Length;//12
     uint8_t                                                 IoApicID;
@@ -634,7 +634,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_IO_APIC_STRUCTURE{
     uint32_t                                                GsiBase;
 }MADT_ICS_IO_APIC_STRUCTURE, * PMADT_ICS_IO_APIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCTURE{
+typedef struct PACKED _MADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCTURE{
     uint8_t                                                 Type;  //2
     uint8_t                                                 Length;//10
     uint8_t                                                 Bus;
@@ -643,14 +643,14 @@ typedef struct __attribute__((packed)) _MADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCT
     uint16_t                                                MpsIntiFlags;
 }MADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCTURE, * PMADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_NON_MASKABLE_INTERRUPT_SOURCE_STRUCTURE{
+typedef struct PACKED _MADT_ICS_NON_MASKABLE_INTERRUPT_SOURCE_STRUCTURE{
     uint8_t                                                 Type;  //3
     uint8_t                                                 Length;//8
     uint16_t                                                MpsIntiFlags;
     uint32_t                                                Gsi;
 }MADT_ICS_NON_MASKABLE_INTERRUPT_SOURCE_STRUCTURE, * PMADT_ICS_NON_MASKABLE_INTERRUPT_SOURCE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_APIC_NMI_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LOCAL_APIC_NMI_STRUCTURE{
     uint8_t                                                 Type;  //4
     uint8_t                                                 Length;//6
     uint8_t                                                 ProcessorID;
@@ -658,14 +658,14 @@ typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_APIC_NMI_STRUCTURE{
     uint8_t                                                 LocalInterrupt;
 }MADT_ICS_LOCAL_APIC_NMI_STRUCTURE, * PMADT_ICS_LOCAL_APIC_NMI_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE{
     uint8_t                                                 Type;  //5
     uint8_t                                                 Length;//12
     uint16_t                                                Reserved;//i see what you did here uefi.org thanks for not breaking my -O2 /s
     uint64_t                                                LocalApicAddress;
 }MADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE, * PMADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_IO_SAPIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_IO_SAPIC_STRUCTURE{
     uint8_t                                                 Type;  //6
     uint8_t                                                 Length;//16
     uint8_t                                                 IoApicID;
@@ -674,7 +674,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_IO_SAPIC_STRUCTURE{
     uint64_t                                                IoSapicAddress;
 }MADT_ICS_IO_SAPIC_STRUCTURE, * PMADT_ICS_IO_SAPIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_SAPIC_STATIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LOCAL_SAPIC_STATIC_STRUCTURE{
     uint8_t                                                 Type;  //7
     uint8_t                                                 Length;//Variac
     uint8_t                                                 ProcessorID;
@@ -684,12 +684,12 @@ typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_SAPIC_STATIC_STRUCTURE{
     uint32_t                                                ProcessorUID;
 }MADT_ICS_LOCAL_SAPIC_STATIC_STRUCTURE, * PMADT_ICS_LOCAL_SAPIC_STATIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_SAPIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LOCAL_SAPIC_STRUCTURE{
     MADT_ICS_LOCAL_SAPIC_STATIC_STRUCTURE                   LocalSapicStatic;
     char                                                    ProcessorUIDStr[];
 }MADT_ICS_LOCAL_SAPIC_STRUCTURE, * PMADT_ICS_LOCAL_SAPIC_STRUCTURE; 
 
-typedef struct __attribute__((packed)) _MADT_ICS_PLATFORM_INTERRUPT_SOURCE_STRUCTURE{
+typedef struct PACKED _MADT_ICS_PLATFORM_INTERRUPT_SOURCE_STRUCTURE{
     uint8_t                                                 Type;//8
     uint8_t                                                 Length;//16
     uint16_t                                                MpsIntiFlags;
@@ -701,7 +701,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_PLATFORM_INTERRUPT_SOURCE_STRUC
     uint32_t                                                PlatformInterruptSource;
 }MADT_ICS_PLATFORM_INTERRUPT_SOURCE_STRUCTURE, * PMADT_ICS_PLATFORM_INTERRUPT_SOURCE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_X2_APIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LOCAL_X2_APIC_STRUCTURE{
     uint8_t                                                 Type; //9
     uint8_t                                                 Length;//16
     uint16_t                                                Reserved1;
@@ -710,7 +710,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_X2_APIC_STRUCTURE{
     uint32_t                                                ProcessorID;
 }MADT_ICS_LOCAL_X2_APIC_STRUCTURE, * PMADT_ICS_LOCAL_X2_APIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE{
     uint8_t                                                 Type;//A
     uint8_t                                                 Length;//12
     uint16_t                                                Flags;
@@ -719,7 +719,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE{
     uint8_t                                                 Reserved[3];
 }MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE, * PMADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE;;
 
-typedef union __attribute__((packed)) _MPIDR{ //once again 64s for bit padding glitch
+typedef union PACKED _MPIDR{ //once again 64s for bit padding glitch
     uint64_t                                                FlatValue;
     struct { //Arm systems are BE Last Bit First
         uint64_t                                            MustBeZero : 40;
@@ -737,7 +737,7 @@ typedef union __attribute__((packed)) _MPIDR{ //once again 64s for bit padding g
     }ArmV8;
 }MPIDR, * PMPIDR;
 
-typedef struct __attribute__((packed)) _MADT_ICS_GIC_CPU_INTERFACE_STRUCTURE{
+typedef struct PACKED _MADT_ICS_GIC_CPU_INTERFACE_STRUCTURE{
     uint8_t                                                 Type;//B
     uint8_t                                                 Length;//82
     uint16_t                                                Reserved1;
@@ -759,7 +759,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_GIC_CPU_INTERFACE_STRUCTURE{
     uint16_t                                                Trbeinterrupt;
 }MADT_ICS_GIC_CPU_INTERFACE_STRUCTURE, * PMADT_ICS_GIC_CPU_INTERFACE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_GICD_STRUCTURE{
+typedef struct PACKED _MADT_ICS_GICD_STRUCTURE{
     uint8_t                                                 Type; //C
     uint8_t                                                 Length;//24
     uint16_t                                                Reserved1;
@@ -770,7 +770,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_GICD_STRUCTURE{
     uint8_t                                                 Reserved2[3];
 }MADT_ICS_GICD_STRUCTURE, * PMADT_ICS_GICD_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_GIC_MSI_FRAME_STRUCTURE{
+typedef struct PACKED _MADT_ICS_GIC_MSI_FRAME_STRUCTURE{
     uint8_t                                                 Type;//D
     uint8_t                                                 Length;//24
     uint16_t                                                Reseved1;
@@ -781,7 +781,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_GIC_MSI_FRAME_STRUCTURE{
     uint16_t                                                SpiBase;
 }MADT_ICS_GIC_MSI_FRAME_STRUCTURE, * PMADT_ICS_GIC_MSI_FRAME_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_GIC_REDISTRIBUTER_STRUCTURE{
+typedef struct PACKED _MADT_ICS_GIC_REDISTRIBUTER_STRUCTURE{
     uint8_t                                                 Type;//E
     uint8_t                                                 Length;//16
     uint16_t                                                Reserved1;
@@ -789,7 +789,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_GIC_REDISTRIBUTER_STRUCTURE{
     uint32_t                                                DiscoveryRangeLength;
 }MADT_ICS_GIC_REDISTRIBUTER_STRUCTURE, * PMADT_ICS_GIC_REDISTRIBUTER_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_GIC_INTERRUPT_TRANSLATION_SERIVCE_STRUCTURE{
+typedef struct PACKED _MADT_ICS_GIC_INTERRUPT_TRANSLATION_SERIVCE_STRUCTURE{
     uint8_t                                                 Type;//F
     uint8_t                                                 Length;//20
     uint16_t                                                Reserved1;
@@ -798,7 +798,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_GIC_INTERRUPT_TRANSLATION_SERIV
     uint32_t                                                Reserved2;
 }MADT_ICS_GIC_INTERRUPT_TRANSLATION_SERIVCE_STRUCTURE, * PMADT_ICS_GIC_INTERRUPT_TRANSLATION_SERIVCE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_MULTIPROCESSOR_WAKEUP_MAILBOX_STRUCTURE{
+typedef struct PACKED _MADT_ICS_MULTIPROCESSOR_WAKEUP_MAILBOX_STRUCTURE{
     uint16_t                                                Command;
     uint16_t                                                Reserved1;
     uint32_t                                                ApicID;
@@ -807,7 +807,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_MULTIPROCESSOR_WAKEUP_MAILBOX_S
     uint8_t                                                 FirmwareReserved[2048];
 }MADT_ICS_MULTIPROCESSOR_WAKEUP_MAILBOX_STRUCTURE, * PMADT_ICS_MULTIPROCESSOR_WAKEUP_MAILBOX_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_MULTIPROCESSOR_WAKEUP_STRUCTURE{
+typedef struct PACKED _MADT_ICS_MULTIPROCESSOR_WAKEUP_STRUCTURE{
     uint8_t                                                 Type;//10
     uint8_t                                                 Length;//16
     uint16_t                                                MailboxVersion;
@@ -815,7 +815,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_MULTIPROCESSOR_WAKEUP_STRUCTURE
     MADT_ICS_MULTIPROCESSOR_WAKEUP_MAILBOX_STRUCTURE        MailboxAddress;
 }MADT_ICS_MULTIPROCESSOR_WAKEUP_STRUCTURE, * PMADT_ICS_MULTIPROCESSOR_WAKEUP_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_CORE_PIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_CORE_PIC_STRUCTURE{
     uint8_t                                                 Type; //11
     uint8_t                                                 Length;
     uint8_t                                                 Version;
@@ -824,7 +824,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_CORE_PIC_STRUCTURE{
     uint32_t                                                Flags;
 }MADT_ICS_CORE_PIC_STRUCTURE, * PMADT_ICS_CORE_PIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LEGACY_IO_PIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LEGACY_IO_PIC_STRUCTURE{
     uint8_t                                                 Type; //12
     uint8_t                                                 Length;
     uint8_t                                                 Version;
@@ -834,7 +834,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_LEGACY_IO_PIC_STRUCTURE{
     uint64_t                                                CascadeVectorMapping;
 }MADT_ICS_LEGACY_IO_PIC_STRUCTURE, * PMADT_ICS_LEGACY_IO_PIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_HT_PIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_HT_PIC_STRUCTURE{
     uint8_t                                                 Type;   //13
     uint8_t                                                 Length;
     uint16_t                                                Version;
@@ -843,7 +843,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_HT_PIC_STRUCTURE{
     uint64_t                                                CascadeVector;
 }MADT_ICS_HT_PIC_STRUCTURE, * PMADT_ICS_HT_PIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_EIO_PCI_STRUCTURE{
+typedef struct PACKED _MADT_ICS_EIO_PCI_STRUCTURE{
     uint8_t                                                 Type;//14
     uint8_t                                                 Length;
     uint8_t                                                 Version;
@@ -852,7 +852,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_EIO_PCI_STRUCTURE{
     uint64_t                                                NodeMap;
 }MADT_ICS_EIO_PCI_STRUCTURE, * PMADT_ICS_EIO_PCI_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_MSI_PIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_MSI_PIC_STRUCTURE{
     uint8_t                                                 Type; //15
     uint8_t                                                 Length;
     uint8_t                                                 Version;
@@ -861,7 +861,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_MSI_PIC_STRUCTURE{
     uint32_t                                                VectorCount;
 }MADT_ICS_MSI_PIC_STRUCTURE, * PMADT_ICS_MSI_PIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_BIO_PIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_BIO_PIC_STRUCTURE{
     uint8_t                                                 Type;//16
     uint8_t                                                 Length;
     uint8_t                                                 Version;
@@ -871,7 +871,7 @@ typedef struct __attribute__((packed)) _MADT_ICS_BIO_PIC_STRUCTURE{
     uint16_t                                                GsiBase;
 }MADT_ICS_BIO_PIC_STRUCTURE, * PMADT_ICS_BIO_PIC_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MADT_ICS_LPC_PIC_STRUCTURE{
+typedef struct PACKED _MADT_ICS_LPC_PIC_STRUCTURE{
     uint8_t                                                 Type; //17
     uint8_t                                                 Length;
     uint8_t                                                 Version;
@@ -881,29 +881,29 @@ typedef struct __attribute__((packed)) _MADT_ICS_LPC_PIC_STRUCTURE{
 }MADT_ICS_LPC_PIC_STRUCTURE, * PMADT_ICS_LPC_PIC_STRUCTURE;
 
 
-typedef struct __attribute__((packed)) _SMART_BATTER_TABLE{
+typedef struct PACKED _SMART_BATTER_TABLE{
     TABLE_DESCRIPTION_HEADER                                SbstHeader;
     uint32_t                                                WarningEnergyLevel;
     uint32_t                                                LowEnergyLevel;
     uint32_t                                                CriticalEnergyLevel;
 }SMART_BATTER_TABLE, * PSMART_BATTER_TABLE;
 
-typedef struct __attribute__((packed)) _EMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE{
+typedef struct PACKED _EMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE{
     TABLE_DESCRIPTION_HEADER                                EcdtHeader;
-    uint8_t                                                 EccControl[12];
-    uint8_t                                                 EccData[12];
+    GENERAL_ADRESS_STRUCTURE                                EccControl;
+    GENERAL_ADRESS_STRUCTURE                                EccData;
     uint32_t                                                Uid;
     uint8_t                                                 GpeBit;
     uint8_t                                                 EcId[];
 }EMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE, * PEMBEDDED_CONTROLLER_BOOT_RESOURCES_TABLE;
 
-typedef struct __attribute__((packed)) _STATIC_RESOURCE_AFINITY_TABLE{
+typedef struct PACKED _STATIC_RESOURCE_AFINITY_TABLE{
     TABLE_DESCRIPTION_HEADER                                SratHeader;
-    uint8_t                                                 Reserved[12];
+    GENERAL_ADRESS_STRUCTURE                                Reserved;
     uint8_t                                                 SratBuffer[];    
 }STATIC_RESOURCE_AFINITY_TABLE, * PSTATIC_RESOURCE_AFINITY_TABLE;
 
-typedef struct __attribute__((packed)) _SRAT_LOCAL_APIC_AFFINITY_STRUCTURE{
+typedef struct PACKED _SRAT_LOCAL_APIC_AFFINITY_STRUCTURE{
     uint8_t                                                 Type;//0
     uint8_t                                                 Length;//16
     uint8_t                                                 ProximityDomainLow;
@@ -914,7 +914,7 @@ typedef struct __attribute__((packed)) _SRAT_LOCAL_APIC_AFFINITY_STRUCTURE{
     uint32_t                                                ClockDomain;
 }SRAT_LOCAL_APIC_AFFINITY_STRUCTURE, * PSRAT_LOCAL_APIC_AFFINITY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _SRAT_MEMORY_AFFINITY_STRUTURE{
+typedef struct PACKED _SRAT_MEMORY_AFFINITY_STRUTURE{
     uint8_t                                                 Type;//1
     uint8_t                                                 Length;//40
     uint32_t                                                ProximityDomain;
@@ -928,7 +928,7 @@ typedef struct __attribute__((packed)) _SRAT_MEMORY_AFFINITY_STRUTURE{
     uint64_t                                                Reserved3;
 }SRAT_MEMORY_AFFINITY_STRUTURE, * PSRAT_MEMORY_AFFINITY_STRUTURE;
 
-typedef struct __attribute__((packed)) _SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE{
+typedef struct PACKED _SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE{
     uint8_t                                                 Type;//2
     uint8_t                                                 Length;//24
     uint16_t                                                Reserved1;
@@ -939,7 +939,7 @@ typedef struct __attribute__((packed)) _SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_ST
     uint32_t                                                Reserved2;
 }SRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE, * PSRAT_PROCESSOR_LOCAL_X2_APIC_AFFINITY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _SRAT_GICC_AFFINITY_STRUCTURE{
+typedef struct PACKED _SRAT_GICC_AFFINITY_STRUCTURE{
     uint8_t                                                 Type;//3
     uint8_t                                                 ProximityDomain;
     uint32_t                                                ProcessorUID;
@@ -947,7 +947,7 @@ typedef struct __attribute__((packed)) _SRAT_GICC_AFFINITY_STRUCTURE{
     uint32_t                                                ClockDomain;
 }SRAT_GICC_AFFINITY_STRUCTURE, * PSRAT_GICC_AFFINITY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _SRAT_GIC_ITS_AFFINITY_STRUCTURE{
+typedef struct PACKED _SRAT_GIC_ITS_AFFINITY_STRUCTURE{
     uint8_t                                                 Type;//4;
     uint8_t                                                 Length;// 12
     uint32_t                                                ProximityDomain;
@@ -955,7 +955,7 @@ typedef struct __attribute__((packed)) _SRAT_GIC_ITS_AFFINITY_STRUCTURE{
     uint32_t                                                ItsID;
 }SRAT_GIC_ITS_AFFINITY_STRUCTURE, * PSRAT_GIC_ITS_AFFINITY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _SRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE{
+typedef struct PACKED _SRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE{
     uint8_t                                                 Type;//5
     uint8_t                                                 Length;//32
     uint8_t                                                 Reserved1;
@@ -966,13 +966,13 @@ typedef struct __attribute__((packed)) _SRAT_GENERIC_INITIATOR_AFFINITY_STRUCTUR
     uint32_t                                                Reserved2;
 }SRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE, * PSRAT_GENERIC_INITIATOR_AFFINITY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _ACPI_SPEC_ACPI_DEVICE_HANDLE{
+typedef struct PACKED _ACPI_SPEC_ACPI_DEVICE_HANDLE{
     uint64_t                                                AcpiHID;
     uint32_t                                                AcpiUID;
     uint32_t                                                Reserved;
 }ACPI_SPEC_ACPI_DEVICE_HANDLE, * PACPI_SPEC_ACPI_DEVICE_HANDLE;
 
-typedef struct __attribute__((packed)) _ACPI_BDF_STRUCTURE{
+typedef struct PACKED _ACPI_BDF_STRUCTURE{
     uint8_t     Reserved;
     uint8_t     BusNumber;
     //split bit LE bit 0 first
@@ -980,18 +980,18 @@ typedef struct __attribute__((packed)) _ACPI_BDF_STRUCTURE{
     uint8_t    DeviceNumber     : 6;
 }ACPI_BDF_STRUCTURE, * PACPI_BDF_STRUCTURE;
 
-typedef union __attribute__((packed)) _ACPI_BDF{
+typedef union PACKED _ACPI_BDF{
     uint16_t            FlatValue;
     ACPI_BDF_STRUCTURE  BdfMembers;
 }ACPI_BDF, * PACPI_BDF;
 
-typedef struct __attribute__((packed)) _ACPI_SPEC_PCI_DEVICE_HANDLE{
+typedef struct PACKED _ACPI_SPEC_PCI_DEVICE_HANDLE{
     uint16_t                                                PciSegment;
     ACPI_BDF                                                BdfNumber;
     uint8_t                                                 Reserved;
 }ACPI_SPEC_PCI_DEVICE_HANDLE, * PACPI_SPEC_PCI_DEVICE_HANDLE;
 
-typedef struct __attribute__((packed)) _SRAT_GENERIC_PORT_AFFINITY_STRUCTURE{
+typedef struct PACKED _SRAT_GENERIC_PORT_AFFINITY_STRUCTURE{
     uint8_t                                                 Type;//6
     uint8_t                                                 Length;//32
     uint8_t                                                 Reserved1;
@@ -1002,13 +1002,13 @@ typedef struct __attribute__((packed)) _SRAT_GENERIC_PORT_AFFINITY_STRUCTURE{
     uint32_t                                                Reserved2;
 }SRAT_GENERIC_PORT_AFFINITY_STRUCTURE, * PSRAT_GENERIC_PORT_AFFINITY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _SYSTEM_LOCALITY_INFORMATION_TABLE{
+typedef struct PACKED _SYSTEM_LOCALITY_INFORMATION_TABLE{
     TABLE_DESCRIPTION_HEADER    SlitHeader;
     uint64_t                    NumberOfSystemLocality;
     uint8_t                     Entries[];//the matrix entries 00 and 10 = 10
 }SYSTEM_LOCALITY_INFORMATION_TABLE, * PSYSTEM_LOCALITY_INFORMATION_TABLE;
 
-typedef struct __attribute__((packed)) _CPEP_PROCESSOR_STRUCUTRE{
+typedef struct PACKED _CPEP_PROCESSOR_STRUCUTRE{
     uint8_t                     Type; //0
     uint8_t                     Length;//8
     uint8_t                     ProcessorID;
@@ -1016,13 +1016,13 @@ typedef struct __attribute__((packed)) _CPEP_PROCESSOR_STRUCUTRE{
     uint32_t                    PollingInterval;
 }CPEP_PROCESSOR_STRUCUTRE, * PCPEP_PROCESSOR_STRUCUTRE;
 
-typedef struct __attribute__((packed)) _CORRECTED_PLATFORM_ERROR_POLLING_TABLE{
+typedef struct PACKED _CORRECTED_PLATFORM_ERROR_POLLING_TABLE{
     TABLE_DESCRIPTION_HEADER    CpepHeader;
     uint64_t                    Reserved1;
     CPEP_PROCESSOR_STRUCUTRE    ProcessorStructure[];
 }CORRECTED_PLATFORM_ERROR_POLLING_TABLE, * PCORRECTED_PLATFORM_ERROR_POLLING_TABLE;
 
-typedef struct __attribute__((packed)) _MAXIMUM_SYSTEM_CHARECTERISTICS_TABLE{
+typedef struct PACKED _MAXIMUM_SYSTEM_CHARECTERISTICS_TABLE{
     TABLE_DESCRIPTION_HEADER    MsctHeader;
     uint32_t                    ProximityDomainInfoOffset;
     uint32_t                    MaximumProximityDomains;
@@ -1031,7 +1031,7 @@ typedef struct __attribute__((packed)) _MAXIMUM_SYSTEM_CHARECTERISTICS_TABLE{
     uint8_t                     TableBuffer[]; //starts at MaximumProximityDomains
 }MAXIMUM_SYSTEM_CHARECTERISTICS_TABLE, * PMAXIMUM_SYSTEM_CHARECTERISTICS_TABLE;
 
-typedef struct __attribute__((packed)) _MAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE{
+typedef struct PACKED _MAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE{
     uint8_t                     Revision;//1
     uint8_t                     Length;//22
     uint32_t                    ProximityDomainLow;
@@ -1040,12 +1040,12 @@ typedef struct __attribute__((packed)) _MAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STR
     uint64_t                    MaximumMemoryCapacity;
 }MAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE, *  PMAXIMUM_PROXIMITY_DOMAIN_INFORMATION_STRUCTURE;
 
-typedef struct __attribute__((packed)) _RAS_FEATURE_TABLE{
+typedef struct PACKED _RAS_FEATURE_TABLE{
     TABLE_DESCRIPTION_HEADER    RasfHeader;
-    uint8_t                     RasfPlatformCommunicationChannelID[12];
+    GENERAL_ADRESS_STRUCTURE    RasfPlatformCommunicationChannelID;
 }RAS_FEATURE_TABLE, * PRAS_FEATURE_TABLE;
 
-typedef struct __attribute__((packed)) _RASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION{
+typedef struct PACKED _RASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION{
     uint32_t                    Signature;
     uint16_t                    Command;
     uint16_t                    Status;
@@ -1057,28 +1057,28 @@ typedef struct __attribute__((packed)) _RASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REG
     uint8_t                     ParameterBlocks[];
 }RASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION, * PRASF_PLAT_COMM_CHANNEL_SHARED_MEMORY_REGION;
 
-typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB_FLAGS_STRCUTRE{
+typedef struct PACKED _RASF_PATROL_SCRUB_FLAGS_STRCUTRE{
     uint8_t     CurrentPatrolSpeed : 3;
     uint8_t     ReservedLow        : 5;
     uint16_t    ReservedHigh;
 }RASF_PATROL_SCRUB_FLAGS_STRCUTRE, * PRASF_PATROL_SCRUB_FLAGS_STRCUTRE;
 
-typedef union __attribute__((packed)) _RASF_PATROL_SCRUB_FLAGS{
+typedef union PACKED _RASF_PATROL_SCRUB_FLAGS{
     uint16_t                            FlatValue;
     RASF_PATROL_SCRUB_FLAGS_STRCUTRE    SpecFlags;
 }RASF_PATROL_SCRUB_FLAGS, * PRASF_PATROL_SCRUB_FLAGS;
 
-typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE{
+typedef struct PACKED _RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE{
     uint8_t     Speed       : 2;
     uint8_t     Reserved    : 6;
 }RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE, * PRASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE;
 
-typedef union __attribute__((packed)) _RASF_PATROL_SCRUB_REQUEST_SPEED{
+typedef union PACKED _RASF_PATROL_SCRUB_REQUEST_SPEED{
     uint8_t                                     FlatValue;
     RASF_PATROL_SCRUB_REQUEST_SPEED_STRUCTURE   Speed;
 }RASF_PATROL_SCRUB_REQUEST_SPEED, * PRASF_PATROL_SCRUB_REQUEST_SPEED;
 
-typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB{
+typedef struct PACKED _RASF_PATROL_SCRUB{
     uint16_t                            Type;   
     uint16_t                            Version;
     uint16_t                            Length;
@@ -1089,21 +1089,21 @@ typedef struct __attribute__((packed)) _RASF_PATROL_SCRUB{
     RASF_PATROL_SCRUB_REQUEST_SPEED     RequestSpeed;
 }RASF_PATROL_SCRUB, * PRASF_PATROL_SCRUB;
 
-typedef struct __attribute__((packed)) _RAS2_PCC_DESCRIPTOR{
+typedef struct PACKED _RAS2_PCC_DESCRIPTOR{
     uint8_t                             PccID;
     uint16_t                            Reserved;
     uint8_t                             FeatureType;
     uint32_t                            Instance;
 }RAS2_PCC_DESCRIPTOR, * PRAS2_PCC_DESCRIPTOR;
 
-typedef struct __attribute__((packed)) _RAS_FEATURE_2_TABLE{
+typedef struct PACKED _RAS_FEATURE_2_TABLE{
     TABLE_DESCRIPTION_HEADER            Ras2Header;
     uint16_t                            Reserved1;
     uint16_t                            PccDescriptors;
     RAS2_PCC_DESCRIPTOR                 Ras2PCCDescriptorList[];
 }RAS_FEATURE_2_TABLE, * PRAS_FEATURE_2_TABLE;
 
-typedef struct __attribute__((packed)) _RAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION{
+typedef struct PACKED _RAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION{
     uint32_t                            Signature;
     uint16_t                            Command;
     uint16_t                            Status;
@@ -1115,14 +1115,14 @@ typedef struct __attribute__((packed)) _RAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION{
     uint8_t                             ParameterBlocks[];
 }RAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION, * PRAS2_PCC_CHANNEL_SHARED_MEMPRY_REGION;
 
-typedef struct __attribute__((packed)) _RAS2_FEATURE_TYPE_0{
+typedef struct PACKED _RAS2_FEATURE_TYPE_0{
     uint8_t                             PccIdentifier;
     uint16_t                            Reserved;
     uint8_t                             FeatureType;
     uint32_t                            Instance;
 }RAS2_FEATURE_TYPE_0, * PRAS2_FEATURE_TYPE_0;
 
-typedef struct __attribute__((packed)) _RAS2_PATROL_SCRUB_PARAMETER_BLOCK{
+typedef struct PACKED _RAS2_PATROL_SCRUB_PARAMETER_BLOCK{
     uint16_t                            Type;
     uint16_t                            Version;
     uint16_t                            Length;
@@ -1133,7 +1133,7 @@ typedef struct __attribute__((packed)) _RAS2_PATROL_SCRUB_PARAMETER_BLOCK{
     uint32_t                            ScrubParameters;
 }RAS2_PATROL_SCRUB_PARAMETER_BLOCK, * PRAS2_PATROL_SCRUB_PARAMETER_BLOCK;
 
-typedef struct __attribute__((packed)) _RAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK{
+typedef struct PACKED _RAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK{
     uint16_t        Type;
     uint16_t        Version;
     uint16_t        Length;
@@ -1144,7 +1144,7 @@ typedef struct __attribute__((packed)) _RAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK{
     uint32_t        Status;
 }RAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK, * PRAS2_LA2PA_TRANSLATION_PARAMETER_BLOCK;
 
-typedef struct __attribute__((packed)) _MEMORY_POWER_STATE_TABLE{
+typedef struct PACKED _MEMORY_POWER_STATE_TABLE{
     TABLE_DESCRIPTION_HEADER            MpstHeader;
     uint8_t                             MpstPccID;
     uint8_t                             Reserved1[3];
@@ -1153,7 +1153,7 @@ typedef struct __attribute__((packed)) _MEMORY_POWER_STATE_TABLE{
     uint8_t                             MemoryPowerNodeBuffer[];
 }MEMORY_POWER_STATE_TABLE, * PMEMORY_POWER_STATE_TABLE;
 
-typedef struct __attribute__((packed)) _MPST_PCC_SHARED_MEMORY_REGION{
+typedef struct PACKED _MPST_PCC_SHARED_MEMORY_REGION{
     uint32_t    Signature;
     uint16_t    Command;
     uint16_t    Status;
@@ -1165,7 +1165,7 @@ typedef struct __attribute__((packed)) _MPST_PCC_SHARED_MEMORY_REGION{
     uint64_t    ExpectedAveragePowerConsumed;
 }MPST_PCC_SHARED_MEMORY_REGION, * PMPST_PCC_SHARED_MEMORY_REGION;
 
-typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_NODE{
+typedef struct PACKED _MPST_MEMORY_POWER_NODE{
     uint8_t     Flag;
     uint8_t     Reserved;
     uint16_t    MemoryPowerNodeID;
@@ -1179,22 +1179,22 @@ typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_NODE{
     uint8_t     MPNBuffer[];
 }MPST_MEMORY_POWER_NODE, * PMPST_MEMORY_POWER_NODE;
 
-typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_STATE{
+typedef struct PACKED _MPST_MEMORY_POWER_STATE{
     uint8_t     PowerStateValue;
     uint8_t     PowerStateInformationIndex;
 }MPST_MEMORY_POWER_STATE, * PMPST_MEMORY_POWER_STATE;
 
-typedef struct __attribute__((packed)) _MPST_MPSC_POWER_STATE_ID_STRCUTURE{
+typedef struct PACKED _MPST_MPSC_POWER_STATE_ID_STRCUTURE{
     uint8_t     FormatID            : 6;
     uint8_t     StrucutreRevision   : 2;
 }MPST_MPSC_POWER_STATE_ID_STRCUTURE, * PMPST_MPSC_POWER_STATE_ID_STRCUTURE;
 
-typedef union __attribute__((packed)) _MPST_MPSC_POWER_STATE_ID{
+typedef union PACKED _MPST_MPSC_POWER_STATE_ID{
     uint8_t                                 FlatValue;
     MPST_MPSC_POWER_STATE_ID_STRCUTURE      SpecValue;
 }MPST_MPSC_POWER_STATE_ID, * PMPST_MPSC_POWER_STATE_ID;
 
-typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_STATE_CHARECTERISTICS{
+typedef struct PACKED _MPST_MEMORY_POWER_STATE_CHARECTERISTICS{
     MPST_MPSC_POWER_STATE_ID        PowerStateID;
     uint8_t                         Flags;
     uint16_t                        Reserved1;
@@ -1204,13 +1204,13 @@ typedef struct __attribute__((packed)) _MPST_MEMORY_POWER_STATE_CHARECTERISTICS{
     uint64_t                        Reserved2;
 }MPST_MEMORY_POWER_STATE_CHARECTERISTICS, * PMPST_MEMORY_POWER_STATE_CHARECTERISTICS;
 
-typedef struct __attribute__((packed)) _PLATFORM_MEMORY_TOPOLOGY_TABLE{
+typedef struct PACKED _PLATFORM_MEMORY_TOPOLOGY_TABLE{
     TABLE_DESCRIPTION_HEADER        PmttHeader;
     uint32_t                        NumberOfMemoryDevices;
     uint8_t                         MemoryDeviceBuffer[];
 }PLATFORM_MEMORY_TOPOLOGY_TABLE, * PPLATFORM_MEMORY_TOPOLOGY_TABLE;
 
-typedef struct __attribute__((packed)) _PMTT_COMMON_MEMORY_DEVICE{
+typedef struct PACKED _PMTT_COMMON_MEMORY_DEVICE{
     uint8_t     Type;
     uint8_t     Reserved1;
     uint16_t    Length;
@@ -1219,43 +1219,43 @@ typedef struct __attribute__((packed)) _PMTT_COMMON_MEMORY_DEVICE{
     uint32_t    NumberOfMemoryDevices;
 }PMTT_COMMON_MEMORY_DEVICE, * PPMTT_COMMON_MEMORY_DEVICE;
 
-typedef struct __attribute__((packed)) _PMTT_CMD_SOCKET_TYPE_DATA{
+typedef struct PACKED _PMTT_CMD_SOCKET_TYPE_DATA{
     PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
     uint16_t                    SocketIdentifier;
     uint16_t                    Reserved1;
     uint8_t                     MemorDeviceData[];
 }PMTT_CMD_SOCKET_TYPE_DATA, * PPMTT_CMD_SOCKET_TYPE_DATA;
 
-typedef struct __attribute__((packed)) _PMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA{
+typedef struct PACKED _PMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA{
     PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
     uint16_t                    MemoryControllerIdentifier;
     uint16_t                    Reserved1;
     uint8_t                     MemorDeviceData[];
 }PMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA, * PPMTT_CMD_MEMORY_CONTROLLER_TYPE_DATA;
 
-typedef struct __attribute__((packed)) _PMTT_CMD_DIMM_TYPE_DATA{
+typedef struct PACKED _PMTT_CMD_DIMM_TYPE_DATA{
     PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
     uint32_t                    SmBiosHandle;
 }PMTT_CMD_DIMM_TYPE_DATA, * PPMTT_CMD_DIMM_TYPE_DATA;
 
-typedef struct __attribute__((packed)) _PMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA{
+typedef struct PACKED _PMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA{
     PMTT_COMMON_MEMORY_DEVICE   CommonDeviceHeader;
     uint8_t                     TypeUUID[16];
     uint8_t                     VendorSpecificData[];
 }PMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA, * PPMTT_CMD_VENDOR_SPECIFIC_TYPE_DATA;
 
-typedef struct __attribute__((packed)) _BGRT_STATUS_STRUCTURE{
+typedef struct PACKED _BGRT_STATUS_STRUCTURE{
     uint8_t                     Displayed           : 1;
     uint8_t                     OrientationOffset   : 2;
     uint8_t                     Reserved            : 5;
 }BGRT_STATUS_STRUCTURE, * PBGRT_STATUS_STRUCTURE;
 
-typedef union __attribute__((packed)) _BGRT_STATUS{
+typedef union PACKED _BGRT_STATUS{
     uint8_t                 FlatValue;
     BGRT_STATUS_STRUCTURE   SpecFlags;
 }BGRT_STATUS, * PBGRT_STATUS;
 
-typedef struct __attribute__((packed)) _BOOT_GRAPHICS_RESOURCE_TABLE{
+typedef struct PACKED _BOOT_GRAPHICS_RESOURCE_TABLE{
     TABLE_DESCRIPTION_HEADER    BgrtHeader;
     uint16_t                    Version;
     BGRT_STATUS                 Status;
@@ -1265,19 +1265,19 @@ typedef struct __attribute__((packed)) _BOOT_GRAPHICS_RESOURCE_TABLE{
     uint32_t                    ImageOffsetY;
 }BOOT_GRAPHICS_RESOURCE_TABLE, * PBOOT_GRAPHICS_RESOURCE_TABLE;
 
-typedef struct __attribute__((packed)) _FIRMWARE_PERFORMANCE_DATA_TABLE{
+typedef struct PACKED _FIRMWARE_PERFORMANCE_DATA_TABLE{
     TABLE_DESCRIPTION_HEADER    FpdtHeader;
     uint8_t                     RecordBuffer[];
 }FIRMWARE_PERFORMANCE_DATA_TABLE, * PFIRMWARE_PERFORMANCE_DATA_TABLE;
 
-typedef struct __attribute__((packed)) _FPDT_PERFORMANCE_RECORD{
+typedef struct PACKED _FPDT_PERFORMANCE_RECORD{
     uint16_t                    PerformanceRecord;
     uint8_t                     RecordLength;
     uint8_t                     Revision;
     uint8_t                     Data[];
 }FPDT_PERFORMANCE_RECORD, * PFPDT_PERFORMANCE_RECORD;
 
-typedef struct __attribute__((packed)) _FPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER{
+typedef struct PACKED _FPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER{
     uint16_t                    PerformanceRecordType;
     uint8_t                     RecordLength; //16
     uint8_t                     Revision;
@@ -1285,7 +1285,7 @@ typedef struct __attribute__((packed)) _FPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTE
     uint64_t                    Pointer;
 }FPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER, * PFPDT_BASIC_BOOT_PERFORMANCE_TABLE_POINTER;
 
-typedef struct __attribute__((packed)) _FPDT_S3_PERFORMANCE_TABLE_POINTER{
+typedef struct PACKED _FPDT_S3_PERFORMANCE_TABLE_POINTER{
     uint16_t                    PerformanceRecordType;
     uint8_t                     RecordLength; //16
     uint8_t                     Revision;
@@ -1293,7 +1293,7 @@ typedef struct __attribute__((packed)) _FPDT_S3_PERFORMANCE_TABLE_POINTER{
     uint64_t                    Pointer;
 }FPDT_S3_PERFORMANCE_TABLE_POINTER, * PFPDT_S3_PERFORMANCE_TABLE_POINTER;
 
-typedef struct __attribute__((packed)) _PFPDT_BASIC_BOOT_PERFORMANCE_TABLE{
+typedef struct PACKED _PFPDT_BASIC_BOOT_PERFORMANCE_TABLE{
     char                        Signature[4];
     uint32_t                    Length;
     uint16_t                    PerformanceRecordType;
@@ -1307,12 +1307,12 @@ typedef struct __attribute__((packed)) _PFPDT_BASIC_BOOT_PERFORMANCE_TABLE{
     uint64_t                    ExitBootServiceExit;
 }PFPDT_BASIC_BOOT_PERFORMANCE_TABLE, * PPFPDT_BASIC_BOOT_PERFORMANCE_TABLE;
 
-typedef struct __attribute__((packed)) _S3_PERFROMANCE_TABLE_HEADER{
+typedef struct PACKED _S3_PERFROMANCE_TABLE_HEADER{
     char                        Signature[4];
     uint32_t                    Length;
 }S3_PERFROMANCE_TABLE_HEADER, * PS3_PERFROMANCE_TABLE_HEADER;
 
-typedef struct __attribute__((packed)) _BASIC_S3_RESUME_PERFORMANCE_RECORD{
+typedef struct PACKED _BASIC_S3_RESUME_PERFORMANCE_RECORD{
     uint16_t                    RuntimePerformanceRecord;
     uint8_t                     RecordLength;
     uint8_t                     Revision;
@@ -1321,7 +1321,7 @@ typedef struct __attribute__((packed)) _BASIC_S3_RESUME_PERFORMANCE_RECORD{
     uint64_t                    AverageResume;
 }BASIC_S3_RESUME_PERFORMANCE_RECORD, * PBASIC_S3_RESUME_PERFORMANCE_RECORD; 
 
-typedef struct __attribute__((packed)) _BASIC_S3_SUSPEND_PERFORMANCE_RECORD{
+typedef struct PACKED _BASIC_S3_SUSPEND_PERFORMANCE_RECORD{
     uint16_t                    RuntimePerformanceRecord;
     uint8_t                     RecordLength;
     uint8_t                     Revision;
@@ -1329,7 +1329,7 @@ typedef struct __attribute__((packed)) _BASIC_S3_SUSPEND_PERFORMANCE_RECORD{
     uint64_t                    SuspendEnd;
 }BASIC_S3_SUSPEND_PERFORMANCE_RECORD, * PBASIC_S3_SUSPEND_PERFORMANCE_RECORD;
 
-typedef struct __attribute__((packed)) _GENERIC_TIMER_DESCRIPTION_TABLE{
+typedef struct PACKED _GENERIC_TIMER_DESCRIPTION_TABLE{
     TABLE_DESCRIPTION_HEADER    GtdtHeader;
     uint64_t                    CounterControlBase;
     uint32_t                    Reserved;
@@ -1349,7 +1349,7 @@ typedef struct __attribute__((packed)) _GENERIC_TIMER_DESCRIPTION_TABLE{
     uint8_t                     PlatformTimerStruct[];
 }GENERIC_TIMER_DESCRIPTION_TABLE, * PGENERIC_TIMER_DESCRIPTION_TABLE;
 
-typedef struct __attribute__((packed)) _GTDT_GT_BLOCK_TIMER_STRUCTURE{
+typedef struct PACKED _GTDT_GT_BLOCK_TIMER_STRUCTURE{
     uint8_t     GtFrameNumber;
     uint8_t     Reserved1[3];
     uint64_t    CountControlBaseX;
@@ -1357,7 +1357,7 @@ typedef struct __attribute__((packed)) _GTDT_GT_BLOCK_TIMER_STRUCTURE{
     uint32_t    GTxPhysicalTimerGsi;
 }GTDT_GT_BLOCK_TIMER_STRUCTURE, * PGTDT_GT_BLOCK_TIMER_STRUCTURE;
 
-typedef struct __attribute__((packed)) _GTDT_GT_BLOCK_STRUCUTRE{
+typedef struct PACKED _GTDT_GT_BLOCK_STRUCUTRE{
     uint8_t                         Type;
     uint16_t                        Length;
     uint8_t                         Reserved;
@@ -1367,7 +1367,7 @@ typedef struct __attribute__((packed)) _GTDT_GT_BLOCK_STRUCUTRE{
     GTDT_GT_BLOCK_TIMER_STRUCTURE   GtBlockTimerData[];
 }GTDT_GT_BLOCK_STRUCUTRE, * PGTDT_GT_BLOCK_STRUCUTRE;
 
-typedef struct __attribute__((packed)) _GTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE{
+typedef struct PACKED _GTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE{
     uint8_t     Type;
     uint16_t    Length;
     uint8_t     Reserved1;
@@ -1377,13 +1377,13 @@ typedef struct __attribute__((packed)) _GTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE{
     uint32_t    WatchdogTimerFlags;
 }GTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE, * PGTDT_ARM_GENERIC_WATCHDOG_STRUCUTRE;
 
-typedef struct __attribute__((packed)) _NVDIMM_FIRMWARE_INTERFACE_TABLE{
+typedef struct PACKED _NVDIMM_FIRMWARE_INTERFACE_TABLE{
     TABLE_DESCRIPTION_HEADER        NFitHeader;
     uint32_t                        Reserved;
     uint8_t                         NFitBuffer[];
 }NVDIMM_FIRMWARE_INTERFACE_TABLE, * PNVDIMM_FIRMWARE_INTERFACE_TABLE;
 
-typedef struct __attribute__((packed)) _NFIT_SPA_RANGE_STRUCTURE{
+typedef struct PACKED _NFIT_SPA_RANGE_STRUCTURE{
     uint16_t    Type;
     uint16_t    Length;
     uint16_t    SPARangeIndex;
@@ -1397,7 +1397,7 @@ typedef struct __attribute__((packed)) _NFIT_SPA_RANGE_STRUCTURE{
     uint64_t    SpaLocationCookie;
 }NFIT_SPA_RANGE_STRUCTURE, * PNFIT_SPA_RANGE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _NFIT_NVDIMM_REGION_MAPPING{
+typedef struct PACKED _NFIT_NVDIMM_REGION_MAPPING{
     uint16_t    Type;
     uint16_t    Length;
     uint32_t    NFITDeviceHandle;
@@ -1414,7 +1414,7 @@ typedef struct __attribute__((packed)) _NFIT_NVDIMM_REGION_MAPPING{
     uint16_t    Reserved2;
 }NFIT_NVDIMM_REGION_MAPPING, * PNFIT_NVDIMM_REGION_MAPPING;
 
-typedef struct __attribute__((packed)) _NFIT_INTERLEAVE_STRUCTURE{
+typedef struct PACKED _NFIT_INTERLEAVE_STRUCTURE{
     uint16_t    Type;
     uint16_t    Length;
     uint16_t    InterleaveIndex;
@@ -1426,14 +1426,14 @@ typedef struct __attribute__((packed)) _NFIT_INTERLEAVE_STRUCTURE{
     uint32_t    LineMOffset[];
 }NFIT_INTERLEAVE_STRUCTURE, * PNFIT_INTERLEAVE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _NFIT_SMBIOS_INFORMATION_STRUCTURE{
+typedef struct PACKED _NFIT_SMBIOS_INFORMATION_STRUCTURE{
     uint16_t    Type;
     uint16_t    Length;
     uint32_t    Reserved1;
     uint8_t     Data[];
 }NFIT_SMBIOS_INFORMATION_STRUCTURE, * PNFIT_SMBIOS_INFORMATION_STRUCTURE;
 
-typedef struct __attribute__((packed)) _NFIT_NVDIMM_CONTROL_REGION_STRUCTURE{
+typedef struct PACKED _NFIT_NVDIMM_CONTROL_REGION_STRUCTURE{
     uint16_t    Type;
     uint16_t    Length;
     uint16_t    NVDIMMControlRegionIndex;
@@ -1459,7 +1459,7 @@ typedef struct __attribute__((packed)) _NFIT_NVDIMM_CONTROL_REGION_STRUCTURE{
     uint8_t     Reserved2[6];
 }NFIT_NVDIMM_CONTROL_REGION_STRUCTURE, * PNFIT_NVDIMM_CONTROL_REGION_STRUCTURE;
 
-typedef struct __attribute__((packed)) _NFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION{
+typedef struct PACKED _NFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION{
     uint16_t    Type;
     uint16_t    Length;
     uint16_t    NVDIMMControlRegionIndex;
@@ -1470,7 +1470,7 @@ typedef struct __attribute__((packed)) _NFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION{
     uint64_t    AddressOfFirstBlock;
 }NFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION, * PNFIT_NVDIMM_BLOCK_DATA_WINDOWS_REGION;
 
-typedef struct __attribute__((packed)) _NFIT_FLUSH_HINT_ADDRESS{
+typedef struct PACKED _NFIT_FLUSH_HINT_ADDRESS{
     uint16_t    Type;
     uint16_t    Length;
     uint32_t    NFITDeviceHandle;
@@ -1481,7 +1481,7 @@ typedef struct __attribute__((packed)) _NFIT_FLUSH_HINT_ADDRESS{
     uint64_t    FlushHintM[];
 }NFIT_FLUSH_HINT_ADDRESS, * PNFIT_FLUSH_HINT_ADDRESS;
 
-typedef struct __attribute__((packed)) _NFIT_PLATFORM_CAPABILITIES{
+typedef struct PACKED _NFIT_PLATFORM_CAPABILITIES{
     uint16_t Type;
     uint16_t Length;
     uint8_t  HighValidCap;
@@ -1490,12 +1490,12 @@ typedef struct __attribute__((packed)) _NFIT_PLATFORM_CAPABILITIES{
     uint32_t Reserved2;
 }NFIT_PLATFORM_CAPABILITIES, * PNFIT_PLATFORM_CAPABILITIES;
 
-typedef struct __attribute__((packed)) _SECURE_DEVICES_TABLE{
+typedef struct PACKED _SECURE_DEVICES_TABLE{
     TABLE_DESCRIPTION_HEADER    SdevHeader;
     uint8_t                     SecureDeviceData[];
 }SECURE_DEVICES_TABLE, * PSECURE_DEVICES_TABLE;
 
-typedef struct __attribute__((packed)) _SDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE{
+typedef struct PACKED _SDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE{
     uint8_t                     Type;
     uint8_t                     Flags;
     uint16_t                    Length;
@@ -1507,7 +1507,7 @@ typedef struct __attribute__((packed)) _SDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE{
     uint16_t                    SecureAccessComponentLength;
 }SDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE, * PSDEV_ACPI_NAMESPACE_DEVICE_STRUCUTRE;
 
-typedef struct __attribute__((packed)) _SDEV_SECURE_ACCESS_COMPONENT_ID_BASED{
+typedef struct PACKED _SDEV_SECURE_ACCESS_COMPONENT_ID_BASED{
     uint8_t                     Type;
     uint8_t                     Flags;
     uint16_t                    Length;
@@ -1523,7 +1523,7 @@ typedef struct __attribute__((packed)) _SDEV_SECURE_ACCESS_COMPONENT_ID_BASED{
     uint8_t                     PciCompatibleProgIF;
 }SDEV_SECURE_ACCESS_COMPONENT_ID_BASED, * PSDEV_SECURE_ACCESS_COMPONENT_ID_BASED;
 
-typedef struct __attribute__((packed)) _SDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED{ 
+typedef struct PACKED _SDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED{ 
     uint8_t     Type;
     uint8_t     Flags;
     uint16_t    Length;
@@ -1532,7 +1532,7 @@ typedef struct __attribute__((packed)) _SDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASE
     uint64_t    MemoryLength;
 }SDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED, * PSDEV_SECURE_ACCESS_COMPONENT_MEMORY_BASED;
 
-typedef struct __attribute__((packed)) _SDEV_PCIE_ENDPOINT_DEVICE{
+typedef struct PACKED _SDEV_PCIE_ENDPOINT_DEVICE{
     uint8_t     Type;
     uint8_t     Flags;
     uint16_t    Length;
@@ -1544,13 +1544,13 @@ typedef struct __attribute__((packed)) _SDEV_PCIE_ENDPOINT_DEVICE{
     uint16_t    VendorSpecificDataLength;
 }SDEV_PCIE_ENDPOINT_DEVICE, * PSDEV_PCIE_ENDPOINT_DEVICE;
 
-typedef struct __attribute__((packed)) _HETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE{
+typedef struct PACKED _HETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE{
     TABLE_DESCRIPTION_HEADER    HmatHeader;
     uint32_t                    Reserved;
     uint8_t                     HmatData[];
 }HETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE, * PHETEROGENEOUS_MEMORY_ATTRIBUTE_TABLE;
 
-typedef struct __attribute__((packed)) _HMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE{
+typedef struct PACKED _HMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE{
     uint16_t    Type;
     uint16_t    Reserved1;
     uint32_t    Length;
@@ -1561,18 +1561,18 @@ typedef struct __attribute__((packed)) _HMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE{
     uint8_t     Reserved3[20];
 }HMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE, * PHMAT_MEMORY_PROXIMITY_DOMAIN_STRUCTURE;
 
-typedef struct __attribute__((packed)) _HMAT_SSLB_FLAG_STRUCTURE{
+typedef struct PACKED _HMAT_SSLB_FLAG_STRUCTURE{
     uint8_t MemoryHierarchy     : 4;
     uint8_t AccessAttributes    : 2;
     uint8_t Reserved            : 2;
 }HMAT_SSLB_FLAG_STRUCTURE, * PHMAT_SSLB_FLAG_STRUCTURE;
 
-typedef union __attribute__((packed)) _HMAT_SSLB_FLAGS{
+typedef union PACKED _HMAT_SSLB_FLAGS{
     uint8_t                     FlatValue;
     HMAT_SSLB_FLAG_STRUCTURE    SpecFlags;
 }HMAT_SSLB_FLAGS, * PHMAT_SSLB_FLAGS;
 
-typedef struct __attribute__((packed)) _HMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE{
+typedef struct PACKED _HMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE{
     uint16_t    Type;
     uint16_t    Reserved1;
     uint32_t    Length;
@@ -1587,7 +1587,7 @@ typedef struct __attribute__((packed)) _HMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_ST
     uint8_t     DataBuffer[];
 }HMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE, * PHMAT_SYSTEM_LOCALITY_LATENCY_BANDWITH_STRUCTURE;
 
-typedef struct __attribute__((packed)) _HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE{
+typedef struct PACKED _HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE{
     uint32_t    CacheLevelCount         : 4;
     uint32_t    CacheLevel              : 4;
     uint32_t    CacheAssociativiy       : 4;
@@ -1595,12 +1595,12 @@ typedef struct __attribute__((packed)) _HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE{
     uint32_t    CacheLineSize           : 16;
 }HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE, * PHMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE;
 
-typedef union __attribute__((packed)) _HMA_MSC_CACHE_ATTRIBUTES{
+typedef union PACKED _HMA_MSC_CACHE_ATTRIBUTES{
     uint32_t                                FlatValue;
     HMAT_MSC_CACHE_ATTRIBUTE_STRUCTURE      SpecFlags;
 }HMA_MSC_CACHE_ATTRIBUTES, * PHMA_MSC_CACHE_ATTRIBUTES;
 
-typedef struct __attribute__((packed)) _HMAT_MEMORY_SIDE_CACHE_STRUCTURE{
+typedef struct PACKED _HMAT_MEMORY_SIDE_CACHE_STRUCTURE{
     uint16_t                    Type;
     uint16_t                    Reserved1;
     uint32_t                    Length;
@@ -1612,7 +1612,7 @@ typedef struct __attribute__((packed)) _HMAT_MEMORY_SIDE_CACHE_STRUCTURE{
     uint8_t                     DataBuffer[];
 }HMAT_MEMORY_SIDE_CACHE_STRUCTURE, * PHMAT_MEMORY_SIDE_CACHE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _PLATFORM_DEBUG_TRIGGER_TABLE{
+typedef struct PACKED _PLATFORM_DEBUG_TRIGGER_TABLE{
     TABLE_DESCRIPTION_HEADER    PdttHeader;
     uint8_t                     TriggerCount;
     uint8_t                     Reserved1[3];
@@ -1620,24 +1620,24 @@ typedef struct __attribute__((packed)) _PLATFORM_DEBUG_TRIGGER_TABLE{
     uint8_t                     PCCBuffer;
 }PLATFORM_DEBUG_TRIGGER_TABLE, * PPLATFORM_DEBUG_TRIGGER_TABLE;
 
-typedef struct __attribute__((packed)) _PDTT_PCC_SHARED_MEMORY_STRUCTURE{
+typedef struct PACKED _PDTT_PCC_SHARED_MEMORY_STRUCTURE{
     uint8_t     Signature[4];
     uint8_t     VendorSpecificData[];
 }PDTT_PCC_SHARED_MEMORY_STRUCTURE, * PPDTT_PCC_SHARED_MEMORY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _PDTT_PLATFOMR_COMMUNICATION_CHANNEL{
+typedef struct PACKED _PDTT_PLATFOMR_COMMUNICATION_CHANNEL{
     uint8_t     Signature[4];
     uint16_t    Command;
     uint16_t    Status;
     uint8_t     VendorSpecific[];
 }PDTT_PLATFOMR_COMMUNICATION_CHANNEL, * PPDTT_PLATFOMR_COMMUNICATION_CHANNEL;
 
-typedef struct __attribute__((packed)) _PROCESSOR_PROPERTIES_TOPOLOGY_TABLE{
+typedef struct PACKED _PROCESSOR_PROPERTIES_TOPOLOGY_TABLE{
     TABLE_DESCRIPTION_HEADER    PpttHeader;
     uint8_t                     TableData[];
 }PROCESSOR_PROPERTIES_TOPOLOGY_TABLE, * PPROCESSOR_PROPERTIES_TOPOLOGY_TABLE;
 
-typedef struct __attribute__((packed)) _PPTT_PROCESSOR_HIERARCHY_NODE{
+typedef struct PACKED _PPTT_PROCESSOR_HIERARCHY_NODE{
     uint8_t     Type;
     uint8_t     Length;
     uint16_t    Reserved1;
@@ -1648,19 +1648,19 @@ typedef struct __attribute__((packed)) _PPTT_PROCESSOR_HIERARCHY_NODE{
     uint32_t    PRivateResources[];
 }PPTT_PROCESSOR_HIERARCHY_NODE, * PPPTT_PROCESSOR_HIERARCHY_NODE;
 
-typedef struct __attribute__((packed)) _PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE{
+typedef struct PACKED _PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE{
     uint8_t     AllocationType  : 2;
     uint8_t     CacheType       : 2;
     uint8_t     WritePolicy     : 1;
     uint8_t     Reserved        : 3;
 }PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE, * PPPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE;
 
-typedef union __attribute__((packed)) _PPTT_CACHE_TYPE_ATTRIBUTE{
+typedef union PACKED _PPTT_CACHE_TYPE_ATTRIBUTE{
     uint8_t                                 FlatValue;
     PPTT_CACHE_TYPE_ATTRIBUTE_STRUCTURE     SpecAttributes;
 }PPTT_CACHE_TYPE_ATTRIBUTE, * PPPTT_CACHE_TYPE_ATTRIBUTE;
 
-typedef struct __attribute__((packed)) _PPTT_CACHE_TYPE{
+typedef struct PACKED _PPTT_CACHE_TYPE{
     uint8_t                     Type;
     uint8_t                     Length;
     uint16_t                    Reserved1;
@@ -1674,25 +1674,25 @@ typedef struct __attribute__((packed)) _PPTT_CACHE_TYPE{
     uint32_t                    CacheID;
 }PPTT_CACHE_TYPE, * PPPTT_CACHE_TYPE;
 
-typedef struct __attribute__((packed)) _PLATFORM_HEALTH_ASSESMENT_TABLE{
+typedef struct PACKED _PLATFORM_HEALTH_ASSESMENT_TABLE{
     TABLE_DESCRIPTION_HEADER    PhatHeader;
     uint8_t                     PhatData[];
 }PLATFORM_HEALTH_ASSESMENT_TABLE, * PPLATFORM_HEALTH_ASSESMENT_TABLE;
 
-typedef struct __attribute__((packed)) _PHAT_PLATFORM_HEALTH_ASSESMENT_RECORD{
+typedef struct PACKED _PHAT_PLATFORM_HEALTH_ASSESMENT_RECORD{
     uint16_t                    PlatformHealthAssesmentType;
     uint16_t                    Length;
     uint8_t                     Revision;
     uint8_t                     RecordData[];
 }PHAT_PLATFORM_HEALTH_ASSESMENT_RECORD, * PPHAT_PLATFORM_HEALTH_ASSESMENT_RECORD;
 
-typedef struct __attribute__((packed)) _PHAT_VERSION_ELEMENT{
+typedef struct PACKED _PHAT_VERSION_ELEMENT{
     GUID                        ComponentID;
     uint64_t                    VersionValue;
     uint32_t                    ProducerID;
 }PHAT_VERSION_ELEMENT, * PPHAT_VERSION_ELEMENT;
 
-typedef struct __attribute__((packed)) _PHAT_FIRMWARE_VERSION_DATA_RECORD{
+typedef struct PACKED _PHAT_FIRMWARE_VERSION_DATA_RECORD{
     uint16_t                    PlatformRecordType;
     uint16_t                    RecoreLength;
     uint8_t                     Revision;
@@ -1701,7 +1701,7 @@ typedef struct __attribute__((packed)) _PHAT_FIRMWARE_VERSION_DATA_RECORD{
     uint8_t                     PhatVersionElement[];
 }PHAT_FIRMWARE_VERSION_DATA_RECORD, * PPHAT_FIRMWARE_VERSION_DATA_RECORD;
 
-typedef struct __attribute__((packed)) _PHAT_FIRMWARE_HEALTH_DATA_RECORD{
+typedef struct PACKED _PHAT_FIRMWARE_HEALTH_DATA_RECORD{
     uint16_t    PlatformRecordType;
     uint16_t    RecordLength;
     uint8_t     Revision;
@@ -1712,7 +1712,7 @@ typedef struct __attribute__((packed)) _PHAT_FIRMWARE_HEALTH_DATA_RECORD{
     uint8_t     Buffer[];
 }PHAT_FIRMWARE_HEALTH_DATA_RECORD, * PPHAT_FIRMWARE_HEALTH_DATA_RECORD; 
 
-typedef struct __attribute__((packed)) _PHAT_REASON_HEALTH_RECORD{
+typedef struct PACKED _PHAT_REASON_HEALTH_RECORD{
     uint16_t    PlatformRecordType;
     uint16_t    RecordLength;
     uint8_t     Revision;
@@ -1724,7 +1724,7 @@ typedef struct __attribute__((packed)) _PHAT_REASON_HEALTH_RECORD{
     uint8_t     DeviceData[];
 }PHAT_REASON_HEALTH_RECORD, * PPHAT_REASON_HEALTH_RECORD;
 
-typedef struct __attribute__((packed)) _PHAT_RESET_REASON_HEALTH_RECORD{
+typedef struct PACKED _PHAT_RESET_REASON_HEALTH_RECORD{
     uint8_t     SupportedSources;
     uint8_t     Source;
     uint8_t     SubSource;
@@ -1733,14 +1733,14 @@ typedef struct __attribute__((packed)) _PHAT_RESET_REASON_HEALTH_RECORD{
     uint8_t     VendorSpecificData[];
 }PHAT_RESET_REASON_HEALTH_RECORD, * PPHAT_RESET_REASON_HEALTH_RECORD;
 
-typedef struct __attribute__((packed)) _PHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY{
+typedef struct PACKED _PHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY{
     GUID        VenodrDataID;
     uint16_t    Length;
     uint16_t    Revision;
     uint8_t     Data[];
 }PHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY, * PPHAT_RESET_REASON_HEALTH_RECORD_DATA_ENTRY;
 
-typedef struct __attribute__((packed)) _VIRTUAL_IO_TRANSLATION_TABLE{
+typedef struct PACKED _VIRTUAL_IO_TRANSLATION_TABLE{
     TABLE_DESCRIPTION_HEADER    ViotTable;
     uint16_t                    NodeCount;
     uint16_t                    NodeOffset;
@@ -1748,7 +1748,7 @@ typedef struct __attribute__((packed)) _VIRTUAL_IO_TRANSLATION_TABLE{
     uint8_t                     NodeList[];    
 }VIRTUAL_IO_TRANSLATION_TABLE, * PVIRTUAL_IO_TRANSLATION_TABLE;
 
-typedef struct __attribute__((packed)) _PCI_RANGENODE_STRUCTURE{
+typedef struct PACKED _PCI_RANGENODE_STRUCTURE{
     uint8_t     Type;
     uint8_t     Reserved1;
     uint16_t    Length;
@@ -1761,7 +1761,7 @@ typedef struct __attribute__((packed)) _PCI_RANGENODE_STRUCTURE{
     uint8_t     Reserved2[16];
 }PCI_RANGENODE_STRUCTURE, * PPCI_RANGENODE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _SINGLE_MMIO_ENDPOINT_NODE_STRUCTURE{
+typedef struct PACKED _SINGLE_MMIO_ENDPOINT_NODE_STRUCTURE{
     uint8_t     Type;
     uint8_t     Reserved1;
     uint16_t    Length;
@@ -1771,7 +1771,7 @@ typedef struct __attribute__((packed)) _SINGLE_MMIO_ENDPOINT_NODE_STRUCTURE{
     uint8_t     Reserved2[6];
 }SINGLE_MMIO_ENDPOINT_NODE_STRUCTURE, * PSINGLE_MMIO_ENDPOINT_NODE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _VIRTIO_PCI_NODE_STRUCTURE{
+typedef struct PACKED _VIRTIO_PCI_NODE_STRUCTURE{
     uint8_t     Type;
     uint8_t     Reserved1;
     uint16_t    Length;
@@ -1780,7 +1780,7 @@ typedef struct __attribute__((packed)) _VIRTIO_PCI_NODE_STRUCTURE{
     uint64_t    Reserved2;
 }VIRTIO_PCI_NODE_STRUCTURE, * PVIRTIO_PCI_NODE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _VIRTIO_MMIO_NODE_STRUCTURE{
+typedef struct PACKED _VIRTIO_MMIO_NODE_STRUCTURE{
     uint8_t     Type;
     uint8_t     Reserved1;
     uint16_t    Length;
@@ -1788,12 +1788,12 @@ typedef struct __attribute__((packed)) _VIRTIO_MMIO_NODE_STRUCTURE{
     uint64_t    BaseAddress;
 }VIRTIO_MMIO_NODE_STRUCTURE, * PVIRTIO_MMIO_NODE_STRUCTURE;
 
-typedef struct __attribute__((packed)) _MISC_GUIDED_TABLE_ENTRIES{
+typedef struct PACKED _MISC_GUIDED_TABLE_ENTRIES{
     TABLE_DESCRIPTION_HEADER    MiscHeader;
     uint8_t                     Entries;
 }MISC_GUIDED_TABLE_ENTRIES, * PMISC_GUIDED_TABLE_ENTRIES;
 
-typedef struct __attribute__((packed)) _MISC_GUIDED_ENTRY_FORMAT{
+typedef struct PACKED _MISC_GUIDED_ENTRY_FORMAT{
     GUID        EntryID;
     uint32_t    EntryLength;
     uint32_t    Revision;
@@ -1801,7 +1801,7 @@ typedef struct __attribute__((packed)) _MISC_GUIDED_ENTRY_FORMAT{
     uint8_t     Data[];
 }MISC_GUIDED_ENTRY_FORMAT, * PMISC_GUIDED_ENTRY_FORMAT;
 
-typedef struct __attribute__((packed)) _CC_EVENT_LOG_ACPI_TABLE{
+typedef struct PACKED _CC_EVENT_LOG_ACPI_TABLE{
     TABLE_DESCRIPTION_HEADER    CcelHeader;
     uint8_t                     CcType;
     uint8_t                     CcSubType;
@@ -1810,14 +1810,14 @@ typedef struct __attribute__((packed)) _CC_EVENT_LOG_ACPI_TABLE{
     uint64_t                    LogAreaStartAddress;
 }CC_EVENT_LOG_ACPI_TABLE, * PCC_EVENT_LOG_ACPI_TABLE;
 
-typedef struct __attribute__((packed)) _SKVL_KEY_STRUCTURE{
+typedef struct PACKED _SKVL_KEY_STRUCTURE{
     uint16_t    KeyType;
     uint16_t    KeyFormat;
     uint32_t    KeySize;
     uint64_t    KeyAddress;
 }SKVL_KEY_STRUCTURE, * PSKVL_KEY_STRUCTURE;
 
-typedef struct __attribute__((packed)) _STORAGE_VOLUME_KEY_LOCATION_TABLE{
+typedef struct PACKED _STORAGE_VOLUME_KEY_LOCATION_TABLE{
     TABLE_DESCRIPTION_HEADER    SkvlHeader;
     uint32_t                    KeyCount;
     SKVL_KEY_STRUCTURE          KeyStructure[];
@@ -1828,6 +1828,38 @@ typedef union _LOU_ACPI_TABLE_POINTER_UNION{
     PFIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE      Facs;
     PDIFFERETIATED_SYSTEM_DESCRIPTION_TABLE     Dsdt;
 }LOU_ACPI_TABLE_POINTER_UNION, * PLOU_ACPI_TABLE_POINTER_UNION;
+
+typedef struct PACKED _PLATFORM_RUNTIME_MECHANISM_HEADER{
+    uint16_t    Revision;
+    uint16_t    Length;
+}PLATFORM_RUNTIME_MECHANISM_HEADER, * PPLATFORM_RUNTIME_MECHANISM_HEADER;
+
+typedef struct PACKED _CXL_EARLY_DISCOVERY_HEADER{
+    uint8_t     Type;
+    uint8_t     Reserved;
+    uint16_t    Length;
+}CXL_EARLY_DISCOVERY_HEADER, * PCXL_EARLY_DISCOVERY_HEADER;
+
+typedef struct PACKED _HETEROGENEOUS_MEMORY_ATTRIBUTE_HEADER{
+    uint16_t    Type;
+    uint16_t    Reserved;
+    uint32_t    Length;
+}HETEROGENEOUS_MEMORY_ATTRIBUTE_HEADER, * PHETEROGENEOUS_MEMORY_ATTRIBUTE_HEADER;
+
+typedef struct PACKED _CDAT_COMMON_HEADER{
+    uint8_t     Type;
+    uint8_t     Reserved;
+    uint16_t    Length;
+}CDAT_COMMON_HEADER, * PCDAT_COMMON_HEADER;
+
+typedef struct PACKED _ACPI_CDAT_TABLE{
+    uint32_t    Length;
+    uint8_t     Revision;
+    uint8_t     Checksum;
+    uint8_t     Reserved[6];
+    uint32_t    Sequence;
+}ACPI_CDAT_TABLE, * PACPI_CDAT_TABLE; 
+
 
 #ifdef __cplusplus
 }
