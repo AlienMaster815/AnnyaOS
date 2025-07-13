@@ -13,11 +13,12 @@ static inline uint64_t read_tsc(void) {
     return ((uint64_t)hi << 32) | lo;
 }
 
+
+
 LOUSTATUS SetUpTimers() {
 	LOUSTATUS Status = LOUSTATUS_GOOD;
 
 	//Start With the Most Reliable And Work From There
-
 
 	//if (LOUSTATUS_GOOD != InitHPET()) {
 		//if no hpet use tsc

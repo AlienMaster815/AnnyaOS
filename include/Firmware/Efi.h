@@ -45,17 +45,20 @@ typedef void*           EFI_HANDLE;
 #endif
 
 typedef struct _EFI_GUID{
-    uint32_t Data1;
-    uint16_t Data2;
-    uint16_t Data3;
-    uint8_t  Data4[8];
+    uint8_t  Data[16];
 } EFI_GUID, * PEFI_GUID;
 
-#define DEFINE_EFI_GUID(Alpha, Brovo, Charlie, Delta...)((EFI_GUID){                        \
-    (Alpha) & 0xFF, ((Alpha) >> 8) & 0xFF, ((Alpha) >> 16) & 0xFF, {((Alpha) >> 24) & 0xFF, \
-    (Brovo) & 0xFF, ((Bravo) >> 8) & 0xFF,                                                  \
-    (Charlie) & 0xFF, ((Charlie) >> 8) & 0xFF, Delta}                                       \
+#define DEFINE_EFI_GUID(Alpha, Bravo, Charlie, Delta...)((EFI_GUID){                        \
+    (Alpha) & 0xFF, ((Alpha) >> 8) & 0xFF, ((Alpha) >> 16) & 0xFF, ((Alpha) >> 24) & 0xFF,  \
+    (Bravo) & 0xFF, ((Bravo) >> 8) & 0xFF,                                                  \
+    (Charlie) & 0xFF, ((Charlie) >> 8) & 0xFF, Delta                                        \
 })
+
+#define DEFINE_GUID(Alpha, Bravo, Charlie, Delta...){                                      \
+    (Alpha) & 0xFF, ((Alpha) >> 8) & 0xFF, ((Alpha) >> 16) & 0xFF, ((Alpha) >> 24) & 0xFF,  \
+    (Bravo) & 0xFF, ((Bravo) >> 8) & 0xFF,                                                  \
+    (Charlie) & 0xFF, ((Charlie) >> 8) & 0xFF, Delta                                        \
+}
 
 typedef struct _EFI_TABLE_HEADER{
     EFI_UINT64          Signature;

@@ -290,22 +290,6 @@ typedef struct {
 } RSDP_DESCRIPTOR_2;
 
 
-RSDP_DESCRIPTOR_2* find_rsdp_from_efi_table(uint64_t efi_system_table_address) {
-    EFI_SYSTEM_TABLE *SystemTable = (EFI_SYSTEM_TABLE *)efi_system_table_address;
-    EFI_CONFIGURATION_TABLE *ConfigTable = (EFI_CONFIGURATION_TABLE *)SystemTable->Tables;
-
-    EFI_GUID Acpi20TableGuid = { 0x8868e871, 0xe4f1, 0x11d3, { 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81 } };
-    EFI_GUID AcpiTableGuid = { 0xeb9d2d30, 0x2d88, 0x11d3, { 0x9a, 0x16, 0x00, 0x0c, 0x29, 0x27, 0x81, 0x98 } };
-
-    for (uint64_t i = 0; i < SystemTable->TableCount; i++) {
-        if (memcmp(&ConfigTable[i].VendorGuid, &Acpi20TableGuid, sizeof(EFI_GUID)) == 0 ||
-            memcmp(&ConfigTable[i].VendorGuid, &AcpiTableGuid, sizeof(EFI_GUID)) == 0) {
-            return (RSDP_DESCRIPTOR_2 *)ConfigTable[i].VendorTable;
-        }
-    }
-
-    return NULL;  // RSDP not found
-}
 
 static uint64_t EfiMemMap = 0x00;
 

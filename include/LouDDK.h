@@ -3,6 +3,7 @@
 
 #include <cstdint.h>
 
+#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 
 #ifndef _GUID_TYPE
 #define _GUID_TYPE

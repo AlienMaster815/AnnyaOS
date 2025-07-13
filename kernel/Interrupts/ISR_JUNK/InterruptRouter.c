@@ -32,7 +32,7 @@ void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t st
 void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 
 
-void local_apic_send_eoi();
+void LouKeSendIcEOI();
 bool GetAPICStatus();
 
 typedef struct _INTERRUPT_ROUTER_ENTRY{
@@ -48,7 +48,7 @@ typedef struct _INTERRUPT_ROUTER_ENTRY{
 static INTERRUPT_ROUTER_ENTRY InterruptRouterTable[256] = {0};
 uint64_t GetAdvancedRegisterInterruptsStorage();
 
-void ioapic_unmask_irq(uint8_t irq);
+void LouKeIcUnmaskIrq(uint8_t irq);
 
 void InterruptWrapper(uint64_t Handler,uint8_t InterruptNumber, bool NeedFlotationSave, uintptr_t OverideData) {
 	RegisterInterruptHandler((void(*)(uint64_t))Handler, InterruptNumber, NeedFlotationSave, OverideData);
@@ -78,7 +78,7 @@ void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, 
 	InterruptRouterTable[InterruptNumber].ListCount++;
     if((InterruptNumber > 32) && (!InterruptRouterTable[InterruptNumber].InterruptUnMasked)){
         InterruptNumber -= 32;
-        ioapic_unmask_irq(InterruptNumber);
+        LouKeIcUnmaskIrq(InterruptNumber);
         InterruptRouterTable[InterruptNumber].InterruptUnMasked = true;
     }
 }
@@ -170,11 +170,11 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
             RestoreEverything(&ContextHandle);
         }
         MutexUnlock(&InterruptLock);
-        local_apic_send_eoi();
+        LouKeSendIcEOI();
         return;
     }
     MutexUnlock(&InterruptLock);
-    local_apic_send_eoi();
+    LouKeSendIcEOI();
     return;
     
 	LouPrint("Interrupt Number: %d Was Called\n",Interrupt);

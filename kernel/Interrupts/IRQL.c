@@ -8,8 +8,7 @@
 #define HIGH_LEVEL 15
 */
 
-void ioapic_mask_irq(uint8_t irq);
-void ioapic_unmask_irq(uint8_t irq);
+void LouKeIcUnmaskIrq(uint8_t irq);
 bool GetAPICStatus();
 
 static LouKIRQL SystemInterruptLevel = HIGH_LEVEL;
@@ -21,9 +20,9 @@ LouKIRQL InterruptSwitch(LouKIRQL New){
 }
 
 void LocalApicSetTimer(bool On);
+void LouKeSendIcEOI();
 
 void SetAllInterrupts(bool Enable){
-    LocalApicSetTimer(Enable);
     if(Enable){
         SetInterruptFlags();
     }
@@ -37,7 +36,6 @@ void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 ){
-    if(GetAPICStatus()){
         if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
             *OldIrql = SystemInterruptLevel; // save the old irql1
         }
@@ -72,7 +70,6 @@ void LouKeSetIrql(
             default: // error case
                 return;
         }
-    }
 }
 
 void KeRaiseIrql( // for wdk compatibility

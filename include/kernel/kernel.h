@@ -15,7 +15,6 @@
 
 
 #include <kernel/memmory.h>
-#include <kernel/acpi.h>
 #include <kernel/gdt.h>
 #include <kernel/apic.h>
 #include <kernel/Clock.h>

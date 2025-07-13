@@ -106,7 +106,7 @@ static inline bool IsThreadInThreadTable(thread_t* Thread){
 
 UNUSED static thread_t* current_thread[MAX_CORES] = {0}; // Track current thread per core
 UNUSED static int thread_count = 0;
-
+KERNEL_IMPORT void LouKeSendIcEOI();
 KERNEL_IMPORT void SetInterruptFlags();
 KERNEL_IMPORT void UnSetInterruptFlags();
 KERNEL_IMPORT void LouKeRunThreadContext(
@@ -127,8 +127,6 @@ static inline uint32_t get_processor_id() {
     return processor_id;
 }
 
-KERNEL_IMPORT void local_apic_send_eoi();
-
 
 UNUSED static uint32_t timeQuantum[MAX_CORES] = {0}; // Array to track the load on each core
 
@@ -137,7 +135,6 @@ static inline int find_next_thread(int CurrentThread) {
     return 0;
 }
 
-LOUDDK_API_ENTRY void local_apic_send_eoi();
 
 KERNEL_IMPORT mutex_t* LouKeGetInterruptGlobalLock();
 
@@ -229,13 +226,14 @@ static void HanldeLouQSystem(uint8_t ProcessorID){
 }
 
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
+    
     uint8_t ProcessorID = get_processor_id();
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
     CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
     
     HanldeLouQSystem(ProcessorID);
-    
+
     if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
@@ -251,6 +249,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
         timeQuantum[ProcessorID]++;
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
+
 
     ProcessorID = get_processor_id();
     CurrentThread = current_thread[ProcessorID];
@@ -284,7 +283,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     current_thread[ProcessorID] = NextThread;
     
     _UPDATE_THREAD_MANAGER_FINISHED:
-    local_apic_send_eoi();
+    LouKeSendIcEOI();
     return CpuCurrentState;
 }
 
@@ -349,7 +348,7 @@ LOUDDK_API_ENTRY uint64_t GetThreadContext(
 KERNEL_IMPORT void ThreadStart(void(*Function)(PVOID), PVOID Parameters);
 
 
-void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, thread_t* ThreadHandle){
+void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, thread_t* ThreadHandle){    
     int Result = Thread(FunctionParam);
     LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
     LouKeDestroyThread(ThreadHandle);

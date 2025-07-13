@@ -131,6 +131,7 @@ uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParame
 
 HANDLE LouKeLoadLibraryA(string LibraryName){
 
+    
     bool IsLibraryAPath = false; 
     if(LibraryName[1] == ':'){
         IsLibraryAPath = true;

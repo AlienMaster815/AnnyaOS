@@ -16,6 +16,8 @@ typedef long long   INT64;
 typedef unsigned long long UINT64, ULONGLONG, * PULONGLONG, * PULONG64, QWORD;
 typedef long long LONGLONG, * PLONGLONG;
 
+typedef void* PVOID;
+
 #define PACKED __attribute__((packed))
 
 #define SIZE_T size_t

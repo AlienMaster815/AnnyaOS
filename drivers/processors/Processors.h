@@ -7,8 +7,12 @@
 KERNEL_IMPORT uint16_t GetNPROC();
 KERNEL_IMPORT void UpgradeNPROC();
 KERNEL_IMPORT void DowngradeNPROC();
-
+void LouKeInitializeEoiHandler(PVOID Handler, UINT16 Cpu);
+void LouKeInitializeUnmaskHandler(PVOID Handler, UINT16 Cpu);
+void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu);
 KERNEL_IMPORT void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
+
+
 
 #define IS_PENTIUM4 family == 0xF && model >= 0x3 && model <= 0xF
 #define IS_XENON51xx family == 0xF && model == 0xF

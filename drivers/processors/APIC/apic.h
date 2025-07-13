@@ -152,7 +152,6 @@ LOUDDK_API_ENTRY LOUSTATUS SetTimerMode(
 KERNEL_IMPORT void SetInterruptFlags();
 KERNEL_IMPORT void UnSetInterruptFlags();
 
-KERNEL_IMPORT void local_apic_send_eoi();
 
 int IsX2ApicSupported();
 

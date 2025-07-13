@@ -178,11 +178,11 @@ void LouKeInitializeAcpicaSubSystem();
 void LouKeInitializeFullLouACPISubsystem();
 
 void AdvancedLousineKernelInitialization(){
-    if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Start APIC System\n");
-    if (LOUSTATUS_GOOD != InitThreadManager())LouPrint("SHIT!!!:I Hope You Hate Efficency: No Thread Management\n");
+    if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
+    InitThreadManager();
     LouKeInitializeFullLouACPISubsystem();
-    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
- }
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
+}
 
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
 
@@ -319,7 +319,7 @@ void DisableCR0WriteProtection() {
 void InitializeAcpiSystem();
 void InitializeDebuggerComunications();
 void LouKeInitializeMouseManagemet();
-void ioapic_unmask_irq(uint8_t irq);
+void LouKeIcUnmaskIrq(uint8_t irq);
 void IoApicConfigureEntryFlags(
     uint8_t     irq,
     uint16_t    Flags

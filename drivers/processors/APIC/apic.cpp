@@ -7,6 +7,8 @@
 //I appologise if this is messy but at this point i just need this to work
 // I WILL FIX IT LATER BEFORE 1.0
 
+
+
 namespace APIC {
 
 	class APIC_TIMER{
@@ -174,6 +176,10 @@ ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* ISOPointer[LEGACY_IRQ_SCOPE];
 bool InitializeIoApic(uint64_t IoApicNumber, uint64_t MappedArea);
 LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature);
 
+LOUDDK_API_ENTRY void local_apic_send_eoi() {    
+    WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
+}
+
 void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
     while (entryAddress < endAddress) {
         ACPI_MADT_ENTRY_HEADER* header = (ACPI_MADT_ENTRY_HEADER*)entryAddress;
@@ -250,11 +256,12 @@ void cpu_set_apic_base(uintptr_t apic) {
    write_msr(IA32_APIC_BASE_MSR, msr_value);
 }
 
+void ApcInstallIoApicHandlers();
+void LouKeInitializeBackupPic();
 
 LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
     LOUSTATUS Status = LOUSTATUS_GOOD;
     LouPrint(DRV_VERSION_APIC);
-    disable_pic();
 
     PACPI_MADT ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("APIC");
 
@@ -262,8 +269,12 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
         ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("MADT");
     }
     if(!ApicTable){
-        while(1);
+        LouPrint("Unable To Find APIC Using Backup Pic\n");
+        LouKeInitializeBackupPic();
+        return LOUSTATUS_GOOD;
     }
+
+    disable_pic();
 
     uint8_t* EntryHeaderAddress = ((uint8_t*)ApicTable + sizeof(ACPI_MADT));
     uint8_t* HeaderEndAddress = ((uint8_t*)ApicTable + ApicTable->Header.Length);
@@ -275,6 +286,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
 
     Cpu = (CPU::CPUID*)LouKeMallocEx(sizeof(CPU::CPUID), GET_ALIGNMENT(CPU::CPUID), WRITEABLE_PAGE | PRESENT_PAGE);
     Lapic = (APIC::LAPIC*)LouKeMallocEx(sizeof(APIC::LAPIC), GET_ALIGNMENT(APIC::LAPIC), WRITEABLE_PAGE | PRESENT_PAGE);
+
+    LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, 0);
 
     if(Lapic->InitializeApic())LouPrint("APIC ENABLED SUCCESSFULLY\n");
 
@@ -292,6 +305,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
             return false;
         }
     }
+    
+    ApcInstallIoApicHandlers();
 
     LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);
 
@@ -413,9 +428,7 @@ bool APIC::LAPIC::InitializeBspLapic(){
 
 
 
-LOUDDK_API_ENTRY void local_apic_send_eoi() {    
-    WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
-}
+
 
 LOUDDK_API_ENTRY void LocalApicSetTimer(bool On){
     //ULONG TimerValue = READ_REGISTER_ULONG(LVT_TIMER_REGISTER);

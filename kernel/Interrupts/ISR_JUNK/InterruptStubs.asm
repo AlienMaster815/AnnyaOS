@@ -31,7 +31,6 @@ section .text
 extern InterruptRouter
 extern PIC_sendEOI
 extern UpdateThreadManager
-extern local_apic_send_eoi
 
 FPU_ON dq 0
 SSE_ON dq 0

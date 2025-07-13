@@ -370,6 +370,96 @@ typedef struct _ACPI_EMBEDDED_CONTROLLER{
     uint32_t                    PollingGuard;
 }ACPI_EMBEDDED_CONTROLLER, * PACPI_EMBEDDED_CONTROLLER;
 
+typedef struct _LOUACPI_BUFFER{
+    SIZE    Length;
+    PVOID   Pointer;   
+}LOUACPI_BUFFER, * PLOUACPI_BUFFER;
+
+typedef struct _ACPI_OSC_CONTEXT{
+    GUID*           Uuid;
+    INTEGER         Revision;
+    LOUACPI_BUFFER  Capabilities;
+    LOUACPI_BUFFER  Return;
+}ACPI_OSC_CONTEXT, * PACPI_OSC_CONTEXT;
+
+#define OSC_PCI_CAP_DWORDS  3
+#define OSC_CXL_CAP_DWORDS  5
+
+#define OSC_QUERY_DWORD         0
+#define OSC_SUPPORT_DWORD       1
+#define OSC_CONTROL_DWORD       2
+#define OSC_EXT_SUPPORT_DWORD   3
+#define OSC_EXT_CONTROL_DWORD   4
+
+#define OSC_QUERY_ENABLE            0x01
+#define OSC_REQUEST_ERROR           0x02
+#define OSC_INVALID_UUID_ERROR      0x04
+#define OSC_INVALID_REVISION_ERROR  0x08
+#define OSC_CAP_MASK_ERROR          0x10
+
+#define OSC_SB_PAD_SUPPORT			                0x01
+#define OSC_SB_PPC_OST_SUPPORT			            0x02
+#define OSC_SB_PR3_SUPPORT			                0x04
+#define OSC_SB_HOTPLUG_OST_SUPPORT		            0x08
+#define OSC_SB_APEI_SUPPORT			                0x10
+#define OSC_SB_CPC_SUPPORT			                0x20
+#define OSC_SB_CPCV2_SUPPORT			            0x40
+#define OSC_SB_PCLPI_SUPPORT			            0x80
+#define OSC_SB_OSLPI_SUPPORT			            0x0100
+#define OSC_SB_FAST_THERMAL_SAMPLING_SUPPORT	    0x0200
+#define OSC_SB_OVER_16_PSTATES_SUPPORT		        0x0400
+#define OSC_SB_GED_SUPPORT			                0x0800
+#define OSC_SB_CPC_DIVERSE_HIGH_SUPPORT		        0x1000
+#define OSC_SB_IRQ_RESOURCE_SOURCE_SUPPORT	        0x2000
+#define OSC_SB_CPC_FLEXIBLE_ADR_SPACE		        0x4000
+#define OSC_SB_GENERIC_INITIATOR_SUPPORT	        0x00020000
+#define OSC_SB_NATIVE_USB4_SUPPORT		            0x00040000
+#define OSC_SB_BATTERY_CHARGE_LIMITING_SUPPORT	    0x00080000
+#define OSC_SB_PRM_SUPPORT			                0x00200000
+#define OSC_SB_FFH_OPR_SUPPORT			            0x00400000
+
+#define OSC_USB_USB3_TUNNELING                  0x01
+#define OSC_USB_DP_TUNNELING                    0x02
+#define OSC_USB_PCIE_TUNNELING                  0x04
+#define OSC_USB_XDOMAIN                         0x08
+
+#define OSC_PCI_EXT_CONFIG_SUPPORT		        0x01
+#define OSC_PCI_ASPM_SUPPORT			        0x02
+#define OSC_PCI_CLOCK_PM_SUPPORT		        0x04
+#define OSC_PCI_SEGMENT_GROUPS_SUPPORT		    0x08
+#define OSC_PCI_MSI_SUPPORT			            0x10
+#define OSC_PCI_EDR_SUPPORT			            0x80
+#define OSC_PCI_HPX_TYPE_3_SUPPORT		        0x0100
+
+#define OSC_PCI_EXPRESS_NATIVE_HP_CONTROL	    0x01
+#define OSC_PCI_SHPC_NATIVE_HP_CONTROL		    0x02
+#define OSC_PCI_EXPRESS_PME_CONTROL		        0x04
+#define OSC_PCI_EXPRESS_AER_CONTROL		        0x08
+#define OSC_PCI_EXPRESS_CAPABILITY_CONTROL	    0x10
+#define OSC_PCI_EXPRESS_LTR_CONTROL		        0x20
+#define OSC_PCI_EXPRESS_DPC_CONTROL		        0x80
+
+#define OSC_CXL_1_1_PORT_REG_ACCESS_SUPPORT	    0x01
+#define OSC_CXL_2_0_PORT_DEV_REG_ACCESS_SUPPORT	0x02
+#define OSC_CXL_PROTOCOL_ERR_REPORTING_SUPPORT	0x04
+#define OSC_CXL_NATIVE_HP_SUPPORT		        0x08
+
+#define OSC_CXL_ERROR_REPORTING_CONTROL		    0x01
+
+#define INVALID_CPU_ID (~(INT32_MAX))
+
+#define INVALID_ACPI_CPU_ID(CpuId)      (bool)(INVALID_CPU_ID == CpuId)
+#define INVALID_ACPI_CPU_PHY_ID(PhyId)  (bool)(PhyId == (UINT64_MAX))
+
+
+#define ACPI_PROCESSOR_DEVICE_HID	"ACPI0007"
+
+
+#ifndef __cplusplus
+#include <acpi.h>
+ACPI_STATUS AcpiEvaluateInteger(ACPI_HANDLE AcpiHandle, ACPI_STRING Path, ACPI_OBJECT_LIST* Args, UINT64* Data);
+#endif
+
 #include "Pcc.h"
 
 #ifdef __cplusplus

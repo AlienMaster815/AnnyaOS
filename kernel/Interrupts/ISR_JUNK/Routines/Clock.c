@@ -13,8 +13,6 @@ void ChangerStackPointer(uint64_t BasePointer){
 
 }
 
-void local_apic_send_eoi();
-
 
 void Clock(uint64_t Rsp) {
 	UpdateThreadManager(Rsp);

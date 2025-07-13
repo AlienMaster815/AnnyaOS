@@ -1,4 +1,3 @@
-#include <kernel/acpi.h>
 #include <kernel/errors.h>
 #include <bootloader/grub/multiboot.h>
 #include <kernel/memmory.h>

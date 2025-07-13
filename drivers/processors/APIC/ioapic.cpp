@@ -1,5 +1,6 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
+#include "../Processors.h"
 KERNEL_IMPORT void ioapic_unmask_irq(uint8_t irq) ;
 // Structure representing the lower 32 bits of an IOAPIC redirection table entry
 typedef struct {
@@ -354,5 +355,12 @@ KERNEL_IMPORT bool LouKePollIoApicPinForAssertion(uint8_t Pin){
         }else if(low & (0x10000)){
             return false;
         }
+    }
+}
+
+void ApcInstallIoApicHandlers(){
+    for(UINT8 i = 0 ; i < GetNPROC(); i++){
+        LouKeInitializeMaskHandler((PVOID)ioapic_mask_irq, i);
+        LouKeInitializeUnmaskHandler((PVOID)ioapic_unmask_irq, i);
     }
 }
