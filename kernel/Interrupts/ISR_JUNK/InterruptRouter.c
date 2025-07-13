@@ -136,16 +136,13 @@ mutex_t* LouKeGetInterruptGlobalLock(){
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
-    if(Interrupt == 41){
-        LouPrint("YAY\n");
-        while(1);
-    }
-
     if(Interrupt < 0x20){
         LouKIRQL Irql;
         LouKeSetIrql(HIGH_LEVEL, &Irql);
-        LouPrint("FAULT:%h\n", Interrupt);  
-        InterruptRouterTable[Interrupt].InterruptHandler(Args);
+        CPUContext* Cpu = (CPUContext*)Args;
+        LouPrint("FAULT:%h\n", Interrupt);
+        LouPrint("RIP:%h\n", Cpu->rip);  
+        //InterruptRouterTable[Interrupt].InterruptHandler(Args);
         while(1);
     }
     MutexLock(&InterruptLock);

@@ -20,7 +20,13 @@ uint64_t GetRamSize();
 
 static spinlock_t MemmoryMapLock;
 
-struct master_multiboot_mmap_entry* LousineMemoryMapTable;
+static struct master_multiboot_mmap_entry* LousineMemoryMapTable;
+
+void LouKeInitializeSafeMemory(){
+    void* Foo = LouKeMalloc(LousineMemoryMapTable->tag.size, KERNEL_GENERIC_MEMORY);
+    memcpy(Foo, LousineMemoryMapTable, LousineMemoryMapTable->tag.size);
+    LousineMemoryMapTable = Foo;
+}
 
 void SendMapToAllocation(struct master_multiboot_mmap_entry* mmap) {
     LousineMemoryMapTable = mmap;

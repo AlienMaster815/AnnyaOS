@@ -285,7 +285,7 @@ typedef struct  PACKED _CPUContext{
 
 void SMPInit();
 void InitializeUserSpace();
-
+void LouKeInitializeSafeMemory();
 void CheckForPs2Mouse();
 void InitializeInternalChipsetHostDriver();
 uint8_t LouKeGetNumberOfStorageDevices();
@@ -346,6 +346,7 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfiv = true;
     }                      
     
+    LouKeInitializeSafeMemory();
 
     LousineKernelEarlyInitialization();
 
@@ -355,7 +356,6 @@ KERNEL_ENTRY Lou_kernel_start(
     LouKeInitializeLouACPISubsystem();
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
-
     InitializeGenericTables();
 
     AdvancedLousineKernelInitialization();
@@ -463,6 +463,7 @@ void InitializeUserSpace(){
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
    
     LouPrint("Hello World\n");
+
     if(!InitEntry){
         LouPrint("ERROR Could Not Jump To Usermode\n");
         while(1);

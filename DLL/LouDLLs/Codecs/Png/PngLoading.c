@@ -163,10 +163,11 @@ static void* InflatePng(void* Data, size_t* DataSize){
 CODECS_API 
 HANDLE AnnyaOpenPngA(
     string FileName
-){
+){  
+
     FILE* NewPng = LouOpenFileA(FileName);
     IDAT_CODECS_STREAM_UNPACKER IDATUnpacker = {0};
-
+    
     uint64_t PngSignature = 0;
     uint32_t ChunkType = 0;
     LouSwapEndianess(NewPng, (void*)&PngSignature, sizeof(uint64_t));
@@ -192,11 +193,13 @@ HANDLE AnnyaOpenPngA(
         LouSwapEndianess(&ChunkData->Length, &TmpChunkData.Length, sizeof(uint32_t)); 
         LouMemCpy(TmpChunkData.Type, &ChunkData->Type, sizeof(uint32_t));
     }
+
     
     IDATUnpacker.UnpackedStream = LouGlobalUserMallocEx(IDATUnpacker.StreamSize, 8); 
     IDATUnpacker.CurrentIndex = IDATUnpacker.UnpackedStream;
 
     PPNG_CHUNK_HEADER_HANDLE PngHeaderHandles = LouGlobalUserMallocArray(PNG_CHUNK_HEADER_HANDLE, PngHeaderCount);
+
 
     if(!PngHeaderHandles){
         LouCloseFile(NewPng);
@@ -239,5 +242,13 @@ HANDLE AnnyaOpenPngA(
     PPNG_IMAGE_CHUNK ImageHeader = (PPNG_IMAGE_CHUNK)PngHeaderHandles[0].Data;
     ReturnHandle->Width = ImageHeader->Width;
     ReturnHandle->Height = ImageHeader->Height;
+
+
+    //if(!strncmp(FileName, "C:/ANNYA/FOLDER.PNG", 19)){
+
+    //    LouPrint("HERE\n");
+    //    while(1);
+    //}
+
     return (HANDLE)AnnyaCodecsCreateHandle(IMAGE_HANDLE, PNG, ReturnHandle);
 }

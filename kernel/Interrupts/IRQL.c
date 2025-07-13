@@ -22,14 +22,6 @@ LouKIRQL InterruptSwitch(LouKIRQL New){
 void LocalApicSetTimer(bool On);
 void LouKeSendIcEOI();
 
-void SetAllInterrupts(bool Enable){
-    if(Enable){
-        SetInterruptFlags();
-    }
-    else {
-        UnSetInterruptFlags();
-    }
-}
 
 
 void LouKeSetIrql(
@@ -44,7 +36,7 @@ void LouKeSetIrql(
         switch (NewIrql){
             case PASSIVE_LEVEL:{
                 SystemInterruptLevel = PASSIVE_LEVEL;
-                SetAllInterrupts(true);
+                asm("sti");
                 return;
             }
             case APC_LEVEL:{
@@ -65,7 +57,7 @@ void LouKeSetIrql(
             }
             case HIGH_LEVEL:{
                 SystemInterruptLevel = HIGH_LEVEL;
-                SetAllInterrupts(false);
+                asm("cli");
             }
             default: // error case
                 return;

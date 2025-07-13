@@ -19,6 +19,7 @@ typedef struct _AWM_CLIP_TREE{
     ListHeader  CurrentPlane;
     ListHeader  SubPlane;
     PDRSD_CLIP  Clip;
+    void (*UpdateClipSubState)(void* Clip, size_t X, size_t Y, size_t Width, size_t Height);
 }AWM_CLIP_TREE, * PAWM_CLIP_TREE;
 
 
@@ -53,6 +54,8 @@ static PAWM_CLIP_TREE GenericButtonTree = 0;
 static HANDLE (*AnnyaOpenBmpA)(string);
 static HANDLE BackgroundImage = 0x00;
 static HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
+static HANDLE FolderPng = 0x00;
+static PDRSD_CLIP* FolderClips = 0x00;
 
 //192 dark greay
 //198 ligt grey
@@ -65,7 +68,7 @@ void RedrawClipTree(PAWM_CLIP_TREE Tree, int64_t X, int64_t Y, int64_t Width, in
             (Tree->Clip->Y < (Y + Height)) &&
             ((Tree->Clip->Y + Tree->Clip->Height) > Y)
         ) {
-            LouUpdateClipSubState((void*)Tree->Clip, X, Y, Width, Height);
+            Tree->UpdateClipSubState((void*)Tree->Clip, X, Y, Width, Height);
         }
         if (Tree->SubPlane.NextHeader) {
             RedrawClipTree((PAWM_CLIP_TREE)Tree->SubPlane.NextHeader, X, Y, Width, Height);
@@ -145,6 +148,7 @@ static void InitializeDependencies(){
     AnnyaPaintClipWithBmp = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaPaintClipWithBmp");
 
     MousePng = AnnyaOpenPngA("C:/ANNYA/MOUSE.PNG");
+    FolderPng = AnnyaOpenPngA("C:/ANNYA/FOLDER.PNG");
     GenericButtonPng = AnnyaOpenPngA("C:/ANNYA/BUTTON.PNG");
     BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
     LouPrint("InitializeDependencies() STATUS_SUCCESS\n");
@@ -164,10 +168,12 @@ AWM_STATUS InitializeAwmUserSubsystem(){
     PlaneBackgrounds = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     GenericButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    FolderClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     TaskBars = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     ClipTrees = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
     PAWM_CLIP_TREE TaskBarTree = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
     PAWM_CLIP_TREE GenericButtonTree = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
+    PAWM_CLIP_TREE FolderTree = LouGlobalUserMallocArray(AWM_CLIP_TREE, PlaneTracker.PlaneCount);
     LouPrint("Allocation Finished\n");
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
@@ -212,14 +218,27 @@ AWM_STATUS InitializeAwmUserSubsystem(){
         GenericButtonClips[i]->X = 1;
         GenericButtonClips[i]->Y = PlaneTracker.PlaneInformation[i].Height - 33;
         LouUpdateClipState((void*)GenericButtonClips[i]);
+        FolderClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, FolderPng);
+        
+        FolderClips[i]->X = 68;
+        FolderClips[i]->Y = PlaneTracker.PlaneInformation[i].Height - 31;
+        LouUpdateShadowClipState((void*)FolderClips[i]);
 
         MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
         LouUpdateShadowClipState((void*)MouseClips[i]);
+
         TaskBarTree[i].Clip = TaskBars[i];
+        TaskBarTree[i].UpdateClipSubState = LouUpdateClipSubState;
         GenericButtonTree[i].Clip = GenericButtonClips[i];
+        GenericButtonTree[i].UpdateClipSubState = LouUpdateClipSubState;
+        FolderTree[i].Clip = FolderClips[i];
+        FolderTree[i].UpdateClipSubState = LouUpdateShadowClipSubState;
         ClipTrees[i].Clip = PlaneBackgrounds[i];
+        ClipTrees[i].UpdateClipSubState = LouUpdateClipSubState;
+        
         ClipTrees[i].SubPlane.NextHeader = (PListHeader)&TaskBarTree[i];
-        TaskBarTree[i].SubPlane.NextHeader = (PListHeader)&GenericButtonTree[i]; 
+        TaskBarTree[i].SubPlane.NextHeader = (PListHeader)&GenericButtonTree[i];
+        GenericButtonTree[i].CurrentPlane.NextHeader = (PListHeader)&FolderTree[i]; 
         LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);        
     }
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");

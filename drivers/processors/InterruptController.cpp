@@ -1,8 +1,8 @@
 #include <LouDDK.h>
 
-static void (*EoiHandler[512])();
-static void (*UnmaskHandler[512])(UINT8 Irq);
-UNUSED static void (*MaskHandler[512])(UINT8 Irq);
+static void (*EoiHandler[512])() = {0x00};
+static void (*UnmaskHandler[512])(UINT8 Irq) = {0x00};
+static void (*MaskHandler[512])(UINT8 Irq) = {0x00};
 
 static inline uint32_t get_processor_id() {
     uint32_t eax, ebx, ecx, edx;

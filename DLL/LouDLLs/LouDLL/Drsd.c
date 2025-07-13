@@ -90,7 +90,6 @@ void LouUpdateClipSubState(
 LOUDLL_API
 void LouUpdateShadowClipSubState(
     void* Clip,
-    void* Shadow,
     size_t X, size_t Y, 
     size_t Width, size_t Height
 ){
