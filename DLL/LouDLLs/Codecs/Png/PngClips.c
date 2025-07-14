@@ -34,17 +34,29 @@ AnnyaCreateClipFromPng(
         uint8_t* Decompressed = (uint8_t*)UnpackedDataHandle->Data;
         size_t RowSize = Width * 4;  // 4 bytes per pixel (RGBA)
         size_t Stride = RowSize + 1; // 1 extra byte for filter type
+        size_t FullStride = Height * Stride;
+
+        uint8_t* DecompressedCopy = LouGlobalUserMallocEx(FullStride, 8);
+        if (!DecompressedCopy) {
+            LouPrint("ERROR: Failed to allocate temp PNG buffer\n");
+            return 0x00;
+        }
+        LouMemCpy(DecompressedCopy, Decompressed, FullStride);
 
         uint8_t* PrevRow = LouGlobalUserMallocEx(RowSize, 8); 
-    
+        if (!PrevRow) {
+            LouGlobalUserFree(DecompressedCopy);
+            return 0x00;
+        }
+
         for (size_t y = 0; y < Height; y++) {
-            uint8_t* Row = Decompressed + y * Stride;
+            uint8_t* Row = DecompressedCopy + y * Stride;
             uint8_t FilterType = Row[0];
             uint8_t* PixelData = Row + 1;
 
             switch (FilterType) {
                 case 0:  // None
-                    // No filtering, raw data
+                    // No filtering
                     break;
 
                 case 1:  // Sub
@@ -110,6 +122,7 @@ AnnyaCreateClipFromPng(
         }
 
         LouGlobalUserFree(PrevRow);
+        LouGlobalUserFree(DecompressedCopy);
     }
     
     LouPrint("Filter Type   :%d\n", ImageHeader->FilterMethod);

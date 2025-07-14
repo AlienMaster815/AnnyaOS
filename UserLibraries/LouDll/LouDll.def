@@ -33,3 +33,4 @@ EXPORTS
     LouGetSystemUpdate
     LouUpdateClipSubState
     LouUpdateShadowClipSubState
+    strcmp

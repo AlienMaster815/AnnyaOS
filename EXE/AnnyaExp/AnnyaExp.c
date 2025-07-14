@@ -16,9 +16,10 @@ int WinMain(
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
 
     LouExitDosMode();
-    InitializeAwmUserSubsystem();
+    InitializeAwmUserSubsystem(hInstance);
     LouGetSystemUpdate(&StateStack);
 
+    LouPrint("AnnyaExp:Entering Main Loop\n");
     while(1){
         AwmUpdateState(&StateStack);
     }

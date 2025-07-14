@@ -55,6 +55,6 @@ typedef union _AWM_CALLBACK_DATA{
 //End of copy
 
 
-__declspec(dllimport) AWM_STATUS InitializeAwmUserSubsystem();
+__declspec(dllimport) AWM_STATUS InitializeAwmUserSubsystem(HINSTANCE hInstance);
 
 #endif

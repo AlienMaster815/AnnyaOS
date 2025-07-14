@@ -10,7 +10,8 @@ LIBS = -lLouDll -lntdll -lKERNEL32
 # Source and Target
 SRC = User32.c \
 		Interface/Awm.c \
-		Interface/Geometry.c
+		Interface/Geometry.c \
+		Interface/WinCreation.c
 
 TARGET = user32.dll
 

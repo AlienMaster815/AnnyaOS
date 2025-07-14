@@ -5,6 +5,8 @@
 
 #include <cstdint.h>
 #include <stdalign.h>
+#define SIZE   size_t
+
 #define GET_ALIGNMENT(x) (alignof(x))
 
 #define ROUND_UP(value, multiple) \
@@ -208,6 +210,8 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 #ifndef _LOUDLL_
 
+__declspec(dllimport)
+int strcmp(const char* str1, const char* str2);
 
 __declspec(dllimport)
 void LouUpdateShadowClipSubState(
