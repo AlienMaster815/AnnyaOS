@@ -306,6 +306,7 @@ bool LouKeMapEfiMemory(){
 	if(EfiMemMap){
 		//LouPrint("We Got Somthing\n");
 		struct multiboot_tag_efi_mmap* Map = (struct multiboot_tag_efi_mmap*)EfiMemMap;
+		LouMapAddress(EfiMemMap, EfiMemMap, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
 
 		//LouPrint("DescVer:%d\n", Map->descr_vers);
 		//LouPrint("DescSize:%d\n", Map->descr_size);
@@ -333,9 +334,6 @@ bool LouKeMapEfiMemory(){
 				default: continue;
 			}
 		}
-		LouMapAddress(EFI_TABLE, EFI_TABLE, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
-		UNUSED EFI_SYSTEM_TABLE* EfiSystemTable = (EFI_SYSTEM_TABLE*)EFI_TABLE;
-		UNUSED EFI_CONFIGURATION_TABLE* configTable = (EFI_CONFIGURATION_TABLE*)EfiSystemTable->Tables;
 
 		return true;
 	}
@@ -355,9 +353,26 @@ void* GetEfiTable(){
 	return (void*)EFI_TABLE;
 }
 
-void InitializeEfiCore(){
+void* FindSmbiosTable(PEFI_SYSTEM_TABLE SystemTable) {
+    EFI_CONFIGURATION_TABLE* Tables = (EFI_CONFIGURATION_TABLE*)(uintptr_t)(SystemTable->Tables);
+    uint64_t Count = SystemTable->TableCount;
+	LouMapAddress((uintptr_t)Tables, (uintptr_t)Tables, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
+    static const EFI_GUID SmbiosGuid = {SMBIOS_TABLE_GUID};
+    static const EFI_GUID Smbios3Guid = {SMBIOS3_TABLE_GUID};
+    for (uint64_t i = 0; i < Count; i++) {
+        if (memcmp(&Tables[i].VendorGuid, &SmbiosGuid, sizeof(EFI_GUID)) == 0 ||
+            memcmp(&Tables[i].VendorGuid, &Smbios3Guid, sizeof(EFI_GUID)) == 0) {
+            return Tables[i].VendorTable;
+        }
+    }
+    return NULL;
+}
 
-	//LouPrint("InitializeEfiCore()\n");
-	//while(1);
-    //InitializeSmBiosSystem(0x00);
+void InitializeEfiCore(){
+	LouMapAddress(EFI_TABLE, EFI_TABLE, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
+	void* Foo = FindSmbiosTable((EFI_SYSTEM_TABLE*)EFI_TABLE);
+	if(Foo){
+		InitializeSmBiosSystem(Foo);
+	}
+	InitializeDmiSystem();
 }

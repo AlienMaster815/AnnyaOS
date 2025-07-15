@@ -6,6 +6,8 @@ void AcpiInitializePlatformRuntime();
 PACPI_PCC_INFORMATION GetPccContext();
 void AcpiEcEcdtProbe();
 void AcpiEarlyProcessorControlSetup();
+void AcpiEcProbDsdt();
+LOUSTATUS AcpiInitializeSleep();
 
 static ACPI_STATUS AcpiBusTableHandler(
     UINT32 Event, 
@@ -109,6 +111,11 @@ static void AcpiBusOscNegotiatePlatformControl(){
     while(1);
 }
 
+static void AcpiBusNotify(ACPI_HANDLE Handle, UINT32 Type, PVOID Data){
+    LouPrint("AcpiBusNotify()\n");
+    while(1);
+}
+
 LOUSTATUS AcpiBusInitialize(){
     ACPI_STATUS AcpiStatus;
     ACPI_HANDLE PicHandle;
@@ -146,9 +153,11 @@ LOUSTATUS AcpiBusInitialize(){
 
     AcpiEarlyProcessorControlSetup();
     
-    //Continue Here
-    //AcpiEcDstProbe    
-    //InitializeSleepStructures
+    AcpiEcProbDsdt();
+
+    LouPrint("Interpreter Enabled\n");
+
+    AcpiInitializeSleep();
 
     AcpiStatus = AcpiGetHandle(NULL, "\\_PIC", &PicHandle);
     if(ACPI_SUCCESS(AcpiStatus)) {
@@ -168,6 +177,12 @@ LOUSTATUS AcpiBusInitialize(){
             LouPrint("_PIC method executed successfully\n");
         }
     }
+
+    AcpiInstallNotifyHandler(ACPI_ROOT_OBJECT, ACPI_SYSTEM_NOTIFY, &AcpiBusNotify, NULL);
+    if (ACPI_FAILURE(AcpiStatus)) {
+        LouPrint("Failed to Register AcpiBusNotify Handler\n");
+        goto _ACPI_BUS_INITIALIZE_ERROR;
+    } 
 
     return STATUS_SUCCESS;
 
@@ -192,9 +207,12 @@ ACPI_STATUS AcpiPccAddressSpaceSetup(
 );
 
 void AcpiInitializePlatformCommunications();
+void AcpiInitializeFfh();
+void PciMmcfgLateInit();
 
 void LouKeInitializeFullLouACPISubsystem(){
     ACPI_STATUS Status;
+    LOUSTATUS St;
     LouPrint("Initializing Acpica Subsystem\n");
 
     Status = AcpiInitializeSubsystem();
@@ -211,8 +229,15 @@ void LouKeInitializeFullLouACPISubsystem(){
     }
     AcpiInitializePlatformRuntime();
     AcpiInitializePlatformCommunications();
-    AcpiBusInitialize();
-    
+    St = AcpiBusInitialize();
+    if(St != STATUS_SUCCESS){
+        LouPrint("St != STATUS_SUCCESS\n");
+        while(1);
+    }
+
+    AcpiInitializeFfh();
+
+    PciMmcfgLateInit();
 
 
     LouPrint("LouKeInitializeFullLouACPISubsystem()\n");

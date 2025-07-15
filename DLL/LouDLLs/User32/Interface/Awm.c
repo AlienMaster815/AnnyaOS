@@ -40,6 +40,8 @@ static int64_t DesktopCurrentY = 0;
 int64_t DesktopCurrentWidth = 0;
 int64_t DesktopCurrentHeight = 0;
 
+
+
 SIZE AwmGetPlaneCount(){
     return PlaneTracker.PlaneCount;
 }
@@ -226,8 +228,12 @@ static void InitializeDependencies(){
 
 }
 
-
-AWM_STATUS InitializeAwmUserSubsystem(HINSTANCE hInstance){
+USER32_API
+AWM_STATUS 
+InitializeAwmUserSubsystem(
+    HINSTANCE                       hInstance,
+    PANNYA_DESKTOP_SETUP_PACKET     InterfaceSetup
+){
     LouPrint("InitializeAwmUserSubsystem()\n");
  
     InitializeDependencies();
@@ -321,6 +327,7 @@ AWM_STATUS InitializeAwmUserSubsystem(HINSTANCE hInstance){
     ShowWindow(FileExplorerButon, SW_SHOW);
 
     UpdateWindow(FileExplorerButon); 
+
 
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
 }

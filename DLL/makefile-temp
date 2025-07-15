@@ -5,16 +5,11 @@ CFLAGS = -shared -nostdlib -nodefaultlibs -O3
 # Paths
 INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
-LIBS = -lLouDll -lntdll -lKERNEL32
+LIBS = -lLouDll -lntdll -luser32 #defaultlibs
 
 # Source and Target
-SRC = User32.c \
-		Interface/Awm.c \
-		Interface/Geometry.c \
-		Interface/WindowCreation/WinCreation.c \
-		Interface/WinModifications/WinModification.c 
-
-TARGET = user32.dll
+SRC = #replace with c Files
+TARGET = #.dll #Name of dll
 
 # Default Rule
 all: $(TARGET)
@@ -23,6 +18,8 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(INCLUDES) $(LDFLAGS) $(LIBS)
 
+
 # Clean Rule
 clean:
+	@echo "Cleaning up..."
 	rm -f $(TARGET)

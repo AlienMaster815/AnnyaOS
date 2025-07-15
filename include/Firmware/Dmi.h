@@ -39,12 +39,12 @@ typedef enum {
 typedef struct _DMI_STRING_MATCH{
     uint8_t     Slot         : 7;
     uint8_t     ExactMatch   : 1;
-    char        SubString[79]; 
+    CHAR        SubString[79]; 
     bool        ValidEntry;
 }DMI_STRING_MATCH, * PDMI_STRING_MATCH;
 
 typedef struct _DMI_SYSTEM_ID{
-    int                 (*Callback)(struct _DMI_SYSTEM_ID*);
+    INTEGER             (*Callback)(struct _DMI_SYSTEM_ID*);
     string              Identification;
     DMI_STRING_MATCH    Matches[4];
     void*               DriverData;
@@ -53,7 +53,10 @@ typedef struct _DMI_SYSTEM_ID{
 
 
 INTEGER CheckDmiSystem(PDMI_SYSTEM_ID IdList);
+INTEGER DmiGetBiosYear();
+INTEGER CheckDmiSystem(PDMI_SYSTEM_ID IdList);
 
+#define DMI_MATCH(Id, String) {.Slot = (Id), .SubString = (String), .ValidEntry = true}
 
 #ifdef __cplusplus
 }

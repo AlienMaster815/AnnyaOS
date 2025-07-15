@@ -1,4 +1,4 @@
-#include "Awm.h"
+#include "WinCreation.h"
 
 void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle);
 SIZE AwmGetPlaneCount();
@@ -31,6 +31,7 @@ static void AddPngToWindow(
         Window->ClipTreeHandle[i].Clip = Window->MainWindow[i];
         Window->ClipTreeHandle[i].UpdateClipSubState = LouUpdateShadowClipSubState;
     } 
+    AwmHookCalbackToWindow(Window, WindowModificationWndProc);
 }
 
 static void GenericWindowHandleInit(
@@ -62,6 +63,7 @@ static void GenericWindowHandleInit(
         Window->ClipTreeHandle[i].Clip = Window->MainWindow[i];
         Window->ClipTreeHandle[i].UpdateClipSubState = LouUpdateClipSubState;
     } 
+    AwmHookCalbackToWindow(Window, WindowModificationWndProc);
 }
 
 static HWND AwmCreateBackgroundWindow(){

@@ -8,8 +8,9 @@ INCLUDES = -I../../../include
 # Source and Target
 SRC = LouDll.c \
 	Dispatch.c \
-	Drsd.c \
-	memory.c
+	memory.c \
+	DrsdUserCore/Drsd.c \
+	DrsdUserCore/DrsdDraw.c 
 
 TARGET = LouDll.dll
 

@@ -1,6 +1,20 @@
 #include <LouACPI.h>
 #include <acpi.h>
 
+static PACPI_EMBEDDED_CONTROLLER BootEc = 0x00;
+
+void AcpiEcProbDsdt(){
+    UNUSED PACPI_EMBEDDED_CONTROLLER Ec = 0x0;
+    UNUSED ACPI_STATUS Status;
+
+    if(!BootEc){
+        return;
+    }
+
+
+    LouPrint("AcpiEcProbDsdt()\n");
+    while(1);
+}
 
 
 void AcpiEcEcdtProbe(){

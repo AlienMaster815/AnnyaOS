@@ -123,7 +123,9 @@ LOUSTATUS LousineKernelEarlyInitialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
     SetupGDT();
+
     HandleProccessorInitialization();
+
     InitializeBootGraphics();
 
     InitializeInterruptRouter();
@@ -344,10 +346,11 @@ KERNEL_ENTRY Lou_kernel_start(
         LouKeHandleSystemIsBios();
     }else {
         SystemIsEfiv = true;
+        InitializeEfiCore();
     }                      
     
-    LouKeInitializeSafeMemory();
-
+    LouKeInitializeSafeMemory();    
+    
     LousineKernelEarlyInitialization();
 
     LouKeMapPciMemory();

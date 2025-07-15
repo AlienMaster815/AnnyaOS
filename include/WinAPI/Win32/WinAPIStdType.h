@@ -12,7 +12,7 @@ typedef unsigned int UINT;
 typedef void* HTREEITEM;
 typedef void* PFNTVCOMPARE;
 typedef void* LPARAM;
-
+typedef void* WPARAM;
 
 typedef wchar_t*        LPWSTR;
 typedef char*           LPSTR;

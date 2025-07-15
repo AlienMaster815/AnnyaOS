@@ -1,4 +1,4 @@
-#include "LouDll.h"
+#include "../LouDll.h"
 
 #define LOUDLL_API __declspec(dllexport)
 

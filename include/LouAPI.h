@@ -41,6 +41,7 @@
 #include <drivers/cpu/IntelFamily.h>
 #include <drivers/cpu/cpu.h>
 #include <kernel/Firmware.h>
+#include <kernel/KernelPm.h>
 
 #ifndef _KERNEL_MODULE_
 

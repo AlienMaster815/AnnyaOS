@@ -32,6 +32,7 @@ void InitializeBootGraphics(){
 	if(!BootGraphics){
 		return;
 	}
+
 	UNUSED uint16_t Width = BootGraphics->framebuffer_width;
 	UNUSED uint16_t Height = BootGraphics->framebuffer_height;
 	UNUSED uint16_t Bpp = BootGraphics->framebuffer_bpp;
@@ -53,6 +54,11 @@ void InitializeBootGraphics(){
 	Plane->FrameBuffer->FramebufferBase = (uintptr_t)LouVMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), MEGABYTE_PAGE);
 	Plane->FrameBuffer->SecondaryFrameBufferBase = (uintptr_t)LouKeMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), MEGABYTE_PAGE, KERNEL_GENERIC_MEMORY);
 	LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, Plane->FrameBuffer->FramebufferBase, ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), KERNEL_DMA_MEMORY);
+
+
+	//while(1){
+		//BUGBUG	
+	//}
 
 	DrsdInitializeGenericPlane(Device, Plane, 0, 0,0, 0, 0, PRIMARY_PLANE, "BOOTVID.SYS");
 

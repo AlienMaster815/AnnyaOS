@@ -20,7 +20,6 @@ typedef enum {
 union _AWM_CALLBACK_DATA; 
 struct _WINDOW_HANDLE;
 
-typedef AWM_STATUS(*WINDOW_CALLBACK)(struct _WINDOW_HANDLE*, AWM_CALL_REASON ,union _AWM_CALLBACK_DATA*) ; 
 
 
 typedef struct _DRSD_PLANE_QUERY_INFORMATION{
@@ -54,12 +53,14 @@ typedef struct _WINDOW_HANDLE{
     struct _DRSD_CLIP**     MainWindow;
     struct _WINDOW_HANDLE*  ParentWindow;
     struct _WINDOW_HANDLE*  Children;
-    WINDOW_CALLBACK         WindowCallback;
-    HWND                    WinApiHandleChecksum; //used for winAPI applications and to check the indegrity of the AnnyaHandle
     PAWM_CLIP_TREE          ClipTreeHandle;
     DWORD                   WindowStyle;
     BOOL                    Visable;
     INTEGER                 WindowVisability;
+    mutex_t                 CallbackMutex;
+    SIZE                    CallbackCount;
+    ANNYA_WINDOW_CALLBACK*  WindowCallbacks;
+    HWND                    WinApiHandleChecksum; //used for winAPI applications and to check the indegrity of the AnnyaHandle
 }WINDOW_HANDLE, * PWINDOW_HANDLE;
 
 typedef struct _AWM_WINDOW_TRACKER_ENTRY{
@@ -94,7 +95,12 @@ typedef union _AWM_CALLBACK_DATA{
 
 //any updates in this region must have exports to the other Dlls From User32
 
-USER32_API AWM_STATUS InitializeAwmUserSubsystem(HINSTANCE hInstance);
+USER32_API 
+AWM_STATUS 
+InitializeAwmUserSubsystem(
+    HINSTANCE                       hInstance,
+    PANNYA_DESKTOP_SETUP_PACKET     InterfaceSetup
+);
 
 USER32_API
 HWND 
@@ -186,4 +192,17 @@ typedef struct _ANNYA_CANVAS_BUTTON_PARAM{
 #define SW_SHOWDEFAULT      10	//Sets the show state based on the SW_ value specified in the STARTUPINFO structure passed to the CreateProcess function by the program that started the application.
 #define SW_FORCEMINIMIZE    11	//Minimizes a window, even if the thread that owns the window is not responding. This flag should only be used when minimizing windows from a different thread.
 //endof Private Data
+
+
+USER32_API
+LOUSTATUS 
+AwmHookCalbackToWindow(
+    HWND Window, 
+    ANNYA_WINDOW_CALLBACK Callback
+);
+
+LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
+
+
+
 #endif

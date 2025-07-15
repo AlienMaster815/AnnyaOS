@@ -5,7 +5,12 @@
 
 static SYSTEM_STATE_STACK StateStack = {0};
 
-int WndProc(void* hwnd, uint32_t uMsg, void* WParam, void* LParam);
+LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
+
+//typedef LRESULT (*ANNYA_WINDOW_CALLBACK)(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
+
+static ANNYA_DESKTOP_SETUP_PACKET InterfaceSetup = {0};
+
 
 int WinMain(
     HINSTANCE hInstance,
@@ -15,8 +20,10 @@ int WinMain(
 ){
     LouPrint("AnnyaExp Created With Instance:%h\n", hInstance);
 
+    InterfaceSetup.WindowCallback = WndProc;
+
     LouExitDosMode();
-    InitializeAwmUserSubsystem(hInstance);
+    InitializeAwmUserSubsystem(hInstance, &InterfaceSetup);
     LouGetSystemUpdate(&StateStack);
 
     LouPrint("AnnyaExp:Entering Main Loop\n");
@@ -28,6 +35,8 @@ int WinMain(
 }
 
 
-int WndProc(void* hwnd, uint32_t uMsg, void* WParam, void* LParam){
+LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
+
+    
 
 }

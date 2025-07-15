@@ -159,6 +159,19 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
     uint32_t    ThreadIdentification;
 }WIN_API_PROCESS_INFORMATION, * PWIN_API_PROCESS_INFORMATION;
 
+#ifndef LONG
+typedef long LONG;
+#endif
+
+typedef LONG    LRESULT;
+typedef PVOID   WNDPROC;
+
+typedef LRESULT (*ANNYA_WINDOW_CALLBACK)(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
+
+//Pivate Data for Shell/Annya API Windows
+typedef struct _ANNYA_DESKTOP_SETUP_PACKET{
+    ANNYA_WINDOW_CALLBACK WindowCallback;
+}ANNYA_DESKTOP_SETUP_PACKET, * PANNYA_DESKTOP_SETUP_PACKET;
 
 #ifndef _USER_32_
 
