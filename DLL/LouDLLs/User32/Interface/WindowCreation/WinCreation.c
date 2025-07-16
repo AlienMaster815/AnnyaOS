@@ -114,7 +114,6 @@ static HWND AwmCreateTaskbarWindow(
         192, 192, 192, 255
     );
 
-    InitializeWindowToWindowManager(NewWindow);
     return (HWND)NewWindow;
 }
 
@@ -145,7 +144,6 @@ HWND AwmCreateCanvasButton(
             );
         }
     }
-    InitializeWindowToWindowManager(NewWindow);
 
     return (HWND)NewWindow;
 }
@@ -165,11 +163,12 @@ CreateWindowA(
     HINSTANCE   Instance,
     LPVOID      Parameter
 ){
+    PWINDOW_HANDLE NewWindow = 0x00;
 
     if(!strcmp(ClassName, DEKSTOP_BACKGROUND)){
         return AwmCreateBackgroundWindow();
     }else if(!strcmp(ClassName, TRAY_WINDOW)){
-        return AwmCreateTaskbarWindow(
+        NewWindow = AwmCreateTaskbarWindow(
             Style,
             ParrentHandle,
             Menu,
@@ -177,7 +176,7 @@ CreateWindowA(
             Parameter
         );
     }else if(!strcmp(ClassName, CANVAS_BUTTON)){
-        return AwmCreateCanvasButton(
+        NewWindow = AwmCreateCanvasButton(
             ClassName, WindowName,
             Style,
             X, Y,
@@ -187,6 +186,13 @@ CreateWindowA(
             Instance,
             Parameter
         );
+    }
+
+    if(NewWindow){
+        NewWindow->WindowName = WindowName;
+        InitializeWindowToWindowManager(NewWindow);
+        LouPrint("Created New Window:%s\n", WindowName);
+        return NewWindow;
     }
 
     LouPrint("CreateWindowA()\n");

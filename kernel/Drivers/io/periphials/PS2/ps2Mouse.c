@@ -2,7 +2,7 @@
 
 //static uint16_t x = 0, y = 0;
 void PS2MouseHandler(uint64_t Rsp);
-void LouKeMouseMoveEventUpdate(int64_t X, int64_t Y);
+void LouKeMouseMoveEventUpdate(int64_t X, int64_t Y , BOOL RigtClick, BOOL LeftClick);
 
 static uint8_t Offset = 0;
 static uint8_t Buffer[3] = {0};
@@ -82,8 +82,7 @@ void PS2MouseHandler(uint64_t Rsp){
         bool LeftClick = Buffer[0] & 0x01;
         bool RigtClick = Buffer[0] & 0x02;
 
-        LouKeMouseMoveEventUpdate((int64_t)x, (int64_t)-y);
-        LouKeMouseClickEventUpdate(RigtClick, LeftClick);
+        LouKeMouseMoveEventUpdate((int64_t)x, (int64_t)-y, RigtClick, LeftClick);
     }
 
 }

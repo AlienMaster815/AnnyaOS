@@ -34,3 +34,6 @@ EXPORTS
     LouUpdateClipSubState
     LouUpdateShadowClipSubState
     strcmp
+    LouUserGetMessage
+    LouUserDispatchMessage
+    LouRegisterMouseHandler

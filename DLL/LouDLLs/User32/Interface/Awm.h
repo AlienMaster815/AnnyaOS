@@ -49,6 +49,7 @@ typedef struct _AWM_PLANE_TRACKER{
 
 typedef struct _WINDOW_HANDLE{
     PWINDOW_CHARECTERISTICS Charecteristics;
+    string                  WindowName;
     SIZE                    PlaneCount;
     struct _DRSD_CLIP**     MainWindow;
     struct _WINDOW_HANDLE*  ParentWindow;

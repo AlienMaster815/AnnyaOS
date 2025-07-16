@@ -73,32 +73,99 @@ PAWM_CLIP_TREE FindEnclosingClip(PAWM_CLIP_TREE Tree, PDRSD_CLIP InnerClip) {
 }
 
 
-void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle){
-    MutexLock(&AwmMasterTrackerMutex);
+PAWM_CLIP_TREE FindClipAtPoint(PAWM_CLIP_TREE Tree, INT64 X, INT64 Y){
+    PAWM_CLIP_TREE Best = 0x00;    
+    while (Tree) {
+        PDRSD_CLIP Clip = Tree->Clip;
+        if (
+            (Clip->X <= X) &&
+            (Clip->Y <= Y) &&
+            ((Clip->X + Clip->Width) >= (X)) &&
+            ((Clip->Y + Clip->Height) >= (Y))
+        ) {
+            PAWM_CLIP_TREE ChildMatch = NULL;
+            if (Tree->SubPlane.NextHeader) {
+                ChildMatch = FindClipAtPoint((PAWM_CLIP_TREE)Tree->SubPlane.NextHeader, X, Y);
+            }
+            Best = ChildMatch ? ChildMatch : Tree;
+        }
+        Tree = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
+    }
+    return Best;
+}
+
+PWINDOW_HANDLE AwmFindWindowFromClip(PDRSD_CLIP Clip, SIZE i){
     PAWM_WINDOW_TRACKER_ENTRY Tmp = &AwmMasterTracker;
-    while(Tmp->Peers.NextHeader){
+    while(Tmp){
+        if(Tmp->WindowHandle){
+            if((uintptr_t)Tmp->WindowHandle->MainWindow[i] == (uintptr_t)Clip){
+                return Tmp->WindowHandle; 
+            }
+        }
         Tmp = (PAWM_WINDOW_TRACKER_ENTRY)Tmp->Peers.NextHeader;
     }
-    Tmp->WindowHandle = WindowHandle;
-    Tmp->Peers.NextHeader = (PListHeader)LouGlobalUserMallocType(AWM_WINDOW_TRACKER_ENTRY);
-    
-    for(SIZE i = 0; i < WindowHandle->PlaneCount; i++){
-        PAWM_CLIP_TREE Tree = FindEnclosingClip(
-            &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i], 
-            WindowHandle->MainWindow[i]
-        );    
-        while(Tree->SubPlane.NextHeader){
-            Tree = (PAWM_CLIP_TREE)Tree->SubPlane.NextHeader;
+    return 0x00;
+}
+
+PWINDOW_HANDLE AwmFineWindowAtPoint(INT64 X, INT64 Y){
+    PWINDOW_HANDLE Result = 0x00;
+    for(SIZE i = 0; i < PlaneTracker.PlaneCount; i++){
+        PAWM_CLIP_TREE ClipTree = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
+        ClipTree = FindClipAtPoint(ClipTree, X, Y);
+        Result = AwmFindWindowFromClip(ClipTree->Clip, i);
+        if(Result){
+            return Result;
         }
-        Tree->SubPlane.NextHeader = (PListHeader)LouGlobalUserMallocType(AWM_CLIP_TREE);
-        Tree = (PAWM_CLIP_TREE)Tree->SubPlane.NextHeader; 
-        Tree->Clip = WindowHandle->MainWindow[i];
+    }
+    return 0x00;
+}
+
+void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
+    MutexLock(&AwmMasterTrackerMutex);
+
+    PAWM_WINDOW_TRACKER_ENTRY Tmp = &AwmMasterTracker;
+    while (Tmp->Peers.NextHeader) {
+        Tmp = (PAWM_WINDOW_TRACKER_ENTRY)Tmp->Peers.NextHeader;
+    }
+
+    PAWM_WINDOW_TRACKER_ENTRY NewEntry = (PAWM_WINDOW_TRACKER_ENTRY)LouGlobalUserMallocType(AWM_WINDOW_TRACKER_ENTRY);
+    Tmp->Peers.NextHeader = (PListHeader)NewEntry;
+    NewEntry->WindowHandle = WindowHandle;
+    NewEntry->Peers.NextHeader = NULL;
+
+    for (SIZE i = 0; i < WindowHandle->PlaneCount; i++) {
+        PDRSD_CLIP Clip = WindowHandle->MainWindow[i];
+
+        PAWM_CLIP_TREE Enclosing = FindEnclosingClip(
+            &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i],
+            Clip
+        );
+
+        PAWM_CLIP_TREE NewClip = (PAWM_CLIP_TREE)LouGlobalUserMallocType(AWM_CLIP_TREE);
+        NewClip->Clip = Clip;
+        NewClip->SubPlane.NextHeader = NULL;
+        NewClip->CurrentPlane.NextHeader = NULL;
+
+        if (!Enclosing) {
+            PAWM_CLIP_TREE Root = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
+            PAWM_CLIP_TREE* Chain = (PAWM_CLIP_TREE*)&Root->CurrentPlane.NextHeader;
+            while (*Chain) {
+                Chain = (PAWM_CLIP_TREE*)&(*Chain)->CurrentPlane.NextHeader;
+            }
+            *Chain = NewClip;
+        } else {
+            PAWM_CLIP_TREE* Chain = (PAWM_CLIP_TREE*)&Enclosing->SubPlane.NextHeader;
+            while (*Chain) {
+                Chain = (PAWM_CLIP_TREE*)&(*Chain)->CurrentPlane.NextHeader;
+            }
+            *Chain = NewClip;
+        }
+
+        LouPrint("Window Installed To Window Manager:%s\n", WindowHandle->WindowName);
     }
 
     MutexUnlock(&AwmMasterTrackerMutex);
 }
-
-
 
 void RedrawClipTree(PAWM_CLIP_TREE Tree, int64_t X, int64_t Y, int64_t Width, int64_t Height) {
     while (Tree) {
@@ -228,6 +295,63 @@ static void InitializeDependencies(){
 
 }
 
+static void UpdateMouseClip(int64_t X, int64_t Y){
+    if((MouseX != X) || (MouseY != Y)){
+        
+        for(size_t i = 0 ; i < PlaneTracker.PlaneCount; i++){
+            MouseClips[i]->X = X;
+            MouseClips[i]->Y = Y;
+            CalculateRedraws(MouseX, MouseY, MouseClips[i]->Width, MouseClips[i]->Height);
+            LouUpdateShadowClipState((void*)MouseClips[i]);
+            LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);
+        }
+        MouseX = X;
+        MouseY = Y;
+    }
+}
+
+static INT64 gMouseX = 0, gMouseY = 0;
+
+static 
+void 
+MouseEventHandler(
+    PLOUSINE_USER_SHARED_MESSAGE MessageHandle
+){
+    PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
+    gMouseX += MouseEvent->X;
+    gMouseY += MouseEvent->Y;
+    BOOL RightClick = MouseEvent->RightClick;
+    BOOL LeftClick  = MouseEvent->LeftClick;
+    
+
+    if(gMouseX < DesktopCurrentX){
+        gMouseX = DesktopCurrentX;
+    }else if(gMouseX > (DesktopCurrentX + DesktopCurrentWidth)){
+        gMouseX = (DesktopCurrentX + DesktopCurrentWidth);
+    }
+    if(gMouseY < DesktopCurrentY){
+        gMouseY = DesktopCurrentY;
+    }else if(gMouseY > (DesktopCurrentY + DesktopCurrentHeight)){
+        gMouseY = (DesktopCurrentY + DesktopCurrentHeight);
+    }
+    //LouPrint("X:%d, Y:%d\n", gMouseX, gMouseY);
+    UpdateMouseClip(gMouseX, gMouseY);
+
+    if(RightClick){
+
+    }
+    if(LeftClick){
+        PWINDOW_HANDLE WinHandle = AwmFineWindowAtPoint(gMouseX, gMouseY);
+        if(WinHandle){
+            if(WinHandle->WindowName){
+                LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
+            }
+        }
+
+    }
+
+}
+
 USER32_API
 AWM_STATUS 
 InitializeAwmUserSubsystem(
@@ -254,7 +378,7 @@ InitializeAwmUserSubsystem(
 
     BackgroundWindow = CreateWindowA(
                             DEKSTOP_BACKGROUND,
-                            0x00,
+                            "DesktopBackground",
                             WS_VISIBLE | WS_DISABLED,
                             0,0, 0, 0,
                             0x00, 0x00, hInstance, 0x00 
@@ -274,7 +398,7 @@ InitializeAwmUserSubsystem(
 
     TaskbarWindow = CreateWindowA(
         TRAY_WINDOW,
-        0x00,
+        "TaskTray",
         WS_VISIBLE | WS_DISABLED,
         0,0, 0, 0,
         0x00, 0x00, hInstance, 0x00 
@@ -293,7 +417,7 @@ InitializeAwmUserSubsystem(
 
     StartButton = CreateWindowA(
         CANVAS_BUTTON,
-        "Start",
+        "StartButton",
         WS_VISIBLE | WS_CHILD,
         1,
         DesktopCurrentHeight - 33,
@@ -328,37 +452,10 @@ InitializeAwmUserSubsystem(
 
     UpdateWindow(FileExplorerButon); 
 
+    LouRegisterMouseHandler(&MouseEventHandler, MOUSE_EVENT_TYPE);
 
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
 }
 
 
-static void UpdateMouseClip(int64_t X, int64_t Y){
-    if((MouseX != X) || (MouseY != Y)){
-        
-        for(size_t i = 0 ; i < PlaneTracker.PlaneCount; i++){
-            MouseClips[i]->X = X;
-            MouseClips[i]->Y = Y;
-            CalculateRedraws(MouseX, MouseY, MouseClips[i]->Width, MouseClips[i]->Height);
-            LouUpdateShadowClipState((void*)MouseClips[i]);
-            LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);
-        }
-        MouseX = X;
-        MouseY = Y;
-    }
-}
 
-USER32_API
-void AwmUpdateState(PSYSTEM_STATE_STACK State){
-    if(State->MouseState.MouseX < DesktopCurrentX){
-        State->MouseState.MouseX = DesktopCurrentX;
-    }else if(State->MouseState.MouseX > (DesktopCurrentX + DesktopCurrentWidth)){
-        State->MouseState.MouseX = (DesktopCurrentX + DesktopCurrentWidth);
-    }
-    if(State->MouseState.MouseY < DesktopCurrentY){
-        State->MouseState.MouseY = DesktopCurrentY;
-    }else if(State->MouseState.MouseY > (DesktopCurrentY + DesktopCurrentHeight)){
-        State->MouseState.MouseY = (DesktopCurrentY + DesktopCurrentHeight);
-    }
-    UpdateMouseClip(State->MouseState.MouseX, State->MouseState.MouseY);
-}

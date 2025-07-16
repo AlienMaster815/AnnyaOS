@@ -42,6 +42,8 @@
 #include <drivers/cpu/cpu.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
+#include <Dispatching.h>
+
 
 #ifndef _KERNEL_MODULE_
 

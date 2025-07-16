@@ -5,6 +5,10 @@
 #include <stdarg.h>
 #include <USRSPC/DRSD.h>
 
-
 #define LOUDLL_API __declspec(dllexport)
+
+
+LOUDLL_API
+void LouGlobalUserFree(void* Addr);
+
 #endif

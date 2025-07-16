@@ -26,9 +26,11 @@ int WinMain(
     InitializeAwmUserSubsystem(hInstance, &InterfaceSetup);
     LouGetSystemUpdate(&StateStack);
 
+    HANDLE Message = 0x00;
+
     LouPrint("AnnyaExp:Entering Main Loop\n");
-    while(1){
-        AwmUpdateState(&StateStack);
+    while(LouUserGetMessage(&Message, ANY_EVENT_TYPE, ANY_PRIORITY)){
+        LouUserDispatchMessage(Message);
     }
     return (int)-1;
 

@@ -457,6 +457,9 @@ void* RtlAllocateHeapEx(
 typedef void* HINSTANCE;
 
 #include <stdint.h>
+#include <Dispatching.h>
+
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 
 #ifndef _ANNYA_DLL_CALL_REASONS
 #define _ANNYA_DLL_CALL_REASONS
