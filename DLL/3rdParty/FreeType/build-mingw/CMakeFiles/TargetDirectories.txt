@@ -1,0 +1,9 @@
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/freetype.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/package.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/package_source.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/edit_cache.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/rebuild_cache.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/list_install_components.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/install.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/install/local.dir
+/home/napoleon/Desktop/AnnyaOS/DLL/3rdParty/FreeType/build-mingw/CMakeFiles/install/strip.dir

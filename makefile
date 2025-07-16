@@ -1,4 +1,4 @@
-# mingw-w64 nasm grub-common grub2-common grub-pc xorriso mtools make build-essential gcc grub-pc-bin
+# mingw-w64 nasm grub-common grub2-common grub-pc xorriso mtools make build-essential gcc grub-pc-bin 
 #git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1
 #cd limine
 #make
@@ -334,6 +334,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
 
+	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
+	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw 
+
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 
@@ -396,4 +399,4 @@ cleanall:
 	$(MAKE) -C drivers/gpu/Virtualbox clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C drivers/gpu/VMWare clean
-
+	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
