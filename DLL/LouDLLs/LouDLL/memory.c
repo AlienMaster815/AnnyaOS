@@ -61,7 +61,7 @@ static void* memcpy_basic(void* destination, const void* source, size_t num) {
 }
  
 __attribute__((target("sse2")))
-UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t num) {
+static void* memcpy_sse2(void* destination, const void* source, size_t num) {
     __m128i* dest = (__m128i*)destination;
     const __m128i* src = (const __m128i*)source;
 
@@ -80,7 +80,7 @@ UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t nu
 }
 
 __attribute__((target("avx512f")))
-UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t num) {
+static void* memcpy_avx512(void* destination, const void* source, size_t num) {
     uintptr_t dest_ptr = (uintptr_t)destination;
     uintptr_t src_ptr = (uintptr_t)source;
 
