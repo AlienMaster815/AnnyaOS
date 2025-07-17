@@ -122,7 +122,6 @@ typedef struct {
 // Rest of the code...
 #ifndef _KERNEL_MODULE_
 
-void PS2KeyboardHandler();
 LOUSTATUS SetBasicInterrupts(bool init);
 
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);

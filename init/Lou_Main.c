@@ -51,39 +51,37 @@ LOUSTATUS InitSLIT();
 LOUSTATUS InitMCFG();
 LOUSTATUS InitThreadManager();
 LOUSTATUS SetUpTimers();
-void LastSataRun();
-void PS2KeyboardHandler();
-void PS2MouseHandler();
-void PageFault();
-void GPF();
-void DoubleFault();
-void Clock(uint64_t SavedState);
-void INTERRUPT(uint8_t interrupt_number);
-void NMI();
-void BreakPoint();
-void DivideByZero();
-void OverFlow();
-void BoundRange();
-void Debug();
-void InvalidOpcode();
-void FloatDeviceNotAvailable();
+void PS2KeyboardHandler(UINT64 Rsp);
+void PS2MouseHandler(UINT64 Rsp);
+void PageFault(UINT64 Rsp);
+void GPF(UINT64 Rsp);
+void DoubleFault(UINT64 Rsp);
+void Clock(UINT64 SavedState);
+void INTERRUPT(UINT8 interrupt_number);
+void NMI(UINT64 Rsp);
+void BreakPoint(UINT64 Rsp);
+void DivideByZero(UINT64 Stack);
+void OverFlow(UINT64 Rsp);
+void BoundRange(UINT64 Rsp);
+void Debug(UINT64 Rsp);
+void InvalidOpcode(UINT64 Rsp);
+void FloatDeviceNotAvailable(UINT64 Rsp);
 //void TSS();
-void CpOverun();
-void SegmentNotPresent();
-void StackSegmentFault();
-void x87FloatPointError();
-void AlignmentCheck();
-void MachineCheck();
-void SIMDFloatPointException();
-void VirtualizationException();
-void ControlProtectionException();
-void CookieCheckFail();
+void CpOverun(UINT64 Rsp);
+void SegmentNotPresent(UINT64 Rsp);
+void StackSegmentFault(UINT64 Rsp);
+void x87FloatPointError(UINT64 Rsp);
+void AlignmentCheck(UINT64 Rsp);
+void MachineCheck(UINT64 Rsp);
+void SIMDFloatPointException(UINT64 Rsp);
+void VirtualizationException(UINT64 Rsp);
+void ControlProtectionException(UINT64 Rsp);
+void CookieCheckFail(UINT64 Rsp);
 void InitPreLoadedModules();
 void ParseMBootTags(struct multiboot_tag* MBOOT);
 void CreateNewPageSystem();
 uint64_t GetRamSize();
 void InitializeSystemCalls();
-void SYSCALLS();
 void initialize_ps2_keyboard();    uint64_t ContextHandle = 0x00;
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
@@ -110,7 +108,6 @@ void LouKeDrsdDrawDesktopBackground(
     FILE* ImageFile,
     uint16_t DrsdFileType
 );
-
 void UpdateThreadManager(uint64_t Rsp);
 void InitializeInterruptRouter();
 
@@ -153,7 +150,6 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     RegisterInterruptHandler(SIMDFloatPointException, INTERRUPT_SERVICE_ROUTINE_19, false, 0);
     RegisterInterruptHandler(VirtualizationException, INTERRUPT_SERVICE_ROUTINE_20, false, 0);
     RegisterInterruptHandler(ControlProtectionException, INTERRUPT_SERVICE_ROUTINE_21, false, 0);
-    RegisterInterruptHandler(SYSCALLS, 0x80, false, 0);
     RegisterInterruptHandler(UpdateThreadManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
     RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
@@ -262,7 +258,6 @@ void UsrJmp(uint64_t Entry);
 
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, bool LargePage);
 
-void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation);
 
 void PrintTest(){
     while(1){
@@ -389,7 +384,7 @@ KERNEL_ENTRY Lou_kernel_start(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    LouKeRunOnNewUserStack(InitializeUserSpace, 0x00, 8 * MEGABYTE);
+    LouKeRunOnNewUserStack((void (*)(void*))InitializeUserSpace, 0x00, 8 * MEGABYTE);
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
 	// IF the Kernel returns from this
 	// the whole thing crashes

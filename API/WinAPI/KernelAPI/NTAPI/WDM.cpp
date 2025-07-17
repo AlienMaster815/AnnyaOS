@@ -1,6 +1,8 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
 void IoDisconnectInterrupt(
    PKINTERRUPT InterruptObject
 ){

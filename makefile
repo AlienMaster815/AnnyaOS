@@ -1,4 +1,4 @@
-# mingw-w64 nasm grub-common grub2-common grub-pc xorriso mtools make build-essential gcc grub-pc-bin 
+# mingw-w64 nasm xorriso mtools cmake make gcc git binutils
 #git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1
 #cd limine
 #make
@@ -27,7 +27,7 @@ TARGET_OS = WINDOWS
 HOST_ARCH = x86_64
 FIRMWARE_TARGET = BIOS
 
-INCLUDE = -I include -I include/drivers/acpi -I include/ACPICA
+INCLUDE = -I. -I include -I include/drivers/acpi -I include/ACPICA
 
 FileStructureTable = Config/System_Config/FileStructure.xml
 SystemFileTable = Config/System_Config/SystemFiles.xml

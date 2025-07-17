@@ -82,7 +82,7 @@ KERNEL_IMPORT char* ConvertWCharToChar(const wchar_t* wstr);
 KERNEL_IMPORT int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
 #endif
 #endif
-#define CHAR_WIDTH 16
+
 #define CHAR_HEIGHT 16
 
 #define SupportedCharecters 48 * 2

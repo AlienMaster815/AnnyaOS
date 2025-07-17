@@ -7,7 +7,7 @@
 
 static uint64_t SavedState = 0;
 
-uint8_t* LouMallocEx(size_t x, size_t y);
+void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
 
 //Fuck It Well do it live
 void SaveEverything(uint64_t* ContextHandle);

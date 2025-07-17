@@ -23,10 +23,21 @@ typedef struct _uint48_t{
 #define SHIFT_LEFT_GET(d, s)            (d << s)
 #define SHIFT_LEFT_MASK_GET(d, s, m)    ((d << s) & m)
 
+#ifndef UINT8_WIDTH
 #define UINT8_WIDTH                      (8)
+#endif
+
+#ifndef UINT16_WIDTH 
 #define UINT16_WIDTH                    (16)
+#endif
+
+#ifndef UINT32_WIDTH
 #define UINT32_WIDTH                    (32)
+#endif
+
+#ifndef UINT64_WIDTH
 #define UINT64_WIDTH                    (64)
+#endif
 
 #define UINT8_MASK                      UINT8_MAX
 #define INT8_MASK                       INT8_MAX

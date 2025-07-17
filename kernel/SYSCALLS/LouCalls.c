@@ -40,7 +40,11 @@ extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
 HANDLE LouKeLoadLibraryA(string Name);
 void* LouDrsdGetPlaneInformation(size_t* CountHandle);
-void* LouKeGenericAllocateHeapEx();
+void* LouKeGenericAllocateHeapEx(
+    void* HeapHandle, 
+    size_t AllocationSize,
+    size_t Alignment
+);
 uint64_t LouKeGetThreadIdentification();
 void LouKeExitDosMode();
 void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain);
@@ -68,7 +72,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         } 
         case LOUCREATETHREAD:{
             uint64_t* Tmp = (uint64_t*)Data;
-            UNUSED uintptr_t Result = LouKeCreateUserStackThread((void(*)(PVOID))Tmp[0], (PVOID)Tmp[1], 2 * MEGABYTE);
+            UNUSED uintptr_t Result = LouKeCreateUserStackThread((void(*)())Tmp[0], (PVOID)Tmp[1], 2 * MEGABYTE);
             Tmp[0] = Result;
             return;
         }
@@ -185,7 +189,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUALLOCHEAPGENERICEX:{
             uint64_t* tmp = (uint64_t*)Data;
-            tmp[3] = (uint64_t)LouKeGenericAllocateHeapEx(tmp[0], tmp[1], tmp[2]);
+            tmp[3] = (uint64_t)LouKeGenericAllocateHeapEx((void*)tmp[0], (size_t)tmp[1], (size_t)tmp[2]);
             return;
         }
         case LOUGETTHREADID:{
