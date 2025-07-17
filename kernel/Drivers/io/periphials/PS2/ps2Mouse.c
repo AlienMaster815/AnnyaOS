@@ -2,7 +2,9 @@
 
 //static uint16_t x = 0, y = 0;
 void PS2MouseHandler(uint64_t Rsp);
-void LouKeMouseMoveEventUpdate(int64_t X, int64_t Y , BOOL RigtClick, BOOL LeftClick);
+void LouKeMouseMoveEventUpdate(PLOUSINE_USER_SHARED_MESSAGE Message);
+PLOUSINE_USER_SHARED_MESSAGE LouKeMouseAllocateMessageDevice();
+static PLOUSIINE_USER_SHARED_MESSAGE Ps2MouseDispatchLine = 0x00;
 
 static uint8_t Offset = 0;
 static uint8_t Buffer[3] = {0};
@@ -40,6 +42,7 @@ typedef struct  PACKED _CPUContext{
 
 void InitializePs2Mouse(){
     LouPrint("Initializing PS/2 Mouse (If There Is One)\n");
+    Ps2MouseDispatchLine = LouKeMouseAllocateMessageDevice();
     RegisterInterruptHandler(PS2MouseHandler, 32 + 12, false, 0x00);
     
     outb(0x64, 0xA8);
@@ -76,13 +79,13 @@ void PS2MouseHandler(uint64_t Rsp){
     Offset = (Offset + 1) % 3;
 
     if(Offset == 0){
-        x = (int8_t)Buffer[1];
-        y = (int8_t)Buffer[2];
+        Ps2MouseDispatchLine->X = (int8_t)Buffer[1];
+        Ps2MouseDispatchLine->Y = (int8_t)Buffer[2];
 
-        bool LeftClick = Buffer[0] & 0x01;
-        bool RigtClick = Buffer[0] & 0x02;
+        Ps2MouseDispatchLine->LeftClick = Buffer[0] & 0x01;
+        Ps2MouseDispatchLine->RightClick = Buffer[0] & 0x02;
 
-        LouKeMouseMoveEventUpdate((int64_t)x, (int64_t)-y, RigtClick, LeftClick);
+        LouKeMouseMoveEventUpdate(Message);
     }
 
 }
