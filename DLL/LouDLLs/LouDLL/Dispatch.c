@@ -108,5 +108,5 @@ LouUserDispatchMessage(
     }else{
         LouPrint("Handler For Message:%h Does Not Exist Message Not Handled\n", Message->MessageType);    
     }
-    LouGlobalUserFree(MessageHandle);
+    MutexUnlock(&Message->MessageMutex);
 }
