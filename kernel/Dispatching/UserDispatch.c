@@ -19,7 +19,6 @@ void LouKeDispatchNewUserMessage(
     PLOUSINE_USER_SHARED_MESSAGE Message
 ){
     if(!SendUserMessage){
-        LouKeFree(Message);
         return;
     }
     SendUserMessage(Message);

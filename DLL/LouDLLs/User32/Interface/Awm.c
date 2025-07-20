@@ -283,7 +283,7 @@ static void InitializeDependencies(){
         while(1);
     }
 
-    FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
+    //FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
     //if(FREETYPEModule){
     //    LouPrint("KICK FUCKIN ASS DUDE\n");
     //}
@@ -330,7 +330,11 @@ MouseEventHandler(
     gMouseY += MouseEvent->Y;
     BOOL RightClick = MouseEvent->RightClick;
     BOOL LeftClick  = MouseEvent->LeftClick;
-    
+    //write 0s for the request to complete
+    MouseEvent->X = 0;
+    MouseEvent->Y = 0;
+    MouseEvent->LeftClick = 0;
+    MouseEvent->RightClick = 0;
 
     if(gMouseX < DesktopCurrentX){
         gMouseX = DesktopCurrentX;

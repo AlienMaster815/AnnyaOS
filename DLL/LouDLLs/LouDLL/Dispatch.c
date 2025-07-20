@@ -23,6 +23,10 @@ SendMessageToUserMode(
     MutexLock(&MessageMutex);
     while(Tmp->Peers.NextHeader){
         Tmp = (PLOUSINE_USER_SHARED_MESSAGE)Tmp->Peers.NextHeader;
+        if((uintptr_t)Tmp == (uintptr_t)NewMessage){
+            MutexUnlock(&MessageMutex);
+            return;
+        }
     }
     Tmp->Peers.NextHeader = (PListHeader)NewMessage;
     MutexUnlock(&MessageMutex);
@@ -44,33 +48,21 @@ LouUserGetMessage(
         return true;
     }
 
-    while (Tmp->Peers.NextHeader) {
+    while (Tmp) {
         if (!MutexIsLocked(&Tmp->MessageMutex)) {
             bool typeMatch    = (Type == ANY_EVENT_TYPE)    || (Tmp->MessageType == Type);
             bool priorityMatch = (Priority == ANY_PRIORITY) || (Tmp->MessagePriority == Priority);
 
             if (typeMatch && priorityMatch) {
                 *Message = (HANDLE)Tmp;
-                MutexLock(&Tmp->MessageMutex);
                 Prev->Peers.NextHeader = Tmp->Peers.NextHeader;
+                MutexLock(&Tmp->MessageMutex);
                 return true;
             }
         }
 
         Prev = Tmp;
         Tmp = (PLOUSINE_USER_SHARED_MESSAGE)Tmp->Peers.NextHeader;
-    }
-
-    if (!MutexIsLocked(&Tmp->MessageMutex)) {
-        bool typeMatch    = (Type == ANY_EVENT_TYPE)    || (Tmp->MessageType == Type);
-        bool priorityMatch = (Priority == ANY_PRIORITY) || (Tmp->MessagePriority == Priority);
-
-        if (typeMatch && priorityMatch) {
-            *Message = (HANDLE)Tmp;
-            MutexLock(&Tmp->MessageMutex);
-            Prev->Peers.NextHeader = Tmp->Peers.NextHeader;
-            return true;
-        }
     }
 
     *Message = 0x00;
@@ -90,7 +82,6 @@ LouRegisterMouseHandler(
     if(MessageType >= LOUSINE_USER_MESSAGE_COUNT){
         return;
     }
-
     MessageHandlers[MessageType] = MessageHandler;
 }
 

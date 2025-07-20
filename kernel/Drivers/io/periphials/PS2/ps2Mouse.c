@@ -5,6 +5,7 @@ void PS2MouseHandler(uint64_t Rsp);
 void LouKeMouseMoveEventUpdate(PLOUSINE_USER_SHARED_MESSAGE Message);
 PLOUSINE_USER_SHARED_MESSAGE LouKeMouseAllocateMessageDevice();
 static PLOUSINE_USER_SHARED_MESSAGE Ps2MouseDispatchLine = 0x00;
+void LouKeMouseUpdateInput(PLOUSINE_USER_SHARED_MESSAGE Message, INT32 X, INT32 Y, BOOL RightClick, BOOL LeftClick);
 
 static uint8_t Offset = 0;
 static uint8_t Buffer[3] = {0};
@@ -77,13 +78,13 @@ void PS2MouseHandler(uint64_t Rsp){
     Offset = (Offset + 1) % 3;
 
     if(Offset == 0){
-        Ps2MouseDispatchLine->MouseEvent.X = (int8_t)Buffer[1];
-        Ps2MouseDispatchLine->MouseEvent.Y = (int8_t)Buffer[2];
 
-        Ps2MouseDispatchLine->MouseEvent.LeftClick = Buffer[0] & 0x01;
-        Ps2MouseDispatchLine->MouseEvent.RightClick = Buffer[0] & 0x02;
+        LouKeMouseUpdateInput(
+            Ps2MouseDispatchLine, 
+            (INT32)(int8_t)Buffer[1], -(INT32)(int8_t)Buffer[2], 
+            (BOOL)(Buffer[0] & 0x02), (BOOL)(Buffer[0] & 0x01)
+        );
 
-        LouKeMouseMoveEventUpdate(Ps2MouseDispatchLine);
     }
 
 }
