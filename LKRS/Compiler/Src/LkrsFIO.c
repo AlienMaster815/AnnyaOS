@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <Lkrs.h>
 
 //read and writes follow LE based encoding

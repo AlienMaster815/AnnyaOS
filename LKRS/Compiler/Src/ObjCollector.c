@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <Lkrs.h>
 
 size_t CountNameSpaceData(PLKRS_NAMESPACE_NODE NameNode){

@@ -256,6 +256,11 @@ annya.iso: release
 
 ifeq ($(TARGET_ARCH),x86_64)
 
+	$(MAKE) -C LKRS/Compiler CleanHostCompiler
+	rm -f LKRS/SYSTEM.KRF
+	$(MAKE) -C LKRS/Compiler BuildHostCompiler
+	./LKRS/Compiler/LkrsUser.sh LKRS/System.krs
+
 	$(MAKE) -C KernelLibraries/louoskrnl clean
 	$(MAKE) -C KernelLibraries/louoskrnl all
 
@@ -400,3 +405,5 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C drivers/gpu/VMWare clean
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
+	$(MAKE) -C LKRS/Compiler CleanHostCompiler
+	rm -f LKRS/SYSTEM.KRF

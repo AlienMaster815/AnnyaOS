@@ -2,6 +2,21 @@
 #ifndef _LKRS_H
 #define _LKRS_H
 
+#ifdef _KERNEL_COMPILER_
+#define LkrsMallocType(x) (x*)LouKeMallocType(sizeof(x), KERNEL_GENERIC_MEMORY)
+#define LkrsMalloc(x) LouKeMalloc(x, KERNEL_GENERIC_MEMORY)
+#else
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define LkrsMallocType(x) (x*)malloc(sizeof(x))
+#define LkrsMalloc(x) malloc(x)
+#endif
+
+
 #include "namespace.h"
 #include "SiHelpers.h"
 
@@ -50,12 +65,6 @@ size_t LkrsCountByteDeclarationSourceLength(char* ByteBuffer);
 size_t LkrsCountWordDeclarationSourceLength(char* ByteBuffer);
 size_t LkrsCountStringDeclarationSourceLength(char* StringBuffer);
 
-#ifdef _KERNEL_COMPILER_
-#define LkrsMallocType(x) (x*)LouKeMallocType(sizeof(x), KERNEL_GENERIC_MEMORY)
-#define LkrsMalloc(x) LouKeMalloc(x, KERNEL_GENERIC_MEMORY)
-#else
-#define LkrsMallocType(x) (x*)malloc(sizeof(x))
-#define LkrsMalloc(x) malloc(x)
-#endif
+
 
 #endif

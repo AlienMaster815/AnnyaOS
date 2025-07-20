@@ -1,8 +1,7 @@
 #ifndef _LKRS_NAMESPACE_H
 #define _LKRS_NAMESPACE_H
 
-typedef uint8_t LKRS_NAMESPACE, * PLKRS_NAMESPACE;
-
+#include <Lkrs.h>
 
 #define LKRS_NAMESPACE                      "NAMESPACE::"
 #define LKRS_BYTE                           "BYTE::"

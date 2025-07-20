@@ -32,9 +32,12 @@
         <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp SpriteAssets/Folder.png ISO/ANNYA/FOLDER.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSSET.png ISO/ANNYA/AOSSET.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp SpriteAssets/Start.png ISO/ANNYA/START.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/DRIVERS/DRIVERS.CFG</FILETOCPY64>        <!--Annya OS Driver Manifest Registry-->
         <FILETOCPY64>cp Config/System_Config/BootManifest.cfg ISO/ANNYA/SYSTEM64/BOOT.CFG</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp LKRS/SYSTEM.KRF ISO/ANNYA/SYSTEM64/SYSTEM.KRF</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
     </64Targets>
 </FILESBEFORECOPY>
