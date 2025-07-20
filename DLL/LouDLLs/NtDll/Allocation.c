@@ -33,6 +33,12 @@ void* GetProcessHeap(){
     return (void*)(uint8_t*)Peb->ProcessHeap;
 }
 
+//used for Dlls that have a dedicated Version of GetProcessHeap
+NTDLL_API 
+void* AnnyaNtGetProcessHeap(){
+    return GetProcessHeap(); 
+}
+
 NTDLL_API
 uint16_t NtGetProcessorCount(){
     PWIN_PEB Peb = (PWIN_PEB)(uint8_t*)NtGetPeb();

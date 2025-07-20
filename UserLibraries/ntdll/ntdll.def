@@ -8,3 +8,4 @@ EXPORTS
     RtlLeaveCriticalSection
     GetProcessHeap
     NtGetProcessorCount
+    AnnyaNtGetProcessHeap

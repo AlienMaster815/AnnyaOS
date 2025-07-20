@@ -136,3 +136,105 @@ void LoadLibraryExyW(
     LouPrint("LoadLibraryExW()\n");
     while(1);
 }
+
+
+KERNEL32_API 
+BOOL 
+CloseHandle(HANDLE Handle){
+
+    LouPrint("CloseHandle()\n");
+    while(1);
+    return true;
+}
+
+KERNEL32_API 
+HANDLE 
+CreateFileA(
+    LPCSTR                    FileName,
+    UINT32                    DesiredAccess,
+    UINT32                    ShareMode,
+    PVOID /*LPSECURITY_ATTRIBUTES*/     SecurityAttributes,
+    UINT32                    CreationDisposition,
+    UINT32                    FlagsAndAttributes,
+    HANDLE                    TemplateFile
+){
+
+    LouPrint("CreateFileA()\n");
+    while(1);
+    return 0x00;
+}
+
+KERNEL32_API
+HANDLE 
+CreateFileMappingA(){
+
+
+    LouPrint("CreateFileMappingA()\n");
+    while(1);
+    return 0x00;
+}
+
+KERNEL32_API
+void 
+GetFileSizeEx(){
+
+    LouPrint("GetFileSizeEx()\n");
+    while(1);   
+}
+
+KERNEL32_API
+void
+GetProcAddress(){
+    LouPrint("GetProcAddress\n");
+    while(1);  
+}
+
+
+KERNEL32_API
+void* 
+GetProcessHeap(){
+    return AnnyaNtGetProcessHeap();
+}
+
+KERNEL32_API
+void HeapAlloc(){
+    LouPrint("Heap Alloc\n");
+    while(1);
+}
+
+KERNEL32_API
+void HeapFree(){
+
+    LouPrint("LouFree\n");
+    while(1);
+}
+
+KERNEL32_API
+void
+HeapReAlloc(){
+    LouPrint("HeapReAlloc()\n");
+    while(1);
+}
+
+KERNEL32_API
+void
+MapViewOfFile(){
+    LouPrint("MapViewOfFile()\n");
+    while(1);
+}
+
+KERNEL32_API
+void 
+ReadFile(){
+
+    LouPrint("ReadFile\n");
+    while(1);
+}
+
+KERNEL32_API
+void 
+UnmapViewOfFile(){
+
+    LouPrint("UnmapViewOfFile()\n");
+    while(1);
+}

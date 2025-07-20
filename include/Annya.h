@@ -223,6 +223,7 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 #ifndef _LOUDLL_
 
+
 __declspec(dllimport)
 int strcmp(const char* str1, const char* str2);
 
@@ -421,6 +422,10 @@ void InitializeCriticalSectionEx(
 
 #ifndef NTDLL_H
 
+
+__declspec(dllimport)
+void* AnnyaNtGetProcessHeap();
+
 __declspec(dllimport)
 NTSTATUS RtlInitializeCriticalSectionEx(
     PMSVC_CRITICAL_SECTION CriticalSection,
@@ -434,8 +439,10 @@ NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 __declspec(dllimport)
 NTSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
+#ifndef _KERNEL32_
 __declspec(dllimport)
 void* GetProcessHeap();
+#endif
 
 __declspec(dllimport)
 uint16_t NtGetProcessorCount();

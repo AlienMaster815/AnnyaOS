@@ -3,6 +3,7 @@
 static PDRSD_CLIP* PlaneBackgrounds = 0x00;
 static HANDLE MousePng = 0x00;
 static HMODULE CODECShModule = 0;
+static HMODULE FREETYPEModule = 0;
 static HANDLE (*AnnyaOpenPngA)(string);
 static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
@@ -281,6 +282,13 @@ static void InitializeDependencies(){
         LouPrint("Critical Error Initializig CODECS.DLL\n");
         while(1);
     }
+
+    FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
+    //if(FREETYPEModule){
+    //    LouPrint("KICK FUCKIN ASS DUDE\n");
+    //}
+
+    //while(1);
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");

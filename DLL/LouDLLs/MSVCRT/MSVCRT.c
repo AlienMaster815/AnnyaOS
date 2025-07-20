@@ -257,3 +257,86 @@ void _close(){
     LouPrint("_close()\n");
     while(1);
 }
+
+MSVCRT_API
+void 
+_setjmp(){
+
+    LouPrint("_setjmp()\n");
+    while(1);
+}
+
+
+MSVCRT_API
+void 
+getenv(){
+
+    LouPrint("getenv()\n");
+    while(1);
+}
+
+
+MSVCRT_API
+void 
+longjmp(){
+
+    LouPrint("longjmp()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+memcmp(){
+    LouPrint("memcmp()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+qsort(){
+    LouPrint("qsort()\n");
+    while(1);
+}
+
+MSVCRT_API
+void 
+strcat(){
+
+    LouPrint("strcat()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+strcpy(){
+    LouPrint("strcpy()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+strncpy(){
+    LouPrint("strncpy()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+strrchr(){
+    LouPrint("strrchr()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+strstr(){
+    LouPrint("strstr()\n");
+    while(1);
+}
+
+MSVCRT_API
+void
+strtol(){
+    LouPrint("strtol\n");
+    while(1);
+}
