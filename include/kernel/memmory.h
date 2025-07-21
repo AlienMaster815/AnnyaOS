@@ -537,6 +537,9 @@ PLOU_PFN_TABLE_ENTRY LouKePageToPFN(
     uint64_t PAddress
 );
 
+void* LouKeMemReMap(void* Location, size_t Size, uint64_t Flags);
+void  LouKeMemReleaseReMap(void* Address);
+
 #endif
 #ifdef __cplusplus
 }

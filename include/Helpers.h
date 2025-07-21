@@ -68,6 +68,8 @@ typedef struct _uint48_t{
 #define SHIFT_LEFT_GET_UINT32(d, s)     (SHIFT_LEFT_MASK_GET((uint32_t)d, s, UINT32_MASK))
 #define SHIFT_LEFT_GET_UINT64(d, s)     (SHIFT_LEFT_MASK_GET((uint64_t)d, s, UINT64_MASK)) 
 
+#define GetStructureSize(p, member, count) \
+    ((size_t)((uintptr_t)(&((p)->member[count])) - (uintptr_t)(p)))
 
 
 #ifdef __cplusplus

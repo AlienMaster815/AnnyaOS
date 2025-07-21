@@ -262,6 +262,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C KernelLibraries/LouDDK all
 
+	$(MAKE) -C KernelLibraries/LCC clean
+	$(MAKE) -C KernelLibraries/LCC all
+
 	$(MAKE) -C KernelLibraries/wprecorder clean
 	$(MAKE) -C KernelLibraries/wprecorder all
 

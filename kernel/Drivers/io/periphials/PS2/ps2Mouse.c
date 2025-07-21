@@ -43,20 +43,24 @@ void InitializePs2Mouse(){
     LouPrint("Initializing PS/2 Mouse (If There Is One)\n");
     Ps2MouseDispatchLine = LouKeMouseAllocateMessageDevice();
     RegisterInterruptHandler(PS2MouseHandler, 32 + 12, false, 0x00);
-    
+
     outb(0x64, 0xA8);
     outb(0x64, 0x20);
 
     uint8_t Status = (inb(0x60) | 2);
-    outb(0x64, 0x60);
-    outb(0x60, Status);
+    outb(0x64, 0x60);                 
+    outb(0x60, Status);             
 
-    outb(0x64, 0xD4);
-    outb(0x60, 0xF4);
-    inb(0x60);
+    outb(0x64, 0xD4); outb(0x60, 0xF4); inb(0x60);
 
-    LouPrint("PS/2 Mouse Initialized Successfully\n");
-    
+    outb(0x64, 0xD4); outb(0x60, 0xF3); inb(0x60);
+    outb(0x64, 0xD4); outb(0x60, 200);  inb(0x60);
+
+    outb(0x64, 0xD4); outb(0x60, 0xE8); inb(0x60);
+    outb(0x64, 0xD4); outb(0x60, 3);    inb(0x60);
+
+    outb(0x64, 0xD4); outb(0x60, 0xE6); inb(0x60);
+    LouPrint("PS/2 Mouse Initialized with High Sample Rate\n");
 }
 
 void LouKeMouseClickEventUpdate(bool Right, bool Left);

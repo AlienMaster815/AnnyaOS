@@ -88,31 +88,6 @@ uint64_t GetAllocationBlockSize(uint64_t Address){
     return 0x00;
 }
 
-bool EnforceSystemMemoryMap(
-    uint64_t Address, 
-    uint64_t size
-){
-    LouKIRQL OldIrql;
-    LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
-    for(uint32_t i = 0 ; i < AddressesLogged; i++){
-        if(AddressBlock[i].Address == Address){
-            LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-            return false; //System Already Mapped Address
-        }
-        if(AddressBlock[i].Address == 0x00){
-            AddressBlock[i].Address = Address;
-            AddressBlock[i].size = size;
-            LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-            return true;
-        }
-    }
-
-    AddressBlock[AddressesLogged].Address = Address;
-    AddressBlock[AddressesLogged].size = size;
-    AddressesLogged++;
-    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
-    return true;
-}
 
 static bool IsEarlyMallocation = true;
 
@@ -211,6 +186,62 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
     while(1);
     return NULL;    
 }
+
+bool EnforceSystemMemoryMap(
+    uint64_t Address, 
+    uint64_t size
+){
+    LouKIRQL OldIrql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
+    for(uint32_t i = 0 ; i < AddressesLogged; i++){
+        if(AddressBlock[i].Address == Address){
+            LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+            return false; //System Already Mapped Address
+        }
+        if(AddressBlock[i].Address == 0x00){
+            AddressBlock[i].Address = Address;
+            AddressBlock[i].size = size;
+            LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+            return true;
+        }
+    }
+    if(AllocationBlocksConfigured){
+        for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
+            for (uint32_t j = 0; j < TotalAllocations[k]; j++) {
+                if (AllocationBlocks[k][j].Address == 0x00) {
+                    AllocationBlocks[k][j].Address = Address;
+                    AllocationBlocks[k][j].size = size;
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                    return true;
+                }
+            }
+        }
+        if((TotalAllocations[CURRENT_ALLOCATION_BLOCK] * sizeof(LOU_MALLOC_TRACKER)) > (10 * MEGABYTE)){
+            AllocationBlocksConfigured++;
+            if(AllocationBlocksConfigured == 100){
+                LouPrint("error using 100% memory is imposible\n");
+                while(1);//error using 100 % memory is imposible
+            }
+            AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+        }
+        AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = Address;
+        AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = size;
+        TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
+        LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+        return true;
+    }
+    if(AddressesLogged < 512){
+        AddressBlock[AddressesLogged].Address = Address;
+        AddressBlock[AddressesLogged].size = size;
+        AddressesLogged++;
+        LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
+        return true;
+    }
+    LouPrint("KERNEL_PANIC:Out Of Memory EnforceSystemMemoryMap()\n");
+    while(1);
+    return false;
+}
+
 
 void* LouMalloc(size_t BytesToAllocate) {
 

@@ -238,7 +238,9 @@ void LouKeInitializeFullLouACPISubsystem(){
     AcpiInitializeFfh();
 
     PciMmcfgLateInit();
-
+    EarlyInitializeViot();
+    AcpiInitializeHest();
+    AcpiInitializeScan();
 
     LouPrint("LouKeInitializeFullLouACPISubsystem()\n");
     //while(1);

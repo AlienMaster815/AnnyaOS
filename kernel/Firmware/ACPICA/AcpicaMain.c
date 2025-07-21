@@ -56,31 +56,14 @@ void* AcpiOsMapMemory(
     ACPI_PHYSICAL_ADDRESS   PhyAddress,
     ACPI_SIZE               Length
 ){
-    EnforceSystemMemoryMap(PhyAddress, Length);
-    uintptr_t AlignedAddress = ((uintptr_t)PhyAddress & ~(KILOBYTE_PAGE - 1));
-    size_t Offset = (uintptr_t)PhyAddress - AlignedAddress;
-    size_t TotalSize = ROUND_UP64(((size_t)Offset + (size_t)Length), KILOBYTE_PAGE);
-
-    //LouPrint("PhysicalAddress:%h\n", PhyAddress);
-    //LouPrint("AlignedAddress :%h\n", AlignedAddress);
-    //LouPrint("Offset         :%h\n", Offset);
-    //LouPrint("TotalSize      :%h\n", TotalSize);
-
-    return (void*)((uintptr_t)LouKeMallocPageEx(
-        KILOBYTE_PAGE, 
-        TotalSize / KILOBYTE_PAGE, 
-        KERNEL_DMA_MEMORY, 
-        AlignedAddress) + Offset
-    );
+    return LouKeMemReMap((void*)PhyAddress, (size_t)Length, KERNEL_DMA_MEMORY);
 }
 
 void AcpiOsUnmapMemory(
-    void*       PhyAddress,
+    void*       Address,
     ACPI_SIZE   Length
 ){
-    uintptr_t AlignedAddress = ((uintptr_t)PhyAddress & ~(KILOBYTE_PAGE - 1));
-    LouKeFreePage((void*)AlignedAddress);
-    LouFree((uint8_t*)PhyAddress);
+    LouKeMemReleaseReMap(Address);
 }
 
 ACPI_STATUS AcpiOsGetPhysicalAddress(

@@ -230,3 +230,27 @@ LOUSTATUS LouKeAcpiTableParseEntries(
 ){
     return _LouKeAcpiTableParseEntries(Id, TableSize, EntryID, Handler, 0x00, 0x00, MaxEntries);
 }
+
+LOUSTATUS 
+LouKeAcpiTableTableParse(
+    string TableID, 
+    LOUACPI_TABLE_HANDLER Handler
+){
+    PACPI_TABLE_HEADER Table = 0x00;
+    if((!TableID) || (!Handler)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if(!strncmp(TableID, ACPI_SIG_MADT, sizeof(UINT32))){
+        AcpiGetTable(TableID, AcpiApicInstance , &Table);
+    }else{
+        AcpiGetTable(TableID, 0, &Table);
+    }
+
+    if(Table){
+        Handler(Table);
+        AcpiPutTable(Table);
+        return STATUS_SUCCESS;
+    }
+    return STATUS_NO_SUCH_DEVICE;
+}

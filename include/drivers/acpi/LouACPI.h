@@ -457,7 +457,28 @@ typedef struct _ACPI_OSC_CONTEXT{
 
 #ifndef __cplusplus
 #include <acpi.h>
+typedef ACPI_TABLE_HEADER* PACPI_TABLE_HEADER;
+typedef LOUSTATUS (*LOUACPI_TABLE_HANDLER)(PACPI_TABLE_HEADER);
+
 ACPI_STATUS AcpiEvaluateInteger(ACPI_HANDLE AcpiHandle, ACPI_STRING Path, ACPI_OBJECT_LIST* Args, UINT64* Data);
+LOUSTATUS 
+LouKeAcpiTableTableParse(
+    string TableID, 
+    LOUACPI_TABLE_HANDLER Handler
+);
+void EarlyInitializeViot();
+void AcpiInitializeHest();
+void AcpiInitializeGhes();
+bool LouKeAcpiCheckHestSetup();
+void AcpiInitializeScan();
+void AcpiInitializePciRoot();
+LOUSTATUS LouKeAcpiTableParseEntries(
+    string                      Id, 
+    size_t                      TableSize,
+    int                         EntryID,
+    ACPI_TABLE_ENTRY_HANDLER    Handler,
+    size_t                      MaxEntries
+);
 #endif
 
 #include "Pcc.h"
