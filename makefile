@@ -403,3 +403,4 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C drivers/gpu/VMWare clean
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
+	$(MAKE) -C KernelLibraries/LCC clean

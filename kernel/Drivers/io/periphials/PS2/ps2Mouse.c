@@ -44,22 +44,38 @@ void InitializePs2Mouse(){
     Ps2MouseDispatchLine = LouKeMouseAllocateMessageDevice();
     RegisterInterruptHandler(PS2MouseHandler, 32 + 12, false, 0x00);
 
-    outb(0x64, 0xA8);
-    outb(0x64, 0x20);
+    outb(0x64, 0xA8);  // Enable auxiliary device - PS/2 mouse
+    outb(0x64, 0x20);  // Read command byte
 
-    uint8_t Status = (inb(0x60) | 2);
-    outb(0x64, 0x60);                 
+    uint8_t Status = (inb(0x60) | 2); // Enable IRQ12
+    outb(0x64, 0x60);                 // Write command byte
     outb(0x60, Status);             
 
+    // Enable the mouse
     outb(0x64, 0xD4); outb(0x60, 0xF4); inb(0x60);
 
+    // Set sample rate to 200Hz
     outb(0x64, 0xD4); outb(0x60, 0xF3); inb(0x60);
     outb(0x64, 0xD4); outb(0x60, 200);  inb(0x60);
 
+    // Set resolution to 3 (8 counts/mm)
     outb(0x64, 0xD4); outb(0x60, 0xE8); inb(0x60);
     outb(0x64, 0xD4); outb(0x60, 3);    inb(0x60);
 
+    // Set scaling to 1:1
     outb(0x64, 0xD4); outb(0x60, 0xE6); inb(0x60);
+
+    // Enable Intellimouse mode
+    outb(0x64, 0xD4); outb(0x60, 0xF3); inb(0x60);
+    outb(0x64, 0xD4); outb(0x60, 200);  inb(0x60);
+
+    outb(0x64, 0xD4); outb(0x60, 0xF3); inb(0x60);
+    outb(0x64, 0xD4); outb(0x60, 100);  inb(0x60);
+
+    outb(0x64, 0xD4); outb(0x60, 0xF3); inb(0x60);
+    outb(0x64, 0xD4); outb(0x60, 80);   inb(0x60);
+
+
     LouPrint("PS/2 Mouse Initialized with High Sample Rate\n");
 }
 

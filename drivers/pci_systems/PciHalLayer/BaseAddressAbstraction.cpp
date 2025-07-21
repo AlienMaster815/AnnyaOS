@@ -6,6 +6,12 @@
 #define SLOT PDEV->slot
 #define FUNCTION PDEV->func
 
+static uint64_t IoMemEnd = 0;
+
+KERNEL_IMPORT uint64_t GetIoMemEnd(){
+    return IoMemEnd;
+}
+
 KERNEL_IMPORT
 uint16_t LouKeCreatIoPort(
     uint16_t PortSize
@@ -156,6 +162,9 @@ void LouKeHalRegisterPciDevice(
                             
                             Config->BarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x0F);
                             Config->BarSize[i] = BarSize;
+                            if(IoMemEnd < (Config->BarBase[i] + Config->BarSize[i])){
+                                IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
+                            }
                             uint64_t Tmp = 0x00;
                             if((Config->BarBase[i] & (MEGABYTE_PAGE - 1)) == 0){
                                 Tmp = (uint64_t)LouVMallocEx(ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), MEGABYTE_PAGE);
@@ -181,6 +190,9 @@ void LouKeHalRegisterPciDevice(
 
                             Config->BarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x0F);
                             Config->BarSize[i] = BarSize;
+                            if(IoMemEnd < (Config->BarBase[i] + Config->BarSize[i])){
+                                IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
+                            }
                             uint64_t Tmp = 0x00;
                             if((Config->BarBase[i] & (MEGABYTE_PAGE - 1)) == 0){
                                 Tmp = (uint64_t)LouVMallocEx(ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), MEGABYTE_PAGE);

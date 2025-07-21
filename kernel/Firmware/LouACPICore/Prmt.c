@@ -54,13 +54,10 @@ static LOUSTATUS AcpiParsePrmt(
     Tm->HandlerCount = ModuleInfo->HandlerInfoCount;
     Tm->Updateable = true;
 
-    if(ModuleInfo->MmioListPointer){
-        //MmioCount = (UINT64*)
-    }else{
 
-    }
-
-    return STATUS_SUCCESS;;
+    LouPrint("AcpiParsePrmt()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 void AcpiInitializePlatformRuntime(){
@@ -90,6 +87,7 @@ void AcpiInitializePlatformRuntime(){
         LouPrint("ERROR: EFI Runtime Service Unavailable\n");
         return;
     }
+
 
 
     LouPrint("AcpiInitializePlatformRuntime()\n");
