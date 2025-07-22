@@ -3,37 +3,6 @@
 extern int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
 extern int WndProc(void* hwnd, uint32_t uMsg, void* WParam, void* LParam);
 
-static inline void TailLouCall(
-    uint64_t Call,
-    uint64_t Data,
-    uint64_t SystemEmulation
-){
-    asm("INT $0x80");
-}
-
-static mutex_t LouCallLock;
-
-void LouCALLcrtc(
-    uint64_t Call,
-    uint64_t Data,
-    uint64_t SystemEmulation
-){
-    MutexLock(&LouCallLock);
-    TailLouCall(Call, Data, SystemEmulation);
-    MutexUnlock(&LouCallLock);
-}
-
-uint64_t AnnyaRegisterCallbackProcedure(
-    void* CallbackHandler
-){
-    uint64_t Data[2];
-    Data[0] = 0;
-    Data[1] = (uint64_t)CallbackHandler; 
-    while(Data[0] != 1){
-        LouCALLcrtc(LOUREGISTERCALLBACK, (uint64_t)&Data, 0);
-    }
-    return Data[1];
-}
 
 
 int __WinMainCrtc(
@@ -42,10 +11,6 @@ int __WinMainCrtc(
     uint64_t CommandLine, 
     uint64_t CmdShow
 ){
-
-    AnnyaRegisterCallbackProcedure(
-        (void*)WndProc
-    );
 
     return WinMain(
         (HINSTANCE)hInstance,

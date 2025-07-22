@@ -924,7 +924,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     size_t i = 0;
     size_t j = 0;
 
-    //LouPrint("Module:%s Function:%s", ModuleName, FunctionName);
+    //LouPrint("Module:%s Function:%s\n", ModuleName, FunctionName);
 
     for(i = 0; i < PRE_LOADED_MODULES; i++){
 

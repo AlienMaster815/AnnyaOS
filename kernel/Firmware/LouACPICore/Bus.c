@@ -128,7 +128,7 @@ LOUSTATUS AcpiBusInitialize(){
         LouPrint("AcpiLoadTables failed\n");
         goto _ACPI_BUS_INITIALIZE_ERROR;
     }
-
+    
     AcpiEcEcdtProbe();
 
     LouPrint("Enabling System\n");

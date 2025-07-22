@@ -457,6 +457,9 @@ typedef struct _ACPI_OSC_CONTEXT{
 
 #ifndef __cplusplus
 #include <acpi.h>
+
+
+
 typedef ACPI_TABLE_HEADER* PACPI_TABLE_HEADER;
 typedef LOUSTATUS (*LOUACPI_TABLE_HANDLER)(PACPI_TABLE_HEADER);
 

@@ -1860,6 +1860,25 @@ typedef struct PACKED _ACPI_CDAT_TABLE{
     uint32_t    Sequence;
 }ACPI_CDAT_TABLE, * PACPI_CDAT_TABLE; 
 
+typedef struct _ACPI_DEVICE_IDENTIFICATION{
+    UINT8       Identification[16];
+    UINT64      DriverDataTag;
+    UINT32      Cls;
+    UINT32      ClSMask;    
+}ACPI_DEVICE_IDENTIFICATION, * PACPI_DEVICE_IDENTIFICATION;
+
+typedef struct _ACPI_DEVICE{
+    UINT32      PldCrc;
+    INTEGER     DeviceType;
+    PVOID       AcpiHandle;
+}ACPI_DEVICE, * PACPI_DEVICE;
+
+typedef struct PACKED _ACPI_SCAN_HANDLER{
+    ListHeader                      Peers;
+    PACPI_DEVICE_IDENTIFICATION     IdList;
+    BOOL                            (*MatchID)(string IdString, PACPI_DEVICE_IDENTIFICATION* MatchingID);
+    LOUSTATUS                       (*AtatchDevice)(PACPI_DEVICE Device, PACPI_DEVICE_IDENTIFICATION Id);
+}ACPI_SCAN_HANDLER, * PACPI_SCAN_HANDLER;
 
 #ifdef __cplusplus
 }

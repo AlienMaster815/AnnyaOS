@@ -9,3 +9,4 @@ EXPORTS
     GetProcessHeap
     NtGetProcessorCount
     AnnyaNtGetProcessHeap
+    RtlAllocateHeap

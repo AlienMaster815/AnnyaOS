@@ -81,10 +81,12 @@ PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
 
 LOUDLL_API
 void AnnyaDestroyThread(PTHREAD Thread){
-    uint64_t Data = (uint64_t) Thread;
-    LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data, 0);
+    uint64_t Data[2];
+    Data[1] = (uint64_t) Thread;
+    while(Data[0] != 1){
+        LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data, 0);
+    }
 }
-
 
 void uintToHexString(uint64_t number, char* hexString) {
     int i = 0;
@@ -353,9 +355,7 @@ void LouCALL(
     uint64_t Data,
     uint64_t SystemEmulation
 ){
-    MutexLock(&LouCallLock);
     TailLouCall(Call, Data, SystemEmulation);
-    MutexUnlock(&LouCallLock);
     LouSpin();
 }
 
@@ -374,14 +374,15 @@ typedef struct _ATTACH_THREAD_DATA{
     uint64_t DllHandle;
     uint64_t DllCallReason;
     uint64_t DllReserved;
-    void   (*LockRelease)();
+    void   (*LockRelease)(mutex_t* Lock);
+    mutex_t* Lock;
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
 
 LOUDLL_API
 DWORD AnnyaAttachDllToProcess(PVOID ThreadData){
     PATTACH_THREAD_DATA DllAttachData = (PATTACH_THREAD_DATA)ThreadData;
     DllAttachData->DllEntry(DllAttachData->DllHandle, DllAttachData->DllCallReason, DllAttachData->DllReserved);
-    DllAttachData->LockRelease();
+    DllAttachData->LockRelease(DllAttachData->Lock);
     return 0;
 }
 
@@ -457,7 +458,7 @@ AnnyaGetLibraryFunctionH(
     HANDLE ModuleHandle, 
     string FunctionName
 ){
-
+    LouPrint("AnnyaGetLibraryFunctionH()\n");
     while(1);
     return 0;
 }

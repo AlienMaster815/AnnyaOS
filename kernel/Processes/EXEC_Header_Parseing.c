@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-#define TotalNeededVM (SectionHeader[CoffHeader->numberOfSections - 1].virtualAddress + SectionHeader[CoffHeader->numberOfSections - 1].virtualSize)
+#define TotalNeededVM ROUND_UP64((SectionHeader[CoffHeader->numberOfSections - 1].virtualAddress + SectionHeader[CoffHeader->numberOfSections - 1].virtualSize), KILOBYTE_PAGE)
 
 uint64_t LouKeLinkerGetAddress(string ModuleName, string FunctionName);
 
@@ -40,8 +40,8 @@ void ParseExportTables(
 
         FunctionNames[i] = (string)(ModuleStart + (uint64_t)(uint32_t)NPR[i]);
         FunctionPointers[i] = ModuleStart + (uint64_t)(uint32_t)ATR[OTRIndex];
-
-        //LouPrint("Function Name:%s\n", FunctionNames[i]);
+        
+        //LouPrint("ModuleName:%s Function Name:%s\n", ModuleName, FunctionNames[i]);
         //LouPrint("Function Pointer:%h\n", FunctionPointers[i]);
 
     }
@@ -122,9 +122,8 @@ static inline uint8_t FilePathCountBackToDirectory(string FilePath){
     return i + 1;
 }
 
-HANDLE LouKeLoadLibraryA(string LibraryName);
+HANDLE LouKeLoadLibraryA(string LibraryName, mutex_t* Lock);
 bool LouKeLinkerCheckLibraryPresence(string SystemName);
-HANDLE LouKeLoadLibraryA(string LibraryName);
 
 void ParseImportTables(
     uint64_t ModuleStart,
@@ -182,7 +181,9 @@ void ParseImportTables(
 
                 if(!LouKeLinkerCheckLibraryPresence(SYSName)){
                     if(fseek(Directory)){
-                        LouKeLoadLibraryA(Directory);
+                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
+                        LouKeLoadLibraryA(Directory, Lock);
+                        LouKeFree(Lock);
                         goto _LINKER_LOADED_A_MODULE;
                     }
 
@@ -190,7 +191,9 @@ void ParseImportTables(
                     LouKeStrLowerToUpper(Directory);
                     
                     if(fseek(Directory)){
-                        LouKeLoadLibraryA(Directory);
+                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
+                        LouKeLoadLibraryA(Directory, Lock);
+                        LouKeFree(Lock);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     
@@ -200,13 +203,17 @@ void ParseImportTables(
                     strncpy(Directory, "C:/ANNYA/SYSTEM64/", strlen("C:/ANNYA/SYSTEM64/"));
                     strncpy((string)((uint64_t)Directory + strlen("C:/ANNYA/SYSTEM64/")), SYSName, strlen(SYSName));    
                     if(fseek(Directory)){
-                        LouKeLoadLibraryA(Directory);
+                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
+                        LouKeLoadLibraryA(Directory, Lock);
+                        LouKeFree(Lock);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     LouKeStrLowerToUpper(Directory);
-                    
+                
                     if(fseek(Directory)){
-                        LouKeLoadLibraryA(Directory);
+                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
+                        LouKeLoadLibraryA(Directory, Lock);
+                        LouKeFree(Lock);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     
@@ -418,6 +425,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             KILOBYTE_PAGE,
             KERNEL_PAGE_WRITE_PRESENT
         );
+        LouPrint("KernelModule:%s Loaded At Address:%h With Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, PRESENT_PAGE | WRITEABLE_PAGE);
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
 
@@ -517,6 +525,8 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
             PE64Header->sectionAlignment,
             USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
+        LouPrint("User DLL:%s Loaded At Address:%h ans Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
+
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
         
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
@@ -616,6 +626,8 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
             PE64Header->sectionAlignment,
             USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
+        LouPrint("User Executable:%s Loaded At Address:%h With Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
+
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
         
         // /LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);

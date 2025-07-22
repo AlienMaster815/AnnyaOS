@@ -455,6 +455,14 @@ void* RtlAllocateHeapEx(
     size_t      Alignment
 );
 
+__declspec(dllimport)
+void* 
+RtlAllocateHeap(
+    PVOID       HeapHandle,
+    uint64_t    HeapAllocationFlags,
+    size_t      HeapSize
+);
+
 #endif
 
 #ifdef __cplusplus    

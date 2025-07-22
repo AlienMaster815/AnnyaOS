@@ -96,6 +96,8 @@ PFRAME_INFO _CreateFrameInfo(
     PULONG WETHTI,
     void* Context
 ){
+
+    LouPrint("_CreateFrameInfo()\n");
     while(1);
 
     return 0x00;

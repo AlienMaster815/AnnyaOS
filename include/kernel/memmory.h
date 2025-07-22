@@ -268,14 +268,14 @@ typedef struct _LMPOOL_DIRECTORY{
     ListHeader          List;
     bool                FixedSizePool;
     string              Tag;
+    uint64_t            LastOut;
     uint64_t            Location;
     uint64_t            VLocation;
     uint64_t            PoolSize;
     uint64_t            ObjectSize;
     uint64_t            Flags;
-    uint64_t            CacheLimit;
-    uint64_t            DirtyAllocations;
-    uint64_t            LastOut;
+    uint64_t*           FreeList;
+    uint64_t            FreeListTop;       
     POOL_MEMORY_TRACKS  MemoryTracks;
 }LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
 

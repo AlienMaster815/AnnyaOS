@@ -19,7 +19,9 @@ void* RtlAllocateHeapEx(
     }
 }
 
-void* RtlAllocateHeap(
+NTDLL_API
+void* 
+RtlAllocateHeap(
     PVOID       HeapHandle,
     uint64_t    HeapAllocationFlags,
     size_t      HeapSize

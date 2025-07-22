@@ -1,5 +1,9 @@
 #include "Awm.h"
 
+typedef int FT_Error;
+typedef void* FT_Library;
+
+
 static PDRSD_CLIP* PlaneBackgrounds = 0x00;
 static HANDLE MousePng = 0x00;
 static HMODULE CODECShModule = 0;
@@ -9,6 +13,8 @@ static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
 static int64_t MouseX = 0;
 static int64_t MouseY = 0;
+
+static FT_Library FtInitLib = 0x00;
 
 static PDRSD_CLIP* TaskBars = 0;
 static HANDLE StartButtonPng = 0x00;
@@ -20,6 +26,7 @@ static HANDLE (*AnnyaOpenBmpA)(string);
 HANDLE BackgroundImage = 0x00;
 HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
 HANDLE (*AnnyaCreateClipFromPng)(void*, HANDLE);
+static FT_Error (*FT_Init_FreeType)(FT_Library* Lib);
 
 //192 dark greay
 //198 ligt grey
@@ -276,6 +283,14 @@ static void InitializeDependencies(){
         while(1);
     }
 
+    LouPrint("Loading FREETYPE.DLL\n");
+
+    FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
+    if(!FREETYPEModule){
+        LouPrint("FREETYPE.DLL Could Not Be Loaded\n");
+        while(1);
+    }
+
     InitializePNGHandleing = AnnyaGetLibraryFunctionN("CODECS.DLL", "InitializePNGHandleing");
     Status = InitializePNGHandleing();  
     if(Status != STATUS_SUCCESS){
@@ -283,12 +298,7 @@ static void InitializeDependencies(){
         while(1);
     }
 
-    //FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
-    //if(FREETYPEModule){
-    //    LouPrint("KICK FUCKIN ASS DUDE\n");
-    //}
-
-    //while(1);
+    FT_Init_FreeType = AnnyaGetLibraryFunctionN("LIBFREETYPE.DLL", "FT_Init_FreeType");
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");
@@ -299,6 +309,10 @@ static void InitializeDependencies(){
     FolderPng = AnnyaOpenPngA("C:/ANNYA/FOLDER.PNG");
     StartButtonPng = AnnyaOpenPngA("C:/ANNYA/START.PNG");
     BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
+
+    LouPrint("Initiailizing FreeType\n");
+    //FT_Init_FreeType(&FtInitLib);
+
     LouPrint("InitializeDependencies() STATUS_SUCCESS\n");
 
 }
@@ -350,7 +364,14 @@ MouseEventHandler(
     UpdateMouseClip(gMouseX, gMouseY);
 
     if(RightClick){
+        PWINDOW_HANDLE WinHandle = AwmFineWindowAtPoint(gMouseX, gMouseY);
+        if(WinHandle){
+            if(WinHandle->WindowName){
+            
+            }
+        }else{
 
+        }
     }
     if(LeftClick){
         PWINDOW_HANDLE WinHandle = AwmFineWindowAtPoint(gMouseX, gMouseY);
@@ -359,9 +380,7 @@ MouseEventHandler(
                 LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
             }
         }
-
     }
-
 }
 
 USER32_API

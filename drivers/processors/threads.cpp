@@ -315,29 +315,30 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
     return Status;
 }
 
-//static spinlock_t UserThreadCreationLock;
+static spinlock_t UserThreadCreationLock;
 
 
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(thread_t* Thread) {
-    //LouKIRQL Irql;
-    //LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
-    //thread_t* TmpThreadHandle = &MasterThreadTable;
-    //for(uint64_t i = 0 ; i < NumberOfThreads; i++){
-    //    TmpThreadHandle = (thread_t*)TmpThreadHandle->Neighbors.NextHeader;
-    //    if(TmpThreadHandle == Thread){
-    //        thread_t* TmpThreadHandle2 = &MasterThreadTable;
-    //        for(uint64_t j = 0 ; j < i; j++){
-    //            TmpThreadHandle2 = (thread_t*)TmpThreadHandle2->Neighbors.NextHeader;
-    //        }
-    //        TmpThreadHandle2->Neighbors.NextHeader = TmpThreadHandle->Neighbors.NextHeader;
-    //        LouKeUserFree((RAMADD)Thread);
-    //        NumberOfThreads--;
-    //        LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);   
-    //        return;
-    //        //Endof SystemCall
-    //    }
-    //}
-    //LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
+    thread_t* TmpThreadHandle = &MasterThreadTable;
+    for(uint64_t i = 0 ; i < NumberOfThreads; i++){
+        TmpThreadHandle = (thread_t*)TmpThreadHandle->Neighbors.NextHeader;
+        if(TmpThreadHandle == Thread){
+            thread_t* TmpThreadHandle2 = &MasterThreadTable;
+            for(uint64_t j = 0 ; j < i; j++){
+                TmpThreadHandle2 = (thread_t*)TmpThreadHandle2->Neighbors.NextHeader;
+            }
+            TmpThreadHandle2->Neighbors.NextHeader = TmpThreadHandle->Neighbors.NextHeader;
+            LouKeFree(Thread);
+            NumberOfThreads--;
+            LouPrint("Destroyed Thread:%h Threads Running:%d\n", Thread, NumberOfThreads + 1);
+            LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);   
+            return;
+            //Endof SystemCall
+        }
+    }
+    LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
     //Endof SystemCall
 }
 LOUDDK_API_ENTRY uint64_t GetThreadContext(
@@ -412,7 +413,8 @@ uintptr_t RetriveThreadStubAddress(){
 KERNEL_IMPORT uint64_t GetPEB();
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer) {
-    
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
     //allocate New Stack
     void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     
@@ -420,6 +422,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     thread_t* NewThread = CreateThreadHandle();
     if(!NewThread){
         LouKeFree(NewStack);
+        LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
         return 0x00;
     }
     //store the top of the stack
@@ -457,18 +460,21 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     //Increment Thread Counter
     NumberOfThreads++;
     //return the handle to the new thread
+    LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
     return (uintptr_t)NewThread;//NewThread;
 }
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
-     
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
     //allocate New Stack
     void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     
-    //Allocate New Thread
+    //Allocate New Threads
     thread_t* NewThread = CreateThreadHandle();
     if(!NewThread){
         LouKeFree(NewStack);
+        LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
         return 0x00;
     }
     //store the top of the stack
@@ -501,6 +507,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //Increment Thread Counter
     NumberOfThreads++;
     //return the handle to the new thread
+    LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
     return (uintptr_t)NewThread;//NewThread;
 }
 

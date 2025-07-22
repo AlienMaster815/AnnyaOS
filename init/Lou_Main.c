@@ -328,6 +328,7 @@ UNUSED static bool SystemIsEfiv = false;
 bool IsSystemEfi(){
     return SystemIsEfiv;
 }
+void InitializePoolsPool();
 
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
@@ -350,6 +351,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeMapPciMemory();
 
+    InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
 

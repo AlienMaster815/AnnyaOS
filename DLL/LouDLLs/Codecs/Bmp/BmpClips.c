@@ -28,6 +28,7 @@ AnnyaPaintClipWithBmp(
             TmpData = PixelData[0];
             TmpData |= (PixelData[1] << 8);
             TmpData |= (PixelData[2] << 16);
+            TmpData |= (PixelData[3] << 24);
             for(size_t Ys = 0 ; Ys < ScalingY; Ys++){
                 for(size_t Xs = 0 ; Xs < ScalingX; Xs++){ 
                     Clip->WindowBuffer[(X+(xz*ScalingX)+Xs) + ((Y+(yz*ScalingY)+Ys) * Clip->Width)] = TmpData;

@@ -89,20 +89,31 @@ void WideCharToMultiByte(){
 static mutex_t LoadLibraryAMutex;
 
 KERNEL32_API
-HANDLE LoadLibraryA(string DllName){
-    MutexLock(&LoadLibraryAMutex);
-    uint64_t KulaPacket[3] = {0};
+HANDLE LoadLibraryExA(
+    string DllName, 
+    HANDLE File, 
+    DWORD Flags
+){
+    uint64_t KulaPacket[4] = {0};
     KulaPacket[1] = (uint64_t)DllName;
+    KulaPacket[3] = (uint64_t)LouGlobalUserMallocType(mutex_t);
+    MutexLock((mutex_t*)KulaPacket[3]);
     while(KulaPacket[0] == 0){
         LouCALL(LOULOADLIBRARYA, (uint64_t)&KulaPacket, 0);
     }
-    MutexSynchronize(&LoadLibraryAMutex);
+    MutexSynchronize((mutex_t*)KulaPacket[3]);
+    LouGlobalUserFree((void*)KulaPacket[3]);
     return (HANDLE)KulaPacket[2];
 }
 
+KERNEL32_API
+HANDLE LoadLibraryA(string DllName){
+    return LoadLibraryExA(DllName, 0, 0);
+}
+
 KERNEL32_API 
-void ReleaseLoadLibraryALock(){
-    MutexUnlock(&LoadLibraryAMutex);
+void ReleaseLoadLibraryALock(mutex_t* Lock){
+    MutexUnlock(Lock);
 }
 
 KERNEL32_API
@@ -113,21 +124,8 @@ void LoadLibraryW(wchar_t* DllName){
 }
 
 
-
 KERNEL32_API
-void LoadLibraryExA(
-    string DllName, 
-    HANDLE File, 
-    DWORD Flags
-){
-
-    LouPrint("LoadLibraryExA()\n");
-    while(1);
-}
-
-
-KERNEL32_API
-void LoadLibraryExyW(
+void LoadLibraryExW(
     wchar_t* DllName, 
     HANDLE File, 
     DWORD Flags
@@ -196,10 +194,11 @@ GetProcessHeap(){
     return AnnyaNtGetProcessHeap();
 }
 
+
 KERNEL32_API
-void HeapAlloc(){
-    LouPrint("Heap Alloc\n");
-    while(1);
+void* 
+HeapAlloc(PVOID Foo, uint64_t Bar, size_t Too){
+    return RtlAllocateHeap(Foo, Bar, Too);
 }
 
 KERNEL32_API

@@ -7,7 +7,7 @@ static POOL AcpicaPool = 0x00;
 
 ACPI_STATUS AcpiOsInitialize(){
     AcpicaPool = LouKeCreateDynamicPool(
-        32 * MEGABYTE,
+        16 * MEGABYTE,
         KILOBYTE_PAGE,
         "ACPICAPool",
         0,

@@ -5,11 +5,7 @@
 extern "C"{
 #endif
 
-#include <stdatomic.h>
-
-typedef struct {
-	uint64_t counter;
-}atomic_t;
+#include <kernel/atomic.h>
 
 typedef atomic_t* p_atomic_t;
 
@@ -17,6 +13,8 @@ typedef struct _mutex_t{
     atomic_t locked;
     atomic_t Handle;
     atomic_t PrivaledgeLevel;
+    atomic_t ThreadOwnerLow;
+    atomic_t ThreadOwnerHigh;
 } mutex_t;
 
 typedef struct {
@@ -31,10 +29,51 @@ typedef struct {
     atomic_t ThreadOwner;
 }semaphore_t;
 
-static inline void MutexLock(mutex_t* m){
-    while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
-        // spin
+
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+
+static inline void LouSetAtomic(atomic_t* A, int Value){
+    atomic_set(A, Value);
+}
+
+static inline int LouGetAtomic(atomic_t* A){
+    return atomic_read(A);
+}
+
+
+static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
+    if(LockOutTagOut){
+        while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
+            // spin
+        }
+    }else{
+        uint64_t Thread = (uint64_t)LouGetAtomic(&m->ThreadOwnerLow);
+        Thread |= (((uint64_t)LouGetAtomic(&m->ThreadOwnerHigh)) << 32);
+        #ifndef _USER_MODE_CODE_
+        if((Thread == LouKeGetThreadIdentification()) && (LouGetAtomic(&m->locked) == 0x01)){
+            //access Granted
+            LouKeMemoryBarrier();
+            return;
+        }
+        #else
+            //TODO: Use User Mode Thread Request
+        #endif
+        while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
+            // spin
+        }
+        #ifndef _USER_MODE_CODE_
+        Thread = LouKeGetThreadIdentification();
+        #else
+            //TODO: Use User Mode Thread Request
+        #endif
+        LouSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
+        LouSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
     }
+    LouKeMemoryBarrier();
+}
+
+static inline void MutexLock(mutex_t* m){
+    MutexLockEx(m, true);
 }
 
 static inline void MutexSynchronize(mutex_t* m){
@@ -49,27 +88,7 @@ static inline bool MutexIsLocked(mutex_t* m){
 
 static inline void MutexUnlock(mutex_t* m){
     __atomic_clear(&m->locked.counter, __ATOMIC_RELEASE);
-}
-
-static inline uintptr_t MutexPriorityLock(
-    mutex_t* m, 
-    uintptr_t Handle, 
-    int Privaledge
-){
-    if((m->locked.counter) && (m->PrivaledgeLevel.counter < Privaledge)){
-        uintptr_t OldHandle = m->Handle.counter;
-        m->Handle.counter = Handle;
-        m->PrivaledgeLevel.counter = Privaledge;
-        return OldHandle;
-    }
-    MutexLock(m);
-    return 0;
-}
-
-static inline void MutexPriorityUnlock(mutex_t* m){
-    m->Handle.counter = 0x00;
-    m->PrivaledgeLevel.counter = 0x00;
-    MutexUnlock(m);
+    LouKeMemoryBarrier();
 }
 
 #ifdef __cplusplus
