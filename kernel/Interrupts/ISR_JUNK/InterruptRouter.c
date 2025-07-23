@@ -134,7 +134,11 @@ mutex_t* LouKeGetInterruptGlobalLock(){
     return &InterruptLock;
 }
 
+void LouKeThrowPc();
+
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
+
+
 
     if(Interrupt < 0x20){
         LouKIRQL Irql;

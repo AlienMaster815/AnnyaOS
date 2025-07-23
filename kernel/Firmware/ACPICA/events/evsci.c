@@ -179,7 +179,7 @@ AcpiEvSciXruptHandler (
  * DESCRIPTION: Dispatch the SCI to all host-installed SCI handlers.
  *
  ******************************************************************************/
-
+int LouPrint(char*, ...);
 UINT32
 AcpiEvSciDispatch (
     void)
@@ -231,6 +231,7 @@ AcpiEvSciDispatch (
  *              control method to call to deal with a SCI.
  *
  ******************************************************************************/
+void LouKeThrowPc();
 
 static UINT32 ACPI_SYSTEM_XFACE
 AcpiEvSciXruptHandler (
@@ -238,7 +239,7 @@ AcpiEvSciXruptHandler (
 {
     ACPI_GPE_XRUPT_INFO     *GpeXruptList = Context;
     UINT32                  InterruptHandled = ACPI_INTERRUPT_NOT_HANDLED;
-
+    
 
     ACPI_FUNCTION_TRACE (EvSciXruptHandler);
 
@@ -281,6 +282,8 @@ AcpiEvSciXruptHandler (
  *
  ******************************************************************************/
 
+void LouKeThrowPc();
+
 UINT32 ACPI_SYSTEM_XFACE
 AcpiEvGpeXruptHandler (
     void                    *Context)
@@ -290,7 +293,6 @@ AcpiEvGpeXruptHandler (
 
 
     ACPI_FUNCTION_TRACE (EvGpeXruptHandler);
-
 
     /*
      * We are guaranteed by the ACPICA initialization/shutdown code that

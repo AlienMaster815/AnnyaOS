@@ -55,3 +55,7 @@ void LouKeDebuggerCommunicationsSendCharecter(char Charecter){
         Com = (PDEBUGGER_COMMUNICATIONS_DEVICE)Com->Peers.NextHeader;
     }
 }
+
+void LouKeThrowPc(){
+    DEBUG_TRAP
+}

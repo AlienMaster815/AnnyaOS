@@ -1867,17 +1867,157 @@ typedef struct _ACPI_DEVICE_IDENTIFICATION{
     UINT32      ClSMask;    
 }ACPI_DEVICE_IDENTIFICATION, * PACPI_DEVICE_IDENTIFICATION;
 
+typedef struct _ACPI_DEVICE_STATUS{
+    UINT32      Present         : 1;
+    UINT32      Enabled         : 1;
+    UINT32      ShowInUi        : 1;
+    UINT32      Functional      : 1;
+    UINT32      BatteryPresent  : 1;
+    UINT32      Reserved        : 27; 
+}ACPI_DEVICE_STATUS, * PACPI_DEVICE_STATUS;
+
+typedef struct _ACPI_DEVICE_FLAGS{
+    UINT32      DynamicStatus       : 1;
+    UINT32      Removeable          : 1;
+    UINT32      Ejectable           : 1;
+    UINT32      PowerManageable     : 1;
+    UINT32      MatchDriver         : 1;
+    UINT32      Initialized         : 1;
+    UINT32      Visited             : 1;
+    UINT32      HpNotify            : 1;
+    UINT32      IsDockingStation    : 1;
+    UINT32      OfCompatibleOK      : 1;
+    UINT32      CoherentDMA         : 1;
+    UINT32      CcaSeen             : 1;
+    UINT32      EnumerationByParrent: 1;
+    UINT32      HonorDeps           : 1;
+    UINT32      Reserved            : 18;
+}ACPI_DEVICE_FLAGS, * PACPI_DEVICE_FLAGS;;
+
+typedef char ACPI_BUS_ID[8];
+typedef char ACPI_DEVICE_NAME[40];
+typedef char ACPI_DEVICE_CLASS[20];
+
+typedef struct _ACPI_PNP_TYPE{
+    UINT32      HardwareID      : 1;
+    UINT32      BusAddress      : 1;
+    UINT32      PlatformID      : 1;
+    UINT32      Backlight       : 1;
+    UINT32      Reserved        : 28;
+}ACPI_PNP_TYPE, * PACPI_PNP_TYPE;
+
+typedef struct _ACPI_DEVICE_PNP{
+    ACPI_BUS_ID         BusIdentification;
+    INTEGER             IntanceID;
+    ACPI_PNP_TYPE       Type;
+    UINT64              BusAddress;
+    string              UniqueIdentifier;
+    ListHeader          IDs;
+    ACPI_DEVICE_NAME    DeviceName;
+    ACPI_DEVICE_CLASS   DeviceClass;
+}ACPI_DEVICE_PNP, * PACPI_DEVICE_PNP;
+
+typedef struct _ACPI_DEVICE_POWER_FLAGS{
+    UINT32      PscPresent      : 1;
+    UINT32      PowerResource   : 1;
+    UINT32      InRushCurrent   : 1;
+    UINT32      PowerRemoved1   : 1;
+    UINT32      IgnorePresent   : 1;
+    UINT32      DswPresent      : 1;
+    UINT32      Reserved        : 26; 
+}ACPI_DEVICE_POWER_FLAGS, * PACPI_DEVICE_POWER_FLAGS;
+
+typedef struct _ACPI_DEVICE_POWER_STATE{
+    ListHeader  Resources;
+    struct{
+        UINT8   Valid       : 1;
+        UINT8   PsxPresent  : 1;
+        UINT8   Reserved    : 6;
+    }StateFlags;
+    INTEGER     PowerPrecentage;
+    INTEGER     D0TransitionTime;
+}ACPI_DEVICE_POWER_STATE, * PACPI_DEVICE_POWER_STATE;
+
+typedef struct _ACPI_DEVICE_POWER{
+    INTEGER                     State;
+    ACPI_DEVICE_POWER_FLAGS     Flags;
+    ACPI_DEVICE_POWER_STATE     States[5];
+    UINT8                       EnumerationState;
+}ACPI_DEVICE_POWER, * PACPI_DEVICE_POWER;
+
+typedef struct _ACPI_DEVICE_WAKEUP_FLAGS{
+    UINT8   Valid           : 1;
+    UINT8   NotifierPresent : 1;
+    UINT8   Reserved        : 6;
+}ACPI_DEVICE_WAKEUP_FLAGS, * PACPI_DEVICE_WAKEUP_FLAGS;
+
+typedef struct _ACPI_DEVICE_WAKEUP_CONTEXT{
+    void (*Function)(struct _ACPI_DEVICE_WAKEUP_CONTEXT* Context);
+    PVOID  PlatformaDevice;
+}ACPI_DEVICE_WAKEUP_CONTEXT, * PACPI_DEVICE_WAKEUP_CONTEXT;
+
+typedef struct _ACPI_DEVICE_WAKEUP{
+    PVOID                       GpeHandle;
+    UINT64                      GpeNumber;
+    UINT64                      SleepState;
+    ListHeader                  Resource;
+    ACPI_DEVICE_WAKEUP_FLAGS    Flags;
+    ACPI_DEVICE_WAKEUP_CONTEXT  Context;
+    PWAKEUP_SOURCE              WakeSource;
+    INTEGER                     PreperationCount;
+    INTEGER                     EnableCount;
+}ACPI_DEVICE_WAKEUP, * PACPI_DEVICE_WAKEUP;
+
+typedef struct _ACPI_DEVICE_PERFORMANCE_FLAGS{
+    UINT8 Reserved;
+}ACPI_DEVICE_PERFORMANCE_FLAGS, * PACPI_DEVICE_PERFORMANCE_FLAGS;
+
+typedef struct _ACPI_DEVICE_PERFORMANCE_STATE{
+    struct {
+        UINT8   Valid       : 1;
+        UINT8   Reserved    : 7;
+    }StateFlags;
+    UINT8       Power;
+    UINT8       Performance;
+    INTEGER     P0TransitionLatency;
+}ACPI_DEVICE_PERFORMANCE_STATE, * PACPI_DEVICE_PERFORMANCE_STATE;
+
+typedef struct _ACPI_DEVICE_PERFORMANCE{
+    INTEGER                         State;
+    ACPI_DEVICE_PERFORMANCE_FLAGS   Flags;
+    INTEGER                         StateCount;
+    PACPI_DEVICE_PERFORMANCE_STATE  States;
+}ACPI_DEVICE_PERFORMANCE, * PACPI_DEVICE_PERFORMANCE;
+
 typedef struct _ACPI_DEVICE{
-    UINT32      PldCrc;
-    INTEGER     DeviceType;
-    PVOID       AcpiHandle;
+    UINT32                  PldCrc;
+    INTEGER                 DeviceType;
+    PVOID                   AcpiHandle;
+    FIRMWARE_NODE_HANDLE    FirmwareNode;
+    ACPI_DEVICE_STATUS      Status;
+    ACPI_DEVICE_FLAGS       Flags;
+    ACPI_DEVICE_PNP         Pnp;
+    ACPI_DEVICE_POWER       Power;
+    ACPI_DEVICE_WAKEUP      Wakeup;
+    ACPI_DEVICE_PERFORMANCE Performance;
 }ACPI_DEVICE, * PACPI_DEVICE;
+
+typedef struct _ACPI_HOTPLUG_PROFILE{
+    LOUSTATUS   (*ScanDependent)(PACPI_DEVICE Device);
+    void        (*NotifyOnline)(PACPI_DEVICE Device);
+    BOOL        Enabled         : 1;
+    BOOL        DemandOffline   : 1;
+}ACPI_HOTPLUG_PROFILE, * PACPI_HOTPLUG_PROFILE;
 
 typedef struct PACKED _ACPI_SCAN_HANDLER{
     ListHeader                      Peers;
     PACPI_DEVICE_IDENTIFICATION     IdList;
     BOOL                            (*MatchID)(string IdString, PACPI_DEVICE_IDENTIFICATION* MatchingID);
-    LOUSTATUS                       (*AtatchDevice)(PACPI_DEVICE Device, PACPI_DEVICE_IDENTIFICATION Id);
+    INTEGER                         (*AtatchDevice)(PACPI_DEVICE Device, PACPI_DEVICE_IDENTIFICATION Id);
+    void                            (*DetachDevice)(PACPI_DEVICE Device);
+    void                            (*PostEject)(PACPI_DEVICE Device);
+    void                            (*Bind)(PACPI_DEVICE Device);
+    ACPI_HOTPLUG_PROFILE            HotPlug;
 }ACPI_SCAN_HANDLER, * PACPI_SCAN_HANDLER;
 
 #ifdef __cplusplus

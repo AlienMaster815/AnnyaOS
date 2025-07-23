@@ -151,7 +151,7 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     RegisterInterruptHandler(VirtualizationException, INTERRUPT_SERVICE_ROUTINE_20, false, 0);
     RegisterInterruptHandler(ControlProtectionException, INTERRUPT_SERVICE_ROUTINE_21, false, 0);
     RegisterInterruptHandler(UpdateThreadManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
-    RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
+    //RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
     RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);
 
@@ -358,9 +358,10 @@ KERNEL_ENTRY Lou_kernel_start(
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
+    InitializeDebuggerComunications();
+
     AdvancedLousineKernelInitialization();
 
-    InitializeDebuggerComunications();
 
     //LouPrint("Here\n");
     //while(1);

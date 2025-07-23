@@ -50,6 +50,37 @@ void LouKeRegisterPowerTransitionOperations(
     PLOUSINE_POWER_TRANSITION_OPERATIONS Operations
 );
 
+typedef struct _WAKE_INTERRUPT_REQUEST{
+    PVOID       PlatformDevice;
+    LOUSTATUS   Status;
+    INTEGER     Irq;
+    string      Name;
+}WAKE_INTERRUPT_REQUEST, * PWAKE_INTERRUPT_REQUEST;
+
+//TODO:
+typedef struct _WAKEUP_SOURCE{
+    string                      SourceName;
+    INTEGER                     Id;
+    ListHeader                  Entry;
+    spinlock_t                  Lock;
+    PWAKE_INTERRUPT_REQUEST     WakeRupt;
+    ListHeader                  Timers;
+    UINT64                      TimerExperation;
+    TIME_T                      TotalTime;
+    TIME_T                      MaxTime;
+    TIME_T                      LastTime;
+    TIME_T                      StartPreventionTime;
+    TIME_T                      PreventionSleepTime;
+    UINT64                      EventCount;
+    UINT64                      ActiveCount;
+    UINT64                      RelaxCount;
+    UINT64                      ExpireCount;
+    UINT64                      WakeCount;
+    PVOID                       PlatformDevice;
+    BOOL                        Active;
+    BOOL                        AutoSleepEnabled;
+}WAKEUP_SOURCE, * PWAKEUP_SOURCE;
+
 #ifdef __cplusplus
 }
 #endif

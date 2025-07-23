@@ -235,6 +235,7 @@ ACPI_STATUS AcpiOsInstallInterruptHandler(
         (uint64_t)Context
     );
     InitializeAcpiInterruptTracker(InterruptNumber);
+    LouPrint("IRQ:%d Installed for ACPI\n", InterruptNumber);
     return AE_OK;
 }
 

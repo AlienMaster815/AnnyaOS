@@ -242,6 +242,6 @@ void LouKeInitializeFullLouACPISubsystem(){
     AcpiInitializeHest();
     AcpiInitializeScan();
 
+
     LouPrint("LouKeInitializeFullLouACPISubsystem()\n");
-    //while(1);
 }

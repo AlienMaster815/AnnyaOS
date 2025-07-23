@@ -453,7 +453,7 @@ typedef struct _ACPI_OSC_CONTEXT{
 
 
 #define ACPI_PROCESSOR_DEVICE_HID	"ACPI0007"
-
+#define ACPI_DT_NAMESPACE_ID        "PRP0001"
 
 #ifndef __cplusplus
 #include <acpi.h>
@@ -482,6 +482,7 @@ LOUSTATUS LouKeAcpiTableParseEntries(
     ACPI_TABLE_ENTRY_HANDLER    Handler,
     size_t                      MaxEntries
 );
+void AcpiInitializePciLink();
 #endif
 
 #include "Pcc.h"

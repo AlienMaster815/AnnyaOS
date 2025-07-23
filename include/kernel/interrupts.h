@@ -22,8 +22,6 @@
 #define MediumPrivledge 0x2
 #define LowestPrivledge 0x3
 
-#define Present 0x1
-#define NotPresent 0x0
 
 #define INTERRUPT_SERVICE_ROUTINE_0 0
 #define INTERRUPT_SERVICE_ROUTINE_1 1

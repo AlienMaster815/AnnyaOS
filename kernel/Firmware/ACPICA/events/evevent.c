@@ -335,6 +335,7 @@ AcpiEvFixedEventInitialize (
  * DESCRIPTION: Checks the PM status register for active fixed events
  *
  ******************************************************************************/
+int LouPrint(char*, ...);
 
 UINT32
 AcpiEvFixedEventDetect (
@@ -348,7 +349,6 @@ AcpiEvFixedEventDetect (
 
 
     ACPI_FUNCTION_NAME (EvFixedEventDetect);
-
 
     /*
      * Read the fixed feature status and enable registers, as all the cases

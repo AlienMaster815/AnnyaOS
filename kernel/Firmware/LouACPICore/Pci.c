@@ -162,15 +162,16 @@ void AcpiCheckPciCrsQuirks(){
 
 }
 
-//INTEGER AcpiScanAddHandlerWithHotplug(){
-	
-//}
+
 
 void AcpiInitializePciRoot(){
 
     AcpiCheckPciCrsQuirks();
+	//ACPI CONTINUE HERE
+}
 
+void AcpiInitializePciLink(){
 
-    LouPrint("AcpiInitializePciRoot()\n");
-    while(1);
+	LouPrint("AcpiInitializePciLink()\n");
+	while(1);
 }
