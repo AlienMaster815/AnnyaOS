@@ -284,8 +284,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
         HeaderEndAddress
     );
 
-    Cpu = (CPU::CPUID*)LouKeMallocEx(sizeof(CPU::CPUID), GET_ALIGNMENT(CPU::CPUID), WRITEABLE_PAGE | PRESENT_PAGE);
-    Lapic = (APIC::LAPIC*)LouKeMallocEx(sizeof(APIC::LAPIC), GET_ALIGNMENT(APIC::LAPIC), WRITEABLE_PAGE | PRESENT_PAGE);
+    Cpu = (CPU::CPUID*)LouKeMallocType(CPU::CPUID, KERNEL_GENERIC_MEMORY);
+    Lapic = (APIC::LAPIC*)LouKeMallocType(APIC::LAPIC,  KERNEL_GENERIC_MEMORY);
 
     LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, 0);
 

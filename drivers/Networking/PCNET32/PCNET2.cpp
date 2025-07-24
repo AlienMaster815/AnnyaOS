@@ -95,9 +95,7 @@ NTSTATUS InitializePcNetIIDevice(
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
     uint64_t PortBase = 0;
    
-    LouPrint("InitializePcNetIIDevice()\n");
-    while(1);
-    //PortBase = (uint64_t)LouKeHalGetPciVirtualBaseAddress((PPCI_COMMON_CONFIG)PDEV->CommonConfig, 0);
+    PortBase = (uint64_t)LouKePciGetIoRegion(PDEV, 0, 0);
     if(PortBase > 0xFFFF){
         LouPrint("PCNET32::ERROR::This Driver Cannot Run This Device Invalid Base Address\n");
         LouPrint("PortBase:%h\n", PortBase);
@@ -204,6 +202,5 @@ NTSTATUS InitializePcNetIIDevice(
     LoukeRegisterNetFrameHardwareDriver(HardwareDriver);
 
     LouPrint("InitializePcNetIIDevice() STATUS_SUCCESS\n");
-    //while(1);
     return STATUS_SUCCESS;
 }

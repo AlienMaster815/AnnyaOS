@@ -69,7 +69,7 @@ LOUSTATUS LouKeRegisterDevice(
     }
     
     if(!FoundTable){
-        TmpDevice->TableStart.NextHeader = LouKeMallocEx(sizeof(DEVICE_DIRECTORY_TABLE), GET_ALIGNMENT(DEVICE_DIRECTORY_TABLE), WRITEABLE_PAGE | PRESENT_PAGE);
+        TmpDevice->TableStart.NextHeader = (PListHeader)LouKeMallocType(DEVICE_DIRECTORY_TABLE, KERNEL_GENERIC_MEMORY);
         TmpDevice = (PDEVICE_DIRECTORY_TABLE)TmpDevice->TableStart.NextHeader;
     }
     TmpDevice->PDEV = PDEV;

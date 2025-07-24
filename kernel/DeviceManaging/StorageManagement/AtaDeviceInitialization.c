@@ -72,7 +72,7 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
         if(TmpHostList->Neighbors.NextHeader){
             TmpHostList = (PATA_HOST_DEVICE_LIST)TmpHostList->Neighbors.NextHeader;
         }else {
-            TmpHostList->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(ATA_HOST_DEVICE_LIST), GET_ALIGNMENT(ATA_HOST_DEVICE_LIST), PRESENT_PAGE | WRITEABLE_PAGE);
+            TmpHostList->Neighbors.NextHeader = (PListHeader)LouKeMallocType(ATA_HOST_DEVICE_LIST, KERNEL_GENERIC_MEMORY);
         }
     }
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)DeviceDirectoryTable->KeyData;
@@ -81,7 +81,7 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
 
     for(uint8_t i = 0 ; i < AtaHost->PortCount; i++){
         LouPrint("Registering Ata Port To Device Manager\n");
-        PDEVICE_DIRECTORY_TABLE PortTable = (PDEVICE_DIRECTORY_TABLE)LouKeMallocEx(sizeof(DEVICE_DIRECTORY_TABLE), GET_ALIGNMENT(DEVICE_DIRECTORY_TABLE), PRESENT_PAGE | WRITEABLE_PAGE);
+        PDEVICE_DIRECTORY_TABLE PortTable = (PDEVICE_DIRECTORY_TABLE)LouKeMallocType(DEVICE_DIRECTORY_TABLE, KERNEL_GENERIC_MEMORY);
         *PortTable = *DeviceDirectoryTable;
         PortTable->KeyData = &AtaHost->Ports[i];
         PortTable->DevicePrivateData = &AtaHost->Ports[i];

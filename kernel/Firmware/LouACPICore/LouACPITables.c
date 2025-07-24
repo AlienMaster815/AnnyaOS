@@ -17,7 +17,7 @@ static PLOU_ACPI_TABLE_TRACK AllocateNewTableTrack(){
     PLOU_ACPI_TABLE_TRACK TmpTrack = &TableTracks;
     for(size_t i = 0 ; i < TableCount; i++){
         if(!TmpTrack->TableList.NextHeader){
-            TmpTrack->TableList.NextHeader = (PListHeader)LouKeMallocEx(sizeof(LOU_ACPI_TABLE_TRACK), GET_ALIGNMENT(LOU_ACPI_TABLE_TRACK), KERNEL_GENERIC_MEMORY);
+            TmpTrack->TableList.NextHeader = (PListHeader)LouKeMallocType(LOU_ACPI_TABLE_TRACK, KERNEL_GENERIC_MEMORY);
         }
         TmpTrack = (PLOU_ACPI_TABLE_TRACK)TmpTrack->TableList.NextHeader;
     } 

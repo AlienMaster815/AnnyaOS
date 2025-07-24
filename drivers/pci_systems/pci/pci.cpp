@@ -51,7 +51,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
                 else {
                     P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
                     if(!PDev){
-                        PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);                    
+                        PDev = LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);                    
                     }
                     LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
                     PDev->bus = bus;
@@ -69,7 +69,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
     else{
         P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
         if(!PDev){
-            PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocEx(sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), KERNEL_GENERIC_MEMORY);
+            PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
         }
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
         PDev->bus = bus;
@@ -210,10 +210,10 @@ void ScanTheRestOfHarware(){
             PDRIVER_OBJECT DriverObject;
             DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
             if(!DriverObject->DriverExtension){
-                DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION), WRITEABLE_PAGE | PRESENT_PAGE);
+                DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocType(DRIVER_EXTENSION, KERNEL_GENERIC_MEMORY);
                 Driver(DriverObject, (PUNICODE_STRING)DriverPath);
             }
-            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocEx(sizeof(DEVICE_OBJECT), GET_ALIGNMENT(DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
             if(DriverObject->DriverUsingLkdm){
                 PlatformDevice->PDEV = PDEV;
                 if(DriverObject->DeviceTable){ 

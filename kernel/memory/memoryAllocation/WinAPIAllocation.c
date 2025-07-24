@@ -38,7 +38,7 @@ void* LouKeVirtualAllocUser(
     uint64_t i = 0;
     for(i = 0; i < HeapsManaged; i++){
         if(!TmpHeapTrack->Neighbors.NextHeader){
-            TmpHeapTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_TRACK), GET_ALIGNMENT(HEAP_TRACK), KERNEL_GENERIC_MEMORY);
+            TmpHeapTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocType(HEAP_TRACK, USER_GENERIC_MEMORY);
         }
         TmpHeapTrack = (PHEAP_TRACK)TmpHeapTrack->Neighbors.NextHeader;
     }
@@ -80,7 +80,7 @@ static uint64_t LouKeAllocHeapFreeAddress(
                 break;
             }
             if(!TmpAllocationTrack->Neighbors.NextHeader){
-                TmpAllocationTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_ALLOCATION_TABLE_ENTRY), GET_ALIGNMENT(HEAP_ALLOCATION_TABLE_ENTRY), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+                TmpAllocationTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocType(HEAP_ALLOCATION_TABLE_ENTRY, USER_GENERIC_MEMORY);
             }
             TmpAllocationTrack = (PHEAP_ALLOCATION_TABLE_ENTRY)TmpAllocationTrack->Neighbors.NextHeader;
         }
@@ -121,7 +121,7 @@ void LouKeAllocHeapPhysical(
             return;
         }
         if(!PhyTrack->Neighbors.NextHeader){
-            PhyTrack = (PHEAP_PHY_TRACK)LouKeMallocEx(sizeof(HEAP_PHY_TRACK), GET_ALIGNMENT(HEAP_PHY_TRACK), KERNEL_GENERIC_MEMORY);
+            PhyTrack = (PHEAP_PHY_TRACK)LouKeMallocType(HEAP_PHY_TRACK, USER_GENERIC_MEMORY);
         }
         PhyTrack = (PHEAP_PHY_TRACK)PhyTrack->Neighbors.NextHeader;
     }
@@ -132,7 +132,7 @@ void LouKeAllocHeapPhysical(
         PhyTrack->PhyAddress = NewPhysical;
         PhyTrack->VirtualOffset = Offset1 + i;
         if (!PhyTrack->Neighbors.NextHeader) {
-            PhyTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(HEAP_PHY_TRACK), GET_ALIGNMENT(HEAP_PHY_TRACK), KERNEL_GENERIC_MEMORY);
+            PhyTrack->Neighbors.NextHeader = (PListHeader)LouKeMallocType(HEAP_PHY_TRACK,  USER_GENERIC_MEMORY);
         }
         PhyTrack = (PHEAP_PHY_TRACK)PhyTrack->Neighbors.NextHeader;
         HeapTrack->PhyTracksCount++;

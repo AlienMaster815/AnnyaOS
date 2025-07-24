@@ -179,7 +179,7 @@ void LouKeInitializeLibraryLookup(
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries;
     for(i = 0; i < DynamicLoadedLibrarieCount; i++){
         if(!Tmp->Neighbors.NextHeader){
-            Tmp->Neighbors.NextHeader = (ListHeader*)LouKeMallocEx(sizeof(TableTracks), GET_ALIGNMENT(TableTracks), WRITEABLE_PAGE | PRESENT_PAGE);
+            Tmp->Neighbors.NextHeader = (ListHeader*)LouKeMallocType(TableTracks, KERNEL_GENERIC_MEMORY);
         }
         Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
     }

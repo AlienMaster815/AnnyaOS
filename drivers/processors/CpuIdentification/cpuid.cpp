@@ -25,7 +25,7 @@ uint16_t CPU::CPUID::GetNumberOfProcessors(){
 
 CPU::CPUID::CPUID(){
 
-    CpuIdPacket = (PCPUID_PACKET)LouKeMallocEx(sizeof(CPUID_PACKET), GET_ALIGNMENT(CPUID_PACKET), WRITEABLE_PAGE | PRESENT_PAGE);
+    CpuIdPacket = LouKeMallocType(CPUID_PACKET, KERNEL_GENERIC_MEMORY);
 
     CpuIdPacket->ProccessorId = UNKNOWNProc;
     CpuIdPacket->CpuVenId = UNKNOWNVen;

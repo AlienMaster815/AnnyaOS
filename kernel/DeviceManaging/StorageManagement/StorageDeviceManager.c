@@ -20,7 +20,7 @@ LOUSTATUS LouRegisterStorageDevice(
     LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
     for(size_t i = 0 ; i < NumberOfStorageDevice; i++){
         if(!TmpStorageDrivers->Neighbors.NextHeader){
-            TmpStorageDrivers->Neighbors.NextHeader = LouKeMallocEx(sizeof(STORAGE_DEVICE_MANAGER_DATA), GET_ALIGNMENT(STORAGE_DEVICE_MANAGER_DATA), WRITEABLE_PAGE | PRESENT_PAGE);
+            TmpStorageDrivers->Neighbors.NextHeader = (PListHeader)LouKeMallocType(STORAGE_DEVICE_MANAGER_DATA, KERNEL_GENERIC_MEMORY);
         }
         TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
     }

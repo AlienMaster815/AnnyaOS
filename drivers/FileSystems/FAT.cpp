@@ -247,28 +247,28 @@ PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
 
     switch(FinalVerdict){
     case FAT32:{
-        PLOUSINE_KERNEL_FILESYSTEM NewFat32System = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
+        PLOUSINE_KERNEL_FILESYSTEM NewFat32System = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
         NewFat32System->FileSystemOpen = Fat32FileSystemOpen;
         NewFat32System->FileSystemClose = Fat32FileSystemClose;
         NewFat32System->FileSystemSeek = Fat32FileSystemSeek;
         return NewFat32System;
     }
     case FAT12:{
-        PLOUSINE_KERNEL_FILESYSTEM NewFat12System = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
+        PLOUSINE_KERNEL_FILESYSTEM NewFat12System = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM,  KERNEL_GENERIC_MEMORY);
         NewFat12System->FileSystemOpen = Fat12FileSystemOpen;
         NewFat12System->FileSystemClose = Fat12FileSystemClose;
         NewFat12System->FileSystemSeek = Fat12FileSystemSeek;
         return NewFat12System;
     }
     case FAT16:{
-        PLOUSINE_KERNEL_FILESYSTEM NewFat16System = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
+        PLOUSINE_KERNEL_FILESYSTEM NewFat16System = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
         NewFat16System->FileSystemOpen = Fat16FileSystemOpen;
         NewFat16System->FileSystemClose = Fat16FileSystemClose;
         NewFat16System->FileSystemSeek = Fat16FileSystemSeek;
         return NewFat16System;
     }
     case FAT32_EXT:{
-        PLOUSINE_KERNEL_FILESYSTEM NewFat32ExtSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
+        PLOUSINE_KERNEL_FILESYSTEM NewFat32ExtSystem = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
         NewFat32ExtSystem->FileSystemOpen = Fat32ExtFileSystemOpen;
         NewFat32ExtSystem->FileSystemClose = Fat32ExtFileSystemClose;
         NewFat32ExtSystem->FileSystemSeek = Fat32ExtFileSystemSeek;
@@ -281,7 +281,7 @@ PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
 
 LOUDDK_API_ENTRY
 LOUSTATUS FatDriverEntry(){
-    PLOUSINE_KERNEL_FILESYSTEM FatFileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocEx(sizeof(LOUSINE_KERNEL_FILESYSTEM), GET_ALIGNMENT(LOUSINE_KERNEL_FILESYSTEM), WRITEABLE_PAGE | PRESENT_PAGE);
+    PLOUSINE_KERNEL_FILESYSTEM FatFileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
 
     FatFileSystem->FileSystemScan = FatFileSystemScan;
 

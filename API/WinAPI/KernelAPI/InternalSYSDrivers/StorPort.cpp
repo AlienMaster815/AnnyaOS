@@ -131,7 +131,7 @@ NTSTATUS StorPortInitialize(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    StorPortStack[i] = (PSTOR_PORT_STACK_OBJECT)LouKeMallocEx(sizeof(STOR_PORT_STACK_OBJECT), GET_ALIGNMENT(STOR_PORT_STACK_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE); //BUG BUG alignment required or buffer overflow look into that fixes a buffer overflow
+    StorPortStack[i] = LouKeMallocType(STOR_PORT_STACK_OBJECT, KERNEL_GENERIC_MEMORY);
 
     if(StorPortStack[i] == 0x00){
         LouPrint("NTSTATUS StorPortInitialize() STATUS_INSUFFICIENT_RESOURCES\n");
@@ -149,20 +149,20 @@ NTSTATUS StorPortInitialize(
     StorPortStack[i]->InterruptHandler = (uint64_t)HwInitializationData->HwInterrupt;
 
     if(HwInitializationData->DeviceExtensionSize > 0x00){
-        StorPortStack[i]->DeviceExtention = LouMalloc(HwInitializationData->DeviceExtensionSize);
+        StorPortStack[i]->DeviceExtention = LouKeMalloc(HwInitializationData->DeviceExtensionSize, KERNEL_GENERIC_MEMORY);
     }
     if(HwInitializationData->SpecificLuExtensionSize > 0x00){
-        StorPortStack[i]->SpecificLuExtention = LouMalloc(HwInitializationData->SpecificLuExtensionSize);
+        StorPortStack[i]->SpecificLuExtention = LouKeMalloc(HwInitializationData->SpecificLuExtensionSize, KERNEL_GENERIC_MEMORY);
     }
     if(HwInitializationData->SrbExtensionSize > 0x00){
-        StorPortStack[i]->SrbExtension = LouMalloc(HwInitializationData->SrbExtensionSize);
+        StorPortStack[i]->SrbExtension = LouKeMalloc(HwInitializationData->SrbExtensionSize, KERNEL_GENERIC_MEMORY);
     }
 
-    StorPortStack[i]->ConfigInfo = (PPORT_CONFIGURATION_INFORMATION)LouMalloc(sizeof(PORT_CONFIGURATION_INFORMATION));
+    StorPortStack[i]->ConfigInfo = (PPORT_CONFIGURATION_INFORMATION)LouKeMalloc(sizeof(PORT_CONFIGURATION_INFORMATION), KERNEL_GENERIC_MEMORY);
 
     StorPortStack[i]->ConfigInfo->NumberOfAccessRanges = HwInitializationData->NumberOfAccessRanges;
 
-    StorPortStack[i]->ConfigInfo->AddressRanges = (uint64_t*)LouMalloc(sizeof(ACCESS_RANGE) * StorPortStack[i]->ConfigInfo->NumberOfAccessRanges);
+    StorPortStack[i]->ConfigInfo->AddressRanges = (uint64_t*)LouKeMallocArray(ACCESS_RANGE, StorPortStack[i]->ConfigInfo->NumberOfAccessRanges, KERNEL_GENERIC_MEMORY);
 
 
     LouPrint("NTSTATUS StorPortInitialize() STATUS SUCCESS\n");

@@ -64,7 +64,7 @@ PDRSD_DISPLAY_MODE DrsdCreateModeObject(PDRSD_DEVICE Device){
 
 void DrsdSetModeName(PDRSD_DISPLAY_MODE Mode){
     bool IsInterlaced = (Mode->DdmFlags & DDM_FLAG_INTERLACED);
-    Mode->ModeName = (string)LouKeMallocEx(32, 1, KERNEL_GENERIC_MEMORY);
+    Mode->ModeName = (string)LouKeMallocArray(char, 32, KERNEL_GENERIC_MEMORY);
     snprintf(Mode->ModeName, 32, "%dx%d%s", Mode->HorizontalDisplay, Mode->VirticalDisplay, IsInterlaced ? "i" : "");
 }
 

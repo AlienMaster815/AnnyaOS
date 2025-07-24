@@ -53,10 +53,10 @@ LOUSTATUS LookForStorageDevices(){
             PDRIVER_OBJECT DriverObject;
             DRIVER_MODULE_ENTRY Driver = LouKeLoadBootKernelModule((uintptr_t)DriverBase, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
             if(!DriverObject->DriverExtension){
-                DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocEx(sizeof(DRIVER_EXTENSION), GET_ALIGNMENT(DRIVER_EXTENSION), WRITEABLE_PAGE | PRESENT_PAGE);
+                DriverObject->DriverExtension = LouKeMallocType(DRIVER_EXTENSION,  KERNEL_GENERIC_MEMORY);
                 Driver(DriverObject, (PUNICODE_STRING)0x00);
             }
-            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocEx(sizeof(DEVICE_OBJECT), GET_ALIGNMENT(DEVICE_OBJECT), WRITEABLE_PAGE | PRESENT_PAGE);
+            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
             if(DriverObject->DriverUsingLkdm){
                 PlatformDevice->PDEV = FirstWaveDevices[i]->PDEV;
                 if(DriverObject->DeviceTable){ 

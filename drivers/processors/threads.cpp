@@ -79,7 +79,7 @@ static inline thread_t* CreateThreadHandle(){
             TmpThreadHandle = (thread_t*)TmpThreadHandle->Neighbors.NextHeader;
         }
     }
-    TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(thread_t), GET_ALIGNMENT(thread_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocType(thread_t,  USER_GENERIC_MEMORY);
     return(thread_t*)TmpThreadHandle->Neighbors.NextHeader;
 }
 

@@ -292,11 +292,7 @@ void InitializePs2Mouse();
 void EnablePs2Keyboard();
 void CheckForSoundblaster16();
 void InitializeSafePage();
-void* LouKeMallocEx2(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
+
 
 void LouKeFree2(void* Address);
 
@@ -350,7 +346,8 @@ KERNEL_ENTRY Lou_kernel_start(
     LousineKernelEarlyInitialization();
 
     LouKeMapPciMemory();
-
+    //LouPrint("HERE\n");
+    //while(1);
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
@@ -369,6 +366,7 @@ KERNEL_ENTRY Lou_kernel_start(
     //loading needed modules that need to be 
     //loaded no matter what
     LookForStorageDevices();
+
 
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
@@ -453,7 +451,7 @@ void InitializeUserSpace(){
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
     LouPrint("USER32.DLL Has Loaded\n");
 
-    PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocEx(sizeof(WIN_PEB), GET_ALIGNMENT(WIN_PEB), USER_GENERIC_MEMORY);
+    PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocType(WIN_PEB, USER_GENERIC_MEMORY);
     SetPEB((uint64_t)ProcessExecutionBlock);
     LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
     ProcessExecutionBlock->NumberOfProcessors = GetNPROC();

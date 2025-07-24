@@ -7,7 +7,7 @@ PPCI_DEVICE_GROUP LouKeHalOpenPciCompanions(
     P_PCI_DEVICE_OBJECT PDEV
 ){
 
-    PPCI_DEVICE_GROUP DevGroup = (PPCI_DEVICE_GROUP)LouKeMallocEx(sizeof(PCI_DEVICE_GROUP) * 8, GET_ALIGNMENT(PCI_DEVICE_GROUP), WRITEABLE_PAGE | PRESENT_PAGE);
+    PPCI_DEVICE_GROUP DevGroup = LouKeMallocArray(PCI_DEVICE_GROUP,  8, KERNEL_GENERIC_MEMORY);
 
     for(uint8_t i = 0 ; i < 8;i++){
         DevGroup[i].PDEV = LouKeGetPDEV(PDEV->bus, PDEV->slot, i);

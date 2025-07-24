@@ -42,7 +42,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
         if(TmpHandle->Neighbors.NextHeader){
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }else{
-            TmpHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(DRIVER_MODULE_HANDLES), GET_ALIGNMENT(DRIVER_MODULE_HANDLES), WRITEABLE_PAGE | PRESENT_PAGE);
+            TmpHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocType(DRIVER_MODULE_HANDLES,  KERNEL_GENERIC_MEMORY);
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }
     }
@@ -53,7 +53,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
         return 0x00;
     }
 
-    string NewMod = (string)LouKeMallocEx(strlen(ModuleNameAndPath), GET_ALIGNMENT(string), WRITEABLE_PAGE | PRESENT_PAGE);
+    string NewMod = (string)LouKeMallocArray(char, strlen(ModuleNameAndPath), KERNEL_GENERIC_MEMORY);
     strncpy(NewMod, ModuleNameAndPath, strlen(ModuleNameAndPath));
 
     TmpHandle->Paths = NewMod;
@@ -82,7 +82,7 @@ DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObjec
         if(TmpHandle->Neighbors.NextHeader){
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }else{
-            TmpHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(DRIVER_MODULE_HANDLES), GET_ALIGNMENT(DRIVER_MODULE_HANDLES), WRITEABLE_PAGE | PRESENT_PAGE);
+            TmpHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocType(DRIVER_MODULE_HANDLES,  KERNEL_GENERIC_MEMORY);
             TmpHandle = (PDRIVER_MODULE_HANDLES)TmpHandle->Neighbors.NextHeader;
         }
     }
@@ -152,13 +152,13 @@ HANDLE LouKeLoadLibraryA(string LibraryName, mutex_t* Lock){
         }
 
         if(!TmpLibHandle->Neighbors.NextHeader){
-            TmpLibHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocEx(sizeof(LIBRARY_HANDLES), GET_ALIGNMENT(LIBRARY_HANDLES), WRITEABLE_PAGE | PRESENT_PAGE);
+            TmpLibHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocType(LIBRARY_HANDLES, KERNEL_GENERIC_MEMORY);
         }
         TmpLibHandle = (PLIBRARY_HANDLES)TmpLibHandle->Neighbors.NextHeader;
     }
 
     if(IsLibraryAPath){
-        string NewMod = (string)LouKeMallocEx(strlen(LibraryName), GET_ALIGNMENT(string), WRITEABLE_PAGE | PRESENT_PAGE);
+        string NewMod = (string)LouKeMallocArray(char, strlen(LibraryName), KERNEL_GENERIC_MEMORY);
         strncpy(NewMod, LibraryName, strlen(LibraryName));
         TmpLibHandle->Paths = NewMod;
         TmpLibHandle->LibraryEntry = LouKeLoadUserModule(LibraryName, &TmpLibHandle->ImageBase);
@@ -177,16 +177,16 @@ HANDLE LouKeLoadLibraryA(string LibraryName, mutex_t* Lock){
     //TODO: Look at the registery and 
     //find the reciprical of the above
 
-    TmpLibHandle->LibraryHandle = (HANDLE)LouKeMallocEx(sizeof(atomic_t), GET_ALIGNMENT(atomic_t), USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+    TmpLibHandle->LibraryHandle = (HANDLE)LouKeMallocType(atomic_t,  USER_GENERIC_MEMORY);
 
     //LouPrint("TmpLibHandle->LibraryEntry:%h\n", TmpLibHandle->LibraryEntry);
     //TODO: Manage Processes Loading the DLL
     TmpLibHandle->ProcessInformation = InitializeProcessData(TmpLibHandle->ImageBase, TmpLibHandle->Paths);
 
     if(TmpLibHandle->LibraryEntry){
-        PWIN_TEB Teb = (PWIN_TEB)LouKeMallocEx(sizeof(WIN_TEB), GET_ALIGNMENT(WIN_TEB), WRITEABLE_PAGE | USER_PAGE | PRESENT_PAGE);
+        PWIN_TEB Teb = (PWIN_TEB)LouKeMallocType(WIN_TEB, USER_GENERIC_MEMORY);
     
-        UNUSED PATTACH_THREAD_DATA DllAttachProcessData = (PATTACH_THREAD_DATA)LouKeMallocEx(sizeof(ATTACH_THREAD_DATA), GET_ALIGNMENT(ATTACH_THREAD_DATA) , USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
+        UNUSED PATTACH_THREAD_DATA DllAttachProcessData = (PATTACH_THREAD_DATA)LouKeMallocType(ATTACH_THREAD_DATA , USER_GENERIC_MEMORY);
         DllAttachProcessData->DllEntry = (bool(*)(uint64_t, uint64_t, uint64_t))TmpLibHandle->LibraryEntry;
         DllAttachProcessData->DllHandle = (uint64_t)TmpLibHandle->LibraryHandle;
         DllAttachProcessData->DllCallReason = (uint64_t)DLL_PROCESS_ATTACH;

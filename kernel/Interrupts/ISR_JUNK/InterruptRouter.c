@@ -70,7 +70,7 @@ void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, 
     }
     TmpRouter->List.NextHeader = LouKeMallocFromFixedPool(InterruptRouterPool);
     if(!TmpRouter->List.NextHeader){
-        TmpRouter->List.NextHeader = (PListHeader)LouKeMallocEx(sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), WRITEABLE_PAGE | PRESENT_PAGE);
+        TmpRouter->List.NextHeader = (PListHeader)LouKeMallocType(INTERRUPT_ROUTER_ENTRY, KERNEL_GENERIC_MEMORY);
     }
     TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
     TmpRouter->InterruptHandler = Handler;

@@ -244,4 +244,5 @@ void LouKeInitializeFullLouACPISubsystem(){
 
 
     LouPrint("LouKeInitializeFullLouACPISubsystem()\n");
+    //while(1);
 }

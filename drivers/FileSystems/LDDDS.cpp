@@ -208,7 +208,7 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
 
         CurrentDevice -= i;
         i++; //add room for null terminator
-        string NewString = (string)LouKeMallocEx(i, GET_ALIGNMENT(char), WRITEABLE_PAGE | PRESENT_PAGE);
+        string NewString = (string)LouKeMallocArray(char, i, KERNEL_GENERIC_MEMORY);
 
         for(size_t j = 0 ; j < i; j++){
             if(j == (i - 1)){

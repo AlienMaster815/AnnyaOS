@@ -21,7 +21,7 @@ LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem){
         if(Tmp->List.NextHeader){
             Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
         }else{
-            Tmp->List.NextHeader = (PListHeader)LouKeMallocEx(sizeof(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE), GET_ALIGNMENT(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE), WRITEABLE_PAGE | PRESENT_PAGE);
+            Tmp->List.NextHeader = (PListHeader)LouKeMallocType(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE,  KERNEL_GENERIC_MEMORY);
             Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
         }
     }
@@ -105,7 +105,7 @@ void InitializeFileSystemManager(){
                         TmpMfs = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)TmpMfs->List.NextHeader;
                     }
                 }
-                TmpMfs->List.NextHeader = (PListHeader)LouKeMallocEx(sizeof(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS), GET_ALIGNMENT(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS), WRITEABLE_PAGE | PRESENT_PAGE);
+                TmpMfs->List.NextHeader = (PListHeader)LouKeMallocType(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS, KERNEL_GENERIC_MEMORY);
                 TmpMfs->FileSystem = NewMountedFileSystem;
                 if(NewMountedFileSystem->FileSystemSeek){
                     //Seek Kernel Image tto identify if its a system disk

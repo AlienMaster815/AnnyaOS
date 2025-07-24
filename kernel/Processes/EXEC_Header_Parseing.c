@@ -19,8 +19,8 @@ void ParseExportTables(
 ){
 
     string ModuleName = (string)(ModuleStart + ExportTable->nameRva);
-    uint64_t* FunctionPointers = LouKeMallocEx(ExportTable->numberOfNamePointers * sizeof(uint64_t), GET_ALIGNMENT(uint64_t), WRITEABLE_PAGE | PRESENT_PAGE);
-    string* FunctionNames = LouKeMallocEx(sizeof(string*) * ExportTable->numberOfNamePointers, GET_ALIGNMENT(string*), WRITEABLE_PAGE | PRESENT_PAGE);
+    uint64_t* FunctionPointers = LouKeMallocArray(uint64_t, ExportTable->numberOfNamePointers, KERNEL_GENERIC_MEMORY);
+    string* FunctionNames = LouKeMallocArray(string, ExportTable->numberOfNamePointers, KERNEL_GENERIC_MEMORY);
 
     if(strcmp(ModuleName, "kernbase.dll") == 0){
         ModuleName = "kernelbase.dll"; 
@@ -425,7 +425,7 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             KILOBYTE_PAGE,
             KERNEL_PAGE_WRITE_PRESENT
         );
-        LouPrint("KernelModule:%s Loaded At Address:%h With Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
+        //LouPrint("KernelModule:%s Loaded At Address:%h With Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, PRESENT_PAGE | WRITEABLE_PAGE);
         //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModuleVirtualAddress);
 
@@ -525,7 +525,7 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
             PE64Header->sectionAlignment,
             USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
-        LouPrint("User DLL:%s Loaded At Address:%h ans Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
+        //LouPrint("User DLL:%s Loaded At Address:%h ans Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
 
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
         
@@ -626,7 +626,7 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
             PE64Header->sectionAlignment,
             USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
         );
-        LouPrint("User Executable:%s Loaded At Address:%h With Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
+        //LouPrint("User Executable:%s Loaded At Address:%h With Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
 
         //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
         
@@ -699,7 +699,7 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
 
 
 PPE32_PROCESS_EXECUTION_DATA InitializeProcessData(uintptr_t Start, string ExecutablePath){
-    PPE32_PROCESS_EXECUTION_DATA ExecutionData = (PPE32_PROCESS_EXECUTION_DATA)LouKeMallocEx(sizeof(PE32_PROCESS_EXECUTION_DATA), GET_ALIGNMENT(PE32_PROCESS_EXECUTION_DATA), WRITEABLE_PAGE | PRESENT_PAGE);
+    PPE32_PROCESS_EXECUTION_DATA ExecutionData = (PPE32_PROCESS_EXECUTION_DATA)LouKeMallocType(PE32_PROCESS_EXECUTION_DATA, KERNEL_GENERIC_MEMORY);
     PCOFF_HEADER CoffHeader;
     PPE64_OPTIONAL_HEADER PE64Header;
     PSECTION_HEADER SectionHeader;

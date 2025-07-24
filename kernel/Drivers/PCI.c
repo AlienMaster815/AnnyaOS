@@ -29,8 +29,7 @@ void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
     PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
     for(size_t i = 0 ; i < MaxGroupCount; i++){
         if(!TmpPsm->Neighbors.NextHeader){
-            //using LouMallocEx Because we arent in a stable position to LouKeMallocEx
-            TmpPsm->Neighbors.NextHeader = (PListHeader)LouMallocEx(sizeof(PCIE_SYSTEM_MANAGER), GET_ALIGNMENT(PCIE_SYSTEM_MANAGER));
+            TmpPsm->Neighbors.NextHeader = (PListHeader)LouKeMallocType(PCIE_SYSTEM_MANAGER, KERNEL_GENERIC_MEMORY);
         }
         TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
     }
