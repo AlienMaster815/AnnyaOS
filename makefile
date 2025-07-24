@@ -301,6 +301,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C drivers/storage/Ahci clean
 	$(MAKE) -C drivers/storage/Ahci all
 	
+	$(MAKE) -C drivers/USB/HostDrivers clean_xhci
+	$(MAKE) -C drivers/USB/HostDrivers xhci
+
 	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
 	$(MAKE) -C drivers/storage/AtaAcceleration piix
 
@@ -404,3 +407,4 @@ cleanall:
 	$(MAKE) -C drivers/gpu/VMWare clean
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
 	$(MAKE) -C KernelLibraries/LCC clean
+	$(MAKE) -C drivers/USB/HostDrivers clean_xhci
