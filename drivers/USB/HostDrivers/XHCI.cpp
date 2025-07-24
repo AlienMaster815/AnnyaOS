@@ -5,7 +5,8 @@
 #include "XhciPci.h"
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
-    0,
+    {.BaseClass = 0x0C, .SubClass = 0x03, .BoardID = 0x00, .GenericEntry = true},
+    {0},
 };
 
 LOUDDK_API_ENTRY 
@@ -26,7 +27,7 @@ NTSTATUS AddDevice(
 
     LouPrint("Pci Device ID:%d\n", DeviceID);
 
-    LouPrint("PCI Device Flags:%bl\n", SupportedXhciPciDevices[DeviceID].DriverData);
+    LouPrint("PCI Device Flags:%h\n", SupportedXhciPciDevices[DeviceID].DriverData);
 
     LouPrint("XHCI::AddDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

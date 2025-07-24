@@ -89,6 +89,7 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
     uint16_t DeviceID = 0;
     uint16_t VendorID = 0;
     uint8_t ClassID = 0;
+    uint8_t ProgIf;
     size_t i = 0;
     while((strncmp(CurrentDevice, "}DRIVERS", strlen("}DRIVERS")) != 0) && (strncmp(CurrentDevice, "}DEVICE_TREE_ENTRY", strlen("}DEVICE_TREE_ENTRY")) != 0)){
 
@@ -184,6 +185,22 @@ static string DoesDeviceMatch(string CurrentDevice, PPCI_COMMON_CONFIG Config){
             CurrentDevice += strlen("0x");
             ClassID = LDDDSAsciiToHexU8(CurrentDevice);        
             if(ClassID != Config->Header.SubClass){
+                continue;
+            }
+        }
+
+        while((strncmp(CurrentDevice, "PROG_IF:", strlen("PROG_IF:")) != 0) && (strncmp(CurrentDevice, "}DEVICE_TREE_ENTRY", strlen("}DEVICE_TREE_ENTRY")) != 0)){ //shift to the next Vendor ID
+            CurrentDevice++;
+        }
+        if(strncmp(CurrentDevice, "}DEVICE_TREE_ENTRY", strlen("}DEVICE_TREE_ENTRY")) == 0){
+            return 0x00;
+        }
+
+        CurrentDevice += strlen("PROG_IF:");
+        if(strncmp(CurrentDevice, "ANY_PROG_IF", strlen("ANY_PROG_IF")) != 0){
+            CurrentDevice += strlen("0x");
+            ProgIf = LDDDSAsciiToHexU8(CurrentDevice);        
+            if(ProgIf != Config->Header.ProgIf){
                 continue;
             }
         }

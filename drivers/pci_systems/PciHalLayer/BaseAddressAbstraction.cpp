@@ -166,7 +166,7 @@ void LouKeHalRegisterPciDevice(
                                 IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
                             }
                             uint64_t Tmp = 0x00;
-                            Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarSize[i]);
+                            Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarBase[i]);
                             LouKeMapContinuousMemoryBlock(Config->BarBase[i], Tmp, ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
                             Config->BarBase[i] = Tmp;
                             
@@ -189,7 +189,7 @@ void LouKeHalRegisterPciDevice(
                                 IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
                             }
                             uint64_t Tmp = 0x00;
-                            Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarSize[i]);
+                            Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarBase[i]);
                             LouKeMapContinuousMemoryBlock(Config->BarBase[i], Tmp, ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
                             Config->BarBase[i] = Tmp;
                         }
@@ -225,7 +225,7 @@ void LouKeHalRegisterPciDevice(
                             IoMemEnd = Bar64 + Size64;
                         }
 
-                        uint64_t Tmp = (UINT64)LouVMallocEx(Size64, Size64);
+                        uint64_t Tmp = (UINT64)LouVMallocEx(Size64, Bar64);
                         LouKeMapContinuousMemoryBlock(Bar64, Tmp, ROUND_UP64(Size64, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
                         Config->BarBase[i] = Tmp;
 
