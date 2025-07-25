@@ -51,19 +51,12 @@ void InitializeBootGraphics(){
 	Plane->FrameBuffer->Bpp = Bpp;
 	Plane->FrameBuffer->Pitch = (Width * (Bpp / 8));;
 	Plane->FrameBuffer->FramebufferSize = Width * Height * (Bpp / 8);
-	Plane->FrameBuffer->FramebufferBase = (uintptr_t)LouVMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), MEGABYTE_PAGE);
-	Plane->FrameBuffer->SecondaryFrameBufferBase = (uintptr_t)LouKeMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), MEGABYTE_PAGE, KERNEL_GENERIC_MEMORY);
-	LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, Plane->FrameBuffer->FramebufferBase, ROUND_UP64(Width * Height * (Bpp / 8), MEGABYTE_PAGE), KERNEL_DMA_MEMORY);
-
-
-	//while(1){
-		//BUGBUG	
-	//}
+	Plane->FrameBuffer->FramebufferBase = (uintptr_t)LouKePciGetVirtualBarAddress(BootGraphics->framebuffer_addr);//(uintptr_t)LouVMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), BootGraphics->framebuffer_addr);
+	Plane->FrameBuffer->SecondaryFrameBufferBase = (uintptr_t)LouKeMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
 
 	DrsdInitializeGenericPlane(Device, Plane, 0, 0,0, 0, 0, PRIMARY_PLANE, "BOOTVID.SYS");
 
 	LouKeDrsdInitializeBootDevice(
     	Device
 	);
-
 }

@@ -130,6 +130,8 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
             KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
+            LOUDDK_API_ENTRY uint64_t LouKePciGetVirtualBarAddress(uint64_t PhyAddress);
+
         #else 
             KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
                 PPCI_COMMON_CONFIG PciSearch, 

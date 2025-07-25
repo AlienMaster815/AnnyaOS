@@ -2020,6 +2020,30 @@ typedef struct PACKED _ACPI_SCAN_HANDLER{
     ACPI_HOTPLUG_PROFILE            HotPlug;
 }ACPI_SCAN_HANDLER, * PACPI_SCAN_HANDLER;
 
+typedef struct _MCFG_TABLE_ENTRY{
+    UINT64      ConfigurationBaseAddress;
+    UINT16      Group;
+    UINT8       StartBus;
+    UINT8       EndBus;
+    UINT32      Reserved;
+}MCFG_TABLE_ENTRY, * PMCFG_TABLE_ENTRY;
+
+#define GET_MCFG_ENTRY_COUNT(Table)  (((Table->TableLength) - ((uintptr_t)&Table->TableEntries[0] - (uintptr_t)Table)) / sizeof(MCFG_TABLE_ENTRY))
+
+typedef struct PACKED _MCFG_TABLE{
+    UINT32              TableHeader;
+    UINT32              TableLength;
+    UINT8               Revision;
+    UINT8               Checksum;
+    UINT8               OemID[6];
+    UINT8               OemTableID[8];
+    UINT32              OemRevision;
+    UINT32              CreatorID;
+    UINT32              CreatorRevision;
+    UINT64              Reserved;
+    MCFG_TABLE_ENTRY    TableEntries[];
+}MCFG_TABLE, * PMCFG_TABLE;
+
 #ifdef __cplusplus
 }
 #endif

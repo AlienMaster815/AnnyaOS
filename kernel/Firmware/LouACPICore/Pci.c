@@ -140,11 +140,11 @@ LOUSTATUS ParsePciMcfg(PACPI_TABLE_HEADER Header){
 
 
 void PciMmcfgLateInit(){
-    LouPrint("PciMmcfgLateInit()\n");
-    LOUSTATUS Status = LouKeAcpiTableTableParse(ACPI_SIG_MCFG, ParsePciMcfg);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("Error Saving PCI MCFG\n");
-    }
+    //LouPrint("PciMmcfgLateInit()\n");
+    //LOUSTATUS Status = LouKeAcpiTableTableParse(ACPI_SIG_MCFG, ParsePciMcfg);
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("Error Saving PCI MCFG\n");
+    //}
 }
 
 void AcpiCheckPciCrsQuirks(){

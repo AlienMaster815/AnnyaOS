@@ -88,6 +88,21 @@ uint64_t GetAllocationBlockSize(uint64_t Address){
     return 0x00;
 }
 
+uint64_t GetAllocationBlockBase(uint64_t Address){
+    for(uint16_t i = 0; i < AddressesLogged; i++){
+        if(RangeInterferes(Address, 1, AddressBlock[i].Address, AddressBlock[i].size)){
+            return AddressBlock[i].Address;
+        }
+    }
+    for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
+        for (uint32_t i = 0; i < TotalAllocations[k]; i++) {
+            if(RangeInterferes(Address, 1, AllocationBlocks[k][i].Address, AllocationBlocks[k][i].size)){
+                return AllocationBlocks[k][i].Address;
+            }
+        }
+    }
+    return 0x00;
+}
 
 static bool IsEarlyMallocation = true;
 

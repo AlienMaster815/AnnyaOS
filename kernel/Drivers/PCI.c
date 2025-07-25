@@ -24,8 +24,13 @@ PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem){
     return Result;
 }
 
-void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
+static size_t CalculateMcfgEntrySize(uint8_t StartBus, uint8_t EndBus) {
+    size_t BusCount = (size_t)(EndBus - StartBus + 1);
+    return BusCount * 0x100000;
+}
 
+
+void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
     PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
     for(size_t i = 0 ; i < MaxGroupCount; i++){
         if(!TmpPsm->Neighbors.NextHeader){
@@ -42,27 +47,13 @@ void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
     LouPrint("PCISegmentGroupNumber:%h\n", TmpPsm->PCISegmentGroupNumber);
     LouPrint("StartBusNumber:%h\n", TmpPsm->StartBusNumber);
     LouPrint("EndBusNumber:%h\n", TmpPsm->EndBusNumber);
-    //place Group on stack for heavy recursion
-    uint16_t Group = TmpPsm->PCISegmentGroupNumber;
-    //same with Mapping location
-    uint64_t PcieMMIO = 0x00;
-    MaxGroupCount++;
 
-    for(uint8_t Bus = TmpPsm->StartBusNumber ; Bus <= TmpPsm->EndBusNumber; Bus++){
-        for(uint8_t Slot = 0 ; Slot < 32; Slot++){
-            for(uint8_t Function = 0 ; Function < 8; Function++){ 
-                PcieMMIO = PcieConfigAddress(Group, Bus, Slot, Function, 0); 
-                LouPrint("PcieMMIO:%h\n", PcieMMIO);
-                if(!PcieMMIO){
-                    //TODO: add to broken entries :: But Not a problem yet
-                    continue;
-                }
-                //sanity map address
-                LouMapAddress(PcieMMIO, PcieMMIO, KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, KILOBYTE_PAGE);
-            }
-        }
-    }
-    while(1);
+    size_t GroupSize = CalculateMcfgEntrySize(TmpPsm->StartBusNumber, TmpPsm->EndBusNumber);
+
+    uint64_t Tmp = (uint64_t)LouVMallocEx(GroupSize, MEGABYTE_PAGE);
+    LouKeMapContinuousMemoryBlock(TmpPsm->BaseAddress, Tmp, ROUND_UP64(GroupSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+    TmpPsm->BaseAddress = Tmp;
+    MaxGroupCount++;
 }
 
 uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
@@ -220,7 +211,6 @@ void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t fun
         *PcieReg = value;
         return;        
     }
-    
     // Calculate the address for PCI configuration space access
     uint32_t address = pciConfigAddress(bus, device, function, reg);
 

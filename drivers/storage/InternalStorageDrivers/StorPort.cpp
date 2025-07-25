@@ -66,6 +66,7 @@ LOUSTATUS LookForStorageDevices(){
             DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
         }
     }
+    LouKeClosePciDeviceGroup(FirstWaveDevices);
     LouPrint("Done Scanning For Storage Devices\n");
     return STATUS_SUCCESS;
 }

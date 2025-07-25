@@ -541,6 +541,8 @@ void* LouKeMemReMap(void* Location, size_t Size, uint64_t Flags);
 void  LouKeMemReleaseReMap(void* Address);
 uint64_t GetIoMemEnd();
 
+uint64_t GetAllocationBlockBase(uint64_t Address);
+
 #endif
 #ifdef __cplusplus
 }

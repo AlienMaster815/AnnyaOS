@@ -123,8 +123,6 @@ LOUSTATUS LousineKernelEarlyInitialization(){
 
     HandleProccessorInitialization();
 
-    InitializeBootGraphics();
-
     InitializeInterruptRouter();
 
     InitializeStartupInterruptHandleing();
@@ -342,20 +340,22 @@ KERNEL_ENTRY Lou_kernel_start(
     }                      
     
     LouKeInitializeSafeMemory();    
-    
+
     LousineKernelEarlyInitialization();
 
-    LouKeMapPciMemory();
-    //LouPrint("HERE\n");
-    //while(1);
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
 
+    InitializeDebuggerComunications();
+
+    LouKeMapPciMemory();
+
+    InitializeBootGraphics();
+
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
-    InitializeDebuggerComunications();
 
     AdvancedLousineKernelInitialization();
 

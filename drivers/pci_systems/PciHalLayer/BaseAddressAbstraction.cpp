@@ -285,3 +285,63 @@ void* LouKePciGetIoRegion(
 ){
     return (void*)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarBase[BarNumber] + BarOffset);
 }
+
+LOUDDK_API_ENTRY
+SET_OPTIMIZATION(0) 
+uint64_t 
+LouKePciGetVirtualBarAddress(uint64_t PhyAddress){
+
+    PCI_COMMON_CONFIG Config;
+	Config.Header.VendorID = ANY_PCI_ID;
+	Config.Header.DeviceID = ANY_PCI_ID;
+	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
+	Config.Header.u.type0.SubSystemID = ANY_PCI_ID;
+	Config.Header.BaseClass = ANY_PCI_CLASS;
+	Config.Header.SubClass = ANY_PCI_CLASS;
+	Config.Header.ProgIf = ANY_PCI_CLASS;
+
+	uint8_t NumberOfPciDevices = LouKeGetPciCountByType(&Config);
+    uint64_t Result = 0x00;
+    uint64_t TmpBarAddress = 0x00;
+    uint64_t Flags;
+	PPCI_DEVICE_GROUP* PciDevices = LouKeOpenPciDeviceGroup(&Config);
+    for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
+        P_PCI_DEVICE_OBJECT PDEV = PciDevices[i]->PDEV;
+        PPCI_COMMON_CONFIG TmpConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+        for(uint8_t j = 0 ; j < 6; j++){
+            Flags = TmpConfig->Header.u.type0.BaseAddresses[j] & 0x1;
+            if(Flags == 0){
+                Flags = (TmpConfig->Header.u.type0.BaseAddresses[j] >> 1) & 0x03;
+                if(Flags == 0){
+                    if(TmpConfig->Header.u.type0.BaseAddresses[j] == 0x00){
+                        continue;
+                    }
+                    TmpBarAddress = TmpConfig->Header.u.type0.BaseAddresses[j] & ~(0xF);
+                    if(RangeInterferes(PhyAddress, 1, TmpBarAddress, TmpConfig->BarSize[j])){
+                        Result = (PhyAddress - TmpBarAddress) + TmpConfig->BarBase[j];
+                        break;
+                    }
+                }
+                else if(Flags == 2){
+                    if(TmpConfig->Header.u.type0.BaseAddresses[i] == 0x00){
+                        i++;
+                        continue;
+                    }
+                    uint32_t BarLo = TmpConfig->Header.u.type0.BaseAddresses[j];
+                    uint32_t BarHi = TmpConfig->Header.u.type0.BaseAddresses[j + 1];
+                    TmpBarAddress  = ((uint64_t)BarHi << 32) | (BarLo & ~(0xF));
+                    if(RangeInterferes(PhyAddress, 1, TmpBarAddress, TmpConfig->BarSize[j])){
+                        Result = (PhyAddress - TmpBarAddress) + TmpConfig->BarBase[j];
+                        break;
+                    }
+                }
+            }
+        }
+        if(Result){
+            break;
+        }
+    }
+
+    LouKeClosePciDeviceGroup(PciDevices);
+    return Result;
+}

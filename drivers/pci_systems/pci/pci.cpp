@@ -1,4 +1,5 @@
 #include <LouDDK.h>
+#include <LouACPI.h>
 #include <Hal.h>
 
 #define NOT_A_PCI_DEVICE 0xFFFF 
@@ -91,30 +92,58 @@ uint16_t GetPciGroupCount();
 KERNEL_IMPORT
 PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
 
+typedef struct _ACPI_MCFG_ALLOCATION{
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+} ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
+
+KERNEL_IMPORT void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
 
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 
     LouPrint("Scanning PCI Bus\n");
     
-    uint16_t GroupIndex = 0;
-    uint16_t Count = GetPciGroupCount();
-    PPCIE_SYSTEM_MANAGER Psm = 0x00;
+    //uint16_t GroupIndex = 0;
+    size_t Count = 0x00;
+    //PPCIE_SYSTEM_MANAGER Psm = 0x00;
     
-    for(uint8_t i = 0 ; i < 255; i++){
-        checkBus(0, i);
-    }
-    //secondary count get the rest
-    for(uint16_t i = 0 ; i < Count; i++){
-        Psm = GetPcieGroupHandle(i);
-        if(Psm->PCISegmentGroupNumber == 0){
-            //skip if the group is a rescan
-            continue;
+
+    PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAquireAcpiTable(PCI_EXSPRESS_MEMORY_MAPPED_CONFIGURATION);
+    if(!McfgTable){
+        for(uint8_t i = 0 ; i < 255; i++){
+            checkBus(0, i);
         }
-        if(Psm->PCISegmentGroupNumber){
-            GroupIndex = Psm->PCISegmentGroupNumber;
-            for(uint8_t j = 0 ; j < 255; j++){
-                checkBus(GroupIndex, j);
+        return;
+    }
+    Count = GET_MCFG_ENTRY_COUNT(McfgTable);
+    bool PcieDevice;
+    for (uint8_t i = 0; i < 255; i++) {
+        PcieDevice = false;
+        for (size_t j = 0; j < Count; j++) {
+            if (McfgTable->TableEntries[j].Group == 0) {
+                if (RangeInterferes(i, 0, McfgTable->TableEntries[j].StartBus, McfgTable->TableEntries[j].EndBus)) {
+                    PcieDevice = true;
+                    break;
+                }
             }
+        }
+        if (!PcieDevice) {
+            checkBus(0, i);
+        }
+    }
+
+    LouPrint("MCFG Entry Count:%h\n", Count); 
+    for(size_t i = 0 ; i < Count; i++){
+        ACPI_MCFG_ALLOCATION* NewGroup = LouKeMallocType(ACPI_MCFG_ALLOCATION, KERNEL_GENERIC_MEMORY);
+        NewGroup->BaseAddress = McfgTable->TableEntries[i].ConfigurationBaseAddress;
+        NewGroup->PCISegmentGroupNumber = McfgTable->TableEntries[i].Group;
+        NewGroup->StartBusNumber = McfgTable->TableEntries[i].StartBus;
+        NewGroup->EndBusNumber = McfgTable->TableEntries[i].EndBus;
+        AddPcieGroup(NewGroup);
+        for(size_t j = McfgTable->TableEntries[i].StartBus ; j < McfgTable->TableEntries[i].EndBus; j++){
+            checkBus(McfgTable->TableEntries[i].Group, j);
         }
     }
 }
