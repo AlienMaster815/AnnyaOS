@@ -56,7 +56,7 @@ ACPI_STATUS AcpiRunOsc(ACPI_HANDLE AcpiHandle, PACPI_OSC_CONTEXT Ctx){
     }
 
     LouPrint("AcpiRunOsc()\n");
-    while(1);
+    //while(1);
     return AE_OK;
 }
 
@@ -108,12 +108,12 @@ static void AcpiBusOscNegotiatePlatformControl(){
 
 
     LouPrint("AcpiBusOscNegotiatePlatformControl()\n");
-    while(1);
+    //while(1);
 }
 
 static void AcpiBusNotify(ACPI_HANDLE Handle, UINT32 Type, PVOID Data){
     LouPrint("AcpiBusNotify()\n");
-    while(1);
+    //while(1);
 }
 
 LOUSTATUS AcpiBusInitialize(){

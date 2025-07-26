@@ -29,5 +29,5 @@ void AcpiEcEcdtProbe(){
     }
 
     LouPrint("AcpiEcEcdtProbe()\n");
-    while(1);
+    //while(1);
 }

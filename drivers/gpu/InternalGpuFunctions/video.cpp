@@ -37,7 +37,7 @@ void InitializeBootGraphics(){
 	UNUSED uint16_t Height = BootGraphics->framebuffer_height;
 	UNUSED uint16_t Bpp = BootGraphics->framebuffer_bpp;
 	
-	PDRSD_DEVICE Device = LouKeMallocType(DRSD_DEVICE, KERNEL_GENERIC_MEMORY);
+	UNUSED PDRSD_DEVICE Device = LouKeMallocType(DRSD_DEVICE, KERNEL_GENERIC_MEMORY);
 	PDRSD_PLANE Plane = LouKeMallocType(DRSD_PLANE, KERNEL_GENERIC_MEMORY);
 	Plane->PlaneState = LouKeMallocType(DRSD_PLANE_STATE, KERNEL_GENERIC_MEMORY);
 	Plane->FrameBuffer = LouKeMallocType(DRSD_FRAME_BUFFER, KERNEL_GENERIC_MEMORY);
@@ -52,6 +52,16 @@ void InitializeBootGraphics(){
 	Plane->FrameBuffer->Pitch = (Width * (Bpp / 8));;
 	Plane->FrameBuffer->FramebufferSize = Width * Height * (Bpp / 8);
 	Plane->FrameBuffer->FramebufferBase = (uintptr_t)LouKePciGetVirtualBarAddress(BootGraphics->framebuffer_addr);//(uintptr_t)LouVMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), BootGraphics->framebuffer_addr);
+	if(!Plane->FrameBuffer->FramebufferBase){
+		if(BootGraphics->framebuffer_addr){
+			EnforceSystemMemoryMap(BootGraphics->framebuffer_addr, ROUND_UP64(Plane->FrameBuffer->FramebufferSize, KILOBYTE_PAGE));
+			LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, BootGraphics->framebuffer_addr, ROUND_UP64(Plane->FrameBuffer->FramebufferSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+			Plane->FrameBuffer->FramebufferBase = BootGraphics->framebuffer_addr;
+		}else{
+			return;
+		}
+	}
+
 	Plane->FrameBuffer->SecondaryFrameBufferBase = (uintptr_t)LouKeMallocEx(ROUND_UP64(Width * Height * (Bpp / 8), KILOBYTE_PAGE), KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
 
 	DrsdInitializeGenericPlane(Device, Plane, 0, 0,0, 0, 0, PRIMARY_PLANE, "BOOTVID.SYS");
@@ -59,4 +69,5 @@ void InitializeBootGraphics(){
 	LouKeDrsdInitializeBootDevice(
     	Device
 	);
+
 }
