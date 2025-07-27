@@ -115,7 +115,7 @@ NTSTATUS DriverEntry(
     //tell the System where are key Nt driver functions are
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;
-    //tell the losine kernel we will be using the
+    //tell the lousine kernel we will be using the
     //Lousine Kernel Driver Module (LKDM) alongside the
     //NT Kernel Moudle Subsystem so it fills
     //out the extra information relating to the LKDM

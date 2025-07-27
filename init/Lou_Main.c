@@ -385,8 +385,6 @@ KERNEL_ENTRY Lou_kernel_start(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    while(1);
-    
     LouKeRunOnNewUserStack((void (*)(void*))InitializeUserSpace, 0x00, 8 * MEGABYTE);
 	LouPanic("error kernel has gone too far terminating system\n",BAD);
 	// IF the Kernel returns from this

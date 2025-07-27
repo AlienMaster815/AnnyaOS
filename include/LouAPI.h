@@ -42,6 +42,7 @@
 #include <drivers/cpu/cpu.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
+#include <kernel/XArray.h>
 #include <Dispatching.h>
 
 
