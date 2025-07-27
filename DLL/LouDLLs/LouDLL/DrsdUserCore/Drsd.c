@@ -2,6 +2,8 @@
 
 #define LOUDLL_API __declspec(dllexport)
 
+
+
 LOUDLL_API
 PDRSD_CLIP 
 LouDrsdCreateClip(

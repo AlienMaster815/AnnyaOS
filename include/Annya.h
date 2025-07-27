@@ -223,7 +223,6 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 #ifndef _LOUDLL_
 
-
 __declspec(dllimport)
 int strcmp(const char* str1, const char* str2);
 

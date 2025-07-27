@@ -11,7 +11,6 @@ LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wPar
 
 static ANNYA_DESKTOP_SETUP_PACKET InterfaceSetup = {0};
 
-
 int WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,

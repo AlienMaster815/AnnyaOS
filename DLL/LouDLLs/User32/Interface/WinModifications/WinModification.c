@@ -1,5 +1,15 @@
 #include "WinModification.h"
 
+__declspec(dllimport)
+void LouDrsdDrawLine32(
+    PDRSD_CLIP Clip, 
+    UINT32 X1, UINT32 Y1,
+    UINT32 X2, UINT32 Y2, 
+    UINT32 Color
+);
+
+void AwmHandleStartButtonEvent(PWINDOW_HANDLE StartNutton, bool Click);
+
 USER32_API
 LOUSTATUS 
 AwmHookCalbackToWindow(
@@ -21,8 +31,41 @@ AwmHookCalbackToWindow(
     return STATUS_SUCCESS;
 }
 
-LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
+void 
+AwmWindowDrawLine(
+    PWINDOW_HANDLE  WindowHandle,
+    INT64           X1,
+    INT64           Y1,
+    INT64           X2,
+    INT64           Y2,
+    UINT8           R,
+    UINT8           G,
+    UINT8           B,
+    UINT8           A
+){
+    SIZE PlaneCount = WindowHandle->PlaneCount;
+    SIZE i = 0;
+    UINT32 Color = DRSD_CORE_TRANSLATE_COLOR(R, G, B, A);
+    for(; i < PlaneCount; i++){
+        LouDrsdDrawLine32(
+            WindowHandle->MainWindow[i], 
+            X1, Y1, 
+            X1 + X2 >= WindowHandle->MainWindow[i]->Width ? WindowHandle->MainWindow[i]->Width - X1 : X2, 
+            Y1 + Y2 >= WindowHandle->MainWindow[i]->Height ? WindowHandle->MainWindow[i]->Height - Y2 : Y2, 
+            Color
+        );
+    }
+}
 
-    LouPrint("WindowModificationWndProc()\n");
-    while(1);
+LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
+    PWINDOW_HANDLE TmpWindow = (PWINDOW_HANDLE)WindowHandle;
+    switch(Message){
+        case WM_LBUTTON_DOWN:{
+            if(!strcmp(TmpWindow->WindowName, "StartButton")){
+                AwmHandleStartButtonEvent((PWINDOW_HANDLE)WindowHandle, true);
+            }
+            break;
+        }
+    }
+    return 0;
 }

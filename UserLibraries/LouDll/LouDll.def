@@ -37,4 +37,4 @@ EXPORTS
     LouUserGetMessage
     LouUserDispatchMessage
     LouRegisterMouseHandler
-    
+    LouDrsdDrawLine32

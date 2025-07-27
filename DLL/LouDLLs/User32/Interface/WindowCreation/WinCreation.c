@@ -148,6 +148,40 @@ HWND AwmCreateCanvasButton(
     return (HWND)NewWindow;
 }
 
+HWND AwmCreateGenericWindow(
+    LPCSTR      ClassName,
+    LPCSTR      WindowName,
+    DWORD       Style,
+    int64_t     X,
+    int64_t     Y,
+    uint32_t    Width,
+    uint32_t    Height,
+    HWND        ParrentHandle,
+    HMENU       Menu,
+    HINSTANCE   Instance,
+    LPVOID      Parameter
+){
+    PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
+    GenericWindowHandleInit(
+        NewWindow,
+        0, 
+        0, 
+        DesktopCurrentWidth, 
+        DesktopCurrentHeight,
+        0, 
+        0, 
+        0,
+        0
+    );
+    NewWindow->WindowStyle = Style;
+    NewWindow->WindowClass = ClassName;
+    NewWindow->Parameter = Parameter;
+    NewWindow->ParentWindow = (PWINDOW_HANDLE)ParrentHandle;
+    NewWindow->Menu = Menu;
+    NewWindow->Instance = Instance;
+    return NewWindow;
+}
+
 USER32_API
 HWND 
 CreateWindowA(
@@ -186,6 +220,9 @@ CreateWindowA(
             Instance,
             Parameter
         );
+    }else if(!strcmp(ClassName, ANNYA_GENERIC_WINDOW)){
+
+
     }
 
     if(NewWindow){

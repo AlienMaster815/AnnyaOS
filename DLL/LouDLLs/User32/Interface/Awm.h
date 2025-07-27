@@ -61,7 +61,11 @@ typedef struct _WINDOW_HANDLE{
     mutex_t                 CallbackMutex;
     SIZE                    CallbackCount;
     ANNYA_WINDOW_CALLBACK*  WindowCallbacks;
+    string                  WindowClass;
     HWND                    WinApiHandleChecksum; //used for winAPI applications and to check the indegrity of the AnnyaHandle
+    PVOID                   Parameter;
+    HINSTANCE               Instance;
+    HMENU                   Menu;
 }WINDOW_HANDLE, * PWINDOW_HANDLE;
 
 typedef struct _AWM_WINDOW_TRACKER_ENTRY{
@@ -119,6 +123,8 @@ CreateWindowA(
     LPVOID      Parameter
 );
 
+typedef HWND HMENU; 
+
 size_t AwmGetImageCenteredX(size_t ImageWidth, size_t ScreenHeight, size_t Scale);
 size_t AwmGetImageCenteredY(size_t ImageHeight, size_t ScreenHeight, size_t Scale);
 void AwmGetImageScaleingCentered(
@@ -136,6 +142,7 @@ void AwmGetImageScaleingCentered(
 #define TRAY_WINDOW             "AnnyaShell_TrayWnd"
 #define DEKSTOP_BACKGROUND      "AnnyaDekstopBackground"
 #define CANVAS_BUTTON           "AnnyaCanvasButton"
+#define ANNYA_GENERIC_WINDOW    "AnnyaOSShellWindow"
 
 typedef struct _ANNYA_CANVAS_BUTTON_PARAM{
     CODEC_HANDLE_IMAGE_SUBTYPE      CanvasDataId;
@@ -194,6 +201,12 @@ typedef struct _ANNYA_CANVAS_BUTTON_PARAM{
 #define SW_FORCEMINIMIZE    11	//Minimizes a window, even if the thread that owns the window is not responding. This flag should only be used when minimizing windows from a different thread.
 //endof Private Data
 
+#define WM_LBUTTON_DOWN 0x0201
+#define WM_LBUTTON_UP   0x0202
+#define MK_LBUTTON      0x0001
+
+#define CLIP_WIDTH      UINT64_MAX
+#define CLIP_HEIGHT     UINT64_MAX
 
 USER32_API
 LOUSTATUS 
@@ -204,6 +217,17 @@ AwmHookCalbackToWindow(
 
 LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
 
-
+void 
+AwmWindowDrawLine(
+    PWINDOW_HANDLE  WindowHandle,
+    INT64           X1,
+    INT64           Y1,
+    INT64           X2,
+    INT64           Y2,
+    UINT8           R,
+    UINT8           G,
+    UINT8           B,
+    UINT8           A
+);
 
 #endif

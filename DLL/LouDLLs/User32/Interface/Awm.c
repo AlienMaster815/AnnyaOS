@@ -13,7 +13,8 @@ static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
 static int64_t MouseX = 0;
 static int64_t MouseY = 0;
-
+static bool LeftMouseDown = false;
+static bool RightMouseDown = false;
 static FT_Library FtInitLib = 0x00;
 
 static PDRSD_CLIP* TaskBars = 0;
@@ -42,13 +43,13 @@ static HWND StartButton = 0x00;
 static HWND FileExplorerButon = 0x00;
 static HANDLE FolderPng = 0x00;
 
+static HMENU StartMenu = 0x00;
+static bool StartButtonDown = false;
 
 static int64_t DesktopCurrentX = 0;
 static int64_t DesktopCurrentY = 0;
 int64_t DesktopCurrentWidth = 0;
 int64_t DesktopCurrentHeight = 0;
-
-
 
 SIZE AwmGetPlaneCount(){
     return PlaneTracker.PlaneCount;
@@ -115,7 +116,18 @@ PWINDOW_HANDLE AwmFindWindowFromClip(PDRSD_CLIP Clip, SIZE i){
     return 0x00;
 }
 
-PWINDOW_HANDLE AwmFineWindowAtPoint(INT64 X, INT64 Y){
+PDRSD_CLIP FindClip(INT64 X, INT64 Y){
+    for(SIZE i = 0; i < PlaneTracker.PlaneCount; i++){
+        PAWM_CLIP_TREE ClipTree = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
+        ClipTree = FindClipAtPoint(ClipTree, X, Y);
+        if(ClipTree){
+            return ClipTree->Clip;
+        }   
+    }
+    return 0x00;
+}
+
+PWINDOW_HANDLE AwmFindWindowAtPoint(INT64 X, INT64 Y){
     PWINDOW_HANDLE Result = 0x00;
     for(SIZE i = 0; i < PlaneTracker.PlaneCount; i++){
         PAWM_CLIP_TREE ClipTree = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
@@ -234,8 +246,8 @@ ShowWindow(
         case SW_SHOW:{
             for(SIZE i = 0 ; i < Planes; i++){
                 LouUpdateShadowClipState((PVOID)Window->MainWindow[i]);
-                Window->Visable = true;
             }
+            Window->Visable = true;
         }
     }
 
@@ -258,6 +270,9 @@ UpdateWindow(
         case SW_SHOW:{
             for(;i < PlaneCount; i++){
                 LouUpdateShadowClipState((PVOID)Window->MainWindow[i]);
+                if(MouseClips[i]){
+                    LouUpdateShadowClipState((void*)MouseClips[i]);
+                }
                 LouDrsdSyncScreen(Window->MainWindow[i]->ChainOwner);
             }
             return true;
@@ -339,6 +354,23 @@ static void UpdateMouseClip(int64_t X, int64_t Y){
 
 static INT64 gMouseX = 0, gMouseY = 0;
 
+void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
+    if((Click) && (!StartButtonDown)){
+        AwmWindowDrawLine(Handle, 0, 0, CLIP_WIDTH, 0, 0, 0, 0, 255);
+        AwmWindowDrawLine(Handle, 0, 0, 0, CLIP_HEIGHT, 0, 0, 0, 255);
+        StartButtonDown = true;
+        UpdateWindow(Handle);
+        //TODO Create Start Menu
+    }else if(StartButtonDown){ //destroy
+        AwmWindowDrawLine(Handle, 0, 0, CLIP_WIDTH, 0, 255, 255, 255, 255);
+        AwmWindowDrawLine(Handle, 0, 0, 0, CLIP_HEIGHT, 255, 255, 255, 255);
+        StartButtonDown = false;
+        UpdateWindow(Handle);
+        //TODO Destroy Start Menu
+    }
+}
+
+
 static 
 void 
 MouseEventHandler(
@@ -347,8 +379,10 @@ MouseEventHandler(
     PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
     gMouseX += MouseEvent->X;
     gMouseY += MouseEvent->Y;
+
     BOOL RightClick = MouseEvent->RightClick;
     BOOL LeftClick  = MouseEvent->LeftClick;
+
     //write 0s for the request to complete
     MouseEvent->X = 0;
     MouseEvent->Y = 0;
@@ -368,8 +402,12 @@ MouseEventHandler(
     //LouPrint("X:%d, Y:%d\n", gMouseX, gMouseY);
     UpdateMouseClip(gMouseX, gMouseY);
 
-    if(RightClick){
-        PWINDOW_HANDLE WinHandle = AwmFineWindowAtPoint(gMouseX, gMouseY);
+    if(RightClick && !RightMouseDown){
+        RightMouseDown = true;
+        PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+        if(WinHandle != StartButton){
+            AwmHandleStartButtonEvent(StartButton, false);
+        }
         if(WinHandle){
             if(WinHandle->WindowName){
             
@@ -377,16 +415,56 @@ MouseEventHandler(
         }else{
 
         }
+    }else if(!RightClick && RightMouseDown){
+        RightMouseDown = false;
     }
-    if(LeftClick){
-        PWINDOW_HANDLE WinHandle = AwmFineWindowAtPoint(gMouseX, gMouseY);
+    if(LeftClick && (!LeftMouseDown)){
+        LeftMouseDown = true;
+        PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+        if(WinHandle != StartButton){
+            AwmHandleStartButtonEvent(StartButton, false);
+        }
         if(WinHandle){
             if(WinHandle->WindowName){
+                if(LeftMouseDown){
+                    PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
+                    uint16_t XRelative = (gMouseX - TmpClip->X);
+                    uint16_t YRelative = (gMouseY - TmpClip->Y);
+                    MutexLock(&WinHandle->CallbackMutex);
+                    for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+                        if(i){
+                            WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                        }else{
+                            WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                        }
+                    }
+                    MutexUnlock(&WinHandle->CallbackMutex);
+                }
+                else return;
                 LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
             }
         }
+        
+    }else if(!LeftClick && LeftMouseDown){
+        LeftMouseDown = false;
+        PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+        if(WinHandle && WinHandle->WindowName){
+            PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
+            uint16_t XRelative = (gMouseX - TmpClip->X);
+            uint16_t YRelative = (gMouseY - TmpClip->Y);
+            MutexLock(&WinHandle->CallbackMutex);
+            for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+                if(i){
+                    WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_UP,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                }else{
+                    WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_UP, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                }
+            }
+            MutexUnlock(&WinHandle->CallbackMutex);
+        }
     }
 }
+
 
 USER32_API
 AWM_STATUS 
