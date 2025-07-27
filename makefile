@@ -1,4 +1,4 @@
-# mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex
+# mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build
 #git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1
 #cd limine
 #make
@@ -21,6 +21,8 @@
 
 #qemu-system-x86_64 -m 8192M -cdrom annya.iso
 #VirtualBoxVM --startvm "AnnyaOS" --dbg
+
+
 
 TARGET_ARCH = x86_64
 TARGET_OS = WINDOWS

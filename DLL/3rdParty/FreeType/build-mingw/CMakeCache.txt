@@ -40,7 +40,7 @@ CMAKE_AR:FILEPATH=/usr/bin/x86_64-w64-mingw32-ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+CMAKE_BUILD_TYPE:STRING=Release
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
@@ -48,8 +48,8 @@ CMAKE_COLOR_MAKEFILE:BOOL=ON
 //No help, variable specified on the command line.
 CMAKE_CXX_COMPILER:UNINITIALIZED=x86_64-w64-mingw32-g++
 
-//C compiler
-CMAKE_C_COMPILER:STRING=/usr/bin/x86_64-w64-mingw32-gcc
+//No help, variable specified on the command line.
+CMAKE_C_COMPILER:UNINITIALIZED=x86_64-w64-mingw32-gcc
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -202,8 +202,8 @@ CMAKE_PROJECT_NAME:STATIC=freetype
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/x86_64-w64-mingw32-ranlib
 
-//RC compiler
-CMAKE_RC_COMPILER:FILEPATH=/usr/bin/x86_64-w64-mingw32-windres
+//No help, variable specified on the command line.
+CMAKE_RC_COMPILER:UNINITIALIZED=x86_64-w64-mingw32-windres
 
 //Flags for Windows Resource Compiler during all build types.
 CMAKE_RC_FLAGS:STRING=
@@ -299,16 +299,13 @@ FT_DISABLE_BZIP2:BOOL=OFF
 
 //Disable HarfBuzz (used for improving auto-hinting of OpenType
 // fonts).
-FT_DISABLE_HARFBUZZ:BOOL=OFF
+FT_DISABLE_HARFBUZZ:BOOL=ON
 
 //Disable support of PNG compressed OpenType embedded bitmaps.
 FT_DISABLE_PNG:BOOL=OFF
 
 //Disable use of system zlib and use internal zlib library instead.
 FT_DISABLE_ZLIB:BOOL=OFF
-
-//Load HarfBuzz library dynamically at runtime, if possible.
-FT_DYNAMIC_HARFBUZZ:BOOL=ON
 
 //Enable support for meaningful error descriptions.
 FT_ENABLE_ERROR_STRINGS:BOOL=OFF
@@ -319,14 +316,14 @@ FT_REQUIRE_BROTLI:BOOL=OFF
 //Require support of bzip2 compressed fonts.
 FT_REQUIRE_BZIP2:BOOL=OFF
 
-//Require HarfBuzz for improving auto-hinting of OpenType fonts.
-FT_REQUIRE_HARFBUZZ:BOOL=OFF
-
 //Require support of PNG compressed OpenType embedded bitmaps.
 FT_REQUIRE_PNG:BOOL=OFF
 
 //Require system zlib instead of internal zlib library.
 FT_REQUIRE_ZLIB:BOOL=OFF
+
+//No help, variable specified on the command line.
+FT_WITH_HARFBUZZ:UNINITIALIZED=OFF
 
 //Arguments to supply to pkg-config
 PKG_CONFIG_ARGN:STRING=
@@ -547,6 +544,10 @@ CPACK_SOURCE_7Z-ADVANCED:INTERNAL=1
 CPACK_SOURCE_ZIP-ADVANCED:INTERNAL=1
 //Details about finding PkgConfig
 FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/bin/pkg-config][v1.8.1()]
+//Load HarfBuzz library dynamically at runtime, if possible.
+FT_DYNAMIC_HARFBUZZ:INTERNAL=ON
+//Require HarfBuzz for improving auto-hinting of OpenType fonts.
+FT_REQUIRE_HARFBUZZ:INTERNAL=OFF
 PC_BROTLIDEC_CFLAGS:INTERNAL=
 PC_BROTLIDEC_CFLAGS_I:INTERNAL=
 PC_BROTLIDEC_CFLAGS_OTHER:INTERNAL=

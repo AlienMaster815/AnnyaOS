@@ -275,11 +275,10 @@ _setjmp(){
 
 
 MSVCRT_API
-void 
-getenv(){
-
-    LouPrint("getenv()\n");
-    while(1);
+char*
+getenv(char* EnviornmentName){
+    LouPrint("getenv():%s\n", EnviornmentName);
+    return 0x00;
 }
 
 

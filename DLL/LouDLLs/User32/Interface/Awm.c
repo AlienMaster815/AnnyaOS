@@ -311,7 +311,12 @@ static void InitializeDependencies(){
     BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
 
     LouPrint("Initiailizing FreeType\n");
-    //FT_Init_FreeType(&FtInitLib);
+
+    FT_Error err = FT_Init_FreeType(&FtInitLib);
+    if (err) {
+        LouPrint("FT_Init_FreeType() failed: %u\n", err);
+        while(1);
+    }
 
     LouPrint("InitializeDependencies() STATUS_SUCCESS\n");
 
