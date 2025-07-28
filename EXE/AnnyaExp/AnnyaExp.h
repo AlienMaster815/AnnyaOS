@@ -21,15 +21,6 @@ struct _WINDOW_HANDLE;
 
 typedef AWM_STATUS(*WINDOW_CALLBACK)(struct _WINDOW_HANDLE*, AWM_CALL_REASON ,union _AWM_CALLBACK_DATA*) ; 
 
-typedef struct _WINDOW_HANDLE{
-    PWINDOW_CHARECTERISTICS Charecteristics;
-    struct _DRSD_CLIP*      MainWindow;
-    struct _WINDOW_HANDLE*  ParentWindow;
-    struct _WINDOW_HANDLE*  Children;
-    WINDOW_CALLBACK         WindowCallback;
-    HWND                    WinApiHandleChecksum; //used for winAPI applications and to check the indegrity of the AnnyaHandle
-}WINDOW_HANDLE, * PWINDOW_HANDLE;
-
 typedef struct _AWM_WINDOW_UPDATE_DATA{
     PWINDOW_HANDLE          WindowHandle;
     int64_t                 NewX;

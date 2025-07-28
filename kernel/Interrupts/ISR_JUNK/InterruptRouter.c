@@ -138,17 +138,6 @@ void LouKeThrowPc();
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 
-
-
-    if(Interrupt < 0x20){
-        LouKIRQL Irql;
-        LouKeSetIrql(HIGH_LEVEL, &Irql);
-        CPUContext* Cpu = (CPUContext*)Args;
-        LouPrint("FAULT:%h\n", Interrupt);
-        LouPrint("RIP:%h\n", Cpu->rip);  
-        //InterruptRouterTable[Interrupt].InterruptHandler(Args);
-        while(1);
-    }
     MutexLock(&InterruptLock);
     uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 

@@ -23,6 +23,12 @@ static PDRSD_CLIP* GenericButtonClips = 0;
 static PAWM_CLIP_TREE GenericButtonTree = 0;
 static HANDLE (*AnnyaOpenBmpA)(string);
 
+static HINSTANCE AwmInstance = 0x00;
+
+static bool InterfaceDualClick = false;
+
+static PWINDOW_HANDLE LastInstance = 0x00; 
+
 //Globals
 HANDLE BackgroundImage = 0x00;
 HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
@@ -42,7 +48,6 @@ static PDRSD_CLIP* MouseClips = 0x00;
 static HWND StartButton = 0x00;
 static HWND FileExplorerButon = 0x00;
 static HANDLE FolderPng = 0x00;
-
 static HMENU StartMenu = 0x00;
 static bool StartButtonDown = false;
 
@@ -50,6 +55,8 @@ static int64_t DesktopCurrentX = 0;
 static int64_t DesktopCurrentY = 0;
 int64_t DesktopCurrentWidth = 0;
 int64_t DesktopCurrentHeight = 0;
+
+static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 SIZE AwmGetPlaneCount(){
     return PlaneTracker.PlaneCount;
@@ -333,6 +340,9 @@ static void InitializeDependencies(){
         while(1);
     }
 
+    AnnyaExplorerFileManager = AnnyaGetLibraryFunctionN("ANNYAEXP.EXE", "AnnyaExplorerFileManager");
+    LouPrint("AnnyaExplorerFileManager()%h\n", AnnyaExplorerFileManager);
+
     LouPrint("InitializeDependencies() STATUS_SUCCESS\n");
 
 }
@@ -371,6 +381,16 @@ void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
 }
 
 
+void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
+    if(InterfaceDualClick){
+        if(AnnyaExplorerFileManager){
+            //PANNYA_EXPLORER_INIT_PACKET NewPacket = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
+            //NewPacket->Instance = (HINSTANCE)LouGlobalUserMallocType(HINSTANCE);
+            //AnnyaCreateThread(AnnyaExplorerFileManager, NewPacket);
+        }
+    }
+}
+
 static 
 void 
 MouseEventHandler(
@@ -403,6 +423,7 @@ MouseEventHandler(
     UpdateMouseClip(gMouseX, gMouseY);
 
     if(RightClick && !RightMouseDown){
+        InterfaceDualClick = false;
         RightMouseDown = true;
         PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
         if(WinHandle != StartButton){
@@ -416,11 +437,19 @@ MouseEventHandler(
 
         }
     }else if(!RightClick && RightMouseDown){
+        InterfaceDualClick = false;
+
         RightMouseDown = false;
     }
     if(LeftClick && (!LeftMouseDown)){
         LeftMouseDown = true;
         PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+        if(LastInstance == WinHandle){
+            InterfaceDualClick = true;
+        }else {
+            InterfaceDualClick = false;
+        }
+        LastInstance = WinHandle;
         if(WinHandle != StartButton){
             AwmHandleStartButtonEvent(StartButton, false);
         }
@@ -448,6 +477,12 @@ MouseEventHandler(
     }else if(!LeftClick && LeftMouseDown){
         LeftMouseDown = false;
         PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+        if(LastInstance == WinHandle){
+            InterfaceDualClick = true;
+        }else {
+            InterfaceDualClick = false;
+        }
+        LastInstance = WinHandle;
         if(WinHandle && WinHandle->WindowName){
             PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
             uint16_t XRelative = (gMouseX - TmpClip->X);
@@ -473,7 +508,7 @@ InitializeAwmUserSubsystem(
     PANNYA_DESKTOP_SETUP_PACKET     InterfaceSetup
 ){
     LouPrint("InitializeAwmUserSubsystem()\n");
- 
+    AwmInstance = hInstance;
     InitializeDependencies();
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);

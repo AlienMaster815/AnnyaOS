@@ -656,19 +656,23 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         }
 
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
+        PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
         
-        //ParseExportTables(
-        //    allocatedModuleVirtualAddress,  
-        //    ExportTable
-        //);
+        if((uintptr_t)ExportTable != (uintptr_t)allocatedModuleVirtualAddress){
+            ParseExportTables(
+                allocatedModuleVirtualAddress,  
+                ExportTable,
+                ExecutablePath
+            );
+        }
 
-        ParseImportTables(
-            allocatedModuleVirtualAddress,
-            ImportTable,
-            ExecutablePath
-        );
-
- 
+        if((uintptr_t)ImportTable != (uintptr_t)allocatedModuleVirtualAddress){
+            ParseImportTables(
+                allocatedModuleVirtualAddress,
+                ImportTable,
+                ExecutablePath
+            );
+        }
 
         // Locate the relocation table
         uint64_t relocationTable = (uint64_t)((uint64_t)allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[5].VirtualAddress);

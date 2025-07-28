@@ -134,13 +134,12 @@ void SetupGDT(){
     PTSS Tss = (PTSS)LouMallocEx(sizeof(TSS), 16);
     memset(Tss,0, sizeof(TSS));
 
-    void* KStack = LouMallocEx((64 * KILOBYTE) * 6, 16);
-    Tss->RSP0 = ((uintptr_t)(KStack + (64 * KILOBYTE)) * 1);
-    Tss->RSP1 = ((uintptr_t)(KStack + (64 * KILOBYTE)) * 2);
-    Tss->RSP2 = ((uintptr_t)(KStack + (64 * KILOBYTE)) * 3);    
-    Tss->IST1 = ((uintptr_t)(KStack + (64 * KILOBYTE)) * 4);
-    Tss->IST2 = ((uintptr_t)(KStack + (64 * KILOBYTE)) * 5);
-    Tss->IST3 = ((uintptr_t)(KStack + (64 * KILOBYTE)) * 6);
+    Tss->RSP0 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
+    Tss->RSP1 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
+    Tss->RSP2 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
+    Tss->IST1 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
+    Tss->IST2 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
+    Tss->IST3 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
 
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,

@@ -12,6 +12,7 @@ SRC = User32.c \
 		Interface/Awm.c \
 		Interface/Geometry.c \
 		Interface/WindowCreation/WinCreation.c \
+		Interface/WindowCreation/Styles.c \
 		Interface/WinModifications/WinModification.c 
 
 TARGET = user32.dll

@@ -71,6 +71,7 @@ typedef struct {
 static thread_t MasterThreadTable;
 static uint64_t NumberOfThreads = 0;
 //static uint64_t CurrentRoundRobin = 0;
+static spinlock_t UserThreadCreationLock;
 
 static inline thread_t* CreateThreadHandle(){
     thread_t* TmpThreadHandle = &MasterThreadTable;
@@ -80,6 +81,7 @@ static inline thread_t* CreateThreadHandle(){
         }
     }
     TmpThreadHandle->Neighbors.NextHeader = (PListHeader)LouKeMallocType(thread_t,  USER_GENERIC_MEMORY);
+
     return(thread_t*)TmpThreadHandle->Neighbors.NextHeader;
 }
 
@@ -205,24 +207,44 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext){
 KERNEL_IMPORT
 void SetTEB(uint64_t Teb);
 
-static void HanldeLouQSystem(uint8_t ProcessorID){
-    if(MutexIsLocked(&WorkTrackThread)){
-        return;
+LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
+    uint8_t ProcessorID = get_processor_id();
+    thread_t* CurrentThread = current_thread[ProcessorID];
+    thread_t* NextThread = 0;
+    
+    ProcessorID = get_processor_id();
+    CurrentThread = current_thread[ProcessorID];
+
+    timeQuantum[ProcessorID] = 0;
+
+    NextThread = GetNextThread(CurrentThread);
+    if((uintptr_t)NextThread == (uintptr_t)CurrentThread){
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
-    PLOUQ_DELAYED_WORK_TRACKER TmpQ = &WorkTracker[ProcessorID];
-    while(TmpQ->Peers.NextHeader){
-        if(TmpQ->Timer > 0){
-            TmpQ->Timer--;
-            if(!TmpQ->Timer){
-                TmpQ->WorkFunction(TmpQ->PrivateData);
-                if(TmpQ->Interval){
-                    TmpQ->Timer = TmpQ->Interval;
-                }
-            }
-        }
-        TmpQ = (PLOUQ_DELAYED_WORK_TRACKER)TmpQ->Peers.NextHeader;
+
+    if(IsThreadInThreadTable(CurrentThread)){
+        SaveContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&CurrentThread->SavedContext));
+        CurrentThread->state = THREAD_READY;
+        SaveEverything(&CurrentThread->AdvancedRegisterStorage);
     }
-    //TODO: add an interval of 1 second to clean each core
+
+    while((!IsThreadInThreadTable(NextThread)) && (NextThread->state != THREAD_READY)){
+        NextThread = GetNextThread(NextThread);
+    }
+
+    RestoreEverything(&NextThread->AdvancedRegisterStorage);
+
+    NextThread->state = THREAD_RUNNING;
+    RestoreContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&NextThread->SavedContext));
+
+    if(NextThread->WinTEBData){
+        SetTEB(NextThread->WinTEBData);
+    }
+
+    current_thread[ProcessorID] = NextThread;
+    
+    _UPDATE_THREAD_MANAGER_FINISHED:
+    return CpuCurrentState;
 }
 
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
@@ -232,8 +254,6 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     thread_t* NextThread = 0;
     CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
     
-    HanldeLouQSystem(ProcessorID);
-
     if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
@@ -315,7 +335,6 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
     return Status;
 }
 
-static spinlock_t UserThreadCreationLock;
 
 
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(thread_t* Thread) {

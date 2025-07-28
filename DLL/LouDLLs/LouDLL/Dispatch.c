@@ -1,6 +1,7 @@
 #include "LouDll.h"
 
 int LouPrint(char* Str, ...);
+void LouYeildExecution();
 
 LOUDLL_API
 void LouGetSystemUpdate(PSYSTEM_STATE_STACK StateStack){
@@ -44,6 +45,7 @@ LouUserGetMessage(
     PLOUSINE_USER_SHARED_MESSAGE Tmp = (PLOUSINE_USER_SHARED_MESSAGE)Prev->Peers.NextHeader;
 
     if (!Tmp) {
+        LouYeildExecution();
         *Message = 0x00;
         return true;
     }
@@ -92,6 +94,7 @@ LouUserDispatchMessage(
 ){
     PLOUSINE_USER_SHARED_MESSAGE Message = (PLOUSINE_USER_SHARED_MESSAGE)MessageHandle;
     if(!Message){
+        LouYeildExecution();
         return;
     }
     if(MessageHandlers[Message->MessageType]){

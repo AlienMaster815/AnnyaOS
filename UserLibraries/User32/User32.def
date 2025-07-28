@@ -10,3 +10,6 @@ EXPORTS
     free
     InitializeAwmUserSubsystem
     AwmUpdateState
+    UpdateWindow
+    ShowWindow
+    CreateWindowA

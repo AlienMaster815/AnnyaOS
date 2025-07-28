@@ -8,7 +8,9 @@ void LouDrsdDrawLine32(
     UINT32 Color
 );
 
+
 void AwmHandleStartButtonEvent(PWINDOW_HANDLE StartNutton, bool Click);
+void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click);
 
 USER32_API
 LOUSTATUS 
@@ -63,6 +65,9 @@ LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Me
         case WM_LBUTTON_DOWN:{
             if(!strcmp(TmpWindow->WindowName, "StartButton")){
                 AwmHandleStartButtonEvent((PWINDOW_HANDLE)WindowHandle, true);
+            }
+            if(!strcmp(TmpWindow->WindowName, "FileExplorer")){
+                AwmHandelFileExplorerEvent((PWINDOW_HANDLE)WindowHandle, true);
             }
             break;
         }

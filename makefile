@@ -266,18 +266,18 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C KernelLibraries/LCC clean
 	$(MAKE) -C KernelLibraries/LCC all
-
+	
 	$(MAKE) -C KernelLibraries/wprecorder clean
 	$(MAKE) -C KernelLibraries/wprecorder all
+
+	$(MAKE) -C UserLibraries/LouDll clean
+	$(MAKE) -C UserLibraries/LouDll all
 
 	$(MAKE) -C UserLibraries/KernelBase clean
 	$(MAKE) -C UserLibraries/KernelBase all
 
 	$(MAKE) -C UserLibraries/Kernel32 clean
 	$(MAKE) -C UserLibraries/Kernel32 all
-
-	$(MAKE) -C UserLibraries/LouDll clean
-	$(MAKE) -C UserLibraries/LouDll all
 
 	$(MAKE) -C UserLibraries/ntdll clean
 	$(MAKE) -C UserLibraries/ntdll all

@@ -148,43 +148,17 @@ HWND AwmCreateCanvasButton(
     return (HWND)NewWindow;
 }
 
-HWND AwmCreateGenericWindow(
-    LPCSTR      ClassName,
-    LPCSTR      WindowName,
-    DWORD       Style,
-    int64_t     X,
-    int64_t     Y,
-    uint32_t    Width,
-    uint32_t    Height,
-    HWND        ParrentHandle,
-    HMENU       Menu,
-    HINSTANCE   Instance,
-    LPVOID      Parameter
-){
-    PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
-    GenericWindowHandleInit(
-        NewWindow,
-        0, 
-        0, 
-        DesktopCurrentWidth, 
-        DesktopCurrentHeight,
-        0, 
-        0, 
-        0,
-        0
-    );
-    NewWindow->WindowStyle = Style;
-    NewWindow->WindowClass = ClassName;
-    NewWindow->Parameter = Parameter;
-    NewWindow->ParentWindow = (PWINDOW_HANDLE)ParrentHandle;
-    NewWindow->Menu = Menu;
-    NewWindow->Instance = Instance;
-    return NewWindow;
+bool AwmIsClassFromAnnyaOs(string ClassName){
+    if((!strcmp(ClassName, DEKSTOP_BACKGROUND)) || (!strcmp(ClassName, TRAY_WINDOW)) || (!strcmp(ClassName, CANVAS_BUTTON))){
+        return true;
+    }
+    return false;
 }
 
 USER32_API
-HWND 
-CreateWindowA(
+HWND
+CreateWindowExA(
+    DWORD       ExStyle,
     LPCSTR      ClassName,
     LPCSTR      WindowName,
     DWORD       Style,
@@ -221,12 +195,30 @@ CreateWindowA(
             Parameter
         );
     }else if(!strcmp(ClassName, ANNYA_GENERIC_WINDOW)){
-
-
+        NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
+        GenericWindowHandleInit(
+            NewWindow,
+            X, Y,
+            Width, Height,
+            192, 
+            192, 
+            192,
+            255
+        );
     }
 
     if(NewWindow){
         NewWindow->WindowName = WindowName;
+        NewWindow->WindowStyle = Style;
+        NewWindow->ExtendedWindowStyle = ExStyle;
+        NewWindow->WindowClass = ClassName;
+        NewWindow->Parameter = Parameter;
+        NewWindow->ParentWindow = (PWINDOW_HANDLE)ParrentHandle;
+        NewWindow->Menu = Menu;
+        NewWindow->Instance = Instance;
+        if(!AwmIsClassFromAnnyaOs(ClassName)){
+            AwmInitializeWindowStyle(NewWindow, ExStyle, Style);
+        }
         InitializeWindowToWindowManager(NewWindow);
         LouPrint("Created New Window:%s\n", WindowName);
         return NewWindow;
@@ -235,4 +227,33 @@ CreateWindowA(
     LouPrint("CreateWindowA()\n");
     while(1);
     return (PWINDHANDLE)0x00;
+}
+
+USER32_API
+HWND 
+CreateWindowA(
+    LPCSTR      ClassName,
+    LPCSTR      WindowName,
+    DWORD       Style,
+    int64_t     X,
+    int64_t     Y,
+    uint32_t    Width,
+    uint32_t    Height,
+    HWND        ParrentHandle,
+    HMENU       Menu,
+    HINSTANCE   Instance,
+    LPVOID      Parameter
+){
+    return CreateWindowExA(
+        0,
+        ClassName,
+        WindowName,
+        Style,
+        X, Y,
+        Width, Height,
+        ParrentHandle,
+        Menu,
+        Instance,
+        Parameter
+    );
 }

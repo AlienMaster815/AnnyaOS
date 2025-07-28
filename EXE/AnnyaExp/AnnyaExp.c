@@ -11,6 +11,37 @@ LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wPar
 
 static ANNYA_DESKTOP_SETUP_PACKET InterfaceSetup = {0};
 
+
+__declspec(dllexport)
+DWORD AnnyaExplorerFileManager(PVOID Args){
+    PANNYA_EXPLORER_INIT_PACKET InitPacket = (PANNYA_EXPLORER_INIT_PACKET)Args;
+    
+    //HWND TestWindow = CreateWindowA(
+    //    ANNYA_GENERIC_WINDOW,
+    //    "TestWindow",
+    //    WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+    //    30,
+    //    30,
+    //    500,
+    //    500,
+    //    0x00,
+    //    0x00,
+    //    InitPacket->Instance,
+    //    0x00
+    //);
+
+    //ShowWindow(TestWindow, SW_SHOW);
+    //UpdateWindow(TestWindow); 
+
+    HANDLE Message = 0x00;
+    while(LouUserGetMessage(&Message, ANY_EVENT_TYPE, ANY_PRIORITY)){
+        LouUserDispatchMessage(Message);
+    }
+
+    LouGlobalUserFree(Args);
+    return 0;
+}
+
 int WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,

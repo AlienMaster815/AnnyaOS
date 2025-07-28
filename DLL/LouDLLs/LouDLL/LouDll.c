@@ -535,3 +535,8 @@ void* memset(void* dest, int value, size_t count) {
 
     return dest;
 }
+
+LOUDLL_API
+void LouYeildExecution(){
+    asm("INT $200");
+}
