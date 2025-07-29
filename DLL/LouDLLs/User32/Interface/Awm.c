@@ -3,6 +3,11 @@
 typedef int FT_Error;
 typedef void* FT_Library;
 
+USER32_API
+BOOL 
+UpdateWindow(
+    HWND WindowHandle
+);
 
 static PDRSD_CLIP* PlaneBackgrounds = 0x00;
 static HANDLE MousePng = 0x00;
@@ -147,7 +152,47 @@ PWINDOW_HANDLE AwmFindWindowAtPoint(INT64 X, INT64 Y){
     return 0x00;
 }
 
+void MoveWindowTheFront(PWINDOW_HANDLE WindowHandle){
+    MutexLock(&AwmMasterTrackerMutex);
+    for(size_t i = 0 ; i < WindowHandle->PlaneCount; i++){
+        PAWM_CLIP_TREE Tree = &WindowHandle->ClipTreeHandle[i];
+        if(!Tree->CurrentPlane.NextHeader){
+            continue;
+        }
+        PAWM_CLIP_TREE Last = (PAWM_CLIP_TREE)Tree->CurrentPlane.LastHeader;
+        PAWM_CLIP_TREE Next = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
+        PAWM_CLIP_TREE UpDirectory = 0x00;
+        if(Last){
+            Last->CurrentPlane.NextHeader = (PListHeader)Next;
+        }
+        if(Tree->SubPlane.LastHeader){
+            UpDirectory = (PAWM_CLIP_TREE)Tree->SubPlane.LastHeader;
+            Tree->SubPlane.LastHeader = 0x00;
+            UpDirectory->SubPlane.NextHeader = (PListHeader)Next;
+            Next->SubPlane.LastHeader = (PListHeader)UpDirectory;
+
+        }
+        Next->CurrentPlane.LastHeader = (PListHeader)Last;
+        while(Next->CurrentPlane.NextHeader){
+            Next = (PAWM_CLIP_TREE)Next->CurrentPlane.NextHeader;
+        }
+        Next->CurrentPlane.NextHeader = (PListHeader)Tree;
+        Tree->CurrentPlane.LastHeader = (PListHeader)Next;
+        Tree->CurrentPlane.NextHeader = 0x00;
+    }
+    MutexUnlock(&AwmMasterTrackerMutex);
+}
+
+void UpdateWindowToDesktop(PWINDOW_HANDLE WindowHandle){
+    MoveWindowTheFront(WindowHandle);
+    MoveWindowTheFront(TaskbarWindow);
+    MoveWindowTheFront(StartButton);
+    MoveWindowTheFront(FileExplorerButon);
+    
+}
+
 void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
+
     MutexLock(&AwmMasterTrackerMutex);
 
     PAWM_WINDOW_TRACKER_ENTRY Tmp = &AwmMasterTracker;
@@ -168,24 +213,38 @@ void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
             Clip
         );
 
-        PAWM_CLIP_TREE NewClip = (PAWM_CLIP_TREE)LouGlobalUserMallocType(AWM_CLIP_TREE);
+        PAWM_CLIP_TREE NewClip = (PAWM_CLIP_TREE)&WindowHandle->ClipTreeHandle[i];
         NewClip->Clip = Clip;
         NewClip->SubPlane.NextHeader = NULL;
         NewClip->CurrentPlane.NextHeader = NULL;
 
         if (!Enclosing) {
             PAWM_CLIP_TREE Root = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-            PAWM_CLIP_TREE* Chain = (PAWM_CLIP_TREE*)&Root->CurrentPlane.NextHeader;
-            while (*Chain) {
-                Chain = (PAWM_CLIP_TREE*)&(*Chain)->CurrentPlane.NextHeader;
+            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Root->CurrentPlane.NextHeader;
+            PAWM_CLIP_TREE LastClip = 0x00;
+
+            while (Chain->CurrentPlane.NextHeader) {
+                LastClip = Chain;
+                Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
             }
-            *Chain = NewClip;
+
+            Chain->CurrentPlane.NextHeader = (PListHeader)NewClip;
+            NewClip->CurrentPlane.LastHeader = (PListHeader)Chain;
         } else {
-            PAWM_CLIP_TREE* Chain = (PAWM_CLIP_TREE*)&Enclosing->SubPlane.NextHeader;
-            while (*Chain) {
-                Chain = (PAWM_CLIP_TREE*)&(*Chain)->CurrentPlane.NextHeader;
+            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Enclosing->SubPlane.NextHeader;
+            if(!Chain){
+                Enclosing->SubPlane.NextHeader = (PListHeader)NewClip;
+                NewClip->SubPlane.LastHeader = (PListHeader)Enclosing;
+            }else{
+                PAWM_CLIP_TREE LastClip = 0x00;
+                while (Chain->CurrentPlane.NextHeader) {
+                    LastClip = Chain;
+                    Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
+                }
+                Chain->CurrentPlane.NextHeader = (PListHeader)NewClip;
+                NewClip->CurrentPlane.LastHeader = (PListHeader)Chain;
             }
-            *Chain = NewClip;
+
         }
 
         LouPrint("Window Installed To Window Manager:%s\n", WindowHandle->WindowName);
@@ -238,6 +297,7 @@ void CalculateRedraws(int64_t X, int64_t Y, int64_t Width, int64_t Height){
     }
 }
 
+
 USER32_API
 BOOL
 ShowWindow(
@@ -276,7 +336,12 @@ UpdateWindow(
     switch(Window->WindowVisability){
         case SW_SHOW:{
             for(;i < PlaneCount; i++){
-                LouUpdateShadowClipState((PVOID)Window->MainWindow[i]);
+                CalculateRedraws(
+                    Window->MainWindow[i]->X,
+                    Window->MainWindow[i]->Y,
+                    Window->MainWindow[i]->Width,
+                    Window->MainWindow[i]->Height
+                );
                 if(MouseClips[i]){
                     LouUpdateShadowClipState((void*)MouseClips[i]);
                 }
@@ -384,11 +449,37 @@ void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
 void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
     if(InterfaceDualClick){
         if(AnnyaExplorerFileManager){
-            //PANNYA_EXPLORER_INIT_PACKET NewPacket = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
-            //NewPacket->Instance = (HINSTANCE)LouGlobalUserMallocType(HINSTANCE);
-            //AnnyaCreateThread(AnnyaExplorerFileManager, NewPacket);
+            PANNYA_EXPLORER_INIT_PACKET NewPacket = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
+            NewPacket->Instance = (HINSTANCE)LouGlobalUserMallocType(HINSTANCE);
+            AnnyaCreateThread(AnnyaExplorerFileManager, NewPacket);
         }
     }
+}
+
+void AwmMoveWindow(PWINDOW_HANDLE Window, INT64 DeltaX, INT64 DeltaY){
+    size_t PlaneCount = Window->PlaneCount;
+    INT64 LastX;
+    INT64 LastY;
+    INT64 LastWidth;
+    INT64 LastHeight;
+    for(size_t i = 0 ; i < PlaneCount; i++){
+        LastX = Window->MainWindow[i]->X;
+        LastY = Window->MainWindow[i]->Y;
+        LastWidth = Window->MainWindow[i]->Width;
+        LastHeight = Window->MainWindow[i]->Height;
+        if(DesktopCurrentX >= (LastX + DeltaX)){
+            DeltaX = 0;
+        }
+        if(DesktopCurrentY >= (LastY + DeltaY)){
+            DeltaY = 0;
+        }
+        LouUpdateClipLocation(Window->MainWindow[i], (UINT32)(LastX + DeltaX), (UINT32)(LastY + DeltaY));
+        UpdateWindowToDesktop(Window);
+        CalculateRedraws(LastX, LastY, LastWidth, LastHeight);
+    }
+    UpdateWindow(
+        Window
+    );
 }
 
 static 
@@ -397,8 +488,11 @@ MouseEventHandler(
     PLOUSINE_USER_SHARED_MESSAGE MessageHandle
 ){
     PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
-    gMouseX += MouseEvent->X;
-    gMouseY += MouseEvent->Y;
+    
+    INT64 DeltaX = MouseEvent->X;
+    INT64 DeltaY = MouseEvent->Y;
+    gMouseX += DeltaX;
+    gMouseY += DeltaY;
 
     BOOL RightClick = MouseEvent->RightClick;
     BOOL LeftClick  = MouseEvent->LeftClick;
@@ -410,17 +504,26 @@ MouseEventHandler(
     MouseEvent->RightClick = 0;
 
     if(gMouseX < DesktopCurrentX){
+        DeltaX = 0;
         gMouseX = DesktopCurrentX;
     }else if(gMouseX > (DesktopCurrentX + DesktopCurrentWidth)){
+        DeltaX = 0;
         gMouseX = (DesktopCurrentX + DesktopCurrentWidth);
     }
     if(gMouseY < DesktopCurrentY){
+        DeltaY = 0;
         gMouseY = DesktopCurrentY;
     }else if(gMouseY > (DesktopCurrentY + DesktopCurrentHeight)){
+        DeltaY = 0;
         gMouseY = (DesktopCurrentY + DesktopCurrentHeight);
     }
     //LouPrint("X:%d, Y:%d\n", gMouseX, gMouseY);
     UpdateMouseClip(gMouseX, gMouseY);
+
+    PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
+    if(GrabbedWindow){
+        AwmMoveWindow(GrabbedWindow, DeltaX, DeltaY);
+    }
 
     if(RightClick && !RightMouseDown){
         InterfaceDualClick = false;
@@ -455,26 +558,28 @@ MouseEventHandler(
         }
         if(WinHandle){
             if(WinHandle->WindowName){
-                if(LeftMouseDown){
-                    PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
-                    uint16_t XRelative = (gMouseX - TmpClip->X);
-                    uint16_t YRelative = (gMouseY - TmpClip->Y);
-                    MutexLock(&WinHandle->CallbackMutex);
-                    for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
-                        if(i){
-                            WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-                        }else{
-                            WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-                        }
+                PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
+                uint16_t XRelative = (gMouseX - TmpClip->X);
+                uint16_t YRelative = (gMouseY - TmpClip->Y);
+                MutexLock(&WinHandle->CallbackMutex);
+                for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+                    if(i){
+                        WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                    }else{
+                        WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
                     }
-                    MutexUnlock(&WinHandle->CallbackMutex);
                 }
-                else return;
-                LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
+                MutexUnlock(&WinHandle->CallbackMutex);
             }
+            else return;
+            LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
         }
         
     }else if(!LeftClick && LeftMouseDown){
+        PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
+        if(GrabbedWindow){
+            AwmSignalEndofGrabEvent();    
+        }
         LeftMouseDown = false;
         PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
         if(LastInstance == WinHandle){

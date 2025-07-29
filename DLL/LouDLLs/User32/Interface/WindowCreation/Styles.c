@@ -109,7 +109,7 @@ static void AwmDrawBorder(
 
 }
 
-static void AwmFillRectangle(
+static void AwmFillRectangleRelative(
     PDRSD_CLIP  WindowClip,
     UINT32      RightBevel,
     UINT32      LeftBevel,
@@ -134,6 +134,25 @@ static void AwmFillRectangle(
     }
 }
 
+static void AwmFillRectangleDimentional(
+    PDRSD_CLIP  WindowClip,
+    UINT32 OriginX,
+    UINT32 OriginY,
+    UINT32 Width,
+    UINT32 Height,
+    UINT8 R,
+    UINT8 G,
+    UINT8 B,
+    UINT8 A
+){
+    UINT32 Color = DRSD_CORE_TRANSLATE_COLOR(R, G, B, A);
+    for(UINT32 Y = OriginY; Y < Height; Y++){
+        for(UINT32 X = OriginX; X < Width; X++){
+            LouDrsdPutPixel32(WindowClip, X, Y, Color);
+        }
+    }
+}
+
 void AwmDrawOverlappedWindow(
     PWINDOW_HANDLE WindowHandle
 ){
@@ -146,7 +165,8 @@ void AwmDrawOverlappedWindow(
         }else{
             AwmDrawBorder(WindowHandle->MainWindow[i], 9, 8, 32, 8, 0, 0 , 0, 255);
         }
-        AwmFillRectangle(WindowHandle->MainWindow[i], 10, 9, 33, 9, 255, 255 , 255, 255);
+        AwmFillRectangleRelative(WindowHandle->MainWindow[i], 10, 9, 33, 9, 255, 255 , 255, 255);
+        AwmFillRectangleDimentional(WindowHandle->MainWindow[i], 2, 2,  (WindowHandle->MainWindow[i]->Width - 2), 14, 0, 0 , 255, 255);
     }
 }
 

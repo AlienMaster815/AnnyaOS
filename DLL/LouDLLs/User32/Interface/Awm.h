@@ -219,6 +219,9 @@ typedef struct _ANNYA_CANVAS_BUTTON_PARAM{
 #define WS_EX_TRANSPARENT 0x00000020L //The window should not be painted until siblings beneath the window (that were created by the same thread) have been painted. The window appears transparent because the bits of underlying sibling windows have already been painted. To achieve transparency without these restrictions, use the SetWindowRgn function.
 #define WS_EX_WINDOWEDGE 0x00000100L
 
+#define AWM_BASE                0xFFFF0000
+#define AWM_POSITION_WINDOW     (AWM_BASE + 0)
+
 
 USER32_API
 LOUSTATUS 
@@ -247,5 +250,9 @@ void AwmInitializeWindowStyle(
     DWORD           ExStyle, 
     DWORD           Style
 );
+
+void AwmSignalEndofGrabEvent();
+PWINDOW_HANDLE AwmCheckIfWindowIsGrabbed();
+void AwmMoveWindow(PWINDOW_HANDLE Window, INT64 DeltaX, INT64 DeltaY);
 
 #endif

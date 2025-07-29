@@ -3,35 +3,38 @@
 
 #include "AnnyaExp.h"
 
+#define ANNYAEXP_API __declspec(dllexport)
+
+
 static SYSTEM_STATE_STACK StateStack = {0};
 
-LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
+ANNYAEXP_API LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
 
 //typedef LRESULT (*ANNYA_WINDOW_CALLBACK)(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
 
 static ANNYA_DESKTOP_SETUP_PACKET InterfaceSetup = {0};
 
-
-__declspec(dllexport)
-DWORD AnnyaExplorerFileManager(PVOID Args){
+ANNYAEXP_API
+DWORD 
+AnnyaExplorerFileManager(PVOID Args){
     PANNYA_EXPLORER_INIT_PACKET InitPacket = (PANNYA_EXPLORER_INIT_PACKET)Args;
     
-    //HWND TestWindow = CreateWindowA(
-    //    ANNYA_GENERIC_WINDOW,
-    //    "TestWindow",
-    //    WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-    //    30,
-    //    30,
-    //    500,
-    //    500,
-    //    0x00,
-    //    0x00,
-    //    InitPacket->Instance,
-    //    0x00
-    //);
+    HWND ExplorerFmWindow = CreateWindowA(
+        ANNYA_GENERIC_WINDOW,
+        "File Explorer",
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+        10,
+        10,
+        400,
+        400,
+        0x00,
+        0x00,
+        InitPacket->Instance,
+        0x00
+    );
 
-    //ShowWindow(TestWindow, SW_SHOW);
-    //UpdateWindow(TestWindow); 
+    ShowWindow(ExplorerFmWindow, SW_SHOW);
+    UpdateWindow(ExplorerFmWindow); 
 
     HANDLE Message = 0x00;
     while(LouUserGetMessage(&Message, ANY_EVENT_TYPE, ANY_PRIORITY)){
@@ -42,7 +45,9 @@ DWORD AnnyaExplorerFileManager(PVOID Args){
     return 0;
 }
 
-int WinMain(
+ANNYAEXP_API
+int 
+WinMain(
     HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
     LPSTR     CommandLine,
@@ -66,8 +71,9 @@ int WinMain(
 
 }
 
-
-LRESULT WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
+ANNYAEXP_API
+LRESULT 
+WndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
 
     
 

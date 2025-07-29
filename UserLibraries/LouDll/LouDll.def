@@ -40,3 +40,4 @@ EXPORTS
     LouDrsdDrawLine32
     LouDrsdPutPixel32
     LouYeildExecution
+    LouUpdateClipLocation

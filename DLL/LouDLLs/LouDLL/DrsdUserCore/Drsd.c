@@ -106,3 +106,10 @@ void LouUpdateShadowClipSubState(
         LouCALL(LOUDRSDUPDATESHADOWCLIPSUBSTATE, (uint64_t)&KulaPacket[0], 0);
     }
 }
+
+LOUDLL_API
+void 
+LouUpdateClipLocation(PDRSD_CLIP Clip, UINT32 X, UINT32 Y){
+    Clip->X = X;
+    Clip->Y = Y;
+}

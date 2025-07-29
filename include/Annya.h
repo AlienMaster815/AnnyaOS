@@ -271,6 +271,10 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 #ifndef _LOUDLL_
 
 __declspec(dllimport)
+void 
+LouUpdateClipLocation(struct _DRSD_CLIP* Clip, UINT32 DeltaX, UINT32 DeltaY);
+
+__declspec(dllimport)
 int strcmp(const char* str1, const char* str2);
 
 __declspec(dllimport)
