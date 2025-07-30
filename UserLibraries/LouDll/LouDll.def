@@ -41,3 +41,4 @@ EXPORTS
     LouDrsdPutPixel32
     LouYeildExecution
     LouUpdateClipLocation
+    LouDrsdClipToClip

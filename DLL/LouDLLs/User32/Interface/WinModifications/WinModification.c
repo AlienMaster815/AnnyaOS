@@ -76,9 +76,12 @@ static void AwmCheckMovableWindowLbuttonDownEvent(WNDPROC LastFunc, HWND WindowH
     UINT16 X = (uintptr_t)lParam & 0xFFFF;
     UINT16 Y = ((uintptr_t)lParam >> 16) & 0xFFFF;
 
-    if(Y < 17){
-        GrabbedWindow = WindowHandle;
-        WindowGrabbed = true;
+    for(size_t i = 0 ; i < ((PWINDOW_HANDLE)WindowHandle)->PlaneCount; i++){
+        if((Y < 25) && (X < (((PWINDOW_HANDLE)WindowHandle)->MainWindow[i]->Width - (6 + 18)))){
+            GrabbedWindow = WindowHandle;
+            WindowGrabbed = true;
+            return;
+        }
     }
 
 }

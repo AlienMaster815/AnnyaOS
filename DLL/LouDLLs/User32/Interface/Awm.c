@@ -61,6 +61,9 @@ static int64_t DesktopCurrentY = 0;
 int64_t DesktopCurrentWidth = 0;
 int64_t DesktopCurrentHeight = 0;
 
+static HANDLE XButtonPng = 0x00;
+PDRSD_CLIP* XButtonClips = 0x00;
+
 static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 SIZE AwmGetPlaneCount(){
@@ -186,8 +189,6 @@ void MoveWindowTheFront(PWINDOW_HANDLE WindowHandle){
 void UpdateWindowToDesktop(PWINDOW_HANDLE WindowHandle){
     MoveWindowTheFront(WindowHandle);
     MoveWindowTheFront(TaskbarWindow);
-    MoveWindowTheFront(StartButton);
-    MoveWindowTheFront(FileExplorerButon);
     
 }
 
@@ -396,7 +397,7 @@ static void InitializeDependencies(){
     FolderPng = AnnyaOpenPngA("C:/ANNYA/FOLDER.PNG");
     StartButtonPng = AnnyaOpenPngA("C:/ANNYA/START.PNG");
     BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
-
+    XButtonPng = AnnyaOpenPngA("C:/ANNYA/XBUTTON.PNG");
     LouPrint("Initiailizing FreeType\n");
 
     FT_Error err = FT_Init_FreeType(&FtInitLib);
@@ -617,7 +618,8 @@ InitializeAwmUserSubsystem(
     InitializeDependencies();
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);
-
+    
+    XButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
 
     LouPrint("Allocation Finished\n");
@@ -643,7 +645,7 @@ InitializeAwmUserSubsystem(
     UpdateWindow(BackgroundWindow);
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
-
+        XButtonClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, XButtonPng); 
         MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
         LouUpdateShadowClipState((void*)MouseClips[i]);
         LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);

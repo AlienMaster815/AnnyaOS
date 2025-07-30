@@ -15,7 +15,10 @@ void LouDrsdPutPixel32(
     UINT32 Color
 );
 
-static void AwmDraw3dBorder(
+extern PDRSD_CLIP* XButtonClips; 
+//0,0, SCREEN_WIDTH, SCREEN_HEIGHT,
+
+static void AwmDraw3dBorderRelative(
     PDRSD_CLIP  WindowClip,
     UINT32      RightBevel,
     UINT32      LeftBevel,
@@ -60,7 +63,7 @@ static void AwmDraw3dBorder(
 
 }
 
-static void AwmDrawBorder(
+static void AwmDrawBorderRelative(
     PDRSD_CLIP  WindowClip,
     UINT32      RightBevel,
     UINT32      LeftBevel,
@@ -146,8 +149,8 @@ static void AwmFillRectangleDimentional(
     UINT8 A
 ){
     UINT32 Color = DRSD_CORE_TRANSLATE_COLOR(R, G, B, A);
-    for(UINT32 Y = OriginY; Y < Height; Y++){
-        for(UINT32 X = OriginX; X < Width; X++){
+    for(UINT32 Y = OriginY; Y < (OriginY + Height); Y++){
+        for(UINT32 X = OriginX; X < (OriginX + Width); X++){
             LouDrsdPutPixel32(WindowClip, X, Y, Color);
         }
     }
@@ -159,14 +162,16 @@ void AwmDrawOverlappedWindow(
     size_t PlaneCount = WindowHandle->PlaneCount;
     for(size_t i = 0 ; i < PlaneCount; i++){
         //Draw 3d border
-        AwmDraw3dBorder(WindowHandle->MainWindow[i], 0, 0, 0, 0, false);
+        AwmDraw3dBorderRelative(WindowHandle->MainWindow[i], 0, 0, 0, 0, false);
         if(WindowHandle->ExtendedWindowStyle & WS_EX_CLIENTEDGE){
-            AwmDraw3dBorder(WindowHandle->MainWindow[i], 9, 8, 32, 8, true);
+            AwmDraw3dBorderRelative(WindowHandle->MainWindow[i], 11, 10, 47, 10, true);
         }else{
-            AwmDrawBorder(WindowHandle->MainWindow[i], 9, 8, 32, 8, 0, 0 , 0, 255);
+            AwmDrawBorderRelative(WindowHandle->MainWindow[i], 11, 10, 47, 10, 0, 0 , 0, 255);
         }
-        AwmFillRectangleRelative(WindowHandle->MainWindow[i], 10, 9, 33, 9, 255, 255 , 255, 255);
-        AwmFillRectangleDimentional(WindowHandle->MainWindow[i], 2, 2,  (WindowHandle->MainWindow[i]->Width - 2), 14, 0, 0 , 255, 255);
+        AwmFillRectangleRelative(WindowHandle->MainWindow[i], 12, 11, 48, 11, 255, 255 , 255, 255);
+        AwmFillRectangleDimentional(WindowHandle->MainWindow[i], 3, 3,  (WindowHandle->MainWindow[i]->Width - 5), 23, 0, 0 , 255, 255);
+        //AwmFillRectangleDimentional(WindowHandle->MainWindow[i], (WindowHandle->MainWindow[i]->Width - (6 + 18)), 6,  18, 18, 192, 192 , 192, 255);
+        LouDrsdClipToClip(WindowHandle->MainWindow[i], XButtonClips[i], (WindowHandle->MainWindow[i]->Width - (6 + 18)), 6);
     }
 }
 

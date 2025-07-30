@@ -1,6 +1,8 @@
 #include "../LouDll.h"
 
 #define LOUDLL_API __declspec(dllexport)
+LOUDLL_API
+int LouPrint(char* Str, ...);
 
 int abs(int x) {
     return (x < 0) ? -x : x;
@@ -95,4 +97,23 @@ void LouDrsdFillRectangle(
     UINT8 R, UINT8 G, UINT8 B, UINT8 A
 ){
 
+}
+
+LOUDLL_API
+void 
+LouDrsdClipToClip(
+    PDRSD_CLIP BackClip,
+    PDRSD_CLIP FrontClip,
+    UINT32 X,
+    UINT32 Y
+){
+    if((BackClip->Width < (X + FrontClip->Width)) || (BackClip->Height < (Y + FrontClip->Height))){
+        LouPrint("LouDrsdClipToClip() Bad Data\n");
+        return;
+    }
+    for(size_t y = 0; y < FrontClip->Height; y++){
+        for(size_t x = 0; x < FrontClip->Width; x++){
+            BackClip->WindowBuffer[(X + x) + ((Y + y) * BackClip->Width)] = FrontClip->WindowBuffer[x + (y * FrontClip->Width)];
+        }
+    }
 }
