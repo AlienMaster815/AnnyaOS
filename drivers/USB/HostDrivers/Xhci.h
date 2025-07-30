@@ -265,15 +265,120 @@
 #define XHCI_COMPLETION_STOPPED                             26
 #define XHCI_COMPLETION_STOPPED_LENGTH_INVALID              27
 #define XHCI_COMPLETION_STOPPED_SHORT_PACKET                28
-#define XHCI_COMPLETION_MAX_EXITT_LATENCY_TOO_LARGE_ERROR   29
-#define XHCI_COMPLETION_ISOCJ_BUFFER_OVERRUN                31
+#define XHCI_COMPLETION_MAX_EXIT_LATENCY_TOO_LARGE_ERROR   29
+#define XHCI_COMPLETION_ISOCH_BUFFER_OVERRUN                31
 #define XHCI_COMPLETION_EVENT_LOST_ERROR                    32
 #define XHCI_COMPLETION_UNDEFINED_ERROR                     33
 #define XHCI_COMPLETION_INVALID_STREAM_ID_ERROR             34
 #define XHCI_COMPLETION_SECONDARY_BANDWIDTH_ERROR           35
 #define XHCI_COMPLETION_SPLIT_TRANSACTION_ERROR             36
 
+#define XHCI_COMPLETION_PARAMETER(Port)     ((Port) & 0xFFFFFF)
 
+#define XHCI_TRB_BSR        (1 << 9)
+#define XHCI_TRB_DC         (1 << 9)
+#define XHCI_TRB_TSP        (1 << 9)
+
+#define XHCI_TRB_TO_VF_INTR_TARGET(Port)        (((Port) & (0x03FF << 22)) >> 22)
+#define XHCI_TRB_TO_VF_ID(Port)                 (((Port) & (0xFF << 16)) >> 16)
+#define XHCI_TRB_TO_BELT(Port)                  (((Port) & (0x0FFF << 16)) >> 16)
+#define XHCI_TRB_TO_DEVICE_SPEED(Port)          (((Port) & (0x0F << 16)) >> 16)
+#define XHCI_TRB_TO_PACKET_TYPE(Port)           ((Port) & 0x1F)
+#define XHCI_TRB_TO_ROOTHUB_PORT(Port)          (((Port) & (0xFF << 24)) >> 24)
+
+#define XHCI_DEV_SPEED_FOR_TRB(Port)            ((Port) << 16)
+
+#define XHCI_SUSPEND_PORT_TO_TRB(Port)          (((Port) & 0x01) << 23)
+#define XHCI_TRB_TO_SUSPEND_PORT(Port)          (((Port) & (1 << 23)) >> 23)
+
+#define XHCI_LAST_EP_INDEX                      30
+
+#define XHCI_TRB_TO_STREAM_ID(Port)             ((((Port) & (0xFFFF << 16)) >> 16))
+#define XHCI_STREAM_ID_TO_TRB(Port)             ((((Port)) & 0xFFFF) << 16)
+#define XHCI_ST_FOR_TRB(Port)                   (((Port) & 0x07) << 1)
+
+#define XHCI_TRB_TC                             (1 << 1)
+#define XHCI_GET_PORT_ID(Port)                  (((Port) & (0xFF << 24)) >> 24)
+#define XHCI_EVENT_DATA                         (1 << 2)
+
+#define XHCI_TRB_LENGTH(Port)                   ((Port) & 0x1FFFF)
+#define XHCI_TRB_TD_SIZE(Port)                  (min((Port), (UINT32)31) << 17)
+#define XHCI_GET_TD_SIZE(Port)                  (((Port) & 0x3E0000) >> 17)
+#define XHCI_TRB_TD_SIZE_TBC(Port)              (min((Port), (UINT32)31) << 17)
+#define XHCI_TRB_INTR_TARGET(Port)              (((Port) & 0x03FF) << 22)
+#define XHCI_GET_INTR_TARGET(Port)              (((Port) >> 22) & 0x03FF)
+
+#define XHCI_TRB_CYCLE          (1 << 0)
+#define XHCI_TRB_ENT            (1 << 1)
+#define XHCI_TRB_ISP            (1 << 2)
+#define XHCI_TRB_NO_SNOOP       (1 << 3)
+#define XHCI_TRB_CHAIN          (1 << 4)
+#define XHCI_TRB_IOC            (1 << 5)
+#define XHCI_TRB_IDT            (1 << 6)
+#define XHCI_TRB_IDT_MAX_SIZE   8
+#define XHCI_TRB_BEI            (1 << 9)
+#define XHCI_TRB_DIR_IN         (1 << 16)
+#define XHCI_TRB_TX_TYPE(Port)  ((Port) << 16)
+#define XHCI_TRB_DATA_OUT       2
+#define XHCI_TRB_DATA_IN        3
+
+#define XHCI_TRB_SIA            (1 << 31)
+#define XHCI_TRB_FRAME_ID(Port) (((Port) & 0x07FF) << 20)
+#define XHCI_GET_FRAME_ID(Port) (((Port) >> 20) & 0x07FF)
+
+#define XHCI_TRB_TBC(Port)      (((Port) & 0x03) << 7)
+#define XHCI_GET_TBC(Port)      (((Port) >> 7) & 0x03)
+#define XHCI_TRB_TLBPC(Port)    (((Port) & 0x0F) << 16)
+#define XHCI_GET_TLBPC(Port)    (((Port) >> 16) & 0x0F)
+
+#define XHCI_TRB_CACHE_SIZE_HS      8
+#define XHCI_TRB_CACHE_SIZE_SS      16
+
+#define XHCI_TRB_TYPE_MASK          (0xFC00)
+#define XHCI_TRB_TYPE(Port)         ((Port) << 10)
+#define XHCI_TRB_FIELD_TO_TYPE      (((Port) & XHCI_TRB_TYPE_MASK) >> 10)
+
+#define XHCI_TRB_NORMAL                     1
+#define XHCI_TRB_SETUP                      2
+#define XHCI_TRB_DATA                       3
+#define XHCI_TRB_STATUS                     4
+#define XHCI_TRB_ISOC                       5
+#define XHCI_TRB_LINK                       6
+#define XHCI_TRB_EVENT_DATA                 7
+#define XHCI_TRB_TR_NOOP                    8
+#define XHCI_TRB_ENABLE_SLOT                9
+#define XHCI_TRB_DISABLE_SLOT               10
+#define XHCI_TRB_ADDR_DEV                   11
+#define XHCI_TRB_CONFIG_EP                  12
+#define XHCI_TRB_EVAL_CONTEXT               13
+#define XHCI_TRB_RESET_EP                   14
+#define XHCI_TRB_STOP_RING                  15
+#define XHCI_TRB_SET_DEQ                    16
+#define XHCI_TRB_RESET_DEV                  17
+#define XHCI_TRB_FORCE_EVENT                18
+#define XHCI_TRB_NEG_BANDWIDTH              19
+#define XHCI_TRB_SET_LT                     20
+#define XHCI_TRB_GET_BW                     21
+#define XHCI_TRB_FORCE_HEADER               22
+#define XHCI_TRB_COMMAND_NOOP               23
+#define XHCI_TRB_TRANSFER                   32
+#define XHCI_TRB_COMPLETION                 33
+#define XHCI_TRB_PORT_STATUS                34
+#define XHCI_TRB_BANDWIDTH_EVENT            35
+#define XHCI_TRB_DOORBELL                   36
+#define XHCI_TRB_HC_EVENT                   37
+#define XHCI_TRB_DEV_NOTE                   38
+#define XHCI_TRB_MF_INDEX_WRAP              39
+#define XHCI_TRB_VENDOR_DEFINED_LOW         48
+#define XHCI_TRB_NEC_COMMAND_COMPLETION     48
+#define XHCI_TRB_NEC_GET_FW_REVISION        49
+
+#define XHCI_TRB_TYPE_LINK(Port)            (((Port) & XHCI_TRB_TYPE_MASK) == XHCI_TRB_TYPE(XHCI_TRB_LINK))
+
+#define XHCI_NEC_FW_MINOR(Port)             ((Port) & 0xFF)
+#define XHCI_NEC_FW_MAJOR(Port)             (((Port) >> 8) & 0xFF)
+
+//1260
 
 typedef struct _XHCI_CAPABILITIES_REGISTER{
     UINT32      HcCapBase;
@@ -362,7 +467,7 @@ typedef struct _XHCI_COMMAND{
     UINT32                      CompParam;
     INTEGER                     SlotID;
     bool                        CommandCompleted;
-    union XHCI_TRB*             CommandTrb;
+    union _XHCI_TRB*            CommandTrb;
     ListHeader                  CommandList;
     UINT32                      MsTimeout;
 }XHCI_COMMAND, * PXHCI_COMMAND;
@@ -402,7 +507,7 @@ typedef struct _XHCI_VIRTUAL_EP{
     ListHeader                          CancelledList;
     struct _XHCI_HCD*                   Xhci;
     struct _XHCI_SEGMENT*               QueuedDeqSegment;
-    union XHCI_TRB*                     QueuedDeqPtr;
+    union _XHCI_TRB*                    QueuedDeqPtr;
     BOOL                                Skip;
     XHCI_BW_INFORMATION                 BwInformation;
     ListHeader                          BandwithEpList;
@@ -518,9 +623,198 @@ static inline string XhciTrbCompletionCodeString(UINT8  Status){
         case XHCI_COMPLETION_RING_OVERRUN:{
             return "Ring Overrun Error";
         }
-        //905   
+        case XHCI_COMPLETION_VF_EVENT_RING_FULL_ERROR:{
+            return "VF Event Ring Full Error";
+        }   
+        case XHCI_COMPLETION_PARAMETER_ERROR:{
+            return "Parameter Error";
+        }
+        case XHCI_COMPLETION_BANDWIDTH_OVERRUN_ERROR:{
+            return "Bandwidth Overrun Error";
+        }
+        case XHCI_COMPLETION_CONTEXT_STATE_ERROR:{
+            return "Context State Error";
+        }
+        case XHCI_COMPLETION_NO_PING_RESPONCE_ERROR:{
+            return "No Ping Responce Error";
+        }
+        case XHCI_COMPLETION_EVENT_RING_FULL_ERROR:{
+            return "Event Ring Full Error";
+        }
+        case XHCI_COMPLETION_INCOMPATIBLE_DEVICE_ERROR:{
+            return "Incompatible Device Error";
+        }
+        case XHCI_COMPLETION_MISSED_SERVICE_ERROR:{
+            return "Missed Service Error";
+        }
+        case XHCI_COMPLETION_COMMAND_RING_STOPED:{
+            return "Command Ring Stoped Error";
+        }
+        case XHCI_COMPLETION_COMMAND_ABORTED:{
+            return "Command Aborted Error";
+        }
+        case XHCI_COMPLETION_STOPPED:{
+            return "Stopped Error";
+        }
+        case XHCI_COMPLETION_STOPPED_LENGTH_INVALID:{
+            return "Stopped Error Invalid Length";
+        }
+        case XHCI_COMPLETION_STOPPED_SHORT_PACKET:{
+            return "Stopped Error Short Packet";
+        }
+        case XHCI_COMPLETION_MAX_EXIT_LATENCY_TOO_LARGE_ERROR:{
+            return "Max Exit Latency Too Large";
+        }
+        case XHCI_COMPLETION_ISOCH_BUFFER_OVERRUN:{
+            return "Isoch Buffer Overrun";
+        }
+        case XHCI_COMPLETION_EVENT_LOST_ERROR:{
+            return "Max Exit Latency Too Large Error";
+        }
+        case XHCI_COMPLETION_UNDEFINED_ERROR:{
+            return "Undefined Error";
+        }
+        case XHCI_COMPLETION_INVALID_STREAM_ID_ERROR:{
+            return "Invalid Stream ID Error";
+        }
+        case XHCI_COMPLETION_SECONDARY_BANDWIDTH_ERROR:{
+            return "Secondary Bandwidth Error";
+        }
+        case XHCI_COMPLETION_SPLIT_TRANSACTION_ERROR:{
+            return "Split Transaction Error";
+        }
     }
     return "Invalid Or Unkown";
 }
+
+typedef struct _XHCI_LINK_TRB{
+    UINT64      SegmentPointer;
+    UINT32      InterTarget;
+    UINT32      Control;
+}XHCI_LINK_TRB, * PXHCI_LINK_TRB;
+
+#define XHCI_LINK_TOGGLE    (1 << 1)
+
+typedef struct _XHCI_EVENT_COMMAND{
+    UINT64      CommandTRB;
+    UINT32      Status;
+    UINT32      Flags;
+}XHCI_EVENT_COMMAND, * PXHCI_EVENT_COMMAND;
+
+typedef enum{
+    EP_HARD_RESET = 0,
+    EP_SOFT_RESET = 1,
+}XHCI_EP_RESET_TYPE;
+
+typedef enum{
+    SETUP_CONTEXT_ONLY = 0,
+    SETUP_CONTEXT_ADDRESS = 1,
+}XHCI_SETUP_DEVICE;
+
+typedef struct _XHCI_GENERIC_TRB{
+    UINT32  Field[4];
+}XHCI_GENERIC_TRB, * PXHCI_GENERIC_TRB;
+
+typedef union _XHCI_TRB{
+    XHCI_LINK_TRB           Link;
+    XHCI_TRANSFER_EVENT     TransferEvent;
+    XHCI_EVENT_COMMAND      EventCommand;
+    XHCI_GENERIC_TRB        Generic;
+}XHCI_TRB, * PXHCI_TRB;
+
+static inline string XhciTrbTypeString(UINT8 Type){
+    switch(Type){
+        case XHCI_TRB_NORMAL:{
+            return "Normal";
+        }
+        case XHCI_TRB_SETUP:{
+            return "Setup Stage";
+        }
+        case XHCI_TRB_DATA:{
+            return "Data Stage";
+        }
+        case XHCI_TRB_STATUS:{
+            return "Status Stage";
+        }
+        case XHCI_TRB_ISOC:{
+            return "Isoch";
+        }
+        case XHCI_TRB_LINK:{
+            return "Link";
+        }
+        case XHCI_TRB_EVENT_DATA:{
+            return "Event Data";
+        }
+        case XHCI_TRB_TR_NOOP:{
+            return "No-Op";
+        } 
+        case XHCI_TRB_ENABLE_SLOT:{
+            return "Enable Slot Command";
+        }
+        case XHCI_TRB_DISABLE_SLOT:{
+            return "Disable Slot Command";
+        }
+        case XHCI_TRB_ADDR_DEV:{
+            return "Address Device Command";
+        }
+        case XHCI_TRB_CONFIG_EP:{
+            return "Configure Endpoint Command";
+        }
+        case XHCI_TRB_EVAL_CONTEXT:{
+            return "Evaluate Context Command";
+        }
+        case XHCI_TRB_RESET_EP:{
+            return "Endpoint Reset Command";
+        }
+        case XHCI_TRB_FORCE_EVENT:{
+            return "Force Event Command";
+        }
+        case XHCI_TRB_NEG_BANDWIDTH:{
+            return "Negotiate Bandwidth Command";
+        }
+        case XHCI_TRB_SET_LT:{
+            return "Set Latency Tolerance Value Command";
+        }
+        case XHCI_TRB_GET_BW:{
+            return "Get Port Bandwidth Command";
+        }
+        case XHCI_TRB_FORCE_HEADER:{
+            return "Force Header Command";
+        }
+        case XHCI_TRB_COMMAND_NOOP:{
+            return "No-Op Command";
+        }
+        case XHCI_TRB_TRANSFER:{
+            return "Transfer Event";
+        }
+        case XHCI_TRB_COMPLETION:{
+            return "Command Completion Event";
+        }
+        case XHCI_TRB_PORT_STATUS:{
+            return "Port Status Change Event";
+        }
+        case XHCI_TRB_DOORBELL:{
+            return "Doorbell Event";
+        }
+        case XHCI_TRB_HC_EVENT:{
+            return "Host Controller Event";
+        }
+        case XHCI_TRB_DEV_NOTE:{
+            return "Device Notification Event";
+        }
+        case XHCI_TRB_MF_INDEX_WRAP:{
+            return "MFINDEX Wrap Event";
+        }
+        case XHCI_TRB_NEC_COMMAND_COMPLETION:{
+            return "NEX Command Completion Event";
+        }
+        case XHCI_TRB_NEC_GET_FW_REVISION:{
+            return "NEC Get Firmware Revision Command";
+        }
+    }
+    return "Unkown Event";
+}
+
+
 
 #endif
