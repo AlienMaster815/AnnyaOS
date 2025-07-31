@@ -20,7 +20,7 @@ typedef struct _XARRAY{
     .XaHead = 0x00,                                 \
 }
 
-typedef XARRAY RADIX_TREE_ROOT;
+typedef XARRAY RADIX_TREE_ROOT, * PRADIX_TREE_ROOT;
 
 
 #ifdef __cplusplus

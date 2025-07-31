@@ -20,7 +20,6 @@ static int64_t MouseX = 0;
 static int64_t MouseY = 0;
 static bool LeftMouseDown = false;
 static bool RightMouseDown = false;
-static FT_Library FtInitLib = 0x00;
 
 static PDRSD_CLIP* TaskBars = 0;
 static HANDLE StartButtonPng = 0x00;
@@ -38,7 +37,6 @@ static PWINDOW_HANDLE LastInstance = 0x00;
 HANDLE BackgroundImage = 0x00;
 HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
 HANDLE (*AnnyaCreateClipFromPng)(void*, HANDLE);
-static FT_Error (*FT_Init_FreeType)(FT_Library* Lib);
 
 //192 dark greay
 //198 ligt grey
@@ -66,6 +64,8 @@ PDRSD_CLIP* XButtonClips = 0x00;
 
 static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
+void InitializeFreeType();
+
 SIZE AwmGetPlaneCount(){
     return PlaneTracker.PlaneCount;
 }
@@ -82,8 +82,8 @@ PAWM_CLIP_TREE FindEnclosingClip(PAWM_CLIP_TREE Tree, PDRSD_CLIP InnerClip) {
         if (
             (Clip->X <= InnerClip->X) &&
             (Clip->Y <= InnerClip->Y) &&
-            ((Clip->X + Clip->Width) >= (InnerClip->X + InnerClip->Width)) &&
-            ((Clip->Y + Clip->Height) >= (InnerClip->Y + InnerClip->Height))
+            ((Clip->X + Clip->Width) > (InnerClip->X + InnerClip->Width)) &&
+            ((Clip->Y + Clip->Height) > (InnerClip->Y + InnerClip->Height))
         ) {
             PAWM_CLIP_TREE ChildMatch = NULL;
             if (Tree->SubPlane.NextHeader) {
@@ -104,8 +104,8 @@ PAWM_CLIP_TREE FindClipAtPoint(PAWM_CLIP_TREE Tree, INT64 X, INT64 Y){
         if (
             (Clip->X <= X) &&
             (Clip->Y <= Y) &&
-            ((Clip->X + Clip->Width) >= (X)) &&
-            ((Clip->Y + Clip->Height) >= (Y))
+            ((Clip->X + Clip->Width) > (X)) &&
+            ((Clip->Y + Clip->Height) > (Y))
         ) {
             PAWM_CLIP_TREE ChildMatch = NULL;
             if (Tree->SubPlane.NextHeader) {
@@ -155,8 +155,7 @@ PWINDOW_HANDLE AwmFindWindowAtPoint(INT64 X, INT64 Y){
     return 0x00;
 }
 
-void MoveWindowTheFront(PWINDOW_HANDLE WindowHandle){
-    MutexLock(&AwmMasterTrackerMutex);
+void MoveWindowTheFrontRec(PWINDOW_HANDLE WindowHandle){
     for(size_t i = 0 ; i < WindowHandle->PlaneCount; i++){
         PAWM_CLIP_TREE Tree = &WindowHandle->ClipTreeHandle[i];
         if(!Tree->CurrentPlane.NextHeader){
@@ -167,23 +166,62 @@ void MoveWindowTheFront(PWINDOW_HANDLE WindowHandle){
         PAWM_CLIP_TREE UpDirectory = 0x00;
         if(Last){
             Last->CurrentPlane.NextHeader = (PListHeader)Next;
-        }
-        if(Tree->SubPlane.LastHeader){
+        }else{
             UpDirectory = (PAWM_CLIP_TREE)Tree->SubPlane.LastHeader;
             Tree->SubPlane.LastHeader = 0x00;
             UpDirectory->SubPlane.NextHeader = (PListHeader)Next;
             Next->SubPlane.LastHeader = (PListHeader)UpDirectory;
-
+            Next->SubPlane.NextHeader = Tree->SubPlane.NextHeader;
+            Tree->SubPlane.NextHeader = 0x00;   
         }
         Next->CurrentPlane.LastHeader = (PListHeader)Last;
-        while(Next->CurrentPlane.NextHeader){
-            Next = (PAWM_CLIP_TREE)Next->CurrentPlane.NextHeader;
+
+        PAWM_CLIP_TREE Enclosing = FindEnclosingClip(
+            &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i],
+            WindowHandle->MainWindow[i]
+        );
+        Tree->SubPlane.NextHeader = NULL;
+        Tree->CurrentPlane.NextHeader = NULL;
+
+        if (!Enclosing) {
+            PAWM_CLIP_TREE Root = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
+            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Root;
+            PAWM_CLIP_TREE LastClip = 0x00;
+
+            while (Chain->CurrentPlane.NextHeader) {
+                LastClip = Chain;
+                Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
+            }
+
+            Chain->CurrentPlane.NextHeader = (PListHeader)Tree;
+            Tree->CurrentPlane.LastHeader = (PListHeader)Chain;
+        } else {
+            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Enclosing->SubPlane.NextHeader;
+            if(!Chain){
+                Enclosing->SubPlane.NextHeader = (PListHeader)Tree;
+                Tree->SubPlane.LastHeader = (PListHeader)Enclosing;
+            }else{
+                PAWM_CLIP_TREE LastClip = 0x00;
+                while (Chain->CurrentPlane.NextHeader) {
+                    LastClip = Chain;
+                    Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
+                }
+                Chain->CurrentPlane.NextHeader = (PListHeader)Tree;
+                Tree->CurrentPlane.LastHeader = (PListHeader)Chain;
+            }
+
         }
-        Next->CurrentPlane.NextHeader = (PListHeader)Tree;
-        Tree->CurrentPlane.LastHeader = (PListHeader)Next;
-        Tree->CurrentPlane.NextHeader = 0x00;
+
     }
-    MutexUnlock(&AwmMasterTrackerMutex);
+}
+
+void MoveWindowTheFront(PWINDOW_HANDLE WindowHandle){
+    MoveWindowTheFrontRec(WindowHandle);
+    PCHILD_WINDOW_TRACKER Children = &WindowHandle->Children;
+    while(Children->Peers.NextHeader){
+        MoveWindowTheFrontRec(Children->Child);
+        Children = (PCHILD_WINDOW_TRACKER)Children->Peers.NextHeader;
+    }
 }
 
 void UpdateWindowToDesktop(PWINDOW_HANDLE WindowHandle){
@@ -193,8 +231,6 @@ void UpdateWindowToDesktop(PWINDOW_HANDLE WindowHandle){
 }
 
 void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
-
-    MutexLock(&AwmMasterTrackerMutex);
 
     PAWM_WINDOW_TRACKER_ENTRY Tmp = &AwmMasterTracker;
     while (Tmp->Peers.NextHeader) {
@@ -221,7 +257,7 @@ void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
 
         if (!Enclosing) {
             PAWM_CLIP_TREE Root = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Root->CurrentPlane.NextHeader;
+            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Root;
             PAWM_CLIP_TREE LastClip = 0x00;
 
             while (Chain->CurrentPlane.NextHeader) {
@@ -251,7 +287,6 @@ void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
         LouPrint("Window Installed To Window Manager:%s\n", WindowHandle->WindowName);
     }
 
-    MutexUnlock(&AwmMasterTrackerMutex);
 }
 
 void RedrawClipTree(PAWM_CLIP_TREE Tree, int64_t X, int64_t Y, int64_t Width, int64_t Height) {
@@ -276,6 +311,8 @@ void RedrawClipTree(PAWM_CLIP_TREE Tree, int64_t X, int64_t Y, int64_t Width, in
 }
 
 void CalculateRedraws(int64_t X, int64_t Y, int64_t Width, int64_t Height){
+    MutexLock(&AwmMasterTrackerMutex);
+    
     /*
     // Clip Tree Example
     // DESKTOP ; CurrentPlane Object
@@ -296,6 +333,7 @@ void CalculateRedraws(int64_t X, int64_t Y, int64_t Width, int64_t Height){
             RedrawClipTree(RootTree, X, Y, Width, Height);
         }
     }
+    MutexUnlock(&AwmMasterTrackerMutex);
 }
 
 
@@ -386,7 +424,7 @@ static void InitializeDependencies(){
         while(1);
     }
 
-    FT_Init_FreeType = AnnyaGetLibraryFunctionN("LIBFREETYPE.DLL", "FT_Init_FreeType");
+    InitializeFreeType();
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");
@@ -399,12 +437,6 @@ static void InitializeDependencies(){
     BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
     XButtonPng = AnnyaOpenPngA("C:/ANNYA/XBUTTON.PNG");
     LouPrint("Initiailizing FreeType\n");
-
-    FT_Error err = FT_Init_FreeType(&FtInitLib);
-    if (err) {
-        LouPrint("FT_Init_FreeType() failed: %u\n", err);
-        while(1);
-    }
 
     AnnyaExplorerFileManager = AnnyaGetLibraryFunctionN("ANNYAEXP.EXE", "AnnyaExplorerFileManager");
     LouPrint("AnnyaExplorerFileManager()%h\n", AnnyaExplorerFileManager);

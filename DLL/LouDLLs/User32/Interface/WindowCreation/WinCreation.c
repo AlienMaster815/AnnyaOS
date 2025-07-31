@@ -155,6 +155,15 @@ bool AwmIsClassFromAnnyaOs(string ClassName){
     return false;
 }
 
+static void LinkParentWindow(PWINDOW_HANDLE Parrent, PWINDOW_HANDLE Child){
+    PCHILD_WINDOW_TRACKER Children = &Parrent->Children;
+    while(Children->Peers.NextHeader){
+        Children = (PCHILD_WINDOW_TRACKER)Children->Peers.NextHeader;
+    }
+    Children->Peers.NextHeader = (PListHeader)LouGlobalUserMallocType(CHILD_WINDOW_TRACKER);
+    Children->Child = Child;
+}
+
 USER32_API
 HWND
 CreateWindowExA(
@@ -214,6 +223,9 @@ CreateWindowExA(
         NewWindow->WindowClass = ClassName;
         NewWindow->Parameter = Parameter;
         NewWindow->ParentWindow = (PWINDOW_HANDLE)ParrentHandle;
+        if(NewWindow->ParentWindow){
+            LinkParentWindow(NewWindow->ParentWindow, NewWindow);
+        }
         NewWindow->Menu = Menu;
         NewWindow->Instance = Instance;
         if(!AwmIsClassFromAnnyaOs(ClassName)){

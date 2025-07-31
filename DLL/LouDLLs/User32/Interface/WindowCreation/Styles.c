@@ -172,6 +172,10 @@ void AwmDrawOverlappedWindow(
         AwmFillRectangleDimentional(WindowHandle->MainWindow[i], 3, 3,  (WindowHandle->MainWindow[i]->Width - 5), 23, 0, 0 , 255, 255);
         //AwmFillRectangleDimentional(WindowHandle->MainWindow[i], (WindowHandle->MainWindow[i]->Width - (6 + 18)), 6,  18, 18, 192, 192 , 192, 255);
         LouDrsdClipToClip(WindowHandle->MainWindow[i], XButtonClips[i], (WindowHandle->MainWindow[i]->Width - (6 + 18)), 6);
+        if(WindowHandle->WindowName){
+            //PDRSD_CLIP WindowTitle = CreateClipFromString(WindowHandle->WindowName, AnnyaGetFont("C:/ANNYA/MJSSR.OTF"), 16, 16 ,WindowHandle->MainWindow[i], 6, 6);
+    
+        }
     }
 }
 

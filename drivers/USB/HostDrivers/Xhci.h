@@ -378,7 +378,28 @@
 #define XHCI_NEC_FW_MINOR(Port)             ((Port) & 0xFF)
 #define XHCI_NEC_FW_MAJOR(Port)             (((Port) >> 8) & 0xFF)
 
-//1260
+#define XHCI_TRBS_PER_SEGMENT               256
+#define XHCI_MAX_RESERVED_COMMAND_TRBS      (XHCI_TRBS_PER_SEGMENT - 3)
+#define XHCI_TRB_SEGMENT_SIZE               (XHCI_TRBS_PER_SEGMENT * 16)
+#define XHCI_TRB_SEGMENT_SHIFT              (ilog2(XHCI_TRB_SEGMENT_SIZE))
+#define XHCI_TRB_MAX_BUFFER_SHIFT           16
+#define XHCI_TRB_MAX_BUFFER_SIZE            (1 << XHCI_TRB_MAX_BUFFER_SHIFT)
+#define XHCI_TRB_BUFFER_LENGTH_TO_BOUNDRY(Address)   (XHCI_TRB_MAX_BUFFER_SIZE - (Address & (XHCI_TRB_MAX_BUFFER_SIZE -1)))
+#define XHCI_MAX_SOFT_RETRY                 3
+
+#define XHCI_AVOID_BEI_INTERVAL_MIN         8
+#define XHCI_AVOID_BEI_INTERVAL_MAX         32
+
+#define XhciForEachRingSegment(Head, Segment) for(Segment = Head; Segment != 0x00; Segment = (Segment->NextSegment != Head ? Segment->NextSegment : 0x00))
+
+#define XHCI_COMMAND_DEFAULT_TIMEOUT        5000
+
+#define XHCI_ERST_DEFAULT_SEGMENTS          2
+#define XHCI_POLL_TIMEOUT                   60
+
+#define XHCI_STOP_EP_COMMAND_TIMEOUT        5
+
+#define XHCI_MAX_REXIT_TIMEOUT              20
 
 typedef struct _XHCI_CAPABILITIES_REGISTER{
     UINT32      HcCapBase;
@@ -576,7 +597,201 @@ typedef struct _XHCI_TRANSFER_EVENT{
     UINT32                  Flags;
 }XHCI_TRANSFER_EVENT, * PXHCI_TRANSFER_EVENT;
 
-static inline string XhciTrbCompletionCodeString(UINT8  Status){
+typedef struct _XHCI_LINK_TRB{
+    UINT64      SegmentPointer;
+    UINT32      InterTarget;
+    UINT32      Control;
+}XHCI_LINK_TRB, * PXHCI_LINK_TRB;
+
+#define XHCI_LINK_TOGGLE    (1 << 1)
+
+typedef struct _XHCI_EVENT_COMMAND{
+    UINT64      CommandTRB;
+    UINT32      Status;
+    UINT32      Flags;
+}XHCI_EVENT_COMMAND, * PXHCI_EVENT_COMMAND;
+
+typedef enum{
+    EP_HARD_RESET = 0,
+    EP_SOFT_RESET = 1,
+}XHCI_EP_RESET_TYPE;
+
+typedef enum{
+    SETUP_CONTEXT_ONLY = 0,
+    SETUP_CONTEXT_ADDRESS = 1,
+}XHCI_SETUP_DEVICE;
+
+typedef struct _XHCI_GENERIC_TRB{
+    UINT32  Field[4];
+}XHCI_GENERIC_TRB, * PXHCI_GENERIC_TRB;
+
+typedef union _XHCI_TRB{
+    XHCI_LINK_TRB           Link;
+    XHCI_TRANSFER_EVENT     TransferEvent;
+    XHCI_EVENT_COMMAND      EventCommand;
+    XHCI_GENERIC_TRB        Generic;
+}XHCI_TRB, * PXHCI_TRB;
+
+typedef struct _XHCI_SEGMENT{
+    PXHCI_TRB               Trbs;
+    struct _XHCI_SEGMENT*   NextSegment;
+    UINT32                  Number;
+    UINT64                  DmaAddress;
+    UINT64                  BounceDma;
+    PVOID                   BounceBuffer;
+    UINT32                  BounceOffset;
+    UINT32                  BounceLength;
+}XHCI_SEGMENT, * PXHCI_SEGMENT;
+
+typedef enum{
+    TD_DIRTY = 0,
+    TD_HALTED = 1,
+    TD_CLEARING_CACHE = 2,
+    TD_CLEARING_CACHE_DEFERED = 3,
+    TD_CLEARED = 4,
+}XHCI_CANCELLED_TD_STATUS;
+
+typedef struct _XHCI_TD{
+    ListHeader                  TdList;
+    ListHeader                  CanceledTdList;
+    INTEGER                     Status;
+    XHCI_CANCELLED_TD_STATUS    CancelStatus;
+    PURB                        Urb;
+    PXHCI_SEGMENT               StartSegment;
+    PXHCI_TRB                   StartTrb;
+    PXHCI_SEGMENT               EndSegment;
+    PXHCI_TRB                   EndTrb;
+    PXHCI_SEGMENT               BounceSegment;
+    BOOL                        UrbLengthSet;
+    BOOL                        ErrorMidTd;
+}XHCI_TD, * PXHCI_TD;
+
+typedef struct _XHCI_CD{
+    PXHCI_COMMAND   Command;
+    PXHCI_TRB       CommandTrb; 
+}XHCI_CD, * PXHCI_CD;
+
+typedef enum{
+    TYPE_CONTROL = 0,
+    TYPE_ISOC = 1,
+    TYPE_BULK = 2,
+    TYPE_INTR = 3,
+    TYPE_STREAM = 4,
+    TYPE_COMMAND = 5,
+    TYPE_EVENT = 6,
+}XHCI_RING_TYPE;
+
+typedef struct _XHCI_RING{
+    PXHCI_SEGMENT       FirstSegment;
+    PXHCI_SEGMENT       LastSegment;
+    PXHCI_TRB           EnQueue;
+    PXHCI_SEGMENT       EnqSegment;
+    PXHCI_TRB           DeQueue;
+    PXHCI_SEGMENT       DeqSegment;
+    ListHeader          TdList;
+    UINT32              CycleState;
+    UINT32              StreamID;
+    UINT32              SegmentCount;
+    UINT32              FreeTrbs;
+    UINT32              BounceBufferLength;
+    XHCI_RING_TYPE      Type;
+    UINT32              OldTrbCompletionCode;
+    PRADIX_TREE_ROOT    TrbAddressMap;    
+}XHCI_RING, * PXHCI_RING;
+
+typedef struct _XHCI_ERST_ENTRY{
+    UINT64      SegmentAddress;
+    UINT32      SegmentSize;
+    UINT32      Reserved;
+}XHCI_ERST_ENTRY, * PXHCI_ERST_ENTRY;
+
+typedef struct _XHCI_ERST{
+    PXHCI_ERST_ENTRY    Entries;
+    UINT32              EntryCount;
+    UINT64              ErstDmaAddress;
+}XHCI_ERST, * PXHCI_ERST;
+
+typedef struct _XHCI_SCRATCHPAD{
+    UINT64*     SpArray;
+    UINT64      SpDmaAddress;
+    PVOID*      SpBuffers;
+}XHCI_SCRATCHPAD, * PXHCI_SCRATCHPAD;
+
+typedef struct _XHCI_URB_PRIVATE{
+    INTEGER     TdsCount;
+    INTEGER     TdsDoneCount;
+    XHCI_TD     Tds[];
+}XHCI_URB_PRIVATE, * PXHCI_URB_PRIVATE;
+
+typedef struct _XHCI_S3_SAVE{
+    UINT32      Command;
+    UINT32      DevNt;
+    UINT64      DcbaaPointer;
+    UINT32      ConfigRegister;
+}XHCI_S3_SAVE, * PXHCI_S3_SAVE;
+
+typedef struct _XHCI_DEVICE_INFO{
+    UINT32      DeviceID;
+    ListHeader  NextDevice;
+}XHCI_DEVICE_INFO, * PXHCI_DEVICE_INFO;
+
+typedef struct _XHCI_BUS_STATE{
+    UINT64      BusSuspend;
+    UINT64      NextStateChange;
+    UINT32      PortCSuspend;
+    UINT32      PortRemoteWakeup;
+    UINT64      ResumingPorts;
+}XHCI_BUS_STATE, * PXHCI_BUS_STATE;
+
+typedef struct _XHCI_INTERRUPTER{
+    PXHCI_RING                  EventRing;
+    XHCI_ERST                   Erst;
+    XHCI_INTERRUPT_REGISTER     IrSet;
+    UINT32                      IntrNumber;
+    BOOL                        IpAutoClear;
+    UINT32                      IsocBeiInterval;
+    UINT32                      S3IMan;
+    UINT32                      S3IMod;
+    UINT32                      S3ErstSize;
+    UINT64                      S3ErstBase;
+    UINT64                      S3ErstDeQueue;
+}XHCI_INTERRUPTER, * PXHCI_INTERRUPTER;
+
+typedef struct _XHCI_PORT_CAPABILITES{
+    UINT32*         Psi;
+    UINT8           PsiCount;
+    UINT8           PciUidCount;
+    UINT8           MajorRevision;
+    UINT8           MinorRevision;
+    UINT32          ProtocolCapabilities;
+}XHCI_PORT_CAPABILITES, * PXHCI_PORT_CAPABILITES;
+
+typedef struct _XHCI_PORT{
+    UINT32*                     Address;
+    INTEGER                     HwPortNumber;
+    INTEGER                     HcdPortNumber;
+    struct _XHCI_HUB*           RootHub;
+    PXHCI_PORT_CAPABILITES      PortCapabilities;
+    BOOL                        LpmIncapable;
+    UINT64                      ResumeTimestamp;
+    BOOL                        RExitActive;
+    INTEGER                     SlotID;
+    BOOL                        RExitDone;
+    BOOL                        U3ExitDone;
+}XHCI_PORT, * PXHCI_PORT;
+
+typedef struct _XHCI_HUB{
+    PXHCI_PORT*                 Ports;
+    UINT32                      PortCount;
+    PUSB_HOST_CONTROLER_DEVICE  HostControllerDevice;
+    XHCI_BUS_STATE              BusState;
+    UINT8                       MajorRevision;
+    UINT8                       MinorRevision;
+}XHCI_HUB, * PXHCI_HUB;
+
+//1502
+
+static inline string XhciTrbCompletionCodeString(UINT8 Status){
     switch(Status){
         case XHCI_COMPLETION_SUCCESS:{
             return "Success";
@@ -687,41 +902,6 @@ static inline string XhciTrbCompletionCodeString(UINT8  Status){
     return "Invalid Or Unkown";
 }
 
-typedef struct _XHCI_LINK_TRB{
-    UINT64      SegmentPointer;
-    UINT32      InterTarget;
-    UINT32      Control;
-}XHCI_LINK_TRB, * PXHCI_LINK_TRB;
-
-#define XHCI_LINK_TOGGLE    (1 << 1)
-
-typedef struct _XHCI_EVENT_COMMAND{
-    UINT64      CommandTRB;
-    UINT32      Status;
-    UINT32      Flags;
-}XHCI_EVENT_COMMAND, * PXHCI_EVENT_COMMAND;
-
-typedef enum{
-    EP_HARD_RESET = 0,
-    EP_SOFT_RESET = 1,
-}XHCI_EP_RESET_TYPE;
-
-typedef enum{
-    SETUP_CONTEXT_ONLY = 0,
-    SETUP_CONTEXT_ADDRESS = 1,
-}XHCI_SETUP_DEVICE;
-
-typedef struct _XHCI_GENERIC_TRB{
-    UINT32  Field[4];
-}XHCI_GENERIC_TRB, * PXHCI_GENERIC_TRB;
-
-typedef union _XHCI_TRB{
-    XHCI_LINK_TRB           Link;
-    XHCI_TRANSFER_EVENT     TransferEvent;
-    XHCI_EVENT_COMMAND      EventCommand;
-    XHCI_GENERIC_TRB        Generic;
-}XHCI_TRB, * PXHCI_TRB;
-
 static inline string XhciTrbTypeString(UINT8 Type){
     switch(Type){
         case XHCI_TRB_NORMAL:{
@@ -815,6 +995,32 @@ static inline string XhciTrbTypeString(UINT8 Type){
     return "Unkown Event";
 }
 
+static inline string XhciRingTypeString(XHCI_RING_TYPE Type){
 
+    switch(Type){
+        case TYPE_CONTROL:{
+            return "CONTROL";
+        }
+        case TYPE_ISOC:{
+            return "ISOC";
+        }
+        case TYPE_BULK:{
+            return "BULK";
+        }
+        case TYPE_INTR:{
+            return "INTR";
+        }
+        case TYPE_STREAM:{
+            return "STREAM";
+        }
+        case TYPE_COMMAND:{
+            return "COMMAND";
+        }
+        case TYPE_EVENT:{
+            return "EVENT";
+        }
+    }
+    return "UNKOWN";
+}
 
 #endif

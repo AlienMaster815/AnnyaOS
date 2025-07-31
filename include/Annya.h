@@ -112,13 +112,20 @@ typedef PVOID   WNDPROC;
 
 typedef LRESULT (*ANNYA_WINDOW_CALLBACK)(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
 
+struct _WINDOW_HANDLE;
+
+typedef struct _CHILD_WINDOW_TRACKER{
+    ListHeader              Peers;
+    struct _WINDOW_HANDLE*  Child;
+}CHILD_WINDOW_TRACKER, * PCHILD_WINDOW_TRACKER;
+
 typedef struct _WINDOW_HANDLE{
     PWINDOW_CHARECTERISTICS Charecteristics;
     string                  WindowName;
     SIZE                    PlaneCount;
     struct _DRSD_CLIP**     MainWindow;
     struct _WINDOW_HANDLE*  ParentWindow;
-    struct _WINDOW_HANDLE*  Children;
+    CHILD_WINDOW_TRACKER    Children;
     struct _AWM_CLIP_TREE*  ClipTreeHandle;
     DWORD                   WindowStyle;
     BOOL                    Visable;
