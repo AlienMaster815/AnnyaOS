@@ -401,6 +401,10 @@
 
 #define XHCI_MAX_REXIT_TIMEOUT              20
 
+#define COMMAND_RING_STATE_RUNNING          (1)
+#define COMMAND_RING_STATE_ABORTED          (1 << 1)
+#define COMMAND_RING_STATE_STOPPED          (1 << 2)
+
 typedef struct _XHCI_CAPABILITIES_REGISTER{
     UINT32      HcCapBase;
     UINT32      HcsParameter1;
@@ -790,6 +794,35 @@ typedef struct _XHCI_HUB{
 }XHCI_HUB, * PXHCI_HUB;
 
 //1502
+
+typedef struct _XHCI_HCD{
+    PUSB_HOST_CONTROLER_DEVICE      MainHcd;
+    PUSB_HOST_CONTROLER_DEVICE      SharedHcd;
+    PXHCI_CAPABILITIES_REGISTER     CapabilitiesRegister;
+    PXHCI_OPERATIONAL_REGISTER      OperationalRegister;
+    PXHCI_RUNTIME_REGISTERS         RuntimeRegister;
+    PXHCI_DORRBELL_ARRAY            Dba;
+    UINT32                          HcsParameter1;
+    UINT32                          HcsParameter2;
+    UINT32                          HcsParameter3;
+    UINT32                          HccParameter1;
+    UINT32                          HccParameter2;
+    spinlock_t                      DeviceHardLock;
+    UINT16                          HciVersion;
+    UINT16                          MaxInterrupts;
+    UINT32                          IModInterval;
+    UINT32                          PageSize;
+    INTEGER                         nVectors;
+    PXHCI_DEVICE_CONTEXT_ARRAY      ContextArray;
+    PXHCI_INTERRUPTER*              Interrupters;
+    PXHCI_RING                      CommandRing;
+    UINT32                          CommandRingState;
+    ListHeader                      CommandList;
+    UINT32                          CommandRingReservedTrbs;
+    PXHCI_COMMAND                   CurrentCommand;
+    PXHCI_SCRATCHPAD                Scratchpad;
+    mutex_t                         DeviceSoftLock;
+}XHCI_HCD, * PXHCI_HCD;
 
 static inline string XhciTrbCompletionCodeString(UINT8 Status){
     switch(Status){
