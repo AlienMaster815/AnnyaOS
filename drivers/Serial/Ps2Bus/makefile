@@ -7,7 +7,7 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC = Ps2.cpp
+SRC = Ps2.cpp  
 TARGET = PS2IO.SYS
 
 # Build rule

@@ -272,6 +272,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C KernelLibraries/wprecorder clean
 	$(MAKE) -C KernelLibraries/wprecorder all
 
+	$(MAKE) -C KernelLibraries/Ps2IO clean
+	$(MAKE) -C KernelLibraries/Ps2IO all
+
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
 

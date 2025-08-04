@@ -1,0 +1,13 @@
+LIBRARY PS2IO.SYS
+
+EXPORTS	
+    LouKeHalPs2ReadConfigurationByte
+    LouKeHalPs2WriteConfigurationByte
+    LouKeHalPs2DisableSecondaryPort
+    LouKeHalPs2EnableSecondaryPort
+    LouKeHalPs2DisablePrimaryPort
+    LouKeHalPs2EnablePrimaryPort
+    LouKeHalPs2FlushBuffer
+    LouKeHalPs2TestPrimaryPort
+    LouKeHalPs2TestController
+    LouKeHalPs2TestSecondaryPort

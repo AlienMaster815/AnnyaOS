@@ -4,7 +4,7 @@
 
 #include <LouDDK.h>
 
-#define KEYBOARD_INTERRUTP  1
+#define KEYBOARD_INTERRUPT  1
 #define AUX_INTERRUPT       12
 
 #define PS2_COMMAND_REGISTER    0x64
@@ -15,11 +15,41 @@
 #define PS2_INPUT_BUFFER_FULL   (1 << 1)
 #define PS2_SHOULD_BE_ZERO      (1 << 2)
 #define PS2_INPUT_SELECTOR      (1 << 3)
-#define PS2_KEYBOARD_INHIBITED  (1 << 4)
-#define PS2_TRANSMITION_TIMEOUT (1 << 5)
-#define PS2_RECIEVE_TIMEOUR     (1 << 6)
+#define PS2_TIMEOUT_ERROR       (1 << 6)
 #define PS2_PARITY_ERROR        (1 << 7)
 
+#define PS2_READ_BYTE(n)                ((n + 0x20) & 0x3F)
+#define PS2_WRITE_BYTE(n)               ((n + 0x60) & 0x7F)
+#define PS2_CONFIG_BYTE                 0
+#define PS2_DISABLE_SECONDARY_PORT      0xA7
+#define PS2_ENABLE_SECONDARY_PORT       0xA8
+#define PS2_TEST_SECONDARY_PORT         0xA9
+#define PS2_TEST_CONTROLLER             0xAA
+#define PS2_TEST_PRIMARY_PORT           0xAB
+#define PS2_DISAGNOSTIC_DUMP            0xAC
+#define PS2_DISABLE_PRIMARY_PORT        0xAD
+#define PS2_ENABLE_PRIMARY_PORT         0xAE
+#define PS2_READ_CONTROLLER_INPUT       0xC0
+#define PS2_COPY_0_TO_3_TO_STATUS       0xC1
+#define PS2_COPY_4_TO_7_TO_STATUS       0xC2
+#define PS2_READ_CONTROLLER_OUTPUT      0xD1
+#define PS2_WRITE_TO_PRIMARY_OUTPUT     0xD2
+#define PS2_WRITE_TO_SECONDARY_OUTPUT   0xD3
+#define PS2_WRITE_TO_SECONDARY_INPUT    0xD4
+
+#define PS2_PRIMARY_PORT_IRQ_ENABLED            (1)
+#define PS2_SECONDARY_PORT_IRQ_ENABLED          (1 << 1)
+#define PS2_SYSTEM_FLAG                         (1 << 2)
+#define PS2_PRIMARY_PORT_CLOCK_DISABLED         (1 << 4)
+#define PS2_SECONDARY_PORT_CLOCK_DSIABLED       (1 << 5)
+#define PS2_PRIMARY_PORT_TRANSLATION            (1 << 6)
+
+#define PS2_CHIPSET_CLASS               "8042 PS/2"
+
+#define PS2_RESET_DEVICE 0xFF
+#define PS2_DISABLE_SCANNING    0xF5
+#define PS2_IDENTIFY_DEVICE     0xF2
+#define PS2_DEVICE_ACK          0xFA
 
 
 static inline UINT8 Ps2ReadData(){
@@ -65,6 +95,7 @@ typedef struct _PS2_DEVICE_OBJECT{
     BOOL                HasDriver;
     UINT8               PortNumber;
     PS2_DEVICE_CLASS    DeviceClass;
+    BOOL                ChipsetDevice;
     //union {
 
     //};
