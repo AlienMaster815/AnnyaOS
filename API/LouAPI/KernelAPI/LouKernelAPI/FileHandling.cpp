@@ -92,7 +92,7 @@ FILE* fopen(string FileName, uint64_t PageFlags){
             MountedSystems = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)MountedSystems->List.NextHeader;
         }
     }
-
+    LouPrint("Unable To Open File:%s\n", FileName);
     return 0x00;
 }
 

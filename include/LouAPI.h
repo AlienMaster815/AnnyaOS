@@ -44,6 +44,7 @@
 #include <kernel/KernelPm.h>
 #include <kernel/XArray.h>
 #include <Dispatching.h>
+#include <drivers/Busses.h>
 
 
 #ifndef _KERNEL_MODULE_

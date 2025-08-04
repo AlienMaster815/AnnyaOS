@@ -323,6 +323,8 @@ bool IsSystemEfi(){
     return SystemIsEfiv;
 }
 void InitializePoolsPool();
+void CheckAndInitializePs2Controller();
+void InitializeBusCore();
 
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
@@ -377,11 +379,15 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeFileSystemManager();
     InitializeNtKernelTransitionLayer();
 
+    InitializeBusCore();
+
     //CheckForSoundblaster16();
     ScanTheRestOfHarware();
     
     //SMPInit();
-	
+    
+
+
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
@@ -474,9 +480,9 @@ void InitializeUserSpace(){
 void LouKeUpdateMouseState(PSYSTEM_STATE_STACK State);
 
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
-    LouKeUpdateMouseState(Stack);
-    EnablePs2Keyboard();
-    InitializePs2Mouse();
+    //LouKeUpdateMouseState(Stack);
+    //EnablePs2Keyboard();
+    //InitializePs2Mouse();
 }
 
 //0x220B21030

@@ -167,3 +167,7 @@ EXPORTS
     DrsdUpdateEdidConnectorProperties
     DrsdGetNewPlaneState
     LouKeDrsdHandleConflictingDevices
+    inb
+    outb
+    LouKeCreateBusClass
+    LouKeLoadSubsystem

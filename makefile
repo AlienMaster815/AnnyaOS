@@ -125,10 +125,12 @@ driver_cpp_source_files += $(shell find drivers/MotherBoards -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/pci_systems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/PnP -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/processors -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/Serial -name *.cpp)
+#driver_cpp_source_files += $(shell find drivers/Serial -name *.cpp)
+driver_cpp_source_files += $(shell find drivers/Busses -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/storage/InternalStorageDrivers -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/USB/UsbInternals -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/virtualization -name *.cpp)
+#driver_cpp_source_files += $(shell find drivers/virtualization -name *.cpp)
+driver_cpp_source_files += $(shell find drivers/Subsystems -name *.cpp)
 
 driver_cpp_object_files := $(patsubst drivers/%.cpp, build/drivers/%.o, $(driver_cpp_source_files))
 
@@ -314,6 +316,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C drivers/gpu/VMWare clean
 	$(MAKE) -C drivers/gpu/VMWare all
+	
+	$(MAKE) -C drivers/Serial/Ps2Bus clean
+	$(MAKE) -C drivers/Serial/Ps2Bus all
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
@@ -410,3 +415,4 @@ cleanall:
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
 	$(MAKE) -C KernelLibraries/LCC clean
 	$(MAKE) -C drivers/USB/HostDrivers clean_xhci
+	$(MAKE) -C drivers/Serial/Ps2Bus clean

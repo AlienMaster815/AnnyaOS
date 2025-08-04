@@ -18,6 +18,7 @@
         <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
         <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX IDE Chipset-->
         <FILETOCPY64>cp drivers/storage/Ahci/AHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AHCI.SYS</FILETOCPY64>                     <!--AHCI Chipset-->
+        <FILETOCPY64>cp drivers/Serial/Ps2Bus/PS2IO.SYS ISO/ANNYA/SYSTEM64/PS2IO.SYS</FILETOCPY64>                      <!--AHCI Chipset-->
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/ANNYA/SYSTEM64/LOUDLL.DLL</FILETOCPY64>                           <!--Lousine Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/ANNYA/SYSTEM64/NTDLL.DLL</FILETOCPY64>                              <!--Nt Kernel User Space Abstraction Layer-->

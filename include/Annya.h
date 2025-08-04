@@ -139,6 +139,7 @@ typedef struct _WINDOW_HANDLE{
     HINSTANCE               Instance;
     HMENU                   Menu;
     DWORD                   ExtendedWindowStyle;
+    UINT64                  ThreadID;
 }WINDOW_HANDLE, * PWINDOW_HANDLE;
 
 #define TRAY_WINDOW             "AnnyaShell_TrayWnd"

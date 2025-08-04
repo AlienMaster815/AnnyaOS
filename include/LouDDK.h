@@ -51,9 +51,10 @@ typedef void* PVOID;
 #ifndef _KERNEL_EXPORTS_
 #define _KERNEL_EXPORTS_
 #define KERNEL_EXPORT extern "C" __declspec(dllimport)
+#endif
+#endif
 
-#endif
-#endif
+#define DRIVER_EXPORT extern "C" __declspec(dllexport)
 
 #define KERNEL_IMPORT extern "C"
 
@@ -188,6 +189,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <kernel/KernelPm.h>
 #include <Dispatching.h>
 #include <kernel/XArray.h>
+#include <drivers/Busses.h>
+
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"
@@ -210,6 +213,10 @@ KERNEL_IMPORT int strncmp(const char* str1, const char* str2, size_t n);
 KERNEL_IMPORT int strcmp(const char* str1, const char* str2);
 KERNEL_IMPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_IMPORT char* strncpy(char* dest, const char* src, size_t n);
+
+LOUDDK_API_ENTRY
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
 
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 //KERNEL_IMPORT void INTERRUPT(uint8_t InterruptNumber);
@@ -295,7 +302,11 @@ KERNEL_EXPORT uint16_t inw(uint64_t port64);
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 KERNEL_EXPORT uint32_t inl(uint64_t Port64);
 KERNEL_EXPORT uint32_t outl(uint64_t Port64, uint32_t Data);
-
+KERNEL_EXPORT uint8_t inb(uint64_t port);
+KERNEL_EXPORT void outb(uint64_t port, uint8_t data);
+KERNEL_EXPORT
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
 #ifndef _MEMORY_BARRIER
 #define _MEMORY_BARRIER
 

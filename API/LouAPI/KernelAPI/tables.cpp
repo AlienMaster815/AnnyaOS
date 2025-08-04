@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 167
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 171
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -383,6 +383,10 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[164] = "DrsdUpdateEdidConnectorProperties";
     ImportTables[4].FunctionName[165] = "DrsdGetNewPlaneState";
     ImportTables[4].FunctionName[166] = "LouKeDrsdHandleConflictingDevices";
+    ImportTables[4].FunctionName[167] = "inb";
+    ImportTables[4].FunctionName[168] = "outb";
+    ImportTables[4].FunctionName[169] = "LouKeCreateBusClass";
+    ImportTables[4].FunctionName[170] = "LouKeLoadSubsystem";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -551,6 +555,10 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[164] = (uint64_t)DrsdUpdateEdidConnectorProperties;
     ImportTables[4].VirtualAddress[165] = (uint64_t)DrsdGetNewPlaneState;
     ImportTables[4].VirtualAddress[166] = (uint64_t)LouKeDrsdHandleConflictingDevices;
+    ImportTables[4].VirtualAddress[167] = (uint64_t)inb;
+    ImportTables[4].VirtualAddress[168] = (uint64_t)outb;
+    ImportTables[4].VirtualAddress[169] = (uint64_t)LouKeCreateBusClass;
+    ImportTables[4].VirtualAddress[170] = (uint64_t)LouKeLoadSubsystem;
 
 }
 

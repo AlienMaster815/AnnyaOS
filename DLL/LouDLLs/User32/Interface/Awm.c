@@ -104,8 +104,8 @@ PAWM_CLIP_TREE FindClipAtPoint(PAWM_CLIP_TREE Tree, INT64 X, INT64 Y){
         if (
             (Clip->X <= X) &&
             (Clip->Y <= Y) &&
-            ((Clip->X + Clip->Width) > (X)) &&
-            ((Clip->Y + Clip->Height) > (Y))
+            ((Clip->X + Clip->Width) >= (X)) &&
+            ((Clip->Y + Clip->Height) >= (Y))
         ) {
             PAWM_CLIP_TREE ChildMatch = NULL;
             if (Tree->SubPlane.NextHeader) {

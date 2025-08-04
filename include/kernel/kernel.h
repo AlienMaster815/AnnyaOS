@@ -33,10 +33,17 @@
 #include "DRSD.h"
 #include "Process.h"
 
+
+
 #ifdef __cplusplus
 KERNEL_IMPORT bool IsSystemEfi();
+LOUDDK_API_ENTRY
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
 #else
 bool IsSystemEfi();
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
 #endif
 
 
