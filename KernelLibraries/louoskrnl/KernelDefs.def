@@ -171,3 +171,4 @@ EXPORTS
     outb
     LouKeCreateBusClass
     LouKeLoadSubsystem
+    LouKeLoadDriver

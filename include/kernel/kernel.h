@@ -44,6 +44,8 @@ LouKeLoadSubsystem(string Subsystem, string EntryName);
 bool IsSystemEfi();
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);
+void* 
+LouKeLoadDriver(string Driver, string EntryName);
 #endif
 
 

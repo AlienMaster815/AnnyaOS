@@ -55,6 +55,7 @@ typedef void* PVOID;
 #endif
 
 #define DRIVER_EXPORT extern "C" __declspec(dllexport)
+#define DRIVER_IMPORT extern "C" __declspec(dllimport)
 
 #define KERNEL_IMPORT extern "C"
 
@@ -218,6 +219,10 @@ LOUDDK_API_ENTRY
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);
 
+LOUDDK_API_ENTRY
+void* 
+LouKeLoadDriver(string Driver, string EntryName);
+
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 //KERNEL_IMPORT void INTERRUPT(uint8_t InterruptNumber);
 
@@ -307,6 +312,11 @@ KERNEL_EXPORT void outb(uint64_t port, uint8_t data);
 KERNEL_EXPORT
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);
+
+KERNEL_EXPORT
+void* 
+LouKeLoadDriver(string Driver, string EntryName);
+
 #ifndef _MEMORY_BARRIER
 #define _MEMORY_BARRIER
 

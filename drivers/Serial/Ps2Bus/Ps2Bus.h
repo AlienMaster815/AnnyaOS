@@ -78,11 +78,14 @@ typedef enum {
     PS2_MOUSE = 0x00,
     PS2_SCROLL_MOUSE = 0x03,
     PS2_5BUTTON_MOUSE = 0x04,
-    PS2_MF2_KEYBOARD1 = 0xAB63,        
+    PS2_MF2_KEYBOARD1 = 0xAB83,        
     PS2_MF2_KEYBOARD2 = 0xABC1,
     PS2_SHORTBOARD_KEYBOARD = 0xAB84,
     PS2_NCDN97_KEYBOARD = 0xAB85,
     PS2_122KEY_KEYBOARD = 0xAB86,
+    PS2_JP_CLASS_G_KEYBOARD = 0xAB90,
+    PS2_JP_CLASS_P_KEYBOARD = 0xAB91,
+    PS2_JP_CLASS_A_KEYBOARD = 0xAB92,
     PS2_NCD_SUN_LAYOUT = 0xACA1,
     ANCHIENT_KEYBOARD = 0xFFFE,
     NO_DEVICE = 0xFFFF,
@@ -96,9 +99,7 @@ typedef struct _PS2_DEVICE_OBJECT{
     UINT8               PortNumber;
     PS2_DEVICE_CLASS    DeviceClass;
     BOOL                ChipsetDevice;
-    //union {
-
-    //};
+    PVOID               DriverPrivateData;
 }PS2_DEVICE_OBJECT, * PPS2_DEVICE_OBJECT;
 
 

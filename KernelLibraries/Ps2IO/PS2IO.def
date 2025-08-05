@@ -11,3 +11,9 @@ EXPORTS
     LouKeHalPs2TestPrimaryPort
     LouKeHalPs2TestController
     LouKeHalPs2TestSecondaryPort
+    LouKeHalPs2InstallInterruptHandler
+    LouKeHalPs2EnableInterrupt
+    LouKeHalPs2DisableInterrupt
+    LouKeHalPs2CommandPs2Device
+    Ps2ReadDataRegister
+    Ps2WriteDataRegister

@@ -323,6 +323,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C drivers/Serial/Ps2Bus clean
 	$(MAKE) -C drivers/Serial/Ps2Bus all
 
+	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 clean
+	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 all
+
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
 
