@@ -172,3 +172,5 @@ EXPORTS
     LouKeCreateBusClass
     LouKeLoadSubsystem
     LouKeLoadDriver
+    LouKeMouseAllocateMessageDevice
+    LouKeMouseUpdateInput

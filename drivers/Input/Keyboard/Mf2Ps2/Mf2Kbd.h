@@ -137,11 +137,11 @@ LOUSTATUS
 LouKeHalPs2FlushBuffer();
 
 DRIVER_IMPORT
-LOUSTATUS 
-Ps2WriteDataRegister(UINT8 Data);
-
-DRIVER_IMPORT
-LOUSTATUS 
-Ps2ReadDataRegister(UINT8* Data);
+LOUSTATUS
+LouKeHalPs2ReadDeviceBuffer(
+    PPS2_DEVICE_OBJECT Ps2Device, 
+    UINT8* Buffer, 
+    SIZE Length
+);
 
 #endif //MF2_KBD

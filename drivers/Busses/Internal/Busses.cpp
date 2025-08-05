@@ -39,10 +39,13 @@ LouKeCreateBusClass(
     PLOU_BUS    Bus
 ){
     LOUSTATUS   Status;
+    LouKIRQL    Irql;
     AllocateNewClassTracker(Bus);
+    LouKeAcquireSpinLock(&Bus->BusScanLock, &Irql);
     if(Bus->SearchMachine){
         Status = Bus->SearchMachine(Bus);
         if(Status != STATUS_SUCCESS){
+            LouKeReleaseSpinLock(&Bus->BusScanLock, &Irql);
             return Status;
         }
     }
@@ -59,11 +62,13 @@ LouKeCreateBusClass(
                     }
                 }
                 DeAllocateClassTracker(Bus);
+                LouKeReleaseSpinLock(&Bus->BusScanLock, &Irql);
                 return Status;
             }
             Object = (PLOU_BUS_OBJECT)Object->Peers.NextHeader;
         }
     }
+    LouKeReleaseSpinLock(&Bus->BusScanLock, &Irql);
     return STATUS_SUCCESS;
 }
 

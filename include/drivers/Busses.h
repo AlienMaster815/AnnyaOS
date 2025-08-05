@@ -43,6 +43,7 @@ typedef struct _LOU_BUS_OBJECT{
 typedef struct _LOU_BUS{
     string              BusName;
     PLOU_BUS_OBJECT     BusObjects;
+    spinlock_t          BusScanLock;
     LOUSTATUS           (*SearchMachine)(struct _LOU_BUS* BusData);
     LOUSTATUS           (*InitializeBus)(struct _LOU_BUS* BusData, PLOU_BUS_OBJECT BusObject);
     LOUSTATUS           (*DeInitializeBus)(struct _LOU_BUS* BusData, PLOU_BUS_OBJECT BusObject);

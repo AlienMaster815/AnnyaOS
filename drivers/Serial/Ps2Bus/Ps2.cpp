@@ -2,11 +2,11 @@
 
 static spinlock_t Ps2Lock = {0};
 static mutex_t Ps2Mutex = {0};
-LOU_BUS_OBJECT Ps2BusObjects = {0};
+static LOU_BUS_OBJECT Ps2BusObjects = {0};
 
 static PS2_DEVICE_OBJECT Ps2Devices[TOTAL_PS2_PORTS] = {0};
 
-DRIVER_EXPORT 
+static 
 LOUSTATUS 
 Ps2ReadDataRegister(UINT8* Data){
     size_t TimeOut;
@@ -33,7 +33,7 @@ Ps2ReadDataRegister(UINT8* Data){
     return STATUS_SUCCESS;
 }
 
-DRIVER_EXPORT
+static
 LOUSTATUS 
 Ps2WriteDataRegister(UINT8 Data){
     size_t TimeOut;
@@ -83,20 +83,29 @@ static LOUSTATUS Ps2WriteCommandRegister(UINT8 Command){
 
 static LOUSTATUS Ps2BindDeviceToDriver(PPS2_DEVICE_OBJECT Ps2Device){
     LOUSTATUS Status;
-    LOUSTATUS (*Mf2KbdInitFunction)(PPS2_DEVICE_OBJECT);
+    LOUSTATUS (*Ps2DeviceInitFunction)(PPS2_DEVICE_OBJECT);
     switch(Ps2Device->DeviceClass){
 
         case PS2_MF2_KEYBOARD1:
         case PS2_MF2_KEYBOARD2:
-            Mf2KbdInitFunction = (LOUSTATUS (*)(PPS2_DEVICE_OBJECT))LouKeLoadDriver("MF2KBD.SYS", "LouKeHalInitializeMf2Ps2Keyboard");
-            if(Mf2KbdInitFunction){
-                Status = Mf2KbdInitFunction(Ps2Device);
+            Ps2DeviceInitFunction = (LOUSTATUS (*)(PPS2_DEVICE_OBJECT))LouKeLoadDriver("MF2KBD.SYS", "LouKeHalInitializeMf2Ps2Keyboard");
+            if(Ps2DeviceInitFunction){
+                Status = Ps2DeviceInitFunction(Ps2Device);
                 if(Status == STATUS_SUCCESS){
                     Ps2Device->HasDriver = true;
                 }
             }else {
                 LouPrint("ERROR:Unable To Register Device\n");
                 Status = STATUS_UNSUCCESSFUL;
+            }
+            break;
+        case PS2_MOUSE:
+            Ps2DeviceInitFunction = (LOUSTATUS (*)(PPS2_DEVICE_OBJECT))LouKeLoadDriver("PS2MOUSE.SYS", "LouKeHalInitializePs2Mouse");
+            if(Ps2DeviceInitFunction){
+                Status = Ps2DeviceInitFunction(Ps2Device);
+                if(Status == STATUS_SUCCESS){
+                    Ps2Device->HasDriver = true;
+                }
             }
             break;
         default:
@@ -392,8 +401,36 @@ LouKeHalPs2DisableInterrupt(PPS2_DEVICE_OBJECT Ps2Device){
     return Status;
 }
 
+DRIVER_EXPORT
+LOUSTATUS
+LouKeHalPs2ReadDeviceBuffer(
+    PPS2_DEVICE_OBJECT Ps2Device, 
+    UINT8* Buffer, 
+    SIZE Length
+){
+    if(!Buffer){
+        return STATUS_INVALID_PARAMETER;
+    }
+    LOUSTATUS Status = STATUS_UNSUCCESSFUL;
+    if((Ps2Device->ChipsetDevice) && (Ps2Device->DeviceExists)){
+        MutexUnlock(&Ps2Mutex);
+        for(size_t i = 0 ; i < Length; i++){
+            Status = Ps2ReadDataRegister(&Buffer[i]);
+            if(Status != STATUS_SUCCESS){
+                MutexUnlock(&Ps2Mutex);
+                return Status;
+            }
+        }
+        MutexUnlock(&Ps2Mutex);
+    }
+    return Status;
+}
 
-
+DRIVER_EXPORT
+UINT8 
+LouKeHalPs2CheckControllerStatus(){
+    return Ps2ReadStatus();
+}
 
 LOUSTATUS Ps2InitializeBus(PLOU_BUS BussClass, PLOU_BUS_OBJECT Object){
     LOUSTATUS InitStatus;
@@ -549,7 +586,6 @@ LOUSTATUS Ps2InitializeBus(PLOU_BUS BussClass, PLOU_BUS_OBJECT Object){
         Ps2Devices[1].DeviceExists = false;
     }
 
-    InitStatus = STATUS_SUCCESS;
 
     LouPrint("PS2IO.SYS:Ps2InitializeBus() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
@@ -584,6 +620,5 @@ DriverEntry(
     );
 
     LouPrint("PS2IO.SYS:DriverEntry() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }

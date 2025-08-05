@@ -15,5 +15,5 @@ EXPORTS
     LouKeHalPs2EnableInterrupt
     LouKeHalPs2DisableInterrupt
     LouKeHalPs2CommandPs2Device
-    Ps2ReadDataRegister
-    Ps2WriteDataRegister
+    LouKeHalPs2ReadDeviceBuffer
+    LouKeHalPs2CheckControllerStatus

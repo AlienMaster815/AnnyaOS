@@ -19,7 +19,10 @@ void LouKeDispatchNewUserMessage(
     PLOUSINE_USER_SHARED_MESSAGE Message
 ){
     if(!SendUserMessage){
-        return;
+        SendUserMessage = (void(*)(PLOUSINE_USER_SHARED_MESSAGE))LouKeLinkerGetAddress("LOUDLL.DLL", "SendMessageToUserMode");
+        if(!SendUserMessage){
+            return;
+        }
     }
     SendUserMessage(Message);
 }

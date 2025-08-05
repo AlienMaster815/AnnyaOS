@@ -1,9 +1,8 @@
 #include "Mf2Kbd.h"
 
 static void LouKeMf2KbdIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){
-
-    UINT8 Scan; 
-    Ps2ReadDataRegister(&Scan);
+    UINT8 Data;    
+    LouKeHalPs2ReadDeviceBuffer(Ps2Device, &Data, 1);
 
     
 
@@ -24,9 +23,8 @@ LouKeHalInitializeMf2Ps2Keyboard(
     if(Status != STATUS_SUCCESS){
         LouPrint("Error Starting Scanning\n");
     }
-    LouKeHalPs2FlushBuffer();
     
-    LouKeHalPs2EnableInterrupt(Ps2Device);    
+    LouKeHalPs2EnableInterrupt(Ps2Device);
 
     LouPrint("LouKeHalInitializeMf2Ps2Keyboard() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

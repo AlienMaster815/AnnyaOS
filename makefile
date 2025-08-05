@@ -326,6 +326,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 clean
 	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 all
 
+	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse clean
+	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse all
+
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
 
@@ -422,3 +425,5 @@ cleanall:
 	$(MAKE) -C KernelLibraries/LCC clean
 	$(MAKE) -C drivers/USB/HostDrivers clean_xhci
 	$(MAKE) -C drivers/Serial/Ps2Bus clean
+	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 clean
+	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse clean
