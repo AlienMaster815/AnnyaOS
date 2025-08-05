@@ -68,7 +68,7 @@ static inline void Ps2WriteCommand(UINT8 Command){
     outb(PS2_COMMAND_REGISTER, Command);
 }
 
-#define PS2_TIMEOUT_MS          100
+#define PS2_TIMEOUT_MS          10
 #define PS2_RET_CONTROLL_TEST   0x55
 #define PS2_BUFFER_SIZE         16
 #define PS2_MAX_MULTIPORT       4

@@ -96,7 +96,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUGLOBALMALLOC:{
             uint64_t* Tmp = (uint64_t*)Data; 
-            Tmp[0] = (uint64_t)LouKeMallocEx(Tmp[1], Tmp[2], USER_GENERIC_MEMORY);
+            Tmp[0] = (uint64_t)LouKeMallocEx(Tmp[1], Tmp[2], USER_GENERIC_MEMORY);            
             return;
         }
         case LOUDRSDGETPLANEINFO:{

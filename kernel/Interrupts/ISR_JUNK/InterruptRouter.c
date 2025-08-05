@@ -137,8 +137,6 @@ mutex_t* LouKeGetInterruptGlobalLock(){
 void LouKeThrowPc();
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
-
-    MutexLock(&InterruptLock);
     uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
@@ -159,11 +157,9 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             RestoreEverything(&ContextHandle);
         }
-        MutexUnlock(&InterruptLock);
         LouKeSendIcEOI();
         return;
     }
-    MutexUnlock(&InterruptLock);
     LouKeSendIcEOI();
     return;
     

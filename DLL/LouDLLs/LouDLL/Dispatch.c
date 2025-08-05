@@ -16,7 +16,6 @@ static LOUSINE_USER_SHARED_MESSAGE UserMessages = {0};
 static mutex_t MessageMutex = {0};
 
 LOUDLL_API
-SET_OPTIMIZATION(3)
 void 
 SendMessageToUserMode(
     PLOUSINE_USER_SHARED_MESSAGE NewMessage
@@ -35,7 +34,6 @@ SendMessageToUserMode(
 }
 
 LOUDLL_API
-SET_OPTIMIZATION(3)
 bool 
 LouUserGetMessage(
     HANDLE*                         Message,
@@ -78,7 +76,6 @@ static LOUSINE_MESSAGE_HANDLER MessageHandlers[LOUSINE_USER_MESSAGE_COUNT] = {
 };
 
 LOUDLL_API
-SET_OPTIMIZATION(3)
 void 
 LouRegisterMouseHandler(
     LOUSINE_MESSAGE_HANDLER     MessageHandler,
@@ -91,7 +88,6 @@ LouRegisterMouseHandler(
 }
 
 LOUDLL_API
-SET_OPTIMIZATION(3)
 void
 LouUserDispatchMessage(
     HANDLE MessageHandle

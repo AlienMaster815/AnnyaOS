@@ -24,9 +24,7 @@ extern uint64_t X86_64MemoryReferenceBug64Write(uint64_t, uint64_t , uint64_t);
 #define KMALLOC_PAGE_TRACK_SIZE 48
 
 static uint64_t   KeMallocPageTracks = 0;
-static uint64_t   KeMallocPageTracksCount = 0;
 static uint64_t   KeMallocPageTracksPhy = 0;
-static uint64_t   KeMallocPageTracksPhyCount = 0;
 
 //static KMALLOC_PAGE_TRACK   TB3 = {0};
 //static size_t               KeMallocPageTracksPhyCount = 0;
@@ -71,10 +69,9 @@ LouKeMallocEx(
     uint64_t TmpVMemTrackBase = 0x00;
     uint64_t Base = 0x00;
     uint64_t Limit = 0x00;
-    uint64_t VmemCheck = 0;
     uint64_t TrackCount = 0;
     bool FoundAddress;
-    for(uint64_t i = 0 ; i < KeMallocPageTracksCount; i++){
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
         if(PAGE_TRACK_DEREFERENCE_READ_FLAGS(TmpPageTrackBase) == AllocationFlags){
             Base = PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase);
             Limit = Base + PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase);
@@ -82,7 +79,7 @@ LouKeMallocEx(
             while((Base + AllocationSize) <= Limit){
                 TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
                 FoundAddress = true;
-                for(VmemCheck = 0; VmemCheck < TrackCount; VmemCheck++){
+                while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
                     if(RangeInterferes(
                         Base, 
                         AllocationSize,
@@ -120,7 +117,6 @@ LouKeMallocEx(
     VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
-    KeMallocPageTracksCount++;
     ZeroMem(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase), AllocationSize);
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
@@ -145,10 +141,9 @@ void* LouKeMallocPhysicalEx(
     uint64_t TmpVMemTrackBase = 0x00;
     uint64_t Base = 0x00;
     uint64_t Limit = 0x00;
-    uint64_t VmemCheck = 0;
     uint64_t TrackCount = 0;
     bool FoundAddress;
-    for(uint64_t i = 0 ; i < KeMallocPageTracksPhyCount; i++){
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
         if(PAGE_TRACK_DEREFERENCE_READ_FLAGS(TmpPageTrackBase) == AllocationFlags){
             Base = PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase);
             Limit = Base + PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase);
@@ -156,7 +151,7 @@ void* LouKeMallocPhysicalEx(
             while((Base + AllocationSize) <= Limit){
                 TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
                 FoundAddress = true;
-                for(VmemCheck = 0; VmemCheck < TrackCount; VmemCheck++){
+                while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
                     if(RangeInterferes(
                         Base, 
                         AllocationSize,
@@ -194,7 +189,6 @@ void* LouKeMallocPhysicalEx(
     VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
-    KeMallocPageTracksPhyCount++;
     ZeroMem(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase), AllocationSize);
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
@@ -212,12 +206,12 @@ void LouKeFree(void* Address){
         return;
     }
     uint64_t TmpPageTrackBase = KeMallocPageTracks;
+    uint64_t TmpPageTrackLast = KeMallocPageTracks;
     uint64_t TmpVMemTrackBase;
-    uint64_t VmemCheck = 0;
+    uint64_t TmpVMemTrackLast;
     uint64_t TrackCount = 0;
-    uint64_t Foo = 0;
-    for(uint64_t PageCount = 0; PageCount < KeMallocPageTracksCount; PageCount++){
-        
+    
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
         if(RangeInterferes(
             (uint64_t)Address, 
             1,
@@ -225,27 +219,47 @@ void LouKeFree(void* Address){
             PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase)
         )){
             TrackCount = PAGE_TRACK_DEREFERENCE_READ_TRACK_COUNT(TmpPageTrackBase);
-            TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
-
-            for(VmemCheck = 0 ; VmemCheck < TrackCount; VmemCheck++){
-
-                if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
-                    if(TmpVMemTrackBase == PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase)){
-                        PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
-                        LouFree((RAMADD)TmpVMemTrackBase);
-                        PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
-                        return;
-                    }else{
-                        VMEM_TRACK_DEREFERENCE_WRITE_NEXT(Foo, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
-                        LouFree((RAMADD)TmpVMemTrackBase);
-                        PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
-                        return;
-                    }
+            if((!(TrackCount - 1)) && (VMEM_TRACK_DEREFERENCE_READ_ADDRESS(PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase)) == (uint64_t)Address)){
+                if(KeMallocPageTracks == TmpPageTrackBase){
+                    return;
                 }
-                Foo = TmpVMemTrackBase;
-                TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+                PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackLast, PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase));
+                LouKeFreePage((PVOID)PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
+                TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+                TmpVMemTrackLast = TmpVMemTrackBase;
+                while(TmpVMemTrackBase){
+                    TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+                    LouFree((RAMADD)TmpVMemTrackLast);
+                    TmpVMemTrackLast = TmpVMemTrackBase;
+                }
+                LouFree((RAMADD)TmpPageTrackBase);
+                return;
+            }else{
+                if(KeMallocPageTracks == TmpPageTrackBase){
+                    return;
+                }
+                TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+                TmpVMemTrackLast = TmpVMemTrackBase;
+                while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
+                    if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
+                        if(TmpVMemTrackBase == TmpVMemTrackLast){
+                            PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
+                            LouFree((RAMADD)TmpVMemTrackBase);
+                            PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
+                            return;
+                        }else{
+                            VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackLast, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
+                            LouFree((RAMADD)TmpVMemTrackBase);
+                            PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
+                            return;
+                        }
+                    }
+                    TmpVMemTrackLast = TmpVMemTrackBase;
+                    TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+                }
             }
         }
+        TmpPageTrackLast = TmpPageTrackBase;
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
 }
@@ -255,11 +269,12 @@ void LouKeFreePhysical(void* Address){
         return;
     }
     uint64_t TmpPageTrackBase = KeMallocPageTracksPhy;
+    uint64_t TmpPageTrackLast = KeMallocPageTracksPhy;
     uint64_t TmpVMemTrackBase;
-    uint64_t VmemCheck = 0;
+    uint64_t TmpVMemTrackLast;
     uint64_t TrackCount = 0;
-    uint64_t Foo = 0;
-    for(uint64_t PageCount = 0; PageCount < KeMallocPageTracksPhyCount; PageCount++){
+    
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
         if(RangeInterferes(
             (uint64_t)Address, 
             1,
@@ -267,27 +282,47 @@ void LouKeFreePhysical(void* Address){
             PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase)
         )){
             TrackCount = PAGE_TRACK_DEREFERENCE_READ_TRACK_COUNT(TmpPageTrackBase);
-            TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
-
-            for(VmemCheck = 0 ; VmemCheck < TrackCount; VmemCheck++){
-
-                if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
-                    if(TmpVMemTrackBase == PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase)){
-                        PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
-                        LouFree((RAMADD)TmpVMemTrackBase);
-                        PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
-                        return;
-                    }else{
-                        VMEM_TRACK_DEREFERENCE_WRITE_NEXT(Foo, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
-                        LouFree((RAMADD)TmpVMemTrackBase);
-                        PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
-                        return;
-                    }
+            if((!(TrackCount - 1)) && (VMEM_TRACK_DEREFERENCE_READ_ADDRESS(PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase)) == (uint64_t)Address)){
+                if(KeMallocPageTracks == TmpPageTrackBase){
+                    return;
                 }
-                Foo = TmpVMemTrackBase;
-                TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+                PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackLast, PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase));
+                LouKeFreePage((PVOID)PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
+                TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+                TmpVMemTrackLast = TmpVMemTrackBase;
+                while(TmpVMemTrackBase){
+                    TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+                    LouFree((RAMADD)TmpVMemTrackLast);
+                    TmpVMemTrackLast = TmpVMemTrackBase;
+                }
+                LouFree((RAMADD)TmpPageTrackBase);
+                return;
+            }else{
+                if(KeMallocPageTracks == TmpPageTrackBase){
+                    return;
+                }
+                TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+                TmpVMemTrackLast = TmpVMemTrackBase;
+                while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
+                    if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
+                        if(TmpVMemTrackBase == TmpVMemTrackLast){
+                            PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
+                            LouFree((RAMADD)TmpVMemTrackBase);
+                            PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
+                            return;
+                        }else{
+                            VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackLast, VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase));
+                            LouFree((RAMADD)TmpVMemTrackBase);
+                            PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount - 1);
+                            return;
+                        }
+                    }
+                    TmpVMemTrackLast = TmpVMemTrackBase;
+                    TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+                }
             }
         }
+        TmpPageTrackLast = TmpPageTrackBase;
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
 }

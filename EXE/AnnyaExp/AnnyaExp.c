@@ -18,7 +18,6 @@ ANNYAEXP_API
 DWORD 
 AnnyaExplorerFileManager(PVOID Args){
     PANNYA_EXPLORER_INIT_PACKET InitPacket = (PANNYA_EXPLORER_INIT_PACKET)Args;
-    
     HWND ExplorerFmWindow = CreateWindowA(
         ANNYA_GENERIC_WINDOW,
         "File Explorer",

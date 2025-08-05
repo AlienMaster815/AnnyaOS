@@ -480,6 +480,7 @@ void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
 
 
 void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
+
     if(InterfaceDualClick){
         if(AnnyaExplorerFileManager){
             PANNYA_EXPLORER_INIT_PACKET NewPacket = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
