@@ -18,6 +18,10 @@ void LouKeMouseMoveEventUpdate(PLOUSINE_USER_SHARED_MESSAGE Message){
 
 void LouKeMouseUpdateInput(PLOUSINE_USER_SHARED_MESSAGE Message, INT64 X, INT64 Y, BOOL RightClick, BOOL LeftClick){
 
+    if(MutexIsLocked(&Message->MessageMutex)){
+        return;
+    }
+
     Message->MouseEvent.X += X;
     Message->MouseEvent.Y += Y;
 

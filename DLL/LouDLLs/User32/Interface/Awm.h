@@ -253,7 +253,7 @@ void AwmInitializeWindowStyle(
 
 void AwmSignalEndofGrabEvent();
 PWINDOW_HANDLE AwmCheckIfWindowIsGrabbed();
-void AwmMoveWindow(PWINDOW_HANDLE Window, INT64 DeltaX, INT64 DeltaY);
+void AwmMoveWindow(PWINDOW_HANDLE Window, INT64* DeltaX, INT64* DeltaY);
 
 PDRSD_CLIP CreateClipFromString(
     string Str, 

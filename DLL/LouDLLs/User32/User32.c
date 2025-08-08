@@ -58,17 +58,6 @@ void free(void* Address){
 //    LouCALL(LOUVFREE, &Data, 0);
 //}
 
-USER32_API
-void* AnnyaAPI(){
-
-}
-
-USER32_API
-void AnnyaResetGpu(uint64_t Monitor){
-
-
-}
-
 
 
 USER32_API

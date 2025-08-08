@@ -25,6 +25,7 @@ void print_binary32(uint32_t number);
 void print_binary16(uint16_t number);
 void print_binary8(uint8_t number);
 void intToString(uint64_t num, char* str);
+void sintToString(int64_t num, char* str);
 //void uintToLittleEndianHexString(uint64_t number, char* hexString);
 void uintToHexString(uint64_t number, char* hexString);
 
@@ -100,11 +101,23 @@ int LouPrint_s(char* format, va_list args){
                     break;
                 }
                 case 's': {
-                    char* text = va_arg(args, char*);
-                    while (*text != '\0') {
-                        LouKeOsDosPrintCharecter(*text);
-                        LouKeDebuggerCommunicationsSendCharecter(*text);
-                        text++;
+                    if(format[1] == 'd'){
+                        format++;
+                        int64_t num = va_arg(args, int64_t);
+                        sintToString((uint64_t)num, PrintString);
+                        char* p = PrintString;
+                        while (*p != '\0') {
+                            LouKeOsDosPrintCharecter(*p);
+                            LouKeDebuggerCommunicationsSendCharecter(*p);
+                            p++;
+                        }
+                    }else{
+                        char* text = va_arg(args, char*);
+                        while (*text != '\0') {
+                            LouKeOsDosPrintCharecter(*text);
+                            LouKeDebuggerCommunicationsSendCharecter(*text);
+                            text++;
+                        }
                     }
                     break;
                 }

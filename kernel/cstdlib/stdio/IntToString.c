@@ -29,6 +29,26 @@ void intToString(uint64_t num, char* str) {
         right--;
     }
 }
+
+void sintToString(int64_t num, char* str) {
+    uint64_t i = 0;
+
+    // Handle negative
+    if (num < 0) {
+        str[i++] = '-';
+        num = -num;
+    }
+
+    char temp[21];
+    intToString((uint64_t)num, temp);
+
+    uint64_t j = 0;
+    while (temp[j] != '\0') {
+        str[i++] = temp[j++];
+    }
+    str[i] = '\0';
+}
+
 #endif
 #ifdef __i386__
 void intToString(uint32_t num, char* str) {

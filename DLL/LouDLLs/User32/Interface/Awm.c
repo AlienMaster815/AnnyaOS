@@ -490,22 +490,26 @@ void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
     }
 }
 
-void AwmMoveWindow(PWINDOW_HANDLE Window, INT64 DeltaX, INT64 DeltaY){
+void AwmMoveWindow(PWINDOW_HANDLE Window, INT64* pDeltaX, INT64* pDeltaY){
     size_t PlaneCount = Window->PlaneCount;
     INT64 LastX;
     INT64 LastY;
     INT64 LastWidth;
     INT64 LastHeight;
+    INT64 DeltaX = *pDeltaX;
+    INT64 DeltaY = *pDeltaY;
     for(size_t i = 0 ; i < PlaneCount; i++){
         LastX = Window->MainWindow[i]->X;
         LastY = Window->MainWindow[i]->Y;
         LastWidth = Window->MainWindow[i]->Width;
         LastHeight = Window->MainWindow[i]->Height;
-        if(DesktopCurrentX >= (LastX + DeltaX)){
-            DeltaX = 0;
+        if(DesktopCurrentX > (LastX + DeltaX)){
+            DeltaX = -LastX;
+            *pDeltaX = DeltaX;
         }
-        if(DesktopCurrentY >= (LastY + DeltaY)){
-            DeltaY = 0;
+        if(DesktopCurrentY > (LastY + DeltaY)){
+            DeltaY = -LastY;
+            *pDeltaY = DeltaY;
         }
         LouUpdateClipLocation(Window->MainWindow[i], (UINT32)(LastX + DeltaX), (UINT32)(LastY + DeltaY));
         UpdateWindowToDesktop(Window);
@@ -525,39 +529,37 @@ MouseEventHandler(
     
     INT64 DeltaX = MouseEvent->X;
     INT64 DeltaY = MouseEvent->Y;
-    gMouseX += DeltaX;
-    gMouseY += DeltaY;
 
     BOOL RightClick = MouseEvent->RightClick;
     BOOL LeftClick  = MouseEvent->LeftClick;
 
-    //write 0s for the request to complete
     MouseEvent->X = 0;
     MouseEvent->Y = 0;
     MouseEvent->LeftClick = 0;
     MouseEvent->RightClick = 0;
 
-    if(gMouseX < DesktopCurrentX){
-        DeltaX = 0;
-        gMouseX = DesktopCurrentX;
-    }else if(gMouseX > (DesktopCurrentX + DesktopCurrentWidth)){
-        DeltaX = 0;
-        gMouseX = (DesktopCurrentX + DesktopCurrentWidth);
+    if((gMouseX + DeltaX) < DesktopCurrentX){
+        DeltaX = -gMouseX;
+    }else if((gMouseX + DeltaX) > (DesktopCurrentX + DesktopCurrentWidth)){
+        DeltaX = (DesktopCurrentX + DesktopCurrentWidth) - gMouseX;
     }
-    if(gMouseY < DesktopCurrentY){
-        DeltaY = 0;
-        gMouseY = DesktopCurrentY;
-    }else if(gMouseY > (DesktopCurrentY + DesktopCurrentHeight)){
-        DeltaY = 0;
-        gMouseY = (DesktopCurrentY + DesktopCurrentHeight);
+    if((gMouseY + DeltaY) < DesktopCurrentY){
+        DeltaY = -gMouseY;
+    }else if((gMouseY + DeltaY) > (DesktopCurrentY + DesktopCurrentHeight)){
+        DeltaY = (DesktopCurrentY + DesktopCurrentHeight) - gMouseY;
     }
+
     //LouPrint("X:%d, Y:%d\n", gMouseX, gMouseY);
-    UpdateMouseClip(gMouseX, gMouseY);
 
     PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
     if(GrabbedWindow){
-        AwmMoveWindow(GrabbedWindow, DeltaX, DeltaY);
+        AwmMoveWindow(GrabbedWindow, &DeltaX, &DeltaY);
     }
+
+    gMouseY += DeltaY;
+    gMouseX += DeltaX;
+
+    UpdateMouseClip(gMouseX, gMouseY);
 
     if(RightClick && !RightMouseDown){
         InterfaceDualClick = false;
