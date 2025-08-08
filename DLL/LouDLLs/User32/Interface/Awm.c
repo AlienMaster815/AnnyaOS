@@ -43,7 +43,7 @@ HANDLE (*AnnyaCreateClipFromPng)(void*, HANDLE);
 
 static AWM_WINDOW_TRACKER_ENTRY AwmMasterTracker = {0};
 static mutex_t AwmMasterTrackerMutex = {0};
-static AWM_PLANE_TRACKER PlaneTracker = {0};
+AWM_PLANE_TRACKER PlaneTracker = {0};
 static mutex_t AwmPlaneTrackerMutex = {0};
 static HWND BackgroundWindow = 0x00;
 static HWND TaskbarWindow = 0x00;
@@ -54,8 +54,8 @@ static HANDLE FolderPng = 0x00;
 static HMENU StartMenu = 0x00;
 static bool StartButtonDown = false;
 
-static int64_t DesktopCurrentX = 0;
-static int64_t DesktopCurrentY = 0;
+int64_t DesktopCurrentX = 0;
+int64_t DesktopCurrentY = 0;
 int64_t DesktopCurrentWidth = 0;
 int64_t DesktopCurrentHeight = 0;
 
@@ -65,6 +65,7 @@ PDRSD_CLIP* XButtonClips = 0x00;
 static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 void InitializeFreeType();
+void InitializePlaneTracker();
 
 USER32_API
 BOOL
@@ -284,23 +285,20 @@ InitializeAwmUserSubsystem(
     PANNYA_DESKTOP_SETUP_PACKET     InterfaceSetup
 ){
     LouPrint("InitializeAwmUserSubsystem()\n");
-    /*AwmInstance = hInstance;
+    AwmInstance = hInstance;
     InitializeDependencies();
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);
+    InitializePlaneTracker();
+
     
+    /*
+
     XButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
 
     LouPrint("Allocation Finished\n");
-    for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
-        if(PlaneTracker.PlaneInformation[i].Width > DesktopCurrentWidth){
-            DesktopCurrentWidth = PlaneTracker.PlaneInformation[i].Width; 
-        }
-        if(PlaneTracker.PlaneInformation[i].Height > DesktopCurrentHeight){
-            DesktopCurrentHeight = PlaneTracker.PlaneInformation[i].Height; 
-        }
-    }
+
 
     BackgroundWindow = CreateWindowA(
                             DEKSTOP_BACKGROUND,

@@ -295,7 +295,7 @@ LouKeDrsdInitializeBootDevice(
 
     PDRSD_CLIP Background = LouKeDrsdCreateClip(
         Plane,
-        Plane->PlaneState->SourceX, Plane->PlaneState->SourceY,
+        0, 0,
         Plane->PlaneState->Width, Plane->PlaneState->Height,
         0, 128, 128, 255
     );
@@ -381,7 +381,7 @@ LouKeDrsdInitializeDevice(
         Chain->PrimaryAtomicUpdate = PrimaryPlane->AssistCallbacks->AtomicUpdate;
         UNUSED PDRSD_CLIP Background = LouKeDrsdCreateClip(
             PrimaryPlane,
-            PrimaryPlane->PlaneState->SourceX, PrimaryPlane->PlaneState->SourceY,
+            0, 0,
             PrimaryPlane->PlaneState->Width, PrimaryPlane->PlaneState->Height,
             0, 128, 128, 255
         );
