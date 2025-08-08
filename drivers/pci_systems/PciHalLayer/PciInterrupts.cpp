@@ -4,12 +4,6 @@
 KERNEL_IMPORT uint16_t GetNPROC();
 KERNEL_IMPORT uint8_t GetTotalHardwareInterrupts();
 
-uint64_t* AdvancedInterruptRouterData;
-int NumberOfInterruptHandlers = 0;
-int HandlersPerCore = 0;
-
-
-
 int GetSupportedMsiVectors(P_PCI_DEVICE_OBJECT PDEV,uint64_t Flags) {
 
 
@@ -51,13 +45,4 @@ int LouKeHalMallocPciIrqVectors(
     return 0;
 }
 
-LOUDDK_API_ENTRY 
-LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing(){
-    return STATUS_SUCCESS;
-}
 
-
-LOUDDK_API_ENTRY
-void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args){
-
-}

@@ -25,7 +25,7 @@ uintptr_t RSP_Current;
 uintptr_t RBP_Current;
 
 
-/* Tyler Grenier 9/21/23 9:56 PM
+/* Tyler Grenier 10/4/23 9:56 PM
 -- Started the file with the main
 -- functions to get us going along 
 -- with allocation functions
@@ -40,19 +40,22 @@ string KERNEL_ARCH = "64-BIT";
 sring KERNEL_ARCH = "32-BIT";
 #endif
 
-LOUSTATUS InitFADT();
-LOUSTATUS InitDSDT();
-LOUSTATUS InitSSDT();
-LOUSTATUS InitSBST();
-LOUSTATUS InitSRAT();
-LOUSTATUS InitBGRT();
-LOUSTATUS InitECDT();
-LOUSTATUS InitSLIT();
-LOUSTATUS InitMCFG();
+typedef struct _PROCESSOR_FEATURES{
+    bool    Sse1Supported;
+    bool    Sse2Supported;
+    bool    Sse3Supported;
+    bool    Ssse3Supported;
+    bool    Sse41Supported;
+    bool    Sse42Supported;
+    bool    Avx1Supported;
+    bool    Avx2Supported;
+    bool    Avx512Supported;
+}PROCESSOR_FEATURES, * PPROCESSOR_FEATURES;
+
+static PPROCESSOR_FEATURES ProcAcceleratedFeatures = 0;
+
 LOUSTATUS InitThreadManager();
 LOUSTATUS SetUpTimers();
-void PS2KeyboardHandler(UINT64 Rsp);
-void PS2MouseHandler(UINT64 Rsp);
 void PageFault(UINT64 Rsp);
 void GPF(UINT64 Rsp);
 void DoubleFault(UINT64 Rsp);
@@ -66,7 +69,6 @@ void BoundRange(UINT64 Rsp);
 void Debug(UINT64 Rsp);
 void InvalidOpcode(UINT64 Rsp);
 void FloatDeviceNotAvailable(UINT64 Rsp);
-//void TSS();
 void CpOverun(UINT64 Rsp);
 void SegmentNotPresent(UINT64 Rsp);
 void StackSegmentFault(UINT64 Rsp);
@@ -77,26 +79,17 @@ void SIMDFloatPointException(UINT64 Rsp);
 void VirtualizationException(UINT64 Rsp);
 void ControlProtectionException(UINT64 Rsp);
 void CookieCheckFail(UINT64 Rsp);
-void InitPreLoadedModules();
 void ParseMBootTags(struct multiboot_tag* MBOOT);
-void CreateNewPageSystem();
 uint64_t GetRamSize();
-void InitializeSystemCalls();
-void initialize_ps2_keyboard();    uint64_t ContextHandle = 0x00;
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
-LOUSTATUS InitializeDynamicHardwareInterruptHandleing();
 void initializeInterruptRouter();
 void InitializeGenericTables();
-void InitializeVesaSystem();
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
-PWINDHANDLE HWind = 0x00;
-void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
 uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
 void FlushTss();
-LOUSTATUS SetupInitialVideoDevices();
 void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
@@ -104,17 +97,83 @@ void InitializeNtKernelTransitionLayer();
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
 void InitializeBootGraphics();
-void LouKeDrsdDrawDesktopBackground(
-    FILE* ImageFile,
-    uint16_t DrsdFileType
-);
 void UpdateThreadManager(uint64_t Rsp);
 void InitializeInterruptRouter();
-
+void LouKeProbeSbIsa();
 void SetupGDT();
 extern void ReloadGdt();
 extern void LoadTaskRegister();
 uint64_t GetCurrentTimeIn100ns();
+int TestLoop2();
+void LouKeInitializeFullLouACPISubsystem();
+void LouKeDestroyThread();
+extern void MachineCodeDebug(uint64_t FOO);
+void LouKeRunOnNewStack(void (*func)(void), void* FunctionParameters, size_t stack_size);
+void LouKeSwitchContext(void (*Function)(), uint64_t StackSize);
+LOUSTATUS LookForStorageDevices();
+void LouKeRunThreadContext(
+    uint64_t Ctex,
+    uint64_t CCTex
+);
+uint64_t GetThreadContext(
+    int Thread
+);
+void UsrJmp(uint64_t Entry);
+void read_rtc();
+void ManualContextSwitch(uint64_t Context1, uint64_t Context_2);
+void LouKeMapPciMemory();
+bool LouKeMapEfiMemory();
+void ListAllocatedPorts();
+void ScanTheRestOfHarware();
+void LouKeHandleSystemIsBios();
+void SetContext(uint64_t Context, uint64_t Function);
+void SMPInit();
+void InitializeUserSpace();
+void LouKeInitializeSafeMemory();
+uint8_t LouKeGetNumberOfStorageDevices();
+void InitializeFileSystemManager();
+void GenericVideoProtocolInitialize();
+void InitializeSafePage();
+void InitializePoolsPool();
+void CheckAndInitializePs2Controller();
+void InitializeBusCore();
+void InitializeAcpiSystem();
+void InitializeDebuggerComunications();
+void LouKeInitializeMouseManagemet();
+void LouKeIcUnmaskIrq(uint8_t irq);
+void IoApicConfigureEntryFlags(
+    uint8_t     irq,
+    uint16_t    Flags
+);
+void LouKePollIoApicPinForAssertion(uint8_t Pin);
+uint64_t GetUsedMemory();
+uint32_t Random32(uint32_t Seed);
+void SetGSBase(uint64_t gs_base);
+uint64_t GetGSBase();
+extern uint64_t GetRBP();
+extern uint64_t RecreateDisasemblyIssue();
+extern void SetTEB();
+bool LouKeCreateProcessA(
+    string                          ApplicationName,
+    string                          CommandLine,
+    PWIN_API_SECUTIY_ATTRIBUTES     ProcessAttributes,
+    PWIN_API_SECUTIY_ATTRIBUTES     ThreadAttributes,
+    bool                            Inherited,
+    uint32_t                        Flags,
+    void*                           Enviornment,
+    string                          CurrentDirectory,
+    PWIN_API_STARTUP_INFOA          StartupInformation,
+    PWIN_API_PROCESS_INFORMATION    ProcessInformation,
+    bool                            AnnyaAPIProcess //AnnyaAPI uses different flags and setups
+);
+void* LouKeVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+);
+extern void SetPEB(uint64_t PEB);
+uint16_t GetNPROC();
+
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -160,19 +219,6 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     return LOUSTATUS_GOOD;
 }
 
-void StorPortInitializeAllDevices();
-
-int InitKThread();
-int TestLoop2();
-
-
-void InitializeDeviceManager();
-LOUSTATUS LouKeMallocAdvancedKernelInterruptHandleing();
-
-void HandleProccessorInitialization();
-void LouKeInitializeAcpicaSubSystem();
-void LouKeInitializeFullLouACPISubsystem();
-
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
     InitThreadManager();
@@ -180,48 +226,13 @@ void AdvancedLousineKernelInitialization(){
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
 }
 
-bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-
-void LouKeDestroyThread();
-
-void TestFontFunction();
-extern void MachineCodeDebug(uint64_t FOO);
-
-bool DetatchWindowToKrnlDebug(PWINDHANDLE WindowSecurityCheck);
-
 void KillDebuger(){
     //DetatchWindowToKrnlDebug(HWind);
     //LouDestroyWindow(HWind);
 }
 
-void LouKeRunOnNewStack(void (*func)(void), void* FunctionParameters, size_t stack_size);
 
-void LouKeSwitchContext(void (*Function)(), uint64_t StackSize);
 
-LOUSTATUS LookForStorageDevices();
-
-void LouKeRunThreadContext(
-    uint64_t Ctex,
-    uint64_t CCTex
-);
-
-uint64_t GetThreadContext(
-    int Thread
-);
-
-typedef struct _PROCESSOR_FEATURES{
-    bool    Sse1Supported;
-    bool    Sse2Supported;
-    bool    Sse3Supported;
-    bool    Ssse3Supported;
-    bool    Sse41Supported;
-    bool    Sse42Supported;
-    bool    Avx1Supported;
-    bool    Avx2Supported;
-    bool    Avx512Supported;
-}PROCESSOR_FEATURES, * PPROCESSOR_FEATURES;
-
-static PPROCESSOR_FEATURES ProcAcceleratedFeatures = 0;
 
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
     if(!ProcAcceleratedFeatures){
@@ -230,16 +241,6 @@ void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
         *ProcAcceleratedFeatures = *Features;
     }
 }
-
-void read_rtc();
-void ManualContextSwitch(uint64_t Context1, uint64_t Context_2);
-void LouKeMapPciMemory();
-bool LouKeMapEfiMemory();
-void ListAllocatedPorts();
-void ScanTheRestOfHarware();
-void LouKeHandleSystemIsBios();
-
-//static mutex_t SmpStartupMutex;
 
 KERNEL_ENTRY LouKernelSmpStart(){
 
@@ -252,9 +253,7 @@ KERNEL_ENTRY LouKernelSmpStart(){
     }
 }
 
-void UsrJmp(uint64_t Entry);
 
-bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, bool LargePage);
 
 
 void PrintTest(){
@@ -263,7 +262,6 @@ void PrintTest(){
     }
 }
 
-void SetContext(uint64_t Context, uint64_t Function);
 
 
 typedef struct  PACKED _CPUContext{
@@ -278,22 +276,6 @@ typedef struct  PACKED _CPUContext{
 } CPUContext;
 
 
-void SMPInit();
-void InitializeUserSpace();
-void LouKeInitializeSafeMemory();
-void CheckForPs2Mouse();
-void InitializeInternalChipsetHostDriver();
-uint8_t LouKeGetNumberOfStorageDevices();
-void InitializeFileSystemManager();
-void GenericVideoProtocolInitialize();
-void InitializePs2Mouse();
-void EnablePs2Keyboard();
-void CheckForSoundblaster16();
-void InitializeSafePage();
-
-
-void LouKeFree2(void* Address);
-
 void EnableCR0WriteProtection() {
     uint64_t cr0;
     asm volatile ("mov %%cr0, %0" : "=r"(cr0));
@@ -307,24 +289,13 @@ void DisableCR0WriteProtection() {
     cr0 &= ~(1ULL << 16); // Set WP bit
     asm volatile ("mov %0, %%cr0" :: "r"(cr0));
 }
-void InitializeAcpiSystem();
-void InitializeDebuggerComunications();
-void LouKeInitializeMouseManagemet();
-void LouKeIcUnmaskIrq(uint8_t irq);
-void IoApicConfigureEntryFlags(
-    uint8_t     irq,
-    uint16_t    Flags
-);
-void LouKePollIoApicPinForAssertion(uint8_t Pin);
+
 
 UNUSED static bool SystemIsEfiv = false;
 
 bool IsSystemEfi(){
     return SystemIsEfiv;
 }
-void InitializePoolsPool();
-void CheckAndInitializePs2Controller();
-void InitializeBusCore();
 
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
@@ -381,7 +352,8 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeBusCore();
 
-    //CheckForSoundblaster16();
+    LouKeProbeSbIsa();
+
     ScanTheRestOfHarware();
     
     //SMPInit();
@@ -406,39 +378,8 @@ void TrampolineFinalInit(){
     LouKeRunOnNewStack(LouKernelSmpStart, 0 , 16 * KILOBYTE);
 }
 
-uint64_t GetUsedMemory();
-uint32_t Random32(uint32_t Seed);
 
-void SetGSBase(uint64_t gs_base);
-uint64_t GetGSBase();
 
-extern uint64_t GetRBP();
-
-extern uint64_t RecreateDisasemblyIssue();
-extern void SetTEB();
-
-bool LouKeCreateProcessA(
-    string                          ApplicationName,
-    string                          CommandLine,
-    PWIN_API_SECUTIY_ATTRIBUTES     ProcessAttributes,
-    PWIN_API_SECUTIY_ATTRIBUTES     ThreadAttributes,
-    bool                            Inherited,
-    uint32_t                        Flags,
-    void*                           Enviornment,
-    string                          CurrentDirectory,
-    PWIN_API_STARTUP_INFOA          StartupInformation,
-    PWIN_API_PROCESS_INFORMATION    ProcessInformation,
-    bool                            AnnyaAPIProcess //AnnyaAPI uses different flags and setups
-);
-
-void* LouKeVirtualAllocUser(
-    size_t      CommitSize,     //allocated PhysicalMemory
-    size_t      ReservedSize,   //AllocatedVirtual
-    uint64_t    PageFlags
-);
-
-extern void SetPEB(uint64_t PEB);
-uint16_t GetNPROC();
 
 void InitializeUserSpace(){
     LouPrint("Initializing User Mode\n");
@@ -477,12 +418,9 @@ void InitializeUserSpace(){
     UsrJmp(InitEntry);
 }
 
-void LouKeUpdateMouseState(PSYSTEM_STATE_STACK State);
 
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
-    //LouKeUpdateMouseState(Stack);
-    //EnablePs2Keyboard();
-    //InitializePs2Mouse();
+
 }
 
 //0x220B21030
