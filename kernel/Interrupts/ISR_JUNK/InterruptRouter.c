@@ -29,8 +29,6 @@ typedef struct  PACKED _CPUContext{
 } CPUContext;
 
 void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size);
-void AdvancedInterruptRouter(uint64_t InterruptNumber, uint64_t Args);
-
 
 void LouKeSendIcEOI();
 bool GetAPICStatus();

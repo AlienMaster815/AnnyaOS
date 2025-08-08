@@ -16,6 +16,7 @@
         <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>                   <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/USB/HostDrivers/XHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/XHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
+        <FILETOCPY64>cp drivers/DMA/8237A/8237A.SYS ISO/ANNYA/SYSTEM64/DRIVERS/8237A.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
         <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX IDE Chipset-->
         <FILETOCPY64>cp drivers/storage/Ahci/AHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AHCI.SYS</FILETOCPY64>                     <!--AHCI Chipset-->
         <FILETOCPY64>cp drivers/Serial/Ps2Bus/PS2IO.SYS ISO/ANNYA/SYSTEM64/PS2IO.SYS</FILETOCPY64>                      <!--AHCI Chipset-->

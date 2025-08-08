@@ -115,7 +115,6 @@ x86_64_c_source_files := $(shell find init -name *.c)
 x86_64_c_object_files := $(patsubst init/%.c, build/x86_64/init/%.o, $(x86_64_c_source_files))
 
 driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
-driver_cpp_source_files := $(shell find drivers/Audio/InternalSound -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/DriverInterrupts -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/FileSystems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/gpu/InternalGpuFunctions -name *.cpp)
@@ -294,6 +293,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C drivers/Networking/PCNET32 clean
 	$(MAKE) -C drivers/Networking/PCNET32 all
+
+	$(MAKE) -C drivers/DMA/8237A clean
+	$(MAKE) -C drivers/DMA/8237A all
 
 	$(MAKE) -C drivers/Audio/SoundBlaster clean
 	$(MAKE) -C drivers/Audio/SoundBlaster all

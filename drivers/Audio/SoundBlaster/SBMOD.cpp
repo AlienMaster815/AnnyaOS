@@ -1,22 +1,29 @@
-
-#define _KERNEL_MODULE_
-
-#include <LouDDK.h>
 #include "SBMOD.h"
-
-#define SB16 1
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedSoundBalsters[] = {
     {0},
 };
 
-LOUDDK_API_ENTRY 
-VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
-    LouPrint("SBMOD::UnloadDriver()\n");
-    //we have nothing to unload
-    LouPrint("SBMOD::UnloadDriver() STATUS_SUCCESS\n");
+
+DRIVER_EXPORT
+LOUSTATUS 
+LouKeAddSbIsaDevice(){
+    LouPrint("SBMOD.SYS::LouKeAddSbIsaDevice()\n");
+    LouKeLoadDriver("8237A.SYS", 0x00);
+
+
+
+    LouPrint("SBMOD.SYS::LouKeAddSbIsaDevice() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
 }
 
+
+LOUDDK_API_ENTRY 
+VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
+    LouPrint("SBMOD.SYS::UnloadDriver()\n");
+    //we have nothing to unload
+    LouPrint("SBMOD.SYS::UnloadDriver() STATUS_SUCCESS\n");
+}
 
 NTSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
@@ -32,7 +39,7 @@ NTSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry
 ){
-    LouPrint("SBMOD::DriverEntry()\n");
+    LouPrint("SBMOD.SYS::DriverEntry()\n");
     //tell the System where are key Nt driver functions are
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;
@@ -44,8 +51,7 @@ NTSTATUS DriverEntry(
     //fill LDM information
     DriverObject->DeviceTable = (uintptr_t)SupportedSoundBalsters;
 
-    LouPrint("SBMOD::DriverEntry() STATUS_SUCCESS\n");
-    while(1);
+    LouPrint("SBMOD.SYS::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 

@@ -1,7 +1,7 @@
 // Header: HeaderName.h
 
-#ifndef _BUSSES_H
-#define _BUSSES_H
+#ifndef _SOUND_CORE_H
+#define _SOUND_CORE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,35 +34,15 @@ extern "C" {
 #include <LouAPI.h>
 #endif
 
-typedef struct _LOU_BUS_OBJECT{
-    ListHeader          Peers;
-    string              BusName;
-    PVOID               BusPrivateData;
-}LOU_BUS_OBJECT, * PLOU_BUS_OBJECT;
 
-typedef struct _LOU_BUS{
-    string              BusName;
-    PLOU_BUS_OBJECT     BusObjects;
-    spinlock_t          BusScanLock;
-    LOUSTATUS           (*SearchMachine)(struct _LOU_BUS* BusData);
-    LOUSTATUS           (*InitializeBus)(struct _LOU_BUS* BusData, PLOU_BUS_OBJECT BusObject);
-    LOUSTATUS           (*DeInitializeBus)(struct _LOU_BUS* BusData, PLOU_BUS_OBJECT BusObject);
-}LOU_BUS, * PLOU_BUS;
 
 #ifdef _KERNEL_MODULE_
 // --- Module-specific data (MODULE_NAME.SYS) ---
-KERNEL_EXPORT
-LOUSTATUS 
-LouKeCreateBusClass(
-    PLOU_BUS    Bus
-);
 
 #else
 // --- LOUOSKRNL.EXE-specific data ---
-LOUSTATUS 
-LouKeCreateBusClass(
-    PLOU_BUS    Bus
-);
+
+
 #endif
 
 #endif // end user vs kernel

@@ -66,298 +66,14 @@ static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 void InitializeFreeType();
 
-SIZE AwmGetPlaneCount(){
-    return PlaneTracker.PlaneCount;
-}
-
-PDRSD_PLANE_QUERY_INFORMATION AwmGetPlaneInformation(){
-    return PlaneTracker.PlaneInformation;
-}
-
-PAWM_CLIP_TREE FindEnclosingClip(PAWM_CLIP_TREE Tree, PDRSD_CLIP InnerClip) {
-    PAWM_CLIP_TREE Best = 0x00;
-
-    while (Tree) {
-        PDRSD_CLIP Clip = Tree->Clip;
-        if (
-            (Clip->X <= InnerClip->X) &&
-            (Clip->Y <= InnerClip->Y) &&
-            ((Clip->X + Clip->Width) > (InnerClip->X + InnerClip->Width)) &&
-            ((Clip->Y + Clip->Height) > (InnerClip->Y + InnerClip->Height))
-        ) {
-            PAWM_CLIP_TREE ChildMatch = NULL;
-            if (Tree->SubPlane.NextHeader) {
-                ChildMatch = FindEnclosingClip((PAWM_CLIP_TREE)Tree->SubPlane.NextHeader, InnerClip);
-            }
-            Best = ChildMatch ? ChildMatch : Tree;
-        }
-        Tree = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
-    }
-    return Best;
-}
-
-
-PAWM_CLIP_TREE FindClipAtPoint(PAWM_CLIP_TREE Tree, INT64 X, INT64 Y){
-    PAWM_CLIP_TREE Best = 0x00;    
-    while (Tree) {
-        PDRSD_CLIP Clip = Tree->Clip;
-        if (
-            (Clip->X <= X) &&
-            (Clip->Y <= Y) &&
-            ((Clip->X + Clip->Width) >= (X)) &&
-            ((Clip->Y + Clip->Height) >= (Y))
-        ) {
-            PAWM_CLIP_TREE ChildMatch = NULL;
-            if (Tree->SubPlane.NextHeader) {
-                ChildMatch = FindClipAtPoint((PAWM_CLIP_TREE)Tree->SubPlane.NextHeader, X, Y);
-            }
-            Best = ChildMatch ? ChildMatch : Tree;
-        }
-        Tree = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
-    }
-    return Best;
-}
-
-PWINDOW_HANDLE AwmFindWindowFromClip(PDRSD_CLIP Clip, SIZE i){
-    PAWM_WINDOW_TRACKER_ENTRY Tmp = &AwmMasterTracker;
-    while(Tmp){
-        if(Tmp->WindowHandle){
-            if((uintptr_t)Tmp->WindowHandle->MainWindow[i] == (uintptr_t)Clip){
-                return Tmp->WindowHandle; 
-            }
-        }
-        Tmp = (PAWM_WINDOW_TRACKER_ENTRY)Tmp->Peers.NextHeader;
-    }
-    return 0x00;
-}
-
-PDRSD_CLIP FindClip(INT64 X, INT64 Y){
-    for(SIZE i = 0; i < PlaneTracker.PlaneCount; i++){
-        PAWM_CLIP_TREE ClipTree = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-        ClipTree = FindClipAtPoint(ClipTree, X, Y);
-        if(ClipTree){
-            return ClipTree->Clip;
-        }   
-    }
-    return 0x00;
-}
-
-PWINDOW_HANDLE AwmFindWindowAtPoint(INT64 X, INT64 Y){
-    PWINDOW_HANDLE Result = 0x00;
-    for(SIZE i = 0; i < PlaneTracker.PlaneCount; i++){
-        PAWM_CLIP_TREE ClipTree = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-        ClipTree = FindClipAtPoint(ClipTree, X, Y);
-        Result = AwmFindWindowFromClip(ClipTree->Clip, i);
-        if(Result){
-            return Result;
-        }
-    }
-    return 0x00;
-}
-
-void MoveWindowTheFrontRec(PWINDOW_HANDLE WindowHandle){
-    for(size_t i = 0 ; i < WindowHandle->PlaneCount; i++){
-        PAWM_CLIP_TREE Tree = &WindowHandle->ClipTreeHandle[i];
-        if(!Tree->CurrentPlane.NextHeader){
-            continue;
-        }
-        PAWM_CLIP_TREE Last = (PAWM_CLIP_TREE)Tree->CurrentPlane.LastHeader;
-        PAWM_CLIP_TREE Next = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
-        PAWM_CLIP_TREE UpDirectory = 0x00;
-        if(Last){
-            Last->CurrentPlane.NextHeader = (PListHeader)Next;
-        }else{
-            UpDirectory = (PAWM_CLIP_TREE)Tree->SubPlane.LastHeader;
-            Tree->SubPlane.LastHeader = 0x00;
-            UpDirectory->SubPlane.NextHeader = (PListHeader)Next;
-            Next->SubPlane.LastHeader = (PListHeader)UpDirectory;
-            Next->SubPlane.NextHeader = Tree->SubPlane.NextHeader;
-            Tree->SubPlane.NextHeader = 0x00;   
-        }
-        Next->CurrentPlane.LastHeader = (PListHeader)Last;
-
-        PAWM_CLIP_TREE Enclosing = FindEnclosingClip(
-            &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i],
-            WindowHandle->MainWindow[i]
-        );
-        Tree->SubPlane.NextHeader = NULL;
-        Tree->CurrentPlane.NextHeader = NULL;
-
-        if (!Enclosing) {
-            PAWM_CLIP_TREE Root = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Root;
-            PAWM_CLIP_TREE LastClip = 0x00;
-
-            while (Chain->CurrentPlane.NextHeader) {
-                LastClip = Chain;
-                Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
-            }
-
-            Chain->CurrentPlane.NextHeader = (PListHeader)Tree;
-            Tree->CurrentPlane.LastHeader = (PListHeader)Chain;
-        } else {
-            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Enclosing->SubPlane.NextHeader;
-            if(!Chain){
-                Enclosing->SubPlane.NextHeader = (PListHeader)Tree;
-                Tree->SubPlane.LastHeader = (PListHeader)Enclosing;
-            }else{
-                PAWM_CLIP_TREE LastClip = 0x00;
-                while (Chain->CurrentPlane.NextHeader) {
-                    LastClip = Chain;
-                    Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
-                }
-                Chain->CurrentPlane.NextHeader = (PListHeader)Tree;
-                Tree->CurrentPlane.LastHeader = (PListHeader)Chain;
-            }
-
-        }
-
-    }
-}
-
-void MoveWindowTheFront(PWINDOW_HANDLE WindowHandle){
-    MoveWindowTheFrontRec(WindowHandle);
-    PCHILD_WINDOW_TRACKER Children = &WindowHandle->Children;
-    while(Children->Peers.NextHeader){
-        MoveWindowTheFrontRec(Children->Child);
-        Children = (PCHILD_WINDOW_TRACKER)Children->Peers.NextHeader;
-    }
-}
-
-void UpdateWindowToDesktop(PWINDOW_HANDLE WindowHandle){
-    MoveWindowTheFront(WindowHandle);
-    MoveWindowTheFront(TaskbarWindow);
-    
-}
-
-void InitializeWindowToWindowManager(PWINDOW_HANDLE WindowHandle) {
-
-    PAWM_WINDOW_TRACKER_ENTRY Tmp = &AwmMasterTracker;
-    while (Tmp->Peers.NextHeader) {
-        Tmp = (PAWM_WINDOW_TRACKER_ENTRY)Tmp->Peers.NextHeader;
-    }
-
-    PAWM_WINDOW_TRACKER_ENTRY NewEntry = (PAWM_WINDOW_TRACKER_ENTRY)LouGlobalUserMallocType(AWM_WINDOW_TRACKER_ENTRY);
-    Tmp->Peers.NextHeader = (PListHeader)NewEntry;
-    NewEntry->WindowHandle = WindowHandle;
-    NewEntry->Peers.NextHeader = NULL;
-
-    for (SIZE i = 0; i < WindowHandle->PlaneCount; i++) {
-        PDRSD_CLIP Clip = WindowHandle->MainWindow[i];
-
-        PAWM_CLIP_TREE Enclosing = FindEnclosingClip(
-            &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i],
-            Clip
-        );
-
-        PAWM_CLIP_TREE NewClip = (PAWM_CLIP_TREE)&WindowHandle->ClipTreeHandle[i];
-        NewClip->Clip = Clip;
-        NewClip->SubPlane.NextHeader = NULL;
-        NewClip->CurrentPlane.NextHeader = NULL;
-
-        if (!Enclosing) {
-            PAWM_CLIP_TREE Root = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Root;
-            PAWM_CLIP_TREE LastClip = 0x00;
-
-            while (Chain->CurrentPlane.NextHeader) {
-                LastClip = Chain;
-                Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
-            }
-
-            Chain->CurrentPlane.NextHeader = (PListHeader)NewClip;
-            NewClip->CurrentPlane.LastHeader = (PListHeader)Chain;
-        } else {
-            PAWM_CLIP_TREE Chain = (PAWM_CLIP_TREE)Enclosing->SubPlane.NextHeader;
-            if(!Chain){
-                Enclosing->SubPlane.NextHeader = (PListHeader)NewClip;
-                NewClip->SubPlane.LastHeader = (PListHeader)Enclosing;
-            }else{
-                PAWM_CLIP_TREE LastClip = 0x00;
-                while (Chain->CurrentPlane.NextHeader) {
-                    LastClip = Chain;
-                    Chain = (PAWM_CLIP_TREE)Chain->CurrentPlane.NextHeader;
-                }
-                Chain->CurrentPlane.NextHeader = (PListHeader)NewClip;
-                NewClip->CurrentPlane.LastHeader = (PListHeader)Chain;
-            }
-
-        }
-
-        LouPrint("Window Installed To Window Manager:%s\n", WindowHandle->WindowName);
-    }
-
-}
-
-void RedrawClipTree(PAWM_CLIP_TREE Tree, int64_t X, int64_t Y, int64_t Width, int64_t Height) {
-    while (Tree) {
-        if (
-            (Tree->Clip->X < (X + Width)) &&
-            ((Tree->Clip->X + Tree->Clip->Width) > X) &&
-            (Tree->Clip->Y < (Y + Height)) &&
-            ((Tree->Clip->Y + Tree->Clip->Height) > Y)
-        ) {
-            if(Tree->UpdateClipSubState){
-                Tree->UpdateClipSubState((void*)Tree->Clip, X, Y, Width, Height);
-            }else{
-                LouUpdateShadowClipSubState((void*)Tree->Clip, X, Y, Width, Height);
-            }
-        }
-        if (Tree->SubPlane.NextHeader) {
-            RedrawClipTree((PAWM_CLIP_TREE)Tree->SubPlane.NextHeader, X, Y, Width, Height);
-        }
-        Tree = (PAWM_CLIP_TREE)Tree->CurrentPlane.NextHeader;
-    }
-}
-
-void CalculateRedraws(int64_t X, int64_t Y, int64_t Width, int64_t Height){
-    MutexLock(&AwmMasterTrackerMutex);
-    
-    /*
-    // Clip Tree Example
-    // DESKTOP ; CurrentPlane Object
-    // | 
-    // V
-    // Window1 -> Window Ornament ; SubPlane Object
-    // |                |  
-    // |                V  
-    // |           ChildOranment ; Current Plane Object 
-    // V
-    // Window2 -> Window Ornament ; Sub Plane Object
-    // CurrentPlane Object
-    */
-    
-    for (size_t i = 0; i < PlaneTracker.PlaneCount; i++) {
-        PAWM_CLIP_TREE RootTree = &((PWINDOW_HANDLE)BackgroundWindow)->ClipTreeHandle[i];
-        if (RootTree) {
-            RedrawClipTree(RootTree, X, Y, Width, Height);
-        }
-    }
-    MutexUnlock(&AwmMasterTrackerMutex);
-}
-
-
 USER32_API
 BOOL
 ShowWindow(
     HWND        WindowHandle,
     INTEGER     nCmdShow
 ){
-    PWINDOW_HANDLE Window = (PWINDOW_HANDLE)WindowHandle;
 
-    SIZE Planes = Window->PlaneCount;
-    BOOL WasVisable = Window->Visable;
-    Window->WindowVisability = nCmdShow; 
-    switch(nCmdShow){
-        case SW_SHOW:{
-            for(SIZE i = 0 ; i < Planes; i++){
-                LouUpdateShadowClipState((PVOID)Window->MainWindow[i]);
-            }
-            Window->Visable = true;
-        }
-    }
-
-    return WasVisable;
+    return false;
 }
 
 USER32_API
@@ -365,33 +81,8 @@ BOOL
 UpdateWindow(
     HWND WindowHandle
 ){
-    PWINDOW_HANDLE Window = (PWINDOW_HANDLE)WindowHandle;
-    SIZE PlaneCount = Window->PlaneCount;
-    SIZE i = 0;
-    if(!Window->Visable){
-        return true;
-    }
 
-    switch(Window->WindowVisability){
-        case SW_SHOW:{
-            for(;i < PlaneCount; i++){
-                CalculateRedraws(
-                    Window->MainWindow[i]->X,
-                    Window->MainWindow[i]->Y,
-                    Window->MainWindow[i]->Width,
-                    Window->MainWindow[i]->Height
-                );
-                if(MouseClips[i]){
-                    LouUpdateShadowClipState((void*)MouseClips[i]);
-                }
-                LouDrsdSyncScreen(Window->MainWindow[i]->ChainOwner);
-            }
-            return true;
-        }
-        default :
-            LouPrint("UpdateWindow\n");
-            while(1);
-    }
+    return false;
 }
 
 static void InitializeDependencies(){
@@ -446,78 +137,22 @@ static void InitializeDependencies(){
 }
 
 static void UpdateMouseClip(int64_t X, int64_t Y){
-    if((MouseX != X) || (MouseY != Y)){
-        
-        for(size_t i = 0 ; i < PlaneTracker.PlaneCount; i++){
-            MouseClips[i]->X = X;
-            MouseClips[i]->Y = Y;
-            CalculateRedraws(MouseX, MouseY, MouseClips[i]->Width, MouseClips[i]->Height);
-            LouUpdateShadowClipState((void*)MouseClips[i]);
-            LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);
-        }
-        MouseX = X;
-        MouseY = Y;
-    }
+
 }
 
 static INT64 gMouseX = 0, gMouseY = 0;
 
 void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
-    if((Click) && (!StartButtonDown)){
-        AwmWindowDrawLine(Handle, 0, 0, CLIP_WIDTH, 0, 0, 0, 0, 255);
-        AwmWindowDrawLine(Handle, 0, 0, 0, CLIP_HEIGHT, 0, 0, 0, 255);
-        StartButtonDown = true;
-        UpdateWindow(Handle);
-        //TODO Create Start Menu
-    }else if(StartButtonDown){ //destroy
-        AwmWindowDrawLine(Handle, 0, 0, CLIP_WIDTH, 0, 255, 255, 255, 255);
-        AwmWindowDrawLine(Handle, 0, 0, 0, CLIP_HEIGHT, 255, 255, 255, 255);
-        StartButtonDown = false;
-        UpdateWindow(Handle);
-        //TODO Destroy Start Menu
-    }
+
 }
 
 
 void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
 
-    if(InterfaceDualClick){
-        if(AnnyaExplorerFileManager){
-            PANNYA_EXPLORER_INIT_PACKET NewPacket = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
-            NewPacket->Instance = (HINSTANCE)LouGlobalUserMallocType(HINSTANCE);
-            AnnyaCreateThread(AnnyaExplorerFileManager, NewPacket);
-        }
-    }
 }
 
 void AwmMoveWindow(PWINDOW_HANDLE Window, INT64* pDeltaX, INT64* pDeltaY){
-    size_t PlaneCount = Window->PlaneCount;
-    INT64 LastX;
-    INT64 LastY;
-    INT64 LastWidth;
-    INT64 LastHeight;
-    INT64 DeltaX = *pDeltaX;
-    INT64 DeltaY = *pDeltaY;
-    for(size_t i = 0 ; i < PlaneCount; i++){
-        LastX = Window->MainWindow[i]->X;
-        LastY = Window->MainWindow[i]->Y;
-        LastWidth = Window->MainWindow[i]->Width;
-        LastHeight = Window->MainWindow[i]->Height;
-        if(DesktopCurrentX > (LastX + DeltaX)){
-            DeltaX = -LastX;
-            *pDeltaX = DeltaX;
-        }
-        if(DesktopCurrentY > (LastY + DeltaY)){
-            DeltaY = -LastY;
-            *pDeltaY = DeltaY;
-        }
-        LouUpdateClipLocation(Window->MainWindow[i], (UINT32)(LastX + DeltaX), (UINT32)(LastY + DeltaY));
-        UpdateWindowToDesktop(Window);
-        CalculateRedraws(LastX, LastY, LastWidth, LastHeight);
-    }
-    UpdateWindow(
-        Window
-    );
+    
 }
 
 static 
@@ -525,7 +160,7 @@ void
 MouseEventHandler(
     PLOUSINE_USER_SHARED_MESSAGE MessageHandle
 ){
-    PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
+    /*PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
     
     INT64 DeltaX = MouseEvent->X;
     INT64 DeltaY = MouseEvent->Y;
@@ -638,7 +273,7 @@ MouseEventHandler(
             }
             MutexUnlock(&WinHandle->CallbackMutex);
         }
-    }
+    }*/
 }
 
 
@@ -649,7 +284,7 @@ InitializeAwmUserSubsystem(
     PANNYA_DESKTOP_SETUP_PACKET     InterfaceSetup
 ){
     LouPrint("InitializeAwmUserSubsystem()\n");
-    AwmInstance = hInstance;
+    /*AwmInstance = hInstance;
     InitializeDependencies();
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);
@@ -743,7 +378,7 @@ InitializeAwmUserSubsystem(
 
     UpdateWindow(FileExplorerButon); 
 
-    LouRegisterMouseHandler(&MouseEventHandler, MOUSE_EVENT_TYPE);
+    LouRegisterMouseHandler(&MouseEventHandler, MOUSE_EVENT_TYPE);*/
 
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
 }

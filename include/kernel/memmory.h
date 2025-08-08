@@ -543,6 +543,14 @@ uint64_t GetIoMemEnd();
 
 uint64_t GetAllocationBlockBase(uint64_t Address);
 
+PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
+    uint64_t    LocationOfPool,
+    size_t      PoolSize,
+    size_t      CachedTracks,
+    string      Tag,
+    uint64_t    Flags
+);
+
 #endif
 #ifdef __cplusplus
 }

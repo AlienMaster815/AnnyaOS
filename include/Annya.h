@@ -121,6 +121,10 @@ typedef struct _CHILD_WINDOW_TRACKER{
 
 typedef struct _WINDOW_HANDLE{
     PWINDOW_CHARECTERISTICS Charecteristics;
+    INT64                   X;
+    INT64                   Y;
+    UINT32                  Width;
+    UINT32                  Height;
     string                  WindowName;
     SIZE                    PlaneCount;
     struct _DRSD_CLIP**     MainWindow;

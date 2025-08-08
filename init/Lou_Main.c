@@ -174,7 +174,6 @@ void* LouKeVirtualAllocUser(
 extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
 
-
 LOUSTATUS LousineKernelEarlyInitialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
