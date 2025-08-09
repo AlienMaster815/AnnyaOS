@@ -125,6 +125,7 @@ typedef struct _WINDOW_HANDLE{
     INT64                   Y;
     UINT32                  Width;
     UINT32                  Height;
+    UINT32*                 WindowBuffer;    
     string                  WindowName;
     SIZE                    PlaneCount;
     struct _DRSD_CLIP**     MainWindow;
@@ -133,6 +134,7 @@ typedef struct _WINDOW_HANDLE{
     struct _AWM_CLIP_TREE*  ClipTreeHandle;
     DWORD                   WindowStyle;
     BOOL                    Visable;
+    BOOL                    Mirrored;
     INTEGER                 WindowVisability;
     mutex_t                 CallbackMutex;
     SIZE                    CallbackCount;

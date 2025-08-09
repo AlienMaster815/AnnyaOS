@@ -279,4 +279,11 @@ PDRSD_CLIP CreateClipFromStringEx(
 
 PVOID AnnyaGetFont(string FontPath);
 
+USER32_API
+BOOL
+ShowWindow(
+    HWND        WindowHandle,
+    INTEGER     nCmdShow
+);
+
 #endif

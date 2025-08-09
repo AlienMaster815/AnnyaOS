@@ -9,15 +9,13 @@ UpdateWindow(
     HWND WindowHandle
 );
 
-static PDRSD_CLIP* PlaneBackgrounds = 0x00;
 static HANDLE MousePng = 0x00;
 static HMODULE CODECShModule = 0;
 static HMODULE FREETYPEModule = 0;
 static HANDLE (*AnnyaOpenPngA)(string);
 static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
-static int64_t MouseX = 0;
-static int64_t MouseY = 0;
+
 static bool LeftMouseDown = false;
 static bool RightMouseDown = false;
 
@@ -45,9 +43,8 @@ static AWM_WINDOW_TRACKER_ENTRY AwmMasterTracker = {0};
 static mutex_t AwmMasterTrackerMutex = {0};
 AWM_PLANE_TRACKER PlaneTracker = {0};
 static mutex_t AwmPlaneTrackerMutex = {0};
-static HWND BackgroundWindow = 0x00;
 static HWND TaskbarWindow = 0x00;
-static PDRSD_CLIP* MouseClips = 0x00;
+PDRSD_CLIP* MouseClips = 0x00;
 static HWND StartButton = 0x00;
 static HWND FileExplorerButon = 0x00;
 static HANDLE FolderPng = 0x00;
@@ -65,7 +62,7 @@ PDRSD_CLIP* XButtonClips = 0x00;
 static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 void InitializeFreeType();
-void InitializePlaneTracker();
+void InitializePlaneTracker(HINSTANCE hInstance);
 
 USER32_API
 BOOL
@@ -289,26 +286,18 @@ InitializeAwmUserSubsystem(
     InitializeDependencies();
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);
-    InitializePlaneTracker();
+    InitializePlaneTracker(hInstance);
 
     
     /*
 
-    XButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
-    MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+
 
     LouPrint("Allocation Finished\n");
 
 
-    BackgroundWindow = CreateWindowA(
-                            DEKSTOP_BACKGROUND,
-                            "DesktopBackground",
-                            WS_VISIBLE | WS_DISABLED,
-                            0,0, 0, 0,
-                            0x00, 0x00, hInstance, 0x00 
-                        );
 
-    ShowWindow(BackgroundWindow, SW_SHOW);
+
     
     UpdateWindow(BackgroundWindow);
 

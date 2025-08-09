@@ -56,7 +56,7 @@ WinMain(
 
     InterfaceSetup.WindowCallback = WndProc;
 
-    //LouExitDosMode();
+    LouExitDosMode();
     InitializeAwmUserSubsystem(hInstance, &InterfaceSetup);
 
     HANDLE Message = 0x00;
