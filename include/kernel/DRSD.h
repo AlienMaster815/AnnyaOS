@@ -997,17 +997,30 @@ typedef enum {
     
 }DRSD_CLIP_UPDATE_REASON;
 
-struct _DRSD_CLIP_CHAIN;
+struct _DRSD_CLIP;
+
+typedef struct _DRSD_PLANE_CHAIN{
+    ListHeader          Peers;
+    PDRSD_PLANE         PlaneID;
+    void                (*PrimaryAtomicUpdate)(PDRSD_PLANE, void* Handle);
+    bool                PlaneReady;
+}DRSD_PLANE_CHAIN, * PDRSD_PLANE_CHAIN;
+
+typedef struct _LAYERED_CLIP_CHAIN{
+    PDRSD_PLANE_CHAIN NextChain;
+    PDRSD_PLANE_CHAIN LastChain;
+    PDRSD_PLANE_CHAIN CurrentChain;
+}LAYERED_CLIP_CHAIN, * PLAYERED_CLIP_CHAIN;
 
 typedef struct _DRSD_CLIP{
     ListHeader              Peers;
-    PDRSD_PLANE             Owner;
-    struct _DRSD_CLIP_CHAIN* ChainOwner;
+    PDRSD_PLANE_CHAIN       PlaneGroup;
+    size_t                  PlaneCount;
     void                    (*SignalClipChange)(struct _DRSD_CLIP*, DRSD_CLIP_UPDATE_REASON, void* UpdateData);
-    size_t                  X;
-    size_t                  Y;
-    size_t                  Width;
-    size_t                  Height;
+    INT64                   X;
+    INT64                   Y;
+    INT64                   Width;
+    INT64                   Height;
     uint32_t*               WindowBuffer;
     size_t                  RedShift;
     size_t                  BlueShift;
@@ -1021,13 +1034,6 @@ typedef struct _DRSD_LAYERED_CLIP{
     DRSD_CLIP   CurrentClip; 
 }DRSD_LAYERED_CLIP, * PDRSD_LAYERED_CLIP;
 
-typedef struct _DRSD_CLIP_CHAIN{
-    ListHeader  Peers;
-    PDRSD_PLANE Owner;    
-    PDRSD_CLIP  Clips;
-    void        (*PrimaryAtomicUpdate)(PDRSD_PLANE, void* Handle);
-    bool        PlaneReady;
-}DRSD_CLIP_CHAIN, * PDRSD_CLIP_CHAIN;
 
 
 #ifndef _KERNEL_MODULE_

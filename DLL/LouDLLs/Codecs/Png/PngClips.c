@@ -26,7 +26,7 @@ AnnyaCreateClipFromPng(
         LouPrint("ERROR: Header is not Image Header:%s\n", &UnpackedDataHandle->Type[0]);
     }
     
-    PDRSD_CLIP PngClip = LouDrsdCreateClip(Plane, 0, 0, ImageHeader->Width, ImageHeader->Height, 0, 0, 0 ,0);
+    PDRSD_CLIP PngClip = LouDrsdCreateClip(0, 0, ImageHeader->Width, ImageHeader->Height, 0, 0, 0 ,0);
 
     if ((ImageHeader->ColorType == 6) && (ImageHeader->BitDepth == 8)) {
         const size_t Width = ImageHeader->Width;

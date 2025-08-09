@@ -128,11 +128,11 @@ PDRSD_CLIP CreateClipFromStringEx(
     Dimentions.Width = CharecterWidth;
     Dimentions.Height = CharecterHeight;
     GetFloatingStringDimention(Str, &Dimentions);
-    PDRSD_CLIP Result = LouDrsdCreateClip(BackgroundClip->ChainOwner->Owner, 0,0, Dimentions.Width, Dimentions.Height, 0, 0, 0, 255);
+    //PDRSD_CLIP Result = LouDrsdCreateClip(BackgroundClip->ChainOwner->PlaneID, 0,0, Dimentions.Width, Dimentions.Height, 0, 0, 0, 255);
 
     
     while(1);
-    return Result;
+    return 0x00;
 }
 
 PDRSD_CLIP CreateClipFromString(

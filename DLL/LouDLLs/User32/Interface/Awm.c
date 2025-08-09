@@ -311,7 +311,7 @@ InitializeAwmUserSubsystem(
         XButtonClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, XButtonPng); 
         MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
         LouUpdateShadowClipState((void*)MouseClips[i]);
-        LouDrsdSyncScreen((void*)MouseClips[i]->ChainOwner);
+        LouDrsdSyncScreen((void*)MouseClips[i]);
 
     }
 

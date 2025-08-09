@@ -1,16 +1,16 @@
 #include "DrsdCore.h"
 
-LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain);
+LOUDDK_API_ENTRY void LouKeDrsdSyncScreen();
 
 static bool UsingDosTerminal = true;
 
 typedef struct _TERMAINAL_PLANE {
     ListHeader          Peers;
     PDRSD_CLIP          DosClip;
-    size_t              CursorX;
-    size_t              CursorY;
-    uint32_t            TerminalBackground;
-    uint32_t            TerminalForeground;
+    INT64               CursorX;
+    INT64               CursorY;
+    INT64               TerminalBackground;
+    INT64               TerminalForeground;
 } TERMAINAL_PLANE, *PTERMAINAL_PLANE;
 
 typedef struct _LOUOS_DOS_TERMINAL {
@@ -64,7 +64,7 @@ void LouKeCreateScrollTerminal(PDRSD_CLIP Clip) {
 
     LouKeDrsdUpdateClipColor(Clip, LouOsDosTerminalScreen.DefaultBackground);
     LouKeUpdateClipState(Clip);
-    LouKeDrsdSyncScreen(Clip->ChainOwner);
+    LouKeDrsdSyncScreen();
 
     LouPrint("Hello LouOS DOS\n");
 }
@@ -93,7 +93,7 @@ void _LouKeOsDosPrintCharacter(char Character, PTERMAINAL_PLANE Plane, uint32_t 
             LouOsDosScrollDown(Plane->DosClip, 17);
         } else {
             Plane->CursorY++;
-        }
+    }
         return;
     } else if (Character == ' ') {
         Plane->CursorX++;
@@ -137,7 +137,7 @@ void LouKeOsDosUpdateMapping() {
     PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;
     while (Plane) {
         LouKeUpdateClipState(Plane->DosClip);
-        LouKeDrsdSyncScreen(Plane->DosClip->ChainOwner);
+        LouKeDrsdSyncScreen();
         Plane = (PTERMAINAL_PLANE)Plane->Peers.NextHeader;
     }
 }

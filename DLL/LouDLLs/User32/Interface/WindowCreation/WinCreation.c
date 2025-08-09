@@ -36,13 +36,12 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
 
-        NewWindow->MainWindow[i] = LouDrsdCreateClip(
-            (void*)PlaneTracker.PlaneInformation[i].Plane,
-            0,0,
-            (size_t)PlaneTracker.PlaneInformation[i].Width,
-            (size_t)PlaneTracker.PlaneInformation[i].Height,
-            0,0xC0,0xC0, 0xFF
-        );
+        //NewWindow->MainWindow[i] = LouDrsdCreateClip(
+        //    0,0,
+        //    (size_t)PlaneTracker.PlaneInformation[i].Width,
+        //    (size_t)PlaneTracker.PlaneInformation[i].Height,
+        //    0,0xC0,0xC0, 0xFF
+        //);
 
     }
 

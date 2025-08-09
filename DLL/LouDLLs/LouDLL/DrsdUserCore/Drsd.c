@@ -7,21 +7,19 @@
 LOUDLL_API
 PDRSD_CLIP 
 LouDrsdCreateClip(
-    void* Plane, 
     size_t X, size_t Y, 
     size_t Width, size_t Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 ){
-    uint64_t KulaPacket[11] = {0};
-    KulaPacket[2] = (uint64_t)Plane;
-    KulaPacket[3] = (uint64_t)X;
-    KulaPacket[4] = (uint64_t)Y;
-    KulaPacket[5] = (uint64_t)Width;
-    KulaPacket[6] = (uint64_t)Height;
-    KulaPacket[7] = (uint64_t)R;
-    KulaPacket[8] = (uint64_t)G;
-    KulaPacket[9] = (uint64_t)B;
-    KulaPacket[10] = (uint64_t)A;
+    uint64_t KulaPacket[10] = {0};
+    KulaPacket[2] = (uint64_t)X;
+    KulaPacket[3] = (uint64_t)Y;
+    KulaPacket[4] = (uint64_t)Width;
+    KulaPacket[5] = (uint64_t)Height;
+    KulaPacket[6] = (uint64_t)R;
+    KulaPacket[7] = (uint64_t)G;
+    KulaPacket[8] = (uint64_t)B;
+    KulaPacket[9] = (uint64_t)A;
     while(!KulaPacket[0]){
         LouCALL(LOUDRSDCREATECLIP, (uint64_t)&KulaPacket[0], 0);
     }
@@ -40,9 +38,8 @@ void* LouDrsdGetPlaneInformation(size_t* CountHandle){
 
 LOUDLL_API
 void 
-LouDrsdSyncScreen(void* Chain){
-    uint64_t KulaPacket[2] = {0};
-    KulaPacket[1] = (uint64_t)Chain;
+LouDrsdSyncScreen(){
+    uint64_t KulaPacket[1] = {0};
     while(!KulaPacket[0]){
         LouCALL(LOUDRSDSYNCSCREEN, (uint64_t)&KulaPacket[0], 0);
     }

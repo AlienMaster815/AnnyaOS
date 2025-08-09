@@ -407,14 +407,13 @@ int LouPrint(char* Str, ...);
 
 __declspec(dllimport)
 void 
-LouDrsdSyncScreen(void* Chain);
+LouDrsdSyncScreen();
 
 __declspec(dllimport)
 void LouUpdateClipState(void* Clip);
 
 __declspec(dllimport)
 void* LouDrsdCreateClip(
-    void* Plane, 
     size_t X, size_t Y, 
     size_t Width, size_t Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A

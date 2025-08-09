@@ -47,9 +47,8 @@ void* LouKeGenericAllocateHeapEx(
 );
 uint64_t LouKeGetThreadIdentification();
 void LouKeExitDosMode();
-void LouKeDrsdSyncScreen(PDRSD_CLIP_CHAIN Chain);
+void LouKeDrsdSyncScreen();
 PDRSD_CLIP LouKeDrsdCreateClip(
-    PDRSD_PLANE Plane, 
     size_t X, size_t Y, 
     size_t Width, size_t Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
@@ -107,21 +106,19 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUDRSDCREATECLIP:{
             uint64_t* Tmp = (uint64_t*)Data;
             Tmp[0] = (uint64_t)LouKeDrsdCreateClip(
-                (PDRSD_PLANE)Tmp[1], //Plane
-                (size_t)Tmp[2], //X
-                (size_t)Tmp[3], //Y
-                (size_t)Tmp[4], //Width
-                (size_t)Tmp[5], //Height
-                (uint8_t)Tmp[6], //R
-                (uint8_t)Tmp[7], //G
-                (uint8_t)Tmp[8], //B
-                (uint8_t)Tmp[9] //A
+                (size_t)Tmp[1], //X
+                (size_t)Tmp[2], //Y
+                (size_t)Tmp[3], //Width
+                (size_t)Tmp[4], //Height
+                (uint8_t)Tmp[5], //R
+                (uint8_t)Tmp[6], //G
+                (uint8_t)Tmp[7], //B
+                (uint8_t)Tmp[8] //A
             );
             return;
         }
         case LOUDRSDSYNCSCREEN:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeDrsdSyncScreen((PDRSD_CLIP_CHAIN)Tmp[0]);
+            LouKeDrsdSyncScreen();
             return;
         }
         case LOUUPDTATECLIP:{
