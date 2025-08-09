@@ -63,6 +63,7 @@ static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 void InitializeFreeType();
 void InitializePlaneTracker(HINSTANCE hInstance);
+void AwmUpdateWindowToScreen(PWINDOW_HANDLE Window);
 
 USER32_API
 BOOL
@@ -70,6 +71,12 @@ ShowWindow(
     HWND        WindowHandle,
     INTEGER     nCmdShow
 ){
+    PWINDOW_HANDLE Window = (PWINDOW_HANDLE)WindowHandle;
+    if(nCmdShow & SW_SHOW){
+        Window->Visable = true;
+        Window->WindowVisability = nCmdShow;
+        return true;
+    }
 
     return false;
 }
@@ -79,6 +86,12 @@ BOOL
 UpdateWindow(
     HWND WindowHandle
 ){
+    PWINDOW_HANDLE Window = (PWINDOW_HANDLE)WindowHandle;
+    
+    if(Window->Visable){
+        AwmUpdateWindowToScreen(Window);
+        return true;    
+    }
 
     return false;
 }
@@ -289,17 +302,10 @@ InitializeAwmUserSubsystem(
     InitializePlaneTracker(hInstance);
 
     
+
     /*
 
-
-
     LouPrint("Allocation Finished\n");
-
-
-
-
-    
-    UpdateWindow(BackgroundWindow);
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
         XButtonClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, XButtonPng); 

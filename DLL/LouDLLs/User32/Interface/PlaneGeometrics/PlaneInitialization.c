@@ -11,7 +11,7 @@ extern int64_t DesktopCurrentHeight;
 extern AWM_PLANE_TRACKER PlaneTracker;
 extern PDRSD_CLIP* XButtonClips;
 extern PDRSD_CLIP* MouseClips;
-
+bool MirrorAllScreens = true;
 static HWND BackgroundWindow = 0x00;
 
 void InitializeBackgroundWindows(PWINDOW_HANDLE WindowHandle){
@@ -24,6 +24,7 @@ void InitializeBackgroundWindows(PWINDOW_HANDLE WindowHandle){
 void InitializePlaneTracker(
     HINSTANCE   hInstance
 ){
+
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
         DesktopCurrentWidth += PlaneTracker.PlaneInformation[i].Width;
         if(PlaneTracker.PlaneInformation[i].Height > DesktopCurrentHeight){
@@ -41,6 +42,8 @@ void InitializePlaneTracker(
         Tmp += PlaneTracker.PlaneInformation[i].Width;
     }
 
+    DesktopCurrentX = PlaneTracker.PlaneInformation[0].X;
+    DesktopCurrentY = PlaneTracker.PlaneInformation[0].Y;
     
     XButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
@@ -60,4 +63,5 @@ void InitializePlaneTracker(
 
     ShowWindow((HWND)BackgroundWindow, SW_SHOW);
 
+    UpdateWindow(BackgroundWindow);
 }

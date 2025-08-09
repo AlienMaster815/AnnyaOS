@@ -286,4 +286,54 @@ ShowWindow(
     INTEGER     nCmdShow
 );
 
+USER32_API
+BOOL 
+UpdateWindow(
+    HWND WindowHandle
+);
+
+static inline bool IsAreaInsidePlane(
+    INT64 X1, INT64 Y1, UINT32 Width1, UINT32 Height1,
+    INT64 X2, INT64 Y2, UINT32 Width2, UINT32 Height2
+){
+    if(
+        (X1 >= X2) && (Y1 >= Y2) && ((Width1 + X1) <= (X2 + Width2)) && ((Height1 + Y1) <= (Y2+ Height2))
+    ){
+        return true;
+    }
+    return false;
+}
+
+
+static inline bool IsAreaInPlane(
+    INT64* pX1, INT64* pY1, UINT32* pWidth1, UINT32* pHeight1,
+    INT64 X2, INT64 Y2, UINT32 Width2, UINT32 Height2
+){
+    INT64 X1 = *pX1;
+    INT64 Y1 = *pY1;
+    UINT32 Width1 = *pWidth1;
+    UINT32 Height1 = *pHeight1;
+
+    bool Result = false;
+    if((X1 >= X2) && ((X2 + Width2) > X1)){
+        *pX1 = X2;
+        X1 = X2;
+        Result = true;
+    }
+    if((X1 + Width1) >= (X2 + Width2)){
+        *pWidth1 = (X2 + Width2) - X1;
+        Result = true;
+    }
+    if((Y1 >= Y2) && ((Y2 + Height2) > Y1)){
+        *pY1 = Y2;
+        Y1 = Y2;
+        Result = true;
+    }
+    if((Y1 + Height1) >= (Y2 + Height2)){
+        *pHeight1 = (Y2 + Height2) - Y1;
+        Result = true;
+    }
+    return Result;
+}
+
 #endif

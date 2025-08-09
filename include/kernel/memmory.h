@@ -490,7 +490,7 @@ bool RangeInterferes(
     uint64_t End = AddressOfBlock + SizeOfBlock;
     if (
         ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
-        (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
+        (((AddressForCheck + SizeOfCheck) >= Start) && ((AddressForCheck + SizeOfCheck) < End)) ||
         ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
     ) {
         return true;

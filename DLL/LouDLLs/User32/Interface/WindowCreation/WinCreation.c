@@ -3,6 +3,10 @@
 extern AWM_PLANE_TRACKER PlaneTracker;
 void InitializeBackgroundWindows(PWINDOW_HANDLE WindowHandle);
 
+extern int64_t DesktopCurrentWidth;
+extern int64_t DesktopCurrentHeight;
+extern int64_t DesktopCurrentX;
+extern int64_t DesktopCurrentY;
 
 static void CreateGenericWindowHandle(
     PWINDOW_HANDLE WindowHandle, 
@@ -24,6 +28,11 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
     PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
     NewWindow->MainWindow = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     NewWindow->PlaneCount = PlaneTracker.PlaneCount;
+    NewWindow->Mirrored = true;
+    NewWindow->X = DesktopCurrentX;
+    NewWindow->Y = DesktopCurrentY;
+    NewWindow->Width = (UINT32)DesktopCurrentWidth;
+    NewWindow->Height = (UINT32)DesktopCurrentHeight;
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
 
@@ -36,6 +45,14 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
         );
 
     }
+
+    return NewWindow;
+}
+
+static PWINDOW_HANDLE CreateDesktopTaskTrayWindow(){
+    PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
+
+
 
     return NewWindow;
 }
@@ -56,11 +73,16 @@ CreateWindowExA(
     HINSTANCE   Instance,
     LPVOID      Parameter
 ){
+    PWINDOW_HANDLE NewWindow = 0x00;
     if(!strcmp(ClassName, DEKSTOP_BACKGROUND)){
-
+        return CreateDesktopBackgroundWindow();
+    }else if(!strcmp(ClassName, TRAY_WINDOW)){
+        NewWindow = CreateDesktopTaskTrayWindow();
     }
 
-    return (PWINDHANDLE)0x00;
+
+
+    return (PWINDHANDLE)NewWindow;
 }
 
 USER32_API
