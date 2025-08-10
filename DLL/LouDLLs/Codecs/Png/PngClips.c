@@ -8,7 +8,6 @@ static int abs(int x) {
 CODECS_API
 HANDLE 
 AnnyaCreateClipFromPng(
-    void*   Plane,
     HANDLE  Handle
 ){
     PCODECS_TYPE_QUERY Type = (PCODECS_TYPE_QUERY)Handle;

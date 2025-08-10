@@ -69,7 +69,7 @@ static void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STA
     State->SourceY = State->SourceY ? State->SourceY : 0;
     State->Width = DisplayMode->HorizontalDisplay;
     State->Height = DisplayMode->VirticalDisplay;
-    State->FrameBuffer = LouKeMallocType(DRSD_FRAME_BUFFER, KERNEL_GENERIC_MEMORY);
+    State->FrameBuffer = LouKeMallocType(DRSD_FRAME_BUFFER, USER_GENERIC_MEMORY);
     State->FrameBuffer->Device = Device;
     State->FrameBuffer->Width = State->Width;
     State->FrameBuffer->Height = State->Height;
@@ -150,7 +150,7 @@ PDRSD_CLIP LouKeDrsdCreateClip(
     size_t Width, size_t Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 ) {
-    PDRSD_CLIP ClipQueue = LouKeMallocType(DRSD_CLIP, KERNEL_GENERIC_MEMORY);
+    PDRSD_CLIP ClipQueue = LouKeMallocType(DRSD_CLIP, USER_GENERIC_MEMORY);
     
     ClipQueue->PlaneGroup = &MasterPlaneChain;
     ClipQueue->WindowBuffer = LouKeMallocArray(uint32_t, Width * Height, USER_GENERIC_MEMORY);

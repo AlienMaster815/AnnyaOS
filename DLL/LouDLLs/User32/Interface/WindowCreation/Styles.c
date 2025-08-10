@@ -15,7 +15,7 @@ void LouDrsdPutPixel32(
     UINT32 Color
 );
 
-extern PDRSD_CLIP* XButtonClips; 
+extern PDRSD_CLIP XButtonClip; 
 //0,0, SCREEN_WIDTH, SCREEN_HEIGHT,
 
 

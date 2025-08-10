@@ -8,15 +8,12 @@ void CalculateRedrawsMirrored(PDRSD_PLANE_QUERY_INFORMATION PlaneInfo, PDRSD_CLI
 
 }
 
+void AwmUpdateSubWindowToScreen(PWINDOW_HANDLE Window, INT64 X, INT64 Y, INT64 Width, INT64 Height){
 
-void AwmUpdateWindowToScreen(PWINDOW_HANDLE Window){
-    size_t PlaneCount = Window->PlaneCount;
-    if(MirrorAllScreens || Window->Mirrored){
-        for(size_t i = 0 ; i < PlaneCount; i++){
-            CalculateRedrawsMirrored(
-                &PlaneTracker.PlaneInformation[i],
-                Window->MainWindow[i]
-            );
+    if(Window->Mirrored){
+        for(size_t i = 0 ; i < Window->PlaneCount; i++){
+            LouUpdateShadowClipSubState(Window->MainWindow[i], X, Y, Width, Height);
         }
     }
+
 }

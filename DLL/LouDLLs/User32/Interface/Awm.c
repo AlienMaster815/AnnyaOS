@@ -34,7 +34,7 @@ static PWINDOW_HANDLE LastInstance = 0x00;
 //Globals
 HANDLE BackgroundImage = 0x00;
 HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
-HANDLE (*AnnyaCreateClipFromPng)(void*, HANDLE);
+HANDLE (*AnnyaCreateClipFromPng)(HANDLE);
 
 //192 dark greay
 //198 ligt grey
@@ -44,7 +44,7 @@ static mutex_t AwmMasterTrackerMutex = {0};
 AWM_PLANE_TRACKER PlaneTracker = {0};
 static mutex_t AwmPlaneTrackerMutex = {0};
 static HWND TaskbarWindow = 0x00;
-PDRSD_CLIP* MouseClips = 0x00;
+PDRSD_CLIP MouseClip = 0x00;
 static HWND StartButton = 0x00;
 static HWND FileExplorerButon = 0x00;
 static HANDLE FolderPng = 0x00;
@@ -57,13 +57,16 @@ int64_t DesktopCurrentWidth = 0;
 int64_t DesktopCurrentHeight = 0;
 
 static HANDLE XButtonPng = 0x00;
-PDRSD_CLIP* XButtonClips = 0x00;
+PDRSD_CLIP XButtonClip = 0x00;
 
 static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
 void InitializeFreeType();
 void InitializePlaneTracker(HINSTANCE hInstance);
 void AwmUpdateWindowToScreen(PWINDOW_HANDLE Window);
+void AwmUpdateSubWindowToScreen(PWINDOW_HANDLE Window, INT64 X, INT64 Y, INT64 Width, INT64 Height);
+
+extern HWND BackgroundWindow;
 
 USER32_API
 BOOL
@@ -78,6 +81,7 @@ ShowWindow(
         return true;
     }
     
+    
 
     return false;
 }
@@ -91,7 +95,7 @@ UpdateWindow(
     
     if(Window->Visable){
         for(size_t i = 0 ; i < Window->PlaneCount; i++){
-            LouUpdateClipState(Window->MainWindow[i]);
+            LouUpdateShadowClipState(Window->MainWindow[i]);
         }
         LouDrsdSyncScreen();
         return true;    
@@ -154,9 +158,19 @@ static void InitializeDependencies(){
 
 static void UpdateMouseClip(int64_t X, int64_t Y){
 
+    INT64 LastX = MouseClip->X;
+    INT64 LastY = MouseClip->Y;
+    INT64 LastWidth = MouseClip->Width;
+    INT64 LastHeight = MouseClip->Height;
+    AwmUpdateSubWindowToScreen(BackgroundWindow, LastX, LastY, LastWidth, LastHeight);
+    LouUpdateClipLocation(MouseClip, X, Y);
+    LouUpdateShadowClipState(MouseClip);
+    LouDrsdSyncScreen();
+
 }
 
 static INT64 gMouseX = 0, gMouseY = 0;
+
 
 void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
 
@@ -176,7 +190,7 @@ void
 MouseEventHandler(
     PLOUSINE_USER_SHARED_MESSAGE MessageHandle
 ){
-    /*PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
+    PLOUSINE_MOUSE_EVENT_MESSAGE MouseEvent = &MessageHandle->MouseEvent;
     
     INT64 DeltaX = MouseEvent->X;
     INT64 DeltaY = MouseEvent->Y;
@@ -202,94 +216,93 @@ MouseEventHandler(
 
     //LouPrint("X:%d, Y:%d\n", gMouseX, gMouseY);
 
-    PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
-    if(GrabbedWindow){
-        AwmMoveWindow(GrabbedWindow, &DeltaX, &DeltaY);
-    }
+    //PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
+    //if(GrabbedWindow){
+    //   AwmMoveWindow(GrabbedWindow, &DeltaX, &DeltaY);
+    //}
 
     gMouseY += DeltaY;
     gMouseX += DeltaX;
 
     UpdateMouseClip(gMouseX, gMouseY);
 
-    if(RightClick && !RightMouseDown){
-        InterfaceDualClick = false;
-        RightMouseDown = true;
-        PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
-        if(WinHandle != StartButton){
-            AwmHandleStartButtonEvent(StartButton, false);
-        }
-        if(WinHandle){
-            if(WinHandle->WindowName){
+    //if(RightClick && !RightMouseDown){
+    //    InterfaceDualClick = false;
+    //    RightMouseDown = true;
+    //    PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+    //    if(WinHandle != StartButton){
+    //        AwmHandleStartButtonEvent(StartButton, false);
+    //    }
+    //    if(WinHandle){
+    //        if(WinHandle->WindowName){
             
-            }
-        }else{
+    //        }
+    //    }else{
 
-        }
-    }else if(!RightClick && RightMouseDown){
-        InterfaceDualClick = false;
-
-        RightMouseDown = false;
-    }
-    if(LeftClick && (!LeftMouseDown)){
-        LeftMouseDown = true;
-        PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
-        if(LastInstance == WinHandle){
-            InterfaceDualClick = true;
-        }else {
-            InterfaceDualClick = false;
-        }
-        LastInstance = WinHandle;
-        if(WinHandle != StartButton){
-            AwmHandleStartButtonEvent(StartButton, false);
-        }
-        if(WinHandle){
-            if(WinHandle->WindowName){
-                PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
-                uint16_t XRelative = (gMouseX - TmpClip->X);
-                uint16_t YRelative = (gMouseY - TmpClip->Y);
-                MutexLock(&WinHandle->CallbackMutex);
-                for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
-                    if(i){
-                        WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-                    }else{
-                        WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-                    }
-                }
-                MutexUnlock(&WinHandle->CallbackMutex);
-            }
-            else return;
-            LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
-        }
-        
-    }else if(!LeftClick && LeftMouseDown){
-        PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
-        if(GrabbedWindow){
-            AwmSignalEndofGrabEvent();    
-        }
-        LeftMouseDown = false;
-        PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
-        if(LastInstance == WinHandle){
-            InterfaceDualClick = true;
-        }else {
-            InterfaceDualClick = false;
-        }
-        LastInstance = WinHandle;
-        if(WinHandle && WinHandle->WindowName){
-            PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
-            uint16_t XRelative = (gMouseX - TmpClip->X);
-            uint16_t YRelative = (gMouseY - TmpClip->Y);
-            MutexLock(&WinHandle->CallbackMutex);
-            for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
-                if(i){
-                    WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_UP,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-                }else{
-                    WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_UP, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-                }
-            }
-            MutexUnlock(&WinHandle->CallbackMutex);
-        }
-    }*/
+    //    }
+    //}else if(!RightClick && RightMouseDown){
+    //    InterfaceDualClick = false;
+    //    RightMouseDown = false;
+    //}
+    //if(LeftClick && (!LeftMouseDown)){
+    //    LeftMouseDown = true;
+    //    PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+    //    if(LastInstance == WinHandle){
+    //        InterfaceDualClick = true;
+    //    }else {
+    //        InterfaceDualClick = false;
+    //    }
+    //    LastInstance = WinHandle;
+    //    if(WinHandle != StartButton){
+    //        AwmHandleStartButtonEvent(StartButton, false);
+    //    }
+    //    if(WinHandle){
+    //        if(WinHandle->WindowName){
+    //            PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
+    //            uint16_t XRelative = (gMouseX - TmpClip->X);
+    //            uint16_t YRelative = (gMouseY - TmpClip->Y);
+    //            MutexLock(&WinHandle->CallbackMutex);
+    //            for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+    //                if(i){
+    //                    WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+    //                }else{
+    //                    WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+    //                }
+    //            }
+    //            MutexUnlock(&WinHandle->CallbackMutex);
+    //        }
+    //        else return;
+    //        LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
+    //    }
+    //    
+    //}else if(!LeftClick && LeftMouseDown){
+    //    PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
+    //    if(GrabbedWindow){
+    //        AwmSignalEndofGrabEvent();    
+    //    }
+    //    LeftMouseDown = false;
+    //    PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
+    //    if(LastInstance == WinHandle){
+    //        InterfaceDualClick = true;
+    //    }else {
+    //        InterfaceDualClick = false;
+    //    }
+    //    LastInstance = WinHandle;
+    //    if(WinHandle && WinHandle->WindowName){
+    //        PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
+    //        uint16_t XRelative = (gMouseX - TmpClip->X);
+    //        uint16_t YRelative = (gMouseY - TmpClip->Y);
+    //        MutexLock(&WinHandle->CallbackMutex);
+    //        for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+    //            if(i){
+    //                WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_UP,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+    //            }else{
+    //                WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_UP, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+    //            }
+    //        }
+    //        MutexUnlock(&WinHandle->CallbackMutex);
+    //    }
+    //}
 }
 
 
@@ -305,20 +318,6 @@ InitializeAwmUserSubsystem(
 
     PlaneTracker.PlaneInformation = (PDRSD_PLANE_QUERY_INFORMATION)LouDrsdGetPlaneInformation(&PlaneTracker.PlaneCount);
     InitializePlaneTracker(hInstance);
-
-    
-
-    /*
-
-    LouPrint("Allocation Finished\n");
-
-    for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
-        XButtonClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, XButtonPng); 
-        MouseClips[i] = AnnyaCreateClipFromPng((void*)PlaneTracker.PlaneInformation[i].Plane, MousePng);
-        LouUpdateShadowClipState((void*)MouseClips[i]);
-        LouDrsdSyncScreen((void*)MouseClips[i]);
-
-    }
 
     TaskbarWindow = CreateWindowA(
         TRAY_WINDOW,
@@ -343,8 +342,8 @@ InitializeAwmUserSubsystem(
         CANVAS_BUTTON,
         "StartButton",
         WS_VISIBLE | WS_CHILD,
-        1,
-        DesktopCurrentHeight - 33,
+        2,
+        2,
         0,0, //height and width ignored
         TaskbarWindow,
         0x00,
@@ -363,8 +362,8 @@ InitializeAwmUserSubsystem(
         CANVAS_BUTTON,
         "FileExplorer",
         WS_VISIBLE | WS_CHILD,
-        68,
-        DesktopCurrentHeight - 31,
+        69,
+        3,
         0,0, //height and width ignored
         TaskbarWindow,
         0x00,
@@ -376,7 +375,12 @@ InitializeAwmUserSubsystem(
 
     UpdateWindow(FileExplorerButon); 
 
-    LouRegisterMouseHandler(&MouseEventHandler, MOUSE_EVENT_TYPE);*/
+    XButtonClip = AnnyaCreateClipFromPng(XButtonPng); 
+    MouseClip = AnnyaCreateClipFromPng(MousePng);
+    LouUpdateShadowClipState(MouseClip);
+    LouDrsdSyncScreen();
+
+    LouRegisterMouseHandler(&MouseEventHandler, MOUSE_EVENT_TYPE);
 
     LouPrint("InitializeAwmUserSubsystem() STATUS_SUCCESS\n");
 }

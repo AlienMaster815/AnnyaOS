@@ -18,6 +18,9 @@
 #define ROUND_DOWN64(value, multiple) \
     ((value) / (multiple) * (multiple))
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 #define LOUSTATUS uint32_t
 
 //#include "USRSPC/API/WinAPItypes.h"

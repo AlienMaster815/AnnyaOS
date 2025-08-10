@@ -1,23 +1,18 @@
 #include "../Awm.h"
 
-static INT64 vDesktopCurrentWidth = 0;
-static INT64 vDesktopCurrentHeight = 0;
-static PDRSD_CLIP* PlaneBackgrounds = 0x00;
+static PDRSD_CLIP PlaneBackground = 0x00;
 
 extern int64_t DesktopCurrentX;
 extern int64_t DesktopCurrentY;
 extern int64_t DesktopCurrentWidth;
 extern int64_t DesktopCurrentHeight;
 extern AWM_PLANE_TRACKER PlaneTracker;
-extern PDRSD_CLIP* XButtonClips;
-extern PDRSD_CLIP* MouseClips;
+extern PDRSD_CLIP XButtonClip;
+extern PDRSD_CLIP MouseClip;
 bool MirrorAllScreens = true;
-static HWND BackgroundWindow = 0x00;
+HWND BackgroundWindow = 0x00;
 
 void InitializeBackgroundWindows(PWINDOW_HANDLE WindowHandle){
-    for(size_t i = 0 ; i < WindowHandle->PlaneCount; i++){
-        PlaneBackgrounds[i] = WindowHandle->MainWindow[i];
-    }
 
 }
 
@@ -45,12 +40,9 @@ void InitializePlaneTracker(
 
     LouPrint("X:%h :: Y:%h\n", DesktopCurrentX, DesktopCurrentY);
 
-    vDesktopCurrentWidth = DesktopCurrentWidth * 3;
-    vDesktopCurrentHeight = DesktopCurrentHeight * 3;
-
-    XButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
-    MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
-    PlaneBackgrounds = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    XButtonClip = LouGlobalUserMallocType(DRSD_CLIP);
+    MouseClip = LouGlobalUserMallocType(DRSD_CLIP);
+    PlaneBackground = LouGlobalUserMallocType(DRSD_CLIP);
     
     LouDrsdSetPlaneInformation(PlaneTracker.PlaneInformation);
 

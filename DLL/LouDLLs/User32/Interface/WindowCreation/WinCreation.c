@@ -2,11 +2,13 @@
 
 extern AWM_PLANE_TRACKER PlaneTracker;
 void InitializeBackgroundWindows(PWINDOW_HANDLE WindowHandle);
+extern HANDLE (*AnnyaCreateClipFromPng)(HANDLE);
 
 extern int64_t DesktopCurrentWidth;
 extern int64_t DesktopCurrentHeight;
 extern int64_t DesktopCurrentX;
 extern int64_t DesktopCurrentY;
+extern bool MirrorAllScreens;
 
 static void CreateGenericWindowHandle(
     PWINDOW_HANDLE WindowHandle, 
@@ -52,8 +54,66 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
 static PWINDOW_HANDLE CreateDesktopTaskTrayWindow(){
     PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
 
+    NewWindow->MainWindow = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
+    NewWindow->PlaneCount = PlaneTracker.PlaneCount;
+    NewWindow->Mirrored = true;
+    NewWindow->X = DesktopCurrentX;
+    NewWindow->Y = DesktopCurrentY;
+    NewWindow->Width = (UINT32)DesktopCurrentWidth;
+    NewWindow->Height = (UINT32)DesktopCurrentHeight;
+
+    for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
+
+        NewWindow->MainWindow[i] = LouDrsdCreateClip(
+            0,
+            (size_t)PlaneTracker.PlaneInformation[i].Height - 35,
+            (size_t)PlaneTracker.PlaneInformation[i].Width,
+            35,
+            192,192,192, 0xFF
+        );
+
+    }
+    return NewWindow;
+}
 
 
+
+static PWINDOW_HANDLE CreateCanvasButton(
+    DWORD       ExStyle,
+    LPCSTR      ClassName,
+    LPCSTR      WindowName,
+    DWORD       Style,
+    int64_t     X,
+    int64_t     Y,
+    uint32_t    Width,
+    uint32_t    Height,
+    HWND        ParrentHandle,
+    HMENU       Menu,
+    HINSTANCE   Instance,
+    LPVOID      Parameter
+){
+    PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
+    NewWindow->WindowStyle = Style;
+    NewWindow->ExtendedWindowStyle = ExStyle;
+    NewWindow->WindowClass = ClassName;
+    NewWindow->WindowName = WindowName;
+    if(ParrentHandle){
+        PWINDOW_HANDLE Parrent = (PWINDOW_HANDLE)ParrentHandle;
+        if(Parrent->Mirrored || MirrorAllScreens){
+            NewWindow->MainWindow = LouGlobalUserMallocArray(PDRSD_CLIP, Parrent->PlaneCount);
+            NewWindow->PlaneCount = Parrent->PlaneCount;
+            PANNYA_CANVAS_BUTTON_PARAM Params = (PANNYA_CANVAS_BUTTON_PARAM)Parameter;
+            for(size_t i = 0 ; i < NewWindow->PlaneCount; i++){
+                if(Params->CanvasDataId == PNG){
+                    NewWindow->MainWindow[i] = AnnyaCreateClipFromPng(Params->CanvasData);
+                    NewWindow->MainWindow[i]->X = Parrent->MainWindow[i]->X + X;
+                    NewWindow->MainWindow[i]->Y = Parrent->MainWindow[i]->Y + Y;
+                }
+            }
+
+        }
+
+    }
     return NewWindow;
 }
 
@@ -78,11 +138,29 @@ CreateWindowExA(
         return CreateDesktopBackgroundWindow();
     }else if(!strcmp(ClassName, TRAY_WINDOW)){
         NewWindow = CreateDesktopTaskTrayWindow();
+    }else if(!strcmp(ClassName, CANVAS_BUTTON)){
+        NewWindow = CreateCanvasButton(
+            ExStyle,
+            ClassName,
+            WindowName,
+            Style,
+            X, Y,
+            Width,
+            Height,
+            ParrentHandle,
+            Menu,
+            Instance,
+            Parameter
+        );
     }
 
+    if(NewWindow){
+        return (PWINDHANDLE)NewWindow;
+    }
 
-
-    return (PWINDHANDLE)NewWindow;
+    LouPrint("CreateWindowExA");
+    while(1);
+    return 0x00;
 }
 
 USER32_API
