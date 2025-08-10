@@ -42,3 +42,4 @@ EXPORTS
     LouYeildExecution
     LouUpdateClipLocation
     LouDrsdClipToClip
+    LouDrsdSetPlaneInformation

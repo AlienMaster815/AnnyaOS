@@ -124,7 +124,7 @@ PDRSD_PLANE_CHAIN LouKeDrsdAcquireClipChainMember(PDRSD_PLANE Plane) {
     return TmpChain;
 }
 
-void LouKeDrsdRemoveClipChainMember(PDRSD_PLANE Plane) {
+void LouKeDrsdRemovePlaneChainMember(PDRSD_PLANE Plane) {
     MutexLock(&PlaneLock);
     PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
     PDRSD_PLANE_CHAIN LastChain = &MasterPlaneChain;
@@ -134,6 +134,7 @@ void LouKeDrsdRemoveClipChainMember(PDRSD_PLANE Plane) {
         if(Plane == TmpChain->PlaneID){
             TmpChain->PlaneReady = false;
             LastChain->Peers.NextHeader = TmpChain->Peers.NextHeader;
+            PlaneCount--;
             LouKeFree(TmpChain);
             MutexUnlock(&PlaneLock);
             return;
@@ -272,7 +273,7 @@ LOUDDK_API_ENTRY
 void LouKeDrsdHandleConflictingDevices(P_PCI_DEVICE_OBJECT PDEV){
 
     if(BootDevice){
-        LouKeDrsdRemoveClipChainMember(BootDevice->Planes);
+        LouKeDrsdRemovePlaneChainMember(BootDevice->Planes);
         BootDevice = 0x00;
     }
 
@@ -282,6 +283,8 @@ void LouKeDrsdHandleConflictingDevices(P_PCI_DEVICE_OBJECT PDEV){
 
 LOUDDK_API_ENTRY
 void LouKeOsDosUpdateMapping();
+
+void LouKeSetScrollTerminalResolution(SIZE Width, SIZE Height);
 
 LOUDDK_API_ENTRY
 LOUSTATUS
@@ -329,19 +332,8 @@ LouKeDrsdInitializeDevice(
         Crtc->CrtcState->NeedsModeset = false;
 
         
-        //PDRSD_PLANE_CHAIN Chain = LouKeDrsdAcquireClipChainMember(PrimaryPlane);
-        //Chain->PrimaryAtomicUpdate = PrimaryPlane->AssistCallbacks->AtomicUpdate;
-        //UNUSED PDRSD_CLIP Background = LouKeDrsdCreateClip(
-        //    0, 0,
-        //    PrimaryPlane->PlaneState->Width, PrimaryPlane->PlaneState->Height,
-        //    0, 128, 128, 255
-        //);
-
-        //LouKeUpdateClipState(Background);
-        
-        //LouKeDrsdSyncScreen(Background);
-
-        //LouKeCreateScrollTerminal(Background);
+        PDRSD_PLANE_CHAIN Chain = LouKeDrsdAcquireClipChainMember(PrimaryPlane);
+        Chain->PrimaryAtomicUpdate = PrimaryPlane->AssistCallbacks->AtomicUpdate;
 
         LouPrint("Connector:%h Successfully Configured\n", Connector);
 
@@ -349,7 +341,7 @@ LouKeDrsdInitializeDevice(
     }
 
     LouPrint("LouKeDrsdInitializeDevice() STATUS_SUCCESS\n");
-    while(1);
+
     return STATUS_SUCCESS;
 }
 
@@ -364,7 +356,7 @@ typedef struct _DRSD_PLANE_QUERY_INFORMATION{
 
 
 LOUDDK_API_ENTRY
-void* LouDrsdGetPlaneInformation(size_t* CountHandle){
+void* LouKeDrsdGetPlaneInformation(size_t* CountHandle){
     *CountHandle = PlaneCount;
     MutexLock(&PlaneLock);
     PDRSD_PLANE_QUERY_INFORMATION Query = LouKeMallocArray(DRSD_PLANE_QUERY_INFORMATION, PlaneCount, USER_GENERIC_MEMORY);
@@ -387,6 +379,30 @@ void* LouDrsdGetPlaneInformation(size_t* CountHandle){
     return (void*)Query;
 }
 
+LOUDDK_API_ENTRY
+LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context){
+
+    MutexLock(&PlaneLock);
+    PDRSD_PLANE_QUERY_INFORMATION Query = (PDRSD_PLANE_QUERY_INFORMATION)Context;
+
+    PDRSD_PLANE_CHAIN Tmp = &MasterPlaneChain;
+    size_t i = 0;
+    while(Tmp->Peers.NextHeader){
+        Tmp = (PDRSD_PLANE_CHAIN)Tmp->Peers.NextHeader;
+        LouPrint("Seting Drsd Plane ID:%h Plane Values X:%d :: Y:%d :: Width:%d :: Height:%d\n", Tmp->PlaneID, Query[i].X, Query[i].Y, Query[i].Width, Query[i].Height);
+        Tmp->PlaneID->PlaneState->SourceX = Query[i].X;
+        Tmp->PlaneID->PlaneState->SourceY = Query[i].Y;
+        Tmp->PlaneID->PlaneState->Width = Query[i].Width;
+        Tmp->PlaneID->PlaneState->Height = Query[i].Height;
+        LouPrint("Drsd Plane ID:%h Changed Dimentions: X:%d :: Y:%d :: Width:%d :: Height:%d\n", 
+            Tmp->PlaneID, Tmp->PlaneID->PlaneState->SourceX, Tmp->PlaneID->PlaneState->SourceY, 
+            Tmp->PlaneID->PlaneState->Width, Tmp->PlaneID->PlaneState->Height
+        );
+        i++;
+    }
+    MutexUnlock(&PlaneLock);
+    return STATUS_SUCCESS;
+}
 
 LOUDDK_API_ENTRY
 void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t SubX, size_t SubY, size_t SubWidth, size_t SubHeight) {
@@ -412,8 +428,6 @@ void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t SubX, size_t SubY, size_t S
         INT64 w = x2 - x;
         INT64 h = y2 - y;
 
-        LouPrint("SubState w:%d :: h:%d\n", w, h);
-
         size_t FbWidth = Plane->FrameBuffer->Width;
         uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
         uint32_t* Cb = Clip->WindowBuffer;
@@ -435,14 +449,92 @@ void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t SubX, size_t SubY, size_t S
 
 LOUDDK_API_ENTRY
 void LouKeUpdateShadowClipState(PDRSD_CLIP Clip) {
-    
+    INT64 X = Clip->X;
+    INT64 Y = Clip->Y;
+    INT64 Width = (INT64)Clip->Width;
+    INT64 Height = (INT64)Clip->Height;
+
+    PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
+    while (TmpChain->Peers.NextHeader) {
+        TmpChain = (PDRSD_PLANE_CHAIN)TmpChain->Peers.NextHeader;
+        PDRSD_PLANE Plane = TmpChain->PlaneID;
+
+        INT64 x = MAX(X, Plane->PlaneState->SourceX);
+        INT64 y = MAX(Y, Plane->PlaneState->SourceY);
+        INT64 x2 = MIN(X + Width, Plane->PlaneState->SourceX + (INT64)Plane->PlaneState->Width);
+        INT64 y2 = MIN(Y + Height, Plane->PlaneState->SourceY + (INT64)Plane->PlaneState->Height);
+
+        if (x2 <= x || y2 <= y) {
+            continue;
+        }
+
+        INT64 w = x2 - x;
+        INT64 h = y2 - y;
+
+        size_t FbWidth = Plane->FrameBuffer->Width;
+        uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
+        uint32_t* Cb = Clip->WindowBuffer;
+
+        for (size_t Ty = 0; Ty < (size_t)h; Ty++) {
+            size_t dstY = (size_t)(y + Ty);
+            size_t srcY = (size_t)(Ty + (y - Clip->Y));
+            size_t dstOffset = (dstY * FbWidth) + (size_t)x;
+            size_t srcOffset = (srcY * Clip->Width) + (size_t)(x - Clip->X);
+            for (size_t Tx = 0; Tx < (size_t)w; Tx++) {
+                if(Cb[srcOffset + Tx] & (0xFF << 24)){
+                    Fb2[dstOffset + Tx] = Cb[srcOffset + Tx];
+                }
+            }
+        }
+        CalculateNextUpdate(Plane, x, y, w, h);
+
+    }
 }
 
 LOUDDK_API_ENTRY
 void LouKeUpdateShadowClipSubState(
     PDRSD_CLIP Clip, 
-    size_t X, size_t Y, 
-    size_t Width, size_t Height
+    size_t SubX, size_t SubY, 
+    size_t SubWidth, size_t SubHeight
 ){
+    INT64 X = (INT64)Clip->X + (INT64)SubX;
+    INT64 Y = (INT64)Clip->Y + (INT64)SubY;
+    INT64 Width  = (INT64)SubWidth;
+    INT64 Height = (INT64)SubHeight;
 
+    PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
+    while (TmpChain->Peers.NextHeader) {
+        TmpChain = (PDRSD_PLANE_CHAIN)TmpChain->Peers.NextHeader;
+        PDRSD_PLANE Plane = TmpChain->PlaneID;
+
+        INT64 x  = MAX(X, Plane->PlaneState->SourceX);
+        INT64 y  = MAX(Y, Plane->PlaneState->SourceY);
+        INT64 x2 = MIN(X + Width,  Plane->PlaneState->SourceX + (INT64)Plane->PlaneState->Width);
+        INT64 y2 = MIN(Y + Height, Plane->PlaneState->SourceY + (INT64)Plane->PlaneState->Height);
+
+        if (x2 <= x || y2 <= y) {
+            continue; // No overlap
+        }
+
+        INT64 w = x2 - x;
+        INT64 h = y2 - y;
+
+        size_t FbWidth = Plane->FrameBuffer->Width;
+        uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
+        uint32_t* Cb = Clip->WindowBuffer;
+
+        for (size_t Ty = 0; Ty < (size_t)h; Ty++) {
+            size_t dstY = (size_t)(y + Ty);
+            size_t srcY = (size_t)(Ty + (y - Clip->Y));
+            size_t dstOffset = (dstY * FbWidth) + (size_t)x;
+            size_t srcOffset = (srcY * Clip->Width) + (size_t)(x - Clip->X);
+            for (size_t Tx = 0; Tx < (size_t)w; Tx++) {
+                if(Cb[srcOffset + Tx] & (0xFF << 24)){
+                    Fb2[dstOffset + Tx] = Cb[srcOffset + Tx];
+                }
+            }
+        }
+        CalculateNextUpdate(Plane, x, y, w, h);
+
+    }
 }

@@ -39,7 +39,8 @@ void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
 HANDLE LouKeLoadLibraryA(string Name, mutex_t* Lock);
-void* LouDrsdGetPlaneInformation(size_t* CountHandle);
+void* LouKeDrsdGetPlaneInformation(size_t* CountHandle);
+LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context);
 void* LouKeGenericAllocateHeapEx(
     void* HeapHandle, 
     size_t AllocationSize,
@@ -100,7 +101,12 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUDRSDGETPLANEINFO:{
             uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[0] = (uint64_t)LouDrsdGetPlaneInformation((size_t*)Tmp[1]);
+            Tmp[0] = (uint64_t)LouKeDrsdGetPlaneInformation((size_t*)Tmp[1]);
+            return;
+        }
+        case LOUDRSDSETPLANEINFO:{
+            UINT64* Tmp = (UINT64*)Data;
+            Tmp[0] = (UINT64)LouKeDrsdSetPlaneInformation((PVOID)Tmp[1]);
             return;
         }
         case LOUDRSDCREATECLIP:{

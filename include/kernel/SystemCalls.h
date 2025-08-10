@@ -157,6 +157,7 @@ void LouCALL(
 #define LOUGETSYSTEMSTATE                       109
 #define LOUDRSDUPDATECLIPSUBSTATE               110
 #define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
+#define LOUDRSDSETPLANEINFO                     112
 //Kernel SystemCalls
 
 #include <stdbool.h>

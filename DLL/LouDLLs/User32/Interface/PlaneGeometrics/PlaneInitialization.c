@@ -31,31 +31,34 @@ void InitializePlaneTracker(
             DesktopCurrentHeight = PlaneTracker.PlaneInformation[i].Height;
         }
     }
-    vDesktopCurrentWidth = DesktopCurrentWidth * 3;
-    vDesktopCurrentHeight = DesktopCurrentHeight * 3;
 
-    INT64 Tmp = DesktopCurrentWidth;
+    INT64 Tmp = 0;
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
         //LouPrint("PlaneX:%d::PlaneY:%d\n", Tmp, DesktopCurrentHeight);
         PlaneTracker.PlaneInformation[i].X = Tmp;
-        PlaneTracker.PlaneInformation[i].Y = DesktopCurrentHeight;
+        PlaneTracker.PlaneInformation[i].Y = 0;
         Tmp += PlaneTracker.PlaneInformation[i].Width;
     }
 
     DesktopCurrentX = PlaneTracker.PlaneInformation[0].X;
     DesktopCurrentY = PlaneTracker.PlaneInformation[0].Y;
-    
+
+    LouPrint("X:%h :: Y:%h\n", DesktopCurrentX, DesktopCurrentY);
+
+    vDesktopCurrentWidth = DesktopCurrentWidth * 3;
+    vDesktopCurrentHeight = DesktopCurrentHeight * 3;
+
     XButtonClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     MouseClips = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     PlaneBackgrounds = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
-    //LouPrint("Desktop  Width:%d ::  Height:%d\n", DesktopCurrentWidth, DesktopCurrentHeight);
-    //LouPrint("Desktop vWidth:%d :: vHeight:%d\n", vDesktopCurrentWidth, vDesktopCurrentHeight);
+    
+    LouDrsdSetPlaneInformation(PlaneTracker.PlaneInformation);
 
     BackgroundWindow = CreateWindowA(
                             DEKSTOP_BACKGROUND,
                             "DesktopBackground",
                             WS_VISIBLE | WS_DISABLED,
-                            0,0, 0, 0,
+                            0,0, 0, 0, //dimentions ignored
                             0x00, 0x00, hInstance, 0x00 
                         );
 
@@ -64,4 +67,9 @@ void InitializePlaneTracker(
     ShowWindow((HWND)BackgroundWindow, SW_SHOW);
 
     UpdateWindow(BackgroundWindow);
+    
+    /*
+    //LouPrin t("Desktop  Width:%d ::  Height:%d\n", DesktopCurrentWidth, DesktopCurrentHeight);
+    //LouPrint("Desktop vWidth:%d :: vHeight:%d\n", vDesktopCurrentWidth, vDesktopCurrentHeight);
+    */
 }

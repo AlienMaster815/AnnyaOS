@@ -77,6 +77,7 @@ ShowWindow(
         Window->WindowVisability = nCmdShow;
         return true;
     }
+    
 
     return false;
 }
@@ -89,9 +90,13 @@ UpdateWindow(
     PWINDOW_HANDLE Window = (PWINDOW_HANDLE)WindowHandle;
     
     if(Window->Visable){
-        AwmUpdateWindowToScreen(Window);
+        for(size_t i = 0 ; i < Window->PlaneCount; i++){
+            LouUpdateClipState(Window->MainWindow[i]);
+        }
+        LouDrsdSyncScreen();
         return true;    
     }
+
 
     return false;
 }

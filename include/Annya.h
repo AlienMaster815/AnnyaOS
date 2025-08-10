@@ -334,6 +334,10 @@ void*
 LouDrsdGetPlaneInformation(size_t* CountHandle);
 
 __declspec(dllimport)
+LOUSTATUS
+LouDrsdSetPlaneInformation(void* Context);
+
+__declspec(dllimport)
 void*
 LouGlobalUserMallocEx(size_t Size, uint64_t Alignment);
 

@@ -37,6 +37,17 @@ void* LouDrsdGetPlaneInformation(size_t* CountHandle){
 }
 
 LOUDLL_API
+LOUSTATUS
+LouDrsdSetPlaneInformation(void* Context){
+    UINT64 KulaPacket[3] = {0};
+    KulaPacket[2] = (UINT64)Context;
+    while(!KulaPacket[0]){
+        LouCALL(LOUDRSDSETPLANEINFO, (UINT64)&KulaPacket[0], 0);
+    }
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+LOUDLL_API
 void 
 LouDrsdSyncScreen(){
     uint64_t KulaPacket[1] = {0};
