@@ -162,8 +162,9 @@ static void UpdateMouseClip(int64_t X, int64_t Y){
     INT64 LastY = MouseClip->Y;
     INT64 LastWidth = MouseClip->Width;
     INT64 LastHeight = MouseClip->Height;
+    MouseClip->X = X;
+    MouseClip->Y = Y;
 
-    LouUpdateClipLocation(MouseClip, X, Y);
     AwmUpdateLocationArea(LastX, LastY, LastWidth, LastHeight);
     LouUpdateShadowClipState(MouseClip);
     LouDrsdSyncScreen();

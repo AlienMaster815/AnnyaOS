@@ -293,11 +293,11 @@ UpdateWindow(
 );
 
 static inline bool IsAreaInsidePlane(
-    INT64 X1, INT64 Y1, UINT32 Width1, UINT32 Height1,
-    INT64 X2, INT64 Y2, UINT32 Width2, UINT32 Height2
+    INT64 X1, INT64 Y1, INT64 Width1, INT64 Height1,
+    INT64 X2, INT64 Y2, INT64 Width2, INT64 Height2
 ){
     if(
-        (X1 >= X2) && (Y1 >= Y2) && ((Width1 + X1) <= (X2 + Width2)) && ((Height1 + Y1) <= (Y2+ Height2))
+        (X1 >= X2) && (Y1 >= Y2) && ((Width1 + X1) <= (X2 + Width2)) && ((Height1 + Y1) <= (Y2 + Height2))
     ){
         return true;
     }

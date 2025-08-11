@@ -20,14 +20,14 @@ static void AddChildToParentWindow(
     Tmp->Peers.NextHeader = (PListHeader)LouGlobalUserMallocType(CHILD_WINDOW_TRACKER);
     Tmp = (PCHILD_WINDOW_TRACKER)Tmp->Peers.NextHeader;
     Tmp->Child = Child;
+    Child->ParentWindow = Parrent;
     MutexUnlock(&Parrent->ChildTrackerMutex);
 } 
 
 static PDRSD_CLIP FindClipOwnerFromWindowClips(PDRSD_CLIP* ClipArray, SIZE ArraySize, INT64 X, INT64 Y, INT64 Width, INT64 Height){
     for(size_t i = 0 ; i < ArraySize; i++){
         if(
-            (ClipArray[i]->X <= X) && (ClipArray[i]->Y <= Y) &&
-            ((ClipArray[i]->X + ClipArray[i]->Width) >= (X + Width)) && ((ClipArray[i]->Y + ClipArray[i]->Height) >= (Y + Height))
+            IsAreaInsidePlane(X, Y, Width, Height, ClipArray[i]->X, ClipArray[i]->Y, ClipArray[i]->Width, ClipArray[i]->Height)
         ){
             return ClipArray[i];
         }
@@ -81,7 +81,9 @@ void AwmUpdateLocationArea(
     PWINDOW_HANDLE Window;
     PDRSD_CLIP Clip;
     GetWindowFromLocation(X, Y, Width, Height, &Window);
-    //
+    if(Window->ParentWindow){
+        Window = (PWINDOW_HANDLE)Window->ParentWindow;
+    }
     AwmRedrawArea(Window, X, Y, Width, Height);
 
 }

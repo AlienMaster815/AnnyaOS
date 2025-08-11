@@ -3,11 +3,11 @@
 static PDRSD_DEVICE BootDevice = 0x00;
 static DRSD_PLANE_CHAIN MasterPlaneChain = {0};
 static mutex_t PlaneLock = {0};
-static size_t PlaneCount = 0;
+static INT64 PlaneCount = 0;
 
-UNUSED static void CalculateNextUpdate(PDRSD_PLANE Plane, size_t X, size_t Y, size_t Width, size_t Height){
-    size_t Right = X + Width;
-    size_t Bottom = Y + Height;
+UNUSED static void CalculateNextUpdate(PDRSD_PLANE Plane, INT64 X, INT64 Y, INT64 Width, INT64 Height){
+    INT64 Right = X + Width;
+    INT64 Bottom = Y + Height;
     if(!Plane->IsDirty){
         Plane->DirtyX = X;
         Plane->DirtyY = Y;
@@ -15,8 +15,8 @@ UNUSED static void CalculateNextUpdate(PDRSD_PLANE Plane, size_t X, size_t Y, si
         Plane->DirtyHeight = Height;
         Plane->IsDirty = true;
     }else{
-        size_t DirtyRight = Plane->DirtyX + Plane->DirtyWidth;
-        size_t DirtyBottom = Plane->DirtyY + Plane->DirtyHeight;
+        INT64 DirtyRight = Plane->DirtyX + Plane->DirtyWidth;
+        INT64 DirtyBottom = Plane->DirtyY + Plane->DirtyHeight;
         if(X < Plane->DirtyX){
             Plane->DirtyX = X;
         }
@@ -40,10 +40,10 @@ UNUSED static void DrsdFbDoUpdate(
 ){
     uint32_t* Fb1 = (uint32_t*)Plane->FrameBuffer->FramebufferBase;
     uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
-    size_t FbWidth = Plane->FrameBuffer->Width; 
-    size_t X = Plane->DirtyX, Y = Plane->DirtyY, Width = Plane->DirtyWidth, Height = Plane->DirtyHeight;
-    for(size_t y = 0 ; y < Height; y++){
-       for(size_t x = 0 ; x < Width; x++){
+    INT64 FbWidth = Plane->FrameBuffer->Width; 
+    INT64 X = Plane->DirtyX, Y = Plane->DirtyY, Width = Plane->DirtyWidth, Height = Plane->DirtyHeight;
+    for(INT64 y = 0 ; y < Height; y++){
+       for(INT64 x = 0 ; x < Width; x++){
             Fb1[(x + X) + ((y + Y) * FbWidth)] = Fb2[(x + X)  + ((y + Y) * FbWidth)];
        }
     }
@@ -174,10 +174,10 @@ LOUDDK_API_ENTRY void LouKeDestroyClip(PDRSD_CLIP Clip){
 }
 
 LOUDDK_API_ENTRY void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color) {
-    size_t Width = (size_t)Clip->Width;
-    size_t Height = (size_t)Clip->Height;
-    for(size_t Ty = 0; Ty < Height; Ty++){
-        for(size_t Tx = 0; Tx < Width; Tx++){
+    INT64 Width = (INT64)Clip->Width;
+    INT64 Height = (INT64)Clip->Height;
+    for(INT64 Ty = 0; Ty < Height; Ty++){
+        for(INT64 Tx = 0; Tx < Width; Tx++){
             Clip->WindowBuffer[Tx + (Ty * Width)] = Color;   
         }
     }
@@ -256,7 +256,7 @@ LouKeDrsdInitializeDevice(
     PDRSD_CRTC Crtc = 0x00;
     PDRSD_PLANE PrimaryPlane = 0x00;
     uint32_t* Formats; 
-    size_t FormatCount; 
+    INT64 FormatCount; 
     while(Connector){
         LouPrint("Configuring Connector:%h\n", Connector);
         
@@ -270,7 +270,7 @@ LouKeDrsdInitializeDevice(
         PrimaryPlane = Crtc->PrimaryPlane;
         FormatCount = PrimaryPlane->FormatCount;
         Formats = PrimaryPlane->PlaneState->Formats;
-        for(size_t foo = 0 ; foo < FormatCount; foo++){
+        for(INT64 foo = 0 ; foo < FormatCount; foo++){
             if(memcmp(&Formats[foo] , DRSD_COLOR_FORMAT_XRGB8888, 4) == 0){
                 PrimaryPlane->AlphaShift = 24;
                 PrimaryPlane->RedShift = 16;
@@ -309,21 +309,21 @@ LouKeDrsdInitializeDevice(
 typedef struct _DRSD_PLANE_QUERY_INFORMATION{
     uintptr_t           Plane;
     uintptr_t           Chain;
-    size_t              X;
-    size_t              Y;
-    size_t              Width;
-    size_t              Height;
+    INT64              X;
+    INT64              Y;
+    INT64              Width;
+    INT64              Height;
 }DRSD_PLANE_QUERY_INFORMATION, * PDRSD_PLANE_QUERY_INFORMATION;
 
 
 LOUDDK_API_ENTRY
-void* LouKeDrsdGetPlaneInformation(size_t* CountHandle){
+void* LouKeDrsdGetPlaneInformation(INT64* CountHandle){
     *CountHandle = PlaneCount;
     MutexLock(&PlaneLock);
     PDRSD_PLANE_QUERY_INFORMATION Query = LouKeMallocArray(DRSD_PLANE_QUERY_INFORMATION, PlaneCount, USER_GENERIC_MEMORY);
 
     PDRSD_PLANE_CHAIN Tmp = &MasterPlaneChain;
-    size_t i = 0;
+    INT64 i = 0;
     while(Tmp->Peers.NextHeader){
         Tmp = (PDRSD_PLANE_CHAIN)Tmp->Peers.NextHeader;
 
@@ -347,7 +347,7 @@ LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context){
     PDRSD_PLANE_QUERY_INFORMATION Query = (PDRSD_PLANE_QUERY_INFORMATION)Context;
 
     PDRSD_PLANE_CHAIN Tmp = &MasterPlaneChain;
-    size_t i = 0;
+    INT64 i = 0;
     while(Tmp->Peers.NextHeader){
         Tmp = (PDRSD_PLANE_CHAIN)Tmp->Peers.NextHeader;
         LouPrint("Seting Drsd Plane ID:%h Plane Values X:%d :: Y:%d :: Width:%d :: Height:%d\n", Tmp->PlaneID, Query[i].X, Query[i].Y, Query[i].Width, Query[i].Height);
@@ -365,48 +365,14 @@ LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context){
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
-    INT64 X = Clip->X;
-    INT64 Y = Clip->Y;
-    INT64 Width = (INT64)Clip->Width;
-    INT64 Height = (INT64)Clip->Height;
 
-    PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
-    while (TmpChain->Peers.NextHeader) {
-        TmpChain = (PDRSD_PLANE_CHAIN)TmpChain->Peers.NextHeader;
-        PDRSD_PLANE Plane = TmpChain->PlaneID;
-
-        INT64 x = MAX(X, Plane->PlaneState->SourceX);
-        INT64 y = MAX(Y, Plane->PlaneState->SourceY);
-        INT64 x2 = MIN(X + Width, Plane->PlaneState->SourceX + (INT64)Plane->PlaneState->Width);
-        INT64 y2 = MIN(Y + Height, Plane->PlaneState->SourceY + (INT64)Plane->PlaneState->Height);
-
-        if (x2 <= x || y2 <= y) {
-            continue;
-        }
-
-        INT64 w = x2 - x;
-        INT64 h = y2 - y;
-
-        UNUSED size_t FbWidth = Plane->FrameBuffer->Width;
-        UNUSED uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
-        UNUSED uint32_t* Cb = Clip->WindowBuffer;
-
-        for (size_t Ty = 0; Ty < (size_t)h; Ty++){
-            for (size_t Tx = 0; Tx < (size_t)w; Tx++) {
-
-            }
-        }
-        CalculateNextUpdate(Plane, x, y, w, h);
-    }
-}
 
 LOUDDK_API_ENTRY
-void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t SubX, size_t SubY, size_t SubWidth, size_t SubHeight) {
+void LouKeUpdateClipSubState(PDRSD_CLIP Clip, INT64 SubX, INT64 SubY, INT64 SubWidth, INT64 SubHeight) {
     INT64 X = (INT64)Clip->X + (INT64)SubX;
     INT64 Y = (INT64)Clip->Y + (INT64)SubY;
-    INT64 Width  = (INT64)SubWidth;
-    INT64 Height = (INT64)SubHeight;
+    INT64 Width  = (INT64)MIN(SubX + SubWidth, Clip->Width);
+    INT64 Height = (INT64)MIN(SubY + SubHeight,Clip->Height);
 
     PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
     while (TmpChain->Peers.NextHeader) {
@@ -424,58 +390,28 @@ void LouKeUpdateClipSubState(PDRSD_CLIP Clip, size_t SubX, size_t SubY, size_t S
 
         INT64 w = x2 - x;
         INT64 h = y2 - y;
-
-        UNUSED size_t FbWidth = Plane->FrameBuffer->Width;
-        UNUSED uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
+        INT64 OffsetX = x - X;
+        INT64 OffsetY = y - Y;
+        UNUSED INT64 FbWidth = Plane->FrameBuffer->Width;
+        UNUSED uint32_t* Fb = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
         UNUSED uint32_t* Cb = Clip->WindowBuffer;
 
-        for (size_t Ty = 0; Ty < (size_t)h; Ty++) {
-            for (size_t Tx = 0; Tx < (size_t)w; Tx++) {
-
+        for (INT64 Ty = 0; Ty < (INT64)h; Ty++) {
+            for (INT64 Tx = 0; Tx < (INT64)w; Tx++) {
+                Fb[(Tx + x) + ((Ty + y) * FbWidth)] = Cb[(OffsetX + Tx) + ((Ty + OffsetY) * Width)];
             }
         }
         CalculateNextUpdate(Plane, x, y, w, h);
-
     }
 }
 
-
-LOUDDK_API_ENTRY
-void LouKeUpdateShadowClipState(PDRSD_CLIP Clip) {
-    INT64 X = Clip->X;
-    INT64 Y = Clip->Y;
-    INT64 Width = (INT64)Clip->Width;
-    INT64 Height = (INT64)Clip->Height;
-
-    PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
-    while (TmpChain->Peers.NextHeader) {
-        TmpChain = (PDRSD_PLANE_CHAIN)TmpChain->Peers.NextHeader;
-        PDRSD_PLANE Plane = TmpChain->PlaneID;
-
-        INT64 x = MAX(X, Plane->PlaneState->SourceX);
-        INT64 y = MAX(Y, Plane->PlaneState->SourceY);
-        INT64 x2 = MIN(X + Width, Plane->PlaneState->SourceX + (INT64)Plane->PlaneState->Width);
-        INT64 y2 = MIN(Y + Height, Plane->PlaneState->SourceY + (INT64)Plane->PlaneState->Height);
-
-        if (x2 <= x || y2 <= y) {
-            continue;
-        }
-
-        INT64 w = x2 - x;
-        INT64 h = y2 - y;
-
-        UNUSED size_t FbWidth = Plane->FrameBuffer->Width;
-        UNUSED uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
-        UNUSED uint32_t* Cb = Clip->WindowBuffer;
-
-        for (size_t Ty = 0; Ty < (size_t)h; Ty++) {
-            for (size_t Tx = 0; Tx < (size_t)w; Tx++) {
-
-            }
-        }
-        CalculateNextUpdate(Plane, x, y, w, h);
-
-    }
+LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
+    LouKeUpdateClipSubState(
+        Clip,
+        0, 0,
+        Clip->Width, 
+        Clip->Height
+    );
 }
 
 LOUDDK_API_ENTRY
@@ -486,8 +422,8 @@ void LouKeUpdateShadowClipSubState(
 ){
     INT64 X = (INT64)Clip->X + (INT64)SubX;
     INT64 Y = (INT64)Clip->Y + (INT64)SubY;
-    INT64 Width  = (INT64)SubWidth;
-    INT64 Height = (INT64)SubHeight;
+    INT64 Width  = (INT64)Clip->Width;
+    INT64 Height = (INT64)Clip->Height;
 
     PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
     while (TmpChain->Peers.NextHeader) {
@@ -505,17 +441,30 @@ void LouKeUpdateShadowClipSubState(
 
         INT64 w = x2 - x;
         INT64 h = y2 - y;
-
-        UNUSED size_t FbWidth = Plane->FrameBuffer->Width;
-        UNUSED uint32_t* Fb2 = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
+        INT64 OffsetX = x - X;
+        INT64 OffsetY = y - Y;
+        UNUSED INT64 FbWidth = Plane->FrameBuffer->Width;
+        UNUSED uint32_t* Fb = (uint32_t*)Plane->FrameBuffer->SecondaryFrameBufferBase;
         UNUSED uint32_t* Cb = Clip->WindowBuffer;
 
-        for (size_t Ty = 0; Ty < (size_t)h; Ty++) {
-            for (size_t Tx = 0; Tx < (size_t)w; Tx++) {
-
+        for (INT64 Ty = 0; Ty < (INT64)h; Ty++) {
+            for (INT64 Tx = 0; Tx < (INT64)w; Tx++) {
+                if(Cb[(OffsetX + Tx) + ((Ty + OffsetY) * Width)] & (0xFF << 24)){
+                    Fb[(Tx + x) + ((Ty + y) * FbWidth)] = Cb[(OffsetX + Tx) + ((Ty + OffsetY) * Width)];
+                }
             }
         }
         CalculateNextUpdate(Plane, x, y, w, h);
 
     }
+}
+
+LOUDDK_API_ENTRY
+void LouKeUpdateShadowClipState(PDRSD_CLIP Clip) {
+    LouKeUpdateShadowClipSubState(
+        Clip,
+        0, 0,
+        Clip->Width, 
+        Clip->Height
+    );
 }
