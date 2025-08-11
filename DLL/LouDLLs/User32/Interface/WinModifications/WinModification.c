@@ -3,8 +3,8 @@
 __declspec(dllimport)
 void LouDrsdDrawLine32(
     PDRSD_CLIP Clip, 
-    UINT32 X1, UINT32 Y1,
-    UINT32 X2, UINT32 Y2, 
+    INT64 X1, INT64 Y1,
+    INT64 X2, INT64 Y2, 
     UINT32 Color
 );
 

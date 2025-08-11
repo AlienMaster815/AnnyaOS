@@ -16,7 +16,9 @@ SRC = User32.c \
 		Interface/WindowCreation/Styles.c \
 		Interface/WinModifications/WinModification.c \
 		Interface/PlaneGeometrics/PlaneInitialization.c \
-		Interface/PlaneGeometrics/PlanePaint.c 
+		Interface/PlaneGeometrics/PlanePaint.c \
+		Interface/PlaneGeometrics/WindowTracking.c \
+		Interface/PlaneGeometrics/ClipTracking.c 
 
 TARGET = user32.dll
 

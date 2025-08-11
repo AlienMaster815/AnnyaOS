@@ -6,15 +6,6 @@ void*
 LouGlobalUserMallocEx(size_t Size, uint64_t Alignment);
 
 __declspec(dllimport)
-PDRSD_CLIP 
-LouDrsdCreateClip(
-    void* Plane, 
-    size_t X, size_t Y, 
-    size_t Width, size_t Height, 
-    uint8_t R, uint8_t G, uint8_t B, uint8_t A
-);
-
-__declspec(dllimport)
 void* AnnyaGetLibraryFunctionN(string ModuleName,string FunctionName);
 
 static FT_Error (*FT_Init_FreeTypel)(FT_Library* Lib);
@@ -121,8 +112,8 @@ PDRSD_CLIP CreateClipFromStringEx(
     SIZE        SpaceWidth,
     SIZE        SpaceHeight,
     PDRSD_CLIP  BackgroundClip, 
-    UINT32      BackX, 
-    UINT32      BackY
+    INT64      BackX, 
+    INT64      BackY
 ){
     FLOATING_STRING_DIMENTION Dimentions = {0};
     Dimentions.Width = CharecterWidth;
@@ -141,8 +132,8 @@ PDRSD_CLIP CreateClipFromString(
     SIZE CharecterWidth, 
     SIZE CharecterHeight, 
     PDRSD_CLIP BackgroundClip, 
-    UINT32 BackX, 
-    UINT32 BackY
+    INT64 BackX, 
+    INT64 BackY
 ){
     return CreateClipFromStringEx(
         Str, 

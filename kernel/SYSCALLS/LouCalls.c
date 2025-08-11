@@ -11,11 +11,11 @@ uintptr_t LouKeCreateUserStackThread(
 );
 void LouKeUpdateClipSubState(
     PDRSD_CLIP Clip, 
-    size_t X, size_t Y, 
-    size_t Width, size_t Height
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height
 );
 uint8_t LouKeGetCurrentTimeMinute();
-void LouKeUpdateShadowClipSubState(PDRSD_CLIP Clip, size_t X, size_t Y, size_t Width, size_t Height);
+void LouKeUpdateShadowClipSubState(PDRSD_CLIP Clip, INT64 X, INT64 Y, INT64 Width, INT64 Height);
 int LouPrint_s(char* format, va_list args);
 
 
@@ -50,8 +50,8 @@ uint64_t LouKeGetThreadIdentification();
 void LouKeExitDosMode();
 void LouKeDrsdSyncScreen();
 PDRSD_CLIP LouKeDrsdCreateClip(
-    size_t X, size_t Y, 
-    size_t Width, size_t Height, 
+    INT64    X, INT64 Y, 
+    INT64 Width, INT64 Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 );
 
@@ -112,10 +112,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUDRSDCREATECLIP:{
             uint64_t* Tmp = (uint64_t*)Data;
             Tmp[0] = (uint64_t)LouKeDrsdCreateClip(
-                (size_t)Tmp[1], //X
-                (size_t)Tmp[2], //Y
-                (size_t)Tmp[3], //Width
-                (size_t)Tmp[4], //Height
+                (INT64)Tmp[1], //X
+                (INT64)Tmp[2], //Y
+                (INT64)Tmp[3], //Width
+                (INT64)Tmp[4], //Height
                 (uint8_t)Tmp[5], //R
                 (uint8_t)Tmp[6], //G
                 (uint8_t)Tmp[7], //B
@@ -219,12 +219,12 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }case LOUDRSDUPDATECLIPSUBSTATE:{
             uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (size_t)Tmp[1], (size_t)Tmp[2], (size_t)Tmp[3], (size_t)Tmp[4]);
+            LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
             return;
         }
         case LOUDRSDUPDATESHADOWCLIPSUBSTATE:{
             uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateShadowClipSubState((PDRSD_CLIP)Tmp[0],(size_t)Tmp[1], (size_t)Tmp[2], (size_t)Tmp[3], (size_t)Tmp[4]);
+            LouKeUpdateShadowClipSubState((PDRSD_CLIP)Tmp[0],(INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
             return;
         }
         default:

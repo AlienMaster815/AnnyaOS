@@ -261,8 +261,8 @@ PDRSD_CLIP CreateClipFromString(
     SIZE CharecterWidth, 
     SIZE CharecterHeight, 
     PDRSD_CLIP BackgroundClip, 
-    UINT32 BackX, 
-    UINT32 BackY
+    INT64 BackX, 
+    INT64 BackY
 );
 
 PDRSD_CLIP CreateClipFromStringEx(
@@ -273,8 +273,8 @@ PDRSD_CLIP CreateClipFromStringEx(
     SIZE        SpaceWidth,
     SIZE        SpaceHeight,
     PDRSD_CLIP  BackgroundClip, 
-    UINT32      BackX, 
-    UINT32      BackY
+    INT64       BackX, 
+    INT64       BackY
 );
 
 PVOID AnnyaGetFont(string FontPath);
@@ -305,35 +305,19 @@ static inline bool IsAreaInsidePlane(
 }
 
 
-static inline bool IsAreaInPlane(
-    INT64* pX1, INT64* pY1, UINT32* pWidth1, UINT32* pHeight1,
-    INT64 X2, INT64 Y2, UINT32 Width2, UINT32 Height2
-){
-    INT64 X1 = *pX1;
-    INT64 Y1 = *pY1;
-    UINT32 Width1 = *pWidth1;
-    UINT32 Height1 = *pHeight1;
 
-    bool Result = false;
-    if((X1 >= X2) && ((X2 + Width2) > X1)){
-        *pX1 = X2;
-        X1 = X2;
-        Result = true;
-    }
-    if((X1 + Width1) >= (X2 + Width2)){
-        *pWidth1 = (X2 + Width2) - X1;
-        Result = true;
-    }
-    if((Y1 >= Y2) && ((Y2 + Height2) > Y1)){
-        *pY1 = Y2;
-        Y1 = Y2;
-        Result = true;
-    }
-    if((Y1 + Height1) >= (Y2 + Height2)){
-        *pHeight1 = (Y2 + Height2) - Y1;
-        Result = true;
-    }
-    return Result;
-}
+
+void AwmInitializeWindowToTracker(
+    PWINDOW_HANDLE Parrent,
+    PWINDOW_HANDLE Child
+);
+
+void AwmUpdateLocationArea(
+    INT64 X, INT64 Y,
+    INT64 Width, INT64 Height
+);
+
+void AwmUpdateSubWindowToScreen(PWINDOW_HANDLE Window, INT64 X, INT64 Y, INT64 Width, INT64 Height);
+void AwmRedrawArea(PWINDOW_HANDLE Window, INT64 X, INT64 Y, INT64 Width, INT64 Height);
 
 #endif

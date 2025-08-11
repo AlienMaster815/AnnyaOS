@@ -7,8 +7,8 @@
 LOUDLL_API
 PDRSD_CLIP 
 LouDrsdCreateClip(
-    size_t X, size_t Y, 
-    size_t Width, size_t Height, 
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 ){
     uint64_t KulaPacket[10] = {0};
@@ -117,7 +117,7 @@ void LouUpdateShadowClipSubState(
 
 LOUDLL_API
 void 
-LouUpdateClipLocation(PDRSD_CLIP Clip, UINT32 X, UINT32 Y){
+LouUpdateClipLocation(PDRSD_CLIP Clip, INT64 X, INT64 Y){
     Clip->X = X;
     Clip->Y = Y;
 }

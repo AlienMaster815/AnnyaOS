@@ -1001,10 +1001,10 @@ typedef struct _DRSD_CLIP{
     PDRSD_PLANE             Owner;
     struct _DRSD_CLIP_CHAIN* ChainOwner;
     void                    (*SignalClipChange)(struct _DRSD_CLIP*, DRSD_CLIP_UPDATE_REASON, void* UpdateData);
-    size_t                  X;
-    size_t                  Y;
-    size_t                  Width;
-    size_t                  Height;
+    INT64                   X;
+    INT64                   Y;
+    INT64                   Width;
+    INT64                   Height;
     uint32_t*               WindowBuffer;
     size_t                  RedShift;
     size_t                  BlueShift;

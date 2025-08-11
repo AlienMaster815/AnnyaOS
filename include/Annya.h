@@ -133,6 +133,7 @@ typedef struct _WINDOW_HANDLE{
     SIZE                    PlaneCount;
     struct _DRSD_CLIP**     MainWindow;
     struct _WINDOW_HANDLE*  ParentWindow;
+    mutex_t                 ChildTrackerMutex;
     CHILD_WINDOW_TRACKER    Children;
     struct _AWM_CLIP_TREE*  ClipTreeHandle;
     DWORD                   WindowStyle;
@@ -292,13 +293,13 @@ void
 LouDrsdClipToClip(
     struct _DRSD_CLIP* BackClip,
     struct _DRSD_CLIP* FrontClip,
-    UINT32 X,
-    UINT32 Y
+    INT64 X,
+    INT64 Y
 );
 
 __declspec(dllimport)
 void 
-LouUpdateClipLocation(struct _DRSD_CLIP* Clip, UINT32 DeltaX, UINT32 DeltaY);
+LouUpdateClipLocation(struct _DRSD_CLIP* Clip, INT64 DeltaX, INT64 DeltaY);
 
 __declspec(dllimport)
 int strcmp(const char* str1, const char* str2);
@@ -421,8 +422,8 @@ void LouUpdateClipState(void* Clip);
 
 __declspec(dllimport)
 void* LouDrsdCreateClip(
-    size_t X, size_t Y, 
-    size_t Width, size_t Height, 
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 );
 

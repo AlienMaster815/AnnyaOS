@@ -11,7 +11,7 @@ int abs(int x) {
 LOUDLL_API
 void LouDrsdPutPixel32(
     PDRSD_CLIP Clip,
-    UINT32 X, UINT32 Y,
+    INT64 X, INT64 Y,
     UINT32 Color
 ){
     Clip->WindowBuffer[X + (Y * Clip->Width)] = Color;
@@ -20,8 +20,8 @@ void LouDrsdPutPixel32(
 LOUDLL_API
 void LouDrsdDrawRectangle32(
     PDRSD_CLIP Clip,
-    UINT32 X, UINT32 Y, 
-    UINT32 Width, UINT32 Height,
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height,
     UINT32 Color
 ){
 
@@ -30,8 +30,8 @@ void LouDrsdDrawRectangle32(
 LOUDLL_API
 void LouDrsdFillRectangle32(
     PDRSD_CLIP Clip,
-    UINT32 X, UINT32 Y, 
-    UINT32 Width, UINT32 Height,
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height,
     UINT32 Color
 ){
     
@@ -41,7 +41,7 @@ void LouDrsdFillRectangle32(
 LOUDLL_API
 void LouDrsdPutPixel(
     PDRSD_CLIP Clip,
-    UINT32 X, UINT32 Y,
+    INT64 X, INT64 Y,
     UINT8 R, UINT8 G, UINT8 B, UINT8 A
 ){
 
@@ -50,8 +50,8 @@ void LouDrsdPutPixel(
 LOUDLL_API
 void LouDrsdDrawLine(
     PDRSD_CLIP Clip, 
-    UINT32 X1, UINT32 Y1,
-    UINT32 X2, UINT32 Y2, 
+    INT64 X1, INT64 Y1,
+    INT64 X2, INT64 Y2, 
     UINT8 R, UINT8 G, UINT8 B, UINT8 A
 ){
 
@@ -62,8 +62,8 @@ void LouDrsdDrawLine(
 LOUDLL_API
 void LouDrsdDrawLine32(
     PDRSD_CLIP Clip, 
-    UINT32 x0, UINT32 y0,
-    UINT32 x1, UINT32 y1, 
+    INT64 x0, INT64 y0,
+    INT64 x1, INT64 y1, 
     UINT32 Color
 ){
   int dx =  abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -82,8 +82,8 @@ void LouDrsdDrawLine32(
 LOUDLL_API
 void LouDrsdDrawRectangle(
     PDRSD_CLIP Clip,
-    UINT32 X, UINT32 Y, 
-    UINT32 Width, UINT32 Height,
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height,
     UINT8 R, UINT8 G, UINT8 B, UINT8 A
 ){
 
@@ -92,8 +92,8 @@ void LouDrsdDrawRectangle(
 LOUDLL_API
 void LouDrsdFillRectangle(
     PDRSD_CLIP Clip,
-    UINT32 X, UINT32 Y, 
-    UINT32 Width, UINT32 Height,
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height,
     UINT8 R, UINT8 G, UINT8 B, UINT8 A
 ){
 
@@ -104,8 +104,8 @@ void
 LouDrsdClipToClip(
     PDRSD_CLIP BackClip,
     PDRSD_CLIP FrontClip,
-    UINT32 X,
-    UINT32 Y
+    INT64 X,
+    INT64 Y
 ){
     if((BackClip->Width < (X + FrontClip->Width)) || (BackClip->Height < (Y + FrontClip->Height))){
         LouPrint("LouDrsdClipToClip() Bad Data\n");

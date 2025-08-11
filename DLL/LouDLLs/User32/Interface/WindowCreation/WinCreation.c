@@ -3,7 +3,7 @@
 extern AWM_PLANE_TRACKER PlaneTracker;
 void InitializeBackgroundWindows(PWINDOW_HANDLE WindowHandle);
 extern HANDLE (*AnnyaCreateClipFromPng)(HANDLE);
-
+extern HWND BackgroundWindow;
 extern int64_t DesktopCurrentWidth;
 extern int64_t DesktopCurrentHeight;
 extern int64_t DesktopCurrentX;
@@ -41,8 +41,8 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
         NewWindow->MainWindow[i] = LouDrsdCreateClip(
             PlaneTracker.PlaneInformation[i].X,
             PlaneTracker.PlaneInformation[i].Y,
-            (size_t)PlaneTracker.PlaneInformation[i].Width,
-            (size_t)PlaneTracker.PlaneInformation[i].Height,
+            PlaneTracker.PlaneInformation[i].Width,
+            PlaneTracker.PlaneInformation[i].Height,
             0,0xC0,0xC0, 0xFF
         );
 
@@ -53,21 +53,17 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
 
 static PWINDOW_HANDLE CreateDesktopTaskTrayWindow(){
     PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
-
+    PWINDOW_HANDLE Desktop = (PWINDOW_HANDLE)BackgroundWindow;
     NewWindow->MainWindow = LouGlobalUserMallocArray(PDRSD_CLIP, PlaneTracker.PlaneCount);
     NewWindow->PlaneCount = PlaneTracker.PlaneCount;
     NewWindow->Mirrored = true;
-    NewWindow->X = DesktopCurrentX;
-    NewWindow->Y = DesktopCurrentY;
-    NewWindow->Width = (UINT32)DesktopCurrentWidth;
-    NewWindow->Height = (UINT32)DesktopCurrentHeight;
 
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
 
         NewWindow->MainWindow[i] = LouDrsdCreateClip(
             0,
-            (size_t)PlaneTracker.PlaneInformation[i].Height - 35,
-            (size_t)PlaneTracker.PlaneInformation[i].Width,
+            (Desktop->MainWindow[i]->Height + Desktop->MainWindow[i]->Y) - 35,
+            Desktop->MainWindow[i]->Width,
             35,
             192,192,192, 0xFF
         );
@@ -93,10 +89,7 @@ static PWINDOW_HANDLE CreateCanvasButton(
     LPVOID      Parameter
 ){
     PWINDOW_HANDLE NewWindow = LouGlobalUserMallocType(WINDOW_HANDLE);
-    NewWindow->WindowStyle = Style;
-    NewWindow->ExtendedWindowStyle = ExStyle;
-    NewWindow->WindowClass = ClassName;
-    NewWindow->WindowName = WindowName;
+
     if(ParrentHandle){
         PWINDOW_HANDLE Parrent = (PWINDOW_HANDLE)ParrentHandle;
         if(Parrent->Mirrored || MirrorAllScreens){
@@ -155,6 +148,11 @@ CreateWindowExA(
     }
 
     if(NewWindow){
+        NewWindow->WindowStyle = Style;
+        NewWindow->ExtendedWindowStyle = ExStyle;
+        NewWindow->WindowClass = ClassName;
+        NewWindow->WindowName = WindowName;
+        AwmInitializeWindowToTracker((PWINDOW_HANDLE)ParrentHandle, NewWindow);
         return (PWINDHANDLE)NewWindow;
     }
 
