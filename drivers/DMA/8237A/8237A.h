@@ -55,8 +55,28 @@ typedef struct _DMA16_TRANSFER_PACKET{
     UINT32  DmaAddress;
     UINT16  Transferlength;
     UINT16  TransferMode;
-    BOOL    Direction;
+    UINT8   Channel     : 2;
+    UINT8   Transfer    : 2;
+    UINT8   Auto        : 1;
+    UINT8   Down        : 1;
+    UINT8   Mode        : 2;
 }DMA16_TRANSFER_PACKET, * PDMA16_TRANSFER_PACKET;
+
+#define DMA16_SET_CHANNEL(x)                    (((x) > 3) ? (x - 4) : (x))
+#define TRANSFER_SELF_TEST                      0b00
+#define TRANSFER_DEVICE_WRAM                    0b01
+#define TRANSFER_DEVICE_RRAM                    0b10
+
+#define AUTO_RELOAD_START_ON_COMPLETION         1
+#define AUTO_STANDBY_ON_COMPLETION              0
+
+#define DOWN_REVERSE_TRANSFER_ORDER             1
+#define DOWN_REGULAR_TRANSFER_ORDER             0
+
+#define MODE_TRANSFER_ON_DEMAND                 0b00
+#define MODE_SINGLE_DMA_TRANSFER                0b01
+#define MODE_BLOCK_DMA_TRANSFER                 0b10
+#define MODE_CASCADE_SLAVE_CHIP                 0b11
 
 
 
