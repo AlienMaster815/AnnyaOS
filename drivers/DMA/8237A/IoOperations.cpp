@@ -12,7 +12,7 @@ static const UINT16 DmaPageReg[8] = {
     0, C5_PAGE_ADDRESS_REGISTER, C6_PAGE_ADDRESS_REGISTER, C7_PAGE_ADDRESS_REGISTER
 };
 
-void Write16Bit8237ARegister(UINT8 Channel, UINT16 Port, UINT16 Value){
+static void Write16Bit8237ARegister(UINT8 Channel, UINT16 Port, UINT16 Value){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&IoLock, &Irql);
     UINT8 Controller = (Channel < 4) ? 0 : 1;
@@ -22,14 +22,14 @@ void Write16Bit8237ARegister(UINT8 Channel, UINT16 Port, UINT16 Value){
     LouKeReleaseSpinLock(&IoLock, &Irql);
 }
 
-void Write8Bit8237ARegister(UINT16 Port, UINT8 Value){
+static void Write8Bit8237ARegister(UINT16 Port, UINT8 Value){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&IoLock, &Irql);
     outb(Port, Value);
     LouKeReleaseSpinLock(&IoLock, &Irql);
 }
 
-UINT8 Read8Bit8237ARegister(UINT16 Port){
+static UINT8 Read8Bit8237ARegister(UINT16 Port){
     UINT8 Result;
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&IoLock, &Irql);
@@ -69,11 +69,58 @@ LOUSTATUS Mask8237ADrq(UINT8 Channel){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS SetDmaMode(UINT8 Channel, UINT8 ModeConfig){
+LOUSTATUS UnMask8237ADrq(UINT8 Channel){
+    if(Channel > 7){
+        LouPrint("Invalid Channel:%d\n", Channel);
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT16 Port = (Channel > 3) ? (DMA16_MASK_RESET_4_7) : (DMA16_MASK_RESET_0_3);
+    UINT8 Register = Read8Bit8237ARegister(Port);
+    Register &= ~(((Channel > 3) ? (1 << (Channel - 4)) : (1 << Channel)));
+    Write8Bit8237ARegister(
+        Port,
+        Register
+    );
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS Set8237ADmaMode(UINT8 Channel, UINT8 ModeConfig){
     if(Channel > 7 || (Channel == 0) || (Channel == 4)){
         LouPrint("Invalid Channel\n");
         return STATUS_INVALID_PARAMETER;
     }
-    
+    UINT16 Port = (Channel > 3) ? (DMA16_MODE_REG_4_7) : (DMA16_MODE_REG_0_3);
+    Write8Bit8237ARegister(Port, ModeConfig);    
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS Set8237ACount(UINT8 Channel, UINT16 Count){
+    UINT16 Port;
+    switch(Channel){    
+        case 1:
+            Port = DMA16_COUNT_REG_C1;
+            break;
+        case 2:
+            Port = DMA16_COUNT_REG_C2;
+            break;
+        case 3:
+            Port = DMA16_COUNT_REG_C3;
+            break;
+        case 5:
+            Port = DMA16_COUNT_REG_C5;
+            break;
+        case 6:
+            Port = DMA16_COUNT_REG_C6;
+            break;
+        case 7:
+            Port = DMA16_COUNT_REG_C7;
+            break;
+        default :
+            LouPrint("Invalid Channel\n");
+            return STATUS_INVALID_PARAMETER;
+    }
+
+    Write16Bit8237ARegister(Channel, Port, Count - 1);
     return STATUS_SUCCESS;
 }

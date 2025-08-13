@@ -55,7 +55,7 @@ typedef struct _DMA16_TRANSFER_PACKET{
     UINT32  DmaAddress;
     UINT16  Transferlength;
     UINT16  TransferMode;
-    UINT8   Channel     : 2;
+    UINT8   Channel;
     UINT8   Transfer    : 2;
     UINT8   Auto        : 1;
     UINT8   Down        : 1;
@@ -78,6 +78,13 @@ typedef struct _DMA16_TRANSFER_PACKET{
 #define MODE_BLOCK_DMA_TRANSFER                 0b10
 #define MODE_CASCADE_SLAVE_CHIP                 0b11
 
+#ifndef _INTERNAL_
 
+DRIVER_EXPORT
+LOUSTATUS Initialize8237ADmaTransfer(
+    PDMA16_TRANSFER_PACKET Packet
+);
+
+#endif
 
 #endif
