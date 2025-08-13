@@ -273,6 +273,9 @@ ifeq ($(TARGET_ARCH),x86_64)
 	$(MAKE) -C KernelLibraries/Ps2IO clean
 	$(MAKE) -C KernelLibraries/Ps2IO all
 
+	$(MAKE) -C KernelLibraries/Dma16 clean
+	$(MAKE) -C KernelLibraries/Dma16 all
+
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
 
@@ -428,3 +431,4 @@ cleanall:
 	$(MAKE) -C drivers/Serial/Ps2Bus clean
 	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 clean
 	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse clean
+	$(MAKE) -C KernelLibraries/Dma16 clean
