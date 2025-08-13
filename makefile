@@ -175,7 +175,7 @@ KernelModules:
 	$(MAKE) -C drivers clean
 	$(MAKE) -C drivers all
 
-UserLibraries:
+UserSpace:
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
 
@@ -193,7 +193,6 @@ UserLibraries:
 	
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
-
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
@@ -229,7 +228,7 @@ UserLibraries:
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 
 
-annya.iso: release KernelModules UserLibraries
+annya.iso: release KernelModules UserSpace
 	rm -rf ISO
 	
 	#Make The System Directories
