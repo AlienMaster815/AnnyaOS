@@ -168,31 +168,14 @@ release: lou.exe
 
 
 
+KernelModules:
+	$(MAKE) -C KernelLibraries clean
+	$(MAKE) -C KernelLibraries all
 
-annya.iso: release
-	rm -rf ISO
-	
-	#Make The System Directories
-	$(MAKEDIR)
+	$(MAKE) -C drivers clean
+	$(MAKE) -C drivers all
 
-	$(MAKE) -C KernelLibraries/louoskrnl clean
-	$(MAKE) -C KernelLibraries/louoskrnl all
-
-	$(MAKE) -C KernelLibraries/LouDDK clean
-	$(MAKE) -C KernelLibraries/LouDDK all
-
-	$(MAKE) -C KernelLibraries/LCC clean
-	$(MAKE) -C KernelLibraries/LCC all
-	
-	$(MAKE) -C KernelLibraries/wprecorder clean
-	$(MAKE) -C KernelLibraries/wprecorder all
-
-	$(MAKE) -C KernelLibraries/Ps2IO clean
-	$(MAKE) -C KernelLibraries/Ps2IO all
-
-	$(MAKE) -C KernelLibraries/Dma16 clean
-	$(MAKE) -C KernelLibraries/Dma16 all
-
+UserLibraries:
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
 
@@ -211,44 +194,6 @@ annya.iso: release
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
 
-	$(MAKE) -C drivers/Networking/PCNET32 clean
-	$(MAKE) -C drivers/Networking/PCNET32 all
-
-	$(MAKE) -C drivers/DMA/8237A clean
-	$(MAKE) -C drivers/DMA/8237A all
-
-	$(MAKE) -C drivers/Audio/SoundBlaster clean
-	$(MAKE) -C drivers/Audio/SoundBlaster all
-
-	$(MAKE) -C drivers/Audio/AC97 clean
-	$(MAKE) -C drivers/Audio/AC97 all
-
-	$(MAKE) -C drivers/Audio/HDA clean
-	$(MAKE) -C drivers/Audio/HDA all
-
-	$(MAKE) -C drivers/storage/Ahci clean
-	$(MAKE) -C drivers/storage/Ahci all
-	
-	$(MAKE) -C drivers/USB/HostDrivers clean_xhci
-	$(MAKE) -C drivers/USB/HostDrivers xhci
-
-	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
-	$(MAKE) -C drivers/storage/AtaAcceleration piix
-
-	$(MAKE) -C drivers/gpu/Virtualbox clean
-	$(MAKE) -C drivers/gpu/Virtualbox all
-
-	$(MAKE) -C drivers/gpu/VMWare clean
-	$(MAKE) -C drivers/gpu/VMWare all
-	
-	$(MAKE) -C drivers/Serial/Ps2Bus clean
-	$(MAKE) -C drivers/Serial/Ps2Bus all
-
-	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 clean
-	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 all
-
-	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse clean
-	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse all
 
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
@@ -283,6 +228,13 @@ annya.iso: release
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 
+
+annya.iso: release KernelModules UserLibraries
+	rm -rf ISO
+	
+	#Make The System Directories
+	$(MAKEDIR)
+
 	#Make 64 Bit System Directories
 	$(MAKEDIR64)
 	#Copy System Files To The Appropriate Directories
@@ -301,10 +253,8 @@ PublicRelease: annya.iso
 	rm -rf annya.iso
 
 cleanall:
-	rm annya.iso
-	rm -rf release
-	rm -rf ISO
-	rm -rd dist
+	$(MAKE) -C KernelLibraries clean
+	$(MAKE) -C drivers clean
 	$(MAKE) -C UserLibraries/KernelBase clean
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/ntdll clean
@@ -316,26 +266,15 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
 	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
-	$(MAKE) -C KernelLibraries/LouDDK clean
 	$(MAKE) -C drivers/Networking/PCNET32 clean
-	$(MAKE) -C KernelLibraries/louoskrnl clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
-	$(MAKE) -C drivers/storage/AtaAcceleration clean_piix
-	$(MAKE) -C drivers/storage/Ahci clean
-	$(MAKE) -C drivers/Audio/HDA clean
-	$(MAKE) -C drivers/Audio/AC97 clean
-	$(MAKE) -C drivers/Audio/SoundBlaster clean
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
-	$(MAKE) -C KernelLibraries/wprecorder clean
-	$(MAKE) -C drivers/gpu/Virtualbox clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
-	$(MAKE) -C drivers/gpu/VMWare clean
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
-	$(MAKE) -C KernelLibraries/LCC clean
-	$(MAKE) -C drivers/USB/HostDrivers clean_xhci
-	$(MAKE) -C drivers/Serial/Ps2Bus clean
-	$(MAKE) -C drivers/Input/Keyboard/Mf2Ps2 clean
-	$(MAKE) -C drivers/Input/Mouse/Ps2Mouse clean
-	$(MAKE) -C KernelLibraries/Dma16 clean
+
+	rm annya.iso
+	rm -rf release
+	rm -rf ISO
+	rm -rd dist

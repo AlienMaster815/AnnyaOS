@@ -11,11 +11,11 @@ PIIX_SRC = PIIX.cpp
 PIIX_TARGET = PIIX.SYS
 
 # Build rule
-piix: $(PIIX_TARGET)
+all: $(PIIX_TARGET)
 
 $(PIIX_TARGET): $(PIIX_SRC)
 	$(CC) $(CFLAGS) -o $(PIIX_TARGET) $(PIIX_SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
 
 # Clean rule
-clean_piix:
+clean:
 	rm -f $(PIIX_TARGET)

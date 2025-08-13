@@ -12,11 +12,11 @@ XHCI_SRC = 	XHCI.cpp
 XHCI_TARGET = XHCI.SYS
 
 # Build rule
-xhci: $(XHCI_TARGET)
+all: $(XHCI_TARGET)
 
 $(XHCI_TARGET): $(XHCI_SRC)
 	$(CC) $(CFLAGS) -o $(XHCI_TARGET) $(XHCI_SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
 
 # Clean rule
-clean_xhci:
+clean:
 	rm -f $(XHCI_TARGET)
