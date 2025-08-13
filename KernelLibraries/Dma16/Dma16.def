@@ -1,4 +1,4 @@
-LIBRARY 8237A.SYS
+LIBRARY "8237A.SYS"
 
 EXPORTS	
     Initialize8237ADmaTransfer

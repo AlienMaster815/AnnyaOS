@@ -23,12 +23,6 @@
 #VirtualBoxVM --startvm "AnnyaOS" --dbg
 
 
-
-TARGET_ARCH = x86_64
-TARGET_OS = WINDOWS
-HOST_ARCH = x86_64
-FIRMWARE_TARGET = BIOS
-
 INCLUDE = -I. -I include -I include/drivers/acpi -I include/ACPICA
 
 FileStructureTable = Config/System_Config/FileStructure.xml
@@ -45,50 +39,16 @@ CPY64 := $(shell awk -F '[<>]' '/<FILETOCPY64>/{print " " $$3 ";"}' $(SystemFile
 
 EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
 
-ifeq ($(HOST_ARCH),x86_64)
-    CC = x86_64-w64-mingw32-gcc
-    CP = x86_64-w64-mingw32-g++
-    LD = ld
-	PELD = x86_64-w64-mingw32-ld
-endif
+CC = x86_64-w64-mingw32-gcc
+CP = x86_64-w64-mingw32-g++
+LD = ld
+PELD = x86_64-w64-mingw32-ld
 
-ifeq ($(HOST_ARCH),ARM)
-    CC = x86_64-w64-mingw32-gcc
-    CP = x86_64-w64-mingw32-g++
-    LD = x86_64-elf-ld
-endif
+C_COMPILE_FLAGS = -m64
+NASM_COMPILE_FLAGS = elf64
 
-ifeq ($(TARGET_ARCH),x86_64)
-    C_COMPILE_FLAGS = -m64
-    NASM_COMPILE_FLAGS = elf64
-endif
+RELEASE_PATH = Releases/Annya.iso
 
-ifeq ($(TARGET_ARCH),x86)
-    C_COMPILE_FLAGS = -m32
-    NASM_COMPILE_FLAGS = elf32
-endif
-
-
-ifeq ($(TARGET_ARCH),x86_64)
-	ifeq ($(FIRMWARE_TARGET),BIOS)
-		RELEASE_PATH = Releases/64BIOS/Annya.iso
-	endif
-	ifeq ($(FIRMWARE_TARGET),UEFI)
-		RELEASE_PATH = Releases/64UEFI/Annya.iso
-	endif
-endif
-
-
-ifeq ($(TARGET_ARCH),x86)
-	ifeq ($(FIRMWARE_TARGET),BIOS)
-		RELEASE_PATH = Releases/32BIOS/Annya.iso
-	endif
-	ifeq ($(FIRMWARE_TARGET),UEFI)
-		RELEASE_PATH = Releases/32UEFI/Annya.iso
-	endif
-endif
-
-ifeq ($(TARGET_ARCH),x86_64)
 #Wextra
 CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -O2 -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
@@ -100,12 +60,6 @@ CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
            -fno-builtin -fstrict-aliasing -O2 -I include \
 		   -Wno-write-strings -Wno-multichar $(INCLUDE) 
 
-endif
-
-ifeq ($(TARGET_ARCH),x86)
-CFLAGS = -c -ffreestanding -Werror -I include -Wno-multichar -mmmx -msse
-CPPFLAGS = -c -ffreestanding -O2 -Wall -fno-exceptions -fno-rtti -msse -mmmx -Werror -Wno-write-strings -fno-use-cxa-atexit -I include -Wno-multichar
-endif
 
 
 kernel_source_files := $(shell find kernel -name *.c)
@@ -150,25 +104,13 @@ kernel_s_source_files := $(shell find kernel -name *.s)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
 
-ifeq ($(TARGET_ARCH), x86_64)
 x86_64_asm_source_files = boot/x86_64/BOOT.asm
-endif
-
-
-ifeq ($(TARGET_ARCH), x86)
-x86_64_asm_source_files = boot/x86/BOOT.asm
-endif
-
 x86_64_asm_object_files = build/x86_64/boot/boot.o 
-
-
 
 kernel_asm_source_files := $(shell find kernel -name *.asm)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
-ifeq ($(FIRMWARE_TARGET),BIOS)
 x86_64_object_files := $(kernel_object_files) $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
-endif
 
 
 
@@ -215,36 +157,14 @@ clean:
 	rm -r build
 
 
-ifeq ($(TARGET_ARCH), x86_64)
 lou.exe: $(x86_64_object_files) $(kernel_object_files)
 	mkdir -p dist/x86_64
 	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
 	rm -r build
-endif
 
-
-ifeq ($(TARGET_ARCH), x86)
-lou.exe: $(x86_64_object_files)
-	mkdir -p dist/x86 && \
-	$(LD) -melf_i386 -n -o dist/x86/LOUOSKRNL.bin -T targets/x86/linker.ld $(x86_64_object_files)
-	rm -r build
-endif
-
-ifeq ($(TARGET_ARCH), x86_64)
 release: lou.exe
 	mkdir -p release/x86_64 && \
 	cp dist/x86_64/LOUOSKRNL.bin release/x86_64/LOUOSKRNL.exe
-endif
-
-
-ifeq ($(TARGET_ARCH), x86)
-release: lou.exe
-	
-	mkdir -p release/x86 && \
-	cp dist/x86/LOUOSKRNL.bin release/x86/LOUOSKRNL.exe
-	release/x86/LOUOSKRNL.exe
-
-endif
 
 
 
@@ -254,9 +174,6 @@ annya.iso: release
 	
 	#Make The System Directories
 	$(MAKEDIR)
-
-
-ifeq ($(TARGET_ARCH),x86_64)
 
 	$(MAKE) -C KernelLibraries/louoskrnl clean
 	$(MAKE) -C KernelLibraries/louoskrnl all
@@ -373,16 +290,6 @@ ifeq ($(TARGET_ARCH),x86_64)
 	#Build The Image In One Shabang
 	$(OSBUILDX64)
 
-endif
-
-ifeq ($(TARGET_ARCH),x86)
-
-	#Copy System Files To The Appropriate Directories
-	$(CPY32)
-	#Build The Image In One Shabang
-	$(OSBUILDX86)
-
-endif
 
 	rm -rf release
 	rm -rf ISO
