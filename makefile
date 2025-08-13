@@ -274,7 +274,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
 
-	rm annya.iso
 	rm -rf release
 	rm -rf ISO
 	rm -rd dist
+	rm annya.iso
