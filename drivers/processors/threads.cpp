@@ -39,18 +39,6 @@ typedef struct  PACKED _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-typedef struct _LOUQ_DELAYED_WORK_TRACKER{
-    ListHeader      Peers;
-    uint64_t        PrivateData;
-    uint64_t        Timer;
-    uint64_t        Interval;
-    void            (*WorkFunction)(uint64_t PrivateData);
-}LOUQ_DELAYED_WORK_TRACKER, * PLOUQ_DELAYED_WORK_TRACKER; 
-
-static LOUQ_DELAYED_WORK_TRACKER WorkTracker[MAX_CORES] = {0};
-static size_t WorkRoundRobin = 0;
-static mutex_t WorkTrackThread = {0};
-
 KERNEL_IMPORT void SaveEverything(uint64_t* ContextHandle);
 KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
 
@@ -71,7 +59,8 @@ typedef struct {
 static thread_t MasterThreadTable;
 static uint64_t NumberOfThreads = 0;
 //static uint64_t CurrentRoundRobin = 0;
-static spinlock_t UserThreadCreationLock;
+static spinlock_t ThreadCreationLock;
+
 
 static inline thread_t* CreateThreadHandle(){
     thread_t* TmpThreadHandle = &MasterThreadTable;
@@ -208,10 +197,15 @@ KERNEL_IMPORT
 void SetTEB(uint64_t Teb);
 
 LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
+    
     uint8_t ProcessorID = get_processor_id();
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
-    
+
+    if(MutexIsLocked(&ThreadCreationLock.Lock)){
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
+    }
+
     ProcessorID = get_processor_id();
     CurrentThread = current_thread[ProcessorID];
 
@@ -252,24 +246,15 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     uint8_t ProcessorID = get_processor_id();
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
-    CPUContext* CurrentContext = (CPUContext*)(uint8_t*)CpuCurrentState;
-    
-    if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
-        goto _UPDATE_THREAD_MANAGER_FINISHED;
-    }
-    if((CurrentContext->cs & 0b11) == 0){
-        //tasks shall not switch when running
-        //in the kernel segment to eliminate
-        //stack curruoption and add better 
-        //prediction to switching states
-        goto _UPDATE_THREAD_MANAGER_FINISHED;
-    }
 
     if(timeQuantum[ProcessorID] < 5){
         timeQuantum[ProcessorID]++;
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
 
+    if(MutexIsLocked(&ThreadCreationLock.Lock)){
+        goto _UPDATE_THREAD_MANAGER_FINISHED;
+    }
 
     ProcessorID = get_processor_id();
     CurrentThread = current_thread[ProcessorID];
@@ -339,7 +324,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
 
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(thread_t* Thread) {
     LouKIRQL Irql;
-    LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
+    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
     thread_t* TmpThreadHandle = &MasterThreadTable;
     for(uint64_t i = 0 ; i < NumberOfThreads; i++){
         TmpThreadHandle = (thread_t*)TmpThreadHandle->Neighbors.NextHeader;
@@ -352,12 +337,12 @@ LOUDDK_API_ENTRY VOID LouKeDestroyThread(thread_t* Thread) {
             LouKeFree(Thread);
             NumberOfThreads--;
             LouPrint("Destroyed Thread:%h Threads Running:%d\n", Thread, NumberOfThreads + 1);
-            LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);   
+            LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);   
             return;
             //Endof SystemCall
         }
     }
-    LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
+    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
     //Endof SystemCall
 }
 LOUDDK_API_ENTRY uint64_t GetThreadContext(
@@ -433,7 +418,7 @@ KERNEL_IMPORT uint64_t GetPEB();
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer) {
     LouKIRQL Irql;
-    LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
+    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
     //allocate New Stack
     void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     
@@ -441,7 +426,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     thread_t* NewThread = CreateThreadHandle();
     if(!NewThread){
         LouKeFree(NewStack);
-        LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
+        LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
         return 0x00;
     }
     //store the top of the stack
@@ -479,13 +464,13 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     //Increment Thread Counter
     NumberOfThreads++;
     //return the handle to the new thread
-    LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
+    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
     return (uintptr_t)NewThread;//NewThread;
 }
 
 LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
     LouKIRQL Irql;
-    LouKeAcquireSpinLock(&UserThreadCreationLock, &Irql);
+    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
     //allocate New Stack
     void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
     
@@ -493,7 +478,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     thread_t* NewThread = CreateThreadHandle();
     if(!NewThread){
         LouKeFree(NewStack);
-        LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
+        LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
         return 0x00;
     }
     //store the top of the stack
@@ -526,7 +511,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //Increment Thread Counter
     NumberOfThreads++;
     //return the handle to the new thread
-    LouKeReleaseSpinLock(&UserThreadCreationLock, &Irql);
+    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
     return (uintptr_t)NewThread;//NewThread;
 }
 
@@ -543,55 +528,55 @@ semaphore_t* LouKeCreateSemaphore(int initial, int limit){
 }
 
 
-
-LOUDDK_API_ENTRY void LouKeInitializeDelayedWork(
-    void (*DelayedFunction)(uint64_t PrivateData),
-    uint64_t PrivateData,
-    uint64_t MsDelay
-) {
-    MutexLock(&WorkTrackThread);
-    PLOUQ_DELAYED_WORK_TRACKER TmpQ = &WorkTracker[WorkRoundRobin];
-
-    WorkRoundRobin++;
-    if (WorkRoundRobin >= CpuCount) {
-        WorkRoundRobin = 0;
-    }
-
-    while (TmpQ->Peers.NextHeader) {
-        TmpQ = (PLOUQ_DELAYED_WORK_TRACKER)TmpQ->Peers.NextHeader;
-    }
-
-    TmpQ->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUQ_DELAYED_WORK_TRACKER, KERNEL_GENERIC_MEMORY);
-
-    TmpQ->WorkFunction = DelayedFunction;
-    TmpQ->PrivateData = PrivateData;
-    TmpQ->Timer = MsDelay;
-
-    MutexUnlock(&WorkTrackThread);
-}
-
-LOUDDK_API_ENTRY void LouKeInitializeIntervalWork(
-    void (*DelayedFunction)(uint64_t PrivateData),
-    uint64_t PrivateData,
-    uint64_t MsInterval
+LOUDDK_API_ENTRY 
+PTHREAD 
+LouKeCreateDemon(
+    PVOID Function,
+    PVOID Params,
+    SIZE  StackSize
 ){
-    MutexLock(&WorkTrackThread);
-    PLOUQ_DELAYED_WORK_TRACKER TmpQ = &WorkTracker[WorkRoundRobin];
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
+    void* NewStack = LouKeMallocPhysical(StackSize, KERNEL_GENERIC_MEMORY);
+    thread_t* NewThread = CreateThreadHandle();
 
-    WorkRoundRobin++;
-    if (WorkRoundRobin >= CpuCount) {
-        WorkRoundRobin = 0;
+    if(!NewThread){
+        LouKeFree(NewStack);
+        LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
+        return 0x00;
     }
 
-    while (TmpQ->Peers.NextHeader) {
-        TmpQ = (PLOUQ_DELAYED_WORK_TRACKER)TmpQ->Peers.NextHeader;
-    }
+    //store the top of the stack
+    NewThread->StackTop = NewStack;
+    //set the context pointer
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)((uint8_t*)NewStack) + StackSize) - KILOBYTE); //leave a kilobyte for wiggle room
+    //set the New Threads Context
+    NewThread->cpu_state = NewContext;
+    //Allocate Space For Safe Context Handling
+    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    //Mark the Register Storage As Clean
+    NewThread->NewTask = true;
+    NewThread->state = THREAD_READY;
+    NewThread->ThreadIdentification = NumberOfThreads + 2;
 
-    TmpQ->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUQ_DELAYED_WORK_TRACKER, KERNEL_GENERIC_MEMORY);
-    TmpQ->WorkFunction = DelayedFunction;
-    TmpQ->PrivateData = PrivateData;
-    TmpQ->Timer = MsInterval;
-    TmpQ->Interval = MsInterval;
+    //Get the Stub Address
+    uintptr_t StubAddress = (uintptr_t)ThreadStub;
+    //fill the Context...
+    NewThread->SavedContext.rcx = (uint64_t)Function;           //first parameter  MSVC
+    NewThread->SavedContext.rdx = (uint64_t)Params;             //Second Parameter MSVC
+    NewThread->SavedContext.r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
+    NewThread->SavedContext.rip = (uint64_t)StubAddress;        //Liftoff Address  
+    NewThread->SavedContext.rbp = (uint64_t)NewContext;         //Base Pointer
+    NewThread->SavedContext.rsp = (uint64_t)NewContext;         //Current Pointer
+    //Fill Segments and flags
+    NewThread->SavedContext.cs  = 0x08;
+    NewThread->SavedContext.ss  = 0x10;  
+    NewThread->SavedContext.rflags = 0x202;  
+    //Increment Thread Counter
+    NumberOfThreads++;
+    //return the handle to the new thread
 
-    MutexUnlock(&WorkTrackThread);
+    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
+    return (PTHREAD)NewThread;
 }

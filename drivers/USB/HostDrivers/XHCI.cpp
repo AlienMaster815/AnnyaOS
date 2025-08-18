@@ -23,13 +23,13 @@ NTSTATUS AddDevice(
 ){
     LouPrint("XHCI::AddDevice()\n");
     P_PCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
-    uint8_t DeviceID = PlatformDevice->DeviceID;
 
-    LouPrint("Pci Device ID:%d\n", DeviceID);
 
-    LouPrint("PCI Device Flags:%h\n", SupportedXhciPciDevices[DeviceID].DriverData);
+    
 
     LouPrint("XHCI::AddDevice() STATUS_SUCCESS\n");
+
+    //while(1);
     return STATUS_SUCCESS;
 }
 

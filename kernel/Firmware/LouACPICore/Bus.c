@@ -148,7 +148,6 @@ LOUSTATUS AcpiBusInitialize(){
     AcpiBusOscNegotiatePlatformControl();
 
     //TODO: Negotiate USB
-
     AcpiStatus = AcpiInstallTableHandler(AcpiBusTableHandler, NULL);
 
     AcpiEarlyProcessorControlSetup();
@@ -178,7 +177,7 @@ LOUSTATUS AcpiBusInitialize(){
         }
     }
 
-    AcpiInstallNotifyHandler(ACPI_ROOT_OBJECT, ACPI_SYSTEM_NOTIFY, &AcpiBusNotify, NULL);
+    AcpiStatus = AcpiInstallNotifyHandler(ACPI_ROOT_OBJECT, ACPI_SYSTEM_NOTIFY, &AcpiBusNotify, NULL);
     if (ACPI_FAILURE(AcpiStatus)) {
         LouPrint("Failed to Register AcpiBusNotify Handler\n");
         goto _ACPI_BUS_INITIALIZE_ERROR;
@@ -231,8 +230,11 @@ void LouKeInitializeFullLouACPISubsystem(){
     AcpiInitializePlatformCommunications();
     St = AcpiBusInitialize();
     if(St != STATUS_SUCCESS){
-        LouPrint("St != STATUS_SUCCESS\n");
+        //DisableAcpi();
+
+        LouPrint("Error Initializing ACPI Bus\n");
         while(1);
+        return;
     }
 
     AcpiInitializeFfh();

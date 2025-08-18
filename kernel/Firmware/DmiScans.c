@@ -9,7 +9,7 @@ static inline string DmiGetSystemInformation(DMI_FIELD Field){
     return DmiIndetification[Field];
 }
 
-void RegisterSmiDevice(DMI_FIELD Field, string String){
+void RegisterDmiDevice(DMI_FIELD Field, string String){
     DmiIndetification[Field] = String;
 }
 

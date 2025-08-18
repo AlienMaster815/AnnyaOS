@@ -192,11 +192,22 @@ static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit)
     atomic_set(&sem->Counter, initial);
     atomic_set(&sem->Limit, limit);
 }
+
 semaphore_t* LouKeCreateSemaphore(int initial, int limit);
+#define LouKeDestroySemaphore(s) LouKeFree(s)
 
 #ifndef _KERNEL_MODULE_
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
 void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
+PTHREAD 
+LouKeCreateDemon(
+    PVOID   Function,
+    PVOID   Params,
+    size_t  StackSize
+);
+
+
+
 #else 
 KERNEL_EXPORT void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
 KERNEL_EXPORT void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);

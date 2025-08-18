@@ -64,6 +64,13 @@ typedef struct _PS2_MOUSE_PRIVATE_DATA{
     UINT8                           Data[3];
     UINT8                           Offset;
     PLOUSINE_USER_SHARED_MESSAGE    MouseMessage;
+    LOUQ_WORK                       MouseWorkQueue;
+    PTHREAD                         WorkQueueHandle;
+    bool                            Queued;
+    INT64                           Dx;
+    INT64                           Dy;
+    bool                            Rb;
+    bool                            Lb;
 }PS2_MOUSE_PRIVATE_DATA, * PPS2_MOUSE_PRIVATE_DATA;
 
 DRIVER_IMPORT

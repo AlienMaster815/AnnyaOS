@@ -16,3 +16,32 @@ LouKeMallocLouQWorkManagement(
     Result->Identifier = Identifier;
     return Result;
 }
+
+LOUSTATUS LouKeInitializeLouQ(
+    PLOUQ               Queue,
+    string              Identifier,
+    UINT64              QueueFlags,
+    UINT64              Timeout,
+    UINT64              QueueLimit,
+    UINT64              Priority,
+    PLOUQ_COMPLETION    Completion,
+    PVOID               QueueHandler,
+    PVOID               QueueHandlerData
+){
+    if((!Queue) || (!QueueHandler)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    memset(Queue, 0, sizeof(LOUQ));
+
+    Queue->Identifer = Identifier;
+    Queue->LOUQFlags = QueueFlags;
+    Queue->QueueTimeout = Timeout;
+    Queue->QueueLimit = QueueLimit;
+    Queue->Priority = Priority;
+    Queue->Completion = Completion;
+
+
+
+    return STATUS_SUCCESS;
+}

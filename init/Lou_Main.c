@@ -173,6 +173,7 @@ void* LouKeVirtualAllocUser(
 );
 extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
+LOUSTATUS LouKeInitializeDefaultDemons();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -218,9 +219,18 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     return LOUSTATUS_GOOD;
 }
 
+void InitializeSynapticProcesseing(){
+    LouPrint("InitializeSynapticProcesseing()\n");    
+    
+    
+    LouPrint("InitializeSynapticProcesseing() STATUS_SUCCESS\n");    
+    while(1);
+}
+
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
     InitThreadManager();
+    //LouKeInitializeDefaultDemons();
     LouKeInitializeFullLouACPISubsystem();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
 }
@@ -229,9 +239,6 @@ void KillDebuger(){
     //DetatchWindowToKrnlDebug(HWind);
     //LouDestroyWindow(HWind);
 }
-
-
-
 
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
     if(!ProcAcceleratedFeatures){
@@ -251,8 +258,6 @@ KERNEL_ENTRY LouKernelSmpStart(){
         asm ("hlt"); //spin the cpus untill context assignement
     }
 }
-
-
 
 
 void PrintTest(){
@@ -331,7 +336,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     AdvancedLousineKernelInitialization();
 
-
     //LouPrint("Here\n");
     //while(1);
     //TODO: Add a parser for the manifest for 
@@ -353,11 +357,9 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeProbeSbIsa();
 
-    ScanTheRestOfHarware();
-    
-    //SMPInit();
-    
+    InitializeSynapticProcesseing();
 
+    ScanTheRestOfHarware();
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");

@@ -9,20 +9,19 @@ extern "C" {
 #endif
  
 typedef struct  _LOUQ{
-    string      Identifer;
-    void*       QueueData;
-    uint64_t    QueueDataSize;
-    bool        ActiveQ;
-    bool        LOUQNext;
-    bool        LOUQBeingHandled;
-    bool        LOUQCompleted;
-    uint64_t    LOUQFlags;
-    uint64_t    QueueTimeout;
-    uint64_t    QueueDepth;
-    uint64_t    QueuesInFront;
-    uint64_t    Priority;
-    spinlock_t  LOUQLock;
-    mutex_t     LouQtex;
+    ListHeader                  Peers;
+    string                      Identifer;
+    void*                       QueueData;
+    uint64_t                    QueueDataSize;
+    uint64_t                    LOUQFlags;
+    uint64_t                    QueueTimeout;
+    uint64_t                    QueueDepth;
+    uint64_t                    QueueLimit;
+    uint64_t                    QueuesInFront;
+    uint64_t                    Priority;
+    spinlock_t                  LOUQLock;
+    mutex_t                     LouQtex;
+    struct _LOUQ_COMPLETION*    Completion;
 }LOUQ, * PLOUQ;
 
 typedef struct _LOUQ_WAIT{
@@ -31,6 +30,7 @@ typedef struct _LOUQ_WAIT{
 
 typedef struct _LOUQ_WORK{
     LOUQ                LouQHeader;
+    bool                WorkRequired;
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
 
@@ -54,7 +54,7 @@ typedef struct  _LOUQ_INTEFACE{
 
 typedef struct _LOUQ_COMPLETION{
     ListHeader      Neighbors;
-    void*           CompletedDataStructure;
+
 }LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
 typedef struct _LOUQ_REQUEST{
@@ -71,9 +71,49 @@ typedef struct _LOUQ_LIMITS{
 #define KERNEL_WORK_QUEUE 0
 #define USER_WORK_QUEUE   1
 
+#define IMEDIATE_PRIORITY            UINT64_MAX
+#define KERNEL_PRIORITY             (UINT64_MAX - 1)
+#define KERNEL_DEMON_PRIORITY       (UINT64_MAX - 2)
+#define SUBSYSTEM_PRIORITY          (UINT64_MAX - 3)
+#define SUBSYSTEM_DEMON_PRIORITY    (UINT64_MAX - 4)
+#define DEVICE_PRIORITY             (UINT64_MAX - 5)
+#define USER_SUBSYSTEM              (UINT64_MAX - 6)
+#define USER_SUBSYSTEM_THREAD       (UINT64_MAX - 7)
+
+#ifndef _KERNEL_MODULE_
+
 PLOUQ_WORK_STRUCTURE LouKeMallocLouQWorkManagement(string Identifer, uint64_t StructureFlags, size_t MaxActive);
 #define LouKeMallocLouQWorkStream(Identifer, StructureFlags) LouKeMallocLouQWorkManagement(Identifer, StructureFlags, 1)
+LOUSTATUS LouKeInitializeWorkQueue(
+    PLOUQ_WORK          WorkQueue,
+    string              Identifier,
+    UINT64              QueueFlags,
+    UINT64              Timeout,
+    UINT64              QueueLimit,
+    UINT64              Priority,
+    PLOUQ_COMPLETION    Completion,
+    PVOID               WorkHandler,
+    PVOID               WorkHandlerData
+);
 
+#else
+
+KERNEL_EXPORT
+LOUSTATUS LouKeInitializeWorkQueue(
+    PLOUQ_WORK          WorkQueue,
+    string              Identifier,
+    UINT64              QueueFlags,
+    UINT64              Timeout,
+    UINT64              QueueLimit,
+    UINT64              Priority,
+    PLOUQ_COMPLETION    Completion,
+    PVOID               WorkHandler,
+    PVOID               WorkHandlerData
+);
+
+
+
+#endif
 #ifdef __cplusplus
 }
 #endif

@@ -51,6 +51,7 @@ int StdIoVsnPrintf(char* Buffer, size_t Count, const char* Format, va_list Argum
 int StdIoVPrintf(const char* Format, va_list Arguments);
 void* memset(void* dest, int value, size_t count);
 
+#define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
 
 #endif
 #else

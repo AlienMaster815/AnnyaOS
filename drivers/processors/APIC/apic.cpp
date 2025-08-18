@@ -185,8 +185,11 @@ void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
         ACPI_MADT_ENTRY_HEADER* header = (ACPI_MADT_ENTRY_HEADER*)entryAddress;
         switch (header->Type) {
         case 0: {
-            UpgradeNPROC();
             ACPI_MADT_LOCAL_APIC* localAPIC = (ACPI_MADT_LOCAL_APIC*)entryAddress;
+            if(localAPIC->APICID == 0xFF){
+                break;
+            }
+            UpgradeNPROC();
             LouPrint("Processor ID:%d, APIC ID:%d, Flags:%d\n", localAPIC->ProcessorID, localAPIC->APICID, localAPIC->Flags);
             break;
         }
@@ -222,11 +225,12 @@ void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
             ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE* laa = (ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE*)entryAddress;
             LouPrint("Local APIC Address:%h\n", laa->LocalApicAddress);
             LocalApicBase = laa->LocalApicAddress;
-            UpgradeNPROC();
+            while(1);
             break;
         }
         default:
             LouPrint("Unknown entry type:%d\n", header->Type);
+            while(1);
             break;
         }
         entryAddress += header->Length;

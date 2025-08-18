@@ -11,6 +11,7 @@
 
 
 #ifndef _KERNEL_MODULE_
+KERNEL_IMPORT uint64_t GetCurrentTimeInMilliseconds();
 KERNEL_IMPORT void sleep(uint64_t Time);
 KERNEL_IMPORT void sleepEx(uint8_t Interval, uint64_t Time);
 KERNEL_IMPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uint32_t Mask, uint64_t MsTimeout);
@@ -25,6 +26,7 @@ KERNEL_IMPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uin
 #define MilliSec 1
 #define Sec 2
 #ifndef _KERNEL_MODULE_
+uint64_t GetCurrentTimeInMilliseconds();
 void sleep(uint64_t Time);
 void sleepEx(uint8_t Interval, uint64_t Time);
 #endif

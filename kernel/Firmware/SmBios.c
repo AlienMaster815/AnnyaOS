@@ -36,14 +36,14 @@ char* SmbiosGetString(SMBIOS_HEADER* Header, UINT8 Index) {
     return (*StringArea) ? StringArea : "";
 }
 
-void RegisterSmiDevice(DMI_FIELD Field, string String);
+void RegisterDmiDevice(DMI_FIELD Field, string String);
 
 static void DmiRegisterFromSmBios(DMI_FIELD Field, string String){
     if(!memcmp(String, 0, 1)){
-        RegisterSmiDevice(Field, 0x00);
+        RegisterDmiDevice(Field, 0x00);
         return;
     }
-    RegisterSmiDevice(Field, String);
+    RegisterDmiDevice(Field, String);
 }
 
 static void IterateSmbiosTables(uint8_t* TablePtr, uint8_t* End) {

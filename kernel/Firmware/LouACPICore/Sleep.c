@@ -283,6 +283,7 @@ static void AcpiSleepSuspendSetup(){
         }
     }
     //TODO:
+	//while(1);
 }
 
 LOUSTATUS AcpiInitializeSleep(){
@@ -299,5 +300,6 @@ LOUSTATUS AcpiInitializeSleep(){
     AcpiSleepSuspendSetup();
     //TODO:
 
+	//while(1);
     return STATUS_SUCCESS;
 }

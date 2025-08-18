@@ -135,6 +135,11 @@ mutex_t* LouKeGetInterruptGlobalLock(){
 void LouKeThrowPc();
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
+    
+    if(Interrupt < 0x20){
+        LouPrint("Fualt\n");
+        while(1);
+    }
     uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){

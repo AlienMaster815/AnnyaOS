@@ -67,8 +67,6 @@ RtlTryEnterCriticalSection(
     return false;
 }
 
-
-
 NTDLL_API
 NTSTATUS 
 RtlEnterCriticalSection(
@@ -90,7 +88,7 @@ RtlEnterCriticalSection(
                     return STATUS_SUCCESS;
                 }
             }
-            //TODO:YeildProcessor
+            LouYeildExecution();
         }
 
     }

@@ -136,8 +136,7 @@ ACPI_STATUS AcpiOsCreateSemaphore(
 ACPI_STATUS AcpiOsDeleteSemaphore(
     ACPI_SEMAPHORE Handle
 ){  
-    LouPrint("AcpiOsDeleteSemaphore()\n");
-    while(1);
+    LouKeDestroySemaphore(Handle);
     return AE_OK;
 }
 

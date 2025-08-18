@@ -56,7 +56,7 @@ typedef struct _USB_ANCHOR{
     LOUQ_WAIT       WaitQueue;
     spinlock_t      WaitLock;
     atomic_t        SuspendWakeupCount;
-    bool            Poinsoned;
+    bool            Poisoned;
 }USB_ANCHOR, * PUSB_ANCHOR;
 
 typedef struct _USB_TT{
