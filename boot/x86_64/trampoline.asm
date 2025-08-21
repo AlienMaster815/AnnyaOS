@@ -1,7 +1,5 @@
 BITS 16
 [org 0x8000]
-
-jmp $
 cli
 lgdt[Gdtr]
 mov eax, cr0
@@ -31,4 +29,5 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 mov ss, ax	
+
 jmp $

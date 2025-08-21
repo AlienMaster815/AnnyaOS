@@ -31,6 +31,7 @@ typedef struct {
 
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 static inline void LouSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);

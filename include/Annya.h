@@ -558,6 +558,7 @@ typedef void* HINSTANCE;
 #include <Dispatching.h>
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 #ifndef _ANNYA_DLL_CALL_REASONS
 #define _ANNYA_DLL_CALL_REASONS

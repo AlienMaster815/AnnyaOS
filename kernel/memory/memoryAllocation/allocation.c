@@ -23,8 +23,10 @@ static spinlock_t MemmoryMapLock;
 static struct master_multiboot_mmap_entry* LousineMemoryMapTable;
 
 void LouKeInitializeSafeMemory(){
-    void* Foo = LouKeMalloc(LousineMemoryMapTable->tag.size, KERNEL_GENERIC_MEMORY);
+
+    void* Foo = LouMalloc(LousineMemoryMapTable->tag.size);
     memcpy(Foo, LousineMemoryMapTable, LousineMemoryMapTable->tag.size);
+
     LousineMemoryMapTable = Foo;
 }
 

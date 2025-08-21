@@ -321,6 +321,7 @@ LouKeLoadDriver(string Driver, string EntryName);
 #define _MEMORY_BARRIER
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 #endif
 

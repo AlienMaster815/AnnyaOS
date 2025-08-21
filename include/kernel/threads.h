@@ -66,6 +66,7 @@ typedef struct _mutex_t{
 } mutex_t;
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 int LouPrint(char*, ...);
 

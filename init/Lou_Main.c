@@ -316,7 +316,7 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfiv = true;
         InitializeEfiCore();
     }                      
-    
+
     LouKeInitializeSafeMemory();    
 
     LousineKernelEarlyInitialization();

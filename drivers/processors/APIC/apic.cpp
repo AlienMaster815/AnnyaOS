@@ -157,11 +157,40 @@ typedef struct _CPU_TRACKER_INFORMATION{
     UINT32      ProcID;
     UINT32      ApicID;
     UINT64      ApicBase;
+    bool        Broken;
 }CPU_TRACKER_INFORMATION, * PCPU_TRACKER_INFORMATION;
 
 static CPU_TRACKER_INFORMATION CpuTracker = {0};
 static APIC_ISO_TRACKER IoApicOverideTracker = {0};
 static IO_APIC_TRACKER IoApicTracker = {0};
+
+LOUDDK_API_ENTRY PCPU_TRACKER_INFORMATION GetCpuInfoFromTrackerMember(INTEGER Member){
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    INTEGER i = 0;
+    while(TmpTracker->Peers.NextHeader){
+
+        if(i == Member){
+            return TmpTracker;
+        }
+
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+        i++;
+    }
+    return 0x00;
+}
+
+LOUDDK_API_ENTRY INTEGER GetCpuTrackMemberFromID(UINT32 CpuID){
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    INTEGER i = 0;
+    while(TmpTracker->Peers.NextHeader){
+        if(TmpTracker->ProcID == CpuID){
+            return i; 
+        }
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+        i++;
+    }
+    return -1;
+}
 
 void LouKeCreateCpuTracker(
     UINT32 ProcID,
@@ -511,6 +540,57 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
     LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);
     return Status;
 }
+
+
+LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
+
+    spinlock_t* Lock = (spinlock_t*)0x7000;
+    LouKIRQL* Irql = (LouKIRQL*)(ROUND_UP64(0x7000 + sizeof(spinlock_t), GET_ALIGNMENT(spinlock_t)));
+
+    PCPU_TRACKER_INFORMATION CpuInfo = GetCpuInfoFromTrackerMember(TrackMember);
+    UINT64 ApicBase = LouKeGetCurrentApicBase();
+    UINT32 CpuID = CpuInfo->ProcID;
+    UINT32 ApicID = CpuInfo->ApicID;
+    
+    if(CpuID > 0xFF){
+        return;
+    }
+
+    LouPrint("Waking CPU:%d With Apic:%d IPI\n", CpuID, ApicID);
+
+
+    WRITE_REGISTER_ULONG(ERR_STATUS_REGISTER, 0x00);
+    WRITE_REGISTER_ULONG(ICR_REGISTER_HI, (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
+    WRITE_REGISTER_ULONG(ICR_REGISTER_LOW, (READ_REGISTER_ULONG(ICR_REGISTER_LOW) & 0xFFF00000) | INIT_IPI_MAGIC);
+    do {
+        LouKePauseMemoryBarrier();
+    }while(READ_REGISTER_ULONG(ICR_REGISTER_LOW) & (1 << 12));
+    WRITE_REGISTER_ULONG(ICR_REGISTER_HI, (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
+    WRITE_REGISTER_ULONG(ICR_REGISTER_LOW, (READ_REGISTER_ULONG(ICR_REGISTER_LOW) & 0xFFF00000) | DEASSERT_IPI_MAGIC);
+    do {
+        LouKePauseMemoryBarrier();
+    }while(READ_REGISTER_ULONG(ICR_REGISTER_LOW) & (1 << 12));
+    sleep(10);
+
+    for(size_t i = 0 ; i < 2; i++){
+        WRITE_REGISTER_ULONG(ERR_STATUS_REGISTER, 0x00);
+        WRITE_REGISTER_ULONG(ICR_REGISTER_HI, (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
+        WRITE_REGISTER_ULONG(ICR_REGISTER_LOW, (READ_REGISTER_ULONG(ICR_REGISTER_LOW) & 0xFFF0F800) | 0x000608); //IPI 0x8000
+        sleep(200);
+        do {
+            LouKePauseMemoryBarrier();
+        }while(READ_REGISTER_ULONG(ICR_REGISTER_LOW) & (1 << 12));
+    }
+
+    sleep(100);
+
+    if(MutexIsLocked(&Lock->Lock)){
+        CpuInfo->Broken = true;
+        LouKeReleaseSpinLock(Lock,Irql);
+    }   
+
+}
+
 
 LOUDDK_API_ENTRY void LocalApicSetTimer(bool On){
     //ULONG TimerValue = READ_REGISTER_ULONG(LVT_TIMER_REGISTER);

@@ -87,6 +87,9 @@
 #define INIT (5 << 8)
 #define ExtINIT (7 << 8)
 
+#define INIT_IPI_MAGIC 0x00C500
+#define DEASSERT_IPI_MAGIC 0x008500
+
 #define IDLE (0 << 12)
 #define SEND_PENDING (1 << 12)
 
