@@ -105,103 +105,6 @@ typedef struct {
 #define IOAPIC_WIN     0x10  // IOAPIC Window
 #define IOAPIC_REDIRECTION_TABLE_BASE 0x10
 
-/*
-#define MAX_IOAPICS 16
-#define LEGACY_IRQ_SCOPE 16
-
-//extern IOAPICInfo ioapics[MAX_IOAPICS];
-
-//extern int ioapic_count;
-//extern int OverideCount;
-
-static uint64_t NumberOfInterrupts;
-
-// Function to read from an I/O APIC register
-static inline uint32_t ioapic_read(uint32_t reg) {
-    *ioapic_mmio(IOAPIC_REGSEL) = reg;  // Select the register
-    return *ioapic_mmio(IOAPIC_WIN);    // Read from the selected register
-}
-
-// Function to read the vector for a given IRQ
-static inline uint8_t IoApicGetVector(uint8_t irq) {
-    uint32_t redir_low;
-    uint32_t reg = 0x10 + (irq * 2); // Redirection Table starts at 0x10, each IRQ has 2 registers
-
-    redir_low = ioapic_read(reg);      // Read the lower 32 bits of the redirection entry
-    return (uint8_t)(redir_low & 0xFF); // Extract vector (lowest 8 bits)
-}
-
-
-// Advanced function to unmask a given IRQ in the I/O APIC
-void ioapic_advanced_unmask_irq(uint64_t ioapic_base, uint8_t irq) {
-    uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + (2 * irq);
-    uint32_t high_index = index + 1;
-
-    // Read the current redirection entry
-    uint32_t low = ioapic_advanced_read(ioapic_base, index);
-    uint32_t high = ioapic_advanced_read(ioapic_base, high_index);
-
-    // Clear the mask bit (16th bit) to unmask the interrupt
-    low &= ~0x10000;
-
-    // Write back the updated values
-    ioapic_advanced_write(ioapic_base, index, low);
-    ioapic_advanced_write(ioapic_base, high_index, high);
-}
-
-// Advanced function to mask a given IRQ in the I/O APIC
-void ioapic_advanced_mask_irq(uint64_t ioapic_base, uint8_t irq) {
-    uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + (2 * irq);
-    uint32_t high_index = index + 1;
-
-    // Read the current redirection entry
-    uint32_t low = ioapic_advanced_read(ioapic_base, index);
-    uint32_t high = ioapic_advanced_read(ioapic_base, high_index);
-
-    // Set the mask bit (16th bit) to mask the interrupt
-    low |= 0x10000;
-
-    // Write back the updated values
-    ioapic_advanced_write(ioapic_base, index, low);
-    ioapic_advanced_write(ioapic_base, high_index, high);
-}
-
-uint8_t GetIoApicNumber(uint8_t PIN){
-    for(uint8_t i = 0 ; i < ioapic_count; i++){
-        if((ioapics[i].gsi_base < PIN) && ((ioapics[i].gsi_base + (ioapic_advanced_read(ioapics[i].ioapic_vaddress,0x01) >> 16)) > PIN))return i;
-    }
-    return ioapic_count + 1;
-}
-
-KERNEL_IMPORT bool LouKePollIoApicPinForAssertion(uint8_t Pin){
-    uint8_t irq = FindTrueIRQ(Pin); //finds the interrupt based on if there is a overide
-    uint8_t IoApicNum = GetIoApicNumber(irq); //gets the actual ioapic the irq belogs to based on the 
-    //gsi and the number of handles
-    
-    //gets the offset of the irq register in the ioapic
-    irq = irq - ioapics[IoApicNum].gsi_base;
-
-    uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + (2 * irq);
-
-    // Read the current redirection entry
-    uint32_t low;// = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
-
-    while(1){
-        low = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
-        if(low & (1 << 12)){
-            return true;
-        }else if(low & (0x10000)){
-            return false;
-        }
-    }
-}
-
-void ApcInstallIoApicHandlers(){
-    for(UINT8 i = 0 ; i < GetNPROC(); i++){
-        LouKeInitializeMaskHandler((PVOID)ioapic_mask_irq, i);
-        LouKeInitializeUnmaskHandler((PVOID)ioapic_unmask_irq, i);
-    }
-}*/
 
 PACPI_MADT_IO_APIC GetIoApicHandleFromIrq(UINT8 Irq);
 
@@ -243,8 +146,8 @@ LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
 
     uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + (2 * irq);
     uint32_t high_index = index + 1;
-    uint32_t low = IoApicRead(IoApic->GlobalSystemInterruptBase, index);
-    uint32_t high = IoApicRead(IoApic->GlobalSystemInterruptBase, high_index);
+    uint32_t low = IoApicRead(IoApic->IOAPICAddress, index);
+    uint32_t high = IoApicRead(IoApic->IOAPICAddress, high_index);
 
     //LouPrint("Polarity:%d : Trigger:%d\n", Polarity, Trigger);
 
@@ -257,27 +160,26 @@ LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
         low |= ((Trigger >> 1) << 15);
     }
 
-    IoApicWrite(IoApic->GlobalSystemInterruptBase, index, low);
-    IoApicWrite(IoApic->GlobalSystemInterruptBase, high_index, high);
+    IoApicWrite(IoApic->IOAPICAddress, index, low);
+    IoApicWrite(IoApic->IOAPICAddress, high_index, high);
 
 }
 
+KERNEL_IMPORT void IoApicUnmaskIrq(uint8_t tirq) {
 
-KERNEL_IMPORT void ioapic_unmask_irq(uint8_t tirq) {
+    uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
 
-/*    uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
-
-    uint8_t IoApicNum = GetIoApicNumber(irq); //gets the actual ioapic the irq belogs to based on the 
+    PACPI_MADT_IO_APIC IoApic = GetIoApicHandleFromIrq(irq);
 
     //gets the offset of the irq register in the ioapic
-    irq = irq - ioapics[IoApicNum].gsi_base;
+    irq = irq - IoApic->GlobalSystemInterruptBase;
 
     uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + (2 * irq);
     uint32_t high_index = index + 1;
 
     // Read the current redirection entry
-    uint32_t low = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
-    uint32_t high = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, high_index);
+    uint32_t low = IoApicRead(IoApic->IOAPICAddress, index);
+    uint32_t high = IoApicRead(IoApic->IOAPICAddress, high_index);
 
     // Clear the mask bit (16th bit) to unmask the interrupt
     low &= ~0x10000;
@@ -286,34 +188,36 @@ KERNEL_IMPORT void ioapic_unmask_irq(uint8_t tirq) {
     //LouPrint("low :%bi\n", low);
 
     // Write back the updated values
-    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
-    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);*/
+    IoApicWrite(IoApic->IOAPICAddress, index, low);
+    IoApicWrite(IoApic->IOAPICAddress, high_index, high);
 }
 
 
 // Function to mask a given IRQ in the I/O APIC
-KERNEL_IMPORT void ioapic_mask_irq(uint8_t tirq) {
+KERNEL_IMPORT void IoApicMaskIrq(uint8_t tirq) {
     
-    /*uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
-    uint8_t IoApicNum = GetIoApicNumber(irq); //gets the actual ioapic the irq belogs to based on the 
-    //gsi and the number of handles
+    uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
+    PACPI_MADT_IO_APIC IoApic = GetIoApicHandleFromIrq(irq);
     
     //gets the offset of the irq register in the ioapic
-    irq = irq - ioapics[IoApicNum].gsi_base;
+    irq = irq - IoApic->GlobalSystemInterruptBase;
 
     uint32_t index = IOAPIC_REDIRECTION_TABLE_BASE + (2 * irq);
     uint32_t high_index = index + 1;
 
     // Read the current redirection entry
-    uint32_t low = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, index);
-    uint32_t high = ioapic_advanced_read(ioapics[IoApicNum].ioapic_vaddress, high_index);
+    uint32_t low = IoApicRead(IoApic->IOAPICAddress, index);
+    uint32_t high = IoApicRead(IoApic->IOAPICAddress, high_index);
 
     // Set the mask bit (16th bit) to mask the interrupt
     low |= 0x10000;
 
-    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, index, low);
-    ioapic_advanced_write(ioapics[IoApicNum].ioapic_vaddress, high_index, high);*/
+    IoApicWrite(IoApic->IOAPICAddress, index, low);
+    IoApicWrite(IoApic->IOAPICAddress, high_index, high);
 }
+
+
+
 
 bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic){
     LouPrint("Starting IO/APIC:%d At Address:%h\n", IoApic->IOAPICID, IoApic->IOAPICAddress);
@@ -340,3 +244,4 @@ bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic){
     }
     return true;
 }
+

@@ -270,6 +270,21 @@ LOUDDK_API_ENTRY void local_apic_send_eoi() {
     WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
 }
 
+KERNEL_IMPORT void IoApicMaskIrq(uint8_t tirq);
+KERNEL_IMPORT void IoApicUnmaskIrq(uint8_t tirq);
+
+void ApicInstallIoApicHandlers(){
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    while(TmpTracker->Peers.NextHeader){
+
+        LouKeInitializeMaskHandler((PVOID)IoApicMaskIrq, TmpTracker->ProcID);
+        LouKeInitializeUnmaskHandler((PVOID)IoApicUnmaskIrq, TmpTracker->ProcID);
+
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+    }
+
+}
+
 void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
     while (entryAddress < endAddress) {
         ACPI_MADT_ENTRY_HEADER* header = (ACPI_MADT_ENTRY_HEADER*)entryAddress;
@@ -491,12 +506,10 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
         TmpIoApic = (PIO_APIC_TRACKER)TmpIoApic->Peers.NextHeader;
     }
     
-    //ApcInstallIoApicHandlers();
+    ApicInstallIoApicHandlers();
 
     LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);
-    while(1);
     return Status;
-
 }
 
 LOUDDK_API_ENTRY void LocalApicSetTimer(bool On){
