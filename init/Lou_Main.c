@@ -141,10 +141,6 @@ void InitializeAcpiSystem();
 void InitializeDebuggerComunications();
 void LouKeInitializeMouseManagemet();
 void LouKeIcUnmaskIrq(uint8_t irq);
-void IoApicConfigureEntryFlags(
-    uint8_t     irq,
-    uint16_t    Flags
-);
 void LouKePollIoApicPinForAssertion(uint8_t Pin);
 uint64_t GetUsedMemory();
 uint32_t Random32(uint32_t Seed);
@@ -174,6 +170,8 @@ void* LouKeVirtualAllocUser(
 extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
 LOUSTATUS LouKeInitializeDefaultDemons();
+void LouKeLoadLousineBootTrampoline(string FilePath);
+
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -219,11 +217,14 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     return LOUSTATUS_GOOD;
 }
 
-void InitializeSynapticProcesseing(){
-    LouPrint("InitializeSynapticProcesseing()\n");    
+void InitializeSymmetricMultiProcessing(){
+    LouPrint("Checking If System Supports SMP\n");
+    if(GetNPROC() < 2)return;
+    LouPrint("InitializeSymmetricMultiProcessing()\n");    
     
-    
-    LouPrint("InitializeSynapticProcesseing() STATUS_SUCCESS\n");    
+    LouKeLoadLousineBootTrampoline("C:/ANNYA/SYSTEM64/SMPBOOT.LTB");
+
+    LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
     while(1);
 }
 
@@ -357,7 +358,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeProbeSbIsa();
 
-    InitializeSynapticProcesseing();
+    InitializeSymmetricMultiProcessing();
 
     ScanTheRestOfHarware();
 

@@ -178,3 +178,4 @@ EXPORTS
     LouKeMallocDma16
     LouKeFreeDma16
     LouKeInitializeWorkQueue
+    LouKeGetAllocationSize

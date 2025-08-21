@@ -21,7 +21,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 178
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 179
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -394,6 +394,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[175] = "LouKeMallocDma16";
     ImportTables[4].FunctionName[176] = "LouKeFreeDma16";
     ImportTables[4].FunctionName[177] = "LouKeInitializeWorkQueue";
+    ImportTables[4].FunctionName[178] = "LouKeGetAllocationSize";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -573,6 +574,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[175] = (uint64_t)LouKeMallocDma16;
     ImportTables[4].VirtualAddress[176] = (uint64_t)LouKeFreeDma16;
     ImportTables[4].VirtualAddress[177] = (uint64_t)LouKeInitializeWorkQueue;
+    ImportTables[4].VirtualAddress[178] = (uint64_t)LouKeGetAllocationSize;
 
 }
 

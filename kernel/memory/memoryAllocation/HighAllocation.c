@@ -326,3 +326,32 @@ void LouKeFreePhysical(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
 }
+
+SIZE LouKeGetAllocationSize(PVOID Address){
+    if(!Address){
+        return 0;
+    }
+    uint64_t TmpPageTrackBase = KeMallocPageTracks;
+    uint64_t TmpVMemTrackBase;
+
+    
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
+        if(RangeInterferes(
+            (uint64_t)Address, 
+            1,
+            PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase),
+            PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase)
+        )){
+            TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+            while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
+                if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
+                    return VMEM_TRACK_DEREFERENCE_READ_SIZE(TmpVMemTrackBase);
+                }
+                TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+            }
+        }
+        TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
+    }
+
+    return 0x00;
+}

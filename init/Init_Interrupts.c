@@ -4,14 +4,14 @@
 #include <kernel/errors.h>
 #include <kernel/pic.h>
 
-LOUSTATUS InitApicSystems(bool LateStage);
+LOUSTATUS InitApicSystems();
 
 LOUSTATUS InitializeMainInterruptHandleing(){
     
     //if(InitializeAdvancedProgramableController() != LOUSTATUS_GOOD)LouPanic("Cunstruction Panic",BAD);
     LOUSTATUS Status = LOUSTATUS_GOOD;
 
-    Status = InitApicSystems(true);
+    Status = InitApicSystems();
     if (Status == LOUSTATUS_GOOD) {
         LouPrint("Advance Interrupts Setup\n");
     }

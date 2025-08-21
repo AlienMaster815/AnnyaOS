@@ -9,6 +9,7 @@
         <FILETOCPY64>cp /usr/local/share/limine/limine-bios-cd.bin ISO/</FILETOCPY64>                         
         <FILETOCPY64>cp /usr/local/share/limine/limine-uefi-cd.bin ISO/</FILETOCPY64>                         
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                         <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/Networking/PCNET32/PCNET32.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCNET32.SYS</FILETOCPY64>         <!--Amd PCNet 2 and 3-->
         <FILETOCPY64>cp drivers/Audio/SoundBlaster/SBMOD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/SBMOD.SYS</FILETOCPY64>             <!--Sound Blaster-->
         <FILETOCPY64>cp drivers/Audio/HDA/HDAPCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/HDAPCI.SYS</FILETOCPY64>                    <!--Intel Hd Audio-->

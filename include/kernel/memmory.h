@@ -369,6 +369,8 @@ void* LouKeMallocPage32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlag
 
 uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);
 
+size_t LouKeGetAllocationSize(PVOID Addrress);
+
 LOUSTATUS RequestPhysicalAddress(
     uint64_t VAddress,
     uint64_t* PAddress
@@ -652,6 +654,8 @@ void* LouKeMallocEx(
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
+
+KERNEL_EXPORT size_t LouKeGetAllocationSize(PVOID Addrress);
 
 KERNEL_EXPORT 
 PLMPOOL_DIRECTORY LouKeMapDynamicPool(

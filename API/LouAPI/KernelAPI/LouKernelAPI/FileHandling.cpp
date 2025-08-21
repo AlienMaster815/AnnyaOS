@@ -100,3 +100,11 @@ LOUDDK_API_ENTRY
 void fclose(FILE* File){
     LouKeFreeFileData(File);
 }
+
+LOUDDK_API_ENTRY 
+SIZE 
+fsize(
+    FILE* File
+){
+    return LouKeGetAllocationSize((PVOID)File);
+}

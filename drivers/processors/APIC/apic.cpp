@@ -7,40 +7,19 @@
 //I appologise if this is messy but at this point i just need this to work
 // I WILL FIX IT LATER BEFORE 1.0
 
-
-
-namespace APIC {
-
-	class APIC_TIMER{
-	public:
-		APIC_TIMER();
-		~APIC_TIMER();
-
-		void ApicEnableTimer();
-		
-	private:
-		BOOLEAN IsX6CpuIdSupported();
-		long double GetApicTimerFrequency();
-
-		void ApicSetTimer();
-
-		BOOLEAN IsX6Supported;
-	};
-
-	class LAPIC{
-
-		public:
-			LAPIC();
-			~LAPIC();
-			CPU::FEATURE APIC_VERSION;
-			bool InitializeApic();
-			uint8_t MaxLVTEntries;
-			bool EOI_Suppressable;
-			uint16_t APIC_ID;
-		private:
-			bool InitializeBspLapic();
-	};
+static inline uint32_t get_processor_id() {
+    uint32_t eax, ebx, ecx, edx;
+    eax = 1; // Processor info and feature bits
+    __asm__ volatile(
+        "cpuid"
+        : "=b" (ebx), "=d" (edx), "=c" (ecx)
+        : "a" (eax)
+    );
+    uint32_t processor_id = ebx >> 24;
+    return processor_id;
 }
+
+
 
 
 // Structure representing the lower 32 bits of an IOAPIC redirection table entry
@@ -142,11 +121,6 @@ typedef struct {
     uint64_t ioapic_vaddress;
 } IOAPICInfo;
 
-#define MAX_IOAPICS 16
-
-IOAPICInfo ioapics[MAX_IOAPICS];
-int ioapic_count = 0;
-int OverideCount = 0;
 #define APICADDRESSCAST (volatile uint32_t*)(uintptr_t)
 #define LEGACY_IRQ_SCOPE 16
 
@@ -154,29 +128,145 @@ KERNEL_IMPORT uint64_t read_msr(uint32_t msr);
 KERNEL_IMPORT void write_msr(uint32_t msr, uint64_t Value);
 
 KERNEL_IMPORT void disable_pic();
-
-static CPU::CPUID* Cpu;
-static APIC::LAPIC* Lapic;
-
 string DRV_VERSION_APIC = "\nLousine Internal Kernel APIC.SYS Module Version 1.10\n";
 string DRV_UNLOAD_STRING_SUCCESS_APIC = "Driver Execution Completed Successfully Exiting Proccess\n\n"; 
 string DRV_UNLOAD_STRING_FAILURE_APIC = "Driver Execution Failed To Execute Properly Exiting Proccess\n\n"; 
 
 LOUDDK_API_ENTRY void SMPInit();
 
-uint64_t ApicBase;
+void SetTotalIoApicInterrupts(UINT8 TotalInterrupts);
+bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic);
+LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature);
+LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
+    uint8_t     irq,
+    uint16_t    Flags
+);
 
-uint64_t GetApicBase(){
-    return ApicBase;
+typedef struct _IO_APIC_TRACKER{
+    ListHeader          Peers;
+    ACPI_MADT_IO_APIC   IoApic;
+}IO_APIC_TRACKER, * PIO_APIC_TRACKER;;
+
+typedef struct _APIC_ISO_TRACKER{
+    ListHeader                              Peers;
+    ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE     Overide;    
+}APIC_ISO_TRACKER, * PAPIC_ISO_TRACKER;
+
+typedef struct _CPU_TRACKER_INFORMATION{
+    ListHeader  Peers;
+    UINT32      ProcID;
+    UINT32      ApicID;
+    UINT64      ApicBase;
+}CPU_TRACKER_INFORMATION, * PCPU_TRACKER_INFORMATION;
+
+static CPU_TRACKER_INFORMATION CpuTracker = {0};
+static APIC_ISO_TRACKER IoApicOverideTracker = {0};
+static IO_APIC_TRACKER IoApicTracker = {0};
+
+void LouKeCreateCpuTracker(
+    UINT32 ProcID,
+    UINT32 ApicID
+){
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    while(TmpTracker->Peers.NextHeader){
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+    }
+
+    TmpTracker->Peers.NextHeader = (PListHeader)LouKeMallocType(CPU_TRACKER_INFORMATION, KERNEL_GENERIC_MEMORY);
+    TmpTracker->ProcID = ProcID;
+    TmpTracker->ApicID = ApicID;  
+    TmpTracker->ApicBase = 0x00;  
 }
 
-static uint64_t LocalApicBase = 0xFEE00000;
-ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* ISOPointer[LEGACY_IRQ_SCOPE];
+UINT32 CpuToApicID(UINT32 CpuID){
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    while(TmpTracker->Peers.NextHeader){
+        if(TmpTracker->ProcID == CpuID){
+            return TmpTracker->ApicID;
+        }
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+    }
+    return (UINT32)-1;
+}
 
-bool InitializeIoApic(uint64_t IoApicNumber, uint64_t MappedArea);
-LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature);
+void LouKeSetApicBase(UINT32 ApicID, UINT64 ApicBase){
+    if(ApicID == (UINT32)-1){
+        return;
+    }
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    while(TmpTracker->Peers.NextHeader){
+        if(TmpTracker->ApicID == ApicID){
+            TmpTracker->ApicBase = ApicBase;
+            return;
+        }
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+    }
+}
+
+UINT64 LouKeGetCurrentApicBase(){
+    PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
+    UINT32 Cpu = get_processor_id();
+    while(TmpTracker->Peers.NextHeader){
+        if(TmpTracker->ProcID == Cpu){
+            return TmpTracker->ApicBase;
+        }
+        TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
+    }
+    return 0x00;
+}
+
+
+void LouKeInitializeOverideEntry(ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* Overide){
+    PAPIC_ISO_TRACKER TmpTracker = &IoApicOverideTracker;
+    while(TmpTracker->Peers.NextHeader){
+        TmpTracker = (PAPIC_ISO_TRACKER)TmpTracker->Peers.NextHeader;
+    }
+    TmpTracker->Peers.NextHeader = (PListHeader)LouKeMallocType(APIC_ISO_TRACKER, KERNEL_GENERIC_MEMORY);
+    TmpTracker->Overide = *Overide;
+}
+
+
+KERNEL_IMPORT uint8_t FindTrueIRQ(uint8_t IRQ){
+    PAPIC_ISO_TRACKER TmpTracker = &IoApicOverideTracker;
+    while(TmpTracker->Peers.NextHeader){
+        if(TmpTracker->Overide.Source == IRQ){
+            IoApicConfigureEntryFlags(TmpTracker->Overide.GlobalSystemInterrupt, TmpTracker->Overide.Flags);
+            return TmpTracker->Overide.GlobalSystemInterrupt;
+        }
+        TmpTracker = (PAPIC_ISO_TRACKER)TmpTracker->Peers.NextHeader;
+    }    
+    return IRQ;
+}
+
+void LouKeInitializeIoApicTracker(PACPI_MADT_IO_APIC IoApic){
+    PIO_APIC_TRACKER TmpTracker = &IoApicTracker;
+    while(TmpTracker->Peers.NextHeader){
+        TmpTracker = (PIO_APIC_TRACKER)TmpTracker->Peers.NextHeader;
+    }
+    TmpTracker->Peers.NextHeader = (PListHeader)LouKeMallocType(APIC_ISO_TRACKER, KERNEL_GENERIC_MEMORY);
+    TmpTracker->IoApic = *IoApic;
+}
+
+uint32_t IoApicRead(uint64_t ioapic_base, uint32_t reg);
+
+PACPI_MADT_IO_APIC GetIoApicHandleFromIrq(UINT8 Irq){
+    PIO_APIC_TRACKER TmpTracker = &IoApicTracker;
+    while(TmpTracker->Peers.NextHeader){
+        if(Irq >= TmpTracker->IoApic.GlobalSystemInterruptBase){
+            if(((IoApicRead(TmpTracker->IoApic.IOAPICAddress, 0x01) >> 16) + TmpTracker->IoApic.GlobalSystemInterruptBase) >= Irq){
+                return &TmpTracker->IoApic;
+            }
+        }
+        TmpTracker = (PIO_APIC_TRACKER)TmpTracker->Peers.NextHeader;
+    }
+    return 0x00;
+}
 
 LOUDDK_API_ENTRY void local_apic_send_eoi() {    
+    uint64_t ApicBase = LouKeGetCurrentApicBase();
+    if(!ApicBase){
+        return;
+    }
     WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
 }
 
@@ -190,24 +280,19 @@ void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
                 break;
             }
             UpgradeNPROC();
+            LouKeCreateCpuTracker(localAPIC->ProcessorID, localAPIC->APICID);
             LouPrint("Processor ID:%d, APIC ID:%d, Flags:%d\n", localAPIC->ProcessorID, localAPIC->APICID, localAPIC->Flags);
             break;
         }
         case 1: {
             ACPI_MADT_IO_APIC* ioAPIC = (ACPI_MADT_IO_APIC*)entryAddress;
+            LouKeInitializeIoApicTracker(ioAPIC);
             LouPrint("I/O APIC ID:%d, Address:%h, Global System Interrupt Base:%d\n", ioAPIC->IOAPICID, ioAPIC->IOAPICAddress, ioAPIC->GlobalSystemInterruptBase);
-            if (ioapic_count < MAX_IOAPICS) {
-                ioapics[ioapic_count].ioapic_id = ioAPIC->IOAPICID;
-                ioapics[ioapic_count].ioapic_address = ioAPIC->IOAPICAddress;
-                ioapics[ioapic_count].gsi_base = ioAPIC->GlobalSystemInterruptBase;
-                ioapic_count++;
-            }
             break;
         }
         case 2: {
             ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* iso = (ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE*)entryAddress;
-            ISOPointer[OverideCount] = iso;
-            OverideCount++;
+            LouKeInitializeOverideEntry(iso);            
             LouPrint("Bus: %d, Source:%d, Global System Interrupt:%d, Flags:%d\n", iso->Bus, iso->Source, iso->GlobalSystemInterrupt, iso->Flags);
             break;
         }
@@ -224,7 +309,7 @@ void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
         case 5: {
             ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE* laa = (ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE*)entryAddress;
             LouPrint("Local APIC Address:%h\n", laa->LocalApicAddress);
-            LocalApicBase = laa->LocalApicAddress;
+            //LocalApicBase = laa->LocalApicAddress;
             while(1);
             break;
         }
@@ -263,100 +348,13 @@ void cpu_set_apic_base(uintptr_t apic) {
 void ApcInstallIoApicHandlers();
 void LouKeInitializeBackupPic();
 
-LOUDDK_API_ENTRY LOUSTATUS InitApicSystems(bool LateStage) {
-    LOUSTATUS Status = LOUSTATUS_GOOD;
-    LouPrint(DRV_VERSION_APIC);
-
-    PACPI_MADT ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("APIC");
-
-    if(!ApicTable){
-        ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("MADT");
-    }
-    if(!ApicTable){
-        LouPrint("Unable To Find APIC Using Backup Pic\n");
-        LouKeInitializeBackupPic();
-        return LOUSTATUS_GOOD;
-    }
-
-    disable_pic();
-
-    uint8_t* EntryHeaderAddress = ((uint8_t*)ApicTable + sizeof(ACPI_MADT));
-    uint8_t* HeaderEndAddress = ((uint8_t*)ApicTable + ApicTable->Header.Length);
-
-    ParseAPIC(
-        EntryHeaderAddress,
-        HeaderEndAddress
-    );
-
-    Cpu = (CPU::CPUID*)LouKeMallocType(CPU::CPUID, KERNEL_GENERIC_MEMORY);
-    Lapic = (APIC::LAPIC*)LouKeMallocType(APIC::LAPIC,  KERNEL_GENERIC_MEMORY);
-
-    LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, 0);
-
-    if(Lapic->InitializeApic())LouPrint("APIC ENABLED SUCCESSFULLY\n");
-
-    //configure FPU for BSP
-    EnableAdvancedBspFeatures(CPU::FPU);
-
-    Cpu->~CPUID();
-    ApicSet = true;
-
-    LouKeFree((RAMADD)Cpu);
-
-    for(uint8_t i = 0 ; i < ioapic_count; i++){
-        if(!InitializeIoApic(i,ApicBase)){
-            LouPrint(DRV_UNLOAD_STRING_FAILURE_APIC);
-            return false;
-        }
-    }
-    
-    ApcInstallIoApicHandlers();
-
-    LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);
-
-    return Status;
-
-}
-
-
-APIC::LAPIC::LAPIC(){
-
-}
-APIC::LAPIC::~LAPIC(){
-
-}
-bool APIC::LAPIC::InitializeApic(){
-
-    LouPrint("Setting Up APIC\n");
-    uint64_t MSR = read_msr(IA32_APIC_BASE_MSR);
-
-    if(!(MSR >> 11) & 0x01) return false;
-    if((MSR >> 8) & 0x01)   InitializeBspLapic();
-    //else if (!(MSR >> 8) & 0x01) InitializeApApic();
-    else{
-        LouPrint(DRV_UNLOAD_STRING_FAILURE_APIC);
-        return false;
-    } 
-
-    return true;
-}
-
-
-bool APIC::LAPIC::InitializeBspLapic(){
-
-    LouPrint("Initializing BootStrap Processor\n");
- 
-    LouPrint("Disableing Pic\n");
-    disable_pic();
-    LouPrint("Pic Has Been Disabled\n");
-
+bool InitializeLapic(UINT32 CpuID){
+    uint64_t ApicBase;
+    LouPrint("Initializing Processor:%d\n", CpuID);
     ApicBase = (uint64_t)LouKeMallocPageEx32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
-    
-    //ApicBase = (uint64_t)LouMallocEx(KILOBYTE_PAGE, KILOBYTE_PAGE);
-
-    //LouMapAddress(GetLocalApicBase(), ApicBase, KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT,KILOBYTE_PAGE);
-
-    if(Cpu->IsFeatureSupported(CPU::X2APIC)){
+    LouKeSetApicBase(CpuToApicID(get_processor_id()), ApicBase);
+    CPU::CPUID Cpu;
+    if(Cpu.IsFeatureSupported(CPU::X2APIC)){
         //initiailize x2 standard
         LouPrint("Using X2 Standard\n");
         //Set the Spurious Interrupt Vector Register bit 8 to start receiving interrupts
@@ -375,7 +373,7 @@ bool APIC::LAPIC::InitializeBspLapic(){
         WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC);
         
     }
-    else if (Cpu->IsFeatureSupported(CPU::XAPIC)){
+    else if (Cpu.IsFeatureSupported(CPU::XAPIC)){
         //initialize x1 standard
         LouPrint("Using X1 Standard\n");
 
@@ -430,9 +428,76 @@ bool APIC::LAPIC::InitializeBspLapic(){
     return true;
 }
 
+bool InitializeApic(){
+    LouPrint("Setting Up APIC\n");
+    uint64_t MSR = read_msr(IA32_APIC_BASE_MSR);
+    if(!(MSR >> 11) & 0x01) return false;
+    return true;
+}
 
+LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
+    LOUSTATUS Status = LOUSTATUS_GOOD;  
+    LouPrint(DRV_VERSION_APIC);
 
+    PACPI_MADT ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("APIC");
 
+    if(!ApicTable){
+        ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("MADT");
+    }
+    if(!ApicTable){
+        LouPrint("Unable To Find APIC Using Backup Pic\n");
+        LouKeInitializeBackupPic();
+        return LOUSTATUS_GOOD;
+    }
+
+    disable_pic();
+
+    uint8_t* EntryHeaderAddress = ((uint8_t*)ApicTable + sizeof(ACPI_MADT));
+    uint8_t* HeaderEndAddress = ((uint8_t*)ApicTable + ApicTable->Header.Length);
+
+    ParseAPIC(
+        EntryHeaderAddress,
+        HeaderEndAddress
+    );
+
+    LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, 0);
+
+    if(InitializeApic())LouPrint("APIC ENABLED SUCCESSFULLY\n");
+    else{   
+        LouPrint("ERROR Could Not Initialize APIC\n");
+        while(1);   
+    }
+
+    InitializeLapic(get_processor_id());
+
+    //configure FPU for BSP
+
+    ApicSet = true;
+
+    PIO_APIC_TRACKER TmpIoApic = &IoApicTracker;
+
+    while(TmpIoApic->Peers.NextHeader){
+        TmpIoApic = (PIO_APIC_TRACKER)TmpIoApic->Peers.NextHeader;
+    }
+
+    SetTotalIoApicInterrupts(TmpIoApic->IoApic.GlobalSystemInterruptBase);
+
+    TmpIoApic = &IoApicTracker;
+
+    while(TmpIoApic->Peers.NextHeader){
+
+        InitializeIoApic(&TmpIoApic->IoApic);
+
+        TmpIoApic = (PIO_APIC_TRACKER)TmpIoApic->Peers.NextHeader;
+    }
+    
+    //ApcInstallIoApicHandlers();
+
+    LouPrint(DRV_UNLOAD_STRING_SUCCESS_APIC);
+    while(1);
+    return Status;
+
+}
 
 LOUDDK_API_ENTRY void LocalApicSetTimer(bool On){
     //ULONG TimerValue = READ_REGISTER_ULONG(LVT_TIMER_REGISTER);

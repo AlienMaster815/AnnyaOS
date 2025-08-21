@@ -175,6 +175,9 @@ KernelModules:
 	$(MAKE) -C drivers clean
 	$(MAKE) -C drivers all
 
+	$(MAKE) -C boot/x86_64 clean
+	$(MAKE) -C boot/x86_64 all
+
 UserSpace:
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/LouDll all
