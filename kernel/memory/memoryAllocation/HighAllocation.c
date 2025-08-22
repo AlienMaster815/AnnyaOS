@@ -202,7 +202,7 @@ void* LouKeMallocPhysical(
 }
 
 void LouKeFree(void* Address){
-    if(!Address){
+    /*if(!Address){
         return;
     }
     uint64_t TmpPageTrackBase = KeMallocPageTracks;
@@ -261,11 +261,11 @@ void LouKeFree(void* Address){
         }
         TmpPageTrackLast = TmpPageTrackBase;
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
-    }
+    }*/
 }
 
 void LouKeFreePhysical(void* Address){
-    if(!Address){
+    /*if(!Address){
         return;
     }
     uint64_t TmpPageTrackBase = KeMallocPageTracksPhy;
@@ -324,7 +324,7 @@ void LouKeFreePhysical(void* Address){
         }
         TmpPageTrackLast = TmpPageTrackBase;
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
-    }
+    }*/
 }
 
 SIZE LouKeGetAllocationSize(PVOID Address){

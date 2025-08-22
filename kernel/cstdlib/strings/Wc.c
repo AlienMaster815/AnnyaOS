@@ -659,7 +659,7 @@ wchar_t* LouKeCharToWchar(const char* src) {
     }
 
     // Allocate memory for the wide character string, including space for the null terminator
-    wchar_t* dest = (wchar_t*)LouMalloc((length + 1) * sizeof(wchar_t));
+    wchar_t* dest = (wchar_t*)LouKeMalloc((length + 1) * sizeof(wchar_t), KERNEL_GENERIC_MEMORY);
     if (dest == 0x00) return 0x00; // Handle memory allocation failure
 
     // Convert each character from `char` to `wchar_t`

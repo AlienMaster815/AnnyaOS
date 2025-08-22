@@ -46,7 +46,7 @@ char* ConvertWCharToChar(const wchar_t* wstr) {
     //LouPrint("UTF-8 length is: %d\n", len);
 
     // Allocate memory for the resulting UTF-8 string
-    char* str = (char*)LouMalloc(len + 1);
+    char* str = (char*)LouKeMalloc(len + 1, KERNEL_GENERIC_MEMORY);
     if (str == NULL) {
         // Memory allocation error
         return NULL;

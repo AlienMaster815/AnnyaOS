@@ -98,7 +98,7 @@ extern void SetPEB(uint64_t PEB);
 void SetupGDT(){
     LouPrint("Setting Up GDT\n");
 
-    PLongModeGdt GDT = (PLongModeGdt)LouMallocEx(sizeof(LongModeGdt), 16);
+    PLongModeGdt GDT = (PLongModeGdt)LouKeMallocPhysicalEx(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
     memset(GDT,0, sizeof(LongModeGdt));
 
     SetGDTSegmentEntry(
@@ -131,15 +131,15 @@ void SetupGDT(){
             0xC
         );
 
-    PTSS Tss = (PTSS)LouMallocEx(sizeof(TSS), 16);
+    PTSS Tss = (PTSS)LouKeMallocPhysicalEx(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
     memset(Tss,0, sizeof(TSS));
 
-    Tss->RSP0 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
-    Tss->RSP1 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
-    Tss->RSP2 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
-    Tss->IST1 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
-    Tss->IST2 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
-    Tss->IST3 = (uintptr_t)LouMallocEx((64 * KILOBYTE), 16);
+    Tss->RSP0 = (uintptr_t)LouKeMallocPhysicalEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY);
+    Tss->RSP1 = (uintptr_t)LouKeMallocPhysicalEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY);
+    Tss->RSP2 = (uintptr_t)LouKeMallocPhysicalEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY);
+    Tss->IST1 = (uintptr_t)LouKeMallocPhysicalEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY);
+    Tss->IST2 = (uintptr_t)LouKeMallocPhysicalEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY);
+    Tss->IST3 = (uintptr_t)LouKeMallocPhysicalEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY);
 
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
@@ -149,7 +149,7 @@ void SetupGDT(){
     );
 
 
-    uint64_t GsBase = (uint64_t)LouMalloc(KILOBYTE_PAGE);
+    uint64_t GsBase = (uint64_t)LouKeMallocPhysical(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
 
     if(GsBase >= 0xFFFFFFFFFFFF){
         LouPrint("PANIC GsBase Over GDT Limit\n");
@@ -172,8 +172,6 @@ void SetupGDT(){
     InstallGDT((uint64_t)&Gdtr);
 
     SetGSBase(GsBase);
-
-    LouKeMapContinuousMemoryBlock(GsBase, GsBase, KILOBYTE_PAGE, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
 
     LouPrint("Done Setting Up GDT\n");
 

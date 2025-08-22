@@ -22,13 +22,6 @@ static spinlock_t MemmoryMapLock;
 
 static struct master_multiboot_mmap_entry* LousineMemoryMapTable;
 
-void LouKeInitializeSafeMemory(){
-
-    void* Foo = LouMalloc(LousineMemoryMapTable->tag.size);
-    memcpy(Foo, LousineMemoryMapTable, LousineMemoryMapTable->tag.size);
-
-    LousineMemoryMapTable = Foo;
-}
 
 void SendMapToAllocation(struct master_multiboot_mmap_entry* mmap) {
     LousineMemoryMapTable = mmap;
@@ -499,4 +492,12 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);
     while(1);
     return NULL;
+}
+
+void LouKeInitializeSafeMemory(){
+
+    void* Foo = LouMalloc(LousineMemoryMapTable->tag.size);
+    memcpy(Foo, LousineMemoryMapTable, LousineMemoryMapTable->tag.size);
+
+    LousineMemoryMapTable = Foo;
 }

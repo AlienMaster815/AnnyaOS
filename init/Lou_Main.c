@@ -427,7 +427,7 @@ void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
 
 //0x220B21030
 
-//TODO : 
+//TODO : Fix the memory manager...
 
 //BUGS TO FIX:
 //memcpy doesent use SSE correctly

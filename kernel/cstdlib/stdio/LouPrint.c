@@ -173,7 +173,7 @@ int LouPrint_s(char* format, va_list args){
                     switch (*format) {
                         case 'l': {
                             long double num = va_arg(args, long double);
-                            char* str = (char*)LouMalloc(21);
+                            char str[21];
                             long_double_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {

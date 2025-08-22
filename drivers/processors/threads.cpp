@@ -309,8 +309,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
     LouPrint("Initialized Processor:%d as Thread 1\n", get_processor_id());
 
     current_thread[get_processor_id()] = &MasterThreadTable;
-    current_thread[get_processor_id()]->AdvancedRegisterStorage = (uintptr_t)LouMallocEx(2688, 64);
-    current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouMallocEx(2688, 64);
+    current_thread[get_processor_id()]->AdvancedRegisterStorage = (uintptr_t)LouKeMallocPhysicalEx(2688, 64, KERNEL_GENERIC_MEMORY);
+    current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouKeMallocPhysicalEx(2688, 64, KERNEL_GENERIC_MEMORY);
     current_thread[get_processor_id()]->NewTask = false;
     current_thread[get_processor_id()]->state = THREAD_RUNNING;
     current_thread[get_processor_id()]->ThreadIdentification = NumberOfThreads + 1;
@@ -436,8 +436,8 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling
-    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
-    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
     //Mark the Register Storage As Clean
     NewThread->NewTask = true;
     NewThread->state = THREAD_READY;
@@ -488,8 +488,8 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling
-    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
-    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
     //Mark the Register Storage As Clean
     NewThread->NewTask = true;
     NewThread->state = THREAD_READY;
@@ -553,8 +553,8 @@ LouKeCreateDemon(
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling
-    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
-    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouMallocEx(1688, 64);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
+    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
     //Mark the Register Storage As Clean
     NewThread->NewTask = true;
     NewThread->state = THREAD_READY;
