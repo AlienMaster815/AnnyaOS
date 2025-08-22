@@ -275,7 +275,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
-
+	$(MAKE) -C boot/x86_64 clean
 	rm -rf release
 	rm -rf ISO
 	rm -rd dist

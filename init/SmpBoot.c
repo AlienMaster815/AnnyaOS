@@ -17,28 +17,49 @@ void LouKeSendProcessorWakeupSignal(INTEGER TrackMember);
 
 uint16_t GetNPROC();
 
-//static spinlock_t* TrampolineLock;
-//static LouKIRQL* PreTrampolineIrql;
+static mutex_t* TrampolineLock;
+static UINT64* TrampolineStack;
+static UINT64* FunctionAddress;
+static UINT64* Pml4Address;
+
+extern UINT64 page_table_l4;
+
+void LouKeSmpWakeFunction(){
+
+    MutexUnlock(TrampolineLock);
+
+    while(1){
+
+    }
+}
 
 
 void LouKeLoadLousineBootTrampoline(string FilePath){
-    //LouPrint("FilePath:%s\n", FilePath);
-    //UNUSED FILE* TrampolineFile = fopen(FilePath, KERNEL_GENERIC_MEMORY);
-    //LouKeMapContinuousMemoryBlock(0x7000, 0x7000, 0x2000, KERNEL_DMA_MEMORY);
-    //memset((PVOID)0x7000, 0, 0x2000);
-    //memcpy((PVOID)0x8000, (PVOID)TrampolineFile, fsize(TrampolineFile));
-    //INTEGER CurrentCpu = GetCpuTrackMemberFromID(get_processor_id());
-    
-    //TrampolineLock = (spinlock_t*)0x7000;
-    //PreTrampolineIrql = (LouKIRQL*)(ROUND_UP64(0x7000 + sizeof(spinlock_t), GET_ALIGNMENT(spinlock_t)));
-    //for(INTEGER i = 0 ; i < GetNPROC(); i++){
-    //    if(i == CurrentCpu){
-    //        continue;
-    //    }
-    //    LouKeAcquireSpinLock(TrampolineLock, PreTrampolineIrql);
+    LouPrint("FilePath:%s\n", FilePath);
+    UNUSED FILE* TrampolineFile = fopen(FilePath, KERNEL_GENERIC_MEMORY);
+    LouKeMapContinuousMemoryBlock(0x7000, 0x7000, 0x2000, KERNEL_DMA_MEMORY);
+    memset((PVOID)0x7000, 0, 0x2000);
+    memcpy((PVOID)0x8000, (PVOID)TrampolineFile, fsize(TrampolineFile));
+    INTEGER CurrentCpu = GetCpuTrackMemberFromID(get_processor_id());
 
-    //    LouKeSendProcessorWakeupSignal(i);
+    TrampolineStack = (UINT64*)0x7000;
+    FunctionAddress = (UINT64*)0x7008;
+    Pml4Address = (UINT64*)0x7010;
+    TrampolineLock = (mutex_t*)0x7018;
 
-    //}
+    *Pml4Address     = (UINT64)&page_table_l4;
+    *TrampolineStack = (UINT64)(LouKeMallocPhysicalEx(16 * KILOBYTE, 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16)); 
+    *FunctionAddress = (UINT64)LouKeSmpWakeFunction; 
 
+    LouKeMemoryBarrier();
+
+    for(INTEGER i = 0 ; i < 2; i++){
+        if(i == CurrentCpu){
+            continue;
+        }
+        MutexLock(TrampolineLock);
+        LouKeSendProcessorWakeupSignal(i);
+    }
+
+    while(1);
 }

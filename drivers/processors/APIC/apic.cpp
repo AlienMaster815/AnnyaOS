@@ -544,8 +544,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
 
 LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
-    spinlock_t* Lock = (spinlock_t*)0x7000;
-    LouKIRQL* Irql = (LouKIRQL*)(ROUND_UP64(0x7000 + sizeof(spinlock_t), GET_ALIGNMENT(spinlock_t)));
+    mutex_t* Lock = (mutex_t*)0x7018;
 
     PCPU_TRACKER_INFORMATION CpuInfo = GetCpuInfoFromTrackerMember(TrackMember);
     UINT64 ApicBase = LouKeGetCurrentApicBase();
@@ -574,7 +573,7 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
     for(size_t i = 0 ; i < 2; i++){
         WRITE_REGISTER_ULONG(ERR_STATUS_REGISTER, 0x00);
-        WRITE_REGISTER_ULONG(ICR_REGISTER_HI, (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
+        WRITE_REGISTER_ULONG(ICR_REGISTER_HI,  (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
         WRITE_REGISTER_ULONG(ICR_REGISTER_LOW, (READ_REGISTER_ULONG(ICR_REGISTER_LOW) & 0xFFF0F800) | 0x000608); //IPI 0x8000
         sleep(200);
         do {
@@ -582,12 +581,19 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
         }while(READ_REGISTER_ULONG(ICR_REGISTER_LOW) & (1 << 12));
     }
 
-    sleep(100);
-
-    if(MutexIsLocked(&Lock->Lock)){
-        CpuInfo->Broken = true;
-        LouKeReleaseSpinLock(Lock,Irql);
+    size_t Timeout = 0;
+    while(MutexIsLocked(Lock)){
+        sleep(10);
+        Timeout += 10;
+        if(Timeout >= 100){
+            MutexUnlock(Lock);
+            break;
+        }
     }   
+    if(Timeout >= 100){
+        LouPrint("Cpu:%d Faild To Wakeup In Time\n", CpuID);
+        CpuInfo->Broken = true;
+    }
 
 }
 

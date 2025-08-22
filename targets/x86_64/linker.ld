@@ -3,7 +3,9 @@ OUTPUT_FORMAT("elf64-x86-64")
 
 SECTIONS
 {
+
     . = 0x01000000;
+
     .boot :
     {
         KEEP(*(.multiboot_header))

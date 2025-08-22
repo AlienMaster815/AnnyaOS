@@ -225,7 +225,7 @@ void InitializeSymmetricMultiProcessing(){
     LouKeLoadLousineBootTrampoline("C:/ANNYA/SYSTEM64/SMPBOOT.LTB");
 
     LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
-    while(1);
+
 }
 
 void AdvancedLousineKernelInitialization(){
