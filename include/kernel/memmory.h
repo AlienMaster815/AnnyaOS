@@ -96,6 +96,7 @@ void LouKeFreePhysical(void* AddressToFree);
 void LouFree(RAMADD Addr);
 void* LouMalloc(size_t BytesToAllocate);
 void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
+void* LouMallocEx64(size_t BytesToAllocate, uint64_t Alignment);
 uint64_t GetStackBackset(uint64_t Offset);
 #endif
 
@@ -366,7 +367,8 @@ void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags)
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 void* LouKeMallocPageEx32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 void* LouKeMallocPage32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
-
+void* LouKeMallocPhysicalPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
+void* LouKeMallocPhysicalPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);
 
 size_t LouKeGetAllocationSize(PVOID Addrress);

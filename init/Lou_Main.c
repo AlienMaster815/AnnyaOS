@@ -90,7 +90,6 @@ uint64_t getTrampolineAddress();
 uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
 void FlushTss();
-void LouKeRunOnNewUserStack(void (*func)(void*), void* FunctionParameters, size_t StackSize);
 void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
 void InitializeNtKernelTransitionLayer();
@@ -108,7 +107,6 @@ int TestLoop2();
 void LouKeInitializeFullLouACPISubsystem();
 void LouKeDestroyThread();
 extern void MachineCodeDebug(uint64_t FOO);
-void LouKeRunOnNewStack(void (*func)(void), void* FunctionParameters, size_t stack_size);
 void LouKeSwitchContext(void (*Function)(), uint64_t StackSize);
 LOUSTATUS LookForStorageDevices();
 void LouKeRunThreadContext(
@@ -365,22 +363,15 @@ KERNEL_ENTRY Lou_kernel_start(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    LouKeRunOnNewUserStack((void (*)(void*))InitializeUserSpace, 0x00, 8 * MEGABYTE);
-	LouPanic("error kernel has gone too far terminating system\n",BAD);
-	// IF the Kernel returns from this
-	// the whole thing crashes
+    LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
+
+    
+    while(1){
+        //default kernel deomon
+        asm("INT $200");
+    }
+
 }
-
-//131df
-
-void TrampolineFinalInit(){
-    LouPrint("SMP Final Initializations\n");
-
-    LouPrint("SMP Final Initializations Finished\n");
-    LouKeRunOnNewStack(LouKernelSmpStart, 0 , 16 * KILOBYTE);
-}
-
-
 
 
 void InitializeUserSpace(){
@@ -416,6 +407,8 @@ void InitializeUserSpace(){
         LouPrint("ERROR Could Not Jump To Usermode\n");
         while(1);
     }
+
+    LouPrint("InitEntry:%h\n", InitEntry);
 
     UsrJmp(InitEntry);
 }

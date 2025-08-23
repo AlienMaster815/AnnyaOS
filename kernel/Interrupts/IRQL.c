@@ -22,7 +22,9 @@ LouKIRQL InterruptSwitch(LouKIRQL New){
 void LocalApicSetTimer(bool On);
 void LouKeSendIcEOI();
 
-
+LouKIRQL LouKeGetIrql(){
+    return SystemInterruptLevel;
+}
 
 void LouKeSetIrql(
     LouKIRQL  NewIrql,

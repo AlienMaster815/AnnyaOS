@@ -8,6 +8,34 @@
 #ifdef ARCH_I386_VGA_H
 #define LOU_PANIC
 
+typedef struct  PACKED _CPUContext{
+    // General-Purpose Registers    
+    uint64_t rax;
+    uint64_t rbx;
+    uint64_t rcx;
+    uint64_t rdx;
+
+    uint64_t rbp;
+    uint64_t rsi;
+    uint64_t rdi;
+    uint64_t r8;
+
+    uint64_t r9;
+    uint64_t r10;
+    uint64_t r11;
+    uint64_t r12;
+
+    uint64_t r13;
+    uint64_t r14;
+    uint64_t r15;
+    uint64_t rip;
+
+    uint64_t cs;
+    uint64_t fq;
+    uint64_t FaultStack;
+    uint64_t ss;
+} CPUContext;
+
 LOUSTATUS SilentPanic() {
 	LOUSTATUS Status = 1;
 
@@ -37,12 +65,9 @@ void LouPanic(char* error_message,STATUS recoverable) {
 }
 
 PWINDHANDLE SetBlueScreenPannel(){
-	/*WINDOW_CHARECTERISTICS BSODCharecteristics;
-    BSODCharecteristics.Type = CANVAS_WINDOW;
-    BSODCharecteristics.WindowName = "BSOD";
 
 
-	PWINDHANDLE Result = LouCreateCanvasBuffer(
+	/*PWINDHANDLE Result = LouCreateCanvasBuffer(
 		0,0,
 		GetScreenBufferWidth(), GetScreenBufferHeight(),
 		0x00,
@@ -133,7 +158,6 @@ void LouKeSetPanicInfo(
 		255
 	);
 	
-
 
 	CurrentY += 28;
 	size_t ErrorMessageSize = (strlen("The Fault Was Caused By A:%s") * strlen(DynamicErrorMessage));
@@ -236,8 +260,74 @@ void LouKeSetPanicInfo(
 	_GENERIC_FUALT_PANIC:
 	LouKeDrsdSyncScreens();
 	*/
+
+	LouPrint("The Lousine Kernel has initialized a kernel panic. Information from the panic is below.\n");
+	size_t ErrorMessageSize = (strlen("The Fault Was Caused By A:%s") * strlen(DynamicErrorMessage));
+	string ErrorMessage = (string)LouMallocEx(ErrorMessageSize, 1);
+	_vsnprintf(ErrorMessage, ErrorMessageSize, "The Fault Was Caused By A:%s", DynamicErrorMessage);
+	LouPrint("%s\n", ErrorMessage);
+
+	char TmpString[256];
+
+	_vsnprintf((string)TmpString, 256, "RAX:%h :: RBX:%h :: RCX:%h :: RDX:%h", rax, rbx,rcx, rdx);
+	LouPrint("%s\n", TmpString);
+	_vsnprintf((string)TmpString, 256, "RBP:%h :: RSI:%h :: RDI:%h :: R8:%h", rbp, rsi, rdi, r8);
+	LouPrint("%s\n", TmpString);
+	_vsnprintf((string)TmpString, 256, "R9:%h :: R10:%h :: R11:%h :: R12:%h", r9, r10, r11, r12);
+	LouPrint("%s\n", TmpString);
+	_vsnprintf((string)TmpString, 256, "R13:%h :: R14:%h :: R15:%h :: RIP:%h", r13, r14, r15, rip);
+	LouPrint("%s\n", TmpString);
+	_vsnprintf((string)TmpString, 256, "CS:%h :: FQ:%h :: RSP:%h :: SS:%h", cs, fq, rsp, ss);
+	LouPrint("%s\n", TmpString);
+
+	if(strncmp(DynamicErrorMessage, "Page Fault Protection Violation", strlen("Page Fault Protection Violation")) == 0){
+		goto _PAGE_FUALT_PANIC;
+	}else {
+		goto _GENERIC_FUALT_PANIC;
+	}
+
+	_PAGE_FUALT_PANIC:
+
+	_vsnprintf((string)TmpString, 256, "Page Fault Code HexValue:%h", PageFaultData);
+	LouPrint("%s\n", TmpString);
+
+	_GENERIC_FUALT_PANIC:
+
 	while(1);
 }
+
+void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData){
+        PWINDHANDLE Bsod = SetBlueScreenPannel();
+
+        CPUContext* FaultData = (CPUContext*)((uint64_t)PageFaultData);
+
+        LouKeSetPanicInfo(
+        Bsod, Message,
+        FaultData->rax, 
+        FaultData->rbx, 
+        FaultData->rcx, 
+        FaultData->rdx,
+        FaultData->rbp,
+        FaultData->rsi,
+        FaultData->rdi,
+        FaultData->r8,
+        FaultData->r9,
+        FaultData->r10,
+        FaultData->r11,
+        FaultData->r12,
+        FaultData->r13,
+        FaultData->r14,
+        FaultData->r15,
+        FaultData->rip,
+        FaultData->cs,
+		FaultData->fq,
+        FaultData->FaultStack,
+        FaultData->ss,
+        PageFaultData
+    );
+    while(1);
+}
+
 
 #endif
 

@@ -180,11 +180,6 @@ LOUDDK_API_ENTRY void ScanForVideoHardware(){
 
 }
 
-
-
-KERNEL_IMPORT 
-void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size) ;
-
 void InitializeBARHalLayer();
 
 LOUDDK_API_ENTRY 

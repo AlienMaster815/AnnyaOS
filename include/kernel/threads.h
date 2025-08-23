@@ -206,7 +206,12 @@ LouKeCreateDemon(
     PVOID   Params,
     size_t  StackSize
 );
-
+PTHREAD 
+LouKeCreateUserStackDemon(
+    PVOID Function,
+    PVOID Params,
+    size_t  StackSize
+);
 
 
 #else 

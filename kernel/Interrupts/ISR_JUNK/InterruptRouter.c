@@ -28,8 +28,6 @@ typedef struct  PACKED _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-void LouKeRunOnNewStack(void (*func)(void*), void* FunctionParameters, size_t stack_size);
-
 void LouKeSendIcEOI();
 bool GetAPICStatus();
 
@@ -135,11 +133,8 @@ mutex_t* LouKeGetInterruptGlobalLock(){
 void LouKeThrowPc();
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
-    
-    if(Interrupt < 0x20){
-        LouPrint("Fualt\n");
-        while(1);
-    }
+    //LouKIRQL Irql;
+    //LouKeSetIrql(HIGH_LEVEL, &Irql);
     uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
@@ -160,9 +155,11 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             RestoreEverything(&ContextHandle);
         }
+        //LouKeSetIrql(Irql, 0x00);
         LouKeSendIcEOI();
         return;
     }
+    //LouKeSetIrql(Irql, 0x00);
     LouKeSendIcEOI();
     return;
     

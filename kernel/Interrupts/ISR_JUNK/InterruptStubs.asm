@@ -313,6 +313,8 @@ global getRsp
 
 SaveNext dd 0
 
+
+
 ContextLiftoff:
 	pusha
 	mov [rdx], rsp
@@ -558,8 +560,6 @@ ISR31:
 	push 31
 	mov [InterruptNum], ah
 	Handle
-
-
 
 
 

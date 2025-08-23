@@ -21,9 +21,6 @@ void* LouKeMemReMap(void* PhyAddress, size_t Length, uint64_t Flags){
 }
 
 void LouKeMemReleaseReMap(void* Address){
-    uint64_t PhyAddress = 0x00;
     uintptr_t AlignedAddress = ((uintptr_t)Address & ~(KILOBYTE_PAGE - 1));
     LouKeFreePage((void*)AlignedAddress);
-    RequestPhysicalAddress((uint64_t)Address, &PhyAddress);
-    LouFree((uint8_t*)PhyAddress);
 }

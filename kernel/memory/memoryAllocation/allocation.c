@@ -5,6 +5,7 @@
 //include headers from freestanding
 
 #define StartMap (60ULL * MEGABYTE)
+#define StartMap64 (4ULL * GIGABYTE)
 
 #include <LouAPI.h>
 // define constants
@@ -267,7 +268,10 @@ uint64_t SearchForMappedAddressSize(uint64_t Address){
     return GetAllocationBlockSize(Address);
 }
 
-void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
+void* _LouMallocEx(
+    SIZE BytesToAllocate, 
+    UINT64 Alignment
+){
     LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
     uint16_t Number_Of_Entries = (LousineMemoryMapTable->tag.size - sizeof(struct master_multiboot_mmap_entry)) / LousineMemoryMapTable->entry_size;
@@ -285,6 +289,118 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
                 else if (mmap_entry->addr < StartMap) {
                     limit = (mmap_entry->addr + mmap_entry->len) - StartMap;
                     address = StartMap;
+                }
+                if(!AllocationBlocksConfigured){
+                    AllocationBlocks[0] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+                    AllocationBlocksConfigured++;
+                }
+                
+                UNUSED uint64_t AlignmentCheck = ROUND_UP64(address,Alignment);
+
+                PLOU_MALLOC_TRACKER FreeTrack = AllocationBlocks[CURRENT_ALLOCATION_BLOCK];
+
+                FreeTrack = &FreeTrack[TotalAllocations[CURRENT_ALLOCATION_BLOCK]];
+
+                while ((AlignmentCheck + Alignment) <= StartMap64) {
+                    if (((AlignmentCheck + Alignment) > limit) || ((AlignmentCheck + BytesToAllocate + Alignment) > limit)) {
+                        break;
+                    }
+                    //AlignmentCheck += Alignment;
+                    bool addrssSpaceCheck = true;
+
+                    for (uint32_t i = 0; i < AddressesLogged; i++) {
+
+                        if(RangeInterferes(
+                            AlignmentCheck,
+                            BytesToAllocate,
+                            AddressBlock[i].Address,
+                            AddressBlock[i].size
+                        )){
+                            AlignmentCheck += ROUND_UP64(AddressBlock[i].size, Alignment);
+                            addrssSpaceCheck = false;
+                            break;
+                        }
+                    }
+                    if(!addrssSpaceCheck){
+                        continue;
+                    }
+                    for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
+                        for (uint32_t i = 0; i < TotalAllocations[k]; i++) {
+                            if(RangeInterferes(
+                                AlignmentCheck,
+                                BytesToAllocate,
+                                AllocationBlocks[k][i].Address,
+                                AllocationBlocks[k][i].size
+                            )){
+                                AlignmentCheck += ROUND_UP64(AllocationBlocks[k][i].size, Alignment);
+                                addrssSpaceCheck = false;
+                                break;
+                            }
+                        }
+                    }
+                    if(!addrssSpaceCheck){
+                        continue;
+                    }
+                    for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
+                        for (uint32_t j = 0; j < TotalAllocations[k]; j++) {
+                            if (AllocationBlocks[k][j].Address == 0x00) {
+                                AllocationBlocks[k][j].Address = AlignmentCheck;
+                                AllocationBlocks[k][j].size = BytesToAllocate;
+                                LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
+                                memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
+                                return (void*)AlignmentCheck;
+                            }
+                        }
+                    }
+                    if((TotalAllocations[CURRENT_ALLOCATION_BLOCK] * sizeof(LOU_MALLOC_TRACKER)) > (10 * MEGABYTE)){
+                        AllocationBlocksConfigured++;
+                        if(AllocationBlocksConfigured == 100){
+                            LouPrint("error using 100% memory is imposible\n");
+                            while(1);//error using 100 % memory is imposible
+                        }
+                        AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+                    }
+
+                    AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
+                    AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
+                    TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+                    memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
+                    return (void*)AlignmentCheck;
+                }
+
+            }
+            else if (mmap_entry->type == 2) continue;
+            else if (mmap_entry->type == 3) continue;
+            else continue;
+        }
+    }
+    LouPrint("Out Of Memory Needed:%h\n", BytesToAllocate);
+    while(1);
+    return NULL; 
+}
+
+void* _LouMallocEx64(
+    SIZE BytesToAllocate, 
+    UINT64 Alignment
+){
+    LouKIRQL OldIrql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
+    uint16_t Number_Of_Entries = (LousineMemoryMapTable->tag.size - sizeof(struct master_multiboot_mmap_entry)) / LousineMemoryMapTable->entry_size;
+    if (LousineMemoryMapTable->entry_version == 0) {
+        struct multiboot_mmap_entry* mmap_entry;
+        for (uint16_t i = 0; i < Number_Of_Entries; i++) {
+            mmap_entry = (struct multiboot_mmap_entry*)(uintptr_t)((uint64_t)LousineMemoryMapTable + (uint64_t)sizeof(struct master_multiboot_mmap_entry) + (uint64_t)i * (uint64_t)LousineMemoryMapTable->entry_size);
+            UNUSED uint64_t limit = mmap_entry->len;
+            UNUSED uint64_t address = mmap_entry->addr;
+            if (mmap_entry->type == 0) continue; // Skip unusable memory
+            else if (mmap_entry->type == 1) {
+                // Skip if system memory
+
+                if ((mmap_entry->addr + mmap_entry->len) < StartMap64) continue;
+                else if (mmap_entry->addr < StartMap64) {
+                    limit = (mmap_entry->addr + mmap_entry->len) - StartMap64;
+                    address = StartMap64;
                 }
                 if(!AllocationBlocksConfigured){
                     AllocationBlocks[0] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
@@ -371,9 +487,25 @@ void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
             else continue;
         }
     }
-    LouPrint("Out Of Memory Needed:%h\n", BytesToAllocate);
-    while(1);
-    return NULL;    
+    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+    return NULL; 
+}
+
+void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
+   return _LouMallocEx(BytesToAllocate, Alignment);
+}
+
+static void* (*LouMallocEx64Instance)(SIZE BytesToAllocate, UINT64 Alignment);
+
+void* LouMallocEx64(SIZE BytesToAllocate, UINT64 Alignment){
+    PVOID Result;
+    if(LouMallocEx64Instance){
+        Result = LouMallocEx64Instance(BytesToAllocate, Alignment);
+        if(Result){
+            return Result;
+        }
+    }
+    return _LouMallocEx(BytesToAllocate, Alignment);
 }
 
 void LouFree(RAMADD Addr) {
@@ -500,4 +632,9 @@ void LouKeInitializeSafeMemory(){
     memcpy(Foo, LousineMemoryMapTable, LousineMemoryMapTable->tag.size);
 
     LousineMemoryMapTable = Foo;
+
+    if(GetRamSize() > StartMap64){
+        LouMallocEx64Instance = _LouMallocEx64;
+    }
+
 }

@@ -76,6 +76,7 @@ void LouKeSetPanicInfo(
     uint64_t PageFaultData
 );
 
+void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData);
 
 void PageFault(uint64_t FaultingStackP) {
     uint64_t VAddress = get_cr2();
@@ -86,43 +87,14 @@ void PageFault(uint64_t FaultingStackP) {
 
     LouPrint("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
     LouPrint("Physical Address:%h\n", PAddress);
-    while(1){
 
-    }
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
-     
+    string PanicMessage = (string)LouMallocEx(strlen("Page Fault Protection Violation At Address:%h") + 21, 1);
 
+    _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:%h",  VAddress);
     // Check for specific error causes, e.g.:
     //if (InterruptCode & 0x1) {
-        PWINDHANDLE Bsod = SetBlueScreenPannel();
-
-        CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP);
-
-        LouKeSetPanicInfo(
-            Bsod, "Page Fault Protection Violation",
-            FaultData->rax, 
-            FaultData->rbx, 
-            FaultData->rcx, 
-            FaultData->rdx,
-            FaultData->rbp,
-            FaultData->rsi,
-            FaultData->rdi,
-            FaultData->r8,
-            FaultData->r9,
-            FaultData->r10,
-            FaultData->r11,
-            FaultData->r12,
-            FaultData->r13,
-            FaultData->r14,
-            FaultData->r15,
-            FaultData->rip,
-            FaultData->cs,
-            FaultData->fq,
-            FaultData->FaultStack,
-            FaultData->ss,
-            VAddress
-        );
-        //while(1);
+        LouKePanic(PanicMessage, (CPUContext*)FaultingStackP, InterruptCode);
     //} else {
     //    if(PAddress != 0x00){
     //        //PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
@@ -138,6 +110,7 @@ void PageFault(uint64_t FaultingStackP) {
     //}
 
     //clear_cr2();
+    while(1);
 }
 
 
