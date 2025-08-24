@@ -5,7 +5,7 @@ static PCI_MANAGER_DATA PciData;
 static size_t RegisteredPciDevices = 0;
 
 LOUSTATUS RegisterPciDeviceToDeviceManager(
-    P_PCI_DEVICE_OBJECT PDEV,
+    PPCI_DEVICE_OBJECT PDEV,
     string RegistryEntry,
     string DeviceManagerString
 ){

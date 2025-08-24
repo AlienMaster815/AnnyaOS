@@ -90,7 +90,7 @@
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_HOST_CONTROL  GenericHostController;
     PAHCI_GENERIC_PORT          GenericPort;
-    P_PCI_DEVICE_OBJECT         PDEV;
+    PPCI_DEVICE_OBJECT         PDEV;
     uint64_t                    AhciFlags;
     uint64_t                    AtaFlags;
     uint64_t                    PioFlags;

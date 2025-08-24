@@ -2,7 +2,7 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-LOUSTATUS LouKeHalEnablePciDevice(P_PCI_DEVICE_OBJECT PDEV){
+LOUSTATUS LouKeHalEnablePciDevice(PPCI_DEVICE_OBJECT PDEV){
     uint16_t Command = LouKeReadPciCommandRegister(PDEV);
     Command &= ~(1 << 10); 
     LouKeWritePciCommandRegister(PDEV, Command | MEMORY_SPACE_ENABLE | IO_SPACE_ENABLE);
@@ -14,7 +14,7 @@ LOUSTATUS LouKeHalEnablePciDevice(P_PCI_DEVICE_OBJECT PDEV){
 }
 
 LOUDDK_API_ENTRY
-LOUSTATUS LouKeHalPciSetMmio(P_PCI_DEVICE_OBJECT PDEV){
+LOUSTATUS LouKeHalPciSetMmio(PPCI_DEVICE_OBJECT PDEV){
     LOUSTATUS Status = STATUS_SUCCESS;
 
     LouKeWritePciCommandRegister(PDEV, MEMORY_SPACE_ENABLE);
@@ -22,7 +22,7 @@ LOUSTATUS LouKeHalPciSetMmio(P_PCI_DEVICE_OBJECT PDEV){
     return Status;
 }
 
-uint8_t PciFindCapStart(P_PCI_DEVICE_OBJECT PDEV){
+uint8_t PciFindCapStart(PPCI_DEVICE_OBJECT PDEV){
 
     uint16_t Header = getHeaderType(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func);
 
@@ -43,7 +43,7 @@ uint8_t PciFindCapStart(P_PCI_DEVICE_OBJECT PDEV){
 }
 
 uint8_t PciFindNextCapTtl(
-    P_PCI_DEVICE_OBJECT PDEV, 
+    PPCI_DEVICE_OBJECT PDEV, 
     uint8_t Position,
     int32_t Capability,
     int32_t* TTL
@@ -78,7 +78,7 @@ uint8_t PciFindNextCapTtl(
 }
 
 uint8_t PciFindNextCap(
-    P_PCI_DEVICE_OBJECT PDEV,
+    PPCI_DEVICE_OBJECT PDEV,
     uint8_t Position,
     int32_t Capability
 ){
@@ -87,7 +87,7 @@ uint8_t PciFindNextCap(
 }
 
 uint8_t LouKeHalFindCompatibility(
-    P_PCI_DEVICE_OBJECT PDEV,
+    PPCI_DEVICE_OBJECT PDEV,
     int32_t Capability
 ){
     uint8_t Position = 0;
@@ -102,7 +102,7 @@ uint8_t LouKeHalFindCompatibility(
 
 LOUDDK_API_ENTRY
 bool LouKeHalIsDevicePcie(
-    P_PCI_DEVICE_OBJECT PDEV
+    PPCI_DEVICE_OBJECT PDEV
 ){
     return LouKeHalFindCompatibility(PDEV, 0x10) ? true : false;
 }

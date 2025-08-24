@@ -9,7 +9,7 @@ extern "C"{
 #endif
 
 typedef struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER{
-    P_PCI_DEVICE_OBJECT     PDEV;
+    PPCI_DEVICE_OBJECT     PDEV;
     #ifdef __cplusplus
     PDRIVER_OBJECT          DriverObject;
     PDEVICE_OBJECT          PlatformDevice;

@@ -17,8 +17,8 @@ uint16_t LouKeCreatIoPort(
     uint16_t PortSize
 );
 
-uint32_t LouKeReadBarValue(P_PCI_DEVICE_OBJECT PDEV, uint8_t BarNumber);
-void LouKeWriteBarValue(P_PCI_DEVICE_OBJECT PDEV, uint8_t BarNumber, uint32_t Value);
+uint32_t LouKeReadBarValue(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber);
+void LouKeWriteBarValue(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber, uint32_t Value);
 
 KERNEL_IMPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer){
     ConfigBuffer->Header.VendorID = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x00);
@@ -96,7 +96,7 @@ KERNEL_IMPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULON
     }
 }
 
-KERNEL_IMPORT void LouKeHalGetPciConfiguration(P_PCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
+KERNEL_IMPORT void LouKeHalGetPciConfiguration(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
     GetPciConfiguration(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Config);
 }
 
@@ -104,7 +104,7 @@ static spinlock_t Lock;
 
 KERNEL_IMPORT
 LOUSTATUS RegisterPciDeviceToDeviceManager(
-    P_PCI_DEVICE_OBJECT PDEV,
+    PPCI_DEVICE_OBJECT PDEV,
     string RegistryEntry,
     string DeviceManagerString
 );
@@ -116,7 +116,7 @@ void InitializeBARHalLayer(){
 }
 
 void LouKeHalRegisterPciDevice(
-    P_PCI_DEVICE_OBJECT PDEV
+    PPCI_DEVICE_OBJECT PDEV
 ){
 
     LouPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
@@ -255,7 +255,7 @@ void LouKeHalRegisterPciDevice(
 
 
 void* LouKeHalPnpInitializeBaseRegister(
-    P_PCI_DEVICE_OBJECT PDEV,
+    PPCI_DEVICE_OBJECT PDEV,
     uint8_t BarNum
 ){
     //LouKeWriteBarValue(PDEV, BarNum, 0xFFFFFFFF);
@@ -279,7 +279,7 @@ size_t LouKeHalGetPciBaseAddressSize(
 
 KERNEL_IMPORT 
 void* LouKePciGetIoRegion(
-    P_PCI_DEVICE_OBJECT PDEV, 
+    PPCI_DEVICE_OBJECT PDEV, 
     uint8_t BarNumber,
     size_t BarOffset
 ){
@@ -306,7 +306,7 @@ LouKePciGetVirtualBarAddress(uint64_t PhyAddress){
     uint64_t Flags;
 	PPCI_DEVICE_GROUP* PciDevices = LouKeOpenPciDeviceGroup(&Config);
     for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-        P_PCI_DEVICE_OBJECT PDEV = PciDevices[i]->PDEV;
+        PPCI_DEVICE_OBJECT PDEV = PciDevices[i]->PDEV;
         PPCI_COMMON_CONFIG TmpConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
         for(uint8_t j = 0 ; j < 6; j++){
             Flags = TmpConfig->Header.u.type0.BaseAddresses[j] & 0x1;

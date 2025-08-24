@@ -935,7 +935,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     uint32_t                                SectorSize;
     PATA_QUEUED_COMMAND*                    CurrentQueuedCommand;
     struct _LOUSINE_KERNEL_DEVICE_ATA_HOST* AtaHost;
-    P_PCI_DEVICE_OBJECT                     PDEV;
+    PPCI_DEVICE_OBJECT                     PDEV;
     void*                                   PortPrivateData;
     uint8_t                                 Siblings;
     bool                                    PortScsiDevice;
@@ -952,7 +952,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
 
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
-    P_PCI_DEVICE_OBJECT                         PDEV;
+    PPCI_DEVICE_OBJECT                         PDEV;
     uint8_t                                     PortCount;
     spinlock_t                                  HostLock;
     void*                                       HostIoAddress;
@@ -1080,7 +1080,7 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
 #include "Ahci.h"
 
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
-LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
+LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
 
 void
 LouKeMallocAtaPrivateData(

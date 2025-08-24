@@ -3,6 +3,9 @@
 #define _XHCI_PCI_H
 #include <LouDDK.h>
 
-
+NTSTATUS AddDevice(
+    PDRIVER_OBJECT DriverObject, 
+    PDEVICE_OBJECT PlatformDevice
+);
 
 #endif

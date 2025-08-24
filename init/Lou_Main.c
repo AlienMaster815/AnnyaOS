@@ -356,7 +356,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeProbeSbIsa();
 
-    InitializeSymmetricMultiProcessing();
+    //InitializeSymmetricMultiProcessing();
 
     ScanTheRestOfHarware();
 

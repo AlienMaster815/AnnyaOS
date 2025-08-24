@@ -85,7 +85,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uintptr_t 	VgaDecode; //only video devces
 	bool 		ExpressDevice;
 	bool		DeviceManaged;
-}PCI_DEVICE_OBJECT, * P_PCI_DEVICE_OBJECT;
+}PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 #endif
 
 typedef struct _AGP_BRIDGE_DATA{
@@ -127,7 +127,7 @@ enum BaseAddressRegisterType {
 };
 
 
-uint8_t LouKePciGetInterruptLine(P_PCI_DEVICE_OBJECT PDEV);
+uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
 
 //Is C Land
 void PCI_Setup();
@@ -155,23 +155,23 @@ void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t fun
 void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
 
 
-uint8_t LouKePciReadHeaderType(P_PCI_DEVICE_OBJECT PDEV);
-uint32_t LouKeReadPciVendorId(P_PCI_DEVICE_OBJECT PDEV);
-uint32_t LouKeReadPciDeviceId(P_PCI_DEVICE_OBJECT PDEV);
-uint8_t LouKePciReadSubClass(P_PCI_DEVICE_OBJECT PDEV);
-uint8_t LouKePciReadClass(P_PCI_DEVICE_OBJECT PDEV);
-uint8_t LouKeGetPciInterruptPin(P_PCI_DEVICE_OBJECT PDEV);
-uint8_t LouKeGetPciInterruptLine(P_PCI_DEVICE_OBJECT PDEV);
-void LouKeConfigureInterrupt(P_PCI_DEVICE_OBJECT PDEV,  bool Mask, uint8_t Pin, uint8_t Destination);
-void LouKeWritePciCommandRegister(P_PCI_DEVICE_OBJECT PDEV,uint16_t Value);
-uint16_t LouKeReadPciCommandRegister(P_PCI_DEVICE_OBJECT PDEV);
+uint8_t LouKePciReadHeaderType(PPCI_DEVICE_OBJECT PDEV);
+uint32_t LouKeReadPciVendorId(PPCI_DEVICE_OBJECT PDEV);
+uint32_t LouKeReadPciDeviceId(PPCI_DEVICE_OBJECT PDEV);
+uint8_t LouKePciReadSubClass(PPCI_DEVICE_OBJECT PDEV);
+uint8_t LouKePciReadClass(PPCI_DEVICE_OBJECT PDEV);
+uint8_t LouKeGetPciInterruptPin(PPCI_DEVICE_OBJECT PDEV);
+uint8_t LouKeGetPciInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+void LouKeConfigureInterrupt(PPCI_DEVICE_OBJECT PDEV,  bool Mask, uint8_t Pin, uint8_t Destination);
+void LouKeWritePciCommandRegister(PPCI_DEVICE_OBJECT PDEV,uint16_t Value);
+uint16_t LouKeReadPciCommandRegister(PPCI_DEVICE_OBJECT PDEV);
 
-uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
-void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
-void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
+uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
+void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
+void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 
 uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
 void write_pci(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset,uint32_t Value);
@@ -265,16 +265,16 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uintptr_t 	VgaDecode; //only video devces
 	bool 		ExpressDevice;
 	bool		DeviceManaged;
-}PCI_DEVICE_OBJECT, * P_PCI_DEVICE_OBJECT;
+}PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 #endif
 
-KERNEL_EXPORT uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-KERNEL_EXPORT uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-KERNEL_EXPORT uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-KERNEL_EXPORT void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
-KERNEL_EXPORT void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
-KERNEL_EXPORT void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
-KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(P_PCI_DEVICE_OBJECT PDEV);
+KERNEL_EXPORT uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+KERNEL_EXPORT uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+KERNEL_EXPORT uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
+KERNEL_EXPORT void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
+KERNEL_EXPORT void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
+KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
+KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
 
 #define ANY_PCI_ID 0xFFFF
 #define ANY_PCI_CLASS 255

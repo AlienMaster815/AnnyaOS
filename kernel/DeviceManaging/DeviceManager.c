@@ -7,7 +7,7 @@ static uint32_t NumberOfDevices = 0;
 
 LOUSTATUS LouRegisterAtaDeviceToInformationTable(
     PDEVICE_DIRECTORY_TABLE Table,
-    P_PCI_DEVICE_OBJECT PDEV, 
+    PPCI_DEVICE_OBJECT PDEV, 
     SYSTEM_DEVICE_IDENTIFIER Sdi,
     string LRE, //optional
     void* KeyData, //optional
@@ -31,7 +31,7 @@ LOUSTATUS LouKeDrsdInitializeDevice(
 );
 
 LOUSTATUS LouKeRegisterDevice(
-    P_PCI_DEVICE_OBJECT PDEV, 
+    PPCI_DEVICE_OBJECT PDEV, 
     SYSTEM_DEVICE_IDENTIFIER Sdi,
     string LRE, //optional
     void* KeyData, //optional

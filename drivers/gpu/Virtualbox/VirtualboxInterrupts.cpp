@@ -132,7 +132,7 @@ void VirtualboxInterruptHandler(uint64_t VBoxPrivate){
 }
 
 LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
-    P_PCI_DEVICE_OBJECT PDEV = VBox->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
 
     VirtualboxUpdateModeHints(VBox);
 

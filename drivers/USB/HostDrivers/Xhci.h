@@ -787,7 +787,7 @@ typedef struct _XHCI_PORT{
 typedef struct _XHCI_HUB{
     PXHCI_PORT*                 Ports;
     UINT32                      PortCount;
-    PUSB_HOST_CONTROLER_DEVICE  HostControllerDevice;
+    PUSB_HOST_CONTROLLER_DEVICE  HostControllerDevice;
     XHCI_BUS_STATE              BusState;
     UINT8                       MajorRevision;
     UINT8                       MinorRevision;
@@ -796,8 +796,8 @@ typedef struct _XHCI_HUB{
 //1502
 
 typedef struct _XHCI_HCD{
-    PUSB_HOST_CONTROLER_DEVICE      MainHcd;
-    PUSB_HOST_CONTROLER_DEVICE      SharedHcd;
+    PUSB_HOST_CONTROLLER_DEVICE      MainHcd;
+    PUSB_HOST_CONTROLLER_DEVICE      SharedHcd;
     PXHCI_CAPABILITIES_REGISTER     CapabilitiesRegister;
     PXHCI_OPERATIONAL_REGISTER      OperationalRegister;
     PXHCI_RUNTIME_REGISTERS         RuntimeRegister;

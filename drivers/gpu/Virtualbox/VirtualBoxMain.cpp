@@ -73,7 +73,7 @@ bool VboxCheckSupport(uint16_t Identification){
 static LOUSTATUS VBoxAccelerationInitialize(
     PVIRTUALBOX_PRIVATE_DATA VBox
 ){
-    P_PCI_DEVICE_OBJECT PDEV = VBox->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
     VBVA_BUFFER* VBva;
 
     VBox->VbvaInformation = LouKeMallocType(VBVA_BUFFER_CONTEXT, KERNEL_GENERIC_MEMORY);
@@ -106,7 +106,7 @@ LOUSTATUS VBoxMemoryManagementInitialization(
 
 ){
     PDRSD_DEVICE Device = &VBox->DrsdDevice;
-    P_PCI_DEVICE_OBJECT PDEV = VBox->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
     void* VramBase = LouKePciGetIoRegion(PDEV, 0, 0);
     LOUSTATUS Result;
 
@@ -119,7 +119,7 @@ LOUSTATUS VBoxInitializeHardware(
     PVIRTUALBOX_PRIVATE_DATA VBox
 ){
 
-    P_PCI_DEVICE_OBJECT PDEV = VBox->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
     LOUSTATUS Status;
     VBox->FullVRamSize = inl(VIRTUALBOX_VBE_DISPI_IO_DATA_PORT);
     VBox->AnyPitch = VboxCheckSupport(VIRTUALBOX_VBE_DISPI_ID_ANYX);    
@@ -169,7 +169,7 @@ NTSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
     
-    P_PCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     
     PVIRTUALBOX_PRIVATE_DATA VBox;
     LOUSTATUS Status;
@@ -214,7 +214,7 @@ AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
 
 
     LouKeRegisterDevice(
-        (P_PCI_DEVICE_OBJECT)PDEV, 
+        (PPCI_DEVICE_OBJECT)PDEV, 
         GRAPHICS_DEVICE_T, 
         "HKEY:Annya/System64/Drivers/VBoxGpu", 
         (void*)VBox, 

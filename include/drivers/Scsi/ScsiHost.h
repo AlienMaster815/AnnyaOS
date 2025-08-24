@@ -187,7 +187,7 @@ typedef struct _LOUSINE_SCSI_HOST{
     uint8_t                                         DmaChannel;
     uint32_t                                        InterruptRequest;
     uint32_t                                        ScsiHostState;
-    P_PCI_DEVICE_OBJECT                             PDEV;
+    PPCI_DEVICE_OBJECT                             PDEV;
     void*                                           DeviceHandle;
     void*                                           DmaHandle;
     int                                             AutoSleepDelay;

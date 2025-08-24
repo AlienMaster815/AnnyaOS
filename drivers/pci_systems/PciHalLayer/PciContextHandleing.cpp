@@ -75,7 +75,7 @@ void SetPciConfiguration(ULONG SystemIoBusNumber, ULONG SlotNumber, ULONG Functi
     }
 }
 
-PPCI_CONTEXT LouKeHalPciSaveContext(P_PCI_DEVICE_OBJECT PDEV){
+PPCI_CONTEXT LouKeHalPciSaveContext(PPCI_DEVICE_OBJECT PDEV){
 
     PPCI_CONTEXT SavedContext = LouKeMallocType(PCI_CONTEXT, KERNEL_GENERIC_MEMORY);
     GetPciConfiguration(PDEV->Group, PDEV->bus,PDEV->slot, PDEV->func, (PPCI_COMMON_CONFIG)LouKeCastToUnalignedPointer(&SavedContext->PciConfig));
@@ -87,14 +87,14 @@ PPCI_CONTEXT LouKeHalPciSaveContext(P_PCI_DEVICE_OBJECT PDEV){
 void LouKeHalPciRestoreContext(PPCI_CONTEXT PciContext){
 
     UNUSED PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)LouKeCastToUnalignedPointer(&PciContext->PciConfig);
-    P_PCI_DEVICE_OBJECT PDEV = (P_PCI_DEVICE_OBJECT)PciContext->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = (PPCI_DEVICE_OBJECT)PciContext->PDEV;
 
     SetPciConfiguration(PDEV->bus, PDEV->slot, PDEV->func, PciConfig);
 
     LouFree((RAMADD)PciContext);
 }
 
-void LouKeHalPciClearMaster(P_PCI_DEVICE_OBJECT PDEV){
+void LouKeHalPciClearMaster(PPCI_DEVICE_OBJECT PDEV){
         // Read the current value of the PCI Command Register (offset 0x04)
     uint16_t command_reg = pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, 0x04);
 
@@ -105,7 +105,7 @@ void LouKeHalPciClearMaster(P_PCI_DEVICE_OBJECT PDEV){
     pciConfigWriteWord(0 ,PDEV->bus, PDEV->slot, PDEV->func, 0x04, command_reg);
 }
 
-LOUDDK_API_ENTRY void LouKeHalPciSetMaster(P_PCI_DEVICE_OBJECT PDEV){
+LOUDDK_API_ENTRY void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV){
          // Read the current value of the PCI Command Register (offset 0x04)
     uint16_t command_reg = pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, 0x04);
 
@@ -115,9 +115,9 @@ LOUDDK_API_ENTRY void LouKeHalPciSetMaster(P_PCI_DEVICE_OBJECT PDEV){
     pciConfigWriteWord(0 ,PDEV->bus, PDEV->slot, PDEV->func, 0x04, command_reg);   
 }
 
-LOUDDK_API_ENTRY void LouKeHalPciEnableInterrupts(P_PCI_DEVICE_OBJECT PDEV){
+LOUDDK_API_ENTRY void LouKeHalPciEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     LouKeWritePciCommandRegister(PDEV,LouKeReadPciCommandRegister(PDEV) & ~(1 << 10));
 }
-LOUDDK_API_ENTRY void LouKeHalPciDisableInterrupts(P_PCI_DEVICE_OBJECT PDEV){
+LOUDDK_API_ENTRY void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     LouKeWritePciCommandRegister(PDEV,LouKeReadPciCommandRegister(PDEV) | (1 << 10));
 }

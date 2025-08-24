@@ -203,7 +203,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
 );
 
 KERNEL_IMPORT void* LouKePciGetIoRegion(
-    P_PCI_DEVICE_OBJECT PDEV, 
+    PPCI_DEVICE_OBJECT PDEV, 
     uint8_t BarNumber,
     size_t BarOffset
 );

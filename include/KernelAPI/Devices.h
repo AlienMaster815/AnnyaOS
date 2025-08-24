@@ -48,7 +48,7 @@ typedef struct _DEVICE_DIRECTORY_TABLE{
     SYSTEM_DEVICE_IDENTIFIER Sdi;
     string LOUSINE_REGISTRATION_ENTRY;
     void* KeyData;
-    P_PCI_DEVICE_OBJECT PDEV;
+    PPCI_DEVICE_OBJECT PDEV;
     void* DevicePrivateData;
     void* DeviceSpecificData;
 }DEVICE_DIRECTORY_TABLE, * PDEVICE_DIRECTORY_TABLE, DEIVCE_INFORMATION_TABLE, * PDEVICE_INFORMATION_TABLE;
@@ -155,7 +155,7 @@ typedef struct  _AHCI_DEVICE{
 
 SYSTEM_DEVICE_IDENTIFIER LouKeGetStorageDeviceSystemIdentifier(uint8_t DriveNumber);
 uint8_t LouKeDeviceManagerGetGpuCount();
-void LouKeDrsdPciResetScreen(P_PCI_DEVICE_OBJECT PDEV);
+void LouKeDrsdPciResetScreen(PPCI_DEVICE_OBJECT PDEV);
 
 void 
 WriteDrive(

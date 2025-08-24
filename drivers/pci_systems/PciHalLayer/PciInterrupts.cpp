@@ -4,7 +4,7 @@
 KERNEL_IMPORT uint16_t GetNPROC();
 KERNEL_IMPORT uint8_t GetTotalHardwareInterrupts();
 
-int GetSupportedMsiVectors(P_PCI_DEVICE_OBJECT PDEV,uint64_t Flags) {
+int GetSupportedMsiVectors(PPCI_DEVICE_OBJECT PDEV,uint64_t Flags) {
 
 
     uint8_t CapabilitiesPtr = LouKeReadPciUint8(PDEV, 0x34); 
@@ -38,7 +38,7 @@ int GetSupportedMsiVectors(P_PCI_DEVICE_OBJECT PDEV,uint64_t Flags) {
 
 LOUDDK_API_ENTRY
 int LouKeHalMallocPciIrqVectors(
-    P_PCI_DEVICE_OBJECT PDEV, 
+    PPCI_DEVICE_OBJECT PDEV, 
     int RequestedVectors, 
     uint64_t Flags
 ){

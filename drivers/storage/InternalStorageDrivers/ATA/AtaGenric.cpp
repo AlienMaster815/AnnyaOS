@@ -316,7 +316,7 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     void*                            IdBuffer
 );
 
-LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV){
+LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
 
     //Allocate 4 Ports For The Ata Host
     LouPrint("Allocating Ata Device Data\n");

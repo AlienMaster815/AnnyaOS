@@ -95,7 +95,7 @@ NTSTATUS AddDevice(
     PDEVICE_OBJECT PlatformDevice
 ){
     LouPrint("HDAPCI::AddDevice()\n");
-    P_PCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     uint8_t DeviceID = PlatformDevice->DeviceID;
 
     LouPrint("Pci Device ID:%d\n", DeviceID);

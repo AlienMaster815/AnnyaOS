@@ -2,7 +2,7 @@
 #include <Hal.h>
 #include "Scsi.h"
 
-LOUSTATUS InitializeScsiDevice(P_PCI_DEVICE_OBJECT PDEV){
+LOUSTATUS InitializeScsiDevice(PPCI_DEVICE_OBJECT PDEV){
 
     LouPrint("Hello Scsi Controller\n");
 

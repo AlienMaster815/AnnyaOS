@@ -17,7 +17,7 @@ NTSTATUS AddDevice(
     PDEVICE_OBJECT PlatformDevice
 ){
     LouPrint("DRIVER_NAME::AddDevice()\n");
-    P_PCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     uint8_t DeviceID = PlatformDevice->DeviceID;
 
     LouPrint("Pci Device ID:%d\n", DeviceID);

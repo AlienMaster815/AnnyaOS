@@ -29,7 +29,7 @@ void PcNetIIHardwareActivate(
 ){
     LouPrint("PcNetIIHardwareActivate()\n");
     PPCNET_II_DRIVER_DATA PcNetPrivate = (PPCNET_II_DRIVER_DATA)HardwareDriver->DriverPrivateData;
-    P_PCI_DEVICE_OBJECT PDEV = HardwareDriver->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = HardwareDriver->PDEV;
     outw(PcNetPrivate->RegisterAddressPort, 0);           // CSR0
     outw(PcNetPrivate->RegisterDataPort, 0x0001);         // INIT only
     
@@ -91,7 +91,7 @@ NTSTATUS InitializePcNetIIDevice(
     LouPrint("InitializePcNetIIDevice()\n");
     PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver;
     PPCNET_II_DRIVER_DATA PcNetPrivate;
-    P_PCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
     uint64_t PortBase = 0;
    

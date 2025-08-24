@@ -64,7 +64,7 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
 LOUDDK_API_ENTRY
 NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
     LouPrint("AddDevice()\n");
-    P_PCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     uint8_t DeviceID = PlatformDevice->DeviceID;
     
     LouPrint("PDEV :%h\n", PDEV);

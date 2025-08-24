@@ -2,7 +2,7 @@
 #include <acpi.h>
 
 
-uint8_t LouKeGetPciInterruptLineFromPin(P_PCI_DEVICE_OBJECT PDEV){
+uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV){
     ACPI_STATUS Status;
     ACPI_HANDLE PrtHandle;
     ACPI_BUFFER ResultBuffer = { ACPI_ALLOCATE_BUFFER, NULL };

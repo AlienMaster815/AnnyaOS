@@ -482,7 +482,7 @@ VOID AhciUnloadDriver(
     LouPrint("AhciUnloadDriver() RETURN\n");
 }
 
-static void AhciIntelPcs(P_PCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
+static void AhciIntelPcs(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
     uint16_t Tmp;
 
     if(!(PrivateData->AhciFlags & AHCI_FLAG_INTEL_PCS)){
@@ -569,7 +569,7 @@ static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 
 LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     NTSTATUS Status = STATUS_SUCCESS;
-    P_PCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
+    PPCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
 
     
@@ -592,7 +592,7 @@ static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig){
     ) ? true : false;
 }
 
-static void NvidiaMcp89AppleBiosUnlockAhciChip(P_PCI_DEVICE_OBJECT PDEV){
+static void NvidiaMcp89AppleBiosUnlockAhciChip(PPCI_DEVICE_OBJECT PDEV){
     uint32_t Tmp;
 
     LouPrint("AHCIMOD:Enableing MCP89 Ahci Mode For Macraps\n");
@@ -651,7 +651,7 @@ NTSTATUS AddAhciDevice(
     //get the device ID and Pci Device from the LKDM
     uint64_t AhciDeviceID = Device->DeviceID;
     uint8_t BoardID = AhciDevices[AhciDeviceID].BoardID;
-    P_PCI_DEVICE_OBJECT PDEV = LkdmDeviceObjectToPciDevice(Device);    
+    PPCI_DEVICE_OBJECT PDEV = LkdmDeviceObjectToPciDevice(Device);    
     UNUSED PAHCI_DRIVER_BOARD_INFORMATION BoardInformation = &AhciBoardInfomationTable[BoardID];
     int Abar = AHCI_STANDARD_ABAR;
     uint8_t PortCount;

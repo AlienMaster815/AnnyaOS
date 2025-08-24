@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 
 LOUSTATUS VgaSwitchClientDefer(
-    P_PCI_DEVICE_OBJECT PDEV
+    PPCI_DEVICE_OBJECT PDEV
 ){
 
     UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
@@ -14,7 +14,7 @@ LOUSTATUS VgaSwitchClientDefer(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS VgaClientRegister(P_PCI_DEVICE_OBJECT PDEV, uint32_t (*Handler)(P_PCI_DEVICE_OBJECT, bool)){
+LOUSTATUS VgaClientRegister(PPCI_DEVICE_OBJECT PDEV, uint32_t (*Handler)(PPCI_DEVICE_OBJECT, bool)){
 
     PDEV->VgaDecode = (uintptr_t)Handler;
 

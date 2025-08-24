@@ -231,7 +231,7 @@ LouKeDrsdInitializeBootDevice(
 
 
 LOUDDK_API_ENTRY 
-void LouKeDrsdHandleConflictingDevices(P_PCI_DEVICE_OBJECT PDEV){
+void LouKeDrsdHandleConflictingDevices(PPCI_DEVICE_OBJECT PDEV){
 
     if(BootDevice){
         LouKeDrsdRemovePlaneChainMember(BootDevice->Planes);

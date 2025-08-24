@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-LOUSTATUS ResetPciDevice(P_PCI_DEVICE_OBJECT PDEV) {
+LOUSTATUS ResetPciDevice(PPCI_DEVICE_OBJECT PDEV) {
 
 
 

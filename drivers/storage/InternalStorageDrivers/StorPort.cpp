@@ -4,17 +4,17 @@
 bool IsPataCheck(uint8_t bus, uint8_t slot, uint8_t function);
 void InitializeAtaDevice();
 
-LOUSTATUS InitializeScsiDevice(P_PCI_DEVICE_OBJECT PDEV);
+LOUSTATUS InitializeScsiDevice(PPCI_DEVICE_OBJECT PDEV);
 
 LOUDDK_API_ENTRY
 void LOUSB_DRIVER_INIT(
-	P_PCI_DEVICE_OBJECT USB_DEV
+	PPCI_DEVICE_OBJECT USB_DEV
 );
 
 LOUDDK_API_ENTRY
 void FindAnyHiddenUsbSystems();
 
-LOUSTATUS InitializeGenericAtaDevice(P_PCI_DEVICE_OBJECT PDEV);
+LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 
 //static bool AhciDriverLoaded = false;
 //static PDRIVER_OBJECT AhciDriverObject = 0x00;

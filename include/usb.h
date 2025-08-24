@@ -471,8 +471,8 @@ typedef struct _GIVEBACK_URB_BH{
     PUSB_HOST_ENDPOINT  CompletedEndpoint;
 }GIVEBACK_URB_BH, * PGIVEBACK_URB_BH;
 
-typedef struct _USB_HOST_CONTROLER_DEVICE{
-    P_PCI_DEVICE_OBJECT                 PDEV;
+typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
+    PPCI_DEVICE_OBJECT                 PDEV;
     USB_BUS                             UsbSelf;
     void*                               KernelHandle;
     int32_t                             RoothubSpeed;
@@ -496,12 +496,12 @@ typedef struct _USB_HOST_CONTROLER_DEVICE{
     GIVEBACK_URB_BH                     LowPriorityBh;
     mutex_t                             Address0Mutex;
     mutex_t                             BandwithMutex;
-    struct _USB_HOST_CONTROLER_DEVICE*  PrimaryHcd;
-    struct _USB_HOST_CONTROLER_DEVICE*  SharedHcd;
+    struct _PUSB_HOST_CONTROLLER_DEVICE*  PrimaryHcd;
+    struct _PUSB_HOST_CONTROLLER_DEVICE*  SharedHcd;
     int                                 HcdState;
     POOL                                HcdLocalMemory;
     void*                               PrivateData;
-}USB_HOST_CONTROLER_DEVICE, * PUSB_HOST_CONTROLER_DEVICE;
+}USB_HOST_CONTROLLER_DEVICE, * PUSB_HOST_CONTROLLER_DEVICE;
 
 typedef struct _USB_HOST_CONTROLER_DRIVER{
     string              DeviceDescription;
@@ -509,48 +509,48 @@ typedef struct _USB_HOST_CONTROLER_DRIVER{
     size_t              HcdPrivateSize;
     void              (*InterruptHandler)(uint64_t HcdHandle);
     uint16_t            DriverFlags;
-    LOUSTATUS         (*ResetHcd)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*StartHcd)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*SuspendPciDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*ResumePciDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*PciPowerOff)(PUSB_HOST_CONTROLER_DEVICE Hcd, bool Wakeup);
-    void              (*HaltHcdExecution)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    void              (*ShutdownHcd)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    int               (*HcdRequestFrameNumber)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*HcdQueueUrb)(PUSB_HOST_CONTROLER_DEVICE Hcd, PURB Urn, uint64_t MemoryFlags);
-    LOUSTATUS         (*HcdUnQueue)(PUSB_HOST_CONTROLER_DEVICE Hcd, PURB Urb, LOUSTATUS* Status);
-    LOUSTATUS         (*MapUrbToDma)(PUSB_HOST_CONTROLER_DEVICE Hcd, PURB Urb, uint64_t MemoryFlags);
-    void              (*UnmapUrbToDma)(PUSB_HOST_CONTROLER_DEVICE Hcd, PURB Urb);
-    void              (*DisableEndpoint)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_HOST_ENDPOINT Endpoint);
-    void              (*ResetEndpoint)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_HOST_ENDPOINT   Endpoint);
-    LOUSTATUS         (*HubStatusData)(PUSB_HOST_CONTROLER_DEVICE Hcd, string DataString);
-    LOUSTATUS         (*HubControl)(PUSB_HOST_CONTROLER_DEVICE Hcd, uint16_t RequestType, uint16_t Value, uint16_t Index, string DataString, uint16_t Length);
-    LOUSTATUS         (*SuspendBus)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*ResumeBus)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    LOUSTATUS         (*InitiatePortReset)(PUSB_HOST_CONTROLER_DEVICE Hcd, uint64_t PortID);
-    uint32_t          (*RequestResumingPorts)(PUSB_HOST_CONTROLER_DEVICE Hcd);
-    void              (*ReleasePort)(PUSB_HOST_CONTROLER_DEVICE Hcd, uint64_t PortID);
-    LOUSTATUS         (*CheckHandOver)(PUSB_HOST_CONTROLER_DEVICE Hcd, uint64_t PortID);
-    void              (*CtbComplete)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_HOST_ENDPOINT Endpoint);
-    LOUSTATUS         (*LouKeMallocDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    void              (*LouKeFreeDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    LOUSTATUS         (*LouKeMallocStreams)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT* Endpoints, uint32_t EndpointCount, uint32_t StreamCount, uint64_t MemoryFlags);
-    LOUSTATUS         (*LouKeFreeStreams)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT* Endpoints, uint32_t EndpointCount, uint32_t StreamCount, uint64_t MemoryFlags);
-    LOUSTATUS         (*AddEndpoint)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT Endpoint);
-    LOUSTATUS         (*DropEndpoint)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT Endpoint);
-    LOUSTATUS         (*CheckBandwith)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    void              (*ResetBandwith)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, uint64_t Timeout);
-    LOUSTATUS         (*AddressDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, uint64_t Timeout);
-    LOUSTATUS         (*EnableDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    LOUSTATUS         (*UpdateHubDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    LOUSTATUS         (*ResetDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    LOUSTATUS         (*UpdateDevice)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
-    LOUSTATUS         (*SetUsb2LowPowerMode)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int PowerFlags);
-    LOUSTATUS         (*EnableUsb3LowPowerModeTimeout)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int PowerFlags);
-    LOUSTATUS         (*DisableUSb3LowPowerModeTimeout)(PUSB_HOST_CONTROLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int Usb3LinkState);
-    LOUSTATUS         (*SearchRawPortID)(PUSB_HOST_CONTROLER_DEVICE Hcd, int PortID);
-    LOUSTATUS         (*PortPowerSwitch)(PUSB_HOST_CONTROLER_DEVICE Hcd, int PortID, bool LightSwich);//santa clause torn on the lights please
-    LOUSTATUS         (*SubmitSingleStepSetFeature)(PUSB_HOST_CONTROLER_DEVICE* Hcd, PURB Urb, int FeatureFlags);
+    LOUSTATUS         (*ResetHcd)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*StartHcd)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*SuspendPciDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*ResumePciDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*PciPowerOff)(PUSB_HOST_CONTROLLER_DEVICE Hcd, bool Wakeup);
+    void              (*HaltHcdExecution)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    void              (*ShutdownHcd)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    int               (*HcdRequestFrameNumber)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*HcdQueueUrb)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PURB Urb, uint64_t MemoryFlags);
+    LOUSTATUS         (*HcdUnQueueUrb)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PURB Urb, LOUSTATUS* Status);
+    LOUSTATUS         (*MapUrbToDma)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PURB Urb, uint64_t MemoryFlags);
+    void              (*UnmapUrbToDma)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PURB Urb);
+    void              (*DisableEndpoint)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_HOST_ENDPOINT Endpoint);
+    void              (*ResetEndpoint)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_HOST_ENDPOINT   Endpoint);
+    LOUSTATUS         (*HubStatusData)(PUSB_HOST_CONTROLLER_DEVICE Hcd, string DataString);
+    LOUSTATUS         (*HubControl)(PUSB_HOST_CONTROLLER_DEVICE Hcd, uint16_t RequestType, uint16_t Value, uint16_t Index, string DataString, uint16_t Length);
+    LOUSTATUS         (*SuspendBus)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*ResumeBus)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    LOUSTATUS         (*InitiatePortReset)(PUSB_HOST_CONTROLLER_DEVICE Hcd, uint64_t PortID);
+    uint32_t          (*RequestResumingPorts)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+    void              (*ReleasePort)(PUSB_HOST_CONTROLLER_DEVICE Hcd, uint64_t PortID);
+    LOUSTATUS         (*CheckHandOver)(PUSB_HOST_CONTROLLER_DEVICE Hcd, uint64_t PortID);
+    void              (*CtbComplete)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_HOST_ENDPOINT Endpoint);
+    LOUSTATUS         (*LouKeMallocDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE* UsbDevice);
+    void              (*LouKeFreeDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
+    LOUSTATUS         (*LouKeMallocStreams)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT* Endpoints, uint32_t EndpointCount, uint32_t StreamCount, uint64_t MemoryFlags);
+    LOUSTATUS         (*LouKeFreeStreams)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT* Endpoints, uint32_t EndpointCount, uint32_t StreamCount, uint64_t MemoryFlags);
+    LOUSTATUS         (*AddEndpoint)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT Endpoint);
+    LOUSTATUS         (*DropEndpoint)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT Endpoint);
+    LOUSTATUS         (*CheckBandwith)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
+    void              (*ResetBandwith)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, uint64_t Timeout);
+    LOUSTATUS         (*AddressDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, uint64_t Timeout);
+    LOUSTATUS         (*EnableDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
+    LOUSTATUS         (*UpdateHubDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
+    LOUSTATUS         (*ResetDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
+    LOUSTATUS         (*UpdateDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
+    LOUSTATUS         (*SetUsb2LowPowerMode)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int PowerFlags);
+    LOUSTATUS         (*EnableUsb3LowPowerModeTimeout)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int PowerFlags);
+    LOUSTATUS         (*DisableUsb3LowPowerModeTimeout)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int Usb3LinkState);
+    LOUSTATUS         (*SearchRawPortID)(PUSB_HOST_CONTROLLER_DEVICE Hcd, int PortID);
+    LOUSTATUS         (*PortPowerSwitch)(PUSB_HOST_CONTROLLER_DEVICE Hcd, int PortID, bool LightSwich);//santa clause torn on the lights please
+    LOUSTATUS         (*SubmitSingleStepSetFeature)(PUSB_HOST_CONTROLLER_DEVICE* Hcd, PURB Urb, int FeatureFlags);
 }USB_HOST_CONTROLER_DRIVER, * PUSB_HOST_CONTROLER_DRIVER;
 
 

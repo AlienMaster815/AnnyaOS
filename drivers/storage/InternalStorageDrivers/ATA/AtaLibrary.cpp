@@ -29,7 +29,7 @@ LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 
 LOUDDK_API_ENTRY
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
-LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
+LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
 
     PLOUSINE_KERNEL_DEVICE_ATA_HOST NewHost = 0x00;
 
@@ -50,7 +50,7 @@ LouKeMallocAtaDevice(P_PCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
 
 
 
-bool IsAtaController(P_PCI_DEVICE_OBJECT PDEV){
+bool IsAtaController(PPCI_DEVICE_OBJECT PDEV){
     PCI_COMMON_CONFIG PciConfig;
     GetPciConfiguration(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, &PciConfig);
 

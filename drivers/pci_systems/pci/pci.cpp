@@ -50,7 +50,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
             if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
                 if (PciGetDeviceID(Group, bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
-                    P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+                    PPCI_DEVICE_OBJECT PDev = (PPCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
                     if(!PDev){
                         PDev = LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);                    
                     }
@@ -68,9 +68,9 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         }
     }
     else{
-        P_PCI_DEVICE_OBJECT PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+        PPCI_DEVICE_OBJECT PDev = (PPCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
         if(!PDev){
-            PDev = (P_PCI_DEVICE_OBJECT)LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+            PDev = (PPCI_DEVICE_OBJECT)LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
         }
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
         PDev->bus = bus;
@@ -150,29 +150,29 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 
 // C Land
 
-LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     return pciConfigReadByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
-LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     return pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Offset);
 
 }
 
-LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     return pci_read(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
 
-LOUDDK_API_ENTRY void LouKeWritePciUint8(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value){
+LOUDDK_API_ENTRY void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value){
     pciConfigWriteByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func,Offset,Value);
 }
 
-LOUDDK_API_ENTRY void LouKeWritePciUint16(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value){
+LOUDDK_API_ENTRY void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value){
     pciConfigWriteWord(PDEV->Group, PDEV->bus, PDEV->slot,PDEV->func,Offset,Value);
 }
 
-LOUDDK_API_ENTRY void LouKeWritePciUint32(P_PCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value){
+LOUDDK_API_ENTRY void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value){
     write_pci(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset, Value);
 }
 
@@ -215,7 +215,7 @@ void ScanTheRestOfHarware(){
 
 	PPCI_DEVICE_GROUP* SecondWaveDevices = LouKeOpenPciDeviceGroup(&Config);
     for(uint8_t i = 0 ; i < NumberOfPciDevices; i++){
-        P_PCI_DEVICE_OBJECT PDEV = SecondWaveDevices[i]->PDEV;
+        PPCI_DEVICE_OBJECT PDEV = SecondWaveDevices[i]->PDEV;
         if(PDEV->DeviceManaged){
             continue;
         }
@@ -251,9 +251,9 @@ void ScanTheRestOfHarware(){
 }
 
 KERNEL_IMPORT
-bool LouKeSeachPreLoadedSystemModules(P_PCI_DEVICE_OBJECT PDEV);
+bool LouKeSeachPreLoadedSystemModules(PPCI_DEVICE_OBJECT PDEV);
 
-bool IsAtaController(P_PCI_DEVICE_OBJECT PDEV);
+bool IsAtaController(PPCI_DEVICE_OBJECT PDEV);
 void InitializeAtaDevice();
-bool IsAhciController(P_PCI_DEVICE_OBJECT PDEV);
-LOUSTATUS InitializeStartupAhciImplementation(P_PCI_DEVICE_OBJECT PDEV);
+bool IsAhciController(PPCI_DEVICE_OBJECT PDEV);
+LOUSTATUS InitializeStartupAhciImplementation(PPCI_DEVICE_OBJECT PDEV);

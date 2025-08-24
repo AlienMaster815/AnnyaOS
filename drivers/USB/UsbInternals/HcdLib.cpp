@@ -1,12 +1,12 @@
 #include <usb.h>
 #include <Hal.h>
 
-typedef void (*COMPANION_WORK_FUNCTION)(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONTROLER_DEVICE HostDevice, PUSB_HOST_CONTROLER_DEVICE CompanionHostDevice); 
+typedef void (*COMPANION_WORK_FUNCTION)(PPCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONTROLLER_DEVICE HostDevice, PUSB_HOST_CONTROLLER_DEVICE CompanionHostDevice); 
 
 static void EhciWorkPreAddition(
-    P_PCI_DEVICE_OBJECT PDEV, 
-    PUSB_HOST_CONTROLER_DEVICE HostDevice, 
-    PUSB_HOST_CONTROLER_DEVICE CompanionHostDevice
+    PPCI_DEVICE_OBJECT PDEV, 
+    PUSB_HOST_CONTROLLER_DEVICE HostDevice, 
+    PUSB_HOST_CONTROLLER_DEVICE CompanionHostDevice
 ){
 
     LouPrint("EhciWorkPreAddition()\n");
@@ -14,18 +14,18 @@ static void EhciWorkPreAddition(
 }
 
 static void EhciWorkPostAddition(
-    P_PCI_DEVICE_OBJECT PDEV, 
-    PUSB_HOST_CONTROLER_DEVICE HostDevice, 
-    PUSB_HOST_CONTROLER_DEVICE CompanionHostDevice
+    PPCI_DEVICE_OBJECT PDEV, 
+    PUSB_HOST_CONTROLLER_DEVICE HostDevice, 
+    PUSB_HOST_CONTROLLER_DEVICE CompanionHostDevice
 ){
     LouPrint("EhciWorkPostAddition()\n");
     while(1);
 }
 
 static void NonEhciWorkAddition(
-    P_PCI_DEVICE_OBJECT PDEV, 
-    PUSB_HOST_CONTROLER_DEVICE HostDevice, 
-    PUSB_HOST_CONTROLER_DEVICE CompanionHostDevice
+    PPCI_DEVICE_OBJECT PDEV, 
+    PUSB_HOST_CONTROLLER_DEVICE HostDevice, 
+    PUSB_HOST_CONTROLLER_DEVICE CompanionHostDevice
 ){
     LouPrint("NonEhciWorkAddition()\n");
     while(1);
@@ -35,9 +35,9 @@ UNUSED
 static 
 void 
 DoForAllCompanions(
-    P_PCI_DEVICE_OBJECT Self,
+    PPCI_DEVICE_OBJECT Self,
     PPCI_DEVICE_GROUP DeviceGroup, 
-    PUSB_HOST_CONTROLER_DEVICE HostDevice, 
+    PUSB_HOST_CONTROLLER_DEVICE HostDevice, 
     COMPANION_WORK_FUNCTION WorkToDo
 ){
     PPCI_COMMON_CONFIG  CommonConfig;
@@ -68,13 +68,13 @@ DoForAllCompanions(
             //LouPrint("Slave  Bus :%d:%d:%d\n", DeviceGroup[i].PDEV->bus, DeviceGroup[i].PDEV->slot, DeviceGroup[i].PDEV->func);
 
             //LouPrint("Master Host ProgIF:%h :: Slave Host ProgIF:%h\n", ((PPCI_COMMON_CONFIG)Self->CommonConfig)->Header.ProgIf, ((PPCI_COMMON_CONFIG)DeviceGroup[i].PDEV->CommonConfig)->Header.ProgIf);
-            WorkToDo(DeviceGroup[i].PDEV, HostDevice, (PUSB_HOST_CONTROLER_DEVICE)DeviceGroup[i].PDEV->DevicePrivateData);
+            WorkToDo(DeviceGroup[i].PDEV, HostDevice, (PUSB_HOST_CONTROLLER_DEVICE)DeviceGroup[i].PDEV->DevicePrivateData);
         }   
     }
 
 }
 
-LOUSTATUS LoUSBAddHostController(PUSB_HOST_CONTROLER_DEVICE HostController){
+LOUSTATUS LoUSBAddHostController(PUSB_HOST_CONTROLLER_DEVICE HostController){
     LouPrint("Adding New USB Host Controller\n");
 
 
@@ -83,9 +83,9 @@ LOUSTATUS LoUSBAddHostController(PUSB_HOST_CONTROLER_DEVICE HostController){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS LoUSBInitializeHostController(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONTROLER_DRIVER HostDriver){
+LOUSTATUS LoUSBInitializeHostController(PPCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONTROLER_DRIVER HostDriver){
     LouPrint("Initializing Host Controller\n");
-    UNUSED PUSB_HOST_CONTROLER_DEVICE HostController;
+    UNUSED PUSB_HOST_CONTROLLER_DEVICE HostController;
     LOUSTATUS Status = STATUS_SUCCESS;
 
     if(!HostDriver){
@@ -109,7 +109,7 @@ LOUSTATUS LoUSBInitializeHostController(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONT
 
     }
 
-    HostController = (PUSB_HOST_CONTROLER_DEVICE)LouKeMallocType(USB_HOST_CONTROLER_DEVICE, KERNEL_GENERIC_MEMORY);
+    HostController = (PUSB_HOST_CONTROLLER_DEVICE)LouKeMallocType(PUSB_HOST_CONTROLLER_DEVICE, KERNEL_GENERIC_MEMORY);
 
     HostController->PDEV = PDEV;
     PDEV->DevicePrivateData = (uintptr_t)&HostController;
@@ -172,7 +172,7 @@ LOUSTATUS LoUSBInitializeHostController(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONT
     return Status;
 }
 
-LOUSTATUS LoUSBDeInitializeHostController(P_PCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONTROLER_DRIVER HostDriver){
+LOUSTATUS LoUSBDeInitializeHostController(PPCI_DEVICE_OBJECT PDEV, PUSB_HOST_CONTROLER_DRIVER HostDriver){
     LouPrint("DeInitializing Host Controller\n");
     
 
