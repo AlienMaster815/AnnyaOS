@@ -130,6 +130,7 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
 ){
     POOL NewPool = (POOL)LouKeMallocType(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
     NewPool->VLocation = (uint64_t)LouKeMallocEx(ROUND_UP64(ObjectSize, Alignment) * NumberOfPoolMembers, Alignment, PageFlags);
+    RequestPhysicalAddress(NewPool->VLocation, &NewPool->Location);
     NewPool->FixedSizePool = true;
     NewPool->Flags = Flags;
     NewPool->Tag = Tag;
@@ -166,6 +167,7 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPoolEx(
 ){
     POOL NewPool = (POOL)LouKeMallocType(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
     NewPool->VLocation = (uint64_t)LouKeMallocEx(PoolSize, PagedTypeAlignement, PageFlags);
+    RequestPhysicalAddress(NewPool->VLocation, &NewPool->Location);
     NewPool->LastOut = NewPool->VLocation;
     NewPool->FixedSizePool = false;
     NewPool->Flags = Flags;
@@ -303,6 +305,19 @@ void* LouKeGenricAllocateDmaPool(
 ){
 
     uint64_t Result = (uint64_t)LouKeMallocFromDynamicPool(Pool, size);
+    if(Offset){
+        *Offset = (uint64_t)LouKeGenericPoolGetPhyAddress(Pool, (void*)Result);
+    }
+
+    return (void*)Result;
+}
+
+void* LouKeGenericAllocateFixedDmaPool(
+    POOL Pool,
+    size_t* Offset
+){
+    uint64_t Result = (uint64_t)LouKeMallocFromFixedPool(Pool);
+
     if(Offset){
         *Offset = (uint64_t)LouKeGenericPoolGetPhyAddress(Pool, (void*)Result);
     }

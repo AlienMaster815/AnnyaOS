@@ -13,6 +13,7 @@ LOUSTATUS
 XhciRun(
     PUSB_HOST_CONTROLLER_DEVICE Hcd
 ){
+    
 
     return STATUS_SUCCESS;
 }
@@ -173,6 +174,8 @@ XhciAddressDevice(
     uint64_t Timeout
 ){
 
+
+        
     return STATUS_SUCCESS;
 }
 
@@ -313,7 +316,9 @@ XhciSearchRawPortID(
     return STATUS_SUCCESS;
 }
 
-UNUSED static const USB_HOST_CONTROLER_DRIVER HostControllerDriver = {
+
+
+UNUSED static const USB_HOST_CONTROLLER_DRIVER HostControllerDriver = {
     .DeviceDescription              = "XHCI.SYS",
     .ProductDescriptor              = "XHCI Host Controller",
     .HcdPrivateSize                 = sizeof(XHCI_HCD),
@@ -373,14 +378,19 @@ NTSTATUS AddDevice(
 ){
     LouPrint("XHCI.SYS::AddDevice()\n");
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    LouPrint("XHCI Bar:%h\n", Config->BarBase[0]);
 
-
+    LOUSTATUS Status = LouKeUsbHcdPciProbe(PDEV, &HostControllerDriver);
     
+    if(Status != STATUS_SUCCESS){
+        return (NTSTATUS)Status;
+    }
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
 
     while(1);
-    return STATUS_SUCCESS;
+    return Status;
 }
 
 LOUDDK_API_ENTRY

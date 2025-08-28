@@ -461,6 +461,18 @@ void* LouKeMallocFromFixedPool(
     PLMPOOL_DIRECTORY Pool
 );
 
+void* LouKeGenericAllocateFixedDmaPool(
+    POOL Pool,
+    size_t* Offset
+);
+
+void LouKeFreeFromFixedPool(
+    PLMPOOL_DIRECTORY Pool, 
+    void* Object
+);
+
+void* LouKeRealloc(void* Address, size_t NewSide);
+
 void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 
 static inline
@@ -708,5 +720,17 @@ void* LouKeGenericPoolGetPhyAddress(
 );
 
 KERNEL_EXPORT void LouKeFree(void* AddressToFree);
+
+KERNEL_EXPORT
+void* LouKeGenericAllocateFixedDmaPool(
+    POOL Pool,
+    size_t* Offset
+);
+
+KERNEL_EXPORT
+void LouKeFreeFromFixedPool(
+    PLMPOOL_DIRECTORY Pool, 
+    void* Object
+);
 
 #endif

@@ -1,7 +1,7 @@
 #include <LouAPI.h>
 #include <Hal.h>
 
-static PCI_MANAGER_DATA PciData;
+static PCI_MANAGER_DATA PciData = {0};
 static size_t RegisteredPciDevices = 0;
 
 LOUSTATUS RegisterPciDeviceToDeviceManager(
@@ -15,10 +15,8 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
 
 
     PPCI_MANAGER_DATA Tmp = &PciData;
-    for(size_t i = 0; i < RegisteredPciDevices; i++){
-        if(Tmp->Neigbors.NextHeader){
-            Tmp = (PPCI_MANAGER_DATA)Tmp->Neigbors.NextHeader;
-        }
+    while(Tmp->Neigbors.NextHeader){
+        Tmp = (PPCI_MANAGER_DATA)Tmp->Neigbors.NextHeader;
     }
 
     Tmp->Neigbors.NextHeader = (PListHeader)LouKeMallocType(PCI_MANAGER_DATA, KERNEL_GENERIC_MEMORY);
@@ -35,7 +33,7 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
 }
 
 PPCI_MANAGER_DATA LouKeGetPciDataTable(){
-    return &PciData;
+    return (PPCI_MANAGER_DATA)PciData.Neigbors.NextHeader;
 }
 
 uint8_t LouKeGetPciGlobalMembers(){

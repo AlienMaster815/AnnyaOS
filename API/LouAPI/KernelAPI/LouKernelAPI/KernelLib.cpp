@@ -44,7 +44,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 	);
 
 	if (Status != LOUSTATUS_GOOD) {
-		LouPrint("Firmware Table Provider Signature Could Not BeFound:ID NUMBER:%d\n",FirmwareTableProviderSignature);
+		LouPrint("Firmware Table Provider Signature Could Not BeFound:ID NUMBER:%u\n",FirmwareTableProviderSignature);
 		return Status;
 	}
 
@@ -56,7 +56,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 		&Type
 	);
 	if (Status != LOUSTATUS_GOOD) {
-		LouPrint("Firmware Table Id Could Not Be Found:ID NUMBER:%d\n",FirmwareTabeId);
+		LouPrint("Firmware Table Id Could Not Be Found:ID NUMBER:%u\n",FirmwareTabeId);
 		return Status;
 	}
 

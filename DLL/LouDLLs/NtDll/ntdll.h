@@ -7,7 +7,7 @@
 #include <WinTEB.h>
 #include <stdalign.h>
 #define GET_ALIGNMENT(x) (alignof(x))
-
+#define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
 
 #define KILOBYTE_PAGE 4096ULL
 #define MEGABYTE_PAGE (2 * 1024 * 1024ULL)

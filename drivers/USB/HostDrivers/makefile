@@ -7,7 +7,10 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-XHCI_SRC = 	XHCI.cpp
+XHCI_SRC = 	XHCI.cpp \
+			XhciRing.cpp \
+			XhciMemory.cpp \
+			XhciCommand.cpp \
 
 XHCI_TARGET = XHCI.SYS
 

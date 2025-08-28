@@ -130,14 +130,19 @@ void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon){
 
 }
 
-PPCI_DEVICE_OBJECT LouKeGetPDEV(uint8_t Bus, uint8_t Slot, uint8_t Function){
+PPCI_DEVICE_OBJECT LouKeHalGetPDEV(
+    uint16_t Group, 
+    uint8_t Bus, 
+    uint8_t Slot, 
+    uint8_t Function
+){
 
     PPCI_MANAGER_DATA PciData = LouKeGetPciDataTable();
     uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
 
     for(uint8_t i = 0 ; i  < GlobalMembers; i++){
-
         if(
+            (PciData->PDEV->Group == Group) &&
             (PciData->PDEV->bus == Bus) &&
             (PciData->PDEV->slot == Slot) &&
             (PciData->PDEV->func == Function)

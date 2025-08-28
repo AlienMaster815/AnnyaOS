@@ -132,6 +132,19 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
             LOUDDK_API_ENTRY uint64_t LouKePciGetVirtualBarAddress(uint64_t PhyAddress);
 
+            LOUDDK_API_ENTRY
+            PPCI_DEVICE_OBJECT 
+            LouKeHalGetPDEV(
+                uint16_t Group, 
+                uint8_t Bus, 
+                uint8_t Slot, 
+                uint8_t Function
+            );
+
+            LOUDDK_API_ENTRY
+            UINT16 
+            LouKeHalGetChipsetVendor();
+
         #else 
             KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
                 PPCI_COMMON_CONFIG PciSearch, 
@@ -193,6 +206,19 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_DEVICE_OBJECT PDEV, 
                 PPCI_COMMON_CONFIG Config
             );
+
+            KERNEL_EXPORT
+            PPCI_DEVICE_OBJECT 
+            LouKeHalGetPDEV(
+                uint16_t Group, 
+                uint8_t Bus, 
+                uint8_t Slot, 
+                uint8_t Function
+            );
+
+            KERNEL_EXPORT
+            UINT16 
+            LouKeHalGetChipsetVendor();
 
         #endif
     #else

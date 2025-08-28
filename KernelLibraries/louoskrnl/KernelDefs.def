@@ -179,3 +179,7 @@ EXPORTS
     LouKeFreeDma16
     LouKeInitializeWorkQueue
     LouKeGetAllocationSize
+    LouKeGenericAllocateFixedDmaPool
+    LouKeFreeFromFixedPool
+    LouKeAllocateUsbHostControllerDevice
+    LouKeUsbHcdPciProbe

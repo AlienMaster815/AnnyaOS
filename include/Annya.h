@@ -8,6 +8,7 @@
 #define SIZE   size_t
 
 #define GET_ALIGNMENT(x) (alignof(x))
+#define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
 
 #define ROUND_UP(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))

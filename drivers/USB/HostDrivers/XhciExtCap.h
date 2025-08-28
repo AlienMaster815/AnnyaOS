@@ -4,7 +4,7 @@
 #include <LouDDK.h>
 
 #define XHCI_MAX_HALT_TIME                          32
-#define XHCI_STATUS_HALT_HC                         0
+#define XHCI_STATUS_HALT                            (1 << 0)
 #define XHCI_HCC_PARAMETERS_OFFSET                  0x10
 #define XHCI_HCC_EXTENDED_CAPABILITIES(Port)        (((Port) >> 16) & 0xFFFF)
 #define XHCI_COMMAND_OFFSET                         0x00

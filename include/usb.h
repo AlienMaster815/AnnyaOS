@@ -472,16 +472,18 @@ typedef struct _GIVEBACK_URB_BH{
 }GIVEBACK_URB_BH, * PGIVEBACK_URB_BH;
 
 typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
-    PPCI_DEVICE_OBJECT                 PDEV;
+    PPCI_DEVICE_OBJECT                  PDEV;
     USB_BUS                             UsbSelf;
     void*                               KernelHandle;
     int32_t                             RoothubSpeed;
     uint8_t                             InterruptDescriptors[24];
     ListHeader                          RootHubPolls;
+    bool                                UsesNewPoling;
+    bool                                MsiEnabled;
     PURB                                StatusUrb;
     PLOUQ_WORK                          WakeyWork;
     PLOUQ_WORK                          DeathWork;
-    struct _USB_HOST_CONTROLER_DRIVER*  HcDriver;
+    struct _USB_HOST_CONTROLLER_DRIVER*  HcDriver;
     PUSB_PHY_LAYER_CHAIN                UsbPhyLayer;
     PUSB_PHY_LAYER_ROOTHUB_CHAIN        UsbRootHubPhyLayer;
     uint16_t                            Flags;
@@ -503,10 +505,11 @@ typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
     void*                               PrivateData;
 }USB_HOST_CONTROLLER_DEVICE, * PUSB_HOST_CONTROLLER_DEVICE;
 
-typedef struct _USB_HOST_CONTROLER_DRIVER{
+typedef struct _USB_HOST_CONTROLLER_DRIVER{
     string              DeviceDescription;
     string              ProductDescriptor;
     size_t              HcdPrivateSize;
+    void*               PrivateData;
     void              (*InterruptHandler)(uint64_t HcdHandle);
     uint16_t            DriverFlags;
     LOUSTATUS         (*ResetHcd)(PUSB_HOST_CONTROLLER_DEVICE Hcd);
@@ -549,9 +552,9 @@ typedef struct _USB_HOST_CONTROLER_DRIVER{
     LOUSTATUS         (*EnableUsb3LowPowerModeTimeout)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int PowerFlags);
     LOUSTATUS         (*DisableUsb3LowPowerModeTimeout)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, int Usb3LinkState);
     LOUSTATUS         (*SearchRawPortID)(PUSB_HOST_CONTROLLER_DEVICE Hcd, int PortID);
-    LOUSTATUS         (*PortPowerSwitch)(PUSB_HOST_CONTROLLER_DEVICE Hcd, int PortID, bool LightSwich);//santa clause torn on the lights please
+    LOUSTATUS         (*PortPowerSwitch)(PUSB_HOST_CONTROLLER_DEVICE Hcd, int PortID, bool LightSwich);//santa clause turn on the lights please
     LOUSTATUS         (*SubmitSingleStepSetFeature)(PUSB_HOST_CONTROLLER_DEVICE* Hcd, PURB Urb, int FeatureFlags);
-}USB_HOST_CONTROLER_DRIVER, * PUSB_HOST_CONTROLER_DRIVER;
+}USB_HOST_CONTROLLER_DRIVER, * PUSB_HOST_CONTROLLER_DRIVER;
 
 
 #define HCD_HARDWARE_ACCESSIBLE(Hcd)    ((Hcd)->Flags & 1)
@@ -696,7 +699,37 @@ typedef struct _USB_HOST_CONTROLER_DRIVER{
 #define USB_INTERFACE_RESETTING_DEVICE(UsbInterface)                    ((UsbINterface)->Flags & (1 << 6))
 #define USB_INTERFACE_AUTHORIZED(UsbInterface)                          ((UsbInterface)->Flags & (1 << 7))
 
+#ifndef _KERNEL_MODULE_
 
+PUSB_HOST_CONTROLLER_DEVICE 
+LouKeAllocateUsbHostControllerDevice(
+    const USB_HOST_CONTROLLER_DRIVER*   Hcd,
+    PPCI_DEVICE_OBJECT                  PDEV
+);
+
+LOUSTATUS 
+LouKeUsbHcdPciProbe(
+    PPCI_DEVICE_OBJECT Pdev, 
+    const USB_HOST_CONTROLLER_DRIVER*   Hcd
+);
+
+#else
+
+KERNEL_EXPORT
+PUSB_HOST_CONTROLLER_DEVICE 
+LouKeAllocateUsbHostControllerDevice(
+    const USB_HOST_CONTROLLER_DRIVER*   Hcd,
+    PPCI_DEVICE_OBJECT                  PDEV
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeUsbHcdPciProbe(
+    PPCI_DEVICE_OBJECT Pdev, 
+    const USB_HOST_CONTROLLER_DRIVER* Hcd 
+);
+
+#endif
 
 #ifdef __cplusplus
 }

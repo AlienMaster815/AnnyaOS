@@ -381,7 +381,7 @@
 #define XHCI_TRBS_PER_SEGMENT               256
 #define XHCI_MAX_RESERVED_COMMAND_TRBS      (XHCI_TRBS_PER_SEGMENT - 3)
 #define XHCI_TRB_SEGMENT_SIZE               (XHCI_TRBS_PER_SEGMENT * 16)
-#define XHCI_TRB_SEGMENT_SHIFT              (ilog2(XHCI_TRB_SEGMENT_SIZE))
+#define XHCI_TRB_SEGMENT_SHIFT              (ILog2(XHCI_TRB_SEGMENT_SIZE))
 #define XHCI_TRB_MAX_BUFFER_SHIFT           16
 #define XHCI_TRB_MAX_BUFFER_SIZE            (1 << XHCI_TRB_MAX_BUFFER_SHIFT)
 #define XHCI_TRB_BUFFER_LENGTH_TO_BOUNDRY(Address)   (XHCI_TRB_MAX_BUFFER_SIZE - (Address & (XHCI_TRB_MAX_BUFFER_SIZE -1)))
@@ -404,6 +404,63 @@
 #define COMMAND_RING_STATE_RUNNING          (1)
 #define COMMAND_RING_STATE_ABORTED          (1 << 1)
 #define COMMAND_RING_STATE_STOPPED          (1 << 2)
+
+#define XHCI_STATE_DYING                    (1 << 0)
+#define XHCI_STATE_HALTED                   (1 << 1)
+#define XHCI_STATE_REMOVING                 (1 << 2)
+
+#define XHCI_QUIRK_LINK_TRB                         (1 << 0)
+#define XHCI_QUIRK_RESET_EP                         (1 << 1)
+#define XHCI_QUIRK_NEC_HOST                         (1 << 2)
+#define XHCI_QUIRK_AMD_PLL_FIX                      (1 << 3)
+#define XHCI_QUIRK_SPURRIOUS_SUCCESS                (1 << 4)
+#define XHCI_QUIRK_EP_LIMIT                         (1 << 5)
+#define XHCI_QUIRK_BROKEN_MSI                       (1 << 6)
+#define XHCI_QUIRK_RESET_ON_RESUME                  (1 << 7)
+#define XHCI_QUIRK_SW_BW_CHECKING                   (1 << 8)
+#define XHCI_QUIRK_AMD_0x96_HOST                    (1 << 9)
+#define XHCI_QUIRK_TRUST_TX_LENGTH                  (1 << 10)
+#define XHCI_QUIRK_LPM_SUPPORT                      (1 << 11)
+#define XHCI_QUIRK_INTEL_HOST                       (1 << 12)
+#define XHCI_QUIRK_SPURRIOUS_REBOOT                 (1 << 13)
+#define XHCI_QUIRK_COMP_MODE_QUIRK                  (1 << 14)
+#define XHCI_QUIRK_AVOID_BEI                        (1 << 15)
+#define XHCI_QUIRK_PLAT                             (1 << 16)
+#define XHCI_QUIRK_SLOW_SUSPEND                     (1 << 17)
+#define XHCI_QUIRK_SPURRIOUS_WAKEUP                 (1 << 18)
+#define XHCI_QUIRK_BROKEN_STREAMS                   (1 << 19)
+#define XHCI_QUIRK_PME_STUCK                        (1 << 20)
+#define XHCI_QUIRK_MTK_HOST                         (1 << 21)
+#define XHCI_QUIRK_SSIC_PORT_UNUSED                 (1 << 22)
+#define XHCI_QUIRK_NO_64BIT_SUPPORT                 (1 << 23)
+#define XHCI_QUIRK_MISSING_CAS                      (1 << 24)
+#define XHCI_QUIRK_BROKEN_PORT_PED                  (1 << 25)
+#define XHCI_QUIRK_LIMIT_ENDPOINT_INTERVAL_7        (1 << 26)
+#define XHCI_QUIRK_U2_DISABLE_WAKE                  (1 << 27)
+#define XHCI_QUIRK_ASMEDIA_MODIFY_FLOW_CONTROL      (1 << 28)
+#define XHCI_QUIRK_HW_LPM_DISABLED                  (1 << 29)
+#define XHCI_QUIRK_SUSPEND_DELAY                    (1 << 30)
+#define XHCI_QUIRK_INTEL_USB_ROLE_SW                (1 << 31)
+#define XHCI_QUIRK_ZERO_64_BIT_REGISTERS            (1 << 32)
+#define XHCI_QUIRK_DEFAULT_PM_RUNTIME_ALLOW         (1 << 33)
+#define XHCI_QUIRK_RESET_PLL_ON_DISCONNECT          (1 << 34)
+#define XHCI_QUIRK_SNPS_BROKEN_SUSPEND              (1 << 35)
+#define XHCI_QUIRK_SKIP_PHY_INIT                    (1 << 37)
+#define XHCI_QUIRK_DISABLE_SPARCE                   (1 << 38)
+#define XHCI_QUIRK_SG_TRB_CACHE_SIZE_QUIRK          (1 << 39)
+#define XHCI_QUIRK_NO_SOFT_RETRY                    (1 << 40)
+#define XHCI_QUIRK_BROKEN_D3_COLD_S2I               (1 << 41)
+#define XHCI_QUIRK_EP_CONTEXT_BROKER_DCS            (1 << 42)
+#define XHCI_QUIRK_SUSPEND_RESUME_CLOCKS            (1 << 43)
+#define XHCI_QUIRK_RESET_TO_DEFAULT                 (1 << 44)
+#define XHCI_QUIRK_TRB_OVERFETCH                    (1 << 45)
+#define XHCI_QUIRK_ZHAOXIN_HOST                     (1 << 46)
+#define XHCI_QUIRK_WRITE_64_HI_LO                   (1 << 47)
+#define XHCI_QUIRK_CDNS_SCTX                        (1 << 48)
+#define XHCI_QUIRK_ETRON_HOST                       (1 << 49)
+#define XHCI_QUIRK_LIMIT_ENDPOINT_INTERVAL_9        (1 << 50)
+
+#define XHCI_COMPLETION_MODE_RECOVERY_MSEC  2000
 
 typedef struct _XHCI_CAPABILITIES_REGISTER{
     UINT32      HcCapBase;
@@ -439,7 +496,7 @@ typedef struct _XHCI_OPERATIONAL_REGISTER{
 }XHCI_OPERATIONAL_REGISTER, * PXHCI_OPERATIONAL_REGISTER;
 
 typedef struct _XHCI_INTERRUPT_REGISTER{
-    UINT32          Man;
+    UINT32          Iman;
     UINT32          Mod;
     UINT32          ERstSize;
     UINT32          Reserved;
@@ -455,13 +512,13 @@ typedef struct _XHCI_RUNTIME_REGISTERS{
 
 typedef struct _XHCI_DORRBELL_ARRAY{
     UINT32      Doorbell[256];
-}XHCI_DORRBELL_ARRAY, * PXHCI_DORRBELL_ARRAY;
+}XHCI_DORRBELL_ARRAY, * PXHCI_DOORBELL_ARRAY;
 
 typedef struct _XHCI_CONTAINER_CONTEXT{
     UINT64      Type;
     UINT32      Size;
     UINT8*      Bytes;
-    UINT64      DmaAddress;
+    UINT64      DmaVAddress;
 }XHCI_CONTAINER_CONTEXT, * PXHCI_CONTAINER_CONTEXT;
 
 typedef struct _XHCI_SLOT_CONTEXT{
@@ -750,7 +807,7 @@ typedef struct _XHCI_BUS_STATE{
 typedef struct _XHCI_INTERRUPTER{
     PXHCI_RING                  EventRing;
     XHCI_ERST                   Erst;
-    XHCI_INTERRUPT_REGISTER     IrSet;
+    PXHCI_INTERRUPT_REGISTER    IrSet;
     UINT32                      IntrNumber;
     BOOL                        IpAutoClear;
     UINT32                      IsocBeiInterval;
@@ -796,12 +853,13 @@ typedef struct _XHCI_HUB{
 //1502
 
 typedef struct _XHCI_HCD{
-    PUSB_HOST_CONTROLLER_DEVICE      MainHcd;
-    PUSB_HOST_CONTROLLER_DEVICE      SharedHcd;
+    PPCI_DEVICE_OBJECT              PDEV;
+    PUSB_HOST_CONTROLLER_DEVICE     MainHcd;
+    PUSB_HOST_CONTROLLER_DEVICE     SharedHcd;
     PXHCI_CAPABILITIES_REGISTER     CapabilitiesRegister;
     PXHCI_OPERATIONAL_REGISTER      OperationalRegister;
     PXHCI_RUNTIME_REGISTERS         RuntimeRegister;
-    PXHCI_DORRBELL_ARRAY            Dba;
+    PXHCI_DOORBELL_ARRAY            Dba;
     UINT32                          HcsParameter1;
     UINT32                          HcsParameter2;
     UINT32                          HcsParameter3;
@@ -822,6 +880,32 @@ typedef struct _XHCI_HCD{
     PXHCI_COMMAND                   CurrentCommand;
     PXHCI_SCRATCHPAD                Scratchpad;
     mutex_t                         DeviceSoftLock;
+    mutex_t                         RegisterPollLock;
+    PXHCI_VIRTUAL_DEVICE            Devices[XHCI_MAX_HC_SLOTS];
+    POOL                            DevicePool;
+    POOL                            SegmentPool;
+    POOL                            SmallStreamsPool;
+    POOL                            PortBwPool;
+    POOL                            MediumStreamsPool;
+    UINT32                          XhcState;
+    UINT64                          RunGracePeriod;
+    XHCI_S3_SAVE                    S3;
+    UINT64                          Quirks;
+    UINT32                          ActiveEpCount;
+    UINT32                          LimitActiveEpCount;
+    PXHCI_PORT                      HwPorts;
+    PXHCI_HUB                       Usb2RootHub;
+    PXHCI_HUB                       Usb3RootHub;
+    UINT8                           HwLpmSupport    : 1;
+    UINT8                           BrokenSuspend   : 1;
+    UINT8                           AllowSingleRoot : 1;
+    PXHCI_PORT_CAPABILITES          PortCaps;
+    UINT32                          PortCount;
+    //TODO: add completion mode recovery timer
+    UINT32                          PortStatusU0;
+    UINT16                          TestMode;
+    ListHeader                      RegisterSetList;
+    UINT64                          PrivateData[] FORCE_ALIGNMENT(sizeof(UINT64));
 }XHCI_HCD, * PXHCI_HCD;
 
 static inline string XhciTrbCompletionCodeString(UINT8 Status){
@@ -1055,5 +1139,74 @@ static inline string XhciRingTypeString(XHCI_RING_TYPE Type){
     }
     return "UNKOWN";
 }
+
+static inline PXHCI_HCD HcdToXhci(PUSB_HOST_CONTROLLER_DEVICE Hcd){
+    PUSB_HOST_CONTROLLER_DEVICE PrimaryDevice;
+    if(Hcd->PrimaryHcd){
+        PrimaryDevice = Hcd->PrimaryHcd;
+    }else{
+        PrimaryDevice = Hcd;
+    }
+    return (PXHCI_HCD)PrimaryDevice->PrivateData;
+}
+
+static inline PUSB_HOST_CONTROLLER_DEVICE XhciToHcd(PXHCI_HCD Xhci){
+    return Xhci->MainHcd;
+}
+
+static inline UINT64 XhciRead64(PXHCI_HCD Xhci, PVOID Register) {
+    UINT64 Result = READ_REGISTER_ULONG((PULONG)Register);
+    Result |= ((UINT64)READ_REGISTER_ULONG(((PULONG)Register) + 1)) << 32;
+    return Result;
+}
+
+static inline void XhciWrite64(PXHCI_HCD Xhci, PVOID Register, UINT64 Value) {
+    UINT32 Low  = (UINT32)(Value & UINT32_MAX);
+    UINT32 High = (UINT32)(Value >> 32);
+    WRITE_REGISTER_ULONG(((PULONG)Register), Low);
+    WRITE_REGISTER_ULONG(((PULONG)Register) + 1, High);
+}
+
+
+void XhciRingCommandDoorbell(
+    PXHCI_HCD Xhci
+);
+
+PXHCI_COMMAND 
+XhciAllocateCommand(
+    PXHCI_HCD   Xhci,
+    bool        AllocateCompletion,
+    UINT64      MemoryFlags
+);
+
+void
+XhciFreeCommand(
+    PXHCI_HCD Xhci,
+    PXHCI_COMMAND Command
+);
+
+LOUSTATUS 
+XhciQueueVendorCommand(
+    PXHCI_HCD Xhci,
+    PXHCI_COMMAND Command,
+    UINT32 Feild1,
+    UINT32 Feild2,
+    UINT32 Feild3,
+    UINT32 Feild4
+);
+
+LOUSTATUS 
+XhciRingExspansion(
+    PXHCI_HCD Xhci,
+    PXHCI_RING Ring,
+    UINT32 NewSegments,
+    UINT64 MemoryFlags
+);
+
+bool 
+XhciLinkChainQuirk(
+    PXHCI_HCD Xhci,
+    XHCI_RING_TYPE Type
+);
 
 #endif

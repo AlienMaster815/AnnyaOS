@@ -230,6 +230,8 @@ void LouKeHalRegisterPciDevice(
                         Config->BarBase[i] = Tmp;
 
                         i++;
+                        Config->BarBase[i] = 0;
+                        while(1);
                 }
             }
             else{

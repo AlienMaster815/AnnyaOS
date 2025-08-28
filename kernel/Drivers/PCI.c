@@ -265,13 +265,7 @@ uint8_t getHeaderType(uint16_t Group, uint8_t bus, uint8_t device, uint8_t funct
 }
 
 uint16_t PciGetVendorID(uint16_t Group, uint8_t bus, uint8_t slot) {
-    UNUSED uint16_t vendor, device;
-    /* Try and read the first configuration register. Since there are no
-     * vendors that == 0xFFFF, it must be a non-existent device. */
-    if ((vendor = pciConfigReadWord(Group, bus, slot, 0, 0)) != 0xFFFF) {
-        device = pciConfigReadWord(Group, bus, slot, 0, 2);
-        //TODO: Is Vendor Part Of System
-    } return (vendor);
+    return pciConfigReadWord(Group, bus, slot, 0, 0);
 }
 
 
