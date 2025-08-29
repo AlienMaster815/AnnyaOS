@@ -42,8 +42,8 @@ typedef struct _USB_BUS{
     int                     NextDeviceNumber;
     mutex_t                 NextDeviceNumberMutex;
     uint8_t                 DeviceMap[128/8];//bitmap 128 bits
-    struct _USB_DEVICE*     Device;
-    struct _USB_BUS*        EhciEsCompanion;
+    struct _USB_DEVICE*     RootHub;
+    struct _USB_BUS*        HsCompanion;
     int                     BandwithAllocated;
     int                     BandwithInterrupts;
     int                     BandwithIsoc;
@@ -472,7 +472,9 @@ typedef struct _GIVEBACK_URB_BH{
 }GIVEBACK_URB_BH, * PGIVEBACK_URB_BH;
 
 typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
+    string                              ProductDescriptor;    
     PPCI_DEVICE_OBJECT                  PDEV;
+    BOOL                                AmdResumeBug;
     USB_BUS                             UsbSelf;
     void*                               KernelHandle;
     int32_t                             RoothubSpeed;
@@ -483,7 +485,7 @@ typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
     PURB                                StatusUrb;
     PLOUQ_WORK                          WakeyWork;
     PLOUQ_WORK                          DeathWork;
-    struct _USB_HOST_CONTROLLER_DRIVER*  HcDriver;
+    struct _USB_HOST_CONTROLLER_DRIVER*  HcdDriver;
     PUSB_PHY_LAYER_CHAIN                UsbPhyLayer;
     PUSB_PHY_LAYER_ROOTHUB_CHAIN        UsbRootHubPhyLayer;
     uint16_t                            Flags;
@@ -496,8 +498,8 @@ typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
     uint64_t                            MillaAmpereRation;
     GIVEBACK_URB_BH                     HighPriorityBh;
     GIVEBACK_URB_BH                     LowPriorityBh;
-    mutex_t                             Address0Mutex;
-    mutex_t                             BandwithMutex;
+    mutex_t*                            Address0Mutex;
+    mutex_t*                            BandwithMutex;
     struct _PUSB_HOST_CONTROLLER_DEVICE*  PrimaryHcd;
     struct _PUSB_HOST_CONTROLLER_DEVICE*  SharedHcd;
     int                                 HcdState;
@@ -569,6 +571,7 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
 #define USB_DEVICE_AUTHORITY_NONE       0
 #define USB_DEVICE_AUTHORITY_ALL        1
 #define USB_DEVICE_AUTHORITY_INTERNAL   2
+#define USB_DEVICE_AUTHORITY_WIRED      3
 
 #define HCDS_ROOTHUB_REGISTERED(Hcd)            ((Hcd)->HCDS & 1)
 #define HCDS_ROOTHUB_POLLABLE(Hcd)              ((Hcd)->HCDS & (1 << 1))
@@ -702,7 +705,7 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
 #ifndef _KERNEL_MODULE_
 
 PUSB_HOST_CONTROLLER_DEVICE 
-LouKeAllocateUsbHostControllerDevice(
+LouKeCreateUsbHostControllerDevice(
     const USB_HOST_CONTROLLER_DRIVER*   Hcd,
     PPCI_DEVICE_OBJECT                  PDEV
 );
@@ -717,7 +720,7 @@ LouKeUsbHcdPciProbe(
 
 KERNEL_EXPORT
 PUSB_HOST_CONTROLLER_DEVICE 
-LouKeAllocateUsbHostControllerDevice(
+LouKeCreateUsbHostControllerDevice(
     const USB_HOST_CONTROLLER_DRIVER*   Hcd,
     PPCI_DEVICE_OBJECT                  PDEV
 );

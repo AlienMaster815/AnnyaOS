@@ -398,7 +398,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[178] = "LouKeGetAllocationSize";
     ImportTables[4].FunctionName[179] = "LouKeGenericAllocateFixedDmaPool";
     ImportTables[4].FunctionName[180] = "LouKeFreeFromFixedPool";
-    ImportTables[4].FunctionName[181] = "LouKeAllocateUsbHostControllerDevice";
+    ImportTables[4].FunctionName[181] = "LouKeCreateUsbHostControllerDevice";
     ImportTables[4].FunctionName[182] = "LouKeUsbHcdPciProbe";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
@@ -582,7 +582,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[178] = (uint64_t)LouKeGetAllocationSize;
     ImportTables[4].VirtualAddress[179] = (uint64_t)LouKeGenericAllocateFixedDmaPool;
     ImportTables[4].VirtualAddress[180] = (uint64_t)LouKeFreeFromFixedPool;
-    ImportTables[4].VirtualAddress[181] = (uint64_t)LouKeAllocateUsbHostControllerDevice;
+    ImportTables[4].VirtualAddress[181] = (uint64_t)LouKeCreateUsbHostControllerDevice;
     ImportTables[4].VirtualAddress[182] = (uint64_t)LouKeUsbHcdPciProbe;
 
 }

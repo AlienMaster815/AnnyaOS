@@ -116,7 +116,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             LOUDDK_API_ENTRY void LouKeHalAcpiShutdown();
 
             LOUDDK_API_ENTRY size_t LouKeHalGetPciBaseAddressSize(
-               PPCI_COMMON_CONFIG PciConfig,
+               PPCI_DEVICE_OBJECT PciConfig,
                 uint8_t BarNum  
             );
             
@@ -187,7 +187,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 void* DevicePrivateData
             );
             KERNEL_EXPORT size_t LouKeHalGetPciBaseAddressSize(
-                PPCI_COMMON_CONFIG PciConfig,
+                PPCI_DEVICE_OBJECT PciConfig,
                 uint8_t BarNum  
             );
 

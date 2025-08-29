@@ -231,6 +231,7 @@ void LouKeHalRegisterPciDevice(
 
                         i++;
                         Config->BarBase[i] = 0;
+                        Config->BarSize[i] = 0;
                         while(1);
                 }
             }
@@ -273,10 +274,10 @@ KERNEL_IMPORT uint64_t GetAllocationBlockSize(uint64_t Address);
 
 KERNEL_IMPORT 
 size_t LouKeHalGetPciBaseAddressSize(
-    PPCI_COMMON_CONFIG PciConfig,
+    PPCI_DEVICE_OBJECT PDEV,
     uint8_t BarNum  
 ){
-    return (size_t)PciConfig->BarSize[BarNum];
+    return (size_t)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarSize[BarNum]);
 }
 
 KERNEL_IMPORT 
