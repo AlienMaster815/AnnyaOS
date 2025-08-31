@@ -110,6 +110,28 @@ static PWINDOW_HANDLE CreateCanvasButton(
     return NewWindow;
 }
 
+static 
+PWINDOW_HANDLE 
+AwmCreateWinAPIWindow(
+    DWORD       ExStyle,
+    LPCSTR      ClassName,
+    LPCSTR      WindowName,
+    DWORD       Style,
+    int         X,
+    int         Y,
+    int         Width,
+    int         Height,
+    HWND        ParrentHandle,
+    HMENU       Menu,
+    HINSTANCE   Instance,
+    LPVOID      Parameters
+){
+
+    LouPrint("AwmCreateWinAPIWindow\n");
+    while(1);
+    return 0x00;
+}
+
 USER32_API
 HWND
 CreateWindowExA(
@@ -117,10 +139,10 @@ CreateWindowExA(
     LPCSTR      ClassName,
     LPCSTR      WindowName,
     DWORD       Style,
-    int64_t     X,
-    int64_t     Y,
-    uint32_t    Width,
-    uint32_t    Height,
+    int         X,
+    int         Y,
+    int         Width,
+    int         Height,
     HWND        ParrentHandle,
     HMENU       Menu,
     HINSTANCE   Instance,
@@ -139,6 +161,20 @@ CreateWindowExA(
             Style,
             X, Y,
             Width,
+            Height,
+            ParrentHandle,
+            Menu,
+            Instance,
+            Parameter
+        );
+    }else{
+        NewWindow = AwmCreateWinAPIWindow(
+            ExStyle,
+            ClassName,
+            WindowName,
+            Style,
+            X,Y,
+            Width, 
             Height,
             ParrentHandle,
             Menu,
@@ -167,10 +203,10 @@ CreateWindowA(
     LPCSTR      ClassName,
     LPCSTR      WindowName,
     DWORD       Style,
-    int64_t     X,
-    int64_t     Y,
-    uint32_t    Width,
-    uint32_t    Height,
+    int         X,
+    int         Y,
+    int         Width,
+    int         Height,
     HWND        ParrentHandle,
     HMENU       Menu,
     HINSTANCE   Instance,

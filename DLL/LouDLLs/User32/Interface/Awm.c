@@ -234,7 +234,7 @@ MouseEventHandler(
         RightMouseDown = true;
         PWINDOW_HANDLE WinHandle = AwmFindWindowAtPoint(gMouseX, gMouseY);
         if(WinHandle != StartButton){
-            //AwmHandleStartButtonEvent(StartButton, false);
+            AwmHandleStartButtonEvent(StartButton, false);
         }
         if(WinHandle){
             if(WinHandle->WindowName){
@@ -257,22 +257,21 @@ MouseEventHandler(
         }
         LastInstance = WinHandle;
         if(WinHandle != StartButton){
-    //        AwmHandleStartButtonEvent(StartButton, false);
+            AwmHandleStartButtonEvent(StartButton, false);
         }
         if(WinHandle){
             if(WinHandle->WindowName){
-    //            PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
-    //            uint16_t XRelative = (gMouseX - TmpClip->X);
-    //            uint16_t YRelative = (gMouseY - TmpClip->Y);
-    //            MutexLock(&WinHandle->CallbackMutex);
-    //            for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
-    //                if(i){
-    //                    WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-    //                }else{
-    //                    WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-    //                }
-    //            }
-    //            MutexUnlock(&WinHandle->CallbackMutex);
+                uint16_t XRelative = (gMouseX - WinHandle->X);
+                uint16_t YRelative = (gMouseY - WinHandle->Y);
+                MutexLock(&WinHandle->CallbackMutex);
+                for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+                    if(i){
+                        WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_DOWN,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                    }else{
+                        WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_DOWN, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                    }
+                }
+                MutexUnlock(&WinHandle->CallbackMutex);
             }
             else return;
             LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
@@ -291,18 +290,17 @@ MouseEventHandler(
         }
         LastInstance = WinHandle;
         if(WinHandle && WinHandle->WindowName){
-    //        PDRSD_CLIP TmpClip = FindClip(gMouseX, gMouseY);
-    //        uint16_t XRelative = (gMouseX - TmpClip->X);
-    //        uint16_t YRelative = (gMouseY - TmpClip->Y);
-    //        MutexLock(&WinHandle->CallbackMutex);
-    //        for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
-    //            if(i){
-    //                WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_UP,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-    //            }else{
-    //                WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_UP, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
-    //            }
-    //        }
-    //        MutexUnlock(&WinHandle->CallbackMutex);
+            uint16_t XRelative = (gMouseX - WinHandle->X);
+            uint16_t YRelative = (gMouseY - WinHandle->Y);
+            MutexLock(&WinHandle->CallbackMutex);
+            for(size_t i = 0 ; i < WinHandle->CallbackCount; i++){
+                if(i){
+                    WinHandle->WindowCallbacks[i](&WinHandle->WindowCallbacks[i-1], WinHandle, WM_LBUTTON_UP,  (void*)(uintptr_t)MK_LBUTTON,  (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                }else{
+                    WinHandle->WindowCallbacks[i](0x00, WinHandle, WM_LBUTTON_UP, (void*)(uintptr_t)MK_LBUTTON, (void*)(uintptr_t)((uint32_t)XRelative | (uint32_t)(YRelative << 16)));
+                }
+            }
+            MutexUnlock(&WinHandle->CallbackMutex);
         }
     }
 }
