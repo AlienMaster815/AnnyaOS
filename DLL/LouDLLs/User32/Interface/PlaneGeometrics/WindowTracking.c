@@ -87,3 +87,9 @@ void AwmUpdateLocationArea(
     AwmRedrawArea(Window, X, Y, Width, Height);
 
 }
+
+PWINDOW_HANDLE AwmFindWindowAtPoint(INT64 X, INT64 Y){
+    PWINDOW_HANDLE Result;
+    GetWindowFromLocation(X, Y, 1, 1, &Result);
+    return Result;
+}
