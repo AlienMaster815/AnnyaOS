@@ -3,6 +3,8 @@
 #include <Hal.h>
 #include "Hcd.h"
 
+static PIDENTIFICATION_RANGE UsbIdRange = 0x00;
+
 static void LouKeInitializeUsbBus(PUSB_BUS UsbBus){
     memset(&UsbBus->DeviceMap, 0, sizeof(UsbBus->DeviceMap));
     UsbBus->NextDeviceNumber = 1;
@@ -59,6 +61,30 @@ LouKeCreateUsbHostControllerDevice(
 
 static UINT8 UsbDeviceDefaultAuthority = USB_DEVICE_AUTHORITY_ALL;
 
+static 
+LOUSTATUS
+LouKeUsbRegisterBus(
+    PUSB_BUS Bus
+){
+    INTEGER BusNumber;
+    if(!UsbIdRange){
+        UsbIdRange = LouKeCreateIdentificationRange(0, 256);
+    }
+    BusNumber = LouKeAcquireIdFromRange(UsbIdRange, (PVOID)Bus);
+    
+    if(BusNumber == (INTEGER)-1){
+        LouPrint("USB ERROR: Unable To Acquire ID For Bus:%h\n", Bus);
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    LouPrint("Bus:%h Is Now Tied To ID:%d\n", Bus, BusNumber);
+    Bus->BusNumber = BusNumber;
+
+    //MABYE_TODO: add notifier
+
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS 
 LouKeUsbAddHcd(
     PUSB_HOST_CONTROLLER_DEVICE Hcd,
@@ -68,7 +94,7 @@ LouKeUsbAddHcd(
     UNUSED PUSB_DEVICE RhDev;
     UNUSED PUSB_HOST_CONTROLLER_DEVICE SharedHcd;
     UNUSED INTEGER SkipPhyLayerInit;
-    UNUSED BOOL IsPrimaryHcd = Hcd->PrimaryHcd;
+    UNUSED BOOL IsPrimaryHcd = !Hcd->PrimaryHcd;
 
     Hcd->DevicePolicy = UsbDeviceDefaultAuthority;
     if(Hcd->DevicePolicy == USB_DEVICE_AUTHORITY_WIRED){
@@ -83,8 +109,26 @@ LouKeUsbAddHcd(
         return Status;
     }
 
-    //2882
+    Status = LouKeUsbRegisterBus(&Hcd->UsbSelf);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
 
+    RhDev = LouKeAllocateUsbDevice(0x00, &Hcd->UsbSelf, 0);
+    LouPrint("RootHub Device:%h\n", RhDev);    
 
     return Status;
+}
+
+PUSB_HOST_CONTROLLER_DEVICE LouKeUsbGetHcd(PUSB_HOST_CONTROLLER_DEVICE Hcd){
+    if(Hcd){
+        LouKeAcquireReference(&Hcd->KRef);
+    }
+    return Hcd;
+}
+
+void LouKeUsbPutHcd(PUSB_HOST_CONTROLLER_DEVICE Hcd){
+    if(Hcd){
+        LouKeReleaseReferece(&Hcd->KRef);
+    }
 }

@@ -10,6 +10,18 @@ extern "C" {
 
 typedef void(*USB_COMPLETE)(struct _URB*);
  
+typedef enum{
+    USB_STATE_NOT_ATTACHED          = 0,
+    USB_STATE_ATTACHED              = 1,
+    USB_STATE_POWERED               = 2,
+    USB_STATE_RECONNECTING          = 3,
+    USB_STATE_UN_AUTHENTICATED      = 4,
+    USB_STATE_DEFAULT               = 5,
+    USB_STATE_ADDRESS               = 6,
+    USB_STATE_CONFIGURED            = 7,
+    USB_STATE_SUSPENDED             = 8,
+}USB_DEVICE_STATE;
+
 typedef struct _MON_BUS{
     ListHeader          BusLink;
     spinlock_t          MonBuasLock;
@@ -158,7 +170,7 @@ typedef struct _USB_PHY_LAYER_ROOTHUB_CHAIN{
 
 typedef struct PACKED _USB_ENDPOINT_DESCRIPTOR{
     uint8_t         Length;
-    uint8_t         Descriptor;
+    uint8_t         DescriptorType;
     uint8_t         EndpointAddress;
     uint8_t         Attributes;
     uint16_t        MaxPacketSize;
@@ -413,8 +425,9 @@ typedef struct _USB_DEVICE{
     int                             DeviceNumber;
     string                          DevicePath;
     uint32_t                        Route;
-    uint8_t                         UsbDeviceState;
+    USB_DEVICE_STATE                UsbDeviceState;
     uint8_t                         UsbDeviceSpeed;
+    atomic_t                        UrbNumber;
     uint32_t                        RxLanes;
     uint32_t                        TxLanes;
     uint8_t                         SspRate;
@@ -476,7 +489,7 @@ typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
     PPCI_DEVICE_OBJECT                  PDEV;
     BOOL                                AmdResumeBug;
     USB_BUS                             UsbSelf;
-    void*                               KernelHandle;
+    KERNEL_REFERENCE                    KRef;
     int32_t                             RoothubSpeed;
     uint8_t                             InterruptDescriptors[24];
     ListHeader                          RootHubPolls;
@@ -537,7 +550,7 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
     void              (*ReleasePort)(PUSB_HOST_CONTROLLER_DEVICE Hcd, uint64_t PortID);
     LOUSTATUS         (*CheckHandOver)(PUSB_HOST_CONTROLLER_DEVICE Hcd, uint64_t PortID);
     void              (*CtbComplete)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_HOST_ENDPOINT Endpoint);
-    LOUSTATUS         (*LouKeMallocDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE* UsbDevice);
+    LOUSTATUS         (*LouKeMallocDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
     void              (*LouKeFreeDevice)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice);
     LOUSTATUS         (*LouKeMallocStreams)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT* Endpoints, uint32_t EndpointCount, uint32_t StreamCount, uint64_t MemoryFlags);
     LOUSTATUS         (*LouKeFreeStreams)(PUSB_HOST_CONTROLLER_DEVICE Hcd, PUSB_DEVICE UsbDevice, PUSB_HOST_ENDPOINT* Endpoints, uint32_t EndpointCount, uint32_t StreamCount, uint64_t MemoryFlags);
@@ -701,6 +714,43 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
 #define USB_INTERFACE_NEEDS_BINDING(UsbInterface)                       ((UsbInterface)->Flags & (1 << 5))
 #define USB_INTERFACE_RESETTING_DEVICE(UsbInterface)                    ((UsbINterface)->Flags & (1 << 6))
 #define USB_INTERFACE_AUTHORIZED(UsbInterface)                          ((UsbInterface)->Flags & (1 << 7))
+
+#define USB_TYPE_CLASS (1 << 5)
+
+#define USB_DT_ENDPOINT_SIZE        7
+#define USB_DT_ENDPOINT_AUDIO_SIZE  9
+
+#define USB_DT_DEVICE                       0x01
+#define USB_DT_CONFIG                       0x02
+#define USB_DT_STRING                       0x03
+#define USB_DT_INTERFACE                    0x04
+#define USB_DT_ENDPOINT                     0x05
+#define USB_DT_DEVICE_QUALIFIER             0x06
+#define USB_DT_OTHER_SPEED_CONFIG           0x07
+#define USB_DT_INTERFACE_POWER              0x08
+#define USB_DT_OTG                          0x09
+#define USB_DT_DEBUG                        0x0A
+#define USB_DT_INTERFACE_ASSOCIATION        0x0B
+#define USB_DT_SECURITY                     0x0C
+#define USB_DT_KEY                          0x0D
+#define USB_DT_ENCRYPTION_TYPE              0x0E
+#define USB_DT_BOS                          0x0F
+#define USB_DT_DEVICE_CAPABILITIES          0x10
+#define USB_DT_WIRELESS_ENDPOINT_COMP       0x11
+#define USB_DT_EUSB2_ISOC_ENDPOINT_COMP     0x12
+#define USB_DT_WIRE_ADAPTER                 0x21
+#define USB_DT_DFU_FUNCTIONAL               0x21
+#define USB_DT_RPIPE                        0x22
+#define USB_DT_CS_RADIO_CONTROL             0x23
+#define USB_DT_PIPE_USAGE                   0x24
+#define USB_DT_SS_ENDPOINT_COMP             0x30
+#define USB_DT_SSP_ISOC_ENDPOINT_COMP       0x31
+#define USB_DT_CS_DEVICE                    (USB_TYPE_CLASS | USB_DT_DEVICE)
+#define USB_DT_CS_CONFIG                    (USB_TYPE_CLASS | USB_DT_CONFIG)
+#define USB_DT_CS_STRING                    (USB_TYPE_CLASS | USB_DT_STRING)
+#define USB_DT_CS_INTERFACE                 (USB_TYPE_CLASS | USB_DT_INTERFACE)
+#define USB_DT_CS_ENDPOINT                  (USB_TYPE_CLASS | USB_DT_ENDPOINT)
+
 
 #ifndef _KERNEL_MODULE_
 

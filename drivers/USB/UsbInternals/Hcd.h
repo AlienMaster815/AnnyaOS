@@ -20,6 +20,22 @@ LouKeUsbAddHcd(
     UINT8                       Irq
 );
 
+void LouKeUsbNotifyAddBus(PUSB_BUS Bus);
+
+PUSB_DEVICE LouKeAllocateUsbDevice(
+    PUSB_DEVICE Parrent,
+    PUSB_BUS    Bus,
+    UINT64      Port
+);
+
+static inline PUSB_HOST_CONTROLLER_DEVICE UsbBusToHcd(PUSB_BUS Bus){
+    return CONTAINER_OF(Bus, USB_HOST_CONTROLLER_DEVICE, UsbSelf);
+}
+
+PUSB_HOST_CONTROLLER_DEVICE LouKeUsbGetHcd(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+
+void LouKeUsbPutHcd(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+
 static 
 inline 
 bool 
@@ -35,5 +51,6 @@ AmdHcdResumeBug(
     }
     return false;
 }
+
 
 #endif

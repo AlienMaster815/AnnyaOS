@@ -13,7 +13,6 @@ LOUSTATUS
 XhciRun(
     PUSB_HOST_CONTROLLER_DEVICE Hcd
 ){
-    
 
     return STATUS_SUCCESS;
 }
@@ -73,7 +72,7 @@ XhciUnmapUrbDma(
 LOUSTATUS 
 XhciMallocDevice(
     PUSB_HOST_CONTROLLER_DEVICE Hcd,
-    PUSB_DEVICE*                UsbDevice
+    PUSB_DEVICE                 UsbDevice
 ){
 
     return STATUS_SUCCESS;
