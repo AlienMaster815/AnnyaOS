@@ -169,7 +169,7 @@ extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
 LOUSTATUS LouKeInitializeDefaultDemons();
 void LouKeLoadLousineBootTrampoline(string FilePath);
-
+int LouKeMainWorkDemon();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -229,7 +229,9 @@ void InitializeSymmetricMultiProcessing(){
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
     InitThreadManager();
-    //LouKeInitializeDefaultDemons();
+
+    LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
+
     LouKeInitializeFullLouACPISubsystem();
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
 }
@@ -303,6 +305,7 @@ bool IsSystemEfi(){
 KERNEL_ENTRY Lou_kernel_start(
     uint32_t MBOOT
 ){    
+ 
     struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
     ParseMBootTags(mboot);
     InitializeBasicMemcpy();
@@ -314,6 +317,7 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfiv = true;
         InitializeEfiCore();
     }                      
+
 
     LouKeInitializeSafeMemory();    
 

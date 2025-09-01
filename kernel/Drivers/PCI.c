@@ -26,18 +26,18 @@ PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem){
 
 static size_t CalculateMcfgEntrySize(uint8_t StartBus, uint8_t EndBus) {
     size_t BusCount = (size_t)(EndBus - StartBus + 1);
-    return BusCount * 0x100000;
+    return BusCount * MEGABYTE;
 }
 
 
 void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
     PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
-    for(size_t i = 0 ; i < MaxGroupCount; i++){
-        if(!TmpPsm->Neighbors.NextHeader){
-            TmpPsm->Neighbors.NextHeader = (PListHeader)LouKeMallocType(PCIE_SYSTEM_MANAGER, KERNEL_GENERIC_MEMORY);
-        }
+    while(TmpPsm->Neighbors.NextHeader){
         TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
     }
+    TmpPsm->Neighbors.NextHeader = (PListHeader)LouKeMallocType(PCIE_SYSTEM_MANAGER, KERNEL_GENERIC_MEMORY);
+    TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
+
     TmpPsm->BaseAddress = PciManagerData->BaseAddress;
     TmpPsm->PCISegmentGroupNumber = PciManagerData->PCISegmentGroupNumber;
     TmpPsm->StartBusNumber = PciManagerData->StartBusNumber;
@@ -49,11 +49,10 @@ void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
     LouPrint("EndBusNumber:%h\n", TmpPsm->EndBusNumber);
 
     size_t GroupSize = CalculateMcfgEntrySize(TmpPsm->StartBusNumber, TmpPsm->EndBusNumber);
-
-    uint64_t Tmp = (uint64_t)LouVMallocEx(GroupSize, MEGABYTE_PAGE);
+    EnforceSystemMemoryMap(TmpPsm->BaseAddress, GroupSize);
+    uint64_t Tmp = (uint64_t)LouVMallocEx(GroupSize, TmpPsm->BaseAddress);
     LouKeMapContinuousMemoryBlock(TmpPsm->BaseAddress, Tmp, ROUND_UP64(GroupSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
     TmpPsm->BaseAddress = Tmp;
-    MaxGroupCount++;
 }
 
 uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
@@ -89,7 +88,6 @@ void write_pci(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function, uint
         *PcieReg = value;
         return;
     }
-
     
     // Calculate the address based on bus, device, function, and offset
     uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)slot << 11) | ((uint32_t)function << 8) | (offset & 0xFC);
@@ -111,7 +109,7 @@ uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t fu
         Result = *PcieReg;
         return Result;        
     }
-
+    
     // Create configuration address as per Figure 1
     address = (uint32_t)((lbus << 16) | (lslot << 11) |
         (lfunc << 8) | (offset & 0xFC) | ((uint32_t)0x80000000));
@@ -166,18 +164,22 @@ uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_
 
 uintptr_t PcieConfigAddress(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg) {
     MutexLock(&PsmLock);
-    PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
-    for(size_t i = 0; i < MaxGroupCount; i++){
+    PPCIE_SYSTEM_MANAGER TmpPsm = (PPCIE_SYSTEM_MANAGER)Psm.Neighbors.NextHeader;
+    while(TmpPsm){
         if((TmpPsm->PCISegmentGroupNumber == Group) && (TmpPsm->StartBusNumber <= bus) && (TmpPsm->EndBusNumber >= bus)){
             uintptr_t BaseAddress = TmpPsm->BaseAddress;
             MutexUnlock(&PsmLock);
             if(BaseAddress == 0x00){
                 return (uintptr_t)-1;        
             }
-            return BaseAddress + ((((bus * 256) + (device * 8) + function) * 4096) + reg);
-        }else if(TmpPsm->Neighbors.NextHeader){
-            TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
-        }
+            uintptr_t offset = 
+                    (((uintptr_t)bus   << 20)   |
+                    ((uintptr_t)device << 15)   |  
+                    ((uintptr_t)function << 12) | 
+                    (reg & 0xFFF));
+            return BaseAddress + offset;
+        } 
+        TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
     }
     MutexUnlock(&PsmLock);
     return (uintptr_t)-1;

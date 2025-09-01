@@ -1,5 +1,7 @@
 <!--File Map For Operating System-->
 <MainDirectoryStructure>mkdir ISO</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/EFI</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/EFI/BOOT</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/boot</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES</MainDirectoryStructure>

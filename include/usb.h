@@ -22,6 +22,22 @@ typedef enum{
     USB_STATE_SUSPENDED             = 8,
 }USB_DEVICE_STATE;
 
+typedef enum {
+    USB_SSP_GEN_UNKOWN = 0,
+    USB_SSP_GEN_2x1 = 1,
+    USB_SSP_GEN_1x2 = 2,
+    USB_SSP_GEN_2x2 = 3,
+}USB_SSP_RATE;
+
+typedef enum {
+    USB_SPEED_UNKOWN = 0,
+    USB_SPEED_LOW = 1,
+    USB_SPEED_FULL = 2,
+    USB_SPEED_HIGH = 3,
+    USB_SPEED_SUPER = 4,
+    USB_SPEED_SUPER_PLUS = 5,
+}USB_DEVICE_SPEED;
+
 typedef struct _MON_BUS{
     ListHeader          BusLink;
     spinlock_t          MonBuasLock;
@@ -426,22 +442,18 @@ typedef struct _USB_DEVICE{
     string                          DevicePath;
     uint32_t                        Route;
     USB_DEVICE_STATE                UsbDeviceState;
-    uint8_t                         UsbDeviceSpeed;
+    USB_DEVICE_SPEED                Speed;
     atomic_t                        UrbNumber;
     uint32_t                        RxLanes;
     uint32_t                        TxLanes;
-    uint8_t                         SspRate;
+    USB_SSP_RATE                    SspRate;
     PUSB_TT                         Tt;
     int                             TtPort;
     uint32_t                        Toggle[2];
     struct _USB_DEVICE*             Parent;
     struct _USB_DEVICE*             UsbDevice;
     USB_HOST_ENDPOINT               Endpoint0;
-    #ifdef __cplusplus              //C++ only recognizes platform devices 
-    PDEVICE_OBJECT                  Device;
-    #else
-    void*                           Device;
-    #endif
+    PUSB_BUS                        UsbBus;
     USB_DEVICE_DESCRIPTOR           DeviceDescriptor;
     PUSB_HOST_BOS                   UsbBos;
     PUSB_HOST_CONFIGURATION         HostConfiguration;
@@ -479,9 +491,9 @@ typedef struct _GIVEBACK_URB_BH{
     bool                Running;
     bool                HighPriority;
     spinlock_t          BhLock;
-    ListHeader          Head;
+    ListHeader          Urbs;
     LOUQ_WORK           Bh;
-    PUSB_HOST_ENDPOINT  CompletedEndpoint;
+    PUSB_HOST_ENDPOINT  CompletingEndpoint;
 }GIVEBACK_URB_BH, * PGIVEBACK_URB_BH;
 
 typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
@@ -490,7 +502,7 @@ typedef struct _PUSB_HOST_CONTROLLER_DEVICE{
     BOOL                                AmdResumeBug;
     USB_BUS                             UsbSelf;
     KERNEL_REFERENCE                    KRef;
-    int32_t                             RoothubSpeed;
+    int32_t                             Speed;
     uint8_t                             InterruptDescriptors[24];
     ListHeader                          RootHubPolls;
     bool                                UsesNewPoling;
@@ -570,6 +582,7 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
     LOUSTATUS         (*PortPowerSwitch)(PUSB_HOST_CONTROLLER_DEVICE Hcd, int PortID, bool LightSwich);//santa clause turn on the lights please
     LOUSTATUS         (*SubmitSingleStepSetFeature)(PUSB_HOST_CONTROLLER_DEVICE* Hcd, PURB Urb, int FeatureFlags);
 }USB_HOST_CONTROLLER_DRIVER, * PUSB_HOST_CONTROLLER_DRIVER;
+
 
 
 #define HCD_HARDWARE_ACCESSIBLE(Hcd)    ((Hcd)->Flags & 1)
@@ -715,7 +728,24 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
 #define USB_INTERFACE_RESETTING_DEVICE(UsbInterface)                    ((UsbINterface)->Flags & (1 << 6))
 #define USB_INTERFACE_AUTHORIZED(UsbInterface)                          ((UsbInterface)->Flags & (1 << 7))
 
-#define USB_TYPE_CLASS (1 << 5)
+#define USB_DIR_IN                  0x00
+#define USB_DIR_OUT                 0x80
+
+#define USB_TYPE_MASK               (3 << 5)
+#define USB_TYPE_STANDARD           (0 << 5)
+#define USB_TYPE_CLASS              (1 << 5)
+#define USB_TYPE_VENDOR             (2 << 5)
+#define USB_TYPE_RESERVED           (3 << 5)
+
+#define USB_RECIP_MASK              0x1F
+#define USB_RECIP_DEVICE            0x00
+#define USB_RECIP_INTERFACE         0x01
+#define USB_RECIP_ENDPOINT          0x02
+#define USB_RECIP_OTHER             0x03
+#define USB_RECIP_PORT              0x04
+#define USB_RECIP_RPIPE             0x05
+
+
 
 #define USB_DT_ENDPOINT_SIZE        7
 #define USB_DT_ENDPOINT_AUDIO_SIZE  9
@@ -751,6 +781,80 @@ typedef struct _USB_HOST_CONTROLLER_DRIVER{
 #define USB_DT_CS_INTERFACE                 (USB_TYPE_CLASS | USB_DT_INTERFACE)
 #define USB_DT_CS_ENDPOINT                  (USB_TYPE_CLASS | USB_DT_ENDPOINT)
 
+#define USB_ENDPOINT_NUMBER_MASK            0x0F
+#define USB_ENDPOINT_DIR_MASK               0x80
+#define USB_ENDPOINT_XFERTYPE_MASK          0x03
+#define USB_ENDPOINT_XFER_CONTROL           0x00
+#define USB_ENDPOINT_XFER_ISOC              0x01
+#define USB_ENDPOINT_XFER_BULK              0x02
+#define USB_ENDPOINT_XFER_INT               0x03
+
+#define USB_REQ_GET_STATUS                  0x00
+#define USB_REQ_CLEAR_FEATURE               0x01
+#define USB_REQ_SET_FEATURE                 0x03
+#define USB_REQ_SET_ADDRESS                 0x05
+#define USB_REQ_GET_DESCRIPTOR              0x06
+#define USB_REQ_SET_DESCRIPTOR              0x07
+#define USB_REQ_GET_CONFIG                  0x08
+#define USB_REQ_SET_CONFIG                  0x09
+#define USB_REQ_GET_INTERFACE               0x0A
+#define USB_REQ_SET_INTERFACE               0x0B
+#define USB_REQ_SYNCH_FRAME                 0x0C
+#define USB_REQ_SET_SEL                     0x30
+#define USB_REQ_SET_ISOCH_DELAY             0x31
+#define USB_REQ_SET_ENCRYPTION              0x0D
+#define USB_REQ_GET_ENCRYPTION              0x0E
+#define USB_REQ_RPIPE_ABORT                 0x0E
+#define USB_REQ_SET_HANDSHAKE               0x0F
+#define USB_REQ_RPIPE_RESET                 0x0F
+#define USB_REQ_GET_HANDSHAKE               0x10
+#define USB_REQ_SET_CONNECTION              0x11
+#define USB_REQ_SET_SECURITY_DATA           0x12
+#define USB_REQ_GET_SECURITY_DATA           0x13
+#define USB_REQ_SET_WSUB_DATA               0x14
+#define USB_REQ_LOOPBACK_DATA_WRITE         0x15
+#define USB_REQ_LOOPBACK_DATA_READ          0x16
+#define USB_REQ_SET_INTERFACE_DS            0x17
+
+#define USB_REQ_GET_PARTNER_PD0             20
+#define USB_REQ_GET_BATTERY_STATUS          21
+#define USB_REQ_SET_PD0                     22
+#define USB_REQ_GET_VDM                     23
+#define USB_REQ_SEND_VDM                    24
+
+#define USB_DEVICE_SELF_POWERED             0
+#define USB_DEVICE_REMOTE_WAKEUP            1
+#define USB_DEVICE_TEST_MODE                2
+#define USB_DEVICE_BATTERY                  2
+#define USB_DEVICE_B_HNP_ENABLE             3
+#define USB_DEVICE_WSUB_DEVICE              3
+#define USB_DEVICE_A_HNP_SUPPORT            4
+#define USB_DEVICE_A_ALT_HNP_SUPPORT        5
+#define USB_DEVICE_DEBUG_MODE               6
+
+#define USB_TEST_J                          1
+#define USB_TEST_K                          2
+#define USB_TEST_SE0_NAK                    3
+#define USB_TEST_PACKET                     4
+#define USB_TEST_FORCE_ENABLE               5
+
+#define USB_STATUS_TYPE_STANDARD            0
+#define USB_STATUS_TYPE_PTM                 1
+
+#define USB_DEVICE_U1_ENABLE                48
+#define USB_DEVICE_U2_ENABLE                49
+#define USB_DEVICE_LTM_ENABLE               50
+#define USB_INTF_FUNC_SUSPEND               0
+
+#define USB_INTR_FUNC_SUSPEND_OPT_MASK      0xFF00
+
+#define USB_INTR_FUNC_SUSPEND_LP            (1 << 8)
+#define USB_INTR_FUNC_SUSPEND_RW            (1 << 9)
+
+#define USB_INTRF_STAT_FUNC_RW_CAP          1
+#define USB_INTRF_STAT_FUNC_RW              2
+
+#define USB_ENDPOINT_HALT                   0
 
 #ifndef _KERNEL_MODULE_
 

@@ -1,11 +1,9 @@
 #include "Ps2Mouse.h"
 
+static LOUSTATUS LouKePs2MouseUpdate(PLOUQ_WORK Work){
+    
+    PPS2_DEVICE_OBJECT Ps2Device = CONTAINER_OF(Work, PS2_DEVICE_OBJECT, Work);
 
-
-static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){ 
-    if(!(LouKeHalPs2CheckControllerStatus() & (0x20))){
-        return;
-    }
     PPS2_MOUSE_PRIVATE_DATA Private = (PPS2_MOUSE_PRIVATE_DATA)Ps2Device->DriverPrivateData;
     LouKeHalPs2ReadDeviceBuffer(Ps2Device, &Private->Data[Private->Offset], 1);
 
@@ -27,7 +25,14 @@ static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){
         );
 
     }
+    return STATUS_SUCCESS;
+}
 
+static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){ 
+    if(!(LouKeHalPs2CheckControllerStatus() & (0x20))){
+        return;
+    }
+    LouKeStartWork(&Ps2Device->Work);
 }
 
 
@@ -43,6 +48,9 @@ LouKeHalInitializePs2Mouse(
 
     Private->Scaling = MOUSE_COMMAND_SET_SCALLING_1_1;
     Private->Resolution = MOUSE_RESOLUTION_1_COUNT_MM;
+
+    LouKeLouQInitializeWork(&Ps2Device->Work, LouKePs2MouseUpdate);
+
     LouKeHalPs2InstallInterruptHandler(Ps2Device, (void(*)(uint64_t))LouKePs2MouseIrqHandler);
     UINT8 Command;
     Command = Private->Scaling;

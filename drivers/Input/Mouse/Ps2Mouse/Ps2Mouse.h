@@ -29,6 +29,7 @@ typedef struct _PS2_DEVICE_OBJECT{
     PS2_DEVICE_CLASS    DeviceClass;
     BOOL                ChipsetDevice;
     PVOID               DriverPrivateData;
+    LOUQ_WORK           Work;
 }PS2_DEVICE_OBJECT, * PPS2_DEVICE_OBJECT;
 
 

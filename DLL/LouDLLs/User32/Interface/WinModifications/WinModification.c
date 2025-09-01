@@ -37,7 +37,6 @@ AwmHookCalbackToWindow(
 
 
 
-
 LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
 
     return 0;

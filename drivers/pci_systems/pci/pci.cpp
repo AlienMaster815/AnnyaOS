@@ -41,7 +41,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
 
     if (vendorID == NOT_A_PCI_DEVICE) return; // Device doesn't exist
     uint8_t headerType = getHeaderType(Group, bus, device, function);
-    LouPrint("HeaderType:%bc\n", headerType);
+    LouPrint("HeaderType:%d\n", headerType);
     if ((headerType & 0x80) != 0) {
         LouPrint("Device Is MultiFunction\n");
         // It's a multi-function device, so check remaining functions
@@ -54,6 +54,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
                         PDev = LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);                    
                     }
                     LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
+                    PDev->Group = Group;
                     PDev->bus = bus;
                     PDev->slot = device;
                     PDev->func = function;
@@ -72,6 +73,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
             PDev = (PPCI_DEVICE_OBJECT)LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
         }
         LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
+        PDev->Group = Group;
         PDev->bus = bus;
         PDev->slot = device;
         PDev->func = function;
@@ -107,6 +109,7 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
     //uint16_t GroupIndex = 0;
     size_t Count = 0x00;
     //PPCIE_SYSTEM_MANAGER Psm = 0x00;
+
     
 
     PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAquireAcpiTable(PCI_EXSPRESS_MEMORY_MAPPED_CONFIGURATION);
@@ -121,7 +124,7 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
     for (uint8_t i = 0; i < 255; i++) {
         PcieDevice = false;
         for (size_t j = 0; j < Count; j++) {
-            if (McfgTable->TableEntries[j].Group == 0) {
+            if ((McfgTable->TableEntries[j].Group == 0) && (McfgTable->TableEntries[j].ConfigurationBaseAddress)) {
                 if (RangeInterferes(i, 0, McfgTable->TableEntries[j].StartBus, McfgTable->TableEntries[j].EndBus)) {
                     PcieDevice = true;
                     break;
@@ -133,18 +136,23 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
         }
     }
 
+
     LouPrint("MCFG Entry Count:%h\n", Count); 
     for(size_t i = 0 ; i < Count; i++){
+        if(!McfgTable->TableEntries[i].ConfigurationBaseAddress){
+            continue;
+        }
         ACPI_MCFG_ALLOCATION* NewGroup = LouKeMallocType(ACPI_MCFG_ALLOCATION, KERNEL_GENERIC_MEMORY);
         NewGroup->BaseAddress = McfgTable->TableEntries[i].ConfigurationBaseAddress;
         NewGroup->PCISegmentGroupNumber = McfgTable->TableEntries[i].Group;
         NewGroup->StartBusNumber = McfgTable->TableEntries[i].StartBus;
         NewGroup->EndBusNumber = McfgTable->TableEntries[i].EndBus;
         AddPcieGroup(NewGroup);
-        for(size_t j = McfgTable->TableEntries[i].StartBus ; j < McfgTable->TableEntries[i].EndBus; j++){
+        for(size_t j = McfgTable->TableEntries[i].StartBus ; j <= McfgTable->TableEntries[i].EndBus; j++){        
             checkBus(McfgTable->TableEntries[i].Group, j);
         }
     }
+
 }
 
 // C Land

@@ -10,15 +10,6 @@ extern "C" {
  
 typedef struct  _LOUQ{
     ListHeader                  Peers;
-    string                      Identifer;
-    void*                       QueueData;
-    uint64_t                    QueueDataSize;
-    uint64_t                    LOUQFlags;
-    uint64_t                    QueueTimeout;
-    uint64_t                    QueueDepth;
-    uint64_t                    QueueLimit;
-    uint64_t                    QueuesInFront;
-    uint64_t                    Priority;
     spinlock_t                  LOUQLock;
     mutex_t                     LouQtex;
     struct _LOUQ_COMPLETION*    Completion;
@@ -29,8 +20,8 @@ typedef struct _LOUQ_WAIT{
 }LOUQ_WAIT, * PLOUQ_WAIT;
 
 typedef struct _LOUQ_WORK{
+    ListHeader          CurrentWorkList;
     LOUQ                LouQHeader;
-    bool                WorkRequired;
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
 
@@ -54,7 +45,8 @@ typedef struct  _LOUQ_INTEFACE{
 
 typedef struct _LOUQ_COMPLETION{
     ListHeader      Neighbors;
-
+    UINT64          MsTime;
+    BOOL            Completed;
 }LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
 typedef struct _LOUQ_REQUEST{
@@ -80,39 +72,18 @@ typedef struct _LOUQ_LIMITS{
 #define USER_SUBSYSTEM              (UINT64_MAX - 6)
 #define USER_SUBSYSTEM_THREAD       (UINT64_MAX - 7)
 
+static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, DELAYED_CALLBACK Callback){
+    Work->Work.DelayedFunction = Callback;
+}
+
 #ifndef _KERNEL_MODULE_
 
-PLOUQ_WORK_STRUCTURE LouKeMallocLouQWorkManagement(string Identifer, uint64_t StructureFlags, size_t MaxActive);
-#define LouKeMallocLouQWorkStream(Identifer, StructureFlags) LouKeMallocLouQWorkManagement(Identifer, StructureFlags, 1)
-LOUSTATUS LouKeInitializeWorkQueue(
-    PLOUQ_WORK          WorkQueue,
-    string              Identifier,
-    UINT64              QueueFlags,
-    UINT64              Timeout,
-    UINT64              QueueLimit,
-    UINT64              Priority,
-    PLOUQ_COMPLETION    Completion,
-    PVOID               WorkHandler,
-    PVOID               WorkHandlerData
-);
+LOUSTATUS LouKeStartWork(PLOUQ_WORK Work);
 
 #else
 
-KERNEL_EXPORT
-LOUSTATUS LouKeInitializeWorkQueue(
-    PLOUQ_WORK          WorkQueue,
-    string              Identifier,
-    UINT64              QueueFlags,
-    UINT64              Timeout,
-    UINT64              QueueLimit,
-    UINT64              Priority,
-    PLOUQ_COMPLETION    Completion,
-    PVOID               WorkHandler,
-    PVOID               WorkHandlerData
-);
-
-
-
+KERNEL_EXPORT LOUSTATUS LouKeStartWork(PLOUQ_WORK Work);
+ 
 #endif
 #ifdef __cplusplus
 }

@@ -177,7 +177,7 @@ EXPORTS
     LouKeMallocDma16Ex
     LouKeMallocDma16
     LouKeFreeDma16
-    LouKeInitializeWorkQueue
+    LouKeStartWork
     LouKeGetAllocationSize
     LouKeGenericAllocateFixedDmaPool
     LouKeFreeFromFixedPool

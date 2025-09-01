@@ -3,6 +3,28 @@
 #include <usb.h>
 #include "Hcd.h"
 
+void LouKeUsbEnableEnpoint(
+    PUSB_DEVICE                 UsbDevice,
+    PUSB_HOST_ENDPOINT          Ep,
+    BOOL                        ResetEp
+);
+
+static bool UsbDeviceAuthorized(PUSB_DEVICE Device, PUSB_HOST_CONTROLLER_DEVICE Hcd){
+
+	if (!Device->Parent){
+		return true;
+    }
+
+    switch(Hcd->DevicePolicy){
+        case USB_DEVICE_AUTHORITY_NONE:
+        default: 
+            return false;
+        case USB_DEVICE_AUTHORITY_ALL:
+            return true;
+    }
+
+    return false;
+}
 
 PUSB_DEVICE LouKeAllocateUsbDevice(
     PUSB_DEVICE Parrent,
@@ -32,8 +54,13 @@ PUSB_DEVICE LouKeAllocateUsbDevice(
 
     NewDevice->Endpoint0.EndpointDescriptor.Length = USB_DT_ENDPOINT_SIZE;
     NewDevice->Endpoint0.EndpointDescriptor.DescriptorType = USB_DT_ENDPOINT;
+    NewDevice->UsbBus = Bus;
 
-    //
+    LouKeUsbEnableEnpoint(NewDevice, &NewDevice->Endpoint0, false);
+    NewDevice->UsbDeviceFlags1 |= 1;//submitable
 
+    if(UsbDeviceAuthorized(NewDevice, Hcd)){
+        NewDevice->UsbDeviceFlags1 |= (1 << 4); //authorized
+    }
     return NewDevice;
 }

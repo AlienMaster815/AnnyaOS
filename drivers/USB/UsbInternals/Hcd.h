@@ -28,6 +28,11 @@ PUSB_DEVICE LouKeAllocateUsbDevice(
     UINT64      Port
 );
 
+void LouKeUsbHcdResetEndpoint(
+    PUSB_DEVICE         Device,
+    PUSB_HOST_ENDPOINT  Ep
+);
+
 static inline PUSB_HOST_CONTROLLER_DEVICE UsbBusToHcd(PUSB_BUS Bus){
     return CONTAINER_OF(Bus, USB_HOST_CONTROLLER_DEVICE, UsbSelf);
 }
@@ -35,6 +40,36 @@ static inline PUSB_HOST_CONTROLLER_DEVICE UsbBusToHcd(PUSB_BUS Bus){
 PUSB_HOST_CONTROLLER_DEVICE LouKeUsbGetHcd(PUSB_HOST_CONTROLLER_DEVICE Hcd);
 
 void LouKeUsbPutHcd(PUSB_HOST_CONTROLLER_DEVICE Hcd);
+
+void LouKeUsbEnableEnpoint(
+    PUSB_DEVICE         UsbDevice,
+    PUSB_HOST_ENDPOINT  Ep,
+    BOOL                ResetEp
+);
+
+static inline INTEGER LouKeUsbGetEndpointNumber(
+    PUSB_ENDPOINT_DESCRIPTOR Ep
+){
+    return Ep->EndpointAddress & USB_ENDPOINT_NUMBER_MASK;
+}
+
+static inline INTEGER LouKeUsbEndpointDirOut(
+    PUSB_ENDPOINT_DESCRIPTOR Ep
+){
+    return ((Ep->EndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_OUT);
+}
+
+static inline INTEGER LouKeUsbEndpointDirIn(
+    PUSB_ENDPOINT_DESCRIPTOR Ep
+){
+    return ((Ep->EndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN);
+}
+
+static inline INTEGER LouKeUsbEndpointXferControl(
+    PUSB_ENDPOINT_DESCRIPTOR Ep
+){
+    return ((Ep->EndpointAddress & USB_ENDPOINT_XFERTYPE_MASK) == USB_ENDPOINT_XFER_CONTROL);
+}
 
 static 
 inline 
@@ -52,5 +87,6 @@ AmdHcdResumeBug(
     return false;
 }
 
+#define UsbSetToggle(Device, Ep, Out, Bit) ((Device)->Toggle[Out] = (((Device)->Toggle[Out] & ~((1) << Ep)) | ((Bit) << Ep)))
 
 #endif

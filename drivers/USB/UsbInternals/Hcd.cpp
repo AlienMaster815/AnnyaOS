@@ -5,6 +5,46 @@
 
 static PIDENTIFICATION_RANGE UsbIdRange = 0x00;
 
+static void LouKeUsbHcdGivebackUrbEx(PURB Urb){
+    UNUSED PUSB_HOST_CONTROLLER_DEVICE Hcd = UsbBusToHcd(Urb->UsbDevice->UsbBus);
+    UNUSED PUSB_ANCHOR Anchor = Urb->Anchor;
+    UNUSED int Status = Urb->UnlinkedErrorCode;
+
+
+}
+
+static LOUSTATUS LouKeUsbGivebackUrbBh(PLOUQ_WORK Work){
+
+    PGIVEBACK_URB_BH Bh = CONTAINER_OF(Work, GIVEBACK_URB_BH, Bh);
+    LouKIRQL Irql;
+
+    LouKeAcquireSpinLock(&Bh->BhLock, &Irql);
+    Bh->Running = true;
+    PURB Urbs = (PURB)Bh->Urbs.NextHeader;    
+    PURB UrbsFollower = Urbs;
+    Bh->Urbs.NextHeader = 0x00;
+    LouKeReleaseSpinLock(&Bh->BhLock, &Irql);
+
+    while(Urbs){
+
+        Bh->CompletingEndpoint = Urbs->Endpoint;
+        LouKeUsbHcdGivebackUrbEx(Urbs);
+        Bh->CompletingEndpoint = 0x00;
+        UrbsFollower = Urbs;
+        Urbs = (PURB)Urbs->UrbList.NextHeader;
+        UrbsFollower->UrbList.NextHeader = 0x00;
+    }
+
+
+    return STATUS_SUCCESS;
+}
+
+static void LouKeUsbInitializeGivebackUrb(
+    PGIVEBACK_URB_BH Bh
+){
+    LouKeLouQInitializeWork(&Bh->Bh, LouKeUsbGivebackUrbBh);
+}
+
 static void LouKeInitializeUsbBus(PUSB_BUS UsbBus){
     memset(&UsbBus->DeviceMap, 0, sizeof(UsbBus->DeviceMap));
     UsbBus->NextDeviceNumber = 1;
@@ -46,7 +86,7 @@ LouKeCreateUsbHostControllerDeviceEx(
     Hcd->UsbSelf.BusName = Driver->DeviceDescription;
 
     Hcd->HcdDriver = (PUSB_HOST_CONTROLLER_DRIVER)Driver;
-    Hcd->RoothubSpeed  = Driver->DriverFlags & HCD_MASK;
+    Hcd->Speed  = Driver->DriverFlags & HCD_MASK;
     Hcd->ProductDescriptor = (Driver->ProductDescriptor) ? Driver->ProductDescriptor : (string)"USB Host Controller";
     return Hcd;
 }
@@ -80,9 +120,31 @@ LouKeUsbRegisterBus(
     LouPrint("Bus:%h Is Now Tied To ID:%d\n", Bus, BusNumber);
     Bus->BusNumber = BusNumber;
 
+    
     //MABYE_TODO: add notifier
 
     return STATUS_SUCCESS;
+}
+
+void LouKeUsbHcdResetEndpoint(
+    PUSB_DEVICE         Device,
+    PUSB_HOST_ENDPOINT  Ep
+){
+    PUSB_HOST_CONTROLLER_DEVICE Hcd = UsbBusToHcd(Device->UsbBus);
+    if(Hcd->HcdDriver->ResetEndpoint){
+        Hcd->HcdDriver->ResetEndpoint(Hcd, Ep);
+        return;
+    }
+
+    INTEGER EpNumber = LouKeUsbGetEndpointNumber(&Ep->EndpointDescriptor);
+    INTEGER Out = LouKeUsbEndpointDirOut(&Ep->EndpointDescriptor);
+    INTEGER Xfer = LouKeUsbEndpointXferControl(&Ep->EndpointDescriptor);
+
+    UsbSetToggle(Device, EpNumber, Out, 0);
+    if(Xfer){
+        UsbSetToggle(Device, EpNumber, !Out, 0);
+    }
+
 }
 
 LOUSTATUS 
@@ -115,7 +177,51 @@ LouKeUsbAddHcd(
     }
 
     RhDev = LouKeAllocateUsbDevice(0x00, &Hcd->UsbSelf, 0);
-    LouPrint("RootHub Device:%h\n", RhDev);    
+    Hcd->UsbSelf.RootHub = RhDev;
+    RhDev->RxLanes = 1;
+    RhDev->TxLanes = 1;
+    RhDev->SspRate = USB_SSP_GEN_UNKOWN;
+
+    switch(Hcd->Speed){
+        case HCD_USB1_1:
+            RhDev->Speed = USB_SPEED_FULL;
+            break;
+        case HCD_USB2_0:
+            RhDev->Speed = USB_SPEED_FULL;
+            break;
+        case HCD_USB3_0:
+            RhDev->Speed = USB_SPEED_SUPER;
+            break;
+        case HCD_USB3_2:
+            RhDev->RxLanes = 2;
+            RhDev->TxLanes = 2;
+            RhDev->SspRate = USB_SSP_GEN_2x1;
+            RhDev->Speed = USB_SPEED_SUPER_PLUS;
+            break;
+        case HCD_USB3_1:
+            RhDev->SspRate = USB_SSP_GEN_2x1;
+            RhDev->Speed = USB_SPEED_SUPER_PLUS;
+            break;
+        default:
+            LouPrint("ERROR:Speed\n");
+            while(1);
+    }
+
+    Hcd->Flags |= (1 << 5); //roothub running
+
+    if(Hcd->HcdDriver->ResetHcd){
+        Status = Hcd->HcdDriver->ResetHcd(Hcd);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("Roothub Failed To Reset\n");
+            while(1);
+        }
+    }
+    Hcd->HCDS |= (1 << 1);
+
+    LouKeUsbInitializeGivebackUrb(&Hcd->HighPriorityBh);
+    Hcd->HighPriorityBh.HighPriority = true;
+    LouKeUsbInitializeGivebackUrb(&Hcd->LowPriorityBh);
+
 
     return Status;
 }
