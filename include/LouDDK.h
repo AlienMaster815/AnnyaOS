@@ -192,6 +192,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <kernel/XArray.h>
 #include <drivers/Busses.h>
 #include <kernel/Objects.h>
+#include <drivers/Ecam.h>
+
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

@@ -64,27 +64,31 @@ typedef int pci_power_t;
 #ifndef _PCI_DEVICE_OBJECT_
 #define _PCI_DEVICE_OBJECT_
 typedef struct _PCI_DEVICE_OBJECT {
-	uint16_t 	VendorID;
-	uint16_t 	DeviceID;
-	uint16_t 	Group;
-	uint8_t 	bus;
-	uint8_t 	slot;
-	uint8_t 	func;
-	bool		InterruptsEnabled;
-	int 		NumberOfSAssignedVectors;
-	uint64_t* 	InterruptVectors;
-	void* 		Dev;
-	void* 		CommonConfig;
-	pci_power_t CurrentState;
-	uint8_t 	PmCap;
-	atomic_t 	enable_cnt;
-	uint8_t	  	InterruptLine;
-	uint8_t	  	InterruptPin;
-	uintptr_t 	DeviceExtendedObject; 
-	uintptr_t 	DevicePrivateData;
-	uintptr_t 	VgaDecode; //only video devces
-	bool 		ExpressDevice;
-	bool		DeviceManaged;
+	uint16_t 			VendorID;
+	uint16_t 			DeviceID;
+	uint16_t 			Group;
+	uint8_t 			bus;
+	uint8_t 			slot;
+	uint8_t 			func;
+	bool				InterruptsEnabled;
+	int 				NumberOfSAssignedVectors;
+	uint64_t* 			InterruptVectors;
+	void* 				Dev;
+	void* 				CommonConfig;
+	void*				EcamDevice;//literal base
+	struct{
+		LOUSTATUS 		(*PcieReadEcam)(struct _PCI_DEVICE_OBJECT* Device, size_t Offset, size_t Width, uint32_t* Value);
+		LOUSTATUS 		(*PcieWriteEcam)(struct _PCI_DEVICE_OBJECT* Device, size_t Offset, size_t Width, uint32_t Value);
+	}EcamOperations;
+	pci_power_t 		CurrentState;
+	uint8_t 			PmCap;
+	atomic_t 			enable_cnt;
+	uint8_t	  			InterruptLine;
+	uint8_t	  			InterruptPin;
+	uintptr_t 			DeviceExtendedObject; 
+	uintptr_t 			DevicePrivateData;
+	uintptr_t 			VgaDecode; //only video devces
+	bool				DeviceManaged;
 }PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 #endif
 
@@ -244,27 +248,31 @@ typedef int pci_power_t;
 #ifndef _PCI_DEVICE_OBJECT_
 #define _PCI_DEVICE_OBJECT_
 typedef struct _PCI_DEVICE_OBJECT {
-	uint16_t 	VendorID;
-	uint16_t 	DeviceID;
-	uint16_t 	Group;
-	uint8_t 	bus;
-	uint8_t 	slot;
-	uint8_t 	func;
-	bool		InterruptsEnabled;
-	int 		NumberOfSAssignedVectors;
-	uint64_t* 	InterruptVectors;
-	void* 		Dev;
-	void* 		CommonConfig;
-	pci_power_t CurrentState;
-	uint8_t 	PmCap;
-	atomic_t 	enable_cnt;
-	uint8_t	  	InterruptLine;
-	uint8_t	  	InterruptPin;
-	uintptr_t 	DeviceExtendedObject; 
-	uintptr_t 	DevicePrivateData;
-	uintptr_t 	VgaDecode; //only video devces
-	bool 		ExpressDevice;
-	bool		DeviceManaged;
+	uint16_t 			VendorID;
+	uint16_t 			DeviceID;
+	uint16_t 			Group;
+	uint8_t 			bus;
+	uint8_t 			slot;
+	uint8_t 			func;
+	bool				InterruptsEnabled;
+	int 				NumberOfSAssignedVectors;
+	uint64_t* 			InterruptVectors;
+	void* 				Dev;
+	void* 				CommonConfig;
+	void*				EcamDevice;//literal base
+	struct{
+		LOUSTATUS 		(*PcieReadEcam)(struct _PCI_DEVICE_OBJECT* Device, size_t Offset, size_t Width, uint32_t* Value);
+		LOUSTATUS 		(*PcieWriteEcam)(struct _PCI_DEVICE_OBJECT* Device, size_t Offset, size_t Width, uint32_t Value);
+	}EcamOperations;
+	pci_power_t 		CurrentState;
+	uint8_t 			PmCap;
+	atomic_t 			enable_cnt;
+	uint8_t	  			InterruptLine;
+	uint8_t	  			InterruptPin;
+	uintptr_t 			DeviceExtendedObject; 
+	uintptr_t 			DevicePrivateData;
+	uintptr_t 			VgaDecode; //only video devces
+	bool				DeviceManaged;
 }PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 #endif
 

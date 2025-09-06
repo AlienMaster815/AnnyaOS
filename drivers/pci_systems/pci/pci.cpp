@@ -23,15 +23,21 @@ LOUDDK_API_ENTRY void scan_pci_bridges();
 
 bool IsPciBus(uint8_t bus, uint8_t slot, uint8_t func);
 
-LOUDDK_API_ENTRY void checkBus(uint16_t Group, uint8_t bus) {
-    uint8_t device;
+LOUDDK_API_ENTRY
+void checkBus(uint16_t Group, uint8_t bus) {
 
-    for (device = 0; device < 32; device++) {
+    for (size_t device = 0; device < 32; device++) {
         checkDevice(Group, bus, device);
     }
 }
 
+PPCI_DEVICE_OBJECT LouKeAllocPciDevObject(){
+    return (PPCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+}
 
+void LouKeFreePciDevObject(PPCI_DEVICE_OBJECT PDEV){
+    LouKeFreeFromFixedPool(PciDeicePool, (PVOID)(UINT8*)PDEV);
+}
 
 LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
     //LouPrint("Here\n");
@@ -102,6 +108,8 @@ typedef struct _ACPI_MCFG_ALLOCATION{
 
 KERNEL_IMPORT void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
 
+KERNEL_IMPORT size_t LouKeGetMcfgCount(void* Table);
+
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 
     LouPrint("Scanning PCI Bus\n");
@@ -119,7 +127,7 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
         }
         return;
     }
-    Count = GET_MCFG_ENTRY_COUNT(McfgTable);
+    Count = LouKeGetMcfgCount((void*)McfgTable);
     bool PcieDevice;
     for (uint8_t i = 0; i < 255; i++) {
         PcieDevice = false;
@@ -136,56 +144,65 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
         }
     }
 
-
-    LouPrint("MCFG Entry Count:%h\n", Count); 
-    for(size_t i = 0 ; i < Count; i++){
-        if(!McfgTable->TableEntries[i].ConfigurationBaseAddress){
-            continue;
-        }
-        ACPI_MCFG_ALLOCATION* NewGroup = LouKeMallocType(ACPI_MCFG_ALLOCATION, KERNEL_GENERIC_MEMORY);
-        NewGroup->BaseAddress = McfgTable->TableEntries[i].ConfigurationBaseAddress;
-        NewGroup->PCISegmentGroupNumber = McfgTable->TableEntries[i].Group;
-        NewGroup->StartBusNumber = McfgTable->TableEntries[i].StartBus;
-        NewGroup->EndBusNumber = McfgTable->TableEntries[i].EndBus;
-        AddPcieGroup(NewGroup);
-        for(size_t j = McfgTable->TableEntries[i].StartBus ; j <= McfgTable->TableEntries[i].EndBus; j++){        
-            checkBus(McfgTable->TableEntries[i].Group, j);
-        }
-    }
-
 }
 
 // C Land
 
 LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+    UINT32 Tmp = 0;
+    if(PDEV->EcamDevice){
+        PDEV->EcamOperations.PcieReadEcam(PDEV, Offset, sizeof(UINT8), &Tmp);
+        return (UINT8)Tmp;
+        if(PDEV->Group)return UINT8_MAX;
+    }
     return pciConfigReadByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
 LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+    UINT32 Tmp = 0;
+    if(PDEV->EcamDevice){
+        PDEV->EcamOperations.PcieReadEcam(PDEV, Offset, sizeof(UINT16), &Tmp);
+        return (UINT16)Tmp;
+        if(PDEV->Group)return UINT16_MAX;
+    }
     return pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Offset);
-
 }
 
 LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+    UINT32 Tmp = 0;
+    if(PDEV->EcamDevice){
+        PDEV->EcamOperations.PcieReadEcam(PDEV, Offset, sizeof(UINT16), &Tmp);
+        return (UINT32)Tmp;
+        if(PDEV->Group)return UINT32_MAX;
+    }
     return pci_read(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
 
 LOUDDK_API_ENTRY void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value){
+    if(PDEV->EcamDevice){
+        PDEV->EcamOperations.PcieWriteEcam(PDEV, Offset, sizeof(UINT8), (UINT32)Value);
+        if(PDEV->Group)return;
+    }
     pciConfigWriteByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func,Offset,Value);
 }
 
 LOUDDK_API_ENTRY void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value){
+    if(PDEV->EcamDevice){
+        PDEV->EcamOperations.PcieWriteEcam(PDEV, Offset, sizeof(UINT16), (UINT32)Value);
+        if(PDEV->Group)return;
+    }
     pciConfigWriteWord(PDEV->Group, PDEV->bus, PDEV->slot,PDEV->func,Offset,Value);
 }
 
 LOUDDK_API_ENTRY void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value){
+    if(PDEV->EcamDevice){
+        PDEV->EcamOperations.PcieWriteEcam(PDEV, Offset, sizeof(UINT32), (UINT32)Value);
+        if(PDEV->Group)return;
+    }
     write_pci(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset, Value);
 }
 
-LOUDDK_API_ENTRY void ScanForVideoHardware(){
-
-}
 
 void InitializeBARHalLayer();
 

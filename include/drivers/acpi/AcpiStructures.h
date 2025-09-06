@@ -2028,7 +2028,6 @@ typedef struct _MCFG_TABLE_ENTRY{
     UINT32      Reserved;
 }MCFG_TABLE_ENTRY, * PMCFG_TABLE_ENTRY;
 
-#define GET_MCFG_ENTRY_COUNT(Table)  (((Table->TableLength) - ((uintptr_t)&Table->TableEntries[0] - (uintptr_t)Table)) / sizeof(MCFG_TABLE_ENTRY))
 
 typedef struct PACKED _MCFG_TABLE{
     UINT32              TableHeader;

@@ -207,7 +207,6 @@ ACPI_STATUS AcpiPccAddressSpaceSetup(
 
 void AcpiInitializePlatformCommunications();
 void AcpiInitializeFfh();
-void PciMmcfgLateInit();
 
 void LouKeInitializeFullLouACPISubsystem(){
     ACPI_STATUS Status;
@@ -239,11 +238,9 @@ void LouKeInitializeFullLouACPISubsystem(){
 
     AcpiInitializeFfh();
 
-    PciMmcfgLateInit();
     EarlyInitializeViot();
     AcpiInitializeHest();
     AcpiInitializeScan();
-
 
     LouPrint("LouKeInitializeFullLouACPISubsystem()\n");
     //while(1);

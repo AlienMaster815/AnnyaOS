@@ -12,62 +12,16 @@ UNUSED static uint16_t MaxGroupCount = 0;
 UNUSED static PCIE_SYSTEM_MANAGER Psm = {0};
 UNUSED static mutex_t PsmLock; 
 
-uint16_t GetPciGroupCount(){
-    return MaxGroupCount;
-}
 
-PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem){
-    PPCIE_SYSTEM_MANAGER Result = &Psm;
-    for(uint16_t i = 0; i < GroupItem; i++){
-        Result = (PPCIE_SYSTEM_MANAGER)Result->Neighbors.NextHeader;
-    }
-    return Result;
-}
-
-static size_t CalculateMcfgEntrySize(uint8_t StartBus, uint8_t EndBus) {
-    size_t BusCount = (size_t)(EndBus - StartBus + 1);
-    return BusCount * MEGABYTE;
-}
+#define ECAM_BAR_DMA_MAPPING ((1ULL << 0) | (1ULL << 1) | (1ULL << 3) | (1ULL << 4) | (1ULL << 63))
 
 
-void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData){
-    PPCIE_SYSTEM_MANAGER TmpPsm = &Psm;
-    while(TmpPsm->Neighbors.NextHeader){
-        TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
-    }
-    TmpPsm->Neighbors.NextHeader = (PListHeader)LouKeMallocType(PCIE_SYSTEM_MANAGER, KERNEL_GENERIC_MEMORY);
-    TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
-
-    TmpPsm->BaseAddress = PciManagerData->BaseAddress;
-    TmpPsm->PCISegmentGroupNumber = PciManagerData->PCISegmentGroupNumber;
-    TmpPsm->StartBusNumber = PciManagerData->StartBusNumber;
-    TmpPsm->EndBusNumber = PciManagerData->EndBusNumber;
-    
-    LouPrint("BaseAddress:%h\n", TmpPsm->BaseAddress);
-    LouPrint("PCISegmentGroupNumber:%h\n", TmpPsm->PCISegmentGroupNumber);
-    LouPrint("StartBusNumber:%h\n", TmpPsm->StartBusNumber);
-    LouPrint("EndBusNumber:%h\n", TmpPsm->EndBusNumber);
-
-    size_t GroupSize = CalculateMcfgEntrySize(TmpPsm->StartBusNumber, TmpPsm->EndBusNumber);
-    EnforceSystemMemoryMap(TmpPsm->BaseAddress, GroupSize);
-    uint64_t Tmp = (uint64_t)LouVMallocEx(GroupSize, TmpPsm->BaseAddress);
-    LouKeMapContinuousMemoryBlock(TmpPsm->BaseAddress, Tmp, ROUND_UP64(GroupSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
-    TmpPsm->BaseAddress = Tmp;
-}
 
 uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset) {
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
     uint32_t lfunc = (uint32_t)func;
-
-    volatile uint32_t* PcieReg = (volatile uint32_t*)PcieConfigAddress(Group, bus, slot, func, offset);;
-    uint32_t Result;
-    
-    if((uintptr_t)PcieReg != ((uintptr_t)-1)){
-        Result = *PcieReg;
-        return Result;        
-    }
 
     // Create the PCI configuration address
     address = (uint32_t)((lbus << 16) | (lslot << 11) |
@@ -82,13 +36,6 @@ uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint3
 void write_pci(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function, uint32_t offset, uint32_t value) {
     
     
-    volatile uint32_t* PcieReg = (volatile uint32_t*)PcieConfigAddress(Group, bus, slot, function, offset);;
-    
-    if((uintptr_t)PcieReg != ((uintptr_t)-1)){
-        *PcieReg = value;
-        return;
-    }
-    
     // Calculate the address based on bus, device, function, and offset
     uint32_t address = (1U << 31) | ((uint32_t)bus << 16) | ((uint32_t)slot << 11) | ((uint32_t)function << 8) | (offset & 0xFC);
     // Write to PCI configuration space
@@ -101,14 +48,6 @@ uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t fu
     uint32_t lslot = (uint32_t)slot;
     uint32_t lfunc = (uint32_t)func;
     uint16_t tmp = 0;
-
-    volatile uint16_t* PcieReg = (volatile uint16_t*)PcieConfigAddress(Group, bus, slot, func, offset);;
-    uint16_t Result;
-    
-    if((uintptr_t)PcieReg != ((uintptr_t)-1)){
-        Result = *PcieReg;
-        return Result;        
-    }
     
     // Create configuration address as per Figure 1
     address = (uint32_t)((lbus << 16) | (lslot << 11) |
@@ -127,13 +66,6 @@ void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func,
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
     uint32_t lfunc = (uint32_t)func;
-
-    volatile uint16_t* PcieReg = (volatile uint16_t*)PcieConfigAddress(Group, bus, slot, func, offset);;
-    
-    if((uintptr_t)PcieReg != ((uintptr_t)-1)){
-        *PcieReg = value;
-        return;        
-    }
 
     // Create configuration address as per Figure 1
     address = (uint32_t)((lbus << 16) | (lslot << 11) |
@@ -162,38 +94,7 @@ uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_
     return (1U << 31) | (bus << 16) | (device << 11) | (function << 8) | (reg & 0xFC);
 }
 
-uintptr_t PcieConfigAddress(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg) {
-    MutexLock(&PsmLock);
-    PPCIE_SYSTEM_MANAGER TmpPsm = (PPCIE_SYSTEM_MANAGER)Psm.Neighbors.NextHeader;
-    while(TmpPsm){
-        if((TmpPsm->PCISegmentGroupNumber == Group) && (TmpPsm->StartBusNumber <= bus) && (TmpPsm->EndBusNumber >= bus)){
-            uintptr_t BaseAddress = TmpPsm->BaseAddress;
-            MutexUnlock(&PsmLock);
-            if(BaseAddress == 0x00){
-                return (uintptr_t)-1;        
-            }
-            uintptr_t offset = 
-                    (((uintptr_t)bus   << 20)   |
-                    ((uintptr_t)device << 15)   |  
-                    ((uintptr_t)function << 12) | 
-                    (reg & 0xFFF));
-            return BaseAddress + offset;
-        } 
-        TmpPsm = (PPCIE_SYSTEM_MANAGER)TmpPsm->Neighbors.NextHeader;
-    }
-    MutexUnlock(&PsmLock);
-    return (uintptr_t)-1;
-}
-
 uint8_t pciConfigReadByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg) {
-    
-    volatile uint8_t* PcieReg = (volatile uint8_t*)PcieConfigAddress(Group, bus, device, function, reg);;
-    uint8_t Result;
-    
-    if((uintptr_t)PcieReg != ((uintptr_t)-1)){
-        Result = *PcieReg;
-        return Result;        
-    }
     
     // Calculate the address for PCI configuration space access
     uint32_t address = pciConfigAddress(bus, device, function, reg);
@@ -207,12 +108,6 @@ uint8_t pciConfigReadByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t f
 
 void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value) {
     
-    volatile uint8_t* PcieReg = (volatile uint8_t*)PcieConfigAddress(Group, bus, device, function, reg);;
-    
-    if((uintptr_t)PcieReg != ((uintptr_t)-1)){
-        *PcieReg = value;
-        return;        
-    }
     // Calculate the address for PCI configuration space access
     uint32_t address = pciConfigAddress(bus, device, function, reg);
 

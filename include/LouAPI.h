@@ -46,6 +46,7 @@
 #include <Dispatching.h>
 #include <drivers/Busses.h>
 #include <kernel/Objects.h>
+#include <drivers/Ecam.h>
 
 
 #ifndef _KERNEL_MODULE_

@@ -3327,11 +3327,7 @@ void RtlRaiseStatus(LOUSTATUS Status){
 // vsprintf   IMPLEMENTED
 // vsprintf_s IMPLEMENTED
 
-// x86BiosAllocateBuffer
-// x86BiosCall
-// x86BiosFreeBuffer
-// x86BiosReadMemory
-// x86BiosWriteMemory
+
 
 void NtTransitionLayerInitMessageTraceStack();
 

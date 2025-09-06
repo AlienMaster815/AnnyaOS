@@ -138,13 +138,83 @@ LOUSTATUS ParsePciMcfg(PACPI_TABLE_HEADER Header){
     return AE_OK;
 }
 
+size_t LouKeGetMcfgCount(void* Table);
 
-void PciMmcfgLateInit(){
-    //LouPrint("PciMmcfgLateInit()\n");
-    //LOUSTATUS Status = LouKeAcpiTableTableParse(ACPI_SIG_MCFG, ParsePciMcfg);
-    //if(Status != STATUS_SUCCESS){
-    //    LouPrint("Error Saving PCI MCFG\n");
-    //}
+void LouKeInitializeEcamAbstractionDevice(
+    UINTPTR         Phys,
+    UINTPTR         Virt,
+    UINT16          Group,
+    UINT8           StartBus,
+    UINT8           EndBus
+);
+
+
+void PciMmcfgEarlyInit(){
+
+	ACPI_TABLE_MCFG* Mcfg = LouKeAquireAcpiTable(ACPI_SIG_MCFG);	
+	if(!Mcfg){
+		LouPrint("Pc Does Not Support PCIe\n");
+		return;
+	}
+
+	LouPrint("Initializing PCIe ECAM System\n");
+
+	size_t CfgCount = LouKeGetMcfgCount((PVOID)Mcfg);
+	size_t TotalDevices = 0;
+	//never ever ever ever
+	ACPI_MCFG_ALLOCATION* Allocations = (ACPI_MCFG_ALLOCATION*)(UINT8*)((UINTPTR)Mcfg + (UINTPTR)sizeof(ACPI_TABLE_MCFG));
+
+	ACPI_MCFG_ALLOCATION* Tmp = LouKeMallocArray(ACPI_MCFG_ALLOCATION, CfgCount, KERNEL_GENERIC_MEMORY);
+
+	for(size_t i = 0 ; i < CfgCount; i++){
+		if(!Allocations[i].Address)continue;
+
+		//i hate hardware companies
+		for(size_t j = 0 ; j < TotalDevices; j++){
+			if(Tmp[j].Address == Allocations[i].Address){
+				//i guess trust the second one if bios updates currupted but continuing is still a bad idea...
+				Tmp[j].Address = Allocations[i].Address;
+				Tmp[j].PciSegment = Allocations[i].PciSegment;
+				Tmp[j].StartBusNumber = Allocations[i].StartBusNumber;
+				Tmp[j].EndBusNumber = Allocations[i].EndBusNumber;
+				goto _FINISHED_PARSE_ROUND;
+			}
+		}
+
+		Tmp[TotalDevices].Address = Allocations[i].Address;
+		Tmp[TotalDevices].PciSegment = Allocations[i].PciSegment;
+		Tmp[TotalDevices].StartBusNumber = Allocations[i].StartBusNumber;
+		Tmp[TotalDevices].EndBusNumber = Allocations[i].EndBusNumber;
+		TotalDevices++;
+
+		_FINISHED_PARSE_ROUND:
+	}
+
+	for (size_t i = 0; i < TotalDevices; i++) {
+		size_t NumBuses = (Tmp[i].EndBusNumber - Tmp[i].StartBusNumber) + 1;
+		size_t TmpSize  = NumBuses * (1 * MEGABYTE);
+		TmpSize = ROUND_UP64(TmpSize, KILOBYTE_PAGE);
+
+		EnforceSystemMemoryMap(Tmp[i].Address, TmpSize);
+
+		UINTPTR Virt = (UINTPTR)LouVMallocEx(TmpSize, Tmp[i].Address);
+		LouKeMapContinuousMemoryBlock(
+			Tmp[i].Address,
+			Virt,
+			TmpSize,
+			ECAM_DMA_MEMORY_FLAGS
+		);
+
+		LouKeInitializeEcamAbstractionDevice(
+			Tmp[i].Address,
+			Virt,
+			Tmp[i].PciSegment,
+			Tmp[i].StartBusNumber,
+			Tmp[i].EndBusNumber
+		);
+	}
+
+	LouKeFree(Tmp);
 }
 
 void AcpiCheckPciCrsQuirks(){
@@ -174,4 +244,11 @@ void AcpiInitializePciLink(){
 
 	LouPrint("AcpiInitializePciLink()\n");
 	while(1);
+}
+
+size_t LouKeGetMcfgCount(void* Table){
+
+	ACPI_TABLE_MCFG* McfgTable = (ACPI_TABLE_MCFG*)Table;
+
+	return (McfgTable->Header.Length - sizeof(ACPI_TABLE_MCFG)) / sizeof(ACPI_MCFG_ALLOCATION);
 }

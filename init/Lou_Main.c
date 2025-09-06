@@ -170,6 +170,8 @@ uint16_t GetNPROC();
 LOUSTATUS LouKeInitializeDefaultDemons();
 void LouKeLoadLousineBootTrampoline(string FilePath);
 int LouKeMainWorkDemon();
+void PciMmcfgEarlyInit();
+void LouKePcieProbeEcam();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -326,10 +328,14 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
-
+    
     InitializeDebuggerComunications();
 
     LouKeMapPciMemory();
+
+    PciMmcfgEarlyInit();
+
+    LouKePcieProbeEcam();
 
     InitializeBootGraphics();
 
@@ -339,8 +345,8 @@ KERNEL_ENTRY Lou_kernel_start(
 
     AdvancedLousineKernelInitialization();
 
-    //LouPrint("Here\n");
-    //while(1);
+    LouPrint("Here\n");
+    while(1);
     //TODO: Add a parser for the manifest for 
     //loading needed modules that need to be 
     //loaded no matter what
