@@ -20,29 +20,30 @@
 #define PORT_1                              1
 #define PORT_2                              2
 #define PORT_3                              3
-#define IDE_STTRIBUTE                       -1
+#define IDE_ATTRIBUTE                       -1
 #define NO_ATTRIBUTE                        -2
 #define RESERVED_ATTRIBUTE                  -3
 #define PIIX_AHCI_SUPPORTED                 6
 #define PIIX_HOST_HAS_BROKEN_SUSSPEND       true
 #define PIIX_HOST_HAS_NO_BROKEN_SUSSPEND    false
 
-#define PIIX_CONTROLLER_ID_PATA_MWDMA           0
-#define PIIX_CONTROLLER_ID_PATA_33              1
-#define ICH_CONTROLLER_ID_PATA_33               2
-#define ICH_CONTROLLER_ID_PATA_66               3
-#define ICH_CONTROLLER_ID_PATA_100              4
-#define ICH_CONTROLLER_ID_PATA_100_NO_MWDMA     5
-#define ICH5_CONTROLLER_ID_SATA                 6
-#define ICH6_CONTROLLER_ID_SATA                 7
-#define ICH6M_CONTROLLER_ID_SATA                8
-#define ICH8_CONTROLLER_ID_SATA                 9
-#define ICH8_2P_CONTROLLER_ID_SATA              10
-#define ICH8M_APPLE_CONTROLLER_ID_SATA          11
-#define TOLAPI_CONTROLLER_ID_SATA               12
-#define PIIX_CONTROLLER_ID_VMWARE               13
-#define ICH8_2P_CONTROLLER_ID_SATA_SNB          14
-#define ICH8_2P_CONTROLLER_ID_SATA_BYT          15
+#define ICH5_CONTROLLER_ID_SATA                 0
+#define ICH6_CONTROLLER_ID_SATA                 1
+#define ICH6M_CONTROLLER_ID_SATA                2
+#define ICH8_CONTROLLER_ID_SATA                 3
+#define ICH8_2P_CONTROLLER_ID_SATA              4
+#define ICH8M_APPLE_CONTROLLER_ID_SATA          5
+#define TOLAPI_CONTROLLER_ID_SATA               6
+#define ICH8_CONTROLLER_ID_SATA_SNB             7
+#define ICH8_2P_CONTROLLER_ID_SATA_SNB          8
+#define ICH8_2P_CONTROLLER_ID_SATA_BYT          9
+#define PIIX_CONTROLLER_ID_PATA_MWDMA           10
+#define PIIX_CONTROLLER_ID_PATA_33              11
+#define ICH_CONTROLLER_ID_PATA_33               12
+#define ICH_CONTROLLER_ID_PATA_66               13
+#define ICH_CONTROLLER_ID_PATA_100              14
+#define ICH_CONTROLLER_ID_PATA_100_NO_MWDMA     15
+#define PIIX_CONTROLLER_ID_VMWARE               16
 
 typedef struct _PIIX_MAP_ENTRY{
     uint32_t Bits;
@@ -55,3 +56,9 @@ typedef struct _PIIX_HOST_PRIVATE_DATA{
     uint32_t SavedIoConfiguration;
     void*    SidPr;
 }PIIX_HOST_PRIVATE_DATA, * PPIIX_HOST_PRIVATE_DATA;
+
+typedef struct _ICH_LAPTOP_ID{
+    UINT16 Device;
+    UINT16 SubVendor;
+    UINT16 SubDevice;
+}ICH_LAPTOP_ID, * PICH_LAPTOP_ID;

@@ -345,8 +345,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     AdvancedLousineKernelInitialization();
 
-    LouPrint("Here\n");
-    while(1);
     //TODO: Add a parser for the manifest for 
     //loading needed modules that need to be 
     //loaded no matter what
@@ -433,7 +431,6 @@ void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
 //TODO : Fix the memory manager...
 
 //BUGS TO FIX:
-//memcpy doesent use SSE correctly
 
 //Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 
