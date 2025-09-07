@@ -246,6 +246,7 @@ LOUSTATUS AtaGenricDMAIssueCommand(
         Result = ReadLegacyAtapi(QueuedCommand, AtaPort);
         MutexUnlock(&AtaPort->OperaionLock);
         LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
+        return Result;
     }
 
     Result = ReadLegacyAta(QueuedCommand, AtaPort);
@@ -284,25 +285,25 @@ static void AtaGenericGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT Port){
     uint8_t LBAH = COMMAND_READ_LBAH_PORT_LBA28;
 
     if((LBAL == 0x14) || (LBAH == 0xEB)){
-        //LouPrint("PATAPI\n");
+        LouPrint("PATAPI\n");
         Port->PortScsiDevice = true;
         Port->SerialDevice = false;
         Port->SectorSize = 2048;
     }
     if((LBAL == 0x69) || (LBAH == 0x96)){
-        //LouPrint("SATAPI\n");
+        LouPrint("SATAPI\n");
         Port->PortScsiDevice = true;
         Port->SerialDevice = true;
         Port->SectorSize = 2048;
     }
     if((LBAL == 0) || (LBAH == 0)){
-        //LouPrint("ATA\n");
+        LouPrint("ATA\n");
         Port->PortScsiDevice = false;
         Port->SerialDevice = false;
         Port->SectorSize = 512;
     }
     if((LBAL == 0x3C) || (LBAH == 0xC3)){
-        //LouPrint("SATA\n");
+        LouPrint("SATA\n");
         Port->PortScsiDevice = false;
         Port->SerialDevice = true;
         Port->SectorSize = 512;
@@ -384,7 +385,7 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
         ATA_DEVICE_T,
         "Annya/System64/Drivers/IDEGen.sys",
         (void*)LegacyAtaHost,
-        0x00
+        LegacyAtaHost
     );
 
     return STATUS_SUCCESS;

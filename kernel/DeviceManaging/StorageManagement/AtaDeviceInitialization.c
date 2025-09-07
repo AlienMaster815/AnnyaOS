@@ -41,7 +41,7 @@ LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable
     void* AtaIdBuffer;
     if(PortToInitialize->PortScsiDevice){
         PortToInitialize->PortFunctioning = true;
-        return Status;
+        return STATUS_SUCCESS;
     }else{
         AtaIdBuffer = LouKeMalloc(512, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
         Status = LouKeAtaSendAtaIdentifyCommand(
@@ -59,7 +59,7 @@ LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable
     }
 
     LouPrint("Initialization Of ATA Port Successfull\n");
-    return Status;
+    return STATUS_SUCCESS;
 }
 
 LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable){

@@ -178,6 +178,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <Random.h>
 
 #include "drivers/Ata/ata.h"
+#include <drivers/Scsi/Sam5.h>
 #include <LKDM.h>
 #include <drivers/Networking/IpV4.h>
 

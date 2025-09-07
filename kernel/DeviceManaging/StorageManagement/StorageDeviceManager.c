@@ -7,9 +7,9 @@ typedef struct _STORAGE_DEVICE_MANAGER_DATA{
     PDEVICE_DIRECTORY_TABLE     Table;
 }STORAGE_DEVICE_MANAGER_DATA, * PSTORAGE_DEVICE_MANAGER_DATA;
 
-static STORAGE_DEVICE_MANAGER_DATA StorageDevices;
+static STORAGE_DEVICE_MANAGER_DATA StorageDevices = {0};
 
-static spinlock_t StorgaeDeviceManagerLock;
+static spinlock_t StorgaeDeviceManagerLock = {0};
 
 LOUSTATUS LouRegisterStorageDevice(
     PDEVICE_DIRECTORY_TABLE Table
@@ -18,12 +18,12 @@ LOUSTATUS LouRegisterStorageDevice(
     PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
-    for(size_t i = 0 ; i < NumberOfStorageDevice; i++){
-        if(!TmpStorageDrivers->Neighbors.NextHeader){
-            TmpStorageDrivers->Neighbors.NextHeader = (PListHeader)LouKeMallocType(STORAGE_DEVICE_MANAGER_DATA, KERNEL_GENERIC_MEMORY);
-        }
+    while(TmpStorageDrivers->Neighbors.NextHeader){
         TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
     }
+    TmpStorageDrivers->Neighbors.NextHeader = (PListHeader)LouKeMallocType(STORAGE_DEVICE_MANAGER_DATA, KERNEL_GENERIC_MEMORY);
+    TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
+
     TmpStorageDrivers->Table = Table;
     NumberOfStorageDevice++;
     LouKeReleaseSpinLock(&StorgaeDeviceManagerLock, &Irql);
@@ -31,7 +31,7 @@ LOUSTATUS LouRegisterStorageDevice(
 }
 
 SYSTEM_DEVICE_IDENTIFIER LouKeGetStorageDeviceSystemIdentifier(uint8_t DriveNumber){
-    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
+    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)StorageDevices.Neighbors.NextHeader;
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
     for(size_t i = 0 ; i < DriveNumber; i++){
@@ -42,7 +42,7 @@ SYSTEM_DEVICE_IDENTIFIER LouKeGetStorageDeviceSystemIdentifier(uint8_t DriveNumb
 }
 
 PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber){
-    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
+    PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)StorageDevices.Neighbors.NextHeader;
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
     for(size_t i = 0 ; i < DriveNumber; i++){

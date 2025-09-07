@@ -123,11 +123,11 @@ static void InitializeDependencies(){
 
     LouPrint("Loading FREETYPE.DLL\n");
 
-    FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
-    if(!FREETYPEModule){
-        LouPrint("FREETYPE.DLL Could Not Be Loaded\n");
-        while(1);
-    }
+    //FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
+    //if(!FREETYPEModule){
+    //    LouPrint("FREETYPE.DLL Could Not Be Loaded\n");
+    //    while(1);
+    //}
 
     InitializePNGHandleing = AnnyaGetLibraryFunctionN("CODECS.DLL", "InitializePNGHandleing");
     Status = InitializePNGHandleing();  
@@ -136,7 +136,7 @@ static void InitializeDependencies(){
         while(1);
     }
 
-    InitializeFreeType();
+    //InitializeFreeType();
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");

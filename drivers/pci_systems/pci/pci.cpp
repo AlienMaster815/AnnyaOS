@@ -244,11 +244,6 @@ void ScanTheRestOfHarware(){
             continue;
         }
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
-
-        if(PConfig->Header.VendorID == 0x1102){
-            LouPrint("Device ID:%h\n", PConfig->Header.DeviceID);
-            while(1);
-        }
         string DriverPath = 0x00;
         while(1){
             DriverPath = ParseLousineDriverManifestForCompatibleDriver(PConfig, DriverPath);

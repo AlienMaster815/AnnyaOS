@@ -34,6 +34,7 @@
 #include <math.h>
 #include <kernel/threads.h>
 #include <kernel/LouQs.h>
+#include <drivers/Scsi/Sam5.h>
 #include "drivers/Ata/ata.h"
 #include <drivers/Networking/IpV4.h>
 #include <WinTEB.h>

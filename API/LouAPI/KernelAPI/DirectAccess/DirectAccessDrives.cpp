@@ -40,9 +40,11 @@ LOUSTATUS* State
 				SectorCount = BufferChecksum;
 				BufferChecksum = BufferChecksum * 2048;
 			}
-		
 			Result = LouKeMallocEx(BufferChecksum, 2048, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 			*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result);
+			if(*State != STATUS_SUCCESS){
+				LouPrint("State:%h\n", *State);
+			}
 		}else{
 			BufferChecksum = ROUND_UP64(*BufferSize, 512);
 			BufferChecksum /= 512;
