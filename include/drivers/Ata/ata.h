@@ -952,7 +952,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
 
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
-    PPCI_DEVICE_OBJECT                         PDEV;
+    PPCI_DEVICE_OBJECT                          PDEV;
     uint8_t                                     PortCount;
     spinlock_t                                  HostLock;
     void*                                       HostIoAddress;
@@ -962,6 +962,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
 }LOUSINE_KERNEL_DEVICE_ATA_HOST, * PLOUSINE_KERNEL_DEVICE_ATA_HOST;
 
 typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
+    PVOID       InheritedIo;
     int         (*DelayQueuedCommand)       (PATA_QUEUED_COMMAND QueuedCommand);
     int         (*CheckAtapiDma)            (PATA_QUEUED_COMMAND QueuedCommand);
     LOUSTATUS   (*PrepCommand)              (PATA_QUEUED_COMMAND QueuedCommand);
@@ -980,6 +981,15 @@ typedef struct _LOUSINE_ATA_PORT_OPERATIONS{
     void        (*PortPowerOn)              (PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
 }LOUSINE_ATA_PORT_OPERATIONS, * PLOUSINE_ATA_PORT_OPERATIONS;
 
+typedef struct _LOUSINE_ATA_PORT_INFORMATION{
+    UINT32                              PortFlags;
+    UINT32                              LinkFlags;
+    UINT32                              PioMask;
+    UINT32                              MwdmaMask;
+    UINT32                              UdmaMask;
+    PLOUSINE_ATA_PORT_OPERATIONS        PortOperations;
+    PVOID                               PrivateData;
+}LOUSINE_ATA_PORT_INFORMATION, * PLOUSINE_ATA_PORT_INFORMATION;
 
 #define COMMAND_LENGTH_FLAG_LBA48 1 
 
@@ -1094,6 +1104,8 @@ void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost)
 #define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex = 0; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
 
 void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq);
+
+
 
 #ifdef __cplusplus
 }

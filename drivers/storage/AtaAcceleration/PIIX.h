@@ -1,6 +1,7 @@
 
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
+#include "AtaAPI.h"
 
 #define PIIX_IO_CFG_REG                     0x54
 #define ICH5_ADDRESS_MAP_REG                0x90

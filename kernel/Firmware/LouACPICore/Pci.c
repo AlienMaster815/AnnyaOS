@@ -228,7 +228,7 @@ void AcpiCheckPciCrsQuirks(){
         PciHasE820 = false;
     }
 
-    CheckDmiSystem(AcpiCheckPciCrsQuirk);
+    LouKeCheckDmiSystem(AcpiCheckPciCrsQuirk);
 
 }
 

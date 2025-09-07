@@ -103,7 +103,7 @@ static bool DmiMatch(PDMI_SYSTEM_ID SystemID){
 
 
 
-INTEGER CheckDmiSystem(PDMI_SYSTEM_ID IdList){
+INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList){
     
     INTEGER Count = 0;
 
@@ -121,6 +121,14 @@ INTEGER CheckDmiSystem(PDMI_SYSTEM_ID IdList){
     return Count;
 }
 
+PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList){
+    for(SIZE i = 0 ; IdList[i].ValidEntry ; i++){
+        if(DmiMatch(&IdList[i])){
+            return &IdList[i];
+        }
+    }
+    return 0x00;
+}
 
 void InitializeDmiSystem(){
 

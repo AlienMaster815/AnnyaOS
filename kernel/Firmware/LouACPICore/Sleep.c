@@ -261,7 +261,7 @@ static void AcpiSleepDmiCheck(){
     if(DmiGetBiosYear() >= 2012){
         InitializeNvsNoSave(0x00);
     }
-    CheckDmiSystem((PDMI_SYSTEM_ID)AcpiSleepDmiTable);
+    LouKeCheckDmiSystem((PDMI_SYSTEM_ID)AcpiSleepDmiTable);
 }
 
 static BOOL AcpiSleepStateSupported(INTEGER i){

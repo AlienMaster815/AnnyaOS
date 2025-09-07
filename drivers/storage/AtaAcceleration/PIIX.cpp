@@ -1,10 +1,12 @@
 
 #include "PIIX.h"
 
+
+
 static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     //PATA Devices
     {.VendorID = 0x8086, .DeviceID = 0x7010 , .BoardID = PIIX_CONTROLLER_ID_PATA_MWDMA, .SimpleEntry = true},
-    {.VendorID = 0x8086, .DeviceID = 0x7111 , .SubVendorID = 0x15AD, .SubDeviceID = 0x1976, .BoardID = PIIX_CONTROLLER_ID_VMWARE, .AdvancedEntry = true},
+    /*{.VendorID = 0x8086, .DeviceID = 0x7111 , .SubVendorID = 0x15AD, .SubDeviceID = 0x1976, .BoardID = PIIX_CONTROLLER_ID_VMWARE, .AdvancedEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x7111 , .BoardID = PIIX_CONTROLLER_ID_PATA_33, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x7199 , .BoardID = PIIX_CONTROLLER_ID_PATA_33, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x7601 , .BoardID = PIIX_CONTROLLER_ID_PATA_33, .SimpleEntry = true},
@@ -50,133 +52,12 @@ static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     {.VendorID = 0x8086, .DeviceID = 0x5028 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x3A00 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
     {.VendorID = 0x8086, .DeviceID = 0x3A06 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
-    {.VendorID = 0x8086, .DeviceID = 0x3A20 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},
+    {.VendorID = 0x8086, .DeviceID = 0x3A20 , .BoardID = ICH8_CONTROLLER_ID_SATA, .SimpleEntry = true},*/
     {0},
 };
 
-UNUSED static const PIIX_MAP_ENTRY Ich5Map = {
-    .Bits = 0x07,
-    .PortEnabled = 0x03,
-    .PortMap = {
-        {PORT_0, NO_ATTRIBUTE, PORT_1, NO_ATTRIBUTE},
-        {PORT_1, NO_ATTRIBUTE, PORT_0, NO_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {PORT_0, PORT_1, IDE_ATTRIBUTE, IDE_ATTRIBUTE},
-        {PORT_1, PORT_0, IDE_ATTRIBUTE, IDE_ATTRIBUTE},
-        {IDE_ATTRIBUTE, IDE_ATTRIBUTE, PORT_0, PORT_1},
-        {IDE_ATTRIBUTE, IDE_ATTRIBUTE, PORT_1, PORT_0},
-    },
-};
+void UnloadDriver(PDRIVER_OBJECT Driver){
 
-UNUSED static const PIIX_MAP_ENTRY Ich6Map = {
-    .Bits = 0x03,
-    .PortEnabled = 0x0F,
-    .PortMap = {
-        {PORT_0, PORT_2, PORT_1, PORT_3},
-        {IDE_ATTRIBUTE, IDE_ATTRIBUTE, PORT_1, PORT_3},
-        {PORT_0, PORT_2, IDE_ATTRIBUTE, IDE_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-    },
-};
-
-UNUSED static const PIIX_MAP_ENTRY Ich6mMap = {
-    .Bits = 0x03,
-    .PortEnabled = 0x05,
-    .PortMap = {
-        {PORT_0, PORT_2, NO_ATTRIBUTE, NO_ATTRIBUTE},
-        {IDE_ATTRIBUTE, IDE_ATTRIBUTE, PORT_1, PORT_3},
-        {PORT_0, PORT_2, IDE_ATTRIBUTE, IDE_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE , RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-    },
-};
-
-UNUSED static const PIIX_MAP_ENTRY Ich8Map = {
-    .Bits = 0x03,
-    .PortEnabled = 0x0F,
-    .PortMap = {
-        {PORT_0, PORT_2, PORT_1, PORT_3},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {PORT_0, PORT_2, IDE_ATTRIBUTE, IDE_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-    },
-};
-
-UNUSED static const PIIX_MAP_ENTRY Ich8_2Map = {
-    .Bits = 0x03,
-    .PortEnabled = 0x03,
-    .PortMap = {
-        {PORT_0, NO_ATTRIBUTE, PORT_1, NO_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-    },
-};
-
-UNUSED static const PIIX_MAP_ENTRY Ich8mApple = {
-    .Bits = 0x03,
-    .PortEnabled = 0x01,
-    .PortMap = {
-        {PORT_0, NO_ATTRIBUTE, NO_ATTRIBUTE, NO_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {PORT_0, PORT_2, IDE_ATTRIBUTE, IDE_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-    },
-};
-
-UNUSED static const PIIX_MAP_ENTRY TolapiMap = {
-    .Bits = 0x03,
-    .PortEnabled = 0x03,
-    .PortMap = {
-        {PORT_0, NO_ATTRIBUTE, PORT_1, NO_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-        {RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE, RESERVED_ATTRIBUTE},
-    },
-};
-
-static const PIIX_MAP_ENTRY* PiixMapTable[] = {
-    &Ich5Map,
-    &Ich6Map,
-    &Ich6mMap,
-    &Ich8Map,
-    &Ich8_2Map,
-    &Ich8mApple,
-    &TolapiMap,
-    &Ich8Map,
-    &Ich8_2Map,
-    &Ich8_2Map,
-};
-
-UNUSED UINT32 PiixEnableBits[][4] = {
-    {0x41, 1, 0x80, 0x80},
-    {0x43, 1, 0x80, 0x80},
-};
-
-UNUSED ICH_LAPTOP_ID IchShortCableLaptops[] = {
-	{0x27DF, 0x0005, 0x0280},
-	{0x27DF, 0x1025, 0x0102},
-	{0x27DF, 0x1025, 0x0110},
-	{0x27DF, 0x1028, 0x02B0},
-	{0x27DF, 0x1043, 0x1267},
-	{0x27DF, 0x103C, 0x30A1},
-	{0x27DF, 0x103C, 0x361A},
-	{0x27DF, 0x1071, 0xD221},
-	{0x27DF, 0x152D, 0x0778},
-	{0x24CA, 0x1025, 0x0061},
-	{0x24CA, 0x1025, 0x003D},
-	{0x24CA, 0x10CF, 0x11AB},
-	{0x266F, 0x1025, 0x0066},	
-	{0x2653, 0x1043, 0x82D8},
-	{0x27DF, 0x104D, 0x900E},
-    {0},
-};
-
-LOUDDK_API_ENTRY 
-VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
-    LouPrint("PIIX::UnloadDriver()\n");
-    //we have nothing to unload
-    LouPrint("PIIX::UnloadDriver() STATUS_SUCCESS\n");
 }
 
 LOUDDK_API_ENTRY
@@ -184,12 +65,11 @@ NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
     LouPrint("AddDevice()\n");
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     uint8_t DeviceID = PlatformDevice->DeviceID;
-    
     LouPrint("PDEV :%h\n", PDEV);
     LouPrint("DEVID:%d\n", DeviceID);
     LouPrint("BoardID:%d\n", PiixPciDeviceTable[DeviceID].BoardID);
 
-
+    
 
     LouPrint("AddDevice() STATUS_SUCCESS\n");
     while(1);

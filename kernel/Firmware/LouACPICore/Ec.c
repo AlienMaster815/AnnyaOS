@@ -103,7 +103,7 @@ void AcpiEcEcdtProbe(){
     UNUSED ACPI_STATUS                     Status      = AE_OK;
     UNUSED int                             Result      = 0x00;
 
-    CheckDmiSystem((PDMI_SYSTEM_ID)EcDmiTable);
+    LouKeCheckDmiSystem((PDMI_SYSTEM_ID)EcDmiTable);
     Status = AcpiGetTable(ACPI_SIG_ECDT, 1, (ACPI_TABLE_HEADER**)&EcdtPointer);
     if(ACPI_FAILURE(Status)){
         return;

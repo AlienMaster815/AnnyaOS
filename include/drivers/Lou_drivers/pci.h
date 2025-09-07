@@ -199,6 +199,20 @@ void PCI_Scan_Bus();
 uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
 uintptr_t PcieConfigAddress(uint16_t Group,uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
 
+typedef struct _PCI_BITS{
+    UINT32  Register;
+    UINT32  Width;
+    UINT32  Mask;
+    UINT32  Value;
+}PCI_BITS, * PPCI_BITS;
+
+typedef struct _PCI_BIT_TEST_PACKET{
+	PPCI_BITS	Bits;
+	bool		Result;
+}PCI_BIT_TEST_PACKET, * PPCI_BIT_TEST_PACKET;
+
+LOUSTATUS PciTestAtaConfigurationBits(PPCI_DEVICE_OBJECT PDEV, PPCI_BIT_TEST_PACKET TestPacket);
+
 #ifdef __cplusplus
 }
 #endif
@@ -276,6 +290,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 }PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 #endif
 
+
 KERNEL_EXPORT uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
 KERNEL_EXPORT uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
 KERNEL_EXPORT uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
@@ -283,6 +298,20 @@ KERNEL_EXPORT void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, 
 KERNEL_EXPORT void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
 KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+
+typedef struct _PCI_BITS{
+    UINT32  Register;
+    UINT32  Width;
+    UINT32  Mask;
+    UINT32  Value;
+}PCI_BITS, * PPCI_BITS;
+
+typedef struct _PCI_BIT_TEST_PACKET{
+	PPCI_BITS	Bits;
+	bool		Result;
+}PCI_BIT_TEST_PACKET, * PPCI_BIT_TEST_PACKET;
+
+KERNEL_EXPORT LOUSTATUS PciTestAtaConfigurationBits(PPCI_DEVICE_OBJECT PDEV, PPCI_BIT_TEST_PACKET TestPacket);
 
 #define ANY_PCI_ID 0xFFFF
 #define ANY_PCI_CLASS 255

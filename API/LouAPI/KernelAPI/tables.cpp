@@ -4,6 +4,7 @@
 #include <drivers/Dma8237A.h>
 #include <usb.h>
 
+
 typedef struct _TABLE_ENTRY{
     FILE_NAME        ModuleName;
     uint32_t         NumberOfFunctions;
@@ -22,7 +23,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 183
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 185
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -400,6 +401,8 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[180] = "LouKeFreeFromFixedPool";
     ImportTables[4].FunctionName[181] = "LouKeCreateUsbHostControllerDevice";
     ImportTables[4].FunctionName[182] = "LouKeUsbHcdPciProbe";
+    ImportTables[4].FunctionName[183] = "PciTestAtaConfigurationBits";
+    ImportTables[4].FunctionName[184] = "LouKeDmiGetFirstMatch";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -584,7 +587,8 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[180] = (uint64_t)LouKeFreeFromFixedPool;
     ImportTables[4].VirtualAddress[181] = (uint64_t)LouKeCreateUsbHostControllerDevice;
     ImportTables[4].VirtualAddress[182] = (uint64_t)LouKeUsbHcdPciProbe;
-
+    ImportTables[4].VirtualAddress[183] = (uint64_t)PciTestAtaConfigurationBits;
+    ImportTables[4].VirtualAddress[184] = (uint64_t)LouKeDmiGetFirstMatch;
 }
 
 LOUDDK_API_ENTRY

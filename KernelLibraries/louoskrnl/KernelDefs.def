@@ -183,3 +183,5 @@ EXPORTS
     LouKeFreeFromFixedPool
     LouKeAllocateUsbHostControllerDevice
     LouKeUsbHcdPciProbe
+    PciTestAtaConfigurationBits
+    LouKeDmiGetFirstMatch
