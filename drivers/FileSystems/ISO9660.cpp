@@ -130,11 +130,14 @@ static FILE* ISOLouKeFindDirectory(
     string SearchDirectory = NewDir;
 
     while(1){
+        //LouPrint("String Length:%d\n", FOO[32]);
+        //LouPrint("String Value :%s\n", &FOO[33]);
+
         if (IsIso9660ItemOfSearch(FOO, SearchDirectory)){
             
             //LouPrint("String Length:%d\n", FOO[32]);
             //LouPrint("String Value :%s\n", &FOO[33]);
-            
+
             //First We are going to look at the LBA
             //to see where the Directory Exists in
             //memory
@@ -172,7 +175,7 @@ static FILE* ISOLouKeFindDirectory(
             uint16_t* Test = (uint16_t*)ReadDrive(
                 DrvNum,
                 RootLBA,
-                1,
+                BufferSize / 2048,
                 &BufferSize,
                 &Status
             );
@@ -199,7 +202,12 @@ static FILE* ISOLouKeFindDirectory(
 
         }
         if(FOO[0] == 0){
-            break;
+            UINT64 Offset = ((UINT64)(FOO - (UINT8*)Test) + 2047) & ~(2047);
+            if(Offset >= BufferSize){
+                break;
+            }
+            FOO = ((UINT8*)Test + Offset);
+            continue;
         }
         else{
             FOO += FOO[0];   
@@ -268,7 +276,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             
         //If We are here we have successfully found an ISO Filesystem
 
-        //LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
+        LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
 
         uint16_t i = 0, BufferSelector = 0;
         bool condition = false;
@@ -338,7 +346,7 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
     //:/Dir/dir/.../file
-    //LouPrint("Opening File:%s\n", Path);
+    LouPrint("Seeking File:%s\n", FilePath);
 
     uint64_t LBA = 0;
     uint64_t DATA_LEN = 0;

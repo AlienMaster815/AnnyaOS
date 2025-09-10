@@ -33,7 +33,7 @@ static PWINDOW_HANDLE LastInstance = 0x00;
 
 //Globals
 HANDLE BackgroundImage = 0x00;
-HANDLE (*AnnyaPaintClipWithBmp)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
+HANDLE (*AnnyaCodecsPaintClipFromImageHandle)(HANDLE, HANDLE, size_t, size_t, size_t, size_t) = 0x00;
 HANDLE (*AnnyaCreateClipFromPng)(HANDLE);
 
 //192 dark greay
@@ -68,6 +68,15 @@ void AwmUpdateSubWindowToScreen(PWINDOW_HANDLE Window, INT64 X, INT64 Y, INT64 W
 PWINDOW_HANDLE AwmFindWindowAtPoint(INT64 X, INT64 Y);
 
 extern HWND BackgroundWindow;
+
+__declspec(dllimport)
+void LouDrsdDrawLine32(
+    PDRSD_CLIP Clip, 
+    INT64 X1, INT64 Y1,
+    INT64 X2, INT64 Y2, 
+    UINT32 Color
+);
+
 
 USER32_API
 BOOL
@@ -141,7 +150,7 @@ static void InitializeDependencies(){
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");
     AnnyaOpenBmpA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenBmpA");
-    AnnyaPaintClipWithBmp = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaPaintClipWithBmp");
+    AnnyaCodecsPaintClipFromImageHandle = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCodecsPaintClipFromImageHandle");
 
     MousePng = AnnyaOpenPngA("C:/ANNYA/MOUSE.PNG");
     FolderPng = AnnyaOpenPngA("C:/ANNYA/FOLDER.PNG");
@@ -167,8 +176,6 @@ static void UpdateMouseClip(int64_t X, int64_t Y){
     MouseClip->Y = Y;
 
     AwmUpdateLocationArea(LastX, LastY, LastWidth, LastHeight);
-    LouUpdateShadowClipState(MouseClip);
-    LouDrsdSyncScreen();
 
 }
 
@@ -176,7 +183,22 @@ static INT64 gMouseX = 0, gMouseY = 0;
 
 
 void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
-
+    if((Click) && (!StartButtonDown)){
+        for(size_t i = 0; i < Handle->PlaneCount; i++){
+            LouDrsdDrawLine32(Handle->MainWindow[i], 0, 0 , 0, Handle->MainWindow[i]->Height, DRSD_CORE_TRANSLATE_COLOR(0, 0, 0, 255));
+            LouDrsdDrawLine32(Handle->MainWindow[i], 0, 0 , Handle->MainWindow[i]->Width, 0, DRSD_CORE_TRANSLATE_COLOR(0, 0, 0, 255));
+        }
+        StartButtonDown = true;
+        UpdateWindow((HWND)Handle);
+    }
+    else if((!Click) || (Click && StartButtonDown)){
+        for(size_t i = 0; i < Handle->PlaneCount; i++){
+            LouDrsdDrawLine32(Handle->MainWindow[i], 0, 0 , 0, Handle->MainWindow[i]->Height, DRSD_CORE_TRANSLATE_COLOR(255, 255, 255, 255));
+            LouDrsdDrawLine32(Handle->MainWindow[i], 0, 0 , Handle->MainWindow[i]->Width, 0, DRSD_CORE_TRANSLATE_COLOR(255, 255, 255, 255));
+        }
+        StartButtonDown = false;
+        UpdateWindow((HWND)Handle);
+    }
 }
 
 
@@ -273,8 +295,8 @@ MouseEventHandler(
                 }
                 MutexUnlock(&WinHandle->CallbackMutex);
             }
-            else return;
-            LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
+            else goto _MOSUE_EVENT_FINISHED;
+            //LouPrint("WINDOW CLICKED:%s\n", WinHandle->WindowName);
         }    
     }else if(!LeftClick && LeftMouseDown){
     //    PWINDOW_HANDLE GrabbedWindow = AwmCheckIfWindowIsGrabbed();
@@ -303,6 +325,11 @@ MouseEventHandler(
             MutexUnlock(&WinHandle->CallbackMutex);
         }
     }
+
+    _MOSUE_EVENT_FINISHED:
+
+    LouUpdateShadowClipState(MouseClip);
+    LouDrsdSyncScreen();
 }
 
 

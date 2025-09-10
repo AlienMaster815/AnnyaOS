@@ -64,9 +64,20 @@ HgsmiUpdateInputMappings(
     uint32_t Width, 
     uint32_t Height
 ){
+    PVBVA_REPORT_INPUT_MAPPING Input;
+    Input = (PVBVA_REPORT_INPUT_MAPPING)HgsmiBufferAllocate(Context, sizeof(VBVA_REPORT_INPUT_MAPPING), HGSMI_CH_VBVA, VBVA_REPORT_INPUT_MAPPING_COMMAND);
+    if(!Input){
+        return STATUS_INVALID_PARAMETER;
+    }
 
+    Input->X = OriginX;
+    Input->Y = OriginY;
+    Input->Cx = Width;
+    Input->Cy = Height;
 
-
+    HgsmiBufferSubmit(Context, Input);
+    HgsmiBufferFree(Context, Input);
+    
     return STATUS_SUCCESS;
 }
 

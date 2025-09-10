@@ -9,6 +9,8 @@ extern int64_t DesktopCurrentHeight;
 extern int64_t DesktopCurrentX;
 extern int64_t DesktopCurrentY;
 extern bool MirrorAllScreens;
+extern HANDLE BackgroundImage;
+extern HANDLE (*AnnyaCodecsPaintClipFromImageHandle)(HANDLE, HANDLE, size_t, size_t, size_t, size_t);
 
 static void CreateGenericWindowHandle(
     PWINDOW_HANDLE WindowHandle, 
@@ -35,7 +37,13 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
     NewWindow->Y = DesktopCurrentY;
     NewWindow->Width = (UINT32)DesktopCurrentWidth;
     NewWindow->Height = (UINT32)DesktopCurrentHeight;
-
+    
+    size_t BackgroundWdth = (size_t)AnnyaCodecsImageHandleToWidth(BackgroundImage);
+    size_t BackgroundHeight = (size_t)AnnyaCodecsImageHandleToHeight(BackgroundImage);
+    size_t WidthTScale;
+    size_t HeightTScale;
+    size_t Tx;
+    size_t Ty;
     for(size_t i = 0; i < PlaneTracker.PlaneCount; i++){
 
         NewWindow->MainWindow[i] = LouDrsdCreateClip(
@@ -44,6 +52,31 @@ static PWINDOW_HANDLE CreateDesktopBackgroundWindow(){
             PlaneTracker.PlaneInformation[i].Width,
             PlaneTracker.PlaneInformation[i].Height,
             0,0xC0,0xC0, 0xFF
+        );
+        AwmGetImageScaleingCentered(
+            BackgroundWdth, BackgroundHeight, 
+            PlaneTracker.PlaneInformation[i].Width, 
+            PlaneTracker.PlaneInformation[i].Height,
+            &WidthTScale, &HeightTScale
+        );
+        Tx = AwmGetImageCenteredX(
+            BackgroundWdth,  
+            PlaneTracker.PlaneInformation[i].Width, 
+            WidthTScale
+        );
+        Ty = AwmGetImageCenteredY(
+            BackgroundHeight, 
+            PlaneTracker.PlaneInformation[i].Height,
+            HeightTScale
+        );
+
+        AnnyaCodecsPaintClipFromImageHandle(
+            BackgroundImage, 
+            NewWindow->MainWindow[i],
+            Tx, 
+            Ty,
+            WidthTScale,
+            HeightTScale
         );
 
     }
@@ -188,6 +221,13 @@ CreateWindowExA(
         NewWindow->ExtendedWindowStyle = ExStyle;
         NewWindow->WindowClass = ClassName;
         NewWindow->WindowName = WindowName;
+        NewWindow->WinApiHandleChecksum = NewWindow;
+        if(strcmp(ClassName, TRAY_WINDOW)){
+            AwmHookCalbackToWindow(
+                NewWindow, 
+                WindowModificationWndProc
+            );
+        }
         AwmInitializeWindowToTracker((PWINDOW_HANDLE)ParrentHandle, NewWindow);
         return (PWINDHANDLE)NewWindow;
     }

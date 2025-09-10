@@ -123,10 +123,52 @@ HgsmiUpdatePointerShape(
     uint8_t* Pixels, 
     uint32_t Length
 ){
-
+    PVBVA_MOUSE_POINTER_SHAPE Pointer;
+    UINT32 PixelLength = 0;
+    LOUSTATUS Result;
     
+    if(Flags & VBOX_MOUSE_POINTER_SHAPE){
+        PixelLength = ((((Width + 7) / 8) * Height + 3) & ~(3)) + Width * 4 * Height;
+        if(PixelLength > Length){
+            return STATUS_INVALID_PARAMETER;
+        }
+        Flags |= VBOX_MOUSE_POINTER_VISABLE;
+    }
 
-    return STATUS_SUCCESS;
+    Pointer = (PVBVA_MOUSE_POINTER_SHAPE)HgsmiBufferAllocate(Context, sizeof(VBVA_MOUSE_POINTER_SHAPE) + PixelLength + 4, HGSMI_CH_VBVA, VBVA_MOUSE_POINTER_SHAPE_COMMAND);
+    if(!Pointer){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Pointer->Result = VINF_SUCCESS;
+    Pointer->Flags = Flags;
+    Pointer->HotX = HotX;
+    Pointer->HotY = HotY;
+    Pointer->Width = Width;
+    Pointer->Height= Height;
+    if(PixelLength){
+        memcpy(Pointer->DataBlock, Pixels, PixelLength);
+    }
+
+    HgsmiBufferSubmit(Context, Pointer);
+
+    switch(Pointer->Result){
+        case VINF_SUCCESS:
+            Result = STATUS_SUCCESS;
+            break;
+        case VERR_NO_MEMORY:
+            Result = STATUS_INVALID_PARAMETER;
+            break;
+        case VERR_NOT_SUPPORTED:
+            Result = STATUS_DEVICE_BUSY;
+            break;    
+        default:
+            Result = STATUS_INVALID_PARAMETER;
+    }
+    
+    HgsmiBufferFree(Context, Pointer);
+
+    return Result;
 }
 
 LOUSTATUS 

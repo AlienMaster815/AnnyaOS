@@ -5,7 +5,8 @@ void
 AnnyaPaintClipWithBmp(
     HANDLE  Bitmap,
     HANDLE  Cliph,
-    size_t  X, size_t  Y,
+    size_t  X, 
+    size_t  Y,
     size_t  ScalingX,
     size_t  ScalingY
 ){

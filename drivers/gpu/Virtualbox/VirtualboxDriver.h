@@ -30,7 +30,7 @@
 
 typedef struct _VIRTUALBOX_PRIVATE_DATA{
     DRSD_DEVICE                         DrsdDevice;
-    PPCI_DEVICE_OBJECT                 PDEV;
+    PPCI_DEVICE_OBJECT                  PDEV;
     struct _VBVA_BUFFER_CONTEXT*        VbvaInformation;
     POOL                                VramPool;
     uint8_t*                            VbvaBuffers;

@@ -2,7 +2,7 @@
 #define _VBOX_ERROR_H
 
 #define VINF_SUCCESS 0
-
+#define VERR_NO_MEMORY          (-8)
 #define VERR_NOT_IMPLEMENTED    (-12)
 
 #define VERR_NOT_SUPPORTED      (-37)

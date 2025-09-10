@@ -8,6 +8,7 @@ void LouDrsdDrawLine32(
     UINT32 Color
 );
 
+void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click);
 
 USER32_API
 LOUSTATUS 
@@ -38,6 +39,17 @@ AwmHookCalbackToWindow(
 
 
 LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
+
+    switch(Message){
+        case WM_LBUTTON_DOWN:
+            if(!strcmp(((PWINDOW_HANDLE)WindowHandle)->WindowName, "StartButton")){
+                AwmHandleStartButtonEvent(WindowHandle, true);    
+            }
+            break;
+
+        default:
+            break;
+    }
 
     return 0;
 }

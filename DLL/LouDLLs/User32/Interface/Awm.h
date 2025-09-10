@@ -107,7 +107,7 @@ size_t AwmGetImageCenteredX(size_t ImageWidth, size_t ScreenHeight, size_t Scale
 size_t AwmGetImageCenteredY(size_t ImageHeight, size_t ScreenHeight, size_t Scale);
 void AwmGetImageScaleingCentered(
     size_t ImageWidth, size_t ImageHeight, 
-    size_t ScreenHeight, size_t ScreenWidth,
+    size_t ScreeWidth, size_t ScreenHeight,
     size_t* XScaling, size_t* YScaling
 );
 

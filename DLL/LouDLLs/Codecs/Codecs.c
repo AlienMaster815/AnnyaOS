@@ -7,6 +7,17 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
     return TRUE;
 }
 
+CODECS_API
+void 
+AnnyaPaintClipWithBmp(
+    HANDLE  Bitmap,
+    HANDLE  Cliph,
+    size_t  X, 
+    size_t  Y,
+    size_t  ScalingX,
+    size_t  ScalingY
+);
+
 PCODECS_TYPE_QUERY AnnyaCodecsCreateHandle(
     CODEC_HANDLE_TYPE HandleType, 
     int SubHandle, 
@@ -16,6 +27,7 @@ PCODECS_TYPE_QUERY AnnyaCodecsCreateHandle(
 
     switch(HandleType){
         case IMAGE_HANDLE:
+            Result->HandleType = IMAGE_HANDLE;
             Result->HandleInformation.ImageHandleData.ImageSubType = (CODEC_HANDLE_IMAGE_SUBTYPE)SubHandle;
             Result->HandleInformation.ImageHandleData.PrivateDataHandle = PrivateData;
             switch((CODEC_HANDLE_IMAGE_SUBTYPE)SubHandle){
@@ -37,4 +49,40 @@ PCODECS_TYPE_QUERY AnnyaCodecsCreateHandle(
     }
 
     return Result;
+}
+
+
+CODECS_API
+LOUSTATUS AnnyaCodecsPaintClipFromImageHandle(
+    PCODECS_TYPE_QUERY Handle, 
+    HANDLE  Cliph,
+    size_t  X, 
+    size_t  Y,
+    size_t  ScalingX,
+    size_t  ScalingY
+){
+    if(Handle->HandleType != IMAGE_HANDLE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    switch(Handle->HandleInformation.ImageHandleData.ImageSubType){
+
+        case BMP:
+            AnnyaPaintClipWithBmp(
+                (HANDLE)Handle,
+                Cliph,
+                X,
+                Y,
+                ScalingX,
+                ScalingY
+            );
+            break;
+
+        case PNG:
+            return STATUS_UNSUCCESSFUL;
+            break;
+        default:
+            return STATUS_INVALID_PARAMETER;
+    }
+    return STATUS_SUCCESS;
 }

@@ -25,4 +25,13 @@ typedef struct _CODECS_TYPE_QUERY{
     }HandleInformation;
 }CODECS_TYPE_QUERY, * PCODECS_TYPE_QUERY;
 
+static inline UINT32 AnnyaCodecsImageHandleToWidth(void* Handle){
+    PCODECS_TYPE_QUERY Query = (PCODECS_TYPE_QUERY)Handle;
+    return Query->HandleInformation.ImageHandleData.Width;
+}
+static inline UINT32 AnnyaCodecsImageHandleToHeight(void* Handle){
+    PCODECS_TYPE_QUERY Query = (PCODECS_TYPE_QUERY)Handle;
+    return Query->HandleInformation.ImageHandleData.Height;
+}
+
 #endif

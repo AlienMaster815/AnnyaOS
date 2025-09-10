@@ -23,7 +23,7 @@ size_t AwmGetImageCenteredY(size_t ImageHeight, size_t ScreenHeight, size_t Scal
 
 void AwmGetImageScaleingCentered(
     size_t ImageWidth, size_t ImageHeight, 
-    size_t ScreenHeight, size_t ScreenWidth,
+    size_t ScreenWidth, size_t ScreenHeight,
     size_t* XScaling, size_t* YScaling
 ){
     if(ImageHeight >= ScreenHeight){
