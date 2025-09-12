@@ -9,3 +9,6 @@ CreateBrushIndirect(
     LouMemCpy(&NewBrush->LogBrush, BrushTemplate, sizeof(BRUSH));
     return NewBrush;
 }
+
+
+

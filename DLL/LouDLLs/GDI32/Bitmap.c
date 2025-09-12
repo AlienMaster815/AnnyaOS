@@ -76,3 +76,15 @@ CreateCompatibleBitmap(
 
     return 0x00;
 }
+
+GDI32_API
+HBITMAP
+CreateDiscardableBitmap(
+    HDC Hdc,
+    int Cx,
+    int Cy
+){
+
+    
+
+}

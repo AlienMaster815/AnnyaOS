@@ -50,3 +50,19 @@ CreateDCW(
 
     return 0x00;
 }
+
+GDI32_API
+HBITMAP
+CreateDIBitmap(
+    HDC                     Hdc,
+    BITMAP_INFO_HEADER      BitmapInfoHeader,
+    DWORD                   Init,
+    PVOID                   Bits,
+    PBITMAP_INFO            Bmi,
+    UINT32                  Usage  
+){
+
+
+    return 0x00;
+}
+

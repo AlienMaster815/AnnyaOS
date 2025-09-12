@@ -14,9 +14,10 @@ SRC = 	Gdi32.c \
 		Bitmap.c \
 		Font.c \
 		Dc.c \
-		Close.c \
-		Combine.c \
-		Copy.c
+		Transform.c \
+		DIB.c \
+		Rgn.c \
+		File.c
 
 TARGET = GDI32.DLL
 

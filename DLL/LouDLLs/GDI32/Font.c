@@ -53,3 +53,59 @@ AddFontResourceW(
    return  AddFontResourceExW(Name, 0, 0);
 }
 
+GDI32_API
+HFONT
+CreateFontA(
+    int     Height,
+    int     Width,
+    int     Escapement,
+    int     Orientation,
+    int     Weight,
+    DWORD   Italic,
+    DWORD   Underline,
+    DWORD   Strikeout,
+    DWORD   CharSet,
+    DWORD   OutPrecision,
+    DWORD   ClipPrecision,
+    DWORD   Quality,
+    DWORD   PitchAndFamily,
+    LPCSTR  FaceName
+){
+
+
+
+    return 0x00;
+}
+
+GDI32_API
+HFONT
+CreateFontIndirectA(
+    PLOGFONTA LogFont
+){
+
+
+
+    return 0x00;
+}
+
+GDI32_API
+HFONT
+CreateFontIndirectExA(
+    ENUMLOGFONTEXDVA FontLog
+){
+
+
+
+    return 0x00;
+}
+
+GDI32_API
+HFONT
+CreateFontIndirectExW(
+    ENUMLOGFONTEXDVW FontLog
+){
+
+
+
+    return 0x00;
+}

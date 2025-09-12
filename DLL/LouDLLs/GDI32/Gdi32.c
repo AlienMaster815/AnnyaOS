@@ -25,3 +25,18 @@ Chord(
 
     return false;
 }
+
+
+
+GDI32_API
+BOOL 
+CloseFigure(
+    HDC Hdc
+){
+
+
+
+    return false;
+}
+
+

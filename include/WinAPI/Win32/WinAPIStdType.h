@@ -22,7 +22,14 @@ typedef LPWSTR          HKEY;
 
 typedef void* HWND;
 typedef void* TVITEMPART;
-typedef void* RECT;
+
+typedef struct _RECT{
+    long Left;
+    long Top;
+    long Right;
+    long Bottom;
+}RECT, * PRECT, * NPRECT, * LPRECT; 
+
 typedef void* HINSTANCE;
 
 typedef struct _POINT{

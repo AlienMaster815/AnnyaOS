@@ -586,6 +586,7 @@ typedef HANDLE HBITMAP;
 #define CCHDEVICENAME   16
 #define CCHFORMNAME     16
 
+typedef HANDLE HGLOBAL;
 
 typedef struct _DEVICE_MODEA{
     BYTE    DeviceName[CCHDEVICENAME];
@@ -687,6 +688,87 @@ typedef struct _DEVICE_MODEW{
     DWORD   PanningHeight;
 }DEVICE_MODEW, * PDEVICE_MODEW,
     DEVICEMODEW, * PDEVICEMODEW, * LPDEVICEMODEW; 
+
+typedef HANDLE HGRN;
+typedef HANDLE HFONT;
+
+#define LF_FACESIZE     32
+#define LF_FULLFACESIZE 256
+
+typedef struct _LOGFONTA{
+    LONG    Height;
+    LONG    Width;
+    LONG    Escapement;
+    LONG    Orientation;
+    LONG    Weight;
+    BYTE    Italic;
+    BYTE    Underline;
+    BYTE    StrikeOut;
+    BYTE    CharSet;
+    BYTE    OutPrecision;
+    BYTE    ClipPercision;
+    BYTE    Quality;
+    BYTE    PitchAndFamily;
+    CHAR    FaceName[LF_FACESIZE];
+}LOGFONTA, * PLOGFONTA, * LPLOGFONTA, * NPLOGFONTA;
+
+typedef struct _LOGFONTW{
+    LONG    Height;
+    LONG    Width;
+    LONG    Escapement;
+    LONG    Orientation;
+    LONG    Weight;
+    BYTE    Italic;
+    BYTE    Underline;
+    BYTE    StrikeOut;
+    BYTE    CharSet;
+    BYTE    OutPrecision;
+    BYTE    ClipPercision;
+    BYTE    Quality;
+    BYTE    PitchAndFamily;
+    WCHAR   FaceName[LF_FACESIZE];
+}LOGFONTW, * PLOGFONTW, * LPLOGFONTW, * NPLOGFONTW;
+
+typedef struct _ENUMLOGFONTA{
+    LOGFONTA    LogFont;
+    CHAR        FullName[LF_FULLFACESIZE];
+    CHAR        Style[LF_FACESIZE];
+}ENUMLOGFONTA, * PENUMLOGFONTA, * LPENUMLOGFONTA, * NPENUMLOGFONTA;
+
+typedef struct _ENUMLOGFONTW{
+    LOGFONTW    LogFont;
+    WCHAR       FullName[LF_FULLFACESIZE];
+    WCHAR       Style[LF_FACESIZE];
+}ENUMLOGFONTW, * PENUMLOGFONTW, * LPENUMLOGFONTW, * NPENUMLOGFONTW;
+
+typedef struct _ENUMLOGFONTEXA{
+    LOGFONTA    LogFont;
+    CHAR        Style[LF_FACESIZE];
+    CHAR        Script[LF_FACESIZE];
+}ENUMLOGFONTEXA, * PENUMLOGFONTEXA, * LPENUMLOGFONTEXA, * NPENUMLOGFONTEXA;
+
+typedef struct _ENUMLOGFONTEXW{
+    LOGFONTA    LogFont;
+    CHAR        Style[LF_FACESIZE];
+    CHAR        Script[LF_FACESIZE];
+}ENUMLOGFONTEXW, * PENUMLOGFONTEXW, * LPENUMLOGFONTEXW, * NPENUMLOGFONTEXW;
+
+typedef struct _DESIGNVECTOR{
+    DWORD   Reserved;
+    DWORD   NumAxes;
+    LONG    Value[MM_MAX_NUMAXES];
+}DESIGNVECTOR, * PDESIGNVECTOR, * LPDESIGNVECTOR, * NDESIGNVECTOR;
+
+typedef struct _ENUMLOGFONTEXDVA{
+    ENUMLOGFONTEXA  LogFontEx;
+    DESIGNVECTOR    DesignVector;
+}ENUMLOGFONTEXDVA, * PENUMLOGFONTEXDVA, * LPENUMLOGFONTEXDVA, * NPENUMLOGFONTEXDVA;
+
+typedef struct _ENUMLOGFONTEXDVW{
+    ENUMLOGFONTEXW  LogFontEx;
+    DESIGNVECTOR    DesignVector;
+}ENUMLOGFONTEXDVW, * PENUMLOGFONTEXDVW, * LPENUMLOGFONTEXDVW, * NPENUMLOGFONTEXDVW;
+
 
 
 #ifndef _GDI32_H

@@ -1,16 +1,5 @@
 #include "Gdi32.h"
 
-GDI32_API
-int 
-CombineRgn(
-
-    int Mode
-){
-
-
-
-    return 0x00;
-}
 
 GDI32_API
 BOOL
