@@ -1,3 +1,0 @@
-/usr/bin/cmake -E rm -f CMakeFiles/freetype.dir/objects.a
-/usr/bin/x86_64-w64-mingw32-ar qc CMakeFiles/freetype.dir/objects.a @CMakeFiles/freetype.dir/objects1.rsp
-/usr/bin/x86_64-w64-mingw32-gcc -O3 -DNDEBUG -shared -o libfreetype.dll -Wl,--out-implib,libfreetype.dll.a -Wl,--major-image-version,6,--minor-image-version,20 -Wl,--whole-archive CMakeFiles/freetype.dir/objects.a -Wl,--no-whole-archive @CMakeFiles/freetype.dir/linkLibs.rsp

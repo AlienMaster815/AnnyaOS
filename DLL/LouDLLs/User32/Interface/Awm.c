@@ -9,9 +9,9 @@ UpdateWindow(
     HWND WindowHandle
 );
 
+static HMODULE Gdi32 = 0x00;
 static HANDLE MousePng = 0x00;
 static HMODULE CODECShModule = 0;
-static HMODULE FREETYPEModule = 0;
 static HANDLE (*AnnyaOpenPngA)(string);
 static LOUSTATUS (*InitializePNGHandleing)();
 static HMODULE Msvcrt = 0;
@@ -61,7 +61,6 @@ PDRSD_CLIP XButtonClip = 0x00;
 
 static DWORD (*AnnyaExplorerFileManager)(PVOID);
 
-void InitializeFreeType();
 void InitializePlaneTracker(HINSTANCE hInstance);
 void AwmUpdateWindowToScreen(PWINDOW_HANDLE Window);
 void AwmUpdateSubWindowToScreen(PWINDOW_HANDLE Window, INT64 X, INT64 Y, INT64 Width, INT64 Height);
@@ -130,13 +129,8 @@ static void InitializeDependencies(){
         while(1);
     }
 
-    LouPrint("Loading FREETYPE.DLL\n");
-
-    //FREETYPEModule = LoadLibraryA("C:/ANNYA/FREETYPE.DLL");
-    //if(!FREETYPEModule){
-    //    LouPrint("FREETYPE.DLL Could Not Be Loaded\n");
-    //    while(1);
-    //}
+    LouPrint("Loading GDI32.DLL\n");
+    Gdi32 = LoadLibraryA("C:/ANNYA/SYSTEM64/GDI32.DLL");
 
     InitializePNGHandleing = AnnyaGetLibraryFunctionN("CODECS.DLL", "InitializePNGHandleing");
     Status = InitializePNGHandleing();  
@@ -144,8 +138,6 @@ static void InitializeDependencies(){
         LouPrint("Critical Error Initializig CODECS.DLL\n");
         while(1);
     }
-
-    //InitializeFreeType();
 
     AnnyaOpenPngA = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaOpenPngA");
     AnnyaCreateClipFromPng = AnnyaGetLibraryFunctionN("CODECS.DLL", "AnnyaCreateClipFromPng");
@@ -157,7 +149,6 @@ static void InitializeDependencies(){
     StartButtonPng = AnnyaOpenPngA("C:/ANNYA/START.PNG");
     BackgroundImage = AnnyaOpenBmpA("C:/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP");
     XButtonPng = AnnyaOpenPngA("C:/ANNYA/XBUTTON.PNG");
-    LouPrint("Initiailizing FreeType\n");
 
     AnnyaExplorerFileManager = AnnyaGetLibraryFunctionN("ANNYAEXP.EXE", "AnnyaExplorerFileManager");
     LouPrint("AnnyaExplorerFileManager()%h\n", AnnyaExplorerFileManager);
@@ -203,6 +194,12 @@ void AwmHandleStartButtonEvent(PWINDOW_HANDLE Handle, bool Click){
 
 
 void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
+    if(Click){
+        PANNYA_EXPLORER_INIT_PACKET ExpInit = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
+        ExpInit->Instance = AwmInstance;
+        AnnyaCreateThread(AnnyaExplorerFileManager, (PVOID)ExpInit);
+    }
+
 
 }
 

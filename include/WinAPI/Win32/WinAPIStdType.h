@@ -23,13 +23,63 @@ typedef LPWSTR          HKEY;
 typedef void* HWND;
 typedef void* TVITEMPART;
 typedef void* RECT;
-typedef void* POINT;
 typedef void* HINSTANCE;
+
+typedef struct _POINT{
+    long    X;
+    long    Y;
+}POINT, * PPOINT, *NPPOINT, * LPPOINT;
 
 typedef void* TV_ITEMW;
 
 typedef void* PFTASKDIALOGCALLBACK;
-typedef void* HICON;
+
+typedef BYTE YANG_AND[4], * PYANG_AND[4], YANG_XOR[4], * PYANG_XOR[4];
+
+typedef struct _WINAPI_BITMAP{
+    long    BitmapType;
+    long    BitmapWidth;
+    long    Height;
+    long    BitmapByteWidth;
+    WORD    Planes;
+    WORD    Bpp;
+    void*   Data;
+}WINAPI_BITMAP, * PWINAPI_BITMAP, * NPWINAPI_BITMAP, * LPWINAPI_BITMAP;
+
+typedef struct _ICONINFO{
+    bool                Icon;
+    DWORD               X;
+    DWORD               Y;
+    PWINAPI_BITMAP      Mask;
+    PWINAPI_BITMAP      Color;
+}ICONINFO, * PICONINFO;
+
+typedef struct _ICONINFOEXA{
+    DWORD       DataSize;
+    ICONINFO    BasicInfo;
+    WORD        ResID;
+    char*       ModeName[256];
+    char*       ResName[256];       
+}ICONINFOEXA, * PICONINFOEXA;
+
+typedef struct _ICONINFOEXW{
+    DWORD       DataSize;
+    ICONINFO    BasicInfo;
+    WORD        ResID;
+    short*      ModeName[256];
+    short*      ResName[256];       
+}ICONINFOEXW, * PICONINFOEXW;
+
+typedef struct _HICON{
+    string      IconResourceName;
+    void*       IconHandle;
+    int         Width;
+    int         Height;
+    ICONINFOEXA InfoA;
+    ICONINFOEXW InfoW;
+}HICON, * PHICON;
+
+
 typedef void* TASKDIALOG_BUTTON;
 typedef void* TASKDIALOG_COMMON_BUTTON_FLAGS;
 typedef void* TASKDIALOG_FLAGS;

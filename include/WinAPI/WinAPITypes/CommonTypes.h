@@ -14,7 +14,7 @@ typedef int32_t INT32, LONG32,HRESULT, NTSTRSAFEDDI, INT;
 typedef int64_t INT64, LONG64;
 typedef uint16_t UWORD, USHORT,UINT16;
 typedef uint16_t WORD;
-typedef int16_t INT16;
+typedef int16_t INT16, SHORT;
 typedef uint8_t BYTE, UCHAR,UINT8;
 typedef const char CCHAR;
 typedef char INT8;

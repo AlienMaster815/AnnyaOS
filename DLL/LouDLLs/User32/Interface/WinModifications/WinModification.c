@@ -36,7 +36,7 @@ AwmHookCalbackToWindow(
 #define WINDOW_DEFACTO_MOVABLE_REQUIREMENT  (WS_CAPTION | WS_SYSMENU) //required for movment
 #define WINDOW_HAS_MOVMENT_DISQUALIFIERS    (WS_DISABLED | WS_CHILD)//disqualifes movment
 
-
+void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click);
 
 LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam){
 
@@ -44,6 +44,9 @@ LRESULT WindowModificationWndProc(WNDPROC LastFunc, HWND WindowHandle, UINT32 Me
         case WM_LBUTTON_DOWN:
             if(!strcmp(((PWINDOW_HANDLE)WindowHandle)->WindowName, "StartButton")){
                 AwmHandleStartButtonEvent(WindowHandle, true);    
+            }
+            else if(!strcmp(((PWINDOW_HANDLE)WindowHandle)->WindowName, "FileExplorer")){
+                AwmHandelFileExplorerEvent(WindowHandle, true);
             }
             break;
 

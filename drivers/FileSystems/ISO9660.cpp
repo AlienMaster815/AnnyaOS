@@ -276,7 +276,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             
         //If We are here we have successfully found an ISO Filesystem
 
-        LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
+        //LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
 
         uint16_t i = 0, BufferSelector = 0;
         bool condition = false;
@@ -346,7 +346,7 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
     //:/Dir/dir/.../file
-    LouPrint("Seeking File:%s\n", FilePath);
+    //LouPrint("Seeking File:%s\n", FilePath);
 
     uint64_t LBA = 0;
     uint64_t DATA_LEN = 0;
@@ -375,6 +375,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
     //Create A File System Structure
     if((PVD.Type == ISO_PrimaryVolumeDescriptor) && (strncmp(PVD.Identifier, "CD001", 5) == 0) && (PVD.Version == 0x01)){
+        LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
         PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
         Iso9660FileSystem->PortID = PortID;
         Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;

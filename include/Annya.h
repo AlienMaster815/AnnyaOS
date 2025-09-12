@@ -662,6 +662,9 @@ typedef void* HINSTANCE;
 #define WS_EX_WINDOWEDGE 0x00000100L
 
 
+#include "../DLL/LouDLLs/GDI32/AnnyaGdi.h"
+#include "../DLL/LouDLLs/User32/AnnyaUser.h"
+
 #ifdef IS_X86_64
 
 #else

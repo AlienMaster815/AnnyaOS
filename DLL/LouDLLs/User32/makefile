@@ -3,7 +3,7 @@ CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -nostdlib -nodefaultlibs -O3 -flto
 
 # Paths
-INCLUDES = -I../../../include -I../../3rdParty/FreeType/include
+INCLUDES = -I../../../include
 LDFLAGS = -L../../../UserLibraries
 LIBS = -lLouDll -lntdll -lKERNEL32
 

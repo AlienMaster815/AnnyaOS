@@ -250,7 +250,7 @@ string ParseLousineDriverManifestForCompatibleDriver(void* Config, string Index)
     UNUSED PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)Config;
 
     if(!LDDDS){
-        LDDDS = (string)fopen("C:/ANNYA/SYSTEM64/DRIVERS/DRIVERS.CFG", KERNEL_GENERIC_MEMORY);
+        LDDDS = (string)fopen("C:/ANNYA/SYSTEM64/CONFIG/DRIVERS.CFG", KERNEL_GENERIC_MEMORY);
     }
     if(!LDDDS){
         return 0x00;

@@ -423,7 +423,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
     //allocate New Stack
-    void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, USER_GENERIC_MEMORY);
     
     //Allocate New Thread
     thread_t* NewThread = CreateThreadHandle();
@@ -435,7 +435,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVO
     //store the top of the stack
     NewThread->StackTop = NewStack;
     //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 16) & ~(16 - 1)); //leave a kilobyte for wiggle room
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling
@@ -477,8 +477,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
     //allocate New Stack
-    void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
-    
+    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, USER_GENERIC_MEMORY);
     //Allocate New Threads
     thread_t* NewThread = CreateThreadHandle();
     if(!NewThread){
@@ -489,7 +488,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
     //store the top of the stack
     NewThread->StackTop = NewStack;
     //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)((((uintptr_t)((uint8_t*)NewStack) + StackSize) - 16) & ~(16 - 1)); //leave a kilobyte for wiggle room
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)((((uintptr_t)((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling
@@ -545,7 +544,7 @@ LouKeCreateUserStackDemon(
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
-    void* NewStack = LouKeMallocPhysical(StackSize, WRITEABLE_PAGE | PRESENT_PAGE | USER_PAGE);
+    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, USER_GENERIC_MEMORY);
     thread_t* NewThread = CreateThreadHandle();
 
     if(!NewThread){
@@ -557,7 +556,7 @@ LouKeCreateUserStackDemon(
     //store the top of the stack
     NewThread->StackTop = NewStack;
     //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 16) & ~(16 - 1)); //leave a kilobyte for wiggle room
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling
@@ -601,7 +600,7 @@ LouKeCreateDemon(
 ){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
-    void* NewStack = LouKeMallocPhysical(StackSize, KERNEL_GENERIC_MEMORY);
+    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
     thread_t* NewThread = CreateThreadHandle();
 
     if(!NewThread){
@@ -613,7 +612,7 @@ LouKeCreateDemon(
     //store the top of the stack
     NewThread->StackTop = NewStack;
     //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 16) & ~(16 - 1)); //leave a kilobyte for wiggle room
+    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
     //set the New Threads Context
     NewThread->cpu_state = NewContext;
     //Allocate Space For Safe Context Handling

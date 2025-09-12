@@ -191,6 +191,9 @@ UserSpace:
 	$(MAKE) -C UserLibraries/ntdll clean
 	$(MAKE) -C UserLibraries/ntdll all
 
+	$(MAKE) -C UserLibraries/GDI32 clean
+	$(MAKE) -C UserLibraries/GDI32 all
+
 	$(MAKE) -C UserLibraries/User32 clean
 	$(MAKE) -C UserLibraries/User32 all
 	
@@ -224,12 +227,11 @@ UserSpace:
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
 
-	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
-	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw 
-
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 
+	$(MAKE) -C DLL/LouDLLs/GDI32 clean
+	$(MAKE) -C DLL/LouDLLs/GDI32 all
 
 annya.iso: release KernelModules UserSpace
 	rm -rf ISO
@@ -274,7 +276,6 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
-	$(MAKE) -C DLL/3rdParty/FreeType/build-mingw clean
 	$(MAKE) -C boot/x86_64 clean
 	rm -rf release
 	rm -rf ISO
