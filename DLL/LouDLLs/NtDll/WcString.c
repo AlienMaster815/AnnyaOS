@@ -50,3 +50,93 @@ static const UINT16 NtWcTypes[256] = {
     0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0010,
     0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102
 }; 
+
+NTDLL_API
+int 
+_wcsicmp(LPCWSTR String1, LPCWSTR String2){
+    wchar_t Char1, Char2;
+    size_t i = 0;
+    while(1){
+        Char1 = ((String1[i] >= 'A') && (String1[i] <= 'Z')) ? String1[i] + 32 : String1[i];
+        Char2 = ((String2[i] >= 'A') && (String2[i] <= 'Z')) ? String2[i] + 32 : String2[i];
+        if((Char1 !=Char2) || (!*String1)){
+            return Char1 - Char2;
+        }
+        i++;
+    }
+    return 0x00;
+}
+
+NTDLL_API
+size_t 
+wcsnlen(
+    LPCWSTR Str,
+    size_t Length
+){
+    size_t i = 0;
+    while((Str[i]) && (Length)){
+        i++;
+        Length--;
+    }
+    return i - (size_t)Str;
+}
+
+NTDLL_API
+LPWSTR 
+_wcslwr(
+    LPWSTR Str
+){
+    LPWSTR Result = Str;
+    for ( ; *Str; Str++) if (*Str >= 'A' && *Str <= 'Z') *Str += 'a' - 'A';
+    return Result;
+}
+
+NTDLL_API
+int 
+_wcslwr_s(wchar_t* Str, size_t Length){
+
+    if(!Str){
+        return 22;//EINVAL
+    }
+
+    if(wcsnlen(Str, Length) == Length){
+        *Str = 0x00;
+        return 22;//EINVAL
+    }
+
+    _wcslwr(Str);
+
+    return 0x00;
+}
+
+NTDLL_API
+LPWSTR 
+_wcsupr(
+    LPWSTR Str
+){
+    LPWSTR Result = Str;
+    for ( ; *Str; Str++) if (*Str >= 'a' && *Str <= 'z') *Str += 'A' - 'a';
+    return Result;
+}
+
+NTDLL_API
+int 
+_wcsupr_s(
+    LPWSTR Str,
+    size_t Length
+){
+
+    if(!Str){
+        return 22;//EINVAL
+    }
+
+    if(wcsnlen(Str, Length) == Length){
+        *Str = 0x00;
+        return 22;//EINVAL
+    }
+
+    _wcsupr(Str);
+    return 0x00;
+}
+
+//184
