@@ -28,14 +28,16 @@ typedef struct _RECT{
     long Top;
     long Right;
     long Bottom;
-}RECT, * PRECT, * NPRECT, * LPRECT; 
+}RECT, * PRECT, * NPRECT, * LPRECT,
+    RECTL, * PRECTL, * NPRECTL, * LPRECTL;
 
 typedef void* HINSTANCE;
 
 typedef struct _POINT{
     long    X;
     long    Y;
-}POINT, * PPOINT, *NPPOINT, * LPPOINT;
+}POINT, * PPOINT, *NPPOINT, * LPPOINT,
+    POINTL, * PPOINTL, * NPPOINTL, * LPPOINTL;
 
 typedef void* TV_ITEMW;
 

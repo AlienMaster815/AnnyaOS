@@ -661,8 +661,8 @@ typedef void* HINSTANCE;
 #define WS_EX_TRANSPARENT 0x00000020L //The window should not be painted until siblings beneath the window (that were created by the same thread) have been painted. The window appears transparent because the bits of underlying sibling windows have already been painted. To achieve transparency without these restrictions, use the SetWindowRgn function.
 #define WS_EX_WINDOWEDGE 0x00000100L
 
+typedef void* HBRUSH;
 
-#include "../DLL/LouDLLs/GDI32/AnnyaGdi.h"
 #include "../DLL/LouDLLs/User32/AnnyaUser.h"
 
 #ifdef IS_X86_64
