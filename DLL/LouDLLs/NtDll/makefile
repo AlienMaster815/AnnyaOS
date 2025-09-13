@@ -17,7 +17,8 @@ SRC = 	NtDll.c \
 		Sha.c \
 		Alpc.c \
 		Syncronization.c \
-		Allocation.c
+		Allocation.c \
+		WcString.c
 
 ASM_SRC = ntdll.asm
 ASM_OBJ = ntdll.o
