@@ -636,7 +636,9 @@ typedef struct _DEVICE_MODEA{
     DWORD   PanningWidth;
     DWORD   PanningHeight;
 }DEVICE_MODEA, * PDEVICE_MODEA,
-    DEVICEMODEA, * PDEVICEMODEA, * LPDEVICEMODEA; 
+    DEVICEMODEA, * PDEVICEMODEA, * LPDEVICEMODEA,
+        DEVMODEA, * PDEVMODEA, * LPDEVMODEA; 
+
 
 
 typedef struct _DEVICE_MODEW{
@@ -687,9 +689,10 @@ typedef struct _DEVICE_MODEW{
     DWORD   PanningWidth;
     DWORD   PanningHeight;
 }DEVICE_MODEW, * PDEVICE_MODEW,
-    DEVICEMODEW, * PDEVICEMODEW, * LPDEVICEMODEW; 
+    DEVICEMODEW, * PDEVICEMODEW, * LPDEVICEMODEW,
+        DEVMODEW, * PDEVMODEW, * LPDEVMODEW; 
 
-typedef HANDLE HGRN;
+typedef HANDLE HRGN;
 typedef HANDLE HFONT;
 
 #define LF_FACESIZE     32
@@ -769,7 +772,60 @@ typedef struct _ENUMLOGFONTEXDVW{
     DESIGNVECTOR    DesignVector;
 }ENUMLOGFONTEXDVW, * PENUMLOGFONTEXDVW, * LPENUMLOGFONTEXDVW, * NPENUMLOGFONTEXDVW;
 
+typedef HANDLE HPALETTE;
 
+typedef struct _PALETTEENTRY{
+    BYTE    Red;
+    BYTE    Green;
+    BYTE    Blue;
+    BYTE    Flags;
+}PALETTEENTRY, * PPALETTEENTRY, * LPPALETTEENTRY, * NPPALETTEENTRY;
+
+typedef struct _LOGPALETTE{
+    WORD            Version;
+    WORD            NumEntries;
+    PALETTEENTRY    PaletteEntry;
+}LOGPALETTE, * PLOGPALETTE, * LPLOGPALETTE, * NPLOGPALETTE;
+
+typedef HANDLE HPEN;
+
+typedef struct _LOGPEN{
+    UINT32      Style;
+    POINT       Width;
+    COLORREF    Color;
+}LOGPEN, * PLOGPEN, * LPLOGPEN, * NPLOGPEN;
+
+typedef HANDLE HGDIOBJ;
+
+typedef struct _DIBSECTION{
+    BITMAP              Ditmap;
+    BITMAP_INFO_HEADER  InfoHeader;
+    DWORD               BitFields[3];
+    HANDLE              Section;
+    DWORD               Offset;
+}DIBSECTION, * PDIBSECTION;
+
+typedef struct _DISPLAY_DEVICEA{
+    DWORD   Buffer;
+    CHAR    DeviceName[32];
+    CHAR    DeviceString[128];
+    DWORD   StateFlags;
+    CHAR    DeviceID[128];
+    CHAR    DeviceKey[128];
+}DISPLAY_DEVICEA, * PDISPLAY_DEVICEA, * LPDISPLAY_DEVICEA;
+
+typedef struct _DISPLAY_DEVICEW{
+    DWORD   Buffer;
+    WCHAR   DeviceName[32];
+    WCHAR   DeviceString[128];
+    DWORD   StateFlags;
+    WCHAR   DeviceID[128];
+    WCHAR   DeviceKey[128];
+}DISPLAY_DEVICEW, * PDISPLAY_DEVICEW, * LPDISPLAY_DEVICEW;
+
+typedef struct _EMR{
+    
+}EMR, * PEMR, * LPEMR, * NPEMR;
 
 #ifndef _GDI32_H
 

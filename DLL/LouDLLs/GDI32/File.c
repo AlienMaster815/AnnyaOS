@@ -98,3 +98,26 @@ CreateEnhMetaFileW(
 
     return 0x00;
 }
+
+GDI32_API
+BOOL
+DeleteEnhMEtaFile(
+    HENHMETAFILE    Hmf
+){
+
+
+
+    return false;
+}
+
+GDI32_API
+BOOL
+DeleteMetaFile(
+    HMETAFILE   Hmf
+){
+
+    
+
+    return false;
+}
+
