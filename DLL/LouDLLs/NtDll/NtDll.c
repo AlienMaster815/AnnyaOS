@@ -2545,6 +2545,7 @@ NTDLL_API void wcsncat_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsncmp() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsncpy() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsncpy_s() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void wcsnlen() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcspbrk() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsrchr() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsspn() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -2553,6 +2554,7 @@ NTDLL_API void wcstok_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcstol() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcstombs() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcstoul() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void _wcsicmp() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _wcsnicmp() {LouPrint("Hello nt Dll\n"); while(1);}
 /*NTDLL_API void isalnum() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void isalpha() {LouPrint("Hello nt Dll\n"); while(1);}
