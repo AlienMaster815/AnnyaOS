@@ -6,6 +6,13 @@ static void* CsrPortHeap = 0x00;
 void* GetCsrPortHeap(){
     return CsrPortHeap;
 }
+
+NTDLL_API
+BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    CsrPortHeap = LouVirtualAllocUser(2 * MEGABYTE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
+    return TRUE;
+}
+
 //NtDll Functions
 
 
@@ -2525,9 +2532,14 @@ NTDLL_API void _vsnprintf_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _vsnwprintf() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _vsnwprintf_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _vswprintf_s() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void wcscat() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void wcscat_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcschr() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcscmp() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void wcscpy() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void wcscpy_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcscspn() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void wcslen() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsncat() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsncat_s() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcsncmp() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -2542,6 +2554,30 @@ NTDLL_API void wcstol() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcstombs() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcstoul() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _wcsnicmp() {LouPrint("Hello nt Dll\n"); while(1);}
+/*NTDLL_API void isalnum() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void isalpha() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void isxdigit() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void memcmp() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void memcpy() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void memmove() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void memset() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void strcat() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void strchr() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API int strcmp(const char* str1, const char* str2) {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API int strncmp(const char* str1, const char* str2, size_t i) {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API int strcpy(const char* str1, const char* str2, size_t i) {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API int strlen(const char* str1) {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void strrchr() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void tolower() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void toupper() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void towupper() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void towlower() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void strtol() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void __wine_dbg_get_channel_flags() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void __wine_dbg_header() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void __wine_dbg_output() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void __wine_dbg_strdup() {LouPrint("Hello nt Dll\n"); while(1);}
+*/
 
 NTDLL_API void LdrDisableThreadCalloutsForDll() {
 

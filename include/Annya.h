@@ -504,7 +504,7 @@ void InitializeCriticalSectionEx(
 
 #endif
 
-#ifndef _LOUDLL_
+#ifndef NTDLL_H
 
 
 __declspec(dllimport)

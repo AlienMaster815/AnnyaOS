@@ -1,26 +1,24 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -nostdlib -nodefaultlibs
+CFLAGS = -shared -nostdlib -nodefaultlibs -O3
 
 # Paths
 INCLUDES = -I../../../include
+LDFLAGS = -L../../../UserLibraries
+LIBS = -lLouDll -lntdll
 
 # Source and Target
-SRC = LouDll.c \
-	Dispatch.c \
-	memory.c \
-	DrsdUserCore/Drsd.c \
-	DrsdUserCore/DrsdDraw.c 
-
-TARGET = LouDll.dll
+SRC = kernbase.c \
+	  Syncronization.c
+TARGET = kernbase.dll
 
 # Default Rule
 all: $(TARGET)
 
 # Build Rule
 $(TARGET): $(SRC)
-	@echo "Building $(TARGET)..."
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(INCLUDES) $(LDFLAGS) $(LIBS)
+
 
 # Clean Rule
 clean:

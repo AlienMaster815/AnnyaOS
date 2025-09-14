@@ -388,8 +388,10 @@ void InitializeUserSpace(){
     LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
     void (*SendProcessorFeaturesToLouMemCpy)(PPROCESSOR_FEATURES) = (void (*)(PPROCESSOR_FEATURES))LouKeLinkerGetAddress("LOUDLL.DLL", "SendProcessorFeaturesToLouMemCpy");
     SendProcessorFeaturesToLouMemCpy(ProcAcceleratedFeatures);
-    LouPrint("LOUDLL.DLL Has Loaded\n");
     
+    //LouPrint("LOUDLL.DLL Has Loaded\n");
+    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL", 0x00);
+    //LouPrint("NTDLL.DLL Has Loaded\n");
     //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
     //LouPrint("KERNEL32.DLL Has Loaded\n");
     //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNBASE.DLL", 0x00);

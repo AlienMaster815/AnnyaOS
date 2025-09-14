@@ -32,7 +32,7 @@ typedef struct _A_SHA_CONTEXT{
 
 
 #ifdef _USER_MODE_CODE_
-#ifdef _LOUDLL_
+#ifdef NTDLL_H
 void RSA32_API A_SHAInit(A_SHA_CONTEXT* ShaContext);
 uintptr_t RSA32_API A_SHAUpdate(A_SHA_CONTEXT* ShaContext, uint8_t* InputBuffer, size_t InputLength);
 void RSA32_API A_SHAFinal(A_SHA_CONTEXT* ShaContext, uint8_t InputBuffer[A_SHA_DIGEST_LENGTH]);
