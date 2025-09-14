@@ -66,14 +66,3 @@ CreateDIBitmap(
     return 0x00;
 }
 
-GDI32_API
-BOOL
-DeleteDC(
-    HDC Hdc
-){
-
-
-
-    return true;
-}
-

@@ -77,48 +77,10 @@ CreateFontA(
     return 0x00;
 }
 
-
-GDI32_API
-HFONT
-CreateFontW(
-    int     Height,
-    int     Width,
-    int     Escapement,
-    int     Orientation,
-    int     Weight,
-    DWORD   Italic,
-    DWORD   Underline,
-    DWORD   Strikeout,
-    DWORD   CharSet,
-    DWORD   OutPrecision,
-    DWORD   ClipPrecision,
-    DWORD   Quality,
-    DWORD   PitchAndFamily,
-    LPCWSTR FaceName
-){
-
-
-
-    return 0x00;
-}
-
-
-
 GDI32_API
 HFONT
 CreateFontIndirectA(
     PLOGFONTA LogFont
-){
-
-
-
-    return 0x00;
-}
-
-GDI32_API
-HFONT 
-CreateFontIndirectW(
-    PLOGFONTW LogFont
 ){
 
 
@@ -147,55 +109,3 @@ CreateFontIndirectExW(
 
     return 0x00;
 }
-
-GDI32_API
-HDC
-CreateMetaFileA(
-    LPCSTR  File
-){
-
-
-
-    return 0x00;
-}
-
-GDI32_API
-HDC
-CreateMetaFileW(
-    LPCWSTR File
-){
-
-
-
-    return 0x00;
-}
-
-GDI32_API
-BOOL
-CreateScalableFontResourceA(
-    DWORD   Hidden,
-    LPCSTR  Font,
-    LPCSTR  File,
-    LPCSTR  Path
-){
-
-
-
-    return false;
-}
-
-GDI32_API
-BOOL
-CreateScalableFontResourceW(
-    DWORD       Hidden,
-    LPCWSTR     Font,
-    LPCWSTR     File,
-    LPCWSTR     Path
-){
-
-
-
-    return false;
-}
-
-

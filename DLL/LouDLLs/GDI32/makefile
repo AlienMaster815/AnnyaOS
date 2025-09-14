@@ -17,11 +17,7 @@ SRC = 	Gdi32.c \
 		Transform.c \
 		DIB.c \
 		Rgn.c \
-		File.c \
-		Palette.c \
-		Ic.c \
-		Pen.c \
-		Emr.c
+		File.c
 
 TARGET = GDI32.DLL
 
