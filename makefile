@@ -209,14 +209,6 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 all 
 
-	$(MAKE) -C DLL/LouDLLs/NtDll clean
-	$(MAKE) -C DLL/LouDLLs/NtDll all
-
-	$(MAKE) -C DLL/LouDLLs/kernelbase clean
-	$(MAKE) -C DLL/LouDLLs/kernelbase all
-
-	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
-	$(MAKE) -C DLL/LouDLLs/KERNEL32 all
 
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT all
@@ -265,13 +257,10 @@ cleanall:
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
-	$(MAKE) -C DLL/LouDLLs/NtDll clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C drivers/Networking/PCNET32 clean
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
-	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
-	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C boot/x86_64 clean
 	rm -rf release

@@ -48,7 +48,7 @@ static const UINT16 NtWcTypes[256] = {
     0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102,
     //F0
     0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0010,
-    0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102
+    0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102, 0x0102,
 }; 
 
 NTDLL_API
@@ -139,4 +139,85 @@ _wcsupr_s(
     return 0x00;
 }
 
-//184
+NTDLL_API
+LPWSTR
+wcscpy(
+    LPWSTR Destination, 
+    LPWSTR Source
+){
+    LPWSTR Tmp = Destination;
+    while((*Tmp++ = *Source++));
+    return Destination;
+}
+
+NTDLL_API
+int
+wcscpy_s(
+    LPWSTR  Destination,
+    size_t  Length,
+    LPCWSTR Source
+){
+    size_t i;
+    if((!Destination) || (!Length) || (!Source)){
+        if(Destination) {
+            *Destination = 0;
+        }
+        return 22; //EINVAL:
+    }
+
+    for(i = 0 ; i < Length; i++){
+        if(!(Destination[i] = Source[i]))return 0;
+    }
+    *Destination = 0;
+    return 34;//ERANGE
+}
+
+NTDLL_API
+size_t 
+wcslen(
+    LPCWSTR Str
+){
+    LPWSTR Tmp = Str;
+    while(*Tmp){
+        Tmp++;
+    }
+    return (size_t)Tmp - (size_t)Str;
+}
+
+NTDLL_API
+LPWSTR
+wcscat(
+    LPWSTR  Destination,
+    LPCWSTR Source
+){
+    wcscpy(Destination + wcslen(Destination), Source);
+    return Destination;
+}
+NTDLL_API
+int 
+wcscat_s(
+    wchar_t*            Destination,
+    size_t              Length,
+    const wchar_t*      Source
+){
+    size_t i, j;
+    if((!Destination) || (!Length) || (!Source)){
+        if(Destination){
+            *Destination = 0;
+        } 
+        return 22;//EINVAL
+    } 
+    for(i = 0; i < Length; i++){
+        if(!Destination[i]){
+            break;
+        }
+    }
+    for(j = 0; (j + i) < Length; j++){
+        if(!(Destination[j + i] = Source[j])){
+            return 0;
+        }
+    }
+    return 34;//ERANGE
+}
+
+//256
