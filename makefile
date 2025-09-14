@@ -230,6 +230,9 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 
+	$(MAKE) -C DLL/LouDLLs/GDI32 clean
+	$(MAKE) -C DLL/LouDLLs/GDI32 all
+
 annya.iso: release KernelModules UserSpace
 	rm -rf ISO
 	
@@ -273,6 +276,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/KERNEL32 clean
 	$(MAKE) -C DLL/LouDLLs/kernelbase clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
+	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 	$(MAKE) -C boot/x86_64 clean
 	rm -rf release
 	rm -rf ISO
