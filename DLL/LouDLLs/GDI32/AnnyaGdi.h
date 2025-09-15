@@ -769,7 +769,36 @@ typedef struct _ENUMLOGFONTEXDVW{
     DESIGNVECTOR    DesignVector;
 }ENUMLOGFONTEXDVW, * PENUMLOGFONTEXDVW, * LPENUMLOGFONTEXDVW, * NPENUMLOGFONTEXDVW;
 
+typedef struct _DIBSECTION{
+    BITMAP              Bitmap;
+    BITMAP_INFO_HEADER  InfoHeader;
+    DWORD               Bitfields[3];
+    HANDLE              Section;
+    DWORD               Offset;
+}DIBSECTION, * PDIBSECTION,
+    * LPDIBSECTION, * NPDIBSECTION;
 
+typedef struct _DISPLAY_DEVICEA{
+    DWORD   Buffer;
+    CHAR    DeviceName[32];
+    CHAR    DeviceString[128];
+    DWORD   StateFlags;
+    CHAR    DeviceID[128];
+    CHAR    DeviceKEy[128];
+}DISPLAY_DEVICEA, * PDISPLAY_DEVICEA,
+    * LPDISPLAY_DEVICEA, * NPDISPLAY_DEVICEA;
+
+typedef struct _DISPLAY_DEVICEW{
+    DWORD   Buffer;
+    WCHAR   DeviceName[32];
+    WCHAR   DeviceString[128];
+    DWORD   StateFlags;
+    WCHAR   DeviceID[128];
+    WCHAR   DeviceKEy[128];
+}DISPLAY_DEVICEA, * PDISPLAY_DEVICEA,
+    * LPDISPLAY_DEVICEA, * NPDISPLAY_DEVICEA;
+
+//DPtoLP Function
 
 #ifndef _GDI32_H
 
