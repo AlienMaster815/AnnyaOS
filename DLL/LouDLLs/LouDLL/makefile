@@ -17,7 +17,7 @@ SRC = LouDll.c \
 	Nt/Allocation.c \
 	Nt/Alpc.c \
 	Nt/NtDll.c \
-	Nt/Sha.c #\
+	Nt/Sha.c \
 	Nt/wcstring.c
 
 ASM_SRC = Lou.asm

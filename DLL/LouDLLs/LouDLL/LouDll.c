@@ -3,7 +3,7 @@
 #include "LouDll.h"
 #include <LouCoff.h>
 
-#define NTDLL_RVA_ENTRIES 6
+#define NTDLL_RVA_ENTRIES 12
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
@@ -22,6 +22,12 @@ static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "RtlEnterCriticalSection",
     "RtlLeaveCriticalSection",
     "GetProcessHeap",
+    "_wcsicmp",
+    "_wcslwr",
+    "wcslen",
+    "_wcslwr_s",
+    "wcsnlen",
+    "_wcsnicmp",
 };
 
 static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
@@ -31,6 +37,12 @@ static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
     (PVOID)RtlEnterCriticalSection,
     (PVOID)RtlLeaveCriticalSection,
     (PVOID)AnnyaNtGetProcessHeap,
+    (PVOID)_wcsicmp,
+    (PVOID)_wcslwr,
+    (PVOID)wcslen,
+    (PVOID)_wcslwr_s,
+    (PVOID)wcsnlen,
+    (PVOID)_wcsnicmp,
 };
 
 static KULA_TBALE_ENTRIES KulaEntries[LOUDLL_EMULATED_BINARIES] = {

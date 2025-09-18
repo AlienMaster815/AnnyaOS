@@ -42,4 +42,29 @@ RtlAllocateHeap(
 
 void* AnnyaNtGetProcessHeap();
 
+int
+_wcsicmp(
+    LPCWSTR String1,
+    LPCWSTR String2
+);
+
+int 
+_wcslwr_s(
+    LPWSTR Str, 
+    size_t Length 
+);
+
+LPWSTR _wcslwr(
+    LPWSTR Str
+);
+
+size_t
+wcslen(
+    LPCWSTR Str  
+);
+
+size_t wcsnlen(const WCHAR *str, size_t len);
+
+int _wcsnicmp(LPCWSTR str1, LPCWSTR str2, size_t n);
+
 #endif

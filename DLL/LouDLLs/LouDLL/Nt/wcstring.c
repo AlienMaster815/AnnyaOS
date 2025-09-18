@@ -1,8 +1,7 @@
 #include "ntdll.h"
 
 
-static const unsigned short wctypes[256] =
-{
+static const unsigned short wctypes[256] = {
     //0x00 
     0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020,
     0x0020, 0x0068, 0x0028, 0x0028, 0x0028, 0x0028, 0x0020, 0x0020,
@@ -56,27 +55,71 @@ static const unsigned short wctypes[256] =
 NTDLL_API
 int
 _wcsicmp(
-LPCWSTR String1,
-LPCWSTR String2
+    LPCWSTR String1,
+    LPCWSTR String2
 ){
     size_t i = 0;
-    for(::){
-	WCHAR Char1 = ((String1[i] >= 'A') && (String1[i] <= 'Z')) ? String1[i] + 32 : String1[i]; 
+    for(;;){
+	    WCHAR Char1 = ((String1[i] >= 'A') && (String1[i] <= 'Z')) ? String1[i] + 32 : String1[i]; 
     	WCHAR Char2 = ((String2[i] >= 'A') && (String2[i] <= 'Z')) ? String2[i] + 32 : String2[i];
         if((Char1 != Char2) || (!String1[i])){
-  	    return (Char1 - Char2);
-	}
+  	        return (Char1 - Char2);
+	    }
         i++;
     }
     return 0;
 }
 
+NTDLL_API
 LPWSTR _wcslwr(
     LPWSTR Str
 ){
     LPWSTR Result;
-    for(;*Str; Str++; if((*Str >= 'A') && (*Str <= 'Z'))){
-	*Str = += ('a' - 'A');
+    for(;*Str; Str++){
+        if((*Str >= 'A') && (*Str <= 'Z')){
+	       *Str += ('a' - 'A');
+        }
+    }
+    return Result;
+}
+
+NTDLL_API
+size_t 
+wcslen(LPCWSTR str){
+    const WCHAR *s = str;
+    while (*s) s++;
+    return s - str;
+}
+
+size_t wcsnlen(const WCHAR *str, size_t len){
+    const WCHAR *s;
+    for (s = str; len && *s; s++, len--) ;
+    return s - str;
+}
+
+NTDLL_API
+int 
+_wcslwr_s(
+    LPWSTR Str, 
+    size_t Length 
+){
+    if (!Str) return 22;
+    else if (wcsnlen(Str, Length) == Length){
+        *Str = 0;
+        return 22;
+    }
+    _wcslwr(Str);
+    return 0;
+}
+
+NTDLL_API
+int
+_wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
+    int Result = 0;
+    for ( ; n > 0; n--, str1++, str2++){
+        WCHAR ch1 = (*str1 >= 'A' && *str1 <= 'Z') ? *str1 + 32 : *str1;
+        WCHAR ch2 = (*str2 >= 'A' && *str2 <= 'Z') ? *str2 + 32 : *str2;
+        if ((Result = ch1 - ch2) ||  !*str1) break;
     }
     return Result;
 }
