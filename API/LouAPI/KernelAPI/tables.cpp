@@ -949,6 +949,11 @@ LOUDDK_API_ENTRY void InitializeGenericTables(){
 
 }
 
+PVOID 
+LouKeGetKulaEmulatedFunctionN(
+    string BinaryName, 
+    string FunctionName
+);
 
 LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     string ModuleName,
@@ -1007,7 +1012,10 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
         }
     }
 
-    return 0x00;
+    return (UINT64)LouKeGetKulaEmulatedFunctionN(
+        ModuleName,
+        FunctionName
+    );
 }
 
 LOUDDK_API_ENTRY

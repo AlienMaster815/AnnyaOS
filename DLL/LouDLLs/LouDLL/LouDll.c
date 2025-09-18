@@ -1,7 +1,58 @@
 
 //x86_64-w64-mingw32-gcc -shared -o LouDll.dll LouDll.c -nostdlib -nodefaultlibs -I../../../Include
 #include "LouDll.h"
+#include <LouCoff.h>
 
+#define NTDLL_RVA_ENTRIES 6
+#define KERNELBASE_RVA_ENTRIES 1
+#define LOUDLL_EMULATED_BINARIES 2
+
+static KULA_RVA_NAME KernelBaseNames[KERNELBASE_RVA_ENTRIES] = {
+    "InitializeCriticalSectionEx",
+};
+
+static KULA_RVA_ADDRESS KernelBaseAddresses[KERNELBASE_RVA_ENTRIES] = {
+    (PVOID)RtlInitializeCriticalSectionEx,
+};
+
+static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
+    "RtlInitializeCriticalSectionEx",
+    "AnnyaNtGetProcessHeap",
+    "RtlAllocateHeap",
+    "RtlEnterCriticalSection",
+    "RtlLeaveCriticalSection",
+    "GetProcessHeap",
+};
+
+static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
+    (PVOID)RtlInitializeCriticalSectionEx,
+    (PVOID)AnnyaNtGetProcessHeap,
+    (PVOID)RtlAllocateHeap,
+    (PVOID)RtlEnterCriticalSection,
+    (PVOID)RtlLeaveCriticalSection,
+    (PVOID)AnnyaNtGetProcessHeap,
+};
+
+static KULA_TBALE_ENTRIES KulaEntries[LOUDLL_EMULATED_BINARIES] = {
+    {
+        .BinaryName = "ntdll.dll",
+        .Members = NTDLL_RVA_ENTRIES,
+        .Names = NtDllNames,
+        .Rvas = NtDllAddresses,
+    },
+    {
+        .BinaryName = "kernelbase.dll",
+        .Members = KERNELBASE_RVA_ENTRIES,
+        .Names = KernelBaseNames,
+        .Rvas = KernelBaseAddresses,
+    },
+};
+
+DECLARE_KULA_TABLE = {
+    .KulaSignature = "KULA;",
+    .TableMembers = LOUDLL_EMULATED_BINARIES,
+    .Entries = KulaEntries,
+};
 
 static inline size_t GetAlignmentBySize(size_t Size){
     if(Size <= 2)    return 2;
@@ -39,9 +90,17 @@ LouSwapEndianess(
     return STATUS_SUCCESS;
 }
 
+
+BOOL NtDllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+
 LOUDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    return TRUE;
+    BOOL Tmp = true;
+    Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
+    if(!Tmp){
+        return Tmp;
+    }
+    return TRUE;    
 }
 
 static mutex_t PrintLock;

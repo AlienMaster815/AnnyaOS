@@ -4,6 +4,11 @@
 
 uint64_t LouKeLinkerGetAddress(string ModuleName, string FunctionName);
 
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
+
 void LouKeInitializeLibraryLookup(
     string    ModuleName,
     uint32_t  NumberOfFunctions,
@@ -12,19 +17,28 @@ void LouKeInitializeLibraryLookup(
     bool IsNativeLongmode
 );
 
+void
+LouKeInitializeKulaEmulatedFunctions(
+    string      HostBinary,
+    PKULA_TABLE Table
+);
+
 void ParseExportTables(
     uint64_t ModuleStart,
     PEXPORT_DIRECTORY_ENTRY ExportTable,
-    bool IsLongModeBinary
+    bool IsLongModeBinary,
+    string* pModuleName
 ){
 
     string ModuleName = (string)(ModuleStart + ExportTable->nameRva);
+    *pModuleName = ModuleName;
+    size_t koo = strlen(ModuleName);
+    for(size_t foo = 0 ; foo < koo; foo++){
+        ModuleName[foo] = toupper(ModuleName[foo]);
+    }
+    
     uint64_t* FunctionPointers = LouKeMallocArray(uint64_t, ExportTable->numberOfNamePointers, KERNEL_GENERIC_MEMORY);
     string* FunctionNames = LouKeMallocArray(string, ExportTable->numberOfNamePointers, KERNEL_GENERIC_MEMORY);
-
-    if(strcmp(ModuleName, "kernbase.dll") == 0){
-        ModuleName = "kernelbase.dll"; 
-    }
 
     //LouPrint("ATR:%h\n",ExportTable->exportAddressTableRva);
     //LouPrint("NPR:%h\n",ExportTable->namePointerRva);
@@ -43,8 +57,8 @@ void ParseExportTables(
         
         //LouPrint("ModuleName:%s Function Name:%s\n", ModuleName, FunctionNames[i]);
         //LouPrint("Function Pointer:%h\n", FunctionPointers[i]);
-
     }
+    
 
     LouKeInitializeLibraryLookup(
         ModuleName,
@@ -53,6 +67,8 @@ void ParseExportTables(
         FunctionPointers,
         IsLongModeBinary
     );
+
+
 
 }
 
@@ -152,26 +168,14 @@ void ParseImportTables(
             TableOffset = (i + ImportTable[j].ImportAddressTableRva + ModuleStart);
             FunctionName = (string)(TableEntry + ModuleStart + sizeof(uint16_t));
             SYSName = (string)(ModuleStart + ImportTable[j].NameRva);
-            if(strcmp(SYSName, "kernelbase.dll") == 0){
-                SYSName = "KERNBASE.DLL";
+            size_t koo = strlen(SYSName);
+            for(size_t foo = 0 ; foo < koo; foo++){
+                SYSName[foo] = toupper(SYSName[foo]);
             }
-
             //LouPrint("Function Requested:%s\n", FunctionName);
 
             uint64_t AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
-
-            //TODO: Verify this logic works
-            if((strncmp("ntdll.dll",SYSName, strlen("ntdll.dll")) == 0) && (!AddressOfPeFunction)){
-                
-                if(strncmp("_errno",FunctionName, strlen("_errno")) == 0){
-                    FunctionName = "_errnoNT";
-                    AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
-                    goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
-                }
-                goto _NULL_LINKER_ADDRESS_ERROR_LABEL;
-            }
-            else if (!AddressOfPeFunction){
-                _NULL_LINKER_ADDRESS_ERROR_LABEL:
+            if (!AddressOfPeFunction){
                 DirectoryLength = FilePathCountBackToDirectory(FilePath);
                 Directory = (string)LouKeMalloc(DirectoryLength + strlen(SYSName) + 2, WRITEABLE_PAGE | PRESENT_PAGE);//apending two null strings
                 
@@ -458,10 +462,13 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
         PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
         
+        string ModuleName;
+
         ParseExportTables(
             allocatedModuleVirtualAddress,  
             ExportTable,
-            true
+            true,
+            &ModuleName
         );
 
         ParseImportTables(
@@ -487,6 +494,15 @@ PHANDLE LoadKernelModule(uintptr_t Start, string ExecutablePath) {
             PE64Header->imageBase,
             relocationTableSize
         );
+
+
+        PKULA_TABLE NewTable = (PKULA_TABLE)LouKeLinkerGetAddress(ModuleName, "KulaTable"); 
+        if(NewTable){
+            LouKeInitializeKulaEmulatedFunctions(
+                ModuleName,
+                NewTable
+            );
+        }
 
         //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
@@ -554,11 +570,14 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
         PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
 
+        string ModuleName;
+
         if(PE64Header->PE_Data_Directory_Entries[0].VirtualAddress){
             ParseExportTables(
                 allocatedModuleVirtualAddress,  
                 ExportTable,
-                true
+                true,
+                &ModuleName
             );
         }
 
@@ -587,6 +606,14 @@ DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
             PE64Header->imageBase,
             relocationTableSize
         );
+
+        PKULA_TABLE NewTable = (PKULA_TABLE)LouKeLinkerGetAddress(ModuleName, "KulaTable"); 
+        if(NewTable){
+            LouKeInitializeKulaEmulatedFunctions(
+                ModuleName,
+                NewTable
+            );
+        }
 
         //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info
@@ -658,11 +685,14 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
         PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
         PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
         
+        string ModuleName;
+        
         if((uintptr_t)ExportTable != (uintptr_t)allocatedModuleVirtualAddress){
             ParseExportTables(
                 allocatedModuleVirtualAddress,  
                 ExportTable,
-                ExecutablePath
+                ExecutablePath,
+                &ModuleName
             );
         }
 
@@ -691,6 +721,14 @@ void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
             PE64Header->imageBase,
             relocationTableSize
         );
+
+        PKULA_TABLE NewTable = (PKULA_TABLE)LouKeLinkerGetAddress(ModuleName, "KulaTable"); 
+        if(NewTable){
+            LouKeInitializeKulaEmulatedFunctions(
+                ModuleName,
+                NewTable
+            );
+        }
 
         //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
         // Print function address debug info

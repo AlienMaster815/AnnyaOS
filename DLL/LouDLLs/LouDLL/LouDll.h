@@ -1,6 +1,7 @@
 #ifndef _LOUDLL_
 #define _LOUDLL_
 #define _INCLUDE_DRSD_LIBRARY_
+
 #include <Annya.h>
 #include <stdarg.h>
 #include <USRSPC/DRSD.h>
@@ -11,5 +12,34 @@
 
 LOUDLL_API
 void LouGlobalUserFree(void* Addr);
+
+void* AnnyaNtGetProcessHeap();
+NTSTATUS RtlInitializeCriticalSectionEx(
+    PMSVC_CRITICAL_SECTION CriticalSection,
+    uint32_t SpinCount,
+    uint32_t Flags
+);
+
+NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+NTSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+
+uint16_t NtGetProcessorCount();
+
+void* RtlAllocateHeapEx(
+    PVOID       HeapHandle,
+    uint64_t    HeapAllocationFlags,
+    size_t      HeapSize,
+    size_t      Alignment
+);
+
+void* 
+RtlAllocateHeap(
+    PVOID       HeapHandle,
+    uint64_t    HeapAllocationFlags,
+    size_t      HeapSize
+);
+
+void* AnnyaNtGetProcessHeap();
 
 #endif

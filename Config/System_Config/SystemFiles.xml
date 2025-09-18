@@ -27,11 +27,8 @@
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/GDI32/GDI32.DLL ISO/ANNYA/SYSTEM64/GDI32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/ANNYA/SYSTEM64/LOUDLL.DLL</FILETOCPY64>                           <!--Lousine Kernel User Space Abstraction Layer-->
-        <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/ANNYA/SYSTEM64/NTDLL.DLL</FILETOCPY64>                              <!--Nt Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/3rdParty/zlib/zlib1.dll ISO/ANNYA/ZLIB1.DLL</FILETOCPY64>                                       <!--Mark Adler Zlib Userspace module for windows-->
         <FILETOCPY64>cp DLL/LouDLLs/Codecs/codecs.dll ISO/ANNYA/SYSTEM64/CODECS.DLL</FILETOCPY64>                           <!--Annya OS Usermode Codecs Subsystem-->
-        <FILETOCPY64>cp DLL/LouDLLs/KERNEL32/KERNEL32.dll ISO/ANNYA/SYSTEM64/KERNEL32.DLL</FILETOCPY64>                     <!--Windows Legacy(9x 32 bit Kernel) Abstraction Layer-->
-        <FILETOCPY64>cp DLL/LouDLLs/kernelbase/kernbase.dll ISO/ANNYA/SYSTEM64/KERNBASE.DLL</FILETOCPY64>                   <!--Windows Legacy(9x 16 bit Kernel) Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/MSVCRT/msvcrt.dll ISO/ANNYA/SYSTEM64/MSVCRT.DLL</FILETOCPY64>                           <!--Microsoft Windows C Std Library-->
         <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/ANNYA/SYSTEM64/CRT140.DLL</FILETOCPY64>               <!--Windows C/C++ Std Library Version 1.40-->
         <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Init-->

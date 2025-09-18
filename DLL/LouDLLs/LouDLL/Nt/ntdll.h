@@ -1,6 +1,8 @@
 #ifndef NTDLL_H
 #define NTDLL_H
 
+#include "../LouDll.h"
+
 #define NTDLL_API __declspec(dllexport)
 
 #include <Annya.h>
@@ -92,11 +94,109 @@ typedef struct _CSR_CAPTURE_BUFFER{
 
 void* GetCsrPortHeap();
 void* GetNtDllPointerHeap();
-
 void* RtlAllocateHeap(
     PVOID       HeapHandle,
     uint64_t    HeapAllocationFlags,
     size_t      HeapSize
 );
+void 
+LouDrsdClipToClip(
+    struct _DRSD_CLIP* BackClip,
+    struct _DRSD_CLIP* FrontClip,
+    INT64 X,
+    INT64 Y
+);
+void 
+LouUpdateClipLocation(struct _DRSD_CLIP* Clip, INT64 DeltaX, INT64 DeltaY);
+int strcmp(const char* str1, const char* str2);
+void LouUpdateShadowClipSubState(
+    void* Clip, 
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+);
+void LouYeildExecution();
+void LouUpdateClipSubState(
+    void* Clip,
+    size_t X, size_t Y, 
+    size_t Width, size_t Height
+);
+void LouGetSystemUpdate(PSYSTEM_STATE_STACK StateStack);
+void 
+LouUpdateShadowClipState(
+    void* Clip
+);
+void LouGenericFreeHeap(void* Heap, void* Address);
+void*
+LouDrsdGetPlaneInformation(size_t* CountHandle);
+LOUSTATUS
+LouDrsdSetPlaneInformation(void* Context);
+void*
+LouGlobalUserMallocEx(size_t Size, uint64_t Alignment);
+void LouGlobalUserFree(void* Addr);
+#define LouGlobalUserMallocArray(type, count) (type*)LouGlobalUserMallocEx((ROUND_UP64(sizeof(type), GET_ALIGNMENT(type))) * (count), GET_ALIGNMENT(type))
+#define LouGlobalUserMallocType(Type) (Type*)LouGlobalUserMallocEx(sizeof(Type), GET_ALIGNMENT(Type))
+void*
+LouGlobalUserMalloc(size_t Size);
+void 
+LouExitDosMode();
+int strncmp(const char* str1, const char* str2, size_t n);
+void
+LouCloseFile(
+    FILE* ClosingFile
+);
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
+);
+LOUSTATUS 
+LouSwapEndianess(
+    void* InStreamTmp, 
+    void* OutStreamTmp, 
+    size_t StreamSize
+);
+void* LouGenericAllocateHeapEx(
+    void* Heap, 
+    size_t AllocationSize,
+    size_t Alginment
+);
+void* AnnyaGetLibraryFunctionN(string ModuleName,string FunctionName);
+void* AnnyaGetLibraryFunctionH(HANDLE ModuleHandle, string FunctionName);
+void* LouVirtualAllocUser(
+    size_t      CommitSize,     //allocated PhysicalMemory
+    size_t      ReservedSize,   //AllocatedVirtual
+    uint64_t    PageFlags
+);
+FILE*
+LouOpenFileA(
+    string FileName
+);
+int LouPrint(char* Str, ...);
+void 
+LouDrsdSyncScreen();
+void LouUpdateClipState(void* Clip);
+void* LouDrsdCreateClip(
+    INT64 X, INT64 Y, 
+    INT64 Width, INT64 Height, 
+    uint8_t R, uint8_t G, uint8_t B, uint8_t A
+);
+PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters);
+void AnnyaDestroyThread(PTHREAD Thread);
+int _vsprintf(
+    char* Buffer, 
+    size_t BufferCount, 
+    const string Format, 
+    ...
+);
+void GetRtcTimeData(TIME_T* PTIME);
+void AnnyaUpdateButton(
+    int64_t x, int64_t y,
+    uint32_t Width, uint32_t Height,
+    PBUTTONHANDLE HBUTTON
+);
+void LouTrashAndDumpProcess();
+void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
+
 
 #endif

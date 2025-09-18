@@ -1,13 +1,13 @@
 #include <LouAPI.h>
 
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql){
-    MutexLock(&LockValue->Lock);
     LouKeSetIrql(HIGH_LEVEL, Irql);
+    MutexLock(&LockValue->Lock);
 }
 
 void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql){
-    LouKeSetIrql(*Irql, 0x00);
     MutexUnlock(&LockValue->Lock);
+    LouKeSetIrql(*Irql, 0x00);
 }
 
 

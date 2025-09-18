@@ -131,8 +131,17 @@ static void InitializeDependencies(){
 
     LouPrint("Loading GDI32.DLL\n");
     Gdi32 = LoadLibraryA("C:/ANNYA/SYSTEM64/GDI32.DLL");
+    if(!Gdi32){
+        LouPrint("Critical Error Initializig GDI32.DLL\n");
+        while(1);
+    }
 
     InitializePNGHandleing = AnnyaGetLibraryFunctionN("CODECS.DLL", "InitializePNGHandleing");
+    if(!InitializePNGHandleing){
+        LouPrint("Critical Error Initializig CODECS.DLL Entry Not Found\n");
+        while(1);
+    }
+    
     Status = InitializePNGHandleing();  
     if(Status != STATUS_SUCCESS){
         LouPrint("Critical Error Initializig CODECS.DLL\n");
@@ -197,7 +206,7 @@ void AwmHandelFileExplorerEvent(PWINDOW_HANDLE Handle, bool Click){
     if(Click){
         PANNYA_EXPLORER_INIT_PACKET ExpInit = LouGlobalUserMallocType(ANNYA_EXPLORER_INIT_PACKET);
         ExpInit->Instance = AwmInstance;
-        AnnyaCreateThread(AnnyaExplorerFileManager, (PVOID)ExpInit);
+        //AnnyaCreateThread(AnnyaExplorerFileManager, (PVOID)ExpInit);
     }
 
 

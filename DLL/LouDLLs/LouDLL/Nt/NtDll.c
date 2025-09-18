@@ -7,15 +7,15 @@ void* GetCsrPortHeap(){
     return CsrPortHeap;
 }
 
-NTDLL_API
-BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+
+BOOL NtDllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     CsrPortHeap = LouVirtualAllocUser(2 * MEGABYTE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
     return TRUE;
 }
 
 //NtDll Functions
 
-
+/*
 
 NTDLL_API
 void ApiSetQueryApiSetPresence(){LouPrint("Hello NT DLL\n"); while(1);}
@@ -2556,7 +2556,7 @@ NTDLL_API void wcstombs() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void wcstoul() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _wcsicmp() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void _wcsnicmp() {LouPrint("Hello nt Dll\n"); while(1);}
-/*NTDLL_API void isalnum() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void isalnum() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void isalpha() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void isxdigit() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void memcmp() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -2581,8 +2581,8 @@ NTDLL_API void __wine_dbg_output() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void __wine_dbg_strdup() {LouPrint("Hello nt Dll\n"); while(1);}
 */
 
-NTDLL_API void LdrDisableThreadCalloutsForDll() {
+//NTDLL_API void LdrDisableThreadCalloutsForDll() {
 
-    LouPrint("Hello LdrDisableThreadCalloutsForDll(\n"); 
-    while(1);
-}
+//    LouPrint("Hello LdrDisableThreadCalloutsForDll(\n"); 
+//    while(1);
+//}

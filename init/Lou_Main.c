@@ -385,27 +385,25 @@ KERNEL_ENTRY Lou_kernel_start(
 void InitializeUserSpace(){
     LouPrint("Initializing User Mode\n");
 
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
+    DllModuleEntry BELL = LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
     void (*SendProcessorFeaturesToLouMemCpy)(PPROCESSOR_FEATURES) = (void (*)(PPROCESSOR_FEATURES))LouKeLinkerGetAddress("LOUDLL.DLL", "SendProcessorFeaturesToLouMemCpy");
     SendProcessorFeaturesToLouMemCpy(ProcAcceleratedFeatures);
-    
     LouPrint("LOUDLL.DLL Has Loaded\n");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/NTDLL.DLL", 0x00);
-    LouPrint("NTDLL.DLL Has Loaded\n");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
-    LouPrint("KERNEL32.DLL Has Loaded\n");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNBASE.DLL", 0x00);
-    LouPrint("KERNBASE.DLL Has Loaded\n");
-    LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
-    LouPrint("USER32.DLL Has Loaded\n");
-
     PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocType(WIN_PEB, USER_GENERIC_MEMORY);
     SetPEB((uint64_t)ProcessExecutionBlock);
     LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
     ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
     ProcessExecutionBlock->ProcessHeap = (uint64_t)LouKeVirtualAllocUser(MEGABYTE_PAGE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
-    
-    uint64_t InitEntry = (uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
+
+    BELL(0,0,0);
+     
+    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
+    //LouPrint("KERNEL32.DLL Has Loaded\n");
+
+    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
+    //LouPrint("USER32.DLL Has Loaded\n");    
+
+    uint64_t InitEntry = 0x00;//(uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
 
     LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
    

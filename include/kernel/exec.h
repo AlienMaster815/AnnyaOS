@@ -239,6 +239,30 @@ typedef struct _JITL_DIRECTORY {
     JITL_TABLE  JitlEntries[];
 }JITL_DIRECTORY, * PJITL_DIRECTORY;
 
+typedef string* KULA_RVA_NAMES;
+typedef PVOID*  KULA_RVA_ADDRESSES;
+
+typedef struct _KULA_TBALE_ENTRIES{
+    string              BinaryName; //Binary to emulate
+    size_t              Members;    //RVA Function Count
+    KULA_RVA_NAMES      Names;      //RVA Function Names
+    KULA_RVA_ADDRESSES  Rvas;       //RVA Function Address    
+}KULA_TBALE_ENTRIES, * PKULA_TBALE_ENTRIES;
+
+typedef struct _KULA_TABLE{
+    CHAR                    KulaSignature[5];   //K U L A ;
+    SIZE                    TableMembers;       //Entries Count For KULA Linker
+    PKULA_TBALE_ENTRIES     Entries;            //Entries For KULA Linker
+}KULA_TABLE, * PKULA_TABLE; 
+
+typedef struct _KULA_TABLE_TRACKER{
+    ListHeader              Peers;
+    string                  HostBinary;
+    PKULA_TABLE             Table;
+}KULA_TABLE_TRACKER, * PKULA_TABLE_TRACKER;
+
+#define DECLARE_KULA_TABLE static const KULA_TABLE KulaTable 
+
 #define SECTIONED_CODE(x) __attribute__((section(x)))
 
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName);

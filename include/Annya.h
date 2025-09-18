@@ -505,7 +505,7 @@ void InitializeCriticalSectionEx(
 #endif
 
 #ifndef NTDLL_H
-
+#ifndef _LOUDLL_
 
 __declspec(dllimport)
 void* AnnyaNtGetProcessHeap();
@@ -547,6 +547,7 @@ RtlAllocateHeap(
     size_t      HeapSize
 );
 
+#endif
 #endif
 
 #ifdef __cplusplus    

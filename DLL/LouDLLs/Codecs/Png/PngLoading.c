@@ -51,6 +51,7 @@ LOUSTATUS InitializePNGHandleing(){
     LouPrint("ZLIB Version:%s\n", ImpZlibVersion());
 
     LouPrint("CODECS.DLL:Initializing PNG Handling STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
 }
 
 static void CreateHeaderHandle(
