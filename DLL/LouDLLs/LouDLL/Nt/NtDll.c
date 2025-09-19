@@ -1450,8 +1450,6 @@ NTDLL_API void RtlMapGenericMask() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMapSecurityErrorToNtStatus() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMoveMemory() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMultiAppendUnicodeStringBuffer() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlMultiByteToUnicodeN() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlMultiByteToUnicodeSize() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMultipleAllocateHeap() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMultipleFreeHeap() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNewInstanceSecurityObject() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1734,8 +1732,6 @@ NTDLL_API void RtlUnicodeStringToOemSize() {LouPrint("Hello nt Dll\n"); while(1)
 NTDLL_API void RtlUnicodeStringToOemString() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUnicodeStringToUTF8String() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUnicodeToCustomCPN() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlUnicodeToMultiByteN() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlUnicodeToMultiByteSize() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUnicodeToOemN() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUnicodeToUTF8N() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUniform() {LouPrint("Hello nt Dll\n"); while(1);}

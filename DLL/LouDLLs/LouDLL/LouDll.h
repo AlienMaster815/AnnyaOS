@@ -48,7 +48,7 @@ _wcsicmp(
     LPCWSTR String2
 );
 
-int 
+errno_t
 _wcslwr_s(
     LPWSTR Str, 
     size_t Length 
@@ -66,5 +66,150 @@ wcslen(
 size_t wcsnlen(const WCHAR *str, size_t len);
 
 int _wcsnicmp(LPCWSTR str1, LPCWSTR str2, size_t n);
+
+LPWSTR 
+_wcsupr(
+    LPWSTR Str
+);
+
+errno_t 
+_wcsupr_s(
+    LPWSTR Str, 
+    size_t Length
+);
+
+LPWSTR
+wcscpy(
+    LPWSTR Destination,
+    LPWSTR Source
+);
+
+errno_t wcscpy_s(
+    LPWSTR Destination,
+    size_t Length, 
+    LPWSTR Source
+);
+
+LPWSTR 
+wcscat(
+    LPWSTR Destination,
+    LPWSTR Source
+);
+
+errno_t
+wcscat_s(
+    LPWSTR Destination,
+    size_t Length,
+    LPWSTR Source
+);
+
+LPWSTR 
+wcschr(
+    LPWSTR Str,
+    WCHAR  Token
+);
+
+int
+wcscmp(
+    LPWSTR Str1,
+    LPWSTR Str2
+);
+
+size_t 
+wcscspn(
+    LPWSTR Str,
+    LPWSTR Reject
+);
+
+LPWSTR 
+wcsncat(
+    LPWSTR Str1,
+    LPWSTR Str2,
+    size_t Length
+);
+
+errno_t
+wcsncat_s(
+    LPWSTR Destination, 
+    size_t Length, 
+    LPWSTR Source, 
+    size_t Count
+);
+
+int 
+wcsncmp(
+    LPWSTR String1,
+    LPWSTR String2,
+    size_t Length
+);
+
+LPWSTR 
+wcsncpy(
+    LPWSTR String1,
+    LPWSTR String2,
+    size_t Length
+);
+
+errno_t
+wcsncpy_s(
+    LPWSTR Destination,
+    size_t Length,
+    LPWSTR Source,
+    size_t Count
+);
+
+LPWSTR 
+wcsrchr(
+    LPWSTR Str,
+    WCHAR  Token
+);
+
+LPWSTR
+wcspbrk(
+    LPWSTR Str,
+    LPWSTR Accept
+);
+
+NTSTATUS 
+WINAPI 
+RtlUnicodeToMultiByteSize(
+    DWORD*  Size,
+    LPWSTR Str,
+    DWORD  Length
+);
+
+ 
+NTSTATUS
+WINAPI
+RtlUnicodeToMultiByteN(
+    string  Destination,
+    DWORD   DestinationLength,
+    DWORD*  ResultLength,
+    LPWSTR  Source,
+    DWORD   SrcLength
+);
+
+NTSTATUS
+WINAPI
+RtlMultiByteToUnicodeSize(
+    DWORD* Size,
+    string Str,
+    DWORD  Length
+);
+
+NTSTATUS
+WINAPI
+RtlMultiByteToUnicodeN(
+    LPWSTR  Destination,
+    DWORD   DestinationLength,
+    DWORD*  ResultLength,
+    string  Src,
+    DWORD   SrcLength
+);
+
+size_t 
+strlen(
+    const char* str
+);
 
 #endif

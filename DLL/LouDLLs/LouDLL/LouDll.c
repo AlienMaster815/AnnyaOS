@@ -3,9 +3,10 @@
 #include "LouDll.h"
 #include <LouCoff.h>
 
-#define NTDLL_RVA_ENTRIES 12
+#define NTDLL_RVA_ENTRIES 33
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
+
 
 static KULA_RVA_NAME KernelBaseNames[KERNELBASE_RVA_ENTRIES] = {
     "InitializeCriticalSectionEx",
@@ -28,6 +29,27 @@ static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "_wcslwr_s",
     "wcsnlen",
     "_wcsnicmp",
+    "_wcsupr",
+    "_wcsupr_s",
+    "wcscpy",
+    "wcscpy_s",
+    "wcscat",
+    "wcscat_s",
+    "wcschr",
+    "wcscmp",
+    "wcscspn",
+    "wcsncat",
+    "wcsncat_s",
+    "wcsncmp",
+    "wcsncpy",
+    "wcsncpy_s",
+    "wcsrchr",
+    "wcspbrk",
+    "RtlUnicodeToMultiByteSize",
+    "RtlUnicodeToMultiByteN",
+    "RtlMultiByteToUnicodeSize",
+    "RtlMultiByteToUnicodeN",
+    "strlen",
 };
 
 static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
@@ -43,6 +65,27 @@ static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
     (PVOID)_wcslwr_s,
     (PVOID)wcsnlen,
     (PVOID)_wcsnicmp,
+    (PVOID)_wcsupr,
+    (PVOID)_wcsupr_s,
+    (PVOID)wcscpy,
+    (PVOID)wcscpy_s,
+    (PVOID)wcscat,
+    (PVOID)wcscat_s,
+    (PVOID)wcschr,
+    (PVOID)wcscmp,
+    (PVOID)wcscspn,
+    (PVOID)wcsncat,
+    (PVOID)wcsncat_s,
+    (PVOID)wcsncmp,
+    (PVOID)wcsncpy,
+    (PVOID)wcsncpy_s,
+    (PVOID)wcsrchr,
+    (PVOID)wcspbrk,
+    (PVOID)RtlUnicodeToMultiByteSize,
+    (PVOID)RtlUnicodeToMultiByteN,
+    (PVOID)RtlMultiByteToUnicodeSize,
+    (PVOID)RtlMultiByteToUnicodeN,
+    (PVOID)strlen,
 };
 
 static KULA_TBALE_ENTRIES KulaEntries[LOUDLL_EMULATED_BINARIES] = {
@@ -298,14 +341,7 @@ int strcmp(const char* str1, const char* str2) {
     return 0;
 }
 
-LOUDLL_API
-size_t strlen(const char* str) {
-    const char* ptr = str;
-    while (*ptr != '\0') {
-        ++ptr;
-    }
-    return ptr - str;
-}
+
 
 static mutex_t VsSprintFLock;
 

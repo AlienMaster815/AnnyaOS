@@ -662,6 +662,29 @@ typedef void* HINSTANCE;
 #define WS_EX_TRANSPARENT 0x00000020L //The window should not be painted until siblings beneath the window (that were created by the same thread) have been painted. The window appears transparent because the bits of underlying sibling windows have already been painted. To achieve transparency without these restrictions, use the SetWindowRgn function.
 #define WS_EX_WINDOWEDGE 0x00000100L
 
+#define C1_UPPER (1)
+#define C1_LOWER (1 << 1)
+#define C1_DIGIT (1 << 2)
+#define C1_SPACE (1 << 3)
+#define C1_PUNCT (1 << 4)
+#define C1_CNTRL (1 << 5)
+#define C1_BLANK (1 << 6)
+#define C1_XDIGIT (1 << 7)
+#define C1_ALPHA (1 << 8)
+#define C1_DEFINED (1 << 9)
+
+#define MINLONG ((long)0x80000000)
+#define MAXLONG ((long)0x7FFFFFFF)
+
+
+#define WINAPI __stdcall
+
+typedef int errno_t;
+#define EINVAL      22
+#define ERANGE      34
+#define STRUNCATE   80
+
+#define _TRUNCATE ((size_t)-1)
 
 #include "../DLL/LouDLLs/GDI32/AnnyaGdi.h"
 #include "../DLL/LouDLLs/User32/AnnyaUser.h"
