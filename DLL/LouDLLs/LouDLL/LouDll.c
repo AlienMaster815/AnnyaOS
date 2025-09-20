@@ -3,7 +3,7 @@
 #include "LouDll.h"
 #include <LouCoff.h>
 
-#define NTDLL_RVA_ENTRIES 33
+#define NTDLL_RVA_ENTRIES 68
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
@@ -15,6 +15,7 @@ static KULA_RVA_NAME KernelBaseNames[KERNELBASE_RVA_ENTRIES] = {
 static KULA_RVA_ADDRESS KernelBaseAddresses[KERNELBASE_RVA_ENTRIES] = {
     (PVOID)RtlInitializeCriticalSectionEx,
 };
+
 
 static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "RtlInitializeCriticalSectionEx",
@@ -50,6 +51,41 @@ static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "RtlMultiByteToUnicodeSize",
     "RtlMultiByteToUnicodeN",
     "strlen",
+    "wcsspn",
+    "wcsstr",
+    "wcstok",
+    "wcstok_s",
+    "wcstombs",
+    "mbstowcs",
+    "iswctype",
+    "iswalnum",
+    "iswalpha",
+    "iswascii",
+    "iswdigit",
+    "iswgraph",    
+    "iswlower",
+    "iswprint",
+    "iswspace",
+    "iswxdigit",
+    "wcstol",
+    "wcstoul",
+    "wcstoi64",
+    "wcstoui64",
+    "_ultow",
+    "_ltow",
+    "_itow",
+    "_ui64tow",
+    "_i64tow",
+    "_ui64tow_s",
+    "_ultow_s",
+    "_i64tow_s",
+    "_ltow_s",
+    "_itow_s",
+    "_wtol",
+    "_wtoi",
+    "_wtoi64",
+    "_wsplitpath_s",
+    "_wmakepath_s",
 };
 
 static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
@@ -86,6 +122,41 @@ static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
     (PVOID)RtlMultiByteToUnicodeSize,
     (PVOID)RtlMultiByteToUnicodeN,
     (PVOID)strlen,
+    (PVOID)wcsspn,
+    (PVOID)wcsstr,
+    (PVOID)wcstok,
+    (PVOID)wcstok_s,
+    (PVOID)wcstombs,
+    (PVOID)mbstowcs,
+    (PVOID)iswctype,
+    (PVOID)iswalnum,
+    (PVOID)iswalpha,
+    (PVOID)iswascii,
+    (PVOID)iswdigit,
+    (PVOID)iswgraph,
+    (PVOID)iswlower,
+    (PVOID)iswprint,
+    (PVOID)iswspace,
+    (PVOID)iswxdigit,
+    (PVOID)wcstol,
+    (PVOID)wcstoul,
+    (PVOID)wcstoi64,
+    (PVOID)wcstoui64,
+    (PVOID)_ultow,
+    (PVOID)_ltow,
+    (PVOID)_itow,
+    (PVOID)_ui64tow,
+    (PVOID)_i64tow,
+    (PVOID)_ui64tow_s,
+    (PVOID)_ultow_s,
+    (PVOID)_i64tow_s,
+    (PVOID)_ltow_s,
+    (PVOID)_itow_s,
+    (PVOID)_wtol,
+    (PVOID)_wtoi,
+    (PVOID)_wtoi64,
+    (PVOID)_wsplitpath_s,
+    (PVOID)_wmakepath_s,
 };
 
 static KULA_TBALE_ENTRIES KulaEntries[LOUDLL_EMULATED_BINARIES] = {

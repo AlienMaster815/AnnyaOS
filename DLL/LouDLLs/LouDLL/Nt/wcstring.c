@@ -467,7 +467,6 @@ wcspbrk(
     return 0x00;
 }
 
-//440
 
 NTDLL_API
 size_t
@@ -1285,6 +1284,7 @@ _wtoi64(
     return Negative ? -TotalRun : TotalRun;
 }
 
+NTDLL_API
 errno_t
 _wsplitpath_s(
     LPWSTR InPath, 
