@@ -454,4 +454,26 @@ iswspace(
     WCHAR Wc
 );
 
+WCHAR  
+RtlAnsiCharToUnicodeChar(
+    string* Strp
+);
+
+NTSTATUS
+WINAPI
+RtlUpcaseUnicodeToMultiByteN(
+    string  Destination,
+    DWORD   DestinationLength,
+    DWORD*   ResultLength,
+    LPWSTR  Source,
+    DWORD   SourceLength
+);
+
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
+);
+
 #endif

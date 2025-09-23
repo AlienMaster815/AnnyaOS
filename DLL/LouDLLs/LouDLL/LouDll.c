@@ -337,82 +337,6 @@ void intToString(uint64_t num, char* str) {
 #define VSPRINTF_S_OVERFLOW (((size_t)Buffer - (size_t)BufferStart) + Addition) > BufferCount
 #include <stdarg.h>
 
-LOUDLL_API
-char* strncpy(char* dest, const char* src, size_t n) {
-    char* original_dest = dest;
-
-    // Copy at most 'n' characters from src to dest
-    while (*src && n > 0) {
-        *dest++ = *src++;
-        n--;
-    }
-
-    // If 'n' is greater than the length of src, pad with null bytes
-    while (n > 0) {
-        *dest++ = '\0';
-        n--;
-    }
-
-    return original_dest;
-}
-
-LOUDLL_API
-int strncmp(const char* str1, const char* str2, size_t n) {
-    // Compare characters until we reach the specified number of characters (n)
-    while (n > 0) {
-        // Compare the current characters in both strings
-        char c1 = *str1++;
-        char c2 = *str2++;
-
-        // If the characters are equal or both are null terminators, continue
-        if (c1 == c2 || c1 == '\0' || c2 == '\0') {
-            // If we've compared n characters or reached the end of either string, return 0
-            if (n == 1 || (c1 == '\0' && c2 == '\0')) {
-                return 0;
-            }
-        }
-        else {
-            // The characters are not equal, return the difference
-            return c1 - c2;
-        }
-
-        // Decrement the remaining characters to compare
-        n--;
-    }
-
-    // If we've reached here, the first n characters are equal
-    return 0;
-}
-
-LOUDLL_API
-int strcmp(const char* str1, const char* str2) {
-
-    // Compare characters until we reach the specified number of characters (n)
-    while (1) {
-        // Compare the current characters in both strings
-        char c1 = *str1++;
-        char c2 = *str2++;
-
-        // If the characters are equal or both are null terminators, continue
-        if (c1 == c2 || c1 == '\0' || c2 == '\0') {
-            // If we've compared n characters or reached the end of either string, return 0
-            if (c1 == '\0' && c2 == '\0') {
-                return 0;
-            }
-        }
-        else {
-            // The characters are not equal, return the difference
-            return c1 - c2;
-        }
-
-    }
-
-    // If we've reached here, the first n characters are equal
-
-    return 0;
-}
-
-
 
 static mutex_t VsSprintFLock;
 
@@ -700,18 +624,6 @@ LOUDLL_API
 void*
 LouGlobalUserMalloc(size_t Size){
     LouGlobalUserMallocEx(Size, GetAlignmentBySize(Size));
-}
-
-LOUDLL_API
-void* memset(void* dest, int value, size_t count) {
-    unsigned char* ptr = (unsigned char*)dest;
-    unsigned char val = (unsigned char)value;
-
-    for (size_t i = 0; i < count; i++) {
-        ptr[i] = val;
-    }
-
-    return dest;
 }
 
 LOUDLL_API

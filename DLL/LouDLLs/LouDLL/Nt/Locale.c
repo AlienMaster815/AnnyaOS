@@ -51,3 +51,26 @@ RtlUnicodeToMultiByteSize(
     //TODO:
     return STATUS_SUCCESS;
 }
+
+NTDLL_API
+WCHAR  
+RtlAnsiCharToUnicodeChar(
+    string* Strp
+) {
+    
+    //TODO:
+    return 0;
+}
+
+NTDLL_API
+NTSTATUS
+WINAPI
+RtlUpcaseUnicodeToMultiByteN(
+    string  Destination,
+    DWORD   DestinationLength,
+    DWORD*  ResultLength,
+    LPWSTR  Source,
+    DWORD   SourceLength
+){
+
+}

@@ -894,7 +894,6 @@ NTDLL_API void RtlAllocateHandle() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateMemoryBlockLookaside() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateMemoryZone() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAllocateWnfSerializationGroup() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlAnsiCharToUnicodeChar() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAnsiStringToUnicodeSize() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAnsiStringToUnicodeString() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlAppendAsciizToString() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1755,7 +1754,6 @@ NTDLL_API void RtlUpcaseUnicodeStringToAnsiString() {LouPrint("Hello nt Dll\n");
 NTDLL_API void RtlUpcaseUnicodeStringToCountedOemString() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUpcaseUnicodeStringToOemString() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUpcaseUnicodeToCustomCPN() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlUpcaseUnicodeToMultiByteN() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUpcaseUnicodeToOemN() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUpdateClonedCriticalSection() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlUpdateClonedSRWLock() {LouPrint("Hello nt Dll\n"); while(1);}

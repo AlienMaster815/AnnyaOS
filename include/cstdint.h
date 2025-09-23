@@ -18,7 +18,7 @@ typedef char        INT8, CHAR;
 typedef short       INT16; 
 typedef int         INT32; 
 typedef long long   INT64; 
-
+typedef unsigned char UCHAR;
 typedef unsigned long long UINT64, ULONGLONG, * PULONGLONG, * PULONG64, QWORD;
 typedef long long LONGLONG, * PLONGLONG;
 
