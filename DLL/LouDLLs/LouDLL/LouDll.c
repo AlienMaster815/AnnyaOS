@@ -472,19 +472,19 @@ void AnnyaUserThreadStub(void* PTHREAD, void* THREAD_DATA, uintptr_t ThreadHandl
 }
 
 typedef struct _ATTACH_THREAD_DATA{
-    bool   (*DllEntry)(uint64_t, uint64_t, uint64_t);
+    bool     (*DllEntry)(uint64_t, uint64_t, uint64_t);
     uint64_t DllHandle;
     uint64_t DllCallReason;
     uint64_t DllReserved;
-    void   (*LockRelease)(mutex_t* Lock);
-    mutex_t* Lock;
+    mutex_t  Lock;
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
+
 
 LOUDLL_API
 DWORD AnnyaAttachDllToProcess(PVOID ThreadData){
     PATTACH_THREAD_DATA DllAttachData = (PATTACH_THREAD_DATA)ThreadData;
     DllAttachData->DllEntry(DllAttachData->DllHandle, DllAttachData->DllCallReason, DllAttachData->DllReserved);
-    DllAttachData->LockRelease(DllAttachData->Lock);
+    MutexUnlock(&DllAttachData->Lock);
     return 0;
 }
 

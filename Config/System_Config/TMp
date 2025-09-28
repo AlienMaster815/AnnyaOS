@@ -1,2 +1,3 @@
         <FILETOCPY64>cp DLL/LouDLLs/NtDll/ntdll.dll ISO/ANNYA/SYSTEM64/NTDLL.DLL</FILETOCPY64>                              <!--Nt Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/LouDLLs/kernelbase/kernbase.dll ISO/ANNYA/SYSTEM64/KERNBASE.DLL</FILETOCPY64>                   <!--Windows Legacy(9x 16 bit Kernel) Abstraction Layer-->
+echo 'module_path: boot():/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS' >> ISO/boot/limine.conf ;

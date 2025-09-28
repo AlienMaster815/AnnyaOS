@@ -45,7 +45,10 @@ LOUSTATUS LookForStorageDevices(){
     size_t BootDeviceCount = GetBootDeviceCount();
     size_t DeviceIndex;
     for(size_t i = 0 ; i < NumberOfPciDevices; i++){
-        DeviceIndex = LouKeGetBootDeviceIndex((void*)FirstWaveDevices[i]->PDEV->CommonConfig);
+
+        LouPrint("REPLACE_ME!!!\n");
+        while(1);
+        //DeviceIndex = LouKeGetBootDeviceIndex((void*)FirstWaveDevices[i]->PDEV->CommonConfig);
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)FirstWaveDevices[i]->PDEV->CommonConfig;
 
         if(DeviceIndex < BootDeviceCount){
