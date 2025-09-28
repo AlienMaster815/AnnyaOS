@@ -1,7 +1,5 @@
 #include <LouDDK.h>
 
-int LouWStrnCpy(PWSTR WString, ULONG StrLen, PWSTR StringCopy);
-
 uint64_t NumberOfNtAtoms = 0;
 
 typedef struct _LOU_KE_ATOM_TABLE_ENTRY{
@@ -19,9 +17,10 @@ LOUSTATUS LouKeAddAtomEx(
     wchar_t* AtomName,
     uint32_t Length,
     uint16_t* Atom,
-    uint32_t Flags
+    uint32_t Flags  
 ){
-
+    LouPrint("LouKeAddAtomEx()\n");
+    while(1);
     PLOU_KE_ATOM_TABLE_ENTRY TmpAtomTable = &AtomMasterTable;
 
 
@@ -38,7 +37,7 @@ LOUSTATUS LouKeAddAtomEx(
     //allocate Atom name
     TmpAtomTable->AtomName = (wchar_t*)LouKeMallocArray(WCHAR, Length, KERNEL_GENERIC_MEMORY);
     //copy atom name
-    LouWStrnCpy(TmpAtomTable->AtomName, (ULONG)Length, AtomName);
+    //LouWStrnCpy(TmpAtomTable->AtomName, (ULONG)Length, AtomName);
     //place Atom
     TmpAtomTable->Atom = Atom;
     //Place Flags

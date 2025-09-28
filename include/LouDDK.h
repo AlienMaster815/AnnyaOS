@@ -193,7 +193,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/Busses.h>
 #include <kernel/Objects.h>
 #include <drivers/Ecam.h>
-
+#include <NtAPI.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

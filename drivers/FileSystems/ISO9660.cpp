@@ -370,11 +370,18 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
     );
 }
 
+string DuplicateString(string Str, size_t Length){
+    string Result = LouKeMallocArray(CHAR, Length + 1, KERNEL_GENERIC_MEMORY);
+    Result[Length] = '\0';
+    strncpy(Result, Str, Length);
+    return Result;
+}
+
 PFILESYSTEM_DIRECTORY_QUERY Iso9660FileSystemDirectoryQuery(
     string DirPath,
     PLOUSINE_KERNEL_FILESYSTEM LouKeFileSystem
 ){
-    UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
+    UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(LouKeFileSystem->PortID);
 
     // Get root directory entry from Volume Descriptor
     uint64_t RootLBA = 0;
@@ -394,10 +401,10 @@ PFILESYSTEM_DIRECTORY_QUERY Iso9660FileSystemDirectoryQuery(
     UINT8* DirBuffer = (UINT8*)ISOLouKeFindDirectory(
         RootLBA,
         RootSize,
-        FilesystemHandle->PortID,
+        LouKeFileSystem->PortID,
         DirPath,
         false,
-        PageFlags
+        KERNEL_GENERIC_MEMORY
     );
 
     if (!DirBuffer) {
@@ -423,7 +430,7 @@ PFILESYSTEM_DIRECTORY_QUERY Iso9660FileSystemDirectoryQuery(
         + sizeof(FILESYSTEM_DIRECTORY_QUERY::Entities[0]) * EntryCount;
 
     PFILESYSTEM_DIRECTORY_QUERY Result =
-        (PFILESYSTEM_DIRECTORY_QUERY)LouKeMallocEx(QuerySize, KILOBYTE_PAGE, PageFlags);
+        (PFILESYSTEM_DIRECTORY_QUERY)LouKeMallocEx(QuerySize, KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
 
     Result->Entries = EntryCount;
 

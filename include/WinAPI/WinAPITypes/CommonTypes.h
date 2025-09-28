@@ -19,7 +19,7 @@ typedef uint8_t BYTE, UCHAR,UINT8;
 typedef const char CCHAR;
 typedef char INT8;
 
-typedef wchar_t WCHAR, * PWCHAR;
+typedef wchar_t WCHAR, * PWCHAR, * LPWSTR;
 
 typedef const short CSHORT;
 
@@ -93,8 +93,8 @@ typedef KSPIN_LOCK *PKSPIN_LOCK;
 typedef ULONG_PTR KAFFINITY;
 typedef KAFFINITY *PKAFFINITY;
 
-typedef wchar_t* PWSTR,* PCWSTR;
-
+typedef wchar_t* PWSTR,* LPWSTR;
+typedef const wchar_t* PCWSTR, *LPCWSTR;
 
 typedef int32_t NTSTATUS;
 
@@ -1041,7 +1041,7 @@ typedef struct _DEVOBJ_EXTENSION {
 
 } DEVOBJ_EXTENSION, *PDEVOBJ_EXTENSION;
 
-#define LOUSTATUS uint32_t
+#define LOUSTATUS int32_t
 
 
 typedef struct _DRIVER_OBJECT {

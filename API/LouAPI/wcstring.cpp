@@ -1,5 +1,28 @@
-#include "ntdll.h"
+#include <LouDDK.h>
 
+#define C1_UPPER (1)
+#define C1_LOWER (1 << 1)
+#define C1_DIGIT (1 << 2)
+#define C1_SPACE (1 << 3)
+#define C1_PUNCT (1 << 4)
+#define C1_CNTRL (1 << 5)
+#define C1_BLANK (1 << 6)
+#define C1_XDIGIT (1 << 7)
+#define C1_ALPHA (1 << 8)
+#define C1_DEFINED (1 << 9)
+
+#define MINLONG ((long)0x80000000)
+#define MAXLONG ((long)0x7FFFFFFF)
+
+
+#define WINAPI __stdcall
+
+typedef int errno_t;
+#define EINVAL      22
+#define ERANGE      34
+#define STRUNCATE   80
+
+#define _TRUNCATE ((size_t)-1)
 
 static const unsigned short wctypes[256] = {
     //0x00 
@@ -80,7 +103,7 @@ wctoint(
     return -1;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int
 _wcsicmp(
     LPCWSTR String1,
@@ -98,11 +121,11 @@ _wcsicmp(
     return 0;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR _wcslwr(
     LPWSTR Str
 ){
-    LPWSTR Result;
+    LPWSTR Result = Str;
     for(;*Str; Str++){
         if((*Str >= 'A') && (*Str <= 'Z')){
 	       *Str += ('a' - 'A');
@@ -111,7 +134,7 @@ LPWSTR _wcslwr(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 size_t 
 wcslen(LPCWSTR str){
     const WCHAR *s = str;
@@ -125,7 +148,7 @@ size_t wcsnlen(const WCHAR *str, size_t len){
     return s - str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _wcslwr_s(
     LPWSTR Str, 
@@ -140,7 +163,7 @@ _wcslwr_s(
     return 0;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int
 _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
     int Result = 0;
@@ -152,7 +175,13 @@ _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
+WCHAR
+wctoupr(WCHAR Char){
+    return ((Char >= 'a') && (Char <= 'z')) ? Char + 'A' - 'a' : Char;
+}
+
+LOUDDK_API_ENTRY
 LPWSTR 
 _wcsupr(
     LPWSTR Str
@@ -166,7 +195,7 @@ _wcsupr(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t 
 _wcsupr_s(
     LPWSTR Str, 
@@ -183,7 +212,7 @@ _wcsupr_s(
     return 0;
 }
 
-LOUDKK_API_ENTRY 
+LOUDDK_API_ENTRY 
 LPWSTR
 wcscpy(
     LPWSTR Destination,
@@ -194,7 +223,7 @@ wcscpy(
     return Destination;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t wcscpy_s(
     LPWSTR Destination,
     size_t Length, 
@@ -216,7 +245,7 @@ errno_t wcscpy_s(
     return ERANGE;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcscat(
     LPWSTR Destination,
@@ -226,7 +255,7 @@ wcscat(
     return Destination;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 wcscat_s(
     LPWSTR Destination,
@@ -254,7 +283,7 @@ wcscat_s(
     return ERANGE;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcschr(
     LPWSTR Str,
@@ -268,7 +297,7 @@ wcschr(
     return 0x00;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int
 wcscmp(
     LPWSTR Str1,
@@ -281,7 +310,7 @@ wcscmp(
     return *Str1 - *Str2;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 size_t 
 wcscspn(
     LPWSTR Str,
@@ -296,7 +325,7 @@ wcscspn(
     return Tmp - Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcsncat(
     LPWSTR Str1,
@@ -317,7 +346,7 @@ wcsncat(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 wcsncat_s(
     LPWSTR Destination, 
@@ -360,7 +389,7 @@ wcsncat_s(
     return ERANGE;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 wcsncmp(
     LPWSTR String1,
@@ -377,7 +406,7 @@ wcsncmp(
     return *String1 - *String2;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcsncpy(
     LPWSTR String1,
@@ -394,7 +423,7 @@ wcsncpy(
     return String1;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 wcsncpy_s(
     LPWSTR Destination,
@@ -438,7 +467,7 @@ wcsncpy_s(
     return ERANGE;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcsrchr(
     LPWSTR Str,
@@ -453,7 +482,7 @@ wcsrchr(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR
 wcspbrk(
     LPWSTR Str,
@@ -468,7 +497,7 @@ wcspbrk(
 }
 
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 size_t
 wcsspn(
     LPWSTR Str,
@@ -483,7 +512,7 @@ wcsspn(
     return Tmp - Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcsstr(
     LPWSTR Str,
@@ -505,7 +534,7 @@ wcsstr(
     return 0x00;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcstok(
     LPWSTR Str,
@@ -536,7 +565,7 @@ wcstok(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 wcstok_s(
     LPWSTR Str,
@@ -571,14 +600,14 @@ wcstok_s(
     return Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 size_t 
 wcstombs(
     string Destination,
     LPWSTR Source,
     size_t Length
 ){
-    DWORD Result;
+    //DWORD Result;
 
     //if(!Destination){
     //    RtlUnicodeToMultiByteSize(&Result, Source, wcslen(Source) * sizeof(WCHAR));
@@ -595,7 +624,7 @@ wcstombs(
     //return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 size_t 
 mbstowcs(
     LPWSTR Destination,
@@ -617,7 +646,7 @@ mbstowcs(
     //return Result / sizeof(WCHAR);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswctype(
     WCHAR           Wc,
@@ -627,7 +656,7 @@ iswctype(
     return wctypes[Wc] & Type;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswalnum(
     WCHAR Wc
@@ -635,7 +664,7 @@ iswalnum(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswalpha(
     WCHAR Wc
@@ -643,7 +672,7 @@ iswalpha(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswascii(
     WCHAR Wc
@@ -651,7 +680,7 @@ iswascii(
     return Wc < 0x80;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswdigit(
     WCHAR Wc
@@ -659,7 +688,7 @@ iswdigit(
     return iswctype(Wc, C1_DIGIT);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int
 iswgraph(
    WCHAR Wc
@@ -667,7 +696,7 @@ iswgraph(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT | C1_PUNCT);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswlower(
     WCHAR Wc
@@ -675,7 +704,7 @@ iswlower(
     return iswctype(Wc, C1_LOWER);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswprint(
     WCHAR Wc
@@ -683,7 +712,7 @@ iswprint(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT | C1_PUNCT | C1_BLANK);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 iswspace(
     WCHAR Wc
@@ -691,7 +720,7 @@ iswspace(
     return iswctype(Wc, C1_SPACE);
 }
 
-LOUDKK_API_ENTRY 
+LOUDDK_API_ENTRY 
 int 
 iswxdigit(
     WCHAR Wc
@@ -699,7 +728,7 @@ iswxdigit(
     return iswctype(Wc, C1_DIGIT);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 long 
 wcstol(
     LPWSTR  Str,
@@ -764,14 +793,13 @@ wcstol(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 unsigned long 
 wcstoul(
     LPWSTR  Str,
     LPWSTR* End,
     int     Base
 ){
-    BOOL Negative = false;
     BOOL Empty = true;
     unsigned long Result = 0;
 
@@ -784,13 +812,7 @@ wcstoul(
     while(iswspace(*Str)){
         Str++;
     }
-    if(*Str == '-'){
-        Negative = false;
-        Str++;
-    }
-    else if(*Str == '+'){
-        Str++;
-    }
+
     if(
         ((Base == 0) || (Base == 16)) && 
         (!wctoint(*Str)) && 
@@ -824,7 +846,7 @@ wcstoul(
 }
 
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 INT64 
 wcstoi64(
     LPWSTR  Str,
@@ -889,14 +911,13 @@ wcstoi64(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 UINT64 
 wcstoui64(
     LPWSTR  Str,
     LPWSTR* End,
     int     Base
 ){
-    BOOL Negative = false;
     BOOL Empty = true;
     UINT64 Result = 0;
 
@@ -909,13 +930,7 @@ wcstoui64(
     while(iswspace(*Str)){
         Str++;
     }
-    if(*Str == '-'){
-        Negative = false;
-        Str++;
-    }
-    else if(*Str == '+'){
-        Str++;
-    }
+
     if(
         ((Base == 0) || (Base == 16)) && 
         (!wctoint(*Str)) && 
@@ -948,7 +963,7 @@ wcstoui64(
     return Result;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 _ultow(
     unsigned long   V, 
@@ -978,7 +993,7 @@ _ultow(
     return Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 _ltow(
     long    V,
@@ -1021,7 +1036,7 @@ _ltow(
     return Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR
 _itow(
     int     Value,
@@ -1031,7 +1046,7 @@ _itow(
     return _ltow(Value, Str, Radix);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 _ui64tow(
     UINT64  Value,
@@ -1060,7 +1075,7 @@ _ui64tow(
     return Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 LPWSTR 
 _i64tow(
     UINT64  Value,
@@ -1104,7 +1119,7 @@ _i64tow(
     return Str;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _ui64tow_s(
     UINT64  Value,
@@ -1133,7 +1148,7 @@ _ui64tow_s(
             *--Position = 'a' + Digit - 10;
         }
     }while(Value != 0);
-    if((&Buffer[64] - Position) > Length){
+    if((size_t)((&Buffer[64]) - Position) > Length){
         *Str = 0;
         return ERANGE;
     }
@@ -1141,7 +1156,7 @@ _ui64tow_s(
     return 0;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _ultow_s(
     unsigned long   Value,
@@ -1152,7 +1167,7 @@ _ultow_s(
     return _ui64tow_s(Value, Str, Length, Radix);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _i64tow_s(
     INT64   Value,
@@ -1197,7 +1212,7 @@ _i64tow_s(
     if(Negative){
         *--Position = '-';
     }
-    if((&Buffer[64] - Position) > Length){
+    if((size_t)(&Buffer[64] - Position) > (size_t)Length){
         *Str = 0;
         return ERANGE;
     }
@@ -1205,7 +1220,7 @@ _i64tow_s(
     return 0;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _ltow_s(
     long            Value,
@@ -1219,7 +1234,7 @@ _ltow_s(
     return _ui64tow_s((UINT64)Value, Str, Length, Radix);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _itow_s(
     int             Value,
@@ -1233,7 +1248,7 @@ _itow_s(
     return _ui64tow_s((UINT64)Value, Str, Length, Radix);
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 long 
 _wtol(
     LPWSTR Str
@@ -1253,7 +1268,7 @@ _wtol(
     return Negative ? -TotalRun : TotalRun;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 int 
 _wtoi(
     LPWSTR Str
@@ -1261,7 +1276,7 @@ _wtoi(
     return (int)_wtol(Str);
 }
 
-LOUDKK_API_ENTRY 
+LOUDDK_API_ENTRY 
 UINT64
 _wtoi64(
     LPWSTR Str
@@ -1284,7 +1299,7 @@ _wtoi64(
     return Negative ? -TotalRun : TotalRun;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _wsplitpath_s(
     LPWSTR InPath, 
@@ -1338,7 +1353,7 @@ _wsplitpath_s(
 
     if(End){
         if(Directory){
-            if(SzDirectory <= (End - InPath)){
+            if((size_t)SzDirectory <= (size_t)(End - InPath)){
                 goto _SPLITPATH_ERROR;
             }
             memcpy(Directory, InPath, (End - InPath) * sizeof(WCHAR));
@@ -1363,7 +1378,7 @@ _wsplitpath_s(
     }
 
     if(FileName){
-        if(SzFileName <= (End - InPath)){
+        if((size_t)SzFileName <= (size_t)(End - InPath)){
             goto _SPLITPATH_ERROR;
         }
         memcpy(FileName, InPath, (End - InPath) * sizeof(WCHAR));
@@ -1394,7 +1409,7 @@ _wsplitpath_s(
         return ERANGE;
 }
 
-LOUDKK_API_ENTRY
+LOUDDK_API_ENTRY
 errno_t
 _wmakepath_s(
     LPWSTR Path,

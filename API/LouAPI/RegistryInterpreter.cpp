@@ -18,35 +18,35 @@ UNUSED static FILE* SamRegistryFile = 0x00;
 
 static void CreateFiles(){
 
-    SystemRegistryFile = LouKeCreateRegistryFile(
-        L"/ANNYA/PROFILES/DEFAULT",
-        L"SYSTEM.LKR"
-    );
+    //SystemRegistryFile = LouKeCreateRegistryFile(
+    //    L"/ANNYA/PROFILES/DEFAULT",
+    //    L"SYSTEM"
+    //);
 
-    SoftwareRegistryFile = LouKeCreateRegistryFile(
-        L"/ANNYA/PROFILES/DEFAULT",
-        L"SOFTWARE.LKR"
-    );
+    //SoftwareRegistryFile = LouKeCreateRegistryFile(
+    //    L"/ANNYA/PROFILES/DEFAULT",
+    //    L"SOFTWARE"
+    //);
 
-    DefaultRegistryFile = LouKeCreateRegistryFile(
-        L"/ANNYA/PROFILES/DEFAULT",
-        L"DEFAULT.LKR"
-    );
+    //DefaultRegistryFile = LouKeCreateRegistryFile(
+    //    L"/ANNYA/PROFILES/DEFAULT",
+    //    L"DEFAULT"
+    //);
 
-    UsersRegistryFile = LouKeCreateRegistryFile(
-        L"/ANNYA/PROFILES/DEFAULT",
-        L"USERS.LKR"
-    );
+    //UsersRegistryFile = LouKeCreateRegistryFile(
+    //    L"/ANNYA/PROFILES/DEFAULT",
+    //    L"USERS"
+    //);
 
-    SecurityRegistryFile = LouKeCreateRegistryFile(
-        L"/ANNYA/PROFILES/DEFAULT",
-        L"SECURITY.LKR"
-    );
+    //SecurityRegistryFile = LouKeCreateRegistryFile(
+    //    L"/ANNYA/PROFILES/DEFAULT",
+    //    L"SECURITY"
+    //);
     
-    SamRegistryFile = LouKeCreateRegistryFile(
-        L"/ANNYA/PROFILES/DEFAULT",
-        L"SAM.LKR"
-    );
+    //SamRegistryFile = LouKeCreateRegistryFile(
+    //    L"/ANNYA/PROFILES/DEFAULT",
+    //    L"SAM"
+    //);
 }
 
 LOUDDK_API_ENTRY

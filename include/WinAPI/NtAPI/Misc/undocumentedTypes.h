@@ -27,15 +27,15 @@ typedef struct _KAPC {
 typedef ULONG ACCESS_MASK;
 typedef LONGLONG USN;
 
+typedef struct _OBJECT_ATTRIBUTES{
+    ULONG               Length;
+    HANDLE              RootDirectory;
+    PCUNICODE_STRING    ObjectName;
+    ULONG               Attributes;
+    PVOID               SecurityDescriptor;
+    PVOID               SecurityQualityOfService;
+}OBJECT_ATTRIBUTES, * POBJECT_ATTRIBUTES;
 
-typedef struct _OBJECT_ATTRIBUTES {
-    ULONG Length;
-    HANDLE RootDirectory;
-    PUNICODE_STRING ObjectName;
-    ULONG Attributes;
-    PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
-    PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
-} OBJECT_ATTRIBUTES;
 typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
 typedef CONST OBJECT_ATTRIBUTES* PCOBJECT_ATTRIBUTES;
 
@@ -236,14 +236,14 @@ POWER_SETTING_CALLBACK (
 
 typedef POWER_SETTING_CALLBACK *PPOWER_SETTING_CALLBACK;
 
-typedef struct _STRING {
+typedef struct _WIN_STRING{
     USHORT Length;
     USHORT MaximumLength;
-}STRING;
-
-typedef STRING* PSTRING;
-typedef STRING ANSI_STRING;
-typedef PSTRING PANSI_STRING;
+    PCHAR  Buffer;
+}WIN_STRING, * PWIN_STRING,
+    STRING, * PSTRING,
+     ANSI_STRING, *PANSI_STRING, 
+        OEM_STRING, *POEM_STRING;
 
 
 typedef enum _EVENT_TYPE {

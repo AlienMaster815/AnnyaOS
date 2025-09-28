@@ -20,7 +20,7 @@
 #define VOID void
 #define VOIDP void*
 
-#define LOUSTATUS uint32_t
+#define LOUSTATUS int32_t
 
 #define IS_CPP __cplusplus
 #define IS_X86 __i386__

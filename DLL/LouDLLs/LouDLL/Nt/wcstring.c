@@ -102,7 +102,7 @@ NTDLL_API
 LPWSTR _wcslwr(
     LPWSTR Str
 ){
-    LPWSTR Result;
+    LPWSTR Result = Str;
     for(;*Str; Str++){
         if((*Str >= 'A') && (*Str <= 'Z')){
 	       *Str += ('a' - 'A');

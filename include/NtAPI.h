@@ -48,28 +48,14 @@ KERNEL_EXPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULON
     #define DLL_THREAD_ATTACH  2
     #define DLL_THREAD_DETACH  3
 #endif
+#endif
 
-typedef struct _OBJECT_ATTRIBUTES{
-    ULONG               Length;
-    HANDLE              RootDirectory;
-    PCUNICODE_STRING    ObjectName;
-    ULONG               Attributes;
-    PVOID               SecurityDescriptor;
-    PVOID               SecurityQualityOfService;
-}OBJECT_ATTRIBUTES, * POBJECT_ATTRIBUTES;
 
 typedef struct _CURDIR{
     UNICODE_STRING      DosPath;
     HANDLE              Handle;
 }CURDIR, * PCURDIR;
 
-typedef struct _WIN_STRING{
-    USHORT Length;
-    USHORT MaximumLength;
-    PCHAR  Buffer;
-}WIN_STRING, * PWIN_STRING,
-     ANSI_STRING, *PANSI_STRING, 
-        OEM_STRING, *POEM_STRING;
 
 typedef struct _RTL_DRIVE_LETTER_CURDIR{
     USHORT  Flags;
@@ -108,7 +94,7 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS{
     UNICODE_STRING              DesktopInfo;
     UNICODE_STRING              ShellInfo;
     UNICODE_STRING              RuntimeData;
-    RTL_DRIVE_LETTER_CURDIR     CurrentDirectory[RTL_MAX_DRIVE_LETTERS];
+    RTL_DRIVE_LETTER_CURDIR     CurrentDirectories[RTL_MAX_DRIVE_LETTERS];
     ULONG_PTR                   EnviornmentSize;
     ULONG_PTR                   EnviornmentVersion;
     PVOID                       PackageDependencyData;
@@ -134,7 +120,7 @@ typedef enum _PS_CREATE_STATE{
 }PS_CREATE_STATE;
 
 typedef struct _PS_CREATE_INFO{
-    SIZE                        Size;
+    size_t                      Size;
     PS_CREATE_STATE             State;
     union{
         struct {
@@ -187,23 +173,20 @@ typedef struct _PS_CREATE_INFO{
     };
 }PS_CREATE_INFO, * PPS_CREATE_INFO;
 
-typedef struct _PS_ATTRIBUTE
-{
+typedef struct _PS_ATTRIBUTE{
     ULONG_PTR           Attribute;
-    SIZE                Size;
+    size_t              Size;
     union
     {
         ULONG_PTR       Value;
         PVOID           ValuePtr;
     };
-    SIZE*               ReturnLength;
+    size_t*             ReturnLength;
 } PS_ATTRIBUTE, *PPS_ATTRIBUTE;
 
 typedef struct _PS_ATTRIBUTE_LIST{
-    SIZE                        TotalLength;
+    size_t                      TotalLength;
     PS_ATTRIBUTE                Attributes[1];
 }PS_ATTRIBUTE_LIST, * PPS_ATTRIBUTE_LIST;
-
-#endif
 
 #endif

@@ -52,10 +52,11 @@
         <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
         <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/CONFIG/DRIVERS.CFG</FILETOCPY64>        <!--Annya OS Driver Manifest Registry-->
         <FILETOCPY64>cp Config/System_Config/BootManifest.cfg ISO/ANNYA/SYSTEM64/CONFIG/BOOT.CFG</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
-        <FILETOCPY64>cp Config/System_Config/SYSTEM.LKR ISO/ANNYA/PROFILES/DEFAULT/SYSTEM.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
-        <FILETOCPY64>cp Config/System_Config/SOFTWARE.LKR ISO/ANNYA/PROFILES/DEFAULT/SOFTWARE.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
-        <FILETOCPY64>cp Config/System_Config/USERS.LKR ISO/ANNYA/PROFILES/DEFAULT/USERS.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
-        <FILETOCPY64>cp Config/System_Config/SECURITY.LKR ISO/ANNYA/PROFILES/DEFAULT/SECURITY.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
-        <FILETOCPY64>cp Config/System_Config/SAM.LKR ISO/ANNYA/PROFILES/DEFAULT/SAM.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/SYSTEM.LRS ISO/ANNYA/PROFILES/DEFAULT/SYSTEM.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/SOFTWARE.LRS ISO/ANNYA/PROFILES/DEFAULT/SOFTWARE.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/USERS.LRS ISO/ANNYA/PROFILES/DEFAULT/USERS.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/SECURITY.LRS ISO/ANNYA/PROFILES/DEFAULT/SECURITY.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/SAM.LRS ISO/ANNYA/PROFILES/DEFAULT/SAM.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <FILETOCPY64>cp Config/System_Config/DEFAULT.LRS ISO/ANNYA/PROFILES/DEFAULT/DEFAULT.LRS</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
     </64Targets>
 </FILESBEFORECOPY>
