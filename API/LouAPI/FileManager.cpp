@@ -1,39 +1,6 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
-size_t wcslen(LPWSTR Str);
-
-LOUDDK_API_ENTRY
-int 
-wcsncmp(
-    LPWSTR String1,
-    LPWSTR String2,
-    size_t Length
-);
-
-LOUDDK_API_ENTRY 
-LPWSTR
-wcscpy(
-    LPWSTR Destination,
-    LPWSTR Source
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcschr(
-    LPWSTR Str,
-    WCHAR  Token
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcsncpy(
-    LPWSTR String1,
-    LPWSTR String2,
-    size_t Length
-);
-
-typedef struct _LOU_VFS_FILE{
+typedef struct __attribute__((packed)) _LOU_VFS_FILE{
     size_t                  RemainingBytes;
     size_t                  LBA;
     size_t                  Sectors;
@@ -41,7 +8,7 @@ typedef struct _LOU_VFS_FILE{
     struct _LOU_VFS_FILE*   NextSectors;
 }LOU_VFS_FILE, * PLOU_VFS_FILE;
 
-typedef struct _LOU_VFS_DIRECTORY_ENTRY{
+typedef struct __attribute__((packed)) _LOU_VFS_DIRECTORY_ENTRY{
     struct _LOU_VFS_DIRECTORY_ENTRY*    NextDirectoryEntry;
     struct _LOU_VFS_DIRECTORY_ENTRY*    UpperDirectory;
     size_t                              LBA;
@@ -51,7 +18,7 @@ typedef struct _LOU_VFS_DIRECTORY_ENTRY{
 }LOU_VFS_DIRECTORY_ENTRY, * PLOU_VFS_DIRECTORY_ENTRY;
 
 static LOU_VFS_DIRECTORY_ENTRY RootDirectory = {
-    .NextDirectoryEntry = 0x00,
+    .NextEntryOffset = 0x00,
     .UpperDirectory = 0x00,
     .File = 0x00,
     .EntryName = L"/",
@@ -67,7 +34,7 @@ static PLOU_VFS_DIRECTORY_ENTRY GetNextDirectory(
     PLOU_VFS_DIRECTORY_ENTRY DirectoryFile = (PLOU_VFS_DIRECTORY_ENTRY)File->Sector; 
     //scroll over the entries
     while(1){   
-        if(!wcsncmp(Next, DirectoryFile->EntryName, PathLength) && ((size_t)wcslen(DirectoryFile->EntryName) == PathLength)){ //found Directory entry
+        if(!wcsncmp(Next, DirectoryFile->EntryName, PathLength) && (wcsnlen(DirectoryFile->EntryName) == PathLength)){ //found Directory entry
             return DirectoryFile;
         }
         if(DirectoryFile->NextDirectoryEntry){ //nothing else
@@ -81,19 +48,19 @@ static PLOU_VFS_DIRECTORY_ENTRY GetNextDirectory(
     }
     //if not found check for room otherwise allocate more room...
 
-    DirectoryFile->NextDirectoryEntry = (PLOU_VFS_DIRECTORY_ENTRY)LouKeMallocEx(
+    DirectoryFile->NextDirectoryEntry = LouKeMallocEx(
         GetStructureSize((PLOU_VFS_DIRECTORY_ENTRY)0, EntryName, PathLength + 1),
         GET_ALIGNMENT(LOU_VFS_DIRECTORY_ENTRY),
         KERNEL_GENERIC_MEMORY
     );
-    DirectoryFile = DirectoryFile->NextDirectoryEntry;
+    DirectoryFile = DirectoryFile->NextDirectoryEntry
     wcsncpy(DirectoryFile->EntryName, Next, PathLength);
     DirectoryFile->EntryName[PathLength] = L'\0';
     DirectoryFile->UpperDirectory = Current;
     return DirectoryFile;
 }
 
-UNUSED static LPWSTR FileToFilePath(PLOU_VFS_DIRECTORY_ENTRY File)
+static LPWSTR FileToFilePath(PLOU_VFS_DIRECTORY_ENTRY File)
 {
     PLOU_VFS_DIRECTORY_ENTRY Tmp = File;
     size_t PathLength = 0;
@@ -115,7 +82,7 @@ UNUSED static LPWSTR FileToFilePath(PLOU_VFS_DIRECTORY_ENTRY File)
     while(Tmp) {
         size_t EntryLength = wcslen(Tmp->EntryName);
         Pos -= EntryLength;
-        wcsncpy(&Path[Pos], Tmp->EntryName, EntryLength);
+        wmemcpy(&Path[Pos], Tmp->EntryName, EntryLength);
 
         if (Tmp->UpperDirectory) {
             Pos--;
@@ -131,7 +98,7 @@ UNUSED static LPWSTR FileToFilePath(PLOU_VFS_DIRECTORY_ENTRY File)
 LOUDDK_API_ENTRY
 FILE* LouKeFmCreateFile(
     LPWSTR  Path, 
-    LPWSTR  FileName 
+    string  FileName 
 ){  
     WCHAR Drive[2];
     if(Path[1] == L':'){
@@ -228,7 +195,7 @@ FILE* LouKeFmCreateFile(
 LOUDDK_API_ENTRY
 FILE* LouKeFmOpenFile(
     LPWSTR  Path, 
-    LPWSTR  FileName 
+    string  FileName 
 ){  
     WCHAR Drive[2];
     if(Path[1] == L':'){
@@ -324,11 +291,10 @@ FILE* LouKeFmOpenFile(
 
 LOUDDK_API_ENTRY
 LOUSTATUS LouKeFmConcatenateFile(
-    FILE* tFile, 
+    FILE* File, 
     PVOID Buffer, 
     size_t BufferSize
 ){
-    PLOU_VFS_FILE File = (PLOU_VFS_FILE)tFile;
     size_t NewSectorSize = ROUND_UP64(BufferSize, 512);
 
     while(File->NextSectors){
@@ -338,7 +304,7 @@ LOUSTATUS LouKeFmConcatenateFile(
     if(File->Sector){
         if(File->RemainingBytes >= BufferSize){
             size_t SectorIndex = (File->Sectors * 512) - File->RemainingBytes;
-            memcpy((PVOID)((UINTPTR)File->Sector + SectorIndex), Buffer, BufferSize);
+            memcpy((PVOID)(UINTPTR)File->Sector + SectorIndex, Buffer, BufferSize);
             File->RemainingBytes -= BufferSize;
             return STATUS_SUCCESS;
         }else{
@@ -361,14 +327,13 @@ LOUSTATUS LouKeFmConcatenateFile(
 }
 
 LOUDDK_API_ENTRY
-void
-LouKeFmMountObject(
+LOUSTATUS LouKeFmMountObject(
     WCHAR  DriveLetter,
-    LPWSTR Path,
+    LPWSTR Directory,
     size_t Sector,
     size_t SectorCount
 ){
-    WCHAR Drive[2] = {DriveLetter, L'\0'}; //Directory is exspected as /Path/To/Dir
+    Drive[2] = {DriveLetter, L'\0'}; //Directory is exspected as /Path/To/Dir
     
     PLOU_VFS_DIRECTORY_ENTRY TmpDir = GetNextDirectory(&RootDirectory, Drive, 1, true);
 
@@ -387,11 +352,11 @@ LouKeFmMountObject(
         }
     }
     TmpDir->LBA = Sector;
-    TmpDir->Sectors = SectorCount;
+    TmpDir->SectorCount = SectorCount;
 }
 
 LOUDDK_API_ENTRY
-LOUSTATUS LouKeFmMountDrive(
+LOUDTATUS LouKeFmMountDrive(
     PLOUSINE_KERNEL_FILESYSTEM LouKeFileSystem
 ){  
     LouPrint("LouKeFmMountDrive()\n");

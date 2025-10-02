@@ -38,7 +38,7 @@ void LouKeDestroyThread(uint64_t Thread);
 void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
-HANDLE LouKeLoadLibraryA(string Names);
+HANDLE LouKeLoadLibraryA(string Name, mutex_t* Lock);
 void* LouKeDrsdGetPlaneInformation(size_t* CountHandle);
 LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context);
 void* LouKeGenericAllocateHeapEx(

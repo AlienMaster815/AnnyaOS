@@ -105,11 +105,11 @@ typedef struct  _ListHeader{
 struct _LOUQ_WORK;
 
 typedef struct _DELAYED_FUNCTION{
-    int32_t    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
+    uint32_t    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
     void*       WorkData;
 }DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 
-typedef int32_t (*DELAYED_CALLBACK)(struct _LOUQ_WORK* WorkData);
+typedef uint32_t (*DELAYED_CALLBACK)(struct _LOUQ_WORK* WorkData);
 
 typedef int         LOU_TOKEN;
 typedef uint64_t    COUNTER;

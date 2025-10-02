@@ -1,32 +1,7 @@
 #include <LouDDK.h>
 
-LPWSTR 
-_wcsupr(
-    LPWSTR Str
-);
-
-LOUDDK_API_ENTRY
-WCHAR
-wctoupr(WCHAR Char);
-
-LOUDDK_API_ENTRY
-size_t wcslen(LPWSTR Str);
-
-LOUDDK_API_ENTRY
-FILE* LouKeFmCreateFile(
-    LPWSTR  Path, 
-    LPWSTR  FileName 
-);
-
-LOUDDK_API_ENTRY
-LOUSTATUS LouKeFmConcatenateFile(
-    FILE* File, 
-    PVOID Buffer, 
-    size_t BufferSize
-);
-
 typedef struct __attribute__((packed)) _LKR_FILE_HEADER{
-    BYTE        Signature[4]; //regf
+    BYTE        Signature[]; //regf
     UINT32      PrimarySequenceID;
     UINT32      SecondarySequenceID;
     UINT64      FileTime;
@@ -133,7 +108,7 @@ typedef struct __attribute__((packed)) _LKR_SUB_KEY_LIST{
     UINT8                       Signature[2];//lf, lh, li, ri
     UINT16                      ElementCount;
     union{
-        UINT8                   ElementData;// buffer
+        UINT8                   ElementData[];
         LEAF_HASH_SUB_KEY       LeafHash;
         LEAF_HASH_SUB_KEY       Leaf;
         LEAF_ITEM_SUB_KEY       LeafItem;
@@ -192,13 +167,13 @@ typedef struct _LKR_DATA_BLOCK_KEY{
 #define SHELL_CLASS             L"Shell"
 #define TCPMON_CLASS            L"TCPMon"
 
-UNUSED static UINT32 CreateLhSubHashFromUtf16(LPWSTR Str){
+static UINT32 CreateLhSubHashFromUtf16(LPWSTR Str){
     size_t StrSize = wcslen(Str);
 
     UINT32 Hash = 0;
     for(size_t i = 0 ; i < StrSize; i++){
         Hash *= 37;
-        Hash += wctoupr(Str[i]);
+        Hash += _wcsupr(Str[i]);
     }
 
     return Hash;
@@ -214,7 +189,7 @@ FILE* LouKeCreateRegistryFile(
     LPWSTR FileName
 ){
     PLKR_FILE_HANDLE NewFile = LouKeMallocType(LKR_FILE_HANDLE, KERNEL_GENERIC_MEMORY);
-    NewFile->FileStreamHandle = LouKeFmCreateFile(
+    NewFile->FileStreamHandle = LouKeCreateFile(
         Path,
         FileName
     );
@@ -227,7 +202,7 @@ FILE* LouKeCreateRegistryFile(
     NewFile->FileHeader->FileType = LKR_FILE_TYPE_HIVE;
     NewFile->FileHeader->ClusterFactor = 1; //VFS uses 512 byte sectors
 
-    LouKeFmConcatenateFile(
+    LouKeConcatenateFile(
         NewFile->FileStreamHandle,
         NewFile->FileHeader,
         4096

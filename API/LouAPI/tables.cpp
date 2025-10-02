@@ -19,7 +19,7 @@ typedef struct _TableTracks{
 }TableTracks, * PTableTracks;
 
 #define PRE_LOADED_MODULES 5
-#define PRE_LOADED_NTOSKRNL_FUNCTIONS 0
+#define PRE_LOADED_NTOSKRNL_FUNCTIONS 75
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
@@ -27,8 +27,8 @@ typedef struct _TableTracks{
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-UNUSED static uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-UNUSED static FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
+static uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
+static FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
 static uint64_t UnkownFunctionAddresses[PRE_LOADED_UNKOWN_FUNCTIONS];
 static FUNCTION_NAME UnkownFunctionNames[PRE_LOADED_UNKOWN_FUNCTIONS];
 static uint64_t WDFLDRFunctionAddresses[PRE_LOADED_WDFLDR_FUNCTIONS];
@@ -44,89 +44,6 @@ static PTABLE_ENTRY ImportTables = (PTABLE_ENTRY)GenericTable;
 
 KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
-LOUDDK_API_ENTRY
-size_t wcslen(LPWSTR Str);
-
-LOUDDK_API_ENTRY
-int 
-wcsncmp(
-    LPWSTR String1,
-    LPWSTR String2,
-    size_t Length
-);
-
-LOUDDK_API_ENTRY 
-LPWSTR
-wcscpy(
-    LPWSTR Destination,
-    LPWSTR Source
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcschr(
-    LPWSTR Str,
-    WCHAR  Token
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcsncpy(
-    LPWSTR String1,
-    LPWSTR String2,
-    size_t Length
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcschr(
-    LPWSTR Str,
-    WCHAR  Token
-);
-
-LOUDDK_API_ENTRY
-size_t
-wcsspn(
-    LPWSTR Str,
-    LPWSTR Accept
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcsrchr(
-    LPWSTR Str,
-    WCHAR  Token
-);
-
-LOUDDK_API_ENTRY
-LPWSTR 
-wcsstr(
-    LPWSTR Str,
-    LPWSTR Sub
-);
-
-LOUDDK_API_ENTRY
-size_t 
-wcstombs(
-    string Destination,
-    LPWSTR Source,
-    size_t Length
-);
-
-LOUDDK_API_ENTRY
-unsigned long 
-wcstoul(
-    LPWSTR  Str,
-    LPWSTR* End,
-    int     Base
-);
-
-LOUDDK_API_ENTRY
-int
-wcscmp(
-    LPWSTR Str1,
-    LPWSTR Str2
-);
 
 typedef void* PEXCEPTION_RECORD;
 
@@ -703,6 +620,168 @@ int tolower(int c);
 
 static inline
 void InitializeNtKernelTable(){
+    ImportTables[0].ModuleName = "NTOSKRNL.EXE";
+    ImportTables[0].NumberOfFunctions = PRE_LOADED_NTOSKRNL_FUNCTIONS;
+    
+    ImportTables[0].FunctionName = NTFunctionNames;
+
+    ImportTables[0].FunctionName[0] = "RtlCopyUnicodeString";
+    ImportTables[0].FunctionName[1] = "DbgPrint";
+    ImportTables[0].FunctionName[2] = "DbgPrintEx";
+    //ioaccess
+    ImportTables[0].FunctionName[3] = "READ_REGISTER_UCHAR";
+    ImportTables[0].FunctionName[4] = "WRITE_REGISTER_UCHAR";
+    ImportTables[0].FunctionName[5] = "READ_REGISTER_USHORT";
+    ImportTables[0].FunctionName[6] = "WRITE_REGISTER_USHORT";
+    ImportTables[0].FunctionName[7] = "READ_REGISTER_ULONG";
+    ImportTables[0].FunctionName[8] = "WRITE_REGISTER_ULONG";
+ 
+    ImportTables[0].FunctionName[9] =  "wcslen";
+    ImportTables[0].FunctionName[10] = "wcscmp";
+    ImportTables[0].FunctionName[11] = "wcstoul";
+    ImportTables[0].FunctionName[12] = "wcstombs";
+    ImportTables[0].FunctionName[13] = "wcsstr";
+    ImportTables[0].FunctionName[14] = "wcsspn";
+    ImportTables[0].FunctionName[15] = "wcsrchr";
+    ImportTables[0].FunctionName[16] = "vDbgPrintEx";
+    ImportTables[0].FunctionName[17] = "vDbgPrintExWithPrefix";
+    ImportTables[0].FunctionName[18] = "vswprintf_s";
+    ImportTables[0].FunctionName[19] = "vsprintf_s";
+    ImportTables[0].FunctionName[20] = "towupper";
+    ImportTables[0].FunctionName[21] = "towlower";
+    ImportTables[0].FunctionName[22] = "tolower";
+    ImportTables[0].FunctionName[23] = "toupper";
+    ImportTables[0].FunctionName[24] = "sscanf_s";
+    ImportTables[0].FunctionName[25] = "_sscanf_s_l";
+    ImportTables[0].FunctionName[26] = "swscanf_s";
+    ImportTables[0].FunctionName[27] = "_swscanf_s_l";
+    ImportTables[0].FunctionName[28] = "swprintf_s";
+    ImportTables[0].FunctionName[29] = "swprintf";
+    ImportTables[0].FunctionName[30] = "strtok_s";
+    ImportTables[0].FunctionName[31] = "strstr";
+    ImportTables[0].FunctionName[32] = "strspn";
+    ImportTables[0].FunctionName[33] = "strrchr";
+    ImportTables[0].FunctionName[34] = "strlen";
+    ImportTables[0].FunctionName[35] = "strncpy_s";
+    ImportTables[0].FunctionName[36] = "strncpy";
+    ImportTables[0].FunctionName[37] = "strncmp";
+    ImportTables[0].FunctionName[38] = "strcpy";
+    ImportTables[0].FunctionName[39] = "strcmp";
+    ImportTables[0].FunctionName[40] = "strncat_s";
+    ImportTables[0].FunctionName[41] = "strncat";
+    ImportTables[0].FunctionName[42] = "strcpy_s";
+    ImportTables[0].FunctionName[43] = "strcat_s";
+    ImportTables[0].FunctionName[44] = "strcat";
+    ImportTables[0].FunctionName[45] = "srand";
+    ImportTables[0].FunctionName[46] = "rand";
+    ImportTables[0].FunctionName[47] = "sqrtf";
+    ImportTables[0].FunctionName[48] = "sqrt";
+    ImportTables[0].FunctionName[49] = "memset";
+    ImportTables[0].FunctionName[50] = "_BitTest64";
+    ImportTables[0].FunctionName[51] = "memset";
+    ImportTables[0].FunctionName[52] = "sprintf_s";
+    ImportTables[0].FunctionName[53] = "memcmp";
+    ImportTables[0].FunctionName[54] = "memmove";
+    ImportTables[0].FunctionName[55] = "sprintf";
+    ImportTables[0].FunctionName[56] = "vsprintf";
+    ImportTables[0].FunctionName[57] = "HeadlessDispatch";
+    ImportTables[0].FunctionName[58] = "InitializeSListHead";
+    ImportTables[0].FunctionName[59] = "RtlRaiseStatus";
+    ImportTables[0].FunctionName[60] = "InterlockedPushListSList";
+    ImportTables[0].FunctionName[61] = "NtAddAtom";
+    ImportTables[0].FunctionName[62] = "NtAddAtomEx";
+    ImportTables[0].FunctionName[63] = "NtAdjustPrivilegesToken";
+    ImportTables[0].FunctionName[64] = "NtAllocateLocallyUniqueId";
+    ImportTables[0].FunctionName[65] = "NtAllocateUuids";
+    ImportTables[0].FunctionName[66] = "NtAllocateVirtualMemory";
+    ImportTables[0].FunctionName[67] = "NtClose";
+    ImportTables[0].FunctionName[68] = "NtCommitComplete";
+    ImportTables[0].FunctionName[69] = "NtCommitEnlistment";
+    ImportTables[0].FunctionName[70] = "RtlUpcaseUnicodeChar";
+    ImportTables[0].FunctionName[71] = "PsGetVersion";
+    ImportTables[0].FunctionName[72] = "WmiTraceMessageVa";
+    ImportTables[0].FunctionName[73] = "WmiTraceMessage";
+    ImportTables[0].FunctionName[74] = "WmiQueryTraceInformation";
+    
+    ImportTables[0].VirtualAddress = NTFunctionAddresses;
+
+    ImportTables[0].VirtualAddress[0] = (uint64_t)RtlCopyUnicodeString;
+    ImportTables[0].VirtualAddress[1] = (uint64_t)DbgPrint;
+    ImportTables[0].VirtualAddress[2] = (uint64_t)DbgPrintEx;
+
+    ImportTables[0].VirtualAddress[3] = (uint64_t)READ_REGISTER_UCHAR;
+    ImportTables[0].VirtualAddress[4] = (uint64_t)WRITE_REGISTER_UCHAR;
+    ImportTables[0].VirtualAddress[5] = (uint64_t)READ_REGISTER_USHORT;
+    ImportTables[0].VirtualAddress[6] = (uint64_t)WRITE_REGISTER_USHORT;
+    ImportTables[0].VirtualAddress[7] = (uint64_t)READ_REGISTER_ULONG;
+    ImportTables[0].VirtualAddress[8] = (uint64_t)WRITE_REGISTER_ULONG;
+
+    ImportTables[0].VirtualAddress[9] = (uint64_t)wcslen;
+    ImportTables[0].VirtualAddress[10] = (uint64_t)wcscmp;
+    ImportTables[0].VirtualAddress[11] = (uint64_t)wcstoul;
+    ImportTables[0].VirtualAddress[12] = (uint64_t)wcstombs;
+    ImportTables[0].VirtualAddress[13] = (uint64_t)wcsstr;
+    ImportTables[0].VirtualAddress[14] = (uint64_t)wcsspn;
+    ImportTables[0].VirtualAddress[15] = (uint64_t)wcsrchr;
+    ImportTables[0].VirtualAddress[16] = (uint64_t)vDbgPrintEx;
+    ImportTables[0].VirtualAddress[17] = (uint64_t)vDbgPrintExWithPrefix;
+    ImportTables[0].VirtualAddress[18] = (uint64_t)vswprintf_s;
+    ImportTables[0].VirtualAddress[19] = (uint64_t)vsprintf_s;
+    ImportTables[0].VirtualAddress[20] = (uint64_t)towupper;
+    ImportTables[0].VirtualAddress[21] = (uint64_t)towlower;
+    ImportTables[0].VirtualAddress[22] = (uint64_t)tolower;
+    ImportTables[0].VirtualAddress[23] = (uint64_t)toupper;
+    ImportTables[0].VirtualAddress[24] = (uint64_t)sscanf_s;
+    ImportTables[0].VirtualAddress[25] = (uint64_t)_sscanf_s_l;
+    ImportTables[0].VirtualAddress[26] = (uint64_t)swscanf_s;
+    ImportTables[0].VirtualAddress[27] = (uint64_t)_swscanf_s_l;
+    ImportTables[0].VirtualAddress[28] = (uint64_t)swprintf_s;
+    ImportTables[0].VirtualAddress[29] = (uint64_t)swprintf;
+    ImportTables[0].VirtualAddress[30] = (uint64_t)strtok_s;
+    ImportTables[0].VirtualAddress[31] = (uint64_t)strstr;
+    ImportTables[0].VirtualAddress[32] = (uint64_t)strspn;
+    ImportTables[0].VirtualAddress[33] = (uint64_t)strrchr;
+    ImportTables[0].VirtualAddress[34] = (uint64_t)strlen;
+    ImportTables[0].VirtualAddress[35] = (uint64_t)strncpy_s;
+    ImportTables[0].VirtualAddress[36] = (uint64_t)strncpy;
+    ImportTables[0].VirtualAddress[37] = (uint64_t)strncmp;
+    ImportTables[0].VirtualAddress[38] = (uint64_t)Winstrcpy;
+    ImportTables[0].VirtualAddress[39] = (uint64_t)strcmp;
+    ImportTables[0].VirtualAddress[40] = (uint64_t)strncat_s;
+    ImportTables[0].VirtualAddress[41] = (uint64_t)strncat;
+    ImportTables[0].VirtualAddress[42] = (uint64_t)strcpy_s;
+    ImportTables[0].VirtualAddress[43] = (uint64_t)strcat_s;
+    ImportTables[0].VirtualAddress[44] = (uint64_t)Winstrcat;
+    ImportTables[0].VirtualAddress[45] = (uint64_t)srand;
+    ImportTables[0].VirtualAddress[46] = (uint64_t)rand;
+    ImportTables[0].VirtualAddress[47] = (uint64_t)sqrtf;
+    ImportTables[0].VirtualAddress[48] = (uint64_t)sqrt;
+    ImportTables[0].VirtualAddress[49] = (uint64_t)memset;
+    ImportTables[0].VirtualAddress[50] = (uint64_t)_BitTest64;
+    ImportTables[0].VirtualAddress[51] = (uint64_t)memset;
+    ImportTables[0].VirtualAddress[52] = (uint64_t)sprintf_s;
+    ImportTables[0].VirtualAddress[53] = (uint64_t)memcmp;
+    ImportTables[0].VirtualAddress[54] = (uint64_t)memmove;
+    ImportTables[0].VirtualAddress[55] = (uint64_t)sprintf;
+    ImportTables[0].VirtualAddress[56] = (uint64_t)vsprintf;
+    ImportTables[0].VirtualAddress[57] = (uint64_t)HeadlessDispatch;
+    ImportTables[0].VirtualAddress[58] = (uint64_t)InitializeSListHead;
+    ImportTables[0].VirtualAddress[59] = (uint64_t)RtlRaiseStatus;
+    ImportTables[0].VirtualAddress[60] = (uint64_t)InterlockedPushListSList;
+    ImportTables[0].VirtualAddress[61] = (uint64_t)NtAddAtom;
+    ImportTables[0].VirtualAddress[62] = (uint64_t)NtAddAtomEx;
+    ImportTables[0].VirtualAddress[63] = (uint64_t)NtAdjustPrivilegesToken;
+    ImportTables[0].VirtualAddress[64] = (uint64_t)NtAllocateLocallyUniqueId;
+    ImportTables[0].VirtualAddress[65] = (uint64_t)NtAllocateUuids;
+    ImportTables[0].VirtualAddress[66] = (uint64_t)NtAllocateVirtualMemory;
+    ImportTables[0].VirtualAddress[67] = (uint64_t)NtClose;
+    ImportTables[0].VirtualAddress[68] = (uint64_t)NtCommitComplete;
+    ImportTables[0].VirtualAddress[69] = (uint64_t)NtCommitEnlistment;
+    ImportTables[0].VirtualAddress[70] = (uint64_t)RtlUpcaseUnicodeChar;
+    ImportTables[0].VirtualAddress[71] = (uint64_t)PsGetVersion;
+    ImportTables[0].VirtualAddress[72] = (uint64_t)WmiTraceMessageVa;
+    ImportTables[0].VirtualAddress[73] = (uint64_t)WmiTraceMessage;
+    ImportTables[0].VirtualAddress[74] = (uint64_t)WmiQueryTraceInformation;
 
 }
 

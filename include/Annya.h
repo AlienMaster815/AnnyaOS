@@ -22,7 +22,7 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#define LOUSTATUS int32_t
+#define LOUSTATUS uint32_t
 
 //#include "USRSPC/API/WinAPItypes.h"
 #include "kernel/SystemCalls.h"

@@ -3,7 +3,7 @@
 LOUSTATUS Iso9660DriverEntry();
 uint8_t LouKeGetNumberOfStorageDevices();
 LOUSTATUS FatDriverEntry();
-LOUSTATUS LouKeFmMountDrive(
+LOUDTATUS LouKeFmMountDrive(
     PLOUSINE_KERNEL_FILESYSTEM LouKeFileSystem
 );
 typedef struct _LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE{
