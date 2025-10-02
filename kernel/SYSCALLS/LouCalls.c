@@ -174,7 +174,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
 
         case LOULOADLIBRARYA:{
             uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[1] = (uint64_t)LouKeLoadLibraryA((string)Tmp[0]);
+            Tmp[1] = (uint64_t)LouKeLoadLibraryA((string)Tmp[0], (mutex_t*)Tmp[2]);
             return;
         }
         case LOULOADLIBRARYW:{

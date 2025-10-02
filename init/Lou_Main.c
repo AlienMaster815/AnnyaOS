@@ -172,8 +172,6 @@ void LouKeLoadLousineBootTrampoline(string FilePath);
 int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
 void LouKePcieProbeEcam();
-LOUSTATUS 
-LouKeInitializeRegistrySystem();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -341,12 +339,9 @@ KERNEL_ENTRY Lou_kernel_start(
 
     InitializeBootGraphics();
 
-    //TODO: initialize this after safe memory after debug
-    LouKeInitializeRegistrySystem();
-
-    while(1);
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
+
 
     AdvancedLousineKernelInitialization();
 

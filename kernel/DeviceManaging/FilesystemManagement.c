@@ -3,9 +3,7 @@
 LOUSTATUS Iso9660DriverEntry();
 uint8_t LouKeGetNumberOfStorageDevices();
 LOUSTATUS FatDriverEntry();
-LOUDTATUS LouKeFmMountDrive(
-    PLOUSINE_KERNEL_FILESYSTEM LouKeFileSystem
-);
+
 typedef struct _LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE{
     ListHeader                   List;
     PDEVICE_DIRECTORY_TABLE      FileSystem;
@@ -117,7 +115,6 @@ void InitializeFileSystemManager(){
                         NewMountedFileSystem->SystemDisk = true;
                         NewMountedFileSystem->DriveID = 'C';
                         MountedFileSystemTableMembers++;
-                        LouKeFmMountDrive(NewMountedFileSystem);
                         continue;
                     }
                 }
@@ -128,7 +125,6 @@ void InitializeFileSystemManager(){
                     }
                 }
                 MountedFileSystemTableMembers++;
-                LouKeFmMountDrive(NewMountedFileSystem);
             }
         }  
         if(Tmp->List.NextHeader){

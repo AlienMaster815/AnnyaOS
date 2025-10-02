@@ -370,106 +370,6 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
     );
 }
 
-PFILESYSTEM_DIRECTORY_QUERY Iso9660FileSystemDirectoryQuery(
-    string DirPath,
-    PLOUSINE_KERNEL_FILESYSTEM LouKeFileSystem
-){
-    UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
-
-    // Get root directory entry from Volume Descriptor
-    uint64_t RootLBA = 0;
-    uint64_t RootSize = 0;
-
-    RootLBA |= VD.Data[LBA_LSB32];
-    RootLBA |= (VD.Data[LBA_LSB_HI32] << 8);
-    RootLBA |= (VD.Data[LBA_MSB_LO32] << 16);
-    RootLBA |= (VD.Data[LBA_MSB32] << 24);
-
-    RootSize |= VD.Data[DL_LSB32];
-    RootSize |= (VD.Data[DL_LSB_HI32] << 8);
-    RootSize |= (VD.Data[DL_MSB_LO32] << 16);
-    RootSize |= (VD.Data[DL_MSB] << 24);
-
-    // Read directory sector into memory
-    UINT8* DirBuffer = (UINT8*)ISOLouKeFindDirectory(
-        RootLBA,
-        RootSize,
-        FilesystemHandle->PortID,
-        DirPath,
-        false,
-        PageFlags
-    );
-
-    if (!DirBuffer) {
-        return 0x00;
-    }
-
-    // Count entries first
-    size_t EntryCount = 0;
-    UINT8* FOO = DirBuffer;
-    while (1) {
-        if (FOO[0] == 0) {
-            UINT64 Offset = ((UINT64)(FOO - DirBuffer) + 2047) & ~(2047);
-            if (Offset >= RootSize) break;
-            FOO = DirBuffer + Offset;
-            continue;
-        }
-        EntryCount++;
-        FOO += FOO[0]; // advance by record length
-    }
-
-    // Allocate result structure dynamically
-    size_t QuerySize = sizeof(FILESYSTEM_DIRECTORY_QUERY)
-        + sizeof(FILESYSTEM_DIRECTORY_QUERY::Entities[0]) * EntryCount;
-
-    PFILESYSTEM_DIRECTORY_QUERY Result =
-        (PFILESYSTEM_DIRECTORY_QUERY)LouKeMallocEx(QuerySize, KILOBYTE_PAGE, PageFlags);
-
-    Result->Entries = EntryCount;
-
-    // Second pass: fill entries
-    FOO = DirBuffer;
-    size_t idx = 0;
-
-    while (1) {
-        if (FOO[0] == 0) {
-            UINT64 Offset = ((UINT64)(FOO - DirBuffer) + 2047) & ~(2047);
-            if (Offset >= RootSize) break;
-            FOO = DirBuffer + Offset;
-            continue;
-        }
-
-        // Extract name
-        UINT8 NameLen = FOO[32];
-        char* NamePtr = (char*)&FOO[33];
-
-        Result->Entities[idx].ObjectName = DuplicateString(NamePtr, NameLen);
-
-        // File Flags at offset 25 in ISO9660 Dir Record
-        bool isDir = (FOO[25] & 0x02) != 0;
-        Result->Entities[idx].File = !isDir;
-
-        if (!isDir) {
-            // Get start LBA
-            uint32_t StartSector = *(uint32_t*)&FOO[2];
-            uint32_t SectorCount = *(uint32_t*)&FOO[10];
-            Result->Entities[idx].StartSector = StartSector;
-            Result->Entities[idx].SectorCount = (SectorCount + 2047) / 2048;
-        } else {
-            Result->Entities[idx].StartSector = 0;
-            Result->Entities[idx].SectorCount = 0;
-        }
-
-        idx++;
-        FOO += FOO[0];
-    }
-
-    ReleaseDriveHandle((RAMADD)DirBuffer);
-    return Result;
-}
-
-
-
 LOUDDK_API_ENTRY
 PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
@@ -479,7 +379,6 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
         PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
         Iso9660FileSystem->PortID = PortID;
         Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
-        Iso9660FileSystem->FileSystemDirectoryQuery = Iso9660FileSystemDirectoryQuery;
         Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
         Iso9660FileSystem->FileSystemOpen = Iso9660FileSystemOpen;
         Iso9660FileSystem->FileSystemSeek = Iso9660FileSystemSeek;
@@ -498,9 +397,8 @@ LOUSTATUS Iso9660DriverEntry(){
     return LouKeRegisterDevice(
         0x00, 
         FILESYSTEM_DEVICE_T,
-        "HKEY_LOCAL_MACHINE\\ANNYA\\SYSTEM64\\DRIVERS\\ISO9660.SYS",
+        "HKEY_LOCAL_MACHINE:/ANNYA/SYSTEM64/DRIVERS/ISO9660.SYS",
         (void*)Iso9660FileSystem,
         (void*)Iso9660FileSystem
     );
 }
-
