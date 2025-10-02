@@ -108,13 +108,7 @@ LouDrsdClipToClip(
 );
 void 
 LouUpdateClipLocation(struct _DRSD_CLIP* Clip, INT64 DeltaX, INT64 DeltaY);
-
-int 
-strcmp(
-    string Str1,
-    string Str2
-);
-
+int strcmp(const char* str1, const char* str2);
 void LouUpdateShadowClipSubState(
     void* Clip, 
     size_t X, size_t Y, 
@@ -145,12 +139,7 @@ void*
 LouGlobalUserMalloc(size_t Size);
 void 
 LouExitDosMode();
-int
-strncmp(
-    string  Str1,
-    string  Str2,
-    size_t  Length
-);
+int strncmp(const char* str1, const char* str2, size_t n);
 void
 LouCloseFile(
     FILE* ClosingFile
@@ -208,5 +197,6 @@ void AnnyaUpdateButton(
 );
 void LouTrashAndDumpProcess();
 void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
+
 
 #endif
