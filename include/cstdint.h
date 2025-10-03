@@ -15,8 +15,8 @@ typedef uint32_t    UINT32, DWORD, INTEGER;
 typedef unsigned long       ULONG;
 
 typedef char        INT8, CHAR; 
-#ifndef wchar_t 
-#define wchar_t     uint16_t
+#ifndef __cplusplus
+typedef uint16_t wchar_t;     
 #endif
 typedef wchar_t WCHAR, * PWCHAR, * LPWSTR;
 typedef const wchar_t * LPCWSTR; 

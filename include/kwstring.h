@@ -319,7 +319,7 @@ _ltow(
     long    V,
     LPWSTR  Str,
     int     Radix    
-)
+);
 
 LPWSTR
 _itow(

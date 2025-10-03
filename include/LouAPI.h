@@ -47,6 +47,7 @@
 #include <drivers/Busses.h>
 #include <kernel/Objects.h>
 #include <drivers/Ecam.h>
+#include <kwstring.h>
 
 
 #ifndef _KERNEL_MODULE_
