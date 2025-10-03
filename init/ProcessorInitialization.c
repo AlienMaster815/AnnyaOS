@@ -2,15 +2,15 @@
 
 extern uint64_t GetCr4();
 void save_fpu_state(uint8_t* buffer) ;
-void restore_fpu_state(const uint8_t* buffer);
+void restore_fpu_state(uint8_t* buffer);
 void fxsave_handler(uint8_t* buffer);
-void fxrstor_handler(const uint8_t* buffer);
+void fxrstor_handler(uint8_t* buffer);
 extern void StoreAdvancedRegisters(uint8_t* buffer);
-extern void RestoreAdvancedRegisters(const uint8_t* buffer);
+extern void RestoreAdvancedRegisters(uint8_t* buffer);
 
 typedef struct _PROCESSOR_CALLBACKS{
     void (*SaveHandler)(uint8_t*);
-    void (*RestoreHandler)(const uint8_t*);
+    void (*RestoreHandler)(uint8_t*);
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
 typedef struct _PROCESSOR_FEATURES{

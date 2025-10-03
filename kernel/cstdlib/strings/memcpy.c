@@ -10,8 +10,8 @@ static uint64_t SavedState = 0;
 void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
 
 //Fuck It Well do it live
-void SaveEverything(uint64_t* ContextHandle);
-void RestoreEverything(uint64_t* ContextHandle);
+void SaveEverythingWithContext(uint64_t ContextHandle);
+void RestoreEverythingWithContext(uint64_t ContextHandle);
 
 typedef struct _PROCESSOR_FEATURES{
     bool    Sse1Supported;
@@ -31,7 +31,7 @@ void simd_copy(uint64_t Destination, uint64_t Source);
 
 __attribute__((target("avx2")))
 static void* memcpy_avx2(void* destination, const void* source, size_t num) {
-    SaveEverything(&SavedState);
+    SaveEverythingWithContext(SavedState);
     uintptr_t dest_ptr = (uintptr_t)destination;
     uintptr_t src_ptr = (uintptr_t)source;
 
@@ -48,7 +48,7 @@ static void* memcpy_avx2(void* destination, const void* source, size_t num) {
     for(size_t i = 0; i < remaining; ++i){
         c_dest[i] = c_src[i];
     }
-    RestoreEverything(&SavedState);
+    RestoreEverythingWithContext(SavedState);
     return destination;
 }
 
@@ -74,7 +74,7 @@ static void* memcpy_basic(void* destination, const void* source, size_t num) {
  
 __attribute__((target("sse2")))
 UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t num) {
-    SaveEverything(&SavedState);
+    SaveEverythingWithContext(SavedState);
     __m128i* dest = (__m128i*)destination;
     const __m128i* src = (const __m128i*)source;
 
@@ -89,12 +89,14 @@ UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t nu
     for(size_t i = 0; i < remaining; ++i){
         c_dest[i] = c_src[i];
     }
-    RestoreEverything(&SavedState);
+    RestoreEverythingWithContext(SavedState);
     return destination;
 }
 
 __attribute__((target("avx512f")))
 UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t num) {
+    SaveEverythingWithContext(SavedState);
+    
     uintptr_t dest_ptr = (uintptr_t)destination;
     uintptr_t src_ptr = (uintptr_t)source;
 
@@ -111,7 +113,7 @@ UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t 
     for(size_t i = 0; i < remaining; ++i){
         c_dest[i] = c_src[i];
     }
-
+    RestoreEverythingWithContext(SavedState);
     return destination;
 }
 

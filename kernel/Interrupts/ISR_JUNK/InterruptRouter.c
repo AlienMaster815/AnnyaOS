@@ -102,7 +102,7 @@ void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
 typedef struct _PROCESSOR_CALLBACKS{
     void (*SaveHandler)(uint8_t*);
-    void (*RestoreHandler)(const uint8_t*);
+    void (*RestoreHandler)(uint8_t*);
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
 static PPROCESSOR_CALLBACKS ProcessorCallbacks;
@@ -121,8 +121,19 @@ void SaveEverything(uint64_t* ContextHandle){
 void RestoreEverything(uint64_t* ContextHandle){
     if(!ContextHandle)return;
     if(!(*ContextHandle))return;
-    ProcessorCallbacks->RestoreHandler((const uint8_t*)(*ContextHandle));
+    ProcessorCallbacks->RestoreHandler((uint8_t*)(*ContextHandle));
 }
+
+void SaveEverythingWithContext(uint64_t ContextHandle){
+    if(!ContextHandle)return;
+    ProcessorCallbacks->SaveHandler((uint8_t*)ContextHandle);
+}
+
+void RestoreEverythingWithContext(uint64_t ContextHandle){
+    if(!ContextHandle)return;
+    ProcessorCallbacks->RestoreHandler((uint8_t*)ContextHandle);
+}
+
 
 static mutex_t InterruptLock;
 
