@@ -3,8 +3,7 @@
 #ifndef _COMMON_TYPES_H
 #define _COMMON_TYPES_H
 
-#include <stdint.h>
-
+#include <cstdint.h>
 //Fixed Percision Integers
 
 
@@ -18,8 +17,6 @@ typedef int16_t INT16, SHORT;
 typedef uint8_t BYTE, UCHAR,UINT8;
 typedef const char CCHAR;
 typedef char INT8;
-
-typedef wchar_t WCHAR, * PWCHAR;
 
 typedef const short CSHORT;
 
@@ -72,7 +69,6 @@ typedef void* PVOID;
 #define VOID void
 typedef char CHAR;
 typedef unsigned short USHORT;
-typedef wchar_t WCHAR;
 typedef unsigned char UCHAR;
 
 typedef bool BOOLEAN;

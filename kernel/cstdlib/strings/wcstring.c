@@ -1,4 +1,28 @@
-#include "ntdll.h"
+#include <LouAPI.h>
+
+#define C1_UPPER (1)
+#define C1_LOWER (1 << 1)
+#define C1_DIGIT (1 << 2)
+#define C1_SPACE (1 << 3)
+#define C1_PUNCT (1 << 4)
+#define C1_CNTRL (1 << 5)
+#define C1_BLANK (1 << 6)
+#define C1_XDIGIT (1 << 7)
+#define C1_ALPHA (1 << 8)
+#define C1_DEFINED (1 << 9)
+
+#define MINLONG ((long)0x80000000)
+#define MAXLONG ((long)0x7FFFFFFF)
+
+
+#define WINAPI __stdcall
+
+typedef int errno_t;
+#define EINVAL      22
+#define ERANGE      34
+#define STRUNCATE   80
+
+#define _TRUNCATE ((size_t)-1)
 
 
 static const unsigned short wctypes[256] = {
@@ -80,7 +104,7 @@ wctoint(
     return -1;
 }
 
-NTDLL_API
+
 int
 _wcsicmp(
     LPCWSTR String1,
@@ -98,7 +122,7 @@ _wcsicmp(
     return 0;
 }
 
-NTDLL_API
+
 LPWSTR _wcslwr(
     LPWSTR Str
 ){
@@ -111,7 +135,7 @@ LPWSTR _wcslwr(
     return Result;
 }
 
-NTDLL_API
+
 size_t 
 wcslen(LPCWSTR str){
     const WCHAR *s = str;
@@ -125,7 +149,7 @@ size_t wcsnlen(const WCHAR *str, size_t len){
     return s - str;
 }
 
-NTDLL_API
+
 errno_t
 _wcslwr_s(
     LPWSTR Str, 
@@ -140,7 +164,7 @@ _wcslwr_s(
     return 0;
 }
 
-NTDLL_API
+
 int
 _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
     int Result = 0;
@@ -152,7 +176,7 @@ _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
     return Result;
 }
 
-NTDLL_API
+
 LPWSTR 
 _wcsupr(
     LPWSTR Str
@@ -166,7 +190,7 @@ _wcsupr(
     return Result;
 }
 
-NTDLL_API
+
 errno_t 
 _wcsupr_s(
     LPWSTR Str, 
@@ -183,7 +207,7 @@ _wcsupr_s(
     return 0;
 }
 
-NTDLL_API 
+ 
 LPWSTR
 wcscpy(
     LPWSTR Destination,
@@ -194,7 +218,7 @@ wcscpy(
     return Destination;
 }
 
-NTDLL_API
+
 errno_t wcscpy_s(
     LPWSTR Destination,
     size_t Length, 
@@ -216,7 +240,7 @@ errno_t wcscpy_s(
     return ERANGE;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcscat(
     LPWSTR Destination,
@@ -226,7 +250,7 @@ wcscat(
     return Destination;
 }
 
-NTDLL_API
+
 errno_t
 wcscat_s(
     LPWSTR Destination,
@@ -254,7 +278,7 @@ wcscat_s(
     return ERANGE;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcschr(
     LPWSTR Str,
@@ -268,7 +292,7 @@ wcschr(
     return 0x00;
 }
 
-NTDLL_API
+
 int
 wcscmp(
     LPWSTR Str1,
@@ -281,7 +305,7 @@ wcscmp(
     return *Str1 - *Str2;
 }
 
-NTDLL_API
+
 size_t 
 wcscspn(
     LPWSTR Str,
@@ -296,7 +320,7 @@ wcscspn(
     return Tmp - Str;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcsncat(
     LPWSTR Str1,
@@ -317,7 +341,7 @@ wcsncat(
     return Result;
 }
 
-NTDLL_API
+
 errno_t
 wcsncat_s(
     LPWSTR Destination, 
@@ -360,7 +384,7 @@ wcsncat_s(
     return ERANGE;
 }
 
-NTDLL_API
+
 int 
 wcsncmp(
     LPWSTR String1,
@@ -377,7 +401,7 @@ wcsncmp(
     return *String1 - *String2;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcsncpy(
     LPWSTR String1,
@@ -394,7 +418,7 @@ wcsncpy(
     return String1;
 }
 
-NTDLL_API
+
 errno_t
 wcsncpy_s(
     LPWSTR Destination,
@@ -438,7 +462,7 @@ wcsncpy_s(
     return ERANGE;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcsrchr(
     LPWSTR Str,
@@ -453,7 +477,7 @@ wcsrchr(
     return Result;
 }
 
-NTDLL_API
+
 LPWSTR
 wcspbrk(
     LPWSTR Str,
@@ -468,7 +492,7 @@ wcspbrk(
 }
 
 
-NTDLL_API
+
 size_t
 wcsspn(
     LPWSTR Str,
@@ -483,7 +507,7 @@ wcsspn(
     return Tmp - Str;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcsstr(
     LPWSTR Str,
@@ -505,7 +529,7 @@ wcsstr(
     return 0x00;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcstok(
     LPWSTR Str,
@@ -536,7 +560,7 @@ wcstok(
     return Result;
 }
 
-NTDLL_API
+
 LPWSTR 
 wcstok_s(
     LPWSTR Str,
@@ -571,14 +595,15 @@ wcstok_s(
     return Str;
 }
 
-NTDLL_API
+
 size_t 
 wcstombs(
     string Destination,
     LPWSTR Source,
     size_t Length
 ){
-    DWORD Result;
+    return 0x00;
+    /*DWORD Result;
 
     if(!Destination){
         RtlUnicodeToMultiByteSize(&Result, Source, wcslen(Source) * sizeof(WCHAR));
@@ -592,17 +617,18 @@ wcstombs(
             Destination[Result] = 0;
         }
     }
-    return Result;
+    return Result;*/
 }
 
-NTDLL_API
+
 size_t 
 mbstowcs(
     LPWSTR Destination,
     string Source,
     size_t Length
 ){
-    DWORD Result;
+    return 0x00;
+    /*DWORD Result;
     if(!Destination){
         RtlMultiByteToUnicodeSize(&Result, Source, strlen(Source));
     }else{
@@ -614,10 +640,10 @@ mbstowcs(
             Destination[Result / sizeof(WCHAR)] = 0;
         }
     }
-    return Result / sizeof(WCHAR);
+    return Result / sizeof(WCHAR);*/
 }
 
-NTDLL_API
+
 int 
 iswctype(
     WCHAR           Wc,
@@ -627,7 +653,7 @@ iswctype(
     return wctypes[Wc] & Type;
 }
 
-NTDLL_API
+
 int 
 iswalnum(
     WCHAR Wc
@@ -635,7 +661,7 @@ iswalnum(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT);
 }
 
-NTDLL_API
+
 int 
 iswalpha(
     WCHAR Wc
@@ -643,7 +669,7 @@ iswalpha(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER);
 }
 
-NTDLL_API
+
 int 
 iswascii(
     WCHAR Wc
@@ -651,7 +677,7 @@ iswascii(
     return Wc < 0x80;
 }
 
-NTDLL_API
+
 int 
 iswdigit(
     WCHAR Wc
@@ -659,7 +685,7 @@ iswdigit(
     return iswctype(Wc, C1_DIGIT);
 }
 
-NTDLL_API
+
 int
 iswgraph(
    WCHAR Wc
@@ -667,7 +693,7 @@ iswgraph(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT | C1_PUNCT);
 }
 
-NTDLL_API
+
 int 
 iswlower(
     WCHAR Wc
@@ -675,7 +701,7 @@ iswlower(
     return iswctype(Wc, C1_LOWER);
 }
 
-NTDLL_API
+
 int 
 iswprint(
     WCHAR Wc
@@ -683,7 +709,7 @@ iswprint(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT | C1_PUNCT | C1_BLANK);
 }
 
-NTDLL_API
+
 int 
 iswspace(
     WCHAR Wc
@@ -691,7 +717,7 @@ iswspace(
     return iswctype(Wc, C1_SPACE);
 }
 
-NTDLL_API 
+ 
 int 
 iswxdigit(
     WCHAR Wc
@@ -699,7 +725,7 @@ iswxdigit(
     return iswctype(Wc, C1_DIGIT);
 }
 
-NTDLL_API
+
 long 
 wcstol(
     LPWSTR  Str,
@@ -764,7 +790,7 @@ wcstol(
     return Result;
 }
 
-NTDLL_API
+
 unsigned long 
 wcstoul(
     LPWSTR  Str,
@@ -822,7 +848,7 @@ wcstoul(
 }
 
 
-NTDLL_API
+
 INT64 
 wcstoi64(
     LPWSTR  Str,
@@ -887,7 +913,7 @@ wcstoi64(
     return Result;
 }
 
-NTDLL_API
+
 UINT64 
 wcstoui64(
     LPWSTR  Str,
@@ -944,7 +970,7 @@ wcstoui64(
     return Result;
 }
 
-NTDLL_API
+
 LPWSTR 
 _ultow(
     unsigned long   V, 
@@ -969,12 +995,12 @@ _ultow(
     }while(V != 0L);
 
     if(Str != 0x00){
-        LouMemCpy(Str, Position, (&Buffer[32] - Position + 1) * sizeof(WCHAR));
+        memcpy(Str, Position, (&Buffer[32] - Position + 1) * sizeof(WCHAR));
     }
     return Str;
 }
 
-NTDLL_API
+
 LPWSTR 
 _ltow(
     long    V,
@@ -1012,12 +1038,12 @@ _ltow(
         *--Position = '-';
     }
     if(Str != 0x00){
-        LouMemCpy(Str, Position, (&Buffer[32] - Position + 1) * sizeof(WCHAR));
+        memcpy(Str, Position, (&Buffer[32] - Position + 1) * sizeof(WCHAR));
     }
     return Str;
 }
 
-NTDLL_API
+
 LPWSTR
 _itow(
     int     Value,
@@ -1027,7 +1053,7 @@ _itow(
     return _ltow(Value, Str, Radix);
 }
 
-NTDLL_API
+
 LPWSTR 
 _ui64tow(
     UINT64  Value,
@@ -1051,12 +1077,12 @@ _ui64tow(
         }
     }while(Value != 0L);
     if(Str != 0x00){
-        LouMemCpy(Str, Position, (&Buffer[64] - Position + 1) * sizeof(WCHAR));
+        memcpy(Str, Position, (&Buffer[64] - Position + 1) * sizeof(WCHAR));
     }
     return Str;
 }
 
-NTDLL_API
+
 LPWSTR 
 _i64tow(
     UINT64  Value,
@@ -1095,12 +1121,12 @@ _i64tow(
     }
 
     if(Str != 0x00){
-        LouMemCpy(Str, Position, (&Buffer[64] - Position + 1) * sizeof(WCHAR));
+        memcpy(Str, Position, (&Buffer[64] - Position + 1) * sizeof(WCHAR));
     }
     return Str;
 }
 
-NTDLL_API
+
 errno_t
 _ui64tow_s(
     UINT64  Value,
@@ -1133,11 +1159,11 @@ _ui64tow_s(
         *Str = 0;
         return ERANGE;
     }
-    LouMemCpy(Str, Position, (&Buffer[64] - Position) * sizeof(WCHAR));
+    memcpy(Str, Position, (&Buffer[64] - Position) * sizeof(WCHAR));
     return 0;
 }
 
-NTDLL_API
+
 errno_t
 _ultow_s(
     unsigned long   Value,
@@ -1148,7 +1174,7 @@ _ultow_s(
     return _ui64tow_s(Value, Str, Length, Radix);
 }
 
-NTDLL_API
+
 errno_t
 _i64tow_s(
     INT64   Value,
@@ -1197,11 +1223,11 @@ _i64tow_s(
         *Str = 0;
         return ERANGE;
     }
-    LouMemCpy(Str, Position, (&Buffer[64] - Position) * sizeof(WCHAR));
+    memcpy(Str, Position, (&Buffer[64] - Position) * sizeof(WCHAR));
     return 0;
 }
 
-NTDLL_API
+
 errno_t
 _ltow_s(
     long            Value,
@@ -1215,7 +1241,7 @@ _ltow_s(
     return _ui64tow_s((UINT64)Value, Str, Length, Radix);
 }
 
-NTDLL_API
+
 errno_t
 _itow_s(
     int             Value,
@@ -1229,7 +1255,7 @@ _itow_s(
     return _ui64tow_s((UINT64)Value, Str, Length, Radix);
 }
 
-NTDLL_API
+
 long 
 _wtol(
     LPWSTR Str
@@ -1249,7 +1275,7 @@ _wtol(
     return Negative ? -TotalRun : TotalRun;
 }
 
-NTDLL_API
+
 int 
 _wtoi(
     LPWSTR Str
@@ -1257,7 +1283,7 @@ _wtoi(
     return (int)_wtol(Str);
 }
 
-NTDLL_API 
+ 
 UINT64
 _wtoi64(
     LPWSTR Str
@@ -1280,7 +1306,7 @@ _wtoi64(
     return Negative ? -TotalRun : TotalRun;
 }
 
-NTDLL_API
+
 errno_t
 _wsplitpath_s(
     LPWSTR InPath, 
@@ -1337,7 +1363,7 @@ _wsplitpath_s(
             if((size_t)SzDirectory <= (size_t)(End - InPath)){
                 goto _SPLITPATH_ERROR;
             }
-            LouMemCpy(Directory, InPath, (End - InPath) * sizeof(WCHAR));
+            memcpy(Directory, InPath, (End - InPath) * sizeof(WCHAR));
             Directory[End - InPath] = 0;
         }
         InPath = End;
@@ -1362,7 +1388,7 @@ _wsplitpath_s(
         if((size_t)SzFileName <= (size_t)(End - InPath)){
             goto _SPLITPATH_ERROR;
         }
-        LouMemCpy(FileName, InPath, (End - InPath) * sizeof(WCHAR));
+        memcpy(FileName, InPath, (End - InPath) * sizeof(WCHAR));
         FileName[End - InPath] = 0;
     }
 
@@ -1390,7 +1416,7 @@ _wsplitpath_s(
         return ERANGE;
 }
 
-NTDLL_API
+
 errno_t
 _wmakepath_s(
     LPWSTR Path,
@@ -1422,7 +1448,7 @@ _wmakepath_s(
         if(Length < 2){
             goto _MAKE_PATH_RANGE;
         }
-        LouMemCpy(Position, Directory, CopyLen * sizeof(WCHAR));
+        memcpy(Position, Directory, CopyLen * sizeof(WCHAR));
         if(Length <= Len){
             goto _MAKE_PATH_RANGE;
         }
@@ -1443,7 +1469,7 @@ _wmakepath_s(
         if(Length < 2){
             goto _MAKE_PATH_RANGE;
         }
-        LouMemCpy(Position, FileName, CopyLen * sizeof(WCHAR));
+        memcpy(Position, FileName, CopyLen * sizeof(WCHAR));
         if(Length <= Len){
             goto _MAKE_PATH_RANGE;
         }
@@ -1463,7 +1489,7 @@ _wmakepath_s(
             Length -= 1;
         }
         CopyLen = MIN(Length - 1, Len);
-        LouMemCpy(Position, Extention, CopyLen * sizeof(WCHAR));
+        memcpy(Position, Extention, CopyLen * sizeof(WCHAR));
         if(Length <= Len){
             goto _MAKE_PATH_RANGE;
         }

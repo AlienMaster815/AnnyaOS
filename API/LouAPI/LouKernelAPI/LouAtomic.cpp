@@ -21,8 +21,9 @@ LOUSTATUS LouKeAddAtomEx(
     uint16_t* Atom,
     uint32_t Flags
 ){
-
-    PLOU_KE_ATOM_TABLE_ENTRY TmpAtomTable = &AtomMasterTable;
+    LouPrint("LouKeAddAtomEx()\n");
+    while(1);
+    /*PLOU_KE_ATOM_TABLE_ENTRY TmpAtomTable = &AtomMasterTable;
 
 
     for(uint64_t i = 0 ; i < NumberOfNtAtoms; i++){
@@ -43,7 +44,7 @@ LOUSTATUS LouKeAddAtomEx(
     TmpAtomTable->Atom = Atom;
     //Place Flags
     TmpAtomTable->Flags = Flags;
-    return STATUS_SUCCESS;
+    */return STATUS_SUCCESS;
 }
 
 LOUDDK_API_ENTRY
