@@ -277,7 +277,7 @@ void* LouKeMallocPhysical(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 ){
-    return LouKeMallocPhysicalEx(AllocationSize, AllocationSize, AllocationFlags);
+    return LouKeMallocPhysicalEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
 void LouKeFree(void* Address){
@@ -509,4 +509,132 @@ SIZE LouKeGetAllocationSize(PVOID Address){
     }
 
     return 0x00;
+}
+
+void* LouKeReallocEx(
+    void* Address, 
+    size_t Alignment, 
+    size_t NewSize
+){
+    if(!Address){
+        return 0x00;
+    }
+    if(!NewSize){
+        LouKeFree(Address);
+        return 0x00;
+    }
+    MutexLock(&GenMallocLock);
+    uint64_t TmpPageTrackBase = KeMallocPageTracks;
+    uint64_t TmpVMemTrackBase;
+
+    
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
+        if(RangeInterferes(
+            (uint64_t)Address, 
+            1,
+            PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase),
+            PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase)
+        )){
+            TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+            while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
+                if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
+                    bool Relocation = false;
+                    uint64_t Flags = PAGE_TRACK_DEREFERENCE_READ_FLAGS(TmpPageTrackBase);
+                    size_t AllocationSize = VMEM_TRACK_DEREFERENCE_READ_SIZE(TmpVMemTrackBase);
+                    if(AllocationSize < NewSize){
+                        Relocation = true;
+                    }else{
+                        VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, NewSize);
+                    }
+                    MutexUnlock(&GenMallocLock);
+                    if(Relocation){
+                        PVOID Tmp = LouKeMallocEx(NewSize, Alignment, Flags);
+                        memcpy(Tmp, Address, AllocationSize);
+                        LouKeFree(Address);
+                        Address = Tmp;
+                    }
+                    return Address;
+                }
+                TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+            }
+        }
+        TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
+    }
+    MutexUnlock(&GenMallocLock);
+    return 0x00;
+}
+
+void* LouKeRealloc(
+    void* Address, 
+    size_t NewSize
+){
+    return LouKeReallocEx(
+        Address, 
+        GetAlignmentBySize(NewSize),
+        NewSize        
+    );
+}
+
+void* LouKeReallocPhysicalEx(
+    void* Address, 
+    size_t Alignment, 
+    size_t NewSize
+){
+    if(!Address){
+        return 0x00;
+    }
+    if(!NewSize){
+        LouKeFree(Address);
+        return 0x00;
+    }
+    MutexLock(&GenMallocPhyLock);
+    uint64_t TmpPageTrackBase = KeMallocPageTracksPhy;
+    uint64_t TmpVMemTrackBase;
+
+    
+    while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
+        if(RangeInterferes(
+            (uint64_t)Address, 
+            1,
+            PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase),
+            PAGE_TRACK_DEREFERENCE_READ_PAGE_SIZE(TmpPageTrackBase)
+        )){
+            TmpVMemTrackBase = PAGE_TRACK_DEREFERENCE_READ_TRACK_BASE(TmpPageTrackBase);
+            while(VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase)){
+                if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
+                    bool Relocation = false;
+                    uint64_t Flags = PAGE_TRACK_DEREFERENCE_READ_FLAGS(TmpPageTrackBase);
+                    size_t AllocationSize = VMEM_TRACK_DEREFERENCE_READ_SIZE(TmpVMemTrackBase);
+                    if(AllocationSize < NewSize){
+                        Relocation = true;
+                    }else{
+                        VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, NewSize);
+                    }
+                    MutexUnlock(&GenMallocLock);
+                    if(Relocation){
+                        PVOID Tmp = LouKeMallocEx(NewSize, Alignment, Flags);
+                        memcpy(Tmp, Address, AllocationSize);
+                        LouKeFree(Address);
+                        Address = Tmp;
+                    }
+                    return Address;
+                }
+                TmpVMemTrackBase = VMEM_TRACK_DEREFERENCE_READ_NEXT(TmpVMemTrackBase);
+            }
+        }
+        TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
+    }
+    MutexUnlock(&GenMallocPhyLock);
+    return 0x00;
+}
+
+void* LouKeReallocPhysical(
+    void* Address, 
+    size_t NewSize
+){
+    return LouKeReallocPhysicalEx(
+        Address, 
+        GetAlignmentBySize(NewSize),
+        NewSize        
+    );
 }
