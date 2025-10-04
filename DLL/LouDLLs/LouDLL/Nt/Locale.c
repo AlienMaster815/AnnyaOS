@@ -1,4 +1,5 @@
 #include "ntdll.h"
+#include "privlocal.h"
 
 NTDLL_API 
 NTSTATUS

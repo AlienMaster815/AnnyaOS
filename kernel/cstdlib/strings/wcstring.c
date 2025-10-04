@@ -1,15 +1,5 @@
 #include <LouAPI.h>
 
-#define C1_UPPER (1)
-#define C1_LOWER (1 << 1)
-#define C1_DIGIT (1 << 2)
-#define C1_SPACE (1 << 3)
-#define C1_PUNCT (1 << 4)
-#define C1_CNTRL (1 << 5)
-#define C1_BLANK (1 << 6)
-#define C1_XDIGIT (1 << 7)
-#define C1_ALPHA (1 << 8)
-#define C1_DEFINED (1 << 9)
 
 #define MINLONG ((long)0x80000000)
 #define MAXLONG ((long)0x7FFFFFFF)

@@ -194,6 +194,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <kernel/Objects.h>
 #include <drivers/Ecam.h>
 #include <kwstring.h>
+#include <WinAPI/Win32/winnls.h>
 
 
 #ifndef _KERNEL_MODULE_
