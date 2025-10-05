@@ -411,6 +411,9 @@ _wmakepath_s(
     LPWSTR Extention
 );
 
+LPWSTR LouKeForkWcsStr(LPWSTR Str);
+LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len);
+
 #ifdef __cplusplus
 }
 #endif

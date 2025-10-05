@@ -2,7 +2,7 @@
 #define _MEMMORY_H
 
 #define LouKeMallocArray(type, count, tag) \
-    (type*)LouKeMallocEx((ROUND_UP64(sizeof(type), GET_ALIGNMENT(type))) * (count) , GET_ALIGNMENT(type), (tag))
+    (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 
 
