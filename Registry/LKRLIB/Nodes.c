@@ -16,7 +16,7 @@ PLOUSINE_NODE LouKeCreateLousineNode(
     while(Tmp->Peers.NextHeader){
         Tmp = (PLOUSINE_NODE_TRACKER)Tmp->Peers.NextHeader;
         PLOUSINE_NODE Checksum = Tmp->TreeRoot;
-        if(!wcscmp(Checksum->NodeID, NodeID)){
+        if(!Lou_wcscmp(Checksum->NodeID, NodeID)){
             return Checksum;
         }
     }
@@ -41,7 +41,10 @@ GetLousineNodeEntry(
     PLOUSINE_NODE TmpHeader = NodeHeader;
 
     while(1){
-        Slash = wcspbrk(Entry, L"\\/");
+        static const char Tmp[] = {'\\', 0x00, '/', 0x00, 0x00, 0x00};
+        static uint16_t Foo[3];
+        memcpy(Foo, Tmp, 3 * sizeof(uint16_t));
+        Slash = Lou_wcspbrk(Entry, (LPWSTR)Foo);
         if(!Slash){
             break;
         }
@@ -49,7 +52,7 @@ GetLousineNodeEntry(
 
         while(TmpHeader->NodePeers.Forward){
             TmpHeader = (PLOUSINE_NODE)TmpHeader->NodePeers.Forward;
-            if(!wcsncmp(Entry, TmpHeader->DirectoryName, Slash - Entry) && ((size_t)(Slash - Entry) == wcslen(TmpHeader->DirectoryName))){
+            if(!Lou_wcsncmp(Entry, TmpHeader->DirectoryName, Slash - Entry) && ((size_t)(Slash - Entry) == Lou_wcslen(TmpHeader->DirectoryName))){
                 Found = true;
                 if(!TmpHeader->NodePeers.Downward && ModificationApplied){
                     TmpHeader->NodePeers.Downward = (PLOUSINE_NODE_LIST)LouKeMallocType(LOUSINE_NODE, KERNEL_GENERIC_MEMORY);
@@ -91,7 +94,7 @@ GetLousineNodeEntry(
 
     while(TmpHeader->NodePeers.Forward){
         TmpHeader = (PLOUSINE_NODE)TmpHeader->NodePeers.Forward;
-        if(!wcsncmp(Entry, TmpHeader->DirectoryName, wcslen(Entry)) && (wcslen(Entry) == wcslen(TmpHeader->DirectoryName))){
+        if(!Lou_wcsncmp(Entry, TmpHeader->DirectoryName, Lou_wcslen(Entry)) && (Lou_wcslen(Entry) == Lou_wcslen(TmpHeader->DirectoryName))){
             Found = true;
             break;
         }
@@ -138,7 +141,7 @@ LouKeAddLousineNodeEntryToTree(
     while(Tmp->Peers.NextHeader){
         Tmp = (PLOUSINE_NODE_TRACKER)Tmp->Peers.NextHeader;
         Checksum = Tmp->TreeRoot;
-        if(!wcscmp(Checksum->NodeID, TreeName)){
+        if(!Lou_wcscmp(Checksum->NodeID, TreeName)){
             FoundTree = true;
             break;
         }

@@ -62,4 +62,11 @@ LouKeDestroyLousineNodeTree(
     PLOUSINE_NODE NodeTree
 );
 
+error_t
+LouKeCreateSourceNodes(
+    PCOMPILER_CONTEXT Context
+);
+
+LPWSTR CompilerDeclarationLookup(LOU_STRING Str);
+
 #endif

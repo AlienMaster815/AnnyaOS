@@ -1,11 +1,10 @@
 #ifndef _LKR_LIB_H
 #define _LKR_LIB_H
 
-#include <wchar.h>
 #include <stdint.h>
 
-#define LPWSTR wchar_t*
-#define WCHAR wchar_t
+#define LPWSTR uint16_t*
+#define WCHAR uint16_t
 
 
 typedef struct _LOUSINE_NODE_LIST{

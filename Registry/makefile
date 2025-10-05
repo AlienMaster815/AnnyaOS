@@ -4,8 +4,8 @@ CFLAGS  = -Wall -Wextra -O2 -IInclude
 LDFLAGS = 
 TARGET  = LKRCompiler
 SRC     = 	Compiler.c \
-			wcsext.c \
-			Nodes.c \
+			LKRLIB/wcsext.c \
+			LKRLIB/Nodes.c \
 			LKRLIB/LkrFile.c \
 			LKRLIB/LkrLexer.c			
 OBJ     = $(SRC:.c=.o)
