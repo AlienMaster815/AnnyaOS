@@ -172,6 +172,7 @@ void LouKeLoadLousineBootTrampoline(string FilePath);
 int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
 void LouKePcieProbeEcam();
+LOUSTATUS LouKeInitializeRegistry();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -320,6 +321,7 @@ KERNEL_ENTRY Lou_kernel_start(
         InitializeEfiCore();
     }                      
 
+    //LouKeInitializeRegistry();
 
     LouKeInitializeSafeMemory();    
 
@@ -342,6 +344,11 @@ KERNEL_ENTRY Lou_kernel_start(
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
+    //TODO: move to //LouKeInitializeRegistry();
+    LouKeInitializeRegistry();
+
+    LouPrint("STATUS SUCCESS\n");
+    while(1);
 
     AdvancedLousineKernelInitialization();
 

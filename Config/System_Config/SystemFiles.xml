@@ -5,12 +5,15 @@
         <FILETOCPY32>cp </FILETOCPY32>
     </32Targets>
     <64Targets>
-        <FILETOCPY64>cp /usr/local/share/limine/limine-bios.sys ISO/boot/</FILETOCPY64>                         
-        <FILETOCPY64>cp /usr/local/share/limine/limine-bios-cd.bin ISO/</FILETOCPY64>                         
-        <FILETOCPY64>cp /usr/local/share/limine/limine-uefi-cd.bin ISO/</FILETOCPY64>  
-        <FILETOCPY64>cp /usr/local/share/limine/BOOTX64.EFI ISO/EFI/BOOT</FILETOCPY64>                       
+        <!--Kernel Bootloader Files-->
+        <FILETOCPY64>cp /usr/local/share/limine/limine-bios.sys ISO/boot/</FILETOCPY64>                                     <!--limine bios library-->
+        <FILETOCPY64>cp /usr/local/share/limine/limine-bios-cd.bin ISO/</FILETOCPY64>                                       <!--limine Torino MBR-->
+        <FILETOCPY64>cp /usr/local/share/limine/limine-uefi-cd.bin ISO/</FILETOCPY64>                                       <!--limine EFI Partition-->
+        <FILETOCPY64>cp /usr/local/share/limine/BOOTX64.EFI ISO/EFI/BOOT</FILETOCPY64>  
+
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
-        <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
+        <!--Kernel Drivers-->
         <FILETOCPY64>cp drivers/Networking/PCNET32/PCNET32.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCNET32.SYS</FILETOCPY64>         <!--Amd PCNet 2 and 3-->
         <FILETOCPY64>cp drivers/Audio/SoundBlaster/SBMOD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/SBMOD.SYS</FILETOCPY64>             <!--Sound Blaster-->
         <FILETOCPY64>cp drivers/Audio/HDA/HDAPCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/HDAPCI.SYS</FILETOCPY64>                    <!--Intel Hd Audio-->
@@ -18,39 +21,45 @@
         <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>                   <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/USB/HostDrivers/XHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/XHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
-        <FILETOCPY64>cp drivers/DMA/8237A/8237A.SYS ISO/ANNYA/SYSTEM64/DRIVERS/8237A.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
+        <FILETOCPY64>cp drivers/DMA/8237A/8237A.SYS ISO/ANNYA/SYSTEM64/DRIVERS/8237A.SYS</FILETOCPY64>                      <!--8237A DMA Controller-->
         <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX IDE Chipset-->
         <FILETOCPY64>cp drivers/storage/Ahci/AHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AHCI.SYS</FILETOCPY64>                     <!--AHCI Chipset-->
-        <FILETOCPY64>cp drivers/Serial/Ps2Bus/PS2IO.SYS ISO/ANNYA/SYSTEM64/PS2IO.SYS</FILETOCPY64>                      <!--AHCI Chipset-->
-        <FILETOCPY64>cp drivers/Input/Keyboard/Mf2Ps2/MF2KBD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/MF2KBD.SYS</FILETOCPY64>                      <!--AHCI Chipset-->
-        <FILETOCPY64>cp drivers/Input/Mouse/Ps2Mouse/PS2MOUSE.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PS2MOUSE.SYS</FILETOCPY64>                      <!--AHCI Chipset-->
+        <FILETOCPY64>cp drivers/Serial/Ps2Bus/PS2IO.SYS ISO/ANNYA/SYSTEM64/PS2IO.SYS</FILETOCPY64>                          <!--PS2 BUS-->
+        <FILETOCPY64>cp drivers/Input/Keyboard/Mf2Ps2/MF2KBD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/MF2KBD.SYS</FILETOCPY64>        <!--MF2 Keyboard-->
+        <FILETOCPY64>cp drivers/Input/Mouse/Ps2Mouse/PS2MOUSE.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PS2MOUSE.SYS</FILETOCPY64>     <!--PS2 Mouse-->
+        <!--User Dynamic Loadable Libraries-->
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
-        <FILETOCPY64>cp DLL/LouDLLs/GDI32/GDI32.DLL ISO/ANNYA/SYSTEM64/GDI32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
+        <FILETOCPY64>cp DLL/LouDLLs/GDI32/GDI32.DLL ISO/ANNYA/SYSTEM64/GDI32.DLL</FILETOCPY64>                              <!--GDI library-->
         <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/ANNYA/SYSTEM64/LOUDLL.DLL</FILETOCPY64>                           <!--Lousine Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/3rdParty/zlib/zlib1.dll ISO/ANNYA/ZLIB1.DLL</FILETOCPY64>                                       <!--Mark Adler Zlib Userspace module for windows-->
         <FILETOCPY64>cp DLL/LouDLLs/Codecs/codecs.dll ISO/ANNYA/SYSTEM64/CODECS.DLL</FILETOCPY64>                           <!--Annya OS Usermode Codecs Subsystem-->
-        <FILETOCPY64>cp DLL/LouDLLs/MSVCRT/msvcrt.dll ISO/ANNYA/SYSTEM64/MSVCRT.DLL</FILETOCPY64>                           <!--Microsoft Windows C Std Library-->
+        <FILETOCPY64>cp DLL/LouDLLs/MSVCRT/msvcrt.dll ISO/ANNYA/SYSTEM64/MSVCRT.DLL</FILETOCPY64>                           <!--Microsoft Windows Visual C Std Library-->
         <FILETOCPY64>cp DLL/LouDLLs/VCRUNTIME140/VCRUNTIME140.dll ISO/ANNYA/SYSTEM64/CRT140.DLL</FILETOCPY64>               <!--Windows C/C++ Std Library Version 1.40-->
-        <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Init-->
+        <!--User Executables-->
+        <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Explorer Interface-->
+        <FILETOCPY64>cp EXE/AnnyaInit/AnnyaInit.exe ISO/ANNYA/ANNYAINIT.EXE</FILETOCPY64>                                   <!--Annya OS Init-->
+        <!--User Backgrounds-->
         <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
-        <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/Folder.png ISO/ANNYA/FOLDER.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSSET.png ISO/ANNYA/AOSSET.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/Start.png ISO/ANNYA/START.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/XBUTTON.png ISO/ANNYA/XBUTTON.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSPO.png ISO/ANNYA/AOSPO.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSPROG.png ISO/ANNYA/AOSPROG.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSODD.png ISO/ANNYA/AOSODD.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSHDD.png ISO/ANNYA/AOSHDD.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSETC.png ISO/ANNYA/AOSETC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSCHIP.png ISO/ANNYA/AOSCHIP.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSTCD.png ISO/ANNYA/AOSTCD.PNG</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                            <!--Annya OS My Computer Asset-->
-        <FILETOCPY64>cp Config/System_Config/DriverManifest.cfg ISO/ANNYA/SYSTEM64/CONFIG/DRIVERS.CFG</FILETOCPY64>        <!--Annya OS Driver Manifest Registry-->
-        <FILETOCPY64>cp Config/System_Config/BootManifest.cfg ISO/ANNYA/SYSTEM64/CONFIG/BOOT.CFG</FILETOCPY64>                     <!--Annya OS BOOT Manifest Registry-->
+        <!--ANNYAEXP Assets-->
+        <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/Folder.png ISO/ANNYA/FOLDER.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                              <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSSET.png ISO/ANNYA/AOSSET.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/Start.png ISO/ANNYA/START.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/XBUTTON.png ISO/ANNYA/XBUTTON.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSPO.png ISO/ANNYA/AOSPO.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSPROG.png ISO/ANNYA/AOSPROG.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSODD.png ISO/ANNYA/AOSODD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSHDD.png ISO/ANNYA/AOSHDD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSETC.png ISO/ANNYA/AOSETC.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSCHIP.png ISO/ANNYA/AOSCHIP.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSTCD.png ISO/ANNYA/AOSTCD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <!--System Fonts-->
+        <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                              <!--Annya OS Asset-->
+        <!--System Configuration-->
+        <FILETOCPY64>cp Config/System_Config/KCONF.LRS ISO/ANNYA/SYSTEM64/KCONF.LRS</FILETOCPY64>                           <!--Annya OS Registry Source-->
     </64Targets>
 </FILESBEFORECOPY>

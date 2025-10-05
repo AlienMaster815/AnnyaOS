@@ -203,6 +203,9 @@ UserSpace:
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
 
+	$(MAKE) -C EXE/AnnyaInit clean
+	$(MAKE) -C EXE/AnnyaInit all
+
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/User32 all
 
@@ -257,6 +260,7 @@ cleanall:
 	$(MAKE) -C UserLibraries/Kernel32 clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C EXE/AnnyaExp clean
+	$(MAKE) -C EXE/AnnyaInit clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean

@@ -24,7 +24,6 @@ uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVIC
 KERNEL_IMPORT void* LouKeGetBootDevice(size_t Index);
 LOUSTATUS LouKeInitializeNetworkManager();
 KERNEL_IMPORT size_t GetBootDeviceCount();
-KERNEL_IMPORT size_t LouKeGetBootDeviceIndex(void* Config);
 KERNEL_IMPORT DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
 
 LOUDDK_API_ENTRY 
@@ -45,7 +44,9 @@ LOUSTATUS LookForStorageDevices(){
     size_t BootDeviceCount = GetBootDeviceCount();
     size_t DeviceIndex;
     for(size_t i = 0 ; i < NumberOfPciDevices; i++){
-        DeviceIndex = LouKeGetBootDeviceIndex((void*)FirstWaveDevices[i]->PDEV->CommonConfig);
+        LouPrint("LookForStorageDevices() FIXME\n");
+        while(1);
+        DeviceIndex = 0;//LouKeGetBootDeviceIndex((void*)FirstWaveDevices[i]->PDEV->CommonConfig);
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)FirstWaveDevices[i]->PDEV->CommonConfig;
 
         if(DeviceIndex < BootDeviceCount){
