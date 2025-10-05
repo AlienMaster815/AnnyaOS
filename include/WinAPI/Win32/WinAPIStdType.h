@@ -7,7 +7,6 @@ extern "C"{
 
 #ifdef _USER_MODE_CODE_
 
-typedef unsigned int UINT;
 
 typedef void* HTREEITEM;
 typedef void* PFNTVCOMPARE;

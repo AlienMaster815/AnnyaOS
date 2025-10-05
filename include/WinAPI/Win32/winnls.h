@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+#include "windef.h"
+
 #ifndef WINNORMALIZEAPI 
 #ifndef _NORMALIZE_
 #define     WINNORMALIZEAPI __declspec(dllimport)
@@ -599,7 +601,29 @@ typedef enum _NORM_FORM{
     NormalizationKD     = 6,
 }NORM_FORM;
 
-//657
+typedef DWORD   CALID;
+typedef DWORD   CALTYPE;
+typedef long    GEOID;
+typedef DWORD   GEOCLASS;
+typedef DWORD   LCTYPE;
+typedef DWORD   LGRPID;
+
+typedef struct _CPINFO{
+    UINT    MaxCharSize;
+    BYTE    DefaultChar[MAX_DEFAULTCHAR];
+    BYTE    LeadByte[MAX_LEADBYTES];
+}CPINFO, * PCPINFO, * LPCPINFO;
+
+typedef struct _CPINFOEXA{
+    UINT    MaxCharSize;
+    BYTE    DefaultChar[MAX_DEFAULTCHAR];
+    BYTE    LeadByte[MAX_LEADBYTES];
+    WCHAR   UnicodeDefaultChar;
+    UINT    CodePage;
+    CHAR    CodePageName[MAX_PATH];
+}CPINFOEXA, * PCPINFOEXA, * LPCPINFOEXA;
+
+//682
 
 #ifdef __cplusplus
 }
