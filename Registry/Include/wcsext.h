@@ -60,4 +60,10 @@ int LouKeCompareLpwstrFromRaw(
 
 LPWSTR LouKeCreateLpwstr(LOU_STRING Str);
 
+LPWSTR 
+Lou_wcsstr(
+    LPWSTR Str,
+    LPWSTR Sub
+);
+
 #endif

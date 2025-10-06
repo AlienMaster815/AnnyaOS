@@ -114,7 +114,7 @@ GetLousineNodeEntry(
     return TmpHeader;
 }
 
-error_t 
+errno_t 
 LouKeAddLousineNodeEntryToHeader(
     PLOUSINE_NODE           NodeHeader,
     LPWSTR                  Entry,
@@ -129,7 +129,7 @@ LouKeAddLousineNodeEntryToHeader(
 
 
 
-error_t 
+errno_t 
 LouKeAddLousineNodeEntryToTree(
     LPWSTR      TreeName,
     LPWSTR      Entry,

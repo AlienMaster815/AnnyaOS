@@ -10,7 +10,7 @@
 #define PVOID void*
 #define LOU_STRING char*
 
-typedef int error_t;
+typedef int errno_t;
 
 #define LKR_SECTION_SIZE 4096
 
@@ -26,6 +26,16 @@ static inline void* SafeMalloc(size_t x){
 
 #include "LKRLIB/LKRLIB.h"
 #include "wcsext.h"
+
+
+#ifdef __cplusplus
+#define UNUSED [[maybe_unused]]
+#define UNINIT [[uninitialized]]
+#else
+#define UNUSED __attribute__((unused))
+#define UNINIT __attribute__((uninitialized))
+#endif
+
 
 typedef struct _ListHeader{
     struct _ListHeader* NextHeader;
@@ -43,14 +53,14 @@ PLOUSINE_NODE LouKeCreateLousineNode(
     LPWSTR  NodeID
 );
 
-error_t 
+errno_t 
 LouKeAddLousineNodeEntryToHeader(
     PLOUSINE_NODE           NodeHeader,
     LPWSTR                  Entry,
     PVOID                   Data
 );
 
-error_t 
+errno_t 
 LouKeAddLousineNodeEntryToTree(
     LPWSTR      TreeName,
     LPWSTR      Entry,
@@ -62,11 +72,30 @@ LouKeDestroyLousineNodeTree(
     PLOUSINE_NODE NodeTree
 );
 
-error_t
+errno_t
 LouKeCreateSourceNodes(
     PCOMPILER_CONTEXT Context
 );
 
 LPWSTR CompilerDeclarationLookup(LOU_STRING Str);
+
+typedef errno_t (*LEXER_HANLDER)(LPWSTR Stream, size_t Length, PVOID Data);
+
+errno_t 
+LouKeLexerWcsWithTerminator(
+    LPWSTR              Buffer,
+    LPWSTR              OpenToken,
+    LPWSTR              CloseToken,
+    size_t              Length,
+    LEXER_HANLDER       Handle,
+    PVOID               Data
+);
+
+LPWSTR 
+Lou_wcsnstr(
+    LPWSTR Str,
+    LPWSTR Sub,
+    size_t Length
+);
 
 #endif

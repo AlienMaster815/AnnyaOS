@@ -132,3 +132,46 @@ LPWSTR LouKeCreateLpwstr(LOU_STRING Str){
     }
     return Result;
 }
+
+LPWSTR 
+Lou_wcsstr(
+    LPWSTR Str,
+    LPWSTR Sub
+){
+    while(*Str){
+            LPWSTR P1 = Str;
+            LPWSTR P2 = Sub;
+            while((*P1) && (*P2) && (*P1 == *P2)){
+                P1++;
+                P2++;
+            }
+            if(!*P2){
+                return (LPWSTR)Str;
+            }
+
+        Str++;
+    }
+    return 0x00;
+}
+
+LPWSTR 
+Lou_wcsnstr(
+    LPWSTR Str,
+    LPWSTR Sub,
+    size_t Length
+){
+    for(size_t i = 0 ; i < Length; i++){
+            LPWSTR P1 = Str;
+            LPWSTR P2 = Sub;
+            while((*P1) && (*P2) && (*P1 == *P2)){
+                P1++;
+                P2++;
+            }
+            if(!*P2){
+                return (LPWSTR)Str;
+            }
+
+        Str++;
+    }
+    return 0x00;
+}
