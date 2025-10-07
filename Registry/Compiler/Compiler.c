@@ -168,10 +168,10 @@ LPWSTR CompilerDeclarationGetType(LPWSTR InBuffer, size_t Length){
         if(!Declaration){
             continue;
         }
-        Result = Lou_wcsnstr(InBuffer, Declaration, Length);
-        if (Result){
-            return Result;
+        if(!Lou_wcsncmp(InBuffer, Declaration, Length)){
+            return Declaration;
         }
+    
     }
     return SourceDeclarationLookup(InBuffer, Length);
 }
