@@ -37,7 +37,9 @@ static inline void* SafeMalloc(size_t x){
 #endif
 
 //EDEF
-#define ENO_DECLSEPORATOR 1
+#define ENO_DECLSEPORATOR           1
+#define ENO_DECLARATION             2
+#define EINVALID_NAME_DECLARATION   3
 
 void LkrDispatchErrorMessage(
     LPWSTR  Buffer,
@@ -127,6 +129,13 @@ LouKeLexerGetSyntaxes(
     LPWSTR*     Declaration,
     LPWSTR*     Data,
     PVOID       Context
+);
+
+void CreateSourceDeclarationLookup(
+    LPWSTR SourceName, 
+    size_t SourceNameLength,
+    LPWSTR CommonName,
+    size_t CommonNameLength
 );
 
 #endif

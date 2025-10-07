@@ -68,4 +68,9 @@ Lou_wcsstr(
 
 void PrintDocumentBuffer(LPWSTR Str, size_t Length);
 
+int 
+Lou_iswspace(
+    WCHAR Wc
+);
+
 #endif

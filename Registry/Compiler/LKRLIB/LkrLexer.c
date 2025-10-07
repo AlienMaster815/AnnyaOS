@@ -1,5 +1,57 @@
 #include <Compiler.h>
 
+static LPWSTR GetDeclaration(
+    LPWSTR Buffer, 
+    LPWSTR Data
+){
+    int Length = (size_t)(Data - Buffer);
+    Buffer += Length;
+    int i;
+    for(i = 1 ; i < Length; i++){
+        if(!Lou_wcsncmp(&Buffer[-i], CompilerDeclarationLookup("="), strlen("="))){
+            return 0x00;
+        }
+        if(!Lou_iswspace(Buffer[-i]))break;
+    }
+    for(; i < Length; i++){
+        if(!Lou_wcsncmp(&Buffer[-i], CompilerDeclarationLookup("="), strlen("="))){
+            return 0x00;
+        }
+        if(Lou_iswspace(Buffer[-i]))break;
+    }
+    return &Buffer[-i];
+}
+
+static errno_t GetNameData(
+    LPWSTR Buffer,
+    LPWSTR* Name, 
+    LPWSTR* NameEnd, 
+    LPWSTR Declaration
+){
+    size_t Length = (size_t)(Declaration - Buffer);
+    size_t i = 0;
+    
+    for(i = 0 ; i < Length; i++){
+        if(!Lou_wcsncmp(&Buffer[i], CompilerDeclarationLookup("="), strlen("="))){
+            return 1;
+        }
+        if(!Lou_wcsncmp(&Buffer[i], CompilerDeclarationLookup("\""), strlen("\""))){
+            break;
+        }
+    }
+    *Name = &Buffer[i];
+    i++;
+    for(; i < Length; i++){
+        if(!Lou_wcsncmp(&Buffer[i], CompilerDeclarationLookup("="), strlen("="))){
+            return 1;
+        }
+        if(!Lou_wcsncmp(&Buffer[i], CompilerDeclarationLookup("\""), strlen("\""))){
+            break;
+        }
+    }
+    *NameEnd = &Buffer[i];
+    return 0;
+}
 
 errno_t 
 LouKeLexerGetSyntaxes(
@@ -11,6 +63,7 @@ LouKeLexerGetSyntaxes(
     LPWSTR*     Data,
     PVOID       Context
 ){
+    errno_t Result = 0;
     if((!NameEnd) || (!Declaration) || (!Data) || (!Name)){
         return EINVAL;
     }else if(!Length){
@@ -31,10 +84,32 @@ LouKeLexerGetSyntaxes(
         );
         return ENO_DECLSEPORATOR;
     }
+    *Declaration = GetDeclaration(Buffer, *Data);
+    if(!(*Declaration)){
+        LkrDispatchErrorMessage(
+            Buffer,
+            Length,
+            ENO_DECLARATION,
+            Context
+        );
+    }
 
+    Result = GetNameData(
+        Buffer,
+        Name,
+        NameEnd,
+        *Declaration
+    );
+    if(Result){
+        LkrDispatchErrorMessage(
+            Buffer,
+            Length,
+            EINVALID_NAME_DECLARATION,
+            Context
+        );
+    }
 
-
-    return 0;
+    return Result;
 }
 
 errno_t 

@@ -68,8 +68,14 @@ typedef struct _COMPILER_DECLARATION_LIST{
     LOU_STRING      Str;
 }COMPILER_DECLARATION_LIST, * PCOMPILER_DECLARATION_LIST;
 
+typedef struct _SOURCE_DECLARATION_LIST{
+    ListHeader      Peers;
+    LPWSTR          CommonName;
+    LPWSTR          SourceName;
+}SOURCE_DECLARATION_LIST, * PSOURCE_DECLARATION_LIST;
+
 static PCOMPILER_DECLARATION_LIST MasterList = 0x00;
-static PCOMPILER_DECLARATION_LIST SourceList = 0x00;
+static PSOURCE_DECLARATION_LIST SourceList = 0x00;
 
 LPWSTR CompilerDeclarationLookup(LOU_STRING Str){
     if (!MasterList)return 0x00;
@@ -102,52 +108,39 @@ void CreateCompilerDeclarationLookup(LOU_STRING Str){
     }
 }
 
-LPWSTR SourceDeclarationSourceSearch(
+LPWSTR SourceDeclarationLookup(
     LPWSTR Buffer, 
     size_t Length
 ){
     LPWSTR Result = 0x00;
     if (!SourceList)return 0x00;
     if(!SourceList->Peers.NextHeader)return 0x00;
-    PCOMPILER_DECLARATION_LIST TmpListMember = (PCOMPILER_DECLARATION_LIST)SourceList->Peers.NextHeader;
+    PSOURCE_DECLARATION_LIST TmpListMember = (PSOURCE_DECLARATION_LIST)SourceList->Peers.NextHeader;
     while(TmpListMember){
-        if((Result = Lou_wcsnstr(Buffer, TmpListMember->LStr, Length))){
+        if(!Lou_wcsncmp(Buffer, TmpListMember->SourceName, Length) && (Lou_wcslen(TmpListMember->SourceName) == Length)){
             return Result;
         }        
-        TmpListMember = (PCOMPILER_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
+        TmpListMember = (PSOURCE_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
     }
     return 0x00;
 }
 
-LPWSTR SourceDeclarationLookup(LOU_STRING Str){
-    if (!SourceList)return 0x00;
-    if(!SourceList->Peers.NextHeader)return 0x00;
-    PCOMPILER_DECLARATION_LIST TmpListMember = (PCOMPILER_DECLARATION_LIST)SourceList->Peers.NextHeader;
-    while(TmpListMember){
-        if(!strcmp(Str, TmpListMember->Str)){
-            return TmpListMember->LStr;
-        }        
-        TmpListMember = (PCOMPILER_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
-    }
-    return 0x00;
-}
-
-
-void SourceCompilerDeclarationLookup(LOU_STRING Str){
-    if (!SourceList) return;
-
-    PCOMPILER_DECLARATION_LIST TmpListMember = SourceList;
+void CreateSourceDeclarationLookup(
+    LPWSTR SourceName, 
+    size_t SourceNameLength,
+    LPWSTR CommonName,
+    size_t CommonNameLength
+){
+    //TODO: Add Redefinition error handling
+    if (!SourceList)return;
+    PSOURCE_DECLARATION_LIST TmpListMember = SourceList;
     while(TmpListMember->Peers.NextHeader){
-        TmpListMember = (PCOMPILER_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
+        TmpListMember = (PSOURCE_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
     }
-    TmpListMember->Peers.NextHeader = (PListHeader)LouKeMallocType(COMPILER_DECLARATION_LIST, KERNEL_GENERIC_MEMORY);
-    TmpListMember = (PCOMPILER_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
-    TmpListMember->LStr = LouKeCreateLpwstr(Str);
-    size_t Tmp = strlen(Str) + 1;
-    TmpListMember->Str = LouKeMallocArray(char, Tmp , KERNEL_GENERIC_MEMORY);
-    for(size_t i = 0 ; i < Tmp; i++){
-        TmpListMember->Str[i] = Str[i];
-    }
+    TmpListMember->Peers.NextHeader = (PListHeader)LouKeMallocType(SOURCE_DECLARATION_LIST, KERNEL_GENERIC_MEMORY);
+    TmpListMember = (PSOURCE_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
+    TmpListMember->CommonName = LouKeForkWcsStr_s(CommonName, CommonNameLength + 1);
+    TmpListMember->SourceName = LouKeForkWcsStr_s(SourceName, SourceNameLength + 1);
 }
 
 static LOU_STRING StandardizedDeclarations[] = {
@@ -162,6 +155,8 @@ static LOU_STRING StandardizedDeclarations[] = {
     "DEFINE_QWORD",
     "STRUCTURE",
     "DEFINE_STRUCTURE",
+    "STRING",
+    "DEFINE_STRING",
     0,
 };
 
@@ -179,14 +174,14 @@ LPWSTR CompilerDeclarationGetType(LPWSTR InBuffer, size_t Length){
             return Result;
         }
     }
-    return SourceDeclarationSourceSearch(InBuffer, Length);
+    return SourceDeclarationLookup(InBuffer, Length);
 }
 
 
 static void CreateDeclarationList(){
     
     MasterList = LouKeMallocType(COMPILER_DECLARATION_LIST, KERNEL_GENERIC_MEMORY);
-    SourceList = LouKeMallocType(COMPILER_DECLARATION_LIST, KERNEL_GENERIC_MEMORY);
+    SourceList = LouKeMallocType(SOURCE_DECLARATION_LIST, KERNEL_GENERIC_MEMORY);
 
     CreateCompilerDeclarationLookup("Lousine Kernel Registry File Source");
     CreateCompilerDeclarationLookup("NodeID");
@@ -201,6 +196,8 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup("DEFINE_STRUCTURE");
     CreateCompilerDeclarationLookup("STRUCTURE");
     CreateCompilerDeclarationLookup("ARRAY");
+    CreateCompilerDeclarationLookup("STRING");
+    CreateCompilerDeclarationLookup("DEFINE_STRING");
     CreateCompilerDeclarationLookup("\"");
     CreateCompilerDeclarationLookup("//");
     CreateCompilerDeclarationLookup("\\");
@@ -217,10 +214,10 @@ static void CreateDeclarationList(){
 }
 
 static void DestroyDeclarationList(){
-    if (!MasterList){
+    /*if (!MasterList){
         goto _SOURCE_LIST;
     }
-    PCOMPILER_DECLARATION_LIST TmpListMember;
+    void* TmpListMember;
     PCOMPILER_DECLARATION_LIST Next = MasterList;
     while(Next){
         TmpListMember = Next;
@@ -240,7 +237,7 @@ static void DestroyDeclarationList(){
         if(TmpListMember->Str)LouKeFree(TmpListMember->Str);
         if(TmpListMember->LStr)LouKeFree(TmpListMember->LStr);
         LouKeFree(TmpListMember);
-    }
+    }*/
 }
 
 int main(int argc, char *argv[]){

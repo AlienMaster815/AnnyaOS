@@ -30,7 +30,9 @@ errno_t LouKeObjectHandler(
         return Result;
     }
 
-
+    if(Lou_wcsncmp(DeclarationIndex, CompilerDeclarationLookup("DEFINE_STRUCTURE") ,(size_t)(DataIndex - DeclarationIndex))){
+        //CreateSourceDeclarationLookup()
+    }
 
     return 0;
 }

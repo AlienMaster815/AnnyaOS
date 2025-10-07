@@ -1,25 +1,21 @@
 # --- Configuration ---
 CC      = gcc
-CFLAGS  = -Wall -Wextra -O2 -IInclude
+CFLAGS  = -Wall -Wextra -O2 -IInclude -ICompiler
 LDFLAGS = 
 TARGET  = LKRCompiler
-SRC     = 	Compiler.c \
-			LKRLIB/wcsext.c \
-			LKRLIB/Nodes.c \
-			LKRLIB/LkrFile.c \
-			LKRLIB/LkrLexer.c \
-			LKRLIB/Errors.c
-OBJ     = $(SRC:.c=.o)
+SRC     = $(shell find Compiler -name "*.c")
+OBJ     = $(patsubst %.c, build/%.o, $(SRC))
 
 # --- Build Rules ---
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $@ $(LDFLAGS) 
+	$(CC) $(OBJ) -o $@ $(LDFLAGS)
 
-%.o: %.c
+build/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # --- Cleanup ---
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -rf build $(TARGET)
