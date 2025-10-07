@@ -162,13 +162,13 @@ static LOU_STRING StandardizedDeclarations[] = {
 LPWSTR CompilerDeclarationGetType(LPWSTR InBuffer, size_t Length){
     //TODO: Add error handling
     //check standardized values
-    LPWSTR Result = 0x00;
     for (size_t i = 0; StandardizedDeclarations[i]; i++) {
         LPWSTR Declaration = CompilerDeclarationLookup(StandardizedDeclarations[i]);
-        if(!Declaration){
-            continue;
+        if((!Declaration) || (strlen(StandardizedDeclarations[i]) != (Length))){
+            printf("HERE\n");
+            break;
         }
-        if(!Lou_wcsncmp(InBuffer, Declaration, Length)){
+        if(!Lou_wcsncmp(InBuffer, Declaration, strlen(StandardizedDeclarations[i]))){
             return Declaration;
         }
     

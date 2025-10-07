@@ -64,19 +64,29 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
 static LKR_PARSER_HANDLER LkrDefinitionToManifest(
     LPWSTR CommonName
 ){
+    if(!CommonName){
+        return 0x00;
+    }
     for(size_t i = 0 ; LkrParserManifest[i].CommonName; i++){
         if(!Lou_wcsncmp(
                 CompilerDeclarationLookup(
                     LkrParserManifest[i].CommonName
                 ), 
                 CommonName, 
-                Lou_wcslen(
-                    CompilerDeclarationLookup(
-                        LkrParserManifest[i].CommonName
-                    )
+                strlen(
+                    LkrParserManifest[i].CommonName
                 )
             )
         ){
+            SanityCheck(
+                CompilerDeclarationLookup(
+                    LkrParserManifest[i].CommonName
+                ),
+                strlen(
+                    LkrParserManifest[i].CommonName
+                )
+            );
+
             return LkrParserManifest[i].Handler;
         }
     }
@@ -107,6 +117,7 @@ errno_t LouKeObjectHandler(
     if(Result){
         return Result;
     }
+
 
     LkrDefinitionToManifest(CompilerDeclarationGetType(DeclarationIndex, (size_t)(DataIndex - DeclarationIndex)));
 

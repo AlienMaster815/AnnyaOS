@@ -19,7 +19,7 @@ static LPWSTR GetDeclaration(
         }
         if(Lou_iswspace(Buffer[-i]))break;
     }
-    return &Buffer[-i];
+    return &Buffer[-i + 1];
 }
 
 static errno_t GetNameData(
