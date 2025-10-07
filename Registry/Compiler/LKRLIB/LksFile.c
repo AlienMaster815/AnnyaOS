@@ -78,15 +78,6 @@ static LKR_PARSER_HANDLER LkrDefinitionToManifest(
                 )
             )
         ){
-            SanityCheck(
-                CompilerDeclarationLookup(
-                    LkrParserManifest[i].CommonName
-                ),
-                strlen(
-                    LkrParserManifest[i].CommonName
-                )
-            );
-
             return LkrParserManifest[i].Handler;
         }
     }
@@ -118,10 +109,20 @@ errno_t LouKeObjectHandler(
         return Result;
     }
 
-
-    LkrDefinitionToManifest(CompilerDeclarationGetType(DeclarationIndex, (size_t)(DataIndex - DeclarationIndex)));
-
-    return 0;
+    LKR_PARSER_HANDLER Handler = LkrDefinitionToManifest(CompilerDeclarationGetType(DeclarationIndex, (size_t)(DataIndex - DeclarationIndex)));
+    if(Handler){
+        Result = Handler(        
+            Buffer, 
+            Length, 
+            NameIndex, 
+            NameEndIndex, 
+            DeclarationIndex, 
+            DataIndex,
+            Data
+        );
+    }
+    
+    return Result;
 }
 
 errno_t

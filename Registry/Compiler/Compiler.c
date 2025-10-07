@@ -165,8 +165,7 @@ LPWSTR CompilerDeclarationGetType(LPWSTR InBuffer, size_t Length){
     for (size_t i = 0; StandardizedDeclarations[i]; i++) {
         LPWSTR Declaration = CompilerDeclarationLookup(StandardizedDeclarations[i]);
         if((!Declaration) || (strlen(StandardizedDeclarations[i]) != (Length))){
-            printf("HERE\n");
-            break;
+            continue;
         }
         if(!Lou_wcsncmp(InBuffer, Declaration, strlen(StandardizedDeclarations[i]))){
             return Declaration;
