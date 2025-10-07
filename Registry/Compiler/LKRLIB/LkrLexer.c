@@ -39,8 +39,7 @@ static errno_t GetNameData(
             break;
         }
     }
-    *Name = &Buffer[i];
-    i++;
+    *Name = &Buffer[++i];
     for(; i < Length; i++){
         if(!Lou_wcsncmp(&Buffer[i], CompilerDeclarationLookup("="), strlen("="))){
             return 1;

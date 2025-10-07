@@ -55,11 +55,14 @@ typedef struct _ListHeader{
     struct _ListHeader* LastHeader;
 }ListHeader, * PListHeader;
 
+#include <Nodes.h>
+
 typedef struct _COMPILER_CONTEXT{
-    LOU_STRING      Path;
-    size_t          FileSize;
-    void*           FileContext;
-    PLOUSINE_NODE   CompilerNode;
+    LOU_STRING              Path;
+    size_t                  FileSize;
+    void*                   FileContext;
+    PLOUSINE_NODE           CompilerNode;
+    NODE_CONTEXT            NodeContext;
 }COMPILER_CONTEXT, * PCOMPILER_CONTEXT;
 
 PLOUSINE_NODE LouKeCreateLousineNode(
@@ -93,6 +96,8 @@ LouKeCreateSourceNodes(
 LPWSTR CompilerDeclarationLookup(LOU_STRING Str);
 
 typedef errno_t (*LEXER_HANLDER)(LPWSTR Stream, size_t Length, PVOID Data);
+
+
 
 errno_t 
 LouKeLexerWcsWithTerminator(
@@ -137,5 +142,32 @@ void CreateSourceDeclarationLookup(
     LPWSTR CommonName,
     size_t CommonNameLength
 );
+
+errno_t LkrHandleStrcutrueDefinnition(
+    LPWSTR   Buffer,
+    size_t   Length,
+    LPWSTR   NameIndex,
+    LPWSTR   NameEndIndex,
+    LPWSTR   DeclarationIndex,
+    LPWSTR   DataIndex,
+    PVOID    Data
+);
+
+typedef errno_t (*LKR_PARSER_HANDLER)(
+    LPWSTR   Buffer,
+    size_t   Length,
+    LPWSTR   NameIndex,
+    LPWSTR   NameEndIndex,
+    LPWSTR   DeclarationIndex,
+    LPWSTR   DataIndex,
+    PVOID    Data
+);
+
+typedef struct _LKR_PARSER_MANIFEST{
+    LKR_PARSER_HANDLER      Handler;
+    LOU_STRING              CommonName;
+}LKR_PARSER_MANIFEST, * PLKR_PARSER_MANIFEST;
+
+LPWSTR CompilerDeclarationGetType(LPWSTR InBuffer, size_t Length);
 
 #endif

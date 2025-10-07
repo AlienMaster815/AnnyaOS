@@ -112,13 +112,12 @@ LPWSTR SourceDeclarationLookup(
     LPWSTR Buffer, 
     size_t Length
 ){
-    LPWSTR Result = 0x00;
     if (!SourceList)return 0x00;
     if(!SourceList->Peers.NextHeader)return 0x00;
     PSOURCE_DECLARATION_LIST TmpListMember = (PSOURCE_DECLARATION_LIST)SourceList->Peers.NextHeader;
     while(TmpListMember){
         if(!Lou_wcsncmp(Buffer, TmpListMember->SourceName, Length) && (Lou_wcslen(TmpListMember->SourceName) == Length)){
-            return Result;
+            return TmpListMember->CommonName;
         }        
         TmpListMember = (PSOURCE_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
     }
@@ -147,16 +146,16 @@ static LOU_STRING StandardizedDeclarations[] = {
     "ARRAY",
     "DEFINE_BYTE",
     "BYTE",
-    "WORD",
     "DEFINE_WORD",
-    "DWORD",
+    "WORD",
     "DEFINE_DWORD",
-    "QWORD",
+    "DWORD",
     "DEFINE_QWORD",
-    "STRUCTURE",
+    "QWORD",
     "DEFINE_STRUCTURE",
-    "STRING",
+    "STRUCTURE",
     "DEFINE_STRING",
+    "STRING",
     0,
 };
 
@@ -209,21 +208,22 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup(":");
     CreateCompilerDeclarationLookup("=");
     CreateCompilerDeclarationLookup("\n");
+    CreateCompilerDeclarationLookup("/");
     
 
 }
 
 static void DestroyDeclarationList(){
-    /*if (!MasterList){
+    if (!MasterList){
         goto _SOURCE_LIST;
     }
     void* TmpListMember;
-    PCOMPILER_DECLARATION_LIST Next = MasterList;
+    void* Next = MasterList;
     while(Next){
         TmpListMember = Next;
-        Next = (PCOMPILER_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
-        if(TmpListMember->Str)LouKeFree(TmpListMember->Str);
-        if(TmpListMember->LStr)LouKeFree(TmpListMember->LStr);
+        Next = ((PCOMPILER_DECLARATION_LIST)TmpListMember)->Peers.NextHeader;
+        if(((PCOMPILER_DECLARATION_LIST)TmpListMember)->Str)LouKeFree(((PCOMPILER_DECLARATION_LIST)TmpListMember)->Str);
+        if(((PCOMPILER_DECLARATION_LIST)TmpListMember)->LStr)LouKeFree(((PCOMPILER_DECLARATION_LIST)TmpListMember)->LStr);
         LouKeFree(TmpListMember);
     }
     _SOURCE_LIST:
@@ -233,11 +233,11 @@ static void DestroyDeclarationList(){
     Next = SourceList;
     while(Next){
         TmpListMember = Next;
-        Next = (PCOMPILER_DECLARATION_LIST)TmpListMember->Peers.NextHeader;
-        if(TmpListMember->Str)LouKeFree(TmpListMember->Str);
-        if(TmpListMember->LStr)LouKeFree(TmpListMember->LStr);
+        Next = ((PSOURCE_DECLARATION_LIST)TmpListMember)->Peers.NextHeader;
+        if(((PSOURCE_DECLARATION_LIST)TmpListMember)->CommonName)LouKeFree(((PSOURCE_DECLARATION_LIST)TmpListMember)->CommonName);
+        if(((PSOURCE_DECLARATION_LIST)TmpListMember)->SourceName)LouKeFree(((PSOURCE_DECLARATION_LIST)TmpListMember)->SourceName);
         LouKeFree(TmpListMember);
-    }*/
+    }
 }
 
 int main(int argc, char *argv[]){

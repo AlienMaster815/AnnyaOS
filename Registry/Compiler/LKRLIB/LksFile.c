@@ -5,6 +5,84 @@ static bool LKR_SOURCE_FILE_SANITY_FAILURE(LPWSTR Str){
     return Lou_wcsncmp(CompilerDeclarationLookup("Lousine Kernel Registry File Source"), Str, strlen("Lousine Kernel Registry File Source"));
 }
 
+static LKR_PARSER_MANIFEST LkrParserManifest[] = {
+    {
+        .CommonName = "ARRAY",
+        .Handler = 0x00,
+    },
+    {   
+        .CommonName = "DEFINE_BYTE",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "BYTE",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "DEFINE_WORD",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "WORD",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "DEFINE_DWORD",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "DWORD",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "DEFINE_QWORD",
+        .Handler = 0x00,
+    },
+    {
+        .CommonName = "QWORD",
+        .Handler = 0x00,
+    },
+    { 
+        .CommonName = "DEFINE_STRUCTURE",
+        .Handler = LkrHandleStrcutrueDefinnition,
+    },
+    { 
+        .CommonName = "STRUCTURE",
+        .Handler = 0x00,
+    },
+    { 
+        .CommonName = "DEFINE_STRING",
+        .Handler = 0x00,
+    },
+    { 
+        .CommonName = "STRING",
+        .Handler = 0x00,
+    },
+    {0},
+};
+
+static LKR_PARSER_HANDLER LkrDefinitionToManifest(
+    LPWSTR CommonName
+){
+    for(size_t i = 0 ; LkrParserManifest[i].CommonName; i++){
+        if(!Lou_wcsncmp(
+                CompilerDeclarationLookup(
+                    LkrParserManifest[i].CommonName
+                ), 
+                CommonName, 
+                Lou_wcslen(
+                    CompilerDeclarationLookup(
+                        LkrParserManifest[i].CommonName
+                    )
+                )
+            )
+        ){
+            return LkrParserManifest[i].Handler;
+        }
+    }
+    return 0x00;
+}
+
 errno_t LouKeObjectHandler(
     LPWSTR  Buffer,
     size_t  Length,
@@ -30,9 +108,7 @@ errno_t LouKeObjectHandler(
         return Result;
     }
 
-    if(Lou_wcsncmp(DeclarationIndex, CompilerDeclarationLookup("DEFINE_STRUCTURE") ,(size_t)(DataIndex - DeclarationIndex))){
-        //CreateSourceDeclarationLookup()
-    }
+    LkrDefinitionToManifest(CompilerDeclarationGetType(DeclarationIndex, (size_t)(DataIndex - DeclarationIndex)));
 
     return 0;
 }
