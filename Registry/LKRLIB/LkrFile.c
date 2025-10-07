@@ -5,11 +5,30 @@ static bool LKR_SOURCE_FILE_SANITY_FAILURE(LPWSTR Str){
     return Lou_wcsncmp(CompilerDeclarationLookup("Lousine Kernel Registry File Source"), Str, strlen("Lousine Kernel Registry File Source"));
 }
 
-errno_t LouKeRootHandler(
-    UNUSED LPWSTR  Buffer,
-    UNUSED size_t  Length,
-    UNUSED PVOID   Data
+errno_t LouKeObjectHandler(
+    LPWSTR  Buffer,
+    size_t  Length,
+    PVOID   Data
 ){
+    UNUSED PCOMPILER_CONTEXT Context = (PCOMPILER_CONTEXT)Data;
+    errno_t Result = 0;
+    LPWSTR NameIndex = 0;
+    LPWSTR NameEndIndex = 0;
+    LPWSTR DeclarationIndex = 0;
+    LPWSTR DataIndex = 0;
+
+    Result = LouKeLexerGetSyntaxes(
+        Buffer, 
+        Length, 
+        &NameIndex, 
+        &NameEndIndex, 
+        &DeclarationIndex, 
+        &DataIndex,
+        Data
+    );
+    if(Result){
+        return Result;
+    }
 
 
 
@@ -38,10 +57,10 @@ LouKeCreateSourceNodes(
 
     LouKeLexerWcsWithTerminator(
         CheckString,
-        CompilerDeclarationLookup("["),
-        CompilerDeclarationLookup("]"),
+        CompilerDeclarationLookup("\""),
+        CompilerDeclarationLookup(";"),
         FirstDefinitionBlock - CheckString,
-        LouKeRootHandler,
+        LouKeObjectHandler,
         (PVOID)Context
     );
 

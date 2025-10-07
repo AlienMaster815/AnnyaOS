@@ -124,6 +124,12 @@ void SanityCheck(LPWSTR Str, size_t Length){
     printf("\n");
 }
 
+void PrintDocumentBuffer(LPWSTR Str, size_t Length){
+    for(size_t i = 0 ; i < Length; i++){
+        printf("%c", (char)Str[i]);
+    }
+}
+
 LPWSTR LouKeCreateLpwstr(LOU_STRING Str){
     size_t Length = strlen(Str);
     LPWSTR Result = LouKeMallocArray(WCHAR, Length + 1 , KERNEL_GENERIC_MEMORY);
@@ -160,18 +166,20 @@ Lou_wcsnstr(
     LPWSTR Sub,
     size_t Length
 ){
-    for(size_t i = 0 ; i < Length; i++){
-            LPWSTR P1 = Str;
-            LPWSTR P2 = Sub;
-            while((*P1) && (*P2) && (*P1 == *P2)){
-                P1++;
-                P2++;
-            }
-            if(!*P2){
-                return (LPWSTR)Str;
-            }
+    if(!Str || !Sub || !*Sub){
+        return 0x00;
+    }
 
-        Str++;
+    size_t sublen = Lou_wcslen(Sub);
+    if(sublen > Length){
+        return 0x00;
+    }
+
+    for(size_t i = 0; i + sublen <= Length && Str[i]; i++) {
+        if (Lou_wcsncmp(&Str[i], Sub, sublen) == 0) {
+            return &Str[i];
+        }
     }
     return 0x00;
 }
+

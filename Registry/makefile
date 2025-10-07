@@ -7,7 +7,8 @@ SRC     = 	Compiler.c \
 			LKRLIB/wcsext.c \
 			LKRLIB/Nodes.c \
 			LKRLIB/LkrFile.c \
-			LKRLIB/LkrLexer.c			
+			LKRLIB/LkrLexer.c \
+			LKRLIB/Errors.c
 OBJ     = $(SRC:.c=.o)
 
 # --- Build Rules ---

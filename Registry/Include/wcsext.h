@@ -66,4 +66,6 @@ Lou_wcsstr(
     LPWSTR Sub
 );
 
+void PrintDocumentBuffer(LPWSTR Str, size_t Length);
+
 #endif

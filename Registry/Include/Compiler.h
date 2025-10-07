@@ -36,6 +36,17 @@ static inline void* SafeMalloc(size_t x){
 #define UNINIT __attribute__((uninitialized))
 #endif
 
+//EDEF
+#define ENO_DECLSEPORATOR 1
+
+void LkrDispatchErrorMessage(
+    LPWSTR  Buffer,
+    size_t  Length,
+    errno_t Error,
+    PVOID   Data
+);
+
+//EDEF
 
 typedef struct _ListHeader{
     struct _ListHeader* NextHeader;
@@ -91,11 +102,31 @@ LouKeLexerWcsWithTerminator(
     PVOID               Data
 );
 
+errno_t 
+LouKeLexerWcsWithoutTerminator(
+    LPWSTR              Buffer,
+    LPWSTR              OpenToken,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+);
+
 LPWSTR 
 Lou_wcsnstr(
     LPWSTR Str,
     LPWSTR Sub,
     size_t Length
+);
+
+errno_t 
+LouKeLexerGetSyntaxes(
+    LPWSTR     Buffer,
+    size_t      Length,
+    LPWSTR*     Name,
+    LPWSTR*     NameEnd,
+    LPWSTR*     Declaration,
+    LPWSTR*     Data,
+    PVOID       Context
 );
 
 #endif
