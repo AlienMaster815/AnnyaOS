@@ -1,6 +1,6 @@
 #include <Compiler.h>
 
-errno_t LkrHandleStrcutrueDefinnition(
+errno_t LkrHandleArrayCreation(
     UNUSED LPWSTR   Buffer,
     UNUSED size_t   Length,
     UNUSED LPWSTR   NameIndex,
@@ -9,8 +9,9 @@ errno_t LkrHandleStrcutrueDefinnition(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-
-    
+    printf("LkrHandleArrayCreation()\n");
 
     return 0;
 }
+
+

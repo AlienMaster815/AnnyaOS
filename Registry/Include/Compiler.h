@@ -40,10 +40,10 @@ static inline void* SafeMalloc(size_t x){
 #define ENO_DECLSEPORATOR           1
 #define ENO_DECLARATION             2
 #define EINVALID_NAME_DECLARATION   3
+#define ENO_DEFINITION              4
 
 void LkrDispatchErrorMessage(
     LPWSTR  Buffer,
-    size_t  Length,
     errno_t Error,
     PVOID   Data
 );
@@ -143,7 +143,7 @@ void CreateSourceDeclarationLookup(
     size_t CommonNameLength
 );
 
-errno_t LkrHandleStrcutrueDefinnition(
+errno_t LkrHandleStrcutureDefinnition(
     LPWSTR   Buffer,
     size_t   Length,
     LPWSTR   NameIndex,
@@ -169,5 +169,97 @@ typedef struct _LKR_PARSER_MANIFEST{
 }LKR_PARSER_MANIFEST, * PLKR_PARSER_MANIFEST;
 
 LPWSTR CompilerDeclarationGetType(LPWSTR InBuffer, size_t Length);
+
+errno_t LkrHandleStringCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleByteCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleByteDefinition(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleStrcutureCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleDwordCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleDwordDefinition(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleWordCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleWordDefinition(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleArrayCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+
 
 #endif

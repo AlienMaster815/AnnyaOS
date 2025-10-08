@@ -8,31 +8,31 @@ static bool LKR_SOURCE_FILE_SANITY_FAILURE(LPWSTR Str){
 static LKR_PARSER_MANIFEST LkrParserManifest[] = {
     {
         .CommonName = "ARRAY",
-        .Handler = 0x00,
+        .Handler = LkrHandleArrayCreation,
     },
     {   
         .CommonName = "DEFINE_BYTE",
-        .Handler = 0x00,
+        .Handler = LkrHandleByteDefinition,
     },
     {
         .CommonName = "BYTE",
-        .Handler = 0x00,
+        .Handler = LkrHandleByteCreation,
     },
     {
         .CommonName = "DEFINE_WORD",
-        .Handler = 0x00,
+        .Handler = LkrHandleWordDefinition,
     },
     {
         .CommonName = "WORD",
-        .Handler = 0x00,
+        .Handler = LkrHandleWordCreation,
     },
     {
         .CommonName = "DEFINE_DWORD",
-        .Handler = 0x00,
+        .Handler = LkrHandleDwordDefinition,
     },
     {
         .CommonName = "DWORD",
-        .Handler = 0x00,
+        .Handler = LkrHandleDwordCreation,
     },
     {
         .CommonName = "DEFINE_QWORD",
@@ -44,7 +44,7 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
     },
     { 
         .CommonName = "DEFINE_STRUCTURE",
-        .Handler = LkrHandleStrcutrueDefinnition,
+        .Handler = LkrHandleStrcutureDefinnition,
     },
     { 
         .CommonName = "STRUCTURE",
@@ -56,7 +56,7 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
     },
     { 
         .CommonName = "STRING",
-        .Handler = 0x00,
+        .Handler = LkrHandleStringCreation,
     },
     {0},
 };
@@ -120,6 +120,13 @@ errno_t LouKeObjectHandler(
             DataIndex,
             Data
         );
+    }else{
+        LkrDispatchErrorMessage(
+            Buffer,
+            ENO_DEFINITION,
+            Data
+        );
+        Result = ENO_DEFINITION;
     }
     
     return Result;

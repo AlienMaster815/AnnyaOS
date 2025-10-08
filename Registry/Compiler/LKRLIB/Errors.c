@@ -27,14 +27,14 @@ static size_t GetErrorLine(
 
 static void LkrPrintError(
     UNUSED LPWSTR   Buffer, 
-    UNUSED size_t   Length,
     UNUSED errno_t  Error,
     UNUSED PVOID    Data,
     LOU_STRING      ErrorMessage
 ){
     PCOMPILER_CONTEXT Context = (PCOMPILER_CONTEXT)Data;
-    LPWSTR LineTerminator = Lou_wcsnstr(Buffer, CompilerDeclarationLookup("\n"), Length);
-    Length = (size_t)(LineTerminator - Buffer); 
+    LPWSTR LineTerminator = Lou_wcsstr(Buffer, CompilerDeclarationLookup("\n"));
+    if(!LineTerminator)LineTerminator = Lou_wcsstr(Buffer, CompilerDeclarationLookup("\0"));
+    size_t Length = (size_t)(LineTerminator - Buffer); 
 
     printf("Error:%d Line:%zu %s:: --> ", Error, GetErrorLine(Context->FileContext, (size_t)(LineTerminator - (LPWSTR)Context->FileContext)), ErrorMessage);
 
@@ -45,13 +45,11 @@ static void LkrPrintError(
 
 static void LkrEnoDeclSeperator(
     UNUSED LPWSTR   Buffer, 
-    UNUSED size_t   Length,
     UNUSED errno_t  Error,
     UNUSED PVOID    Data
 ){
     LkrPrintError(
         Buffer,
-        Length,
         Error,
         Data,
         "Missing Seperator"
@@ -60,13 +58,11 @@ static void LkrEnoDeclSeperator(
 
 static void LkrEnoDeclaration(
     UNUSED LPWSTR  Buffer,
-    UNUSED size_t  Length,
     UNUSED errno_t Error,
     UNUSED PVOID   Data
 ){
     LkrPrintError(
         Buffer,
-        Length,
         Error,
         Data,
         "Missing Declaration"
@@ -76,23 +72,32 @@ static void LkrEnoDeclaration(
 
 static void LkrEinvalidNameDeclaration(
     UNUSED LPWSTR  Buffer,
-    UNUSED size_t  Length,
     UNUSED errno_t Error,
     UNUSED PVOID   Data
 ){
     LkrPrintError(
         Buffer,
-        Length,
         Error,
         Data,
         "Invalid Name Declaration"
     );
 }
 
+static void LkrEnoDefinition(
+    UNUSED LPWSTR  Buffer,
+    UNUSED errno_t Error,
+    UNUSED PVOID   Data
+){
+    LkrPrintError(
+        Buffer,
+        Error,
+        Data,
+        "Undeclared Type"
+    );
+}
 
 void LkrDispatchErrorMessage(
     LPWSTR  Buffer,
-    size_t  Length,
     errno_t Error,
     PVOID   Data
 ){
@@ -101,7 +106,6 @@ void LkrDispatchErrorMessage(
         case ENO_DECLSEPORATOR:{
             LkrEnoDeclSeperator(
                 Buffer,
-                Length,
                 Error,
                 Data
             );
@@ -110,7 +114,6 @@ void LkrDispatchErrorMessage(
         case ENO_DECLARATION:{
             LkrEnoDeclaration(
                 Buffer,
-                Length,
                 Error,
                 Data
             );
@@ -119,7 +122,14 @@ void LkrDispatchErrorMessage(
         case EINVALID_NAME_DECLARATION:{
             LkrEinvalidNameDeclaration(
                 Buffer,
-                Length,
+                Error,
+                Data
+            );
+            return;
+        }
+        case ENO_DEFINITION:{
+            LkrEnoDefinition(
+                Buffer,
                 Error,
                 Data
             );

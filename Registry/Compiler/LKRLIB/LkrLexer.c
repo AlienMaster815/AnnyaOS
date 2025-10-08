@@ -77,7 +77,6 @@ LouKeLexerGetSyntaxes(
     if(!(*Data)){
         LkrDispatchErrorMessage(
             Buffer,
-            Length,
             ENO_DECLSEPORATOR,
             Context
         );
@@ -87,7 +86,6 @@ LouKeLexerGetSyntaxes(
     if(!(*Declaration)){
         LkrDispatchErrorMessage(
             Buffer,
-            Length,
             ENO_DECLARATION,
             Context
         );
@@ -102,7 +100,6 @@ LouKeLexerGetSyntaxes(
     if(Result){
         LkrDispatchErrorMessage(
             Buffer,
-            Length,
             EINVALID_NAME_DECLARATION,
             Context
         );
