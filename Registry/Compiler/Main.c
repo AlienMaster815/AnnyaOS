@@ -209,6 +209,7 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup("\n");
     CreateCompilerDeclarationLookup("\0");
     CreateCompilerDeclarationLookup("/");
+    CreateCompilerDeclarationLookup("\\/");
 
 }
 

@@ -43,10 +43,7 @@ GetLousineNodeEntry(
     while(1){
         Found = false;
 
-        static const char Tmp[] = {'\\', 0x00, '/', 0x00, 0x00, 0x00};
-        static uint16_t Foo[3];
-        memcpy(Foo, Tmp, 3 * sizeof(uint16_t));
-        Slash = Lou_wcspbrk(Entry, (LPWSTR)Foo);
+        Slash = Lou_wcspbrk(Entry, CompilerDeclarationLookup("\\/"));
         if(!Slash){
             break;
         }

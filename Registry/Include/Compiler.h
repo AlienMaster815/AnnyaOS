@@ -153,7 +153,7 @@ void CreateSourceDeclarationLookup(
     size_t CommonNameLength
 );
 
-errno_t LkrHandleStrcutureDefinnition(
+errno_t LkrHandleStrcutureDefinition(
     LPWSTR   Buffer,
     size_t   Length,
     LPWSTR   NameIndex,
@@ -302,6 +302,14 @@ errno_t LkrHandleStringDefinition(
 
 void SanityCheckNodes(
     PLOUSINE_NODE Node
+);
+
+errno_t
+LkrParserCreateNode(
+    LPWSTR  EntryName,
+    size_t  EntryLength,
+    PVOID   tContext,
+    PVOID   Data
 );
 
 #endif

@@ -9,8 +9,13 @@ errno_t LkrHandleDwordCreation(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleDwordCreation()\n");
-
+    //printf("LkrHandleDwordCreation()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
     return 0;
 }
 
@@ -25,7 +30,12 @@ errno_t LkrHandleDwordDefinition(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleDwordDefinition()\n");
-
+    //printf("LkrHandleDwordDefinition()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
     return 0;
 }

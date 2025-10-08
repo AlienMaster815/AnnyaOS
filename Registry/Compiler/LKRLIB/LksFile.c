@@ -44,7 +44,7 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
     },
     { 
         .CommonName = "DEFINE_STRUCTURE",
-        .Handler = LkrHandleStrcutureDefinnition,
+        .Handler = LkrHandleStrcutureDefinition,
     },
     { 
         .CommonName = "STRUCTURE",
@@ -109,7 +109,13 @@ errno_t LouKeObjectHandler(
         return Result;
     }
 
-    LKR_PARSER_HANDLER Handler = LkrDefinitionToManifest(CompilerDeclarationGetType(DeclarationIndex, (size_t)(DataIndex - DeclarationIndex)));
+    LKR_PARSER_HANDLER Handler = LkrDefinitionToManifest(
+        CompilerDeclarationGetType(
+            DeclarationIndex, 
+            (size_t)(DataIndex - DeclarationIndex)
+        )
+    );
+    
     if(Handler){
         Result = Handler(        
             Buffer, 
@@ -167,15 +173,12 @@ errno_t LouKeNameSpaceHandler(
         0x00
     );
 
-
-    LouKeFree(NewEntry);
-
     if(Result){
         printf("ERROR Creating Node\n");
         return Result;
     }
 
-    SanityCheck(Buffer, Length);
+    Context->NodeContext.CurrentDirectory = NewEntry;
 
     Buffer += Length + 2;
     Length = GetNameSpaceLength(
@@ -190,8 +193,10 @@ errno_t LouKeNameSpaceHandler(
         CompilerDeclarationLookup(";"),
         Length,
         LouKeObjectHandler,
-        (PVOID)Context
+        Data
     );
+
+    LouKeFree(NewEntry);
 
     return 0;
 }
@@ -233,6 +238,8 @@ LouKeCreateSourceNodes(
         LouKeNameSpaceHandler,
         (PVOID)Context
     );
+
+    //SanityCheckNodes(Context->CompilerNode);
 
     LouKeDestroyLousineNodeTree(Context->CompilerNode);
 

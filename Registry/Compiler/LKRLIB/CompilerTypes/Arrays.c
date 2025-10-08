@@ -9,8 +9,13 @@ errno_t LkrHandleArrayCreation(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleArrayCreation()\n");
-
+    //printf("LkrHandleArrayCreation()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
     return 0;
 }
 

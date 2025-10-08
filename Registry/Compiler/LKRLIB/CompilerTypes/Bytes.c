@@ -9,8 +9,13 @@ errno_t LkrHandleByteCreation(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleByteCreation()\n");
-
+    //printf("LkrHandleByteCreation()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
     return 0;
 }
 
@@ -25,7 +30,12 @@ errno_t LkrHandleByteDefinition(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleByteDefinition()\n");
-
+    //printf("LkrHandleByteDefinition()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
     return 0;
 }

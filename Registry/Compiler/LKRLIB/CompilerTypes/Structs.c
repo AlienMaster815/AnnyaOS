@@ -9,13 +9,19 @@ errno_t LkrHandleStrcutureCreation(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleStrcutureCreation()\n");
-    
+    //printf("LkrHandleStrcutureCreation()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
+ 
 
     return 0;
 }
 
-errno_t LkrHandleStrcutureDefinnition(
+errno_t LkrHandleStrcutureDefinition(
     UNUSED LPWSTR   Buffer,
     UNUSED size_t   Length,
     UNUSED LPWSTR   NameIndex,
@@ -24,8 +30,13 @@ errno_t LkrHandleStrcutureDefinnition(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    printf("LkrHandleStrcutureDefinnition()\n");
-    
+    //printf("LkrHandleStrcutureDefinition()\n");
+    LkrParserCreateNode(
+        NameIndex,
+        NameEndIndex - NameIndex,
+        Data,
+        0x00
+    );
 
     return 0;
 }
