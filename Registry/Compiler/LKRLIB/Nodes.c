@@ -41,6 +41,8 @@ GetLousineNodeEntry(
     PLOUSINE_NODE TmpHeader = NodeHeader;
 
     while(1){
+        Found = false;
+
         static const char Tmp[] = {'\\', 0x00, '/', 0x00, 0x00, 0x00};
         static uint16_t Foo[3];
         memcpy(Foo, Tmp, 3 * sizeof(uint16_t));
@@ -48,7 +50,6 @@ GetLousineNodeEntry(
         if(!Slash){
             break;
         }
-        Found = false;
 
         while(TmpHeader->NodePeers.Forward){
             TmpHeader = (PLOUSINE_NODE)TmpHeader->NodePeers.Forward;
@@ -84,7 +85,7 @@ GetLousineNodeEntry(
             }else{
                 return 0x00;
             }
-        }else{
+        }else if(!Found){
             return 0x00;
         }
         Entry = Slash + 1;
@@ -181,4 +182,20 @@ LouKeDestroyLousineNodeTree(
 ){
     LouKeFree(NodeTree->NodeID);
     LouKeDestroyLousineNodeTree_r(NodeTree);
+}
+
+void SanityCheckNodes(
+    PLOUSINE_NODE Node
+){
+    PLOUSINE_NODE TmpNode = Node; 
+
+    while(TmpNode->NodePeers.Forward){
+        TmpNode = (PLOUSINE_NODE)TmpNode->NodePeers.Forward;
+        SanityCheck(TmpNode->DirectoryName, Lou_wcslen(TmpNode->DirectoryName));
+        if(TmpNode->NodePeers.Downward){
+            SanityCheckNodes(
+                (PLOUSINE_NODE)TmpNode->NodePeers.Downward
+            );
+        }
+    }
 }

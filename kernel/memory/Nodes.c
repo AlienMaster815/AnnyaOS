@@ -56,10 +56,11 @@ GetLousineNodeEntry(
 
     while(1){
         Slash = wcspbrk(Entry, L"\\/");
+        Found = false;
+
         if(!Slash){
             break;
         }
-        Found = false;
 
         while(TmpHeader->NodePeers.Forward){
             TmpHeader = (PLOUSINE_NODE)TmpHeader->NodePeers.Forward;
@@ -95,7 +96,7 @@ GetLousineNodeEntry(
             }else{
                 return 0x00;
             }
-        }else{
+        }else if(!Found){
             return 0x00;
         }
         Entry = Slash + 1;

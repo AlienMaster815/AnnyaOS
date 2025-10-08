@@ -41,6 +41,7 @@ static inline void* SafeMalloc(size_t x){
 #define ENO_DECLARATION             2
 #define EINVALID_NAME_DECLARATION   3
 #define ENO_DEFINITION              4
+#define ENODE_ENTRY_NOT_ALLOCATED   5
 
 void LkrDispatchErrorMessage(
     LPWSTR  Buffer,
@@ -75,6 +76,15 @@ LouKeAddLousineNodeEntryToHeader(
     LPWSTR                  Entry,
     PVOID                   Data
 );
+
+errno_t 
+LouKeAddLousineNodeEntryToHeader_s(
+    PLOUSINE_NODE           NodeHeader,
+    LPWSTR                  Entry,
+    size_t                  EntrySize,
+    PVOID                   Data
+);
+
 
 errno_t 
 LouKeAddLousineNodeEntryToTree(
@@ -260,6 +270,38 @@ errno_t LkrHandleArrayCreation(
     UNUSED PVOID    Data
 );
 
+errno_t LkrHandleQwordDefinition(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
 
+errno_t LkrHandleQwordCreation(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+errno_t LkrHandleStringDefinition(
+    UNUSED LPWSTR   Buffer,
+    UNUSED size_t   Length,
+    UNUSED LPWSTR   NameIndex,
+    UNUSED LPWSTR   NameEndIndex,
+    UNUSED LPWSTR   DeclarationIndex,
+    UNUSED LPWSTR   DataIndex,
+    UNUSED PVOID    Data
+);
+
+void SanityCheckNodes(
+    PLOUSINE_NODE Node
+);
 
 #endif

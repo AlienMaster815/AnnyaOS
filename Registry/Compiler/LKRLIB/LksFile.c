@@ -36,11 +36,11 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
     },
     {
         .CommonName = "DEFINE_QWORD",
-        .Handler = 0x00,
+        .Handler = LkrHandleQwordDefinition,
     },
     {
         .CommonName = "QWORD",
-        .Handler = 0x00,
+        .Handler = LkrHandleQwordCreation,
     },
     { 
         .CommonName = "DEFINE_STRUCTURE",
@@ -48,11 +48,11 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
     },
     { 
         .CommonName = "STRUCTURE",
-        .Handler = 0x00,
+        .Handler = LkrHandleStrcutureCreation,
     },
     { 
         .CommonName = "DEFINE_STRING",
-        .Handler = 0x00,
+        .Handler = LkrHandleStringDefinition,
     },
     { 
         .CommonName = "STRING",
@@ -132,6 +132,70 @@ errno_t LouKeObjectHandler(
     return Result;
 }
 
+static size_t GetNameSpaceLength(
+    LPWSTR  Buffer,
+    size_t  Length,
+    PVOID   Data
+){
+    PCOMPILER_CONTEXT Context = (PCOMPILER_CONTEXT)Data;
+    LPWSTR NameSpaceEnd = Lou_wcsstr(Buffer, CompilerDeclarationLookup("["));
+    if(!NameSpaceEnd){ //last block may be the terminator so a null is not a tuma
+        NameSpaceEnd = (LPWSTR)((uintptr_t)Context->FileContext + (uintptr_t)Context->FileSize);
+    }
+    Length = NameSpaceEnd - Buffer;
+    return Length;
+}
+
+errno_t LouKeNameSpaceHandler(
+    LPWSTR  Buffer,
+    size_t  Length,
+    PVOID   Data
+){
+    errno_t Result = 0;
+    
+    //printf("LouKeNameSpaceHandler()\n");
+    UNUSED PCOMPILER_CONTEXT Context = (PCOMPILER_CONTEXT)Data;
+    //enclose NameSpace
+    Buffer++;
+    Length--;
+
+    LPWSTR NewEntry = LouKeForkWcsStr_s(Buffer, Length);
+    
+    Result = LouKeAddLousineNodeEntryToHeader(
+        Context->CompilerNode,
+        NewEntry,
+        0x00
+    );
+
+
+    LouKeFree(NewEntry);
+
+    if(Result){
+        printf("ERROR Creating Node\n");
+        return Result;
+    }
+
+    SanityCheck(Buffer, Length);
+
+    Buffer += Length + 2;
+    Length = GetNameSpaceLength(
+        Buffer,
+        Length,
+        Data
+    );    
+
+    LouKeLexerWcsWithTerminator(
+        Buffer,
+        CompilerDeclarationLookup("\""),
+        CompilerDeclarationLookup(";"),
+        Length,
+        LouKeObjectHandler,
+        (PVOID)Context
+    );
+
+    return 0;
+}
+
 errno_t
 LouKeCreateSourceNodes(
     PCOMPILER_CONTEXT Context
@@ -161,12 +225,14 @@ LouKeCreateSourceNodes(
         (PVOID)Context
     );
 
-    //LouKeLexerWcsWithTerminator(
-    //    Context->FileContext,
-    //    CompilerDeclarationLookup("["),
-    //    CompilerDeclarationLookup("]"),
-    //    Context->
-    //);
+    LouKeLexerWcsWithTerminator(
+        FirstDefinitionBlock,
+        CompilerDeclarationLookup("["),
+        CompilerDeclarationLookup("]"),
+        (size_t)(((LPWSTR)Context->FileSize ) - ((LPWSTR)FirstDefinitionBlock - (LPWSTR)Context->FileContext)),
+        LouKeNameSpaceHandler,
+        (PVOID)Context
+    );
 
     LouKeDestroyLousineNodeTree(Context->CompilerNode);
 
