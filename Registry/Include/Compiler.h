@@ -21,6 +21,7 @@ static inline void* SafeMalloc(size_t x){
 }
 
 #define LouKeMallocType(x,y) SafeMalloc(sizeof(x))
+#define LouKeMalloc(x,y) SafeMalloc(x)
 #define LouKeMallocArray(x, y, z) SafeMalloc(sizeof(x) * y)
 #define LouKeFree(x) free(x)
 

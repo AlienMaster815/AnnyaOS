@@ -1,5 +1,24 @@
 #include <Compiler.h>
 
+
+
+errno_t LkrOpcodeByteAssembler(
+    UNUSED LPWSTR  Name,
+    UNUSED size_t  NameLength,
+    UNUSED uint8_t Byte,
+    UNUSED PVOID*  Out
+){
+    if((!Out) || (!Name) || (!NameLength)){
+        return EINVAL;
+    }
+
+    //PLKR_NODE_ENTRY  
+
+
+
+    return 0;
+}
+
 errno_t LkrHandleByteCreation(
     UNUSED LPWSTR   Buffer,
     UNUSED size_t   Length,

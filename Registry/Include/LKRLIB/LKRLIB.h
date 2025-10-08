@@ -24,9 +24,8 @@ typedef struct _LOUSINE_NODE{
 
 typedef struct _LKR_NODE_ENTRY{
     LOUSINE_NODE_LIST   NodePeers;
-    LPWSTR              ItemName;
+    size_t              NameSize;
     size_t              ItemSize;
-    uint8_t             ItemData[];
 }LKR_NODE_ENTRY, * PLKR_NODE_ENTRY;
 
 typedef struct _LKR_FILE_HEADER{
@@ -37,5 +36,10 @@ typedef struct _LKR_FILE_HEADER{
 }LKR_FILE_HEADER, * PLKR_FILE_HEADER;
 
 #include "LKRSRC.h"
+
+PLKR_NODE_ENTRY LkrAllocateNode(
+    LPWSTR NodeName,
+    size_t AllocationSize
+);
 
 #endif
