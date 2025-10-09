@@ -60,12 +60,19 @@ errno_t LkrHandleQwordDefinition(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
-    //printf("LkrHandleQwordDefinition()\n");
+    LPWSTR NewName = LouKeForkWcsStr_s(NameIndex, NameEndIndex - NameIndex);
+
+
     LkrParserCreateNode(
         NameIndex,
         NameEndIndex - NameIndex,
         Data,
-        0x00
+        (PVOID)LkrCreateStandardTypedefNode(
+            NewName,
+            QWORD_OPCODE
+        )   
     );
+
+    LouKeFree(NewName);
     return 0;
 }

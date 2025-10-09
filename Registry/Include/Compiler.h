@@ -330,11 +330,19 @@ uint64_t LkrParserStringToUi64(
     size_t Length
 );
 
+
+PVOID 
+LkrCreateStandardTypedefNode(
+    LPWSTR  NewName,
+    UINT8   Opcode
+);
+
 errno_t
 LkrFillNodeData(
     PLKR_NODE_ENTRY Node,
     uint8_t*        Buffer,
     size_t          BufferSize
 );
+
 
 #endif

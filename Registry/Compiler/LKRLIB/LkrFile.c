@@ -30,3 +30,71 @@ LkrFillNodeData(
     memcpy(To, Buffer, BufferSize);
     return 0;
 }
+
+
+
+PVOID 
+LkrCreateStandardTypedefNode(
+    LPWSTR  NewName,
+    UINT8   Opcode
+){
+    PLKR_NODE_ENTRY NewNode = LkrAllocateNode(
+        NewName,
+        0
+    );
+    
+    ENCODE_OP(NewNode, Opcode | DEFINITION);
+    
+    switch(Opcode){
+
+        case BYTE_OPCODE:
+            CreateSourceDeclarationLookup(
+                NewName,
+                Lou_wcslen(NewName),
+                CompilerDeclarationLookup("BYTE"),
+                strlen("BYTE")
+            );
+            break;
+
+        case WORD_OPCODE:
+            CreateSourceDeclarationLookup(
+                NewName,
+                Lou_wcslen(NewName),
+                CompilerDeclarationLookup("WORD"),
+                strlen("WORD")
+            );
+            break;
+
+        case DWORD_OPCODE:
+            CreateSourceDeclarationLookup(
+                NewName,
+                Lou_wcslen(NewName),
+                CompilerDeclarationLookup("DWORD"),
+                strlen("DWORD")
+            );
+            break;
+
+        case QWORD_OPCODE:
+            CreateSourceDeclarationLookup(
+                NewName,
+                Lou_wcslen(NewName),
+                CompilerDeclarationLookup("DWORD"),
+                strlen("DWORD")
+            );
+            break;
+
+        case STRING_OPCODE:
+            CreateSourceDeclarationLookup(
+                NewName,
+                Lou_wcslen(NewName),
+                CompilerDeclarationLookup("STRING"),
+                strlen("STRING")
+            );
+            break;
+
+        default:
+            return 0x00;
+    }
+
+    return (PVOID)NewNode;
+}

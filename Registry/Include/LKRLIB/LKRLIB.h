@@ -34,12 +34,7 @@ typedef struct _LKR_NODE_ENTRY{
 #define QWORD_OPCODE            4
 #define STRING_OPCODE           5
 #define STRUCT_OPCODE           6
-#define BYTE_DEF_OPCODE         7
-#define WORD_DEF_OPCODE         8
-#define DWORD_DEF_OPCODE        9
-#define QWORD_DEF_OPCODE        10
-#define STRING_DEF_OPCODE       11
-#define STRUCT_DEF_OPCODE       12
+#define DEFINITION              (1 << 4)
 
 #define ENCODE_OP(Node, Op)                 (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0xFFFFFFFFFFFFFFF0ULL) | (Op))
 #define ENCODE_ITEM_OFFSET(Node, Offset)    (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0x0FULL) |  (Offset) << 4) 

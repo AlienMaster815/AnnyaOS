@@ -68,11 +68,21 @@ errno_t LkrHandleByteDefinition(
     UNUSED PVOID    Data
 ){
     //printf("LkrHandleByteDefinition()\n");
+    
+    LPWSTR NewName = LouKeForkWcsStr_s(NameIndex, NameEndIndex - NameIndex);
+
+
     LkrParserCreateNode(
         NameIndex,
         NameEndIndex - NameIndex,
         Data,
-        0x00
+        (PVOID)LkrCreateStandardTypedefNode(
+            NewName,
+            BYTE_OPCODE
+        )   
     );
+
+    LouKeFree(NewName);
+
     return 0;
 }
