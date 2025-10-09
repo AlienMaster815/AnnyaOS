@@ -38,3 +38,17 @@ LkrParserCreateNode(
 
     return 0;
 }
+
+uint64_t LkrParserStringToUi64(
+    LPWSTR Str,
+    size_t Length
+){
+    uint64_t Converted = 0x00;
+    LPWSTR HexChar = Lou_wcspbrk_s(Str, Length, CompilerDeclarationLookup("xX"), strlen("xX"));
+    if(HexChar){
+        Converted = (uint64_t)Lou__wtoh64_s(&HexChar[-1],  Length - (size_t)(&HexChar[-1] - Str));
+    }else {
+        Converted = (uint64_t)Lou__wtoi64_s(Str, Length);
+    }
+    return Converted;
+}

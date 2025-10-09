@@ -2,40 +2,58 @@
 
 
 
-errno_t LkrOpcodeByteAssembler(
-    UNUSED LPWSTR  Name,
-    UNUSED size_t  NameLength,
-    UNUSED uint8_t Byte,
-    UNUSED PVOID*  Out
+errno_t LkrAssemblerByteBlock(
+    LPWSTR  Name,
+    size_t  NameLength,
+    uint8_t ByteData,
+    PVOID*  Out
 ){
     if((!Out) || (!Name) || (!NameLength)){
         return EINVAL;
     }
-
-    //PLKR_NODE_ENTRY  
-
-
-
-    return 0;
+    LPWSTR TmpName = LouKeForkWcsStr_s(Name, NameLength);
+    *Out = (PVOID)LkrAllocateNode(TmpName, 1);
+    ENCODE_OP(*Out, BYTE_OPCODE);
+    LouKeFree(TmpName);
+    return LkrFillNodeData(*Out, &ByteData, 1);
 }
 
+
+
 errno_t LkrHandleByteCreation(
-    UNUSED LPWSTR   Buffer,
-    UNUSED size_t   Length,
-    UNUSED LPWSTR   NameIndex,
-    UNUSED LPWSTR   NameEndIndex,
+    LPWSTR   Buffer,
+    size_t   Length,
+    LPWSTR   NameIndex,
+    LPWSTR   NameEndIndex,
     UNUSED LPWSTR   DeclarationIndex,
     UNUSED LPWSTR   DataIndex,
-    UNUSED PVOID    Data
+    PVOID    Data
 ){
-    //printf("LkrHandleByteCreation()\n");
-    LkrParserCreateNode(
+    errno_t Result = 0;
+    PVOID NodeData = 0;
+    uint8_t ByteValue = LkrParserStringToUi64(
+        DataIndex,
+        Length - (size_t)(DataIndex - Buffer)
+    );
+    if(ByteValue != (ByteValue & 0xFF)){
+        return ETYPE_OVERFLOW;
+    }
+    Result = LkrAssemblerByteBlock(
+        NameIndex, 
+        NameEndIndex - NameIndex, 
+        ByteValue, 
+        &NodeData
+    );
+    if(Result){
+        return Result;
+    }
+    Result = LkrParserCreateNode(
         NameIndex,
         NameEndIndex - NameIndex,
         Data,
-        0x00
+        NodeData
     );
-    return 0;
+    return Result;
 }
 
 

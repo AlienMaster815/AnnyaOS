@@ -123,7 +123,7 @@ errno_t LouKeObjectHandler(
             NameIndex, 
             NameEndIndex, 
             DeclarationIndex, 
-            DataIndex,
+            DataIndex + 1,
             Data
         );
     }else{
@@ -200,6 +200,8 @@ errno_t LouKeNameSpaceHandler(
 
     return 0;
 }
+
+
 
 errno_t
 LouKeCreateSourceNodes(

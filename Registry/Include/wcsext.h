@@ -47,6 +47,20 @@ Lou_wcspbrk(
     LPWSTR Accept
 );
 
+LPWSTR
+Lou_wcspbrk_s(
+    LPWSTR Str,
+    size_t StrLen,
+    LPWSTR Accept,
+    size_t AcceptLen
+);
+
+UINT64
+Lou__wtoi64_s(
+    LPCWSTR Str,
+    size_t  Length
+);
+
 LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len);
 LPWSTR LouKeForkWcsStr(LPWSTR Str);
 
@@ -71,6 +85,17 @@ void PrintDocumentBuffer(LPWSTR Str, size_t Length);
 int 
 Lou_iswspace(
     WCHAR Wc
+);
+
+UINT64
+Lou__wtoh64(
+    LPCWSTR Str
+);
+
+UINT64
+Lou__wtoh64_s(
+    LPCWSTR Str,
+    size_t  Length
 );
 
 #endif

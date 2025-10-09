@@ -1059,7 +1059,7 @@ _ui64tow(
 NTDLL_API
 LPWSTR 
 _i64tow(
-    UINT64  Value,
+    INT64   Value,
     LPWSTR  Str,
     int     Radix
 ){

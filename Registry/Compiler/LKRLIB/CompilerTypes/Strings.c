@@ -9,6 +9,9 @@ errno_t LkrHandleStringCreation(
     UNUSED LPWSTR   DataIndex,
     UNUSED PVOID    Data
 ){
+
+    SanityCheck(DataIndex, Length - (size_t)(DataIndex - Buffer));
+
     //printf("LkrHandleStringCreation()\n");
     LkrParserCreateNode(
         NameIndex,

@@ -1,7 +1,6 @@
 #ifndef _LKR_LIB_H
 #define _LKR_LIB_H
 
-#include <stdint.h>
 
 #define LPWSTR uint16_t*
 #define WCHAR uint16_t
@@ -25,8 +24,27 @@ typedef struct _LOUSINE_NODE{
 typedef struct _LKR_NODE_ENTRY{
     LOUSINE_NODE_LIST   NodePeers;
     size_t              NameSize;
+    size_t              OpItemOffset;
     size_t              ItemSize;
 }LKR_NODE_ENTRY, * PLKR_NODE_ENTRY;
+
+#define BYTE_OPCODE             1
+#define WORD_OPCODE             2
+#define DWORD_OPCODE            3
+#define QWORD_OPCODE            4
+#define STRING_OPCODE           5
+#define STRUCT_OPCODE           6
+#define BYTE_DEF_OPCODE         7
+#define WORD_DEF_OPCODE         8
+#define DWORD_DEF_OPCODE        9
+#define QWORD_DEF_OPCODE        10
+#define STRING_DEF_OPCODE       11
+#define STRUCT_DEF_OPCODE       12
+
+#define ENCODE_OP(Node, Op)                 (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0xFFFFFFFFFFFFFFF0ULL) | (Op))
+#define ENCODE_ITEM_OFFSET(Node, Offset)    (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0x0FULL) |  (Offset) << 4) 
+#define GET_ITEM_OPCODE(Node)               (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0x0FULL) 
+#define GET_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0xFFFFFFFFFFFFFFF0ULL) >> 4) 
 
 typedef struct _LKR_FILE_HEADER{
     LPWSTR              NodeID;
@@ -41,5 +59,6 @@ PLKR_NODE_ENTRY LkrAllocateNode(
     LPWSTR NodeName,
     size_t AllocationSize
 );
+
 
 #endif

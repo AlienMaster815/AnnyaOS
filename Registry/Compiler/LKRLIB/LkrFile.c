@@ -4,18 +4,14 @@ PLKR_NODE_ENTRY LkrAllocateNode(
     LPWSTR NodeName,
     size_t AllocationSize
 ){
-    size_t NameSize = Lou_wcslen(NodeName) + 1;
+    size_t NameSize = Lou_wcslen(NodeName);
     PLKR_NODE_ENTRY NewNode = (PLKR_NODE_ENTRY)LouKeMalloc(sizeof(LKR_NODE_ENTRY) + AllocationSize + (NameSize * sizeof(WCHAR)), 0);
-
     NewNode->NameSize = NameSize;
     NewNode->ItemSize = AllocationSize;
- 
+    ENCODE_ITEM_OFFSET(NewNode, (sizeof(LKR_NODE_ENTRY) + ((NameSize + 1) * sizeof(WCHAR))));
     LPWSTR AllocatedName = (LPWSTR)((uint8_t*)NewNode + sizeof(LKR_NODE_ENTRY));
-    
     Lou_wcscpy(AllocatedName, NodeName);
-    AllocatedName += NameSize;
-
-    uint8_t* Tmp = (uint8_t*)AllocatedName; 
+    uint8_t* Tmp = (uint8_t*)(AllocatedName + NameSize); 
     memset(Tmp, 0, AllocationSize);
     return NewNode;
 }
@@ -30,7 +26,7 @@ LkrFillNodeData(
     if((Node->ItemSize < BufferSize) || (!Buffer) || (!BufferSize)){
         return EINVAL;
     }
-    uint8_t* To = ((uint8_t*)Node + (sizeof(LKR_NODE_ENTRY) + (Node->NameSize * sizeof(WCHAR))));
+    uint8_t* To = (uint8_t*)Node + GET_ITEM_OFFSET(Node);
     memcpy(To, Buffer, BufferSize);
     return 0;
 }

@@ -1,6 +1,8 @@
 #ifndef _COMPILER_H
 #define _COMPILER_H
 
+#include <stdint.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +12,16 @@
 #define PVOID void*
 #define LOU_STRING char*
 
+typedef unsigned long long UINT64;
+typedef unsigned long ULONG;
+typedef long long INT64;
+typedef bool BOOL;
 typedef int errno_t;
+
+#define TRUE true
+#define FALSE false
+
+typedef unsigned char UINT8;
 
 #define LKR_SECTION_SIZE 4096
 
@@ -43,6 +54,7 @@ static inline void* SafeMalloc(size_t x){
 #define EINVALID_NAME_DECLARATION   3
 #define ENO_DEFINITION              4
 #define ENODE_ENTRY_NOT_ALLOCATED   5
+#define ETYPE_OVERFLOW              6
 
 void LkrDispatchErrorMessage(
     LPWSTR  Buffer,
@@ -311,6 +323,18 @@ LkrParserCreateNode(
     size_t  EntryLength,
     PVOID   tContext,
     PVOID   Data
+);
+
+uint64_t LkrParserStringToUi64(
+    LPWSTR Str,
+    size_t Length
+);
+
+errno_t
+LkrFillNodeData(
+    PLKR_NODE_ENTRY Node,
+    uint8_t*        Buffer,
+    size_t          BufferSize
 );
 
 #endif

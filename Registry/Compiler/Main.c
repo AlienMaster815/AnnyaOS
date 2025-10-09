@@ -210,6 +210,7 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup("\0");
     CreateCompilerDeclarationLookup("/");
     CreateCompilerDeclarationLookup("\\/");
+    CreateCompilerDeclarationLookup("xX");
 
 }
 
