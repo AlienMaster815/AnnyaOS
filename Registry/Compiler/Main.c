@@ -211,6 +211,8 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup("/");
     CreateCompilerDeclarationLookup("\\/");
     CreateCompilerDeclarationLookup("xX");
+    CreateCompilerDeclarationLookup(",}");
+    CreateCompilerDeclarationLookup(",");
 
 }
 

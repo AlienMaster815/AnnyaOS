@@ -29,7 +29,7 @@ PLOUSINE_NODE LouKeCreateLousineNode(
     return NewNode;
 }
 
-static 
+static
 PLOUSINE_NODE 
 GetLousineNodeEntry(
     PLOUSINE_NODE   NodeHeader,
@@ -195,4 +195,69 @@ void SanityCheckNodes(
             );
         }
     }
+}
+
+bool UpDirectory(
+    UNUSED LPWSTR   Str,
+    UNUSED LPWSTR   ObjectName, 
+    UNUSED LPWSTR*  Object
+){
+    LPWSTR TmpObject = *Object;
+    if(TmpObject > Str){
+        TmpObject--;
+
+        while((*TmpObject != *(CompilerDeclarationLookup("\\"))) && (*TmpObject != *(CompilerDeclarationLookup("/"))) && (TmpObject > Str)){
+            TmpObject--;
+        }
+        
+        memset(TmpObject, 0, Lou_wcslen(TmpObject) * sizeof(WCHAR));
+        if(TmpObject > Str){
+            Lou_wcsncpy(TmpObject, CompilerDeclarationLookup("\\"), 1);
+            Lou_wcscpy(TmpObject + 1, ObjectName);
+        }else{
+            Lou_wcscpy(TmpObject, ObjectName);
+        }
+
+        *Object = TmpObject;
+
+        return true;
+    }
+    return false;
+}
+
+PLOUSINE_NODE LouKeSearchNodeNameSpace(
+    UNUSED PLOUSINE_NODE           NodeHeader,
+    UNUSED LPWSTR                  DirectoryOrigin,
+    UNUSED LPWSTR                  ObjectName
+){
+
+    size_t TotalStringSize = (Lou_wcslen(DirectoryOrigin) + 1) + (Lou_wcslen(ObjectName) + 1);
+    LPWSTR NewString = LouKeMallocArray(WCHAR, TotalStringSize, KERNEL_GENERIC_MEMORY);
+    Lou_wcsncpy(NewString, DirectoryOrigin, Lou_wcslen(DirectoryOrigin));
+    Lou_wcsncpy(NewString + Lou_wcslen(DirectoryOrigin), CompilerDeclarationLookup("\\"), 1);
+    Lou_wcsncpy(NewString + Lou_wcslen(DirectoryOrigin) + 1, ObjectName, Lou_wcslen(ObjectName));
+    LPWSTR Object = NewString + Lou_wcslen(DirectoryOrigin);
+    PLOUSINE_NODE Result = 0x00;
+
+    while(1){
+
+        Result = GetLousineNodeEntry(
+            NodeHeader,
+            NewString,
+            false
+        );
+
+        if(Result){
+            //SanityCheck(NewString, Lou_wcslen(NewString));
+            return Result;
+        }
+
+        //SanityCheck(NewString, Lou_wcslen(NewString));
+
+        if(!UpDirectory(NewString, ObjectName, &Object)){
+            break;
+        }
+    }
+
+    return 0x00;    
 }

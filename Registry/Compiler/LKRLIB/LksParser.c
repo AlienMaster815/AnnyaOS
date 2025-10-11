@@ -52,3 +52,120 @@ uint64_t LkrParserStringToUi64(
     }
     return Converted;
 }
+
+static LKR_PARSER_MANIFEST LkrParserManifest[] = {
+    {
+        .CommonName = "ARRAY",
+        .Handler = LkrHandleArrayCreation,
+    },
+    {   
+        .CommonName = "DEFINE_BYTE",
+        .Handler = LkrHandleByteDefinition,
+    },
+    {
+        .CommonName = "BYTE",
+        .Handler = LkrHandleByteCreation,
+    },
+    {
+        .CommonName = "DEFINE_WORD",
+        .Handler = LkrHandleWordDefinition,
+    },
+    {
+        .CommonName = "WORD",
+        .Handler = LkrHandleWordCreation,
+    },
+    {
+        .CommonName = "DEFINE_DWORD",
+        .Handler = LkrHandleDwordDefinition,
+    },
+    {
+        .CommonName = "DWORD",
+        .Handler = LkrHandleDwordCreation,
+    },
+    {
+        .CommonName = "DEFINE_QWORD",
+        .Handler = LkrHandleQwordDefinition,
+    },
+    {
+        .CommonName = "QWORD",
+        .Handler = LkrHandleQwordCreation,
+    },
+    { 
+        .CommonName = "DEFINE_STRUCTURE",
+        .Handler = LkrHandleStrcutureDefinition,
+    },
+    { 
+        .CommonName = "STRUCTURE",
+        .Handler = LkrHandleStrcutureCreation,
+    },
+    { 
+        .CommonName = "DEFINE_STRING",
+        .Handler = LkrHandleStringDefinition,
+    },
+    { 
+        .CommonName = "STRING",
+        .Handler = LkrHandleStringCreation,
+    },
+    {0},
+};
+
+LKR_PARSER_HANDLER LkrDefinitionToManifest(
+    LPWSTR CommonName
+){
+    if(!CommonName){
+        return 0x00;
+    }
+    for(size_t i = 0 ; LkrParserManifest[i].CommonName; i++){
+        if(!Lou_wcsncmp(
+                CompilerDeclarationLookup(
+                    LkrParserManifest[i].CommonName
+                ), 
+                CommonName, 
+                strlen(
+                    LkrParserManifest[i].CommonName
+                )
+            )
+        ){
+            return LkrParserManifest[i].Handler;
+        }
+    }
+    return 0x00;
+}
+
+size_t LkrParserGetTypeSize(
+    LPWSTR Declaration , 
+    size_t Length
+){
+    LPWSTR CommonName = CompilerDeclarationGetType(
+        Declaration, 
+        Length
+    );
+    size_t i = 0;
+    for(; LkrParserManifest[i].CommonName; i++){
+        if(!Lou_wcsncmp(
+                CompilerDeclarationLookup(
+                    LkrParserManifest[i].CommonName
+                ), 
+                CommonName, 
+                strlen(
+                    LkrParserManifest[i].CommonName
+                )
+            )
+        ){
+            switch(i){
+                case 8:
+                    return 8;
+                case 6:
+                    return 4;
+                case 4:
+                    return 2;
+                case 2:
+                    return 1;
+
+                default: //TODO: add structure support
+                    return 0;
+            }
+        }   
+    }
+    return 0;
+}

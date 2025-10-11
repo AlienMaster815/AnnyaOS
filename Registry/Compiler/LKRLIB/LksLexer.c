@@ -1,8 +1,9 @@
 #include <Compiler.h>
 
-static LPWSTR GetDeclaration(
+LPWSTR GetDeclaration(
     LPWSTR Buffer, 
-    LPWSTR Data
+    LPWSTR Data,
+    LPWSTR* DataEnd
 ){
     int Length = (size_t)(Data - Buffer);
     Buffer += Length;
@@ -12,6 +13,9 @@ static LPWSTR GetDeclaration(
             return 0x00;
         }
         if(!Lou_iswspace(Buffer[-i]))break;
+    }
+    if(DataEnd){
+        *DataEnd = &Buffer[-i + 1];
     }
     for(; i < Length; i++){
         if(!Lou_wcsncmp(&Buffer[-i], CompilerDeclarationLookup("="), strlen("="))){
@@ -82,7 +86,7 @@ LouKeLexerGetSyntaxes(
         );
         return ENO_DECLSEPORATOR;
     }
-    *Declaration = GetDeclaration(Buffer, *Data);
+    *Declaration = GetDeclaration(Buffer, *Data, 0x00);
     if(!(*Declaration)){
         LkrDispatchErrorMessage(
             Buffer,
@@ -107,6 +111,8 @@ LouKeLexerGetSyntaxes(
 
     return Result;
 }
+
+
 
 errno_t 
 LouKeLexerWcsWithTerminator(
@@ -140,6 +146,38 @@ LouKeLexerWcsWithTerminator(
     return 0;
 }
 
+errno_t 
+LouKeLexerWcsWithMultiCharecterTermination(
+    LPWSTR              Buffer,
+    LPWSTR              OpenToken,
+    LPWSTR              Accept,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+){
+    LPWSTR End = (LPWSTR)(Buffer + Length);
+    LPWSTR Open;
+    LPWSTR Close;
+    errno_t Result;
+    size_t AcceptLen = Lou_wcslen(Accept);
+    while(End - Buffer){
+        Open = Lou_wcsnstr(Buffer, OpenToken, End - Buffer);
+        if(!Open){
+            break;
+        }
+        Close = Lou_wcspbrk_s(Open + 1, End - (Open + 1), Accept, AcceptLen);
+        if(!Close){
+            break;
+        }
+        Result = Handler(Open, Close - Open, Data);
+        if(Result){
+            return Result;
+        }
+        Buffer = Close + 1;
+    }
+
+    return 0;
+}
 
 errno_t 
 LouKeLexerWcsWithoutTerminator(

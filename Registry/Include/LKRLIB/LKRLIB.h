@@ -28,18 +28,24 @@ typedef struct _LKR_NODE_ENTRY{
     size_t              ItemSize;
 }LKR_NODE_ENTRY, * PLKR_NODE_ENTRY;
 
-#define BYTE_OPCODE             1
-#define WORD_OPCODE             2
-#define DWORD_OPCODE            3
-#define QWORD_OPCODE            4
-#define STRING_OPCODE           5
-#define STRUCT_OPCODE           6
-#define DEFINITION              (1 << 4)
+#define BYTE_OPCODE             (0b00001)
+#define WORD_OPCODE             (0b00010)
+#define DWORD_OPCODE            (0b00011)
+#define QWORD_OPCODE            (0b00100)
+#define STRING_OPCODE           (0b00101)
+#define STRUCT_OPCODE           (0b00110)
+#define DEFINITION              (0b01000)
+#define ARRAY_DATA              (0b10000)
 
-#define ENCODE_OP(Node, Op)                 (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0xFFFFFFFFFFFFFFF0ULL) | (Op))
-#define ENCODE_ITEM_OFFSET(Node, Offset)    (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0x0FULL) |  (Offset) << 4) 
-#define GET_ITEM_OPCODE(Node)               (((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0x0FULL) 
-#define GET_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & 0xFFFFFFFFFFFFFFF0ULL) >> 4) 
+#define OPCODE_FLAG_MASKS       (0b11000)
+
+#define OPCODE_MASK             (0x1FULL)
+#define OFFSET_MASK             (0xFFFFFFFFFFFFFFE0ULL)
+
+#define ENCODE_OP(Node, Op)                 (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) | (uint8_t)(Op))
+#define ENCODE_ITEM_OFFSET(Node, Offset)    (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & OPCODE_MASK) |  (uint64_t)(Offset) << 5) 
+#define GET_ITEM_OPCODE(Node)               (((PLKR_NODE_ENTRY)Node)->OpItemOffset & OPCODE_MASK)
+#define GET_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) >> 5) 
 
 typedef struct _LKR_FILE_HEADER{
     LPWSTR              NodeID;

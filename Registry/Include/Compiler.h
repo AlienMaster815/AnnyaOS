@@ -31,6 +31,9 @@ static inline void* SafeMalloc(size_t x){
     return Foo;
 }
 
+#define ROUND_UP64(value, multiple) \
+    (((value) + (multiple) - 1) / (multiple) * (multiple))
+
 #define LouKeMallocType(x,y) SafeMalloc(sizeof(x))
 #define LouKeMalloc(x,y) SafeMalloc(x)
 #define LouKeMallocArray(x, y, z) SafeMalloc(sizeof(x) * y)
@@ -344,5 +347,45 @@ LkrFillNodeData(
     size_t          BufferSize
 );
 
+errno_t 
+LouKeLexerWcsWithMultiCharecterTermination(
+    LPWSTR              Buffer,
+    LPWSTR              OpenToken,
+    LPWSTR              Accept,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+);
+
+LKR_PARSER_HANDLER LkrDefinitionToManifest(
+    LPWSTR CommonName
+);
+
+size_t LkrParserGetTypeSize(
+    LPWSTR Declaration , 
+    size_t Length
+);
+
+PLOUSINE_NODE LouKeSearchNodeNameSpace(
+    PLOUSINE_NODE           NodeHeader,
+    LPWSTR                  DirectoryOrigin,
+    LPWSTR                  ObjectName
+);
+
+size_t LkrGetNodeSize(PLKR_NODE_ENTRY Node);
+PVOID LkrGetNodeData(
+    PLKR_NODE_ENTRY Node
+);
+
+PVOID LkrOpenNodeData(
+    PLKR_NODE_ENTRY Node
+);
+
+void LkrCloseNodeData(
+    PLKR_NODE_ENTRY Node,
+    PVOID           Data
+);
+
+LPWSTR LkrGetNodeName(PLKR_NODE_ENTRY Node);
 
 #endif
