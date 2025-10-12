@@ -54,10 +54,6 @@ uint64_t LkrParserStringToUi64(
 }
 
 static LKR_PARSER_MANIFEST LkrParserManifest[] = {
-    {
-        .CommonName = "ARRAY",
-        .Handler = LkrHandleArrayCreation,
-    },
     {   
         .CommonName = "DEFINE_BYTE",
         .Handler = LkrHandleByteDefinition,
@@ -91,14 +87,6 @@ static LKR_PARSER_MANIFEST LkrParserManifest[] = {
         .Handler = LkrHandleQwordCreation,
     },
     { 
-        .CommonName = "DEFINE_STRUCTURE",
-        .Handler = LkrHandleStrcutureDefinition,
-    },
-    { 
-        .CommonName = "STRUCTURE",
-        .Handler = LkrHandleStrcutureCreation,
-    },
-    { 
         .CommonName = "DEFINE_STRING",
         .Handler = LkrHandleStringDefinition,
     },
@@ -130,42 +118,4 @@ LKR_PARSER_HANDLER LkrDefinitionToManifest(
         }
     }
     return 0x00;
-}
-
-size_t LkrParserGetTypeSize(
-    LPWSTR Declaration , 
-    size_t Length
-){
-    LPWSTR CommonName = CompilerDeclarationGetType(
-        Declaration, 
-        Length
-    );
-    size_t i = 0;
-    for(; LkrParserManifest[i].CommonName; i++){
-        if(!Lou_wcsncmp(
-                CompilerDeclarationLookup(
-                    LkrParserManifest[i].CommonName
-                ), 
-                CommonName, 
-                strlen(
-                    LkrParserManifest[i].CommonName
-                )
-            )
-        ){
-            switch(i){
-                case 8:
-                    return 8;
-                case 6:
-                    return 4;
-                case 4:
-                    return 2;
-                case 2:
-                    return 1;
-
-                default: //TODO: add structure support
-                    return 0;
-            }
-        }   
-    }
-    return 0;
 }

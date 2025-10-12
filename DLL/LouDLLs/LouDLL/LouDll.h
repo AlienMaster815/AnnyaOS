@@ -361,7 +361,7 @@ _ui64tow(
 
 LPWSTR 
 _i64tow(
-    UINT64  Value,
+    INT64  Value,
     LPWSTR  Str,
     int     Radix
 );

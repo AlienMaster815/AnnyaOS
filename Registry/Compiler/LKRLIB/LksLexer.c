@@ -204,3 +204,67 @@ LouKeLexerWcsWithoutTerminator(
 
     return 0;
 }
+
+errno_t
+LouKeLexerWmcWithWmcTerminator(
+    LPWSTR              Buffer,
+    LPWSTR              OpenAccept,
+    LPWSTR              CloseAccept,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+){
+
+    LPWSTR End = (LPWSTR)(Buffer + Length);
+    LPWSTR Open;
+    LPWSTR Close;
+    errno_t Result;
+    size_t CloseAcceptLen = Lou_wcslen(CloseAccept);
+    size_t OpenAcceptLen = Lou_wcslen(OpenAccept);
+    while(End - Buffer){
+        Open = Lou_wcspbrk_s(Buffer, End - Buffer, OpenAccept, OpenAcceptLen);
+        if(!Open){
+            break;
+        }
+        Close = Lou_wcspbrk_s(Open + 1, End - (Open + 1), CloseAccept, CloseAcceptLen);
+        if(!Close){
+            break;
+        }
+        Result = Handler(Open, Close - Open, Data);
+        if(Result){
+            return Result;
+        }
+        Buffer = Close + 1;
+    }
+
+    return 0;
+}
+
+
+errno_t
+LouKeLexerWmcWithoutTerminator(
+    LPWSTR              Buffer,
+    LPWSTR              OpenAccept,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+){
+
+    LPWSTR End = (LPWSTR)(Buffer + Length);
+    LPWSTR Open;
+    errno_t Result;
+    size_t OpenAcceptLen = Lou_wcslen(OpenAccept);
+    while(End - Buffer){
+        Open = Lou_wcspbrk_s(Buffer, End - Buffer, OpenAccept, OpenAcceptLen);
+        if(!Open){
+            break;
+        }
+        Result = Handler(Open, End - Open, Data);
+        if(Result){
+            return Result;
+        }
+        Buffer = Open + 1;
+    }
+
+    return 0;
+}

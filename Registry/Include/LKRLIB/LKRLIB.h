@@ -22,11 +22,15 @@ typedef struct _LOUSINE_NODE{
 }LOUSINE_NODE, * PLOUSINE_NODE;
 
 typedef struct _LKR_NODE_ENTRY{
-    LOUSINE_NODE_LIST   NodePeers;
     size_t              NameSize;
     size_t              OpItemOffset;
     size_t              ItemSize;
 }LKR_NODE_ENTRY, * PLKR_NODE_ENTRY;
+
+typedef struct _COMPILED_NODE_ENTRY{
+    LOUSINE_NODE_LIST       NodePeers;
+    LKR_NODE_ENTRY          Node;
+}COMPILED_NODE_ENTRY, * PCOMPILED_NODE_ENTRY;
 
 #define BYTE_OPCODE             (0b00001)
 #define WORD_OPCODE             (0b00010)
@@ -48,10 +52,9 @@ typedef struct _LKR_NODE_ENTRY{
 #define GET_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) >> 5) 
 
 typedef struct _LKR_FILE_HEADER{
-    LPWSTR              NodeID;
-    LPWSTR              MountPoint;
-    size_t              TotalSections;
+    WCHAR               Signature[20];//LOUSINE_SYSTEM_FILE
     size_t              FirstEntry;
+    size_t              SectionCount;
 }LKR_FILE_HEADER, * PLKR_FILE_HEADER;
 
 #include "LKRSRC.h"

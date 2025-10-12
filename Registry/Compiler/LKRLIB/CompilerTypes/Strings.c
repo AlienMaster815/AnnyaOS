@@ -54,7 +54,7 @@ errno_t LkrHandleStringCreation(
         NameIndex,
         NameEndIndex - NameIndex,
         Data,
-        0x00
+        NewNode
     );
     LouKeFree(TmpData);
     LouKeFree(NewName);

@@ -34,7 +34,6 @@ static PCOMPILER_CONTEXT CreateCompilerContext(
     }
 
     NewContext->FileSize = (size_t)FileSize;
-    printf("FileSize:%zu\n", NewContext->FileSize);
 
     rewind(SourceFile);
 
@@ -191,9 +190,6 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup("DEFINE_DWORD");
     CreateCompilerDeclarationLookup("QWORD");
     CreateCompilerDeclarationLookup("DEFINE_QWORD");
-    CreateCompilerDeclarationLookup("DEFINE_STRUCTURE");
-    CreateCompilerDeclarationLookup("STRUCTURE");
-    CreateCompilerDeclarationLookup("ARRAY");
     CreateCompilerDeclarationLookup("STRING");
     CreateCompilerDeclarationLookup("DEFINE_STRING");
     CreateCompilerDeclarationLookup("\"");
@@ -212,7 +208,8 @@ static void CreateDeclarationList(){
     CreateCompilerDeclarationLookup("\\/");
     CreateCompilerDeclarationLookup("xX");
     CreateCompilerDeclarationLookup(",}");
-    CreateCompilerDeclarationLookup(",");
+    CreateCompilerDeclarationLookup("{,");
+    CreateCompilerDeclarationLookup("LOUSINE_SYSTEM_FILE");
 
 }
 
@@ -245,8 +242,14 @@ static void DestroyDeclarationList(){
 
 int main(int argc, char *argv[]){
 
-    if(argc > 2){
+    if(argc > 3){
         printf("Too Many Parameters\n");
+        return -1;
+    }else if(argc < 2){
+        printf("No Input Specified\n");
+        return -1;
+    }else if(argc < 3){
+        printf("No Output Specified\n");
         return -1;
     }
 
@@ -262,6 +265,12 @@ int main(int argc, char *argv[]){
         NewContext
     );
 
+    LkrCreateLkrFileContext(
+        argv[2],
+        NewContext
+    );
+
+    LouKeDestroyLousineNodeTree(NewContext->CompilerNode);
 
     DestroyCompilerContext(NewContext);
 

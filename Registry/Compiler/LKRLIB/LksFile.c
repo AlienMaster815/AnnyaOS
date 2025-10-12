@@ -166,7 +166,5 @@ LouKeCreateSourceNodes(
 
     //SanityCheckNodes(Context->CompilerNode);
 
-    LouKeDestroyLousineNodeTree(Context->CompilerNode);
-
     return 0;
 }

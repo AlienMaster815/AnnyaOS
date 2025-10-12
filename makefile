@@ -169,6 +169,11 @@ release: lou.exe
 
 
 KernelModules:
+
+	$(MAKE) -C Registry clean
+	$(MAKE) -C Registry all
+	./Registry/LKRCompiler Config/System_Config/LOUOSKRNL.LRS Registry/build/LOUOSKRNL.LKR
+
 	$(MAKE) -C KernelLibraries clean
 	$(MAKE) -C KernelLibraries all
 
@@ -251,6 +256,7 @@ PublicRelease: annya.iso
 	rm -rf annya.iso
 
 cleanall:
+	$(MAKE) -C Registry clean
 	$(MAKE) -C KernelLibraries clean
 	$(MAKE) -C drivers clean
 	$(MAKE) -C UserLibraries/KernelBase clean

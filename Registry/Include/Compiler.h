@@ -34,6 +34,8 @@ static inline void* SafeMalloc(size_t x){
 #define ROUND_UP64(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))
 
+
+
 #define LouKeMallocType(x,y) SafeMalloc(sizeof(x))
 #define LouKeMalloc(x,y) SafeMalloc(x)
 #define LouKeMallocArray(x, y, z) SafeMalloc(sizeof(x) * y)
@@ -80,6 +82,9 @@ typedef struct _COMPILER_CONTEXT{
     void*                   FileContext;
     PLOUSINE_NODE           CompilerNode;
     NODE_CONTEXT            NodeContext;
+    void*                   OutHandle;
+    size_t                  OutSize;
+    void*                   OutContext;
 }COMPILER_CONTEXT, * PCOMPILER_CONTEXT;
 
 PLOUSINE_NODE LouKeCreateLousineNode(
@@ -361,10 +366,6 @@ LKR_PARSER_HANDLER LkrDefinitionToManifest(
     LPWSTR CommonName
 );
 
-size_t LkrParserGetTypeSize(
-    LPWSTR Declaration , 
-    size_t Length
-);
 
 PLOUSINE_NODE LouKeSearchNodeNameSpace(
     PLOUSINE_NODE           NodeHeader,
@@ -387,5 +388,30 @@ void LkrCloseNodeData(
 );
 
 LPWSTR LkrGetNodeName(PLKR_NODE_ENTRY Node);
+
+errno_t
+LouKeLexerWmcWithWmcTerminator(
+    LPWSTR              Buffer,
+    LPWSTR              OpenAccept,
+    LPWSTR              CloseAccept,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+);
+
+errno_t
+LouKeLexerWmcWithoutTerminator(
+    LPWSTR              Buffer,
+    LPWSTR              OpenAccept,
+    size_t              Length,
+    LEXER_HANLDER       Handler,
+    PVOID               Data
+);
+
+errno_t 
+LkrCreateLkrFileContext(
+    LOU_STRING          Output,
+    PCOMPILER_CONTEXT   Context
+);
 
 #endif
