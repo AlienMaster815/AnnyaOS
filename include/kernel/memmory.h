@@ -567,6 +567,7 @@ PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
     uint64_t    Flags
 );
 
+
 #endif
 #ifdef __cplusplus
 }

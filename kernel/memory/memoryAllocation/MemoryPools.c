@@ -197,8 +197,7 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
     );
 }
 
-void LouKeFreeFromDynamicPool(POOL Pool, void* Address)
-{
+void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
     PPOOL_MEMORY_TRACKS Prev = (PPOOL_MEMORY_TRACKS)&Pool->MemoryTracks;
     PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Prev->Peers.NextHeader;
 
@@ -216,8 +215,7 @@ void LouKeFreeFromDynamicPool(POOL Pool, void* Address)
 }
 
 
-void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alignment)
-{
+void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alignment){
     if (Pool->FixedSizePool) {
         LouPrint("LouKeMallocFromDynamicPoolEx(): ERROR - FixedSizePool input\n");
         return NULL;

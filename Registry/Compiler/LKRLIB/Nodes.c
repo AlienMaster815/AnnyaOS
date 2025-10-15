@@ -181,21 +181,7 @@ LouKeDestroyLousineNodeTree(
     LouKeDestroyLousineNodeTree_r(NodeTree);
 }
 
-void SanityCheckNodes(
-    PLOUSINE_NODE Node
-){
-    PLOUSINE_NODE TmpNode = Node; 
 
-    while(TmpNode->NodePeers.Forward){
-        TmpNode = (PLOUSINE_NODE)TmpNode->NodePeers.Forward;
-        SanityCheck(TmpNode->DirectoryName, Lou_wcslen(TmpNode->DirectoryName));
-        if(TmpNode->NodePeers.Downward){
-            SanityCheckNodes(
-                (PLOUSINE_NODE)TmpNode->NodePeers.Downward
-            );
-        }
-    }
-}
 
 bool UpDirectory(
     UNUSED LPWSTR   Str,

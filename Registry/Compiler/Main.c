@@ -1,5 +1,7 @@
 #include <Compiler.h>
 
+void InitializePoolsPool();
+void DeInitializePoolsPool();
 
 static PCOMPILER_CONTEXT CreateCompilerContext(
     LOU_STRING Path
@@ -265,10 +267,14 @@ int main(int argc, char *argv[]){
         NewContext
     );
 
+    InitializePoolsPool();
+
     LkrCreateLkrFileContext(
         argv[2],
         NewContext
     );
+
+    DeInitializePoolsPool();
 
     LouKeDestroyLousineNodeTree(NewContext->CompilerNode);
 

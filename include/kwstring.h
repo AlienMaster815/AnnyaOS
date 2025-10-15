@@ -414,6 +414,11 @@ _wmakepath_s(
 LPWSTR LouKeForkWcsStr(LPWSTR Str);
 LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len);
 
+LPWSTR LouKeCreateCombineWcsStr(
+    LPWSTR Str1, 
+    LPWSTR Str2
+);
+
 #ifdef __cplusplus
 }
 #endif

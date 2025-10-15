@@ -186,62 +186,52 @@ static size_t CalculateFileSize(
     return 4096;
 }
 
-errno_t LkrCreateFile(
-    UNUSED PLOUSINE_NODE            CurrentNode,
-    UNUSED PCOMPILED_NODE_ENTRY     FileListHeader,
-    UNUSED PVOID*                   CurrentContext
+size_t RecursiveCompileNodes(
+    UNUSED PLOUSINE_NODE           UpNode,
+    UNUSED POOL                    FilePool
 ){
-    errno_t Result = 0;
+    UNUSED PCOMPILED_NODE_ENTRY LastEntry = 0x00;
+    UNUSED PCOMPILED_NODE_ENTRY CurrentEntry = 0x00;
+    UNUSED size_t CurrentOffset = 0x00;
+    UNUSED size_t LastOffset = 0x00;
+    UNUSED size_t Result = 0x00; 
+    while(UpNode){
 
-    size_t NodeSize = 0;
-    bool Pass1 = true;
-    while(CurrentNode->NodePeers.Forward){
-        CurrentNode = (PLOUSINE_NODE)CurrentNode->NodePeers.Forward;
-        PCOMPILED_NODE_ENTRY NewEntry = (PCOMPILED_NODE_ENTRY)*CurrentContext; 
-        if(CurrentNode->NodeData){
-            NodeSize = ROUND_UP64(sizeof(COMPILED_NODE_ENTRY) + LkrGetNodeSize(CurrentNode->NodeData), 8);
-            memcpy(&NewEntry->Node, CurrentNode->NodeData, LkrGetNodeSize(CurrentNode->NodeData));
-            if(Pass1 && FileListHeader){
-                NewEntry->NodePeers.Upward = (PLOUSINE_NODE_LIST)FileListHeader->NodePeers.Downward;
-            }else if(FileListHeader){
-                NewEntry->NodePeers.Aftward = (PLOUSINE_NODE_LIST)FileListHeader->NodePeers.Forward;
-            }            
-            Pass1 = false;
-            FileListHeader = *CurrentContext;
-            *CurrentContext += NodeSize;
-        }
-        else if(CurrentNode->DirectoryName){
-            NodeSize = ROUND_UP64(sizeof(COMPILED_NODE_ENTRY), 8);
-            NodeSize += ROUND_UP64((Lou_wcslen(CurrentNode->DirectoryName) + 1) * sizeof(WCHAR), 8);
-            NewEntry->Node.NameSize = Lou_wcslen(CurrentNode->DirectoryName);
-            Lou_wcscpy((PVOID)NewEntry + sizeof(COMPILED_NODE_ENTRY), CurrentNode->DirectoryName);
-            if(Pass1 && FileListHeader){
-                NewEntry->NodePeers.Upward = (PLOUSINE_NODE_LIST)FileListHeader->NodePeers.Downward;
-            }else if(FileListHeader){
-                NewEntry->NodePeers.Aftward = (PLOUSINE_NODE_LIST)FileListHeader->NodePeers.Forward;
+        if(UpNode->NodeData){
+            PLKR_NODE_ENTRY TmpEntry = (PLKR_NODE_ENTRY)UpNode->NodeData;
+            CurrentEntry = (PCOMPILED_NODE_ENTRY)LouKeGenricAllocateDmaPool(FilePool, sizeof(COMPILED_NODE_ENTRY) + ((TmpEntry->NameSize + 1) * sizeof(WCHAR)) + TmpEntry->ItemSize, &CurrentOffset);
+            memcpy(&CurrentEntry->Node, TmpEntry, sizeof(LKR_NODE_ENTRY));
+            Lou_wcscpy((LPWSTR)(uint8_t*)((size_t)CurrentEntry + sizeof(COMPILED_NODE_ENTRY)), (LPWSTR)(uint8_t*)((size_t)TmpEntry + sizeof(LKR_NODE_ENTRY)));
+            memcpy((uint8_t*)((size_t)&CurrentEntry->Node + GET_ITEM_OFFSET(TmpEntry)), (uint8_t*)TmpEntry + GET_ITEM_OFFSET(TmpEntry), TmpEntry->ItemSize);
+
+            if(LastEntry){
+                LastEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)CurrentOffset;
+                CurrentEntry->NodePeers.Aftward = (PLOUSINE_NODE_LIST)LastOffset;
             }
-            Pass1 = false;
-            FileListHeader = *CurrentContext;
-            *CurrentContext += NodeSize;
+            
+        }
+        else if(UpNode->DirectoryName){
+            CurrentEntry = (PCOMPILED_NODE_ENTRY)LouKeGenricAllocateDmaPool(FilePool, sizeof(COMPILED_NODE_ENTRY) + ((Lou_wcslen(UpNode->DirectoryName) + 1) * sizeof(WCHAR)), &CurrentOffset);
+            if(LastEntry){
+                LastEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)CurrentOffset;
+                CurrentEntry->NodePeers.Aftward = (PLOUSINE_NODE_LIST)LastOffset;
+            }
+            CurrentEntry->Node.NameSize = Lou_wcslen(UpNode->DirectoryName);
+            Lou_wcscpy((LPWSTR)(uint8_t*)((size_t)CurrentEntry + sizeof(COMPILED_NODE_ENTRY)), UpNode->DirectoryName);
+            if(UpNode->NodePeers.Downward){
+                CurrentEntry->NodePeers.Downward = (PLOUSINE_NODE_LIST)RecursiveCompileNodes((PLOUSINE_NODE)UpNode->NodePeers.Downward, FilePool);
+            }
         }
 
-
-        //printf("Current Context:%zu\n", (size_t)*CurrentContext);
-        //printf("Last    Context:%zu\n", (size_t)FileListHeader);
-
-        if(CurrentNode->NodePeers.Downward){
-            NewEntry->NodePeers.Downward = (PLOUSINE_NODE_LIST)((PVOID)*CurrentContext - (PVOID)NewEntry);
-            LkrCreateFile(
-                (PLOUSINE_NODE)CurrentNode->NodePeers.Downward,
-                FileListHeader,
-                CurrentContext
-            );
-        }else{
-            NewEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)((PVOID)*CurrentContext - (PVOID)NewEntry);
+        if(!Result){
+            Result = CurrentOffset;
         }
+        LastOffset = CurrentOffset;
+        LastEntry = CurrentEntry;
+        UpNode = (PLOUSINE_NODE)UpNode->NodePeers.Forward;
     }
     return Result;
-}
+}                      
 
 errno_t 
 LkrCreateLkrFileContext(
@@ -265,14 +255,54 @@ LkrCreateLkrFileContext(
         return errno; // errno is automatically set by fopen()
     }
 
-    PLKR_FILE_HEADER FileHeader = (PLKR_FILE_HEADER)FileBuffer;
+
+    UNUSED POOL FilePool = LouKeCreateGenericPool((uint64_t)FileBuffer, 0, Context->OutSize, 0);
+    PLKR_FILE_HEADER FileHeader = (PLKR_FILE_HEADER)LouKeGenricAllocateDmaPool(FilePool, sizeof(LKR_FILE_HEADER), 0);
 
     Lou_wcscpy(&FileHeader->Signature[0], CompilerDeclarationLookup("LOUSINE_SYSTEM_FILE"));
     FileHeader->SectionCount = Context->OutSize / 4096;
-    Context->OutContext = (FileBuffer + ROUND_UP64(sizeof(LKR_FILE_HEADER), 8));
-    FileHeader->FirstEntry = (size_t)ROUND_UP64(sizeof(LKR_FILE_HEADER), 8);
+    PLOUSINE_NODE RootNodes = (PLOUSINE_NODE)Context->CompilerNode->NodePeers.Forward;
+    UNUSED PCOMPILED_NODE_ENTRY CurrentRootCompilerHandle = 0x00;
+    UNUSED PCOMPILED_NODE_ENTRY LastEntry = 0x00;
+    size_t CurrentOffset = 0;
+    size_t LastOffset = 0;
 
-    LkrCreateFile((PLOUSINE_NODE)Context->CompilerNode, 0x00, &Context->OutContext);
+    while(RootNodes){
+        if(RootNodes->NodeData){
+            PLKR_NODE_ENTRY TmpEntry = (PLKR_NODE_ENTRY)RootNodes->NodeData;
+            CurrentRootCompilerHandle = (PCOMPILED_NODE_ENTRY)LouKeGenricAllocateDmaPool(FilePool, sizeof(COMPILED_NODE_ENTRY) + ((TmpEntry->NameSize + 1) * sizeof(WCHAR)) + TmpEntry->ItemSize, &CurrentOffset);
+            memcpy(&CurrentRootCompilerHandle->Node, TmpEntry, sizeof(LKR_NODE_ENTRY));
+            Lou_wcscpy((LPWSTR)(uint8_t*)((size_t)CurrentRootCompilerHandle + sizeof(COMPILED_NODE_ENTRY)), (LPWSTR)(uint8_t*)((size_t)TmpEntry + sizeof(LKR_NODE_ENTRY)));
+            memcpy((uint8_t*)((size_t)&CurrentRootCompilerHandle->Node + GET_ITEM_OFFSET(TmpEntry)), (uint8_t*)TmpEntry + GET_ITEM_OFFSET(TmpEntry), TmpEntry->ItemSize);
+
+            if(LastEntry){
+                LastEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)CurrentOffset;
+                CurrentRootCompilerHandle->NodePeers.Aftward = (PLOUSINE_NODE_LIST)LastOffset;
+            }
+        }else{
+            CurrentRootCompilerHandle = LouKeGenricAllocateDmaPool(FilePool, sizeof(COMPILED_NODE_ENTRY) + ((Lou_wcslen(RootNodes->DirectoryName) + 1) * sizeof(WCHAR)), &CurrentOffset);
+            Lou_wcscpy((LPWSTR)(uint8_t*)((size_t)CurrentRootCompilerHandle + sizeof(COMPILED_NODE_ENTRY)), RootNodes->DirectoryName);
+            CurrentRootCompilerHandle->Node.NameSize = Lou_wcslen(RootNodes->DirectoryName);
+            if(LastEntry){
+                LastEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)CurrentOffset;
+                CurrentRootCompilerHandle->NodePeers.Aftward = (PLOUSINE_NODE_LIST)LastOffset;
+            }
+            if(RootNodes->NodePeers.Downward){
+                CurrentRootCompilerHandle->NodePeers.Downward = (PLOUSINE_NODE_LIST)RecursiveCompileNodes((PLOUSINE_NODE)RootNodes->NodePeers.Downward, FilePool);
+            }
+        }
+    
+        if(!FileHeader->FirstEntry){
+            FileHeader->FirstEntry = CurrentOffset;
+            CurrentRootCompilerHandle->NodePeers.Aftward = (PLOUSINE_NODE_LIST)FileHeader->FirstEntry;
+        }
+
+        LastEntry = CurrentRootCompilerHandle;
+        LastOffset = CurrentOffset;
+        RootNodes = (PLOUSINE_NODE)RootNodes->NodePeers.Forward;
+    }
+
+    //LkrCreateFile((PLOUSINE_NODE)Context->CompilerNode, 0x00, &Context->OutContext);
 
     size_t written = fwrite(FileBuffer, 1, Context->OutSize, File);
     if (written != Context->OutSize) {

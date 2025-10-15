@@ -141,6 +141,11 @@ PPCI_DEVICE_OBJECT LouKeHalGetPDEV(
     uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
 
     for(uint8_t i = 0 ; i  < GlobalMembers; i++){
+        if (PciData->Neigbors.NextHeader) {
+            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
+        } else {
+            break;
+        }
         if(
             (PciData->PDEV->Group == Group) &&
             (PciData->PDEV->bus == Bus) &&
@@ -149,11 +154,7 @@ PPCI_DEVICE_OBJECT LouKeHalGetPDEV(
         ){
             return PciData->PDEV;
         }
-        if (PciData->Neigbors.NextHeader) {
-            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
-        } else {
-            break;
-        }
+
     }
 
     return 0x00;

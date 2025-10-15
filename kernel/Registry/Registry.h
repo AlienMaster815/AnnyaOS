@@ -58,10 +58,4 @@ typedef struct _LKR_FILE_HEADER{
 }LKR_FILE_HEADER, * PLKR_FILE_HEADER;
 
 
-PLKR_NODE_ENTRY LkrAllocateNode(
-    LPWSTR NodeName,
-    size_t AllocationSize
-);
-
-
 #endif

@@ -33,7 +33,7 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
 }
 
 PPCI_MANAGER_DATA LouKeGetPciDataTable(){
-    return (PPCI_MANAGER_DATA)PciData.Neigbors.NextHeader;
+    return (PPCI_MANAGER_DATA)&PciData;
 }
 
 uint8_t LouKeGetPciGlobalMembers(){

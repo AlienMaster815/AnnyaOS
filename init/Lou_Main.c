@@ -320,10 +320,9 @@ KERNEL_ENTRY Lou_kernel_start(
         SystemIsEfiv = true;
         InitializeEfiCore();
     }                      
+    LouKeInitializeSafeMemory();    
 
     //LouKeInitializeRegistry();
-
-    LouKeInitializeSafeMemory();    
 
     LousineKernelEarlyInitialization();
 
@@ -347,22 +346,22 @@ KERNEL_ENTRY Lou_kernel_start(
     //TODO: move to //LouKeInitializeRegistry();
     LouKeInitializeRegistry();
 
-    LouPrint("STATUS SUCCESS\n");
-    while(1);
 
     AdvancedLousineKernelInitialization();
 
-    //TODO: Add a parser for the manifest for 
-    //loading needed modules that need to be 
-    //loaded no matter what
     LookForStorageDevices();
 
 
+    
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
         LouPrint("No Storage Devices Detected\n");
         while(1);
     }
+
+    LouPrint("STATUS SUCCESS\n");
+    while(1);
+
 
     InitializeFileSystemManager();
     InitializeNtKernelTransitionLayer();

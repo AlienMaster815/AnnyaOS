@@ -132,7 +132,7 @@ LouKeCreateSourceNodes(
 ){
     LPWSTR CheckString = (LPWSTR)((uintptr_t)Context->FileContext + sizeof(WCHAR)); 
 
-    SanityCheck(CheckString, strlen("Lousine Kernel Registry File Source"));
+    //SanityCheck(CheckString, strlen("Lousine Kernel Registry File Source"));
 
     if(LKR_SOURCE_FILE_SANITY_FAILURE(CheckString)){
         printf("Error: Invalid Registry Source File Header\n");

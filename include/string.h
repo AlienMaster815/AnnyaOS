@@ -86,7 +86,7 @@ KERNEL_IMPORT int _vsnprintf(char *buffer, size_t buffer_size, const char *forma
 
 #define CHAR_HEIGHT 16
 
-#define SupportedCharecters 48 * 2
+#define SupportedCharecters 49 * 2
 
 typedef struct {
     char character;    

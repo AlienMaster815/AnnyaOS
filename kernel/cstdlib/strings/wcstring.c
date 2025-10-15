@@ -1530,3 +1530,15 @@ LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len){
     wcsncpy(New, Str, Len);
     return New;
 }
+
+LPWSTR LouKeCreateCombineWcsStr(
+    LPWSTR Str1, 
+    LPWSTR Str2
+){
+    size_t size = wcslen(Str1);
+    size += wcslen(Str2) + 1;
+    LPWSTR NewString;
+    NewString = LouKeForkWcsStr_s(Str1, size);
+    wcscat(NewString, Str2);
+    return NewString;
+}   

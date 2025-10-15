@@ -68,6 +68,18 @@ static inline void LouKeReleaseReferece(PKERNEL_REFERENCE KRef){
     MutexUnlock(&KRef->RaceLock);
 }
 
+LOUSTATUS 
+LouKeReadRegistryValue(
+    LPWSTR  Key,
+    PVOID   Data,
+    size_t  Count
+);
+
+PVOID 
+LouKeOpenRegistryHandle(
+    LPWSTR  Key,
+    PVOID   RootHandle
+);
 
 #ifdef __cplusplus
 }
