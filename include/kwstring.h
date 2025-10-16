@@ -419,6 +419,14 @@ LPWSTR LouKeCreateCombineWcsStr(
     LPWSTR Str2
 );
 
+errno_t
+_ui64towUppr_s(
+    UINT64  Value,
+    LPWSTR  Str, 
+    size_t  Length,
+    int     Radix
+);
+
 #ifdef __cplusplus
 }
 #endif

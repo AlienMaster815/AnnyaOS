@@ -220,7 +220,8 @@ void LouKePs2Parse();
 //static spinlock_t ScanLock;
 
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
-
+void LouKeReleasePciDriverPath(string Path);
+string LouKeAcquirePciDriverPath(PPCI_COMMON_CONFIG Config);
 LOUDDK_API_ENTRY
 void ScanTheRestOfHarware(){
     //LouKIRQL Irql;
@@ -245,26 +246,25 @@ void ScanTheRestOfHarware(){
         }
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
         string DriverPath = 0x00;
-        while(1){
-            DriverPath = ParseLousineDriverManifestForCompatibleDriver(PConfig, DriverPath);
-            if(!DriverPath){
-                break;
-            }
-            PDRIVER_OBJECT DriverObject;
-            DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
-            if(!DriverObject->DriverExtension){
-                DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocType(DRIVER_EXTENSION, KERNEL_GENERIC_MEMORY);
-                Driver(DriverObject, (PUNICODE_STRING)DriverPath);
-            }
-            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
-            if(DriverObject->DriverUsingLkdm){
-                PlatformDevice->PDEV = PDEV;
-                if(DriverObject->DeviceTable){ 
-                    PlatformDevice->DeviceID = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)DriverObject->DeviceTable);
-                }
-            }
-            DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
+        DriverPath = LouKeAcquirePciDriverPath(PConfig);
+        if(!DriverPath){
+            continue;
         }
+        PDRIVER_OBJECT DriverObject;
+        DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
+        if(!DriverObject->DriverExtension){
+            DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocType(DRIVER_EXTENSION, KERNEL_GENERIC_MEMORY);
+            Driver(DriverObject, (PUNICODE_STRING)DriverPath);
+        }
+        PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+        if(DriverObject->DriverUsingLkdm){
+            PlatformDevice->PDEV = PDEV;
+            if(DriverObject->DeviceTable){ 
+                PlatformDevice->DeviceID = LouKeGetLdmModuleDeviceID(PConfig, (PLOUSINE_PCI_DEVICE_TABLE)DriverObject->DeviceTable);
+            }
+        }
+        DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
+        LouKeReleasePciDriverPath(DriverPath);
     }
     //LouKeReleaseSpinLock(&ScanLock, &Irql);    
 }

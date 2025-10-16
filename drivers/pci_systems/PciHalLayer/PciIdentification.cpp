@@ -64,37 +64,34 @@ static void CreateRegistryEntryFromPciDevice(
     WCHAR SubClasss[8 * sizeof(WCHAR)] = {0};
     WCHAR ProgIfs[8 * sizeof(WCHAR)] = {0};
 
-
-    if((Class == 0x01) && (SubClass == 0x06)){
-
         VendorIDs[0] = L'0';
         VendorIDs[1] = L'x';
-        _ui64tow_s(VendorID, &VendorIDs[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(VendorID, &VendorIDs[2], 5 * sizeof(WCHAR),16);
 
         DeviceIDs[0] = L'0';
         DeviceIDs[1] = L'x';
-        _ui64tow_s(DeviceID, &DeviceIDs[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(DeviceID, &DeviceIDs[2], 5 * sizeof(WCHAR),16);
 
         SubVendorIDs[0] = L'0';
         SubVendorIDs[1] = L'x';
-        _ui64tow_s(SubVendorID, &SubVendorIDs[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(SubVendorID, &SubVendorIDs[2], 5 * sizeof(WCHAR),16);
 
         SubDeviceIDs[0] = L'0';
         SubDeviceIDs[1] = L'x';
-        _ui64tow_s(SubDeviceID, &SubDeviceIDs[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(SubDeviceID, &SubDeviceIDs[2], 5 * sizeof(WCHAR),16);
 
 
         Classs[0] = L'0';
         Classs[1] = L'x';
-        _ui64tow_s(Class, &Classs[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(Class, &Classs[2], 5 * sizeof(WCHAR),16);
 
         SubClasss[0] = L'0';
         SubClasss[1] = L'x';
-        _ui64tow_s(SubClass, &SubClasss[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(SubClass, &SubClasss[2], 5 * sizeof(WCHAR),16);
 
         ProgIfs[0] = L'0';
         ProgIfs[1] = L'x';
-        _ui64tow_s(ProgIf, &ProgIfs[2], 5 * sizeof(WCHAR),16);
+        _ui64towUppr_s(ProgIf, &ProgIfs[2], 5 * sizeof(WCHAR),16);
 
         Result = LouKeMallocArray(WCHAR, (wcslen(VendorIDs) + 1) + (wcslen(DeviceIDs) + 1) + (wcslen(SubVendorIDs) + 1) + (wcslen(SubDeviceIDs) + 1) + (wcslen(Classs) + 1) + (wcslen(SubClasss) + 1) + (wcslen(ProgIfs) + 1), KERNEL_GENERIC_MEMORY);
         *WcsVendorID = Result;         
@@ -123,7 +120,6 @@ static void CreateRegistryEntryFromPciDevice(
         Result += wcslen(Result) + 1;
         *WcsProgIf = Result;
         wcscpy(Result, ProgIfs);
-    }
 }
 
 PVOID LouKeGetPciDeviceRegistryHandle(
@@ -276,6 +272,7 @@ size_t LouKePciGetLoadOrderForEntry(
     PVOID LoadOrderHandle = 0x00;
     PVOID DriverKeyHandle = 0x00;
     PVOID LoadOrder = 0x00;
+    LPWSTR DriverKey = 0;
     if(VendorID){
         
         PciDeviceHandle = LouKeGetPciDeviceRegistryHandle(
@@ -299,7 +296,7 @@ size_t LouKePciGetLoadOrderForEntry(
         
         size_t WcsDriverKeySize = LouKeGetRegistryKeySize(DriverKeyHandle);
 
-        LPWSTR DriverKey = LouKeMallocArray(WCHAR, WcsDriverKeySize, KERNEL_GENERIC_MEMORY);
+        DriverKey = LouKeMallocArray(WCHAR, (WcsDriverKeySize / 2) + 1, KERNEL_GENERIC_MEMORY);
         UNUSED LOUSTATUS ReadResult = LouKeReadRegistryWcsValue(DriverKeyHandle, DriverKey);
         if(ReadResult != STATUS_SUCCESS){
             goto _NOT_LOADED_DEVICE;
@@ -328,6 +325,9 @@ size_t LouKePciGetLoadOrderForEntry(
     _NOT_LOADED_DEVICE:
     if(VendorID){
         LouKeFree(VendorID);
+        if(DriverKey){
+            LouKeFree(DriverKey);
+        }
     }
     return GetBootDeviceCount();
 }
@@ -352,7 +352,7 @@ size_t LouKeGetBootDeviceIndex(PPCI_COMMON_CONFIG Config){
         &SubClassID,
         &ProgIf
     );
-
+    
     Result = LouKePciGetLoadOrderForEntry(
         VendorID,
         DeviceID,
@@ -363,7 +363,127 @@ size_t LouKeGetBootDeviceIndex(PPCI_COMMON_CONFIG Config){
         ProgIf
     );
 
-    LouPrint("Result:%d\n", Result);
-
     return Result;
+}
+
+KERNEL_IMPORT
+char *
+strcat(
+    char                    *DstString,
+    const char              *SrcString
+);
+
+
+string LouKeAcquirePciDriverPath(PPCI_COMMON_CONFIG Config){
+    LPWSTR VendorID = 0; 
+    LPWSTR DeviceID = 0;
+    LPWSTR SubVendorID = 0; 
+    LPWSTR SubDeviceID = 0;
+    LPWSTR ClassID = 0; 
+    LPWSTR SubClassID = 0;
+    LPWSTR ProgIf = 0;
+    PVOID PciDeviceHandle = 0x00;
+    PVOID DriverKeyHandle = 0x00;
+    PVOID DriverPathHandle = 0x00;
+    LPWSTR DriverKey = 0x00;
+    LPWSTR WcsDriverPath = 0x00;
+    string BcsDriverPath = 0x00;  
+    
+    CreateRegistryEntryFromPciDevice(
+        Config,
+        &VendorID,
+        &DeviceID,
+        &SubVendorID,
+        &SubDeviceID,
+        &ClassID,
+        &SubClassID,
+        &ProgIf
+    );
+
+    if(VendorID){
+
+        PciDeviceHandle = LouKeGetPciDeviceRegistryHandle(
+            VendorID,
+            DeviceID,
+            SubVendorID,
+            SubDeviceID,
+            ClassID,
+            SubClassID,
+            ProgIf
+        );
+        if(!PciDeviceHandle){
+            goto _DEVICE_NOT_SUPPORTED;
+        }
+        
+        DriverKeyHandle = LouKeOpenRegistryHandle(L"DriverKey", PciDeviceHandle);
+        if(!DriverKeyHandle){
+            goto _DEVICE_NOT_SUPPORTED;
+        }
+        
+        size_t WcsDriverKeySize = LouKeGetRegistryKeySize(DriverKeyHandle);
+
+        DriverKey = LouKeMallocArray(WCHAR, (WcsDriverKeySize / 2) + 1, KERNEL_GENERIC_MEMORY);
+        UNUSED LOUSTATUS ReadResult = LouKeReadRegistryWcsValue(DriverKeyHandle, DriverKey);
+        if(ReadResult != STATUS_SUCCESS){
+            goto _DEVICE_NOT_SUPPORTED;
+        }
+
+        DriverPathHandle = LouKeOpenRegistryHandle(DriverKey, 0x00);
+        if(!DriverPathHandle){
+            goto _DEVICE_NOT_SUPPORTED;
+        }
+
+        DriverPathHandle = LouKeOpenRegistryHandle(L"DriverName", DriverPathHandle);
+        if(!DriverPathHandle){
+            goto _DEVICE_NOT_SUPPORTED;
+        }
+
+        size_t WcsPathKeySize = LouKeGetRegistryKeySize(DriverPathHandle) / 2 + 1;
+        WcsDriverPath = LouKeMallocArray(WCHAR, WcsPathKeySize, KERNEL_GENERIC_MEMORY);
+
+        ReadResult = LouKeReadRegistryWcsValue(DriverPathHandle, WcsDriverPath);
+        if(ReadResult != STATUS_SUCCESS){
+            goto _DEVICE_NOT_SUPPORTED;
+        }
+
+        SanityCheck(WcsDriverPath, wcslen(WcsDriverPath));
+
+        size_t DriverDirLength = strlen("C:/ANNYA/SYSTEM64/DRIVERS/");
+
+        BcsDriverPath = LouKeMallocArray(CHAR, DriverDirLength + WcsPathKeySize, KERNEL_GENERIC_MEMORY);
+        
+        strncpy(BcsDriverPath, "C:/ANNYA/SYSTEM64/DRIVERS/", DriverDirLength);
+
+        for(size_t i = 0 ; i < (WcsPathKeySize - 1); i++){
+            BcsDriverPath[DriverDirLength + i] = (CHAR)WcsDriverPath[i];
+        }
+            
+        LouKeFree(VendorID);
+        if(DriverKey){
+            LouKeFree(DriverKey);
+        }
+        if(WcsDriverPath){
+            LouKeFree(WcsDriverPath);
+        }
+        return BcsDriverPath;
+    }
+    _DEVICE_NOT_SUPPORTED:
+    if(VendorID){
+        LouKeFree(VendorID);
+        if(DriverKey){
+            LouKeFree(DriverKey);
+        }
+        if(WcsDriverPath){
+            LouKeFree(WcsDriverPath);
+        }
+        if(BcsDriverPath){
+            LouKeFree(BcsDriverPath);
+        }
+    }
+
+    return 0x00;
+}
+
+void LouKeReleasePciDriverPath(string Path){
+    LouKeFree(Path);
 }

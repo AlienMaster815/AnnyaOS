@@ -139,7 +139,7 @@ LOUSTATUS LouKeReadRegistryWcsValue(
         return STATUS_INVALID_PARAMETER;
     }
 
-    wcscpy(String, (LPWSTR)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node)));
+    wcsncpy(String, (LPWSTR)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node)), Node->Node.ItemSize / 2);
 
     return STATUS_SUCCESS;
 }
