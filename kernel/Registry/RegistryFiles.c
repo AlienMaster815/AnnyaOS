@@ -20,6 +20,10 @@ UNUSED static void SanityCheck(LPWSTR Str, size_t Length){
 
 static PLKR_FILE_HEADER RegistryHandle = 0x00;
 
+PVOID GetRegHiveOffsetHandle(PVOID Key){
+    return (PVOID)(Key - (PVOID)RegistryHandle);
+}
+
 LOUSTATUS LouKeInitializeRegistry(){
     LouPrint("LouKeInitializeRegistry()\n");
 
@@ -41,7 +45,7 @@ LouKeReadRegistryValue(
     size_t  Count
 ){
 
-    
+    //todo
 
     return STATUS_UNSUCCESSFUL;
 }
@@ -68,14 +72,19 @@ LouKeOpenRegistryHandle(
        TmpNode = (PCOMPILED_NODE_ENTRY)(uint8_t*)((uintptr_t)RegistryHandle + (uintptr_t)RegistryHandle->FirstEntry);
     }else{
         TmpNode = (PCOMPILED_NODE_ENTRY)(uint8_t*)(uintptr_t)(RootHandle);
+        if(!TmpNode->NodePeers.Downward){
+            return 0x00;
+        }
+        TmpNode = (PCOMPILED_NODE_ENTRY)(uint8_t*)((uintptr_t)RegistryHandle + (uintptr_t)TmpNode->NodePeers.Downward);
     }
 
     while(1){
         UNUSED LPWSTR NodeName = (LPWSTR)(uint8_t*)((uintptr_t)TmpNode + sizeof(COMPILED_NODE_ENTRY));
         UNUSED size_t NameSize = TmpNode->Node.NameSize;
-        SanityCheck(NodeName, NameSize);
+        //SanityCheck(NodeName, NameSize);
 
         if(((size_t)(EndKey - TmpKey) == NameSize) && (!wcsncmp(NodeName, TmpKey, NameSize))){
+            //SanityCheck(NodeName, NameSize);
             if((size_t)(EndKey - TmpKey) == wcslen(TmpKey)){
                 return (PVOID)TmpNode;
             }
@@ -106,4 +115,123 @@ LouKeOpenRegistryHandle(
     }
 
     return 0x00;
+}
+
+size_t LouKeGetRegistryKeySize(PVOID Key){
+    return ((PCOMPILED_NODE_ENTRY)Key)->Node.ItemSize;
+}
+
+LOUSTATUS LouKeReadRegistryWcsValue(
+    PVOID Key, 
+    LPWSTR String
+){
+
+    if(!String){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!Key){
+        String[0] = L'\0';
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PCOMPILED_NODE_ENTRY Node = (PCOMPILED_NODE_ENTRY)Key;
+
+    if(GET_ITEM_OPCODE(&Node->Node) != STRING_OPCODE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    wcsncpy(String, (LPWSTR)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node)), Node->Node.ItemSize / 2);
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeReadRegistryWordValue(
+    PVOID Key, 
+    WORD* Data
+){
+
+    if(!Data){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!Key){
+        *Data = 0;
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PCOMPILED_NODE_ENTRY Node = (PCOMPILED_NODE_ENTRY)Key;
+
+    if(GET_ITEM_OPCODE(&Node->Node) != WORD_OPCODE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    *Data = *(WORD*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeReadRegistryByteValue(
+    PVOID Key, 
+    BYTE* Data
+){
+
+    if(!Data){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!Key){
+        *Data = 0;
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PCOMPILED_NODE_ENTRY Node = (PCOMPILED_NODE_ENTRY)Key;
+
+    if(GET_ITEM_OPCODE(&Node->Node) != BYTE_OPCODE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    *Data = *(BYTE*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeReadRegistryDWordValue(
+    PVOID Key, 
+    DWORD* Data
+){
+
+    if(!Data){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!Key){
+        *Data = 0;
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PCOMPILED_NODE_ENTRY Node = (PCOMPILED_NODE_ENTRY)Key;
+
+    if(GET_ITEM_OPCODE(&Node->Node) != DWORD_OPCODE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    *Data = *(DWORD*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeReadRegistryQWordValue(
+    PVOID Key, 
+    QWORD* Data
+){
+
+    if(!Data){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!Key){
+        *Data = 0;
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PCOMPILED_NODE_ENTRY Node = (PCOMPILED_NODE_ENTRY)Key;
+
+    if(GET_ITEM_OPCODE(&Node->Node) != QWORD_OPCODE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    *Data = *(QWORD*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+
+    return STATUS_SUCCESS;
 }

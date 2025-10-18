@@ -1175,6 +1175,19 @@ _ui64tow_s(
     return 0;
 }
 
+errno_t
+_ui64towUppr_s(
+    UINT64  Value,
+    LPWSTR  Str, 
+    size_t  Length,
+    int     Radix
+){
+    errno_t Result = _ui64tow_s(Value, Str, Length, Radix);
+    if(Result){
+        return Result;
+    }
+    return _wcsupr_s(Str, Length); 
+}
 
 errno_t
 _ultow_s(

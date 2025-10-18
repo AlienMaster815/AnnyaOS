@@ -9,7 +9,7 @@ errno_t LkrAssemblerStringBlock(
 
     *Out = (PVOID)LkrAllocateNode(
         Name,
-        Lou_wcslen(Str) * sizeof(WCHAR)
+        Lou_wcslen(Str) * sizeof(WCHAR) + 1
     );
 
     ENCODE_OP(*Out, STRING_OPCODE);

@@ -81,6 +81,36 @@ LouKeOpenRegistryHandle(
     PVOID   RootHandle
 );
 
+void LouKeDumpRegData(
+    PVOID RegHandle
+);
+
+PVOID GetRegHiveOffsetHandle(PVOID Key);
+
+size_t LouKeGetRegistryKeySize(PVOID Key);
+
+LOUSTATUS LouKeReadRegistryWcsValue(PVOID Key, LPWSTR String);
+
+LOUSTATUS LouKeReadRegistryByteValue(
+    PVOID Key, 
+    BYTE* Data
+);
+
+LOUSTATUS LouKeReadRegistryWordValue(
+    PVOID Key, 
+    WORD* Data
+);
+
+LOUSTATUS LouKeReadRegistryDWordValue(
+    PVOID Key, 
+    DWORD* Data
+);
+
+LOUSTATUS LouKeReadRegistryQWordValue(
+    PVOID Key, 
+    QWORD* Data
+);
+
 #ifdef __cplusplus
 }
 #endif

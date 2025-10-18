@@ -65,6 +65,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
     return (DRIVER_MODULE_ENTRY)Entry;
 }
 
+
 DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize){
     if(!Base){
         return 0x00;

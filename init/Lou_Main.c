@@ -322,7 +322,7 @@ KERNEL_ENTRY Lou_kernel_start(
     }                      
     LouKeInitializeSafeMemory();    
 
-    //LouKeInitializeRegistry();
+    LouKeInitializeRegistry();
 
     LousineKernelEarlyInitialization();
 
@@ -343,10 +343,6 @@ KERNEL_ENTRY Lou_kernel_start(
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
-    //TODO: move to //LouKeInitializeRegistry();
-    LouKeInitializeRegistry();
-
-
     AdvancedLousineKernelInitialization();
 
     LookForStorageDevices();
@@ -358,9 +354,6 @@ KERNEL_ENTRY Lou_kernel_start(
         LouPrint("No Storage Devices Detected\n");
         while(1);
     }
-
-    LouPrint("STATUS SUCCESS\n");
-    while(1);
 
 
     InitializeFileSystemManager();

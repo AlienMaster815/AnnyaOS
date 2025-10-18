@@ -37,7 +37,7 @@ typedef struct _COMPILED_NODE_ENTRY{
 #define DWORD_OPCODE            (0b00011)
 #define QWORD_OPCODE            (0b00100)
 #define STRING_OPCODE           (0b00101)
-#define STRUCT_OPCODE           (0b00110)
+//#define STRUCT_OPCODE           (0b00110) Depreciated
 #define DEFINITION              (0b01000)
 #define ARRAY_DATA              (0b10000)
 
