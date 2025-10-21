@@ -55,7 +55,7 @@ typedef void* PTHREAD;
 #include <WinAPI/Win32/winnls.h>
 
 typedef unsigned int UINT;
-typedef unsigned short USHORT;
+typedef unsigned short USHORT, * PUSHORT;
 
 typedef void*       HWND;
 typedef void*       HMENU;

@@ -12,7 +12,7 @@ typedef bool BOOLEAN;
 typedef uint8_t BYTE;
 typedef uint16_t WORD;
 
-typedef unsigned short USHORT;
+typedef unsigned short USHORT, * PUSHORT;
 
 
 typedef struct _LPC_SECTION_OWNER_MEMORY {

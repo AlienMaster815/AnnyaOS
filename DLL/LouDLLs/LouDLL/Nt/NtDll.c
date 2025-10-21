@@ -2571,10 +2571,7 @@ NTDLL_API void toupper() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void towupper() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void towlower() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void strtol() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void __wine_dbg_get_channel_flags() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void __wine_dbg_header() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void __wine_dbg_output() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void __wine_dbg_strdup() {LouPrint("Hello nt Dll\n"); while(1);}
+
 */
 
 //NTDLL_API void LdrDisableThreadCalloutsForDll() {

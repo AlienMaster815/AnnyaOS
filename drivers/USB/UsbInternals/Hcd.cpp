@@ -3,9 +3,11 @@
 #include <Hal.h>
 #include "Hcd.h"
 
+extern mutex_t UsbPortPeerMutex;
+
 static PIDENTIFICATION_RANGE UsbIdRange = 0x00;
 
-static void LouKeUsbHcdGivebackUrbEx(PURB Urb){
+UNUSED static void LouKeUsbHcdGivebackUrbEx(PURB Urb){
     UNUSED PUSB_HOST_CONTROLLER_DEVICE Hcd = UsbBusToHcd(Urb->UsbDevice->UsbBus);
     UNUSED PUSB_ANCHOR Anchor = Urb->Anchor;
     UNUSED int Status = Urb->UnlinkedErrorCode;
@@ -35,11 +37,16 @@ static LOUSTATUS LouKeUsbGivebackUrbBh(PLOUQ_WORK Work){
         UrbsFollower->UrbList.NextHeader = 0x00;
     }
 
-
+    LouKeAcquireSpinLock(&Bh->BhLock, &Irql);
+    if(!Bh->Urbs.NextHeader){
+        //LouKeStartWork(,&bh->Bh);
+    }
+    Bh->Running = false;
+    LouKeReleaseSpinLock(&Bh->BhLock, &Irql);
     return STATUS_SUCCESS;
 }
 
-static void LouKeUsbInitializeGivebackUrb(
+UNUSED static void LouKeUsbInitializeGivebackUrb(
     PGIVEBACK_URB_BH Bh
 ){
     LouKeLouQInitializeWork(&Bh->Bh, LouKeUsbGivebackUrbBh);
@@ -177,7 +184,10 @@ LouKeUsbAddHcd(
     }
 
     RhDev = LouKeAllocateUsbDevice(0x00, &Hcd->UsbSelf, 0);
+    MutexLock(&UsbPortPeerMutex);
     Hcd->UsbSelf.RootHub = RhDev;
+    MutexUnlock(&UsbPortPeerMutex);
+
     RhDev->RxLanes = 1;
     RhDev->TxLanes = 1;
     RhDev->SspRate = USB_SSP_GEN_UNKOWN;
@@ -216,7 +226,12 @@ LouKeUsbAddHcd(
             while(1);
         }
     }
+
+    Hcd->Flags |= (1 << 2);//is polable
+
     Hcd->HCDS |= (1 << 1);
+ 
+    //TODO: Root hub Can Wakeup
 
     LouKeUsbInitializeGivebackUrb(&Hcd->HighPriorityBh);
     Hcd->HighPriorityBh.HighPriority = true;

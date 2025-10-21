@@ -246,11 +246,6 @@ typedef STRING ANSI_STRING;
 typedef PSTRING PANSI_STRING;
 
 
-typedef enum _EVENT_TYPE {
-    NotificationEvent,
-    SynchronizationEvent
-} EVENT_TYPE;
-
 typedef struct _PCI_CAPABILITIES_HEADER {
     UCHAR   CapabilityID;
     UCHAR   Next;

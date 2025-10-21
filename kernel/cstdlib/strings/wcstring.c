@@ -1555,3 +1555,4 @@ LPWSTR LouKeCreateCombineWcsStr(
     wcscat(NewString, Str2);
     return NewString;
 }   
+

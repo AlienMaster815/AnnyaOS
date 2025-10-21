@@ -16,6 +16,8 @@
 #pragma warning(disable: 5051) // Disable C5051 warning
 #endif
 
+#include <WinAPI/Win32/ntdef.h>
+
 #include <stdint.h>
 
 #ifndef _GUID_TYPE
@@ -31,6 +33,7 @@ typedef struct _GUID {
 #include <WinAPI/WinAPITypes/WDFLDRTypes.h>
 #include <KernelAPI/WDFLDR.h>
 #include <WinAPI/NtAPI/NtAPIFunc.h>
+
 
 #define ACPI 1094930505
 #define SMBIOS 837766737983

@@ -38,6 +38,7 @@
         <!--User Executables-->
         <FILETOCPY64>cp EXE/AnnyaExp/AnnyaExp.exe ISO/ANNYA/ANNYAEXP.EXE</FILETOCPY64>                                      <!--Annya OS Explorer Interface-->
         <FILETOCPY64>cp EXE/AnnyaInit/AnnyaInit.exe ISO/ANNYA/ANNYAINIT.EXE</FILETOCPY64>                                   <!--Annya OS Init-->
+        <FILETOCPY64>cp EXE/asmss/asmss.exe ISO/ANNYA/SYSTEM64/ASMSS.EXE</FILETOCPY64>                                      <!--Annya OS Init-->
         <!--User Backgrounds-->
         <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
         <!--ANNYAEXP Assets-->

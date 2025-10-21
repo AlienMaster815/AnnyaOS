@@ -205,6 +205,9 @@ UserSpace:
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
 
+	$(MAKE) -C EXE/asmss/ clean
+	$(MAKE) -C EXE/asmss/ all
+
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaExp all
 

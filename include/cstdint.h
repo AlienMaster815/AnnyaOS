@@ -14,7 +14,7 @@ typedef uint16_t    UINT16, WORD;
 typedef uint32_t    UINT32, DWORD, INTEGER;
 typedef unsigned long       ULONG;
 typedef unsigned int UINT;
-typedef char        INT8, CHAR; 
+typedef char        CHAR, INT8; 
 #ifndef __cplusplus
 typedef uint16_t wchar_t;     
 #endif

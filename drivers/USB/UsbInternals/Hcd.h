@@ -87,6 +87,8 @@ AmdHcdResumeBug(
     return false;
 }
 
+LOUSTATUS LouKeUsbPhyRoothubCalibration(PUSB_PHY_LAYER_ROOTHUB_CHAIN PhyRootHub);
+
 #define UsbSetToggle(Device, Ep, Out, Bit) ((Device)->Toggle[Out] = (((Device)->Toggle[Out] & ~((1) << Ep)) | ((Bit) << Ep)))
 
 #endif

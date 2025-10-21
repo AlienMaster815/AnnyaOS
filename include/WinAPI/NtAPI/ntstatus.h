@@ -18,7 +18,7 @@
 // the kernel will actualy have real knoledge 
 // on what the hell happened 
 
-typedef int32_t NTSTATUS;
+typedef int NTSTATUS;
 
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 

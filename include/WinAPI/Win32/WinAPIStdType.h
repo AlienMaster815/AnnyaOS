@@ -5,12 +5,13 @@
 extern "C"{
 #endif
 
+typedef void* LPARAM;
+
 #ifdef _USER_MODE_CODE_
 
 
 typedef void* HTREEITEM;
 typedef void* PFNTVCOMPARE;
-typedef void* LPARAM;
 typedef void* WPARAM;
 
 typedef wchar_t*        LPWSTR;
@@ -22,19 +23,8 @@ typedef LPWSTR          HKEY;
 typedef void* HWND;
 typedef void* TVITEMPART;
 
-typedef struct _RECT{
-    long Left;
-    long Top;
-    long Right;
-    long Bottom;
-}RECT, * PRECT, * NPRECT, * LPRECT; 
 
 typedef void* HINSTANCE;
-
-typedef struct _POINT{
-    long    X;
-    long    Y;
-}POINT, * PPOINT, *NPPOINT, * LPPOINT;
 
 typedef void* TV_ITEMW;
 
@@ -94,7 +84,7 @@ typedef uint64_t ULONG64;
 typedef void* PVOID;
 
 typedef uint32_t DWORD;
-typedef uintptr_t ULONG_PTR;
+typedef unsigned long* ULONG_PTR;
 
 typedef void* HMODULE;
 typedef void* LPVOID;

@@ -6,12 +6,11 @@
 #include <cstdint.h>
 //Fixed Percision Integers
 
-
 typedef uint32_t DWORD32, UINT32, ULONG32,DWORD, UINT;
 typedef uint64_t DWORD64, UINT64, ULONG64,QWORD;
 typedef int32_t INT32, LONG32,HRESULT, NTSTRSAFEDDI, INT;
 typedef int64_t INT64, LONG64;
-typedef uint16_t UWORD, USHORT,UINT16;
+typedef uint16_t UWORD, USHORT,UINT16, * PUSHORT;
 typedef uint16_t WORD;
 typedef int16_t INT16, SHORT;
 typedef uint8_t BYTE, UCHAR,UINT8;
@@ -41,7 +40,7 @@ typedef unsigned long** PULONG_PTR;
 typedef unsigned long *DWORD_PTR;
 
 typedef int32_t* HALF_PTR;//16 bit int 32 bit systems
-typedef int* INT_PTR; //32 bit for 32 bit systems
+typedef int* INT_PTR; //moved to windef
 typedef long* LONG_PTR;
 typedef uint64_t SIZE_T;
 typedef int64_t SSIZE_T;
