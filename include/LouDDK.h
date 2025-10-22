@@ -100,17 +100,7 @@ KERNEL_IMPORT void LouKeInitializeIntervalWork(
 #define RAMADDDATA unsigned char *
 #define BLOCK 4096
 
-#ifdef __x86_64__
-    #define SIZE uint64_t
-    
-#endif
-#ifdef __i386__
-
-    #define SIZE uint32_t
-
-#endif
-
-
+typedef size_t SIZE;
 
 #define LOUSTATUS_GOOD 0
 #define PATADEV 1

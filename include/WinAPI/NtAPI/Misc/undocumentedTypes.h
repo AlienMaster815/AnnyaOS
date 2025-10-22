@@ -4,6 +4,7 @@
 #include <NtAPI.h>
 #include <LouDDK.h>
 #include "../NtAPIFunc.h"
+#include <WinAPI/Win32/winternl.h>
 
 typedef  void* ETHREAD,* PETHREAD;
 
@@ -235,15 +236,6 @@ POWER_SETTING_CALLBACK (
 );
 
 typedef POWER_SETTING_CALLBACK *PPOWER_SETTING_CALLBACK;
-
-typedef struct _STRING {
-    USHORT Length;
-    USHORT MaximumLength;
-}STRING;
-
-typedef STRING* PSTRING;
-typedef STRING ANSI_STRING;
-typedef PSTRING PANSI_STRING;
 
 
 typedef struct _PCI_CAPABILITIES_HEADER {

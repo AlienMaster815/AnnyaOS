@@ -65,7 +65,7 @@ typedef __int128 int128_t;
 #define RAMADD unsigned char*
 #define RAMADDDATA unsigned char *
 #define BLOCK 4096
-#define SIZE unsigned long long
+typedef size_t SIZE;
 
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes

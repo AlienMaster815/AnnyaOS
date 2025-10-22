@@ -5,7 +5,7 @@
 
 #include <cstdint.h>
 #include <stdalign.h>
-#define SIZE   size_t
+
 
 #define GET_ALIGNMENT(x) (alignof(x))
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))

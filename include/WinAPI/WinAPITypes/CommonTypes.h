@@ -17,7 +17,7 @@ typedef uint8_t BYTE, UCHAR,UINT8;
 typedef const char CCHAR;
 typedef char INT8;
 
-typedef const short CSHORT;
+typedef short CSHORT;
 
 #ifndef _LONGLONG
 #define _LONGLONG
@@ -101,13 +101,13 @@ typedef PVOID PSID;
 
 
 
-
-typedef struct _LIST_ENTRY {
-    struct _LIST_ENTRY *Flink;
-    struct _LIST_ENTRY *Blink;
-} LIST_ENTRY, *PLIST_ENTRY, *RESTRICTED_POINTER PRLIST_ENTRY;
-
-
+#ifndef _LIST_ENTRY_
+#define _LIST_ENTRY_
+typedef struct _LIST_ENTRY{
+    struct _LIST_ENTRY* Flink;
+    struct _LIST_ENTRY* Blink;
+}LIST_ENTRY, * PLIST_ENTRY, *RESTRICTED_POINTER PRLIST_ENTRY;
+#endif
 
 #if defined(_X86_)
 
@@ -337,14 +337,16 @@ DRIVER_ADD_DEVICE (
 
 typedef DRIVER_ADD_DEVICE *PDRIVER_ADD_DEVICE;
 
-typedef struct _UNICODE_STRING {
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR  Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
-
-typedef const PUNICODE_STRING PCUNICODE_STRING;
+#ifndef __UNICODE_STRING_DEFINED__
+#define __UNICODE_STRING_DEFINED__
+typedef struct _UNICODE_STRING{
+    USHORT  Length;
+    USHORT  MaximumLength;
+    LPWSTR  Buffer;
+}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
+typedef const UNICODE_STRING* PCUNICODE_STRING;
 typedef const UNICODE_STRING CUNICODE_STRING;
+#endif
 
 typedef
 NTSTATUS

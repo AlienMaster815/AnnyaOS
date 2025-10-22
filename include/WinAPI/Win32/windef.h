@@ -66,6 +66,8 @@ typedef INT_PTR (CALLBACK *PROC)();
 #define MAX_PATH 260
 #define HFILE_ERROR ((HFILE)-1)
 
+typedef size_t SIZE;
+
 typedef SIZE  SIZEL;
 typedef SIZE* PSIZE;
 typedef SIZE* PSIZEL;
