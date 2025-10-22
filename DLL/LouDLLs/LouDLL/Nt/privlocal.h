@@ -167,11 +167,6 @@ static inline UINT DecodeUtf16Char(
     return (UINT)~0;
 }
 
-static inline void InitializeCodePageTable(
-    PUSHORT Pointer
 
-){
-
-}
 
 #endif

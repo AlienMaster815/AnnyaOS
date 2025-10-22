@@ -166,6 +166,116 @@ typedef struct _PEB_LDR_DATA{
     HANDLE      ShutDownThreadID;
 }PEB_LDR_DATA, * PPEB_LDR_DATA;
 
+typedef struct _GDI_TEB_BATCH{
+    ULONG       Offset;
+    HANDLE      Hdc;
+    ULONG       Buffer[0x136];
+}GDI_TEB_BATCH, * PGDI_TEB_BATCH;
 
+struct _ACTIVATION_CONTEXT;
+
+typedef struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME{
+    struct _RTL_ACTIVATION_CONTEXT_STACK_FRAME* Previous;
+    struct _ACTIVATION_CONTEXT*                 ActivationContext;
+    ULONG                                       Flags;
+}RTL_ACTIVATION_CONTEXT_STACK_FRAME, * PRTL_ACTIVATION_CONTEXT_STACK_FRAME;
+
+typedef struct _RTL_CALLER_ALLOCATED_ACTIVATION_CONTEXT_STACK_FRAME_EXTENDED{
+    SIZE                                    Size;
+    ULONG                                   Format;
+    RTL_ACTIVATION_CONTEXT_STACK_FRAME      StackFrame;
+    PVOID                                   Extra1;
+    PVOID                                   Extra2;
+    PVOID                                   Extra3;
+    PVOID                                   Extra4;
+}RTL_CALLER_ALLOCATED_ACTIVATION_CONTEXT_STACK_FRAME_EXTENDED, 
+    * PRTL_CALLER_ALLOCATED_ACTIVATION_CONTEXT_STACK_FRAME_EXTENDED;
+
+typedef struct _ACTIVATION_CONTEXT_STACK{
+    PRTL_ACTIVATION_CONTEXT_STACK_FRAME     ActiveFrame;
+    LIST_ENTRY                              FrameListCache;
+    ULONG                                   Flags;
+    ULONG                                   NextCookieSequenceNumber;
+    ULONG_PTR                               StackID; 
+}ACTIVATION_CONTEXT_STACK, * PACTIVATION_CONTEXT_STACK;
+
+typedef struct _TEB_ACTIVE_FRAME_CONTEXT{
+    ULONG               Flags;
+    const char*         FrameName;
+}TEB_ACTIVE_FRAME_CONTEXT, * PTEB_ACTIVE_FRAME_CONTEXT;
+
+typedef struct _TEB_ACTIVE_FRAME_CONTEXT_EX{
+    TEB_ACTIVE_FRAME_CONTEXT        BasicContext;
+    const char*                     SourceLocation;
+}TEB_ACTIVE_FRAME_CONTEXT_EX, * PTEB_ACTIVE_FRAME_CONTEXT_EX;
+
+typedef struct _TEB_ACTIVE_FRAME{
+    ULONG                           Flags;
+    struct _TEB_ACTIVE_FRAME*       Previous;
+    PTEB_ACTIVE_FRAME_CONTEXT       Context;
+}TEB_ACTIVE_FRAME, * PTEB_ACTIVE_FRAME;
+
+typedef struct _TEB_ACTIVE_FRAME_EX{
+    TEB_ACTIVE_FRAME    BasicFrame;
+    PVOID               ExtentionIdentifier;
+}TEB_ACTIVE_FRAME_EX, * PTEB_ACTIVE_FRAME_EX;
+
+typedef struct _FLS_CALLBACK{
+    PVOID                       Undocumented;
+    PFLS_CALLBACK_FUNCTION      Callback;
+}FLS_CALLBACK, * PFLS_CALLBACK;
+
+typedef struct _FLS_INFO_CHUNK{
+    ULONG           Count;
+    FLS_CALLBACK    Callbacks[1];
+}FLS_INFO_CHUNK, * PFLS_INFO_CHUNK;
+
+typedef struct _GLOBAL_FLS_DATA{
+    FLS_INFO_CHUNK      FlsCallbackChunks[8];
+    LIST_ENTRY          FlsListHeader;
+    ULONG               FlsHighIndex;
+}GLOBAL_FLS_DATA, * PGLOBAL_FLS_DATA;
+
+typedef struct _TEB_FLS_DATA{
+    LIST_ENTRY      FlsListEntry;
+    PVOID*          FlsDataChunks[8];
+}TEB_FLS_DATA, * PTEB_FLS_DATA;
+
+typedef struct _CROSS_PROCESS_WORK_ENTRY{
+    UINT            Next;
+    UINT            Id;
+    ULONGLONG       Address;
+    ULONGLONG       Size;
+    UINT            Args[4];
+}CROSS_PROCESS_WORK_ENTRY, * PCROSS_PROCESS_WORK_ENTRY;
+
+typedef union _CROSS_PROCESS_WORK_HDR{
+    struct {
+        UINT    First;
+        UINT    Counter;
+    };
+    volatile    LONGLONG Hdr;
+}CROSS_PROCESS_WORK_HDR, * PCROSS_PROCESS_WORK_HDR;
+
+typedef struct _CROSS_PROCESS_WORK_LIST{
+    CROSS_PROCESS_WORK_HDR      FreeList;
+    CROSS_PROCESS_WORK_HDR      WorkList;
+    ULONGLONG                   Undocumented[4];    
+    CROSS_PROCESS_WORK_ENTRY    Entries[1];
+}CROSS_PROCESS_WORK_LIST, * PCROSS_PROCESS_WORK_LIST;
+
+typedef enum{
+    CrossProcessPreVirtualAlloc    = 0,
+    CrossProcessPostVirtualAlloc   = 1,
+    CrossProcessPreVirtualFree     = 2,
+    CrossProcessPostVirtualFree    = 3,
+    CrossProcessPreVirtualProtect  = 4,
+    CrossProcessPostVirtualProtect = 5,
+    CrossProcessFlushCache         = 6,
+    CrossProcessFlushCacheHeavy    = 7,
+    CrossProcessMemoryWrite        = 8,
+}CROSS_PROCESS_NOTIFICATION;
+
+//347
 
 #endif //_WINTERNL_H

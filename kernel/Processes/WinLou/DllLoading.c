@@ -119,7 +119,7 @@ typedef struct _ATTACH_THREAD_DATA{
     uint64_t DllCallReason;
     uint64_t DllReserved;
     void   (*LockRelease)(mutex_t* Lock);
-    mutex_t* Lock;
+    mutex_t  Lock;
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
 
 uint64_t LouKeLinkerGetAddress(
@@ -131,7 +131,7 @@ extern uint64_t GetRBP();
 extern void SetTEB();
 uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer);
 
-HANDLE LouKeLoadLibraryA(string LibraryName, mutex_t* Lock){
+HANDLE LouKeLoadLibraryA(string LibraryName){
 
     LouPrint("Loading Library:%s\n", LibraryName);
     bool IsLibraryAPath = false; 
@@ -192,11 +192,13 @@ HANDLE LouKeLoadLibraryA(string LibraryName, mutex_t* Lock){
         DllAttachProcessData->DllHandle = (uint64_t)TmpLibHandle->LibraryHandle;
         DllAttachProcessData->DllCallReason = (uint64_t)DLL_PROCESS_ATTACH;
         DllAttachProcessData->DllReserved = 0;
-        DllAttachProcessData->LockRelease = (void(*)())(uint8_t*)LouKeLinkerGetAddress("KERNEL32.dll", "ReleaseLoadLibraryALock");//ReleaseLoadLibraryALock
-        DllAttachProcessData->Lock = Lock;
+        DllAttachProcessData->LockRelease = (void(*)())(uint8_t*)LouKeLinkerGetAddress("LouDll.dll", "ReleaseLoadLibraryALock");//ReleaseLoadLibraryALock
 
-        UNUSED uint64_t AttachLing = LouKeLinkerGetAddress("LouDll.dll", "AnnyaAttachDllToProcess");
-        LouKeCreateUserStackThreadWin((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE, (uint64_t)(uint8_t*)Teb);
+        uint64_t AttachLing = LouKeLinkerGetAddress("LouDll.dll", "AnnyaAttachDllToProcess");
+        if((AttachLing) && (DllAttachProcessData->LockRelease)){
+            LouKeCreateUserStackThreadWin((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE, (uint64_t)(uint8_t*)Teb);
+            MutexSynchronize(&DllAttachProcessData->Lock);
+        }
     }
     LibHandlesCount++;
     return TmpLibHandle->LibraryHandle;

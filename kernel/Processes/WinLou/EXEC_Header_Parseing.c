@@ -138,7 +138,7 @@ static inline uint8_t FilePathCountBackToDirectory(string FilePath){
     return i + 1;
 }
 
-HANDLE LouKeLoadLibraryA(string LibraryName, mutex_t* Lock);
+HANDLE LouKeLoadLibraryA(string LibraryName);
 bool LouKeLinkerCheckLibraryPresence(string SystemName);
 
 void ParseImportTables(
@@ -185,9 +185,7 @@ void ParseImportTables(
 
                 if(!LouKeLinkerCheckLibraryPresence(SYSName)){
                     if(fseek(Directory)){
-                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
-                        LouKeLoadLibraryA(Directory, Lock);
-                        LouKeFree(Lock);
+                        LouKeLoadLibraryA(Directory);
                         goto _LINKER_LOADED_A_MODULE;
                     }
 
@@ -195,9 +193,7 @@ void ParseImportTables(
                     LouKeStrLowerToUpper(Directory);
                     
                     if(fseek(Directory)){
-                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
-                        LouKeLoadLibraryA(Directory, Lock);
-                        LouKeFree(Lock);
+                        LouKeLoadLibraryA(Directory);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     
@@ -207,17 +203,13 @@ void ParseImportTables(
                     strncpy(Directory, "C:/ANNYA/SYSTEM64/", strlen("C:/ANNYA/SYSTEM64/"));
                     strncpy((string)((uint64_t)Directory + strlen("C:/ANNYA/SYSTEM64/")), SYSName, strlen(SYSName));    
                     if(fseek(Directory)){
-                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
-                        LouKeLoadLibraryA(Directory, Lock);
-                        LouKeFree(Lock);
+                        LouKeLoadLibraryA(Directory);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     LouKeStrLowerToUpper(Directory);
                 
-                    if(fseek(Directory)){
-                        mutex_t* Lock = LouKeMallocType(mutex_t, KERNEL_GENERIC_MEMORY); 
-                        LouKeLoadLibraryA(Directory, Lock);
-                        LouKeFree(Lock);
+                    if(fseek(Directory)){ 
+                        LouKeLoadLibraryA(Directory);
                         goto _LINKER_LOADED_A_MODULE;
                     }
                     

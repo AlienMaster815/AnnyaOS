@@ -30,7 +30,7 @@ section .bss
 section .text
 extern InterruptRouter
 extern PIC_sendEOI
-extern UpdateThreadManager
+extern UpdateProcessManager
 extern LouKeYeildExecution
 
 FPU_ON dq 0
@@ -566,7 +566,7 @@ ISR31:
 ISR32:
 	pusha
 	mov rcx, rsp
-	call UpdateThreadManager  
+	call UpdateProcessManager  
 	mov rsp, rax 
 	popa                                                                                              
 	iretq

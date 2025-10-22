@@ -553,14 +553,14 @@ typedef struct _ATTACH_THREAD_DATA{
     uint64_t DllCallReason;
     uint64_t DllReserved;
     void   (*LockRelease)(mutex_t* Lock);
-    mutex_t* Lock;
+    mutex_t  Lock;
 }ATTACH_THREAD_DATA, * PATTACH_THREAD_DATA;
 
 LOUDLL_API
 DWORD AnnyaAttachDllToProcess(PVOID ThreadData){
     PATTACH_THREAD_DATA DllAttachData = (PATTACH_THREAD_DATA)ThreadData;
     DllAttachData->DllEntry(DllAttachData->DllHandle, DllAttachData->DllCallReason, DllAttachData->DllReserved);
-    DllAttachData->LockRelease(DllAttachData->Lock);
+    DllAttachData->LockRelease(&DllAttachData->Lock);
     return 0;
 }
 
@@ -717,4 +717,9 @@ void* memset(void* dest, int value, size_t count) {
 LOUDLL_API
 void LouYeildExecution(){
     asm("INT $200");
+}
+
+LOUDLL_API
+void ReleaseLoadLibraryALock(mutex_t* Mutex){
+    MutexUnlock(Mutex);
 }

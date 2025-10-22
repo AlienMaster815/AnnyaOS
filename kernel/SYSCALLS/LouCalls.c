@@ -38,7 +38,7 @@ void LouKeDestroyThread(uint64_t Thread);
 void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
-HANDLE LouKeLoadLibraryA(string Name, mutex_t* Lock);
+HANDLE LouKeLoadLibraryA(string Name);
 void* LouKeDrsdGetPlaneInformation(size_t* CountHandle);
 LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context);
 void* LouKeGenericAllocateHeapEx(
@@ -174,7 +174,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
 
         case LOULOADLIBRARYA:{
             uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[1] = (uint64_t)LouKeLoadLibraryA((string)Tmp[0], (mutex_t*)Tmp[2]);
+            Tmp[1] = (uint64_t)LouKeLoadLibraryA((string)Tmp[0]);
             return;
         }
         case LOULOADLIBRARYW:{

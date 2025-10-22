@@ -12,6 +12,7 @@
 #include <drivers/display/vga.h>
 #include <LouACPI.h>
 
+
 extern LOUSTATUS InitializeStartupInterruptHandleing();
 
 #define DEBUG 1
@@ -96,7 +97,7 @@ void InitializeNtKernelTransitionLayer();
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
 void InitializeBootGraphics();
-void UpdateThreadManager(uint64_t Rsp);
+void UpdateProcessManager(uint64_t Rsp);
 void InitializeInterruptRouter();
 void LouKeProbeSbIsa();
 void SetupGDT();
@@ -126,7 +127,7 @@ void ScanTheRestOfHarware();
 void LouKeHandleSystemIsBios();
 void SetContext(uint64_t Context, uint64_t Function);
 void SMPInit();
-void InitializeUserSpace();
+void LouOsKrnlMain();
 void LouKeInitializeSafeMemory();
 uint8_t LouKeGetNumberOfStorageDevices();
 void InitializeFileSystemManager();
@@ -173,6 +174,8 @@ int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
 void LouKePcieProbeEcam();
 LOUSTATUS LouKeInitializeRegistry();
+HANDLE LouKeLoadLibraryA(string Name);
+void InitializeProcessManager();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -206,7 +209,7 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     RegisterInterruptHandler(SIMDFloatPointException, INTERRUPT_SERVICE_ROUTINE_19, false, 0);
     RegisterInterruptHandler(VirtualizationException, INTERRUPT_SERVICE_ROUTINE_20, false, 0);
     RegisterInterruptHandler(ControlProtectionException, INTERRUPT_SERVICE_ROUTINE_21, false, 0);
-    RegisterInterruptHandler(UpdateThreadManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
+    RegisterInterruptHandler(UpdateProcessManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
     //RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
     RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);
@@ -231,7 +234,9 @@ void InitializeSymmetricMultiProcessing(){
 
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
-    InitThreadManager();
+    InitializeProcessManager();
+
+    while(1);
 
     LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
 
@@ -346,8 +351,6 @@ KERNEL_ENTRY Lou_kernel_start(
     AdvancedLousineKernelInitialization();
 
     LookForStorageDevices();
-
-
     
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
@@ -367,34 +370,37 @@ KERNEL_ENTRY Lou_kernel_start(
 
     ScanTheRestOfHarware();
 
+    LouKeLoadLibraryA("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
+
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-    
-    LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 
-    
+    //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
+
     while(1){
         //default kernel deomon
-        asm("INT $200");
+        //asm("INT $200");
     }
 
 }
 
 
-void InitializeUserSpace(){
+void LouOsKrnlMain(){
     LouPrint("Initializing User Mode\n");
+    //PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocType(WIN_PEB, USER_GENERIC_MEMORY);
+    //SetPEB((uint64_t)ProcessExecutionBlock);
+    //ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
+    //ProcessExecutionBlock->ProcessHeap = (uint64_t)
+    //LouKeVirtualAllocUser(MEGABYTE_PAGE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
 
-    DllModuleEntry BELL = LouKeLoadUserModule("C:/ANNYA/SYSTEM64/LOUDLL.DLL", 0x00); //this is the systems access into the kernel so no matter what load it
-    void (*SendProcessorFeaturesToLouMemCpy)(PPROCESSOR_FEATURES) = (void (*)(PPROCESSOR_FEATURES))LouKeLinkerGetAddress("LOUDLL.DLL", "SendProcessorFeaturesToLouMemCpy");
-    SendProcessorFeaturesToLouMemCpy(ProcAcceleratedFeatures);
-    LouPrint("LOUDLL.DLL Has Loaded\n");
-    PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocType(WIN_PEB, USER_GENERIC_MEMORY);
-    SetPEB((uint64_t)ProcessExecutionBlock);
-    LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
-    ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
-    ProcessExecutionBlock->ProcessHeap = (uint64_t)LouKeVirtualAllocUser(MEGABYTE_PAGE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
+    //DllModuleEntry BELL = 
+    //void (*SendProcessorFeaturesToLouMemCpy)(PPROCESSOR_FEATURES) = (void (*)(PPROCESSOR_FEATURES))LouKeLinkerGetAddress("LOUDLL.DLL", "SendProcessorFeaturesToLouMemCpy");
+    //SendProcessorFeaturesToLouMemCpy(ProcAcceleratedFeatures);
+    //LouPrint("LOUDLL.DLL Has Loaded\n");
 
-    BELL(0,0,0);
+    //LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
+
+    //BELL(0,0,0);
      
     //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
     //LouPrint("KERNEL32.DLL Has Loaded\n");

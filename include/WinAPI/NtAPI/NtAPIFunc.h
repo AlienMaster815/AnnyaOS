@@ -148,7 +148,7 @@ typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE;
 typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE_EX;
 typedef void* PRTL_RUN_ONCE;
 typedef void* PCORRELATION_VECTOR;
-typedef void* PACCESS_MASK;
+typedef unsigned long* PACCESS_MASK;
 typedef void* PRTL_RUN_ONCE_INIT_FN;
 
 typedef struct _LUID{
@@ -468,7 +468,6 @@ typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 #ifdef __cplusplus
 #define NTHALAPI extern "C"
 #define NTSYSCALLAPI extern "C"
-#define NTSYSAPI extern "C"
 #define CLFSUSER_API extern "C"
 #define NTAPI_INLINE inline
 #define NTKERNELAPI extern "C"
@@ -477,7 +476,6 @@ typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 
 #define NTHALAPI extern
 #define NTSYSCALLAPI extern
-#define NTSYSAPI extern
 #define CLFSUSER_API extern
 #define NTAPI_INLINE inline
 #define NTKERNELAPI extern
