@@ -140,8 +140,8 @@ typedef struct _RTL_CRITICAL_SECTION_DEBUG_DATA{
 
 typedef struct _RTL_CRITICAL_SECTION{
     PRTL_CRITICAL_SECTION_DEBUG_DATA        DebuggingInfo;
-    long                                    LockCount;
-    long                                    RecusionCount;
+    int32_t                                 LockCount;
+    int32_t                                 RecusionCount;
     HANDLE                                  ThreadWithPossesion;
     HANDLE                                  Semaphore;
     uint32_t                                SpinCount;

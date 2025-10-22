@@ -1,3 +1,3 @@
 AnnyaOS™ is an Operating System based on "The Lousine Kernel™" created by Tyler Grenier(AlienMaster815) using Tyler Grenier's KULA (Kernel Unification Layer) Architecture wich is an architectured designed for multi system emulation for enhanced software compatibility and is licenced under the GPL2 licence. (3rd party user mode libraries have their own licence)
 
-Some drivers are clean-room reimplementations based on public documentation and observed behavior of Linux drivers. No Linux source code was copied or reused unless EXPLICITLY STATED.
+Some drivers are clean-room reimplementations based on public documentation and observed behavior of Linux drivers and the WINAPI Reference Manuals on the Microsoft website. No Linux source code or Microsoft source code was copied or reused unless EXPLICITLY STATED.

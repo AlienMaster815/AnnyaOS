@@ -15,13 +15,6 @@
  * - BSD kernel documentation
  * - Microsoft, NVIDIA, and Advanced Micro Devices (AMD) documentation
  *
- * DISCLAIMER:
- * Due to the nature of proprietary information and potential leaks, the sources 
- * of certain information will not be disclosed **nor shall they be provided.** 
- * Any possibly leaked information, if present, is used **strictly for compatibility 
- * purposes and not with any malicious intent.** If you require additional information 
- * regarding this driver, please obtain it from the **respective hardware or documentation owner.**
- *
  * This software is provided "as is," without any warranty of any kind, express or 
  * implied, including but not limited to the implied warranties of merchantability, 
  * fitness for a particular purpose, and non-infringement. In no event shall the author
