@@ -240,7 +240,7 @@
 
 #define local static
 typedef unsigned int uint;
-typedef unsigned long ulong;
+typedef unsigned int32_t ulong;
 
 /* Macro for debugging to deterministically force recovery operations */
 #ifdef GZLOG_DEBUG

@@ -16,14 +16,14 @@ void LouGlobalUserFree(void* Addr);
 
 void* AnnyaNtGetProcessHeap();
 NTSTATUS RtlInitializeCriticalSectionEx(
-    PMSVC_CRITICAL_SECTION CriticalSection,
+    PRTL_CRITICAL_SECTION CriticalSection,
     uint32_t SpinCount,
     uint32_t Flags
 );
 
-NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+NTSTATUS RtlEnterCriticalSection(PRTL_CRITICAL_SECTION CriticalSection);
 
-NTSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+NTSTATUS RtlLeaveCriticalSection(PRTL_CRITICAL_SECTION CriticalSection);
 
 uint16_t NtGetProcessorCount();
 

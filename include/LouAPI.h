@@ -2,6 +2,8 @@
 #ifndef LOUAPI_H
 #define LOUAPI_H
 
+#define WINAPI __stdcall
+
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 
 //Include API Headers

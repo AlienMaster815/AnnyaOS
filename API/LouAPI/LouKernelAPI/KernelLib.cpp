@@ -20,7 +20,7 @@ KERNEL_IMPORT LOUSTATUS LouKeGetSystemFirmwareTableBuffer(
 	uint32_t SystemType,
 	void* FirmwareTableBufferSrc,
 	void* FirmwareTableBufferDest,
-	unsigned long* BufferLength
+	unsigned int* BufferLength
 );
 
 LOUDDK_API_ENTRY

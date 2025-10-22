@@ -47,7 +47,7 @@ typedef enum _WAIT_TYPE {
 #define BASETYPES
 typedef unsigned char UCHAR, *PUCHAR;
 typedef unsigned short USHORT, *PUSHORT;
-typedef unsigned long ULONG, *PULONG;
+typedef unsigned int ULONG, *PULONG;
 #endif
 typedef ULONG CLONG;
 typedef CLONG *PCLONG;

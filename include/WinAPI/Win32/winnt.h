@@ -7,6 +7,9 @@
 extern "C"{
 #endif
 
+typedef int LONG;
+typedef unsigned int ULONG;
+
 #define DECLSPEC_IMPORT __declspec(dllimport)
 #define DECLSPEC_EXPORT __declspec(dllexport)
 
@@ -122,7 +125,32 @@ typedef struct _LIST_ENTRY{
 #define PROCESS_SET_LIMITED_INFORMATION     0x2000
 #define PROCESS_ALL_ACCESS                  (STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0xffff)
 
+typedef PVOID HINSTANCE;
 
+typedef struct _RTL_CRITICAL_SECTION_DEBUG_DATA{
+    uint16_t                                SectionType;
+    uint16_t                                CBTI;
+    struct _RTL_CRITICAL_SECTION*           RtlCriticalSection;
+    LIST_ENTRY                              ProcessLockList;
+    uint32_t                                LockListEntryCount;
+    uint32_t                                ContentionCount;
+    uint32_t                                SpareData[2];
+}RTL_CRITICAL_SECTION_DEBUG_DATA, * PRTL_CRITICAL_SECTION_DEBUG_DATA,
+    MSVC_CRITICAL_SECTION_DEBUG_DATA, * PMSVC_CRITICAL_SECTION_DEBUG_DATA;
+
+typedef struct _RTL_CRITICAL_SECTION{
+    PRTL_CRITICAL_SECTION_DEBUG_DATA        DebuggingInfo;
+    long                                    LockCount;
+    long                                    RecusionCount;
+    HANDLE                                  ThreadWithPossesion;
+    HANDLE                                  Semaphore;
+    uint32_t                                SpinCount;
+}RTL_CRITICAL_SECTION, * PRTL_CRITICAL_SECTION,
+    MSVC_CRITICAL_SECTION, *PMSVC_CRITICAL_SECTION;
+
+typedef struct _ANNYA_EXPLORER_INIT_PACKET{
+    HINSTANCE       Instance;
+}ANNYA_EXPLORER_INIT_PACKET, * PANNYA_EXPLORER_INIT_PACKET;
 
 #ifdef __cplusplus
 }

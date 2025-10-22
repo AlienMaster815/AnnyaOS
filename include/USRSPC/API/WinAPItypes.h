@@ -3,7 +3,7 @@
 
 #include <WinAPI/NtAPI/Ntstatus.h>
 
-typedef unsigned long ULONG;
+typedef unsigned int ULONG;
 typedef void* PVOID;
 typedef PVOID HANDLE;
 typedef HANDLE* PHANDLE;

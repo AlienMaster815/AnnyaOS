@@ -51,7 +51,7 @@ HANDLE ULongToHandle(uint64_t ThreadID){
 NTDLL_API 
 bool 
 RtlTryEnterCriticalSection(
-    PMSVC_CRITICAL_SECTION CriticalSection
+    PRTL_CRITICAL_SECTION CriticalSection
 ){
 
     if(InterlockedCompareExchange(&CriticalSection->LockCount, 0 , -1) == -1){
@@ -70,7 +70,7 @@ RtlTryEnterCriticalSection(
 NTDLL_API
 NTSTATUS 
 RtlEnterCriticalSection(
-    PMSVC_CRITICAL_SECTION CriticalSection
+    PRTL_CRITICAL_SECTION CriticalSection
 ){
 
     if(CriticalSection->SpinCount){
@@ -101,24 +101,24 @@ RtlEnterCriticalSection(
 NTDLL_API
 NTSTATUS 
 RtlInitializeCriticalSectionEx(
-    PMSVC_CRITICAL_SECTION CriticalSection,
+    PRTL_CRITICAL_SECTION CriticalSection,
     uint32_t SpinCount,
     uint32_t Flags
 ){
-    if(Flags & MSVC_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION_DYNAMIC_SPIN){
+    if(Flags & RTL_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION_DYNAMIC_SPIN){
         //TODO:allocate static pool for debug information
         LouPrint("Critical Section:%h :: SpinCount:%d :: Flags:%h\n", CriticalSection, SpinCount, Flags);
     }
 
-    if(Flags & MSVC_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFORMATION){
+    if(Flags & RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFORMATION){
         LouPrint("Forcing Debug on critical section\n");
-        CriticalSection->DebuggingInfo = (PMSVC_CRITICAL_SECTION_DEBUG_DATA)RtlAllocateHeapEx(GetProcessHeap(), 0, sizeof(MSVC_CRITICAL_SECTION_DEBUG_DATA), GET_ALIGNMENT(MSVC_CRITICAL_SECTION_DEBUG_DATA));
+        CriticalSection->DebuggingInfo = (PRTL_CRITICAL_SECTION_DEBUG_DATA)RtlAllocateHeapEx(GetProcessHeap(), 0, sizeof(RTL_CRITICAL_SECTION_DEBUG_DATA), GET_ALIGNMENT(RTL_CRITICAL_SECTION_DEBUG_DATA));
         if(CriticalSection->DebuggingInfo){
             CriticalSection->DebuggingInfo->SectionType = 0;
             CriticalSection->DebuggingInfo->CBTI;
-            CriticalSection->DebuggingInfo->MsvcCriticalSection = CriticalSection;
-            CriticalSection->DebuggingInfo->ProcessLockList.LastHeader = (PListHeader)&CriticalSection->DebuggingInfo->ProcessLockList;
-            CriticalSection->DebuggingInfo->ProcessLockList.NextHeader = (PListHeader)&CriticalSection->DebuggingInfo->ProcessLockList;
+            CriticalSection->DebuggingInfo->RtlCriticalSection = CriticalSection;
+            CriticalSection->DebuggingInfo->ProcessLockList.Blink = (PLIST_ENTRY)&CriticalSection->DebuggingInfo->ProcessLockList;
+            CriticalSection->DebuggingInfo->ProcessLockList.Flink = (PLIST_ENTRY)&CriticalSection->DebuggingInfo->ProcessLockList;
             CriticalSection->DebuggingInfo->LockListEntryCount - 0;
             CriticalSection->DebuggingInfo->ContentionCount = 0;
         }
@@ -142,7 +142,7 @@ RtlInitializeCriticalSectionEx(
 
 NTDLL_API 
 NTSTATUS 
-RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection) {
+RtlLeaveCriticalSection(PRTL_CRITICAL_SECTION CriticalSection) {
 
     if(--CriticalSection->RecusionCount){
         if(CriticalSection->RecusionCount > 0){

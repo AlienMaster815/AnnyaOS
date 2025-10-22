@@ -122,4 +122,11 @@ typedef enum{
     DPI_HOSTING_BEHAVIOR_MIXED = 1,
 }DPI_HOSTING_BEHAVIOR;
 
+#ifndef _GUID_TYPE
+#define _GUID_TYPE
+typedef struct _GUID {
+	unsigned char DataByte[16];
+} GUID,* LPGUID, UUID, * PGUID, * PUUID;
+#endif
+
 #endif

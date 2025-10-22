@@ -247,7 +247,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableBuffer(
 	uint32_t SystemType,
 	void* FirmwareTableBufferSrc,
 	void* FirmwareTableBufferDest, 
-	unsigned long* BufferLength
+	unsigned int* BufferLength
 ) {
 	LouKIRQL OldIrql;
 	LouKeAcquireSpinLock(&FirmwareLock, &OldIrql);

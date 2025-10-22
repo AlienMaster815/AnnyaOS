@@ -1,6 +1,8 @@
 #ifndef _LOUDDK_H
 #define _LOUDDK_H
 
+#define WINAPI __stdcall
+
 #include <cstdint.h>
 
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))

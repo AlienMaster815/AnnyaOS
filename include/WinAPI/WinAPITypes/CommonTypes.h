@@ -25,7 +25,7 @@ typedef unsigned long long ULONGLONG, * PULONGLONG, * PULONG64;
 typedef long long LONGLONG, * PLONGLONG;
 #endif
 
-typedef unsigned long* PULONG,* PQWORD;
+typedef unsigned int* PULONG,* PQWORD;
 typedef unsigned char* PUCHAR,* PBYTE;
 typedef unsigned short* PUWORD,* PUSHORT;
 typedef long* PLONG;
@@ -62,8 +62,8 @@ typedef int32_t POINTER_32;
 #define CONST const
 #define IRP_MJ_MAXIMUM_FUNCTION         0x1b
 typedef short SHORT;
-typedef unsigned long ULONG;
-typedef long LONG;
+typedef unsigned int ULONG;
+typedef int LONG;
 typedef void* PVOID;
 #define VOID void
 typedef char CHAR;
@@ -427,7 +427,8 @@ typedef struct _IO_STATUS_BLOCK {
     ULONG_PTR Information;
 } IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
 
-
+#ifndef _LARGE_INTEGERS_
+#define _LARGE_INTEGERS_
 
 #if defined(MIDL_PASS)
 typedef struct _LARGE_INTEGER {
@@ -468,6 +469,7 @@ typedef union _ULARGE_INTEGER {
 typedef LARGE_INTEGER *PLARGE_INTEGER;
 typedef ULARGE_INTEGER *PULARGE_INTEGER;
 
+#endif
 
 typedef
 BOOLEAN

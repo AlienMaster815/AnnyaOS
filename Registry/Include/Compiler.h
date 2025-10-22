@@ -13,7 +13,7 @@
 #define LOU_STRING char*
 
 typedef unsigned long long UINT64;
-typedef unsigned long ULONG;
+typedef unsigned int ULONG;
 typedef long long INT64;
 typedef bool BOOL;
 typedef int errno_t;

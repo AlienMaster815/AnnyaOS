@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+#define WINAPI __stdcall
+
 #ifndef _GUID_TYPE
 #define _GUID_TYPE
 typedef struct _GUID {

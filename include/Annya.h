@@ -3,6 +3,8 @@
 
 #define _USER_MODE_CODE_
 
+#define WINAPI __stdcall
+
 #include <cstdint.h>
 #include <stdalign.h>
 
@@ -79,38 +81,15 @@ typedef struct _TIME_T{
 
 typedef void (__cdecl *FunctionVector)(void);
 
-typedef struct  _ListHeader{
-    struct _ListHeader* LastHeader;
+typedef struct _ListHeader{
     struct _ListHeader* NextHeader;
+    struct _ListHeader* LastHeader;
 }ListHeader, * PListHeader;
-
-typedef struct _MSVC_CRITICAL_SECTION_DEBUG_DATA{
-    uint16_t                                SectionType;
-    uint16_t                                CBTI;
-    struct _MSVC_CRITICAL_SECTION*          MsvcCriticalSection;
-    ListHeader                              ProcessLockList;
-    uint32_t                                LockListEntryCount;
-    uint32_t                                ContentionCount;
-    uint32_t                                SpareData[2];
-}MSVC_CRITICAL_SECTION_DEBUG_DATA, * PMSVC_CRITICAL_SECTION_DEBUG_DATA;
-
-typedef struct _MSVC_CRITICAL_SECTION{
-    PMSVC_CRITICAL_SECTION_DEBUG_DATA       DebuggingInfo;
-    long                                    LockCount;
-    long                                    RecusionCount;
-    HANDLE                                  ThreadWithPossesion;
-    HANDLE                                  Semaphore;
-    uint32_t                                SpinCount;
-}MSVC_CRITICAL_SECTION, * PMSVC_CRITICAL_SECTION;
-
-typedef struct _ANNYA_EXPLORER_INIT_PACKET{
-    HINSTANCE       Instance;
-}ANNYA_EXPLORER_INIT_PACKET, * PANNYA_EXPLORER_INIT_PACKET;
 
 struct _AWM_CLIP_TREE;
 
 #ifndef LONG
-typedef long LONG;
+typedef int LONG;
 #endif
 
 typedef LONG    LRESULT;
@@ -160,15 +139,15 @@ typedef struct _WINDOW_HANDLE{
 #define CANVAS_BUTTON           "AnnyaCanvasButton"
 #define ANNYA_GENERIC_WINDOW    "AnnyaOSShellWindow"
 
-#define MSVC_CRITICAL_SECTION_FLAG_NO_DEBUG_INFORMATION     0x01000000
-#define MSVC_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN             0x02000000
-#define MSVC_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION    0x04000000
-#define MSVC_CRITICAL_SECTION_FLAG_RESOURCE_TYPE            0x08000000
-#define MSVC_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFORMATION  0x10000000
-#define MSVC_CRITICAL_SECTION_ALL_FLAG_MASK                 0xFF000000
-#define MSVC_CRITICAL_SECTION_FLAG_RESERVED_FLAGS           0xE0000000
+#define RTL_CRITICAL_SECTION_FLAG_NO_DEBUG_INFORMATION     0x01000000
+#define RTL_ACTIVATION_CONTEXT_STACK_FRAME_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN             0x02000000
+#define RTL_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION    0x04000000
+#define RTL_CRITICAL_SECTION_FLAG_RESOURCE_TYPE            0x08000000
+#define RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFORMATION  0x10000000
+#define RTL_CRITICAL_SECTION_ALL_FLAG_MASK                 0xFF000000
+#define RTL_CRITICAL_SECTION_FLAG_RESERVED_FLAGS           0xE0000000
 
-#define MSVC_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION_DYNAMIC_SPIN (MSVC_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION | MSVC_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN)
+#define RTL_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION_DYNAMIC_SPIN (RTL_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION | RTL_CRITICAL_SECTION_FLAG_DYNAMIC_SPIN)
 
 #define HEAP_NO_SERIALIZE               0x00000001
 #define HEAP_GROWABLE                   0x00000002

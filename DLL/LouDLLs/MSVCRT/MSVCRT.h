@@ -6,6 +6,9 @@
 
 typedef void (__cdecl *FunctionVector)(void);
 
+typedef int LONG;
+typedef unsigned int ULONG;
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -93,11 +96,11 @@ typedef struct _MSVC_CRITICAL_SECTION_DEBUG_DATA{
 
 typedef struct _MSVC_CRITICAL_SECTION{
     PMSVC_CRITICAL_SECTION_DEBUG_DATA       DebuggingInfo;
-    long                                    LockCount;
-    long                                    RecusionCount;
+    LONG                                    LockCount;
+    LONG                                    RecusionCount;
     HANDLE                                  ThreadWithPossesion;
     HANDLE                                  Semaphore;
-    unsigned long*                          SpinCount;
+    ULONG*                                  SpinCount;
 }MSVC_CRITICAL_SECTION, * PMSVC_CRITICAL_SECTION;
 
 

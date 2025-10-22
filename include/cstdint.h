@@ -12,7 +12,7 @@ typedef bool BOOL;
 typedef uint8_t     UINT8,  BYTE;
 typedef uint16_t    UINT16, WORD;
 typedef uint32_t    UINT32, DWORD, INTEGER;
-typedef unsigned long       ULONG;
+typedef unsigned int       ULONG;
 typedef unsigned int UINT;
 typedef char        CHAR, INT8; 
 #ifndef __cplusplus

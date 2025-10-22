@@ -89,7 +89,7 @@ typedef unsigned long* ULONG_PTR;
 typedef void* HMODULE;
 typedef void* LPVOID;
 
-typedef unsigned long* PULONG;
+typedef unsigned int* PULONG;
 
 typedef bool BOOL;
 #define TRUE true
