@@ -1,3 +1,16 @@
+/* 
+ * Clean-room reimplementation of functionality from Wine project file: <concurrencysal.h>
+ *
+ * This file contains original source code written from scratch based on
+ * publicly available behavior of the Windows API and documented interfaces.
+ *
+ * No Wine source code was copied or reused. Behavior is matched only for
+ * compatibility.
+ *
+ * This implementation is NOT a derivative of Wine source code and is not
+ * subject to Wine licensing terms.
+ */
+
 #ifndef CONCURRENCYSAL_HXX
 #define CONCURRENCYSAL_HXX
 
