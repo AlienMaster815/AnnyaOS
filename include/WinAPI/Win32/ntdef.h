@@ -1,14 +1,19 @@
-/* 
- * Clean-room reimplementation of functionality from Wine project file: <ntdef.h>
+/*
+ * Copyright (C) 2015 Austin English
  *
- * This file contains original source code written from scratch based on
- * publicly available behavior of the Windows API and documented interfaces.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * No Wine source code was copied or reused. Behavior is matched only for
- * compatibility.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * This implementation is NOT a derivative of Wine source code and is not
- * subject to Wine licensing terms.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
 #ifndef _NTDEF_

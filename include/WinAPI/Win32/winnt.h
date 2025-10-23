@@ -1,19 +1,25 @@
 #ifndef _WINNT_H
 #define _WINNT_H
 
-/* 
- * Clean-room reimplementation of functionality from Wine project file: <winnt.h>
+/*
+ * Win32 definitions for Windows NT
  *
- * This file contains original source code written from scratch based on
- * publicly available behavior of the Windows API and documented interfaces.
+ * Copyright 1996 Alexandre Julliard
  *
- * No Wine source code was copied or reused. Behavior is matched only for
- * compatibility.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This implementation is NOT a derivative of Wine source code and is not
- * subject to Wine licensing terms.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
-
 #include "winapifamily.h"
 
 #ifdef __cplusplus
@@ -164,6 +170,20 @@ typedef struct _RTL_CRITICAL_SECTION{
 typedef struct _ANNYA_EXPLORER_INIT_PACKET{
     HINSTANCE       Instance;
 }ANNYA_EXPLORER_INIT_PACKET, * PANNYA_EXPLORER_INIT_PACKET;
+
+
+typedef struct _NT_TIB{
+	struct _EXCEPTION_REGISTRATION_RECORD *ExceptionList;
+	PVOID StackBase;
+	PVOID StackLimit;
+	PVOID SubSystemTib;
+	union {
+          PVOID FiberData;
+          DWORD Version;
+	} DUMMYUNIONNAME;
+	PVOID ArbitraryUserPointer;
+	struct _NT_TIB *Self;
+} NT_TIB, *PNT_TIB;
 
 #ifdef __cplusplus
 }

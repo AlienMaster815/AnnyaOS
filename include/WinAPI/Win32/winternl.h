@@ -1,15 +1,23 @@
-/* 
- * Clean-room reimplementation of functionality from Wine project file: <winternl.h>
+/*
+ * Internal NT APIs and data structures
  *
- * This file contains original source code written from scratch based on
- * publicly available behavior of the Windows API and documented interfaces.
+ * Copyright (C) the Wine project
  *
- * No Wine source code was copied or reused. Behavior is matched only for
- * compatibility.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This implementation is NOT a derivative of Wine source code and is not
- * subject to Wine licensing terms.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
+
 
 #ifndef _WINTERNL_H
 #define _WINTERNL_H
@@ -476,10 +484,8 @@ typedef struct _PEB{
     ULONG                           NtGlobalFlag2;
 }PEB, * PPEB;
 
-
-
 typedef struct _TEB{                                                                
-    //NT_TIB                          Tib;
+    NT_TIB                          Tib;
     PVOID                           EnvironmentPointer;
     CLIENT_ID                       ClientId;
     PVOID                           ActiveRpcHandle;
@@ -616,6 +622,45 @@ typedef struct _TEB{
     GUID                            EffectiveContainerId;
 } TEB, *PTEB;
 
-//647
+typedef struct _NT_TIB32{
+    ULONG       ExceptionList;
+    ULONG       StackBase;
+    ULONG       StackLimit;
+    ULONG       SubSystemTIB;
+    ULONG       FiberData;
+    ULONG       ArbUserPointer;
+}NT_TIB32, * PNT_TIB32;
+
+typedef struct _NT_TIB64{
+    UINT64      ExceptionList;
+    UINT64      StackBase;
+    UINT64      StackLimit;
+    UINT64      SubSystemTIB;
+    UINT64      FiberData;
+    UINT64      ArbUserPointer;
+    UINT64      Self;
+}NT_TIB64, * PNT_TIB64;
+
+typedef struct _CLIENT_ID32{
+    ULONG       UniqueProcess;
+    ULONG       UniqueThread;
+}CLIENT_ID32, * PCLIENT_ID32;
+
+typedef struct _CLIENT_ID64{
+    UINT64      UniqueProcess;
+    UINT64      UniqueThread;
+}CLIENT_ID64, * PCLIENT_ID64;
+
+typedef struct _LIST_ENTRY32{
+    ULONG       Flink;
+    ULONG       Blink;
+}LIST_ENTRY32, * PLIST_ENTRY32;
+
+typedef struct _LIST_ENTRY64{
+    UINT64      Flink;
+    UINT64      Blink;
+}LIST_ENTRY64, * PLIST_ENTRY64;
+
+
 
 #endif //_WINTERNL_H

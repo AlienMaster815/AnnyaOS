@@ -2,41 +2,25 @@
 #include <LouDDK.h>
 #include "AhciMod.h"
 
+// SPDX-License-Identifier: GPL-2.0-or-later
 /*
- * This software is provided under the GNU General Public License (GPL) v2.
- * Copyright (C) 2025 Tyler Grenier.
+ *  libahci.c - Common AHCI SATA low-level routines
  *
- * The following kernel module is based on a combination of publicly available 
- * specifications, OS development resources, and various vendor documentation, 
- * including but not limited to:
- * - AHCI Specification
- * - OSDev.org materials
- * - Linux kernel documentation
- * - BSD kernel documentation
- * - Microsoft, NVIDIA, and Advanced Micro Devices (AMD) documentation
+ *  Maintained by:  Tejun Heo <tj@kernel.org>
+ *    		    Please ALWAYS copy linux-ide@vger.kernel.org
+ *		    on emails.
  *
- * This software is provided "as is," without any warranty of any kind, express or 
- * implied, including but not limited to the implied warranties of merchantability, 
- * fitness for a particular purpose, and non-infringement. In no event shall the author
- * be liable for any direct, indirect, incidental, special, exemplary, or consequential 
- * damages arising from the use of this software.
+ *  Copyright 2004-2005 Red Hat, Inc.
  *
- * MODULE FILES:
- * - AhciMod.h
- * - Ahci.cpp
- * - Ahci-Vt8251.cpp
- * - AhciLib.cpp
- * - Ahci-P5wdh.cpp
- * - Ahci-Avn.cpp
- * - AhciPowerManagement.cpp
- * - AhciPhyLayer.cpp
+ * libata documentation is available via 'make {ps|pdf}docs',
+ * as Documentation/driver-api/libata.rst
  *
- * LICENSE:
- * This module is licensed under the GNU General Public License v2 (GPLv2).
- * You may obtain a copy of the GPLv2 at:
- * https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * AHCI hardware documentation:
+ * http://www.intel.com/technology/serialata/pdf/rev1_0.pdf
+ * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
 
+ 
 void* LouKeMallocAhciCommandTable(uint16_t Entries){
     return LouKeMallocEx( 0x80 + ((sizeof(uint32_t) * 4) * Entries), 128, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
 }

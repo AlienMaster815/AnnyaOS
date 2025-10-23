@@ -22,18 +22,18 @@ uint64_t GetCurrentThreadID(){
     return ThreadId[1];
 }
 
-long InterlockedIncrement(long* LockHandle){
+int InterlockedIncrement(int* LockHandle){
     *LockHandle = (*LockHandle + 1);
     return *LockHandle;
 }
 
-long InterlockedDecrement(long* LockHandle){
+int InterlockedDecrement(int* LockHandle){
     *LockHandle = (*LockHandle - 1);
     return *LockHandle;
 }
 
 uint32_t InterlockedCompareExchange(
-    long* LockHandle, 
+    int* LockHandle, 
     uint32_t Reserved, 
     uint32_t Result
 ){
