@@ -9,7 +9,7 @@ typedef struct _EXTERNALLY_CONNECTED_DEVICE{
     uint32_t*                               CableSupportID;
     uint32_t*                               MutualExclusionID;
     #ifdef __cplusplus
-    PDEVICE_OBJECT                          PlatformDevice;    
+    struct _DEVICE_OBJECT*                          PlatformDevice;    
     #else
     void*                                   PlatformDevice;
     #endif

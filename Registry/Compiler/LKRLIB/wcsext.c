@@ -112,7 +112,7 @@ Lou_iswspace(
 
 
 size_t
-Lou_wcslen(LPCWSTR str){
+Lou_wcslen(LPWSTR str){
     const WCHAR *s = str;
     while (*s) s++;
     return s - str;
@@ -900,7 +900,7 @@ Lou__wtoi64(
 
 UINT64
 Lou__wtoh64(
-    LPCWSTR Str
+    LPWSTR Str
 ){
     UINT64 TotalRun = 0;
     BOOL   Negative  = FALSE;
@@ -941,7 +941,7 @@ Lou__wtoh64(
 
 UINT64
 Lou__wtoh64_s(
-    LPCWSTR Str,
+    LPWSTR Str,
     size_t  Length
 ){
     UINT64 TotalRun = 0;
@@ -985,7 +985,7 @@ Lou__wtoh64_s(
 
 UINT64
 Lou__wtoi64_s(
-    LPCWSTR Str,
+    LPWSTR Str,
     size_t  Length
 ){
     UINT64 TotalRun = 0;

@@ -11,8 +11,8 @@ extern "C"{
 typedef struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER{
     PPCI_DEVICE_OBJECT     PDEV;
     #ifdef __cplusplus
-    PDRIVER_OBJECT          DriverObject;
-    PDEVICE_OBJECT          PlatformDevice;
+    struct _DRIVER_OBJECT*          DriverObject;
+    struct _DEVICE_OBJECT*          PlatformDevice;
     #else
     void*                   DriverObject;
     void*                   PlatformDevice;

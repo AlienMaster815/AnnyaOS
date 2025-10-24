@@ -1,40 +1,35 @@
 
-
-#ifndef _COMMON_TYPES_H
-#define _COMMON_TYPES_H
-
 #include <cstdint.h>
+#include <WinAPI/Win32/winnt.h>
+#include <WinAPI/Win32/winternl.h>
 //Fixed Percision Integers
 
 typedef uint32_t DWORD32, UINT32, ULONG32,DWORD, UINT;
-typedef uint64_t DWORD64, UINT64, ULONG64,QWORD;
-typedef int32_t INT32, LONG32,HRESULT, NTSTRSAFEDDI, INT;
+typedef uint64_t UINT64,QWORD;
+typedef int32_t INT32, LONG32, NTSTRSAFEDDI, INT;
 typedef int64_t INT64, LONG64;
 typedef uint16_t UWORD, USHORT,UINT16, * PUSHORT;
 typedef uint16_t WORD;
 typedef int16_t INT16, SHORT;
-typedef uint8_t BYTE, UCHAR,UINT8;
-typedef const char CCHAR;
+typedef uint8_t UCHAR,UINT8;
 typedef char INT8;
 
 typedef short CSHORT;
 
 #ifndef _LONGLONG
 #define _LONGLONG
-typedef unsigned long long ULONGLONG, * PULONGLONG, * PULONG64;
+typedef unsigned long long ULONGLONG, * PULONGLONG;
 typedef long long LONGLONG, * PLONGLONG;
 #endif
 
 typedef unsigned int* PULONG,* PQWORD;
-typedef unsigned char* PUCHAR,* PBYTE;
+typedef unsigned char* PUCHAR;
 typedef unsigned short* PUWORD,* PUSHORT;
 typedef long* PLONG;
 typedef unsigned short* PWORD;
 typedef char* PCHAR;
 
 typedef void* PVOID;
-
-typedef unsigned long** PULONG_PTR;
 
 //Pointer Percision Integers
 typedef unsigned long *DWORD_PTR;
@@ -46,7 +41,6 @@ typedef uint64_t SIZE_T;
 typedef int64_t SSIZE_T;
 typedef uint32_t* UHALF_PTR;
 typedef unsigned int* UINT_PTR;
-typedef unsigned long* ULONG_PTR;
 
 //FIXED PRECISION POINTER TYPES
 //#ifdef __x86_64__
@@ -63,16 +57,13 @@ typedef int32_t POINTER_32;
 #define IRP_MJ_MAXIMUM_FUNCTION         0x1b
 typedef short SHORT;
 typedef unsigned int ULONG;
-typedef int LONG;
 typedef void* PVOID;
 #define VOID void
 typedef char CHAR;
 typedef unsigned short USHORT;
 typedef unsigned char UCHAR;
 
-typedef bool BOOLEAN;
-
-#define RESTRICTED_POINTER __restrict
+//#define RESTRICTED_POINTER __restrict
 
 #define DEVICE_TYPE ULONG
 
@@ -88,7 +79,6 @@ typedef KSPIN_LOCK *PKSPIN_LOCK;
 typedef ULONG_PTR KAFFINITY;
 typedef KAFFINITY *PKAFFINITY;
 
-typedef wchar_t* PWSTR,* PCWSTR;
 
 
 typedef int32_t NTSTATUS;
@@ -106,7 +96,7 @@ typedef PVOID PSID;
 typedef struct _LIST_ENTRY{
     struct _LIST_ENTRY* Flink;
     struct _LIST_ENTRY* Blink;
-}LIST_ENTRY, * PLIST_ENTRY, *RESTRICTED_POINTER PRLIST_ENTRY;
+}LIST_ENTRY, * PLIST_ENTRY, *RESTRICTED_POINTER, PRLIST_ENTRY;
 #endif
 
 #if defined(_X86_)
@@ -119,6 +109,8 @@ typedef struct _LIST_ENTRY{
 #define TIMER_EXPIRED_INDEX_BITS        6
 #define TIMER_PROCESSOR_INDEX_BITS      5
 
+#ifndef _DISPATCHER_HEADER_
+#define _DISPATCHER_HEADER_
 typedef struct _DISPATCHER_HEADER {
     union {
         union {
@@ -259,7 +251,7 @@ typedef struct _DISPATCHER_HEADER {
     LONG SignalState;                   // Object lock
     LIST_ENTRY WaitListHead;            // Object lock
 } DISPATCHER_HEADER, *PDISPATCHER_HEADER;
-
+#endif
 
 
 
@@ -274,39 +266,17 @@ KDEFERRED_ROUTINE (
 
 typedef KDEFERRED_ROUTINE *PKDEFERRED_ROUTINE;
 
-
-typedef struct _ACL
-    {
-    UCHAR AclRevision;
-    UCHAR Sbz1;
-    USHORT AclSize;
-    USHORT AceCount;
-    USHORT Sbz2;
-    }     ACL;
-
-typedef ACL *PACL;
-
-typedef struct _SECURITY_DESCRIPTOR {
-    UCHAR Revision;
-    UCHAR Sbz1;
-    //TODO: 
-    SECURITY_DESCRIPTOR_CONTROL Control;
-    PSID Owner;
-    PSID Group;
-    PACL Sacl;
-    PACL Dacl;
-} SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
-
+#ifndef _KEVENT_
+#define _KEVENT_
 typedef struct _KEVENT {
     DISPATCHER_HEADER Header;
-} KEVENT, *PKEVENT, *RESTRICTED_POINTER PRKEVENT;
-
-typedef struct _SINGLE_LIST_ENTRY {
-    struct _SINGLE_LIST_ENTRY *Next;
-} SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
+} KEVENT, *PKEVENT, PRKEVENT;
+#endif
 
 typedef CONST CHAR *PCSTR, *LPCSTR;
 
+#ifndef _KDPC_
+#define _KDPC_
 typedef struct _KDPC {
     union {
         ULONG TargetInfoAsUlong;
@@ -325,7 +295,7 @@ typedef struct _KDPC {
     PVOID SystemArgument2;
     PVOID DpcData;
 } KDPC, *PKDPC, *PRKDPC;
-
+#endif
 
 
 typedef
@@ -383,9 +353,8 @@ DRIVER_STARTIO (
 
 typedef DRIVER_STARTIO *PDRIVER_STARTIO;
 
-
-
-
+#ifndef _KDEVICE_QUERY_
+#define _KDEVICE_QUERY_
 typedef struct _KDEVICE_QUEUE_ENTRY {
     LIST_ENTRY DeviceListEntry;
     ULONG SortKey;
@@ -415,9 +384,10 @@ typedef struct _KDEVICE_QUEUE {
 #endif
     
 } KDEVICE_QUEUE, *PKDEVICE_QUEUE, *PRKDEVICE_QUEUE;
+#endif
 
-
-
+#ifndef _IO_STATUS_BLOCK
+#define _IO_STATUS_BLOCK
 typedef struct _IO_STATUS_BLOCK {
     union {
         NTSTATUS Status;
@@ -426,49 +396,6 @@ typedef struct _IO_STATUS_BLOCK {
 
     ULONG_PTR Information;
 } IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
-
-#ifndef _LARGE_INTEGERS_
-#define _LARGE_INTEGERS_
-
-#if defined(MIDL_PASS)
-typedef struct _LARGE_INTEGER {
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#else // MIDL_PASS
-typedef union _LARGE_INTEGER {
-    struct {
-        ULONG LowPart;
-        LONG HighPart;
-    } DUMMYSTRUCTNAME;
-    struct {
-        ULONG LowPart;
-        LONG HighPart;
-    } u;
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#endif //MIDL_PASS
-
-#if defined(MIDL_PASS)
-typedef struct _LARGE_INTEGER {
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#else // MIDL_PASS
-typedef union _ULARGE_INTEGER {
-    struct {
-        ULONG LowPart;
-        ULONG HighPart;
-    } DUMMYSTRUCTNAME;
-    struct {
-        ULONG LowPart;
-        ULONG HighPart;
-    } u;
-    LONGLONG QuadPart;
-} ULARGE_INTEGER;
-#endif //MIDL_PASS
-
-typedef LARGE_INTEGER *PLARGE_INTEGER;
-typedef ULARGE_INTEGER *PULARGE_INTEGER;
-
 #endif
 
 typedef
@@ -487,12 +414,14 @@ FAST_IO_READ (
 typedef FAST_IO_READ *PFAST_IO_READ;
 
 
-
+#ifndef _IO_ALLOCATION_ACTION_
+#define _IO_ALLOCATION_ACTION_
 typedef enum _IO_ALLOCATION_ACTION {
     KeepObject = 1,
     DeallocateObject,
     DeallocateObjectKeepRegisters
 } IO_ALLOCATION_ACTION, *PIO_ALLOCATION_ACTION;
+#endif
 
 typedef
 IO_ALLOCATION_ACTION
@@ -522,6 +451,8 @@ FAST_IO_CHECK_IF_POSSIBLE (
 
 typedef FAST_IO_CHECK_IF_POSSIBLE *PFAST_IO_CHECK_IF_POSSIBLE;
 
+#ifndef _WAIT_CONTEXT_BLOCK_
+#define _WAIT_CONTEXT_BLOCK_
 typedef struct _WAIT_CONTEXT_BLOCK {
     union {
         KDEVICE_QUEUE_ENTRY WaitQueueEntry;
@@ -542,7 +473,7 @@ typedef struct _WAIT_CONTEXT_BLOCK {
     PVOID CurrentIrp;
     PKDPC BufferChainingDpc;
 } WAIT_CONTEXT_BLOCK, *PWAIT_CONTEXT_BLOCK;
-
+#endif
 
 typedef
 BOOLEAN
@@ -559,6 +490,8 @@ FAST_IO_WRITE (
 
 typedef FAST_IO_WRITE *PFAST_IO_WRITE;
 
+#ifndef _FILE_BASIC_INFORMATION_
+#define _FILE_BASIC_INFORMATION_
 typedef struct _FILE_BASIC_INFORMATION {
     LARGE_INTEGER CreationTime;
     LARGE_INTEGER LastAccessTime;
@@ -566,7 +499,7 @@ typedef struct _FILE_BASIC_INFORMATION {
     LARGE_INTEGER ChangeTime;
     ULONG FileAttributes;
 } FILE_BASIC_INFORMATION, *PFILE_BASIC_INFORMATION;
-
+#endif
 
 typedef
 BOOLEAN
@@ -580,7 +513,8 @@ FAST_IO_QUERY_BASIC_INFO (
 
 typedef FAST_IO_QUERY_BASIC_INFO *PFAST_IO_QUERY_BASIC_INFO;
 
-
+#ifndef _FILE_STANDARD_INFORMATION_
+#define _FILE_STANDARD_INFORMATION_
 typedef struct _FILE_STANDARD_INFORMATION {
     LARGE_INTEGER AllocationSize;
     LARGE_INTEGER EndOfFile;
@@ -588,6 +522,7 @@ typedef struct _FILE_STANDARD_INFORMATION {
     BOOLEAN DeletePending;
     BOOLEAN Directory;
 } FILE_STANDARD_INFORMATION, *PFILE_STANDARD_INFORMATION;
+#endif
 
 typedef struct _KPROCESS *PEPROCESS;
 
@@ -705,7 +640,7 @@ FAST_IO_QUERY_NETWORK_OPEN_INFO (
      struct _FILE_OBJECT *FileObject,
      BOOLEAN Wait,
      struct _FILE_NETWORK_OPEN_INFORMATION *Buffer,
-     struct _IO_STATUS_BLOCK *IoStatus,
+     PIO_STATUS_BLOCK IoStatus,
      struct _DEVICE_OBJECT *DeviceObject
     );
 
@@ -722,6 +657,8 @@ FAST_IO_ACQUIRE_FOR_MOD_WRITE (
 
 typedef FAST_IO_ACQUIRE_FOR_MOD_WRITE *PFAST_IO_ACQUIRE_FOR_MOD_WRITE;
 
+#ifndef _MDL_
+#define _MDL_
 typedef struct _MDL {
     struct _MDL *MdlNext;
     short MdlSize;
@@ -733,6 +670,7 @@ typedef struct _MDL {
     ULONG ByteOffset;
 } MDL;
 typedef MDL *PMDL;
+#endif
 
 typedef
 BOOLEAN
@@ -838,7 +776,8 @@ FAST_IO_MDL_WRITE_COMPLETE_COMPRESSED (
 
 typedef FAST_IO_MDL_WRITE_COMPLETE_COMPRESSED *PFAST_IO_MDL_WRITE_COMPLETE_COMPRESSED;
 
-
+#ifndef _FILE_NETWORK_OPEN_INFORMATION_
+#define _FILE_NETWORK_OPEN_INFORMATION_
 typedef struct _FILE_NETWORK_OPEN_INFORMATION {
     LARGE_INTEGER CreationTime;
     LARGE_INTEGER LastAccessTime;
@@ -848,8 +787,7 @@ typedef struct _FILE_NETWORK_OPEN_INFORMATION {
     LARGE_INTEGER EndOfFile;
     ULONG FileAttributes;
 } FILE_NETWORK_OPEN_INFORMATION, *PFILE_NETWORK_OPEN_INFORMATION;
-
-
+#endif
 
 typedef
 BOOLEAN
@@ -890,7 +828,8 @@ FAST_IO_RELEASE_FOR_CCFLUSH (
 typedef FAST_IO_RELEASE_FOR_CCFLUSH *PFAST_IO_RELEASE_FOR_CCFLUSH;
 
 
-
+#ifndef _FAST_IO_DISPATCH_
+#define _FAST_IO_DISPATCH_
 typedef struct _FAST_IO_DISPATCH {
     ULONG SizeOfFastIoDispatch;
     PFAST_IO_CHECK_IF_POSSIBLE FastIoCheckIfPossible;
@@ -921,7 +860,10 @@ typedef struct _FAST_IO_DISPATCH {
     PFAST_IO_ACQUIRE_FOR_CCFLUSH AcquireForCcFlush;
     PFAST_IO_RELEASE_FOR_CCFLUSH ReleaseForCcFlush;
 } FAST_IO_DISPATCH, *PFAST_IO_DISPATCH;
+#endif
 
+#ifndef _VPB_
+#define _VPB_
 typedef struct _VPB {
     SHORT Type;
     SHORT Size;
@@ -935,9 +877,10 @@ typedef struct _VPB {
 } VPB, *PVPB;
 
 typedef struct _VPB *PVPB;
+#endif
 
-
-
+#ifndef _DRIVER_EXTENSION_
+#define _DRIVER_EXTENSION_
 typedef struct _DRIVER_EXTENSION {
 
     //
@@ -974,9 +917,12 @@ typedef struct _DRIVER_EXTENSION {
 
 
 } DRIVER_EXTENSION, *PDRIVER_EXTENSION;
+#endif
 
 typedef struct _IO_TIMER *PIO_TIMER;
 
+#ifndef _DEVICE_OBJECT_
+#define _DEVICE_OBJECT_
 typedef struct _DEVICE_OBJECT {
   SHORT                   Type;
   USHORT                   Size;
@@ -1010,8 +956,10 @@ typedef struct _DEVICE_OBJECT {
   struct _PCI_DEVICE_OBJECT*    PDEV;
   uint64_t                      DeviceID;
 } DEVICE_OBJECT, *PDEVICE_OBJECT;
+#endif
 
-
+#ifndef _DEVICE_OBJECT_
+#define _DEVICE_OBJECT_
 typedef struct _DEVOBJ_EXTENSION {
 
     SHORT          Type;
@@ -1039,10 +987,12 @@ typedef struct _DEVOBJ_EXTENSION {
     PVOID VerifierContext;
 
 } DEVOBJ_EXTENSION, *PDEVOBJ_EXTENSION;
+#endif
 
 #define LOUSTATUS uint32_t
 
-
+#ifndef _DRIVER_OBJECT_
+#define _DRIVER_OBJECT_
 typedef struct _DRIVER_OBJECT {
   SHORT              Type;
   SHORT              Size;
@@ -1062,8 +1012,5 @@ typedef struct _DRIVER_OBJECT {
   //DriverObjectModificationss for ldm
   bool              DriverUsingLkdm;
   uintptr_t         DeviceTable;
-} DRIVER_OBJECT, *PDRIVER_OBJECT;
-
-
+} DRIVER_OBJECT, * PDRIVER_OBJECT;
 #endif
-

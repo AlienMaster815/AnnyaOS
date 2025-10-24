@@ -384,7 +384,7 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
 
 NTSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
-    PDEVICE_OBJECT PlatformDevice
+    struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("XHCI.SYS::AddDevice()\n");
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;

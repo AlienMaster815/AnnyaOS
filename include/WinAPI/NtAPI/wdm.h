@@ -4,6 +4,9 @@
 #include "irp.h"
 #include "ntoapi.h"
 #include <NtAPI.h>
+#include <WinAPI/WinAPITypes/CommonTypes.h>
+
+#define MAXIMUM_VOLUME_LABEL_LENGTH  (32 * sizeof(WCHAR)) // 32 characters
 
 #define CONNECT_FULLY_SPECIFIED 1
 #define CONNECT_LINE_BASED 2
@@ -228,10 +231,6 @@ typedef enum _RESOURCEMANAGER_INFORMATION_CLASS {
     ResourceManagerCompletionInformation
 } RESOURCEMANAGER_INFORMATION_CLASS;
 
-typedef struct _SLIST_ENTRY {
-    struct _SLIST_ENTRY* Next;
-} SLIST_ENTRY, * PSLIST_ENTRY;
-
 
 typedef struct _SYSTEM_POOL_ZEROING_INFORMATION {
     BOOLEAN PoolZeroingSupportPresent;
@@ -249,8 +248,8 @@ typedef enum {
 typedef struct _FILE_OBJECT {
     CSHORT                            Type;
     CSHORT                            Size;
-    PDEVICE_OBJECT                    DeviceObject;
-    PVPB                              Vpb;
+    struct _DEVICE_OBJECT*            DeviceObject;
+    struct _VPB*                      Vpb;
     PVOID                             FsContext;
     PVOID                             FsContext2;
     PSECTION_OBJECT_POINTERS          SectionObjectPointer;
@@ -589,11 +588,6 @@ typedef struct _REG_PRE_CREATE_KEY_INFORMATION {
     PUNICODE_STRING CompleteName;
 } REG_PRE_CREATE_KEY_INFORMATION, REG_PRE_OPEN_KEY_INFORMATION, * PREG_PRE_CREATE_KEY_INFORMATION, * PREG_PRE_OPEN_KEY_INFORMATION;
 
-typedef enum {
-    LT_DONT_CARE,
-    LT_LOWEST_LATENCY
-} LATENCY_TIME;
-
 typedef struct _LINK_SHARE_ACCESS {
     ULONG OpenCount;
     ULONG Deleters;
@@ -606,33 +600,6 @@ typedef struct _MAILSLOT_CREATE_PARAMETERS {
     LARGE_INTEGER ReadTimeout;
     BOOLEAN       TimeoutSpecified;
 } MAILSLOT_CREATE_PARAMETERS, * PMAILSLOT_CREATE_PARAMETERS;
-
-
-typedef struct MEM_EXTENDED_PARAMETER {
-    struct {
-        ULONG64 Type : MEM_EXTENDED_PARAMETER_TYPE_BITS;
-        ULONG64 Reserved : 64 - MEM_EXTENDED_PARAMETER_TYPE_BITS;
-    } DUMMYSTRUCTNAME;
-    union {
-        ULONG64 ULong64;
-        PVOID   Pointer;
-        SIZE_T  Size;
-        HANDLE  Handle;
-        ULONG   ULong;
-    } DUMMYUNIONNAME;
-} MEM_EXTENDED_PARAMETER, * PMEM_EXTENDED_PARAMETER;
-
-typedef enum MEM_EXTENDED_PARAMETER_TYPE {
-    MemExtendedParameterInvalidType = 0,
-    MemExtendedParameterAddressRequirements = 1,
-    MemExtendedParameterNumaNode = 2,
-    MemExtendedParameterPartitionHandle = 3,
-    MemExtendedParameterUserPhysicalHandle = 4,
-    MemExtendedParameterAttributeFlags = 5,
-    MemExtendedParameterImageMachine = 6,
-    MemExtendedParameterMax
-}  *PMEM_EXTENDED_PARAMETER_TYPE;
-
 
 typedef struct _MEMORY_PARTITION_DEDICATED_MEMORY_OPEN_INFORMATION {
     ULONG64     DedicatedMemoryTypeId;
@@ -969,31 +936,6 @@ typedef struct _OB_PRE_OPERATION_INFORMATION {
 typedef struct {
     GUID Guid;
 } NOTIFY_USER_POWER_SETTING, * PNOTIFY_USER_POWER_SETTING;
-
-typedef struct _OSVERSIONINFOEXW {
-    ULONG  dwOSVersionInfoSize;
-    ULONG  dwMajorVersion;
-    ULONG  dwMinorVersion;
-    ULONG  dwBuildNumber;
-    ULONG  dwPlatformId;
-    WCHAR  szCSDVersion[128];
-    USHORT wServicePackMajor;
-    USHORT wServicePackMinor;
-    USHORT wSuiteMask;
-    UCHAR  wProductType;
-    UCHAR  wReserved;
-} OSVERSIONINFOEXW, * POSVERSIONINFOEXW, * LPOSVERSIONINFOEXW, RTL_OSVERSIONINFOEXW, * PRTL_OSVERSIONINFOEXW;
-
-
-
-typedef struct _OSVERSIONINFOW {
-    ULONG dwOSVersionInfoSize;
-    ULONG dwMajorVersion;
-    ULONG dwMinorVersion;
-    ULONG dwBuildNumber;
-    ULONG dwPlatformId;
-    WCHAR szCSDVersion[128];
-} OSVERSIONINFOW, * POSVERSIONINFOW, * LPOSVERSIONINFOW, RTL_OSVERSIONINFOW, * PRTL_OSVERSIONINFOW;
 
 typedef struct _PCI_ATS_INTERFACE {
     USHORT                 Size;
@@ -2200,14 +2142,6 @@ typedef struct _FUNCTION_LEVEL_DEVICE_RESET_PARAMETERS {
     PVOID                    CompletionContext;
 } FUNCTION_LEVEL_DEVICE_RESET_PARAMETERS, * PFUNCTION_LEVEL_DEVICE_RESET_PARAMETERS;
 
-
-typedef struct _GENERIC_MAPPING {
-    ACCESS_MASK GenericRead;
-    ACCESS_MASK GenericWrite;
-    ACCESS_MASK GenericExecute;
-    ACCESS_MASK GenericAll;
-} GENERIC_MAPPING;
-
 typedef struct _HWPROFILE_CHANGE_NOTIFICATION {
     USHORT Version;
     USHORT Size;
@@ -3027,12 +2961,6 @@ ULONG ExInterlockedAddUlong(
    PKSPIN_LOCK Lock
 );
 
-//void ExInterlockedCompareExchange64(
-//    Destination,
-//         Exchange,
-//             Comperand,
-//         Lock
-//);
 
 NTKERNELAPI
 PSLIST_ENTRY
@@ -3331,24 +3259,6 @@ void InsertTailList(
    PLIST_ENTRY Entry
 );
 
-
-LONG InterlockedAnd(
-   LONG volatile *Destination,
-        LONG          Value
-);
-
-LONG InterlockedCompareExchange(
-   LONG volatile *Destination,
-        LONG          ExChange,
-        LONG          Comperand
-);
-
-PVOID InterlockedCompareExchangePointer(
-   PVOID volatile *Destination,
-        PVOID          Exchange,
-        PVOID          Comperand
-);
-
 LONG  InterlockedDecrement(
    LONG volatile *Addend
 );
@@ -3372,10 +3282,7 @@ LONG  InterlockedIncrement(
    LONG volatile *Addend
 );
 
-LONG InterlockedOr(
-   LONG volatile *Destination,
-        LONG          Value
-);
+
 
 LONG InterlockedXor(
    LONG volatile *Destination,
@@ -3636,12 +3543,12 @@ typedef struct _IO_STACK_LOCATION {
     } SetSecurity;
     struct {
       PVPB           Vpb;
-      PDEVICE_OBJECT DeviceObject;
+      struct _DEVICE_OBJECT* DeviceObject;
       ULONG          OutputBufferLength;
     } MountVolume;
     struct {
       PVPB           Vpb;
-      PDEVICE_OBJECT DeviceObject;
+      struct _DEVICE_OBJECT* DeviceObject;
     } VerifyVolume;
     struct {
       struct _SCSI_REQUEST_BLOCK *Srb;
@@ -3733,7 +3640,7 @@ typedef struct _IO_STACK_LOCATION {
       PVOID Argument4;
     } Others;
   } Parameters;
-  PDEVICE_OBJECT         DeviceObject;
+  struct _DEVICE_OBJECT*         DeviceObject;
   PFILE_OBJECT           FileObject;
   PIO_COMPLETION_ROUTINE CompletionRoutine;
   PVOID                  Context;
@@ -3833,14 +3740,14 @@ void IoAcquireCancelSpinLock(
 
 NTSTATUS IoAcquireKsrPersistentMemory(
   PDRIVER_OBJECT DriverObject,
-  PDEVICE_OBJECT PhysicalDeviceObject,
+  struct _DEVICE_OBJECT* PhysicalDeviceObject,
   PVOID          Buffer,
   PSIZE_T        Size
 );
 
 NTSTATUS IoAcquireKsrPersistentMemoryEx(
   PDRIVER_OBJECT  DriverObject,
-  PDEVICE_OBJECT  PhysicalDeviceObject,
+  struct _DEVICE_OBJECT*  PhysicalDeviceObject,
   PUNICODE_STRING PhysicalDeviceId,
   PUSHORT         DataTag,
   PULONG          DataVersion,
@@ -3879,7 +3786,7 @@ PIRP IoAllocateIrp(
 );
 
 PIRP IoAllocateIrpEx(
-  PDEVICE_OBJECT DeviceObject,
+  struct _DEVICE_OBJECT* DeviceObject,
   CCHAR          StackSize,
   BOOLEAN        ChargeQuota
 );
@@ -3893,24 +3800,24 @@ PMDL IoAllocateMdl(
 );
 
 PIO_WORKITEM IoAllocateWorkItem(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 NTSTATUS IoAttachDevice(
-    PDEVICE_OBJECT  SourceDevice,
+    struct _DEVICE_OBJECT*  SourceDevice,
     PUNICODE_STRING TargetDevice,
-   PDEVICE_OBJECT  *AttachedDevice
+   struct _DEVICE_OBJECT*  *AttachedDevice
 );
 
-PDEVICE_OBJECT IoAttachDeviceToDeviceStack(
-   PDEVICE_OBJECT SourceDevice,
-   PDEVICE_OBJECT TargetDevice
+struct _DEVICE_OBJECT* IoAttachDeviceToDeviceStack(
+   struct _DEVICE_OBJECT* SourceDevice,
+   struct _DEVICE_OBJECT* TargetDevice
 );
 
 
 PIRP IoBuildAsynchronousFsdRequest(
              ULONG            MajorFunction,
-             PDEVICE_OBJECT   DeviceObject,
+             struct _DEVICE_OBJECT*   DeviceObject,
         PVOID            Buffer,
    ULONG            Length,
    PLARGE_INTEGER   StartingOffset,
@@ -3919,7 +3826,7 @@ PIRP IoBuildAsynchronousFsdRequest(
 
 PIRP IoBuildDeviceIoControlRequest(
               ULONG            IoControlCode,
-              PDEVICE_OBJECT   DeviceObject,
+              struct _DEVICE_OBJECT*   DeviceObject,
     PVOID            InputBuffer,
               ULONG            InputBufferLength,
    PVOID            OutputBuffer,
@@ -3938,7 +3845,7 @@ void IoBuildPartialMdl(
 
  PIRP IoBuildSynchronousFsdRequest(
              ULONG            MajorFunction,
-             PDEVICE_OBJECT   DeviceObject,
+             struct _DEVICE_OBJECT*   DeviceObject,
         PVOID            Buffer,
    ULONG            Length,
    PLARGE_INTEGER   StartingOffset,
@@ -4007,7 +3914,7 @@ NTSTATUS IoCreateDevice(
              DEVICE_TYPE     DeviceType,
              ULONG           DeviceCharacteristics,
              BOOLEAN         Exclusive,
-            PDEVICE_OBJECT  *DeviceObject
+            struct _DEVICE_OBJECT*  *DeviceObject
 );
 
 NTSTATUS IoCreateFile(
@@ -4041,6 +3948,14 @@ PKEVENT IoCreateSynchronizationEvent(
     PUNICODE_STRING EventName,
    PHANDLE         EventHandle
 );
+
+#ifndef _CLIENT_ID_
+#define _CLIENT_ID_
+typedef struct _CLIENT_ID{
+    HANDLE  UniqueProcess;
+    HANDLE  UniqueThread;
+}CLIENT_ID, * PCLIENT_ID;
+#endif
 
 NTSTATUS IoCreateSystemThread(
          PVOID              IoObject,
@@ -4102,7 +4017,7 @@ PIRP IoCsqRemoveNextIrp(
 );
 
 void IoDeleteDevice(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 NTSTATUS IoDeleteSymbolicLink(
@@ -4110,7 +4025,7 @@ NTSTATUS IoDeleteSymbolicLink(
 );
 
 void IoDetachDevice(
-   PDEVICE_OBJECT TargetDevice
+   struct _DEVICE_OBJECT* TargetDevice
 );
 
 void IoDisconnectInterrupt(
@@ -4123,14 +4038,14 @@ void IoDisconnectInterruptEx(
 
 NTSTATUS IoEnumerateKsrPersistentMemoryEx(
   PDRIVER_OBJECT                            DriverObject,
-  PDEVICE_OBJECT                            PhysicalDeviceObject,
+  struct _DEVICE_OBJECT*                            PhysicalDeviceObject,
   PUNICODE_STRING                           PhysicalDeviceId,
   PIO_PERSISTED_MEMORY_ENUMERATION_CALLBACK Callback,
   PVOID                                     CallbackContext
 );
 
 NTSTATUS IofCallDriver(
-  PDEVICE_OBJECT        DeviceObject,
+  struct _DEVICE_OBJECT*        DeviceObject,
    PIRP Irp
 );
 
@@ -4140,7 +4055,7 @@ void IofCompleteRequest(
 );
 
 BOOLEAN IoForwardIrpSynchronously(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    PIRP           Irp
 );
 
@@ -4169,8 +4084,8 @@ NTSTATUS IoGetAffinityInterrupt(
    PGROUP_AFFINITY GroupAffinity
 );
 
-PDEVICE_OBJECT IoGetAttachedDeviceReference(
-   PDEVICE_OBJECT DeviceObject
+struct _DEVICE_OBJECT* IoGetAttachedDeviceReference(
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 NTSTATUS IoGetBootDiskInformation(
@@ -4210,13 +4125,13 @@ NTSTATUS IoGetDeviceInterfacePropertyData(
 
 NTSTATUS IoGetDeviceInterfaces(
              const GUID     *InterfaceClassGuid,
-   PDEVICE_OBJECT PhysicalDeviceObject,
+   struct _DEVICE_OBJECT* PhysicalDeviceObject,
              ULONG          Flags,
             PZZWSTR        *SymbolicLinkList
 );
 
 NTSTATUS IoGetDeviceNumaNode(
-    PDEVICE_OBJECT Pdo,
+    struct _DEVICE_OBJECT* Pdo,
    PUSHORT        NodeNumber
 );
 
@@ -4224,11 +4139,11 @@ NTSTATUS IoGetDeviceObjectPointer(
     PUNICODE_STRING ObjectName,
     ACCESS_MASK     DesiredAccess,
    PFILE_OBJECT    *FileObject,
-   PDEVICE_OBJECT  *DeviceObject
+   struct _DEVICE_OBJECT*  *DeviceObject
 );
 
 NTSTATUS IoGetDeviceProperty(
-              PDEVICE_OBJECT           DeviceObject,
+              struct _DEVICE_OBJECT*           DeviceObject,
               DEVICE_REGISTRY_PROPERTY DeviceProperty,
               ULONG                    BufferLength,
    PVOID                    PropertyBuffer,
@@ -4236,7 +4151,7 @@ NTSTATUS IoGetDeviceProperty(
 );
 
 NTSTATUS IoGetDevicePropertyData(
-    PDEVICE_OBJECT   Pdo,
+    struct _DEVICE_OBJECT*   Pdo,
     const DEVPROPKEY *PropertyKey,
     LCID             Lcid,
         ULONG            Flags,
@@ -4247,7 +4162,7 @@ NTSTATUS IoGetDevicePropertyData(
 );
 
 _DMA_ADAPTER * IoGetDmaAdapter(
-   PDEVICE_OBJECT      PhysicalDeviceObject,
+   struct _DEVICE_OBJECT*      PhysicalDeviceObject,
              _DEVICE_DESCRIPTION *DeviceDescription,
             PULONG              NumberOfMapRegisters
 );
@@ -4290,7 +4205,7 @@ IO_PRIORITY_HINT IoGetIoPriorityHint(
 );
 
 
-PDEVICE_OBJECT IoGetRelatedDeviceObject(
+struct _DEVICE_OBJECT* IoGetRelatedDeviceObject(
    PFILE_OBJECT FileObject
 );
 
@@ -4303,7 +4218,7 @@ void IoGetStackLimits(
 
 
 void IoInitializeDpcRequest(
-   PDEVICE_OBJECT  DeviceObject,
+   struct _DEVICE_OBJECT*  DeviceObject,
    PIO_DPC_ROUTINE DpcRoutine
 );
 
@@ -4321,7 +4236,7 @@ void IoInitializeIrp(
 //);
 
 NTSTATUS IoInitializeTimer(
-             PDEVICE_OBJECT         DeviceObject,
+             struct _DEVICE_OBJECT*         DeviceObject,
              PIO_TIMER_ROUTINE      TimerRoutine,
     PVOID Context
 );
@@ -4332,12 +4247,12 @@ void IoInitializeWorkItem(
 );
 
 void IoInvalidateDeviceRelations(
-   PDEVICE_OBJECT       DeviceObject,
+   struct _DEVICE_OBJECT*       DeviceObject,
    DEVICE_RELATION_TYPE Type
 );
 
 void IoInvalidateDeviceState(
-   PDEVICE_OBJECT PhysicalDeviceObject
+   struct _DEVICE_OBJECT* PhysicalDeviceObject
 );
 
 BOOLEAN IoIs32bitProcess(
@@ -4525,7 +4440,7 @@ NTSTATUS IoOpenDeviceInterfaceRegistryKey(
 );
 
 NTSTATUS IoOpenDeviceRegistryKey(
-    PDEVICE_OBJECT DeviceObject,
+    struct _DEVICE_OBJECT* DeviceObject,
     ULONG          DevInstKeyType,
     ACCESS_MASK    DesiredAccess,
    PHANDLE        DeviceRegKey
@@ -4541,13 +4456,13 @@ NTSTATUS IoOpenDriverRegistryKey(
 
 NTSTATUS IoQueryKsrPersistentMemorySize(
   PDRIVER_OBJECT DriverObject,
-  PDEVICE_OBJECT PhysicalDeviceObject,
+  struct _DEVICE_OBJECT* PhysicalDeviceObject,
   PSIZE_T        BufferSize
 );
 
 NTSTATUS IoQueryKsrPersistentMemorySizeEx(
   PDRIVER_OBJECT  DriverObject,
-  PDEVICE_OBJECT  PhysicalDeviceObject,
+  struct _DEVICE_OBJECT*  PhysicalDeviceObject,
   PUNICODE_STRING PhysicalDeviceId,
   PUSHORT         DataTag,
   PULONG          DataVersion,
@@ -4578,14 +4493,14 @@ IoRegisterContainerNotification(
     );
 
     NTSTATUS IoRegisterDeviceInterface(
-             PDEVICE_OBJECT  PhysicalDeviceObject,
+             struct _DEVICE_OBJECT*  PhysicalDeviceObject,
              const GUID      *InterfaceClassGuid,
    PUNICODE_STRING ReferenceString,
             PUNICODE_STRING SymbolicLinkName
 );
 
 NTSTATUS IoRegisterLastChanceShutdownNotification(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 NTSTATUS IoRegisterPlugPlayNotification(
@@ -4599,7 +4514,7 @@ NTSTATUS IoRegisterPlugPlayNotification(
 );
 
 NTSTATUS IoRegisterShutdownNotification(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void IoReleaseCancelSpinLock(
@@ -4636,30 +4551,30 @@ void IoReportInterruptInactive(
 );
 
 NTSTATUS IoReportTargetDeviceChange(
-   PDEVICE_OBJECT PhysicalDeviceObject,
+   struct _DEVICE_OBJECT* PhysicalDeviceObject,
    PVOID          NotificationStructure
 );
 
 NTSTATUS IoReportTargetDeviceChangeAsynchronous(
-             PDEVICE_OBJECT                   PhysicalDeviceObject,
+             struct _DEVICE_OBJECT*                   PhysicalDeviceObject,
              PVOID                            NotificationStructure,
    PDEVICE_CHANGE_COMPLETE_CALLBACK Callback,
         PVOID                            Context
 );
 
 void IoRequestDeviceEject(
-   PDEVICE_OBJECT PhysicalDeviceObject
+   struct _DEVICE_OBJECT* PhysicalDeviceObject
 );
 
 void IoRequestDpc(
-   PDEVICE_OBJECT         DeviceObject,
+   struct _DEVICE_OBJECT*         DeviceObject,
    PIRP                   Irp,
     PVOID Context
 );
 
 NTSTATUS IoReserveKsrPersistentMemory(
   PDRIVER_OBJECT DriverObject,
-  PDEVICE_OBJECT PhysicalDeviceObject,
+  struct _DEVICE_OBJECT* PhysicalDeviceObject,
   SIZE_T         Size,
   ULONG          Flags,
   PVOID          *DataHandle
@@ -4667,7 +4582,7 @@ NTSTATUS IoReserveKsrPersistentMemory(
 
 NTSTATUS IoReserveKsrPersistentMemoryEx(
   PDRIVER_OBJECT  DriverObject,
-  PDEVICE_OBJECT  PhysicalDeviceObject,
+  struct _DEVICE_OBJECT*  PhysicalDeviceObject,
   PUNICODE_STRING PhysicalDeviceId,
   PUSHORT         DataTag,
   ULONG           DataVersion,
@@ -4706,7 +4621,7 @@ void IoSetCompletionRoutine(
 );
 
 NTSTATUS IoSetCompletionRoutineEx(
-             PDEVICE_OBJECT         DeviceObject,
+             struct _DEVICE_OBJECT*         DeviceObject,
              PIRP                   Irp,
              PIO_COMPLETION_ROUTINE CompletionRoutine,
    PVOID                  Context,
@@ -4731,7 +4646,7 @@ NTSTATUS IoSetDeviceInterfaceState(
 );
 
 NTSTATUS IoSetDevicePropertyData(
-             PDEVICE_OBJECT   Pdo,
+             struct _DEVICE_OBJECT*   Pdo,
              const DEVPROPKEY *PropertyKey,
              LCID             Lcid,
              ULONG            Flags,
@@ -4775,7 +4690,7 @@ void IoSetShareAccessEx(
 );
 
 void IoSetStartIoAttributes(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    BOOLEAN        DeferredStartIo,
    BOOLEAN        NonCancelable
 );
@@ -4787,29 +4702,29 @@ void IoSetStartIoAttributes(
 ULONG IoSizeofWorkItem();
 
 void IoStartNextPacket(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    BOOLEAN        Cancelable
 );
 
 void IoStartNextPacketByKey(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    BOOLEAN        Cancelable,
    ULONG          Key
 );
 
 void IoStartPacket(
-             PDEVICE_OBJECT DeviceObject,
+             struct _DEVICE_OBJECT* DeviceObject,
              PIRP           Irp,
    PULONG         Key,
    PDRIVER_CANCEL CancelFunction
 );
 
 void IoStartTimer(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void IoStopTimer(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void IoUninitializeWorkItem(
@@ -4829,7 +4744,7 @@ NTSTATUS IoUnregisterPlugPlayNotificationEx(
 );
 
 void IoUnregisterShutdownNotification(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void IoUpdateLinkShareAccess(
@@ -4868,12 +4783,12 @@ NTSTATUS IoWMIAllocateInstanceIds(
 
 NTSTATUS IoWMIDeviceObjectToInstanceName(
     PVOID           DataBlockObject,
-    PDEVICE_OBJECT  DeviceObject,
+    struct _DEVICE_OBJECT*  DeviceObject,
    PUNICODE_STRING InstanceName
 );
 
 ULONG IoWMIDeviceObjectToProviderId(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 NTSTATUS IoWMIExecuteMethod(
@@ -4926,7 +4841,7 @@ NTSTATUS IoWMIQuerySingleInstanceMultiple(
 );
 
 NTSTATUS IoWMIRegistrationControl(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    ULONG          Action
 );
 
@@ -4954,7 +4869,7 @@ NTSTATUS IoWMISetSingleItem(
 );
 
 NTSTATUS IoWMISuggestInstanceName(
-   PDEVICE_OBJECT  PhysicalDeviceObject,
+   struct _DEVICE_OBJECT*  PhysicalDeviceObject,
    PUNICODE_STRING SymbolicLinkName,
              BOOLEAN         CombineNames,
             PUNICODE_STRING SuggestedInstanceName
@@ -6259,7 +6174,7 @@ void ObUnRegisterCallbacks(
 
 
 NTSTATUS PoCallDriver(
-        PDEVICE_OBJECT        DeviceObject,
+        struct _DEVICE_OBJECT*        DeviceObject,
     PIRP Irp
 );
 
@@ -6270,7 +6185,7 @@ NTSTATUS PoClearPowerRequest(
 
 NTSTATUS PoCreatePowerRequest(
    PVOID                   *PowerRequest,
-    PDEVICE_OBJECT          DeviceObject,
+    struct _DEVICE_OBJECT*          DeviceObject,
     PCOUNTED_REASON_CONTEXT Context
 );
 
@@ -6330,7 +6245,7 @@ void PoFxIssueComponentPerfStateChangeMultiple(
 );
 
 void PoFxNotifySurprisePowerOn(
-   PDEVICE_OBJECT Pdo
+   struct _DEVICE_OBJECT* Pdo
 );
 
 NTSTATUS PoFxPowerControl(
@@ -6370,7 +6285,7 @@ NTSTATUS PoFxRegisterCrashdumpDevice(
 );
 
 NTSTATUS PoFxRegisterDevice(
-    PDEVICE_OBJECT Pdo,
+    struct _DEVICE_OBJECT* Pdo,
     PPO_FX_DEVICE  Device,
    POHANDLE       *Handle
 );
@@ -6426,12 +6341,12 @@ PSINGLE_LIST_ENTRY PopEntryList(
 );
 
 BOOLEAN PoQueryWatchdogTime(
-    PDEVICE_OBJECT Pdo,
+    struct _DEVICE_OBJECT* Pdo,
    PULONG         SecondsRemaining
 );
 
 PULONG PoRegisterDeviceForIdleDetection(
-   PDEVICE_OBJECT     DeviceObject,
+   struct _DEVICE_OBJECT*     DeviceObject,
    ULONG              ConservationIdleTime,
    ULONG              PerformanceIdleTime,
    DEVICE_POWER_STATE State
@@ -6439,7 +6354,7 @@ PULONG PoRegisterDeviceForIdleDetection(
 
 
 NTSTATUS PoRegisterPowerSettingCallback(
-   PDEVICE_OBJECT          DeviceObject,
+   struct _DEVICE_OBJECT*          DeviceObject,
              LPCGUID                 SettingGuid,
              PPOWER_SETTING_CALLBACK Callback,
    PVOID                   Context,
@@ -6452,7 +6367,7 @@ PVOID PoRegisterSystemState(
 );
 
 NTSTATUS PoRequestPowerIrp(
-             PDEVICE_OBJECT          DeviceObject,
+             struct _DEVICE_OBJECT*          DeviceObject,
              UCHAR                   MinorFunction,
              POWER_STATE             PowerState,
    PREQUEST_POWER_COMPLETE CompletionFunction,
@@ -6474,7 +6389,7 @@ NTSTATUS PoSetPowerRequest(
 );
 
 POWER_STATE PoSetPowerState(
-   PDEVICE_OBJECT   DeviceObject,
+   struct _DEVICE_OBJECT*   DeviceObject,
    POWER_STATE_TYPE Type,
    POWER_STATE      State
 );
@@ -6488,7 +6403,7 @@ void PoSetSystemWake(
 );
 
 void PoSetSystemWakeDevice(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void PoStartDeviceBusy(
@@ -6641,6 +6556,19 @@ PLIST_ENTRY RemoveTailList(
 );
 
 
+#ifndef __STRING_DEFINED__
+#define __STRING_DEFINED__
+typedef struct _STRING{
+    USHORT  Length;
+    USHORT  MaximumLength;
+    LPSTR   Buffer;
+}STRING, * PSTRING, *LPSTRING,
+    ANSI_STRING, * PANSI_STRING, * LPANSI_STRING,
+        OEM_STRING, * POEM_STRING, * LPOEM_STRING;
+
+typedef const STRING* PCANSI_STRING;
+typedef const STRING* PCOEM_STRING;
+#endif
 
   
   ULONG
@@ -6672,6 +6600,21 @@ PLIST_ENTRY RemoveTailList(
    PCWSTR          Source
 );
 
+#ifndef _RTL_BITMAP_
+#define _RTL_BITMAP_
+typedef struct _RTL_BITMAP{
+    ULONG           SizeOfBitMap;
+    PULONG          Buffer;
+}RTL_BITMAP, * PRTL_BITMAP;
+typedef const RTL_BITMAP* PCRTL_BITMAP;
+
+typedef struct _RTL_BITMAP_RUN{
+    ULONG       StartingIndex;
+    ULONG       NumberOfBits;
+}RTL_BITMAP_RUN, * PRTL_BITMAP_RUN;
+
+typedef const RTL_BITMAP_RUN* PCRTL_BITMAP_RUN;
+#endif
 
 BOOLEAN RtlAreBitsClear(
    PRTL_BITMAP BitMapHeader,
@@ -6749,17 +6692,6 @@ LARGE_INTEGER NTAPI_INLINE RtlConvertUlongToLargeInteger(
    ULONG UnsignedInteger
 );
 
-void RtlCopyMemory(
-   void*       Destination,
-   const void* Source,
-   size_t      Length
-);
-
- VOID RtlCopyMemoryNonTemporal(
-  VOID       *Destination,
-  const VOID *Source,
-  SIZE_T     Length
-);
 
  VOID RtlCopyUnicodeString(
         PUNICODE_STRING  DestinationString,
@@ -6786,25 +6718,11 @@ void RtlCopyMemory(
    WCHAR SourceCharacter
 );
 
-BOOLEAN
-RtlEqualMemory(
-    void*  Destination,
-    void*  Source,
-    size_t Length
-);
-
  BOOLEAN RtlEqualUnicodeString(
    PCUNICODE_STRING String1,
    PCUNICODE_STRING String2,
    BOOLEAN          CaseInSensitive
 );
-
-void RtlFillMemory(
-   void*  Destination,
-   size_t Length,
-   int    Fill
-);
-
 
  VOID RtlFillMemoryNonTemporal(
   VOID        *Destination,
@@ -6986,13 +6904,6 @@ BOOLEAN RtlIsServicePackVersionInstalled(
    PSECURITY_DESCRIPTOR SecurityDescriptor
 );
 
-void RtlMoveMemory(
-   void*       Destination,
-   const void* Source,
-   size_t      Length
-);
-
-
  ULONG RtlNumberOfClearBits(
    PRTL_BITMAP BitMapHeader
 );
@@ -7149,11 +7060,6 @@ WCHAR RtlUpcaseUnicodeChar(
 
  ULONG RtlxUnicodeStringToAnsiSize(
    PCUNICODE_STRING UnicodeString
-);
-
-void RtlZeroMemory(
-   void*  Destination,
-   size_t Length
 );
 
 

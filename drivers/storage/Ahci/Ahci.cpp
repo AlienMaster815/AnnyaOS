@@ -618,7 +618,7 @@ void AhciInterruptHandler(uint64_t Rsp){
 
 NTSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
-    PDEVICE_OBJECT Device
+    struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AddAhciDevice()\n");
     //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);

@@ -3,6 +3,7 @@
 #include <NtAPI.h>
 
 
+typedef ULONG* PULONG;
 typedef const GUID* LPCGUID;
 
 

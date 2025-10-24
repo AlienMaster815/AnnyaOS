@@ -1,3 +1,4 @@
+#define _USER_MODE_CODE_
 #include <Annya.h>
 
 extern int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);

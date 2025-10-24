@@ -14,7 +14,7 @@ void* RtlAllocateHeapEx(
     size_t      Alignment
 );
 
-uint64_t GetCurrentThreadID(){
+uint64_t GetCurrentOwningThread(){
     uint64_t ThreadId[2] = {0};
     while(!ThreadId[0]){
         LouCALL(LOUGETTHREADID, (uint64_t)&ThreadId[0], 0);
@@ -22,30 +22,9 @@ uint64_t GetCurrentThreadID(){
     return ThreadId[1];
 }
 
-int InterlockedIncrement(int* LockHandle){
-    *LockHandle = (*LockHandle + 1);
-    return *LockHandle;
-}
 
-int InterlockedDecrement(int* LockHandle){
-    *LockHandle = (*LockHandle - 1);
-    return *LockHandle;
-}
-
-uint32_t InterlockedCompareExchange(
-    int* LockHandle, 
-    uint32_t Reserved, 
-    uint32_t Result
-){
-    
-
-    LouPrint("InterlockedCompareExchange()\n"); 
-    while(1);
-    return 0;
-}
-
-HANDLE ULongToHandle(uint64_t ThreadID){
-    return (HANDLE)ThreadID;
+HANDLE ULongToHandle(uint64_t OwningThread){
+    return (HANDLE)OwningThread;
 }
 
 NTDLL_API 
@@ -55,13 +34,13 @@ RtlTryEnterCriticalSection(
 ){
 
     if(InterlockedCompareExchange(&CriticalSection->LockCount, 0 , -1) == -1){
-        CriticalSection->ThreadWithPossesion = ULongToHandle(GetCurrentThreadID());
-        CriticalSection->RecusionCount  =   1;
+        CriticalSection->OwningThread = ULongToHandle(GetCurrentOwningThread());
+        CriticalSection->RecursionCount  =   1;
         return true;
     }
-    else if((uint64_t)CriticalSection->ThreadWithPossesion == GetCurrentThreadID()){
+    else if((uint64_t)CriticalSection->OwningThread == GetCurrentOwningThread()){
         InterlockedIncrement(&CriticalSection->LockCount);
-        CriticalSection->RecusionCount++;
+        CriticalSection->RecursionCount++;
         return true;
     }
     return false;
@@ -77,14 +56,14 @@ RtlEnterCriticalSection(
         uint64_t Count = 0;
 
         if(RtlTryEnterCriticalSection(CriticalSection))return 0;//STATUS_SUCCESS
-        for(Count = CriticalSection->SpinCount; Count > 0; Count--){
+        for(Count = *CriticalSection->SpinCount; Count > 0; Count--){
             if(CriticalSection->LockCount > 0){
                 break;
             }
             if(CriticalSection->LockCount == -1){
                 if(InterlockedCompareExchange(&CriticalSection->LockCount, 0 , -1) == -1){
-                    CriticalSection->ThreadWithPossesion = ULongToHandle(GetCurrentThreadID());
-                    CriticalSection->RecusionCount = 1;
+                    CriticalSection->OwningThread = ULongToHandle(GetCurrentOwningThread());
+                    CriticalSection->RecursionCount = 1;
                     return STATUS_SUCCESS;
                 }
             }
@@ -92,8 +71,8 @@ RtlEnterCriticalSection(
         }
 
     }
-    CriticalSection->ThreadWithPossesion = ULongToHandle(GetCurrentThreadID());
-    CriticalSection->RecusionCount = 1;
+    CriticalSection->OwningThread = ULongToHandle(GetCurrentOwningThread());
+    CriticalSection->RecursionCount = 1;
     return STATUS_SUCCESS;
 }
 
@@ -105,6 +84,11 @@ RtlInitializeCriticalSectionEx(
     uint32_t SpinCount,
     uint32_t Flags
 ){
+
+    if(!CriticalSection->SpinCount){
+        return STATUS_UNSUCCESSFUL;
+    }
+
     if(Flags & RTL_CRITICAL_SECTION_FLAG_STATIC_INITIALIZATION_DYNAMIC_SPIN){
         //TODO:allocate static pool for debug information
         LouPrint("Critical Section:%h :: SpinCount:%d :: Flags:%h\n", CriticalSection, SpinCount, Flags);
@@ -112,30 +96,29 @@ RtlInitializeCriticalSectionEx(
 
     if(Flags & RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFORMATION){
         LouPrint("Forcing Debug on critical section\n");
-        CriticalSection->DebuggingInfo = (PRTL_CRITICAL_SECTION_DEBUG_DATA)RtlAllocateHeapEx(GetProcessHeap(), 0, sizeof(RTL_CRITICAL_SECTION_DEBUG_DATA), GET_ALIGNMENT(RTL_CRITICAL_SECTION_DEBUG_DATA));
-        if(CriticalSection->DebuggingInfo){
-            CriticalSection->DebuggingInfo->SectionType = 0;
-            CriticalSection->DebuggingInfo->CBTI;
-            CriticalSection->DebuggingInfo->RtlCriticalSection = CriticalSection;
-            CriticalSection->DebuggingInfo->ProcessLockList.Blink = (PLIST_ENTRY)&CriticalSection->DebuggingInfo->ProcessLockList;
-            CriticalSection->DebuggingInfo->ProcessLockList.Flink = (PLIST_ENTRY)&CriticalSection->DebuggingInfo->ProcessLockList;
-            CriticalSection->DebuggingInfo->LockListEntryCount - 0;
-            CriticalSection->DebuggingInfo->ContentionCount = 0;
+        CriticalSection->DebugInfo = (PRTL_CRITICAL_SECTION_DEBUG)RtlAllocateHeapEx(GetProcessHeap(), 0, sizeof(RTL_CRITICAL_SECTION_DEBUG_DATA), GET_ALIGNMENT(RTL_CRITICAL_SECTION_DEBUG_DATA));
+        if(CriticalSection->DebugInfo){
+            CriticalSection->DebugInfo->Type = 0;
+            CriticalSection->DebugInfo->CreatorBackTraceIndex;
+            CriticalSection->DebugInfo->CriticalSection = CriticalSection;
+            CriticalSection->DebugInfo->ProcessLocksList.Blink = (PLIST_ENTRY)&CriticalSection->DebugInfo->ProcessLocksList;
+            CriticalSection->DebugInfo->ProcessLocksList.Flink = (PLIST_ENTRY)&CriticalSection->DebugInfo->ProcessLocksList;
+            CriticalSection->DebugInfo->EntryCount = 0;
+            CriticalSection->DebugInfo->ContentionCount = 0;
         }
     }else{
-        CriticalSection->DebuggingInfo = 0x00;
+        CriticalSection->DebugInfo = 0x00;
     }
 
     CriticalSection->LockCount              = -1;
-    CriticalSection->RecusionCount          = 0;
-    CriticalSection->ThreadWithPossesion    = 0;
-    CriticalSection->Semaphore              = 0;
+    CriticalSection->RecursionCount         = 0;
+    CriticalSection->OwningThread           = 0;
+    CriticalSection->LockSemaphore          = 0;
     
     if(NtGetProcessorCount() <= 1){
-        CriticalSection->SpinCount = 0;    
+        *CriticalSection->SpinCount = 0;    
     }
-    CriticalSection->SpinCount = SpinCount & ~(0x80000000);
-
+    *CriticalSection->SpinCount = SpinCount & ~(0x80000000);
     return STATUS_SUCCESS;
 }
 
@@ -144,15 +127,15 @@ NTDLL_API
 NTSTATUS 
 RtlLeaveCriticalSection(PRTL_CRITICAL_SECTION CriticalSection) {
 
-    if(--CriticalSection->RecusionCount){
-        if(CriticalSection->RecusionCount > 0){
+    if(--CriticalSection->RecursionCount){
+        if(CriticalSection->RecursionCount > 0){
             InterlockedDecrement(&CriticalSection->LockCount);
         }else{
             LouPrint("Error:Lock Not Aquired:%h\n", CriticalSection);
             while(1);
         }
     }else{
-        CriticalSection->ThreadWithPossesion = 0;
+        CriticalSection->OwningThread = 0;
         if(InterlockedDecrement(&CriticalSection->LockCount) >= 0){
 
             LouPrint("Someone Is Waiting\n");

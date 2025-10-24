@@ -1,12 +1,13 @@
 #ifndef _WCS_EXTENTIONS
 #define _WCS_EXTENTIONS
 
-typedef const LPWSTR LPCWSTR;
+#include <Compiler.h>
+
 typedef uintptr_t UINTPTR;
 
 size_t
 Lou_wcslen(
-    LPCWSTR Str  
+    LPWSTR Str  
 );
 
 int 
@@ -57,7 +58,7 @@ Lou_wcspbrk_s(
 
 UINT64
 Lou__wtoi64_s(
-    LPCWSTR Str,
+    LPWSTR Str,
     size_t  Length
 );
 
@@ -89,12 +90,12 @@ Lou_iswspace(
 
 UINT64
 Lou__wtoh64(
-    LPCWSTR Str
+    LPWSTR Str
 );
 
 UINT64
 Lou__wtoh64_s(
-    LPCWSTR Str,
+    LPWSTR Str,
     size_t  Length
 );
 

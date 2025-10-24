@@ -80,11 +80,11 @@ typedef void* TASKDIALOG_BUTTON;
 typedef void* TASKDIALOG_COMMON_BUTTON_FLAGS;
 typedef void* TASKDIALOG_FLAGS;
 
-typedef uint64_t ULONG64;
+typedef unsigned long  ULONG64;
 typedef void* PVOID;
 
 typedef uint32_t DWORD;
-typedef unsigned long* ULONG_PTR;
+typedef unsigned int* ULONG_PTR;
 
 typedef void* HMODULE;
 typedef void* LPVOID;
@@ -101,6 +101,9 @@ typedef struct __type_info_nodeTag{
 
 #define EXCEPTION_MAXIMUM_PARAMETERS 15
 
+#ifndef _DISPATCHER_CONTEXT_
+#define _DISPATCHER_CONTEXT_
+#ifndef _USER_MODE_CODE_
 typedef struct _DISPATCHER_CONTEXT {
     ULONG64 ControlPc;
     ULONG64 ImageBase;
@@ -111,7 +114,10 @@ typedef struct _DISPATCHER_CONTEXT {
     void* LanguageHandler;
     PVOID HandlerData;
 } DISPATCHER_CONTEXT, *PDISPATCHER_CONTEXT;
+#endif
+#endif
 
+#ifndef _USER_MODE_CODE_
 typedef struct _EXCEPTION_RECORD {
   DWORD                    ExceptionCode;
   DWORD                    ExceptionFlags;
@@ -120,6 +126,7 @@ typedef struct _EXCEPTION_RECORD {
   DWORD                    NumberParameters;
   ULONG_PTR                ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];
 } EXCEPTION_RECORD;
+#endif
 
 typedef struct _FrameInfo{
     void* EstablishedFrame;

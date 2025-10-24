@@ -47,7 +47,7 @@ typedef struct _MON_BUS{
     FILE*               DebugFile;
     FILE*               TextInterfaceFile;
     #ifdef __cplusplus  //C++ only recognizes platform devices
-    PDEVICE_OBJECT      ClassDevice;
+    struct _DEVICE_OBJECT*      ClassDevice;
     #else
     void*               ClassDevice;
     #endif
@@ -143,8 +143,8 @@ typedef struct _CURRENT_USB_CHARGER{
 typedef struct _USB_PHY_LAYER_CHAIN{
     struct _USB_PHY_LAYER_CHAIN*                PhyChain;
     #ifdef __cplusplus
-    PDEVICE_OBJECT                              Device;
-    PDEVICE_OBJECT                              IoDevice;
+    struct _DEVICE_OBJECT*                              Device;
+    struct _DEVICE_OBJECT*                              IoDevice;
     #else
     void*                                       Device;
     void*                                       IoDevice;
@@ -214,7 +214,7 @@ typedef struct _USB_ENDPOINT_DEVICE{
     PUSB_ENDPOINT_DESCRIPTOR    Descriptor;
     struct _USB_DEVICE*         UsbDevice;
     #ifdef __cplusplus
-    PDEVICE_OBJECT              Device;
+    struct _DEVICE_OBJECT*              Device;
     #else
     void*                       Device;
     #endif
@@ -399,8 +399,8 @@ typedef struct _USB_INTERFACE{
     uint8_t                             WirelessStatus;
     PLOUQ_WORK                          WirelessStatusWork;
     #ifdef __cplusplus
-    PDEVICE_OBJECT                      Device;
-    PDEVICE_OBJECT                      UsbDevice;
+    struct _DEVICE_OBJECT*                      Device;
+    struct _DEVICE_OBJECT*                      UsbDevice;
     #else
     void*                               Device;
     void*                               UsbDevice;

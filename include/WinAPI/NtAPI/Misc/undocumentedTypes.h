@@ -6,6 +6,8 @@
 #include "../NtAPIFunc.h"
 #include <WinAPI/Win32/winternl.h>
 
+#define CONST const
+
 typedef  void* ETHREAD,* PETHREAD;
 
 typedef struct _KAPC {
@@ -42,6 +44,8 @@ typedef CONST OBJECT_ATTRIBUTES* PCOBJECT_ATTRIBUTES;
 
 typedef HANDLE* PHANDLE;
 
+#include <WinAPI/WinAPITypes/CommonTypes.h>
+
 typedef
 VOID
 (*PIO_APC_ROUTINE) (
@@ -50,14 +54,6 @@ VOID
      ULONG Reserved
     );
 #define PIO_APC_ROUTINE_DEFINED
-
-
-
-typedef struct _PRIVILEGE_SET {
-    ULONG PrivilegeCount;
-    ULONG Control;
-    LUID_AND_ATTRIBUTES Privilege;
-} PRIVILEGE_SET, * PPRIVILEGE_SET;
 
 
 typedef enum _FILE_INFORMATION_CLASS {

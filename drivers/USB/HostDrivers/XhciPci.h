@@ -16,7 +16,7 @@
 
 NTSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
-    PDEVICE_OBJECT PlatformDevice
+    struct _DEVICE_OBJECT* PlatformDevice
 );
 
 #endif

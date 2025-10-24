@@ -21,7 +21,7 @@
 
 #include "specstrings.h"
 
-typedef unsigned long* ULONG_PTR;
+typedef unsigned int* ULONG_PTR;
 
 #ifdef __cplusplus
 extern "C" {

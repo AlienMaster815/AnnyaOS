@@ -18,7 +18,7 @@ all: $(LIB_FILE)
 # Compile C file into object file
 $(OBJ_FILE): $(CFILE)
 	@echo "Compiling $(CFILE) into $(OBJ_FILE)..."
-	$(CC) -c $(CFILE) -o $(OBJ_FILE) $(INCLUDES) $(LIBRARIES)
+	$(CC) -c $(CFILE) -o $(OBJ_FILE) $(INCLUDES) $(LIBRARIES) -fmax-errors=1
 
 # Build .lib file from object file
 $(LIB_FILE): $(OBJ_FILE)

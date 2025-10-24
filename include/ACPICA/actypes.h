@@ -232,7 +232,10 @@
 
 #ifndef ACPI_USE_SYSTEM_INTTYPES
 
+#ifndef _BOOLEAN_
+#define _BOOLEAN_
 typedef unsigned char                   BOOLEAN;
+#endif
 typedef unsigned char                   UINT8;
 typedef unsigned short                  UINT16;
 typedef short                           INT16;

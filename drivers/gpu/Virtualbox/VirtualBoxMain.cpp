@@ -155,7 +155,7 @@ LOUSTATUS VBoxInitializeHardware(
 
 LOUDDK_API_ENTRY
 NTSTATUS
-AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
+AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
     
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;

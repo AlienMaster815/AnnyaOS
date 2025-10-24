@@ -25,7 +25,7 @@ typedef struct PACKED _PCNET2_BUFFER_DESCRIPTOR{
 }PCNET2_BUFFER_DESCRIPTOR, * PPCNET2_BUFFER_DESCRIPTOR;
 
 typedef struct _PCNET_II_DRIVER_DATA{
-    PDEVICE_OBJECT                      PlatformDevice;
+    struct _DEVICE_OBJECT*                      PlatformDevice;
     PDRIVER_OBJECT                      DriverObject;
     uint16_t                            MacAddressPortWord0;
     uint16_t                            MacAddressPortWord1;
@@ -45,7 +45,7 @@ typedef struct _PCNET_II_DRIVER_DATA{
 
 NTSTATUS InitializePcNetIIDevice(
     PDRIVER_OBJECT DriverObject,
-    PDEVICE_OBJECT PlatformDevice
+    struct _DEVICE_OBJECT* PlatformDevice
 );
 
 #endif //_PCI_NET_32_H

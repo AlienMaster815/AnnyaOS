@@ -13,7 +13,7 @@ NTSTATUS WdmlibIoCreateDeviceSecure(
              BOOLEAN          Exclusive,
              PCUNICODE_STRING DefaultSDDLString,
    LPCGUID          DeviceClassGuid,
-                 PDEVICE_OBJECT   *DeviceObject
+                 struct _DEVICE_OBJECT*   *DeviceObject
 );
 
 NTSTATUS WdmlibIoValidateDeviceIoControlAccess(

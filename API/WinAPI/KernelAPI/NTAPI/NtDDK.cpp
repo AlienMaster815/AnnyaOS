@@ -1,13 +1,10 @@
 #include <NtAPI.h>
 #include <LouDDK.h>
 
-VOID RtlZeroMemory(void* Location ,size_t Size){
-	memset(Location, 0 , Size);
-}
 
 NTSTATUS IoAllocateAdapterChannel(
 	PADAPTER_OBJECT AdapterObject,
-	PDEVICE_OBJECT  DeviceObject,
+	struct _DEVICE_OBJECT*  DeviceObject,
 	ULONG           NumberOfMapRegisters,
 	PDRIVER_CONTROL ExecutionRoutine,
 	PVOID           Context
@@ -112,7 +109,7 @@ NTSTATUS HalAllocateHardwareCounters(
 }
 
 void HalExamineMBR(
-	  PDEVICE_OBJECT DeviceObject,
+	  struct _DEVICE_OBJECT* DeviceObject,
 	  ULONG          SectorSize,
 	  ULONG          MBRTypeIdentifier,
 	 PVOID* Buffer
@@ -156,7 +153,7 @@ ULONG HalSetBusDataByOffset(
 
 void IoAllocateController(
 	           PCONTROLLER_OBJECT ControllerObject,
-	           PDEVICE_OBJECT     DeviceObject,
+	           struct _DEVICE_OBJECT*     DeviceObject,
 	           PDRIVER_CONTROL    ExecutionRoutine,
 	 PVOID              Context
 ) {

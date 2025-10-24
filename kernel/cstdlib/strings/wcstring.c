@@ -22,9 +22,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
  
-#define MINLONG ((long)0x80000000)
-#define MAXLONG ((long)0x7FFFFFFF)
-
 
 #define WINAPI __stdcall
 

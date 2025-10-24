@@ -3,6 +3,8 @@
 #ifndef _NTAPI_H
 #define _NTAPI_H
 
+
+
 #ifndef _KERNEL_ENTRY_
 #define _KERNEL_ENTRY_
 #define KERNEL_ENTRY extern "C"

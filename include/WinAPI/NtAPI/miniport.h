@@ -208,11 +208,6 @@ typedef struct  _PCI_CONTEXT{
 
 #endif
 
-typedef struct _GROUP_AFFINITY {
-	KAFFINITY Mask;
-	USHORT    Group;
-	USHORT    Reserved[3];
-} GROUP_AFFINITY, * PGROUP_AFFINITY;
 
 typedef enum {
 	PciDeviceD3Cold_State_Disabled_BitIndex,
@@ -345,13 +340,6 @@ typedef struct _PCI_VENDOR_SPECIFIC_CAPABILITY {
 	UCHAR                   VscLength;
 	UCHAR                   VendorSpecific;
 } PCI_VENDOR_SPECIFIC_CAPABILITY, * PPCI_VENDOR_SPECIFIC_CAPABILITY;
-
-typedef struct _PROCESSOR_NUMBER {
-	USHORT Group;
-	UCHAR  Number;
-	UCHAR  Reserved;
-} PROCESSOR_NUMBER, * PPROCESSOR_NUMBER;
-
 
 
 
@@ -557,9 +545,6 @@ typedef struct _INTERFACE {
 } INTERFACE, * PINTERFACE;
 
 
-#define FIELD_OFFSET(type, field) ((LONG_PTR)(&((type *)0)->field))
-
-
 typedef struct _EMULATOR_ACCESS_ENTRY {
 	ULONG BasePort;
 	ULONG NumConsecutivePorts;
@@ -658,22 +643,6 @@ void BarrierAfterReadR1();
 
 void BarrierAfterReadR2();
 
-LONG InterlockedAnd(
-	  LONG volatile* Destination,
-	      LONG          Value
-);
-
-LONG InterlockedCompareExchange(
-	  LONG volatile* Destination,
-	LONG          ExChange,
-	LONG          Comperand
-);
-
-PVOID InterlockedCompareExchangePointer(
-	  PVOID volatile* Destination,
-	      PVOID          Exchange,
-	PVOID          Comperand
-);
 
 LONG InterlockedDecrement(
 	  LONG volatile* Addend
@@ -700,10 +669,6 @@ LONG InterlockedIncrement(
 	  LONG volatile* Addend
 );
 
-LONG InterlockedOr(
-	  LONG volatile* Destination,
-	      LONG          Value
-);
 
 LONG InterlockedXor(
 	  LONG volatile* Destination,
@@ -1013,7 +978,7 @@ typedef struct _STORPORT_HW_INITIALIZATION_DATA {
 } STORPORT_HW_INITIALIZATION_DATA, *PSTORPORT_HW_INITIALIZATION_DATA;
 
 typedef struct  _STOR_PORT_STACK_OBJECT{
-    PDRIVER_OBJECT DrvObj;
+    struct _DRIVER_OBJECT* DrvObj;
     PUNICODE_STRING RegistryEntry;
 	uint64_t FindAdapter;
 	uint64_t InitAdapter;
@@ -1024,7 +989,7 @@ typedef struct  _STOR_PORT_STACK_OBJECT{
 	PPORT_CONFIGURATION_INFORMATION ConfigInfo;
 }STOR_PORT_STACK_OBJECT, * PSTOR_PORT_STACK_OBJECT;
 
-PSTOR_PORT_STACK_OBJECT GetStorPortObject(PDRIVER_OBJECT DrvObject);
+PSTOR_PORT_STACK_OBJECT GetStorPortObject(struct _DRIVER_OBJECT* DrvObject);
 
 typedef enum _SCSI_NOTIFICATION_TYPE {
     RequestComplete,

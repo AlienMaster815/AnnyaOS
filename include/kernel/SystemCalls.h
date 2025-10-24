@@ -158,6 +158,9 @@ void LouCALL(
 #define LOUDRSDUPDATECLIPSUBSTATE               110
 #define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
 #define LOUDRSDSETPLANEINFO                     112
+
+#define WINECALL            1   
+#define WINECALL_FASTFAIL   1
 //Kernel SystemCalls
 
 #include <stdbool.h>

@@ -24,7 +24,7 @@ LOUDDK_API_ENTRY
 NTSTATUS 
 AddDevice(
     PDRIVER_OBJECT DriverObject,
-    PDEVICE_OBJECT PlatformDevice
+    struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("PCNET32::AddDevice()\n");
     uint8_t DeviceID = PlatformDevice->DeviceID;

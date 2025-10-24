@@ -6,7 +6,7 @@
 
 
 NTSTATUS WmiCompleteRequest(
-         PDEVICE_OBJECT DeviceObject,
+         struct _DEVICE_OBJECT* DeviceObject,
     PIRP           Irp,
          NTSTATUS       Status,
          ULONG          BufferUsed,
@@ -16,7 +16,7 @@ NTSTATUS WmiCompleteRequest(
 
 
 NTSTATUS WmiFireEvent(
-             PDEVICE_OBJECT DeviceObject,
+             struct _DEVICE_OBJECT* DeviceObject,
              LPCGUID        Guid,
              ULONG          InstanceIndex,
              ULONG          EventDataSize,
@@ -42,7 +42,7 @@ typedef struct _WMILIB_CONTEXT {
 
 NTSTATUS WmiSystemControl(
         PWMILIB_CONTEXT         WmiLibInfo,
-        PDEVICE_OBJECT          DeviceObject,
+        struct _DEVICE_OBJECT*          DeviceObject,
     PIRP                    Irp,
        PSYSCTL_IRP_DISPOSITION IrpDisposition
 );

@@ -6,23 +6,8 @@
 #include "ntoapi.h"
 #include "irp.h"
 #include "Misc/undocumentedTypes.h"
-typedef struct _ACE_HEADER {
-	UCHAR  AceType;
-	UCHAR  AceFlags;
-	USHORT AceSize;
-} ACE_HEADER;
 
-typedef struct _ACCESS_ALLOWED_ACE {
-	ACE_HEADER  Header;
-	ACCESS_MASK Mask;
-	ULONG       SidStart;
-} ACCESS_ALLOWED_ACE;
 
-typedef struct _ACCESS_DENIED_ACE {
-	ACE_HEADER  Header;
-	ACCESS_MASK Mask;
-	ULONG       SidStart;
-} ACCESS_DENIED_ACE;
 
 NTSTATUS AllocateVirtualMemoryExCallback(
 	HANDLE CallbackContext,
@@ -117,14 +102,14 @@ BOOLEAN IoCheckFileObjectOpenedAsCopySource(
    PFILE_OBJECT FileObject
 );
 
-PDEVICE_OBJECT IoGetAttachedDeviceReference(
-   PDEVICE_OBJECT DeviceObject
+struct _DEVICE_OBJECT* IoGetAttachedDeviceReference(
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 PCONFIGURATION_INFORMATION IoGetConfigurationInformation();
 
 void IoSetStartIoAttributes(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    BOOLEAN        DeferredStartIo,
    BOOLEAN        NonCancelable
 );
@@ -134,29 +119,29 @@ void IoSizeOfIrp(
 );
 
 void IoStartNextPacket(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    BOOLEAN        Cancelable
 );
 
 void IoStartNextPacketByKey(
-   PDEVICE_OBJECT DeviceObject,
+   struct _DEVICE_OBJECT* DeviceObject,
    BOOLEAN        Cancelable,
    ULONG          Key
 );
 
 void IoStartPacket(
-             PDEVICE_OBJECT DeviceObject,
+             struct _DEVICE_OBJECT* DeviceObject,
              PIRP           Irp,
    PULONG         Key,
    PDRIVER_CANCEL CancelFunction
 );
 
 void IoStartTimer(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void IoStopTimer(
-   PDEVICE_OBJECT DeviceObject
+   struct _DEVICE_OBJECT* DeviceObject
 );
 
 void IoWriteErrorLogEntry(
@@ -179,17 +164,6 @@ BOOLEAN KeSetKernelStackSwapEnable(
 NTHALAPI VOID KeStallExecutionProcessor(
    ULONG MicroSeconds
 );
-
-typedef struct _MEMORY_BASIC_INFORMATION {
-  PVOID  BaseAddress;
-  PVOID  AllocationBase;
-  ULONG  AllocationProtect;
-  USHORT PartitionId;
-  SIZE_T RegionSize;
-  ULONG  State;
-  ULONG  Protect;
-  ULONG  Type;
-} MEMORY_BASIC_INFORMATION, *PMEMORY_BASIC_INFORMATION;
 
 LOUDDK_API_ENTRY
 NTSTATUS
@@ -517,7 +491,7 @@ KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtWriteFile(
 );
 
 NTSTATUS PoCallDriver(
-        PDEVICE_OBJECT        DeviceObject,
+        struct _DEVICE_OBJECT*        DeviceObject,
     PIRP Irp
 );
 
@@ -528,7 +502,7 @@ NTSTATUS PoClearPowerRequest(
 
 NTSTATUS PoCreatePowerRequest(
    PVOID                   *PowerRequest,
-    PDEVICE_OBJECT          DeviceObject,
+    struct _DEVICE_OBJECT*          DeviceObject,
     PCOUNTED_REASON_CONTEXT Context
 );
 
@@ -541,19 +515,19 @@ void PoEndDeviceBusy(
 );
 
 BOOLEAN PoQueryWatchdogTime(
-    PDEVICE_OBJECT Pdo,
+    struct _DEVICE_OBJECT* Pdo,
    PULONG         SecondsRemaining
 );
 
 PULONG PoRegisterDeviceForIdleDetection(
-   PDEVICE_OBJECT     DeviceObject,
+   struct _DEVICE_OBJECT*     DeviceObject,
    ULONG              ConservationIdleTime,
    ULONG              PerformanceIdleTime,
    DEVICE_POWER_STATE State
 );
 
 NTSTATUS PoRegisterPowerSettingCallback(
-   PDEVICE_OBJECT          DeviceObject,
+   struct _DEVICE_OBJECT*          DeviceObject,
              LPCGUID                 SettingGuid,
              PPOWER_SETTING_CALLBACK Callback,
    PVOID                   Context,
@@ -575,7 +549,7 @@ NTSTATUS PoSetPowerRequest(
 );
 
 POWER_STATE PoSetPowerState(
-   PDEVICE_OBJECT   DeviceObject,
+   struct _DEVICE_OBJECT*   DeviceObject,
    POWER_STATE_TYPE Type,
    POWER_STATE      State
 );

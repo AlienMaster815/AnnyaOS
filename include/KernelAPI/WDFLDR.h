@@ -1,6 +1,35 @@
 #ifndef _WDFLDR_H
 #define _WDFLDR_H
 
+#include <WinAPI/Win32/winnt.h>
+#include <WinAPI/Win32/winternl.h>
+
+#ifndef __UNICODE_STRING_DEFINED__
+#define __UNICODE_STRING_DEFINED__
+
+typedef INT64 DWORD64;
+typedef UINT64 ULONG64;
+typedef DWORD64 *PDWORD64;
+typedef BYTE* PBYTE;
+typedef DWORD* PDWORD;
+typedef GUID IID,*LPIID;
+typedef GUID CLSID,*LPCLSID;
+typedef GUID FMTID,*LPFMTID;
+typedef int64_t LONG64;
+typedef ULONG_PTR KAFFINITY;
+typedef short SHORT;
+typedef unsigned short USHORT;
+typedef unsigned char UCHAR;
+
+typedef struct _UNICODE_STRING{
+    USHORT  Length;
+    USHORT  MaximumLength;
+    LPWSTR  Buffer;
+}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
+typedef const UNICODE_STRING* PCUNICODE_STRING;
+typedef const UNICODE_STRING CUNICODE_STRING;
+#endif
+
 #ifdef __cplusplus
 
 #include <WDKSubsystem/WDKSubsystem.h>
@@ -74,10 +103,12 @@ struct _WDF_LIBRARY_INFO
 };
 
 #ifndef _KERNEL_MODULE_
+
 int32_t WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2);
 int32_t DllInitialize(UNICODE_STRING* arg1);
 int32_t DllUnload();
-int32_t WdfVersionBindClass(PDRIVER_OBJECT DrvObj,WDF_BIND_INFO* arg1, PWSTR arg2, WDF_CLASS_BIND_INFO* arg3);
+
+int32_t WdfVersionBindClass(struct _DRIVER_OBJECT* DrvObj,WDF_BIND_INFO* arg1, PWSTR arg2, WDF_CLASS_BIND_INFO* arg3);
 void WdfVersionUnbindClass(struct _WDF_BIND_INFO* arg1, void** arg2, struct _WDF_CLASS_BIND_INFO* arg3);
 
 int32_t WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1);

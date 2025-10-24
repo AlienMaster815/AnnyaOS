@@ -10,6 +10,7 @@
 extern "C" {
 #endif    
 
+#include <WinAPI/Win32/winternl.h>
 
 #define WINAPI __stdcall
 

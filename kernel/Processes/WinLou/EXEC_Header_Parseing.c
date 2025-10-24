@@ -238,24 +238,6 @@ void ParseImportTables(
 
 }
 
-#define IMAGE_REL_BASED_ABSOLUTE        0x00
-#define IMAGE_REL_BASED_HIGH            0x01
-#define IMAGE_REL_BASED_LOW             0x02
-#define IMAGE_REL_BASED_HIGHLOW         0x03
-#define IMAGE_REL_BASED_HIGHADJ         0x04
-#define IMAGE_REL_BASED_MIPS_JMPADDR    0x05
-#define IMAGE_REL_BASED_SECTION         0x06
-#define IMAGE_REL_BASED_REL             0x07
-#define IMAGE_REL_BASED_MIPS_JMPADDR16  0x08
-#define IMAGE_REL_BASED_IA64_IMM64      0x09
-#define IMAGE_REL_BASED_DIR64           0x0A
-#define IMAGE_REL_BASED_HIGH3ADJ        0x0B
-
-typedef struct _IMAGE_BASE_RELOCATION {
-    uint32_t VirtualAddress;
-    uint32_t SizeOfBlock;
-    // Followed by an array of TypeOffset entries
-} IMAGE_BASE_RELOCATION;
 
 uintptr_t ConfigCookie = 0;
 
@@ -341,12 +323,6 @@ void RelocateBaseAddresses(
                 }
                 case IMAGE_REL_BASED_REL:{
                     LouPrint("IMAGE_REL_BASED_REL");
-                    while(1);
-                    continue;
-                }
-
-                case IMAGE_REL_BASED_MIPS_JMPADDR16:{
-                    LouPrint("IMAGE_REL_BASED_MIPS_JMPADDR16\n");
                     while(1);
                     continue;
                 }

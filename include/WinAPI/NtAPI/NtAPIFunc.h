@@ -7,28 +7,13 @@
 
 typedef void* HANDLE;
 
-
-typedef CHAR** PSTR;
+typedef int32_t NTSTATUS;
 typedef NTSTATUS* PNTSTATUS;
 
 typedef struct _OFFSETINSTANCEDATAANDLENGTH {
     ULONG OffsetInstanceData;
     ULONG LengthInstanceData;
 } OFFSETINSTANCEDATAANDLENGTH, * POFFSETINSTANCEDATAANDLENGTH;
-
-typedef struct _IMAGE_EXPORT_DIRECTORY {
-    DWORD   Characteristics;
-    DWORD   TimeDateStamp;
-    WORD    MajorVersion;
-    WORD    MinorVersion;
-    DWORD   Name;
-    DWORD   Base;
-    DWORD   NumberOfFunctions;
-    DWORD   NumberOfNames;
-    DWORD   AddressOfFunctions;     // RVA from base of image
-    DWORD   AddressOfNames;         // RVA from base of image
-    DWORD   AddressOfNameOrdinals;  // RVA from base of image
-} IMAGE_EXPORT_DIRECTORY, * PIMAGE_EXPORT_DIRECTORY;
 
 typedef enum {
     KernelMode,
@@ -44,12 +29,10 @@ typedef UCHAR KIRQL;
 typedef void* FILE_INTERNAL_INFORMATION;
 typedef void* PREPARSE_DATA_BUFFER;
 typedef void* PFILE_TIMESTAMPS;
-typedef void* TOKEN_TYPE;
 typedef BOOLEAN* PBOOLEAN;
 typedef void* OBJECT_INFORMATION_CLASS;
 typedef ULONG SECURITY_INFORMATION;
 typedef void* MEMORY_INFORMATION_CLASS;
-typedef void* TOKEN_INFORMATION_CLASS;
 typedef ULONG EXECUTION_STATE;
 typedef const WCHAR* PCWCH;
 typedef const CHAR* PCCH;
@@ -70,7 +53,6 @@ typedef PWSTR NTSTRSAFE_PWSTR;
 typedef PCWSTR NTSTRSAFE_PCWSTR;
 typedef const char* PCNZCH;
 typedef const wchar_t* PCNZWCH;
-typedef const unsigned short* PCUNZWCH;
 typedef PCNZCH STRSAFE_PCNZCH;
 typedef PCNZWCH STRSAFE_PCNZWCH;
 typedef PCUNZWCH STRSAFE_PCUNZWCH;
@@ -123,10 +105,8 @@ typedef void* HalGetPrmCache;
 typedef void* KSYSTEM_TIME;
 typedef void* NT_PRODUCT_TYPE;
 typedef void* ALTERNATIVE_ARCHITECTURE_TYPE;
-typedef void* XSTATE_CONFIGURATION;
 typedef void* PPHYSICAL_COUNTER_EVENT_BUFFER_OVERFLOW_HANDLER;
 typedef void* PPHYSICAL_COUNTER_OVERFLOW_HANDLER;
-typedef void* PGENERIC_MAPPING;
 typedef void* PKTHREAD;
 typedef void* PBOOT_DRIVER_CALLBACK_FUNCTION;
 typedef void* PDRIVER_REINITIALIZE;
@@ -136,7 +116,6 @@ typedef void* KPRIORITY;
 typedef void* KDPC_IMPORTANCE;
 typedef void* NODE_REQUIREMENT;
 typedef void* PPHYSICAL_MEMORY_RANGE;
-typedef void* PZZWSTR;
 typedef void* PGET_LOCATION_STRING;
 typedef void* PESILO;
 typedef void* SILO_CONTEXT_CLEANUP_CALLBACK;
@@ -146,15 +125,9 @@ typedef void* PCREATE_THREAD_NOTIFY_ROUTINE;
 typedef void* PLOAD_IMAGE_NOTIFY_ROUTINE;
 typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE;
 typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE_EX;
-typedef void* PRTL_RUN_ONCE;
 typedef void* PCORRELATION_VECTOR;
-typedef unsigned long* PACCESS_MASK;
-typedef void* PRTL_RUN_ONCE_INIT_FN;
 
-typedef struct _LUID{
-    unsigned long LowPart;
-    long  HighPart;
-}LUID, * PLUID;
+
 
 typedef void* SILO_MONITOR_CREATE_CALLBACK;
 typedef void* SILO_MONITOR_TERMINATE_CALLBACK;
@@ -303,11 +276,9 @@ typedef void* PEX_TIMER;
 typedef void* PEXT_CALLBACK;
 typedef void* PEXT_CANCEL_PARAMETERS;
 typedef void* PCALLBACK_OBJECT;
-typedef void* FIRMWARE_TYPE;
 typedef void* PALLOCATE_FUNCTION_EX;
 typedef void* PFREE_FUNCTION_EX;
 typedef void* PEX_PUSH_LOCK;
-typedef void* PSLIST_HEADER;
 typedef void* PCALLBACK_FUNCTION;
 typedef void* ERESOURCE_THREAD;
 typedef void* PEXT_DELETE_CALLBACK;
@@ -320,13 +291,11 @@ typedef void* PFPGA_CONTROL_ERROR_REPORTING;
 typedef void* IO_CONNECT_INTERRUPT_FULLY_SPECIFIED_PARAMETERS;
 typedef void* IO_CONNECT_INTERRUPT_LINE_BASED_PARAMETERS;
 typedef void* IO_CONNECT_INTERRUPT_MESSAGE_BASED_PARAMETERS;
-typedef void* PSECURITY_QUALITY_OF_SERVICE;
 typedef void* PACCESS_STATE;
 typedef void* PNAMED_PIPE_CREATE_PARAMETERS;
 typedef void* DIRECTORY_NOTIFY_INFORMATION_CLASS;
 typedef void* PFILE_GET_QUOTA_INFORMATION;
 typedef void* DEVICE_RELATION_TYPE;
-typedef void* LCID;
 typedef void* PPOWER_SEQUENCE;
 typedef void* PIO_COMPLETION_ROUTINE;
 typedef void* PVOID64;
@@ -360,7 +329,6 @@ typedef void* SCATTER_GATHER_ELEMENT;
 typedef void* PGET_SDEV_IDENTIFIER;
 typedef void* PREENUMERATE_SELF;
 typedef void* POBJECT_NAME_INFORMATION;
-typedef void* PSECURITY_INFORMATION;
 typedef void* POBJECT_TYPE;
 typedef void* OB_OPERATION;
 typedef void* POB_PRE_OPERATION_CALLBACK;
@@ -396,8 +364,6 @@ typedef void* PKBUGCHECK_CALLBACK_RECORD;
 typedef void* PKBUGCHECK_REASON_CALLBACK_RECORD;
 typedef void* PRKSEMAPHORE;
 typedef void* PKIPI_BROADCAST_WORKER;
-typedef void* LOGICAL_PROCESSOR_RELATIONSHIP;
-typedef void* PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX;
 typedef void* PBOUND_CALLBACK;
 typedef void* PKBUGCHECK_CALLBACK_ROUTINE;
 typedef void* PKBUGCHECK_REASON_CALLBACK_ROUTINE;
@@ -410,7 +376,6 @@ typedef void* KWAIT_REASON;
 typedef void* PKWAIT_BLOCK;
 typedef void* PMM_MDL_ROUTINE;
 typedef void* LOCK_OPERATION;
-typedef void* PFILE_SEGMENT_ELEMENT;
 typedef void* MM_SYSTEMSIZE;
 typedef void* NOTIFICATION_MASK;
 typedef void* PTRANSACTION_NOTIFICATION;
@@ -445,11 +410,6 @@ typedef void* PKINTERRUPT_ROUTINE;
 typedef USHORT RTL_ATOM;
 typedef RTL_ATOM* PRTL_ATOM;
 
-typedef struct _LUID_AND_ATTRIBUTES{
-    LUID Luid;
-    DWORD Attributes;
-}LUID_AND_ATTRIBUTES, * PLUID_AND_ATTRIBUTES;
-
 typedef struct _TOKEN_PRIVALEDGES{
     DWORD PrivaledgeCount;
     LUID_AND_ATTRIBUTES Priviledges[];
@@ -458,7 +418,7 @@ typedef struct _TOKEN_PRIVALEDGES{
 #define POOL_EXTENDED_PARAMETER_TYPE_BITS 1
 #define POOL_EXTENDED_PARAMETER_REQUIRED_FIELD_BITS 1
 #define POOL_EXTENDED_PARAMETER_RESERVED_BITS 1
-#define MEM_EXTENDED_PARAMETER_TYPE_BITS 1
+
 //ENDOF: TODO LIST\n
 
 typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;

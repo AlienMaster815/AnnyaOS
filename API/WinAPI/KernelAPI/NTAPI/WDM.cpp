@@ -132,13 +132,6 @@ NTSTATUS IoConnectInterruptEx(PIO_CONNECT_INTERRUPT_PARAMETERS Parameters){
     return status;
 }
 
-void RtlCopyMemory(
-   void*       Destination,
-   const void* Source,
-   size_t      Length
-){
-    memcpy(Destination, Source, Length);
-}
 
  VOID RtlCopyUnicodeString(
             PUNICODE_STRING  DestinationString,

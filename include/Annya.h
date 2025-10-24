@@ -1,9 +1,11 @@
 #ifndef _ANNYA_API_H
 #define _ANNYA_API_H
 
+#define WINAPI __stdcall
+
 #define _USER_MODE_CODE_
 
-#define WINAPI __stdcall
+#include <WinAPI/Win32/winternl.h>
 
 #include <cstdint.h>
 #include <stdalign.h>
@@ -89,7 +91,7 @@ typedef struct _ListHeader{
 struct _AWM_CLIP_TREE;
 
 #ifndef LONG
-typedef int LONG;
+//typedef int LONG;
 #endif
 
 typedef LONG    LRESULT;
@@ -642,10 +644,6 @@ typedef void* HINSTANCE;
 #define WS_EX_TOPMOST 0x00000008L //The window should be placed above all non-topmost windows and should stay above them, even when the window is deactivated. To add or remove this style, use the SetWindowPos function.
 #define WS_EX_TRANSPARENT 0x00000020L //The window should not be painted until siblings beneath the window (that were created by the same thread) have been painted. The window appears transparent because the bits of underlying sibling windows have already been painted. To achieve transparency without these restrictions, use the SetWindowRgn function.
 #define WS_EX_WINDOWEDGE 0x00000100L
-
-
-#define MINLONG ((long)0x80000000)
-#define MAXLONG ((long)0x7FFFFFFF)
 
 
 #define WINAPI __stdcall

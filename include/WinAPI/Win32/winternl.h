@@ -27,53 +27,6 @@
 #include "../NtAPI/ntstatus.h"
 #include "winnt.h"
 
-typedef const char*     PCSZ;
-typedef char*           LPSTR;
-typedef short           CSHORT, * PCSHORT;
-typedef unsigned int    ULONG; 
-typedef int             LONG; 
-typedef ULONG_PTR       KAFFINITY, *PKAFFINITY;
-typedef PVOID           HMODULE;
-
-#ifndef _LARGE_INTEGERS_
-#define _LARGE_INTEGERS_
-
-#if defined(MIDL_PASS)
-typedef struct _LARGE_INTEGER {
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#else // MIDL_PASS
-typedef union _LARGE_INTEGER {
-    struct {
-        ULONG LowPart;
-        LONG HighPart;
-    } DUMMYSTRUCTNAME;
-    struct {
-        ULONG LowPart;
-        LONG HighPart;
-    } u;
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#endif //MIDL_PASS
-
-#if defined(MIDL_PASS)
-typedef struct _LARGE_INTEGER {
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#else // MIDL_PASS
-typedef union _ULARGE_INTEGER {
-    struct {
-        ULONG LowPart;
-        ULONG HighPart;
-    } DUMMYSTRUCTNAME;
-    struct {
-        ULONG LowPart;
-        ULONG HighPart;
-    } u;
-    LONGLONG QuadPart;
-} ULARGE_INTEGER;
-#endif //MIDL_PASS
-#endif
 
 #ifndef __STRING_DEFINED__
 #define __STRING_DEFINED__
@@ -141,10 +94,13 @@ typedef struct _RTL_TIME_DYNAMIC_ZONE_INFORMATION{
     BOOL                DynamicDaylightTimeDisabled;
 }RTL_TIME_DYNAMIC_ZONE_INFORMATION, * PRTL_TIME_DYNAMIC_ZONE_INFORMATION;
 
+#ifndef _CLIENT_ID_
+#define _CLIENT_ID_
 typedef struct _CLIENT_ID{
     HANDLE  UniqueProcess;
     HANDLE  UniqueThread;
 }CLIENT_ID, * PCLIENT_ID;
+#endif
 
 typedef struct _CURDIR{
     UNICODE_STRING  DosPath;
@@ -164,11 +120,12 @@ typedef struct _RTL_RELATIVE_NAME{
     PVOID           CurDirReference;
 }RTL_RELATIVE_NAME, * PRTL_RELATIVE_NAME;
 
+#ifndef _RTL_BITMAP_
+#define _RTL_BITMAP_
 typedef struct _RTL_BITMAP{
     ULONG           SizeOfBitMap;
     PULONG          Buffer;
 }RTL_BITMAP, * PRTL_BITMAP;
-
 typedef const RTL_BITMAP* PCRTL_BITMAP;
 
 typedef struct _RTL_BITMAP_RUN{
@@ -177,6 +134,7 @@ typedef struct _RTL_BITMAP_RUN{
 }RTL_BITMAP_RUN, * PRTL_BITMAP_RUN;
 
 typedef const RTL_BITMAP_RUN* PCRTL_BITMAP_RUN;
+#endif
 
 typedef struct _RTL_USER_PROCESS_PARAMETERS{
     ULONG                       AllocationSize;

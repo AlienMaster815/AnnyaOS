@@ -4,10 +4,6 @@
 #include <NtAPI.h>
 #include "ntoapi.h"
 
-typedef struct {
-  ULONG Granularity;
-  ULONG Capacity;
-} BATTERY_REPORTING_SCALE, *PBATTERY_REPORTING_SCALE;
 
 typedef enum _POWER_STATE_TYPE {
     SystemPowerState,
@@ -15,154 +11,12 @@ typedef enum _POWER_STATE_TYPE {
 } POWER_STATE_TYPE, * PPOWER_STATE_TYPE;
 
 
-typedef enum _POWER_REQUEST_TYPE {
-    PowerRequestDisplayRequired,
-    PowerRequestSystemRequired,
-    PowerRequestAwayModeRequired,
-    PowerRequestExecutionRequired
-} POWER_REQUEST_TYPE, * PPOWER_REQUEST_TYPE;
-
-
-typedef enum _SYSTEM_POWER_STATE {
-    PowerSystemUnspecified,
-    PowerSystemWorking,
-    PowerSystemSleeping1,
-    PowerSystemSleeping2,
-    PowerSystemSleeping3,
-    PowerSystemHibernate,
-    PowerSystemShutdown,
-    PowerSystemMaximum
-} SYSTEM_POWER_STATE, * PSYSTEM_POWER_STATE;
-
-
-
-typedef enum _DEVICE_POWER_STATE {
-    PowerDeviceUnspecified,
-    PowerDeviceD0,
-    PowerDeviceD1,
-    PowerDeviceD2,
-    PowerDeviceD3,
-    PowerDeviceMaximum
-} DEVICE_POWER_STATE, * PDEVICE_POWER_STATE;
-
-typedef enum {
-    PowerActionNone = 0,
-    PowerActionReserved = (PowerActionNone + 1),
-    PowerActionSleep = (PowerActionReserved + 1),
-    PowerActionHibernate = (PowerActionSleep + 1),
-    PowerActionShutdown = (PowerActionHibernate + 1),
-    PowerActionShutdownReset = (PowerActionShutdown + 1),
-    PowerActionShutdownOff = (PowerActionShutdownReset + 1),
-    PowerActionWarmEject = (PowerActionShutdownOff + 1)
-} POWER_ACTION, * PPOWER_ACTION;
 
 typedef enum {
     InternalWakeSourceDozeToHibernate,
     InternalWakeSourcePredictedUserPresence,
     InternalWakeSourceTimerOverride
 } PO_INTERNAL_WAKE_SOURCE_TYPE, * PPO_INTERNAL_WAKE_SOURCE_TYPE;
-
-typedef enum {
-    SystemPowerPolicyAc,
-    SystemPowerPolicyDc,
-    VerifySystemPolicyAc,
-    VerifySystemPolicyDc,
-    SystemPowerCapabilities,
-    SystemBatteryState,
-    SystemPowerStateHandler,
-    ProcessorStateHandler,
-    SystemPowerPolicyCurrent,
-    AdministratorPowerPolicy,
-    SystemReserveHiberFile,
-    ProcessorInformation,
-    SystemPowerInformation,
-    ProcessorStateHandler2,
-    LastWakeTime,
-    LastSleepTime,
-    SystemExecutionState,
-    SystemPowerStateNotifyHandler,
-    ProcessorPowerPolicyAc,
-    ProcessorPowerPolicyDc,
-    VerifyProcessorPowerPolicyAc,
-    VerifyProcessorPowerPolicyDc,
-    ProcessorPowerPolicyCurrent,
-    SystemPowerStateLogging,
-    SystemPowerLoggingEntry,
-    SetPowerSettingValue,
-    NotifyUserPowerSetting,
-    PowerInformationLevelUnused0,
-    SystemMonitorHiberBootPowerOff,
-    SystemVideoState,
-    TraceApplicationPowerMessage,
-    TraceApplicationPowerMessageEnd,
-    ProcessorPerfStates,
-    ProcessorIdleStates,
-    ProcessorCap,
-    SystemWakeSource,
-    SystemHiberFileInformation,
-    TraceServicePowerMessage,
-    ProcessorLoad,
-    PowerShutdownNotification,
-    MonitorCapabilities,
-    SessionPowerInit,
-    SessionDisplayState,
-    PowerRequestCreate,
-    PowerRequestAction,
-    GetPowerRequestList,
-    ProcessorInformationEx,
-    NotifyUserModeLegacyPowerEvent,
-    GroupPark,
-    ProcessorIdleDomains,
-    WakeTimerList,
-    SystemHiberFileSize,
-    ProcessorIdleStatesHv,
-    ProcessorPerfStatesHv,
-    ProcessorPerfCapHv,
-    ProcessorSetIdle,
-    LogicalProcessorIdling,
-    UserPresence,
-    PowerSettingNotificationName,
-    GetPowerSettingValue,
-    IdleResiliency,
-    SessionRITState,
-    SessionConnectNotification,
-    SessionPowerCleanup,
-    SessionLockState,
-    SystemHiberbootState,
-    PlatformInformation,
-    PdcInvocation,
-    MonitorInvocation,
-    FirmwareTableInformationRegistered,
-    SetShutdownSelectedTime,
-    SuspendResumeInvocation,
-    PlmPowerRequestCreate,
-    ScreenOff,
-    CsDeviceNotification,
-    PlatformRole,
-    LastResumePerformance,
-    DisplayBurst,
-    ExitLatencySamplingPercentage,
-    RegisterSpmPowerSettings,
-    PlatformIdleStates,
-    ProcessorIdleVeto,
-    PlatformIdleVeto,
-    SystemBatteryStatePrecise,
-    ThermalEvent,
-    PowerRequestActionInternal,
-    BatteryDeviceState,
-    PowerInformationInternal,
-    ThermalStandby,
-    SystemHiberFileType,
-    PhysicalPowerButtonPress,
-    QueryPotentialDripsConstraint,
-    EnergyTrackerCreate,
-    EnergyTrackerQuery,
-    UpdateBlackBoxRecorder,
-    SessionAllowExternalDmaDevices,
-    SendSuspendResumeNotification,
-    BlackBoxRecorderDirectAccessBuffer,
-    PowerInformationLevelMaximum
-} POWER_INFORMATION_LEVEL;
 
 typedef enum {
     MonitorRequestReasonUnknown,

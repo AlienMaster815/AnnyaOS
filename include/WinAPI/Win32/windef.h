@@ -29,6 +29,79 @@
 extern "C" {
 #endif
 
+#define WINAPI __stdcall
+
+#ifdef _USER_MODE_CODE_
+
+#define __int64 long long
+
+#include <stdbool.h>
+typedef bool BOOL;
+typedef unsigned int UINT;
+typedef unsigned long long UINT64;
+typedef unsigned long long size_t;
+typedef unsigned short wchar_t;
+
+typedef unsigned int DWORD;
+typedef unsigned short UINT16;
+typedef UINT16 uint16_t;
+typedef unsigned int UINT32;
+typedef UINT32 uint32_t;
+typedef int int32_t;
+typedef long long DWORD64;
+typedef unsigned long ULONG64;
+typedef DWORD64 *PDWORD64;
+typedef unsigned char* PBYTE;
+typedef unsigned char BYTE;
+typedef unsigned int ULONG;
+typedef long long LONGLONG;
+typedef unsigned int* ULONG_PTR;
+typedef ULONG_PTR* PULONG_PTR;
+typedef unsigned int* PDWORD;
+typedef long long LONG64;
+typedef ULONG_PTR KAFFINITY;
+typedef short SHORT;
+typedef unsigned short USHORT;
+typedef unsigned char UCHAR;
+typedef ULONG64* PULONG64;
+
+#ifndef _GUID_TYPE 
+#define _GUID_TYPE
+
+typedef struct _GUID {
+	unsigned char DataByte[16];
+} GUID,* LPGUID, UUID, * PGUID, * PUUID;
+#endif
+
+typedef GUID IID,*LPIID;
+typedef GUID CLSID,*LPCLSID;
+typedef GUID FMTID,*LPFMTID;
+
+typedef const char*     PCSZ;
+typedef char*           LPSTR;
+typedef short           CSHORT, * PCSHORT;
+//typedef unsigned int    ULONG; 
+//typedef int             LONG; 
+typedef ULONG_PTR       KAFFINITY, *PKAFFINITY;
+typedef void*           HMODULE;
+
+typedef void* LPVOID;
+
+typedef enum _EXCEPTION_DISPOSITION
+{
+  ExceptionContinueExecution,
+  ExceptionContinueSearch,
+  ExceptionNestedException,
+  ExceptionCollidedUnwind
+} EXCEPTION_DISPOSITION;
+
+#define CDECL __cdecl
+#endif
+
+
+typedef unsigned char* PBYTE;
+typedef unsigned char BYTE;
+
 #define CALLBACK __stdcall
 
 typedef DWORD   COLORREF, * LPCOLORREF;

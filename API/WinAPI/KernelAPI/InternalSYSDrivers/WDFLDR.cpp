@@ -61,9 +61,9 @@ NTSTATUS WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1){
     LouPrint("NTSTATUS WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1)\n");
     return STATUS_SUCCESS;
 }
-NTSTATUS WdfVersionBind(struct _DRIVER_OBJECT* arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4){
+NTSTATUS WdfVersionBind(PDRIVER_OBJECT arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4){
     
-    LouPrint("NTSTATUS WdfVersionBind(struct _DRIVER_OBJECT* arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4)\n");
+    LouPrint("NTSTATUS WdfVersionBind(PDRIVER_OBJECT arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4)\n");
     return STATUS_SUCCESS;
 }
 

@@ -212,36 +212,6 @@ typedef struct _BDCB_STATUS_UPDATE_CONTEXT {
 } BDCB_STATUS_UPDATE_CONTEXT, * PBDCB_STATUS_UPDATE_CONTEXT;
 
 
-typedef struct _CONTEXT {
-	ULONG              ContextFlags;
-	ULONG              Dr0;
-	ULONG              Dr1;
-	ULONG              Dr2;
-	ULONG              Dr3;
-	ULONG              Dr6;
-	ULONG              Dr7;
-	FLOATING_SAVE_AREA FloatSave;
-	ULONG              SegGs;
-	ULONG              SegFs;
-	ULONG              SegEs;
-	ULONG              SegDs;
-	ULONG              Edi;
-	ULONG              Esi;
-	ULONG              Ebx;
-	ULONG              Edx;
-	ULONG              Ecx;
-	ULONG              Eax;
-	ULONG              Ebp;
-	ULONG              Eip;
-	ULONG              SegCs;
-	ULONG              EFlags;
-	ULONG              Esp;
-	ULONG              SegSs;
-	UCHAR*              ExtendedRegisters;
-} CONTEXT;
-
-
-
 typedef struct _CONTROLLER_OBJECT {
 	SHORT        Type;
 	SHORT        Size;
@@ -320,7 +290,7 @@ typedef struct _FILE_VALID_DATA_LENGTH_INFORMATION {
 
 
 void HalExamineMBR(
-	  PDEVICE_OBJECT DeviceObject,
+	  struct _DEVICE_OBJECT* DeviceObject,
 	  ULONG          SectorSize,
 	  ULONG          MBRTypeIdentifier,
 	 PVOID* Buffer
@@ -330,7 +300,7 @@ void HalExamineMBR(
 typedef HalQuerySystemInformation* pHalQuerySystemInformation;
 typedef HalSetSystemInformation* pHalSetSystemInformation;
 typedef HalQueryBusSlots* pHalQueryBusSlots;
-typedef void (*pHalExamineMBR)( PDEVICE_OBJECT, ULONG,  ULONG,  PVOID*);
+typedef void (*pHalExamineMBR)( struct _DEVICE_OBJECT*, ULONG,  ULONG,  PVOID*);
 typedef HalIoReadPartitionTable* pHalIoReadPartitionTable;
 typedef HalIoSetPartitionInformation* pHalIoSetPartitionInformation;
 typedef HalIoWritePartitionTable* pHalIoWritePartitionTable;
@@ -637,7 +607,7 @@ typedef struct _PHYSICAL_COUNTER_RESOURCE_LIST {
 
 NTSTATUS IoAllocateAdapterChannel(
 	PADAPTER_OBJECT AdapterObject,
-	PDEVICE_OBJECT  DeviceObject,
+	struct _DEVICE_OBJECT*  DeviceObject,
 	ULONG           NumberOfMapRegisters,
 	PDRIVER_CONTROL ExecutionRoutine,
 	PVOID           Context
@@ -716,7 +686,7 @@ ULONG HalSetBusDataByOffset(
 
 void IoAllocateController(
 	           PCONTROLLER_OBJECT ControllerObject,
-	           PDEVICE_OBJECT     DeviceObject,
+	           struct _DEVICE_OBJECT*     DeviceObject,
 	           PDRIVER_CONTROL    ExecutionRoutine,
 	 PVOID              Context
 );
@@ -807,7 +777,7 @@ NTSTATUS IoQueryFullDriverPath(
 void IoRaiseHardError(
 	           PIRP           Irp,
 	 PVPB           Vpb,
-	           PDEVICE_OBJECT RealDeviceObject
+	           struct _DEVICE_OBJECT* RealDeviceObject
 );
 
 BOOLEAN IoRaiseInformationalHardError(
@@ -841,14 +811,14 @@ NTSTATUS IoReportDetectedDevice(
 	 PCM_RESOURCE_LIST              ResourceList,
 	 PIO_RESOURCE_REQUIREMENTS_LIST ResourceRequirements,
 	           BOOLEAN                        ResourceAssigned,
-	       PDEVICE_OBJECT* DeviceObject
+	       struct _DEVICE_OBJECT** DeviceObject
 );
 
 NTSTATUS IoReportResourceForDetection(
 	           PDRIVER_OBJECT    DriverObject,
 	 PCM_RESOURCE_LIST DriverList,
 	 ULONG             DriverListSize,
-	 PDEVICE_OBJECT    DeviceObject,
+	 struct _DEVICE_OBJECT*    DeviceObject,
 	 PCM_RESOURCE_LIST DeviceList,
 	 ULONG             DeviceListSize,
 	          PBOOLEAN          ConflictDetected
@@ -867,7 +837,7 @@ LPCGUID IoSetActivityIdThread(
 );
 void IoSetHardErrorOrVerifyDevice(
 	 PIRP           Irp,
-	 PDEVICE_OBJECT DeviceObject
+	 struct _DEVICE_OBJECT* DeviceObject
 );
 void IoSetMasterIrpStatus(
 	  PIRP     MasterIrp,
@@ -893,7 +863,7 @@ void IoUnregisterBootDriverCallback(
 	 PVOID CallbackHandle
 );
 NTSTATUS IoVerifyPartitionTable(
-	 PDEVICE_OBJECT DeviceObject,
+	 struct _DEVICE_OBJECT* DeviceObject,
 	 BOOLEAN        FixErrors
 );
 NTSTATUS IoVolumeDeviceToDosName(
@@ -1128,6 +1098,14 @@ void MmUnsecureVirtualMemory(
    HANDLE SecureHandle
 );
 
+#ifndef _CLIENT_ID_
+#define _CLIENT_ID_
+typedef struct _CLIENT_ID{
+    HANDLE  UniqueProcess;
+    HANDLE  UniqueThread;
+}CLIENT_ID, * PCLIENT_ID;
+#endif
+
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtOpenProcess(
             PHANDLE            ProcessHandle,
              ACCESS_MASK        DesiredAccess,
@@ -1154,7 +1132,7 @@ NTSTATUS PgetLocationString(
 );
 
 void Phalexaminembr(
-    PDEVICE_OBJECT DeviceObject,
+    struct _DEVICE_OBJECT* DeviceObject,
     ULONG SectorSize,
     ULONG MBRTypeIdentifier,
    PVOID *Buffer
@@ -1253,30 +1231,6 @@ typedef struct _PROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY {
 	} DUMMYSTRUCTNAME;
   } DUMMYUNIONNAME;
 } PROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY, *PPROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY;
-
-typedef enum _PROCESS_MITIGATION_POLICY {
-  ProcessDEPPolicy,
-  ProcessASLRPolicy,
-  ProcessDynamicCodePolicy,
-  ProcessStrictHandleCheckPolicy,
-  ProcessSystemCallDisablePolicy,
-  ProcessMitigationOptionsMask,
-  ProcessExtensionPointDisablePolicy,
-  ProcessControlFlowGuardPolicy,
-  ProcessSignaturePolicy,
-  ProcessFontDisablePolicy,
-  ProcessImageLoadPolicy,
-  ProcessSystemCallFilterPolicy,
-  ProcessPayloadRestrictionPolicy,
-  ProcessChildProcessPolicy,
-  ProcessSideChannelIsolationPolicy,
-  ProcessUserShadowStackPolicy,
-  ProcessRedirectionTrustPolicy,
-  ProcessUserPointerAuthPolicy,
-  ProcessSEHOPPolicy,
-  ProcessActivationContextTrustPolicy,
-  MaxProcessMitigationPolicy
-} PROCESS_MITIGATION_POLICY, *PPROCESS_MITIGATION_POLICY;
 
 typedef struct _PROCESS_MITIGATION_SEHOP_POLICY {
   union {
@@ -1659,25 +1613,6 @@ NTSYSAPI NTSTATUS RtlQueryRegistryValueWithFallback(
 
 NTSTATUS RtlRaiseCustomSystemEventTrigger(
    PCUSTOM_SYSTEM_EVENT_TRIGGER_CONFIG TriggerConfig
-);
-
-NTSYSAPI NTSTATUS RtlRunOnceBeginInitialize(
-    PRTL_RUN_ONCE RunOnce,
-        ULONG         Flags,
-       PVOID         *Context
-);
-
-NTSYSAPI NTSTATUS RtlRunOnceComplete(
-         PRTL_RUN_ONCE RunOnce,
-             ULONG         Flags,
-   PVOID         Context
-);
-
-NTSYSAPI NTSTATUS RtlRunOnceExecuteOnce(
-  PRTL_RUN_ONCE         RunOnce,
-  PRTL_RUN_ONCE_INIT_FN InitFn,
-  PVOID                 Parameter,
-  PVOID                 *Context
 );
 
 NTSYSAPI VOID RtlRunOnceInitialize(

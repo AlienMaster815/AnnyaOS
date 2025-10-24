@@ -256,7 +256,7 @@ void ScanTheRestOfHarware(){
             DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocType(DRIVER_EXTENSION, KERNEL_GENERIC_MEMORY);
             Driver(DriverObject, (PUNICODE_STRING)DriverPath);
         }
-        PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+        struct _DEVICE_OBJECT* PlatformDevice = (struct _DEVICE_OBJECT*)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
         if(DriverObject->DriverUsingLkdm){
             PlatformDevice->PDEV = PDEV;
             if(DriverObject->DeviceTable){ 

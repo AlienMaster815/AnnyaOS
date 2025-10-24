@@ -59,7 +59,7 @@ LOUSTATUS LookForStorageDevices(){
                 DriverObject->DriverExtension = LouKeMallocType(DRIVER_EXTENSION,  KERNEL_GENERIC_MEMORY);
                 Driver(DriverObject, (PUNICODE_STRING)0x00);
             }
-            PDEVICE_OBJECT PlatformDevice = (PDEVICE_OBJECT)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+            struct _DEVICE_OBJECT* PlatformDevice = (struct _DEVICE_OBJECT*)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
             if(DriverObject->DriverUsingLkdm){
                 PlatformDevice->PDEV = FirstWaveDevices[i]->PDEV;
                 if(DriverObject->DeviceTable){ 

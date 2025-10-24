@@ -31,7 +31,7 @@ UnloadDriver(PDRIVER_OBJECT DriverObject){
 
 LOUDDK_API_ENTRY
 NTSTATUS
-AddDevice(PDRIVER_OBJECT DriverObject, PDEVICE_OBJECT PlatformDevice){
+AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VMWGPU::AddDevice()\n");
 
 

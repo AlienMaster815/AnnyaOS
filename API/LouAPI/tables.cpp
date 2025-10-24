@@ -45,8 +45,6 @@ static PTABLE_ENTRY ImportTables = (PTABLE_ENTRY)GenericTable;
 KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
 
-typedef void* PEXCEPTION_RECORD;
-
 ULONG KeNumberProcessors();
 
 //define JITL Section data

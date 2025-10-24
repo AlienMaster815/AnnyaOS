@@ -86,7 +86,7 @@ void PcNetIIHardwareSetMacAddress(
 
 NTSTATUS InitializePcNetIIDevice(
     PDRIVER_OBJECT DriverObject,
-    PDEVICE_OBJECT PlatformDevice
+    struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("InitializePcNetIIDevice()\n");
     PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver;

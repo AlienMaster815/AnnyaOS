@@ -1,6 +1,12 @@
 #ifndef _IO_ACCESS_H
 #define _IO_ACCESS_H
 
+typedef UCHAR* PUCHAR;
+typedef USHORT* PUSHORT;
+#ifndef LOUDDK_API_ENTRY
+#define LOUDDK_API_ENTRY extern "C"
+#endif
+
 #include <NtAPI.h>
 #ifndef _KERNEL_MODULE_
 // Function prototypes for reading from memory-mapped registers
