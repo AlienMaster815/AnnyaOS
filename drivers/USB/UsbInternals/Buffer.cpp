@@ -2,33 +2,31 @@
 /*
  * AnnyaOS USB Core Subsystem
  *
- * This subsystem was inspired by the design of the Linux USB core and USB
- * host controller stack originally developed by:
+ * This subsystem is derived from the Linux USB core implementation
+ * and has been ported into the Lousine Kernel architecture for use
+ * in AnnyaOS. Structural and logical behavior is largely based on
+ * the Linux USB stack to maintain hardware compatibility across
+ * UHCI, OHCI, EHCI, and xHCI host controllers.
+ *
+ * Significant portions were adapted from the original Linux USB
+ * core developed by the following contributors:
  *
  *   - Johannes Erdfelt        <johannes@erdfelt.com>
  *   - Greg Kroah-Hartman      <gregkh@linuxfoundation.org>
  *   - Alan Stern              <stern@rowland.harvard.edu>
- *   - David Brownell          (USB-OTG work)
- *   - Sarah Sharp             (USB 3.x / xHCI development)
+ *   - David Brownell          (USB-OTG subsystem)
+ *   - Sarah Sharp             (USB 3.x and xHCI implementation)
  *
- * This implementation is an original reimplementation for the
- * Lousine Kernel architecture used by AnnyaOS. It was developed from
- * public documentation including:
+ * Original Linux code is licensed under GPLv2. This port
+ * complies with the GPLv2 by preserving the license and attributions.
+ * Modifications, restructuring, and kernel integration were performed
+ * for the AnnyaOS environment.
  *
- *   - USB 1.1 / 2.0 / 3.x specifications (USB.org)
- *   - Intel UHCI and EHCI specifications
- *   - AMD/VIA OHCI controller specifications
- *   - xHCI specification (eXtensible Host Controller Interface)
- *   - Public chipset datasheets
- *
- * No Linux source code was copied into this implementation.
- * Structural similarity exists only due to USB specification requirements.
- *
- * Copyright (C) 2025  Tyler Grenier (AlienMaster815)
+ * Copyright (C) 2025
+ * Tyler Grenier (AlienMaster815)
  * AnnyaOS Project — https://github.com/AlienMaster815/AnnyaOS
- *
- * Licensed under GPL-2.0-only. See COPYING for details.
  */
+
 
 #include <LouDDK.h>
 #include <Hal.h>

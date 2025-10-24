@@ -1,8 +1,8 @@
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
-/* SPDX-License-Identifier: GPL-2.0-or-later */
+// SPDX-License-Identifier: GPL-2.0-or-later
 /*
- *  ahci.h - Common AHCI SATA definitions and declarations
+ *  ahci.c - AHCI SATA support
  *
  *  Maintained by:  Tejun Heo <tj@kernel.org>
  *    		    Please ALWAYS copy linux-ide@vger.kernel.org
@@ -17,7 +17,6 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_0.pdf
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
- 
 #define SATA_SIGNATURE_ATA      0x101
 #define SATA_SIGNATURE_ATAPI    0xEB140101
 #define SATA_SIGNATURE_SEMB     0xC33C0101

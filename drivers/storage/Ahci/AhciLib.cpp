@@ -4,7 +4,7 @@
 
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*
- *  libahci.c - Common AHCI SATA low-level routines
+ *  ahci.c - AHCI SATA support
  *
  *  Maintained by:  Tejun Heo <tj@kernel.org>
  *    		    Please ALWAYS copy linux-ide@vger.kernel.org

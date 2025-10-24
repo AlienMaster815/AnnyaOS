@@ -236,7 +236,6 @@ void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
     InitializeProcessManager();
 
-    while(1);
 
     LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
 
