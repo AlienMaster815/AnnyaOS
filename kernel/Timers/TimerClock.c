@@ -22,32 +22,13 @@ void RegisterForClockInterrupt(){
 }
 
 void RunTimerClockMS(uint64_t TimerInMS){
-        for(uint64_t i = 0; i < TimerInMS;  i++){
-            //TODO: change The Clock Speed For Time Segments
-            RegisterForClockInterrupt();
-            //WaitForInterrupt();
-        }
-        Mask_All_Programable_Interrupts();
-        IRQ_Pic_clear_mask(1);
-
+    uint64_t Time = GetCurrentTimeInMilliseconds() + TimerInMS;
+    uint64_t Spin = 0;
+    while(Time > Spin){
+        Spin = GetCurrentTimeInMilliseconds();
+    }
 }
 
 void RunTimerClockS(uint64_t TimerInS){
-
-    for(uint64_t i = 0; i < (TimerInS * 1000);  i++){
-            //TODO: change The Clock Speed For Time Segments
-            RegisterForClockInterrupt();
-            //WaitForInterrupt();
-    }
+    RunTimerClockMS(TimerInS * 1000);
 }
-
-void RunTimerClockHs(uint64_t TimerHS){
-    
-    for(uint64_t i = 0; i < ((TimerHS * 1000) * 30); i++){
-            //TODO: change The Clock Speed For Time Segments
-            RegisterForClockInterrupt();
-            //WaitForInterrupt();
-    }
-}
-
-//Bree Likes Cars

@@ -7570,10 +7570,10 @@ static FORCEINLINE void MemoryBarrier(void)
 #define __WINE_ATOMIC_STORE_RELEASE(ptr, val) do { C_ASSERT(sizeof(*(ptr)) <= sizeof(void *)); __asm__ __volatile__( "" ::: "memory" ); *(ptr) = *(val); } while (0)
 #define __WINE_ATOMIC_STORE_RELAXED(ptr, val) do { C_ASSERT(sizeof(*(ptr)) <= sizeof(void *)); *(ptr) = *(val); } while (0)
 #else
-#define __WINE_ATOMIC_LOAD_ACQUIRE(ptr, ret) __atomic_load(ptr, ret, __ATOMIC_ACQUIRE)
-#define __WINE_ATOMIC_LOAD_RELAXED(ptr, ret) __atomic_load(ptr, ret, __ATOMIC_RELAXED)
-#define __WINE_ATOMIC_STORE_RELEASE(ptr, val) __atomic_store(ptr, val, __ATOMIC_RELEASE)
-#define __WINE_ATOMIC_STORE_RELAXED(ptr, val) __atomic_store(ptr, val, __ATOMIC_RELAXED)
+#define __WINE_ATOMIC_LOAD_ACQUIRE(ptr, ret) __atomic_load(ptr, ret, 1)
+#define __WINE_ATOMIC_LOAD_RELAXED(ptr, ret) __atomic_load(ptr, ret, 0)
+#define __WINE_ATOMIC_STORE_RELEASE(ptr, val) __atomic_store(ptr, val, 0)
+#define __WINE_ATOMIC_STORE_RELAXED(ptr, val) __atomic_store(ptr, val, 0)
 #endif  /* defined(__x86_64__) || defined(__i386__) */
 
 static FORCEINLINE LONG ReadAcquire( LONG const volatile *src )

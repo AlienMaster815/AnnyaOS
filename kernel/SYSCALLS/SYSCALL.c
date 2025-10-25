@@ -53,3 +53,11 @@ void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t S
     RestoreEverything(&RegisterHandle);
 
 }
+
+void LouKeMakeKCall(
+    UINT64  Call,
+    UINT64  Data,
+    UINT64  SystemEmulation
+){
+    LouCALL(Call, Data, SystemEmulation);
+}

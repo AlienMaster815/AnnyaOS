@@ -50,22 +50,35 @@ typedef struct _THREAD_CONTEXT_MANAGR_BLOCK{
 #define CTXMGR_DEFAULT_SAVE_EVERYTHING      SaveEverything
 #define CTXMGR_DEFAULT_RESTORE_EVERYTHING   RestoreEverything
 
+#define IS_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] &  (1u << ((Processor) % 8)))
+
+typedef enum {
+    LONG_MODE       = 0,
+    PROTECTED_MODE  = 1,
+    REAL_MODE       = 2,
+}INSTRUCTION_MODE;
+
+typedef struct _PM_ID_RANGE_POOL{
+    ListHeader              Peers;
+    PIDENTIFICATION_RANGE   IdRange;
+}PM_ID_RANGE_POOL, * PPM_ID_RANGE_POOL;
+
 typedef struct _GENERIC_THREAD_DATA{
-    mutex_t         LockOutTagOut;
-    thread_state_t  state;
-    PPEB            KPeb;
-    CPUContext      SavedState;
-    TEB             KTeb;
-    UINT64          ThreadID;
-    UINT64          StackBase;
-    UINT64          StackTop;
-    TIME_T          ThreadStart;
-    TIME_T          BlockTimeout;
-    BOOL            NewThread;
-    UINT8           Cs;
-    UINT8           Ss;
-    UINT8           Fs;
-    UINT8           Gs;
+    mutex_t             LockOutTagOut;
+    thread_state_t      State;
+    PPEB                KPeb;
+    CPUContext          SavedState;
+    TEB                 KTeb;
+    INTEGER             ThreadID;
+    UINT64              StackBase;
+    UINT64              StackTop;
+    TIME_T              ThreadStart;
+    TIME_T              BlockTimeout;
+    BOOL                NewThread;
+    UINT8               Cs;
+    UINT8               Ss;
+    INSTRUCTION_MODE    InstructionMode;
+    UINT8*              AfinityBitmap;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
 typedef struct _DEMON_THREAD_RING{
@@ -81,15 +94,17 @@ typedef struct _USER_THREAD_RING{
 
 typedef struct _PROCESS_THREAD_RING{
     ListHeader                      Peers;
+    mutex_t                         LockOutTagOut;
     ATOMIC_BOOLEAN                  RingSelector; //TRUE = DEMON, FALSE = USER
-    PKULA_TRANSITION_LAYER_OBECT    KernelObject;
-    PKULA_TRANSITION_LAYER_OBECT    UserObject;
+    PKULA_TRANSITION_LAYER_OBECT    KulaObject;
     PUSER_THREAD_RING               CurrentThread;
     PDEMON_THREAD_RING              CurrentDemon;//demon Process service 
 }PROCESS_THREAD_RING, * PPROCESS_THREAD_RING;
 
 
 typedef struct _PROCESSOR_STATE_BLOCK{
+    mutex_t                         LockOutTagOut;
+    PM_ID_RANGE_POOL                ThreadIDPool;
     ATOMIC_BOOLEAN                  RingSelector; //Transition layer Ring; //TRUE = LOUOSKRNL.EXE // False = TRANSITION EMULATION STATE (KULA Determined)
     PDEMON_THREAD_RING              CurrentDemon;
     PPROCESS_THREAD_RING            CurrentProcess;
@@ -97,11 +112,17 @@ typedef struct _PROCESSOR_STATE_BLOCK{
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
+    mutex_t                         LockOutTagOut;
+    PM_ID_RANGE_POOL                DemonIDPool;
+    PM_ID_RANGE_POOL                ProcessIDPool;
     THREAD_CONTEXT_MANAGR_BLOCK     ThreadCtxMgrBlock;
-    ATOMIC                          ProcessorCount;
+    INTEGER                         ProcessorCount;
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
     DEMON_THREAD_RING               DemonRing;
     PROCESS_THREAD_RING             ProcessRing;
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;
+
+KERNEL_IMPORT uint16_t GetNPROC();
+PDEMON_THREAD_RING LouKeCreateDemonThreadHandle();
 
 #endif

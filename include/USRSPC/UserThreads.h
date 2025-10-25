@@ -7,6 +7,14 @@ extern "C"{
 
 #include <kernel/atomic.h>
 
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
+
+static inline void LouKeSetAtomic(atomic_t* A, int Value){
+    atomic_set(A, Value);
+    LouKeMemoryBarrier();
+}
+
 typedef atomic_t* p_atomic_t;
 
 typedef struct _mutex_t{
@@ -30,8 +38,6 @@ typedef struct {
 }semaphore_t;
 
 
-#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
-#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 static inline void LouSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);
@@ -46,7 +52,7 @@ static inline int LouGetAtomic(atomic_t* A){
 
 static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     if(LockOutTagOut){
-        while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
+        while (__atomic_test_and_set(&m->locked.counter, 1)) {
             LouKeMemoryBarrier();
             // spin
         }
@@ -62,7 +68,7 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
         #else
             //TODO: Use User Mode Thread Request
         #endif
-        while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
+        while (__atomic_test_and_set(&m->locked.counter, 1)) {
             // spin
             LouKeMemoryBarrier();
         }
@@ -94,7 +100,7 @@ static inline bool MutexIsLocked(mutex_t* m){
 }
 
 static inline void MutexUnlock(mutex_t* m){
-    __atomic_clear(&m->locked.counter, __ATOMIC_RELEASE);
+    LouKeSetAtomic(&m->locked, 0);
     LouKeMemoryBarrier();
 }
 

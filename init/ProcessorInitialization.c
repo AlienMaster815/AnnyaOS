@@ -117,3 +117,17 @@ void HandleProccessorInitialization(){
     //memcpy(UserCopy, &ProcessorFeatures, sizeof(PROCESSOR_FEATURES));
     LouKeInitProcessorAcceleratedFeaturesList(UserCopy);
 }
+
+void HandleApProccessorInitialization(){
+    unsigned int  rax, rbx, rcx, rdx;
+    cpuid(1, &rax, &rbx, &rcx, &rdx);
+
+    if(rcx & (1 << 26)){
+        InitializeXSave();
+    }
+    if(rdx & (1 << 24)){
+        enable_fxsave();
+    }else{
+        initialize_fpu();
+    }
+}

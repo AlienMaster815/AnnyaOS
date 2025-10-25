@@ -9,7 +9,6 @@ extern "C"{
 #endif
 
 typedef struct _IDENTIFICATION_RANGE{
-    string      RangeName;
     INTEGER     RangeStart;
     INTEGER     Entries;
     mutex_t     RangeLock;

@@ -4,9 +4,6 @@
 #include "apic.h"
 #include <LouACPI.h>
 
-//I appologise if this is messy but at this point i just need this to work
-// I WILL FIX IT LATER BEFORE 1.0
-
 static inline uint32_t get_processor_id() {
     uint32_t eax, ebx, ecx, edx;
     eax = 1; // Processor info and feature bits
@@ -189,7 +186,13 @@ LOUDDK_API_ENTRY INTEGER GetCpuTrackMemberFromID(UINT32 CpuID){
         TmpTracker = (PCPU_TRACKER_INFORMATION)TmpTracker->Peers.NextHeader;
         i++;
     }
-    return -1;
+    return (INTEGER)-1;
+}
+
+INTEGER 
+GetCurrentCpuTrackMember(){
+    INTEGER Tmp = GetCpuTrackMemberFromID(get_processor_id());
+    return (Tmp == (INTEGER)-1) ?  0 : Tmp;  
 }
 
 void LouKeCreateCpuTracker(
@@ -580,7 +583,7 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
             LouKePauseMemoryBarrier();
         }while(READ_REGISTER_ULONG(ICR_REGISTER_LOW) & (1 << 12));
     }
-
+    
     size_t Timeout = 0;
     while(MutexIsLocked(Lock)){
         sleep(10);

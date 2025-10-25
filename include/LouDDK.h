@@ -189,6 +189,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <WinAPI/Win32/winnls.h>
 #include <KernelAPI/Processes.h>
 #include <FileHandleing/Coff.h>
+#include <drivers/Processors.h>
+
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

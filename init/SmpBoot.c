@@ -1,21 +1,11 @@
 #include <LouAPI.h>
 
-static inline uint32_t get_processor_id() {
-    uint32_t eax, ebx, ecx, edx;
-    eax = 1; // Processor info and feature bits
-    __asm__ volatile(
-        "cpuid"
-        : "=b" (ebx), "=d" (edx), "=c" (ecx)
-        : "a" (eax)
-    );
-    uint32_t processor_id = ebx >> 24;
-    return processor_id;
-}
-
 void* LouKeGetBootDevice(size_t Index);
 size_t LouKeGetBootDeviceSize(size_t Index);
 INTEGER GetCpuTrackMemberFromID(UINT32 CpuID);
 void LouKeSendProcessorWakeupSignal(INTEGER TrackMember);
+INTEGER 
+GetCurrentCpuTrackMember();
 
 uint16_t GetNPROC();
 
@@ -28,13 +18,6 @@ static INTEGER Bsp = 0;
 extern UINT64 page_table_l4;
 UNUSED static bool SmpBootInitialized = false;
 
-void LouKeSmpParkFunction(){
-    MutexUnlock(TrampolineLock);
-    while(1){
-
-    }
-
-}
 
 LOUSTATUS LouKeSmpWakeAssistant(
     INTEGER Assistant, 
@@ -44,7 +27,7 @@ LOUSTATUS LouKeSmpWakeAssistant(
     if(!SmpBootInitialized){
         return STATUS_NO_SUCH_DEVICE;
     }
-    INTEGER CurrentCpu = GetCpuTrackMemberFromID(get_processor_id());
+    INTEGER CurrentCpu = GetCurrentCpuTrackMember();
 
     if(Assistant == CurrentCpu){
         return STATUS_UNSUCCESSFUL;
@@ -84,22 +67,20 @@ void LouKeLoadLousineBootTrampoline(){
         return;
     }
 
-    LouPrint("SMP Trampoline Boot Order:%d\n", SmpBootLoadOrder);
-
     UNUSED FILE* TrampolineFile = LouKeGetBootDevice(SmpBootLoadOrder);//fopen(FilePath, KERNEL_GENERIC_MEMORY);
     
     LouKeMapContinuousMemoryBlock(0x7000, 0x7000, 0x2000, KERNEL_DMA_MEMORY);
     memset((PVOID)0x7000, 0, 0x2000);
     memcpy((PVOID)0x8000, (PVOID)TrampolineFile, LouKeGetBootDeviceSize(SmpBootLoadOrder));
 
-    INTEGER CurrentCpu = GetCpuTrackMemberFromID(get_processor_id());
+    INTEGER CurrentCpu = GetCurrentCpuTrackMember();
     Bsp = CurrentCpu;
 
     TrampolineStack = (UINT64*)0x7000;
     FunctionAddress = (UINT64*)0x7008;
     Pml4Address = (UINT64*)0x7010;
     GlobalParkFunction = (UINT64*)0x7018;
-    TrampolineLock = (mutex_t*)0x7020;
+    TrampolineLock = (mutex_t*)(UINT64)0x7020;
 
     *Pml4Address     = (UINT64)&page_table_l4;
     *FunctionAddress = (UINT64)LouKeSmpWakeFunction; 

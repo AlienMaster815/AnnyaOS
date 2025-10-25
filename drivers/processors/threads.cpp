@@ -111,7 +111,7 @@ unsigned long long get_rsp() {
 
 LOUDDK_API_ENTRY void ManualContextSwitch(uint64_t Context_1, uint64_t Context_2){
 
-    //current_thread[get_processor_id()] = Context_1;
+    //current_thread[GetCurrentCpuTrackMember()] = Context_1;
 
     //threads[Context_2].cpu_state = (CPUContext*)(get_rsp() + 120);
 
@@ -151,22 +151,9 @@ static inline bool IsThreadInThreadTable(thread_t* Thread){
     return false;
 }
 
-
-static inline uint32_t get_processor_id() {
-    uint32_t eax, ebx, ecx, edx;
-    eax = 1; // Processor info and feature bits
-    __asm__ volatile(
-        "cpuid"
-        : "=b" (ebx), "=d" (edx), "=c" (ecx)
-        : "a" (eax)
-    );
-    uint32_t processor_id = ebx >> 24;
-    return processor_id;
-}
-
 LOUDDK_API_ENTRY
 uint64_t GetAdvancedRegisterInterruptsStorage(){
-    return current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage;
+    return current_thread[GetCurrentCpuTrackMember()]->AdvancedRegisterInterruptsStorage;
 }
 
 UNUSED 
@@ -231,7 +218,7 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext, th
 
 
 LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
-    /*uint8_t ProcessorID = get_processor_id();
+    /*uint8_t ProcessorID = GetCurrentCpuTrackMember();
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
 
@@ -239,7 +226,7 @@ LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
 
-    ProcessorID = get_processor_id();
+    ProcessorID = GetCurrentCpuTrackMember();
     CurrentThread = current_thread[ProcessorID];
 
     timeQuantum[ProcessorID] = 0;
@@ -276,7 +263,7 @@ LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
 
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     
-    uint8_t ProcessorID = get_processor_id();
+    uint8_t ProcessorID = GetCurrentCpuTrackMember();
     thread_t* CurrentThread = current_thread[ProcessorID];
     thread_t* NextThread = 0;
 
@@ -291,7 +278,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
         goto _UPDATE_THREAD_MANAGER_FINISHED;
     }
 
-    ProcessorID = get_processor_id();
+    ProcessorID = GetCurrentCpuTrackMember();
     CurrentThread = current_thread[ProcessorID];
 
     timeQuantum[ProcessorID] = 0;
@@ -472,7 +459,7 @@ LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID 
 
 LOUDDK_API_ENTRY
 uint64_t LouKeGetThreadIdentification(){
-    return current_thread[get_processor_id()]->ThreadIdentification;
+    return current_thread[GetCurrentCpuTrackMember()]->ThreadIdentification;
 }
 
 LOUDDK_API_ENTRY
@@ -605,17 +592,17 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
 
     LouPrint("Thread Manager Starting\nNumber Of Processors: %d\n", CpuCount);
 
-    LouPrint("Initialized Processor:%d as Thread 1\n", get_processor_id());
+    LouPrint("Initialized Processor:%d as Thread 1\n", GetCurrentCpuTrackMember());
 
     current_thread = LouKeMallocArray(thread_t*, CpuCount, KERNEL_GENERIC_MEMORY);    
     timeQuantum = LouKeMallocArray(uint32_t, CpuCount, KERNEL_GENERIC_MEMORY);
 
-    current_thread[get_processor_id()] = CreateThreadHandle();
-    current_thread[get_processor_id()]->AdvancedRegisterStorage = (uintptr_t)LouKeMallocPhysicalEx(2688, 64, KERNEL_GENERIC_MEMORY);
-    current_thread[get_processor_id()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouKeMallocPhysicalEx(2688, 64, KERNEL_GENERIC_MEMORY);
-    current_thread[get_processor_id()]->NewTask = false;
-    current_thread[get_processor_id()]->state = THREAD_RUNNING;
-    current_thread[get_processor_id()]->ThreadIdentification = NumberOfThreads + 1;
+    current_thread[GetCurrentCpuTrackMember()] = CreateThreadHandle();
+    current_thread[GetCurrentCpuTrackMember()]->AdvancedRegisterStorage = (uintptr_t)LouKeMallocPhysicalEx(2688, 64, KERNEL_GENERIC_MEMORY);
+    current_thread[GetCurrentCpuTrackMember()]->AdvancedRegisterInterruptsStorage = (uintptr_t)LouKeMallocPhysicalEx(2688, 64, KERNEL_GENERIC_MEMORY);
+    current_thread[GetCurrentCpuTrackMember()]->NewTask = false;
+    current_thread[GetCurrentCpuTrackMember()]->state = THREAD_RUNNING;
+    current_thread[GetCurrentCpuTrackMember()]->ThreadIdentification = NumberOfThreads + 1;
 
     LouPrint("Thread Manager Successfully Started\n");
 

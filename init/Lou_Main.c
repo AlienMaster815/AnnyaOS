@@ -260,26 +260,6 @@ void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
     }
 }
 
-KERNEL_ENTRY LouKernelSmpStart(){
-
-    SetupGDT();
-    InitializeStartupInterruptHandleing();
-    LouPrint("Processor Succesfully Idleing\n");
-
-    while(1){
-        asm ("hlt"); //spin the cpus untill context assignement
-    }
-}
-
-
-void PrintTest(){
-    while(1){
-        LouPrint("FOO ");
-    }
-}
-
-
-
 typedef struct  PACKED _CPUContext{
 
     uint64_t rip;       // Instruction Pointer (user-mode entry point)

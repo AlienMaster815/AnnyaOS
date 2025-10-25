@@ -17,6 +17,17 @@ static inline void LouCALL(
 ){
     asm("INT $0x80");
 }
+#ifdef __cplusplus
+extern "C" {
+#endif
+void LouKeMakeKCall(
+    UINT64  Call,
+    UINT64  Data,
+    UINT64  SystemEmulation
+);
+#ifdef __cplusplus
+}
+#endif
 #else
 #ifndef _LOUDLL_
 
