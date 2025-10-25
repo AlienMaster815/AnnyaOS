@@ -34,21 +34,10 @@ bool SleepTSC(uint64_t Milliseconds) {
 }
 
 void sleep(uint64_t Time) {
-	if (HPET) {
-		SleepHPET(Time);
-	}
-	else if (PIT) {
-		SleepPIT(Time);
-	}
-	else if (TSC) {
-		busy_wait_TSC(Time);
-	}
-	else if (GetAPICStatus()) {
 
-	}
-	else {
+	//else {
 		RunTimerClockMS(Time);
-	}
+	//}
 }
 void sleepEx(uint8_t Interval, uint64_t Time) {
 

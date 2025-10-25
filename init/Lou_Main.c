@@ -169,7 +169,7 @@ void* LouKeVirtualAllocUser(
 extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
 LOUSTATUS LouKeInitializeDefaultDemons();
-void LouKeLoadLousineBootTrampoline(string FilePath);
+void LouKeLoadLousineBootTrampoline();
 int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
 void LouKePcieProbeEcam();
@@ -226,7 +226,7 @@ void InitializeSymmetricMultiProcessing(){
     if(GetNPROC() < 2)return;
     LouPrint("InitializeSymmetricMultiProcessing()\n");    
     
-    LouKeLoadLousineBootTrampoline("C:/ANNYA/SYSTEM64/SMPBOOT.LTB");
+    LouKeLoadLousineBootTrampoline();
 
     LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
 
@@ -234,13 +234,17 @@ void InitializeSymmetricMultiProcessing(){
 
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
+    
+    InitializeSymmetricMultiProcessing();
+
     InitializeProcessManager();
 
-
-    LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
+    //LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
 
     LouKeInitializeFullLouACPISubsystem();
+
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
+
 }
 
 void KillDebuger(){
@@ -365,7 +369,6 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouKeProbeSbIsa();
 
-    //InitializeSymmetricMultiProcessing();
 
     ScanTheRestOfHarware();
 

@@ -544,7 +544,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
 
 LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
-    mutex_t* Lock = (mutex_t*)0x7018;
+    mutex_t* Lock = (mutex_t*)(UINT64)0x7020;
 
     PCPU_TRACKER_INFORMATION CpuInfo = GetCpuInfoFromTrackerMember(TrackMember);
     UINT64 ApicBase = LouKeGetCurrentApicBase();

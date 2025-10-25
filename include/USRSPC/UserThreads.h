@@ -35,9 +35,11 @@ typedef struct {
 
 static inline void LouSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);
+    LouKeMemoryBarrier();
 }
 
 static inline int LouGetAtomic(atomic_t* A){
+    LouKeMemoryBarrier();
     return atomic_read(A);
 }
 
@@ -45,6 +47,7 @@ static inline int LouGetAtomic(atomic_t* A){
 static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     if(LockOutTagOut){
         while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
+            LouKeMemoryBarrier();
             // spin
         }
     }else{
@@ -61,6 +64,7 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
         #endif
         while (__atomic_test_and_set(&m->locked.counter, __ATOMIC_ACQUIRE)) {
             // spin
+            LouKeMemoryBarrier();
         }
         #ifndef _USER_MODE_CODE_
         Thread = LouKeGetThreadIdentification();
@@ -80,10 +84,12 @@ static inline void MutexLock(mutex_t* m){
 static inline void MutexSynchronize(mutex_t* m){
     while (m->locked.counter) {
         // spin until it's unlocked
+        LouKeMemoryBarrier();
     }
 }
 
 static inline bool MutexIsLocked(mutex_t* m){
+    LouKeMemoryBarrier();
     return m->locked.counter;
 }
 

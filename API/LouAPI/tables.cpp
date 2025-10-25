@@ -3,6 +3,7 @@
 #include <Hal.h>
 #include <drivers/Dma8237A.h>
 #include <usb.h>
+#include <KulaAPI.h>
 
 
 typedef struct _TABLE_ENTRY{
@@ -13,9 +14,11 @@ typedef struct _TABLE_ENTRY{
 }TABLE_ENTRY, * PTABLE_ENTRY;
 
 typedef struct _TableTracks{
-    ListHeader Neighbors;
-    TABLE_ENTRY Table;
-    bool LongModeEntry;
+    ListHeader                      Neighbors;
+    TABLE_ENTRY                     Table;
+    bool                            LongModeEntry;
+    PKULA_TRANSITION_LAYER_OBECT    TransitionObject;
+    KERNEL_REFERENCE                Counter;
 }TableTracks, * PTableTracks;
 
 #define PRE_LOADED_MODULES 5
@@ -168,12 +171,13 @@ LOUDDK_API_ENTRY
 int toupper(int c);
 
 LOUDDK_API_ENTRY
-void LouKeInitializeLibraryLookup(
-    string    ModuleName,
-    uint32_t  NumberOfFunctions,
-    string*   FunctionNames,
-    uint64_t* FunctionAddresses,
-    bool IsNativeLongmode
+void LouKeInitializeLibraryLookupEx(
+    string                          ModuleName,
+    uint32_t                        NumberOfFunctions,
+    string*                         FunctionNames,
+    uint64_t*                       FunctionAddresses,
+    bool                            IsNativeLongmode,
+    PKULA_TRANSITION_LAYER_OBECT    TransitionObject
 ){
     uint16_t i;
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries;
@@ -193,8 +197,27 @@ void LouKeInitializeLibraryLookup(
     Tmp->Table.NumberOfFunctions = NumberOfFunctions;
     Tmp->Table.FunctionName = FunctionNames;
     Tmp->Table.VirtualAddress = FunctionAddresses;
+    Tmp->TransitionObject = TransitionObject;
 
     DynamicLoadedLibrarieCount++;
+}
+
+LOUDDK_API_ENTRY
+void LouKeInitializeLibraryLookup(
+    string    ModuleName,
+    uint32_t  NumberOfFunctions,
+    string*   FunctionNames,
+    uint64_t* FunctionAddresses,
+    bool      IsNativeLongmode
+){
+    LouKeInitializeLibraryLookupEx(
+        ModuleName,
+        NumberOfFunctions,
+        FunctionNames,
+        FunctionAddresses,
+        IsNativeLongmode,
+        0x00
+    );
 }
 
 LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
@@ -792,9 +815,10 @@ LouKeGetKulaEmulatedFunctionN(
     string FunctionName
 );
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
     string ModuleName,
-    string FunctionName
+    string FunctionName,
+    PKULA_TRANSITION_LAYER_OBECT TransitionObject
 ){
     size_t koo = strlen(ModuleName);
     for(size_t foo = 0 ; foo < koo; foo++){
@@ -807,7 +831,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
 
     for(i = 0; i < PRE_LOADED_MODULES; i++){
 
-        if(strcmp(ImportTables[i].ModuleName, ModuleName) == 0){
+        if((strcmp(ImportTables[i].ModuleName, ModuleName) == 0) && (TransitionObject == 0x00)){
             //LouPrint("Getting A Address From Loaded Module:%s ", ModuleName);
             for(j = 0; j < ImportTables[i].NumberOfFunctions; j++){
                 //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
@@ -833,7 +857,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     //last resourt but most likely here
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        if(strcmp(Tmp->Table.ModuleName, ModuleName) == 0){
+        if((strcmp(Tmp->Table.ModuleName, ModuleName) == 0) && (TransitionObject == Tmp->TransitionObject)){
             for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
                 if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
                     //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
@@ -855,9 +879,16 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     );
 }
 
+LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+){
+    return LouKeLinkerGetAddressEx(ModuleName, FunctionName, 0x00);
+}
+
 LOUDDK_API_ENTRY
 bool 
-LouKeLinkerCheckLibraryPresence(string SystemName){
+LouKeLinkerCheckLibraryPresenceEx(string SystemName, PKULA_TRANSITION_LAYER_OBECT TransitionObject){
     
     size_t koo = strlen(SystemName);
     for(size_t foo = 0 ; foo < koo; foo++){
@@ -867,7 +898,7 @@ LouKeLinkerCheckLibraryPresence(string SystemName){
     uint8_t i = 0;
     for(i = 0; i < PRE_LOADED_MODULES; i++){
 
-        if(strcmp(ImportTables[i].ModuleName, SystemName) == 0){
+        if((strcmp(ImportTables[i].ModuleName, SystemName) == 0) && (TransitionObject == 0x00)){
             return true;
         }  
     }
@@ -875,7 +906,7 @@ LouKeLinkerCheckLibraryPresence(string SystemName){
     //last resourt but most likely here
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        if(strcmp(Tmp->Table.ModuleName, SystemName) == 0){
+        if((strcmp(Tmp->Table.ModuleName, SystemName) == 0) && (TransitionObject == Tmp->TransitionObject)){
             return true;
         }
         //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
@@ -884,4 +915,10 @@ LouKeLinkerCheckLibraryPresence(string SystemName){
         }
     }
     return false;
+}
+
+LOUDDK_API_ENTRY
+bool 
+LouKeLinkerCheckLibraryPresence(string SystemName){
+    return LouKeLinkerCheckLibraryPresenceEx(SystemName, 0x00);
 }

@@ -30,6 +30,15 @@ void* LouKeGetBootDevice(size_t Index){
     return (i == Index) ? (void*)Tmp->Base : 0x00;
 } 
 
+size_t LouKeGetBootDeviceSize(size_t Index){
+    size_t i = 0;
+    PBOOT_DRIVER_LIST Tmp = &BootDriverList;
+    for(; i < Index && Tmp->Peers.NextHeader; i++){
+        Tmp = (PBOOT_DRIVER_LIST)Tmp->Peers.NextHeader;
+    }
+    return (i == Index) ? (size_t)Tmp->Top : 0x00;
+} 
+
 
 size_t GetBootDeviceCount(){
     return BootCount;
