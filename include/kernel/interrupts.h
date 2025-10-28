@@ -210,7 +210,6 @@ void LouKeSetIrql(
 
 typedef uint8_t LOUSINE_INTERRUPT_LEVEL;
 
-
 KERNEL_IMPORT void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql

@@ -231,7 +231,8 @@ PTHREAD
 LouKeCreateDemonEx(
     PVOID   Function,
     PVOID   Params,
-    SIZE    StackSize,
+    size_t  StackSize,
+    BOOL    ProcessorSpecific,
     INTEGER Processor
 );
 
@@ -239,7 +240,8 @@ PTHREAD
 LouKeCreateDeferedDemonEx(
     PVOID   Function,
     PVOID   Params,
-    SIZE    StackSize,
+    size_t  StackSize,
+    BOOL    ProcessorSpecific,
     INTEGER Processor,
     PVOID   UnblockTimeHandle
 );

@@ -55,7 +55,8 @@ typedef struct _TIME_T{
 void LouKeGetTime(
     PTIME_T TimeStruct
 );
-
+bool LouKeDidTimeoutExpired(PTIME_T Timeout);
+bool LouKeIsTimeoutNull(PTIME_T Timeout);
 void LouKeGetRtcData(TIME_T* pTime);
 
 #endif

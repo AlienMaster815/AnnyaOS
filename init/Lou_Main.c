@@ -166,7 +166,6 @@ void* LouKeVirtualAllocUser(
     size_t      ReservedSize,   //AllocatedVirtual
     uint64_t    PageFlags
 );
-extern void SetPEB(uint64_t PEB);
 uint16_t GetNPROC();
 LOUSTATUS LouKeInitializeDefaultDemons();
 void LouKeLoadLousineBootTrampoline();
@@ -221,12 +220,16 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     return LOUSTATUS_GOOD;
 }
 
+void LouKeEnableSmpIrqlManagement(INTEGER Cpus);
+
 void InitializeSymmetricMultiProcessing(){
     LouPrint("Checking If System Supports SMP\n");
     if(GetNPROC() < 2)return;
     LouPrint("InitializeSymmetricMultiProcessing()\n");    
     
     LouKeLoadLousineBootTrampoline();
+
+    LouKeEnableSmpIrqlManagement(GetNPROC());
 
     LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
 
@@ -239,12 +242,11 @@ void AdvancedLousineKernelInitialization(){
 
     InitializeProcessManager();
 
-    //LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
+    LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
 
     LouKeInitializeFullLouACPISubsystem();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
-
 }
 
 void KillDebuger(){

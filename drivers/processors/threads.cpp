@@ -527,61 +527,6 @@ LouKeCreateUserStackDemon(
 }
 
 
-LOUDDK_API_ENTRY 
-PTHREAD 
-LouKeCreateDemon(
-    PVOID Function,
-    PVOID Params,
-    SIZE  StackSize
-){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
-    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
-    thread_t* NewThread = CreateThreadHandle();
-
-    if(!NewThread){
-        LouKeFree(NewStack);
-        LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-        return 0x00;
-    }
-
-    //store the top of the stack
-    NewThread->StackTop = NewStack;
-    //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
-    //set the New Threads Context
-    NewThread->cpu_state = NewContext;
-    //Allocate Space For Safe Context Handling
-    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
-    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
-    //Mark the Register Storage As Clean
-    NewThread->NewTask = true;
-    NewThread->state = THREAD_READY;
-    NewThread->ThreadIdentification = NumberOfThreads + 2;
-
-    //Get the Stub Address
-    uintptr_t StubAddress = (uintptr_t)ThreadStub;
-    //fill the Context...
-    NewThread->SavedContext.rcx = (uint64_t)Function;           //first parameter  MSVC
-    NewThread->SavedContext.rdx = (uint64_t)Params;             //Second Parameter MSVC
-    NewThread->SavedContext.r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
-    NewThread->SavedContext.rip = (uint64_t)StubAddress;        //Liftoff Address  
-    NewThread->SavedContext.rbp = (uint64_t)NewContext;         //Base Pointer
-    NewThread->SavedContext.rsp = (uint64_t)NewContext;         //Current Pointer
-    //Fill Segments and flags
-    NewThread->SavedContext.cs  = 0x08;
-    NewThread->SavedContext.ss  = 0x10;  
-    NewThread->SavedContext.rflags = 0x202;  
-
-    NewThread->StackSegment = 0x10;
-
-    //Increment Thread Counter
-    NumberOfThreads++;
-    //return the handle to the new thread
-
-    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-    return (PTHREAD)NewThread;
-}
 
 
 LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {

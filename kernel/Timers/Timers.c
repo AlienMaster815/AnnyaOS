@@ -99,9 +99,9 @@ void LouKeGetTime(
     int month = 0;
     int daysmonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     int daysmonth_leap[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
+    int dayscurrent_month = 0;
     while (1) {
-        int dayscurrent_month = is_leap_year(year) ? daysmonth_leap[month] : daysmonth[month];
+        dayscurrent_month = is_leap_year(year) ? daysmonth_leap[month] : daysmonth[month];
         if (days_since_epoch >= dayscurrent_month) {
             days_since_epoch -= dayscurrent_month;
             month++;
@@ -109,8 +109,35 @@ void LouKeGetTime(
             break;
         }
     }
+
+    TimeStruct->Month = month;
+    TimeStruct->Day = dayscurrent_month;
 }
 
+bool LouKeDidTimeoutExpired(PTIME_T Timeout){
+    TIME_T CurrentTime = {0}; 
+    LouKeGetTime(&CurrentTime);
+
+    return(
+        (CurrentTime.Month >= Timeout->Month) && 
+        (CurrentTime.Day >= Timeout->Day) && 
+        (CurrentTime.Hour >= Timeout->Hour) && 
+        (CurrentTime.Minute >= Timeout->Minute) && 
+        (CurrentTime.Second >= Timeout->Second) &&
+        (CurrentTime.MilliSeconds >= Timeout->MilliSeconds)
+    );
+}
+
+bool LouKeIsTimeoutNull(PTIME_T Timeout){
+    return(
+        (0 == Timeout->Month) && 
+        (0 == Timeout->Day) && 
+        (0 == Timeout->Hour) && 
+        (0 == Timeout->Minute) && 
+        (0 == Timeout->Second) &&
+        (0 == Timeout->MilliSeconds)
+    );
+}
 
 bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uint32_t Mask, uint64_t MsTimeout){
     for(uint64_t i = 0; i < MsTimeout; i++){
