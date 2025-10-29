@@ -20,4 +20,6 @@ LouKeRequestVirtualAddressAllocation(
 void DisableCR0WriteProtection();
 void EnableCR0WriteProtection();
 
+#define ImageAlignment (64 * KILOBYTE)
+
 #endif

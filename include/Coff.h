@@ -267,7 +267,9 @@ typedef struct _CFI_OBJECT{
     PVOID                   LoadedAddress;                                                                                                                                                
     PVOID                   PhysicalLoadedAddress;
     PVOID                   ExecututionLoading;
+    UINT64                  KCopy;
 }CFI_OBJECT, * PCFI_OBJECT;
+
 
 
 LOUSTATUS 
@@ -276,6 +278,7 @@ LouKeLoadCoffImageA(
     string          FileName,      
     PCFI_OBJECT     CfiObject
 );
+
 
 #ifdef __cplusplus
 }
