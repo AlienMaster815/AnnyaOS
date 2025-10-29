@@ -28,7 +28,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            #define LouKeHalClosePciCompanions(x) LouFree((RAMADD)x)
+            #define LouKeHalClosePciCompanions(x) LouKeFree((RAMADD)x)
 
             LOUDDK_API_ENTRY
             bool LouKeHalIsDevicePcie(
@@ -46,7 +46,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_COMMON_CONFIG PciConfig
             ); 
 
-            #define LouKeClosePciDeviceGroup(x) LouFree((uint8_t*)x)
+            #define LouKeClosePciDeviceGroup(x) LouKeFree((uint8_t*)x)
 
             LOUDDK_API_ENTRY 
             uint8_t LouKeGetPciCountByType(

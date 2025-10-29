@@ -316,6 +316,8 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LousineKernelEarlyInitialization();
 
+    EnableCR0WriteProtection();
+
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
@@ -354,10 +356,22 @@ KERNEL_ENTRY Lou_kernel_start(
 
     ScanTheRestOfHarware();
 
-    LouKeLoadLibraryA("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
+    //LouKeLoadLibraryA("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
+
+    PCFI_OBJECT LouDll =  LouKeMallocType(CFI_OBJECT, KERNEL_GENERIC_MEMORY);
+
+    LOUSTATUS LouDllState = LouKeLoadCoffImageA(
+        "C:/ANNYA/SYSTEM64",
+        "LOUDLL.DLL",
+        LouDll
+    );    
+    
+    if(LouDllState == STATUS_SUCCESS){
+        LouPrint("LOUDLL.DLL Successfully Loaded\n");
+    }
 
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 

@@ -200,6 +200,7 @@ POOL LouKeCreateGenericPool(
 }
 
 void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
+
     PPOOL_MEMORY_TRACKS Prev = (PPOOL_MEMORY_TRACKS)&Pool->MemoryTracks;
     PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Prev->Peers.NextHeader;
 

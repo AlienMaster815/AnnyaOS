@@ -509,7 +509,7 @@ void* LouMallocEx64(SIZE BytesToAllocate, UINT64 Alignment){
 }
 
 void LouFree(RAMADD Addr) {
-    LouKIRQL OldIrql;
+    /*LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
         if(AddressBlock[i].Address == (uint64_t)Addr){
@@ -529,9 +529,10 @@ void LouFree(RAMADD Addr) {
             }
         }
     }
-    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
+    LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
+    //LouPrint("Address Not Freed:%h\n", Addr);
+    */
 }
-
 
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
 
@@ -637,4 +638,50 @@ void LouKeInitializeSafeMemory(){
         LouMallocEx64Instance = _LouMallocEx64;
     }
 
+}
+
+static mutex_t ReserveCheckMutex = {0}; 
+
+bool CheckAndReserveVAddress(
+    UINTPTR     VAddress,
+    SIZE        size
+){
+    if(VAddress < StartMap){
+        return false;
+    }
+
+    SIZE TotalSize = ROUND_UP64(size, KILOBYTE_PAGE);
+    MutexLock(&ReserveCheckMutex);
+
+    for (uint32_t i = 0; i < AddressesLogged; i++) {
+        if(RangeInterferes(
+            VAddress,
+            TotalSize,
+            AddressBlock[i].Address,
+            AddressBlock[i].size
+        )){
+            goto _ADDRESS_IS_ALREADY_RESERVED;        
+        }
+    }
+
+    for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
+        for (uint32_t i = 0; i < TotalAllocations[k]; i++) {
+            if(RangeInterferes(
+                VAddress,
+                TotalSize,
+                AllocationBlocks[k][i].Address,
+                AllocationBlocks[k][i].size
+            )){
+                goto _ADDRESS_IS_ALREADY_RESERVED;
+            }
+        }
+    }
+
+    EnforceSystemMemoryMap(VAddress, TotalSize);
+    MutexUnlock(&ReserveCheckMutex);
+    return true;
+
+    _ADDRESS_IS_ALREADY_RESERVED:
+    MutexUnlock(&ReserveCheckMutex);
+    return false;
 }

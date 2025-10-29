@@ -181,7 +181,6 @@ int LouPrint_s(char* format, va_list args){
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
                                 p++;
                             }
-                            LouFree((RAMADD)str);
                             break;
                         }
                         case 'd': {

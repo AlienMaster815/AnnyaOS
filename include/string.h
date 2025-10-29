@@ -50,6 +50,10 @@ int StdIoSnPrintf(char* Buffer, size_t Count, const char* Format, ...);
 int StdIoVsnPrintf(char* Buffer, size_t Count, const char* Format, va_list Arguments);
 int StdIoVPrintf(const char* Format, va_list Arguments);
 void* memset(void* dest, int value, size_t count);
+string LouKeCombineStr_s(string String1, size_t Str1Size, string String2, size_t Str2Size);
+string LouKeCombineStr(string String1, string String2);
+string LouKeAddFileToPath(string Path, string FileName);
+string LouKeAddFileToPath_s(string Path, size_t PathLength, string FileName, size_t FileNameLength);
 
 #define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
 
@@ -81,6 +85,10 @@ KERNEL_IMPORT void float_to_string(string Buffer, float value);
 KERNEL_IMPORT void long_double_to_string(string Buffer, long double value);
 KERNEL_IMPORT char* ConvertWCharToChar(const wchar_t* wstr);
 KERNEL_IMPORT int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
+KERNEL_IMPORT string LouKeCombineStr_s(string String1, size_t Str1Size, string String2, size_t Str2Size);
+KERNEL_IMPORT string LouKeCombineStr(string String1, string String2);
+KERNEL_IMPORT string LouKeAddFileToPath(string Path, string FileName);
+KERNEL_IMPORT string LouKeAddFileToPath_s(string Path, size_t PathLength, string FileName, size_t FileNameLength);
 #endif
 #endif
 

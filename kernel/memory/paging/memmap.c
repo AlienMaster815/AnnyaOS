@@ -301,6 +301,8 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
         &L1Entry
     );
 
+
+
     PML* PML4 = GetPageBase();
 
     if (PageSize == MEGABYTE_PAGE) {
@@ -449,6 +451,8 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
     
     PageFlush(VAddress);
     ReloadCR3();
+
+
     return true;
 }
 
