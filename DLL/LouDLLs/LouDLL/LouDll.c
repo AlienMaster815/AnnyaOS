@@ -222,7 +222,7 @@ BOOL NtDllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpRes
 LOUDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     BOOL Tmp = true;
-    Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
+    //Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
     if(!Tmp){
         return Tmp;
     }

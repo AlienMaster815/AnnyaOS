@@ -21,7 +21,7 @@ typedef struct _DRIVER_MODULE_HANDLES{
     ListHeader          Neighbors;
     string              Paths;
     DRIVER_MODULE_ENTRY ModuleEntry;
-    void* DriverObject;
+    void*               DriverObject;
 }DRIVER_MODULE_HANDLES, * PDRIVER_MODULE_HANDLES;
 
 static DRIVER_MODULE_HANDLES DriverHandles = {0};

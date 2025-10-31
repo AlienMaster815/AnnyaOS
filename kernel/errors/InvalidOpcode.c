@@ -60,6 +60,7 @@ void LouKeSetPanicInfo(
 void InvalidOpcode(uint64_t FaultingStackP) {
 
     CPUContext* FualtingStack = (CPUContext*)FaultingStackP;
+    LouPrint("Invalid Opcode\n");
     LouPrint("Thread ID:%d\n", LouKeGetThreadIdentification());
 
     LouPrint("Thread IP:%h\n", FualtingStack->rip);

@@ -29,4 +29,18 @@ typedef struct _KULA_TABLE_TRACKER{
 
 #define DECLARE_KULA_TABLE __declspec(dllexport) const KULA_TABLE KulaTable 
 
+#define CFI_OPTIONAL_HEADER_LOUCOFF_MAGIC               0x0815
+#define CFI_SUBSYSTEM_ANNYA_NATIVE                      17
+#define CFI_SUBSUSTEM_LOUSINE_KULA                      18
+#define CFI_DLLCHARACTERISTICS_LOUSINE_KERNEL_DRIVER    CFI_DLLCHARACTERISTICS_WDM_DRIVER
+#define CFI_DDOFFSET_KULA_TABLE                         CFI_DDOFFSET_UNUSED_TABLE
+#define CFI_DDOFFSET_FORWARDER_TABLE                    CFI_DDOFFSET_ARCHITECTURE_TABLE
+
+//the following are reserved if necisary
+//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0001) 
+//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0002) 
+//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0004) 
+//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0008)
+//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0010)
+
 #endif

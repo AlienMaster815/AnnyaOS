@@ -121,7 +121,7 @@ typedef struct _COFF_IMAGE_DATA_DIRECTORY{
 #define CFI_DDOFFSET_IAT_TABLE                          12
 #define CFI_DDOFFSET_DELAY_IMPORT_DESCRIPTOR_TABLE      13
 #define CFI_DDOFFSET_CLR_RUNTIME_HEADER                 14
-#define CFI_DDOFFSET_KULA_TABLE                         15 //LOUCOFF
+#define CFI_DDOFFSET_UNUSED_TABLE                       15
 #define CFI_TOTAL_DATA_DIRECTORY_OFFSETS                16
 
 typedef struct _SECTION_TABLE{
@@ -259,26 +259,486 @@ typedef struct _COFF_IMAGE_HEADER{
     COFF_IMAGE_OPTIONAL_HEADER  OptionalHeader;
 }COFF_IMAGE_HEADER, * PCOFF_IMAGE_HEADER;
 
+
+typedef union _CFI_SYMBOL_TABLE_NAME{
+    UINT64                  ShortName;
+    struct {
+        UINT32              Zeroes;
+        UINT32              Offset;
+    };
+}CFI_SYMBOL_TABLE_NAME, * PCFI_SYMBOL_TABLE_NAME;
+
+typedef struct _CFI_SYMTABLE_AUXFMT_1{
+    UINT32      TagIndex;
+    UINT32      TotalSize;
+    UINT32      PointerToLineNumber;
+    UINT32      PointerToNextFunction;
+    UINT16      Unused;
+}CFI_SYMTABLE_AUXFMT_1, * PCFI_SYMTABLE_AUXFMT_1;
+
+typedef struct _CFI_SYMTABLE_AUXFMT_2{
+    UINT32      Unused;
+    UINT16      LineNumber;
+    UINT8       Unused1[6];
+    UINT32      PointerToNextFunction;
+    UINT16      Unused2;
+}CFI_SYMTABLE_AUXFMT_2, * PCFI_SYMTABLE_AUXFMT_2;
+
+typedef struct _CFI_SYMTABLE_AUXFMT_3{
+    UINT32      TagIndex;
+    UINT32      Characteristics;
+    UINT8       Unused[10];
+}CFI_SYMTABLE_AUXFMT_3, * PCFI_SYMTABLE_AUXFMT_3;
+
+typedef struct _CFI_SYMTABLE_AUXFMT_4{
+    UINT8       FileName[18];
+}CFI_SYMTABLE_AUXFMT_4, * PCFI_SYMTABLE_AUXFMT_4;
+
+typedef struct _CFI_SYMTABLE_AUXFMT_5{
+    UINT32      Length;
+    UINT16      NumberOfRelocations;
+    UINT16      NumberOfLineNumbers;
+    UINT32      CheckSum;
+    UINT16      Number;
+    UINT8       Selection;
+    UINT8       Unused[3];
+}CFI_SYMTABLE_AUXFMT_5, * PCFI_SYMTABLE_AUXFMT_5;
+
+typedef union PACKED _CFI_SYMTABLE_AUXFMT{ //sanity pack
+    CFI_SYMTABLE_AUXFMT_1   Fmt1;
+    CFI_SYMTABLE_AUXFMT_2   Fmt2;
+    CFI_SYMTABLE_AUXFMT_3   Fmt3;
+    CFI_SYMTABLE_AUXFMT_4   Fmt4;
+    CFI_SYMTABLE_AUXFMT_5   Fmt5;
+    UINT8                   Sanity[18]; //all tables sum to 18 
+}CFI_SYMTABLE_AUXFMT, * PCFI_SYMTABLE_AUXFMT;
+
+typedef struct _CFI_SYMBOL_TABLE{
+    CFI_SYMBOL_TABLE_NAME   Name;
+    UINT32                  Value;
+    UINT16                  SectionNumber;
+    UINT16                  Type;
+    UINT8                   StorageClass;
+    UINT8                   NumberOfAuxSymbols;
+    CFI_SYMTABLE_AUXFMT     Formats[];
+}CFI_SYMBOL_TABLE, * PCFI_SYMBOL_TABLE;
+
+static inline UINT32* GetCoffStringTable(PCFI_SYMBOL_TABLE Table){
+    if(!Table){
+        return 0x00;
+    }
+    return (UINT32*)((UINT8*)&Table->Formats[Table->NumberOfAuxSymbols] + sizeof(CFI_SYMBOL_TABLE));
+}
+
+#define CFI_SYMTBL_SN_UNDEFINED    0     
+#define CFI_SYMTBL_SN_ABSOLUTE     (UINT16)-1
+#define CFI_SYMTBL_SN_DEBUG        (UINT16)-2
+
+#define CFI_SYMTBLE_TYPE_NULL           0
+#define CFI_SYMTBLE_TYPE_VOID           1
+#define CFI_SYMTBLE_TYPE_CHAR           2
+#define CFI_SYMTBLE_TYPE_SHORT          3
+#define CFI_SYMTBLE_TYPE_INT            4
+#define CFI_SYMTBLE_TYPE_LONG           5
+#define CFI_SYMTBLE_TYPE_FLOAT          6
+#define CFI_SYMTBLE_TYPE_DOUBLE         7
+#define CFI_SYMTBLE_TYPE_STRUCT         8
+#define CFI_SYMTBLE_TYPE_UNION          9
+#define CFI_SYMTBLE_TYPE_ENUM           10
+#define CFI_SYMTBLE_TYPE_MOE            11
+#define CFI_SYMTBLE_TYPE_BYTE           12
+#define CFI_SYMTBLE_TYPE_WORD           13
+#define CFI_SYMTBLE_TYPE_UINT           14
+#define CFI_SYMTBLE_TYPE_DWORD          15
+
+#define CFI_SYMTABLE_DTYPE_NULL         0
+#define CFI_SYMTABLE_DTYPE_POINTER      1
+#define CFI_SYMTABLE_DTYPE_FUNCTION     2
+#define CFI_SYMTABLE_DTYPE_ARRAY        3
+
+#define CFI_SYMTABLE_CLASS_END_OF_FUNCTION  (UINT8)-1
+#define CFI_SYMTABLE_CLASS_NULL                     0
+#define CFI_SYMTABLE_CLASS_AUTOMATIC                1
+#define CFI_SYMTABLE_CLASS_EXTERNAL                 2
+#define CFI_SYMTABLE_CLASS_STATIC                   3
+#define CFI_SYMTABLE_CLASS_REGISTER                 4
+#define CFI_SYMTABLE_CLASS_EXTERNAL_DEF             5
+#define CFI_SYMTABLE_CLASS_LABEL                    6
+#define CFI_SYMTABLE_CLASS_UNDEFINED_LABEL          7
+#define CFI_SYMTABLE_CLASS_MEMBER_OF_STRUCT         8
+#define CFI_SYMTABLE_CLASS_ARGUMENT                 9
+#define CFI_SYMTABLE_CLASS_STRUCT_TAG               10
+#define CFI_SYMTABLE_CLASS_MEMBER_OF_UNION          11
+#define CFI_SYMTABLE_CLASS_UNION_TAG                12
+#define CFI_SYMTABLE_CLASS_TYPE_DEFINITION          13
+#define CFI_SYMTABLE_CLASS_UNDEFINED_STATIC         14
+#define CFI_SYMTABLE_CLASS_ENUM_TAG                 15
+#define CFI_SYMTABLE_CLASS_MEMBER_OF_ENUM           16
+#define CFI_SYMTABLE_CLASS_REGISTER_PARANM          17
+#define CFI_SYMTABLE_CLASS_BIT_FIELD                18
+#define CFI_SYMTABLE_CLASS_BLOCK                    100
+#define CFI_SYMTABLE_CLASS_FUNCTION                 101
+#define CFI_SYMTABLE_CLASS_END_OF_STRUCTURE         102
+#define CFI_SYMTABLE_CLASS_FILE                     103
+#define CFI_SYMTABLE_CLASS_SECTION                  104
+#define CFI_SYMTABLE_CLASS_WEAK_EXTERNAL            105
+#define CFI_SYMTABLE_CLASS_CLR_TOKEN                107
+
+typedef struct _CFI_ATTRIBUTE_CERTICIFATE_TABLE{
+    UINT32      Length;
+    UINT16      Revision;
+    UINT16      CertificateType;
+    UINT8       Certificate;
+}CFI_ATTRIBUTE_CERTICIFATE_TABLE, * PCFI_ATTRIBUTE_CERTICIFATE_TABLE;
+
+#define CFI_WINCERT_REVISION_10     0x0100
+#define CFI_WINCERT_REVISION_20     0x0200
+
+#define CFI_WINCERT_TYPE_X509       0x0001
+#define CFI_WINCERT_TYPE_DATA       0x0002
+#define CFI_WINCERT_TYPE_RESERVED   0x0003
+#define CFI_WINCERT_TYPE_SIGNED     0x0004
+
+typedef struct _CFI_DELAY_LOAD_DIRECTORY_TABLE{
+    UINT32          Attribute;
+    UINT32          Name;
+    UINT32          ModuleHandle;
+    UINT32          DelayImportNameTable;
+    UINT32          BoundDelayImportNameTable;
+    UINT32          UnloadDelayImportTable;
+    UINT32          TimeStamp;
+}CFI_DELAY_LOAD_DIRECTORY_TABLE, * PCFI_DELAY_LOAD_DIRECTORY_TABLE;
+
+typedef struct _CFI_DEBUG_DIRECTORY{
+    UINT32          Characteristics;
+    UINT32          TimeDateStamp;
+    UINT16          MajorVersion;
+    UINT16          MinorVersion;
+    UINT32          Type;
+    UINT32          SizeOfData;
+    UINT32          AddressOfRawData;
+    UINT32          PointerToRawData;
+}CFI_DEBUG_DIRECTORY, * PCFI_DEBUG_DIRECTORY;
+
+#define CFI_DEBUG_TYPE_UNKOWN           0
+#define CFI_DEBUG_TYPE_COFF             1
+#define CFI_DEBUG_TYPE_CODEVIEW         2
+#define CFI_DEBUG_TYPE_FPO              3
+#define CFI_DEBUG_TYPE_MISC             4
+#define CFI_DEBUG_TYPE_EXCEPTION        5
+#define CFI_DEBUG_TYPE_FIXUP            6
+#define CFI_DEBUG_TYPE_OMAP_TO_SRC      7
+#define CFI_DEBUG_TYPE_OMAP_FROM_SRC    8
+#define CFI_DEBUG_TYPE_BORLAND          9
+#define CFI_DEBUG_TYPE_RESERVED10       10
+#define CFI_DEBUG_TYPE_CLSID            11
+#define CFI_DEBUG_TYPE_REPRO            16
+
+#define CFI_FPO_FRAME_FPO   0
+#define CFI_FPO_FRAME_TRAP  1
+#define CFI_FPO_FRAME_TSS   2
+
+typedef struct _CFI_FPO_DATA{
+    UINT32      OffsetStart;
+    UINT32      ProcSize;
+    UINT32      Locals;
+    UINT16      Params;
+    UINT16      Polog       :   8;
+    UINT16      Regs        :   3;
+    UINT16      HasSEH      :   1;
+    UINT16      UseBP       :   1;
+    UINT16      Reserved    :   1;
+    UINT16      Frame       :   2;
+}CFI_FPO_DATA, * PCFI_FPO_DATA;
+
+typedef struct _CFI_EXPORT_DIRECTORY_TABLE{
+    UINT32      ExportFlags;
+    UINT32      TimeDateStamp;
+    UINT16      MajorVersion;
+    UINT16      MinorVersion;
+    UINT32      NameRVA;
+    UINT32      OrdinalBase;
+    UINT32      AddressTableEntries;
+    UINT32      NumberOfNamePointers;
+    UINT32      ExportAddressTableRVA;
+    UINT32      NamePointerTableRVA;
+    UINT32      OrdinalTableRVA; 
+}CFI_EXPORT_DIRECTORY_TABLE, * PCFI_EXPORT_DIRECTORY_TABLE;
+
+typedef union _CFI_EXPORT_ADDRESS_TABLE{
+    UINT32      ExportRVA;
+    UINT32      ForwarderRVA;
+}CFI_EXPORT_ADDRESS_TABLE, * PCFI_EXPORT_ADDRESS_TABLE;
+
+typedef struct _CFI_IMPORT_DIRECTORY_TABLE{
+    UINT32      IltRvaCharacteristics;
+    UINT32      TimeDateStamp;
+    UINT32      ForwarderChain;
+    UINT32      NameRVA;
+    UINT32      ImportAddressTable;
+}CFI_IMPORT_DIRECTORY_TABLE, * PCFI_IMPORT_DIRECTORY_TABLE;
+
+typedef UINT32* CFI_IMPORT_LOOKUP_TABLE64, * PCFI_IMPORT_LOOKUP_TABLE64; 
+typedef UINT32* CFI_IMPORT_LOOKUP_TABLE32, * PCFI_IMPORT_LOOKUP_TABLE32;
+
+#define CFI_IMPORT_LOOKUP_TABLE32_PARSE_BY_ORDINAL    0x80000000
+#define CFI_IMPORT_LOOKUP_TABLE64_PARSE_BY_ORDINAL    0x8000000000000000
+
+typedef struct _CFI_HINT_NAME_TABLE{
+    UINT16      Hint;
+    UINT8       Name[];
+}CFI_HINT_NAME_TABLE, * PCFI_HINT_NAME_TABLE;
+
+typedef struct _X66_PLATFORM_FUNCTION_TABLE{
+    UINT32      BeginAddress;
+    UINT32      EndAddress;
+    UINT32      UnwindInformation;
+}X66_PLATFORM_FUNCTION_TABLE, * PX66_PLATFORM_FUNCTION_TABLE;
+
+typedef struct _CFI_BASE_RELOCATION_BLOCK{
+    UINT32              PageRVA;
+    UINT32              BlockSize;
+    union{
+        struct{
+            UINT16      Offset : 12;
+            UINT16      Type   : 4; 
+        };
+        UINT16          SanityIndexor;//compiler rounds to 16 bit indexing
+    }                   RelocationEntires[];
+}CFI_BASE_RELOCATION_BLOCK, * PCFI_BASE_RELOCATION_BLOCK;
+
+#define CFI_BASE_RELOCATION_TYPE_BASED_ABSOLUTE         0
+#define CFI_BASE_RELOCATION_TYPE_BASED_HIGH             1
+#define CFI_BASE_RELOCATION_TYPE_BASED_LOW              2
+#define CFI_BASE_RELOCATION_TYPE_BASED_HIGH_LOW         3
+#define CFI_BASE_RELOCATION_TYPE_BASED_HIGH_ADJ         4
+#define CFI_BASE_RELOCATION_TYPE_BASED_MIPS_JMPADDR     5
+#define CFI_BASE_RELOCATION_TYPE_BASED_ARM_MOV32        5
+#define CFI_BASE_RELOCATION_TYPE_BASED_RISCV_HIGH20     5
+#define CFI_BASE_RELOCATION_TYPE_BASED_THUMB_MOV32      7
+#define CFI_BASE_RELOCATION_TYPE_BASED_RISCV_LOW12L     7
+#define CFI_BASE_RELOCATION_TYPE_BASED_RISCV_LOW12S     8
+#define CFI_BASE_RELOCATION_TYPE_BASED_MIPS_JMPADDR16   9
+#define CFI_BASE_RELOCATION_TYPE_BASED_DIR64            10
+
+
+typedef struct _CFI_TLS_DIRECTORY32{
+    UINT32      RawDataStartVA;
+    UINT32      RawDaraEndVA;
+    UINT32      AddressOfIndex;
+    UINT32      AddressOfCallbacks;
+    UINT32      SizeOfZeroFill;
+    UINT32      Characteristics;
+}CFI_TLS_DIRECTORY32, * PCFI_TLS_DIRECTORY32;
+
+typedef struct _CFI_TLS_DIRECTORY64{
+    UINT64      RawDataStartVA;
+    UINT64      RawDaraEndVA;
+    UINT64      AddressOfIndex;
+    UINT64      AddressOfCallbacks;
+    UINT32      SizeOfZeroFill;
+    UINT32      Characteristics;
+}CFI_TLS_DIRECTORY64, * PCFI_TLS_DIRECTORY64;
+
+typedef union _CFI_TLS_DIRECTORY{
+    CFI_TLS_DIRECTORY32     Directory32;
+    CFI_TLS_DIRECTORY64     Directory64;
+}CFI_TLS_DIRECTORY, * PCFI_TLS_DIRECTORY;
+
+typedef VOID (NTAPI *PCFI_IMAGE_TLS_CALLBACK)(PVOID DllHandle, UINT32 Reason, PVOID Reserved);
+
+#define CFI_DLL_PROCESS_DETATCH 0
+#define CFI_DLL_PROCESS_ATTATCH 1
+#define CFI_DLL_THREAD_ATTATCH  2
+#define CFI_DLL_THREAD_DETATCH  3
+
+typedef struct _CFI_LOAD_CONFIGURATION_LAYOUT32{
+    UINT32      Characteristics;
+    UINT32      TimeDateStamp;
+    UINT16      MajorVersion;
+    UINT16      MinorVersion;
+    UINT32      GlobalFlagsClear;
+    UINT32      GlobalFlagsSet;
+    UINT32      CriticalSectionDefaultTimeout;
+    UINT32      DeCommitFreeBlockThreshold;
+    UINT32      DeCommitTotalFreeThreshold;
+    UINT32      LockPrefixTable;
+    UINT32      MaximumAllocationSize;
+    UINT32      VirtualMemoryThreshold;
+    UINT32      ProcessAffinityMask;    
+    UINT32      ProcessHeapFlags;
+    UINT16      CSDVersion;
+    UINT16      Reserved;
+    UINT32      EditList;
+    UINT32      SecurityCookie;
+    UINT32      SEHandlerTable;
+    UINT32      SEHandlerCount;
+    UINT32      GuardCFCheckFunctionPointer;
+    UINT32      GuardCFDispatchFunctionPointe;
+    UINT32      GuardCFFunctionTable;
+    UINT32      GuardCFFunctionCount;
+    UINT32      GuardFlags;
+    UINT8       CodeIntegrity[12];
+    UINT32      GuardAddressTakenIatEntryTable;
+    UINT32      GuardAddressTakenIatEntryCount;
+    UINT32      GuardLongJumpTargetTable;
+    UINT32      GuardLongJumpTargetCount;
+}CFI_LOAD_CONFIGURATION_LAYOUT32, * PCFI_LOAD_CONFIGURATION_LAYOUT32;
+
+typedef struct _CFI_LOAD_CONFIGURATION_LAYOUT64{
+    UINT32      Characteristics;
+    UINT32      TimeDateStamp;
+    UINT16      MajorVersion;
+    UINT16      MinorVersion;
+    UINT32      GlobalFlagsClear;
+    UINT32      GlobalFlagsSet;
+    UINT32      CriticalSectionDefaultTimeout;
+    UINT64      DeCommitFreeBlockThreshold;
+    UINT64      DeCommitTotalFreeThreshold;
+    UINT64      LockPrefixTable;
+    UINT64      MaximumAllocationSize;
+    UINT64      VirtualMemoryThreshold;
+    UINT64      ProcessAffinityMask;
+    UINT32      ProcessHeapFlags;
+    UINT16      CSDVersion;
+    UINT16      Reserved;
+    UINT64      EditList;
+    UINT64      SecurityCookie;
+    UINT64      SEHandlerTable;
+    UINT64      SEHandlerCount;
+    UINT64      GuardCFCheckFunctionPointer;
+    UINT64      GuardCFDispatchFunctionPointe;
+    UINT64      GuardCFFunctionTable;
+    UINT64      GuardCFFunctionCount;
+    UINT32      GuardFlags;
+    UINT8       CodeIntegrity[12];
+    UINT64      GuardAddressTakenIatEntryTable;
+    UINT64      GuardAddressTakenIatEntryCount;
+    UINT64      GuardLongJumpTargetTable;
+    UINT64      GuardLongJumpTargetCount;
+}CFI_LOAD_CONFIGURATION_LAYOUT64, * PCFI_LOAD_CONFIGURATION_LAYOUT64;
+
+typedef union _CFI_LOAD_CONFIGURATION_LAYOUT{
+    CFI_LOAD_CONFIGURATION_LAYOUT64 LoadConfigurationLayout64;
+    CFI_LOAD_CONFIGURATION_LAYOUT32 LoadConfigurationLayout32;
+}CFI_LOAD_CONFIGURATION_LAYOUT, * PCFI_LOAD_CONFIGURATION_LAYOUT;
+
+#define CFI_GUARD_CF_INSTRUMENTED                       0x00000100
+#define CFI_GUARD_CFW_INSTRUMENTED                      0x00000200
+#define CFI_GUARD_CF_FUNCTION_TABLE_PRESENT             0x00000400
+#define CFI_GUARD_SECURITY_COOKIE_UNUSED                0x00000800
+#define CFI_GUARD_PROTECT_DELAYLOAD_IAT                 0x00001000
+#define CFI_GUARD_DELAYLOAD_IAT_IN_ITS_OWN_SECTION      0x00002000
+#define CFI_GUARD_CF_EXPORT_SUPPRESSION_INFO_PRESENT    0x00004000
+#define CFI_GUARD_CF_ENABLE_EXPORT_SUPPRESSION          0x00008000
+#define CFI_GUARD_CF_LONGJUMP_TABLE_PRESENT             0x00010000
+#define CFI_GUARD_CF_FUNCTION_TABLE_SIZE_MASK           0xF0000000
+
+#define CFI_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT          28
+
+typedef struct _CFI_RESOURCE_DIRECTORY_ENTRIES{
+    union{
+        UINT32      NameOffset;
+        UINT32      ID;
+    };
+    UINT32          DataEntryOffset;
+    UINT32          SubDirectoryOffset;
+}CFI_RESOURCE_DIRECTORY_ENTRIES, * PCFI_RESOURCE_DIRECTORY_ENTRIES;
+
+typedef struct _CFI_RESOURCE_DIRECTORY_TABLE{
+    UINT32                              Charecteristics;
+    UINT32                              TimeDateStamp;
+    UINT16                              MajorVersion;
+    UINT16                              MinorVersion;
+    UINT16                              NumberOfNameEntries;
+    UINT16                              NumberOfIDEntries;
+    CFI_RESOURCE_DIRECTORY_ENTRIES      Entires[];
+}CFI_RESOURCE_DIRECTORY_TABLE, * PCFI_RESOURCE_DIRECTORY_TABLE;
+
+typedef UNICODE_STRING CFI_RESOURCE_DIRECTORY_STRING, * PCFI_RESOURCE_DIRECTORY_STRING;
+
+typedef struct _CFI_RESOURCE_DATA_ENTRY{
+    UINT32      DataRva;
+    UINT32      Size;
+    UINT32      CodePage;
+    UINT32      Reserved;
+}CFI_RESOURCE_DATA_ENTRY, * PCFI_RESOURCE_DATA_ENTRY;
+
+typedef struct _CFI_ARCHIVE_MEMBER_HEADERS{
+    UINT8       Name[16];
+    UINT8       Date[12];
+    UINT8       UserID[6];
+    UINT8       GroupID[6];
+    UINT64      Mode;
+    UINT8       Size[10];
+    UINT16      EndOfHeader;
+}CFI_ARCHIVE_MEMBER_HEADERS, * PCFI_ARCHIVE_MEMBER_HEADERS;
+
+typedef struct _CFI_FIRST_LINKER_MEMBER{
+    UINT32      NumberOfSymbols;
+    UINT32      Offsets[];
+}CFI_FIRST_LINKER_MEMBER, * PCFI_FIRST_LINKER_MEMBER;
+
+//the following structure only represents the bottom half of the second linker
+//and uses the first linker member for the upper half of the second linker
+//to reduce redundancy of code 
+typedef struct _CFI_SECOND_LINKER_MEMBER{ 
+    UINT32      NumberOfSymbols;
+    UINT16      Indices;
+}CFI_SECOND_LINKER_MEMBER, * PCFI_SECOND_LINKER_MEMBER;
+
+//use this to get the second member structure from the base of the second member table 
+#define GET_SECOND_LINKER_MEMBER_FROM_BASE(BaseOfSecond)    ((PCFI_SECOND_LINKER_MEMBER)(UINT8*)((((PCFI_FIRST_LINKER_MEMBER)BaseOfSecond)->Indices *  sizeof(UINT32)) + sizeof(UINT32)) + (UINT8*)BaseOfSecond)
+
+typedef struct _CFI_IMPORT_HEADER{
+    UINT16      Signature1;
+    UINT16      Signature2;
+    UINT16      Version;
+    UINT16      Machine;
+    UINT32      TimeDateStamp;
+    UINT32      SizeOfData;
+    UINT16      OrdinalHint;
+    UINT16      Type    :   2;
+    UINT16      NameType:   3;
+    UINT16      Reserved:   11;
+}CFI_IMPORT_HEADER, * PCFI_IMPORT_HEADER;
+
+#define CFI_IMPORT_TYPE_CODE    0
+#define CFI_IMPORT_TYPE_DATA    1
+#define CFI_IMPORT_TYPE_CONST   2
+
+#define CFI_IMPORT_NAME_TYPE_ORDINAL    0
+#define CFI_IMPORT_NAME_TYPE_NAME       1
+#define CFI_IMPORT_NAME_TYPE_NOPREFIX   2
+#define CFI_IMPORT_NAME_TYPE_UNDECORATE 3
+
 typedef struct _CFI_OBJECT{
     FILE*                   CoffFile;
+    string                  FormalName;
     BOOL                    AOA64;
     BOOL                    KernelObject;
     PCOFF_IMAGE_HEADER      ImageHeader;
-    PVOID                   LoadedAddress;                                                                                                                                                
+    PVOID                   LoadedAddress;
     PVOID                   PhysicalLoadedAddress;
     PVOID                   ExecututionLoading;
     UINT64                  KCopy;
+    KERNEL_REFERENCE        Reference;
+    PVOID                   Entry;
+    mutex_t                 LockOutTagOut;    
 }CFI_OBJECT, * PCFI_OBJECT;
 
-
+LOUSTATUS
+LouKeLoadCoffImageExA(
+    string          FileNameAndPath,
+    PCFI_OBJECT*    LoadedObjectCheck
+);
 
 LOUSTATUS 
 LouKeLoadCoffImageA(
     string          Path,
     string          FileName,      
-    PCFI_OBJECT     CfiObject
+    PCFI_OBJECT*    CfiObject
 );
-
 
 #ifdef __cplusplus
 }
