@@ -47,7 +47,8 @@ static void DestroyLoadedImageEntry(PCFI_OBJECT Object){
 LOUSTATUS
 LouKeLoadCoffImageExA_ns(
     string          FileNameAndPath,
-    PCFI_OBJECT     CfiObject
+    PCFI_OBJECT     CfiObject,
+    BOOL            KernelObject
 ){
     LOUSTATUS LoaderStatus;
     PCOFF_IMAGE_HEADER  CoffStdHeader;
@@ -81,6 +82,8 @@ LouKeLoadCoffImageExA_ns(
     }
 
     CfiObject->AOA64 = (CoffStdHeader->OptionalHeader.PE64.Magic == CFI_OPTIONAL_HEADER_PE3264_MAGIC) ? 0 : 1;
+    CfiObject->KernelObject = KernelObject;
+
     if((CoffStdHeader->OptionalHeader.PE64.Magic != CFI_OPTIONAL_HEADER_PE32_MAGIC) && CfiObject->AOA64){
         LouPrint("Error Loading Coff Image: Could Not Find Compatible Low Level Loader\n");
         DestroyLoadedImageEntry(CfiObject);
@@ -102,7 +105,8 @@ LouKeLoadCoffImageExA_ns(
 LOUSTATUS
 LouKeLoadCoffImageExA(
     string          FileNameAndPath,
-    PCFI_OBJECT*    LoadedObjectCheck
+    PCFI_OBJECT*    LoadedObjectCheck,
+    BOOL            KernelObject
 ){
     LOUSTATUS           LoaderStatus;
     PCFI_OBJECT         CfiObject;
@@ -124,7 +128,9 @@ LouKeLoadCoffImageExA(
 
     CfiObject = CreateLoadedImageEntry(FileNameAndPath);
 
-    LoaderStatus = LouKeLoadCoffImageExA_ns(FileNameAndPath, CfiObject);
+    
+
+    LoaderStatus = LouKeLoadCoffImageExA_ns(FileNameAndPath, CfiObject, KernelObject);
     
     //size_t ImageSize = CoffStdHeader->
     //LouPrint("Image Size Is:%h\n", ImageSize);
@@ -145,7 +151,8 @@ LOUSTATUS
 LouKeLoadCoffImageA(
     string          Path,
     string          FileName,      
-    PCFI_OBJECT*    CfiObject
+    PCFI_OBJECT*    CfiObject,
+    BOOL            KernelObject
 ){
     string FullPath = 0x00;
     if(!FileName){
@@ -159,5 +166,5 @@ LouKeLoadCoffImageA(
         LouPrint("LouKeLoadCoffImageA64() ERROR No Path\n");
         while(1);
     }
-    return LouKeLoadCoffImageExA(FullPath, CfiObject);
+    return LouKeLoadCoffImageExA(FullPath, CfiObject, KernelObject);
 }

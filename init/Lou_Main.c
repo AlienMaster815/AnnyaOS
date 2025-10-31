@@ -359,7 +359,7 @@ KERNEL_ENTRY Lou_kernel_start(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-    
+
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 
     while(1){
@@ -433,4 +433,3 @@ GPUs	Hardest
 PCIe FPGA Cards	Hardest	
 High-Performance NICs	Hardest
 */
-//TODO finish Ps an WMI

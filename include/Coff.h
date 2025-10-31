@@ -721,7 +721,6 @@ typedef struct _CFI_OBJECT{
     PVOID                   LoadedAddress;
     PVOID                   PhysicalLoadedAddress;
     PVOID                   ExecututionLoading;
-    UINT64                  KCopy;
     KERNEL_REFERENCE        Reference;
     PVOID                   Entry;
     mutex_t                 LockOutTagOut;    
@@ -730,14 +729,16 @@ typedef struct _CFI_OBJECT{
 LOUSTATUS
 LouKeLoadCoffImageExA(
     string          FileNameAndPath,
-    PCFI_OBJECT*    LoadedObjectCheck
+    PCFI_OBJECT*    LoadedObjectCheck,
+    BOOL            KernelObject
 );
 
 LOUSTATUS 
 LouKeLoadCoffImageA(
     string          Path,
     string          FileName,      
-    PCFI_OBJECT*    CfiObject
+    PCFI_OBJECT*    CfiObject,
+    BOOL            KernelObject
 );
 
 #ifdef __cplusplus

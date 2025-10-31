@@ -283,6 +283,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 	$(MAKE) -C boot/x86_64 clean
+	$(MAKE) -C EXE/asmss/ clean
 	rm -rf release
 	rm -rf ISO
 	rm -rd dist
