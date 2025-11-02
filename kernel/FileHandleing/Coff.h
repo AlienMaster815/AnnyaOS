@@ -14,7 +14,8 @@ LOUSTATUS LouKeLoadCoffImageA64(
 LOUSTATUS 
 LouKeRequestVirtualAddressAllocation(
     UINTPTR     Address,
-    SIZE        size
+    SIZE        size,
+    PVOID*      Phy
 );
 
 void DisableCR0WriteProtection();
@@ -33,7 +34,7 @@ void LouKeInitializeLibraryLookup(
 typedef struct _LOADED_IMAGE_TRACKER{
     ListHeader  Peers;
     string      LoadedObjectName;
-    CFI_OBJECT  LoadedObject;
+    PCFI_OBJECT LoadedObject;
 }LOADED_IMAGE_TRACKER, * PLOADED_IMAGE_TRACKER;
 
 #endif

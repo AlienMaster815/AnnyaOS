@@ -14,7 +14,8 @@ bool CheckAndReserveVAddress(
 LOUSTATUS 
 LouKeRequestVirtualAddressAllocation(
     UINTPTR     Address,
-    SIZE        size
+    SIZE        size,
+    PVOID*      Phy
 ){  
     if(!size){
         return STATUS_INVALID_PARAMETER;
@@ -22,6 +23,18 @@ LouKeRequestVirtualAddressAllocation(
     if(!CheckAndReserveVAddress(Address, size)){
         return STATUS_UNSUCCESSFUL;
     }
-    LouKeUnMapContinuousMemoryBlock(Address, size);
+
+    size_t Tmp;
+    size_t i = 0;
+    while(i < size){
+        RequestPhysicalAddress(Address + i, (UINT64*)Phy);
+        if(*Phy || (!LouKeIsPageUnMapped((UINTPTR)*Phy))){
+            LouUnMapAddress(Address + i, 0x00, &Tmp, 0x00);
+            i += Tmp;
+        }else{
+            i += KILOBYTE_PAGE;
+        }
+    }
+    
     return STATUS_SUCCESS;
 }

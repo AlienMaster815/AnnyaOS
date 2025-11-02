@@ -5,8 +5,8 @@
 static mutex_t LITMutex = {0}; 
 static LOADED_IMAGE_TRACKER MasterTracker = {0};
 
-static PCFI_OBJECT CreateLoadedImageEntry(
-    string          LoadedObjectName
+static void CreateLoadedImageEntry(
+    PCFI_OBJECT CfiObject
 ){
     PLOADED_IMAGE_TRACKER TmpTracker = &MasterTracker;
     while(TmpTracker->Peers.NextHeader){
@@ -14,27 +14,26 @@ static PCFI_OBJECT CreateLoadedImageEntry(
     }
     TmpTracker->Peers.NextHeader = (PListHeader)LouKeMallocType(LOADED_IMAGE_TRACKER, KERNEL_GENERIC_MEMORY);
     TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
-    TmpTracker->LoadedObjectName = LoadedObjectName;
-    LouKeAcquireReference(&TmpTracker->LoadedObject.Reference);
-    return &TmpTracker->LoadedObject;
+    TmpTracker->LoadedObject = CfiObject;
+    LouKeAcquireReference(&TmpTracker->LoadedObject->Reference);
 }
 
-static PCFI_OBJECT LookForLoadedImageEntry(string ImageName){
+static bool LookForLoadedImageEntry(PCFI_OBJECT Object){
     PLOADED_IMAGE_TRACKER TmpTracker = (PLOADED_IMAGE_TRACKER)MasterTracker.Peers.NextHeader;
     while(TmpTracker){
-        if(!strcmp(TmpTracker->LoadedObjectName, ImageName)){
-            return &TmpTracker->LoadedObject;
+        if((UINT64)TmpTracker->LoadedObject == (UINT64)Object){
+            return true;
         }
         TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
     }
-    return 0x00;
+    return false;
 }
 
 static void DestroyLoadedImageEntry(PCFI_OBJECT Object){
     PLOADED_IMAGE_TRACKER TmpTracker = (PLOADED_IMAGE_TRACKER)MasterTracker.Peers.NextHeader;
     PLOADED_IMAGE_TRACKER Follower = &MasterTracker; 
     while(TmpTracker){
-        if(&TmpTracker->LoadedObject == Object){
+        if(TmpTracker->LoadedObject == Object){
             Follower->Peers.NextHeader = TmpTracker->Peers.NextHeader;
             
             LouKeFree(TmpTracker);
@@ -43,6 +42,16 @@ static void DestroyLoadedImageEntry(PCFI_OBJECT Object){
         TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
     }
 }
+
+//LOUSTATUS 
+//LouKeLoadCoffImageB(
+//    string          FileNameAndPath,
+//    PCFI_OBJECT     CfiObject,
+//    BOOL            KernelObject,
+//    PVOID           Base
+//){
+//   
+//}
 
 LOUSTATUS
 LouKeLoadCoffImageExA_ns(
@@ -105,40 +114,34 @@ LouKeLoadCoffImageExA_ns(
 LOUSTATUS
 LouKeLoadCoffImageExA(
     string          FileNameAndPath,
-    PCFI_OBJECT*    LoadedObjectCheck,
+    PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 ){
     LOUSTATUS           LoaderStatus;
-    PCFI_OBJECT         CfiObject;
 
-    if((!LoadedObjectCheck) || (!FileNameAndPath)){
+    if(!FileNameAndPath){
         return STATUS_INVALID_PARAMETER;
     }
 
     MutexLock(&LITMutex);
 
-    *LoadedObjectCheck = LookForLoadedImageEntry(FileNameAndPath);
+    bool Loaded = LookForLoadedImageEntry(CfiObject);
 
-    if(*LoadedObjectCheck){
+    if(Loaded){
         LouPrint("Image Already Loaded\n");
         MutexUnlock(&LITMutex);
-        MutexSynchronize(&(*LoadedObjectCheck)->LockOutTagOut);
+        MutexSynchronize(&CfiObject->LockOutTagOut);
         return STATUS_SUCCESS;
     }
 
-    CfiObject = CreateLoadedImageEntry(FileNameAndPath);
-
-    
+    CreateLoadedImageEntry(CfiObject);
 
     LoaderStatus = LouKeLoadCoffImageExA_ns(FileNameAndPath, CfiObject, KernelObject);
     
     //size_t ImageSize = CoffStdHeader->
     //LouPrint("Image Size Is:%h\n", ImageSize);
 
-    if(LoaderStatus == STATUS_SUCCESS){
-        *LoadedObjectCheck = CfiObject;
-    }else{
-        *LoadedObjectCheck = 0x00;
+    if(LoaderStatus != STATUS_SUCCESS){
         DestroyLoadedImageEntry(CfiObject);
     }
     fclose(CfiObject->CoffFile);
@@ -151,7 +154,7 @@ LOUSTATUS
 LouKeLoadCoffImageA(
     string          Path,
     string          FileName,      
-    PCFI_OBJECT*    CfiObject,
+    PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 ){
     string FullPath = 0x00;

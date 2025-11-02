@@ -21,6 +21,7 @@ typedef struct _DRIVER_MODULE_HANDLES{
     ListHeader          Neighbors;
     string              Paths;
     DRIVER_MODULE_ENTRY ModuleEntry;
+    CFI_OBJECT          CfiObject;
     void*               DriverObject;
 }DRIVER_MODULE_HANDLES, * PDRIVER_MODULE_HANDLES;
 
@@ -47,22 +48,18 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
         }
     }
 
-    DRIVER_MODULE_ENTRY Entry;
-    FILE* ModuleHandle = fopen(ModuleNameAndPath, KERNEL_GENERIC_MEMORY);
-    if(!ModuleHandle){
-        return 0x00;
-    }
-
     string NewMod = (string)LouKeMallocArray(char, strlen(ModuleNameAndPath), KERNEL_GENERIC_MEMORY);
     strncpy(NewMod, ModuleNameAndPath, strlen(ModuleNameAndPath));
 
+    LouKeLoadCoffImageExA(NewMod, &TmpHandle->CfiObject, true);
+
     TmpHandle->Paths = NewMod;
-    Entry = (DRIVER_MODULE_ENTRY)LoadKernelModule((uintptr_t)ModuleHandle, ModuleNameAndPath);
-    TmpHandle->ModuleEntry = Entry;
+    //Entry = (DRIVER_MODULE_ENTRY)LoadKernelModule((uintptr_t)ModuleHandle, ModuleNameAndPath);
+    TmpHandle->ModuleEntry = TmpHandle->CfiObject.Entry;
     TmpHandle->DriverObject = LouKeMalloc(DriverObjectSize, WRITEABLE_PAGE | PRESENT_PAGE);
     *DriverObject = TmpHandle->DriverObject;
     DriveHandlesCount++;
-    return (DRIVER_MODULE_ENTRY)Entry;
+    return (DRIVER_MODULE_ENTRY)TmpHandle->CfiObject.Entry;
 }
 
 

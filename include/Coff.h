@@ -729,7 +729,7 @@ typedef struct _CFI_OBJECT{
 LOUSTATUS
 LouKeLoadCoffImageExA(
     string          FileNameAndPath,
-    PCFI_OBJECT*    LoadedObjectCheck,
+    PCFI_OBJECT     LoadedObjectCheck,
     BOOL            KernelObject
 );
 
@@ -737,7 +737,7 @@ LOUSTATUS
 LouKeLoadCoffImageA(
     string          Path,
     string          FileName,      
-    PCFI_OBJECT*    CfiObject,
+    PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 );
 

@@ -246,6 +246,7 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeFullLouACPISubsystem();
 
+    while(1);
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
 }
 

@@ -67,6 +67,18 @@ void LouKeMapContinuousMemoryBlock(
     }
 }
 
+void LouKeMapContinuousMemoryBlockKB(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+){
+    uint64_t i = 0;
+    while(i < size){
+        LouMapAddress(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE);
+        i += KILOBYTE_PAGE;
+    }
+}
 
 void LouKeUnMapContinuousMemoryBlock(
     uint64_t VAddress,

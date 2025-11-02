@@ -12,26 +12,22 @@ UNUSED static void EnableCoffImageProtection(
     UNUSED UINT32 SectionAlignment = PeImageHeader->OptionalHeader.PE64.SectionAlignment;
     
     for(size_t i = 0; i < SectionCount; i++){
-        UINT64 PageFlags = CfiObject->KernelObject ? KERNEL_GENERIC_MEMORY : USER_GENERIC_MEMORY;
+        UINT64 PageFlags = CfiObject->KernelObject ? 0 : USER_PAGE;
         UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
         SIZE VirtualSize = (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize;
         VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
                 
-        if(SectionCharacteristics & CFI_SCN_MEM_NOT_PAGED){
-            PageFlags &= ~PRESENT_PAGE;
-        }       
-
-        if(SectionCharacteristics & CFI_SCN_MEM_NOT_CACHED){
-            PageFlags |= UNCACHEABLE_PAGE;
+        if(SectionCharacteristics & CFI_SCN_CNT_CODE){
+            PageFlags = PRESENT_PAGE;
+        }else if(
+            SectionCharacteristics & CFI_SCN_CNT_INITIALIZED_DATA ||
+            SectionCharacteristics & CFI_SCN_CNT_UNINITIALIZED_DATA
+        ){
+            PageFlags = PRESENT_PAGE | WRITEABLE_PAGE;
+        }else{
+            PageFlags = PRESENT_PAGE;
         }
-
-        if(!(SectionCharacteristics & CFI_SCN_MEM_READ)){
-            PageFlags &= ~PAGE_USER;
-        }
-
-        if(!(SectionCharacteristics & CFI_SCN_MEM_WRITE)){
-            PageFlags &= ~WRITEABLE_PAGE;
-        }
+        
         
         LouKeMapContinuousMemoryBlock(
             PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
@@ -61,7 +57,11 @@ static void UnpackCoffImage(
         VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
                 
         if(PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress){
-            memcpy((PVOID)(LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress), (PVOID)(RawData + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].PointerToRawData), PeImageHeader->OptionalHeader.PE64.SectionTables[i].SizeOfRawData);
+            memcpy(
+                (PVOID)(LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress), 
+                (PVOID)(RawData + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].PointerToRawData), 
+                PeImageHeader->OptionalHeader.PE64.SectionTables[i].SizeOfRawData
+            );
         }
     }
     CfiObject->ImageHeader = (PCOFF_IMAGE_HEADER)((UINT64)LoadedAddress + ((UINT64)PeImageHeader - RawData));
@@ -198,9 +198,13 @@ static inline uint8_t FilePathCountBackToDirectory(string FilePath){
 static LOUSTATUS ConfigureImportTables(
     PCFI_OBJECT CfiObject
 ){
+    if(!CfiObject->ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress){
+        return STATUS_SUCCESS;
+    }
+
     //TODO: redo the error Handleing of this file
     uint64_t ModuleStart = (uint64_t)CfiObject->LoadedAddress;
-    PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)((UINTPTR)CfiObject->LoadedAddress + (UINTPTR)CfiObject->ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress);;
+    PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)((UINTPTR)CfiObject->LoadedAddress + (UINTPTR)CfiObject->ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress);
     //string FilePath;
 
     uint64_t i = 0;
@@ -258,14 +262,14 @@ LOUSTATUS LouKeLoadCoffImageA64(
     PCOFF_IMAGE_HEADER Pe64ImageHeader = CfiObject->ImageHeader; 
 
     CfiObject->LoadedAddress = (PVOID)Pe64ImageHeader->OptionalHeader.PE64.ImageBase;
-
     
     UINT64 ISize = Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage;
     ISize = ROUND_UP64(ISize, KILOBYTE_PAGE);
 
     LOUSTATUS Status = LouKeRequestVirtualAddressAllocation(
         Pe64ImageHeader->OptionalHeader.PE64.ImageBase,
-        Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage
+        ISize,
+        &CfiObject->PhysicalLoadedAddress
     );
 
     if(Status != STATUS_SUCCESS){
@@ -279,9 +283,8 @@ LOUSTATUS LouKeLoadCoffImageA64(
             ImageAlignment
         );
     }
-
+        
     CfiObject->PhysicalLoadedAddress = LouMallocEx64(Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageAlignment);
-
     LouKeMapContinuousMemoryBlock((UINT64)CfiObject->PhysicalLoadedAddress, (UINT64)CfiObject->LoadedAddress, ISize, KERNEL_GENERIC_MEMORY);
 
     UnpackCoffImage(CfiObject);

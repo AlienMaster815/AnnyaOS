@@ -509,7 +509,12 @@ void* LouMallocEx64(SIZE BytesToAllocate, UINT64 Alignment){
 }
 
 void LouFree(RAMADD Addr) {
-    /*LouKIRQL OldIrql;
+
+    if(LouKeIsPageUnMapped((UINTPTR)Addr)){
+        return;
+    }
+
+    LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
         if(AddressBlock[i].Address == (uint64_t)Addr){
@@ -531,7 +536,7 @@ void LouFree(RAMADD Addr) {
     }
     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
     //LouPrint("Address Not Freed:%h\n", Addr);
-    */
+    
 }
 
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){

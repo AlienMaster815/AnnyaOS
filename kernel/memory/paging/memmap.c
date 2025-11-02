@@ -38,6 +38,10 @@ void InitializeSafePage(){
     SafePage = (uint64_t)LouMallocEx(MEGABYTE_PAGE, MEGABYTE_PAGE);
 }
 
+bool LouKeIsPageUnMapped(UINTPTR PhysicalAddress){
+    return (SafePage == PhysicalAddress);
+}
+
 void LouKeMallocPageFrameNumber(
     uint64_t Virtual,
     uint64_t Physical,
