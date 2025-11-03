@@ -1,5 +1,12 @@
 #include "ProcessPrivate.h"
 
+LOUDDK_API_ENTRY
+semaphore_t* LouKeCreateSemaphore(int initial, int limit){
+    semaphore_t* NewSemaphore = (semaphore_t*)LouKeMallocType(semaphore_t, KERNEL_GENERIC_MEMORY);
+    SemaphoreInitialize(NewSemaphore, initial, limit);
+    return NewSemaphore;
+}
+
 UNUSED 
 static void SaveContext(CPUContext* TMContext, CPUContext* ProgramContext){
 
@@ -81,3 +88,5 @@ void LouKeSwitchToTask(
     SetTEB((UINT64)&ThreadTo->Teb);
 
 }
+
+

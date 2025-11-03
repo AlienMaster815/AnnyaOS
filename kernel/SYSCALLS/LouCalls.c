@@ -4,11 +4,6 @@ void LouKeLoadFileCall(uint64_t* Data);
 void LouKeCloseFileCall(uint64_t* Data);
 void LouKeUpdateShadowClipState(PDRSD_CLIP Clip);
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack);
-uintptr_t LouKeCreateUserStackThread(
-    void (*Function)(), 
-    PVOID FunctionParameters, 
-    size_t StackSize
-);
 void LouKeUpdateClipSubState(
     PDRSD_CLIP Clip, 
     INT64 X, INT64 Y, 
@@ -34,7 +29,7 @@ uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-void LouKeDestroyThread(uint64_t Thread);
+void LouKeDestroyDemon(uint64_t Thread);
 void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
@@ -70,12 +65,6 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             *(uint64_t*)Data = (uint64_t)LouKeMalloc(*(uint64_t*)Data, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
             return;
         } 
-        case LOUCREATETHREAD:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            UNUSED uintptr_t Result = LouKeCreateUserStackThread((void(*)())Tmp[0], (PVOID)Tmp[1], 2 * MEGABYTE);
-            Tmp[0] = Result;
-            return;
-        }
         case LOUEXITDOSMODE:{
             LouKeExitDosMode();
             return;
@@ -168,7 +157,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUDESTROYTHREAD:{
             //TODO: Do A Privaledge Check
-            LouKeDestroyThread(*(uint64_t*)Data);
+            LouKeDestroyDemon(*(uint64_t*)Data);
             return;
         }
 

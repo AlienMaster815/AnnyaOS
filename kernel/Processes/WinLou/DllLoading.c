@@ -126,7 +126,6 @@ uint64_t LouKeLinkerGetAddress(
 
 extern uint64_t GetRBP();
 extern void SetTEB();
-uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer);
 
 HANDLE LouKeLoadLibraryA(string LibraryName){
 
@@ -182,7 +181,7 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
     TmpLibHandle->ProcessInformation = InitializeProcessData(TmpLibHandle->ImageBase, TmpLibHandle->Paths);
 
     if(TmpLibHandle->LibraryEntry){
-        PWIN_TEB Teb = (PWIN_TEB)LouKeMallocType(WIN_TEB, USER_GENERIC_MEMORY);
+        //PWIN_TEB Teb = (PWIN_TEB)LouKeMallocType(WIN_TEB, USER_GENERIC_MEMORY);
     
         UNUSED PATTACH_THREAD_DATA DllAttachProcessData = (PATTACH_THREAD_DATA)LouKeMallocType(ATTACH_THREAD_DATA , USER_GENERIC_MEMORY);
         DllAttachProcessData->DllEntry = (bool(*)(uint64_t, uint64_t, uint64_t))TmpLibHandle->LibraryEntry;
@@ -193,7 +192,9 @@ HANDLE LouKeLoadLibraryA(string LibraryName){
 
         uint64_t AttachLing = LouKeLinkerGetAddress("LouDll.dll", "AnnyaAttachDllToProcess");
         if((AttachLing) && (DllAttachProcessData->LockRelease)){
-            LouKeCreateUserStackThreadWin((void(*))AttachLing, DllAttachProcessData, 16 * KILOBYTE, (uint64_t)(uint8_t*)Teb);
+            
+            LouPrint("LouKeLoadLibraryA():HERE\n");
+            while(1);
             MutexSynchronize(&DllAttachProcessData->Lock);
         }
     }

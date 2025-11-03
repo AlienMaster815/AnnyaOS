@@ -150,6 +150,9 @@ typedef struct _PROCESS_THREAD_RING{
 
 typedef struct _PROCESSOR_STATE_BLOCK{
     mutex_t                         LockOutTagOut;
+    UINT64                          CurrentThreadID;
+    UINT64                          CurrentInterruptStorage;
+    UINT64                          CurrentContextStorage;
     UINT64                          TotalMsSlice;
     UINT64                          CurrentMsSlice;
     PM_ID_RANGE_POOL                ThreadIDPool;

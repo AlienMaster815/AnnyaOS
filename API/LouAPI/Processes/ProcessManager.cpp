@@ -142,7 +142,9 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         }else{
             LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true);        
         }
-        
+        ProcessBlock.ProcStateBlock[ProcessorID].CurrentInterruptStorage = TmpRing->DemonData.InterruptStorage; 
+        ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage = TmpRing->DemonData.ContextStorage; 
+        ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID = TmpRing->DemonData.ThreadID;
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemon = TmpRing;
 
     }
@@ -247,4 +249,24 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
+}
+
+LOUDDK_API_ENTRY
+uint64_t LouKeGetThreadIdentification(){    
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    return ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID;
+}
+
+LOUDDK_API_ENTRY
+uint64_t GetAdvancedRegisterInterruptsStorage(){
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    return ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage;
+}
+
+
+LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
+
+
+
+    return CpuCurrentState;
 }

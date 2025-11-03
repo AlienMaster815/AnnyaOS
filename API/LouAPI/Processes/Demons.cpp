@@ -1,8 +1,18 @@
 #include "ProcessPrivate.h"
 
+
+LOUDDK_API_ENTRY VOID LouKeDestroyDemon(PVOID ThreadHandle) {
+    
+
+
+    //Endof SystemCall
+}
+
+
 static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
     int Result = Thread(FunctionParam);
     LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
+    LouKeDestroyDemon(ThreadHandle);
     while(1);
 }
 
@@ -91,3 +101,4 @@ LouKeCreateDemon(
         0
     );
 };
+

@@ -7,22 +7,17 @@ typedef void* PTHREAD_DATA;
 #ifdef __cplusplus
 #include <LouDDK.h>
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
-LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 KERNEL_IMPORT uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
 LOUDDK_API_ENTRY uint64_t LouKeGetThreadIdentification();
 
 #else
-KERNEL_EXPORT LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 KERNEL_EXPORT uint64_t LouKeGetThreadIdentification();
 #endif
 extern "C" {
 #else
 #include <LouAPI.h>
 typedef void* PVOID; 
-LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
-uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 void LouKeInitializeDelayedWork(
     void (*DelayedFunction)(uint64_t PrivateData),
     uint64_t PrivateData,

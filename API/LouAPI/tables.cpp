@@ -310,7 +310,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[68] = "LouKeTDrsdInternalAtomicCheckestBitU64";
     ImportTables[4].FunctionName[69] = "LouKeUnSetBitU64";
     ImportTables[4].FunctionName[70] = "LouKeSetBitU64";
-    ImportTables[4].FunctionName[71] = "LouKeCreateThread";
+    ImportTables[4].FunctionName[71] = "LouKeCreateDemon";
     ImportTables[4].FunctionName[72] = "LouKeAcquireSpinLock";
     ImportTables[4].FunctionName[73] = "LouKeReleaseSpinLock";
     ImportTables[4].FunctionName[74] = "LouMalloc";
@@ -498,7 +498,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[68] = (uint64_t)LouKeTestBitU64;
     ImportTables[4].VirtualAddress[69] = (uint64_t)LouKeUnSetBitU64;
     ImportTables[4].VirtualAddress[70] = (uint64_t)LouKeSetBitU64;
-    ImportTables[4].VirtualAddress[71] = (uint64_t)LouKeCreateThread;
+    ImportTables[4].VirtualAddress[71] = (uint64_t)LouKeCreateDemon;
     ImportTables[4].VirtualAddress[72] = (uint64_t)LouKeAcquireSpinLock;
     ImportTables[4].VirtualAddress[73] = (uint64_t)LouKeReleaseSpinLock;
     ImportTables[4].VirtualAddress[74] = (uint64_t)LouMalloc;

@@ -106,7 +106,7 @@ extern void LoadTaskRegister();
 uint64_t GetCurrentTimeIn100ns();
 int TestLoop2();
 void LouKeInitializeFullLouACPISubsystem();
-void LouKeDestroyThread();
+void LouKeDestroyDemon();
 extern void MachineCodeDebug(uint64_t FOO);
 void LouKeSwitchContext(void (*Function)(), uint64_t StackSize);
 LOUSTATUS LookForStorageDevices();
@@ -246,7 +246,6 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeFullLouACPISubsystem();
 
-    while(1);
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
 }
 

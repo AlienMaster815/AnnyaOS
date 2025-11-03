@@ -1,3 +1,4 @@
+/*
 #include <LouDDK.h>
 #include <NtAPI.h>
 #include "Processors.h"
@@ -85,12 +86,6 @@ KERNEL_IMPORT void ThreadStart(void(*Function)(PVOID), PVOID Parameters);
 
 
 
-
-LOUDDK_API_ENTRY LOUSTATUS LouKeCreateThread(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize) {
-
-    return STATUS_SUCCESS;
-}
-
 LOUDDK_API_ENTRY uint64_t GetThreadContext(
     int Thread
 ){
@@ -151,10 +146,7 @@ static inline bool IsThreadInThreadTable(thread_t* Thread){
     return false;
 }
 
-LOUDDK_API_ENTRY
-uint64_t GetAdvancedRegisterInterruptsStorage(){
-    return current_thread[GetCurrentCpuTrackMember()]->AdvancedRegisterInterruptsStorage;
-}
+
 
 UNUSED 
 static void SaveContext(CPUContext* TMContext, CPUContext* ProgramContext){
@@ -217,49 +209,6 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext, th
 }
 
 
-LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
-    /*uint8_t ProcessorID = GetCurrentCpuTrackMember();
-    thread_t* CurrentThread = current_thread[ProcessorID];
-    thread_t* NextThread = 0;
-
-    if(MutexIsLocked(&ThreadCreationLock.Lock)){
-        goto _UPDATE_THREAD_MANAGER_FINISHED;
-    }
-
-    ProcessorID = GetCurrentCpuTrackMember();
-    CurrentThread = current_thread[ProcessorID];
-
-    timeQuantum[ProcessorID] = 0;
-
-    NextThread = GetNextThread(CurrentThread);
-    if((uintptr_t)NextThread == (uintptr_t)CurrentThread){
-        goto _UPDATE_THREAD_MANAGER_FINISHED;
-    }
-
-    if(IsThreadInThreadTable(CurrentThread)){
-        SaveContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&CurrentThread->SavedContext));
-        CurrentThread->state = THREAD_READY;
-        SaveEverything(&CurrentThread->AdvancedRegisterStorage);
-    }
-
-    while((!IsThreadInThreadTable(NextThread)) && (NextThread->state != THREAD_READY)){
-        NextThread = GetNextThread(NextThread);
-    }
-
-    RestoreEverything(&NextThread->AdvancedRegisterStorage);
-
-    NextThread->state = THREAD_RUNNING;
-    RestoreContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&NextThread->SavedContext), NextThread);
-
-    if(NextThread->WinTEBData){
-        SetTEB(NextThread->WinTEBData);
-    }
-
-    current_thread[ProcessorID] = NextThread;
-    
-    _UPDATE_THREAD_MANAGER_FINISHED:*/
-    return CpuCurrentState;
-}
 
 LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     
@@ -314,22 +263,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     return CpuCurrentState;
 }
 
-LOUDDK_API_ENTRY VOID LouKeDestroyThread(thread_t* Thread) {
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
 
-
-
-    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-    //Endof SystemCall
-}
-
-void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, thread_t* ThreadHandle){    
-    int Result = Thread(FunctionParam);
-    LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
-    LouKeDestroyThread(ThreadHandle);
-    while(1);
-}
 
 
 KERNEL_IMPORT
@@ -354,120 +288,9 @@ uintptr_t RetriveThreadStubAddress(){
 
 KERNEL_IMPORT uint64_t GetPEB();
 
-LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThreadWin(void (*Function)(), PVOID FunctionParameters, size_t StackSize, uint64_t TEBPointer) {
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
-    //allocate New Stack
-    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, USER_GENERIC_MEMORY);
-    
-    //Allocate New Thread
-    thread_t* NewThread = CreateThreadHandle();
-    if(!NewThread){
-        LouKeFree(NewStack);
-        LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-        return 0x00;
-    }
-    //store the top of the stack
-    NewThread->StackTop = NewStack;
-    //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)(((uintptr_t)(((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
-    //set the New Threads Context
-    NewThread->cpu_state = NewContext;
-    //Allocate Space For Safe Context Handling
-    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
-    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
-    //Mark the Register Storage As Clean
-    NewThread->NewTask = true;
-    NewThread->state = THREAD_READY;
-    //Get the Stub Address
-    uintptr_t StubAddress = RetriveThreadStubAddress();
-    //fill the Context...
-    NewThread->SavedContext.rcx = (uint64_t)Function;           //first parameter  MSVC
-    NewThread->SavedContext.rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
-    NewThread->SavedContext.r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
-    NewThread->SavedContext.rip = (uint64_t)StubAddress;        //Liftoff Address  
-    NewThread->SavedContext.rbp = (uint64_t)NewContext;         //Base Pointer
-    NewThread->SavedContext.rsp = (uint64_t)NewContext;         //Current Pointer
-    //Fill Segments and flags
-    NewThread->SavedContext.cs  = 0x1B;
-    NewThread->SavedContext.ss  = 0x23;  
-    NewThread->SavedContext.rflags = 0x202;  
-    NewThread->ThreadIdentification = NumberOfThreads + 1;
-    NewThread->WinTEBData = TEBPointer;
 
-    NewThread->StackSegment = 0x23;
 
-    PWIN_TEB Teb = (PWIN_TEB)(uint8_t*)TEBPointer;
-    Teb->TebNtTibStackBase = (uint64_t)NewContext;
-    Teb->TebNtTibStackLimit = (uint64_t)NewContext - (2 * MEGABYTE); //this thread is 2 Megs
-    Teb->TebProcessEnvironmentBlock = GetPEB();
-    //Increment Thread Counter
-    NumberOfThreads++;
-    //return the handle to the new thread
-    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-    return (uintptr_t)NewThread;//NewThread;
-}
 
-LOUDDK_API_ENTRY uintptr_t LouKeCreateUserStackThread(void (*Function)(), PVOID FunctionParameters, size_t StackSize) {
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&ThreadCreationLock, &Irql);
-    //allocate New Stack
-    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, USER_GENERIC_MEMORY);
-    //Allocate New Threads
-    thread_t* NewThread = CreateThreadHandle();
-    if(!NewThread){
-        LouKeFree(NewStack);
-        LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-        return 0x00;
-    }
-    //store the top of the stack
-    NewThread->StackTop = NewStack;
-    //set the context pointer
-    CPUContext* NewContext = (CPUContext*)(uint8_t*)((((uintptr_t)((uint8_t*)NewStack) + StackSize) - 64) & ~(64 - 1)); //leave a kilobyte for wiggle room
-    //set the New Threads Context
-    NewThread->cpu_state = NewContext;
-    //Allocate Space For Safe Context Handling
-    NewThread->AdvancedRegisterStorage              = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
-    NewThread->AdvancedRegisterInterruptsStorage    = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);//1688 bytes by a 64 byte alignment
-    //Mark the Register Storage As Clean
-    NewThread->NewTask = true;
-    NewThread->state = THREAD_READY;
-    NewThread->ThreadIdentification = NumberOfThreads + 2;
-
-    //Get the Stub Address
-    uintptr_t StubAddress = RetriveThreadStubAddress();
-    //fill the Context...
-    NewThread->SavedContext.rcx = (uint64_t)Function;           //first parameter  MSVC
-    NewThread->SavedContext.rdx = (uint64_t)FunctionParameters; //Second Parameter MSVC
-    NewThread->SavedContext.r8  = (uint64_t)NewThread;          //Third Parameter  MSVC
-    NewThread->SavedContext.rip = (uint64_t)StubAddress;        //Liftoff Address  
-    NewThread->SavedContext.rbp = (uint64_t)NewContext;         //Base Pointer
-    NewThread->SavedContext.rsp = (uint64_t)NewContext;         //Current Pointer
-    //Fill Segments and flags
-    NewThread->SavedContext.cs  = 0x1B;
-    NewThread->SavedContext.ss  = 0x23;  
-    NewThread->SavedContext.rflags = 0x202;
-    
-    NewThread->StackSegment = 0x23;
-    
-    //Increment Thread Counter
-    NumberOfThreads++;
-    //return the handle to the new thread
-    LouKeReleaseSpinLock(&ThreadCreationLock, &Irql);
-    return (uintptr_t)NewThread;//NewThread;
-}
-
-LOUDDK_API_ENTRY
-uint64_t LouKeGetThreadIdentification(){
-    return current_thread[GetCurrentCpuTrackMember()]->ThreadIdentification;
-}
-
-LOUDDK_API_ENTRY
-semaphore_t* LouKeCreateSemaphore(int initial, int limit){
-    semaphore_t* NewSemaphore = (semaphore_t*)LouKeMallocType(semaphore_t, KERNEL_GENERIC_MEMORY);
-    SemaphoreInitialize(NewSemaphore, initial, limit);
-    return NewSemaphore;
-}
 
 
 LOUDDK_API_ENTRY 
@@ -553,3 +376,4 @@ LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
 
     return Status;
 }
+*/
