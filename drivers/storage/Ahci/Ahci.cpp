@@ -616,6 +616,111 @@ void AhciInterruptHandler(uint64_t Rsp){
     while(1);
 }
 
+static AhciSb600Enable64Bit(
+    PPCI_DEVICE_OBJECT  PDEV
+){
+    UNUSED static const DMI_SYSTEM_ID SystemIds[] = {
+        {
+            .Identification = "ASUS M2A-VM",
+            .Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "ASUSTeK Computer INC."),
+				DMI_MATCH(DMI_BOARD_NAME, "M2A-VM"),            
+            },
+            .DriverData = (PVOID)"20071026",
+        },
+        {
+			.Identification = "MSI K9A2 Platinum",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "MICRO-STAR INTER"),
+				DMI_MATCH(DMI_BOARD_NAME, "MS-7376"),
+			},
+		},
+        {
+			.Identification = "MSI K9AGM2",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "MICRO-STAR INTER"),
+				DMI_MATCH(DMI_BOARD_NAME, "MS-7327"),
+			},    
+		},
+        {
+			.Identification = "ASUS M3A",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "ASUSTeK Computer INC."),
+				DMI_MATCH(DMI_BOARD_NAME, "M3A"),
+			},
+		},
+        0,
+    };
+
+    PDMI_SYSTEM_ID Match;
+    INTEGER Year, Month, Date;
+    CHAR Buffer[9];
+
+    Match = LouKeDmiGetFirstMatch((PDMI_SYSTEM_ID)SystemIds);
+    if((PDEV->bus != 0x00) || (PDEV->func == 0x12) || (!Match)){
+        return false;
+    }
+
+    if(!Match->DriverData){
+        goto _ENABLE_64_BIT;
+    }
+
+    DmiGetDate(DMI_BIOS_DATE, &Year, &Month, &Date);
+    snprintf(Buffer, 9, "%04d%02d%02d", Year, Month, Date);
+
+    if(strcmp(Buffer, (string)Match->DriverData) >= 0){
+        goto _ENABLE_64_BIT;
+    }else{
+        LouPrint("WARNING:Device:%h Can Not Enable 64 Bit DMA BIOS Is Too Old\n", PDEV);
+        return false;
+    }
+
+    _ENABLE_64_BIT:
+    LouPrint("WARNING:Device:%h Enabling 64 Bit DMA\n", PDEV);
+    return true;
+}
+
+static void AhciRemapCheck(
+    PPCI_DEVICE_OBJECT          PDEV,
+    int                         Bar,
+    PAHCI_DRIVER_PRIVATE_DATA   PrivateData
+){
+    //TODO: implement NVME remap once NVME is done
+
+}
+
+static bool AhciHasBrokenSystemPowerOff(
+    PPCI_DEVICE_OBJECT PDEV
+){
+    static const DMI_SYSTEM_ID BrokenSystems[] = {
+        {
+			.Identification = "HP Compaq nx6310",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP Compaq nx6310"),
+			},
+			.DriverData = (PVOID)0x1F,
+		},
+		{
+			.Identification = "HP Compaq 6720s",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP Compaq 6720s"),
+			},
+			.DriverData = (PVOID)0x1F,
+		},
+        0,
+    }; 
+
+    PDMI_SYSTEM_ID Match = LouKeDmiGetFirstMatch((PDMI_SYSTEM_ID)BrokenSystems);
+
+    if(Match){
+        return (((UINT8)(UINTPTR)Match->DriverData) == PDEV->slot);
+    }
+
+    return false;
+}
+
 NTSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
@@ -750,7 +855,12 @@ NTSTATUS AddAhciDevice(
         PrivateAhciData->AhciFlags &= ~(AHCI_FLAG_IGN_INTERNAL_SERR);
     }
 
-    //TODO: Enable SB600 64 bit and loose the restriction
+    if(AhciSb600Enable64Bit(PDEV)){
+        PrivateAhciData->AhciFlags &= ~(AHCI_FLAG_32BIT_ONLY);
+    }
+
+    AhciRemapCheck(PDEV, Abar, PrivateAhciData);
+
 
     if(AHCI_SUPPORTS_SNCQ(Ghc->Capabilities)){
         PrivateAhciData->AtaFlags |= ATA_FLAG_NCQ;
@@ -788,6 +898,15 @@ NTSTATUS AddAhciDevice(
         PrivateAhciData->AhciFlags |= AHCI_FLAG_32BIT_ONLY;
         PrivateAhciData->DmaBits = 32;    
     }
+
+    //TODO: set Em messages
+
+    if(AhciHasBrokenSystemPowerOff(PDEV)){
+        PrivateAhciData->AhciFlags |= AHCI_FLAG_NO_POWEROFF_SPINDOWN;
+        LouPrint("AHCI Spindown Quirk Skipping Spindown On Power Off\n");
+    }
+
+    //continue at 2029 linux driver linux/drivers/ata/ahci.c
 
     LouKeForkAtaHostPrivateDataToPorts(AtaHost);
     

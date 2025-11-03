@@ -143,6 +143,7 @@ typedef enum _WORK_QUEUE_TYPE {
     MaximumWorkQueue,
     CustomPriorityWorkQueue
 } WORK_QUEUE_TYPE;
+
 typedef enum _TRACE_INFORMATION_CLASS {
     TraceIdClass,
     TraceHandleClass,

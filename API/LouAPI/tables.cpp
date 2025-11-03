@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 185
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 186
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -231,6 +231,14 @@ KERNEL_IMPORT void* LouKePciGetIoRegion(
     size_t BarOffset
 );
 
+KERNEL_IMPORT
+PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
+
+KERNEL_IMPORT
+int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
+
+KERNEL_IMPORT
+BOOL DmiGetDate(DMI_FIELD Field, INTEGER* Year, INTEGER* Month, INTEGER* Day);
 
 static inline 
 void InitializeLousineKernelTables(){
@@ -420,10 +428,11 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[178] = "LouKeGetAllocationSize";
     ImportTables[4].FunctionName[179] = "LouKeGenericAllocateFixedDmaPool";
     ImportTables[4].FunctionName[180] = "LouKeFreeFromFixedPool";
-    ImportTables[4].FunctionName[181] = "LouKeCreateUsbHostControllerDevice";
-    ImportTables[4].FunctionName[182] = "LouKeUsbHcdPciProbe";
+    ImportTables[4].FunctionName[181] = "LouKeDmiGetFirstMatch";
+    ImportTables[4].FunctionName[182] = "snprintf";
     ImportTables[4].FunctionName[183] = "PciTestAtaConfigurationBits";
     ImportTables[4].FunctionName[184] = "LouKeDmiGetFirstMatch";
+    ImportTables[4].FunctionName[185] = "DmiGetDate";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -606,10 +615,12 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[178] = (uint64_t)LouKeGetAllocationSize;
     ImportTables[4].VirtualAddress[179] = (uint64_t)LouKeGenericAllocateFixedDmaPool;
     ImportTables[4].VirtualAddress[180] = (uint64_t)LouKeFreeFromFixedPool;
-    ImportTables[4].VirtualAddress[181] = (uint64_t)LouKeCreateUsbHostControllerDevice;
-    ImportTables[4].VirtualAddress[182] = (uint64_t)LouKeUsbHcdPciProbe;
+    ImportTables[4].VirtualAddress[181] = (uint64_t)LouKeDmiGetFirstMatch;
+    ImportTables[4].VirtualAddress[182] = (uint64_t)snprintf;
     ImportTables[4].VirtualAddress[183] = (uint64_t)PciTestAtaConfigurationBits;
     ImportTables[4].VirtualAddress[184] = (uint64_t)LouKeDmiGetFirstMatch;
+    ImportTables[4].VirtualAddress[185] = (uint64_t)DmiGetDate;
+    
 }
 
 LOUDDK_API_ENTRY

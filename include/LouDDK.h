@@ -316,6 +316,13 @@ KERNEL_EXPORT
 void* 
 LouKeLoadDriver(string Driver, string EntryName);
 
+KERNEL_EXPORT
+int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
+
+#ifdef _DMI_CORE_H
+KERNEL_EXPORT BOOL DmiGetDate(DMI_FIELD Field, INTEGER* Year, INTEGER* Month, INTEGER* Day);
+#endif
+
 #ifndef _MEMORY_BARRIER
 #define _MEMORY_BARRIER
 

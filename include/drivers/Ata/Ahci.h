@@ -137,7 +137,7 @@ typedef struct _AHCI_GENERIC_PORT{
 #define AHCI_FLAG_IGN_INTERNAL_SERR     1 << 14
 #define AHCI_FLAG_32BIT_ONLY            1 << 15
 #define AHCI_FLAG_SECTOR255             1 << 16
-
+#define AHCI_FLAG_NO_POWEROFF_SPINDOWN  1 << 17
 
 typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
     uint32_t                        AhciFlags;

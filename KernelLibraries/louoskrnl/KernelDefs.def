@@ -185,3 +185,5 @@ EXPORTS
     LouKeUsbHcdPciProbe
     PciTestAtaConfigurationBits
     LouKeDmiGetFirstMatch
+    snprintf
+    DmiGetDate

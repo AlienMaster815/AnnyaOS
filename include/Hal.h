@@ -145,6 +145,9 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             UINT16 
             LouKeHalGetChipsetVendor();
 
+            KERNEL_IMPORT
+            PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
+
         #else 
             KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
                 PPCI_COMMON_CONFIG PciSearch, 
@@ -219,6 +222,9 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             KERNEL_EXPORT
             UINT16 
             LouKeHalGetChipsetVendor();
+
+            KERNEL_EXPORT
+            PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 
         #endif
     #else
