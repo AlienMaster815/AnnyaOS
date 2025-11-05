@@ -18,8 +18,8 @@
 
 static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     //PATA Devices
-    {0x15AD, 0x0405, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
-    {0x15AD, 0x0406, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
+    //{0x15AD, 0x0405, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
+    //{0x15AD, 0x0406, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
     {0},
 };
 

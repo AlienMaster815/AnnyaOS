@@ -7,7 +7,7 @@
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable){
 
     UNUSED uint16_t DeviceID, VendorID, SubVendorID, SubDeviceID;
-    UNUSED uint8_t BaseClass, SubClass, Progif;
+    UNUSED uint8_t BaseClass, SubClass, ProgIf;
 
     DeviceID = Config->Header.DeviceID;
     VendorID = Config->Header.VendorID;
@@ -16,7 +16,7 @@ uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVIC
 
     BaseClass = Config->Header.BaseClass;
     SubClass = Config->Header.SubClass;
-    Progif = Config->Header.ProgIf;
+    ProgIf = Config->Header.ProgIf;
 
     uint64_t DeviceNumber = 0;
 
@@ -24,11 +24,13 @@ uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVIC
 
         if(
             ((DeviceTable[DeviceNumber].DeviceID == DeviceID || DeviceTable[DeviceNumber].DeviceID == ANY_PCI_ID) &&
-            (DeviceTable[DeviceNumber].VendorID == VendorID || DeviceTable[DeviceNumber].VendorID == ANY_PCI_ID) &&
-            (DeviceTable[DeviceNumber].SubVendorID == VendorID || DeviceTable[DeviceNumber].SubVendorID == ANY_PCI_ID) &&
-            (DeviceTable[DeviceNumber].SubVendorID == VendorID || DeviceTable[DeviceNumber].SubVendorID == ANY_PCI_ID) &&
-            (DeviceTable[DeviceNumber].BaseClass == BaseClass || DeviceTable[DeviceNumber].BaseClass == ANY_PCI_CLASS) &&
-            (DeviceTable[DeviceNumber].SubClass == SubClass || DeviceTable[DeviceNumber].SubClass == ANY_PCI_CLASS)) || 
+                (DeviceTable[DeviceNumber].VendorID == VendorID || DeviceTable[DeviceNumber].VendorID == ANY_PCI_ID) &&
+                (DeviceTable[DeviceNumber].SubVendorID == VendorID || DeviceTable[DeviceNumber].SubVendorID == ANY_PCI_ID) &&
+                (DeviceTable[DeviceNumber].SubVendorID == VendorID || DeviceTable[DeviceNumber].SubVendorID == ANY_PCI_ID) &&
+                (DeviceTable[DeviceNumber].BaseClass == BaseClass || DeviceTable[DeviceNumber].BaseClass == ANY_PCI_CLASS) &&
+                (DeviceTable[DeviceNumber].SubClass == SubClass || DeviceTable[DeviceNumber].SubClass == ANY_PCI_CLASS) && 
+                (DeviceTable[DeviceNumber].ProgIf == ProgIf || DeviceTable[DeviceNumber].ProgIf == ANY_PCI_CLASS)
+            ) || 
             (
                 (DeviceTable[DeviceNumber].SimpleEntry) && 
                 (DeviceTable[DeviceNumber].DeviceID == DeviceID || DeviceTable[DeviceNumber].DeviceID == ANY_PCI_ID) &&
@@ -51,7 +53,8 @@ uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVIC
             (
                 (DeviceTable[DeviceNumber].GenericEntry) && 
                 (DeviceTable[DeviceNumber].BaseClass == BaseClass || DeviceTable[DeviceNumber].BaseClass == ANY_PCI_CLASS) &&
-                (DeviceTable[DeviceNumber].SubClass == SubClass || DeviceTable[DeviceNumber].SubClass == ANY_PCI_CLASS)
+                (DeviceTable[DeviceNumber].SubClass == SubClass || DeviceTable[DeviceNumber].SubClass == ANY_PCI_CLASS) &&
+                (DeviceTable[DeviceNumber].ProgIf == ProgIf || DeviceTable[DeviceNumber].ProgIf == ANY_PCI_CLASS)
             )
         ){
             return DeviceNumber;

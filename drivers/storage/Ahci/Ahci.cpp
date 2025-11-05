@@ -443,7 +443,7 @@ UNUSED static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     {.VendorID = PCI_VENDOR_ID_LOONGSON, .DeviceID = 0x7A08, .BoardID = AHCI_BOARD_NORMAL_AHCI, .SimpleEntry = true},
 
     //Generic Ahci Device    
-    {.BaseClass = 0x01, .SubClass = 0x06, .BoardID = AHCI_BOARD_NORMAL_AHCI, .GenericEntry = true},
+    {.BaseClass = 0x01, .SubClass = 0x06, .ProgIf = ANY_PCI_CLASS, .BoardID = AHCI_BOARD_NORMAL_AHCI, .GenericEntry = true},
     //List Termination
     {0},
 };

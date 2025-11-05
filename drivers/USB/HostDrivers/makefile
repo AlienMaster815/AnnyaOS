@@ -7,15 +7,29 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC = Xhci.cpp
-TARGET = XHCI.SYS
+SRC1 = Xhci.cpp
+TARGET1 = XHCI.SYS
+
+SRC2 = Ohci.cpp
+TARGET2 = OHCI.SYS
+
+SRC3 = Ehci.cpp
+TARGET3 = EHCI.SYS
 
 # Build rule
-all: $(TARGET)
+all: $(TARGET1) $(TARGET2) $(TARGET3)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+$(TARGET1): $(SRC1)
+	$(CC) $(CFLAGS) -o $(TARGET1) $(SRC1) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+
+$(TARGET2): $(SRC2)
+	$(CC) $(CFLAGS) -o $(TARGET2) $(SRC2) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+
+$(TARGET3): $(SRC3)
+	$(CC) $(CFLAGS) -o $(TARGET3) $(SRC3) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
 
 # Clean rule
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET1)
+	rm -f $(TARGET2)
+	rm -f $(TARGET3)

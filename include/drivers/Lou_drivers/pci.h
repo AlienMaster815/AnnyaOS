@@ -24,6 +24,7 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 	uint16_t SubDeviceID;
 	uint8_t  BaseClass;
 	uint8_t  SubClass;
+	uint8_t	 ProgIf;
 	uint64_t BoardID;
 	uint64_t DriverData;
 	bool     SimpleEntry;
@@ -240,6 +241,7 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 	uint16_t SubDeviceID;
 	uint8_t  BaseClass;
 	uint8_t  SubClass;
+	uint8_t	 ProgIf;
 	uint64_t BoardID;
 	uint64_t DriverData;
 	bool     SimpleEntry;

@@ -10,21 +10,32 @@
         <FILETOCPY64>cp /usr/local/share/limine/limine-bios-cd.bin ISO/</FILETOCPY64>                                       <!--limine Torino MBR-->
         <FILETOCPY64>cp /usr/local/share/limine/limine-uefi-cd.bin ISO/</FILETOCPY64>                                       <!--limine EFI Partition-->
         <FILETOCPY64>cp /usr/local/share/limine/BOOTX64.EFI ISO/EFI/BOOT</FILETOCPY64>  
-
+        <!--THEE KERNEL-->
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <!--Smp Trampoline-->
         <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
         <!--Kernel Drivers-->
+        <!--NIC Drivers-->
         <FILETOCPY64>cp drivers/Networking/PCNET32/PCNET32.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCNET32.SYS</FILETOCPY64>         <!--Amd PCNet 2 and 3-->
+        <!--Audio Drivers-->
         <FILETOCPY64>cp drivers/Audio/SoundBlaster/SBMOD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/SBMOD.SYS</FILETOCPY64>             <!--Sound Blaster-->
         <FILETOCPY64>cp drivers/Audio/HDA/HDAPCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/HDAPCI.SYS</FILETOCPY64>                    <!--Intel Hd Audio-->
+        <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
+        <!--GPU Drivers-->
         <FILETOCPY64>cp drivers/gpu/Virtualbox/VBOXGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VBOXGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
         <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>                   <!--VMWare GPU-->
+        <!--USB Drivers-->
         <FILETOCPY64>cp drivers/USB/HostDrivers/XHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/XHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
-        <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
+        <FILETOCPY64>cp drivers/USB/HostDrivers/OHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/OHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
+        <FILETOCPY64>cp drivers/USB/HostDrivers/EHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/EHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
+        <!--DMA Drivers-->
         <FILETOCPY64>cp drivers/DMA/8237A/8237A.SYS ISO/ANNYA/SYSTEM64/DRIVERS/8237A.SYS</FILETOCPY64>                      <!--8237A DMA Controller-->
+        <!--Storage Drivers-->
         <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX IDE Chipset-->
         <FILETOCPY64>cp drivers/storage/Ahci/AHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AHCI.SYS</FILETOCPY64>                     <!--AHCI Chipset-->
+        <!--Serial Drivers-->
         <FILETOCPY64>cp drivers/Serial/Ps2Bus/PS2IO.SYS ISO/ANNYA/SYSTEM64/PS2IO.SYS</FILETOCPY64>                          <!--PS2 BUS-->
+        <!--Input Drivers-->
         <FILETOCPY64>cp drivers/Input/Keyboard/Mf2Ps2/MF2KBD.SYS ISO/ANNYA/SYSTEM64/DRIVERS/MF2KBD.SYS</FILETOCPY64>        <!--MF2 Keyboard-->
         <FILETOCPY64>cp drivers/Input/Mouse/Ps2Mouse/PS2MOUSE.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PS2MOUSE.SYS</FILETOCPY64>     <!--PS2 Mouse-->
         <!--User Dynamic Loadable Libraries-->
