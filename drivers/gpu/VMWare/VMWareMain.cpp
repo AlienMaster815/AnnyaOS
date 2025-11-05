@@ -1,25 +1,17 @@
-/*
- * This is a clean-room reimplementation of the VirtualBox VBE/VMSVGA driver,
- * originally developed by Oracle Corporation and released under the MIT license.
+// SPDX-License-Identifier: GPL-2.0 OR MIT
+/**************************************************************************
  *
- * This implementation is based on independent research and observation of the
- * Linux kernel's `vboxvideo` driver and related specifications. No code was
- * directly copied or translated.
+ * Copyright (c) 2009-2025 Broadcom. All Rights Reserved. The term
+ * “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
  *
- * All identifiers, register names, and behavior are derived from public
- * documentation or reverse-engineered from hardware behavior.
- *
- * Copyright (C) 2025 Tyler Grenier
- * Licensed under the GNU GPLv2
- */
+ **************************************************************************/
 
-#define _KERNEL_MODULE_
-#include <LouDDK.h>
 
-static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
-    //PATA Devices
-    //{0x15AD, 0x0405, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
-    //{0x15AD, 0x0406, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
+#include "VMWareMain.h"
+
+static LOUSINE_PCI_DEVICE_TABLE VmwPciDeviceTable[] = {
+    {.VendorID = PCI_VENDOR_ID_VMWARE, .DeviceID = VMWGFX_PCI_ID_SVGA2, .SimpleEntry = true},
+    {.VendorID = PCI_VENDOR_ID_VMWARE, .DeviceID = VMWGFX_PCI_ID_SVGA3, .SimpleEntry = true},
     {0},
 };
 
@@ -58,7 +50,7 @@ DriverEntry(
     //out the extra information relating to the LKDM
     DriverObject->DriverUsingLkdm = true;
     //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)PiixPciDeviceTable;
+    DriverObject->DeviceTable = (uintptr_t)VmwPciDeviceTable;
     LouPrint("VMWGPU::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }

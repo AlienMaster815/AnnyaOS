@@ -7,6 +7,7 @@
  *	Do not add new entries to this file unless the definitions
  *	are shared between multiple drivers.
  */
+ 
 #ifndef _PCI_IDS_H
 #define _PCI_IDS_H
 

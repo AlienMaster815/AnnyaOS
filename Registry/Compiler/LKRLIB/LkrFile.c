@@ -177,13 +177,13 @@ static size_t CalculateFileSize(
     );
 
     if(FileSize == ROUND_UP64(FileSize, 4096)){
-        FileSize += 2048;
+        FileSize += 1;
     }
 
 
     FileSize = ROUND_UP64(FileSize, 4096);
 
-    return 4096;
+    return FileSize;
 }
 
 size_t RecursiveCompileNodes(
