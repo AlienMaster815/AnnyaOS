@@ -43,15 +43,78 @@ static void DestroyLoadedImageEntry(PCFI_OBJECT Object){
     }
 }
 
-//LOUSTATUS 
-//LouKeLoadCoffImageB(
-//    string          FileNameAndPath,
-//    PCFI_OBJECT     CfiObject,
-//    BOOL            KernelObject,
-//    PVOID           Base
-//){
-//   
-//}
+LOUSTATUS 
+LouKeLoadCoffImageB(
+    PVOID           Base,
+    PCFI_OBJECT     CfiObject,
+    BOOL            KernelObject
+){
+    LOUSTATUS           LoaderStatus;
+    PCOFF_IMAGE_HEADER  CoffStdHeader;
+
+    if((!Base) || (!CfiObject)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    MutexLock(&LITMutex);
+
+
+    bool Loaded = LookForLoadedImageEntry(CfiObject);
+
+    if(Loaded){
+        LouPrint("Image Already Loaded\n");
+        MutexUnlock(&LITMutex);
+        MutexSynchronize(&CfiObject->LockOutTagOut);
+        return STATUS_SUCCESS;
+    }
+
+    CreateLoadedImageEntry(CfiObject);
+
+    CfiObject->CoffFile = (FILE*)Base;
+
+    CoffStdHeader = CoffGetImageHeader((UINT8*)CfiObject->CoffFile);
+    if(memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))){
+        LouPrint("Error Loading Coff Image: File Is Not Coff Image\n");
+        DestroyLoadedImageEntry(CfiObject);
+        MutexUnlock(&LITMutex);
+        return STATUS_INVALID_PARAMETER;
+    }
+    
+    
+    if( //TODO: Add EFI Byte Code
+        (CoffStdHeader->StandardHeader.MachineType != CFI_MACHINE_TYPE_AMD64) &&
+        (CoffStdHeader->StandardHeader.MachineType != CFI_MACHINE_TYPE_I386) 
+    ){
+        LouPrint("Error Loading Coff Image: Image Is Not Compatible With This Machine\n");
+        DestroyLoadedImageEntry(CfiObject);
+        MutexUnlock(&LITMutex);
+        return STATUS_INVALID_PARAMETER;
+    }
+    
+    CfiObject->AOA64 = (CoffStdHeader->OptionalHeader.PE64.Magic == CFI_OPTIONAL_HEADER_PE3264_MAGIC) ? 0 : 1;
+    CfiObject->KernelObject = KernelObject;
+
+    if((CoffStdHeader->OptionalHeader.PE64.Magic != CFI_OPTIONAL_HEADER_PE32_MAGIC) && CfiObject->AOA64){
+        LouPrint("Error Loading Coff Image: Could Not Find Compatible Low Level Loader\n");
+        DestroyLoadedImageEntry(CfiObject);
+        MutexUnlock(&LITMutex);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    CfiObject->ImageHeader = CoffStdHeader;
+
+    if(!CfiObject->AOA64){
+        LoaderStatus = LouKeLoadCoffImageA64(CfiObject);
+    }else {
+        LoaderStatus = LouKeLoadCoffImageA32(CfiObject);
+    }
+
+    if(LoaderStatus != STATUS_SUCCESS){
+        DestroyLoadedImageEntry(CfiObject);
+    }
+    MutexUnlock(&LITMutex);
+    return LoaderStatus;
+}
 
 LOUSTATUS
 LouKeLoadCoffImageExA_ns(
@@ -141,9 +204,6 @@ LouKeLoadCoffImageExA(
     //size_t ImageSize = CoffStdHeader->
     //LouPrint("Image Size Is:%h\n", ImageSize);
 
-    if(LoaderStatus != STATUS_SUCCESS){
-        DestroyLoadedImageEntry(CfiObject);
-    }
     fclose(CfiObject->CoffFile);
     MutexUnlock(&LITMutex);
     return LoaderStatus;
