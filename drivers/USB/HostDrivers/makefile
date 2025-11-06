@@ -10,11 +10,15 @@ INCLUDES = -I../../../include
 SRC1 = Xhci.cpp
 TARGET1 = XHCI.SYS
 
-SRC2 = Ohci.cpp
+SRC2 = Ohci.cpp \
+		OhciPci.cpp
 TARGET2 = OHCI.SYS
 
-SRC3 = Ehci.cpp
+SRC3 = Ehci.cpp \
+		EhciPci.cpp
 TARGET3 = EHCI.SYS
+
+
 
 # Build rule
 all: $(TARGET1) $(TARGET2) $(TARGET3)

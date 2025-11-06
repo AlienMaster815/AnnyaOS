@@ -1,51 +1,45 @@
-#define _KERNEL_MODULE_
-#include <LouDDK.h>
+#include "OHCI.h"
 
 
-UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedOhciPciDevices[] = {
-    {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x10, .GenericEntry = true},
-    {0},
-};
-
-LOUDDK_API_ENTRY 
-VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
-    LouPrint("OHCI.SYS::UnloadDriver()\n");
-    //we have nothing to unload
-    LouPrint("OHCI.SYS::UnloadDriver() STATUS_SUCCESS\n");
+UINT8 OhciGetHcRevision(
+    POHCI_DEVICE    OhciDevice
+){
+    LouKIRQL    Irql; 
+    UINT8       Revision;
+    LouKeAcquireSpinLock(&OhciDevice->IoLock, &Irql);
+    Revision = OhciDevice->OperationalRegisters->HcRevision;
+    LouKeReleaseSpinLock(&OhciDevice->IoLock, &Irql);
+    return Revision & 0xFF;
 }
 
-
-NTSTATUS AddDevice(
-    PDRIVER_OBJECT DriverObject, 
-    struct _DEVICE_OBJECT* PlatformDevice
+void OhciSetHcRevision(
+    POHCI_DEVICE    OhciDevice,
+    UINT8           Revision
 ){
-    LouPrint("OHCI.SYS::AddDevice()\n");
-
-    
-
-    LouPrint("OHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
+    //ditch the top 6 bits they arent writeable
+    LouKIRQL Irql;
+    Revision &= ~(0xFC);
+    UINT32 Result;    
+    LouKeAcquireSpinLock(&OhciDevice->IoLock, &Irql);
+    Result = OhciDevice->OperationalRegisters->HcRevision;
+    Result &= ~(0x03);
+    Result |= Revision;
+    OhciDevice->OperationalRegisters->HcRevision = Result;
+    LouKeReleaseSpinLock(&OhciDevice->IoLock, &Irql);
 }
 
-LOUDDK_API_ENTRY
-NTSTATUS DriverEntry(
-    PDRIVER_OBJECT  DriverObject,
-    PUNICODE_STRING RegistryEntry
+void OhciWriteHcControl(
+    POHCI_DEVICE    OhciDevice,
+    UINT16          Control
 ){
-    LouPrint("OHCI.SYS::DriverEntry()\n");
-    //tell the System where are key Nt driver functions are
-    DriverObject->DriverExtension->AddDevice = AddDevice;
-    DriverObject->DriverUnload = UnloadDriver;
-    //tell the lousine kernel we will be using the
-    //Lousine Kernel Driver Module (LKDM) alongside the
-    //NT Kernel Moudle Subsystem so it fills
-    //out the extra information relating to the LKDM
-    DriverObject->DriverUsingLkdm = true;
-    //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)SupportedOhciPciDevices;
-
-    LouPrint("OHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    while(1);
-    return STATUS_SUCCESS;
+    Control &= ~(0xF800);
+    LouKIRQL Irql;
+    UINT32 Result;
+    LouKeAcquireSpinLock(&OhciDevice->IoLock, &Irql);
+    Result = OhciDevice->OperationalRegisters->HcControl;
+    Result &= ~(0x07FF);
+    Result |= Control;
+    OhciDevice->OperationalRegisters->HcControl = Result;
+    LouKeReleaseSpinLock(&OhciDevice->IoLock, &Irql);
 }
 
