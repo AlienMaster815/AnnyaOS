@@ -21,9 +21,10 @@ NTSTATUS AddDevice(
 ){
     LouPrint("OHCI.SYS::AddDevice()\n");
 
-    
+        
 
     LouPrint("OHCI.SYS::AddDevice() STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -45,7 +46,6 @@ NTSTATUS DriverEntry(
     DriverObject->DeviceTable = (uintptr_t)SupportedOhciPciDevices;
 
     LouPrint("OHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

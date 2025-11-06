@@ -11,6 +11,7 @@ SRC1 = Xhci.cpp
 TARGET1 = XHCI.SYS
 
 SRC2 = Ohci.cpp \
+		OhciIo.cpp \
 		OhciPci.cpp
 TARGET2 = OHCI.SYS
 
