@@ -175,6 +175,8 @@ void LouKePcieProbeEcam();
 LOUSTATUS LouKeInitializeRegistry();
 HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
+void LouKeInitializeSecondStageLouPrint();
+void LouKeUnmaskSmpInterrupts();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -242,11 +244,17 @@ void AdvancedLousineKernelInitialization(){
 
     InitializeProcessManager();
 
-    LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
+    //LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
 
     LouKeInitializeFullLouACPISubsystem();
 
-    LouKeSetIrql(PASSIVE_LEVEL, 0x00);    
+    LouKeInitializeSecondStageLouPrint();
+
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
+    
+    LouKeUnmaskSmpInterrupts();
+    while(1);
+    
 }
 
 void KillDebuger(){

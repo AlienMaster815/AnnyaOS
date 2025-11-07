@@ -231,6 +231,8 @@ int LouPrint_s(char* format, va_list args){
     return 0;
 }
 
+
+
 int LouPrint(char* format, ...) {
     int result = -1;
     va_list args;
@@ -241,3 +243,8 @@ int LouPrint(char* format, ...) {
 }
 
 
+void LouKeInitializeSecondStageLouPrint(){
+
+
+
+}

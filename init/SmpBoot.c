@@ -18,6 +18,9 @@ static INTEGER Bsp = 0;
 extern UINT64 page_table_l4;
 UNUSED static bool SmpBootInitialized = false;
 
+bool LouKeIsCpuBroken(INTEGER Cpu);
+
+static mutex_t WakeLock = {0};
 
 LOUSTATUS LouKeSmpWakeAssistant(
     INTEGER Assistant, 
@@ -33,13 +36,18 @@ LOUSTATUS LouKeSmpWakeAssistant(
         return STATUS_UNSUCCESSFUL;
     }
 
-    *TrampolineStack = Stack; 
-    *GlobalParkFunction = CpuInitFunction; 
+    MutexLock(&WakeLock);
+
     MutexLock(TrampolineLock);
 
+    *TrampolineStack = Stack; 
+    *GlobalParkFunction = CpuInitFunction; 
+    
     LouKeMemoryBarrier();
 
     LouKeSendProcessorWakeupSignal(Assistant);
+
+    MutexUnlock(&WakeLock);
 
     return STATUS_SUCCESS;
 }
@@ -103,3 +111,4 @@ void LouKeLoadLousineBootTrampoline(){
     //}
 
 }
+

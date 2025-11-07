@@ -475,6 +475,11 @@ bool InitializeLapic(UINT32 CpuID){
     return true;
 }
 
+LOUDDK_API_ENTRY
+void LouKeInitializeCurrentApApic(){
+    InitializeLapic(get_processor_id());
+}
+
 bool InitializeApic(){
     LouPrint("Setting Up APIC\n");
     uint64_t MSR = read_msr(IA32_APIC_BASE_MSR);
@@ -544,6 +549,13 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
     return Status;
 }
 
+LOUDDK_API_ENTRY
+bool LouKeIsCpuBroken(INTEGER Cpu){
+    LouKeMemoryBarrier();
+    PCPU_TRACKER_INFORMATION CpuInfo = GetCpuInfoFromTrackerMember(Cpu);
+    return CpuInfo->Broken;
+}
+
 
 LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
@@ -560,6 +572,11 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
     LouPrint("Waking CPU:%d With Apic:%d IPI\n", CpuID, ApicID);
 
+    if(!ApicBase){
+        LouPrint("ERROR: Apic Not Registered\n");
+        CpuInfo->Broken = true;
+        return;
+    }
 
     WRITE_REGISTER_ULONG(ERR_STATUS_REGISTER, 0x00);
     WRITE_REGISTER_ULONG(ICR_REGISTER_HI, (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
@@ -589,7 +606,6 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
         sleep(10);
         Timeout += 10;
         if(Timeout >= 100){
-            MutexUnlock(Lock);
             break;
         }
     }   

@@ -1,7 +1,22 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
+KERNEL_IMPORT
+void SetupGDT();
 
+KERNEL_IMPORT
+void HandleApProccessorInitialization();
+
+KERNEL_IMPORT
+LOUSTATUS InitializeStartupInterruptHandleing();
+
+KERNEL_IMPORT
+LOUSTATUS SetUpTimers();
+
+LOUDDK_API_ENTRY
+void LouKeInitializeCurrentApApic();
+
+static mutex_t CoreIrqReadyLock = {0};
 
 UNUSED static LOUSINE_PROCESS_MANAGER_BLOCK ProcessBlock = {0};
 
@@ -81,13 +96,11 @@ static bool AbortTaskSwap(INTEGER ProcessorID){
 //static LouKeManagerProcessSwap();
 
 
-
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     PDEMON_THREAD_RING TmpRing = 0x00;
     PDEMON_THREAD_RING CurrentRing = TmpRing; 
-
 
     if( //if in a demon and a processor ring exist check for a process
         (LouKeCheckAtomicBoolean(&ProcessBlock.ProcStateBlock[ProcessorID].RingSelector)) && 
@@ -157,10 +170,18 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 }
 
 UNUSED static void ProcessorIdleTask(){
+    LouPrint("Initializing Processor()\n");
 
+    SetupGDT();
+    HandleApProccessorInitialization();
+    InitializeStartupInterruptHandleing();
+    SetUpTimers();
+    LouKeInitializeCurrentApApic();
 
-
-    LouPrint("Processor Now Idleing\n");
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    LouPrint("AP Now Idleing\n");
+    MutexSynchronize(&CoreIrqReadyLock);
+    LouPrint("AP Interrupts Enabled\n");
     while(1){
 
     }
@@ -169,12 +190,17 @@ UNUSED static void ProcessorIdleTask(){
 UNUSED static void InitializeIdleProcess(){
     LouPrint("Initializing Processor()\n");
 
-    while(1);
+    SetupGDT();
+    HandleApProccessorInitialization();
+    InitializeStartupInterruptHandleing();
+    SetUpTimers();
+    LouKeInitializeCurrentApApic();
 
     INTEGER CurrentCpu = GetCurrentCpuTrackMember();
     for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
         if((i != InitializationProcessor) && (i != CurrentCpu)){
+            
             UNUSED PTHREAD NewThread = LouKeCreateDeferedDemonEx(
                 (PVOID)ProcessorIdleTask,
                 0x00,
@@ -190,12 +216,22 @@ UNUSED static void InitializeIdleProcess(){
 
             memset(&ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
 
-            LouKeSmpWakeAssistant(i, (UINT64)ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.CurrentState, (UINT64)InitializeIdleProcess);
+            LouKeSmpWakeAssistant(i, (UINT64)ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.CurrentState, (UINT64)ProcessorIdleTask);
         }
     }
+    LouPrint("AP Now Idleing\n");
+    MutexSynchronize(&CoreIrqReadyLock);
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    LouPrint("AP Interrupts Enabled\n");
     while(1){
 
     }
+}
+
+LOUDDK_API_ENTRY
+void LouKeUnmaskSmpInterrupts(){
+    MutexUnlock(&CoreIrqReadyLock);
+
 }
 
 LOUDDK_API_ENTRY void InitializeProcessManager(){
@@ -205,6 +241,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     InitializationProcessor = GetCurrentCpuTrackMember();
 
     MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
+    MutexLock(&CoreIrqReadyLock);
 
     ProcessBlock.DemonIDPool.IdRange = LouKeCreateIdentificationRange(1, ProcessBlock.ProcessorCount + 1);
     PTHREAD NewThread = LouKeCreateDeferedDemonEx(
