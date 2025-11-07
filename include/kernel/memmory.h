@@ -678,6 +678,14 @@ void* LouKeMallocEx(
     uint64_t    AllocationFlags
 );
 
+KERNEL_EXPORT
+void* LouKeMallocPhysicalEx(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
+
+
 KERNEL_EXPORT size_t LouKeGetAllocationSize(PVOID Addrress);
 
 KERNEL_EXPORT 

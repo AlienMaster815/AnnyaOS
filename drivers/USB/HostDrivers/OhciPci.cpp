@@ -19,13 +19,60 @@ NTSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
     struct _DEVICE_OBJECT* PlatformDevice
 ){
+    LOUSTATUS Status;
+    PPCI_DEVICE_OBJECT PDEV = (PPCI_DEVICE_OBJECT)PlatformDevice->PDEV;
     LouPrint("OHCI.SYS::AddDevice()\n");
 
-        
+    POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
+
+    LouKeHalEnablePciDevice(PDEV);
+    LouKeHalPciSetMaster(PDEV);
+
+    OhciDevice->OperationalRegisters = (POHCI_OPERATIONAL_REGISTERS)LouKePciGetIoRegion(
+        PDEV,
+        OHCI_OPERATIONAL_REGISTER_BAR,
+        OHCI_OPERATIONAL_REGISTER_OFFSET
+    );
+    LouPrint("Operational Reg:%h\n", OhciDevice->OperationalRegisters);
+
+    UINT32 Revision = OhciDevice->OperationalRegisters->HcRevision;
+    Revision &= 0xFF;
+
+    if(Revision != 0x10){
+        LouPrint("ERROR Invalid Revision Reset Data:%h\n", Revision);
+        LouKeFree(OhciDevice);
+        return STATUS_NO_SUCH_DEVICE;
+    }
+
+    Status = OhciCreateEdPool(OhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR Unable To Allocate Driver Resources\n");
+        return Status;
+    }
+
+    Status = OhciInitialzeEndpointHeaders(OhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR Unable To Initialize Device Data\n");
+        goto _ERROR_COULD_NOT_DESIGNATE_RESOURCES;
+    }
+
+    //allocate system resources
+    
+    //take control of Hc
+
+    //set up registers
+
+    //start SOF tokens
 
     LouPrint("OHCI.SYS::AddDevice() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;
+
+    _ERROR_COULD_NOT_DESIGNATE_RESOURCES:
+    //TODO:
+    LouPrint("_ERROR_COULD_NOT_DESIGNATE_RESOURCES\n");
+    while(1);
+    return Status;
 }
 
 LOUDDK_API_ENTRY

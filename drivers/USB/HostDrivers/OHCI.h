@@ -3,8 +3,48 @@
 #define _OHCI_H
 
 #include <LouDDK.h>
+#include <Hal.h>
 
-typedef struct _OHCI_OPERATIONAL_REGISTERS{
+typedef struct _OHCI_ED_INITIALIZOR{
+    UINT8       FunctionAddress;
+    UINT8       EndpointNumber      :   4;
+    UINT8       Direction           :   2;
+    UINT8       Speed               :   1;
+    UINT8       Skip                :   1;
+    UINT8       Format              :   1;
+    UINT8       Halted              :   1;
+    UINT8       ToggleCarry         :   1;
+    UINT16      MaximumPacketSize   :   11;
+    UINT32      TDQueueTailPointer;
+    UINT32      TDQueueHeadPointer;
+    UINT32      NextED;
+}OHCI_ED_INITIALIZOR, * POHCI_ED_INITIALIZOR;
+
+typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_ENDPOINT_DESCRIPTOR{
+    UINT32      Dword0;
+    UINT32      Dword1;
+    UINT32      Dword2;
+    UINT32      Dword3;
+}OHCI_ENDPOINT_DESCRIPTOR, * POHCI_ENDPOINT_DESCRIPTOR;
+
+typedef struct _OHCI_ED_POOL{
+    ListHeader                  Peers;
+    POOL                        EdPool;
+}OHCI_ED_POOL, * POHCI_ED_POOL;
+
+typedef struct _OHCI_TD_POOL{
+    ListHeader                  Peers;
+    POOL                        TdPool;
+}OHCI_TD_POOL, * POHCI_TD_POOL;
+
+typedef struct PACKED _OHCI_HCCA{
+    UINT32      InterruptTable[128 / sizeof(UINT32)];
+    UINT16      HccaFrameNumber;
+    UINT16      HccaPad1;
+    UINT32      HccaDoneHead;
+}OHCI_HCCA, * POHCI_HCCA;
+
+typedef struct PACKED _OHCI_OPERATIONAL_REGISTERS{
     UINT32      HcRevision;
     UINT32      HcControl;
     UINT32      HcCommandStatus;
@@ -28,10 +68,34 @@ typedef struct _OHCI_OPERATIONAL_REGISTERS{
     UINT32      HcRhPortStatus[];
 }OHCI_OPERATIONAL_REGISTERS, * POHCI_OPERATIONAL_REGISTERS;
 
+typedef enum {
+    ControlEndpoint = 0,
+    BulkEndpoint = 1,
+    InterruptEndpoint = 2,
+    IsochEndpoint = 3, 
+}OHCI_ED_TYPE;
+
+
+
+typedef struct _OHCI_ED_TRACKER{
+    ListHeader                  Peers;
+    struct _OHCI_DEVICE*        OhciDevice;
+    OHCI_ED_TYPE                EdType;
+    OHCI_ED_INITIALIZOR         Initializor;
+    ListHeader                  EdList;
+    ListHeader                  TdList;
+    OHCI_ENDPOINT_DESCRIPTOR    Ep;
+}OHCI_ED_TRACKER, * POHCI_ED_TRACKER;
+
 typedef struct _OHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
     POHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
     spinlock_t                      IoLock;
+    mutex_t                         DeviceMutex;
+    UINT64                          HccaAddress;
+    OHCI_ED_POOL                    EdPool;
+    OHCI_TD_POOL                    TdPool;
+    POHCI_ED_TRACKER                EdTrackers;
 }OHCI_DEVICE, * POHCI_DEVICE;
 
 #define OHCI_REVISION_HC_BIT     (0x01)
@@ -117,195 +181,72 @@ typedef struct _OHCI_DEVICE{
 #define OHCI_RWE_ENABLE             1
 #define OHCI_REW_DISABLE            0
 
-//command status
-//126 || 112
+#define OHCI_OPERATIONAL_REGISTER_BAR       0
+#define OHCI_OPERATIONAL_REGISTER_OFFSET    0
 
-UINT8 OhciGetHcRevision(
+//endpoint descritor data 
+#define OHCI_ED_FA_MASK         ((1 << 7) - 1)
+#define OHCI_ED_EN_MASK         ((1 << 5) - 1)
+#define OHCI_ED_D_MASK          ((1 << 3) - 1)
+#define OHCI_ED_S_MASK          (1)
+#define OHCI_ED_K_MASK          (1)
+#define OHCI_ED_F_MASK          (1)
+#define OHCI_ED_MPS_MASK        ((1 << 12) - 1)
+
+#define OHCI_ED_TAILP_MASK      (0xFFFFFFF0)
+#define OHCI_ED_H_MASK          (1)
+#define OHCI_ED_C_MASK          (1)
+#define OHCI_ED_HEADP_MASK      (0xFFFFFFF0)
+#define OHCI_ED_NEXTED_MASK     (0xFFFFFFF0)
+
+#define OHCI_ED_FA_SHIFT        (0)
+#define OHCI_ED_EN_SHIFT        (7)
+#define OHCI_ED_D_SHIFT         (11)
+#define OHCI_ED_S_SHIFT         (13)
+#define OHCI_ED_K_SHIFT         (14)
+#define OHCI_ED_F_SHIFT         (15)
+#define OHCI_ED_MPS_SHIFT       (16)
+#define OHCI_ED_TAILP_SHIFT     (4)
+#define OHCI_ED_H_SHIFT         (0)
+#define OHCI_ED_C_SHIFT         (1)
+#define OHCI_ED_HEADP_SHIFT     (4)
+#define OHCI_ED_NEXTED_SHIFT    (4)
+
+#define OHCI_ED_DIRECTION_GFTD0 0b00
+#define OHCI_ED_DIRECTION_OUT   0b01
+#define OHCI_ED_DIRECTION_IN    0b10
+#define OHCI_ED_DIRECTION_GFTD3 0b11
+
+#define OHCI_ED_SPEED_FULL      0
+#define OHCI_ED_SPEED_LOW       1
+
+#define OHCI_ED_SKIP            1
+
+#define OHCI_ED_FORMAT_GENERAL_TD   0
+#define OHCI_ED_FORMAT_ISOCH_TD     1
+
+#define OHCI_ED_HALTED          1
+#define OHCI_ED_TOGGLE_CARRY    1
+
+#define OHCI_ED_POOL_SIZE       256
+#define OHCI_TD_POOL_SIZE       2048
+
+LOUSTATUS 
+OhciInitialzeEndpointHeaders(
     POHCI_DEVICE    OhciDevice
 );
 
-void OhciSetHcRevision(
+LOUSTATUS OhciCreateEndpoint(
     POHCI_DEVICE    OhciDevice,
-    UINT8           Revision
+    UINT8           FunctionAddress,
+    UINT8           EndpointNumber,
+    UINT8           Direction,
+    BOOL            LowSpeed,
+    OHCI_ED_TYPE    EdType
 );
 
-void OhciWriteHcControl(
-    POHCI_DEVICE    OhciDevice,
-    UINT16          Control
-);
-
-void OhciWriteHcCommandStatus(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          CommandStatus
-);
-
-UINT32 OhciReadHcCommandStatus(
+LOUSTATUS OhciCreateEdPool(
     POHCI_DEVICE    OhciDevice
 );
-
-void OhciWriteHcInterruptStatus(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          InterruptStatus
-);
-
-UINT32 OhciReadHcInterruptStatus(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcInterruptEnable(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          InterruptEnable
-);
-
-UINT32 OhciReadHcInterruptEnable(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcInterruptDisable(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          InterruptDisable
-);
-
-UINT32 OhciReadHcInterruptDisable(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcHCCA(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          HCCA
-);
-
-UINT32 OhciReadHcHCCA(
-    POHCI_DEVICE    OhciDevice
-);
-
-UINT32 OhciReadHcPeriodCurrentED(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcPeriodCurrentED(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          PeriodCurrentED
-);
-
-UINT32 OhciReadHcControlHeadED(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciReadHcControlHeadED(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          ControlHeadED
-);
-
-UINT32 OhciReadHcControlCurrentED(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcControlCurrentED(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          ControlCurrentED
-);
-
-UINT32 OhciReadHcBulkHeadED(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcBulkHeadED(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          BulkHeadED
-);
-
-UINT32 OhciReadHcBulkCurrentED(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcBulkCurrentED(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          BulkCurrentED
-);
-
-UINT32 OhciReadDoneHead(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteDoneHead(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          DoneHead
-);
-
-UINT32 OhciReadHcFmInterval(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcFmInterval(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          HcFmInterval
-);
-
-UINT32 OhciReadHcFmRemaining(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcFmRemaining(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          HcFmRemaining
-);
-
-UINT32 OhciReadHcPeriodicStart(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcPeriodicStart(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          PeriodicStart
-);
-
-UINT32 OhciReadHcLSThreashold(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcLSThreashold(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          LSThreshold
-);
-
-UINT32 OhciReadHcRhDescriptorA(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcRhDescriptorA(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          RhDescriptorA
-);
-
-UINT32 OhciReadHcRhDescriptorB(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcRhDescriptorB(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          RhDescriptorB
-);
-
-UINT32 OhciReadHcRhStatus(
-    POHCI_DEVICE    OhciDevice
-);
-
-void OhciWriteHcRhStatus(
-    POHCI_DEVICE    OhciDevice,
-    UINT32          RhStatus
-);
-
-UINT32 OhciReadHcRhPortStatus(
-    POHCI_DEVICE    OhciDevice,
-    UINT8           Port
-);
-
-void OhciWriteHcRhPortStatus(
-    POHCI_DEVICE    OhciDevice,
-    UINT8           Port,
-    UINT32          RhStatus
-);
-
 
 #endif

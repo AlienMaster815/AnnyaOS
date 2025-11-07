@@ -157,7 +157,7 @@ void* LouKeMallocPage32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlag
         return 0x00;
     }
 
-    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (uint64_t)LouMallocEx(PageSize * PageCount, PageSize));
+    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (uint64_t)LouMallocEx64(PageSize * PageCount, PageSize));
 }
 
 void* LouKeMallocPhysicalPageEx(UINT64 PageSize, UINT64 PageCount, UINT64 PageFlags, UINT64 PhysicalAddres){

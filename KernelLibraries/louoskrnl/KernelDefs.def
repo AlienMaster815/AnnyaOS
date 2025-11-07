@@ -187,3 +187,4 @@ EXPORTS
     LouKeDmiGetFirstMatch
     snprintf
     DmiGetDate
+    LouKeMallocPhysicalEx

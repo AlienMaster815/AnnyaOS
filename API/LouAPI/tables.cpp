@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 186
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 187
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -433,6 +433,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[183] = "PciTestAtaConfigurationBits";
     ImportTables[4].FunctionName[184] = "LouKeDmiGetFirstMatch";
     ImportTables[4].FunctionName[185] = "DmiGetDate";
+    ImportTables[4].FunctionName[186] = "LouKeMallocPhysicalEx";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -620,6 +621,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[183] = (uint64_t)PciTestAtaConfigurationBits;
     ImportTables[4].VirtualAddress[184] = (uint64_t)LouKeDmiGetFirstMatch;
     ImportTables[4].VirtualAddress[185] = (uint64_t)DmiGetDate;
+    ImportTables[4].VirtualAddress[186] = (uint64_t)LouKeMallocPhysicalEx;
     
 }
 
