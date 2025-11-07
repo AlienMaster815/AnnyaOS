@@ -82,6 +82,7 @@ typedef struct _GENERIC_THREAD_DATA{
     TIME_T              ThreadStart;
     TIME_T              BlockTimeout;
     BOOL                NewThread;
+    ATOMIC_BOOLEAN      ThreadQueuedForDestruction;
     UINT8               Cs;
     UINT8               Ss;
     INSTRUCTION_MODE    InstructionMode;

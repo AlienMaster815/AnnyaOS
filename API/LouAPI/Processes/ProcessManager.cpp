@@ -131,7 +131,11 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         while((TmpRing) && (TmpRing != CurrentRing)){
 
             if((!MutexIsLocked(&TmpRing->DemonData.LockOutTagOut)) && (TmpRing->DemonData.State != THREAD_RUNNING)){
-                if(
+                if(LouKeCheckAtomicBoolean(&TmpRing->DemonData.ThreadQueuedForDestruction)){
+                    LouPrint("Thread Qeued For Destruction\n");
+                    while(1);
+                }
+                else if(
                     (TmpRing->DemonData.State == THREAD_BLOCKED) && 
                     (LouKeDidTimeoutExpired(&TmpRing->DemonData.BlockTimeout)) && 
                     (!LouKeIsTimeoutNull(&TmpRing->DemonData.BlockTimeout))
@@ -149,12 +153,8 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         if(TmpRing == CurrentRing){
             goto _SCHEDUALR_FINISHED;
         }
-        if(!TmpRing){
-            LouPrint("Thread Destroyed\n");
-            while(1);
-        }else{
-            LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true);        
-        }
+            
+        LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true);        
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentInterruptStorage = TmpRing->DemonData.InterruptStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage = TmpRing->DemonData.ContextStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID = TmpRing->DemonData.ThreadID;
