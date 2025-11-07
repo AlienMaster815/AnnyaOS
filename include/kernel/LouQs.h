@@ -25,52 +25,7 @@ typedef struct _LOUQ_WORK{
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
 
-typedef struct _LOUQ_WORK_STRUCTURE{
-    string          Identifier;
-    size_t          ActiveQCount; 
-    mutex_t         StructureLock;
-    uint64_t        StructureFlags;
-    PLOUQ_WORK      NonActiveMembers;
-    //the Non active mebers are pushed to the ActiveMembers
-    //stack and removed from non ActiveMembers so that the
-    //next worker can just grab from the ActiveMembers through
-    //an array access rather than using the Listings
-    PLOUQ_WORK       ActiveMembers;
-}LOUQ_WORK_STRUCTURE, * PLOUQ_WORK_STRUCTURE;
 
-typedef struct  _LOUQ_INTEFACE{
-    PLOUQ NextInLine;
-    PLOUQ InFront;
-}LOUQ_INTEFACE, *PLOUQ_INTEFACE;
-
-typedef struct _LOUQ_COMPLETION{
-    ListHeader      Neighbors;
-    UINT64          MsTime;
-    BOOL            Completed;
-}LOUQ_COMPLETION, * PLOUQ_COMPLETION;
-
-typedef struct _LOUQ_REQUEST{
-    LOUQ    LouQHeader;
-    void*   RequestData;
-}LOUQ_REQUEST, * PLOUQ_REQUEST;
-
-typedef struct _LOUQ_LIMITS{
-    PLOUQ    LouQReference;
-    uint64_t NumberOfQues;
-    uint64_t OperationLimitFlags;
-}LOUQ_LIMITS, * PLOUQ_LIMITS;
-
-#define KERNEL_WORK_QUEUE 0
-#define USER_WORK_QUEUE   1
-
-#define IMEDIATE_PRIORITY            UINT64_MAX
-#define KERNEL_PRIORITY             (UINT64_MAX - 1)
-#define KERNEL_DEMON_PRIORITY       (UINT64_MAX - 2)
-#define SUBSYSTEM_PRIORITY          (UINT64_MAX - 3)
-#define SUBSYSTEM_DEMON_PRIORITY    (UINT64_MAX - 4)
-#define DEVICE_PRIORITY             (UINT64_MAX - 5)
-#define USER_SUBSYSTEM              (UINT64_MAX - 6)
-#define USER_SUBSYSTEM_THREAD       (UINT64_MAX - 7)
 
 static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, DELAYED_CALLBACK Callback){
     Work->Work.DelayedFunction = Callback;
