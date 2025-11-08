@@ -356,7 +356,7 @@ typedef struct _ACPI_EMBEDDED_CONTROLLER{
     uint64_t                    Flags;
     uint64_t                    ReferenceCount;
     mutex_t                     EcMutex;
-    PLOUQ_WAIT                  WaitQueue;
+    PLOUQ_WORK                  WaitQueue;
     ListHeader                  List;
     PACPI_EC_TRANSACTION        CurrentTransaction;
     spinlock_t                  EcLock;

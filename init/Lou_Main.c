@@ -32,14 +32,10 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.5.04 RSC-1";
+string KERNEL_VERSION = "0.5.04 RSC-2";
 
-#ifdef __x86_64__
 string KERNEL_ARCH = "64-BIT";
-#endif
-#ifdef __i386__
-sring KERNEL_ARCH = "32-BIT";
-#endif
+
 
 typedef struct _PROCESSOR_FEATURES{
     bool    Sse1Supported;
@@ -138,7 +134,7 @@ void CheckAndInitializePs2Controller();
 void InitializeBusCore();
 void InitializeAcpiSystem();
 void InitializeDebuggerComunications();
-void LouKeInitializeMouseManagemet();
+void LouKeInitializeMouseHandling();
 void LouKeIcUnmaskIrq(uint8_t irq);
 void LouKePollIoApicPinForAssertion(uint8_t Pin);
 uint64_t GetUsedMemory();
@@ -175,7 +171,7 @@ void LouKePcieProbeEcam();
 LOUSTATUS LouKeInitializeRegistry();
 HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
-void LouKeInitializeSecondStageLouPrint();
+void LouKeInitializeSmpLouPrint();
 void LouKeUnmaskSmpInterrupts();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
@@ -233,6 +229,8 @@ void InitializeSymmetricMultiProcessing(){
 
     LouKeEnableSmpIrqlManagement(GetNPROC());
 
+    LouKeInitializeSmpLouPrint();
+
     LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
 
 }
@@ -244,16 +242,11 @@ void AdvancedLousineKernelInitialization(){
 
     InitializeProcessManager();
 
-    //LouKeCreateDemon(LouKeMainWorkDemon, 0x00, 16 * KILOBYTE);
-
     LouKeInitializeFullLouACPISubsystem();
-
-    LouKeInitializeSecondStageLouPrint();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
     LouKeUnmaskSmpInterrupts();
-    while(1);
     
 }
 
@@ -344,6 +337,8 @@ KERNEL_ENTRY Lou_kernel_start(
     InitializeGenericTables();
 
     AdvancedLousineKernelInitialization();
+
+    LouKeInitializeMouseHandling();
 
     LookForStorageDevices();
     

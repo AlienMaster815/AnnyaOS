@@ -32,7 +32,7 @@ static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){
     if(!(LouKeHalPs2CheckControllerStatus() & (0x20))){
         return;
     }
-    LouKeStartWork(&Ps2Device->Work);
+    LouKeQueueWork("MouseWork", &Ps2Device->Work);
 }
 
 

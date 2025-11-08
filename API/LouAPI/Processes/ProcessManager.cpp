@@ -102,6 +102,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
     PDEMON_THREAD_RING TmpRing = 0x00;
     PDEMON_THREAD_RING CurrentRing = TmpRing; 
 
+
     if( //if in a demon and a processor ring exist check for a process
         (LouKeCheckAtomicBoolean(&ProcessBlock.ProcStateBlock[ProcessorID].RingSelector)) && 
         (ProcessBlock.ProcessRing)
@@ -140,6 +141,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
                     (LouKeDidTimeoutExpired(&TmpRing->DemonData.BlockTimeout)) && 
                     (!LouKeIsTimeoutNull(&TmpRing->DemonData.BlockTimeout))
                 ){
+                    memset(&TmpRing->DemonData.BlockTimeout, 0, sizeof(TIME_T));
                     TmpRing->DemonData.State = THREAD_READY;
                 }
                 
@@ -165,6 +167,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
 
     _SCHEDUALR_FINISHED:
+    LouKeMemoryBarrier();
     LouKeSendIcEOI();
     return CpuCurrentState;
 }
@@ -178,9 +181,9 @@ UNUSED static void ProcessorIdleTask(){
     SetUpTimers();
     LouKeInitializeCurrentApApic();
 
-    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
     LouPrint("AP Now Idleing\n");
     MutexSynchronize(&CoreIrqReadyLock);
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
     LouPrint("AP Interrupts Enabled\n");
     while(1){
 

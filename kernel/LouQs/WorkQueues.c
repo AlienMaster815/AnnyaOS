@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-static LOUQ_WORK MainWorkQueue = {0};
+/*static LOUQ_WORK MainWorkQueue = {0};
 
 LOUSTATUS LouKeStartWork(PLOUQ_WORK Work){
     MutexLock(&MainWorkQueue.LouQHeader.LouQtex);
@@ -67,5 +67,79 @@ int LouKeMainWorkDemon(){
             asm("INT $200");//yeild
         }
     }
+}*/
+
+UNUSED static LOUQ_WORK_QUEUE MainWorkQueue = {0};
+
+DWORD LouKeWorkStackDemon(PVOID Data){
+    UNUSED PLOUQ_WORK_QUEUE WorkQueueData = (PLOUQ_WORK_QUEUE)Data;
+    LouPrint("Work Queue Started:%s\n", WorkQueueData->QueueName);
+    while(1){
+        
+    }
+    return STATUS_SUCCESS;
 }
 
+LOUSTATUS 
+LouKeQueueWork(
+    string QueueName,
+    PLOUQ_WORK WorkItem
+){
+
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeQueueDelayedWork(
+    string QueueName, 
+    PLOUQ_WORK WorkItem, 
+    PTIME_T Delay
+){
+
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeQueueTimedWork(
+    string QueueName, 
+    PLOUQ_WORK WorkItem, 
+    PTIME_T Delay
+){
+
+
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeCreateWorkQueue(
+    PLOUQ_WORK_QUEUE*   OutQueue,
+    WORK_QUEUE_PRIORITY QueuePriority,
+    string              QueueName
+){
+    PLOUQ_WORK_QUEUE TmpQueue = &MainWorkQueue;
+    while(TmpQueue->Peers.NextHeader){
+        TmpQueue = (PLOUQ_WORK_QUEUE)TmpQueue->Peers.NextHeader;
+        if(strcmp(TmpQueue->QueueName, QueueName)){
+            if(OutQueue){
+                *OutQueue = TmpQueue;
+            }
+            return STATUS_SUCCESS;
+        }
+    }
+    
+    TmpQueue->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUQ_WORK_QUEUE, KERNEL_GENERIC_MEMORY);
+    TmpQueue = (PLOUQ_WORK_QUEUE)TmpQueue->Peers.NextHeader;
+
+    TmpQueue->QueueName = LouKeMallocArray(CHAR, strlen(QueueName) + 1, KERNEL_GENERIC_MEMORY);
+    strcpy(TmpQueue->QueueName, QueueName);
+    TmpQueue->QueuePriority = QueuePriority;
+
+    TmpQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)TmpQueue, 16 * KILOBYTE);
+
+    if(OutQueue){
+        *OutQueue = TmpQueue;
+    }
+    return STATUS_SUCCESS;
+}

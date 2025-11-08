@@ -1,7 +1,6 @@
 #include <LouAPI.h>
 
 static PSYSTEM_STATE_STACK SystemState = 0x00;
-//static bool FirstDraw = true;
 
 PLOUSINE_USER_SHARED_MESSAGE LouKeMouseAllocateMessageDevice(){
     return LouKeCreateNewUserMessage(
@@ -34,4 +33,8 @@ void LouKeMouseUpdateInput(PLOUSINE_USER_SHARED_MESSAGE Message, INT64 X, INT64 
 
 void LouKeUpdateMouseState(PSYSTEM_STATE_STACK State){
     SystemState = State;
+}
+
+void LouKeInitializeMouseHandling(){
+    LouKeCreateWorkQueue(0x00, SUBSYSTEM_WORK, "MouseWork");
 }

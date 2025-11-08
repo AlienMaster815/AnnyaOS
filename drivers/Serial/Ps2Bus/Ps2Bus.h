@@ -101,6 +101,7 @@ typedef struct _PS2_DEVICE_OBJECT{
     BOOL                ChipsetDevice;
     PVOID               DriverPrivateData;
     LOUQ_WORK           Work;
+    PLOUQ_WORK_QUEUE    WorkQueue;
 }PS2_DEVICE_OBJECT, * PPS2_DEVICE_OBJECT;
 
 

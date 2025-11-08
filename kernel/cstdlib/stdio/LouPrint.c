@@ -232,8 +232,7 @@ int LouPrint_s(char* format, va_list args){
 }
 
 
-
-int LouPrint(char* format, ...) {
+int _LouPrint(char* format, ...){
     int result = -1;
     va_list args;
     va_start(args, format);
@@ -242,9 +241,32 @@ int LouPrint(char* format, ...) {
     return result;
 }
 
+bool UsingSmp = false;
 
-void LouKeInitializeSecondStageLouPrint(){
+INTEGER 
+GetCurrentCpuTrackMember();
+
+mutex_t PrintMutex = {0};
+
+int LouPrint(char* format, ...) {
+    MutexLock(&PrintMutex);
+    int result = 0;
+    if(UsingSmp){
+        result = _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
+        if(result){
+            return result;
+        }
+    }
+    va_list args;
+    va_start(args, format);
+    result = LouPrint_s(format, args);
+    va_end(args);
+    MutexUnlock(&PrintMutex);
+    return result;
+}
 
 
-
+void LouKeInitializeSmpLouPrint(){
+    UsingSmp = true;
+    LouKeMemoryBarrier();
 }

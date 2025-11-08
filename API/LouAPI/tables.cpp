@@ -424,7 +424,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[174] = "LouKeMallocDma16Ex";
     ImportTables[4].FunctionName[175] = "LouKeMallocDma16";
     ImportTables[4].FunctionName[176] = "LouKeFreeDma16";
-    ImportTables[4].FunctionName[177] = "LouKeStartWork";
+    ImportTables[4].FunctionName[177] = "LouKeQueueWork";
     ImportTables[4].FunctionName[178] = "LouKeGetAllocationSize";
     ImportTables[4].FunctionName[179] = "LouKeGenericAllocateFixedDmaPool";
     ImportTables[4].FunctionName[180] = "LouKeFreeFromFixedPool";
@@ -612,7 +612,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[174] = (uint64_t)LouKeMallocDma16Ex;
     ImportTables[4].VirtualAddress[175] = (uint64_t)LouKeMallocDma16;
     ImportTables[4].VirtualAddress[176] = (uint64_t)LouKeFreeDma16;
-    ImportTables[4].VirtualAddress[177] = (uint64_t)LouKeStartWork;
+    ImportTables[4].VirtualAddress[177] = (uint64_t)LouKeQueueWork;
     ImportTables[4].VirtualAddress[178] = (uint64_t)LouKeGetAllocationSize;
     ImportTables[4].VirtualAddress[179] = (uint64_t)LouKeGenericAllocateFixedDmaPool;
     ImportTables[4].VirtualAddress[180] = (uint64_t)LouKeFreeFromFixedPool;

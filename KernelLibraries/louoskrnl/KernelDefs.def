@@ -177,7 +177,6 @@ EXPORTS
     LouKeMallocDma16Ex
     LouKeMallocDma16
     LouKeFreeDma16
-    LouKeStartWork
     LouKeGetAllocationSize
     LouKeGenericAllocateFixedDmaPool
     LouKeFreeFromFixedPool
@@ -188,3 +187,4 @@ EXPORTS
     snprintf
     DmiGetDate
     LouKeMallocPhysicalEx
+    LouKeQueueWork

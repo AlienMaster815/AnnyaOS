@@ -86,6 +86,7 @@ void LouKeSwitchToTask(
     RestoreEverything(&ThreadTo->ContextStorage);
     SetPEB((UINT64)ThreadTo->Peb);
     SetTEB((UINT64)&ThreadTo->Teb);
+    RestoreContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&ThreadTo->SavedState));
 
 }
 
