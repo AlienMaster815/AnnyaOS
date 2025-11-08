@@ -16,6 +16,9 @@ LOUSTATUS SetUpTimers();
 LOUDDK_API_ENTRY
 void LouKeInitializeCurrentApApic();
 
+KERNEL_IMPORT
+LOUSTATUS UpdateIDT(bool Init);
+
 static mutex_t CoreIrqReadyLock = {0};
 
 UNUSED static LOUSINE_PROCESS_MANAGER_BLOCK ProcessBlock = {0};
@@ -132,11 +135,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         while((TmpRing) && (TmpRing != CurrentRing)){
 
             if((!MutexIsLocked(&TmpRing->DemonData.LockOutTagOut)) && (TmpRing->DemonData.State != THREAD_RUNNING)){
-                if(LouKeCheckAtomicBoolean(&TmpRing->DemonData.ThreadQueuedForDestruction)){
-                    LouPrint("Thread Qeued For Destruction\n");
-                    while(1);
-                }
-                else if(
+                if(
                     (TmpRing->DemonData.State == THREAD_BLOCKED) && 
                     (LouKeDidTimeoutExpired(&TmpRing->DemonData.BlockTimeout)) && 
                     (!LouKeIsTimeoutNull(&TmpRing->DemonData.BlockTimeout))
@@ -156,7 +155,8 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
             goto _SCHEDUALR_FINISHED;
         }
             
-        LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true);        
+        LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true); 
+        TmpRing->DemonData.Cpu = ProcessorID;       
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentInterruptStorage = TmpRing->DemonData.InterruptStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage = TmpRing->DemonData.ContextStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID = TmpRing->DemonData.ThreadID;
@@ -173,11 +173,9 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 }
 
 UNUSED static void ProcessorIdleTask(){
-    LouPrint("Initializing Processor()\n");
-
-    SetupGDT();
     HandleApProccessorInitialization();
-    InitializeStartupInterruptHandleing();
+    SetupGDT();
+    UpdateIDT(true);
     SetUpTimers();
     LouKeInitializeCurrentApApic();
 
@@ -191,11 +189,9 @@ UNUSED static void ProcessorIdleTask(){
 }
 
 UNUSED static void InitializeIdleProcess(){
-    LouPrint("Initializing Processor()\n");
-
-    SetupGDT();
     HandleApProccessorInitialization();
-    InitializeStartupInterruptHandleing();
+    SetupGDT();
+    UpdateIDT(true);
     SetUpTimers();
     LouKeInitializeCurrentApApic();
 

@@ -247,7 +247,6 @@ void AdvancedLousineKernelInitialization(){
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
     LouKeUnmaskSmpInterrupts();
-    
 }
 
 void KillDebuger(){

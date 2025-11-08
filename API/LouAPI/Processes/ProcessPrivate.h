@@ -68,6 +68,7 @@ typedef struct _PM_ID_RANGE_POOL{
 typedef struct _GENERIC_THREAD_DATA{
     mutex_t             LockOutTagOut;
     thread_state_t      State;
+    INTEGER             Cpu;
     PPEB                Peb;
     CPUContext          SavedState;
     CPUContext*         CurrentState;
@@ -82,7 +83,6 @@ typedef struct _GENERIC_THREAD_DATA{
     TIME_T              ThreadStart;
     TIME_T              BlockTimeout;
     BOOL                NewThread;
-    ATOMIC_BOOLEAN      ThreadQueuedForDestruction;
     UINT8               Cs;
     UINT8               Ss;
     INSTRUCTION_MODE    InstructionMode;
