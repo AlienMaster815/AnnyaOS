@@ -27,6 +27,12 @@ LouKeCreateIdentificationRange(
     INTEGER RangeEnd
 );
 
+bool 
+LouKeIsIdInRange(
+    PIDENTIFICATION_RANGE IdRange,
+    INTEGER Id
+);
+
 void LouKeReleaseIdFromRange(
     PIDENTIFICATION_RANGE IdRange,
     INTEGER Id

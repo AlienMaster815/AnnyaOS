@@ -1,6 +1,17 @@
 #include <LouAPI.h>
 
 
+bool 
+LouKeIsIdInRange(
+    PIDENTIFICATION_RANGE IdRange,
+    INTEGER Id
+){
+    if((!IdRange) ||  (Id >= (IdRange->RangeStart + IdRange->Entries)) || (Id < IdRange->RangeStart)){
+        return false;
+    }
+    return true;
+}
+
 INTEGER 
 LouKeAcquireIdFromRange(
     PIDENTIFICATION_RANGE   IdRange,
@@ -17,9 +28,10 @@ LouKeAcquireIdFromRange(
             Result = IdRange->Identities[i].RangeID;
             IdRange->Identities[i].Object = Object;
             IdRange->Identities[i].RangeAllocated = true;
-            break;
+            goto _RANGE_ALLOCATED;
         }
     }
+    _RANGE_ALLOCATED:
     MutexUnlock(&IdRange->RangeLock);
     return Result;
 }
@@ -51,11 +63,12 @@ LouKeCreateIdentificationRange(
     Result = LouKeMallocEx(GetStructureSize(Result, Identities, MemberCount), GET_ALIGNMENT(IDENTIFICATION_RANGE), KERNEL_GENERIC_MEMORY);
     Result->RangeStart = RangeStart; 
     Result->Entries = MemberCount;
-
+    MutexLock(&Result->RangeLock);
     for(INTEGER i = 0 ; i < MemberCount; i++){
         Result->Identities[i].RangeID = RangeStart + i;  
         Result->Identities[i].Object = 0x00;
         Result->Identities[i].RangeAllocated = false;
     }
+    MutexUnlock(&Result->RangeLock);
     return Result;
 }
