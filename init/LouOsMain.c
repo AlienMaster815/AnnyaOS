@@ -295,7 +295,7 @@ bool IsSystemEfi(){
     return SystemIsEfiv;
 }
 
-KERNEL_ENTRY Lou_kernel_start(
+KERNEL_ENTRY LouOsKrnlStart(
     uint32_t MBOOT
 ){    
  

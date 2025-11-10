@@ -20,18 +20,3 @@ uint8_t IdentifyApicVersion(){
     return 0;
 }
 
-extern void SetApicTimerOneShot(uint64_t Timer);
-
-//tailcall
-void SetApicTimer(uint64_t Timer, uint64_t mode) {
-
-    if (mode == 1) {
-        SetApicTimerOneShot(Timer);
-    }
-
-    else if(mode == 2) {
-
-    }
-
-}
-

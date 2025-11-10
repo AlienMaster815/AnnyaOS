@@ -1,3 +1,6 @@
+bits 64
+default rel
+
 section .text
 
 global simd_copy
