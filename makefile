@@ -73,9 +73,6 @@ CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
 kernel_source_files := $(shell find kernel -name *.c)
 kernel_object_files := $(patsubst kernel/%.c, build/kernel/%.o, $(kernel_source_files))
 
-x86_64_c_source_files := $(shell find init -name *.c)
-x86_64_c_object_files := $(patsubst init/%.c, build/x86_64/init/%.o, $(x86_64_c_source_files))
-
 driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/DriverInterrupts -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/FileSystems -name *.cpp)
@@ -118,7 +115,7 @@ kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, 
 kernel_asm_source_files := $(shell find kernel -name *.asm)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
-x86_64_object_files := $(kernel_object_files) $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
+x86_64_object_files := $(kernel_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
 
 
 
@@ -190,6 +187,9 @@ KernelModules:
 
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C boot/x86_64 all
+
+	$(MAKE) -C EXE/LouLoad clean
+	$(MAKE) -C EXE/LouLoad all
 
 UserSpace:
 	$(MAKE) -C UserLibraries/LouDll clean
