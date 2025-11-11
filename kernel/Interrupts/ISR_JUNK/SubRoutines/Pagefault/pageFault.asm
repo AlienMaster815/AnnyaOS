@@ -1,5 +1,4 @@
 section .text
-default rel
 
 global CheckPresent
 

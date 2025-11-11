@@ -1,7 +1,3 @@
-bits 64
-default rel
-
-
 section .User
 
 global UsrJmp

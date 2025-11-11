@@ -41,12 +41,7 @@ EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
 
 CC = x86_64-w64-mingw32-gcc
 CP = x86_64-w64-mingw32-g++
-LD = x86_64-w64-mingw32-ld --entry=LouOsKrnlStart \
-    --subsystem=native \
-    --dynamicbase \
-    --high-entropy-va \
-	--image-base 0x1000000
-
+LD = ld
 PELD = x86_64-w64-mingw32-ld
 
 C_COMPILE_FLAGS = -m64
@@ -73,6 +68,9 @@ CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
 
 kernel_source_files := $(shell find kernel -name *.c)
 kernel_object_files := $(patsubst kernel/%.c, build/kernel/%.o, $(kernel_source_files))
+
+x86_64_c_source_files := $(shell find init -name *.c)
+x86_64_c_object_files := $(patsubst init/%.c, build/x86_64/init/%.o, $(x86_64_c_source_files))
 
 driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/DriverInterrupts -name *.cpp)
@@ -110,13 +108,13 @@ kernel_s_source_files := $(shell find kernel -name *.s)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
 
-#x86_64_asm_source_files = boot/x86_64/BOOT.asm
-#x86_64_asm_object_files = build/x86_64/boot/boot.o 
+x86_64_asm_source_files = boot/x86_64/BOOT.asm
+x86_64_asm_object_files = build/x86_64/boot/boot.o 
 
 kernel_asm_source_files := $(shell find kernel -name *.asm)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
 
-x86_64_object_files := $(kernel_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
+x86_64_object_files := $(kernel_object_files) $(x86_64_c_object_files) $(x86_64_asm_object_files) $(driver_cpp_object_files) $(x86_64_API_asm_object_files) $(x86_64_API_cpp_object_files) $(kernel_asm_object_files) $(kernel_s_object_files)
 
 
 
@@ -165,12 +163,12 @@ clean:
 
 lou.exe: $(x86_64_object_files) $(kernel_object_files)
 	mkdir -p dist/x86_64
-	$(LD) -n -o dist/x86_64/LOUOSKRNL.EXE $(x86_64_object_files)
+	$(LD) -n -o dist/x86_64/LOUOSKRNL.bin -T targets/x86_64/linker.ld $(x86_64_object_files)
 	rm -r build
 
 release: lou.exe
 	mkdir -p release/x86_64 && \
-	cp dist/x86_64/LOUOSKRNL.EXE release/x86_64/LOUOSKRNL.exe
+	cp dist/x86_64/LOUOSKRNL.bin release/x86_64/LOUOSKRNL.exe
 
 
 
@@ -188,9 +186,6 @@ KernelModules:
 
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C boot/x86_64 all
-
-	$(MAKE) -C EXE/LouLoad clean
-	$(MAKE) -C EXE/LouLoad all
 
 UserSpace:
 	$(MAKE) -C UserLibraries/LouDll clean
@@ -279,7 +274,6 @@ cleanall:
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaInit clean
-	$(MAKE) -C EXE/LouLoad clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean

@@ -1,4 +1,3 @@
-default rel
 
 global Write16BitValueToAddress
 global Get16BitValueFromAddress

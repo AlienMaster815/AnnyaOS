@@ -56,6 +56,41 @@ start:
     lgdt [gdt64.pointer]           ; Load the GDT
     jmp gdt64.code_segment:long_mode_start ; Jump to 64-bit mode
 
+check_cpuid:
+    pushfd
+    pop eax
+    mov ecx, eax
+    xor eax, 1 << 21
+    push eax
+    popfd
+    pushfd
+    pop eax
+    push ecx
+    popfd
+    cmp eax, ecx
+    je .no_cpuid
+    ret
+.no_cpuid:
+    mov al, "C"
+    jmp error
+
+check_long_mode:
+    mov eax, 0x80000001
+    cpuid
+    test edx, 1 << 29
+    jz .no_long_mode
+    ret
+.no_long_mode:
+    mov al, "L"
+    jmp error
+
+error:
+    ; Print "ERR: X" where X is the error code
+    mov dword [0xb8000], 0x4f524f45
+    mov dword [0xb8004], 0x4f3a4f52
+    mov dword [0xb8008], 0x4f204f20
+    mov byte  [0xb800a], al
+    hlt
 
 section .bss
 align 4096
@@ -137,90 +172,25 @@ LouKeGetBspStackBottom:
 
 global LoadTaskRegister
 
+global InstallGDT
 
+InstallGDT:
+    lgdt [rcx]
+    mov ax, 0x30
+    ltr ax
+    push 0x08
+    lea rax, [rel .reload_CS]
+    push rax   
+    retfq
+
+.reload_CS:
+    mov   ax, 0x10
+    mov   ds, ax
+    mov   es, ax
+    mov   fs, ax
+    mov   gs, ax
+    mov   ss, ax
+    ret
     
 no_xsave:
     hlt    
-
-bits 32
-section .text
-
-global SetUpPages
-global enable_paging
-global clear_cr2
-
-extern page_table_l4
-extern page_table_l3
-extern page_table_l2
-
-SetUpPages:
-    mov eax, page_table_l3
-    or eax, 0b111
-    mov [page_table_l4], eax
-
-    mov eax, page_table_l2
-    or eax, 0b111
-    mov [page_table_l3], eax
-
-    mov ecx, 0
-    .loop: 
-
-        mov eax, 0x200000
-        mul ecx
-        or eax, 0b10000011
-        mov [page_table_l2 + ecx * 8], eax
-        inc ecx
-        cmp ecx, 512
-        jne .loop
-    ret
-
-enable_paging:
-    ; pass page table location to cpu
-
-    mov eax, page_table_l4
-    mov cr3, eax
-
-    ; enable PAE
-    mov eax, cr4
-    or eax, 1 << 5
-    mov cr4, eax
-
-    ; enable long mode
-    mov ecx, 0xC0000080
-    rdmsr
-    or eax, 1 << 8
-    wrmsr
-
-    ; enable paging
-    mov eax, cr0
-    or eax, 1 << 31
-    mov cr0, eax
-
-    ret
-
-bits 32
-
-section .bss
-align 4096
-page_table_l4:
-    resq  512      ; Allocate space for the L4 table (PML4), containing one entry
-page_table_l3:
-    resq 512   ; 1024 entries for the L3 table (PDPT)
-page_table_l2:
-    resq  512; 524288 entries for the L2 table (PDT)
-
-
-global page_table_l4
-global page_table_l3  
-global page_table_l2
-
-
-section .text.trampoline
-global WakeTheFuckUpBoys
-extern page_table_l4
-extern gdt64
-
-WakeTheFuckUpBoys:
-
-
-WakeTheFuckUpBoysEnd:

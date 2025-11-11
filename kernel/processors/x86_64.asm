@@ -1,7 +1,3 @@
-bits 64
-default rel
-
-
 global SetUpSmpPageing
 
 global StoreAdvancedRegisters
@@ -69,10 +65,12 @@ align 16
 
 section .text
     global init_fpu
+    global WakeTheFuckUpBoys
+    global getTrampolineAddress
     extern fpu_control_word
     extern  GetIdtAsmTailCall
     extern  GetGdtAsmTailCall
-
+    global GetWakeTheFuckUpBoysEnd
 
 extern TURN_FPU_ON
 
@@ -84,8 +82,26 @@ init_fpu:
     call TURN_FPU_ON
     ret
 
+[BITS 32]
+section .text.trampoline
+global WakeTheFuckUpBoys
+extern page_table_l4
+extern gdt64
 
+WakeTheFuckUpBoys:
+
+
+WakeTheFuckUpBoysEnd:
 [BITS 64]
+
+getTrampolineAddress:
+    mov rax, WakeTheFuckUpBoys
+    ret
+
+GetWakeTheFuckUpBoysEnd:
+    mov rax, WakeTheFuckUpBoysEnd
+    ret
+
 
 GetCr4:
     mov rax, cr4
@@ -137,24 +153,4 @@ GetPEB:
 
 GetGSValue:
     mov rax, qword[gs:rcx]
-    ret
-
-global InstallGDT
-
-InstallGDT:
-    lgdt [rcx]
-    mov ax, 0x30
-    ltr ax
-    push 0x08
-    lea rax, [rel .reload_CS]
-    push rax   
-    retfq
-
-.reload_CS:
-    mov   ax, 0x10
-    mov   ds, ax
-    mov   es, ax
-    mov   fs, ax
-    mov   gs, ax
-    mov   ss, ax
     ret

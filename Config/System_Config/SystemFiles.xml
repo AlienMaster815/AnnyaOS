@@ -10,7 +10,6 @@
         <FILETOCPY64>cp /usr/local/share/limine/limine-bios-cd.bin ISO/</FILETOCPY64>                                       <!--limine Torino MBR-->
         <FILETOCPY64>cp /usr/local/share/limine/limine-uefi-cd.bin ISO/</FILETOCPY64>                                       <!--limine EFI Partition-->
         <FILETOCPY64>cp /usr/local/share/limine/BOOTX64.EFI ISO/EFI/BOOT</FILETOCPY64>  
-        <FILETOCPY64>cp EXE/LouLoad/LOULOAD.EXE ISO/ANNYA/SYSTEM64/LOULOAD.EXE</FILETOCPY64>  
         <!--THEE KERNEL-->
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
         <!--Smp Trampoline-->

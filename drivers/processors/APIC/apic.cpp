@@ -565,7 +565,6 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
     UINT64 ApicBase = LouKeGetCurrentApicBase();
     UINT32 CpuID = CpuInfo->ProcID;
     UINT32 ApicID = CpuInfo->ApicID;
-    LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, TrackMember);
     
     if(CpuID > 0xFF){
         return;

@@ -1,6 +1,5 @@
 Bits 64
 
-default rel
 
 section .data
 
