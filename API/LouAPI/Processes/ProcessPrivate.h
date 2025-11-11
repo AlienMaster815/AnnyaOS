@@ -52,7 +52,7 @@ typedef struct _THREAD_CONTEXT_MANAGR_BLOCK{
 
 #define IS_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] &  (1u << ((Processor) % 8)))
 #define MARK_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] |=  (1u << ((Processor) % 8)))
-#define UNMARK_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] &=  ~(1u << ((Processor) % 8)))
+#define UNMARK_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] &=  (1u << ((Processor) % 8)))
 
 typedef enum {
     LONG_MODE       = 0,

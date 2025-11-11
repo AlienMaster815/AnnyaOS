@@ -1,11 +1,17 @@
 #include "ProcessPrivate.h"
 
 
-LOUDDK_API_ENTRY VOID LouKeDestroyDemon(PVOID ThreadHandle);
+LOUDDK_API_ENTRY VOID LouKeDestroyDemon(PVOID ThreadHandle) {
+    
+
+
+    //Endof SystemCall
+}
+
 
 static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
     int Result = Thread(FunctionParam);
-    LouPrint("Demon:%h Exited With Code:%d\n", ((PDEMON_THREAD_RING)ThreadHandle)->DemonData.ThreadID, Result);
+    LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
     LouKeDestroyDemon(ThreadHandle);
     while(1);
 }
@@ -54,7 +60,7 @@ LouKeCreateDeferedDemonEx(
         memcpy(&NewThread->DemonData.BlockTimeout, UnblockTime, sizeof(TIME_T));
     }
 
-    LouPrint("Demon Created With ID:%d\n", NewThread->DemonData.ThreadID);
+    //LouPrint("Demon Handle:%h\nStack Top:%h\nStack Base:%h\nCurrentState:%h\n", NewThread, NewThread->DemonData.StackTop, NewThread->DemonData.StackBase, (UINT64)NewThread->DemonData.CurrentState );
 
     return (PTHREAD)NewThread;
 }
