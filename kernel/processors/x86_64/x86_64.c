@@ -214,28 +214,9 @@ extern void WakeTheFuckUpBoys();
 
 
 
-extern uint64_t GetSmpBase();
-
-void WakeTheFuckUpBoysTailCall(){
-}
-
 uint64_t getTrampolineAddress();
 
-uint64_t getTrampolineAddressTailCall(){
-   return GetSmpBase();
-}
 
-extern uint64_t GetWakeTheFuckUpBoysEnd();
-
-uint64_t GetWakeTheFuckUpBoysEndTailCall(){
-    return GetWakeTheFuckUpBoysEnd();
-}
-
-extern uint64_t CheckApCompletionTailCall();
-
-uint64_t CheckApCompletion(){   
-    return CheckApCompletionTailCall();
-}
 
 
 

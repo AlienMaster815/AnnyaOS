@@ -1,5 +1,6 @@
 section .text
 [bits 64]
+default rel
 
 global enable_sse
 

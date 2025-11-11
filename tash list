@@ -1,0 +1,20 @@
+[33m8efe010[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: revert: Revert "mid day push"
+[33m3715454[m HEAD@{1}: reset: moving to HEAD
+[33m3715454[m HEAD@{2}: commit: mid day push
+[33me441536[m HEAD@{3}: commit: smp bugfix
+[33m4f70fdb[m HEAD@{4}: commit: queue and thread updates
+[33mce5ab81[m HEAD@{5}: commit: Queue cleanup
+[33mb7a9af5[m HEAD@{6}: commit: Process Manager Update
+[33mdb44089[m HEAD@{7}: commit: Ap Initialization Update
+[33mc3e3d1f[m HEAD@{8}: commit: Ohci update
+[33m2e93c54[m HEAD@{9}: commit: USB Update
+[33m9e90b4d[m HEAD@{10}: commit: USB update
+[33m5534f5c[m HEAD@{11}: pull --ff --recurse-submodules --progress origin: Fast-forward
+[33mccadb2f[m HEAD@{12}: pull --ff --recurse-submodules --progress origin: Merge made by the 'ort' strategy.
+[33mc3ccbe6[m HEAD@{13}: commit: Morning update
+[33m3d25671[m HEAD@{14}: commit: end of weekend push
+[33mca472eb[m HEAD@{15}: commit: Compiler Update
+[33m9527786[m HEAD@{16}: commit: Saturday Update
+[33mb598ae2[m HEAD@{17}: commit: Data Type Update
+[33mf94d8f0[m HEAD@{18}: commit: data type update
+[33mb5f5d0e[m HEAD@{19}: pull --ff --recurse-submodules --progress origin: Fast-forward

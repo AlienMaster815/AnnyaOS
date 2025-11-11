@@ -9,13 +9,14 @@ GetCurrentCpuTrackMember();
 
 uint16_t GetNPROC();
 
+PML* GetPageBase();
+
 static mutex_t* TrampolineLock;
 static UINT64* TrampolineStack;
 static UINT64* FunctionAddress;
 static UINT64* GlobalParkFunction;
 static UINT64* Pml4Address;
 static INTEGER Bsp = 0;
-extern UINT64 page_table_l4;
 UNUSED static bool SmpBootInitialized = false;
 
 bool LouKeIsCpuBroken(INTEGER Cpu);
@@ -90,7 +91,7 @@ void LouKeLoadLousineBootTrampoline(){
     GlobalParkFunction = (UINT64*)0x7018;
     TrampolineLock = (mutex_t*)(UINT64)0x7020;
 
-    *Pml4Address     = (UINT64)&page_table_l4;
+    *Pml4Address     = (UINT64)GetPageBase();
     *FunctionAddress = (UINT64)LouKeSmpWakeFunction; 
 
     //*TrampolineStack = (UINT64)(LouKeMallocPhysicalEx(16 * KILOBYTE, 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16)); 
