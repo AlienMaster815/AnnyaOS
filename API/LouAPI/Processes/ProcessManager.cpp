@@ -32,13 +32,13 @@ static INTEGER AllocateDemonId(PVOID ThreadHandle){
     size_t Index = 0;
     while(1){
         Result = LouKeAcquireIdFromRange(Range->IdRange, ThreadHandle);
+        Index++;
         if(Result != (INTEGER)-1){
             return Result;
         }
         else if(!Range->Peers.NextHeader){
             break;
         }
-        Index++;
         Range = (PPM_ID_RANGE_POOL)Range->Peers.NextHeader;
     }
     if(Result == (INTEGER)-1){
@@ -48,6 +48,19 @@ static INTEGER AllocateDemonId(PVOID ThreadHandle){
     }
     Result = LouKeAcquireIdFromRange(Range->IdRange, ThreadHandle);
     return Result;
+}
+
+UNUSED static void FreeDemonId(
+    PDEMON_THREAD_RING ThreadHandle
+){
+    INTEGER RangeIndex = (ThreadHandle->DemonData.ThreadID / (ProcessBlock.ProcessorCount + 1));
+    PPM_ID_RANGE_POOL Range = &ProcessBlock.DemonIDPool;
+
+    for(INTEGER i = 0 ; i < RangeIndex; i++){
+        Range = (PPM_ID_RANGE_POOL)Range->Peers.NextHeader;
+    }
+
+    LouKeReleaseIdFromRange(Range->IdRange, ThreadHandle->DemonData.ThreadID);
 }
 
 PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(){
@@ -89,6 +102,42 @@ PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(){
     return NewThread;
 }
 
+static spinlock_t DestructoLock = {0};
+
+LOUDDK_API_ENTRY VOID LouKeDestroyDemon(PVOID ThreadHandle){
+
+    UNUSED PDEMON_THREAD_RING Thread = (PDEMON_THREAD_RING)ThreadHandle;
+    LouKIRQL Irql;
+    Thread->DemonData.State = THREAD_BLOCKED;
+    LouKeAcquireSpinLock(&DestructoLock, &Irql);
+    MutexLock(&ProcessBlock.LockOutTagOut);
+    PDEMON_THREAD_RING Last, Next;
+
+    Last = (PDEMON_THREAD_RING)Thread->Peers.LastHeader;
+    Next = (PDEMON_THREAD_RING)Thread->Peers.NextHeader;
+
+    Last->Peers.NextHeader = (PListHeader)Next;
+    Next->Peers.LastHeader = (PListHeader)Last;
+    
+    if(LouKeGetThreadIdentification() != Thread->DemonData.ThreadID){
+        while(Thread->DemonData.State == THREAD_RUNNING){
+            LouKeMemoryBarrier();
+        }
+    }
+
+    FreeDemonId(Thread);
+
+    LouKeFree(Thread->DemonData.AfinityBitmap);
+    LouKeFreePhysical((PVOID)Thread->DemonData.ContextStorage);
+    LouKeFreePhysical((PVOID)Thread->DemonData.InterruptStorage);
+    LouKeFree(Thread);
+
+    MutexUnlock(&ProcessBlock.LockOutTagOut);
+    LouKeReleaseSpinLock(&DestructoLock, &Irql);
+    asm ("INT $200");
+    //Endof SystemCall
+}
+
 static bool AbortTaskSwap(INTEGER ProcessorID){
     if((MutexIsLocked(&ProcessBlock.ProcStateBlock[ProcessorID].LockOutTagOut) || (LouKeGetIrql() == HIGH_LEVEL))){
         return true;
@@ -105,6 +154,9 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
     PDEMON_THREAD_RING TmpRing = 0x00;
     PDEMON_THREAD_RING CurrentRing = TmpRing; 
 
+    if(MutexIsLocked(&ProcessBlock.LockOutTagOut)){
+        goto _SCHEDUALR_FINISHED;
+    }
 
     if( //if in a demon and a processor ring exist check for a process
         (LouKeCheckAtomicBoolean(&ProcessBlock.ProcStateBlock[ProcessorID].RingSelector)) && 
@@ -118,6 +170,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         while(1);
 
     }else{
+
         CurrentRing = ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemon;
 
         if(CurrentRing->DemonData.CurrentMsSlice < CurrentRing->DemonData.TotalMsSlice){
@@ -143,6 +196,8 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
                     memset(&TmpRing->DemonData.BlockTimeout, 0, sizeof(TIME_T));
                     TmpRing->DemonData.State = THREAD_READY;
                 }
+
+
                 
                 if((TmpRing->DemonData.State == THREAD_READY) && (IS_PROCESSOR_AFFILIATED(TmpRing->DemonData.AfinityBitmap, ProcessorID))){
                     break;
@@ -155,16 +210,17 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
             goto _SCHEDUALR_FINISHED;
         }
             
+
         LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true); 
         TmpRing->DemonData.Cpu = ProcessorID;       
+        CurrentRing->DemonData.State = THREAD_READY;
+        TmpRing->DemonData.State = THREAD_RUNNING;
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentInterruptStorage = TmpRing->DemonData.InterruptStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage = TmpRing->DemonData.ContextStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID = TmpRing->DemonData.ThreadID;
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemon = TmpRing;
 
     }
-
-
 
     _SCHEDUALR_FINISHED:
     LouKeMemoryBarrier();
@@ -182,7 +238,7 @@ UNUSED static void ProcessorIdleTask(){
     LouPrint("AP Now Idleing\n");
     MutexSynchronize(&CoreIrqReadyLock);
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    LouPrint("AP Interrupts Enabled\n");
+    //LouPrint("AP Interrupts Enabled\n");
     while(1){
 
     }
@@ -221,7 +277,7 @@ UNUSED static void InitializeIdleProcess(){
     LouPrint("AP Now Idleing\n");
     MutexSynchronize(&CoreIrqReadyLock);
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    LouPrint("AP Interrupts Enabled\n");
+    //LouPrint("AP Interrupts Enabled\n");
     while(1){
 
     }
@@ -302,7 +358,7 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
 
 LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
 
-
-
+    LouPrint("LouKeYeildExecution() Was Called\n");
+    while(1);
     return CpuCurrentState;
 }
