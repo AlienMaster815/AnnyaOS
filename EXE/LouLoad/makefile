@@ -1,22 +1,24 @@
 
-loader_asm_source_files := $(shell find ../LouLoad -name *.asm)
-loader_asm_object_files := $(patsubst ../LouLoad/%.asm, build/loaderasm/%.o, $(loader_asm_source_files))
+loader_asm_object_files := $(shell find Source -name *.asm)
+loader_asm_object_files := $(patsubst Source/%.asm, build/kernelasm/%.o, $(loader_asm_object_files))
 
 NASM_COMPILE_FLAGS = elf64
 
 LD = ld
 
-$(loader_asm_object_files): $(loader_asm_source_files)
+TARGET = LOULOAD.EXE
+
+$(loader_asm_object_files): build/kernelasm/%.o : Source/%.asm
 	mkdir -p $(dir $@) && \
-	nasm -f $(NASM_COMPILE_FLAGS) $(loader_asm_source_files) -o $@
+	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/kernelasm/%.o, Source/%.asm, $@) -o $@
 
 
-LOADER_OBJECTS = $(loader_asm_object_files)
+LOADER_OBJECTS := $(loader_asm_object_files)
 
 all: $(LOADER_OBJECTS)
-	$(LD) -n -o LOULOAD.EXE -T linker.ld $(LOADER_OBJECTS)
+	$(LD) -n -o $(TARGET) -T linker.ld $(LOADER_OBJECTS)
 	rm -rf build
 
 clean:
 	rm -rf build
-	rm LOULOAD.EXE
+	rm -f $(TARGET)

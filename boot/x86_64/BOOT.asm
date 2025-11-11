@@ -56,41 +56,6 @@ start:
     lgdt [gdt64.pointer]           ; Load the GDT
     jmp gdt64.code_segment:long_mode_start ; Jump to 64-bit mode
 
-check_cpuid:
-    pushfd
-    pop eax
-    mov ecx, eax
-    xor eax, 1 << 21
-    push eax
-    popfd
-    pushfd
-    pop eax
-    push ecx
-    popfd
-    cmp eax, ecx
-    je .no_cpuid
-    ret
-.no_cpuid:
-    mov al, "C"
-    jmp error
-
-check_long_mode:
-    mov eax, 0x80000001
-    cpuid
-    test edx, 1 << 29
-    jz .no_long_mode
-    ret
-.no_long_mode:
-    mov al, "L"
-    jmp error
-
-error:
-    ; Print "ERR: X" where X is the error code
-    mov dword [0xb8000], 0x4f524f45
-    mov dword [0xb8004], 0x4f3a4f52
-    mov dword [0xb8008], 0x4f204f20
-    mov byte  [0xb800a], al
-    hlt
 
 section .bss
 align 4096
