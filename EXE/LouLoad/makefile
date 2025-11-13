@@ -1,8 +1,7 @@
-
-loader_asm_source_files := $(shell find ../LouLoad -name *.asm)
+loader_asm_source_files := $(shell find ../LouLoad -name "*.asm")
 loader_asm_object_files := $(patsubst ../LouLoad/%.asm, build/loaderasm/%.o, $(loader_asm_source_files))
 
-loader_source_files := $(shell find ../LouLoad -name *.c)
+loader_source_files := $(shell find ../LouLoad -name "*.c")
 loader_object_files := $(patsubst ../LouLoad/%.c, build/LoaderC/%.o, $(loader_source_files))
 
 INCLUDE = -I ../../include 
