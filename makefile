@@ -278,6 +278,7 @@ cleanall:
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C EXE/AnnyaExp clean
 	$(MAKE) -C EXE/AnnyaInit clean
+	$(MAKE) -C EXE/LouLoad clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean

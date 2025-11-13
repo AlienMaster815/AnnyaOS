@@ -12,6 +12,7 @@ $(loader_asm_object_files): $(loader_asm_source_files)
 
 
 LOADER_OBJECTS = $(loader_asm_object_files)
+TARGET = LOULOAD.EXE
 
 all: $(LOADER_OBJECTS)
 	$(LD) -n -o LOULOAD.EXE -T linker.ld $(LOADER_OBJECTS)
@@ -19,4 +20,4 @@ all: $(LOADER_OBJECTS)
 
 clean:
 	rm -rf build
-	rm LOULOAD.EXE
+	rm -f $(TARGET)
