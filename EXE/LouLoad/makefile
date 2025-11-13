@@ -2,16 +2,28 @@
 loader_asm_source_files := $(shell find ../LouLoad -name *.asm)
 loader_asm_object_files := $(patsubst ../LouLoad/%.asm, build/loaderasm/%.o, $(loader_asm_source_files))
 
+loader_source_files := $(shell find ../LouLoad -name *.c)
+loader_object_files := $(patsubst ../LouLoad/%.c, build/LoaderC/%.o, $(loader_source_files))
+
+INCLUDE = -I ../../include 
+
+CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
+         -fno-omit-frame-pointer -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
+         -fstrict-aliasing $(INCLUDE)
+
 NASM_COMPILE_FLAGS = elf64
 
 LD = ld
 
-$(loader_asm_object_files): $(loader_asm_source_files)
-	mkdir -p $(dir $@) && \
-	nasm -f $(NASM_COMPILE_FLAGS) $(loader_asm_source_files) -o $@
+build/loaderasm/%.o: ../LouLoad/%.asm
+	mkdir -p $(dir $@)
+	nasm -f $(NASM_COMPILE_FLAGS) $< -o $@
 
+build/LoaderC/%.o: ../LouLoad/%.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-LOADER_OBJECTS = $(loader_asm_object_files)
+LOADER_OBJECTS := $(loader_asm_object_files) $(loader_object_files)
 TARGET = LOULOAD.EXE
 
 all: $(LOADER_OBJECTS)

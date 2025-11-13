@@ -43,7 +43,7 @@ LouLoaderCheckCpuID:
     cmp eax, ecx
     je .NoCpuID
     ret 
-.NoCpuID
+.NoCpuID:
     mov al, "C"
     jmp LouLoaderSetupError
 
@@ -123,7 +123,9 @@ LouLoaderSetupError:
     mov dword [0xb8008], 0x4f204f20
     mov byte  [0xb800a], al
     hlt
+    jmp $
 
+section .note.GNU-stack progbits ;dear gnu, fuck you
 section .bss
 align 4096
 LoaderStackBottom:
@@ -157,6 +159,9 @@ gdt64:
     dq gdt64                  ; GDT base address
 
 bits 64
+
+extern LouLoaderStart
+
 section .text
 
 LouLoaderLongModeTrampoline:
@@ -168,6 +173,9 @@ LouLoaderLongModeTrampoline:
     mov gs, ax
     mov ss, ax
 
-    
+    mov rcx, [MulitibootInfo]    
+    mov rdx, rbp
 
+    call LouLoaderStart
+    
     jmp $

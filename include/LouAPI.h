@@ -55,6 +55,7 @@
 #include <FileHandleing/Coff.h>
 #include <drivers/Processors.h>
 #include <Coff.h>
+#include <LouLoad.h>
 
 #ifndef _KERNEL_MODULE_
 
