@@ -6,13 +6,14 @@ loader_object_files := $(patsubst ../LouLoad/%.c, build/LoaderC/%.o, $(loader_so
 
 INCLUDE = -I ../../include 
 
-CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
+CFLAGS = -m64 -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
          -fstrict-aliasing $(INCLUDE)
 
 NASM_COMPILE_FLAGS = elf64
 
 LD = ld
+CC = x86_64-w64-mingw32-gcc
 
 build/loaderasm/%.o: ../LouLoad/%.asm
 	mkdir -p $(dir $@)
@@ -26,9 +27,11 @@ LOADER_OBJECTS := $(loader_asm_object_files) $(loader_object_files)
 TARGET = LOULOAD.EXE
 
 all: $(LOADER_OBJECTS)
-	$(LD) -n -o LOULOAD.EXE -T linker.ld $(LOADER_OBJECTS)
+	$(LD) -n -o LOULOAD.bin -T linker.ld $(LOADER_OBJECTS)
+	cp LOULOAD.bin $(TARGET)
 	rm -rf build
 
 clean:
 	rm -rf build
+	rm -f LOULOAD.bin
 	rm -f $(TARGET)

@@ -23,11 +23,12 @@ MBOOTEND:
 ;======================================================================
 
 section .data
-MulitibootInfo dd 0
 
 section .text
 
 global LouLoaderSetup
+
+MulitibootInfo dd 0
 
 LouLoaderCheckCpuID:
     pushfd
@@ -103,8 +104,10 @@ LouLoaderEnableLoaderPages:
 
 
 LouLoaderSetup:
-    mov esp, LoaderStackTop
+
     mov [MulitibootInfo], ebx
+    mov ebp, LoaderStackTop
+    mov esp, ebp
     
     call LouLoaderCheckCpuID
     call LouLoaderCheckLongMode
@@ -128,17 +131,16 @@ LouLoaderSetupError:
 section .note.GNU-stack progbits ;dear gnu, fuck you
 section .bss
 align 4096
-LoaderStackBottom:
-    resb    16 * 1024
-LoaderStackTop:
-align 4096
 LoaderPageL4:
     resq 512
 LoaderPageL3:
     resq 512
 LoaderPageL2:
     resq 512
-
+LoaderStackBottom:
+    resb    16 * 1024
+LoaderStackTop:
+    resq    2 ;mingw is trying to access the 8 bytes above the stack
 
 section .rodata
 gdt64:
@@ -173,7 +175,10 @@ LouLoaderLongModeTrampoline:
     mov gs, ax
     mov ss, ax
 
-    mov rcx, [MulitibootInfo]    
+    xor rcx, rcx
+    xor rdx, rdx
+
+    mov ecx, [MulitibootInfo]    
     mov rdx, rbp
 
     call LouLoaderStart
