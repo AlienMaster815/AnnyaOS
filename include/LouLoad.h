@@ -12,6 +12,9 @@
 #define ROUND_UP64(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 #endif
 
 typedef uint8_t     UINT8, BYTE;
@@ -32,12 +35,39 @@ typedef struct _LOUSINE_KERNEL_VM_TABLE{
     UINT64      KernelVmLimit;
 }LOUSINE_KERNEL_VM_TABLE, * PLOUSINE_KERNEL_VM_TABLE;
 
+typedef struct _LOUSINE_RAT_PARTITION{
+    UINT64      RamMap;
+    UINT64      BootPartition;
+    UINT16      PartitionItems;
+}LOUSINE_RAT_PARTITION, * PLOUSINE_RAT_PARTITION;
+
+typedef struct _LOULOAD_MEMORY_TRACKER{
+    UINT64 Address;
+    UINT64 size;
+}LOULOAD_MEMORY_TRACKER, * PLOULOAD_MEMORY_TRACKER;
+
+typedef struct _LOUSINE_FIRWARE_INFO{
+    UINT64 RamMap;
+    UINT64 EfiTable;
+    UINT64 Smbios;
+    UINT64 Rsdp;
+    UINT64 Rsdp2;
+    UINT64 Vbe;
+    UINT64 Apm;
+    UINT64 Framebuffer;
+    UINT64 EfiMap;
+}LOUSINE_FIRWARE_INFO, * PLOUSINE_FIRWARE_INFO;
+
 typedef struct _LOUSINE_LOADER_INFO{
     UINT64                      KernelBase;
     UINT64                      KernelLimit;    
     UINT64                      MultibootInfo;
     UINT64                      BootStack;
+    UINT64                      KernelTag;
+    UINT64                      RegistryTag;
     LOUSINE_KERNEL_VM_TABLE     KernelVm;
+    LOUSINE_RAT_PARTITION       RatPartition;
+    LOUSINE_FIRWARE_INFO        FirmwareInfo;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
 
