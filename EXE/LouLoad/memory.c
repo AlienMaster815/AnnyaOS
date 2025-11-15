@@ -1,5 +1,4 @@
 #include <LouLoad.h>
-#include <LoaderPrivate.h>
 
 void 
 memset(
@@ -12,16 +11,23 @@ memset(
     }
 }
 
-int 
-memcmp(
-    void*   pSource1,
-    void*   pSource2,
-    size_t  Count
-){
-    UINT8* Source1 = (UINT8*)pSource1;
-    UINT8* Source2 = (UINT8*)pSource2;
-    size_t i = 0;
-    for(; i < Count && Source1[i] == Source2[i]; i++);
-    return Source1[i] - Source2[i];
+
+//memcmp from ACPICA see /AnnyaOS/kernel/Firmware/ACPICA/utilities/utclib.c
+int
+memcmp (
+    void                    *VBuffer1,
+    void                    *VBuffer2,
+    UINT64                  Count)
+{
+    char                    *Buffer1 = (char *) VBuffer1;
+    char                    *Buffer2 = (char *) VBuffer2;
+
+
+    for ( ; Count-- && (*Buffer1 == *Buffer2); Buffer1++, Buffer2++)
+    {
+    }
+
+    return ((Count == 0xFFFFFFFFFFFFFFFF) ? 0 : ((unsigned char) *Buffer1 -
+        (unsigned char) *Buffer2));
 }
 

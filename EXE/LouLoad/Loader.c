@@ -5,7 +5,9 @@ LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
 extern LOULOAD_MEMORY_TRACKER MemoryTracker[512];
 
-static void ReserveKernelMemory(UINT64 KernelTag){
+void ReserveKernelMemory(struct multiboot_tag* KernelTag){
+    struct multiboot_tag_module* KernelMod = (struct multiboot_tag_module*)KernelTag; 
+    UNUSED PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader((UINT8*)(UINT64)KernelMod->mod_start);
 
     
 
@@ -22,7 +24,7 @@ extern void LouLoaderStart(
 
     InitializeLoaderMultibootInformation(mboot);
 
-    ReserveKernelMemory(KernelLoaderInfo.KernelTag);
+    ReserveKernelMemory((struct multiboot_tag*)KernelLoaderInfo.KernelTag);
 
     while(1);
 }

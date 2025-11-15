@@ -18,7 +18,7 @@ void InitializeModuleForLoading(
             KernelLoaderInfo.RegistryTag = (UINT64)Module;
         }
     }   
-    struct multiboot_tag_module *mod = (struct multiboot_tag_module *)Module;
+    struct multiboot_tag_module* mod = (struct multiboot_tag_module*)Module;
     EnforceLoaderMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
     Counter++;
 }
