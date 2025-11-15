@@ -4,11 +4,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #ifndef __cplusplus
 
 #define UNUSED __attribute__((unused))
-
+#define PACKED __attribute__((packed))
 #define ROUND_UP64(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))
 
@@ -17,10 +18,20 @@
 
 #endif
 
+#define NTAPI __stdcall //copied over from wines winnt.h see /AnnyaOS/include/WinAPI/Win32/winnt.h
+
+
+typedef void* PVOID;
+typedef unsigned short USHORT;
+typedef wchar_t*       LPWSTR;
+
+typedef char        CHAR;
 typedef uint8_t     UINT8, BYTE;
 typedef uint16_t    UINT16;
 typedef uint32_t    UINT32;
 typedef uint64_t    UINT64;
+
+typedef uintptr_t   UINTPTR;
 
 typedef bool BOOL;
 typedef BYTE BOOLEAN;

@@ -1,11 +1,10 @@
 #include <LouLoad.h>
-#include <bootloader/grub/multiboot2.h>
+#include <LoaderPrivate.h>
 
 
 LOULOAD_MEMORY_TRACKER MemoryTracker[512] = {0};
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
-
 
 
 static inline
@@ -67,11 +66,26 @@ EnforceLoaderMemoryMap(
     
 }
 
+#define MapIndexToEntry(Map, Index) ((struct multiboot_mmap_entry*)(UINTPTR)((UINT64)Map + (UINT64)sizeof(struct master_multiboot_mmap_entry) + (UINT64)Index + (UINT64)Map->entry_size))
+
 void ParseRamMap(
     struct multiboot_tag* RamMap
 ){
+    struct master_multiboot_mmap_entry* mmap = (struct master_multiboot_mmap_entry*)RamMap;
+    UINT16  EntryCount = (mmap->tag.size - sizeof(struct master_multiboot_mmap_entry)) / mmap->entry_size;
 
-    //struct master_multiboot_mmap_entry* mmap = (struct master_multiboot_mmap_entry*)MBOOT;
+    struct multiboot_mmap_entry* MapEntry;
+    for(UINT16 i = 0 ; i < EntryCount; i++){
+        MapEntry = MapIndexToEntry(mmap, i);
+        switch(MapEntry->type){
 
+            case 1:
+                break;
+            
+            default:
+                EnforceLoaderMemoryMap(MapEntry->addr, MapEntry->len);
+                break;
+        }
+    }
 
 }

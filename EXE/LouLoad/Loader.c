@@ -1,14 +1,15 @@
 #include <LouLoad.h>
-#include <bootloader/grub/multiboot2.h>
-
-
-void InitializeLoaderMultibootInformation(struct multiboot_tag* MBoot);
-int memcmp(void* pSource1, void* pSource2, size_t Count);
-void memset(void* pDestination, size_t Count);
+#include <LoaderPrivate.h>
 
 LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
 extern LOULOAD_MEMORY_TRACKER MemoryTracker[512];
+
+static void ReserveKernelMemory(UINT64 KernelTag){
+
+    
+
+}
 
 extern void LouLoaderStart(
     UINT64 MBoot,
@@ -21,6 +22,7 @@ extern void LouLoaderStart(
 
     InitializeLoaderMultibootInformation(mboot);
 
+    ReserveKernelMemory(KernelLoaderInfo.KernelTag);
 
     while(1);
 }

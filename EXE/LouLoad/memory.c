@@ -1,4 +1,5 @@
 #include <LouLoad.h>
+#include <LoaderPrivate.h>
 
 void 
 memset(

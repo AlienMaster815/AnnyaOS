@@ -4,7 +4,7 @@ loader_asm_object_files := $(patsubst ../LouLoad/%.asm, build/loaderasm/%.o, $(l
 loader_source_files := $(shell find ../LouLoad -name "*.c")
 loader_object_files := $(patsubst ../LouLoad/%.c, build/LoaderC/%.o, $(loader_source_files))
 
-INCLUDE = -I ../../include 
+INCLUDE = -I ../../include -I ../LouLoad
 
 CFLAGS = -m64 -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -fno-common -fno-builtin -fno-asynchronous-unwind-tables \

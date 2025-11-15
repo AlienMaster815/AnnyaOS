@@ -299,6 +299,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     uint32_t MBOOT
 ){    
  
+    while(1);
     struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
     ParseMBootTags(mboot);
     InitializeBasicMemcpy();

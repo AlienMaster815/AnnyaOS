@@ -1,11 +1,15 @@
 #ifndef _COFF_H
 #define _COFF_H
 
+#ifdef _LOUSINE_LOADER
+#include <LouLoad.h>
+#else
 #ifndef __cplusplus
 #include <LouAPI.h>
 #else
 #include <LouDDK.h>
 extern "C"{
+#endif
 #endif
 
 #define COFF_PE_SIGNATURE "PE\0\0"
@@ -712,6 +716,7 @@ typedef struct _CFI_IMPORT_HEADER{
 #define CFI_IMPORT_NAME_TYPE_NOPREFIX   2
 #define CFI_IMPORT_NAME_TYPE_UNDECORATE 3
 
+#ifndef _LOUSINE_LOADER
 typedef struct _CFI_OBJECT{
     FILE*                   CoffFile;
     string                  FormalName;
@@ -740,8 +745,11 @@ LouKeLoadCoffImageA(
     PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 );
+#endif
 
+#ifndef _LOUSINE_LOADER
 #ifdef __cplusplus
 }
+#endif
 #endif
 #endif

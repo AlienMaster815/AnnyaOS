@@ -1,5 +1,5 @@
 #include <LouLoad.h>
-#include <bootloader/grub/multiboot2.h>
+#include <LoaderPrivate.h>
 
 static UINT8 Counter = 0;
 
@@ -18,6 +18,8 @@ void InitializeModuleForLoading(
             KernelLoaderInfo.RegistryTag = (UINT64)Module;
         }
     }   
-    
+    struct multiboot_tag_module *mod = (struct multiboot_tag_module *)Module;
+    EnforceLoaderMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
     Counter++;
 }
+

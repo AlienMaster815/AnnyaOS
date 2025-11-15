@@ -1,21 +1,8 @@
 #include <LouLoad.h>
-#include <bootloader/grub/multiboot2.h>
+#include <LoaderPrivate.h>
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 
-void 
-EnforceLoaderMemoryMap(
-    UINT64  Address,
-    UINT64  size
-);
-
-void InitializeModuleForLoading(
-    struct multiboot_tag* Module
-);
-
-void ParseRamMap(
-    struct multiboot_tag* RamMap
-);
 
 void 
 InitializeLoaderMultibootInformation(
