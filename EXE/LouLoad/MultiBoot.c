@@ -8,15 +8,14 @@ void
 InitializeLoaderMultibootInformation(
     struct multiboot_tag* MBoot
 ){
-    struct multiboot_tag* RamMap;
 
     while (MBoot->type != 0) {
         // Check if tag is memory map tag
         EnforceLoaderMemoryMap((uint64_t)MBoot, MBoot->size);
         switch (MBoot->type) {
         case(MULTIBOOT_TAG_TYPE_MMAP):{
-            RamMap = MBoot;
-            KernelLoaderInfo.FirmwareInfo.RamMap = (UINT64)RamMap;
+            ParseRamMap(MBoot);
+            KernelLoaderInfo.RatPartition.RamMap = (UINT64)(UINT8*)MBoot;
             break;
         }
         case(MULTIBOOT_TAG_TYPE_EFI64):{
@@ -69,6 +68,7 @@ InitializeLoaderMultibootInformation(
         }
     }
 
-    ParseRamMap(RamMap);
+    
+
 
 }

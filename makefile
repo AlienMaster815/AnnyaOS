@@ -44,7 +44,8 @@ CP = x86_64-w64-mingw32-g++
 LD = x86_64-w64-mingw32-ld --entry=LouOsKrnlStart \
     --subsystem=native \
     --dynamicbase \
-    --high-entropy-va
+    --high-entropy-va \
+	--image-base=0x1000000
 
 PELD = x86_64-w64-mingw32-ld
 

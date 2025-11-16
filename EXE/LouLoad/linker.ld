@@ -8,7 +8,7 @@ PHDRS {
 
 SECTIONS
 {
-    . = 0x200000;
+    . = 1M;
 
     .boot : {
         KEEP(*(.multiboot_header))

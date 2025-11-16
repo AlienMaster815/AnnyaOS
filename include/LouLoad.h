@@ -13,6 +13,9 @@
 #define ROUND_UP64(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))
 
+#define ROUND_DOWN64(value, multiple) \
+    ((value) / (multiple) * (multiple))
+
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
@@ -58,7 +61,6 @@ typedef struct _LOULOAD_MEMORY_TRACKER{
 }LOULOAD_MEMORY_TRACKER, * PLOULOAD_MEMORY_TRACKER;
 
 typedef struct _LOUSINE_FIRWARE_INFO{
-    UINT64 RamMap;
     UINT64 EfiTable;
     UINT64 Smbios;
     UINT64 Rsdp;

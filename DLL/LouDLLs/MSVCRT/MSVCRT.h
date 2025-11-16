@@ -32,7 +32,7 @@ typedef void* LPVOID;
 
 #define KILOBYTE_PAGE 4096ULL
 #define MEGABYTE_PAGE (2 * 1024 * 1024)
-#define KILOBYTE 1 * 1024
+#define KILOBYTE (1 * 1024)
 
 #define PRESENT_PAGE           0b1
 #define WRITEABLE_PAGE        0b10
@@ -60,7 +60,7 @@ typedef size_t SIZE;
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes
 #define MEGABYTE (1ULL << 20)  // 1 MB in bytes
-#define KILOBYTE 1 * 1024
+#define KILOBYTE (1 * 1024)
 
 #define PAGE_TABLE_ALLIGNMENT 4096
 #define PAGE_SIZE 4096
