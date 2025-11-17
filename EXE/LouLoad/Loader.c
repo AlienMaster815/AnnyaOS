@@ -41,7 +41,6 @@ extern void LouLoaderStart(
 
     InitializeLoaderMultibootInformation(mboot);
 
-
     UNUSED void* KernelImage = ReserveKernelMemory((struct multiboot_tag*)KernelLoaderInfo.KernelTag);
 
     LoaderCreateKernelSpace();
