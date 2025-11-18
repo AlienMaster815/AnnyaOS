@@ -105,3 +105,12 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
     }
     //while(1);
 }
+
+
+void ParserLouLoaderInformation(
+    PLOUSINE_LOADER_INFO LoaderInfo
+){
+
+
+    
+}

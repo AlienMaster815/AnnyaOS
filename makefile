@@ -42,10 +42,11 @@ EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
 CC = x86_64-w64-mingw32-gcc
 CP = x86_64-w64-mingw32-g++
 LD = x86_64-w64-mingw32-ld --entry=LouOsKrnlStart \
-    --subsystem=native \
+    --subsystem=console \
     --dynamicbase \
     --high-entropy-va \
-	--image-base=0x1000000
+	--image-base=0x1000000 \
+	--section-alignment=0x200000
 
 PELD = x86_64-w64-mingw32-ld
 

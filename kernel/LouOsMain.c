@@ -36,6 +36,8 @@ string KERNEL_VERSION = "0.5.04 RSC-2";
 
 string KERNEL_ARCH = "64-BIT";
 
+static LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
+
 
 typedef struct _PROCESSOR_FEATURES{
     bool    Sse1Supported;
@@ -173,6 +175,10 @@ HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
 void LouKeInitializeSmpLouPrint();
 void LouKeUnmaskSmpInterrupts();
+void ParserLouLoaderInformation(
+    PLOUSINE_LOADER_INFO LoaderInfo
+);
+void* memcpy_basic(void* destination, const void* source, size_t num);
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -296,13 +302,19 @@ bool IsSystemEfi(){
 }
 
 KERNEL_ENTRY LouOsKrnlStart(
-    uint32_t MBOOT
+    UINT64 pKernelLoaderInfo
 ){    
- 
+
+    //KernelLoaderInfo = *(PLOUSINE_LOADER_INFO)pKernelLoaderInfo;
+    memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
+    ParserLouLoaderInformation(
+        &KernelLoaderInfo
+    );
+    
     while(1);
-    struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
-    ParseMBootTags(mboot);
-    InitializeBasicMemcpy();
+    //struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
+    //ParseMBootTags(mboot);
+    //InitializeBasicMemcpy();
 
     ///vga set for debug
     if(!LouKeMapEfiMemory()){

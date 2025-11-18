@@ -52,7 +52,7 @@ static void* memcpy_avx2(void* destination, const void* source, size_t num) {
     return destination;
 }
 
-static void* memcpy_basic(void* destination, const void* source, size_t num) {
+void* memcpy_basic(void* destination, const void* source, size_t num) {
     volatile char* dest = (char*)destination;
     volatile const char* src = (const char*)source;
 

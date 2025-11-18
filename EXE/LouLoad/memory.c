@@ -92,21 +92,19 @@ static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags
         &L1
     );
 
-    UINT64 L3Base = (KernelLoaderInfo.KernelVm.KernelPml4 * 512);     
-    UINT64 L2Base = L3Base + (KernelLoaderInfo.KernelVm.KernelPml3 * 512);
+    UINT64 L3Base = ((KernelLoaderInfo.KernelVm.KernelPml4 * 512) + (L4 * 512));     
+    UINT64 L2Base = ((KernelLoaderInfo.KernelVm.KernelPml4 * 512) + ((KernelLoaderInfo.KernelVm.KernelPml3 * 512)) + (L3 * 512));
     
     ClusterBase[L2Base + L2]    = GetPageValue(PAddress, (1 << 7) | Flags);
     ClusterBase[L3Base + L3]    = GetPageValue(&ClusterBase[L2Base], 0b111);
     ClusterBase[L4]             = GetPageValue(&ClusterBase[L3Base], 0b111);
 
-    CacheFlush(&ClusterBase[L2]);
-    CacheFlush(&ClusterBase[L3]);
     PageFlush(VAddress);
     ReloadCR3();
 }
 
 
-static void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, UINT64 Flags){
+void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, UINT64 Flags){
     for(size_t i = 0; i < Size; i += (2 * MEGABYTE)){
         LoaderMapKernelMemory(PAddress + i, VAddress + i, Flags);
     }   
@@ -128,7 +126,6 @@ static void MapKernelSpace(){
         }
     }
 }
-
 
 void LoaderCreateKernelSpace(){
 
@@ -168,3 +165,4 @@ void LoaderCreateKernelSpace(){
     MapKernelSpace();
  
 }
+

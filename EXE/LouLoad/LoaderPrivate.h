@@ -25,6 +25,7 @@ void* LoaderAllocateMemoryEx(size_t size, size_t Alignment);
 size_t GetRamSize();
 void LoaderCreateKernelSpace();
 void memcpy(void* pDestination, void* pSource, size_t Count);
+void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, UINT64 Flags);
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes
 #define MEGABYTE (1ULL << 20)  // 1 MB in bytes
@@ -32,6 +33,8 @@ void memcpy(void* pDestination, void* pSource, size_t Count);
 
 #define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
 #define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
+
+#define FLAGSSPACE 0x1FF
 
 #define _LOUSINE_LOADER
 

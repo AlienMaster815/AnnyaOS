@@ -9,23 +9,22 @@ UNUSED static void EnableCoffImageProtection(
     UNUSED UINT64 PhysicalLoadedAddress = (UINT64)CfiObject->PhysicalLoadedAddress;
     
     size_t SectionCount = PeImageHeader->StandardHeader.NumberOfSections;
-    UNUSED UINT32 SectionAlignment = PeImageHeader->OptionalHeader.PE64.SectionAlignment;
     
     for(size_t i = 0; i < SectionCount; i++){
-        UINT64 PageFlags = CfiObject->KernelObject ? 0 : USER_PAGE;
+        UINT64 PageFlags;
         UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
         SIZE VirtualSize = (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize;
         VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
                 
         if(SectionCharacteristics & CFI_SCN_CNT_CODE){
-            PageFlags = PRESENT_PAGE;
+            PageFlags = PRESENT_PAGE | CfiObject->KernelObject ? 0 : USER_PAGE;
         }else if(
             SectionCharacteristics & CFI_SCN_CNT_INITIALIZED_DATA ||
             SectionCharacteristics & CFI_SCN_CNT_UNINITIALIZED_DATA
         ){
-            PageFlags = PRESENT_PAGE | WRITEABLE_PAGE;
+            PageFlags = PRESENT_PAGE | WRITEABLE_PAGE | CfiObject->KernelObject ? 0 : USER_PAGE;
         }else{
-            PageFlags = PRESENT_PAGE;
+            PageFlags = PRESENT_PAGE | CfiObject->KernelObject ? 0 : USER_PAGE;
         }
         
         
@@ -93,7 +92,7 @@ static LOUSTATUS ApplyCoffRelocations(
         for(size_t i = 0 ; i < EntryCount; i++){            
             switch(TmpReloc->RelocationEntires[i].Type){
                 case CFI_BASE_RELOCATION_TYPE_BASED_DIR64:{
-                    UNUSED UINT64* Target = (UINT64*)(UINT8*)(((UINT64)TmpReloc->PageRVA + (UINT64)TmpReloc->RelocationEntires[i].Offset) + NewBase);
+                    UINT64* Target = (UINT64*)(UINT8*)(((UINT64)TmpReloc->PageRVA + (UINT64)TmpReloc->RelocationEntires[i].Offset) + NewBase);
                     if(AddressDrop){
                         *Target -= BaseDelta;
                     
@@ -123,11 +122,7 @@ static LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
         return STATUS_SUCCESS;
     }
 
-    PCFI_LOAD_CONFIGURATION_LAYOUT LoadConfigurationLayout = (PCFI_LOAD_CONFIGURATION_LAYOUT)(UINT8*)((UINTPTR)CfiObject->ImageHeader + (UINTPTR)LoadConfigTable->VirtualAddress);
 
-    LoadConfigurationLayout->LoadConfigurationLayout64.SecurityCookie = (((UINTPTR)LoadConfigurationLayout->LoadConfigurationLayout64.SecurityCookie - (UINTPTR)PeImageHeader->OptionalHeader.PE64.ImageBase) + (UINTPTR)CfiObject->ImageHeader);
-
-    *(UINT64*)LoadConfigurationLayout->LoadConfigurationLayout64.SecurityCookie = 81503;
 
     return STATUS_SUCCESS;
 }

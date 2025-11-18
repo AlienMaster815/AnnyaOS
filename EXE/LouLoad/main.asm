@@ -198,8 +198,9 @@ GetPageValue:
     ret
     
 GetCr3Address:
-    mov rax, cr3
-    and rax, 0x000FFFFFFFFFF000
+    mov rdx, cr3
+    and rdx, 0x000FFFFFFFFFF000 
+    mov rax, rdx
     ret
 
 SetCr3:

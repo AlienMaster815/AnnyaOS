@@ -44,6 +44,7 @@ typedef struct _LOUSINE_KERNEL_VM_TABLE{
     UINT8       KernelPml3;
     UINT8       KernelPml2;
     UINT64      LargePageClusters;
+    UINT64      SmallPageClusters;
     UINT64      KernelVmBase;
     UINT64      KernelVmLimit;
 }LOUSINE_KERNEL_VM_TABLE, * PLOUSINE_KERNEL_VM_TABLE;
