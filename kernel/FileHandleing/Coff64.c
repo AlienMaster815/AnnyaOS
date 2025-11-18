@@ -50,12 +50,8 @@ static void UnpackCoffImage(
     memcpy((PVOID)LoadedAddress, (PVOID)RawData, PeImageHeader->OptionalHeader.PE64.SizeOfHeaders);
 
     size_t SectionCount = PeImageHeader->StandardHeader.NumberOfSections;
-    UNUSED UINT32 SectionAlignment = PeImageHeader->OptionalHeader.PE64.SectionAlignment;
     
     for(size_t i = 0; i < SectionCount; i++){
-        SIZE VirtualSize = (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize;
-        VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
-                
         if(PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress){
             memcpy(
                 (PVOID)(LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress), 

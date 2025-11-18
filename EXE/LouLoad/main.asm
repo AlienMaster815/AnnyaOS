@@ -184,3 +184,24 @@ LouLoaderLongModeTrampoline:
     call LouLoaderStart
     
     jmp $
+
+
+global GetPageValue
+global GetCr3Address
+global SetCr3
+
+GetPageValue:
+    ;rcx has the address
+    ;rdx has the flags
+    mov rax, rcx ; rax now is address
+    or rax, rdx  ; bitwise by flags
+    ret
+    
+GetCr3Address:
+    mov rax, cr3
+    and rax, 0x000FFFFFFFFFF000
+    ret
+
+SetCr3:
+    mov Cr3, rcx
+    ret

@@ -2,6 +2,39 @@
 #include <LoaderPrivate.h>
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
+extern UINT64 GetPageValue();
+extern UINT64 GetCr3Address();
+extern void SetCr3(UINT64 Value);
+
+static void CalculateTableMarks(
+    uint64_t VAddress,
+    uint64_t* L4Entry,
+    uint64_t* L3Entry,
+    uint64_t* L2Entry,
+    uint64_t* L1Entry
+){
+    *L4Entry = (VAddress >> 39) & 0x1FF;
+    *L3Entry = (VAddress >> 30) & 0x1FF;
+    *L2Entry = (VAddress >> 21) & 0x1FF;
+    *L1Entry = (VAddress >> 12) & 0x1FF;
+}
+
+static inline void CacheFlush(void* addr) {
+    asm volatile ("clflush (%0)" :: "r"(addr) : "memory");
+    asm volatile ("mfence");
+}
+
+static inline void PageFlush(uint64_t addr) {
+    asm volatile("invlpg (%0)" ::"r" (addr) : "memory");
+    asm("mfence");
+}
+
+
+static inline void ReloadCR3() {
+    uint64_t cr3;
+    asm volatile ("mov %%cr3, %0" : "=r"(cr3));
+    asm volatile ("mov %0, %%cr3" :: "r"(cr3));
+}
 
 void 
 memset(
@@ -35,9 +68,43 @@ memcmp (
         (unsigned char) *Buffer2));
 }
 
-static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags){
-
+void memcpy(
+    void* pDestination, 
+    void* pSource, 
+    size_t Count
+){
+    UINT8* Destination = pDestination;
+    UINT8* Source = pSource;
+    for(size_t i = 0 ; i < Count; i++){
+        Destination[i] = Source[i];
+    }
 }
+
+static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags){
+    UINT64* ClusterBase = (UINT64*)(UINT8*)KernelLoaderInfo.KernelVm.LargePageClusters;
+
+    UINT64 L4, L3, L2, L1;
+    CalculateTableMarks(
+        VAddress, 
+        &L4, 
+        &L3, 
+        &L2, 
+        &L1
+    );
+
+    UINT64 L3Base = (KernelLoaderInfo.KernelVm.KernelPml4 * 512);     
+    UINT64 L2Base = L3Base + (KernelLoaderInfo.KernelVm.KernelPml3 * 512);
+    
+    ClusterBase[L2Base + L2]    = GetPageValue(PAddress, (1 << 7) | Flags);
+    ClusterBase[L3Base + L3]    = GetPageValue(&ClusterBase[L2Base], 0b111);
+    ClusterBase[L4]             = GetPageValue(&ClusterBase[L3Base], 0b111);
+
+    CacheFlush(&ClusterBase[L2]);
+    CacheFlush(&ClusterBase[L3]);
+    PageFlush(VAddress);
+    ReloadCR3();
+}
+
 
 static void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, UINT64 Flags){
     for(size_t i = 0; i < Size; i += (2 * MEGABYTE)){
@@ -53,9 +120,9 @@ static void MapKernelSpace(){
         MapEntry = MapIndexToEntry(mmap, i);
         if(MapEntry->type == 1){
             LoaderMapKernelMemoryBlock(
-                ROUND_DOWN64(MapEntry->addr, 4096), 
-                ROUND_DOWN64(KernelLoaderInfo.KernelVm.KernelVmBase + MapEntry->addr, 4096), 
-                ROUND_UP64(MapEntry->len, 4096), 
+                ROUND_DOWN64(MapEntry->addr, 2 * MEGABYTE), 
+                ROUND_DOWN64(KernelLoaderInfo.KernelVm.KernelVmBase + MapEntry->addr, 2 * MEGABYTE), 
+                ROUND_UP64(MapEntry->len, 2 * MEGABYTE), 
                 0b011
             );
         }
@@ -76,21 +143,28 @@ void LoaderCreateKernelSpace(){
         Frames * 4096, 4096
     );
 
-    UINT64 Rem = KSpaceLimit;
-    UINT64 L4 = Rem / (512ULL * GIGABYTE);
-    Rem = Rem % (512ULL * GIGABYTE);
-    UINT64 L3 = Rem / (1ULL * GIGABYTE);
-    Rem = Rem % (1ULL * GIGABYTE);
-    UINT64 L2 = Rem / (2ULL * MEGABYTE);
-    Rem = Rem % (2ULL * MEGABYTE);
+    UINT64 L4, L3, L2, L1;
 
-    KernelLoaderInfo.KernelVm.KernelVmBase = KSpaceBase;
+    CalculateTableMarks(
+        KSpaceLimit,
+        &L4,
+        &L3,
+        &L2,
+        &L1
+    );
+
+    SetKSpaceBase(KSpaceBase);
+    //KernelLoaderInfo.KernelVm.KernelVmBase = KSpaceBase;
     KernelLoaderInfo.KernelVm.KernelVmLimit = KSpaceLimit;
     KernelLoaderInfo.KernelVm.LargePageClusters = (UINT64)KSpaceManager;
-    KernelLoaderInfo.KernelVm.KernelPml4 = L4;
-    KernelLoaderInfo.KernelVm.KernelPml3 = L3;
-    KernelLoaderInfo.KernelVm.KernelPml2 = L2;
+    KernelLoaderInfo.KernelVm.KernelPml4 = (UINT8)L4 + 1;
+    KernelLoaderInfo.KernelVm.KernelPml3 = (UINT8)L3 + 1;
+    KernelLoaderInfo.KernelVm.KernelPml2 = (UINT8)L2 + 1;
+
+    UINT64* Pml4 = (UINT64*)GetCr3Address();
+    *(UINT64*)(KSpaceManager) = Pml4[0];
+    SetCr3((UINT64)KSpaceManager);
 
     MapKernelSpace();
-
+ 
 }

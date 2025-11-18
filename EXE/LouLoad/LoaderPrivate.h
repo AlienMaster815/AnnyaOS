@@ -24,11 +24,14 @@ void* LoaderAllocateMemory(size_t size);
 void* LoaderAllocateMemoryEx(size_t size, size_t Alignment);
 size_t GetRamSize();
 void LoaderCreateKernelSpace();
-
+void memcpy(void* pDestination, void* pSource, size_t Count);
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes
 #define MEGABYTE (1ULL << 20)  // 1 MB in bytes
 #define KILOBYTE (1 * 1024)
+
+#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
+#define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
 
 #define _LOUSINE_LOADER
 
