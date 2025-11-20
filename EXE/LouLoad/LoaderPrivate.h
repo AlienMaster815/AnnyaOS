@@ -34,7 +34,6 @@ void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, U
 #define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
 #define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
 
-#define KERNEL_SPACE_DEFAULT_BASE 0xFFFF800000000000ULL
 
 
 #define FLAGSSPACE 0x1FF

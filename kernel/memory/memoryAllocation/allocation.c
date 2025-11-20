@@ -4,7 +4,7 @@
 
 //include headers from freestanding
 
-#define StartMap (60ULL * MEGABYTE)
+#define StartMap (64ULL * MEGABYTE)
 #define StartMap64 (4ULL * GIGABYTE)
 
 #include <LouAPI.h>
@@ -543,7 +543,7 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
 
     LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
-    uint64_t AlignmentCheck = GetRamSize();
+    uint64_t AlignmentCheck = (KERNEL_SPACE_DEFAULT_BASE + GetRamSize());
     if(!AlignmentCheck){
         AlignmentCheck = 4 * GIGABYTE;
     }

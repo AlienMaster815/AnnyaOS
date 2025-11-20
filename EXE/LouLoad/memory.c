@@ -131,20 +131,13 @@ void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, U
 }
 
 static void MapKernelSpace(){
-    struct master_multiboot_mmap_entry* mmap = (struct master_multiboot_mmap_entry*)(UINT8*)KernelLoaderInfo.RatPartition.RamMap;
-    UINT16  EntryCount = (mmap->tag.size - sizeof(struct master_multiboot_mmap_entry)) / mmap->entry_size;
-    struct multiboot_mmap_entry* MapEntry;
-    for(UINT16 i = 0 ; i < EntryCount; i++){
-        MapEntry = MapIndexToEntry(mmap, i);
-        if(MapEntry->type == 1){
-            LoaderMapKernelMemoryBlock(
-                ROUND_DOWN64(MapEntry->addr, 2 * MEGABYTE), 
-                ROUND_DOWN64(KernelLoaderInfo.KernelVm.KernelVmBase + MapEntry->addr, 2 * MEGABYTE), 
-                ROUND_UP64(MapEntry->len, 2 * MEGABYTE), 
-                0b011
-            );
-        }
-    }
+
+    LoaderMapKernelMemoryBlock(
+        0, 
+        KernelLoaderInfo.KernelVm.KernelVmBase, 
+        ROUND_UP64(KernelLoaderInfo.KernelVm.KernelVmLimit, 2 * MEGABYTE), 
+        0b011
+    );
 }
 
 void LoaderCreateKernelSpace(){
@@ -158,6 +151,7 @@ void LoaderCreateKernelSpace(){
     void* KSpaceManager = LoaderAllocateMemoryEx(
         Frames * 4096, 4096
     );
+    EnforceLoaderMemoryMap(((UINT64)KSpaceManager + KSpaceBase), Frames * 4096);
 
     UINT64 L4, L3, L2, L1;
 
@@ -182,6 +176,7 @@ void LoaderCreateKernelSpace(){
     SetCr3((UINT64)KSpaceManager);
 
     MapKernelSpace();
- 
+
+    
 }
 

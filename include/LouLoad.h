@@ -44,7 +44,6 @@ typedef struct _LOUSINE_KERNEL_VM_TABLE{
     UINT8       KernelPml3;
     UINT8       KernelPml2;
     UINT64      LargePageClusters;
-    UINT64      SmallPageClusters;
     UINT64      KernelVmBase;
     UINT64      KernelVmLimit;
 }LOUSINE_KERNEL_VM_TABLE, * PLOUSINE_KERNEL_VM_TABLE;
@@ -83,6 +82,6 @@ typedef struct _LOUSINE_LOADER_INFO{
     LOUSINE_FIRWARE_INFO        FirmwareInfo;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
-
+#define KERNEL_SPACE_DEFAULT_BASE 0xFFFF800000000000ULL
 
 #endif

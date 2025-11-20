@@ -118,4 +118,6 @@ void ParserLouLoaderInformation(
             BootPartition[i].size
         );        
     }    
+    ParseMemoryMap((struct multiboot_tag*)BootRamAllocationTable->RamMap);
+
 }

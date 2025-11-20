@@ -206,3 +206,20 @@ GetCr3Address:
 SetCr3:
     mov Cr3, rcx
     ret
+
+global AdjdustStackAndJump
+
+AdjdustStackAndJump:
+    ;adjuts stacks
+    mov rbx, rbp 
+    add rbx, rcx
+    mov rax, rsp 
+    add rax, rcx
+    ;set data
+    mov rbp, rbx
+    Mov rsp, rax
+    push qword 0 ; set return to null
+
+    mov rcx, r8 
+    call rdx
+    jmp $

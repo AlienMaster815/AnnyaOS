@@ -304,7 +304,6 @@ bool IsSystemEfi(){
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-
     //KernelLoaderInfo = *(PLOUSINE_LOADER_INFO)pKernelLoaderInfo;
     memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
     ParserLouLoaderInformation(

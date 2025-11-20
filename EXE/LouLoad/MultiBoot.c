@@ -29,12 +29,14 @@ void InitializeModuleForLoading(
     }   
     struct multiboot_tag_module* mod = (struct multiboot_tag_module*)Module;
     EnforceLoaderMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
+    EnforceLoaderMemoryMap(mod->mod_start + GetKSpaceBase(), mod->mod_end - mod->mod_start);
     Counter++;
 }
 
 void LoaderReserveEfiTable(uint64_t Address) {
     struct multiboot_tag_efi64* TableHeader = (struct multiboot_tag_efi64*)Address;
 	EnforceLoaderMemoryMap((uint64_t)(uintptr_t)TableHeader->pointer, TableHeader->size);
+	EnforceLoaderMemoryMap((uint64_t)(uintptr_t)TableHeader->pointer + GetKSpaceBase(), TableHeader->size);
 }
 
 void InitializeEfiMap(
@@ -62,6 +64,7 @@ void InitializeEfiMap(
 			case(13):
 			case(14):
 				EnforceLoaderMemoryMap(Desc->PhysicalStart, 4096 * Desc->NumberOfPages);
+				EnforceLoaderMemoryMap(Desc->PhysicalStart + GetKSpaceBase(), 4096 * Desc->NumberOfPages);
 				EnforceLoaderMemoryMap(Desc->VirtualStart, 4096 * Desc->NumberOfPages);
 			default: continue;
 		}
@@ -71,6 +74,7 @@ void InitializeEfiMap(
 void ReserveVbeMemory(struct multiboot_tag* MBOOT){
     struct multiboot_tag_vbe* vbe_tag = (struct multiboot_tag_vbe*)MBOOT;
     EnforceLoaderMemoryMap(vbe_tag->vbe_mode_info.framebuffer, ROUND_UP64(640 * 480 * (32 / 8), 4 * KILOBYTE));
+    EnforceLoaderMemoryMap(vbe_tag->vbe_mode_info.framebuffer + GetKSpaceBase(), ROUND_UP64(640 * 480 * (32 / 8), 4 * KILOBYTE));
 }
 
 void 
@@ -81,6 +85,7 @@ InitializeLoaderMultibootInformation(
     while (MBoot->type != 0) {
         // Check if tag is memory map tag
         EnforceLoaderMemoryMap((uint64_t)MBoot, MBoot->size);
+        EnforceLoaderMemoryMap((uint64_t)MBoot + GetKSpaceBase(), MBoot->size);
         switch (MBoot->type) {
         case(MULTIBOOT_TAG_TYPE_MMAP):{
             ParseRamMap(MBoot);

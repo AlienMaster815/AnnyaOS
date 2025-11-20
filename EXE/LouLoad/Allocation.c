@@ -86,6 +86,7 @@ void ParseRamMap(
         }
         if(MapEntry->type != 1){
             EnforceLoaderMemoryMap(MapEntry->addr, MapEntry->len);
+            EnforceLoaderMemoryMap(MapEntry->addr + GetKSpaceBase(), MapEntry->len);
         }
     }
 
