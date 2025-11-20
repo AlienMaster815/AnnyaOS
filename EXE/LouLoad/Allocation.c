@@ -97,12 +97,12 @@ static void* RunThroughAllocationCheck(
     size_t                          Alignment
 ){
 
-    if((MapEntry->addr + MapEntry->len) <= (16 * MEGABYTE)){
+    if((MapEntry->addr + MapEntry->len) <= (64 * MEGABYTE)){
         return 0x00;
     }        
 
     const UINT16  PartitionItems = KernelLoaderInfo.RatPartition.PartitionItems;
-    UINT64 Base = MapEntry->addr;
+    UINT64 Base = MAX(MapEntry->addr, 64 * MEGABYTE);
     const UINT64 Limit = MapEntry->addr + MapEntry->len;
     Base = ROUND_UP64(Base, Alignment);
 
@@ -143,7 +143,7 @@ void* LoaderAllocateMemoryEx(
         if(MapEntry->type == 1){
             Result = RunThroughAllocationCheck(MapEntry, size, Alignment);
             if(Result){
-                memset(Result, 0, size);
+                memzero(Result, size);
                 return Result;
             }        
         }
@@ -168,20 +168,6 @@ LoaderRequestMemory(
     struct master_multiboot_mmap_entry* mmap = (struct master_multiboot_mmap_entry*)(UINT8*)KernelLoaderInfo.RatPartition.RamMap;
     UINT16  EntryCount = (mmap->tag.size - sizeof(struct master_multiboot_mmap_entry)) / mmap->entry_size;
 
-    struct multiboot_mmap_entry* MapEntry;
-    for(UINT16 i = 0 ; i < EntryCount; i++){
-        MapEntry = MapIndexToEntry(mmap, i);
-        if(MapEntry->type != 1){
-            if(RangeInterferes(
-                MapEntry->addr,
-                MapEntry->len,
-                (UINT64)Address,
-                size
-            )){
-                return false;
-            }
-        }
-    }
     const UINT16 PartitionItems = KernelLoaderInfo.RatPartition.PartitionItems;
     size_t j;
     for(j = 0 ; j < PartitionItems; j++){
@@ -195,10 +181,23 @@ LoaderRequestMemory(
         }
     }
 
+    struct multiboot_mmap_entry* MapEntry;
+    for(UINT16 i = 0 ; i < EntryCount; i++){
+        MapEntry = MapIndexToEntry(mmap, i);
+        if(MapEntry->type == 1){
+            if((MapEntry->addr <= (UINT64)Address) && 
+               (MapEntry->addr + MapEntry->len) >= ((UINT64)Address + size)
+            ){
+                MemoryTracker[PartitionItems].Address = (UINT64)Address;
+                MemoryTracker[PartitionItems].size = size;
+                KernelLoaderInfo.RatPartition.PartitionItems++;
+                memzero(Address, size);
 
-    MemoryTracker[PartitionItems].Address = (UINT64)Address;
-    MemoryTracker[PartitionItems].size = size;
-    KernelLoaderInfo.RatPartition.PartitionItems++;
+                return true;
+            }       
+        }
+    }
 
-    return true;
+
+    return false;
 }

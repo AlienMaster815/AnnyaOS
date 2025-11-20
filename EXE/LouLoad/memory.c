@@ -37,14 +37,12 @@ static inline void ReloadCR3() {
 }
 
 void 
-memset(
+memzero(
     void*   pDestination, 
-    int     v,
     size_t  Count
 ){
-    UINT8* Destination = (UINT8*)pDestination;
     for(size_t i = 0 ; i < Count; i++){
-        Destination[Count] = (UINT8)v;
+        ((UINT8*)pDestination)[i] = 0;
     }
 }
 
@@ -80,6 +78,21 @@ void memcpy(
     }
 }
 
+static void GetTableBases(
+    UINT64  L4, 
+    UINT64  L3, 
+    UINT64* L3Base,
+    UINT64* L2Base
+){
+    UINT64 TL3Base = 512; // L3 Semment starts at 512th quadword
+    UINT64 TL2Base = (KernelLoaderInfo.KernelVm.KernelPml4 * 512) + 512; //L2 segment starts after the allocates L3 segment
+
+    TL3Base += (512 * L4); //segmentation is 512 quads per L4
+    TL2Base += ((512 * 512) * L3); //segmentations i 512 quads for 512 entries per L3
+    *L3Base = TL3Base;
+    *L2Base = TL2Base;
+}
+
 static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags){
     UINT64* ClusterBase = (UINT64*)(UINT8*)KernelLoaderInfo.KernelVm.LargePageClusters;
 
@@ -92,9 +105,16 @@ static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags
         &L1
     );
 
-    UINT64 L3Base = ((KernelLoaderInfo.KernelVm.KernelPml4 * 512) + (L4 * 512));     
-    UINT64 L2Base = ((KernelLoaderInfo.KernelVm.KernelPml4 * 512) + ((KernelLoaderInfo.KernelVm.KernelPml3 * 512)) + (L3 * 512));
+    UINT64 L3Base; 
+    UINT64 L2Base;
     
+    GetTableBases(
+        L4, 
+        L3, 
+        &L3Base, 
+        &L2Base
+    ); 
+
     ClusterBase[L2Base + L2]    = GetPageValue(PAddress, (1 << 7) | Flags);
     ClusterBase[L3Base + L3]    = GetPageValue(&ClusterBase[L2Base], 0b111);
     ClusterBase[L4]             = GetPageValue(&ClusterBase[L3Base], 0b111);
@@ -129,12 +149,11 @@ static void MapKernelSpace(){
 
 void LoaderCreateKernelSpace(){
 
-    UNUSED UINT64 KSpaceBase = ROUND_UP64(GetRamSize(), 512 * GIGABYTE);
+    UNUSED UINT64 KSpaceBase = KERNEL_SPACE_DEFAULT_BASE;
     UINT64 KSpaceLimit = ROUND_UP64(GetRamSize(), 4096);
-    UINT64 Frames;
-    Frames =  (KSpaceLimit / (512 * GIGABYTE)) ? ( KSpaceLimit / (512 * GIGABYTE)) : 1;
-    Frames += ((KSpaceLimit / GIGABYTE) ? (KSpaceLimit / GIGABYTE) : 1);
-    Frames += (KSpaceLimit / (2 * MEGABYTE)) ? (KSpaceLimit / (2 * MEGABYTE)) : 1;
+    UINT64 Frames = 1; //PML4
+    Frames += (KSpaceLimit + (512 * GIGABYTE - 1)) / (512 * GIGABYTE);
+    Frames += (KSpaceLimit + (1 * GIGABYTE - 1)) / (1 * GIGABYTE);
 
     void* KSpaceManager = LoaderAllocateMemoryEx(
         Frames * 4096, 4096

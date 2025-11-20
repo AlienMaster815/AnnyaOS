@@ -106,11 +106,16 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
     //while(1);
 }
 
-
 void ParserLouLoaderInformation(
     PLOUSINE_LOADER_INFO LoaderInfo
 ){
-
-
-    
+    PLOUSINE_RAT_PARTITION BootRamAllocationTable = (PLOUSINE_RAT_PARTITION)&LoaderInfo->RatPartition;  
+    PLOULOAD_MEMORY_TRACKER BootPartition = (PLOULOAD_MEMORY_TRACKER)BootRamAllocationTable->BootPartition; 
+    size_t RamAllocations = BootRamAllocationTable->PartitionItems;
+    for(size_t i = 0 ; i < RamAllocations; i++){
+        EnforceSystemMemoryMap(
+            BootPartition[i].Address,
+            BootPartition[i].size
+        );        
+    }    
 }

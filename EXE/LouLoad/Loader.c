@@ -41,7 +41,6 @@ PCOFF_IMAGE_HEADER UnpackKernelImage(
     struct multiboot_tag_module* KernelMod = (struct multiboot_tag_module*)KernelTag; 
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader((UINT8*)(UINT64)KernelMod->mod_start);
     EnforceLoaderMemoryMap((UINT64)ImageVBase, ImageHeader->OptionalHeader.PE64.SizeOfImage);
-    memset(ImageVBase, 0, ImageHeader->OptionalHeader.PE64.SizeOfImage);
     memcpy(ImageVBase, (void*)(UINTPTR)KernelMod->mod_start, ImageHeader->OptionalHeader.PE64.SizeOfHeaders);
 
     size_t SectionCount = ImageHeader->StandardHeader.NumberOfSections;
@@ -128,11 +127,11 @@ void EnableKernelMemoryProtecion(
     PCOFF_IMAGE_HEADER  KernelImage,
     UINT64              KernelBase
 ){
-    UINT64 KernelPhysicalAddress = KernelBase - GetKSpaceBase();
+    UNUSED UINT64 KernelPhysicalAddress = KernelBase - GetKSpaceBase();
     size_t SectionCount = KernelImage->StandardHeader.NumberOfSections;
 
     for(size_t i = 0 ; i < SectionCount; i++){
-        UINT64 PageFlags;
+        UNUSED UINT64 PageFlags;
         UINT32 SectionCharacteristics = KernelImage->OptionalHeader.PE64.SectionTables[i].Characteristics;
         size_t VirtualSize = (size_t)KernelImage->OptionalHeader.PE64.SectionTables[i].VirtualSize;
         VirtualSize = ROUND_UP64(VirtualSize, 2 * MEGABYTE);
@@ -170,12 +169,11 @@ extern void LouLoaderStart(
     KernelLoaderInfo.BootStack = BootStack;
     KernelLoaderInfo.RatPartition.BootPartition = (UINT64)MemoryTracker;
 
+
     InitializeLoaderMultibootInformation(mboot);
-
+    
     void* KernelBase = ReserveKernelMemory((struct multiboot_tag*)KernelLoaderInfo.KernelTag);
-
-    LoaderCreateKernelSpace();
-
+    
     PCOFF_IMAGE_HEADER LousineImage = UnpackKernelImage((struct multiboot_tag*)KernelLoaderInfo.KernelTag, &KernelBase);
 
     RelocateKernelImage(
@@ -189,7 +187,7 @@ extern void LouLoaderStart(
     );
     
     void (*LousineKernelEntry)(UINT64) = (void(*)(UINT64))(LousineImage->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)KernelBase);
-
+    
     LousineKernelEntry((UINT64)&KernelLoaderInfo);
 
     while(1);

@@ -19,7 +19,7 @@ void InitializeModuleForLoading(struct multiboot_tag* Module);
 void ParseRamMap(struct multiboot_tag* RamMap);
 void InitializeLoaderMultibootInformation(struct multiboot_tag* MBoot);
 int memcmp(void* pSource1, void* pSource2, size_t Count);
-void memset(void* pDestination, int v, size_t Count);
+void memzero(void* pDestination, size_t Count);
 void* LoaderAllocateMemory(size_t size);
 void* LoaderAllocateMemoryEx(size_t size, size_t Alignment);
 size_t GetRamSize();
@@ -33,6 +33,9 @@ void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, U
 
 #define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
 #define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
+
+#define KERNEL_SPACE_DEFAULT_BASE 0xFFFF800000000000ULL
+
 
 #define FLAGSSPACE 0x1FF
 

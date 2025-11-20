@@ -79,12 +79,9 @@ static struct multiboot_tag_apm* APM_MASTER = 0x00;
 
 LOUSTATUS LouKeSetEfiTable(uint64_t Address) {
     struct multiboot_tag_efi64* TableHeader = (struct multiboot_tag_efi64*)Address;
-    
-    // Cast the 32-bit pointer to a 64-bit pointer
-	EnforceSystemMemoryMap((uint64_t)(uintptr_t)TableHeader->pointer, TableHeader->size);
+    EnforceSystemMemoryMap((uint64_t)(uintptr_t)TableHeader->pointer, TableHeader->size);
 	EFI_TABLE = (uint64_t)(uintptr_t)TableHeader->pointer;
-
-    return STATUS_SUCCESS;  // Assuming LOUSTATUS_SUCCESS is your success code
+    return STATUS_SUCCESS;
 }
 
 LOUSTATUS LouKeSetSmbios(uintptr_t SMBIOS) {
