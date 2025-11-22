@@ -99,7 +99,6 @@ EXPORTS
     LouKeHalPciSetMaster
     LouKeRegisterDevice
     AtaStdQcDefer
-    LouMallocEx
     LouKeWaitForMmioState
     LouKeCreateFixedPool
     outw
@@ -186,5 +185,5 @@ EXPORTS
     LouKeDmiGetFirstMatch
     snprintf
     DmiGetDate
-    LouKeMallocPhysicalEx
+    LouKeMallocExPhy32
     LouKeQueueWork

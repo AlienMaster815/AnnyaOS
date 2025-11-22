@@ -321,7 +321,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[71] = "LouKeCreateDemon";
     ImportTables[4].FunctionName[72] = "LouKeAcquireSpinLock";
     ImportTables[4].FunctionName[73] = "LouKeReleaseSpinLock";
-    ImportTables[4].FunctionName[74] = "LouMalloc";
+    ImportTables[4].FunctionName[74] = "LouAllocatePhysical64UpEx";
     ImportTables[4].FunctionName[75] = "GetPciConfiguration";
     ImportTables[4].FunctionName[76] = "LouKeHalLinuxPciCheckForCompatibleConfiguration";
     ImportTables[4].FunctionName[77] = "pci_read";
@@ -346,7 +346,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[96] = "LouKeHalPciSetMaster";
     ImportTables[4].FunctionName[97] = "LouKeRegisterDevice";
     ImportTables[4].FunctionName[98] = "AtaStdQcDefer";
-    ImportTables[4].FunctionName[99] = "LouMallocEx";
+    ImportTables[4].FunctionName[99] = "LouGeneralAllocateMemoryEx";
     ImportTables[4].FunctionName[100] = "memset";
     ImportTables[4].FunctionName[101] = "LouKeWaitForMmioState";
     ImportTables[4].FunctionName[102] = "LouKeCreateFixedPool";
@@ -433,7 +433,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].FunctionName[183] = "PciTestAtaConfigurationBits";
     ImportTables[4].FunctionName[184] = "LouKeDmiGetFirstMatch";
     ImportTables[4].FunctionName[185] = "DmiGetDate";
-    ImportTables[4].FunctionName[186] = "LouKeMallocPhysicalEx";
+    ImportTables[4].FunctionName[186] = "LouKeMallocExPhy32";
 
     ImportTables[4].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -511,7 +511,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[71] = (uint64_t)LouKeCreateDemon;
     ImportTables[4].VirtualAddress[72] = (uint64_t)LouKeAcquireSpinLock;
     ImportTables[4].VirtualAddress[73] = (uint64_t)LouKeReleaseSpinLock;
-    ImportTables[4].VirtualAddress[74] = (uint64_t)LouMalloc;
+    ImportTables[4].VirtualAddress[74] = (uint64_t)LouAllocatePhysical64UpEx;
     ImportTables[4].VirtualAddress[75] = (uint64_t)GetPciConfiguration;
     ImportTables[4].VirtualAddress[76] = (uint64_t)LouKeHalLinuxPciCheckForCompatibleConfiguration;
     ImportTables[4].VirtualAddress[77] = (uint64_t)pci_read;
@@ -534,7 +534,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[95] = (uint64_t)sleep;
     ImportTables[4].VirtualAddress[96] = (uint64_t)LouKeHalPciSetMaster;
     ImportTables[4].VirtualAddress[97] = (uint64_t)LouKeRegisterDevice;
-    ImportTables[4].VirtualAddress[99] = (uint64_t)LouMallocEx;
+    ImportTables[4].VirtualAddress[99] = (uint64_t)LouGeneralAllocateMemoryEx;
     ImportTables[4].VirtualAddress[100] = (uint64_t)memset;
     ImportTables[4].VirtualAddress[101] = (uint64_t)LouKeWaitForMmioState;
     ImportTables[4].VirtualAddress[102] = (uint64_t)LouKeCreateFixedPool;
@@ -621,7 +621,7 @@ void InitializeLousineKernelTables(){
     ImportTables[4].VirtualAddress[183] = (uint64_t)PciTestAtaConfigurationBits;
     ImportTables[4].VirtualAddress[184] = (uint64_t)LouKeDmiGetFirstMatch;
     ImportTables[4].VirtualAddress[185] = (uint64_t)DmiGetDate;
-    ImportTables[4].VirtualAddress[186] = (uint64_t)LouKeMallocPhysicalEx;
+    ImportTables[4].VirtualAddress[186] = (uint64_t)LouKeMallocExPhy32;
     
 }
 

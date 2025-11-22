@@ -89,7 +89,7 @@ void PageFault(uint64_t FaultingStackP) {
     LouPrint("Physical Address:%h\n", PAddress);
 
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
-    string PanicMessage = (string)LouMallocEx(strlen("Page Fault Protection Violation At Address:%h") + 21, 1);
+    string PanicMessage = (string)LouGeneralAllocateMemoryEx(strlen("Page Fault Protection Violation At Address:%h") + 21, 1);
 
     _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:%h",  VAddress);
     // Check for specific error causes, e.g.:

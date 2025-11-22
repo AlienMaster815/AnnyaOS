@@ -47,7 +47,7 @@ void* LouKeVirtualAllocUser(
     TmpHeapTrack->VirtualSize = ReservedSize;
     
     TmpHeapTrack->PhyTracks.VirtualOffset = 0;    
-    TmpHeapTrack->PhyTracks.PhyAddress = (uintptr_t)LouMallocEx(CommitSize, KILOBYTE_PAGE);
+    TmpHeapTrack->PhyTracks.PhyAddress = (uintptr_t)LouAllocatePhysical64UpEx(CommitSize, KILOBYTE_PAGE);
 
     LouKeMapContinuousMemoryBlock(TmpHeapTrack->PhyTracks.PhyAddress, TmpHeapTrack->VirtualAddress, CommitSize, PageFlags);
     HeapsManaged++;
@@ -127,7 +127,7 @@ void LouKeAllocHeapPhysical(
     }
     size_t NeededPhysicalSize = Offset2 - Offset1;
     for(uint64_t i = 0; i < NeededPhysicalSize; i += KILOBYTE_PAGE){
-        uint64_t NewPhysical = (uint64_t)LouMallocEx(KILOBYTE_PAGE, KILOBYTE_PAGE);
+        uint64_t NewPhysical = (uint64_t)LouAllocatePhysical64UpEx(KILOBYTE_PAGE, KILOBYTE_PAGE);
         LouKeMapContinuousMemoryBlock(NewPhysical, Offset1, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
         PhyTrack->PhyAddress = NewPhysical;
         PhyTrack->VirtualOffset = Offset1 + i;

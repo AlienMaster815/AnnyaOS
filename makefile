@@ -29,7 +29,6 @@ FileStructureTable = Config/System_Config/FileStructure.xml
 SystemFileTable = Config/System_Config/SystemFiles.xml
 
 OSBUILDX64 := $(shell cat Config/OSIMGBUILDX64.cfg)
-OSBUILDX86 := $(shell cat Config/OSIMGBUILDX86.cfg)
 
 MAKEDIR := $(shell awk -F '[<>]' '/<MainDirectoryStructure>/{print " " $$3 ";"}' $(FileStructureTable) | tr '\n' ' ')
 MAKEDIR64 := $(shell awk -F '[<>]' '/<MainDirectoryStructure64>/{print " " $$3 ";"}' $(FileStructureTable) | tr '\n' ' ')
@@ -97,9 +96,6 @@ x86_64_API_cpp_source_files := $(shell find API -name *.cpp)
 x86_64_API_cpp_object_files := $(patsubst API/%.cpp, build/x86_64/API/%.o, $(x86_64_API_cpp_source_files))
 
 
-x86_64_c_source_files := $(shell find init -name *.c)
-x86_64_c_object_files := $(patsubst init/%.c, build/x86_64/init/%.o, $(x86_64_c_source_files))
-
 
 x86_64_API_cpp_source_files := $(shell find API -name *.cpp)
 x86_64_API_cpp_object_filee := $(patsubst API/%.cpp, build/x86_64/API/%.o, $(x86_64_API_cpp_source_files))
@@ -126,9 +122,7 @@ $(kernel_object_files): build/kernel/%.o : kernel/%.c
 	mkdir -p $(dir $@) && \
 	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/kernel/%.o, kernel/%.c, $@) -o $@
 
-$(x86_64_c_object_files): build/x86_64/init/%.o : init/%.c
-	mkdir -p $(dir $@) && \
-	$(CC) $(C_COMPILE_FLAGS) $(CFLAGS) $(patsubst build/x86_64/init/%.o, init/%.c, $@) -o $@
+
 
 $(driver_cpp_object_files): build/drivers/%.o : drivers/%.cpp
 	mkdir -p $(dir $@) && \

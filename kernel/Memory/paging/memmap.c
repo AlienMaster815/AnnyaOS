@@ -35,7 +35,7 @@ static LOU_PFN_TABLE_ENTRY PfnDatabase = {0};
 static size_t PageFrameCount = 0;
 
 void InitializeSafePage(){
-    SafePage = (uint64_t)LouMallocEx(MEGABYTE_PAGE, MEGABYTE_PAGE);
+    SafePage = (uint64_t)LouAllocatePhysical64UpEx(MEGABYTE_PAGE, MEGABYTE_PAGE);
 }
 
 bool LouKeIsPageUnMapped(UINTPTR PhysicalAddress){
@@ -68,7 +68,7 @@ void LouKeMallocPageFrameNumber(
     CurrentEntry->PresentPage       = true;
     CurrentEntry->Flags             = Flags;
     CurrentEntry->PageAddress       = PageAddress;
-    CurrentEntry->Chain.NextHeader  = (PListHeader)LouMallocEx(sizeof(LOU_PFN_TABLE_ENTRY), GET_ALIGNMENT(LOU_PFN_TABLE_ENTRY));
+    CurrentEntry->Chain.NextHeader  = (PListHeader)LouGeneralAllocateMemoryEx(sizeof(LOU_PFN_TABLE_ENTRY), GET_ALIGNMENT(LOU_PFN_TABLE_ENTRY));
     PageFrameCount++;
 }
 
@@ -291,6 +291,8 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
 
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize) {
 
+    DEBUG_TRAP
+    while(1);
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
     uint64_t L3Entry = 0;
@@ -325,7 +327,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 // Case: 512 MB page
                 UNUSED uint64_t oldL3 = PML4->PML3.entries[L3Entry];
                 if ((oldL3 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL2 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL2 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL2) return false;
                     InitializePageTable(PageDirectoryL2);
                 } else {
@@ -343,7 +345,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 UNUSED uint64_t oldL2;
 
                 if ((oldL4 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL3 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL3 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL3) return false;
                     InitializePageTable(PageDirectoryL3);
                 } else {
@@ -351,7 +353,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 }
                 uint64_t oldL3 = PageDirectoryL3[L3Entry];
                 if ((oldL3 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL2 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL2 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL2) return false;
                     InitializePageTable(PageDirectoryL2);
                 } else {
@@ -377,7 +379,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
             // Case: Small page (4KB) in L2
             uint64_t oldL2 = PML4->PML2.entries[L2Entry];
             if (oldL2 & (1 << 7)) {
-                PageDirectoryL1 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                PageDirectoryL1 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                 if (!PageDirectoryL1) return false;
                 uint64_t PageIndex = oldL2 & ~(FLAGSSPACE);
                 InitializePageTableWithIndex(PageDirectoryL1, PageIndex, KILOBYTE_PAGE);
@@ -393,7 +395,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
             if (L4Entry == 0) {
                 uint64_t oldL3 = PML4->PML3.entries[L3Entry];
                 if ((oldL3 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL2 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL2 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL2) return false;
                     InitializePageTable(PageDirectoryL2);
                 } else {
@@ -401,7 +403,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 }
                 uint64_t oldL2 = PageDirectoryL2[L2Entry];
                 if ((oldL2 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL1 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL1 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL1) return false;
                     InitializePageTable(PageDirectoryL1);
                 } else {
@@ -416,7 +418,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
             } else {
                 uint64_t oldL4 = PML4->PML4.entries[L4Entry];
                 if ((oldL4 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL3 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL3 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL3) return false;
                     InitializePageTable(PageDirectoryL3);
                 } else {
@@ -424,7 +426,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 }
                 uint64_t oldL3 = PageDirectoryL3[L3Entry];
                 if ((oldL3 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL2 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL2 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL2) return false;
                     InitializePageTable(PageDirectoryL2);
                 } else {
@@ -432,7 +434,7 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
                 }
                 uint64_t oldL2 = PageDirectoryL2[L2Entry];
                 if ((oldL2 & ~(FLAGSSPACE)) == 0) {
-                    PageDirectoryL1 = (uint64_t*)LouMallocEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
+                    PageDirectoryL1 = (uint64_t*)LouGeneralAllocateMemoryEx(sizeof(uint64_t) * 512, PAGE_TABLE_ALIGNMENT);
                     if (!PageDirectoryL1) return false;
                     InitializePageTable(PageDirectoryL1);
                 } else {

@@ -60,8 +60,8 @@ PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(){
     NewThread->DemonData.InstructionMode = LONG_MODE;
     NewThread->DemonData.State = THREAD_BLOCKED;
     NewThread->DemonData.NewThread = true;
-    NewThread->DemonData.InterruptStorage = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);
-    NewThread->DemonData.ContextStorage = (uintptr_t)LouKeMallocPhysicalEx(1688, 64, KERNEL_GENERIC_MEMORY);
+    NewThread->DemonData.InterruptStorage = (uintptr_t)LouAllocatePhysical64UpEx(1688, 64);
+    NewThread->DemonData.ContextStorage = (uintptr_t)LouAllocatePhysical64UpEx(1688, 64);
     LouKeGetTime(&NewThread->DemonData.ThreadStart);
     NewThread->DemonData.ThreadID = AllocateDemonId((PVOID)NewThread);
     NewThread->DemonData.AfinityBitmap = LouKeMallocArray(UINT8, (ROUND_UP64(ProcessBlock.ProcessorCount, 8) / 8), KERNEL_GENERIC_MEMORY);

@@ -94,9 +94,8 @@ void LouKeFreePhysical(void* AddressToFree);
 
 
 void LouFree(RAMADD Addr);
-void* LouMalloc(size_t BytesToAllocate);
-void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
-void* LouMallocEx64(size_t BytesToAllocate, uint64_t Alignment);
+void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
+void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, uint64_t Alignment);
 uint64_t GetStackBackset(uint64_t Offset);
 #endif
 
@@ -128,10 +127,9 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
 uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
 uint64_t GetRamSize();
-
+void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
 bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical,uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
-void* LouMallocAlligned(size_t size, uint64_t allignment);
 bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
@@ -148,11 +146,11 @@ void* LouKeMallocEx(
 
 void LouKeFree(void* AddressToFree);
 
-void* LouKeMallocPhysical(
+void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-void* LouKeMallocPhysicalEx(
+void* LouKeMallocExPhy32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
@@ -204,12 +202,12 @@ KERNEL_IMPORT void MapIoMemory(
 KERNEL_IMPORT bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
 KERNEL_IMPORT void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
 KERNEL_IMPORT void LouFree(uint8_t* Addr);
-KERNEL_IMPORT void* LouMalloc(size_t BytesToAllocate);
 KERNEL_IMPORT LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
 KERNEL_IMPORT bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-KERNEL_IMPORT void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
+KERNEL_IMPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
+KERNEL_IMPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
+KERNEL_IMPORT void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
 KERNEL_IMPORT void* memset(void* dest, int value, size_t count);
-KERNEL_IMPORT void* LouMallocAlligned(size_t size, uint64_t allignment);
 KERNEL_IMPORT bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 KERNEL_IMPORT void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
 KERNEL_IMPORT bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
@@ -230,20 +228,37 @@ KERNEL_IMPORT void LouKeFree(void* AddressToFree);
 KERNEL_IMPORT void LouUserFree(uint64_t DataP);
 KERNEL_IMPORT void LouKeUserFree(void* AddressToFree);
 KERNEL_IMPORT void LouKeFreePhysical(void* AddressToFree);
-KERNEL_IMPORT void* LouKeMallocPhysical(
+KERNEL_IMPORT void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT void* LouKeMallocPhysicalEx(
+KERNEL_IMPORT
+void* LouKeMallocExPhy32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
+KERNEL_IMPORT
+void* LouKeMallocExVirt32(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
+KERNEL_IMPORT
+void* LouKeMallocVirt32(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
 #else 
-KERNEL_EXPORT void* LouMalloc(size_t BytesToAllocate);
-KERNEL_EXPORT void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
+KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
+KERNEL_EXPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
-
+KERNEL_EXPORT
+void* LouKeMallocExPhy32(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
 #endif
 #endif
 
@@ -373,12 +388,20 @@ bool LouKeIsPageUnMapped(UINTPTR PhysicalAddress);
 
 void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
-void* LouKeMallocPageEx32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
-void* LouKeMallocPage32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
-void* LouKeMallocPhysicalPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
-void* LouKeMallocPhysicalPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
+void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
+void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
+void* LouKeMallocPageExPhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
+void* LouKeMallocPagePhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);
-
+void* LouKeMallocExVirt32(
+    size_t      AllocationSize,
+    size_t      Alignment,
+    uint64_t    AllocationFlags
+);
+void* LouKeMallocVirt32(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
 size_t LouKeGetAllocationSize(PVOID Addrress);
 
 LOUSTATUS RequestPhysicalAddress(
@@ -677,14 +700,6 @@ void* LouKeMallocEx(
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
-
-KERNEL_EXPORT
-void* LouKeMallocPhysicalEx(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
-
 
 KERNEL_EXPORT size_t LouKeGetAllocationSize(PVOID Addrress);
 

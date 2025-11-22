@@ -68,7 +68,7 @@ LouKeMallocEx(
     MutexLock(&GenMallocLock);
     uint64_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     if(!KeMallocPageTracks){
-        KeMallocPageTracks = (uint64_t)LouMallocEx(KMALLOC_PAGE_TRACK_SIZE , 8);
+        KeMallocPageTracks = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE , 8);
     }
     uint64_t TmpPageTrackBase = KeMallocPageTracks;
     uint64_t TmpVMemTrackBase = 0x00;
@@ -98,7 +98,7 @@ LouKeMallocEx(
                 }
 
                 if(FoundAddress){
-                    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
+                    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8));
                     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, Base);
                     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
                     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount + 1);
@@ -112,15 +112,15 @@ LouKeMallocEx(
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
 
-    PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouMallocEx(KMALLOC_PAGE_TRACK_SIZE, 8));
+    PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE, 8));
     PAGE_TRACK_DEREFERENCE_WRITE_FLAGS(TmpPageTrackBase, AllocationFlags);
     PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, (uint64_t)LouKeMallocPage(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags));
     PAGE_TRACK_DEREFERENCE_WRITE_PAGE_SIZE(TmpPageTrackBase, RoundUpSize);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, 1);
-    TmpVMemTrackBase = (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8);
+    TmpVMemTrackBase = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, TmpVMemTrackBase);
     
-    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
+    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8));
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     MutexUnlock(&GenMallocLock);
@@ -129,7 +129,7 @@ LouKeMallocEx(
 }
 
 void* 
-LouKeMalloc32(
+LouKeMallocExVirt32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
@@ -137,7 +137,7 @@ LouKeMalloc32(
     MutexLock(&GenMallocLock32);
     uint64_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     if(!KaMallocPageTracks32){
-        KaMallocPageTracks32 = (uint64_t)LouMallocEx(KMALLOC_PAGE_TRACK_SIZE , 8);
+        KaMallocPageTracks32 = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE , 8);
     }
     uint64_t TmpPageTrackBase = KaMallocPageTracks32;
     uint64_t TmpVMemTrackBase = 0x00;
@@ -167,7 +167,7 @@ LouKeMalloc32(
                 }
 
                 if(FoundAddress){
-                    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
+                    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8));
                     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, Base);
                     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
                     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount + 1);
@@ -181,15 +181,15 @@ LouKeMalloc32(
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
 
-    PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouMallocEx(KMALLOC_PAGE_TRACK_SIZE, 8));
+    PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE, 8));
     PAGE_TRACK_DEREFERENCE_WRITE_FLAGS(TmpPageTrackBase, AllocationFlags);
-    PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, (uint64_t)LouKeMallocPage32(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags));
+    PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, (uint64_t)LouKeMallocPageVirt32(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags));
     PAGE_TRACK_DEREFERENCE_WRITE_PAGE_SIZE(TmpPageTrackBase, RoundUpSize);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, 1);
-    TmpVMemTrackBase = (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8);
+    TmpVMemTrackBase = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, TmpVMemTrackBase);
     
-    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
+    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8));
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     MutexUnlock(&GenMallocLock32);
@@ -204,7 +204,14 @@ void* LouKeMalloc(
     return LouKeMallocEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
-void* LouKeMallocPhysicalEx(
+void* LouKeMallocVirt32(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+){
+    return LouKeMallocExVirt32(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
+}
+
+void* LouKeMallocExPhy32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
@@ -212,7 +219,7 @@ void* LouKeMallocPhysicalEx(
     MutexLock(&GenMallocPhyLock);
     uint64_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     if(!KeMallocPageTracksPhy){
-        KeMallocPageTracksPhy = (uint64_t)LouMallocEx(KMALLOC_PAGE_TRACK_SIZE , 8);
+        KeMallocPageTracksPhy = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE , 8);
     }
     uint64_t TmpPageTrackBase = KeMallocPageTracksPhy;
     uint64_t TmpVMemTrackBase = 0x00;
@@ -242,7 +249,7 @@ void* LouKeMallocPhysicalEx(
                 }
 
                 if(FoundAddress){
-                    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
+                    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8));
                     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, Base);
                     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
                     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount + 1);
@@ -256,15 +263,15 @@ void* LouKeMallocPhysicalEx(
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
 
-    PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouMallocEx(KMALLOC_PAGE_TRACK_SIZE, 8));
+    PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE, 8));
     PAGE_TRACK_DEREFERENCE_WRITE_FLAGS(TmpPageTrackBase, AllocationFlags);
-    PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, (uint64_t)LouKeMallocPhysicalPage(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags));
+    PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, (uint64_t)LouKeMallocPagePhy32(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags));
     PAGE_TRACK_DEREFERENCE_WRITE_PAGE_SIZE(TmpPageTrackBase, RoundUpSize);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, 1);
-    TmpVMemTrackBase = (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8);
+    TmpVMemTrackBase = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_BASE(TmpPageTrackBase, TmpVMemTrackBase);
     
-    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouMallocEx(KMALLOC_VMEM_TRACK_SIZE, 8));
+    VMEM_TRACK_DEREFERENCE_WRITE_NEXT(TmpVMemTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8));
     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, PAGE_TRACK_DEREFERENCE_READ_PAGE_ADDRESS(TmpPageTrackBase));
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     MutexUnlock(&GenMallocPhyLock);
@@ -273,11 +280,11 @@ void* LouKeMallocPhysicalEx(
 }
 
 
-void* LouKeMallocPhysical(
+void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 ){
-    return LouKeMallocPhysicalEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
+    return LouKeMallocExPhy32(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
 void LouKeFree(void* Address){
@@ -346,7 +353,7 @@ void LouKeFree(void* Address){
     MutexUnlock(&GenMallocLock);
 }
 
-void LouKeFree32(void* Address){
+void LouKeFreeVirt32(void* Address){
     if(!Address){
         return;
     }
@@ -412,7 +419,7 @@ void LouKeFree32(void* Address){
     MutexUnlock(&GenMallocLock32);
 }
 
-void LouKeFreePhysical(void* Address){
+void LouKeFreePhys32(void* Address){
     if(!Address){
         return;
     }
@@ -575,7 +582,7 @@ void* LouKeRealloc(
     );
 }
 
-void* LouKeReallocPhysicalEx(
+void* LouKeReallocExPhy32(
     void* Address, 
     size_t Alignment, 
     size_t NewSize
@@ -628,11 +635,11 @@ void* LouKeReallocPhysicalEx(
     return 0x00;
 }
 
-void* LouKeReallocPhysical(
+void* LouKeReallocPhy32(
     void* Address, 
     size_t NewSize
 ){
-    return LouKeReallocPhysicalEx(
+    return LouKeReallocExPhy32(
         Address, 
         GetAlignmentBySize(NewSize),
         NewSize        

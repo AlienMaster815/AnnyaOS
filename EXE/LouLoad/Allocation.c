@@ -2,7 +2,11 @@
 #include <LoaderPrivate.h>
 
 
-LOULOAD_MEMORY_TRACKER MemoryTracker[512] = {0};
+static LOULOAD_MEMORY_TRACKER MemoryTracker[512] = {0};
+
+UINT64 GetMemoryTrackerAddress(){
+    return (UINT64)&MemoryTracker[0];
+}
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 

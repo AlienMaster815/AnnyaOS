@@ -29,7 +29,7 @@ LouKeCreateDeferedDemonEx(
 ){
     LouPrint("Creating Demon\n");
     PDEMON_THREAD_RING NewThread = LouKeCreateDemonThreadHandle();
-    void* NewStack = LouKeMallocPhysicalEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
+    void* NewStack = LouKeMallocEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
 
     NewThread->DemonData.StackTop = (UINT64)NewStack;
     NewThread->DemonData.StackBase = (UINT64)NewStack + StackSize;

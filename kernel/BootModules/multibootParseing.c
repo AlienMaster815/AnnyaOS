@@ -17,24 +17,18 @@ void handle_module(
 
 extern bool GOPIsUnsable;
 
-static bool BootRegistryInitialize = false;
-
 void SetBootVbe(struct multiboot_tag_vbe VbeInfo);
 void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
 void InitializeBootRegistry(uintptr_t Base, uintptr_t Top);
 
+extern LOUSINE_LOADER_INFO KernelLoaderInfo;
+
 void ParseMBootTags(struct multiboot_tag* MBOOT) {
     struct multiboot_tag* MBOOTp2 = MBOOT;
-
     // Iterate through tags until end tag is encountered
     while (MBOOT->type != 0) {
         // Check if tag is memory map tag
-        EnforceSystemMemoryMap((uint64_t)MBOOT, MBOOT->size);
         switch (MBOOT->type) {
-        case (MULTIBOOT_TAG_TYPE_MMAP): {
-            ParseMemoryMap(MBOOT);
-            break;
-        }
         case (MULTIBOOT_TAG_TYPE_EFI64): {
             uint64_t EFI_TABLE = (uint64_t)((uint8_t*)MBOOT);
             LouKeSetEfiTable(EFI_TABLE); 
@@ -55,7 +49,6 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
         }
         case (MULTIBOOT_TAG_TYPE_VBE): {
             struct multiboot_tag_vbe* vbe_tag = (struct multiboot_tag_vbe*)MBOOT;
-            EnforceSystemMemoryMap(vbe_tag->vbe_mode_info.framebuffer, ROUND_UP64(640 * 480 * (32 / 8), KILOBYTE_PAGE));
             SetBootVbe(*vbe_tag);
             break;
         }
@@ -82,18 +75,18 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
         else
             MBOOT = (struct multiboot_tag*)((uint8_t*)MBOOT + MBOOT->size + (8 - MBOOT->size % 8));
     }
+
     while (MBOOTp2->type != 0) {
         switch (MBOOTp2->type) {
             case (MULTIBOOT_TAG_TYPE_MODULE): {
                 struct multiboot_tag_module *mod = (struct multiboot_tag_module *)MBOOTp2;
-                if(mod->mod_end > (64 * MEGABYTE)){
-                    EnforceSystemMemoryMap(mod->mod_start, mod->mod_end - mod->mod_start);
+                if((UINT64)MBOOTp2 == KernelLoaderInfo.KernelTag){
+                    break;
                 }
-                if(!BootRegistryInitialize){
-                    InitializeBootRegistry(mod->mod_start, mod->mod_end - mod->mod_start);
-                    BootRegistryInitialize = true;
+                else if((UINT64)MBOOTp2 == KernelLoaderInfo.RegistryTag){
+                    InitializeBootRegistry(mod->mod_start + GetKSpaceBase(), mod->mod_end - mod->mod_start);
                 }else{
-                    AddDriverToBootDeviceManager(mod->mod_start, mod->mod_end - mod->mod_start);   
+                    AddDriverToBootDeviceManager(mod->mod_start + GetKSpaceBase(), mod->mod_end - mod->mod_start);   
                 }
                 break;
             }
@@ -103,8 +96,9 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
         else
             MBOOTp2 = (struct multiboot_tag*)((uint8_t*)MBOOTp2 + MBOOTp2->size + (8 - MBOOTp2->size % 8));
     }
-    //while(1);
 }
+
+void SetRamSize(UINT64 Size);
 
 void ParserLouLoaderInformation(
     PLOUSINE_LOADER_INFO LoaderInfo
@@ -112,12 +106,17 @@ void ParserLouLoaderInformation(
     PLOUSINE_RAT_PARTITION BootRamAllocationTable = (PLOUSINE_RAT_PARTITION)&LoaderInfo->RatPartition;  
     PLOULOAD_MEMORY_TRACKER BootPartition = (PLOULOAD_MEMORY_TRACKER)BootRamAllocationTable->BootPartition; 
     size_t RamAllocations = BootRamAllocationTable->PartitionItems;
+    SetRamSize(LoaderInfo->KernelVm.KernelVmLimit);
+    
     for(size_t i = 0 ; i < RamAllocations; i++){
         EnforceSystemMemoryMap(
             BootPartition[i].Address,
             BootPartition[i].size
         );        
     }    
+
     ParseMemoryMap((struct multiboot_tag*)BootRamAllocationTable->RamMap);
+    
+    //ParseMBootTags((struct multiboot_tag*)LoaderInfo->MultibootInfo);    
 
 }

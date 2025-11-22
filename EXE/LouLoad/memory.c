@@ -131,13 +131,20 @@ void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, U
 }
 
 static void MapKernelSpace(){
-
-    LoaderMapKernelMemoryBlock(
-        0, 
-        KernelLoaderInfo.KernelVm.KernelVmBase, 
-        ROUND_UP64(KernelLoaderInfo.KernelVm.KernelVmLimit, 2 * MEGABYTE), 
-        0b011
-    );
+    struct master_multiboot_mmap_entry* mmap = (struct master_multiboot_mmap_entry*)(UINT8*)KernelLoaderInfo.RatPartition.RamMap;
+    UINT16  EntryCount = (mmap->tag.size - sizeof(struct master_multiboot_mmap_entry)) / mmap->entry_size;
+    struct multiboot_mmap_entry* MapEntry;
+    for(UINT16 i = 0 ; i < EntryCount; i++){
+        MapEntry = MapIndexToEntry(mmap, i);
+        if(MapEntry->type == 1){
+            LoaderMapKernelMemoryBlock(
+                MapEntry->addr, 
+                MapEntry->addr + KernelLoaderInfo.KernelVm.KernelVmBase, 
+                ROUND_UP64(MapEntry->len, 2 * MEGABYTE), 
+                0b011
+            );
+        }
+    }
 }
 
 void LoaderCreateKernelSpace(){
@@ -145,14 +152,6 @@ void LoaderCreateKernelSpace(){
     UNUSED UINT64 KSpaceBase = KERNEL_SPACE_DEFAULT_BASE;
     UINT64 KSpaceLimit = ROUND_UP64(GetRamSize(), 4096);
     UINT64 Frames = 1; //PML4
-    Frames += (KSpaceLimit + (512 * GIGABYTE - 1)) / (512 * GIGABYTE);
-    Frames += (KSpaceLimit + (1 * GIGABYTE - 1)) / (1 * GIGABYTE);
-
-    void* KSpaceManager = LoaderAllocateMemoryEx(
-        Frames * 4096, 4096
-    );
-    EnforceLoaderMemoryMap(((UINT64)KSpaceManager + KSpaceBase), Frames * 4096);
-
     UINT64 L4, L3, L2, L1;
 
     CalculateTableMarks(
@@ -166,10 +165,18 @@ void LoaderCreateKernelSpace(){
     SetKSpaceBase(KSpaceBase);
     //KernelLoaderInfo.KernelVm.KernelVmBase = KSpaceBase;
     KernelLoaderInfo.KernelVm.KernelVmLimit = KSpaceLimit;
-    KernelLoaderInfo.KernelVm.LargePageClusters = (UINT64)KSpaceManager;
     KernelLoaderInfo.KernelVm.KernelPml4 = (UINT8)L4 + 1;
     KernelLoaderInfo.KernelVm.KernelPml3 = (UINT8)L3 + 1;
     KernelLoaderInfo.KernelVm.KernelPml2 = (UINT8)L2 + 1;
+
+    Frames += KernelLoaderInfo.KernelVm.KernelPml4;
+    Frames += (KernelLoaderInfo.KernelVm.KernelPml3 * 512); //L2s
+    void* KSpaceManager = LoaderAllocateMemoryEx(
+        Frames * 4096, 4096
+    );
+    EnforceLoaderMemoryMap((UINT64)KSpaceManager + GetKSpaceBase(), Frames * 4096);
+
+    KernelLoaderInfo.KernelVm.LargePageClusters = (UINT64)KSpaceManager;
 
     UINT64* Pml4 = (UINT64*)GetCr3Address();
     *(UINT64*)(KSpaceManager) = Pml4[0];

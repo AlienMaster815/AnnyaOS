@@ -263,7 +263,7 @@ void LouKeSetPanicInfo(
 
 	LouPrint("The Lousine Kernel has initialized a kernel panic. Information from the panic is below.\n");
 	size_t ErrorMessageSize = (strlen("The Fault Was Caused By A:%s") * strlen(DynamicErrorMessage));
-	string ErrorMessage = (string)LouMallocEx(ErrorMessageSize, 1);
+	string ErrorMessage = (string)LouGeneralAllocateMemoryEx(ErrorMessageSize, 1);
 	_vsnprintf(ErrorMessage, ErrorMessageSize, "The Fault Was Caused By A:%s", DynamicErrorMessage);
 	LouPrint("%s\n", ErrorMessage);
 

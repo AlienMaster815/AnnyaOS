@@ -26,13 +26,13 @@ size_t GetRamSize();
 void LoaderCreateKernelSpace();
 void memcpy(void* pDestination, void* pSource, size_t Count);
 void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, UINT64 Flags);
+UINT64 GetMemoryTrackerAddress();
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes
 #define MEGABYTE (1ULL << 20)  // 1 MB in bytes
 #define KILOBYTE (1 * 1024)
 
-#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
-#define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
+#define KERNEL_SPACE_DEFAULT_BASE 0xFFFF800000000000ULL
 
 
 

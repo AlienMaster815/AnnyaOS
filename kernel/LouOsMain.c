@@ -36,7 +36,7 @@ string KERNEL_VERSION = "0.5.04 RSC-2";
 
 string KERNEL_ARCH = "64-BIT";
 
-static LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
+LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
 
 typedef struct _PROCESSOR_FEATURES{
@@ -309,11 +309,12 @@ KERNEL_ENTRY LouOsKrnlStart(
     ParserLouLoaderInformation(
         &KernelLoaderInfo
     );
+    //InitializeBasicMemcpy();
     
     while(1);
     //struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
     //ParseMBootTags(mboot);
-    //InitializeBasicMemcpy();
+    //
 
     ///vga set for debug
     if(!LouKeMapEfiMemory()){

@@ -3,8 +3,6 @@
 
 LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
-extern LOULOAD_MEMORY_TRACKER MemoryTracker[512];
-
 
 bool LoaderRequestMemory(
     void*   Address,
@@ -37,10 +35,13 @@ PCOFF_IMAGE_HEADER UnpackKernelImage(
 ){
     UINT64 KSpaceBase = GetKSpaceBase();
     void* ImageVBase = (void*)((UINT64)*ImageBase + KSpaceBase);
-    *ImageBase = ImageVBase;
     struct multiboot_tag_module* KernelMod = (struct multiboot_tag_module*)KernelTag; 
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader((UINT8*)(UINT64)KernelMod->mod_start);
+    LoaderMapKernelMemoryBlock((UINT64)*ImageBase, (UINT64)ImageVBase, ImageHeader->OptionalHeader.PE64.SizeOfImage, 0b11);   
+    *ImageBase = ImageVBase;
     EnforceLoaderMemoryMap((UINT64)ImageVBase, ImageHeader->OptionalHeader.PE64.SizeOfImage);
+
+
     memcpy(ImageVBase, (void*)(UINTPTR)KernelMod->mod_start, ImageHeader->OptionalHeader.PE64.SizeOfHeaders);
     KernelLoaderInfo.KernelBase = (UINT64)ImageVBase;
     KernelLoaderInfo.KernelLimit = (UINT64)ImageHeader->OptionalHeader.PE64.SizeOfImage;
@@ -164,16 +165,16 @@ void EnableKernelMemoryProtecion(
 extern void AdjdustStackAndJump(UINT64, UINT64 , UINT64);
 
 PLOUSINE_LOADER_INFO RebaseKernelLoaderInformation(){
+    LoaderMapKernelMemoryBlock(0, GetKSpaceBase(), 16 * MEGABYTE, 0b11);    
     PLOUSINE_LOADER_INFO KernelLoaderInfoCopy = (PLOUSINE_LOADER_INFO)((UINT64)&KernelLoaderInfo + GetKSpaceBase());
-    KernelLoaderInfoCopy->MultibootInfo += GetKSpaceBase();
-    
+    KernelLoaderInfoCopy->MultibootInfo += GetKSpaceBase();   
     UINT64 Stack = KernelLoaderInfoCopy->BootStack - (16 * KILOBYTE);
     EnforceLoaderMemoryMap(Stack, 16 * KILOBYTE);
     EnforceLoaderMemoryMap(Stack + GetKSpaceBase(), 16 * KILOBYTE);
     KernelLoaderInfoCopy->BootStack += GetKSpaceBase();
     KernelLoaderInfoCopy->KernelTag += GetKSpaceBase();
     KernelLoaderInfoCopy->RegistryTag += GetKSpaceBase();
-    KernelLoaderInfoCopy->KernelVm.LargePageClusters += GetKSpaceBase();
+    KernelLoaderInfoCopy->KernelVm.vLargePageClusters = KernelLoaderInfoCopy->KernelVm.LargePageClusters + GetKSpaceBase();
     KernelLoaderInfoCopy->RatPartition.RamMap += GetKSpaceBase();
     KernelLoaderInfoCopy->RatPartition.BootPartition += GetKSpaceBase();
     if(KernelLoaderInfoCopy->FirmwareInfo.EfiTable)KernelLoaderInfoCopy->FirmwareInfo.EfiTable += GetKSpaceBase();
@@ -195,8 +196,9 @@ extern void LouLoaderStart(
 
     KernelLoaderInfo.MultibootInfo = (UINT64)(UINT8*)mboot;
     KernelLoaderInfo.BootStack = BootStack;
-    KernelLoaderInfo.RatPartition.BootPartition = (UINT64)MemoryTracker;
+    KernelLoaderInfo.RatPartition.BootPartition = GetMemoryTrackerAddress();
 
+    SetKSpaceBase(KERNEL_SPACE_DEFAULT_BASE);
 
     InitializeLoaderMultibootInformation(mboot);
     
@@ -210,12 +212,12 @@ extern void LouLoaderStart(
         (UINT64)KernelBase
     );
 
+    UNUSED PLOUSINE_LOADER_INFO KernelLoaderInfoCopy = RebaseKernelLoaderInformation();
+
     EnableKernelMemoryProtecion(
         LousineImage,
         (UINT64)KernelBase
     );
-
-    UNUSED PLOUSINE_LOADER_INFO KernelLoaderInfoCopy = RebaseKernelLoaderInformation();
 
     AdjdustStackAndJump(
         GetKSpaceBase(), 

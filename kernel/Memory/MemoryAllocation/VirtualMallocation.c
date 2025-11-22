@@ -140,7 +140,7 @@ void* LouKeAllocateUncachedVMemoryEx(
     uint64_t NumberOfBytes,
     uint64_t Alignment
 ){
-    void* AllocatedPMemory = LouMallocEx(sizeof(NumberOfBytes), Alignment);
+    void* AllocatedPMemory = LouAllocatePhysical64UpEx(sizeof(NumberOfBytes), Alignment);
     void* AllocatedVMemory = LouVMallocEx(sizeof(NumberOfBytes), Alignment);
 
     LouKeMapContinuousMemoryBlock((uint64_t)AllocatedPMemory, (uint64_t)AllocatedVMemory, NumberOfBytes, KERNEL_PAGE_WRITE_PRESENT | CACHE_DISABLED_PAGE);

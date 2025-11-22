@@ -5,11 +5,7 @@ LOUSTATUS OhciCreateEdPool(
 ){
     POHCI_ED_POOL TmpPool = &OhciDevice->EdPool;
 
-    UINT64 NewPoolAddress = (UINT64)LouKeMallocPhysicalEx(OHCI_ED_POOL_SIZE * sizeof(OHCI_ED_TRACKER), GET_ALIGNMENT(OHCI_ED_TRACKER), KERNEL_DMA_MEMORY);
-
-    if(NewPoolAddress > UINT32_MAX){
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
+    UINT64 NewPoolAddress = (UINT64)LouKeMallocExPhy32(OHCI_ED_POOL_SIZE * sizeof(OHCI_ED_TRACKER), GET_ALIGNMENT(OHCI_ED_TRACKER), KERNEL_DMA_MEMORY);
 
     POOL NewPool = LouKeCreateGenericPool(
         NewPoolAddress,
@@ -93,7 +89,7 @@ OhciInitialzeEndpointHeaders(
 ){
     POHCI_OPERATIONAL_REGISTERS OpReg = OhciDevice->OperationalRegisters;
 
-    OhciDevice->HccaAddress = (UINT64)LouKeMallocPhysicalEx(256, 256, KERNEL_DMA_MEMORY);
+    OhciDevice->HccaAddress = (UINT64)LouKeMallocExPhy32(256, 256, KERNEL_DMA_MEMORY);
     if(OhciDevice->HccaAddress >= UINT32_MAX){
         LouPrint("No Free 32 bit Address\n");
         return STATUS_INSUFFICIENT_RESOURCES;

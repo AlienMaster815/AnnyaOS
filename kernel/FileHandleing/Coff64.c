@@ -275,7 +275,7 @@ LOUSTATUS LouKeLoadCoffImageA64(
         );
     }
         
-    CfiObject->PhysicalLoadedAddress = LouMallocEx64(Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageAlignment);
+    CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageAlignment);
     LouKeMapContinuousMemoryBlock((UINT64)CfiObject->PhysicalLoadedAddress, (UINT64)CfiObject->LoadedAddress, ISize, KERNEL_GENERIC_MEMORY);
 
     UnpackCoffImage(CfiObject);

@@ -7,7 +7,7 @@
 
 static uint64_t SavedState = 0;
 
-void* LouMallocEx(size_t BytesToAllocate, size_t Aligned);
+void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 
 //Fuck It Well do it live
 void SaveEverythingWithContext(uint64_t ContextHandle);
@@ -121,7 +121,7 @@ UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t 
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
     
     if(!SavedState){
-        SavedState = (uintptr_t)LouMallocEx(2688, 64);
+        SavedState = (uintptr_t)LouAllocatePhysical32UpEx(2688, 64);
     }
 
     if(ProcessorFeatures->Avx512Supported){
@@ -141,7 +141,7 @@ void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
 }
 
 void InitializeBasicMemcpy(){
-    SavedState = (uintptr_t)LouMallocEx(2688, 64);
+    SavedState = (uintptr_t)LouAllocatePhysical32UpEx(2688, 64);
     MemcopyHandler = memcpy_basic;
 }
 

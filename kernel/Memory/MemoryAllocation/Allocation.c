@@ -18,6 +18,7 @@ void* LouMalloc(size_t BytesToAllocate);
 
 uint64_t GetRamSize();
 
+extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 
 static spinlock_t MemmoryMapLock;
 
@@ -132,6 +133,7 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
                         AddressBlock[0].Address = AlignmentCheck;
                         AddressBlock[0].size = BytesToAllocate;
                         AddressesLogged++; // Increment after logging the first address
+                        AlignmentCheck += GetKSpaceBase();
                         memset((void*)AlignmentCheck, 0 , BytesToAllocate);
                         return (void*)AlignmentCheck;
                     }
@@ -169,6 +171,7 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
                                 AddressBlock[i].Address = AlignmentCheck;
                                 AddressBlock[i].size = BytesToAllocate;
                                 //LouPrint("Address:%h\n", AlignmentCheck);
+                                AlignmentCheck += GetKSpaceBase();
                                 memset((void*)AlignmentCheck, 0 , BytesToAllocate);
                                 return (void*)AlignmentCheck;
                             }
@@ -184,6 +187,7 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
                         AddressBlock[AddressesLogged].size = BytesToAllocate;
                         AddressesLogged++; // Increment after logging the new address
                         //LouPrint("Address:%h\n", AlignmentCheck);
+                        AlignmentCheck += GetKSpaceBase();
                         memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                         return (void*)AlignmentCheck;
                     }
@@ -202,6 +206,7 @@ bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 ){
+
     LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
@@ -253,22 +258,11 @@ bool EnforceSystemMemoryMap(
     return false;
 }
 
-
-void* LouMalloc(size_t BytesToAllocate) {
-
-    return LouMallocEx(BytesToAllocate, GetAlignmentBySize(BytesToAllocate));
-
-}
-
-void ListUsedAddresses(){
-
-}
-
 uint64_t SearchForMappedAddressSize(uint64_t Address){
     return GetAllocationBlockSize(Address);
 }
 
-void* _LouMallocEx(
+static void* _LouMallocEx(
     SIZE BytesToAllocate, 
     UINT64 Alignment
 ){
@@ -380,7 +374,7 @@ void* _LouMallocEx(
     return NULL; 
 }
 
-void* _LouMallocEx64(
+static void* _LouMallocEx64(
     SIZE BytesToAllocate, 
     UINT64 Alignment
 ){
@@ -491,21 +485,35 @@ void* _LouMallocEx64(
     return NULL; 
 }
 
-void* LouMallocEx(size_t BytesToAllocate, uint64_t Alignment) {
+void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, uint64_t Alignment) {
    return _LouMallocEx(BytesToAllocate, Alignment);
 }
 
-static void* (*LouMallocEx64Instance)(SIZE BytesToAllocate, UINT64 Alignment);
+void* LouAllocatePhysical64UpEx(SIZE BytesToAllocate, UINT64 Alignment){
+    return _LouMallocEx64(BytesToAllocate, Alignment);
+}
 
-void* LouMallocEx64(SIZE BytesToAllocate, UINT64 Alignment){
-    PVOID Result;
-    if(LouMallocEx64Instance){
-        Result = LouMallocEx64Instance(BytesToAllocate, Alignment);
-        if(Result){
-            return Result;
-        }
-    }
-    return _LouMallocEx(BytesToAllocate, Alignment);
+void* LouAllocatePhysical64Up(
+    SIZE Size
+){
+    return LouAllocatePhysical64UpEx(Size, GetAlignmentBySize(Size));
+}
+
+void* LouAllocatePhysical32Up(
+    SIZE Size 
+){
+    return LouAllocatePhysical32UpEx(Size, GetAlignmentBySize(Size));
+}
+
+void* 
+LouGeneralAllocateMemoryEx(
+    UINT64 Size,
+    UINT64 Alignment
+){
+    void* Result = LouAllocatePhysical64UpEx(Size, Alignment);
+    Result += GetKSpaceBase();
+    memset(Result, 0, Size);
+    return Result;
 }
 
 void LouFree(RAMADD Addr) {
@@ -543,7 +551,7 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
 
     LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
-    uint64_t AlignmentCheck = (KERNEL_SPACE_DEFAULT_BASE + GetRamSize());
+    uint64_t AlignmentCheck = (GetKSpaceBase() + GetRamSize());
     if(!AlignmentCheck){
         AlignmentCheck = 4 * GIGABYTE;
     }
@@ -630,19 +638,6 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);
     while(1);
     return NULL;
-}
-
-void LouKeInitializeSafeMemory(){
-
-    void* Foo = LouMalloc(LousineMemoryMapTable->tag.size);
-    memcpy(Foo, LousineMemoryMapTable, LousineMemoryMapTable->tag.size);
-
-    LousineMemoryMapTable = Foo;
-
-    if(GetRamSize() > StartMap64){
-        LouMallocEx64Instance = _LouMallocEx64;
-    }
-
 }
 
 static mutex_t ReserveCheckMutex = {0}; 

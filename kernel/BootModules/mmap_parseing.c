@@ -9,7 +9,9 @@ uint64_t GetRamSize() {
     return mlimit;
 }
 
-
+void SetRamSize(UINT64 Size){
+    mlimit = Size;
+}
 
 void ParseMemoryMap(struct multiboot_tag* MBOOT) {
 
