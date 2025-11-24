@@ -341,7 +341,6 @@ static void* _LouMallocEx(
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
                                 LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
-                                memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                                 return (void*)AlignmentCheck;
                             }
                         }
@@ -359,7 +358,6 @@ static void* _LouMallocEx(
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
                     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-                    memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                     return (void*)AlignmentCheck;
                 }
 
@@ -453,7 +451,6 @@ static void* _LouMallocEx64(
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
                                 LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);  
-                                memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                                 return (void*)AlignmentCheck;
                             }
                         }
@@ -471,7 +468,6 @@ static void* _LouMallocEx64(
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
                     LouKeReleaseSpinLock(&MemmoryMapLock, &OldIrql);    
-                    memset((void*)AlignmentCheck, 0 , BytesToAllocate);                   
                     return (void*)AlignmentCheck;
                 }
 
@@ -490,7 +486,11 @@ void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, uint64_t Alignment) {
 }
 
 void* LouAllocatePhysical64UpEx(SIZE BytesToAllocate, UINT64 Alignment){
-    return _LouMallocEx64(BytesToAllocate, Alignment);
+    void* Result = _LouMallocEx64(BytesToAllocate, Alignment);
+    if(!Result){
+        return _LouMallocEx(BytesToAllocate, Alignment);
+    }
+    return Result;
 }
 
 void* LouAllocatePhysical64Up(

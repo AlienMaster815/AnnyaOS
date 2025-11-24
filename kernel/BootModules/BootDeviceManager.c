@@ -17,6 +17,7 @@ void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top){
     Tmp->Base = Base;
     Tmp->Top = Top;
     Tmp->Peers.NextHeader = (PListHeader)LouKeMallocType(BOOT_DRIVER_LIST, KERNEL_GENERIC_MEMORY);
+    while(1);
     BootCount++;
 }
 

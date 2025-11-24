@@ -165,7 +165,6 @@ void EnableKernelMemoryProtecion(
 extern void AdjdustStackAndJump(UINT64, UINT64 , UINT64);
 
 PLOUSINE_LOADER_INFO RebaseKernelLoaderInformation(){
-    LoaderMapKernelMemoryBlock(0, GetKSpaceBase(), 16 * MEGABYTE, 0b11);    
     PLOUSINE_LOADER_INFO KernelLoaderInfoCopy = (PLOUSINE_LOADER_INFO)((UINT64)&KernelLoaderInfo + GetKSpaceBase());
     KernelLoaderInfoCopy->MultibootInfo += GetKSpaceBase();   
     UINT64 Stack = KernelLoaderInfoCopy->BootStack - (16 * KILOBYTE);
@@ -185,6 +184,7 @@ PLOUSINE_LOADER_INFO RebaseKernelLoaderInformation(){
     if(KernelLoaderInfoCopy->FirmwareInfo.Apm)KernelLoaderInfoCopy->FirmwareInfo.Apm += GetKSpaceBase();
     if(KernelLoaderInfoCopy->FirmwareInfo.Framebuffer)KernelLoaderInfoCopy->FirmwareInfo.Framebuffer += GetKSpaceBase();
     if(KernelLoaderInfoCopy->FirmwareInfo.EfiMap)KernelLoaderInfoCopy->FirmwareInfo.EfiMap += GetKSpaceBase();
+    
     return KernelLoaderInfoCopy;
 }
 

@@ -116,7 +116,5 @@ void ParserLouLoaderInformation(
     }    
 
     ParseMemoryMap((struct multiboot_tag*)BootRamAllocationTable->RamMap);
-    
-    //ParseMBootTags((struct multiboot_tag*)LoaderInfo->MultibootInfo);    
-
+    ParseMBootTags((struct multiboot_tag*)LoaderInfo->MultibootInfo);    
 }
