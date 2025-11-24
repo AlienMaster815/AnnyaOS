@@ -516,6 +516,12 @@ LouGeneralAllocateMemoryEx(
     return Result;
 }
 
+void LouGeneralFreeMemory(void* Address){
+    UINT64 Tmp = (UINT64)Address;
+    Tmp -= GetKSpaceBase();
+    LouFree((RAMADD)Tmp);
+}
+
 void LouFree(RAMADD Addr) {
 
     if(LouKeIsPageUnMapped((UINTPTR)Addr)){

@@ -298,41 +298,11 @@ void SetEfiMap(uint64_t Map){
 //static EFI_GUID SMBIOS_GUID = { 0xEB9D2D31, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D } };
 
 bool LouKeMapEfiMemory(){
-
 	if(EfiMemMap){
-		//LouPrint("We Got Somthing\n");
-		struct multiboot_tag_efi_mmap* Map = (struct multiboot_tag_efi_mmap*)EfiMemMap;
-		LouMapAddress(EfiMemMap, EfiMemMap, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
-
-		//LouPrint("DescVer:%d\n", Map->descr_vers);
-		//LouPrint("DescSize:%d\n", Map->descr_size);
-
-		static EFI_MEMORY_DESCRIPTOR* Desc;
-
-		for(uint64_t i = 16; i < (Map->size); i += Map->descr_size){
-			
-			Desc = (EFI_MEMORY_DESCRIPTOR*)(EfiMemMap + i);
-			switch(Desc->Type){
-				case(0):
-				case(3):
-				case(4):
-				case(5):
-				case(6):
-				case(8):
-				case(9):
-				case(10):
-				case(11):
-				case(12):
-				case(13):
-				case(14):
-					EnforceSystemMemoryMap(Desc->PhysicalStart, 4096 * Desc->NumberOfPages);
-					EnforceSystemMemoryMap(Desc->VirtualStart, 4096 * Desc->NumberOfPages);
-				default: continue;
-			}
-		}
 
 		return true;
 	}
+
 	return false;
 }
 #define BIOS_START 0xF0000

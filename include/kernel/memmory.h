@@ -128,6 +128,7 @@ uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
 uint64_t GetRamSize();
 void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
+void  LouGeneralFreeMemory(void* Address);
 bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical,uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
 bool EnforceSystemMemoryMap(

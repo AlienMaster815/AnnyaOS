@@ -11,6 +11,7 @@ UNUSED static void* SmBiosAddress;
 
 static void* SearchForSmBiosBiosEntry(){
     UNUSED UINT8* VirtualScanArea = LouKeMallocPageEx(KILOBYTE_PAGE, (SMBIOS_BIOS_SCAN_RANGE / KILOBYTE_PAGE), KERNEL_GENERIC_MEMORY, SMBIOS_BIOS_ENTRY);
+
     for(size_t i = 0 ; i < (SMBIOS_BIOS_SCAN_RANGE - 4); i++){
         if(memcmp(&VirtualScanArea[i], "_SM_", 4) == 0){
             LouPrint("Found the SMBIOS Entry At:%h\n", &VirtualScanArea[i]);
@@ -22,7 +23,6 @@ static void* SearchForSmBiosBiosEntry(){
 
 void* GetSmBiosAddress(){
     if(!SmBiosSupported){
-        while(1);
         return 0x00;
     }
     return SmBiosAddress;
@@ -86,6 +86,9 @@ static void IterateSmbiosTables(uint8_t* TablePtr, uint8_t* End) {
 
 
 void InitializeSmbiosTables(void* Entry){
+    if(Entry == (void*)-1){
+        return;
+    }
     SIZE Offset = 0x00;
     if(!strncmp(Entry, SMBIOS64_ANCHOR_STRING, strlen(SMBIOS64_ANCHOR_STRING))){
         PSMBIOS_ENTRY_3_64  Entry64 = (PSMBIOS_ENTRY_3_64)Entry;

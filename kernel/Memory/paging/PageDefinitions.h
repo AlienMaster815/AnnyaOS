@@ -20,7 +20,7 @@ typedef enum{
 #define L2Parameter 2
 #define L1Parameter 3
 
-PML* GetPageBase();
+UINT64* GetPageBase();
 
 CurrentPageSize GetCurrentPageSize(
     uint64_t AddressOfTable,

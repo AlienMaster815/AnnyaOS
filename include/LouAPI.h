@@ -57,6 +57,11 @@
 #include <Coff.h>
 #include <LouLoad.h>
 
+#ifndef KERNEL_MAIN_FILE
+extern LOUSINE_LOADER_INFO KernelLoaderInfo;
+#endif
+
+
 #ifndef _KERNEL_MODULE_
 
 #define ACPIBUFFER 512

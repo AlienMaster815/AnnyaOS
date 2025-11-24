@@ -1,3 +1,4 @@
+#define KERNEL_MAIN_FILE
 #ifdef __x86_64__
 #include <LouAPI.h>
 #include <bootloader/grub/multiboot2.h>
@@ -309,13 +310,8 @@ KERNEL_ENTRY LouOsKrnlStart(
     ParserLouLoaderInformation(
         &KernelLoaderInfo
     );
-    //InitializeBasicMemcpy();
+    InitializeBasicMemcpy();
     
-    while(1);
-    //struct multiboot_tag* mboot = (struct multiboot_tag*)(uintptr_t)(MBOOT + 8);
-    //ParseMBootTags(mboot);
-    //
-
     ///vga set for debug
     if(!LouKeMapEfiMemory()){
         LouKeHandleSystemIsBios();
@@ -323,6 +319,8 @@ KERNEL_ENTRY LouOsKrnlStart(
         SystemIsEfiv = true;
         InitializeEfiCore();
     }                      
+    while(1);
+
     LouKeInitializeSafeMemory();    
 
     LouKeInitializeRegistry();

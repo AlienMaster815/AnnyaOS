@@ -133,7 +133,6 @@ void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags)
     if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
         return 0x00;
     }
-    while(1);
     void* Resurve = LouKeGetFreeReservePage(PageSize, PageCount);
     if(Resurve){
         return Resurve;
