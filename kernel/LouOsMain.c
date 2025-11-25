@@ -127,7 +127,6 @@ void LouKeHandleSystemIsBios();
 void SetContext(uint64_t Context, uint64_t Function);
 void SMPInit();
 void LouOsKrnlMain();
-void LouKeInitializeSafeMemory();
 uint8_t LouKeGetNumberOfStorageDevices();
 void InitializeFileSystemManager();
 void GenericVideoProtocolInitialize();
@@ -319,12 +318,9 @@ KERNEL_ENTRY LouOsKrnlStart(
         SystemIsEfiv = true;
         InitializeEfiCore();
     }                      
-    while(1);
-
-    LouKeInitializeSafeMemory();    
 
     LouKeInitializeRegistry();
-
+    
     LousineKernelEarlyInitialization();
 
     EnableCR0WriteProtection();
@@ -342,6 +338,8 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouKePcieProbeEcam();
 
     InitializeBootGraphics();
+
+    while(1);
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();

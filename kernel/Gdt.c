@@ -99,7 +99,7 @@ void SetupGDT(){
 
     PLongModeGdt GDT = (PLongModeGdt)LouKeMallocEx(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
     memset(GDT,0, sizeof(LongModeGdt));
-
+    UNUSED UINT64 Tmp;
     SetGDTSegmentEntry(
             (uint8_t*)&GDT->KCODE,
             0,
@@ -140,55 +140,44 @@ void SetupGDT(){
     Tss->IST2 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
     Tss->IST3 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
 
-    UINT64 Tmp = 0;
-    RequestPhysicalAddress(Tss->RSP0, &Tmp);
-    Tss->RSP0 = Tmp;
-    RequestPhysicalAddress(Tss->RSP1, &Tmp);
-    Tss->RSP1 = Tmp;
-    RequestPhysicalAddress(Tss->RSP2, &Tmp);
-    Tss->RSP2 = Tmp;
-
-    RequestPhysicalAddress(Tss->IST1, &Tmp);
-    Tss->IST1 = Tmp;
-    RequestPhysicalAddress(Tss->IST2, &Tmp);
-    Tss->IST2 = Tmp;
-    RequestPhysicalAddress(Tss->IST3, &Tmp);
-    Tss->IST3 = Tmp;
-
-    RequestPhysicalAddress((UINT64)&GDT->TSSLo, &Tmp);
+    RequestPhysicalAddress((UINT64)(UINT8*)Tss, &Tmp);
 
     SetGDTSystemSegmentEntry(
-        (uint8_t*)Tmp,
-        (uintptr_t)Tss, sizeof(TSS) - 1,
+        (uint8_t*)&GDT->TSSLo,
+        (uintptr_t)Tmp, sizeof(TSS) - 1,
         0x89,
         0x00
     );
 
 
-    uint64_t GsBase = (uint64_t)LouKeMallocVirt32(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
+    uint64_t GsBase = (uint64_t)LouKeMallocPhy32(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
 
-    if(GsBase >= 0xFFFFFFFFFFFF){
+    RequestPhysicalAddress(GsBase, &Tmp);
+
+    if(Tmp >= 0xFFFFFFFFFFFF){
         LouPrint("PANIC GsBase Over GDT Limit\n");
         while(1);
     }
     
     SetGDTSegmentEntry(
         (uint8_t*)&GDT->KPCR,
-        GsBase,
+        Tmp,
         0xFFFFF,
         0xF2,
         0xC
     );
 
+    RequestPhysicalAddress((UINT64)(UINT8*)GDT, &Tmp);
+
     GDTREntry Gdtr;
     Gdtr.Length = sizeof(LongModeGdt) - 1;
-    Gdtr.Base   = (uint64_t)GDT;
+    Gdtr.Base   = (uint64_t)Tmp;
+    RequestPhysicalAddress((UINT64)(UINT8*)&Gdtr, &Tmp);
 
-    LouPrint("Installing GDT:%h\n", GDT);
-    InstallGDT((uint64_t)&Gdtr);
+    LouPrint("Installing GDT:%h\n", Gdtr.Base);
 
+    InstallGDT((uint64_t)Tmp);
     SetGSBase(GsBase);
 
     LouPrint("Done Setting Up GDT\n");
-
 }

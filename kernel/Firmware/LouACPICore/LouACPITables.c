@@ -51,7 +51,7 @@ static bool AcpiConflict(void* Table){
     return false;
 }
 
-static void LouACPIHandleSpecificTableInitialization(void* TableBase){
+UNUSED static void LouACPIHandleSpecificTableInitialization(void* TableBase){
     //edge cases for specific tables
     IF_ACPI_TABLE_IS((string)TableBase, FIXED_ACPI_DESCRIPTION){
         LouKeInitializeFixedAcpiDescriptionTable((void*)(uintptr_t)TableBase);
@@ -65,16 +65,20 @@ static void LouACPIHandleSpecificTableInitialization(void* TableBase){
 }
 
 void LouKeInitializeLouACPITable(void* TableBase){
-    uint64_t AddressCheck = 0;
-    PTABLE_DESCRIPTION_HEADER TmpHeader = 0;
-    RequestPhysicalAddress((uint64_t)(uintptr_t)TableBase, &AddressCheck);
-    if(AddressCheck != (uint64_t)TableBase){
-        LouKeMapContinuousMemoryBlock((uint64_t)(uintptr_t)TableBase & ~(KILOBYTE_PAGE - 1), (uint64_t)(uintptr_t)TableBase & ~(KILOBYTE_PAGE - 1), KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
-        if((uint64_t)(uintptr_t)TableBase >= (65 * MEGABYTE)){ //if system is in the memory allocations area then map it
-            TmpHeader = (PTABLE_DESCRIPTION_HEADER)(uint64_t)(uintptr_t)TableBase;
-            EnforceSystemMemoryMap((uint64_t)TmpHeader, TmpHeader->Length);
-        }
+
+    UINT64 SanityMapCheck;
+    RequestPhysicalAddress((UINT64)TableBase, &SanityMapCheck);
+    if(!SanityMapCheck){
+
+        DEBUG_TRAP;
     }
+
+    PTABLE_DESCRIPTION_HEADER TmpHeader = 0;
+    if((uint64_t)((uintptr_t)TableBase - GetKSpaceBase()) >= (65 * MEGABYTE)){ //if system is in the memory allocations area then map it
+        TmpHeader = (PTABLE_DESCRIPTION_HEADER)(uint64_t)((uintptr_t)TableBase - GetKSpaceBase());
+        EnforceSystemMemoryMap((uint64_t)TmpHeader, TmpHeader->Length);
+    }
+    
     MutexLock(&AcpiTableTrackMutex);
     if(AcpiConflict(TableBase)){
         MutexUnlock(&AcpiTableTrackMutex);
