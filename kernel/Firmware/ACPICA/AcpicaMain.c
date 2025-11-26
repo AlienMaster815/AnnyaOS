@@ -23,7 +23,7 @@ ACPI_STATUS AcpiOsTerminate(){
 }
 
 ACPI_PHYSICAL_ADDRESS AcpiOsGetRootPointer(){
-    return (ACPI_PHYSICAL_ADDRESS)LouKeGetRsdp();
+    return (ACPI_PHYSICAL_ADDRESS)LouKeGetRsdp() - GetKSpaceBase();
 }
 
 ACPI_STATUS AcpiOsPredefinedOverride(

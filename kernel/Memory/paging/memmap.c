@@ -6,8 +6,6 @@ static spinlock_t PageTableLock = {0};
 
 //LouKe PFN Architecture
 
-static uint64_t SafePage = 0x00;
-
 void CacheFlush(void* addr) {
     asm volatile ("clflush (%0)" :: "r"(addr) : "memory");
     asm volatile ("mfence");
@@ -34,14 +32,6 @@ void CalculateTableMarks(
 
 static LOU_PFN_TABLE_ENTRY PfnDatabase = {0};
 static size_t PageFrameCount = 0;
-
-void InitializeSafePage(){
-    SafePage = (uint64_t)LouAllocatePhysical64UpEx(MEGABYTE_PAGE, MEGABYTE_PAGE);
-}
-
-bool LouKeIsPageUnMapped(UINTPTR PhysicalAddress){
-    return (SafePage == PhysicalAddress);
-}
 
 void LouKeMallocPageFrameNumber(
     uint64_t Virtual,
@@ -213,12 +203,30 @@ static inline bool PageFrameL2SanityCheck(uint64_t oldL2){
     return true;
 }
 
+static UINT64* PageDown(UINT64* PageUpperBase, UINT64 UpperIndex){
+    UINT64 Base = PageUpperBase[UpperIndex] & ~(FLAGSSPACE);
+
+    if(!Base){
+        Base = (UINT64)LouGeneralAllocateMemoryEx(4096, 4096);
+        PageUpperBase[UpperIndex] = GetPageValue(Base - GetKSpaceBase(), 0b111);
+    }else {
+        Base += GetKSpaceBase();
+    }
+
+    return (UINT64*)Base;
+}
 
 void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags){
 
-
-    while(1);
+    LouKIRQL Irql;
     VAddress &= ~(KILOBYTE_PAGE - 1);
+
+    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), GetRamSize())){
+        DEBUG_TRAP
+        while(1);
+    }
+
+    LouKeAcquireSpinLock(&PageTableLock, &Irql);
 
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
@@ -234,75 +242,44 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
         &L1Entry
     );
     
-    //TODO Change To UINT64*
-    UNUSED PML* PML4 = (PML*)GetPageBase();
+    UINT64* TmpPageBase = GetPageBase();
+    UINT64  TmpPageValue;
+    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
+    TmpPageBase = PageDown(TmpPageBase, L4Entry);    
+    TmpPageBase = PageDown(TmpPageBase, L3Entry);
+    TmpPageValue = TmpPageBase[L2Entry];
 
-    uint64_t* PML3Directory = (uint64_t*)(PML4->PML4.entries[L4Entry] & ~(FLAGSSPACE));
-    if(!PML3Directory){
-        return;
-    }
-    uint64_t* PML2Directory = (uint64_t*)(PML3Directory[L3Entry] & ~(FLAGSSPACE));
-    if(!PML2Directory){
-        return;
-    }
-    if(PML2Directory[L2Entry] & (1 << 7)){
-        if((PML2Directory[L2Entry] & ~(FLAGSSPACE)) == SafePage){
-            return;
-        }
-        if(PAddress){
-            *PAddress = PML2Directory[L2Entry] & ~(FLAGSSPACE);
-        }
+    if(TmpPageValue & (1 << 7)){
         if(UnmapedLength){
             *UnmapedLength = MEGABYTE_PAGE;
         }
         if(PageFlags){
-            *PageFlags = PML2Directory[L2Entry] & (FLAGSSPACE);
-        }
-        PML2Directory[L2Entry] = GetPageValue(SafePage, (1 << 7));
-
-    }else{
-        uint64_t* PML1Directory = (uint64_t*)(PML2Directory[L2Entry] & ~(FLAGSSPACE));
-        if((PML1Directory[L1Entry] & ~(FLAGSSPACE)) == SafePage){
-            return;
+            *PageFlags = TmpPageValue & FLAGSSPACE; 
         }
         if(PAddress){
-            *PAddress = PML1Directory[L1Entry] & ~(FLAGSSPACE);
+            *PAddress = TmpPageValue & ~(FLAGSSPACE);
         }
+        TmpPageValue &= ~(PRESENT_PAGE);
+        TmpPageBase[L2Entry] = TmpPageValue;
+    }else{
+        TmpPageValue &= ~(FLAGSSPACE);
+        TmpPageBase = (UINT64*)(UINT8*)(TmpPageValue + GetKSpaceBase());
+        TmpPageValue = TmpPageBase[L1Entry];
         if(UnmapedLength){
             *UnmapedLength = KILOBYTE_PAGE;
         }
         if(PageFlags){
-            *PageFlags = PML1Directory[L1Entry] & (FLAGSSPACE);
+            *PageFlags = TmpPageValue & FLAGSSPACE; 
         }
-
-        PML1Directory[L1Entry] = GetPageValue(SafePage, 0);
-        CacheFlush(&PML1Directory[L1Entry]);
-
-        if(PageFrameL2SanityCheck(PML2Directory[L2Entry])){
-            PML2Directory[L2Entry] = GetPageValue(SafePage, 1 << 7);
-            LouFree((RAMADD)PML1Directory);
-        }
-
+        if(PAddress){
+            *PAddress = TmpPageValue & ~(FLAGSSPACE);
+        }   
+        TmpPageValue &= ~(PRESENT_PAGE);
+        TmpPageBase[L1Entry] = TmpPageValue;
     }
-    CacheFlush(&PML2Directory[L2Entry]);
-    CacheFlush(&PML3Directory[L3Entry]);
-    CacheFlush(&PML4->PML4.entries[L4Entry]);
-    
-    PageFlush(VAddress);
+
     ReloadCR3();
-}
-
-static UINT64* PageDown(UINT64* PageUpperBase, UINT64 UpperIndex){
-    UINT64 Base = PageUpperBase[UpperIndex] & ~(FLAGSSPACE);
-
-    if(!Base){
-        Base = (UINT64)LouGeneralAllocateMemoryEx(4096, 4096);
-        PageUpperBase[UpperIndex] = GetPageValue(Base - GetKSpaceBase(), 0b111);
-    }else {
-        Base += GetKSpaceBase();
-    }
-
-    return (UINT64*)Base;
+    LouKeReleaseSpinLock(&PageTableLock, &Irql);
 }
 
 

@@ -91,7 +91,7 @@ void PageFault(uint64_t FaultingStackP) {
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
     string PanicMessage = (string)LouGeneralAllocateMemoryEx(strlen("Page Fault Protection Violation At Address:%h") + 21, 1);
 
-    _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:%h",  VAddress);
+    _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:\n%h",  VAddress);
     // Check for specific error causes, e.g.:
     //if (InterruptCode & 0x1) {
         LouKePanic(PanicMessage, (CPUContext*)FaultingStackP, InterruptCode);

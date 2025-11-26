@@ -110,7 +110,7 @@ int vsprintf_s(char* Buffer, size_t BufferCount, const char* Format, va_list arg
                 remainingBuffer -= Addition;
                 Index++;
             }
-            else if (Format[Index] == 'x' || Format[Index] == 'X') { // Hexadecimal
+            else if (Format[Index] == 'x' || Format[Index] == 'X' || Format[Index] == 'h') { // Hexadecimal
                 uint64_t num = va_arg(args, uint64_t);
                 char hexString[21];
                 uintToHexString(num, hexString);
@@ -146,62 +146,10 @@ int _vsprintf(char* Buffer, size_t BufferCount, const char* Format, ...) {
 
 
 int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...) {
+    int Index;
     va_list args;
     va_start(args, format);
-    size_t Index = 0;
-    
-    for (size_t i = 0; format[i] != '\0' && Index < buffer_size - 1; i++) {
-        if (format[i] == '%') {
-            i++; // Skip '%'
-            switch (format[i]) {
-                case 'd': // Signed integer
-                case 'i': {
-                    int value = va_arg(args, int);
-                    int_to_ascii(value, buffer, &Index, buffer_size);
-                    break;
-                }
-                case 'u': { // Unsigned integer
-                    unsigned int value = va_arg(args, unsigned int);
-                    int_to_ascii(value, buffer, &Index, buffer_size);
-                    break;
-                }
-                case 'h': {  // Lowercase hexadecimal
-                    unsigned int value = va_arg(args, unsigned int);
-                    uint_to_hex(value, buffer, &Index, buffer_size, 0);  // 0 for lowercase hex
-                    break;
-                }
-                case 'x': {  // Lowercase hexadecimal
-                    unsigned int value = va_arg(args, unsigned int);
-                    uint_to_hex(value, buffer, &Index, buffer_size, 0);  // 0 for lowercase hex
-                    break;
-                }
-                case 'X': {  // Uppercase hexadecimal
-                    unsigned int value = va_arg(args, unsigned int);
-                    uint_to_hex(value, buffer, &Index, buffer_size, 1);  // 1 for uppercase hex
-                    break;
-                }
-                case 'c': { // Character
-                    char value = (char)va_arg(args, int);  // Characters are promoted to int in varargs
-                    append_char(buffer, &Index, value, buffer_size);
-                    break;
-                }
-                case 's': { // String
-                    const char *value = va_arg(args, const char *);
-                    append_string(buffer, &Index, value, buffer_size);
-                    break;
-                }
-                default: {
-                    append_char(buffer, &Index, '%', buffer_size);
-                    append_char(buffer, &Index, format[i], buffer_size);
-                    break;
-                }
-            }
-        } else {
-            append_char(buffer, &Index, format[i], buffer_size);
-        }
-    }
-    
-    buffer[Index] = '\0'; // Null-terminate the result
+    Index = vsprintf_s(buffer, buffer_size, format, args);
     va_end(args);
     return (int)Index; // Return how many characters were written
 }

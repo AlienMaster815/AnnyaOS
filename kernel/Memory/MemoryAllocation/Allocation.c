@@ -524,10 +524,6 @@ void LouGeneralFreeMemory(void* Address){
 
 void LouFree(RAMADD Addr) {
 
-    if(LouKeIsPageUnMapped((UINTPTR)Addr)){
-        return;
-    }
-
     LouKIRQL OldIrql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &OldIrql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){

@@ -269,15 +269,35 @@ void LouKeSetPanicInfo(
 
 	char TmpString[256];
 
-	_vsnprintf((string)TmpString, 256, "RAX:%h :: RBX:%h :: RCX:%h :: RDX:%h", rax, rbx,rcx, rdx);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "RAX:%h :: RBX:%h", rax, rbx);
 	LouPrint("%s\n", TmpString);
-	_vsnprintf((string)TmpString, 256, "RBP:%h :: RSI:%h :: RDI:%h :: R8:%h", rbp, rsi, rdi, r8);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "RCX:%h :: RDX:%h", rcx, rdx);
 	LouPrint("%s\n", TmpString);
-	_vsnprintf((string)TmpString, 256, "R9:%h :: R10:%h :: R11:%h :: R12:%h", r9, r10, r11, r12);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "RBP:%h :: RSI:%h", rbp, rsi);
 	LouPrint("%s\n", TmpString);
-	_vsnprintf((string)TmpString, 256, "R13:%h :: R14:%h :: R15:%h :: RIP:%h", r13, r14, r15, rip);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "RDI:%h :: R8 :%h", rdi, r8);
 	LouPrint("%s\n", TmpString);
-	_vsnprintf((string)TmpString, 256, "CS:%h :: FQ:%h :: RSP:%h :: SS:%h", cs, fq, rsp, ss);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "R9 :%h :: R10:%h", r9, r10);
+	LouPrint("%s\n", TmpString);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "R11:%h :: R12:%h", r11, r12);
+	LouPrint("%s\n", TmpString);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "R13:%h :: R14:%h", r13, r14);
+	LouPrint("%s\n", TmpString);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "R15:%h :: RIP:%h", r15, rip);
+	LouPrint("%s\n", TmpString);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "CS :%h :: FQ :%h", cs, fq);
+	LouPrint("%s\n", TmpString);
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "RSP:%h :: SS :%h", rsp, ss);
 	LouPrint("%s\n", TmpString);
 
 	if(strncmp(DynamicErrorMessage, "Page Fault Protection Violation", strlen("Page Fault Protection Violation")) == 0){
@@ -288,10 +308,15 @@ void LouKeSetPanicInfo(
 
 	_PAGE_FUALT_PANIC:
 
+	memset(TmpString, 0, 256);
 	_vsnprintf((string)TmpString, 256, "Page Fault Code HexValue:%h", PageFaultData);
 	LouPrint("%s\n", TmpString);
 
 	_GENERIC_FUALT_PANIC:
+
+	memset(TmpString, 0, 256);
+	_vsnprintf((string)TmpString, 256, "Test:%h", 0xFFFF800000000000);
+	LouPrint("%s\n", TmpString);
 
 	while(1);
 }
@@ -299,7 +324,7 @@ void LouKeSetPanicInfo(
 void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData){
         PWINDHANDLE Bsod = SetBlueScreenPannel();
 
-        CPUContext* FaultData = (CPUContext*)((uint64_t)PageFaultData);
+        CPUContext* FaultData = (CPUContext*)((uint64_t)CpuContext);
 
         LouKeSetPanicInfo(
         Bsod, Message,

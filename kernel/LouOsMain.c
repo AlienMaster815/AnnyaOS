@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.5.04 RSC-2";
+string KERNEL_VERSION = "0.5.04 RSC-4";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -130,7 +130,6 @@ void LouOsKrnlMain();
 uint8_t LouKeGetNumberOfStorageDevices();
 void InitializeFileSystemManager();
 void GenericVideoProtocolInitialize();
-void InitializeSafePage();
 void InitializePoolsPool();
 void CheckAndInitializePs2Controller();
 void InitializeBusCore();
@@ -230,7 +229,6 @@ void InitializeSymmetricMultiProcessing(){
     LouPrint("Checking If System Supports SMP\n");
     if(GetNPROC() < 2)return;
     LouPrint("InitializeSymmetricMultiProcessing()\n");    
-    
     LouKeLoadLousineBootTrampoline();
 
     LouKeEnableSmpIrqlManagement(GetNPROC());
@@ -339,8 +337,6 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeBootGraphics();
 
-    while(1);
-
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
@@ -355,7 +351,6 @@ KERNEL_ENTRY LouOsKrnlStart(
         LouPrint("No Storage Devices Detected\n");
         while(1);
     }
-
 
     InitializeFileSystemManager();
     InitializeNtKernelTransitionLayer();
@@ -426,8 +421,6 @@ void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
 }
 
 //0x220B21030
-
-//TODO : Fix the memory manager...
 
 //BUGS TO FIX:
 

@@ -385,7 +385,6 @@ void LouKeUnMapContinuousMemoryBlock(
     uint64_t size
 );
 
-bool LouKeIsPageUnMapped(UINTPTR PhysicalAddress);
 
 void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);

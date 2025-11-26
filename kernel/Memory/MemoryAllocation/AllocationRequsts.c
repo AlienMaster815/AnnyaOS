@@ -28,7 +28,7 @@ LouKeRequestVirtualAddressAllocation(
     size_t i = 0;
     while(i < size){
         RequestPhysicalAddress(Address + i, (UINT64*)Phy);
-        if(*Phy || (!LouKeIsPageUnMapped((UINTPTR)*Phy))){
+        if(*Phy){
             LouUnMapAddress(Address + i, 0x00, &Tmp, 0x00);
             i += Tmp;
         }else{
