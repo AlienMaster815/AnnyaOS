@@ -1,40 +1,14 @@
 #ifndef _COFF_H
 #define _COFF_H
 
-#ifdef _LOUSINE_LOADER
-#include <LouLoad.h>
-#else
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
-extern "C"{
-#endif
-#endif
 
 #define COFF_PE_SIGNATURE "PE\0\0"
-
 
 #define CFI_HEADER_LOUCOFF_SIGNATURE                    "LPE\0"
 
 #define CFI_SUBSYSTEM_LOUSINE_UNKOWN_OBJECT             0
 #define CFI_SUBSYSTEM_LOUSINE_USER_OBJECT               1
 #define CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT             2
-
-//TODO:kula and subsystems
-//#define CFI_SUBSUSTEM_LOUSINE_KULA                      3
-//#define CFI_SUBSUSTEM_LOUSINE_SUBSYS                    4
-
-#define CFI_DLLCHARACTERISTICS_LOUSINE_KERNEL_DRIVER    CFI_DLLCHARACTERISTICS_WDM_DRIVER
-#define CFI_DDOFFSET_KULA_TABLE                         CFI_DDOFFSET_UNUSED_TABLE
-#define CFI_DDOFFSET_FORWARDER_TABLE                    CFI_DDOFFSET_ARCHITECTURE_TABLE
-
-//the following are reserved if necisary
-//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0001) 
-//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0002) 
-//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0004) 
-//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0008)
-//      CFI_DLLCHARACTERISTICS_RESERVED                 (0x0010)
 
 #define CoffGetImageHeader(x) ((PCOFF_IMAGE_HEADER)((UINT8*)(x) + *(UINT32*)((UINT8*)(x) + 0x3C)))
 
@@ -330,7 +304,7 @@ typedef struct _CFI_SYMTABLE_AUXFMT_5{
     UINT8       Unused[3];
 }CFI_SYMTABLE_AUXFMT_5, * PCFI_SYMTABLE_AUXFMT_5;
 
-typedef union PACKED _CFI_SYMTABLE_AUXFMT{ //sanity pack
+typedef union __attribute__((packed)) _CFI_SYMTABLE_AUXFMT{ //sanity pack
     CFI_SYMTABLE_AUXFMT_1   Fmt1;
     CFI_SYMTABLE_AUXFMT_2   Fmt2;
     CFI_SYMTABLE_AUXFMT_3   Fmt3;
@@ -571,7 +545,7 @@ typedef union _CFI_TLS_DIRECTORY{
     CFI_TLS_DIRECTORY64     Directory64;
 }CFI_TLS_DIRECTORY, * PCFI_TLS_DIRECTORY;
 
-typedef VOID (NTAPI *PCFI_IMAGE_TLS_CALLBACK)(PVOID DllHandle, UINT32 Reason, PVOID Reserved);
+
 
 #define CFI_DLL_PROCESS_DETATCH 0
 #define CFI_DLL_PROCESS_ATTATCH 1
@@ -681,6 +655,12 @@ typedef struct _CFI_RESOURCE_DIRECTORY_TABLE{
     CFI_RESOURCE_DIRECTORY_ENTRIES      Entires[];
 }CFI_RESOURCE_DIRECTORY_TABLE, * PCFI_RESOURCE_DIRECTORY_TABLE;
 
+typedef struct _UNICODE_STRING{
+    USHORT  Length;
+    USHORT  MaximumLength;
+    LPWSTR  Buffer;
+}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
+
 typedef UNICODE_STRING CFI_RESOURCE_DIRECTORY_STRING, * PCFI_RESOURCE_DIRECTORY_STRING;
 
 typedef struct _CFI_RESOURCE_DATA_ENTRY{
@@ -738,40 +718,6 @@ typedef struct _CFI_IMPORT_HEADER{
 #define CFI_IMPORT_NAME_TYPE_NOPREFIX   2
 #define CFI_IMPORT_NAME_TYPE_UNDECORATE 3
 
-#ifndef _LOUSINE_LOADER
-typedef struct _CFI_OBJECT{
-    FILE*                   CoffFile;
-    string                  FormalName;
-    BOOL                    AOA64;
-    BOOL                    KernelObject;
-    PCOFF_IMAGE_HEADER      ImageHeader;
-    PVOID                   LoadedAddress;
-    PVOID                   PhysicalLoadedAddress;
-    PVOID                   ExecututionLoading;
-    KERNEL_REFERENCE        Reference;
-    PVOID                   Entry;
-    mutex_t                 LockOutTagOut;    
-}CFI_OBJECT, * PCFI_OBJECT;
 
-LOUSTATUS
-LouKeLoadCoffImageExA(
-    string          FileNameAndPath,
-    PCFI_OBJECT     LoadedObjectCheck,
-    BOOL            KernelObject
-);
 
-LOUSTATUS 
-LouKeLoadCoffImageA(
-    string          Path,
-    string          FileName,      
-    PCFI_OBJECT     CfiObject,
-    BOOL            KernelObject
-);
-#endif
-
-#ifndef _LOUSINE_LOADER
-#ifdef __cplusplus
-}
-#endif
-#endif
 #endif

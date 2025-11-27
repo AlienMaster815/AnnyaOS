@@ -242,6 +242,10 @@ UserSpace:
 annya.iso: release KernelModules UserSpace
 	rm -rf ISO
 	
+	$(MAKE) -C LouCoff clean
+	$(MAKE) -C LouCoff all
+	$(MAKE) -C LouCoff modifications
+
 	#Make The System Directories
 	$(MAKEDIR)
 

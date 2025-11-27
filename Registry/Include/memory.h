@@ -27,7 +27,6 @@ typedef struct _LMPOOL_DIRECTORY{
     POOL_MEMORY_TRACKS  MemoryTracks;
 }LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
 
-
 #define LouKeMallocType(x,y) SafeMalloc(sizeof(x))
 #define LouKeMalloc(x,y) SafeMalloc(x)
 #define LouKeMallocArray(x, y, z) SafeMalloc(sizeof(x) * y)

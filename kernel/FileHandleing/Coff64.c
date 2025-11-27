@@ -288,7 +288,10 @@ LOUSTATUS LouKeLoadCoffImageA64(
     //image header location changed
     Pe64ImageHeader = CfiObject->ImageHeader;
 
-    if(memcmp((PVOID)(UINT8*)&Pe64ImageHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))){
+    if(
+        (memcmp((PVOID)(UINT8*)&Pe64ImageHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))) &&
+        (memcmp((PVOID)(UINT8*)&Pe64ImageHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, sizeof(UINT32)))
+    ){
         LouPrint("Error Loading Coff Image: File Could Not Fork\n");
         return STATUS_UNSUCCESSFUL;
     }

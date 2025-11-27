@@ -29,9 +29,17 @@ typedef struct _KULA_TABLE_TRACKER{
 
 #define DECLARE_KULA_TABLE __declspec(dllexport) const KULA_TABLE KulaTable 
 
-#define CFI_OPTIONAL_HEADER_LOUCOFF_MAGIC               0x0815
-#define CFI_SUBSYSTEM_ANNYA_NATIVE                      17
-#define CFI_SUBSUSTEM_LOUSINE_KULA                      18
+#define CFI_HEADER_LOUCOFF_SIGNATURE                    "LPE\0"
+
+#define CFI_SUBSYSTEM_LOUSINE_UNKOWN_OBJECT             0
+#define CFI_SUBSYSTEM_LOUSINE_USER_OBJECT               1
+#define CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT             2
+
+
+//TODO:kula and subsystems
+//#define CFI_SUBSUSTEM_LOUSINE_KULA                      3
+//#define CFI_SUBSUSTEM_LOUSINE_SUBSYS                    4
+
 #define CFI_DLLCHARACTERISTICS_LOUSINE_KERNEL_DRIVER    CFI_DLLCHARACTERISTICS_WDM_DRIVER
 #define CFI_DDOFFSET_KULA_TABLE                         CFI_DDOFFSET_UNUSED_TABLE
 #define CFI_DDOFFSET_FORWARDER_TABLE                    CFI_DDOFFSET_ARCHITECTURE_TABLE

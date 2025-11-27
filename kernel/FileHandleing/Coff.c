@@ -51,13 +51,13 @@ LouKeLoadCoffImageB(
 ){
     LOUSTATUS           LoaderStatus;
     PCOFF_IMAGE_HEADER  CoffStdHeader;
+    bool LouCoff = false;
 
     if((!Base) || (!CfiObject)){
         return STATUS_INVALID_PARAMETER;
     }
 
     MutexLock(&LITMutex);
-
 
     bool Loaded = LookForLoadedImageEntry(CfiObject);
 
@@ -73,11 +73,20 @@ LouKeLoadCoffImageB(
     CfiObject->CoffFile = (FILE*)Base;
 
     CoffStdHeader = CoffGetImageHeader((UINT8*)CfiObject->CoffFile);
-    if(memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))){
-        LouPrint("Error Loading Coff Image: File Is Not Coff Image\n");
+    if(
+        (memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))) &&
+        (memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, sizeof(UINT32)))
+    ){
+
+        LouPrint("Error Loading Coff Image: File Is Not Coff Image:%s\n", (PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature);
         DestroyLoadedImageEntry(CfiObject);
         MutexUnlock(&LITMutex);
+        while(1);
         return STATUS_INVALID_PARAMETER;
+    }
+
+    if(memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, sizeof(UINT32))){
+        LouCoff = true;
     }
     
     
@@ -92,6 +101,15 @@ LouKeLoadCoffImageB(
     }
     
     CfiObject->AOA64 = (CoffStdHeader->OptionalHeader.PE64.Magic == CFI_OPTIONAL_HEADER_PE3264_MAGIC) ? 0 : 1;
+    if(LouCoff){
+        if(CfiObject->AOA64){
+            KernelObject = (CoffStdHeader->OptionalHeader.PE32.Subsystem == CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT); 
+
+        }else{
+            KernelObject = (CoffStdHeader->OptionalHeader.PE64.Subsystem == CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT); 
+        }
+    }
+ 
     CfiObject->KernelObject = KernelObject;
 
     if((CoffStdHeader->OptionalHeader.PE64.Magic != CFI_OPTIONAL_HEADER_PE32_MAGIC) && CfiObject->AOA64){
@@ -108,6 +126,8 @@ LouKeLoadCoffImageB(
     }else {
         LoaderStatus = LouKeLoadCoffImageA32(CfiObject);
     }
+
+    //TODO: add KULA Parser
 
     if(LoaderStatus != STATUS_SUCCESS){
         DestroyLoadedImageEntry(CfiObject);
@@ -122,6 +142,7 @@ LouKeLoadCoffImageExA_ns(
     PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 ){
+    bool LouCoff = false;
     LOUSTATUS LoaderStatus;
     PCOFF_IMAGE_HEADER  CoffStdHeader;
 
@@ -136,10 +157,15 @@ LouKeLoadCoffImageExA_ns(
 
 
     CoffStdHeader = CoffGetImageHeader((UINT8*)CfiObject->CoffFile);
-    if(memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))){
-        LouPrint("Error Loading Coff Image: File Is Not Coff Image\n");
+    if(
+        (memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)COFF_PE_SIGNATURE, sizeof(UINT32))) &&
+        (memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, sizeof(UINT32)))
+    ){
+
+        LouPrint("Error Loading Coff Image: File Is Not Coff Image:%s\n", (PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature);
         DestroyLoadedImageEntry(CfiObject);
         MutexUnlock(&LITMutex);
+        while(1);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -154,6 +180,14 @@ LouKeLoadCoffImageExA_ns(
     }
 
     CfiObject->AOA64 = (CoffStdHeader->OptionalHeader.PE64.Magic == CFI_OPTIONAL_HEADER_PE3264_MAGIC) ? 0 : 1;
+    if(LouCoff){
+        if(CfiObject->AOA64){
+            KernelObject = (CoffStdHeader->OptionalHeader.PE32.Subsystem == CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT); 
+
+        }else{
+            KernelObject = (CoffStdHeader->OptionalHeader.PE64.Subsystem == CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT); 
+        }
+    }
     CfiObject->KernelObject = KernelObject;
 
     if((CoffStdHeader->OptionalHeader.PE64.Magic != CFI_OPTIONAL_HEADER_PE32_MAGIC) && CfiObject->AOA64){
@@ -170,6 +204,8 @@ LouKeLoadCoffImageExA_ns(
     }else {
         LoaderStatus = LouKeLoadCoffImageA32(CfiObject);
     }
+
+    //todo add kula parser
 
     return LoaderStatus;
 }

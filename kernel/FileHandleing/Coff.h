@@ -3,6 +3,7 @@
 
 #include <LouAPI.h>
 
+
 LOUSTATUS LouKeLoadCoffImageA32(
     PCFI_OBJECT CoffObject
 );
