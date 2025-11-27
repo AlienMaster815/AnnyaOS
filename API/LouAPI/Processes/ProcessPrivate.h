@@ -100,7 +100,16 @@ typedef struct _USER_THREAD_RING{
     PVOID                   SubsystemPrivateData;
 }USER_THREAD_RING, * PUSER_THREAD_RING;
 
+#define USER_THREAD_RING_ID     1
+#define DEMON_THREAD_RING_ID    2
+
+typedef union _THREAD_RING{
+    DEMON_THREAD_RING   Demon;
+    USER_THREAD_RING    User;
+}THREAD_RING, * PTHREAD_RING;
+
 typedef PTHREAD (*PROCESS_RING_DISPATCH_HANDLER)(struct _PROCESSOR_STATE_BLOCK* ProcessBlock);
+
 
 #define PROCESS_DISPATCH_HANDLER_HIGH_Q1        0   //HIGH
 #define PRDCESS_DISPATCH_HANDLER_ABOVE_Q1       1   //ABOVE
@@ -118,6 +127,8 @@ typedef PTHREAD (*PROCESS_RING_DISPATCH_HANDLER)(struct _PROCESSOR_STATE_BLOCK* 
 #define PROCESS_DISPATCH_HANDLER_LOW_Q1         13  //LOW 
 #define PRIORITY_DISPATCH_HANDLER_RINGS         14
 
+#define THREAD_PRIORITY_RINGS 32
+
 #define PROCESS_PRIORITY_HIGH       0
 #define PROCESS_PRIORITY_ABOVE      1
 #define PROCESS_PRIORITY_NORMAL     2
@@ -130,7 +141,6 @@ typedef PTHREAD (*PROCESS_RING_DISPATCH_HANDLER)(struct _PROCESSOR_STATE_BLOCK* 
 #define THREAD_PRIORITY_NORMAL      PROCESS_PRIORITY_NORMAL
 #define THREAD_PRIORITY_BELOW       PROCESS_PRIORITY_BELOW
 #define THREAD_PRIORITY_LOW         PROCESS_PRIORITY_LOW
-#define THREAD_PRIORITY_RINGS       PROCESS_PRIORITY_RINGS
 
 typedef struct _PROCESS_DISPATCH_MANAGER{
     struct {
@@ -149,6 +159,30 @@ typedef struct _PROCESS_THREAD_RING{
     PUSER_THREAD_RING               ThreadRings[THREAD_PRIORITY_RINGS];
 }PROCESS_THREAD_RING, * PPROCESS_THREAD_RING;
 
+typedef struct _SCHEDUALER_OBJECT{
+    UINT8           CurrentLimiter; //prioirty dips in goaround
+    UINT8           CurrentIndexor;
+    PTHREAD_RING    ThreadRings[THREAD_PRIORITY_RINGS];
+}SCHEDUALER_OBJECT, * PSCHEDUALER_OBJECT;
+
+static inline UINT8 EulerCurveIndexor(PSCHEDUALER_OBJECT Sched){
+    Sched->CurrentIndexor++;
+    Sched->CurrentIndexor %= Sched->CurrentLimiter; 
+    if(!Sched->CurrentIndexor){
+        Sched->CurrentLimiter++;
+        if(Sched->CurrentLimiter > THREAD_PRIORITY_RINGS){// over 32 set to 1
+            Sched->CurrentLimiter = 1;
+        }
+    }
+    return Sched->CurrentIndexor;
+}
+
+static inline PSCHEDUALER_OBJECT CreateShecdualerObject(){
+    PSCHEDUALER_OBJECT NewObject = LouKeMallocType(SCHEDUALER_OBJECT, KERNEL_GENERIC_MEMORY);
+    NewObject->CurrentLimiter = 1;
+    return NewObject;
+}
+
 typedef struct _PROCESSOR_STATE_BLOCK{
     mutex_t                         LockOutTagOut;
     UINT64                          CurrentThreadID;
@@ -160,7 +194,7 @@ typedef struct _PROCESSOR_STATE_BLOCK{
     ATOMIC_BOOLEAN                  RingSelector;
     UINT8                           DispatchRobin;
     THREAD_DISPATCH_MANAGER         ProcessRobin;
-    PDEMON_THREAD_RING              CurrentDemon;
+    PDEMON_THREAD_RING              LegacyCurrentDemon;
     PUSER_THREAD_RING               ProcessRings[PROCESS_PRIORITY_RINGS];  
     PVOID                           ProcessorPrivateData;
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
@@ -173,7 +207,7 @@ typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
     INTEGER                         ProcessorCount;
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
     PROCESS_DISPATCH_MANAGER        DispatchManager;
-    PDEMON_THREAD_RING              DemonRing;
+    PDEMON_THREAD_RING              LegacyDemonRing;
     PPROCESS_THREAD_RING            ProcessRing;
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;
 

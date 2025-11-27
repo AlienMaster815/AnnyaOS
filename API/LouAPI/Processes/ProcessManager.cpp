@@ -52,7 +52,7 @@ static INTEGER AllocateDemonId(PVOID ThreadHandle){
 
 PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(){
     PDEMON_THREAD_RING NewThread = LouKeMallocType(DEMON_THREAD_RING, KERNEL_GENERIC_MEMORY);
-    PDEMON_THREAD_RING TmpRing = ProcessBlock.DemonRing;
+    PDEMON_THREAD_RING TmpRing = ProcessBlock.LegacyDemonRing;
     PDEMON_THREAD_RING BaseRing = TmpRing;
     NewThread->DemonData.Peb = &KPeb;
     NewThread->DemonData.Cs = 0x08;
@@ -79,9 +79,9 @@ PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(){
         TmpRing->Peers.NextHeader = (PListHeader)NewThread;
         NewThread->Peers.LastHeader = (PListHeader)TmpRing;
     }else{
-        ProcessBlock.DemonRing = NewThread;
-        ProcessBlock.DemonRing->Peers.NextHeader = (PListHeader)NewThread;
-        ProcessBlock.DemonRing->Peers.LastHeader = (PListHeader)NewThread;
+        ProcessBlock.LegacyDemonRing = NewThread;
+        ProcessBlock.LegacyDemonRing->Peers.NextHeader = (PListHeader)NewThread;
+        ProcessBlock.LegacyDemonRing->Peers.LastHeader = (PListHeader)NewThread;
     }
     
     LouKeMemoryBarrier();
@@ -118,7 +118,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         while(1);
 
     }else{
-        CurrentRing = ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemon;
+        CurrentRing = ProcessBlock.ProcStateBlock[ProcessorID].LegacyCurrentDemon;
 
         if(CurrentRing->DemonData.CurrentMsSlice < CurrentRing->DemonData.TotalMsSlice){
             CurrentRing->DemonData.CurrentMsSlice += 10;//timer in 10MS increments
@@ -160,7 +160,7 @@ LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentInterruptStorage = TmpRing->DemonData.InterruptStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage = TmpRing->DemonData.ContextStorage; 
         ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID = TmpRing->DemonData.ThreadID;
-        ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemon = TmpRing;
+        ProcessBlock.ProcStateBlock[ProcessorID].LegacyCurrentDemon = TmpRing;
 
     }
 
@@ -209,13 +209,13 @@ UNUSED static void InitializeIdleProcess(){
                 0
             );
             
-            ProcessBlock.ProcStateBlock[i].CurrentDemon = (PDEMON_THREAD_RING)NewThread;
+            ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon = (PDEMON_THREAD_RING)NewThread;
             LouKeSetAtomicBoolean(&ProcessBlock.ProcStateBlock[i].RingSelector, 1);
-            ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.State = THREAD_RUNNING;
+            ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon->DemonData.State = THREAD_RUNNING;
 
-            memset(&ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
+            memset(&ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
 
-            LouKeSmpWakeAssistant(i, (UINT64)ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.CurrentState, (UINT64)ProcessorIdleTask);
+            LouKeSmpWakeAssistant(i, (UINT64)ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon->DemonData.CurrentState, (UINT64)ProcessorIdleTask);
         }
     }
     LouPrint("AP Now Idleing\n");
@@ -251,12 +251,12 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
         InitializationProcessor,
         0
     );
-    ProcessBlock.ProcStateBlock[InitializationProcessor].CurrentDemon->DemonData.NewThread = false;
-    ProcessBlock.ProcStateBlock[InitializationProcessor].CurrentDemon = (PDEMON_THREAD_RING)NewThread;
+    ProcessBlock.ProcStateBlock[InitializationProcessor].LegacyCurrentDemon->DemonData.NewThread = false;
+    ProcessBlock.ProcStateBlock[InitializationProcessor].LegacyCurrentDemon = (PDEMON_THREAD_RING)NewThread;
     LouKeSetAtomicBoolean(&ProcessBlock.ProcStateBlock[InitializationProcessor].RingSelector, 1);
-    ProcessBlock.ProcStateBlock[InitializationProcessor].CurrentDemon->DemonData.State = THREAD_RUNNING;
+    ProcessBlock.ProcStateBlock[InitializationProcessor].LegacyCurrentDemon->DemonData.State = THREAD_RUNNING;
 
-    memset(&ProcessBlock.ProcStateBlock[InitializationProcessor].CurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
+    memset(&ProcessBlock.ProcStateBlock[InitializationProcessor].LegacyCurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
 
     for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
@@ -270,13 +270,13 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
                 0
             );
             
-            ProcessBlock.ProcStateBlock[i].CurrentDemon = (PDEMON_THREAD_RING)NewThread;
+            ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon = (PDEMON_THREAD_RING)NewThread;
             LouKeSetAtomicBoolean(&ProcessBlock.ProcStateBlock[i].RingSelector, 1);
-            ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.State = THREAD_RUNNING;
+            ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon->DemonData.State = THREAD_RUNNING;
 
-            memset(&ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
+            memset(&ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon->DemonData.SavedState, 0, sizeof(CPUContext));
 
-            LouKeSmpWakeAssistant(i, (UINT64)ProcessBlock.ProcStateBlock[i].CurrentDemon->DemonData.CurrentState, (UINT64)InitializeIdleProcess);
+            LouKeSmpWakeAssistant(i, (UINT64)ProcessBlock.ProcStateBlock[i].LegacyCurrentDemon->DemonData.CurrentState, (UINT64)InitializeIdleProcess);
 
             break;
         }
@@ -285,6 +285,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
+
 }
 
 LOUDDK_API_ENTRY
