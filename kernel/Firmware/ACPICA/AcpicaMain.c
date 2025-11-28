@@ -105,7 +105,7 @@ ACPI_THREAD_ID AcpiOsGetThreadId(){
 }
 
 ACPI_STATUS AcpiOsExecute(ACPI_EXECUTE_TYPE Type, ACPI_OSD_EXEC_CALLBACK Function, void* Context){
-    LouKeCreateDemon(Function, Context, 16 * KILOBYTE);
+    LouKeCreateDemon(Function, Context, 16 * KILOBYTE, 31);
     return AE_OK;
 }
 

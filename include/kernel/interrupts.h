@@ -12,7 +12,11 @@
     __asm__ volatile("lidt %0" : : "m"(idtr)); \
     __asm__ volatile("int $3"); \
 
+#ifndef __cplusplus
 void LouKeThrowPc();
+#else
+extern "C" void LouKeThrowPc();
+#endif
 
 #define INTERRUPT_GATE 0x5
 #define TRAP_GATE 0x7

@@ -8,7 +8,8 @@ LOUSTATUS LouKeInitializeDefaultDemons(){
     LouKeCreateDemon(
         LouQWorkDemon,
         0x00,
-        16 * KILOBYTE
+        16 * KILOBYTE,
+        31
     );
 
 

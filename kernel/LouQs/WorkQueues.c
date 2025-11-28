@@ -136,7 +136,7 @@ LOUSTATUS LouKeCreateWorkQueue(
     strcpy(TmpQueue->QueueName, QueueName);
     TmpQueue->QueuePriority = QueuePriority;
 
-    TmpQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)TmpQueue, 16 * KILOBYTE);
+    TmpQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)TmpQueue, 16 * KILOBYTE, 31);
 
     if(OutQueue){
         *OutQueue = TmpQueue;

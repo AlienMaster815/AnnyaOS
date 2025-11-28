@@ -23,12 +23,17 @@ LouKeCreateDeferedDemonEx(
     PVOID   Function,
     PVOID   Params,
     SIZE    StackSize,
+    UINT8   Prioirty,
     BOOL    ProcessorSpcific,
     INTEGER Processor,
     PVOID   UnblockTime
 ){
+    if(Prioirty > 31){
+        LouPrint("Unable To Create Thread: INVALID_PRIORITY\n");
+        return 0x00;
+    }
     LouPrint("Creating Demon\n");
-    PDEMON_THREAD_RING NewThread = LouKeCreateDemonThreadHandle();
+    PDEMON_THREAD_RING NewThread = LouKeCreateDemonThreadHandle(Prioirty);
     void* NewStack = LouKeMallocEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
 
     NewThread->DemonData.StackTop = (UINT64)NewStack;
@@ -71,6 +76,7 @@ LouKeCreateDemonEx(
     PVOID   Function,
     PVOID   Params,
     SIZE    StackSize,
+    UINT8   Prioirty,
     BOOL    ProcessorSpcific,
     INTEGER Processor
 ){
@@ -80,6 +86,7 @@ LouKeCreateDemonEx(
         Function,
         Params,
         StackSize,
+        Prioirty,
         ProcessorSpcific,
         Processor,
         (PVOID)&CurrentTime
@@ -91,12 +98,14 @@ PTHREAD
 LouKeCreateDemon(
     PVOID Function,
     PVOID Params,
-    SIZE  StackSize
+    SIZE  StackSize,
+    UINT8   Prioirty
 ){
     return LouKeCreateDemonEx(
         Function,
         Params,
         StackSize,
+        Prioirty,
         false,
         0
     );

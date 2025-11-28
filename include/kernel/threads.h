@@ -213,13 +213,8 @@ PTHREAD
 LouKeCreateDemon(
     PVOID   Function,
     PVOID   Params,
-    size_t  StackSize
-);
-PTHREAD 
-LouKeCreateUserStackDemon(
-    PVOID Function,
-    PVOID Params,
-    size_t  StackSize
+    size_t  StackSize,
+    UINT8   Priority
 );
 
 PTHREAD
@@ -227,6 +222,7 @@ LouKeCreateDemonEx(
     PVOID   Function,
     PVOID   Params,
     size_t  StackSize,
+    UINT8   Prioirty,
     BOOL    ProcessorSpecific,
     INTEGER Processor
 );
@@ -236,6 +232,7 @@ LouKeCreateDeferedDemonEx(
     PVOID   Function,
     PVOID   Params,
     size_t  StackSize,
+    UINT8   Prioirty,
     BOOL    ProcessorSpecific,
     INTEGER Processor,
     PVOID   UnblockTimeHandle

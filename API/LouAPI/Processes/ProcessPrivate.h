@@ -41,12 +41,6 @@ typedef struct  PACKED _CPUContext{
 KERNEL_IMPORT void SaveEverything(uint64_t* ContextHandle);
 KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
 
-typedef struct _THREAD_CONTEXT_MANAGR_BLOCK{
-    void    (*SaveEverything)(uint64_t* ContextHandle);
-    void    (*RestoreEverything)(uint64_t* ContextHandle);
-    PVOID   PrivateManagementData;
-}THREAD_CONTEXT_MANAGR_BLOCK, * PTHREAD_CONTEXT_MANAGR_BLOCK;
-
 #define CTXMGR_DEFAULT_SAVE_EVERYTHING      SaveEverything
 #define CTXMGR_DEFAULT_RESTORE_EVERYTHING   RestoreEverything
 
@@ -142,27 +136,11 @@ typedef PTHREAD (*PROCESS_RING_DISPATCH_HANDLER)(struct _PROCESSOR_STATE_BLOCK* 
 #define THREAD_PRIORITY_BELOW       PROCESS_PRIORITY_BELOW
 #define THREAD_PRIORITY_LOW         PROCESS_PRIORITY_LOW
 
-typedef struct _PROCESS_DISPATCH_MANAGER{
-    struct {
-        struct _PROCESS_THREAD_RING*    Ring; //priority ring tied to dispatcher
-        PROCESS_RING_DISPATCH_HANDLER   DispatchHandlers;
-    }QuantumMember[PRIORITY_DISPATCH_HANDLER_RINGS];
-}PROCESS_DISPATCH_MANAGER, * PPROCESS_DISPATCH_MANAGER, 
-    THREAD_DISPATCH_MANAGER, * PTHREAD_DISPATCH_MANAGER;
-
-typedef struct _PROCESS_THREAD_RING{
-    ListHeader                      Peers;
-    mutex_t                         LockOutTagOut;
-    PKULA_TRANSITION_LAYER_OBECT    KulaObject;
-    UINT8                           DispatchRobin;
-    THREAD_DISPATCH_MANAGER         ThreadRobin;
-    PUSER_THREAD_RING               ThreadRings[THREAD_PRIORITY_RINGS];
-}PROCESS_THREAD_RING, * PPROCESS_THREAD_RING;
 
 typedef struct _SCHEDUALER_OBJECT{
     UINT8           CurrentLimiter; //prioirty dips in goaround
     UINT8           CurrentIndexor;
-    PTHREAD_RING    ThreadRings[THREAD_PRIORITY_RINGS];
+    THREAD_RING     ThreadRings[THREAD_PRIORITY_RINGS];
 }SCHEDUALER_OBJECT, * PSCHEDUALER_OBJECT;
 
 static inline UINT8 EulerCurveIndexor(PSCHEDUALER_OBJECT Sched){
@@ -192,27 +170,20 @@ typedef struct _PROCESSOR_STATE_BLOCK{
     UINT64                          CurrentMsSlice;
     PM_ID_RANGE_POOL                ThreadIDPool;
     ATOMIC_BOOLEAN                  RingSelector;
-    UINT8                           DispatchRobin;
-    THREAD_DISPATCH_MANAGER         ProcessRobin;
-    PDEMON_THREAD_RING              LegacyCurrentDemon;
-    PUSER_THREAD_RING               ProcessRings[PROCESS_PRIORITY_RINGS];  
+    PTHREAD_RING                    CurrentDemonThreads[THREAD_PRIORITY_RINGS];
     PVOID                           ProcessorPrivateData;
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
     mutex_t                         LockOutTagOut;
     PM_ID_RANGE_POOL                DemonIDPool;
-    PM_ID_RANGE_POOL                ProcessIDPool;
-    THREAD_CONTEXT_MANAGR_BLOCK     ThreadCtxMgrBlock;
     INTEGER                         ProcessorCount;
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
-    PROCESS_DISPATCH_MANAGER        DispatchManager;
-    PDEMON_THREAD_RING              LegacyDemonRing;
-    PPROCESS_THREAD_RING            ProcessRing;
+    PSCHEDUALER_OBJECT              DemonSchedualer;
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;
 
 KERNEL_IMPORT uint16_t GetNPROC();
-PDEMON_THREAD_RING LouKeCreateDemonThreadHandle();
+PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(UINT8 Prioirty);
 KERNEL_IMPORT LouKIRQL LouKeGetIrql();
 KERNEL_IMPORT void LouKeSendIcEOI();
 void LouKeSwitchToTask(

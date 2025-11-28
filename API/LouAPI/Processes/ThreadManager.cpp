@@ -82,7 +82,8 @@ void LouKeSwitchToTask(
         ThreadFrom->State = THREAD_READY;
         SaveEverything(&ThreadFrom->ContextStorage);
     }
-
+        
+    ThreadTo->State = THREAD_RUNNING;
     RestoreEverything(&ThreadTo->ContextStorage);
     SetPEB((UINT64)ThreadTo->Peb);
     SetTEB((UINT64)&ThreadTo->Teb);

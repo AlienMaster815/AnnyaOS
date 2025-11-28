@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.5.04 RSC-4";
+string KERNEL_VERSION = "0.6.01 RSC-3";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -251,6 +251,7 @@ void AdvancedLousineKernelInitialization(){
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
     LouKeUnmaskSmpInterrupts();
+    LouPrint("Kernel Advanced System Initialized\n");
 }
 
 void KillDebuger(){
@@ -341,7 +342,6 @@ KERNEL_ENTRY LouOsKrnlStart(
     InitializeGenericTables();
 
     AdvancedLousineKernelInitialization();
-
     LouKeInitializeMouseHandling();
 
     LookForStorageDevices();
