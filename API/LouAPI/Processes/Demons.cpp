@@ -9,7 +9,7 @@ LOUDDK_API_ENTRY VOID LouKeDestroyDemon(PVOID ThreadHandle) {
 }
 
 
-static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
+UNUSED static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
     int Result = Thread(FunctionParam);
     LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
     LouKeDestroyDemon(ThreadHandle);
@@ -33,8 +33,8 @@ LouKeCreateDeferedDemonEx(
         return 0x00;
     }
     LouPrint("Creating Demon\n");
-    PDEMON_THREAD_RING NewThread = LouKeCreateDemonThreadHandle(Prioirty);
-    void* NewStack = LouKeMallocEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
+    //PDEMON_THREAD_RING NewThread = LouKeCreateDemonThreadHandle(Prioirty);
+    /*void* NewStack = LouKeMallocEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
 
     NewThread->DemonData.StackTop = (UINT64)NewStack;
     NewThread->DemonData.StackBase = (UINT64)NewStack + StackSize;
@@ -66,8 +66,8 @@ LouKeCreateDeferedDemonEx(
     }
 
     //LouPrint("Demon Handle:%h\nStack Top:%h\nStack Base:%h\nCurrentState:%h\n", NewThread, NewThread->DemonData.StackTop, NewThread->DemonData.StackBase, (UINT64)NewThread->DemonData.CurrentState );
-
-    return (PTHREAD)NewThread;
+    */
+    return 0x00;//(PTHREAD)NewThread;
 }
 
 LOUDDK_API_ENTRY

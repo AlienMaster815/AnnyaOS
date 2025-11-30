@@ -20,198 +20,20 @@ KERNEL_IMPORT
 LOUSTATUS UpdateIDT(bool Init);
 
 static mutex_t CoreIrqReadyLock = {0};
-
-UNUSED static LOUSINE_PROCESS_MANAGER_BLOCK ProcessBlock = {0};
-
-static INTEGER          InitializationProcessor = 0; 
-static PEB              KPeb = {0};
-
-static INTEGER AllocateDemonId(PVOID ThreadHandle){
-    PPM_ID_RANGE_POOL Range = &ProcessBlock.DemonIDPool;
-    INTEGER Result = (INTEGER)-1;
-    size_t Index = 0;
-    while(1){
-        Result = LouKeAcquireIdFromRange(Range->IdRange, ThreadHandle);
-        if(Result != (INTEGER)-1){
-            return Result;
-        }
-        else if(!Range->Peers.NextHeader){
-            break;
-        }
-        Index++;
-        Range = (PPM_ID_RANGE_POOL)Range->Peers.NextHeader;
-    }
-    if(Result == (INTEGER)-1){
-        Range->Peers.NextHeader = (PListHeader)LouKeMallocType(PM_ID_RANGE_POOL, KERNEL_GENERIC_MEMORY);
-        Range = (PPM_ID_RANGE_POOL)Range->Peers.NextHeader;
-        Range->IdRange = LouKeCreateIdentificationRange(Index * (ProcessBlock.ProcessorCount + 1), (Index * (ProcessBlock.ProcessorCount + 1)) + (ProcessBlock.ProcessorCount + 1));
-    }
-    Result = LouKeAcquireIdFromRange(Range->IdRange, ThreadHandle);
-    return Result;
-}
-
-PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(UINT8 Prioirty){
-    if(Prioirty >= THREAD_PRIORITY_RINGS){
-        return 0x00;
-    }
-    PDEMON_THREAD_RING NewThread = LouKeMallocType(DEMON_THREAD_RING, KERNEL_GENERIC_MEMORY);
-    PDEMON_THREAD_RING TmpRing = (PDEMON_THREAD_RING)ProcessBlock.DemonSchedualer->ThreadRings[31 - Prioirty].Demon.Peers.NextHeader;
-    UNUSED PDEMON_THREAD_RING BaseRing = TmpRing;
-    NewThread->DemonData.Peb = &KPeb;
-    NewThread->DemonData.Cs = 0x08;
-    NewThread->DemonData.Ss = 0x10;
-    NewThread->DemonData.InstructionMode = LONG_MODE;
-    NewThread->DemonData.State = THREAD_BLOCKED;
-    NewThread->DemonData.NewThread = true;
-    NewThread->DemonData.InterruptStorage = (uintptr_t)LouAllocatePhysical64UpEx(1688, 64);
-    NewThread->DemonData.ContextStorage = (uintptr_t)LouAllocatePhysical64UpEx(1688, 64);
-    LouKeGetTime(&NewThread->DemonData.ThreadStart);
-    NewThread->DemonData.ThreadID = AllocateDemonId((PVOID)NewThread);
-    NewThread->DemonData.AfinityBitmap = LouKeMallocArray(UINT8, (ROUND_UP64(ProcessBlock.ProcessorCount, 8) / 8), KERNEL_GENERIC_MEMORY);
-    NewThread->DemonData.TotalMsSlice = 50;
-    NewThread->DemonData.CurrentMsSlice = 0;
-    
-    LouKeMemoryBarrier();
-
-    if(TmpRing){
-        BaseRing->Peers.LastHeader = (PListHeader)NewThread;
-        NewThread->Peers.NextHeader = (PListHeader)BaseRing;
-        while(TmpRing->Peers.NextHeader != (PListHeader)BaseRing){
-            TmpRing = (PDEMON_THREAD_RING)TmpRing->Peers.NextHeader;
-        }
-        TmpRing->Peers.NextHeader = (PListHeader)NewThread;
-        NewThread->Peers.LastHeader = (PListHeader)TmpRing;
-    }else{
-        ProcessBlock.DemonSchedualer->ThreadRings[31 - Prioirty].Demon.Peers.NextHeader = (PListHeader)NewThread;
-        NewThread->Peers.NextHeader = (PListHeader)NewThread;
-        NewThread->Peers.LastHeader = (PListHeader)NewThread;
-    }
-    
-    LouKeMemoryBarrier();
-    return NewThread;
-}
-
-static bool AbortTaskSwap(INTEGER ProcessorID){
-    if((MutexIsLocked(&ProcessBlock.ProcStateBlock[ProcessorID].LockOutTagOut) || (LouKeGetIrql() == HIGH_LEVEL))){
-        return true;
-    }
-    return false;
-}
+UNUSED static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
+UNUSED static INTEGER                           InitializationProcessor = 0; 
+UNUSED static PEB                               KPeb = {0};
 
 //static LouKeManagerProcessSwap();
 
-
-
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
-    INTEGER ProcessorID = GetCurrentCpuTrackMember();
-    PDEMON_THREAD_RING TmpRing = 0x00;
-    PDEMON_THREAD_RING TmpCurrentRing = 0x00;
-    PDEMON_THREAD_RING CurrentRing = TmpRing; 
-    UINT8 NextIndexr = 0;
-    bool FoundThread = false;
-
-    //if( //if in a demon and a processor ring exist check for a process
-        //(LouKeCheckAtomicBoolean(&ProcessBlock.ProcStateBlock[ProcessorID].RingSelector))// && 
-        //(ProcessBlock.ProcessRing)
-    //){
-
-        //TODO: im going to implement actual processes after
-        //the coff specification is fully implemented
-
-        //LouPrint("PROCESS_TASK_SWAP\n");
-        //while(1);
-
-    //}else{
-        UINT8 LastIndexor = ProcessBlock.DemonSchedualer->CurrentIndexor;
-
-        CurrentRing = (PDEMON_THREAD_RING)ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemonThreads[LastIndexor];
-
-        if(CurrentRing->DemonData.CurrentMsSlice < CurrentRing->DemonData.TotalMsSlice){
-            CurrentRing->DemonData.CurrentMsSlice += 10;//timer in 10MS increments
-            goto _SCHEDUALR_FINISHED;
-        }
+    //INTEGER ProcessorID = GetCurrentCpuTrackMember();
     
-        if(AbortTaskSwap(ProcessorID)){
-            goto _SCHEDUALR_FINISHED;
-        }
-
-        NextIndexr = LastIndexor;//EulerCurveIndexor(ProcessBlock.DemonSchedualer);
-        CurrentRing->DemonData.CurrentMsSlice = 0;
-
-        /*while(NextIndexr != LastIndexor){
-            TmpCurrentRing = (PDEMON_THREAD_RING)ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemonThreads[NextIndexr];
-            if(TmpCurrentRing){
-                TmpRing = (PDEMON_THREAD_RING)TmpCurrentRing->Peers.NextHeader;
-                FoundThread = false;
-                LouKeThrowPc();
-                while((TmpRing) && (TmpRing != TmpCurrentRing)){
-                    if((!MutexIsLocked(&TmpRing->DemonData.LockOutTagOut)) && (TmpRing->DemonData.State != THREAD_RUNNING)){
-                //        if(
-                //            (TmpRing->DemonData.State == THREAD_BLOCKED) && 
-                //            (LouKeDidTimeoutExpired(&TmpRing->DemonData.BlockTimeout)) && 
-                //            (!LouKeIsTimeoutNull(&TmpRing->DemonData.BlockTimeout))
-                //        ){
-                //            memset(&TmpRing->DemonData.BlockTimeout, 0, sizeof(TIME_T));
-                //            TmpRing->DemonData.State = THREAD_READY;
-                //        }
-                //        
-                        if((TmpRing->DemonData.State == THREAD_READY) && (IS_PROCESSOR_AFFILIATED(TmpRing->DemonData.AfinityBitmap, ProcessorID))){
-                            FoundThread = true;
-                            break;
-                        }
-                    }   
-                    TmpRing = (PDEMON_THREAD_RING)TmpRing->Peers.NextHeader;
-                }
-                if(FoundThread){
-                    break;
-                }
-            }
-            NextIndexr = EulerCurveIndexor(ProcessBlock.DemonSchedualer);
-        }*/
-        if(!FoundThread){
-            TmpCurrentRing = (PDEMON_THREAD_RING)ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemonThreads[NextIndexr];
-            if(!TmpCurrentRing){
-                TmpCurrentRing = (PDEMON_THREAD_RING)ProcessBlock.DemonSchedualer->ThreadRings[0].Demon.Peers.NextHeader;
-                if(!TmpCurrentRing){
-                    LouKeThrowPc();
-                }
-            }
-            TmpRing = (PDEMON_THREAD_RING)TmpCurrentRing->Peers.NextHeader;
-            while((TmpRing) && (TmpRing != TmpCurrentRing)){
-                if((!MutexIsLocked(&TmpRing->DemonData.LockOutTagOut)) && (TmpRing->DemonData.State != THREAD_RUNNING)){
-                    if(
-                        (TmpRing->DemonData.State == THREAD_BLOCKED) && 
-                        (LouKeDidTimeoutExpired(&TmpRing->DemonData.BlockTimeout)) && 
-                        (!LouKeIsTimeoutNull(&TmpRing->DemonData.BlockTimeout))
-                    ){
-                        memset(&TmpRing->DemonData.BlockTimeout, 0, sizeof(TIME_T));
-                        TmpRing->DemonData.State = THREAD_READY;
-                    }
-                    if((TmpRing->DemonData.State == THREAD_READY) && (IS_PROCESSOR_AFFILIATED(TmpRing->DemonData.AfinityBitmap, ProcessorID))){
-                        break;
-                    }
-                }
-                TmpRing = (PDEMON_THREAD_RING)TmpRing->Peers.NextHeader;
-            }
-        }        
-        if(TmpCurrentRing == TmpRing){
-            goto _SCHEDUALR_FINISHED;
-        }
-
-        LouKeSwitchToTask(CpuCurrentState, &CurrentRing->DemonData, &TmpRing->DemonData, true); 
-        TmpRing->DemonData.Cpu = ProcessorID;
-
-        ProcessBlock.ProcStateBlock[ProcessorID].CurrentInterruptStorage = TmpRing->DemonData.InterruptStorage; 
-        ProcessBlock.ProcStateBlock[ProcessorID].CurrentContextStorage = TmpRing->DemonData.ContextStorage; 
-        ProcessBlock.ProcStateBlock[ProcessorID].CurrentThreadID = TmpRing->DemonData.ThreadID;
-        ProcessBlock.ProcStateBlock[ProcessorID].CurrentDemonThreads[NextIndexr] = (PTHREAD_RING)TmpRing;
-
-    //}
 
 
 
-    _SCHEDUALR_FINISHED:
+    //_SCHEDUALR_FINISHED:
     LouKeMemoryBarrier();
     LouKeSendIcEOI();
     return CpuCurrentState;
@@ -283,7 +105,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
     ProcessBlock.ProcessorCount = GetNPROC();
     ProcessBlock.ProcStateBlock = LouKeMallocArray(PROCESSOR_STATE_BLOCK, ProcessBlock.ProcessorCount, KERNEL_GENERIC_MEMORY);
-    InitializationProcessor = GetCurrentCpuTrackMember();
+    /*InitializationProcessor = GetCurrentCpuTrackMember();
 
     MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
     MutexLock(&CoreIrqReadyLock);
@@ -332,11 +154,12 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
 
             break;
         }
-    }
+    }*/
 
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
+    while(1);
 }
 
 LOUDDK_API_ENTRY

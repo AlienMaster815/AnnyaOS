@@ -54,12 +54,8 @@ typedef enum {
     REAL_MODE       = 2,
 }INSTRUCTION_MODE;
 
-typedef struct _PM_ID_RANGE_POOL{
-    ListHeader              Peers;
-    PIDENTIFICATION_RANGE   IdRange;
-}PM_ID_RANGE_POOL, * PPM_ID_RANGE_POOL;
-
 typedef struct _GENERIC_THREAD_DATA{
+    ListHeader          Peers; //thread manager chain
     mutex_t             LockOutTagOut;
     thread_state_t      State;
     INTEGER             Cpu;
@@ -83,43 +79,13 @@ typedef struct _GENERIC_THREAD_DATA{
     UINT8*              AfinityBitmap;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
-typedef struct _DEMON_THREAD_RING{
-    ListHeader              Peers;
-    GENERIC_THREAD_DATA     DemonData;
-}DEMON_THREAD_RING, * PDEMON_THREAD_RING;
-
-typedef struct _USER_THREAD_RING{
-    ListHeader              Peers;
+typedef struct THREAD_RING{
+    ListHeader              Peers; //schedualer chain
     GENERIC_THREAD_DATA     ThreadData;
-    PVOID                   SubsystemPrivateData;
-}USER_THREAD_RING, * PUSER_THREAD_RING;
+}THREAD_RING, * PTHREAD_RING;
 
 #define USER_THREAD_RING_ID     1
 #define DEMON_THREAD_RING_ID    2
-
-typedef union _THREAD_RING{
-    DEMON_THREAD_RING   Demon;
-    USER_THREAD_RING    User;
-}THREAD_RING, * PTHREAD_RING;
-
-typedef PTHREAD (*PROCESS_RING_DISPATCH_HANDLER)(struct _PROCESSOR_STATE_BLOCK* ProcessBlock);
-
-
-#define PROCESS_DISPATCH_HANDLER_HIGH_Q1        0   //HIGH
-#define PRDCESS_DISPATCH_HANDLER_ABOVE_Q1       1   //ABOVE
-#define PROCESS_DISPATCH_HANDLER_HIGH_Q2        2   //HIGH
-#define PRDCESS_DISPATCH_HANDLER_ABOVE_Q2       3   //ABOVE
-#define PROCESS_DISPATCH_HANDLER_NORMAL_Q1      4   //NORMAL
-#define PROCESS_DISPATCH_HANDLER_HIGH_Q3        5   //HIGH
-#define PROCESS_DISPATCH_HANDLER_ABOVE_Q3       6   //ABOVE 
-#define PROCESS_DISPATCH_HANDLER_NORMAL_Q2      7   //NORMAL
-#define PROCESS_DISPATCH_HANDLER_BELOW_Q1       8   //BELOW
-#define PROCESS_DISPATCH_HANDLER_HIGH_Q4        9   //HIGH
-#define PROCESS_DISPATCH_HANDLER_ABOVE_Q4       10  //ABOVE
-#define PROCESS_DISPATCH_HANDLER_NORMAL_Q3      11  //NORMAL
-#define PROCESS_DISPATCH_HANDLER_BELOW_Q2       12  //BELOW
-#define PROCESS_DISPATCH_HANDLER_LOW_Q1         13  //LOW 
-#define PRIORITY_DISPATCH_HANDLER_RINGS         14
 
 #define THREAD_PRIORITY_RINGS 32
 
@@ -136,54 +102,60 @@ typedef PTHREAD (*PROCESS_RING_DISPATCH_HANDLER)(struct _PROCESSOR_STATE_BLOCK* 
 #define THREAD_PRIORITY_BELOW       PROCESS_PRIORITY_BELOW
 #define THREAD_PRIORITY_LOW         PROCESS_PRIORITY_LOW
 
+typedef struct _SCHEDUALER_DISTRIBUTION_OBJECT{
+    UINT64              TotalLimiters;
+    UINT64              LimitIncrementor;
+    UINT64              CurrentLimiter; //prioirty dips in goaround
+    UINT64              CurrentIndexor;
+}SCHEDUALER_DISTRIBUTION_OBJECT, * PSCHEDUALER_DISTRIBUTION_OBJECT;
 
-typedef struct _SCHEDUALER_OBJECT{
-    UINT8           CurrentLimiter; //prioirty dips in goaround
-    UINT8           CurrentIndexor;
-    THREAD_RING     ThreadRings[THREAD_PRIORITY_RINGS];
-}SCHEDUALER_OBJECT, * PSCHEDUALER_OBJECT;
-
-static inline UINT8 EulerCurveIndexor(PSCHEDUALER_OBJECT Sched){
+static inline UINT8 EulerCurveIndexor(PSCHEDUALER_DISTRIBUTION_OBJECT Sched){
     Sched->CurrentIndexor++;
     Sched->CurrentIndexor %= Sched->CurrentLimiter; 
     if(!Sched->CurrentIndexor){
-        Sched->CurrentLimiter++;
-        if(Sched->CurrentLimiter > THREAD_PRIORITY_RINGS){// over 32 set to 1
+        Sched->CurrentLimiter += Sched->LimitIncrementor;
+        if(Sched->CurrentLimiter > Sched->TotalLimiters){// over 32 set to 1
             Sched->CurrentLimiter = 1;
         }
     }
     return Sched->CurrentIndexor;
 }
 
-static inline PSCHEDUALER_OBJECT CreateShecdualerObject(){
-    PSCHEDUALER_OBJECT NewObject = LouKeMallocType(SCHEDUALER_OBJECT, KERNEL_GENERIC_MEMORY);
-    NewObject->CurrentLimiter = 1;
-    return NewObject;
+static inline LOUSTATUS CreateShecdualerObject(
+    PSCHEDUALER_DISTRIBUTION_OBJECT ObjectIn,
+    UINT64                          TotalLimiters,
+    UINT64                          LimitIncrementor
+){
+    if((!TotalLimiters) || (!LimitIncrementor) || (!ObjectIn)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    ObjectIn->TotalLimiters = TotalLimiters;
+    ObjectIn->LimitIncrementor = LimitIncrementor;
+    ObjectIn->CurrentLimiter = 1;
+    return STATUS_SUCCESS;
 }
+
+typedef class _SCHEDUAL_MANAGER{
+
+}SCHEDUAL_MANAGER, * PSCHEDUAL_MANAGER;
 
 typedef struct _PROCESSOR_STATE_BLOCK{
     mutex_t                         LockOutTagOut;
     UINT64                          CurrentThreadID;
     UINT64                          CurrentInterruptStorage;
     UINT64                          CurrentContextStorage;
-    UINT64                          TotalMsSlice;
-    UINT64                          CurrentMsSlice;
-    PM_ID_RANGE_POOL                ThreadIDPool;
-    ATOMIC_BOOLEAN                  RingSelector;
-    PTHREAD_RING                    CurrentDemonThreads[THREAD_PRIORITY_RINGS];
-    PVOID                           ProcessorPrivateData;
+    
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
     mutex_t                         LockOutTagOut;
-    PM_ID_RANGE_POOL                DemonIDPool;
     INTEGER                         ProcessorCount;
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
-    PSCHEDUALER_OBJECT              DemonSchedualer;
+
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;
 
 KERNEL_IMPORT uint16_t GetNPROC();
-PDEMON_THREAD_RING LouKeCreateDemonThreadHandle(UINT8 Prioirty);
+
 KERNEL_IMPORT LouKIRQL LouKeGetIrql();
 KERNEL_IMPORT void LouKeSendIcEOI();
 void LouKeSwitchToTask(
