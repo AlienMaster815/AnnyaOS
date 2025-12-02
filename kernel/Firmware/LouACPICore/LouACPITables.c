@@ -68,6 +68,7 @@ void LouKeInitializeLouACPITable(void* TableBase){
 
     UINT64 SanityMapCheck;
     RequestPhysicalAddress((UINT64)TableBase, &SanityMapCheck);
+
     if(!SanityMapCheck){
 
         DEBUG_TRAP;
@@ -76,7 +77,7 @@ void LouKeInitializeLouACPITable(void* TableBase){
     PTABLE_DESCRIPTION_HEADER TmpHeader = 0;
     if((uint64_t)((uintptr_t)TableBase - GetKSpaceBase()) >= (65 * MEGABYTE)){ //if system is in the memory allocations area then map it
         TmpHeader = (PTABLE_DESCRIPTION_HEADER)(uint64_t)((uintptr_t)TableBase - GetKSpaceBase());
-        EnforceSystemMemoryMap((uint64_t)TmpHeader, TmpHeader->Length);
+        EnforceSystemMemoryMap((uint64_t)TmpHeader, ((PTABLE_DESCRIPTION_HEADER)TableBase)->Length);
     }
     
     MutexLock(&AcpiTableTrackMutex);

@@ -94,10 +94,16 @@ uint16_t GetNPROC();
 void SetGSBase(uint64_t gs_base);
 
 
+void DebugValueTrap(UINT64 Value){
+    UINT64 Foo = Value;
+    Value = Foo;
+    while(1);
+}
+
 void SetupGDT(){
     LouPrint("Setting Up GDT\n");
 
-    PLongModeGdt GDT = (PLongModeGdt)LouKeMallocEx(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
+    PLongModeGdt GDT = (PLongModeGdt)LouKeMallocExPhy32(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
     memset(GDT,0, sizeof(LongModeGdt));
     UNUSED UINT64 Tmp;
     SetGDTSegmentEntry(
@@ -130,7 +136,7 @@ void SetupGDT(){
             0xC
         );
 
-    PTSS Tss = (PTSS)LouKeMallocEx(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
+    PTSS Tss = (PTSS)LouKeMallocExPhy32(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
     memset(Tss,0, sizeof(TSS));
 
     Tss->RSP0 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
@@ -141,15 +147,14 @@ void SetupGDT(){
     Tss->IST3 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
 
     RequestPhysicalAddress((UINT64)(UINT8*)Tss, &Tmp);
-
+    
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
         (uintptr_t)Tmp, sizeof(TSS) - 1,
         0x89,
         0x00
     );
-
-
+        
     uint64_t GsBase = (uint64_t)LouKeMallocPhy32(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
 
     RequestPhysicalAddress(GsBase, &Tmp);

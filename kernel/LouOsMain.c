@@ -323,7 +323,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     LousineKernelEarlyInitialization();
 
     EnableCR0WriteProtection();
-
+    
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();

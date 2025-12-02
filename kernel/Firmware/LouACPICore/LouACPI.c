@@ -50,7 +50,7 @@ void LouKeInitializeLouACPISubsystem(){
     LouPrint("Initializing LouACPI Subsystem\n");
     UNUSED PROOT_SYSTEM_DISCRIPTION_POINTER Rsdp = (PROOT_SYSTEM_DISCRIPTION_POINTER)(UINT8*)LouKeGetRsdp();
     LouPrint("Rsdp Version:%d\n", Rsdp->Revision);
-    
+        
     AcpiVersion = Rsdp->Revision;
 
     if(Rsdp->Revision > 1){
