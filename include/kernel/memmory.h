@@ -36,6 +36,7 @@ typedef __int128 int128_t;
 
 #define PRESENT_PAGE           0b1
 #define WRITEABLE_PAGE        0b10
+#define NOEXEC_PAGE           (1ULL << 63)
 
 #define USER_PAGE           (1 << 2)
 
@@ -128,6 +129,7 @@ uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
 uint64_t GetRamSize();
 void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
+void* LouGeneralAllocateMemory(UINT64 Size);
 void  LouGeneralFreeMemory(void* Address);
 bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical,uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
@@ -161,6 +163,16 @@ void MapIoMemory(
     uint64_t Address,
     uint64_t MapSize
 );
+
+LOUSTATUS LouKeCreateDeviceSection(
+    void*   PBase,
+    void*   VBase,
+    size_t    Size,
+    uint64_t  PageFlags
+);
+
+ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
+
 #endif
 //Directory Entry FLAGS
 
@@ -208,6 +220,7 @@ KERNEL_IMPORT bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_
 KERNEL_IMPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_IMPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_IMPORT void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
+KERNEL_IMPORT void* LouGeneralAllocateMemory(UINT64 Size);
 KERNEL_IMPORT void* memset(void* dest, int value, size_t count);
 KERNEL_IMPORT bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 KERNEL_IMPORT void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
@@ -250,6 +263,18 @@ void* LouKeMallocVirt32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
+KERNEL_IMPORT
+void  LouGeneralFreeMemory(void* Address);
+KERNEL_IMPORT
+LOUSTATUS LouKeCreateDeviceSection(
+    void*   PBase,
+    void*   VBase,
+    size_t    Size,
+    uint64_t  PageFlags
+);
+KERNEL_IMPORT
+ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
+
 #else 
 KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_EXPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);

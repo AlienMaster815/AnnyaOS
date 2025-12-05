@@ -149,7 +149,6 @@ void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t Pa
     LouKeRegisterPAddressToReserveVAddresses((UINT64)Result, PageSize, PageCount);
 
     LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
-
     return Result;
 }
 

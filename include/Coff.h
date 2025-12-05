@@ -747,6 +747,8 @@ typedef struct _CFI_OBJECT{
     PCOFF_IMAGE_HEADER      ImageHeader;
     PVOID                   LoadedAddress;
     PVOID                   PhysicalLoadedAddress;
+    SIZE                    LoadedSize;
+    UINT64*                 SectionMapping;
     PVOID                   ExecututionLoading;
     KERNEL_REFERENCE        Reference;
     PVOID                   Entry;
@@ -767,6 +769,14 @@ LouKeLoadCoffImageA(
     PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 );
+
+LOUSTATUS 
+LouKeLoadCoffImageB(
+    PVOID           Base,
+    PCFI_OBJECT     CfiObject,
+    BOOL            KernelObject
+);
+
 #endif
 
 #ifndef _LOUSINE_LOADER

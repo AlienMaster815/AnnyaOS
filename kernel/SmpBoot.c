@@ -79,6 +79,7 @@ void LouKeLoadLousineBootTrampoline(){
     UNUSED FILE* TrampolineFile = LouKeGetBootDevice(SmpBootLoadOrder);//fopen(FilePath, KERNEL_GENERIC_MEMORY);
     
     LouKeMapContinuousMemoryBlock(0x7000, 0x7000, 0x2000, KERNEL_DMA_MEMORY);
+    LouKeCreateDeviceSection((PVOID)0x7000, (PVOID)0x7000, (SIZE)0x2000, PAGE_READWRITE | SEC_NOCACHE);
     memset((PVOID)0x7000, 0, 0x2000);
     memcpy((PVOID)0x8000, (PVOID)TrampolineFile, LouKeGetBootDeviceSize(SmpBootLoadOrder));
 

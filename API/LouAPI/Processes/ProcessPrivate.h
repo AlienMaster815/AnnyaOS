@@ -46,6 +46,7 @@ KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
 #define CTXMGR_DEFAULT_SAVE_EVERYTHING      SaveEverything
 #define CTXMGR_DEFAULT_RESTORE_EVERYTHING   RestoreEverything
 
+#define PROCESSOR_BITMAP_LENGTH (ROUND_UP64(GetNPROC(), 8) / 8)
 #define IS_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] &  (1u << ((Processor) % 8)))
 #define MARK_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] |=  (1u << ((Processor) % 8)))
 #define UNMARK_PROCESSOR_AFFILIATED(Bitmap, Processor) ((Bitmap)[(Processor) / 8] &=  (1u << ((Processor) % 8)))
@@ -57,29 +58,26 @@ typedef enum {
 }INSTRUCTION_MODE;
 
 typedef struct _GENERIC_THREAD_DATA{
-    ListHeader          Peers; //thread manager chain
-    mutex_t             LockOutTagOut;
-    thread_state_t      State;
-    UINT64              Cpu;
-    PPEB                Peb;
-    CPUContext          SavedState;
-    CPUContext*         CurrentState;
-    TEB                 Teb;
-    UINT64              ThreadID;
-    UINT8               ThreadPriority;
-    UINT64              StackBase;
-    UINT64              StackTop;
-    UINT64              InterruptStorage;
-    UINT64              ContextStorage;
-    UINT64              TotalMsSlice;
-    UINT64              CurrentMsSlice;
-    TIME_T              ThreadStart;
-    TIME_T              BlockTimeout;
-    BOOL                NewThread;
-    UINT8               Cs;
-    UINT8               Ss;
-    INSTRUCTION_MODE    InstructionMode;
-    UINT8*              AfinityBitmap;
+    ListHeader                      Peers; //thread manager chain
+    mutex_t                         LockOutTagOut;
+    thread_state_t                  State;
+    struct _GENERIC_PROCESS_DATA*   Process;
+    CPUContext                      SavedState;
+    TEB                             Teb;
+    UINT64                          ThreadID;
+    UINT8                           ThreadPriority;
+    UINT64                          StackBase;
+    UINT64                          StackTop;
+    UINT64                          InterruptStorage;
+    UINT64                          ContextStorage;
+    UINT64                          TotalMsSlice;
+    UINT64                          CurrentMsSlice;
+    TIME_T                          ThreadStart;
+    TIME_T                          BlockTimeout;
+    UINT8                           Cs;
+    UINT8                           Ss;
+    INSTRUCTION_MODE                InstructionMode;
+    UINT8*                          AfinityBitmap;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
 typedef struct THREAD_RING{
@@ -91,13 +89,6 @@ typedef struct THREAD_RING{
 #define DEMON_THREAD_RING_ID    2
 
 #define THREAD_PRIORITY_RINGS 32
-
-#define PROCESS_PRIORITY_HIGH       0
-#define PROCESS_PRIORITY_ABOVE      1
-#define PROCESS_PRIORITY_NORMAL     2
-#define PROCESS_PRIORITY_BELOW      3
-#define PROCESS_PRIORITY_LOW        4
-#define PROCESS_PRIORITY_RINGS      5
 
 typedef struct _SCHEDUALER_DISTRIBUTION_OBJECT{
     UINT64              TotalLimiters;
@@ -118,12 +109,17 @@ static inline UINT8 EulerCurveIndexor(PSCHEDUALER_DISTRIBUTION_OBJECT Sched){
     return Sched->CurrentIndexor;
 }
 
+static inline void ResetEulerCurveIndexor(PSCHEDUALER_DISTRIBUTION_OBJECT Sched){
+    Sched->CurrentIndexor = 0;
+    Sched->CurrentLimiter = 1;
+}
+
 static inline LOUSTATUS CreateShecdualerObject(
     PSCHEDUALER_DISTRIBUTION_OBJECT ObjectIn,
     UINT64                          TotalLimiters,
     UINT64                          LimitIncrementor
 ){
-    if((!TotalLimiters) || (!LimitIncrementor) || (!ObjectIn)){
+    if((TotalLimiters < 2) || (!LimitIncrementor) || (!ObjectIn)){
         return STATUS_INVALID_PARAMETER;
     }
     ObjectIn->TotalLimiters = TotalLimiters;
@@ -132,33 +128,38 @@ static inline LOUSTATUS CreateShecdualerObject(
     return STATUS_SUCCESS;
 }
 
-typedef class ThreadSchedualManagerObject{
+typedef class TsmThreadSchedualManagerObject{
     private:
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
+        PGENERIC_THREAD_DATA                IdleTask;
     public:
-                                            ThreadSchedualManagerObject(
-                                                UINT64 ProcessorID, 
-                                                UINT64 DistibutionLimitor,
-                                                UINT64 DistributerIncrementation
+        LOUSTATUS                           TsmInitializeSchedualerObject(
+                                                UINT64                          ProcessorID, 
+                                                struct _GENERIC_PROCESS_DATA*   ProcessData,
+                                                UINT64                          DistibutionLimitor,
+                                                UINT64                          DistributerIncrementation
                                             );
-                                            ~ThreadSchedualManagerObject();
-        void                                AsignThreadToSchedual(PGENERIC_THREAD_DATA Thread);
-        void                                DeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread, bool SelfIdentifiing);
-        UINT64                              GetCurrentThreadID();
-        UINT64                              GetCurrentInterruptStorage();
-        UINT64                              GetCurrentContextStorage();
+        PGENERIC_THREAD_DATA                TsmSchedual();
+        void                                TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread);
+        void                                TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread, bool SelfIdentifiing);
+        UINT64                              TsmGetCurrentThreadID();
+        UINT64                              TsmGetCurrentInterruptStorage();
+        UINT64                              TsmGetCurrentContextStorage();
 }THREAD_SCHEDUAL_MANAGER, * PTHREAD_SCHEDUAL_MANAGER;
+
+#define THREAD_DEFAULT_DISTRIBUTER_INCREMENTER 1
 
 typedef struct _GENERIC_PROCESS_DATA{
     ListHeader                              Peers;
+    struct _GENERIC_PROCESS_DATA*           ParentProcess;
     string                                  ProcessName;
     mutex_t                                 LockOutTagOut;
-    UINT64                                  PML4Tree;
-    UINT8                                   PIID;
+    UINT64                                  PMLTree;
+    UINT16                                  ProcessID;
     UINT8                                   ProcessPriority;
-    THREAD_SCHEDUAL_MANAGER                 ThreadObjects;    
+    PTHREAD_SCHEDUAL_MANAGER                ThreadObjects;    
     PEB                                     Peb;
     UINT64                                  Subsystem;
     process_state_t                         ProcessState;
@@ -168,6 +169,7 @@ typedef struct _GENERIC_PROCESS_DATA{
     UINT64                                  CurrentMsSlice;
     INSTRUCTION_MODE                        InstructionMode;
     UINT8*                                  AfinityBitmap;
+    HANDLE                                  ProcessSection;
 }GENERIC_PROCESS_DATA, * PGENERIC_PROCESS_DATA;
 
 typedef struct _PROCESS_RING{
@@ -175,35 +177,32 @@ typedef struct _PROCESS_RING{
     GENERIC_PROCESS_DATA    ProcessData;
 }PROCESS_RING, * PPROCESS_RING;
 
-typedef class ProcessScedualManagerObject{
+typedef class PsmProcessScedualManagerObject{
     private:
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
     public:
-                                            ProcessScedualManagerObject(
+                                            PsmInitializeSchedualerObject(
                                                 UINT64 ProcessorID, 
                                                 UINT64 DistibutionLimitor,
                                                 UINT64 DistributerIncrementation
                                             );
-                                            ~ProcessScedualManagerObject();
-        void                                AsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
-        void                                DeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
-        UINT64                              GetCurrentProcessID();
-        UINT64                              GetCurrentSubsystem();
+        PGENERIC_PROCESS_DATA               PsmSchedual();
+        void                                PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
+        void                                PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
+        UINT64                              PsmGetCurrentProcessID();
+        UINT64                              PsmGetCurrentSubsystem();
 }PROCESS_SCHEDUAL_MANAGER, * PPROCESS_SCHEDUAL_MANAGER;
 
-typedef struct _SCHEDUAL_MANAGER{
-    THREAD_SCHEDUAL_MANAGER     DemonSchedualer;
-    PROCESS_SCHEDUAL_MANAGER    ProcessSchedualer;
-}SCHEDUAL_MANAGER, * PSCHEDUAL_MANAGER;
+typedef PROCESS_SCHEDUAL_MANAGER SCHEDUAL_MANAGER, *PSCHEDUAL_MANAGER;
 
 typedef struct _PROCESSOR_STATE_BLOCK{
     mutex_t                         LockOutTagOut;
     UINT64                          CurrentThreadID;
     UINT64                          CurrentInterruptStorage;
     UINT64                          CurrentContextStorage;
-    SCHEDUAL_MANAGER                Schedualer;
+    PSCHEDUAL_MANAGER               Schedualer;
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
@@ -227,5 +226,8 @@ KERNEL_IMPORT
 void SetPEB(uint64_t PEB);
 KERNEL_IMPORT
 void SetTEB(uint64_t Teb);
+
+UINT64 LouKeVmmCreatePmlTable();
+void LouKeVmmCloneSectionToPml(UINT64* Pml4);
 
 #endif

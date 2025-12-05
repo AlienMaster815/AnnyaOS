@@ -192,6 +192,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/Processors.h>
 #include <Coff.h>
 #include <LouLoad.h>
+#include <kernel/Process.h>
+
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

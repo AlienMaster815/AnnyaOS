@@ -399,6 +399,7 @@ bool InitializeLapic(UINT32 CpuID){
     uint64_t ApicBase;
     LouPrint("Initializing Processor:%d\n", CpuID);
     ApicBase = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
+    LouKeCreateDeviceSection((PVOID)GetLocalApicBase(), (PVOID)ApicBase, KILOBYTE_PAGE, PAGE_READWRITE | SEC_NOCACHE);
     LouKeSetApicBase(CpuToApicID(get_processor_id()), ApicBase);
     CPU::CPUID Cpu;
     if(Cpu.IsFeatureSupported(CPU::X2APIC)){

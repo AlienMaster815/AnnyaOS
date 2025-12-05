@@ -236,6 +236,31 @@ LOUSTATUS LouKeGetFaultBnaryHande(
     PPROCESS_EXCEPTION_DATA_PACKET DataPacket
 );
 
+typedef struct _LOUSINE_CREATE_PROCESS_PARAMS{
+    TIME_T      OptionalStartTime;   //null for default
+    UINT64      TimeQuantum;         //0 for default
+    UINT64      Subsystem;           //0 for Annya/Winapi
+    UINT8*      ProcessAffinityMask; //optional
+}LOUSINE_CREATE_PROCESS_PARAMS, * PLOUSINE_CREATE_PROCESS_PARAMS;
+
+typedef HANDLE HPROCESS, * PHPROCESS;
+
+LOUSTATUS LouKePmCreateProcessEx(
+    PHPROCESS                       HandleOut,          //Optional                       
+    string                          ProcessName,        //Process Name
+    PHPROCESS                       ParrentProcess,     //Parent Process Handle           
+    UINT8                           Priority,           //Process Schedualer Priority
+    HANDLE                          Section,            //Section of the Executable Image
+    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
+);
+
+#define PROCESS_PRIORITY_HIGH       0
+#define PROCESS_PRIORITY_ABOVE      1
+#define PROCESS_PRIORITY_NORMAL     2
+#define PROCESS_PRIORITY_BELOW      3
+#define PROCESS_PRIORITY_LOW        4
+#define PROCESS_PRIORITY_RINGS      5
+
 #endif
 
 #ifdef __cplusplus

@@ -219,17 +219,7 @@ KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtCreateSection(
    HANDLE             FileHandle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtCreateSectionEx(
-            PHANDLE                 SectionHandle,
-            ACCESS_MASK             DesiredAccess,
-   POBJECT_ATTRIBUTES      ObjectAttributes,
-   PLARGE_INTEGER          MaximumSize,
-             ULONG                   SectionPageProtection,
-             ULONG                   AllocationAttributes,
-   HANDLE                  FileHandle,
-          PMEM_EXTENDED_PARAMETER ExtendedParameters,
-				 ULONG                   ExtendedParameterCount
-);
+#define NtCreateSectionEx(a,b,c,d,e,f,g,h,i) LouKeVmmCreateSectionEx(a,b,c,d,e,f,g,h,i)
 
 KERNEL_ENTRY NTSYSCALLAPI NTSTATUS NtDeviceIoControlFile(
               HANDLE           FileHandle,

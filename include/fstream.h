@@ -24,6 +24,16 @@ size_t fsize(FILE* File);
 #define LouKeMallocFileData(x, y)  LouKeMallocEx(x, y, WRITEABLE_PAGE | PRESENT_PAGE)
 #define LouKeFreeFileData(x)    LouKeFree(x)
 
+typedef enum {
+    UNKOWN_FILE_TYPE = 0,
+    COFF_FILE_TYPE = 1,
+    ELF_FILE_TYPE = 2,
+    BITMAP_FILE_TYPE = 3,
+    PNG_FILE_TYPE = 4,
+}FILE_TYPE;
+
+FILE_TYPE LouKeGetFileType(FILE File);
+
 #endif
 
 #ifdef __cplusplus

@@ -116,6 +116,7 @@ void InitializeSmBiosSystem(void* SmBiosEntry){
         LouKeMapContinuousMemoryBlock((uintptr_t)SmBiosEntry, (uintptr_t)SmBiosEntry, KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
         InitializeSmbiosTables(SmBiosEntry);
         LouKeUnMapContinuousMemoryBlock((uintptr_t)SmBiosEntry, KILOBYTE_PAGE);
+        while(1);
     }else{
         InitializeSmbiosTables(SearchForSmBiosBiosEntry());
     }

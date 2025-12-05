@@ -26,6 +26,8 @@ UNUSED static PEB                               KPeb = {0};
 
 //static LouKeManagerProcessSwap();
 
+
+
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
     //INTEGER ProcessorID = GetCurrentCpuTrackMember();
@@ -105,6 +107,16 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
     ProcessBlock.ProcessorCount = GetNPROC();
     ProcessBlock.ProcStateBlock = LouKeMallocArray(PROCESSOR_STATE_BLOCK, ProcessBlock.ProcessorCount, KERNEL_GENERIC_MEMORY);
+
+    LouKePmCreateProcessEx(
+        0x00,
+        "The Lousine Kernel",
+        0x00, 
+        PROCESS_PRIORITY_HIGH,
+        0x00,
+        0x00
+    );
+    
     /*InitializationProcessor = GetCurrentCpuTrackMember();
 
     MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);

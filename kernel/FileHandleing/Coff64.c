@@ -9,13 +9,13 @@ UNUSED static void EnableCoffImageProtection(
     UNUSED UINT64 PhysicalLoadedAddress = (UINT64)CfiObject->PhysicalLoadedAddress;
     
     size_t SectionCount = PeImageHeader->StandardHeader.NumberOfSections;
-    
+    CfiObject->SectionMapping = LouKeMallocArray(UINT64, SectionCount, KERNEL_GENERIC_MEMORY);
     for(size_t i = 0; i < SectionCount; i++){
         UINT64 PageFlags;
         UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
         SIZE VirtualSize = (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize;
         VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
-                
+        
         if(SectionCharacteristics & CFI_SCN_CNT_CODE){
             PageFlags = PRESENT_PAGE | (CfiObject->KernelObject ? 0 : USER_PAGE);
         }else if(
@@ -27,6 +27,8 @@ UNUSED static void EnableCoffImageProtection(
             PageFlags = PRESENT_PAGE | (CfiObject->KernelObject ? 0 : USER_PAGE);
         }
         
+        CfiObject->SectionMapping[i] = VirtualSize | PageFlags;
+
         LouKeMapContinuousMemoryBlock(
             PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
             LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress,
@@ -257,11 +259,13 @@ LOUSTATUS LouKeLoadCoffImageA64(
     ISize = ROUND_UP64(ISize, KILOBYTE_PAGE);
     LOUSTATUS Status = STATUS_INVALID_PARAMETER;
     if(!CfiObject->KernelObject){ //only user objects are allowed non aslr addresses
-        Status = LouKeRequestVirtualAddressAllocation(
-            Pe64ImageHeader->OptionalHeader.PE64.ImageBase,
-            ISize,
-            &CfiObject->PhysicalLoadedAddress
-        );
+        //Status = LouKeRequestVirtualAddressAllocation(
+        //    Pe64ImageHeader->OptionalHeader.PE64.ImageBase,
+        //    ISize,
+        //    &CfiObject->PhysicalLoadedAddress
+        //);
+        LouPrint("COFF64::TODO::USER_MAPPING\n");
+        while(1);
     }
 
     if(Status != STATUS_SUCCESS){

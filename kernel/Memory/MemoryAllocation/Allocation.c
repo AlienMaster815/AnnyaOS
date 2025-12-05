@@ -516,6 +516,10 @@ LouGeneralAllocateMemoryEx(
     return Result;
 }
 
+void* LouGeneralAllocateMemory(UINT64 Size){
+    return LouGeneralAllocateMemoryEx(Size, GetAlignmentBySize(Size));
+}
+
 void LouGeneralFreeMemory(void* Address){
     UINT64 Tmp = (UINT64)Address;
     Tmp -= GetKSpaceBase();
