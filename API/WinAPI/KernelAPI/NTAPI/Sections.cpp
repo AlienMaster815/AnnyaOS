@@ -20,6 +20,7 @@ typedef struct _SECTION_OBJECT{
     PVOID                       SectionPBase;
     SIZE                        SectionSize;
     PVOID                       SectionPrivateData;
+    UINT64                      FrameFlags;
 }SECTION_OBJECT, * PSECTION_OBJECT;
 
 static SECTION_OBJECT   MasterSectionList = {0};
@@ -55,7 +56,7 @@ LouKeCreateDeviceSection(
     SectionObject->SectionPBase = PBase;
     SectionObject->SectionSize = Size;
     SectionObject->SectionPageProtection = PageFlags;
-
+    SectionObject->FrameFlags = NtPageFlagsToLouPageFlags(PageFlags ,false, false);
 
     return STATUS_SUCCESS;
 }
@@ -157,6 +158,13 @@ LouKeVmmCreateSectionEx(
     return STATUS_UNSUCCESSFUL;
 }
 
+KERNEL_IMPORT
+LOUSTATUS LouKeGetVAddressPageInformation(
+    UINT64  VAddress, 
+    UINT8   Level,
+    UINT64* FrameBase, 
+    UINT64* FrameMember
+);
 
 void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     LouPrint("LouKeVmmCloneSectionToPml()\n");
@@ -164,11 +172,17 @@ void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     MutexLock(&SectionListLock);
     while(TmpSection->Peers.NextHeader){
         TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
-
-
-
+        UINT64 FrameBase;
+        UINT64 FrameMember;
+        LouKeGetVAddressPageInformation(
+            (UINT64)TmpSection->SectionVBase,
+            4, 
+            &FrameBase,
+            &FrameMember
+        );
+        Pml4[(((UINT64)FrameMember - (UINT64)FrameBase) / 8)] = *(UINT64*)FrameMember;   
+        //LouPrint("%h:%h:%h:%bc:%d\n", TmpSection->SectionVBase, TmpSection->SectionPBase, TmpSection->SectionSize, TmpSection->FrameFlags, (((UINT64)FrameMember - (UINT64)FrameBase) / 8));
     }    
     MutexUnlock(&SectionListLock);
     LouPrint("LouKeVmmCloneSectionToPml() DONE\n");
-    while(1);
 }

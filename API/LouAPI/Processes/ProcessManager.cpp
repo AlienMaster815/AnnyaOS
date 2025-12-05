@@ -21,17 +21,87 @@ LOUSTATUS UpdateIDT(bool Init);
 
 static mutex_t CoreIrqReadyLock = {0};
 UNUSED static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
-UNUSED static INTEGER                           InitializationProcessor = 0; 
+static INTEGER                           InitializationProcessor = 0; 
 UNUSED static PEB                               KPeb = {0};
 
-//static LouKeManagerProcessSwap();
+KERNEL_IMPORT void SetCr3(UINT64);
 
+//static LouKeManagerProcessSwap();
+void PsmProcessScedualManagerObject::PsmSetProcessTransitionState(){
+    SetCr3(this->CurrentProcess->PMLTree - GetKSpaceBase());
+    SetPEB((UINT64)&this->CurrentProcess->Peb);
+    this->CurrentProcess->ProcessState = PROCESS_RUNNING;
+}
+
+LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
+    UINT64 ProcessorID, 
+    UINT64 DistibutionLimitor,
+    UINT64 DistributerIncrementation
+){
+    LouPrint("PsmInitializeSchedualerObject()\n");   
+    if((!DistibutionLimitor) || (!DistributerIncrementation)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    LOUSTATUS Status;
+    this->ProcessorID = ProcessorID;
+
+    Status = CreateShecdualerObject(
+        &this->LoadDistributer,
+        DistibutionLimitor,
+        DistributerIncrementation
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PSM ERROR:Unable To Initialize Schedualer Object\n");
+    }
+
+    LouPrint("PsmInitializeSchedualerObject() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+PGENERIC_THREAD_DATA PsmProcessScedualManagerObject::PsmSchedual(){
+
+
+    this->CurrentProcess = this->SystemProcess;    
+    PsmSetProcessTransitionState();
+    return this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
+}
+
+void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
+
+}
+void  PsmProcessScedualManagerObject::PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing){
+
+}
+
+UINT64 PsmProcessScedualManagerObject::PsmGetCurrentProcessID(){
+
+    return 0x00;
+}
+
+UINT64 PsmProcessScedualManagerObject::PsmGetCurrentSubsystem(){
+
+
+
+    return 0x00;
+}
+
+void PsmProcessScedualManagerObject::PsmSetSystemProcess(HANDLE ProcessHandle){
+    if(this->SystemProcess){
+        return;
+    }
+    this->SystemProcess = (PGENERIC_PROCESS_DATA)ProcessHandle;
+    this->CurrentProcess = (PGENERIC_PROCESS_DATA)ProcessHandle;
+}
 
 
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
-    //INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    UNUSED PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
+    UINT64 NewThread = (UINT64)Schedualer->PsmSchedual();
     
+    LouPrint("UpdateProcessManager():%h\n", NewThread);
 
 
 
@@ -107,7 +177,12 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
     ProcessBlock.ProcessorCount = GetNPROC();
     ProcessBlock.ProcStateBlock = LouKeMallocArray(PROCESSOR_STATE_BLOCK, ProcessBlock.ProcessorCount, KERNEL_GENERIC_MEMORY);
-
+    
+    InitializationProcessor = GetCurrentCpuTrackMember();
+    
+    MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
+    MutexLock(&CoreIrqReadyLock);
+    
     LouKePmCreateProcessEx(
         0x00,
         "The Lousine Kernel",
@@ -116,15 +191,19 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
         0x00,
         0x00
     );
+    InitializationProcessor = GetCurrentCpuTrackMember();
+    HANDLE KernelProcess = 0x00;
+    LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, &KernelProcess);
+    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetSystemProcess(KernelProcess);
+    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmInitializeSchedualerObject(
+        (UINT64)InitializationProcessor, 
+        PROCESS_PRIORITY_RINGS, 
+        PROCESS_DEFAULT_DISTRIBUTER_INCREMENTER
+    );
     
-    /*InitializationProcessor = GetCurrentCpuTrackMember();
+    /*;
 
-    MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
-    MutexLock(&CoreIrqReadyLock);
-    
-    ProcessBlock.DemonSchedualer = CreateShecdualerObject();
 
-    ProcessBlock.DemonIDPool.IdRange = LouKeCreateIdentificationRange(1, ProcessBlock.ProcessorCount + 1);
     PTHREAD NewThread = LouKeCreateDeferedDemonEx(
         (PVOID)0x00,
         0x00,
@@ -171,7 +250,10 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
-    while(1);
+    while(1){
+        sleep(1000);
+        asm("INT $32");
+    }
 }
 
 LOUDDK_API_ENTRY

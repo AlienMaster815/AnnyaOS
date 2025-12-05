@@ -96,7 +96,6 @@ void LouKeSwitchToTask(
         
     ThreadTo->State = THREAD_RUNNING;
     RestoreEverything(&ThreadTo->ContextStorage);
-    SetPEB((UINT64)&ThreadTo->Process->Peb);
     SetTEB((UINT64)&ThreadTo->Teb);
     RestoreContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&ThreadTo->SavedState));
 
@@ -251,7 +250,32 @@ ThreadManagerIdleFallback(
 }
 
 PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(){
+    UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
+    UINT64 NextRing = EulerCurveIndexor(&this->LoadDistributer);
+    PTHREAD_RING CurrentThreadRing;
+    PTHREAD_RING TmpThreadRing;
+    while(NextRing != CurrentRing){
+        CurrentThreadRing = this->Threads[NextRing];
+        if((CurrentThreadRing) && (CurrentThreadRing->Peers.NextHeader)){
+            TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
+            while(TmpThreadRing != CurrentThreadRing){
+                if(!(MutexIsLocked(&TmpThreadRing->ThreadData->LockOutTagOut))){
+                    if(
+                        (!LouKeIsTimeoutNull(&TmpThreadRing->ThreadData->BlockTimeout)) &&
+                        (LouKeDidTimeoutExpired(&TmpThreadRing->ThreadData->BlockTimeout))
+                    ){
+                        TmpThreadRing->ThreadData->State = THREAD_READY;
+                    }
 
+                    if(TmpThreadRing->ThreadData->State == THREAD_READY){
+                        return  TmpThreadRing->ThreadData;
+                    }
+                }
+                TmpThreadRing = (PTHREAD_RING)TmpThreadRing;
+            }
+        }
+        NextRing = EulerCurveIndexor(&this->LoadDistributer);
+    }
 
     return this->IdleTask;
 }

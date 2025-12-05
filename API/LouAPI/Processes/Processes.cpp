@@ -105,3 +105,23 @@ LOUSTATUS LouKePmCreateProcessEx(
     
     return STATUS_SUCCESS;
 }
+
+LOUSTATUS LouKePsmGetProcessHandle(
+    string  ProcessName,
+    PHANDLE OutHandle
+){
+    if((!ProcessName) || (!OutHandle)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PGENERIC_PROCESS_DATA TmpHandle = &MasterProcessList;
+    while(TmpHandle->Peers.NextHeader){
+        TmpHandle = (PGENERIC_PROCESS_DATA)TmpHandle->Peers.NextHeader;
+        if(!strcmp(TmpHandle->ProcessName, ProcessName)){
+            *OutHandle = (HANDLE)TmpHandle;
+            return STATUS_SUCCESS;
+        }
+    }
+    *OutHandle = 0x00;
+    return STATUS_NO_SUCH_FILE;
+}

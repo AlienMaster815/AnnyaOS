@@ -10,7 +10,12 @@ typedef enum {
     THREAD_BLOCKED = 3,
 } thread_state_t;
 
-typedef thread_state_t process_state_t;
+typedef enum {
+    PROCESS_READY = 0,
+    PROCESS_RUNNING = 1,
+    PROCESS_TERMINATED = 2,
+    PROCESS_BLOCKED = 3,
+} process_state_t;
 
 typedef struct  PACKED _CPUContext{
     // General-Purpose Registers    
@@ -82,7 +87,7 @@ typedef struct _GENERIC_THREAD_DATA{
 
 typedef struct THREAD_RING{
     ListHeader              Peers; //schedualer chain
-    GENERIC_THREAD_DATA     ThreadData;
+    PGENERIC_THREAD_DATA    ThreadData;
 }THREAD_RING, * PTHREAD_RING;
 
 #define USER_THREAD_RING_ID     1
@@ -97,7 +102,7 @@ typedef struct _SCHEDUALER_DISTRIBUTION_OBJECT{
     UINT64              CurrentIndexor;
 }SCHEDUALER_DISTRIBUTION_OBJECT, * PSCHEDUALER_DISTRIBUTION_OBJECT;
 
-static inline UINT8 EulerCurveIndexor(PSCHEDUALER_DISTRIBUTION_OBJECT Sched){
+static inline UINT64 EulerCurveIndexor(PSCHEDUALER_DISTRIBUTION_OBJECT Sched){
     Sched->CurrentIndexor++;
     Sched->CurrentIndexor %= Sched->CurrentLimiter; 
     if(!Sched->CurrentIndexor){
@@ -150,6 +155,7 @@ typedef class TsmThreadSchedualManagerObject{
 }THREAD_SCHEDUAL_MANAGER, * PTHREAD_SCHEDUAL_MANAGER;
 
 #define THREAD_DEFAULT_DISTRIBUTER_INCREMENTER 1
+#define PROCESS_DEFAULT_DISTRIBUTER_INCREMENTER THREAD_DEFAULT_DISTRIBUTER_INCREMENTER
 
 typedef struct _GENERIC_PROCESS_DATA{
     ListHeader                              Peers;
@@ -182,17 +188,22 @@ typedef class PsmProcessScedualManagerObject{
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
+        PGENERIC_PROCESS_DATA               SystemProcess;
+        PGENERIC_THREAD_DATA                CurrentThread;
+        PGENERIC_PROCESS_DATA               CurrentProcess;
+        void                                PsmSetProcessTransitionState();
     public:
-                                            PsmInitializeSchedualerObject(
+        LOUSTATUS                           PsmInitializeSchedualerObject(
                                                 UINT64 ProcessorID, 
                                                 UINT64 DistibutionLimitor,
                                                 UINT64 DistributerIncrementation
                                             );
-        PGENERIC_PROCESS_DATA               PsmSchedual();
+        PGENERIC_THREAD_DATA                PsmSchedual();
         void                                PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
         void                                PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
         UINT64                              PsmGetCurrentProcessID();
         UINT64                              PsmGetCurrentSubsystem();
+        void                                PsmSetSystemProcess(HANDLE ProcessData);
 }PROCESS_SCHEDUAL_MANAGER, * PPROCESS_SCHEDUAL_MANAGER;
 
 typedef PROCESS_SCHEDUAL_MANAGER SCHEDUAL_MANAGER, *PSCHEDUAL_MANAGER;
@@ -202,7 +213,7 @@ typedef struct _PROCESSOR_STATE_BLOCK{
     UINT64                          CurrentThreadID;
     UINT64                          CurrentInterruptStorage;
     UINT64                          CurrentContextStorage;
-    PSCHEDUAL_MANAGER               Schedualer;
+    SCHEDUAL_MANAGER                Schedualer;
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
@@ -229,5 +240,9 @@ void SetTEB(uint64_t Teb);
 
 UINT64 LouKeVmmCreatePmlTable();
 void LouKeVmmCloneSectionToPml(UINT64* Pml4);
+LOUSTATUS LouKePsmGetProcessHandle(
+    string  ProcessName,
+    PHANDLE OutHandle
+);
 
 #endif

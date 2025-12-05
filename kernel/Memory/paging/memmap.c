@@ -349,3 +349,56 @@ uint64_t GetPageOfFaultValue(uint64_t VAddress) {
     return 0;
 }
 
+LOUSTATUS LouKeGetVAddressPageInformation(
+    UINT64  VAddress, 
+    UINT8   Level,
+    UINT64* FrameBase, 
+    UINT64* FrameMember
+){  
+    if(((!Level) || (Level > 4)) || (!FrameBase) || (!FrameMember)){
+        return STATUS_INVALID_PARAMETER;
+    }   
+
+    uint64_t L4Entry = 0;
+    uint64_t L3Entry = 0;
+    uint64_t L2Entry = 0;
+    uint64_t L1Entry = 0;
+
+    CalculateTableMarks(
+        VAddress,
+        &L4Entry,
+        &L3Entry,
+        &L2Entry,
+        &L1Entry
+    );
+
+    UINT64* TmpPageBase = GetPageBase();
+
+    if(Level == 4){
+        *FrameMember = (UINT64)&TmpPageBase[L4Entry];
+        *FrameBase = (UINT64)TmpPageBase;
+    }
+    if(Level == 3){
+        TmpPageBase = PageDown(TmpPageBase,L4Entry);    
+        *FrameMember = (UINT64)&TmpPageBase[L3Entry];
+        *FrameBase = (UINT64)TmpPageBase;
+    }
+    if(Level == 2){
+        TmpPageBase = PageDown(TmpPageBase,L4Entry);    
+        TmpPageBase = PageDown(TmpPageBase,L3Entry);
+        *FrameMember = (UINT64)&TmpPageBase[L2Entry];
+        *FrameBase = (UINT64)TmpPageBase;
+    }
+    if(Level == 1){
+        TmpPageBase = PageDown(TmpPageBase,L4Entry);    
+        TmpPageBase = PageDown(TmpPageBase,L3Entry);
+        if((TmpPageBase[L2Entry] & (1 << 7)) || (!(TmpPageBase[L2Entry] & ~(FLAGSSPACE)))){
+            return STATUS_NO_SUCH_FILE;
+        }
+        TmpPageBase = PageDown(TmpPageBase,L2Entry);
+        *FrameMember = (UINT64)&TmpPageBase[L1Entry];
+        *FrameBase = (UINT64)TmpPageBase;
+    }   
+
+    return STATUS_SUCCESS;
+}

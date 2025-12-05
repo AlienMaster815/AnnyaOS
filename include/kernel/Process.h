@@ -261,6 +261,8 @@ LOUSTATUS LouKePmCreateProcessEx(
 #define PROCESS_PRIORITY_LOW        4
 #define PROCESS_PRIORITY_RINGS      5
 
+#define KERNEL_PROCESS_NAME         "The Lousine Kernel"
+
 #endif
 
 #ifdef __cplusplus

@@ -172,7 +172,7 @@ LOUSTATUS LouKeCreateDeviceSection(
 );
 
 ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
-
+UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists);
 #endif
 //Directory Entry FLAGS
 
@@ -274,7 +274,8 @@ LOUSTATUS LouKeCreateDeviceSection(
 );
 KERNEL_IMPORT
 ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
-
+KERNEL_IMPORT 
+UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists);
 #else 
 KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_EXPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);

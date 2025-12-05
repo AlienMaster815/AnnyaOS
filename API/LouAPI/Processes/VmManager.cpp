@@ -3,7 +3,8 @@
 
 #define L4SCAN_START ((0xFFFF800000000000ULL >> 39) & 0x1FF)
 
-extern "C" uint64_t GetCr3();
+KERNEL_IMPORT uint64_t GetCr3();
+
 
 
 UINT64 LouKeVmmCreatePmlTable(){

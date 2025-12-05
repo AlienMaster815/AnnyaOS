@@ -83,7 +83,12 @@ typedef struct _LOUSINE_LOADER_INFO{
     LOUSINE_FIRWARE_INFO        FirmwareInfo;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
+#ifdef __cplusplus
+KERNEL_IMPORT LOUSINE_LOADER_INFO KernelLoaderInfo;
 #define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
+#else
+#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
+#endif
 #define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
 
 
