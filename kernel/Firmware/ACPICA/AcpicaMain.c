@@ -56,14 +56,14 @@ void* AcpiOsMapMemory(
     ACPI_PHYSICAL_ADDRESS   PhyAddress,
     ACPI_SIZE               Length
 ){
-    return LouKeMemReMap((void*)PhyAddress, (size_t)Length, KERNEL_DMA_MEMORY);
+    return (void*)((UINT64)PhyAddress + GetKSpaceBase());
 }
 
 void AcpiOsUnmapMemory(
     void*       Address,
     ACPI_SIZE   Length
 ){
-    LouKeMemReleaseReMap(Address);
+    
 }
 
 ACPI_STATUS AcpiOsGetPhysicalAddress(

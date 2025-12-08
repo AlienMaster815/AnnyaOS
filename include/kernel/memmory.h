@@ -124,6 +124,7 @@ typedef struct __attribute__((packed, aligned(4096))) _PML {
 void LouKeFreePage(void* PageAddress);
 void LouKeFreePage32(void* PageAddress);
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
+bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
 void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags);
 uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
@@ -216,7 +217,7 @@ KERNEL_IMPORT bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t 
 KERNEL_IMPORT void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
 KERNEL_IMPORT void LouFree(uint8_t* Addr);
 KERNEL_IMPORT LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
-KERNEL_IMPORT bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
+KERNEL_IMPORT bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
 KERNEL_IMPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_IMPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_IMPORT void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
@@ -397,6 +398,14 @@ void LouKeMapContinuousMemoryBlock(
     uint64_t VAddress,
     uint64_t size, 
     uint64_t FLAGS
+);
+
+void LouKeMapContinuousMemoryBlockEx(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
 );
 
 void LouKeMapContinuousMemoryBlockKB(
@@ -669,6 +678,14 @@ KERNEL_EXPORT void LouKeMapContinuousMemoryBlock(
     uint64_t VAddress,
     uint64_t size, 
     uint64_t FLAGS
+);
+
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockEx(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
 );
 
 KERNEL_EXPORT void LouKeUnMapContinuousMemoryBlock(

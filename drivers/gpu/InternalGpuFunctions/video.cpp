@@ -56,7 +56,7 @@ void InitializeBootGraphics(){
 		if(BootGraphics->framebuffer_addr){
 			EnforceSystemMemoryMap(BootGraphics->framebuffer_addr, ROUND_UP64(Plane->FrameBuffer->FramebufferSize, KILOBYTE_PAGE));
 			LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, BootGraphics->framebuffer_addr, ROUND_UP64(Plane->FrameBuffer->FramebufferSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
-			LouKeCreateDeviceSection((PVOID)BootGraphics->framebuffer_addr, (PVOID)BootGraphics->framebuffer_addr, ROUND_UP64(Plane->FrameBuffer->FramebufferSize, KILOBYTE_PAGE), PAGE_READWRITE);
+			LouKeCreateDeviceSection((PVOID)BootGraphics->framebuffer_addr, (PVOID)BootGraphics->framebuffer_addr, ROUND_UP64(Plane->FrameBuffer->FramebufferSize, KILOBYTE_PAGE), PAGE_READWRITE | SEC_NOCACHE);
 			Plane->FrameBuffer->FramebufferBase = BootGraphics->framebuffer_addr;
 		}else{
 			return;

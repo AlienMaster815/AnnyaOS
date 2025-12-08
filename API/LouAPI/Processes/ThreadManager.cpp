@@ -78,22 +78,27 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext){
 
 }
 
+static PTHREAD_RING LouKeTsmCreateThreadRing(PGENERIC_THREAD_DATA ThreadHandle){
+    PTHREAD_RING NewThreadRing = LouKeMallocType(THREAD_RING, KERNEL_GENERIC_MEMORY);
+    NewThreadRing->ThreadData = ThreadHandle;
+    return NewThreadRing;
+}
+
+UNUSED static void LouKeTsmDestroyThreadRing(PTHREAD_RING ThreadRing){
+    LouKeFree(ThreadRing);
+}
 
 
 void LouKeSwitchToTask(
     UINT64                  CpuCurrentState,
     PGENERIC_THREAD_DATA    ThreadFrom,
-    PGENERIC_THREAD_DATA    ThreadTo,
-    BOOL                    StoreData
+    PGENERIC_THREAD_DATA    ThreadTo
 ){
     //LouPrint("Switching From:%h To:%h\n", ThreadFrom, ThreadTo);
 
-    if(StoreData){
-        SaveContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&ThreadFrom->SavedState));
-        ThreadFrom->State = THREAD_READY;
-        SaveEverything(&ThreadFrom->ContextStorage);
-    }
-        
+    SaveContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&ThreadFrom->SavedState));
+    ThreadFrom->State = THREAD_READY;
+    SaveEverything(&ThreadFrom->ContextStorage);    
     ThreadTo->State = THREAD_RUNNING;
     RestoreEverything(&ThreadTo->ContextStorage);
     SetTEB((UINT64)&ThreadTo->Teb);
@@ -197,7 +202,10 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     NewThreadHandle->InstructionMode = InstructionMode;
 
     if(StartTime){ //if delayed or defered work this is used for blocking/unblocking
-        memcpy(&NewThreadHandle->BlockTimeout, StartTime, sizeof(TIME_T)); 
+        memcpy(&NewThreadHandle->BlockTimeout, StartTime, sizeof(TIME_T));
+        NewThreadHandle->State = THREAD_BLOCKED; //thread state is managed by schedualer
+    }else{
+        NewThreadHandle->State = THREAD_READY; //thread state is managed by schedualer
     }
     
     //Afinity mask tells the schedualer 
@@ -211,7 +219,6 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
         }
     }
 
-    NewThreadHandle->State = THREAD_READY; //thread state is managed by schedualer
 
     NewThreadHandle->SavedState.rip = (UINT64)CtxEntry;                 //worker subsystem liftoff stub     : iretq Location
     NewThreadHandle->SavedState.rcx = (UINT64)CtxFunction;              //requested work                    : MSVC PARAM 1
@@ -249,32 +256,46 @@ ThreadManagerIdleFallback(
     return -1;
 }
 
+
+
 PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(){
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
+    if(this->Threads[CurrentRing]->ThreadData->CurrentMsSlice < this->Threads[CurrentRing]->ThreadData->TotalMsSlice){
+        this->Threads[CurrentRing]->ThreadData->CurrentMsSlice += 10;
+        return this->Threads[CurrentRing]->ThreadData;
+    }
+    this->Threads[CurrentRing]->ThreadData->CurrentMsSlice = 0;
+    
     UINT64 NextRing = EulerCurveIndexor(&this->LoadDistributer);
     PTHREAD_RING CurrentThreadRing;
     PTHREAD_RING TmpThreadRing;
-    while(NextRing != CurrentRing){
+    while(1){
         CurrentThreadRing = this->Threads[NextRing];
-        if((CurrentThreadRing) && (CurrentThreadRing->Peers.NextHeader)){
-            TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
-            while(TmpThreadRing != CurrentThreadRing){
-                if(!(MutexIsLocked(&TmpThreadRing->ThreadData->LockOutTagOut))){
+        if(CurrentThreadRing){
+            if(CurrentThreadRing->Peers.NextHeader){
+                TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
+                while(TmpThreadRing != CurrentThreadRing){
                     if(
                         (!LouKeIsTimeoutNull(&TmpThreadRing->ThreadData->BlockTimeout)) &&
-                        (LouKeDidTimeoutExpired(&TmpThreadRing->ThreadData->BlockTimeout))
+                        (LouKeDidTimeoutExpire(&TmpThreadRing->ThreadData->BlockTimeout))
                     ){
                         TmpThreadRing->ThreadData->State = THREAD_READY;
                     }
-
                     if(TmpThreadRing->ThreadData->State == THREAD_READY){
-                        return  TmpThreadRing->ThreadData;
+                        return TmpThreadRing->ThreadData;
                     }
+                    TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
                 }
-                TmpThreadRing = (PTHREAD_RING)TmpThreadRing;
+                if(CurrentThreadRing->ThreadData->State == THREAD_READY){
+                    return CurrentThreadRing->ThreadData;
+                }
             }
         }
         NextRing = EulerCurveIndexor(&this->LoadDistributer);
+        if(NextRing == CurrentRing){
+            //if no tasks are ready just idle
+            break;
+        }        
     }
 
     return this->IdleTask;
@@ -329,24 +350,57 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
 }
 
 void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread){
+    MutexLock(&this->LockOutTagOut);
+    PTHREAD_RING NewThreadRing = LouKeTsmCreateThreadRing(Thread);
+    PTHREAD_RING TmpThreadRing = this->Threads[Thread->ThreadPriority];
+    PTHREAD_RING CurrentThread = TmpThreadRing;
 
+    if(!TmpThreadRing){
+        this->Threads[Thread->ThreadPriority] = NewThreadRing;
+        NewThreadRing->Peers.NextHeader = (PListHeader)NewThreadRing;
+        NewThreadRing->Peers.LastHeader = (PListHeader)NewThreadRing;
+        goto _THREAD_ASIGNMENT_DONE;
+    }
+
+    while(TmpThreadRing->Peers.NextHeader != (PListHeader)CurrentThread){
+        TmpThreadRing = (PTHREAD_RING)TmpThreadRing->Peers.NextHeader;
+    }
+
+    CurrentThread->Peers.LastHeader = (PListHeader)NewThreadRing;
+    NewThreadRing->Peers.NextHeader = (PListHeader)CurrentThread;
+    TmpThreadRing->Peers.NextHeader = (PListHeader)NewThreadRing;
+
+    _THREAD_ASIGNMENT_DONE:
+    MutexUnlock(&this->LockOutTagOut);
 }
 
 void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread, bool SelfIdentifiing){
 
+
+    LouPrint("TsmDeasignThreadFromSchedual()\n");
+    while(1);
 }
 
 UINT64 TsmThreadSchedualManagerObject::TsmGetCurrentThreadID(){
 
+
+    LouPrint("TsmGetCurrentThreadID()\n");
+    while(1);
     return 0x00;
 }
 
 UINT64 TsmThreadSchedualManagerObject::TsmGetCurrentInterruptStorage(){
+    
 
+    LouPrint("TsmGetCurrentInterruptStorage()\n");
+    while(1);
     return 0x00;
 }
 
 UINT64 TsmThreadSchedualManagerObject::TsmGetCurrentContextStorage(){
+    
 
+    LouPrint("TsmGetCurrentContextStorage()\n");
+    while(1);
     return 0x00;
 }

@@ -17,57 +17,93 @@ UNUSED static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD 
 }
 
 
+static LOUSTATUS CreateDemonThreadHandle(
+    PTHREAD*    ThreadOut, 
+    PVOID       WorkEntry, 
+    PVOID       WorkParam, 
+    SIZE        StackSize,
+    UINT8       Prioirty,
+    PVOID       AfinityBitmap,
+    PVOID       UnblockTime
+){
+    PGENERIC_PROCESS_DATA ProcessData = 0x00;
+    LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);    
+    
+    LOUSTATUS Status = LouKeTsmCreateThreadHandle(
+        (PGENERIC_THREAD_DATA*)ThreadOut,
+        ProcessData,
+        (PVOID)ThreadStub,
+        WorkEntry,
+        WorkParam,
+        Prioirty,
+        StackSize,
+        10,
+        0x08,
+        0x10,
+        LONG_MODE,
+        (PTIME_T)UnblockTime,
+        (UINT8*)AfinityBitmap
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("CreateDemonThreadHandle() ERROR:Unable To Create Thread Handle\n");
+    }
+
+    return Status;
+}
+
+
 LOUDDK_API_ENTRY
 PTHREAD
 LouKeCreateDeferedDemonEx(
     PVOID   Function,
     PVOID   Params,
     SIZE    StackSize,
-    UINT8   Prioirty,
+    UINT8   Priority,
     BOOL    ProcessorSpcific,
     INTEGER Processor,
     PVOID   UnblockTime
 ){
-    if(Prioirty > 31){
+    UINT8* AfinityMask = 0x00;
+    if(Priority > 31){
         LouPrint("Unable To Create Thread: INVALID_PRIORITY\n");
         return 0x00;
     }
     LouPrint("Creating Demon\n");
-    //PDEMON_THREAD_RING NewThread = LouKeCreateDemonThreadHandle(Prioirty);
-    /*void* NewStack = LouKeMallocEx(StackSize, 64, KERNEL_GENERIC_MEMORY);
-
-    NewThread->DemonData.StackTop = (UINT64)NewStack;
-    NewThread->DemonData.StackBase = (UINT64)NewStack + StackSize;
-
-    CPUContext* NewContext = (CPUContext*)((UINT64)NewStack + (StackSize - (ROUND_UP64(sizeof(CPUContext), 64))));
-    NewThread->DemonData.CurrentState = NewContext;
-
-    NewThread->DemonData.SavedState.rcx = (uint64_t)Function;                           //first parameter  MSVC
-    NewThread->DemonData.SavedState.rdx = (uint64_t)Params;                             //Second Parameter MSVC
-    NewThread->DemonData.SavedState.r8  = (uint64_t)NewThread;                          //Third Parameter  MSVC
-    NewThread->DemonData.SavedState.rip = (uint64_t)ThreadStub;                         //Liftoff Address  
-    NewThread->DemonData.SavedState.rbp = (uint64_t)NewThread->DemonData.StackBase;     //Base Pointer
-    NewThread->DemonData.SavedState.rsp = (uint64_t)NewContext;                         //Current Pointer
-
-    NewThread->DemonData.SavedState.cs  = NewThread->DemonData.Cs;
-    NewThread->DemonData.SavedState.ss  = NewThread->DemonData.Ss;  
-    NewThread->DemonData.SavedState.rflags = 0x202;  
-
     if(ProcessorSpcific){
-        MARK_PROCESSOR_AFFILIATED(NewThread->DemonData.AfinityBitmap, Processor);
-    }else{
-        for(size_t i = 0; i < GetNPROC(); i++){
-            MARK_PROCESSOR_AFFILIATED(NewThread->DemonData.AfinityBitmap, i);
+        AfinityMask = LouKeMallocArray(UINT8, PROCESSOR_BITMAP_LENGTH, KERNEL_GENERIC_MEMORY);
+        MARK_PROCESSOR_AFFILIATED(AfinityMask, Processor);
+    }
+    LOUSTATUS Status;
+    PGENERIC_THREAD_DATA NewThread; 
+    Status = CreateDemonThreadHandle(
+        (PTHREAD*)&NewThread,
+        Function,
+        Params,
+        StackSize,
+        Priority,
+        AfinityMask,
+        UnblockTime
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("LouKeCreateDeferedDemonEx() Unable To Create Thread\n");
+        return 0x00;
+    }
+
+    PGENERIC_PROCESS_DATA ProcessData = 0x00;
+    Status = LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("LouKeCreateDeferedDemonEx() Unable To Get Kernel Process Handle\n");
+        return 0x00;
+    }
+    INTEGER Processors = GetNPROC();
+    for(size_t i = 0 ; i < Processors; i++){
+        if(IS_PROCESSOR_AFFILIATED(NewThread->AfinityBitmap, i)){
+            ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(NewThread);
         }
     }
-
-    if(UnblockTime){
-        memcpy(&NewThread->DemonData.BlockTimeout, UnblockTime, sizeof(TIME_T));
-    }
-
-    //LouPrint("Demon Handle:%h\nStack Top:%h\nStack Base:%h\nCurrentState:%h\n", NewThread, NewThread->DemonData.StackTop, NewThread->DemonData.StackBase, (UINT64)NewThread->DemonData.CurrentState );
-    */
-    return 0x00;//(PTHREAD)NewThread;
+    return NewThread;
 }
 
 LOUDDK_API_ENTRY

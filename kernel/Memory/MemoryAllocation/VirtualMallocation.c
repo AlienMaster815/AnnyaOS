@@ -46,6 +46,28 @@ uint64_t LouKeVMemmoryGetSize(uint64_t VAddress){
     return 0x00;
 }
 
+void LouKeMapContinuousMemoryBlockEx(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
+){
+    uint64_t i = 0;
+
+    while(i < size){
+        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+            LouMapAddressEx(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE, Pml4);
+            i += MEGABYTE_PAGE;
+        }
+        else{
+            LouMapAddressEx(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE, Pml4);
+            i += KILOBYTE_PAGE;
+        }
+        //LouPrint("I:%h : Size:%h\n",i, size);
+    }
+}
+
 void LouKeMapContinuousMemoryBlock(
     uint64_t PAddress, 
     uint64_t VAddress,

@@ -34,11 +34,11 @@ static spinlock_t PrintLock;
 void print_binary64(uint64_t number) {
     for(uint8_t BitMask = 0; BitMask < 64; BitMask++){
         if(number & (1 << (63 - BitMask))){
-            LouKeOsDosPrintCharecter('1');
             LouKeDebuggerCommunicationsSendCharecter('1');
-        }else{
             LouKeOsDosPrintCharecter('1');
+        }else{
             LouKeDebuggerCommunicationsSendCharecter('0');
+            LouKeOsDosPrintCharecter('1');
         }
     }
 }
@@ -46,11 +46,11 @@ void print_binary64(uint64_t number) {
 void print_binary32(uint32_t number) {
     for(uint8_t BitMask = 0; BitMask < 32; BitMask++){
         if(number & (1 << (31 - BitMask))){
-            LouKeOsDosPrintCharecter('1');
             LouKeDebuggerCommunicationsSendCharecter('1');
+            LouKeOsDosPrintCharecter('1');
         }else{
-            LouKeOsDosPrintCharecter('0');
             LouKeDebuggerCommunicationsSendCharecter('0');
+            LouKeOsDosPrintCharecter('0');
         }
     }
 }
@@ -58,11 +58,11 @@ void print_binary32(uint32_t number) {
 void print_binary16(uint16_t number) {
     for(uint8_t BitMask = 0; BitMask < 16; BitMask++){
         if(number & (1 << (15 - BitMask))){
-            LouKeOsDosPrintCharecter('1');
             LouKeDebuggerCommunicationsSendCharecter('1');
+            LouKeOsDosPrintCharecter('1');
         }else{
-            LouKeOsDosPrintCharecter('0');
             LouKeDebuggerCommunicationsSendCharecter('0');
+            LouKeOsDosPrintCharecter('0');
         }
     }
 }
@@ -70,19 +70,19 @@ void print_binary16(uint16_t number) {
 void print_binary8(uint8_t number) {
     for(uint8_t BitMask = 0; BitMask < 8; BitMask++){
         if(number & (1 << (7 - BitMask))){
-            LouKeOsDosPrintCharecter('1');
             LouKeDebuggerCommunicationsSendCharecter('1');
+            LouKeOsDosPrintCharecter('1');
         }else{
-            LouKeOsDosPrintCharecter('0');
             LouKeDebuggerCommunicationsSendCharecter('0');
+            LouKeOsDosPrintCharecter('0');
         }
     }
 }
-//static uint8_t Bullshit = 0;
 
 __stdcall
 int LouPrint_s(char* format, va_list args){
     LouKIRQL OldLevel;
+
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     char PrintString[21] = {0};
     while (*format) {
@@ -94,8 +94,8 @@ int LouPrint_s(char* format, va_list args){
                     intToString((uint64_t)num, PrintString);
                     char* p = PrintString;
                     while (*p != '\0') {
-                        LouKeOsDosPrintCharecter(*p);
                         LouKeDebuggerCommunicationsSendCharecter(*p);
+                        LouKeOsDosPrintCharecter(*p);
                         p++;
                     }
                     break;
@@ -107,15 +107,15 @@ int LouPrint_s(char* format, va_list args){
                         sintToString((uint64_t)num, PrintString);
                         char* p = PrintString;
                         while (*p != '\0') {
-                            LouKeOsDosPrintCharecter(*p);
                             LouKeDebuggerCommunicationsSendCharecter(*p);
+                            LouKeOsDosPrintCharecter(*p);
                             p++;
                         }
                     }else{
                         char* text = va_arg(args, char*);
                         while (*text != '\0') {
-                            LouKeOsDosPrintCharecter(*text);
                             LouKeDebuggerCommunicationsSendCharecter(*text);
+                            LouKeOsDosPrintCharecter(*text);
                             text++;
                         }
                     }
@@ -123,8 +123,8 @@ int LouPrint_s(char* format, va_list args){
                 }
                 case 'c': {
                     char c = va_arg(args, int);
-                    LouKeOsDosPrintCharecter(c);
                     LouKeDebuggerCommunicationsSendCharecter(c);
+                    LouKeOsDosPrintCharecter(c);
                     break;
                 }
                 case 'h': {                 
@@ -132,8 +132,8 @@ int LouPrint_s(char* format, va_list args){
                     uintToHexString((uint64_t)num, PrintString);
                     char* p = PrintString;
                     while (*p  != '\0') {
-                        LouKeOsDosPrintCharecter(*p);
                         LouKeDebuggerCommunicationsSendCharecter(*p);
+                        LouKeOsDosPrintCharecter(*p);
                         p++;
                     }
                     break;
@@ -177,8 +177,8 @@ int LouPrint_s(char* format, va_list args){
                             long_double_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {
-                                LouKeOsDosPrintCharecter(*p);
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
+                                LouKeOsDosPrintCharecter(*p);
                                 p++;
                             }
                             break;
@@ -189,8 +189,8 @@ int LouPrint_s(char* format, va_list args){
                             double_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {
-                                LouKeOsDosPrintCharecter(*p);
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
+                                LouKeOsDosPrintCharecter(*p);
                                 p++;
                             }
                             break;
@@ -202,8 +202,8 @@ int LouPrint_s(char* format, va_list args){
                             float_to_string(str, num);
                             char* p = str;
                             while (*p  != '\0') {
-                                LouKeOsDosPrintCharecter(*p);
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
+                                LouKeOsDosPrintCharecter(*p);
                                 p++;
                             }
                             break;
@@ -212,17 +212,17 @@ int LouPrint_s(char* format, va_list args){
                     break;
                 }
                 default: {
-                    LouKeOsDosPrintCharecter('%');
-                    LouKeOsDosPrintCharecter(*format);
                     LouKeDebuggerCommunicationsSendCharecter('%');
                     LouKeDebuggerCommunicationsSendCharecter(*format);
+                    LouKeOsDosPrintCharecter('%');
+                    LouKeOsDosPrintCharecter(*format);
                     break;
                 }
             }
             format++; // Move to the next character in the format string
-        } else {
-            LouKeOsDosPrintCharecter(*format);
+        } else {    
             LouKeDebuggerCommunicationsSendCharecter(*format);
+            LouKeOsDosPrintCharecter(*format);
             format++;
         }
     }
@@ -246,14 +246,20 @@ bool UsingSmp = false;
 INTEGER 
 GetCurrentCpuTrackMember();
 
-mutex_t PrintMutex = {0};
+static mutex_t PrintMutex = {0};
 
 int LouPrint(char* format, ...) {
+
+    if(MutexIsLocked(&PrintMutex)){
+        return -1;
+    }
+
     MutexLock(&PrintMutex);
     int result = 0;
     if(UsingSmp){
         result = _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
         if(result){
+            MutexUnlock(&PrintMutex);
             return result;
         }
     }

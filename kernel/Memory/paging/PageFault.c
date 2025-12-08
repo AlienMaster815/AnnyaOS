@@ -83,9 +83,11 @@ void PageFault(uint64_t FaultingStackP) {
     uint64_t PAddress = 0x00;
     
     LouPrint("PAGE FUALT\n");
+
+    LouPrint("\nPage Fault Detected At Address %h Handleing Now :: Error Code:%h\n",VAddress, InterruptCode);
+
     RequestPhysicalAddress(VAddress, &PAddress);
 
-    LouPrint("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
     LouPrint("Physical Address:%h\n", PAddress);
 
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);

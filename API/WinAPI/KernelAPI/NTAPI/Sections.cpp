@@ -172,15 +172,7 @@ void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     MutexLock(&SectionListLock);
     while(TmpSection->Peers.NextHeader){
         TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
-        UINT64 FrameBase;
-        UINT64 FrameMember;
-        LouKeGetVAddressPageInformation(
-            (UINT64)TmpSection->SectionVBase,
-            4, 
-            &FrameBase,
-            &FrameMember
-        );
-        Pml4[(((UINT64)FrameMember - (UINT64)FrameBase) / 8)] = *(UINT64*)FrameMember;   
+        LouKeMapContinuousMemoryBlockEx((UINT64)TmpSection->SectionPBase, (UINT64)TmpSection->SectionVBase, TmpSection->SectionSize, TmpSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
         //LouPrint("%h:%h:%h:%bc:%d\n", TmpSection->SectionVBase, TmpSection->SectionPBase, TmpSection->SectionSize, TmpSection->FrameFlags, (((UINT64)FrameMember - (UINT64)FrameBase) / 8));
     }    
     MutexUnlock(&SectionListLock);

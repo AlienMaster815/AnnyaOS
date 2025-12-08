@@ -103,9 +103,8 @@ void DebugValueTrap(UINT64 Value){
 void SetupGDT(){
     LouPrint("Setting Up GDT\n");
 
-    PLongModeGdt GDT = (PLongModeGdt)LouKeMallocExPhy32(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
-    memset(GDT,0, sizeof(LongModeGdt));
-    UNUSED UINT64 Tmp;
+    PLongModeGdt GDT = (PLongModeGdt)LouKeMallocExVirt32(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
+            
     SetGDTSegmentEntry(
             (uint8_t*)&GDT->KCODE,
             0,
@@ -136,8 +135,7 @@ void SetupGDT(){
             0xC
         );
 
-    PTSS Tss = (PTSS)LouKeMallocExPhy32(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
-    memset(Tss,0, sizeof(TSS));
+    PTSS Tss = (PTSS)LouKeMallocExVirt32(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
 
     Tss->RSP0 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
     Tss->RSP1 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
@@ -146,43 +144,33 @@ void SetupGDT(){
     Tss->IST2 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
     Tss->IST3 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
 
-    RequestPhysicalAddress((UINT64)(UINT8*)Tss, &Tmp);
-    
+
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
-        (uintptr_t)Tmp, sizeof(TSS) - 1,
+        (uintptr_t)Tss, sizeof(TSS) - 1,
         0x89,
         0x00
     );
         
-    uint64_t GsBase = (uint64_t)LouKeMallocPhy32(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
-
-    RequestPhysicalAddress(GsBase, &Tmp);
-
-    if(Tmp >= 0xFFFFFFFFFFFF){
-        LouPrint("PANIC GsBase Over GDT Limit\n");
-        while(1);
-    }
+    uint64_t GsBase = (uint64_t)LouKeMallocVirt32(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
     
     SetGDTSegmentEntry(
         (uint8_t*)&GDT->KPCR,
-        Tmp,
+        GsBase,
         0xFFFFF,
         0xF2,
         0xC
     );
 
-    RequestPhysicalAddress((UINT64)(UINT8*)GDT, &Tmp);
-
     GDTREntry Gdtr;
     Gdtr.Length = sizeof(LongModeGdt) - 1;
-    Gdtr.Base   = (uint64_t)Tmp;
-    RequestPhysicalAddress((UINT64)(UINT8*)&Gdtr, &Tmp);
+    Gdtr.Base   = (uint64_t)GDT;
 
     LouPrint("Installing GDT:%h\n", Gdtr.Base);
 
-    InstallGDT((uint64_t)Tmp);
+    InstallGDT((uint64_t)&Gdtr);
     SetGSBase(GsBase);
 
     LouPrint("Done Setting Up GDT\n");
+
 }

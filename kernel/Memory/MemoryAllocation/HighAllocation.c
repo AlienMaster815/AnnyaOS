@@ -66,6 +66,8 @@ LouKeMallocEx(
     uint64_t    AllocationFlags
 ){  
     MutexLock(&GenMallocLock);
+
+
     uint64_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     if(!KeMallocPageTracks){
         KeMallocPageTracks = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE , 8);
@@ -125,6 +127,7 @@ LouKeMallocEx(
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     MutexUnlock(&GenMallocLock);
     ZeroMem(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase), AllocationSize);
+
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
 
@@ -171,7 +174,7 @@ LouKeMallocExVirt32(
                     VMEM_TRACK_DEREFERENCE_WRITE_ADDRESS(TmpVMemTrackBase, Base);
                     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
                     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, TrackCount + 1);
-                    MutexUnlock(&GenMallocLock);
+                    MutexUnlock(&GenMallocLock32);
                     ZeroMem(Base, AllocationSize);
                     return (void*)Base;
                 }
@@ -201,7 +204,10 @@ void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 ){
-    return LouKeMallocEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
+    LouPrint("Allocation Size:%h :: Allocation Flags:%h\n", AllocationSize, AllocationFlags);
+    void* Result = LouKeMallocEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
+    LouPrint("Result:%h\n");
+    return Result;
 }
 
 void* LouKeMallocVirt32(
@@ -358,8 +364,8 @@ void LouKeFreeVirt32(void* Address){
         return;
     }
     MutexLock(&GenMallocLock32);
-    uint64_t TmpPageTrackBase = KeMallocPageTracks;
-    uint64_t TmpPageTrackLast = KeMallocPageTracks;
+    uint64_t TmpPageTrackBase = KaMallocPageTracks32;
+    uint64_t TmpPageTrackLast = KaMallocPageTracks32;
     uint64_t TmpVMemTrackBase;
     uint64_t TmpVMemTrackLast;
     uint64_t TrackCount = 0;

@@ -135,6 +135,7 @@ static inline LOUSTATUS CreateShecdualerObject(
 
 typedef class TsmThreadSchedualManagerObject{
     private:
+        mutex_t                             LockOutTagOut;                     
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
@@ -180,7 +181,7 @@ typedef struct _GENERIC_PROCESS_DATA{
 
 typedef struct _PROCESS_RING{
     ListHeader              Peers;
-    GENERIC_PROCESS_DATA    ProcessData;
+    PGENERIC_PROCESS_DATA   ProcessData;
 }PROCESS_RING, * PPROCESS_RING;
 
 typedef class PsmProcessScedualManagerObject{
@@ -189,16 +190,17 @@ typedef class PsmProcessScedualManagerObject{
         UINT64                              ProcessorID;
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
         PGENERIC_PROCESS_DATA               SystemProcess;
-        PGENERIC_THREAD_DATA                CurrentThread;
-        PGENERIC_PROCESS_DATA               CurrentProcess;
         void                                PsmSetProcessTransitionState();
     public:
+        PGENERIC_THREAD_DATA                OwnerThread;
+        PGENERIC_THREAD_DATA                CurrentThread;
+        PGENERIC_PROCESS_DATA               CurrentProcess;
         LOUSTATUS                           PsmInitializeSchedualerObject(
                                                 UINT64 ProcessorID, 
                                                 UINT64 DistibutionLimitor,
                                                 UINT64 DistributerIncrementation
                                             );
-        PGENERIC_THREAD_DATA                PsmSchedual();
+        void                                PsmSchedual(UINT64 IrqState);
         void                                PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
         void                                PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
         UINT64                              PsmGetCurrentProcessID();
@@ -210,9 +212,6 @@ typedef PROCESS_SCHEDUAL_MANAGER SCHEDUAL_MANAGER, *PSCHEDUAL_MANAGER;
 
 typedef struct _PROCESSOR_STATE_BLOCK{
     mutex_t                         LockOutTagOut;
-    UINT64                          CurrentThreadID;
-    UINT64                          CurrentInterruptStorage;
-    UINT64                          CurrentContextStorage;
     SCHEDUAL_MANAGER                Schedualer;
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
@@ -229,8 +228,7 @@ KERNEL_IMPORT void LouKeSendIcEOI();
 void LouKeSwitchToTask(
     UINT64                  StackContex,
     PGENERIC_THREAD_DATA    ThreadFrom,
-    PGENERIC_THREAD_DATA    ThreadTo,
-    BOOL                    StoreData
+    PGENERIC_THREAD_DATA    ThreadTo
 );
 
 KERNEL_IMPORT 
@@ -243,6 +241,22 @@ void LouKeVmmCloneSectionToPml(UINT64* Pml4);
 LOUSTATUS LouKePsmGetProcessHandle(
     string  ProcessName,
     PHANDLE OutHandle
+);
+
+LOUSTATUS LouKeTsmCreateThreadHandle(
+    PGENERIC_THREAD_DATA*   OutHandle,    
+    PGENERIC_PROCESS_DATA   Process,
+    PVOID                   CtxEntry,
+    PVOID                   CtxFunction,
+    PVOID                   CtxParams,
+    UINT8                   ThreadPriority,
+    UINT64                  StackSize,
+    UINT64                  TimeSliceMs,
+    UINT8                   CodeSegment,
+    UINT8                   StackSegment,
+    INSTRUCTION_MODE        InstructionMode,
+    PTIME_T                 StartTime,
+    UINT8*                  AfinityBitmap
 );
 
 #endif

@@ -114,7 +114,7 @@ void LouKeGetTime(
     TimeStruct->Day = dayscurrent_month;
 }
 
-bool LouKeDidTimeoutExpired(PTIME_T Timeout){
+bool LouKeDidTimeoutExpire(PTIME_T Timeout){
     TIME_T CurrentTime = {0}; 
     LouKeGetTime(&CurrentTime);
 
