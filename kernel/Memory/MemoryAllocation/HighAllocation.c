@@ -204,10 +204,7 @@ void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 ){
-    LouPrint("Allocation Size:%h :: Allocation Flags:%h\n", AllocationSize, AllocationFlags);
-    void* Result = LouKeMallocEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
-    LouPrint("Result:%h\n");
-    return Result;
+    return LouKeMallocEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
 void* LouKeMallocVirt32(

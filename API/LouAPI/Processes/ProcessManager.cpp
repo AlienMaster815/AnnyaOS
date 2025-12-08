@@ -116,15 +116,15 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         }
     }*/
 
-    //this->CurrentProcess = this->SystemProcess;    
-    //PsmSetProcessTransitionState();
-    //NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
-    //LouKeSwitchToTask(
-    //    IrqState,
-    //    CurrentThread,
-    //    NextThread
-    //);
-    //this->CurrentThread = NextThread;
+    this->CurrentProcess = this->SystemProcess;    
+    PsmSetProcessTransitionState();
+    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
+    LouKeSwitchToTask(
+        IrqState,
+        CurrentThread,
+        NextThread
+    );
+    this->CurrentThread = NextThread;
 }
 
 void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
@@ -156,13 +156,12 @@ void PsmProcessScedualManagerObject::PsmSetSystemProcess(HANDLE ProcessHandle){
 
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
-    //INTEGER ProcessorID = GetCurrentCpuTrackMember();
-    //UNUSED PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
-    //Schedualer->PsmSchedual(CpuCurrentState);
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    UNUSED PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
+    Schedualer->PsmSchedual(CpuCurrentState);
 
-    
-    //LouKeMemoryBarrier();
-    //LouKeSendIcEOI();
+    LouKeMemoryBarrier();
+    LouKeSendIcEOI();
     return CpuCurrentState;
 }
 

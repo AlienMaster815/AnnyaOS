@@ -242,15 +242,15 @@ void InitializeSymmetricMultiProcessing(){
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
     
-    //InitializeSymmetricMultiProcessing();
+    InitializeSymmetricMultiProcessing();
 
-    //InitializeProcessManager();
+    InitializeProcessManager();
 
-    //LouKeInitializeFullLouACPISubsystem();
+    LouKeInitializeFullLouACPISubsystem();
 
-    //LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
-    //LouKeUnmaskSmpInterrupts();
+    LouKeUnmaskSmpInterrupts();
     LouPrint("Kernel Advanced System Initialized\n");
 }
 
@@ -343,24 +343,25 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     AdvancedLousineKernelInitialization();
 
-    //LouKeInitializeMouseHandling();
+    LouKeInitializeMouseHandling();
 
     LookForStorageDevices();
     
-    //uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
-    //if(!StorageDevices){
-    //    LouPrint("No Storage Devices Detected\n");
-    //    while(1);
-    //}
+    uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
+    if(!StorageDevices){
+        LouPrint("No Storage Devices Detected\n");
+        while(1);
+    }
 
-    //InitializeFileSystemManager();
-    //InitializeNtKernelTransitionLayer();
+    InitializeFileSystemManager();
+    
+    InitializeNtKernelTransitionLayer();
 
-    //InitializeBusCore();
+    InitializeBusCore();
+    
+    LouKeProbeSbIsa();
 
-    //LouKeProbeSbIsa();
-
-    //ScanTheRestOfHarware();
+    ScanTheRestOfHarware();
 
     //LouKeLoadLibraryA("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
 

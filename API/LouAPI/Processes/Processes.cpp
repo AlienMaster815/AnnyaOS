@@ -100,7 +100,6 @@ LOUSTATUS LouKePmCreateProcessEx(
     NewProcessObject->ProcessID = AllocateProcessID();
     NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
 
-
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
     
     return STATUS_SUCCESS;

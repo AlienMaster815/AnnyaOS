@@ -27,11 +27,8 @@ UNUSED static void LouKeRegisterPAddressToReserveVAddresses(
 
     TmpTracker->Peers.NextHeader = (PListHeader)LouGeneralAllocateMemoryEx(sizeof(VADDRESS_RESERVE_POOL_TRACKER), GET_ALIGNMENT(VADDRESS_RESERVE_POOL_TRACKER));
     TmpTracker->PAddress = PAddress; 
-    TmpTracker->VAddress = (UINT64)LouVMallocEx(PageSize * PageCount, PageSize);
     TmpTracker->PageSize = PageSize;
     TmpTracker->PageCount = PageCount;
-
-    LouKeMapContinuousMemoryBlock(PAddress, TmpTracker->VAddress, (PageSize * PageCount), KERNEL_GENERIC_MEMORY);
 
     MutexUnlock(&VaPoolMutex);
 }
@@ -44,8 +41,8 @@ UNUSED static void* LouKeGetFreeReservePage(
     void* Result = 0x00;
     MutexLock(&VaPoolMutex);
     while(TmpTracker->Peers.NextHeader){
-        if((TmpTracker->PageCount == PageCount) && (TmpTracker->PageSize == PageSize)){
-            Result = (void*)TmpTracker->VAddress;
+        if((TmpTracker->PageCount == PageCount) && (TmpTracker->PageSize == PageSize) && (!TmpTracker->AddressUsed)){
+            Result = (void*)TmpTracker->PAddress;
             TmpTracker->AddressUsed = true;
             break; 
         }
@@ -133,11 +130,11 @@ void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags)
     if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
         return 0x00;
     }
-    //void* Resurve = LouKeGetFreeReservePage(PageSize, PageCount);
-    //if(Resurve){
-    //    return Resurve;
-    //}
-    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (uint64_t)LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize));
+    void* Resurve = LouKeGetFreeReservePage(PageSize, PageCount);
+    if(!Resurve){
+        Resurve = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
+    }
+    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (uint64_t)Resurve);
 }
 
 void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres){
@@ -145,8 +142,7 @@ void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t Pa
         return 0x00;
     }
     void* Result = LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
-
-    //LouKeRegisterPAddressToReserveVAddresses((UINT64)Result, PageSize, PageCount);
+    LouKeRegisterPAddressToReserveVAddresses((UINT64)Result, PageSize, PageCount);
     LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
     LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
     return Result;

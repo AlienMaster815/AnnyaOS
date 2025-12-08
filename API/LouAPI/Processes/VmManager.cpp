@@ -11,13 +11,13 @@ UINT64 LouKeVmmCreatePmlTable(){
     UINT64* Pml4 = (UINT64*)LouGeneralAllocateMemory(KILOBYTE_PAGE);
     UINT64* Cloner = (UINT64*)(GetCr3() + GetKSpaceBase());
 
-    UINT64 L4Scan = 256;
+    UINT64 L4Scan = 0;
     
     for(;L4Scan < 512; L4Scan++){
         Pml4[L4Scan] = Cloner[L4Scan];
     }
 
-    LouKeVmmCloneSectionToPml(Pml4);
+    //LouKeVmmCloneSectionToPml(Pml4);
 
     LouKeMemoryBarrier();
 

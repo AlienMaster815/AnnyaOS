@@ -44,7 +44,7 @@ LOUSTATUS RequestPhysicalAddress(
     //LouPrint("L2Entry:%h\n", L2Entry);
     //LouPrint("L1Entry:%h\n", L1Entry);  
 
-    PML* PML4 = GetPageBase();
+    PML* PML4 = (PML*)((UINT64)GetPageBase() + GetKSpaceBase());
 
     uint64_t* Tmp = &PML4->PML4.entries[0];
     Tmp = (uint64_t*)(Tmp[L4Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
