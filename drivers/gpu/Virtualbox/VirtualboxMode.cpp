@@ -9,6 +9,9 @@
 #include <drivers/VBoxError.h>
 
 static void* VBoxEdid = 0x00;
+static uint32_t PlaneFormats[2] = {0};
+static uint32_t CursorPlaneFormats[1] = {0};
+
 
 static const uint8_t VBoxMasterEdid[] ={
 //directly coppied from Linux https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/vboxvideo/vbox_mode.c
@@ -402,7 +405,6 @@ static void VirtualboxAtomicSetState(
     while(1);
 }
 
-static uint32_t CursorPlaneFormats[1] = {0};
 
 static  DRSD_PLANE_ASSIST_CALLBACKS CursorPlaneAssistFunctions = {
     .StartFrameBufferProcessing = DrsdGxeInternalStartFrameBufferProcessing,
@@ -421,7 +423,6 @@ static  DRSD_PLANE_CALLBACKS CursorPlaneFunctions = {
     .DestroyPlaneAtomic = DrsdGxeDestroyShadowPlane,
 };
 
-static uint32_t PlaneFormats[2] = {0};
 
 static  DRSD_PLANE_ASSIST_CALLBACKS PlaneAssistedCallbacks = {
     .PrepareFrameBuffer = DrsdGxeInternalPrepareFrameBuffer,
@@ -601,7 +602,6 @@ static LOUSTATUS VirtualboxConnectorInitialize(
     VBoxConnector = LouKeMallocType(VIRTUALBOX_CONNECTOR, KERNEL_GENERIC_MEMORY);
 
     Connector = &VBoxConnector->Base;
-
 
     DrsdConnectorInitialize(
         Device, 

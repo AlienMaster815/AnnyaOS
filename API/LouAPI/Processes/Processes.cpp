@@ -53,6 +53,7 @@ static UINT16 AllocateProcessID(){
     }
     return Result;
 }
+void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc);
 
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,                       
@@ -63,6 +64,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     PLOUSINE_CREATE_PROCESS_PARAMS  Params 
 ){
     LouPrint("LouKePmCreateProcessEx()\n");
+    size_t Processors = GetNPROC();
 
     if(!ProcessName){
         return STATUS_INVALID_PARAMETER;
@@ -83,7 +85,6 @@ LOUSTATUS LouKePmCreateProcessEx(
 
         }
     }else{
-        size_t Processors = GetNPROC();
         NewProcessObject->ThreadObjects = LouKeMallocArray(THREAD_SCHEDUAL_MANAGER, Processors , KERNEL_GENERIC_MEMORY);
         PTHREAD_SCHEDUAL_MANAGER Tsm = NewProcessObject->ThreadObjects;
         for(size_t i = 0 ; i < Processors; i++){
@@ -99,6 +100,14 @@ LOUSTATUS LouKePmCreateProcessEx(
 
     NewProcessObject->ProcessID = AllocateProcessID();
     NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
+
+    if(Params){
+
+    }else{
+        for(size_t i = 0 ; i < Processors; i++){
+            LouKeInitProceSchedTail(NewProcessObject, i);
+        }
+    }
 
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
     

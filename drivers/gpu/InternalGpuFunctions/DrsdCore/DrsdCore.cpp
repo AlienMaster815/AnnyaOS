@@ -302,7 +302,8 @@ LouKeDrsdInitializeDevice(
         Crtc = Connector->Crtc;
         PrimaryPlane = Crtc->PrimaryPlane;
         FormatCount = PrimaryPlane->FormatCount;
-        Formats = PrimaryPlane->PlaneState->Formats;
+        Formats = PrimaryPlane->Formats;
+
         for(INT64 foo = 0 ; foo < FormatCount; foo++){
             if(memcmp(&Formats[foo] , DRSD_COLOR_FORMAT_XRGB8888, 4) == 0){
                 PrimaryPlane->AlphaShift = 24;

@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.01 RSC-3";
+string KERNEL_VERSION = "0.6.02 RSC-3";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -308,6 +308,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     ParserLouLoaderInformation(
         &KernelLoaderInfo
     );
+
     InitializeBasicMemcpy();
     
     ///vga set for debug

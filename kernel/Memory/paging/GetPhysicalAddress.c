@@ -44,13 +44,13 @@ LOUSTATUS RequestPhysicalAddress(
     //LouPrint("L2Entry:%h\n", L2Entry);
     //LouPrint("L1Entry:%h\n", L1Entry);  
 
-    PML* PML4 = (PML*)((UINT64)GetPageBase() + GetKSpaceBase());
-
-    uint64_t* Tmp = &PML4->PML4.entries[0];
+    UINT64* Tmp = (UINT64*)((UINT64)GetPageBase() + GetKSpaceBase());
     Tmp = (uint64_t*)(Tmp[L4Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
+    Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
     Tmp = (uint64_t*)(Tmp[L3Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
+    Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
 
     if(IsMegabytePage(&Tmp[L2Entry])){
         AlteredVAddress = VAddress & ~(MEGABYTE_PAGE - 1);
@@ -62,6 +62,7 @@ LOUSTATUS RequestPhysicalAddress(
 
     Tmp = (uint64_t*)(Tmp[L2Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
+    Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
 
     AlteredVAddress = VAddress & ~(KILOBYTE_PAGE - 1);
     AddressToPageOffset = VAddress - AlteredVAddress;

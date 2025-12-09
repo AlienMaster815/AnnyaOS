@@ -350,7 +350,8 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
 }
 
 void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread){
-    MutexLock(&this->LockOutTagOut);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&this->LockOutTagOut, &Irql);
     PTHREAD_RING NewThreadRing = LouKeTsmCreateThreadRing(Thread);
     PTHREAD_RING TmpThreadRing = this->Threads[Thread->ThreadPriority];
     PTHREAD_RING CurrentThread = TmpThreadRing;
@@ -371,7 +372,7 @@ void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DA
     TmpThreadRing->Peers.NextHeader = (PListHeader)NewThreadRing;
 
     _THREAD_ASIGNMENT_DONE:
-    MutexUnlock(&this->LockOutTagOut);
+    LouKeReleaseSpinLock(&this->LockOutTagOut, &Irql);
 }
 
 void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread, bool SelfIdentifiing){

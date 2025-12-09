@@ -20,9 +20,8 @@ KERNEL_IMPORT
 LOUSTATUS UpdateIDT(bool Init);
 
 static mutex_t CoreIrqReadyLock = {0};
-UNUSED static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
+static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
 static INTEGER                           InitializationProcessor = 0; 
-UNUSED static PEB                               KPeb = {0};
 
 KERNEL_IMPORT void SetCr3(UINT64);
 
@@ -60,9 +59,12 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
 }
 
 void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
+    if(SpinlockIsLocked(&this->LockOutTagOut)){
+        return;
+    }
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread ? this->CurrentThread : this->OwnerThread;
-    /*
+    
     PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice){
         CurrentProcess->CurrentMsSlice += 10;
@@ -114,7 +116,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                 break;
             }        
         }
-    }*/
+    }
 
     this->CurrentProcess = this->SystemProcess;    
     PsmSetProcessTransitionState();
@@ -127,9 +129,44 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     this->CurrentThread = NextThread;
 }
 
+
+static PPROCESS_RING LouKePsmCreateProcessRing(PGENERIC_PROCESS_DATA ProcessHandle){
+    PPROCESS_RING NewProcessRing = LouKeMallocType(PROCESS_RING, KERNEL_GENERIC_MEMORY);
+    NewProcessRing->ProcessData = ProcessHandle;
+    return NewProcessRing;
+}
+
+UNUSED static void LouKePsmDestroyProcessRing(PPROCESS_RING ProcessRing){
+    LouKeFree(ProcessRing);
+}
+
+
+
 void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
-    LouPrint("PsmAsignProcessToSchedual()\n");
-    while(1);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&this->LockOutTagOut, &Irql);
+
+    PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
+    PPROCESS_RING TmpProcessRing = this->Processes[Process->ProcessPriority];
+    PPROCESS_RING CurrentProcessRing = TmpProcessRing;
+
+    if(!TmpProcessRing){
+        this->Processes[Process->ProcessPriority] = NewProcessRing;
+        NewProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
+        NewProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
+        goto _PROCESS_ASSIGNMENT_DONE;
+    }
+
+    while(TmpProcessRing->Peers.NextHeader != (PListHeader)CurrentProcessRing){
+        TmpProcessRing = (PPROCESS_RING)TmpProcessRing->Peers.NextHeader;
+    }
+
+    CurrentProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
+    NewProcessRing->Peers.NextHeader = (PListHeader)CurrentProcessRing;
+    TmpProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
+
+    _PROCESS_ASSIGNMENT_DONE:
+    LouKeReleaseSpinLock(&this->LockOutTagOut, &Irql);
 }
 void PsmProcessScedualManagerObject::PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing){
 
@@ -156,8 +193,13 @@ void PsmProcessScedualManagerObject::PsmSetSystemProcess(HANDLE ProcessHandle){
 
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
+    if(LouKeGetIrql() == HIGH_LEVEL){
+        return CpuCurrentState;
+    }
+
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     UNUSED PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
+    
     Schedualer->PsmSchedual(CpuCurrentState);
 
     LouKeMemoryBarrier();
@@ -317,4 +359,8 @@ LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
 
 
     return CpuCurrentState;
+}
+
+void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc){
+    ProcessBlock.ProcStateBlock[Proc].Schedualer.PsmAsignProcessToSchedual(Process); 
 }
