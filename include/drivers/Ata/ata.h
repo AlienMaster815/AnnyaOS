@@ -477,6 +477,12 @@ extern "C" {
 #define ATA_FLAG_NO_SSC         1 << 8
 #define ATA_FLAG_NO_DEV_SLP     1 << 9
 #define ATA_FLAG_SLAVE_POSS     1 << 10
+#define ATA_FLAG_EM             1 << 11
+#define ATA_FLAG_SW_ACTIVITY    1 << 12
+#define ATA_FLAG_NO_LPM         1 << 13
+#define ATA_FLAG_PARALLEL_SCAN  1 << 14
+#define ATA_FLAG_NO_PART        1 << 15
+
 
 typedef struct _ATA_BMDMA_PRD{
     uint32_t    Address;
@@ -935,7 +941,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     uint32_t                                SectorSize;
     PATA_QUEUED_COMMAND*                    CurrentQueuedCommand;
     struct _LOUSINE_KERNEL_DEVICE_ATA_HOST* AtaHost;
-    PPCI_DEVICE_OBJECT                     PDEV;
+    PPCI_DEVICE_OBJECT                      PDEV;
     void*                                   PortPrivateData;
     uint8_t                                 Siblings;
     bool                                    PortScsiDevice;

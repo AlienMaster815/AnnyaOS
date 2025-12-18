@@ -20,7 +20,7 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
 LOUSTATUS AhciVt8251HardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    LouPrint("AhciVt8251HardReset");
+    LouPrint("AHCI.SYS:AhciVt8251HardReset");
     while(1);
     return STATUS_SUCCESS;
 }

@@ -808,4 +808,9 @@ void LouKeFreeFromFixedPool(
     void* Object
 );
 
+KERNEL_EXPORT void* LouKeMallocPhy32(
+    size_t      AllocationSize,
+    uint64_t    AllocationFlags
+);
+
 #endif

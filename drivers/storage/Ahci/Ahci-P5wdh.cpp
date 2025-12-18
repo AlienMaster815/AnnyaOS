@@ -21,7 +21,7 @@
  */
 
 LOUSTATUS AhciP5wdhHardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    LouPrint("AhciP5wdhHardReset");
+    LouPrint("AHCI.SYS:AhciP5wdhHardReset");
     while(1);
     return STATUS_SUCCESS;
 }

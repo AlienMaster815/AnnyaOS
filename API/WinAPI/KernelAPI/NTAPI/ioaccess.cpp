@@ -50,6 +50,21 @@ VOID WRITE_REGISTER_ULONG(volatile PULONG Register, ULONG Value){
     *Register = Value;
 }
 
-VOID WRITE_REGISTER_ULONGLONG(volatile PULONGLONG Register, ULONGLONG Value){
+LOUDDK_API_ENTRY 
+ULONGLONG 
+READ_REGISTER_ULONGLONG(
+    volatile PULONGLONG Register
+){
+    ULONGLONG Result = 0x00;
+    Result = *Register;
+    return Result;
+}
+
+LOUDDK_API_ENTRY
+VOID 
+WRITE_REGISTER_ULONGLONG(
+    volatile PULONGLONG Register,
+    ULONGLONG           Value
+){
     *Register = Value;
 }

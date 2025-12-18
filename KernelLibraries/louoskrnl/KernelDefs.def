@@ -187,3 +187,8 @@ EXPORTS
     DmiGetDate
     LouKeMallocExPhy32
     LouKeQueueWork
+    READ_REGISTER_ULONGLONG
+    WRITE_REGISTER_ULONGLONG
+    LouKeCheckDmiSystem
+    LouKeHalGetPciIrqVectorCount
+    LouKeMallocPhy32

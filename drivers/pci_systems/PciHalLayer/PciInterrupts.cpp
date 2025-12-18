@@ -4,45 +4,58 @@
 KERNEL_IMPORT uint16_t GetNPROC();
 KERNEL_IMPORT uint8_t GetTotalHardwareInterrupts();
 
-int GetSupportedMsiVectors(PPCI_DEVICE_OBJECT PDEV,uint64_t Flags) {
 
-
-    uint8_t CapabilitiesPtr = LouKeReadPciUint8(PDEV, 0x34); 
-
-    if(Flags & PCI_IRQ_MSIX){
-        while (CapabilitiesPtr != 0) {
-            uint8_t CapId = LouKeReadPciUint8(PDEV, CapabilitiesPtr);  // Read Capability ID
-            if (CapId == 0x11) {  // MSI-X Capability ID
-                uint16_t MsixControl = LouKeReadPciUint16(PDEV, CapabilitiesPtr + 2);  // MSI-X Control register
-                uint16_t table_size = (MsixControl & 0x07FF) + 1;  // Bits 10-0 hold the number of entries (table size)
-                return table_size;  // Return number of MSI-X vectors supported
-            }
-            CapabilitiesPtr = LouKeReadPciUint8(PDEV, CapabilitiesPtr + 1);  // Next capability
-        }
-    }
-    if(Flags & PCI_IRQ_MSIX){
-        while (CapabilitiesPtr != 0) {
-            uint8_t CapId = LouKeReadPciUint8(PDEV, CapabilitiesPtr); 
-            if (CapId == 0x05) { 
-                uint16_t MsiControl = LouKeReadPciUint16(PDEV, CapabilitiesPtr + 2); 
-                uint8_t multiple_message_capable = (MsiControl >> 1) & 0x07;
-                return (1 << multiple_message_capable); 
-            }
-            CapabilitiesPtr = LouKeReadPciUint8(PDEV, CapabilitiesPtr + 1);
-        }
-    }
-    return 0;
-}
-
-
+UINT8 LouKeHalPciGetCapabilityPointer(
+    PPCI_DEVICE_OBJECT   PDEV,
+    UINT8               CapID
+);
 
 LOUDDK_API_ENTRY
-int LouKeHalMallocPciIrqVectors(
-    PPCI_DEVICE_OBJECT PDEV, 
-    int RequestedVectors, 
-    uint64_t Flags
+LOUSTATUS LouKeHalMallocPciIrqVectors(
+    PPCI_DEVICE_OBJECT  PDEV, 
+    UINT32              RequestedVectors, 
+    uint64_t            Flags
 ){
-    return 0;
+
+    if(Flags & PCI_IRQ_USE_MSI_X){
+        UNUSED UINT8 MsixCap = LouKeHalPciGetCapabilityPointer(PDEV, PCI_CAP_MSI_X);
+        if(MsixCap){
+            LouPrint("LouKeHalMallocPciIrqVectors() MsixCap\n");
+            while(1);
+        }
+    
+    }
+
+    if(Flags & PCI_IRQ_USE_MSI){
+        UNUSED UINT8 MsiCap = LouKeHalPciGetCapabilityPointer(PDEV, PCI_CAP_MSI);
+        if(MsiCap){
+            LouPrint("LouKeHalMallocPciIrqVectors() MsiCap\n");
+            while(1);
+        }
+    
+    }
+
+    if(Flags & PCI_IRQ_USE_LEGACY){
+        if(PDEV->InterruptVectors){
+            LouPrint("ERROR:Device Already Has Allocated Interrutps\n");
+            return STATUS_UNSUCCESSFUL;
+        }
+
+        PDEV->InterruptVectors = LouKeMallocArray(UINT8, 2, KERNEL_GENERIC_MEMORY);
+        PDEV->InterruptVectors[0] = 1;
+        PDEV->InterruptVectors[1] = LouKePciGetInterruptLine(PDEV);
+        return STATUS_SUCCESS;
+    }
+
+    return STATUS_UNSUCCESSFUL;
 }
 
-
+LOUDDK_API_ENTRY
+UINT8 LouKeHalGetPciIrqVectorCount(
+    PPCI_DEVICE_OBJECT PDEV
+){
+    if(!PDEV->InterruptVectors){
+        return 0;
+    }
+    return PDEV->InterruptVectors[0];
+}

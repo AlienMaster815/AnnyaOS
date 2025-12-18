@@ -22,8 +22,6 @@ LouKeRequestVirtualAddressAllocation(
 void DisableCR0WriteProtection();
 void EnableCR0WriteProtection();
 
-#define ImageAlignment (64 * KILOBYTE)
-
 void LouKeInitializeLibraryLookup(
     string    ModuleName,
     uint32_t  NumberOfFunctions,

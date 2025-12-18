@@ -247,6 +247,11 @@ static LOUSTATUS ConfigureImportTables(
     return STATUS_SUCCESS;
 }
 
+void LouKeLibTraceInitializeLibrarary(
+    UINT64      LibraryBase,
+    UINT64      LibrarySize
+);
+
 LOUSTATUS LouKeLoadCoffImageA64(
     PCFI_OBJECT CfiObject
 ){
@@ -257,6 +262,7 @@ LOUSTATUS LouKeLoadCoffImageA64(
     
     UINT64 ISize = Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage;
     ISize = ROUND_UP64(ISize, KILOBYTE_PAGE);
+
     LOUSTATUS Status = STATUS_INVALID_PARAMETER;
     if(!CfiObject->KernelObject){ //only user objects are allowed non aslr addresses
         //Status = LouKeRequestVirtualAddressAllocation(
@@ -279,12 +285,12 @@ LOUSTATUS LouKeLoadCoffImageA64(
             }
             CfiObject->LoadedAddress = LouVMallocEx(        
                 ISize, 
-                ImageAlignment
+                Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment
             );
         }
     }
         
-    CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageAlignment);
+    CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage, Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment);
     LouKeMapContinuousMemoryBlock((UINT64)CfiObject->PhysicalLoadedAddress, (UINT64)CfiObject->LoadedAddress, ISize, KERNEL_GENERIC_MEMORY);
 
     UnpackCoffImage(CfiObject);
@@ -314,6 +320,11 @@ LOUSTATUS LouKeLoadCoffImageA64(
         LouPrint("Finished Applying Relocations\n");
     }
 
+    LouKeLibTraceInitializeLibrarary(
+        (UINT64)CfiObject->LoadedAddress,
+        ISize
+    );
+
     Status = ConfigureConfigurationStructure(CfiObject);
     if(Status != STATUS_SUCCESS){
         return Status;
@@ -334,6 +345,8 @@ LOUSTATUS LouKeLoadCoffImageA64(
     }
 
     EnableCoffImageProtection(CfiObject);
+        
+    LouPrint("Coff Loaded At Address:%h\n", CfiObject->LoadedAddress);
 
     return STATUS_SUCCESS;
 }

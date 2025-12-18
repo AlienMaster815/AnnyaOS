@@ -66,7 +66,8 @@
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_HOST_CONTROL  GenericHostController;
     PAHCI_GENERIC_PORT          GenericPort;
-    PPCI_DEVICE_OBJECT         PDEV;
+    PPCI_DEVICE_OBJECT          PDEV;
+    UINT32                      CapOveride;
     uint64_t                    AhciFlags;
     uint64_t                    AtaFlags;
     uint64_t                    PioFlags;
@@ -79,6 +80,11 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint16_t                    PortMap;
     uint8_t                     InterruptRequestVector;
     uint8_t                     DmaBits;
+    size_t                      RemappedNvme;
+    uint64_t                    EmLocation;
+    uint64_t                    EmBufferSize;
+    uint8_t                     EmMessageType;
+    uint32_t                    ExternalPortMask;
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
 //#pragma pack(pop)
 
@@ -148,3 +154,40 @@ static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
 #define PORT_STATE_DEVICE_SLEEP             11
 #define PORT_STATE_IDLE                     12
 #define PORT_STATE_NDR_ENTRY                13
+
+#define AHCI_SYSTEM_MODULE_VERSION_MESSAGE "AHCI.SYS Module Version 1.01\n"
+
+#define         AHCI_ENCODE_BUSDEVFUNC(Bus, Slot, Func) (PVOID)(((Bus & 0xFF) << 16) | ((Slot & 0xFF) << 8) | ((Func & 0xFF)))
+static inline 
+void   
+AHCI_DECODE_BUSDEVFUNC(
+    UINT8* Bus, 
+    UINT8* Slot, 
+    UINT8* Func,
+    PVOID pEncoding
+){
+    UINT64 Encoding = (UINT64)pEncoding;
+    if(Bus){
+        *Bus = ((Encoding >> 16) & 0xFF);
+    }
+    if(Slot){
+        *Slot = ((Encoding >> 8) & 0xFF);
+    }
+    if(Func){
+        *Func = ((Encoding) & 0xFF);
+    }
+}
+
+
+static inline unsigned int AhciRemapDcc(int i){
+    return AHCI_REMAP_N_DCC + i * 0x80;
+}
+
+void AhciSetEmMessages(
+    PAHCI_DRIVER_PRIVATE_DATA HostPrivate
+);
+
+LOUSTATUS  
+AhciResetEm(
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
+);

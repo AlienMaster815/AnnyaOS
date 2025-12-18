@@ -88,10 +88,15 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             LOUDDK_API_ENTRY LOUSTATUS LouKeHalEnablePciDevice(PPCI_DEVICE_OBJECT PDEV);
 
             LOUDDK_API_ENTRY
-            int LouKeHalMallocPciIrqVectors(
+            LOUSTATUS LouKeHalMallocPciIrqVectors(
                 PPCI_DEVICE_OBJECT PDEV, 
-                int RequestedVectors, 
+                UINT32 RequestedVectors, 
                 uint64_t Flags
+            );
+
+            LOUDDK_API_ENTRY
+            UINT8 LouKeHalGetPciIrqVectorCount(
+                PPCI_DEVICE_OBJECT PDEV
             );
 
             KERNEL_IMPORT LOUSTATUS LouKeRegisterDevice(
@@ -174,9 +179,9 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             );
 
             KERNEL_EXPORT
-            int LouKeHalMallocPciIrqVectors(
+            LOUSTATUS LouKeHalMallocPciIrqVectors(
                 PPCI_DEVICE_OBJECT PDEV, 
-                int RequestedVectors, 
+                UINT32 RequestedVectors, 
                 uint64_t Flags
             );
 
@@ -225,6 +230,13 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
             KERNEL_EXPORT
             PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
+
+            KERNEL_EXPORT
+            UINT8 LouKeHalGetPciIrqVectorCount(
+                PPCI_DEVICE_OBJECT PDEV
+            );
+
+            #define LouKeHalGetPciIrqVector(x,y) (((PPCI_DEVICE_OBJECT)x)->InterruptVectors[y + 1])
 
         #endif
     #else

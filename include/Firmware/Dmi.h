@@ -112,5 +112,7 @@ typedef struct _DMI_SYSTEM_ID{
 #define DMI_MATCH(Id, String) {.Slot = (Id), .SubString = (String), .ValidEntry = true}
 
 KERNEL_EXPORT PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
+KERNEL_EXPORT INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList);
+
 #endif
 #endif

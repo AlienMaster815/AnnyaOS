@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.02 RSC-3";
+string KERNEL_VERSION = "0.6.03 RSC-2";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -303,7 +303,6 @@ bool IsSystemEfi(){
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-    //KernelLoaderInfo = *(PLOUSINE_LOADER_INFO)pKernelLoaderInfo;
     memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
     ParserLouLoaderInformation(
         &KernelLoaderInfo
@@ -370,6 +369,8 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
+
+    //TODO: Create Process for C:/ANNYA/SYSTEM64/ASMSS.EXE
 
     while(1){
         //default kernel deomon

@@ -20,6 +20,7 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
 
+static BOOL AhciMessagesEnabled = true;
  
 void* LouKeMallocAhciCommandTable(uint16_t Entries){
     return LouKeMallocEx( 0x80 + ((sizeof(uint32_t) * 4) * Entries), 128, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
@@ -68,7 +69,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     Port->PxIS = 0xFFFFFFFF;
     Port->PxSERR = 0xFFFFFFFF;
     if(FreeSlot == -1){
-        LouPrint("AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
+        LouPrint("AHCI.SYS:AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
         LouKeFreeAhciCommandTable(NewCommandTable);
         LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
         return STATUS_IO_DEVICE_ERROR;
@@ -126,7 +127,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
             break;
         }
         if(IS_INTERRUPT_TFES(Port->PxIS)){
-            LouPrint("AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
+            LouPrint("AHCI.SYS:AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
             LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
             LouKeFreeAhciCommandTable(NewCommandTable);
             return STATUS_IO_DEVICE_ERROR;
@@ -138,7 +139,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
 }
 
 LOUSTATUS AhciGenericHardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    LouPrint("AhciGenericHardReset\n");
+    LouPrint("AHCI.SYS:AhciGenericHardReset\n");
     while(1);
     return STATUS_SUCCESS;
 }
@@ -154,7 +155,7 @@ LOUSTATUS AhciStopCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     }
 
     if(Tmp == 0xFFFFFFFF){
-        LouPrint("AHCI LIB:Ahci Controller Not Available\n");
+        LouPrint("AHCI.SYS:Ahci Controller Not Available\n");
         return STATUS_IO_DEVICE_ERROR;
     }
 
@@ -170,10 +171,10 @@ LOUSTATUS AhciStopCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         break;
     }
     if(Tmp >= 10000){
-        LouPrint("AHCI_LIB:Ahci Controller Command Engine Timeout Occoured\n");
+        LouPrint("AHCI.SYS:Ahci Controller Command Engine Timeout Occoured\n");
         return STATUS_IO_DEVICE_ERROR;
     }
-    LouPrint("AHCI_LIB:Ahci Controller Command Engine Stopped\n");
+    LouPrint("AHCI.SYS:Ahci Controller Command Engine Stopped\n");
     return STATUS_SUCCESS;
 }
 
@@ -199,12 +200,12 @@ void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         sleep(100);
         Poll += 100;
         if(Poll >= 1000){
-            LouPrint("Timeout Occoured Starting Command Engine\n");
+            LouPrint("AHCI.SYS:Timeout Occoured Starting Command Engine\n");
             AhciStopCommandEngine(AhciPort);
             return;
         }
     }
-    LouPrint("Ahci Command Engine Started\n");
+    LouPrint("AHCI.SYS:Ahci Command Engine Started\n");
 }
 
 static LOUSTATUS AhciStopFisReception(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
@@ -226,7 +227,7 @@ static LOUSTATUS AhciStopFisReception(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     if(Tmp >= 10000){
         return STATUS_IO_DEVICE_ERROR;
     }
-    LouPrint("Fis Reception Stopped\n");
+    LouPrint("AHCI.SYS:Fis Reception Stopped\n");
     return STATUS_SUCCESS;
 }
 
@@ -267,12 +268,12 @@ void AhciStartFisReception(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         sleep(100);
         Poll += 100;
         if(Poll >= 1000){
-            LouPrint("Timeout Occoured Starting Fis Reception\n");
+            LouPrint("AHCI.SYS:Timeout Occoured Starting Fis Reception\n");
             AhciStartFisReception(AhciPort);
             return;
         }
     }
-    LouPrint("Fis Reception Started\n");
+    LouPrint("AHCI.SYS:Fis Reception Started\n");
 }
 
 static LOUSTATUS AhciDeInitalizePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
@@ -282,14 +283,14 @@ static LOUSTATUS AhciDeInitalizePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     //Stop Command Engine
     Status = PrivateData->StopCommandEngine(AhciPort);
     if(Status != STATUS_SUCCESS){
-        LouPrint("AHCI LIB: Failed to Stop command engine\n");
+        LouPrint("AHCI.SYS:Failed to Stop command engine\n");
         return Status;
     }
 
     //Stop Fis Reception
     Status = AhciStopFisReception(AhciPort);
     if(Status != STATUS_SUCCESS){
-        LouPrint("AHCI LIB:Failed to stop FIS Reception\n");
+        LouPrint("AHCI.SYS:Failed to stop FIS Reception\n");
         return Status;
     }
     return STATUS_SUCCESS;
@@ -318,7 +319,7 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     
     //PxTFD cannot be set at the time of running this
     if(Port->PxTFD & (0x80 | 0x08)){
-        LouPrint("TFD BSY AND_OR DRQ SET Port Not A Device\n");
+        LouPrint("AHCI.SYS:TFD BSY AND_OR DRQ SET Port Not A Device\n");
         return false;
     }
     // (PxSTSS DET = 0x03 || (PxSTSS IPM = (0x02 || 0x06 || 0x08) is a device
@@ -328,7 +329,7 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
 
     if(Det != 0x03){
-        LouPrint("PxSTSS DET != 0x03:%h\n", Det);
+        LouPrint("AHCI.SYS:PxSTSS DET != 0x03:%h\n", Det);
         return false;
     }
 
@@ -340,14 +341,14 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
             //LouPrint("IPM:%d\n", Ipm);
             break;
         default:
-            LouPrint("PxSTSS IPM Invalid:%h\n",Ipm);
+            LouPrint("AHCI.SYS:PxSTSS IPM Invalid:%h\n",Ipm);
             return false;
     }
 
     AhciPort->DeviceAttached = true;
 
     if(Port->PxSIG == 0xEB140101){
-        LouPrint("Ahci Port Is SATAPI Device\n");
+        LouPrint("AHCI.SYS:Ahci Port Is SATAPI Device\n");
         return true;
     }
     return false;
@@ -355,7 +356,7 @@ static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
 
 void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    LouPrint("AhciInitializePort()\n");
+    LouPrint("AHCI.SYS:AhciInitializePort()\n");
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     volatile PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     
@@ -364,20 +365,26 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         return;
     }
 
-    PrivateData->FisDma = (uintptr_t)LouKeMalloc(256, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
-    PrivateData->CommandDma = (uintptr_t)LouKeMalloc(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    if(PrivateData->DmaBits == 64){
+        PrivateData->CommandDma = (uintptr_t)LouKeMalloc(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+        PrivateData->FisDma = (uintptr_t)LouKeMalloc(256, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    }else{
+        PrivateData->CommandDma = (uintptr_t)LouKeMallocPhy32(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+        PrivateData->FisDma = (uintptr_t)LouKeMallocPhy32(256, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
+    }
+
 
     if(Port->PxCMD & (1 << 2)){
-        LouPrint("Port Is Powered On\n");
+        LouPrint("AHCI.SYS:Port Is Powered On\n");
     }
     if((Port->PxSCTL & 0x0F) != 3){
         sleep(10);
     }
-    LouPrint("Communication Is Up\n");
+    LouPrint("AHCI.SYS:Communication Is Up\n");
 
     AhciStartFisReception(AhciPort);
 
-    LouPrint("PrivateData->StartCommandEngine:%h\n", PrivateData->StartCommandEngine);
+    LouPrint("AHCI.SYS:PrivateData->StartCommandEngine:%h\n", PrivateData->StartCommandEngine);
 
     PrivateData->StartCommandEngine(AhciPort);
 
@@ -391,11 +398,10 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
 
 void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
-    LouPrint("AhciInitializeController\n");
-    //PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
-    //PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
-    //uint32_t TmpControl;
-
+    LouPrint("AHCI.SYS:AhciInitializeController\n");
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    uint32_t TmpControl;
     ForEachAtaPort(AtaHost){
         //skip port uinitialization if the port is a dummy port
         if(!AtaHost->Ports[AtaPortIndex].Operations){
@@ -405,22 +411,41 @@ void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         AhciInitializePort(&AtaHost->Ports[AtaPortIndex]);
     }
 
-    //TmpControl = Ghc->GlobalHostControl;
-    //TmpControl |= (1 << 1);
-    //Ghc->GlobalHostControl = TmpControl;
-    //TmpControl = Ghc->GlobalHostControl;
-    //if(TmpControl & (1 << 1)){
-    //    LouPrint("Interrupts Are Now Active On The Host Controller\n");
-    //}
-    //else{
-    //    LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
-    //}
+    TmpControl = Ghc->GlobalHostControl;
+    TmpControl |= (1 << 1);
+    Ghc->GlobalHostControl = TmpControl;
+    TmpControl = Ghc->GlobalHostControl;
+    if(TmpControl & (1 << 1)){
+        LouPrint("Interrupts Are Now Active On The Host Controller\n");
+    }
+    else{
+        LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
+    }
 }
 
 void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    PAHCI_DRIVER_PRIVATE_DATA AhciPrivate = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+    PPCI_DEVICE_OBJECT PDEV = AhciPrivate->PDEV;
+    PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    UINT32 Tmp;
+    UINT8 Mv;
 
-    //TODO Initialize MV PATA
+    if(AhciPrivate->AhciFlags & AHCI_FLAG_MV_PATA){
+        if(CommonConfig->Header.DeviceID == 0x6121){
+            Mv = 2;
+        }else{
+            Mv = 4;
+        }
 
+        if(AtaHost->PortCount > Mv){
+            PAHCI_DRIVER_PRIVATE_DATA MvPort = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[Mv].PortPrivateData;
+            MvPort->GenericPort->PxIE = 0;
+            Tmp = MvPort->GenericPort->PxIS;
+            if(Tmp){
+                MvPort->GenericPort->PxIS = Tmp;
+            }
+        }
+    }
     AhciInitializeController(AtaHost);
 }
 
@@ -428,7 +453,7 @@ void AhciStartPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
 
     if(!AhciPort->DeviceAttached){
-        LouPrint("No Device On Port Cannot Start Port\n");
+        LouPrint("AHCI.SYS:No Device On Port Cannot Start Port\n");
         return;
     }
 
@@ -439,7 +464,7 @@ void AhciStartPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
     //TODO Turn On LED's adn activate witch activity
 
-    LouPrint("Ahci Port Started\n");
+    LouPrint("AHCI.SYS:Ahci Port Started\n");
 }
 
 void AhciSetPortRpm(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
@@ -456,7 +481,7 @@ void AhciStopPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     Ghc->InterruptStatus = (1 << AhciPort->PortNumber);
     
     AhciSetPortRpm(AhciPort);
-    LouPrint("Ahci Port Stopped\n");
+    LouPrint("AHCI.SYS:Ahci Port Stopped\n");
 }
 
 void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq) {
@@ -486,4 +511,48 @@ void QueuedCommandToFis(PATA_QUEUED_COMMAND QueuedCommand, uint8_t PortMultiplie
     Fis[17] = (QueuedCommand->Auxillery >> 8) & 0xFF;
     Fis[18] = (QueuedCommand->Auxillery >> 16) & 0xFF;
     Fis[19] = (QueuedCommand->Auxillery >> 24) & 0xFF;
+}
+
+void AhciSetEmMessages(
+    PAHCI_DRIVER_PRIVATE_DATA HostPrivate
+){
+    UINT8 Messages;
+    PAHCI_GENERIC_HOST_CONTROL Ghc = HostPrivate->GenericHostController;
+    UINT32 EmLocation = Ghc->EmLocation;
+    UINT32 EmControl = Ghc->EmControl;
+
+    if((!AhciMessagesEnabled) || (!(AHCI_SUPPORTS_EMS(Ghc->Capabilities)))){
+        LouPrint("AHCI.SYS:AhciSetEmMessages() EM Not Supported\n");
+        return;
+    }
+
+    Messages = ((EmControl & EM_CONTROL_MESSAGE_TYPE) >> 16);
+
+    if(Messages){
+        HostPrivate->EmLocation = EmLocation;
+        HostPrivate->EmBufferSize = ((EmLocation & 0xFF) * 4);
+        HostPrivate->EmMessageType = Messages;
+        HostPrivate->AtaFlags |= ATA_FLAG_EM;
+        if(!(EmControl & EM_CONTROL_ALHD)){
+            HostPrivate->AtaFlags |= ATA_FLAG_SW_ACTIVITY;
+        }
+    }else{
+        LouPrint("AHCI.SYS:AhciSetEmMessages() EM Not Supported\n");
+    }
+
+}
+
+LOUSTATUS  
+AhciResetEm(
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
+){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+    UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    UINT32 EmControl = Ghc->EmControl;
+    if((EmControl & EM_CONTROL_TM) || (EmControl & EM_CONTROL_RST)){
+        LouPrint("AHCI.SYS:AhciResetEm() STATUS_INVALID_PARAMETER\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+    Ghc->EmControl = (EmControl | EM_CONTROL_RST);
+    return STATUS_SUCCESS;
 }

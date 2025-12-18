@@ -78,6 +78,7 @@ void LouKeSetPanicInfo(
 
 void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData);
 
+
 void PageFault(uint64_t FaultingStackP) {
     uint64_t VAddress = get_cr2();
     uint64_t PAddress = 0x00;
@@ -96,7 +97,9 @@ void PageFault(uint64_t FaultingStackP) {
     _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:\n%h",  VAddress);
     // Check for specific error causes, e.g.:
     //if (InterruptCode & 0x1) {
-        LouKePanic(PanicMessage, (CPUContext*)FaultingStackP, InterruptCode);
+
+
+    LouKePanic(PanicMessage, (CPUContext*)FaultingStackP, InterruptCode);
     //} else {
     //    if(PAddress != 0x00){
     //        //PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);

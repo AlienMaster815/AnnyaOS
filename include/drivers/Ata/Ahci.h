@@ -44,6 +44,8 @@ typedef struct _AHCI_GENERIC_HOST_CONTROL{
 #define AHCI_SUPPORTS_EMS(Capabilities)     ((Capabilities & (1 << 6))  ? 1 : 0)
 #define AHCI_SUPPORTS_SXS(Capabilities)     ((Capabilities & (1 << 4))  ? 1 : 0)
 #define AHCI_GET_NP(Capabilities)           (Capabilities & 0x1F)
+#define AHCI_SUPPORTS_SDS(Capabilities)     ((Capabilities & (1 << 6))  ? 1 : 0)
+
 
 typedef struct _AHCI_PRIVATE_DATA_TEMPLATE_HEADER{
     uint8_t Supports64BitAddressing                 :   1;
@@ -138,6 +140,9 @@ typedef struct _AHCI_GENERIC_PORT{
 #define AHCI_FLAG_32BIT_ONLY            1 << 15
 #define AHCI_FLAG_SECTOR255             1 << 16
 #define AHCI_FLAG_NO_POWEROFF_SPINDOWN  1 << 17
+#define AHCI_FLAG_NO_SUSPEND            1 << 18
+#define AHCI_SRST_TOUT_IS_OFFLINE       1 << 19
+
 
 typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
     uint32_t                        AhciFlags;
@@ -160,6 +165,21 @@ typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
 
 #define AHCI_COMMAND_WRITE 1 << 5
 #define AHCI_COMMAND_ATAPI 1 << 9
+#define AHCI_COMMAND_ESP   (1UL << 21)
+#define AHCI_COMMAND_HPCP  (1UL << 18)
+
+#define AHCI_VS_CAPABILITIES    0xA4
+#define AHCI_REMAP_CAP          0x800
+
+#define AHCI_MAXIMUM_REMAP 3
+#define AHCI_REMAP_N_DCC        0x880
+
+#define EM_CONTROL_MESSAGE_TYPE 0x000F0000
+#define EM_CONTROL_ALHD         (1 << 26)
+#define EM_CONTROL_RST          (1 << 9)
+#define EM_CONTROL_TM           (1 << 8)
+
+
 
 
 #ifdef __cplusplus

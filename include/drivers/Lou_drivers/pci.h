@@ -8,6 +8,13 @@
 #ifndef _PCI_MODULES_H
 #define _PCI_MODULES_H
 
+#define PCI_IRQ_USE_LEGACY 	(1)
+#define PCI_IRQ_USE_MSI		(1 << 1)
+#define PCI_IRQ_USE_MSI_X	(1 << 2)
+
+#define PCI_CAP_MSI 	0x05
+#define PCI_CAP_MSI_X  	0x11
+
 #ifdef __cplusplus
 #include <LouDDK.h>
 extern "C"{
@@ -48,8 +55,7 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 #define MEMORY_SPACE_DISABLE ~(1 << 1)
 #define IO_SPACE_ENABLE (1)
 #define IO_SPACE_DISABLE ~(1)
-#define PCI_IRQ_MSI (1 << 0)
-#define PCI_IRQ_MSIX (1 << 1)
+
 
 typedef struct _PCIDev {
 
@@ -73,7 +79,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uint8_t 			func;
 	bool				InterruptsEnabled;
 	int 				NumberOfSAssignedVectors;
-	uint64_t* 			InterruptVectors;
+	uint8_t* 			InterruptVectors;
 	void* 				Dev;
 	void* 				CommonConfig;
 	void*				EcamDevice;//literal base
@@ -317,6 +323,13 @@ KERNEL_EXPORT LOUSTATUS PciTestAtaConfigurationBits(PPCI_DEVICE_OBJECT PDEV, PPC
 
 #define ANY_PCI_ID 0xFFFF
 #define ANY_PCI_CLASS 255
+
+#define PCI_IRQ_USE_LEGACY 	(1)
+#define PCI_IRQ_USE_MSI		(1 << 1)
+#define PCI_IRQ_USE_MSI_X	(1 << 2)
+
+#define PCI_CAP_MSI 	0x05
+#define PCI_CAP_MSI_X  	0x11
 
 #endif
 #endif

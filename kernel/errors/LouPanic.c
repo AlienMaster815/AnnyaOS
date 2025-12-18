@@ -84,6 +84,10 @@ PWINDHANDLE SetBlueScreenPannel(){
 	return 0x00;//Result;
 }
 
+void LouKeLibTraceCheckPanic(
+    UINT64 Instruction
+);
+
 
 void LouKeSetPanicMode(){
 	UNUSED PWINDHANDLE Bsod = SetBlueScreenPannel();
@@ -262,6 +266,9 @@ void LouKeSetPanicInfo(
 	*/
 
 	LouPrint("The Lousine Kernel has initialized a kernel panic. Information from the panic is below.\n");
+
+    LouKeLibTraceCheckPanic(rip);
+
 	size_t ErrorMessageSize = (strlen("The Fault Was Caused By A:%s") * strlen(DynamicErrorMessage));
 	string ErrorMessage = (string)LouGeneralAllocateMemoryEx(ErrorMessageSize, 1);
 	_vsnprintf(ErrorMessage, ErrorMessageSize, "The Fault Was Caused By A:%s", DynamicErrorMessage);

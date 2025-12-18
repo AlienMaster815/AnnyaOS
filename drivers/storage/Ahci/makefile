@@ -26,3 +26,8 @@ $(TARGET): $(SRC)
 # Clean rule
 clean:
 	rm -f $(TARGET)
+
+
+#TODO List
+#TODO:Update Ahci Driver To Support Power Management
+#TODO:Add Support For Accelerated Commands and queueing
