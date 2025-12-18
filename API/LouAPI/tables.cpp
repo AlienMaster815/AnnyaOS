@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 192
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 193
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -437,7 +437,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[189] = "LouKeCheckDmiSystem";
     ImportTables[0].FunctionName[190] = "LouKeHalGetPciIrqVectorCount";
     ImportTables[0].FunctionName[191] = "LouKeMallocPhy32";
-
+    ImportTables[0].FunctionName[192] = "LouKeHalGetPciIrqVector";
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
     ImportTables[0].VirtualAddress[0] = (uint64_t)LouPrint;
@@ -630,6 +630,8 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[189] = (uint64_t)LouKeCheckDmiSystem;
     ImportTables[0].VirtualAddress[190] = (uint64_t)LouKeHalGetPciIrqVectorCount;
     ImportTables[0].VirtualAddress[191] = (uint64_t)LouKeMallocPhy32;
+    ImportTables[0].VirtualAddress[192] = (uint64_t)LouKeHalGetPciIrqVector;
+    
 }
 
 LOUDDK_API_ENTRY

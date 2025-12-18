@@ -10,6 +10,11 @@ UINT8 LouKeHalPciGetCapabilityPointer(
     UINT8               CapID
 );
 
+KERNEL_IMPORT
+UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq){
+    return PDEV->InterruptVectors[Irq + 1];
+}
+
 LOUDDK_API_ENTRY
 LOUSTATUS LouKeHalMallocPciIrqVectors(
     PPCI_DEVICE_OBJECT  PDEV, 
@@ -44,6 +49,7 @@ LOUSTATUS LouKeHalMallocPciIrqVectors(
         PDEV->InterruptVectors = LouKeMallocArray(UINT8, 2, KERNEL_GENERIC_MEMORY);
         PDEV->InterruptVectors[0] = 1;
         PDEV->InterruptVectors[1] = LouKePciGetInterruptLine(PDEV);
+
         return STATUS_SUCCESS;
     }
 

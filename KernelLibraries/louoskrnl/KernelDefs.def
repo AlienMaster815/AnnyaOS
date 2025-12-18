@@ -192,3 +192,4 @@ EXPORTS
     LouKeCheckDmiSystem
     LouKeHalGetPciIrqVectorCount
     LouKeMallocPhy32
+    LouKeHalGetPciIrqVector

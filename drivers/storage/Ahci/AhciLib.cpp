@@ -135,6 +135,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     }
     LouKeFreeAhciCommandTable(NewCommandTable);
     LouKeReleaseSpinLock(&AhciCommandLock, &Irql);
+        
     return STATUS_SUCCESS;
 }
 
@@ -296,7 +297,7 @@ static LOUSTATUS AhciDeInitalizePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     return STATUS_SUCCESS;
 }
 
-UNUSED static void AhciClearPortPendingIrq(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
+static void AhciClearPortPendingIrq(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
 
@@ -360,6 +361,10 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     volatile PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     
+    AhciDeInitalizePort(AhciPort);
+
+    AhciClearPortPendingIrq(AhciPort);
+
     AhciPort->PortScsiDevice = AhciDetectAttachedDevice(AhciPort);
     if(!AhciPort->DeviceAttached){
         return;
@@ -394,6 +399,7 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     
     AhciPort->DmaPort = true;
     AhciPort->SerialDevice = true;
+    Port->PxIE = 0xFFFFFFFF;
 }
 
 

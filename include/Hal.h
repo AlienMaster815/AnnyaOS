@@ -153,6 +153,9 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             KERNEL_IMPORT
             PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 
+            KERNEL_IMPORT
+            UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
+
         #else 
             KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
                 PPCI_COMMON_CONFIG PciSearch, 
@@ -236,8 +239,8 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            #define LouKeHalGetPciIrqVector(x,y) (((PPCI_DEVICE_OBJECT)x)->InterruptVectors[y + 1])
-
+            KERNEL_EXPORT 
+            UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
         #endif
     #else
 

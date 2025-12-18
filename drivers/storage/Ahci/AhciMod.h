@@ -139,6 +139,17 @@ static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
     LouPrint("BIHC    :%h\n", Ghc->BiosHandoff);
 }
 
+static inline void DumpEverything(
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
+){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData; 
+    DumpGhc(PrivateData->GenericHostController);
+    ForEachAtaPort(AtaHost){
+        PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData2 = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[AtaPortIndex].PortPrivateData;
+        DumpPort(PrivateAhciData2->GenericPort);
+    }    
+}
+
 //port States
 #define PORT_STATE_UNDEFINED                0
 #define PORT_STATE_RESET                    1

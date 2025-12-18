@@ -610,10 +610,45 @@ LOUSTATUS AhciStopCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 void AhciStartCommandEngine(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
-void AhciInterruptHandler(uint64_t Rsp){
+void AhciPortInterruptHandler(
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
+    UINT32                          IrqMask
+){  
+    UINT32 Status;
+    for(size_t i = 0 ; i < AtaHost->PortCount; i++){
+        if(!(IrqMask & (1 << i))){
+            continue;
+        }
+        PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = &AtaHost->Ports[i]; 
+        PAHCI_DRIVER_PRIVATE_DATA Private = (PAHCI_DRIVER_PRIVATE_DATA)AtaPort->PortPrivateData;
+        PAHCI_GENERIC_PORT Port = Private->GenericPort;
+        Status = Port->PxIS;
+        Port->PxIS = Status;
 
-    LouPrint("Ahci Interrupt Handler\n");
-    while(1);
+        //1895
+
+    }
+}
+
+void AhciInterruptHandler(uint64_t IrqData){
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)IrqData;
+    PAHCI_DRIVER_PRIVATE_DATA HostPrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+    PAHCI_GENERIC_HOST_CONTROL Ghc = HostPrivateData->GenericHostController;
+    UINT32 IrqStatus, IrqMask, Pi = Ghc->PortsImplemented;//3.1415
+    LouKIRQL Irql;
+    
+    IrqStatus = Ghc->InterruptStatus;
+    if(!IrqStatus){
+        return;
+    }
+    IrqMask = IrqStatus & Pi;//3.1415
+    //LouKeAcquireSpinLock(&AtaHost->HostLock, &Irql);
+
+    AhciPortInterruptHandler(AtaHost, IrqMask);
+
+    Ghc->InterruptStatus = IrqStatus;
+    //LouKeReleaseSpinLock(&AtaHost->HostLock, &Irql);
+    return;
 }
 
 static AhciSb600Enable64Bit(
@@ -1010,6 +1045,18 @@ static LOUSTATUS AhciConfigureDmaMasks(
     return STATUS_SUCCESS;
 }
 
+
+static void AhciSetupInterruptHandler(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+    PPCI_DEVICE_OBJECT PDEV = AtaHost->PDEV;
+    if(LouKeHalGetPciIrqVectorCount(PDEV) > 1){
+        LouPrint("AhciSetupInterruptHandler()\n");
+        while(1);
+    } 
+    else{
+        RegisterInterruptHandler(AhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)AtaHost);
+    }
+}
+
 NTSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
@@ -1238,7 +1285,6 @@ NTSTATUS AddAhciDevice(
         AhciResetEm(AtaHost);
     }
 
-    //RegisterInterruptHandler(AhciInterruptHandler, PDEV->InterruptLine, false, (uint64_t)AtaHost);
 
     LouKeForkAtaHostPrivateDataToPorts(AtaHost);
     
@@ -1269,7 +1315,10 @@ NTSTATUS AddAhciDevice(
     AhciPciInitializeController(AtaHost);
     LouKeHalPciSetMaster(PDEV);
 
+    AhciSetupInterruptHandler(AtaHost);
+
     LouPrint("AHCI.SYS:Adding AHCI Device To Device Manager\n");    
+
     LouKeRegisterDevice(
         PDEV, 
         ATA_DEVICE_T,
@@ -1278,7 +1327,6 @@ NTSTATUS AddAhciDevice(
         0x00
     );
     LouPrint("AHCI.SYS:AddAhciDevice() STATUS_SUCCESS\n");
-    while(1);
     return Status;
 }
 

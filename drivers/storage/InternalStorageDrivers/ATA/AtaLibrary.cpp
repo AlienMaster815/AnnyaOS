@@ -10,6 +10,7 @@ LouKeMallocAtaPrivateData(
     AtaHost->PrivateDataSize = SizeofPrivateData;
     AtaHost->HostPrivateData = LouKeMallocEx(SizeofPrivateData, AlignmentOfPrivateData, WRITEABLE_PAGE | PRESENT_PAGE);
     for(uint8_t i = 0; i < AtaHost->PortCount; i++){
+        AtaHost->Ports[i].AtaHost = AtaHost;
         AtaHost->Ports[i].PortPrivateData = LouKeMallocEx(SizeofPrivateData, AlignmentOfPrivateData, WRITEABLE_PAGE | PRESENT_PAGE);
     }
 }

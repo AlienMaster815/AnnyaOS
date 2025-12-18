@@ -1,63 +1,116 @@
 #include <LouACPI.h>
 #include <acpi.h>
 
+#include <acpi.h>
+
+static ACPI_STATUS
+PciRootMatchCallback(
+    ACPI_HANDLE ObjHandle,
+    UINT32 Level,
+    void *Context,
+    void **ReturnValue
+){
+    *(ACPI_HANDLE*)Context = ObjHandle;
+    return AE_CTRL_TERMINATE;
+}
+
+ACPI_HANDLE LouKeGetPciRootBridge(){
+    ACPI_STATUS Status;
+    ACPI_HANDLE Root = NULL;
+
+    Status = AcpiGetDevices(
+        "PNP0A03",
+        PciRootMatchCallback,
+        &Root,
+        NULL
+    );
+
+    if (ACPI_FAILURE(Status) || Root == NULL) {
+        LouPrint("ACPICA: PCI root bridge (PNP0A03) not found\n");
+        return NULL;
+    }
+
+    return Root;
+}
+
 
 uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV){
-    ACPI_STATUS Status;
-    ACPI_HANDLE PrtHandle;
-    ACPI_BUFFER ResultBuffer = { ACPI_ALLOCATE_BUFFER, NULL };
-    ACPI_OBJECT* ResultObject;
-    ACPI_OBJECT* TmpPackage;
-    ACPI_OBJECT* TmpPrtObject;
-    size_t PackageCount = 0x00;
-    Status = AcpiGetHandle(NULL, "\\_SB.PCI0._PRT", &PrtHandle);
-    size_t Address = (PDEV->slot << 16) | PDEV->func;
+    ACPI_STATUS     Status;
+    ACPI_BUFFER     PrtBuffer = {ACPI_ALLOCATE_BUFFER, 0x00};
+    ACPI_HANDLE     PciRootBusHandle = LouKeGetPciRootBridge();
+    ACPI_OBJECT*    PrtObject;
+    UINT8           PciDevice = PDEV->slot;
+    UINT8           PciPin = PDEV->InterruptPin;
+    UINT32          WantedAddress = (PciDevice << 16) | 0xFFFF;
+    UINT8           WantedPin = PciPin - 1;
+    ACPI_OBJECT*    TmpEntry;
+    ACPI_OBJECT*    AddressObject;
+    ACPI_OBJECT*    PinObject;
+    ACPI_OBJECT*    SourceObject;
+    ACPI_OBJECT*    IndexObject;
+
+    if(!PciRootBusHandle){
+        return 0xFF;
+    }
+
+    Status = AcpiEvaluateObject(
+        PciRootBusHandle,
+        "_PRT",
+        0x00,
+        &PrtBuffer
+    );
 
     if(ACPI_FAILURE(Status)){
-        LouPrint("ACPICA Failed To Find the PCI Rounting Table\n");
-        //return (uint8_t)-1;
-        while(1);//while one for debugging
+        LouPrint("ACPICA:_PRT Execution Failed\n");
+        return 0xFF;
     }
 
-    Status = AcpiEvaluateObject(PrtHandle, NULL, NULL, &ResultBuffer);
-    if(ACPI_FAILURE(Status)){
-        LouPrint("ACPICA Faild To Evaluate PCI Routing Table\n");
-        //return (uint8_t)-1;
-        while(1);
+    PrtObject = (ACPI_OBJECT*)PrtBuffer.Pointer;
+
+    if(PrtObject->Type != ACPI_TYPE_PACKAGE){
+        LouPrint("ACPICA:_PRT Did Not Return A Package\n");
+        return 0xFF;
     }
+    
+    for(UINT32 i = 0 ; i < PrtObject->Package.Count; i++){
+        TmpEntry = &PrtObject->Package.Elements[i];
 
-    ResultObject = (ACPI_OBJECT*)ResultBuffer.Pointer;
-
-    if(ResultObject->Type != ACPI_TYPE_PACKAGE){
-        LouPrint("ACPICA Returned An Invalid PCI Routing Table");
-        //return (uint8_t)-1;
-        while(1);
-    }
-
-    LouPrint("Parsing ACPI Package\n");
-
-    PackageCount = ResultObject->Package.Count;
-
-    for(size_t i = 0 ; i < PackageCount; i++){
-        TmpPackage = &ResultObject->Package.Elements[i];
-        TmpPrtObject = &TmpPackage->Package.Elements[0];
-
-        if((TmpPrtObject->Integer.Value == (Address & 0xFFFFFFFF)) || ((Address & 0xFFFFFFFF) | 0xFFFF)) {
-            TmpPrtObject = &TmpPackage->Package.Elements[1];
-            if(TmpPrtObject->Integer.Value != PDEV->InterruptPin){
-                continue;
-            }
-            TmpPrtObject = &TmpPackage->Package.Elements[2];
-            if(TmpPrtObject->Integer.Value == 0){
-                TmpPrtObject = &TmpPackage->Package.Elements[3];
-                uint8_t Gsi = (uint8_t)TmpPrtObject->Integer.Value;
-                //LouPrint("Gsi:%h\n", Gsi);
-                return Gsi;
-            }
+        if(TmpEntry->Type != ACPI_TYPE_PACKAGE){
+            continue;
         }
+
+        if(TmpEntry->Package.Count != 4){
+            continue;
+        }
+
+        AddressObject   = &TmpEntry->Package.Elements[0];        
+        PinObject       = &TmpEntry->Package.Elements[1];        
+        SourceObject    = &TmpEntry->Package.Elements[2];        
+        IndexObject     = &TmpEntry->Package.Elements[3];        
+
+        if(
+            (AddressObject->Type != ACPI_TYPE_INTEGER) || 
+            (PinObject->Type != ACPI_TYPE_INTEGER)
+        ){
+            continue;
+        }
+
+        if((UINT32)AddressObject->Integer.Value != WantedAddress){
+            continue;
+        }
+
+        if((UINT8)PinObject->Integer.Value != WantedPin){
+            continue;
+        }
+
+        if(SourceObject->Type == ACPI_TYPE_INTEGER){
+        
+            return (UINT8)(UINT32)IndexObject->Integer.Value;
+        }
+
     }
 
     LouPrint("LouKeGetPciInterruptLineFromPin()\n");
     while(1);
-    return 0x00;
+    return 0xFF;
 }
