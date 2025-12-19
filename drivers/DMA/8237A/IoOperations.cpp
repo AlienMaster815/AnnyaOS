@@ -43,14 +43,23 @@ LOUSTATUS Write8237AStartAddress(UINT8 Channel, UINT32 DmaAddress) {
         LouPrint("Invalid Channel %u\n", Channel);
         return STATUS_INVALID_PARAMETER;
     }
+
     UINT32 AddrForController = DmaAddress;
+    UINT8 Page;
+
     if (Channel >= 5) {
         AddrForController >>= 1;
+        Page = (DmaAddress >> 17) & 0xFF;
+    } else {
+        Page = (DmaAddress >> 16) & 0xFF;
     }
+
     Write16Bit8237ARegister(Channel, DmaBaseAddrReg[Channel], AddrForController);
-    Write8Bit8237ARegister(DmaPageReg[Channel], (DmaAddress >> 16) & 0xFF);
+    Write8Bit8237ARegister(DmaPageReg[Channel], Page);
+
     return STATUS_SUCCESS;
 }
+
 
 
 LOUSTATUS Mask8237ADrq(UINT8 Channel){
@@ -97,28 +106,21 @@ LOUSTATUS Set8237ADmaMode(UINT8 Channel, UINT8 ModeConfig){
 
 LOUSTATUS Set8237ACount(UINT8 Channel, UINT16 Count){
     UINT16 Port;
+
     switch(Channel){    
-        case 1:
-            Port = DMA16_COUNT_REG_C1;
-            break;
-        case 2:
-            Port = DMA16_COUNT_REG_C2;
-            break;
-        case 3:
-            Port = DMA16_COUNT_REG_C3;
-            break;
-        case 5:
-            Port = DMA16_COUNT_REG_C5;
-            break;
-        case 6:
-            Port = DMA16_COUNT_REG_C6;
-            break;
-        case 7:
-            Port = DMA16_COUNT_REG_C7;
-            break;
-        default :
+        case 1: Port = DMA16_COUNT_REG_C1; break;
+        case 2: Port = DMA16_COUNT_REG_C2; break;
+        case 3: Port = DMA16_COUNT_REG_C3; break;
+        case 5: Port = DMA16_COUNT_REG_C5; break;
+        case 6: Port = DMA16_COUNT_REG_C6; break;
+        case 7: Port = DMA16_COUNT_REG_C7; break;
+        default:
             LouPrint("Invalid Channel\n");
             return STATUS_INVALID_PARAMETER;
+    }
+
+    if (Channel >= 5) {
+        Count >>= 1;
     }
 
     Write16Bit8237ARegister(Channel, Port, Count - 1);

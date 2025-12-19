@@ -74,8 +74,6 @@ DriverEntry(
 ){
     LouPrint("8237A.SYS:DriverEntry()\n");
     
-
-
     LouPrint("8237A.SYS:DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }

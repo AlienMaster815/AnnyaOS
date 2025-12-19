@@ -178,8 +178,10 @@ LouKeLoadCoffImageExA_ns(
         MutexUnlock(&LITMutex);
         return STATUS_INVALID_PARAMETER;
     }
-
-    CfiObject->AOA64 = (CoffStdHeader->OptionalHeader.PE64.Magic == CFI_OPTIONAL_HEADER_PE3264_MAGIC) ? 0 : 1;
+    if(memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, sizeof(UINT32))){
+        LouCoff = true;
+    }
+    
     if(LouCoff){
         if(CfiObject->AOA64){
             KernelObject = (CoffStdHeader->OptionalHeader.PE32.Subsystem == CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT); 
