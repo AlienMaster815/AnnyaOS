@@ -337,7 +337,6 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouKePcieProbeEcam();
 
     InitializeBootGraphics();
-
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
@@ -346,7 +345,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouKeInitializeMouseHandling();
 
     LookForStorageDevices();
-    
+
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
         LouPrint("No Storage Devices Detected\n");
@@ -368,9 +367,15 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
+
+    sleep(1000);
+
+    LouKeSystemShutdown(ShutdownReboot);
+
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 
     //TODO: Create Process for C:/ANNYA/SYSTEM64/ASMSS.EXE
+
 
     while(1){
         //default kernel deomon

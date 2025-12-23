@@ -56,6 +56,7 @@
 #include <drivers/Processors.h>
 #include <Coff.h>
 #include <LouLoad.h>
+#include <Power.h>
 
 #ifndef KERNEL_MAIN_FILE
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;

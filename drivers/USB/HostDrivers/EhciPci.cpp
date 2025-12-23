@@ -43,7 +43,6 @@ NTSTATUS DriverEntry(
     DriverObject->DeviceTable = (uintptr_t)SupportedEhciPciDevices;
 
     LouPrint("EHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

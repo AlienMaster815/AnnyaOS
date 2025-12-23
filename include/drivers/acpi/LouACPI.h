@@ -483,6 +483,8 @@ LOUSTATUS LouKeAcpiTableParseEntries(
     size_t                      MaxEntries
 );
 void AcpiInitializePciLink();
+
+
 #endif
 
 #include "Pcc.h"

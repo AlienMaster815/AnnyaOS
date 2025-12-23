@@ -658,6 +658,8 @@ typedef int errno_t;
 #include "../DLL/LouDLLs/GDI32/AnnyaGdi.h"
 #include "../DLL/LouDLLs/User32/AnnyaUser.h"
 
+#include <Power.h>
+
 #ifdef IS_X86_64
 
 #else

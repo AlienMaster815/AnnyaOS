@@ -600,7 +600,7 @@ LOUSTATUS Ps2DeInitializeBus(PLOU_BUS BussClass, PLOU_BUS_OBJECT Object){
     return STATUS_SUCCESS;
 }
 
-static const LOU_BUS Ps2Bus = {
+static LOU_BUS Ps2Bus = {
     .BusName = PS2_CHIPSET_CLASS,
     .BusObjects = &Ps2BusObjects,
     .InitializeBus = Ps2InitializeBus,
@@ -616,7 +616,7 @@ DriverEntry(
     LouPrint("PS2IO.SYS:DriverEntry()\n");
 
     LouKeCreateBusClass(
-        (PLOU_BUS)&Ps2Bus
+        &Ps2Bus
     );
 
     LouPrint("PS2IO.SYS:DriverEntry() STATUS_SUCCESS\n");

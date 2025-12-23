@@ -3,5 +3,5 @@
 NTSTATUS AnnyaSmssNtProcessStartup(HANDLE Peb){
 
     
-
+    while(1);
 }

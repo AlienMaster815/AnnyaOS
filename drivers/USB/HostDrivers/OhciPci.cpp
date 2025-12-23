@@ -23,7 +23,7 @@ NTSTATUS AddDevice(
     PPCI_DEVICE_OBJECT PDEV = (PPCI_DEVICE_OBJECT)PlatformDevice->PDEV;
     LouPrint("OHCI.SYS::AddDevice()\n");
 
-    POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
+    /*POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
 
     LouKeHalEnablePciDevice(PDEV);
     LouKeHalPciSetMaster(PDEV);
@@ -33,12 +33,17 @@ NTSTATUS AddDevice(
         OHCI_OPERATIONAL_REGISTER_BAR,
         OHCI_OPERATIONAL_REGISTER_OFFSET
     );
+    if(!OhciDevice->OperationalRegisters){
+        LouPrint("Legacy BIOS Hc Bug Controller Did Not Handoff\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
     LouPrint("Operational Reg:%h\n", OhciDevice->OperationalRegisters);
 
     UINT32 Revision = OhciDevice->OperationalRegisters->HcRevision;
     Revision &= 0xFF;
 
-    if(Revision != 0x10){
+    if(Revision < 0x10){
         LouPrint("ERROR Invalid Revision Reset Data:%h\n", Revision);
         LouKeFree(OhciDevice);
         return STATUS_NO_SUCH_DEVICE;
@@ -50,11 +55,11 @@ NTSTATUS AddDevice(
         return Status;
     }
 
-    Status = OhciInitialzeEndpointHeaders(OhciDevice);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("ERROR Unable To Initialize Device Data\n");
-        goto _ERROR_COULD_NOT_DESIGNATE_RESOURCES;
-    }
+    //Status = OhciInitialzeEndpointHeaders(OhciDevice);
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("ERROR Unable To Initialize Device Data\n");
+    //    goto _ERROR_COULD_NOT_DESIGNATE_RESOURCES;
+    //}
 
     //allocate system resources
     
@@ -62,17 +67,16 @@ NTSTATUS AddDevice(
 
     //set up registers
 
-    //start SOF tokens
+    //start SOF tokens*/
 
     LouPrint("OHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 
-    _ERROR_COULD_NOT_DESIGNATE_RESOURCES:
+    //_ERROR_COULD_NOT_DESIGNATE_RESOURCES:
     //TODO:
-    LouPrint("_ERROR_COULD_NOT_DESIGNATE_RESOURCES\n");
-    while(1);
-    return Status;
+    //LouPrint("_ERROR_COULD_NOT_DESIGNATE_RESOURCES\n");
+    //while(1);
+    //return Status;
 }
 
 LOUDDK_API_ENTRY

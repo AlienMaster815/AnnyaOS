@@ -193,6 +193,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <Coff.h>
 #include <LouLoad.h>
 #include <kernel/Process.h>
+#include <Power.h>
 
 
 #ifndef _KERNEL_MODULE_

@@ -46,6 +46,7 @@ LOUSTATUS LookForStorageDevices(){
     size_t BootDeviceCount = GetBootDeviceCount();
     size_t DeviceIndex;
     for(size_t i = 0 ; i < NumberOfPciDevices; i++){
+        _DRIVER_NOT_SUCCESSFULL:
         DeviceIndex = LouKeGetBootDeviceIndex((PPCI_COMMON_CONFIG)FirstWaveDevices[i]->PDEV->CommonConfig);
         PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)FirstWaveDevices[i]->PDEV->CommonConfig;
 
@@ -57,7 +58,9 @@ LOUSTATUS LookForStorageDevices(){
             DRIVER_MODULE_ENTRY Driver = LouKeLoadBootKernelModule((uintptr_t)DriverBase, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
             if(!DriverObject->DriverExtension){
                 DriverObject->DriverExtension = LouKeMallocType(DRIVER_EXTENSION,  KERNEL_GENERIC_MEMORY);
-                Driver(DriverObject, (PUNICODE_STRING)0x00);
+                if(!NT_SUCCESS(Driver(DriverObject, (PUNICODE_STRING)0x00))){
+                    goto _DRIVER_NOT_SUCCESSFULL;
+                }
             }
             struct _DEVICE_OBJECT* PlatformDevice = (struct _DEVICE_OBJECT*)LouKeMallocType(DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
             if(DriverObject->DriverUsingLkdm){

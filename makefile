@@ -260,6 +260,9 @@ annya.iso: release KernelModules UserSpace
 	rm -rf release
 	rm -rf ISO
 
+PxeInstall: annya.iso
+	cp annya.iso ~/iventoy-1.0.21/iso/annya.iso
+#uses 26000 protocol for flush
 
 
 PublicRelease: annya.iso

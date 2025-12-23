@@ -28,5 +28,8 @@ modifications:
 	./LPEModifier -E../drivers/Input/Keyboard/Mf2Ps2/MF2KBD.SYS -PKernel
 	./LPEModifier -E../drivers/Audio/SoundBlaster/SBMOD.SYS -PKernel
 	./LPEModifier -E../drivers/DMA/8237A/8237A.SYS -PKernel
+	./LPEModifier -E../drivers/USB/HostDrivers/OHCI.SYS -PKernel
+	./LPEModifier -E../drivers/USB/HostDrivers/EHCI.SYS -PKernel
+	./LPEModifier -E../drivers/USB/HostDrivers/XHCI.SYS -PKernel
 	./LPEModifier -E../DLL/LouDLLs/LouDLL/LouDll.dll -PUser 
 #-S../DLL/LouDLLs/LouDLL/LOUDLL.KSF
