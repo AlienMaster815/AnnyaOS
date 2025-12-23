@@ -207,6 +207,7 @@ typedef class PsmProcessScedualManagerObject{
         UINT64                              PsmGetCurrentProcessID();
         UINT64                              PsmGetCurrentSubsystem();
         void                                PsmSetSystemProcess(HANDLE ProcessData);
+        void                                PsmSetCurrentThread(PGENERIC_THREAD_DATA Thread);
 }PROCESS_SCHEDUAL_MANAGER, * PPROCESS_SCHEDUAL_MANAGER;
 
 typedef PROCESS_SCHEDUAL_MANAGER SCHEDUAL_MANAGER, *PSCHEDUAL_MANAGER;

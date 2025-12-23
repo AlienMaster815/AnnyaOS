@@ -63,9 +63,9 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         return;
     }
     UNUSED PGENERIC_THREAD_DATA    NextThread;
-    UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread ? this->CurrentThread : this->OwnerThread;
+    UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
     
-    PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
+    /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice){
         CurrentProcess->CurrentMsSlice += 10;
         NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
@@ -116,10 +116,12 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                 break;
             }        
         }
-    }
+    }*/
 
-    this->CurrentProcess = this->SystemProcess;    
-    PsmSetProcessTransitionState();
+    if(this->CurrentProcess != this->SystemProcess){
+        this->CurrentProcess = this->SystemProcess;    
+        PsmSetProcessTransitionState();
+    }
     NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
     LouKeSwitchToTask(
         IrqState,
@@ -188,12 +190,17 @@ void PsmProcessScedualManagerObject::PsmSetSystemProcess(HANDLE ProcessHandle){
     }
     this->SystemProcess = (PGENERIC_PROCESS_DATA)ProcessHandle;
     this->CurrentProcess = (PGENERIC_PROCESS_DATA)ProcessHandle;
+    PsmSetProcessTransitionState();
 }
 
+void PsmProcessScedualManagerObject::PsmSetCurrentThread(PGENERIC_THREAD_DATA Thread){
+    this->CurrentThread = Thread;
+}
 
 LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
 
     if(LouKeGetIrql() == HIGH_LEVEL){
+        LouKeSendIcEOI();
         return CpuCurrentState;
     }
 
@@ -307,7 +314,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
         0
     );
     ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
-    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.OwnerThread = (PGENERIC_THREAD_DATA)NewThread;
+    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
     /*;
 
     for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){

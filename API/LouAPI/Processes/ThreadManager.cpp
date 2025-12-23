@@ -282,6 +282,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(){
                         TmpThreadRing->ThreadData->State = THREAD_READY;
                     }
                     if(TmpThreadRing->ThreadData->State == THREAD_READY){
+                        CurrentThreadRing->ThreadData->State = THREAD_READY;
                         return TmpThreadRing->ThreadData;
                     }
                     TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
