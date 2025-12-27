@@ -633,6 +633,7 @@ PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
     uint64_t    Flags
 );
 
+void LouKeFreePhy32(void*);
 
 #endif
 #ifdef __cplusplus
@@ -812,5 +813,8 @@ KERNEL_EXPORT void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
+
+KERNEL_EXPORT
+void LouKeFreePhy32(void*);
 
 #endif

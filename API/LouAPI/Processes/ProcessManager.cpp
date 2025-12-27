@@ -118,10 +118,8 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         }
     }*/
 
-    if(this->CurrentProcess != this->SystemProcess){
-        this->CurrentProcess = this->SystemProcess;    
-        PsmSetProcessTransitionState();
-    }
+    this->CurrentProcess = this->SystemProcess;    
+    PsmSetProcessTransitionState();
     NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
     LouKeSwitchToTask(
         IrqState,

@@ -14,7 +14,13 @@
 KERNEL_IMPORT uint64_t GetCurrentTimeInMilliseconds();
 KERNEL_IMPORT void sleep(uint64_t Time);
 KERNEL_IMPORT void sleepEx(uint8_t Interval, uint64_t Time);
-KERNEL_IMPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uint32_t Mask, uint64_t MsTimeout);
+KERNEL_IMPORT LOUSTATUS 
+LouKeWaitForUlongRegisterCondition(
+    PULONG  Mmio, 
+    size_t  MsWait,
+    ULONG   Mask, 
+    ULONG   Value
+);
 #else 
 #endif
 #else

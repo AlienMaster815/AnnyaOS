@@ -136,7 +136,13 @@ KERNEL_EXPORT int strcmp(const char* str1, const char* str2);
 KERNEL_EXPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_EXPORT void sleep(uint64_t Time);
-KERNEL_EXPORT bool LouKeWaitForMmioState(uint32_t* Register, uint32_t State, uint32_t Mask, uint64_t MsTimeout);
+KERNEL_EXPORT LOUSTATUS 
+LouKeWaitForUlongRegisterCondition(
+    PULONG  Mmio, 
+    size_t  MsWait,
+    ULONG   Mask, 
+    ULONG   Value
+);
 KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName

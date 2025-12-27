@@ -99,7 +99,7 @@ EXPORTS
     LouKeHalPciSetMaster
     LouKeRegisterDevice
     AtaStdQcDefer
-    LouKeWaitForMmioState
+    LouKeWaitForUlongRegisterCondition
     LouKeCreateFixedPool
     outw
     LouKeMalloc
@@ -193,3 +193,4 @@ EXPORTS
     LouKeHalGetPciIrqVectorCount
     LouKeMallocPhy32
     LouKeHalGetPciIrqVector
+    LouKeFreePhy32

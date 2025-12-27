@@ -27,18 +27,18 @@ typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_ENDPOINT_DESCRIPTOR{
     UINT32      Dword3;
 }OHCI_ENDPOINT_DESCRIPTOR, * POHCI_ENDPOINT_DESCRIPTOR;
 
-typedef struct _OHCI_ED_POOL{
+typedef struct _OHCI_ED_LIST{
     ListHeader                  Peers;
-    POOL                        EdPool;
-}OHCI_ED_POOL, * POHCI_ED_POOL;
+    PVOID                       Ep;
+}OHCI_ED_LIST, * POHCI_ED_LIST;
 
-typedef struct _OHCI_TD_POOL{
+typedef struct _OHCI_TD_LIST{
     ListHeader                  Peers;
-    POOL                        TdPool;
-}OHCI_TD_POOL, * POHCI_TD_POOL;
+    PVOID                       Td;
+}OHCI_TD_LIST, * POHCI_TD_LIST;
 
 typedef struct PACKED _OHCI_HCCA{
-    UINT32      InterruptTable[128 / sizeof(UINT32)];
+    UINT32      InterruptTable[32];
     UINT16      HccaFrameNumber;
     UINT16      HccaPad1;
     UINT32      HccaDoneHead;
@@ -87,15 +87,27 @@ typedef struct _OHCI_ED_TRACKER{
     OHCI_ENDPOINT_DESCRIPTOR    Ep;
 }OHCI_ED_TRACKER, * POHCI_ED_TRACKER;
 
+typedef struct _OHCI_PORT{
+    struct _OHCI_DEVICE*            Host;
+    bool                            PortAttatched;
+    bool                            PortEnabled;
+    bool                            LowSpeed;
+}OHCI_PORT, * POHCI_PORT;
+
 typedef struct _OHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
     POHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
     spinlock_t                      IoLock;
     mutex_t                         DeviceMutex;
     UINT64                          HccaAddress;
-    OHCI_ED_POOL                    EdPool;
-    OHCI_TD_POOL                    TdPool;
+    OHCI_ED_LIST                    EdPool;
+    OHCI_TD_LIST                    TdPool;
     POHCI_ED_TRACKER                EdTrackers;
+    UINT32                          Fminterval;
+    POHCI_ENDPOINT_DESCRIPTOR       ControlEpList;
+    POHCI_ENDPOINT_DESCRIPTOR       BulkEpList;
+    POHCI_ENDPOINT_DESCRIPTOR       IsochIntEpList[32];//32 synchronized lists
+    OHCI_PORT                       Port[32];
 }OHCI_DEVICE, * POHCI_DEVICE;
 
 #define OHCI_REVISION_HC_BIT     (0x01)
@@ -134,7 +146,11 @@ typedef struct _OHCI_DEVICE{
 #define SET_OHCI_CONTROL_IE(Control, x)     (Control = ((Control & ~(1 << OHCI_CONTROL_IE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_IE_BIT)))
 #define SET_OHCI_CONTROL_CLE(Control, x)    (Control = ((Control & ~(1 << OHCI_CONTROL_CLE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_CLE_BIT)))
 #define SET_OHCI_COTROL_BLE(Control, x)     (Control = ((Control & ~(1 << OHCI_CONTROL_BLE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_BLE_BIT)))
-#define SET_OHCI_COTROL_HCFS(Control, x)    (Control = ((Control & ~(OHCI_CONTROL_HCFS_MASK << OHCI_CONTROL_HCFS_BITS)) |= ((x & OHCI_CONTROL_HCFS_MASK) << OHCI_CONTROL_HCFS_BITS)))
+static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
+    Control = Control & ~(OHCI_CONTROL_HCFS_MASK << OHCI_CONTROL_HCFS_BITS);
+    Control |= ((Mod & OHCI_CONTROL_HCFS_MASK) << OHCI_CONTROL_HCFS_BITS);
+    return Control;
+}
 #define SET_OHCI_COTROL_IR(Control, x)      (Control = ((Control & ~(1 << OHCI_CONTROL_IR_BIT)) |= ((x & 0x01) << OHCI_CONTROL_IR_BIT)))
 #define SET_OHCI_COTROL_WRC(Control, x)     (Control = ((Control & ~(1 << OHCI_CONTROL_WRC_BIT)) |= ((x & 0x01) << OHCI_CONTROL_WRC_BIT)))
 #define SET_OHCI_COTROL_WRE(Control, x)     (Control = ((Control & ~(1 << OHCI_CONTROL_WRE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_WRE_BIT)))
@@ -184,6 +200,12 @@ typedef struct _OHCI_DEVICE{
 #define OHCI_OPERATIONAL_REGISTER_BAR       0
 #define OHCI_OPERATIONAL_REGISTER_OFFSET    0
 
+#define OHCI_COMMAND_STATUS_HCR     (1)
+#define OHCI_COMMAND_STATUS_CLF     (1 << 1)
+#define OHCI_COMMAND_STATUS_BLF     (1 << 2)
+#define OHCI_COMMAND_STATUS_OCR     (1 << 3)
+#define OHCI_COMMAND_STATUS_SOC     (0b11 << 16)
+
 //endpoint descritor data 
 #define OHCI_ED_FA_MASK         ((1 << 7) - 1)
 #define OHCI_ED_EN_MASK         ((1 << 5) - 1)
@@ -231,8 +253,23 @@ typedef struct _OHCI_DEVICE{
 #define OHCI_ED_POOL_SIZE       256
 #define OHCI_TD_POOL_SIZE       2048
 
+#define OHCI_RH_STATUS_LPSC     (1)
+
+#define OHCI_PORT_STATUS_CCS    (1)
+#define OHCI_PORT_STATUS_PES    (1 << 1)
+#define OHCI_PORT_STATUS_PSS    (1 << 2)
+#define OHCI_PORT_STATUS_POCI   (1 << 3)
+#define OHCI_PORT_STATUS_PRS    (1 << 4)
+#define OHCI_PORT_STATUS_PPS    (1 << 8)
+#define OHCI_PORT_STATUS_LSDA   (1 << 9)
+#define OHCI_PORT_STATUS_CSC    (1 << 16)
+#define OHCI_PORT_STATUS_PESC   (1 << 17)
+#define OHCI_PORT_STATUS_PSSC   (1 << 18)
+#define OHCI_PORT_STATUS_OCIC   (1 << 19)
+#define OHCI_PORT_STATUS_PRSC   (1 << 20)
+
 LOUSTATUS 
-OhciInitialzeEndpointHeaders(
+OhciInitialzeHcca(
     POHCI_DEVICE    OhciDevice
 );
 
@@ -245,8 +282,25 @@ LOUSTATUS OhciCreateEndpoint(
     OHCI_ED_TYPE    EdType
 );
 
-LOUSTATUS OhciCreateEdPool(
-    POHCI_DEVICE    OhciDevice
+LOUSTATUS
+OhciAllocateDma(
+    size_t  Size,
+    size_t  Alignment,
+    PVOID*  Out
+); 
+
+void OhciFreeDma(
+    PVOID VAddress
+);
+
+UINT32 OhciGetDmaAddress(
+    PVOID VAddress
+);
+
+LOUSTATUS 
+OhciInitializePort(
+    POHCI_DEVICE    Device,
+    UINT8           Port
 );
 
 #endif

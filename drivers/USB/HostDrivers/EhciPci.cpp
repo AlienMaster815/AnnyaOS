@@ -18,10 +18,31 @@ NTSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("EHCI.SYS::AddDevice()\n");
-
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PEHCI_CAPABILITY_REGISTERS CapRegs = (PEHCI_CAPABILITY_REGISTERS)LouKePciGetIoRegion(PDEV, EHCI_OPERATIONAL_REGISTER_BAR, EHCI_CAP_REGISTER_OFFSET);
+    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs;
+    LouPrint("EHCI.SYS:Cap Version:%h\n", CapRegs->HciVersion);
     
+    if(CapRegs->HciVersion != 0x100){
+        LouPrint("EHCI.SYS:This Driver Does Not Support This Controller Version\n");
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    UINT64 Base = (UINT64)(UINTPTR)CapRegs;
+    Base += (UINT64)CapRegs->CapLength;
+    OpRegs = (PEHCI_HOST_OPERATIONAL_REGISTERS)Base;
+    
+    PEHCI_DEVICE EhciDevice = LouKeMallocType(EHCI_DEVICE, KERNEL_GENERIC_MEMORY);
+
+    EhciDevice->PDEV = PDEV;
+    EhciDevice->Capabilities = CapRegs;
+    EhciDevice->OperationalRegisters = OpRegs;
+
+    EhciGetHostCapabilities(EhciDevice);
+
+    EhciStopHostController(EhciDevice);    
 
     LouPrint("EHCI.SYS::AddDevice() STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 

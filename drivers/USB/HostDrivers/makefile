@@ -11,11 +11,13 @@ SRC1 = Xhci.cpp
 TARGET1 = XHCI.SYS
 
 SRC2 = Ohci.cpp \
-		OhciPci.cpp
+		OhciPci.cpp \
+		OhciMem.cpp
 TARGET2 = OHCI.SYS
 
 SRC3 = Ehci.cpp \
-		EhciPci.cpp
+		EhciPci.cpp \
+		EhciCap.cpp
 TARGET3 = EHCI.SYS
 
 

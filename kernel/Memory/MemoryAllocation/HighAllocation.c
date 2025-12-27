@@ -422,7 +422,7 @@ void LouKeFreeVirt32(void* Address){
     MutexUnlock(&GenMallocLock32);
 }
 
-void LouKeFreePhys32(void* Address){
+void LouKeFreePhy32(void* Address){
     if(!Address){
         return;
     }
