@@ -303,10 +303,113 @@ static inline UINT32 EHCI_USBSTS_SET_USBINT(UINT32 UsbSts, BOOL v){
     return UsbSts;
 }
 
+#define EHCI_PFLE_TERMINATE_BIT 1
+
+typedef struct PACKED _EHCI_QH{
+    UINT32 HLink;           
+    UINT32 EpChar;          
+    UINT32 EpCaps;          
+    UINT32 CurrentQtd;      
+    UINT32 NextQtd;         
+    UINT32 AltNextQtd;      
+    UINT32 Token;           
+    UINT32 Buffer[5];       
+    UINT32 ExtendedBuffer[4]; 
+}EHCI_QH, * PEHCI_QH;
+
+//PORTSC
+#define EHCI_PORTSC_WKOC_E_MASK         1
+#define EHCI_PORTSC_WKOC_E_SHIFT        22
+#define EHCI_PORTSC_WKDSCNNT_E_MASK     1
+#define EHCI_PORTSC_WKDSCNNT_E_SHIFT    21
+#define EHCI_PORTSC_WKCNNT_E_MASK       1
+#define EHCI_PORTSC_WKCNNT_E_SHIFT      20
+#define EHCI_PORTSC_PTC_MASK            0x0F
+#define EHCI_PORTSC_PTC_SHIFT           16
+#define EHCI_PORTSC_PIC_MASK            3
+#define EHCI_PORTSC_PIC_SHIFT           14
+#define EHCI_PORTSC_PORT_OWNER_MASK     1
+#define EHCI_PORTSC_PORT_OWNER_SHIFT    13
+#define EHCI_PORTSC_PORT_POWER_MASK     1
+#define EHCI_PORTSC_PORT_POWER_SHIFT    12
+#define EHCI_PORTSC_LINE_STATUS_MASK    3
+#define EHCI_PORTSC_LINE_STATUS_SHIFT   10
+#define EHCI_PORTSC_PORT_RESET_MASK     1
+#define EHCI_PORTSC_PORT_RESET_SHIFT    8
+#define EHCI_PORTSC_SUSPEND_MASK        1
+#define EHCI_PORTSC_SUSPEND_SHIFT       7
+#define EHCI_PORTSC_FPR_MASK            1
+#define EHCI_PORTSC_FPR_SHIFT           6
+#define EHCI_PORTSC_OCC_MASK            1
+#define EHCI_PORTSC_OCC_SHIFT           5
+#define EHCI_PORTSC_OCA_MASK            1
+#define EHCI_PORTSC_OCA_SHIFT           4
+#define EHCI_PORTSC_PEC_MASK            1
+#define EHCI_PORTSC_PEC_SHIFT           3
+#define EHCI_PORTSC_PORT_ENABLE_MASK    1
+#define EHCI_PORTSC_PORT_ENABLE_SHIFT   2
+#define EHCI_PORTSC_CSC_MASK            1
+#define EHCI_PORTSC_CSC_SHIFT           1
+#define EHCI_PORTSC_CCS_MASK            1
+#define EHCI_PORTSC_CCS_SHIFT           0
+
+#define EHCI_PORTSC_WKOC_E                      (EHCI_PORTSC_WKOC_E_MASK << EHCI_PORTSC_WKOC_E_SHIFT) //RW
+#define EHCI_PORTSC_WKDSCNNT_E                  (EHCI_PORTSC_WKDSCNNT_E_MASK << EHCI_PORTSC_WKDSCNNT_E_SHIFT) //RW
+#define EHCI_PORTSC_WKCNNT_E                    (EHCI_PORTSC_WKCNNT_E_MASK << EHCI_PORTSC_WKCNNT_E_SHIFT) //RW
+#define EHCI_PORTSC_PTC                         (EHCI_PORTSC_PTC_MASK << EHCI_PORTSC_PTC_SHIFT) //RW
+#define EHCI_PORTSC_PIC                         (EHCI_PORTSC_PIC_MASK << EHCI_PORTSC_PIC_SHIFT) //R
+#define EHCI_PORTSC_PORT_OWNER                  (EHCI_PORTSC_PORT_OWNER_MASK << EHCI_PORTSC_PORT_OWNER_SHIFT) //RW
+#define EHCI_PORTSC_PORT_POWER                  (EHCI_PORTSC_PORT_POWER_MASK << EHCI_PORTSC_PORT_POWER_SHIFT) //RW
+#define EHCI_PORTSC_LINE_STATUS                 (EHCI_PORTSC_LINE_STATUS_MASK << EHCI_PORTSC_LINE_STATUS_SHIFT) //R
+#define EHCI_PORTSC_PORT_RESET                  (EHCI_PORTSC_PORT_RESET_MASK << EHCI_PORTSC_PORT_RESET_SHIFT) //RW
+#define EHCI_PORTSC_SUSPEND                     (EHCI_PORTSC_SUSPEND_MASK << EHCI_PORTSC_SUSPEND_SHIFT) //RW
+#define EHCI_PORTSC_FPR                         (EHCI_PORTSC_FPR_MASK << EHCI_PORTSC_FPR_SHIFT) //RW
+#define EHCI_PORTSC_OCC                         (EHCI_PORTSC_OCC_MASK << EHCI_PORTSC_OCC_SHIFT) //RW
+#define EHCI_PORTSC_OCA                         (EHCI_PORTSC_OCA_MASK << EHCI_PORTSC_OCA_SHIFT) //R
+#define EHCI_PORTSC_PEC                         (EHCI_PORTSC_PEC_MASK << EHCI_PORTSC_PEC_SHIFT) //RW
+#define EHCI_PORTSC_PORT_ENABLE                 (EHCI_PORTSC_PORT_ENABLE_MASK << EHCI_PORTSC_PORT_ENABLE_SHIFT) //RW
+#define EHCI_PORTSC_CSC                         (EHCI_PORTSC_CSC_MASK << EHCI_PORTSC_CSC_SHIFT) //RW
+#define EHCI_PORTSC_CCS                         (EHCI_PORTSC_CCS_MASK << EHCI_PORTSC_CCS_SHIFT) //R
+
+#define EHCI_GET_PORTSC_WKOC_E(PortSc)          (PortSc & EHCI_PORTSC_WKOC_E)
+#define EHCI_GET_PORTSC_WKDSCNNT_E(PortSc)      (PortSc & EHCI_PORTSC_WKDSCNNT_E)
+#define EHCI_GET_PORTSC_WKCNNT_E(PortSc)        (PortSc & EHCI_PORTSC_WKCNNT_E)
+#define EHCI_GET_PORTSC_PTC(PortSc)             ((PortSc & EHCI_PORTSC_PTC) >> EHCI_PORTSC_PTC_SHIFT)
+#define EHCI_GET_PORTSC_PIC(PortSc)             ((PortSc & EHCI_PORTSC_PIC) >> EHCI_PORTSC_PIC_SHIFT)
+#define EHCI_GET_PORTSC_PORT_OWNER(PortSc)      (PortSc & EHCI_PORTSC_PORT_OWNER)
+#define EHCI_GET_PORTSC_PORT_POWER(PortSc)      (PortSc & EHCI_PORTSC_PORT_POWER)
+#define EHCI_GET_PORTSC_LINE_STATUS(PortSc)     ((PortSc & EHCI_PORTSC_LINE_STATUS) >> EHCI_PORTSC_LINE_STATUS_SHIFT)
+#define EHCI_GET_PORTSC_PORT_RESET(PortSc)      (PortSc & EHCI_PORTSC_PORT_RESET)
+#define EHCI_GET_PORTSC_SUSPEND(PortSc)         (PortSc & EHCI_PORTSC_SUSPEND)
+#define EHCI_GET_PORTSC_FPR(PortSc)             (PortSc & EHCI_PORTSC_FPR)
+#define EHCI_GET_PORTSC_OCC(PortSc)             (PortSc & EHCI_PORTSC_OCC)
+#define EHCI_GET_PORTSC_OCA(PortSc)             (PortSc & EHCI_PORTSC_OCA)
+#define EHCI_GET_PORTSC_PEC(PortSc)             (PortSc & EHCI_PORTSC_PEC)
+#define EHCI_GET_PORTSC_PORT_ENABLE(PortSc)     (PortSc & EHCI_PORTSC_PORT_ENABLE)
+#define EHCI_GET_PORTSC_CSC(PortSc)             (PortSc & EHCI_PORTSC_CSC)
+#define EHCI_GET_PORTSC_CCS(PortSc)             (PortSc & EHCI_PORTSC_CCS)
+
+
+
+#define PORTSC_PTC_NOT_ENABLED          0b0000
+#define PORTSC_PTC_J_STATE              0b0001
+#define PORTSC_PTC_K_STATE              0b0010
+#define PORTSC_PTC_SE0_NAK              0b0011
+#define PORTSC_PTC_PACKET               0b0100
+#define PORTSC_PTR_FORCE_ENABLE         0b0101
+
+#define PORTSC_PIC_OFF                  0b00
+#define PORTSC_PIC_AMBER                0b01
+#define PORTSC_PIC_GREEN                0b10
+#define PORTSC_PIC_UNDEFINED            0b11
+
+
 typedef struct _EHCI_DEVICE{
     PPCI_DEVICE_OBJECT                  PDEV;
     PEHCI_CAPABILITY_REGISTERS          Capabilities;
     PEHCI_HOST_OPERATIONAL_REGISTERS    OperationalRegisters;
+    UINTPTR                             PeriodicFrameListBase;
+    UINTPTR                             AshQHAddress;
     EHCI_PCI_EXTENTIONS                 Extentions;
     BOOL                                Dma64Supported;
     BOOL                                PortIndicatorSupport;
@@ -324,5 +427,13 @@ typedef struct _EHCI_DEVICE{
 
 void EhciGetHostCapabilities(PEHCI_DEVICE EhciDevice);
 LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice);
+LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice);
+UINTPTR EhciGetDmaAddress(PVOID VAddress);
+void EhciFreeDma(PEHCI_DEVICE EhciDevice, PVOID VAddress);
+LOUSTATUS EhciAllocateDma(PEHCI_DEVICE EhciDevice, SIZE size, SIZE Alignment, PVOID* Out);
+LOUSTATUS EhciAllocatePeriodicFrameListBase(PEHCI_DEVICE EhciDevice);
+LOUSTATUS EhciAllocateAsyncHead(PEHCI_DEVICE EhciDevice);
+
+
 
 #endif

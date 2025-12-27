@@ -17,7 +17,8 @@ TARGET2 = OHCI.SYS
 
 SRC3 = Ehci.cpp \
 		EhciPci.cpp \
-		EhciCap.cpp
+		EhciCap.cpp \
+		EhciMem.cpp
 TARGET3 = EHCI.SYS
 
 

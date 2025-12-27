@@ -58,6 +58,7 @@ static void EhciPrintCapabilities(
 
 void EhciGetHostCapabilities(PEHCI_DEVICE EhciDevice){
     LouPrint("EHCI.SYS:EhciGetHostCapabilities()\n");
+    
     PEHCI_CAPABILITY_REGISTERS CapReg = EhciDevice->Capabilities;
     UINT32 HcsParams = CapReg->HcsParams;
     UINT32 HccParams = CapReg->HccParams;

@@ -1,6 +1,6 @@
 #include "Coff.h"
 
-UNUSED static void EnableCoffImageProtection(
+UNUSED void EnableCoffImageProtection(
     PCFI_OBJECT CfiObject
 ){
     //apply paging protections
@@ -38,7 +38,7 @@ UNUSED static void EnableCoffImageProtection(
     }    
 }
 
-static void UnpackCoffImage(
+void UnpackCoffImage(
     PCFI_OBJECT CfiObject
 ){
     //do basic unbacking for the loader
@@ -63,7 +63,7 @@ static void UnpackCoffImage(
     CfiObject->ImageHeader = (PCOFF_IMAGE_HEADER)((UINT64)LoadedAddress + ((UINT64)PeImageHeader - RawData));
 }
 
-static LOUSTATUS ApplyCoffRelocations(
+LOUSTATUS ApplyCoffRelocations(
     PCFI_OBJECT CfiObject
 ){
     PCOFF_IMAGE_HEADER PeImageHeader = CfiObject->ImageHeader;
@@ -96,7 +96,6 @@ static LOUSTATUS ApplyCoffRelocations(
                     UINT64* Target = (UINT64*)(UINT8*)(((UINT64)TmpReloc->PageRVA + (UINT64)TmpReloc->RelocationEntires[i].Offset) + NewBase);
                     if(AddressDrop){
                         *Target -= BaseDelta;
-                    
                     }else{
                         *Target += BaseDelta;
                     }
@@ -113,7 +112,7 @@ static LOUSTATUS ApplyCoffRelocations(
     return STATUS_SUCCESS;
 }
 
-static LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
+LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
     //CFI_DDOFFSET_LOAD_CONFIG_TABLE
     PCOFF_IMAGE_HEADER PeImageHeader = CfiObject->ImageHeader;
     PCOFF_IMAGE_DATA_DIRECTORY LoadConfigTable = &PeImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_LOAD_CONFIG_TABLE];
@@ -130,7 +129,7 @@ static LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
 
 //continue from here on with coff 32
 
-static LOUSTATUS ConfigureExportTables(
+LOUSTATUS ConfigureExportTables(
     PCFI_OBJECT CfiObject
 ){
 
@@ -187,7 +186,7 @@ static inline uint8_t FilePathCountBackToDirectory(string FilePath){
     return i + 1;
 }
 
-static LOUSTATUS ConfigureImportTables(
+LOUSTATUS ConfigureImportTables(
     PCFI_OBJECT CfiObject
 ){
     if(!CfiObject->ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress){
@@ -290,7 +289,7 @@ LOUSTATUS LouKeLoadCoffImageA64(
         }
     }
         
-    CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage, Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment);
+    CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(ISize, Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment);
     LouKeMapContinuousMemoryBlock((UINT64)CfiObject->PhysicalLoadedAddress, (UINT64)CfiObject->LoadedAddress, ISize, KERNEL_GENERIC_MEMORY);
 
     UnpackCoffImage(CfiObject);

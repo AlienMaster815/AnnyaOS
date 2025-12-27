@@ -21,6 +21,7 @@ NTSTATUS AddDevice(
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     PEHCI_CAPABILITY_REGISTERS CapRegs = (PEHCI_CAPABILITY_REGISTERS)LouKePciGetIoRegion(PDEV, EHCI_OPERATIONAL_REGISTER_BAR, EHCI_CAP_REGISTER_OFFSET);
     PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs;
+    LOUSTATUS Status;
     LouPrint("EHCI.SYS:Cap Version:%h\n", CapRegs->HciVersion);
     
     if(CapRegs->HciVersion != 0x100){
@@ -41,8 +42,58 @@ NTSTATUS AddDevice(
 
     EhciStopHostController(EhciDevice);    
 
+    EhciResetController(EhciDevice);
+
+    UINTPTR TmpVAddress; 
+    UINTPTR TmpPAddress; 
+    Status = EhciAllocatePeriodicFrameListBase(EhciDevice);
+    if(!NT_SUCCESS(Status)){
+        return Status;
+    }
+    Status = EhciAllocateAsyncHead(EhciDevice);
+    if(!NT_SUCCESS(Status)){
+        return Status;
+    }
+
+    OpRegs->UsbStatus = EHCI_USBSTS_SET_USBINT(OpRegs->UsbStatus, 1);
+    Status = LouKeWaitForUlongRegisterCondition(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+        10,
+        EHCI_USBSTS_USBINT,
+        0
+    );
+
+    if(!NT_SUCCESS(Status)){
+        LouPrint("EHCI.SYS:Unable To Clear USBINT Bit In USBSTS\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    OpRegs->UsbCommand = EHCI_SET_USBCMD_RS(OpRegs->UsbCommand, 1);
+
+    Status = LouKeWaitForUlongRegisterCondition(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+        10,
+        EHCI_USBSTS_HC_HALTED,
+        0
+    );
+
+    if(!NT_SUCCESS(Status)){
+        LouPrint("EHCI.SYS:Host Faild To Start\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    OpRegs->UsbCommand = EHCI_SET_USBCMD_ASE(OpRegs->UsbCommand, 1);
+
+    UINT8 PortCount = EhciDevice->EhciPortCount;
+
+    for(UINT8 i = 0 ; i < PortCount; i++){
+        if(EHCI_GET_PORTSC_CCS(OpRegs->PortStatusControl[i])){
+            LouPrint("EHCI.SYS:Device Connected On Port:%d\n", i);
+            while(1);
+        }   
+    }
+
     LouPrint("EHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
