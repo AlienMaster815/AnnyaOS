@@ -89,19 +89,16 @@ typedef enum {
     UsbSuperSpeedFunction = 3,
 }USB_FUNCTION_SPEED;
 
-typedef enum {
-    UsbHubTreeIdentifier = 0,
-    UsbFunctionTreeIdentifier = 1,
-}USB_TREE_IDENTIFIER;
-
-typedef struct _USB_HUB_DEVICE{
-    struct _USB_TOPOLOGY_TREE*  Children;
-
-}USB_HUB_DEVICE, * PUSB_HUB_DEVICE;
+typedef struct _USB_FUNCTION_OPERATIONS{
+    LOUSTATUS   (*UsbInitializeFunctionDevice)(struct _USB_FUNCTION_DEVICE* FunctionDevice);
+}USB_FUNCTION_OPERATIONS, * PUSB_FUNCTION_OPERATIONS;
 
 typedef struct _USB_FUNCTION_DEVICE{
+    struct _USB_TOPOLOGY_TREE*  Children;
+    USB_FUNCTION_OPERATIONS     Operations;
+    UINT8                       PortNumber;
     USB_FUNCTION_SPEED          FunctionSpeed;
-
+    BOOL                        PortEnabled;
 }USB_FUNCTION_DEVICE, * PUSB_FUNCTION_DEVICE;
 
 typedef struct _USB_TOPOLOGY_TREE{
@@ -109,25 +106,55 @@ typedef struct _USB_TOPOLOGY_TREE{
     struct _USB_TOPOLOGY_TREE*  ULink; //hub owner
     struct _USB_TOPOLOGY_TREE*  FLink; //next port
     struct _USB_TOPOLOGY_TREE*  BLink; //last port
-    USB_TREE_IDENTIFIER         ObjectIdentifier;
-    union{
-        USB_HUB_DEVICE          HubDevice;
-        USB_FUNCTION_DEVICE     FunctionDevice;
-    };
+    USB_FUNCTION_DEVICE         FunctionDevice;
 }USB_TOPOLOGY_TREE, * PUSB_TOPOLOGY_TREE;
 
+
+typedef struct _USB_HOST_OPERATIONS{
+    LOUSTATUS       (*UsbHcdResetHostController)(struct _USB_HOST_DEVICE* HostDevice);
+    LOUSTATUS       (*UsbHcdProbeRootHub)(struct _USB_HOST_DEVICE* HostDevice);
+    
+}USB_HOST_OPERATIONS, * PUSB_HOST_OPERATIONS;
 
 typedef struct _USB_HOST_DEVICE{
     struct _USB_HOST_DEVICE*        Siblings;
     struct _USB_HOST_DEVICE*        Leader;
     PPCI_DEVICE_OBJECT              PDEV;
+    mutex_t                         RootHubMutex;
     USB_TOPOLOGY_TREE               RootHub;
-
-
+    USB_HOST_OPERATIONS             Operations;
+    PVOID                           DevicePrivateData;
 }USB_HOST_DEVICE, * PUSB_HOST_DEVICE;
 
+#define UsbFunctionDeviceToHcd(FunctionDevice) (((PUSB_TOPOLOGY_TREE)CONTAINER_OF(FunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice))->HostIdentifier)
 
-#ifdef _KERNEL_MODULE_
+
+
+#ifndef _KERNEL_MODULE_
+
+LOUSTATUS LouKeUsbAddHcd(
+    PUSB_HOST_DEVICE    HostDevice
+);
+
+LOUSTATUS LouKeUsbAddDeviceToHcd(
+    PUSB_HOST_DEVICE        HostDevice,
+    PUSB_FUNCTION_DEVICE    ParrentFunction,
+    PUSB_FUNCTION_DEVICE    DeviceDescription
+);
+
+#else
+
+KERNEL_EXPORT
+LOUSTATUS LouKeUsbAddHcd(
+    PUSB_HOST_DEVICE    HostDevice
+);
+
+KERNEL_EXPORT
+LOUSTATUS LouKeUsbAddDeviceToHcd(
+    PUSB_HOST_DEVICE        HostDevice,
+    PUSB_FUNCTION_DEVICE    ParrentFunction,
+    PUSB_FUNCTION_DEVICE    DeviceDescription
+);
 
 #endif
 

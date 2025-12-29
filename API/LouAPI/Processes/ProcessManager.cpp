@@ -120,7 +120,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
 
     this->CurrentProcess = this->SystemProcess;    
     PsmSetProcessTransitionState();
-    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
+    NextThread = CurrentThread;//this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
     LouKeSwitchToTask(
         IrqState,
         CurrentThread,
@@ -195,21 +195,22 @@ void PsmProcessScedualManagerObject::PsmSetCurrentThread(PGENERIC_THREAD_DATA Th
     this->CurrentThread = Thread;
 }
 
-LOUDDK_API_ENTRY uint64_t UpdateProcessManager(uint64_t CpuCurrentState){
-
-    if(LouKeGetIrql() == HIGH_LEVEL){
-        LouKeSendIcEOI();
-        return CpuCurrentState;
-    }
+LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
 
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
+
+    if((LouKeGetIrql() == HIGH_LEVEL) || (MutexIsLocked(&ProcessBlock.ProcStateBlock[ProcessorID].LockOutTagOut))){
+        LouKeSendIcEOI(); 
+        return;
+    }
+
     UNUSED PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
     
     Schedualer->PsmSchedual(CpuCurrentState);
 
     LouKeMemoryBarrier();
     LouKeSendIcEOI();
-    return CpuCurrentState;
+    return;
 }
 
 UNUSED static void ProcessorIdleTask(){

@@ -368,9 +368,9 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
 
-    sleep(1000);
+    //sleep(1000);
 
-    LouKeSystemShutdown(ShutdownReboot);
+    //LouKeSystemShutdown(ShutdownReboot);
 
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 

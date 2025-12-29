@@ -194,3 +194,5 @@ EXPORTS
     LouKeMallocPhy32
     LouKeHalGetPciIrqVector
     LouKeFreePhy32
+    LouKeUsbAddHcd
+    LouKeUsbAddDeviceToHcd

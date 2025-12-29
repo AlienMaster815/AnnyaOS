@@ -568,7 +568,6 @@ ISR32:
 	pusha
 	mov rcx, rsp
 	call UpdateProcessManager  
-	mov rsp, rax 
 	popa                                                                                              
 	iretq
 

@@ -207,16 +207,9 @@ LOUSTATUS ConfigureImportTables(
     //size_t DirectoryLength;
     //string Directory;
 
-    while (1) {
-        if(ImportTable[j].ImportLookupRva == 0x00) {
-            break;
-        }
-        while (1) {
-
-            TableEntry = *(uint64_t*)(uintptr_t)(ModuleStart + ImportTable[j].ImportLookupRva + i);
-            if (TableEntry == 0) {
-                break;
-            }
+    while (ImportTable[j].ImportLookupRva) {
+        i = 0;
+        while ((TableEntry = *(uint64_t*)(uint8_t*)(uintptr_t)(ModuleStart + ImportTable[j].ImportLookupRva + i))){
             TableOffset = (i + ImportTable[j].ImportAddressTableRva + ModuleStart);
             FunctionName = (string)(TableEntry + ModuleStart + sizeof(uint16_t));
             SYSName = (string)(ModuleStart + ImportTable[j].NameRva);
@@ -240,7 +233,6 @@ LOUSTATUS ConfigureImportTables(
 
             i += sizeof(uint64_t);
         }
-        i = 0;
         j++;
     }
     return STATUS_SUCCESS;

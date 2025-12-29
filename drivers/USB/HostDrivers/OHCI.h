@@ -4,6 +4,8 @@
 
 #include <LouDDK.h>
 #include <Hal.h>
+#include <usb.h>
+
 
 typedef struct _OHCI_ED_INITIALIZOR{
     UINT8       FunctionAddress;
@@ -96,6 +98,7 @@ typedef struct _OHCI_PORT{
 
 typedef struct _OHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
+    USB_HOST_DEVICE                 UsbHost;
     POHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
     spinlock_t                      IoLock;
     mutex_t                         DeviceMutex;
@@ -107,7 +110,6 @@ typedef struct _OHCI_DEVICE{
     POHCI_ENDPOINT_DESCRIPTOR       ControlEpList;
     POHCI_ENDPOINT_DESCRIPTOR       BulkEpList;
     POHCI_ENDPOINT_DESCRIPTOR       IsochIntEpList[32];//32 synchronized lists
-    OHCI_PORT                       Port[32];
 }OHCI_DEVICE, * POHCI_DEVICE;
 
 #define OHCI_REVISION_HC_BIT     (0x01)
@@ -268,6 +270,9 @@ static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
 #define OHCI_PORT_STATUS_OCIC   (1 << 19)
 #define OHCI_PORT_STATUS_PRSC   (1 << 20)
 
+#define UsbHcdToOhciDevice(HostDevice) CONTAINER_OF(HostDevice, OHCI_DEVICE, UsbHost)
+
+
 LOUSTATUS 
 OhciInitialzeHcca(
     POHCI_DEVICE    OhciDevice
@@ -297,10 +302,7 @@ UINT32 OhciGetDmaAddress(
     PVOID VAddress
 );
 
-LOUSTATUS 
-OhciInitializePort(
-    POHCI_DEVICE    Device,
-    UINT8           Port
-);
+LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
 
 #endif
