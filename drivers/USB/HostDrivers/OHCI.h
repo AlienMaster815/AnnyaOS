@@ -133,6 +133,19 @@ typedef struct _OHCI_DEVICE{
 #define OHCI_CONTROL_RWC_BIT    (9)
 #define OHCI_CONTROL_RWE_BIT    (10)
 
+#define OHCI_CONTROL_CBSR       (OHCI_CONTROL_CBSR_MASK << OHCI_CONTROL_CBSR_BITS)
+#define OHCI_CONTROL_HCFS       (OHCI_CONTROL_HCFS_MASK << OHCI_CONTROL_HCFS_BITS)
+
+#define OHCI_CONTROL_PLE        (1 << OHCI_CONTROL_PLE_BIT)
+#define OHCI_CONTROL_IE         (1 << OHCI_CONTROL_IE_BIT)
+#define OHCI_CONTROL_CLE        (1 << OHCI_CONTROL_CLE_BIT)
+#define OHCI_CONTROL_BLE        (1 << OHCI_CONTROL_BLE_BIT)
+#define OHCI_CONTROL_IR         (1 << OHCI_CONTROL_IR_BIT)
+#define OHCI_CONTROL_RWC        (1 << OHCI_CONTROL_RWC_BIT)
+#define OHCI_CONTROL_RWE        (1 << OHCI_CONTROL_RWE_BIT)
+
+
+
 #define GET_OHCI_CONTROL_CSBR(Control)  (Control & OHCI_CONTROL_CBSR_MASK)
 #define GET_OHCI_CONTROL_PLE(Control)   ((Control >> OHCI_CONTROL_PLE_BIT) & 0x01)
 #define GET_OHCI_CONTROL_IE(Control)    ((COntrol >> OHCI_CONTROL_IE_BIT) & 0x01)
@@ -304,5 +317,8 @@ UINT32 OhciGetDmaAddress(
 
 LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice);
+void OhciInterruptHandler(uint64_t UsbHostData);
 
 #endif

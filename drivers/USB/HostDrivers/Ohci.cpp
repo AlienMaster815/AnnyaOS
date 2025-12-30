@@ -87,7 +87,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
 
     OpRegs->HcRhPortStatus[Port] = Tmp;
 
-        Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterCondition(
         (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcRhPortStatus[Port]), //it actually is aligned the compiler just gives a warning
         100,
         OHCI_PORT_STATUS_PRS,
@@ -181,7 +181,6 @@ LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice){
 
     POHCI_DEVICE OhciDevice = UsbHcdToOhciDevice(HostDevice);
 
-    OhciDevice->OperationalRegisters->HcCommandStatus |= OHCI_COMMAND_STATUS_OCR;
     OhciDevice->Fminterval = OhciDevice->OperationalRegisters->HcFmInterval;
     OhciDevice->OperationalRegisters->HcCommandStatus |= OHCI_COMMAND_STATUS_HCR;
 
@@ -199,7 +198,11 @@ LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice){
     }
 
     OhciDevice->OperationalRegisters->HcFmInterval = OhciDevice->Fminterval;
+    
+    OhciDevice->OperationalRegisters->HcControl = SET_OHCI_COTROL_HCFS(OhciDevice->OperationalRegisters->HcControl , OHCI_HCFS_USBRESET);
+    sleep(10);
     OhciDevice->OperationalRegisters->HcControl = SET_OHCI_COTROL_HCFS(OhciDevice->OperationalRegisters->HcControl , OHCI_HCFS_USBRESUME);
+    sleep(10);
 
     if(OhciDevice->OperationalRegisters->HcCommandStatus & OHCI_COMMAND_STATUS_HCR){
         LouPrint("OHCI.SYS:ERROR:Host Re Entered Reset\n");
@@ -222,8 +225,6 @@ LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice){
         return Status;
     }
 
-    OhciDevice->OperationalRegisters->HcControl &= ~((1 << OHCI_CONTROL_CLE_BIT) | (1 << OHCI_CONTROL_BLE_BIT) | (1 << OHCI_CONTROL_PLE_BIT)); 
-
     Fm = OhciDevice->OperationalRegisters->HcFmInterval;
     FrameInterval = Fm & 0x3FFF;   // mask bits 0–13
     PeriodicStart = (FrameInterval * 9) / 10;
@@ -240,3 +241,76 @@ LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice){
     LouPrint("OHCI.SYS:OhciResetHostController() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
+
+LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice){
+    LouPrint("OHCI.SYS:OhciStopHostController()\n");
+    POHCI_DEVICE OhciDevice = UsbHcdToOhciDevice(HostDevice);
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;    
+    UINT32 Tmp;
+    LOUSTATUS Status;
+    MutexLock(&HostDevice->ExlusiveOwnership);
+
+    OpRegs->HcInterruptDisable = 0xFFFFFFFF;
+    OpRegs->HcInterruptStatus = 0xFFFFFFFF;
+
+    Tmp = OpRegs->HcControl;
+    Tmp &= ~(OHCI_CONTROL_CLE | OHCI_CONTROL_BLE | OHCI_CONTROL_PLE | OHCI_CONTROL_IE);
+    OpRegs->HcControl = Tmp;
+
+    sleep(20);
+
+    OpRegs->HcControl = SET_OHCI_COTROL_HCFS(OpRegs->HcControl , OHCI_HCFS_USBSUSPEND);
+
+    Status = LouKeWaitForUlongRegisterCondition(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcControl),
+        10,
+        OHCI_CONTROL_HCFS,
+        OHCI_HCFS_USBSUSPEND
+    );
+
+    MutexUnlock(&HostDevice->ExlusiveOwnership);
+    if(!NT_SUCCESS(Status)){
+        return  Status;
+    }
+    LouPrint("OHCI.SYS:OhciStopHostController() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice){
+    LouPrint("OhciStartHostController()\n");
+    LOUSTATUS Status;
+    POHCI_DEVICE OhciDevice = UsbHcdToOhciDevice(HostDevice);
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
+
+    if(GET_OHCI_CONTROL_HCFS(OpRegs->HcControl) == OHCI_HCFS_USBSUSPEND){
+        OpRegs->HcControl = SET_OHCI_COTROL_HCFS(OpRegs->HcControl , OHCI_HCFS_USBOPERATIONAL);
+        Status = LouKeWaitForUlongRegisterCondition(
+            (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcControl),
+            10,
+            OHCI_CONTROL_HCFS,
+            OHCI_HCFS_USBOPERATIONAL
+        );
+        if(!NT_SUCCESS(Status)){
+            LouPrint("OHCI.SYS:ERROR Unable To Set Host To Operational State\n");
+            return Status;
+        }
+    }else if(GET_OHCI_CONTROL_HCFS(OpRegs->HcControl) != OHCI_HCFS_USBOPERATIONAL){
+        LouPrint("OHCI.SYS:ERROR Function Given An Invalid Controller State\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    
+
+    LouPrint("OhciStartHostController() STATUS_SUCCESS\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+void OhciInterruptHandler(uint64_t UsbHostData){
+    LouPrint("OHCI.SYS:OhciInterruptHandler()\n");
+
+
+
+    while(1);
+}
+

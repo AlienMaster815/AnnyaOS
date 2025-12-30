@@ -40,7 +40,7 @@ NTSTATUS AddDevice(
 
     EhciGetHostCapabilities(EhciDevice);
 
-    EhciStopHostController(EhciDevice);    
+    /*EhciStopHostController(EhciDevice);    
 
     EhciResetController(EhciDevice);
 
@@ -91,7 +91,7 @@ NTSTATUS AddDevice(
             LouPrint("EHCI.SYS:Device Connected On Port:%d\n", i);
             while(1);
         }   
-    }
+    }*/
 
     LouPrint("EHCI.SYS::AddDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

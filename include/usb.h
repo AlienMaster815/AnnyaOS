@@ -112,6 +112,8 @@ typedef struct _USB_TOPOLOGY_TREE{
 
 typedef struct _USB_HOST_OPERATIONS{
     LOUSTATUS       (*UsbHcdResetHostController)(struct _USB_HOST_DEVICE* HostDevice);
+    LOUSTATUS       (*UsbHcdStopHostController)(struct _USB_HOST_DEVICE* HostDevice);
+    LOUSTATUS       (*UsbHcdStartHostController)(struct _USB_HOST_DEVICE* HostDevice);
     LOUSTATUS       (*UsbHcdProbeRootHub)(struct _USB_HOST_DEVICE* HostDevice);
     
 }USB_HOST_OPERATIONS, * PUSB_HOST_OPERATIONS;
@@ -120,6 +122,7 @@ typedef struct _USB_HOST_DEVICE{
     struct _USB_HOST_DEVICE*        Siblings;
     struct _USB_HOST_DEVICE*        Leader;
     PPCI_DEVICE_OBJECT              PDEV;
+    mutex_t                         ExlusiveOwnership;
     mutex_t                         RootHubMutex;
     USB_TOPOLOGY_TREE               RootHub;
     USB_HOST_OPERATIONS             Operations;

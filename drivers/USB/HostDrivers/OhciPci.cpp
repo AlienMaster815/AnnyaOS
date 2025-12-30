@@ -3,6 +3,8 @@
 
 static const USB_HOST_OPERATIONS OhciOperations = {
     .UsbHcdResetHostController = OhciResetHostController,
+    .UsbHcdStopHostController = OhciStopHostController,
+    .UsbHcdStartHostController = OhciStartHostController,
     .UsbHcdProbeRootHub = OhciProbeRootHub,
 };
 
@@ -55,6 +57,19 @@ NTSTATUS AddDevice(
 
 
     OhciDevice->UsbHost.Operations = OhciOperations;
+
+    Status = LouKeHalMallocPciIrqVectors(
+        PDEV,
+        1,
+        PCI_IRQ_USE_LEGACY
+    );
+
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:ERROR Could Not Allocate Interrupt Vector\n");
+        return Status;
+    }
+
+    RegisterInterruptHandler(OhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
 
     Status = LouKeUsbAddHcd(&OhciDevice->UsbHost);
 
