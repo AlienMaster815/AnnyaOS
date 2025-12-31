@@ -31,7 +31,7 @@ typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_ENDPOINT_DESCRIPTOR{
 
 typedef struct _OHCI_ED_LIST{
     ListHeader                  Peers;
-    PVOID                       Ep;
+    PVOID                       Ed;
 }OHCI_ED_LIST, * POHCI_ED_LIST;
 
 typedef struct _OHCI_TD_LIST{
@@ -77,18 +77,6 @@ typedef enum {
     IsochEndpoint = 3, 
 }OHCI_ED_TYPE;
 
-
-
-typedef struct _OHCI_ED_TRACKER{
-    ListHeader                  Peers;
-    struct _OHCI_DEVICE*        OhciDevice;
-    OHCI_ED_TYPE                EdType;
-    OHCI_ED_INITIALIZOR         Initializor;
-    ListHeader                  EdList;
-    ListHeader                  TdList;
-    OHCI_ENDPOINT_DESCRIPTOR    Ep;
-}OHCI_ED_TRACKER, * POHCI_ED_TRACKER;
-
 typedef struct _OHCI_PORT{
     struct _OHCI_DEVICE*            Host;
     bool                            PortAttatched;
@@ -103,13 +91,10 @@ typedef struct _OHCI_DEVICE{
     spinlock_t                      IoLock;
     mutex_t                         DeviceMutex;
     UINT64                          HccaAddress;
-    OHCI_ED_LIST                    EdPool;
-    OHCI_TD_LIST                    TdPool;
-    POHCI_ED_TRACKER                EdTrackers;
     UINT32                          Fminterval;
-    POHCI_ENDPOINT_DESCRIPTOR       ControlEpList;
-    POHCI_ENDPOINT_DESCRIPTOR       BulkEpList;
-    POHCI_ENDPOINT_DESCRIPTOR       IsochIntEpList[32];//32 synchronized lists
+    OHCI_ED_LIST                    ControlEDs;
+    OHCI_ED_LIST                    BulkEDs;
+    OHCI_ED_LIST                    IsochIntEDs[32];
 }OHCI_DEVICE, * POHCI_DEVICE;
 
 #define OHCI_REVISION_HC_BIT     (0x01)
