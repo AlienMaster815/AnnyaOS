@@ -262,3 +262,37 @@ void OhciInterruptHandler(uint64_t UsbHostData){
     while(1);
 }
 
+LOUSTATUS OhciInitializeLists(
+    POHCI_DEVICE OhciDevice
+){
+    LouPrint("OHCI.SYS:OhciInitializeLists()\n");
+    LOUSTATUS Status;
+    UINT32 DmaAddress;
+    OHCI_ED_INITIALIZOR Initializor = {0};
+    POHCI_ENDPOINT_DESCRIPTOR EdOut;
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
+
+    Initializor.FunctionAddress = 0;
+    Initializor.EndpointNumber = 0;
+    Initializor.Direction = OHCI_ED_DIRECTION_GFTD0;
+    Initializor.MaximumPacketSize = 8;
+    Initializor.Skip = 1;
+
+    Status = OhciCreateControlED(
+        OhciDevice,
+        &EdOut,
+        &Initializor
+    );
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:Could Not Add Default Control ED\n");
+        return Status;
+    }
+    DmaAddress = OhciGetDmaAddress(EdOut);
+    OpRegs->HcControlHeadED = DmaAddress;
+
+    
+
+    LouPrint("OHCI.SYS:OhciInitializeLists() STATUS_SUCCESS\n");
+    while(1);
+    return STATUS_SUCCESS;
+}

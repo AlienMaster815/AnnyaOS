@@ -305,5 +305,7 @@ LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice);
 void OhciInterruptHandler(uint64_t UsbHostData);
+LOUSTATUS OhciInitializeLists(POHCI_DEVICE OhciDevice);
 
+LOUSTATUS OhciCreateControlED(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
 #endif

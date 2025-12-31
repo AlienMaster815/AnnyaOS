@@ -71,6 +71,12 @@ NTSTATUS AddDevice(
 
     RegisterInterruptHandler(OhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
 
+    Status = OhciInitializeLists(OhciDevice);
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:Error Initializing Lists\n");
+        return STATUS_SUCCESS;
+    }
+
     Status = LouKeUsbAddHcd(&OhciDevice->UsbHost);
 
     if(!NT_SUCCESS(Status)){
