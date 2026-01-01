@@ -24,6 +24,8 @@ OhciInitialzeHcca(
     return STATUS_SUCCESS;
 }
 
+
+
 LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice()\n");
     PUSB_HOST_DEVICE HostDevice = UsbFunctionDeviceToHcd(FunctionDevice);
@@ -74,7 +76,34 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         FunctionDevice->FunctionSpeed = UsbFullSpeedFunction;
     }
 
+    UINT8 Data[8] = {0};
+    USB_HOST_IO_PACKET IoPacket;
+
+    OHCI_IO_PACKET_PRIVATE_DATA IoData;
+
+    IoData.EdItem = (POHCI_ED_LIST)OhciDevice->ControlEDs.Peers.NextHeader;
+
+    FunctionDevice->PrivateHostFunctionData = &IoData;
+
+    Status = LouKeUsbGetDescriptorRequest(
+        FunctionDevice,
+        &IoPacket,
+        USB_DESCRIPTOR_TYPE_DEVICE,
+        0,
+        8,
+        0,
+        Data
+    );    
+
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:Error Getting Descriptor\n");
+        return Status;
+    }
+
+
+
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice() STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -102,6 +131,7 @@ LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice){
             LouPrint("OHCI.SYS:Port:%d Is Connected To Somthing\n", i);
             UsbDescriptor.PortNumber = i;
             UsbDescriptor.Operations = FunctionOperations;
+            
             Status = LouKeUsbAddDeviceToHcd(
                 HostDevice,
                 &HostDevice->RootHub.FunctionDevice,
@@ -247,22 +277,39 @@ LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice){
         return STATUS_INVALID_PARAMETER;
     }
 
-    
+    if((!OpRegs->HcFmInterval) || (!OpRegs->HcPeriodicStart)){
+        LouPrint("OHCI.SYS:Fatal Controller Error\n"); //this is initialized in controller reset if its 0 here then there was a critical error
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    //OpRegs->HcInterruptEnable = 0xFFFFFFFF;
+
+    UINT32 IoMask = 0;
+
+    if(OpRegs->HcControlHeadED){
+        IoMask |= OHCI_CONTROL_CLE;
+    } 
+    if(OpRegs->HcBulkHeadED){
+        IoMask |= OHCI_CONTROL_BLE;
+    }
+
+    OpRegs->HcControl |= IoMask | OHCI_CONTROL_PLE | OHCI_CONTROL_IE;
+
 
     LouPrint("OHCI.SYS:OhciStartHostController() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
 void OhciInterruptHandler(uint64_t UsbHostData){
     LouPrint("OHCI.SYS:OhciInterruptHandler()\n");
+    POHCI_DEVICE OhciDevice = (POHCI_DEVICE)UsbHostData;
 
-
+    LouPrint("OHCI.SYS:%h\n", OhciDevice->OperationalRegisters->HcInterruptStatus);
 
     while(1);
 }
 
-LOUSTATUS OhciInitializeLists(
+LOUSTATUS OhciInitializeDefaultControl(
     POHCI_DEVICE OhciDevice
 ){
     LouPrint("OHCI.SYS:OhciInitializeLists()\n");
@@ -290,9 +337,21 @@ LOUSTATUS OhciInitializeLists(
     DmaAddress = OhciGetDmaAddress(EdOut);
     OpRegs->HcControlHeadED = DmaAddress;
 
+    LouPrint("OHCI.SYS:OhciInitializeLists() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciCommitRequest(
+    PUSB_HOST_IO_PACKET IoPacket
+){
+    LouPrint("OHCI.SYS:OhciCommitRequest\n");
+
+    PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
+    POHCI_ED_LIST EdItem = (POHCI_ED_LIST)FunctionDevice->PrivateHostFunctionData;
+
     
 
-    LouPrint("OHCI.SYS:OhciInitializeLists() STATUS_SUCCESS\n");
+    LouPrint("OHCI.SYS:OhciCommitRequest STATUS_SUCCESS\n");
     while(1);
-    return STATUS_SUCCESS;
+    return STATUS_SUCCESS;  
 }

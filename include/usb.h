@@ -99,6 +99,7 @@ typedef struct _USB_FUNCTION_DEVICE{
     UINT8                       PortNumber;
     USB_FUNCTION_SPEED          FunctionSpeed;
     BOOL                        PortEnabled;
+    PVOID                       PrivateHostFunctionData;
 }USB_FUNCTION_DEVICE, * PUSB_FUNCTION_DEVICE;
 
 typedef struct _USB_TOPOLOGY_TREE{
@@ -115,7 +116,7 @@ typedef struct _USB_HOST_OPERATIONS{
     LOUSTATUS       (*UsbHcdStopHostController)(struct _USB_HOST_DEVICE* HostDevice);
     LOUSTATUS       (*UsbHcdStartHostController)(struct _USB_HOST_DEVICE* HostDevice);
     LOUSTATUS       (*UsbHcdProbeRootHub)(struct _USB_HOST_DEVICE* HostDevice);
-    
+    LOUSTATUS       (*UsbHcdCommitRequest)(struct _USB_HOST_IO_PACKET* IoPacket);
 }USB_HOST_OPERATIONS, * PUSB_HOST_OPERATIONS;
 
 typedef struct _USB_HOST_DEVICE{
@@ -128,6 +129,55 @@ typedef struct _USB_HOST_DEVICE{
     USB_HOST_OPERATIONS             Operations;
     PVOID                           DevicePrivateData;
 }USB_HOST_DEVICE, * PUSB_HOST_DEVICE;
+
+
+
+typedef struct _USB_HOST_IO_PACKET{
+    PUSB_FUNCTION_DEVICE    FunctionDevice;
+    UINT8                   RequestType;
+    UINT8                   Request;
+    UINT16                  Value;
+    UINT16                  Index;
+    UINT16                  Length;
+    PVOID                   Data;
+}USB_HOST_IO_PACKET, * PUSB_HOST_IO_PACKET;
+
+#define USB_REQUEST_RECIPIANT_SHIFT         0
+#define USB_REQUEST_TYPE_SHIFT              5
+#define USB_REQUEST_XFER_DIRECTION_SHIFT    7
+
+#define USB_RECIPIANT_DEVICE        0
+#define USB_RECIPIANT_INTERFACE     1
+#define USB_RECIPIANT_ENDPOINT      2
+#define USB_RECIPIANT_OTHER         3
+
+#define USB_TYPE_STANDARD           0
+#define USB_TYPE_CLASS              1
+#define USB_TYPE_VENDOR             2
+
+#define USB_XFER_H2D                        0
+#define USB_XFER_D2H                        1 
+
+#define USB_REQUEST_GET_STATUS              0
+#define USB_REQUEST_CLEAR_FEATURE           1
+#define USB_REQUEST_SET_FEATURE             3
+#define USB_REQUEST_SET_ADDRESS             5
+#define USB_REQUEST_GET_DESCRIPTOR          6
+#define USB_REQUEST_SET_DESCRIPTOR          7
+#define USB_REQUEST_GET_CONFIGURATION       8
+#define USB_REQUEST_SET_CONFIGURATION       9
+#define USB_REQUEST_GET_INTERFACE           10
+#define USB_REQUEST_SET_INTERFACE           11
+#define USB_REQUEST_SYNCH_FRAMS             12
+
+#define USB_DESCRIPTOR_TYPE_DEVICE          1
+#define USB_DESCRIPTOR_TYPE_CONFIGURATION   2
+#define USB_DESCRIPTOR_TYPE_STRING          3
+#define USB_DESCRIPTOR_TYPE_INTERFACE       4
+#define USB_DESCRIPTOR_TYPE_ENDPOINT        5
+
+#define USB_FEATURE_SELECTOR_DEVICE_REMOTE_WAKEUP   1
+#define USB_FEATURE_SELECTOR_ENDPOINT_STALL         0
 
 #define UsbFunctionDeviceToHcd(FunctionDevice) (((PUSB_TOPOLOGY_TREE)CONTAINER_OF(FunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice))->HostIdentifier)
 
@@ -145,6 +195,16 @@ LOUSTATUS LouKeUsbAddDeviceToHcd(
     PUSB_FUNCTION_DEVICE    DeviceDescription
 );
 
+LOUSTATUS LouKeUsbGetDescriptorRequest(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   DescriptorType,
+    UINT8                   DescriptorIndex,
+    UINT16                  Length,
+    UINT16                  LanguageId,
+    PVOID                   Data
+);
+
 #else
 
 KERNEL_EXPORT
@@ -157,6 +217,17 @@ LOUSTATUS LouKeUsbAddDeviceToHcd(
     PUSB_HOST_DEVICE        HostDevice,
     PUSB_FUNCTION_DEVICE    ParrentFunction,
     PUSB_FUNCTION_DEVICE    DeviceDescription
+);
+
+KERNEL_EXPORT
+LOUSTATUS LouKeUsbGetDescriptorRequest(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   DescriptorType,
+    UINT8                   DescriptorIndex,
+    UINT16                  Length,
+    UINT16                  LanguageId,
+    PVOID                   Data
 );
 
 #endif

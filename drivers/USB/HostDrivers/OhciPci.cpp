@@ -6,6 +6,7 @@ static const USB_HOST_OPERATIONS OhciOperations = {
     .UsbHcdStopHostController = OhciStopHostController,
     .UsbHcdStartHostController = OhciStartHostController,
     .UsbHcdProbeRootHub = OhciProbeRootHub,
+    .UsbHcdCommitRequest = OhciCommitRequest,
 };
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedOhciPciDevices[] = {
@@ -71,7 +72,7 @@ NTSTATUS AddDevice(
 
     RegisterInterruptHandler(OhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
 
-    Status = OhciInitializeLists(OhciDevice);
+    Status = OhciInitializeDefaultControl(OhciDevice);
     if(!NT_SUCCESS(Status)){
         LouPrint("OHCI.SYS:Error Initializing Lists\n");
         return STATUS_SUCCESS;

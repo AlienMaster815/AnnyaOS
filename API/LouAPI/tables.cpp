@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 196
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 197
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -441,6 +441,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[193] = "LouKeFreePhy32";
     ImportTables[0].FunctionName[194] = "LouKeUsbAddHcd";
     ImportTables[0].FunctionName[195] = "LouKeUsbAddDeviceToHcd";
+    ImportTables[0].FunctionName[196] = "LouKeUsbGetDescriptorRequest";
 
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -638,6 +639,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[193] = (uint64_t)LouKeFreePhy32;
     ImportTables[0].VirtualAddress[194] = (uint64_t)LouKeUsbAddHcd;
     ImportTables[0].VirtualAddress[195] = (uint64_t)LouKeUsbAddDeviceToHcd;
+    ImportTables[0].VirtualAddress[196] = (uint64_t)LouKeUsbGetDescriptorRequest;
 
 }
 

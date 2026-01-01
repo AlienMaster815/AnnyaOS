@@ -27,12 +27,40 @@ LOUSTATUS OhciInitializeTransferDescriptor(
 }
 
 LOUSTATUS OhciCreateTD(
-    POHCI_TRANSFER_DESCRIPTOR*  Td,
+    POHCI_TRANSFER_DESCRIPTOR*  TransferDescriptor,
     POHCI_TD_INITIALIZOR        Initializor
 ){
     LouPrint("OHCI.SYS:OhciCreateTD()\n");
+    if((!TransferDescriptor) || (!Initializor)){
+        LouPrint("OHCI.SYS:Invalid Parameter\n");
+        return STATUS_INVALID_PARAMETER;
+    }
 
-    
+    LOUSTATUS Status;
+    POHCI_TRANSFER_DESCRIPTOR Td;
+    PVOID Out;
+
+    Status = OhciAllocateDma(
+        sizeof(OHCI_TRANSFER_DESCRIPTOR), 
+        16, 
+        &Out
+    );
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:Could Not Allocate TD\n");
+        return Status;
+    }
+
+    Td = (POHCI_TRANSFER_DESCRIPTOR)Out;
+    *TransferDescriptor = Td;
+
+    Status = OhciInitializeTransferDescriptor(
+        Td,
+        Initializor
+    );
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:Could Not Initialize Descriptor\n");
+        return Status;
+    }
 
     LouPrint("OHCI.SYS:OhciCreateTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

@@ -118,6 +118,10 @@ typedef struct _OHCI_DEVICE{
     OHCI_ED_LIST                    IsochIntEDs[32];
 }OHCI_DEVICE, * POHCI_DEVICE;
 
+typedef struct _OHCI_IO_PACKET_PRIVATE_DATA{
+    POHCI_ED_LIST   EdItem;
+}OHCI_IO_PACKET_PRIVATE_DATA, * POHCI_IO_PACKET_PRIVATE_DATA;
+
 #define OHCI_REVISION_HC_BIT     (0x01)
 #define OHCI_REVISION_HCD_BIT    (0x02)
 
@@ -340,6 +344,7 @@ LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice);
 void OhciInterruptHandler(uint64_t UsbHostData);
-LOUSTATUS OhciInitializeLists(POHCI_DEVICE OhciDevice);
+LOUSTATUS OhciInitializeDefaultControl(POHCI_DEVICE OhciDevice);
 LOUSTATUS OhciCreateControlED(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
+LOUSTATUS OhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
 #endif
