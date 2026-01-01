@@ -1,4 +1,4 @@
-#include "../Processors.h"
+#include "Processors.h"
 
 KERNEL_IMPORT bool IsIntel(string VendorID);
 KERNEL_IMPORT uint8_t GetCPUVendor();

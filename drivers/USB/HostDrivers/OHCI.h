@@ -29,15 +29,36 @@ typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_ENDPOINT_DESCRIPTOR{
     UINT32      Dword3;
 }OHCI_ENDPOINT_DESCRIPTOR, * POHCI_ENDPOINT_DESCRIPTOR;
 
-typedef struct _OHCI_ED_LIST{
-    ListHeader                  Peers;
-    PVOID                       Ed;
-}OHCI_ED_LIST, * POHCI_ED_LIST;
+typedef struct _OHCI_TD_INITIALIZOR{
+    UINT8       BufferRounding;         :   1;      //R
+    UINT8       DirectionPID            :   2;      //DP
+    UINT8       DelayInterrupt          :   3;      //DI
+    UINT8       DataToggle              :   2;      //T
+    UINT8       ErrorCount              :   2;      //EC
+    UINT8       ConditionCode           :   4;      //CC
+    UINT32      CurrentBufferPointer;               //CBP
+    UINT32      NextTD;                             //NextTD
+    UINT32      BufferEnd;                          //BE
+}OHCI_TD_INITIALIZOR, * POHCI_TD_INITIALIZOR;
+
+typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_TRANSFER_DESCRIPTOR{
+    UINT32      Dword0;
+    UINT32      Dword1;
+    UINT32      Dword2;
+    UINT32      Dword3;
+}OHCI_TRANSFER_DESCRIPTOR, * POHCI_TRANSFER_DESCRIPTOR;
 
 typedef struct _OHCI_TD_LIST{
     ListHeader                  Peers;
     PVOID                       Td;
 }OHCI_TD_LIST, * POHCI_TD_LIST;
+
+typedef struct _OHCI_ED_LIST{
+    ListHeader                  Peers;
+    PVOID                       Ed;
+    OHCI_TD_LIST                Tds;
+}OHCI_ED_LIST, * POHCI_ED_LIST;
+
 
 typedef struct PACKED _OHCI_HCCA{
     UINT32      InterruptTable[32];
@@ -250,9 +271,6 @@ static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
 #define OHCI_ED_HALTED          1
 #define OHCI_ED_TOGGLE_CARRY    1
 
-#define OHCI_ED_POOL_SIZE       256
-#define OHCI_TD_POOL_SIZE       2048
-
 #define OHCI_RH_STATUS_LPSC     (1)
 
 #define OHCI_PORT_STATUS_CCS    (1)
@@ -268,8 +286,25 @@ static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
 #define OHCI_PORT_STATUS_OCIC   (1 << 19)
 #define OHCI_PORT_STATUS_PRSC   (1 << 20)
 
-#define UsbHcdToOhciDevice(HostDevice) CONTAINER_OF(HostDevice, OHCI_DEVICE, UsbHost)
+#define OHCI_TD_DIRECTION_SETUP 0b00
+#define OHCI_TD_DIRECTION_OUT   0b01
+#define OHCI_TD_DIRECTION_IN    0b10
 
+
+#define OHCI_TD_R_MASK          0x01
+#define OHCI_TD_R_SHIFT         18
+#define OHCI_TD_DP_MASK         0x03
+#define OHCI_TD_DP_SHIFT        19
+#define OHCI_TD_DI_MASK         0x07
+#define OHCI_TD_DI_SHIFT        21
+#define OHCI_TD_T_MASK          0x03
+#define OHCI_TD_T_SHIFT         24
+#define OHCI_TD_EC_MASK         0x03
+#define OHCI_TD_EC_SHIFT        26
+#define OHCI_TD_CC_MASK         0x0F
+#define OHCI_TD_CC_SHIFT        28
+
+#define UsbHcdToOhciDevice(HostDevice) CONTAINER_OF(HostDevice, OHCI_DEVICE, UsbHost)
 
 LOUSTATUS 
 OhciInitialzeHcca(
@@ -306,6 +341,5 @@ LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice);
 void OhciInterruptHandler(uint64_t UsbHostData);
 LOUSTATUS OhciInitializeLists(POHCI_DEVICE OhciDevice);
-
 LOUSTATUS OhciCreateControlED(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
 #endif
