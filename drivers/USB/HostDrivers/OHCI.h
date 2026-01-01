@@ -55,6 +55,7 @@ typedef struct _OHCI_TD_LIST{
 
 typedef struct _OHCI_ED_LIST{
     ListHeader                  Peers;
+    mutex_t                     EdLock;
     PVOID                       Ed;
     OHCI_TD_LIST                Tds;
 }OHCI_ED_LIST, * POHCI_ED_LIST;
@@ -121,6 +122,14 @@ typedef struct _OHCI_DEVICE{
 typedef struct _OHCI_IO_PACKET_PRIVATE_DATA{
     POHCI_ED_LIST   EdItem;
 }OHCI_IO_PACKET_PRIVATE_DATA, * POHCI_IO_PACKET_PRIVATE_DATA;
+
+typedef struct PACKED _OHCI_TRANSFER_INFO{
+    UINT8   RequestType;
+    UINT8   Request;
+    UINT16  Value;
+    UINT16  Index;
+    UINT16  Length;
+}OHCI_TRANSFER_INFO, * POHCI_TRANSFER_INFO;
 
 #define OHCI_REVISION_HC_BIT     (0x01)
 #define OHCI_REVISION_HCD_BIT    (0x02)

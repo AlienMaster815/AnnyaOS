@@ -348,9 +348,11 @@ LOUSTATUS OhciCommitRequest(
 
     PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
     POHCI_ED_LIST EdItem = (POHCI_ED_LIST)FunctionDevice->PrivateHostFunctionData;
+    MutexLock(&EdItem->EdLock);
 
     
 
+    MutexUnlock(&EdItem->EdLock);
     LouPrint("OHCI.SYS:OhciCommitRequest STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;  
