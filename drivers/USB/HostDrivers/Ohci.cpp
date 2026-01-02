@@ -76,10 +76,10 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         FunctionDevice->FunctionSpeed = UsbFullSpeedFunction;
     }
 
-    UINT8 Data[8] = {0};
-    USB_HOST_IO_PACKET IoPacket;
+    UINT8 Data[16] = {0};
+    USB_HOST_IO_PACKET IoPacket = {0};
 
-    OHCI_IO_PACKET_PRIVATE_DATA IoData;
+    OHCI_IO_PACKET_PRIVATE_DATA IoData = {0};
 
     IoData.EdItem = (POHCI_ED_LIST)OhciDevice->ControlEDs.Peers.NextHeader;
 
@@ -90,17 +90,16 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         &IoPacket,
         USB_DESCRIPTOR_TYPE_DEVICE,
         0,
-        8,
+        16,
         0,
         Data
     );    
-
     if(!NT_SUCCESS(Status)){
         LouPrint("OHCI.SYS:Error Getting Descriptor\n");
         return Status;
     }
 
-
+    
 
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice() STATUS_SUCCESS\n");
     while(1);
@@ -131,7 +130,7 @@ LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice){
             LouPrint("OHCI.SYS:Port:%d Is Connected To Somthing\n", i);
             UsbDescriptor.PortNumber = i;
             UsbDescriptor.Operations = FunctionOperations;
-            
+            UsbDescriptor.MaxPacketSize = 8;
             Status = LouKeUsbAddDeviceToHcd(
                 HostDevice,
                 &HostDevice->RootHub.FunctionDevice,
@@ -344,16 +343,30 @@ LOUSTATUS OhciInitializeDefaultControl(
 LOUSTATUS OhciCommitRequest(
     PUSB_HOST_IO_PACKET IoPacket
 ){
-    LouPrint("OHCI.SYS:OhciCommitRequest\n");
-
+    LouPrint("OHCI.SYS:OhciCommitRequest()\n");
+    POHCI_IO_PACKET_PRIVATE_DATA IoData;
     PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
-    POHCI_ED_LIST EdItem = (POHCI_ED_LIST)FunctionDevice->PrivateHostFunctionData;
+    IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
+    POHCI_ED_LIST EdItem = (POHCI_ED_LIST)IoData->EdItem;
+
     MutexLock(&EdItem->EdLock);
 
     
+    if(IoPacket->TransferType == USB_TRANSFER_TYPE_CONTROL){
+        OhciCreateSetupTD(IoPacket, EdItem);
+        OhciCreateDataTDs(IoPacket, EdItem);
+        OhciCreateStatusTD(IoPacket, EdItem);
+        
+
+    
+    }else{
+        LouPrint("OHCI.SYS:Invalid Parameter\n");
+        return STATUS_INVALID_PARAMETER;
+    }    
+            
 
     MutexUnlock(&EdItem->EdLock);
-    LouPrint("OHCI.SYS:OhciCommitRequest STATUS_SUCCESS\n");
+    LouPrint("OHCI.SYS:OhciCommitRequest() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;  
 }

@@ -128,3 +128,81 @@ LOUSTATUS OhciCreateSetupTD(
     LouPrint("OHCI.SYS:OhciCreateSetupTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
+
+static void InitializeDataTD(
+    PUSB_HOST_IO_PACKET     IoPacket,
+    POHCI_ED_LIST           EdItem,
+    POHCI_TD_INITIALIZOR    Initializor,
+    UINT16                  Index, 
+    UINT16                  Length
+){
+
+}
+
+LOUSTATUS OhciCreateDataTDs(
+    PUSB_HOST_IO_PACKET     IoPacket,
+    POHCI_ED_LIST           EdItem
+){
+    LouPrint("OHCI.SYS:OhciCreateDataTDs()\n");
+
+    LOUSTATUS Status;
+    PUSB_FUNCTION_DEVICE FunctionDevice;
+    POHCI_IO_PACKET_PRIVATE_DATA IoData;
+    UINT16 i;
+    OHCI_TD_INITIALIZOR Initializor = {0};
+
+    if((!IoPacket->Data) || (!IoPacket->Length)){
+        goto _OHCI_DATA_TD_SKIP;
+    }
+    
+    FunctionDevice = IoPacket->FunctionDevice;
+    IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
+    
+    Status = OhciAllocateDma(IoPacket->Length, 16 , &IoData->DmaOut);
+    if(!NT_SUCCESS(Status)){
+        LouPrint("OHCI.SYS:Unable To Allocate DMA\n");
+        return Status;
+    }
+
+    Initializor.DataToggle = 1; //DATA1
+
+    for(
+        i = 0; 
+        (IoPacket->Length - i) > FunctionDevice->MaxPacketSize;
+        i += FunctionDevice->MaxPacketSize
+    ){
+
+        InitializeDataTD(
+            IoPacket,
+            EdItem,
+            &Initializor,
+            i,
+            FunctionDevice->MaxPacketSize
+        );
+
+        Initializor.DataToggle = 2;//CARRY : Im using redundancy for simplicity here
+
+    }
+
+    InitializeDataTD(
+        IoPacket,
+        EdItem,
+        &Initializor,
+        i,
+        IoPacket->Length - i
+    );
+
+    _OHCI_DATA_TD_SKIP:
+    LouPrint("OHCI.SYS:OhciCreateDataTDs() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciCreateStatusTD(
+    PUSB_HOST_IO_PACKET     IoPacket,
+    POHCI_ED_LIST           EdItem
+){
+    LouPrint("OHCI.SYS:OhciCreateStatusTD()\n");
+
+    LouPrint("OHCI.SYS:OhciCreateStatusTD() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}

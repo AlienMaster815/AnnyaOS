@@ -82,6 +82,12 @@ typedef struct _USB_START_SPLIT_TRANSACTION_TOKEN{
     UINT8       Crc5                :       5;  
 }USB_START_SPLIT_TRANSACTION_TOKEN, * PUSB_START_SPLIT_TRANSACTION_TOKEN;
 
+#define USB_TRANSFER_TYPE_CONTROL   0
+#define USB_TRANSFER_TYPE_BULK      1
+#define USB_TRANSFER_TYPE_INTERRUPT 2
+#define USB_TRANSFER_TYPE_ISOCH     3
+
+
 typedef enum {
     UsbLowSpeedFunction = 0,
     UsbFullSpeedFunction = 1,
@@ -99,6 +105,7 @@ typedef struct _USB_FUNCTION_DEVICE{
     UINT8                       PortNumber;
     USB_FUNCTION_SPEED          FunctionSpeed;
     BOOL                        PortEnabled;
+    UINT8                       MaxPacketSize;
     PVOID                       PrivateHostFunctionData;
 }USB_FUNCTION_DEVICE, * PUSB_FUNCTION_DEVICE;
 
@@ -134,6 +141,7 @@ typedef struct _USB_HOST_DEVICE{
 
 typedef struct _USB_HOST_IO_PACKET{
     PUSB_FUNCTION_DEVICE    FunctionDevice;
+    UINT8                   TransferType;
     UINT8                   RequestType;
     UINT8                   Request;
     UINT16                  Value;

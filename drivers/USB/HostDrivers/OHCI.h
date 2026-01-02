@@ -121,6 +121,7 @@ typedef struct _OHCI_DEVICE{
 
 typedef struct _OHCI_IO_PACKET_PRIVATE_DATA{
     POHCI_ED_LIST   EdItem;
+    PVOID           DmaOut;
 }OHCI_IO_PACKET_PRIVATE_DATA, * POHCI_IO_PACKET_PRIVATE_DATA;
 
 typedef struct PACKED _OHCI_TRANSFER_INFO{
@@ -356,4 +357,8 @@ void OhciInterruptHandler(uint64_t UsbHostData);
 LOUSTATUS OhciInitializeDefaultControl(POHCI_DEVICE OhciDevice);
 LOUSTATUS OhciCreateControlED(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
 LOUSTATUS OhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
+LOUSTATUS OhciCreateSetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
+LOUSTATUS OhciCreateDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
+LOUSTATUS OhciCreateStatusTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
+
 #endif

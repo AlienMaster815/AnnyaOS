@@ -36,6 +36,7 @@ LOUSTATUS LouKeUsbCreateRequest(
 }
 
 LOUSTATUS LouKeUsbCommitRequest(PUSB_HOST_IO_PACKET IoPacket){
+    
     PUSB_TOPOLOGY_TREE Topology = CONTAINER_OF(IoPacket->FunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice);
     PUSB_HOST_DEVICE Host = Topology->HostIdentifier; 
     
@@ -80,6 +81,8 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
         LouPrint("Error Initializing Usb Request\n");
         return Status;
     }
+
+    IoPacket->TransferType = USB_TRANSFER_TYPE_CONTROL;
 
     Status = LouKeUsbCommitRequest(IoPacket);
     if(!NT_SUCCESS(Status)){
