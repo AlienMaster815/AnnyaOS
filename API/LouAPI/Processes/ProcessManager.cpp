@@ -58,6 +58,18 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
     return STATUS_SUCCESS;
 }
 
+void PsmProcessScedualManagerObject::PsmYeildThread(UINT64 IrqState){
+    UNUSED PGENERIC_THREAD_DATA    NextThread;
+    UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
+    //NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmYeild();
+    //LouKeSwitchToTask(
+    //    IrqState,
+    //    CurrentThread,
+    //    NextThread
+    //);
+    //this->CurrentThread = NextThread;
+}
+
 void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     if(SpinlockIsLocked(&this->LockOutTagOut)){
         return;
@@ -65,7 +77,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
     
-    /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
+    PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice){
         CurrentProcess->CurrentMsSlice += 10;
         NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
@@ -116,16 +128,18 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                 break;
             }        
         }
-    }*/
+    }
 
     this->CurrentProcess = this->SystemProcess;    
     PsmSetProcessTransitionState();
-    NextThread = CurrentThread;//this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
+    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual();
+    
     LouKeSwitchToTask(
         IrqState,
         CurrentThread,
         NextThread
     );
+
     this->CurrentThread = NextThread;
 }
 
@@ -195,23 +209,30 @@ void PsmProcessScedualManagerObject::PsmSetCurrentThread(PGENERIC_THREAD_DATA Th
     this->CurrentThread = Thread;
 }
 
+KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
+    LouKIRQL  NewIrql,
+    LouKIRQL* OldIrql
+);
+
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
 
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
 
-    if((LouKeGetIrql() == HIGH_LEVEL) || (MutexIsLocked(&ProcessBlock.ProcStateBlock[ProcessorID].LockOutTagOut))){
+    if((LouKeGetIrql() >= CLOCK_LEVEL) || (MutexIsLocked(&ProcessBlock.ProcStateBlock[ProcessorID].LockOutTagOut))){
         LouKeSendIcEOI(); 
         return;
     }
 
-    UNUSED PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
+    PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
     
     Schedualer->PsmSchedual(CpuCurrentState);
 
     LouKeMemoryBarrier();
     LouKeSendIcEOI();
+
     return;
 }
+
 
 UNUSED static void ProcessorIdleTask(){
     HandleApProccessorInitialization();
@@ -287,7 +308,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     LouKePmCreateProcessEx(
         0x00,
-        "The Lousine Kernel",
+        KERNEL_PROCESS_NAME,
         0x00, 
         PROCESS_PRIORITY_HIGH,
         0x00,
@@ -314,7 +335,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     );
     ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
     ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
-    /*;
+    /*
 
     for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
@@ -350,6 +371,11 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
 LOUDDK_API_ENTRY
 uint64_t LouKeGetThreadIdentification(){    
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    if(!ProcessBlock.ProcStateBlock){
+        return 0;
+    }else if(!ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread){
+        return 0;
+    }
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadID;
 }
 
@@ -360,11 +386,13 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
 }
 
 
-LOUDDK_API_ENTRY uint64_t LouKeYeildExecution(uint64_t CpuCurrentState){
+LOUDDK_API_ENTRY void LouKeYeildExecution(uint64_t CpuCurrentState){
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
+    
+    Schedualer->PsmYeildThread(CpuCurrentState);
 
-
-
-    return CpuCurrentState;
+    LouKeMemoryBarrier();
 }
 
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc){

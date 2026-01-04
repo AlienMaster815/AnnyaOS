@@ -2122,6 +2122,5 @@ ISR200:
 	pusha
 	mov rcx, rsp
 	call LouKeYeildExecution  
-	mov rsp, rax 
 	popa                                                                                              
 	iretq

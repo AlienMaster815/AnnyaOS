@@ -21,6 +21,8 @@ LouKeWaitForUlongRegisterCondition(
     ULONG   Mask, 
     ULONG   Value
 );
+KERNEL_IMPORT void LouKeThreadSleep(size_t Ms);
+
 #else 
 #endif
 #else
@@ -35,6 +37,7 @@ LouKeWaitForUlongRegisterCondition(
 uint64_t GetCurrentTimeInMilliseconds();
 void sleep(uint64_t Time);
 void sleepEx(uint8_t Interval, uint64_t Time);
+void LouKeThreadSleep(size_t Ms);
 #endif
 #endif
 #endif
@@ -64,7 +67,10 @@ void LouKeGetTime(
 bool LouKeDidTimeoutExpire(PTIME_T Timeout);
 bool LouKeIsTimeoutNull(PTIME_T Timeout);
 void LouKeGetRtcData(TIME_T* pTime);
-
+void LouKeGetFutureTime(
+    PTIME_T TimeStruct,
+    size_t Ms
+);
 #endif
 #define PTIME_SEED T->MilliSeconds + (T->Second * 60) + (T->Minute * (60 * 60))
 #define  TIME_SEED T.MilliSeconds + (T.Second * 60) + (T.Minute * (60 * 60))

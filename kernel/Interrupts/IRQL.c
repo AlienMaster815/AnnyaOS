@@ -50,6 +50,83 @@ LouKIRQL LouKeGetIrql(){
     return SystemInterruptLevel;
 }
 
+void LouKeSetIrqlNoFlagUpdate(
+    LouKIRQL  NewIrql,
+    LouKIRQL* OldIrql
+){
+    if(SmpSystemInterruptLayer){
+        INTEGER ProcessorID = GetCurrentCpuTrackMember();
+
+        if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
+            *OldIrql = SmpSystemInterruptLayer[ProcessorID]; // save the old irql1
+        }
+
+        switch (NewIrql){
+            case PASSIVE_LEVEL:{
+                SmpSystemInterruptLayer[ProcessorID] = PASSIVE_LEVEL;
+                LouKeMemoryBarrier();
+                return;
+            }
+            case APC_LEVEL:{
+                
+                return;
+            }
+            case DISPATCH_LEVEL:{
+
+                return;
+            }
+            case DIRQL:{
+
+                return;
+            } 
+            case CLOCK_LEVEL:{
+
+                return;
+            }
+            case HIGH_LEVEL:{
+                SmpSystemInterruptLayer[ProcessorID] = HIGH_LEVEL;
+                LouKeMemoryBarrier();
+                return;
+            }
+            default: // error case
+                return;
+        }
+
+    }else{
+        if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
+            *OldIrql = SystemInterruptLevel; // save the old irql1
+        }
+
+        switch (NewIrql){
+            case PASSIVE_LEVEL:{
+                SystemInterruptLevel = PASSIVE_LEVEL;
+                return;
+            }
+            case APC_LEVEL:{
+                
+                return;
+            }
+            case DISPATCH_LEVEL:{
+
+                return;
+            }
+            case DIRQL:{
+
+                return;
+            } 
+            case CLOCK_LEVEL:{
+
+                return;
+            }
+            case HIGH_LEVEL:{
+                SystemInterruptLevel = HIGH_LEVEL;
+            }
+            default: // error case
+                return;
+        }
+    }
+}
+
 void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql

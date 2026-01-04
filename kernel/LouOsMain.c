@@ -251,7 +251,9 @@ void AdvancedLousineKernelInitialization(){
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
     LouKeUnmaskSmpInterrupts();
+
     LouPrint("Kernel Advanced System Initialized\n");
+
 }
 
 void KillDebuger(){
@@ -346,6 +348,7 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LookForStorageDevices();
 
+
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
         LouPrint("No Storage Devices Detected\n");
@@ -353,11 +356,11 @@ KERNEL_ENTRY LouOsKrnlStart(
     }
 
     InitializeFileSystemManager();
-    
+
     InitializeNtKernelTransitionLayer();
 
     InitializeBusCore();
-    
+
     LouKeProbeSbIsa();
 
     ScanTheRestOfHarware();
@@ -368,9 +371,11 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
 
-    //sleep(1000);
+    sleep(1000);
 
-    //LouKeSystemShutdown(ShutdownReboot);
+    LouKeSystemShutdown(ShutdownReboot);
+
+    while(1);
 
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
 

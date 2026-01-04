@@ -114,6 +114,64 @@ void LouKeGetTime(
     TimeStruct->Day = dayscurrent_month;
 }
 
+void LouKeGetFutureTime(
+    PTIME_T TimeStruct,
+    size_t Ms
+){
+    if (TimeStruct == NULL) {
+        return; // Handle null pointer case
+    }
+
+    uint64_t TimeMS = GetCurrentTimeInMilliseconds() + Ms;
+
+    // Extract milliseconds
+    TimeStruct->MilliSeconds = TimeMS % 1000;
+    TimeMS /= 1000; // Convert to seconds
+
+    // Calculate seconds, minutes, and hours
+    TimeStruct->Second = TimeMS % 60;
+    TimeMS /= 60; // Convert to minutes
+    TimeStruct->Minute = TimeMS % 60;
+    TimeMS /= 60; // Convert to hours
+    TimeStruct->Hour = TimeMS % 24;
+    TimeMS /= 24; // Convert to days
+
+    // Calculate year, month, and day
+    // Unix epoch time starts on January 1, 1970
+    int days_since_epoch = (int)TimeMS;
+    int year = 1970;
+
+    // Calculate the year
+    while (1) {
+        int daysyear = is_leap_year(year) ? 366 : 365;
+        if (days_since_epoch >= daysyear) {
+            days_since_epoch -= daysyear;
+            year++;
+        } else {
+            break;
+        }
+    }
+
+    // Calculate the month and day
+    int month = 0;
+    int daysmonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int daysmonth_leap[] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    int dayscurrent_month = 0;
+    while (1) {
+        dayscurrent_month = is_leap_year(year) ? daysmonth_leap[month] : daysmonth[month];
+        if (days_since_epoch >= dayscurrent_month) {
+            days_since_epoch -= dayscurrent_month;
+            month++;
+        } else {
+            break;
+        }
+    }
+
+    TimeStruct->Month = month;
+    TimeStruct->Day = dayscurrent_month;
+}
+
+
 bool LouKeDidTimeoutExpire(PTIME_T Timeout){
     TIME_T CurrentTime = {0}; 
     LouKeGetTime(&CurrentTime);

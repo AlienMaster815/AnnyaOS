@@ -9,8 +9,10 @@ extern void StoreAdvancedRegisters(uint8_t* buffer);
 extern void RestoreAdvancedRegisters(uint8_t* buffer);
 
 typedef struct _PROCESSOR_CALLBACKS{
-    void (*SaveHandler)(uint8_t*);
-    void (*RestoreHandler)(uint8_t*);
+    void        (*SaveHandler)(uint8_t*);
+    void        (*RestoreHandler)(uint8_t*);
+    void        (*InitializeThreadDataHandler)(uint8_t*, uint8_t*);
+    uint64_t    (*AllocateSaveContext)();
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
 typedef struct _PROCESSOR_FEATURES{
@@ -28,52 +30,37 @@ typedef struct _PROCESSOR_FEATURES{
 void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback);
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures);
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features);
+uint64_t LouKeAllocateFxSaveMemory();
 
+extern void initialize_thread_fpu_state(uint8_t* New, uint8_t* Current);
+extern void initialize_thread_fxsave_state(uint8_t* New, uint8_t* Current);
+extern void InitializeXSaveThread(uint8_t* New, uint8_t* Current);
 
 static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
     {
         .SaveHandler = save_fpu_state,
         .RestoreHandler = restore_fpu_state,
+        .InitializeThreadDataHandler = initialize_thread_fpu_state,
     },
     {
         .SaveHandler = fxsave_handler,
         .RestoreHandler = fxrstor_handler,
+        .InitializeThreadDataHandler = initialize_thread_fxsave_state,
+        .AllocateSaveContext = LouKeAllocateFxSaveMemory,
     },
     {
         .SaveHandler = StoreAdvancedRegisters,
         .RestoreHandler = RestoreAdvancedRegisters,
+        .InitializeThreadDataHandler = InitializeXSaveThread,
     },
     { 0 },
 };
 
 static PROCESSOR_FEATURES ProcessorFeatures;
 
-void enable_fxsave() {
-    uint64_t cr4;
-
-    // Read CR4
-    __asm__ volatile (
-        "mov %%cr4, %0"
-        : "=r" (cr4)
-    );
-
-    // Set OSFXSR (bit 9)
-    cr4 |= (1 << 9);
-
-    // Write back to CR4
-    __asm__ volatile (
-        "mov %0, %%cr4"
-        :
-        : "r" (cr4)
-    );
-}
-
-
-void initialize_fpu() {
-    __asm__ volatile ("finit");  // Initialize FPU to known state
-}
-
-void InitializeXSave();
+extern void enable_fxsave();
+extern void initialize_fpu();
+extern void InitializeXSave();
 
 void HandleProccessorInitialization(){
     //the processor should be up by now
@@ -84,12 +71,13 @@ void HandleProccessorInitialization(){
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
     if(rcx & (1 << 26)){
-        InitializeXSave();
-        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
+        //InitializeXSave();
+        //LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
     }
-    if(rdx & (1 << 24)){
+    if(rdx & (1 << 25)){
         enable_fxsave();
-        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);        
+        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);       
+
     }else{
         initialize_fpu();
         LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[0]);
@@ -114,7 +102,7 @@ void HandleProccessorInitialization(){
     SendProcessorFeaturesToMemCpy(&ProcessorFeatures);
     
     PPROCESSOR_FEATURES UserCopy = LouKeMallocType(PROCESSOR_FEATURES, USER_GENERIC_MEMORY);
-    //memcpy(UserCopy, &ProcessorFeatures, sizeof(PROCESSOR_FEATURES));
+    memcpy(UserCopy, &ProcessorFeatures, sizeof(PROCESSOR_FEATURES));
     LouKeInitProcessorAcceleratedFeaturesList(UserCopy);
 }
 
@@ -125,7 +113,7 @@ void HandleApProccessorInitialization(){
     if(rcx & (1 << 26)){
         InitializeXSave();
     }
-    if(rdx & (1 << 24)){
+    if(rdx & (1 << 25)){
         enable_fxsave();
     }else{
         initialize_fpu();

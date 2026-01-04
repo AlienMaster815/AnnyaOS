@@ -136,6 +136,34 @@ static void InitializeDataTD(
     UINT16                  Index, 
     UINT16                  Length
 ){
+    PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
+    POHCI_IO_PACKET_PRIVATE_DATA IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
+    UINT32 DmaAddress = OhciGetDmaAddress(IoData->DmaOut);
+
+    DmaAddress += Index;
+
+    if(Initializor->DirectionPID == OHCI_TD_DIRECTION_OUT){
+        memcpy(
+            (PVOID)((UINT64)IoData->DmaOut + (UINT64)Index), 
+            (PVOID)((UINT64)IoPacket->Data + (UINT64)Index), 
+            Length
+        );
+    }
+
+    Initializor->CurrentBufferPointer = DmaAddress;
+    Initializor->BufferEnd = DmaAddress + (Length - 1);
+
+    POHCI_TRANSFER_DESCRIPTOR Td;
+    
+    OhciCreateTD(
+        &Td,
+        Initializor
+    );
+
+    TraverseAndAddTd(
+        Td,
+        &EdItem->Tds
+    );
 
 }
 
@@ -165,6 +193,7 @@ LOUSTATUS OhciCreateDataTDs(
     }
 
     Initializor.DataToggle = 1; //DATA1
+    Initializor.DirectionPID = ((IoPacket->RequestType & (USB_XFER_D2H << USB_REQUEST_XFER_DIRECTION_SHIFT)) ? OHCI_TD_DIRECTION_IN : OHCI_TD_DIRECTION_OUT);
 
     for(
         i = 0; 

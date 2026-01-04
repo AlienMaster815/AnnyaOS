@@ -1174,7 +1174,9 @@ NTSTATUS AddAhciDevice(
     PrivateAhciData->AtaFlags  |= (uint64_t)BoardInformation->AtaFlags;
     PrivateAhciData->PioFlags  |= (uint64_t)BoardInformation->PioFlags;
     PrivateAhciData->DmaFlags  |= (uint64_t)BoardInformation->DmaFlags;
-    
+
+    LouKeInitializeEventTimeOut(&PrivateAhciData->CommandCompletion, 10000); //1 second timeout
+
     //Nvidia MCP65 Chip Revisions 0xA1 and 0xA2 do not support
     //MSI so we should take note of this however the losuine
     //currently dosent support interrupts for storage devices

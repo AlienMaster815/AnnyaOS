@@ -90,8 +90,10 @@ void StoreAdvancedRegisters(uint64_t ContextHandle);
 void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
 typedef struct _PROCESSOR_CALLBACKS{
-    void (*SaveHandler)(uint8_t*);
-    void (*RestoreHandler)(uint8_t*);
+    void        (*SaveHandler)(uint8_t*);
+    void        (*RestoreHandler)(uint8_t*);
+    void        (*InitializeThreadDataHandler)(uint8_t*, uint8_t*);
+    uint64_t    (*AllocateSaveContext)();
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
 static PPROCESSOR_CALLBACKS ProcessorCallbacks;
@@ -101,28 +103,35 @@ void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback){
 }
 
 //Fuck It Well do it live
-void SaveEverything(uint64_t* ContextHandle){
+void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle){
+    if(!ContextHandle)return;   
     *ContextHandle = GetAdvancedRegisterInterruptsStorage();
     if(!(*ContextHandle))return;
     ProcessorCallbacks->SaveHandler((uint8_t*)(*ContextHandle));
 }
 
-void RestoreEverything(uint64_t* ContextHandle){
+void RestoreEverythingWithInterruptBuffer(uint64_t* ContextHandle){
     if(!ContextHandle)return;
     if(!(*ContextHandle))return;
     ProcessorCallbacks->RestoreHandler((uint8_t*)(*ContextHandle));
 }
 
-void SaveEverythingWithContext(uint64_t ContextHandle){
+void SaveEverything(uint64_t ContextHandle){
     if(!ContextHandle)return;
     ProcessorCallbacks->SaveHandler((uint8_t*)ContextHandle);
 }
 
-void RestoreEverythingWithContext(uint64_t ContextHandle){
+void RestoreEverything(uint64_t ContextHandle){
     if(!ContextHandle)return;
     ProcessorCallbacks->RestoreHandler((uint8_t*)ContextHandle);
 }
 
+uint64_t AllocateSaveContext(){
+    if(!ProcessorCallbacks->AllocateSaveContext){
+        return 0x00;
+    }
+    return ProcessorCallbacks->AllocateSaveContext();
+}
 
 static mutex_t InterruptLock;
 
@@ -139,7 +148,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
-            SaveEverything(&ContextHandle);
+            SaveEverythingWithInterruptBuffer(&ContextHandle);
         }
         while(TmpEntry){
             if(TmpEntry->InterruptHandler){
@@ -153,7 +162,7 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
             TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
         }
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
-            RestoreEverything(&ContextHandle);
+            RestoreEverythingWithInterruptBuffer(&ContextHandle);
         }
         //LouKeSetIrql(Irql, 0x00);
         LouKeSendIcEOI();

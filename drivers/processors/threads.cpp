@@ -38,7 +38,7 @@ typedef struct  PACKED _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-KERNEL_IMPORT void SaveEverything(uint64_t* ContextHandle);
+KERNEL_IMPORT void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
 KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
 
 typedef struct {
@@ -240,7 +240,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     if(IsThreadInThreadTable(CurrentThread)){
         SaveContext((CPUContext*)(uint8_t*)CpuCurrentState, (CPUContext*)(uint8_t*)LouKeCastToUnalignedPointer((void*)&CurrentThread->SavedContext));
         CurrentThread->state = THREAD_READY;
-        SaveEverything(&CurrentThread->AdvancedRegisterStorage);
+        SaveEverythingWithInterruptBuffer(&CurrentThread->AdvancedRegisterStorage);
     }
 
     while((!IsThreadInThreadTable(NextThread)) && (NextThread->state != THREAD_READY)){

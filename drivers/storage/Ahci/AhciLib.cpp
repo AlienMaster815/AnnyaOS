@@ -122,6 +122,8 @@ LOUSTATUS AhciGenricDMAIssueCommand(
 
     Port->PxCI |= (1 << FreeSlot);
 
+    //LOUSTATUS Status = LouKeWaitForEvent(&PrivateData->CommandCompletion);
+    
     while(1){
         if(!(Port->PxCI & (1 << FreeSlot))){
             break;

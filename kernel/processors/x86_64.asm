@@ -3,9 +3,6 @@ default rel
 
 
 global SetUpSmpPageing
-
-global StoreAdvancedRegisters
-global RestoreAdvancedRegisters
 global SetGS
 global GetRBP
 global GetGS
@@ -74,16 +71,6 @@ section .text
     extern  GetGdtAsmTailCall
 
 
-extern TURN_FPU_ON
-
-init_fpu:
-    sub rsp, 8          ; Align stack
-    fninit              ; Initialize FPU (clears all status flags)
-    fldcw [fpu_control_word] ; Load FPU control word
-    add rsp, 8          ; Restore stack
-    call TURN_FPU_ON
-    ret
-
 
 [BITS 64]
 
@@ -92,28 +79,6 @@ GetCr4:
     ret
 
 
-
-StoreAdvancedRegisters:
-	XSAVE [RCX]
-	ret
-
-RestoreAdvancedRegisters:
-	XRSTOR [RCX]
-	ret
-
-global InitializeXSave
-
-InitializeXSave:
-    mov rax, cr4       ; Read CR4
-    or rax, (1 << 18)  ; Set OSXSAVE bit (bit 18)
-    mov cr4, rax       ; Write back to CR4
-
-    ; XSAVE is supported, now you can use XGETBV safely
-    mov ecx, 0
-    xgetbv
-    or eax, 0b111
-    mov ecx, 0
-    xsetbv
 
 
 GetRBP:

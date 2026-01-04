@@ -197,3 +197,5 @@ EXPORTS
     LouKeUsbAddHcd
     LouKeUsbAddDeviceToHcd
     LouKeUsbGetDescriptorRequest
+    LouKeSignalEvent
+    LouKeWaitForEvent

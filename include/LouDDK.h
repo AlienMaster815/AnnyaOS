@@ -81,7 +81,6 @@ typedef void* PVOID;
 #include "NtOsKrnlLib.h"
 #include <HashTables.h>
 #include <drivers/Networking/IpV4.h>
-
 #include <WinAPI/Win32/Win32API.h>
 
 #include <math.h>
@@ -200,7 +199,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <LouLoad.h>
 #include <kernel/Process.h>
 #include <Power.h>
-
+#include <kernel/Events.h>
+#include <drivers/fpu.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

@@ -31,8 +31,8 @@ typedef struct  PACKED _CPUContext{
 void CheckWinCallTable(int64_t Call, uint64_t Data);
 void CheckLouCallTables(int64_t Call, uint64_t Data);
 mutex_t* LouKeGetInterruptGlobalLock();
-void RestoreEverything(uint64_t* ContextHandle);
-void SaveEverything(uint64_t* ContextHandle);
+void RestoreEverythingWithInterruptBuffer(uint64_t* ContextHandle);
+void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
 
 void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t StackPointer){
     uint64_t* Status = (uint64_t*)Data;
@@ -44,13 +44,13 @@ void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t S
     //througt to be handled
     *Status = 1;
     uint64_t RegisterHandle;
-    SaveEverything(&RegisterHandle);
+    SaveEverythingWithInterruptBuffer(&RegisterHandle);
     if(!SystemEmulation){
         CheckLouCallTables(Call, Data);
     }else if(SystemEmulation == LOUCALL_WIN64_EMU){
         CheckWinCallTable(Call, Data);
     }
-    RestoreEverything(&RegisterHandle);
+    RestoreEverythingWithInterruptBuffer(&RegisterHandle);
 
 }
 

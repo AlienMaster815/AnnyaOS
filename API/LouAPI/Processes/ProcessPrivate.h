@@ -37,16 +37,17 @@ typedef struct  PACKED _CPUContext{
     uint64_t r13;
     uint64_t r14;
     uint64_t r15;
-    uint64_t rip;
 
+    uint64_t rip;
     uint64_t cs;
     uint64_t rflags;
     uint64_t rsp;
     uint64_t ss;
 } CPUContext;
 
-KERNEL_IMPORT void SaveEverything(uint64_t* ContextHandle);
-KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
+KERNEL_IMPORT void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
+KERNEL_IMPORT void RestoreEverything(uint64_t ContextHandle);
+KERNEL_IMPORT void SaveEverything(uint64_t ContextHandle);
 
 #define CTXMGR_DEFAULT_SAVE_EVERYTHING      SaveEverything
 #define CTXMGR_DEFAULT_RESTORE_EVERYTHING   RestoreEverything
@@ -67,7 +68,6 @@ typedef struct _GENERIC_THREAD_DATA{
     mutex_t                         LockOutTagOut;
     thread_state_t                  State;
     struct _GENERIC_PROCESS_DATA*   Process;
-    CPUContext                      SavedState;
     TEB                             Teb;
     UINT64                          ThreadID;
     UINT8                           ThreadPriority;
@@ -83,6 +83,7 @@ typedef struct _GENERIC_THREAD_DATA{
     UINT8                           Ss;
     INSTRUCTION_MODE                InstructionMode;
     UINT8*                          AfinityBitmap;
+    CPUContext                      SavedState;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
 typedef struct THREAD_RING{
@@ -148,6 +149,7 @@ typedef class TsmThreadSchedualManagerObject{
                                                 UINT64                          DistributerIncrementation
                                             );
         PGENERIC_THREAD_DATA                TsmSchedual();
+        PGENERIC_THREAD_DATA                TsmYeild();
         void                                TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread);
         void                                TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread, bool SelfIdentifiing);
         UINT64                              TsmGetCurrentThreadID();
@@ -202,6 +204,7 @@ typedef class PsmProcessScedualManagerObject{
                                                 UINT64 DistributerIncrementation
                                             );
         void                                PsmSchedual(UINT64 IrqState);
+        void                                PsmYeildThread(UINT64 IrqState);
         void                                PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
         void                                PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
         UINT64                              PsmGetCurrentProcessID();
