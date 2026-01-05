@@ -230,12 +230,13 @@ ThreadManagerIdleFallback(
     PVOID   Params
 ){
     while(1){
-        
+        sleep(1);
+        asm("INT $200");
     }
     return -1;
 }
 
-PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(){
+PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(){
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
     this->Threads[CurrentRing]->ThreadData->CurrentMsSlice = 0;
     
@@ -248,21 +249,25 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(){
             if(CurrentThreadRing->Peers.NextHeader){
                 TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
                 while(TmpThreadRing != CurrentThreadRing){
-                    if(
-                        (!LouKeIsTimeoutNull(&TmpThreadRing->ThreadData->BlockTimeout)) &&
-                        (LouKeDidTimeoutExpire(&TmpThreadRing->ThreadData->BlockTimeout))
-                    ){
-                        TmpThreadRing->ThreadData->State = THREAD_READY;
-                    }
-                    if(TmpThreadRing->ThreadData->State == THREAD_READY){
-                        CurrentThreadRing->ThreadData->State = THREAD_READY;
-                        return TmpThreadRing->ThreadData;
+                    if(!MutexIsLocked(&TmpThreadRing->ThreadData->LockOutTagOut)){
+                        if(
+                            (TmpThreadRing->ThreadData->State == THREAD_BLOCKED) &&
+                            (!LouKeIsTimeoutNull(&TmpThreadRing->ThreadData->BlockTimeout)) &&
+                            (LouKeDidTimeoutExpire(&TmpThreadRing->ThreadData->BlockTimeout))
+                        ){
+                            memset(&TmpThreadRing->ThreadData->BlockTimeout, 0, sizeof(TIME_T));
+                            TmpThreadRing->ThreadData->State = THREAD_READY;
+                        }
+                        if(TmpThreadRing->ThreadData->State == THREAD_READY){
+                            this->Threads[NextRing] = TmpThreadRing;
+                            return TmpThreadRing->ThreadData;
+                        }
                     }
                     TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
                 }
-                if(CurrentThreadRing->ThreadData->State == THREAD_READY){
-                    return CurrentThreadRing->ThreadData;
-                }
+            }
+            if((CurrentThreadRing->ThreadData->State != THREAD_BLOCKED) && (CurrentThreadRing->ThreadData->State != THREAD_TERMINATED)){
+                return CurrentThreadRing->ThreadData;
             }
         }
         NextRing = EulerCurveIndexor(&this->LoadDistributer);
@@ -271,53 +276,25 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(){
             break;
         }        
     }
-
     return this->IdleTask;
+}
+
+PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(){
+    return TsmGetNext();
 }
 
 
 PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(){
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
-    if(this->Threads[CurrentRing]->ThreadData->CurrentMsSlice < this->Threads[CurrentRing]->ThreadData->TotalMsSlice){
+    if(
+        (this->Threads[CurrentRing]->ThreadData->CurrentMsSlice < this->Threads[CurrentRing]->ThreadData->TotalMsSlice) &&
+        (this->Threads[CurrentRing]->ThreadData->State == THREAD_RUNNING)
+    ){
         this->Threads[CurrentRing]->ThreadData->CurrentMsSlice += 10;
         return this->Threads[CurrentRing]->ThreadData;
     }
-    this->Threads[CurrentRing]->ThreadData->CurrentMsSlice = 0;
-    
-    UINT64 NextRing = EulerCurveIndexor(&this->LoadDistributer);
-    PTHREAD_RING CurrentThreadRing;
-    PTHREAD_RING TmpThreadRing;
-    while(1){
-        CurrentThreadRing = this->Threads[NextRing];
-        if(CurrentThreadRing){
-            if(CurrentThreadRing->Peers.NextHeader){
-                TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
-                while(TmpThreadRing != CurrentThreadRing){
-                    if(
-                        (!LouKeIsTimeoutNull(&TmpThreadRing->ThreadData->BlockTimeout)) &&
-                        (LouKeDidTimeoutExpire(&TmpThreadRing->ThreadData->BlockTimeout))
-                    ){
-                        TmpThreadRing->ThreadData->State = THREAD_READY;
-                    }
-                    if(TmpThreadRing->ThreadData->State == THREAD_READY){
-                        CurrentThreadRing->ThreadData->State = THREAD_READY;
-                        return TmpThreadRing->ThreadData;
-                    }
-                    TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
-                }
-                if(CurrentThreadRing->ThreadData->State == THREAD_READY){
-                    return CurrentThreadRing->ThreadData;
-                }
-            }
-        }
-        NextRing = EulerCurveIndexor(&this->LoadDistributer);
-        if(NextRing == CurrentRing){
-            //if no tasks are ready just idle
-            break;
-        }        
-    }
 
-    return this->IdleTask;
+    return TsmGetNext();
 }
 
 
@@ -350,7 +327,7 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
         (PVOID)ThreadManagerIdleFallback,
         0,
         0,
-        512,
+        2048,
         20,
         0x08,
         0x10,
@@ -427,8 +404,6 @@ UINT64 TsmThreadSchedualManagerObject::TsmGetCurrentContextStorage(){
 
 static spinlock_t SleepLock = {0};
 
-
-
 KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     uint64_t ThreadID = LouKeGetThreadIdentification();
     if(!ThreadID){
@@ -437,13 +412,23 @@ KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     }
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
     LouKIRQL Irql;
-    LouKeAcquireSpinLock(&SleepLock, &Irql);
     TIME_T Time;
+    LouKeAcquireSpinLock(&SleepLock, &Irql);
+    memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
+    ThreadData->State = THREAD_BLOCKED;
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    ThreadData->State = THREAD_BLOCKED;
     LouKeReleaseSpinLock(&SleepLock, &Irql);
     asm("INT $200");
-    LouPrint("LouKeThreadSleep:%d\n", Ms);
-    while(1);
+}
+
+static spinlock_t UnblockLock = {0};
+
+KERNEL_IMPORT void LouKeUnblockThread(UINT64 ThreadID){
+    PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&UnblockLock, &Irql);
+    memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
+    ThreadData->State = THREAD_READY;
+    LouKeReleaseSpinLock(&UnblockLock, &Irql);
 }

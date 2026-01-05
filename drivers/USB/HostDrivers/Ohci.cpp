@@ -14,7 +14,7 @@ OhciInitialzeHcca(
     LOUSTATUS Status;
 
     Status = OhciAllocateDma(256, 256, (PVOID*)&OhciDevice->HccaAddress);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Unable To Allocate HCCA Memory\n");
         return Status;
     }
@@ -44,7 +44,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         0
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Port:%d Hung On PRS Command\n", Port);
         return STATUS_TIMEOUT;
     }
@@ -94,7 +94,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         0,
         Data
     );    
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Error Getting Descriptor\n");
         return Status;
     }
@@ -137,7 +137,7 @@ LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice){
                 &UsbDescriptor
             );
 
-            if(!NT_SUCCESS(Status)){
+            if(Status != STATUS_SUCCESS){
                 LouPrint("OHCI.SYS:Error Adding Device To Host\n");
                 return Status;
             }
@@ -168,7 +168,7 @@ LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice){
         0
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Ohci Controller Hung On Reset\n");
         LouKeFree(OhciDevice);
         return Status;
@@ -246,7 +246,7 @@ LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice){
     );
 
     MutexUnlock(&HostDevice->ExlusiveOwnership);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         return  Status;
     }
     LouPrint("OHCI.SYS:OhciStopHostController() STATUS_SUCCESS\n");
@@ -267,7 +267,7 @@ LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice){
             OHCI_CONTROL_HCFS,
             OHCI_HCFS_USBOPERATIONAL
         );
-        if(!NT_SUCCESS(Status)){
+        if(Status != STATUS_SUCCESS){
             LouPrint("OHCI.SYS:ERROR Unable To Set Host To Operational State\n");
             return Status;
         }
@@ -329,7 +329,7 @@ LOUSTATUS OhciInitializeDefaultControl(
         &EdOut,
         &Initializor
     );
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Add Default Control ED\n");
         return Status;
     }

@@ -141,6 +141,7 @@ typedef class TsmThreadSchedualManagerObject{
         UINT64                              ProcessorID;
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
         PGENERIC_THREAD_DATA                IdleTask;
+        PGENERIC_THREAD_DATA                TsmGetNext();
     public:
         LOUSTATUS                           TsmInitializeSchedualerObject(
                                                 UINT64                          ProcessorID, 

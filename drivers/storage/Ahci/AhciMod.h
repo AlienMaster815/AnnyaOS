@@ -75,7 +75,6 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                    PrivateFlags;
     void                        (*StartCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     LOUSTATUS                   (*StopCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
-    KERNEL_EVENT_OBJECT         CommandCompletion;
     uintptr_t                   FisDma;
     uintptr_t                   CommandDma;
     uint16_t                    PortMap;
@@ -86,6 +85,8 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                    EmBufferSize;
     uint8_t                     EmMessageType;
     uint32_t                    ExternalPortMask;
+    UINT32                      CommandsQueued;
+    KERNEL_EVENT_OBJECT         CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
 //#pragma pack(pop)
 

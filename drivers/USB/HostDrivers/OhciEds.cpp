@@ -45,7 +45,7 @@ LOUSTATUS OhciCreateED(
         16,
         &Out
     );
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Unable To Allocate Memory\n");
         return Status;
     }
@@ -57,7 +57,7 @@ LOUSTATUS OhciCreateED(
         Initializor
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Create ED\n");
         return Status;
     }
@@ -134,7 +134,7 @@ LOUSTATUS OhciCreateControlED(
         Initializor
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Create ED\n");
         return Status;
     }
@@ -183,7 +183,7 @@ LOUSTATUS OhciCreateBulkED(
         Initializor
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Create ED\n");
         return Status;
     }
@@ -234,7 +234,7 @@ LOUSTATUS OhciCreateIsochIntED(
         Initializor
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Create ED\n");
         return Status;
     }

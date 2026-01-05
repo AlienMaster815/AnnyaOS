@@ -61,13 +61,13 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
 void PsmProcessScedualManagerObject::PsmYeildThread(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
-    //NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmYeild();
-    //LouKeSwitchToTask(
-    //    IrqState,
-    //    CurrentThread,
-    //    NextThread
-    //);
-    //this->CurrentThread = NextThread;
+    NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmYeild();
+    LouKeSwitchToTask(
+        IrqState,
+        CurrentThread,
+        NextThread
+    );
+    this->CurrentThread = NextThread;
 }
 
 void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
@@ -217,11 +217,6 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
 
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
-
-    if((LouKeGetIrql() >= CLOCK_LEVEL) || (MutexIsLocked(&ProcessBlock.ProcStateBlock[ProcessorID].LockOutTagOut))){
-        LouKeSendIcEOI(); 
-        return;
-    }
 
     PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
     

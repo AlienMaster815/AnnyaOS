@@ -34,7 +34,7 @@ AddDevice(
     if(DeviceID < 2){
         //PCNET 2
         Status = InitializePcNetIIDevice(DriverObject, PlatformDevice);
-        if(!NT_SUCCESS(Status)){
+        if(Status != STATUS_SUCCESS){
             LouPrint("Device Initialization Failed\n");
             return Status;
         }

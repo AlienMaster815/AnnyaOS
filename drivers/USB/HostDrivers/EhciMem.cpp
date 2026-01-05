@@ -67,7 +67,7 @@ EhciAllocatePeriodicFrameListBase(
     PVOID Out;
     
     Status = EhciAllocateDma(EhciDevice, 4 * KILOBYTE, 4 * KILOBYTE, &Out);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("EHCI.SYS:Could Not Allocate Resources For Periodic Frame List\n");
         return Status;
     }
@@ -91,7 +91,7 @@ EhciAllocateAsyncHead(
     PVOID Out;
     PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciDevice->OperationalRegisters;
     Status = EhciAllocateDma(EhciDevice, 64, 32, &Out);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("EHCI.SYS:Unable To Allocate Resources For Async Qh\n");
         return Status;
     }

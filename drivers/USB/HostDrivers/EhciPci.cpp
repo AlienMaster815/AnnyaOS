@@ -47,11 +47,11 @@ NTSTATUS AddDevice(
     UINTPTR TmpVAddress; 
     UINTPTR TmpPAddress; 
     Status = EhciAllocatePeriodicFrameListBase(EhciDevice);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         return Status;
     }
     Status = EhciAllocateAsyncHead(EhciDevice);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         return Status;
     }
 
@@ -63,7 +63,7 @@ NTSTATUS AddDevice(
         0
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("EHCI.SYS:Unable To Clear USBINT Bit In USBSTS\n");
         return STATUS_IO_DEVICE_ERROR;
     }
@@ -77,7 +77,7 @@ NTSTATUS AddDevice(
         0
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("EHCI.SYS:Host Faild To Start\n");
         return STATUS_IO_DEVICE_ERROR;
     }

@@ -77,7 +77,7 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
         Data
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("Error Initializing Usb Request\n");
         return Status;
     }
@@ -85,7 +85,7 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
     IoPacket->TransferType = USB_TRANSFER_TYPE_CONTROL;
 
     Status = LouKeUsbCommitRequest(IoPacket);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("Error Commiting Request\n");
         return Status;
     }

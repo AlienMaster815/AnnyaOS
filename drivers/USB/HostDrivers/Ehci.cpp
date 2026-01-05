@@ -16,7 +16,7 @@ LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice){
             EHCI_USBSTS_HC_HALTED,
             1
         );
-        if(!NT_SUCCESS(Status)){
+        if(Status != STATUS_SUCCESS){
             LouPrint("EHCI.SYS:Ehci Controller Failed To Halt\n");
             return Status;
         }
@@ -43,7 +43,7 @@ LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice){
         EHCI_USBCMD_HCRESET,
         0
     );
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("EHCI.SYS:Ehci Controller Failed To Reset\n");
         return Status;
     }

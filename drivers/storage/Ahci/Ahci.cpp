@@ -550,7 +550,7 @@ LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 
     
     Status = ResetAhciHba(AtaHost);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         return Status;
     }
 
@@ -625,6 +625,13 @@ void AhciPortInterruptHandler(
         Status = Port->PxIS;
         Port->PxIS = Status;
 
+        if(((Status & (1)) || (Status & (1 << 3))) && (!(Status & (0b00011111 << 26)))){
+            for(size_t j = 0; j < 32; j++){
+                if((Private->CommandsQueued & (1 << j)) && (!(Port->PxCI & (1 << j)))){
+                    LouKeSignalEvent(&Private->CommandCompletion[j]);
+                }
+            }
+        }
         //1895
 
     }
@@ -1124,7 +1131,7 @@ NTSTATUS AddAhciDevice(
 
     //now we are finally ready to start the controller
     Status = LouKeHalEnablePciDevice(PDEV);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         return Status;
     }
 
@@ -1175,7 +1182,9 @@ NTSTATUS AddAhciDevice(
     PrivateAhciData->PioFlags  |= (uint64_t)BoardInformation->PioFlags;
     PrivateAhciData->DmaFlags  |= (uint64_t)BoardInformation->DmaFlags;
 
-    LouKeInitializeEventTimeOut(&PrivateAhciData->CommandCompletion, 10000); //1 second timeout
+    for(size_t Slot = 0 ; Slot < 32; Slot++){
+        LouKeInitializeEventTimeOut(&PrivateAhciData->CommandCompletion[Slot], 5000); //10 second timeout
+    }
 
     //Nvidia MCP65 Chip Revisions 0xA1 and 0xA2 do not support
     //MSI so we should take note of this however the losuine

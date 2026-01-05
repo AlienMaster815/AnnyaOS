@@ -65,7 +65,7 @@ NTSTATUS AddDevice(
         PCI_IRQ_USE_LEGACY
     );
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:ERROR Could Not Allocate Interrupt Vector\n");
         return Status;
     }
@@ -73,14 +73,14 @@ NTSTATUS AddDevice(
     RegisterInterruptHandler(OhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
 
     Status = OhciInitializeDefaultControl(OhciDevice);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Error Initializing Lists\n");
         return STATUS_SUCCESS;
     }
 
     Status = LouKeUsbAddHcd(&OhciDevice->UsbHost);
 
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Error Adding Host Controller\n");
         return Status;
     }

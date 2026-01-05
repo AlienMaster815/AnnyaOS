@@ -76,6 +76,9 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     LouPrint("Work Queue Started:%s\n", WorkQueueData->QueueName);
     while(1){
         
+
+
+        //asm("INT $200");
     }
     return STATUS_SUCCESS;
 }

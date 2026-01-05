@@ -45,7 +45,7 @@ LOUSTATUS OhciCreateTD(
         16, 
         &Out
     );
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Allocate TD\n");
         return Status;
     }
@@ -57,7 +57,7 @@ LOUSTATUS OhciCreateTD(
         Td,
         Initializor
     );
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Initialize Descriptor\n");
         return Status;
     }
@@ -187,7 +187,7 @@ LOUSTATUS OhciCreateDataTDs(
     IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
     
     Status = OhciAllocateDma(IoPacket->Length, 16 , &IoData->DmaOut);
-    if(!NT_SUCCESS(Status)){
+    if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Unable To Allocate DMA\n");
         return Status;
     }

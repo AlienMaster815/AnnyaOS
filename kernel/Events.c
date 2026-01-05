@@ -1,5 +1,7 @@
 #include <LouAPI.h>
 
+void LouKeUnblockThread(UINT64 ThreadID);
+
 LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
     MutexLock(&Event->Lock);
     Event->ThreadID = LouKeGetThreadIdentification();
@@ -11,7 +13,7 @@ LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
 }
 
 
-LOUSTATUS LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event){
+void LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event){
     Event->Completed = true;
-    return STATUS_SUCCESS;
+    LouKeUnblockThread(Event->ThreadID);
 }
