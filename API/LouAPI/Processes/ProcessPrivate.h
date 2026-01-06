@@ -8,6 +8,7 @@ typedef enum {
     THREAD_RUNNING = 1,
     THREAD_TERMINATED = 2,
     THREAD_BLOCKED = 3,
+    THREAD_HANDOFF = 4,
 } thread_state_t;
 
 typedef enum {

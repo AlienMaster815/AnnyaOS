@@ -78,6 +78,8 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
     
+
+
     /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice){
         CurrentProcess->CurrentMsSlice += 10;
@@ -133,8 +135,9 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
 
     this->CurrentProcess = this->SystemProcess;    
     PsmSetProcessTransitionState();
-    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread);
     
+    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread);
+
     LouKeSwitchToTask(
         IrqState,
         CurrentThread,
@@ -199,6 +202,7 @@ UINT64 PsmProcessScedualManagerObject::PsmGetCurrentSubsystem(){
 
 void PsmProcessScedualManagerObject::PsmSetSystemProcess(HANDLE ProcessHandle){
     if(this->SystemProcess){
+        PsmSetProcessTransitionState();
         return;
     }
     this->SystemProcess = (PGENERIC_PROCESS_DATA)ProcessHandle;
@@ -218,6 +222,7 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
 
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
+
 
     PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
     
@@ -252,7 +257,8 @@ UNUSED static void InitializeIdleProcess(){
     UpdateIDT(true);
     SetUpTimers();
     LouKeInitializeCurrentApApic();
-    //INTEGER CurrentCpu = GetCurrentCpuTrackMember();
+
+    
     //PTHREAD NewThread;
     /*for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         if((i != InitializationProcessor) && (i != CurrentCpu)){
@@ -275,7 +281,8 @@ UNUSED static void InitializeIdleProcess(){
     LouPrint("AP Now Idleing\n");
     MutexSynchronize(&CoreIrqReadyLock);
     LouPrint("AP Interrupts Enabled\n");
-    //LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
     while(1){
 
     }

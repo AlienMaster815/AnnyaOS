@@ -30,7 +30,7 @@ mov fs, ax
 mov gs, ax
 mov ss, ax	
 
-mov ebp, [0x7000]
+mov ebp, StackTop
 mov esp, ebp
 
 call EnablePaging
@@ -74,6 +74,11 @@ dq 0
 dw $ - gdt64 - 1          
 dq gdt64         
 
+section .bss
+StackBottom:
+    resb 4096
+StackTop:
+
 BITS 64
 section .text
 
@@ -84,5 +89,8 @@ long_mode_start:
     mov es, ax
     mov gs, ax
     mov ss, ax
+
+    mov rbp, [0x7000]
+    mov rsp, rbp
 
     jmp [0x7008]

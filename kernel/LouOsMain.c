@@ -252,15 +252,16 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeUnmaskSmpInterrupts();
 
-    LouKeCreateDemon(
-        LouKeThreadManagerDemon,
-        0,
-        16 * KILOBYTE,
-        31
-    );
+    //LouKeCreateDemon(
+    //    LouKeThreadManagerDemon,
+    //    0,
+    //    16 * KILOBYTE,
+    //    31
+    //);
 
     LouPrint("Kernel Advanced System Initialized\n");
 
+    while(1);
 }
 
 void KillDebuger(){
@@ -378,7 +379,7 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     sleep(1000);
 
-    LouKeSystemShutdown(ShutdownReboot);
+    //LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
 

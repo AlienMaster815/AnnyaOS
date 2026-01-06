@@ -6,6 +6,9 @@ LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
 static void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
     DWORD Result = 0;
+    if(Thread->ThreadID == 2){
+        DEBUG_TRAP
+    }
     LouPrint("Thread:%d Started\n", Thread->ThreadID);
     Result = Work(Param);
     LouPrint("Thread:%d Exited With Code:%h\n", Thread->ThreadID, Result);
@@ -247,6 +250,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
     CurrentThread->CurrentMsSlice = 0;
     
+
     UINT64 NextRing;
     PTHREAD_RING CurrentThreadRing;
     PTHREAD_RING TmpThreadRing;
@@ -274,7 +278,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
                     TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
                 }
             }
-            if((CurrentThreadRing->ThreadData->State != THREAD_BLOCKED) && (CurrentThreadRing->ThreadData->State != THREAD_TERMINATED)){
+            if(CurrentThreadRing->ThreadData->State == THREAD_READY){
                 return CurrentThreadRing->ThreadData;
             }
         }
@@ -282,10 +286,6 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
             //if no tasks are ready just idle
             break;
         }        
-    }
-
-    if(CurrentThread->State == THREAD_RUNNING){
-        return CurrentThread;
     }
 
     return this->IdleTask;
@@ -303,6 +303,10 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(PGENERIC_THREAD
     ){
         CurrentThread->CurrentMsSlice += 10;
         return CurrentThread;
+    }
+
+    if(this->ProcessorID == 1){
+        DEBUG_TRAP
     }
 
     return TsmGetNext(CurrentThread);
@@ -470,6 +474,8 @@ LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
 
         }
         LouKeReleaseSpinLock(&ThreadManagerDemonLock, &Irql);*/
+        sleep(1000);
+        LouPrint("HERE\n");
     }
     return -1;
 }
