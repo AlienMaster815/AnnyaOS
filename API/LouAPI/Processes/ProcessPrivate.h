@@ -83,6 +83,7 @@ typedef struct _GENERIC_THREAD_DATA{
     UINT8                           Ss;
     INSTRUCTION_MODE                InstructionMode;
     UINT8*                          AfinityBitmap;
+    BOOL                            Resting;
     CPUContext                      SavedState;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
@@ -141,7 +142,7 @@ typedef class TsmThreadSchedualManagerObject{
         UINT64                              ProcessorID;
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
         PGENERIC_THREAD_DATA                IdleTask;
-        PGENERIC_THREAD_DATA                TsmGetNext();
+        PGENERIC_THREAD_DATA                TsmGetNext(PGENERIC_THREAD_DATA CurrentThread);
     public:
         LOUSTATUS                           TsmInitializeSchedualerObject(
                                                 UINT64                          ProcessorID, 
@@ -149,13 +150,10 @@ typedef class TsmThreadSchedualManagerObject{
                                                 UINT64                          DistibutionLimitor,
                                                 UINT64                          DistributerIncrementation
                                             );
-        PGENERIC_THREAD_DATA                TsmSchedual();
-        PGENERIC_THREAD_DATA                TsmYeild();
+        PGENERIC_THREAD_DATA                TsmSchedual(PGENERIC_THREAD_DATA CurrentThread);
+        PGENERIC_THREAD_DATA                TsmYeild(PGENERIC_THREAD_DATA CurrentThread);
         void                                TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread);
-        void                                TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread, bool SelfIdentifiing);
-        UINT64                              TsmGetCurrentThreadID();
-        UINT64                              TsmGetCurrentInterruptStorage();
-        UINT64                              TsmGetCurrentContextStorage();
+        void                                TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread);
 }THREAD_SCHEDUAL_MANAGER, * PTHREAD_SCHEDUAL_MANAGER;
 
 #define THREAD_DEFAULT_DISTRIBUTER_INCREMENTER 1

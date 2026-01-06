@@ -81,9 +81,7 @@ void print_binary8(uint8_t number) {
 
 __stdcall
 int LouPrint_s(char* format, va_list args){
-    LouKIRQL OldLevel;
 
-    LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     char PrintString[21] = {0};
     while (*format) {
         if (*format == '%') {
@@ -227,7 +225,6 @@ int LouPrint_s(char* format, va_list args){
         }
     }
     LouKeOsDosUpdateMapping();
-    LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
     return 0;
 }
 
@@ -246,28 +243,19 @@ bool UsingSmp = false;
 INTEGER 
 GetCurrentCpuTrackMember();
 
-static mutex_t PrintMutex = {0};
-
 int LouPrint(char* format, ...) {
+    LouKIRQL OldLevel;
 
-    if(MutexIsLocked(&PrintMutex)){
-        return -1;
-    }
-
-    MutexLock(&PrintMutex);
+    LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     int result = 0;
     if(UsingSmp){
-        result = _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
-        if(result){
-            MutexUnlock(&PrintMutex);
-            return result;
-        }
+        _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
     }
     va_list args;
     va_start(args, format);
     result = LouPrint_s(format, args);
     va_end(args);
-    MutexUnlock(&PrintMutex);
+    LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
     return result;
 }
 

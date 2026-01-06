@@ -13,6 +13,7 @@ typedef struct _PROCESSOR_CALLBACKS{
     void        (*RestoreHandler)(uint8_t*);
     void        (*InitializeThreadDataHandler)(uint8_t*, uint8_t*);
     uint64_t    (*AllocateSaveContext)();
+    void        (*DeAllocateSaveContext)(uint64_t);
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
 typedef struct _PROCESSOR_FEATURES{
@@ -31,6 +32,7 @@ void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback);
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures);
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features);
 uint64_t LouKeAllocateFxSaveMemory();
+void LouKeDeAllocateFxSaveMemory(uint64_t Context);
 
 extern void initialize_thread_fpu_state(uint8_t* New, uint8_t* Current);
 extern void initialize_thread_fxsave_state(uint8_t* New, uint8_t* Current);
@@ -47,6 +49,7 @@ static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
         .RestoreHandler = fxrstor_handler,
         .InitializeThreadDataHandler = initialize_thread_fxsave_state,
         .AllocateSaveContext = LouKeAllocateFxSaveMemory,
+        .DeAllocateSaveContext = LouKeDeAllocateFxSaveMemory,
     },
     {
         .SaveHandler = StoreAdvancedRegisters,

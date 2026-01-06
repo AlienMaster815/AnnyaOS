@@ -105,7 +105,6 @@ extern void LoadTaskRegister();
 uint64_t GetCurrentTimeIn100ns();
 int TestLoop2();
 void LouKeInitializeFullLouACPISubsystem();
-void LouKeDestroyDemon();
 extern void MachineCodeDebug(uint64_t FOO);
 void LouKeSwitchContext(void (*Function)(), uint64_t StackSize);
 LOUSTATUS LookForStorageDevices();
@@ -178,6 +177,7 @@ void ParserLouLoaderInformation(
     PLOUSINE_LOADER_INFO LoaderInfo
 );
 void* memcpy_basic(void* destination, const void* source, size_t num);
+DWORD LouKeThreadManagerDemon(PVOID Params);
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -246,11 +246,18 @@ void AdvancedLousineKernelInitialization(){
 
     InitializeProcessManager();
 
-    LouKeInitializeFullLouACPISubsystem();
+    //LouKeInitializeFullLouACPISubsystem();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
-    
+
     LouKeUnmaskSmpInterrupts();
+
+    LouKeCreateDemon(
+        LouKeThreadManagerDemon,
+        0,
+        16 * KILOBYTE,
+        31
+    );
 
     LouPrint("Kernel Advanced System Initialized\n");
 
@@ -348,7 +355,6 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LookForStorageDevices();
 
-
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
         LouPrint("No Storage Devices Detected\n");
@@ -369,7 +375,6 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-
 
     sleep(1000);
 

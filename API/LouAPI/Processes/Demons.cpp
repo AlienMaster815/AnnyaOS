@@ -1,18 +1,21 @@
 #include "ProcessPrivate.h"
 
+LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
+    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
+    ThreadData->State = THREAD_TERMINATED;
 
-LOUDDK_API_ENTRY VOID LouKeDestroyDemon(PVOID ThreadHandle) {
-    
+    if(ThreadData->ThreadID == LouKeGetThreadIdentification()){
+        asm("INT $200");
+        while(1);
+    }
 
-
-    //Endof SystemCall
 }
 
 
 UNUSED static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
     int Result = Thread(FunctionParam);
     LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
-    LouKeDestroyDemon(ThreadHandle);
+    LouKeDestroyThread(ThreadHandle);
     while(1);
 }
 
@@ -132,9 +135,9 @@ LouKeCreateDemonEx(
 LOUDDK_API_ENTRY 
 PTHREAD 
 LouKeCreateDemon(
-    PVOID Function,
-    PVOID Params,
-    SIZE  StackSize,
+    PVOID   Function,
+    PVOID   Params,
+    SIZE    StackSize,
     UINT8   Prioirty
 ){
     return LouKeCreateDemonEx(
@@ -146,4 +149,3 @@ LouKeCreateDemon(
         0
     );
 };
-

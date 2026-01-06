@@ -94,6 +94,7 @@ typedef struct _PROCESSOR_CALLBACKS{
     void        (*RestoreHandler)(uint8_t*);
     void        (*InitializeThreadDataHandler)(uint8_t*, uint8_t*);
     uint64_t    (*AllocateSaveContext)();
+    void        (*DeAllocateSaveContext)(uint64_t);
 }PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
 static PPROCESSOR_CALLBACKS ProcessorCallbacks;
@@ -131,6 +132,13 @@ uint64_t AllocateSaveContext(){
         return 0x00;
     }
     return ProcessorCallbacks->AllocateSaveContext();
+}
+
+void DeAllocateSaveContext(uint64_t Context){
+    if(!ProcessorCallbacks->DeAllocateSaveContext){
+        return;
+    }
+    ProcessorCallbacks->DeAllocateSaveContext(Context);
 }
 
 static mutex_t InterruptLock;
