@@ -67,7 +67,7 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
 void PsmProcessScedualManagerObject::PsmYeildThread(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
-    NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmYeild(CurrentThread);
+    NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmYeild(CurrentThread, false);
     LouKeSwitchToTask(
         IrqState,
         CurrentThread,
@@ -92,7 +92,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         (CurrentProcess->ProcessState == PROCESS_RUNNING)
     ){
         CurrentProcess->CurrentMsSlice += 10;
-        NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread);
+        NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
         LouKeSwitchToTask(
             IrqState,
             CurrentThread,
@@ -125,7 +125,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                             this->Processes[NextRing] = TmpProcessRing;
                             this->CurrentProcess = TmpProcessRing->ProcessData;
                             PsmSetProcessTransitionState();
-                            NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread);
+                            NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
                             LouKeSwitchToTask(
                                 IrqState,
                                 CurrentThread,
@@ -150,7 +150,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     this->CurrentProcess = this->SystemProcess;    
     PsmSetProcessTransitionState();
     
-    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread);
+    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
 
 
     LouKeSwitchToTask(

@@ -243,11 +243,12 @@ ThreadManagerIdleFallback(
     return -1;
 }
 
-PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_DATA CurrentThread){
+PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_DATA CurrentThread, bool ProcessSwitch){
     if(SpinlockIsLocked(&this->LockOutTagOut)){
         return CurrentThread;
     }
     MutexLock(&this->LockOutTagOut.Lock);
+
 
 
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
@@ -293,7 +294,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
         }        
     }
 
-    if(CurrentThread->State == THREAD_RUNNING){
+    if((CurrentThread->State == THREAD_RUNNING) && (!ProcessSwitch)){
         MutexUnlock(&this->LockOutTagOut.Lock);
         return CurrentThread;
     }
@@ -302,12 +303,12 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
     return this->IdleTask;
 }
 
-PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(PGENERIC_THREAD_DATA CurrentThread){
-    return TsmGetNext(CurrentThread);
+PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(PGENERIC_THREAD_DATA CurrentThread, bool ProcessSwitch){
+    return TsmGetNext(CurrentThread, ProcessSwitch);
 }
 
 
-PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(PGENERIC_THREAD_DATA CurrentThread){
+PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(PGENERIC_THREAD_DATA CurrentThread, bool ProcessSwitch){
     if(
         (CurrentThread->CurrentMsSlice < CurrentThread->TotalMsSlice) &&
         (CurrentThread->State == THREAD_RUNNING)
@@ -316,7 +317,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(PGENERIC_THREAD
         return CurrentThread;
     }
 
-    return TsmGetNext(CurrentThread);
+    return TsmGetNext(CurrentThread, ProcessSwitch);
 }
 
 
