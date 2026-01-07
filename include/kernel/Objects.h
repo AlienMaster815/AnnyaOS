@@ -59,12 +59,19 @@ static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     return true;
 }
 
-static inline void LouKeReleaseReferece(PKERNEL_REFERENCE KRef){
+static inline void LouKeReleaseReference(PKERNEL_REFERENCE KRef){
     MutexLock(&KRef->RaceLock);
     UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
     Tmp--;
     LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
     MutexUnlock(&KRef->RaceLock);
+}
+
+static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
+    MutexLock(&KRef->RaceLock);
+    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
+    MutexUnlock(&KRef->RaceLock);
+    return Tmp;
 }
 
 LOUSTATUS 

@@ -310,8 +310,8 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
     LouKeAcquireSpinLock(&PageTableLock, &Irql);
     
     TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
-    TmpPageBase = PageDown(TmpPageBase,L4Entry);    
-    TmpPageBase = PageDown(TmpPageBase,L3Entry);
+    TmpPageBase = PageDown(TmpPageBase, L4Entry);    
+    TmpPageBase = PageDown(TmpPageBase, L3Entry);
     UINT64* NewPage;
 
     if(PageSize == MEGABYTE_PAGE){

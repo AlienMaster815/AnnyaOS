@@ -23,6 +23,14 @@ typedef struct _SECTION_OBJECT{
     UINT64                      FrameFlags;
 }SECTION_OBJECT, * PSECTION_OBJECT;
 
+typedef struct _PML4_LIST {
+    ListHeader  Peers;
+    UINT64*     Pml4;
+}PML4_LIST, * PPML4_LIST;
+
+static PML4_LIST Pml4MasterList = {0};
+static mutex_t Pml4MasterLock = {0};
+
 static SECTION_OBJECT   MasterSectionList = {0};
 static mutex_t          SectionListLock = {0};
 static 
@@ -57,6 +65,14 @@ LouKeCreateDeviceSection(
     SectionObject->SectionSize = Size;
     SectionObject->SectionPageProtection = PageFlags;
     SectionObject->FrameFlags = NtPageFlagsToLouPageFlags(PageFlags ,false, false);
+
+    PPML4_LIST TmpList = &Pml4MasterList;
+    MutexLock(&Pml4MasterLock);
+    while(TmpList->Peers.NextHeader){
+        TmpList = (PPML4_LIST)TmpList->Peers.NextHeader;
+        LouKeMapContinuousMemoryBlockEx((UINT64)PBase, (UINT64)VBase, Size, SectionObject->FrameFlags, TmpList->Pml4);
+    }
+    MutexUnlock(&Pml4MasterLock);
 
     return STATUS_SUCCESS;
 }
@@ -177,4 +193,16 @@ void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     }    
     MutexUnlock(&SectionListLock);
     LouPrint("LouKeVmmCloneSectionToPml() DONE\n");
+}
+
+void LouKeSendPml4ToSections(UINT64* Pml4){
+    PPML4_LIST TmpList = &Pml4MasterList;
+    MutexLock(&Pml4MasterLock);
+    while(TmpList->Peers.NextHeader){
+        TmpList = (PPML4_LIST)TmpList->Peers.NextHeader;
+    }
+    TmpList->Peers.NextHeader = (PListHeader)LouKeMallocType(PML4_LIST, KERNEL_GENERIC_MEMORY);
+    TmpList = (PPML4_LIST)TmpList->Peers.NextHeader;
+    TmpList->Pml4 = Pml4;
+    MutexUnlock(&Pml4MasterLock);
 }

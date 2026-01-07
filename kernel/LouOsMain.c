@@ -165,7 +165,6 @@ void ParserLouLoaderInformation(
 );
 void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
-
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
 
 
@@ -229,6 +228,8 @@ void InitializeSymmetricMultiProcessing(){
     LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
 
 }
+
+void LouKeWaitForProcessorInitialization();
 
 void AdvancedLousineKernelInitialization(){
     if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
@@ -301,16 +302,6 @@ bool IsSystemEfi(){
 }
 
 void PrintProcessManagerSwaps();
-
-static mutex_t CpuInitLock = {0}; 
-
-void SignalProcessorsInitPending(){
-    MutexLock(&CpuInitLock);
-}
-
-void SignalProcessorsInitialized(){
-    MutexUnlock(&CpuInitLock);
-}
 
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
@@ -389,7 +380,6 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
-    MutexSynchronize(&CpuInitLock);
 
     LOUSTATUS Status = LouKePmCreateProcessEx(
         0x00,
@@ -400,19 +390,21 @@ KERNEL_ENTRY LouOsKrnlStart(
         0x00
     );
 
+    sleep(1000);
+    LouKeSystemShutdown(ShutdownReboot);
+
     if(Status != STATUS_SUCCESS){
         LouPrint("ERROR Unable To Start Session Manager\n");
         sleep(5000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
     }
+    LouPrint("Lousine Kernel Successfully Initialized\n");
+    //ITS ALIIIIIVVVVEE!!!
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     while(1);
 
-    //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);
-
     //TODO: Create Process for C:/ANNYA/SYSTEM64/ASMSS.EXE
-
 
     while(1){
         //default kernel deomon

@@ -4,7 +4,7 @@
 
 KERNEL_IMPORT uint64_t GetCr3();
 
-
+void LouKeSendPml4ToSections(UINT64* Pml4);
 
 UINT64 LouKeVmmCreatePmlTable(){
     LouPrint("LouKeVmmCreatePmlTable()\n");
@@ -18,8 +18,9 @@ UINT64 LouKeVmmCreatePmlTable(){
     }
 
     LouKeVmmCloneSectionToPml(Pml4);
+    
+    LouKeSendPml4ToSections((UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
 
     LouKeMemoryBarrier();
-
     return (UINT64)Pml4;
 }
