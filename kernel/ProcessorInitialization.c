@@ -113,9 +113,9 @@ void HandleApProccessorInitialization(){
     unsigned int  rax, rbx, rcx, rdx;
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
-    if(rcx & (1 << 26)){
-        InitializeXSave();
-    }
+    //if(rcx & (1 << 26)){
+    //    InitializeXSave();
+    //}
     if(rdx & (1 << 25)){
         enable_fxsave();
     }else{

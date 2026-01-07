@@ -13,8 +13,10 @@ LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
 
 
 UNUSED static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
+    PGENERIC_THREAD_DATA Tmp = (PGENERIC_THREAD_DATA)ThreadHandle;
+    LouPrint("Demon:%d Has Started\n", Tmp->ThreadID);
     int Result = Thread(FunctionParam);
-    LouPrint("Thread:%h Exited With Code:%h\n", ThreadHandle, Result);
+    LouPrint("Demon:%d Exited With Code:%d\n", Tmp->ThreadID, Result);
     LouKeDestroyThread(ThreadHandle);
     while(1);
 }
@@ -77,6 +79,8 @@ LouKeCreateDeferedDemonEx(
         AfinityMask = LouKeMallocArray(UINT8, PROCESSOR_BITMAP_LENGTH, KERNEL_GENERIC_MEMORY);
         MARK_PROCESSOR_AFFILIATED(AfinityMask, Processor);
     }
+
+
     LOUSTATUS Status;
     PGENERIC_THREAD_DATA NewThread; 
     Status = CreateDemonThreadHandle(

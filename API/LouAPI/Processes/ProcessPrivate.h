@@ -12,10 +12,9 @@ typedef enum {
 } thread_state_t;
 
 typedef enum {
-    PROCESS_READY = 0,
-    PROCESS_RUNNING = 1,
-    PROCESS_TERMINATED = 2,
-    PROCESS_BLOCKED = 3,
+    PROCESS_RUNNING = 0,
+    PROCESS_TERMINATED = 1,
+    PROCESS_BLOCKED = 2,
 } process_state_t;
 
 typedef struct  PACKED _CPUContext{

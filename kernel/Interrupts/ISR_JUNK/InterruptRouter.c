@@ -80,8 +80,6 @@ void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, 
 }
 
 
-LouKIRQL InterruptSwitch(LouKIRQL New);
-
 uint8_t GetTotalHardwareInterrupts();
 
 int LouPrintPanic(char* format, ...);

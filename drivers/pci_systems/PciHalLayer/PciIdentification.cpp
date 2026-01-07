@@ -33,10 +33,10 @@ uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
 KERNEL_IMPORT size_t GetBootDeviceCount();
 
 UNUSED static void SanityCheck(LPWSTR Str, size_t Length){
-    for(size_t i = 0 ; i < Length; i++){
-        LouPrint("%c", (char)Str[i]);
-    }
-    LouPrint("\n");
+    //for(size_t i = 0 ; i < Length; i++){
+    //    LouPrint("%c", (char)Str[i]);
+    //}
+    //LouPrint("\n");
 }
 
 static void CreateRegistryEntryFromPciDevice(

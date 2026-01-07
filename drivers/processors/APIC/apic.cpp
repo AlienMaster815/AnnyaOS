@@ -297,6 +297,7 @@ PACPI_MADT_IO_APIC GetIoApicHandleFromIrq(UINT8 Irq){
 LOUDDK_API_ENTRY void local_apic_send_eoi() {    
     uint64_t ApicBase = LouKeGetCurrentApicBase();
     if(!ApicBase){
+        LouPrint("APIC.SYS:ERROR:No Base\n");
         return;
     }
     WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
@@ -308,7 +309,7 @@ KERNEL_IMPORT void IoApicUnmaskIrq(uint8_t tirq);
 void ApicInstallIoApicHandlers(){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
     while(TmpTracker->Peers.NextHeader){
-
+        LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, TmpTracker->ProcID);
         LouKeInitializeMaskHandler((PVOID)IoApicMaskIrq, TmpTracker->ProcID);
         LouKeInitializeUnmaskHandler((PVOID)IoApicUnmaskIrq, TmpTracker->ProcID);
 
@@ -397,8 +398,9 @@ void LouKeInitializeBackupPic();
 
 bool InitializeLapic(UINT32 CpuID){
     uint64_t ApicBase;
-    LouPrint("Initializing Processor:%d\n", CpuID);
+    LouPrint("Initializing Processor:%d At Address:%h\n", CpuID, GetLocalApicBase());
     ApicBase = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
+    LouPrint("New Apic Base:%h\n", ApicBase);
     LouKeSetApicBase(CpuToApicID(get_processor_id()), ApicBase);
     CPU::CPUID Cpu;
     if(Cpu.IsFeatureSupported(CPU::X2APIC)){
@@ -480,6 +482,8 @@ void LouKeInitializeCurrentApApic(){
     InitializeLapic(get_processor_id());
 }
 
+//void LouKeSetIcSetProcessorCount(UINT64 Cpus);
+
 bool InitializeApic(){
     LouPrint("Setting Up APIC\n");
     uint64_t MSR = read_msr(IA32_APIC_BASE_MSR);
@@ -511,6 +515,8 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
         EntryHeaderAddress,
         HeaderEndAddress
     );
+
+    //LouKeSetIcSetProcessorCount(GetNPROC());
 
     LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, 0);
 

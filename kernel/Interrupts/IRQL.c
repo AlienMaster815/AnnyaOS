@@ -21,30 +21,13 @@ void LouKeEnableSmpIrqlManagement(INTEGER Cpus){
     }
 }
 
-LouKIRQL InterruptSwitch(LouKIRQL New){
-    LouKIRQL Old; 
-    INTEGER ProcessorID = GetCurrentCpuTrackMember();
-
-    if(SmpSystemInterruptLayer){
-        Old = SmpSystemInterruptLayer[ProcessorID];
-        SmpSystemInterruptLayer[ProcessorID] = New;
-        LouKeMemoryBarrier();
-        return Old;
-    }
-    
-    Old = SystemInterruptLevel;
-    SystemInterruptLevel = New;
-    LouKeMemoryBarrier();
-    return Old;
-}
-
 void LocalApicSetTimer(bool On);
 void LouKeSendIcEOI();
 
 LouKIRQL LouKeGetIrql(){
     LouKeMemoryBarrier();
-    INTEGER ProcessorID = GetCurrentCpuTrackMember();
     if(SmpSystemInterruptLayer){
+        INTEGER ProcessorID = GetCurrentCpuTrackMember();
         return SmpSystemInterruptLayer[ProcessorID];
     }
     return SystemInterruptLevel;
@@ -141,8 +124,8 @@ void LouKeSetIrql(
         switch (NewIrql){
             case PASSIVE_LEVEL:{
                 SmpSystemInterruptLayer[ProcessorID] = PASSIVE_LEVEL;
-                asm("sti");
                 LouKeMemoryBarrier();
+                asm("sti");
                 return;
             }
             case APC_LEVEL:{
@@ -163,8 +146,8 @@ void LouKeSetIrql(
             }
             case HIGH_LEVEL:{
                 SmpSystemInterruptLayer[ProcessorID] = HIGH_LEVEL;
-                asm("cli");
                 LouKeMemoryBarrier();
+                asm("cli");
                 return;
             }
             default: // error case
@@ -201,6 +184,7 @@ void LouKeSetIrql(
             case HIGH_LEVEL:{
                 SystemInterruptLevel = HIGH_LEVEL;
                 asm("cli");
+                return;
             }
             default: // error case
                 return;

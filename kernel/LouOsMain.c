@@ -246,22 +246,21 @@ void AdvancedLousineKernelInitialization(){
 
     InitializeProcessManager();
 
-    //LouKeInitializeFullLouACPISubsystem();
+    LouKeInitializeFullLouACPISubsystem();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
 
     LouKeUnmaskSmpInterrupts();
 
-    //LouKeCreateDemon(
-    //    LouKeThreadManagerDemon,
-    //    0,
-    //    16 * KILOBYTE,
-    //    31
-    //);
+    LouKeCreateDemon(
+        LouKeThreadManagerDemon,
+        0,
+        16 * KILOBYTE,
+        31
+    );
 
     LouPrint("Kernel Advanced System Initialized\n");
 
-    while(1);
 }
 
 void KillDebuger(){
@@ -310,6 +309,8 @@ bool IsSystemEfi(){
     return SystemIsEfiv;
 }
 
+void PrintProcessManagerSwaps();
+
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -351,6 +352,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     InitializeGenericTables();
 
     AdvancedLousineKernelInitialization();
+
 
     LouKeInitializeMouseHandling();
 
