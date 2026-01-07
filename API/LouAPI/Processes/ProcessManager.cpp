@@ -21,7 +21,7 @@ LOUSTATUS UpdateIDT(bool Init);
 
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 
 static mutex_t CoreIrqReadyLock = {0};
 static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
@@ -266,10 +266,14 @@ UNUSED static void ProcessorIdleTask(){
     LouPrint("AP Interrupts Enabled\n");
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
+    
     while(1){
 
     }
 }
+
+KERNEL_IMPORT void SignalProcessorsInitialized();
+KERNEL_IMPORT void SignalProcessorsInitPending();
 
 UNUSED static void InitializeIdleProcess(){
     SetCr3(SystemCr3);
@@ -302,6 +306,7 @@ UNUSED static void InitializeIdleProcess(){
     MutexSynchronize(&CoreIrqReadyLock);
     LouPrint("AP Interrupts Enabled\n");
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    SignalProcessorsInitialized();
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     while(1){
 
@@ -362,6 +367,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
         if(i != InitializationProcessor){
+            SignalProcessorsInitPending();
             NewThread = LouKeCreateDeferedDemonEx(
                 0x00,
                 0x00,

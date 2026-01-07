@@ -29,7 +29,6 @@ uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-void LouKeDestroyThread(uint64_t Thread);
 void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
@@ -157,7 +156,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUDESTROYTHREAD:{
             //TODO: Do A Privaledge Check
-            LouKeDestroyThread(*(uint64_t*)Data);
+            LouKeDestroyThread((PVOID)*(uint64_t*)Data);
             return;
         }
 

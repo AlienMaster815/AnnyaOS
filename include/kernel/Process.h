@@ -262,6 +262,7 @@ LOUSTATUS LouKePmCreateProcessEx(
 #define PROCESS_PRIORITY_RINGS      5
 
 #define KERNEL_PROCESS_NAME         "The Lousine Kernel"
+#define ASMSS_PROCESS_NAME          "Annya Os Session Manager Subsystem"
 
 #endif
 

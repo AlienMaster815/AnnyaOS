@@ -144,19 +144,6 @@ uint64_t GetGSBase();
 extern uint64_t GetRBP();
 extern uint64_t RecreateDisasemblyIssue();
 extern void SetTEB();
-bool LouKeCreateProcessA(
-    string                          ApplicationName,
-    string                          CommandLine,
-    PWIN_API_SECUTIY_ATTRIBUTES     ProcessAttributes,
-    PWIN_API_SECUTIY_ATTRIBUTES     ThreadAttributes,
-    bool                            Inherited,
-    uint32_t                        Flags,
-    void*                           Enviornment,
-    string                          CurrentDirectory,
-    PWIN_API_STARTUP_INFOA          StartupInformation,
-    PWIN_API_PROCESS_INFORMATION    ProcessInformation,
-    bool                            AnnyaAPIProcess //AnnyaAPI uses different flags and setups
-);
 void* LouKeVirtualAllocUser(
     size_t      CommitSize,     //allocated PhysicalMemory
     size_t      ReservedSize,   //AllocatedVirtual
@@ -178,6 +165,10 @@ void ParserLouLoaderInformation(
 );
 void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
+
+struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
+
+
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -311,6 +302,16 @@ bool IsSystemEfi(){
 
 void PrintProcessManagerSwaps();
 
+static mutex_t CpuInitLock = {0}; 
+
+void SignalProcessorsInitPending(){
+    MutexLock(&CpuInitLock);
+}
+
+void SignalProcessorsInitialized(){
+    MutexUnlock(&CpuInitLock);
+}
+
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -379,10 +380,33 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
-    sleep(1000);
+    //LOUSTATUS LouKePmCreateProcessEx(
+    //    PHPROCESS                       HandleOut,          //Optional                       
+    //    string                          ProcessName,        //Process Name
+    //    PHPROCESS                       ParrentProcess,     //Parent Process Handle           
+    //    UINT8                           Priority,           //Process Schedualer Priority
+    //    HANDLE                          Section,            //Section of the Executable Image
+    //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
+    //);
 
-    //LouKeSystemShutdown(ShutdownReboot);
+    MutexSynchronize(&CpuInitLock);
 
+    LOUSTATUS Status = LouKePmCreateProcessEx(
+        0x00,
+        ASMSS_PROCESS_NAME,
+        0x00,
+        PROCESS_PRIORITY_HIGH,
+        0x00,
+        0x00
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR Unable To Start Session Manager\n");
+        sleep(5000);
+        LouKeSystemShutdown(ShutdownReboot);
+        while(1);
+    }
+    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     while(1);
 
     //LouKeCreateUserStackDemon(InitializeUserSpace, 0x00, 2 * MEGABYTE);

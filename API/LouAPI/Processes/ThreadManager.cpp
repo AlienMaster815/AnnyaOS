@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
-PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
 static void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
@@ -206,7 +206,7 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     return STATUS_SUCCESS;
 }
 
-PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
+KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
     PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
     MutexLock(&ThreadListLock);
     while(TmpThreadHandle->Peers.NextHeader){

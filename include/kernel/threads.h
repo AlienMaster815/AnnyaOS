@@ -209,6 +209,9 @@ semaphore_t* LouKeCreateSemaphore(int initial, int limit);
 #ifndef _KERNEL_MODULE_
 void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
 void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
+
+void LouKeDestroyThread(PVOID ThreadHandle);
+
 PTHREAD 
 LouKeCreateDemon(
     PVOID   Function,
