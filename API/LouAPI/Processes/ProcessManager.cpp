@@ -122,6 +122,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                             TmpProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
                         }
                         if(TmpProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
+                            this->Processes[NextRing] = TmpProcessRing;
                             this->CurrentProcess = TmpProcessRing->ProcessData;
                             PsmSetProcessTransitionState();
                             NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread);
