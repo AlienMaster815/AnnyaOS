@@ -87,6 +87,14 @@ LouKeOpenRegistryHandle(
     PVOID   RootHandle
 );
 
+LOUSTATUS LouKeRegGetAndCombineStringPath(  
+    PVOID   RootKey,
+    LPWSTR  PathKey,
+    LPWSTR  ExeKey,
+    string* OutString
+);   
+
+
 void LouKeDumpRegData(
     PVOID RegHandle
 );
@@ -115,6 +123,32 @@ LOUSTATUS LouKeReadRegistryDWordValue(
 LOUSTATUS LouKeReadRegistryQWordValue(
     PVOID Key, 
     QWORD* Data
+);
+
+#ifndef _OBJECT_ATTRIBUTES_DEF
+#define _OBJECT_ATTRIBUTES_DEF
+typedef struct _OBJECT_ATTRIBUTES {
+    ULONG Length;
+    HANDLE RootDirectory;
+    PUNICODE_STRING ObjectName;
+    ULONG Attributes;
+    PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
+    PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
+} OBJECT_ATTRIBUTES;
+typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
+#endif
+
+LOUSTATUS 
+LouKeVmmCreateSectionEx(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
 );
 
 #ifdef __cplusplus

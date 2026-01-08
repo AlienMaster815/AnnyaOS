@@ -30,7 +30,8 @@ typedef struct _KAPC {
 typedef ULONG ACCESS_MASK;
 typedef LONGLONG USN;
 
-
+#ifndef _OBJECT_ATTRIBUTES_DEF
+#define _OBJECT_ATTRIBUTES_DEF
 typedef struct _OBJECT_ATTRIBUTES {
     ULONG Length;
     HANDLE RootDirectory;
@@ -40,6 +41,7 @@ typedef struct _OBJECT_ATTRIBUTES {
     PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
 } OBJECT_ATTRIBUTES;
 typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
+#endif
 typedef CONST OBJECT_ATTRIBUTES* PCOBJECT_ATTRIBUTES;
 
 typedef HANDLE* PHANDLE;

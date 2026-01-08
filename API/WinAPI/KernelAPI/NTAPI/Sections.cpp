@@ -130,6 +130,7 @@ UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists)
     return Result;
 }
 
+LOUDDK_API_ENTRY
 LOUSTATUS 
 LouKeVmmCreateSectionEx(
     PHANDLE                 OutSectionHandle,

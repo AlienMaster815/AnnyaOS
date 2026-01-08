@@ -380,8 +380,51 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
+    PVOID AsmssKey = LouKeOpenRegistryHandle(
+        L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
+        0x00
+    );
+    if(!AsmssKey){
+        LouPrint("ERROR Opening Sesion Manager Key\n");
+        goto _SESSION_MANAGER_LAUNCH_FAILURE;
+    }
+    string PathKey;
+    LOUSTATUS Status;
 
-    LOUSTATUS Status = LouKePmCreateProcessEx(
+    Status = LouKeRegGetAndCombineStringPath(
+        AsmssKey,
+        L"Path",
+        L"Executable",
+        &PathKey
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR Unable To Create String For Session Manager Path\n");
+        goto _SESSION_MANAGER_LAUNCH_FAILURE;
+    }
+
+    LouPrint("Session Manager:%s\n", PathKey);    
+
+    FILE* AsmssExe = fopen(PathKey, KERNEL_GENERIC_MEMORY);
+    if(!AsmssExe){
+        LouPrint("ERROR Unable To Open File\n");
+        goto _SESSION_MANAGER_LAUNCH_FAILURE;
+    }
+
+    HANDLE SectionHandle;
+
+    LouKeVmmCreateSectionEx(
+        &SectionHandle,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        AsmssExe,
+        0x00,
+        0x00
+    );
+
+    Status = LouKePmCreateProcessEx(
         0x00,
         ASMSS_PROCESS_NAME,
         0x00,
@@ -390,27 +433,17 @@ KERNEL_ENTRY LouOsKrnlStart(
         0x00
     );
 
-    sleep(1000);
-    LouKeSystemShutdown(ShutdownReboot);
-
     if(Status != STATUS_SUCCESS){
+        _SESSION_MANAGER_LAUNCH_FAILURE:
         LouPrint("ERROR Unable To Start Session Manager\n");
         sleep(5000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
     }
     LouPrint("Lousine Kernel Successfully Initialized\n");
-    //ITS ALIIIIIVVVVEE!!!
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
+    //ITS ALIIIIIVVVVEE!!!
     while(1);
-
-    //TODO: Create Process for C:/ANNYA/SYSTEM64/ASMSS.EXE
-
-    while(1){
-        //default kernel deomon
-        //asm("INT $200");
-    }
-
 }
 
 

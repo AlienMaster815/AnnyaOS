@@ -19,3 +19,6 @@ build/%.o: %.c
 # --- Cleanup ---
 clean:
 	rm -rf build $(TARGET)
+
+
+#TODO: Fix Termination Bug
