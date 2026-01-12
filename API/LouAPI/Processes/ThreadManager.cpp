@@ -243,7 +243,6 @@ ThreadManagerIdleFallback(
     PVOID   Params
 ){
     while(1){
-        sleep(1);
         LouKeYeildExecution();
     }
     return -1;
@@ -522,14 +521,13 @@ LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
     UNUSED INTEGER Processors = GetNPROC();
 
     while(1){
-        //TODO:spinlock this
         //PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
         //PGENERIC_THREAD_DATA TailThread = 0;
         //while(TmpThreadHandle->Peers.NextHeader){
         //    TailThread = TmpThreadHandle;
         //    TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
         //    if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
-        //        TailThread->Peers.NextHeader = TmpThreadHandle->Peers.NextHeader;
+        //       TailThread->Peers.NextHeader = TmpThreadHandle->Peers.NextHeader;
         //        ((PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader)->Peers.LastHeader = (PListHeader)TailThread;
         //        PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
         //        for(INTEGER i = 0 ; i < Processors; i++){
@@ -541,6 +539,7 @@ LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
         //        LouKeTsmDestroyThreadHandle(TmpThreadHandle);
         //    }
         //}
+        LouKeYeildExecution();
     }
     return -1;
 }

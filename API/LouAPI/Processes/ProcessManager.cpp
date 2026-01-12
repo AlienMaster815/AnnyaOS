@@ -1,6 +1,16 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
+static mutex_t UpmLock = {0};
+
+void LouKeLockProcessManager(){
+    MutexLock(&UpmLock);
+}
+
+void LouKeUnlockProcessManager(){
+    MutexUnlock(&UpmLock);
+}
+
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
 LOUDDK_API_ENTRY
@@ -162,10 +172,13 @@ UNUSED static void LouKePsmDestroyProcessRing(PPROCESS_RING ProcessRing){
     LouKeFree(ProcessRing);
 }
 
-
+static spinlock_t AsignLock = {0};
 
 void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
 
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&AsignLock, &Irql);
+    LouKeLockProcessManager();
     PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
     PPROCESS_RING TmpProcessRing = this->Processes[Process->ProcessPriority];
     PPROCESS_RING CurrentProcessRing = TmpProcessRing;
@@ -184,9 +197,12 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
     CurrentProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
     NewProcessRing->Peers.NextHeader = (PListHeader)CurrentProcessRing;
     TmpProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
+    NewProcessRing->Peers.LastHeader = (PListHeader)TmpProcessRing;
 
     _PROCESS_ASSIGNMENT_DONE:
     this->CurrentProcess->ProcessState = PROCESS_RUNNING;
+    LouKeUnlockProcessManager();
+    LouKeReleaseSpinLock(&AsignLock, &Irql);
 }
 
 void PsmProcessScedualManagerObject::PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing){
@@ -222,15 +238,7 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL* OldIrql
 );
 
-static mutex_t UpmLock = {0};
 
-void LouKeLockProcessManager(){
-    MutexLock(&UpmLock);
-}
-
-void LouKeUnlockProcessManager(){
-    MutexUnlock(&UpmLock);
-}
 
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
 

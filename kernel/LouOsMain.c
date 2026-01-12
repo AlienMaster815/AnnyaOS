@@ -345,7 +345,6 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     AdvancedLousineKernelInitialization();
 
-
     LouKeInitializeMouseHandling();
 
     LookForStorageDevices();
@@ -443,7 +442,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Lousine Kernel Successfully Initialized\n");
     sleep(5000);
     LouKeSystemShutdown(ShutdownReboot);
-    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
+    //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!
     while(1);
 }
