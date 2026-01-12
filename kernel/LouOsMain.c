@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.04 RSC-2";
+string KERNEL_VERSION = "0.6.04 RSC-3";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -429,7 +429,7 @@ KERNEL_ENTRY LouOsKrnlStart(
         ASMSS_PROCESS_NAME,
         0x00,
         PROCESS_PRIORITY_HIGH,
-        0x00,
+        SectionHandle,
         0x00
     );
 
@@ -441,51 +441,12 @@ KERNEL_ENTRY LouOsKrnlStart(
         while(1);
     }
     LouPrint("Lousine Kernel Successfully Initialized\n");
+    sleep(5000);
+    LouKeSystemShutdown(ShutdownReboot);
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!
     while(1);
 }
-
-
-void LouOsKrnlMain(){
-    LouPrint("Initializing User Mode\n");
-    //PWIN_PEB ProcessExecutionBlock = (PWIN_PEB)LouKeMallocType(WIN_PEB, USER_GENERIC_MEMORY);
-    //SetPEB((uint64_t)ProcessExecutionBlock);
-    //ProcessExecutionBlock->NumberOfProcessors = GetNPROC();
-    //ProcessExecutionBlock->ProcessHeap = (uint64_t)
-    //LouKeVirtualAllocUser(MEGABYTE_PAGE, 10 * MEGABYTE, USER_GENERIC_MEMORY);
-
-    //DllModuleEntry BELL = 
-    //void (*SendProcessorFeaturesToLouMemCpy)(PPROCESSOR_FEATURES) = (void (*)(PPROCESSOR_FEATURES))LouKeLinkerGetAddress("LOUDLL.DLL", "SendProcessorFeaturesToLouMemCpy");
-    //SendProcessorFeaturesToLouMemCpy(ProcAcceleratedFeatures);
-    //LouPrint("LOUDLL.DLL Has Loaded\n");
-
-    //LouPrint("ProcessExecutionBlock:%h\n", ProcessExecutionBlock);
-
-    //BELL(0,0,0);
-     
-    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/KERNEL32.DLL", 0x00); //KERNEL32 is required for loading dlls
-    //LouPrint("KERNEL32.DLL Has Loaded\n");
-
-    //LouKeLoadUserModule("C:/ANNYA/SYSTEM64/USER32.DLL", 0x00);
-    //LouPrint("USER32.DLL Has Loaded\n");    
-
-    uint64_t InitEntry = 0x00;//(uint64_t)LouKeLoadPeExecutable("C:/ANNYA/ANNYAEXP.EXE");
-
-    LouPrint("System Memory:%d MEGABYTES Usable\n", (GetRamSize() / (1024 * 1024)));
-   
-    LouPrint("Hello World\n");
-
-    if(!InitEntry){
-        LouPrint("ERROR Could Not Jump To Usermode\n");
-        while(1);
-    }
-
-    LouPrint("InitEntry:%h\n", InitEntry);
-
-    UsrJmp(InitEntry);
-}
-
 
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
 

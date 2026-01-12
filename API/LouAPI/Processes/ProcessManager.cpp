@@ -1,6 +1,14 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
+#define USER_THREAD_STUB "AnnyaUserThreadStub"
+
+LOUDDK_API_ENTRY
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
+
 KERNEL_IMPORT
 void SetupGDT();
 
@@ -64,24 +72,7 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
     return STATUS_SUCCESS;
 }
 
-void PsmProcessScedualManagerObject::PsmYeildThread(UINT64 IrqState){
-    UNUSED PGENERIC_THREAD_DATA    NextThread;
-    UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
-    NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmYeild(CurrentThread, false);
-    LouKeSwitchToTask(
-        IrqState,
-        CurrentThread,
-        NextThread
-    );
-    this->CurrentThread = NextThread;
-}
-
 void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
-    if(SpinlockIsLocked(&this->LockOutTagOut)){
-        return;
-    }
-    MutexLock(&this->LockOutTagOut.Lock);
-
 
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
@@ -99,7 +90,6 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
             NextThread
         );
         this->CurrentThread = NextThread;
-        MutexUnlock(&this->LockOutTagOut.Lock);
         return;
     }else{
         CurrentProcess->CurrentMsSlice = 0;
@@ -132,7 +122,6 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                                 NextThread
                             );
                             this->CurrentThread = NextThread;
-                            MutexUnlock(&this->LockOutTagOut.Lock);
                             return;
                         }
                         TmpProcessRing = (PPROCESS_RING)CurrentProcessRing->Peers.NextHeader;
@@ -160,8 +149,6 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     );
 
     this->CurrentThread = NextThread;
-    MutexUnlock(&this->LockOutTagOut.Lock);
-
 }
 
 
@@ -178,8 +165,6 @@ UNUSED static void LouKePsmDestroyProcessRing(PPROCESS_RING ProcessRing){
 
 
 void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&this->LockOutTagOut, &Irql);
 
     PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
     PPROCESS_RING TmpProcessRing = this->Processes[Process->ProcessPriority];
@@ -202,8 +187,8 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
 
     _PROCESS_ASSIGNMENT_DONE:
     this->CurrentProcess->ProcessState = PROCESS_RUNNING;
-    LouKeReleaseSpinLock(&this->LockOutTagOut, &Irql);
 }
+
 void PsmProcessScedualManagerObject::PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing){
 
     LouPrint("PsmDeasignProcessFromSchedual()\n");
@@ -238,6 +223,14 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
 );
 
 static mutex_t UpmLock = {0};
+
+void LouKeLockProcessManager(){
+    MutexLock(&UpmLock);
+}
+
+void LouKeUnlockProcessManager(){
+    MutexUnlock(&UpmLock);
+}
 
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
 
@@ -412,15 +405,46 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
 }
 
 
-LOUDDK_API_ENTRY void LouKeYeildExecution(uint64_t CpuCurrentState){
-    INTEGER ProcessorID = GetCurrentCpuTrackMember();
-    PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
-    
-    Schedualer->PsmYeildThread(CpuCurrentState);
-
-    LouKeMemoryBarrier();
-}
-
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc){
     ProcessBlock.ProcStateBlock[Proc].Schedualer.PsmAsignProcessToSchedual(Process); 
+}
+
+LOUSTATUS LouKeProcessCreateEntryThread(PHPROCESS Process, PVOID Entry){
+    if((!Entry) || (!Process)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PGENERIC_PROCESS_DATA ProcessData = (PGENERIC_PROCESS_DATA)Process;
+    PVOID ImpStub = (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", USER_THREAD_STUB);
+
+    if(!ImpStub){
+        LouPrint("ERROR ImpStub Was Not Found\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    PGENERIC_THREAD_DATA ThreadOut;
+    LOUSTATUS Status = LouKeTsmCreateThreadHandle(
+        &ThreadOut,
+        ProcessData,
+        ImpStub,
+        Entry,
+        &ProcessData->Peb,
+        15,
+        (ProcessData->StackSize ? ProcessData->StackSize : (16 * KILOBYTE)),
+        10,
+        0x18 | 0b11,
+        0x20 | 0b11,
+        LONG_MODE,
+        0x00,
+        0x00
+    );
+
+    INTEGER Processors = GetNPROC();
+    for(size_t i = 0 ; i < Processors; i++){
+        if(IS_PROCESSOR_AFFILIATED(ThreadOut->AfinityBitmap, i)){
+            ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(ThreadOut);
+        }
+    }
+
+    return Status;
 }

@@ -2,7 +2,7 @@
 #include "PageDefinitions.h"
 #include <stdint.h>
 
-static spinlock_t PageTableLock = {0};
+static mutex_t PageTableLock = {0};
 
 //LouKe PFN Architecture
 
@@ -217,7 +217,6 @@ static UINT64* PageDown(UINT64* PageUpperBase, UINT64 UpperIndex){
 
 void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags){
 
-    LouKIRQL Irql;
     VAddress &= ~(KILOBYTE_PAGE - 1);
 
     if(RangeInterferes(VAddress, 1, GetKSpaceBase(), GetRamSize())){
@@ -225,7 +224,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
         while(1);
     }
 
-    LouKeAcquireSpinLock(&PageTableLock, &Irql);
+    MutexLock(&PageTableLock);
 
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
@@ -278,7 +277,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
     }
 
     ReloadCR3();
-    LouKeReleaseSpinLock(&PageTableLock, &Irql);
+    MutexUnlock(&PageTableLock);
 }
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase);
 
@@ -289,7 +288,6 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase){
 
     // Calculate the entries for each page level
-    LouKIRQL Irql;
     uint64_t L4Entry = 0;
     uint64_t L3Entry = 0;
     uint64_t L2Entry = 0;
@@ -307,7 +305,7 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
         DEBUG_TRAP
         while(1);
     }
-    LouKeAcquireSpinLock(&PageTableLock, &Irql);
+    MutexLock(&PageTableLock);
     
     TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
     TmpPageBase = PageDown(TmpPageBase, L4Entry);    
@@ -335,13 +333,13 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
     } 
     else {
         LouPrint("Could Not Map Memory\n");
-        LouKeReleaseSpinLock(&PageTableLock, &Irql);
+        MutexUnlock(&PageTableLock);
         return false;
     }
 
     PageFlush(VAddress);
     ReloadCR3();
-    LouKeReleaseSpinLock(&PageTableLock, &Irql);
+    MutexUnlock(&PageTableLock);
 
     return true;
 }

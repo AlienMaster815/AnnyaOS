@@ -8,7 +8,7 @@ LDFLAGS = \
     -Wl,--high-entropy-va \
     -L../../UserLibraries
 INCLUDES = -I../../include
-#LIBS = 
+LIBS = -lLouDll
 
 # Source and target
 SRC = asmss.c

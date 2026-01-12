@@ -12,7 +12,7 @@ int64_t LouAlpcSetInformation(
     KulaPacket[3] = ConcurrencyCount;
     KulaPacket[4] = AlpcCompletionCurrencyCount;
     while(KulaPacket[0] != 1){
-        LouCALL(LOUALPCSETINFORMATION, (uint64_t)&KulaPacket, 0);
+        LouCALL(LOUALPCSETINFORMATION, (uint64_t)&KulaPacket[0], 0);
     }
     return KulaPacket[1];
 }

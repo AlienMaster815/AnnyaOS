@@ -32,7 +32,6 @@ section .text
 extern InterruptRouter
 extern PIC_sendEOI
 extern UpdateProcessManager
-extern LouKeYeildExecution
 
 FPU_ON dq 0
 SSE_ON dq 0
@@ -2120,7 +2119,6 @@ ISR199:
 
 ISR200:
 	pusha
-	mov rcx, rsp
-	call LouKeYeildExecution  
+
 	popa                                                                                              
 	iretq

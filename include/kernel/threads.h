@@ -242,9 +242,41 @@ LouKeCreateDeferedDemonEx(
 );
 
 
+PTHREAD 
+LouKeCreateImp(
+    PVOID   Function,
+    PVOID   Params,
+    size_t  StackSize,
+    UINT8   Priority
+);
+
+PTHREAD
+LouKeCreateImpEx(
+    PVOID   Function,
+    PVOID   Params,
+    size_t  StackSize,
+    UINT8   Prioirty,
+    BOOL    ProcessorSpecific,
+    INTEGER Processor
+);
+
+PTHREAD
+LouKeCreateDeferedImpEx(
+    PVOID   Function,
+    PVOID   Params,
+    size_t  StackSize,
+    UINT8   Prioirty,
+    BOOL    ProcessorSpecific,
+    INTEGER Processor,
+    PVOID   UnblockTimeHandle
+);
+
+void LouKeYeildExecution();
+
 #else 
 KERNEL_EXPORT void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
 KERNEL_EXPORT void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
+KERNEL_EXPORT void LouKeYeildExecution();
 #endif
 #ifdef __cplusplus
 }

@@ -13,7 +13,7 @@ void* AnnyaAPIVMalloc(uint64_t BytesNeeded){
     CallData[0] = 0;
     CallData[1] = BytesNeeded;
     while(CallData[0] != 1){
-        LouCALL(LOUVMALLOC, (uint64_t)&CallData, 0);
+        LouCALL(LOUVMALLOC, (uint64_t)&CallData[0], 0);
     }
     return (void*)CallData[1];
 }

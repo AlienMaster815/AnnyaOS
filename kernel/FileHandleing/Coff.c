@@ -8,6 +8,7 @@ static LOADED_IMAGE_TRACKER MasterTracker = {0};
 static void CreateLoadedImageEntry(
     PCFI_OBJECT CfiObject
 ){
+    MutexLock(&LITMutex);
     PLOADED_IMAGE_TRACKER TmpTracker = &MasterTracker;
     while(TmpTracker->Peers.NextHeader){
         TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
@@ -16,31 +17,38 @@ static void CreateLoadedImageEntry(
     TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
     TmpTracker->LoadedObject = CfiObject;
     LouKeAcquireReference(&TmpTracker->LoadedObject->Reference);
+    MutexUnlock(&LITMutex);
 }
 
 static bool LookForLoadedImageEntry(PCFI_OBJECT Object){
+    MutexLock(&LITMutex);
     PLOADED_IMAGE_TRACKER TmpTracker = (PLOADED_IMAGE_TRACKER)MasterTracker.Peers.NextHeader;
     while(TmpTracker){
         if((UINT64)TmpTracker->LoadedObject == (UINT64)Object){
+            MutexUnlock(&LITMutex);
             return true;
         }
         TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
     }
+    MutexUnlock(&LITMutex);
     return false;
 }
 
 static void DestroyLoadedImageEntry(PCFI_OBJECT Object){
+    MutexLock(&LITMutex);
+
     PLOADED_IMAGE_TRACKER TmpTracker = (PLOADED_IMAGE_TRACKER)MasterTracker.Peers.NextHeader;
     PLOADED_IMAGE_TRACKER Follower = &MasterTracker; 
     while(TmpTracker){
         if(TmpTracker->LoadedObject == Object){
             Follower->Peers.NextHeader = TmpTracker->Peers.NextHeader;
-            
             LouKeFree(TmpTracker);
+            break;
         }
         Follower = TmpTracker;
         TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
     }
+    MutexUnlock(&LITMutex);
 }
 
 LOUSTATUS 
@@ -57,13 +65,11 @@ LouKeLoadCoffImageB(
         return STATUS_INVALID_PARAMETER;
     }
 
-    MutexLock(&LITMutex);
 
     bool Loaded = LookForLoadedImageEntry(CfiObject);
 
     if(Loaded){
         LouPrint("Image Already Loaded\n");
-        MutexUnlock(&LITMutex);
         MutexSynchronize(&CfiObject->LockOutTagOut);
         return STATUS_SUCCESS;
     }
@@ -80,7 +86,6 @@ LouKeLoadCoffImageB(
 
         LouPrint("Error Loading Coff Image: File Is Not Coff Image:%s\n", (PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature);
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         while(1);
         return STATUS_INVALID_PARAMETER;
     }
@@ -96,7 +101,6 @@ LouKeLoadCoffImageB(
     ){
         LouPrint("Error Loading Coff Image: Image Is Not Compatible With This Machine\n");
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         return STATUS_INVALID_PARAMETER;
     }
     
@@ -115,7 +119,6 @@ LouKeLoadCoffImageB(
     if((CoffStdHeader->OptionalHeader.PE64.Magic != CFI_OPTIONAL_HEADER_PE32_MAGIC) && CfiObject->AOA64){
         LouPrint("Error Loading Coff Image: Could Not Find Compatible Low Level Loader\n");
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -132,7 +135,6 @@ LouKeLoadCoffImageB(
     if(LoaderStatus != STATUS_SUCCESS){
         DestroyLoadedImageEntry(CfiObject);
     }
-    MutexUnlock(&LITMutex);
     return LoaderStatus;
 }
 
@@ -151,7 +153,6 @@ LouKeLoadCoffImageExA_ns(
     if(!CfiObject->CoffFile){
         LouPrint("Error Loading Coff Image: Image Does Not Exist\n");
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         return STATUS_NO_SUCH_FILE;
     }
 
@@ -164,7 +165,6 @@ LouKeLoadCoffImageExA_ns(
 
         LouPrint("Error Loading Coff Image: File Is Not Coff Image:%s\n", (PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature);
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         while(1);
         return STATUS_INVALID_PARAMETER;
     }
@@ -175,7 +175,6 @@ LouKeLoadCoffImageExA_ns(
     ){
         LouPrint("Error Loading Coff Image: Image Is Not Compatible With This Machine\n");
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         return STATUS_INVALID_PARAMETER;
     }
     if(memcmp((PVOID)(UINT8*)&CoffStdHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, sizeof(UINT32))){
@@ -195,7 +194,6 @@ LouKeLoadCoffImageExA_ns(
     if((CoffStdHeader->OptionalHeader.PE64.Magic != CFI_OPTIONAL_HEADER_PE32_MAGIC) && CfiObject->AOA64){
         LouPrint("Error Loading Coff Image: Could Not Find Compatible Low Level Loader\n");
         DestroyLoadedImageEntry(CfiObject);
-        MutexUnlock(&LITMutex);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -224,13 +222,10 @@ LouKeLoadCoffImageExA(
         return STATUS_INVALID_PARAMETER;
     }
 
-    MutexLock(&LITMutex);
-
     bool Loaded = LookForLoadedImageEntry(CfiObject);
 
     if(Loaded){
         LouPrint("Image Already Loaded\n");
-        MutexUnlock(&LITMutex);
         MutexSynchronize(&CfiObject->LockOutTagOut);
         return STATUS_SUCCESS;
     }
@@ -243,7 +238,6 @@ LouKeLoadCoffImageExA(
     //LouPrint("Image Size Is:%h\n", ImageSize);
 
     fclose(CfiObject->CoffFile);
-    MutexUnlock(&LITMutex);
     return LoaderStatus;
 }
 

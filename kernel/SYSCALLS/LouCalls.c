@@ -56,6 +56,8 @@ void* LouKeVirtualAllocUser(
     uint64_t    PageFlags
 );
 
+VOID LouKeDestroyThreadSyscall(PVOID ThreadHandle);
+
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
     uint64_t Data = (uint64_t)&Tmp2[1];
@@ -156,7 +158,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUDESTROYTHREAD:{
             //TODO: Do A Privaledge Check
-            LouKeDestroyThread((PVOID)*(uint64_t*)Data);
+            LouKeDestroyThreadSyscall((PVOID)*(uint64_t*)Data);
             return;
         }
 
@@ -213,6 +215,15 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUDRSDUPDATESHADOWCLIPSUBSTATE:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouKeUpdateShadowClipSubState((PDRSD_CLIP)Tmp[0],(INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
+            return;
+        }
+        case LOUSHUTDOWN:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeSystemShutdown(Tmp[0]);
+            return;
+        }
+        case LOUYEILDEXE:{
+            LouKeYeildExecution();
             return;
         }
         default:

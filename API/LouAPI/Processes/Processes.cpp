@@ -2,6 +2,12 @@
 
 static GENERIC_PROCESS_DATA MasterProcessList = {0};
 static mutex_t ProcessListLock = {0};
+static KERNEL_REFERENCE TotalProcesses = {0};
+
+LOUDDK_API_ENTRY
+SIZE LouKePmGetProcessCount(){
+    return LouKeGetReferenceCount(&TotalProcesses);
+}
 
 static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){
 
@@ -14,7 +20,9 @@ static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){
     TmpProcessObject = (PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader;
     TmpProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, KERNEL_GENERIC_MEMORY);
     strncpy(TmpProcessObject->ProcessName, ProcessName, strlen(ProcessName));
+    LouKeAcquireReference(&TotalProcesses);
     MutexUnlock(&ProcessListLock);
+    
     return TmpProcessObject;
 }
 
@@ -29,6 +37,8 @@ UNUSED static void DestroyProcessObject(
             LouKeFree(ProcessObject->ProcessName);
             LouKeFree(ProcessObject);
             MutexUnlock(&ProcessListLock);
+            LouKeReleaseReference(&TotalProcesses);
+
             return;
         }
         TmpProcessObject = (PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader;
@@ -55,6 +65,12 @@ static UINT16 AllocateProcessID(){
 }
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc);
 
+LOUDDK_API_ENTRY
+LOUSTATUS LouKeSectionInitNewProcess(
+    PHPROCESS    Process,
+    HANDLE      Section
+);
+
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,                       
     string                          ProcessName,
@@ -63,6 +79,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     HANDLE                          Section,
     PLOUSINE_CREATE_PROCESS_PARAMS  Params 
 ){
+    LOUSTATUS Status;
     LouPrint("LouKePmCreateProcessEx()\n");
     size_t Processors = GetNPROC();
 
@@ -101,6 +118,18 @@ LOUSTATUS LouKePmCreateProcessEx(
     NewProcessObject->ProcessID = AllocateProcessID();
     NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
 
+    if(Section){
+        Status = LouKeSectionInitNewProcess(
+            (PHPROCESS)NewProcessObject, 
+            Section
+        );
+
+        if(Status != STATUS_SUCCESS){
+            LouPrint("ERROR Unable To Initialize Process For Serction\n");
+            return Status;
+        }
+    }
+
     if(Params){
 
     }else{
@@ -110,7 +139,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     }
 
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
-    
+
     return STATUS_SUCCESS;
 }
 

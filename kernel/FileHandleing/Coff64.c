@@ -1,5 +1,32 @@
 #include "Coff.h"
 
+static bool LoadCoffLoadSupport(string Path, string System){
+    HANDLE SectionHandle;
+    string File = LouKeAddFileToPath(Path, System);
+    FILE* NewCoff = fopen(File, KERNEL_GENERIC_MEMORY);
+
+    LOUSTATUS Status = LouKeVmmCreateSectionEx(
+        &SectionHandle,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        NewCoff,
+        0x00,
+        0x00
+    );
+    return (Status == STATUS_SUCCESS);
+}
+
+LOUSTATUS 
+LouKeVmmCreateSharedSection(
+    PVOID           PBase,
+    PVOID           VBase,
+    SIZE            Size,
+    UINT64          FrameFlags
+);
+
 UNUSED void EnableCoffImageProtection(
     PCFI_OBJECT CfiObject
 ){
@@ -35,6 +62,15 @@ UNUSED void EnableCoffImageProtection(
             VirtualSize,
             PageFlags
         );
+        
+        if(!CfiObject->KernelObject){
+            LouKeVmmCreateSharedSection(
+                (PVOID)PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                VirtualSize, 
+                PageFlags
+            );
+        }
     }    
 }
 
@@ -186,6 +222,9 @@ static inline uint8_t FilePathCountBackToDirectory(string FilePath){
     return i + 1;
 }
 
+bool 
+LouKeLinkerCheckLibraryPresence(string SystemName);
+
 LOUSTATUS ConfigureImportTables(
     PCFI_OBJECT CfiObject
 ){
@@ -222,12 +261,24 @@ LOUSTATUS ConfigureImportTables(
             uint64_t AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
             if (!AddressOfPeFunction){
 
-                LouPrint("ERROR M:E is 0 :: %s:%s\n", SYSName, FunctionName);
+                if(LouKeLinkerCheckLibraryPresence(SYSName)){
+                    LouPrint("ERROR M:E is 0 :: %s:%s\n", SYSName, FunctionName);
+                }else{
+
+                    //TODO: Check Current Path
+
+                    if(LoadCoffLoadSupport("C:/ANNYA/SYSTEM64", SYSName)){
+                        if((AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName))){
+                            goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
+                        }
+                    }
+                }
+                LouPrint("HERE:%s\n", SYSName);
                 while(1);
                 return STATUS_UNSUCCESSFUL;
             }
 
-            //_NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL:
+            _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL:
 
             *(uint64_t*)TableOffset = AddressOfPeFunction;
 
@@ -256,13 +307,11 @@ LOUSTATUS LouKeLoadCoffImageA64(
 
     LOUSTATUS Status = STATUS_INVALID_PARAMETER;
     if(!CfiObject->KernelObject){ //only user objects are allowed non aslr addresses
-        //Status = LouKeRequestVirtualAddressAllocation(
-        //    Pe64ImageHeader->OptionalHeader.PE64.ImageBase,
-        //    ISize,
-        //    &CfiObject->PhysicalLoadedAddress
-        //);
-        LouPrint("COFF64::TODO::USER_MAPPING\n");
-        while(1);
+        Status = LouKeRequestVirtualAddressAllocation(
+            Pe64ImageHeader->OptionalHeader.PE64.ImageBase,
+            ISize,
+            &CfiObject->PhysicalLoadedAddress
+        );
     }
 
     if(Status != STATUS_SUCCESS){

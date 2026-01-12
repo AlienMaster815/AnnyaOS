@@ -7,6 +7,7 @@
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
+void LouYeildExecution();
 
 static KULA_RVA_NAME KernelBaseNames[KERNELBASE_RVA_ENTRIES] = {
     "InitializeCriticalSectionEx",
@@ -234,12 +235,12 @@ LOUDLL_API
 int LouPrint(char* Str, ...){
     va_list Arg;
     va_start(Arg, Str);
-    uint64_t Data[3];
+    uint64_t Data[3] = {0};
     Data[0] = 0;
     Data[1] = (uint64_t)Str;
     Data[2] = (uint64_t)&Arg;
     while(Data[0] != 1){
-        LouCALL(LOUPRINTCALL, (uint64_t)&Data, 0);
+        LouCALL(LOUPRINTCALL, (uint64_t)&Data[0], 0);
     }
     va_end(Arg);
     return Data[1];
@@ -253,12 +254,12 @@ PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
         return 0x00;
     }
     //uint64_t Result;
-    uint64_t Data[3];
+    uint64_t Data[3] = {0};
     Data[0] = 0;
     Data[1] = (uint64_t)Function;
     Data[2] = (uint64_t)FunctionParameters;
     while(Data[0] != 1){
-        LouCALL(LOUCREATETHREAD, (uint64_t)&Data ,0);
+        LouCALL(LOUCREATETHREAD, (uint64_t)&Data[0] ,0);
     }
     return (PTHREAD)Data[1];
 }
@@ -266,10 +267,10 @@ PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
 
 LOUDLL_API
 void AnnyaDestroyThread(PTHREAD Thread){
-    uint64_t Data[2];
-    Data[1] = (uint64_t) Thread;
+    uint64_t Data[2] = {0};
+    Data[1] = (uint64_t)Thread;
     while(Data[0] != 1){
-        LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data, 0);
+        LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data[0], 0);
     }
 }
 
@@ -496,7 +497,7 @@ void GetRtcTimeData(TIME_T* PTIME){
     Data[0] = 0;
     Data[1] = (uint64_t)PTIME;
     while(Data[0] != 1){
-        LouCALL(LOUGETRTCDATA,(uint64_t)&Data,0);
+        LouCALL(LOUGETRTCDATA,(uint64_t)&Data[0],0);
     }
 }
 
@@ -520,13 +521,7 @@ static inline void TailLouCall(
     asm("INT $0x80");
 }
 
-static void LouSpin(){
-    uint16_t i = 0;
-    while(i != (uint16_t)-1){
-        i++;
-    }
-}
-
+ 
 LOUDLL_API
 void LouCALL(
     uint64_t Call,
@@ -534,7 +529,6 @@ void LouCALL(
     uint64_t SystemEmulation
 ){
     TailLouCall(Call, Data, SystemEmulation);
-    LouSpin();
 }
 
 
@@ -542,9 +536,11 @@ LOUDLL_API
 void AnnyaUserThreadStub(void* PTHREAD, void* THREAD_DATA, uintptr_t ThreadHandle){
     DWORD (*NewThread)(void* THREAD_DATA) = PTHREAD;
     DWORD Result = NewThread(THREAD_DATA);    
-    LouPrint("Thread:%h :: Exited With Value:%h\n", PTHREAD, Result);
     AnnyaDestroyThread((void*)ThreadHandle);
-    while(1);
+    LouPrint("User Thread:%h :: Exited With Value:%h\n", ThreadHandle, Result);
+    while(1){
+        LouYeildExecution();
+    }
 }
 
 typedef struct _ATTACH_THREAD_DATA{
@@ -593,7 +589,7 @@ void LouGenericFreeHeap(void* Heap, void* Address){
     KulaPacket[1] = (uint64_t)Heap;
     KulaPacket[2] = (uint64_t)Address;
     while(!KulaPacket){
-        LouCALL(LOUFREEGENERICHEAP, (uint64_t)&KulaPacket, 0);
+        LouCALL(LOUFREEGENERICHEAP, (uint64_t)&KulaPacket[0], 0);
     }
 }
 
@@ -716,10 +712,40 @@ void* memset(void* dest, int value, size_t count) {
 
 LOUDLL_API
 void LouYeildExecution(){
-    asm("INT $200");
+    uint64_t KulaPacket;
+    while(KulaPacket != 1){
+        LouCALL(LOUYEILDEXE, (uint64_t)&KulaPacket, 0);
+    }
 }
 
 LOUDLL_API
 void ReleaseLoadLibraryALock(mutex_t* Mutex){
     MutexUnlock(Mutex);
+}
+
+struct InitData{
+    HANDLE      Proces; 
+    mutex_t     Lock;
+};
+
+LOUDLL_API
+DWORD LouProcessInitThread(
+    PVOID   Data
+){
+    struct InitData* ImpData = (struct InitData*)Data;
+
+
+
+    MutexUnlock(&ImpData->Lock);
+    return 0;
+}
+
+LOUDLL_API
+void 
+LouSystemShutdown(SHUTDOWN_ACTION ShutDown){
+    uint64_t Data[2] = {0};
+    Data[1] = (uint64_t)ShutDown;
+    while(Data[0] != 1){
+        LouCALL(LOUSHUTDOWN, (uint64_t)Data, 0);
+    }
 }

@@ -169,6 +169,8 @@ void LouCALL(
 #define LOUDRSDUPDATECLIPSUBSTATE               110
 #define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
 #define LOUDRSDSETPLANEINFO                     112
+#define LOUSHUTDOWN                             113
+#define LOUYEILDEXE                             114
 
 #define WINECALL            1   
 #define WINECALL_FASTFAIL   1

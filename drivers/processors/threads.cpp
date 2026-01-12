@@ -70,8 +70,6 @@ KERNEL_IMPORT void LouKeSendIcEOI();
 KERNEL_IMPORT void SetInterruptFlags();
 KERNEL_IMPORT void UnSetInterruptFlags();
 
-KERNEL_IMPORT mutex_t* LouKeGetInterruptGlobalLock();
-
 KERNEL_IMPORT
 void SetTEB(uint64_t Teb);
 KERNEL_IMPORT LouKIRQL LouKeGetIrql();

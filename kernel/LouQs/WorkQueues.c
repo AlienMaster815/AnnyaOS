@@ -77,8 +77,7 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     while(1){
         
 
-
-        //asm("INT $200");
+        LouKeYeildExecution();
     }
     return STATUS_SUCCESS;
 }

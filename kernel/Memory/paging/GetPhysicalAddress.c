@@ -45,9 +45,11 @@ LOUSTATUS RequestPhysicalAddress(
     //LouPrint("L1Entry:%h\n", L1Entry);  
 
     UINT64* Tmp = (UINT64*)((UINT64)GetPageBase() + GetKSpaceBase());
+    if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (uint64_t*)(Tmp[L4Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
+    if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (uint64_t*)(Tmp[L3Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());

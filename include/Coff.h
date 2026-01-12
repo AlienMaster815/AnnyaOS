@@ -752,6 +752,8 @@ typedef struct _CFI_OBJECT{
     PVOID                   ExecututionLoading;
     KERNEL_REFERENCE        Reference;
     PVOID                   Entry;
+    UINT64                  StackSize;
+    UINT64                  HeapSize;
     mutex_t                 LockOutTagOut;    
 }CFI_OBJECT, * PCFI_OBJECT;
 

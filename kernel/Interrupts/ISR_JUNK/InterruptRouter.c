@@ -139,12 +139,6 @@ void DeAllocateSaveContext(uint64_t Context){
     ProcessorCallbacks->DeAllocateSaveContext(Context);
 }
 
-static mutex_t InterruptLock;
-
-mutex_t* LouKeGetInterruptGlobalLock(){
-    return &InterruptLock;
-}
-
 void LouKeThrowPc();
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {

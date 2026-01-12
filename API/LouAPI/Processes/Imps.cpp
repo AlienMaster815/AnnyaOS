@@ -1,34 +1,14 @@
 #include "ProcessPrivate.h"
 
-LOUDDK_API_ENTRY VOID LouKeDestroyThreadSyscall(PVOID ThreadHandle){
-    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
-    ThreadData->State = THREAD_TERMINATED;
-}
+#define USER_THREAD_STUB "AnnyaUserThreadStub"
 
-LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
-    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
+LOUDDK_API_ENTRY
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
 
-    LouKeDestroyThreadSyscall(ThreadHandle);
-
-    if(ThreadData->ThreadID == LouKeGetThreadIdentification()){
-        LouKeYeildExecution();
-        while(1);
-    }
-
-}
-
-
-UNUSED static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
-    PGENERIC_THREAD_DATA Tmp = (PGENERIC_THREAD_DATA)ThreadHandle;
-    LouPrint("Demon:%d Has Started\n", Tmp->ThreadID);
-    int Result = Thread(FunctionParam);
-    LouPrint("Demon:%d Exited With Code:%d\n", Tmp->ThreadID, Result);
-    LouKeDestroyThread(ThreadHandle);
-    while(1);
-}
-
-
-static LOUSTATUS CreateDemonThreadHandle(
+static LOUSTATUS CreateImpThreadHandle(
     PTHREAD*    ThreadOut, 
     PVOID       WorkEntry, 
     PVOID       WorkParam, 
@@ -37,27 +17,35 @@ static LOUSTATUS CreateDemonThreadHandle(
     PVOID       AfinityBitmap,
     PVOID       UnblockTime
 ){
+
+    PVOID ImpStub = (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", USER_THREAD_STUB);
+
+    if(!ImpStub){
+        LouPrint("ERROR ImpStub Was Not Found\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+
     PGENERIC_PROCESS_DATA ProcessData = 0x00;
     LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);    
     
     LOUSTATUS Status = LouKeTsmCreateThreadHandle(
         (PGENERIC_THREAD_DATA*)ThreadOut,
         ProcessData,
-        (PVOID)ThreadStub,
+        ImpStub,
         WorkEntry,
         WorkParam,
         Prioirty,
         StackSize,
         10,
-        0x08,
-        0x10,
+        0x18 | 0b11,
+        0x20 | 0b11,
         LONG_MODE,
         (PTIME_T)UnblockTime,
         (UINT8*)AfinityBitmap
     );
 
     if(Status != STATUS_SUCCESS){
-        LouPrint("CreateDemonThreadHandle() ERROR:Unable To Create Thread Handle\n");
+        LouPrint("CreateImpThreadHandle() ERROR:Unable To Create Thread Handle\n");
     }
 
     return Status;
@@ -66,7 +54,7 @@ static LOUSTATUS CreateDemonThreadHandle(
 
 LOUDDK_API_ENTRY
 PTHREAD
-LouKeCreateDeferedDemonEx(
+LouKeCreateDeferedImpEx(
     PVOID   Function,
     PVOID   Params,
     SIZE    StackSize,
@@ -80,7 +68,7 @@ LouKeCreateDeferedDemonEx(
         LouPrint("Unable To Create Thread: INVALID_PRIORITY\n");
         return 0x00;
     }
-    LouPrint("Creating Demon\n");
+    LouPrint("Creating Imp\n");
     if(ProcessorSpcific){
         AfinityMask = LouKeMallocArray(UINT8, PROCESSOR_BITMAP_LENGTH, KERNEL_GENERIC_MEMORY);
         MARK_PROCESSOR_AFFILIATED(AfinityMask, Processor);
@@ -89,7 +77,7 @@ LouKeCreateDeferedDemonEx(
 
     LOUSTATUS Status;
     PGENERIC_THREAD_DATA NewThread; 
-    Status = CreateDemonThreadHandle(
+    Status = CreateImpThreadHandle(
         (PTHREAD*)&NewThread,
         Function,
         Params,
@@ -100,14 +88,14 @@ LouKeCreateDeferedDemonEx(
     );
 
     if(Status != STATUS_SUCCESS){
-        LouPrint("LouKeCreateDeferedDemonEx() Unable To Create Thread\n");
+        LouPrint("LouKeCreateDeferedImpEx() Unable To Create Thread\n");
         return 0x00;
     }
 
     PGENERIC_PROCESS_DATA ProcessData = 0x00;
     Status = LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);
     if(Status != STATUS_SUCCESS){
-        LouPrint("LouKeCreateDeferedDemonEx() Unable To Get Kernel Process Handle\n");
+        LouPrint("LouKeCreateDeferedImpEx() Unable To Get Kernel Process Handle\n");
         return 0x00;
     }
     INTEGER Processors = GetNPROC();
@@ -121,7 +109,7 @@ LouKeCreateDeferedDemonEx(
 
 LOUDDK_API_ENTRY
 PTHREAD
-LouKeCreateDemonEx(
+LouKeCreateImpEx(
     PVOID   Function,
     PVOID   Params,
     SIZE    StackSize,
@@ -131,7 +119,7 @@ LouKeCreateDemonEx(
 ){
     TIME_T CurrentTime = {0}; 
     LouKeGetTime(&CurrentTime);
-    return LouKeCreateDeferedDemonEx(
+    return LouKeCreateDeferedImpEx(
         Function,
         Params,
         StackSize,
@@ -144,13 +132,13 @@ LouKeCreateDemonEx(
 
 LOUDDK_API_ENTRY 
 PTHREAD 
-LouKeCreateDemon(
+LouKeCreateImp(
     PVOID   Function,
     PVOID   Params,
     SIZE    StackSize,
     UINT8   Prioirty
 ){
-    return LouKeCreateDemonEx(
+    return LouKeCreateImpEx(
         Function,
         Params,
         StackSize,

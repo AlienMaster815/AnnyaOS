@@ -43,3 +43,4 @@ EXPORTS
     LouUpdateClipLocation
     LouDrsdClipToClip
     LouDrsdSetPlaneInformation
+    LouSystemShutdown

@@ -224,9 +224,6 @@ void LouKeReleasePciDriverPath(string Path);
 string LouKeAcquirePciDriverPath(PPCI_COMMON_CONFIG Config);
 LOUDDK_API_ENTRY
 void ScanTheRestOfHarware(){
-    //LouKIRQL Irql;
-    //LouKeAcquireSpinLock(&ScanLock, &Irql);
-
     PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
 	Config.Header.DeviceID = ANY_PCI_ID;
@@ -266,7 +263,6 @@ void ScanTheRestOfHarware(){
         DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
         LouKeReleasePciDriverPath(DriverPath);
     }
-    //LouKeReleaseSpinLock(&ScanLock, &Irql);    
 }
 
 KERNEL_IMPORT

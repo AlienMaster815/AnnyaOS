@@ -30,16 +30,11 @@ typedef struct  PACKED _CPUContext{
 
 void CheckWinCallTable(int64_t Call, uint64_t Data);
 void CheckLouCallTables(int64_t Call, uint64_t Data);
-mutex_t* LouKeGetInterruptGlobalLock();
 void RestoreEverythingWithInterruptBuffer(uint64_t* ContextHandle);
 void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
 
 void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t StackPointer){
     uint64_t* Status = (uint64_t*)Data;
-    if(MutexIsLocked(LouKeGetInterruptGlobalLock())){
-        *Status = 0;
-        return;
-    }
     //Status Success the Call went 
     //througt to be handled
     *Status = 1;

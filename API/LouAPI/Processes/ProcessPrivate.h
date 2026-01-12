@@ -137,7 +137,6 @@ static inline LOUSTATUS CreateShecdualerObject(
 
 typedef class TsmThreadSchedualManagerObject{
     private:
-        spinlock_t                          LockOutTagOut;                     
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
@@ -178,6 +177,7 @@ typedef struct _GENERIC_PROCESS_DATA{
     INSTRUCTION_MODE                        InstructionMode;
     UINT8*                                  AfinityBitmap;
     HANDLE                                  ProcessSection;
+    UINT64                                  StackSize;
 }GENERIC_PROCESS_DATA, * PGENERIC_PROCESS_DATA;
 
 typedef struct _PROCESS_RING{
@@ -187,7 +187,6 @@ typedef struct _PROCESS_RING{
 
 typedef class PsmProcessScedualManagerObject{
     private:
-        spinlock_t                          LockOutTagOut;                     
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
