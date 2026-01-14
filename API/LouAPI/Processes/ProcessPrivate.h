@@ -8,14 +8,12 @@ typedef enum {
     THREAD_RUNNING = 1,
     THREAD_TERMINATED = 2,
     THREAD_BLOCKED = 3,
-    THREAD_HANDOFF = 4,
-    THREAD_YEILD = 5,
 } thread_state_t;
 
 typedef enum {
-    PROCESS_RUNNING = 0,
-    PROCESS_TERMINATED = 1,
-    PROCESS_BLOCKED = 2,
+    PROCESS_RUNNING = 1,
+    PROCESS_TERMINATED = 2,
+    PROCESS_BLOCKED = 3,
 } process_state_t;
 
 typedef struct  PACKED _CPUContext{
@@ -69,6 +67,7 @@ typedef struct _GENERIC_THREAD_DATA{
     mutex_t                         LockOutTagOut;
     thread_state_t                  State;
     struct _GENERIC_PROCESS_DATA*   Process;
+    KERNEL_REFERENCE                EFBY;
     TEB                             Teb;
     UINT64                          ThreadID;
     UINT8                           ThreadPriority;

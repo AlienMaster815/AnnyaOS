@@ -306,10 +306,13 @@ void PrintProcessManagerSwaps();
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
+
     memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
+
     ParserLouLoaderInformation(
         &KernelLoaderInfo
     );
+
 
     InitializeBasicMemcpy();
     
@@ -379,7 +382,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
-    PVOID AsmssKey = LouKeOpenRegistryHandle(
+    /*PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
         0x00
     );
@@ -438,9 +441,9 @@ KERNEL_ENTRY LouOsKrnlStart(
         sleep(5000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
-    }
+    }*/
     LouPrint("Lousine Kernel Successfully Initialized\n");
-    sleep(5000);
+    sleep(3000);
     LouKeSystemShutdown(ShutdownReboot);
     //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!

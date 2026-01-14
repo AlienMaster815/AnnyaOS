@@ -521,6 +521,10 @@ void LouGeneralFreeMemory(void* Address){
     LouFree((RAMADD)Tmp);
 }
 
+static inline uint64_t FuckThis(uint64_t Addr){
+    return Addr;
+}
+
 void LouFree(RAMADD Addr) {
     MutexLock(&MemmoryMapLock);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
@@ -542,8 +546,9 @@ void LouFree(RAMADD Addr) {
         }
     }
     MutexUnlock(&MemmoryMapLock);  
-    //LouPrint("Address Not Freed:%h\n", Addr);
-    
+    LouPrint("Address Not Freed:%h\n", Addr);
+    FuckThis((UINT64)Addr);
+    while(1);
 }
 
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){

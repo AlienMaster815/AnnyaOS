@@ -57,6 +57,8 @@ void InitializeInterruptRouter(){
 }
 
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData) {
+    //LouPrint("Handler:%h Installed For Vector:%d\n", Handler, InterruptNumber);
+
     PINTERRUPT_ROUTER_ENTRY TmpRouter = &InterruptRouterTable[InterruptNumber]; 
 	if(NeedFlotationSave){
         InterruptRouterTable[InterruptNumber].NeedFlotationSave = true;
@@ -141,9 +143,14 @@ void DeAllocateSaveContext(uint64_t Context){
 
 void LouKeThrowPc();
 
+void LouKeSetIrqlNoFlagUpdate(
+    LouKIRQL  NewIrql,
+    LouKIRQL* OldIrql
+);
+
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
-    //LouKIRQL Irql;
-    //LouKeSetIrql(HIGH_LEVEL, &Irql);
+    LouKIRQL Irql;
+    LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, &Irql);
     uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
@@ -164,11 +171,11 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
             RestoreEverythingWithInterruptBuffer(&ContextHandle);
         }
-        //LouKeSetIrql(Irql, 0x00);
+        LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
         LouKeSendIcEOI();
         return;
     }
-    //LouKeSetIrql(Irql, 0x00);
+    LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
     LouKeSendIcEOI();
     return;
     

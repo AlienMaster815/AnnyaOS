@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 199
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 200
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -444,6 +444,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[196] = "LouKeUsbGetDescriptorRequest";
     ImportTables[0].FunctionName[197] = "LouKeWaitForEvent";
     ImportTables[0].FunctionName[198] = "LouKeSignalEvent";
+    ImportTables[0].FunctionName[199] = "LouKeReportMutexBlock";
 
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -644,6 +645,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[196] = (uint64_t)LouKeUsbGetDescriptorRequest;
     ImportTables[0].VirtualAddress[197] = (uint64_t)LouKeWaitForEvent;
     ImportTables[0].VirtualAddress[198] = (uint64_t)LouKeSignalEvent;
+    ImportTables[0].VirtualAddress[199] = (uint64_t)LouKeReportMutexBlock;
 
 }
 

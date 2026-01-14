@@ -107,14 +107,13 @@ void ParserLouLoaderInformation(
     PLOULOAD_MEMORY_TRACKER BootPartition = (PLOULOAD_MEMORY_TRACKER)BootRamAllocationTable->BootPartition; 
     size_t RamAllocations = BootRamAllocationTable->PartitionItems;
     SetRamSize(LoaderInfo->KernelVm.KernelVmLimit);
-    
+        
     for(size_t i = 0 ; i < RamAllocations; i++){
         EnforceSystemMemoryMap(
             BootPartition[i].Address,
             BootPartition[i].size
         );        
     }    
-
-    ParseMemoryMap((struct multiboot_tag*)BootRamAllocationTable->RamMap);
+    ParseMemoryMap((struct multiboot_tag*)BootRamAllocationTable->RamMap);    
     ParseMBootTags((struct multiboot_tag*)LoaderInfo->MultibootInfo);    
 }

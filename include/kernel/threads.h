@@ -74,37 +74,41 @@ static inline bool LouKeCheckAtomicBoolean(PATOMIC_BOOLEAN b){
 }
 
 int LouPrint(char*, ...);
+#ifdef _KERNEL_MODULE_
+KERNEL_EXPORT void LouKeReportMutexBlock(mutex_t* m, UINT64 Thread);
+#else
+void LouKeReportMutexBlock(mutex_t* m, UINT64 Thread);
+#endif
 
 static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
+    uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
+    Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
     if(LockOutTagOut){
+        if(LouKeGetAtomic(&m->locked)){
+            uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
+            Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
+            LouKeReportMutexBlock(m, Thread);
+        }
+        LouKeMemoryBarrier();
         while (__atomic_test_and_set(&m->locked.counter, 1)) {
             // spin
             LouKeMemoryBarrier();
         }
     }else{
-        uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
-        Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
-        #ifndef _USER_MODE_CODE_
+
         if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
             //access Granted
             LouKeMemoryBarrier();
             return;
         }
-        #else
-            //TODO: Use User Mode Thread Request
-        #endif
         while (__atomic_test_and_set(&m->locked.counter, 1)) {
             // spin
             LouKeMemoryBarrier();
         }
-        #ifndef _USER_MODE_CODE_
-        Thread = LouKeGetThreadIdentification();
-        #else
-            //TODO: Use User Mode Thread Request
-        #endif
-        LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
-        LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
     }
+    Thread = LouKeGetThreadIdentification();
+    LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
+    LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
     LouKeMemoryBarrier();
 }
 

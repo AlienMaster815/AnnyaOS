@@ -313,7 +313,7 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
     UINT64* NewPage;
 
     if(PageSize == MEGABYTE_PAGE){
-        if(!(TmpPageBase[L2Entry] & (1 << 7))){
+        if(!(TmpPageBase[L2Entry] & (1 << 7)) && (TmpPageBase[L2Entry] & ~(FLAGSSPACE))){
             LouFree((RAMADD)(TmpPageBase[L2Entry] & ~(FLAGSSPACE)));
         }
         TmpPageBase[L2Entry] = GetPageValue(PAddress, FLAGS | (1 << 7));

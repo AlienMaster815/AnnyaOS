@@ -31,6 +31,11 @@ void uintToHexString(uint64_t number, char* hexString);
 
 static spinlock_t PrintLock; 
 
+mutex_t* LouKeGetPrintMutex(){
+    return &PrintLock.Lock;
+}
+
+
 void print_binary64(uint64_t number) {
     for(uint8_t BitMask = 0; BitMask < 64; BitMask++){
         if(number & (1 << (63 - BitMask))){

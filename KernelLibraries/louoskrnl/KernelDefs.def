@@ -199,3 +199,4 @@ EXPORTS
     LouKeUsbGetDescriptorRequest
     LouKeSignalEvent
     LouKeWaitForEvent
+    LouKeReportMutexBlock

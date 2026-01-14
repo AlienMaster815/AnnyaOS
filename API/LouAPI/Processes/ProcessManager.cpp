@@ -84,10 +84,11 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
 
 void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
 
+    BOOL ProcessSwitch = false;
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
     
-    PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
+    /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(
         (CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice) &&
         (CurrentProcess->ProcessState == PROCESS_RUNNING)
@@ -144,13 +145,15 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                 break;
             }        
         }
+    }*/
+
+    if(this->CurrentProcess != this->SystemProcess){
+        this->CurrentProcess = this->SystemProcess;    
+        PsmSetProcessTransitionState();
+        ProcessSwitch = true;
     }
-
-    this->CurrentProcess = this->SystemProcess;    
-    PsmSetProcessTransitionState();
-    
-    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
-
+        
+    NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, ProcessSwitch);
 
     LouKeSwitchToTask(
         IrqState,
@@ -177,9 +180,9 @@ static spinlock_t AsignLock = {0};
 void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
 
     LouKIRQL Irql;
+    PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
     LouKeAcquireSpinLock(&AsignLock, &Irql);
     LouKeLockProcessManager();
-    PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
     PPROCESS_RING TmpProcessRing = this->Processes[Process->ProcessPriority];
     PPROCESS_RING CurrentProcessRing = TmpProcessRing;
 
@@ -404,6 +407,13 @@ uint64_t LouKeGetThreadIdentification(){
         return 0;
     }
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadID;
+}
+
+LOUDDK_API_ENTRY
+PGENERIC_THREAD_DATA
+LouKeGetCurrentThreadData(){
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread;
 }
 
 LOUDDK_API_ENTRY
