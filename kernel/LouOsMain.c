@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.04 RSC-3";
+string KERNEL_VERSION = "0.6.04 RSC-4";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -96,7 +96,6 @@ void InitializeNtKernelTransitionLayer();
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
 void InitializeBootGraphics();
-void UpdateProcessManager(uint64_t Rsp);
 void InitializeInterruptRouter();
 void LouKeProbeSbIsa();
 void SetupGDT();
@@ -201,7 +200,7 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     RegisterInterruptHandler(SIMDFloatPointException, INTERRUPT_SERVICE_ROUTINE_19, false, 0);
     RegisterInterruptHandler(VirtualizationException, INTERRUPT_SERVICE_ROUTINE_20, false, 0);
     RegisterInterruptHandler(ControlProtectionException, INTERRUPT_SERVICE_ROUTINE_21, false, 0);
-    RegisterInterruptHandler(UpdateProcessManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
+    //RegisterInterruptHandler(UpdateProcessManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
     //RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
     RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);

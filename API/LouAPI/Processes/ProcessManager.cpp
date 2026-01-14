@@ -83,7 +83,6 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
 }
 
 void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
-
     BOOL ProcessSwitch = false;
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
@@ -162,6 +161,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     );
 
     this->CurrentThread = NextThread;
+
 }
 
 
@@ -244,7 +244,7 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
 
 
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
-
+    
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
 
@@ -253,8 +253,6 @@ LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
     MutexUnlock(&UpmLock);
 
     LouKeSendIcEOI();
-
-    return;
 }
 
 static mutex_t InitLock = {0};

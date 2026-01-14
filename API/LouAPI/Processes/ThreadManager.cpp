@@ -38,6 +38,63 @@ UNUSED static void LouKeTsmDestroyThreadRing(PTHREAD_RING ThreadRing){
     LouKeFree(ThreadRing);
 }
 
+static void KernelContextSwitch(
+    CPUContext*         SavedFromState,
+    CPUContext*         SavedToState,
+    CPUKernelContext*   Ist1State
+){
+    //Save Current State
+    SavedFromState->rax     = Ist1State->rax;
+    SavedFromState->rbx     = Ist1State->rbx;
+    SavedFromState->rcx     = Ist1State->rcx;
+    SavedFromState->rdx     = Ist1State->rdx;
+
+    SavedFromState->rbp     = Ist1State->rbp;
+    SavedFromState->rsi     = Ist1State->rsi;
+    SavedFromState->rdi     = Ist1State->rdi;
+    SavedFromState->r8      = Ist1State->r8;
+
+    SavedFromState->r9      = Ist1State->r9;
+    SavedFromState->r10     = Ist1State->r10;
+    SavedFromState->r11     = Ist1State->r11;
+    SavedFromState->r12     = Ist1State->r12;
+
+    SavedFromState->r13     = Ist1State->r13;
+    SavedFromState->r14     = Ist1State->r14;
+    SavedFromState->r15     = Ist1State->r15;
+
+    SavedFromState->rip     = Ist1State->rip;
+    SavedFromState->cs      = Ist1State->cs;
+    SavedFromState->rflags  = Ist1State->rflags;
+    SavedFromState->rsp     = Ist1State->rsp;
+
+    //Change To New State
+    Ist1State->rax          = SavedToState->rax;
+    Ist1State->rbx          = SavedToState->rbx;
+    Ist1State->rcx          = SavedToState->rcx;
+    Ist1State->rdx          = SavedToState->rdx;
+
+    Ist1State->rbp          = SavedToState->rbp;
+    Ist1State->rsi          = SavedToState->rsi;
+    Ist1State->rdi          = SavedToState->rdi;
+    Ist1State->r8           = SavedToState->r8;
+
+    Ist1State->r9           = SavedToState->r9;
+    Ist1State->r10          = SavedToState->r10;
+    Ist1State->r11          = SavedToState->r11;
+    Ist1State->r12          = SavedToState->r12;
+
+    Ist1State->r13          = SavedToState->r13;
+    Ist1State->r14          = SavedToState->r14;
+    Ist1State->r15          = SavedToState->r15;
+
+    Ist1State->rip          = SavedToState->rip;
+    Ist1State->cs           = SavedToState->cs;
+    Ist1State->rflags       = SavedToState->rflags;
+    Ist1State->rsp          = SavedToState->rsp;
+    
+}
+
 void LouKeSwitchToTask(
     UINT64                  CpuCurrentState,
     PGENERIC_THREAD_DATA    ThreadFrom,
@@ -46,19 +103,33 @@ void LouKeSwitchToTask(
     if(ThreadFrom == ThreadTo){
         return;
     }
-    ThreadFrom->SavedState = *(CPUContext*)(UINT8*)CpuCurrentState;
     SaveEverything(ThreadFrom->ContextStorage);    
     if((ThreadFrom->State != THREAD_BLOCKED) && (ThreadFrom->State != THREAD_TERMINATED)){
         ThreadFrom->State = THREAD_READY;
     }
 
+    if(ThreadTo->Cs == 0x08){
+        
+        KernelContextSwitch(
+            &ThreadFrom->SavedState,
+            &ThreadTo->SavedState,
+            (CPUKernelContext*)CpuCurrentState
+        );
+
+    }else{
+
+        LouPrint("HERE User\n");
+        while(1);
+    }
+    //CpuCurrentState
+
     ThreadFrom->Resting = true;
     ThreadTo->Resting = false;
-    
+
     ThreadTo->State = THREAD_RUNNING;
-    RestoreEverything(ThreadTo->ContextStorage);
     SetTEB((UINT64)&ThreadTo->Teb);
-    *(CPUContext*)(UINT8*)CpuCurrentState = ThreadTo->SavedState;
+    RestoreEverything(ThreadTo->ContextStorage);    
+
 }
 
 static GENERIC_THREAD_DATA MasterThreadList = {0};
@@ -151,8 +222,6 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     NewThreadHandle->ContextStorage = (UINT64)AllocateSaveContext();
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
 
-
-
     //Allocate a new stack
     NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 64, (User ? USER_GENERIC_MEMORY : KERNEL_GENERIC_MEMORY));
     NewThreadHandle->StackTop = NewThreadHandle->StackBase + StackSize;
@@ -186,7 +255,6 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
         }
     }
 
-
     NewThreadHandle->SavedState.rip = (UINT64)CtxEntry;                 //worker subsystem liftoff stub     : iretq Location
     NewThreadHandle->SavedState.rcx = (UINT64)CtxFunction;              //requested work                    : MSVC PARAM 1
     NewThreadHandle->SavedState.rdx = (UINT64)CtxParams;                //work params                       : MSVC PARAM 2
@@ -200,8 +268,6 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
 
     LouKeGetTime(&NewThreadHandle->ThreadStart); //time of creation for thread object manager
     
-
-
     return STATUS_SUCCESS;
 }
 

@@ -354,6 +354,8 @@ void LouKeFree(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
     MutexUnlock(&GenMallocLock);
+    LouPrint("LouKeFree:%d\n", Address);
+    while(1);
 }
 
 void LouKeFreeVirt32(void* Address){
@@ -420,6 +422,8 @@ void LouKeFreeVirt32(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
     MutexUnlock(&GenMallocLock32);
+    LouPrint("LouKeFreeVirt32:%d\n", Address);
+    while(1);
 }
 
 void LouKeFreePhy32(void* Address){
@@ -490,6 +494,8 @@ void LouKeFreePhy32(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
     MutexUnlock(&GenMallocPhyLock);
+    LouPrint("LouKeFreePhy32:%d\n", Address);
+    while(1);
 }
 
 SIZE LouKeGetAllocationSize(PVOID Address){

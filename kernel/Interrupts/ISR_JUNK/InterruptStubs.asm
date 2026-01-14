@@ -566,8 +566,10 @@ ISR31:
 ISR32:
 	pusha
 	mov rcx, rsp
-	call UpdateProcessManager  
-	popa                                                                                              
+	push rsp ;insurance for privaledge switch
+	call UpdateProcessManager
+	pop  rsp
+	popa                                                                     
 	iretq
 
 ISR33:
