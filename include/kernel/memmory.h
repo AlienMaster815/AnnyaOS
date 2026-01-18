@@ -1,8 +1,7 @@
 #ifndef _MEMMORY_H
 #define _MEMMORY_H
 
-#define LouKeMallocArray(type, count, tag) \
-    (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
+#define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 
 

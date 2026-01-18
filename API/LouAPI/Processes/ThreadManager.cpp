@@ -38,7 +38,7 @@ UNUSED static void LouKeTsmDestroyThreadRing(PTHREAD_RING ThreadRing){
     LouKeFree(ThreadRing);
 }
 
-static void KernelContextSwitch(
+STRIP_OPTIMIZATIONS static void KernelContextSwitch(
     CPUContext*         SavedFromState,
     CPUContext*         SavedToState,
     CPUKernelContext*   Ist1State
@@ -113,7 +113,7 @@ void LouKeSwitchToTask(
         KernelContextSwitch(
             &ThreadFrom->SavedState,
             &ThreadTo->SavedState,
-            (CPUKernelContext*)CpuCurrentState
+            (CPUKernelContext*)(UINT8*)CpuCurrentState
         );
 
     }else{

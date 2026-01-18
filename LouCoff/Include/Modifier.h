@@ -48,7 +48,7 @@ static inline PVOID LouKeMallocExUnix(
 
 #define LouKeMallocEx(x, y, z)      LouKeMallocExUnix(x, y)
 #define LouKeFree(x)                free(x)
-#define LouKeMallocArray(x, y, z)   LouKeMallocEx(sizeof(x) * y, GET_ALIGNMENT(x), z);
+#define LouKeMallocArray(x, y, z)   LouKeMallocEx(sizeof(x) * y, GET_ALIGNMENT(x), z)
 
 #define MODIFIER_PARAMETER_EXECUTABLE   "-E"
 #define MODIFIER_PARAMETER_SOURCE       "-S"

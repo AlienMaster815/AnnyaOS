@@ -336,7 +336,8 @@ static void* _LouMallocEx(
                             if (AllocationBlocks[k][j].Address == 0x00) {
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
-                                MutexUnlock(&MemmoryMapLock);  
+                                MutexUnlock(&MemmoryMapLock); 
+                                memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                                 return (void*)AlignmentCheck;
                             }
                         }
@@ -354,6 +355,7 @@ static void* _LouMallocEx(
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
                     MutexUnlock(&MemmoryMapLock);    
+                    memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                     return (void*)AlignmentCheck;
                 }
 
@@ -446,6 +448,7 @@ static void* _LouMallocEx64(
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
                                 MutexUnlock(&MemmoryMapLock);  
+                                memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                                 return (void*)AlignmentCheck;
                             }
                         }
@@ -462,7 +465,8 @@ static void* _LouMallocEx64(
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
-                    MutexUnlock(&MemmoryMapLock);    
+                    MutexUnlock(&MemmoryMapLock); 
+                    memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                     return (void*)AlignmentCheck;
                 }
 

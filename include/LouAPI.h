@@ -59,6 +59,7 @@
 #include <Power.h>
 #include <kernel/Events.h>
 #include <drivers/fpu.h>
+#include <kernel/LKPCB.h>
 
 #ifndef KERNEL_MAIN_FILE
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;

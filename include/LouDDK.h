@@ -201,6 +201,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <Power.h>
 #include <kernel/Events.h>
 #include <drivers/fpu.h>
+#include <kernel/LKPCB.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

@@ -287,6 +287,12 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
 
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase){
 
+    if(VAddress == 0xFFFF800120221000){
+
+        //LouPrint("HERE\n");
+        //while(1);
+    }
+
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
     uint64_t L3Entry = 0;

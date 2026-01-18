@@ -47,6 +47,8 @@ static INTEGER                           InitializationProcessor = 0;
 
 KERNEL_IMPORT void SetCr3(UINT64);
 KERNEL_IMPORT UINT64 GetCr3();
+KERNEL_IMPORT void SetLKPCB(UINT64 KernelProcBlock);
+KERNEL_IMPORT UINT64 GetLKPCB();
 
 static UINT64 SystemCr3 = 0;
 
@@ -244,14 +246,10 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
 
 
 LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
-    
-    INTEGER ProcessorID = GetCurrentCpuTrackMember();
-    PSCHEDUAL_MANAGER Schedualer = &ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
-
+    PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
     MutexLock(&UpmLock);
     Schedualer->PsmSchedual(CpuCurrentState);
     MutexUnlock(&UpmLock);
-
     LouKeSendIcEOI();
 }
 
@@ -332,6 +330,10 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     InitializationProcessor = GetCurrentCpuTrackMember();
     
+    PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
+    KernelProcBlock->ProcID = InitializationProcessor;
+    KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer;
+
     MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
     MutexLock(&CoreIrqReadyLock);
     
@@ -370,7 +372,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     SystemCr3 = GetCr3();
 
-    for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
+    /*for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
         if(i != InitializationProcessor){
             NewThread = LouKeCreateDeferedDemonEx(
@@ -388,12 +390,11 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
 
             break;
         }
-    }
+    }*/
 
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
-
 }
 
 LOUDDK_API_ENTRY

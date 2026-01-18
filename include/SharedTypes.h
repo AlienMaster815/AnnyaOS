@@ -12,7 +12,10 @@
 #define INT_MAX 2147483647
 #endif
 
+#ifndef _LOUKIRQL_
+#define _LOUKIRQL_
 typedef uint8_t LouKIRQL;
+#endif
 
 typedef struct _Fixed20_12{
     int32_t FULL;

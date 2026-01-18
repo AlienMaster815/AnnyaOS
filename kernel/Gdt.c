@@ -1,5 +1,7 @@
 #include <LouAPI.h>
 
+void SetLKPCB(UINT64 KernelProcBlock);
+
 typedef struct PACKED _TSS{
     uint32_t RESVD;
     uint64_t RSP0;
@@ -152,11 +154,13 @@ void SetupGDT(){
         0x00
     );
         
-    uint64_t GsBase = (uint64_t)LouKeMallocVirt32(KILOBYTE_PAGE, USER_GENERIC_MEMORY);
-    
+    uint64_t GsBase = (uint64_t)LouKeMallocEx(0xB080, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
+
+    PLKPCB NewProcControllBlock = LouKeMallocType(LKPCB, USER_GENERIC_MEMORY);
+
     SetGDTSegmentEntry(
         (uint8_t*)&GDT->KPCR,
-        GsBase,
+        0x00,
         0xFFFFF,
         0xF2,
         0xC
@@ -170,6 +174,8 @@ void SetupGDT(){
 
     InstallGDT((uint64_t)&Gdtr);
     SetGSBase(GsBase);
+
+    SetLKPCB((UINT64)NewProcControllBlock);
 
     LouPrint("Done Setting Up GDT\n");
 

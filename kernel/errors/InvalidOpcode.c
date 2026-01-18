@@ -59,16 +59,34 @@ void LouKeSetPanicInfo(
 
 void InvalidOpcode(uint64_t FaultingStackP) {
 
-    CPUContext* FualtingStack = (CPUContext*)FaultingStackP;
-    LouPrint("Invalid Opcode\n");
-    LouPrint("Thread ID:%d\n", LouKeGetThreadIdentification());
+    PWINDHANDLE Bsod = SetBlueScreenPannel();
 
-    LouPrint("Thread IP:%h\n", FualtingStack->rip);
-    LouPrint("Thread CS:%h\n", FualtingStack->cs);
-    LouPrint("Thread FQ:%h\n", FualtingStack->fq);
-    LouPrint("Thread SP:%h\n", FualtingStack->FaultStack);
-    LouPrint("Thread SS:%h\n", FualtingStack->ss);
+    CPUContext* FaultData = (CPUContext*)((uint64_t)FaultingStackP);
 
+
+    LouKeSetPanicInfo(
+        Bsod, "Invalid Opcode",
+        FaultData->rax, 
+        FaultData->rbx, 
+        FaultData->rcx, 
+        FaultData->rdx,
+        FaultData->rbp,
+        FaultData->rsi,
+        FaultData->rdi,
+        FaultData->r8,
+        FaultData->r9,
+        FaultData->r10,
+        FaultData->r11,
+        FaultData->r12,
+        FaultData->r13,
+        FaultData->r14,
+        FaultData->r15,
+        FaultData->rip,
+        FaultData->cs,
+        FaultData->fq,
+        FaultData->FaultStack,
+        FaultData->ss
+    );
 
 	while (1);
 }

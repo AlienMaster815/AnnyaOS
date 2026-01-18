@@ -9,6 +9,8 @@ global GetGS
 global RecreateDisasemblyIssue
 global SetTEB
 global SetPEB
+global SetLKPCB
+global GetLKPCB
 global GetPEB
 global GetGSValue
 
@@ -95,6 +97,15 @@ SetTEB:
 SetPEB:
     mov qword[gs:0x60], RCX
     ret
+
+SetLKPCB:
+    mov qword[gs:0x40], RCX
+    ret
+
+GetLKPCB:
+    mov RAX, qword[gs:0x40]
+    ret
+
 
 GetPEB:
     mov rax, qword[gs:0x60]
