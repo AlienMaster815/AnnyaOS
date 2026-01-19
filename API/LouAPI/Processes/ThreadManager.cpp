@@ -302,7 +302,7 @@ ThreadManagerIdleFallback(
     PVOID   Params
 ){
     while(1){
-        LouKeYeildExecution();
+        //LouKeYeildExecution();
     }
     return -1;
 }
@@ -595,7 +595,7 @@ LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
         //        LouKeTsmDestroyThreadHandle(TmpThreadHandle);
         //    }
         //}
-        LouKeYeildExecution();
+        //LouKeYeildExecution();
     }
     return -1;
 }

@@ -77,7 +77,7 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     while(1){
         
 
-        LouKeYeildExecution();
+        //LouKeYeildExecution();
     }
     return STATUS_SUCCESS;
 }

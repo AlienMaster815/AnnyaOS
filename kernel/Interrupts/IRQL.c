@@ -11,102 +11,64 @@
 void LouKeIcUnmaskIrq(uint8_t irq);
 bool GetAPICStatus();
 
-static LouKIRQL SystemInterruptLevel = HIGH_LEVEL;
-static LouKIRQL* SmpSystemInterruptLayer = 0x00;
+UINT8 GetWinIRQL();
+void  SetWinIRQL(UINT8 Irql);
 
-void LouKeEnableSmpIrqlManagement(INTEGER Cpus){
-    SmpSystemInterruptLayer = LouKeMallocArray(LouKIRQL, Cpus, KERNEL_GENERIC_MEMORY);
-    for(INTEGER i = 0 ; i <  Cpus; i++){
-        SmpSystemInterruptLayer[i] = HIGH_LEVEL;
-    }
-}
 
 void LocalApicSetTimer(bool On);
 void LouKeSendIcEOI();
 
+static bool IrqlUninitialized = true;
+
+void InitializeIrql(){
+    IrqlUninitialized = false;
+}
+
 LouKIRQL LouKeGetIrql(){
-    LouKeMemoryBarrier();
-    if(SmpSystemInterruptLayer){
-        INTEGER ProcessorID = GetCurrentCpuTrackMember();
-        return SmpSystemInterruptLayer[ProcessorID];
+    if(IrqlUninitialized){
+        return HIGH_LEVEL;
     }
-    return SystemInterruptLevel;
+    return (LouKIRQL)GetWinIRQL();
 }
 
 void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 ){
-    if(SmpSystemInterruptLayer){
-        INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    if(IrqlUninitialized){
+        return;
+    }
+    
+    if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
+        *OldIrql = LouKeGetIrql(); // save the old irql1
+    }
 
-        if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-            *OldIrql = SmpSystemInterruptLayer[ProcessorID]; // save the old irql1
+    switch (NewIrql){
+        case PASSIVE_LEVEL:{
+            SetWinIRQL((UINT8)PASSIVE_LEVEL);
+            return;
         }
-
-        switch (NewIrql){
-            case PASSIVE_LEVEL:{
-                SmpSystemInterruptLayer[ProcessorID] = PASSIVE_LEVEL;
-                LouKeMemoryBarrier();
-                return;
-            }
-            case APC_LEVEL:{
-                
-                return;
-            }
-            case DISPATCH_LEVEL:{
-
-                return;
-            }
-            case DIRQL:{
-
-                return;
-            } 
-            case CLOCK_LEVEL:{
-
-                return;
-            }
-            case HIGH_LEVEL:{
-                SmpSystemInterruptLayer[ProcessorID] = HIGH_LEVEL;
-                LouKeMemoryBarrier();
-                return;
-            }
-            default: // error case
-                return;
+        case APC_LEVEL:{
+            SetWinIRQL((UINT8)APC_LEVEL);    
+            return;
         }
-
-    }else{
-        if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-            *OldIrql = SystemInterruptLevel; // save the old irql1
+        case DISPATCH_LEVEL:{
+            SetWinIRQL((UINT8)DISPATCH_LEVEL);    
+            return;
         }
-
-        switch (NewIrql){
-            case PASSIVE_LEVEL:{
-                SystemInterruptLevel = PASSIVE_LEVEL;
-                return;
-            }
-            case APC_LEVEL:{
-                
-                return;
-            }
-            case DISPATCH_LEVEL:{
-
-                return;
-            }
-            case DIRQL:{
-
-                return;
-            } 
-            case CLOCK_LEVEL:{
-
-                return;
-            }
-            case HIGH_LEVEL:{
-                SystemInterruptLevel = HIGH_LEVEL;
-            }
-            default: // error case
-                return;
+        case DIRQL:{
+            SetWinIRQL((UINT8)DIRQL);    
+            return;
+        } 
+        case CLOCK_LEVEL:{
+            SetWinIRQL((UINT8)CLOCK_LEVEL);    
+            return;
         }
+        case HIGH_LEVEL:{
+            SetWinIRQL((UINT8)HIGH_LEVEL);    
+        }
+        default: // error case
+            return;
     }
 }
 
@@ -114,81 +76,55 @@ void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 ){
-    if(SmpSystemInterruptLayer){
-        INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    if(IrqlUninitialized){
+        return;
+    }
+    if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
+        *OldIrql = LouKeGetIrql(); // save the old irql1
+    }
 
-        if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-            *OldIrql = SmpSystemInterruptLayer[ProcessorID]; // save the old irql1
+    switch (NewIrql){
+        case PASSIVE_LEVEL:{
+            SetWinIRQL((UINT8)PASSIVE_LEVEL);
+            //sanity clear interrupts so nesting occours
+            asm("cli");
+            asm("sti");
+            return;
         }
-
-        switch (NewIrql){
-            case PASSIVE_LEVEL:{
-                SmpSystemInterruptLayer[ProcessorID] = PASSIVE_LEVEL;
-                LouKeMemoryBarrier();
-                asm("sti");
-                return;
-            }
-            case APC_LEVEL:{
-                
-                return;
-            }
-            case DISPATCH_LEVEL:{
-
-                return;
-            }
-            case DIRQL:{
-
-                return;
-            } 
-            case CLOCK_LEVEL:{
-
-                return;
-            }
-            case HIGH_LEVEL:{
-                SmpSystemInterruptLayer[ProcessorID] = HIGH_LEVEL;
-                LouKeMemoryBarrier();
-                asm("cli");
-                return;
-            }
-            default: // error case
-                return;
+        case APC_LEVEL:{
+            SetWinIRQL((UINT8)APC_LEVEL);    
+            //sanity clear interrupts so nesting occours
+            asm("cli");
+            asm("sti");
+            return;
         }
-
-    }else{
-        if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-            *OldIrql = SystemInterruptLevel; // save the old irql1
+        case DISPATCH_LEVEL:{
+            SetWinIRQL((UINT8)DISPATCH_LEVEL);    
+            //sanity clear interrupts so nesting occours
+            asm("cli");
+            asm("sti");
+            return;
         }
-
-        switch (NewIrql){
-            case PASSIVE_LEVEL:{
-                SystemInterruptLevel = PASSIVE_LEVEL;
-                asm("sti");
-                return;
-            }
-            case APC_LEVEL:{
-                
-                return;
-            }
-            case DISPATCH_LEVEL:{
-
-                return;
-            }
-            case DIRQL:{
-
-                return;
-            } 
-            case CLOCK_LEVEL:{
-
-                return;
-            }
-            case HIGH_LEVEL:{
-                SystemInterruptLevel = HIGH_LEVEL;
-                asm("cli");
-                return;
-            }
-            default: // error case
-                return;
+        case DIRQL:{
+            SetWinIRQL((UINT8)DIRQL);    
+            //sanity clear interrupts so nesting occours
+            asm("cli");
+            asm("sti");
+            return;
+        } 
+        case CLOCK_LEVEL:{
+            SetWinIRQL((UINT8)CLOCK_LEVEL);    
+            //sanity clear interrupts so nesting occours
+            asm("cli");
+            asm("sti");
+            return;
         }
+        case HIGH_LEVEL:{
+            asm("cli");
+            SetWinIRQL((UINT8)HIGH_LEVEL);    
+        }
+        default: // error case
+            return;
     }
 }
 

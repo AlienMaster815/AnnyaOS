@@ -165,8 +165,8 @@ void ParserLouLoaderInformation(
 void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
-
-
+void InitializeIrql();
+uint64_t GetCr3();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -212,15 +212,11 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     return LOUSTATUS_GOOD;
 }
 
-void LouKeEnableSmpIrqlManagement(INTEGER Cpus);
-
 void InitializeSymmetricMultiProcessing(){
     LouPrint("Checking If System Supports SMP\n");
     if(GetNPROC() < 2)return;
     LouPrint("InitializeSymmetricMultiProcessing()\n");    
     LouKeLoadLousineBootTrampoline();
-
-    LouKeEnableSmpIrqlManagement(GetNPROC());
 
     LouKeInitializeSmpLouPrint();
 
@@ -238,6 +234,10 @@ void AdvancedLousineKernelInitialization(){
     InitializeProcessManager();
 
     LouKeInitializeFullLouACPISubsystem();
+
+    //TODO: Wait For SMP 
+
+    InitializeIrql();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
 
@@ -307,14 +307,23 @@ KERNEL_ENTRY LouOsKrnlStart(
 ){    
 
     memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
+    
+    UINT64 Cr3 =  (UINT64)GetCr3();
+    Cr3 += GetKSpaceBase();
 
+    for(size_t i = 0 ; i < 255; i++){
+        ((UINT64*)Cr3)[i] = 0;
+    }
+
+    EnableCR0WriteProtection();
+
+    
     ParserLouLoaderInformation(
         &KernelLoaderInfo
     );
 
-
     InitializeBasicMemcpy();
-    
+
     ///vga set for debug
     if(!LouKeMapEfiMemory()){
         LouKeHandleSystemIsBios();
@@ -324,15 +333,13 @@ KERNEL_ENTRY LouOsKrnlStart(
     }                      
 
     LouKeInitializeRegistry();
-    
+     
     LousineKernelEarlyInitialization();
-
-    EnableCR0WriteProtection();
     
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
-    
+
     InitializeDebuggerComunications();
 
     LouKeMapPciMemory();
@@ -342,12 +349,11 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouKePcieProbeEcam();
 
     InitializeBootGraphics();
+
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 
     AdvancedLousineKernelInitialization();
-
-    LouKeInitializeMouseHandling();
 
     LookForStorageDevices();
 
@@ -361,13 +367,13 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeNtKernelTransitionLayer();
 
-    InitializeBusCore();
+    LouKeInitializeMouseHandling();
 
-    LouKeProbeSbIsa();
+    //InitializeBusCore();
 
-    ScanTheRestOfHarware();
+    //LouKeProbeSbIsa();
 
-    //LouKeLoadLibraryA("C:/ANNYA/SYSTEM64/LOUDLL.DLL"); //this is the systems access into the kernel so no matter what load it
+    //ScanTheRestOfHarware();
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");

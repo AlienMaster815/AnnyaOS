@@ -13,6 +13,8 @@ global SetLKPCB
 global GetLKPCB
 global GetPEB
 global GetGSValue
+global GetWinIRQL
+global SetWinIRQL
 
 section .rodata
 gdt64:
@@ -106,6 +108,12 @@ GetLKPCB:
     mov RAX, qword[gs:0x40]
     ret
 
+GetWinIRQL:
+    mov al, byte[gs:50]
+
+SetWinIRQL:
+    mov byte[gs:0x50], cl
+    ret
 
 GetPEB:
     mov rax, qword[gs:0x60]

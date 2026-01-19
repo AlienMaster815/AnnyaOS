@@ -1,6 +1,11 @@
 #include <LouAPI.h>
 
 void SetLKPCB(UINT64 KernelProcBlock);
+ 
+void LouKeSetIrqlNoFlagUpdate(
+    LouKIRQL  NewIrql,
+    LouKIRQL* OldIrql
+);
 
 typedef struct PACKED _TSS{
     uint32_t RESVD;
@@ -178,5 +183,7 @@ void SetupGDT(){
     SetLKPCB((UINT64)NewProcControllBlock);
 
     LouPrint("Done Setting Up GDT\n");
+
+    LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, 0x00);
 
 }

@@ -205,7 +205,7 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
     NewProcessRing->Peers.LastHeader = (PListHeader)TmpProcessRing;
 
     _PROCESS_ASSIGNMENT_DONE:
-    this->CurrentProcess->ProcessState = PROCESS_RUNNING;
+    Process->ProcessState = PROCESS_RUNNING;
     LouKeUnlockProcessManager();
     LouKeReleaseSpinLock(&AsignLock, &Irql);
 }
@@ -325,9 +325,10 @@ void LouKeUnmaskSmpInterrupts(){
 
 LOUDDK_API_ENTRY void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
+
     ProcessBlock.ProcessorCount = GetNPROC();
     ProcessBlock.ProcStateBlock = LouKeMallocArray(PROCESSOR_STATE_BLOCK, ProcessBlock.ProcessorCount, KERNEL_GENERIC_MEMORY);
-    
+
     InitializationProcessor = GetCurrentCpuTrackMember();
     
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
@@ -345,7 +346,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
         0x00,
         0x00
     );
-
+    
     InitializationProcessor = GetCurrentCpuTrackMember();
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, &KernelProcess);
@@ -372,6 +373,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     SystemCr3 = GetCr3();
 
+
     /*for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
         if(i != InitializationProcessor){
@@ -395,6 +397,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
+
 }
 
 LOUDDK_API_ENTRY
