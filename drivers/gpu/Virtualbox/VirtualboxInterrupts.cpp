@@ -124,9 +124,8 @@ LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
     PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
 
     VirtualboxUpdateModeHints(VBox);
-
-
-    RegisterInterruptHandler(VirtualboxInterruptHandler, LouKePciGetInterruptLine(PDEV), false, (uint64_t)VBox);
+    
+    //RegisterInterruptHandler(VirtualboxInterruptHandler, LouKePciGetInterruptLine(PDEV), false, (uint64_t)VBox);
 
     LouPrint("InitializeVirtualboxInterrupts() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

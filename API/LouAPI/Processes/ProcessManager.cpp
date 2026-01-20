@@ -38,7 +38,6 @@ static INTEGER                           InitializationProcessor = 0;
 KERNEL_IMPORT void SetCr3(UINT64);
 KERNEL_IMPORT UINT64 GetCr3();
 KERNEL_IMPORT void SetLKPCB(UINT64 KernelProcBlock);
-KERNEL_IMPORT UINT64 GetLKPCB();
 
 static UINT64 SystemCr3 = 0;
 
@@ -79,20 +78,20 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
 
-    /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
+    PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(
         (CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice) &&
         (CurrentProcess->ProcessState == PROCESS_RUNNING)
     ){
         CurrentProcess->CurrentMsSlice += 10;
         NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
-        LouKeSwitchToTask(
+        IrqState = LouKeSwitchToTask(
             IrqState,
             CurrentThread,
             NextThread
         );
         this->CurrentThread = NextThread;
-        return;
+        return IrqState;
     }else{
         CurrentProcess->CurrentMsSlice = 0;
         PPROCESS_RING CurrentProcessRing;
@@ -106,37 +105,55 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                 if(CurrentProcessRing->Peers.NextHeader){
                     TmpProcessRing = (PPROCESS_RING)CurrentProcessRing->Peers.NextHeader;
                     while(TmpProcessRing != CurrentProcessRing){
-                        if(
-                            (!LouKeIsTimeoutNull(&TmpProcessRing->ProcessData->BlockTimeout)) &&
-                            (LouKeDidTimeoutExpire(&TmpProcessRing->ProcessData->BlockTimeout)) &&
-                            (TmpProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED)
-                        ){
-                            TmpProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
+                        if(TmpProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED){
+                            if(
+                                (!LouKeIsTimeoutNull(&TmpProcessRing->ProcessData->BlockTimeout)) &&
+                                (LouKeDidTimeoutExpire(&TmpProcessRing->ProcessData->BlockTimeout))
+                            ){
+                                TmpProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
+                            }
                         }
                         if(TmpProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
                             this->Processes[NextRing] = TmpProcessRing;
                             this->CurrentProcess = TmpProcessRing->ProcessData;
                             PsmSetProcessTransitionState();
                             NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
-                            LouKeSwitchToTask(
+                            IrqState = LouKeSwitchToTask(
                                 IrqState,
                                 CurrentThread,
                                 NextThread
                             );
                             this->CurrentThread = NextThread;
-                            return;
+                            return IrqState;
                         }
                         TmpProcessRing = (PPROCESS_RING)CurrentProcessRing->Peers.NextHeader;
                     }
                 }
+                if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED){
+                    if(
+                        (!LouKeIsTimeoutNull(&CurrentProcessRing->ProcessData->BlockTimeout)) &&
+                        (LouKeDidTimeoutExpire(&CurrentProcessRing->ProcessData->BlockTimeout))
+                    ){
+                        CurrentProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
+                    }
+                }
+                if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
+                    NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
+                    IrqState = LouKeSwitchToTask(
+                        IrqState,
+                        CurrentThread,
+                        NextThread
+                    );
+                    this->CurrentThread = NextThread;
+                    return IrqState;
+                }
             }
-            NextRing = EulerCurveIndexor(&this->LoadDistributer);
             if(NextRing == CurrentRing){
                 //if no tasks are ready just idle
                 break;
             }        
         }
-    }*/
+    }
 
     if(this->CurrentProcess != this->SystemProcess){
         this->CurrentProcess = this->SystemProcess;    
@@ -145,7 +162,6 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     }
         
     NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, ProcessSwitch);
-
     IrqState = LouKeSwitchToTask(
         IrqState,
         CurrentThread,
@@ -179,9 +195,9 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
     PPROCESS_RING CurrentProcessRing = TmpProcessRing;
 
     if(!TmpProcessRing){
-        this->Processes[Process->ProcessPriority] = NewProcessRing;
         NewProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
         NewProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
+        this->Processes[Process->ProcessPriority] = NewProcessRing;
         goto _PROCESS_ASSIGNMENT_DONE;
     }
 
@@ -189,13 +205,12 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
         TmpProcessRing = (PPROCESS_RING)TmpProcessRing->Peers.NextHeader;
     }
 
-    CurrentProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
-    NewProcessRing->Peers.NextHeader = (PListHeader)CurrentProcessRing;
-    TmpProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
-    NewProcessRing->Peers.LastHeader = (PListHeader)TmpProcessRing;
+    CurrentProcessRing->Peers.LastHeader    = (PListHeader)NewProcessRing;
+    NewProcessRing->Peers.NextHeader        = (PListHeader)CurrentProcessRing;
+    NewProcessRing->Peers.LastHeader        = (PListHeader)TmpProcessRing;
+    TmpProcessRing->Peers.NextHeader        = (PListHeader)NewProcessRing;
 
     _PROCESS_ASSIGNMENT_DONE:
-    Process->ProcessState = PROCESS_RUNNING;
     LouKeReleaseSpinLock(&AsignLock, &Irql);
 }
 
@@ -370,17 +385,6 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     SystemCr3 = GetCr3();
     
-    UINT8* NewStackTop = (UINT8*)((PGENERIC_THREAD_DATA)NewThread)->SavedState->rbp;
-    SIZE   CurrentStackOffset = (GetBootStackTop() - GetRSP());
-    UINT8* OldStackCurrent = (UINT8*)GetRSP();
-    UINT8* NewStackCurrent = NewStackTop - CurrentStackOffset; 
-
-    memcpy(NewStackCurrent, OldStackCurrent, CurrentStackOffset);
-
-    UINT64 NewRbp = (GetRBP() - GetRSP()) + (UINT64)NewStackCurrent;
-
-    SetNewBootStack(NewRbp, (UINT64)NewStackCurrent);
-
     /*for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
         if(i != InitializationProcessor){
@@ -401,10 +405,10 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
         }
     }*/
 
+
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
-
 }
 
 LOUDDK_API_ENTRY

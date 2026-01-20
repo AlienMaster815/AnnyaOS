@@ -13,7 +13,7 @@ LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
     LouKeDestroyThreadSyscall(ThreadHandle);
 
     if(ThreadData->ThreadID == LouKeGetThreadIdentification()){
-        //LouKeYeildExecution();
+        LouKeYeildExecution();
         while(1);
     }
 

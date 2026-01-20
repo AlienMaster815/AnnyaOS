@@ -82,6 +82,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort = QueuedCommand->Port;
+    MutexLock(&AhciPort->OpreationLock);
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     uint64_t PrdtEntries = ROUND_UP64(QueuedCommand->DataSize, 4 * MEGABYTE) / (4 * MEGABYTE);
     void* NewCommandTable = LouKeMallocAhciCommandTable(PrdtEntries);    
@@ -92,6 +93,7 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     if(FreeSlot == -1){
         LouPrint("AHCI.SYS:AhciIssueCommand() STATUS_IO_DEVICE_ERROR\n");
         LouKeFreeAhciCommandTable(NewCommandTable);
+        MutexUnlock(&AhciPort->OpreationLock);
         return STATUS_IO_DEVICE_ERROR;
     }
     UNUSED PAHCI_COMMAND_LIST_STRUCTURE CommandHeaders = (PAHCI_COMMAND_LIST_STRUCTURE)PrivateData->CommandDma;
@@ -143,10 +145,11 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     PrivateData->CommandsQueued |= (1 << FreeSlot);
     Port->PxCI |= (1 << FreeSlot);
     
-    LOUSTATUS Status = LouKeWaitForEvent(&PrivateData->CommandCompletion[FreeSlot]);
-    //Status = AhciPollCommand(Port, FreeSlot);
+    LOUSTATUS Status;// = LouKeWaitForEvent(&PrivateData->CommandCompletion[FreeSlot]);
+    Status = AhciPollCommand(Port, FreeSlot);
     
-    LouKeFreeAhciCommandTable(NewCommandTable);        
+    LouKeFreeAhciCommandTable(NewCommandTable);  
+    MutexUnlock(&AhciPort->OpreationLock);
     return Status;
 }
 

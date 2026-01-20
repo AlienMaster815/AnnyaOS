@@ -23,7 +23,7 @@ LOUSTATUS AtaGenricDMAPrepCommand(
 ){
     //LouPrint("Ata Generic DMA Prep Comman\n");
     //PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
-    //MutexLock(&AtaPort->OperaionLock);
+    //MutexLock(&AtaPort->OpreationLock);
     //PATA_PRDT_ENTRY Prdt = (PATA_PRDT_ENTRY)AtaPort->PrdtAddress;
     //uint64_t PhysicalTransferAddress;
     //RequestPhysicalAddress(QueuedCommand->DataAddress, &PhysicalTransferAddress);
@@ -237,20 +237,20 @@ LOUSTATUS AtaGenricDMAIssueCommand(
     ){
         //LouPrint("Handleing ATA/ATAPI Identification Command\n");
         Result = IdLegacyDrive(QueuedCommand, AtaPort);
-        MutexUnlock(&AtaPort->OperaionLock);
+        MutexUnlock(&AtaPort->OpreationLock);
         LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
         return Result;
     }
 
     if(QueuedCommand->PacketCommand){
         Result = ReadLegacyAtapi(QueuedCommand, AtaPort);
-        MutexUnlock(&AtaPort->OperaionLock);
+        MutexUnlock(&AtaPort->OpreationLock);
         LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
         return Result;
     }
 
     Result = ReadLegacyAta(QueuedCommand, AtaPort);
-    MutexUnlock(&AtaPort->OperaionLock);
+    MutexUnlock(&AtaPort->OpreationLock);
     LouKeReleaseSpinLock(&AtaPort->PortLock, &Irql);
     return Result;
 }

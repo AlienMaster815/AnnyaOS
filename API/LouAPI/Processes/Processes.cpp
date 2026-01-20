@@ -112,7 +112,9 @@ LOUSTATUS LouKePmCreateProcessEx(
                 THREAD_DEFAULT_DISTRIBUTER_INCREMENTER
             );
         }
-        NewProcessObject->TotalMsSlice = 100;   
+        NewProcessObject->TotalMsSlice = 100;
+        LouKeGetTime(&NewProcessObject->BlockTimeout);
+        NewProcessObject->ProcessState = PROCESS_BLOCKED;   
     }
 
     NewProcessObject->ProcessID = AllocateProcessID();
@@ -139,7 +141,6 @@ LOUSTATUS LouKePmCreateProcessEx(
     }
 
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
-
     return STATUS_SUCCESS;
 }
 

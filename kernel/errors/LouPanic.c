@@ -267,6 +267,8 @@ void LouKeSetPanicInfo(
 
 	LouPrint("The Lousine Kernel has initialized a kernel panic. Information from the panic is below.\n");
 
+	LouPrint("ThreadID:%d\n", LouKeGetThreadIdentification());
+
     LouKeLibTraceCheckPanic(rip);
 
 	size_t ErrorMessageSize = (strlen("The Fault Was Caused By A:%s") * strlen(DynamicErrorMessage));

@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.04 RSC-4";
+string KERNEL_VERSION = "0.6.04 RSC-5";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -370,11 +370,11 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LouKeInitializeMouseHandling();
 
-    //InitializeBusCore();
+    InitializeBusCore();
 
-    //LouKeProbeSbIsa();
+    LouKeProbeSbIsa();
 
-    //ScanTheRestOfHarware();
+    ScanTheRestOfHarware();
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
@@ -388,7 +388,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
-    /*PVOID AsmssKey = LouKeOpenRegistryHandle(
+    PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
         0x00
     );
@@ -447,10 +447,9 @@ KERNEL_ENTRY LouOsKrnlStart(
         sleep(5000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
-    }*/
+    }
     LouPrint("Lousine Kernel Successfully Initialized\n");
-    //sleep(5000);
-    while(1);
+    sleep(3000);
     LouKeSystemShutdown(ShutdownReboot);
     //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!

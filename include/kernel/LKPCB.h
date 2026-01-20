@@ -21,9 +21,12 @@ typedef struct _LKPCB{
     UINT64      Schedualer;
     UINT8       ProcID;
     LouKIRQL    Irql;
+    UINTPTR     ApicBase;
 }LKPCB, * PLKPCB;
 
 LouKIRQL LouKeGetIrql();
+
+UINT64 GetLKPCB();
 
 #ifdef _USER_MODE_CODE_
 

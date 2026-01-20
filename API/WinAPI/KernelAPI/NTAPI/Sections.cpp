@@ -282,6 +282,7 @@ LOUSTATUS LouKeSectionInitNewProcess(
                 16 * KILOBYTE,
                 31
             );
+
             MutexSynchronize(&Data->Lock);
             LouKeFree(Data);
             PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)SectionData->SectionPrivateData; 

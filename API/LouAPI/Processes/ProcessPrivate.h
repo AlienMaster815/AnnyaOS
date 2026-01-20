@@ -26,13 +26,12 @@ typedef struct  PACKED _CPUContext{
     uint64_t rbp;
     uint64_t rsi;
     uint64_t rdi;
-    uint64_t r8;
 
+    uint64_t r8;
     uint64_t r9;
     uint64_t r10;
     uint64_t r11;
     uint64_t r12;
-
     uint64_t r13;
     uint64_t r14;
     uint64_t r15;
@@ -54,13 +53,12 @@ typedef struct  PACKED _CPUKernelContext{
     uint64_t rbp;
     uint64_t rsi;
     uint64_t rdi;
-    uint64_t r8;
 
+    uint64_t r8;
     uint64_t r9;
     uint64_t r10;
     uint64_t r11;
     uint64_t r12;
-
     uint64_t r13;
     uint64_t r14;
     uint64_t r15;
@@ -111,7 +109,7 @@ typedef struct _GENERIC_THREAD_DATA{
     INSTRUCTION_MODE                InstructionMode;
     UINT8*                          AfinityBitmap;
     BOOL                            Resting;
-    CPUContext*                     SavedState;
+    CPUContext                      SavedState;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
 typedef struct THREAD_RING{

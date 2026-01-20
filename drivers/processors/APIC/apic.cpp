@@ -295,7 +295,7 @@ PACPI_MADT_IO_APIC GetIoApicHandleFromIrq(UINT8 Irq){
 }
 
 LOUDDK_API_ENTRY void local_apic_send_eoi() {    
-    uint64_t ApicBase = LouKeGetCurrentApicBase();
+    uint64_t ApicBase = ((PLKPCB)GetLKPCB())->ApicBase;
     if(!ApicBase){
         LouPrint("APIC.SYS:ERROR:No Base\n");
         return;
@@ -400,6 +400,7 @@ bool InitializeLapic(UINT32 CpuID){
     uint64_t ApicBase;
     LouPrint("Initializing Processor:%d At Address:%h\n", CpuID, GetLocalApicBase());
     ApicBase = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
+    ((PLKPCB)GetLKPCB())->ApicBase = ApicBase;
     LouPrint("New Apic Base:%h\n", ApicBase);
     LouKeSetApicBase(CpuToApicID(get_processor_id()), ApicBase);
     CPU::CPUID Cpu;

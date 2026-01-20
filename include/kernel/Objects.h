@@ -8,6 +8,8 @@
 extern "C"{
 #endif
 
+#define GetObjectItemOffset(Object, Item) ((SIZE)&((Object*)0x00)->Item)
+
 typedef struct _IDENTIFICATION_RANGE{
     INTEGER     RangeStart;
     INTEGER     Entries;

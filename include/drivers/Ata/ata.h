@@ -928,7 +928,7 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
     struct _LOUSINE_ATA_PORT_OPERATIONS*    Operations;
     uint32_t                                PollTimer;
     spinlock_t                              PortLock;
-    mutex_t                                 OperaionLock;
+    mutex_t                                 OpreationLock;
     uint64_t                                AtaFlags;
     unsigned int                            AtaPFlags;
     char                                    UserPortID;

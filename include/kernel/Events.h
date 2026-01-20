@@ -10,10 +10,10 @@ extern "C"{
 
 
 typedef struct _KERNEL_EVENT_OBJECT{
-    BOOL        Completed;
-    mutex_t     Lock;
-    SIZE        TimeOut;
-    SIZE        ThreadID;
+    BOOL                Completed;
+    mutex_t             Lock;
+    SIZE                TimeOut;
+    SIZE                ThreadID;
 }KERNEL_EVENT_OBJECT, * PKERNEL_EVENT_OBJECT;
 
 static inline void LouKeInitializeEventTimeOut(

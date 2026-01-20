@@ -615,9 +615,9 @@ DriverEntry(
 ){
     LouPrint("PS2IO.SYS:DriverEntry()\n");
 
-    //LouKeCreateBusClass(
-    //    &Ps2Bus
-    //);
+    LouKeCreateBusClass(
+        &Ps2Bus
+    );
 
     LouPrint("PS2IO.SYS:DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

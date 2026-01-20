@@ -4,8 +4,6 @@ static void (*EoiHandler[512])() = {0x00};
 static void (*UnmaskHandler[512])(UINT8 Irq) = {0x00};
 static void (*MaskHandler[512])(UINT8 Irq) = {0x00};
 
-KERNEL_IMPORT UINT64 GetLKPCB();
-
     //EoiHandler      = (void (**)())     LouKeMallocArray(void**, Cpus, KERNEL_GENERIC_MEMORY);
     //UnmaskHandler   = (void (**)(UINT8))LouKeMallocArray(void**, Cpus, KERNEL_GENERIC_MEMORY);
     //MaskHandler     = (void (**)(UINT8))LouKeMallocArray(void**, Cpus, KERNEL_GENERIC_MEMORY);
