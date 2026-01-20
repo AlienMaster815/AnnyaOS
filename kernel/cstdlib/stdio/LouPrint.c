@@ -84,7 +84,6 @@ void print_binary8(uint8_t number) {
     }
 }
 
-__stdcall
 int LouPrint_s(char* format, va_list args){
 
     char PrintString[21] = {0};

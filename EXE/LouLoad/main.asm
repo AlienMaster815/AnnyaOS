@@ -104,7 +104,6 @@ LouLoaderEnableLoaderPages:
 
 
 LouLoaderSetup:
-
     mov [MulitibootInfo], ebx
     mov ebp, LoaderStackTop
     mov esp, ebp

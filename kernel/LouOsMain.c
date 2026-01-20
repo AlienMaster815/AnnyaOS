@@ -242,7 +242,7 @@ void AdvancedLousineKernelInitialization(){
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
 
     LouKeUnmaskSmpInterrupts();
-
+    
     LouKeCreateDemon(
         LouKeThreadManagerDemon,
         0,
@@ -251,6 +251,7 @@ void AdvancedLousineKernelInitialization(){
     );
 
     LouPrint("Kernel Advanced System Initialized\n");
+    
 
 }
 
@@ -449,6 +450,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     }*/
     LouPrint("Lousine Kernel Successfully Initialized\n");
     //sleep(5000);
+    while(1);
     LouKeSystemShutdown(ShutdownReboot);
     //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!

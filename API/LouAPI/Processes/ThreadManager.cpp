@@ -1,16 +1,15 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
-void LouKeLockProcessManager();
-void LouKeUnlockProcessManager();
-
 LOUDDK_API_ENTRY
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData();
 KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-static void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
+KERNEL_IMPORT UINT64 GetRFLAGS();
+
+void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
     DWORD Result = 0;
     LouPrint("Thread:%d Has Started\n", Thread->ThreadID);
     Result = Work(Param);
@@ -38,98 +37,92 @@ UNUSED static void LouKeTsmDestroyThreadRing(PTHREAD_RING ThreadRing){
     LouKeFree(ThreadRing);
 }
 
-STRIP_OPTIMIZATIONS static void KernelContextSwitch(
+void KernelContextSwitchFrom(
     CPUContext*         SavedFromState,
-    CPUContext*         SavedToState,
-    CPUKernelContext*   Ist1State
+    CPUKernelContext*   IstState
 ){
     //Save Current State
-    SavedFromState->rax     = Ist1State->rax;
-    SavedFromState->rbx     = Ist1State->rbx;
-    SavedFromState->rcx     = Ist1State->rcx;
-    SavedFromState->rdx     = Ist1State->rdx;
+    SavedFromState->rax     = IstState->rax;
+    SavedFromState->rbx     = IstState->rbx;
+    SavedFromState->rcx     = IstState->rcx;
+    SavedFromState->rdx     = IstState->rdx;
 
-    SavedFromState->rbp     = Ist1State->rbp;
-    SavedFromState->rsi     = Ist1State->rsi;
-    SavedFromState->rdi     = Ist1State->rdi;
-    SavedFromState->r8      = Ist1State->r8;
+    SavedFromState->rbp     = IstState->rbp;
+    SavedFromState->rsi     = IstState->rsi;
+    SavedFromState->rdi     = IstState->rdi;
+    SavedFromState->r8      = IstState->r8;
 
-    SavedFromState->r9      = Ist1State->r9;
-    SavedFromState->r10     = Ist1State->r10;
-    SavedFromState->r11     = Ist1State->r11;
-    SavedFromState->r12     = Ist1State->r12;
+    SavedFromState->r9      = IstState->r9;
+    SavedFromState->r10     = IstState->r10;
+    SavedFromState->r11     = IstState->r11;
+    SavedFromState->r12     = IstState->r12;
 
-    SavedFromState->r13     = Ist1State->r13;
-    SavedFromState->r14     = Ist1State->r14;
-    SavedFromState->r15     = Ist1State->r15;
+    SavedFromState->r13     = IstState->r13;
+    SavedFromState->r14     = IstState->r14;
+    SavedFromState->r15     = IstState->r15;
 
-    SavedFromState->rip     = Ist1State->rip;
-    SavedFromState->cs      = Ist1State->cs;
-    SavedFromState->rflags  = Ist1State->rflags;
-    SavedFromState->rsp     = Ist1State->rsp;
-
-    //Change To New State
-    Ist1State->rax          = SavedToState->rax;
-    Ist1State->rbx          = SavedToState->rbx;
-    Ist1State->rcx          = SavedToState->rcx;
-    Ist1State->rdx          = SavedToState->rdx;
-
-    Ist1State->rbp          = SavedToState->rbp;
-    Ist1State->rsi          = SavedToState->rsi;
-    Ist1State->rdi          = SavedToState->rdi;
-    Ist1State->r8           = SavedToState->r8;
-
-    Ist1State->r9           = SavedToState->r9;
-    Ist1State->r10          = SavedToState->r10;
-    Ist1State->r11          = SavedToState->r11;
-    Ist1State->r12          = SavedToState->r12;
-
-    Ist1State->r13          = SavedToState->r13;
-    Ist1State->r14          = SavedToState->r14;
-    Ist1State->r15          = SavedToState->r15;
-
-    Ist1State->rip          = SavedToState->rip;
-    Ist1State->cs           = SavedToState->cs;
-    Ist1State->rflags       = SavedToState->rflags;
-    Ist1State->rsp          = SavedToState->rsp;
+    SavedFromState->rip     = IstState->rip;
+    SavedFromState->cs      = IstState->cs;
+    SavedFromState->rflags  = IstState->rflags;
+    SavedFromState->rsp     = IstState->rsp;
     
 }
 
-void LouKeSwitchToTask(
+void KernelContextSwitchTo(
+    CPUContext*         SavedToState,
+    CPUKernelContext*   IstState
+){
+
+    //Change To New State
+    IstState->rax          = SavedToState->rax;
+    IstState->rbx          = SavedToState->rbx;
+    IstState->rcx          = SavedToState->rcx;
+    IstState->rdx          = SavedToState->rdx;
+
+    IstState->rbp          = SavedToState->rbp;
+    IstState->rsi          = SavedToState->rsi;
+    IstState->rdi          = SavedToState->rdi;
+    IstState->r8           = SavedToState->r8;
+
+    IstState->r9           = SavedToState->r9;
+    IstState->r10          = SavedToState->r10;
+    IstState->r11          = SavedToState->r11;
+    IstState->r12          = SavedToState->r12;
+
+    IstState->r13          = SavedToState->r13;
+    IstState->r14          = SavedToState->r14;
+    IstState->r15          = SavedToState->r15;
+
+    IstState->rip          = SavedToState->rip;
+    IstState->cs           = SavedToState->cs;
+    IstState->rflags       = SavedToState->rflags;
+    IstState->rsp          = SavedToState->rsp;
+    
+}
+
+UINT64 LouKeSwitchToTask(
     UINT64                  CpuCurrentState,
     PGENERIC_THREAD_DATA    ThreadFrom,
     PGENERIC_THREAD_DATA    ThreadTo
 ){
     if(ThreadFrom == ThreadTo){
-        return;
+        return CpuCurrentState;
     }
+
+    ThreadFrom->SavedState = (CPUContext*)CpuCurrentState;
     SaveEverything(ThreadFrom->ContextStorage);    
     if((ThreadFrom->State != THREAD_BLOCKED) && (ThreadFrom->State != THREAD_TERMINATED)){
         ThreadFrom->State = THREAD_READY;
     }
-
-    if(ThreadTo->Cs == 0x08){
-        
-        KernelContextSwitch(
-            &ThreadFrom->SavedState,
-            &ThreadTo->SavedState,
-            (CPUKernelContext*)(UINT8*)CpuCurrentState
-        );
-
-    }else{
-
-        LouPrint("HERE User\n");
-        while(1);
-    }
-    //CpuCurrentState
 
     ThreadFrom->Resting = true;
     ThreadTo->Resting = false;
 
     ThreadTo->State = THREAD_RUNNING;
     SetTEB((UINT64)&ThreadTo->Teb);
-    RestoreEverything(ThreadTo->ContextStorage);    
+    RestoreEverything(ThreadTo->ContextStorage);
 
+    return (UINT64)ThreadTo->SavedState;
 }
 
 static GENERIC_THREAD_DATA MasterThreadList = {0};
@@ -223,8 +216,8 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
 
     //Allocate a new stack
-    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 64, (User ? USER_GENERIC_MEMORY : KERNEL_GENERIC_MEMORY));
-    NewThreadHandle->StackTop = NewThreadHandle->StackBase + StackSize;
+    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, (User ? USER_GENERIC_MEMORY : KERNEL_GENERIC_MEMORY));
+    NewThreadHandle->StackTop = NewThreadHandle->StackBase + ((StackSize - (sizeof(CPUContext) + 8)) & ~(16));
     //thread prioirties are backwards 0 being the highest +x being lowest 
     NewThreadHandle->ThreadPriority = (THREAD_PRIORITY_RINGS - 1) - ThreadPriority;
 
@@ -254,17 +247,19 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
             MARK_PROCESSOR_AFFILIATED(NewThreadHandle->AfinityBitmap, i);
         }
     }
+    
+    NewThreadHandle->SavedState = (CPUContext*)NewThreadHandle->StackTop;
 
-    NewThreadHandle->SavedState.rip = (UINT64)CtxEntry;                 //worker subsystem liftoff stub     : iretq Location
-    NewThreadHandle->SavedState.rcx = (UINT64)CtxFunction;              //requested work                    : MSVC PARAM 1
-    NewThreadHandle->SavedState.rdx = (UINT64)CtxParams;                //work params                       : MSVC PARAM 2
-    NewThreadHandle->SavedState.r8  = (UINT64)NewThreadHandle;          //Identity for worker subsystem     : MSVC PARAM 3
-    NewThreadHandle->SavedState.rsp = NewThreadHandle->StackTop;        //stack pointer
-    NewThreadHandle->SavedState.rbp = NewThreadHandle->SavedState.rsp;  //stack base
+    NewThreadHandle->SavedState->rip = (UINT64)CtxEntry;                 //worker subsystem liftoff stub     : iretq Location
+    NewThreadHandle->SavedState->rcx = (UINT64)CtxFunction;              //requested work                    : MSVC PARAM 1
+    NewThreadHandle->SavedState->rdx = (UINT64)CtxParams;                //work params                       : MSVC PARAM 2
+    NewThreadHandle->SavedState->r8  = (UINT64)NewThreadHandle;          //Identity for worker subsystem     : MSVC PARAM 3
+    NewThreadHandle->SavedState->rsp = NewThreadHandle->StackTop;        //stack pointer
+    NewThreadHandle->SavedState->rbp = NewThreadHandle->SavedState->rsp;  //stack base
 
-    NewThreadHandle->SavedState.cs = CodeSegment;       //Desired Code Segment
-    NewThreadHandle->SavedState.ss = StackSegment;      //Desired Stack segment
-    NewThreadHandle->SavedState.rflags = 0x202;         //interrupts enabled no operation normal
+    NewThreadHandle->SavedState->cs = CodeSegment;       //Desired Code Segment
+    NewThreadHandle->SavedState->ss = StackSegment;      //Desired Stack segment
+    NewThreadHandle->SavedState->rflags = 0x0202;        //interrupts enabled no operation normal
 
     LouKeGetTime(&NewThreadHandle->ThreadStart); //time of creation for thread object manager
     
@@ -431,7 +426,6 @@ void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DA
     LouKIRQL Irql;
     PTHREAD_RING NewThreadRing = LouKeTsmCreateThreadRing(Thread);
     LouKeAcquireSpinLock(&AsignLock, &Irql);
-    LouKeLockProcessManager();
     PTHREAD_RING TmpThreadRing = this->Threads[Thread->ThreadPriority];
     PTHREAD_RING CurrentThread = TmpThreadRing;
 
@@ -452,7 +446,7 @@ void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DA
     NewThreadRing->Peers.LastHeader = (PListHeader)TmpThreadRing;
 
     _ASERT_FINISHED:
-    LouKeUnlockProcessManager();
+    
     LouKeReleaseSpinLock(&AsignLock, &Irql);
 }
 
@@ -461,7 +455,7 @@ static spinlock_t DeasignLock = {0};
 void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&DeasignLock, &Irql);
-    LouKeLockProcessManager();
+    
 
     UINT64 Limitors = this->LoadDistributer.TotalLimiters;
 
@@ -505,7 +499,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 
     _DEASERT_FINISHED:
-    LouKeUnlockProcessManager();
+    
     LouKeReleaseSpinLock(&DeasignLock, &Irql);
 }
 
@@ -523,12 +517,10 @@ KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     TIME_T Time;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
     LouKeAcquireSpinLock(&SleepLock, &Irql);
-    LouKeLockProcessManager();
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_BLOCKED;
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeUnlockProcessManager();
     LouKeReleaseSpinLock(&SleepLock, &Irql);
     asm("INT $32");
 }
@@ -540,19 +532,15 @@ KERNEL_IMPORT
 void 
 LouKeYeildExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
-    if(LouKeGetReferenceCount(&ThreadData->EFBY)){
-        LouKeReleaseReference(&ThreadData->EFBY);
-        return;
-    }
     LouKIRQL Irql;
     TIME_T Time;
     LouKeAcquireSpinLock(&YeildLock, &Irql);
-    LouKeLockProcessManager();
+    
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_BLOCKED;
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeUnlockProcessManager();
+    
     LouKeReleaseSpinLock(&YeildLock, &Irql);
     asm("INT $32");
 }
@@ -563,18 +551,15 @@ KERNEL_IMPORT void LouKeUnblockThread(UINT64 ThreadID){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
     LouKeAcquireSpinLock(&UnblockLock, &Irql);
-    LouKeLockProcessManager();
-    LouKeAcquireReference(&ThreadData->EFBY);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    ThreadData->State = THREAD_READY;
-    LouKeUnlockProcessManager();
+    ThreadData->State = THREAD_READY;    
     LouKeReleaseSpinLock(&UnblockLock, &Irql);
 }
 
 
 LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
     LouPrint("Thread Manager Demon Started\n");
-    UNUSED INTEGER Processors = GetNPROC();
+    //UNUSED INTEGER Processors = GetNPROC();
 
     while(1){
         //PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;

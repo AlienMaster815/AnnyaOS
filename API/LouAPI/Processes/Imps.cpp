@@ -8,7 +8,7 @@ uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-static LOUSTATUS CreateImpThreadHandle(
+LOUSTATUS CreateImpThreadHandle(
     PTHREAD*    ThreadOut, 
     PVOID       WorkEntry, 
     PVOID       WorkParam, 

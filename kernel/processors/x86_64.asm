@@ -4,7 +4,6 @@ default rel
 
 global SetUpSmpPageing
 global SetGS
-global GetRBP
 global GetGS
 global RecreateDisasemblyIssue
 global SetTEB
@@ -15,6 +14,10 @@ global GetPEB
 global GetGSValue
 global GetWinIRQL
 global SetWinIRQL
+global GetRSP
+global GetRBP
+global SetNewBootStack
+global GetRFLAGS
 
 section .rodata
 gdt64:
@@ -82,13 +85,6 @@ GetCr4:
     mov rax, cr4
     ret
 
-
-
-
-GetRBP:
-    mov rax, rbp
-    ret
-
 RecreateDisasemblyIssue:
     ret
 
@@ -109,8 +105,9 @@ GetLKPCB:
     ret
 
 GetWinIRQL:
-    mov al, byte[gs:50]
-
+    mov al, byte[gs:0x50]
+    ret
+    
 SetWinIRQL:
     mov byte[gs:0x50], cl
     ret
@@ -121,6 +118,24 @@ GetPEB:
 
 GetGSValue:
     mov rax, qword[gs:rcx]
+    ret
+
+GetRSP:
+    mov rax, rsp
+    ret
+
+GetRBP:
+    mov rax, rbp
+    ret
+
+GetRFLAGS:
+    pushfq
+    pop rax
+    ret
+
+SetNewBootStack:
+    mov rbp, rcx
+    mov rsp, rdx 
     ret
 
 global InstallGDT

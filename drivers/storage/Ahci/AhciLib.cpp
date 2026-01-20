@@ -55,6 +55,29 @@ LOUSTATUS AhciGenricDMAPrepCommand(
 
 static spinlock_t AhciCommandLock;
 
+#define AHCI_COMMAND_TIMEOUT 100000
+ 
+
+LOUSTATUS AhciPollCommand(
+    PAHCI_GENERIC_PORT  Port,
+    UINT32              Slot
+){
+    size_t i = 0;
+    while(i < AHCI_COMMAND_TIMEOUT){
+        if((Port->PxCI & (1U << Slot)) == 0){
+            break;
+        }
+        if(Port->PxIS & (1U << 30)){
+            return STATUS_IO_DEVICE_ERROR;
+        }
+        i++;
+    }
+    if(i >= AHCI_COMMAND_TIMEOUT){
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS AhciGenricDMAIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
@@ -121,9 +144,10 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     Port->PxCI |= (1 << FreeSlot);
     
     LOUSTATUS Status = LouKeWaitForEvent(&PrivateData->CommandCompletion[FreeSlot]);
-
+    //Status = AhciPollCommand(Port, FreeSlot);
+    
     LouKeFreeAhciCommandTable(NewCommandTable);        
-    return STATUS_SUCCESS;
+    return Status;
 }
 
 LOUSTATUS AhciGenericHardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){

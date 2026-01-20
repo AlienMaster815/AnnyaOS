@@ -109,6 +109,7 @@ void InitializeFileSystemManager(){
                 TmpMfs->FileSystem = NewMountedFileSystem;
                 if(NewMountedFileSystem->FileSystemSeek){
                     //Seek Kernel Image tto identify if its a system disk
+                    //TODO Change This
                     bool KernelImage = NewMountedFileSystem->FileSystemSeek("/ANNYA/SYSTEM64/LOUOSKRN.EXE", NewMountedFileSystem);
                     if(KernelImage){
                         LouPrint("Storage Device Is A System Disk\n");

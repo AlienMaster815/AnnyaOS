@@ -1,16 +1,6 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
-static mutex_t UpmLock = {0};
-
-void LouKeLockProcessManager(){
-    MutexLock(&UpmLock);
-}
-
-void LouKeUnlockProcessManager(){
-    MutexUnlock(&UpmLock);
-}
-
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
 LOUDDK_API_ENTRY
@@ -84,11 +74,11 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
     return STATUS_SUCCESS;
 }
 
-void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
+UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     BOOL ProcessSwitch = false;
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
-    
+
     /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     if(
         (CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice) &&
@@ -156,7 +146,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         
     NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, ProcessSwitch);
 
-    LouKeSwitchToTask(
+    IrqState = LouKeSwitchToTask(
         IrqState,
         CurrentThread,
         NextThread
@@ -164,6 +154,7 @@ void PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
 
     this->CurrentThread = NextThread;
 
+    return IrqState;
 }
 
 
@@ -184,7 +175,6 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
     LouKIRQL Irql;
     PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
     LouKeAcquireSpinLock(&AsignLock, &Irql);
-    LouKeLockProcessManager();
     PPROCESS_RING TmpProcessRing = this->Processes[Process->ProcessPriority];
     PPROCESS_RING CurrentProcessRing = TmpProcessRing;
 
@@ -206,7 +196,6 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
 
     _PROCESS_ASSIGNMENT_DONE:
     Process->ProcessState = PROCESS_RUNNING;
-    LouKeUnlockProcessManager();
     LouKeReleaseSpinLock(&AsignLock, &Irql);
 }
 
@@ -243,14 +232,18 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL* OldIrql
 );
 
+//static SIZE Foo = 0;
 
-
-LOUDDK_API_ENTRY void UpdateProcessManager(uint64_t CpuCurrentState){
+LOUDDK_API_ENTRY UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
+    if(LouKeGetIrql() >= CLOCK_LEVEL){
+        LouKeSendIcEOI();
+        return CpuCurrentState;
+    }
     PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
-    MutexLock(&UpmLock);
-    Schedualer->PsmSchedual(CpuCurrentState);
-    MutexUnlock(&UpmLock);
+    CpuCurrentState = Schedualer->PsmSchedual(CpuCurrentState);
+    LouKeMemoryBarrier();
     LouKeSendIcEOI();
+    return CpuCurrentState;
 }
 
 static mutex_t InitLock = {0};
@@ -323,6 +316,10 @@ void LouKeUnmaskSmpInterrupts(){
 
 }
 
+KERNEL_IMPORT UINT64 GetRSP();
+KERNEL_IMPORT UINT64 GetRBP();
+KERNEL_IMPORT void SetNewBootStack(UINT64 Base, UINT64 Pointer);
+
 LOUDDK_API_ENTRY void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
 
@@ -372,7 +369,17 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
     
     SystemCr3 = GetCr3();
+    
+    UINT8* NewStackTop = (UINT8*)((PGENERIC_THREAD_DATA)NewThread)->SavedState->rbp;
+    SIZE   CurrentStackOffset = (GetBootStackTop() - GetRSP());
+    UINT8* OldStackCurrent = (UINT8*)GetRSP();
+    UINT8* NewStackCurrent = NewStackTop - CurrentStackOffset; 
 
+    memcpy(NewStackCurrent, OldStackCurrent, CurrentStackOffset);
+
+    UINT64 NewRbp = (GetRBP() - GetRSP()) + (UINT64)NewStackCurrent;
+
+    SetNewBootStack(NewRbp, (UINT64)NewStackCurrent);
 
     /*for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle

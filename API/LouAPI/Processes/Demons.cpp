@@ -1,5 +1,7 @@
 #include "ProcessPrivate.h"
 
+void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread);
+
 LOUDDK_API_ENTRY VOID LouKeDestroyThreadSyscall(PVOID ThreadHandle){
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
     ThreadData->State = THREAD_TERMINATED;
@@ -17,18 +19,7 @@ LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
 
 }
 
-
-UNUSED static void ThreadStub(int(*Thread)(PVOID), PVOID FunctionParam, PTHREAD ThreadHandle){    
-    PGENERIC_THREAD_DATA Tmp = (PGENERIC_THREAD_DATA)ThreadHandle;
-    LouPrint("Demon:%d Has Started\n", Tmp->ThreadID);
-    int Result = Thread(FunctionParam);
-    LouPrint("Demon:%d Exited With Code:%d\n", Tmp->ThreadID, Result);
-    LouKeDestroyThread(ThreadHandle);
-    while(1);
-}
-
-
-static LOUSTATUS CreateDemonThreadHandle(
+LOUSTATUS CreateDemonThreadHandle(
     PTHREAD*    ThreadOut, 
     PVOID       WorkEntry, 
     PVOID       WorkParam, 
@@ -43,7 +34,7 @@ static LOUSTATUS CreateDemonThreadHandle(
     LOUSTATUS Status = LouKeTsmCreateThreadHandle(
         (PGENERIC_THREAD_DATA*)ThreadOut,
         ProcessData,
-        (PVOID)ThreadStub,
+        (PVOID)KernelThreadStub,
         WorkEntry,
         WorkParam,
         Prioirty,

@@ -144,13 +144,11 @@ void SetupGDT(){
 
     PTSS Tss = (PTSS)LouKeMallocExVirt32(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
 
-    Tss->RSP0 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
-    Tss->RSP1 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
-    Tss->RSP2 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
-    Tss->IST1 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
-    Tss->IST2 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
-    Tss->IST3 = (uintptr_t)(LouKeMallocEx((64 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((64 * KILOBYTE) - 16));
-
+    Tss->RSP0 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    Tss->RSP1 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    Tss->RSP2 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    Tss->IST1 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    Tss->IST2 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
 
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,

@@ -309,7 +309,6 @@ global StoreContext
 global ContextLiftoff
 extern RegisterLastKnownStackLocation
 section .text
-global getRsp
 
 SaveNext dd 0
 
@@ -566,9 +565,8 @@ ISR31:
 ISR32:
 	pusha
 	mov rcx, rsp
-	push rsp ;insurance for privaledge switch
 	call UpdateProcessManager
-	pop  rsp
+	mov rsp, rax
 	popa                                                                     
 	iretq
 

@@ -111,7 +111,7 @@ typedef struct _GENERIC_THREAD_DATA{
     INSTRUCTION_MODE                InstructionMode;
     UINT8*                          AfinityBitmap;
     BOOL                            Resting;
-    CPUContext                      SavedState;
+    CPUContext*                     SavedState;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
 typedef struct THREAD_RING{
@@ -228,7 +228,7 @@ typedef class PsmProcessScedualManagerObject{
                                                 UINT64 DistibutionLimitor,
                                                 UINT64 DistributerIncrementation
                                             );
-        void                                PsmSchedual(UINT64 IrqState);
+        UINT64                              PsmSchedual(UINT64 IrqState);
         void                                PsmYeildThread(UINT64 IrqState);
         void                                PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
         void                                PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
@@ -255,7 +255,7 @@ KERNEL_IMPORT uint16_t GetNPROC();
 
 KERNEL_IMPORT LouKIRQL LouKeGetIrql();
 KERNEL_IMPORT void LouKeSendIcEOI();
-void LouKeSwitchToTask(
+UINT64 LouKeSwitchToTask(
     UINT64                  StackContex,
     PGENERIC_THREAD_DATA    ThreadFrom,
     PGENERIC_THREAD_DATA    ThreadTo

@@ -39,8 +39,8 @@ void LouKeSetIrqlNoFlagUpdate(
         return;
     }
     
-    if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-        *OldIrql = LouKeGetIrql(); // save the old irql1
+    if(OldIrql){//0x00 is null in this system and is excplicitly checked for sanity
+        *OldIrql = GetWinIRQL(); // save the old irql1
     }
 
     switch (NewIrql){
@@ -79,8 +79,8 @@ void LouKeSetIrql(
     if(IrqlUninitialized){
         return;
     }
-    if(OldIrql != 0x00){//0x00 is null in this system and is excplicitly checked for sanity
-        *OldIrql = LouKeGetIrql(); // save the old irql1
+    if(OldIrql){
+        *OldIrql = GetWinIRQL(); // save the old irql1
     }
 
     switch (NewIrql){

@@ -23,7 +23,7 @@ typedef struct _LKPCB{
     LouKIRQL    Irql;
 }LKPCB, * PLKPCB;
 
-
+LouKIRQL LouKeGetIrql();
 
 #ifdef _USER_MODE_CODE_
 
