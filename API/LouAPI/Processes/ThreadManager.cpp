@@ -535,7 +535,9 @@ KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
     LouKeAcquireSpinLock(&AsignLock, &Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    ThreadData->State = THREAD_BLOCKED;
+    if(ThreadData->State < THREAD_BLOCKED){
+        ThreadData->State = THREAD_BLOCKED;
+    }
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeReleaseSpinLock(&AsignLock, &Irql);
@@ -551,10 +553,11 @@ LouKeYeildExecution(){
     LouKeAcquireSpinLock(&AsignLock, &Irql);
     
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    ThreadData->State = THREAD_BLOCKED;
+    if(ThreadData->State < THREAD_BLOCKED){
+        ThreadData->State = THREAD_BLOCKED;
+    }    
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    
     LouKeReleaseSpinLock(&AsignLock, &Irql);
     asm("INT $32");
 }
@@ -574,13 +577,9 @@ LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
 
     while(1){
         PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
-        UNUSED PGENERIC_THREAD_DATA TailThread = 0;
         while(TmpThreadHandle->Peers.NextHeader){
-            TailThread = TmpThreadHandle;
             TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
             if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
-               TailThread->Peers.NextHeader = TmpThreadHandle->Peers.NextHeader;
-                ((PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader)->Peers.LastHeader = (PListHeader)TailThread;
                 PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
                 for(INTEGER i = 0 ; i < Processors; i++){
                     if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){

@@ -278,8 +278,6 @@ void LouKeSendPml4ToSections(UINT64* Pml4){
     MutexUnlock(&Pml4MasterLock);
 }
 
-LOUSTATUS LouKeProcessCreateEntryThread(PHPROCESS Process, PVOID Entry);
-
 LOUDDK_API_ENTRY
 LOUSTATUS LouKeSectionInitNewProcess(
     PHPROCESS   Process,

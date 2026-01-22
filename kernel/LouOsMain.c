@@ -449,8 +449,8 @@ KERNEL_ENTRY LouOsKrnlStart(
         while(1);
     }
     LouPrint("Lousine Kernel Successfully Initialized\n");
-    //sleep(3000);
-    //LouKeSystemShutdown(ShutdownReboot);
+    sleep(3000);
+    LouKeSystemShutdown(ShutdownReboot);
     //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!
     while(1);
