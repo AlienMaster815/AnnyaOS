@@ -309,9 +309,12 @@ void LouKeSetPanicInfo(
 	_vsnprintf((string)TmpString, 256, "RSP:%h :: SS :%h", rsp, ss);
 	LouPrint("%s\n", TmpString);
 
-	if(strncmp(DynamicErrorMessage, "Page Fault Protection Violation", strlen("Page Fault Protection Violation")) == 0){
+	if(!strcmp(DynamicErrorMessage, "Page Fault Protection Violation")){
 		goto _PAGE_FUALT_PANIC;
-	}else {
+	}else if(!strcmp(DynamicErrorMessage, "Invalid Opcode")){
+		goto _GENERIC_FUALT_PANIC;//_INVALOP_PANIC;
+	}
+	else {
 		goto _GENERIC_FUALT_PANIC;
 	}
 
@@ -320,6 +323,13 @@ void LouKeSetPanicInfo(
 	memset(TmpString, 0, 256);
 	_vsnprintf((string)TmpString, 256, "Page Fault Code HexValue:%h", PageFaultData);
 	LouPrint("%s\n", TmpString);
+
+	goto _GENERIC_FUALT_PANIC;
+
+	//_INVALOP_PANIC:
+	//memset(TmpString, 0, 256);
+	//_vsnprintf((string)TmpString, 256, "OpBuffer:%h:%h:%h:%h:%h:%h:%h:%h", ((UINT8*)rip)[0], ((UINT8*)rip)[1], ((UINT8*)rip)[2], ((UINT8*)rip)[3], ((UINT8*)rip)[4], ((UINT8*)rip)[5], ((UINT8*)rip)[6], ((UINT8*)rip)[7]);
+	//LouPrint("%s\n", TmpString);
 
 	_GENERIC_FUALT_PANIC:
 

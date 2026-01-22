@@ -857,10 +857,6 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
     string FunctionName,
     PKULA_TRANSITION_LAYER_OBECT TransitionObject
 ){
-    size_t koo = strlen(ModuleName);
-    for(size_t foo = 0 ; foo < koo; foo++){
-        ModuleName[foo] = toupper(ModuleName[foo]);
-    }
     size_t i = 0;
     size_t j = 0;
 
@@ -914,6 +910,51 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
         ModuleName,
         FunctionName
     );
+}
+
+LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandleEx(
+    string ModuleName,
+    PKULA_TRANSITION_LAYER_OBECT TransitionObject
+){
+    
+    if(!ModuleName){
+        return 0x00;
+    }
+
+    size_t i = 0;
+
+    //LouPrint("Module:%s Function:%s\n", ModuleName, FunctionName);
+
+    for(i = 0; i < PRE_LOADED_MODULES; i++){
+
+        if((strcmp(ImportTables[i].ModuleName, ModuleName) == 0) && (TransitionObject == 0x00)){
+            return (HANDLE)&ImportTables[i];
+            goto _LOADED_MODULE_CHAIN;
+        }  
+    }
+
+    _LOADED_MODULE_CHAIN:
+
+    //last resourt but most likely here
+    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
+    for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
+        if((strcmp(Tmp->Table.ModuleName, ModuleName) == 0) && (TransitionObject == Tmp->TransitionObject)){
+            return (HANDLE)&Tmp->Table;
+        }
+        //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
+        if(Tmp->Neighbors.NextHeader){
+            Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
+        }
+    }
+
+
+    return 0x00;
+}
+
+LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandle(
+    string ModuleName
+){
+    return LouKeLinkerGetModuleLookupHandleEx(ModuleName, 0x00);
 }
 
 LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(

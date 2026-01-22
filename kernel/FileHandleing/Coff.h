@@ -36,4 +36,18 @@ typedef struct _LOADED_IMAGE_TRACKER{
     PCFI_OBJECT LoadedObject;
 }LOADED_IMAGE_TRACKER, * PLOADED_IMAGE_TRACKER;
 
+HANDLE LouKeLinkerGetModuleLookupHandle(
+    string ModuleName
+);
+
+LOUSTATUS 
+LouKeVmmCreatePrivateSection(
+    PVOID   VirtualAddress,
+    size_t  Size,
+    UINT64  Alignment,
+    UINT64  FrameFlags,
+    BOOL    Cow,
+    BOOL    Bss
+);
+
 #endif

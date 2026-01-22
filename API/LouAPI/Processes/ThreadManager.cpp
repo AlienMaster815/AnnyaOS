@@ -472,7 +472,7 @@ void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DA
 void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&AsignLock, &Irql);
-    
+    PVOID FreeItem = 0x00;
 
     UINT64 Limitors = this->LoadDistributer.TotalLimiters;
 
@@ -493,7 +493,8 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
                 TmpThreadRing = (PTHREAD_RING)TailRing->Peers.NextHeader;
                 TmpThreadRing->Peers.LastHeader = (PListHeader)TailRing;
             }
-            LouKeFree(CurrentThreadRing);
+            //LouKeFree(CurrentThreadRing);
+            FreeItem = (PVOID)CurrentThreadRing;
             goto _DEASERT_FINISHED;
         }
         
@@ -506,7 +507,8 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
                 TailRing->Peers.NextHeader = TmpThreadRing->Peers.NextHeader;
                 TmpThreadRing = (PTHREAD_RING)TmpThreadRing->Peers.NextHeader;
                 TmpThreadRing->Peers.LastHeader = (PListHeader)TailRing;
-                LouKeFree(CurrentThreadRing);
+                //LouKeFree(CurrentThreadRing);
+                FreeItem = (PVOID)CurrentThreadRing;
                 goto _DEASERT_FINISHED;
             }            
             TailRing = TmpThreadRing;
@@ -516,8 +518,10 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 
     _DEASERT_FINISHED:
-    
     LouKeReleaseSpinLock(&AsignLock, &Irql);
+    if(FreeItem){
+        LouKeFree(FreeItem);
+    }
 }
 
 KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
@@ -564,30 +568,29 @@ KERNEL_IMPORT void LouKeUnblockThread(UINT64 ThreadID){
     LouKeReleaseSpinLock(&AsignLock, &Irql);
 }
 
-
 LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
     LouPrint("Thread Manager Demon Started\n");
-    //UNUSED INTEGER Processors = GetNPROC();
+    UNUSED INTEGER Processors = GetNPROC();
 
     while(1){
-        //PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
-        //PGENERIC_THREAD_DATA TailThread = 0;
-        //while(TmpThreadHandle->Peers.NextHeader){
-        //    TailThread = TmpThreadHandle;
-        //    TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
-        //    if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
-        //       TailThread->Peers.NextHeader = TmpThreadHandle->Peers.NextHeader;
-        //        ((PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader)->Peers.LastHeader = (PListHeader)TailThread;
-        //        PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
-        //        for(INTEGER i = 0 ; i < Processors; i++){
-        //            if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){
-        //                ProcessData->ThreadObjects[i].TsmDeasignThreadFromSchedual(TmpThreadHandle);
-        //            }
-        //        }
-        //        LouPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
-        //        LouKeTsmDestroyThreadHandle(TmpThreadHandle);
-        //    }
-        //}
+        PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
+        UNUSED PGENERIC_THREAD_DATA TailThread = 0;
+        while(TmpThreadHandle->Peers.NextHeader){
+            TailThread = TmpThreadHandle;
+            TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
+            if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
+               TailThread->Peers.NextHeader = TmpThreadHandle->Peers.NextHeader;
+                ((PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader)->Peers.LastHeader = (PListHeader)TailThread;
+                PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
+                for(INTEGER i = 0 ; i < Processors; i++){
+                    if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){
+                        ProcessData->ThreadObjects[i].TsmDeasignThreadFromSchedual(TmpThreadHandle);
+                    }
+                }
+                LouPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
+                LouKeTsmDestroyThreadHandle(TmpThreadHandle);
+            }
+        }
         LouKeYeildExecution();
     }
     return -1;

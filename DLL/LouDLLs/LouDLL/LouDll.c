@@ -235,7 +235,7 @@ LOUDLL_API
 int LouPrint(char* Str, ...){
     va_list Arg;
     va_start(Arg, Str);
-    uint64_t Data[3] = {0};
+    uint64_t Data[4] = {0};
     Data[0] = 0;
     Data[1] = (uint64_t)Str;
     Data[2] = (uint64_t)&Arg;
@@ -243,7 +243,7 @@ int LouPrint(char* Str, ...){
         LouCALL(LOUPRINTCALL, (uint64_t)&Data[0], 0);
     }
     va_end(Arg);
-    return Data[1];
+    return Data[3];
 }
 
 
@@ -746,6 +746,6 @@ LouSystemShutdown(SHUTDOWN_ACTION ShutDown){
     uint64_t Data[2] = {0};
     Data[1] = (uint64_t)ShutDown;
     while(Data[0] != 1){
-        LouCALL(LOUSHUTDOWN, (uint64_t)Data, 0);
+        LouCALL(LOUSHUTDOWN, (uint64_t)&Data[0], 0);
     }
 }

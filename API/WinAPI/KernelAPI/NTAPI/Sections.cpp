@@ -1,4 +1,5 @@
 #include <LouDDK.h>
+#include "../../../LouAPI/Processes/ProcessPrivate.h"
 
 //LouKeLoadCoffImageB
 
@@ -28,8 +29,13 @@ typedef struct _SECTION_OBJECT{
     PVOID                       SectionVBase;
     PVOID                       SectionPBase;
     SIZE                        SectionSize;
+    SIZE                        SectionAlignment;
     PVOID                       SectionPrivateData;
+    PVOID                       InitializedDataCopy;
     UINT64                      FrameFlags;
+    BOOL                        Cow;
+    BOOL                        Bss;
+    BOOL                        Private;
 }SECTION_OBJECT, * PSECTION_OBJECT;
 
 typedef struct _PML4_LIST {
@@ -58,6 +64,20 @@ AllocateSectionObject(
     MutexUnlock(&SectionListLock);
     return  TmpSection;
 }    
+
+static PSECTION_OBJECT VAddressToSectionObject(PVOID VAddress){
+    PSECTION_OBJECT TmpSection = &MasterSectionList;
+    MutexLock(&SectionListLock);
+    while(TmpSection->Peers.NextHeader){
+        TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
+        if(TmpSection->SectionVBase == VAddress){
+            MutexUnlock(&SectionListLock);
+            return TmpSection;
+        }
+    }    
+    MutexUnlock(&SectionListLock);
+    return 0x00;
+}
 
 LOUDDK_API_ENTRY
 LOUSTATUS 
@@ -237,7 +257,9 @@ void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     MutexLock(&SectionListLock);
     while(TmpSection->Peers.NextHeader){
         TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
-        LouKeMapContinuousMemoryBlockEx((UINT64)TmpSection->SectionPBase, (UINT64)TmpSection->SectionVBase, TmpSection->SectionSize, TmpSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+        if(!TmpSection->Private){
+            LouKeMapContinuousMemoryBlockEx((UINT64)TmpSection->SectionPBase, (UINT64)TmpSection->SectionVBase, TmpSection->SectionSize, TmpSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+        }
         //LouPrint("%h:%h:%h:%bc:%d\n", TmpSection->SectionVBase, TmpSection->SectionPBase, TmpSection->SectionSize, TmpSection->FrameFlags, (((UINT64)FrameMember - (UINT64)FrameBase) / 8));
     }    
     MutexUnlock(&SectionListLock);
@@ -268,31 +290,95 @@ LOUSTATUS LouKeSectionInitNewProcess(
     }
     UNUSED PSECTION_OBJECT SectionData = (PSECTION_OBJECT)Section;
     if(SectionData->Coff){
-        PVOID InitProcess = (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", "LouProcessInitThread");
-        if(InitProcess){
-            struct InitData{
-                HANDLE      Proces; 
-                mutex_t     Lock;
-            };
-            struct InitData* Data = LouKeMallocType(struct InitData, USER_GENERIC_MEMORY);
-            MutexLock(&Data->Lock);
-            LouKeCreateImp(
-                InitProcess,
-                (PVOID)Data,
-                16 * KILOBYTE,
-                31
-            );
+        PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)SectionData->SectionPrivateData; 
 
-            MutexSynchronize(&Data->Lock);
-            LouKeFree(Data);
-            PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)SectionData->SectionPrivateData; 
-            LouKeProcessCreateEntryThread(Process, CfiData->CfiObject.Entry);
+        CfiData->CfiObject.CoffCommitSection((HANDLE)&CfiData->CfiObject, ((PGENERIC_PROCESS_DATA)Process)->PMLTree);
 
-        }
     }else {
         LouPrint("LouKeSectionInitNewProcess() : NON COFF\n");
         while(1);
     }
 
     return STATUS_SUCCESS;
+}
+
+LOUDDK_API_ENTRY
+LOUSTATUS 
+LouKeVmmCreatePrivateSectionEx(
+    PVOID   VirtualAddress,
+    size_t  Size,
+    UINT64  Alignment,
+    UINT64  FrameFlags,
+    ULONG   NtFlags,
+    BOOL    Cow,
+    BOOL    Bss
+){
+    PSECTION_OBJECT NewPrivateSection = AllocateSectionObject(0x00);
+
+    NewPrivateSection->Private                  = true;
+    NewPrivateSection->Cow                      = Cow;
+    NewPrivateSection->Bss                      = Bss;
+
+    if((!Bss) && (!Cow)){
+        NewPrivateSection->InitializedDataCopy = LouKeMallocEx(Size, Alignment, KERNEL_GENERIC_MEMORY);
+        memcpy(NewPrivateSection->InitializedDataCopy, VirtualAddress, Size); 
+    }
+
+    if(Cow){
+        RequestPhysicalAddress((UINT64)VirtualAddress, (UINT64*)&NewPrivateSection->SectionPBase);
+    }
+
+    NewPrivateSection->SectionVBase             = VirtualAddress;
+    NewPrivateSection->SectionSize              = Size;
+    NewPrivateSection->SectionPageProtection    = NtFlags;
+    NewPrivateSection->FrameFlags               = FrameFlags;
+    NewPrivateSection->SectionAlignment         = Alignment;
+
+    return STATUS_SUCCESS;
+}
+
+LOUDDK_API_ENTRY
+LOUSTATUS 
+LouKeVmmCreatePrivateSection(
+    PVOID   VirtualAddress,
+    size_t  Size,
+    UINT64  Alignment,
+    UINT64  FrameFlags,
+    BOOL    Cow,
+    BOOL    Bss
+){
+    return LouKeVmmCreatePrivateSectionEx(
+        VirtualAddress,
+        Size, 
+        Alignment,
+        FrameFlags,
+        LouPageFlagsToNtPageFlags(FrameFlags, false, false),
+        Cow,
+        Bss
+    );
+}
+
+LOUDDK_API_ENTRY
+void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4){
+
+    PSECTION_OBJECT CommitSection = VAddressToSectionObject(VAddress);
+
+    if(CommitSection->Bss){
+        PVOID Section = LouAllocatePhysical64UpEx(CommitSection->SectionSize, CommitSection->SectionAlignment);
+        memset((UINT8*)((UINTPTR)Section + GetKSpaceBase()), 0, CommitSection->SectionSize);
+        LouKeMemoryBarrier();
+        LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+        return;
+    }
+
+    if(CommitSection->Cow){
+        LouKeMemoryBarrier();
+        LouKeMapContinuousMemoryBlockEx((UINT64)CommitSection->SectionPBase, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags & ~(WRITEABLE_PAGE), (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+        return;
+    }
+    
+    PVOID Section = LouAllocatePhysical64UpEx(CommitSection->SectionSize, CommitSection->SectionAlignment);
+    memcpy((UINT8*)((UINTPTR)Section + GetKSpaceBase()), CommitSection->InitializedDataCopy, CommitSection->SectionSize);
+    LouKeMemoryBarrier();
+    LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
 }

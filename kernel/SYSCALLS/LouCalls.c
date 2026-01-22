@@ -76,8 +76,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUPRINTCALL:{
             uint64_t* Tmp = (uint64_t*)Data;
-
-            *(uint64_t*)Data = LouPrint_s((string)Tmp[0], *(va_list*)Tmp[1]);
+            Tmp[2] = LouPrint_s((string)Tmp[0], *(va_list*)Tmp[1]);
             return;
         }
         case LOULOADBITMAP:{

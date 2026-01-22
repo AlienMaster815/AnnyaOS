@@ -3,6 +3,7 @@
 static GENERIC_PROCESS_DATA MasterProcessList = {0};
 static mutex_t ProcessListLock = {0};
 static KERNEL_REFERENCE TotalProcesses = {0};
+KERNEL_IMPORT UINT64 GetCr3();
 
 LOUDDK_API_ENTRY
 SIZE LouKePmGetProcessCount(){
@@ -118,7 +119,11 @@ LOUSTATUS LouKePmCreateProcessEx(
     }
 
     NewProcessObject->ProcessID = AllocateProcessID();
-    NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
+    if(strcmp(ProcessName, KERNEL_PROCESS_NAME)){
+        NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
+    }else {
+        NewProcessObject->PMLTree = (GetCr3() + GetKSpaceBase());
+    }
 
     if(Section){
         Status = LouKeSectionInitNewProcess(

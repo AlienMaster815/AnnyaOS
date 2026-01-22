@@ -17,11 +17,12 @@ LOUSTATUS LouRegisterStorageDevice(
     LouPrint("Registering Storage Device\n");
     PSTORAGE_DEVICE_MANAGER_DATA TmpStorageDrivers = &StorageDevices;
     LouKIRQL Irql;
+    PListHeader NewTrack = (PListHeader)LouKeMallocType(STORAGE_DEVICE_MANAGER_DATA, KERNEL_GENERIC_MEMORY);;
     LouKeAcquireSpinLock(&StorgaeDeviceManagerLock, &Irql);
     while(TmpStorageDrivers->Neighbors.NextHeader){
         TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
     }
-    TmpStorageDrivers->Neighbors.NextHeader = (PListHeader)LouKeMallocType(STORAGE_DEVICE_MANAGER_DATA, KERNEL_GENERIC_MEMORY);
+    TmpStorageDrivers->Neighbors.NextHeader = NewTrack;
     TmpStorageDrivers = (PSTORAGE_DEVICE_MANAGER_DATA)TmpStorageDrivers->Neighbors.NextHeader;
 
     TmpStorageDrivers->Table = Table;

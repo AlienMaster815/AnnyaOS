@@ -83,6 +83,8 @@ void PageFault(uint64_t FaultingStackP) {
     uint64_t VAddress = get_cr2();
     uint64_t PAddress = 0x00;
     
+    //DEBUG_TRAP
+
     LouPrint("PAGE FUALT:%h\n", ((CPUContext*)FaultingStackP)->rip);
 
     LouPrint("\nPage Fault Detected At Address %h Handleing Now :: Error Code:%h\n",VAddress, InterruptCode);

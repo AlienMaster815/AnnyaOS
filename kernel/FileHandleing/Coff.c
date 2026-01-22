@@ -5,6 +5,23 @@
 static mutex_t LITMutex = {0}; 
 static LOADED_IMAGE_TRACKER MasterTracker = {0};
 
+PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64){
+    UINT64 ModuleNameAddress = *(UINT64*)LookupHandle;
+    MutexLock(&LITMutex);
+    PLOADED_IMAGE_TRACKER TmpTracker = (PLOADED_IMAGE_TRACKER)MasterTracker.Peers.NextHeader;
+    while(TmpTracker){
+        PCFI_OBJECT TmpObject = TmpTracker->LoadedObject;
+
+        if((TmpObject->AOA64 == AOA64) && (RangeInterferes((UINT64)TmpObject->LoadedAddress, (UINT64)TmpObject->LoadedSize, (UINT64)ModuleNameAddress, (UINT64)1))){
+            MutexUnlock(&LITMutex);
+            return TmpObject;
+        }
+        TmpTracker = (PLOADED_IMAGE_TRACKER)TmpTracker->Peers.NextHeader;
+    }
+    MutexUnlock(&LITMutex);
+    return 0x00;
+}
+
 static void CreateLoadedImageEntry(
     PCFI_OBJECT CfiObject
 ){

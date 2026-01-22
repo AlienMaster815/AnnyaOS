@@ -754,7 +754,9 @@ typedef struct _CFI_OBJECT{
     PVOID                   Entry;
     UINT64                  StackSize;
     UINT64                  HeapSize;
-    mutex_t                 LockOutTagOut;    
+    mutex_t                 LockOutTagOut;  
+    UINT64*                 ModDependencies;  
+    LOUSTATUS               (*CoffCommitSection)(HANDLE, UINT64);
 }CFI_OBJECT, * PCFI_OBJECT;
 
 LOUSTATUS

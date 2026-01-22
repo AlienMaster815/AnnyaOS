@@ -1,5 +1,43 @@
 #include "Coff.h"
 
+PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
+void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4);
+
+LOUSTATUS Coff64CommitSection(
+    HANDLE      Section,
+    UINT64      Pml4
+){
+    if((!Section) || (!Pml4)){
+        return STATUS_INVALID_PARAMETER;
+    } 
+
+    PCFI_OBJECT CfiObject = (PCFI_OBJECT)Section;
+    PCOFF_IMAGE_HEADER PeImageHeader = CfiObject->ImageHeader; 
+    UNUSED UINT64 LoadedAddress = (UINT64)CfiObject->LoadedAddress;
+    size_t SectionCount = PeImageHeader->StandardHeader.NumberOfSections;
+
+    for(size_t i = 0; i < SectionCount; i++){
+        UNUSED UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
+        if(!CfiObject->KernelObject){
+            if(SectionCharacteristics & CFI_SCN_MEM_WRITE){
+                LouKeVmmCommitPrivateSectionVAddress(
+                    (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                    Pml4
+                );
+            }
+        }
+    }    
+    if(CfiObject->ModDependencies){
+        UINT64* ModDependencies = CfiObject->ModDependencies;
+        UINT64  ModCount = ModDependencies[0];
+        for(size_t i = 0 ; i < ModCount; i++){
+            Coff64CommitSection(LouKeLookupHandleToCfiObject((HANDLE)ModDependencies[i + 1], CfiObject->AOA64), Pml4);
+        }
+
+    }
+    return STATUS_SUCCESS;
+}
+
 static bool LoadCoffLoadSupport(string Path, string System){
     HANDLE SectionHandle;
     string File = LouKeAddFileToPath(Path, System);
@@ -27,6 +65,8 @@ LouKeVmmCreateSharedSection(
     UINT64          FrameFlags
 );
 
+static const char DataSectionName[8] = {'.', 'd','a','t','a','\0','\0'};
+
 UNUSED void EnableCoffImageProtection(
     PCFI_OBJECT CfiObject
 ){
@@ -38,23 +78,50 @@ UNUSED void EnableCoffImageProtection(
     size_t SectionCount = PeImageHeader->StandardHeader.NumberOfSections;
     CfiObject->SectionMapping = LouKeMallocArray(UINT64, SectionCount, KERNEL_GENERIC_MEMORY);
     for(size_t i = 0; i < SectionCount; i++){
-        UINT64 PageFlags;
+        UINT64 PageFlags = (CfiObject->KernelObject ? 0 : USER_PAGE);
         UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
         SIZE VirtualSize = (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize;
         VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
         
-        if(SectionCharacteristics & CFI_SCN_CNT_CODE){
-            PageFlags = PRESENT_PAGE | (CfiObject->KernelObject ? 0 : USER_PAGE);
-        }else if(
-            SectionCharacteristics & CFI_SCN_CNT_INITIALIZED_DATA ||
-            SectionCharacteristics & CFI_SCN_CNT_UNINITIALIZED_DATA
-        ){
-            PageFlags = PRESENT_PAGE | WRITEABLE_PAGE | (CfiObject->KernelObject ? 0 : USER_PAGE);
-        }else{
-            PageFlags = PRESENT_PAGE | (CfiObject->KernelObject ? 0 : USER_PAGE);
+        if(!(SectionCharacteristics & CFI_SCN_MEM_NOT_PAGED)){
+            PageFlags |= PRESENT_PAGE;
         }
-        
+
+        if(SectionCharacteristics & CFI_SCN_MEM_WRITE){
+            PageFlags |= WRITEABLE_PAGE;
+        }
+
+        if(SectionCharacteristics & CFI_SCN_MEM_NOT_CACHED){
+            PageFlags |= CACHE_DISABLED_PAGE;
+        }
+
         CfiObject->SectionMapping[i] = VirtualSize | PageFlags;
+
+        if(!CfiObject->KernelObject){
+            if(!(SectionCharacteristics & CFI_SCN_MEM_WRITE)){
+                LouKeVmmCreateSharedSection(
+                    (PVOID)PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                    (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                    VirtualSize, 
+                    PageFlags
+                );
+            }
+            else{
+                BOOL Cow = false;
+                BOOL Bss = PeImageHeader->OptionalHeader.PE64.SectionTables[i].SizeOfRawData ? false : true;
+                if(!memcmp(PeImageHeader->OptionalHeader.PE64.SectionTables[i].Name, DataSectionName, 8)){
+                    Cow = true;
+                }
+                LouKeVmmCreatePrivateSection(
+                    (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                    VirtualSize, 
+                    PageFlags,
+                    PeImageHeader->OptionalHeader.PE64.SectionAlignment,
+                    Cow,
+                    Bss
+                );
+            }
+        }
 
         LouKeMapContinuousMemoryBlock(
             PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
@@ -63,14 +130,6 @@ UNUSED void EnableCoffImageProtection(
             PageFlags
         );
         
-        if(!CfiObject->KernelObject){
-            LouKeVmmCreateSharedSection(
-                (PVOID)PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
-                (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
-                VirtualSize, 
-                PageFlags
-            );
-        }
     }    
 }
 
@@ -89,11 +148,18 @@ void UnpackCoffImage(
     
     for(size_t i = 0; i < SectionCount; i++){
         if(PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress){
-            memcpy(
-                (PVOID)(LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress), 
-                (PVOID)(RawData + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].PointerToRawData), 
-                PeImageHeader->OptionalHeader.PE64.SectionTables[i].SizeOfRawData
+            memset(
+                (PVOID)(LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress),
+                0,
+                PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize
             );
+            if(PeImageHeader->OptionalHeader.PE64.SectionTables[i].PointerToRawData){
+                memcpy(
+                    (PVOID)(LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress), 
+                    (PVOID)(RawData + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].PointerToRawData), 
+                    PeImageHeader->OptionalHeader.PE64.SectionTables[i].SizeOfRawData
+                );
+            }
         }
     }
     CfiObject->ImageHeader = (PCOFF_IMAGE_HEADER)((UINT64)LoadedAddress + ((UINT64)PeImageHeader - RawData));
@@ -226,7 +292,8 @@ bool
 LouKeLinkerCheckLibraryPresence(string SystemName);
 
 LOUSTATUS ConfigureImportTables(
-    PCFI_OBJECT CfiObject
+    PCFI_OBJECT CfiObject,
+    UINT64**    OutDependencies
 ){
     if(!CfiObject->ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress){
         return STATUS_SUCCESS;
@@ -239,12 +306,22 @@ LOUSTATUS ConfigureImportTables(
 
     uint64_t i = 0;
     uint64_t j = 0;
+    uint64_t TotalImportModules = 0;
     uint64_t TableEntry;
     uint64_t TableOffset;
     string FunctionName;
-    string SYSName;
+    string SYSName = 0;
+    HANDLE TmpHandle = 0;
     //size_t DirectoryLength;
     //string Directory;
+
+    while (ImportTable[TotalImportModules].ImportLookupRva){
+        TotalImportModules++;
+    }
+
+    UINT64* Mods = LouKeMallocArray(UINT64, TotalImportModules + 1, KERNEL_GENERIC_MEMORY);
+    Mods[0] = TotalImportModules;
+    *OutDependencies = &Mods[0]; 
 
     while (ImportTable[j].ImportLookupRva) {
         i = 0;
@@ -285,6 +362,9 @@ LOUSTATUS ConfigureImportTables(
             i += sizeof(uint64_t);
         }
         j++;
+        if((TmpHandle = LouKeLinkerGetModuleLookupHandle(SYSName))){
+            Mods[j] = (UINT64)TmpHandle;
+        }
     }
     return STATUS_SUCCESS;
 }
@@ -298,12 +378,16 @@ LOUSTATUS LouKeLoadCoffImageA64(
     PCFI_OBJECT CfiObject
 ){
 
+    CfiObject->CoffCommitSection = Coff64CommitSection;
+
     PCOFF_IMAGE_HEADER Pe64ImageHeader = CfiObject->ImageHeader; 
 
     CfiObject->LoadedAddress = (PVOID)Pe64ImageHeader->OptionalHeader.PE64.ImageBase;
     
     UINT64 ISize = Pe64ImageHeader->OptionalHeader.PE64.SizeOfImage;
     ISize = ROUND_UP64(ISize, KILOBYTE_PAGE);
+
+    CfiObject->LoadedSize = ISize;
 
     LOUSTATUS Status = STATUS_INVALID_PARAMETER;
     if(!CfiObject->KernelObject){ //only user objects are allowed non aslr addresses
@@ -375,10 +459,13 @@ LOUSTATUS LouKeLoadCoffImageA64(
         return Status;
     }
 
-    Status = ConfigureImportTables(CfiObject);
+    UINT64* ModDependencies = 0;
+    Status = ConfigureImportTables(CfiObject, &ModDependencies);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
+
+    CfiObject->ModDependencies = ModDependencies;
 
     if(CfiObject->ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint){
         CfiObject->Entry = (PVOID)((UINT64)CfiObject->ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)CfiObject->LoadedAddress);
@@ -390,3 +477,4 @@ LOUSTATUS LouKeLoadCoffImageA64(
 
     return STATUS_SUCCESS;
 }
+
