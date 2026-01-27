@@ -18,14 +18,9 @@ void  SetWinIRQL(UINT8 Irql);
 void LocalApicSetTimer(bool On);
 void LouKeSendIcEOI();
 
-static bool IrqlUninitialized = true;
-
-void InitializeIrql(){
-    IrqlUninitialized = false;
-}
 
 LouKIRQL LouKeGetIrql(){
-    if(IrqlUninitialized){
+    if(!GetGSBase()){
         return HIGH_LEVEL;
     }
     return (LouKIRQL)GetWinIRQL();
@@ -35,7 +30,7 @@ void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 ){
-    if(IrqlUninitialized){
+    if(!GetGSBase()){
         return;
     }
     
@@ -76,7 +71,7 @@ void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 ){
-    if(IrqlUninitialized){
+    if(!GetGSBase()){
         return;
     }
     if(OldIrql){

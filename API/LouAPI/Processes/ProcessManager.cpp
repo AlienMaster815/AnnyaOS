@@ -76,83 +76,67 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
 
-    /*PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
-    if(
-        (CurrentProcess->CurrentMsSlice < CurrentProcess->TotalMsSlice) &&
-        (CurrentProcess->ProcessState == PROCESS_RUNNING)
-    ){
-        CurrentProcess->CurrentMsSlice += 10;
-        NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
-        IrqState = LouKeSwitchToTask(
-            IrqState,
-            CurrentThread,
-            NextThread
-        );
-        this->CurrentThread = NextThread;
-        return IrqState;
-    }else{
-        CurrentProcess->CurrentMsSlice = 0;
-        PPROCESS_RING CurrentProcessRing;
-        PPROCESS_RING TmpProcessRing;
-        UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
-        UINT64 NextRing;
-        while(1){
-            NextRing = EulerCurveIndexor(&this->LoadDistributer);
-            CurrentProcessRing = this->Processes[NextRing];
-            if(CurrentProcessRing){
-                if(CurrentProcessRing->Peers.NextHeader){
+    PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
+    PPROCESS_RING CurrentProcessRing;
+    PPROCESS_RING TmpProcessRing;
+    UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
+    UINT64 NextRing;
+    while(1){
+        NextRing = EulerCurveIndexor(&this->LoadDistributer);
+        CurrentProcessRing = this->Processes[NextRing];
+        if(CurrentProcessRing){
+            if(CurrentProcessRing->Peers.NextHeader){
+                TmpProcessRing = (PPROCESS_RING)CurrentProcessRing->Peers.NextHeader;
+                while(TmpProcessRing != CurrentProcessRing){
+                    if(TmpProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED){
+                        if(
+                            (!LouKeIsTimeoutNull(&TmpProcessRing->ProcessData->BlockTimeout)) &&
+                            (LouKeDidTimeoutExpire(&TmpProcessRing->ProcessData->BlockTimeout))
+                        ){
+                            TmpProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
+                        }
+                    }
+                    if(TmpProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
+                        this->Processes[NextRing] = TmpProcessRing;
+                        this->CurrentProcess = TmpProcessRing->ProcessData;
+                        PsmSetProcessTransitionState();
+                        NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
+                        IrqState = LouKeSwitchToTask(
+                            IrqState,
+                            CurrentThread,
+                            NextThread
+                        );
+                        this->CurrentThread = NextThread;
+                        return IrqState;
+                    }
                     TmpProcessRing = (PPROCESS_RING)CurrentProcessRing->Peers.NextHeader;
-                    while(TmpProcessRing != CurrentProcessRing){
-                        if(TmpProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED){
-                            if(
-                                (!LouKeIsTimeoutNull(&TmpProcessRing->ProcessData->BlockTimeout)) &&
-                                (LouKeDidTimeoutExpire(&TmpProcessRing->ProcessData->BlockTimeout))
-                            ){
-                                TmpProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
-                            }
-                        }
-                        if(TmpProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
-                            this->Processes[NextRing] = TmpProcessRing;
-                            this->CurrentProcess = TmpProcessRing->ProcessData;
-                            PsmSetProcessTransitionState();
-                            NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
-                            IrqState = LouKeSwitchToTask(
-                                IrqState,
-                                CurrentThread,
-                                NextThread
-                            );
-                            this->CurrentThread = NextThread;
-                            return IrqState;
-                        }
-                        TmpProcessRing = (PPROCESS_RING)CurrentProcessRing->Peers.NextHeader;
-                    }
-                }
-                if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED){
-                    if(
-                        (!LouKeIsTimeoutNull(&CurrentProcessRing->ProcessData->BlockTimeout)) &&
-                        (LouKeDidTimeoutExpire(&CurrentProcessRing->ProcessData->BlockTimeout))
-                    ){
-                        CurrentProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
-                    }
-                }
-                if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
-                    NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
-                    IrqState = LouKeSwitchToTask(
-                        IrqState,
-                        CurrentThread,
-                        NextThread
-                    );
-                    this->CurrentThread = NextThread;
-                    return IrqState;
                 }
             }
-            if(NextRing == CurrentRing){
-                //if no tasks are ready just idle
-                break;
-            }        
+            if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_BLOCKED){
+                if(
+                    (!LouKeIsTimeoutNull(&CurrentProcessRing->ProcessData->BlockTimeout)) &&
+                    (LouKeDidTimeoutExpire(&CurrentProcessRing->ProcessData->BlockTimeout))
+                ){
+                    CurrentProcessRing->ProcessData->ProcessState = PROCESS_RUNNING;
+                }
+            }
+            if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
+                NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
+                IrqState = LouKeSwitchToTask(
+                    IrqState,
+                    CurrentThread,
+                    NextThread
+                );
+                this->CurrentThread = NextThread;
+                return IrqState;
+            }
         }
+        if(NextRing == CurrentRing){
+            //if no tasks are ready just idle
+            break;
+        }        
     }
-    */
+
     if(this->CurrentProcess != this->SystemProcess){
         this->CurrentProcess = this->SystemProcess;    
         PsmSetProcessTransitionState();
@@ -250,6 +234,16 @@ LOUDDK_API_ENTRY
 void 
 LouKeConfigureNextApicTimerEvent(SIZE Ms);
 
+static spinlock_t ProcLock = {0};
+
+void LouKeLockProcManager(LouKIRQL* Irql){
+    LouKeAcquireSpinLock(&ProcLock, Irql);
+}
+
+void LouKeUnlockProcManager(LouKIRQL* Irql){
+    LouKeReleaseSpinLock(&ProcLock, Irql);
+}
+
 LOUDDK_API_ENTRY UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     if(LouKeGetIrql() >= CLOCK_LEVEL){
         LouKeConfigureNextApicTimerEvent(30);
@@ -257,71 +251,73 @@ LOUDDK_API_ENTRY UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
         return CpuCurrentState;
     }
     PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
+    MutexLock(&ProcLock.Lock);
     CpuCurrentState = Schedualer->PsmSchedual(CpuCurrentState);
+    MutexUnlock(&ProcLock.Lock);
     LouKeMemoryBarrier();
     LouKeConfigureNextApicTimerEvent(Schedualer->CurrentThread->TotalMsSlice);
     LouKeSendIcEOI();
     return CpuCurrentState;
 }
 
+static mutex_t InitLock = {0};
+
 UNUSED static void ProcessorIdleTask(){
-    //HandleApProccessorInitialization();
-    //SetupGDT();
-    //UpdateIDT(true);
-    //SetUpTimers();
-    //LouKeInitializeCurrentApApic();
-
-    //LouPrint("AP Now Idleing\n");
-    //MutexUnlock(&InitLock);
-    //MutexSynchronize(&CoreIrqReadyLock);
-    
-    //LouPrint("AP Interrupts Enabled\n");
-    //LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
-    
-    while(1){
-
-    }
+    HandleApProccessorInitialization();
+    SetupGDT();
+    PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
+    KernelProcBlock->ProcID = GetCurrentCpuTrackMember();
+    UpdateIDT(true);
+    SetUpTimers();
+    LouKeInitializeCurrentApApic();
+    INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;
+    KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[CurrentCpu].Schedualer;
+    LouPrint("AP Now Idleing\n");
+    MutexUnlock(&InitLock);
+    MutexSynchronize(&CoreIrqReadyLock);
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    LouPrint("AP Interrupts Enabled\n");
+    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
 KERNEL_IMPORT void SignalProcessorsInitialized();
 KERNEL_IMPORT void SignalProcessorsInitPending();
 
 UNUSED static void InitializeIdleProcess(){
-    //HandleApProccessorInitialization();
-    //SetupGDT();
-    //UpdateIDT(true);
-    //SetUpTimers();
-    //LouKeInitializeCurrentApApic();
-
-    //INTEGER CurrentCpu = GetCurrentCpuTrackMember();
-    //PTHREAD NewThread;
-    //for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
-    //    if((i != InitializationProcessor) && (i != CurrentCpu)){
-    //        MutexLock(&InitLock);
-    //        NewThread = LouKeCreateDeferedDemonEx(
-    //            0x00,
-    //            0x00,
-    //            16 * KILOBYTE,
-    //            31,
-    //            true,
-    //            i,
-    //            0
-    //        );
-    //        ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
-    //        ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
-    //        LouKeSmpWakeAssistant(i, ((PGENERIC_THREAD_DATA)NewThread)->StackTop, (UINT64)ProcessorIdleTask);
-    //    }
-    //}
-
-    //LouPrint("AP Now Idleing\n");
-    //MutexSynchronize(&CoreIrqReadyLock);
-    //LouPrint("AP Interrupts Enabled\n");
-    //LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
-    while(1){
-
+    HandleApProccessorInitialization();
+    SetupGDT();
+    PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
+    KernelProcBlock->ProcID = GetCurrentCpuTrackMember();
+    UpdateIDT(true);
+    SetUpTimers();
+    LouKeInitializeCurrentApApic();
+    INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;
+    KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[CurrentCpu].Schedualer;
+    
+    PTHREAD NewThread;
+    for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
+        if((i != InitializationProcessor) && (i != CurrentCpu)){
+            MutexLock(&InitLock);
+            NewThread = LouKeCreateDeferedDemonEx(
+                0x00,
+                0x00,
+                16 * KILOBYTE,
+                31,
+                true,
+                i,
+                0
+            );
+            ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
+            ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
+            LouKeSmpWakeAssistant(i, ((PGENERIC_THREAD_DATA)NewThread)->StackTop, (UINT64)ProcessorIdleTask);
+        }
     }
+
+    LouPrint("AP Now Idleing\n");
+    MutexSynchronize(&CoreIrqReadyLock);
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    LouPrint("AP Interrupts Enabled\n");
+    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
 LOUDDK_API_ENTRY

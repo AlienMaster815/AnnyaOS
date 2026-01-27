@@ -8,6 +8,8 @@ KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
 KERNEL_IMPORT UINT64 GetRFLAGS();
+void LouKeLockProcManager(LouKIRQL* Irql);
+void LouKeUnlockProcManager(LouKIRQL* Irql);
 
 void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
     DWORD Result = 0;
@@ -16,7 +18,7 @@ void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thr
     LouPrint("Thread:%d Exited With Code:%h\n", Thread->ThreadID, Result);
     LouKeDestroyThread(Thread);
     while(1){
-
+        asm("hlt");
     }
 }
 
@@ -396,7 +398,6 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
         NextRing = EulerCurveIndexor(&this->LoadDistributer);
         CurrentThreadRing = this->Threads[NextRing];
         if(CurrentThreadRing){
-            MutexLock(&this->LockOutTagOut.Lock);
             if(CurrentThreadRing->Peers.NextHeader){
                 TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
                 while(TmpThreadRing != CurrentThreadRing){
@@ -411,7 +412,6 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
                     }
                     if(TmpThreadRing->ThreadData->State == THREAD_READY){
                         this->Threads[NextRing] = TmpThreadRing;
-                        MutexUnlock(&this->LockOutTagOut.Lock);
                         return TmpThreadRing->ThreadData;
                     }
                     TmpThreadRing = (PTHREAD_RING)TmpThreadRing->Peers.NextHeader;
@@ -427,10 +427,8 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
                 }
             }
             if(CurrentThreadRing->ThreadData->State == THREAD_READY){
-                MutexUnlock(&this->LockOutTagOut.Lock);
                 return CurrentThreadRing->ThreadData;
             }  
-            MutexUnlock(&this->LockOutTagOut.Lock);
         }
         if(NextRing == CurrentRing){
             //if no tasks are ready just idle
@@ -483,26 +481,15 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
     return STATUS_SUCCESS;
 }
 
-static spinlock_t ManipulationLock = {0};
-
-void TsmThreadSchedualManagerObject::TsmLockSchedual(LouKIRQL* Irql){
-    LouKeAcquireSpinLock(&this->LockOutTagOut, Irql);
-    MutexLock(&ManipulationLock.Lock);
-}
-void TsmThreadSchedualManagerObject::TsmUnlockSchedual(LouKIRQL* Irql){
-    MutexUnlock(&ManipulationLock.Lock);
-    LouKeReleaseSpinLock(&this->LockOutTagOut, Irql);
-}
-
 void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread){
 
     LouKIRQL Irql;
     PTHREAD_RING NewThreadRing = LouKeTsmCreateThreadRing(Thread);
 
+    LouKeLockProcManager(&Irql);
+
     PTHREAD_RING TmpThreadRing = this->Threads[Thread->ThreadPriority];
     PTHREAD_RING CurrentThread = TmpThreadRing;
-
-    TsmLockSchedual(&Irql);
 
     if(!TmpThreadRing){
 
@@ -522,7 +509,7 @@ void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DA
     TmpThreadRing->Peers.NextHeader = (PListHeader)NewThreadRing;
 
     _ASERT_FINISHED:
-    TsmUnlockSchedual(&Irql);
+    LouKeUnlockProcManager(&Irql);
 
 }
 
@@ -542,7 +529,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
         PTHREAD_RING TmpThreadRing = (PTHREAD_RING)CurrentThreadRing;
         PTHREAD_RING TailRing = (PTHREAD_RING)TmpThreadRing->Peers.LastHeader;
         if(CurrentThreadRing->ThreadData == Thread){
-            TsmLockSchedual(&Irql);
+            LouKeLockProcManager(&Irql);
             if((PTHREAD_RING)CurrentThreadRing->Peers.NextHeader == CurrentThreadRing){
                 this->Threads[i] = 0x00;
             }else{
@@ -561,7 +548,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
 
         while(TmpThreadRing != CurrentThreadRing){
             if(TmpThreadRing->ThreadData == Thread){
-                TsmLockSchedual(&Irql);
+                LouKeLockProcManager(&Irql);
                 CurrentThreadRing = TmpThreadRing;
                 TailRing->Peers.NextHeader = TmpThreadRing->Peers.NextHeader;
                 TmpThreadRing = (PTHREAD_RING)TmpThreadRing->Peers.NextHeader;
@@ -577,7 +564,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 
     _DEASERT_FINISHED:
-    TsmUnlockSchedual(&Irql);
+    LouKeUnlockProcManager(&Irql);
     if(FreeItem){
         LouKeFree(FreeItem);
     }
@@ -592,14 +579,14 @@ KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     LouKIRQL Irql;
     TIME_T Time;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeAcquireSpinLock(&ManipulationLock, &Irql);
+    LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeReleaseSpinLock(&ManipulationLock, &Irql);
+    LouKeUnlockProcManager(&Irql);
     asm("INT $32");
 }
 
@@ -609,24 +596,24 @@ LouKeYeildExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
     LouKIRQL Irql;
     TIME_T Time;
-    LouKeAcquireSpinLock(&ManipulationLock, &Irql);    
+    LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }    
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeReleaseSpinLock(&ManipulationLock, &Irql);
+    LouKeUnlockProcManager(&Irql);
     asm("INT $32");
 }
 
 KERNEL_IMPORT void LouKeUnblockThread(UINT64 ThreadID){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeAcquireSpinLock(&ManipulationLock, &Irql);
+    LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_READY;    
-    LouKeReleaseSpinLock(&ManipulationLock, &Irql);
+    LouKeUnlockProcManager(&Irql);
 }
 
 LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){

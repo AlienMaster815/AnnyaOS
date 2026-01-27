@@ -29,15 +29,14 @@ typedef struct _LKPCB{
     LOUSINE_KERNEL_APIC_DATA    ApicData;
 }LKPCB, * PLKPCB;
 
-LouKIRQL LouKeGetIrql();
-
-UINT64 GetLKPCB();
-
 #ifdef _USER_MODE_CODE_
 
 
 #else 
 
+LouKIRQL LouKeGetIrql();
+uint64_t GetGSBase();
+UINT64 GetLKPCB();
 
 #ifdef _KERNEL_MODULE_
 

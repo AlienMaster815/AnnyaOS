@@ -179,10 +179,9 @@ void SetupGDT(){
     InstallGDT((uint64_t)&Gdtr);
     SetGSBase(GsBase);
 
-    SetLKPCB((UINT64)NewProcControllBlock);
-
+    LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, 0x00);
     LouPrint("Done Setting Up GDT\n");
 
-    LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, 0x00);
+    SetLKPCB((UINT64)NewProcControllBlock);
 
 }

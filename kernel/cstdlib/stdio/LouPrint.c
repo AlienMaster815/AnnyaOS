@@ -253,7 +253,12 @@ int LouPrint(char* format, ...) {
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     int result = 0;
     if(UsingSmp){
-        _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
+        if((GetGSBase()) && GetLKPCB()){
+            _LouPrint("CPU:%d : ", (UINT64)((PLKPCB)GetLKPCB())->ProcID);
+        }
+        else{
+            _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
+        }
     }
     va_list args;
     va_start(args, format);

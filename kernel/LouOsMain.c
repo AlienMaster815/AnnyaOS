@@ -139,7 +139,6 @@ void LouKePollIoApicPinForAssertion(uint8_t Pin);
 uint64_t GetUsedMemory();
 uint32_t Random32(uint32_t Seed);
 void SetGSBase(uint64_t gs_base);
-uint64_t GetGSBase();
 extern uint64_t GetRBP();
 extern uint64_t RecreateDisasemblyIssue();
 extern void SetTEB();
@@ -165,7 +164,6 @@ void ParserLouLoaderInformation(
 void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
-void InitializeIrql();
 uint64_t GetCr3();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
@@ -237,11 +235,7 @@ void AdvancedLousineKernelInitialization(){
 
     //TODO: Wait For SMP 
 
-    InitializeIrql();
-
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
-
-    LouKeUnmaskSmpInterrupts();
     
     LouKeCreateDemon(
         LouKeThreadManagerDemon,
@@ -250,8 +244,10 @@ void AdvancedLousineKernelInitialization(){
         31
     );
 
-    LouPrint("Kernel Advanced System Initialized\n");
+    LouKeUnmaskSmpInterrupts();
 
+    LouPrint("Kernel Advanced System Initialized\n");
+    
 }
 
 void KillDebuger(){
@@ -387,7 +383,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
-    /*PVOID AsmssKey = LouKeOpenRegistryHandle(
+    PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
         0x00
     );
@@ -446,7 +442,7 @@ KERNEL_ENTRY LouOsKrnlStart(
         sleep(5000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
-    }*/
+    }
     LouPrint("Lousine Kernel Successfully Initialized\n");
     sleep(3000);
     LouKeSystemShutdown(ShutdownReboot);

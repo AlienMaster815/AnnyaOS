@@ -113,7 +113,6 @@ LOUSTATUS LouKePmCreateProcessEx(
                 THREAD_DEFAULT_DISTRIBUTER_INCREMENTER
             );
         }
-        NewProcessObject->TotalMsSlice = 100;
         LouKeGetTime(&NewProcessObject->BlockTimeout);
         NewProcessObject->ProcessState = PROCESS_BLOCKED;   
     }
