@@ -16,7 +16,6 @@
 
 #include <kernel/memmory.h>
 #include <kernel/gdt.h>
-#include <kernel/apic.h>
 #include <kernel/Clock.h>
 #include <kernel/errors.h>
 #include <kernel/exports.h>

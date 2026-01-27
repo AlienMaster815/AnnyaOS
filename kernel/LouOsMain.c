@@ -227,7 +227,7 @@ void InitializeSymmetricMultiProcessing(){
 void LouKeWaitForProcessorInitialization();
 
 void AdvancedLousineKernelInitialization(){
-    if (InitializeMainInterruptHandleing() != LOUSTATUS_GOOD)LouPrint("Unable To Setup Interrupt Controller System\n");
+    if (InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
     
     InitializeSymmetricMultiProcessing();
 
@@ -251,7 +251,6 @@ void AdvancedLousineKernelInitialization(){
     );
 
     LouPrint("Kernel Advanced System Initialized\n");
-    
 
 }
 
@@ -388,7 +387,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
-    PVOID AsmssKey = LouKeOpenRegistryHandle(
+    /*PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
         0x00
     );
@@ -447,7 +446,7 @@ KERNEL_ENTRY LouOsKrnlStart(
         sleep(5000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
-    }
+    }*/
     LouPrint("Lousine Kernel Successfully Initialized\n");
     sleep(3000);
     LouKeSystemShutdown(ShutdownReboot);

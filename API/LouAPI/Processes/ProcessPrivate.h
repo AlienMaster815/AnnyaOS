@@ -167,6 +167,7 @@ typedef class TsmThreadSchedualManagerObject{
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
         PGENERIC_THREAD_DATA                IdleTask;
         PGENERIC_THREAD_DATA                TsmGetNext(PGENERIC_THREAD_DATA CurrentThread, bool ProcessChange);
+        spinlock_t                          LockOutTagOut;
     public:
         LOUSTATUS                           TsmInitializeSchedualerObject(
                                                 UINT64                          ProcessorID, 
@@ -178,6 +179,8 @@ typedef class TsmThreadSchedualManagerObject{
         PGENERIC_THREAD_DATA                TsmYeild(PGENERIC_THREAD_DATA CurrentThread, bool ProcessChange);
         void                                TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread);
         void                                TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread);
+        void                                TsmLockSchedual(LouKIRQL* Irql);
+        void                                TsmUnlockSchedual(LouKIRQL* Irql);
 }THREAD_SCHEDUAL_MANAGER, * PTHREAD_SCHEDUAL_MANAGER;
 
 #define THREAD_DEFAULT_DISTRIBUTER_INCREMENTER 1

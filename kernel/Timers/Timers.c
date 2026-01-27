@@ -39,19 +39,20 @@ LOUSTATUS SetUpTimers() {
 	return Status;
 }
 
-// Function to get the current time in milliseconds using TSC
 uint64_t GetCurrentTimeInMilliseconds() {
-    // Read the current TSC value
     uint64_t current_tsc = read_tsc();
-    
-    // Get the calibrated TSC frequency
     uint64_t tsc_frequency = GetTscMaster();
-    
-    // Convert TSC ticks to milliseconds
     uint64_t timemilliseconds = (current_tsc * 1000) / tsc_frequency;
-    
     return timemilliseconds;
 }
+
+uint64_t GetTscFromNowMilliseconds(uint64_t ms){
+    uint64_t now = read_tsc();
+    uint64_t tsc_frequency = GetTscMaster();
+    uint64_t delta = (tsc_frequency * ms) / 1000;
+    return now + delta;
+}
+
 
 int is_leap_year(int year) {
     return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0));

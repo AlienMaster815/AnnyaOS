@@ -13,8 +13,9 @@ LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
     LouKeDestroyThreadSyscall(ThreadHandle);
 
     if(ThreadData->ThreadID == LouKeGetThreadIdentification()){
-        LouKeYeildExecution();
-        while(1);
+        while(1){
+            asm("hlt");
+        }
     }
 
 }
@@ -31,6 +32,7 @@ LOUSTATUS CreateDemonThreadHandle(
     PGENERIC_PROCESS_DATA ProcessData = 0x00;
     LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);    
     
+    
     LOUSTATUS Status = LouKeTsmCreateThreadHandle(
         (PGENERIC_THREAD_DATA*)ThreadOut,
         ProcessData,
@@ -39,7 +41,7 @@ LOUSTATUS CreateDemonThreadHandle(
         WorkParam,
         Prioirty,
         StackSize,
-        10,
+        30,
         0x08,
         0x10,
         LONG_MODE,

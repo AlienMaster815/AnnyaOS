@@ -49,11 +49,9 @@ KERNEL_EXPORT uint64_t LouKeGetThreadIdentification();
 
 static inline void LouKeSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);
-    LouKeMemoryBarrier();
 }
 
 static inline int LouKeGetAtomic(atomic_t* A){
-    LouKeMemoryBarrier();
     return atomic_read(A);
 }
 
@@ -89,27 +87,22 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
             Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
             LouKeReportMutexBlock(m, Thread);
         }
-        LouKeMemoryBarrier();
         while (__atomic_test_and_set(&m->locked.counter, 1)) {
             // spin
-            LouKeMemoryBarrier();
         }
     }else{
 
         if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
             //access Granted
-            LouKeMemoryBarrier();
             return;
         }
         while (__atomic_test_and_set(&m->locked.counter, 1)) {
             // spin
-            LouKeMemoryBarrier();
         }
     }
     Thread = LouKeGetThreadIdentification();
     LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
     LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
-    LouKeMemoryBarrier();
 }
 
 static inline void MutexLock(mutex_t* m){
@@ -130,7 +123,6 @@ static inline bool MutexIsLocked(mutex_t* m){
 
 static inline void MutexUnlock(mutex_t* m){
     LouKeSetAtomic(&m->locked, 0);
-    LouKeMemoryBarrier();
 }
 
 static inline uintptr_t MutexPriorityLock(

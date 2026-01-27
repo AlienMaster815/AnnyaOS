@@ -1,18 +1,14 @@
 #include <stdlib.h>
 #include <kernel/interrupts.h>
-#include <kernel/apic.h>
 #include <kernel/errors.h>
 #include <kernel/pic.h>
 
 LOUSTATUS InitApicSystems();
 
 LOUSTATUS InitializeMainInterruptHandleing(){
-    
-    //if(InitializeAdvancedProgramableController() != LOUSTATUS_GOOD)LouPanic("Cunstruction Panic",BAD);
-    LOUSTATUS Status = LOUSTATUS_GOOD;
-
+    LOUSTATUS Status;
     Status = InitApicSystems();
-    if (Status == LOUSTATUS_GOOD) {
+    if (Status == STATUS_SUCCESS) {
         LouPrint("Advance Interrupts Setup\n");
     }
     return Status;

@@ -22,7 +22,7 @@ LouKeWaitForUlongRegisterCondition(
     ULONG   Value
 );
 KERNEL_IMPORT void LouKeThreadSleep(size_t Ms);
-
+KERNEL_IMPORT uint64_t GetTscFromNowMilliseconds(uint64_t ms);
 #else 
 #endif
 #else
@@ -38,6 +38,7 @@ uint64_t GetCurrentTimeInMilliseconds();
 void sleep(uint64_t Time);
 void sleepEx(uint8_t Interval, uint64_t Time);
 void LouKeThreadSleep(size_t Ms);
+uint64_t GetTscFromNowMilliseconds(uint64_t ms);
 #endif
 #endif
 #endif

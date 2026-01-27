@@ -1,6 +1,10 @@
 #ifndef _LKPCB_H
 #define _LKPCB_H
 
+#ifndef _APIC_H
+#include <drivers/cpu/Apic.h>
+#endif
+
 #ifdef _USER_MODE_CODE_
 #include <Annya.h>
 #else
@@ -17,11 +21,12 @@ extern "C"{
 typedef uint8_t LouKIRQL;
 #endif
 
+
+
 typedef struct _LKPCB{
-    UINT64      Schedualer;
-    UINT8       ProcID;
-    LouKIRQL    Irql;
-    UINTPTR     ApicBase;
+    UINT64                      Schedualer;
+    UINT8                       ProcID;
+    LOUSINE_KERNEL_APIC_DATA    ApicData;
 }LKPCB, * PLKPCB;
 
 LouKIRQL LouKeGetIrql();

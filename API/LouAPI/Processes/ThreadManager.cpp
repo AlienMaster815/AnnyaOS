@@ -20,6 +20,18 @@ void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thr
     }
 }
 
+DWORD 
+ThreadManagerIdleFallback(
+    PVOID   Params
+){
+    while(1){
+        asm("hlt");
+    }
+    return -1;
+}
+
+PGENERIC_THREAD_DATA* ProcessorIdleThreads = 0;
+
 LOUDDK_API_ENTRY
 semaphore_t* LouKeCreateSemaphore(int initial, int limit){
     semaphore_t* NewSemaphore = (semaphore_t*)LouKeMallocType(semaphore_t, KERNEL_GENERIC_MEMORY);
@@ -191,7 +203,7 @@ static void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread){
 
 KERNEL_IMPORT uint64_t AllocateSaveContext();
 
-LOUSTATUS LouKeTsmCreateThreadHandle(
+LOUSTATUS LouKeTsmCreateThreadHandleNs(
     PGENERIC_THREAD_DATA*   OutHandle,    
     PGENERIC_PROCESS_DATA   Process,
     PVOID                   CtxEntry,
@@ -211,7 +223,7 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     if(
         (!OutHandle)    || (!StackSize) || 
         (!CtxEntry)     || (!CodeSegment) || 
-        (!StackSegment) || (!Process)
+        (!StackSegment) 
     ){
         LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
         return STATUS_INVALID_PARAMETER;
@@ -275,6 +287,75 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS LouKeTsmInitializeIdleThreads(){
+    LOUSTATUS Status = STATUS_SUCCESS;
+    size_t ProcCount = GetNPROC();
+    ProcessorIdleThreads = LouKeMallocArray(PGENERIC_THREAD_DATA, ProcCount, KERNEL_GENERIC_MEMORY);
+    for(size_t i = 0 ; i < ProcCount; i++){
+    
+        UINT8* AfinityBitmap = LouKeMallocArray(UINT8, PROCESSOR_BITMAP_LENGTH, KERNEL_GENERIC_MEMORY);
+
+        MARK_PROCESSOR_AFFILIATED(AfinityBitmap, i);
+
+        Status = LouKeTsmCreateThreadHandleNs(
+            &ProcessorIdleThreads[i],
+            0x00,
+            (PVOID)KernelThreadStub,
+            (PVOID)ThreadManagerIdleFallback,
+            0,
+            0,
+            2048,
+            30,
+            0x08,
+            0x10,
+            LONG_MODE,
+            0x00,
+            AfinityBitmap
+        );
+        
+    }
+
+    return Status;
+}
+
+LOUSTATUS LouKeTsmCreateThreadHandle(
+    PGENERIC_THREAD_DATA*   OutHandle,    
+    PGENERIC_PROCESS_DATA   Process,
+    PVOID                   CtxEntry,
+    PVOID                   CtxFunction,
+    PVOID                   CtxParams,
+    UINT8                   ThreadPriority,
+    UINT64                  StackSize,
+    UINT64                  TimeSliceMs,
+    UINT8                   CodeSegment,
+    UINT8                   StackSegment,
+    INSTRUCTION_MODE        InstructionMode,
+    PTIME_T                 StartTime,
+    UINT8*                  AfinityBitmap
+){
+    if(!Process){
+        LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return LouKeTsmCreateThreadHandleNs(
+        OutHandle,
+        Process,
+        CtxEntry,
+        CtxFunction,
+        CtxParams,
+        ThreadPriority,
+        StackSize,
+        TimeSliceMs,
+        CodeSegment,
+        StackSegment,
+        InstructionMode,
+        StartTime,
+        AfinityBitmap
+    );
+
+}
+
 KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
     if(ThreadID == 0){
         return 0x00;
@@ -301,15 +382,7 @@ void LouKeTsmDestroyThreadHandle(
     DeallocateThreadHandle(Thread);
 }
 
-DWORD 
-ThreadManagerIdleFallback(
-    PVOID   Params
-){
-    while(1){
-        LouKeYeildExecution();
-    }
-    return -1;
-}
+
 
 PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_DATA CurrentThread, bool ProcessSwitch){
 
@@ -323,6 +396,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
         NextRing = EulerCurveIndexor(&this->LoadDistributer);
         CurrentThreadRing = this->Threads[NextRing];
         if(CurrentThreadRing){
+            MutexLock(&this->LockOutTagOut.Lock);
             if(CurrentThreadRing->Peers.NextHeader){
                 TmpThreadRing = (PTHREAD_RING)CurrentThreadRing->Peers.NextHeader;
                 while(TmpThreadRing != CurrentThreadRing){
@@ -337,6 +411,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
                     }
                     if(TmpThreadRing->ThreadData->State == THREAD_READY){
                         this->Threads[NextRing] = TmpThreadRing;
+                        MutexUnlock(&this->LockOutTagOut.Lock);
                         return TmpThreadRing->ThreadData;
                     }
                     TmpThreadRing = (PTHREAD_RING)TmpThreadRing->Peers.NextHeader;
@@ -352,8 +427,10 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNext(PGENERIC_THREAD_
                 }
             }
             if(CurrentThreadRing->ThreadData->State == THREAD_READY){
+                MutexUnlock(&this->LockOutTagOut.Lock);
                 return CurrentThreadRing->ThreadData;
-            }    
+            }  
+            MutexUnlock(&this->LockOutTagOut.Lock);
         }
         if(NextRing == CurrentRing){
             //if no tasks are ready just idle
@@ -374,15 +451,6 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmYeild(PGENERIC_THREAD_DA
 
 
 PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmSchedual(PGENERIC_THREAD_DATA CurrentThread, bool ProcessSwitch){
-    if(
-        (CurrentThread->CurrentMsSlice < CurrentThread->TotalMsSlice) &&
-        (!ProcessSwitch) &&
-        (CurrentThread->State == THREAD_RUNNING)
-    ){
-        CurrentThread->CurrentMsSlice += 10;
-        return CurrentThread;
-    }
-
     return TsmGetNext(CurrentThread, ProcessSwitch);
 }
 
@@ -409,46 +477,35 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
         return Status;
     }
 
-    UINT8* AfinityBitmap = LouKeMallocArray(UINT8, PROCESSOR_BITMAP_LENGTH, KERNEL_GENERIC_MEMORY);
-
-    MARK_PROCESSOR_AFFILIATED(AfinityBitmap, ProcessorID);
-
-    Status = LouKeTsmCreateThreadHandle(
-        &this->IdleTask,
-        ProcessData,
-        (PVOID)KernelThreadStub,
-        (PVOID)ThreadManagerIdleFallback,
-        0,
-        0,
-        2048,
-        20,
-        0x08,
-        0x10,
-        LONG_MODE,
-        0x00,
-        AfinityBitmap
-    );
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("TSM ERROR:Unable To Initialize Process Idle\n");
-        return Status;
-    }
+    this->IdleTask = ProcessorIdleThreads[ProcessorID];
 
     LouPrint("TsmInitializeSchedualerObject() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
-static spinlock_t AsignLock = {0};
+static spinlock_t ManipulationLock = {0};
+
+void TsmThreadSchedualManagerObject::TsmLockSchedual(LouKIRQL* Irql){
+    LouKeAcquireSpinLock(&this->LockOutTagOut, Irql);
+    MutexLock(&ManipulationLock.Lock);
+}
+void TsmThreadSchedualManagerObject::TsmUnlockSchedual(LouKIRQL* Irql){
+    MutexUnlock(&ManipulationLock.Lock);
+    LouKeReleaseSpinLock(&this->LockOutTagOut, Irql);
+}
 
 void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread){
 
     LouKIRQL Irql;
     PTHREAD_RING NewThreadRing = LouKeTsmCreateThreadRing(Thread);
-    LouKeAcquireSpinLock(&AsignLock, &Irql);
+
     PTHREAD_RING TmpThreadRing = this->Threads[Thread->ThreadPriority];
     PTHREAD_RING CurrentThread = TmpThreadRing;
 
+    TsmLockSchedual(&Irql);
+
     if(!TmpThreadRing){
+
         NewThreadRing->Peers.NextHeader = (PListHeader)NewThreadRing;
         NewThreadRing->Peers.LastHeader = (PListHeader)NewThreadRing;
         this->Threads[Thread->ThreadPriority] = NewThreadRing;
@@ -465,13 +522,13 @@ void TsmThreadSchedualManagerObject::TsmAsignThreadToSchedual(PGENERIC_THREAD_DA
     TmpThreadRing->Peers.NextHeader = (PListHeader)NewThreadRing;
 
     _ASERT_FINISHED:
-    
-    LouKeReleaseSpinLock(&AsignLock, &Irql);
+    TsmUnlockSchedual(&Irql);
+
 }
 
 void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread){
     LouKIRQL Irql;
-    LouKeAcquireSpinLock(&AsignLock, &Irql);
+
     PVOID FreeItem = 0x00;
 
     UINT64 Limitors = this->LoadDistributer.TotalLimiters;
@@ -485,6 +542,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
         PTHREAD_RING TmpThreadRing = (PTHREAD_RING)CurrentThreadRing;
         PTHREAD_RING TailRing = (PTHREAD_RING)TmpThreadRing->Peers.LastHeader;
         if(CurrentThreadRing->ThreadData == Thread){
+            TsmLockSchedual(&Irql);
             if((PTHREAD_RING)CurrentThreadRing->Peers.NextHeader == CurrentThreadRing){
                 this->Threads[i] = 0x00;
             }else{
@@ -503,6 +561,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
 
         while(TmpThreadRing != CurrentThreadRing){
             if(TmpThreadRing->ThreadData == Thread){
+                TsmLockSchedual(&Irql);
                 CurrentThreadRing = TmpThreadRing;
                 TailRing->Peers.NextHeader = TmpThreadRing->Peers.NextHeader;
                 TmpThreadRing = (PTHREAD_RING)TmpThreadRing->Peers.NextHeader;
@@ -518,7 +577,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 
     _DEASERT_FINISHED:
-    LouKeReleaseSpinLock(&AsignLock, &Irql);
+    TsmUnlockSchedual(&Irql);
     if(FreeItem){
         LouKeFree(FreeItem);
     }
@@ -533,14 +592,14 @@ KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     LouKIRQL Irql;
     TIME_T Time;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeAcquireSpinLock(&AsignLock, &Irql);
+    LouKeAcquireSpinLock(&ManipulationLock, &Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeReleaseSpinLock(&AsignLock, &Irql);
+    LouKeReleaseSpinLock(&ManipulationLock, &Irql);
     asm("INT $32");
 }
 
@@ -550,25 +609,24 @@ LouKeYeildExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
     LouKIRQL Irql;
     TIME_T Time;
-    LouKeAcquireSpinLock(&AsignLock, &Irql);
-    
+    LouKeAcquireSpinLock(&ManipulationLock, &Irql);    
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }    
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeReleaseSpinLock(&AsignLock, &Irql);
+    LouKeReleaseSpinLock(&ManipulationLock, &Irql);
     asm("INT $32");
 }
 
 KERNEL_IMPORT void LouKeUnblockThread(UINT64 ThreadID){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeAcquireSpinLock(&AsignLock, &Irql);
+    LouKeAcquireSpinLock(&ManipulationLock, &Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_READY;    
-    LouKeReleaseSpinLock(&AsignLock, &Irql);
+    LouKeReleaseSpinLock(&ManipulationLock, &Irql);
 }
 
 LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
@@ -581,16 +639,17 @@ LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
             TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
             if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
                 PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
-                for(INTEGER i = 0 ; i < Processors; i++){
-                    if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){
-                        ProcessData->ThreadObjects[i].TsmDeasignThreadFromSchedual(TmpThreadHandle);
+                if(ProcessData){
+                    for(INTEGER i = 0 ; i < Processors; i++){
+                        if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){
+                            ProcessData->ThreadObjects[i].TsmDeasignThreadFromSchedual(TmpThreadHandle);
+                        }
                     }
                 }
                 LouPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
                 LouKeTsmDestroyThreadHandle(TmpThreadHandle);
             }
         }
-        LouKeYeildExecution();
     }
     return -1;
 }

@@ -40,8 +40,8 @@
 #include "drivers/Ata/ata.h"
 #include <drivers/Networking/IpV4.h>
 #include <WinTEB.h>
-#include <drivers/cpu/IntelFamily.h>
-#include <drivers/cpu/cpu.h>
+#include <drivers/cpu/Apic.h>
+#include <drivers/Processors.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
 #include <kernel/XArray.h>

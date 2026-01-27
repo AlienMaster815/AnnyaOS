@@ -294,8 +294,8 @@ PACPI_MADT_IO_APIC GetIoApicHandleFromIrq(UINT8 Irq){
     return 0x00;
 }
 
-LOUDDK_API_ENTRY void local_apic_send_eoi() {    
-    uint64_t ApicBase = ((PLKPCB)GetLKPCB())->ApicBase;
+LOUDDK_API_ENTRY void LocalApicSendEoi() {    
+    uint64_t ApicBase = ((PLKPCB)GetLKPCB())->ApicData.ApicBase;
     if(!ApicBase){
         LouPrint("APIC.SYS:ERROR:No Base\n");
         return;
@@ -309,7 +309,7 @@ KERNEL_IMPORT void IoApicUnmaskIrq(uint8_t tirq);
 void ApicInstallIoApicHandlers(){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
     while(TmpTracker->Peers.NextHeader){
-        LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, TmpTracker->ProcID);
+        LouKeInitializeEoiHandler((PVOID)LocalApicSendEoi, TmpTracker->ProcID);
         LouKeInitializeMaskHandler((PVOID)IoApicMaskIrq, TmpTracker->ProcID);
         LouKeInitializeUnmaskHandler((PVOID)IoApicUnmaskIrq, TmpTracker->ProcID);
 
@@ -400,7 +400,7 @@ bool InitializeLapic(UINT32 CpuID){
     uint64_t ApicBase;
     LouPrint("Initializing Processor:%d At Address:%h\n", CpuID, GetLocalApicBase());
     ApicBase = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
-    ((PLKPCB)GetLKPCB())->ApicBase = ApicBase;
+    ((PLKPCB)GetLKPCB())->ApicData.ApicBase = ApicBase;
     LouPrint("New Apic Base:%h\n", ApicBase);
     LouKeSetApicBase(CpuToApicID(get_processor_id()), ApicBase);
     CPU::CPUID Cpu;
@@ -415,12 +415,16 @@ bool InitializeLapic(UINT32 CpuID){
         sleep(1); //sleep 1 ms for 1 ms acuracy
 
         uint32_t CRC = 0xFFFFFFFF - READ_REGISTER_ULONG(LVT_CURRENT_COUNT_REGISTER);
+        ((PLKPCB)GetLKPCB())->ApicData.DefaultMsTicks = CRC;
 
         LouPrint("CRC IS:%h\n",CRC);
-        // Start timer as periodic on IRQ 0, divider 128, with the number of ticks we counted
-        WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32 | 0x20000);
+
+        ((PLKPCB)GetLKPCB())->ApicData.CurrentTimerTicks = CRC * 30;
+        //40000 is tsc deadline
+
+        WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32);
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010);
-        WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC);
+        WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC * 30);
         
     }
     else if (Cpu.IsFeatureSupported(CPU::XAPIC)){
@@ -436,12 +440,16 @@ bool InitializeLapic(UINT32 CpuID){
         sleep(1); //sleep 1 ms for 1 ms acuracy
 
         uint32_t CRC = 0xFFFFFFFF - READ_REGISTER_ULONG(LVT_CURRENT_COUNT_REGISTER);
+        ((PLKPCB)GetLKPCB())->ApicData.DefaultMsTicks = CRC;
 
         LouPrint("CRC IS:%h\n",CRC);
-        // Start timer as periodic on IRQ 0, divider 128, with the number of ticks we counted
-        WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32 | 0x20000);
+
+        ((PLKPCB)GetLKPCB())->ApicData.CurrentTimerTicks = CRC * 30;
+        //40000 is tsc deadline
+
+        WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32);
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010);
-        WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC);
+        WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, CRC * 30);
 
     }
     else{
@@ -493,7 +501,7 @@ bool InitializeApic(){
 }
 
 LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
-    LOUSTATUS Status = LOUSTATUS_GOOD;  
+    LOUSTATUS Status = STATUS_SUCCESS;  
     LouPrint(DRV_VERSION_APIC);
 
     PACPI_MADT ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("APIC");
@@ -504,7 +512,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
     if(!ApicTable){
         LouPrint("Unable To Find APIC Using Backup Pic\n");
         LouKeInitializeBackupPic();
-        return LOUSTATUS_GOOD;
+        return STATUS_SUCCESS;
     }
 
     disable_pic();
@@ -519,7 +527,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
 
     //LouKeSetIcSetProcessorCount(GetNPROC());
 
-    LouKeInitializeEoiHandler((PVOID)local_apic_send_eoi, 0);
+    LouKeInitializeEoiHandler((PVOID)LocalApicSendEoi, 0);
 
     if(InitializeApic())LouPrint("APIC ENABLED SUCCESSFULLY\n");
     else{   
@@ -623,13 +631,21 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
 }
 
+LOUDDK_API_ENTRY
+void 
+LouKeConfigureNextApicTimerEvent(SIZE Ms){
+    PLOUSINE_KERNEL_APIC_DATA ApicData = &((PLKPCB)GetLKPCB())->ApicData;
+    UNUSED UINT64 ApicBase = ApicData->ApicBase;
+    if(ApicData->TscDeadlineEnabled){
+    
+        LouPrint("LouKeConfigureNextApicTimerEvent()\n");
+        while(1);
+        return;
+    }
+    else if((ApicData->CurrentTimerTicks / ApicData->DefaultMsTicks) != Ms){
+        ApicData->CurrentTimerTicks = Ms * ApicData->DefaultMsTicks;
+    }
 
-LOUDDK_API_ENTRY void LocalApicSetTimer(bool On){
-    //ULONG TimerValue = READ_REGISTER_ULONG(LVT_TIMER_REGISTER);
-    //if(On){
-    //    TimerValue |= (1 << 16);
-    //}else{
-    //    TimerValue &= ~(1 << 16);
-    //}
-    //WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, TimerValue);
+    WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, ApicData->CurrentTimerTicks);
+
 }

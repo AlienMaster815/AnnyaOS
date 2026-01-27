@@ -181,8 +181,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #include <FileHandleing/LDDDS.h>
 #include <WinTEB.h>
-#include <drivers/cpu/IntelFamily.h>
-#include <drivers/cpu/cpu.h>
+#include <drivers/cpu/Apic.h>
+#include <drivers/Processors.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
 #include <Dispatching.h>
