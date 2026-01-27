@@ -16,6 +16,7 @@ static UINT64* TrampolineStack;
 static UINT64* FunctionAddress;
 static UINT64* GlobalParkFunction;
 static UINT64* Pml4Address;
+static UINT64* Pml4Address32;
 static INTEGER Bsp = 0;
 UNUSED static bool SmpBootInitialized = false;
 
@@ -41,8 +42,9 @@ LOUSTATUS LouKeSmpWakeAssistant(
 
     MutexLock(TrampolineLock);
 
-    *TrampolineStack = Stack; 
+    *TrampolineStack    = Stack; 
     *GlobalParkFunction = CpuInitFunction; 
+    *Pml4Address        = (UINT64)GetPageBase();
     
     LouKeMemoryBarrier();
 
@@ -77,12 +79,13 @@ void LouKeLoadLousineBootTrampoline(){
     }
 
     UNUSED FILE* TrampolineFile = LouKeGetBootDevice(SmpBootLoadOrder);//fopen(FilePath, KERNEL_GENERIC_MEMORY);
-    
-    LouKeMapContinuousMemoryBlock(0x7000, 0x7000, 0x2000, KERNEL_DMA_MEMORY);
-    LouKeCreateDeviceSection((PVOID)0x7000, (PVOID)0x7000, (SIZE)0x2000, PAGE_READWRITE | SEC_NOCACHE);
-    memset((PVOID)0x7000, 0, 0x2000);
+    size_t TrampolineSize = ROUND_UP64(LouKeGetBootDeviceSize(SmpBootLoadOrder), KILOBYTE_PAGE) + 2 * KILOBYTE_PAGE;
+    LouKeMapContinuousMemoryBlock(0x7000, 0x7000, TrampolineSize, KERNEL_DMA_MEMORY);
+    LouKeCreateDeviceSection((PVOID)0x7000, (PVOID)0x7000, (SIZE)TrampolineSize, PAGE_READWRITE | SEC_NOCACHE);
+    memset((PVOID)0x7000, 0, TrampolineSize);
     memcpy((PVOID)0x8000, (PVOID)TrampolineFile, LouKeGetBootDeviceSize(SmpBootLoadOrder));
 
+    
     INTEGER CurrentCpu = GetCurrentCpuTrackMember();
     Bsp = CurrentCpu;
 
@@ -90,10 +93,14 @@ void LouKeLoadLousineBootTrampoline(){
     FunctionAddress = (UINT64*)0x7008;
     Pml4Address = (UINT64*)0x7010;
     GlobalParkFunction = (UINT64*)0x7018;
-    TrampolineLock = (mutex_t*)(UINT64)0x7020;
+    Pml4Address32 = (UINT64*)0x7020;
+    TrampolineLock = (mutex_t*)(UINT64)0x7028;
 
     *Pml4Address     = (UINT64)GetPageBase();
     *FunctionAddress = (UINT64)LouKeSmpWakeFunction; 
+    *Pml4Address32   = (UINT64)(LouGeneralAllocateMemory32(4096) - GetKSpaceBase());
+
+    LouKeMapContinuousMemoryBlockEx32(0x7000, 0x7000, TrampolineSize, KERNEL_DMA_MEMORY, (UINT64*)*Pml4Address32);
 
     //*TrampolineStack = (UINT64)(LouKeMallocPhysicalEx(16 * KILOBYTE, 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16)); 
 

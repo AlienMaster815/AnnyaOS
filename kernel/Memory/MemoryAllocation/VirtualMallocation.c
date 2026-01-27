@@ -68,6 +68,28 @@ void LouKeMapContinuousMemoryBlockEx(
     }
 }
 
+void LouKeMapContinuousMemoryBlockEx32(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
+){
+    uint64_t i = 0;
+
+    while(i < size){
+        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+            LouMapAddressEx32(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE, Pml4);
+            i += MEGABYTE_PAGE;
+        }
+        else{
+            LouMapAddressEx32(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE, Pml4);
+            i += KILOBYTE_PAGE;
+        }
+        //LouPrint("I:%h : Size:%h\n",i, size);
+    }
+}
+
 void LouKeMapContinuousMemoryBlock(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -89,6 +111,27 @@ void LouKeMapContinuousMemoryBlock(
     }
 }
 
+void LouKeMapContinuousMemoryBlock32(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+    ){
+    uint64_t i = 0;
+
+    while(i < size){
+        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+            LouMapAddress32(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE);
+            i += MEGABYTE_PAGE;
+        }
+        else{
+            LouMapAddress32(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE);
+            i += KILOBYTE_PAGE;
+        }
+        //LouPrint("I:%h : Size:%h\n",i, size);
+    }
+}
+
 void LouKeMapContinuousMemoryBlockKB(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -101,6 +144,20 @@ void LouKeMapContinuousMemoryBlockKB(
         i += KILOBYTE_PAGE;
     }
 }
+
+void LouKeMapContinuousMemoryBlockKB32(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+){
+    uint64_t i = 0;
+    while(i < size){
+        LouMapAddress32(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE);
+        i += KILOBYTE_PAGE;
+    }
+}
+
 
 void LouKeUnMapContinuousMemoryBlock(
     uint64_t VAddress,

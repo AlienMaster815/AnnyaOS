@@ -574,7 +574,7 @@ bool LouKeIsCpuBroken(INTEGER Cpu){
 
 LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
-    mutex_t* Lock = (mutex_t*)(UINT64)0x7020;
+    mutex_t* Lock = (mutex_t*)(UINT64)0x7028;
 
     PCPU_TRACKER_INFORMATION CpuInfo = GetCpuInfoFromTrackerMember(TrackMember);
     UINT64 ApicBase = LouKeGetCurrentApicBase();
@@ -610,7 +610,6 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
         WRITE_REGISTER_ULONG(ERR_STATUS_REGISTER, 0x00);
         WRITE_REGISTER_ULONG(ICR_REGISTER_HI,  (READ_REGISTER_ULONG(ICR_REGISTER_HI) & ((1 << 24) - 1)) | ((ApicID & 0xFF) << 24));
         WRITE_REGISTER_ULONG(ICR_REGISTER_LOW, (READ_REGISTER_ULONG(ICR_REGISTER_LOW) & 0xFFF0F800) | 0x000608); //IPI 0x8000
-        sleep(200);
         do {
             LouKePauseMemoryBarrier();
         }while(READ_REGISTER_ULONG(ICR_REGISTER_LOW) & (1 << 12));

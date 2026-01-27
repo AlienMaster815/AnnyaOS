@@ -215,6 +215,18 @@ static UINT64* PageDown(UINT64* PageUpperBase, UINT64 UpperIndex){
     return (UINT64*)Base;
 }
 
+static UINT64* PageDown32(UINT64* PageUpperBase, UINT64 UpperIndex){
+    UINT64 Base = PageUpperBase[UpperIndex] & ~(FLAGSSPACE);
+    if(!Base){
+        Base = (UINT64)LouGeneralAllocateMemoryEx32(4096, 4096);
+        PageUpperBase[UpperIndex] = GetPageValue(Base - GetKSpaceBase(), 0b111);
+    }else {
+        Base += GetKSpaceBase();
+    }
+
+    return (UINT64*)Base;
+}
+
 void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags){
 
     VAddress &= ~(KILOBYTE_PAGE - 1);
@@ -287,12 +299,6 @@ bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_
 
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase){
 
-    if(VAddress == 0xFFFF800120221000){
-
-        //LouPrint("HERE\n");
-        //while(1);
-    }
-
     // Calculate the entries for each page level
     uint64_t L4Entry = 0;
     uint64_t L3Entry = 0;
@@ -325,11 +331,11 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
         TmpPageBase[L2Entry] = GetPageValue(PAddress, FLAGS | (1 << 7));
     }else if(PageSize == KILOBYTE_PAGE){
         if(TmpPageBase[L2Entry] & (1 << 7)){
-            NewPage = LouGeneralAllocateMemoryEx(4096, 4096);
+            NewPage = LouGeneralAllocateMemory(4096);
             InitializePageTableWithIndex(NewPage, TmpPageBase[L2Entry] & ~(FLAGSSPACE), KILOBYTE_PAGE);
             TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
         }else if(!(TmpPageBase[L2Entry] & ~(FLAGSSPACE))){
-            NewPage = LouGeneralAllocateMemoryEx(4096, 4096);
+            NewPage = LouGeneralAllocateMemory(4096);
             TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
         }
         else{
@@ -350,6 +356,68 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
     return true;
 }
 
+bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase){
+
+    // Calculate the entries for each page level
+    uint64_t L4Entry = 0;
+    uint64_t L3Entry = 0;
+    uint64_t L2Entry = 0;
+    uint64_t L1Entry = 0;
+
+    CalculateTableMarks(
+        VAddress,
+        &L4Entry,
+        &L3Entry,
+        &L2Entry,
+        &L1Entry
+    );
+
+    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), GetRamSize())){
+        DEBUG_TRAP
+        while(1);
+    }
+    MutexLock(&PageTableLock);
+    
+    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
+    TmpPageBase = PageDown32(TmpPageBase, L4Entry);    
+    TmpPageBase = PageDown32(TmpPageBase, L3Entry);
+    UINT64* NewPage;
+
+    if(PageSize == MEGABYTE_PAGE){
+        if(!(TmpPageBase[L2Entry] & (1 << 7)) && (TmpPageBase[L2Entry] & ~(FLAGSSPACE))){
+            LouFree((RAMADD)(TmpPageBase[L2Entry] & ~(FLAGSSPACE)));
+        }
+        TmpPageBase[L2Entry] = GetPageValue(PAddress, FLAGS | (1 << 7));
+    }else if(PageSize == KILOBYTE_PAGE){
+        if(TmpPageBase[L2Entry] & (1 << 7)){
+            NewPage = LouGeneralAllocateMemory32(4096);
+            InitializePageTableWithIndex(NewPage, TmpPageBase[L2Entry] & ~(FLAGSSPACE), KILOBYTE_PAGE);
+            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
+        }else if(!(TmpPageBase[L2Entry] & ~(FLAGSSPACE))){
+            NewPage = LouGeneralAllocateMemory32(4096);
+            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
+        }
+        else{
+            NewPage = (UINT64*)((UINT64)(TmpPageBase[L2Entry] & ~(FLAGSSPACE)) + GetKSpaceBase()); 
+        }
+        NewPage[L1Entry] = GetPageValue(PAddress, FLAGS);
+    } 
+    else {
+        LouPrint("Could Not Map Memory\n");
+        MutexUnlock(&PageTableLock);
+        return false;
+    }
+
+    PageFlush(VAddress);
+    ReloadCR3();
+    MutexUnlock(&PageTableLock);
+
+    return true;
+}
+
+bool LouMapAddress32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize){
+    return LouMapAddressEx32(PAddress, VAddress, FLAGS, PageSize,  GetPageBase());
+}
 
 uint64_t GetPageOfFaultValue(uint64_t VAddress) {
 

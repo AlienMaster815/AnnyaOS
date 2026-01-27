@@ -515,8 +515,24 @@ LouGeneralAllocateMemoryEx(
     return Result;
 }
 
+void* 
+LouGeneralAllocateMemoryEx32(
+    UINT64 Size,
+    UINT64 Alignment
+){
+    void* Result = LouAllocatePhysical32UpEx(Size, Alignment);
+    Result += GetKSpaceBase();
+    memset(Result, 0, Size);
+    return Result;
+}
+
+
 void* LouGeneralAllocateMemory(UINT64 Size){
     return LouGeneralAllocateMemoryEx(Size, GetAlignmentBySize(Size));
+}
+
+void* LouGeneralAllocateMemory32(UINT64 Size){
+    return LouGeneralAllocateMemoryEx32(Size, GetAlignmentBySize(Size));
 }
 
 void LouGeneralFreeMemory(void* Address){

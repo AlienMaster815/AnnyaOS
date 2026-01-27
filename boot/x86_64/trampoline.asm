@@ -39,7 +39,7 @@ lgdt [gdt64.pointer]
 jmp gdt64.code_segment:long_mode_start
 
 EnablePaging:
-    mov eax, [0x7010]
+    mov eax, [0x7020]
     mov cr3, eax
     
     mov eax, cr4
@@ -89,6 +89,9 @@ long_mode_start:
     mov es, ax
     mov gs, ax
     mov ss, ax
+
+    mov rax, [0x7010]
+    mov cr3, rax
 
     mov rbp, [0x7000]
     mov rsp, rbp

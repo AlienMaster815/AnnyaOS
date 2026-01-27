@@ -409,7 +409,6 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouPrint("Finished Initializing Process Manager\n");
-    while(1);
 }
 
 LOUDDK_API_ENTRY

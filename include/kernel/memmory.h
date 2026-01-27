@@ -123,13 +123,17 @@ typedef struct __attribute__((packed, aligned(4096))) _PML {
 void LouKeFreePage(void* PageAddress);
 void LouKeFreePage32(void* PageAddress);
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
+bool LouMapAddress32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
+bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
 void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags);
 uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
 uint64_t GetRamSize();
 void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
+void* LouGeneralAllocateMemoryEx32(UINT64 Size,UINT64 Alignment);
 void* LouGeneralAllocateMemory(UINT64 Size);
+void* LouGeneralAllocateMemory32(UINT64 Size);
 void  LouGeneralFreeMemory(void* Address);
 bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical,uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
@@ -413,6 +417,29 @@ void LouKeMapContinuousMemoryBlockKB(
     uint64_t size, 
     uint64_t FLAGS
 );
+
+void LouKeMapContinuousMemoryBlock32(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+);
+
+void LouKeMapContinuousMemoryBlockEx32(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
+);
+
+void LouKeMapContinuousMemoryBlockKB32(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+);
+
 
 void LouKeUnMapContinuousMemoryBlock(
     uint64_t VAddress,
