@@ -220,15 +220,7 @@ LouSwapEndianess(
 
 BOOL NtDllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
 
-LOUDLL_API
-BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    BOOL Tmp = true;
-    //Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
-    if(!Tmp){
-        return Tmp;
-    }
-    return TRUE;    
-}
+
 
 static mutex_t PrintLock;
 LOUDLL_API
@@ -246,7 +238,19 @@ int LouPrint(char* Str, ...){
     return Data[3];
 }
 
-
+LOUDLL_API
+BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
+    BOOL Tmp = true;
+    if(ul_reason_for_call == DLL_PROCESS_ATTACH){
+        LouPrint("LOUDLL.DLL Attatched To New Process\n");
+    }
+    
+    //Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
+    if(!Tmp){
+        return Tmp;
+    }
+    return TRUE;    
+}
 
 LOUDLL_API
 PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
@@ -723,27 +727,34 @@ void ReleaseLoadLibraryALock(mutex_t* Mutex){
     MutexUnlock(Mutex);
 }
 
-struct ModuleEntryList{
-    ListHeader  Peers;
-    PVOID       Entry;
-    PVOID       ModuleHandle;
-};
-
 struct ProcessLoaderParameters{
     mutex_t                 Lock;
-    struct ModuleEntryList  ModEntrys;
+    UINT64*                 ModEntrys;
 };
+
+UINT64 LouGetPeb();
 
 LOUDLL_API
 DWORD LouProcessInitThread(
     PVOID   Data
 ){
     struct ProcessLoaderParameters* LoaderData = (struct ProcessLoaderParameters*)Data;
+    UINT64* Tmp = LoaderData->ModEntrys; 
+    UINT64 CurrentEntry = Tmp[Tmp[0]];
+    bool   (*DllEntry)(uint64_t, uint64_t, uint64_t);
 
-
+    for(size_t i = 0 ; Tmp[i + 1] != CurrentEntry; i++){
+        DllEntry = (PVOID)Tmp[i + 1];
+        DllEntry((uint64_t)DllEntry, DLL_PROCESS_ATTACH, 0);
+    }
 
     MutexUnlock(&LoaderData->Lock);
-    return 0;
+    UINT64 Peb = LouGetPeb();
+
+    int (*ProcessEntry)(UINT64);
+    ProcessEntry = (PVOID)CurrentEntry;
+
+    return ProcessEntry(Peb);
 }
 
 LOUDLL_API

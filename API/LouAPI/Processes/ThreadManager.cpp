@@ -312,7 +312,7 @@ LOUSTATUS LouKeTsmInitializeIdleThreads(){
             0,
             0,
             2048,
-            30,
+            10,
             0x08,
             0x10,
             LONG_MODE,

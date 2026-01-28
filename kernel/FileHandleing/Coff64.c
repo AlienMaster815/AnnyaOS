@@ -65,7 +65,7 @@ LouKeVmmCreateSharedSection(
     UINT64          FrameFlags
 );
 
-static const char DataSectionName[8] = {'.', 'd','a','t','a','\0','\0'};
+static const char DataSectionName[8] = {'.', 'd','a','t','a','\0','\0','\0'};
 
 UNUSED void EnableCoffImageProtection(
     PCFI_OBJECT CfiObject
@@ -79,9 +79,10 @@ UNUSED void EnableCoffImageProtection(
     CfiObject->SectionMapping = LouKeMallocArray(UINT64, SectionCount, KERNEL_GENERIC_MEMORY);
     for(size_t i = 0; i < SectionCount; i++){
         UINT64 PageFlags = (CfiObject->KernelObject ? 0 : USER_PAGE);
+        
         UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
         SIZE VirtualSize = (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualSize;
-        VirtualSize = ROUND_UP64(VirtualSize, KILOBYTE_PAGE);
+        VirtualSize = ROUND_UP64(VirtualSize, PeImageHeader->OptionalHeader.PE64.SectionAlignment);
         
         if(!(SectionCharacteristics & CFI_SCN_MEM_NOT_PAGED)){
             PageFlags |= PRESENT_PAGE;
@@ -109,27 +110,27 @@ UNUSED void EnableCoffImageProtection(
             else{
                 BOOL Cow = false;
                 BOOL Bss = PeImageHeader->OptionalHeader.PE64.SectionTables[i].SizeOfRawData ? false : true;
-                if(!memcmp(PeImageHeader->OptionalHeader.PE64.SectionTables[i].Name, DataSectionName, 8)){
+                if(memcmp(PeImageHeader->OptionalHeader.PE64.SectionTables[i].Name, DataSectionName, 8)){
                     Cow = true;
                 }
                 LouKeVmmCreatePrivateSection(
                     (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                    (PVOID)PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
                     VirtualSize, 
-                    PageFlags,
                     PeImageHeader->OptionalHeader.PE64.SectionAlignment,
+                    PageFlags,
                     Cow,
                     Bss
                 );
             }
+        }else{
+            LouKeMapContinuousMemoryBlock(
+                PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
+                LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress,
+                VirtualSize,
+                PageFlags
+            );
         }
-
-        LouKeMapContinuousMemoryBlock(
-            PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
-            LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress,
-            VirtualSize,
-            PageFlags
-        );
-        
     }    
 }
 

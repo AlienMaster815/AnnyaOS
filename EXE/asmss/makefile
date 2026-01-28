@@ -2,7 +2,7 @@
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -m64 -O3 -fPIC -fno-stack-protector -nostdlib -nodefaultlibs
 LDFLAGS = \
-    -Wl,--entry=AnnyaSmssNtProcessStartup \
+    -Wl,--entry=AnnyaSmssProcessStartup \
     -Wl,--subsystem,console \
     -Wl,--dynamicbase \
     -Wl,--high-entropy-va \

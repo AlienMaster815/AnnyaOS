@@ -46,6 +46,8 @@ typedef struct _PML4_LIST {
 static PML4_LIST Pml4MasterList = {0};
 static mutex_t Pml4MasterLock = {0};
 
+LOUDDK_API_ENTRY PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
+
 static SECTION_OBJECT   MasterSectionList = {0};
 static mutex_t          SectionListLock = {0};
 static 
@@ -302,8 +304,40 @@ LOUSTATUS LouKeSectionInitNewProcess(
 
 LOUDDK_API_ENTRY
 LOUSTATUS 
+LouKeSectionGetEntryList(
+    HANDLE      Section,
+    UINT64**    OutList
+){
+    if((!Section) || (!OutList)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    UNUSED PSECTION_OBJECT SectionData = (PSECTION_OBJECT)Section;
+    if(SectionData->Coff){
+        PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)SectionData->SectionPrivateData; 
+        UINT64 CurrentEntry = (UINT64)CfiData->CfiObject.Entry;
+        UINT64* DependList = CfiData->CfiObject.ModDependencies;
+
+        UINT64* NewList = LouKeMallocArray(UINT64, *DependList + 2, USER_GENERIC_MEMORY);
+        NewList[0] = *DependList + 1;
+        for(size_t i = 0 ; i < *DependList; i++){
+            NewList[i + 1] = (UINT64)(LouKeLookupHandleToCfiObject((HANDLE)DependList[i + 1], CfiData->CfiObject.AOA64))->Entry;
+        }
+        NewList[NewList[0]] = CurrentEntry;
+        *OutList = NewList;
+    }else {
+        LouPrint("LouKeSectionGetEntryList() : NON COFF\n");
+        while(1);
+    }    
+
+    return STATUS_SUCCESS;
+}
+
+LOUDDK_API_ENTRY
+LOUSTATUS 
 LouKeVmmCreatePrivateSectionEx(
     PVOID   VirtualAddress,
+    PVOID   PhyAddress,
     size_t  Size,
     UINT64  Alignment,
     UINT64  FrameFlags,
@@ -322,9 +356,7 @@ LouKeVmmCreatePrivateSectionEx(
         memcpy(NewPrivateSection->InitializedDataCopy, VirtualAddress, Size); 
     }
 
-    if(Cow){
-        RequestPhysicalAddress((UINT64)VirtualAddress, (UINT64*)&NewPrivateSection->SectionPBase);
-    }
+    NewPrivateSection->SectionPBase = PhyAddress;
 
     NewPrivateSection->SectionVBase             = VirtualAddress;
     NewPrivateSection->SectionSize              = Size;
@@ -339,6 +371,7 @@ LOUDDK_API_ENTRY
 LOUSTATUS 
 LouKeVmmCreatePrivateSection(
     PVOID   VirtualAddress,
+    PVOID   PhyAddress,
     size_t  Size,
     UINT64  Alignment,
     UINT64  FrameFlags,
@@ -347,6 +380,7 @@ LouKeVmmCreatePrivateSection(
 ){
     return LouKeVmmCreatePrivateSectionEx(
         VirtualAddress,
+        PhyAddress,
         Size, 
         Alignment,
         FrameFlags,

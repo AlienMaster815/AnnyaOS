@@ -43,6 +43,7 @@ HANDLE LouKeLinkerGetModuleLookupHandle(
 LOUSTATUS 
 LouKeVmmCreatePrivateSection(
     PVOID   VirtualAddress,
+    PVOID   PhyAddress,
     size_t  Size,
     UINT64  Alignment,
     UINT64  FrameFlags,

@@ -79,6 +79,13 @@ LOUSTATUS LouKeSectionInitNewProcess(
     HANDLE      Section
 );
 
+LOUDDK_API_ENTRY
+LOUSTATUS 
+LouKeSectionGetEntryList(
+    HANDLE      Section,
+    UINT64**    OutList
+);
+
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,                       
     string                          ProcessName,
@@ -156,25 +163,27 @@ LOUSTATUS LouKePmCreateProcessEx(
 
     if(Section){
         HANDLE  ThreadOut;
-        struct ModuleEntryList{
-            ListHeader  Peers;
-            PVOID       Entry;
-            PVOID       ModuleHandle;
-        };
+    
 
         struct ProcessLoaderParameters{
             mutex_t                 Lock;
-            struct ModuleEntryList  ModEntrys;
+            UINT64*                 ModEntrys;
         };
 
         struct ProcessLoaderParameters* Tmp = LouKeMallocType(struct ProcessLoaderParameters, USER_GENERIC_MEMORY);
 
+        UINT64* EntryList;
+        Status = LouKeSectionGetEntryList(Section, &EntryList);
         //HPROCESS    Process,
         //PVOID       Entry,
         //PVOID       Params,
         //UINT8       Priority
-
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
         MutexLock(&Tmp->Lock);
+
+        Tmp->ModEntrys = EntryList;
 
         LouKePsmCreateThreadForProcess(
             &ThreadOut,
@@ -185,6 +194,8 @@ LOUSTATUS LouKePmCreateProcessEx(
         );
 
         MutexSynchronize(&Tmp->Lock);
+
+        LouKeFree(EntryList);
 
         LouKeFree(Tmp);
     }

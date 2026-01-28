@@ -31,5 +31,5 @@ modifications:
 	./LPEModifier -E../drivers/USB/HostDrivers/OHCI.SYS -PKernel
 	./LPEModifier -E../drivers/USB/HostDrivers/EHCI.SYS -PKernel
 	./LPEModifier -E../drivers/USB/HostDrivers/XHCI.SYS -PKernel
-#	./LPEModifier -E../DLL/LouDLLs/LouDLL/LouDll.dll -PUser 
+	./LPEModifier -E../DLL/LouDLLs/LouDLL/LouDll.dll -PUser 
 #-S../DLL/LouDLLs/LouDLL/LOUDLL.KSF
