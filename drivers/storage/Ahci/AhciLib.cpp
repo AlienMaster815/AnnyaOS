@@ -145,8 +145,9 @@ LOUSTATUS AhciGenricDMAIssueCommand(
     PrivateData->CommandsQueued |= (1 << FreeSlot);
     Port->PxCI |= (1 << FreeSlot);
     
-    LOUSTATUS Status;// = LouKeWaitForEvent(&PrivateData->CommandCompletion[FreeSlot]);
-    Status = AhciPollCommand(Port, FreeSlot);
+    LOUSTATUS Status = LouKeWaitForEvent(&PrivateData->CommandCompletion[FreeSlot]);
+    
+    //Status = AhciPollCommand(Port, FreeSlot);
     
     LouKeFreeAhciCommandTable(NewCommandTable);  
     MutexUnlock(&AhciPort->OpreationLock);

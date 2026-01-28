@@ -187,7 +187,7 @@ typedef struct _USB_HOST_IO_PACKET{
 #define USB_FEATURE_SELECTOR_DEVICE_REMOTE_WAKEUP   1
 #define USB_FEATURE_SELECTOR_ENDPOINT_STALL         0
 
-#define UsbFunctionDeviceToHcd(FunctionDevice) (((PUSB_TOPOLOGY_TREE)CONTAINER_OF(FunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice))->HostIdentifier)
+#define UsbFunctionDeviceToHcd(pFunctionDevice) (((PUSB_TOPOLOGY_TREE)CONTAINER_OF(pFunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice))->HostIdentifier)
 
 
 

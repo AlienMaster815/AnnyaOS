@@ -10,6 +10,13 @@ SIZE LouKePmGetProcessCount(){
     return LouKeGetReferenceCount(&TotalProcesses);
 }
 
+LOUDDK_API_ENTRY
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
+
+
 static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){
 
     PGENERIC_PROCESS_DATA TmpProcessObject = &MasterProcessList;
@@ -136,12 +143,50 @@ LOUSTATUS LouKePmCreateProcessEx(
         }
     }
 
+
+    
+
     if(Params){
 
     }else{
         for(size_t i = 0 ; i < Processors; i++){
             LouKeInitProceSchedTail(NewProcessObject, i);
         }
+    }
+
+    if(Section){
+        HANDLE  ThreadOut;
+        struct ModuleEntryList{
+            ListHeader  Peers;
+            PVOID       Entry;
+            PVOID       ModuleHandle;
+        };
+
+        struct ProcessLoaderParameters{
+            mutex_t                 Lock;
+            struct ModuleEntryList  ModEntrys;
+        };
+
+        struct ProcessLoaderParameters* Tmp = LouKeMallocType(struct ProcessLoaderParameters, USER_GENERIC_MEMORY);
+
+        //HPROCESS    Process,
+        //PVOID       Entry,
+        //PVOID       Params,
+        //UINT8       Priority
+
+        MutexLock(&Tmp->Lock);
+
+        LouKePsmCreateThreadForProcess(
+            &ThreadOut,
+            (HPROCESS)NewProcessObject,
+            (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", "LouProcessInitThread"),
+            Tmp,
+            15
+        );
+
+        MutexSynchronize(&Tmp->Lock);
+
+        LouKeFree(Tmp);
     }
 
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");

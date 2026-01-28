@@ -3,6 +3,16 @@
 
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
+static spinlock_t ProcLock = {0};
+
+void LouKeLockProcManager(LouKIRQL* Irql){
+    LouKeAcquireSpinLock(&ProcLock, Irql);
+}
+
+void LouKeUnlockProcManager(LouKIRQL* Irql){
+    LouKeReleaseSpinLock(&ProcLock, Irql);
+}
+
 LOUDDK_API_ENTRY
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
@@ -166,13 +176,11 @@ UNUSED static void LouKePsmDestroyProcessRing(PPROCESS_RING ProcessRing){
     LouKeFree(ProcessRing);
 }
 
-static spinlock_t AsignLock = {0};
-
 void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process){
 
     LouKIRQL Irql;
     PPROCESS_RING NewProcessRing = LouKePsmCreateProcessRing(Process); 
-    LouKeAcquireSpinLock(&AsignLock, &Irql);
+    LouKeLockProcManager(&Irql);
     PPROCESS_RING TmpProcessRing = this->Processes[Process->ProcessPriority];
     PPROCESS_RING CurrentProcessRing = TmpProcessRing;
 
@@ -180,6 +188,7 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
         NewProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
         NewProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
         this->Processes[Process->ProcessPriority] = NewProcessRing;
+        LouPrint("HERE\n");
         goto _PROCESS_ASSIGNMENT_DONE;
     }
 
@@ -193,7 +202,7 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
     TmpProcessRing->Peers.NextHeader        = (PListHeader)NewProcessRing;
 
     _PROCESS_ASSIGNMENT_DONE:
-    LouKeReleaseSpinLock(&AsignLock, &Irql);
+    LouKeUnlockProcManager(&Irql);
 }
 
 void PsmProcessScedualManagerObject::PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing){
@@ -233,16 +242,6 @@ KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
 LOUDDK_API_ENTRY
 void 
 LouKeConfigureNextApicTimerEvent(SIZE Ms);
-
-static spinlock_t ProcLock = {0};
-
-void LouKeLockProcManager(LouKIRQL* Irql){
-    LouKeAcquireSpinLock(&ProcLock, Irql);
-}
-
-void LouKeUnlockProcManager(LouKIRQL* Irql){
-    LouKeReleaseSpinLock(&ProcLock, Irql);
-}
 
 LOUDDK_API_ENTRY UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     if(LouKeGetIrql() >= CLOCK_LEVEL){
@@ -434,44 +433,4 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
 
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc){
     ProcessBlock.ProcStateBlock[Proc].Schedualer.PsmAsignProcessToSchedual(Process); 
-}
-
-LOUSTATUS LouKeProcessCreateEntryThread(PHPROCESS Process, PVOID Entry){
-    if((!Entry) || (!Process)){
-        return STATUS_INVALID_PARAMETER;
-    }
-
-    PGENERIC_PROCESS_DATA ProcessData = (PGENERIC_PROCESS_DATA)Process;
-    PVOID ImpStub = (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", USER_THREAD_STUB);
-
-    if(!ImpStub){
-        LouPrint("ERROR ImpStub Was Not Found\n");
-        return STATUS_UNSUCCESSFUL;
-    }
-
-    PGENERIC_THREAD_DATA ThreadOut;
-    LOUSTATUS Status = LouKeTsmCreateThreadHandle(
-        &ThreadOut,
-        ProcessData,
-        ImpStub,
-        Entry,
-        &ProcessData->Peb,
-        15,
-        (ProcessData->StackSize ? ProcessData->StackSize : (16 * KILOBYTE)),
-        30,
-        0x18 | 0b11,
-        0x20 | 0b11,
-        LONG_MODE,
-        0x00,
-        0x00
-    );
-
-    INTEGER Processors = GetNPROC();
-    for(size_t i = 0 ; i < Processors; i++){
-        if(IS_PROCESSOR_AFFILIATED(ThreadOut->AfinityBitmap, i)){
-            ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(ThreadOut);
-        }
-    }
-
-    return Status;
 }

@@ -281,11 +281,10 @@ LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice){
         return STATUS_IO_DEVICE_ERROR;
     }
 
-    //OpRegs->HcInterruptEnable = 0xFFFFFFFF;
-
     UINT32 IoMask = 0;
 
-    if(OpRegs->HcControlHeadED){
+    if(OhciDevice->ControlEDs.Peers.NextHeader){
+        OpRegs->HcControlHeadED = OhciGetDmaAddress(((POHCI_ED_LIST)OhciDevice->ControlEDs.Peers.NextHeader)->Ed);
         IoMask |= OHCI_CONTROL_CLE;
     } 
     if(OpRegs->HcBulkHeadED){
@@ -300,8 +299,19 @@ LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice){
 }
 
 void OhciInterruptHandler(uint64_t UsbHostData){
-    LouPrint("OHCI.SYS:OhciInterruptHandler()\n");
     POHCI_DEVICE OhciDevice = (POHCI_DEVICE)UsbHostData;
+    BOOL Handled = false;
+    if(OhciDevice->OperationalRegisters->HcInterruptStatus & (1 << 1)){
+        LouKeSignalEvent(&OhciDevice->OhciCommitEvent);
+        OhciDevice->OperationalRegisters->HcInterruptStatus |= (1 << 1);
+        Handled = true;
+    }
+
+
+    if(Handled){
+        return;
+    }
+    LouPrint("OHCI.SYS:OhciInterruptHandler()\n");
 
     LouPrint("OHCI.SYS:%h\n", OhciDevice->OperationalRegisters->HcInterruptStatus);
 
@@ -348,17 +358,33 @@ LOUSTATUS OhciCommitRequest(
     PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
     IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
     POHCI_ED_LIST EdItem = (POHCI_ED_LIST)IoData->EdItem;
+    PUSB_HOST_DEVICE Hcd = UsbFunctionDeviceToHcd(FunctionDevice);
+    POHCI_DEVICE OhciDevice = CONTAINER_OF(Hcd, OHCI_DEVICE, UsbHost);
+    LOUSTATUS Status;
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
 
     MutexLock(&EdItem->EdLock);
-
     
     if(IoPacket->TransferType == USB_TRANSFER_TYPE_CONTROL){
         OhciCreateSetupTD(IoPacket, EdItem);
         OhciCreateDataTDs(IoPacket, EdItem);
         OhciCreateStatusTD(IoPacket, EdItem);
-        
+        OhciCreateDummyTD(EdItem);
 
+        OhciAddTdsToEd(EdItem);
+
+        OpRegs->HcInterruptStatus = 0xFFFFFFFF;
+        OpRegs->HcInterruptEnable = ((1 << 1) | (1 << 31));
+        OpRegs->HcCommandStatus |= (1 << 1);
+
+        OhciCommitEd(EdItem);
+        Status = LouKeWaitForEvent(&OhciDevice->OhciCommitEvent);
     
+        if(Status != STATUS_SUCCESS){
+            LouPrint("OHCI.SYS:Device Failed To Commit Buffer To Endpoint\n");
+            while(1);
+        }
+
     }else{
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;

@@ -335,3 +335,32 @@ LOUSTATUS OhciDestroyED(
     LouPrint("OHCI.SYS:OhciDestroyED() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
+
+LOUSTATUS 
+OhciAddTdsToEd(
+    POHCI_ED_LIST EdItem
+){
+    PVOID FirstTD = ((POHCI_TD_LIST)EdItem->Tds.Peers.NextHeader)->Td;
+    POHCI_TD_LIST Tmp = (POHCI_TD_LIST)EdItem->Tds.Peers.NextHeader;
+    while(Tmp->Peers.NextHeader){
+        Tmp = (POHCI_TD_LIST)Tmp->Peers.NextHeader;
+    }
+    PVOID LastTD = Tmp->Td;
+    UINT32 TdAddress = OhciGetDmaAddress(FirstTD);
+    UINT32 TdTailAddress = OhciGetDmaAddress(LastTD);
+
+    POHCI_ENDPOINT_DESCRIPTOR EndpointDescriptor = (POHCI_ENDPOINT_DESCRIPTOR)EdItem->Ed;
+    EndpointDescriptor->Dword2 &= ~(OHCI_ED_HEADP_MASK);
+    EndpointDescriptor->Dword2 |= (TdAddress & (OHCI_ED_HEADP_MASK));
+
+    EndpointDescriptor->Dword1 &= ~(OHCI_ED_TAILP_MASK);
+    EndpointDescriptor->Dword1 |= (TdTailAddress & (OHCI_ED_TAILP_MASK));
+
+    return STATUS_SUCCESS;
+}
+
+void OhciCommitEd(POHCI_ED_LIST EdItem){
+    POHCI_ENDPOINT_DESCRIPTOR EndpointDescriptor = (POHCI_ENDPOINT_DESCRIPTOR)EdItem->Ed;
+    EndpointDescriptor->Dword0 &= ~(OHCI_ED_K_MASK << OHCI_ED_K_SHIFT);
+    EndpointDescriptor->Dword2 &= ~(OHCI_ED_H_MASK << OHCI_ED_H_SHIFT);
+}

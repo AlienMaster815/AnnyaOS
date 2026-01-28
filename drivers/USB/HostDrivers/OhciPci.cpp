@@ -32,6 +32,8 @@ NTSTATUS AddDevice(
 
     POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
 
+    LouKeInitializeEventTimeOut(&OhciDevice->OhciCommitEvent, 5000);
+
     LouKeHalEnablePciDevice(PDEV);
     LouKeHalPciSetMaster(PDEV);
 
@@ -55,7 +57,6 @@ NTSTATUS AddDevice(
         LouKeFree(OhciDevice);
         return STATUS_NO_SUCH_DEVICE;
     }
-
 
     OhciDevice->UsbHost.Operations = OhciOperations;
 

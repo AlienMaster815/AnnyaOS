@@ -185,7 +185,7 @@ static PGENERIC_THREAD_DATA AllocateThreadHandle(){
     while(TmpThreadHandle->Peers.NextHeader){
         TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
     }
-    TmpThreadHandle->Peers.NextHeader = (PListHeader)LouKeMallocType(GENERIC_THREAD_DATA, KERNEL_GENERIC_MEMORY);
+    TmpThreadHandle->Peers.NextHeader = (PListHeader)LouKeMallocType(GENERIC_THREAD_DATA, USER_GENERIC_MEMORY);
     TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
     return TmpThreadHandle;
 }
@@ -230,8 +230,13 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
         LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
         return STATUS_INVALID_PARAMETER;
     }
-    bool User = ((CodeSegment & 0b11) == 3); 
-
+     
+    UINT64 PageFlags;
+    if((CodeSegment & 0b11) == 3){
+        PageFlags = USER_GENERIC_MEMORY;
+    } else{
+        PageFlags = KERNEL_GENERIC_MEMORY;
+    }
     //alocate thread handler
     PGENERIC_THREAD_DATA NewThreadHandle = AllocateThreadHandle();
     //place output
@@ -241,8 +246,8 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
 
     //Allocate a new stack
-    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, (User ? USER_GENERIC_MEMORY : KERNEL_GENERIC_MEMORY));
-    NewThreadHandle->StackTop = NewThreadHandle->StackBase + ((StackSize - 8) & ~(16));
+    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags);
+    NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
     //thread prioirties are backwards 0 being the highest +x being lowest 
     NewThreadHandle->ThreadPriority = (THREAD_PRIORITY_RINGS - 1) - ThreadPriority;
 

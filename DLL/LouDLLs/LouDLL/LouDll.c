@@ -533,11 +533,11 @@ void LouCALL(
 
 
 LOUDLL_API
-void AnnyaUserThreadStub(void* PTHREAD, void* THREAD_DATA, uintptr_t ThreadHandle){
-    DWORD (*NewThread)(void* THREAD_DATA) = PTHREAD;
-    DWORD Result = NewThread(THREAD_DATA);    
-    AnnyaDestroyThread((void*)ThreadHandle);
-    LouPrint("User Thread:%h :: Exited With Value:%h\n", ThreadHandle, Result);
+void AnnyaUserThreadStub(DWORD(*Work)(PVOID), PVOID Param, PVOID Thread){
+    LouPrint("User Thread:%h Has Started\n", Thread);
+    DWORD Result = Work(Param);    
+    LouPrint("User Thread:%h :: Exited With Value:%h\n", Thread, Result);
+    AnnyaDestroyThread((void*)Thread);
     while(1){
         LouYeildExecution();
     }
@@ -723,20 +723,26 @@ void ReleaseLoadLibraryALock(mutex_t* Mutex){
     MutexUnlock(Mutex);
 }
 
-struct InitData{
-    HANDLE      Proces; 
-    mutex_t     Lock;
+struct ModuleEntryList{
+    ListHeader  Peers;
+    PVOID       Entry;
+    PVOID       ModuleHandle;
+};
+
+struct ProcessLoaderParameters{
+    mutex_t                 Lock;
+    struct ModuleEntryList  ModEntrys;
 };
 
 LOUDLL_API
 DWORD LouProcessInitThread(
     PVOID   Data
 ){
-    struct InitData* ImpData = (struct InitData*)Data;
+    struct ProcessLoaderParameters* LoaderData = (struct ProcessLoaderParameters*)Data;
 
 
 
-    MutexUnlock(&ImpData->Lock);
+    MutexUnlock(&LoaderData->Lock);
     return 0;
 }
 

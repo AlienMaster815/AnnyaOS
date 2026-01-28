@@ -57,6 +57,7 @@ typedef struct _OHCI_ED_LIST{
     ListHeader                  Peers;
     mutex_t                     EdLock;
     PVOID                       Ed;
+    SIZE                        TdCount;
     OHCI_TD_LIST                Tds;
 }OHCI_ED_LIST, * POHCI_ED_LIST;
 
@@ -114,6 +115,7 @@ typedef struct _OHCI_DEVICE{
     mutex_t                         DeviceMutex;
     UINT64                          HccaAddress;
     UINT32                          Fminterval;
+    KERNEL_EVENT_OBJECT             OhciCommitEvent;
     OHCI_ED_LIST                    ControlEDs;
     OHCI_ED_LIST                    BulkEDs;
     OHCI_ED_LIST                    IsochIntEDs[32];
@@ -360,5 +362,7 @@ LOUSTATUS OhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
 LOUSTATUS OhciCreateSetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 LOUSTATUS OhciCreateDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 LOUSTATUS OhciCreateStatusTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
-
+LOUSTATUS OhciAddTdsToEd(POHCI_ED_LIST EdItem);
+void OhciCommitEd(POHCI_ED_LIST EdItem);
+LOUSTATUS OhciCreateDummyTD(POHCI_ED_LIST EdItem);
 #endif

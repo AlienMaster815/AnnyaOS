@@ -4,7 +4,7 @@ LOUSTATUS OhciInitializeTransferDescriptor(
     POHCI_TRANSFER_DESCRIPTOR   Td,
     POHCI_TD_INITIALIZOR        Initializor
 ){
-    LouPrint("OHCI.SYS:OhciInitializeTransferDescriptor()\n");
+    //LouPrint("OHCI.SYS:OhciInitializeTransferDescriptor()\n");
     if((!Td) || (!Initializor)){
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
@@ -22,7 +22,7 @@ LOUSTATUS OhciInitializeTransferDescriptor(
     Td->Dword2 |= (Initializor->NextTD & 0xFFFFFFF0);
     Td->Dword3 |= (Initializor->BufferEnd);
 
-    LouPrint("OHCI.SYS:OhciInitializeTransferDescriptor() STATUS_SUCCESS\n");
+    //LouPrint("OHCI.SYS:OhciInitializeTransferDescriptor() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -30,7 +30,7 @@ LOUSTATUS OhciCreateTD(
     POHCI_TRANSFER_DESCRIPTOR*  TransferDescriptor,
     POHCI_TD_INITIALIZOR        Initializor
 ){
-    LouPrint("OHCI.SYS:OhciCreateTD()\n");
+    //LouPrint("OHCI.SYS:OhciCreateTD()\n");
     if((!TransferDescriptor) || (!Initializor)){
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
@@ -62,7 +62,7 @@ LOUSTATUS OhciCreateTD(
         return Status;
     }
 
-    LouPrint("OHCI.SYS:OhciCreateTD() STATUS_SUCCESS\n");
+    //LouPrint("OHCI.SYS:OhciCreateTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -112,6 +112,7 @@ LOUSTATUS OhciCreateSetupTD(
     Initializor.DirectionPID = OHCI_TD_DIRECTION_SETUP;
     Initializor.CurrentBufferPointer = Cbp;
     Initializor.BufferEnd = Be;
+    Initializor.ConditionCode = 0xF;
 
     POHCI_TRANSFER_DESCRIPTOR Td;
     
@@ -124,6 +125,8 @@ LOUSTATUS OhciCreateSetupTD(
         Td,
         &EdItem->Tds
     );
+
+    EdItem->TdCount++;
     
     LouPrint("OHCI.SYS:OhciCreateSetupTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
@@ -152,6 +155,7 @@ static void InitializeDataTD(
 
     Initializor->CurrentBufferPointer = DmaAddress;
     Initializor->BufferEnd = DmaAddress + (Length - 1);
+    Initializor->ConditionCode = 0xF;
 
     POHCI_TRANSFER_DESCRIPTOR Td;
     
@@ -164,7 +168,7 @@ static void InitializeDataTD(
         Td,
         &EdItem->Tds
     );
-
+    EdItem->TdCount++;
 }
 
 LOUSTATUS OhciCreateDataTDs(
@@ -194,6 +198,7 @@ LOUSTATUS OhciCreateDataTDs(
 
     Initializor.DataToggle = 1; //DATA1
     Initializor.DirectionPID = ((IoPacket->RequestType & (USB_XFER_D2H << USB_REQUEST_XFER_DIRECTION_SHIFT)) ? OHCI_TD_DIRECTION_IN : OHCI_TD_DIRECTION_OUT);
+    Initializor.ConditionCode = 0xF;
 
     for(
         i = 0; 
@@ -232,6 +237,73 @@ LOUSTATUS OhciCreateStatusTD(
 ){
     LouPrint("OHCI.SYS:OhciCreateStatusTD()\n");
 
+    OHCI_TD_INITIALIZOR Initializor = {0};
+
+    // STATUS stage always uses DATA1
+    Initializor.DataToggle = 1;
+
+    Initializor.CurrentBufferPointer = 0;
+    Initializor.BufferEnd = 0;
+    Initializor.ConditionCode = 0xF;
+
+
+    if(IoPacket->Length == 0){
+        Initializor.DirectionPID = OHCI_TD_DIRECTION_IN;
+    } else {
+        if(IoPacket->RequestType & (USB_XFER_D2H << USB_REQUEST_XFER_DIRECTION_SHIFT)){
+            Initializor.DirectionPID = OHCI_TD_DIRECTION_OUT;
+        } else {
+            Initializor.DirectionPID = OHCI_TD_DIRECTION_IN;
+        }
+    }
+
+    POHCI_TRANSFER_DESCRIPTOR Td;
+    LOUSTATUS Status = OhciCreateTD(
+        &Td,
+        &Initializor
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Failed to create STATUS TD\n");
+        return Status;
+    }
+
+    TraverseAndAddTd(
+        Td,
+        &EdItem->Tds
+    );
+    EdItem->TdCount++;
+
     LouPrint("OHCI.SYS:OhciCreateStatusTD() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS
+OhciCreateDummyTD(
+    POHCI_ED_LIST EdItem
+){
+    OHCI_TD_INITIALIZOR Initializor;
+
+    Initializor.BufferRounding = 0;
+    Initializor.DirectionPID  = 0;
+    Initializor.DelayInterrupt = 0;
+    Initializor.DataToggle = 0;
+    Initializor.ErrorCount = 0;
+    Initializor.ConditionCode = 0xF;
+    Initializor.CurrentBufferPointer = 0;
+    Initializor.NextTD = 0;
+    Initializor.BufferEnd = 0;
+
+    POHCI_TRANSFER_DESCRIPTOR Td;
+    LOUSTATUS Status = OhciCreateTD(&Td, &Initializor);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    TraverseAndAddTd(
+        Td,
+        &EdItem->Tds
+    );
+
     return STATUS_SUCCESS;
 }

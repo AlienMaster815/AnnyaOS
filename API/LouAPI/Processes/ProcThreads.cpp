@@ -1,5 +1,12 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
+#define USER_THREAD_STUB "AnnyaUserThreadStub"
+
+LOUDDK_API_ENTRY
+uint64_t LouKeLinkerGetAddress(
+    string ModuleName,
+    string FunctionName
+);
 
 LOUDDK_API_ENTRY
 LOUSTATUS 
@@ -13,9 +20,36 @@ LouKePsmCreateDeferedThreadForProcessEx(
     PVOID       UnblockTime
 ){
 
+    LOUSTATUS Status = LouKeTsmCreateThreadHandle(
+        (PGENERIC_THREAD_DATA*)ThreadOut,
+        (PGENERIC_PROCESS_DATA)Process,
+        (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", USER_THREAD_STUB),
+        Entry,
+        Params,
+        Priority,
+        2 * MEGABYTE,
+        30,
+        0x1B,
+        0x23,
+        LONG_MODE,
+        (PTIME_T)UnblockTime,
+        (UINT8*)ProcMask
+    );
 
+    if(Status != STATUS_SUCCESS){
+        LouPrint("LouKePsmCreateDeferedThreadForProcessEx() ERROR:Unable To Create Thread Handle\n");
+        return Status;
+    }
 
-    return STATUS_SUCCESS;
+    PGENERIC_PROCESS_DATA ProcessData = (PGENERIC_PROCESS_DATA)Process;
+    INTEGER Processors = GetNPROC();
+    for(size_t i = 0 ; i < Processors; i++){
+        if(IS_PROCESSOR_AFFILIATED((*(PGENERIC_THREAD_DATA*)ThreadOut)->AfinityBitmap, i)){
+            ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(*(PGENERIC_THREAD_DATA*)ThreadOut);
+        }
+    }
+
+    return Status;
 }
 
 LOUDDK_API_ENTRY

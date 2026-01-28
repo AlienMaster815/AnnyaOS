@@ -285,4 +285,14 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     UINT8*                  AfinityBitmap
 );
 
+LOUDDK_API_ENTRY
+LOUSTATUS 
+LouKePsmCreateThreadForProcess(
+    PHANDLE     ThreadOut,
+    HPROCESS    Process,
+    PVOID       Entry,
+    PVOID       Params,
+    UINT8       Priority
+);
+
 #endif
