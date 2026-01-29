@@ -1,5 +1,7 @@
 #include "OHCI.h"
 
+
+
 LOUSTATUS OhciInitializeEndpointDescriptor(
     POHCI_ENDPOINT_DESCRIPTOR   EndpointDescriptor,
     POHCI_ED_INITIALIZOR        Initializor
@@ -113,6 +115,45 @@ static void AddToControlList(
     );
 }
 
+
+LOUSTATUS OhciCreateControlEDEx(
+    POHCI_DEVICE                OhciDevice,
+    POHCI_ENDPOINT_DESCRIPTOR*  EdOut,
+    POHCI_ED_INITIALIZOR        Initializor
+){
+    LOUSTATUS Status;
+
+    LouPrint("OHCI.SYS:OhciCreateControlED()\n");
+
+    if((!OhciDevice) || (!Initializor) || (!EdOut)){
+        LouPrint("OHCI.SYS:Invalid Parameter\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+
+    POHCI_ENDPOINT_DESCRIPTOR Ed;
+
+    Status = OhciCreateED(
+        &Ed,
+        Initializor
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Could Not Create ED\n");
+        return Status;
+    }
+
+    *EdOut = Ed;
+
+    AddToControlList(
+        OhciDevice,
+        Ed
+    );
+
+    LouPrint("OHCI.SYS:OhciCreateControlED() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS OhciCreateControlED(
     POHCI_DEVICE                OhciDevice,
     POHCI_ENDPOINT_DESCRIPTOR*  EdOut,
@@ -126,6 +167,7 @@ LOUSTATUS OhciCreateControlED(
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
     }
+
 
     POHCI_ENDPOINT_DESCRIPTOR Ed;
 
@@ -328,8 +370,10 @@ LOUSTATUS OhciDestroyED(
         ListItem,
         IoMask
     );
-
-    OhciFreeDma((PVOID)ListItem->Ed);
+    if(ListItem->Ed){
+        OhciFreeDma((PVOID)ListItem->Ed);
+        ListItem->Ed = 0x00;
+    }
     LouKeFree(ListItem);
 
     LouPrint("OHCI.SYS:OhciDestroyED() STATUS_SUCCESS\n");
@@ -370,15 +414,38 @@ void OhciStopEd(POHCI_ED_LIST EdItem){
     EndpointDescriptor->Dword0 |= (OHCI_ED_K_MASK << OHCI_ED_K_SHIFT);
 }
 
-BOOL 
-OhciDidTdsSucessfullyExecute(
-    POHCI_ED_LIST EdItem
-){
-    POHCI_ENDPOINT_DESCRIPTOR EndpointDescriptor = (POHCI_ENDPOINT_DESCRIPTOR)EdItem->Ed;
-    if((EndpointDescriptor->Dword1 & (OHCI_ED_TAILP_MASK)) != (EndpointDescriptor->Dword2 & (OHCI_ED_HEADP_MASK))){
-        return false;
-    }else if(EndpointDescriptor->Dword2 & ((OHCI_ED_H_MASK) << (OHCI_ED_H_SHIFT))){
-        return false;
+POHCI_ED_LIST OhciEdToEdList(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR Ed){
+    POHCI_ED_LIST TmpListEntry = (POHCI_ED_LIST)OhciDevice->ControlEDs.Peers.NextHeader;
+    while(TmpListEntry){
+
+        if(TmpListEntry->Ed == Ed){
+            return TmpListEntry;
+        }
+
+        TmpListEntry = (POHCI_ED_LIST)TmpListEntry->Peers.NextHeader;
     }
-    return true;
+
+    TmpListEntry = (POHCI_ED_LIST)OhciDevice->BulkEDs.Peers.NextHeader;
+    while(TmpListEntry){
+
+        if(TmpListEntry->Ed == Ed){
+            return TmpListEntry;
+        }
+
+        TmpListEntry = (POHCI_ED_LIST)TmpListEntry->Peers.NextHeader;
+    }
+
+    for(size_t i = 0; i < 32; i++){
+        TmpListEntry = (POHCI_ED_LIST)OhciDevice->IsochIntEDs[i].Peers.NextHeader;
+        while(TmpListEntry){
+
+            if(TmpListEntry->Ed == Ed){
+                return TmpListEntry;
+            }
+
+            TmpListEntry = (POHCI_ED_LIST)TmpListEntry->Peers.NextHeader;
+        }
+    }
+
+    return 0x00;
 }

@@ -374,4 +374,5 @@ void OhciDestroySetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 void OhciDestroyStatusTD(POHCI_ED_LIST EdItem);
 void OhciDestroyDummyTD(POHCI_ED_LIST EdItem);
+POHCI_ED_LIST OhciEdToEdList(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR Ed);
 #endif

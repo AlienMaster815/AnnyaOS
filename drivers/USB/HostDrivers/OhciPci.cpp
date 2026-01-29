@@ -32,6 +32,8 @@ NTSTATUS AddDevice(
 
     POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
 
+    OhciDevice->UsbHost.BusAddresses = LouKeCreateIdentificationRange(1, 127);
+
     LouKeInitializeEventTimeOut(&OhciDevice->OhciCommitEvent, 5000);
 
     LouKeHalEnablePciDevice(PDEV);
@@ -87,7 +89,6 @@ NTSTATUS AddDevice(
     }
 
     LouPrint("OHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

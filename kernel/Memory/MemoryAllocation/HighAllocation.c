@@ -354,7 +354,7 @@ void LouKeFree(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
     MutexUnlock(&GenMallocLock);
-    LouPrint("LouKeFree:%d\n", Address);
+    LouPrint("LouKeFree:%h\n", Address);
     while(1);
 }
 
@@ -422,7 +422,7 @@ void LouKeFreeVirt32(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
     MutexUnlock(&GenMallocLock32);
-    LouPrint("LouKeFreeVirt32:%d\n", Address);
+    LouPrint("LouKeFreeVirt32:%h\n", Address);
     while(1);
 }
 
@@ -494,7 +494,7 @@ void LouKeFreePhy32(void* Address){
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
     MutexUnlock(&GenMallocPhyLock);
-    LouPrint("LouKeFreePhy32:%d\n", Address);
+    LouPrint("LouKeFreePhy32:%h\n", Address);
     while(1);
 }
 

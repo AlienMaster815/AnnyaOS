@@ -172,7 +172,7 @@ LOUSTATUS OhciCreateSetupTD(
     PUSB_HOST_IO_PACKET     IoPacket,
     POHCI_ED_LIST           EdItem
 ){  
-    LouPrint("OHCI.SYS:OhciCreateSetupTD()\n");
+    //LouPrint("OHCI.SYS:OhciCreateSetupTD()\n");
 
     PVOID Out;
     LOUSTATUS Status = OhciAllocateDma(8, 16, &Out);
@@ -214,7 +214,7 @@ LOUSTATUS OhciCreateSetupTD(
 
     EdItem->TdCount++;
     
-    LouPrint("OHCI.SYS:OhciCreateSetupTD() STATUS_SUCCESS\n");
+    //LouPrint("OHCI.SYS:OhciCreateSetupTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -232,11 +232,13 @@ static void InitializeDataTD(
     DmaAddress += Index;
 
     if(Initializor->DirectionPID == OHCI_TD_DIRECTION_OUT){
-        memcpy(
-            (PVOID)((UINT64)IoData->DmaOut + (UINT64)Index), 
-            (PVOID)((UINT64)IoPacket->Data + (UINT64)Index), 
-            Length
-        );
+        if(IoData->DmaOut && IoPacket->Data){
+            memcpy(
+                (PVOID)((UINT64)IoData->DmaOut + (UINT64)Index), 
+                (PVOID)((UINT64)IoPacket->Data + (UINT64)Index), 
+                Length
+            );
+        }
     }
 
     Initializor->CurrentBufferPointer = DmaAddress;
@@ -268,7 +270,7 @@ LOUSTATUS OhciCreateDataTDs(
     PUSB_HOST_IO_PACKET     IoPacket,
     POHCI_ED_LIST           EdItem
 ){
-    LouPrint("OHCI.SYS:OhciCreateDataTDs()\n");
+    //LouPrint("OHCI.SYS:OhciCreateDataTDs()\n");
 
     LOUSTATUS Status;
     PUSB_FUNCTION_DEVICE FunctionDevice;
@@ -320,7 +322,7 @@ LOUSTATUS OhciCreateDataTDs(
     );
 
     _OHCI_DATA_TD_SKIP:
-    LouPrint("OHCI.SYS:OhciCreateDataTDs() STATUS_SUCCESS\n");
+    //LouPrint("OHCI.SYS:OhciCreateDataTDs() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -328,7 +330,7 @@ LOUSTATUS OhciCreateStatusTD(
     PUSB_HOST_IO_PACKET     IoPacket,
     POHCI_ED_LIST           EdItem
 ){
-    LouPrint("OHCI.SYS:OhciCreateStatusTD()\n");
+    //LouPrint("OHCI.SYS:OhciCreateStatusTD()\n");
 
     OHCI_TD_INITIALIZOR Initializor = {0};
     // STATUS stage always uses DATA1
@@ -374,7 +376,7 @@ LOUSTATUS OhciCreateStatusTD(
     EdItem->TdCount++;
 
 
-    LouPrint("OHCI.SYS:OhciCreateStatusTD() STATUS_SUCCESS\n");
+    //LouPrint("OHCI.SYS:OhciCreateStatusTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -440,6 +442,7 @@ void OhciDestroySetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem){
 
     if(SetupTd->Td){
         OhciFreeDma(SetupTd->Td);
+        SetupTd->Td = 0x00;
     }
 
     LouKeFree(SetupTd);
@@ -452,14 +455,16 @@ void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem){
     POHCI_IO_PACKET_PRIVATE_DATA IoData = (POHCI_IO_PACKET_PRIVATE_DATA)IoPacket->FunctionDevice->PrivateHostFunctionData;
 
     if(IoPacket->RequestType & (USB_XFER_D2H << USB_REQUEST_XFER_DIRECTION_SHIFT)){
-        memcpy(
-            (PVOID)((UINT64)IoPacket->Data), 
-            (PVOID)((UINT64)IoData->DmaOut), 
-            IoPacket->Length
-        );
+        if(IoData->DmaOut && IoPacket->Data){
+            memcpy(
+                (PVOID)((UINT64)IoPacket->Data), 
+                (PVOID)((UINT64)IoData->DmaOut), 
+                IoPacket->Length
+            );
+        }
     }
 
-    while(((POHCI_TD_LIST)DataTD->Peers.NextHeader)->Peers.NextHeader){
+    while(EdItem->TdCount > 2){
         if(OhciGetTdConditionCode(Td) || OhciGetTdCurrentBufferPointer(Td)){
             LouPrint("CC :%h\n", OhciGetTdConditionCode(Td));
             LouPrint("CBP:%h\n", OhciGetTdCurrentBufferPointer(Td));
@@ -467,6 +472,7 @@ void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem){
 
         if(DataTD->Td){
             OhciFreeDma(DataTD->Td);
+            DataTD->Td = 0x00;
         }
 
         LouKeFree(DataTD);
@@ -476,9 +482,10 @@ void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem){
         EdItem->TdCount--;
         POHCI_TRANSFER_DESCRIPTOR Td = (POHCI_TRANSFER_DESCRIPTOR)DataTD->Td;
     }
-
-    OhciFreeDma(IoData->DmaOut);
-
+    if(IoData->DmaOut){
+        OhciFreeDma(IoData->DmaOut);
+        IoData->DmaOut = 0x00;
+    }
 }
 
 static void DestroyTDHelper(POHCI_ED_LIST EdItem){
@@ -496,6 +503,7 @@ static void DestroyTDHelper(POHCI_ED_LIST EdItem){
 
     if(TdList->Td){
         OhciFreeDma(TdList->Td);
+        TdList->Td = 0x00;
     }
 
     LouKeFree(TdList);

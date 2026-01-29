@@ -13,7 +13,7 @@ LOUSTATUS LouKeUsbCreateRequest(
     UINT16                  Length,
     PVOID                   Data
 ){
-    LouPrint("LouKeUsbCreateRequest()\n");
+    //LouPrint("LouKeUsbCreateRequest()\n");
     if((!FunctionDevice) || (!IoPacket) || (Recipiant > 0x0F) || (RequestType > 0x03) || (XferDirection > 1)){
         LouPrint("Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
@@ -31,7 +31,7 @@ LOUSTATUS LouKeUsbCreateRequest(
     IoPacket->Length = Length;
     IoPacket->Data = Data;
 
-    LouPrint("LouKeUsbCreateRequest() STATUS_SUCCESS\n");
+    //LouPrint("LouKeUsbCreateRequest() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -56,7 +56,7 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
     UINT16                  LanguageId,
     PVOID                   Data
 ){
-    LouPrint("LouKeUsbGetDescriptorRequest()\n");
+    //LouPrint("LouKeUsbGetDescriptorRequest()\n");
     if((!FunctionDevice) || (!IoPacket)){
         LouPrint("Invalid Parameter\n");
         return STATUS_SUCCESS;
@@ -73,7 +73,7 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
         USB_REQUEST_GET_DESCRIPTOR,
         Value,
         LanguageId,
-        Length ? Length : 8,
+        Length,
         Data
     );
 
@@ -90,6 +90,73 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
         return Status;
     }
 
-    LouPrint("LouKeUsbGetDescriptorRequest() STATUS_SUCCESS\n");
+    //LouPrint("LouKeUsbGetDescriptorRequest() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeUsbSetAddress(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   NewAddress
+){
+    LOUSTATUS Status =  LouKeUsbCreateRequest(
+        FunctionDevice,
+        IoPacket,
+        USB_RECIPIANT_DEVICE,
+        USB_TYPE_STANDARD,
+        USB_XFER_H2D,
+        USB_REQUEST_SET_ADDRESS,
+        NewAddress,
+        0,
+        0,
+        0x00
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("Error Initializing Usb Request\n");
+        return Status;
+    }
+
+    IoPacket->TransferType = USB_TRANSFER_TYPE_CONTROL;
+
+    Status = LouKeUsbCommitRequest(IoPacket);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("Error Commiting Request\n");
+        return Status;
+    }
+
+    return Status;
+}
+
+LOUSTATUS LouKeUsbSetConfiguration(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   NewConfig
+){
+    LOUSTATUS Status =  LouKeUsbCreateRequest(
+        FunctionDevice,
+        IoPacket,
+        USB_RECIPIANT_DEVICE,
+        USB_TYPE_STANDARD,
+        USB_XFER_H2D,
+        USB_REQUEST_SET_CONFIGURATION,
+        NewConfig,
+        0,
+        0,
+        0x00
+    );
+    
+    if(Status != STATUS_SUCCESS){
+        LouPrint("Error Initializing Usb Request\n");
+        return Status;
+    }
+
+    IoPacket->TransferType = USB_TRANSFER_TYPE_CONTROL;
+
+    Status = LouKeUsbCommitRequest(IoPacket);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("Error Commiting Request\n");
+        return Status;
+    }
+    
+    return Status;
 }

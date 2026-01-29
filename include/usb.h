@@ -99,14 +99,49 @@ typedef struct _USB_FUNCTION_OPERATIONS{
     LOUSTATUS   (*UsbInitializeFunctionDevice)(struct _USB_FUNCTION_DEVICE* FunctionDevice);
 }USB_FUNCTION_OPERATIONS, * PUSB_FUNCTION_OPERATIONS;
 
+typedef struct _USB_BUS_INFORMATION{
+    PIDENTIFICATION_RANGE   BusAddresses;
+}USB_BUS_INFORMATION, * PUSB_BUS_INFORMATION;
+
+typedef struct PACKED _USB_STANDARD_DEVICE_DESCRIPTOR{
+    UINT8       Length;
+    UINT8       DescriptorType;
+    UINT16      BcdUSB;
+    UINT8       DeviceClass;
+    UINT8       DeviceSubClass;
+    UINT8       DeviceProtocol;
+    UINT8       MaxPacketSize;
+    UINT16      VendorID;
+    UINT16      ProductID;
+    UINT16      BcdDevice;
+    UINT8       Manufacturer;
+    UINT8       Product;
+    UINT8       SerialNumber;
+    UINT8       NumConfigs;
+}USB_STANDARD_DEVICE_DESCRIPTOR, * PUSB_STANDARD_DEVICE_DESCRIPTOR;
+
+typedef struct PACKED _USB_STANDARD_CONFIGURATION_DESCRIPTOR{
+    UINT8       Length;
+    UINT8       DescriptorType;
+    UINT16      TotalLength;
+    UINT8       NumInterfaces;
+    UINT8       ConfigurationValue;
+    UINT8       Configuration;
+    UINT8       Attributes;
+    UINT8       MaxPower;
+}USB_STANDARD_CONFIGURATION_DESCRIPTOR, * PUSB_STANDARD_CONFIGURATION_DESCRIPTOR;
+
 typedef struct _USB_FUNCTION_DEVICE{
-    struct _USB_TOPOLOGY_TREE*  Children;
-    USB_FUNCTION_OPERATIONS     Operations;
-    UINT8                       PortNumber;
-    USB_FUNCTION_SPEED          FunctionSpeed;
-    BOOL                        PortEnabled;
-    UINT8                       MaxPacketSize;
-    PVOID                       PrivateHostFunctionData;
+    struct _USB_TOPOLOGY_TREE*                  Children;
+    PUSB_BUS_INFORMATION                        OptionalBusData;
+    USB_FUNCTION_OPERATIONS                     Operations;
+    UINT8                                       PortNumber;
+    USB_FUNCTION_SPEED                          FunctionSpeed;
+    BOOL                                        PortEnabled;
+    UINT8                                       MaxPacketSize;
+    PVOID                                       PrivateHostFunctionData;
+    USB_STANDARD_DEVICE_DESCRIPTOR              DeviceDescriptor;
+    PUSB_STANDARD_CONFIGURATION_DESCRIPTOR      Configurations;
 }USB_FUNCTION_DEVICE, * PUSB_FUNCTION_DEVICE;
 
 typedef struct _USB_TOPOLOGY_TREE{
@@ -134,10 +169,9 @@ typedef struct _USB_HOST_DEVICE{
     mutex_t                         RootHubMutex;
     USB_TOPOLOGY_TREE               RootHub;
     USB_HOST_OPERATIONS             Operations;
+    PIDENTIFICATION_RANGE           BusAddresses;
     PVOID                           DevicePrivateData;
 }USB_HOST_DEVICE, * PUSB_HOST_DEVICE;
-
-
 
 typedef struct _USB_HOST_IO_PACKET{
     PUSB_FUNCTION_DEVICE    FunctionDevice;
@@ -214,6 +248,18 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
     PVOID                   Data
 );
 
+LOUSTATUS LouKeUsbSetAddress(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   NewAddress
+);
+
+LOUSTATUS LouKeUsbSetConfiguration(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   NewConfig
+);
+
 #else
 
 KERNEL_EXPORT
@@ -237,6 +283,20 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
     UINT16                  Length,
     UINT16                  LanguageId,
     PVOID                   Data
+);
+
+KERNEL_EXPORT
+LOUSTATUS LouKeUsbSetAddress(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   NewAddress
+);
+
+KERNEL_EXPORT
+LOUSTATUS LouKeUsbSetConfiguration(
+    PUSB_FUNCTION_DEVICE    FunctionDevice, 
+    PUSB_HOST_IO_PACKET     IoPacket,
+    UINT8                   NewConfig
 );
 
 #endif

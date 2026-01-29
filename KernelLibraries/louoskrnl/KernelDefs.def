@@ -200,3 +200,7 @@ EXPORTS
     LouKeSignalEvent
     LouKeWaitForEvent
     LouKeReportMutexBlock
+    LouKeCreateIdentificationRange
+    LouKeAcquireIdFromRange
+    LouKeUsbSetAddress
+    LouKeUsbSetConfiguration

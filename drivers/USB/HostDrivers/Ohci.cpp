@@ -30,6 +30,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice()\n");
     PUSB_HOST_DEVICE HostDevice = UsbFunctionDeviceToHcd(FunctionDevice);
     POHCI_DEVICE OhciDevice = UsbHcdToOhciDevice(HostDevice);
+    OHCI_ED_INITIALIZOR Initializor = {0};
     POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
     LOUSTATUS Status;
     UINT8   Port = FunctionDevice->PortNumber;
@@ -76,7 +77,6 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         FunctionDevice->FunctionSpeed = UsbFullSpeedFunction;
     }
 
-    UINT8 Data[16] = {0};
     USB_HOST_IO_PACKET IoPacket = {0};
 
     OHCI_IO_PACKET_PRIVATE_DATA IoData = {0};
@@ -92,17 +92,85 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         0,
         18,
         0,
-        Data
+        &FunctionDevice->DeviceDescriptor
     );    
     if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Error Getting Descriptor\n");
         return Status;
     }
 
+    PUSB_STANDARD_DEVICE_DESCRIPTOR DeviceDescriptor = &FunctionDevice->DeviceDescriptor;
+    UINT8 NewAddress = LouKeAcquireIdFromRange(OhciDevice->UsbHost.BusAddresses, (PVOID)OhciDevice);
 
+    Status = LouKeUsbSetAddress(
+        FunctionDevice,
+        &IoPacket,
+        NewAddress
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Error Setting Up New Device Address\n");
+        while(1);
+    }
+
+    Initializor.FunctionAddress = NewAddress; 
+    Initializor.EndpointNumber = 0;
+    Initializor.MaximumPacketSize = DeviceDescriptor->MaxPacketSize;
+    Initializor.Direction = OHCI_ED_DIRECTION_GFTD0;
+    Initializor.Skip = 1;
+
+    POHCI_ENDPOINT_DESCRIPTOR EdOut;
+
+    Status = OhciCreateControlED(
+        OhciDevice,
+        &EdOut,
+        &Initializor
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Error Unable To Create New ED\n");
+        while(1);
+    }
+
+    IoData.EdItem = OhciEdToEdList(OhciDevice, EdOut);
+
+    if(!IoData.EdItem){
+        LouPrint("OHCI.SYS:Error Unable To Get New ED\n");
+        while(1);
+    }    
+
+    PUSB_STANDARD_CONFIGURATION_DESCRIPTOR ConfigurationBuffer = (PUSB_STANDARD_CONFIGURATION_DESCRIPTOR)LouKeMallocArray(UINT8, 9, KERNEL_GENERIC_MEMORY);
+
+
+    Status = LouKeUsbGetDescriptorRequest(
+        FunctionDevice,
+        &IoPacket,
+        USB_DESCRIPTOR_TYPE_CONFIGURATION,
+        0,
+        9,
+        0,
+        ConfigurationBuffer
+    );    
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Error Unable To Get Device Configuration\n");
+    }
+
+    FunctionDevice->Configurations = (PUSB_STANDARD_CONFIGURATION_DESCRIPTOR)LouKeMallocArray(UINT8, ConfigurationBuffer->TotalLength, KERNEL_GENERIC_MEMORY);
+
+    Status = LouKeUsbGetDescriptorRequest(
+        FunctionDevice,
+        &IoPacket,
+        USB_DESCRIPTOR_TYPE_CONFIGURATION,
+        0,
+        ConfigurationBuffer->TotalLength,
+        0,
+        FunctionDevice->Configurations
+    );   
+
+    LouKeFree(ConfigurationBuffer);
 
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -353,7 +421,7 @@ LOUSTATUS OhciInitializeDefaultControl(
 LOUSTATUS OhciCommitRequest(
     PUSB_HOST_IO_PACKET IoPacket
 ){
-    LouPrint("OHCI.SYS:OhciCommitRequest()\n");
+    //LouPrint("OHCI.SYS:OhciCommitRequest()\n");
     POHCI_IO_PACKET_PRIVATE_DATA IoData;
     PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
     IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
@@ -385,26 +453,27 @@ LOUSTATUS OhciCommitRequest(
             LouPrint("OHCI.SYS:Device Failed To Commit Buffer To Endpoint\n");
             while(1);
         }
-        
-        if(!OhciDidTdsSucessfullyExecute(EdItem)){
-            LouPrint("OHCI.SYS:ERROR A TD Failed To Execute\n");
-            while(1);
-        }    
 
         OhciDestroySetupTD(IoPacket, EdItem);
         OhciDestroyDataTDs(IoPacket, EdItem);
         OhciDestroyStatusTD(EdItem);
         OhciDestroyDummyTD(EdItem);
+        if(EdItem->Tds.Peers.NextHeader){
+            LouPrint("OHCI.SYS Error ED List Wasent Properly Freed\n");
+            while(1);
+        }
+
+        OpRegs->HcInterruptDisable = ((1 << 1) | (1 << 31));
+        OpRegs->HcInterruptStatus = 0xFFFFFFFF;
+
 
     }else{
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
     }    
 
-
-
     MutexUnlock(&EdItem->EdLock);
-    LouPrint("OHCI.SYS:OhciCommitRequest() STATUS_SUCCESS\n");
+    //LouPrint("OHCI.SYS:OhciCommitRequest() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;  
 }
 
