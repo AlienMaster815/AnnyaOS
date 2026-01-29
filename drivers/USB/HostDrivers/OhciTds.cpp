@@ -1,5 +1,83 @@
 #include "OHCI.h"
 
+static UINT8 OhciGetTdBufferRounding(POHCI_TRANSFER_DESCRIPTOR Td){
+    return (UINT8)((Td->Dword0 >> OHCI_TD_R_SHIFT) & OHCI_TD_R_MASK);
+}
+
+static void OhciSetTdBufferRounding(POHCI_TRANSFER_DESCRIPTOR Td, UINT8 Value){
+    Td->Dword0 &= ~(OHCI_TD_R_MASK << OHCI_TD_R_SHIFT);
+    Td->Dword0 |= ((Value & OHCI_TD_R_MASK) << OHCI_TD_R_SHIFT);
+}
+
+static UINT8 OhciGetTdDirectionAndPid(POHCI_TRANSFER_DESCRIPTOR Td){
+    return  (UINT8)((Td->Dword0 >> OHCI_TD_DP_SHIFT) & OHCI_TD_DP_MASK);
+}
+
+static void OhciSetTdDirectionAndPid(POHCI_TRANSFER_DESCRIPTOR Td, UINT8 Value){
+    Td->Dword0 &= ~(OHCI_TD_DP_MASK << OHCI_TD_DP_SHIFT);
+    Td->Dword0 |= ((Value & OHCI_TD_DP_MASK) << OHCI_TD_DP_SHIFT);
+}
+
+static UINT8 OhciGetTdDelayInterrupt(POHCI_TRANSFER_DESCRIPTOR Td){
+    return (UINT8)((Td->Dword0 >> OHCI_TD_DI_SHIFT) & OHCI_TD_DI_MASK);
+}
+
+static void OhciSetTdDelayInterrupt(POHCI_TRANSFER_DESCRIPTOR Td, UINT8 Value){
+    Td->Dword0 &= ~(OHCI_TD_DI_MASK << OHCI_TD_DI_SHIFT);
+    Td->Dword0 |= ((Value & OHCI_TD_DI_MASK) << OHCI_TD_DI_SHIFT);
+}
+
+static UINT8 OhciGetTdDataToggle(POHCI_TRANSFER_DESCRIPTOR Td){
+    return (UINT8)((Td->Dword0 >> OHCI_TD_T_SHIFT) & OHCI_TD_T_MASK);
+}
+
+static void OhciSetTdDataToggle(POHCI_TRANSFER_DESCRIPTOR Td, UINT8 Value){
+    Td->Dword0 &= ~(OHCI_TD_T_MASK << OHCI_TD_T_SHIFT);
+    Td->Dword0 |= ((Value & OHCI_TD_T_MASK) << OHCI_TD_T_SHIFT);
+}
+
+static UINT8 OhciGetTdErrorCount(POHCI_TRANSFER_DESCRIPTOR Td){
+    return (UINT8)((Td->Dword0 >> OHCI_TD_EC_SHIFT) & OHCI_TD_EC_MASK);
+}
+
+static void OhciSetTdErrorCount(POHCI_TRANSFER_DESCRIPTOR Td, UINT8 Value){
+    Td->Dword0 &= ~(OHCI_TD_EC_MASK << OHCI_TD_EC_SHIFT);
+    Td->Dword0 |= ((Value & OHCI_TD_EC_MASK) << OHCI_TD_EC_SHIFT);
+}
+
+static UINT8 OhciGetTdConditionCode(POHCI_TRANSFER_DESCRIPTOR Td){
+    return (UINT8)((Td->Dword0 >> OHCI_TD_CC_SHIFT) & OHCI_TD_CC_MASK); 
+}
+
+static void OhciSetTdConditionCode(POHCI_TRANSFER_DESCRIPTOR Td, UINT8 Value){
+    Td->Dword0 &= ~(OHCI_TD_CC_MASK << OHCI_TD_CC_SHIFT);
+    Td->Dword0 |= ((Value & OHCI_TD_CC_MASK) << OHCI_TD_CC_SHIFT);
+}
+
+static UINT32 OhciGetTdCurrentBufferPointer(POHCI_TRANSFER_DESCRIPTOR Td){
+    return Td->Dword1;
+}
+
+static void OhciSetTdCurrentBufferPointer(POHCI_TRANSFER_DESCRIPTOR Td, UINT32 Address){
+    Td->Dword1 = Address;
+}
+
+static UINT32 OhciGetTdNextTd(POHCI_TRANSFER_DESCRIPTOR Td){
+    return Td->Dword2 & 0xFFFFFFF0;
+}
+
+static void OhciSetTdNextTd(POHCI_TRANSFER_DESCRIPTOR Td, UINT32 Address){
+    Td->Dword2 = Address & 0xFFFFFFF0;
+}
+
+static UINT32 OhciGetTdBufferEnd(POHCI_TRANSFER_DESCRIPTOR Td){
+    return Td->Dword3;
+}
+
+static void OhciSetTdBufferEnd(POHCI_TRANSFER_DESCRIPTOR Td, UINT32 Address){
+    Td->Dword3 = Address;
+}
+
 LOUSTATUS OhciInitializeTransferDescriptor(
     POHCI_TRANSFER_DESCRIPTOR   Td,
     POHCI_TD_INITIALIZOR        Initializor
@@ -12,15 +90,15 @@ LOUSTATUS OhciInitializeTransferDescriptor(
 
     memset(Td, 0, sizeof(OHCI_TRANSFER_DESCRIPTOR));
 
-    Td->Dword0 |= ((Initializor->BufferRounding & OHCI_TD_R_MASK) << OHCI_TD_R_SHIFT);
-    Td->Dword0 |= ((Initializor->DirectionPID & OHCI_TD_DP_MASK) << OHCI_TD_DP_SHIFT);
-    Td->Dword0 |= ((Initializor->DelayInterrupt & OHCI_TD_DI_MASK) << OHCI_TD_DI_SHIFT);
-    Td->Dword0 |= ((Initializor->DataToggle & OHCI_TD_T_MASK) << OHCI_TD_T_SHIFT);
-    Td->Dword0 |= ((Initializor->ErrorCount & OHCI_TD_EC_MASK) << OHCI_TD_EC_SHIFT);
-    Td->Dword0 |= ((Initializor->ConditionCode & OHCI_TD_CC_MASK) << OHCI_TD_CC_SHIFT);
-    Td->Dword1 |= (Initializor->CurrentBufferPointer);
-    Td->Dword2 |= (Initializor->NextTD & 0xFFFFFFF0);
-    Td->Dword3 |= (Initializor->BufferEnd);
+    OhciSetTdBufferRounding(Td, Initializor->BufferRounding);
+    OhciSetTdDirectionAndPid(Td, Initializor->DirectionPID);
+    OhciSetTdDelayInterrupt(Td, Initializor->DelayInterrupt);
+    OhciSetTdDataToggle(Td, Initializor->DataToggle);
+    OhciSetTdErrorCount(Td, Initializor->ErrorCount);
+    OhciSetTdConditionCode(Td, Initializor->ConditionCode);
+    OhciSetTdCurrentBufferPointer(Td, Initializor->CurrentBufferPointer);
+    OhciSetTdNextTd(Td, Initializor->NextTD);
+    OhciSetTdBufferEnd(Td, Initializor->BufferEnd);
 
     //LouPrint("OHCI.SYS:OhciInitializeTransferDescriptor() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
@@ -68,7 +146,8 @@ LOUSTATUS OhciCreateTD(
 
 void TraverseAndAddTd(
     POHCI_TRANSFER_DESCRIPTOR   Td,
-    POHCI_TD_LIST               TdList
+    POHCI_TD_LIST               TdList,
+    POHCI_TD_LIST*              TdOut
 ){
     while(TdList->Peers.NextHeader){
         TdList = (POHCI_TD_LIST)TdList->Peers.NextHeader;
@@ -79,12 +158,14 @@ void TraverseAndAddTd(
     POHCI_TRANSFER_DESCRIPTOR LastTd = (POHCI_TRANSFER_DESCRIPTOR)TdList->Td;
 
     if(LastTd){
-        LastTd->Dword2 &=  ~(0xFFFFFFF0); 
-        LastTd->Dword2 |=  DmaAddress & 0xFFFFFFF0;
+        OhciSetTdNextTd(LastTd, DmaAddress);
     }
 
     TdList = (POHCI_TD_LIST)TdList->Peers.NextHeader;
     TdList->Td = (PVOID)Td;
+    if(TdOut){
+        *TdOut = TdList;
+    }
 }
 
 LOUSTATUS OhciCreateSetupTD(
@@ -115,16 +196,21 @@ LOUSTATUS OhciCreateSetupTD(
     Initializor.ConditionCode = 0xF;
 
     POHCI_TRANSFER_DESCRIPTOR Td;
-    
     Status = OhciCreateTD(
         &Td,
         &Initializor
     );
 
+    POHCI_TD_LIST TdOut;
+
     TraverseAndAddTd(
         Td,
-        &EdItem->Tds
+        &EdItem->Tds,
+        &TdOut
     );
+
+    TdOut->DmaVAddress = (PVOID)SetUp;
+    TdOut->DmaSize = 8;
 
     EdItem->TdCount++;
     
@@ -164,10 +250,17 @@ static void InitializeDataTD(
         Initializor
     );
 
+    POHCI_TD_LIST TdOut;
+
     TraverseAndAddTd(
         Td,
-        &EdItem->Tds
+        &EdItem->Tds,
+        &TdOut
     );
+
+    TdOut->DmaVAddress = (PVOID)((UINT64)IoData->DmaOut + (UINT64)Index);
+    TdOut->DmaSize = Length;
+
     EdItem->TdCount++;
 }
 
@@ -238,7 +331,6 @@ LOUSTATUS OhciCreateStatusTD(
     LouPrint("OHCI.SYS:OhciCreateStatusTD()\n");
 
     OHCI_TD_INITIALIZOR Initializor = {0};
-
     // STATUS stage always uses DATA1
     Initializor.DataToggle = 1;
 
@@ -268,11 +360,19 @@ LOUSTATUS OhciCreateStatusTD(
         return Status;
     }
 
+    POHCI_TD_LIST TdOut;
+
     TraverseAndAddTd(
         Td,
-        &EdItem->Tds
+        &EdItem->Tds,
+        &TdOut
     );
+
+    TdOut->DmaVAddress = 0x00;
+    TdOut->DmaSize = 0x00;
+
     EdItem->TdCount++;
+
 
     LouPrint("OHCI.SYS:OhciCreateStatusTD() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
@@ -300,10 +400,112 @@ OhciCreateDummyTD(
         return Status;
     }
 
+    POHCI_TD_LIST TdOut;
+
     TraverseAndAddTd(
         Td,
-        &EdItem->Tds
+        &EdItem->Tds,
+        &TdOut
     );
 
+    TdOut->DmaVAddress = 0x00;
+    TdOut->DmaSize = 0x00;
+
+    EdItem->TdCount++;
+
     return STATUS_SUCCESS;
+}
+
+
+
+void OhciDestroySetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem){
+
+    POHCI_TD_LIST SetupTd = (POHCI_TD_LIST)EdItem->Tds.Peers.NextHeader;
+    POHCI_TRANSFER_DESCRIPTOR Td = (POHCI_TRANSFER_DESCRIPTOR)SetupTd->Td;
+    UINT8 Cc = OhciGetTdConditionCode(Td);
+
+    if(Cc){
+        LouPrint("CC Error Code:%h\n", Cc);
+        while(1);
+    }
+    IoPacket->ConditionCode = Cc;
+    EdItem->Tds.Peers.NextHeader = SetupTd->Peers.NextHeader;
+    EdItem->TdCount--;
+
+    if(SetupTd->DmaVAddress){
+        OhciFreeDma(SetupTd->DmaVAddress);
+        SetupTd->DmaVAddress = 0x00;
+        SetupTd->DmaSize = 0x00;
+    }
+
+    if(SetupTd->Td){
+        OhciFreeDma(SetupTd->Td);
+    }
+
+    LouKeFree(SetupTd);
+
+}
+
+void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem){
+    POHCI_TD_LIST DataTD = (POHCI_TD_LIST)EdItem->Tds.Peers.NextHeader;
+    POHCI_TRANSFER_DESCRIPTOR Td = (POHCI_TRANSFER_DESCRIPTOR)DataTD->Td;
+    POHCI_IO_PACKET_PRIVATE_DATA IoData = (POHCI_IO_PACKET_PRIVATE_DATA)IoPacket->FunctionDevice->PrivateHostFunctionData;
+
+    if(IoPacket->RequestType & (USB_XFER_D2H << USB_REQUEST_XFER_DIRECTION_SHIFT)){
+        memcpy(
+            (PVOID)((UINT64)IoPacket->Data), 
+            (PVOID)((UINT64)IoData->DmaOut), 
+            IoPacket->Length
+        );
+    }
+
+    while(((POHCI_TD_LIST)DataTD->Peers.NextHeader)->Peers.NextHeader){
+        if(OhciGetTdConditionCode(Td) || OhciGetTdCurrentBufferPointer(Td)){
+            LouPrint("CC :%h\n", OhciGetTdConditionCode(Td));
+            LouPrint("CBP:%h\n", OhciGetTdCurrentBufferPointer(Td));
+        }
+
+        if(DataTD->Td){
+            OhciFreeDma(DataTD->Td);
+        }
+
+        LouKeFree(DataTD);
+
+        DataTD = (POHCI_TD_LIST)DataTD->Peers.NextHeader;
+        EdItem->Tds.Peers.NextHeader = (PListHeader)DataTD;
+        EdItem->TdCount--;
+        POHCI_TRANSFER_DESCRIPTOR Td = (POHCI_TRANSFER_DESCRIPTOR)DataTD->Td;
+    }
+
+    OhciFreeDma(IoData->DmaOut);
+
+}
+
+static void DestroyTDHelper(POHCI_ED_LIST EdItem){
+    POHCI_TD_LIST TdList = (POHCI_TD_LIST)EdItem->Tds.Peers.NextHeader;
+    POHCI_TRANSFER_DESCRIPTOR Td = (POHCI_TRANSFER_DESCRIPTOR)TdList->Td;
+
+    EdItem->Tds.Peers.NextHeader = TdList->Peers.NextHeader;
+    EdItem->TdCount--;
+
+    if(TdList->DmaVAddress){
+        OhciFreeDma(TdList->DmaVAddress);
+        TdList->DmaVAddress = 0x00;
+        TdList->DmaSize = 0x00;
+    }
+
+    if(TdList->Td){
+        OhciFreeDma(TdList->Td);
+    }
+
+    LouKeFree(TdList);
+    
+}
+
+void OhciDestroyStatusTD(POHCI_ED_LIST EdItem){
+    DestroyTDHelper(EdItem);
+}
+
+void OhciDestroyDummyTD(POHCI_ED_LIST EdItem){
+    DestroyTDHelper(EdItem);
 }

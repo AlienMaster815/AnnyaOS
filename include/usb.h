@@ -148,6 +148,7 @@ typedef struct _USB_HOST_IO_PACKET{
     UINT16                  Index;
     UINT16                  Length;
     PVOID                   Data;
+    UINT8                   ConditionCode;
 }USB_HOST_IO_PACKET, * PUSB_HOST_IO_PACKET;
 
 #define USB_REQUEST_RECIPIANT_SHIFT         0

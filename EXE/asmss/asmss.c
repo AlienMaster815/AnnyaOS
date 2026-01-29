@@ -1,8 +1,8 @@
 #include "asmss.h"
 
-NTSTATUS AnnyaSmssNtProcessStartup(HANDLE Peb){
+NTSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
-    LouExitDosMode();
+    //LouExitDosMode();
 
     LouPrint("ASMSS: Hello User Mode\n");    
         

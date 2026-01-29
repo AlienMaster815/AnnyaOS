@@ -50,6 +50,8 @@ typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_TRANSFER_DESCRIPTOR{
 
 typedef struct _OHCI_TD_LIST{
     ListHeader                  Peers;
+    PVOID                       DmaVAddress;
+    SIZE                        DmaSize;
     PVOID                       Td;
 }OHCI_TD_LIST, * POHCI_TD_LIST;
 
@@ -364,5 +366,12 @@ LOUSTATUS OhciCreateDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 LOUSTATUS OhciCreateStatusTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 LOUSTATUS OhciAddTdsToEd(POHCI_ED_LIST EdItem);
 void OhciCommitEd(POHCI_ED_LIST EdItem);
+void OhciStopEd(POHCI_ED_LIST EdItem);
 LOUSTATUS OhciCreateDummyTD(POHCI_ED_LIST EdItem);
+BOOL OhciDidTdsSucessfullyExecute(POHCI_ED_LIST EdList);
+void OhciCleanTdsFromEd(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
+void OhciDestroySetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
+void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
+void OhciDestroyStatusTD(POHCI_ED_LIST EdItem);
+void OhciDestroyDummyTD(POHCI_ED_LIST EdItem);
 #endif

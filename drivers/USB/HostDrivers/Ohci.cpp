@@ -90,7 +90,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         &IoPacket,
         USB_DESCRIPTOR_TYPE_DEVICE,
         0,
-        16,
+        18,
         0,
         Data
     );    
@@ -99,7 +99,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
         return Status;
     }
 
-    
+
 
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice() STATUS_SUCCESS\n");
     while(1);
@@ -379,20 +379,32 @@ LOUSTATUS OhciCommitRequest(
 
         OhciCommitEd(EdItem);
         Status = LouKeWaitForEvent(&OhciDevice->OhciCommitEvent);
+        OhciStopEd(EdItem);
     
         if(Status != STATUS_SUCCESS){
             LouPrint("OHCI.SYS:Device Failed To Commit Buffer To Endpoint\n");
             while(1);
         }
+        
+        if(!OhciDidTdsSucessfullyExecute(EdItem)){
+            LouPrint("OHCI.SYS:ERROR A TD Failed To Execute\n");
+            while(1);
+        }    
+
+        OhciDestroySetupTD(IoPacket, EdItem);
+        OhciDestroyDataTDs(IoPacket, EdItem);
+        OhciDestroyStatusTD(EdItem);
+        OhciDestroyDummyTD(EdItem);
 
     }else{
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
     }    
-            
+
+
 
     MutexUnlock(&EdItem->EdLock);
     LouPrint("OHCI.SYS:OhciCommitRequest() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;  
 }
+

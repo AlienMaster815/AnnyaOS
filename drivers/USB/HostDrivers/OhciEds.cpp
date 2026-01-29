@@ -364,3 +364,21 @@ void OhciCommitEd(POHCI_ED_LIST EdItem){
     EndpointDescriptor->Dword0 &= ~(OHCI_ED_K_MASK << OHCI_ED_K_SHIFT);
     EndpointDescriptor->Dword2 &= ~(OHCI_ED_H_MASK << OHCI_ED_H_SHIFT);
 }
+
+void OhciStopEd(POHCI_ED_LIST EdItem){
+    POHCI_ENDPOINT_DESCRIPTOR EndpointDescriptor = (POHCI_ENDPOINT_DESCRIPTOR)EdItem->Ed;
+    EndpointDescriptor->Dword0 |= (OHCI_ED_K_MASK << OHCI_ED_K_SHIFT);
+}
+
+BOOL 
+OhciDidTdsSucessfullyExecute(
+    POHCI_ED_LIST EdItem
+){
+    POHCI_ENDPOINT_DESCRIPTOR EndpointDescriptor = (POHCI_ENDPOINT_DESCRIPTOR)EdItem->Ed;
+    if((EndpointDescriptor->Dword1 & (OHCI_ED_TAILP_MASK)) != (EndpointDescriptor->Dword2 & (OHCI_ED_HEADP_MASK))){
+        return false;
+    }else if(EndpointDescriptor->Dword2 & ((OHCI_ED_H_MASK) << (OHCI_ED_H_SHIFT))){
+        return false;
+    }
+    return true;
+}
