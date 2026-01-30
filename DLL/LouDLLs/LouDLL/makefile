@@ -11,6 +11,10 @@ INCLUDES = -I../../../include
 SRC = LouDll.c \
 	Dispatch.c \
 	memory.c \
+	Server.c \
+	Security.c \
+	Atom.c \
+	wcstring.c \
 	DrsdUserCore/Drsd.c \
 	DrsdUserCore/DrsdDraw.c \
 	Nt/Syncronization.c \
@@ -18,7 +22,6 @@ SRC = LouDll.c \
 	Nt/Alpc.c \
 	Nt/NtDll.c \
 	Nt/Sha.c \
-	Nt/wcstring.c \
 	Nt/Locale.c \
 	Nt/string.c
 

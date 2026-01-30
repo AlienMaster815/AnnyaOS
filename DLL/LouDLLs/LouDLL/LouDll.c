@@ -3,7 +3,7 @@
 #include "LouDll.h"
 #include <LouCoff.h>
 
-#define NTDLL_RVA_ENTRIES 68
+#define NTDLL_RVA_ENTRIES 78
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
@@ -87,6 +87,16 @@ static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "_wtoi64",
     "_wsplitpath_s",
     "_wmakepath_s",
+    "NtAcceptConnectPort",
+    "NtAccessCheck",
+    "NtAddAtom",
+    "NtAccessCheckAndAuditAlarm",
+    "NtAccessCheckByType",
+    "NtAccessCheckByTypeAndAuditAlarm",
+    "NtAccessCheckByTypeResultList",
+    "NtAccessCheckByTypeResultListAndAuditAlarm",
+    "NtAccessCheckByTypeResultListAndAuditAlarmByHandle",
+    "NtAcquireCMFViewOwnership",
 };
 
 static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
@@ -158,6 +168,16 @@ static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
     (PVOID)_wtoi64,
     (PVOID)_wsplitpath_s,
     (PVOID)_wmakepath_s,
+    (PVOID)LouAcceptConnectPort,
+    (PVOID)LouAccessCheck,
+    (PVOID)LouAddAtom,
+    (PVOID)LouAccessCheckAndAuditAlarm,
+    (PVOID)LouAccessCheckByType,
+    (PVOID)LouAccessCheckByTypeAndAuditAlarm,
+    (PVOID)LouAccessCheckByTypeResultList,
+    (PVOID)LouAccessCheckByTypeResultListAndAuditAlarm,
+    (PVOID)LouAccessCheckByTypeResultListAndAuditAlarmByHandle,
+    (PVOID)LouAcquireCMFViewOwnership,
 };
 
 static KULA_TBALE_ENTRIES KulaEntries[LOUDLL_EMULATED_BINARIES] = {
@@ -766,3 +786,4 @@ LouSystemShutdown(SHUTDOWN_ACTION ShutDown){
         LouCALL(LOUSHUTDOWN, (uint64_t)&Data[0], 0);
     }
 }
+

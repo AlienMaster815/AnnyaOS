@@ -1,4 +1,4 @@
-#include "ntdll.h"
+#include "Nt/ntdll.h"
 
 /*
  * NTDLL wide-char functions

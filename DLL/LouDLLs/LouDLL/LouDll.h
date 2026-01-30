@@ -455,4 +455,26 @@ iswspace(
     WCHAR Wc
 );
 
+void LouAcceptConnectPort();
+
+void LouAccessCheck();
+
+void LouAddAtom();
+
+int LouPrint(char* Str, ...);
+
+void LouAccessCheckAndAuditAlarm();
+
+void LouAccessCheckByType();
+
+void LouAccessCheckByTypeAndAuditAlarm();
+
+void LouAccessCheckByTypeResultList();
+
+void LouAccessCheckByTypeResultListAndAuditAlarm();
+
+void LouAccessCheckByTypeResultListAndAuditAlarmByHandle();
+
+void LouAcquireCMFViewOwnership();
+
 #endif
