@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 204
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 205
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -449,6 +449,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[201] = "LouKeAcquireIdFromRange";
     ImportTables[0].FunctionName[202] = "LouKeUsbSetAddress";
     ImportTables[0].FunctionName[203] = "LouKeUsbSetConfiguration";
+    ImportTables[0].FunctionName[204] = "LouKeDeviceManagerGetAtaDevice";
 
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -654,6 +655,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[201] = (uint64_t)LouKeAcquireIdFromRange;
     ImportTables[0].VirtualAddress[202] = (uint64_t)LouKeUsbSetAddress;
     ImportTables[0].VirtualAddress[203] = (uint64_t)LouKeUsbSetConfiguration;
+    ImportTables[0].VirtualAddress[204] = (uint64_t)LouKeDeviceManagerGetAtaDevice;
 
 }
 
@@ -689,6 +691,7 @@ void InitializeNtKernelTable(){
 
 
 }
+
 
 static inline    
 void InitializeUnKownTable(){

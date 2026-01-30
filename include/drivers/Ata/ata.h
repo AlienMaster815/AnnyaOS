@@ -960,7 +960,8 @@ typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_HOST{
     PPCI_DEVICE_OBJECT                          PDEV;
     uint8_t                                     PortCount;
-    spinlock_t                                  HostLock;
+    mutex_t                                     HostLock;
+    spinlock_t                                  HostIoLock;
     void*                                       HostIoAddress;
     void*                                       HostPrivateData;
     uint64_t                                    PrivateDataSize;
@@ -1097,6 +1098,9 @@ typedef struct _LOUSINE_ATA_PORT_INFORMATION{
 
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
 LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
+
+PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJECT PDEV);
+
 
 void
 LouKeMallocAtaPrivateData(

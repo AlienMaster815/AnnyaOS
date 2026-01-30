@@ -1,6 +1,7 @@
 
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
+#include <Hal.h>
 #include "AtaAPI.h"
 
 #define PIIX_IO_CFG_REG                     0x54
@@ -144,6 +145,35 @@ typedef struct _PIIX3_HOST_PRIVATE_DATA{
 #define BMICOM_SSBM_MASK                    1
 #define BMICOM_SSBM                         (BMICOM_SSBM_MASK << BMICOM_SSBM_SHIFT)
 
-//#define BMISTA
+#define PRIMARY_BMISTA_REGISTER_OFFSET      0x02
+#define PRIMARY_BMISTA_REGISTER(x)          (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + PRIMARY_BMISTA_REGISTER_OFFSET)
+#define SECONDARY_BMISTA_REGISTER_OFFSET    0x0A
+#define SECONDARY_BMISTA_REGISTER(x)        (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + SECONDARY_BMISTA_REGISTER_OFFSET)
+#define BMISTA_DMA1CAP_SHIFT                6
+#define BMISTA_DMA1CAP_MASK                 1
+#define BMISTA_DMA1CAP                      (BMISTA_DMA1CAP_MASK << BMISTA_DMA1CAP_SHIFT)
+#define BMISTA_DMA0CAP_SHIFT                5
+#define BMISTA_DMA0CAP_MASK                 1
+#define BMISTA_DMA0CAP                      (BMISTA_DMA0CAP_MASK << BMISTA_DMA0CAP_SHIFT)
+#define BMISTA_IDEINTR_SHIFT                2
+#define BMISTA_IDEINTR_MASK                 1
+#define BMISTA_IDEINTR                      (BMISTA_IDEINTR_MASK << BMISTA_IDEINTR_SHIFT)
+#define BMISTA_DMAERR_SHIFT                 1
+#define BMISTA_DMAERR_MASK                  1
+#define BMISTA_DMAERR                       (BMISTA_DMAERR_MASK << BMISTA_DMAERR_SHIFT)
+#define BMISTA_BMIDEA_SHIFT                 0
+#define BMISTA_BMIDEA_MASK                  1
+#define BMISTA_BMIDEA                       (BMISTA_BMIDEA_MASK << BMISTA_BMIDEA_SHIFT)
+#define     BMISTA_INTACT_DMA_IN_PROGRESS   0b0001
+#define     BMISTA_INTACT_PRD_EXHAUSTED     0b0100
+#define     BMISTA_INTACT_VALID_COMPLETION  0b0101
+#define     BMISTA_INTACT_DMA_ERROR         0b0000
+#define PRIMARY_BMIDTP_REGISTER_OFFSET      0x04
+#define PRIMARY_BMIDTP_REGISTER(x)          (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + PRIMARY_BMIDTP_REGISTER_OFFSET)
+#define SECONDARY_BMIDTP_REGISTER_OFFSET    0x0C
+#define SECONDARY_BMIDTP_REGISTER(x)        (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + SECONDARY_BMIDTP_REGISTER_OFFSET)
+#define BMIDTP_MASK                         0xFFFFFFFC
+
+
 
 //Endof Piix 3 Specification

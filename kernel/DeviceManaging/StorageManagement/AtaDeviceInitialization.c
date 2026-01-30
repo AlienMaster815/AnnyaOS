@@ -5,7 +5,6 @@ typedef struct _ATA_HOST_DEVICE_LIST{
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHostDevices;
 }ATA_HOST_DEVICE_LIST, * PATA_HOST_DEVICE_LIST;
 
-static size_t                   AtaHostDeviceCount = 0;
 static ATA_HOST_DEVICE_LIST     AtaHostDeviceList;
 
 LOUSTATUS LouRegisterStorageDevice(
@@ -67,18 +66,15 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
     
     PATA_HOST_DEVICE_LIST TmpHostList = &AtaHostDeviceList;
 
-    //Run Through the Host List And Allocate A Host For The Next Time This Function Used
-    for(size_t i = 0 ; i <= AtaHostDeviceCount; i++){
-        if(TmpHostList->Neighbors.NextHeader){
-            TmpHostList = (PATA_HOST_DEVICE_LIST)TmpHostList->Neighbors.NextHeader;
-        }else {
-            TmpHostList->Neighbors.NextHeader = (PListHeader)LouKeMallocType(ATA_HOST_DEVICE_LIST, KERNEL_GENERIC_MEMORY);
-        }
+    while(TmpHostList->Neighbors.NextHeader){
+        TmpHostList = (PATA_HOST_DEVICE_LIST)TmpHostList->Neighbors.NextHeader;    
     }
+    TmpHostList->Neighbors.NextHeader = (PListHeader)LouKeMallocType(ATA_HOST_DEVICE_LIST, KERNEL_GENERIC_MEMORY);
+    TmpHostList = (PATA_HOST_DEVICE_LIST)TmpHostList->Neighbors.NextHeader;
+
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)DeviceDirectoryTable->KeyData;
     TmpHostList->AtaHostDevices = AtaHost;
     
-
     for(uint8_t i = 0 ; i < AtaHost->PortCount; i++){
         LouPrint("Registering Ata Port To Device Manager\n");
         PDEVICE_DIRECTORY_TABLE PortTable = (PDEVICE_DIRECTORY_TABLE)LouKeMallocType(DEVICE_DIRECTORY_TABLE, KERNEL_GENERIC_MEMORY);
@@ -92,4 +88,15 @@ LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDir
         LouRegisterStorageDevice(PortTable);
     }
     return STATUS_SUCCESS;
+}
+
+PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJECT PDEV){
+    PATA_HOST_DEVICE_LIST TmpHostList = &AtaHostDeviceList;
+    while(TmpHostList->Neighbors.NextHeader){
+        TmpHostList = (PATA_HOST_DEVICE_LIST)TmpHostList->Neighbors.NextHeader;    
+        if(TmpHostList->AtaHostDevices->PDEV == PDEV){
+            return TmpHostList->AtaHostDevices;
+        }
+    }
+    return 0x00;
 }

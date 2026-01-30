@@ -237,7 +237,7 @@ void LouKeHalRegisterPciDevice(
                 //uint32_t BVal = LouKeReadBarValue(PDEV, i);
                 //BarSize = (~(BVal & 0xFFFFFFFC)) + 1;  // Mask out the lower 2 bits and invert
                 //LouKeWriteBarValue(PDEV, i, (LouKeCreatIoPort(BarSize) & 0xFFFFFFFC) | 0x1);
-
+                Config->BarBase[i] = (Config->Header.u.type0.BaseAddresses[i] & ~(0x03));
             }
         }
     }

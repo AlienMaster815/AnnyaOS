@@ -212,8 +212,8 @@ UserSpace:
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C EXE/asmss/ all
 
-	$(MAKE) -C EXE/AnnyaExp clean
-	$(MAKE) -C EXE/AnnyaExp all
+	$(MAKE) -C EXE/Explorer clean
+	$(MAKE) -C EXE/Explorer all
 
 	$(MAKE) -C EXE/AnnyaInit clean
 	$(MAKE) -C EXE/AnnyaInit all
@@ -279,7 +279,7 @@ cleanall:
 	$(MAKE) -C UserLibraries/User32 clean
 	$(MAKE) -C UserLibraries/Kernel32 clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
-	$(MAKE) -C EXE/AnnyaExp clean
+	$(MAKE) -C EXE/Explorer clean
 	$(MAKE) -C EXE/AnnyaInit clean
 	$(MAKE) -C EXE/LouLoad clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean

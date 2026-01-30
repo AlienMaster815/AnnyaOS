@@ -65,11 +65,21 @@ NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformD
     LouPrint("AddDevice()\n");
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     uint8_t DeviceID = PlatformDevice->DeviceID;
-    LouPrint("PDEV :%h\n", PDEV);
-    LouPrint("DEVID:%d\n", DeviceID);
-    LouPrint("BoardID:%d\n", PiixPciDeviceTable[DeviceID].BoardID);
+    LOUSTATUS Status;
 
-    
+    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeDeviceManagerGetAtaDevice(PDEV);
+
+    Status = LouKeHalEnablePciDevice(PDEV);
+    if(Status != STATUS_SUCCESS){
+        return (NTSTATUS)Status;
+    }
+
+    LouKeMallocAtaPrivateData(AtaHost, sizeof(PIIX3_HOST_PRIVATE_DATA), GET_ALIGNMENT(PIIX3_HOST_PRIVATE_DATA));
+    PPIIX3_HOST_PRIVATE_DATA PiixPrivateData = (PPIIX3_HOST_PRIVATE_DATA)AtaHost->HostPrivateData;
+
+    PiixPrivateData->Bmiba = (UINT32)(UINTPTR)LouKePciGetIoRegion(PDEV, BMBIA_BAR, 0);
+
+    LouPrint("PIIX BMIBA IO Port:%h\n", PiixPrivateData->Bmiba);
 
     LouPrint("AddDevice() STATUS_SUCCESS\n");
     while(1);
