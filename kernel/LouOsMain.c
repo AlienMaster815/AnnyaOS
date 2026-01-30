@@ -364,9 +364,6 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LookForStorageDevices();
         
-    LouPrint("YAY!!\n");
-    while(1);
-
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
         LouPrint("No Storage Devices Detected\n");
