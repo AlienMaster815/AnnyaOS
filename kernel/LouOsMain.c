@@ -235,8 +235,6 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeFullLouACPISubsystem();
 
-    //TODO: Wait For SMP 
-
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
     LouKeCreateDemon(
