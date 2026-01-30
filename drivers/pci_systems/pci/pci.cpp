@@ -272,3 +272,19 @@ bool IsAtaController(PPCI_DEVICE_OBJECT PDEV);
 void InitializeAtaDevice();
 bool IsAhciController(PPCI_DEVICE_OBJECT PDEV);
 LOUSTATUS InitializeStartupAhciImplementation(PPCI_DEVICE_OBJECT PDEV);
+
+LOUDDK_API_ENTRY
+void LouKeSantyCheckPciDevices(){
+
+    PCI_COMMON_CONFIG Config;
+    LouKeInitializePciCommonPacketAnyType(&Config);
+
+    UINT16 Members = LouKeGetPciCountByType(&Config);
+
+    if(!Members){
+        for(size_t i = 0; i < 255; i++){
+            checkBus(0, i);
+        }
+    }
+
+}

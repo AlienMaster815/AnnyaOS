@@ -136,102 +136,100 @@ void LouKeHalRegisterPciDevice(
     GetPciConfiguration(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Config);
 
     if(Config->Header.HeaderType == 0){
-
         for(uint8_t i = 0 ; i < 6; i++){
-
-                Flags = Config->Header.u.type0.BaseAddresses[i] & 0x1;
+            Flags = Config->Header.u.type0.BaseAddresses[i] & 0x1;
+            if(Flags == 0){
+                Flags = (Config->Header.u.type0.BaseAddresses[i] >> 1) & 0x03;
                 if(Flags == 0){
-                    Flags = (Config->Header.u.type0.BaseAddresses[i] >> 1) & 0x03;
-                    if(Flags == 0){
-                        //32
-                        if(Config->Header.u.type0.BaseAddresses[i] == 0x00){
-                            continue;
-                        }
-                        LouPrint("Device Is 32 Bit MmIO\n");
-                        Flags = (Config->Header.u.type0.BaseAddresses[i] >> 3) & 0x01;
-                        if(Flags == 1){
-                            LouPrint("Device Caheable\n");
-                            LouKeWriteBarValue(PDEV, i , 0xFFFFFFFF);
-                            BarSize = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & ~(0x0F);
-                            BarSize = (~(BarSize & ~(0x0F))) + 1;
-                            LouKeWriteBarValue(PDEV, i , Config->Header.u.type0.BaseAddresses[i]);
-                            EnforceSystemMemoryMap(
-                                Config->Header.u.type0.BaseAddresses[i] & ~(0xF),
-                                BarSize
-                            );
-                            
-                            Config->BarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x0F);
-                            Config->BarSize[i] = BarSize;
-                            if(IoMemEnd < (Config->BarBase[i] + Config->BarSize[i])){
-                                IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
-                            }
-                            uint64_t Tmp = 0x00;
-                            Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarBase[i]);
-                            LouKeMapContinuousMemoryBlock(Config->BarBase[i], Tmp, ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
-                            Config->BarBase[i] = Tmp;
-                            
-                        }
-                        else{
-                            LouPrint("Device Uncaheable\n");
-
-                            LouKeWriteBarValue(PDEV, i , 0xFFFFFFFF);
-                            BarSize = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & ~(0x0F);
-                            BarSize = (~(BarSize & ~(0x0F))) + 1;
-                            LouKeWriteBarValue(PDEV, i , Config->Header.u.type0.BaseAddresses[i]);
-                            EnforceSystemMemoryMap(
-                                Config->Header.u.type0.BaseAddresses[i] & ~(0x0F),
-                                BarSize
-                            );
-
-                            Config->BarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x0F);
-                            Config->BarSize[i] = BarSize;
-                            if(IoMemEnd < (Config->BarBase[i] + Config->BarSize[i])){
-                                IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
-                            }
-                            uint64_t Tmp = 0x00;
-                            Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarBase[i]);
-                            LouKeMapContinuousMemoryBlock(Config->BarBase[i], Tmp, ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
-                            Config->BarBase[i] = Tmp;
-                        }
+                    //32
+                    if(Config->Header.u.type0.BaseAddresses[i] == 0x00){
+                        continue;
                     }
-                    else if(Flags == 1){
-                        //16
-                    }
-                    else if(Flags == 2){
-                        if(Config->Header.u.type0.BaseAddresses[i] == 0x00){
-                            i++;
-                            continue;
+                    LouPrint("Device Is 32 Bit MmIO\n");
+                    Flags = (Config->Header.u.type0.BaseAddresses[i] >> 3) & 0x01;
+                    if(Flags == 1){
+                        LouPrint("Device Caheable\n");
+                        LouKeWriteBarValue(PDEV, i , 0xFFFFFFFF);
+                        BarSize = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & ~(0x0F);
+                        BarSize = (~(BarSize & ~(0x0F))) + 1;
+                        LouKeWriteBarValue(PDEV, i , Config->Header.u.type0.BaseAddresses[i]);
+                        EnforceSystemMemoryMap(
+                            Config->Header.u.type0.BaseAddresses[i] & ~(0xF),
+                            BarSize
+                        );
+                            
+                        Config->BarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x0F);
+                        Config->BarSize[i] = BarSize;
+                        if(IoMemEnd < (Config->BarBase[i] + Config->BarSize[i])){
+                            IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
                         }
-                        LouPrint("Device Is 64 Bit MmIO\n");
-                        uint32_t BarLo = Config->Header.u.type0.BaseAddresses[i];
-                        uint32_t BarHi = Config->Header.u.type0.BaseAddresses[i + 1];
-                        uint64_t Bar64 = ((uint64_t)BarHi << 32) | (BarLo & ~(0xF));
-
-                        LouKeWriteBarValue(PDEV, i, 0xFFFFFFFF);
-                        LouKeWriteBarValue(PDEV, i + 1, 0xFFFFFFFF);
-                        uint32_t SizeLo = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & ~(0xF);
-                        uint32_t SizeHi = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * (i + 1)));
-                        uint64_t Size64 = ((uint64_t)SizeHi << 32) | SizeLo;
-                        Size64 = (~Size64) + 1;
-
-                        LouKeWriteBarValue(PDEV, i, BarLo);
-                        LouKeWriteBarValue(PDEV, i + 1, BarHi);
-
-                        EnforceSystemMemoryMap(Bar64, Size64);
-
-                        Config->BarSize[i] = Size64;
-
-                        if (IoMemEnd < (Bar64 + Size64)) {
-                            IoMemEnd = Bar64 + Size64;
-                        }
-
-                        uint64_t Tmp = (UINT64)LouVMallocEx(Size64, Bar64);
-                        LouKeMapContinuousMemoryBlock(Bar64, Tmp, ROUND_UP64(Size64, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+                        uint64_t Tmp = 0x00;
+                        Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarBase[i]);
+                        LouKeMapContinuousMemoryBlock(Config->BarBase[i], Tmp, ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
                         Config->BarBase[i] = Tmp;
+                            
+                    }
+                    else{
+                        LouPrint("Device Uncaheable\n");
 
+                        LouKeWriteBarValue(PDEV, i , 0xFFFFFFFF);
+                        BarSize = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & ~(0x0F);
+                        BarSize = (~(BarSize & ~(0x0F))) + 1;
+                        LouKeWriteBarValue(PDEV, i , Config->Header.u.type0.BaseAddresses[i]);
+                        EnforceSystemMemoryMap(
+                            Config->Header.u.type0.BaseAddresses[i] & ~(0x0F),
+                            BarSize
+                        );
+
+                        Config->BarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x0F);
+                        Config->BarSize[i] = BarSize;
+                        if(IoMemEnd < (Config->BarBase[i] + Config->BarSize[i])){
+                            IoMemEnd = Config->BarBase[i] + Config->BarSize[i];
+                        }
+                        uint64_t Tmp = 0x00;
+                        Tmp = (uint64_t)LouVMallocEx(Config->BarSize[i] , Config->BarBase[i]);
+                        LouKeMapContinuousMemoryBlock(Config->BarBase[i], Tmp, ROUND_UP64(Config->BarSize[i], KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+                        Config->BarBase[i] = Tmp;
+                    }
+                }
+                else if(Flags == 1){
+                    //16
+                }
+                else if(Flags == 2){
+                    /*if(Config->Header.u.type0.BaseAddresses[i] == 0x00){
                         i++;
-                        Config->BarBase[i] = 0;
-                        Config->BarSize[i] = 0;
+                        continue;
+                    }
+                    LouPrint("Device Is 64 Bit MmIO\n");
+                    uint32_t BarLo = Config->Header.u.type0.BaseAddresses[i];
+                    uint32_t BarHi = Config->Header.u.type0.BaseAddresses[i + 1];
+                    uint64_t Bar64 = ((uint64_t)BarHi << 32) | (BarLo & ~(0xF));
+
+                    LouKeWriteBarValue(PDEV, i, 0xFFFFFFFF);
+                    LouKeWriteBarValue(PDEV, i + 1, 0xFFFFFFFF);
+                    uint32_t SizeLo = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * i)) & ~(0xF);
+                    uint32_t SizeHi = pci_read(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, BAR0_OFFSET + (4 * (i + 1)));
+                    uint64_t Size64 = ((uint64_t)SizeHi << 32) | SizeLo;
+                    Size64 = (~Size64) + 1;
+
+                    LouKeWriteBarValue(PDEV, i, BarLo);
+                    LouKeWriteBarValue(PDEV, i + 1, BarHi);
+
+                    EnforceSystemMemoryMap(Bar64, Size64);
+
+                    Config->BarSize[i] = Size64;
+
+                    if (IoMemEnd < (Bar64 + Size64)) {
+                        IoMemEnd = Bar64 + Size64;
+                    }
+
+                    uint64_t Tmp = (UINT64)LouVMallocEx(Size64, Bar64);
+                    LouKeMapContinuousMemoryBlock(Bar64, Tmp, ROUND_UP64(Size64, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+                    Config->BarBase[i] = Tmp;
+
+                    i++;
+                    Config->BarBase[i] = 0;
+                    Config->BarSize[i] = 0;*/
                 }
             }
             else{

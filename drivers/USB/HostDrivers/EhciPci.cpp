@@ -40,9 +40,9 @@ NTSTATUS AddDevice(
 
     EhciGetHostCapabilities(EhciDevice);
 
-    /*EhciStopHostController(EhciDevice);    
+    EhciStopHostController(EhciDevice);    
 
-    EhciResetController(EhciDevice);
+    /*EhciResetController(EhciDevice);
 
     UINTPTR TmpVAddress; 
     UINTPTR TmpPAddress; 

@@ -46,20 +46,104 @@
 #define ICH_CONTROLLER_ID_PATA_100_NO_MWDMA     15
 #define PIIX_CONTROLLER_ID_VMWARE               16
 
-typedef struct _PIIX_MAP_ENTRY{
-    uint32_t Bits;
-    uint16_t PortEnabled;
-    int      PortMap[][4];
-}PIIX_MAP_ENTRY, * PPIIX_MAP_ENTRY;
+typedef struct _PIIX3_HOST_PRIVATE_DATA{
+    PPCI_DEVICE_OBJECT      PDEV;
+    UINT32                  Bmiba;
+          
+}PIIX3_HOST_PRIVATE_DATA, * PPIIX3_HOST_PRIVATE_DATA;
 
-typedef struct _PIIX_HOST_PRIVATE_DATA{
-    int*     PortMap;
-    uint32_t SavedIoConfiguration;
-    void*    SidPr;
-}PIIX_HOST_PRIVATE_DATA, * PPIIX_HOST_PRIVATE_DATA;
+//Piix 3 Specification
 
-typedef struct _ICH_LAPTOP_ID{
-    UINT16 Device;
-    UINT16 SubVendor;
-    UINT16 SubDevice;
-}ICH_LAPTOP_ID, * PICH_LAPTOP_ID;
+#define BMBIA_BAR                           4       //BUS MASTER INTERFACE BAR IO PORT
+#define PRIMARY_IDETIM_REGISTER_OFFSET      0x40    //PRIMARY IDE TIMING REGISTER U16
+#define SECONDARY_IDETIM_REGISTER_OFFSET    0x42    //SECONDARY IDE TIMING REGISTER U16
+
+#define IDETIM_IDE_SHIFT                    15
+#define IDETIM_IDE_MASK                     1
+#define IDETIM_IDE                          (IDETIM_IDE_MASK << IDETIM_IDE_SHIFT)
+#define IDETIM_SITRE_SHIFT                  14
+#define IDETIM_SITRE_MASK                   1
+#define IDETIM_SITRE                        (IDETIM_SITRE_MASK << IDETIM_SITRE_SHIFT)
+#define IDETIM_ISP_SHIFT                    12
+#define IDETIM_ISP_MASK                     0x03
+#define IDETIM_ISP                          (IDETIM_ISP_MASK << IDETIM_ISP_SHIFT)
+#define     IDETIM_ISP_5CLOCKS              0b00
+#define     IDETIM_ISP_4CLOCKS              0b01
+#define     IDETIM_ISP_3CLOCKS              0b10
+#define     IDETIM_ISP_2CLOCKS              0b11
+#define IDETIM_RTC_SHIFT                    8
+#define IDETIM_RTC_MASK                     0x03
+#define IDETIM_RTC                          (IDETIM_RTC_MASK << IDETIM_RTC_SHIFT)
+#define     IDETIM_RTC_4CLOCK               0b00
+#define     IDETIM_RTC_3CLOCK               0b01
+#define     IDETIM_RTC_2CLOCK               0b10
+#define     IDETIM_RTC_1CLOCK               0b11
+#define IDETIM_DTE1_SHIFT                   7
+#define IDETIM_DTE1_MASK                    1
+#define IDETIM_DTE1                         (IDETIM_DTE1_MASK << IDETIM_DTE1_SHIFT)
+#define IDETIM_PPE1_SHIFT                   6
+#define IDETIM_PPE1_MASK                    1
+#define IDETIM_PPE1                         (IDETIM_PPE1_MASK << IDETIM_PPE1_SHIFT)
+#define IDETIM_IE1_SHIFT                    5
+#define IDETIM_IE1_MASK                     1
+#define IDETIM_IE1                          (IDETIM_IE1_MASK << IDETIM_IE1_SHIFT)
+#define IDETIM_TIME1_SHIFT                  4
+#define IDETIM_TIME1_MASK                   1
+#define IDETIM_TIME1                        (IDETIM_TIME1_MASK << IDETIM_TIME1_SHIFT)
+#define IDETIM_DTE0_SHIFT                   3
+#define IDETIM_DTE0_MASK                    1
+#define IDETIM_DTE0                         (IDETIM_DTE0_MASK << IDETIM_DTE0_SHIFT)
+#define IDETIM_PPE0_SHIFT                   2
+#define IDETIM_PPE0_MASK                    1
+#define IDETIM_PPE0                         (IDETIM_PPE0_MASK << IDETIM_PPE0_SHIFT)
+#define IDETIM_IE0_SHIFT                    1
+#define IDETIM_IE0_MASK                     1
+#define IDETIM_IE0                          (IDETIM_IE0_MASK << IDETIM_IE0_SHIFT)
+#define IDETIM_TIME0_SHIFT                  0
+#define IDETIM_TIME0_MASK                   1
+#define IDETIM_TIME0                        (IDETIM_TIME0_MASK << IDETIM_TIME0_SHIFT)
+
+#define SIDETIM_REGISTER_OFFSET             0x44 //U8
+#define SIDTIM_SISP1_SHIFT                  6
+#define SIDTIM_SISP1_MASK                   0x03
+#define SIDTIM_SISP1                        (SIDTIM_SISP1_MASK << SIDTIM_SISP1_SHIFT)
+#define     SIDTIM_SISP1_5CLOCKS            0b00
+#define     SIDTIM_SISP1_4CLOCKS            0b01
+#define     SIDTIM_SISP1_3CLOCKS            0b10
+#define     SIDTIM_SISP1_2CLOCKS            0b11
+#define SIDTIM_SRTC1_SHIFT                  4
+#define SIDTIM_SRTC1_MASK                   0x03
+#define SIDTIM_SRTC1                        (SIDTIM_SRTC1_MASK << SIDTIM_SRTC1_SHIFT)
+#define     SIDTIM_SRTC1_4CLOCKS            0b00
+#define     SIDTIM_SRTC1_3CLOCKS            0b01
+#define     SIDTIM_SRTC1_2CLOCKS            0b10
+#define     SIDTIM_SRTC1_1CLOCKS            0b11
+#define SIDTIM_PISP1_SHIFT                  2
+#define SIDTIM_PISP1_MASK                   0x03
+#define SIDTIM_PISP1                        (SIDTIM_PISP1_MASK << SIDTIM_PISP1_SHIFT)
+#define     SIDTIM_PISP1_5CLOCKS            0b00
+#define     SIDTIM_PISP1_4CLOCKS            0b01
+#define     SIDTIM_PISP1_3CLOCKS            0b10
+#define     SIDTIM_PISP1_2CLOCKS            0b11
+#define SIDTIM_PRTC1_SHIFT                  0
+#define SIDTIM_PRTC1_MASK                   0x03
+#define SIDTIM_PRTC1                        (SIDTIM_PRTC1_MASK << SIDTIM_PRTC1_SHIFT)
+#define     SIDTIM_PRTC1_4CLOCKS            0b00
+#define     SIDTIM_PRTC1_3CLOCKS            0b01
+#define     SIDTIM_PRTC1_2CLOCKS            0b10
+#define     SIDTIM_PRTC1_1CLOCKS            0b11
+
+#define PRIMARY_BMICOM_REGISTER_OFFSET      0x00
+#define PRIMARY_BMICOM_REGISTER(x)          (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + PRIMARY_BMICOM_REGISTER_OFFSET)
+#define SECONDARY_BMICOM_REGISTER_OFFSET    0x08
+#define SECONDARY_BMICOM_REGISTER(x)        (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + SECONDARY_BMICOM_REGISTER_OFFSET)
+#define BMICOM_RWCON_SHIFT                  3
+#define BMICOM_RWCON_MASK                   1
+#define BMICOM_RWCON                        (BMICOM_RWCON_MASK << BMICOM_RWCON_SHIFT)
+#define BMICOM_SSBM_SHIFT                   0
+#define BMICOM_SSBM_MASK                    1
+#define BMICOM_SSBM                         (BMICOM_SSBM_MASK << BMICOM_SSBM_SHIFT)
+
+//#define BMISTA
+
+//Endof Piix 3 Specification

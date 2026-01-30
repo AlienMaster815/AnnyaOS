@@ -166,6 +166,8 @@ DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
 uint64_t GetCr3();
 
+
+
 LOUSTATUS LousineKernelEarlyInitialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
@@ -298,6 +300,17 @@ bool IsSystemEfi(){
 
 void PrintProcessManagerSwaps();
 
+void LouKeInitializePciDevices(){
+
+    LouKeMapPciMemory();
+
+    PciMmcfgEarlyInit();
+
+    LouKePcieProbeEcam();
+}
+
+void LouKeSantyCheckPciDevices();
+
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -338,11 +351,9 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
-    LouKeMapPciMemory();
+    LouKeInitializePciDevices();
 
-    PciMmcfgEarlyInit();
-
-    LouKePcieProbeEcam();
+    LouKeSantyCheckPciDevices();
 
     InitializeBootGraphics();
 
@@ -352,6 +363,9 @@ KERNEL_ENTRY LouOsKrnlStart(
     AdvancedLousineKernelInitialization();
 
     LookForStorageDevices();
+        
+    LouPrint("YAY!!\n");
+    while(1);
 
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
