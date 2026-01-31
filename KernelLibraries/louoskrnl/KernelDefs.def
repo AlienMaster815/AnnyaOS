@@ -205,3 +205,6 @@ EXPORTS
     LouKeUsbSetAddress
     LouKeUsbSetConfiguration
     LouKeDeviceManagerGetAtaDevice
+    LouKeAtaSendAtaIdentifyCommand
+    LouKeAtaSendAtapiIdentifyCommand
+    InitializeGenericAtaDevice

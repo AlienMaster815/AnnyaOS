@@ -1115,7 +1115,17 @@ void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost)
 
 void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq);
 
+LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
+    void* IdBuffer
+);
 
+LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
+    PLOUSINE_KERNEL_DEVICE_ATA_PORT  AtapiPort,
+    void*                            IdBuffer
+);
+
+LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 
 #ifdef __cplusplus
 }

@@ -18,18 +18,9 @@ static inline void AtaIoWait400ns(uint16_t ControlPort){
 }
 
 
-LOUSTATUS AtaGenricDMAPrepCommand(
+LOUSTATUS AtaGenricPIOPrepCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
-    //LouPrint("Ata Generic DMA Prep Comman\n");
-    //PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort = QueuedCommand->Port;
-    //MutexLock(&AtaPort->OpreationLock);
-    //PATA_PRDT_ENTRY Prdt = (PATA_PRDT_ENTRY)AtaPort->PrdtAddress;
-    //uint64_t PhysicalTransferAddress;
-    //RequestPhysicalAddress(QueuedCommand->DataAddress, &PhysicalTransferAddress);
-    //Prdt[0].PhysicalAddress     = (uint32_t)PhysicalTransferAddress;
-    //Prdt[0].TrasferSize         = (uint16_t)QueuedCommand->DataSize;
-    //Prdt[0].ControllerReserved  = 0x8000;
 
     return STATUS_SUCCESS;
 }   
@@ -64,6 +55,7 @@ static LOUSTATUS IdLegacyDrive(
 
     if(COMMAND_READ_STATUS_PORT == 0){
         LouPrint("Error: Detected Drive Is A Ghost Drive Quirk\n");
+        AtaPort->DeviceAttached = false;
         return STATUS_NO_SUCH_DEVICE;
     }
     //LouPrint("Waiting On Device\n");
@@ -219,7 +211,7 @@ static LOUSTATUS ReadLegacyAta(
     return STATUS_INVALID_PARAMETER;
 }
 
-LOUSTATUS AtaGenricDMAIssueCommand(
+LOUSTATUS AtaGenricPIOIssueCommand(
     PATA_QUEUED_COMMAND QueuedCommand
 ){
     LouKIRQL Irql;
@@ -289,24 +281,28 @@ static void AtaGenericGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT Port){
         Port->PortScsiDevice = true;
         Port->SerialDevice = false;
         Port->SectorSize = 2048;
+        Port->DeviceAttached = true;
     }
     if((LBAL == 0x69) || (LBAH == 0x96)){
         LouPrint("SATAPI\n");
         Port->PortScsiDevice = true;
         Port->SerialDevice = true;
         Port->SectorSize = 2048;
+        Port->DeviceAttached = true;
     }
     if((LBAL == 0) || (LBAH == 0)){
         LouPrint("ATA\n");
         Port->PortScsiDevice = false;
         Port->SerialDevice = false;
         Port->SectorSize = 512;
+        Port->DeviceAttached = true;
     }
     if((LBAL == 0x3C) || (LBAH == 0xC3)){
         LouPrint("SATA\n");
         Port->PortScsiDevice = false;
         Port->SerialDevice = true;
         Port->SectorSize = 512;
+        Port->DeviceAttached = true;
     }
 
 }
@@ -317,6 +313,7 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     void*                            IdBuffer
 );
 
+LOUDDK_API_ENTRY
 LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
 
     //Allocate 4 Ports For The Ata Host
@@ -330,7 +327,7 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[0].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[0].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[0].SectorCountLimit = 1;
-    LegacyAtaHost->Ports[0].DeviceAttached   = true;
+    LegacyAtaHost->Ports[0].DeviceAttached   = false;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[0]);
     
     //Fill Port 2
@@ -339,7 +336,7 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[1].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[1].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[1].SectorCountLimit = 1; 
-    LegacyAtaHost->Ports[1].DeviceAttached   = true;
+    LegacyAtaHost->Ports[1].DeviceAttached   = false;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[1]);
 
     //Fill Port 3
@@ -348,7 +345,7 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[2].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[2].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[2].SectorCountLimit = 1; 
-    LegacyAtaHost->Ports[2].DeviceAttached   = true;
+    LegacyAtaHost->Ports[2].DeviceAttached   = false;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[2]);
     
     //Fill Port 4
@@ -357,12 +354,12 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
     LegacyAtaHost->Ports[3].Operations       = &IdeGenericOperations;
     LegacyAtaHost->Ports[3].PollTimer        = 10000;//Ten Second Timer
     LegacyAtaHost->Ports[3].SectorCountLimit = 1; 
-    LegacyAtaHost->Ports[3].DeviceAttached   = true;
+    LegacyAtaHost->Ports[3].DeviceAttached   = false;
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[3]);
 
 
-    IdeGenericOperations.PrepCommand = AtaGenricDMAPrepCommand;
-    IdeGenericOperations.IssueCommand = AtaGenricDMAIssueCommand;
+    IdeGenericOperations.PrepCommand = AtaGenricPIOPrepCommand;
+    IdeGenericOperations.IssueCommand = AtaGenricPIOIssueCommand;
 
     PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
     LouKeHalGetPciConfiguration(PDEV, Config);

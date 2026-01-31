@@ -50,7 +50,9 @@
 typedef struct _PIIX3_HOST_PRIVATE_DATA{
     PPCI_DEVICE_OBJECT      PDEV;
     UINT32                  Bmiba;
-          
+    UINT8                   MaxPioMode;
+    UINT8                   MaxUDmaMode;
+    UINT8                   CurrentPioMode;
 }PIIX3_HOST_PRIVATE_DATA, * PPIIX3_HOST_PRIVATE_DATA;
 
 //Piix 3 Specification
