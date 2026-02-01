@@ -49,6 +49,11 @@ LOUSTATUS LouKeHalMallocPciIrqVectors(
         PDEV->InterruptVectors = LouKeMallocArray(UINT8, 2, KERNEL_GENERIC_MEMORY);
         PDEV->InterruptVectors[0] = 1;
         PDEV->InterruptVectors[1] = LouKePciGetInterruptLine(PDEV);
+        if(PDEV->InterruptVectors[1] == 0xFF){
+            LouKeFree(PDEV->InterruptVectors);
+            return STATUS_NO_SUCH_DEVICE;
+        }
+
         return STATUS_SUCCESS;
     }
 

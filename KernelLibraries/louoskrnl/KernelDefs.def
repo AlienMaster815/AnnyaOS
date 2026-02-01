@@ -208,3 +208,4 @@ EXPORTS
     LouKeAtaSendAtaIdentifyCommand
     LouKeAtaSendAtapiIdentifyCommand
     InitializeGenericAtaDevice
+    outsw

@@ -924,7 +924,6 @@ typedef struct _ATA_QUEUED_COMMAND{
 }ATA_QUEUED_COMMAND, * PATA_QUEUED_COMMAND;
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
-    struct _LOUSINE_SCSI_HOST*              ScsiHost;
     struct _LOUSINE_ATA_PORT_OPERATIONS*    Operations;
     uint32_t                                PollTimer;
     spinlock_t                              PortLock;

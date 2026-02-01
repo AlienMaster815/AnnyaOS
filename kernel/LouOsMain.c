@@ -464,7 +464,8 @@ void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
 
 }
 
-//0x220B21030
+//TODO:
+// check and optimize Lousine Kernel Exports in API/LouAPI/tables.c
 
 //BUGS TO FIX:
 

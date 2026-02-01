@@ -26,7 +26,7 @@
 
 //ATA Module Structured Operations
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
-    .PrepCommand = AhciGenricDMAPrepCommand,
+    //.PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciGenericHardReset,
     .HostReset = ResetAhcPciController,
@@ -35,7 +35,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
 };
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
-    .PrepCommand = AhciGenricDMAPrepCommand,
+    //.PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciVt8251HardReset,
     .HostReset = ResetAhcPciController,
@@ -44,7 +44,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciVt8251Operations{
 };
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
-    .PrepCommand = AhciGenricDMAPrepCommand,
+    //.PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciP5wdhHardReset,
     .HostReset = ResetAhcPciController,
@@ -53,7 +53,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciP5wdhOperations{
 };
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
-    .PrepCommand = AhciGenricDMAPrepCommand,
+    //.PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciAvnHardReset,
     .HostReset = ResetAhcPciController,
@@ -63,7 +63,7 @@ UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciAvnOperations{
 
 
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
-    .PrepCommand = AhciGenricDMAPrepCommand,
+    //.PrepCommand = AhciGenricDMAPrepCommand,
     .IssueCommand = AhciGenricDMAIssueCommand,
     .HardReset = AhciGenericHardReset,
     .HostReset = ResetAhcPciController, 

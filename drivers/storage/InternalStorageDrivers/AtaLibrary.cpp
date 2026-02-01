@@ -211,9 +211,11 @@ LOUSTATUS LouKeAtaReadDevice(
         //while(1);
     }
 
-    Result = AtaPort->Operations->PrepCommand(&Command);
-    if(Result != STATUS_SUCCESS){
-        return Result;
+    if(AtaPort->Operations->PrepCommand){
+        Result = AtaPort->Operations->PrepCommand(&Command);
+        if(Result != STATUS_SUCCESS){
+            return Result;
+        }
     }
     Result = AtaPort->Operations->IssueCommand(&Command);
     return Result;

@@ -188,7 +188,6 @@ void PsmProcessScedualManagerObject::PsmAsignProcessToSchedual(PGENERIC_PROCESS_
         NewProcessRing->Peers.NextHeader = (PListHeader)NewProcessRing;
         NewProcessRing->Peers.LastHeader = (PListHeader)NewProcessRing;
         this->Processes[Process->ProcessPriority] = NewProcessRing;
-        LouPrint("HERE\n");
         goto _PROCESS_ASSIGNMENT_DONE;
     }
 

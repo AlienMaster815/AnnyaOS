@@ -7,7 +7,8 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-PIIX_SRC = PIIX.cpp
+PIIX_SRC = PIIX.cpp \
+			PIIX3.cpp 
 PIIX_TARGET = PIIX.SYS
 
 # Build rule

@@ -253,9 +253,9 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[5] = "memcmp";
     ImportTables[0].FunctionName[6] = "strncpy";
     ImportTables[0].FunctionName[7] = "insw";
-    ImportTables[0].FunctionName[8] = "LouKeFreeFromPool";
-    ImportTables[0].FunctionName[9] = "LouKeMallocFromPool";
-    ImportTables[0].FunctionName[10] = "LouKeFreePool";
+    ImportTables[0].FunctionName[8] = "outsw";
+    ImportTables[0].FunctionName[9] = "LouKeFreeFromPool";
+    ImportTables[0].FunctionName[10] = "LouKeMallocFromPool";
     ImportTables[0].FunctionName[11] = "LouKeMapPool";
     ImportTables[0].FunctionName[12] = "RequestPhysicalAddress";
     ImportTables[0].FunctionName[13] = "LouKeVMemmoryGetSize";

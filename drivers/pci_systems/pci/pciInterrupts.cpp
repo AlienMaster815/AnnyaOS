@@ -17,7 +17,13 @@ LOUDDK_API_ENTRY bool GetAPICStatus();
 
 KERNEL_IMPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV){
     if(GetAPICStatus()){
-        return LouKeGetPciInterruptLineFromPin(PDEV) + 0x20;
+        UINT8 Result = LouKeGetPciInterruptLineFromPin(PDEV);
+        if(Result == 0xFF){
+            return Result;
+        }
+        else {
+            return Result + 0x20;
+        }
     }
     return LouKeGetPciInterruptLine(PDEV) + 0x20;
 }

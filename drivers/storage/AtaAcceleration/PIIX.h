@@ -49,6 +49,10 @@
 
 typedef struct _PIIX3_HOST_PRIVATE_DATA{
     PPCI_DEVICE_OBJECT      PDEV;
+    KERNEL_EVENT_OBJECT     PrimaryEvent;
+    KERNEL_EVENT_OBJECT     SecondaryEvent;
+    mutex_t                 PrimaryDmaLock;
+    mutex_t                 SecondaryDmaLock;
     UINT32                  Bmiba;
     UINT8                   MaxPioMode;
     UINT8                   MaxUDmaMode;
@@ -70,10 +74,10 @@ typedef struct _PIIX3_HOST_PRIVATE_DATA{
 #define IDETIM_ISP_SHIFT                    12
 #define IDETIM_ISP_MASK                     0x03
 #define IDETIM_ISP                          (IDETIM_ISP_MASK << IDETIM_ISP_SHIFT)
-#define     IDETIM_ISP_5CLOCKS              0b00
-#define     IDETIM_ISP_4CLOCKS              0b01
-#define     IDETIM_ISP_3CLOCKS              0b10
-#define     IDETIM_ISP_2CLOCKS              0b11
+#define     IDETIM_ISP_5CLOCK               0b00
+#define     IDETIM_ISP_4CLOCK               0b01
+#define     IDETIM_ISP_3CLOCK               0b10
+#define     IDETIM_ISP_2CLOCK               0b11
 #define IDETIM_RTC_SHIFT                    8
 #define IDETIM_RTC_MASK                     0x03
 #define IDETIM_RTC                          (IDETIM_RTC_MASK << IDETIM_RTC_SHIFT)
@@ -110,31 +114,31 @@ typedef struct _PIIX3_HOST_PRIVATE_DATA{
 #define SIDTIM_SISP1_SHIFT                  6
 #define SIDTIM_SISP1_MASK                   0x03
 #define SIDTIM_SISP1                        (SIDTIM_SISP1_MASK << SIDTIM_SISP1_SHIFT)
-#define     SIDTIM_SISP1_5CLOCKS            0b00
-#define     SIDTIM_SISP1_4CLOCKS            0b01
-#define     SIDTIM_SISP1_3CLOCKS            0b10
-#define     SIDTIM_SISP1_2CLOCKS            0b11
+#define     SIDTIM_SISP1_5CLOCK             0b00
+#define     SIDTIM_SISP1_4CLOCK             0b01
+#define     SIDTIM_SISP1_3CLOCK             0b10
+#define     SIDTIM_SISP1_2CLOCK             0b11
 #define SIDTIM_SRTC1_SHIFT                  4
 #define SIDTIM_SRTC1_MASK                   0x03
 #define SIDTIM_SRTC1                        (SIDTIM_SRTC1_MASK << SIDTIM_SRTC1_SHIFT)
-#define     SIDTIM_SRTC1_4CLOCKS            0b00
-#define     SIDTIM_SRTC1_3CLOCKS            0b01
-#define     SIDTIM_SRTC1_2CLOCKS            0b10
-#define     SIDTIM_SRTC1_1CLOCKS            0b11
+#define     SIDTIM_SRTC1_4CLOCK             0b00
+#define     SIDTIM_SRTC1_3CLOCK             0b01
+#define     SIDTIM_SRTC1_2CLOCK             0b10
+#define     SIDTIM_SRTC1_1CLOCK             0b11
 #define SIDTIM_PISP1_SHIFT                  2
 #define SIDTIM_PISP1_MASK                   0x03
 #define SIDTIM_PISP1                        (SIDTIM_PISP1_MASK << SIDTIM_PISP1_SHIFT)
-#define     SIDTIM_PISP1_5CLOCKS            0b00
-#define     SIDTIM_PISP1_4CLOCKS            0b01
-#define     SIDTIM_PISP1_3CLOCKS            0b10
-#define     SIDTIM_PISP1_2CLOCKS            0b11
+#define     SIDTIM_PISP1_5CLOCK             0b00
+#define     SIDTIM_PISP1_4CLOCK             0b01
+#define     SIDTIM_PISP1_3CLOCK             0b10
+#define     SIDTIM_PISP1_2CLOCK             0b11
 #define SIDTIM_PRTC1_SHIFT                  0
 #define SIDTIM_PRTC1_MASK                   0x03
 #define SIDTIM_PRTC1                        (SIDTIM_PRTC1_MASK << SIDTIM_PRTC1_SHIFT)
-#define     SIDTIM_PRTC1_4CLOCKS            0b00
-#define     SIDTIM_PRTC1_3CLOCKS            0b01
-#define     SIDTIM_PRTC1_2CLOCKS            0b10
-#define     SIDTIM_PRTC1_1CLOCKS            0b11
+#define     SIDTIM_PRTC1_4CLOCK             0b00
+#define     SIDTIM_PRTC1_3CLOCK             0b01
+#define     SIDTIM_PRTC1_2CLOCK             0b10
+#define     SIDTIM_PRTC1_1CLOCK             0b11
 
 #define PRIMARY_BMICOM_REGISTER_OFFSET      0x00
 #define PRIMARY_BMICOM_REGISTER(x)          (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + PRIMARY_BMICOM_REGISTER_OFFSET)
@@ -176,6 +180,12 @@ typedef struct _PIIX3_HOST_PRIVATE_DATA{
 #define SECONDARY_BMIDTP_REGISTER(x)        (((PPIIX3_HOST_PRIVATE_DATA)x)->Bmiba + SECONDARY_BMIDTP_REGISTER_OFFSET)
 #define BMIDTP_MASK                         0xFFFFFFFC
 
+typedef struct PACKED _PIIX3_DMA_PRD{
+    UINT32  PhyAddress;
+    UINT16  ByteCount;
+    UINT16  Flags;
+}PIIX3_DMA_PRD, * PPIIX3_DMA_PRD;
 
+#define PIIX3_PRD_FLAG_EOT ((UINT16)(1U << 16))
 
 //Endof Piix 3 Specification

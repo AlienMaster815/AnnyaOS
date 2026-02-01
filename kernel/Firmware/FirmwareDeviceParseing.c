@@ -110,7 +110,5 @@ uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV){
 
     }
 
-    LouPrint("LouKeGetPciInterruptLineFromPin()\n");
-    while(1);
     return 0xFF;
 }

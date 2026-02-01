@@ -17,14 +17,6 @@ static inline void AtaIoWait400ns(uint16_t ControlPort){
     CONTROL_READ_ALTERNATE_STATUS_PORT;
 }
 
-
-LOUSTATUS AtaGenricPIOPrepCommand(
-    PATA_QUEUED_COMMAND QueuedCommand
-){
-
-    return STATUS_SUCCESS;
-}   
-
 static LOUSTATUS IdLegacyDrive(
     PATA_QUEUED_COMMAND             QueuedCommand,
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort
@@ -100,7 +92,7 @@ static LOUSTATUS ReadLegacyAtapi(
     uint8_t Status;
 
     if(WriteCommand){
-        //curently there is no read
+        //curently there is no Write
     }else{
         if((AtaPort->PortNumber == 1) || (AtaPort->PortNumber == 3)){
             COMMAND_WRITE_DRIVE_HEAD_PORT(0xA0);
@@ -358,7 +350,6 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
     AtaGenericGetDeviceType(&LegacyAtaHost->Ports[3]);
 
 
-    IdeGenericOperations.PrepCommand = AtaGenricPIOPrepCommand;
     IdeGenericOperations.IssueCommand = AtaGenricPIOIssueCommand;
 
     PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
