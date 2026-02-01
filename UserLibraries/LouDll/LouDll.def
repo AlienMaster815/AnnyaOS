@@ -44,3 +44,4 @@ EXPORTS
     LouDrsdClipToClip
     LouDrsdSetPlaneInformation
     LouSystemShutdown
+    LouCreateSectionEx

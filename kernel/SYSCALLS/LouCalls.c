@@ -12,7 +12,18 @@ void LouKeUpdateClipSubState(
 uint8_t LouKeGetCurrentTimeMinute();
 void LouKeUpdateShadowClipSubState(PDRSD_CLIP Clip, INT64 X, INT64 Y, INT64 Width, INT64 Height);
 int LouPrint_s(char* format, va_list args);
-
+LOUSTATUS 
+LouKeVmmCreateSectionEx(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
+);
 
 void LogButtonToProccess(
     PBUTTONHANDLE ButtonHandle, 
@@ -224,6 +235,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUYEILDEXE:{
             LouKeYeildExecution();
             return;
+        }
+        case LOUCREATESECTIONEX:{
+            LouPrint("LOUCREATESECTION\n");
+            while(1);
         }
         default:
         LouPrint("Unkown Call:%d\n", Call);

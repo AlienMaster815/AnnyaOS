@@ -210,6 +210,19 @@ typedef struct _ANNYA_DESKTOP_SETUP_PACKET{
     ANNYA_WINDOW_CALLBACK WindowCallback;
 }ANNYA_DESKTOP_SETUP_PACKET, * PANNYA_DESKTOP_SETUP_PACKET;
 
+#ifndef _OBJECT_ATTRIBUTES_DEF
+#define _OBJECT_ATTRIBUTES_DEF
+typedef struct _OBJECT_ATTRIBUTES {
+    ULONG Length;
+    HANDLE RootDirectory;
+    PUNICODE_STRING ObjectName;
+    ULONG Attributes;
+    PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
+    PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
+} OBJECT_ATTRIBUTES;
+typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
+#endif
+
 #ifndef _USER_32_
 
 //Copy Changes of the following to the Annya.h system from Awm.h
@@ -440,6 +453,20 @@ void LouTrashAndDumpProcess();
 
 __declspec(dllimport)
 void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
+
+__declspec(dllimport)
+LOUSTATUS 
+LouCreateSectionEx(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
+);
 
 #endif
 

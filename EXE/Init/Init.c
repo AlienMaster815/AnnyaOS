@@ -1,4 +1,4 @@
-#include "AnnyaInit.h"
+#include "Init.h"
 
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
 
