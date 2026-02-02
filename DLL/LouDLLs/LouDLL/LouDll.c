@@ -671,6 +671,8 @@ LouOpenFileA(
     while(!KulaPacket[0]){
         LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     }
+    LouPrint("HERE\n");
+    while(1);
     return (void*)KulaPacket[1]; 
 }
 

@@ -189,3 +189,9 @@ typedef struct PACKED _PIIX3_DMA_PRD{
 #define PIIX3_PRD_FLAG_EOT ((UINT16)(1U << 16))
 
 //Endof Piix 3 Specification
+
+//Piix 4 Specification
+
+
+
+//Endof Piix 4 Specification

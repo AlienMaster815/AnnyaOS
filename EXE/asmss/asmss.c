@@ -22,7 +22,11 @@ NTSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");    
 
-    FILE* SessionManagerBinary = LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
+    LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
+
+    while(1);
+    
+    FILE* SessionManagerBinary = 0x00;
     if(!SessionManagerBinary){
         return STATUS_UNSUCCESSFUL;
     }
