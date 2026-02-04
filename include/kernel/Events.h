@@ -1,5 +1,5 @@
 #ifndef _EVENTS_H
-#define _EVENTD_H
+#define _EVENTS_H
 
 #ifndef __cplusplus
 #include <LouAPI.h>

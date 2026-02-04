@@ -38,7 +38,7 @@ void __iob_func(){
 
 MSVCRT_API
 void _amsg_exit(){
-    _amsg_exit("_amsg_exit()\n");
+    LouPrint("_amsg_exit()\n");
     while(1);
 }
 

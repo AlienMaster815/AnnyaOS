@@ -2,7 +2,7 @@
 #include <LoaderPrivate.h>
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
-extern UINT64 GetPageValue();
+extern UINT64 GetPageValue(UINT64, UINT64);
 extern UINT64 GetCr3Address();
 extern void SetCr3(UINT64 Value);
 
@@ -116,8 +116,8 @@ static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags
     ); 
 
     ClusterBase[L2Base + L2]    = GetPageValue(PAddress, (1 << 7) | Flags);
-    ClusterBase[L3Base + L3]    = GetPageValue(&ClusterBase[L2Base], 0b111);
-    ClusterBase[L4]             = GetPageValue(&ClusterBase[L3Base], 0b111);
+    ClusterBase[L3Base + L3]    = GetPageValue((UINT64)&ClusterBase[L2Base], 0b111);
+    ClusterBase[L4]             = GetPageValue((UINT64)&ClusterBase[L3Base], 0b111);
 
     PageFlush(VAddress);
     ReloadCR3();

@@ -1,4 +1,5 @@
-# mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl
+# Xubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl
+# Fedora:  nasm xorriso mtools cmake make gcc git binutils mingw64-gcc mingw64-gcc-c++ mingw64-binutils mingw64-headers mingw64-crt mingw64-winpthreads flex meson ninja-build openssl
 #git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1
 #cd limine
 #make
