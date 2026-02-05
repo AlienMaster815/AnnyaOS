@@ -349,6 +349,8 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
+    LouKeAllocateSesionHandle(0x00, 0);
+
     LouKeInitializePciDevices();
 
     LouKeSantyCheckPciDevices();

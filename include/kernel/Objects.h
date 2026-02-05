@@ -153,6 +153,11 @@ LouKeVmmCreateSectionEx(
     ULONG                   ExtendedParameterCount
 );
 
+LOUSTATUS LouKeAllocateSesionHandle(
+    PHANDLE OutHandle,
+    PVOID   HandleData
+);
+
 #ifdef __cplusplus
 }
 #endif
