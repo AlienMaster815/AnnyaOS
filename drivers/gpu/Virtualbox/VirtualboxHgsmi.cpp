@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
-/* Port Copyright (C) 2025-2016 Tyler Grenier */
+/* Port Copyright (C) 2025-2026 Tyler Grenier */
 
  #define _KERNEL_MODULE_
  #include <LouDDK.h>

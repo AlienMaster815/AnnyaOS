@@ -3,7 +3,7 @@
 
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
-/* Port Copyright (C) 2025-2016 Tyler Grenier */
+/* Port Copyright (C) 2025-2026 Tyler Grenier */
 
 
 #define VIRTUALBOX_MAXIMUM_CURSOR_WIDTH     64
@@ -89,7 +89,7 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivat
 void VirtualboxReportCapabilities(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 int VirtualboxMmInit(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox);
-void VirtualboxIrqReportHotplug(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
+void VirtualBoxReportHotplug(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualBoxInterruptsFailedInitialization(
     PVIRTUALBOX_PRIVATE_DATA VBox
 );

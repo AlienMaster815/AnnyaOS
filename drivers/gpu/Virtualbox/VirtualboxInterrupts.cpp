@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
-/* Port Copyright (C) 2025-2016 Tyler Grenier */
+/* Port Copyright (C) 2025-2026 Tyler Grenier */
 
 
 #define _KERNEL_MODULE_
@@ -8,6 +8,19 @@
 #include "VirtualboxDriver.h"
 #include <Hal.h>
 #include <drivers/VBoxError.h>
+
+static void VirtualBoxClearIrq(){
+    outl((UINT32)~0, VIRTUALBOX_VGA_HGSMI_HOST);
+}
+
+static UINT32 VirtualBoxGetFlags(PVIRTUALBOX_PRIVATE_DATA VBox){
+    return (UINT32)READ_REGISTER_ULONG((ULONG*)(VBox->GuestHeap + VIRTUALBOX_HOST_FLAGS_OFFSET));
+}
+
+void VirtualboxReportHotplug(PVIRTUALBOX_PRIVATE_DATA VBox){
+    LouPrint("VirtualboxReportHotplug()\n");
+    while(1);
+}
 
 static void ValidateOrSetPositionHints(
     PVIRTUALBOX_PRIVATE_DATA VBox
@@ -116,9 +129,16 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
 }
 
 void VirtualboxInterruptHandler(uint64_t VBoxPrivate){
+    PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)VBoxPrivate;
+    UINT32 HostFlags = VirtualBoxGetFlags(VBox);
 
-    LouPrint("VirtualboxInterruptHandler()\n");
-    while(1);
+    if(!(HostFlags & HGSMIHOSTFLAGS_IRQ)){
+        return;
+    }
+
+    
+
+    VirtualBoxClearIrq();
 }
 
 LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
@@ -126,9 +146,12 @@ LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     VirtualboxUpdateModeHints(VBox);
     
-    LouKeHalMallocPciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY);
+    if(LouKeHalMallocPciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY) != STATUS_SUCCESS){
+        LouPrint("VBOX.SYS:ERROR:Unable To Allocate IRQ\n");
+        return STATUS_UNSUCCESSFUL;
+    }
 
-    //RegisterInterruptHandler(VirtualboxInterruptHandler, LouKePciGetInterruptLine(PDEV), false, (uint64_t)VBox);
+    RegisterInterruptHandler(VirtualboxInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)VBox);
 
     LouPrint("InitializeVirtualboxInterrupts() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
