@@ -202,6 +202,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <kernel/Events.h>
 #include <drivers/fpu.h>
 #include <kernel/LKPCB.h>
+#include <WinAPI/Win32/AccessToken.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

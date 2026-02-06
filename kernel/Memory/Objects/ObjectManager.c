@@ -63,7 +63,7 @@ LouKeAllocateObjectPoolTracker(
                 KILOBYTE_PAGE / sizeof(PROCESS_OBJECT_CHAIN),
                 sizeof(PROCESS_OBJECT_CHAIN),
                 GET_ALIGNMENT(PROCESS_OBJECT_CHAIN),
-                "SessionChainPool",
+                "ProcessChainPool",
                 0x00,
                 KERNEL_GENERIC_MEMORY
             );
@@ -74,7 +74,18 @@ LouKeAllocateObjectPoolTracker(
                 KILOBYTE_PAGE / sizeof(THREAD_OBJECT_CHAIN),
                 sizeof(THREAD_OBJECT_CHAIN),
                 GET_ALIGNMENT(THREAD_OBJECT_CHAIN),
-                "SessionChainPool",
+                "ThreadChainPool",
+                0x00,
+                KERNEL_GENERIC_MEMORY
+            );
+            break;
+
+        case HANDLE_CHAIN:
+            NewTracker->Pool = LouKeCreateFixedPool(
+                KILOBYTE_PAGE / sizeof(HANDLE_TRACKER),
+                sizeof(HANDLE_TRACKER),
+                GET_ALIGNMENT(HANDLE_TRACKER),
+                "HandleChainPool",
                 0x00,
                 KERNEL_GENERIC_MEMORY
             );
@@ -94,15 +105,18 @@ LouKeAllocateObjectPoolTracker(
 PVOID AllocateSessionTracker(){
     POBJECT_POOL_TRACKER Tmp = &ObjPoolTrackerList;
     PVOID Result = 0x00;
+    MutexLock(&ObjPoolTrackerLock);
     while(Tmp->Peers.NextHeader){
         Tmp = (POBJECT_POOL_TRACKER)Tmp->Peers.NextHeader;
         if(Tmp->PoolClass == SESSION_CHAIN){
             Result = LouKeMallocFromFixedPool(Tmp->Pool);
             if(Result){
+                MutexUnlock(&ObjPoolTrackerLock);
                 return Result;
             }
         }
     }
+    MutexUnlock(&ObjPoolTrackerLock);
     LOUSTATUS Status = LouKeAllocateObjectPoolTracker(SESSION_CHAIN, (PVOID*)&Tmp);
     if(Status != STATUS_SUCCESS){
         return 0x00;

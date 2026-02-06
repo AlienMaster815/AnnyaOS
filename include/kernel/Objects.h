@@ -155,8 +155,12 @@ LouKeVmmCreateSectionEx(
 
 LOUSTATUS LouKeAllocateSesionHandle(
     PHANDLE OutHandle,
+    LPWSTR  AcTokRegEntry,
     PVOID   HandleData
 );
+
+#define SESSION_OBJECT_CLASS_TAG                "SessionObject"
+#define ACCESS_TOKEN_OBJECT_CLASS_TAG           "AccessTokenObject"
 
 #ifdef __cplusplus
 }

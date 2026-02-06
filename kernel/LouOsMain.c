@@ -349,13 +349,14 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
-    LouKeAllocateSesionHandle(0x00, 0);
 
     LouKeInitializePciDevices();
 
     LouKeSantyCheckPciDevices();
 
     InitializeBootGraphics();
+
+    //LouKeAllocateSesionHandle(0x00, L"KERNEL_DEFAULT_CONFIG\\SessionDefaults\\Session0\\AccessToken", 0);
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
