@@ -60,7 +60,7 @@
 #include <kernel/Events.h>
 #include <drivers/fpu.h>
 #include <kernel/LKPCB.h>
-#include <WinAPI/Win32/AccessToken.h>
+#include <kernel/LouAccessTokens.h>
 
 
 #ifndef KERNEL_MAIN_FILE
