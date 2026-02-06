@@ -33,7 +33,6 @@ static void LkrPrintError(
 ){
     PCOMPILER_CONTEXT Context = (PCOMPILER_CONTEXT)Data;
     LPWSTR LineTerminator = Lou_wcsstr(Buffer, CompilerDeclarationLookup("\n"));
-    if(!LineTerminator)LineTerminator = Lou_wcsstr(Buffer, CompilerDeclarationLookup("\0"));
     size_t Length = (size_t)(LineTerminator - Buffer); 
 
     printf("Error:%d Line:%zu %s:: --> ", Error, GetErrorLine(Context->FileContext, (size_t)(LineTerminator - (LPWSTR)Context->FileContext)), ErrorMessage);

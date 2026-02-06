@@ -70,11 +70,12 @@
         <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSCHIP.png ISO/ANNYA/AOSCHIP.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSTCD.png ISO/ANNYA/AOSTCD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp Music/STARTUP.WAV ISO/ANNYA/STARTUP.WAV</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp Music/TADA.WAV ISO/ANNYA/TADA.WAV</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp Music/STARTUP.WAV ISO/ANNYA/STARTUP.WAV</FILETOCPY64>                                               <!--Annya OS Asset-->
+        <FILETOCPY64>cp Music/TADA.WAV ISO/ANNYA/TADA.WAV</FILETOCPY64>                                                     <!--Annya OS Asset-->
         <!--System Fonts-->
         <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                              <!--Annya OS Asset-->
         <!--System Configuration-->
         <FILETOCPY64>cp Registry/build/LOUOSKRNL.LKR ISO/ANNYA/SYSTEM64/LOUOSKRNL.LKR</FILETOCPY64>                         <!--Annya OS Registry Source-->
+        <FILETOCPY64>cp Registry/build/SECURITY.LKR ISO/ANNYA/SYSTEM64/SECURITY.DAT</FILETOCPY64>                         <!--Annya OS Registry Source-->
     </64Targets>
 </FILESBEFORECOPY>

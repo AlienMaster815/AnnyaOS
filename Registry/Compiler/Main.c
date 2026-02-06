@@ -39,7 +39,10 @@ static PCOMPILER_CONTEXT CreateCompilerContext(
 
     rewind(SourceFile);
 
-    NewContext->FileContext = malloc(NewContext->FileSize);
+    NewContext->FileContext = malloc(NewContext->FileSize + sizeof(WCHAR));
+    memset(NewContext->FileContext, 0, NewContext->FileSize);
+
+    memcpy((UINT8*)(NewContext->FileContext + NewContext->FileSize), (UINT8*)CompilerDeclarationLookup("\n"), sizeof(WCHAR));
 
     ReadCount = fread(NewContext->FileContext, 1, NewContext->FileSize, SourceFile);
     if(ReadCount != NewContext->FileSize){
@@ -48,6 +51,8 @@ static PCOMPILER_CONTEXT CreateCompilerContext(
         free(NewContext);
         return (PCOMPILER_CONTEXT)0x00;
     }
+
+    NewContext->FileSize += sizeof(WCHAR);
 
     fclose(SourceFile);
     return NewContext;

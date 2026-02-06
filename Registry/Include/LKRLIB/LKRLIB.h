@@ -63,5 +63,6 @@ PLKR_NODE_ENTRY LkrAllocateNode(
     size_t AllocationSize
 );
 
+#include "StructureTypes.h"
 
 #endif
