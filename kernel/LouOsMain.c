@@ -356,7 +356,7 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeBootGraphics();
 
-    //LouKeAllocateSesionHandle(0x00, L"KERNEL_DEFAULT_CONFIG\\SessionDefaults\\Session0\\AccessToken", 0);
+    LouKeAllocateSesionHandle(0x00, 0);
 
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();

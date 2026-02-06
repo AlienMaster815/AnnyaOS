@@ -155,7 +155,6 @@ LouKeVmmCreateSectionEx(
 
 LOUSTATUS LouKeAllocateSesionHandle(
     PHANDLE OutHandle,
-    LPWSTR  AcTokRegEntry,
     PVOID   HandleData
 );
 

@@ -32,7 +32,6 @@ typedef struct _SESSION_OBJECT_CHAIN{
     struct _PROCESS_OBJECT_CHAIN*   ProcessChain;
     HANDLE_TRACKER                  SessionHandle;
     PHANDLE_TRACKER                 ProcessHandles;
-    HANDLE_TRACKER                  AccessTokenHandle;
     POBJECT_POOL_TRACKER            ObjectAllocationPool;
 }SESSION_OBJECT_CHAIN, * PSESSION_OBJECT_CHAIN;
 
