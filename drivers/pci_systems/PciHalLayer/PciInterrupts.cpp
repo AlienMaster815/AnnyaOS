@@ -69,3 +69,11 @@ UINT8 LouKeHalGetPciIrqVectorCount(
     }
     return PDEV->InterruptVectors[0];
 }
+
+LOUDDK_API_ENTRY
+void LouKeHalFreePciIrqVectors(
+    PPCI_DEVICE_OBJECT PDEV
+){
+    LouPrint("LouKeHalFreePciIrqVectors()\n");
+    while(1);
+}

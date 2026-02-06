@@ -94,6 +94,10 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 uint64_t Flags
             );
 
+            LOUDDK_API_ENTRY void LouKeHalFreePciIrqVectors(
+                PPCI_DEVICE_OBJECT PDEV
+            );
+
             LOUDDK_API_ENTRY
             UINT8 LouKeHalGetPciIrqVectorCount(
                 PPCI_DEVICE_OBJECT PDEV
@@ -186,6 +190,11 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_DEVICE_OBJECT PDEV, 
                 UINT32 RequestedVectors, 
                 uint64_t Flags
+            );\
+
+            KERNEL_EXPORT
+            void LouKeHalFreePciIrqVectors(
+                PPCI_DEVICE_OBJECT PDEV
             );
 
             KERNEL_EXPORT void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV);

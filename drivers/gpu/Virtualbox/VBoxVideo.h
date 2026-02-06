@@ -3,6 +3,7 @@
 
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
+/* Port Copyright (C) 2025-2016 Tyler Grenier */
 
 #define VIRTUALBOX_VIDEO_MAX_SCREENS                                64
 #define VBVA_RING_BUFFER_SIZE                                       (4194304 - 1024)

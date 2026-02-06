@@ -1,6 +1,7 @@
 #define _KERNEL_MODULE_
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
+/* Port Copyright (C) 2025-2016 Tyler Grenier */
 
 
 #include <LouDDK.h>
@@ -662,4 +663,8 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
     VBoxEdid = LouKeMalloc(STANDARD_INTEL_CHIPSET_EDID_SIZE, KERNEL_GENERIC_MEMORY);
 
     return STATUS_SUCCESS;
+}
+
+void VirtualBoxModeFaildInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
+    DrsdModeConfigurationCleanup(&VBox->DrsdDevice);
 }

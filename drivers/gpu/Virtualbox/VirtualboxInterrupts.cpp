@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
+/* Port Copyright (C) 2025-2016 Tyler Grenier */
 
 
 #define _KERNEL_MODULE_
@@ -125,8 +126,16 @@ LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     VirtualboxUpdateModeHints(VBox);
     
+    LouKeHalMallocPciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY);
+
     //RegisterInterruptHandler(VirtualboxInterruptHandler, LouKePciGetInterruptLine(PDEV), false, (uint64_t)VBox);
 
     LouPrint("InitializeVirtualboxInterrupts() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
+}
+
+void VirtualBoxInterruptsFailedInitialization(
+    PVIRTUALBOX_PRIVATE_DATA VBox
+){
+    LouKeHalFreePciIrqVectors(VBox->PDEV);
 }

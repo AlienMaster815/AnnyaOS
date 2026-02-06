@@ -249,3 +249,8 @@ PDRSD_DISPLAY_MODE DrsdCvtMode(
     LouPrint("DrsdCvtMode() STATUS_SUCCESS\n");
     return NewMode;
 }
+
+void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice){
+    LouPrint("DrsdModeConfigurationCleanup()\n");
+    while(1);
+}

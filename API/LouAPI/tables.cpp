@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 208
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 210
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -46,7 +46,6 @@ static TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
 static PTABLE_ENTRY ImportTables = (PTABLE_ENTRY)GenericTable;
 
 KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
-
 
 ULONG KeNumberProcessors();
 
@@ -453,6 +452,8 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[205] = "LouKeAtaSendAtaIdentifyCommand";
     ImportTables[0].FunctionName[206] = "LouKeAtaSendAtapiIdentifyCommand";
     ImportTables[0].FunctionName[207] = "InitializeGenericAtaDevice";
+    ImportTables[0].FunctionName[208] = "LouKeHalFreePciIrqVectors";
+    ImportTables[0].FunctionName[209] = "DrsdModeConfigurationCleanup";
 
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -662,6 +663,8 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[205] = (uint64_t)LouKeAtaSendAtaIdentifyCommand;
     ImportTables[0].VirtualAddress[206] = (uint64_t)LouKeAtaSendAtapiIdentifyCommand;
     ImportTables[0].VirtualAddress[207] = (uint64_t)InitializeGenericAtaDevice;
+    ImportTables[0].VirtualAddress[208] = (uint64_t)LouKeHalFreePciIrqVectors;
+    ImportTables[0].VirtualAddress[209] = (uint64_t)DrsdModeConfigurationCleanup;
 
 }
 

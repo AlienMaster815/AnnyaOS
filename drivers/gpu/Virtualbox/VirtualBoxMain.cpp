@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
+/* Port Copyright (C) 2025-2016 Tyler Grenier */
 
 
 #define _KERNEL_MODULE_
@@ -57,6 +58,12 @@ bool VboxCheckSupport(uint16_t Identification){
     VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_ID, Identification);
     IDCheck = inw(VIRTUALBOX_VBE_DISPI_IO_DATA_PORT);
     return (Identification == IDCheck);
+}
+
+static void VirtualboxAccellerationFailedInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
+    for(UINT32 i = 0 ; i < VBox->CrtcCount; i++){
+        VbvaDisable(&VBox->VbvaInformation[i], VBox->GuestPool, i);
+    } 
 }
 
 static LOUSTATUS VBoxAccelerationInitialize(
@@ -209,8 +216,15 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
         (void*)VBox, 
         (void*)VBox
     );
-
     LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
+    return Status;
+
+    ERROR_IRQ_FAILED_INIT:
+        VirtualBoxInterruptsFailedInitialization(VBox);
+    ERROR_MODE_FAILED_INIT:
+        VirtualBoxModeFaildInitialization(VBox);
+    ERROR_HARDWARE_FAILED_INIT:
+        VirtualBoxHardwareFailedInitialization(VBox);
     return Status;
 }
 
@@ -234,4 +248,8 @@ DriverEntry(
     DriverObject->DeviceTable = (uintptr_t)PiixPciDeviceTable;
     LouPrint("VBOXGPU::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
+}
+
+void VirtualBoxHardwareFailedInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
+    VirtualboxAccellerationFailedInitialization(VBox);
 }

@@ -3,6 +3,7 @@
 
 /* SPDX-License-Identifier: MIT */
 /* Copyright (C) 2006-2017 Oracle Corporation */
+/* Port Copyright (C) 2025-2016 Tyler Grenier */
 
 
 #define VIRTUALBOX_MAXIMUM_CURSOR_WIDTH     64
@@ -84,27 +85,26 @@ typedef struct _VIRTUALBOX_ENCODER{
 
 bool VirtualboxCheckSupported(uint16_t Identification);
 int VirtualboxHardwareInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-void VirtualboxHardwareDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-void VirtualboxModeDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxReportCapabilities(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 int VirtualboxMmInit(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox);
-void VirtualboxIrqDeinitialization(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
 void VirtualboxIrqReportHotplug(PVIRTUALBOX_PRIVATE_DATA VirtualboxPrivate);
-
+void VirtualBoxInterruptsFailedInitialization(
+    PVIRTUALBOX_PRIVATE_DATA VBox
+);
 void* HgsmiBufferAllocate(
     POOL GuestPool, 
     size_t size,
     uint8_t Channel,
     uint16_t ChannelInfo
 );
-
+void VirtualBoxModeFaildInitialization(PVIRTUALBOX_PRIVATE_DATA VBox);
 int HgsmiBufferSubmit(
     POOL Context,
     void* Buffer
 );
-
+void VirtualBoxHardwareFailedInitialization(PVIRTUALBOX_PRIVATE_DATA VBox);
 void HgsmiBufferFree(
     POOL Context,
     void* Buffer

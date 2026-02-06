@@ -1307,6 +1307,8 @@ PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE P
 
 void LouKeDrsdClearScreen(PDRSD_PLANE Plane);
 
+void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
+
 #endif
 #ifdef __cplusplus
 }
@@ -1552,6 +1554,8 @@ LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_ST
 KERNEL_EXPORT PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
 
 KERNEL_EXPORT void LouKeDrsdHandleConflictingDevices(struct _PCI_DEVICE_OBJECT* PDEV);
+
+KERNEL_EXPORT void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
 
 #endif
 #endif
