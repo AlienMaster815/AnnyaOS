@@ -157,6 +157,107 @@ typedef struct PACKED _XHCI_CAPABILITIES_REGISTER{
 #define XHCI_CAP_VTC_SHIFT                          9
 #define XHCI_CAP_VTC                                (XHCI_CAP_VTC_MASK << XHCI_CAP_VTC_SHIFT)
 
+//VTIOSOFF
+#define XHCI_VTIOSOFF_MASK                          0x0FFFFF
+#define XHCI_VTIOSOFF_SHIFT                         12
+#define XHCI_VTIOSOFF                               (XHCI_VTIOSOFF_MASK << XHCI_VTIOSOFF_SHIFT)
+#define GET_XHCI_VTIOSOFF(Base)                     ((*(UINT32*)((UINT64)Base + 0x20)) & XHCI_VTIOSOFF)
+
+//HC Operational Registers
+
+typedef struct PACKED _XHCI_USB_PORT_REGISTER_SET{
+    UINT32                          PortStatusControl;
+    UINT32                          PortPMSC;
+    UINT32                          PortLI;
+    UINT32                          PortCH;
+}XHCI_USB_PORT_REGISTER_SET, * PXHCI_USB_PORT_REGISTER_SET;
+
+typedef struct PACKED _XHCI_OPERATIONAL_REGISTERS{
+    UINT32                          UsbCommand;
+    UINT32                          UsbStatus;                      
+    UINT32                          PageSize;                       
+    UINT8                           ReservedZ1[0x13 - 0x0C];        
+    UINT32                          DncCtrl;
+    UINT64                          Crcr;
+    UINT8                           ReservedZ2[0x2F - 0x20];
+    UINT64                          Dcbaap;
+    UINT32                          Config;
+    UINT8                           ReservedZ3[0x03FF - 0x003C];
+    XHCI_USB_PORT_REGISTER_SET      Ports[];
+}XHCI_OPERATIONAL_REGISTERS, * PXHCI_OPERATIONAL_REGISTERS;
+
+
+#define GET_XHCI_OPERATIONAL_REGISTERS(Cap)         ((PXHCI_OPERATIONAL_REGISTERS)((UINT64)((PXHCI_CAPABILITIES_REGISTER)Cap)->CapLength + (UINT64)Cap))
+
+//393
+
+#define XHCI_USBCMD_RUN_STOP_MASK           1
+#define XHCI_USBCMD_RUN_STOP_SHIFT          0
+#define XHCI_USBCMD_RUN_STOP                (XHCI_USBCMD_RUN_STOP_MASK << XHCI_USBCMD_RUN_STOP_SHIFT)
+#define XHCI_USBCMD_HCRST_MASK              1
+#define XHCI_USBCMD_HCRST_SHIFT             1
+#define XHCI_USBCMD_HCRST                   (XHCI_USBCMD_HCRST_MASK << XHCI_USBCMD_HCRST_SHIFT) //this will reset downstream USB3 ports and roots
+#define XHCI_USBCMD_INTE_MASK               1
+#define XHCI_USBCMD_INTE_SHIFT              2
+#define XHCI_USBCMD_INTE                    (XHCI_USBCMD_INTE_MASK << XHCI_USBCMD_INTE_SHIFT)
+#define XHCI_USBCMD_HSEE_MASK               1
+#define XHCI_USBCMD_HSEE_SHIFT              3
+#define XHCI_USBCMD_HSEE                    (XHCI_USBCMD_HSEE_MASK << XHCI_USBCMD_HSEE_SHIFT)
+#define XHCI_USBCMD_LHCRST_MASK             1
+#define XHCI_USBCMD_LHCRST_SHIFT            7
+#define XHCI_USBCMD_LHCRST                  (XHCI_USBCMD_LHCRST_MASK << XHCI_USBCMD_LHCRST_SHIFT)
+#define XHCI_USBCMD_CSS_MASK                1
+#define XHCI_USBCMD_CSS_SHIFT               8
+#define XHCI_USBCMD_CSS                     (XHCI_USBCMD_CSS_MASK << XHCI_USBCMD_CSS_SHIFT)
+#define XHCI_USBCMD_CRS_MASK                1
+#define XHCI_USBCMD_CRS_SHIFT               9
+#define XHCI_USBCMD_CRS                     (XHCI_USBCMD_CRS_MASK << XHCI_USBCMD_CRS_SHIFT)
+#define XHCI_USBCMD_EWE_MASK                1
+#define XHCI_USBCMD_EWE_SHIFT               10
+#define XHCI_USBCMD_EWE                     (XHCI_USBCMD_EWE_MASK << XHCI_USBCMD_EWE_SHIFT)
+#define XHCI_USBCMD_EU3S_MASK               1
+#define XHCI_USBCMD_EU3S_SHIFT              11
+#define XHCI_USBCMD_EU3S                    (XHCI_USBCMD_EU3S_MASK << XHCI_USBCMD_EU3S_SHIFT)
+#define XHCI_USBCMD_CME_MASK                1
+#define XHCI_USBCMD_CME_SHIFT               13
+#define XHCI_USBCMD_CME                     (XHCI_USBCMD_CME_MASK << XHCI_USBCMD_CME_SHIFT)
+#define XHCI_USBCMD_ETE_MASK                1
+#define XHCI_USBCMD_ETE_SHIFT               14
+#define XHCI_USBCMD_TSC_EN_MASK             1
+#define XHCI_USBCMD_TSC_EN_SHIFT            15
+#define XHCI_USBCMD_TSC_EN                  (XHCI_USBCMD_TSC_EN_MASK << XHCI_USBCMD_TSC_EN_SHIFT)
+#define XHCI_USBCMD_VTIOE_MASK              1
+#define XHCI_USBCMD_VTIOE_SHIFT             16
+#define XHCI_USBCMD_VTIOE                   (XHCI_USBCMD_VTIOE_MASK << XHCI_USBCMD_VTIOE_SHIFT)
+
+#define XHCI_USBSTS_HCH_MASK                1
+#define XHCI_USBSTS_HCH_SHIFT               0
+#define XHCI_USBSTS_HCH                     (XHCI_USBSTS_HCH_MASK << XHCI_USBSTS_HCH_SHIFT)
+#define XHCI_USBSTS_HSE_MASK                1
+#define XHCI_USBSTS_HSE_SHIFT               2
+#define XHCI_USBSTS_HSE                     (XHCI_USBSTS_HSE_MASK << XHCI_USBSTS_HSE_SHIFT)
+#define XHCI_USBSTS_EINT_MASK               1
+#define XHCI_USBSTS_EINT_SHIFT              3
+#define XHCI_USBSTS_EINT                    (XHCI_USBSTS_EINT_MASK << XHCI_USBSTS_EINT_SHIFT)
+#define XHCI_USBSTS_PCD_MASK                1
+#define XHCI_USBSTS_PCD_SHIFT               4
+#define XHCI_USBSTS_PCD                     (XHCI_USBSTS_PCD_MASK << XHCI_USBSTS_PCD_SHIFT)
+#define XHCI_USBSTS_SSS_MASK                1
+#define XHCI_USBSTS_SSS_SHIFT               8
+#define XHCI_USBSTS_SSS                     (XHCI_USBSTS_SSS_MASK << XHCI_USBSTS_SSS_SHIFT)
+#define XHCI_USBSTS_RSS_MASK                1
+#define XHCI_USBSTS_RSS_SHIFT               9
+#define XHCI_USBSTS_RSS                     (XHCI_USBSTS_RSS_MASK << XHCI_USBSTS_RSS_SHIFT)
+#define XHCI_USBSTS_SRE_MASK                1
+#define XHCI_USBSTS_SRE_SHIFT               10
+#define XHCI_USBSTS_SRE                     (XHCI_USBSTS_SRE_MASK << XHCI_USBSTS_SRE_SHIFT)
+#define XHCI_USBSTS_CNR_MASK                1
+#define XHCI_USBSTS_CNR_SHIFT               11
+#define XHCI_USBSTS_CNR                     (XHCI_USBSTS_CNR_MASK << XHCI_USBSTS_CNR_SHIFT)
+#define XHCI_USBSTS_HCE_MASK                1
+#define XHCI_USBSTS_HCE_SHIFT               12
+#define XHCI_USBSTS_HCE                     (XHCI_USBSTS_HCE_MASK << XHCI_USBSTS_HCE_SHIFT)
+
 
 
 #endif
