@@ -174,7 +174,7 @@ KernelModules:
 	$(MAKE) -C Registry clean
 	$(MAKE) -C Registry all
 	./Registry/LKRCompiler Config/System_Config/LOUOSKRNL.LRS Registry/build/LOUOSKRNL.LKR
-	./Registry/LKRCompiler Config/System_Config/SECURITY.LRS Registry/build/SECURITY.LKR
+	./Registry/LKRCompiler Config/System_Config/USERS.LRS Registry/build/USERS.LKR
 
 	$(MAKE) -C KernelLibraries clean
 	$(MAKE) -C KernelLibraries all

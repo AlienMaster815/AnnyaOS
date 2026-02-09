@@ -1,5 +1,4 @@
-#define _KERNEL_MODULE_
-#include <LouDDK.h>
+#include "Xhci.h"
 
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
