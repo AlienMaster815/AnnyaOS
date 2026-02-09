@@ -356,8 +356,6 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeBootGraphics();
 
-    LouKeAllocateSesionHandle(0x00, 0);
-
     //INITIALIZE IMPORTANT THINGS FOR US LATER
     InitializeGenericTables();
 

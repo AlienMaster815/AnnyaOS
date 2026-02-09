@@ -153,11 +153,6 @@ LouKeVmmCreateSectionEx(
     ULONG                   ExtendedParameterCount
 );
 
-LOUSTATUS LouKeAllocateSesionHandle(
-    PHANDLE OutHandle,
-    PVOID   HandleData
-);
-
 #define SESSION_OBJECT_CLASS_TAG                "SessionObject"
 #define ACCESS_TOKEN_OBJECT_CLASS_TAG           "AccessTokenObject"
 
