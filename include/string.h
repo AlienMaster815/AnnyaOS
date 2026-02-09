@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define string char*
+#define LOUSTR char*
 #define StrCmpCast const char*
 #define StrCmpTrue 0
 
