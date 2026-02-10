@@ -142,10 +142,9 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
     );
 }
 
-PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
+PLMPOOL_DIRECTORY LouKeMapDynamicPool(
     uint64_t    LocationOfPool,
     size_t      PoolSize,
-    size_t      CachedTracks,
     string      Tag,
     uint64_t    Flags
 ){
@@ -154,31 +153,10 @@ PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
     NewPool->FixedSizePool = false;
     NewPool->Flags = Flags;
     NewPool->Tag = Tag;
-    NewPool->ObjectSize = CachedTracks;
+    NewPool->ObjectSize = 0;
     NewPool->PoolSize = PoolSize;
-    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &NewPool->MemoryTracks;
-    TmpPoolMemTrack->Peers.NextHeader = (PListHeader)LouKeMallocArray(POOL_MEMORY_TRACKS, CachedTracks, KERNEL_GENERIC_MEMORY);  
     NewPool->FixedSizePool = false;
     return NewPool;
-}
-
-PLMPOOL_DIRECTORY LouKeMapDynamicPool(
-    uint64_t    LocationOfPool,
-    size_t      PoolSize,
-    string      Tag,
-    uint64_t    Flags
-){
-    size_t CachedTracks = 0;
-    if(PoolSize > KILOBYTE_PAGE){
-        CachedTracks = PoolSize/KILOBYTE_PAGE;
-    }
-    return LouKeMapDynamicPoolEx(
-        LocationOfPool,
-        PoolSize,
-        CachedTracks,
-        Tag,
-        Flags
-    );  
 }
 
 POOL LouKeCreateGenericPool(
@@ -188,10 +166,9 @@ POOL LouKeCreateGenericPool(
     uint64_t Flags
 ){
 
-    POOL NewPool = LouKeMapDynamicPoolEx(
+    POOL NewPool = LouKeMapDynamicPool(
         VLocation,
         size,
-        1,
         0x00,
         Flags
     );

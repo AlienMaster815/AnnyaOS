@@ -25,6 +25,8 @@
 
 #include <stdatomic.h>
 
+#ifndef _ATOMIC_T_DEF
+#define _ATOMIC_T_DEF
 typedef struct {
 	int counter;
 }atomic_t;
@@ -35,6 +37,7 @@ typedef atomic_t* p_atomic_t;
 #define ATOMIC_FALSE 0
 
 typedef atomic_t ATOMIC, * PATOMIC, ATOMIC_BOOLEAN, * PATOMIC_BOOLEAN;
+#endif
 
 static inline int atomic_read(atomic_t* v) {
     return __atomic_load_n(&v->counter, __ATOMIC_SEQ_CST);

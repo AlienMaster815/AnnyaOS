@@ -26,10 +26,9 @@ PLMPOOL_DIRECTORY LouKeMapPool(
     while(1);
 }
 
-PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
+PLMPOOL_DIRECTORY LouKeMapDynamicPool(
     uint64_t    LocationOfPool,
     size_t      PoolSize,
-    size_t      CachedTracks,
     string      Tag,
     uint64_t    Flags
 ){
@@ -38,31 +37,10 @@ PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
     NewPool->FixedSizePool = false;
     NewPool->Flags = Flags;
     NewPool->Tag = Tag;
-    NewPool->ObjectSize = CachedTracks;
+    NewPool->ObjectSize = 0;
     NewPool->PoolSize = PoolSize;
-    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &NewPool->MemoryTracks;
-    TmpPoolMemTrack->Peers.NextHeader = (PListHeader)LouKeMallocArray(POOL_MEMORY_TRACKS, CachedTracks, KERNEL_GENERIC_MEMORY);  
     NewPool->FixedSizePool = false;
     return NewPool;
-}
-
-PLMPOOL_DIRECTORY LouKeMapDynamicPool(
-    uint64_t    LocationOfPool,
-    size_t      PoolSize,
-    string      Tag,
-    uint64_t    Flags
-){
-    size_t CachedTracks = 0;
-    if(PoolSize > KILOBYTE_PAGE){
-        CachedTracks = PoolSize/KILOBYTE_PAGE;
-    }
-    return LouKeMapDynamicPoolEx(
-        LocationOfPool,
-        PoolSize,
-        CachedTracks,
-        Tag,
-        Flags
-    );  
 }
 
 
@@ -111,13 +89,15 @@ void* LouKeMallocFromFixedPool(
     }
     PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &Pool->MemoryTracks;
     TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
-
+    MutexLock(&Pool->PoolLock);
     for(uint64_t i = 0 ; i < Pool->PoolSize; i++){
         if(!TmpPoolMemTrack[i].AddressInUse){
             TmpPoolMemTrack[i].AddressInUse = true;
+            MutexUnlock(&Pool->PoolLock);
             return (void*)TmpPoolMemTrack[i].Address;
         }
     }
+    MutexUnlock(&Pool->PoolLock);
     return 0x00;
 }
 
@@ -145,6 +125,14 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
         TmpPoolMemTrack[i].AddressInUse = false;
     }
     return NewPool;
+}
+
+void LouKeDestroyFixedPool(PLMPOOL_DIRECTORY Pool){
+
+    LouKeFree((void*)Pool->MemoryTracks.Peers.NextHeader);
+    LouKeFree((void*)Pool->VLocation);
+    LouKeFree((void*)Pool);
+
 }
 
 void LouKeMallocTrimFixedPool(
@@ -279,10 +267,9 @@ POOL LouKeCreateGenericPool(
     uint64_t Flags
 ){
 
-    POOL NewPool = LouKeMapDynamicPoolEx(
+    POOL NewPool = LouKeMapDynamicPool(
         VLocation,
         size,
-        1,
         0x00,
         Flags
     );

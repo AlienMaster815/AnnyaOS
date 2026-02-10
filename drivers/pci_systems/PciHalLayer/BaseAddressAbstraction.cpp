@@ -109,10 +109,8 @@ LOUSTATUS RegisterPciDeviceToDeviceManager(
     string DeviceManagerString
 );
 
-static POOL PciConfigPool = 0x00;
-
 void InitializeBARHalLayer(){
-    PciConfigPool = LouKeCreateFixedPool(0xFFFF, sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG), "PCIConfig Pool", 0 , KERNEL_GENERIC_MEMORY);
+    LouKeCreateFastObjectClass("PCICONFIG", 256, sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG), 0 , KERNEL_GENERIC_MEMORY);
 }
 
 void LouKeHalRegisterPciDevice(
@@ -121,7 +119,7 @@ void LouKeHalRegisterPciDevice(
 
     LouPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
 
-    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouKeMallocFromFixedPool(PciConfigPool);
+    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)LouKeAllocateFastObject("PCICONFIG");
     if(!Config){
         Config = (PPCI_COMMON_CONFIG)LouKeMallocType(PCI_COMMON_CONFIG, KERNEL_GENERIC_MEMORY);
     } 

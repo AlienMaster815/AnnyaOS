@@ -153,8 +153,35 @@ LouKeVmmCreateSectionEx(
     ULONG                   ExtendedParameterCount
 );
 
-#define SESSION_OBJECT_CLASS_TAG                "SessionObject"
-#define ACCESS_TOKEN_OBJECT_CLASS_TAG           "AccessTokenObject"
+typedef LOUSTATUS (*LOUSINE_OBJECT_CONSTRUCTOR)(PVOID Object, PVOID ConstructParams);
+typedef LOUSTATUS (*LOUSINE_OBJECT_DECONSTRUCTOR)(PVOID Object);
+
+LOUSTATUS LouKeCreateFastObjectClass(
+    LOUSTR  ClassName,
+    SIZE    ObjectCount,
+    SIZE    ObjectSize,
+    SIZE    ObjectAlignment,
+    SIZE    Flags,
+    SIZE    PageFlags
+);
+
+LOUSTATUS LouKeCreateFastObjectClassEx(
+    LOUSTR                          ClassName,
+    SIZE                            ObjectCount,
+    SIZE                            ObjectSize,
+    SIZE                            ObjectAlignment,
+    SIZE                            Flags,
+    SIZE                            PageFlags,
+    LOUSINE_OBJECT_CONSTRUCTOR      Constructor,
+    LOUSINE_OBJECT_DECONSTRUCTOR    DeConstructor
+);
+
+PVOID LouKeAllocateFastObject(
+    LOUSTR  ObjectLookup
+);
+
+void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address);
+
 
 #ifdef __cplusplus
 }

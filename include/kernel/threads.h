@@ -55,6 +55,8 @@ static inline int LouKeGetAtomic(atomic_t* A){
     return atomic_read(A);
 }
 
+#ifndef _MUTEX_STRUCTURE_DEFINITION
+#define _MUTEX_STRUCTURE_DEFINITION
 typedef struct _mutex_t{
     atomic_t locked;
     atomic_t Handle;
@@ -62,6 +64,7 @@ typedef struct _mutex_t{
     atomic_t ThreadOwnerLow;
     atomic_t ThreadOwnerHigh;
 } mutex_t;
+#endif
 
 static inline void LouKeSetAtomicBoolean(PATOMIC_BOOLEAN b, int Boolean){
     LouKeSetAtomic(b, Boolean);

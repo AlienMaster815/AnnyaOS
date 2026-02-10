@@ -11,10 +11,9 @@ PVOID LouKeMallocDma16Ex(
     if(!Dma16Pool){
         UINT64 Tmp = (UINT64)LouVMalloc(DMA_16_END - DMA_16_START);
         //64 < is not allowed to be remapped from identiy so assume identity
-        Dma16Pool = LouKeMapDynamicPoolEx(
+        Dma16Pool = LouKeMapDynamicPool(
             Tmp, 
             DMA_16_END - DMA_16_START, 
-            6, //6 ISA devices Sound, Net, Ide 1, Ide 2, Flopy 1, Flopy 2  
             "DMA-16 Pool",
             0 //no flags
         );

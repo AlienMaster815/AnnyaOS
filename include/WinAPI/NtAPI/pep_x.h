@@ -125,11 +125,11 @@ typedef struct _PEP_ACPI_ABANDON_DEVICE {
 } PEP_ACPI_ABANDON_DEVICE, *PPEP_ACPI_ABANDON_DEVICE;
 
 typedef struct _PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE {
-  PEPHANDLE                      DeviceHandle;
-  ULONG                          RequestFlags;
-  NTSTATUS                       Status;
-  ULONG                          ObjectCount;
-  SIZE_T                         ObjectBufferSize;
+  PEPHANDLE                       DeviceHandle;
+  ULONG                           RequestFlags;
+  NTSTATUS                        Status;
+  ULONG                           ObjectCount;
+  SIZE_T                          ObjectBufferSize;
   PEP_ACPI_OBJECT_NAME_WITH_TYPE* Objects;
 } PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE, *PPEP_ACPI_ENUMERATE_DEVICE_NAMESPACE;
 

@@ -50,10 +50,8 @@ void InterruptWrapper(uint64_t Handler,uint8_t InterruptNumber, bool NeedFlotati
 	RegisterInterruptHandler((void(*)(uint64_t))Handler, InterruptNumber, NeedFlotationSave, OverideData);
 }
 
-static POOL InterruptRouterPool = 0x00;
-
 void InitializeInterruptRouter(){
-    InterruptRouterPool = LouKeCreateFixedPool(0xFFFF, sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), "Interrupt Router Pool", 0, KERNEL_GENERIC_MEMORY);
+    LouKeCreateFastObjectClass("IRQROUTE", 256, sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), 0, KERNEL_GENERIC_MEMORY);
 }
 
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData) {
@@ -66,7 +64,7 @@ void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, 
     while(TmpRouter->List.NextHeader){
         TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
     }
-    TmpRouter->List.NextHeader = LouKeMallocFromFixedPool(InterruptRouterPool);
+    TmpRouter->List.NextHeader = LouKeAllocateFastObject("IRQROUTE");
     if(!TmpRouter->List.NextHeader){
         TmpRouter->List.NextHeader = (PListHeader)LouKeMallocType(INTERRUPT_ROUTER_ENTRY, KERNEL_GENERIC_MEMORY);
     }

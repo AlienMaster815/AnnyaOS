@@ -17,6 +17,8 @@ static inline void LouKeSetAtomic(atomic_t* A, int Value){
 
 typedef atomic_t* p_atomic_t;
 
+#ifndef _MUTEX_STRUCTURE_DEFINITION
+#define _MUTEX_STRUCTURE_DEFINITION
 typedef struct _mutex_t{
     atomic_t locked;
     atomic_t Handle;
@@ -24,6 +26,7 @@ typedef struct _mutex_t{
     atomic_t ThreadOwnerLow;
     atomic_t ThreadOwnerHigh;
 } mutex_t;
+#endif
 
 typedef struct {
     mutex_t Lock;

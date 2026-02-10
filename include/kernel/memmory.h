@@ -311,9 +311,35 @@ typedef struct _POOL_MEMORY_TRACKS{
     size_t MemorySize; //used if not fixed
 }POOL_MEMORY_TRACKS, * PPOOL_MEMORY_TRACKS;
 
+#ifndef _ATOMIC_T_DEF
+#define _ATOMIC_T_DEF
+typedef struct {
+	int counter;
+}atomic_t;
+
+typedef atomic_t* p_atomic_t;
+
+#define ATOMIC_TRUE  1
+#define ATOMIC_FALSE 0
+
+typedef atomic_t ATOMIC, * PATOMIC, ATOMIC_BOOLEAN, * PATOMIC_BOOLEAN;
+#endif
+
+#ifndef _MUTEX_STRUCTURE_DEFINITION
+#define _MUTEX_STRUCTURE_DEFINITION
+typedef struct _mutex_t{
+    atomic_t locked;
+    atomic_t Handle;
+    atomic_t PrivaledgeLevel;
+    atomic_t ThreadOwnerLow;
+    atomic_t ThreadOwnerHigh;
+} mutex_t;
+#endif
+
 typedef struct _LMPOOL_DIRECTORY{
     ListHeader          List;
     bool                FixedSizePool;
+    mutex_t             PoolLock;
     string              Tag;
     uint64_t            LastOut;
     uint64_t            Location;
@@ -478,6 +504,8 @@ PLMPOOL_DIRECTORY LouKeMapPool(
     string Tag,
     uint64_t Flags
 );
+
+void LouKeDestroyFixedPool(PLMPOOL_DIRECTORY Pool);
 
 PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     uint64_t NumberOfPoolMembers,
@@ -650,14 +678,6 @@ void  LouKeMemReleaseReMap(void* Address);
 uint64_t GetIoMemEnd();
 
 uint64_t GetAllocationBlockBase(uint64_t Address);
-
-PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
-    uint64_t    LocationOfPool,
-    size_t      PoolSize,
-    size_t      CachedTracks,
-    string      Tag,
-    uint64_t    Flags
-);
 
 void LouKeFreePhy32(void*);
 

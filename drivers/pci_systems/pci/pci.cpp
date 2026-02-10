@@ -4,8 +4,6 @@
 
 #define NOT_A_PCI_DEVICE 0xFFFF 
 
-static POOL PciDeicePool = 0x00; 
-
 bool isUsb(uint8_t bus, uint8_t slot, uint8_t function);
 bool IsVGA(uint8_t bus, uint8_t slot, uint8_t function);
 bool IsSerial(uint8_t bus, uint8_t slot, uint8_t function);
@@ -32,11 +30,11 @@ void checkBus(uint16_t Group, uint8_t bus) {
 }
 
 PPCI_DEVICE_OBJECT LouKeAllocPciDevObject(){
-    return (PPCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+    return (PPCI_DEVICE_OBJECT)LouKeAllocateFastObject("PDEV");
 }
 
 void LouKeFreePciDevObject(PPCI_DEVICE_OBJECT PDEV){
-    LouKeFreeFromFixedPool(PciDeicePool, (PVOID)(UINT8*)PDEV);
+    LouKeFreeFastObject("PDEV", (PVOID)(UINT8*)PDEV);
 }
 
 LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
@@ -55,7 +53,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
             if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
                 if (PciGetDeviceID(Group, bus, device, function) == NOT_A_PCI_DEVICE) continue;
                 else {
-                    PPCI_DEVICE_OBJECT PDev = (PPCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+                    PPCI_DEVICE_OBJECT PDev = (PPCI_DEVICE_OBJECT)LouKeAllocPciDevObject();
                     if(!PDev){
                         PDev = LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);                    
                     }
@@ -74,7 +72,7 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         }
     }
     else{
-        PPCI_DEVICE_OBJECT PDev = (PPCI_DEVICE_OBJECT)LouKeMallocFromFixedPool(PciDeicePool);
+        PPCI_DEVICE_OBJECT PDev = (PPCI_DEVICE_OBJECT)LouKeAllocPciDevObject();
         if(!PDev){
             PDev = (PPCI_DEVICE_OBJECT)LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
         }
@@ -208,7 +206,7 @@ void InitializeBARHalLayer();
 
 LOUDDK_API_ENTRY 
 void LouKeMapPciMemory(){
-    PciDeicePool = LouKeCreateFixedPool(0xFFFF, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), "PDEV Pool", 0, KERNEL_GENERIC_MEMORY);
+    LouKeCreateFastObjectClass("PDEV", 256, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), 0, KERNEL_GENERIC_MEMORY);
     InitializeBARHalLayer();
     PCI_Scan_Bus();
 }
