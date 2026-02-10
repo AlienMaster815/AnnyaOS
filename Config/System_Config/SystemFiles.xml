@@ -71,7 +71,7 @@
         <FILETOCPY64>cp SpriteAssets/AOSCHIP.png ISO/ANNYA/AOSCHIP.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSTCD.png ISO/ANNYA/AOSTCD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
         <FILETOCPY64>cp Music/STARTUP.WAV ISO/ANNYA/STARTUP.WAV</FILETOCPY64>                                               <!--Annya OS Asset-->
-        <FILETOCPY64>cp Music/TADA.WAV ISO/ANNYA/TADA.WAV</FILETOCPY64>                                                     <!--Annya OS Asset-->
+        <FILETOCPY64>cp Music/SHUTDOWN.WAV ISO/ANNYA/SHUTDOWN.WAV</FILETOCPY64>                                                     <!--Annya OS Asset-->
         <!--System Fonts-->
         <FILETOCPY64>cp FontAssets/MJSSR.otf ISO/ANNYA/MJSSR.OTF</FILETOCPY64>                                              <!--Annya OS Asset-->
         <!--System Configuration-->
