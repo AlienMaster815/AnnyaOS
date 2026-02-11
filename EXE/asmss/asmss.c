@@ -22,6 +22,8 @@ NTSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");    
 
+    
+
     LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
 
     while(1);
