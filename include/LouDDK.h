@@ -203,6 +203,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/fpu.h>
 #include <kernel/LKPCB.h>
 #include <kernel/LouAccessTokens.h>
+#include <Riff.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

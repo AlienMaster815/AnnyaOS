@@ -309,6 +309,9 @@ void LouKeInitializePciDevices(){
 
 void LouKeSantyCheckPciDevices();
 
+LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
+PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
+
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -383,6 +386,12 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
+
+    PRIFF_OBJECT StartupWave = LouKeOpenRiffFile("C:/ANNYA/STARTUP.WAV");
+
+    LouKePlayWaveFile(StartupWave);
+
+    while(1);
 
     //LOUSTATUS LouKePmCreateProcessEx(
     //    PHPROCESS                       HandleOut,          //Optional                       
