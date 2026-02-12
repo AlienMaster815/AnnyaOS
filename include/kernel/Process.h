@@ -247,10 +247,11 @@ typedef HANDLE HPROCESS, * PHPROCESS;
 
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,          //Optional                       
-    string                          ProcessName,        //Process Name
+    LOUSTR                          ProcessName,        //Process Name
     PHPROCESS                       ParrentProcess,     //Parent Process Handle           
     UINT8                           Priority,           //Process Schedualer Priority
     HANDLE                          Section,            //Section of the Executable Image
+    HANDLE                          AccessToken,        //Access Token
     PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
 );
 

@@ -165,8 +165,8 @@ void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
 uint64_t GetCr3();
-
-
+LOUSTATUS LouKeObjManInitialize();
+void LouKeInitializeSecuritySubsystem();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -227,6 +227,11 @@ void InitializeSymmetricMultiProcessing(){
 void LouKeWaitForProcessorInitialization();
 
 void AdvancedLousineKernelInitialization(){
+
+    LouKeObjManInitialize();
+
+    LouKeInitializeSecuritySubsystem();
+
     if (InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
     
     InitializeSymmetricMultiProcessing();
@@ -387,11 +392,12 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
-    PRIFF_OBJECT StartupWave = LouKeOpenRiffFile("C:/ANNYA/STARTUP.WAV");
 
-    LouKePlayWaveFile(StartupWave);
+    //PRIFF_OBJECT StartupWave = LouKeOpenRiffFile("C:/ANNYA/STARTUP.WAV");
 
-    while(1);
+    //LouKePlayWaveFile(StartupWave);
+
+    //while(1);
 
     //LOUSTATUS LouKePmCreateProcessEx(
     //    PHPROCESS                       HandleOut,          //Optional                       
@@ -399,6 +405,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     //    PHPROCESS                       ParrentProcess,     //Parent Process Handle           
     //    UINT8                           Priority,           //Process Schedualer Priority
     //    HANDLE                          Section,            //Section of the Executable Image
+    //    HANDLE                          AccessToken,        //Access Token
     //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
     //);
 
@@ -412,6 +419,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     }
     string PathKey;
     LOUSTATUS Status;
+    HANDLE SectionHandle;
 
     Status = LouKeRegGetAndCombineStringPath(
         AsmssKey,
@@ -432,8 +440,6 @@ KERNEL_ENTRY LouOsKrnlStart(
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
 
-    HANDLE SectionHandle;
-
     LouKeVmmCreateSectionEx(
         &SectionHandle,
         0x00,
@@ -446,12 +452,50 @@ KERNEL_ENTRY LouOsKrnlStart(
         0x00
     );
 
+    PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
+    
+    Status = LouKeZwCreateAccessToken(
+        &AccessToken,
+        true,
+        0x00,
+        0x00
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PANIC:Unable To Create System Token\n");
+        while(1);
+    }
+
+    Status = LouKeZwRegisterAccessTokenToObjectManager(
+        AccessToken,
+        0
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PANIC:Unable To Register System Token\n");
+        while(1);
+    }
+
+    HANDLE AccessTokenHandle;
+    
+    Status = LouKeZwAcquireHandleForObjectEx(
+        &AccessTokenHandle, 
+        (PVOID)AccessToken, 
+        0x00,
+        true
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PANIC:Unable To Get System Token Handle\n");
+        while(1);
+    }
+
     Status = LouKePmCreateProcessEx(
         0x00,
         ASMSS_PROCESS_NAME,
         0x00,
         PROCESS_PRIORITY_HIGH,
         SectionHandle,
+        AccessTokenHandle,
         0x00
     );
 

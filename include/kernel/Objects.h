@@ -180,8 +180,50 @@ PVOID LouKeAllocateFastObject(
     LOUSTR  ObjectLookup
 );
 
+PVOID LouKeAllocateFastObjectEx(
+    LOUSTR  ObjectLookup,
+    PVOID   ConstructData
+);
 void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address);
 
+LOUSTATUS LouKeRegisterObjectToObjectManager(
+    PVOID                   ObjectPointer,
+    SIZE                    ObjectSize,
+    LOUSTR                  ObjectName,
+    int                     MaxHandles,
+    PSECURITY_DESCRIPTOR    SecurityDescriptor
+);
+
+LOUSTATUS LouKeRegisterFileToObjectManager(
+    FILE*                   File,
+    LOUSTR                  FileName,
+    int                     MaxHandles,
+    PSECURITY_DESCRIPTOR    SecurityDescriptor
+);
+
+LOUSTATUS LouKeGetObjectHeaderByName(
+    LOUSTR  ObjectName,
+    PVOID*  ObjectHeader
+);
+
+LOUSTATUS LouKeAcquireHandleForObject(
+    PHANDLE     OutHandle,
+    PVOID       Object, 
+    ACCESS_MASK RequestedAccess
+);
+
+LOUSTATUS LouKeZwAcquireHandleForObjectEx(
+    PHANDLE     OutHandle,
+    PVOID       Object, 
+    ACCESS_MASK RequestedAccess,
+    BOOL        KernelIsRequesting
+);
+
+LOUSTATUS LouKeZwAcquireHandleForObject(
+    PHANDLE     OutHandle,
+    PVOID       Object, 
+    ACCESS_MASK RequestedAccess
+);
 
 #ifdef __cplusplus
 }

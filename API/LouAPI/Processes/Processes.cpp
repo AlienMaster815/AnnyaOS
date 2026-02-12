@@ -92,6 +92,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       ParentProcess,  
     UINT8                           Priority,                 
     HANDLE                          Section,
+    HANDLE                          AccessToken,
     PLOUSINE_CREATE_PROCESS_PARAMS  Params 
 ){
     LOUSTATUS Status;
@@ -109,6 +110,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     NewProcessObject->ParentProcess = (PGENERIC_PROCESS_DATA)ParentProcess;
     NewProcessObject->ProcessPriority = Priority;
     NewProcessObject->ProcessSection = Section;
+    NewProcessObject->ProcessAccessToken = AccessToken;
 
     if(Params){
         //TODO::

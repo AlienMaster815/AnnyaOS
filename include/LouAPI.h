@@ -62,6 +62,8 @@
 #include <kernel/LKPCB.h>
 #include <kernel/LouAccessTokens.h>
 #include <Riff.h>
+#include <kernel/LouAccessTokens.h>
+
 
 #ifndef KERNEL_MAIN_FILE
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;

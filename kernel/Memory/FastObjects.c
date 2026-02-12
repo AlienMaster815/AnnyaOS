@@ -246,10 +246,14 @@ void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address){
         TmpTracker = (PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
         POOL TmpPool = TmpTracker->AllocationPool;
         if(RangeInterferes((UINT64)Address, 1, TmpPool->VLocation, PoolSize)){
+            if(Template->DeConstructor){
+                MutexLock(&Template->BuildLock);
+                Template->DeConstructor(Address);
+                MutexUnlock(&Template->BuildLock);
+            }
             LouKeFreeFromFixedPool(TmpPool, Address);
             LouKeReleaseReference(&TmpTracker->KRef);
             if(!LouKeGetReferenceCount(&TmpTracker->KRef)){
-                LouPrint("HERE\n");
                 FreePoolTracker(Template, TmpTracker);
             }
             goto _FREE_FINISHED;

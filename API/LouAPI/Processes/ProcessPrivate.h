@@ -200,6 +200,7 @@ typedef struct _GENERIC_PROCESS_DATA{
     INSTRUCTION_MODE                        InstructionMode;
     UINT8*                                  AfinityBitmap;
     HANDLE                                  ProcessSection;
+    HANDLE                                  ProcessAccessToken;
     UINT64                                  StackSize;
 }GENERIC_PROCESS_DATA, * PGENERIC_PROCESS_DATA;
 

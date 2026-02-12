@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-void LouKeLoadFileCall(uint64_t* Data);
+LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK AccessMask);
 void LouKeCloseFileCall(uint64_t* Data);
 void LouKeUpdateShadowClipState(PDRSD_CLIP Clip);
 void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack);
@@ -82,7 +82,8 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOULOADFILE:{
-            LouKeLoadFileCall((uint64_t*)Data);
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[1] = LouKeLoadFileCall(&Tmp[0], (ACCESS_MASK)Tmp[2]);
             return;
         }
         case LOUPRINTCALL:{

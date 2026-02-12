@@ -204,6 +204,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <kernel/LKPCB.h>
 #include <kernel/LouAccessTokens.h>
 #include <Riff.h>
+#include <kernel/LouAccessTokens.h>
+#include <Security.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

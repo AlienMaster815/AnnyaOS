@@ -2,6 +2,7 @@
 //x86_64-w64-mingw32-gcc -shared -o LouDll.dll LouDll.c -nostdlib -nodefaultlibs -I../../../Include
 #include "LouDll.h"
 #include <LouCoff.h>
+#include <Security.h>
 
 #define NTDLL_RVA_ENTRIES 78
 #define KERNELBASE_RVA_ENTRIES 1
@@ -666,8 +667,9 @@ FILE*
 LouOpenFileA(
     string FileName
 ){
-    uint64_t KulaPacket[2] = {0};
+    uint64_t KulaPacket[4] = {0};
     KulaPacket[1] = (uint64_t)FileName;
+    KulaPacket[3] = (uint64_t)ACCESS_MASK_GENERIC_ALL;
     while(!KulaPacket[0]){
         LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     }
@@ -679,10 +681,11 @@ void
 LouCloseFile(
     FILE* ClosingFile
 ){
+    LouPrint("LouCloseFile\n");
     uint64_t KulaPacket[2] = {0};
     KulaPacket[1] = (uint64_t)ClosingFile;
     while(!KulaPacket[0]){
-        LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
+
     } 
 }
 

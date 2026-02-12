@@ -27,7 +27,8 @@ typedef struct _KAPC {
     BOOLEAN Inserted;
 } KAPC, * PKAPC, * PRKAPC;
 
-typedef ULONG ACCESS_MASK;
+#include <Security.h>
+
 typedef LONGLONG USN;
 
 #ifndef _OBJECT_ATTRIBUTES_DEF

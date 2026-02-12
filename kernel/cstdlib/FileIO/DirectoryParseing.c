@@ -28,9 +28,73 @@ string GetNextDirectoryName(string PATH){
 }
 
 
-void LouKeLoadFileCall(uint64_t* Data){
+LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
     string PathToFile = (string)*Data;
-    *Data = (uint64_t)fopen(PathToFile, USER_GENERIC_MEMORY);   
+    LOUSTATUS Status;
+    PVOID Object;
+    HANDLE OutHandle;
+    Status = LouKeGetObjectHeaderByName(PathToFile, &Object);
+    if(Status == STATUS_SUCCESS){
+        Status = LouKeAcquireHandleForObject(
+            &OutHandle,
+            Object,
+            RequestedAccess
+        );
+        if(Status != STATUS_SUCCESS){
+            LouPrint("LouKeLoadFileCall() Unable To Acquire Handle For Object\n");
+            *Data = 0x00;
+            return Status;
+        }
+        *Data = (uint64_t)OutHandle;
+        return STATUS_SUCCESS;
+    }
+
+    FILE* File = fopen(PathToFile, KERNEL_GENERIC_MEMORY);   
+    
+    if(!File){
+        LouPrint("LouKeLoadFileCall() Unable To Open File\n");
+        *Data = 0x00;
+        return STATUS_NO_SUCH_FILE;
+    }
+
+    Status = LouKeRegisterFileToObjectManager(
+        File,
+        PathToFile,
+        0,
+        0x00
+    );
+ 
+    if(Status != STATUS_SUCCESS){
+        LouPrint("LouKeLoadFileCall() Unable To Register Object");
+        *Data = 0x00;
+        return Status;
+    }
+    
+    
+    Status = LouKeGetObjectHeaderByName(PathToFile, &Object);
+    if(Status == STATUS_SUCCESS){
+        Status = LouKeAcquireHandleForObject(
+            &OutHandle,
+            Object,
+            RequestedAccess
+        );
+        if(Status != STATUS_SUCCESS){
+            LouPrint("LouKeLoadFileCall() Unable To Acquire Handle For Object\n");
+            //TODO Remove Object From Object Manager And Close File
+            *Data = 0x00;
+            return Status;
+        }
+        *Data = (uint64_t)OutHandle;
+        LouPrint("LouKeLoadFileCall():%h\n", OutHandle);
+        while(1);
+        return STATUS_SUCCESS;
+    }
+
+    
+    LouPrint("LouKeLoadFileCall() FAILED To Get Object\n");
+
+    while(1);
+    return STATUS_UNSUCCESSFUL;
 }
 
 void LouKeCloseFileCall(uint64_t* Data){

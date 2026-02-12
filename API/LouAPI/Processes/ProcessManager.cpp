@@ -346,12 +346,50 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     LouKeTsmInitializeIdleThreads();
 
+    PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
+    
+    LOUSTATUS Status = LouKeZwCreateAccessToken(
+        &AccessToken,
+        true,
+        0x00,
+        0x00
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PANIC:Unable To Create System Token\n");
+        while(1);
+    }
+
+    Status = LouKeZwRegisterAccessTokenToObjectManager(
+        AccessToken,
+        0
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PANIC:Unable To Register System Token\n");
+        while(1);
+    }
+
+    HANDLE AccessTokenHandle;
+    
+    Status = LouKeZwAcquireHandleForObjectEx(
+        &AccessTokenHandle, 
+        (PVOID)AccessToken, 
+        0x00,
+        true
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("PANIC:Unable To Get System Token Handle\n");
+        while(1);
+    }
+
     LouKePmCreateProcessEx(
         0x00,
         KERNEL_PROCESS_NAME,
         0x00, 
         PROCESS_PRIORITY_HIGH,
         0x00,
+        AccessTokenHandle,
         0x00
     );
     
