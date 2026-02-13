@@ -229,7 +229,8 @@ LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(){
     }
 }
 
-void LouKeCreateScrollTerminal(PDRSD_CLIP Clip);
+void LouKeCreateScrollTerminal(PDRSD_DEVICE Device, PDRSD_CLIP Clip);
+void LouKeOsDosDetatchDevice(PDRSD_DEVICE Device);
 
 LOUDDK_API_ENTRY 
 LOUSTATUS
@@ -244,7 +245,7 @@ LouKeDrsdInitializeBootDevice(
     PDRSD_CLIP Background = LouKeDrsdCreateClip(
         0, 0,
         Plane->PlaneState->Width, Plane->PlaneState->Height,
-        0, 128, 128, 255
+        0, 0, 0, 0
     );
 
     Plane->AlphaShift = 24;
@@ -257,7 +258,7 @@ LouKeDrsdInitializeBootDevice(
     LouKeDrsdSyncScreen();
     LouPrint("LouKeDrsdInitializeBootDevice() STATUS_SUCCESS\n");
 
-    LouKeCreateScrollTerminal(Background);
+    LouKeCreateScrollTerminal(Device, Background);
 
     return STATUS_SUCCESS;
 }
@@ -267,6 +268,7 @@ LOUDDK_API_ENTRY
 void LouKeDrsdHandleConflictingDevices(PPCI_DEVICE_OBJECT PDEV){
 
     if(BootDevice){
+        LouKeOsDosDetatchDevice(BootDevice);
         LouKeDrsdRemovePlaneChainMember(BootDevice->Planes);
         BootDevice = 0x00;
     }
@@ -326,11 +328,27 @@ LouKeDrsdInitializeDevice(
 
         Crtc->CrtcState->NeedsModeset = false;
 
-        
         PDRSD_PLANE_CHAIN Chain = LouKeDrsdAcquireClipChainMember(PrimaryPlane);
         Chain->PrimaryAtomicUpdate = PrimaryPlane->AssistCallbacks->AtomicUpdate;
 
+        PDRSD_CLIP Background = LouKeDrsdCreateClip(
+            0, 0,
+            PrimaryPlane->PlaneState->Width, PrimaryPlane->PlaneState->Height,
+            0, 0, 0, 0
+        );
+
+        PrimaryPlane->AlphaShift = 24;
+        PrimaryPlane->RedShift = 16;
+        PrimaryPlane->GreenShift = 8;
+        PrimaryPlane->BlueShift = 0;
+
+        LouKeUpdateClipState(Background);
+
+        LouKeDrsdSyncScreen();
+
         LouPrint("Connector:%h Successfully Configured\n", Connector);
+    
+        LouKeCreateScrollTerminal(Device, Background);
 
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
     }
@@ -341,8 +359,8 @@ LouKeDrsdInitializeDevice(
 }
 
 typedef struct _DRSD_PLANE_QUERY_INFORMATION{
-    uintptr_t           Plane;
-    uintptr_t           Chain;
+    uintptr_t          Plane;
+    uintptr_t          Chain;
     INT64              X;
     INT64              Y;
     INT64              Width;

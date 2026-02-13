@@ -39,6 +39,7 @@ static bool UsingDosTerminal = true;
 
 typedef struct _TERMAINAL_PLANE {
     ListHeader          Peers;
+    PDRSD_DEVICE        Device;
     PDRSD_CLIP          DosClip;
     INT64               CursorX;
     INT64               CursorY;
@@ -80,7 +81,7 @@ void ScrollTerminalClipChange(PDRSD_CLIP Clip, DRSD_CLIP_UPDATE_REASON UpdateRea
 }
 
 
-void LouKeCreateScrollTerminal(PDRSD_CLIP Clip) {
+void LouKeCreateScrollTerminal(PDRSD_DEVICE Device, PDRSD_CLIP Clip){
     if (!UsingDosTerminal) return;
 
     PTERMAINAL_PLANE TerminalPlane = &LouOsDosTerminalScreen.TerminalPlane;
@@ -89,6 +90,7 @@ void LouKeCreateScrollTerminal(PDRSD_CLIP Clip) {
     }
     TerminalPlane->Peers.NextHeader = (PListHeader)LouKeMallocType(TERMAINAL_PLANE, KERNEL_GENERIC_MEMORY);
     TerminalPlane = (PTERMAINAL_PLANE)TerminalPlane->Peers.NextHeader;
+    TerminalPlane->Device = Device;
     TerminalPlane->DosClip = Clip;
     TerminalPlane->TerminalBackground = LouOsDosTerminalScreen.DefaultBackground;
     TerminalPlane->TerminalForeground = LouOsDosTerminalScreen.DefaultForeground;
@@ -163,6 +165,22 @@ void LouKeOsDosPrintCharecter(char Character) {
         _LouKeOsDosPrintCharacter(Character, Plane, Plane->TerminalForeground);
         Plane = (PTERMAINAL_PLANE)Plane->Peers.NextHeader;
     }
+}
+
+void LouKeOsDosDetatchDevice(PDRSD_DEVICE Device){
+
+    PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;
+
+    while (Plane) {
+        if(Plane->Device == Device){
+            ScrollClipDestroyed(Plane->DosClip);
+            LouKeDestroyClip(Plane->DosClip);
+            LouKeMemoryBarrier();
+            return;
+        }
+        Plane = (PTERMAINAL_PLANE)Plane->Peers.NextHeader;
+    }
+
 }
 
 void LouKeOsDosUpdateMapping() {
