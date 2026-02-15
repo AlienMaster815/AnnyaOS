@@ -438,7 +438,7 @@ string LouKeAcquirePciDriverPath(PPCI_COMMON_CONFIG Config){
             goto _DEVICE_NOT_SUPPORTED;
         }
 
-        size_t WcsPathKeySize = LouKeGetRegistryKeySize(DriverPathHandle) / 2 + 1;
+        size_t WcsPathKeySize = (LouKeGetRegistryKeySize(DriverPathHandle) / 2) + 1;
         WcsDriverPath = LouKeMallocArray(WCHAR, WcsPathKeySize, KERNEL_GENERIC_MEMORY);
 
         ReadResult = LouKeReadRegistryWcsValue(DriverPathHandle, WcsDriverPath);

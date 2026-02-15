@@ -113,15 +113,13 @@ static inline void MutexLock(mutex_t* m){
 }
 
 static inline void MutexSynchronize(mutex_t* m){
-    while (m->locked.counter) {
+    while (LouKeGetAtomic(&m->locked)) {
         // spin until it's unlocked
-        LouKeMemoryBarrier();
     }
 }
 
 static inline bool MutexIsLocked(mutex_t* m){
-    LouKeMemoryBarrier();
-    return m->locked.counter;
+    return LouKeGetAtomic(&m->locked);
 }
 
 static inline void MutexUnlock(mutex_t* m){

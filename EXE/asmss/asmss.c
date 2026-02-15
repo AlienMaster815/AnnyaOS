@@ -24,7 +24,7 @@ NTSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     
 
-    LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
+    //LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
 
     while(1);
     

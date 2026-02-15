@@ -67,7 +67,6 @@ LouKeMallocEx(
 ){  
     MutexLock(&GenMallocLock);
 
-
     uint64_t RoundUpSize = ROUND_UP64(AllocationSize, MEGABYTE_PAGE);
     if(!KeMallocPageTracks){
         KeMallocPageTracks = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE , 8);
@@ -127,7 +126,6 @@ LouKeMallocEx(
     VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, AllocationSize);
     MutexUnlock(&GenMallocLock);
     ZeroMem(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase), AllocationSize);
-
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
 

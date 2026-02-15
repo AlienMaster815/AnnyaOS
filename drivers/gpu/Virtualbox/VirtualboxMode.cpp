@@ -260,15 +260,42 @@ static void VirtualboxCursorAtomicSetState(
 }
 
 static bool VBoxSetUpInputMapping(PVIRTUALBOX_PRIVATE_DATA VBox){
-    //PDRSD_CRTC Crtc = VBox->DrsdDevice.Crtcs;
-    if(VBox->DrsdDevice.CrtcCount == 1){
-        return false;
+    PDRSD_CRTC Crtc = VBox->DrsdDevice.Crtcs;
+    PDRSD_CONNECTOR Connector = VBox->DrsdDevice.Connectors;
+    PDRSD_CONNECTOR ConnectorIndex;
+    PVIRTUALBOX_CRTC VBoxCrtc;
+    BOOL SingleFrameBuffer = (VBox->DrsdDevice.CrtcCount <= 1) ? true : false;
+    BOOL OldSingleFrameBuffer = VBox->SingleFramebuffer;
+    PDRSD_FRAME_BUFFER FrameBuffer = Crtc->PrimaryPlane->FrameBuffer;
+    PVIRTUALBOX_CONNECTOR VBoxConnector;
+    SIZE Width = 0;
+    SIZE Height = 0;
+
+    if(SingleFrameBuffer){
+        VBox->SingleFramebuffer = true;
+        VBox->InputMappingWidth = FrameBuffer->Width;
+        VBox->InputMappingHeight = FrameBuffer->Height;
+        return (VBox->SingleFramebuffer != OldSingleFrameBuffer);
     }
 
+    ConnectorIndex = Connector;
+    while(ConnectorIndex){
+        VBoxConnector = (PVIRTUALBOX_CONNECTOR)ConnectorIndex;
+        VBoxCrtc = VBoxConnector->VBOXCrtc;
+
+        Width = MAX(Width, VBoxCrtc->XHint + VBoxConnector->ModeHint.Width);
+        Height = MAX(Height, VBoxCrtc->YHint + VBoxConnector->ModeHint.Height);
+
+        ConnectorIndex = (PDRSD_CONNECTOR)ConnectorIndex->Peers.NextHeader;
+    }
+    Width = MIN(Width, 0xFFFF);
+    Height = MIN(Height, 0xFFFF);
+
     //TODO: im going to do this later once i know everything is working
-    LouPrint("VBoxSetUpInputMapping()\n");
-    while(1);
-    return true;
+    VBox->SingleFramebuffer = false;
+    VBox->InputMappingHeight = Height;
+    VBox->InputMappingWidth = Width;
+    return (VBox->SingleFramebuffer != OldSingleFrameBuffer);
 }
 
 static LOUSTATUS VBoxSetView(PDRSD_CRTC DrsdCrtc, size_t FbSize){
@@ -290,11 +317,11 @@ static LOUSTATUS VBoxSetView(PDRSD_CRTC DrsdCrtc, size_t FbSize){
 }
 
 static void VboxDoModeSet(
-    PDRSD_CRTC          Crtc,
-    PDRSD_FRAME_BUFFER  Fb
+    PDRSD_CRTC          Crtc
 ){
     PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)Crtc->Device;
     PVIRTUALBOX_CRTC VBoxCrtc = (PVIRTUALBOX_CRTC)Crtc;
+    PDRSD_FRAME_BUFFER Fb = Crtc->PrimaryPlane->FrameBuffer;
     int32_t Width = VBoxCrtc->Width, Height = VBoxCrtc->Height, Bpp = Fb->Bpp, Pitch = Fb->Pitch, 
         X = VBoxCrtc->X ? VBoxCrtc->X : VBoxCrtc->XHint, Y = VBoxCrtc->Y ? VBoxCrtc->Y : VBoxCrtc->YHint;
     UNUSED uint16_t Flags = 0;
@@ -352,11 +379,20 @@ static void VirtualCrtcSetBaseAndMode(
     VBoxCrtc->FramebufferOffset = FramePBase;
 
     if(ModeSet && VBoxSetUpInputMapping(VBox)){
-        //LouPrint("YAY!!!\n");
+        PDRSD_CRTC CrtcIndex = (PDRSD_CRTC)Crtc;
+        
+        while(CrtcIndex){
+
+            if(CrtcIndex != Crtc){
+                VboxDoModeSet(CrtcIndex);
+            }
+
+            CrtcIndex = (PDRSD_CRTC)CrtcIndex->Peers.NextHeader;
+        }
     }
     
     VBoxSetView(Crtc, FrameSize);
-    VboxDoModeSet(Crtc, FrameBuffer);
+    VboxDoModeSet(Crtc);
 
     if(ModeSet){
         HgsmiUpdateInputMappings(VBox->GuestPool, 0, 0, VBox->InputMappingWidth, VBox->InputMappingHeight);
@@ -631,6 +667,9 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
     PVIRTUALBOX_CRTC    VBoxCrtc;
     PDRSD_ENCODER VBoxEncoder;
     LOUSTATUS Result;
+    
+    VBox->SingleFramebuffer = true;
+
     Device->ModeConfiguration.Callbacks = (PDRSD_MODE_CONFIGURATION_CALLBACKS)&VirtualboxModeCallbacks; 
     Device->ModeConfiguration.MinimalWidth = 0;
     Device->ModeConfiguration.MinimalHeight = 0;

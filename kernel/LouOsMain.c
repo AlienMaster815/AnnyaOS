@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.04 RSC-5";
+string KERNEL_VERSION = "0.6.05 RSC-1";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -392,6 +392,8 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 
+    PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
+    LOUSTATUS Status;
 
     //PRIFF_OBJECT StartupWave = LouKeOpenRiffFile("C:/ANNYA/STARTUP.WAV");
 
@@ -418,7 +420,6 @@ KERNEL_ENTRY LouOsKrnlStart(
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
     string PathKey;
-    LOUSTATUS Status;
     HANDLE SectionHandle;
 
     Status = LouKeRegGetAndCombineStringPath(
@@ -451,9 +452,7 @@ KERNEL_ENTRY LouOsKrnlStart(
         0x00,
         0x00
     );
-
-    PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
-    
+        
     Status = LouKeZwCreateAccessToken(
         &AccessToken,
         true,

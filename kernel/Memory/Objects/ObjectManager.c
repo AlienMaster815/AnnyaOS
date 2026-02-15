@@ -62,7 +62,7 @@ static void UnLinkObjectHeaderFromList(POBJECT_HEADER Object){
     MutexUnlock(&ObjectHeaderLock);
 }
 
-static LOUSTATUS ObjectHeaderConstructor(PVOID Object, PVOID Params){
+UNUSED static LOUSTATUS ObjectHeaderConstructor(PVOID Object, PVOID Params){
     POBJECT_HEADER NewObject = (POBJECT_HEADER)Object;
     POBJHDR_CONSTRUCTOR_PARAMS ConstructData = (POBJHDR_CONSTRUCTOR_PARAMS)Params;
     int MaxHandles = ConstructData->MaxHandles;
@@ -97,7 +97,7 @@ static LOUSTATUS ObjectHeaderConstructor(PVOID Object, PVOID Params){
     return STATUS_SUCCESS;
 }
 
-static LOUSTATUS ObjectHeaderDeConstructor(PVOID Object){
+UNUSED static LOUSTATUS ObjectHeaderDeConstructor(PVOID Object){
     POBJECT_HEADER OldObject = (POBJECT_HEADER)Object;
 
     UnLinkObjectHeaderFromList(OldObject);
@@ -113,10 +113,10 @@ static LOUSTATUS ObjectHeaderDeConstructor(PVOID Object){
 
 LOUSTATUS LouKeObjManInitialize(){
     LouPrint("LouKeObjManInitialize()\n");
-    LOUSTATUS Status;
+    //LOUSTATUS Status;
     
     LouPrint("Initializing Header Class\n");
-    Status = LouKeCreateFastObjectClassEx(
+    /*Status = LouKeCreateFastObjectClassEx(
         "OBJECT_HEADER",
         512, //cached object count can be changed later
         sizeof(OBJECT_HEADER),
@@ -130,7 +130,7 @@ LOUSTATUS LouKeObjManInitialize(){
     if(Status != STATUS_SUCCESS){
         LouPrint("LouKeObjManInitialize():Failed To Create Fast Object\n");
         return Status;
-    }
+    }*/
     
     LouPrint("Successfully Initialized Header Class\n");
 
@@ -145,7 +145,7 @@ LOUSTATUS LouKeRegisterObjectToObjectManager(
     int                     MaxHandles,
     PSECURITY_DESCRIPTOR    SecurityDescriptor
 ){
-
+    return STATUS_SUCCESS;//FIX ME:
     OBJHDR_CONSTRUCTOR_PARAMS NewObjectParams = {0};
 
     NewObjectParams.ObjectPointer = ObjectPointer;
@@ -203,6 +203,7 @@ LOUSTATUS LouKeZwAcquireHandleForObjectEx(
     ACCESS_MASK RequestedAccess,
     BOOL        KernelIsRequesting
 ){
+    return STATUS_SUCCESS;
     if((!Object) || (!OutHandle)){
         LouPrint("LouKeAcquireHandleForObjectEx() EINVAL\n");
         if(!Object)LouPrint("Object Is NULL\n");

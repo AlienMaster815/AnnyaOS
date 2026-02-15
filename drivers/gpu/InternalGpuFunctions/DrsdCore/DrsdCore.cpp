@@ -245,7 +245,7 @@ LouKeDrsdInitializeBootDevice(
     PDRSD_CLIP Background = LouKeDrsdCreateClip(
         0, 0,
         Plane->PlaneState->Width, Plane->PlaneState->Height,
-        0, 0, 0, 0
+        0, 0, 0, 255
     );
 
     Plane->AlphaShift = 24;
@@ -292,9 +292,9 @@ LouKeDrsdInitializeDevice(
     PDRSD_PLANE PrimaryPlane = 0x00;
     uint32_t* Formats; 
     INT64 FormatCount; 
+
     while(Connector){
-        LouPrint("Configuring Connector:%h\n", Connector);
-        
+
         Connector->ProbeModeCount = Connector->Callbacks->ConnectorFillModes(
             Connector, 
             Device->ModeConfiguration.MaximumWidth, 
@@ -322,6 +322,19 @@ LouKeDrsdInitializeDevice(
 
         PrimaryPlane->FrameBuffer = PrimaryPlane->PlaneState->FrameBuffer;
 
+        Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
+    }
+
+    Connector = Device->Connectors;
+
+    while(Connector){
+        LouPrint("Configuring Connector:%h\n", Connector);
+        
+        Crtc = Connector->Crtc;
+        PrimaryPlane = Crtc->PrimaryPlane;
+        FormatCount = PrimaryPlane->FormatCount;
+        Formats = PrimaryPlane->Formats;
+
         if(PrimaryPlane->AssistCallbacks->AtomicUpdate){
             PrimaryPlane->AssistCallbacks->AtomicUpdate(PrimaryPlane, PrimaryPlane->PlaneState);
         }
@@ -332,9 +345,9 @@ LouKeDrsdInitializeDevice(
         Chain->PrimaryAtomicUpdate = PrimaryPlane->AssistCallbacks->AtomicUpdate;
 
         PDRSD_CLIP Background = LouKeDrsdCreateClip(
-            0, 0,
+            PrimaryPlane->PlaneState->SourceX, PrimaryPlane->PlaneState->SourceY,
             PrimaryPlane->PlaneState->Width, PrimaryPlane->PlaneState->Height,
-            0, 0, 0, 0
+            0, 0, 0, 255
         );
 
         PrimaryPlane->AlphaShift = 24;
@@ -354,7 +367,6 @@ LouKeDrsdInitializeDevice(
     }
 
     LouPrint("LouKeDrsdInitializeDevice() STATUS_SUCCESS\n");
-
     return STATUS_SUCCESS;
 }
 

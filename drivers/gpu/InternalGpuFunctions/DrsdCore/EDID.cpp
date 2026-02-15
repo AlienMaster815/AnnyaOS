@@ -266,6 +266,9 @@ PDRSD_EDID_TRACKER DrsdEdidCreateObject(PINTEL_STANDARD_EDID Edid){
     while(NewTrack->Peers.NextHeader){
         NewTrack = (PDRSD_EDID_TRACKER)NewTrack->Peers.NextHeader;
     }
-    NewTrack->Peers.NextHeader = (PListHeader)LouKeMallocType(DRSD_EDID_TRACKER, KERNEL_GENERIC_MEMORY);;\
-    return (PDRSD_EDID_TRACKER)NewTrack->Peers.NextHeader;
+    NewTrack->Peers.NextHeader = (PListHeader)LouKeMallocType(DRSD_EDID_TRACKER, KERNEL_GENERIC_MEMORY);
+    NewTrack = (PDRSD_EDID_TRACKER)NewTrack->Peers.NextHeader;
+    NewTrack->EdidBase = Edid;
+    NewTrack->EdidTotalSize = sizeof(INTEL_STANDARD_EDID);
+    return NewTrack;
 }

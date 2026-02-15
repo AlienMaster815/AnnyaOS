@@ -11,7 +11,6 @@ typedef struct _FAST_ALLOCATION_TRACKER{
 
 typedef struct _FAST_ALLOCATION_TEMPLATE{
     ListHeader                      Peers;
-    mutex_t                         TemplateLock;
     KERNEL_REFERENCE                KRef; 
     LOUSTR                          TrackingTag;
     FAST_ALLOCATION_TRACKER         PoolTrackers;

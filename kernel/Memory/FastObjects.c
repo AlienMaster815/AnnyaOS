@@ -56,16 +56,11 @@ static PFAST_ALLOCATION_TEMPLATE AcquireFastObjectTemplate(LOUSTR ClassName){
         TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
         if(!strcmp(TmpTemplate->TrackingTag, ClassName)){
             MutexUnlock(&FastAllocationTemplateLock);
-            MutexLock(&TmpTemplate->TemplateLock);
             return TmpTemplate;
         }
     }
     MutexUnlock(&FastAllocationTemplateLock);
     return 0x00;
-}
-
-static void ReleaseFastObjectTemplate(PFAST_ALLOCATION_TEMPLATE Template){
-    MutexUnlock(&Template->TemplateLock);
 }
 
 static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Template){
@@ -89,9 +84,10 @@ static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Te
     );    
     
     if(!NewTracker->AllocationPool){
-        LouKeFree(NewTracker);
         Follower->Peers.NextHeader = 0x00;
+        LouKeFree(NewTracker);
         MutexUnlock(&Template->PoolTrackerLock);
+        return 0x00;
     }
 
     MutexUnlock(&Template->PoolTrackerLock);
@@ -101,6 +97,9 @@ static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Te
 static void FreePoolTracker(PFAST_ALLOCATION_TEMPLATE Template, PFAST_ALLOCATION_TRACKER Tracker){
 
     PFAST_ALLOCATION_TRACKER TmpTracker = &Template->PoolTrackers;
+    
+    MutexLock(&Template->PoolTrackerLock);
+
     while((TmpTracker) && ((PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader != Tracker)){
         TmpTracker = (PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
     }
@@ -112,7 +111,13 @@ static void FreePoolTracker(PFAST_ALLOCATION_TEMPLATE Template, PFAST_ALLOCATION
     TmpTracker->Peers.NextHeader = Tracker->Peers.NextHeader;
 
     _FINISH_CLEANUP:
-    LouKeDestroyFixedPool(Tracker->AllocationPool);
+    if(Tracker != &Template->PoolTrackers){
+        if(Tracker->AllocationPool){
+            LouKeDestroyFixedPool(Tracker->AllocationPool);
+        }
+        LouKeFree(Tracker);
+    }
+    MutexUnlock(&Template->PoolTrackerLock);
 }
 
 LOUSTATUS LouKeCreateFastObjectClassEx(
@@ -127,10 +132,9 @@ LOUSTATUS LouKeCreateFastObjectClassEx(
 ){
   
     if(CheckTemplatesForDuplicate(ClassName)){
-        LouPrint("LouKeCreateFastObjectClass() ERESOURCE_EXISTS\n");
-        return STATUS_UNSUCCESSFUL;
+        return STATUS_SUCCESS;
     }
-    
+
     PFAST_ALLOCATION_TEMPLATE NewTemplate = AllocateFastObjectClassTemplate(
         ClassName,
         ObjectCount,
@@ -221,7 +225,6 @@ PVOID LouKeAllocateFastObjectEx(
     }
 
     _ALLOCATION_FINISHED:
-    ReleaseFastObjectTemplate(Template);    
     return Result;
 
 }
@@ -262,5 +265,4 @@ void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address){
 
     _FREE_FINISHED:
     MutexUnlock(&Template->PoolTrackerLock);
-    ReleaseFastObjectTemplate(Template);    
 } 

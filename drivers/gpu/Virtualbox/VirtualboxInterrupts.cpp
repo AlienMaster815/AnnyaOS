@@ -78,6 +78,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
         VBox->LastModeHints
     );
     if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR:VBOX_VIDEO:VirtualboxUpdateModeHints() Failed With LOUSTATUS:%h\n", Status);
         return;
     }
 
@@ -91,7 +92,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
         ModeHint = &VBox->LastModeHints[CrtcID];
 
         if(ModeHint->Magic != VBVA_MODE_HINT_MAGIC){
-            LouPrint("ERROR:VBOX_VIDEO: VirtualboxUpdateModeHints() Invalid Mode Hint\n");
+            LouPrint("ERROR:VBOX_VIDEO:VirtualboxUpdateModeHints() Invalid Mode Hint\n");
             Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
             continue;
         }
@@ -115,8 +116,18 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
             Flags = VBVA_SCREEN_F_ACTIVE | VBVA_SCREEN_F_BLANK;
         }
 
-        LouPrint("VBOX_VIDEO:HERE\n");
-        while(1);
+        HgsmiProccessDisplayInformation(
+            VBox->GuestPool, 
+            CrtcID, 
+            0, 
+            0, 
+            0,
+            ModeHint->Cx * 4,
+            ModeHint->Cx,
+            ModeHint->Cy,
+            0,
+            Flags
+        );
 
         Connector->VBOXCrtc->Disconnected = Disconnected;
 

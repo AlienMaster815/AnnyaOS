@@ -53,7 +53,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
         }
     }
 
-    string NewMod = (string)LouKeMallocArray(char, strlen(ModuleNameAndPath), KERNEL_GENERIC_MEMORY);
+    string NewMod = (string)LouKeMallocArray(char, strlen(ModuleNameAndPath) + 1, KERNEL_GENERIC_MEMORY);
     strncpy(NewMod, ModuleNameAndPath, strlen(ModuleNameAndPath));
 
     LouKeLoadCoffImageExA(NewMod, &TmpHandle->CfiObject, true);

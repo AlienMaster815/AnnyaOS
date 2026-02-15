@@ -15,7 +15,7 @@ LOUSTATUS LouKeZwCreateAccessToken(
         LouPrint("LouKeZwCreateAccessToken():EINVAL");
         return STATUS_INVALID_PARAMETER;
     }
-    LOUSINE_ACCESS_TOKEN TokenTemplate = {0};
+    UNUSED LOUSINE_ACCESS_TOKEN TokenTemplate = {0};
     
     TokenTemplate.SystemAccessToken = SystemAccessToken;
     TokenTemplate.CurrentAccess = CurrentAccess;

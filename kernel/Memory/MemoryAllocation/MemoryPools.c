@@ -70,14 +70,16 @@ void LouKeFreeFromFixedPool(
     }
     PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &Pool->MemoryTracks;
     TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
-    
+    MutexLock(&Pool->PoolLock);
     uint64_t Index = ((uint64_t)Object - Pool->VLocation) / Pool->ObjectSize;    
 
     if(TmpPoolMemTrack[Index].Address != (uint64_t)Object){
         LouPrint("LouKeMallocFromFixedPool() : Error Memory Leak\n");
+        MutexUnlock(&Pool->PoolLock);
         return;
     } 
     TmpPoolMemTrack[Index].AddressInUse = false;
+    MutexUnlock(&Pool->PoolLock);
 }
 
 void* LouKeMallocFromFixedPool(
@@ -94,6 +96,7 @@ void* LouKeMallocFromFixedPool(
         if(!TmpPoolMemTrack[i].AddressInUse){
             TmpPoolMemTrack[i].AddressInUse = true;
             MutexUnlock(&Pool->PoolLock);
+            memset((void*)TmpPoolMemTrack[i].Address, 0x00, Pool->ObjectSize);
             return (void*)TmpPoolMemTrack[i].Address;
         }
     }
@@ -236,8 +239,8 @@ retry_search:
             NewTrack->MemorySize = AllocationSize;
             NewTrack->Peers.NextHeader = Pool->MemoryTracks.Peers.NextHeader;
             Pool->MemoryTracks.Peers.NextHeader = (PListHeader)NewTrack;
-
             Pool->LastOut = Result + AllocationSize;
+            memset((void*)Result, 0, AllocationSize);
             return (void*)Result;
         }
     }

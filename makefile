@@ -63,7 +63,7 @@ CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
 
 
 #Wextra
-CPPFLAGS = -c -ffreestanding -Wall  -fno-exceptions -fno-rtti -Werror \
+CPPFLAGS = -c -ffreestanding -Wall -fno-exceptions -fno-rtti -Werror \
            -fno-use-cxa-atexit -fno-threadsafe-statics -fno-common \
            -fno-builtin -fstrict-aliasing -O2 -I include \
 		   -Wno-write-strings -Wno-multichar $(INCLUDE)

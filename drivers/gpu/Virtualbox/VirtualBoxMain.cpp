@@ -72,7 +72,7 @@ static LOUSTATUS VBoxAccelerationInitialize(
     PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
     VBVA_BUFFER* VBva;
 
-    VBox->VbvaInformation = LouKeMallocType(VBVA_BUFFER_CONTEXT, KERNEL_GENERIC_MEMORY);
+    VBox->VbvaInformation = LouKeMallocArray(VBVA_BUFFER_CONTEXT, VBox->CrtcCount, KERNEL_GENERIC_MEMORY);
     
     VBox->AvailableVramSize -= VBox->CrtcCount * VBVA_MINIMUM_BUFFER_SIZE;
 
