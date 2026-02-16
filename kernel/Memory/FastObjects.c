@@ -1,19 +1,20 @@
 #include "PrivMem.h"
 
+//TODO Change Mutexing to compensate for error loops
 static FAST_ALLOCATION_TEMPLATE FastAllocationTemplateList = {0};
-static mutex_t FastAllocationTemplateLock = {0};
+//static mutex_t FastAllocationTemplateLock = {0};
 
 static bool CheckTemplatesForDuplicate(LOUSTR ClassName){
     PFAST_ALLOCATION_TEMPLATE TmpTemplate = &FastAllocationTemplateList;
-    MutexLock(&FastAllocationTemplateLock);
+    //MutexLock(&FastAllocationTemplateLock);
     while(TmpTemplate->Peers.NextHeader){
         TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
         if(!strcmp(TmpTemplate->TrackingTag, ClassName)){
-            MutexUnlock(&FastAllocationTemplateLock);
+    //        MutexUnlock(&FastAllocationTemplateLock);
             return true;
         }
     }
-    MutexUnlock(&FastAllocationTemplateLock);
+    //MutexUnlock(&FastAllocationTemplateLock);
     return false;
 }
 
@@ -28,7 +29,7 @@ static PFAST_ALLOCATION_TEMPLATE AllocateFastObjectClassTemplate(
     LOUSINE_OBJECT_DECONSTRUCTOR    DeConstructor
 ){
     PFAST_ALLOCATION_TEMPLATE TmpTemplate = &FastAllocationTemplateList;
-    MutexLock(&FastAllocationTemplateLock);
+    //MutexLock(&FastAllocationTemplateLock);
     while(TmpTemplate->Peers.NextHeader){
         TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
     }
@@ -44,22 +45,22 @@ static PFAST_ALLOCATION_TEMPLATE AllocateFastObjectClassTemplate(
     TmpTemplate->PageFlags = PageFlags;
     TmpTemplate->Constructor = Constructor;
     TmpTemplate->DeConstructor = DeConstructor;
-
-    MutexUnlock(&FastAllocationTemplateLock);
+    LouPrint("NewTemplate:%h With Identifier:%s\n", TmpTemplate, ClassName);
+    //MutexUnlock(&FastAllocationTemplateLock);
     return TmpTemplate;
 } 
 
 static PFAST_ALLOCATION_TEMPLATE AcquireFastObjectTemplate(LOUSTR ClassName){
     PFAST_ALLOCATION_TEMPLATE TmpTemplate = &FastAllocationTemplateList;
-    MutexLock(&FastAllocationTemplateLock);
+    //MutexLock(&FastAllocationTemplateLock);
     while(TmpTemplate->Peers.NextHeader){
         TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
         if(!strcmp(TmpTemplate->TrackingTag, ClassName)){
-            MutexUnlock(&FastAllocationTemplateLock);
+            //MutexUnlock(&FastAllocationTemplateLock);
             return TmpTemplate;
         }
     }
-    MutexUnlock(&FastAllocationTemplateLock);
+    //MutexUnlock(&FastAllocationTemplateLock);
     return 0x00;
 }
 
@@ -82,6 +83,8 @@ static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Te
         Template->Flags,
         Template->PageFlags
     );    
+
+    LouPrint("NewPool:%h With Size:%h ObjSize:%h For Template:%h :: %s\n", NewTracker->AllocationPool->VLocation, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment) * Template->ObjectCount, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment), Template, Template->TrackingTag);
     
     if(!NewTracker->AllocationPool){
         Follower->Peers.NextHeader = 0x00;

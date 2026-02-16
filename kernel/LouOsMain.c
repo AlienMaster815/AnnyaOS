@@ -168,6 +168,7 @@ uint64_t GetCr3();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
 
+
 LOUSTATUS LousineKernelEarlyInitialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
@@ -249,7 +250,11 @@ void AdvancedLousineKernelInitialization(){
         31
     );
 
+    
+
     LouKeUnmaskSmpInterrupts();
+
+    
 
     LouPrint("Kernel Advanced System Initialized\n");
     
@@ -317,6 +322,8 @@ void LouKeSantyCheckPciDevices();
 LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 
+
+
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -331,7 +338,6 @@ KERNEL_ENTRY LouOsKrnlStart(
     }
 
     EnableCR0WriteProtection();
-
     
     ParserLouLoaderInformation(
         &KernelLoaderInfo
@@ -356,7 +362,6 @@ KERNEL_ENTRY LouOsKrnlStart(
     LouKeInitializeLouACPISubsystem();
 
     InitializeDebuggerComunications();
-
 
     LouKeInitializePciDevices();
 
@@ -387,7 +392,7 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     LouKeProbeSbIsa();
 
-    ScanTheRestOfHarware();
+    ScanTheRestOfHarware();    
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
@@ -419,6 +424,9 @@ KERNEL_ENTRY LouOsKrnlStart(
         LouPrint("ERROR Opening Sesion Manager Key\n");
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
+
+    
+
     string PathKey;
     HANDLE SectionHandle;
 
@@ -433,6 +441,8 @@ KERNEL_ENTRY LouOsKrnlStart(
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
 
+    
+
     LouPrint("Session Manager:%s\n", PathKey);    
 
     FILE* AsmssExe = fopen(PathKey, KERNEL_GENERIC_MEMORY);
@@ -440,6 +450,8 @@ KERNEL_ENTRY LouOsKrnlStart(
         LouPrint("ERROR Unable To Open File\n");
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
+
+    
 
     LouKeVmmCreateSectionEx(
         &SectionHandle,
@@ -453,6 +465,8 @@ KERNEL_ENTRY LouOsKrnlStart(
         0x00
     );
         
+    
+
     Status = LouKeZwCreateAccessToken(
         &AccessToken,
         true,

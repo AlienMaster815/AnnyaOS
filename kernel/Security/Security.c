@@ -1,7 +1,5 @@
 #include <LouAPI.h>
 
-LOUSTATUS LouKeConstructAccessToken(PVOID Token, PVOID Params);
-
 static inline 
 uint16_t GetCodeSegment(){
     uint16_t cs;
@@ -40,15 +38,13 @@ OperatingMode LouKeCheckOperatingMode(){
 
 void LouKeInitializeSecuritySubsystem(){
  
-    LouKeCreateFastObjectClassEx(
+    LouKeCreateFastObjectClass(
         "LOUSINE_ACCESS_TOKEN",
         512,
         sizeof(LOUSINE_ACCESS_TOKEN),
         GET_ALIGNMENT(LOUSINE_ACCESS_TOKEN),
         0,
-        KERNEL_GENERIC_MEMORY,
-        LouKeConstructAccessToken,
-        0x00
+        KERNEL_GENERIC_MEMORY
     );
 
 }

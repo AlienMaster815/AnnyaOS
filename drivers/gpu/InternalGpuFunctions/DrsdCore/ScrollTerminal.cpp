@@ -185,6 +185,7 @@ void LouKeOsDosDetatchDevice(PDRSD_DEVICE Device){
 
 void LouKeOsDosUpdateMapping() {
     if (!UsingDosTerminal) return;
+
     PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;
     while (Plane) {
         LouKeUpdateClipState(Plane->DosClip);

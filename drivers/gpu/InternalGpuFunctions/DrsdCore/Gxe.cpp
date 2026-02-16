@@ -33,6 +33,7 @@
  */
 
 
+
 KERNEL_IMPORT
 LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress){
 

@@ -1,15 +1,14 @@
 #include <LouAPI.h>
 
 
-static POOL PoolsPool = 0x00;
 
 void InitializePoolsPool(){
-    PoolsPool = LouKeCreateFixedPool(
-        (32 * MEGABYTE) / sizeof(POOL_MEMORY_TRACKS), 
-        sizeof(POOL_MEMORY_TRACKS), 
-        GET_ALIGNMENT(POOL_MEMORY_TRACKS), 
-        "PoolsPool", 
-        0 , 
+    LouKeCreateFastObjectClass(
+        "DYNAMIC_POOL_HELPER",
+        512,
+        sizeof(POOL_MEMORY_TRACKS),
+        GET_ALIGNMENT(POOL_MEMORY_TRACKS),
+        0,
         KERNEL_GENERIC_MEMORY
     );
 }
@@ -196,7 +195,7 @@ void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
     while (Node) {
         if (Node->Address == (uint64_t)Address) {
             Prev->Peers.NextHeader = Node->Peers.NextHeader;
-            LouKeFreeFromFixedPool(PoolsPool, Node);
+            LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
             return;
         }
         Prev = Node;
@@ -234,7 +233,7 @@ retry_search:
         }
 
         if (!Conflict) {
-            PPOOL_MEMORY_TRACKS NewTrack = (PPOOL_MEMORY_TRACKS)LouKeMallocFromFixedPool(PoolsPool);
+            PPOOL_MEMORY_TRACKS NewTrack = (PPOOL_MEMORY_TRACKS)LouKeAllocateFastObject("DYNAMIC_POOL_HELPER");
             NewTrack->Address = Result;
             NewTrack->MemorySize = AllocationSize;
             NewTrack->Peers.NextHeader = Pool->MemoryTracks.Peers.NextHeader;

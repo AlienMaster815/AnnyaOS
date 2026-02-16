@@ -360,6 +360,8 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
         while(1);
     }
 
+    LouPrint("Access Token:%h\n", AccessToken);
+
     Status = LouKeZwRegisterAccessTokenToObjectManager(
         AccessToken,
         0

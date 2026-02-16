@@ -151,7 +151,7 @@ LOUSTATUS VBoxInitializeHardware(
         return STATUS_NOT_SUPPORTED;
     }
 
-    VBox->LastModeHints = LouKeMallocType(VBVA_MODE_HINT, KERNEL_GENERIC_MEMORY);
+    VBox->LastModeHints = LouKeMallocArray(VBVA_MODE_HINT, VBox->CrtcCount, KERNEL_GENERIC_MEMORY);
     if(!VBox->LastModeHints){
         return STATUS_INSUFFICIENT_RESOURCES;
     }

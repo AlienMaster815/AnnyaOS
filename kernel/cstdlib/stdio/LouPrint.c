@@ -85,7 +85,6 @@ void print_binary8(uint8_t number) {
 }
 
 int LouPrint_s(char* format, va_list args){
-
     char PrintString[21] = {0};
     while (*format) {
         if (*format == '%') {
@@ -222,7 +221,10 @@ int LouPrint_s(char* format, va_list args){
                 }
             }
             format++; // Move to the next character in the format string
-        } else {    
+        }
+//        else if(*Format == '\n'){
+//        } 
+        else {    
             LouKeDebuggerCommunicationsSendCharecter(*format);
             LouKeOsDosPrintCharecter(*format);
             format++;
@@ -249,7 +251,7 @@ GetCurrentCpuTrackMember();
 
 int LouPrint(char* format, ...) {
     LouKIRQL OldLevel;
-
+        
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     int result = 0;
     if(UsingSmp){
@@ -265,6 +267,8 @@ int LouPrint(char* format, ...) {
     result = LouPrint_s(format, args);
     va_end(args);
     LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
+    
+    
     return result;
 }
 

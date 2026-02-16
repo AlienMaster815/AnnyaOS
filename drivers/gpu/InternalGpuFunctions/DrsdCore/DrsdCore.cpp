@@ -273,7 +273,6 @@ void LouKeDrsdHandleConflictingDevices(PPCI_DEVICE_OBJECT PDEV){
         BootDevice = 0x00;
     }
 
-
     LouPrint("LouKeDrsdHandleConflictingDevices() STATUS_SUCCESS\n");
 }
 
@@ -293,7 +292,7 @@ LouKeDrsdInitializeDevice(
     uint32_t* Formats; 
     INT64 FormatCount; 
 
-    while(Connector){
+    //while(Connector){
 
         Connector->ProbeModeCount = Connector->Callbacks->ConnectorFillModes(
             Connector, 
@@ -323,17 +322,19 @@ LouKeDrsdInitializeDevice(
         PrimaryPlane->FrameBuffer = PrimaryPlane->PlaneState->FrameBuffer;
 
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
-    }
+    //}
 
     Connector = Device->Connectors;
 
-    while(Connector){
+    //while(Connector){
         LouPrint("Configuring Connector:%h\n", Connector);
         
         Crtc = Connector->Crtc;
         PrimaryPlane = Crtc->PrimaryPlane;
         FormatCount = PrimaryPlane->FormatCount;
         Formats = PrimaryPlane->Formats;
+
+        Crtc->CrtcState->NeedsModeset = false;
 
         if(PrimaryPlane->AssistCallbacks->AtomicUpdate){
             PrimaryPlane->AssistCallbacks->AtomicUpdate(PrimaryPlane, PrimaryPlane->PlaneState);
@@ -364,7 +365,7 @@ LouKeDrsdInitializeDevice(
         LouKeCreateScrollTerminal(Device, Background);
 
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
-    }
+    //}
 
     LouPrint("LouKeDrsdInitializeDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

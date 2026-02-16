@@ -64,6 +64,7 @@ static void ValidateOrSetPositionHints(
 }
 
 void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
+
     PDRSD_DEVICE Device = &VBox->DrsdDevice;
     LOUSTATUS Status;
     PVIRTUALBOX_CONNECTOR Connector = (PVIRTUALBOX_CONNECTOR)Device->Connectors;
@@ -83,9 +84,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
     }
 
     ValidateOrSetPositionHints(VBox);
-
     MutexLock(&Device->ModeConfiguration.ConnectionMutex);
-
     while(Connector){
         LouPrint("Initializing Connector:%h Mode Hints\n", Connector);
         CrtcID = Connector->VBOXCrtc->CrtcId;
@@ -96,7 +95,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
             Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
             continue;
         }
-
+    
         Disconnected = ModeHint->Enabled ? 0 : 1;
         Connector->ModeHint.Width = ModeHint->Cx;
         Connector->ModeHint.Height = ModeHint->Cy;
@@ -109,7 +108,6 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
             Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
             continue;
         }
-
         if(Disconnected){
             Flags = VBVA_SCREEN_F_ACTIVE | VBVA_SCREEN_F_DISABLED;
         }else {
@@ -134,7 +132,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
         LouPrint("Initializing Connector:%h Mode Hints SUCCESS\n", Connector);
         Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
     }
-
+    
     MutexUnlock(&Device->ModeConfiguration.ConnectionMutex);
 
 }
