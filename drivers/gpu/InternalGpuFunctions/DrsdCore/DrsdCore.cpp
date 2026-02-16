@@ -292,7 +292,7 @@ LouKeDrsdInitializeDevice(
     uint32_t* Formats; 
     INT64 FormatCount; 
 
-    //while(Connector){
+    while(Connector){
 
         Connector->ProbeModeCount = Connector->Callbacks->ConnectorFillModes(
             Connector, 
@@ -322,11 +322,11 @@ LouKeDrsdInitializeDevice(
         PrimaryPlane->FrameBuffer = PrimaryPlane->PlaneState->FrameBuffer;
 
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
-    //}
+    }
 
     Connector = Device->Connectors;
 
-    //while(Connector){
+    while(Connector){
         LouPrint("Configuring Connector:%h\n", Connector);
         
         Crtc = Connector->Crtc;
@@ -365,7 +365,7 @@ LouKeDrsdInitializeDevice(
         LouKeCreateScrollTerminal(Device, Background);
 
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
-    //}
+    }
 
     LouPrint("LouKeDrsdInitializeDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

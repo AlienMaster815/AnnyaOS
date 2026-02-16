@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.05 RSC-1";
+string KERNEL_VERSION = "0.6.05 RSC-2";
 
 string KERNEL_ARCH = "64-BIT";
 
