@@ -258,6 +258,106 @@ typedef struct PACKED _XHCI_OPERATIONAL_REGISTERS{
 #define XHCI_USBSTS_HCE_SHIFT               12
 #define XHCI_USBSTS_HCE                     (XHCI_USBSTS_HCE_MASK << XHCI_USBSTS_HCE_SHIFT)
 
+#define XHCI_PAGE_SIZE_MASK                 0xFFFF
+#define XHCI_PAGE_SIZE_SHIFT                0
+#define XHCI_PAGE_SIZE                      (XHCI_PAGE_SIZE_MASK << XHCI_PAGE_SIZE_SHIFT)
 
+#define XHCI_DNCTRL_NEx(x)                  (1 << x)
+
+#define XHCI_CRCR_RCS_MASK                  1
+#define XHCI_CRCR_RCS_SHIFT                 0
+#define XHCI_CRCR_CS_MASK                   1
+#define XHCI_CRCR_CS_SHIFT                  1
+#define XHCI_CRCR_CA_MASK                   1
+#define XHCI_CRCR_CA_SHIFT                  2
+#define XHCI_CRCR_CRR_MASK                  1
+#define XHCI_CRCR_CRR_SHIFT                 3
+#define XHCI_CRCR_CRP                       0xFFFFFFFFFFFFFFC0
+
+#define XHCI_DCBAAP                         0xFFFFFFFFFFFFFFC0
+
+#define XHCI_CONFIG_MAX_SLOTS_EN_MASK       0xFF
+#define XHCI_CONFIG_MAX_SLOTS_EN_SHIFT      0
+#define XHCI_CONFIG_U3_ENTRY_ENABLE_MASK    1
+#define XHCI_CONFIG_U3_ENTRY_ENABLE_SHIFT   8
+#define XHCI_CONFIG_CIE_MASK                1
+#define XHCI_CONFIG_CIE_SHFIT               9
+
+#define XHCI_PORTSC_CSS_MASK                1
+#define XHCI_PORTSC_CSS_SHIFT               0
+#define XHCI_PORTSC_PED_MASK                1
+#define XHCI_PORTSC_PED_SHIFT               1
+#define XHCI_PORTSC_OCA_MASK                1
+#define XHCI_PORTSC_OCA_SHIFT               3
+#define XHCI_PORTSC_PR_MASK                 1
+#define XHCI_PORTSC_PR_SHIFT                4
+#define XHCI_PORTSC_PLS_MASK                0x0F
+#define XHCI_PORTSC_PLS_SHIFT               5
+#define     XHCI_PLS_U0_STATE               0
+#define     XHCI_PLS_U1_STATE               1
+#define     XHCI_PLS_U2_STATE               2
+#define     XHCI_PLS_U3_STATE               3
+#define     XHCI_PLS_DISABLE                4
+#define     XHCI_PLS_RXDETECT               5
+#define     XHCI_PLS_INACTIVE               6
+#define     XHCI_PLS_POLLING                7
+#define     XHCI_PLS_RECOVERY               8
+#define     XHCI_PLS_HOST_RESET             9
+#define     XHCI_PLS_COMPLIANCE_MODE        10
+#define     XHCI_PLS_RESUME                 15
+#define XHCI_PORTSC_PP_MASK                 1
+#define XHCI_PORTSC_PP_SHIFT                9
+#define XHCI_PORTSC_PORT_SPEED_MASK         0x0F
+#define XHCI_PORTSC_PORT_SPEED_SHIFT        10
+#define XHCI_PORTSC_PIC_MASK                0x03
+#define XHCI_PORTSC_PIC_SHIFT               14
+#define XHCI_PORTSC_LWS_MASK                1
+#define XHCI_PORTSC_LWS_SHIFT               16
+#define XHCI_PORTSC_CSC_MASK                1
+#define XHCI_PORTSC_CSC_SHIFT               17
+#define XHCI_PORTSC_PEC_MASK                1
+#define XHCI_PORTSC_PEC_SHIFT               18
+#define XHCI_PORTSC_WRC_MASK                1
+#define XHCI_PORTSC_WRC_SHIFT               19
+#define XHCI_PORTSC_OCC_MASK                1
+#define XHCI_PORTSC_OCC_SHIFT               20
+#define XHCI_PORTSC_PRC_MASK                1
+#define XHCI_PORTSC_PRC_SHIFT               21
+#define XHCI_PORTSC_PLC_MASK                1
+#define XHCI_PORTSC_PLC_SHIFT               22
+#define XHCI_PORTSC_CEC_MASK                1
+#define XHCI_PORTSC_CEC_SHIFT               23
+#define XHCI_PORTSC_CAS_MASK                1
+#define XHCI_PORTSC_CAS_SHIFT               24
+#define XHCI_PORTSC_WCE_MASK                1
+#define XHCI_PORTSC_WCE_SHIFT               25
+#define XHCI_PORTSC_WDE_MASK                1
+#define XHCI_PORTSC_WDE_SHIFT               26
+#define XHCI_PORTSC_WOE_MASK                1
+#define XHCI_PORTSC_WOE_SHIFT               27
+#define XHCI_PORTSC_DR_MASK                 1
+#define XHCI_PORTSC_DR_SHIFT                30
+#define XHCI_PORTSC_WPR_MASK                1
+#define XHCI_PORTSC_WPR_SHIFT               31
+
+#define XHCI_PORTPMSC_L1S_MASK              0x03
+#define XHCI_PORTPMSC_L1S_SHIFT             0
+#define XHCI_PORTPMSC_RWE_MASK              1
+#define XHCI_PORTPMSC_RWE_SHIFT             3
+#define XHCI_PORTPMSC_BESL_MASK             0x0F
+#define XHCI_PORTPMSC_BESL_SHIFT            4
+#define XHCI_PORTPMSC_L1_DEV_SLOT_MASK      0xFF
+#define XHCI_PORTPMSC_L1_DEV_SLOT_SHIFT     8
+#define XHCI_PORTPMSC_HLE_MASK              1
+#define XHCI_PORTPMSC_HLE_SHIFT             16
+#define XHCI_PORTPMSC_TEST_MODE_MASK        0x0F
+#define XHCI_PORTPMSC_TEST_MODE_SHIFT       28
+
+#define XHCI_PORTLI_LEC_MASK                0xFFFF
+#define XHCI_PORTLI_LEC_SHIFT               0
+#define XHCI_PORTLI_RLC_MASK                0x0F
+#define XHCI_PORTLI_RLC_SHIFT               0x16
+#define XHCI_PORTLI_TLC_MASK                0x0F
+#define XHCI_PORTLI_TLC_SHIFT               0x20
 
 #endif
