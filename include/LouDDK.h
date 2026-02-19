@@ -206,6 +206,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <Riff.h>
 #include <kernel/LouAccessTokens.h>
 #include <Security.h>
+#include <kernel/LazyAllocations.h>
 
 #ifndef _KERNEL_MODULE_
 #define KERNEL_EXPORT extern "C"

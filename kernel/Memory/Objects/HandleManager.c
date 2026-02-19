@@ -14,9 +14,6 @@ static LOUSTATUS CreateHandleForObject(
             return Status;
         }
 
-        if(!AccessToken->SystemAccessToken){
-            
-        }
         LouPrint("CreateHandleForObject():SkipAccessTokenCheck\n");
         while(1);
     }
