@@ -492,9 +492,7 @@ KERNEL_ENTRY LouOsKrnlStart(
     
     Status = LouKeZwAcquireHandleForObjectEx(
         &AccessTokenHandle, 
-        (PVOID)AccessToken, 
-        0x00,
-        true
+        (PVOID)AccessToken
     );
 
     if(Status != STATUS_SUCCESS){

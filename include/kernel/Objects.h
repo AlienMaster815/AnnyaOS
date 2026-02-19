@@ -214,15 +214,12 @@ LOUSTATUS LouKeAcquireHandleForObject(
 
 LOUSTATUS LouKeZwAcquireHandleForObjectEx(
     PHANDLE     OutHandle,
-    PVOID       Object, 
-    ACCESS_MASK RequestedAccess,
-    BOOL        KernelIsRequesting
+    PVOID       Object
 );
 
 LOUSTATUS LouKeZwAcquireHandleForObject(
     PHANDLE     OutHandle,
-    PVOID       Object, 
-    ACCESS_MASK RequestedAccess
+    PVOID       Object
 );
 
 #ifdef __cplusplus

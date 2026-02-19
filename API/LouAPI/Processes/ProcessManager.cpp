@@ -232,6 +232,16 @@ void PsmProcessScedualManagerObject::PsmSetCurrentThread(PGENERIC_THREAD_DATA Th
     this->CurrentThread = Thread;
 }
 
+LOUDDK_API_ENTRY HANDLE LouKePsmGetCurrentProcessAccessToken(){
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    return  (HANDLE)ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentProcess->ProcessAccessToken;
+}
+
+LOUDDK_API_ENTRY HANDLE LouKePsmGetCurrentThreadAccessToken(){
+    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    return  (HANDLE)ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadAccessToken;
+}
+
 KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
@@ -375,9 +385,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     
     Status = LouKeZwAcquireHandleForObjectEx(
         &AccessTokenHandle, 
-        (PVOID)AccessToken, 
-        0x00,
-        true
+        (PVOID)AccessToken
     );
 
     if(Status != STATUS_SUCCESS){

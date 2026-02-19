@@ -108,6 +108,7 @@ typedef struct _GENERIC_THREAD_DATA{
     UINT8                           Ss;
     INSTRUCTION_MODE                InstructionMode;
     UINT8*                          AfinityBitmap;
+    HANDLE                          ThreadAccessToken;
     BOOL                            Resting;
     CPUContext                      SavedState;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;

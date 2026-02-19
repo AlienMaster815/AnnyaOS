@@ -153,6 +153,7 @@ LOUSTATUS LouKeRegisterObjectToObjectManager(
     NewObjectParams.SecurityDescriptor = SecurityDescriptor;
     NewObjectParams.MaxHandles = MaxHandles;
 
+
     LouKeAllocateFastObjectEx("OBJECT_HEADER", (PVOID)&NewObjectParams);
 
     return STATUS_SUCCESS;
@@ -186,21 +187,56 @@ LOUSTATUS LouKeAcquireHandleForObject(
         return STATUS_INVALID_PARAMETER;
     }
 
-    UNUSED POBJECT_HEADER ObjectHeader = GetObjectHeaderFromObject(Object);
+    PLOUSINE_ACCESS_TOKEN AccessToken;
+    LOUSTATUS Status = LouKeZwGetAccessTokenData(&AccessToken, LouKePsmGetCurrentProcessAccessToken());
+    if((Status != STATUS_SUCCESS) || (!AccessToken)){
+        LouPrint("CreateHandleForObject() Unable To Get Token\n");
+        return Status;
+    }
+
+    if(AccessToken->SystemAccessToken){
+        return LouKeZwAcquireHandleForObjectEx(
+            OutHandle,
+            Object
+        );
+    }
+
+
+    POBJECT_HEADER ObjectHeader = GetObjectHeaderFromObject(Object);
     
-    
-    
+    if(!ObjectHeader){
+        LouPrint("LouKeAcquireHandleForObject() ObjectHeader NULL\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    for(SIZE i = 0 ; i < 2; i++){
+
+        POBJECT_HANDLE TmpHandle = &ObjectHeader->ObjectHandles;
+        //TODO LockObject during Parsing
+        while(TmpHandle->Peers.NextHeader){
+            TmpHandle = (POBJECT_HANDLE)TmpHandle->Peers.NextHeader;
+            if(TmpHandle->AccessMask == RequestedAccess){
+                LouKeNotifyHandleOfAcquisition(TmpHandle);
+                *OutHandle = (HANDLE)TmpHandle;
+                return STATUS_SUCCESS;
+            }
+        }
+
+        Status = LouKeCreateHandleForObject(ObjectHeader, RequestedAccess);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+    }
+
     //*OutHandle = ;
     LouPrint("LouKeAcquireHandleForObject()\n");
     while(1);
-    return STATUS_SUCCESS;
+    return STATUS_UNSUCCESSFUL;
 }
 
 LOUSTATUS LouKeZwAcquireHandleForObjectEx(
     PHANDLE     OutHandle,
-    PVOID       Object, 
-    ACCESS_MASK RequestedAccess,
-    BOOL        KernelIsRequesting
+    PVOID       Object
 ){
     if((!Object) || (!OutHandle)){
         LouPrint("LouKeAcquireHandleForObjectEx() EINVAL\n");
@@ -210,28 +246,17 @@ LOUSTATUS LouKeZwAcquireHandleForObjectEx(
     }
 
     UNUSED POBJECT_HEADER ObjectHeader = GetObjectHeaderFromObject(Object);
-    
-    if(KernelIsRequesting){
-        LouKeNotifyHandleOfAcquisition(&ObjectHeader->ObjectHandles);
-        *OutHandle = &ObjectHeader->ObjectHandles;
-        return STATUS_SUCCESS;
-    }
-    
-    //*OutHandle = ;
-    LouPrint("LouKeZwAcquireHandleForObjectEx()\n");
-    while(1);
+    LouKeNotifyHandleOfAcquisition(&ObjectHeader->ObjectHandles);
+    *OutHandle = &ObjectHeader->ObjectHandles;
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS LouKeZwAcquireHandleForObject(
     PHANDLE     OutHandle,
-    PVOID       Object, 
-    ACCESS_MASK RequestedAccess
+    PVOID       Object
 ){
     return LouKeZwAcquireHandleForObjectEx(
         OutHandle, 
-        Object, 
-        RequestedAccess, 
-        false
+        Object
     );
 }

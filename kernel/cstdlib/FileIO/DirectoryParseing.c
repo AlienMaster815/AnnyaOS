@@ -37,7 +37,7 @@ LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
     if(Status == STATUS_SUCCESS){
         Status = LouKeAcquireHandleForObject(
             &OutHandle,
-            Object,
+            PathToFile,
             RequestedAccess
         );
         if(Status != STATUS_SUCCESS){
@@ -75,18 +75,17 @@ LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
     if(Status == STATUS_SUCCESS){
         Status = LouKeAcquireHandleForObject(
             &OutHandle,
-            Object,
+            File,
             RequestedAccess
         );
         if(Status != STATUS_SUCCESS){
             LouPrint("LouKeLoadFileCall() Unable To Acquire Handle For Object\n");
             //TODO Remove Object From Object Manager And Close File
             *Data = 0x00;
+            while(1);
             return Status;
         }
         *Data = (uint64_t)OutHandle;
-        LouPrint("LouKeLoadFileCall():%h\n", OutHandle);
-        while(1);
         return STATUS_SUCCESS;
     }
 
