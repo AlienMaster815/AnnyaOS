@@ -262,6 +262,18 @@ void* LouKeMallocFromDynamicPool(
     return LouKeMallocFromDynamicPoolEx(Pool, AllocationSize, GetAlignmentBySize(AllocationSize));
 }
 
+void LouKeDestroyDynamicPool(
+    POOL Pool
+){
+    PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Pool->MemoryTracks.Peers.NextHeader;
+    PPOOL_MEMORY_TRACKS Leader = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
+    while(Node){
+        Node = (PPOOL_MEMORY_TRACKS)Leader->Peers.NextHeader;
+        Leader = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
+        LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
+    }
+}
+
 POOL LouKeCreateGenericPool(
     uint64_t VLocation,
     uint64_t Location,

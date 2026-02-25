@@ -8,7 +8,7 @@ LOUSTATUS LouKeLoadCoffImageA32(
     PCFI_OBJECT CoffObject
 );
 
-LOUSTATUS LouKeLoadCoffImageA64(
+LOUSTATUS LouKeLoadCoffImage64(
     PCFI_OBJECT CoffObject
 );
 

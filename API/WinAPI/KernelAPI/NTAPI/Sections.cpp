@@ -219,7 +219,6 @@ LouKeVmmCreateSectionEx(
 
         FILE_TYPE FileType = LouKeGetFileType(FileHandle);
 
-
         switch(FileType){
             case COFF_FILE_TYPE:{
                 PVOID PrivateData = LouGeneralAllocateMemoryEx(sizeof(COFF_PRIVATE_DATA), GET_ALIGNMENT(COFF_PRIVATE_DATA));
@@ -240,8 +239,8 @@ LouKeVmmCreateSectionEx(
         }
     }
 
-    
-
+    LouPrint("LouKeVmmCreateSectionEx()\n");
+    while(1);
     return STATUS_UNSUCCESSFUL;
 }
 

@@ -142,7 +142,7 @@ LouKeLoadCoffImageB(
     CfiObject->ImageHeader = CoffStdHeader;
 
     if(!CfiObject->AOA64){
-        LoaderStatus = LouKeLoadCoffImageA64(CfiObject);
+        LoaderStatus = LouKeLoadCoffImage64(CfiObject);
     }else {
         LoaderStatus = LouKeLoadCoffImageA32(CfiObject);
     }
@@ -217,7 +217,7 @@ LouKeLoadCoffImageExA_ns(
     CfiObject->ImageHeader = CoffStdHeader;
 
     if(!CfiObject->AOA64){
-        LoaderStatus = LouKeLoadCoffImageA64(CfiObject);
+        LoaderStatus = LouKeLoadCoffImage64(CfiObject);
     }else {
         LoaderStatus = LouKeLoadCoffImageA32(CfiObject);
     }
@@ -275,7 +275,7 @@ LouKeLoadCoffImageA(
         FullPath = LouKeAddFileToPath(Path, FileName);        
 
     }else{
-        LouPrint("LouKeLoadCoffImageA64() ERROR No Path\n");
+        LouPrint("LouKeLoadCoffImage64() ERROR No Path\n");
         while(1);
     }
     return LouKeLoadCoffImageExA(FullPath, CfiObject, KernelObject);

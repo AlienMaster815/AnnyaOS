@@ -375,7 +375,7 @@ void LouKeLibTraceInitializeLibrarary(
     UINT64      LibrarySize
 );
 
-LOUSTATUS LouKeLoadCoffImageA64(
+LOUSTATUS LouKeLoadCoffImage64(
     PCFI_OBJECT CfiObject
 ){
 
@@ -475,6 +475,8 @@ LOUSTATUS LouKeLoadCoffImageA64(
     EnableCoffImageProtection(CfiObject);
         
     LouPrint("Coff Loaded At Address:%h\n", CfiObject->LoadedAddress);
+
+
 
     return STATUS_SUCCESS;
 }

@@ -65,6 +65,7 @@
 #include <kernel/LouAccessTokens.h>
 #include <Security.h>
 #include <kernel/LazyAllocations.h>
+#include <kernel/Stack.h>
 
 #ifndef KERNEL_MAIN_FILE
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;

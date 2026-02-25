@@ -595,6 +595,10 @@ void* LouKeRealloc(void* Address, size_t NewSide);
 
 void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 
+void LouKeDestroyDynamicPool(
+    POOL Pool
+);
+
 static inline
 bool RangeDoesNotInterfere(
     uint64_t AddressForCheck, 

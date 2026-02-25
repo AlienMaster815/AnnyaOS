@@ -13,6 +13,7 @@ typedef struct _LAZY_ALLOCATION_TRACKER{
     PVOID                       VirtualLocation;
     SIZE                        VirtualSize;
     SIZE                        PageSize;
+    SIZE                        PhyMappingCount;
     PVOID*                      PhysicalMappings;
     UINT64                      PageFlags;
     struct _LMPOOL_DIRECTORY*   DynamicAllocations;
@@ -26,6 +27,11 @@ LouKeAllocateLazyBuffer(
     PVOID VirtualLocation, 
     SIZE VirtualSize, 
     UINT64 PageFlags
+);
+
+void 
+LouKeFreeLazyBuffer(
+    PLAZY_ALLOCATION_TRACKER Tracker
 );
 
 BOOL 
@@ -45,6 +51,7 @@ LouKeMallocFromLazyBuffer(
     PLAZY_ALLOCATION_TRACKER    LazyBuffer,
     SIZE                        Size
 );
+
 
 #else
 

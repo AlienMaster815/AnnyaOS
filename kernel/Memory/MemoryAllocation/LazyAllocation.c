@@ -17,9 +17,21 @@ static PLAZY_ALLOCATION_TRACKER AllocateLazyTracker(){
     return TmpTracker;
 }
 
-//TODO void FreeLazyTracker(PLAZY_ALLOCATION_TRACKER TrackMember){
-
-//}
+static void FreeLazyTracker(PLAZY_ALLOCATION_TRACKER TrackMember){
+    PLAZY_ALLOCATION_TRACKER TmpTracker = &MasterList;
+    PLAZY_ALLOCATION_TRACKER Follower;
+    MutexLock(&MasterLock);
+    while(TmpTracker->Peers.NextHeader){
+        Follower = TmpTracker;
+        TmpTracker = (PLAZY_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
+        if(TmpTracker == TrackMember){
+            Follower->Peers.NextHeader = TmpTracker->Peers.NextHeader;
+            LouKeFree(TmpTracker);
+            break;
+        }
+    }
+    MutexUnlock(&MasterLock);
+}
 
 PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE VirtualSize, UINT64 PageFlags){
 
@@ -38,8 +50,16 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
     NewTracker->VirtualLocation = VirtualLocation;
     NewTracker->PageSize = PageSize;
     NewTracker->PageFlags = PageFlags;
+    NewTracker->PhyMappingCount = VirtualSize / PageSize;
+    NewTracker->PhysicalMappings = LouKeMallocArray(PVOID, NewTracker->PhyMappingCount, KERNEL_GENERIC_MEMORY);
     NewTracker->DynamicAllocations = LouKeMapDynamicPool((UINT64)VirtualLocation, VirtualSize, "LAZY_POOL", 0);
     return NewTracker;
+}
+
+void LouKeFreeLazyBuffer(PLAZY_ALLOCATION_TRACKER Tracker){
+    LouKeFree(Tracker->PhysicalMappings);
+    LouKeDestroyDynamicPool(Tracker->DynamicAllocations);
+    FreeLazyTracker(Tracker);
 }
 
 BOOL LouKePageFaultIsDueToLazyBuffer(PVOID Location){
