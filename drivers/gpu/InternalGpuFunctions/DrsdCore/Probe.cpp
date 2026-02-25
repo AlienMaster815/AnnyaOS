@@ -33,6 +33,7 @@
  */
 
  
+KERNEL_EXPORT
 int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector){
 
     int Count = Connector->AssistCallbacks->ConnectorGetModes(Connector);
@@ -47,6 +48,7 @@ int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector){
     return Count;
 }
 
+KERNEL_EXPORT
 DRSD_CONNECTOR_STATUS DrsdInternalProbeDetection(
     PDRSD_CONNECTOR Connector, 
     PDRSD_MODE_SET_CONTEXT Setex, 

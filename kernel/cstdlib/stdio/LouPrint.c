@@ -249,6 +249,7 @@ bool UsingSmp = false;
 INTEGER 
 GetCurrentCpuTrackMember();
 
+KERNEL_EXPORT
 int LouPrint(char* format, ...) {
     LouKIRQL OldLevel;
         

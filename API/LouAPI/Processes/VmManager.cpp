@@ -2,7 +2,7 @@
 #include "ProcessPrivate.h"
 
 
-KERNEL_IMPORT uint64_t GetCr3();
+LOUDDK_API_ENTRY uint64_t GetCr3();
 
 void LouKeSendPml4ToSections(UINT64* Pml4);
 

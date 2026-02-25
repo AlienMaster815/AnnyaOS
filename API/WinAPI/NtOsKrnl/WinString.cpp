@@ -308,7 +308,7 @@ string Winstrcat(
     return Destination; // Return the concatenated string
 }
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void SetRANDSeed(uint32_t NewSeed);
 
 LOUDDK_API_ENTRY
@@ -318,7 +318,7 @@ void srand(
     SetRANDSeed((uint32_t)seed);
 }
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 uint32_t LouKeRandCStdLib();
 
 LOUDDK_API_ENTRY

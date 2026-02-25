@@ -2,6 +2,7 @@
 
 void LouKeUnblockThread(UINT64 ThreadID);
 
+KERNEL_EXPORT
 LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
     MutexLock(&Event->Lock);
     Event->ThreadID = LouKeGetThreadIdentification();
@@ -12,7 +13,7 @@ LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
     return Completed ? STATUS_SUCCESS : STATUS_TIMEOUT;
 }
 
-
+KERNEL_EXPORT
 void LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event){
     Event->Completed = true;
     LouKeUnblockThread(Event->ThreadID);

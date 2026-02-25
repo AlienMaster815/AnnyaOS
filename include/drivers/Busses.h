@@ -49,7 +49,6 @@ typedef struct _LOU_BUS{
     LOUSTATUS           (*DeInitializeBus)(struct _LOU_BUS* BusData, PLOU_BUS_OBJECT BusObject);
 }LOU_BUS, * PLOU_BUS;
 
-#ifdef _KERNEL_MODULE_
 // --- Module-specific data (MODULE_NAME.SYS) ---
 KERNEL_EXPORT
 LOUSTATUS 
@@ -57,13 +56,7 @@ LouKeCreateBusClass(
     PLOU_BUS    Bus
 );
 
-#else
-// --- LOUOSKRNL.EXE-specific data ---
-LOUSTATUS 
-LouKeCreateBusClass(
-    PLOU_BUS    Bus
-);
-#endif
+
 
 #endif // end user vs kernel
 

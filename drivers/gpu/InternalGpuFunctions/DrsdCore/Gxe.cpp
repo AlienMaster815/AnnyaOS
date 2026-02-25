@@ -34,7 +34,7 @@
 
 
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress){
 
     Device->VramPool = LouKeCreateGenericPool((uint64_t)VramBase, (uint64_t)PAddress, size , 0);
@@ -42,7 +42,8 @@ LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, 
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+
+KERNEL_EXPORT
 PDRSD_FRAME_BUFFER DrsdGxeCreateAsyncFramebuffer(
     PDRSD_DEVICE    Device,
     void*           DrsdBuffer,
@@ -54,7 +55,7 @@ PDRSD_FRAME_BUFFER DrsdGxeCreateAsyncFramebuffer(
     return 0x00;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 DRSD_MODE_STATUS DrsdGxeVramInternalModeValid(
     PDRSD_DEVICE        Device,
     PDRSD_DISPLAY_MODE  DisplayMode
@@ -65,7 +66,7 @@ DRSD_MODE_STATUS DrsdGxeVramInternalModeValid(
     return DRSD_MODE_OK;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalAtomicCheck(
     PDRSD_DEVICE        Device,
     void*               AtomicHandle
@@ -75,7 +76,7 @@ LOUSTATUS DrsdInternalAtomicCheck(
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalAtomicUpdate(
     PDRSD_DEVICE        Device,
     void*               AtomicHandle,
@@ -87,7 +88,7 @@ LOUSTATUS DrsdInternalAtomicUpdate(
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalPlaneUpdateAtomic(
     PDRSD_PLANE                     Plane,
     PDRSD_CRTC                      Crtc,
@@ -107,7 +108,7 @@ LOUSTATUS DrsdInternalPlaneUpdateAtomic(
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalPlaneDisableAtomic(
     PDRSD_PLANE                     Plane,
     struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext            
@@ -117,7 +118,7 @@ LOUSTATUS DrsdInternalPlaneDisableAtomic(
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdInternalDestroyPlane(
     PDRSD_PLANE Plane
 ){
@@ -128,7 +129,7 @@ void DrsdInternalDestroyPlane(
 
 
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdInternalResetPlane(
     PDRSD_PLANE Plane
 ){
@@ -168,7 +169,7 @@ void DrsdInternalResetPlane(
     LouPrint("DrsdInternalResetPlane() STATUS_SUCCESS\n");
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 PDRSD_PLANE_STATE DrsdInternalDuplicateAtomicState(
     PDRSD_PLANE         Plane
 ){
@@ -178,7 +179,7 @@ PDRSD_PLANE_STATE DrsdInternalDuplicateAtomicState(
     return 0x00;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdInternalDestroyPlaneAtomic(
     PDRSD_PLANE         Plane,
     PDRSD_PLANE_STATE   PlaneState
@@ -188,7 +189,7 @@ void DrsdInternalDestroyPlaneAtomic(
     while(1);
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdGxeInternalPrepareFrameBuffer(
     PDRSD_PLANE         Plane,
     PDRSD_PLANE_STATE   PlaneState
@@ -199,7 +200,7 @@ LOUSTATUS DrsdGxeInternalPrepareFrameBuffer(
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdGxeInternalCleanupFrameBuffer(
     PDRSD_PLANE         Plane,
     PDRSD_PLANE_STATE   PlaneState
@@ -208,7 +209,7 @@ void DrsdGxeInternalCleanupFrameBuffer(
     while(1);
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdGxeInternalStartFrameBufferProcessing(
     PDRSD_PLANE         Plane,
     PDRSD_PLANE_STATE   PlaneState
@@ -218,7 +219,7 @@ LOUSTATUS DrsdGxeInternalStartFrameBufferProcessing(
     return STATUS_SUCCESS;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdGxeInternalStopFrameBufferProcessing(
     PDRSD_PLANE         Plane,
     PDRSD_PLANE_STATE   PlaneState
@@ -227,7 +228,7 @@ void DrsdGxeInternalStopFrameBufferProcessing(
     while(1);
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdGxeResetShadowPlane(
     PDRSD_PLANE         Plane
 ){
@@ -243,7 +244,7 @@ void DrsdGxeResetShadowPlane(
     LouPrint("DrsdGxeResetShadowPlane() STATUS_SUCCESS\n");
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 PDRSD_PLANE_STATE DrsdGxeDuplicateShadowPlaneState(
     PDRSD_PLANE Plane
 ){
@@ -253,7 +254,7 @@ PDRSD_PLANE_STATE DrsdGxeDuplicateShadowPlaneState(
     return 0x00;
 }
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 void DrsdGxeDestroyShadowPlane(
     PDRSD_PLANE         Plane,
     PDRSD_PLANE_STATE   PlaneState
@@ -297,6 +298,7 @@ LOUSTATUS DrsdInitializeCrtcWithPlanes(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdInitializeCrtcGammaSize(
     PDRSD_CRTC  Crtc,
     size_t      GammaSize
@@ -326,6 +328,7 @@ LOUSTATUS DrsdInitializeCrtcGammaSize(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
     void*                            Mode,
     struct _DRSD_MODE_SET_CONTEXT*   ModeSetAquireContext
@@ -335,6 +338,7 @@ LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
     PDRSD_CRTC                      Crtc,
     PDRSD_FRAME_BUFFER              FrameBuffer,
@@ -347,6 +351,7 @@ LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 void DrsdInternalCrtcResetAtomic(
     PDRSD_CRTC          Crtc 
 ){
@@ -363,6 +368,7 @@ void DrsdInternalCrtcResetAtomic(
     LouPrint("DrsdInternalCrtcResetAtomic() STATUS_SUCCESS\n");
 }
 
+KERNEL_EXPORT
 void* DrsdInternalCrtcDuplicateStateAtomic(
     PDRSD_CRTC          Crtc
 ){
@@ -371,6 +377,7 @@ void* DrsdInternalCrtcDuplicateStateAtomic(
     return 0x00;
 }
 
+KERNEL_EXPORT
 void DrsdInternalCrtcDestroyStateAtomic(
     PDRSD_CRTC  Crtc,
     void*       StateData
@@ -379,6 +386,7 @@ void DrsdInternalCrtcDestroyStateAtomic(
     while(1);
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdInitializeEncoder(
     PDRSD_DEVICE                Device,
     PDRSD_ENCODER               Encoder,
@@ -406,18 +414,21 @@ LOUSTATUS DrsdInitializeEncoder(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 void DrsdInternalResetConnector(PDRSD_CONNECTOR Connector){
 
     LouPrint("DrsdInternalResetConnector()\n");
     while(1);
 }
 
+KERNEL_EXPORT
 PDRSD_CONNECTOR_STATE DrsdInternalAtomicConnectorDuplicateState(PDRSD_CONNECTOR Connector){
     LouPrint("DrsdInternalAtomicConnectorDuplicateState()\n");
     while(1);
     return 0x00;
 }
 
+KERNEL_EXPORT
 void DrsdInternalAtomicConnectorDestroyState(
     PDRSD_CONNECTOR         Connector,
     PDRSD_CONNECTOR_STATE   State
@@ -426,6 +437,7 @@ void DrsdInternalAtomicConnectorDestroyState(
     while(1);
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdConnectorInitialize(
     PDRSD_DEVICE                Device,
     PDRSD_CRTC                  Crtc,
@@ -452,6 +464,7 @@ LOUSTATUS DrsdConnectorInitialize(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
 
     PDRSD_PLANE Plane = Device->Planes;
@@ -489,6 +502,7 @@ void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
     LouPrint("DrsdModeConfigurationReset() STATUS_SUCCESS\n");
 }
 
+KERNEL_EXPORT
 PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane){
 
 

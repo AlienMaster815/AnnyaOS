@@ -1,8 +1,8 @@
 #include <LouDDK.h>
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void UnSetInterruptFlags();
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void SetInterruptFlags();
 
 void LouKeBcdToBinary(uint8_t* bcd_value){

@@ -114,7 +114,6 @@ LouRegisterMouseHandler(
 #include <LouAPI.h>
 #endif
 
-#ifdef _KERNEL_MODULE_
 // --- Module-specific data (MODULE_NAME.SYS) ---
 
 KERNEL_EXPORT
@@ -123,7 +122,6 @@ PLOUSINE_USER_SHARED_MESSAGE LouKeMouseAllocateMessageDevice();
 KERNEL_EXPORT
 void LouKeMouseUpdateInput(PLOUSINE_USER_SHARED_MESSAGE Message, INT64 X, INT64 Y, BOOL RightClick, BOOL LeftClick);
 
-#else
 // --- LOUOSKRNL.EXE-specific data ---
 
 PLOUSINE_USER_SHARED_MESSAGE LouKeCreateNewUserMessage(
@@ -135,11 +133,7 @@ void LouKeDispatchNewUserMessage(
     PLOUSINE_USER_SHARED_MESSAGE Message
 );
 
-PLOUSINE_USER_SHARED_MESSAGE LouKeMouseAllocateMessageDevice();
 
-void LouKeMouseUpdateInput(PLOUSINE_USER_SHARED_MESSAGE Message, INT64 X, INT64 Y, BOOL RightClick, BOOL LeftClick);
-
-#endif
 
 #endif // end user vs kernel
 

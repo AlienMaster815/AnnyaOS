@@ -105,7 +105,7 @@ void LouKeHalPciClearMaster(PPCI_DEVICE_OBJECT PDEV){
     pciConfigWriteWord(0 ,PDEV->bus, PDEV->slot, PDEV->func, 0x04, command_reg);
 }
 
-LOUDDK_API_ENTRY void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV){
+KERNEL_EXPORT void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV){
          // Read the current value of the PCI Command Register (offset 0x04)
     uint16_t command_reg = pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, 0x04);
 

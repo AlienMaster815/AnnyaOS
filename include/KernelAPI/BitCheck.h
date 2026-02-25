@@ -8,243 +8,243 @@
 #include <NtAPI.h>
 #ifndef _KERNEL_MODULE_
 //So Nobody is confused this goes from lsb to msb in memory
-KERNEL_IMPORT void LouKeSetBitU64(
+LOUDDK_API_ENTRY void LouKeSetBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBitU64(
+LOUDDK_API_ENTRY void LouKeUnSetBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitU64(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSetU64(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSetU64(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBitU64(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBit64(
+LOUDDK_API_ENTRY void LouKeSetBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBit64(
+LOUDDK_API_ENTRY void LouKeUnSetBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBit64(
+LOUDDK_API_ENTRY UCHAR LouKeTestBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSet64(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSet64(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBit64(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBitU32(
+LOUDDK_API_ENTRY void LouKeSetBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBitU32(
+LOUDDK_API_ENTRY void LouKeUnSetBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitU32(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSetU32(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSetU32(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBitU32(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBit32(
+LOUDDK_API_ENTRY void LouKeSetBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBit32(
+LOUDDK_API_ENTRY void LouKeUnSetBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBit32(
+LOUDDK_API_ENTRY UCHAR LouKeTestBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSet32(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet32(
 	int32_t* Base,
 	int8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSet32(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBit32(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBitU16(
+LOUDDK_API_ENTRY void LouKeSetBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBitU16(
+LOUDDK_API_ENTRY void LouKeUnSetBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitU16(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSetU16(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSetU16(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBitU16(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBit16(
+LOUDDK_API_ENTRY void LouKeSetBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBit16(
+LOUDDK_API_ENTRY void LouKeUnSetBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBit16(
+LOUDDK_API_ENTRY UCHAR LouKeTestBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSet16(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet16(
 	int16_t* Base,
 	int8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSet16(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBit16(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBitU8(
+LOUDDK_API_ENTRY void LouKeSetBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBitU8(
+LOUDDK_API_ENTRY void LouKeUnSetBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitU8(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSetU8(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSetU8(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBitU8(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeSetBit8(
+LOUDDK_API_ENTRY void LouKeSetBit8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT void LouKeUnSetBit8(
+LOUDDK_API_ENTRY void LouKeUnSetBit8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBit8(
+LOUDDK_API_ENTRY UCHAR LouKeTestBit8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndSet8(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet8(
 	int8_t* Base,
 	int8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestBitAndUnSet8(
+LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-KERNEL_IMPORT UCHAR LouKeTestAndResetBit8(
+LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit8(
 	int8_t* Base,
 	uint8_t Index
 );

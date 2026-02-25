@@ -53,7 +53,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_COMMON_CONFIG PciConfig
             );
             
-            LOUDDK_API_ENTRY void* LouKeHalGetPciVirtualBaseAddress(
+            KERNEL_EXPORT void* LouKeHalGetPciVirtualBaseAddress(
                 PPCI_COMMON_CONFIG Config,
                 uint8_t BarNumber
             );
@@ -77,33 +77,33 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             LOUDDK_API_ENTRY
             LOUSTATUS LouKeHalPciSetMmio(PPCI_DEVICE_OBJECT PDEV);
 
-            LOUDDK_API_ENTRY void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV);
+            KERNEL_EXPORT void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV);
 
 
-            LOUDDK_API_ENTRY uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
+            KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
                 PPCI_COMMON_CONFIG PciSearch, 
                 PLINUX_PCI_DEVICE_ID LinuxCmpatibleDirectory
             );
 
-            LOUDDK_API_ENTRY LOUSTATUS LouKeHalEnablePciDevice(PPCI_DEVICE_OBJECT PDEV);
+            KERNEL_EXPORT LOUSTATUS LouKeHalEnablePciDevice(PPCI_DEVICE_OBJECT PDEV);
 
-            LOUDDK_API_ENTRY
+            KERNEL_EXPORT
             LOUSTATUS LouKeHalMallocPciIrqVectors(
                 PPCI_DEVICE_OBJECT PDEV, 
                 UINT32 RequestedVectors, 
                 uint64_t Flags
             );
 
-            LOUDDK_API_ENTRY void LouKeHalFreePciIrqVectors(
+            KERNEL_EXPORT void LouKeHalFreePciIrqVectors(
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            LOUDDK_API_ENTRY
+            KERNEL_EXPORT
             UINT8 LouKeHalGetPciIrqVectorCount(
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            KERNEL_IMPORT LOUSTATUS LouKeRegisterDevice(
+            KERNEL_EXPORT LOUSTATUS LouKeRegisterDevice(
                 PPCI_DEVICE_OBJECT PDEV, 
                 SYSTEM_DEVICE_IDENTIFIER Sdi,
                 string LRE, //optional
@@ -111,7 +111,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 void* DevicePrivateData
             );
 
-            KERNEL_IMPORT
+            KERNEL_EXPORT
             void LouKeHalGetPciConfiguration(
                 PPCI_DEVICE_OBJECT PDEV, 
                 PPCI_COMMON_CONFIG Config
@@ -119,29 +119,29 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
 
 
-            LOUDDK_API_ENTRY void LouKeHalPciEnableInterrupts(PPCI_DEVICE_OBJECT PDEV);
-            LOUDDK_API_ENTRY void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV);
+            KERNEL_EXPORT void LouKeHalPciEnableInterrupts(PPCI_DEVICE_OBJECT PDEV);
+            KERNEL_EXPORT void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV);
 
-            LOUDDK_API_ENTRY void LouKeHalAcpiShutdown();
+            KERNEL_EXPORT void LouKeHalAcpiShutdown();
 
-            LOUDDK_API_ENTRY size_t LouKeHalGetPciBaseAddressSize(
+            KERNEL_EXPORT size_t LouKeHalGetPciBaseAddressSize(
                PPCI_DEVICE_OBJECT PciConfig,
                 uint8_t BarNum  
             );
             
             void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
             
-            KERNEL_IMPORT void* LouKePciGetIoRegion(
+            KERNEL_EXPORT void* LouKePciGetIoRegion(
                 PPCI_DEVICE_OBJECT PDEV, 
                 uint8_t BarNumber,
                 size_t BarOffset
             );
 
-            KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
+            KERNEL_EXPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
-            LOUDDK_API_ENTRY uint64_t LouKePciGetVirtualBarAddress(uint64_t PhyAddress);
+            KERNEL_EXPORT uint64_t LouKePciGetVirtualBarAddress(uint64_t PhyAddress);
 
-            LOUDDK_API_ENTRY
+            KERNEL_EXPORT
             PPCI_DEVICE_OBJECT 
             LouKeHalGetPDEV(
                 uint16_t Group, 
@@ -150,14 +150,14 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 uint8_t Function
             );
 
-            LOUDDK_API_ENTRY
+            KERNEL_EXPORT
             UINT16 
             LouKeHalGetChipsetVendor();
 
-            KERNEL_IMPORT
+            KERNEL_EXPORT
             PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 
-            KERNEL_IMPORT
+            KERNEL_EXPORT
             UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
 
         #else 

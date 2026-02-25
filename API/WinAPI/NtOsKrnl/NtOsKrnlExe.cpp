@@ -3,8 +3,8 @@
 LOUDDK_API_ENTRY void AsanWrapperMemcmp() {}
 
 
-KERNEL_IMPORT void* LouKeGetHeadlessGlobals();
-KERNEL_IMPORT LOUSTATUS LouKeHdlspDispatch(    
+LOUDDK_API_ENTRY void* LouKeGetHeadlessGlobals();
+LOUDDK_API_ENTRY LOUSTATUS LouKeHdlspDispatch(    
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
     uint64_t Flags, 

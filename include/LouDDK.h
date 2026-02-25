@@ -1,6 +1,12 @@
 #ifndef _LOUDDK_H
 #define _LOUDDK_H
 
+#ifndef _KERNEL_MODULE_
+#define KERNEL_EXPORT extern "C" __declspec(dllexport)
+#else
+#define KERNEL_EXPORT extern "C" __declspec(dllimport)
+#endif
+
 #define WINAPI __stdcall
 
 #include <cstdint.h>
@@ -59,7 +65,7 @@ typedef void* PVOID;
 #define DRIVER_EXPORT extern "C" __declspec(dllexport)
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
 
-#define KERNEL_IMPORT extern "C"
+#define LOUDDK_API_ENTRY extern "C"
 
 //define common used cpp functions with drivers
 #include <drivers/Lou_drivers/io.h>
@@ -91,7 +97,7 @@ typedef void* FILE;
 
 typedef void* DEVICE;
 
-KERNEL_IMPORT void LouKeInitializeIntervalWork(
+LOUDDK_API_ENTRY void LouKeInitializeIntervalWork(
     void (*DelayedFunction)(uint64_t PrivateData),
     uint64_t PrivateData,
     uint64_t MsInterval
@@ -123,10 +129,7 @@ typedef size_t SIZE;
 
 //define kernel c functions that we translate to the cpp world
 //Printing And Debugging
-#ifndef _KERNEL_MODULE_
-KERNEL_IMPORT int LouPrint(char *format, ...);
 
-#else
 KERNEL_EXPORT int LouPrint(char *format, ...);
 KERNEL_EXPORT LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
 KERNEL_EXPORT void* memcpy(void* dest, const void* src, size_t n);
@@ -146,11 +149,10 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
-#endif
 // PORTS Stuff
 
 #ifdef __x86_64__
-    KERNEL_IMPORT uint64_t read_msr(uint32_t msr_id);
+    LOUDDK_API_ENTRY uint64_t read_msr(uint32_t msr_id);
 #endif
 
 #include <ListManagement.h>
@@ -211,39 +213,38 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <kernel/Stack.h>
 
 #ifndef _KERNEL_MODULE_
-#define KERNEL_EXPORT extern "C"
 
-KERNEL_IMPORT uint8_t inb(uint64_t port);
-KERNEL_IMPORT void outb(uint64_t port, uint8_t data);
-KERNEL_IMPORT uint16_t inw(uint64_t port);
-KERNEL_IMPORT void outw(uint64_t port, uint16_t data);
-KERNEL_IMPORT uint32_t inl(uint64_t port);
-KERNEL_IMPORT void outl(uint64_t port, uint32_t data);
-KERNEL_IMPORT void outbSlow(uint64_t port,uint8_t data);
+LOUDDK_API_ENTRY uint8_t inb(uint64_t port);
+LOUDDK_API_ENTRY void outb(uint64_t port, uint8_t data);
+LOUDDK_API_ENTRY uint16_t inw(uint64_t port);
+LOUDDK_API_ENTRY void outw(uint64_t port, uint16_t data);
+LOUDDK_API_ENTRY uint32_t inl(uint64_t port);
+LOUDDK_API_ENTRY void outl(uint64_t port, uint32_t data);
+LOUDDK_API_ENTRY void outbSlow(uint64_t port,uint8_t data);
 //MEMMORY ALLOCATION
-KERNEL_IMPORT void LouPanic(char*,STATUS);
+LOUDDK_API_ENTRY void LouPanic(char*,STATUS);
 //STD Library
-KERNEL_IMPORT void* memset(void* dest, int value, size_t count);
+LOUDDK_API_ENTRY void* memset(void* dest, int value, size_t count);
 
 
-KERNEL_IMPORT void* memcpy(void* dest, const void* src, size_t n);
-KERNEL_IMPORT int strncmp(const char* str1, const char* str2, size_t n);
-KERNEL_IMPORT int strcmp(const char* str1, const char* str2);
-KERNEL_IMPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
-KERNEL_IMPORT char* strncpy(char* dest, const char* src, size_t n);
+KERNEL_EXPORT void* memcpy(void* dest, const void* src, size_t n);
+KERNEL_EXPORT int strncmp(const char* str1, const char* str2, size_t n);
+KERNEL_EXPORT int strcmp(const char* str1, const char* str2);
+KERNEL_EXPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
+KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void* 
 LouKeLoadDriver(string Driver, string EntryName);
 
-void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
-//KERNEL_IMPORT void INTERRUPT(uint8_t InterruptNumber);
+KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
+//LOUDDK_API_ENTRY void INTERRUPT(uint8_t InterruptNumber);
 
-KERNEL_IMPORT void sleep(uint64_t Time);
+KERNEL_EXPORT void sleep(uint64_t Time);
 
 #define ACPIBUFFER 256
 

@@ -2,7 +2,7 @@
 #include <Hal.h>
 #include <bootloader/grub/multiboot2.h>
 
-KERNEL_IMPORT void StartDebugger();
+LOUDDK_API_ENTRY void StartDebugger();
 
 static struct multiboot_tag_vbe VBE_INFO;
 

@@ -1,6 +1,6 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void 
 LouKeMallocAtaPrivateData(
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
@@ -15,7 +15,7 @@ LouKeMallocAtaPrivateData(
     }
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void 
 LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     
@@ -28,7 +28,7 @@ LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
 LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
 

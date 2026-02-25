@@ -4,7 +4,7 @@
 
 #ifdef __cplusplus
 #include <NtAPI.h>
-KERNEL_IMPORT{
+LOUDDK_API_ENTRY{
 #else 
 #include <LouAPI.h>
 typedef void* FILE;

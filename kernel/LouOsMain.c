@@ -84,7 +84,7 @@ uint64_t GetRamSize();
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
 void initializeInterruptRouter();
-void InitializeGenericTables();
+void LouKeInitializeExportTable(PVOID KernelExportTable);
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
 uint8_t GetTotalHardwareInterrupts();
@@ -369,8 +369,7 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeBootGraphics();
 
-    //INITIALIZE IMPORTANT THINGS FOR US LATER
-    InitializeGenericTables();
+    LouKeInitializeExportTable(KernelLoaderInfo.KernelExportTable);
 
     AdvancedLousineKernelInitialization();
 

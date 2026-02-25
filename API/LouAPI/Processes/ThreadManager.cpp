@@ -4,10 +4,10 @@
 LOUDDK_API_ENTRY
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData();
-KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-KERNEL_IMPORT UINT64 GetRFLAGS();
+LOUDDK_API_ENTRY UINT64 GetRFLAGS();
 void LouKeLockProcManager(LouKIRQL* Irql);
 void LouKeUnlockProcManager(LouKIRQL* Irql);
 
@@ -203,7 +203,7 @@ static void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread){
     }
 }
 
-KERNEL_IMPORT uint64_t AllocateSaveContext();
+LOUDDK_API_ENTRY uint64_t AllocateSaveContext();
 
 LOUSTATUS LouKeTsmCreateThreadHandleNs(
     PGENERIC_THREAD_DATA*   OutHandle,    
@@ -363,7 +363,7 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
 
 }
 
-KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
+LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
     if(ThreadID == 0){
         return 0x00;
     }
@@ -377,7 +377,7 @@ KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
     return 0x00;
 }
 
-KERNEL_IMPORT void DeAllocateSaveContext(uint64_t Context);
+LOUDDK_API_ENTRY void DeAllocateSaveContext(uint64_t Context);
 
 void LouKeTsmDestroyThreadHandle(
     PGENERIC_THREAD_DATA Thread
@@ -575,7 +575,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 }
 
-KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
+LOUDDK_API_ENTRY void LouKeThreadSleep(SIZE Ms){
     uint64_t ThreadID = LouKeGetThreadIdentification();
     if(!ThreadID){
         LouPrint("LouKeThreadSleep() ERROR: Thread Non Existent\n");
@@ -595,7 +595,7 @@ KERNEL_IMPORT void LouKeThreadSleep(SIZE Ms){
     asm("INT $32");
 }
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void 
 LouKeYeildExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
@@ -612,7 +612,7 @@ LouKeYeildExecution(){
     asm("INT $32");
 }
 
-KERNEL_IMPORT void LouKeUnblockThread(UINT64 ThreadID){
+LOUDDK_API_ENTRY void LouKeUnblockThread(UINT64 ThreadID){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
     LouKeLockProcManager(&Irql);

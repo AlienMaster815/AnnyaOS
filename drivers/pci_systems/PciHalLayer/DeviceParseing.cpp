@@ -4,9 +4,9 @@
 
 
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 PPCI_MANAGER_DATA LouKeGetPciDataTable();
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 uint8_t LouKeGetPciGlobalMembers();
 
 #define DEVICE_ID_MATCH ((SearchConfig->Header.DeviceID == DeviceConfig->Header.DeviceID) || (SearchConfig->Header.DeviceID == ANY_PCI_ID))

@@ -82,6 +82,7 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT 
 LOUSTATUS 
 LouKeQueueWork(
     string QueueName,
@@ -92,6 +93,7 @@ LouKeQueueWork(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT 
 LOUSTATUS 
 LouKeQueueDelayedWork(
     string QueueName, 
@@ -103,6 +105,7 @@ LouKeQueueDelayedWork(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT 
 LOUSTATUS 
 LouKeQueueTimedWork(
     string QueueName, 
@@ -115,6 +118,7 @@ LouKeQueueTimedWork(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT 
 LOUSTATUS LouKeCreateWorkQueue(
     PLOUQ_WORK_QUEUE*   OutQueue,
     WORK_QUEUE_PRIORITY QueuePriority,

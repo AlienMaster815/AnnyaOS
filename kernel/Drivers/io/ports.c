@@ -3,7 +3,7 @@
 
 
 // Read a byte from an I/O port
-uint8_t inb(uint64_t port64) {
+KERNEL_EXPORT uint8_t inb(uint64_t port64) {
     uint8_t data;
     uint16_t port = (uint16_t)port64;
 
@@ -14,7 +14,7 @@ uint8_t inb(uint64_t port64) {
 }
 
 // Write a byte to an I/O port
-void outb(uint64_t port64, uint8_t data) {
+KERNEL_EXPORT void outb(uint64_t port64, uint8_t data) {
     uint16_t port = (uint16_t)port64;
 
     __asm__ __volatile__("outb %b0, %w1"
@@ -23,7 +23,7 @@ void outb(uint64_t port64, uint8_t data) {
 }
 
 // Read a word from an I/O port
-uint16_t inw(uint64_t port64) {
+KERNEL_EXPORT uint16_t inw(uint64_t port64) {
     uint16_t data;
     uint16_t port = (uint16_t)port64;
 
@@ -34,7 +34,7 @@ uint16_t inw(uint64_t port64) {
 }
 
 // Write a word to an I/O port
-void outw(uint64_t port64, uint16_t data) {
+KERNEL_EXPORT void outw(uint64_t port64, uint16_t data) {
     uint16_t port = (uint16_t)port64;
     __asm__ __volatile__("outw %w0, %w1"
                          :
@@ -42,7 +42,7 @@ void outw(uint64_t port64, uint16_t data) {
 }
 
 // Read a double-word from an I/O port
-uint32_t inl(uint64_t port64) {
+KERNEL_EXPORT uint32_t inl(uint64_t port64) {
     uint16_t port = (uint16_t)port64;
     uint32_t data;
     __asm__ __volatile__("inl %w1, %0"
@@ -52,7 +52,7 @@ uint32_t inl(uint64_t port64) {
 }
 
 // Write a double-word to an I/O port
-void outl(uint64_t port64, uint32_t data) {
+KERNEL_EXPORT void outl(uint64_t port64, uint32_t data) {
     uint16_t port = (uint16_t)port64;
     __asm__ __volatile__("outl %0, %w1"
                          :
@@ -60,7 +60,7 @@ void outl(uint64_t port64, uint32_t data) {
 }
 
 // Slow write of a byte to an I/O port
-void outbSlow(uint64_t port64, uint8_t data) {
+KERNEL_EXPORT void outbSlow(uint64_t port64, uint8_t data) {
     uint16_t port = (uint16_t)port64;
     __asm__ __volatile__("outb %b0, %w1\n\t"
                          "jmp 1f\n\t"
@@ -86,28 +86,28 @@ void write_msr(uint32_t msr, uint64_t value) {
                          : "c"(msr), "a"(low), "d"(high));
 }
 
-void insw(uint16_t port, void *buf, unsigned long count) {
+KERNEL_EXPORT void insw(uint16_t port, void *buf, unsigned long count) {
     __asm__ __volatile__("cld; rep; insw"
                          : "+D"(buf), "+c"(count)
                          : "d"(port)
                          : "memory");
 }
 
-void outsw(uint16_t port, const void *buf, unsigned long count) {
+KERNEL_EXPORT void outsw(uint16_t port, const void *buf, unsigned long count) {
     __asm__ __volatile__("cld; rep; outsw"
                          : "+S"(buf), "+c"(count)
                          : "d"(port)
                          : "memory");
 }
 
-void insb(uint16_t port, void *buf, unsigned long count) {
+KERNEL_EXPORT void insb(uint16_t port, void *buf, unsigned long count) {
     __asm__ __volatile__("cld; rep; insb"
                          : "+D"(buf), "+c"(count)
                          : "d"(port)
                          : "memory");
 }
 
-void outsb(uint16_t port, const void *buf, unsigned long count) {
+KERNEL_EXPORT void outsb(uint16_t port, const void *buf, unsigned long count) {
     __asm__ __volatile__("cld; rep; outsb"
                          : "+S"(buf), "+c"(count)
                          : "d"(port)
@@ -119,12 +119,12 @@ extern uint64_t LouKeMachineLevelReadRegisterUlong(uint64_t AddressOfRegister);
 extern uint64_t LouKeMachineLevelWriteRegisterUlong(uint64_t AddressOfRegister,uint64_t Data);
 
 
-unsigned long LouKeReadRegisterUlong(void* Register){
+KERNEL_EXPORT unsigned long LouKeReadRegisterUlong(void* Register){
     unsigned long RESULT = 0;
     RESULT = (unsigned long)LouKeMachineLevelReadRegisterUlong((uint64_t)(uint8_t*)Register);
     return RESULT;
 }
 
-void LouKeWriteRegisterUlong(void* Register, unsigned long Data){
+KERNEL_EXPORT void LouKeWriteRegisterUlong(void* Register, unsigned long Data){
     LouKeMachineLevelWriteRegisterUlong((uint64_t)(uint8_t*)Register,(uint64_t)Data);
 }

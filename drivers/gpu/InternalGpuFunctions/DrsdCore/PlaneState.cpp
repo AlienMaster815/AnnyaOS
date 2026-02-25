@@ -33,7 +33,7 @@
  */
 
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 LOUSTATUS DrsdInitializeGenericPlane(
     PDRSD_DEVICE            Device, 
     PDRSD_PLANE             Plane,

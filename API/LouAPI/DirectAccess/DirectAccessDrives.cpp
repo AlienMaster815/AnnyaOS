@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber);
 
 LOUDDK_API_ENTRY

@@ -13,6 +13,7 @@ void RegisterDmiDevice(DMI_FIELD Field, string String){
     DmiIndetification[Field] = String;
 }
 
+KERNEL_EXPORT
 BOOL DmiGetDate(DMI_FIELD Field, INTEGER* Year, INTEGER* Month, INTEGER* Day){
     INTEGER TYear = 0, TMonth = 0 , TDay = 0;    
     string s = DmiGetSystemInformation(Field);
@@ -102,7 +103,7 @@ static bool DmiMatch(PDMI_SYSTEM_ID SystemID){
 }
 
 
-
+KERNEL_EXPORT
 INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList){
     
     INTEGER Count = 0;
@@ -121,6 +122,7 @@ INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList){
     return Count;
 }
 
+KERNEL_EXPORT
 PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList){
     for(SIZE i = 0 ; IdList[i].ValidEntry ; i++){
         if(DmiMatch(&IdList[i])){

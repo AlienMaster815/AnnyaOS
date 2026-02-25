@@ -19,35 +19,35 @@ uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void SetupGDT();
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void HandleApProccessorInitialization();
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 LOUSTATUS InitializeStartupInterruptHandleing();
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 LOUSTATUS SetUpTimers();
 
 LOUDDK_API_ENTRY
 void LouKeInitializeCurrentApApic();
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 LOUSTATUS UpdateIDT(bool Init);
 
 LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-KERNEL_IMPORT PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 
 static mutex_t CoreIrqReadyLock = {0};
 static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
 static INTEGER                           InitializationProcessor = 0; 
 
-KERNEL_IMPORT void SetCr3(UINT64);
-KERNEL_IMPORT UINT64 GetCr3();
-KERNEL_IMPORT void SetLKPCB(UINT64 KernelProcBlock);
+LOUDDK_API_ENTRY void SetCr3(UINT64);
+LOUDDK_API_ENTRY UINT64 GetCr3();
+LOUDDK_API_ENTRY void SetLKPCB(UINT64 KernelProcBlock);
 
 //static LouKeManagerProcessSwap();
 void PsmProcessScedualManagerObject::PsmSetProcessTransitionState(){
@@ -242,7 +242,7 @@ LOUDDK_API_ENTRY HANDLE LouKePsmGetCurrentThreadAccessToken(){
     return  (HANDLE)ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadAccessToken;
 }
 
-KERNEL_IMPORT void LouKeSetIrqlNoFlagUpdate(
+LOUDDK_API_ENTRY void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );
@@ -288,8 +288,8 @@ UNUSED static void ProcessorIdleTask(){
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
-KERNEL_IMPORT void SignalProcessorsInitialized();
-KERNEL_IMPORT void SignalProcessorsInitPending();
+LOUDDK_API_ENTRY void SignalProcessorsInitialized();
+LOUDDK_API_ENTRY void SignalProcessorsInitPending();
 
 UNUSED static void InitializeIdleProcess(){
     HandleApProccessorInitialization();
@@ -334,9 +334,9 @@ void LouKeUnmaskSmpInterrupts(){
 
 }
 
-KERNEL_IMPORT UINT64 GetRSP();
-KERNEL_IMPORT UINT64 GetRBP();
-KERNEL_IMPORT void SetNewBootStack(UINT64 Base, UINT64 Pointer);
+LOUDDK_API_ENTRY UINT64 GetRSP();
+LOUDDK_API_ENTRY UINT64 GetRBP();
+LOUDDK_API_ENTRY void SetNewBootStack(UINT64 Base, UINT64 Pointer);
 LOUSTATUS LouKeTsmInitializeIdleThreads();
 
 LOUDDK_API_ENTRY void InitializeProcessManager(){

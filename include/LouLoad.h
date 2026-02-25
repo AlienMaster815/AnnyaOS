@@ -81,10 +81,11 @@ typedef struct _LOUSINE_LOADER_INFO{
     LOUSINE_KERNEL_VM_TABLE     KernelVm;
     LOUSINE_RAT_PARTITION       RatPartition;
     LOUSINE_FIRWARE_INFO        FirmwareInfo;
+    PVOID                       KernelExportTable;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
 #ifdef __cplusplus
-KERNEL_IMPORT LOUSINE_LOADER_INFO KernelLoaderInfo;
+LOUDDK_API_ENTRY LOUSINE_LOADER_INFO KernelLoaderInfo;
 #define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
 #define GetBootStackTop() KernelLoaderInfo.BootStack
 #else

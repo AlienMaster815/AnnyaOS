@@ -33,6 +33,7 @@ bool SleepTSC(uint64_t Milliseconds) {
 	return true;
 }
 
+KERNEL_EXPORT
 void sleep(uint64_t Time) {
 
 	//else {

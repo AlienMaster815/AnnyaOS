@@ -3,7 +3,7 @@
 static GENERIC_PROCESS_DATA MasterProcessList = {0};
 static mutex_t ProcessListLock = {0};
 static KERNEL_REFERENCE TotalProcesses = {0};
-KERNEL_IMPORT UINT64 GetCr3();
+LOUDDK_API_ENTRY UINT64 GetCr3();
 
 LOUDDK_API_ENTRY
 SIZE LouKePmGetProcessCount(){

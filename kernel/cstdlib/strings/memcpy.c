@@ -145,6 +145,7 @@ void InitializeBasicMemcpy(){
     MemcopyHandler = memcpy_basic;
 }
 
+KERNEL_EXPORT
 void* memcpy(void* destination, const void* source, size_t num) {
     return MemcopyHandler(destination, source, num);
 }

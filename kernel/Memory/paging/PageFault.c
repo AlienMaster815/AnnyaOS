@@ -15,7 +15,7 @@ extern void clear_cr2();
 bool IsCheckingPageFault = false;
 bool CheckIsSuccess = true;
 
-LOUSTATUS RequestPhysicalAddress(
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     uint64_t VAddress,
     uint64_t* PAddress
 );

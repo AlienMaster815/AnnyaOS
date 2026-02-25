@@ -21,10 +21,10 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 
 //NTSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
-KERNEL_IMPORT void* LouKeGetBootDevice(size_t Index);
+LOUDDK_API_ENTRY void* LouKeGetBootDevice(size_t Index);
 LOUSTATUS LouKeInitializeNetworkManager();
-KERNEL_IMPORT size_t GetBootDeviceCount();
-KERNEL_IMPORT DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
+LOUDDK_API_ENTRY size_t GetBootDeviceCount();
+LOUDDK_API_ENTRY DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
 
 size_t LouKeGetBootDeviceIndex(PPCI_COMMON_CONFIG Config);
 

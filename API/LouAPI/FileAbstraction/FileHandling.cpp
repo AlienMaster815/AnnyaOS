@@ -1,11 +1,11 @@
 #include <LouDDK.h>
 
 
-KERNEL_IMPORT FSStruct* GetDriveFss(uint8_t DriveNumber);
-KERNEL_IMPORT FSStruct* GetSystemDiskFss();
-KERNEL_IMPORT uint8_t GetDriveNumberByFss(FSStruct* Fs);
-KERNEL_IMPORT PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable();
-KERNEL_IMPORT size_t GetMountedFileSystemTableMembers();
+LOUDDK_API_ENTRY FSStruct* GetDriveFss(uint8_t DriveNumber);
+LOUDDK_API_ENTRY FSStruct* GetSystemDiskFss();
+LOUDDK_API_ENTRY uint8_t GetDriveNumberByFss(FSStruct* Fs);
+LOUDDK_API_ENTRY PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable();
+LOUDDK_API_ENTRY size_t GetMountedFileSystemTableMembers();
 //static spinlock_t FOpenLock;
 
 LOUDDK_API_ENTRY

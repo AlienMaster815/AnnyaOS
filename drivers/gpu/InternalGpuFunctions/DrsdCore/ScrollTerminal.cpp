@@ -33,7 +33,7 @@
  */
 
  
-LOUDDK_API_ENTRY void LouKeDrsdSyncScreen();
+KERNEL_EXPORT void LouKeDrsdSyncScreen();
 
 static bool UsingDosTerminal = true;
 
@@ -104,7 +104,7 @@ void LouKeCreateScrollTerminal(PDRSD_DEVICE Device, PDRSD_CLIP Clip){
     LouPrint("Hello LouOS DOS\n");
 }
 
-KERNEL_IMPORT CharMapping* GetCharecterMap(char Character);
+KERNEL_EXPORT CharMapping* GetCharecterMap(char Character);
 
 void LouOsDosScrollDown(PDRSD_CLIP Clip, size_t Pixels) {
     size_t Width = Clip->Width;
@@ -194,7 +194,7 @@ void LouKeOsDosUpdateMapping() {
     }
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void 
 LouKeExitDosMode(){
     PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;

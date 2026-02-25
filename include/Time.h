@@ -11,18 +11,18 @@
 
 
 #ifndef _KERNEL_MODULE_
-KERNEL_IMPORT uint64_t GetCurrentTimeInMilliseconds();
-KERNEL_IMPORT void sleep(uint64_t Time);
-KERNEL_IMPORT void sleepEx(uint8_t Interval, uint64_t Time);
-KERNEL_IMPORT LOUSTATUS 
+LOUDDK_API_ENTRY uint64_t GetCurrentTimeInMilliseconds();
+KERNEL_EXPORT void sleep(uint64_t Time);
+LOUDDK_API_ENTRY void sleepEx(uint8_t Interval, uint64_t Time);
+LOUDDK_API_ENTRY LOUSTATUS 
 LouKeWaitForUlongRegisterCondition(
     PULONG  Mmio, 
     size_t  MsWait,
     ULONG   Mask, 
     ULONG   Value
 );
-KERNEL_IMPORT void LouKeThreadSleep(size_t Ms);
-KERNEL_IMPORT uint64_t GetTscFromNowMilliseconds(uint64_t ms);
+LOUDDK_API_ENTRY void LouKeThreadSleep(size_t Ms);
+LOUDDK_API_ENTRY uint64_t GetTscFromNowMilliseconds(uint64_t ms);
 #else 
 #endif
 #else
@@ -35,7 +35,7 @@ KERNEL_IMPORT uint64_t GetTscFromNowMilliseconds(uint64_t ms);
 #define Sec 2
 #ifndef _KERNEL_MODULE_
 uint64_t GetCurrentTimeInMilliseconds();
-void sleep(uint64_t Time);
+KERNEL_EXPORT void sleep(uint64_t Time);
 void sleepEx(uint8_t Interval, uint64_t Time);
 void LouKeThreadSleep(size_t Ms);
 uint64_t GetTscFromNowMilliseconds(uint64_t ms);

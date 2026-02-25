@@ -21,31 +21,10 @@ typedef struct _TableTracks{
     KERNEL_REFERENCE                Counter;
 }TableTracks, * PTableTracks;
 
-#define PRE_LOADED_MODULES 4
-//#define PRE_LOADED_NTOSKRNL_FUNCTIONS 0
-#define PRE_LOADED_UNKOWN_FUNCTIONS 12
-#define PRE_LOADED_WDFLDR_FUNCTIONS 5
-#define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 213
-
-static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
-//UNUSED static uint64_t NTFunctionAddresses[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-//UNUSED static FUNCTION_NAME NTFunctionNames[PRE_LOADED_NTOSKRNL_FUNCTIONS];
-static uint64_t UnkownFunctionAddresses[PRE_LOADED_UNKOWN_FUNCTIONS];
-static FUNCTION_NAME UnkownFunctionNames[PRE_LOADED_UNKOWN_FUNCTIONS];
-static uint64_t WDFLDRFunctionAddresses[PRE_LOADED_WDFLDR_FUNCTIONS];
-static FUNCTION_NAME WDFLDRFunctionNames[PRE_LOADED_WDFLDR_FUNCTIONS];
-static uint64_t StorportFunctionAddresses[PRE_LOADED_STORPORT_FUNCTIONS];
-static FUNCTION_NAME StorportFunctionNames[PRE_LOADED_STORPORT_FUNCTIONS];
-
 static TableTracks  DynamicLoadedLibraries;
 static size_t DynamicLoadedLibrarieCount = 0x00;
 
-static TABLE_ENTRY GenericTable[PRE_LOADED_MODULES];
-static PTABLE_ENTRY ImportTables = (PTABLE_ENTRY)GenericTable;
-
-KERNEL_IMPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
+LOUDDK_API_ENTRY LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
 ULONG KeNumberProcessors();
 
@@ -224,29 +203,18 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-KERNEL_IMPORT void* LouKePciGetIoRegion(
+LOUDDK_API_ENTRY void* LouKePciGetIoRegion(
     PPCI_DEVICE_OBJECT PDEV, 
     uint8_t BarNumber,
     size_t BarOffset
 );
 
-KERNEL_IMPORT
-PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
-
-KERNEL_IMPORT
-int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
-
-KERNEL_IMPORT
-BOOL DmiGetDate(DMI_FIELD Field, INTEGER* Year, INTEGER* Month, INTEGER* Day);
-
 static inline 
 void InitializeLousineKernelTables(){
+    /*
     ImportTables[0].ModuleName = "LOUOSKRNL.EXE";
     ImportTables[0].NumberOfFunctions = PRE_LOADED_LOUOSKRNL_FUNCTIONS;
     ImportTables[0].FunctionName = LouOsKrnlFunctionNames;   
-    ImportTables[0].FunctionName[0] = "LouPrint";
-    ImportTables[0].FunctionName[1] = "RegisterInterruptHandler";
-    ImportTables[0].FunctionName[2] = "memcpy";
     ImportTables[0].FunctionName[3] = "strncmp";
     ImportTables[0].FunctionName[4] = "strcmp";
     ImportTables[0].FunctionName[5] = "memcmp";
@@ -256,7 +224,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[9] = "LouKeFreeFromPool";
     ImportTables[0].FunctionName[10] = "LouKeMallocFromPool";
     ImportTables[0].FunctionName[11] = "LouKeMapPool";
-    ImportTables[0].FunctionName[12] = "RequestPhysicalAddress";
     ImportTables[0].FunctionName[13] = "LouKeVMemmoryGetSize";
     ImportTables[0].FunctionName[14] = "LouKeMapContinuousMemoryBlock";
     ImportTables[0].FunctionName[15] = "LouVMalloc";
@@ -316,19 +283,12 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[69] = "LouKeUnSetBitU64";
     ImportTables[0].FunctionName[70] = "LouKeSetBitU64";
     ImportTables[0].FunctionName[71] = "LouKeCreateDemon";
-    ImportTables[0].FunctionName[72] = "LouKeAcquireSpinLock";
     ImportTables[0].FunctionName[73] = "LouKeReleaseSpinLock";
     ImportTables[0].FunctionName[74] = "LouAllocatePhysical64UpEx";
     ImportTables[0].FunctionName[75] = "GetPciConfiguration";
     ImportTables[0].FunctionName[76] = "LouKeHalLinuxPciCheckForCompatibleConfiguration";
     ImportTables[0].FunctionName[77] = "pci_read";
     ImportTables[0].FunctionName[78] = "write_pci";
-    ImportTables[0].FunctionName[79] = "LouKeReadPciUint8";
-    ImportTables[0].FunctionName[80] = "LouKeReadPciUint16";
-    ImportTables[0].FunctionName[81] = "LouKeReadPciUint32";
-    ImportTables[0].FunctionName[82] = "LouKeWritePciUint8";
-    ImportTables[0].FunctionName[83] = "LouKeWritePciUint16";
-    ImportTables[0].FunctionName[84] = "LouKeWritePciUint32";
     ImportTables[0].FunctionName[85] = "LouKeHalEnablePciDevice";
     ImportTables[0].FunctionName[86] = "LouKePciGetIoRegion";
     ImportTables[0].FunctionName[87] = "LouKeHalPciSaveContext";
@@ -337,19 +297,12 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[90] = "READ_REGISTER_ULONG";
     ImportTables[0].FunctionName[91] = "LouMallocAtaHost";
     ImportTables[0].FunctionName[92] = "LouKeHalMallocPciIrqVectors";
-    ImportTables[0].FunctionName[93] = "WRITE_PORT_ULONG";
-    ImportTables[0].FunctionName[94] = "WRITE_REGISTER_ULONG";
-    ImportTables[0].FunctionName[95] = "sleep";
-    ImportTables[0].FunctionName[96] = "LouKeHalPciSetMaster";
-    ImportTables[0].FunctionName[97] = "LouKeRegisterDevice";
     ImportTables[0].FunctionName[98] = "AtaStdQcDefer";
     ImportTables[0].FunctionName[99] = "LouGeneralAllocateMemoryEx";
     ImportTables[0].FunctionName[100] = "memset";
     ImportTables[0].FunctionName[101] = "LouKeWaitForUlongRegisterCondition";
     ImportTables[0].FunctionName[102] = "LouKeCreateFixedPool";
     ImportTables[0].FunctionName[103] = "outw";
-    ImportTables[0].FunctionName[104] = "LouKeMallocEx";
-    ImportTables[0].FunctionName[105] = "LouKeMalloc";
     ImportTables[0].FunctionName[106] = "inw";
     ImportTables[0].FunctionName[107] = "outw";
     ImportTables[0].FunctionName[108] = "LouKeLinkerGetAddress";
@@ -395,27 +348,20 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[148] = "DrsdInternalAtomicConnectorDestroyState";
     ImportTables[0].FunctionName[149] = "DrsdInternalAtomicConnectorDuplicateState";
     ImportTables[0].FunctionName[150] = "DrsdInternalResetConnector";
-    ImportTables[0].FunctionName[151] = "DrsdConnectorInitialize";
     ImportTables[0].FunctionName[152] = "DrsdModeConfigurationReset";
     ImportTables[0].FunctionName[153] = "DrsdInternalProbeSingleConnectorModes";
     ImportTables[0].FunctionName[154] = "LouKeGetThreadIdentification";
     ImportTables[0].FunctionName[155] = "LouKeHalGetPciConfiguration";
-    ImportTables[0].FunctionName[156] = "LouKeFree";
-    ImportTables[0].FunctionName[157] = "LouKeMallocAtaDevice";
-    ImportTables[0].FunctionName[158] = "LouKeMallocAtaPrivateData";
-    ImportTables[0].FunctionName[159] = "LouKeForkAtaHostPrivateDataToPorts";
     ImportTables[0].FunctionName[160] = "DrsdAddModesNoEDID";
     ImportTables[0].FunctionName[161] = "DrsdModeVfresh";
     ImportTables[0].FunctionName[162] = "DrsdCvtMode";
     ImportTables[0].FunctionName[163] = "DrsdAddProbedDisplayModeToConnector";
-    ImportTables[0].FunctionName[164] = "DrsdUpdateEdidConnectorProperties";
     ImportTables[0].FunctionName[165] = "DrsdGetNewPlaneState";
     ImportTables[0].FunctionName[166] = "LouKeDrsdHandleConflictingDevices";
     ImportTables[0].FunctionName[167] = "inb";
     ImportTables[0].FunctionName[168] = "outb";
     ImportTables[0].FunctionName[169] = "LouKeCreateBusClass";
     ImportTables[0].FunctionName[170] = "LouKeLoadSubsystem";
-    ImportTables[0].FunctionName[171] = "LouKeLoadDriver";
     ImportTables[0].FunctionName[172] = "LouKeMouseAllocateMessageDevice";
     ImportTables[0].FunctionName[173] = "LouKeMouseUpdateInput";
     ImportTables[0].FunctionName[174] = "LouKeMallocDma16Ex";
@@ -425,15 +371,10 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[178] = "LouKeGetAllocationSize";
     ImportTables[0].FunctionName[179] = "LouKeGenericAllocateFixedDmaPool";
     ImportTables[0].FunctionName[180] = "LouKeFreeFromFixedPool";
-    ImportTables[0].FunctionName[181] = "LouKeDmiGetFirstMatch";
-    ImportTables[0].FunctionName[182] = "snprintf";
     ImportTables[0].FunctionName[183] = "PciTestAtaConfigurationBits";
-    ImportTables[0].FunctionName[184] = "LouKeDmiGetFirstMatch";
-    ImportTables[0].FunctionName[185] = "DmiGetDate";
     ImportTables[0].FunctionName[186] = "LouKeMallocExPhy32";
     ImportTables[0].FunctionName[187] = "READ_REGISTER_ULONGLONG";
     ImportTables[0].FunctionName[188] = "WRITE_REGISTER_ULONGLONG";
-    ImportTables[0].FunctionName[189] = "LouKeCheckDmiSystem";
     ImportTables[0].FunctionName[190] = "LouKeHalGetPciIrqVectorCount";
     ImportTables[0].FunctionName[191] = "LouKeMallocPhy32";
     ImportTables[0].FunctionName[192] = "LouKeHalGetPciIrqVector";
@@ -441,9 +382,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[194] = "LouKeUsbAddHcd";
     ImportTables[0].FunctionName[195] = "LouKeUsbAddDeviceToHcd";
     ImportTables[0].FunctionName[196] = "LouKeUsbGetDescriptorRequest";
-    ImportTables[0].FunctionName[197] = "LouKeWaitForEvent";
-    ImportTables[0].FunctionName[198] = "LouKeSignalEvent";
-    ImportTables[0].FunctionName[199] = "LouKeReportMutexBlock";
     ImportTables[0].FunctionName[200] = "LouKeCreateIdentificationRange";
     ImportTables[0].FunctionName[201] = "LouKeAcquireIdFromRange";
     ImportTables[0].FunctionName[202] = "LouKeUsbSetAddress";
@@ -453,16 +391,9 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[206] = "LouKeAtaSendAtapiIdentifyCommand";
     ImportTables[0].FunctionName[207] = "InitializeGenericAtaDevice";
     ImportTables[0].FunctionName[208] = "LouKeHalFreePciIrqVectors";
-    ImportTables[0].FunctionName[209] = "DrsdModeConfigurationCleanup";
-    ImportTables[0].FunctionName[210] = "LouKeLinkObjectToListHead";
-    ImportTables[0].FunctionName[211] = "LouKeLinkObjectToListTail";
-    ImportTables[0].FunctionName[212] = "LouKeUnlinkObjectFromList";
 
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
-    ImportTables[0].VirtualAddress[0] = (uint64_t)LouPrint;
-    ImportTables[0].VirtualAddress[1] = (uint64_t)RegisterInterruptHandler;
-    ImportTables[0].VirtualAddress[2] = (uint64_t)memcpy;
     ImportTables[0].VirtualAddress[3] = (uint64_t)strncmp;
     ImportTables[0].VirtualAddress[4] = (uint64_t)strcmp;
     ImportTables[0].VirtualAddress[5] = (uint64_t)memcmp;
@@ -472,7 +403,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[9] = (uint64_t)LouKeFreeFromPool;
     ImportTables[0].VirtualAddress[10] = (uint64_t)LouKeMallocFromPool;
     ImportTables[0].VirtualAddress[11] = (uint64_t)LouKeMapPool;
-    ImportTables[0].VirtualAddress[12] = (uint64_t)RequestPhysicalAddress;
     ImportTables[0].VirtualAddress[13] = (uint64_t)LouKeVMemmoryGetSize;
     ImportTables[0].VirtualAddress[14] = (uint64_t)LouKeMapContinuousMemoryBlock;
     ImportTables[0].VirtualAddress[15] = (uint64_t)LouVMalloc;
@@ -532,19 +462,12 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[69] = (uint64_t)LouKeUnSetBitU64;
     ImportTables[0].VirtualAddress[70] = (uint64_t)LouKeSetBitU64;
     ImportTables[0].VirtualAddress[71] = (uint64_t)LouKeCreateDemon;
-    ImportTables[0].VirtualAddress[72] = (uint64_t)LouKeAcquireSpinLock;
     ImportTables[0].VirtualAddress[73] = (uint64_t)LouKeReleaseSpinLock;
     ImportTables[0].VirtualAddress[74] = (uint64_t)LouAllocatePhysical64UpEx;
     ImportTables[0].VirtualAddress[75] = (uint64_t)GetPciConfiguration;
     ImportTables[0].VirtualAddress[76] = (uint64_t)LouKeHalLinuxPciCheckForCompatibleConfiguration;
     ImportTables[0].VirtualAddress[77] = (uint64_t)pci_read;
     ImportTables[0].VirtualAddress[78] = (uint64_t)write_pci;
-    ImportTables[0].VirtualAddress[79] = (uint64_t)LouKeReadPciUint8;
-    ImportTables[0].VirtualAddress[80] = (uint64_t)LouKeReadPciUint16;
-    ImportTables[0].VirtualAddress[81] = (uint64_t)LouKeReadPciUint32;
-    ImportTables[0].VirtualAddress[82] = (uint64_t)LouKeWritePciUint8;
-    ImportTables[0].VirtualAddress[83] = (uint64_t)LouKeWritePciUint16;
-    ImportTables[0].VirtualAddress[84] = (uint64_t)LouKeWritePciUint32;
     ImportTables[0].VirtualAddress[85] = (uint64_t)LouKeHalEnablePciDevice;
     ImportTables[0].VirtualAddress[86] = (uint64_t)LouKePciGetIoRegion;
     ImportTables[0].VirtualAddress[87] = (uint64_t)LouKeHalPciSaveContext;
@@ -552,18 +475,11 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[89] = (uint64_t)LouKeHalPciClearMaster;
     ImportTables[0].VirtualAddress[90] = (uint64_t)READ_REGISTER_ULONG;
     ImportTables[0].VirtualAddress[92] = (uint64_t)LouKeHalMallocPciIrqVectors;
-    ImportTables[0].VirtualAddress[93] = (uint64_t)WRITE_PORT_ULONG;
-    ImportTables[0].VirtualAddress[94] = (uint64_t)WRITE_REGISTER_ULONG;
-    ImportTables[0].VirtualAddress[95] = (uint64_t)sleep;
-    ImportTables[0].VirtualAddress[96] = (uint64_t)LouKeHalPciSetMaster;
-    ImportTables[0].VirtualAddress[97] = (uint64_t)LouKeRegisterDevice;
     ImportTables[0].VirtualAddress[99] = (uint64_t)LouGeneralAllocateMemoryEx;
     ImportTables[0].VirtualAddress[100] = (uint64_t)memset;
     ImportTables[0].VirtualAddress[101] = (uint64_t)LouKeWaitForUlongRegisterCondition;
     ImportTables[0].VirtualAddress[102] = (uint64_t)LouKeCreateFixedPool;
     ImportTables[0].VirtualAddress[103] = (uint64_t)outw; 
-    ImportTables[0].VirtualAddress[104] = (uint64_t)LouKeMallocEx;
-    ImportTables[0].VirtualAddress[105] = (uint64_t)LouKeMalloc;
     ImportTables[0].VirtualAddress[106] = (uint64_t)inw;
     ImportTables[0].VirtualAddress[107] = (uint64_t)outw;
     ImportTables[0].VirtualAddress[108] = (uint64_t)LouKeLinkerGetAddress;
@@ -609,27 +525,19 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[148] = (uint64_t)DrsdInternalAtomicConnectorDestroyState;
     ImportTables[0].VirtualAddress[149] = (uint64_t)DrsdInternalAtomicConnectorDuplicateState;
     ImportTables[0].VirtualAddress[150] = (uint64_t)DrsdInternalResetConnector;
-    ImportTables[0].VirtualAddress[151] = (uint64_t)DrsdConnectorInitialize;
     ImportTables[0].VirtualAddress[152] = (uint64_t)DrsdModeConfigurationReset;
     ImportTables[0].VirtualAddress[153] = (uint64_t)DrsdInternalProbeSingleConnectorModes;
     ImportTables[0].VirtualAddress[154] = (uint64_t)LouKeGetThreadIdentification;
     ImportTables[0].VirtualAddress[155] = (uint64_t)LouKeHalGetPciConfiguration;
-    ImportTables[0].VirtualAddress[156] = (uint64_t)LouKeFree;
-    ImportTables[0].VirtualAddress[157] = (uint64_t)LouKeMallocAtaDevice;
-    ImportTables[0].VirtualAddress[158] = (uint64_t)LouKeMallocAtaPrivateData;
-    ImportTables[0].VirtualAddress[159] = (uint64_t)LouKeForkAtaHostPrivateDataToPorts;
     ImportTables[0].VirtualAddress[160] = (uint64_t)DrsdAddModesNoEDID;
     ImportTables[0].VirtualAddress[161] = (uint64_t)DrsdModeVfresh;
-    ImportTables[0].VirtualAddress[162] = (uint64_t)DrsdCvtMode;
-    ImportTables[0].VirtualAddress[163] = (uint64_t)DrsdAddProbedDisplayModeToConnector;
-    ImportTables[0].VirtualAddress[164] = (uint64_t)DrsdUpdateEdidConnectorProperties;
+\    ImportTables[0].VirtualAddress[163] = (uint64_t)DrsdAddProbedDisplayModeToConnector;
     ImportTables[0].VirtualAddress[165] = (uint64_t)DrsdGetNewPlaneState;
     ImportTables[0].VirtualAddress[166] = (uint64_t)LouKeDrsdHandleConflictingDevices;
     ImportTables[0].VirtualAddress[167] = (uint64_t)inb;
     ImportTables[0].VirtualAddress[168] = (uint64_t)outb;
     ImportTables[0].VirtualAddress[169] = (uint64_t)LouKeCreateBusClass;
     ImportTables[0].VirtualAddress[170] = (uint64_t)LouKeLoadSubsystem;
-    ImportTables[0].VirtualAddress[171] = (uint64_t)LouKeLoadDriver;
     ImportTables[0].VirtualAddress[172] = (uint64_t)LouKeMouseAllocateMessageDevice;
     ImportTables[0].VirtualAddress[173] = (uint64_t)LouKeMouseUpdateInput;
     ImportTables[0].VirtualAddress[174] = (uint64_t)LouKeMallocDma16Ex;
@@ -639,15 +547,10 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[178] = (uint64_t)LouKeGetAllocationSize;
     ImportTables[0].VirtualAddress[179] = (uint64_t)LouKeGenericAllocateFixedDmaPool;
     ImportTables[0].VirtualAddress[180] = (uint64_t)LouKeFreeFromFixedPool;
-    ImportTables[0].VirtualAddress[181] = (uint64_t)LouKeDmiGetFirstMatch;
-    ImportTables[0].VirtualAddress[182] = (uint64_t)snprintf;
     ImportTables[0].VirtualAddress[183] = (uint64_t)PciTestAtaConfigurationBits;
-    ImportTables[0].VirtualAddress[184] = (uint64_t)LouKeDmiGetFirstMatch;
-    ImportTables[0].VirtualAddress[185] = (uint64_t)DmiGetDate;
     ImportTables[0].VirtualAddress[186] = (uint64_t)LouKeMallocExPhy32;
     ImportTables[0].VirtualAddress[187] = (uint64_t)READ_REGISTER_ULONGLONG;
     ImportTables[0].VirtualAddress[188] = (uint64_t)WRITE_REGISTER_ULONGLONG;
-    ImportTables[0].VirtualAddress[189] = (uint64_t)LouKeCheckDmiSystem;
     ImportTables[0].VirtualAddress[190] = (uint64_t)LouKeHalGetPciIrqVectorCount;
     ImportTables[0].VirtualAddress[191] = (uint64_t)LouKeMallocPhy32;
     ImportTables[0].VirtualAddress[192] = (uint64_t)LouKeHalGetPciIrqVector;
@@ -655,9 +558,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[194] = (uint64_t)LouKeUsbAddHcd;
     ImportTables[0].VirtualAddress[195] = (uint64_t)LouKeUsbAddDeviceToHcd;
     ImportTables[0].VirtualAddress[196] = (uint64_t)LouKeUsbGetDescriptorRequest;
-    ImportTables[0].VirtualAddress[197] = (uint64_t)LouKeWaitForEvent;
-    ImportTables[0].VirtualAddress[198] = (uint64_t)LouKeSignalEvent;
-    ImportTables[0].VirtualAddress[199] = (uint64_t)LouKeReportMutexBlock;
     ImportTables[0].VirtualAddress[200] = (uint64_t)LouKeCreateIdentificationRange;
     ImportTables[0].VirtualAddress[201] = (uint64_t)LouKeAcquireIdFromRange;
     ImportTables[0].VirtualAddress[202] = (uint64_t)LouKeUsbSetAddress;
@@ -667,11 +567,8 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[206] = (uint64_t)LouKeAtaSendAtapiIdentifyCommand;
     ImportTables[0].VirtualAddress[207] = (uint64_t)InitializeGenericAtaDevice;
     ImportTables[0].VirtualAddress[208] = (uint64_t)LouKeHalFreePciIrqVectors;
-    ImportTables[0].VirtualAddress[209] = (uint64_t)DrsdModeConfigurationCleanup;
-    ImportTables[0].VirtualAddress[210] = (uint64_t)LouKeLinkObjectToListHead;
-    ImportTables[0].VirtualAddress[211] = (uint64_t)LouKeLinkObjectToListTail;
-    ImportTables[0].VirtualAddress[212] = (uint64_t)LouKeUnlinkObjectFromList;
-    
+
+    */
 }
 
 LOUDDK_API_ENTRY
@@ -704,71 +601,6 @@ int tolower(int c);
 static inline
 void InitializeNtKernelTable(){
 
-
-}
-
-
-static inline    
-void InitializeUnKownTable(){
-
-    ImportTables[1].ModuleName = "UNKNOWN";
-    ImportTables[1].NumberOfFunctions = PRE_LOADED_UNKOWN_FUNCTIONS;
-
-    ImportTables[1].FunctionName = UnkownFunctionNames;
-
-    //aux_klib
-    ImportTables[1].FunctionName[0] = "AuxKlibEnumerateSystemFirmwareTables";
-    ImportTables[1].FunctionName[1] = "AuxKlibGetBugCheckData";
-    ImportTables[1].FunctionName[2] = "AuxKlibGetImageExportDirectory";
-    ImportTables[1].FunctionName[3] = "AuxKlibGetSystemFirmwareTable";
-    ImportTables[1].FunctionName[4] = "AuxKlibInitialize";
-    ImportTables[1].FunctionName[5] = "AuxKlibQueryModuleInformation";
-    //IOACCESS
-    ImportTables[1].FunctionName[6] = "READ_PORT_UCHAR";
-    ImportTables[1].FunctionName[7] = "READ_PORT_ULONG";
-    ImportTables[1].FunctionName[8] = "READ_PORT_USHORT";
-    ImportTables[1].FunctionName[9] = "WRITE_PORT_UCHAR";
-    ImportTables[1].FunctionName[10] = "WRITE_PORT_ULONG";
-    ImportTables[1].FunctionName[11] = "WRITE_PORT_USHORT";
-    
-    ImportTables[1].VirtualAddress = UnkownFunctionAddresses;
-
-    ImportTables[1].VirtualAddress[0] = (uint64_t)AuxKlibEnumerateSystemFirmwareTables;
-    ImportTables[1].VirtualAddress[1] = (uint64_t)AuxKlibGetBugCheckData;
-    ImportTables[1].VirtualAddress[2] = (uint64_t)AuxKlibGetImageExportDirectory;
-    ImportTables[1].VirtualAddress[3] = (uint64_t)AuxKlibGetSystemFirmwareTable;
-    ImportTables[1].VirtualAddress[4] = (uint64_t)AuxKlibInitialize;
-    ImportTables[1].VirtualAddress[5] = (uint64_t)AuxKlibQueryModuleInformation;
-
-    ImportTables[1].VirtualAddress[6] = (uint64_t)READ_PORT_UCHAR;
-    ImportTables[1].VirtualAddress[7] = (uint64_t)READ_PORT_ULONG;
-    ImportTables[1].VirtualAddress[8] = (uint64_t)READ_PORT_USHORT;
-    ImportTables[1].VirtualAddress[9] = (uint64_t)WRITE_PORT_UCHAR;
-    ImportTables[1].VirtualAddress[10] = (uint64_t)WRITE_PORT_ULONG;
-    ImportTables[1].VirtualAddress[11] = (uint64_t)WRITE_PORT_USHORT;
-
-}
-
-static inline
-void InitializeWDFLDR_SYS(){
-    ImportTables[2].ModuleName = "WDFLDR.SYS";
-    ImportTables[2].NumberOfFunctions = PRE_LOADED_WDFLDR_FUNCTIONS;
-
-    ImportTables[2].FunctionName = WDFLDRFunctionNames;
-
-    ImportTables[2].FunctionName[0] = "WdfVersionUnbindClass";
-    ImportTables[2].FunctionName[1] = "WdfVersionBindClass";
-    ImportTables[2].FunctionName[2] = "WdfVersionUnbind";
-    ImportTables[2].FunctionName[3] = "WdfVersionBind";
-    ImportTables[2].FunctionName[4] = "WdfLdrQueryInterface";
-
-    ImportTables[2].VirtualAddress = WDFLDRFunctionAddresses;
-
-    ImportTables[2].VirtualAddress[0] = (uint64_t)WdfVersionUnbindClass;
-    ImportTables[2].VirtualAddress[1] = (uint64_t)WdfVersionBindClass;
-    ImportTables[2].VirtualAddress[2] = (uint64_t)WdfVersionUnbind;
-    ImportTables[2].VirtualAddress[3] = (uint64_t)WdfVersionBind;
-    ImportTables[2].VirtualAddress[4] = (uint64_t)WdfLdrQueryInterface;
 
 }
 
@@ -823,53 +655,20 @@ NTSTATUS StorPortGetBusData(
   PVOID Buffer,
   ULONG Length
 );
-static inline
-void InitializeStorePort_SYS(){
-
-    ImportTables[3].ModuleName = "storport.sys";
-    ImportTables[3].NumberOfFunctions = PRE_LOADED_STORPORT_FUNCTIONS;
-
-    ImportTables[3].FunctionName = StorportFunctionNames;
-
-    ImportTables[3].FunctionName[0] = "StorPortGetPhysicalAddress";
-    ImportTables[3].FunctionName[1] = "StorPortStallExecution";
-    ImportTables[3].FunctionName[2] = "StorPortNotification";
-    ImportTables[3].FunctionName[3] = "StorPortSetDeviceQueueDepth";
-    ImportTables[3].FunctionName[4] = "StorPortGetUncachedExtension";
-    ImportTables[3].FunctionName[5] = "StorPortInitialize";
-    ImportTables[3].FunctionName[6] = "StorPortGetScatterGatherList";
-    ImportTables[3].FunctionName[7] = "StorPortGetDeviceBase";
-    ImportTables[3].FunctionName[8] = "StorPortGetBusData";
-
-    ImportTables[3].VirtualAddress = StorportFunctionAddresses;
-
-    ImportTables[3].VirtualAddress[0] = (uint64_t)StorPortGetPhysicalAddress;
-    ImportTables[3].VirtualAddress[1] = (uint64_t)StorPortStallExecution;
-    ImportTables[3].VirtualAddress[2] = (uint64_t)StorPortNotification;
-    ImportTables[3].VirtualAddress[3] = (uint64_t)StorPortSetDeviceQueueDepth;
-    ImportTables[3].VirtualAddress[4] = (uint64_t)StorPortGetUncachedExtension;
-    ImportTables[3].VirtualAddress[5] = (uint64_t)StorPortInitialize;
-    ImportTables[3].VirtualAddress[6] = (uint64_t)StorPortGetScatterGatherList;
-    ImportTables[3].VirtualAddress[7] = (uint64_t)StorPortGetDeviceBase;
-    ImportTables[3].VirtualAddress[8] = (uint64_t)StorPortGetBusData;
-
-
-}
 
 void InitializeJitlTables(){
     //Ahci Function
     //SystemSections[0] = &AhciJitlDirectory;
 }
 
-LOUDDK_API_ENTRY void InitializeGenericTables(){
+LOUDDK_API_ENTRY void StartupConfigureExportTable(PVOID Table);
 
-    InitializeNtKernelTable();
-    InitializeUnKownTable();
-    InitializeWDFLDR_SYS();
-    InitializeStorePort_SYS();
-    InitializeLousineKernelTables();
-    InitializeJitlTables();
+LOUDDK_API_ENTRY void LouKeInitializeExportTable(PVOID KernelExportTable){
 
+    if(KernelExportTable){
+        StartupConfigureExportTable(KernelExportTable);
+    }
+    
 }
 
 PVOID 
@@ -883,37 +682,9 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
     string FunctionName,
     PKULA_TRANSITION_LAYER_OBECT TransitionObject
 ){
-    size_t i = 0;
-    size_t j = 0;
 
     //LouPrint("Module:%s Function:%s\n", ModuleName, FunctionName);
 
-    for(i = 0; i < PRE_LOADED_MODULES; i++){
-
-        if((strcmp(ImportTables[i].ModuleName, ModuleName) == 0) && (TransitionObject == 0x00)){
-            //LouPrint("Getting A Address From Loaded Module:%s ", ModuleName);
-            for(j = 0; j < ImportTables[i].NumberOfFunctions; j++){
-                //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-                if(strcmp(ImportTables[i].FunctionName[j], FunctionName) == 0){
-                    //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-                    //LouPrint("::%h : i:%d j:%d\n", ImportTables[i].VirtualAddress[j], i , j);
-                    return ImportTables[i].VirtualAddress[j];
-                }
-            }
-            goto WDK_MODULE_FALLBACK_FUNCTIONS;
-        }  
-    }
-
-    WDK_MODULE_FALLBACK_FUNCTIONS:
-    for(j = 0; j < ImportTables[1].NumberOfFunctions; j++){
-        //LouPrint("Getting A Address From Loaded Module:%s ", ImportTables[i].FunctionName[j]);
-        if(strcmp(ImportTables[1].FunctionName[j], FunctionName) == 0){
-            //LouPrint("::%h : 2\n", ImportTables[1].VirtualAddress[j]);
-            return ImportTables[1].VirtualAddress[j];
-        }
-    }
-
-    //last resourt but most likely here
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
         if((strcmp(Tmp->Table.ModuleName, ModuleName) == 0) && (TransitionObject == Tmp->TransitionObject)){
@@ -947,19 +718,7 @@ LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandleEx(
         return 0x00;
     }
 
-    size_t i = 0;
-
     //LouPrint("Module:%s Function:%s\n", ModuleName, FunctionName);
-
-    for(i = 0; i < PRE_LOADED_MODULES; i++){
-
-        if((strcmp(ImportTables[i].ModuleName, ModuleName) == 0) && (TransitionObject == 0x00)){
-            return (HANDLE)&ImportTables[i];
-            goto _LOADED_MODULE_CHAIN;
-        }  
-    }
-
-    _LOADED_MODULE_CHAIN:
 
     //last resourt but most likely here
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
@@ -999,14 +758,6 @@ LouKeLinkerCheckLibraryPresenceEx(string SystemName, PKULA_TRANSITION_LAYER_OBEC
         SystemName[foo] = toupper(SystemName[foo]);
     }
     
-    uint8_t i = 0;
-    for(i = 0; i < PRE_LOADED_MODULES; i++){
-
-        if((strcmp(ImportTables[i].ModuleName, SystemName) == 0) && (TransitionObject == 0x00)){
-            return true;
-        }  
-    }
-
     //last resourt but most likely here
     PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
     for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){

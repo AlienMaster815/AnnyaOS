@@ -83,7 +83,7 @@ PDRSD_DISPLAY_MODE DrsdForkMode(PDRSD_DEVICE Device, PDRSD_DISPLAY_MODE DispMode
 #define CVT_RB_HORIZONTAL_BLANK         160
 #define CVT_RB_VFPORCH                  3
 
-KERNEL_IMPORT
+KERNEL_EXPORT
 int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
 
 PDRSD_DISPLAY_MODE DrsdCreateModeObject(PDRSD_DEVICE Device){   
@@ -100,6 +100,7 @@ void DrsdSetModeName(PDRSD_DISPLAY_MODE Mode){
     snprintf(Mode->ModeName, 32, "%dx%d%s", Mode->HorizontalDisplay, Mode->VirticalDisplay, IsInterlaced ? "i" : "");
 }
 
+KERNEL_EXPORT
 PDRSD_DISPLAY_MODE DrsdCvtMode(
     PDRSD_DEVICE Device, 
     uint32_t Width, 
@@ -250,6 +251,7 @@ PDRSD_DISPLAY_MODE DrsdCvtMode(
     return NewMode;
 }
 
+KERNEL_EXPORT
 void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice){
     LouPrint("DrsdModeConfigurationCleanup()\n");
     while(1);

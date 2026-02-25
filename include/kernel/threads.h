@@ -7,7 +7,7 @@ typedef void* PTHREAD_DATA;
 #ifdef __cplusplus
 #include <LouDDK.h>
 #ifndef _KERNEL_MODULE_
-KERNEL_IMPORT uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
+LOUDDK_API_ENTRY uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
 LOUDDK_API_ENTRY uint64_t LouKeGetThreadIdentification();
 
 #else
@@ -30,11 +30,8 @@ void LouKeInitializeIntervalWork(
 );
 
 #endif
-#ifndef _KERNEL_MODULE_
-uint64_t LouKeGetThreadIdentification();
-#else
+
 KERNEL_EXPORT uint64_t LouKeGetThreadIdentification();
-#endif
 
 #define MUTEX_FREE 0
 #define MUTEX_LOCKED 1
@@ -78,7 +75,7 @@ int LouPrint(char*, ...);
 #ifdef _KERNEL_MODULE_
 KERNEL_EXPORT void LouKeReportMutexBlock(mutex_t* m, UINT64 Thread);
 #else
-void LouKeReportMutexBlock(mutex_t* m, UINT64 Thread);
+KERNEL_EXPORT void LouKeReportMutexBlock(mutex_t* m, UINT64 Thread);
 #endif
 
 static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
@@ -204,8 +201,8 @@ semaphore_t* LouKeCreateSemaphore(int initial, int limit);
 #define LouKeDestroySemaphore(s) LouKeFree(s)
 
 #ifndef _KERNEL_MODULE_
-void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
-void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
+KERNEL_EXPORT void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
+KERNEL_EXPORT void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql);
 
 void LouKeDestroyThread(PVOID ThreadHandle);
 

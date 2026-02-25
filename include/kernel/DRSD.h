@@ -1277,7 +1277,7 @@ LOUSTATUS DrsdConnectorInitialize(
 
 void DrsdModeConfigurationReset(PDRSD_DEVICE Device);
 
-LOUSTATUS DrsdInternalProbeSingleConnectorModes(
+KERNEL_EXPORT LOUSTATUS DrsdInternalProbeSingleConnectorModes(
     PDRSD_CONNECTOR Connector,
     uint32_t        MaxX,
     uint32_t        MaxY
@@ -1301,12 +1301,14 @@ PDRSD_DISPLAY_MODE DrsdCvtMode(
 );
 void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode);
 
+KERNEL_EXPORT
 LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid);
 
 PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
 
 void LouKeDrsdClearScreen(PDRSD_PLANE Plane);
 
+KERNEL_EXPORT
 void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
 
 #endif

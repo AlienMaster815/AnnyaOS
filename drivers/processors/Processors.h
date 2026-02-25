@@ -4,13 +4,13 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-KERNEL_IMPORT uint16_t GetNPROC();
-KERNEL_IMPORT void UpgradeNPROC();
-KERNEL_IMPORT void DowngradeNPROC();
+LOUDDK_API_ENTRY uint16_t GetNPROC();
+LOUDDK_API_ENTRY void UpgradeNPROC();
+LOUDDK_API_ENTRY void DowngradeNPROC();
 void LouKeInitializeEoiHandler(PVOID Handler, UINT16 Cpu);
 void LouKeInitializeUnmaskHandler(PVOID Handler, UINT16 Cpu);
 void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu);
-KERNEL_IMPORT void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
+LOUDDK_API_ENTRY void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
 
 
 

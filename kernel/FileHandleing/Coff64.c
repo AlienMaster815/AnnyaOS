@@ -232,6 +232,42 @@ LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
 
 //continue from here on with coff 32
 
+void StartupConfigureExportTable(PVOID Table){
+ 
+    PCFI_EXPORT_DIRECTORY_TABLE ExportTable = (PCFI_EXPORT_DIRECTORY_TABLE)Table;
+    string FormalName = (string)(KernelLoaderInfo.KernelBase + ExportTable->NameRVA);
+    size_t Koo = strlen(FormalName);
+    for(size_t Foo = 0 ; Foo < Koo; Foo++){
+        FormalName[Foo] = toupper(FormalName[Foo]);
+    }
+    
+    uint64_t* FunctionPointers = LouKeMallocArray(uint64_t, ExportTable->NumberOfNamePointers, KERNEL_GENERIC_MEMORY);
+    string* FunctionNames = LouKeMallocArray(string, ExportTable->NumberOfNamePointers, KERNEL_GENERIC_MEMORY);
+
+    uint16_t* OTR = (uint16_t*)(KernelLoaderInfo.KernelBase + ExportTable->OrdinalTableRVA);
+    uint32_t* NPR = (uint32_t*)(KernelLoaderInfo.KernelBase + ExportTable->NamePointerTableRVA);
+    uint32_t* ATR = (uint32_t*)(KernelLoaderInfo.KernelBase + ExportTable->ExportAddressTableRVA);
+
+    for (uint32_t i = 0; i < ExportTable->NumberOfNamePointers; i++) {
+
+        uint16_t OTRIndex = OTR[i];
+
+        FunctionNames[i] = (string)(KernelLoaderInfo.KernelBase + (uint64_t)(uint32_t)NPR[i]);
+        FunctionPointers[i] = KernelLoaderInfo.KernelBase + (uint64_t)(uint32_t)ATR[OTRIndex];
+        
+        //LouPrint("Function Name:%s\n", FunctionNames[i]);
+        //LouPrint("Function Pointer:%h\n", FunctionPointers[i]);
+    }
+
+    LouKeInitializeLibraryLookup(
+        FormalName,
+        ExportTable->NumberOfNamePointers,
+        FunctionNames,
+        FunctionPointers,
+        true
+    );
+}
+
 LOUSTATUS ConfigureExportTables(
     PCFI_OBJECT CfiObject
 ){
@@ -263,7 +299,7 @@ LOUSTATUS ConfigureExportTables(
         FunctionNames[i] = (string)(ImageBase + (uint64_t)(uint32_t)NPR[i]);
         FunctionPointers[i] = ImageBase + (uint64_t)(uint32_t)ATR[OTRIndex];
         
-        //LouPrint("ModuleName:%s Function Name:%s\n", ModuleName, FunctionNames[i]);
+        //LouPrint("Function Name:%s\n", FunctionNames[i]);
         //LouPrint("Function Pointer:%h\n", FunctionPointers[i]);
     }
     

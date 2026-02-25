@@ -48,6 +48,7 @@ DRSD_CONNECTOR_STATUS DrsdDetectConnectorStatus(
     return DRSD_CONNECTOR_CONNECTED;
 }
 
+KERNEL_EXPORT
 void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode){
 
     if(!Connector->ProbedModes.NextHeader){
@@ -61,6 +62,7 @@ void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLA
     Tmp->Peers.NextHeader = (PListHeader)Mode;
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdInternalProbeSingleConnectorModes(
     PDRSD_CONNECTOR Connector,
     uint32_t        MaxX,
@@ -214,6 +216,7 @@ LOUSTATUS DrsdEdidConnectorUdate(PDRSD_CONNECTOR Connector, PDRSD_EDID_TRACKER E
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid){
     return DrsdEdidConnectorUdate(Connector, DrsdEdidCreateObject(Edid));
 }

@@ -59,6 +59,7 @@ static inline void ZeroMem(uint64_t Address, uint64_t Size){
     }
 }
 
+KERNEL_EXPORT
 void* 
 LouKeMallocEx(
     size_t      AllocationSize,
@@ -198,6 +199,7 @@ LouKeMallocExVirt32(
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
 
+KERNEL_EXPORT
 void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
@@ -281,13 +283,14 @@ void* LouKeMallocExPhy32(
 }
 
 
-void* LouKeMallocPhy32(
+KERNEL_EXPORT void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 ){
     return LouKeMallocExPhy32(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
+KERNEL_EXPORT
 void LouKeFree(void* Address){
     if(!Address){
         return;

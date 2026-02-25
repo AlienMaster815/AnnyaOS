@@ -11,31 +11,31 @@
 #ifndef _KERNEL_MODULE_
 
 extern "C" void uintToHexString(uint64_t number, char* hexString);
-KERNEL_IMPORT void LouKePrintLittleEndianBufferDecimal(
+LOUDDK_API_ENTRY void LouKePrintLittleEndianBufferDecimal(
     uintptr_t DataPointer,
     uint64_t Offset,
     uint64_t Length
     );
 
-KERNEL_IMPORT void LouKePrintLittleEndianBufferHex(
+LOUDDK_API_ENTRY void LouKePrintLittleEndianBufferHex(
     uintptr_t DataPointer,
     uint64_t Offset,
     uint64_t Length
     );
 
-KERNEL_IMPORT void LouKePrintLittleEndianBufferBinary(
+LOUDDK_API_ENTRY void LouKePrintLittleEndianBufferBinary(
     uintptr_t DataPointer,
     uint64_t Offset,
     uint64_t Length
     );
 
-KERNEL_IMPORT void LouKePrintLittleEndianBufferString(
+LOUDDK_API_ENTRY void LouKePrintLittleEndianBufferString(
     uintptr_t DataPointer,
     uint64_t Offset,
     uint64_t Length
     );
 
-KERNEL_IMPORT bool LouKeIsLittleEndianBufferEqualTo(
+LOUDDK_API_ENTRY bool LouKeIsLittleEndianBufferEqualTo(
     uintptr_t DataPointer,
     uintptr_t CheckBuffer,
     uint64_t Offset,

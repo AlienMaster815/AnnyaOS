@@ -8,11 +8,11 @@
 
 static uint64_t IoMemEnd = 0;
 
-KERNEL_IMPORT uint64_t GetIoMemEnd(){
+LOUDDK_API_ENTRY uint64_t GetIoMemEnd(){
     return IoMemEnd;
 }
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 uint16_t LouKeCreatIoPort(
     uint16_t PortSize
 );
@@ -20,7 +20,7 @@ uint16_t LouKeCreatIoPort(
 uint32_t LouKeReadBarValue(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber);
 void LouKeWriteBarValue(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber, uint32_t Value);
 
-KERNEL_IMPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer){
+LOUDDK_API_ENTRY void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer){
     ConfigBuffer->Header.VendorID = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x00);
     ConfigBuffer->Header.DeviceID = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x02);
     ConfigBuffer->Header.Command = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x04);
@@ -96,13 +96,13 @@ KERNEL_IMPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULON
     }
 }
 
-KERNEL_IMPORT void LouKeHalGetPciConfiguration(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
+LOUDDK_API_ENTRY void LouKeHalGetPciConfiguration(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
     GetPciConfiguration(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Config);
 }
 
 static spinlock_t Lock;
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 LOUSTATUS RegisterPciDeviceToDeviceManager(
     PPCI_DEVICE_OBJECT PDEV,
     string RegistryEntry,
@@ -265,9 +265,9 @@ void* LouKeHalPnpInitializeBaseRegister(
     return 0x00;
 }
 
-KERNEL_IMPORT uint64_t GetAllocationBlockSize(uint64_t Address);
+LOUDDK_API_ENTRY uint64_t GetAllocationBlockSize(uint64_t Address);
 
-KERNEL_IMPORT 
+LOUDDK_API_ENTRY 
 size_t LouKeHalGetPciBaseAddressSize(
     PPCI_DEVICE_OBJECT PDEV,
     uint8_t BarNum  
@@ -275,7 +275,7 @@ size_t LouKeHalGetPciBaseAddressSize(
     return (size_t)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarSize[BarNum]);
 }
 
-KERNEL_IMPORT 
+LOUDDK_API_ENTRY 
 void* LouKePciGetIoRegion(
     PPCI_DEVICE_OBJECT PDEV, 
     uint8_t BarNumber,

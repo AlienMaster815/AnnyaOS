@@ -1,12 +1,12 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-KERNEL_IMPORT LOUSTATUS RequestPhysicalAddress(
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     uint64_t VAddress,
     uint64_t* PAddress
 );
 
-KERNEL_IMPORT uint64_t GetAllocationBlockSize(uint64_t Address);
+LOUDDK_API_ENTRY uint64_t GetAllocationBlockSize(uint64_t Address);
 
 
 UNUSED static PSTOR_PORT_STACK_OBJECT StorPortStack[255] = {0};

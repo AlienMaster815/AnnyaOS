@@ -44,7 +44,7 @@ typedef struct _GUID {
 #define APM 658077
 
 #ifndef _KERNEL_MODULE_
-KERNEL_IMPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber, ULONG Function ,PPCI_COMMON_CONFIG ConfigBuffer);
+LOUDDK_API_ENTRY void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber, ULONG Function ,PPCI_COMMON_CONFIG ConfigBuffer);
 #else
 KERNEL_EXPORT void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber, ULONG Function ,PPCI_COMMON_CONFIG ConfigBuffer);
 

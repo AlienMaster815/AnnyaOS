@@ -836,6 +836,7 @@ vsnprintf (
  *
  ******************************************************************************/
 
+__declspec(dllexport)
 int
 snprintf (
     char                    *String,

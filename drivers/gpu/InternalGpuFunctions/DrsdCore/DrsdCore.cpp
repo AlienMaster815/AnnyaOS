@@ -177,7 +177,7 @@ void LouKeDrsdRemovePlaneChainMember(PDRSD_PLANE Plane) {
 }
 
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 PDRSD_CLIP LouKeDrsdCreateClip(
     INT64 X, INT64 Y, 
     INT64 Width, INT64 Height, 
@@ -200,13 +200,13 @@ PDRSD_CLIP LouKeDrsdCreateClip(
     return ClipQueue;
 }
 
-LOUDDK_API_ENTRY void LouKeDestroyClip(PDRSD_CLIP Clip){
+KERNEL_EXPORT void LouKeDestroyClip(PDRSD_CLIP Clip){
     MutexLock(&PlaneLock);
 
     MutexUnlock(&PlaneLock);
 }
 
-LOUDDK_API_ENTRY void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color) {
+KERNEL_EXPORT void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color) {
     INT64 Width = (INT64)Clip->Width;
     INT64 Height = (INT64)Clip->Height;
     for(INT64 Ty = 0; Ty < Height; Ty++){
@@ -217,7 +217,7 @@ LOUDDK_API_ENTRY void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color) 
 }
 
 
-LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(){
+KERNEL_EXPORT void LouKeDrsdSyncScreen(){
     PDRSD_PLANE_CHAIN TmpChain = &MasterPlaneChain;
     while(TmpChain->Peers.NextHeader){
         TmpChain = (PDRSD_PLANE_CHAIN)TmpChain->Peers.NextHeader;
@@ -232,7 +232,7 @@ LOUDDK_API_ENTRY void LouKeDrsdSyncScreen(){
 void LouKeCreateScrollTerminal(PDRSD_DEVICE Device, PDRSD_CLIP Clip);
 void LouKeOsDosDetatchDevice(PDRSD_DEVICE Device);
 
-LOUDDK_API_ENTRY 
+KERNEL_EXPORT 
 LOUSTATUS
 LouKeDrsdInitializeBootDevice(
     PDRSD_DEVICE Device
@@ -264,7 +264,7 @@ LouKeDrsdInitializeBootDevice(
 }
 
 
-LOUDDK_API_ENTRY 
+KERNEL_EXPORT 
 void LouKeDrsdHandleConflictingDevices(PPCI_DEVICE_OBJECT PDEV){
 
     if(BootDevice){
@@ -276,12 +276,12 @@ void LouKeDrsdHandleConflictingDevices(PPCI_DEVICE_OBJECT PDEV){
     LouPrint("LouKeDrsdHandleConflictingDevices() STATUS_SUCCESS\n");
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void LouKeOsDosUpdateMapping();
 
 void LouKeSetScrollTerminalResolution(SIZE Width, SIZE Height);
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 LOUSTATUS
 LouKeDrsdInitializeDevice(
     PDRSD_DEVICE Device
@@ -381,7 +381,7 @@ typedef struct _DRSD_PLANE_QUERY_INFORMATION{
 }DRSD_PLANE_QUERY_INFORMATION, * PDRSD_PLANE_QUERY_INFORMATION;
 
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void* LouKeDrsdGetPlaneInformation(INT64* CountHandle){
     *CountHandle = PlaneCount;
     MutexLock(&PlaneLock);
@@ -405,7 +405,7 @@ void* LouKeDrsdGetPlaneInformation(INT64* CountHandle){
     return (void*)Query;
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context){
 
     MutexLock(&PlaneLock);
@@ -432,7 +432,7 @@ LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context){
 
 
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void LouKeUpdateClipSubState(PDRSD_CLIP Clip, INT64 SubX, INT64 SubY, INT64 SubWidth, INT64 SubHeight) {
     INT64 X = (INT64)Clip->X + (INT64)SubX;
     INT64 Y = (INT64)Clip->Y + (INT64)SubY;
@@ -470,7 +470,7 @@ void LouKeUpdateClipSubState(PDRSD_CLIP Clip, INT64 SubX, INT64 SubY, INT64 SubW
     }
 }
 
-LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
+KERNEL_EXPORT void LouKeUpdateClipState(PDRSD_CLIP Clip) {
     LouKeUpdateClipSubState(
         Clip,
         0, 0,
@@ -479,7 +479,7 @@ LOUDDK_API_ENTRY void LouKeUpdateClipState(PDRSD_CLIP Clip) {
     );
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void LouKeUpdateShadowClipSubState(
     PDRSD_CLIP Clip, 
     INT64 SubX, INT64 SubY, 
@@ -524,7 +524,7 @@ void LouKeUpdateShadowClipSubState(
     }
 }
 
-LOUDDK_API_ENTRY
+KERNEL_EXPORT
 void LouKeUpdateShadowClipState(PDRSD_CLIP Clip) {
     LouKeUpdateShadowClipSubState(
         Clip,

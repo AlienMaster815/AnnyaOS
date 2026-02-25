@@ -451,7 +451,7 @@ typedef size_t SIZE_T, * PSIZE_T;
 ULONG DbgPrint( PCSTR Format, ...);
 ULONG DbgPrintEx (  ULONG ComponentId,  ULONG Level,  PCSTR Format, ...);
 #else 
-KERNEL_IMPORT unsigned long DbgPrint(char const*, ...);
+LOUDDK_API_ENTRY unsigned long DbgPrint(char const*, ...);
 #endif
 
 #include "Misc/undocumentedTypes.h"

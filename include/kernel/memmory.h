@@ -141,19 +141,20 @@ bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 );
-void* LouKeMalloc(
+
+KERNEL_EXPORT void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-void* LouKeMallocEx(
+KERNEL_EXPORT void* LouKeMallocEx(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
 
-void LouKeFree(void* AddressToFree);
+KERNEL_EXPORT void LouKeFree(void* AddressToFree);
 
-void* LouKeMallocPhy32(
+KERNEL_EXPORT void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
@@ -191,7 +192,7 @@ typedef uint64_t pte_t; // Page Table Entry
 //endof Paging Stubs
 
 #ifndef _KERNEL_MODULE_
-void* memset(void* dest, int value, size_t count);
+KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
 
 void* align_memory(void* ptr, size_t alignment);
 #endif
@@ -201,7 +202,7 @@ void* align_memory(void* ptr, size_t alignment);
 #include <LouDDK.h>
 
 #ifndef _KERNEL_MODULE_
-KERNEL_IMPORT void MapIoMemory(
+LOUDDK_API_ENTRY void MapIoMemory(
     uint64_t Address,
     uint64_t MapSize
 );
@@ -216,69 +217,69 @@ KERNEL_IMPORT void MapIoMemory(
 
 
 #ifndef _KERNEL_MODULE_
-KERNEL_IMPORT bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-KERNEL_IMPORT void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
-KERNEL_IMPORT void LouFree(uint8_t* Addr);
-KERNEL_IMPORT LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
-KERNEL_IMPORT bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
-KERNEL_IMPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
-KERNEL_IMPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
-KERNEL_IMPORT void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
-KERNEL_IMPORT void* LouGeneralAllocateMemory(UINT64 Size);
-KERNEL_IMPORT void* memset(void* dest, int value, size_t count);
-KERNEL_IMPORT bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
-KERNEL_IMPORT void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
-KERNEL_IMPORT bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
-KERNEL_IMPORT bool EnforceSystemMemoryMap(
+LOUDDK_API_ENTRY bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
+LOUDDK_API_ENTRY void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
+LOUDDK_API_ENTRY void LouFree(uint8_t* Addr);
+LOUDDK_API_ENTRY LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
+LOUDDK_API_ENTRY bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
+LOUDDK_API_ENTRY void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
+LOUDDK_API_ENTRY void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
+LOUDDK_API_ENTRY void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
+LOUDDK_API_ENTRY void* LouGeneralAllocateMemory(UINT64 Size);
+KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
+LOUDDK_API_ENTRY bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
+LOUDDK_API_ENTRY void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
+LOUDDK_API_ENTRY bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
+LOUDDK_API_ENTRY bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 );
-KERNEL_IMPORT void* LouKeMalloc(
+KERNEL_EXPORT void* LouKeMalloc(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT void* LouKeMallocEx(
+KERNEL_EXPORT void* LouKeMallocEx(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT void LouKeFree(void* AddressToFree);
-KERNEL_IMPORT void LouUserFree(uint64_t DataP);
-KERNEL_IMPORT void LouKeUserFree(void* AddressToFree);
-KERNEL_IMPORT void LouKeFreePhysical(void* AddressToFree);
-KERNEL_IMPORT void* LouKeMallocPhy32(
+KERNEL_EXPORT void LouKeFree(void* AddressToFree);
+LOUDDK_API_ENTRY void LouUserFree(uint64_t DataP);
+LOUDDK_API_ENTRY void LouKeUserFree(void* AddressToFree);
+LOUDDK_API_ENTRY void LouKeFreePhysical(void* AddressToFree);
+KERNEL_EXPORT void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void* LouKeMallocExPhy32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void* LouKeMallocExVirt32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void* LouKeMallocVirt32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void  LouGeneralFreeMemory(void* Address);
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 LOUSTATUS LouKeCreateDeviceSection(
     void*   PBase,
     void*   VBase,
     size_t    Size,
     uint64_t  PageFlags
 );
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
-KERNEL_IMPORT 
+LOUDDK_API_ENTRY 
 UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists);
 #else 
 KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
@@ -294,7 +295,7 @@ void* LouKeMallocExPhy32(
 #endif
 
 #ifdef __cplusplus
-KERNEL_IMPORT{
+LOUDDK_API_ENTRY{
 #endif
 
 #define LouClamp_t(type, val, min, max) ({           \
@@ -371,6 +372,7 @@ void LouKeMapDeviceMemoryBlock(
     uint64_t FLAGS
 );
 
+KERNEL_EXPORT
 POOL LouKeCreateGenericPool(
     uint64_t VLocation,
     uint64_t Location,
@@ -491,7 +493,7 @@ void* LouKeMallocVirt32(
 );
 size_t LouKeGetAllocationSize(PVOID Addrress);
 
-LOUSTATUS RequestPhysicalAddress(
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     uint64_t VAddress,
     uint64_t* PAddress
 );

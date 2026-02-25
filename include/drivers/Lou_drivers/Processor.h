@@ -39,11 +39,11 @@ uint64_t GetIntelCoreGeneration(string VendorID);
 uint8_t GetMasterXenonVersion(string VendorID);
 uint64_t GetIntelXenonGeneration(string VendorID);
 #else 
-KERNEL_IMPORT bool IsIntel(string VendorID);
-KERNEL_IMPORT bool IsIntelCore(string VendorID);
-KERNEL_IMPORT bool WhatIntelSpeed(string VendorID);
-KERNEL_IMPORT uint8_t GetIntelCoreVersion(string VendorID);
-KERNEL_IMPORT uint64_t GetIntelCoreGeneration(string VendorID);
+LOUDDK_API_ENTRY bool IsIntel(string VendorID);
+LOUDDK_API_ENTRY bool IsIntelCore(string VendorID);
+LOUDDK_API_ENTRY bool WhatIntelSpeed(string VendorID);
+LOUDDK_API_ENTRY uint8_t GetIntelCoreVersion(string VendorID);
+LOUDDK_API_ENTRY uint64_t GetIntelCoreGeneration(string VendorID);
 INTEL_IGPU_DEVICE_IDENTIFICATION_NUIMBER GetGen4IGPUID();
 #endif
 
@@ -69,7 +69,7 @@ INTEL_IGPU_DEVICE_IDENTIFICATION_NUIMBER GetGen4IGPUID();
 #ifndef __cplusplus
 bool IsIntelIntegratedGraphics();
 #else
-KERNEL_IMPORT bool IsIntelIntegratedGraphics();
+LOUDDK_API_ENTRY bool IsIntelIntegratedGraphics();
 #endif
 //End Of Intel Stub
 
@@ -96,7 +96,7 @@ bool IsAMDAthlonX2(string VendorID);
 bool IsAMDPhenom(string VendorID);
 bool IsAMDRyzen(string VendorID);
 #else
-KERNEL_IMPORT bool IsAMD(string VendorID);
+LOUDDK_API_ENTRY bool IsAMD(string VendorID);
 #endif
 
 //End Of AMD Stub
@@ -111,7 +111,7 @@ UNUSED static const string VIAString = "VIA";
 #ifndef __cplusplus
 bool IsVIA(string VendorID);
 #else
-KERNEL_IMPORT bool IsVIA(string VendorID);
+LOUDDK_API_ENTRY bool IsVIA(string VendorID);
 #endif
 
 //End Of VIA Stub
@@ -132,15 +132,15 @@ uint8_t GetCPUCoreVersion();
 uint64_t GetCPUCoreGeneration();
 #else
 
-KERNEL_IMPORT void DeterminCPU();
+LOUDDK_API_ENTRY void DeterminCPU();
 
-KERNEL_IMPORT uint8_t GetCPUVendor();
+LOUDDK_API_ENTRY uint8_t GetCPUVendor();
 
-KERNEL_IMPORT uint8_t GetProcessor();
+LOUDDK_API_ENTRY uint8_t GetProcessor();
 
-KERNEL_IMPORT uint8_t GetCPUCoreVersion();
+LOUDDK_API_ENTRY uint8_t GetCPUCoreVersion();
 
-KERNEL_IMPORT uint64_t GetCPUCoreGeneration();
+LOUDDK_API_ENTRY uint64_t GetCPUCoreGeneration();
 
 #endif
 

@@ -571,6 +571,7 @@ strcpy (
  *
  ******************************************************************************/
 
+__declspec(dllexport)
 int
 strcmp (
     const char              *String1,

@@ -121,10 +121,10 @@ typedef struct {
 #define APICADDRESSCAST (volatile uint32_t*)(uintptr_t)
 #define LEGACY_IRQ_SCOPE 16
 
-KERNEL_IMPORT uint64_t read_msr(uint32_t msr);
-KERNEL_IMPORT void write_msr(uint32_t msr, uint64_t Value);
+LOUDDK_API_ENTRY uint64_t read_msr(uint32_t msr);
+LOUDDK_API_ENTRY void write_msr(uint32_t msr, uint64_t Value);
 
-KERNEL_IMPORT void disable_pic();
+LOUDDK_API_ENTRY void disable_pic();
 string DRV_VERSION_APIC = "\nLousine Internal Kernel APIC.SYS Module Version 1.10\n";
 string DRV_UNLOAD_STRING_SUCCESS_APIC = "Driver Execution Completed Successfully Exiting Proccess\n\n"; 
 string DRV_UNLOAD_STRING_FAILURE_APIC = "Driver Execution Failed To Execute Properly Exiting Proccess\n\n"; 
@@ -258,7 +258,7 @@ void LouKeInitializeOverideEntry(ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* Overide){
 }
 
 
-KERNEL_IMPORT uint8_t FindTrueIRQ(uint8_t IRQ){
+LOUDDK_API_ENTRY uint8_t FindTrueIRQ(uint8_t IRQ){
     PAPIC_ISO_TRACKER TmpTracker = &IoApicOverideTracker;
     while(TmpTracker->Peers.NextHeader){
         if(TmpTracker->Overide.Source == IRQ){
@@ -303,8 +303,8 @@ LOUDDK_API_ENTRY void LocalApicSendEoi() {
     WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
 }
 
-KERNEL_IMPORT void IoApicMaskIrq(uint8_t tirq);
-KERNEL_IMPORT void IoApicUnmaskIrq(uint8_t tirq);
+LOUDDK_API_ENTRY void IoApicMaskIrq(uint8_t tirq);
+LOUDDK_API_ENTRY void IoApicUnmaskIrq(uint8_t tirq);
 
 void ApicInstallIoApicHandlers(){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;

@@ -244,7 +244,7 @@ LouKeVmmCreateSectionEx(
     return STATUS_UNSUCCESSFUL;
 }
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 LOUSTATUS LouKeGetVAddressPageInformation(
     UINT64  VAddress, 
     UINT8   Level,

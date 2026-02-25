@@ -52,10 +52,10 @@ typedef struct _DMI_SYSTEM_ID{
 }DMI_SYSTEM_ID, * PDMI_SYSTEM_ID;
 
 
-INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList);
+KERNEL_EXPORT INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList);
 INTEGER DmiGetBiosYear();
-INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList);
-PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
+KERNEL_EXPORT INTEGER LouKeCheckDmiSystem(PDMI_SYSTEM_ID IdList);
+KERNEL_EXPORT PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 
 #define DMI_MATCH(Id, String) {.Slot = (Id), .SubString = (String), .ValidEntry = true}
 

@@ -1095,12 +1095,14 @@ typedef struct _LOUSINE_ATA_PORT_INFORMATION{
 #include "AtaDma.h"
 #include "Ahci.h"
 
+KERNEL_EXPORT
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
 LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
 
 PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 
 
+KERNEL_EXPORT
 void
 LouKeMallocAtaPrivateData(
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost,
@@ -1108,7 +1110,7 @@ LouKeMallocAtaPrivateData(
     uint64_t AlignmentOfPrivateData
 );
 
-void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
+KERNEL_EXPORT void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
 #define ForEachAtaPort(AtaHost) for(uint8_t AtaPortIndex = 0; AtaPortIndex < (AtaHost)->PortCount; AtaPortIndex++)
 

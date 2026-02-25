@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-KERNEL_IMPORT uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV);
+LOUDDK_API_ENTRY uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV);
 
 uint8_t LouKeGetPciInterruptPin(PPCI_DEVICE_OBJECT PDEV){
 
@@ -15,7 +15,7 @@ uint8_t LouKeGetPciInterruptLine(PPCI_DEVICE_OBJECT PDEV){
 
 LOUDDK_API_ENTRY bool GetAPICStatus();
 
-KERNEL_IMPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV){
+LOUDDK_API_ENTRY uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV){
     if(GetAPICStatus()){
         UINT8 Result = LouKeGetPciInterruptLineFromPin(PDEV);
         if(Result == 0xFF){

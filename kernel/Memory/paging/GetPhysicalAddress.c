@@ -19,7 +19,7 @@ void CalculateTableMarks(
 PML* GetPageBase();
 bool IsMegabytePage(uint64_t* PageAddress);
 
-LOUSTATUS RequestPhysicalAddress(
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     uint64_t VAddress,
     uint64_t* PAddress
 ){

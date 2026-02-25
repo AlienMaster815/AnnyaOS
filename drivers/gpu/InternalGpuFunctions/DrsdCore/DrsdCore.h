@@ -43,7 +43,7 @@ PDRSD_MODE_SET_CONTEXT DrsdInitializeModeContext(PDRSD_DEVICE Device);
 void AddVBlankToCrtc(PDRSD_DEVICE Device);
 void DrsdModeSetWarnIfLocked(PDRSD_DEVICE Device);
 size_t GetDrsdCrtcIndex(PDRSD_CRTC Crtc);
-DRSD_CONNECTOR_STATUS DrsdInternalProbeDetection(
+KERNEL_EXPORT DRSD_CONNECTOR_STATUS DrsdInternalProbeDetection(
     PDRSD_CONNECTOR Connector, 
     PDRSD_MODE_SET_CONTEXT Setex, 
     bool Force
@@ -53,5 +53,6 @@ DRSD_CONNECTOR_STATUS DrsdDetectConnectorStatus(
     PDRSD_MODE_SET_CONTEXT  Setex,
     bool                    Force
 );
-int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector);
+
+KERNEL_EXPORT int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector);
 

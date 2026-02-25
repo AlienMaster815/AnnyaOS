@@ -35,14 +35,16 @@
 
 
 #ifdef __cplusplus
-KERNEL_IMPORT bool IsSystemEfi();
-LOUDDK_API_ENTRY
+LOUDDK_API_ENTRY bool IsSystemEfi();
+KERNEL_EXPORT
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);
 #else
 bool IsSystemEfi();
+KERNEL_EXPORT
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);
+KERNEL_EXPORT
 void* 
 LouKeLoadDriver(string Driver, string EntryName);
 #endif

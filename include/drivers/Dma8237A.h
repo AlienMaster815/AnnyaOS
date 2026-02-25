@@ -36,7 +36,6 @@ extern "C" {
 
 
 
-#ifdef _KERNEL_MODULE_
 // --- Module-specific data (MODULE_NAME.SYS) ---
 KERNEL_EXPORT
 PVOID LouKeMallocDma16Ex(
@@ -51,19 +50,7 @@ KERNEL_EXPORT
 void LouKeFreeDma16(
     PVOID Address
 );
-#else
-// --- LOUOSKRNL.EXE-specific data ---
-PVOID LouKeMallocDma16Ex(
-    SIZE AllocationSize, 
-    UINT64 Alignment
-);
-PVOID LouKeMallocDma16(
-    SIZE AllocationSize
-);
-void LouKeFreeDma16(
-    PVOID Address
-);
-#endif
+
 
 #endif // end user vs kernel
 

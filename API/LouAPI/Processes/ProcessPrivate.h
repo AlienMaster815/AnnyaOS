@@ -69,9 +69,9 @@ typedef struct  PACKED _CPUKernelContext{
     uint64_t rsp;
 } CPUKernelContext;
 
-KERNEL_IMPORT void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
-KERNEL_IMPORT void RestoreEverything(uint64_t ContextHandle);
-KERNEL_IMPORT void SaveEverything(uint64_t ContextHandle);
+LOUDDK_API_ENTRY void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
+LOUDDK_API_ENTRY void RestoreEverything(uint64_t ContextHandle);
+LOUDDK_API_ENTRY void SaveEverything(uint64_t ContextHandle);
 
 #define CTXMGR_DEFAULT_SAVE_EVERYTHING      SaveEverything
 #define CTXMGR_DEFAULT_RESTORE_EVERYTHING   RestoreEverything
@@ -249,19 +249,19 @@ typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;
 
-KERNEL_IMPORT uint16_t GetNPROC();
+LOUDDK_API_ENTRY uint16_t GetNPROC();
 
-KERNEL_IMPORT LouKIRQL LouKeGetIrql();
-KERNEL_IMPORT void LouKeSendIcEOI();
+LOUDDK_API_ENTRY LouKIRQL LouKeGetIrql();
+LOUDDK_API_ENTRY void LouKeSendIcEOI();
 UINT64 LouKeSwitchToTask(
     UINT64                  StackContex,
     PGENERIC_THREAD_DATA    ThreadFrom,
     PGENERIC_THREAD_DATA    ThreadTo
 );
 
-KERNEL_IMPORT 
+LOUDDK_API_ENTRY 
 void SetPEB(uint64_t PEB);
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void SetTEB(uint64_t Teb);
 
 UINT64 LouKeVmmCreatePmlTable();

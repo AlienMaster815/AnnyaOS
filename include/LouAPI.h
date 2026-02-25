@@ -2,6 +2,12 @@
 #ifndef LOUAPI_H
 #define LOUAPI_H
 
+#ifndef _KERNEL_MODULE_
+#define KERNEL_EXPORT __declspec(dllexport)
+#else
+#define KERNEL_EXPORT __declspec(dllimport)
+#endif
+
 #define WINAPI __stdcall
 
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))

@@ -48,6 +48,10 @@ PCOFF_IMAGE_HEADER UnpackKernelImage(
 
     size_t SectionCount = ImageHeader->StandardHeader.NumberOfSections;
     
+    if(ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress){
+        KernelLoaderInfo.KernelExportTable = (PVOID)(ImageVBase + (UINT64)ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress);
+    }
+
     for(size_t i = 0; i < SectionCount; i++){
         if(ImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress){
             memcpy(

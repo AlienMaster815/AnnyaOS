@@ -222,6 +222,7 @@ size_t EdidGetQuirks(PDRSD_EDID_TRACKER Edid){
     return 0x00;
 }
 
+KERNEL_EXPORT
 size_t DrsdAddModesNoEDID(
     PDRSD_CONNECTOR Connector, 
     int32_t Width, 

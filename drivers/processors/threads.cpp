@@ -38,8 +38,8 @@ typedef struct  PACKED _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-KERNEL_IMPORT void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
-KERNEL_IMPORT void RestoreEverything(uint64_t* ContextHandle);
+LOUDDK_API_ENTRY void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
+LOUDDK_API_ENTRY void RestoreEverything(uint64_t* ContextHandle);
 
 typedef struct {
     ListHeader Neighbors;
@@ -66,13 +66,13 @@ UNUSED static uint32_t* timeQuantum = 0; // Array to track the load on each core
 UNUSED static int thread_count = 0;
 
 
-KERNEL_IMPORT void LouKeSendIcEOI();
-KERNEL_IMPORT void SetInterruptFlags();
-KERNEL_IMPORT void UnSetInterruptFlags();
+LOUDDK_API_ENTRY void LouKeSendIcEOI();
+LOUDDK_API_ENTRY void SetInterruptFlags();
+LOUDDK_API_ENTRY void UnSetInterruptFlags();
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void SetTEB(uint64_t Teb);
-KERNEL_IMPORT LouKIRQL LouKeGetIrql();
+LOUDDK_API_ENTRY LouKIRQL LouKeGetIrql();
 
 
 LOUDDK_API_ENTRY uint64_t GetThreadContext(
@@ -80,7 +80,7 @@ LOUDDK_API_ENTRY uint64_t GetThreadContext(
 );
 
 
-KERNEL_IMPORT void ThreadStart(void(*Function)(PVOID), PVOID Parameters);
+LOUDDK_API_ENTRY void ThreadStart(void(*Function)(PVOID), PVOID Parameters);
 
 
 
@@ -264,7 +264,7 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
 
 
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 void UsrJmp(uint64_t Entry);
 
 
@@ -284,7 +284,7 @@ uintptr_t RetriveThreadStubAddress(){
     return FunctionAddress;
 }
 
-KERNEL_IMPORT uint64_t GetPEB();
+LOUDDK_API_ENTRY uint64_t GetPEB();
 
 
 

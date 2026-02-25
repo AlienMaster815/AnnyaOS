@@ -46,14 +46,12 @@ uint64_t GetAdvancedRegisterInterruptsStorage();
 
 void LouKeIcUnmaskIrq(uint8_t irq);
 
-void InterruptWrapper(uint64_t Handler,uint8_t InterruptNumber, bool NeedFlotationSave, uintptr_t OverideData) {
-	RegisterInterruptHandler((void(*)(uint64_t))Handler, InterruptNumber, NeedFlotationSave, OverideData);
-}
 
 void InitializeInterruptRouter(){
     LouKeCreateFastObjectClass("IRQROUTE", 256, sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), 0, KERNEL_GENERIC_MEMORY);
 }
 
+KERNEL_EXPORT
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData) {
     //LouPrint("Handler:%h Installed For Vector:%d\n", Handler, InterruptNumber);
 

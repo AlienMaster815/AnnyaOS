@@ -129,7 +129,7 @@ LOUSTATUS SetBasicInterrupts(bool init);
 
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
 
-void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
+KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 
 LOUSTATUS InitializeMainInterruptHandleing();
 LOUSTATUS InitializeStartupInterruptHandleing();
@@ -178,9 +178,6 @@ static bool PageTableDeletion = false;
 static bool MemoryProbing = false;
 static bool USBKeyboardInterrupt = false;
 
-void RegisterInterruptHandler(void(*Handler), uint8_t InterruptNumber);
-void UnRegisterInterruptHandler(uint8_t InterruptNumber);
-
 void SetPicIDTGate(int index, void (*handler)());
 
 LOUSTATUS InitializeMainInterruptHandleing();
@@ -214,7 +211,7 @@ void LouKeSetIrql(
 
 typedef uint8_t LOUSINE_INTERRUPT_LEVEL;
 
-KERNEL_IMPORT void LouKeSetIrql(
+LOUDDK_API_ENTRY void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );

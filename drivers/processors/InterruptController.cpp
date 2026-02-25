@@ -23,7 +23,7 @@ void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu){
     LouKeMemoryBarrier();
 }
 
-KERNEL_IMPORT void LouKeSendIcEOI(){
+LOUDDK_API_ENTRY void LouKeSendIcEOI(){
     UINT8 ProcID = ((PLKPCB)GetLKPCB())->ProcID;
     if(EoiHandler[ProcID]){
         EoiHandler[ProcID]();
@@ -31,7 +31,7 @@ KERNEL_IMPORT void LouKeSendIcEOI(){
     }
 }
 
-KERNEL_IMPORT void LouKeIcUnmaskIrq(UINT8 Irq){
+LOUDDK_API_ENTRY void LouKeIcUnmaskIrq(UINT8 Irq){
     UINT8 ProcID = ((PLKPCB)GetLKPCB())->ProcID;
     if(UnmaskHandler[ProcID]){
         UnmaskHandler[ProcID](Irq);
@@ -39,7 +39,7 @@ KERNEL_IMPORT void LouKeIcUnmaskIrq(UINT8 Irq){
     }
 }
 
-KERNEL_IMPORT void LouKeIcMaskIrq(UINT8 Irq){
+LOUDDK_API_ENTRY void LouKeIcMaskIrq(UINT8 Irq){
     UINT8 ProcID = ((PLKPCB)GetLKPCB())->ProcID;
     if(MaskHandler[ProcID]){
         MaskHandler[ProcID](Irq);

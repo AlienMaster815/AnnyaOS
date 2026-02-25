@@ -1,8 +1,8 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-KERNEL_IMPORT uint16_t GetNPROC();
-KERNEL_IMPORT uint8_t GetTotalHardwareInterrupts();
+LOUDDK_API_ENTRY uint16_t GetNPROC();
+LOUDDK_API_ENTRY uint8_t GetTotalHardwareInterrupts();
 
 
 UINT8 LouKeHalPciGetCapabilityPointer(
@@ -10,7 +10,7 @@ UINT8 LouKeHalPciGetCapabilityPointer(
     UINT8               CapID
 );
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq){
     return PDEV->InterruptVectors[Irq + 1];
 }

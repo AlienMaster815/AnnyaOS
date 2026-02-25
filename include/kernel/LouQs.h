@@ -49,9 +49,9 @@ static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, DELAYED_CALLBACK Cal
 #ifndef _KERNEL_MODULE_
 
 
-LOUSTATUS LouKeQueueWork(string QueueName, PLOUQ_WORK WorkItem);
-LOUSTATUS LouKeQueueDelayedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
-LOUSTATUS LouKeQueueTimedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
+KERNEL_EXPORT LOUSTATUS LouKeQueueWork(string QueueName, PLOUQ_WORK WorkItem);
+KERNEL_EXPORT LOUSTATUS LouKeQueueDelayedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
+KERNEL_EXPORT LOUSTATUS LouKeQueueTimedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
 
 LOUSTATUS LouKeCreateWorkQueue(
     PLOUQ_WORK_QUEUE*   OutQueue,

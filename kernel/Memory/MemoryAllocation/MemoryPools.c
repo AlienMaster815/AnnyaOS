@@ -25,6 +25,7 @@ PLMPOOL_DIRECTORY LouKeMapPool(
     while(1);
 }
 
+KERNEL_EXPORT
 PLMPOOL_DIRECTORY LouKeMapDynamicPool(
     uint64_t    LocationOfPool,
     size_t      PoolSize,
@@ -59,6 +60,7 @@ void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size) {
     while(1);
 }
 
+KERNEL_EXPORT
 void LouKeFreeFromFixedPool(
     PLMPOOL_DIRECTORY Pool, 
     void* Object
@@ -81,6 +83,7 @@ void LouKeFreeFromFixedPool(
     MutexUnlock(&Pool->PoolLock);
 }
 
+KERNEL_EXPORT
 void* LouKeMallocFromFixedPool(
     PLMPOOL_DIRECTORY Pool
 ){
@@ -129,6 +132,7 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     return NewPool;
 }
 
+KERNEL_EXPORT
 void LouKeDestroyFixedPool(PLMPOOL_DIRECTORY Pool){
 
     LouKeFree((void*)Pool->MemoryTracks.Peers.NextHeader);
@@ -148,6 +152,7 @@ void LouKeFreePool(PLMPOOL_DIRECTORY PoolToFree){
     while(1);
 }
 
+KERNEL_EXPORT
 PLMPOOL_DIRECTORY LouKeCreateDynamicPoolEx(
     size_t PoolSize,
     size_t CachedTracks,
@@ -188,6 +193,7 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
     );
 }
 
+KERNEL_EXPORT
 void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
     PPOOL_MEMORY_TRACKS Prev = (PPOOL_MEMORY_TRACKS)&Pool->MemoryTracks;
     PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Prev->Peers.NextHeader;
@@ -206,6 +212,7 @@ void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
 }
 
 
+KERNEL_EXPORT
 void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alignment){
     if (Pool->FixedSizePool) {
         LouPrint("LouKeMallocFromDynamicPoolEx(): ERROR - FixedSizePool input\n");
@@ -255,6 +262,7 @@ retry_search:
 }
 
 
+KERNEL_EXPORT
 void* LouKeMallocFromDynamicPool(
     POOL Pool, 
     size_t AllocationSize
@@ -274,6 +282,7 @@ void LouKeDestroyDynamicPool(
     }
 }
 
+KERNEL_EXPORT
 POOL LouKeCreateGenericPool(
     uint64_t VLocation,
     uint64_t Location,
@@ -291,6 +300,7 @@ POOL LouKeCreateGenericPool(
     return NewPool;
 }
 
+KERNEL_EXPORT
 void* LouKeGenericPoolGetPhyAddress(
     POOL Pool,
     void* Address
@@ -298,6 +308,7 @@ void* LouKeGenericPoolGetPhyAddress(
     return (void*)Pool->Location + ((uint64_t)Address - Pool->VLocation);
 }
 
+KERNEL_EXPORT
 void* LouKeGenricAllocateDmaPool(
     POOL Pool,
     size_t size,
@@ -312,6 +323,7 @@ void* LouKeGenricAllocateDmaPool(
     return (void*)Result;
 }
 
+KERNEL_EXPORT
 void* LouKeGenericAllocateFixedDmaPool(
     POOL Pool,
     size_t* Offset

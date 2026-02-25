@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stddef.h>
-int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
+KERNEL_EXPORT int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
 
 void append_char(char *buffer, size_t *index, char c, size_t buffer_size) {
     if (*index < buffer_size - 1) {
@@ -190,6 +190,7 @@ void int_to_wide_ascii(int value, wchar_t *buffer, size_t *index, size_t buffer_
     }
 }
 //_snprintf
+KERNEL_EXPORT
 int _snprintf(char *buffer, size_t buffer_size, const char *format, ...) {
     va_list args;
     size_t index = 0;  // Keep track of the buffer index

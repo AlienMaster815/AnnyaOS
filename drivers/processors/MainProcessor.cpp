@@ -5,7 +5,7 @@
 
 
 
-KERNEL_IMPORT void InitializeFloatPointUnit();
+LOUDDK_API_ENTRY void InitializeFloatPointUnit();
 
 LOUDDK_API_ENTRY void SMPInit();
 

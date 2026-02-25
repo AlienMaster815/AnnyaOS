@@ -91,10 +91,10 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
 
 
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 uint16_t GetPciGroupCount();
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
 
 typedef struct _ACPI_MCFG_ALLOCATION{
@@ -104,9 +104,9 @@ typedef struct _ACPI_MCFG_ALLOCATION{
     uint8_t     EndBusNumber;
 } ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
 
-KERNEL_IMPORT void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
+LOUDDK_API_ENTRY void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
 
-KERNEL_IMPORT size_t LouKeGetMcfgCount(void* Table);
+LOUDDK_API_ENTRY size_t LouKeGetMcfgCount(void* Table);
 
 LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 
@@ -146,7 +146,7 @@ LOUDDK_API_ENTRY void PCI_Scan_Bus(){
 
 // C Land
 
-LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+KERNEL_EXPORT uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     UINT32 Tmp = 0;
     if(PDEV->EcamDevice){
         PDEV->EcamOperations.PcieReadEcam(PDEV, Offset, sizeof(UINT8), &Tmp);
@@ -156,7 +156,7 @@ LOUDDK_API_ENTRY uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Off
     return pciConfigReadByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func, Offset);
 }
 
-LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+KERNEL_EXPORT uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     UINT32 Tmp = 0;
     if(PDEV->EcamDevice){
         PDEV->EcamOperations.PcieReadEcam(PDEV, Offset, sizeof(UINT16), &Tmp);
@@ -166,7 +166,7 @@ LOUDDK_API_ENTRY uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t O
     return pciConfigReadWord(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Offset);
 }
 
-LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
+KERNEL_EXPORT uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset){
     UINT32 Tmp = 0;
     if(PDEV->EcamDevice){
         PDEV->EcamOperations.PcieReadEcam(PDEV, Offset, sizeof(UINT16), &Tmp);
@@ -177,7 +177,7 @@ LOUDDK_API_ENTRY uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t O
 }
 
 
-LOUDDK_API_ENTRY void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value){
+KERNEL_EXPORT void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value){
     if(PDEV->EcamDevice){
         PDEV->EcamOperations.PcieWriteEcam(PDEV, Offset, sizeof(UINT8), (UINT32)Value);
         if(PDEV->Group)return;
@@ -185,7 +185,7 @@ LOUDDK_API_ENTRY void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offse
     pciConfigWriteByte(PDEV->Group, PDEV->bus,PDEV->slot,PDEV->func,Offset,Value);
 }
 
-LOUDDK_API_ENTRY void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value){
+KERNEL_EXPORT void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value){
     if(PDEV->EcamDevice){
         PDEV->EcamOperations.PcieWriteEcam(PDEV, Offset, sizeof(UINT16), (UINT32)Value);
         if(PDEV->Group)return;
@@ -193,7 +193,7 @@ LOUDDK_API_ENTRY void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offs
     pciConfigWriteWord(PDEV->Group, PDEV->bus, PDEV->slot,PDEV->func,Offset,Value);
 }
 
-LOUDDK_API_ENTRY void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value){
+KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value){
     if(PDEV->EcamDevice){
         PDEV->EcamOperations.PcieWriteEcam(PDEV, Offset, sizeof(UINT32), (UINT32)Value);
         if(PDEV->Group)return;
@@ -263,7 +263,7 @@ void ScanTheRestOfHarware(){
     }
 }
 
-KERNEL_IMPORT
+LOUDDK_API_ENTRY
 bool LouKeSeachPreLoadedSystemModules(PPCI_DEVICE_OBJECT PDEV);
 
 bool IsAtaController(PPCI_DEVICE_OBJECT PDEV);
