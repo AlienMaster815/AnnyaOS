@@ -26,7 +26,7 @@ typedef struct _TableTracks{
 #define PRE_LOADED_UNKOWN_FUNCTIONS 12
 #define PRE_LOADED_WDFLDR_FUNCTIONS 5
 #define PRE_LOADED_STORPORT_FUNCTIONS 9
-#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 210
+#define PRE_LOADED_LOUOSKRNL_FUNCTIONS 213
 
 static uint64_t LouOsKrnlFunctionAddresses[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
 static FUNCTION_NAME LouOsKrnlFunctionNames[PRE_LOADED_LOUOSKRNL_FUNCTIONS];
@@ -454,6 +454,9 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[207] = "InitializeGenericAtaDevice";
     ImportTables[0].FunctionName[208] = "LouKeHalFreePciIrqVectors";
     ImportTables[0].FunctionName[209] = "DrsdModeConfigurationCleanup";
+    ImportTables[0].FunctionName[210] = "LouKeLinkObjectToListHead";
+    ImportTables[0].FunctionName[211] = "LouKeLinkObjectToListTail";
+    ImportTables[0].FunctionName[212] = "LouKeUnlinkObjectFromList";
 
     ImportTables[0].VirtualAddress = LouOsKrnlFunctionAddresses;
 
@@ -665,7 +668,10 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[207] = (uint64_t)InitializeGenericAtaDevice;
     ImportTables[0].VirtualAddress[208] = (uint64_t)LouKeHalFreePciIrqVectors;
     ImportTables[0].VirtualAddress[209] = (uint64_t)DrsdModeConfigurationCleanup;
-
+    ImportTables[0].VirtualAddress[210] = (uint64_t)LouKeLinkObjectToListHead;
+    ImportTables[0].VirtualAddress[211] = (uint64_t)LouKeLinkObjectToListTail;
+    ImportTables[0].VirtualAddress[212] = (uint64_t)LouKeUnlinkObjectFromList;
+    
 }
 
 LOUDDK_API_ENTRY
