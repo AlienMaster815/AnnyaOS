@@ -14,14 +14,14 @@ typedef struct _TABLE_ENTRY{
 }TABLE_ENTRY, * PTABLE_ENTRY;
 
 typedef struct _TableTracks{
-    ListHeader                      Neighbors;
+    LIST_LINK                       Peers;
     TABLE_ENTRY                     Table;
     bool                            LongModeEntry;
     PKULA_TRANSITION_LAYER_OBECT    TransitionObject;
     KERNEL_REFERENCE                Counter;
 }TableTracks, * PTableTracks;
 
-static TableTracks  DynamicLoadedLibraries;
+static LIST_OBJECT DynamicLoadedLibraries = {0};
 static size_t DynamicLoadedLibrarieCount = 0x00;
 
 LOUDDK_API_ENTRY LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
@@ -157,15 +157,10 @@ void LouKeInitializeLibraryLookupEx(
     bool                            IsNativeLongmode,
     PKULA_TRANSITION_LAYER_OBECT    TransitionObject
 ){
-    uint16_t i;
-    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries;
-    for(i = 0; i < DynamicLoadedLibrarieCount; i++){
-        if(!Tmp->Neighbors.NextHeader){
-            Tmp->Neighbors.NextHeader = (ListHeader*)LouKeMallocType(TableTracks, KERNEL_GENERIC_MEMORY);
-        }
-        Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
-    }
-
+    //&DynamicLoadedLibraries;
+    PTableTracks Tmp = LouKeMallocType(TableTracks, KERNEL_GENERIC_MEMORY);
+    LouKeLinkObjectToListTail(&DynamicLoadedLibraries, &Tmp->Peers);
+    
     Tmp->LongModeEntry = IsNativeLongmode;
     Tmp->Table.ModuleName = ModuleName;
     size_t koo = strlen(ModuleName);
@@ -677,6 +672,21 @@ LouKeGetKulaEmulatedFunctionN(
     string FunctionName
 );
 
+struct _TableTrackFinderParams{
+    PVOID ModuleName;
+    PVOID TransitionObject;
+};
+
+static BOOL FindModuleTracker(PLIST_LINK Link, PVOID Params){
+    struct _TableTrackFinderParams* Foo = (struct _TableTrackFinderParams*)Params;
+    PTableTracks Tmp = CONTAINER_OF(Link, TableTracks, Peers);
+    
+    if((strcmp(Tmp->Table.ModuleName, (string)Foo->ModuleName) == 0) && (Foo->TransitionObject == Tmp->TransitionObject)){
+        return true;
+    }
+    return false;
+}
+
 LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
     string ModuleName,
     string FunctionName,
@@ -685,23 +695,23 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
 
     //LouPrint("Module:%s Function:%s\n", ModuleName, FunctionName);
 
-    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
-    for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        if((strcmp(Tmp->Table.ModuleName, ModuleName) == 0) && (TransitionObject == Tmp->TransitionObject)){
-            for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
-                if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
-                    //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
-                    //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
-                    //LouPrint("::%h : 3\n", Tmp->Table.VirtualAddress[j]);
-                    return Tmp->Table.VirtualAddress[j];
-                }
+    struct _TableTrackFinderParams Foo = {.ModuleName = ModuleName, .TransitionObject = TransitionObject};
+
+    PTableTracks Tmp = (PTableTracks)LouKeLinkGetMemberWithFunction(&DynamicLoadedLibraries, FindModuleTracker, &Foo);
+    
+    if(!Tmp){
+        return 0x00;
+    }
+    //if((strcmp(Tmp->Table.ModuleName, ModuleName) == 0) && (TransitionObject == Tmp->TransitionObject)){
+        for(size_t j = 0 ; j < Tmp->Table.NumberOfFunctions; j++){
+            if(strcmp(Tmp->Table.FunctionName[j], FunctionName) == 0){
+                //LouPrint("Getting A Address From Loaded Module:%s\n",   Tmp->Table.FunctionName[j]);
+                //LouPrint("Getting A Address From Loaded Address:%h\n",  Tmp->Table.VirtualAddress[j]);
+                //LouPrint("::%h : 3\n", Tmp->Table.VirtualAddress[j]);
+                return Tmp->Table.VirtualAddress[j];
             }
         }
-        //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
-        if(Tmp->Neighbors.NextHeader){
-            Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
-        }
-    }
+    //}
 
     return (UINT64)LouKeGetKulaEmulatedFunctionN(
         ModuleName,
@@ -717,23 +727,14 @@ LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandleEx(
     if(!ModuleName){
         return 0x00;
     }
-
-    //LouPrint("Module:%s Function:%s\n", ModuleName, FunctionName);
-
-    //last resourt but most likely here
-    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
-    for(size_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        if((strcmp(Tmp->Table.ModuleName, ModuleName) == 0) && (TransitionObject == Tmp->TransitionObject)){
-            return (HANDLE)&Tmp->Table;
-        }
-        //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
-        if(Tmp->Neighbors.NextHeader){
-            Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
-        }
+    struct _TableTrackFinderParams Foo = {.ModuleName = ModuleName, .TransitionObject = TransitionObject};
+  
+    PTableTracks Tmp = (PTableTracks)LouKeLinkGetMemberWithFunction(&DynamicLoadedLibraries, FindModuleTracker, &Foo);
+    if(!Tmp){
+        return 0x00;
     }
 
-
-    return 0x00;
+    return (HANDLE)&Tmp->Table;
 }
 
 LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandle(
@@ -758,18 +759,7 @@ LouKeLinkerCheckLibraryPresenceEx(string SystemName, PKULA_TRANSITION_LAYER_OBEC
         SystemName[foo] = toupper(SystemName[foo]);
     }
     
-    //last resourt but most likely here
-    PTableTracks Tmp = (PTableTracks)&DynamicLoadedLibraries; 
-    for(uint16_t i = 0 ; i < DynamicLoadedLibrarieCount; i++){
-        if((strcmp(Tmp->Table.ModuleName, SystemName) == 0) && (TransitionObject == Tmp->TransitionObject)){
-            return true;
-        }
-        //LouPrint("Module:%s\n",Tmp->Table.ModuleName);
-        if(Tmp->Neighbors.NextHeader){
-            Tmp = (PTableTracks)Tmp->Neighbors.NextHeader;
-        }
-    }
-    return false;
+    return LouKeLinkerGetModuleLookupHandleEx(SystemName, TransitionObject) ? true : false;
 }
 
 LOUDDK_API_ENTRY
