@@ -211,6 +211,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <Security.h>
 #include <kernel/LazyAllocations.h>
 #include <kernel/Stack.h>
+#include <WinAPI/Win32/GdiCore.h>
 
 #ifndef _KERNEL_MODULE_
 

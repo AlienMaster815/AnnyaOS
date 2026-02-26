@@ -237,8 +237,8 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
 
-	$(MAKE) -C DLL/LouDLLs/GDI32 clean
-	$(MAKE) -C DLL/LouDLLs/GDI32 all
+#	$(MAKE) -C DLL/LouDLLs/GDI32 clean
+#	$(MAKE) -C DLL/LouDLLs/GDI32 all
 
 annya.iso: release KernelModules UserSpace
 	rm -rf ISO
@@ -290,7 +290,7 @@ cleanall:
 	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
 	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
-	$(MAKE) -C DLL/LouDLLs/GDI32 clean
+#	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C LouCoff clean

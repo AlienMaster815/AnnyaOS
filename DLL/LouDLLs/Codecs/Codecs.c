@@ -1,6 +1,5 @@
 #include "codecs.h"
 #include "Png/png.h"
-#include "Bmp/Bmp.h"
 
 CODECS_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
@@ -36,11 +35,6 @@ PCODECS_TYPE_QUERY AnnyaCodecsCreateHandle(
                     Result->HandleInformation.ImageHandleData.Width = PngHandle->Width;
                     Result->HandleInformation.ImageHandleData.Height = PngHandle->Height;
                     break;
-                case BMP:
-                    PBITMAP_HANDLE BmpHandle = PrivateData;
-                    Result->HandleInformation.ImageHandleData.Width = BmpHandle->Width;
-                    Result->HandleInformation.ImageHandleData.Height = BmpHandle->Height;
-                    break;
             }
             break;
         default:
@@ -66,18 +60,6 @@ LOUSTATUS AnnyaCodecsPaintClipFromImageHandle(
     }
 
     switch(Handle->HandleInformation.ImageHandleData.ImageSubType){
-
-        case BMP:
-            AnnyaPaintClipWithBmp(
-                (HANDLE)Handle,
-                Cliph,
-                X,
-                Y,
-                ScalingX,
-                ScalingY
-            );
-            break;
-
         case PNG:
             return STATUS_UNSUCCESSFUL;
             break;

@@ -38,7 +38,6 @@
 #include <SharedTypes.h>
 #include "NtOsKrnlLib.h"
 
-#include <FileHandleing/Bitmap.h>
 //#include <Hal.h>
 #include <math.h>
 #include <kernel/threads.h>
@@ -73,6 +72,7 @@
 #include <Security.h>
 #include <kernel/LazyAllocations.h>
 #include <kernel/Stack.h>
+#include <WinAPI/Win32/GdiCore.h>
 
 #ifndef KERNEL_MAIN_FILE
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;

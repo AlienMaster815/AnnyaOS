@@ -53,10 +53,10 @@ typedef void* PTHREAD;
 
 #include <WinAPI/NtAPI/ntstatus.h>
 #include <WinAPI/Win32/WinAPIStdType.h>
-#include <FileHandleing/Bitmap.h>
 #include <windows.h>
 #include "WinAPI/Win32/wmsdk/wmfsdk/wmfsdk.h"
 #include <WinAPI/Win32/winnls.h>
+#include <WinAPI/Win32/GdiCore.h>
 
 typedef unsigned int UINT;
 typedef unsigned short USHORT, * PUSHORT;
@@ -68,6 +68,7 @@ typedef void*       LOUDISPMSG;
 
 typedef void* HANDLE;
 typedef void* HMODULE;
+typedef HANDLE FILE;
 
 #ifndef _TIME_T_
 #define _TIME_T_
@@ -695,8 +696,8 @@ typedef int errno_t;
 
 #define _TRUNCATE ((size_t)-1)
 
-#include "../DLL/LouDLLs/GDI32/AnnyaGdi.h"
-#include "../DLL/LouDLLs/User32/AnnyaUser.h"
+//#include "../DLL/LouDLLs/GDI32/AnnyaGdi.h"
+//#include "../DLL/LouDLLs/User32/AnnyaUser.h"
 
 #include <Power.h>
 
