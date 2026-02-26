@@ -13,6 +13,8 @@
         <FILETOCPY64>cp EXE/LouLoad/LOULOAD.EXE ISO/ANNYA/SYSTEM64/LOULOAD.EXE</FILETOCPY64>  
         <!--THEE KERNEL-->
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp drivers/gpu/GDI/GDI.SYS ISO/ANNYA/SYSTEM64/GDI.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp drivers/USB/UsbCore/USBCORE.SYS ISO/ANNYA/SYSTEM64/USBCORE.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
         <!--Smp Trampoline-->
         <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
         <!--Kernel Drivers-->

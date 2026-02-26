@@ -1,6 +1,6 @@
-#include <LouDDK.h>
-#include <usb.h>
+#include "UsbCore.h"
 
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbCreateRequest(
     PUSB_FUNCTION_DEVICE    FunctionDevice,
     PUSB_HOST_IO_PACKET     IoPacket,
@@ -35,6 +35,7 @@ LOUSTATUS LouKeUsbCreateRequest(
     return STATUS_SUCCESS;
 }
 
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbCommitRequest(PUSB_HOST_IO_PACKET IoPacket){
     
     PUSB_TOPOLOGY_TREE Topology = CONTAINER_OF(IoPacket->FunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice);
@@ -47,6 +48,7 @@ LOUSTATUS LouKeUsbCommitRequest(PUSB_HOST_IO_PACKET IoPacket){
     return STATUS_UNSUCCESSFUL;
 }
 
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbGetDescriptorRequest(
     PUSB_FUNCTION_DEVICE    FunctionDevice, 
     PUSB_HOST_IO_PACKET     IoPacket,
@@ -94,6 +96,7 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
     return STATUS_SUCCESS;
 }
 
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbSetAddress(
     PUSB_FUNCTION_DEVICE    FunctionDevice, 
     PUSB_HOST_IO_PACKET     IoPacket,
@@ -127,6 +130,7 @@ LOUSTATUS LouKeUsbSetAddress(
     return Status;
 }
 
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbSetConfiguration(
     PUSB_FUNCTION_DEVICE    FunctionDevice, 
     PUSB_HOST_IO_PACKET     IoPacket,

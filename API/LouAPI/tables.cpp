@@ -374,13 +374,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[191] = "LouKeMallocPhy32";
     ImportTables[0].FunctionName[192] = "LouKeHalGetPciIrqVector";
     ImportTables[0].FunctionName[193] = "LouKeFreePhy32";
-    ImportTables[0].FunctionName[194] = "LouKeUsbAddHcd";
-    ImportTables[0].FunctionName[195] = "LouKeUsbAddDeviceToHcd";
-    ImportTables[0].FunctionName[196] = "LouKeUsbGetDescriptorRequest";
-    ImportTables[0].FunctionName[200] = "LouKeCreateIdentificationRange";
-    ImportTables[0].FunctionName[201] = "LouKeAcquireIdFromRange";
-    ImportTables[0].FunctionName[202] = "LouKeUsbSetAddress";
-    ImportTables[0].FunctionName[203] = "LouKeUsbSetConfiguration";
     ImportTables[0].FunctionName[204] = "LouKeDeviceManagerGetAtaDevice";
     ImportTables[0].FunctionName[205] = "LouKeAtaSendAtaIdentifyCommand";
     ImportTables[0].FunctionName[206] = "LouKeAtaSendAtapiIdentifyCommand";
@@ -550,13 +543,8 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[191] = (uint64_t)LouKeMallocPhy32;
     ImportTables[0].VirtualAddress[192] = (uint64_t)LouKeHalGetPciIrqVector;
     ImportTables[0].VirtualAddress[193] = (uint64_t)LouKeFreePhy32;
-    ImportTables[0].VirtualAddress[194] = (uint64_t)LouKeUsbAddHcd;
-    ImportTables[0].VirtualAddress[195] = (uint64_t)LouKeUsbAddDeviceToHcd;
-    ImportTables[0].VirtualAddress[196] = (uint64_t)LouKeUsbGetDescriptorRequest;
     ImportTables[0].VirtualAddress[200] = (uint64_t)LouKeCreateIdentificationRange;
     ImportTables[0].VirtualAddress[201] = (uint64_t)LouKeAcquireIdFromRange;
-    ImportTables[0].VirtualAddress[202] = (uint64_t)LouKeUsbSetAddress;
-    ImportTables[0].VirtualAddress[203] = (uint64_t)LouKeUsbSetConfiguration;
     ImportTables[0].VirtualAddress[204] = (uint64_t)LouKeDeviceManagerGetAtaDevice;
     ImportTables[0].VirtualAddress[205] = (uint64_t)LouKeAtaSendAtaIdentifyCommand;
     ImportTables[0].VirtualAddress[206] = (uint64_t)LouKeAtaSendAtapiIdentifyCommand;

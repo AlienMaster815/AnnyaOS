@@ -130,6 +130,7 @@ LouKeMallocEx(
     return (void*)VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase);
 }
 
+KERNEL_EXPORT
 void* 
 LouKeMallocExVirt32(
     size_t      AllocationSize,
@@ -207,6 +208,7 @@ void* LouKeMalloc(
     return LouKeMallocEx(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
+KERNEL_EXPORT
 void* LouKeMallocVirt32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
@@ -214,6 +216,7 @@ void* LouKeMallocVirt32(
     return LouKeMallocExVirt32(AllocationSize, GetAlignmentBySize(AllocationSize), AllocationFlags);
 }
 
+KERNEL_EXPORT
 void* LouKeMallocExPhy32(
     size_t      AllocationSize,
     size_t      Alignment,
@@ -359,6 +362,7 @@ void LouKeFree(void* Address){
     while(1);
 }
 
+KERNEL_EXPORT
 void LouKeFreeVirt32(void* Address){
     if(!Address){
         return;
@@ -427,6 +431,7 @@ void LouKeFreeVirt32(void* Address){
     while(1);
 }
 
+KERNEL_EXPORT
 void LouKeFreePhy32(void* Address){
     if(!Address){
         return;
@@ -499,6 +504,7 @@ void LouKeFreePhy32(void* Address){
     while(1);
 }
 
+KERNEL_EXPORT
 SIZE LouKeGetAllocationSize(PVOID Address){
     if(!Address){
         return 0;
@@ -528,6 +534,7 @@ SIZE LouKeGetAllocationSize(PVOID Address){
     return 0x00;
 }
 
+KERNEL_EXPORT
 void* LouKeReallocEx(
     void* Address, 
     size_t Alignment, 
@@ -581,6 +588,7 @@ void* LouKeReallocEx(
     return 0x00;
 }
 
+KERNEL_EXPORT
 void* LouKeRealloc(
     void* Address, 
     size_t NewSize
@@ -592,6 +600,7 @@ void* LouKeRealloc(
     );
 }
 
+KERNEL_EXPORT
 void* LouKeReallocExPhy32(
     void* Address, 
     size_t Alignment, 
@@ -645,6 +654,7 @@ void* LouKeReallocExPhy32(
     return 0x00;
 }
 
+KERNEL_EXPORT
 void* LouKeReallocPhy32(
     void* Address, 
     size_t NewSize

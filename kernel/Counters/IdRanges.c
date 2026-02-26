@@ -1,6 +1,7 @@
 #include <LouAPI.h>
 
 
+KERNEL_EXPORT
 INTEGER 
 LouKeAcquireIdFromRange(
     PIDENTIFICATION_RANGE   IdRange,
@@ -24,6 +25,7 @@ LouKeAcquireIdFromRange(
     return Result;
 }
 
+KERNEL_EXPORT
 void LouKeReleaseIdFromRange(
     PIDENTIFICATION_RANGE IdRange,
     INTEGER Id
@@ -37,6 +39,7 @@ void LouKeReleaseIdFromRange(
     MutexUnlock(&IdRange->RangeLock);
 }
 
+KERNEL_EXPORT
 PIDENTIFICATION_RANGE
 LouKeCreateIdentificationRange(
     INTEGER RangeStart,

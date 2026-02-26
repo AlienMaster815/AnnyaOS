@@ -1,7 +1,8 @@
 # Compiler and flags
 CC = x86_64-w64-mingw32-g++
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings 
 
+LIBRARIES = -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc -L../UsbCore -lusbcore
 # Paths
 INCLUDES = -I../../../include
 
@@ -29,13 +30,14 @@ TARGET3 = EHCI.SYS
 all: $(TARGET1) $(TARGET2) $(TARGET3)
 
 $(TARGET1): $(SRC1)
-	$(CC) $(CFLAGS) -o $(TARGET1) $(SRC1) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET1) $(SRC1) $(LIBRARIES) $(INCLUDES)
+
 
 $(TARGET2): $(SRC2)
-	$(CC) $(CFLAGS) -o $(TARGET2) $(SRC2) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET2) $(SRC2) $(LIBRARIES) $(INCLUDES)
 
 $(TARGET3): $(SRC3)
-	$(CC) $(CFLAGS) -o $(TARGET3) $(SRC3) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET3) $(SRC3) $(LIBRARIES) $(INCLUDES)
 
 # Clean rule
 clean:

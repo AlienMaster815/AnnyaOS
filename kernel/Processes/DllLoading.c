@@ -94,8 +94,12 @@ DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObjec
     LouKeLoadCoffImageB((PVOID)Base, &TmpHandle->CfiObject, true);
     Entry = (DRIVER_MODULE_ENTRY)TmpHandle->CfiObject.Entry;
     TmpHandle->ModuleEntry = Entry;
-    TmpHandle->DriverObject = LouKeMalloc(DriverObjectSize, WRITEABLE_PAGE | PRESENT_PAGE);
-    *DriverObject = TmpHandle->DriverObject;
+    if(DriverObject && DriverObjectSize){
+        TmpHandle->DriverObject = LouKeMalloc(DriverObjectSize, WRITEABLE_PAGE | PRESENT_PAGE);
+        *DriverObject = TmpHandle->DriverObject;
+    }else if(DriverObject){
+        *DriverObject = 0x00;
+    }
     DriveHandlesCount++;
     return (DRIVER_MODULE_ENTRY)Entry;
 }

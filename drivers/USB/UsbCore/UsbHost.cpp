@@ -1,9 +1,9 @@
-#include <LouDDK.h>
-#include <usb.h>
+#include "UsbCore.h"
+
 
 //USB_HOST_DEVICE
 
-LOUDDK_API_ENTRY
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbAddHcd(
     PUSB_HOST_DEVICE    HostDevice
 ){  
@@ -31,6 +31,7 @@ LOUSTATUS LouKeUsbAddHcd(
     return STATUS_SUCCESS;
 }
 
+DRIVER_EXPORT
 LOUSTATUS LouKeUsbAddDeviceToHcd(
     PUSB_HOST_DEVICE        HostDevice,
     PUSB_FUNCTION_DEVICE    ParrentFunction,

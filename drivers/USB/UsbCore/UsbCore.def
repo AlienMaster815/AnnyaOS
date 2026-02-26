@@ -1,0 +1,7 @@
+LIBRARY USBCORE.SYS
+
+EXPORTS	
+    LouKeUsbAddHcd
+    LouKeUsbAddDeviceToHcd
+    LouKeUsbGetDescriptorRequest
+    LouKeUsbSetAddress

@@ -224,20 +224,21 @@ typedef struct _USB_HOST_IO_PACKET{
 
 #define UsbFunctionDeviceToHcd(pFunctionDevice) (((PUSB_TOPOLOGY_TREE)CONTAINER_OF(pFunctionDevice, USB_TOPOLOGY_TREE, FunctionDevice))->HostIdentifier)
 
+#ifndef _USBCORE_H
 
-
-#ifndef _KERNEL_MODULE_
-
+DRIVER_IMPORT
 LOUSTATUS LouKeUsbAddHcd(
     PUSB_HOST_DEVICE    HostDevice
 );
 
+DRIVER_IMPORT
 LOUSTATUS LouKeUsbAddDeviceToHcd(
     PUSB_HOST_DEVICE        HostDevice,
     PUSB_FUNCTION_DEVICE    ParrentFunction,
     PUSB_FUNCTION_DEVICE    DeviceDescription
 );
 
+DRIVER_IMPORT
 LOUSTATUS LouKeUsbGetDescriptorRequest(
     PUSB_FUNCTION_DEVICE    FunctionDevice, 
     PUSB_HOST_IO_PACKET     IoPacket,
@@ -248,58 +249,23 @@ LOUSTATUS LouKeUsbGetDescriptorRequest(
     PVOID                   Data
 );
 
+DRIVER_IMPORT
 LOUSTATUS LouKeUsbSetAddress(
     PUSB_FUNCTION_DEVICE    FunctionDevice, 
     PUSB_HOST_IO_PACKET     IoPacket,
     UINT8                   NewAddress
 );
 
+DRIVER_IMPORT
 LOUSTATUS LouKeUsbSetConfiguration(
     PUSB_FUNCTION_DEVICE    FunctionDevice, 
     PUSB_HOST_IO_PACKET     IoPacket,
     UINT8                   NewConfig
 );
 
-#else
+#endif //usbcore
 
-KERNEL_EXPORT
-LOUSTATUS LouKeUsbAddHcd(
-    PUSB_HOST_DEVICE    HostDevice
-);
 
-KERNEL_EXPORT
-LOUSTATUS LouKeUsbAddDeviceToHcd(
-    PUSB_HOST_DEVICE        HostDevice,
-    PUSB_FUNCTION_DEVICE    ParrentFunction,
-    PUSB_FUNCTION_DEVICE    DeviceDescription
-);
-
-KERNEL_EXPORT
-LOUSTATUS LouKeUsbGetDescriptorRequest(
-    PUSB_FUNCTION_DEVICE    FunctionDevice, 
-    PUSB_HOST_IO_PACKET     IoPacket,
-    UINT8                   DescriptorType,
-    UINT8                   DescriptorIndex,
-    UINT16                  Length,
-    UINT16                  LanguageId,
-    PVOID                   Data
-);
-
-KERNEL_EXPORT
-LOUSTATUS LouKeUsbSetAddress(
-    PUSB_FUNCTION_DEVICE    FunctionDevice, 
-    PUSB_HOST_IO_PACKET     IoPacket,
-    UINT8                   NewAddress
-);
-
-KERNEL_EXPORT
-LOUSTATUS LouKeUsbSetConfiguration(
-    PUSB_FUNCTION_DEVICE    FunctionDevice, 
-    PUSB_HOST_IO_PACKET     IoPacket,
-    UINT8                   NewConfig
-);
-
-#endif
 
 #else //USER
 

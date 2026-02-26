@@ -180,7 +180,6 @@ EXPORTS
     LouKeGenericAllocateFixedDmaPool
     LouKeFreeFromFixedPool
     LouKeAllocateUsbHostControllerDevice
-    LouKeUsbHcdPciProbe
     PciTestAtaConfigurationBits
     LouKeDmiGetFirstMatch
     snprintf
@@ -194,16 +193,11 @@ EXPORTS
     LouKeMallocPhy32
     LouKeHalGetPciIrqVector
     LouKeFreePhy32
-    LouKeUsbAddHcd
-    LouKeUsbAddDeviceToHcd
-    LouKeUsbGetDescriptorRequest
     LouKeSignalEvent
     LouKeWaitForEvent
     LouKeReportMutexBlock
     LouKeCreateIdentificationRange
     LouKeAcquireIdFromRange
-    LouKeUsbSetAddress
-    LouKeUsbSetConfiguration
     LouKeDeviceManagerGetAtaDevice
     LouKeAtaSendAtaIdentifyCommand
     LouKeAtaSendAtapiIdentifyCommand

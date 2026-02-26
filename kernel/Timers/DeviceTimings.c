@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-
+KERNEL_EXPORT
 LOUSTATUS 
 LouKeWaitForUlongRegisterCondition(
     PULONG  Mmio, 

@@ -84,7 +84,7 @@ uint64_t GetRamSize();
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
 void initializeInterruptRouter();
-void LouKeInitializeExportTable(PVOID KernelExportTable);
+void LouKeInitializeKernelRuntimeEnviornment();
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
 uint8_t GetTotalHardwareInterrupts();
@@ -323,7 +323,6 @@ LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 
 
-
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -363,13 +362,13 @@ KERNEL_ENTRY LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
+    LouKeInitializeKernelRuntimeEnviornment();
+
     LouKeInitializePciDevices();
 
     LouKeSantyCheckPciDevices();
 
     InitializeBootGraphics();
-
-    LouKeInitializeExportTable(KernelLoaderInfo.KernelExportTable);
 
     AdvancedLousineKernelInitialization();
 
