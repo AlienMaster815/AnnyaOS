@@ -43,7 +43,6 @@
         <FILETOCPY64>cp drivers/Input/Mouse/Ps2Mouse/PS2MOUSE.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PS2MOUSE.SYS</FILETOCPY64>     <!--PS2 Mouse-->
         <!--User Dynamic Loadable Libraries-->
         <FILETOCPY64>cp DLL/LouDLLs/User32/user32.dll ISO/ANNYA/SYSTEM64/USER32.DLL</FILETOCPY64>                           <!--USER Space Abstraction Layer-->
-        <FILETOCPY64>cp DLL/LouDLLs/GDI32/GDI32.DLL ISO/ANNYA/SYSTEM64/GDI32.DLL</FILETOCPY64>                              <!--GDI library-->
         <FILETOCPY64>cp DLL/LouDLLs/LouDLL/LouDll.dll ISO/ANNYA/SYSTEM64/LOUDLL.DLL</FILETOCPY64>                           <!--Lousine Kernel User Space Abstraction Layer-->
         <FILETOCPY64>cp DLL/3rdParty/zlib/zlib1.dll ISO/ANNYA/ZLIB1.DLL</FILETOCPY64>                                       <!--Mark Adler Zlib Userspace module for windows-->
         <FILETOCPY64>cp DLL/LouDLLs/Codecs/codecs.dll ISO/ANNYA/SYSTEM64/CODECS.DLL</FILETOCPY64>                           <!--Annya OS Usermode Codecs Subsystem-->
@@ -56,22 +55,21 @@
         <!--User Backgrounds-->
         <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
         <!--ANNYAEXP Assets-->
-        <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/Folder.png ISO/ANNYA/FOLDER.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/ANNA.ICO ISO/ANNYA/ANNA.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSCHIP.ICO ISO/ANNYA/AOSCHIP.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSHDD.ICO ISO/ANNYA/AOSHDD.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSMC.ICO ISO/ANNYA/AOSMC.ICO</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSODD.ICO ISO/ANNYA/AOSODD.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/AOSPROG.ICO ISO/ANNYA/AOSPROG.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/Folder.ICO ISO/ANNYA/FOLDER.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                              <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSMC.png ISO/ANNYA/AOSMC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSSET.png ISO/ANNYA/AOSSET.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/Start.png ISO/ANNYA/START.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/KING.ICO ISO/ANNYA/KING.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/NUCLEAR.ICO ISO/ANNYA/NUCLEAR.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/POWER.ICO ISO/ANNYA/POWER.ICO</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/TRASH.ICO ISO/ANNYA/TRASH.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/XBUTTON.png ISO/ANNYA/XBUTTON.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSPO.png ISO/ANNYA/AOSPO.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSPROG.png ISO/ANNYA/AOSPROG.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSODD.png ISO/ANNYA/AOSODD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSHDD.png ISO/ANNYA/AOSHDD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSETC.png ISO/ANNYA/AOSETC.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSEC.png ISO/ANNYA/AOSEC.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSCHIP.png ISO/ANNYA/AOSCHIP.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/AOSTCD.png ISO/ANNYA/AOSTCD.PNG</FILETOCPY64>                                          <!--Annya OS Asset-->
+        <!--ANNYAEXP Sounds-->
         <FILETOCPY64>cp Music/STARTUP.WAV ISO/ANNYA/STARTUP.WAV</FILETOCPY64>                                               <!--Annya OS Asset-->
         <FILETOCPY64>cp Music/SHUTDOWN.WAV ISO/ANNYA/SHUTDOWN.WAV</FILETOCPY64>                                                     <!--Annya OS Asset-->
         <!--System Fonts-->
