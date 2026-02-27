@@ -644,15 +644,6 @@ void InitializeJitlTables(){
     //SystemSections[0] = &AhciJitlDirectory;
 }
 
-LOUDDK_API_ENTRY void StartupConfigureExportTable(PVOID Table);
-
-LOUDDK_API_ENTRY void LouKeInitializeExportTable(PVOID KernelExportTable){
-
-    if(KernelExportTable){
-        StartupConfigureExportTable(KernelExportTable);
-    }
-    
-}
 
 PVOID 
 LouKeGetKulaEmulatedFunctionN(

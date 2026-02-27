@@ -51,6 +51,10 @@ PCOFF_IMAGE_HEADER UnpackKernelImage(
     if(ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress){
         KernelLoaderInfo.KernelExportTable = (PVOID)(ImageVBase + (UINT64)ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress);
     }
+    if(ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress){
+        KernelLoaderInfo.KernelImportTable = (PVOID)(ImageVBase + (UINT64)ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress);
+
+    }
 
     for(size_t i = 0; i < SectionCount; i++){
         if(ImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress){

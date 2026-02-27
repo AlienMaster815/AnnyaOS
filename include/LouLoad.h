@@ -82,6 +82,7 @@ typedef struct _LOUSINE_LOADER_INFO{
     LOUSINE_RAT_PARTITION       RatPartition;
     LOUSINE_FIRWARE_INFO        FirmwareInfo;
     PVOID                       KernelExportTable;
+    PVOID                       KernelImportTable;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
 #ifdef __cplusplus

@@ -3,6 +3,21 @@
 PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
 void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4);
 
+static inline uint8_t FilePathCountBackToDirectory(string FilePath){
+    uint16_t i = strlen(FilePath);
+    //i know this looks weird this is not
+    //my first implementation i couldent 
+    //make it work otherwise
+    while(*(char*)((uintptr_t)FilePath + i) != '/'){
+        i--;
+    }
+    return i + 1;
+}
+
+bool 
+LouKeLinkerCheckLibraryPresence(string SystemName);
+
+
 LOUSTATUS Coff64CommitSection(
     HANDLE      Section,
     UINT64      Pml4
@@ -232,8 +247,69 @@ LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
 
 //continue from here on with coff 32
 
+void StartupConfigureImportTable(PVOID Table){
+    if(!Table){
+        return;
+    }
+
+    PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)Table;
+    SIZE j = 0;
+    SIZE i = 0;
+    UINTPTR ModuleStart = KernelLoaderInfo.KernelBase;
+    uint64_t TableEntry;
+    uint64_t TableOffset;
+    string FunctionName;
+    string SYSName = 0;
+
+    while (ImportTable[j].ImportLookupRva) {
+        i = 0;
+        while ((TableEntry = *(uint64_t*)(uint8_t*)(uintptr_t)(ModuleStart + ImportTable[j].ImportLookupRva + i))){
+            TableOffset = (i + ImportTable[j].ImportAddressTableRva + ModuleStart);
+            FunctionName = (string)(TableEntry + ModuleStart + sizeof(uint16_t));
+            SYSName = (string)(ModuleStart + ImportTable[j].NameRva);
+            size_t koo = strlen(SYSName);
+            for(size_t foo = 0 ; foo < koo; foo++){
+                SYSName[foo] = toupper(SYSName[foo]);
+            }
+            //LouPrint("Function Requested:%s\n", FunctionName);
+
+            uint64_t AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName);
+            if (!AddressOfPeFunction){
+
+                if(LouKeLinkerCheckLibraryPresence(SYSName)){
+                    LouPrint("ERROR M:E is 0 :: %s:%s\n", SYSName, FunctionName);
+                }else{
+
+                    //TODO: Check Current Path
+
+                    if(LoadCoffLoadSupport("C:/ANNYA/SYSTEM64", SYSName)){
+                        if((AddressOfPeFunction = LouKeLinkerGetAddress(SYSName, FunctionName))){
+                            goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
+                        }
+                    }
+                }
+                LouPrint("HERE:%s\n", SYSName);
+                while(1);
+            }
+
+            _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL:
+
+            *(uint64_t*)TableOffset = AddressOfPeFunction;
+
+            i += sizeof(uint64_t);
+        }
+
+        j++;
+    }
+
+}
+
 void StartupConfigureExportTable(PVOID Table){
- 
+    
+    if(!Table){
+        return;
+    }
+
     PCFI_EXPORT_DIRECTORY_TABLE ExportTable = (PCFI_EXPORT_DIRECTORY_TABLE)Table;
     string FormalName = (string)(KernelLoaderInfo.KernelBase + ExportTable->NameRVA);
     size_t Koo = strlen(FormalName);
@@ -314,19 +390,6 @@ LOUSTATUS ConfigureExportTables(
     return STATUS_SUCCESS;
 }
 
-static inline uint8_t FilePathCountBackToDirectory(string FilePath){
-    uint16_t i = strlen(FilePath);
-    //i know this looks weird this is not
-    //my first implementation i couldent 
-    //make it work otherwise
-    while(*(char*)((uintptr_t)FilePath + i) != '/'){
-        i--;
-    }
-    return i + 1;
-}
-
-bool 
-LouKeLinkerCheckLibraryPresence(string SystemName);
 
 LOUSTATUS ConfigureImportTables(
     PCFI_OBJECT CfiObject,

@@ -1,16 +1,17 @@
 #include <LouAPI.h>
 
-void LouKeInitializeExportTable(PVOID KernelExportTable);
 DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
 void* LouKeGetBootDevice(size_t Index);
 
+void StartupConfigureExportTable(PVOID Table);
+void StartupConfigureImportTable(PVOID Table);
 
 void LouKeInitializeKernelRuntimeEnviornment(){
 
-    LouKeInitializeExportTable(KernelLoaderInfo.KernelExportTable);
+    StartupConfigureExportTable(KernelLoaderInfo.KernelExportTable);
 
     size_t StrLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x");
-    size_t TotalLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems0x\\                ");
+    size_t TotalLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x                ");
     LPWSTR SearchBuffer = LouKeMallocArray(WCHAR, TotalLen + 1, KERNEL_GENERIC_MEMORY);
     WORD LoadOrder;
     wcscpy(SearchBuffer, L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x");
@@ -50,8 +51,6 @@ void LouKeInitializeKernelRuntimeEnviornment(){
 
     LouKeFree(SearchBuffer);
 
-    //TODO: Parse kernel imports
-
-
+    StartupConfigureImportTable(KernelLoaderInfo.KernelImportTable);
 
 }
