@@ -1,6 +1,6 @@
 #define _KERNEL_MODULE_
-#ifndef _GDI_SYSTEM_H
-#define _GDI_SYSTEM_H
+#ifndef _DRSD_CORE_H
+#define _DRSD_CORE_H
 
 #include <LouDDK.h>
 

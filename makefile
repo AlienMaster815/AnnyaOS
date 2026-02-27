@@ -155,8 +155,9 @@ $(kernel_s_object_files): build/kernel/%.o : kernel/%.s
 clean:
 	rm -r build
 
+Libs: KernelModules UserSpace
 
-lou.exe: $(x86_64_object_files) $(kernel_object_files)
+lou.exe: Libs $(x86_64_object_files) $(kernel_object_files) 
 	mkdir -p dist/x86_64
 	$(LD) -n -o dist/x86_64/LOUOSKRNL.EXE $(x86_64_object_files)
 	rm -r build
@@ -238,7 +239,7 @@ UserSpace:
 #	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 #	$(MAKE) -C DLL/LouDLLs/GDI32 all
 
-annya.iso: release KernelModules UserSpace
+annya.iso: release 
 	rm -rf ISO
 	
 	$(MAKE) -C LouCoff clean

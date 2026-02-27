@@ -1,9 +1,9 @@
 INCLUDES = -I../../../include
-TARGET = GDI.SYS
-SRC = GdiMain.cpp
+TARGET = DRSDCORE.SYS
+SRC = DrsdCore.cpp
 
 CC = x86_64-w64-mingw32-g++
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=GdiSubsystemEntry
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreSubsystemEntry
 
 # Build rule
 all: $(TARGET)
