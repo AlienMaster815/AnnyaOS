@@ -2,50 +2,102 @@
 #ifndef _DRSD_H
 #define _DRSD_H
 
-// SPDX-License-Identifier: GPL-2.0-only
-/*
- * AnnyaOS DRSD (Display Rendering Subsystem)
+#ifndef _LIST_OBJECTS_
+#define _LIST_OBJECTS_
+typedef struct _LIST_LINK{
+    struct _LIST_LINK*  FLink;
+    struct _LIST_LINK*  BLink;
+}LIST_LINK, * PLIST_LINK;
+
+typedef struct _LIST_OBJECT{
+    mutex_t     Lock;
+    LIST_LINK   Head;
+    bool        Initialized;
+}LIST_OBJECT, * PLIST_OBJECT;
+#endif
+
+ /*
+ * Copyright (c) 2026 AnnyaOS
  *
- * This subsystem was inspired by the Linux DRM/KMS graphics stack architecture,
- * originally developed by contributors to the Linux kernel including:
- *
+ * This file is a derivative work based on Linux DRM,
+ * Copyright (c) 1994 - current
  *   - Dave Airlie          <airlied@linux.ie>
  *   - Daniel Vetter        <daniel.vetter@ffwll.ch>
  *   - Thomas Hellstrom     <thomas@vmware.com>
  *   - Alex Deucher         <alexander.deucher@amd.com>
  *   - Michel Dänzer        <michel@daenzer.net>
  *   - The X.Org / Mesa / DRM community
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License.
  *
- * This implementation is an original independent design under the DRSD architecture
- * for the Lousine Kernel. While its conceptual structure resembles Linux DRM/KMS
- * for hardware compatibility reasons (framebuffers, CRTCs, modesetting, planes,
- * scanout buffers), no Linux source code was copied or reused.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- * All code was written from scratch for AnnyaOS. Behavior was based on:
- *
- *   - VESA and PCI/PCIe graphics initialization standards
- *   - AMD, Intel, and NVIDIA public GPU documentation
- *   - Linux DRM documentation (for behavioral understanding only)
- *   - Observed GPU hardware behavior during development
- *
- * Copyright (C) 2025 Tyler Grenier (AlienMaster815)
- * AnnyaOS Project — https://github.com/AlienMaster815/AnnyaOS
- *
- * Licensed under GPL-2.0-only. See COPYING for details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
+#ifdef _USER_MODE_CODE_
+#include <Annya.h>
+#else
 #ifdef __cplusplus
 #include <LouDDK.h>
-#include <NtAPI.h>
 extern "C" {
 #else 
 #include <LouAPI.h>
 #endif
+#endif
 
-/* Clean-room reimplementation of a DRM-like display subsystem.
- * No Linux kernel code has been copied. Inspired by public concepts only.
-*/
+#ifndef _LOUQ_WORK_S
+#define _LOUQ_WORK_S
+typedef struct _LOUQ_WORK{
+    ListHeader          CurrentWorkList;
+    PVOID               Data;//TODO change to ATOMIC64
+    DELAYED_FUNCTION    Work;
+}LOUQ_WORK, * PLOUQ_WORK;
+#endif
+
+
+#ifndef _KERNEL_REFERENCE
+#define _KERNEL_REFERENCE
+typedef struct _KERNEL_REFERENCE{
+    mutex_t     IncrementLock;
+    mutex_t     RaceLock;
+    atomic_t    ReferenceCounter;
+    //TODO: Add variables as needed
+}KERNEL_REFERENCE, * PKERNEL_REFERENCE;
+
+static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
+    if(MutexIsLocked(&KRef->IncrementLock)){
+        return false;
+    }
+    MutexLock(&KRef->RaceLock);
+    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
+    Tmp++;
+    LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
+    MutexUnlock(&KRef->RaceLock);
+    return true;
+}
+
+static inline void LouKeReleaseReference(PKERNEL_REFERENCE KRef){
+    MutexLock(&KRef->RaceLock);
+    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
+    Tmp--;
+    LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
+    MutexUnlock(&KRef->RaceLock);
+}
+
+static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
+    MutexLock(&KRef->RaceLock);
+    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
+    MutexUnlock(&KRef->RaceLock);
+    return Tmp;
+}
+#endif
 
 #define DRSD_ROTATION_MODE_0 1
 
@@ -183,7 +235,7 @@ typedef struct _DRSD_MODE_OBJECT{
     uint32_t                            Identification;
     uint32_t                            ModeType;
     struct _DRSD_OBJECT_PROPERTIES*     Properties;
-    atomic_t                            ReferenceCount;
+    KERNEL_REFERENCE                    ReferenceCount;
     void                                (*FreeCb)(int Reference);
 }DRSD_MODE_OBJECT, * PDRSD_MODE_OBJECT;
 
@@ -606,13 +658,64 @@ typedef struct _DRSD_CONNECTOR_ASSIST_CALLBACKS{
     //TODO  
 }DRSD_CONNECTOR_ASSIST_CALLBACKS, * PDRSD_CONNECTOR_ASSIST_CALLBACKS;
 
+#define DRSD_DISPLAY_MODE_LENGTH    32
+
+typedef enum _DRSD_PANEL_ORIENTATION{
+	DRSD_MODE_PANEL_ORIENTATION_UNKNOWN = -1,
+	DRSD_MODE_PANEL_ORIENTATION_NORMAL = 0,
+	DRSD_MODE_PANEL_ORIENTATION_BOTTOM_UP,
+	DRSD_MODE_PANEL_ORIENTATION_LEFT_UP,
+	DRSD_MODE_PANEL_ORIENTATION_RIGHT_UP,
+}DRSD_PANEL_ORIENTATION;
+
+typedef struct _DRSD_CONNECTOR_TV_MARGINS{
+    UINT    Bottom;
+    UINT    Left;
+    UINT    Right;
+    UINT    Top;
+}DRSD_CONNECTOR_TV_MARGINS, * PDRSD_CONNECTOR_TV_MARGINS;
+
+typedef enum _DRSD_CONNECTOR_TV_MODE{
+	DRSD_MODE_TV_MODE_NTSC = 0,
+	DRSD_MODE_TV_MODE_NTSC_443,
+	DRSD_MODE_TV_MODE_NTSC_J,
+	DRSD_MODE_TV_MODE_PAL,
+	DRSD_MODE_TV_MODE_PAL_M,
+	DRSD_MODE_TV_MODE_PAL_N,
+	DRSD_MODE_TV_MODE_SECAM,
+	DRSD_MODE_TV_MODE_MONOCHROME,
+	DRSD_MODE_TV_MODE_MAX,
+}DRSD_CONNECTOR_TV_MODE;
+
+typedef struct _DRSD_CMDLINE_MODE{
+    CHAR                        Name[DRSD_DISPLAY_MODE_LENGTH];
+    BOOL                        Specified;
+    BOOL                        RefreshSpecified;
+    BOOL                        BppSpecified;
+    UINT                        PixelClock;
+    INTEGER                     Xres;
+    INTEGER                     YRes;
+    INTEGER                     Bpp;
+    INTEGER                     Refresh;
+    BOOL                        ReducedBlanking;
+    BOOL                        Interlaced;
+    BOOL                        Cvt;
+    BOOL                        Margins;
+    DRSD_CONNECTOR_FORCE        Force;
+    UINT                        RotationReflection;
+    DRSD_PANEL_ORIENTATION      PanelOrientation;
+    DRSD_CONNECTOR_TV_MARGINS   TvMargins;
+    DRSD_CONNECTOR_TV_MODE      TvMode;
+    BOOL                        TvModeSpecified;
+}DRSD_CMDLINE_MODE, * PDRSD_CMDLINE_MODE;
+
 typedef struct _DRSD_CONNECTOR{
     ListHeader                          Peers;
     struct _DRSD_DEVICE*                Device;
     void*                               PrivateData;
     void*                               DownwireDevices;//some setups have smart systems down the wire
     ListHeader                          GlobalConectorList;
-    PDRSD_MODE_OBJECT                   Base;
+    DRSD_MODE_OBJECT                    Base;
     string                              Name;
     mutex_t                             ConnectorLock;
     size_t                              Index;
@@ -626,6 +729,7 @@ typedef struct _DRSD_CONNECTOR{
     ListHeader                          SupportedModes;
     DRSD_CONNECTOR_STATUS               ConnectorStatus;
     ListHeader                          ProbedModes;//these modes may burn out things so carefull implementing this in user
+    DRSD_CMDLINE_MODE                   CommandLineMode;
     DRSD_DISPLAY_INFORMATION            DisplayInformation;
     PDRSD_CONNECTOR_CALLBACKS           Callbacks;
     PDRSD_PROPERTY_BLOB                 EdidPropertiesBlob;
@@ -685,7 +789,7 @@ typedef struct _EDID_QUIRK{
 #define DRSD_CONNECTOR_MODE_UNKOWN          0
 #define DRSD_CONNECTOR_MODE_VGA             1
 #define DRSD_CONNECTOR_MODE_DVII            2
-#define DRSD_CONNECTOR_MODE_DBID            3
+#define DRSD_CONNECTOR_MODE_DVID            3
 #define DRSD_CONNECTOR_MODE_DVIA            4
 #define DRSD_CONNECTOR_MODE_COMPOSITE       5
 #define DRSD_CONNECTOR_MODE_SVIDEO          6
@@ -832,7 +936,11 @@ typedef struct _DRSD_VBLANK_CRTC{
 typedef struct _DRSD_MODE_CONFIGURATION{
     mutex_t                                 ConfigLock;
     mutex_t                                 ConnectionMutex;
+    spinlock_t                              ConnectorListLock;
+    mutex_t                                 IdLock;
     PDRSD_MODE_CONFIGURATION_CALLBACKS      Callbacks;
+    LIST_OBJECT                             FreeList;         
+    LOUQ_WORK                               ConnectorFreeWork;
     size_t                                  MinimalWidth;
     size_t                                  MinimalHeight;
     size_t                                  MaximumWidth;
@@ -1067,7 +1175,7 @@ typedef struct _DRSD_LAYERED_CLIP{
 }DRSD_LAYERED_CLIP, * PDRSD_LAYERED_CLIP;
 
 
-
+#ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_
 
 void LouKeDestroyClip(PDRSD_CLIP Clip);
@@ -1558,7 +1666,7 @@ KERNEL_EXPORT PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState,
 KERNEL_EXPORT void LouKeDrsdHandleConflictingDevices(struct _PCI_DEVICE_OBJECT* PDEV);
 
 KERNEL_EXPORT void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
-
+#endif
 #endif
 #endif
 #endif 

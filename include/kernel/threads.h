@@ -44,6 +44,7 @@ KERNEL_EXPORT uint64_t LouKeGetThreadIdentification();
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 #define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
+
 static inline void LouKeSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);
 }

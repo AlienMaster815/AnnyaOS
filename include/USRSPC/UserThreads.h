@@ -12,7 +12,10 @@ extern "C"{
 
 static inline void LouKeSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);
-    LouKeMemoryBarrier();
+}
+
+static inline int LouKeGetAtomic(atomic_t* A){
+    return atomic_read(A);
 }
 
 typedef atomic_t* p_atomic_t;

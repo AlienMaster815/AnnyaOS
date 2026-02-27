@@ -604,6 +604,7 @@ strcmp (
  *
  ******************************************************************************/
 
+__declspec(dllexport)
 char *
 strchr (
     const char              *String,

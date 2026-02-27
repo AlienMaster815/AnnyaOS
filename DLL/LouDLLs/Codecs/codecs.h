@@ -4,7 +4,7 @@
 #define _CODECS_DEF_H
 
 #include <Annya.h>
-#include <USRSPC/DRSD.h>
+#include <kernel/DRSD.h>
 #include "CodecsTypes.h"
 #define CODECS_API __declspec(dllexport)
 

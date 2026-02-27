@@ -56,12 +56,13 @@ string LouKeCombineStr(string String1, string String2);
 string LouKeAddFileToPath(string Path, string FileName);
 string LouKeAddFileToPath_s(string Path, size_t PathLength, string FileName, size_t FileNameLength);
 
+
+
 #define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
 
 #endif
 #else
 #include <LouDDK.h>
-#ifndef _KERNEL_MODULE_
 KERNEL_EXPORT void LouKeStrLowerToUpper(string Format);
 KERNEL_EXPORT void* memcpy(void* destination, const void* source, size_t num);
 KERNEL_EXPORT int strncmp(const char* str1, const char* str2, size_t n);
@@ -90,7 +91,7 @@ KERNEL_EXPORT string LouKeCombineStr_s(string String1, size_t Str1Size, string S
 KERNEL_EXPORT string LouKeCombineStr(string String1, string String2);
 KERNEL_EXPORT string LouKeAddFileToPath(string Path, string FileName);
 KERNEL_EXPORT string LouKeAddFileToPath_s(string Path, size_t PathLength, string FileName, size_t FileNameLength);
-#endif
+KERNEL_EXPORT char *strchr(const char *String, int ch);
 #endif
 
 #define CHAR_HEIGHT 16

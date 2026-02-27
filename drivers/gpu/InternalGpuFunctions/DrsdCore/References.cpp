@@ -35,10 +35,9 @@
 
 void DrsdModeObjectObjectFree(PDRSD_MODE_OBJECT Object){
     if(Object->FreeCb){ 
-        int Tmp = LouKeGetAtomic(&Object->ReferenceCount); 
+        int Tmp = LouKeGetReferenceCount(&Object->ReferenceCount); 
         if(Tmp){
-            Tmp--;
-            LouKeSetAtomic(&Object->ReferenceCount, Tmp);
+            LouKeReleaseReference(&Object->ReferenceCount);
             Object->FreeCb(Tmp);
         }       
     }

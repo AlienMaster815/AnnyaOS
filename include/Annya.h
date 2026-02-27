@@ -586,6 +586,15 @@ typedef void* HINSTANCE;
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 #define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
+struct _LOUQ_WORK;
+
+typedef struct _DELAYED_FUNCTION{
+    uint32_t    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
+    void*       WorkData;
+}DELAYED_FUNCTION, * PDELAYED_FUNCTION;
+
+
+
 #ifndef _ANNYA_DLL_CALL_REASONS
 #define _ANNYA_DLL_CALL_REASONS
     #define DLL_PROCESS_ATTACH 1

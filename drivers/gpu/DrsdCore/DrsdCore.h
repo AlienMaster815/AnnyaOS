@@ -4,5 +4,10 @@
 
 #include <LouDDK.h>
 
+#include "DrsdCrtcInternals.h"
+#include "DrsdCache.h"
+#include "DrsdModes.h"
+
+
 
 #endif

@@ -205,3 +205,4 @@ EXPORTS
     outsw
     LouKeHalFreePciIrqVectors
     DrsdModeConfigurationCleanup
+    strchr

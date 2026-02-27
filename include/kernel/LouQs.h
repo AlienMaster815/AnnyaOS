@@ -24,14 +24,14 @@ typedef enum{
     DRIVER_WORK = 3,
 }WORK_QUEUE_PRIORITY;
 
+#ifndef _LOUQ_WORK_S
+#define _LOUQ_WORK_S
 typedef struct _LOUQ_WORK{
     ListHeader          CurrentWorkList;
-    LOUQ                LouQHeader;
+    PVOID               Data;//TODO change to ATOMIC64
     DELAYED_FUNCTION    Work;
-    BOOL                TimedQueue;
-    BOOL                DelayedQueue;
-    TIME_T              TimeCondition;
 }LOUQ_WORK, * PLOUQ_WORK;
+#endif
 
 typedef struct _LOUQ_WORK_QUEUE{
     ListHeader          Peers;

@@ -1,0 +1,101 @@
+ /*
+ * Copyright (c) 2026 AnnyaOS
+ *
+ * This file is a derivative work based on Linux DRM,
+ * Copyright (c) 1994 - current
+ *   - Dave Airlie          <airlied@linux.ie>
+ *   - Daniel Vetter        <daniel.vetter@ffwll.ch>
+ *   - Thomas Hellstrom     <thomas@vmware.com>
+ *   - Alex Deucher         <alexander.deucher@amd.com>
+ *   - Michel Dänzer        <michel@daenzer.net>
+ *   - The X.Org / Mesa / DRM community
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "DrsdCore.h"
+
+UNUSED static mutex_t ConnectorListLock = {0};
+UNUSED static LIST_OBJECT ConnectorList = {0};
+
+typedef struct _DRSD_CONNECTOR_PROP_ENUM_LIST{
+    INTEGER     Type;
+    LOUSTR      Name;
+    LIST_OBJECT List; //TODO Replace With XARRAY
+}DRSD_CONNECTOR_PROP_ENUM_LIST, * PDRSD_CONNECTOR_PROP_ENUM_LIST;
+
+UNUSED DRSD_CONNECTOR_PROP_ENUM_LIST DrsdConnectorEnumList[21] = {
+    {DRSD_CONNECTOR_MODE_UNKOWN, "Unkown"},
+    {DRSD_CONNECTOR_MODE_VGA, "VGA"},
+    {DRSD_CONNECTOR_MODE_DVII, "DVI-I"},
+    {DRSD_CONNECTOR_MODE_DVID, "DVI-D"},
+    {DRSD_CONNECTOR_MODE_DVIA, "DVI-A"},
+    {DRSD_CONNECTOR_MODE_COMPOSITE, "Composite"},
+    {DRSD_CONNECTOR_MODE_SVIDEO, "SVIDEO"},
+    {DRSD_CONNECTOR_MODE_LVDS, "LVDS"},
+    {DRSD_CONNECTOR_MODE_COMPONENT, "Component"},
+    {DRSD_CONNECTOR_MODE_9PIN_DIN, "DIN"},
+    {DRSD_CONNECTOR_MODE_DISPLAY_PORT, "DP"},
+    {DRSD_CONNECTOR_MODE_HDMI_A, "HDMI-A"},
+    {DRSD_CONNECTOR_MODE_HDMI_B, "HDMI-B"},
+    {DRSD_CONNECTOR_MODE_TV, "TV"},
+    {DRSD_CONNECTOR_MODE_EDP, "EDP"},
+    {DRSD_CONNECTOR_MODE_VIRTUAL, "Virtual"},
+    {DRSD_CONNECTOR_MODE_DSI, "DSI"},
+    {DRSD_CONNECTOR_MODE_DPI, "DPI"},
+    {DRSD_CONNECTOR_MODE_WRITEBACK, "WriteBack"},
+    {DRSD_CONNECTOR_MODE_SPI, "SPI"},
+    {DRSD_CONNECTOR_MODE_USB, "USB"},
+};
+
+void DrsdConnectorIdaInitialize(){
+    //TODO: Initialize Each XArray List
+}
+
+void DrsdConnectorIdaDestroy(){
+    //TODO: Destroy Each XArray
+}
+
+DRIVER_EXPORT
+LOUSTR DrsdGetConnectorTypeName(UINT Type){
+    if(Type >= 21){
+        return 0x00;
+    }
+
+    return DrsdConnectorEnumList[Type].Name;
+}
+
+UNUSED static void DrsdConnectorGetCommandLineMode(PDRSD_CONNECTOR Connector){
+    return;
+}
+
+static void DrsdConnectorFree(PKERNEL_REFERENCE Ref){
+    PDRSD_CONNECTOR Connector = CONTAINER_OF(Ref, DRSD_CONNECTOR, Base.ReferenceCount);
+    PDRSD_DEVICE Device = Connector->Device;
+    DrsdUnregisterModeObject(Device, &Connector->Base);
+    Connector->Callbacks->DestroyConnector(Connector);
+}
+
+void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
+    PDRSD_CONNECTOR Connector, N;
+    PDRSD_DEVICE Device = CONTAINER_OF(Work, DRSD_DEVICE, ModeConfiguration.ConnectorFreeWork);
+    PDRSD_MODE_CONFIGURATION ModeConfig = &Device->ModeConfiguration;
+    LouKIRQL Irql;
+
+    LouKeAcquireSpinLock(&ModeConfig->ConnectorListLock, &Irql);
+
+    LouKeReleaseSpinLock(&ModeConfig->ConnectorListLock, &Irql);
+
+
+
+}

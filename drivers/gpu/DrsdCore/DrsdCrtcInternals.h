@@ -23,15 +23,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _DRSD_CRTC_INTERNALS_H
+#define _DRSD_CRTC_INTERNALS_H
+
 #include "DrsdCore.h"
 
-KERNEL_ENTRY NTSTATUS DrsdCoreSubsystemEntry(){
+void        DrsdConnectorIdaInitialize();
+void        DrsdConnectorIdaDestroy();
+extern "C"  LOUSTR DrsdGetConnectorTypeName(UINT Type);
+void        DrsdUnregisterModeObject(PDRSD_DEVICE Device, PDRSD_MODE_OBJECT Object);
 
-    NTSTATUS Result = STATUS_SUCCESS;
-
-    DrsdConnectorIdaInitialize();
-
-    //TODO:Finish this
-    
-    return Result;
-}
+#endif

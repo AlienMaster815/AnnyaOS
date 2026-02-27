@@ -1,11 +1,15 @@
 #ifndef _KERNEL_OBJECTS_H
 #define _KERNEL_OBJECTS_H
 
+#ifndef _USER_MODE_CODE_
 #ifndef __cplusplus
 #include <LouAPI.h>
 #else
 #include <LouDDK.h>
 extern "C"{
+#endif
+#else
+#include <Annya.h>
 #endif
 
 #define GetObjectItemOffset(Object, Item) ((SIZE)&((Object*)0x00)->Item)
@@ -42,6 +46,8 @@ LouKeAcquireIdFromRange(
 
 
 
+#ifndef _KERNEL_REFERENCE
+#define _KERNEL_REFERENCE
 typedef struct _KERNEL_REFERENCE{
     mutex_t     IncrementLock;
     mutex_t     RaceLock;
@@ -75,6 +81,7 @@ static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
     MutexUnlock(&KRef->RaceLock);
     return Tmp;
 }
+#endif
 
 LOUSTATUS 
 LouKeReadRegistryValue(
