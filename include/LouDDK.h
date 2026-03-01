@@ -1,34 +1,11 @@
 #ifndef _LOUDDK_H
 #define _LOUDDK_H
 
+#include <Modulation.h>
+
 #ifdef __cplusplus
 extern "C" {
-#define DRIVER_IMPORT extern "C" __declspec(dllimport)
-#define LOUAPI extern "C"
-#else
-#define DRIVER_IMPORT __declspec(dllimport)
-#define LOUAPI 
 #endif
-
-#ifndef _KERNEL_MODULE_
-#ifdef __cplusplus
-#define KERNEL_EXPORT extern "C" __declspec(dllexport)
-#define DRIVER_EXPORT extern "C" __declspec(dllimport)
-#else
-#define KERNEL_EXPORT __declspec(dllexport)
-#define DRIVER_EXPORT __declspec(dllimport)
-#endif
-#else
-#ifdef __cplusplus
-#define KERNEL_EXPORT extern "C" __declspec(dllimport)
-#define DRIVER_EXPORT extern "C" __declspec(dllexport)
-#else
-#define KERNEL_EXPORT __declspec(dllimport)
-#define DRIVER_EXPORT __declspec(dllexport)
-#endif
-#endif
-
-
 
 #define WINAPI __stdcall
 
@@ -45,6 +22,7 @@ extern "C" {
 #define NAKED_FUNCTION __attribute__((naked))
 
 #include <stdio.h>
+#include <string.h>
 
 
 
@@ -95,8 +73,6 @@ typedef void* EventHandle;
 //define common used cpp functions with drivers
 #include <drivers/Lou_drivers/io.h>
 #include <stddef.h>
-#include <cstdint.h>
-#include <string.h>
 #include <drivers/Vendors/VendorsDictionary.h>
 #include <kernel/memmory.h>
 #include <kernel/Binarys.h>
@@ -238,13 +214,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #ifndef _KERNEL_MODULE_
 
-LOUAPI uint8_t inb(uint64_t port);
-LOUAPI void outb(uint64_t port, uint8_t data);
-LOUAPI uint16_t inw(uint64_t port);
-LOUAPI void outw(uint64_t port, uint16_t data);
-LOUAPI uint32_t inl(uint64_t port);
-LOUAPI void outl(uint64_t port, uint32_t data);
-LOUAPI void outbSlow(uint64_t port,uint8_t data);
+
 //MEMMORY ALLOCATION
 LOUAPI void LouPanic(char*);
 //STD Library
@@ -344,13 +314,8 @@ KERNEL_EXPORT int strcmp(const char* str1, const char* str2);
 KERNEL_EXPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_EXPORT void sleep(uint64_t Time);
-KERNEL_EXPORT void outw(uint64_t port, uint16_t data);
-KERNEL_EXPORT uint16_t inw(uint64_t port64);
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
-KERNEL_EXPORT uint32_t inl(uint64_t Port64);
-KERNEL_EXPORT uint32_t outl(uint64_t Port64, uint32_t Data);
-KERNEL_EXPORT uint8_t inb(uint64_t port);
-KERNEL_EXPORT void outb(uint64_t port, uint8_t data);
+
 KERNEL_EXPORT
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);

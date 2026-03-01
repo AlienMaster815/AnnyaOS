@@ -1,18 +1,6 @@
-#include <LouAPI.h>
-
 #include <cstdint.h>
+#include <Time.h>
 
-#ifndef _TIME_T_
-#define _TIME_T_
-typedef struct _TIME_T {
-    uint8_t Month;
-    uint8_t Day;
-    uint8_t Hour;
-    uint8_t Minute;
-    uint8_t Second;
-    uint16_t MilliSeconds;
-} TIME_T, *PTIME_T;
-#endif
 
 static inline uint8_t ReadRtcRegister(uint8_t reg) {
     outb(0x70, reg);    // Select RTC register

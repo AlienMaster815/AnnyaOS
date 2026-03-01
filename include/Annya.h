@@ -1,12 +1,7 @@
 #ifndef _ANNYA_API_H
 #define _ANNYA_API_H
 
-
-#ifdef __cplusplus
-#define LOUAPI extern "C"
-#else
-#define LOUAPI 
-#endif
+#include <Modulation.h>
 
 #define WINAPI __stdcall
 
@@ -18,6 +13,7 @@
 #include <kernel/loustatus.h>
 
 #include <stdio.h>
+#include <string.h>
 
 
 
@@ -46,7 +42,6 @@
 #include <stdbool.h>
 #include <USRSPC/UserThreads.h>
 #include <kernel/LKPCB.h>
-typedef char* string;
 
 
 #ifdef __cplusplus
