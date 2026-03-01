@@ -1,5 +1,3 @@
-;x86_64-w64-mingw32-dlltool --input-def LouDll.def --output-lib LouDll.lib
-
 LIBRARY ntdll.dll
 
 EXPORTS	

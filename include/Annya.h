@@ -5,9 +5,9 @@
 
 #define _USER_MODE_CODE_
 
+#include <cstdint.h>
 #include <WinAPI/Win32/winternl.h>
 
-#include <cstdint.h>
 #include <stdalign.h>
 
 
@@ -30,7 +30,6 @@
 
 //#include "USRSPC/API/WinAPItypes.h"
 #include "kernel/SystemCalls.h"
-#include <stdint.h>
 #include <stdbool.h>
 #include <USRSPC/UserThreads.h>
 #include <kernel/LKPCB.h>

@@ -933,13 +933,7 @@ typedef DWORD FLONG;
 #define MAXIMUM_PROCESSORS       32
 #endif
 
-#ifndef _SIZE_T_
-#define _SIZE_T_
-#ifndef _USER_MODE_CODE_
-#include <cstddef>
-#endif
-#define SIZE_T size_t
-#endif
+#include <cstdint.h>
 
 typedef struct _MEMORY_BASIC_INFORMATION
 {

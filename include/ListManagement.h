@@ -1,19 +1,5 @@
 #ifndef _LIST_MANAGEMENT_H
 #define _LIST_MANAGEMENT_H
- 
-#include <stdbool.h>
-#include <kernel/atomic.h>
-
-#ifndef _MUTEX_STRUCTURE_DEFINITION
-#define _MUTEX_STRUCTURE_DEFINITION
-typedef struct _mutex_t{
-    atomic_t locked;
-    atomic_t Handle;
-    atomic_t PrivaledgeLevel;
-    atomic_t ThreadOwnerLow;
-    atomic_t ThreadOwnerHigh;
-} mutex_t;
-#endif
 
 #ifndef __cplusplus
 #include <LouAPI.h>

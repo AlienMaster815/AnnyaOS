@@ -93,7 +93,7 @@ void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
     LouKIRQL Irql;
 
     LouKeAcquireSpinLock(&ModeConfig->ConnectorListLock, &Irql);
-
+    //finish this
     LouKeReleaseSpinLock(&ModeConfig->ConnectorListLock, &Irql);
 
 

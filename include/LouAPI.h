@@ -1,22 +1,43 @@
+#ifndef _LOUDDK_H
+#define _LOUDDK_H
 
-#ifndef LOUAPI_H
-#define LOUAPI_H
+#ifdef __cplusplus
+extern "C" {
+#define DRIVER_IMPORT extern "C" __declspec(dllimport)
+#else
+#define DRIVER_IMPORT __declspec(dllimport)
+#endif
 
 #ifndef _KERNEL_MODULE_
+#ifdef __cplusplus
+#define KERNEL_EXPORT extern "C" __declspec(dllexport)
+#define DRIVER_EXPORT extern "C" __declspec(dllimport)
+#else
 #define KERNEL_EXPORT __declspec(dllexport)
+#define DRIVER_EXPORT __declspec(dllimport)
+#endif
+#else
+#ifdef __cplusplus
+#define KERNEL_EXPORT extern "C" __declspec(dllimport)
+#define DRIVER_EXPORT extern "C" __declspec(dllexport)
 #else
 #define KERNEL_EXPORT __declspec(dllimport)
+#define DRIVER_EXPORT __declspec(dllexport)
 #endif
+#endif
+
 
 #define WINAPI __stdcall
 
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 
 //Include API Headers
-#include <ListManagement.h>
 #include <cstdint.h>
-#include <Helpers.h>
+#include <drivers/Lou_drivers/PciIds.h>
 #include <stdlib.h>
+
+
+
 #include <stdint.h>
 #include <stat.h>
 #include <stdio.h>
@@ -41,6 +62,7 @@
 //#include <Hal.h>
 #include <math.h>
 #include <kernel/threads.h>
+#include <ListManagement.h>
 #include <kernel/LouQs.h>
 #include <drivers/Scsi/Sam5.h>
 #include "drivers/Ata/ata.h"
@@ -151,5 +173,10 @@ uint64_t LouKeLinkerGetAddress(
 
 #else //Kernel Module
 
+#endif
+
+
+#ifdef __cplusplus
+}
 #endif
 #endif

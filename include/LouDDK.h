@@ -1,17 +1,50 @@
 #ifndef _LOUDDK_H
 #define _LOUDDK_H
 
-#ifndef _KERNEL_MODULE_
-#define KERNEL_EXPORT extern "C" __declspec(dllexport)
+#ifdef __cplusplus
+extern "C" {
+#define DRIVER_IMPORT extern "C" __declspec(dllimport)
 #else
-#define KERNEL_EXPORT extern "C" __declspec(dllimport)
+#define DRIVER_IMPORT __declspec(dllimport)
 #endif
+
+#ifndef _KERNEL_MODULE_
+#ifdef __cplusplus
+#define KERNEL_EXPORT extern "C" __declspec(dllexport)
+#define DRIVER_EXPORT extern "C" __declspec(dllimport)
+#else
+#define KERNEL_EXPORT __declspec(dllexport)
+#define DRIVER_EXPORT __declspec(dllimport)
+#endif
+#else
+#ifdef __cplusplus
+#define KERNEL_EXPORT extern "C" __declspec(dllimport)
+#define DRIVER_EXPORT extern "C" __declspec(dllexport)
+#else
+#define KERNEL_EXPORT __declspec(dllimport)
+#define DRIVER_EXPORT __declspec(dllexport)
+#endif
+#endif
+
+
 
 #define WINAPI __stdcall
 
-#include <cstdint.h>
-
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+
+//Include API Headers
+#include <cstdint.h>
+#include <drivers/Lou_drivers/PciIds.h>
+#include <stdlib.h>
+
+
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #ifndef _GUID_TYPE
 #define _GUID_TYPE
@@ -21,7 +54,6 @@ typedef struct _GUID {
 #endif
 
 
-#include <drivers/Lou_drivers/PciIds.h>
 
 #define SYSV_CONVENTION __attribute__((sysv_abi))
 #define NAKED_FUNCTION __attribute__((naked))
@@ -56,14 +88,9 @@ typedef void* EventHandle;
 typedef void* PVOID;
 #endif
 
-#ifndef _KERNEL_EXPORTS_
-#define _KERNEL_EXPORTS_
-#define KERNEL_EXPORT extern "C" __declspec(dllimport)
-#endif
+
 #endif
 
-#define DRIVER_EXPORT extern "C" __declspec(dllexport)
-#define DRIVER_IMPORT extern "C" __declspec(dllimport)
 
 #define LOUDDK_API_ENTRY extern "C"
 
@@ -156,7 +183,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #endif
 
 #include <ListManagement.h>
-#include <Helpers.h>
 #include <KernelAPI/DriverAPI.h> 
 #include <drivers/Lou_drivers/hardrive.h> 
 #include <drivers/Lou_drivers/storage_struct.h>
