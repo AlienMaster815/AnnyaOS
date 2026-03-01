@@ -201,7 +201,7 @@ void* align_memory(void* ptr, size_t alignment);
 #include <LouDDK.h>
 
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY void MapIoMemory(
+LOUAPI void MapIoMemory(
     uint64_t Address,
     uint64_t MapSize
 );
@@ -216,20 +216,20 @@ LOUDDK_API_ENTRY void MapIoMemory(
 
 
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-LOUDDK_API_ENTRY void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
-LOUDDK_API_ENTRY void LouFree(uint8_t* Addr);
-LOUDDK_API_ENTRY LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
-LOUDDK_API_ENTRY bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
-LOUDDK_API_ENTRY void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
-LOUDDK_API_ENTRY void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
-LOUDDK_API_ENTRY void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
-LOUDDK_API_ENTRY void* LouGeneralAllocateMemory(UINT64 Size);
+LOUAPI bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
+LOUAPI void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
+LOUAPI void LouFree(uint8_t* Addr);
+LOUAPI LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
+LOUAPI bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
+LOUAPI void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
+LOUAPI void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
+LOUAPI void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
+LOUAPI void* LouGeneralAllocateMemory(UINT64 Size);
 KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
-LOUDDK_API_ENTRY bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
-LOUDDK_API_ENTRY void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
-LOUDDK_API_ENTRY bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
-LOUDDK_API_ENTRY bool EnforceSystemMemoryMap(
+LOUAPI bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
+LOUAPI void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
+LOUAPI bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
+LOUAPI bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 );
@@ -243,42 +243,42 @@ KERNEL_EXPORT void* LouKeMallocEx(
     uint64_t    AllocationFlags
 );
 KERNEL_EXPORT void LouKeFree(void* AddressToFree);
-LOUDDK_API_ENTRY void LouUserFree(uint64_t DataP);
-LOUDDK_API_ENTRY void LouKeUserFree(void* AddressToFree);
-LOUDDK_API_ENTRY void LouKeFreePhysical(void* AddressToFree);
+LOUAPI void LouUserFree(uint64_t DataP);
+LOUAPI void LouKeUserFree(void* AddressToFree);
+LOUAPI void LouKeFreePhysical(void* AddressToFree);
 KERNEL_EXPORT void* LouKeMallocPhy32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-LOUDDK_API_ENTRY
+LOUAPI
 void* LouKeMallocExPhy32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
-LOUDDK_API_ENTRY
+LOUAPI
 void* LouKeMallocExVirt32(
     size_t      AllocationSize,
     size_t      Alignment,
     uint64_t    AllocationFlags
 );
-LOUDDK_API_ENTRY
+LOUAPI
 void* LouKeMallocVirt32(
     size_t      AllocationSize,
     uint64_t    AllocationFlags
 );
-LOUDDK_API_ENTRY
+LOUAPI
 void  LouGeneralFreeMemory(void* Address);
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeCreateDeviceSection(
     void*   PBase,
     void*   VBase,
     size_t    Size,
     uint64_t  PageFlags
 );
-LOUDDK_API_ENTRY
+LOUAPI
 ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
-LOUDDK_API_ENTRY 
+LOUAPI 
 UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists);
 #else 
 KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
@@ -294,7 +294,7 @@ void* LouKeMallocExPhy32(
 #endif
 
 #ifdef __cplusplus
-LOUDDK_API_ENTRY{
+LOUAPI{
 #endif
 
 #define LouClamp_t(type, val, min, max) ({           \

@@ -10,7 +10,7 @@
 #include <kernel/memmory.h>
 
 #ifdef __cplusplus
-LOUDDK_API_ENTRY{
+LOUAPI{
 #endif
 
 #ifndef _KERNEL_MODULE_

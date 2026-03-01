@@ -30,25 +30,25 @@ typedef struct _LINUX_PCI_DEVICE_ID {
 
             #define LouKeHalClosePciCompanions(x) LouKeFree((RAMADD)x)
 
-            LOUDDK_API_ENTRY
+            LOUAPI
             bool LouKeHalIsDevicePcie(
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            LOUDDK_API_ENTRY 
+            LOUAPI 
             uint8_t LouKeHalFindCompatibility(
                 PPCI_DEVICE_OBJECT PDEV,
                 int32_t Capability
             );
 
-            LOUDDK_API_ENTRY 
+            LOUAPI 
             PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
                 PPCI_COMMON_CONFIG PciConfig
             ); 
 
             #define LouKeClosePciDeviceGroup(x) LouKeFree((uint8_t*)x)
 
-            LOUDDK_API_ENTRY 
+            LOUAPI 
             uint8_t LouKeGetPciCountByType(
                 PPCI_COMMON_CONFIG PciConfig
             );
@@ -58,23 +58,23 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 uint8_t BarNumber
             );
 
-            LOUDDK_API_ENTRY void LouKeHalRegisterPciDevice(
+            LOUAPI void LouKeHalRegisterPciDevice(
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            LOUDDK_API_ENTRY PPCI_CONTEXT LouKeHalPciSaveContext(
+            LOUAPI PPCI_CONTEXT LouKeHalPciSaveContext(
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            LOUDDK_API_ENTRY void LouKeHalPciRestoreContext(
+            LOUAPI void LouKeHalPciRestoreContext(
                 PPCI_CONTEXT PciContext
             );
 
-            LOUDDK_API_ENTRY void LouKeHalPciClearMaster(
+            LOUAPI void LouKeHalPciClearMaster(
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            LOUDDK_API_ENTRY
+            LOUAPI
             LOUSTATUS LouKeHalPciSetMmio(PPCI_DEVICE_OBJECT PDEV);
 
             KERNEL_EXPORT void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV);

@@ -1,14 +1,14 @@
 #include <LouDDK.h>
 
 
-LOUDDK_API_ENTRY FSStruct* GetDriveFss(uint8_t DriveNumber);
-LOUDDK_API_ENTRY FSStruct* GetSystemDiskFss();
-LOUDDK_API_ENTRY uint8_t GetDriveNumberByFss(FSStruct* Fs);
-LOUDDK_API_ENTRY PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable();
-LOUDDK_API_ENTRY size_t GetMountedFileSystemTableMembers();
+LOUAPI FSStruct* GetDriveFss(uint8_t DriveNumber);
+LOUAPI FSStruct* GetSystemDiskFss();
+LOUAPI uint8_t GetDriveNumberByFss(FSStruct* Fs);
+LOUAPI PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable();
+LOUAPI size_t GetMountedFileSystemTableMembers();
 //static spinlock_t FOpenLock;
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool fseek(string FileName){
       
     PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
@@ -52,7 +52,7 @@ bool fseek(string FileName){
     return false;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 FILE* fopen(string FileName, uint64_t PageFlags){
     
     PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
@@ -96,12 +96,12 @@ FILE* fopen(string FileName, uint64_t PageFlags){
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void fclose(FILE* File){
     LouKeFreeFileData(File);
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 SIZE 
 fsize(
     FILE* File

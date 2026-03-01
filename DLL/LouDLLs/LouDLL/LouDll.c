@@ -299,35 +299,32 @@ void AnnyaDestroyThread(PTHREAD Thread){
     }
 }
 
-void uintToHexString(uint64_t number, char* hexString) {
+LOUAPI
+void 
+uintToHexString(
+    uint64_t number, 
+    char* hexString
+) {
     int i = 0;
     hexString[0] = '0';
     hexString[1] = 'x';
-    i = 2;  // Start filling the string after '0x'
-
-    char tempString[16];  // Temporary array to store reversed hex string (16 hex digits for 64 bits)
+    i = 2;
+    char tempString[16];
     int tempIndex = 0;
-
-    // Handle the case when number is 0
     if (number == 0) {
         hexString[i++] = '0';
         hexString[i] = '\0';
         return;
     }
-
-    // Convert number to hex string in reverse order
     while (number != 0) {
         int digit = number % 16;
         tempString[tempIndex++] = (digit < 10) ? (digit + '0') : (digit - 10 + 'A');
         number /= 16;
     }
-
-    // Copy the reversed hex string to the final string
     while (tempIndex > 0) {
         hexString[i++] = tempString[--tempIndex];
     }
-
-    hexString[i] = '\0'; // Null-terminate the string
+    hexString[i] = '\0';
 }
 
 

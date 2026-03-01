@@ -69,7 +69,7 @@ void ExRaiseDatatypeMisalignment() {
 	while(1);
 }
 
-LOUDDK_API_ENTRY uint64_t GetCurrentTimeInMilliseconds();
+LOUAPI uint64_t GetCurrentTimeInMilliseconds();
 
 void KeQuerySystemTime(LARGE_INTEGER* TimeCurrent){ //T = OUT
     // Validate the output pointer

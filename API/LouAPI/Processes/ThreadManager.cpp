@@ -1,13 +1,13 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
-LOUDDK_API_ENTRY
+LOUAPI
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData();
-LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
-LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
+LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-LOUDDK_API_ENTRY UINT64 GetRFLAGS();
+LOUAPI UINT64 GetRFLAGS();
 void LouKeLockProcManager(LouKIRQL* Irql);
 void LouKeUnlockProcManager(LouKIRQL* Irql);
 
@@ -34,7 +34,7 @@ ThreadManagerIdleFallback(
 
 PGENERIC_THREAD_DATA* ProcessorIdleThreads = 0;
 
-LOUDDK_API_ENTRY
+LOUAPI
 semaphore_t* LouKeCreateSemaphore(int initial, int limit){
     semaphore_t* NewSemaphore = (semaphore_t*)LouKeMallocType(semaphore_t, KERNEL_GENERIC_MEMORY);
     SemaphoreInitialize(NewSemaphore, initial, limit);
@@ -203,7 +203,7 @@ static void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread){
     }
 }
 
-LOUDDK_API_ENTRY uint64_t AllocateSaveContext();
+LOUAPI uint64_t AllocateSaveContext();
 
 LOUSTATUS LouKeTsmCreateThreadHandleNs(
     PGENERIC_THREAD_DATA*   OutHandle,    
@@ -363,7 +363,7 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
 
 }
 
-LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
+LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
     if(ThreadID == 0){
         return 0x00;
     }
@@ -377,7 +377,7 @@ LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID)
     return 0x00;
 }
 
-LOUDDK_API_ENTRY void DeAllocateSaveContext(uint64_t Context);
+LOUAPI void DeAllocateSaveContext(uint64_t Context);
 
 void LouKeTsmDestroyThreadHandle(
     PGENERIC_THREAD_DATA Thread
@@ -575,7 +575,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 }
 
-LOUDDK_API_ENTRY void LouKeThreadSleep(SIZE Ms){
+LOUAPI void LouKeThreadSleep(SIZE Ms){
     uint64_t ThreadID = LouKeGetThreadIdentification();
     if(!ThreadID){
         LouPrint("LouKeThreadSleep() ERROR: Thread Non Existent\n");
@@ -595,7 +595,7 @@ LOUDDK_API_ENTRY void LouKeThreadSleep(SIZE Ms){
     asm("INT $32");
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void 
 LouKeYeildExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
@@ -612,7 +612,7 @@ LouKeYeildExecution(){
     asm("INT $32");
 }
 
-LOUDDK_API_ENTRY void LouKeUnblockThread(UINT64 ThreadID){
+LOUAPI void LouKeUnblockThread(UINT64 ThreadID){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
     LouKeLockProcManager(&Irql);
@@ -621,7 +621,7 @@ LOUDDK_API_ENTRY void LouKeUnblockThread(UINT64 ThreadID){
     LouKeUnlockProcManager(&Irql);
 }
 
-LOUDDK_API_ENTRY DWORD LouKeThreadManagerDemon(PVOID Params){
+LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
     LouPrint("Thread Manager Demon Started\n");
     UNUSED INTEGER Processors = GetNPROC();
 

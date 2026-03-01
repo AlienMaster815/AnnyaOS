@@ -3,14 +3,14 @@
 static GENERIC_PROCESS_DATA MasterProcessList = {0};
 static mutex_t ProcessListLock = {0};
 static KERNEL_REFERENCE TotalProcesses = {0};
-LOUDDK_API_ENTRY UINT64 GetCr3();
+LOUAPI UINT64 GetCr3();
 
-LOUDDK_API_ENTRY
+LOUAPI
 SIZE LouKePmGetProcessCount(){
     return LouKeGetReferenceCount(&TotalProcesses);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
@@ -73,13 +73,13 @@ static UINT16 AllocateProcessID(){
 }
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc);
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeSectionInitNewProcess(
     PHPROCESS    Process,
     HANDLE      Section
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeSectionGetEntryList(
     HANDLE      Section,

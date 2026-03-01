@@ -61,14 +61,14 @@ typedef uint8_t FINAL_VERDICT;
 #define FAT32       3
 #define FAT32_EXT   4
 
-LOUDDK_API_ENTRY
+LOUAPI
 void Fat12FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 FILE* Fat12FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
@@ -76,7 +76,7 @@ FILE* Fat12FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesystem
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool Fat12FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     
@@ -84,14 +84,14 @@ bool Fat12FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemH
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 void Fat16FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 FILE* Fat16FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
@@ -99,7 +99,7 @@ FILE* Fat16FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesystem
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool Fat16FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     
@@ -107,14 +107,14 @@ bool Fat16FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemH
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 void Fat32FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 FILE* Fat32FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
@@ -122,20 +122,20 @@ FILE* Fat32FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesystem
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool Fat32FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     return false;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void Fat32ExtFileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 FILE* Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
 
@@ -143,14 +143,14 @@ FILE* Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesys
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool Fat32ExtFileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
     return false;
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
     LouPrint("Searching For Fat FileSystem\n");
     
@@ -279,7 +279,7 @@ PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS FatDriverEntry(){
     PLOUSINE_KERNEL_FILESYSTEM FatFileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
 

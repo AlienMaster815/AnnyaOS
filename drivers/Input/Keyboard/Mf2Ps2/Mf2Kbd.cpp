@@ -30,7 +30,7 @@ LouKeHalInitializeMf2Ps2Keyboard(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DrvObject, 

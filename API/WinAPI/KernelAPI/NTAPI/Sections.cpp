@@ -3,10 +3,10 @@
 
 //LouKeLoadCoffImageB
 
-LOUDDK_API_ENTRY
+LOUAPI
 SIZE LouKePmGetProcessCount();
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+LOUAPI uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
@@ -46,7 +46,7 @@ typedef struct _PML4_LIST {
 static PML4_LIST Pml4MasterList = {0};
 static mutex_t Pml4MasterLock = {0};
 
-LOUDDK_API_ENTRY PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
+LOUAPI PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
 
 static SECTION_OBJECT   MasterSectionList = {0};
 static mutex_t          SectionListLock = {0};
@@ -81,7 +81,7 @@ static PSECTION_OBJECT VAddressToSectionObject(PVOID VAddress){
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeVmmCreateSharedSectionEx(
     PVOID           PBase,
@@ -111,7 +111,7 @@ LouKeVmmCreateSharedSectionEx(
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeVmmCreateSharedSection(
     PVOID           PBase,
@@ -128,7 +128,7 @@ LouKeVmmCreateSharedSection(
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeCreateDeviceSection(
     PVOID   PBase,
@@ -145,7 +145,7 @@ LouKeCreateDeviceSection(
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists){
     ULONG Result = 0;
 
@@ -164,7 +164,7 @@ ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists)
     return Result;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists){ //todo Take Parameter for NX
     UINT64 Result = 0;
     UNUSED bool ExecuteBit = false;
@@ -198,7 +198,7 @@ UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists)
     return Result;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeVmmCreateSectionEx(
     PHANDLE                 OutSectionHandle,
@@ -244,7 +244,7 @@ LouKeVmmCreateSectionEx(
     return STATUS_UNSUCCESSFUL;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeGetVAddressPageInformation(
     UINT64  VAddress, 
     UINT8   Level,
@@ -279,7 +279,7 @@ void LouKeSendPml4ToSections(UINT64* Pml4){
     MutexUnlock(&Pml4MasterLock);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeSectionInitNewProcess(
     PHPROCESS   Process,
     HANDLE      Section
@@ -301,7 +301,7 @@ LOUSTATUS LouKeSectionInitNewProcess(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeSectionGetEntryList(
     HANDLE      Section,
@@ -332,7 +332,7 @@ LouKeSectionGetEntryList(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeVmmCreatePrivateSectionEx(
     PVOID   VirtualAddress,
@@ -366,7 +366,7 @@ LouKeVmmCreatePrivateSectionEx(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeVmmCreatePrivateSection(
     PVOID   VirtualAddress,
@@ -389,7 +389,7 @@ LouKeVmmCreatePrivateSection(
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4){
 
     PSECTION_OBJECT CommitSection = VAddressToSectionObject(VAddress);

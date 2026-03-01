@@ -24,7 +24,7 @@ typedef struct _TableTracks{
 static LIST_OBJECT DynamicLoadedLibraries = {0};
 static size_t DynamicLoadedLibrarieCount = 0x00;
 
-LOUDDK_API_ENTRY LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
+LOUAPI LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
 ULONG KeNumberProcessors();
 
@@ -36,10 +36,10 @@ ULONG KeNumberProcessors();
 
 static PJITL_DIRECTORY SystemSections[CURRENT_JITLS];
 
-LOUDDK_API_ENTRY char* Winstrcpy(char* dest, const char* src);
-LOUDDK_API_ENTRY char* Winstrcat(char* dest, const char* src);
+LOUAPI char* Winstrcpy(char* dest, const char* src);
+LOUAPI char* Winstrcat(char* dest, const char* src);
 
-LOUDDK_API_ENTRY
+LOUAPI
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName){
     for(uint8_t i = 0; i < CURRENT_JITLS; i++){
         if(strcmp(SectionName, SystemSections[i]->SectionName) == 0){
@@ -57,7 +57,7 @@ DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string Funct
     return 0x00;
 };
 
-LOUDDK_API_ENTRY
+LOUAPI
 void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName){
     for(uint8_t i = 0; i < CURRENT_JITLS; i++){
         if(strcmp(SectionName, SystemSections[i]->SectionName) == 0){
@@ -84,7 +84,7 @@ RtlUnwind(
      PVOID ReturnValue
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 ULONG
 vDbgPrintEx(
     ULONG ComponentId,
@@ -93,7 +93,7 @@ vDbgPrintEx(
     va_list args
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 ULONG
 vDbgPrintExWithPrefix (
     PCCH Prefix,
@@ -104,7 +104,7 @@ vDbgPrintExWithPrefix (
 );
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAddAtom(
     PWSTR       AtomName,
@@ -112,7 +112,7 @@ NtAddAtom(
     PRTL_ATOM   Atom
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAddAtomEx(
     PWSTR AtomName,
@@ -130,13 +130,13 @@ LOUSTATUS NtAdjustPrivilegesToken(
     PULONG ReturnLength
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAllocateLocallyUniqueId(
     PLUID Luid
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAllocateUuids(
     PULARGE_INTEGER Time,
@@ -145,10 +145,10 @@ NtAllocateUuids(
     PCHAR Seed
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 int toupper(int c);
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeInitializeLibraryLookupEx(
     string                          ModuleName,
     uint32_t                        NumberOfFunctions,
@@ -175,7 +175,7 @@ void LouKeInitializeLibraryLookupEx(
     DynamicLoadedLibrarieCount++;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeInitializeLibraryLookup(
     string    ModuleName,
     uint32_t  NumberOfFunctions,
@@ -193,12 +193,12 @@ void LouKeInitializeLibraryLookup(
     );
 }
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+LOUAPI uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
 
-LOUDDK_API_ENTRY void* LouKePciGetIoRegion(
+LOUAPI void* LouKePciGetIoRegion(
     PPCI_DEVICE_OBJECT PDEV, 
     uint8_t BarNumber,
     size_t BarOffset
@@ -554,7 +554,7 @@ void InitializeLousineKernelTables(){
     */
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 int vswprintf_s(
     wchar_t* Buffer,
     size_t BufferCount,
@@ -562,7 +562,7 @@ int vswprintf_s(
     va_list Args
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 int vsprintf_s(
     string Buffer,
     size_t BufferCount,
@@ -570,13 +570,13 @@ int vsprintf_s(
     va_list Args
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 wchar_t towupper(wchar_t wc);
 
-LOUDDK_API_ENTRY
+LOUAPI
 wchar_t towlower(wchar_t wc);
 
-LOUDDK_API_ENTRY
+LOUAPI
 int tolower(int c);
 
 
@@ -666,7 +666,7 @@ static BOOL FindModuleTracker(PLIST_LINK Link, PVOID Params){
     return false;
 }
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
+LOUAPI uint64_t LouKeLinkerGetAddressEx(
     string ModuleName,
     string FunctionName,
     PKULA_TRANSITION_LAYER_OBECT TransitionObject
@@ -698,7 +698,7 @@ LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddressEx(
     );
 }
 
-LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandleEx(
+LOUAPI HANDLE LouKeLinkerGetModuleLookupHandleEx(
     string ModuleName,
     PKULA_TRANSITION_LAYER_OBECT TransitionObject
 ){
@@ -716,20 +716,20 @@ LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandleEx(
     return (HANDLE)&Tmp->Table;
 }
 
-LOUDDK_API_ENTRY HANDLE LouKeLinkerGetModuleLookupHandle(
+LOUAPI HANDLE LouKeLinkerGetModuleLookupHandle(
     string ModuleName
 ){
     return LouKeLinkerGetModuleLookupHandleEx(ModuleName, 0x00);
 }
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+LOUAPI uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 ){
     return LouKeLinkerGetAddressEx(ModuleName, FunctionName, 0x00);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool 
 LouKeLinkerCheckLibraryPresenceEx(string SystemName, PKULA_TRANSITION_LAYER_OBECT TransitionObject){
     
@@ -741,7 +741,7 @@ LouKeLinkerCheckLibraryPresenceEx(string SystemName, PKULA_TRANSITION_LAYER_OBEC
     return LouKeLinkerGetModuleLookupHandleEx(SystemName, TransitionObject) ? true : false;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool 
 LouKeLinkerCheckLibraryPresence(string SystemName){
     return LouKeLinkerCheckLibraryPresenceEx(SystemName, 0x00);

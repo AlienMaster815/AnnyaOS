@@ -4,9 +4,9 @@
 
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 PPCI_MANAGER_DATA LouKeGetPciDataTable();
-LOUDDK_API_ENTRY
+LOUAPI
 uint8_t LouKeGetPciGlobalMembers();
 
 #define DEVICE_ID_MATCH ((SearchConfig->Header.DeviceID == DeviceConfig->Header.DeviceID) || (SearchConfig->Header.DeviceID == ANY_PCI_ID))
@@ -56,7 +56,7 @@ bool IsConfigValid(
     return true;
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 uint8_t LouKeGetPciCountByType(
     PPCI_COMMON_CONFIG PciConfig
 ) {
@@ -80,7 +80,7 @@ uint8_t LouKeGetPciCountByType(
 }
 
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
     PPCI_COMMON_CONFIG PciConfig
 ) {

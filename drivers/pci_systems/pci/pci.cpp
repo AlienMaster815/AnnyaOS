@@ -16,12 +16,12 @@ bool isVirtualizationDevice(uint8_t bus, uint8_t slot, uint8_t function);
 void RegisterUnkownDevice(uint8_t bus,uint8_t device,uint8_t function);
 bool PciExternalModuleScan(uint8_t bus, uint8_t slot, uint8_t func);
 
-LOUDDK_API_ENTRY void scan_pci_bridges();
+LOUAPI void scan_pci_bridges();
 
 
 bool IsPciBus(uint8_t bus, uint8_t slot, uint8_t func);
 
-LOUDDK_API_ENTRY
+LOUAPI
 void checkBus(uint16_t Group, uint8_t bus) {
 
     for (size_t device = 0; device < 32; device++) {
@@ -37,7 +37,7 @@ void LouKeFreePciDevObject(PPCI_DEVICE_OBJECT PDEV){
     LouKeFreeFastObject("PDEV", (PVOID)(UINT8*)PDEV);
 }
 
-LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
+LOUAPI void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
     //LouPrint("Here\n");
 
     uint8_t function = 0;
@@ -91,10 +91,10 @@ LOUDDK_API_ENTRY void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
 
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint16_t GetPciGroupCount();
 
-LOUDDK_API_ENTRY
+LOUAPI
 PPCIE_SYSTEM_MANAGER GetPcieGroupHandle(uint16_t GroupItem);
 
 typedef struct _ACPI_MCFG_ALLOCATION{
@@ -104,11 +104,11 @@ typedef struct _ACPI_MCFG_ALLOCATION{
     uint8_t     EndBusNumber;
 } ACPI_MCFG_ALLOCATION, * PACPI_MCFG_ALLOCATION;
 
-LOUDDK_API_ENTRY void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
+LOUAPI void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
 
-LOUDDK_API_ENTRY size_t LouKeGetMcfgCount(void* Table);
+LOUAPI size_t LouKeGetMcfgCount(void* Table);
 
-LOUDDK_API_ENTRY void PCI_Scan_Bus(){
+LOUAPI void PCI_Scan_Bus(){
 
     LouPrint("Scanning PCI Bus\n");
     
@@ -204,7 +204,7 @@ KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset,
 
 void InitializeBARHalLayer();
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 void LouKeMapPciMemory(){
     LouKeCreateFastObjectClass("PDEV", 256, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), 0, KERNEL_GENERIC_MEMORY);
     InitializeBARHalLayer();
@@ -220,7 +220,7 @@ void LouKePs2Parse();
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 void LouKeReleasePciDriverPath(string Path);
 string LouKeAcquirePciDriverPath(PPCI_COMMON_CONFIG Config);
-LOUDDK_API_ENTRY
+LOUAPI
 void ScanTheRestOfHarware(){
     PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
@@ -263,7 +263,7 @@ void ScanTheRestOfHarware(){
     }
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool LouKeSeachPreLoadedSystemModules(PPCI_DEVICE_OBJECT PDEV);
 
 bool IsAtaController(PPCI_DEVICE_OBJECT PDEV);
@@ -271,7 +271,7 @@ void InitializeAtaDevice();
 bool IsAhciController(PPCI_DEVICE_OBJECT PDEV);
 LOUSTATUS InitializeStartupAhciImplementation(PPCI_DEVICE_OBJECT PDEV);
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeSantyCheckPciDevices(){
 
     PCI_COMMON_CONFIG Config;

@@ -4,7 +4,7 @@
 
 #ifdef __cplusplus
 #include <NtAPI.h>
-LOUDDK_API_ENTRY{
+LOUAPI{
 #else 
 #include <LouAPI.h>
 typedef void* FILE;

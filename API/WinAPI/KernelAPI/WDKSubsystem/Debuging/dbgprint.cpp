@@ -4,7 +4,7 @@
 #include <kernel/exports.h>
 //I Will Need To Change The Cases To The Real Cases
 
-LOUDDK_API_ENTRY
+LOUAPI
 ULONG
 vDbgPrintEx(
     ULONG ComponentId,
@@ -67,7 +67,7 @@ vDbgPrintEx(
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 ULONG
 vDbgPrintExWithPrefix (
     PCCH Prefix,

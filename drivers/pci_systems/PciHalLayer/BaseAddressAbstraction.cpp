@@ -8,11 +8,11 @@
 
 static uint64_t IoMemEnd = 0;
 
-LOUDDK_API_ENTRY uint64_t GetIoMemEnd(){
+LOUAPI uint64_t GetIoMemEnd(){
     return IoMemEnd;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint16_t LouKeCreatIoPort(
     uint16_t PortSize
 );
@@ -20,7 +20,7 @@ uint16_t LouKeCreatIoPort(
 uint32_t LouKeReadBarValue(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber);
 void LouKeWriteBarValue(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber, uint32_t Value);
 
-LOUDDK_API_ENTRY void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer){
+LOUAPI void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer){
     ConfigBuffer->Header.VendorID = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x00);
     ConfigBuffer->Header.DeviceID = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x02);
     ConfigBuffer->Header.Command = pciConfigReadWord( Group,SystemIoBusNumber, SlotNumber, Function, 0x04);
@@ -96,13 +96,13 @@ LOUDDK_API_ENTRY void GetPciConfiguration(ULONG Group, ULONG SystemIoBusNumber,U
     }
 }
 
-LOUDDK_API_ENTRY void LouKeHalGetPciConfiguration(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
+LOUAPI void LouKeHalGetPciConfiguration(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
     GetPciConfiguration(PDEV->Group, PDEV->bus, PDEV->slot, PDEV->func, Config);
 }
 
 static spinlock_t Lock;
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS RegisterPciDeviceToDeviceManager(
     PPCI_DEVICE_OBJECT PDEV,
     string RegistryEntry,
@@ -265,9 +265,9 @@ void* LouKeHalPnpInitializeBaseRegister(
     return 0x00;
 }
 
-LOUDDK_API_ENTRY uint64_t GetAllocationBlockSize(uint64_t Address);
+LOUAPI uint64_t GetAllocationBlockSize(uint64_t Address);
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 size_t LouKeHalGetPciBaseAddressSize(
     PPCI_DEVICE_OBJECT PDEV,
     uint8_t BarNum  
@@ -275,7 +275,7 @@ size_t LouKeHalGetPciBaseAddressSize(
     return (size_t)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarSize[BarNum]);
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 void* LouKePciGetIoRegion(
     PPCI_DEVICE_OBJECT PDEV, 
     uint8_t BarNumber,
@@ -284,7 +284,7 @@ void* LouKePciGetIoRegion(
     return (void*)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarBase[BarNumber] + BarOffset);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 SET_OPTIMIZATION(0) 
 uint64_t 
 LouKePciGetVirtualBarAddress(uint64_t PhyAddress){

@@ -1,10 +1,10 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY void AsanWrapperMemcmp() {}
+LOUAPI void AsanWrapperMemcmp() {}
 
 
-LOUDDK_API_ENTRY void* LouKeGetHeadlessGlobals();
-LOUDDK_API_ENTRY LOUSTATUS LouKeHdlspDispatch(    
+LOUAPI void* LouKeGetHeadlessGlobals();
+LOUAPI LOUSTATUS LouKeHdlspDispatch(    
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
     uint64_t Flags, 
@@ -13,7 +13,7 @@ LOUDDK_API_ENTRY LOUSTATUS LouKeHdlspDispatch(
 );
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS HeadlessDispatch(
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
@@ -48,16 +48,16 @@ LOUSTATUS HeadlessDispatch(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY void InitSafeBootMode() {}
-LOUDDK_API_ENTRY void KfRaiseIrql() {}
-LOUDDK_API_ENTRY void KiBugCheckData() {}
-LOUDDK_API_ENTRY void KiCheckForKernelApcDelivery() {}
-LOUDDK_API_ENTRY void KitLogFeatureUsage() {}
-LOUDDK_API_ENTRY void POGOBuffer() {}
+LOUAPI void InitSafeBootMode() {}
+LOUAPI void KfRaiseIrql() {}
+LOUAPI void KiBugCheckData() {}
+LOUAPI void KiCheckForKernelApcDelivery() {}
+LOUAPI void KitLogFeatureUsage() {}
+LOUAPI void POGOBuffer() {}
 
 void RtlRaiseStatus(LOUSTATUS Status);
 
-LOUDDK_API_ENTRY
+LOUAPI
 int512_t InitializeSListHead(__int128* InitData){
     if(((uintptr_t)InitData & 0xf) != 0){
         RtlRaiseStatus(STATUS_DATATYPE_MISALIGNMENT);
@@ -70,7 +70,7 @@ int512_t InitializeSListHead(__int128* InitData){
     return Result;
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 int64_t InterlockedPushListSList(
     uint64_t* InputList, 
     uint64_t  Unused2,
@@ -107,7 +107,7 @@ uint32_t GetNtEmualationBuild(){
 // NtBuildLab
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 NtClose(
   HANDLE Handle
@@ -3331,7 +3331,7 @@ void RtlRaiseStatus(LOUSTATUS Status){
 
 void NtTransitionLayerInitMessageTraceStack();
 
-LOUDDK_API_ENTRY
+LOUAPI
 void InitializeNtKernelTransitionLayer(){
 
     NtTransitionLayerInitMessageTraceStack();

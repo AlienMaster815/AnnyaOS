@@ -1,14 +1,14 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-LOUDDK_API_ENTRY LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
+LOUAPI LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 	unsigned long FirmwareTableProvicerSignature,
 	uintptr_t* TablePointer,
 	uintptr_t* TableExtendedPointer,
 	uint8_t* Type
 );
 
-LOUDDK_API_ENTRY LOUSTATUS LouKeGetSystemFirmwareTableId(
+LOUAPI LOUSTATUS LouKeGetSystemFirmwareTableId(
 	unsigned long FirmwareTableId,
 	unsigned long FirmwareTableProiderSignature,
 	uintptr_t* TablePointer,
@@ -16,14 +16,14 @@ LOUDDK_API_ENTRY LOUSTATUS LouKeGetSystemFirmwareTableId(
 	uint8_t* Type
 );
 
-LOUDDK_API_ENTRY LOUSTATUS LouKeGetSystemFirmwareTableBuffer(
+LOUAPI LOUSTATUS LouKeGetSystemFirmwareTableBuffer(
 	uint32_t SystemType,
 	void* FirmwareTableBufferSrc,
 	void* FirmwareTableBufferDest,
 	unsigned int* BufferLength
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeGetSystemFirmwareTable(
 	ULONG FirmwareTableProviderSignature,
 	ULONG FirmwareTabeId,

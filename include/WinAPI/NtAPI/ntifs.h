@@ -165,7 +165,7 @@ NTHALAPI VOID KeStallExecutionProcessor(
    ULONG MicroSeconds
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAllocateVirtualMemory(
     HANDLE ProcessHandle,
@@ -176,7 +176,7 @@ NtAllocateVirtualMemory(
     ULONG Protect
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 NtClose(
   HANDLE Handle

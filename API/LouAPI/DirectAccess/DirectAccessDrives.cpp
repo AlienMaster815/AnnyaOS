@@ -1,10 +1,10 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber);
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeAtaReadDevice(
 	PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
     uint64_t LBA,
@@ -13,7 +13,7 @@ LOUSTATUS LouKeAtaReadDevice(
     void* DataBuffer
 );
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 void* 
 ReadDrive(
 uint8_t Drive,
@@ -62,7 +62,7 @@ LOUSTATUS* State
 	return Result;
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 void 
 WriteDrive(
 uint8_t Drive,
@@ -74,7 +74,7 @@ void* Data
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void ReleaseDriveHandle(void* DriveHandle){
 	LouKeFree((RAMADD)DriveHandle);
 }

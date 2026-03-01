@@ -10,7 +10,7 @@ void NtTransitionLayerInitCsdVersion(PUNICODE_STRING CsdVersion){
     NtKernelGlobalCsdVersionMaxLength = CsdVersion->MaximumLength;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool
 PsGetVersion(
     PULONG              MajorVersion, 

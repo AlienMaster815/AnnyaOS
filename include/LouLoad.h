@@ -85,7 +85,7 @@ typedef struct _LOUSINE_LOADER_INFO{
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
 #ifdef __cplusplus
-LOUDDK_API_ENTRY LOUSINE_LOADER_INFO KernelLoaderInfo;
+LOUAPI LOUSINE_LOADER_INFO KernelLoaderInfo;
 #define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
 #define GetBootStackTop() KernelLoaderInfo.BootStack
 #else

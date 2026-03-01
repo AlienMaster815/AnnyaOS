@@ -33,7 +33,7 @@ static void DeAllocateClassTracker(PLOU_BUS ClassMember){
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKeCreateBusClass(
     PLOU_BUS    Bus
@@ -69,7 +69,7 @@ LouKeCreateBusClass(
 
 void InitializeSerialIo();
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 void InitializeBusCore(){
     
     InitializeSerialIo();

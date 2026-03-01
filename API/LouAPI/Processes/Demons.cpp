@@ -2,12 +2,12 @@
 
 void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread);
 
-LOUDDK_API_ENTRY VOID LouKeDestroyThreadSyscall(PVOID ThreadHandle){
+LOUAPI VOID LouKeDestroyThreadSyscall(PVOID ThreadHandle){
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
     ThreadData->State = THREAD_TERMINATED;
 }
 
-LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle){
+LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle){
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
 
     LouKeDestroyThreadSyscall(ThreadHandle);
@@ -57,7 +57,7 @@ LOUSTATUS CreateDemonThreadHandle(
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 PTHREAD
 LouKeCreateDeferedDemonEx(
     PVOID   Function,
@@ -112,7 +112,7 @@ LouKeCreateDeferedDemonEx(
     return NewThread;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 PTHREAD
 LouKeCreateDemonEx(
     PVOID   Function,
@@ -135,7 +135,7 @@ LouKeCreateDemonEx(
     );
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 PTHREAD 
 LouKeCreateDemon(
     PVOID   Function,

@@ -11,18 +11,18 @@
 
 
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY uint64_t GetCurrentTimeInMilliseconds();
+LOUAPI uint64_t GetCurrentTimeInMilliseconds();
 KERNEL_EXPORT void sleep(uint64_t Time);
-LOUDDK_API_ENTRY void sleepEx(uint8_t Interval, uint64_t Time);
-LOUDDK_API_ENTRY LOUSTATUS 
+LOUAPI void sleepEx(uint8_t Interval, uint64_t Time);
+LOUAPI LOUSTATUS 
 LouKeWaitForUlongRegisterCondition(
     PULONG  Mmio, 
     size_t  MsWait,
     ULONG   Mask, 
     ULONG   Value
 );
-LOUDDK_API_ENTRY void LouKeThreadSleep(size_t Ms);
-LOUDDK_API_ENTRY uint64_t GetTscFromNowMilliseconds(uint64_t ms);
+LOUAPI void LouKeThreadSleep(size_t Ms);
+LOUAPI uint64_t GetTscFromNowMilliseconds(uint64_t ms);
 #else 
 #endif
 #else

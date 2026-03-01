@@ -1,8 +1,8 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 void UnSetInterruptFlags();
-LOUDDK_API_ENTRY
+LOUAPI
 void SetInterruptFlags();
 
 void LouKeBcdToBinary(uint8_t* bcd_value){
@@ -11,7 +11,7 @@ void LouKeBcdToBinary(uint8_t* bcd_value){
 
 static mutex_t RtcTex;
 
-LOUDDK_API_ENTRY
+LOUAPI
 void read_rtc() {
     MutexLock(&RtcTex);
     UNUSED uint8_t second, minute, hour, day, month, year;

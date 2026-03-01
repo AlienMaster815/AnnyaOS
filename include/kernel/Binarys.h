@@ -26,7 +26,7 @@ typedef char* FUNCTION_NAME;
 #ifndef _KERNEL_MODULE_
 extern "C" uint64_t GetSysBinaryChunk(uint64_t Address, uint32_t ChunkSize);
 extern "C" void ReleaseSysBinaryChunk(uint64_t Address, uint32_t ChunkSize);
-LOUDDK_API_ENTRY wchar_t* LookForUTF16LEBuffer(wchar_t* BufferOfSearch, wchar_t* UTF16LEString, size_t BufferSize, size_t StringSize);
+LOUAPI wchar_t* LookForUTF16LEBuffer(wchar_t* BufferOfSearch, wchar_t* UTF16LEString, size_t BufferSize, size_t StringSize);
 
 
 

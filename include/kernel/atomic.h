@@ -68,160 +68,160 @@ static inline bool atomic_cmpxchg(atomic_t* v, int old, int newv) {
 #include <NtAPI.h>
 
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY uint64_t LouKeAndOperationULongLong(
+LOUAPI uint64_t LouKeAndOperationULongLong(
 	uint64_t volatile* Destination,
 	uint64_t Value
 );
 
-LOUDDK_API_ENTRY int64_t LouKeAndOperationLongLong(
+LOUAPI int64_t LouKeAndOperationLongLong(
 	uint64_t volatile* Destination,
 	uint64_t Value
 );
 
 
-LOUDDK_API_ENTRY int32_t LouKeAndOperationLong(
+LOUAPI int32_t LouKeAndOperationLong(
 	int32_t volatile* Destination,
 	int32_t Value
 );
 
-LOUDDK_API_ENTRY uint32_t LouKeAndOperationULong(
+LOUAPI uint32_t LouKeAndOperationULong(
 	uint32_t volatile* Destination,
 	uint32_t Value
 );
 
-LOUDDK_API_ENTRY uint16_t LouKeAndOperationUShort(
+LOUAPI uint16_t LouKeAndOperationUShort(
 	uint16_t volatile* Destination,
 	uint16_t Value
 );
 
-LOUDDK_API_ENTRY int16_t LouKeAndOperationShort(
+LOUAPI int16_t LouKeAndOperationShort(
 	int16_t volatile* Destination,
 	int16_t Value
 );
 
-LOUDDK_API_ENTRY uint8_t LouKeAndOperationUChar(
+LOUAPI uint8_t LouKeAndOperationUChar(
 	uint8_t volatile* Destination,
 	uint8_t Value
 );
 
-LOUDDK_API_ENTRY int8_t LouKeAndOperationChar(
+LOUAPI int8_t LouKeAndOperationChar(
 	int8_t volatile* Destination,
 	int8_t Value
 );
 
-LOUDDK_API_ENTRY int32_t LouKeCompareAtomicLongValue(
+LOUAPI int32_t LouKeCompareAtomicLongValue(
 	int32_t volatile* Destination,
 	int32_t ExChange,
 	int32_t CompareValue
 );
 
-LOUDDK_API_ENTRY uint16_t LouKeCompareAtomicUShortValue(
+LOUAPI uint16_t LouKeCompareAtomicUShortValue(
 	uint16_t volatile* Destination,
 	uint16_t ExChange,
 	uint16_t CompareValue
 );
 
-LOUDDK_API_ENTRY int16_t LouKeCompareAtomicShortValue(
+LOUAPI int16_t LouKeCompareAtomicShortValue(
 	int16_t volatile* Destination,
 	int16_t ExChange,
 	int16_t CompareValue
 );
 
-LOUDDK_API_ENTRY uint8_t LouKeCompareAtomicUCharValue(
+LOUAPI uint8_t LouKeCompareAtomicUCharValue(
 	uint8_t volatile* Destination,
 	uint8_t ExChange,
 	uint8_t CompareValue
 );
 
-LOUDDK_API_ENTRY int8_t LouKeCompareAtomicCharValue(
+LOUAPI int8_t LouKeCompareAtomicCharValue(
 	int8_t volatile* Destination,
 	int8_t ExChange,
 	int8_t CompareValue
 );
 
-LOUDDK_API_ENTRY void* LouKeComparePointer(
+LOUAPI void* LouKeComparePointer(
 	void* volatile* Destination,
 	void* ExChange,
 	void* CompareValue
 );
 
-LOUDDK_API_ENTRY uint64_t LouKeOrOperationULongLong(
+LOUAPI uint64_t LouKeOrOperationULongLong(
 	uint64_t volatile* Destination,
 	uint64_t		   Value
 );
 
-LOUDDK_API_ENTRY int64_t LouKeOrOperationLongLong(
+LOUAPI int64_t LouKeOrOperationLongLong(
 	int64_t volatile* Destination,
 	int64_t			  Value
 );
 
-LOUDDK_API_ENTRY uint32_t LouKeOrOperationULong(
+LOUAPI uint32_t LouKeOrOperationULong(
 	uint32_t volatile* Destination,
 	uint32_t		   Value
 );
 
-LOUDDK_API_ENTRY int32_t LouKeOrOperationLong(
+LOUAPI int32_t LouKeOrOperationLong(
 	int32_t volatile* Destination,
 	int32_t			  Value
 );
 
-LOUDDK_API_ENTRY uint16_t LouKeOrOperationUShort(
+LOUAPI uint16_t LouKeOrOperationUShort(
 	uint16_t volatile* Destination,
 	uint16_t		   Value
 );
 
-LOUDDK_API_ENTRY int16_t LouKeOrOperationShort(
+LOUAPI int16_t LouKeOrOperationShort(
 	int16_t volatile* Destination,
 	int16_t			  Value
 );
 
-LOUDDK_API_ENTRY uint8_t LouKeOrOperationUChar(
+LOUAPI uint8_t LouKeOrOperationUChar(
 	uint8_t volatile* Destination,
 	uint8_t 		  Value
 );
 
-LOUDDK_API_ENTRY int8_t LouKeOrOperationChar(
+LOUAPI int8_t LouKeOrOperationChar(
 	int8_t volatile* Destination,
 	int8_t 		     Value
 );
 
 
-LOUDDK_API_ENTRY uint64_t LouKeXorOperationULongLong(
+LOUAPI uint64_t LouKeXorOperationULongLong(
 	uint64_t volatile* Destination,
 	uint64_t Value
 );
 
-LOUDDK_API_ENTRY int64_t LouKeXorOperationLongLong(
+LOUAPI int64_t LouKeXorOperationLongLong(
 	int64_t volatile* Destination,
 	int64_t Value
 );
 
-LOUDDK_API_ENTRY uint32_t LouKeXorOperationULong(
+LOUAPI uint32_t LouKeXorOperationULong(
 	uint32_t volatile* Destination,
 	uint32_t Value
 );
 
-LOUDDK_API_ENTRY int32_t LouKeXorOperationLong(
+LOUAPI int32_t LouKeXorOperationLong(
 	int32_t volatile* Destination,
 	int32_t Value
 );
 
-LOUDDK_API_ENTRY uint16_t LouKeXorOperationUShort(
+LOUAPI uint16_t LouKeXorOperationUShort(
 	uint16_t volatile* Destination,
 	uint16_t Value
 );
 
-LOUDDK_API_ENTRY int16_t LouKeXorOperationShort(
+LOUAPI int16_t LouKeXorOperationShort(
 	int16_t volatile* Destination,
 	int16_t Value
 );
 
-LOUDDK_API_ENTRY uint8_t LouKeXorOperationUChar(
+LOUAPI uint8_t LouKeXorOperationUChar(
 	uint8_t volatile* Destination,
 	uint8_t Value
 );
 
-LOUDDK_API_ENTRY int8_t LouKeXorOperationChar(
+LOUAPI int8_t LouKeXorOperationChar(
 	int8_t volatile* Destination,
 	int8_t Value
 );

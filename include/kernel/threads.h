@@ -7,8 +7,8 @@ typedef void* PTHREAD_DATA;
 #ifdef __cplusplus
 #include <LouDDK.h>
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
-LOUDDK_API_ENTRY uint64_t LouKeGetThreadIdentification();
+LOUAPI uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, uint32_t StackSize);
+LOUAPI uint64_t LouKeGetThreadIdentification();
 
 #else
 KERNEL_EXPORT uint64_t LouKeGetThreadIdentification();

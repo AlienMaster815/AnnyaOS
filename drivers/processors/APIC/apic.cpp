@@ -121,20 +121,20 @@ typedef struct {
 #define APICADDRESSCAST (volatile uint32_t*)(uintptr_t)
 #define LEGACY_IRQ_SCOPE 16
 
-LOUDDK_API_ENTRY uint64_t read_msr(uint32_t msr);
-LOUDDK_API_ENTRY void write_msr(uint32_t msr, uint64_t Value);
+LOUAPI uint64_t read_msr(uint32_t msr);
+LOUAPI void write_msr(uint32_t msr, uint64_t Value);
 
-LOUDDK_API_ENTRY void disable_pic();
+LOUAPI void disable_pic();
 string DRV_VERSION_APIC = "\nLousine Internal Kernel APIC.SYS Module Version 1.10\n";
 string DRV_UNLOAD_STRING_SUCCESS_APIC = "Driver Execution Completed Successfully Exiting Proccess\n\n"; 
 string DRV_UNLOAD_STRING_FAILURE_APIC = "Driver Execution Failed To Execute Properly Exiting Proccess\n\n"; 
 
-LOUDDK_API_ENTRY void SMPInit();
+LOUAPI void SMPInit();
 
 void SetTotalIoApicInterrupts(UINT8 TotalInterrupts);
 bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic);
 LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature);
-LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
+LOUAPI void IoApicConfigureEntryFlags(
     uint8_t     irq,
     uint16_t    Flags
 );
@@ -161,7 +161,7 @@ static CPU_TRACKER_INFORMATION CpuTracker = {0};
 static APIC_ISO_TRACKER IoApicOverideTracker = {0};
 static IO_APIC_TRACKER IoApicTracker = {0};
 
-LOUDDK_API_ENTRY PCPU_TRACKER_INFORMATION GetCpuInfoFromTrackerMember(INTEGER Member){
+LOUAPI PCPU_TRACKER_INFORMATION GetCpuInfoFromTrackerMember(INTEGER Member){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
     INTEGER i = 0;
     while(TmpTracker->Peers.NextHeader){
@@ -176,7 +176,7 @@ LOUDDK_API_ENTRY PCPU_TRACKER_INFORMATION GetCpuInfoFromTrackerMember(INTEGER Me
     return 0x00;
 }
 
-LOUDDK_API_ENTRY INTEGER GetCpuTrackMemberFromID(UINT32 CpuID){
+LOUAPI INTEGER GetCpuTrackMemberFromID(UINT32 CpuID){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
     INTEGER i = 0;
     while(TmpTracker->Peers.NextHeader){
@@ -258,7 +258,7 @@ void LouKeInitializeOverideEntry(ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* Overide){
 }
 
 
-LOUDDK_API_ENTRY uint8_t FindTrueIRQ(uint8_t IRQ){
+LOUAPI uint8_t FindTrueIRQ(uint8_t IRQ){
     PAPIC_ISO_TRACKER TmpTracker = &IoApicOverideTracker;
     while(TmpTracker->Peers.NextHeader){
         if(TmpTracker->Overide.Source == IRQ){
@@ -294,7 +294,7 @@ PACPI_MADT_IO_APIC GetIoApicHandleFromIrq(UINT8 Irq){
     return 0x00;
 }
 
-LOUDDK_API_ENTRY void LocalApicSendEoi() {    
+LOUAPI void LocalApicSendEoi() {    
     uint64_t ApicBase = ((PLKPCB)GetLKPCB())->ApicData.ApicBase;
     if(!ApicBase){
         LouPrint("APIC.SYS:ERROR:No Base\n");
@@ -303,8 +303,8 @@ LOUDDK_API_ENTRY void LocalApicSendEoi() {
     WRITE_REGISTER_ULONG(EOI_REGISTER, 0);
 }
 
-LOUDDK_API_ENTRY void IoApicMaskIrq(uint8_t tirq);
-LOUDDK_API_ENTRY void IoApicUnmaskIrq(uint8_t tirq);
+LOUAPI void IoApicMaskIrq(uint8_t tirq);
+LOUAPI void IoApicUnmaskIrq(uint8_t tirq);
 
 void ApicInstallIoApicHandlers(){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;
@@ -372,7 +372,7 @@ void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
 
 static bool ApicSet = false;
 
-LOUDDK_API_ENTRY bool GetAPICStatus() {
+LOUAPI bool GetAPICStatus() {
     return ApicSet;
 }
 
@@ -486,7 +486,7 @@ bool InitializeLapic(UINT32 CpuID){
     return true;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeInitializeCurrentApApic(){
     InitializeLapic(get_processor_id());
 }
@@ -500,7 +500,7 @@ bool InitializeApic(){
     return true;
 }
 
-LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
+LOUAPI LOUSTATUS InitApicSystems() {
     LOUSTATUS Status = STATUS_SUCCESS;  
     LouPrint(DRV_VERSION_APIC);
 
@@ -564,7 +564,7 @@ LOUDDK_API_ENTRY LOUSTATUS InitApicSystems() {
     return Status;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool LouKeIsCpuBroken(INTEGER Cpu){
     LouKeMemoryBarrier();
     PCPU_TRACKER_INFORMATION CpuInfo = GetCpuInfoFromTrackerMember(Cpu);
@@ -572,7 +572,7 @@ bool LouKeIsCpuBroken(INTEGER Cpu){
 }
 
 
-LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
+LOUAPI void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
     mutex_t* Lock = (mutex_t*)(UINT64)0x7028;
 
@@ -630,7 +630,7 @@ LOUDDK_API_ENTRY void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void 
 LouKeConfigureNextApicTimerEvent(SIZE Ms){
     PLOUSINE_KERNEL_APIC_DATA ApicData = &((PLKPCB)GetLKPCB())->ApicData;

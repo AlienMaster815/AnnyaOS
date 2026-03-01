@@ -115,9 +115,9 @@ KERNEL_EXPORT void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV){
     pciConfigWriteWord(0 ,PDEV->bus, PDEV->slot, PDEV->func, 0x04, command_reg);   
 }
 
-LOUDDK_API_ENTRY void LouKeHalPciEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
+LOUAPI void LouKeHalPciEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     LouKeWritePciCommandRegister(PDEV,LouKeReadPciCommandRegister(PDEV) & ~(1 << 10));
 }
-LOUDDK_API_ENTRY void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
+LOUAPI void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     LouKeWritePciCommandRegister(PDEV,LouKeReadPciCommandRegister(PDEV) | (1 << 10));
 }

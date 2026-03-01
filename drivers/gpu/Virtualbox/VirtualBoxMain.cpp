@@ -15,7 +15,7 @@ static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     {0},
 };
 
-LOUDDK_API_ENTRY
+LOUAPI
 VOID
 UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("Unloaded VBOXGPU\n");
@@ -160,7 +160,7 @@ LOUSTATUS VBoxInitializeHardware(
 
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
@@ -228,7 +228,7 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     return Status;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DriverObject, 

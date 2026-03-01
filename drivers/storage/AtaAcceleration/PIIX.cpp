@@ -345,7 +345,7 @@ void UnloadDriver(PDRIVER_OBJECT Driver){
 LOUSTATUS PiixInitializePiix3Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 LOUSTATUS PiixInitializePiix4Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("PIIX.SYS:AddDevice()\n");
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
@@ -389,7 +389,7 @@ LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* Platform
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry

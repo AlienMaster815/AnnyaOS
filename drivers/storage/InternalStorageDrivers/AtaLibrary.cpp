@@ -62,7 +62,7 @@ bool IsAtaController(PPCI_DEVICE_OBJECT PDEV){
     return false;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
     void* IdBuffer
@@ -106,7 +106,7 @@ LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     return Result;  
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT  AtapiPort,
     void*                            IdBuffer
@@ -151,7 +151,7 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeAtaReadDevice(
 	PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
     uint64_t LBA,

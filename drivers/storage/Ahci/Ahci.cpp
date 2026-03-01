@@ -1341,7 +1341,7 @@ LOUSTATUS AddAhciDevice(
     return Status;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 DriverEntry(
     PDRIVER_OBJECT DriverObject, 

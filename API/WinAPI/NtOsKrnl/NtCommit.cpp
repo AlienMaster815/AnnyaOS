@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 NtCommitComplete(
   HANDLE         EnlistmentHandle,
@@ -11,7 +11,7 @@ NtCommitComplete(
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 NtCommitEnlistment(
   HANDLE         EnlistmentHandle,

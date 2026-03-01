@@ -3,7 +3,7 @@
 
 
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 LOUSTATUS 
 PciTestAtaConfigurationBits(
     PPCI_DEVICE_OBJECT PDEV, 

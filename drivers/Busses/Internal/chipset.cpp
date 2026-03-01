@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 UINT16 
 LouKeHalGetChipsetVendor(){
     PCI_COMMON_CONFIG Config;

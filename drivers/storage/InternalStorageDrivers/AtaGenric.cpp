@@ -299,13 +299,13 @@ static void AtaGenericGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT Port){
 
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT  AtapiPort,
     void*                            IdBuffer
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
 
     //Allocate 4 Ports For The Ata Host

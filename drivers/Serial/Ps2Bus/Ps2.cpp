@@ -607,7 +607,7 @@ static LOU_BUS Ps2Bus = {
     .DeInitializeBus = Ps2DeInitializeBus,
 };
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DrvObject, 

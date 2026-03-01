@@ -7,7 +7,7 @@ void LouKeFreePciDevObject(PPCI_DEVICE_OBJECT PDEV);
 static PCIE_ECAM_DEVICE PcieEcamTrack = {0};
 static mutex_t EcamAbstractionLock = {0};
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeInitializeEcamAbstractionDevice(
     UINTPTR         Phys,
     UINTPTR         Virt,
@@ -147,7 +147,7 @@ static void PcieProbeBus(
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 void 
 LouKePcieProbeEcam(){
     PPCIE_ECAM_DEVICE Tmp = (PPCIE_ECAM_DEVICE)PcieEcamTrack.Peers.NextHeader;

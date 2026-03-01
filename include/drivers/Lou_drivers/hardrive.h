@@ -137,7 +137,7 @@ class PATA{
 
 
 #ifndef _KERNEL_MODULE_
-LOUDDK_API_ENTRY bool IsSataCheck(uint8_t bus, uint8_t slot, uint8_t func);
+LOUAPI bool IsSataCheck(uint8_t bus, uint8_t slot, uint8_t func);
 #endif
 
 #endif

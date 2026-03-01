@@ -12,7 +12,7 @@ UNUSED LOUSINE_PCI_DEVICE_TABLE PcNet32SupportedDevices[] = {
     {0},
 };
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("PCNET32::UnloadDriver()\n");
     //we have nothing to unload
@@ -20,7 +20,7 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 AddDevice(
     PDRIVER_OBJECT DriverObject,
@@ -48,7 +48,7 @@ AddDevice(
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 DriverEntry(
     PDRIVER_OBJECT  DriverObject,

@@ -211,7 +211,7 @@ void LouKeSetIrql(
 
 typedef uint8_t LOUSINE_INTERRUPT_LEVEL;
 
-LOUDDK_API_ENTRY void LouKeSetIrql(
+LOUAPI void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );

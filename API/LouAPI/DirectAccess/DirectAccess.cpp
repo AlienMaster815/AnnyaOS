@@ -16,7 +16,7 @@
 
 LOUSTATUS InitializeDirecAccessDrives();
 
-LOUDDK_API_ENTRY LOUSTATUS InitializeDirecAccess(){
+LOUAPI LOUSTATUS InitializeDirecAccess(){
     LOUSTATUS Status = STATUS_SUCCESS;
 
     LouPrint("Initializing DirectAccess Systems\n");

@@ -10,7 +10,7 @@ UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedHdaPciDevices[] = {
     {0},
 };
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("HDAPCI::UnloadDriver()\n");
     //we have nothing to unload
@@ -34,7 +34,7 @@ LOUSTATUS AddDevice(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry

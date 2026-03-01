@@ -1,9 +1,9 @@
 #include "Processors.h"
 
-LOUDDK_API_ENTRY bool IsIntel(string VendorID);
-LOUDDK_API_ENTRY uint8_t GetCPUVendor();
+LOUAPI bool IsIntel(string VendorID);
+LOUAPI uint8_t GetCPUVendor();
 
-LOUDDK_API_ENTRY bool IsIntelCore(string VendorID);
+LOUAPI bool IsIntelCore(string VendorID);
 
 bool CPU::CPUID::IsProcessorBrand(VENDOR_ID Ven){
     if(CpuIdPacket->CpuVenId == Ven) return true;

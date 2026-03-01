@@ -6,7 +6,7 @@ KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     uint64_t* PAddress
 );
 
-LOUDDK_API_ENTRY uint64_t GetAllocationBlockSize(uint64_t Address);
+LOUAPI uint64_t GetAllocationBlockSize(uint64_t Address);
 
 
 UNUSED static PSTOR_PORT_STACK_OBJECT StorPortStack[255] = {0};

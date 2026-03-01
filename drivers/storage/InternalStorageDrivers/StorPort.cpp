@@ -6,12 +6,12 @@ void InitializeAtaDevice();
 
 LOUSTATUS InitializeScsiDevice(PPCI_DEVICE_OBJECT PDEV);
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LOUSB_DRIVER_INIT(
 	PPCI_DEVICE_OBJECT USB_DEV
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 void FindAnyHiddenUsbSystems();
 
 LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
@@ -21,14 +21,14 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 
 //LOUSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
-LOUDDK_API_ENTRY void* LouKeGetBootDevice(size_t Index);
+LOUAPI void* LouKeGetBootDevice(size_t Index);
 LOUSTATUS LouKeInitializeNetworkManager();
-LOUDDK_API_ENTRY size_t GetBootDeviceCount();
-LOUDDK_API_ENTRY DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
+LOUAPI size_t GetBootDeviceCount();
+LOUAPI DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
 
 size_t LouKeGetBootDeviceIndex(PPCI_COMMON_CONFIG Config);
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 LOUSTATUS LookForStorageDevices(){
 
 

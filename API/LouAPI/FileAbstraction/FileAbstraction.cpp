@@ -15,7 +15,7 @@ static bool IsFileCoffFile(FILE File){
     return true;
 }
 
-LOUDDK_API_ENTRY FILE_TYPE LouKeGetFileType(FILE File){
+LOUAPI FILE_TYPE LouKeGetFileType(FILE File){
 
     if(IsFileCoffFile(File)){
         return COFF_FILE_TYPE;

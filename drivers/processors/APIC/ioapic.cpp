@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 #include "../Processors.h"
-LOUDDK_API_ENTRY void ioapic_unmask_irq(uint8_t irq) ;
+LOUAPI void ioapic_unmask_irq(uint8_t irq) ;
 // Structure representing the lower 32 bits of an IOAPIC redirection table entry
 typedef struct {
     uint32_t vector : 8;          // Bits 0-7
@@ -128,14 +128,14 @@ void IoApicWrite(uint64_t ioapic_base, uint32_t reg, uint32_t value) {
     *IoApicMmio(ioapic_base, IOAPIC_WIN) = value;
 }
 
-LOUDDK_API_ENTRY uint8_t GetTotalHardwareInterrupts(){
+LOUAPI uint8_t GetTotalHardwareInterrupts(){
     return TotalApicInterrupts;
 }
 
-LOUDDK_API_ENTRY uint8_t FindTrueIRQ(uint8_t IRQ);
+LOUAPI uint8_t FindTrueIRQ(uint8_t IRQ);
 
 
-LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
+LOUAPI void IoApicConfigureEntryFlags(
     uint8_t     irq,
     uint16_t    Flags
 ){
@@ -165,7 +165,7 @@ LOUDDK_API_ENTRY void IoApicConfigureEntryFlags(
 
 }
 
-LOUDDK_API_ENTRY void IoApicUnmaskIrq(uint8_t tirq) {
+LOUAPI void IoApicUnmaskIrq(uint8_t tirq) {
 
     uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
 
@@ -194,7 +194,7 @@ LOUDDK_API_ENTRY void IoApicUnmaskIrq(uint8_t tirq) {
 
 
 // Function to mask a given IRQ in the I/O APIC
-LOUDDK_API_ENTRY void IoApicMaskIrq(uint8_t tirq) {
+LOUAPI void IoApicMaskIrq(uint8_t tirq) {
     
     uint8_t irq = FindTrueIRQ(tirq); //finds the interrupt based on if there is a overide
     PACPI_MADT_IO_APIC IoApic = GetIoApicHandleFromIrq(irq);

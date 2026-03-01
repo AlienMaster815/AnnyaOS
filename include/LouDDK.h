@@ -4,10 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
-#define LOUDDK_API_ENTRY extern "C"
+#define LOUAPI extern "C"
 #else
 #define DRIVER_IMPORT __declspec(dllimport)
-#define LOUDDK_API_ENTRY 
+#define LOUAPI 
 #endif
 
 #ifndef _KERNEL_MODULE_
@@ -41,6 +41,10 @@ extern "C" {
 #include <kernel/loustatus.h>
 
 
+#define SYSV_CONVENTION __attribute__((sysv_abi))
+#define NAKED_FUNCTION __attribute__((naked))
+
+#include <stdio.h>
 
 
 
@@ -58,8 +62,7 @@ typedef struct _GUID {
 
 
 
-#define SYSV_CONVENTION __attribute__((sysv_abi))
-#define NAKED_FUNCTION __attribute__((naked))
+
 
 typedef void* EventHandle;
 
@@ -83,14 +86,11 @@ typedef void* EventHandle;
 #ifdef _KERNEL_MODULE_
 
 #ifndef PVOID
-typedef void* PVOID;
 #endif
 
 
 #endif
 
-
-#define LOUDDK_API_ENTRY extern "C"
 
 //define common used cpp functions with drivers
 #include <drivers/Lou_drivers/io.h>
@@ -121,7 +121,7 @@ typedef void* FILE;
 
 typedef void* DEVICE;
 
-LOUDDK_API_ENTRY void LouKeInitializeIntervalWork(
+LOUAPI void LouKeInitializeIntervalWork(
     void (*DelayedFunction)(uint64_t PrivateData),
     uint64_t PrivateData,
     uint64_t MsInterval
@@ -175,7 +175,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 // PORTS Stuff
 
 #ifdef __x86_64__
-    LOUDDK_API_ENTRY uint64_t read_msr(uint32_t msr_id);
+    LOUAPI uint64_t read_msr(uint32_t msr_id);
 #endif
 
 #include <ListManagement.h>
@@ -238,17 +238,17 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #ifndef _KERNEL_MODULE_
 
-LOUDDK_API_ENTRY uint8_t inb(uint64_t port);
-LOUDDK_API_ENTRY void outb(uint64_t port, uint8_t data);
-LOUDDK_API_ENTRY uint16_t inw(uint64_t port);
-LOUDDK_API_ENTRY void outw(uint64_t port, uint16_t data);
-LOUDDK_API_ENTRY uint32_t inl(uint64_t port);
-LOUDDK_API_ENTRY void outl(uint64_t port, uint32_t data);
-LOUDDK_API_ENTRY void outbSlow(uint64_t port,uint8_t data);
+LOUAPI uint8_t inb(uint64_t port);
+LOUAPI void outb(uint64_t port, uint8_t data);
+LOUAPI uint16_t inw(uint64_t port);
+LOUAPI void outw(uint64_t port, uint16_t data);
+LOUAPI uint32_t inl(uint64_t port);
+LOUAPI void outl(uint64_t port, uint32_t data);
+LOUAPI void outbSlow(uint64_t port,uint8_t data);
 //MEMMORY ALLOCATION
-LOUDDK_API_ENTRY void LouPanic(char*);
+LOUAPI void LouPanic(char*);
 //STD Library
-LOUDDK_API_ENTRY void* memset(void* dest, int value, size_t count);
+LOUAPI void* memset(void* dest, int value, size_t count);
 
 
 KERNEL_EXPORT void* memcpy(void* dest, const void* src, size_t n);
@@ -266,7 +266,7 @@ void*
 LouKeLoadDriver(string Driver, string EntryName);
 
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
-//LOUDDK_API_ENTRY void INTERRUPT(uint8_t InterruptNumber);
+//LOUAPI void INTERRUPT(uint8_t InterruptNumber);
 
 KERNEL_EXPORT void sleep(uint64_t Time);
 

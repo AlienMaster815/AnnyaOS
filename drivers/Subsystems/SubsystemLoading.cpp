@@ -1,11 +1,11 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+LOUAPI uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName){
     PDRIVER_OBJECT DriverObject;
@@ -26,7 +26,7 @@ LouKeLoadSubsystem(string Subsystem, string EntryName){
 
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 void* 
 LouKeLoadDriver(string Subsystem, string EntryName){
     PDRIVER_OBJECT DriverObject;

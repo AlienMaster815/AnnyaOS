@@ -5,9 +5,9 @@
 
 
 
-LOUDDK_API_ENTRY void InitializeFloatPointUnit();
+LOUAPI void InitializeFloatPointUnit();
 
-LOUDDK_API_ENTRY void SMPInit();
+LOUAPI void SMPInit();
 
 LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature){
     LOUSTATUS Status = STATUS_SUCCESS;

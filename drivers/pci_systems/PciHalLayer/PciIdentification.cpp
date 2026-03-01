@@ -30,7 +30,7 @@ uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
     return 0;
 }
 
-LOUDDK_API_ENTRY size_t GetBootDeviceCount();
+LOUAPI size_t GetBootDeviceCount();
 
 UNUSED static void SanityCheck(LPWSTR Str, size_t Length){
     //for(size_t i = 0 ; i < Length; i++){
@@ -366,7 +366,7 @@ size_t LouKeGetBootDeviceIndex(PPCI_COMMON_CONFIG Config){
     return Result;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 char *
 strcat(
     char                    *DstString,

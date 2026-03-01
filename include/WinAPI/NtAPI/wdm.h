@@ -5819,14 +5819,14 @@ void MmUnmapReservedMapping(
 );
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 NtCommitComplete(
   HANDLE         EnlistmentHandle,
   PLARGE_INTEGER TmVirtualClock
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 NtCommitEnlistment(
   HANDLE         EnlistmentHandle,
@@ -6470,7 +6470,7 @@ void PsFreeAffinityToken(
 
 PETHREAD PsGetCurrentThread();
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool
 PsGetVersion(
     PULONG              MajorVersion, 
@@ -7013,7 +7013,7 @@ void RtlUnicodeStringToAnsiSize(
 );
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 WCHAR RtlUpcaseUnicodeChar(
    WCHAR SourceCharacter
 );
@@ -7260,7 +7260,7 @@ LOUSTATUS VslDeleteSecureSection(
 );
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 WmiQueryTraceInformation(
    TRACE_INFORMATION_CLASS TraceInformationClass,
@@ -7270,7 +7270,7 @@ WmiQueryTraceInformation(
    PVOID                   Buffer
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 WmiTraceMessage(
    TRACEHANDLE LoggerHandle,
@@ -7280,7 +7280,7 @@ WmiTraceMessage(
        ...
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 WmiTraceMessageVa(
    TRACEHANDLE LoggerHandle,

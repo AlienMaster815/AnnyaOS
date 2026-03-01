@@ -5,7 +5,7 @@
 
 LOUSTATUS TRANSLATE_STATUS(LOUSTATUS Status);
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeGetSystemFirmwareTable(
 	ULONG FirmwareTableProviderSignature,
 	ULONG FirmwareTabeId,

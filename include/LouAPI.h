@@ -4,10 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
-#define LOUDDK_API_ENTRY extern "C"
+#define LOUAPI extern "C"
 #else
 #define DRIVER_IMPORT __declspec(dllimport)
-#define LOUDDK_API_ENTRY 
+#define LOUAPI 
 #endif
 
 #ifndef _KERNEL_MODULE_
@@ -28,7 +28,6 @@ extern "C" {
 #endif
 #endif
 
-
 #define WINAPI __stdcall
 
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
@@ -39,10 +38,14 @@ extern "C" {
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
 
-
+#define SYSV_CONVENTION __attribute__((sysv_abi))
+#define NAKED_FUNCTION __attribute__((naked))
 
 #include <stdio.h>
 #include <string.h>
+
+
+
 #include <Time.h>
 #include <fstream.h>
 #include <KernelAPI/KernelAPI.h>

@@ -24,12 +24,6 @@ typedef void*       PVOID;
 typedef UINT16*     LPWSTR;
 typedef UINT16      USHORT;
 
-#define STATUS_SUCCESS                              0
-#define STATUS_UNSUCCESSFUL	            ((LOUSTATUS)0xC0000001L)
-#define STATUS_NO_SUCH_FILE             ((LOUSTATUS)0xC000000FL)
-#define STATUS_INVALID_PARAMETER        ((LOUSTATUS)0xC000000DL)
-
-
 static inline PVOID LouKeMallocExUnix(
     SIZE Size,
     SIZE Alignment

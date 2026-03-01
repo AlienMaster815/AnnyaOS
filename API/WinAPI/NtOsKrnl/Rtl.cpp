@@ -1,7 +1,7 @@
 #include "NtOsKrnl.h"
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool
 RtlDeleteElementGenericTable(
     PRTL_GENERIC_TABLE Table,

@@ -2,11 +2,11 @@
 #include <Hal.h>
 #include <bootloader/grub/multiboot2.h>
 
-LOUDDK_API_ENTRY void StartDebugger();
+LOUAPI void StartDebugger();
 
 static struct multiboot_tag_vbe VBE_INFO;
 
-LOUDDK_API_ENTRY
+LOUAPI
 void SetBootVbe(struct multiboot_tag_vbe VbeInfo){
 	VBE_INFO = VbeInfo;
 }
@@ -14,20 +14,20 @@ void SetBootVbe(struct multiboot_tag_vbe VbeInfo){
 
 static struct multiboot_tag_framebuffer_common* BootGraphics = 0x00;
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeDeferBootGraphics(
 	struct multiboot_tag_framebuffer_common* BootGraphicsDefer
 ){
 	BootGraphics = BootGraphicsDefer;
 }
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 LOUSTATUS
 LouKeDrsdInitializeBootDevice(
     PDRSD_DEVICE Device
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 void InitializeBootGraphics(){
 	if(!BootGraphics){
 		return;

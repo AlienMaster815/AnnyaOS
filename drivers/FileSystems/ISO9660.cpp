@@ -305,12 +305,12 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
 }
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
     LouKeFreeFileData(File);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
 
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
@@ -341,7 +341,7 @@ FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
@@ -370,7 +370,7 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
     //Create A File System Structure
@@ -387,7 +387,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS Iso9660DriverEntry(){
 
     PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);

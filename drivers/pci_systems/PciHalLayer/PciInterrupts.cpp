@@ -1,8 +1,8 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-LOUDDK_API_ENTRY uint16_t GetNPROC();
-LOUDDK_API_ENTRY uint8_t GetTotalHardwareInterrupts();
+LOUAPI uint16_t GetNPROC();
+LOUAPI uint8_t GetTotalHardwareInterrupts();
 
 
 UINT8 LouKeHalPciGetCapabilityPointer(
@@ -10,12 +10,12 @@ UINT8 LouKeHalPciGetCapabilityPointer(
     UINT8               CapID
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq){
     return PDEV->InterruptVectors[Irq + 1];
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeHalMallocPciIrqVectors(
     PPCI_DEVICE_OBJECT  PDEV, 
     UINT32              RequestedVectors, 
@@ -60,7 +60,7 @@ LOUSTATUS LouKeHalMallocPciIrqVectors(
     return STATUS_UNSUCCESSFUL;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 UINT8 LouKeHalGetPciIrqVectorCount(
     PPCI_DEVICE_OBJECT PDEV
 ){
@@ -70,7 +70,7 @@ UINT8 LouKeHalGetPciIrqVectorCount(
     return PDEV->InterruptVectors[0];
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeHalFreePciIrqVectors(
     PPCI_DEVICE_OBJECT PDEV
 ){

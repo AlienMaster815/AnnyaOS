@@ -3,9 +3,6 @@
 
 typedef UCHAR* PUCHAR;
 typedef USHORT* PUSHORT;
-#ifndef LOUDDK_API_ENTRY
-#define LOUDDK_API_ENTRY extern "C"
-#endif
 
 #include <NtAPI.h>
 #ifndef _KERNEL_MODULE_

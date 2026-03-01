@@ -1,6 +1,6 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 string Winstrchr(
     string str,
     int c
@@ -12,7 +12,7 @@ string Winstrchr(
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 string strtok_s(
     string str,
     string Delimiters,
@@ -62,7 +62,7 @@ string strtok_s(
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 string Winstrstr(
    string str,
    string strSearch
@@ -83,7 +83,7 @@ string Winstrstr(
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 size_t strspn(
    string str,
    string strCharSet
@@ -104,7 +104,7 @@ size_t strspn(
     return strlen(str);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 string strrchr(
    string str,
    int c
@@ -118,7 +118,7 @@ string strrchr(
     return 0x00;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 int strncpy_s(
     string Destination,
     size_t ElementsCount,
@@ -142,7 +142,7 @@ int strncpy_s(
     return 0;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 string Winstrcpy(
     string Destination,
     string Source
@@ -159,7 +159,7 @@ string Winstrcpy(
     return Destination;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 int strncat_s(
     string Destination,
     size_t NumElements,
@@ -195,7 +195,7 @@ int strncat_s(
     return 0; // Success
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 string Winstrncat(
     string Destination,
     string Source,
@@ -222,7 +222,7 @@ string Winstrncat(
     return Destination;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 int strcpy_s(
     string Destination,
     size_t DestinationSize,
@@ -243,7 +243,7 @@ int strcpy_s(
     return 0;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 int strcat_s(
     string Destination,
     size_t Elements,
@@ -281,7 +281,7 @@ int strcat_s(
     return 0; // Success
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 string Winstrcat(
     string Destination,
     string Source
@@ -308,20 +308,20 @@ string Winstrcat(
     return Destination; // Return the concatenated string
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void SetRANDSeed(uint32_t NewSeed);
 
-LOUDDK_API_ENTRY
+LOUAPI
 void srand(
     unsigned int seed
 ){
     SetRANDSeed((uint32_t)seed);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint32_t LouKeRandCStdLib();
 
-LOUDDK_API_ENTRY
+LOUAPI
 int rand(){
     return (int)LouKeRandCStdLib();
 }

@@ -8,243 +8,243 @@
 #include <NtAPI.h>
 #ifndef _KERNEL_MODULE_
 //So Nobody is confused this goes from lsb to msb in memory
-LOUDDK_API_ENTRY void LouKeSetBitU64(
+LOUAPI void LouKeSetBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBitU64(
+LOUAPI void LouKeUnSetBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitU64(
+LOUAPI UCHAR LouKeTestBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU64(
+LOUAPI UCHAR LouKeTestBitAndSetU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU64(
+LOUAPI UCHAR LouKeTestBitAndUnSetU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU64(
+LOUAPI UCHAR LouKeTestAndResetBitU64(
 	uint64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBit64(
+LOUAPI void LouKeSetBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBit64(
+LOUAPI void LouKeUnSetBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBit64(
+LOUAPI UCHAR LouKeTestBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet64(
+LOUAPI UCHAR LouKeTestBitAndSet64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet64(
+LOUAPI UCHAR LouKeTestBitAndUnSet64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit64(
+LOUAPI UCHAR LouKeTestAndResetBit64(
 	int64_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBitU32(
+LOUAPI void LouKeSetBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBitU32(
+LOUAPI void LouKeUnSetBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitU32(
+LOUAPI UCHAR LouKeTestBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU32(
+LOUAPI UCHAR LouKeTestBitAndSetU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU32(
+LOUAPI UCHAR LouKeTestBitAndUnSetU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU32(
+LOUAPI UCHAR LouKeTestAndResetBitU32(
 	uint32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBit32(
+LOUAPI void LouKeSetBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBit32(
+LOUAPI void LouKeUnSetBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBit32(
+LOUAPI UCHAR LouKeTestBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet32(
+LOUAPI UCHAR LouKeTestBitAndSet32(
 	int32_t* Base,
 	int8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet32(
+LOUAPI UCHAR LouKeTestBitAndUnSet32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit32(
+LOUAPI UCHAR LouKeTestAndResetBit32(
 	int32_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBitU16(
+LOUAPI void LouKeSetBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBitU16(
+LOUAPI void LouKeUnSetBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitU16(
+LOUAPI UCHAR LouKeTestBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU16(
+LOUAPI UCHAR LouKeTestBitAndSetU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU16(
+LOUAPI UCHAR LouKeTestBitAndUnSetU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU16(
+LOUAPI UCHAR LouKeTestAndResetBitU16(
 	uint16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBit16(
+LOUAPI void LouKeSetBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBit16(
+LOUAPI void LouKeUnSetBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBit16(
+LOUAPI UCHAR LouKeTestBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet16(
+LOUAPI UCHAR LouKeTestBitAndSet16(
 	int16_t* Base,
 	int8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet16(
+LOUAPI UCHAR LouKeTestBitAndUnSet16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit16(
+LOUAPI UCHAR LouKeTestAndResetBit16(
 	int16_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBitU8(
+LOUAPI void LouKeSetBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBitU8(
+LOUAPI void LouKeUnSetBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitU8(
+LOUAPI UCHAR LouKeTestBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSetU8(
+LOUAPI UCHAR LouKeTestBitAndSetU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSetU8(
+LOUAPI UCHAR LouKeTestBitAndUnSetU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBitU8(
+LOUAPI UCHAR LouKeTestAndResetBitU8(
 	uint8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeSetBit8(
+LOUAPI void LouKeSetBit8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY void LouKeUnSetBit8(
+LOUAPI void LouKeUnSetBit8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBit8(
+LOUAPI UCHAR LouKeTestBit8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndSet8(
+LOUAPI UCHAR LouKeTestBitAndSet8(
 	int8_t* Base,
 	int8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestBitAndUnSet8(
+LOUAPI UCHAR LouKeTestBitAndUnSet8(
 	int8_t* Base,
 	uint8_t Index
 );
 
-LOUDDK_API_ENTRY UCHAR LouKeTestAndResetBit8(
+LOUAPI UCHAR LouKeTestAndResetBit8(
 	int8_t* Base,
 	uint8_t Index
 );

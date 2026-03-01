@@ -39,11 +39,11 @@ uint64_t GetIntelCoreGeneration(string VendorID);
 uint8_t GetMasterXenonVersion(string VendorID);
 uint64_t GetIntelXenonGeneration(string VendorID);
 #else 
-LOUDDK_API_ENTRY bool IsIntel(string VendorID);
-LOUDDK_API_ENTRY bool IsIntelCore(string VendorID);
-LOUDDK_API_ENTRY bool WhatIntelSpeed(string VendorID);
-LOUDDK_API_ENTRY uint8_t GetIntelCoreVersion(string VendorID);
-LOUDDK_API_ENTRY uint64_t GetIntelCoreGeneration(string VendorID);
+LOUAPI bool IsIntel(string VendorID);
+LOUAPI bool IsIntelCore(string VendorID);
+LOUAPI bool WhatIntelSpeed(string VendorID);
+LOUAPI uint8_t GetIntelCoreVersion(string VendorID);
+LOUAPI uint64_t GetIntelCoreGeneration(string VendorID);
 INTEL_IGPU_DEVICE_IDENTIFICATION_NUIMBER GetGen4IGPUID();
 #endif
 
@@ -69,7 +69,7 @@ INTEL_IGPU_DEVICE_IDENTIFICATION_NUIMBER GetGen4IGPUID();
 #ifndef __cplusplus
 bool IsIntelIntegratedGraphics();
 #else
-LOUDDK_API_ENTRY bool IsIntelIntegratedGraphics();
+LOUAPI bool IsIntelIntegratedGraphics();
 #endif
 //End Of Intel Stub
 
@@ -96,7 +96,7 @@ bool IsAMDAthlonX2(string VendorID);
 bool IsAMDPhenom(string VendorID);
 bool IsAMDRyzen(string VendorID);
 #else
-LOUDDK_API_ENTRY bool IsAMD(string VendorID);
+LOUAPI bool IsAMD(string VendorID);
 #endif
 
 //End Of AMD Stub
@@ -111,7 +111,7 @@ UNUSED static const string VIAString = "VIA";
 #ifndef __cplusplus
 bool IsVIA(string VendorID);
 #else
-LOUDDK_API_ENTRY bool IsVIA(string VendorID);
+LOUAPI bool IsVIA(string VendorID);
 #endif
 
 //End Of VIA Stub
@@ -132,15 +132,15 @@ uint8_t GetCPUCoreVersion();
 uint64_t GetCPUCoreGeneration();
 #else
 
-LOUDDK_API_ENTRY void DeterminCPU();
+LOUAPI void DeterminCPU();
 
-LOUDDK_API_ENTRY uint8_t GetCPUVendor();
+LOUAPI uint8_t GetCPUVendor();
 
-LOUDDK_API_ENTRY uint8_t GetProcessor();
+LOUAPI uint8_t GetProcessor();
 
-LOUDDK_API_ENTRY uint8_t GetCPUCoreVersion();
+LOUAPI uint8_t GetCPUCoreVersion();
 
-LOUDDK_API_ENTRY uint64_t GetCPUCoreGeneration();
+LOUAPI uint64_t GetCPUCoreGeneration();
 
 #endif
 

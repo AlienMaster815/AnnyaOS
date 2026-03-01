@@ -38,8 +38,8 @@ typedef struct  PACKED _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-LOUDDK_API_ENTRY void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
-LOUDDK_API_ENTRY void RestoreEverything(uint64_t* ContextHandle);
+LOUAPI void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle);
+LOUAPI void RestoreEverything(uint64_t* ContextHandle);
 
 typedef struct {
     ListHeader Neighbors;
@@ -66,25 +66,25 @@ UNUSED static uint32_t* timeQuantum = 0; // Array to track the load on each core
 UNUSED static int thread_count = 0;
 
 
-LOUDDK_API_ENTRY void LouKeSendIcEOI();
-LOUDDK_API_ENTRY void SetInterruptFlags();
-LOUDDK_API_ENTRY void UnSetInterruptFlags();
+LOUAPI void LouKeSendIcEOI();
+LOUAPI void SetInterruptFlags();
+LOUAPI void UnSetInterruptFlags();
 
-LOUDDK_API_ENTRY
+LOUAPI
 void SetTEB(uint64_t Teb);
-LOUDDK_API_ENTRY LouKIRQL LouKeGetIrql();
+LOUAPI LouKIRQL LouKeGetIrql();
 
 
-LOUDDK_API_ENTRY uint64_t GetThreadContext(
+LOUAPI uint64_t GetThreadContext(
     int Thread
 );
 
 
-LOUDDK_API_ENTRY void ThreadStart(void(*Function)(PVOID), PVOID Parameters);
+LOUAPI void ThreadStart(void(*Function)(PVOID), PVOID Parameters);
 
 
 
-LOUDDK_API_ENTRY uint64_t GetThreadContext(
+LOUAPI uint64_t GetThreadContext(
     int Thread
 ){
     //return (uint64_t)threads[Thread].cpu_state;
@@ -102,7 +102,7 @@ unsigned long long get_rsp() {
     return rsp_value;
 }
 
-LOUDDK_API_ENTRY void ManualContextSwitch(uint64_t Context_1, uint64_t Context_2){
+LOUAPI void ManualContextSwitch(uint64_t Context_1, uint64_t Context_2){
 
     //current_thread[GetCurrentCpuTrackMember()] = Context_1;
 
@@ -208,7 +208,7 @@ static void RestoreContext(CPUContext* TMContext, CPUContext* ProgramContext, th
 
 
 
-LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
+LOUAPI uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
     
     uint8_t ProcessorID = GetCurrentCpuTrackMember();
     thread_t* CurrentThread = current_thread[ProcessorID];
@@ -264,11 +264,11 @@ LOUDDK_API_ENTRY uint64_t UpdateThreadManager(uint64_t CpuCurrentState) {
 
 
 
-LOUDDK_API_ENTRY
+LOUAPI
 void UsrJmp(uint64_t Entry);
 
 
-LOUDDK_API_ENTRY uint64_t LouKeLinkerGetAddress(
+LOUAPI uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
@@ -284,14 +284,14 @@ uintptr_t RetriveThreadStubAddress(){
     return FunctionAddress;
 }
 
-LOUDDK_API_ENTRY uint64_t GetPEB();
+LOUAPI uint64_t GetPEB();
 
 
 
 
 
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 PTHREAD 
 LouKeCreateUserStackDemon(
     PVOID Function,
@@ -350,7 +350,7 @@ LouKeCreateUserStackDemon(
 
 
 
-LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
+LOUAPI LOUSTATUS InitThreadManager() {
     
     LOUSTATUS Status = STATUS_SUCCESS;
     size_t CpuCount = GetNPROC();

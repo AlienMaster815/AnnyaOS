@@ -1,6 +1,6 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeAddAtomEx(
     wchar_t* AtomName,
     uint32_t Length,
@@ -8,7 +8,7 @@ LOUSTATUS LouKeAddAtomEx(
     uint32_t Flags
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAddAtomEx(
     PWSTR AtomName,
@@ -19,7 +19,7 @@ NtAddAtomEx(
     return LouKeAddAtomEx((wchar_t*)AtomName, (uint32_t)Length, (uint16_t*)Atom, (uint32_t)Flags);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAddAtom(
     PWSTR       AtomName,

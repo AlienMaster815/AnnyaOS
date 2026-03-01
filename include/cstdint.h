@@ -76,8 +76,7 @@ typedef struct _uint48_t{
 #define INT16_MIN   -0x7FFF
 #define INT8_MIN    -0x7F
 
-
-
+typedef void* PVOID;
 
 #ifdef __cplusplus
 }

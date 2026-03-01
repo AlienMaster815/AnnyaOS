@@ -1,6 +1,6 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAllocateLocallyUniqueId(
     PLUID Luid
@@ -9,7 +9,7 @@ NtAllocateLocallyUniqueId(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAllocateUuids(
     PULARGE_INTEGER Time,
@@ -23,7 +23,7 @@ NtAllocateUuids(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 NtAllocateVirtualMemory(
     HANDLE ProcessHandle,

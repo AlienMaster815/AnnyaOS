@@ -13,41 +13,41 @@ void LouKeUnlockProcManager(LouKIRQL* Irql){
     LouKeReleaseSpinLock(&ProcLock, Irql);
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 void SetupGDT();
 
-LOUDDK_API_ENTRY
+LOUAPI
 void HandleApProccessorInitialization();
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS InitializeStartupInterruptHandleing();
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS SetUpTimers();
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeInitializeCurrentApApic();
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS UpdateIDT(bool Init);
 
-LOUDDK_API_ENTRY VOID LouKeDestroyThread(PVOID ThreadHandle);
+LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-LOUDDK_API_ENTRY PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
 
 static mutex_t CoreIrqReadyLock = {0};
 static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
 static INTEGER                           InitializationProcessor = 0; 
 
-LOUDDK_API_ENTRY void SetCr3(UINT64);
-LOUDDK_API_ENTRY UINT64 GetCr3();
-LOUDDK_API_ENTRY void SetLKPCB(UINT64 KernelProcBlock);
+LOUAPI void SetCr3(UINT64);
+LOUAPI UINT64 GetCr3();
+LOUAPI void SetLKPCB(UINT64 KernelProcBlock);
 
 //static LouKeManagerProcessSwap();
 void PsmProcessScedualManagerObject::PsmSetProcessTransitionState(){
@@ -232,27 +232,27 @@ void PsmProcessScedualManagerObject::PsmSetCurrentThread(PGENERIC_THREAD_DATA Th
     this->CurrentThread = Thread;
 }
 
-LOUDDK_API_ENTRY HANDLE LouKePsmGetCurrentProcessAccessToken(){
+LOUAPI HANDLE LouKePsmGetCurrentProcessAccessToken(){
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     return  (HANDLE)ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentProcess->ProcessAccessToken;
 }
 
-LOUDDK_API_ENTRY HANDLE LouKePsmGetCurrentThreadAccessToken(){
+LOUAPI HANDLE LouKePsmGetCurrentThreadAccessToken(){
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     return  (HANDLE)ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadAccessToken;
 }
 
-LOUDDK_API_ENTRY void LouKeSetIrqlNoFlagUpdate(
+LOUAPI void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );
 
 //static SIZE Foo = 0;
-LOUDDK_API_ENTRY
+LOUAPI
 void 
 LouKeConfigureNextApicTimerEvent(SIZE Ms);
 
-LOUDDK_API_ENTRY UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
+LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     if(LouKeGetIrql() >= CLOCK_LEVEL){
         LouKeConfigureNextApicTimerEvent(30);
         LouKeSendIcEOI();
@@ -288,8 +288,8 @@ UNUSED static void ProcessorIdleTask(){
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
-LOUDDK_API_ENTRY void SignalProcessorsInitialized();
-LOUDDK_API_ENTRY void SignalProcessorsInitPending();
+LOUAPI void SignalProcessorsInitialized();
+LOUAPI void SignalProcessorsInitPending();
 
 UNUSED static void InitializeIdleProcess(){
     HandleApProccessorInitialization();
@@ -328,18 +328,18 @@ UNUSED static void InitializeIdleProcess(){
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 void LouKeUnmaskSmpInterrupts(){
     MutexUnlock(&CoreIrqReadyLock);
 
 }
 
-LOUDDK_API_ENTRY UINT64 GetRSP();
-LOUDDK_API_ENTRY UINT64 GetRBP();
-LOUDDK_API_ENTRY void SetNewBootStack(UINT64 Base, UINT64 Pointer);
+LOUAPI UINT64 GetRSP();
+LOUAPI UINT64 GetRBP();
+LOUAPI void SetNewBootStack(UINT64 Base, UINT64 Pointer);
 LOUSTATUS LouKeTsmInitializeIdleThreads();
 
-LOUDDK_API_ENTRY void InitializeProcessManager(){
+LOUAPI void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
 
     ProcessBlock.ProcessorCount = GetNPROC();
@@ -453,7 +453,7 @@ LOUDDK_API_ENTRY void InitializeProcessManager(){
     LouPrint("Finished Initializing Process Manager\n");
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint64_t LouKeGetThreadIdentification(){    
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     if(!ProcessBlock.ProcStateBlock){
@@ -464,14 +464,14 @@ uint64_t LouKeGetThreadIdentification(){
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadID;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData(){
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint64_t GetAdvancedRegisterInterruptsStorage(){
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->InterruptStorage;

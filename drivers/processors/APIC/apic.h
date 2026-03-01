@@ -140,20 +140,20 @@ typedef enum {
 #ifdef __cplusplus
 #include <LouDDK.h>
 #include <NtAPI.h>
-LOUDDK_API_ENTRY double GetProcessorSpeed();
-LOUDDK_API_ENTRY void PIC_remap(int offset1, int offset2);
-LOUDDK_API_ENTRY uint32_t GetProcessorBusSpeed();
+LOUAPI double GetProcessorSpeed();
+LOUAPI void PIC_remap(int offset1, int offset2);
+LOUAPI uint32_t GetProcessorBusSpeed();
 
-LOUDDK_API_ENTRY void UnMaskLocalInterruptVector(uint8_t Offset);
+LOUAPI void UnMaskLocalInterruptVector(uint8_t Offset);
 
-LOUDDK_API_ENTRY void MaskLocalInterruptVector(uint8_t Offset);
+LOUAPI void MaskLocalInterruptVector(uint8_t Offset);
 
-LOUDDK_API_ENTRY LOUSTATUS SetTimerMode(
+LOUAPI LOUSTATUS SetTimerMode(
 	TimerMode SelectedMode,
 	uint32_t MiS
 );
-LOUDDK_API_ENTRY void SetInterruptFlags();
-LOUDDK_API_ENTRY void UnSetInterruptFlags();
+LOUAPI void SetInterruptFlags();
+LOUAPI void UnSetInterruptFlags();
 
 
 int IsX2ApicSupported();

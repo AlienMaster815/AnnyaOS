@@ -14,7 +14,7 @@ typedef struct _LOU_KE_ATOM_TABLE_ENTRY{
 
 LOU_KE_ATOM_TABLE_ENTRY AtomMasterTable;
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeAddAtomEx(
     wchar_t* AtomName,
     uint32_t Length,
@@ -47,7 +47,7 @@ LOUSTATUS LouKeAddAtomEx(
     */return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS LouKeAddAtom(
     wchar_t* AtomName,
     uint32_t Length,

@@ -7,7 +7,7 @@ static uint64_t pfnWppGetVersion = 0;
 static uint64_t pfnWppTraceMessage = 0;
 static uint64_t pfnWppQueryTraceInformation = 0;
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint64_t 
 WppLoadTracingSupport(){
     pfnWppGetVersion = LouKeLinkerGetAddress(

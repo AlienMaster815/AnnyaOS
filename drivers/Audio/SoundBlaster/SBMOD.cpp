@@ -96,7 +96,7 @@ LouKeAddSbIsaDevice(){
 }
 
 
-LOUDDK_API_ENTRY 
+LOUAPI 
 VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("SBMOD.SYS::UnloadDriver()\n");
     //TODO: Unload 8237A.SYS
@@ -116,7 +116,7 @@ LOUSTATUS AddDevice(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry

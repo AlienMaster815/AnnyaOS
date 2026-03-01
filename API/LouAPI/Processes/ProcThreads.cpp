@@ -2,13 +2,13 @@
 #include "ProcessPrivate.h"
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
-LOUDDK_API_ENTRY
+LOUAPI
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
 );
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKePsmCreateDeferedThreadForProcessEx(
     PHANDLE     ThreadOut,
@@ -52,7 +52,7 @@ LouKePsmCreateDeferedThreadForProcessEx(
     return Status;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKePsmCreateDeferedThreadForProcess(
     PHANDLE     ThreadOut,
@@ -73,7 +73,7 @@ LouKePsmCreateDeferedThreadForProcess(
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKePsmCreateThreadForProcessEx(
     PHANDLE     ThreadOut,
@@ -96,7 +96,7 @@ LouKePsmCreateThreadForProcessEx(
     );
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS 
 LouKePsmCreateThreadForProcess(
     PHANDLE     ThreadOut,

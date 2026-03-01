@@ -1,6 +1,6 @@
 #include <LouDDK.h>
 
-LOUDDK_API_ENTRY
+LOUAPI
 int toupper(int c);
 
 KULA_TABLE_TRACKER MasterTracker = {0};
@@ -60,7 +60,7 @@ LouKeGetKulaEmulatedHandle(
 }
 
 
-LOUDDK_API_ENTRY    
+LOUAPI    
 void
 LouKeInitializeKulaEmulatedFunctions(
     string      HostBinary,

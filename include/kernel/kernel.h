@@ -35,7 +35,7 @@
 
 
 #ifdef __cplusplus
-LOUDDK_API_ENTRY bool IsSystemEfi();
+LOUAPI bool IsSystemEfi();
 KERNEL_EXPORT
 void* 
 LouKeLoadSubsystem(string Subsystem, string EntryName);

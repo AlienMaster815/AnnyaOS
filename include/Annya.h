@@ -1,6 +1,13 @@
 #ifndef _ANNYA_API_H
 #define _ANNYA_API_H
 
+
+#ifdef __cplusplus
+#define LOUAPI extern "C"
+#else
+#define LOUAPI 
+#endif
+
 #define WINAPI __stdcall
 
 #define _USER_MODE_CODE_
@@ -9,6 +16,9 @@
 #include <WinAPI/Win32/winternl.h>
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
+
+#include <stdio.h>
+
 
 
 

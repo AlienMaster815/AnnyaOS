@@ -77,7 +77,7 @@ LouKeHalInitializePs2Mouse(
     return STATUS_SUCCESS;
 }
 
-LOUDDK_API_ENTRY
+LOUAPI
 LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DrvObject, 
