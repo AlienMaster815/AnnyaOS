@@ -608,7 +608,7 @@ static LOU_BUS Ps2Bus = {
 };
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DrvObject, 
     PUNICODE_STRING RegEntry

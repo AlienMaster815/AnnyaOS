@@ -127,7 +127,7 @@ typedef struct _PEP_ACPI_ABANDON_DEVICE {
 typedef struct _PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE {
   PEPHANDLE                       DeviceHandle;
   ULONG                           RequestFlags;
-  NTSTATUS                        Status;
+  LOUSTATUS                        Status;
   ULONG                           ObjectCount;
   SIZE_T                          ObjectBufferSize;
   PEP_ACPI_OBJECT_NAME_WITH_TYPE* Objects;
@@ -141,7 +141,7 @@ typedef struct _PEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD {
     ULONG       MethodName;
     ANSI_STRING MethodNameString;
   };
-  NTSTATUS              MethodStatus;
+  LOUSTATUS              MethodStatus;
   PVOID                 CompletionContext;
   ULONG                 InputArgumentCount;
   SIZE_T                InputArgumentSize;
@@ -218,7 +218,7 @@ typedef struct _PEP_ACPI_PREPARE_DEVICE {
 typedef struct _PEP_ACPI_QUERY_DEVICE_CONTROL_RESOURCES {
         PEPHANDLE            DeviceHandle;
         ULONG                RequestFlags;
-       NTSTATUS             Status;
+       LOUSTATUS             Status;
     SIZE_T               BiosResourcesSize;
             ACPI_METHOD_ARGUMENT* BiosResources;
 } PEP_ACPI_QUERY_DEVICE_CONTROL_RESOURCES, *PPEP_ACPI_QUERY_DEVICE_CONTROL_RESOURCES;
@@ -305,7 +305,7 @@ typedef struct _PEP_PROCESSOR_IDLE_DEPENDENCY {
 
 
 typedef struct _PEP_ACPI_REQUEST_CONVERT_TO_BIOS_RESOURCES {
-    NTSTATUS           TranslationStatus;
+    LOUSTATUS           TranslationStatus;
     PPEP_ACPI_RESOURCE InputBuffer;
     SIZE_T             InputBufferSize;
     PVOID              OutputBuffer;
@@ -325,7 +325,7 @@ typedef struct _PEP_PERF_STATE {
 typedef struct _PEP_ACPI_TRANSLATED_DEVICE_CONTROL_RESOURCES {
   PEPHANDLE         DeviceHandle;
   ULONG             RequestFlags;
-  NTSTATUS          Status;
+  LOUSTATUS          Status;
   SIZE_T            TranslatedResourcesSize;
   PCM_RESOURCE_LIST TranslatedResources;
 } PEP_ACPI_TRANSLATED_DEVICE_CONTROL_RESOURCES, *PPEP_ACPI_TRANSLATED_DEVICE_CONTROL_RESOURCES;
@@ -513,7 +513,7 @@ typedef struct _PEP_POWER_CONTROL_COMPLETE {
    LPCGUID   PowerControlCode;
    PVOID     RequestContext;
    SIZE_T    BytesReturned;
-   NTSTATUS  Status;
+   LOUSTATUS  Status;
 } PEP_POWER_CONTROL_COMPLETE, *PPEP_POWER_CONTROL_COMPLETE;
 
 typedef struct _PEP_POWER_CONTROL_REQUEST {
@@ -524,7 +524,7 @@ typedef struct _PEP_POWER_CONTROL_REQUEST {
     PVOID     OutBuffer;
     SIZE_T    OutBufferSize;
    SIZE_T    BytesReturned;
-   NTSTATUS  Status;
+   LOUSTATUS  Status;
 } PEP_POWER_CONTROL_REQUEST, *PPEP_POWER_CONTROL_REQUEST;
 
 typedef struct _PEP_PPM_CONTEXT_QUERY_PARKING_PAGE {
@@ -580,13 +580,13 @@ typedef struct _PEP_PPM_IDLE_COMPLETE_V2 {
 } PEP_PPM_IDLE_COMPLETE_V2, *PPEP_PPM_IDLE_COMPLETE_V2;
 
 typedef struct _PEP_PPM_IDLE_EXECUTE {
-   NTSTATUS Status;
+   LOUSTATUS Status;
     ULONG    ProcessorState;
     ULONG    PlatformState;
 } PEP_PPM_IDLE_EXECUTE, *PPEP_PPM_IDLE_EXECUTE;
 
 typedef struct _PEP_PPM_IDLE_EXECUTE_V2 {
-   NTSTATUS Status;
+   LOUSTATUS Status;
     ULONG    ProcessorState;
     ULONG    PlatformState;
         ULONG    CoordinatedStateCount;
@@ -1027,7 +1027,7 @@ typedef struct _PEP_UNREGISTER_DEVICE {
 typedef struct _PEP_WORK_ACPI_BUILD_CHILDREN_CONTROL_METHOD_COMPLETE {
   POHANDLE              DeviceHandle;
   ULONG                 CompletionFlags;
-  NTSTATUS              MethodStatus;
+  LOUSTATUS              MethodStatus;
   PVOID                 CompletionContext;
   SIZE_T                OutputArgumentSize;
   PACPI_METHOD_ARGUMENT OutputArguments;
@@ -1110,18 +1110,18 @@ typedef struct _PEP_WORK {
 
 //static PEPCALLBACKNOTIFYACPI Pepcallbacknotifyacpi;
 
-NTSTATUS PoFxRegisterCoreDevice(
+LOUSTATUS PoFxRegisterCoreDevice(
     PCUNICODE_STRING   Id,
     PPO_FX_CORE_DEVICE Device,
    POHANDLE           *Handle
 );
 
-NTSTATUS PoFxRegisterPlugin(
+LOUSTATUS PoFxRegisterPlugin(
         PPEP_INFORMATION        PepInformation,
     PPEP_KERNEL_INFORMATION KernelInformation
 );
 
-NTSTATUS PoFxRegisterPluginEx(
+LOUSTATUS PoFxRegisterPluginEx(
         PPEP_INFORMATION        PepInformation,
         ULONGLONG               Flags,
     PPEP_KERNEL_INFORMATION KernelInformation

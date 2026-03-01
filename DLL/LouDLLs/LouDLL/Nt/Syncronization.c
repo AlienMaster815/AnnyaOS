@@ -47,7 +47,7 @@ RtlTryEnterCriticalSection(
 }
 
 NTDLL_API
-NTSTATUS 
+LOUSTATUS 
 RtlEnterCriticalSection(
     PRTL_CRITICAL_SECTION CriticalSection
 ){
@@ -78,7 +78,7 @@ RtlEnterCriticalSection(
 
 
 NTDLL_API
-NTSTATUS 
+LOUSTATUS 
 RtlInitializeCriticalSectionEx(
     PRTL_CRITICAL_SECTION CriticalSection,
     uint32_t SpinCount,
@@ -124,7 +124,7 @@ RtlInitializeCriticalSectionEx(
 
 
 NTDLL_API 
-NTSTATUS 
+LOUSTATUS 
 RtlLeaveCriticalSection(PRTL_CRITICAL_SECTION CriticalSection) {
 
     if(--CriticalSection->RecursionCount){

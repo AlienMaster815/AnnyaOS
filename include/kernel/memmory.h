@@ -8,7 +8,6 @@
 // Tyler Grenier 9/21/23 9:38 PM
 // added Section 1:1 RAM ADDRESS
 
-#include <stat.h>
 #include <stddef.h>
 #include <cstdint.h>
 #include <cstdlib.h>

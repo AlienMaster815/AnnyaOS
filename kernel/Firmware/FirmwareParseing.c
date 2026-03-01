@@ -84,7 +84,7 @@ LOUSTATUS LouKeSetEfiTable(uint64_t Address) {
 }
 
 LOUSTATUS LouKeSetSmbios(uintptr_t SMBIOS) {
-	return LOUSTATUS_GOOD;
+	return STATUS_SUCCESS;
 }
 
 LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type) {
@@ -94,13 +94,13 @@ LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type) {
 
 	//LouPrint("RSDP Address Is:%d:Version:%d\n",RSDP_MASTER,TYPE_MASTER);
 
-	return LOUSTATUS_GOOD;
+	return STATUS_SUCCESS;
 }
 
 LOUSTATUS LouKeSetApm(struct multiboot_tag_apm* APM) {
 
 	APM_MASTER = APM;
-	return LOUSTATUS_GOOD;
+	return STATUS_SUCCESS;
 }
 
 
@@ -130,7 +130,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 			*TablePointer = (uintptr_t)Rsdp->rsdt_address;
 			*Type = TYPE_MASTER;
 			if ((*TablePointer != 0) && (Type != 0)) {
-				Status = LOUSTATUS_GOOD;
+				Status = STATUS_SUCCESS;
 			}
 		}
 		else {
@@ -141,7 +141,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 			*TableExtended = (uintptr_t)Rsdp2->xsdt_address;
 			*Type = TYPE_MASTER;
 			if ((*TablePointer != 0) && (Type != 0)) {
-				Status = LOUSTATUS_GOOD;
+				Status = STATUS_SUCCESS;
 			}
 		}
 	}
@@ -152,7 +152,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 		*TablePointer = (uintptr_t)APM_MASTER;
 		*Type = 0;
 		if (*TablePointer != 0) {
-			Status = LOUSTATUS_GOOD;
+			Status = STATUS_SUCCESS;
 		}
 	}
 	LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
@@ -180,12 +180,12 @@ LOUSTATUS LouKeGetSystemFirmwareTableId(
 
 		if (FirmwareTableId == 'XSDT') {
 			*TablePointer = *TableExtendedPointer;
-			Status = LOUSTATUS_GOOD;
+			Status = STATUS_SUCCESS;
 			LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
 			return Status;
 		}
 		if (FirmwareTableId == 'RSDT') {
-			Status = LOUSTATUS_GOOD;
+			Status = STATUS_SUCCESS;
 			LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
 			return Status;
 		}
@@ -216,7 +216,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableId(
 				}
 				if ((strncmp((const string)&table->Signature[0], (const string)MasterString, 4) == 0) && (strlen((const string)&table->Signature[0]) != 0)) {
 					*TablePointer = (uintptr_t)table;
-					Status = LOUSTATUS_GOOD;
+					Status = STATUS_SUCCESS;
 					LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
 					return Status;
 				}
@@ -265,7 +265,7 @@ LOUSTATUS LouKeGetSystemFirmwareTableBuffer(
 
 	*BufferLength = ResultBufferLength;
 	LouKeReleaseSpinLock(&FirmwareLock, &OldIrql);
-	return LOUSTATUS_GOOD;
+	return STATUS_SUCCESS;
 }
 
 typedef struct {

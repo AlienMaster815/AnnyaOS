@@ -7,8 +7,7 @@
 
 typedef void* HANDLE;
 
-typedef int32_t NTSTATUS;
-typedef NTSTATUS* PNTSTATUS;
+typedef LOUSTATUS* PLOUSTATUS;
 
 typedef struct _OFFSETINSTANCEDATAANDLENGTH {
     ULONG OffsetInstanceData;
@@ -477,7 +476,7 @@ LOUDDK_API_ENTRY unsigned long DbgPrint(char const*, ...);
 #include "pep_x.h"
 #include "pepfx.h"
 #include "wdm.h"
-#include "ntstatus.h"
+#include "../../kernel/loustatus.h"
 #include "iointx.h"
 
 

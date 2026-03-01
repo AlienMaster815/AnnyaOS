@@ -2,7 +2,7 @@
 
 noreturn void LouKeStackPanic() {
 
-	LouPanic("StkChk Failure", BAD);
+	LouPanic("StkChk Failure");
 
 	while (1);
 }

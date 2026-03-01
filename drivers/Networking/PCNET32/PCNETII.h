@@ -43,7 +43,7 @@ typedef struct _PCNET_II_DRIVER_DATA{
     uint8_t                             ActiveRecieveBuffer;    //bitmask
 }PCNET_II_DRIVER_DATA, * PPCNET_II_DRIVER_DATA;
 
-NTSTATUS InitializePcNetIIDevice(
+LOUSTATUS InitializePcNetIIDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* PlatformDevice
 );

@@ -8,7 +8,7 @@ extern "C"{
 #include <LouAPI.h>
 #endif
 
-#include <WinAPI/NtAPI/ntstatus.h>
+#include <kernel/loustatus.h>
 
 //List Header Is Define in shared types due to the compiler being fussy
 

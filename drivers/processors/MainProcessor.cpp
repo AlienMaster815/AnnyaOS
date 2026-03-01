@@ -10,7 +10,7 @@ LOUDDK_API_ENTRY void InitializeFloatPointUnit();
 LOUDDK_API_ENTRY void SMPInit();
 
 LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature){
-    LOUSTATUS Status = LOUSTATUS_GOOD;
+    LOUSTATUS Status = STATUS_SUCCESS;
 
     LouPrint("Enableing Advanced Processor Features For Bootstrap Processor\n");
 

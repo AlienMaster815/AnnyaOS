@@ -3,11 +3,11 @@
 
 
 
-NTSTATUS TRANSLATE_STATUS(LOUSTATUS Status) {
+LOUSTATUS TRANSLATE_STATUS(LOUSTATUS Status) {
 
 	switch (Status) {
 	
-	case LOUSTATUS_GOOD:
+	case STATUS_SUCCESS:
 		return STATUS_SUCCESS;
 		
 	default:

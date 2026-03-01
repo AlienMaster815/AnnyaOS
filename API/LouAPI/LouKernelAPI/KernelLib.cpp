@@ -31,7 +31,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 	ULONG BufferLength,
 	PULONG ReturnLength) {
 		
-	LOUSTATUS Status = LOUSTATUS_GOOD;
+	LOUSTATUS Status = STATUS_SUCCESS;
 	uintptr_t TablePointer = 0x0000, TableExtendedPointer = 0x0000;
 	uint8_t Type;
 
@@ -43,7 +43,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 		&Type
 	);
 
-	if (Status != LOUSTATUS_GOOD) {
+	if (Status != STATUS_SUCCESS) {
 		LouPrint("Firmware Table Provider Signature Could Not BeFound:ID NUMBER:%u\n",FirmwareTableProviderSignature);
 		return Status;
 	}
@@ -55,7 +55,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 		&TableExtendedPointer,
 		&Type
 	);
-	if (Status != LOUSTATUS_GOOD) {
+	if (Status != STATUS_SUCCESS) {
 		LouPrint("Firmware Table Id Could Not Be Found:ID NUMBER:%u\n",FirmwareTabeId);
 		return Status;
 	}
@@ -71,7 +71,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 	
 
 
-	if (Status != LOUSTATUS_GOOD) {
+	if (Status != STATUS_SUCCESS) {
 		LouPrint("Firmware Table Could Not Be Created\nREASON: ");
 		if(Status == (LOUSTATUS)STATUS_BUFFER_TOO_SMALL)LouPrint("Buffer Too Small\n");
 		return Status;

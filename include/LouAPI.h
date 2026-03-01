@@ -4,8 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
+#define LOUDDK_API_ENTRY extern "C"
 #else
 #define DRIVER_IMPORT __declspec(dllimport)
+#define LOUDDK_API_ENTRY 
 #endif
 
 #ifndef _KERNEL_MODULE_
@@ -35,10 +37,10 @@ extern "C" {
 #include <cstdint.h>
 #include <drivers/Lou_drivers/PciIds.h>
 #include <cstdlib.h>
+#include <kernel/loustatus.h>
 
 
 
-#include <stat.h>
 #include <stdio.h>
 #include <string.h>
 #include <Time.h>
@@ -49,7 +51,6 @@ extern "C" {
 #include <bootloader/grub/multiboot.h>
 #include <CPUInstructionSet/CPURegisters.h>
 
-#include "WinAPI/NtAPI/ntstatus.h"
 
 #include <Random.h>
 

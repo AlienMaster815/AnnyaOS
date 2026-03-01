@@ -829,7 +829,7 @@ ACPI_EXPORT_SYMBOL (AcpiClearGpe)
  *
  * PARAMETERS:  GpeDevice           - Parent GPE Device. NULL for GPE0/GPE1
  *              GpeNumber           - GPE level within the GPE block
- *              EventStatus         - Where the current status of the event
+ *              EveLOUSTATUS         - Where the current status of the event
  *                                    will be returned
  *
  * RETURN:      Status
@@ -842,7 +842,7 @@ ACPI_STATUS
 AcpiGetGpeStatus (
     ACPI_HANDLE             GpeDevice,
     UINT32                  GpeNumber,
-    ACPI_EVENT_STATUS       *EventStatus)
+    ACPI_EVENT_STATUS       *EveLOUSTATUS)
 {
     ACPI_STATUS             Status = AE_OK;
     ACPI_GPE_EVENT_INFO     *GpeEventInfo;
@@ -865,7 +865,7 @@ AcpiGetGpeStatus (
 
     /* Obtain status on the requested GPE number */
 
-    Status = AcpiHwGetGpeStatus (GpeEventInfo, EventStatus);
+    Status = AcpiHwGetGpeStatus (GpeEventInfo, EveLOUSTATUS);
 
 UnlockAndExit:
     AcpiOsReleaseLock (AcpiGbl_GpeLock, Flags);

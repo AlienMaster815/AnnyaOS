@@ -1035,9 +1035,9 @@ AcpiClearEvent (
 
 ACPI_HW_DEPENDENT_RETURN_STATUS (
 ACPI_STATUS
-AcpiGetEventStatus (
+AcpiGetEveLOUSTATUS (
     UINT32                  Event,
-    ACPI_EVENT_STATUS       *EventStatus))
+    ACPI_EVENT_STATUS       *EveLOUSTATUS))
 
 
 /*
@@ -1111,7 +1111,7 @@ ACPI_STATUS
 AcpiGetGpeStatus (
     ACPI_HANDLE             GpeDevice,
     UINT32                  GpeNumber,
-    ACPI_EVENT_STATUS       *EventStatus))
+    ACPI_EVENT_STATUS       *EveLOUSTATUS))
 
 ACPI_HW_DEPENDENT_RETURN_UINT32 (
 UINT32

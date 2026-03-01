@@ -81,10 +81,6 @@ typedef KAFFINITY *PKAFFINITY;
 
 
 
-typedef int32_t NTSTATUS;
-
-#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
-
 typedef USHORT SECURITY_DESCRIPTOR_CONTROL;
 
 typedef PVOID PSID;
@@ -299,7 +295,7 @@ typedef struct _KDPC {
 
 
 typedef
-NTSTATUS
+LOUSTATUS
 DRIVER_ADD_DEVICE (
      struct _DRIVER_OBJECT *DriverObject,
      struct _DEVICE_OBJECT *PhysicalDeviceObject
@@ -319,7 +315,7 @@ typedef const UNICODE_STRING CUNICODE_STRING;
 #endif
 
 typedef
-NTSTATUS
+LOUSTATUS
 DRIVER_INITIALIZE (
      struct _DRIVER_OBJECT *DriverObject,
      PUNICODE_STRING RegistryPath
@@ -334,7 +330,7 @@ DRIVER_UNLOAD (
 typedef DRIVER_UNLOAD *PDRIVER_UNLOAD;
 
 typedef
-NTSTATUS
+LOUSTATUS
 DRIVER_DISPATCH (
      struct _DEVICE_OBJECT *DeviceObject,
      struct _IRP *Irp
@@ -390,7 +386,7 @@ typedef struct _KDEVICE_QUEUE {
 #define _IO_STATUS_BLOCK
 typedef struct _IO_STATUS_BLOCK {
     union {
-        NTSTATUS Status;
+        LOUSTATUS Status;
         PVOID Pointer;
     } DUMMYUNIONNAME;
 
@@ -647,7 +643,7 @@ FAST_IO_QUERY_NETWORK_OPEN_INFO (
 typedef FAST_IO_QUERY_NETWORK_OPEN_INFO *PFAST_IO_QUERY_NETWORK_OPEN_INFO;
 
 typedef
-NTSTATUS
+LOUSTATUS
 FAST_IO_ACQUIRE_FOR_MOD_WRITE (
      struct _FILE_OBJECT *FileObject,
      PLARGE_INTEGER EndingOffset,
@@ -800,7 +796,7 @@ FAST_IO_QUERY_OPEN (
 typedef FAST_IO_QUERY_OPEN *PFAST_IO_QUERY_OPEN;
 
 typedef
-NTSTATUS
+LOUSTATUS
 FAST_IO_RELEASE_FOR_MOD_WRITE (
      struct _FILE_OBJECT *FileObject,
      struct _ERESOURCE *ResourceToRelease,
@@ -810,7 +806,7 @@ FAST_IO_RELEASE_FOR_MOD_WRITE (
 typedef FAST_IO_RELEASE_FOR_MOD_WRITE *PFAST_IO_RELEASE_FOR_MOD_WRITE;
 
 typedef
-NTSTATUS
+LOUSTATUS
 FAST_IO_ACQUIRE_FOR_CCFLUSH (
      struct _FILE_OBJECT *FileObject,
      struct _DEVICE_OBJECT *DeviceObject
@@ -819,7 +815,7 @@ FAST_IO_ACQUIRE_FOR_CCFLUSH (
 typedef FAST_IO_ACQUIRE_FOR_CCFLUSH *PFAST_IO_ACQUIRE_FOR_CCFLUSH;
 
 typedef
-NTSTATUS
+LOUSTATUS
 FAST_IO_RELEASE_FOR_CCFLUSH (
      struct _FILE_OBJECT *FileObject,
      struct _DEVICE_OBJECT *DeviceObject
@@ -989,7 +985,6 @@ typedef struct _DEVOBJ_EXTENSION {
 } DEVOBJ_EXTENSION, *PDEVOBJ_EXTENSION;
 #endif
 
-#define LOUSTATUS uint32_t
 
 #ifndef _DRIVER_OBJECT_
 #define _DRIVER_OBJECT_

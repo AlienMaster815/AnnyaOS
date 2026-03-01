@@ -4,8 +4,10 @@
 #ifdef __cplusplus
 extern "C" {
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
+#define LOUDDK_API_ENTRY extern "C"
 #else
 #define DRIVER_IMPORT __declspec(dllimport)
+#define LOUDDK_API_ENTRY 
 #endif
 
 #ifndef _KERNEL_MODULE_
@@ -36,6 +38,7 @@ extern "C" {
 #include <cstdint.h>
 #include <drivers/Lou_drivers/PciIds.h>
 #include <cstdlib.h>
+#include <kernel/loustatus.h>
 
 
 
@@ -76,11 +79,6 @@ typedef void* EventHandle;
 //#pragma warning(disable: 1218) // Disable C4103
 #endif
 
-#include <cstdlib.h>
-
-
-#define LOUDDK_API_ENTRY extern "C"
-#define DRIVER_IO_FUNCTION extern "C"
 
 #ifdef _KERNEL_MODULE_
 
@@ -96,7 +94,6 @@ typedef void* PVOID;
 
 //define common used cpp functions with drivers
 #include <drivers/Lou_drivers/io.h>
-#include <stat.h>
 #include <stddef.h>
 #include <cstdint.h>
 #include <string.h>
@@ -136,7 +133,6 @@ LOUDDK_API_ENTRY void LouKeInitializeIntervalWork(
 
 typedef size_t SIZE;
 
-#define LOUSTATUS_GOOD 0
 #define PATADEV 1
 #define PATAPIDEV 2
 
@@ -250,7 +246,7 @@ LOUDDK_API_ENTRY uint32_t inl(uint64_t port);
 LOUDDK_API_ENTRY void outl(uint64_t port, uint32_t data);
 LOUDDK_API_ENTRY void outbSlow(uint64_t port,uint8_t data);
 //MEMMORY ALLOCATION
-LOUDDK_API_ENTRY void LouPanic(char*,STATUS);
+LOUDDK_API_ENTRY void LouPanic(char*);
 //STD Library
 LOUDDK_API_ENTRY void* memset(void* dest, int value, size_t count);
 
@@ -341,7 +337,6 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
 #endif
 
 #ifdef _KERNEL_MODULE_
-#define LOUSTATUS uint32_t
 KERNEL_EXPORT LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
 KERNEL_EXPORT void* memcpy(void* dest, const void* src, size_t n);
 KERNEL_EXPORT int strncmp(const char* str1, const char* str2, size_t n);

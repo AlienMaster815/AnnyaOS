@@ -161,7 +161,7 @@ LOUSTATUS VBoxInitializeHardware(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
     
@@ -229,7 +229,7 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DriverObject, 
     PUNICODE_STRING RegistryEntry

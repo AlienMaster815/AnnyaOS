@@ -7,6 +7,10 @@
 
 #include <cstdint.h>
 #include <WinAPI/Win32/winternl.h>
+#include <cstdlib.h>
+#include <kernel/loustatus.h>
+
+
 
 #include <stdalign.h>
 
@@ -26,7 +30,6 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#define LOUSTATUS uint32_t
 
 //#include "USRSPC/API/WinAPItypes.h"
 #include "kernel/SystemCalls.h"
@@ -50,7 +53,7 @@ typedef void* PTHREAD;
 
 #define LOU_EXPORT __declspec(dllexport)
 
-#include <WinAPI/NtAPI/ntstatus.h>
+#include <kernel/loustatus.h>
 #include <WinAPI/Win32/WinAPIStdType.h>
 #include <windows.h>
 #include "WinAPI/Win32/wmsdk/wmfsdk/wmfsdk.h"
@@ -477,10 +480,10 @@ __declspec(dllimport)
 void EnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
-NTSTATUS DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+LOUSTATUS DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
-NTSTATUS LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+LOUSTATUS LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
 HMODULE LoadLibraryA(string DllName);
@@ -521,17 +524,17 @@ __declspec(dllimport)
 void* AnnyaNtGetProcessHeap();
 
 __declspec(dllimport)
-NTSTATUS RtlInitializeCriticalSectionEx(
+LOUSTATUS RtlInitializeCriticalSectionEx(
     PMSVC_CRITICAL_SECTION CriticalSection,
     uint32_t SpinCount,
     uint32_t Flags
 );
 
 __declspec(dllimport)
-NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+LOUSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
-NTSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+LOUSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 #ifndef _KERNEL32_
 __declspec(dllimport)
@@ -588,7 +591,7 @@ typedef void* HINSTANCE;
 struct _LOUQ_WORK;
 
 typedef struct _DELAYED_FUNCTION{
-    uint32_t    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
+    LOUSTATUS    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
     void*       WorkData;
 }DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 

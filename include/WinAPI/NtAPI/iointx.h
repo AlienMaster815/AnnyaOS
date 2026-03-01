@@ -3,17 +3,17 @@
 
 #include <NtAPI.h>
 
-NTSTATUS WdmlibIoGetAffinityInterrupt(
+LOUSTATUS WdmlibIoGetAffinityInterrupt(
 	  PKINTERRUPT     InterruptObject,
 	 PGROUP_AFFINITY GroupAffinity
 );
 
 
-NTSTATUS WdmlibIoDisconnectInterruptEx(
+LOUSTATUS WdmlibIoDisconnectInterruptEx(
 	  PIO_DISCONNECT_INTERRUPT_PARAMETERS Parameters
 );
 
-NTSTATUS WdmlibIoConnectInterruptEx(
+LOUSTATUS WdmlibIoConnectInterruptEx(
 	  PIO_CONNECT_INTERRUPT_PARAMETERS Parameters
 );
 

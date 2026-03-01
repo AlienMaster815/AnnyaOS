@@ -7,6 +7,7 @@
 #define _STYPES_H
 
 #include <cstdint.h>
+#include <kernel/loustatus.h>
 
 #ifndef __INT_MAX__
 #define INT_MAX 2147483647
@@ -108,11 +109,11 @@ typedef struct  _ListHeader{
 struct _LOUQ_WORK;
 
 typedef struct _DELAYED_FUNCTION{
-    uint32_t    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
+    LOUSTATUS    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
     void*       WorkData;
 }DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 
-typedef uint32_t (*DELAYED_CALLBACK)(struct _LOUQ_WORK* WorkData);
+typedef LOUSTATUS (*DELAYED_CALLBACK)(struct _LOUQ_WORK* WorkData);
 
 typedef int         LOU_TOKEN;
 typedef uint64_t    COUNTER;

@@ -104,7 +104,7 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
     while(1);
 }
 
-NTSTATUS AddDevice(
+LOUSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
     struct _DEVICE_OBJECT* PlatformDevice
 ){
@@ -117,7 +117,7 @@ NTSTATUS AddDevice(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS DriverEntry(
+LOUSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry
 ){

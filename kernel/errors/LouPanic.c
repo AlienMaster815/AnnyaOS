@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <kernel/errors.h>
 #include <drivers/display/vga.h>
-#include <stat.h>
 
 #ifdef ARCH_I386_VGA_H
 #define LOU_PANIC
@@ -51,12 +50,8 @@ void LouPanicPrint(string Format){
 }
 
 
-void LouPanic(char* error_message,STATUS recoverable) {
+void LouPanic(char* error_message) {
 	
-	if (true == recoverable) {
-		if(LOUSTATUS_GOOD == SilentPanic()) return;
-	}
-
 	//VgaRgbModeFillBackgroundEx(0,120,215,0);
 	//PanicPrint(error_message);
     asm volatile("cli");

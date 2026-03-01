@@ -31,7 +31,7 @@ LouKeHalInitializeMf2Ps2Keyboard(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DrvObject, 
     PUNICODE_STRING RegEntry

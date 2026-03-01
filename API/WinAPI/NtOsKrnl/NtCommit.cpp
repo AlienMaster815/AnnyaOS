@@ -2,7 +2,7 @@
 
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 NtCommitComplete(
   HANDLE         EnlistmentHandle,
   PLARGE_INTEGER TmVirtualClock
@@ -12,7 +12,7 @@ NtCommitComplete(
 
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 NtCommitEnlistment(
   HANDLE         EnlistmentHandle,
   PLARGE_INTEGER TmVirtualClock

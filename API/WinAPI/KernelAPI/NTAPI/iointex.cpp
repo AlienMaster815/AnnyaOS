@@ -1,13 +1,13 @@
 #include <NtAPI.h>
 #include <LouDDK.h>
 
-NTSTATUS WdmlibIoConnectInterruptEx(
+LOUSTATUS WdmlibIoConnectInterruptEx(
 	  PIO_CONNECT_INTERRUPT_PARAMETERS Parameters
 ) {
 	return IoConnectInterruptEx(Parameters);
 }
 
-NTSTATUS WdmlibIoDisconnectInterruptEx(
+LOUSTATUS WdmlibIoDisconnectInterruptEx(
 	  PIO_DISCONNECT_INTERRUPT_PARAMETERS Parameters
 ) {
 
@@ -16,7 +16,7 @@ NTSTATUS WdmlibIoDisconnectInterruptEx(
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS WdmlibIoGetAffinityInterrupt(
+LOUSTATUS WdmlibIoGetAffinityInterrupt(
       PKINTERRUPT     InterruptObject,
      PGROUP_AFFINITY GroupAffinity
 ) {

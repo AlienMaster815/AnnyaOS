@@ -16,7 +16,7 @@ LouCreateSectionEx(
 
 static HANDLE SessionManagerProcessHandle = 0x00;
 
-NTSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
+LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     //LouExitDosMode();
 

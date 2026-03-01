@@ -14,7 +14,7 @@ LOUDDK_API_ENTRY LOUSTATUS LouKeHdlspDispatch(
 
 
 LOUDDK_API_ENTRY
-NTSTATUS HeadlessDispatch(
+LOUSTATUS HeadlessDispatch(
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
     uint64_t Flags, 
@@ -108,7 +108,7 @@ uint32_t GetNtEmualationBuild(){
 
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 NtClose(
   HANDLE Handle
 ){
@@ -1640,7 +1640,7 @@ NtClose(
 // FsRtlIsNameInExpression
 // FsRtlIsNameInUnUpcasedExpression
 // FsRtlIsNonEmptyDirectoryReparsePointAllowed
-// FsRtlIsNtstatusExpected
+// FsRtlIsLOUSTATUSExpected
 // FsRtlIsPagingFile
 // FsRtlIsSystemPagingFile
 // FsRtlIsTotalDeviceFailure
@@ -1668,7 +1668,7 @@ NtClose(
 // FsRtlMdlWriteCompleteDev
 // FsRtlMupGetProviderIdFromName
 // FsRtlMupGetProviderInfoFromFileObject
-// FsRtlNormalizeNtstatus
+// FsRtlNormalizeLOUSTATUS
 // FsRtlNotifyChangeDirectory
 // FsRtlNotifyCleanup
 // FsRtlNotifyCleanupAll
@@ -2477,7 +2477,7 @@ NtClose(
 // RtlLookupFirstMatchingElementGenericTableAvl
 // RtlLookupFunctionEntry
 // RtlMapGenericMask
-// RtlMapSecurityErrorToNtStatus
+// RtlMapSecurityErrorToLOUSTATUS
 // RtlMergeBitMaps
 // RtlMergeBitMapsEx
 // RtlMergeRangeLists
@@ -2488,8 +2488,8 @@ NtClose(
 // RtlNormalizeSecurityDescriptor
 // RtlNormalizeString
 // RtlNotifyFeatureUsage
-// RtlNtStatusToDosError
-// RtlNtStatusToDosErrorNoTeb
+// RtlLOUSTATUSToDosError
+// RtlLOUSTATUSToDosErrorNoTeb
 // RtlNumberGenericTableElements
 // RtlNumberGenericTableElementsAvl
 // RtlNumberOfClearBits

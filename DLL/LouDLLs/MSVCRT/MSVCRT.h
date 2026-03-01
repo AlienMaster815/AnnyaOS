@@ -11,8 +11,8 @@ typedef unsigned int ULONG;
 
 #include <cstdint.h>
 #include <stdbool.h>
+#include <kernel/loustatus.h>
 
-#define NTSTATUS uint64_t //fillin for Nt Status
 #define ENOMEM  12
 
 typedef uint64_t size_t;
@@ -122,7 +122,7 @@ __declspec(dllimport)
 void LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
-NTSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
+LOUSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 __declspec(dllimport)
 void InitializeCriticalSectionEx(

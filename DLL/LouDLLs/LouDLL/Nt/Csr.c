@@ -69,7 +69,7 @@ CsrCaptureMessageBuffer(
     LouMemCpy(MessageString, *CaptureData , StringLength);
 }
 
-//NTSTATUS 
+//LOUSTATUS 
 //NTDLL_API
 //CsrCaptureMessageMultiUnicodeStringsInPlace(
 

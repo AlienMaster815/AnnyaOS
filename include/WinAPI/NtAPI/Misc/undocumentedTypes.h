@@ -226,7 +226,7 @@ typedef enum _THREADINFOCLASS {
 #include "../aux_klib.h"
 
 typedef
-NTSTATUS
+LOUSTATUS
 POWER_SETTING_CALLBACK (
      LPCGUID SettingGuid,
      PVOID Value,

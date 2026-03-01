@@ -484,7 +484,7 @@ LsaLookupPrivilegeValue
 LsaLookupSids
 LsaLookupSids2
 LsaManageSidNameMapping
-LsaNtStatusToWinError
+LsaLOUSTATUSToWinError
 LsaOpenAccount
 LsaOpenPolicy
 LsaOpenPolicySce

@@ -22,7 +22,7 @@ void TimerHandler();
 
 LOUSTATUS InitializeStartupInterruptHandleing(){
     
-    if(SetBasicInterrupts(true) != LOUSTATUS_GOOD)LouPanic("Error Setting Basic Interrupts",BAD);
+    if(SetBasicInterrupts(true) != STATUS_SUCCESS)LouPanic("Error Setting Basic Interrupts");
 
     UpdateIDT(true);
 

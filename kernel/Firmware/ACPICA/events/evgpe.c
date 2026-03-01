@@ -546,7 +546,7 @@ AcpiEvGpeDetect (
     ACPI_GPE_REGISTER_INFO  *GpeRegisterInfo;
     ACPI_GPE_EVENT_INFO     *GpeEventInfo;
     UINT32                  GpeNumber;
-    UINT32                  IntStatus = ACPI_INTERRUPT_NOT_HANDLED;
+    UINT32                  ILOUSTATUS = ACPI_INTERRUPT_NOT_HANDLED;
     ACPI_CPU_FLAGS          Flags;
     UINT32                  i;
     UINT32                  j;
@@ -558,7 +558,7 @@ AcpiEvGpeDetect (
 
     if (!GpeXruptList)
     {
-        return (IntStatus);
+        return (ILOUSTATUS);
     }
 
     /*
@@ -612,7 +612,7 @@ AcpiEvGpeDetect (
                     ACPI_GPE_REGISTER_WIDTH) + j];
                 GpeNumber = j + GpeRegisterInfo->BaseGpeNumber;
                 AcpiOsReleaseLock (AcpiGbl_GpeLock, Flags);
-                IntStatus |= AcpiEvDetectGpe (
+                ILOUSTATUS |= AcpiEvDetectGpe (
                     GpeDevice, GpeEventInfo, GpeNumber);
                 Flags = AcpiOsAcquireLock (AcpiGbl_GpeLock);
             }
@@ -622,7 +622,7 @@ AcpiEvGpeDetect (
     }
 
     AcpiOsReleaseLock (AcpiGbl_GpeLock, Flags);
-    return (IntStatus);
+    return (ILOUSTATUS);
 }
 
 
@@ -832,7 +832,7 @@ AcpiEvDetectGpe (
     ACPI_GPE_EVENT_INFO     *GpeEventInfo,
     UINT32                  GpeNumber)
 {
-    UINT32                  IntStatus = ACPI_INTERRUPT_NOT_HANDLED;
+    UINT32                  ILOUSTATUS = ACPI_INTERRUPT_NOT_HANDLED;
     UINT8                   EnabledStatusByte;
     UINT64                  StatusReg;
     UINT64                  EnableReg;
@@ -928,7 +928,7 @@ AcpiEvDetectGpe (
          *    destruction.
          */
         AcpiOsReleaseLock (AcpiGbl_GpeLock, Flags);
-        IntStatus |= GpeHandlerInfo->Address (
+        ILOUSTATUS |= GpeHandlerInfo->Address (
             GpeDevice, GpeNumber, GpeHandlerInfo->Context);
         Flags = AcpiOsAcquireLock (AcpiGbl_GpeLock);
     }
@@ -936,13 +936,13 @@ AcpiEvDetectGpe (
     {
         /* Dispatch the event to a standard handler or method. */
 
-        IntStatus |= AcpiEvGpeDispatch (GpeDevice,
+        ILOUSTATUS |= AcpiEvGpeDispatch (GpeDevice,
             GpeEventInfo, GpeNumber);
     }
 
 ErrorExit:
     AcpiOsReleaseLock (AcpiGbl_GpeLock, Flags);
-    return (IntStatus);
+    return (ILOUSTATUS);
 }
 
 

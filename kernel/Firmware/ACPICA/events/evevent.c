@@ -341,7 +341,7 @@ UINT32
 AcpiEvFixedEventDetect (
     void)
 {
-    UINT32                  IntStatus = ACPI_INTERRUPT_NOT_HANDLED;
+    UINT32                  ILOUSTATUS = ACPI_INTERRUPT_NOT_HANDLED;
     UINT32                  FixedStatus;
     UINT32                  FixedEnable;
     UINT32                  i;
@@ -358,7 +358,7 @@ AcpiEvFixedEventDetect (
     Status |= AcpiHwRegisterRead (ACPI_REGISTER_PM1_ENABLE, &FixedEnable);
     if (ACPI_FAILURE (Status))
     {
-        return (IntStatus);
+        return (ILOUSTATUS);
     }
 
     ACPI_DEBUG_PRINT ((ACPI_DB_INTERRUPTS,
@@ -386,11 +386,11 @@ AcpiEvFixedEventDetect (
                      i, AcpiGbl_GlobalEventHandlerContext);
             }
 
-            IntStatus |= AcpiEvFixedEventDispatch (i);
+            ILOUSTATUS |= AcpiEvFixedEventDispatch (i);
         }
     }
 
-    return (IntStatus);
+    return (ILOUSTATUS);
 }
 
 

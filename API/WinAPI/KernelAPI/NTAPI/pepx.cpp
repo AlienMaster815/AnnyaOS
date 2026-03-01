@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 #include <NtAPI.h>
 
-NTSTATUS PoFxRegisterCoreDevice(
+LOUSTATUS PoFxRegisterCoreDevice(
       PCUNICODE_STRING   Id,
       PPO_FX_CORE_DEVICE Device,
      POHANDLE* Handle
@@ -10,7 +10,7 @@ NTSTATUS PoFxRegisterCoreDevice(
     return 0;
 }
 
-NTSTATUS PoFxRegisterPlugin(
+LOUSTATUS PoFxRegisterPlugin(
           PPEP_INFORMATION        PepInformation,
       PPEP_KERNEL_INFORMATION KernelInformation
 ) {
@@ -18,7 +18,7 @@ NTSTATUS PoFxRegisterPlugin(
     return 0;
 }
 
-NTSTATUS PoFxRegisterPluginEx(
+LOUSTATUS PoFxRegisterPluginEx(
           PPEP_INFORMATION        PepInformation,
           ULONGLONG               Flags,
       PPEP_KERNEL_INFORMATION KernelInformation

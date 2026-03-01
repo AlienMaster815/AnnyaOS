@@ -19,7 +19,7 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 //static bool AhciDriverLoaded = false;
 //static PDRIVER_OBJECT AhciDriverObject = 0x00;
 
-//NTSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
+//LOUSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
 uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 LOUDDK_API_ENTRY void* LouKeGetBootDevice(size_t Index);
 LOUSTATUS LouKeInitializeNetworkManager();

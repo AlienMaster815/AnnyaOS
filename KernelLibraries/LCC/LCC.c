@@ -9,7 +9,6 @@ typedef bool BOOL;
 typedef void* HMODULE;
 typedef void* LPVOID;
 typedef uint32_t DWORD;
-typedef uint64_t LOUSTATUS;
 
 //__declspec(dllimport) int LouPrint(char* format, ...);
 

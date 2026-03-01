@@ -5,17 +5,17 @@
 #include "irp.h"
 
 
-NTSTATUS WmiCompleteRequest(
+LOUSTATUS WmiCompleteRequest(
          struct _DEVICE_OBJECT* DeviceObject,
     PIRP           Irp,
-         NTSTATUS       Status,
+         LOUSTATUS       Status,
          ULONG          BufferUsed,
          CCHAR          PriorityBoost
 );
 
 
 
-NTSTATUS WmiFireEvent(
+LOUSTATUS WmiFireEvent(
              struct _DEVICE_OBJECT* DeviceObject,
              LPCGUID        Guid,
              ULONG          InstanceIndex,
@@ -40,7 +40,7 @@ typedef struct _WMILIB_CONTEXT {
   PWMI_FUNCTION_CONTROL WmiFunctionControl;
 } WMILIB_CONTEXT, *PWMILIB_CONTEXT;
 
-NTSTATUS WmiSystemControl(
+LOUSTATUS WmiSystemControl(
         PWMILIB_CONTEXT         WmiLibInfo,
         struct _DEVICE_OBJECT*          DeviceObject,
     PIRP                    Irp,

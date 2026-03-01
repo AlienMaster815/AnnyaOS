@@ -3,7 +3,7 @@
 
 //Define Used Internal Kernel Functions
 
-NTSTATUS TRANSLATE_STATUS(LOUSTATUS Status);
+LOUSTATUS TRANSLATE_STATUS(LOUSTATUS Status);
 
 LOUDDK_API_ENTRY
 LOUSTATUS LouKeGetSystemFirmwareTable(
@@ -15,7 +15,7 @@ LOUSTATUS LouKeGetSystemFirmwareTable(
 
 
 
-NTSTATUS
+LOUSTATUS
 __stdcall
 AuxKlibEnumerateSystemFirmwareTables(
 	 ULONG FirmwareTableProviderSignature,
@@ -30,7 +30,7 @@ AuxKlibEnumerateSystemFirmwareTables(
 }
 
 
-NTSTATUS AuxKlibGetBugCheckData(
+LOUSTATUS AuxKlibGetBugCheckData(
 	 PKBUGCHECK_DATA BugCheckData
 ) {
 
@@ -47,15 +47,15 @@ PIMAGE_EXPORT_DIRECTORY AuxKlibGetImageExportDirectory(
 
 
 
-NTSTATUS AuxKlibGetSystemFirmwareTable(
+LOUSTATUS AuxKlibGetSystemFirmwareTable(
 	      ULONG  FirmwareTableProviderSignature,
 	      ULONG  FirmwareTableID,
 	 PVOID  FirmwareTableBuffer,
 	      ULONG  BufferLength,
 	 PULONG ReturnLength
 ) {
-	LOUSTATUS LouKStatus = LOUSTATUS_GOOD;
-	NTSTATUS DriverApiTranslatedStatus = STATUS_SUCCESS;
+	LOUSTATUS LouKStatus = STATUS_SUCCESS;
+	LOUSTATUS DriverApiTranslatedStatus = STATUS_SUCCESS;
 	
 	LouKStatus = LouKeGetSystemFirmwareTable(
 		FirmwareTableProviderSignature,
@@ -64,20 +64,20 @@ NTSTATUS AuxKlibGetSystemFirmwareTable(
 		BufferLength,
 		ReturnLength);
 
-	DriverApiTranslatedStatus = (NTSTATUS)LouKStatus;
+	DriverApiTranslatedStatus = (LOUSTATUS)LouKStatus;
 
 	return DriverApiTranslatedStatus;
 }
 
 
 
-NTSTATUS AuxKlibInitialize() {
+LOUSTATUS AuxKlibInitialize() {
 
 
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS AuxKlibQueryModuleInformation(
+LOUSTATUS AuxKlibQueryModuleInformation(
 	       PULONG BufferSize,
 	            ULONG  ElementSize,
 			PVOID  QueryInfo

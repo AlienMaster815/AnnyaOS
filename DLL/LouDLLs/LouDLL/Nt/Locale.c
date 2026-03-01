@@ -2,7 +2,7 @@
 #include "privlocal.h"
 
 NTDLL_API 
-NTSTATUS
+LOUSTATUS
 WINAPI
 RtlMultiByteToUnicodeN(
     LPWSTR  Destination,
@@ -16,7 +16,7 @@ RtlMultiByteToUnicodeN(
 }
 
 NTDLL_API
-NTSTATUS
+LOUSTATUS
 WINAPI
 RtlMultiByteToUnicodeSize(
     DWORD* Size,
@@ -28,7 +28,7 @@ RtlMultiByteToUnicodeSize(
 }
 
 NTDLL_API 
-NTSTATUS
+LOUSTATUS
 WINAPI
 RtlUnicodeToMultiByteN(
     string  Destination,
@@ -42,7 +42,7 @@ RtlUnicodeToMultiByteN(
 }
 
 NTDLL_API
-NTSTATUS 
+LOUSTATUS 
 WINAPI 
 RtlUnicodeToMultiByteSize(
     DWORD* Size,

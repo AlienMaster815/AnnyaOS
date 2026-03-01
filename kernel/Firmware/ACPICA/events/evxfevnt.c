@@ -477,10 +477,10 @@ ACPI_EXPORT_SYMBOL (AcpiClearEvent)
 
 /*******************************************************************************
  *
- * FUNCTION:    AcpiGetEventStatus
+ * FUNCTION:    AcpiGetEveLOUSTATUS
  *
  * PARAMETERS:  Event           - The fixed event
- *              EventStatus     - Where the current status of the event will
+ *              EveLOUSTATUS     - Where the current status of the event will
  *                                be returned
  *
  * RETURN:      Status
@@ -490,19 +490,19 @@ ACPI_EXPORT_SYMBOL (AcpiClearEvent)
  ******************************************************************************/
 
 ACPI_STATUS
-AcpiGetEventStatus (
+AcpiGetEveLOUSTATUS (
     UINT32                  Event,
-    ACPI_EVENT_STATUS       *EventStatus)
+    ACPI_EVENT_STATUS       *EveLOUSTATUS)
 {
     ACPI_STATUS             Status;
-    ACPI_EVENT_STATUS       LocalEventStatus = 0;
+    ACPI_EVENT_STATUS       LocalEveLOUSTATUS = 0;
     UINT32                  InByte;
 
 
-    ACPI_FUNCTION_TRACE (AcpiGetEventStatus);
+    ACPI_FUNCTION_TRACE (AcpiGetEveLOUSTATUS);
 
 
-    if (!EventStatus)
+    if (!EveLOUSTATUS)
     {
         return_ACPI_STATUS (AE_BAD_PARAMETER);
     }
@@ -518,7 +518,7 @@ AcpiGetEventStatus (
 
     if (AcpiGbl_FixedEventHandlers[Event].Handler)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_HAS_HANDLER;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_HAS_HANDLER;
     }
 
     /* Fixed event currently enabled? */
@@ -532,7 +532,7 @@ AcpiGetEventStatus (
 
     if (InByte)
     {
-        LocalEventStatus |=
+        LocalEveLOUSTATUS |=
             (ACPI_EVENT_FLAG_ENABLED | ACPI_EVENT_FLAG_ENABLE_SET);
     }
 
@@ -547,13 +547,13 @@ AcpiGetEventStatus (
 
     if (InByte)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_STATUS_SET;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_STATUS_SET;
     }
 
-    (*EventStatus) = LocalEventStatus;
+    (*EveLOUSTATUS) = LocalEveLOUSTATUS;
     return_ACPI_STATUS (AE_OK);
 }
 
-ACPI_EXPORT_SYMBOL (AcpiGetEventStatus)
+ACPI_EXPORT_SYMBOL (AcpiGetEveLOUSTATUS)
 
 #endif /* !ACPI_REDUCED_HARDWARE */

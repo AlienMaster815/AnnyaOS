@@ -301,7 +301,7 @@ AcpiHwClearGpeBlock (
 ACPI_STATUS
 AcpiHwGetGpeStatus (
     ACPI_GPE_EVENT_INFO     *GpeEventInfo,
-    ACPI_EVENT_STATUS       *EventStatus);
+    ACPI_EVENT_STATUS       *EveLOUSTATUS);
 
 ACPI_STATUS
 AcpiHwDisableAllGpes (

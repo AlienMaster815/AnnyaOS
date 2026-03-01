@@ -24,7 +24,7 @@
 
 #include "ntdef.h"
 #include "windef.h"
-#include "../NtAPI/ntstatus.h"
+#include "kernel/loustatus.h"
 #include "winnt.h"
 
 
@@ -325,7 +325,7 @@ typedef struct _CHPEV2_PROCESS_INFO{
 #define TEB_ACTIVE_FRAME_CONTEXT_FLAG_EXTENDED 0x00000001
 #define TEB_ACTIVE_FRAME_FLAG_EXTENDED         0x00000001
 
-typedef NTSTATUS (WINAPI * KERNEL_CALLBACK_FUNCTION)(void *, ULONG);
+typedef LOUSTATUS (WINAPI * KERNEL_CALLBACK_FUNCTION)(void *, ULONG);
 
 typedef struct _PEB{
     BOOL                            InheritedAddressSpace;

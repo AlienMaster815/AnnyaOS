@@ -346,7 +346,7 @@ LOUSTATUS PiixInitializePiix3Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
 LOUSTATUS PiixInitializePiix4Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
 LOUDDK_API_ENTRY
-NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
+LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("PIIX.SYS:AddDevice()\n");
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     LOUSTATUS Status;
@@ -361,7 +361,7 @@ NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformD
 
     Status = LouKeHalEnablePciDevice(PDEV);
     if(Status != STATUS_SUCCESS){
-        return (NTSTATUS)Status;
+        return (LOUSTATUS)Status;
     }
 
     if(PiixPciDeviceTable[DeviceID].BoardID == PIIX_CONTROLLER_ID_PATA_MWDMA){
@@ -390,7 +390,7 @@ NTSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformD
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS DriverEntry(
+LOUSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry
 ){

@@ -107,7 +107,7 @@ static FILE* ISOLouKeFindDirectory(
     uint64_t PageFlags
 ){
 
-    LOUSTATUS Status = LOUSTATUS_GOOD;
+    LOUSTATUS Status = STATUS_SUCCESS;
     uint64_t BufferSize = RootSize;
 
     uint16_t* Test = (uint16_t*)ReadDrive(

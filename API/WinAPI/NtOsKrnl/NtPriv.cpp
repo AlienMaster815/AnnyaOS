@@ -2,7 +2,7 @@
 
 
 
-NTSTATUS NtAdjustPrivilegesToken(
+LOUSTATUS NtAdjustPrivilegesToken(
     HANDLE TokenHandle,
     bool DisableAllPrivaledges,
     PTOKEN_PRIVALEDGES NewState,

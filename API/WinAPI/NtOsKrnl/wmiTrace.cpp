@@ -11,7 +11,7 @@ void NtTransitionLayerInitMessageTraceStack(){
 extern "C" uint64_t GetGSValue(uint64_t Offset);
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 WmiTraceMessageVa(
    TRACEHANDLE LoggerHandle,
    ULONG       MessageFlags,
@@ -25,7 +25,7 @@ WmiTraceMessageVa(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 WmiTraceMessage(
    TRACEHANDLE LoggerHandle,
    ULONG       MessageFlags,
@@ -33,7 +33,7 @@ WmiTraceMessage(
    USHORT      MessageNumber,
    ...
 ){
-    NTSTATUS Status;
+    LOUSTATUS Status;
     va_list args;
     va_start(args, MessageNumber);
     Status = WmiTraceMessageVa(
@@ -49,7 +49,7 @@ WmiTraceMessage(
 
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 WmiQueryTraceInformation(
    TRACE_INFORMATION_CLASS TraceInformationClass,
    PVOID                   TraceInformation,

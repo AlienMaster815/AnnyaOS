@@ -84,7 +84,7 @@ void PcNetIIHardwareSetMacAddress(
     PcNetPrivate->InitializationBlock.PhysicalAddress = Mac;
 }
 
-NTSTATUS InitializePcNetIIDevice(
+LOUSTATUS InitializePcNetIIDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* PlatformDevice
 ){
@@ -123,7 +123,7 @@ NTSTATUS InitializePcNetIIDevice(
 
     LousineKernelStatus = LouKeHalEnablePciDevice(PDEV);
     if(LousineKernelStatus != STATUS_SUCCESS){
-        return (NTSTATUS)LousineKernelStatus;
+        return (LOUSTATUS)LousineKernelStatus;
     }
     LouKeHalPciSetMaster(PDEV);
 

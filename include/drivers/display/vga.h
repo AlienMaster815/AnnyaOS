@@ -7,7 +7,6 @@
 
 #include <cstdint.h>
 #include <kernel/errors.h>
-#include <stat.h>
 #include <kernel/memmory.h>
 
 #ifdef __cplusplus
@@ -101,7 +100,6 @@ typedef struct{
 #ifndef _KERNEL_MODULE_
 
 void setup_vga_systems();
-STATUS register_new_mode(uint8_t new_vga,uint8_t mode);
 void print_clear();
 void print_set_color(uint8_t foreground, uint8_t background);
 void init_terminal();

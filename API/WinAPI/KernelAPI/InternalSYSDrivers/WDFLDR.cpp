@@ -10,21 +10,21 @@ typedef struct _WDF_DRIVER_GLOBALS {
 } WDF_DRIVER_GLOBALS, *PWDF_DRIVER_GLOBALS;
 
 
-NTSTATUS WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2){
-    LouPrint("NTSTATUS WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2)\n");
+LOUSTATUS WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2){
+    LouPrint("LOUSTATUS WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2)\n");
 
     return STATUS_SUCCESS;
 }
-NTSTATUS DllInitialize(UNICODE_STRING* arg1){
+LOUSTATUS DllInitialize(UNICODE_STRING* arg1){
     
     return STATUS_SUCCESS;
 }
-NTSTATUS DllUnload(){
-    LouPrint("NTSTATUS DllUnload()\n");
+LOUSTATUS DllUnload(){
+    LouPrint("LOUSTATUS DllUnload()\n");
     return STATUS_SUCCESS;
 }
 
-NTSTATUS WdfVersionBindClass(
+LOUSTATUS WdfVersionBindClass(
     PDRIVER_OBJECT DrvObject,
     WDF_BIND_INFO* BindInfo, 
     PWSTR ClassLibrary, 
@@ -57,28 +57,28 @@ void WdfVersionUnbindClass(struct _WDF_BIND_INFO* arg1, void** arg2, struct _WDF
     
 }
 
-NTSTATUS WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1){
-    LouPrint("NTSTATUS WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1)\n");
+LOUSTATUS WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1){
+    LouPrint("LOUSTATUS WdfLdrQueryInterface(struct _WDF_INTERFACE_HEADER* arg1)\n");
     return STATUS_SUCCESS;
 }
-NTSTATUS WdfVersionBind(PDRIVER_OBJECT arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4){
+LOUSTATUS WdfVersionBind(PDRIVER_OBJECT arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4){
     
-    LouPrint("NTSTATUS WdfVersionBind(PDRIVER_OBJECT arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4)\n");
+    LouPrint("LOUSTATUS WdfVersionBind(PDRIVER_OBJECT arg1, struct _UNICODE_STRING* arg2, struct _WDF_BIND_INFO* arg3, void*** arg4)\n");
     return STATUS_SUCCESS;
 }
 
-NTSTATUS WdfVersionUnbind(struct _UNICODE_STRING* arg1, struct _WDF_BIND_INFO* arg2, void** arg3){
-    LouPrint("NTSTATUS WdfVersionUnbind(struct _UNICODE_STRING* arg1, struct _WDF_BIND_INFO* arg2, void** arg3)\n");
+LOUSTATUS WdfVersionUnbind(struct _UNICODE_STRING* arg1, struct _WDF_BIND_INFO* arg2, void** arg3){
+    LouPrint("LOUSTATUS WdfVersionUnbind(struct _UNICODE_STRING* arg1, struct _WDF_BIND_INFO* arg2, void** arg3)\n");
     return STATUS_SUCCESS;
 }
 
-NTSTATUS WdfRegisterLibrary(struct _WDF_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3){
-    LouPrint("NTSTATUS WdfRegisterLibrary(struct _WDF_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3)\n");
+LOUSTATUS WdfRegisterLibrary(struct _WDF_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3){
+    LouPrint("LOUSTATUS WdfRegisterLibrary(struct _WDF_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3)\n");
     return STATUS_SUCCESS;
 }
 
 
-NTSTATUS WdfRegisterClassLibrary(struct _WDF_CLASS_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3){
-    LouPrint("NTSTATUS WdfRegisterClassLibrary(struct _WDF_CLASS_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3)\n");
+LOUSTATUS WdfRegisterClassLibrary(struct _WDF_CLASS_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3){
+    LouPrint("LOUSTATUS WdfRegisterClassLibrary(struct _WDF_CLASS_LIBRARY_INFO* arg1, struct _UNICODE_STRING* arg2, struct _UNICODE_STRING const* arg3)\n");
     return STATUS_SUCCESS;
 }

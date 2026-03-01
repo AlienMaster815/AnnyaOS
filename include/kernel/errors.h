@@ -1,15 +1,20 @@
 #ifndef _ERRORS_H
 #define _ERRORS_H
 
-#include <cstdint.h>
-#include <stat.h>
-
-#ifndef _KERNEL_MODULE_
-void LouPanic(char* error_message,STATUS recoverable);
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define LOUSTATUS_GOOD 0
+#include <cstdint.h>
+
+#ifndef _KERNEL_MODULE_
+void LouPanic(char* error_message);
+#endif
 
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

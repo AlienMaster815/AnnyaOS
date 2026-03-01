@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <../../include/kernel/loustatus.h>
 
 typedef int8_t      INT8;
 typedef uint8_t     UINT8, CHAR;
@@ -20,7 +21,6 @@ typedef uint64_t    UINT64;
 typedef size_t      SIZE;
 typedef char*       string;
 typedef void*       PVOID;
-typedef INT32       LOUSTATUS;
 typedef UINT16*     LPWSTR;
 typedef UINT16      USHORT;
 

@@ -476,7 +476,7 @@ static void AhciIntelPcs(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA Priv
 
 }
 
-static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
+static LOUSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     UNUSED PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
     UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;    
     UNUSED uint32_t Tmp;
@@ -544,7 +544,7 @@ static NTSTATUS ResetAhciHba(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 }
 
 LOUSTATUS ResetAhcPciController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
-    NTSTATUS Status = STATUS_SUCCESS;
+    LOUSTATUS Status = STATUS_SUCCESS;
     PPCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
 
@@ -1064,13 +1064,13 @@ static void AhciSetupInterruptHandler(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     }
 }
 
-NTSTATUS AddAhciDevice(
+LOUSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AHCI.SYS:AddAhciDevice()\n");
     //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
-    NTSTATUS Status = STATUS_SUCCESS;
+    LOUSTATUS Status = STATUS_SUCCESS;
 
     //get the device ID and Pci Device from the LKDM
     uint64_t AhciDeviceID = Device->DeviceID;
@@ -1342,7 +1342,7 @@ NTSTATUS AddAhciDevice(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 DriverEntry(
     PDRIVER_OBJECT DriverObject, 
     PUNICODE_STRING RegistryEntry

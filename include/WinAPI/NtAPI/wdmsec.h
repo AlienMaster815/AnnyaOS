@@ -4,7 +4,7 @@
 #include <NtAPI.h>
 #include "../WinAPITypes/CommonTypes.h"
 
-NTSTATUS WdmlibIoCreateDeviceSecure(
+LOUSTATUS WdmlibIoCreateDeviceSecure(
              PDRIVER_OBJECT   DriverObject,
              ULONG            DeviceExtensionSize,
    PUNICODE_STRING  DeviceName,
@@ -16,12 +16,12 @@ NTSTATUS WdmlibIoCreateDeviceSecure(
                  struct _DEVICE_OBJECT*   *DeviceObject
 );
 
-NTSTATUS WdmlibIoValidateDeviceIoControlAccess(
+LOUSTATUS WdmlibIoValidateDeviceIoControlAccess(
    PIRP  Irp,
    ULONG RequiredAccess
 );
 
-NTSTATUS WdmlibRtlInitUnicodeStringEx(
+LOUSTATUS WdmlibRtlInitUnicodeStringEx(
             PUNICODE_STRING DestinationString,
    PCWSTR          SourceString
 );

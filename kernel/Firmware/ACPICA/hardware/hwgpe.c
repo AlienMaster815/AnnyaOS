@@ -329,7 +329,7 @@ AcpiHwClearGpe (
  * FUNCTION:    AcpiHwGetGpeStatus
  *
  * PARAMETERS:  GpeEventInfo        - Info block for the GPE to queried
- *              EventStatus         - Where the GPE status is returned
+ *              EveLOUSTATUS         - Where the GPE status is returned
  *
  * RETURN:      Status
  *
@@ -340,19 +340,19 @@ AcpiHwClearGpe (
 ACPI_STATUS
 AcpiHwGetGpeStatus (
     ACPI_GPE_EVENT_INFO     *GpeEventInfo,
-    ACPI_EVENT_STATUS       *EventStatus)
+    ACPI_EVENT_STATUS       *EveLOUSTATUS)
 {
     UINT64                  InByte;
     UINT32                  RegisterBit;
     ACPI_GPE_REGISTER_INFO  *GpeRegisterInfo;
-    ACPI_EVENT_STATUS       LocalEventStatus = 0;
+    ACPI_EVENT_STATUS       LocalEveLOUSTATUS = 0;
     ACPI_STATUS             Status;
 
 
     ACPI_FUNCTION_ENTRY ();
 
 
-    if (!EventStatus)
+    if (!EveLOUSTATUS)
     {
         return (AE_BAD_PARAMETER);
     }
@@ -362,7 +362,7 @@ AcpiHwGetGpeStatus (
     if (ACPI_GPE_DISPATCH_TYPE (GpeEventInfo->Flags) !=
         ACPI_GPE_DISPATCH_NONE)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_HAS_HANDLER;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_HAS_HANDLER;
     }
 
     /* Get the info block for the entire GPE register */
@@ -377,21 +377,21 @@ AcpiHwGetGpeStatus (
 
     if (RegisterBit & GpeRegisterInfo->EnableForRun)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_ENABLED;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_ENABLED;
     }
 
     /* GPE currently masked? (masked for runtime?) */
 
     if (RegisterBit & GpeRegisterInfo->MaskForRun)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_MASKED;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_MASKED;
     }
 
     /* GPE enabled for wake? */
 
     if (RegisterBit & GpeRegisterInfo->EnableForWake)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_WAKE_ENABLED;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_WAKE_ENABLED;
     }
 
     /* GPE currently enabled (enable bit == 1)? */
@@ -404,7 +404,7 @@ AcpiHwGetGpeStatus (
 
     if (RegisterBit & InByte)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_ENABLE_SET;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_ENABLE_SET;
     }
 
     /* GPE currently active (status bit == 1)? */
@@ -417,12 +417,12 @@ AcpiHwGetGpeStatus (
 
     if (RegisterBit & InByte)
     {
-        LocalEventStatus |= ACPI_EVENT_FLAG_STATUS_SET;
+        LocalEveLOUSTATUS |= ACPI_EVENT_FLAG_STATUS_SET;
     }
 
     /* Set return value */
 
-    (*EventStatus) = LocalEventStatus;
+    (*EveLOUSTATUS) = LocalEveLOUSTATUS;
     return (AE_OK);
 }
 

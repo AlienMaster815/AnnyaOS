@@ -67,7 +67,7 @@ LOUSTATUS Initialize8237ADmaTransfer(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 DriverEntry(
     PDRIVER_OBJECT DrvObj,
     PUNICODE_STRING RegistryEntry

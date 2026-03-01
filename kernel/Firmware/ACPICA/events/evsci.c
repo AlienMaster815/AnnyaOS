@@ -186,7 +186,7 @@ AcpiEvSciDispatch (
 {
     ACPI_SCI_HANDLER_INFO   *SciHandler;
     ACPI_CPU_FLAGS          Flags;
-    UINT32                  IntStatus = ACPI_INTERRUPT_NOT_HANDLED;
+    UINT32                  ILOUSTATUS = ACPI_INTERRUPT_NOT_HANDLED;
 
 
     ACPI_FUNCTION_NAME (EvSciDispatch);
@@ -196,7 +196,7 @@ AcpiEvSciDispatch (
 
     if (!AcpiGbl_SciHandlerList)
     {
-        return (IntStatus);
+        return (ILOUSTATUS);
     }
 
     Flags = AcpiOsAcquireLock (AcpiGbl_GpeLock);
@@ -208,14 +208,14 @@ AcpiEvSciDispatch (
     {
         /* Invoke the installed handler (at interrupt level) */
 
-        IntStatus |= SciHandler->Address (
+        ILOUSTATUS |= SciHandler->Address (
             SciHandler->Context);
 
         SciHandler = SciHandler->Next;
     }
 
     AcpiOsReleaseLock (AcpiGbl_GpeLock, Flags);
-    return (IntStatus);
+    return (ILOUSTATUS);
 }
 
 

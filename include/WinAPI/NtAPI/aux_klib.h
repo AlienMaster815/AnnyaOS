@@ -44,7 +44,7 @@ typedef struct _KBUGCHECK_DATA {
 // we will do this later
 //CONCEPT: Take All the firmware Data And copy
 // into the given buffer
-NTSTATUS
+LOUSTATUS
 __stdcall
 AuxKlibEnumerateSystemFirmwareTables(
 	 ULONG FirmwareTableProviderSignature,
@@ -53,7 +53,7 @@ AuxKlibEnumerateSystemFirmwareTables(
 	 PULONG ReturnLength
 );
 
-NTSTATUS AuxKlibGetBugCheckData(
+LOUSTATUS AuxKlibGetBugCheckData(
 	 PKBUGCHECK_DATA BugCheckData
 );
 
@@ -61,7 +61,7 @@ PIMAGE_EXPORT_DIRECTORY AuxKlibGetImageExportDirectory(
 	 PVOID ImageBase
 );
 
-NTSTATUS AuxKlibGetSystemFirmwareTable(
+LOUSTATUS AuxKlibGetSystemFirmwareTable(
 	      ULONG  FirmwareTableProviderSignature,
 	      ULONG  FirmwareTableID,
 	 PVOID  FirmwareTableBuffer,
@@ -69,10 +69,10 @@ NTSTATUS AuxKlibGetSystemFirmwareTable(
 	 PULONG ReturnLength
 );
 
-NTSTATUS AuxKlibInitialize();
+LOUSTATUS AuxKlibInitialize();
 
 
-NTSTATUS AuxKlibQueryModuleInformation(
+LOUSTATUS AuxKlibQueryModuleInformation(
 	       PULONG BufferSize,
 	            ULONG  ElementSize,
 			PVOID  QueryInfo

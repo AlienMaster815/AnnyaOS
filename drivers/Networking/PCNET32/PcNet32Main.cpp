@@ -21,14 +21,14 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
 
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 AddDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("PCNET32::AddDevice()\n");
     uint8_t DeviceID = PlatformDevice->DeviceID;
-    NTSTATUS Status = STATUS_SUCCESS;
+    LOUSTATUS Status = STATUS_SUCCESS;
     LouPrint("DeviceID:%d\n", DeviceID);
 
     if(DeviceID < 2){
@@ -49,7 +49,7 @@ AddDevice(
 
 
 LOUDDK_API_ENTRY
-NTSTATUS 
+LOUSTATUS 
 DriverEntry(
     PDRIVER_OBJECT  DriverObject,
     PUNICODE_STRING RegistryEntry

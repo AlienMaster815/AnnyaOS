@@ -25,9 +25,9 @@
 
 #include "DrsdCore.h"
 
-KERNEL_ENTRY NTSTATUS DrsdCoreSubsystemEntry(){
+KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
 
-    NTSTATUS Result = STATUS_SUCCESS;
+    LOUSTATUS Result = STATUS_SUCCESS;
 
     DrsdConnectorIdaInitialize();
 

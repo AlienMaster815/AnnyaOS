@@ -15,15 +15,15 @@ LOUDLL_API
 void LouGlobalUserFree(void* Addr);
 
 void* AnnyaNtGetProcessHeap();
-NTSTATUS RtlInitializeCriticalSectionEx(
+LOUSTATUS RtlInitializeCriticalSectionEx(
     PRTL_CRITICAL_SECTION CriticalSection,
     uint32_t SpinCount,
     uint32_t Flags
 );
 
-NTSTATUS RtlEnterCriticalSection(PRTL_CRITICAL_SECTION CriticalSection);
+LOUSTATUS RtlEnterCriticalSection(PRTL_CRITICAL_SECTION CriticalSection);
 
-NTSTATUS RtlLeaveCriticalSection(PRTL_CRITICAL_SECTION CriticalSection);
+LOUSTATUS RtlLeaveCriticalSection(PRTL_CRITICAL_SECTION CriticalSection);
 
 uint16_t NtGetProcessorCount();
 
@@ -171,7 +171,7 @@ wcspbrk(
     LPWSTR Accept
 );
 
-NTSTATUS 
+LOUSTATUS 
 WINAPI 
 RtlUnicodeToMultiByteSize(
     DWORD*  Size,
@@ -180,7 +180,7 @@ RtlUnicodeToMultiByteSize(
 );
 
  
-NTSTATUS
+LOUSTATUS
 WINAPI
 RtlUnicodeToMultiByteN(
     string  Destination,
@@ -190,7 +190,7 @@ RtlUnicodeToMultiByteN(
     DWORD   SrcLength
 );
 
-NTSTATUS
+LOUSTATUS
 WINAPI
 RtlMultiByteToUnicodeSize(
     DWORD* Size,
@@ -198,7 +198,7 @@ RtlMultiByteToUnicodeSize(
     DWORD  Length
 );
 
-NTSTATUS
+LOUSTATUS
 WINAPI
 RtlMultiByteToUnicodeN(
     LPWSTR  Destination,

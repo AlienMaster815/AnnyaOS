@@ -118,7 +118,7 @@ int sprintf(char *buffer, const char *format, ...);
 
 int vsprintf(char *buffer, const char *format, va_list args);
 
-NTSTATUS HeadlessDispatch(
+LOUSTATUS HeadlessDispatch(
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
     uint64_t Flags, 

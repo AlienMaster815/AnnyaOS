@@ -105,7 +105,7 @@ vDbgPrintExWithPrefix (
 
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAddAtom(
     PWSTR       AtomName,
     ULONG       Length,
@@ -113,7 +113,7 @@ NtAddAtom(
 );
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAddAtomEx(
     PWSTR AtomName,
     ULONG Length,
@@ -121,7 +121,7 @@ NtAddAtomEx(
     ULONG Flags
 );
 
-NTSTATUS NtAdjustPrivilegesToken(
+LOUSTATUS NtAdjustPrivilegesToken(
     HANDLE TokenHandle,
     bool DisableAllPrivaledges,
     PTOKEN_PRIVALEDGES NewState,
@@ -131,13 +131,13 @@ NTSTATUS NtAdjustPrivilegesToken(
 );
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAllocateLocallyUniqueId(
     PLUID Luid
 );
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAllocateUuids(
     PULARGE_INTEGER Time,
     PULONG Range,
@@ -612,7 +612,7 @@ PVOID StorPortGetUncachedExtension(
    ULONG NumberOfBytes
 );
 
-NTSTATUS StorPortInitialize(
+LOUSTATUS StorPortInitialize(
     PDRIVER_OBJECT DevObj,
     PUNICODE_STRING RegistryEntry,
     PSTORPORT_HW_INITIALIZATION_DATA HwInitializationData,
@@ -630,7 +630,7 @@ PVOID StorPortGetDeviceBase(
     BOOLEAN InIoSpace
 );
 
-NTSTATUS StorPortGetBusData(
+LOUSTATUS StorPortGetBusData(
   PVOID HwDeviceExtension,
   ULONG BusDataType,
   ULONG SystemIoBusNumber,

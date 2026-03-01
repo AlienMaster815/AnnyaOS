@@ -2,6 +2,7 @@
 //#include <LouAPI.h>
 #include <cstdint.h>
 #include <stdbool.h>
+#include <kernel/loustatus.h>
 
 typedef void* PDRIVER_OBJECT;
 typedef void* PUNICODE_STRING;
@@ -9,7 +10,6 @@ typedef bool BOOL;
 typedef void* HMODULE;
 typedef void* LPVOID;
 typedef uint32_t DWORD;
-typedef uint64_t LOUSTATUS;
 
 //__declspec(dllimport) int LouPrint(char* format, ...);
 

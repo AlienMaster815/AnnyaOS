@@ -1241,7 +1241,7 @@ NTDLL_API void RtlGetGroupSecurityDescriptor() {LouPrint("Hello nt Dll\n"); whil
 NTDLL_API void RtlGetImageFileMachines() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlGetIntegerAtom() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlGetInterruptTimePrecise() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlGetLastNtStatus() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void RtlGetLastLOUSTATUS() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlGetLastWin32Error() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlGetLengthWithoutLastFullDosOrNtPathElement() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlGetLengthWithoutTrailingPathSeperators() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1447,7 +1447,7 @@ NTDLL_API void RtlLookupFunctionEntry() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlLookupFunctionTable() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMakeSelfRelativeSD() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMapGenericMask() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlMapSecurityErrorToNtStatus() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void RtlMapSecurityErrorToLOUSTATUS() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMoveMemory() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMultiAppendUnicodeStringBuffer() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlMultipleAllocateHeap() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1463,8 +1463,8 @@ NTDLL_API void RtlNormalizeString() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNotifyFeatureToggleUsage() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNotifyFeatureUsage() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNtPathNameToDosPathName() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlNtStatusToDosError() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlNtStatusToDosErrorNoTeb() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void RtlLOUSTATUSToDosError() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void RtlLOUSTATUSToDosErrorNoTeb() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNtdllName() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNumberGenericTableElements() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlNumberGenericTableElementsAvl() {LouPrint("Hello nt Dll\n"); while(1);}
@@ -1640,7 +1640,7 @@ NTDLL_API void RtlSetImageMitigationPolicy() {LouPrint("Hello nt Dll\n"); while(
 NTDLL_API void RtlSetInformationAcl() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetIoCompletionCallback() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetLastWin32Error() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlSetLastWin32ErrorAndNtStatusFromNtStatus() {LouPrint("Hello nt Dll\n"); while(1);}
+NTDLL_API void RtlSetLastWin32ErrorAndLOUSTATUSFromLOUSTATUS() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetMemoryStreamSize() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetOwnerSecurityDescriptor() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetPortableOperatingSystem() {LouPrint("Hello nt Dll\n"); while(1);}

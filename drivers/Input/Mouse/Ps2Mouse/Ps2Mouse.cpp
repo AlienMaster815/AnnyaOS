@@ -78,7 +78,7 @@ LouKeHalInitializePs2Mouse(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 DriverEntry(
     PDRIVER_OBJECT DrvObject, 
     PUNICODE_STRING RegEntry

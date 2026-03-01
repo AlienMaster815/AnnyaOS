@@ -3,5 +3,5 @@ LOUSTATUS ResetPciDevice(PPCI_DEVICE_OBJECT PDEV) {
 
 
 
-	return LOUSTATUS_GOOD;
+	return STATUS_SUCCESS;
 }

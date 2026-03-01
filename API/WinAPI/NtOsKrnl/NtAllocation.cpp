@@ -1,7 +1,7 @@
 #include <LouDDK.h>
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAllocateLocallyUniqueId(
     PLUID Luid
 ){
@@ -10,7 +10,7 @@ NtAllocateLocallyUniqueId(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAllocateUuids(
     PULARGE_INTEGER Time,
     PULONG Range,
@@ -24,7 +24,7 @@ NtAllocateUuids(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAllocateVirtualMemory(
     HANDLE ProcessHandle,
     PVOID BaseAddress,

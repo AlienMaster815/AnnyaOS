@@ -158,18 +158,18 @@ typedef struct _PEP_DEBUGGER_TRANSITION_REQUIREMENTS {
    PBOOLEAN  PowerTransitionRequired;
 } PEP_DEBUGGER_TRANSITION_REQUIREMENTS, *PPEP_DEBUGGER_TRANSITION_REQUIREMENTS;
 
-NTSTATUS PoFxRegisterCoreDevice(
+LOUSTATUS PoFxRegisterCoreDevice(
     PCUNICODE_STRING   Id,
     PPO_FX_CORE_DEVICE Device,
    POHANDLE           *Handle
 );
 
-NTSTATUS PoFxRegisterPlugin(
+LOUSTATUS PoFxRegisterPlugin(
         PPEP_INFORMATION        PepInformation,
     PPEP_KERNEL_INFORMATION KernelInformation
 );
 
-NTSTATUS PoFxRegisterPluginEx(
+LOUSTATUS PoFxRegisterPluginEx(
         PPEP_INFORMATION        PepInformation,
         ULONGLONG               Flags,
     PPEP_KERNEL_INFORMATION KernelInformation

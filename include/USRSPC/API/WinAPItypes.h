@@ -1,7 +1,7 @@
 #ifndef _WINAPI_TYPES_H
 #define _WINAPI_TYPES_H
 
-#include <WinAPI/NtAPI/Ntstatus.h>
+#include <kernel/loustatus.h>
 
 typedef unsigned int ULONG;
 typedef void* PVOID;

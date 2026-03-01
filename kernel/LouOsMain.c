@@ -210,7 +210,7 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     SetUpTimers();
     //DeterminCPU();
 
-    return LOUSTATUS_GOOD;
+    return STATUS_SUCCESS;
 }
 
 void InitializeSymmetricMultiProcessing(){

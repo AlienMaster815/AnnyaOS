@@ -9,7 +9,7 @@ LOUSTATUS LouKeAddAtomEx(
 );
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAddAtomEx(
     PWSTR AtomName,
     ULONG Length,
@@ -20,7 +20,7 @@ NtAddAtomEx(
 }
 
 LOUDDK_API_ENTRY
-NTSTATUS
+LOUSTATUS
 NtAddAtom(
     PWSTR       AtomName,
     ULONG       Length,

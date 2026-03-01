@@ -16,11 +16,11 @@ static inline uint64_t read_tsc(void) {
 
 
 LOUSTATUS SetUpTimers() {
-	LOUSTATUS Status = LOUSTATUS_GOOD;
+	LOUSTATUS Status = STATUS_SUCCESS;
 
 	//Start With the Most Reliable And Work From There
 
-	//if (LOUSTATUS_GOOD != InitHPET()) {
+	//if (STATUS_SUCCESS != InitHPET()) {
 		//if no hpet use tsc
 		//LouPrint("HPET Not Found Using TSC\n");
 		

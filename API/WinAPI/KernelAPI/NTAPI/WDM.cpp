@@ -9,7 +9,7 @@ void IoDisconnectInterrupt(
 
 }
 
-NTSTATUS IoConnectInterrupt(
+LOUSTATUS IoConnectInterrupt(
             PKINTERRUPT       *InterruptObject,
              PKSERVICE_ROUTINE  ServiceRoutine,
    PVOID                    ServiceContext,
@@ -62,8 +62,8 @@ void IoDisconnectInterruptEx(
 
 }
 
-NTSTATUS IoConnectInterruptEx(PIO_CONNECT_INTERRUPT_PARAMETERS Parameters){
-    NTSTATUS status = STATUS_SUCCESS;
+LOUSTATUS IoConnectInterruptEx(PIO_CONNECT_INTERRUPT_PARAMETERS Parameters){
+    LOUSTATUS status = STATUS_SUCCESS;
 
     // Validate the Parameters
     if (Parameters == 0x00) {

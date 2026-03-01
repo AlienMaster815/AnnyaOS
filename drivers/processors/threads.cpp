@@ -352,7 +352,7 @@ LouKeCreateUserStackDemon(
 
 LOUDDK_API_ENTRY LOUSTATUS InitThreadManager() {
     
-    LOUSTATUS Status = LOUSTATUS_GOOD;
+    LOUSTATUS Status = STATUS_SUCCESS;
     size_t CpuCount = GetNPROC();
     if (!CpuCount) return STATUS_UNSUCCESSFUL;
 

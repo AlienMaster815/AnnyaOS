@@ -103,19 +103,19 @@ PVOID StorPortGetUncachedExtension(
     return AllocatedBlock;
 }
 
-NTSTATUS StorPortInitialize(
+LOUSTATUS StorPortInitialize(
     PDRIVER_OBJECT DrvObj,
     PUNICODE_STRING RegistryEntry,
     PSTORPORT_HW_INITIALIZATION_DATA HwInitializationData,
     PVOID HwContext
 ){
-    LouPrint("NTSTATUS StorPortInitialize()\n");
+    LouPrint("LOUSTATUS StorPortInitialize()\n");
 
     
     if((DrvObj == 0x00) || (RegistryEntry == 0x00) || 
        (HwInitializationData == 0x00)){
         LouPrint("One Or More Parameters are Null\n");
-        LouPrint("NTSTATUS StorPortInitialize() STATUS_INVALID_PARAMETER\n");
+        LouPrint("LOUSTATUS StorPortInitialize() STATUS_INVALID_PARAMETER\n");
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -127,14 +127,14 @@ NTSTATUS StorPortInitialize(
     }
 
     if(i == 254){
-        LouPrint("NTSTATUS StorPortInitialize() STATUS_INSUFFICIENT_RESOURCES\n");
+        LouPrint("LOUSTATUS StorPortInitialize() STATUS_INSUFFICIENT_RESOURCES\n");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
     StorPortStack[i] = LouKeMallocType(STOR_PORT_STACK_OBJECT, KERNEL_GENERIC_MEMORY);
 
     if(StorPortStack[i] == 0x00){
-        LouPrint("NTSTATUS StorPortInitialize() STATUS_INSUFFICIENT_RESOURCES\n");
+        LouPrint("LOUSTATUS StorPortInitialize() STATUS_INSUFFICIENT_RESOURCES\n");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
@@ -165,7 +165,7 @@ NTSTATUS StorPortInitialize(
     StorPortStack[i]->ConfigInfo->AddressRanges = (uint64_t*)LouKeMallocArray(ACCESS_RANGE, StorPortStack[i]->ConfigInfo->NumberOfAccessRanges, KERNEL_GENERIC_MEMORY);
 
 
-    LouPrint("NTSTATUS StorPortInitialize() STATUS SUCCESS\n");
+    LouPrint("LOUSTATUS StorPortInitialize() STATUS SUCCESS\n");
     return STATUS_SUCCESS;
 }   
 

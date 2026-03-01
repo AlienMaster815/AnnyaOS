@@ -2,7 +2,7 @@
 #include <LouDDK.h>
 
 
-NTSTATUS IoAllocateAdapterChannel(
+LOUSTATUS IoAllocateAdapterChannel(
 	PADAPTER_OBJECT AdapterObject,
 	struct _DEVICE_OBJECT*  DeviceObject,
 	ULONG           NumberOfMapRegisters,
@@ -88,7 +88,7 @@ void KeQuerySystemTime(LARGE_INTEGER* TimeCurrent){ //T = OUT
 
 }
 
-NTSTATUS ExUuidCreate(
+LOUSTATUS ExUuidCreate(
 	 UUID* Uuid
 ) {
 
@@ -98,7 +98,7 @@ NTSTATUS ExUuidCreate(
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS HalAllocateHardwareCounters(
+LOUSTATUS HalAllocateHardwareCounters(
 	PGROUP_AFFINITY                 GroupAffinty,
 	  ULONG                           GroupCount,
 	  PPHYSICAL_COUNTER_RESOURCE_LIST ResourceList,
@@ -118,7 +118,7 @@ void HalExamineMBR(
 
 }
 
-NTSTATUS HalFreeHardwareCounters(
+LOUSTATUS HalFreeHardwareCounters(
 	 HANDLE CounterSetHandle
 ) {
 
@@ -196,7 +196,7 @@ PCONTROLLER_OBJECT IoCreateController(
 
 //}
 
-NTSTATUS IoDecrementKeepAliveCount(
+LOUSTATUS IoDecrementKeepAliveCount(
 	  PFILE_OBJECT FileObject,
 	  PEPROCESS    Process
 ) {
@@ -217,7 +217,7 @@ void IoFreeController(
 
 }
 
-NTSTATUS IoGetActivityIdIrp(
+LOUSTATUS IoGetActivityIdIrp(
     PIRP   Irp,
    LPGUID Guid
 ){
@@ -262,7 +262,7 @@ IO_PAGING_PRIORITY IoGetPagingIoPriority(
 
 }
 
-NTSTATUS IoIncrementKeepAliveCount(
+LOUSTATUS IoIncrementKeepAliveCount(
 	  PFILE_OBJECT FileObject,
 	  PEPROCESS    Process
 ){
@@ -272,7 +272,7 @@ NTSTATUS IoIncrementKeepAliveCount(
 }
 
 LOGICAL IoIsValidIrpStatus(
-   NTSTATUS Status
+   LOUSTATUS Status
 ){
 
 
