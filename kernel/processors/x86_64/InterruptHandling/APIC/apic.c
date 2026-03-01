@@ -1,5 +1,5 @@
 #include <kernel/errors.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <kernel/ports.h>
 
 uint8_t IdentifyApicVersion(){

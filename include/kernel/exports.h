@@ -1,6 +1,6 @@
 #ifndef _EXPORTS_H
 #define _EXPORTS_H
-#include <stdint.h>
+#include <cstdint.h>
 
 #ifdef __cplusplus
 

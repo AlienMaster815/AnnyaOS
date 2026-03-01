@@ -1,5 +1,5 @@
 #include <kernel/kernel.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <stdio.h>
 #include <kernel/errors.h>
 #include <drivers/display/vga.h>

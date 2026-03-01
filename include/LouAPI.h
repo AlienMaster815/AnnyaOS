@@ -34,11 +34,10 @@ extern "C" {
 //Include API Headers
 #include <cstdint.h>
 #include <drivers/Lou_drivers/PciIds.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 
 
 
-#include <stdint.h>
 #include <stat.h>
 #include <stdio.h>
 #include <string.h>

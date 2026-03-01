@@ -178,7 +178,7 @@ void LouCALL(
 //Kernel SystemCalls
 
 #include <stdbool.h>
-#include <stdint.h>
+#include <cstdint.h>
 
 typedef struct _MOUSE_STATE{
     int64_t     MouseX;

@@ -1,7 +1,7 @@
 #include "LouDll.h"
 #include <stddef.h>
 #include <stdbool.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <emmintrin.h> 
 #include <immintrin.h> 
 

@@ -1,7 +1,7 @@
 #ifndef _ERRORS_H
 #define _ERRORS_H
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stat.h>
 
 #ifndef _KERNEL_MODULE_

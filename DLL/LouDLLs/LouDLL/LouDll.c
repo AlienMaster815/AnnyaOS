@@ -443,7 +443,7 @@ int strcmp(const char* str1, const char* str2) {
 static mutex_t VsSprintFLock;
 
 #include <stdarg.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <string.h>
 
 #define BUFFER_OVERFLOW_ERROR -1

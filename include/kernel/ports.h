@@ -1,7 +1,7 @@
 #ifndef _PORTS_H
 #define _PORTS_H
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stddef.h>
 
 

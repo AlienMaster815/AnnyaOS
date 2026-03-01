@@ -495,7 +495,7 @@
 
 /* Use the standard headers from the standard locations */
 
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <string.h>
 #include <ctype.h>
 #if defined (ACPI_APPLICATION) || defined(ACPI_LIBRARY)

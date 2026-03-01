@@ -1,7 +1,6 @@
 #ifndef _STRING_H
 #define _STRING_H
 #include <stddef.h>
-#include <stdint.h>
 
 #define string char*
 #define LOUSTR char*

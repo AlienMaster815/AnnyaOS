@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-#include <stdint.h>
+#include <cstdint.h>
 
 #ifndef _TIME_T_
 #define _TIME_T_

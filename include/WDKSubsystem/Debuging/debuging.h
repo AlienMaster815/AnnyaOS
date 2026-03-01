@@ -6,7 +6,7 @@
 #ifndef _DEBUGING_H
 #define _DEBUGING_H
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stddef.h>
 #include <WinAPI/WinAPITypes/CommonTypes.h>
 

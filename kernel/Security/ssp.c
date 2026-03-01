@@ -1,6 +1,6 @@
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint.h>
+#include <cstdlib.h>
 #include <kernel/errors.h>
  
 #if UINT32_MAX == UINTPTR_MAX

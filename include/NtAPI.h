@@ -20,8 +20,6 @@
 
 #include <WinAPI/Win32/ntdef.h>
 
-#include <stdint.h>
-
 #define WINAPI __stdcall
 
 #ifndef _GUID_TYPE

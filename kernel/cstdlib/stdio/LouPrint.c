@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <drivers/display/vga.h>
 
 void LouKeDebuggerCommunicationsSendCharecter(char Charecter);

@@ -312,7 +312,7 @@
 #ifdef ACPI_USE_STANDARD_HEADERS
 #include <stddef.h>
 #include <unistd.h>
-#include <stdint.h>
+#include <cstdint.h>
 
 #define ACPI_OFFSET(d, f)   offsetof(d, f)
 #endif

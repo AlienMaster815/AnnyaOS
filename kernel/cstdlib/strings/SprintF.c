@@ -7,12 +7,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <drivers/display/vga.h>
 
 
 #include <stdarg.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <stddef.h>
 KERNEL_EXPORT int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
 

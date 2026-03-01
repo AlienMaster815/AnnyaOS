@@ -1,6 +1,6 @@
 #ifndef _STDIO_H
 #define _STDIO_H
-#include <stdint.h>
+#include <cstdint.h>
 
 #define PRINT_NEW_LINE "\n"
 

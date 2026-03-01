@@ -1,9 +1,9 @@
-#include <stdint.h>
+#include <cstdint.h>
 #ifdef __x86_64__
 
 //64 bit Registera
 
-#include <stdint.h>
+#include <cstdint.h>
 
 uint64_t get_cr3_value() {
     uint64_t cr3_value;

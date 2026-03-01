@@ -1,10 +1,9 @@
 #ifndef _LOULOAD_H
 #define _LOULOAD_H
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 
 #ifndef __cplusplus
 

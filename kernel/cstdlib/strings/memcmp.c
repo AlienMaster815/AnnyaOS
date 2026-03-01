@@ -1,5 +1,5 @@
 //USING ACPICA Memcmp
-//#include <stdint.h>
+//#include <cstdint.h>
 //#include <stddef.h>
 //int memcmp(const void* ptr1, const void* ptr2, size_t num) {
 //    const unsigned char* p1 = ptr1;

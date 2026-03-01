@@ -103,7 +103,7 @@
 #ifdef __i386__
 
 #include <cstdlib.h>
-#include <stdint.h>
+#include <cstdint.h>
 
 #endif
 

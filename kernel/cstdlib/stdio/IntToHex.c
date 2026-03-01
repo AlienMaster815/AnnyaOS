@@ -3,7 +3,7 @@
 
 #ifdef __x86_64__
 
-#include <stdint.h>
+#include <cstdint.h>
 
 void uintToHexString(uint64_t number, char* hexString) {
     int i = 0;

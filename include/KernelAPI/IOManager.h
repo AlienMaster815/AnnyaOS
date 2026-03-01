@@ -1,5 +1,5 @@
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib.h>
+#include <cstdint.h>
 #include <KernelAPI/Drives.h>
 #include <drivers/Lou_drivers/hardrive.h>
 

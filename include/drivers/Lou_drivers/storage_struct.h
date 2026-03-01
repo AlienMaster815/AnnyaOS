@@ -1,6 +1,6 @@
 #ifndef _STORAGE_STRUCT_H
 #define _STORAGE_STRUCT_H
-#include <stdint.h>
+#include <cstdint.h>
 
 #ifndef _SERIAL_STRUCT
 #define _SERIAL_STRUCT

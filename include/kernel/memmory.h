@@ -10,8 +10,8 @@
 
 #include <stat.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint.h>
+#include <cstdlib.h>
 #include <bootloader/grub/multiboot.h>
 #include <SharedTypes.h>
 #include <stdalign.h>
@@ -100,7 +100,7 @@ uint64_t GetStackBackset(uint64_t Offset);
 #endif
 
 
-#include <stdint.h>
+#include <cstdint.h>
 
 #define MachineMemoryBase 0 
 

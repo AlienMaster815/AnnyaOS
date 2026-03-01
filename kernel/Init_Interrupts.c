@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <kernel/interrupts.h>
 #include <kernel/errors.h>
 #include <kernel/pic.h>

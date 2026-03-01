@@ -1,6 +1,6 @@
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <stdbool.h>
 
 #ifndef _GDT_H

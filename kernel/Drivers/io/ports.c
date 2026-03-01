@@ -1,5 +1,5 @@
 #include <LouAPI.h>
-#include <stdint.h>
+#include <cstdint.h>
 
 
 // Read a byte from an I/O port

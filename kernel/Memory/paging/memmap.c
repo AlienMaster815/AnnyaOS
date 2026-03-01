@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 #include "PageDefinitions.h"
-#include <stdint.h>
+#include <cstdint.h>
 
 static mutex_t PageTableLock = {0};
 

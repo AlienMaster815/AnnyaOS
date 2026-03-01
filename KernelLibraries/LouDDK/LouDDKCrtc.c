@@ -1,6 +1,6 @@
 
 //#include <LouAPI.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <stdbool.h>
 
 typedef void* PDRIVER_OBJECT;

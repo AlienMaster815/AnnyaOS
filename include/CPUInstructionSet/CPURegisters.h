@@ -1,6 +1,6 @@
 #ifndef _CPUREG_H
 #define _CPUREG_H
-#include <stdint.h>
+#include <cstdint.h>
 
 #ifdef __x86_64__
 

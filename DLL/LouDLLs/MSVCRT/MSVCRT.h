@@ -9,7 +9,7 @@ typedef void (__cdecl *FunctionVector)(void);
 typedef int LONG;
 typedef unsigned int ULONG;
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stdbool.h>
 
 #define NTSTATUS uint64_t //fillin for Nt Status

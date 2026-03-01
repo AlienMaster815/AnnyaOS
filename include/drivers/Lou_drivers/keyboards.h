@@ -2,7 +2,7 @@
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
 
-#include <stdint.h>
+#include <cstdint.h>
 
 #define PS2 0x01
 #define USB 0x02

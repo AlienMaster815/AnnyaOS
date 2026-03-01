@@ -90,9 +90,9 @@ extern "C" void LouKeThrowPc();
 
 
 #ifndef __cplusplus
-#include <stdint.h>
+#include <cstdint.h>
 #include <stddef.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <stdbool.h>
 #include <LouAPI.h>
 

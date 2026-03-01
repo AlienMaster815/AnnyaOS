@@ -166,7 +166,7 @@
 #define COMPILER_DEPENDENT_UINT64 uint64_t
 
 #include <ctype.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <sys/neutrino.h>
 
 #define __cli() InterruptDisable();

@@ -174,7 +174,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <zephyr/fs/fs.h>

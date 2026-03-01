@@ -8,7 +8,7 @@
 -- as well... 
 */
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stdnoreturn.h>
 
 #include "KernelLists.h"

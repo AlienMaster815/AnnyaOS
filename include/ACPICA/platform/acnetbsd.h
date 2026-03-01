@@ -202,7 +202,7 @@
 #else /* defined(_KERNEL) || defined(_STANDALONE) */
 
 #include <ctype.h>
-#include <stdint.h>
+#include <cstdint.h>
 
 /* Not building kernel code, so use libc */
 #define ACPI_USE_STANDARD_HEADERS

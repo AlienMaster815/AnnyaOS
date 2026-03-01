@@ -5,7 +5,7 @@
 #ifndef ARCH_I386_VGA_H
 #define ARCH_I386_VGA_H
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <kernel/errors.h>
 #include <stat.h>
 #include <kernel/memmory.h>
@@ -66,7 +66,7 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 #ifndef _TTY_H
 #define _TTY_H
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stddef.h>
 
 enum VGA_COLOR{
@@ -119,7 +119,7 @@ void Set_X(uint64_t x);
 #ifndef _TTY_H
 #define _TTY_H
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <stddef.h>
 
 enum VGA_COLOR {

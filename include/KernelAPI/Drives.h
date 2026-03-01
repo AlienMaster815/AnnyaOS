@@ -1,8 +1,8 @@
 
 #ifndef _DRIVES_H
 #define _DRIVES_H
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib.h>
+#include <cstdint.h>
 #include <KernelAPI/Security.h>
 #ifdef __cplusplus
 

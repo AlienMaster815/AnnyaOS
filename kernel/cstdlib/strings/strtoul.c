@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <cstdint.h>
 #include <stdbool.h>
 
 //unsigned long strtoul(const char* nptr, char** endptr, int base) {

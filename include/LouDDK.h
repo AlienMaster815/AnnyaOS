@@ -35,7 +35,7 @@ extern "C" {
 //Include API Headers
 #include <cstdint.h>
 #include <drivers/Lou_drivers/PciIds.h>
-#include <stdlib.h>
+#include <cstdlib.h>
 
 
 
@@ -76,7 +76,7 @@ typedef void* EventHandle;
 //#pragma warning(disable: 1218) // Disable C4103
 #endif
 
-#include <stdlib.h>
+#include <cstdlib.h>
 
 
 #define LOUDDK_API_ENTRY extern "C"
@@ -98,7 +98,7 @@ typedef void* PVOID;
 #include <drivers/Lou_drivers/io.h>
 #include <stat.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <cstdint.h>
 #include <string.h>
 #include <drivers/Vendors/VendorsDictionary.h>
 #include <kernel/memmory.h>
@@ -194,7 +194,8 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <stdio.h>
 #include <drivers/Lou_drivers/io.h> 
 #include <drivers/Lou_drivers/pci.h>
-#include <stdlib.h>
+#include <cstdlib.h>
+#include <cstdint.h>
 #include <drivers/Lou_drivers/Processor.h>
 #include <KernelAPI/Video.h>
 #include <fstream.h>
@@ -340,6 +341,7 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
 #endif
 
 #ifdef _KERNEL_MODULE_
+#define LOUSTATUS uint32_t
 KERNEL_EXPORT LOUSTATUS RegisterHardwareInterruptHandler(void(*Handler)(uint64_t), uint8_t InterruptNumber, bool ERS);
 KERNEL_EXPORT void* memcpy(void* dest, const void* src, size_t n);
 KERNEL_EXPORT int strncmp(const char* str1, const char* str2, size_t n);

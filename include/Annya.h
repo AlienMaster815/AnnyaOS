@@ -579,7 +579,7 @@ LouSystemShutdown(SHUTDOWN_ACTION ShutDown);
 
 typedef void* HINSTANCE;
 
-#include <stdint.h>
+#include <cstdint.h>
 #include <Dispatching.h>
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
