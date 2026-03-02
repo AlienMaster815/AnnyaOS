@@ -1,6 +1,6 @@
 #include <kernel/kernel.h>
 #include <cstdlib.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <kernel/errors.h>
 #include <drivers/display/vga.h>
 

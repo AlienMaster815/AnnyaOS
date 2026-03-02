@@ -8,7 +8,7 @@ extern "C" {
 #ifndef _USER_MODE_CODE_
 #include <LouAPI.h>
 #else 
-typedef void* FILE;
+
 #endif
 #endif
 

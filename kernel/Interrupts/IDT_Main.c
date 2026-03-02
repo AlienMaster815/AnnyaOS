@@ -1,5 +1,5 @@
 #include <kernel/memmory.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <kernel/interrupts.h>
 #include <cstdlib.h>
 #include <kernel/gdt.h>

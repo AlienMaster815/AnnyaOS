@@ -1428,7 +1428,7 @@ typedef struct _CLS_CONTAINER_INFORMATION {
     LONGLONG             ContainerSize;
     ULONG                FileNameActualLength;
     ULONG                FileNameLength;
-    WCHAR* FileName;
+    WCHAR*               FileName;
     CLFS_CONTAINER_STATE State;
     CLFS_CONTAINER_ID    PhysicalContainerId;
     CLFS_CONTAINER_ID    LogicalContainerId;

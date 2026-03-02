@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 #include <stdarg.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <string.h>
 #include <cstdint.h>
 #include <drivers/display/vga.h>

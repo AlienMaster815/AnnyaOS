@@ -173,7 +173,7 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <cstdlib.h>
 #include <string.h>
 #include <ctype.h>

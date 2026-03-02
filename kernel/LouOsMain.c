@@ -9,7 +9,7 @@
 #include <KernelAPI/IOManager.h>
 #include <kernel/interrupts.h>
 #include <drivers/Lou_drivers/FileSystem.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <drivers/display/vga.h>
 #include <LouACPI.h>
 

@@ -21,8 +21,11 @@ extern "C" {
 #define SYSV_CONVENTION __attribute__((sysv_abi))
 #define NAKED_FUNCTION __attribute__((naked))
 
-#include <stdio.h>
+#include <cstdio.h>
 #include <string.h>
+#include <fstream.h>
+
+
 
 
 
@@ -76,7 +79,7 @@ typedef void* EventHandle;
 #include <drivers/Vendors/VendorsDictionary.h>
 #include <kernel/memmory.h>
 #include <kernel/Binarys.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <KernelAPI/BitCheck.h>
 
 #include <kernel/interrupts.h>
@@ -92,8 +95,6 @@ typedef void* EventHandle;
 #include <math.h>
 
 #include <LKDM.h>
-
-typedef void* FILE;
 
 typedef void* DEVICE;
 
@@ -163,7 +164,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/Lou_drivers/FileSystems/ISO.h>
 #include <KernelAPI/Drives.h> 
 #include <drivers/Lou_drivers/hardrive.h>
-#include <stdio.h>
+#include <cstdio.h>
 #include <drivers/Lou_drivers/io.h> 
 #include <drivers/Lou_drivers/pci.h>
 #include <cstdlib.h>

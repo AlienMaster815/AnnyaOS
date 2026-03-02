@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 #include <Modulation.h>
-#include <stdio.h>
+#include <cstdio.h>
 
 typedef struct _TIME_T{
     uint8_t Month;

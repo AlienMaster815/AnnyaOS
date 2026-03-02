@@ -12,8 +12,9 @@
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
 
-#include <stdio.h>
+#include <cstdio.h>
 #include <string.h>
+#include <fstream.h>
 
 
 

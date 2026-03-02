@@ -499,7 +499,7 @@
 #include <string.h>
 #include <ctype.h>
 #if defined (ACPI_APPLICATION) || defined(ACPI_LIBRARY)
-#include <stdio.h>
+#include <cstdio.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <time.h>

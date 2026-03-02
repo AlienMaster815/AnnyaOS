@@ -207,7 +207,7 @@ extern const char                       *AcpiGbl_ClockInputScale[];
  */
 #ifdef ACPI_ASL_COMPILER
 
-#include <stdio.h>
+#include <cstdio.h>
 
 #define ACPI_MSG_REDIRECT_BEGIN \
     FILE                    *OutputFile = AcpiGbl_OutputFile; \

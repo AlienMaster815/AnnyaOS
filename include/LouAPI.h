@@ -20,13 +20,13 @@ extern "C" {
 #define SYSV_CONVENTION __attribute__((sysv_abi))
 #define NAKED_FUNCTION __attribute__((naked))
 
-#include <stdio.h>
+#include <cstdio.h>
 #include <string.h>
 #include <Time.h>
-
-
-
 #include <fstream.h>
+
+
+
 #include <KernelAPI/KernelAPI.h>
 #include <kernel/kernel.h>
 #include <drivers/drivers.h>
@@ -88,7 +88,6 @@ extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 #define ACPIBUFFER 512
 #define ERRMAPPINGIO -1
 
-typedef void* FILE;
 
 #define CPU_TO_LE32(x) ((uint32_t)(             \
     (((uint32_t)(x) & 0x000000FFU) << 24) |     \

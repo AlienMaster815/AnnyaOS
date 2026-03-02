@@ -6,6 +6,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef void* FILE;
+
 #ifndef _USER_MODE_CODE_
 
 int LouPrint(char* format, ...);
