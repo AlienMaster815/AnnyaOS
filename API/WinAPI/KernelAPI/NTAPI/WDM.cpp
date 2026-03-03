@@ -28,6 +28,7 @@ LOUSTATUS IoConnectInterrupt(
     return STATUS_SUCCESS;
 }
 
+LOUAPI
 void IoDisconnectInterruptEx(
    PIO_DISCONNECT_INTERRUPT_PARAMETERS Parameters
 ){
@@ -62,6 +63,7 @@ void IoDisconnectInterruptEx(
 
 }
 
+LOUAPI 
 LOUSTATUS IoConnectInterruptEx(PIO_CONNECT_INTERRUPT_PARAMETERS Parameters){
     LOUSTATUS status = STATUS_SUCCESS;
 

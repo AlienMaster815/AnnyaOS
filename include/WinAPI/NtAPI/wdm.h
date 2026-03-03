@@ -4033,6 +4033,7 @@ void IoDisconnectInterrupt(
    PKINTERRUPT InterruptObject
 );
 
+LOUAPI
 void IoDisconnectInterruptEx(
    PIO_DISCONNECT_INTERRUPT_PARAMETERS Parameters
 );
@@ -7850,6 +7851,7 @@ typedef struct _IO_CONNECT_INTERRUPT_PARAMETERS {
     };
 } IO_CONNECT_INTERRUPT_PARAMETERS, *PIO_CONNECT_INTERRUPT_PARAMETERS;
 
+LOUAPI
 LOUSTATUS IoConnectInterruptEx(
    PIO_CONNECT_INTERRUPT_PARAMETERS Parameters
 );

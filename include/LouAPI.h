@@ -62,7 +62,6 @@ extern "C" {
 #include <drivers/Ecam.h>
 #include <kwstring.h>
 #include <WinAPI/Win32/winnls.h>
-#include <KernelAPI/Processes.h>
 #include <FileHandleing/Coff.h>
 #include <drivers/Processors.h>
 #include <Coff.h>

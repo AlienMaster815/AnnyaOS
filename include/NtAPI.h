@@ -33,7 +33,6 @@ typedef struct _GUID {
 #include <WDKSubsystem/Types/DebugTypes.h>
 #include <WinAPI/WinAPITypes/CommonTypes.h>
 #include <WinAPI/WinAPITypes/WDFLDRTypes.h>
-#include <KernelAPI/WDFLDR.h>
 #include <WinAPI/NtAPI/NtAPIFunc.h>
 
 
