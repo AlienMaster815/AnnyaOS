@@ -24,7 +24,9 @@ extern "C" {
 #include <cstdio.h>
 #include <string.h>
 #include <fstream.h>
-
+#include <WinAPI/Win32/winnt.h>
+#include <WinAPI/Win32/winternl.h>
+#include <WDK/Loader.h>
 
 
 
@@ -156,13 +158,10 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #endif
 
 #include <ListManagement.h>
-#include <KernelAPI/DriverAPI.h> 
 #include <drivers/Lou_drivers/hardrive.h> 
 #include <drivers/Lou_drivers/storage_struct.h>
 #include <drivers/Lou_drivers/FileSystem.h>
-#include <KernelAPI/IOManager.h> 
 #include <drivers/Lou_drivers/FileSystems/ISO.h>
-#include <KernelAPI/Drives.h> 
 #include <drivers/Lou_drivers/hardrive.h>
 #include <cstdio.h>
 #include <drivers/Lou_drivers/io.h> 
@@ -170,7 +169,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <cstdlib.h>
 #include <cstdint.h>
 #include <drivers/Lou_drivers/Processor.h>
-#include <KernelAPI/Video.h>
 #include <fstream.h>
 #include <KernelAPI/Devices.h>
 #include <Time.h>

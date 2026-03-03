@@ -20,7 +20,7 @@ typedef short               int16_t;
 typedef int                 int32_t;
 typedef long long           int64_t;
 
-typedef uint8_t             UINT8;
+typedef uint8_t             UINT8, BYTE;
 typedef uint16_t            UINT16, WORD;
 typedef uint32_t            UINT32, DWORD, INTEGER;
 typedef unsigned int        ULONG;

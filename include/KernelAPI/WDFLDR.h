@@ -1,10 +1,9 @@
-#ifndef _WDFLDR_H
-#define _WDFLDR_H
+//#ifndef _WDFLDR_H
+//#define _WDFLDR_H
 
-#include <WinAPI/Win32/winnt.h>
-#include <WinAPI/Win32/winternl.h>
 
-#ifndef __UNICODE_STRING_DEFINED__
+
+/*#ifndef __UNICODE_STRING_DEFINED__
 #define __UNICODE_STRING_DEFINED__
 
 typedef INT64 DWORD64;
@@ -100,11 +99,11 @@ struct _WDF_LIBRARY_INFO
     int32_t (* LibraryRegisterClient )(struct _WDF_BIND_INFO*, void***, void**);
     int32_t (* LibraryUnregisterClient )(struct _WDF_BIND_INFO*, void**);
     struct _WDF_VERSION Version;
-};
+};*/
 
-#ifndef _KERNEL_MODULE_
+//#ifndef _KERNEL_MODULE_
 
-int32_t WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2);
+/*int32_t WdfLdrDiagnosticsValueByNameAsULONG(UNICODE_STRING const* arg1, uint32_t* arg2);
 int32_t DllInitialize(UNICODE_STRING* arg1);
 int32_t DllUnload();
 
@@ -128,4 +127,4 @@ int32_t WdfRegisterClassLibrary(struct _WDF_CLASS_LIBRARY_INFO* arg1, struct _UN
 
 #endif
 
-#endif
+#endif*/

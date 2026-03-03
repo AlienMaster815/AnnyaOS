@@ -24,8 +24,9 @@ extern "C" {
 #include <string.h>
 #include <Time.h>
 #include <fstream.h>
-
-
+#include <WinAPI/Win32/winnt.h>
+#include <WinAPI/Win32/winternl.h>
+#include <WDK/Loader.h>
 
 #include <KernelAPI/KernelAPI.h>
 #include <kernel/kernel.h>
