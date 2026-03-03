@@ -27,8 +27,10 @@ extern "C" {
 #include <WinAPI/Win32/winnt.h>
 #include <WinAPI/Win32/winternl.h>
 #include <WDK/Loader.h>
+#include <Devices.h>
 
-#include <KernelAPI/KernelAPI.h>
+
+
 #include <kernel/kernel.h>
 #include <drivers/drivers.h>
 #include <bootloader/grub/multiboot.h>

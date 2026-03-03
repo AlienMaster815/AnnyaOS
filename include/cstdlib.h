@@ -30,6 +30,10 @@ extern "C" {
 #define VOID 	void
 #define VOIDP	void*
 
+typedef struct  _ListHeader{
+    struct _ListHeader* LastHeader;
+    struct _ListHeader* NextHeader;
+}ListHeader, * PListHeader;
 
 #ifdef __cplusplus
 #define UNUSED [[maybe_unused]]

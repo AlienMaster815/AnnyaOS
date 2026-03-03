@@ -1,22 +1,13 @@
 #ifndef _DEVICES_API_H
 #define _DEVICES_API_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#endif
-
 #ifdef __cplusplus
-#include <LouDDK.h>
-#include <NtAPI.h>
 extern "C" {
 #endif
 
-#ifndef _PCI_H
 #include <drivers/Lou_drivers/pci.h>
-#endif
-#ifndef _STYPES_H
-#include <SharedTypes.h>
-#endif
+#include <cstdint.h>
+#include <cstdlib.h>
 
 typedef enum{
 	MASTER_TABLE				  = 0,
@@ -42,6 +33,8 @@ typedef enum{
     WIFI_DEVICE_T                 = 21,
 	FILESYSTEM_DEVICE_T			  = 22,
 }SYSTEM_DEVICE_IDENTIFIER;
+
+#include <drivers/Lou_drivers/pci.h>
 
 typedef struct _DEVICE_DIRECTORY_TABLE{
     ListHeader TableStart;
@@ -176,6 +169,7 @@ LOUSTATUS* State
 );
 
 void ReleaseDriveHandle(void* DriveHandle);
+
 
 #ifdef __cplusplus
 }

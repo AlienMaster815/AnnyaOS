@@ -7,6 +7,7 @@
 #define _STYPES_H
 
 #include <cstdint.h>
+#include <cstdlib.h>
 #include <kernel/loustatus.h>
 
 #ifndef __INT_MAX__
@@ -94,11 +95,6 @@ typedef struct _INT_512{
 
 
 #endif
-typedef struct  _ListHeader{
-    struct _ListHeader* LastHeader;
-    struct _ListHeader* NextHeader;
-}ListHeader, * PListHeader;
-
 
 #define HighQuad(v) ((__int128)v >> 64)
 #define LowQuad(v) ((__int128)v & 0xFFFFFFFFFFFFFFFF)

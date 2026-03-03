@@ -27,6 +27,7 @@ extern "C" {
 #include <WinAPI/Win32/winnt.h>
 #include <WinAPI/Win32/winternl.h>
 #include <WDK/Loader.h>
+#include <Devices.h>
 
 
 
@@ -169,7 +170,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <cstdint.h>
 #include <drivers/Lou_drivers/Processor.h>
 #include <fstream.h>
-#include <KernelAPI/Devices.h>
 #include <Time.h>
 #include <kernel/exec.h>
 #include <Random.h>

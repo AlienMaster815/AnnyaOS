@@ -15,8 +15,8 @@
 #include <cstdio.h>
 #include <string.h>
 #include <fstream.h>
-
-
+#include <WDK/Loader.h>
+//#include <Devices.h>
 
 
 #include <stdalign.h>
@@ -91,11 +91,6 @@ typedef struct _TIME_T{
 #endif
 
 typedef void (__cdecl *FunctionVector)(void);
-
-typedef struct _ListHeader{
-    struct _ListHeader* NextHeader;
-    struct _ListHeader* LastHeader;
-}ListHeader, * PListHeader;
 
 struct _AWM_CLIP_TREE;
 
