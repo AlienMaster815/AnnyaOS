@@ -2,13 +2,18 @@
 #define _LOUQS_H
 
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C" {
-#else 
-#include <LouAPI.h>
 #endif
- 
+
+#include <kernel/loustatus.h>
 #include <Time.h>
+
+struct _LOUQ_WORK;
+
+typedef struct _DELAYED_FUNCTION{
+    LOUSTATUS         (*DelayedFunction)(struct _LOUQ_WORK*);
+    void*               WorkData;
+}DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 
 typedef struct  _LOUQ{
     ListHeader                  Peers;
@@ -24,14 +29,12 @@ typedef enum{
     DRIVER_WORK = 3,
 }WORK_QUEUE_PRIORITY;
 
-#ifndef _LOUQ_WORK_S
-#define _LOUQ_WORK_S
 typedef struct _LOUQ_WORK{
     ListHeader          CurrentWorkList;
     PVOID               Data;//TODO change to ATOMIC64
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
-#endif
+
 
 typedef struct _LOUQ_WORK_QUEUE{
     ListHeader          Peers;
@@ -42,12 +45,11 @@ typedef struct _LOUQ_WORK_QUEUE{
     PTHREAD             QueueThread;
 }LOUQ_WORK_QUEUE, * PLOUQ_WORK_QUEUE;
 
-static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, DELAYED_CALLBACK Callback){
-    Work->Work.DelayedFunction = Callback;
+static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(struct _LOUQ_WORK*)){
+    Work->Work.DelayedFunction = Function;
 }
 
-#ifndef _KERNEL_MODULE_
-
+#ifndef _USER_MODE_CODE_
 
 KERNEL_EXPORT LOUSTATUS LouKeQueueWork(string QueueName, PLOUQ_WORK WorkItem);
 KERNEL_EXPORT LOUSTATUS LouKeQueueDelayedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
@@ -59,10 +61,6 @@ LOUSTATUS LouKeCreateWorkQueue(
     string              QueueName
 );
 
-
-#else
-
-KERNEL_EXPORT LOUSTATUS LouKeQueueWork(string QueueName, PLOUQ_WORK WorkItem);
 
 #endif
 #ifdef __cplusplus

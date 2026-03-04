@@ -81,18 +81,6 @@ typedef void* HANDLE;
 typedef void* HMODULE;
 typedef HANDLE FILE;
 
-#ifndef _TIME_T_
-#define _TIME_T_
-typedef struct _TIME_T{
-    uint8_t Month;
-    uint8_t Day;
-    uint8_t Hour;
-    uint8_t Minute;
-    uint8_t Second;
-    uint16_t MilliSeconds;
-}TIME_T, * PTIME_T;
-#endif
-
 typedef void (__cdecl *FunctionVector)(void);
 
 struct _AWM_CLIP_TREE;
@@ -291,6 +279,7 @@ PWINDHANDLE AnnyaCreateCanvasBuffer(
 
 
 #ifndef _LOUDLL_
+#include <Time.h>
 
 __declspec(dllimport)
 void 
@@ -591,15 +580,6 @@ typedef void* HINSTANCE;
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 #define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
-
-struct _LOUQ_WORK;
-
-typedef struct _DELAYED_FUNCTION{
-    LOUSTATUS    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
-    void*       WorkData;
-}DELAYED_FUNCTION, * PDELAYED_FUNCTION;
-
-
 
 #ifndef _ANNYA_DLL_CALL_REASONS
 #define _ANNYA_DLL_CALL_REASONS

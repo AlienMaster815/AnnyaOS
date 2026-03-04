@@ -95,17 +95,9 @@ typedef struct _INT_512{
 #define GetStackVariable(offset) (*(uintptr_t*)((uintptr_t)__builtin_frame_address(0) - (offset)))
 #define SetStackVariable(offset, value) (*(uintptr_t*)((uintptr_t)__builtin_frame_address(0) - (offset)) = (uintptr_t)(value))
 
-struct _LOUQ_WORK;
 
-typedef struct _DELAYED_FUNCTION{
-    LOUSTATUS    (*DelayedFunction)(struct _LOUQ_WORK* WorkData);
-    void*       WorkData;
-}DELAYED_FUNCTION, * PDELAYED_FUNCTION;
-
-typedef LOUSTATUS (*DELAYED_CALLBACK)(struct _LOUQ_WORK* WorkData);
 
 typedef int         LOU_TOKEN;
-typedef uint64_t    COUNTER;
 
 
 

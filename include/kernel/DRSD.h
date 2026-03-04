@@ -2,6 +2,8 @@
 #ifndef _DRSD_H
 #define _DRSD_H
 
+#include <kernel/LouQs.h>
+
 #ifndef _LIST_OBJECTS_
 #define _LIST_OBJECTS_
 typedef struct _LIST_LINK{
@@ -51,16 +53,6 @@ extern "C" {
 #include <LouAPI.h>
 #endif
 #endif
-
-#ifndef _LOUQ_WORK_S
-#define _LOUQ_WORK_S
-typedef struct _LOUQ_WORK{
-    ListHeader          CurrentWorkList;
-    PVOID               Data;//TODO change to ATOMIC64
-    DELAYED_FUNCTION    Work;
-}LOUQ_WORK, * PLOUQ_WORK;
-#endif
-
 
 #ifndef _KERNEL_REFERENCE
 #define _KERNEL_REFERENCE

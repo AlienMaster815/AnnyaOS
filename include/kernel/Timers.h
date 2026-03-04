@@ -7,6 +7,8 @@
 
 #ifdef __x86_64__
 
+typedef uint64_t    COUNTER;
+
 void RunTimerClockMS(uint64_t TimerInMS);
 void RunTimerClockS(uint64_t TimerInS);
 void RunTimerClockS(uint64_t TimerInS);
