@@ -8,7 +8,6 @@
 -- as well... 
 */
 
-#include <kernel/memoryprobing.h>
 #include <kernel/pic.h>
 #include <kernel/ports.h>
 #include <kernel/Timers.h>

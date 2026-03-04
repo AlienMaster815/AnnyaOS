@@ -2,6 +2,7 @@
 #ifndef SYSTEM_CALLS_H
 #define SYSTEM_CALLS_H
 
+#include <cstdlib.h>
 
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
