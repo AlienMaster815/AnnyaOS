@@ -56,6 +56,13 @@ typedef struct _uint48_t{
     uint16_t    HighWord;
 }uint48_t;
 
+typedef __int128 int128_t, INT128, * PINT128;
+
+typedef struct _INT_512{
+    __int128 low;  // Lower 128 bits
+    __int128 high; // Higher 128 bits
+} int512_t, INT_512, * PINT_512;
+
 
 #define GetStructureSize(p, member, count) \
     ((size_t)((uintptr_t)(&((p)->member[count])) - (uintptr_t)(p)))
@@ -77,6 +84,10 @@ typedef struct _uint48_t{
 #define INT8_MIN    -0x7F
 
 typedef void* PVOID;
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+
 
 #ifdef __cplusplus
 }

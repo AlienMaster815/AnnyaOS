@@ -107,13 +107,13 @@ void PageFault(uint64_t FaultingStackP) {
     //    if(PAddress != 0x00){
     //        //PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
     //        LouPrintPanic("Physicall Address Is:%h\n", PAddress);
-    //        LouKeMapContinuousMemoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
+    //        LouKeMapContinuousMemoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_WRITEABLE_PAGE_PRESENT);
     //    }
     //    else{
     //        LouPrintPanic("Allocateing New Page\n");
     //        PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
-    //        //LouKeMapcontinuousMemmoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
-    //        LouKeMapContinuousMemoryBlock(VAddress, VAddress, KILOBYTE_PAGE, KERNEL_PAGE_WRITE_PRESENT);
+    //        //LouKeMapcontinuousMemmoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_WRITEABLE_PAGE_PRESENT);
+    //        LouKeMapContinuousMemoryBlock(VAddress, VAddress, KILOBYTE_PAGE, KERNEL_WRITEABLE_PAGE_PRESENT);
     //    }
     //}
 

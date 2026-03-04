@@ -398,7 +398,7 @@ void LouKeInitializeBackupPic();
 bool InitializeLapic(UINT32 CpuID){
     uint64_t ApicBase;
     LouPrint("Initializing Processor:%d At Address:%h\n", CpuID, GetLocalApicBase());
-    ApicBase = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT, GetLocalApicBase());
+    ApicBase = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, GetLocalApicBase());
     ((PLKPCB)GetLKPCB())->ApicData.ApicBase = ApicBase;
     LouPrint("New Apic Base:%h\n", ApicBase);
     LouKeSetApicBase(CpuToApicID(get_processor_id()), ApicBase);

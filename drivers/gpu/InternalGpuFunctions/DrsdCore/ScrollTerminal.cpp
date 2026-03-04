@@ -157,7 +157,7 @@ void _LouKeOsDosPrintCharacter(char Character, PTERMAINAL_PLANE Plane, uint32_t 
     Plane->CursorX++;
 }
 
-void LouKeOsDosPrintCharecter(char Character) {
+LOUAPI void LouKeOsDosPrintCharecter(char Character) {
     if (!UsingDosTerminal) return;
 
     PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;
@@ -183,7 +183,7 @@ void LouKeOsDosDetatchDevice(PDRSD_DEVICE Device){
 
 }
 
-void LouKeOsDosUpdateMapping() {
+LOUAPI void LouKeOsDosUpdateMapping() {
     if (!UsingDosTerminal) return;
 
     PTERMAINAL_PLANE Plane = (PTERMAINAL_PLANE)LouOsDosTerminalScreen.TerminalPlane.Peers.NextHeader;

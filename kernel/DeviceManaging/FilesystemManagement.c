@@ -45,7 +45,7 @@ LOUSTATUS LouUnRegisterFileSystemDevice(PDEVICE_INFORMATION_TABLE FileSystem){
                 }       
             }
             Tmp2->List.NextHeader = Tmp->List.NextHeader; 
-            LouKeFree((RAMADD)Tmp);
+            LouKeFree((PVOID)Tmp);
             FileSystemTableMembers--;
             return STATUS_SUCCESS;
         }

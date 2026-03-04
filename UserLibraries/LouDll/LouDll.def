@@ -45,3 +45,4 @@ EXPORTS
     LouDrsdSetPlaneInformation
     LouSystemShutdown
     LouCreateSectionEx
+    _errno

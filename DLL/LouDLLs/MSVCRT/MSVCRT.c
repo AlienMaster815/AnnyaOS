@@ -42,12 +42,12 @@ void _amsg_exit(){
     while(1);
 }
 
-MSVCRT_API
-int* _errno(){
-    LouPrint("_errno()\n");
-    while(1);
-    return 0;
-}
+//MSVCRT_API
+//int* _errno(){
+//    LouPrint("_errno()\n");
+//    while(1);
+//    return 0;
+//}
 
 MSVCRT_API
 void _initterm(FunctionVector Begining, FunctionVector End){

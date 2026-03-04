@@ -88,7 +88,6 @@ typedef void* EventHandle;
 
 #include <kernel/interrupts.h>
 #include <kernel/threads.h>
-#include <SharedTypes.h>
 #include <kernel/DRSD.h>
 #include <kernel/LouQs.h>
 #include "NtOsKrnlLib.h"
@@ -108,9 +107,6 @@ LOUAPI void LouKeInitializeIntervalWork(
     uint64_t MsInterval
 );
 
-#define RAMADD unsigned char*
-#define RAMADDDATA unsigned char *
-#define BLOCK 4096
 
 
 #define PATADEV 1

@@ -17,7 +17,7 @@
 #include <fstream.h>
 #include <WDK/Loader.h>
 #include <Devices.h>
-//#include <kernel/memmory.h>
+#include <kernel/memmory.h>
 
 
 
@@ -44,7 +44,6 @@
 //#include "USRSPC/API/WinAPItypes.h"
 #include "kernel/SystemCalls.h"
 #include <stdbool.h>
-#include <USRSPC/UserThreads.h>
 #include <kernel/LKPCB.h>
 
 

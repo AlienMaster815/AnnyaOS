@@ -538,14 +538,14 @@ void* LouGeneralAllocateMemory32(UINT64 Size){
 void LouGeneralFreeMemory(void* Address){
     UINT64 Tmp = (UINT64)Address;
     Tmp -= GetKSpaceBase();
-    LouFree((RAMADD)Tmp);
+    LouFree((PVOID)Tmp);
 }
 
 static inline uint64_t FuckThis(uint64_t Addr){
     return Addr;
 }
 
-void LouFree(RAMADD Addr) {
+void LouFree(PVOID Addr) {
     MutexLock(&MemmoryMapLock);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
         if(AddressBlock[i].Address == (uint64_t)Addr){

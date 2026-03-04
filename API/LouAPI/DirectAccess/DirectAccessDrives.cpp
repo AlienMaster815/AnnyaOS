@@ -76,5 +76,5 @@ void* Data
 
 LOUAPI
 void ReleaseDriveHandle(void* DriveHandle){
-	LouKeFree((RAMADD)DriveHandle);
+	LouKeFree((PVOID)DriveHandle);
 }

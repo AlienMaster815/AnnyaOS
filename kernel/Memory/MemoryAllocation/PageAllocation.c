@@ -77,18 +77,18 @@ static void RemoveAddressFromReservePool(UINT64 Address){
 
         if(TmpTracker->PAddress == Address){
             if(Follower == TmpTracker){
-                LouFree((RAMADD)TmpTracker->PAddress);
-                LouFree((RAMADD)TmpTracker->VAddress);
+                LouFree((PVOID)TmpTracker->PAddress);
+                LouFree((PVOID)TmpTracker->VAddress);
                 TmpTracker->PageCount = 0;
                 TmpTracker->PageSize = 0;
                 TmpTracker->VAddress = 0x00;
                 TmpTracker->PAddress = 0x00;
                 break;
             }else{
-                LouFree((RAMADD)TmpTracker->PAddress);
-                LouFree((RAMADD)TmpTracker->VAddress);
+                LouFree((PVOID)TmpTracker->PAddress);
+                LouFree((PVOID)TmpTracker->VAddress);
                 Follower->Peers.NextHeader = TmpTracker->Peers.NextHeader;
-                LouFree((RAMADD)TmpTracker);
+                LouFree((PVOID)TmpTracker);
                 break;
             }
         }
@@ -173,13 +173,13 @@ void LouKeFreePage(void* PageAddress){
     );
     LouKeMapContinuousMemoryBlock(PhysicalAddres, PhysicalAddres, AllocationBlockSize, KERNEL_GENERIC_MEMORY);
     if(PhysicalAddres != (uint64_t)PageAddress){
-        LouFree((RAMADD)PhysicalAddres);
+        LouFree((PVOID)PhysicalAddres);
     }
     
     if(IsAddressRemaped((UINT64)PageAddress)){
         RemoveAddressFromReservePool((UINT64)PageAddress);
     }
     else if(!IsAddressBeingUsed((UINT64)PageAddress)){
-        LouFree((RAMADD)PageAddress);
+        LouFree((PVOID)PageAddress);
     }
 }

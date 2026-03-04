@@ -322,7 +322,7 @@ void* GetEfiTable(){
 void* FindSmbiosTable(PEFI_SYSTEM_TABLE SystemTable) {
     EFI_CONFIGURATION_TABLE* Tables = (EFI_CONFIGURATION_TABLE*)(uintptr_t)(SystemTable->Tables);
     uint64_t Count = SystemTable->TableCount;
-	LouMapAddress((uintptr_t)Tables, (uintptr_t)Tables, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
+	LouMapAddress((uintptr_t)Tables, (uintptr_t)Tables, KERNEL_WRITEABLE_PAGE_PRESENT, KILOBYTE_PAGE);
     static const EFI_GUID SmbiosGuid = {SMBIOS_TABLE_GUID};
     static const EFI_GUID Smbios3Guid = {SMBIOS3_TABLE_GUID};
     for (uint64_t i = 0; i < Count; i++) {
@@ -335,7 +335,7 @@ void* FindSmbiosTable(PEFI_SYSTEM_TABLE SystemTable) {
 }
 
 void InitializeEfiCore(){
-	LouMapAddress(EFI_TABLE, EFI_TABLE, KERNEL_PAGE_WRITE_PRESENT, KILOBYTE_PAGE);
+	LouMapAddress(EFI_TABLE, EFI_TABLE, KERNEL_WRITEABLE_PAGE_PRESENT, KILOBYTE_PAGE);
 	void* Foo = FindSmbiosTable((EFI_SYSTEM_TABLE*)EFI_TABLE);
 	if(Foo){
 		InitializeSmBiosSystem(Foo);

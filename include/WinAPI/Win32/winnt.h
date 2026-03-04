@@ -995,14 +995,14 @@ typedef struct DECLSPEC_ALIGN(8) MEM_EXTENDED_PARAMETER {
 #define PAGE_NOACCESS                   0x00000001
 #define PAGE_READONLY                   0x00000002
 #define PAGE_READWRITE                  0x00000004
-#define PAGE_WRITECOPY                  0x00000008
+#define WRITEABLE_PAGECOPY                  0x00000008
 #define PAGE_EXECUTE                    0x00000010
 #define PAGE_EXECUTE_READ               0x00000020
 #define PAGE_EXECUTE_READWRITE          0x00000040
 #define PAGE_EXECUTE_WRITECOPY          0x00000080
 #define PAGE_GUARD                      0x00000100
 #define PAGE_NOCACHE                    0x00000200
-#define PAGE_WRITECOMBINE               0x00000400
+#define WRITEABLE_PAGECOMBINE               0x00000400
 #define PAGE_GRAPHICS_NOACCESS          0x00000800
 #define PAGE_GRAPHICS_READONLY          0x00001000
 #define PAGE_GRAPHICS_READWRITE         0x00002000

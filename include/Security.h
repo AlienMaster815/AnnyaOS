@@ -1,19 +1,13 @@
 #ifndef _KERNEL_SECURITY_H
 #define _KERNEL_SECURITY_H
 
-#ifdef _USER_MODE_CODE_
-#include <Annya.h>
-#else
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else 
-#include <LouDDK.h>
+#include <cstdint.h>
+
+#ifdef __cplusplus
 extern "C" {
-#endif
 #endif
 
 typedef DWORD ACCESS_MASK, * PACCESS_MASK;
-
 
 #define ACCESS_MASK_OBJSPEC_MASK        0xFFFF
 #define ACCESS_MASK_OBJSPEC_SHIFT       0x00

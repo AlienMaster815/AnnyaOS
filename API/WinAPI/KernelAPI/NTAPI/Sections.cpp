@@ -173,7 +173,7 @@ UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists)
         ExecuteBit = true;
     }
 
-    if(PageFlags & PAGE_WRITECOPY){
+    if(PageFlags & WRITEABLE_PAGECOPY){
         if(PageFault){
             Result |= WRITEABLE_PAGE | PRESENT_PAGE;
         }else{
@@ -192,7 +192,7 @@ UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists)
     }
     
     if(PageFlags & SEC_NOCACHE){
-        Result |= CACHE_DISABLED_PAGE;
+        Result |= UNCACHEABLE_PAGE;
     }
 
     return Result;

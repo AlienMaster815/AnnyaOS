@@ -119,7 +119,7 @@ static FILE* ISOLouKeFindDirectory(
     );
 
     if(Status != STATUS_SUCCESS){
-        ReleaseDriveHandle((RAMADD)Test);
+        ReleaseDriveHandle((PVOID)Test);
         return 0x00;
     }
 
@@ -157,7 +157,7 @@ static FILE* ISOLouKeFindDirectory(
             //from the last sector to get ready
             //to allocate memory from the new
             //sector we are about to read
-            ReleaseDriveHandle((RAMADD)Test);
+            ReleaseDriveHandle((PVOID)Test);
             
             //before we read the Next sector 
             //we need to return if this is a
@@ -181,7 +181,7 @@ static FILE* ISOLouKeFindDirectory(
             );
             
             if(Status != STATUS_SUCCESS){
-                ReleaseDriveHandle((RAMADD)Test);
+                ReleaseDriveHandle((PVOID)Test);
                 return 0x00;
             }
 
@@ -215,7 +215,7 @@ static FILE* ISOLouKeFindDirectory(
     }
 
     LouPrint("Done With Recursion: Could Not Find File\n");
-    ReleaseDriveHandle((RAMADD)Test);  //Free before exiting
+    ReleaseDriveHandle((PVOID)Test);  //Free before exiting
     return 0;
 }
 
@@ -240,7 +240,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             VD.Identifier = 0x0000;
             VD.Version = 0;
             //LouPrint("VD Parsed\n");
-            ReleaseDriveHandle((RAMADD)Test);
+            ReleaseDriveHandle((PVOID)Test);
             return VD;
         }
         
@@ -270,7 +270,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             VD.Identifier = 0x0000;
             VD.Version = 0;
             //LouPrint("VD Parsed\n");
-            ReleaseDriveHandle((RAMADD)Test);
+            ReleaseDriveHandle((PVOID)Test);
             return VD;
         }
             
@@ -299,7 +299,7 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
 
         //LouPrint("VD Parsed\n");
 
-        ReleaseDriveHandle((RAMADD)Test);
+        ReleaseDriveHandle((PVOID)Test);
 
         return VD;
 }

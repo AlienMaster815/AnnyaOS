@@ -1,3 +1,4 @@
+#define _USER_MODE_CODE_
 #ifndef _MSVCRT_H
 #define _MSVCRT_H
 //#include <Annya.h>
@@ -12,6 +13,7 @@ typedef unsigned int ULONG;
 #include <cstdint.h>
 #include <stdbool.h>
 #include <kernel/loustatus.h>
+#include <kernel/memmory.h>
 
 #define ENOMEM  12
 
@@ -30,42 +32,6 @@ typedef bool  BOOL;
 typedef unsigned int DWORD;
 typedef void* LPVOID;
 
-#define KILOBYTE_PAGE 4096ULL
-#define MEGABYTE_PAGE (2 * 1024 * 1024)
-#define KILOBYTE (1 * 1024)
-
-#define PRESENT_PAGE           0b1
-#define WRITEABLE_PAGE        0b10
-
-#define USER_PAGE           (1 << 2)
-
-#define WRITE_THROUGH_PAGE  0b1000
-#define CACHE_DISABLED_PAGE 0b10000
-#define UNCACHEABLE_PAGE    0b10000
-
-#define PAGE_PRESENT        (1 << 0)
-#define PAGE_WRITE          (1 << 1)
-#define PAGE_USER           (1 << 2)
-#define PAGE_PWT            (1 << 3)
-#define PAGE_PCD            (1 << 4)
-#define END_PAGE            (1 << 4)
-
-// Section 1:1 RAM ADDRESS
-#define MAXMEM 0xFFFFFFFFFFFFFFFFULL
-#define RAMADD unsigned char*
-#define RAMADDDATA unsigned char *
-#define BLOCK 4096
-
-// Constants for gigabyte and megabyte sizes
-#define GIGABYTE (1ULL << 30)  // 1 GB in bytes
-#define MEGABYTE (1ULL << 20)  // 1 MB in bytes
-#define KILOBYTE (1 * 1024)
-
-#define PAGE_TABLE_ALLIGNMENT 4096
-#define PAGE_SIZE 4096
-
-#define FLAGSSPACE 0x1FF
-
 
 __declspec(dllimport)
 void* LouVirtualAllocUser(
@@ -76,12 +42,6 @@ void* LouVirtualAllocUser(
 
 __declspec(dllimport)
 void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
-
-
-typedef struct  _ListHeader{
-    struct _ListHeader* LastHeader;
-    struct _ListHeader* NextHeader;
-}ListHeader, * PListHeader;
 
 typedef struct _MSVC_CRITICAL_SECTION_DEBUG_DATA{
     uint16_t                                SectionType;

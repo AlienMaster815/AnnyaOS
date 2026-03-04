@@ -28,7 +28,7 @@ typedef struct _LINUX_PCI_DEVICE_ID {
                 PPCI_DEVICE_OBJECT PDEV
             );
 
-            #define LouKeHalClosePciCompanions(x) LouKeFree((RAMADD)x)
+            #define LouKeHalClosePciCompanions(x) LouKeFree((PVOID)x)
 
             LOUAPI
             bool LouKeHalIsDevicePcie(

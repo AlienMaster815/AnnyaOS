@@ -91,7 +91,7 @@ void LouKeHalPciRestoreContext(PPCI_CONTEXT PciContext){
 
     SetPciConfiguration(PDEV->bus, PDEV->slot, PDEV->func, PciConfig);
 
-    LouKeFree((RAMADD)PciContext);
+    LouKeFree((PVOID)PciContext);
 }
 
 void LouKeHalPciClearMaster(PPCI_DEVICE_OBJECT PDEV){

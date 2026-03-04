@@ -9,27 +9,17 @@ extern "C" {
 #include <cstdlib.h>
 #include <bootloader/grub/multiboot.h>
 #include <stdalign.h>
-
-
-#ifndef _USER_MODE_CODE_
-#define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
-#define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
-
-
-
-#endif
-
-#ifdef __cplusplus
-}
-#endif
+#include <kernel/threads.h>
+#include <string.h>
+#include <kernel/loustatus.h>
 
 
 
-// Tyler Grenier 9/21/23 9:38 PM
-// added Section 1:1 RAM ADDRESS
+#define HighQuad(v) ((__int128)v >> 64)
+#define LowQuad(v) ((__int128)v & 0xFFFFFFFFFFFFFFFF)
 
-
-#include <SharedTypes.h>
+#define GetStackVariable(offset) (*(uintptr_t*)((uintptr_t)__builtin_frame_address(0) - (offset)))
+#define SetStackVariable(offset, value) (*(uintptr_t*)((uintptr_t)__builtin_frame_address(0) - (offset)) = (uintptr_t)(value))
 
 #define GET_ALIGNMENT(x) (alignof(x))
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
@@ -37,34 +27,22 @@ extern "C" {
 #define STRIP_OPTIMIZATIONS __attribute__((optimize(0))) 
 #define SET_OPTIMIZATION(x) __attribute__((optimize(x)))
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+#define KILOBYTE        (1      * 1024ULL)
+#define MEGABYTE        (1024   * KILOBYTE)
+#define GIGABYTE        (1024   * MEGABYTE)
 
-typedef __int128 int128_t;
+#define KILOBYTE_PAGE   (4 * KILOBYTE)
+#define MEGABYTE_PAGE   (2 * MEGABYTE)
 
-#pragma GCC diagnostic pop
+#define PRESENT_PAGE            (1ULL << 0)
+#define WRITEABLE_PAGE          (1ULL << 1)
+#define USER_PAGE               (1ULL << 2)
+#define WRITE_THROUGH_PAGE      (1ULL << 3)
+#define UNCACHEABLE_PAGE        (1ULL << 4)
 
-#define KILOBYTE_PAGE 4096ULL
-#define MEGABYTE_PAGE (2 * 1024 * 1024ULL)
-#define KILOBYTE (1 * 1024ULL)
+#define PAT_PAGE                (1ULL << 7)
 
-#define PRESENT_PAGE           0b1
-#define WRITEABLE_PAGE        0b10
-#define NOEXEC_PAGE           (1ULL << 63)
-
-#define USER_PAGE           (1 << 2)
-
-#define WRITE_THROUGH_PAGE  0b1000
-#define CACHE_DISABLED_PAGE 0b10000
-#define UNCACHEABLE_PAGE    0b10000
-
-#define PAGE_PAT         (1ULL << 7)  // PAT bit
-#define PAGE_PRESENT        (1 << 0)
-#define PAGE_WRITE          (1 << 1)
-#define PAGE_USER           (1 << 2)
-#define PAGE_PWT            (1 << 3)
-#define PAGE_PCD            (1 << 4)
-#define END_PAGE            (1 << 4)
+#define NOEXEC_PAGE             (1ULL << 63)
 
 #define KERNEL_GENERIC_MEMORY   WRITEABLE_PAGE | PRESENT_PAGE
 #define KERNEL_DMA_MEMORY       UNCACHEABLE_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
@@ -72,68 +50,135 @@ typedef __int128 int128_t;
 #define USER_DMA_MEMORY         USER_PAGE | WRITEABLE_PAGE |PRESENT_PAGE
 #define USER_RO_DMA_MEMORY      UNCACHEABLE_PAGE | USER_PAGE | PRESENT_PAGE
 #define USER_RO_GENERIC_MEMORY  USER_PAGE | PRESENT_PAGE
- 
 
-#ifndef __cplusplus
-// Section 1:1 RAM ADDRESS
-#define MAXMEM 0xFFFFFFFFFFFFFFFFULL
-#define RAMADD unsigned char*
-#define RAMADDDATA unsigned char *
-#define BLOCK 4096
+#define PAGE_TABLE_ALLIGNMENT   KILOBYTE_PAGE
+#define PAGE_SIZE               KILOBYTE_PAGE
 
-// Constants for gigabyte and megabyte sizes
-#define GIGABYTE (1ULL << 30)  // 1 GB in bytes
-#define MEGABYTE (1ULL << 20)  // 1 MB in bytes
-#define KILOBYTE (1 * 1024ULL)
+#define PAGE_FLAGSSPACE 0x1FF
 
-#define PAGE_TABLE_ALLIGNMENT 4096
-#define PAGE_SIZE 4096
+#define KERNEL_WRITEABLE_PAGE_PRESENT 0b10000011
+#define KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT 0b10010011
 
-#define FLAGSSPACE 0x1FF
+typedef uint64_t pde_t; // Page Directory Entry
+typedef uint64_t pte_t; // Page Table Entry
 
-#include <LouAPI.h>
+#define LouClamp_t(type, val, min, max) ({           \
+    type __val = (val);                              \
+    type __min = (min);                              \
+    type __max = (max);                              \
+    __val < __min ? __min : __val > __max ? __max : __val; \
+})
 
-#ifndef _KERNEL_MODULE_
-extern void Write16BitValueToAddress(uint64_t Address, uint16_t Value);
-extern uint16_t Get16BitValueFromAddress(uint64_t Address);
-extern void Write8BitValueToAddress(uint64_t Address, uint8_t Value);
-extern uint8_t Get8BitValueFromAddress(uint64_t Address);
-extern void Write32BitValueFromAddress(uint64_t Address, uint32_t Value);
-extern uint32_t Get32BitValueFromAddress(uint64_t Address);
-extern void Write64BitValueToAddress(uint64_t Address, uint64_t Value);
-extern uint64_t Get64BitValueFromAddress(uint64_t Address);
+typedef struct _POOL_MEMORY_TRACKS{
+    ListHeader Peers;
+    bool AddressInUse; //used for fixed pools
+    uint64_t Address;
+    size_t MemorySize; //used if not fixed
+}POOL_MEMORY_TRACKS, * PPOOL_MEMORY_TRACKS;
 
 
+
+typedef struct _LMPOOL_DIRECTORY{
+    ListHeader          List;
+    bool                FixedSizePool;
+    mutex_t             PoolLock;
+    string              Tag;
+    uint64_t            LastOut;
+    uint64_t            Location;
+    uint64_t            VLocation;
+    uint64_t            PoolSize;
+    uint64_t            ObjectSize;
+    uint64_t            Flags;
+    uint64_t*           FreeList;
+    uint64_t            FreeListTop;       
+    POOL_MEMORY_TRACKS  MemoryTracks;
+}LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
+
+typedef struct _BO{
+    ListHeader Header;
+    size_t size;
+    uintptr_t CpuDmaAddress;
+    uintptr_t VRamTranslatedAddress;
+    uint64_t Flags;
+    int ReferenceCount;
+    bool BufferIsInVRam;
+}BO, *PBO;
+
+
+
+static inline
+bool RangeDoesNotInterfere(
+    uint64_t AddressForCheck, 
+    uint64_t SizeOfCheck,
+    uint64_t AddressOfBlock, 
+    uint64_t SizeOfBlock
+) {   
+    uint64_t Start = AddressOfBlock;
+    uint64_t End = AddressOfBlock + SizeOfBlock;
+
+    if (
+        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
+        (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
+        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
+    ) {
+        return false;
+    }
+    return true;
+}
+
+static inline
+bool RangeInterferes(
+    uint64_t AddressForCheck, 
+    uint64_t SizeOfCheck,
+    uint64_t AddressOfBlock, 
+    uint64_t SizeOfBlock
+) {   
+    uint64_t Start = AddressOfBlock;
+    uint64_t End = AddressOfBlock + SizeOfBlock;
+    if (
+        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
+        (((AddressForCheck + SizeOfCheck) >= Start) && ((AddressForCheck + SizeOfCheck) < End)) ||
+        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
+    ) {
+        return true;
+    }
+    return false;
+}
+
+static inline size_t GetAlignmentBySize(size_t Size){
+    if(Size <= 2)    return 2;
+    if(Size <= 4)    return 4;
+    if(Size <= 8)    return 8;
+    if(Size <= 16)   return 16;
+    if(Size <= 32)   return 32;
+    if(Size <= 64)   return 64;
+    if(Size <= 128)  return 128;
+    if(Size <= 256)  return 256;
+    if(Size <= 512)  return 512;
+    if(Size <= 1024) return 1024;
+    if(Size <= 2048) return 2048;
+    return 4096;
+}
+
+
+#ifndef _USER_MODE_CODE_
+#define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
+#define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 void LouKeFreePhysical(void* AddressToFree);
-
-
-void LouFree(RAMADD Addr);
+void LouFree(PVOID Addr);
 void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, uint64_t Alignment);
 uint64_t GetStackBackset(uint64_t Offset);
-#endif
 
+void Write16BitValueToAddress(uint64_t Address, uint16_t Value);
+uint16_t Get16BitValueFromAddress(uint64_t Address);
+void Write8BitValueToAddress(uint64_t Address, uint8_t Value);
+uint8_t Get8BitValueFromAddress(uint64_t Address);
+void Write32BitValueFromAddress(uint64_t Address, uint32_t Value);
+uint32_t Get32BitValueFromAddress(uint64_t Address);
+void Write64BitValueToAddress(uint64_t Address, uint64_t Value);
+uint64_t Get64BitValueFromAddress(uint64_t Address);
 
-#include <cstdint.h>
-
-#define MachineMemoryBase 0 
-
-
-//Paging Stub
-#ifndef _KERNEL_MODULE_
-typedef struct  __attribute__((packed, aligned(4096))) _PageTable {
-    uint64_t entries[512];
-} PageTable;
-
-typedef struct __attribute__((packed, aligned(4096))) _PML {
-    PageTable PML4;
-    PageTable PML3;
-    PageTable PML2;
-    PageTable PML1;
-}PML;
-#endif
-
-#ifndef _KERNEL_MODULE_
 void LouKeFreePage(void* PageAddress);
 void LouKeFreePage32(void* PageAddress);
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
@@ -192,189 +237,14 @@ LOUSTATUS LouKeCreateDeviceSection(
 
 ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
 UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists);
-#endif
-//Directory Entry FLAGS
 
-//2mb Entry
-#define KERNEL_PAGE_WRITE_PRESENT 0b10000011
-#define KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT 0b10010011
-
-
-typedef uint64_t pde_t; // Page Directory Entry
-typedef uint64_t pte_t; // Page Table Entry
-
-//endof Paging Stubs
-
-#ifndef _KERNEL_MODULE_
 KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
 
-void* align_memory(void* ptr, size_t alignment);
-#endif
-
-// Initialize a page table
-#else
-#include <LouDDK.h>
-
-#ifndef _KERNEL_MODULE_
-LOUAPI void MapIoMemory(
+void MapIoMemory(
     uint64_t Address,
     uint64_t MapSize
 );
-#endif
 
-#define GIGABYTE 0x40000000ULL
-#define MEGABYTE 0x100000ULL
-#define KILOBYTE (1 * 1024ULL)
-
-#define KERNEL_PAGE_WRITE_PRESENT 0b10000011
-#define KERNEL_PAGE_WRITE_UNCAHEABLE_PRESENT 0b10010011
-
-
-#ifndef _KERNEL_MODULE_
-LOUAPI bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
-LOUAPI void remove_padding(const void* struct_ptr, size_t struct_size, uint8_t* buffer);
-LOUAPI void LouFree(uint8_t* Addr);
-LOUAPI LOUSTATUS LouKeMapIO(uint64_t PADDRESS, uint64_t MemoryBuffer, uint64_t FLAGS);
-LOUAPI bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* Pml4);
-LOUAPI void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
-LOUAPI void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
-LOUAPI void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
-LOUAPI void* LouGeneralAllocateMemory(UINT64 Size);
-KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
-LOUAPI bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical, uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
-LOUAPI void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
-LOUAPI bool LouUnMapAddress(uint64_t VAddress, uint64_t PageSize);
-LOUAPI bool EnforceSystemMemoryMap(
-    uint64_t Address, 
-    uint64_t size
-);
-KERNEL_EXPORT void* LouKeMalloc(
-    size_t      AllocationSize,
-    uint64_t    AllocationFlags
-);
-KERNEL_EXPORT void* LouKeMallocEx(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
-KERNEL_EXPORT void LouKeFree(void* AddressToFree);
-LOUAPI void LouUserFree(uint64_t DataP);
-LOUAPI void LouKeUserFree(void* AddressToFree);
-LOUAPI void LouKeFreePhysical(void* AddressToFree);
-KERNEL_EXPORT void* LouKeMallocPhy32(
-    size_t      AllocationSize,
-    uint64_t    AllocationFlags
-);
-LOUAPI
-void* LouKeMallocExPhy32(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
-LOUAPI
-void* LouKeMallocExVirt32(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
-LOUAPI
-void* LouKeMallocVirt32(
-    size_t      AllocationSize,
-    uint64_t    AllocationFlags
-);
-LOUAPI
-void  LouGeneralFreeMemory(void* Address);
-LOUAPI
-LOUSTATUS LouKeCreateDeviceSection(
-    void*   PBase,
-    void*   VBase,
-    size_t    Size,
-    uint64_t  PageFlags
-);
-LOUAPI
-ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists);
-LOUAPI 
-UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists);
-#else 
-KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
-KERNEL_EXPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, size_t Aligned);
-KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
-KERNEL_EXPORT
-void* LouKeMallocExPhy32(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
-#endif
-#endif
-
-#ifdef __cplusplus
-LOUAPI{
-#endif
-
-#define LouClamp_t(type, val, min, max) ({           \
-    type __val = (val);                              \
-    type __min = (min);                              \
-    type __max = (max);                              \
-    __val < __min ? __min : __val > __max ? __max : __val; \
-})
-
-typedef struct _POOL_MEMORY_TRACKS{
-    ListHeader Peers;
-    bool AddressInUse; //used for fixed pools
-    uint64_t Address;
-    size_t MemorySize; //used if not fixed
-}POOL_MEMORY_TRACKS, * PPOOL_MEMORY_TRACKS;
-
-#ifndef _ATOMIC_T_DEF
-#define _ATOMIC_T_DEF
-
-#include <kernel/atomic.h>
-
-#define ATOMIC_TRUE  1
-#define ATOMIC_FALSE 0
-
-typedef atomic_t ATOMIC, * PATOMIC, ATOMIC_BOOLEAN, * PATOMIC_BOOLEAN;
-#endif
-
-#ifndef _MUTEX_STRUCTURE_DEFINITION
-#define _MUTEX_STRUCTURE_DEFINITION
-typedef struct _mutex_t{
-    atomic_t locked;
-    atomic_t Handle;
-    atomic_t PrivaledgeLevel;
-    atomic_t ThreadOwnerLow;
-    atomic_t ThreadOwnerHigh;
-} mutex_t;
-#endif
-
-typedef struct _LMPOOL_DIRECTORY{
-    ListHeader          List;
-    bool                FixedSizePool;
-    mutex_t             PoolLock;
-    string              Tag;
-    uint64_t            LastOut;
-    uint64_t            Location;
-    uint64_t            VLocation;
-    uint64_t            PoolSize;
-    uint64_t            ObjectSize;
-    uint64_t            Flags;
-    uint64_t*           FreeList;
-    uint64_t            FreeListTop;       
-    POOL_MEMORY_TRACKS  MemoryTracks;
-}LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
-
-typedef struct _BO{
-    ListHeader Header;
-    size_t size;
-    uintptr_t CpuDmaAddress;
-    uintptr_t VRamTranslatedAddress;
-    uint64_t Flags;
-    int ReferenceCount;
-    bool BufferIsInVRam;
-}BO, *PBO;
-
-#ifndef _KERNEL_MODULE_
 
 void LouKeMapDeviceMemoryBlock(
     uint64_t PAddress, 
@@ -612,59 +482,6 @@ void LouKeDestroyDynamicPool(
     POOL Pool
 );
 
-static inline
-bool RangeDoesNotInterfere(
-    uint64_t AddressForCheck, 
-    uint64_t SizeOfCheck,
-    uint64_t AddressOfBlock, 
-    uint64_t SizeOfBlock
-) {   
-    uint64_t Start = AddressOfBlock;
-    uint64_t End = AddressOfBlock + SizeOfBlock;
-
-    if (
-        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
-        (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
-        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
-    ) {
-        return false;
-    }
-    return true;
-}
-
-static inline
-bool RangeInterferes(
-    uint64_t AddressForCheck, 
-    uint64_t SizeOfCheck,
-    uint64_t AddressOfBlock, 
-    uint64_t SizeOfBlock
-) {   
-    uint64_t Start = AddressOfBlock;
-    uint64_t End = AddressOfBlock + SizeOfBlock;
-    if (
-        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
-        (((AddressForCheck + SizeOfCheck) >= Start) && ((AddressForCheck + SizeOfCheck) < End)) ||
-        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
-    ) {
-        return true;
-    }
-    return false;
-}
-
-static inline size_t GetAlignmentBySize(size_t Size){
-    if(Size <= 2)    return 2;
-    if(Size <= 4)    return 4;
-    if(Size <= 8)    return 8;
-    if(Size <= 16)   return 16;
-    if(Size <= 32)   return 32;
-    if(Size <= 64)   return 64;
-    if(Size <= 128)  return 128;
-    if(Size <= 256)  return 256;
-    if(Size <= 512)  return 512;
-    if(Size <= 1024) return 1024;
-    if(Size <= 2048) return 2048;
-    return 4096;
-}
 
 uint64_t* LouKeVirtualAddresToPageValue(
     uint64_t VAddress
@@ -698,186 +515,21 @@ uint64_t GetAllocationBlockBase(uint64_t Address);
 
 void LouKeFreePhy32(void*);
 
+#ifndef _KERNEL_MODULE_
+typedef struct  __attribute__((packed, aligned(4096))) _PageTable {
+    uint64_t entries[512];
+} PageTable;
+
+typedef struct __attribute__((packed, aligned(4096))) _PML {
+    PageTable PML4;
+    PageTable PML3;
+    PageTable PML2;
+    PageTable PML1;
+}PML;
+#endif
+
 #endif
 #ifdef __cplusplus
 }
 #endif
-
-//typedef __uint128_t uint128_t;
-
-
-
-
-#endif
-#ifdef _KERNEL_MODULE_
-
-KERNEL_EXPORT void LouFree(uint8_t* Addr);
-
-KERNEL_EXPORT void LouKeMallocVMmIO(
-    uint64_t PAddress,
-    uint64_t size,
-    uint64_t FLAGS
-);
-
-KERNEL_EXPORT uint64_t LouKeVMemmorySearchPhysicalSpace(
-    uint64_t VAddress
-);
-
-KERNEL_EXPORT uint64_t LouKeVMemmorySearchVirtualSpace(
-    uint64_t PAddress
-);
-
-KERNEL_EXPORT uint64_t SearchForMappedAddressSize(uint64_t Address);
-KERNEL_EXPORT void* LouKeAllocateUncachedVMemory(uint64_t NumberOfBytes);
-KERNEL_EXPORT void* LouKeAllocateUncachedVMemoryEx(
-    uint64_t NumberOfBytes,
-    uint64_t Alignment
-);
-
-KERNEL_EXPORT void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment);
-KERNEL_EXPORT void* LouVMalloc(size_t BytesToAllocate);
-
-KERNEL_EXPORT void LouKeMapContinuousMemoryBlock(
-    uint64_t PAddress, 
-    uint64_t VAddress,
-    uint64_t size, 
-    uint64_t FLAGS
-);
-
-KERNEL_EXPORT void LouKeMapContinuousMemoryBlockEx(
-    uint64_t PAddress, 
-    uint64_t VAddress,
-    uint64_t size, 
-    uint64_t FLAGS,
-    UINT64*  Pml4
-);
-
-KERNEL_EXPORT void LouKeUnMapContinuousMemoryBlock(
-    uint64_t VAddress,
-    uint64_t size
-);
-
-KERNEL_EXPORT uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);
-
-KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
-    uint64_t VAddress,
-    uint64_t* PAddress
-);
-
-KERNEL_EXPORT PLMPOOL_DIRECTORY LouKeMapPool(
-    uint64_t LocationOfPool,
-    uint64_t PoolSize,
-    uint64_t ObjectSize,
-    string Tag,
-    uint64_t Flags
-);
-
-KERNEL_EXPORT void LouKeFreePool(PLMPOOL_DIRECTORY PoolToFree);
-
-KERNEL_EXPORT void* LouKeMallocFromPool(
-    PLMPOOL_DIRECTORY Pool, 
-    uint64_t size, 
-    uint64_t* Offset
-);
-
-KERNEL_EXPORT void* LouKeMallocFromFixedPool(
-    PLMPOOL_DIRECTORY Pool
-);
-
-KERNEL_EXPORT void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
-
-KERNEL_EXPORT POOL LouKeCreateFixedPool(
-    uint64_t NumberOfPoolMembers,
-    uint64_t ObjectSize,
-    uint64_t Alignment,
-    string Tag,
-    uint64_t Flags,     //flags for alignment
-    uint64_t PageFlags  //flags for Page Directory
-);
-
-KERNEL_EXPORT
-void* LouKeMalloc(
-    size_t      AllocationSize,
-    uint64_t    AllocationFlags
-);
-
-KERNEL_EXPORT
-void* LouKeMallocEx(
-    size_t      AllocationSize,
-    size_t      Alignment,
-    uint64_t    AllocationFlags
-);
-
-KERNEL_EXPORT size_t LouKeGetAllocationSize(PVOID Addrress);
-
-KERNEL_EXPORT 
-PLMPOOL_DIRECTORY LouKeMapDynamicPool(
-    uint64_t    LocationOfPool,
-    size_t      PoolSize,
-    string      Tag,
-    uint64_t    Flags
-);
-
-KERNEL_EXPORT
-void* LouKeMallocFromDynamicPoolEx(
-    POOL Pool, 
-    size_t AllocationSize, 
-    size_t Alignment
-);
-
-KERNEL_EXPORT
-void* LouKeMallocFromDynamicPool(
-    POOL Pool, 
-    size_t AllocationSize
-);
-
-KERNEL_EXPORT
-void LouKeFreeFromDynamicPool(
-    POOL Pool, 
-    void* Address
-);
-
-KERNEL_EXPORT
-POOL LouKeCreateGenericPool(
-    uint64_t VLocation,
-    uint64_t Location,
-    uint64_t Size,
-    uint64_t Flags
-);
-
-KERNEL_EXPORT
-void* LouKeGenricAllocateDmaPool(
-    POOL Pool,
-    size_t size,
-    size_t* Offset
-);
-
-KERNEL_EXPORT
-void* LouKeGenericPoolGetPhyAddress(
-    POOL Pool,
-    void* Address
-);
-
-KERNEL_EXPORT void LouKeFree(void* AddressToFree);
-
-KERNEL_EXPORT
-void* LouKeGenericAllocateFixedDmaPool(
-    POOL Pool,
-    size_t* Offset
-);
-
-KERNEL_EXPORT
-void LouKeFreeFromFixedPool(
-    PLMPOOL_DIRECTORY Pool, 
-    void* Object
-);
-
-KERNEL_EXPORT void* LouKeMallocPhy32(
-    size_t      AllocationSize,
-    uint64_t    AllocationFlags
-);
-
-KERNEL_EXPORT
-void LouKeFreePhy32(void*);
-
 #endif

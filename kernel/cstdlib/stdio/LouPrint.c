@@ -13,6 +13,9 @@
 #include <cstdint.h>
 #include <drivers/display/vga.h>
 
+LOUAPI void LouKeOsDosUpdateMapping();
+LOUAPI void LouKeOsDosPrintCharecter(char Character);
+
 void LouKeDebuggerCommunicationsSendCharecter(char Charecter);
 
 int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);

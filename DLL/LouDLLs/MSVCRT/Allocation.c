@@ -1,19 +1,5 @@
 #include "MSVCRT.h"
 
-static inline size_t GetAlignmentBySize(size_t Size){
-    if(Size <= 2)    return 2;
-    if(Size <= 4)    return 4;
-    if(Size <= 8)    return 8;
-    if(Size <= 16)   return 16;
-    if(Size <= 32)   return 32;
-    if(Size <= 64)   return 64;
-    if(Size <= 128)  return 128;
-    if(Size <= 256)  return 256;
-    if(Size <= 512)  return 512;
-    if(Size <= 1024) return 1024;
-    if(Size <= 2048) return 2048;
-    return 4096;
-}
 
 
 __declspec(dllimport)
@@ -22,7 +8,7 @@ void LouGenericFreeHeap(void* Heap, void* Address);
 __declspec(dllimport)
 void* GetProcessHeap();
 
-int* _errno();
+__declspec(dllimport) int* _errno();
 
 #define HEAP_NO_SERIALIZE               0x00000001
 #define HEAP_GROWABLE                   0x00000002

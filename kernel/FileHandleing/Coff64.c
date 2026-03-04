@@ -108,7 +108,7 @@ UNUSED void EnableCoffImageProtection(
         }
 
         if(SectionCharacteristics & CFI_SCN_MEM_NOT_CACHED){
-            PageFlags |= CACHE_DISABLED_PAGE;
+            PageFlags |= UNCACHEABLE_PAGE;
         }
 
         CfiObject->SectionMapping[i] = VirtualSize | PageFlags;
