@@ -366,7 +366,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[178] = "LouKeGetAllocationSize";
     ImportTables[0].FunctionName[179] = "LouKeGenericAllocateFixedDmaPool";
     ImportTables[0].FunctionName[180] = "LouKeFreeFromFixedPool";
-    ImportTables[0].FunctionName[183] = "PciTestAtaConfigurationBits";
     ImportTables[0].FunctionName[186] = "LouKeMallocExPhy32";
     ImportTables[0].FunctionName[187] = "READ_REGISTER_ULONGLONG";
     ImportTables[0].FunctionName[188] = "WRITE_REGISTER_ULONGLONG";
@@ -535,7 +534,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[178] = (uint64_t)LouKeGetAllocationSize;
     ImportTables[0].VirtualAddress[179] = (uint64_t)LouKeGenericAllocateFixedDmaPool;
     ImportTables[0].VirtualAddress[180] = (uint64_t)LouKeFreeFromFixedPool;
-    ImportTables[0].VirtualAddress[183] = (uint64_t)PciTestAtaConfigurationBits;
     ImportTables[0].VirtualAddress[186] = (uint64_t)LouKeMallocExPhy32;
     ImportTables[0].VirtualAddress[187] = (uint64_t)READ_REGISTER_ULONGLONG;
     ImportTables[0].VirtualAddress[188] = (uint64_t)WRITE_REGISTER_ULONGLONG;

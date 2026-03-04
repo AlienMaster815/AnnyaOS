@@ -133,7 +133,6 @@ LOUAPI void SMPInit();
 
 void SetTotalIoApicInterrupts(UINT8 TotalInterrupts);
 bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic);
-LOUSTATUS EnableAdvancedBspFeatures(CPU::FEATURE Feature);
 LOUAPI void IoApicConfigureEntryFlags(
     uint8_t     irq,
     uint16_t    Flags

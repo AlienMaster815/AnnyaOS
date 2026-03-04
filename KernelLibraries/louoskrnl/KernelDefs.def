@@ -180,7 +180,6 @@ EXPORTS
     LouKeGenericAllocateFixedDmaPool
     LouKeFreeFromFixedPool
     LouKeAllocateUsbHostControllerDevice
-    PciTestAtaConfigurationBits
     LouKeDmiGetFirstMatch
     snprintf
     DmiGetDate

@@ -13,7 +13,7 @@ extern "C" {
 
 //Include API Headers
 #include <cstdint.h>
-#include <drivers/Lou_drivers/PciIds.h>
+#include <drivers/PciIds.h>
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
 
@@ -165,7 +165,7 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/Lou_drivers/hardrive.h>
 #include <cstdio.h>
 #include <drivers/Lou_drivers/io.h> 
-#include <drivers/Lou_drivers/pci.h>
+#include <drivers/pci.h>
 #include <cstdlib.h>
 #include <cstdint.h>
 #include <drivers/Lou_drivers/Processor.h>

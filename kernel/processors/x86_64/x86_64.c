@@ -101,11 +101,7 @@ void DowngradeNPROC(){
 
 extern void init_fpu();
 
-extern void enable_sse();
 
-void InitializeFloatPointUnit(){
-    enable_sse();
-}
 
 uint64_t GetGdtAsmTailCall(){
     return 0x00;

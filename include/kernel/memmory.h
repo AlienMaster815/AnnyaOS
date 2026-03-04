@@ -313,11 +313,8 @@ typedef struct _POOL_MEMORY_TRACKS{
 
 #ifndef _ATOMIC_T_DEF
 #define _ATOMIC_T_DEF
-typedef struct {
-	int counter;
-}atomic_t;
 
-typedef atomic_t* p_atomic_t;
+#include <kernel/atomic.h>
 
 #define ATOMIC_TRUE  1
 #define ATOMIC_FALSE 0

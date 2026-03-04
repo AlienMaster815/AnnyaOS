@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <drivers/Lou_drivers/pci.h>
+#include <drivers/pci.h>
 #include <cstdint.h>
 #include <cstdlib.h>
 
@@ -34,7 +34,7 @@ typedef enum{
 	FILESYSTEM_DEVICE_T			  = 22,
 }SYSTEM_DEVICE_IDENTIFIER;
 
-#include <drivers/Lou_drivers/pci.h>
+#include <drivers/pci.h>
 
 typedef struct _DEVICE_DIRECTORY_TABLE{
     ListHeader TableStart;

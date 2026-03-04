@@ -13,7 +13,7 @@ extern "C" {
 
 //Include API Headers
 #include <cstdint.h>
-#include <drivers/Lou_drivers/PciIds.h>
+#include <drivers/PciIds.h>
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
 

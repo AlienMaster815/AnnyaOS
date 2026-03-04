@@ -5,7 +5,7 @@
 #include <drivers/Lou_drivers/hardrive.h>
 #include <drivers/Lou_drivers/io.h>
 #include <drivers/Lou_drivers/keyboards.h>
-#include <drivers/Lou_drivers/pci.h>
+#include <drivers/pci.h>
 #include <drivers/Lou_drivers/Processor.h>
 #include <drivers/Lou_drivers/storage_struct.h>
 

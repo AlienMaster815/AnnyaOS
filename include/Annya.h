@@ -16,7 +16,7 @@
 #include <string.h>
 #include <fstream.h>
 #include <WDK/Loader.h>
-//#include <Devices.h>
+#include <Devices.h>
 
 
 #include <stdalign.h>

@@ -1,19 +1,19 @@
 #include <LouDDK.h>
 
-LOUAPI void AsanWrapperMemcmp() {}
+//LOUAPI void AsanWrapperMemcmp() {}
 
 
-LOUAPI void* LouKeGetHeadlessGlobals();
+/*LOUAPI void* LouKeGetHeadlessGlobals();
 LOUAPI LOUSTATUS LouKeHdlspDispatch(    
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
     uint64_t Flags, 
     uint8_t* HeadlessLocal, 
     uint64_t* size
-);
+);*/
 
 
-LOUAPI
+/*LOUAPI
 LOUSTATUS HeadlessDispatch(
     uint32_t DispatchCommand, 
     uint32_t* CommandData, 
@@ -46,18 +46,18 @@ LOUSTATUS HeadlessDispatch(
     }
 
     return STATUS_SUCCESS;
-}
+}*/
 
-LOUAPI void InitSafeBootMode() {}
-LOUAPI void KfRaiseIrql() {}
-LOUAPI void KiBugCheckData() {}
-LOUAPI void KiCheckForKernelApcDelivery() {}
-LOUAPI void KitLogFeatureUsage() {}
-LOUAPI void POGOBuffer() {}
+//LOUAPI void InitSafeBootMode() {}
+//LOUAPI void KfRaiseIrql() {}
+//LOUAPI void KiBugCheckData() {}
+//LOUAPI void KiCheckForKernelApcDelivery() {}
+//LOUAPI void KitLogFeatureUsage() {}
+//LOUAPI void POGOBuffer() {}
 
-void RtlRaiseStatus(LOUSTATUS Status);
+//void RtlRaiseStatus(LOUSTATUS Status);
 
-LOUAPI
+/*LOUAPI
 int512_t InitializeSListHead(__int128* InitData){
     if(((uintptr_t)InitData & 0xf) != 0){
         RtlRaiseStatus(STATUS_DATATYPE_MISALIGNMENT);
@@ -68,9 +68,9 @@ int512_t InitializeSListHead(__int128* InitData){
     int512_t Result = {0};
     *(__int128*)InitData = {0};
     return Result;
-}
+}*/
 
-LOUAPI 
+/*LOUAPI 
 int64_t InterlockedPushListSList(
     uint64_t* InputList, 
     uint64_t  Unused2,
@@ -95,7 +95,7 @@ int64_t InterlockedPushListSList(
     }while(!(Finished));
 
     return Result;
-}
+}*/
 
 UNUSED const uint32_t NtBuildNumber = (uint32_t)-0xffff132;
 
@@ -107,14 +107,14 @@ uint32_t GetNtEmualationBuild(){
 // NtBuildLab
 
 
-LOUAPI
+/*LOUAPI
 LOUSTATUS 
 NtClose(
   HANDLE Handle
 ){
 
     return STATUS_SUCCESS;
-}
+}*/
 
 
 // NtCompareSigningLevels
