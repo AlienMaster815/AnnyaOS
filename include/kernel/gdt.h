@@ -1,7 +1,8 @@
 #include <cstdlib.h>
 #include <stddef.h>
 #include <cstdint.h>
-#include <stdbool.h>
+#include <kernel/loustatus.h>
+
 
 #ifndef _GDT_H
 #define _GDT_H

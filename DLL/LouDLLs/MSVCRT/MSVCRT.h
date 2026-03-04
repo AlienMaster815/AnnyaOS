@@ -55,7 +55,6 @@ typedef void* LPVOID;
 #define RAMADD unsigned char*
 #define RAMADDDATA unsigned char *
 #define BLOCK 4096
-typedef size_t SIZE;
 
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes

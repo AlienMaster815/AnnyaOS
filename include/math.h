@@ -5,6 +5,11 @@
 extern "C"{
 #endif
 
+typedef struct _RANGE{
+    UINT64  Start;
+    UINT64  End;
+}RANGE, * PRANGE;
+
 #define IsPowerOf2(x) ((x) > 0 && ((x) & ((x) - 1)) == 0)
 
 static inline int ILog2(unsigned int x) {

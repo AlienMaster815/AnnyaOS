@@ -1,27 +1,22 @@
 #ifndef _LKPCB_H
 #define _LKPCB_H
 
-#ifndef _APIC_H
-#include <drivers/cpu/Apic.h>
+#include <cstdint.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#ifdef _USER_MODE_CODE_
-#include <Annya.h>
-#else
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
-extern "C"{
-#endif    
-#endif
-
-#ifndef _LOUKIRQL_
-#define _LOUKIRQL_
 typedef uint8_t LouKIRQL;
-#endif
 
-
+typedef struct _LOUSINE_KERNEL_APIC_DATA{
+    UINTPTR     ApicBase;
+    BOOL        TscDeadlineSuport;
+    BOOL        TscDeadlineEnabled;
+    UINT64      CurrentTsc;
+    SIZE        DefaultMsTicks;
+    SIZE        CurrentTimerTicks;
+}LOUSINE_KERNEL_APIC_DATA, * PLOUSINE_KERNEL_APIC_DATA;
 
 typedef struct _LKPCB{
     UINT64                      Schedualer;
@@ -29,18 +24,10 @@ typedef struct _LKPCB{
     LOUSINE_KERNEL_APIC_DATA    ApicData;
 }LKPCB, * PLKPCB;
 
-#ifdef _USER_MODE_CODE_
-
-
-#else 
-
+#ifndef _USER_MODE_CODE_
 LouKIRQL LouKeGetIrql();
 uint64_t GetGSBase();
 UINT64 GetLKPCB();
-
-#ifdef _KERNEL_MODULE_
-
-#endif
 #endif
 
 #ifdef __cplusplus

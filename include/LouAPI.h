@@ -28,6 +28,8 @@ extern "C" {
 #include <WinAPI/Win32/winternl.h>
 #include <WDK/Loader.h>
 #include <Devices.h>
+#include <kernel/memmory.h>
+
 
 
 

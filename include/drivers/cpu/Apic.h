@@ -12,14 +12,6 @@ extern "C" {
 #endif
 #endif
 
-typedef struct _LOUSINE_KERNEL_APIC_DATA{
-    UINTPTR     ApicBase;
-    BOOL        TscDeadlineSuport;
-    BOOL        TscDeadlineEnabled;
-    UINT64      CurrentTsc;
-    SIZE        DefaultMsTicks;
-    SIZE        CurrentTimerTicks;
-}LOUSINE_KERNEL_APIC_DATA, * PLOUSINE_KERNEL_APIC_DATA;
 
 
 #ifdef __cplusplus

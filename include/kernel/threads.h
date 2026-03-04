@@ -1,6 +1,8 @@
 #ifndef _THREADS_H
 #define _THREADS_H
 
+#include <kernel/LKPCB.h>
+
 typedef void* PTHREAD;
 typedef void* PTHREAD_DATA;
 

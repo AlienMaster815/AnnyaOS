@@ -1,6 +1,7 @@
 #include <LouAPI.h>
 
-noreturn void LouKeStackPanic() {
+__attribute__((noreturn))
+void LouKeStackPanic() {
 
 	LouPanic("StkChk Failure");
 

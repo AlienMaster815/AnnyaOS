@@ -1,19 +1,35 @@
 #ifndef _MEMMORY_H
 #define _MEMMORY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <cstdint.h>
+#include <cstdlib.h>
+#include <bootloader/grub/multiboot.h>
+#include <stdalign.h>
+
+
+#ifndef _USER_MODE_CODE_
 #define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
+
+
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
 
 
 // Tyler Grenier 9/21/23 9:38 PM
 // added Section 1:1 RAM ADDRESS
 
-#include <stddef.h>
-#include <cstdint.h>
-#include <cstdlib.h>
-#include <bootloader/grub/multiboot.h>
+
 #include <SharedTypes.h>
-#include <stdalign.h>
 
 #define GET_ALIGNMENT(x) (alignof(x))
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
@@ -64,7 +80,6 @@ typedef __int128 int128_t;
 #define RAMADD unsigned char*
 #define RAMADDDATA unsigned char *
 #define BLOCK 4096
-typedef size_t SIZE;
 
 // Constants for gigabyte and megabyte sizes
 #define GIGABYTE (1ULL << 30)  // 1 GB in bytes

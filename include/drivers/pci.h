@@ -127,6 +127,13 @@ typedef struct _PCI_BIT_TEST_PACKET{
 	bool		Result;
 }PCI_BIT_TEST_PACKET, * PPCI_BIT_TEST_PACKET;
 
+typedef struct _PCIE_SYSTEM_MANAGER{
+    ListHeader  Neighbors;
+    uint64_t    BaseAddress;
+    uint16_t    PCISegmentGroupNumber;
+    uint8_t     StartBusNumber;
+    uint8_t     EndBusNumber;
+}PCIE_SYSTEM_MANAGER, * PPCIE_SYSTEM_MANAGER;
 
 #ifndef _USER_MODE_CODE_
 KERNEL_EXPORT uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);

@@ -8,13 +8,6 @@
 -- as well... 
 */
 
-#include <cstdint.h>
-#include <stdnoreturn.h>
-
-#include "KernelLists.h"
-
-
-#include <kernel/memmory.h>
 #include <kernel/gdt.h>
 #include <kernel/Clock.h>
 #include <kernel/errors.h>

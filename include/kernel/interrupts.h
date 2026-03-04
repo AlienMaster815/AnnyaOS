@@ -1,4 +1,5 @@
-#include <SharedTypes.h>
+#include <kernel/LKPCB.h>
+
 
 #ifndef _INTERRUPTS_H
 #define _INTERRUPTS_H
