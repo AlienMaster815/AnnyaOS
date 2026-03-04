@@ -18,6 +18,11 @@
 #include <WDK/Loader.h>
 #include <Devices.h>
 #include <kernel/memmory.h>
+#include <kernel/gdt.h>
+#include <kernel/Clock.h>
+#include <kernel/errors.h>
+#include <kernel/interrupts.h>
+
 
 
 

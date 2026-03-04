@@ -1,9 +1,18 @@
-#include <kernel/LKPCB.h>
-
-
 #ifndef _INTERRUPTS_H
 #define _INTERRUPTS_H
-#pragma pack(push, 1)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <cstdint.h>
+#include <stddef.h>
+#include <cstdlib.h>
+#include <stdbool.h>
+#include <kernel/LKPCB.h>
+#include <Modulation.h>
+#include <kernel/loustatus.h>
+#include <cstdio.h>
 
 #define DEBUG_TRAP \
     struct { \
@@ -12,21 +21,6 @@
     } PACKED idtr = {0, 0}; \
     __asm__ volatile("lidt %0" : : "m"(idtr)); \
     __asm__ volatile("int $3"); \
-
-#ifndef __cplusplus
-void LouKeThrowPc();
-#else
-extern "C" void LouKeThrowPc();
-#endif
-
-#define INTERRUPT_GATE 0x5
-#define TRAP_GATE 0x7
-#define TASK_GATE 0x9
-
-#define HighestPrivledge 0x0
-#define HighPrivledge 0x1
-#define MediumPrivledge 0x2
-#define LowestPrivledge 0x3
 
 
 #define INTERRUPT_SERVICE_ROUTINE_0 0
@@ -80,31 +74,12 @@ extern "C" void LouKeThrowPc();
 #define INTERRUPT_SERVICE_ROUTINE_46 46
 #define INTERRUPT_SERVICE_ROUTINE_47 47
 
-
-
 #define PASSIVE_LEVEL 0
 #define APC_LEVEL 1
 #define DISPATCH_LEVEL 2
 #define DIRQL 3
 #define CLOCK_LEVEL 13
 #define HIGH_LEVEL 15
-
-
-#ifndef __cplusplus
-#include <cstdint.h>
-#include <stddef.h>
-#include <cstdlib.h>
-#include <stdbool.h>
-#include <LouAPI.h>
-
-void LouKeSetIrql(
-    LouKIRQL  NewIrql,
-    LouKIRQL* OldIrql
-);
-
-#ifdef __x86_64__
-
-typedef uint8_t LOUSINE_INTERRUPT_MODE;
 
 typedef struct {
     uint16_t base_low;      // Lower 16 bits of the handler function's address
@@ -123,101 +98,24 @@ typedef struct {
     uint64_t base;
 } IDTP;
 
-// Rest of the code...
-#ifndef _KERNEL_MODULE_
 
-LOUSTATUS SetBasicInterrupts(bool init);
-
-LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
-
-KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
-
-LOUSTATUS InitializeMainInterruptHandleing();
-LOUSTATUS InitializeStartupInterruptHandleing();
-
-LOUSTATUS UpdateIDT(bool Init);
-
-void SetInterruptFlags();
-void UnSetInterruptFlags();
-void WaitForInterrupt();
-
-struct interrupt_frame {
-    uint64_t rip;
-    uint64_t cs;
-    uint64_t rflags;
-    uint64_t rsp;
-    uint64_t ss;
-};
-#endif
-#endif
-
-#ifdef __i386__
-
-// Same content as for x86_64...
-
-
-typedef struct {
-    uint16_t base_low;
-    uint16_t selector;
-    uint8_t always0;
-    uint8_t flags;
-    uint16_t base_high;
-} Interrupt_Descriptor_Table;
-
-static Interrupt_Descriptor_Table idt[256]; // 256 entries for the IDT
-
-typedef struct {
-    uint16_t limit;
-    uint32_t base;
-}IDTP32;
-
-LOUSTATUS SetBasicInterrupts(bool init);
-
-
-#ifndef _KERNEL_MODULE_
-static bool PageTableDeletion = false;
-static bool MemoryProbing = false;
-static bool USBKeyboardInterrupt = false;
-
-void SetPicIDTGate(int index, void (*handler)());
-
-LOUSTATUS InitializeMainInterruptHandleing();
-LOUSTATUS InitializeStartupInterruptHandleing();
-
-LOUSTATUS UpdateIDT(bool Init);
-
-void SetInterruptFlags();
-void UnSetInterruptFlags();
-
-struct interrupt_frame
-{
-    uint32_t ip;
-    uint32_t cs;
-    uint32_t flags;
-    uint32_t sp;
-    uint32_t ss;
-};
-
+#ifndef _USER_MODE_CODE_
+void LouKeThrowPc();
 void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );
+LOUSTATUS SetBasicInterrupts(bool init);
+LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
+KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
+LOUSTATUS InitializeMainInterruptHandleing();
+LOUSTATUS InitializeStartupInterruptHandleing();
+LOUSTATUS UpdateIDT(bool Init);
+void SetInterruptFlags();
+void UnSetInterruptFlags();
+void WaitForInterrupt();
 #endif
-
-#endif //i386
-#endif // c
-
 #ifdef __cplusplus
-#ifndef _KERNEL_MODULE_
-
-typedef uint8_t LOUSINE_INTERRUPT_LEVEL;
-
-LOUAPI void LouKeSetIrql(
-    LouKIRQL  NewIrql,
-    LouKIRQL* OldIrql
-);
+}
 #endif
-#endif
-
-#pragma pack(pop)
 #endif

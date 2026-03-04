@@ -8,11 +8,6 @@
 -- as well... 
 */
 
-#include <kernel/gdt.h>
-#include <kernel/Clock.h>
-#include <kernel/errors.h>
-#include <kernel/exports.h>
-#include <kernel/interrupts.h>
 #include <kernel/memoryprobing.h>
 #include <kernel/pic.h>
 #include <kernel/ports.h>
