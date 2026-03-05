@@ -1,8 +1,5 @@
 #ifndef _MODULATION_H
 #define _MODULATION_H
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifndef _USER_MODE_CODE_
 #ifdef __cplusplus
@@ -32,25 +29,6 @@ extern "C" {
 #endif
 #endif
 
-
-
 typedef void* HMODULE;
 
-#include <string.h>
-
-#ifndef _USER_MODE_CODE_
-KERNEL_EXPORT
-void* 
-LouKeLoadSubsystem(string Subsystem, string EntryName);
-KERNEL_EXPORT
-void* 
-LouKeLoadSubsystem(string Subsystem, string EntryName);
-KERNEL_EXPORT
-void* 
-LouKeLoadDriver(string Driver, string EntryName);
-#endif
-
-#ifdef __cplusplus
-}
-#endif
 #endif

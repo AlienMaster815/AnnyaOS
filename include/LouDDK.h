@@ -231,6 +231,13 @@ KERNEL_EXPORT int strcmp(const char* str1, const char* str2);
 KERNEL_EXPORT int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 
+KERNEL_EXPORT
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
+
+KERNEL_EXPORT
+void* 
+LouKeLoadDriver(string Driver, string EntryName);
 
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 //LOUAPI void INTERRUPT(uint8_t InterruptNumber);
@@ -313,6 +320,13 @@ KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 KERNEL_EXPORT void sleep(uint64_t Time);
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 
+KERNEL_EXPORT
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
+
+KERNEL_EXPORT
+void* 
+LouKeLoadDriver(string Driver, string EntryName);
 
 KERNEL_EXPORT
 int snprintf(char *buffer, size_t buffer_size, const char *format, ...);
