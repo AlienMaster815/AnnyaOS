@@ -1,6 +1,8 @@
 #include "UsbCore.h"
 
-KERNEL_ENTRY LOUSTATUS UsbCoreSubsystemEntry(){
+LOUAPI 
+LOUSTATUS 
+UsbCoreSubsystemEntry(){
 
     //LouPrint("Hello From UsbCoreSubsystemEntry\n");
 

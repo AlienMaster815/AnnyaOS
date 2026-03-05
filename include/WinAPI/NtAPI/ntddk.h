@@ -963,7 +963,7 @@ KeQueryTickCount(
 	 PLARGE_INTEGER CurrentCount
 );
 
-KERNEL_ENTRY KIRQL KeRaiseIrqlToDpcLevel();
+LOUAPI KIRQL KeRaiseIrqlToDpcLevel();
 
 LONG KeSetBasePriorityThread(
 	  PKTHREAD Thread,
@@ -1106,7 +1106,7 @@ typedef struct _CLIENT_ID{
 }CLIENT_ID, * PCLIENT_ID;
 #endif
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenProcess(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtOpenProcess(
             PHANDLE            ProcessHandle,
              ACCESS_MASK        DesiredAccess,
              POBJECT_ATTRIBUTES ObjectAttributes,

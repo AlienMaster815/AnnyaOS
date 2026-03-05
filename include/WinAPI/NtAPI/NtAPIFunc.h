@@ -318,7 +318,6 @@ typedef void* PDEVPROPTYPE;
 typedef void* DEVICE_REGISTRY_PROPERTY;
 typedef void* DRIVER_DIRECTORY_TYPE;
 typedef void* PIO_DPC_ROUTINE;
-typedef void* PIO_TIMER_ROUTINE;
 typedef void* _IORING_OBJECT;
 typedef void* POOL_EXTENDED_PARAMS_SECURE_POOL;
 typedef void* POOL_NODE_REQUIREMENT;

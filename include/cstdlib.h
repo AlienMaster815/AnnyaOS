@@ -132,7 +132,6 @@ typedef struct _SECURITY_DESCRIPTOR{
 
 
 
-
 #ifndef _USER_MODE_CODE_
 #define ABS(x) (((x) < 0) ? -(x) : (x)) 
 int abs(int x);

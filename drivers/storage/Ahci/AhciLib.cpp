@@ -1,6 +1,7 @@
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
 #include "AhciMod.h"
+#include <WinAPI/NtAPI/miniport.h>
 
 // SPDX-License-Identifier: GPL-2.0-or-later
 /*

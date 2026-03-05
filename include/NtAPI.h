@@ -4,12 +4,6 @@
 #define _NTAPI_H
 
 
-
-#ifndef _KERNEL_ENTRY_
-#define _KERNEL_ENTRY_
-#define KERNEL_ENTRY extern "C"
-#endif
-
 #ifdef _KERNEL_MODULE_
 #pragma warning(push)
 #pragma warning(disable: 4083) // Disable specific warning

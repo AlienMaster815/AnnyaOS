@@ -247,36 +247,36 @@ typedef enum {
 
 
 typedef struct _FILE_OBJECT {
-    CSHORT                            Type;
-    CSHORT                            Size;
-    struct _DEVICE_OBJECT*            DeviceObject;
-    struct _VPB*                      Vpb;
-    PVOID                             FsContext;
-    PVOID                             FsContext2;
-    PSECTION_OBJECT_POINTERS          SectionObjectPointer;
-    PVOID                             PrivateCacheMap;
+    CSHORT                             Type;
+    CSHORT                             Size;
+    struct _DEVICE_OBJECT*             DeviceObject;
+    struct _VPB*                       Vpb;
+    PVOID                              FsContext;
+    PVOID                              FsContext2;
+    PSECTION_OBJECT_POINTERS           SectionObjectPointer;
+    PVOID                              PrivateCacheMap;
     LOUSTATUS                          FinalStatus;
-    struct _FILE_OBJECT* RelatedFileObject;
-    BOOLEAN                           LockOperation;
-    BOOLEAN                           DeletePending;
-    BOOLEAN                           ReadAccess;
-    BOOLEAN                           WriteAccess;
-    BOOLEAN                           DeleteAccess;
-    BOOLEAN                           SharedRead;
-    BOOLEAN                           SharedWrite;
-    BOOLEAN                           SharedDelete;
-    ULONG                             Flags;
-    UNICODE_STRING                    FileName;
-    LARGE_INTEGER                     CurrentByteOffset;
-    ULONG                  Waiters;
-    ULONG                  Busy;
-    PVOID                             LastLock;
-    KEVENT                            Lock;
-    KEVENT                            Event;
-    PIO_COMPLETION_CONTEXT CompletionContext;
-    KSPIN_LOCK                        IrpListLock;
-    LIST_ENTRY                        IrpList;
-    PVOID                  FileObjectExtension;
+    struct _FILE_OBJECT*               RelatedFileObject;
+    BOOLEAN                            LockOperation;
+    BOOLEAN                            DeletePending;
+    BOOLEAN                            ReadAccess;
+    BOOLEAN                            WriteAccess;
+    BOOLEAN                            DeleteAccess;
+    BOOLEAN                            SharedRead;
+    BOOLEAN                            SharedWrite;
+    BOOLEAN                            SharedDelete;
+    ULONG                              Flags;
+    UNICODE_STRING                     FileName;
+    LARGE_INTEGER                      CurrentByteOffset;
+    ULONG                              Waiters;
+    ULONG                              Busy;
+    PVOID                              LastLock;
+    KEVENT                             Lock;
+    KEVENT                             Event;
+    PIO_COMPLETION_CONTEXT             CompletionContext;
+    KSPIN_LOCK                         IrpListLock;
+    LIST_ENTRY                         IrpList;
+    PVOID                              FileObjectExtension;
 } FILE_OBJECT, * PFILE_OBJECT;
 
 typedef struct _TARGET_DEVICE_CUSTOM_NOTIFICATION {

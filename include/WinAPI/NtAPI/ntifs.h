@@ -182,7 +182,7 @@ NtClose(
   HANDLE Handle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtCopyFileChunk(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtCopyFileChunk(
              HANDLE           SourceHandle,
              HANDLE           DestHandle,
   		 HANDLE           Event,
@@ -195,7 +195,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtCopyFileChunk(
              ULONG            Flags
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtCreateFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtCreateFile(
             PHANDLE            FileHandle,
              ACCESS_MASK        DesiredAccess,
              POBJECT_ATTRIBUTES ObjectAttributes,
@@ -209,7 +209,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtCreateFile(
              ULONG              EaLength
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtCreateSection(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtCreateSection(
             PHANDLE            SectionHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -221,7 +221,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtCreateSection(
 
 #define NtCreateSectionEx(a,b,c,d,e,f,g,h,i) LouKeVmmCreateSectionEx(a,b,c,d,e,f,g,h,i)
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtDeviceIoControlFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtDeviceIoControlFile(
               HANDLE           FileHandle,
     HANDLE           Event,
     PIO_APC_ROUTINE  ApcRoutine,
@@ -234,7 +234,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtDeviceIoControlFile(
               ULONG            OutputBufferLength
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtDuplicateToken(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtDuplicateToken(
     HANDLE             ExistingTokenHandle,
     ACCESS_MASK        DesiredAccess,
     POBJECT_ATTRIBUTES ObjectAttributes,
@@ -243,7 +243,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtDuplicateToken(
    PHANDLE            NewTokenHandle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtFlushBuffersFileEx(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtFlushBuffersFileEx(
     HANDLE           FileHandle,
     ULONG            Flags,
     PVOID            Parameters,
@@ -251,14 +251,14 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtFlushBuffersFileEx(
    PIO_STATUS_BLOCK IoStatusBlock
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtFreeVirtualMemory(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtFreeVirtualMemory(
         HANDLE  ProcessHandle,
     PVOID   *BaseAddress,
     PSIZE_T RegionSize,
         ULONG   FreeType
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtFsControlFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtFsControlFile(
               HANDLE           FileHandle,
     HANDLE           Event,
     PIO_APC_ROUTINE  ApcRoutine,
@@ -271,7 +271,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtFsControlFile(
               ULONG            OutputBufferLength
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtLockFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtLockFile(
              HANDLE           FileHandle,
    HANDLE           Event,
    PIO_APC_ROUTINE  ApcRoutine,
@@ -284,7 +284,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtLockFile(
              BOOLEAN          ExclusiveLock
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtOpenFile(
    PHANDLE            FileHandle,
     ACCESS_MASK        DesiredAccess,
     POBJECT_ATTRIBUTES ObjectAttributes,
@@ -293,27 +293,27 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenFile(
     ULONG              OpenOptions
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenProcessToken(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtOpenProcessToken(
     HANDLE      ProcessHandle,
     ACCESS_MASK DesiredAccess,
    PHANDLE     TokenHandle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenProcessTokenEx(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtOpenProcessTokenEx(
     HANDLE      ProcessHandle,
     ACCESS_MASK DesiredAccess,
     ULONG       HandleAttributes,
    PHANDLE     TokenHandle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenThreadToken(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtOpenThreadToken(
     HANDLE      ThreadHandle,
     ACCESS_MASK DesiredAccess,
     BOOLEAN     OpenAsSelf,
    PHANDLE     TokenHandle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenThreadTokenEx(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtOpenThreadTokenEx(
     HANDLE      ThreadHandle,
     ACCESS_MASK DesiredAccess,
     BOOLEAN     OpenAsSelf,
@@ -321,13 +321,13 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenThreadTokenEx(
    PHANDLE     TokenHandle
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtPrivilegeCheck(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtPrivilegeCheck(
         HANDLE         ClientToken,
     PPRIVILEGE_SET RequiredPrivileges,
        PBOOLEAN       Result
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryDirectoryFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryDirectoryFile(
              HANDLE                 FileHandle,
    HANDLE                 Event,
    PIO_APC_ROUTINE        ApcRoutine,
@@ -341,7 +341,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryDirectoryFile(
              BOOLEAN                RestartScan
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryDirectoryFileEx(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryDirectoryFileEx(
              HANDLE                 FileHandle,
    HANDLE                 Event,
    PIO_APC_ROUTINE        ApcRoutine,
@@ -354,7 +354,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryDirectoryFileEx(
    PUNICODE_STRING        FileName
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryInformationFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryInformationFile(
     HANDLE                 FileHandle,
    PIO_STATUS_BLOCK       IoStatusBlock,
    PVOID                  FileInformation,
@@ -362,21 +362,21 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryInformationFile(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryInformationToken(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryInformationToken(
     HANDLE                  TokenHandle,
     TOKEN_INFORMATION_CLASS TokenInformationClass,
    PVOID                   TokenInformation,
     ULONG                   TokenInformationLength,
    PULONG                  ReturnLength
 );
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryObject(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryObject(
     HANDLE                   Handle,
               OBJECT_INFORMATION_CLASS ObjectInformationClass,
    PVOID                    ObjectInformation,
               ULONG                    ObjectInformationLength,
    PULONG                   ReturnLength
 );
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryQuotaInformationFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryQuotaInformationFile(
              HANDLE           FileHandle,
             PIO_STATUS_BLOCK IoStatusBlock,
             PVOID            Buffer,
@@ -388,7 +388,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryQuotaInformationFile(
              BOOLEAN          RestartScan
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQuerySecurityObject(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQuerySecurityObject(
     HANDLE               Handle,
     SECURITY_INFORMATION SecurityInformation,
    PSECURITY_DESCRIPTOR SecurityDescriptor,
@@ -396,7 +396,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQuerySecurityObject(
    PULONG               LengthNeeded
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryVirtualMemory(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryVirtualMemory(
               HANDLE                   ProcessHandle,
     PVOID                    BaseAddress,
               MEMORY_INFORMATION_CLASS MemoryInformationClass,
@@ -405,7 +405,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryVirtualMemory(
    PSIZE_T                  ReturnLength
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryVolumeInformationFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtQueryVolumeInformationFile(
     HANDLE               FileHandle,
    PIO_STATUS_BLOCK     IoStatusBlock,
    PVOID                FsInformation,
@@ -413,7 +413,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtQueryVolumeInformationFile(
     FS_INFORMATION_CLASS FsInformationClass
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtReadFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtReadFile(
              HANDLE           FileHandle,
    HANDLE           Event,
    PIO_APC_ROUTINE  ApcRoutine,
@@ -425,7 +425,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtReadFile(
    PULONG           Key
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtSetInformationFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtSetInformationFile(
     HANDLE                 FileHandle,
    PIO_STATUS_BLOCK       IoStatusBlock,
     PVOID                  FileInformation,
@@ -433,34 +433,34 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtSetInformationFile(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtSetInformationThread(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtSetInformationThread(
    HANDLE          ThreadHandle,
    THREADINFOCLASS ThreadInformationClass,
    PVOID           ThreadInformation,
    ULONG           ThreadInformationLength
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtSetInformationToken(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtSetInformationToken(
    HANDLE                  TokenHandle,
    TOKEN_INFORMATION_CLASS TokenInformationClass,
    PVOID                   TokenInformation,
    ULONG                   TokenInformationLength
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtSetQuotaInformationFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtSetQuotaInformationFile(
     HANDLE           FileHandle,
    PIO_STATUS_BLOCK IoStatusBlock,
     PVOID            Buffer,
     ULONG            Length
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtSetSecurityObject(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtSetSecurityObject(
    HANDLE               Handle,
    SECURITY_INFORMATION SecurityInformation,
    PSECURITY_DESCRIPTOR SecurityDescriptor
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtUnlockFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtUnlockFile(
     HANDLE           FileHandle,
    PIO_STATUS_BLOCK IoStatusBlock,
     PLARGE_INTEGER   ByteOffset,
@@ -468,7 +468,7 @@ KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtUnlockFile(
     ULONG            Key
 );
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtWriteFile(
+LOUAPI NTSYSCALLAPI LOUSTATUS NtWriteFile(
              HANDLE           FileHandle,
    HANDLE           Event,
    PIO_APC_ROUTINE  ApcRoutine,

@@ -25,7 +25,9 @@
 
 #include "DrsdCore.h"
 
-KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
+LOUAPI 
+LOUSTATUS 
+DrsdCoreSubsystemEntry(){
 
     LOUSTATUS Result = STATUS_SUCCESS;
 

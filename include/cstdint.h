@@ -17,7 +17,7 @@ typedef unsigned long       ULONG, * PULONG, ULONG32, * PULONG32;
 typedef unsigned long long  uint64_t,   ULONGLONG;
 
 typedef char                int8_t;
-typedef short               int16_t;
+typedef short               int16_t, SHORT;
 typedef int                 int32_t;
 typedef long                LONG;
 typedef long long           int64_t;
