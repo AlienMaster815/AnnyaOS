@@ -36,20 +36,31 @@ typedef unsigned long long  UINT64, ULONGLONG, * PULONGLONG, QWORD, DWORD64, * P
 typedef long long           LONGLONG, * PLONGLONG;
 typedef void*               PVOID;
 
-typedef int32_t  INTEGER;
+typedef int32_t  INTEGER, INT32, LONG32, NTSTRSAFEDDI, INT;
 typedef uint32_t DWORD32, UINT32, DWORD, UINT, 
     * PDWORD32, * PUINT32, * PDWORD, * PUINT;
+
+typedef unsigned long *DWORD_PTR;
+typedef int32_t* HALF_PTR;
+typedef unsigned int* UINT_PTR;
+typedef long* LONG_PTR;
+typedef int64_t* POINTER_64; // 32 in 32 bit
+typedef int32_t* POINTER_32;
+
+#define VOID void
 
 #define PACKED __attribute__((packed))
 
 #ifdef __x86_64__
 typedef uint64_t    size_t;
 typedef uint64_t    uintptr_t;
+typedef int64_t     SSIZE_T;
 #endif
 
 #ifdef __i386__
 typedef uint32_t    size_t;
 typedef uint32_t    uintptr_t;
+typedef int32_t     SSIZE_T;
 #endif
 
 typedef size_t      SIZE, SIZE_T; 

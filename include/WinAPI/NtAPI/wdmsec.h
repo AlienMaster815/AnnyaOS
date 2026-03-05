@@ -2,7 +2,7 @@
 #define WDMSEC_H
 
 #include <NtAPI.h>
-#include "../WinAPITypes/CommonTypes.h"
+#include <Ldm/CommonTypes.h>
 
 LOUSTATUS WdmlibIoCreateDeviceSecure(
              PDRIVER_OBJECT   DriverObject,

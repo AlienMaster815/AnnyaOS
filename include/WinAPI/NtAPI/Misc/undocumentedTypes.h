@@ -36,7 +36,7 @@ typedef CONST OBJECT_ATTRIBUTES* PCOBJECT_ATTRIBUTES;
 
 typedef HANDLE* PHANDLE;
 
-#include <WinAPI/WinAPITypes/CommonTypes.h>
+#include <Ldm/CommonTypes.h>
 
 typedef
 VOID

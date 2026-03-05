@@ -4,7 +4,7 @@
 #include "irp.h"
 #include "ntoapi.h"
 #include <NtAPI.h>
-#include <WinAPI/WinAPITypes/CommonTypes.h>
+#include <Ldm/CommonTypes.h>
 
 #define MAXIMUM_VOLUME_LABEL_LENGTH  (32 * sizeof(WCHAR)) // 32 characters
 

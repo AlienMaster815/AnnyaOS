@@ -2,6 +2,7 @@
 #define _LIST_MANAGEMENT_H
 
 #include <stdbool.h>
+#include <kernel/threads.h>
 
 #ifdef __cplusplus
 extern "C" { 

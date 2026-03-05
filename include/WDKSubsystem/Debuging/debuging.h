@@ -8,7 +8,7 @@
 
 #include <cstdint.h>
 #include <stddef.h>
-#include <WinAPI/WinAPITypes/CommonTypes.h>
+#include <Ldm/CommonTypes.h>
 
 
 
