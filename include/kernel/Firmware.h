@@ -10,6 +10,8 @@ extern "C"{
 
 #include "../Firmware/Efi.h"
 
+LOUAPI bool IsSystemEfi();
+
 #define DEVICE_DMA_NOT_SUPPORTED    0
 #define DEVICE_DMA_NON_COHERENT     1
 #define DEVICE_DMA_COHERENT         2

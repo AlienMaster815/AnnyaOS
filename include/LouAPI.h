@@ -46,7 +46,6 @@ extern "C" {
 
 
 
-#include <kernel/kernel.h>
 #include <drivers/drivers.h>
 #include <bootloader/grub/multiboot.h>
 #include <CPUInstructionSet/CPURegisters.h>

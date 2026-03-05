@@ -4,7 +4,6 @@
 #include <cstdlib.h>
 #include <kernel/gdt.h>
 #include <kernel/errors.h>
-#include <kernel/kernel.h>
 
 
 
