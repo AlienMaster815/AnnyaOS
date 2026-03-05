@@ -3,39 +3,8 @@
 #include <NtAPI.h>
 #pragma once
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-typedef void* HANDLE;
-
-typedef LOUSTATUS* PLOUSTATUS;
-
-typedef struct _OFFSETINSTANCEDATAANDLENGTH {
-    ULONG OffsetInstanceData;
-    ULONG LengthInstanceData;
-} OFFSETINSTANCEDATAANDLENGTH, * POFFSETINSTANCEDATAANDLENGTH;
-
-typedef enum {
-    KernelMode,
-    UserMode,
-}KPROCESSOR_MODE;
-
-typedef UCHAR KIRQL;
-
-//TODO: Find the Definitions of these in the kit
-//  and replace these with the actual definition
 
 //Filler Types Until Found
-typedef void* FILE_INTERNAL_INFORMATION;
-typedef void* PREPARSE_DATA_BUFFER;
-typedef void* PFILE_TIMESTAMPS;
-typedef BOOLEAN* PBOOLEAN;
-typedef void* OBJECT_INFORMATION_CLASS;
-typedef void* MEMORY_INFORMATION_CLASS;
-typedef const WCHAR* PCWCH;
-typedef const CHAR* PCCH;
-typedef void* VIRTUAL_MEMORY_INFORMATION_CLASS;
-typedef void* PMEMORY_RANGE_ENTRY;
-typedef const char* PCSZ;
 typedef void* PSYSCTL_IRP_DISPOSITION;
 typedef void* PWMI_QUERY_REGINFO;
 typedef void* PWMI_QUERY_DATABLOCK;

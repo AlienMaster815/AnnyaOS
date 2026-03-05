@@ -8,7 +8,7 @@
 // the kernel will actualy have real knoledge 
 // on what the hell happened 
 
-typedef int LOUSTATUS;
+typedef int LOUSTATUS, * PLOUSTATUS;
 
 #define STATUS_SUCCESS ((LOUSTATUS)0x00000000L)
 

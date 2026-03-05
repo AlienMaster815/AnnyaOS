@@ -4,8 +4,6 @@
 #define _NTAPI_H
 
 
-#include <Modulation.h>
-
 
 #ifdef _KERNEL_MODULE_
 #pragma warning(push)
@@ -15,20 +13,8 @@
 #pragma warning(disable: 5051) // Disable C5051 warning
 #endif
 
-#include <WinAPI/Win32/ntdef.h>
+#include <Ldm.h>
 
-#define WINAPI __stdcall
-
-#ifndef _GUID_TYPE
-#define _GUID_TYPE
-typedef struct _GUID {
-	unsigned char DataByte[16];
-} GUID,* LPGUID, UUID, * PGUID, * PUUID;
-#endif
-
-#include <WDKSubsystem/Debuging/debuging.h>
-#include <WDKSubsystem/Types/DebugTypes.h>
-#include <Ldm/CommonTypes.h>
 #include <WinAPI/NtAPI/NtAPIFunc.h>
 
 
