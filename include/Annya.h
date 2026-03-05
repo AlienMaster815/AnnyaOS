@@ -28,8 +28,9 @@
 #include <kernel/SystemCalls.h>
 #include <kernel/Binarys.h>
 #include <kernel/exec.h>
-
-
+#include <kernel/DRSD.h>
+#include <kernel/Process.h>
+#include <Ldm.h>
 
 
 #include <stdalign.h>
