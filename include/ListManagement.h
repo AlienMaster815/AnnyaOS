@@ -1,16 +1,12 @@
 #ifndef _LIST_MANAGEMENT_H
 #define _LIST_MANAGEMENT_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#include <stdbool.h>
+
+#ifdef __cplusplus
 extern "C" { 
 #endif
 
-
-#ifndef _LIST_OBJECTS_
-#define _LIST_OBJECTS_
 typedef struct _LIST_LINK{
     struct _LIST_LINK*  FLink;
     struct _LIST_LINK*  BLink;
@@ -21,8 +17,6 @@ typedef struct _LIST_OBJECT{
     LIST_LINK   Head;
     bool        Initialized;
 }LIST_OBJECT, * PLIST_OBJECT;
-#endif
-
 
 typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params); 
 

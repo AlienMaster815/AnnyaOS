@@ -19,6 +19,8 @@
 #ifndef _NTDEF_
 #define _NTDEF_
 
+#include <cstdint.h>
+
 #include "specstrings.h"
 
 typedef unsigned int* ULONG_PTR;
@@ -65,7 +67,6 @@ typedef enum _WAIT_TYPE {
 #define BASETYPES
 typedef unsigned char UCHAR, *PUCHAR;
 typedef unsigned short USHORT, *PUSHORT;
-typedef unsigned int ULONG, *PULONG;
 #endif
 typedef ULONG CLONG;
 typedef CLONG *PCLONG;

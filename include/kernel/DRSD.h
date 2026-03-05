@@ -1,23 +1,3 @@
-
-#ifndef _DRSD_H
-#define _DRSD_H
-
-#include <kernel/LouQs.h>
-
-#ifndef _LIST_OBJECTS_
-#define _LIST_OBJECTS_
-typedef struct _LIST_LINK{
-    struct _LIST_LINK*  FLink;
-    struct _LIST_LINK*  BLink;
-}LIST_LINK, * PLIST_LINK;
-
-typedef struct _LIST_OBJECT{
-    mutex_t     Lock;
-    LIST_LINK   Head;
-    bool        Initialized;
-}LIST_OBJECT, * PLIST_OBJECT;
-#endif
-
  /*
  * Copyright (c) 2026 AnnyaOS
  *
@@ -43,6 +23,24 @@ typedef struct _LIST_OBJECT{
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef _DRSD_H
+#define _DRSD_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <kernel/LouQs.h>
+#include <ListManagement.h>
+#include <kernel/Objects.h>
+
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #ifdef _USER_MODE_CODE_
 #include <Annya.h>
 #else
@@ -52,43 +50,6 @@ extern "C" {
 #else 
 #include <LouAPI.h>
 #endif
-#endif
-
-#ifndef _KERNEL_REFERENCE
-#define _KERNEL_REFERENCE
-typedef struct _KERNEL_REFERENCE{
-    mutex_t     IncrementLock;
-    mutex_t     RaceLock;
-    atomic_t    ReferenceCounter;
-    //TODO: Add variables as needed
-}KERNEL_REFERENCE, * PKERNEL_REFERENCE;
-
-static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
-    if(MutexIsLocked(&KRef->IncrementLock)){
-        return false;
-    }
-    MutexLock(&KRef->RaceLock);
-    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
-    Tmp++;
-    LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
-    MutexUnlock(&KRef->RaceLock);
-    return true;
-}
-
-static inline void LouKeReleaseReference(PKERNEL_REFERENCE KRef){
-    MutexLock(&KRef->RaceLock);
-    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
-    Tmp--;
-    LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
-    MutexUnlock(&KRef->RaceLock);
-}
-
-static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
-    MutexLock(&KRef->RaceLock);
-    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
-    MutexUnlock(&KRef->RaceLock);
-    return Tmp;
-}
 #endif
 
 #define DRSD_ROTATION_MODE_0 1

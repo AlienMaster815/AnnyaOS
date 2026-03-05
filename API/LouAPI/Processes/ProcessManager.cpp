@@ -406,7 +406,7 @@ LOUAPI void InitializeProcessManager(){
     InitializationProcessor = GetCurrentCpuTrackMember();
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, &KernelProcess);
-    for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
+    for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetSystemProcess(KernelProcess);
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmInitializeSchedualerObject(
             (UINT64)i, 
@@ -427,7 +427,7 @@ LOUAPI void InitializeProcessManager(){
     ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
     ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
         
-    for(size_t i = 0 ; i < ProcessBlock.ProcessorCount; i++){
+    for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
         if(i != InitializationProcessor){
             NewThread = LouKeCreateDeferedDemonEx(

@@ -139,7 +139,7 @@ LOUSTATUS LouKeReadRegistryWcsValue(
         return STATUS_INVALID_PARAMETER;
     }
 
-    wcsncpy(String, (LPWSTR)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node)), Node->Node.ItemSize / 2);
+    wcsncpy(String, (LPWSTR)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node)), Node->Node.ItemSize / 2);
 
     return STATUS_SUCCESS;
 }
@@ -162,7 +162,7 @@ LOUSTATUS LouKeReadRegistryWordValue(
         return STATUS_INVALID_PARAMETER;
     }
 
-    *Data = *(WORD*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+    *Data = *(WORD*)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node));
 
     return STATUS_SUCCESS;
 }
@@ -185,7 +185,7 @@ LOUSTATUS LouKeReadRegistryByteValue(
         return STATUS_INVALID_PARAMETER;
     }
 
-    *Data = *(BYTE*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+    *Data = *(BYTE*)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node));
 
     return STATUS_SUCCESS;
 }
@@ -208,7 +208,7 @@ LOUSTATUS LouKeReadRegistryDWordValue(
         return STATUS_INVALID_PARAMETER;
     }
 
-    *Data = *(DWORD*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+    *Data = *(DWORD*)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node));
 
     return STATUS_SUCCESS;
 }
@@ -231,7 +231,7 @@ LOUSTATUS LouKeReadRegistryQWordValue(
         return STATUS_INVALID_PARAMETER;
     }
 
-    *Data = *(QWORD*)((size_t)&Node->Node + GET_ITEM_OFFSET(&Node->Node));
+    *Data = *(QWORD*)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node));
 
     return STATUS_SUCCESS;
 }

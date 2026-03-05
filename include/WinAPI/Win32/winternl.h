@@ -22,10 +22,14 @@
 #ifndef _WINTERNL_H
 #define _WINTERNL_H
 
+#include <cstdint.h>
+#include <cstdlib.h>
+#include <kernel/loustatus.h>
+
 #include "ntdef.h"
 #include "windef.h"
-#include "kernel/loustatus.h"
 #include "winnt.h"
+
 
 
 #ifndef __STRING_DEFINED__
@@ -40,17 +44,6 @@ typedef struct _STRING{
 
 typedef const STRING* PCANSI_STRING;
 typedef const STRING* PCOEM_STRING;
-#endif
-
-#ifndef __UNICODE_STRING_DEFINED__
-#define __UNICODE_STRING_DEFINED__
-typedef struct _UNICODE_STRING{
-    USHORT  Length;
-    USHORT  MaximumLength;
-    LPWSTR  Buffer;
-}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
-typedef const UNICODE_STRING* PCUNICODE_STRING;
-typedef const UNICODE_STRING CUNICODE_STRING;
 #endif
 
 #ifndef _FILETIME_

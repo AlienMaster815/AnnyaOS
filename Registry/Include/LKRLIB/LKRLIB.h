@@ -49,7 +49,7 @@ typedef struct _COMPILED_NODE_ENTRY{
 #define ENCODE_OP(Node, Op)                 (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) | (uint8_t)(Op))
 #define ENCODE_ITEM_OFFSET(Node, Offset)    (((PLKR_NODE_ENTRY)Node)->OpItemOffset = (((PLKR_NODE_ENTRY)Node)->OpItemOffset & OPCODE_MASK) |  (uint64_t)(Offset) << 5) 
 #define GET_ITEM_OPCODE(Node)               (((PLKR_NODE_ENTRY)Node)->OpItemOffset & OPCODE_MASK)
-#define GET_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) >> 5) 
+#define GET_REG_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) >> 5) 
 
 typedef struct _LKR_FILE_HEADER{
     WCHAR               Signature[20];//LOUSINE_SYSTEM_FILE

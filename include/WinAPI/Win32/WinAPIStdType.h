@@ -5,6 +5,8 @@
 extern "C"{
 #endif
 
+#include <cstdint.h>
+
 typedef void* LPARAM;
 
 #ifdef _USER_MODE_CODE_
@@ -88,8 +90,6 @@ typedef unsigned int* ULONG_PTR;
 
 typedef void* HMODULE;
 typedef void* LPVOID;
-
-typedef unsigned int* PULONG;
 
 typedef bool BOOL;
 #define TRUE true

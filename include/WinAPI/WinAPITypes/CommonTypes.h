@@ -2,9 +2,12 @@
 #include <cstdint.h>
 #include <WinAPI/Win32/winnt.h>
 #include <WinAPI/Win32/winternl.h>
+#include <cstdlib.h>
+#include <Security.h>
+
 //Fixed Percision Integers
 
-typedef uint32_t DWORD32, UINT32, ULONG32,DWORD, UINT;
+
 typedef uint64_t UINT64,QWORD;
 typedef int32_t INT32, LONG32, NTSTRSAFEDDI, INT;
 typedef int64_t INT64, LONG64;
@@ -22,7 +25,7 @@ typedef unsigned long long ULONGLONG, * PULONGLONG;
 typedef long long LONGLONG, * PLONGLONG;
 #endif
 
-typedef unsigned int* PULONG,* PQWORD;
+typedef unsigned int* PQWORD;
 typedef unsigned char* PUCHAR;
 typedef unsigned short* PUWORD,* PUSHORT;
 typedef long* PLONG;
@@ -56,7 +59,6 @@ typedef int32_t POINTER_32;
 #define CONST const
 #define IRP_MJ_MAXIMUM_FUNCTION         0x1b
 typedef short SHORT;
-typedef unsigned int ULONG;
 typedef void* PVOID;
 #define VOID void
 typedef char CHAR;
@@ -83,7 +85,6 @@ typedef KAFFINITY *PKAFFINITY;
 
 typedef USHORT SECURITY_DESCRIPTOR_CONTROL;
 
-typedef PVOID PSID;
 
 
 
@@ -302,17 +303,6 @@ DRIVER_ADD_DEVICE (
     );
 
 typedef DRIVER_ADD_DEVICE *PDRIVER_ADD_DEVICE;
-
-#ifndef __UNICODE_STRING_DEFINED__
-#define __UNICODE_STRING_DEFINED__
-typedef struct _UNICODE_STRING{
-    USHORT  Length;
-    USHORT  MaximumLength;
-    LPWSTR  Buffer;
-}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
-typedef const UNICODE_STRING* PCUNICODE_STRING;
-typedef const UNICODE_STRING CUNICODE_STRING;
-#endif
 
 typedef
 LOUSTATUS

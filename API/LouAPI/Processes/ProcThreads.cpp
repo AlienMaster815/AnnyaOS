@@ -43,7 +43,7 @@ LouKePsmCreateDeferedThreadForProcessEx(
 
     PGENERIC_PROCESS_DATA ProcessData = (PGENERIC_PROCESS_DATA)Process;
     INTEGER Processors = GetNPROC();
-    for(size_t i = 0 ; i < Processors; i++){
+    for(INTEGER i = 0 ; i < Processors; i++){
         if(IS_PROCESSOR_AFFILIATED((*(PGENERIC_THREAD_DATA*)ThreadOut)->AfinityBitmap, i)){
             ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(*(PGENERIC_THREAD_DATA*)ThreadOut);
         }

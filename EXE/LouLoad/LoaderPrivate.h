@@ -3,13 +3,6 @@
 #include <LouLoad.h>
 #include <bootloader/grub/multiboot2.h>
 
-typedef struct _UNICODE_STRING{
-    USHORT  Length;
-    USHORT  MaximumLength;
-    LPWSTR  Buffer;
-}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
-
-
 static inline struct multiboot_mmap_entry* MapIndexToEntry(struct master_multiboot_mmap_entry* mmap, UINT16 i){
     return (struct multiboot_mmap_entry*)(uintptr_t)((uint64_t)mmap + (uint64_t)sizeof(struct master_multiboot_mmap_entry) + (uint64_t)i * (uint64_t)mmap->entry_size);
 }

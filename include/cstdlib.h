@@ -23,6 +23,17 @@ extern "C" {
 #define VOID 	void
 #define VOIDP	void*
 
+typedef PVOID HANDLE, * PHANDLE;
+
+typedef struct _UNICODE_STRING{
+    USHORT  Length;
+    USHORT  MaximumLength;
+    LPWSTR  Buffer;
+}UNICODE_STRING, * PUNICODE_STRING, * LPUNICODE_STRING;
+
+typedef const UNICODE_STRING* PCUNICODE_STRING;
+typedef const UNICODE_STRING CUNICODE_STRING;
+
 typedef struct  _ListHeader{
     struct _ListHeader* LastHeader;
     struct _ListHeader* NextHeader;
@@ -50,6 +61,77 @@ typedef struct  _ListHeader{
 static inline void* LouKeCastToUnalignedPointer(void* pointer){
 	return pointer;
 }
+
+typedef enum MEM_EXTENDED_PARAMETER_TYPE {
+    MemExtendedParameterInvalidType = 0,
+    MemExtendedParameterAddressRequirements,
+    MemExtendedParameterNumaNode,
+    MemExtendedParameterPartitionHandle,
+    MemExtendedParameterUserPhysicalHandle,
+    MemExtendedParameterAttributeFlags,
+    MemExtendedParameterImageMachine,
+    MemExtendedParameterMax
+} MEM_EXTENDED_PARAMETER_TYPE, *PMEM_EXTENDED_PARAMETER_TYPE;
+
+#ifndef __has_declspec_attribute
+#if defined(_MSC_VER)
+#define __has_declspec_attribute(x) 1
+#else 
+#define __has_declspec_attribute(x) 0
+#endif
+#endif 
+
+
+#ifndef DECLSPEC_ALIGN
+#if __has_declspec_attribute(Align) && !defined(MIDL_PASS)
+#define DECLSPEC_ALIGN(x) __declspec(align(x))
+#else
+#define DECLSPEC_ALIGN(x)
+#endif
+#endif
+
+#define MEM_EXTENDED_PARAMETER_TYPE_BITS 8
+
+typedef struct DECLSPEC_ALIGN(8) MEM_EXTENDED_PARAMETER {
+    struct
+    {
+        DWORD64 Type : MEM_EXTENDED_PARAMETER_TYPE_BITS;
+        DWORD64 Reserved : 64 - MEM_EXTENDED_PARAMETER_TYPE_BITS;
+    } DUMMYSTRUCTNAME;
+
+    union
+    {
+        DWORD64 ULong64;
+        PVOID Pointer;
+        SIZE_T Size;
+        HANDLE Handle;
+        DWORD ULong;
+    } DUMMYUNIONNAME;
+} MEM_EXTENDED_PARAMETER, *PMEM_EXTENDED_PARAMETER;
+
+typedef WORD SECURITY_DESCRIPTOR_CONTROL, *PSECURITY_DESCRIPTOR_CONTROL;
+
+typedef PVOID PSID;
+typedef struct _ACL {
+    BYTE AclRevision;
+    BYTE Sbz1;
+    WORD AclSize;
+    WORD AceCount;
+    WORD Sbz2;
+} ACL, *PACL;
+
+typedef struct _SECURITY_DESCRIPTOR{
+    BYTE Revision;
+    BYTE Sbz1;
+    SECURITY_DESCRIPTOR_CONTROL Control;
+    PSID Owner;
+    PSID Group;
+    PACL Sacl;
+    PACL Dacl;
+} SECURITY_DESCRIPTOR, *PISECURITY_DESCRIPTOR;
+
+
+
 
 #ifndef _USER_MODE_CODE_
 #define ABS(x) (((x) < 0) ? -(x) : (x)) 

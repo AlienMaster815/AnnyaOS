@@ -213,18 +213,7 @@ typedef struct _ANNYA_DESKTOP_SETUP_PACKET{
     ANNYA_WINDOW_CALLBACK WindowCallback;
 }ANNYA_DESKTOP_SETUP_PACKET, * PANNYA_DESKTOP_SETUP_PACKET;
 
-#ifndef _OBJECT_ATTRIBUTES_DEF
-#define _OBJECT_ATTRIBUTES_DEF
-typedef struct _OBJECT_ATTRIBUTES {
-    ULONG Length;
-    HANDLE RootDirectory;
-    PUNICODE_STRING ObjectName;
-    ULONG Attributes;
-    PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
-    PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
-} OBJECT_ATTRIBUTES;
-typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
-#endif
+
 
 #ifndef _USER_32_
 
@@ -451,6 +440,8 @@ void LouTrashAndDumpProcess();
 
 __declspec(dllimport)
 void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
+
+#include <kernel/Objects.h>
 
 __declspec(dllimport)
 LOUSTATUS 

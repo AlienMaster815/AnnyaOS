@@ -1,18 +1,21 @@
 #ifndef _KERNEL_OBJECTS_H
 #define _KERNEL_OBJECTS_H
 
-#ifndef _USER_MODE_CODE_
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
-extern "C"{
-#endif
-#else
-#include <Annya.h>
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define GetObjectItemOffset(Object, Item) ((SIZE)&((Object*)0x00)->Item)
+#include <cstdint.h>
+#include <cstdlib.h>
+#include <stdbool.h>
+#include <kernel/loustatus.h>
+#include <Security.h>
+#include <string.h>
+#include <kernel/threads.h>
+#include <cstdio.h>
+
+
+#define GET_ITEM_OFFSET(Object, Item) ((SIZE)&((Object*)0x00)->Item)
 
 typedef struct _IDENTIFICATION_RANGE{
     INTEGER     RangeStart;
@@ -25,35 +28,26 @@ typedef struct _IDENTIFICATION_RANGE{
     }Identities[];
 }IDENTIFICATION_RANGE, * PIDENTIFICATION_RANGE;
 
-#define LouKeDestroyIdentificationRange(x) LouKeFree(x)
 
-PIDENTIFICATION_RANGE
-LouKeCreateIdentificationRange(
-    INTEGER RangeStart,
-    INTEGER RangeEnd
-);
-
-void LouKeReleaseIdFromRange(
-    PIDENTIFICATION_RANGE IdRange,
-    INTEGER Id
-);
-
-INTEGER 
-LouKeAcquireIdFromRange(
-    PIDENTIFICATION_RANGE   IdRange,
-    PVOID                   Object
-);
-
-
-
-#ifndef _KERNEL_REFERENCE
-#define _KERNEL_REFERENCE
 typedef struct _KERNEL_REFERENCE{
     mutex_t     IncrementLock;
     mutex_t     RaceLock;
     atomic_t    ReferenceCounter;
     //TODO: Add variables as needed
 }KERNEL_REFERENCE, * PKERNEL_REFERENCE;
+
+typedef struct _OBJECT_ATTRIBUTES {
+    ULONG Length;
+    HANDLE RootDirectory;
+    PUNICODE_STRING ObjectName;
+    ULONG Attributes;
+    PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
+    PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
+} OBJECT_ATTRIBUTES;
+typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
+
+typedef LOUSTATUS (*LOUSINE_OBJECT_CONSTRUCTOR)(PVOID Object, PVOID ConstructParams);
+typedef LOUSTATUS (*LOUSINE_OBJECT_DECONSTRUCTOR)(PVOID Object);
 
 static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     if(MutexIsLocked(&KRef->IncrementLock)){
@@ -81,7 +75,28 @@ static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
     MutexUnlock(&KRef->RaceLock);
     return Tmp;
 }
-#endif
+
+
+#ifndef _USER_MODE_CODE_
+
+#define LouKeDestroyIdentificationRange(x) LouKeFree(x)
+PIDENTIFICATION_RANGE
+LouKeCreateIdentificationRange(
+    INTEGER RangeStart,
+    INTEGER RangeEnd
+);
+
+void LouKeReleaseIdFromRange(
+    PIDENTIFICATION_RANGE IdRange,
+    INTEGER Id
+);
+
+INTEGER 
+LouKeAcquireIdFromRange(
+    PIDENTIFICATION_RANGE   IdRange,
+    PVOID                   Object
+);
+
 
 LOUSTATUS 
 LouKeReadRegistryValue(
@@ -134,19 +149,6 @@ LOUSTATUS LouKeReadRegistryQWordValue(
     QWORD* Data
 );
 
-#ifndef _OBJECT_ATTRIBUTES_DEF
-#define _OBJECT_ATTRIBUTES_DEF
-typedef struct _OBJECT_ATTRIBUTES {
-    ULONG Length;
-    HANDLE RootDirectory;
-    PUNICODE_STRING ObjectName;
-    ULONG Attributes;
-    PVOID SecurityDescriptor;        // Points to type SECURITY_DESCRIPTOR
-    PVOID SecurityQualityOfService;  // Points to type SECURITY_QUALITY_OF_SERVICE
-} OBJECT_ATTRIBUTES;
-typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
-#endif
-
 LOUSTATUS 
 LouKeVmmCreateSectionEx(
     PHANDLE                 OutSectionHandle,
@@ -160,8 +162,6 @@ LouKeVmmCreateSectionEx(
     ULONG                   ExtendedParameterCount
 );
 
-typedef LOUSTATUS (*LOUSINE_OBJECT_CONSTRUCTOR)(PVOID Object, PVOID ConstructParams);
-typedef LOUSTATUS (*LOUSINE_OBJECT_DECONSTRUCTOR)(PVOID Object);
 
 LOUSTATUS LouKeCreateFastObjectClass(
     LOUSTR  ClassName,
@@ -229,8 +229,10 @@ LOUSTATUS LouKeZwAcquireHandleForObject(
     PVOID       Object
 );
 
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif
-
 #endif

@@ -39,7 +39,7 @@ LkrFillNodeData(
     if((Node->ItemSize < BufferSize) || (!Buffer) || (!BufferSize)){
         return EINVAL;
     }
-    uint8_t* To = (uint8_t*)Node + GET_ITEM_OFFSET(Node);
+    uint8_t* To = (uint8_t*)Node + GET_REG_ITEM_OFFSET(Node);
     memcpy(To, Buffer, BufferSize);
     return 0;
 }
@@ -51,7 +51,7 @@ LPWSTR LkrGetNodeName(PLKR_NODE_ENTRY Node){
 PVOID LkrGetNodeData(
     PLKR_NODE_ENTRY Node
 ){
-    return (PVOID)(uint8_t*)Node + GET_ITEM_OFFSET(Node);
+    return (PVOID)(uint8_t*)Node + GET_REG_ITEM_OFFSET(Node);
 }
 
 PVOID LkrOpenNodeData(
@@ -202,7 +202,7 @@ size_t RecursiveCompileNodes(
             CurrentEntry = (PCOMPILED_NODE_ENTRY)LouKeGenricAllocateDmaPool(FilePool, sizeof(COMPILED_NODE_ENTRY) + ((TmpEntry->NameSize + 1) * sizeof(WCHAR)) + TmpEntry->ItemSize, &CurrentOffset);
             memcpy(&CurrentEntry->Node, TmpEntry, sizeof(LKR_NODE_ENTRY));
             Lou_wcscpy((LPWSTR)(uint8_t*)((size_t)CurrentEntry + sizeof(COMPILED_NODE_ENTRY)), (LPWSTR)(uint8_t*)((size_t)TmpEntry + sizeof(LKR_NODE_ENTRY)));
-            memcpy((uint8_t*)((size_t)&CurrentEntry->Node + GET_ITEM_OFFSET(TmpEntry)), (uint8_t*)TmpEntry + GET_ITEM_OFFSET(TmpEntry), TmpEntry->ItemSize);
+            memcpy((uint8_t*)((size_t)&CurrentEntry->Node + GET_REG_ITEM_OFFSET(TmpEntry)), (uint8_t*)TmpEntry + GET_REG_ITEM_OFFSET(TmpEntry), TmpEntry->ItemSize);
 
             if(LastEntry){
                 LastEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)CurrentOffset;
@@ -273,7 +273,7 @@ LkrCreateLkrFileContext(
             CurrentRootCompilerHandle = (PCOMPILED_NODE_ENTRY)LouKeGenricAllocateDmaPool(FilePool, sizeof(COMPILED_NODE_ENTRY) + ((TmpEntry->NameSize + 1) * sizeof(WCHAR)) + TmpEntry->ItemSize, &CurrentOffset);
             memcpy(&CurrentRootCompilerHandle->Node, TmpEntry, sizeof(LKR_NODE_ENTRY));
             Lou_wcscpy((LPWSTR)(uint8_t*)((size_t)CurrentRootCompilerHandle + sizeof(COMPILED_NODE_ENTRY)), (LPWSTR)(uint8_t*)((size_t)TmpEntry + sizeof(LKR_NODE_ENTRY)));
-            memcpy((uint8_t*)((size_t)&CurrentRootCompilerHandle->Node + GET_ITEM_OFFSET(TmpEntry)), (uint8_t*)TmpEntry + GET_ITEM_OFFSET(TmpEntry), TmpEntry->ItemSize);
+            memcpy((uint8_t*)((size_t)&CurrentRootCompilerHandle->Node + GET_REG_ITEM_OFFSET(TmpEntry)), (uint8_t*)TmpEntry + GET_REG_ITEM_OFFSET(TmpEntry), TmpEntry->ItemSize);
 
             if(LastEntry){
                 LastEntry->NodePeers.Forward = (PLOUSINE_NODE_LIST)CurrentOffset;

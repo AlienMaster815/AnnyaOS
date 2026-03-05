@@ -10,20 +10,20 @@ typedef bool                BOOL;
 typedef unsigned short      wchar_t;     
 #endif
 
-typedef unsigned char       uint8_t;
-typedef unsigned short      uint16_t;
-typedef unsigned int        uint32_t;
-typedef unsigned long long  uint64_t;
+typedef unsigned char       uint8_t,    UCHAR;
+typedef unsigned short      uint16_t,   USHORT;
+typedef unsigned int        uint32_t,   UINT;
+typedef unsigned long       ULONG, * PULONG, ULONG32, * PULONG32;
+typedef unsigned long long  uint64_t,   ULONGLONG;
 
 typedef char                int8_t;
 typedef short               int16_t;
 typedef int                 int32_t;
+typedef long                LONG;
 typedef long long           int64_t;
 
 typedef uint8_t             UINT8, BYTE;
 typedef uint16_t            UINT16, WORD;
-typedef uint32_t            UINT32, DWORD, INTEGER;
-typedef unsigned int        ULONG;
 typedef unsigned int        UINT;
 typedef char                CHAR, INT8;
 typedef wchar_t             WCHAR, * PWCHAR, * LPWSTR;
@@ -32,9 +32,13 @@ typedef short               INT16;
 typedef int                 INT32; 
 typedef long long           INT64; 
 
-typedef unsigned long long  UINT64, ULONGLONG, * PULONGLONG, QWORD;
+typedef unsigned long long  UINT64, ULONGLONG, * PULONGLONG, QWORD, DWORD64, * PDWORD64;
 typedef long long           LONGLONG, * PLONGLONG;
 typedef void*               PVOID;
+
+typedef int32_t  INTEGER;
+typedef uint32_t DWORD32, UINT32, DWORD, UINT, 
+    * PDWORD32, * PUINT32, * PDWORD, * PUINT;
 
 #define PACKED __attribute__((packed))
 
@@ -87,6 +91,19 @@ typedef void* PVOID, * LPVOID;
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+
+
+typedef union _LARGE_INTEGER {
+    struct {
+        DWORD    LowPart;
+        LONG     HighPart;
+    } u;
+    struct {
+        DWORD    LowPart;
+        LONG     HighPart;
+    } DUMMYSTRUCTNAME;
+    LONGLONG QuadPart;
+} LARGE_INTEGER, *PLARGE_INTEGER;
 
 
 #ifdef __cplusplus

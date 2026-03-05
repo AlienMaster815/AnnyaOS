@@ -22,6 +22,8 @@
  */
 #include "winapifamily.h"
 
+#include <cstdlib.h>
+
 #define WINAPI __stdcall
 
 #ifndef _USER_MODE_CODE_
@@ -30,12 +32,10 @@ typedef UINT16 uint16_t;
 typedef unsigned int UINT32;
 typedef UINT32 uint32_t;
 typedef int int32_t;
-typedef long long DWORD64;
 typedef unsigned long ULONG64;
 typedef DWORD64 *PDWORD64;
 typedef unsigned char* PBYTE;
 typedef unsigned char BYTE;
-typedef unsigned int ULONG;
 typedef long long LONGLONG;
 typedef unsigned int* ULONG_PTR;
 typedef ULONG_PTR* PULONG_PTR;
@@ -953,35 +953,8 @@ typedef struct _MEM_ADDRESS_REQUIREMENTS
   SIZE_T     Alignment;
 } MEM_ADDRESS_REQUIREMENTS, *PMEM_ADDRESS_REQUIREMENTS;
 
-#define MEM_EXTENDED_PARAMETER_TYPE_BITS 8
 
-typedef enum MEM_EXTENDED_PARAMETER_TYPE {
-    MemExtendedParameterInvalidType = 0,
-    MemExtendedParameterAddressRequirements,
-    MemExtendedParameterNumaNode,
-    MemExtendedParameterPartitionHandle,
-    MemExtendedParameterUserPhysicalHandle,
-    MemExtendedParameterAttributeFlags,
-    MemExtendedParameterImageMachine,
-    MemExtendedParameterMax
-} MEM_EXTENDED_PARAMETER_TYPE, *PMEM_EXTENDED_PARAMETER_TYPE;
 
-typedef struct DECLSPEC_ALIGN(8) MEM_EXTENDED_PARAMETER {
-    struct
-    {
-        DWORD64 Type : MEM_EXTENDED_PARAMETER_TYPE_BITS;
-        DWORD64 Reserved : 64 - MEM_EXTENDED_PARAMETER_TYPE_BITS;
-    } DUMMYSTRUCTNAME;
-
-    union
-    {
-        DWORD64 ULong64;
-        PVOID Pointer;
-        SIZE_T Size;
-        HANDLE Handle;
-        DWORD ULong;
-    } DUMMYUNIONNAME;
-} MEM_EXTENDED_PARAMETER, *PMEM_EXTENDED_PARAMETER;
 
 #define MEM_EXTENDED_PARAMETER_GRAPHICS                 0x00000001
 #define MEM_EXTENDED_PARAMETER_NONPAGED                 0x00000002
@@ -4387,7 +4360,6 @@ typedef struct tagMESSAGE_RESOURCE_DATA {
 
 /* FIXME:  Orphan.  What does it point to? */
 typedef PVOID PACCESS_TOKEN;
-typedef PVOID PSECURITY_DESCRIPTOR;
 typedef PVOID PSID;
 
 typedef enum _TOKEN_ELEVATION_TYPE {
@@ -4527,13 +4499,6 @@ typedef struct _SID {
 
 #define ACL_REVISION 2
 
-typedef struct _ACL {
-    BYTE AclRevision;
-    BYTE Sbz1;
-    WORD AclSize;
-    WORD AceCount;
-    WORD Sbz2;
-} ACL, *PACL;
 
 typedef enum _ACL_INFORMATION_CLASS
 {
@@ -4721,15 +4686,7 @@ typedef struct {
     DWORD Dacl;
 } SECURITY_DESCRIPTOR_RELATIVE, *PISECURITY_DESCRIPTOR_RELATIVE;
 
-typedef struct {
-    BYTE Revision;
-    BYTE Sbz1;
-    SECURITY_DESCRIPTOR_CONTROL Control;
-    PSID Owner;
-    PSID Group;
-    PACL Sacl;
-    PACL Dacl;
-} SECURITY_DESCRIPTOR, *PISECURITY_DESCRIPTOR;
+
 
 #define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR))
 
@@ -5057,17 +5014,7 @@ typedef struct _TOKEN_GROUPS {
  * LUID_AND_ATTRIBUTES
  */
 
-typedef union _LARGE_INTEGER {
-    struct {
-        DWORD    LowPart;
-        LONG     HighPart;
-    } u;
-    struct {
-        DWORD    LowPart;
-        LONG     HighPart;
-    } DUMMYSTRUCTNAME;
-    LONGLONG QuadPart;
-} LARGE_INTEGER, *PLARGE_INTEGER;
+
 
 typedef union _ULARGE_INTEGER {
     struct {

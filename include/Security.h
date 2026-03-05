@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 typedef DWORD ACCESS_MASK, * PACCESS_MASK;
+typedef PVOID PSECURITY_DESCRIPTOR;
 
 #define ACCESS_MASK_OBJSPEC_MASK        0xFFFF
 #define ACCESS_MASK_OBJSPEC_SHIFT       0x00

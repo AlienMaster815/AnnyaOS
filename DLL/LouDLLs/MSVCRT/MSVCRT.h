@@ -7,9 +7,6 @@
 
 typedef void (__cdecl *FunctionVector)(void);
 
-typedef int LONG;
-typedef unsigned int ULONG;
-
 #include <cstdint.h>
 #include <stdbool.h>
 #include <kernel/loustatus.h>
