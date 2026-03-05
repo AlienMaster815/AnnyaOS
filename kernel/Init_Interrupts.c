@@ -20,7 +20,10 @@ void GPF();
 void PageFault();
 void TimerHandler();
 
-LOUSTATUS InitializeStartupInterruptHandleing(){
+LOUAPI
+LOUSTATUS 
+InitializeStartupInterruptHandleing(){
+
     
     if(SetBasicInterrupts(true) != STATUS_SUCCESS)LouPanic("Error Setting Basic Interrupts");
 

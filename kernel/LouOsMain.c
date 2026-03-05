@@ -13,8 +13,9 @@
 #include <drivers/display/vga.h>
 #include <LouACPI.h>
 
-
-extern LOUSTATUS InitializeStartupInterruptHandleing();
+LOUAPI
+LOUSTATUS 
+InitializeStartupInterruptHandleing();
 
 #define DEBUG 1
 
@@ -326,7 +327,7 @@ PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 KERNEL_ENTRY LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-
+    
     memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
     
     UINT64 Cr3 =  (UINT64)GetCr3();

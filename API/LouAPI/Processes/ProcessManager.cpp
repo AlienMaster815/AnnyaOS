@@ -26,7 +26,8 @@ LOUAPI
 void HandleApProccessorInitialization();
 
 LOUAPI
-LOUSTATUS InitializeStartupInterruptHandleing();
+LOUSTATUS 
+InitializeStartupInterruptHandleing();
 
 LOUAPI
 LOUSTATUS SetUpTimers();
@@ -453,7 +454,7 @@ LOUAPI void InitializeProcessManager(){
     LouPrint("Finished Initializing Process Manager\n");
 }
 
-LOUAPI
+KERNEL_EXPORT
 uint64_t LouKeGetThreadIdentification(){    
     INTEGER ProcessorID = GetCurrentCpuTrackMember();
     if(!ProcessBlock.ProcStateBlock){

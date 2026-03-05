@@ -81,7 +81,7 @@ extern "C" {
 #define CLOCK_LEVEL 13
 #define HIGH_LEVEL 15
 
-typedef struct {
+typedef struct PACKED _Interrupt_Descriptor_Table{
     uint16_t base_low;      // Lower 16 bits of the handler function's address
     uint16_t selector;      // Code segment selector
     uint8_t ist;            // Interrupt Stack Table offset
@@ -93,7 +93,7 @@ typedef struct {
 
 //static Interrupt_Descriptor_Table IDT[256];
 
-typedef struct {
+typedef struct PACKED  _IDTP{
     uint16_t limit;
     uint64_t base;
 } IDTP;

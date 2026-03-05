@@ -6,19 +6,6 @@
 #include <kernel/errors.h>
 #include <kernel/kernel.h>
 
-
-
-#ifdef __i386__
-
-
-extern void SetPicIDTGate(int index, void (*handler)());
-
-extern LOUSTATUS InitializeMainInterruptHandleing();
-extern LOUSTATUS InitializeStartupInterruptHandleing();
-
-extern LOUSTATUS UpdateIDT(bool Init);
-#endif
-
 static Interrupt_Descriptor_Table IDT[256];
 
 extern void ISR0();
@@ -434,7 +421,6 @@ void(*Handler[201])() = {
 
 extern void HandleSwitch();
 
-#ifdef __x86_64__
 LOUSTATUS set_idt_gate(int num, void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr) {
     
     //LouPrint("%d", num);
@@ -451,7 +437,6 @@ LOUSTATUS set_idt_gate(int num, void (*handler)(), uint16_t selector, uint8_t is
         return 0;
         
 }
-#endif
 
 
 void SetPicIDTGate(int index, void (*handler)()) {
@@ -516,7 +501,6 @@ LOUSTATUS SetBasicInterrupts(bool Init){
 
 
 LOUSTATUS UpdateIDT(bool Init){
-    #ifdef __x86_64__
     IDTP idtp;
     if(Init){// Using PIC With Legacy Interrupt Descriptor Table
         idtp.base = (uint64_t)(uintptr_t)&IDT;
@@ -525,57 +509,14 @@ LOUSTATUS UpdateIDT(bool Init){
         return 0;
     }
     else{ // Using APIC With Interrupt Descriptor Table 64
-
         idtp.base = (uint64_t)(uintptr_t)&IDT;
         idtp.limit = 256*sizeof(Interrupt_Descriptor_Table) - 1;
         asm volatile("lidt %0" : : "m" (idtp) : "memory");
         return 0;
     }
     
-    #endif
-    #ifdef __i386__
-    IDTP32 idtp;
-
-
-
-    if(Init){// Using PIC With Legacy Interrupt Descriptor Table
-
-        idtp.base = (uint32_t)(uintptr_t)&idt;
-
-        idtp.limit = 256*sizeof(Interrupt_Descriptor_Table) - 1;
-
-        asm volatile("lidt %0" : : "m" (idtp) : "memory");
-
-        //LouPrint("ADDRESS OF IDT: %d, ADDRESS OF IDTP: %d\n",&idt, &idtp);
-
-    unsigned short cs_value;
-
-    // Inline assembly to get CS value
-    asm("mov %%cs, %0" : "=r" (cs_value));
-
-    // Print the CS value
-    //LouPrint("CS register value: %d\n", cs_value);
-
-    }
-    else{ // Using APIC With Interrupt Descriptor Table 64
-
-
-
-        idtp.base = (uint32_t)(uintptr_t)&idt;
-
-        idtp.limit = 256*sizeof(Interrupt_Descriptor_Table) - 1;
-
-        asm volatile("lidt %0" : : "m" (idtp) : "memory");
-
-        return 0;
-
-
-    }
-
-
-    #endif
     return 1;
-    
+
 }
 
 void SetInterruptFlags(){
