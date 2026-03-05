@@ -11,16 +11,6 @@
 
 #include <LouAPI.h>
 
-#ifdef __i386__
-void WaitForInterrupt();
-#endif
-
-void RegisterForClockInterrupt(){
-    Mask_All_Programable_Interrupts();
-    IRQ_Pic_clear_mask(0);
-    IRQ_Pic_clear_mask(1);
-}
-
 void RunTimerClockMS(uint64_t TimerInMS){
     uint64_t Time = GetCurrentTimeInMilliseconds() + TimerInMS;
     uint64_t Spin = 0;

@@ -141,7 +141,7 @@ typedef enum {
 #include <LouDDK.h>
 #include <NtAPI.h>
 LOUAPI double GetProcessorSpeed();
-LOUAPI void PIC_remap(int offset1, int offset2);
+void PIC_remap(int offset1, int offset2);
 LOUAPI uint32_t GetProcessorBusSpeed();
 
 LOUAPI void UnMaskLocalInterruptVector(uint8_t Offset);

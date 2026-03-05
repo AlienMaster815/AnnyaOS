@@ -124,12 +124,13 @@ typedef struct {
 LOUAPI uint64_t read_msr(uint32_t msr);
 LOUAPI void write_msr(uint32_t msr, uint64_t Value);
 
-LOUAPI void disable_pic();
 string DRV_VERSION_APIC = "\nLousine Internal Kernel APIC.SYS Module Version 1.10\n";
 string DRV_UNLOAD_STRING_SUCCESS_APIC = "Driver Execution Completed Successfully Exiting Proccess\n\n"; 
 string DRV_UNLOAD_STRING_FAILURE_APIC = "Driver Execution Failed To Execute Properly Exiting Proccess\n\n"; 
 
 LOUAPI void SMPInit();
+
+LOUAPI bool GetAPICStatus();
 
 void SetTotalIoApicInterrupts(UINT8 TotalInterrupts);
 bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic);
@@ -159,6 +160,39 @@ typedef struct _CPU_TRACKER_INFORMATION{
 static CPU_TRACKER_INFORMATION CpuTracker = {0};
 static APIC_ISO_TRACKER IoApicOverideTracker = {0};
 static IO_APIC_TRACKER IoApicTracker = {0};
+
+void PIC_remap(int offset1, int offset2){
+    if (!GetAPICStatus()) {
+        unsigned char a1, a2;
+
+        a1 = inb(PIC1_DATA);                        // save masks
+        a2 = inb(PIC2_DATA);
+
+        outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+        outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
+        outb(PIC1_DATA, offset1);                   // ICW2: Master PIC vector offset
+        outb(PIC2_DATA, offset2);                   // ICW2: Slave PIC vector offset
+        outb(PIC1_DATA, 4);                         // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+        outb(PIC2_DATA, 2);                         // ICW3: tell Slave PIC its cascade identity (0000 0010)
+
+        outb(PIC1_DATA, ICW4_8086);                 // ICW4: have the PICs use 8086 mode (and not 8080 mode)
+        outb(PIC2_DATA, ICW4_8086);
+
+        outb(PIC1_DATA, a1);   // restore saved masks.
+        outb(PIC2_DATA, a2);
+    }
+}
+
+// Function to disable the PIC
+void disable_pic() {
+
+    PIC_remap(0x40, 0x40 + 0x08);
+
+    // Mask all interrupts on both PICs
+    outb(PIC1_DATA, 0xFF);
+    outb(PIC2_DATA, 0xFF);
+
+}
 
 LOUAPI PCPU_TRACKER_INFORMATION GetCpuInfoFromTrackerMember(INTEGER Member){
     PCPU_TRACKER_INFORMATION TmpTracker = &CpuTracker;

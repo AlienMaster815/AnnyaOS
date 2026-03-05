@@ -33,6 +33,7 @@ extern "C" {
 #include <kernel/Clock.h>
 #include <kernel/errors.h>
 #include <kernel/interrupts.h>
+#include <kernel/pic.h>
 
 
 

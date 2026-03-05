@@ -29,7 +29,6 @@ typedef struct  PACKED _CPUContext{
 } CPUContext;
 
 void LouKeSendIcEOI();
-bool GetAPICStatus();
 
 typedef struct _INTERRUPT_ROUTER_ENTRY{
     ListHeader  List;
