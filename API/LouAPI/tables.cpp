@@ -281,6 +281,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[73] = "LouKeReleaseSpinLock";
     ImportTables[0].FunctionName[74] = "LouAllocatePhysical64UpEx";
     ImportTables[0].FunctionName[75] = "GetPciConfiguration";
+    ImportTables[0].FunctionName[76] = "LouKeHalLinuxPciCheckForCompatibleConfiguration";
     ImportTables[0].FunctionName[77] = "pci_read";
     ImportTables[0].FunctionName[78] = "write_pci";
     ImportTables[0].FunctionName[85] = "LouKeHalEnablePciDevice";
@@ -451,6 +452,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[73] = (uint64_t)LouKeReleaseSpinLock;
     ImportTables[0].VirtualAddress[74] = (uint64_t)LouAllocatePhysical64UpEx;
     ImportTables[0].VirtualAddress[75] = (uint64_t)GetPciConfiguration;
+    ImportTables[0].VirtualAddress[76] = (uint64_t)LouKeHalLinuxPciCheckForCompatibleConfiguration;
     ImportTables[0].VirtualAddress[77] = (uint64_t)pci_read;
     ImportTables[0].VirtualAddress[78] = (uint64_t)write_pci;
     ImportTables[0].VirtualAddress[85] = (uint64_t)LouKeHalEnablePciDevice;

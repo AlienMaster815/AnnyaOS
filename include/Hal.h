@@ -1,8 +1,6 @@
 #ifndef _HAL_H
 #define _HAL_H
 
-#include <WinAPI/NtAPI/miniport.h>
-
 typedef struct _PCI_MANAGER_DATA{
     ListHeader Neigbors;
     PPCI_DEVICE_OBJECT PDEV;
@@ -54,6 +52,11 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             uint8_t LouKeGetPciCountByType(
                 PPCI_COMMON_CONFIG PciConfig
             );
+            
+            KERNEL_EXPORT void* LouKeHalGetPciVirtualBaseAddress(
+                PPCI_COMMON_CONFIG Config,
+                uint8_t BarNumber
+            );
 
             LOUAPI void LouKeHalRegisterPciDevice(
                 PPCI_DEVICE_OBJECT PDEV
@@ -75,6 +78,12 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             LOUSTATUS LouKeHalPciSetMmio(PPCI_DEVICE_OBJECT PDEV);
 
             KERNEL_EXPORT void LouKeHalPciSetMaster(PPCI_DEVICE_OBJECT PDEV);
+
+
+            KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
+                PPCI_COMMON_CONFIG PciSearch, 
+                PLINUX_PCI_DEVICE_ID LinuxCmpatibleDirectory
+            );
 
             KERNEL_EXPORT LOUSTATUS LouKeHalEnablePciDevice(PPCI_DEVICE_OBJECT PDEV);
 
@@ -152,9 +161,17 @@ typedef struct _LINUX_PCI_DEVICE_ID {
             UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
 
         #else 
-
+            KERNEL_EXPORT uint64_t LouKeHalLinuxPciCheckForCompatibleConfiguration(
+                PPCI_COMMON_CONFIG PciSearch, 
+                PLINUX_PCI_DEVICE_ID LinuxCmpatibleDirectory
+            );
             KERNEL_EXPORT void GetPciConfiguration(ULONG DeviceGroup, ULONG SystemIoBusNumber,ULONG SlotNumber,ULONG Function,PPCI_COMMON_CONFIG ConfigBuffer);
             KERNEL_EXPORT LOUSTATUS LouKeHalEnablePciDevice(PPCI_DEVICE_OBJECT PDEV);
+
+            KERNEL_EXPORT void* LouKeHalGetPciVirtualBaseAddress(
+                PPCI_COMMON_CONFIG Config,
+                uint8_t BarNumber
+            );
 
             KERNEL_EXPORT PPCI_CONTEXT LouKeHalPciSaveContext(
                 PPCI_DEVICE_OBJECT PDEV

@@ -4,7 +4,9 @@
 //include <cstdlib>
 // Define Data Types For ISO Filesystems
 
-#include <cstdint.h>
+#include <LouDDK.h>
+#include <NtAPI.h>
+
 
 //8BitTypes
 typedef uint8_t  int8;
@@ -24,6 +26,7 @@ typedef char* strA;
 typedef char* strD;
 
 // Pack The Structures For Pointers In memory Tho Later We Might Align It For More Acurate Readings
+
 
 typedef struct _int16_LSB_MSB{
     int16_LSB LSB;
@@ -72,6 +75,11 @@ typedef struct _DirectoryTable {
 #define ISO_SupplementaryVolumeDescriptor 2
 #define ISO_VolumePartitionDescriptor 3
 #define ISO_VolumeDescriptorSetTerminator 255
+
+#ifndef _KERNEL_MODULE_
+
+
+#endif //kernel mod
 
 #endif
 

@@ -4,6 +4,8 @@
 typedef char LOUSINE_KERNEL_DRIVE_ID;
 typedef uint8_t LOUSINE_KERNEL_STORAGE_DEVICE_ID;
 
+
+
 typedef struct _LOUSINE_KERNEL_FILESYSTEM{
     LOUSINE_KERNEL_DRIVE_ID                     DriveID;
     uint8_t                                     PortID;
@@ -33,14 +35,22 @@ typedef struct _FSStruct{
     uintptr_t ExtendedFilesystemParameters;
 } FSStruct, *PFSStruct;
 
-#include "FileSystems/fat.h"
-#include "FileSystems/ISO.h"
+
+#ifdef __cplusplus
+
 
 typedef struct _ISO_STRUCT{
     uint64_t PathTableSize;
 }ISO_STRUCT, *PISO_STRUCT;
 
-#ifndef _USER_MODE_CODE_
+#include "FileSystems/fat.h"
+
+#else
+
+#ifndef _KERNEL_MODULE_
 void FileSystemSetup();
 #endif //kernel mod 
+
+#endif
+
 #endif
