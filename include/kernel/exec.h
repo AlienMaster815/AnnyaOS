@@ -139,7 +139,7 @@ typedef struct PACKED _DOS_HEADER{
     uint16_t e_oemid;       //oem ID
     uint16_t e_oeminfo;     //OEM Info
     char e_res2[0x14];      //reserv 2
-    uint32_t e_lfanew;  //portable Executabkle HEader Offset
+    uint32_t e_lfanew;      //portable Executabkle HEader Offset
 }DOS_HEADER, * PDOS_HEADER;
 
 typedef struct PACKED _CONFIG_TABLE_TAG{
@@ -213,7 +213,9 @@ typedef struct PACKED _JITL_DIRECTORY {
     JITL_TABLE  JitlEntries[];
 }JITL_DIRECTORY, * PJITL_DIRECTORY;
 
+typedef string  KULA_RVA_NAME;
 typedef string* KULA_RVA_NAMES;
+typedef PVOID   KULA_RVA_ADDRESS;
 typedef PVOID*  KULA_RVA_ADDRESSES;
 
 typedef struct PACKED _KULA_TBALE_ENTRIES{

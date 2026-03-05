@@ -1,7 +1,6 @@
 
 //x86_64-w64-mingw32-gcc -shared -o LouDll.dll LouDll.c -nostdlib -nodefaultlibs -I../../../Include
 #include "LouDll.h"
-#include <LouCoff.h>
 #include <Security.h>
 
 #define NTDLL_RVA_ENTRIES 78

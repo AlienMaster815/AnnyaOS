@@ -1,5 +1,4 @@
 #include "LouDll.h"
-#include <LouCoff.h>
 
 
 //LOUSTATUS 

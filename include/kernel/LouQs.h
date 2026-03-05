@@ -5,8 +5,12 @@
 extern "C" {
 #endif
 
+#include <cstdint.h>
+#include <cstdlib.h>
 #include <kernel/loustatus.h>
 #include <Time.h>
+#include <kernel/threads.h>
+#include <string.h>
 
 struct _LOUQ_WORK;
 
