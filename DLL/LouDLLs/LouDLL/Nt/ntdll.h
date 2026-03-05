@@ -149,7 +149,7 @@ void GetRtcTimeData(TIME_T* PTIME);
 void AnnyaUpdateButton(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
-    PBUTTONHANDLE HBUTTON
+    PVOID HBUTTON
 );
 void LouTrashAndDumpProcess();
 void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);

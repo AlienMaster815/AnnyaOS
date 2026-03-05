@@ -24,15 +24,7 @@ LouKeVmmCreateSectionEx(
     ULONG                   ExtendedParameterCount
 );
 
-void LogButtonToProccess(
-    PBUTTONHANDLE ButtonHandle, 
-    PLOADED_WIN32_BINARY_OBJECT BinaryBind
-);
 
-LOUSTATUS LouKeRegisterCallbackProcedure(
-    void* CallbackHandler,
-    PLOADED_WIN32_BINARY_OBJECT BinaryBind
-);
 
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,

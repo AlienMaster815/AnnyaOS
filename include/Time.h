@@ -4,7 +4,9 @@
 extern "C" {
 #endif
 
+
 #include <Modulation.h>
+#include <cstdint.h>
 #include <cstdio.h>
 
 typedef struct _TIME_T{

@@ -4,7 +4,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <stddef.h>
+#include <cstdint.h>
 
 #define string char*
 #define LOUSTR char*

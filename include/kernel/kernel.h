@@ -8,9 +8,9 @@
 -- as well... 
 */
 
-#include "Process.h"
-
-
+#include <stdbool.h>
+#include <Modulation.h>
+#include <string.h>
 
 #ifdef __cplusplus
 LOUAPI bool IsSystemEfi();

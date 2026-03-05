@@ -40,6 +40,7 @@ extern "C" {
 #include <kernel/Binarys.h>
 #include <kernel/exec.h>
 #include <kernel/DRSD.h>
+#include <kernel/Process.h>
 
 
 
@@ -204,7 +205,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/Processors.h>
 #include <Coff.h>
 #include <LouLoad.h>
-#include <kernel/Process.h>
 #include <Power.h>
 #include <kernel/Events.h>
 #include <drivers/fpu.h>

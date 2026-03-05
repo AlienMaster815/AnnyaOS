@@ -110,7 +110,7 @@ typedef struct _CHILD_WINDOW_TRACKER{
 }CHILD_WINDOW_TRACKER, * PCHILD_WINDOW_TRACKER;
 
 typedef struct _WINDOW_HANDLE{
-    PWINDOW_CHARECTERISTICS Charecteristics;
+    PVOID                   Charecteristics;
     INT64                   X;
     INT64                   Y;
     UINT32                  Width;
@@ -261,11 +261,11 @@ void* malloc(size_t BytesNeeded);
 
 
 __declspec(dllimport)
-PWINDHANDLE AnnyaCreateCanvasBuffer(
+PVOID AnnyaCreateCanvasBuffer(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
-    PWINDOW_CHARECTERISTICS Charecteristics
+    PVOID Charecteristics
 );
 
 
@@ -432,7 +432,7 @@ __declspec(dllimport)
 void AnnyaUpdateButton(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
-    PBUTTONHANDLE HBUTTON
+    PVOID HBUTTON
 );
 
 __declspec(dllimport)

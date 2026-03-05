@@ -44,11 +44,11 @@ void free(void* Address){
 
 
 USER32_API
-PWINDHANDLE AnnyaCreateCanvasBuffer(
+PVOID AnnyaCreateCanvasBuffer(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
     uintptr_t ParentWindow,
-    PWINDOW_CHARECTERISTICS Charecteristics
+    PVOID Charecteristics
 ){  
     LouPrint("AnnyaCreateCanvasBuffer(n");
     return 0x00;

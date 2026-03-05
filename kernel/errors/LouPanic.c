@@ -3,6 +3,7 @@
 #include <cstdio.h>
 #include <kernel/errors.h>
 #include <drivers/display/vga.h>
+#include <kernel/Process.h>
 
 #ifdef ARCH_I386_VGA_H
 #define LOU_PANIC

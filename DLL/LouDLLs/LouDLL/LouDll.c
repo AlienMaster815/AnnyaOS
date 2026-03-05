@@ -512,7 +512,7 @@ LOUDLL_API
 void AnnyaUpdateButton(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
-    PBUTTONHANDLE HBUTTON
+    PVOID HBUTTON
 ){
     LouPrint("AnnyaUpdateButton()\n");
     while(1);

@@ -40,6 +40,7 @@ extern "C" {
 #include <kernel/Binarys.h>
 #include <kernel/exec.h>
 #include <kernel/DRSD.h>
+#include <kernel/Process.h>
 
 
 
