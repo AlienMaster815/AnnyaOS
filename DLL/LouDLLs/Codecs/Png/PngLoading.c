@@ -8,7 +8,7 @@ static const char* (*ImpZlibVersion)(void);
 static int (*ImpInflateInit_)(z_stream*, const char*, int);
 static int (*ImpInflate)(z_stream*, int);
 static int (*ImpInflateEnd)(z_stream*);
-static size_t (*strlen)(string);
+static size_t (*impl_strlen)(string);
 
 #define IMP_ZLIB_VERSION ImpZlibVersion()
 
@@ -42,9 +42,9 @@ LOUSTATUS InitializePNGHandleing(){
         LouPrint("CODECS.DLL:ERROR Unable To Initialize Get inflateEnd Function\n");
         return STATUS_UNSUCCESSFUL;
     }
-    strlen = AnnyaGetLibraryFunctionN("LOUDLL.DLL", "strlen");
-    if(!strlen){
-        LouPrint("CODECS.DLL:ERROR Unable To Initialize Get strlen Function\n");
+    impl_strlen = AnnyaGetLibraryFunctionN("LOUDLL.DLL", "impl_strlen");
+    if(!impl_strlen){
+        LouPrint("CODECS.DLL:ERROR Unable To Initialize Get impl_strlen Function\n");
         return STATUS_UNSUCCESSFUL;
     }
 
@@ -236,8 +236,8 @@ HANDLE AnnyaOpenPngA(
     PngHeaderHandles[PngHeaderCount - 1].Length = IDATUnpacker.StreamSize;
 
     PPNG_HANDLE ReturnHandle = LouGlobalUserMallocType(PNG_HANDLE);
-    ReturnHandle->PngName = LouGlobalUserMallocEx(strlen(FileName), 1);
-    LouMemCpy(ReturnHandle->PngName, FileName, strlen(FileName));
+    ReturnHandle->PngName = LouGlobalUserMallocEx(impl_strlen(FileName), 1);
+    LouMemCpy(ReturnHandle->PngName, FileName, impl_strlen(FileName));
     ReturnHandle->HeaderCount = PngHeaderCount; 
     ReturnHandle->HeaderData = (void*)PngHeaderHandles;
     PPNG_IMAGE_CHUNK ImageHeader = (PPNG_IMAGE_CHUNK)PngHeaderHandles[0].Data;

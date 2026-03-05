@@ -4,7 +4,6 @@
 #include <cstdlib.h>
 #include <kernel/gdt.h>
 #include <kernel/errors.h>
-#include <kernel/kernel.h>
 
 static Interrupt_Descriptor_Table IDT[256];
 

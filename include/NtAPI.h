@@ -7,7 +7,11 @@
 
 #ifndef _KERNEL_ENTRY_
 #define _KERNEL_ENTRY_
+#ifdef __cplusplus
 #define KERNEL_ENTRY extern "C"
+#else
+#define KERNEL_ENTRY
+#endif
 #endif
 
 #ifdef _KERNEL_MODULE_

@@ -1,4 +1,3 @@
-#include <kernel/kernel.h>
 #include <cstdlib.h>
 #include <cstdio.h>
 #include <kernel/errors.h>

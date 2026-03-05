@@ -31,4 +31,15 @@
 
 typedef void* HMODULE;
 
+#include <string.h>
+
+#ifndef _USER_MODE_CODE_
+LOUAPI bool IsSystemEfi();
+KERNEL_EXPORT
+void* 
+LouKeLoadSubsystem(string Subsystem, string EntryName);
+KERNEL_EXPORT
+void* 
+LouKeLoadDriver(string Driver, string EntryName);
+#endif
 #endif

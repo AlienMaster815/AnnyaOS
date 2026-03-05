@@ -5,7 +5,6 @@
 #endif
 #ifdef __i386__
 #include <kernel/errors.h>
-#include <kernel/kernel.h>
 #include <KernelAPI/IOManager.h>
 #include <kernel/interrupts.h>
 #include <drivers/Lou_drivers/FileSystem.h>
@@ -324,7 +323,7 @@ LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 
 
-KERNEL_ENTRY LouOsKrnlStart(
+void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
     
