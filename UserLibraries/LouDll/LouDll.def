@@ -30,7 +30,6 @@ EXPORTS
     LouGlobalUserFree
     LouGenericFreeHeap
     LouUpdateShadowClipState
-    LouGetSystemUpdate
     LouUpdateClipSubState
     LouUpdateShadowClipSubState
     strcmp

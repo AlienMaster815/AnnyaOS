@@ -3,17 +3,17 @@
 #define _EXEC_H
 
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C" {
-#else
-#include <LouAPI.h>
 #endif
 
-typedef void* HANDLE;
-typedef HANDLE* PHANDLE;
+#include <cstdint.h>
+#include <cstdlib.h>
+#include <kernel/loustatus.h>
+#include <Modulation.h>
+#include <string.h>
+#include <kernel/threads.h>
 
-#pragma pack(push, 1)
-typedef struct _IMPORT_DIRECTORY_ENTRY{
+typedef struct PACKED _IMPORT_DIRECTORY_ENTRY{
     uint32_t ImportLookupRva;
     uint32_t TimeDateStamp;
     uint32_t ForwarderChain;
@@ -21,7 +21,7 @@ typedef struct _IMPORT_DIRECTORY_ENTRY{
     uint32_t ImportAddressTableRva;
 }IMPORT_DIRECTORY_ENTRY, * PIMPORT_DIRECTORY_ENTRY;
 
-typedef struct _EXPORT_DIRECTORY_ENTRY{
+typedef struct PACKED _EXPORT_DIRECTORY_ENTRY{
     uint32_t exportFlags;
     uint32_t timeDateStamp;
     uint16_t majorVersion;
@@ -35,9 +35,7 @@ typedef struct _EXPORT_DIRECTORY_ENTRY{
     uint32_t ordinalTableRva;
 }EXPORT_DIRECTORY_ENTRY, * PEXPORT_DIRECTORY_ENTRY;
 
-#ifndef _SECTION_HEADER_DEF
-#define _SECTION_HEADER_DEF
-typedef struct _SECTION_HEADER{
+typedef struct PACKED _SECTION_HEADER{
     char name[0x8];
     uint32_t virtualSize;
     uint32_t virtualAddress;
@@ -49,15 +47,15 @@ typedef struct _SECTION_HEADER{
     uint16_t numberOfLineNumbers;
     uint32_t characteristics;
 }SECTION_HEADER, * PSECTION_HEADER;
-#endif
 
-typedef struct _PE_DATA_DIRECTORY_ENTRY{
+
+typedef struct PACKED _PE_DATA_DIRECTORY_ENTRY{
     uint32_t VirtualAddress;
     uint32_t Size;
 }PE_DATA_DIRECTORY_ENTRY, * PPE_DATA_DIRECTORY_ENTRY;
 
 
-typedef struct _PE64_OPTIONAL_HEADER{
+typedef struct PACKED _PE64_OPTIONAL_HEADER{
     uint16_t magic;
     uint8_t majorLinkerVersion;
     uint8_t minorLinkerVersion;
@@ -90,7 +88,7 @@ typedef struct _PE64_OPTIONAL_HEADER{
     PE_DATA_DIRECTORY_ENTRY PE_Data_Directory_Entries[];
 }PE64_OPTIONAL_HEADER, * PPE64_OPTIONAL_HEADER;
 
-typedef struct _COFF_HEADER{
+typedef struct PACKED _COFF_HEADER{
     char magic[0x4];
     uint16_t machine;
     uint16_t numberOfSections;
@@ -101,8 +99,7 @@ typedef struct _COFF_HEADER{
     uint16_t characteristics;
 }COFF_HEADER, * PCOFF_HEADER;
 
-//RICH HEADER
-typedef struct _RICH_HEADER{
+typedef struct PACKED _RICH_HEADER{
     uint32_t e_magic__DanS;
     uint32_t e_align[0x3];
     uint32_t e_entry_id0__01078170;
@@ -123,8 +120,7 @@ typedef struct _RICH_HEADER{
     uint32_t e_checksum;
 }RICH_HEADER, * PRICH_HEADER;
 
-//DOS HEADER USED FOR THE SYSTEM TO FIND A VALID PROGRAM OR EXECUTABLE FILE
-typedef struct _DOS_HEADER{
+typedef struct PACKED _DOS_HEADER{
     char e_magic[0x02];     //DOS Magic
     uint16_t e_cblp;        //Count Bytes Last Page
     uint16_t e_cp;          //Num 512 Pages
@@ -145,21 +141,8 @@ typedef struct _DOS_HEADER{
     char e_res2[0x14];      //reserv 2
     uint32_t e_lfanew;  //portable Executabkle HEader Offset
 }DOS_HEADER, * PDOS_HEADER;
-#pragma pack(pop)
 
-#ifndef _KERNEL_MODULE_
-bool CheckDosHeaderValidity(PDOS_HEADER PHeader);
-void GetAllPEHeaders(
-    PDOS_HEADER DosHeader,          //in
-    PCOFF_HEADER* CoffHeader,       //out
-    PPE64_OPTIONAL_HEADER* PE64Opt, //out
-    PSECTION_HEADER* SectionHeaders, //out
-    PRICH_HEADER* RichHeader       //out opt
-);
-#endif
-
-#pragma pack(push, 1)
-typedef struct _CONFIG_TABLE_TAG{
+typedef struct PACKED _CONFIG_TABLE_TAG{
     uint32_t Charecteristics;
     uint32_t TimeDateStamp;
     uint16_t MajorVersion;
@@ -211,26 +194,17 @@ typedef struct _CONFIG_TABLE_TAG{
     uint64_t guardXFGDispatchFunctionPointer;
     uint64_t guardXFGTableDispatchFunctionPointer;
 }CONFIG_TABLE, * PCONFIG_TABLE;
-#pragma pack(pop)
-
-typedef void* HMODULE;
-typedef void* LPVOID;
-typedef uint32_t DWORD;
 
 typedef LOUSTATUS (*DRIVER_MODULE_ENTRY)(void* DriverObject, void* RegistryPath);
 
 typedef bool(*DllModuleEntry)(HMODULE, DWORD, LPVOID);
-DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* ImageBase);
-void* LouKeLoadPeExecutable(string ExecutablePath);
 
-DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize);
-
-typedef struct _JITL_TABLE{
+typedef struct PACKED _JITL_TABLE{
     string      Name;
     uint64_t    Location;
 }JITL_TABLE, * PJITL_TABLE;
 
-typedef struct _JITL_DIRECTORY {
+typedef struct PACKED _JITL_DIRECTORY {
     string      SectionName;
     void*       SectionStart;
     void*       SectionEnd;
@@ -242,20 +216,20 @@ typedef struct _JITL_DIRECTORY {
 typedef string* KULA_RVA_NAMES;
 typedef PVOID*  KULA_RVA_ADDRESSES;
 
-typedef struct _KULA_TBALE_ENTRIES{
+typedef struct PACKED _KULA_TBALE_ENTRIES{
     string              BinaryName; //Binary to emulate
     size_t              Members;    //RVA Function Count
     KULA_RVA_NAMES      Names;      //RVA Function Names
     KULA_RVA_ADDRESSES  Rvas;       //RVA Function Address    
 }KULA_TBALE_ENTRIES, * PKULA_TBALE_ENTRIES;
 
-typedef struct _KULA_TABLE{
+typedef struct PACKED _KULA_TABLE{
     CHAR                    KulaSignature[5];   //K U L A ;
     SIZE                    TableMembers;       //Entries Count For KULA Linker
     PKULA_TBALE_ENTRIES     Entries;            //Entries For KULA Linker
 }KULA_TABLE, * PKULA_TABLE; 
 
-typedef struct _KULA_TABLE_TRACKER{
+typedef struct PACKED _KULA_TABLE_TRACKER{
     ListHeader              Peers;
     string                  HostBinary;
     PKULA_TABLE             Table;
@@ -265,21 +239,31 @@ typedef struct _KULA_TABLE_TRACKER{
 
 #define SECTIONED_CODE(x) __attribute__((section(x)))
 
-DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName);
-void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName);
-
-
-typedef struct _PE32_PROCESS_EXECUTION_DATA{
+typedef struct PACKED _PE32_PROCESS_EXECUTION_DATA{
     size_t      ProcessHeapCommit;
     size_t      ProccesHeapReserved;
     size_t      ProcessStackCommit;
     size_t      ProcessStackReserved;
 }PE32_PROCESS_EXECUTION_DATA, * PPE32_PROCESS_EXECUTION_DATA;
 
-PPE32_PROCESS_EXECUTION_DATA InitializeProcessData(uintptr_t Start, string ExecutablePath);
 
+#ifndef _USER_MODE_CODE_
+bool CheckDosHeaderValidity(PDOS_HEADER PHeader);
+void GetAllPEHeaders(
+    PDOS_HEADER DosHeader,          //in
+    PCOFF_HEADER* CoffHeader,       //out
+    PPE64_OPTIONAL_HEADER* PE64Opt, //out
+    PSECTION_HEADER* SectionHeaders, //out
+    PRICH_HEADER* RichHeader       //out opt
+);
+DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* ImageBase);
+void* LouKeLoadPeExecutable(string ExecutablePath);
+DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize);
+DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName);
+void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName);
+PPE32_PROCESS_EXECUTION_DATA InitializeProcessData(uintptr_t Start, string ExecutablePath);
+#endif
 #ifdef __cplusplus
 }
 #endif
-
 #endif

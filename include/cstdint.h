@@ -83,7 +83,7 @@ typedef struct _INT_512{
 #define INT16_MIN   -0x7FFF
 #define INT8_MIN    -0x7F
 
-typedef void* PVOID;
+typedef void* PVOID, * LPVOID;
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))

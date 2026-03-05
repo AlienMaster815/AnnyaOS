@@ -77,7 +77,6 @@ void LouUpdateClipSubState(
     size_t X, size_t Y, 
     size_t Width, size_t Height
 );
-void LouGetSystemUpdate(PSYSTEM_STATE_STACK StateStack);
 void 
 LouUpdateShadowClipState(
     void* Clip

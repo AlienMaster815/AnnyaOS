@@ -34,6 +34,10 @@ extern "C" {
 #include <kernel/errors.h>
 #include <kernel/interrupts.h>
 #include <kernel/pic.h>
+#include <kernel/ports.h>
+#include <kernel/Timers.h>
+#include <kernel/SystemCalls.h>
+#include <kernel/Binarys.h>
 
 
 

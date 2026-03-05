@@ -2,56 +2,12 @@
 #ifndef SYSTEM_CALLS_H
 #define SYSTEM_CALLS_H
 
-#include <cstdlib.h>
-
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
-
-#ifndef _KERNEL_MODULE_
-#ifndef _USER_MODE_CODE_
-static inline void LouCALL(
-    UNUSED uint64_t Call,
-    UNUSED uint64_t Data,
-    UNUSED uint64_t SystemEmulation
-){
-    asm("INT $0x80");
-}
 #ifdef __cplusplus
 extern "C" {
 #endif
-void LouKeMakeKCall(
-    UINT64  Call,
-    UINT64  Data,
-    UINT64  SystemEmulation
-);
-#ifdef __cplusplus
-}
-#endif
-#else
-#ifndef _LOUDLL_
 
-__declspec(dllimport)
-void LouCALL(
-    uint64_t Call,
-    uint64_t Data,
-    uint64_t SystemEmulation
-);
-#else 
-void LouCALL(
-    uint64_t Call,
-    uint64_t Data,
-    uint64_t SystemEmulation
-);
-#endif
-
-#endif
-#endif
-
-
-#define LOUCALL_WIN64_EMU 1
-
+#include <cstdint.h>
+#include <cstdlib.h>
 
 //Original Great 18
 #define LOUVMALLOC          0
@@ -166,7 +122,7 @@ void LouCALL(
 #define LOUAGLFN                                106
 #define LOUCLOSEFILE                            107
 #define LOUALPCSETINFORMATION                   108
-#define LOUGETSYSTEMSTATE                       109
+//#define LOUGETSYSTEMSTATE                       109 Open for replacement
 #define LOUDRSDUPDATECLIPSUBSTATE               110
 #define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
 #define LOUDRSDSETPLANEINFO                     112
@@ -174,24 +130,43 @@ void LouCALL(
 #define LOUYEILDEXE                             114
 #define LOUCREATESECTIONEX                      115
 
-#define WINECALL            1   
-#define WINECALL_FASTFAIL   1
-//Kernel SystemCalls
+#define WINECALL                                1   
+#define WINECALL_FASTFAIL                       1
 
-#include <stdbool.h>
-#include <cstdint.h>
+#ifndef _USER_MODE_CODE_
 
-typedef struct _MOUSE_STATE{
-    int64_t     MouseX;
-    int64_t     MouseY;
-    bool        RightClick;
-    bool        LeftClick;
-    int64_t     Wheel;
-    bool        WHeelButton;
-}MOUSE_STATE, * PMOUSE_STATE;
+static inline void LouCALL(
+    UNUSED uint64_t Call,
+    UNUSED uint64_t Data,
+    UNUSED uint64_t SystemEmulation
+){
+    asm("INT $0x80");
+}
 
-typedef struct _SYSTEM_STATE_STACK{
-    MOUSE_STATE     MouseState;
-}SYSTEM_STATE_STACK, * PSYSTEM_STATE_STACK;
+void LouKeMakeKCall(
+    UINT64  Call,
+    UINT64  Data,
+    UINT64  SystemEmulation
+);
+#else
+#ifndef _LOUDLL_
 
+__declspec(dllimport)
+void LouCALL(
+    uint64_t Call,
+    uint64_t Data,
+    uint64_t SystemEmulation
+);
+#else 
+void LouCALL(
+    uint64_t Call,
+    uint64_t Data,
+    uint64_t SystemEmulation
+);
+#endif
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 #endif

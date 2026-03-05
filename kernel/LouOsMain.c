@@ -523,9 +523,6 @@ KERNEL_ENTRY LouOsKrnlStart(
     while(1);
 }
 
-void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack){
-
-}
 
 //TODO:
 // check and optimize Lousine Kernel Exports in API/LouAPI/tables.c

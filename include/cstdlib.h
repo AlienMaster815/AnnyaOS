@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 #ifndef _CSTD_LIB_H
 #define _CSTD_LIB_H
 
@@ -57,7 +50,6 @@ typedef struct  _ListHeader{
 static inline void* LouKeCastToUnalignedPointer(void* pointer){
 	return pointer;
 }
-
 
 #ifndef _USER_MODE_CODE_
 #define ABS(x) (((x) < 0) ? -(x) : (x)) 

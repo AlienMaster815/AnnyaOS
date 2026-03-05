@@ -29,6 +29,6 @@
 #endif
 #endif
 
-
+typedef void* HMODULE;
 
 #endif

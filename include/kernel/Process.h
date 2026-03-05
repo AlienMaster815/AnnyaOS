@@ -11,22 +11,6 @@ extern "C"{
 
 #pragma pack(push, 1)
 
-#ifndef _SECTION_HEADER_DEF
-#define _SECTION_HEADER_DEF
-typedef struct _SECTION_HEADER{
-    char name[0x8];
-    uint32_t virtualSize;
-    uint32_t virtualAddress;
-    uint32_t sizeOfRawData;
-    uint32_t pointerToRawData;
-    uint32_t pointerToRelocations;
-    uint32_t pointerToLineNumbers;
-    uint16_t numberOfRelocations;
-    uint16_t numberOfLineNumbers;
-    uint32_t characteristics;
-}SECTION_HEADER, * PSECTION_HEADER;
-#endif
-
 
 
 #ifndef _WINDOW_HANDLE_

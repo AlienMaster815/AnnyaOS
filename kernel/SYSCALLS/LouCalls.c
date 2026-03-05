@@ -3,7 +3,6 @@
 LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK AccessMask);
 void LouKeCloseFileCall(uint64_t* Data);
 void LouKeUpdateShadowClipState(PDRSD_CLIP Clip);
-void LouKeGetSystemUpdate(PSYSTEM_STATE_STACK Stack);
 void LouKeUpdateClipSubState(
     PDRSD_CLIP Clip, 
     INT64 X, INT64 Y, 
@@ -214,11 +213,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             LouKeCloseFileCall((uint64_t*)Data);
             return;
         }
-        case LOUGETSYSTEMSTATE:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeGetSystemUpdate((PSYSTEM_STATE_STACK)Tmp[0]);
-            return;
-        }case LOUDRSDUPDATECLIPSUBSTATE:{
+        case LOUDRSDUPDATECLIPSUBSTATE:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
             return;

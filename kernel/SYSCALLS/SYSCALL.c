@@ -42,7 +42,7 @@ void SYSCALLS(uint64_t Call, uint64_t Data, uint64_t SystemEmulation, uint64_t S
     SaveEverythingWithInterruptBuffer(&RegisterHandle);
     if(!SystemEmulation){
         CheckLouCallTables(Call, Data);
-    }else if(SystemEmulation == LOUCALL_WIN64_EMU){
+    }else if(SystemEmulation == WINECALL){
         CheckWinCallTable(Call, Data);
     }
     RestoreEverythingWithInterruptBuffer(&RegisterHandle);

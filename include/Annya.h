@@ -23,6 +23,10 @@
 #include <kernel/errors.h>
 #include <kernel/interrupts.h>
 #include <kernel/pic.h>
+#include <kernel/ports.h>
+#include <kernel/Timers.h>
+#include <kernel/SystemCalls.h>
+#include <kernel/Binarys.h>
 
 
 
@@ -82,7 +86,6 @@ typedef uint16_t    MSG;
 typedef void*       LOUDISPMSG;
 
 typedef void* HANDLE;
-typedef void* HMODULE;
 typedef HANDLE FILE;
 
 typedef void (__cdecl *FunctionVector)(void);
@@ -239,9 +242,6 @@ ShowWindow(
     INTEGER     nCmdShow
 );
 
-__declspec(dllexport)
-void AwmUpdateState(PSYSTEM_STATE_STACK State);
-
 //__declspec(dllimport)
 //uint64_t AnnyaRegisterCallbackProcedure(
 //    void* CallbackHandler
@@ -317,9 +317,6 @@ void LouUpdateClipSubState(
     size_t X, size_t Y, 
     size_t Width, size_t Height
 );
-
-__declspec(dllimport)
-void LouGetSystemUpdate(PSYSTEM_STATE_STACK StateStack);
 
 __declspec(dllimport)
 void 

@@ -2,20 +2,20 @@
 #define TIMERS_H
 
 #ifdef __cplusplus
+extern "C" {
+#endif
 
-#else
+#include <cstdint.h>
 
-#ifdef __x86_64__
 
-typedef uint64_t    COUNTER;
-
+#ifndef _USER_MODE_CODE_
 void RunTimerClockMS(uint64_t TimerInMS);
 void RunTimerClockS(uint64_t TimerInS);
 void RunTimerClockS(uint64_t TimerInS);
 void RunTimerClockHs(uint64_t TimerHS);
-
 #endif
 
+#ifdef __cplusplus
+}
 #endif
-
 #endif

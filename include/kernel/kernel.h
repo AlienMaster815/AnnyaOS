@@ -8,12 +8,6 @@
 -- as well... 
 */
 
-#include <kernel/ports.h>
-#include <kernel/Timers.h>
-#include <kernel/atomic.h>
-#include <kernel/SystemCalls.h>
-#include <kernel/Binarys.h>
-#include "threads.h"
 #include "exec.h"
 #include "DRSD.h"
 #include "Process.h"
