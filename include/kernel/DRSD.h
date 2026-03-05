@@ -34,24 +34,6 @@ extern "C" {
 #include <ListManagement.h>
 #include <kernel/Objects.h>
 
-
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#ifdef _USER_MODE_CODE_
-#include <Annya.h>
-#else
-#ifdef __cplusplus
-#include <LouDDK.h>
-extern "C" {
-#else 
-#include <LouAPI.h>
-#endif
-#endif
-
 #define DRSD_ROTATION_MODE_0 1
 
 #define DRSD_PIXEL_BLEND_PRE_MULTI 1
@@ -67,6 +49,8 @@ struct _DRSD_CRTC_STATE;
 struct _DRSD_CONNECTOR;
 struct _DRSD_PROPERTY;
 struct _DRSD_MODE_SET_CONTEXT;
+
+
 
 //8 bit color
 #define DRSD_COLOR_FORMAT_RGB332    "RGB8"
@@ -1129,7 +1113,7 @@ typedef struct _DRSD_LAYERED_CLIP{
 
 
 #ifndef _USER_MODE_CODE_
-#ifndef _KERNEL_MODULE_
+
 
 void LouKeDestroyClip(PDRSD_CLIP Clip);
 
@@ -1285,11 +1269,11 @@ LOUSTATUS DrsdInitializeCrtcGammaSize(
 );
 
 void DrsdInternalCrtcDestroyStateAtomic(
-    PDRSD_CRTC  Crtc,
-    void*       StateData
+    PDRSD_CRTC         Crtc,
+    PDRSD_CRTC_STATE   StateData
 );
 
-void* DrsdInternalCrtcDuplicateStateAtomic(
+PDRSD_CRTC_STATE DrsdInternalCrtcDuplicateStateAtomic(
     PDRSD_CRTC          Crtc
 );
 
@@ -1375,251 +1359,5 @@ void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
 #endif
 #ifdef __cplusplus
 }
-#ifdef _KERNEL_MODULE_
-
-KERNEL_EXPORT 
-PDRSD_FRAME_BUFFER DrsdGxeCreateAsyncFramebuffer(
-    PDRSD_DEVICE    Device,
-    void*           DrsdBuffer,
-    void*           DrsdCommandBuffer
-);
-
-KERNEL_EXPORT
-DRSD_MODE_STATUS DrsdGxeVramInternalModeValid(
-    PDRSD_DEVICE        Devics,
-    PDRSD_DISPLAY_MODE  DisplayMode
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalAtomicCheck(
-    PDRSD_DEVICE        Device,
-    void*               AtomicHandle
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalAtomicUpdate(
-    PDRSD_DEVICE        Device,
-    void*               AtomicHandle,
-    bool                NonBlock
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalPlaneUpdateAtomic(
-    PDRSD_PLANE                     Plane,
-    PDRSD_CRTC                      Crtc,
-    PDRSD_FRAME_BUFFER              FrameBuffer,
-    int                             CrtcX, 
-    int                             CrctY, 
-    int                             CrtcWidth, 
-    int                             CrtcHeight,
-    uint32_t                        SourceX, 
-    uint32_t                        SourceY, 
-    uint32_t                        SourceWidth, 
-    uint32_t                        SourceHeight,
-    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalPlaneDisableAtomic(
-    PDRSD_PLANE                     Plane,
-    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext            
-);
-
-KERNEL_EXPORT
-void DrsdInternalDestroyPlane(
-    PDRSD_PLANE Plane
-);
-
-KERNEL_EXPORT
-void DrsdInternalResetPlane(
-    PDRSD_PLANE Plane
-);
-
-KERNEL_EXPORT
-PDRSD_PLANE_STATE DrsdInternalDuplicateAtomicState(
-    PDRSD_PLANE         Plane
-);
-
-KERNEL_EXPORT
-void DrsdInternalDestroyPlaneAtomic(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
-);
-
-KERNEL_EXPORT
-void DrsdGxeInternalCleanupFrameBuffer(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdGxeInternalPrepareFrameBuffer(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdGxeInternalStartFrameBufferProcessing(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
-);
-
-KERNEL_EXPORT
-void DrsdGxeInternalStopFrameBufferProcessing(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
-);
-
-KERNEL_EXPORT
-void DrsdGxeResetShadowPlane(
-    PDRSD_PLANE         Plane
-);
-
-KERNEL_EXPORT
-PDRSD_PLANE_STATE DrsdGxeDuplicateShadowPlaneState(
-    PDRSD_PLANE Plane
-);
-
-KERNEL_EXPORT
-void DrsdGxeDestroyShadowPlane(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInitializeGenericPlane(
-    PDRSD_DEVICE            Device, 
-    PDRSD_PLANE             Plane,
-    size_t                  CrtcLimit,
-    PDRSD_PLANE_CALLBACKS   PlaneCallbacks,
-    uint32_t*               PlaneFormats,
-    size_t                  FormatCount,
-    uint64_t*               FormatModifiers,
-    DRSD_PLANE_TYPE         PlaneType,
-    string                  Name,
-    ...
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInitializeCrtcWithPlanes(
-    PDRSD_DEVICE            Device,
-    PDRSD_CRTC              Crtc,
-    PDRSD_PLANE             Primary,
-    PDRSD_PLANE             Cursor,
-    PDRSD_CRTC_CALLBACK     CrtcCallbacks
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInitializeCrtcGammaSize(
-    PDRSD_CRTC  Crtc,
-    size_t      GammaSize
-);
-
-KERNEL_EXPORT
-void DrsdInternalCrtcDestroyStateAtomic(
-    PDRSD_CRTC  Crtc,
-    PDRSD_CRTC_STATE       StateData
-);
-
-KERNEL_EXPORT
-PDRSD_CRTC_STATE DrsdInternalCrtcDuplicateStateAtomic(
-    PDRSD_CRTC          Crtc
-);
-
-KERNEL_EXPORT
-void DrsdInternalCrtcResetAtomic(
-    PDRSD_CRTC          Crtc 
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
-    PDRSD_CRTC                          Crtc,
-    PDRSD_FRAME_BUFFER                  FrameBuffer,
-    void*                               VBlankEvent,
-    uint32_t                            Flags,
-    struct _DRSD_MODE_SET_CONTEXT*      ModeSetAquireContext
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
-    void*                               Mode,
-    struct _DRSD_MODE_SET_CONTEXT*      ModeSetAquireContext
-);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInitializeEncoder(
-    PDRSD_DEVICE                Device,
-    PDRSD_ENCODER               Encoder,
-    PDRSD_ENCODER_CALLBACKS     Callbacks,
-    int                         EncoderType,
-    string                      EncoderName,
-    ...
-);
-
-KERNEL_EXPORT
-void DrsdInternalAtomicConnectorDestroyState(
-    PDRSD_CONNECTOR         Connector,
-    PDRSD_CONNECTOR_STATE   State
-);
-
-KERNEL_EXPORT
-PDRSD_CONNECTOR_STATE DrsdInternalAtomicConnectorDuplicateState(PDRSD_CONNECTOR Connector);
-
-KERNEL_EXPORT
-void DrsdInternalResetConnector(PDRSD_CONNECTOR Connector);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdConnectorInitialize(
-    PDRSD_DEVICE                Device,
-    PDRSD_CRTC                  Crtc,
-    PDRSD_CONNECTOR             Connector,
-    PDRSD_CONNECTOR_CALLBACKS   Callbacks,
-    int                         ConnectorType
-);
-
-KERNEL_EXPORT
-void DrsdModeConfigurationReset(PDRSD_DEVICE Device);
-
-KERNEL_EXPORT
-LOUSTATUS DrsdInternalProbeSingleConnectorModes(
-    PDRSD_CONNECTOR Connector,
-    uint32_t        MaxX,
-    uint32_t        MaxY
-);
-
-KERNEL_EXPORT
-size_t DrsdAddModesNoEDID(
-    PDRSD_CONNECTOR Connector, 
-    int32_t Width, 
-    int32_t Height
-);
-
-KERNEL_EXPORT size_t DrsdModeVfresh(PDRSD_DISPLAY_MODE Mode);
-
-KERNEL_EXPORT
-PDRSD_DISPLAY_MODE DrsdCvtMode(
-    PDRSD_DEVICE Device, 
-    uint32_t PreferedWidth, 
-    uint32_t PreferedHeight, 
-    uint32_t Vfresh, 
-    bool Reduced, 
-    bool Interlaced, 
-    bool Margins
-);
-
-KERNEL_EXPORT
-void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode);
-
-
-KERNEL_EXPORT
-LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid);
-
-KERNEL_EXPORT PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
-
-KERNEL_EXPORT void LouKeDrsdHandleConflictingDevices(struct _PCI_DEVICE_OBJECT* PDEV);
-
-KERNEL_EXPORT void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
 #endif
 #endif
-#endif
-#endif 

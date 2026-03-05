@@ -369,7 +369,7 @@ void DrsdInternalCrtcResetAtomic(
 }
 
 KERNEL_EXPORT
-void* DrsdInternalCrtcDuplicateStateAtomic(
+PDRSD_CRTC_STATE DrsdInternalCrtcDuplicateStateAtomic(
     PDRSD_CRTC          Crtc
 ){
     LouPrint("DrsdInternalCrtcDuplicateStateAtomic()\n");
@@ -379,8 +379,8 @@ void* DrsdInternalCrtcDuplicateStateAtomic(
 
 KERNEL_EXPORT
 void DrsdInternalCrtcDestroyStateAtomic(
-    PDRSD_CRTC  Crtc,
-    void*       StateData
+    PDRSD_CRTC          Crtc,
+    PDRSD_CRTC_STATE    StateData
 ){
     LouPrint("DrsdInternalCrtcDestroyStateAtomic()\n");
     while(1);
