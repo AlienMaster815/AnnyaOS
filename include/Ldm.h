@@ -83,6 +83,9 @@ typedef struct _MEMORY_RANGE_ENTRY{
 
 typedef const char* PCSZ;
 
+typedef const LPGUID LPCGUID;
+
+#include <Ldm/Lmilib.h>
 
 
 #ifdef __cplusplus

@@ -4,7 +4,6 @@
 
 
 typedef ULONG* PULONG;
-typedef const GUID* LPCGUID;
 
 
 #define AUX_KLIB_MODULE_PATH_LEN 256

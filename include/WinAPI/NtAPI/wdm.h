@@ -2881,7 +2881,7 @@ void ExInitializeDeleteTimerParameters(
 );
 
 LOUSTATUS ExInitializeDeviceAts(
-  _DEVICE_OBJECT *PhysicalDeviceObject,
+  PDEVICE_OBJECT PhysicalDeviceObject,
   ULONG          Flags
 );
 

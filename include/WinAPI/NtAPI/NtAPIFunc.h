@@ -5,13 +5,7 @@
 
 
 //Filler Types Until Found
-typedef void* PSYSCTL_IRP_DISPOSITION;
-typedef void* PWMI_QUERY_REGINFO;
-typedef void* PWMI_QUERY_DATABLOCK;
-typedef void* PWMI_SET_DATABLOCK;
-typedef void* PWMI_SET_DATAITEM;
-typedef void* PWMI_FUNCTION_CONTROL;
-typedef void* PWMI_EXECUTE_METHOD;
+
 typedef void* EMULATOR_PORT_ACCESS_TYPE;
 typedef PSTR NTSTRSAFE_PSTR;
 typedef PCSTR NTSTRSAFE_PCSTR;
