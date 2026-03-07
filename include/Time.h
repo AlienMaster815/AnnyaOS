@@ -9,13 +9,25 @@ extern "C" {
 #include <cstdint.h>
 #include <cstdio.h>
 
+typedef struct _FILETIME{
+    union{
+        struct{
+            UINT32      LowDateTime;
+            UINT32      HighDateTime;
+        };
+        UINT64          DateTime;
+    };
+}FILETIME, * PFILETIME, * LPFILETIME;
+
+
 typedef struct _TIME_T{
-    uint8_t Month;
-    uint8_t Day;
-    uint8_t Hour;
-    uint8_t Minute;
-    uint8_t Second;
-    uint16_t MilliSeconds;
+    UINT32      Year;
+    UINT8       Month;
+    UINT8       Day;
+    UINT8       Hour;
+    UINT8       Minute;
+    UINT8       Second;
+    UINT16      MilliSeconds;
 }TIME_T, * PTIME_T;
 
 #define PTIME_SEED T->MilliSeconds + (T->Second * 60) + (T->Minute * (60 * 60))

@@ -46,14 +46,6 @@ typedef const STRING* PCANSI_STRING;
 typedef const STRING* PCOEM_STRING;
 #endif
 
-#ifndef _FILETIME_
-#define _FILETIME_
-typedef struct _FILETIME{
-    DWORD   LowDateTime;
-    DWORD   HighDateTime;
-}FILETIME, * PFILETIME, * LPFILETIME;
-#endif
-
 typedef struct _RTL_SYSTEM_TIME{
     WORD    Year;
     WORD    Month;

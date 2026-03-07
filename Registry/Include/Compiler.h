@@ -17,6 +17,19 @@ typedef unsigned int ULONG;
 typedef long long INT64;
 typedef bool BOOL;
 typedef int errno_t;
+typedef unsigned long long SIZE;
+typedef unsigned short UINT16;
+typedef unsigned int UINT32;
+
+typedef struct _FILETIME{
+    union{
+        struct{
+            UINT32      LowDateTime;
+            UINT32      HighDateTime;
+        };
+        UINT64          DateTime;
+    };
+}FILETIME, * PFILETIME, * LPFILETIME;
 
 #define TRUE true
 #define FALSE false

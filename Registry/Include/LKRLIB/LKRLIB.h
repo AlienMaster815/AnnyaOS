@@ -1,10 +1,8 @@
 #ifndef _LKR_LIB_H
 #define _LKR_LIB_H
 
-
 #define LPWSTR uint16_t*
 #define WCHAR uint16_t
-
 
 typedef struct _LOUSINE_NODE_LIST{
     struct _LOUSINE_NODE_LIST*   Forward;
@@ -52,9 +50,15 @@ typedef struct _COMPILED_NODE_ENTRY{
 #define GET_REG_ITEM_OFFSET(Node)               ((((PLKR_NODE_ENTRY)Node)->OpItemOffset & OFFSET_MASK) >> 5) 
 
 typedef struct _LKR_FILE_HEADER{
-    WCHAR               Signature[20];//LOUSINE_SYSTEM_FILE
-    size_t              FirstEntry;
-    size_t              SectionCount;
+    WCHAR               Signature[20];  //LOUSINE_SYSTEM_FILE
+    UINT32              SpecID;         //"LKR\0"  
+    FILETIME            TimeCreated;
+    FILETIME            LastModified;
+    UINT16              VersionMinor;   //1
+    UINT16              VersionMajor;   //1
+    SIZE                FirstEntry;
+    UINT64              LoadedAddress;  //Ignored on disk
+    SIZE                SectionCount;
 }LKR_FILE_HEADER, * PLKR_FILE_HEADER;
 
 
