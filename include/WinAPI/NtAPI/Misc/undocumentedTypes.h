@@ -212,7 +212,6 @@ typedef enum _THREADINFOCLASS {
     MaxThreadInfoClass = 56,
 } THREADINFOCLASS;
 
-#include "../aux_klib.h"
 
 typedef
 LOUSTATUS

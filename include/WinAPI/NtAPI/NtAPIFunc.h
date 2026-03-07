@@ -415,7 +415,6 @@ LOUAPI unsigned long DbgPrint(char const*, ...);
 #endif
 
 #include "Misc/undocumentedTypes.h"
-#include "aux_klib.h"
 #include "ioaccess.h"
 #include "miniport.h"
 #include "ntddk.h"
