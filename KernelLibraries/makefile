@@ -2,6 +2,7 @@
 
 all:
 	$(MAKE) -C louoskrnl all
+#	$(MAKE) -C KernelAuxillery all
 	$(MAKE) -C LouDDK all
 	$(MAKE) -C LCC all
 	$(MAKE) -C wprecorder all
@@ -11,6 +12,7 @@ all:
 
 clean:
 	$(MAKE) -C louoskrnl clean
+#	$(MAKE) -C KernelAuxillery clean
 	$(MAKE) -C LouDDK clean
 	$(MAKE) -C LCC clean
 	$(MAKE) -C wprecorder clean
