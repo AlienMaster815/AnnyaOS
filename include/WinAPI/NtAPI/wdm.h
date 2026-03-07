@@ -1019,12 +1019,6 @@ typedef struct _PNP_BUS_INFORMATION {
     ULONG          BusNumber;
 } PNP_BUS_INFORMATION, * PPNP_BUS_INFORMATION;
 
-typedef struct _PO_FX_COMPONENT_IDLE_STATE {
-    ULONGLONG TransitionLatency;
-    ULONGLONG ResidencyRequirement;
-    ULONG     NominalPower;
-} PO_FX_COMPONENT_IDLE_STATE, * PPO_FX_COMPONENT_IDLE_STATE;
-
 typedef struct _PO_FX_COMPONENT_PERF_SET {
     UNICODE_STRING        Name;
     ULONGLONG             Flags;
@@ -1046,70 +1040,6 @@ typedef struct _PO_FX_COMPONENT_PERF_INFO {
     ULONG                    PerfStateSetsCount;
     PO_FX_COMPONENT_PERF_SET* PerfStateSets;
 } PO_FX_COMPONENT_PERF_INFO, * PPO_FX_COMPONENT_PERF_INFO;
-
-
-typedef struct _PO_FX_COMPONENT_V1 {
-    GUID                        Id;
-    ULONG                       IdleStateCount;
-    ULONG                       DeepestWakeableIdleState;
-    PPO_FX_COMPONENT_IDLE_STATE IdleStates;
-} PO_FX_COMPONENT_V1, * PPO_FX_COMPONENT_V1;
-
-typedef struct _PO_FX_COMPONENT_V2 {
-    GUID                        Id;
-    ULONGLONG                   Flags;
-    ULONG                       DeepestWakeableIdleState;
-    ULONG                       IdleStateCount;
-    PPO_FX_COMPONENT_IDLE_STATE IdleStates;
-    ULONG                       ProviderCount;
-    PULONG                      Providers;
-} PO_FX_COMPONENT_V2, * PPO_FX_COMPONENT_V2;
-
-typedef struct _PO_FX_DEVICE_V1 {
-    ULONG                                      Version;
-    ULONG                                      ComponentCount;
-    PPO_FX_COMPONENT_ACTIVE_CONDITION_CALLBACK ComponentActiveConditionCallback;
-    PPO_FX_COMPONENT_IDLE_CONDITION_CALLBACK   ComponentIdleConditionCallback;
-    PPO_FX_COMPONENT_IDLE_STATE_CALLBACK       ComponentIdleStateCallback;
-    PPO_FX_DEVICE_POWER_REQUIRED_CALLBACK      DevicePowerRequiredCallback;
-    PPO_FX_DEVICE_POWER_NOT_REQUIRED_CALLBACK  DevicePowerNotRequiredCallback;
-    PPO_FX_POWER_CONTROL_CALLBACK              PowerControlCallback;
-    PVOID                                      DeviceContext;
-    PO_FX_COMPONENT_V1*                         Components;
-} PO_FX_DEVICE_V1, * PPO_FX_DEVICE_V1;
-
-typedef struct _PO_FX_DEVICE_V2 {
-    ULONG                                      Version;
-    ULONGLONG                                  Flags;
-    PPO_FX_COMPONENT_ACTIVE_CONDITION_CALLBACK ComponentActiveConditionCallback;
-    PPO_FX_COMPONENT_IDLE_CONDITION_CALLBACK   ComponentIdleConditionCallback;
-    PPO_FX_COMPONENT_IDLE_STATE_CALLBACK       ComponentIdleStateCallback;
-    PPO_FX_DEVICE_POWER_REQUIRED_CALLBACK      DevicePowerRequiredCallback;
-    PPO_FX_DEVICE_POWER_NOT_REQUIRED_CALLBACK  DevicePowerNotRequiredCallback;
-    PPO_FX_POWER_CONTROL_CALLBACK              PowerControlCallback;
-    PVOID                                      DeviceContext;
-    ULONG                                      ComponentCount;
-    PO_FX_COMPONENT_V2*                         Components;
-} PO_FX_DEVICE_V2, * PPO_FX_DEVICE_V2;
-
-typedef struct _PO_FX_DEVICE_V3 {
-    ULONG                                      Version;
-    ULONGLONG                                  Flags;
-    PPO_FX_COMPONENT_ACTIVE_CONDITION_CALLBACK ComponentActiveConditionCallback;
-    PPO_FX_COMPONENT_IDLE_CONDITION_CALLBACK   ComponentIdleConditionCallback;
-    PPO_FX_COMPONENT_IDLE_STATE_CALLBACK       ComponentIdleStateCallback;
-    PPO_FX_DEVICE_POWER_REQUIRED_CALLBACK      DevicePowerRequiredCallback;
-    PPO_FX_DEVICE_POWER_NOT_REQUIRED_CALLBACK  DevicePowerNotRequiredCallback;
-    PPO_FX_POWER_CONTROL_CALLBACK              PowerControlCallback;
-    PPO_FX_DIRECTED_POWER_UP_CALLBACK          DirectedPowerUpCallback;
-    PPO_FX_DIRECTED_POWER_DOWN_CALLBACK        DirectedPowerDownCallback;
-    ULONG                                      DirectedFxTimeoutInSeconds;
-    PVOID                                      DeviceContext;
-    ULONG                                      ComponentCount;
-    PO_FX_COMPONENT_V2*                         Components;
-} PO_FX_DEVICE_V3, * PPO_FX_DEVICE_V3;
-
-
 
 typedef struct _PO_FX_PERF_STATE_CHANGE {
     ULONG Set;

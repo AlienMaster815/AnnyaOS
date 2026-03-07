@@ -5,70 +5,8 @@
 
 #include <NtAPI.h>
 
-typedef struct _PO_FX_CORE_DEVICE {
-    ULONG                                         Version;
-    ULONG                                         ComponentCount;
-    PPO_FX_COMPONENT_ACTIVE_CONDITION_CALLBACK    ComponentActiveConditionCallback;
-    PPO_FX_COMPONENT_IDLE_CONDITION_CALLBACK      ComponentIdleConditionCallback;
-    PPO_FX_COMPONENT_CRITICAL_TRANSITION_CALLBACK ComponentCriticalTransitionCallback;
-    PPO_FX_COMPONENT_IDLE_STATE_CALLBACK          ComponentIdleStateCallback;
-    PVOID                                         DeviceContext;
-    PO_FX_COMPONENT* Components;
-} PO_FX_CORE_DEVICE, * PPO_FX_CORE_DEVICE;
-
-typedef enum _GPIO_PIN_CONFIG_TYPE {
-  PullDefault,
-  PullUp,
-  PullDown,
-  PullNone
-} GPIO_PIN_CONFIG_TYPE;
-
-typedef enum _GPIO_PIN_IORESTRICTION_TYPE {
-  IoRestrictionNone,
-  IoRestrictionInputOnly,
-  IoRestrictionOutputOnly,
-  IoRestrictionNoneAndPreserve
-} GPIO_PIN_IORESTRICTION_TYPE;
-
-typedef enum {
-    PepIdleCancelWorkPending,
-    PepIdleCancelDependencyCheckFailed,
-    PepIdleCancelNoCState,
-    PepIdleCancelMax
-} PEP_PROCESSOR_IDLE_CANCEL_CODE, * PPEP_PROCESSOR_IDLE_CANCEL_CODE;
-
-typedef enum _PEP_DEVICE_ACCEPTANCE_TYPE {
-    PepDeviceNotAccepted,
-    PepDeviceAccepted,
-    PepDeviceAceptedMax
-} PEP_DEVICE_ACCEPTANCE_TYPE, * PPEP_DEVICE_ACCEPTANCE_TYPE;
-
-typedef enum _PEP_WORK_TYPE {
-    PepWorkRequestPowerControl,
-    PepWorkCompleteIdleState,
-    PepWorkCompletePerfState,
-    PepWorkAcpiNotify,
-    PepWorkAcpiBUILD_CHILDRENControlMethodComplete,
-    PepWorkMax
-} PEP_WORK_TYPE, * PPEP_WORK_TYPE;
-
-typedef enum {
-    PepIdleTypeProcessor,
-    PepIdleTypePlatform,
-    PepIdleTypeMax
-} PEP_PROCESSOR_IDLE_TYPE, * PPEP_PROCESSOR_IDLE_TYPE;
 
 
-typedef union _PEP_ACPI_OBJECT_NAME {
-    UCHAR Name[4];
-    ULONG NameAsUlong;
-} PEP_ACPI_OBJECT_NAME, * PPEP_ACPI_OBJECT_NAME;
-
-typedef enum _PEP_ACPI_OBJECT_TYPE {
-    PepAcpiObjectTypeMethod,
-    PepAcpiObjectTypeDevice,
-    PepAcpiObjectTypeMaximum
-} PEP_ACPI_OBJECT_TYPE, * PPEP_ACPI_OBJECT_TYPE;
 
 typedef struct _PEP_ACPI_OBJECT_NAME_WITH_TYPE {
     PEP_ACPI_OBJECT_NAME Name;
@@ -429,9 +367,6 @@ typedef struct _PEP_INFORMATION {
   PPEPCALLBACKNOTIFYPPM  AcceptProcessorNotification;
   PPEPCALLBACKNOTIFYACPI AcceptAcpiNotification;
 } PEP_INFORMATION, *PPEP_INFORMATION;
-
-
-
 
 
 typedef struct _PEP_LOW_POWER_EPOCH {
