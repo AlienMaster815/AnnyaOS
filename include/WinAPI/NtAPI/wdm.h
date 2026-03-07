@@ -6,8 +6,6 @@
 #include <NtAPI.h>
 #include <Ldm/CommonTypes.h>
 
-#define MAXIMUM_VOLUME_LABEL_LENGTH  (32 * sizeof(WCHAR)) // 32 characters
-
 #define CONNECT_FULLY_SPECIFIED 1
 #define CONNECT_LINE_BASED 2
 #define CONNECT_MESSAGE_BASED 3
