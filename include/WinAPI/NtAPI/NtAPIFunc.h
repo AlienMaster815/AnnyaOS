@@ -6,7 +6,6 @@
 
 //Filler Types Until Found
 
-typedef void* FLOATING_SAVE_AREA;
 typedef void* HalQuerySystemInformation;
 typedef void* HalSetSystemInformation;
 typedef void* HalQueryBusSlots;

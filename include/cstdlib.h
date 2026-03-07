@@ -130,8 +130,17 @@ typedef struct _SECURITY_DESCRIPTOR{
     PACL Dacl;
 } SECURITY_DESCRIPTOR, *PISECURITY_DESCRIPTOR;
 
-
-
+typedef struct PACKED _FLOATING_SAVE_AREA{
+    UINT32  Control;
+    UINT32  Status;
+    UINT32  Tag;
+    UINT32  ErrorOffset;
+    UINT32  ErrorSelector;
+    UINT32  DataOffset;
+    UINT32  DataSelector;
+    BYTE    RegisterArea[80];
+    UINT32  Cr0NpxState;
+}FLOATING_SAVE_AREA, * PFLOATING_SAVE_AREA;
 
 #ifndef _USER_MODE_CODE_
 #define ABS(x) (((x) < 0) ? -(x) : (x)) 

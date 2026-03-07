@@ -6,52 +6,6 @@
 #include <NtAPI.h>
 
 
-
-
-typedef struct _PEP_ACPI_OBJECT_NAME_WITH_TYPE {
-    PEP_ACPI_OBJECT_NAME Name;
-    PEP_ACPI_OBJECT_TYPE Type;
-} PEP_ACPI_OBJECT_NAME_WITH_TYPE, * PPEP_ACPI_OBJECT_NAME_WITH_TYPE;
-
-typedef union _PEP_ACPI_RESOURCE_FLAGS {
-    ULONG  AsULong;
-    struct {
-        ULONG Shared : 1;
-        ULONG Wake : 1;
-        ULONG ResourceUsage : 1;
-        ULONG SlaveMode : 1;
-        ULONG AddressingMode : 1;
-        ULONG SharedMode : 1;
-        ULONG Reserved : 26;
-    } DUMMYSTRUCTNAME;
-} PEP_ACPI_RESOURCE_FLAGS, * PPEP_ACPI_RESOURCE_FLAGS;
-
-typedef enum _PEP_PERF_STATE_TYPE {
-    PepPerfStateTypeDiscrete,
-    PepPerfStateTypeRange,
-    PepPerfStateTypeMax
-} PEP_PERF_STATE_TYPE, * PPEP_PERF_STATE_TYPE;
-
-typedef enum _PEP_PERF_STATE_UNIT {
-    PepPerfStateUnitOther,
-    PepPerfStateUnitFrequency,
-    PepPerfStateUnitBandwidth,
-    PepPerfStateUnitMax
-} PEP_PERF_STATE_UNIT, * PPEP_PERF_STATE_UNIT;
-
-typedef enum _PEP_ACPI_RESOURCE_TYPE {
-    PepAcpiMemory,
-    PepAcpiIoPort,
-    PepAcpiInterrupt,
-    PepAcpiGpioIo,
-    PepAcpiGpioInt,
-    PepAcpiSpbI2c,
-    PepAcpiSpbSpi,
-    PepAcpiSpbUart,
-    PepAcpiExtendedMemory,
-    PepAcpiExtendedIo
-} PEP_ACPI_RESOURCE_TYPE;
-
 typedef struct _PEP_ABANDON_DEVICE {
     PCUNICODE_STRING DeviceId;
    BOOLEAN          DeviceAccepted;

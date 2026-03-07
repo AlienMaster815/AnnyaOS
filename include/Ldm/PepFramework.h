@@ -397,34 +397,34 @@ typedef struct _PO_FX_CORE_DEVICE{
 }PO_FX_CORE_DEVICE, * PPO_FX_CORE_DEVICE;
 
 typedef enum _GPIO_PIN_CONFIG_TYPE{
-    PullDefault,
+    PullDefault = 0,
     PullUp,
     PullDown,
     PullNone
 } GPIO_PIN_CONFIG_TYPE;
 
 typedef enum _GPIO_PIN_IORESTRICTION_TYPE{
-    IoRestrictionNone,
+    IoRestrictionNone = 0,
     IoRestrictionInputOnly,
     IoRestrictionOutputOnly,
     IoRestrictionNoneAndPreserve
 }GPIO_PIN_IORESTRICTION_TYPE;
 
 typedef enum{
-    PepIdleCancelWorkPending,
+    PepIdleCancelWorkPending = 0,
     PepIdleCancelDependencyCheckFailed,
     PepIdleCancelNoCState,
     PepIdleCancelMax
 }PEP_PROCESSOR_IDLE_CANCEL_CODE, * PPEP_PROCESSOR_IDLE_CANCEL_CODE;
 
 typedef enum _PEP_DEVICE_ACCEPTANCE_TYPE{
-    PepDeviceNotAccepted,
+    PepDeviceNotAccepted = 0,
     PepDeviceAccepted,
     PepDeviceAceptedMax
 }PEP_DEVICE_ACCEPTANCE_TYPE, * PPEP_DEVICE_ACCEPTANCE_TYPE;
 
 typedef enum _PEP_WORK_TYPE{
-    PepWorkRequestPowerControl,
+    PepWorkRequestPowerControl = 0,
     PepWorkCompleteIdleState,
     PepWorkCompletePerfState,
     PepWorkAcpiNotify,
@@ -433,7 +433,7 @@ typedef enum _PEP_WORK_TYPE{
 }PEP_WORK_TYPE, * PPEP_WORK_TYPE;
 
 typedef enum{
-    PepIdleTypeProcessor,
+    PepIdleTypeProcessor = 0,
     PepIdleTypePlatform,
     PepIdleTypeMax
 } PEP_PROCESSOR_IDLE_TYPE, * PPEP_PROCESSOR_IDLE_TYPE;
@@ -444,12 +444,54 @@ typedef union _PEP_ACPI_OBJECT_NAME{
 }PEP_ACPI_OBJECT_NAME, * PPEP_ACPI_OBJECT_NAME;
 
 typedef enum _PEP_ACPI_OBJECT_TYPE{
-    PepAcpiObjectTypeMethod,
+    PepAcpiObjectTypeMethod = 0,
     PepAcpiObjectTypeDevice,
     PepAcpiObjectTypeMaximum
 }PEP_ACPI_OBJECT_TYPE, * PPEP_ACPI_OBJECT_TYPE;
 
+typedef struct _PEP_ACPI_OBJECT_NAME_WITH_TYPE{
+    PEP_ACPI_OBJECT_NAME    Name;
+    PEP_ACPI_OBJECT_TYPE    Type;
+}PEP_ACPI_OBJECT_NAME_WITH_TYPE, * PPEP_ACPI_OBJECT_NAME_WITH_TYPE;
 
+typedef union _PEP_ACPI_RESOURCE_FLAGS{
+    ULONG       AsULong;
+    struct {
+        ULONG   Shared          : 1;
+        ULONG   Wake            : 1;
+        ULONG   ResourceUsage   : 1;
+        ULONG   SlaveMode       : 1;
+        ULONG   AddressingMode  : 1;
+        ULONG   SharedMode      : 1;
+        ULONG   Reserved        : 26;
+    };
+}PEP_ACPI_RESOURCE_FLAGS, * PPEP_ACPI_RESOURCE_FLAGS;
+
+typedef enum _PEP_PERF_STATE_TYPE{
+    PepPerfStateTypeDiscrete = 0,
+    PepPerfStateTypeRange,
+    PepPerfStateTypeMax
+}PEP_PERF_STATE_TYPE, * PPEP_PERF_STATE_TYPE;
+
+typedef enum _PEP_PERF_STATE_UNIT{
+    PepPerfStateUnitOther = 0,
+    PepPerfStateUnitFrequency,
+    PepPerfStateUnitBandwidth,
+    PepPerfStateUnitMax
+}PEP_PERF_STATE_UNIT, * PPEP_PERF_STATE_UNIT;
+
+typedef enum _PEP_ACPI_RESOURCE_TYPE {
+    PepAcpiMemory = 0,
+    PepAcpiIoPort,
+    PepAcpiInterrupt,
+    PepAcpiGpioIo,
+    PepAcpiGpioInt,
+    PepAcpiSpbI2c,
+    PepAcpiSpbSpi,
+    PepAcpiSpbUart,
+    PepAcpiExtendedMemory,
+    PepAcpiExtendedIo
+}PEP_ACPI_RESOURCE_TYPE;
 
 
 
