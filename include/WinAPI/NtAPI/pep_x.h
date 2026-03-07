@@ -399,13 +399,6 @@ typedef struct _PEP_COORDINATED_IDLE_STATE {
   ULONG MaximumDependencySize;
 } PEP_COORDINATED_IDLE_STATE, *PPEP_COORDINATED_IDLE_STATE;
 
-typedef struct _PEP_CRASHDUMP_INFORMATION {
-   PEPHANDLE DeviceHandle;
-   PVOID     DeviceContext;
-} PEP_CRASHDUMP_INFORMATION, *PPEP_CRASHDUMP_INFORMATION;
-
-
-
 typedef struct _PEP_DEVICE_PLATFORM_CONSTRAINTS {
    PEPHANDLE           DeviceHandle;
    PDEVICE_POWER_STATE MinimumDStates;
@@ -437,47 +430,9 @@ typedef struct _PEP_INFORMATION {
   PPEPCALLBACKNOTIFYACPI AcceptAcpiNotification;
 } PEP_INFORMATION, *PPEP_INFORMATION;
 
-typedef struct _PEP_KERNEL_INFORMATION_STRUCT_V1 {
-  USHORT                                   Version;
-  USHORT                                   Size;
-  POHANDLE                                 Plugin;
-  PPOFXCALLBACKREQUESTWORKER               RequestWorker;
-  PPOFXCALLBACKENUMERATEUNMASKEDINTERRUPTS EnumerateUnmaskedInterrupts;
-  PPOFXCALLBACKPROCESSORHALT               ProcessorHalt;
-  PPOFXCALLBACKREQUESTINTERRUPT            RequestInterrupt;
-  PPOFXCALLBACKCRITICALRESOURCE            TransitionCriticalResource;
-} PEP_KERNEL_INFORMATION_STRUCT_V1, *PPEP_KERNEL_INFORMATION_STRUCT_V1;
 
-typedef struct _PEP_KERNEL_INFORMATION_STRUCT_V2 {
-  USHORT                                   Version;
-  USHORT                                   Size;
-  POHANDLE                                 Plugin;
-  PPOFXCALLBACKREQUESTWORKER               RequestWorker;
-  PPOFXCALLBACKENUMERATEUNMASKEDINTERRUPTS EnumerateUnmaskedInterrupts;
-  PPOFXCALLBACKPROCESSORHALT               ProcessorHalt;
-  PPOFXCALLBACKREQUESTINTERRUPT            RequestInterrupt;
-  PPOFXCALLBACKCRITICALRESOURCE            TransitionCriticalResource;
-  PPOFXCALLBACKPROCESSORIDLEVETO           ProcessorIdleVeto;
-  PPOFXCALLBACKPLATFORMIDLEVETO            PlatformIdleVeto;
-  PPOFXCALLBACKUPDATEPROCESSORIDLESTATE    UpdateProcessorIdleState;
-  PPOFXCALLBACKUPDATEPLATFORMIDLESTATE     UpdatePlatformIdleState;
-} PEP_KERNEL_INFORMATION_STRUCT_V2, *PPEP_KERNEL_INFORMATION_STRUCT_V2;
 
-typedef struct _PEP_KERNEL_INFORMATION_STRUCT_V3 {
-  USHORT                                   Version;
-  USHORT                                   Size;
-  POHANDLE                                 Plugin;
-  PPOFXCALLBACKREQUESTWORKER               RequestWorker;
-  PPOFXCALLBACKENUMERATEUNMASKEDINTERRUPTS EnumerateUnmaskedInterrupts;
-  PPOFXCALLBACKPROCESSORHALT               ProcessorHalt;
-  PPOFXCALLBACKREQUESTINTERRUPT            RequestInterrupt;
-  PPOFXCALLBACKCRITICALRESOURCE            TransitionCriticalResource;
-  PPOFXCALLBACKPROCESSORIDLEVETO           ProcessorIdleVeto;
-  PPOFXCALLBACKPLATFORMIDLEVETO            PlatformIdleVeto;
-  PPOFXCALLBACKUPDATEPROCESSORIDLESTATE    UpdateProcessorIdleState;
-  PPOFXCALLBACKUPDATEPLATFORMIDLESTATE     UpdatePlatformIdleState;
-  PPOFXCALLBACKREQUESTCOMMON               RequestCommon;
-} PEP_KERNEL_INFORMATION_STRUCT_V3, *PPEP_KERNEL_INFORMATION_STRUCT_V3;
+
 
 typedef struct _PEP_LOW_POWER_EPOCH {
   BOOLEAN LowPowerEpoch;
@@ -501,12 +456,6 @@ typedef struct _PEP_PLATFORM_IDLE_STATE {
   ULONG                         DependencyArrayCount;
   PEP_PROCESSOR_IDLE_DEPENDENCY* DependencyArray;
 } PEP_PLATFORM_IDLE_STATE, *PPEP_PLATFORM_IDLE_STATE;
-
-typedef struct _PEP_PLATFORM_IDLE_STATE_UPDATE {
-  ULONG Version;
-  ULONG Latency;
-  ULONG BreakEvenDuration;
-} PEP_PLATFORM_IDLE_STATE_UPDATE, *PPEP_PLATFORM_IDLE_STATE_UPDATE;
 
 typedef struct _PEP_POWER_CONTROL_COMPLETE {
    PEPHANDLE DeviceHandle;
@@ -864,13 +813,6 @@ typedef struct _PEP_PREPARE_DEVICE {
     PCUNICODE_STRING DeviceId;
    BOOLEAN          DeviceAccepted;
 } PEP_PREPARE_DEVICE, *PPEP_PREPARE_DEVICE;
-
-
-typedef struct _PEP_PROCESSOR_IDLE_STATE_UPDATE {
-  ULONG Version;
-  ULONG Latency;
-  ULONG BreakEvenDuration;
-} PEP_PROCESSOR_IDLE_STATE_UPDATE, *PPEP_PROCESSOR_IDLE_STATE_UPDATE;
 
 
 typedef struct _PEP_QUERY_COMPONENT_PERF_CAPABILITIES {

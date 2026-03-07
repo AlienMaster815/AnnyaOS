@@ -8,44 +8,48 @@ extern "C" {
 
 #include <Ldm.h>
 
-typedef void* PWMI_QUERY_DATABLOCK;
-typedef void* PWMI_SET_DATABLOCK;
-typedef void* PWMI_SET_DATAITEM;
-typedef void* PWMI_FUNCTION_CONTROL;
-typedef void* PWMI_EXECUTE_METHOD;
+typedef void* PLMI_QUERY_DATABLOCK;
+typedef void* PLMI_SET_DATABLOCK;
+typedef void* PLMI_SET_DATAITEM;
+typedef void* PLMI_FUNCTION_CONTROL;
+typedef void* PLMI_EXECUTE_METHOD;
 
 typedef enum _SYSCTL_IRP_DISPOSITION{
     IrpProcessed = 0,
     IrpNotCompleted,
-    IrpNotWmi, 
+    IrpNotLMI, 
     IrpForward,
 }SYSCTL_IRP_DISPOSITION, * PSYSCTL_IRP_DISPOSITION;
 
-typedef LOUSTATUS(*PLMI_QUERY_REGINFO)(
-    PDEVICE_OBJECT      DeviceObject, 
-    PULONG              RegFlags, 
-    PUNICODE_STRING     InstanceName, 
-    PUNICODE_STRING*    RegPath,
-    PUNICODE_STRING*    MofResourceName,
-    PDEVICE_OBJECT*     PDevObj
+typedef 
+LOUSTATUS 
+LMI_QUERY_REGINFO(
+  PDEVICE_OBJECT      DeviceObject, 
+  PULONG              RegFlags, 
+  PUNICODE_STRING     InstanceName, 
+  PUNICODE_STRING*    RegPath,
+  PUNICODE_STRING*    MofResourceName,
+  PDEVICE_OBJECT*     PDevObj
 );
 
-typedef struct _WMIGUIDREGINFO {
+typedef LMI_QUERY_REGINFO* PLMI_QUERY_REGINFO;
+
+typedef struct _LMIGUIDREGINFO {
   LPCGUID Guid;
   ULONG   InstanceCount;
   ULONG   Flags;
-} WMIGUIDREGINFO, *PWMIGUIDREGINFO;
+} LMIGUIDREGINFO, *PLMIGUIDREGINFO;
 
-typedef struct _WMILIB_CONTEXT {
+typedef struct _LMILIB_CONTEXT {
   ULONG                 GuidCount;
-  PWMIGUIDREGINFO       GuidList;
-  PLMI_QUERY_REGINFO    QueryWmiRegInfo;
-  PWMI_QUERY_DATABLOCK  QueryWmiDataBlock;
-  PWMI_SET_DATABLOCK    SetWmiDataBlock;
-  PWMI_SET_DATAITEM     SetWmiDataItem;
-  PWMI_EXECUTE_METHOD   ExecuteWmiMethod;
-  PWMI_FUNCTION_CONTROL WmiFunctionControl;
-} WMILIB_CONTEXT, *PWMILIB_CONTEXT;
+  PLMIGUIDREGINFO       GuidList;
+  PLMI_QUERY_REGINFO    QueryLMIRegInfo;
+  PLMI_QUERY_DATABLOCK  QueryLMIDataBlock;
+  PLMI_SET_DATABLOCK    SetLMIDataBlock;
+  PLMI_SET_DATAITEM     SetLMIDataItem;
+  PLMI_EXECUTE_METHOD   ExecuteLMIMethod;
+  PLMI_FUNCTION_CONTROL LMIFunctionControl;
+} LMILIB_CONTEXT, *PLMILIB_CONTEXT;
 
 
 //export as Wmi With Wmilib Kula Alias
@@ -67,8 +71,8 @@ LOUSTATUS LmiFireEvent(
 );
 
 //export as Wmi With Wmilib Kula Alias
-//LOUSTATUS WmiSystemControl(
-//    PWMILIB_CONTEXT         WmiLibInfo,
+//LOUSTATUS LMISystemControl(
+//    PLMILIB_CONTEXT         LMILibInfo,
 //    PDEVICE_OBJECT          DeviceObject,
 //    PIRP                    Irp,
 //    PSYSCTL_IRP_DISPOSITION IrpDisposition

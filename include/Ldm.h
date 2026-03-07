@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+#define OPAQUE_ARRAY_SIZE 1
+
 typedef struct _OFFSETINSTANCEDATAANDLENGTH {
     ULONG OffsetInstanceData;
     ULONG LengthInstanceData;
@@ -85,8 +87,37 @@ typedef const char* PCSZ;
 
 typedef const LPGUID LPCGUID;
 
-#include <Ldm/Lmilib.h>
+typedef enum _EMULATOR_PORT_ACCESS_TYPE{
+    Uchar = 0,
+    Ushort,
+    Ulong,
+}EMULATOR_PORT_ACCESS_TYPE, * PEMULATOR_PORT_ACCESS_TYPE;
 
+typedef PSTR NTSTRSAFE_PSTR;
+typedef PCSTR NTSTRSAFE_PCSTR;
+typedef PWSTR NTSTRSAFE_PWSTR;
+typedef PCWSTR NTSTRSAFE_PCWSTR;
+typedef const char* PCNZCH;
+typedef const wchar_t* PCNZWCH;
+typedef PCNZCH STRSAFE_PCNZCH;
+typedef PCNZWCH STRSAFE_PCNZWCH;
+typedef PCUNZWCH STRSAFE_PCUNZWCH;
+typedef HANDLE PEPHANDLE;
+
+typedef struct _ACPI_METHOD_ARGUMENT{
+    UINT16      Type;
+    UINT16      Length;
+    union{
+        ULONG   Argument;
+        UINT8   Data[OPAQUE_ARRAY_SIZE];
+    };
+}ACPI_METHOD_ARGUMENT, * PACPI_METHOD_ARGUMENT; 
+
+typedef HANDLE* POHANDLE;
+
+#include <Ldm/PepFramework.h>
+
+#include <Ldm/Lmilib.h>
 
 #ifdef __cplusplus
 }
