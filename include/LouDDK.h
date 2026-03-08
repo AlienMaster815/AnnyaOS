@@ -39,7 +39,7 @@ extern "C" {
 #include <kernel/SystemCalls.h>
 #include <kernel/Binarys.h>
 #include <kernel/exec.h>
-#include <kernel/DRSD.h>
+#include <DRSD.h>
 #include <kernel/Process.h>
 #include <Ldm.h>
 
@@ -109,7 +109,7 @@ typedef void* EventHandle;
 
 #include <kernel/interrupts.h>
 #include <kernel/threads.h>
-#include <kernel/DRSD.h>
+#include <DRSD.h>
 #include <kernel/LouQs.h>
 #include "NtOsKrnlLib.h"
 #include <HashTables.h>

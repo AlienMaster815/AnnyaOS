@@ -5,7 +5,7 @@
 
 #include <Annya.h>
 #include <stdarg.h>
-#include <kernel/DRSD.h>
+#include <DRSD.h>
 
 #define LOUDLL_API __declspec(dllexport)
 

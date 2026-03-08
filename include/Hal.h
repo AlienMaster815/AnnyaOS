@@ -5,7 +5,11 @@
 extern "C" {
 #endif
 
+#include <kernel/memmory.h>
 #include <drivers/pci.h>
+#include <Firmware/Dmi.h>
+#include <Devices.h>
+#include <DRSD.h>
 
 #ifndef _USER_MODE_CODE_
 
@@ -30,6 +34,8 @@ KERNEL_EXPORT PPCI_DEVICE_OBJECT LouKeHalGetPDEV(uint16_t Group, uint8_t Bus, ui
 KERNEL_EXPORT UINT16 LouKeHalGetChipsetVendor();
 KERNEL_EXPORT PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 KERNEL_EXPORT UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
+//KERNEL_EXPORT LOUSTATUS LouKeHalQuerySystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer, PULONG ReturnedLength); //export as HalQuerySystemInformation as NTOSKRNL.EXE 
+
 #ifndef _KERNEL_MODULE_
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);

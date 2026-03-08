@@ -115,6 +115,8 @@ typedef struct _ACPI_METHOD_ARGUMENT{
 
 typedef HANDLE* POHANDLE;
 
+#include <Hal.h>
+
 #include <Ldm/PepFramework.h>
 
 #include <Ldm/Lmilib.h>
