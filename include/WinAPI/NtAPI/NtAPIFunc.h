@@ -6,9 +6,6 @@
 
 //Filler Types Until Found
 
-typedef void* HalQuerySystemInformation;
-typedef void* HalSetSystemInformation;
-typedef void* HalQueryBusSlots;
 typedef void* HalIoReadPartitionTable;
 typedef void* HalIoSetPartitionInformation;
 typedef void* HalIoWritePartitionTable;
@@ -339,7 +336,6 @@ typedef struct _TOKEN_PRIVALEDGES{
 
 //ENDOF: TODO LIST\n
 
-typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 
 
 

@@ -786,6 +786,8 @@ typedef struct _DRIVER_OBJECT {
   uintptr_t             DeviceTable;
 } DRIVER_OBJECT,*  PDRIVER_OBJECT;
 
+
+
 #ifdef __cplusplus
 }
 #endif

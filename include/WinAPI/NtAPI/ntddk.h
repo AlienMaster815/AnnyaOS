@@ -53,61 +53,6 @@ typedef enum _BDCB_STATUS_UPDATE_TYPE {
 	BdCbStatusPrepareForUnload
 } BDCB_STATUS_UPDATE_TYPE, * PBDCB_STATUS_UPDATE_TYPE;
 
-typedef enum _HAL_QUERY_INFORMATION_CLASS {
-	HalInstalledBusInformation,
-	HalProfileSourceInformation,
-	HalInformationClassUnused1,
-	HalPowerInformation,
-	HalProcessorSpeedInformation,
-	HalCallbackInformation,
-	HalMapRegisterInformation,
-	HalMcaLogInformation,
-	HalFrameBufferCachingInformation,
-	HalDisplayBiosInformation,
-	HalProcessorFeatureInformation,
-	HalNumaTopologyInterface,
-	HalErrorInformation,
-	HalCmcLogInformation,
-	HalCpeLogInformation,
-	HalQueryMcaInterface,
-	HalQueryAMLIIllegalIOPortAddresses,
-	HalQueryMaxHotPlugMemoryAddress,
-	HalPartitionIpiInterface,
-	HalPlatformInformation,
-	HalQueryProfileSourceList,
-	HalInitLogInformation,
-	HalFrequencyInformation,
-	HalProcessorBrandString,
-	HalHypervisorInformation,
-	HalPlatformTimerInformation,
-	HalAcpiAuditInformation,
-	HalIrtInformation,
-	HalSecondaryInterruptInformation,
-	HalParkingPageInformation,
-	HalNumaRangeTableInformation,
-	HalChannelTopologyInformation,
-	HalExternalCacheInformation,
-	HalQueryDebuggerInformation,
-	HalFwBootPerformanceInformation,
-	HalFwS3PerformanceInformation,
-	HalGetChannelPowerInformation,
-	HalQueryStateElementInformation,
-	HalPsciInformation,
-	HalInterruptControllerInformation,
-	HalQueryIommuReservedRegionInformation,
-	HalQueryArmErrataInformation,
-	HalQueryProcessorEfficiencyInformation,
-	HalQueryAcpiWakeAlarmSystemPowerStateInformation,
-	HalQueryProfileNumberOfCounters,
-	HalQueryHyperlaunchEntrypoint,
-	HalHardwareWatchdogInformation,
-	HalDmaRemappingInformation,
-	HalQueryUnused0001,
-	HalHeterogeneousMemoryAttributesInterface,
-	HalQueryPerDeviceMsiLimitInformation,
-	HalQueryProfileCorruptionStatus,
-	HalQueryProfileCounterOwnership
-} HAL_QUERY_INFORMATION_CLASS, * PHAL_QUERY_INFORMATION_CLASS;
 
 typedef enum _HAL_SET_INFORMATION_CLASS {
 	HalProfileSourceInterval,
@@ -172,25 +117,6 @@ typedef struct _BDCB_IMAGE_INFORMATION {
 	ULONG               ImageHashLength;
 	ULONG               CertificateThumbprintLength;
 } BDCB_IMAGE_INFORMATION, * PBDCB_IMAGE_INFORMATION;
-
-#ifndef _BUS_DATA_TYPE
-#define _BUS_DATA_TYPE
-typedef enum _BUS_DATA_TYPE {
-	Cmos = 0,
-	EisaConfiguration = 1,
-	Pos = 2,
-	CbusConfiguration = 3,
-	PCIConfiguration = 4,
-	VMEConfiguration = 5,
-	NuBusConfiguration = 6,
-	PCMCIAConfiguration = 7,
-	MPIConfiguration = 8,
-	MPSAConfiguration = 9,
-	PNPISAConfiguration = 10,
-	SgiInternalConfiguration = 11,
-	MaximumBusDataType = 12,
-} BUS_DATA_TYPE, * PBUS_DATA_TYPE;
-#endif
 
 typedef struct _CONFIGURATION_INFORMATION {
 	ULONG   DiskCount;
@@ -296,10 +222,6 @@ void HalExamineMBR(
 	 PVOID* Buffer
 );
 
-
-typedef HalQuerySystemInformation* pHalQuerySystemInformation;
-typedef HalSetSystemInformation* pHalSetSystemInformation;
-typedef HalQueryBusSlots* pHalQueryBusSlots;
 typedef void (*pHalExamineMBR)( struct _DEVICE_OBJECT*, ULONG,  ULONG,  PVOID*);
 typedef HalIoReadPartitionTable* pHalIoReadPartitionTable;
 typedef HalIoSetPartitionInformation* pHalIoSetPartitionInformation;
@@ -1139,19 +1061,6 @@ void Phalexaminembr(
 );
 
 
-LOUSTATUS Phalquerysysteminformation(
-    HAL_QUERY_INFORMATION_CLASS InformationClass,
-    ULONG BufferSize,
-   PVOID Buffer,
-   PULONG ReturnedLength
-);
-
-LOUSTATUS Phalsetsysteminformation(
-	  HAL_SET_INFORMATION_CLASS InformationClass,
-	  ULONG BufferSize,
-	 PVOID Buffer
-);
-
 typedef struct _PNP_LOCATION_INTERFACE {
   USHORT                 Size;
   USHORT                 Version;
@@ -1173,17 +1082,6 @@ typedef struct _POWER_THROTTLING_THREAD_STATE {
   ULONG StateMask;
 } POWER_THROTTLING_THREAD_STATE, *PPOWER_THROTTLING_THREAD_STATE;
 
-void PphysicalCounterEventBufferOverflowHandler(
-  PVOID EventBuffer,
-  SIZE_T EntrySize,
-  SIZE_T NumberOfEntries,
-  HANDLE OwningHandle
-);
-
-void PphysicalCounterOverflowHandler(
-  ULONGLONG OverflowBits,
-  HANDLE OwningHandle
-);
 
 typedef struct _PROCESS_MEMBERSHIP_INFORMATION {
   ULONG ServerSiloId;

@@ -11,6 +11,81 @@ extern "C" {
 #include <Devices.h>
 #include <DRSD.h>
 
+typedef enum _HAL_QUERY_INFORMATION_CLASS{
+    HalInstalledBusInformation = 0,
+    HalProfileSourceInformation,
+    HalInformationClassUnused1,
+    HalPowerInformation,
+    HalProcessorSpeedInformation,
+    HalCallbackInformation,
+    HalMapRegisterInformation,
+    HalMcaLogInformation,
+    HalFrameBufferCachingInformation,
+    HalDisplayBiosInformation,
+    HalProcessorFeatureInformation,
+    HalNumaTopologyInterface,
+    HalErrorInformation,
+    HalCmcLogInformation,
+    HalCpeLogInformation,
+    HalQueryMcaInterface,
+    HalQueryAMLIIllegalIOPortAddresses,
+    HalQueryMaxHotPlugMemoryAddress,
+    HalPartitionIpiInterface,
+    HalPlatformInformation,
+    HalQueryProfileSourceList,
+    HalInitLogInformation,
+    HalFrequencyInformation,
+    HalProcessorBrandString,
+    HalHypervisorInformation,
+    HalPlatformTimerInformation,
+    HalAcpiAuditInformation,
+    HalIrtInformation,
+    HalSecondaryInterruptInformation,
+    HalParkingPageInformation,
+    HalNumaRangeTableInformation,
+    HalChannelTopologyInformation,
+    HalExternalCacheInformation,
+    HalQueryDebuggerInformation,
+    HalFwBootPerformanceInformation,
+    HalFwS3PerformanceInformation,
+    HalGetChannelPowerInformation,
+    HalQueryStateElementInformation,
+    HalPsciInformation,
+    HalInterruptControllerInformation,
+    HalQueryIommuReservedRegionInformation,
+    HalQueryArmErrataInformation,
+    HalQueryProcessorEfficiencyInformation,
+    HalQueryAcpiWakeAlarmSystemPowerStateInformation,
+    HalQueryProfileIsTimerBasedProfiling,
+    HalQueryProfileNumberOfCounters,
+    HalQueryHyperlaunchEntrypoint,
+    HalHardwareWatchdogInformation,
+    HalDmaRemappingInformation,
+    HalQueryUnused0001,
+    HalHeterogeneousMemoryAttributesInterface,
+    HalQueryPerDeviceMsiLimitInformation,
+    HalQueryProfileCorruptionStatus,
+    HalQueryProfileCounterOwnership,
+    HalQueryMpamInformation,
+    HalAmuInformation,
+    HalQueryApHibernateResumePc,
+    HalQueryArm64PlatformInformation
+}HAL_QUERY_INFORMATION_CLASS, * PHAL_QUERY_INFORMATION_CLASS;
+
+typedef LOUSTATUS HalQuerySystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer, PULONG ReturnedLength);
+
+typedef HalQuerySystemInformation* pHalQuerySystemInformation;
+
+typedef LOUSTATUS HalSetSystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer);
+
+typedef HalSetSystemInformation* pHalSetSystemInformation;
+
+typedef LOUSTATUS HalQueryBusSlots(PBUS_HANDLER BusHandler, ULONG Index, PULONG Data, PULONG Remaining);
+
+typedef HalQueryBusSlots* pHalQueryBusSlots;
+
+
+
 #ifndef _USER_MODE_CODE_
 
 #define LouKeHalClosePciCompanions(x) LouKeFree((PVOID)x)
@@ -34,8 +109,8 @@ KERNEL_EXPORT PPCI_DEVICE_OBJECT LouKeHalGetPDEV(uint16_t Group, uint8_t Bus, ui
 KERNEL_EXPORT UINT16 LouKeHalGetChipsetVendor();
 KERNEL_EXPORT PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 KERNEL_EXPORT UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
-//KERNEL_EXPORT LOUSTATUS LouKeHalQuerySystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer, PULONG ReturnedLength); //export as HalQuerySystemInformation as NTOSKRNL.EXE 
-
+KERNEL_EXPORT LOUSTATUS LouKeHalQuerySystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer, PULONG ReturnedLength); //export as HalQuerySystemInformation as NTOSKRNL.EXE 
+KERNEL_EXPORT LOUSTATUS LouKeHalSetSystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer);                          //export as HalSetSystemInformation as NTOSKRNL.EXE
 #ifndef _KERNEL_MODULE_
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);

@@ -115,6 +115,10 @@ typedef struct _ACPI_METHOD_ARGUMENT{
 
 typedef HANDLE* POHANDLE;
 
+typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
+
+#include <Ldm/miniport.h>
+
 #include <Hal.h>
 
 #include <Ldm/PepFramework.h>
