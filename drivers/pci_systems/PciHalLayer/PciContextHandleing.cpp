@@ -79,7 +79,7 @@ PPCI_CONTEXT LouKeHalPciSaveContext(PPCI_DEVICE_OBJECT PDEV){
 
     PPCI_CONTEXT SavedContext = LouKeMallocType(PCI_CONTEXT, KERNEL_GENERIC_MEMORY);
     GetPciConfiguration(PDEV->Group, PDEV->bus,PDEV->slot, PDEV->func, (PPCI_COMMON_CONFIG)LouKeCastToUnalignedPointer(&SavedContext->PciConfig));
-    SavedContext->PDEV = (void*)PDEV;
+    SavedContext->PDEV = PDEV;
 
     return SavedContext;
 }

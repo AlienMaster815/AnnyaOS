@@ -135,6 +135,248 @@ typedef struct _PCIE_SYSTEM_MANAGER{
     uint8_t     EndBusNumber;
 }PCIE_SYSTEM_MANAGER, * PPCIE_SYSTEM_MANAGER;
 
+typedef struct _PCI_MANAGER_DATA{
+    ListHeader Neigbors;
+    PPCI_DEVICE_OBJECT PDEV;
+    string RegistryEntry;
+    string DeviceManagerString;
+}PCI_MANAGER_DATA, * PPCI_MANAGER_DATA, PCI_DEVICE_GROUP,* PPCI_DEVICE_GROUP;
+
+typedef struct _PCI_CAPABILITIES_HEADER {
+    UCHAR   CapabilityID;
+    UCHAR   Next;
+} PCI_CAPABILITIES_HEADER, * PPCI_CAPABILITIES_HEADER;
+
+typedef enum{
+	BusWidth32Bits = 0,
+	BusWidth64Bits
+}PCI_BUS_WIDTH;
+
+#define PCI_TYPE0_ADDRESSES             6
+#define PCI_TYPE1_ADDRESSES             2
+#define PCI_TYPE2_ADDRESSES             5
+
+typedef struct _PCI_COMMON_HEADER{
+    USHORT  			VendorID;            
+    USHORT  			DeviceID;            
+    USHORT  			Command;             
+    USHORT  			Status;
+    UCHAR   			RevisionID;          
+    UCHAR   			ProgIf;              
+    UCHAR   			SubClass;            
+    UCHAR   			BaseClass;           
+    UCHAR   			CacheLineSize;       
+    UCHAR   			LatencyTimer;        
+    UCHAR   			HeaderType;          
+    UCHAR   			BIST;                
+    union{
+        struct _PCI_HEADER_TYPE_0{
+            ULONG   	BaseAddresses[PCI_TYPE0_ADDRESSES];
+            ULONG   	CIS;
+            USHORT  	SubVendorID;
+            USHORT  	SubSystemID;
+            ULONG   	ROMBaseAddress;
+            UCHAR   	CapabilitiesPtr;
+            UCHAR   	Reserved1[3];
+            ULONG   	Reserved2;
+            UCHAR   	InterruptLine;
+            UCHAR   	InterruptPin;
+            UCHAR   	MinimumGrant;
+            UCHAR   	MaximumLatency;
+        }				type0;
+        struct _PCI_HEADER_TYPE_1 {
+            ULONG   	BaseAddresses[PCI_TYPE1_ADDRESSES];
+            UCHAR   	PrimaryBus;
+            UCHAR   	SecondaryBus;
+            UCHAR   	SubordinateBus;
+            UCHAR   	SecondaryLatency;
+            UCHAR   	IOBase;
+            UCHAR   	IOLimit;
+            USHORT  	SecondaryStatus;
+            USHORT  	MemoryBase;
+            USHORT  	MemoryLimit;
+            USHORT  	PrefetchBase;
+            USHORT  	PrefetchLimit;
+            ULONG   	PrefetchBaseUpper32;
+            ULONG   	PrefetchLimitUpper32;
+            USHORT  	IOBaseUpper16;
+            USHORT  	IOLimitUpper16;
+            UCHAR   	CapabilitiesPtr;
+            UCHAR   	Reserved1[3];
+            ULONG   	ROMBaseAddress;
+            UCHAR   	InterruptLine;
+            UCHAR   	InterruptPin;
+            USHORT  	BridgeControl;
+        } 				type1;
+        struct _PCI_HEADER_TYPE_2 {
+            ULONG   	SocketRegistersBaseAddress;
+            UCHAR   	CapabilitiesPtr;
+            UCHAR   	Reserved;
+            USHORT  	SecondaryStatus;
+            UCHAR   	PrimaryBus;
+            UCHAR   	SecondaryBus;
+            UCHAR   	SubordinateBus;
+            UCHAR   	SecondaryLatency;
+            struct  {
+                ULONG   Base;
+                ULONG   Limit;
+            }       	Range[PCI_TYPE2_ADDRESSES-1];
+            UCHAR   	InterruptLine;
+            UCHAR   	InterruptPin;
+            USHORT  	BridgeControl;
+        } 				type2;
+    } u;
+} PCI_COMMON_HEADER, *PPCI_COMMON_HEADER;
+
+typedef struct _PCI_COMMON_CONFIG {
+    PCI_COMMON_HEADER 	Header;
+    UCHAR   			DeviceSpecific[192];
+	uint64_t 			BarSize[6];
+	uint64_t 			BarBase[6];
+	uint8_t  			BarFlags[6];
+} PCI_COMMON_CONFIG, * PPCI_COMMON_CONFIG;
+
+typedef struct  _PCI_CONTEXT{
+    PCI_COMMON_CONFIG 	PciConfig;
+    PPCI_DEVICE_OBJECT	PDEV;
+}PCI_CONTEXT, * PPCI_CONTEXT;
+
+
+
+typedef enum{
+	PciDeviceD3Cold_State_Disabled_BitIndex = 0,
+	PciDeviceD3Cold_State_Enabled_BitIndex,
+	PciDeviceD3Cold_State_ParentRootPortS0WakeSupported_BitIndex,
+	PciDeviceD3Cold_State_Disabled_Bridge_HackFlags_BitIndex,
+	PciDeviceD3Cold_Reason_Default_State_BitIndex,
+	PciDeviceD3Cold_Reason_INF_BitIndex,
+	PciDeviceD3Cold_Reason_Interface_Api_BitIndex
+}PCI_DEVICE_D3COLD_STATE_REASON;
+
+typedef enum{
+	L0sAndL1EntryDisabled = 0,
+	L0sEntryEnabled,
+	L1EntryEnabled,
+	L0sAndL1EntryEnabled
+} PCI_EXPRESS_ASPM_CONTROL;
+
+typedef enum {
+	NoAspmSupport = 0,
+	L0sEntrySupport,
+	L1EntrySupport,
+	L0sAndL1EntrySupport
+}PCI_EXPRESS_ASPM_SUPPORT;
+
+typedef enum{
+	SlotEmpty = 0,
+	CardPresent
+}PCI_EXPRESS_CARD_PRESENCE;
+
+typedef enum {
+	PciExpressEndpoint = 0,
+	PciExpressLegacyEndpoint,
+	PciExpressRootPort,
+	PciExpressUpstreamSwitchPort,
+	PciExpressDownstreamSwitchPort,
+	PciExpressToPciXBridge,
+	PciXToExpressBridge,
+	PciExpressRootComplexIntegratedEndpoint,
+	PciExpressRootComplexEventCollector
+}PCI_EXPRESS_DEVICE_TYPE;
+
+typedef enum{
+	IndicatorOn = 0,
+	IndicatorBlink,
+	IndicatorOff
+}PCI_EXPRESS_INDICATOR_STATE;
+
+typedef enum{
+	L0s_Below64ns = 0,
+	L0s_64ns_128ns,
+	L0s_128ns_256ns,
+	L0s_256ns_512ns,
+	L0s_512ns_1us,
+	L0s_1us_2us,
+	L0s_2us_4us,
+	L0s_Above4us
+}PCI_EXPRESS_L0s_EXIT_LATENCY;
+
+typedef enum{
+	L1_Below1us = 0,
+	L1_1us_2us,
+	L1_2us_4us,
+	L1_4us_8us,
+	L1_8us_16us,
+	L1_16us_32us,
+	L1_32us_64us,
+	L1_Above64us
+}PCI_EXPRESS_L1_EXIT_LATENCY;
+
+typedef enum{
+	MRLClosed = 0,
+	MRLOpen
+}PCI_EXPRESS_MRL_STATE;
+
+typedef enum{
+	PowerOn = 0,
+	PowerOff
+}PCI_EXPRESS_POWER_STATE;
+
+typedef enum {
+	RCB64Bytes = 0,
+	RCB128Bytes
+} PCI_EXPRESS_RCB;
+
+typedef struct _PCI_SLOT_NUMBER {
+	union {
+		struct {
+			ULONG 	DeviceNumber : 5;
+			ULONG 	FunctionNumber : 3;
+			ULONG 	Reserved : 24;
+		} 			bits;
+		ULONG 		AsULONG;
+	} u;
+} PCI_SLOT_NUMBER, * PPCI_SLOT_NUMBER;
+
+typedef union _PCI_EXPRESS_LINK_CAPABILITIES_2_REGISTER {
+	struct {
+		ULONG 		Rsvd0 : 1;
+		ULONG 		SupportedLinkSpeedsVector : 7;
+		ULONG 		Rsvd8_31 : 24;
+	};
+	ULONG  			AsULONG;
+} PCI_EXPRESS_LINK_CAPABILITIES_2_REGISTER, * PPCI_EXPRESS_LINK_CAPABILITIES_2_REGISTER;
+
+typedef union _PCI_EXPRESS_LINK_CONTROL_2_REGISTER {
+	struct {
+		USHORT 		TargetLinkSpeed : 4;
+		USHORT 		Rsvd4_15 : 12;
+	};
+	USHORT 			AsUSHORT;
+} PCI_EXPRESS_LINK_CONTROL_2_REGISTER, * PPCI_EXPRESS_LINK_CONTROL_2_REGISTER;
+
+typedef union _PCI_EXPRESS_LINK_STATUS_2_REGISTER {
+	struct {
+		USHORT 		Rsvd0_15 : 16;
+	};
+	USHORT 			AsUSHORT;
+}PCI_EXPRESS_LINK_STATUS_2_REGISTER, * PPCI_EXPRESS_LINK_STATUS_2_REGISTER;
+
+typedef enum {
+	PciExpressPciPmLinkSubState_L11_BitIndex = 0,
+	PciExpressPciPmLinkSubState_L12_BitIndex,
+	PciExpressASPMLinkSubState_L11_BitIndex,
+	PciExpressASPMLinkSubState_L12_BitIndex
+} PCI_EXPRESS_LINK_SUBSTATE;
+
+typedef struct _PCI_VENDOR_SPECIFIC_CAPABILITY {
+	PCI_CAPABILITIES_HEADER Header;
+	UCHAR                   VscLength;
+	UCHAR                   VendorSpecific;
+} PCI_VENDOR_SPECIFIC_CAPABILITY, * PPCI_VENDOR_SPECIFIC_CAPABILITY;
+
+
+
 #ifndef _USER_MODE_CODE_
 KERNEL_EXPORT uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
 KERNEL_EXPORT uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
