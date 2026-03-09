@@ -3,20 +3,17 @@
 
 
 // Read a byte from an I/O port
-KERNEL_EXPORT uint8_t inb(uint64_t port64) {
+KERNEL_EXPORT uint8_t inb(uint64_t port64){
     uint8_t data;
     uint16_t port = (uint16_t)port64;
-
     __asm__ __volatile__("inb %w1, %b0"
                          : "=a"(data)
                          : "Nd"(port));
     return data;
 }
 
-// Write a byte to an I/O port
 KERNEL_EXPORT void outb(uint64_t port64, uint8_t data) {
     uint16_t port = (uint16_t)port64;
-
     __asm__ __volatile__("outb %b0, %w1"
                          :
                          : "a"(data), "Nd"(port));
@@ -93,7 +90,7 @@ KERNEL_EXPORT void insw(uint16_t port, void *buf, unsigned long count) {
                          : "memory");
 }
 
-KERNEL_EXPORT void outsw(uint16_t port, const void *buf, unsigned long count) {
+KERNEL_EXPORT void outsw(uint16_t port, const void *buf, unsigned long count){
     __asm__ __volatile__("cld; rep; outsw"
                          : "+S"(buf), "+c"(count)
                          : "d"(port)
@@ -114,6 +111,23 @@ KERNEL_EXPORT void outsb(uint16_t port, const void *buf, unsigned long count) {
                          : "memory");
 }
 
+KERNEL_EXPORT void insl(uint16_t port, void *buf, unsigned long count) {
+    __asm__ __volatile__(
+        "cld; rep; insl"
+        : "+D"(buf), "+c"(count)
+        : "d"(port)
+        : "memory"
+    );
+}
+
+KERNEL_EXPORT void outsl(uint16_t port, const void *buf, unsigned long count){
+    __asm__ __volatile__(
+        "cld; rep; outsl"
+        : "+S"(buf), "+c"(count)
+        : "d"(port)
+        : "memory"
+    );
+}
 
 extern uint64_t LouKeMachineLevelReadRegisterUlong(uint64_t AddressOfRegister);
 extern uint64_t LouKeMachineLevelWriteRegisterUlong(uint64_t AddressOfRegister,uint64_t Data);

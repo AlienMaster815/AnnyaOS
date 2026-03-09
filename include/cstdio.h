@@ -2,6 +2,7 @@
 #define _STDIO_H
 
 #include <cstdint.h>
+#include <Modulation.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,12 +56,21 @@ LouKeIsLittleEndianBufferEqualTo(
     uint64_t Length
 );
 
-uint8_t inb(uint64_t port);
-void outb(uint64_t port, uint8_t data);
-uint16_t inw(uint64_t port);
-void outw(uint64_t port, uint16_t data);
-uint32_t inl(uint64_t port);
-void outl(uint64_t port, uint32_t  data);
+KERNEL_EXPORT uint8_t   inb(uint64_t port);
+KERNEL_EXPORT void      outb(uint64_t port, uint8_t data);
+KERNEL_EXPORT void      insb(uint16_t port, void *buf, unsigned long count);
+KERNEL_EXPORT void      outsb(uint16_t port, const void *buf, unsigned long count);
+
+KERNEL_EXPORT uint16_t  inw(uint64_t port);
+KERNEL_EXPORT void      outw(uint64_t port, uint16_t data);
+KERNEL_EXPORT void      insw(uint16_t port, void *buf, unsigned long count);
+KERNEL_EXPORT void      outsw(uint16_t port, const void *buf, unsigned long count);
+
+KERNEL_EXPORT uint32_t  inl(uint64_t port);
+KERNEL_EXPORT void      outl(uint64_t port, uint32_t  data);
+KERNEL_EXPORT void      insl(uint16_t port, void *buf, unsigned long count);
+KERNEL_EXPORT void      outsl(uint16_t port, const void *buf, unsigned long count);
+
 void outbSlow(uint64_t port,uint8_t data);
 
 

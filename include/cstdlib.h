@@ -47,6 +47,8 @@ typedef struct  _ListHeader{
 #define UNINIT __attribute__((uninitialized))
 #endif
 
+#define FORCE_INLINE __attribute__((always_inline)) static inline
+
 #define ROUND_UP(value, multiple) \
     (((value) + (multiple) - 1) / (multiple) * (multiple))
 

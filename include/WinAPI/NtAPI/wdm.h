@@ -372,12 +372,12 @@ typedef struct _SECTION_OBJECT_POINTERS {
 } SECTION_OBJECT_POINTERS;
 
 typedef struct _REENUMERATE_SELF_INTERFACE_STANDARD {
-    USHORT                 Size;
-    USHORT                 Version;
-    PVOID                  Context;
-    PINTERFACE_REFERENCE   InterfaceReference;
-    PINTERFACE_DEREFERENCE InterfaceDereference;
-    PREENUMERATE_SELF      SurpriseRemoveAndReenumerateSelf;
+   USHORT                 Size;
+   USHORT                 Version;
+   PVOID                  Context;
+   PINTERFACE_REFERENCE   InterfaceReference;
+   PINTERFACE_DEREFERENCE InterfaceDereference;
+   PREENUMERATE_SELF      SurpriseRemoveAndReenumerateSelf;
 } REENUMERATE_SELF_INTERFACE_STANDARD, * PREENUMERATE_SELF_INTERFACE_STANDARD;
 
 typedef struct _REG_CALLBACK_CONTEXT_CLEANUP_INFORMATION {
@@ -1129,16 +1129,6 @@ typedef struct _DMA_ADAPTER {
 } *PADAPTER_OBJECT, DMA_ADAPTER, * PDMA_ADAPTER;
 
 
- 
-unsigned char _BitTest64(
-  __int64 const *Base,
-  __int64       Index
-);
-
-unsigned char _BitTestAndComplement64(
-  __int64 *Base,
-  __int64 Index
-);
 
 unsigned char _BitTestAndReset64(
   __int64 *Base,
@@ -1150,7 +1140,6 @@ unsigned char _BitTestAndSet64(
   __int64 Index
 );
 
-void _ReadWriteBarrier();
 
 typedef struct {
   USHORT                                Size;
@@ -1193,11 +1182,6 @@ void ARM64_SYSREG_OP2(
 */
 
 
-void BarrierAfterRead();
-
-void BarrierAfterRead();
-
-void BarrierAfterRead();
 
 typedef struct _BOOTDISK_INFORMATION {
   LONGLONG BootPartitionOffset;

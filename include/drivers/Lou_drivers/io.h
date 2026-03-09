@@ -174,15 +174,9 @@ class Port32Bit : public Port{
         void KeCallBuiltInOutl(uint16_t port,uint32_t data);
 };
 
-extern "C" void insw(uint16_t __port, void *__buf, unsigned long __n);
- 
-extern "C" void outsw(uint16_t __port, const void *__buf, unsigned long __n);
+
 #endif
 #else
-
-
-KERNEL_EXPORT uint16_t insw(uint16_t __port, void *__buf, unsigned long __n);
-KERNEL_EXPORT void outsw(uint16_t __port, const void *__buf, unsigned long __n);
 
 #endif
 #endif

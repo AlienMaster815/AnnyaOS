@@ -117,6 +117,10 @@ typedef HANDLE* POHANDLE;
 
 typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 
+typedef VOID(*PINTERFACE_REFERENCE)(PVOID Context);
+typedef VOID(*PINTERFACE_DEREFERENCE)(PVOID Context);
+
+
 #include <Ldm/miniport.h>
 
 #include <Hal.h>

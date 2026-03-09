@@ -370,7 +370,6 @@ LOUAPI unsigned long DbgPrint(char const*, ...);
 
 #include "Misc/undocumentedTypes.h"
 #include "ioaccess.h"
-#include "miniport.h"
 #include "ntddk.h"
 #include "ntddsfio.h"
 #include "ntddsysenv.h"

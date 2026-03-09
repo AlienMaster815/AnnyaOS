@@ -92,8 +92,6 @@ EXPORTS
     READ_REGISTER_ULONG
     LouMallocAtaHost
     LouKeHalMallocPciIrqVectors
-    WRITE_PORT_ULONG
-    WRITE_REGISTER_ULONG
     sleep
     LouKeHalPciSetMaster
     LouKeRegisterDevice
@@ -184,8 +182,6 @@ EXPORTS
     DmiGetDate
     LouKeMallocExPhy32
     LouKeQueueWork
-    READ_REGISTER_ULONGLONG
-    WRITE_REGISTER_ULONGLONG
     LouKeCheckDmiSystem
     LouKeHalGetPciIrqVectorCount
     LouKeMallocPhy32

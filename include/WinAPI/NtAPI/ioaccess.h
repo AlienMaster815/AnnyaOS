@@ -7,11 +7,7 @@ typedef USHORT* PUSHORT;
 #include <NtAPI.h>
 #ifndef _KERNEL_MODULE_
 // Function prototypes for reading from memory-mapped registers
-UCHAR READ_REGISTER_UCHAR(PUCHAR Register);
-USHORT READ_REGISTER_USHORT(PUSHORT Register);
-KERNEL_EXPORT ULONG READ_REGISTER_ULONG(PULONG Register);
-KERNEL_EXPORT ULONGLONG READ_REGISTER_ULONGLONG(PULONGLONG Register);
-KERNEL_EXPORT VOID WRITE_REGISTER_ULONGLONG(PULONGLONG Register, ULONGLONG Data);
+
 
 // Function prototypes for writing to ports
 void WRITE_PORT_UCHAR(PVOID Port, UCHAR Value);
