@@ -480,7 +480,7 @@ typedef enum _PEP_PERF_STATE_UNIT{
     PepPerfStateUnitMax
 }PEP_PERF_STATE_UNIT, * PPEP_PERF_STATE_UNIT;
 
-typedef enum _PEP_ACPI_RESOURCE_TYPE {
+typedef enum _PEP_ACPI_RESOURCE_TYPE{
     PepAcpiMemory = 0,
     PepAcpiIoPort,
     PepAcpiInterrupt,
@@ -491,7 +491,431 @@ typedef enum _PEP_ACPI_RESOURCE_TYPE {
     PepAcpiSpbUart,
     PepAcpiExtendedMemory,
     PepAcpiExtendedIo
-}PEP_ACPI_RESOURCE_TYPE;
+}PEP_ACPI_RESOURCE_TYPE, * PPEP_ACPI_RESOURCE_TYPE;
+
+typedef struct _PEP_ABANDON_DEVICE{
+    PCUNICODE_STRING DeviceId;
+    BOOLEAN          DeviceAccepted;
+}PEP_ABANDON_DEVICE, * PPEP_ABANDON_DEVICE;
+
+
+typedef struct _PEP_ACPI_ABANDON_DEVICE{
+    PCUNICODE_STRING AcpiDeviceName;
+    BOOLEAN          DeviceAccepted;
+}PEP_ACPI_ABANDON_DEVICE, * PPEP_ACPI_ABANDON_DEVICE;
+
+typedef struct _PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE{
+    PEPHANDLE                       DeviceHandle;
+    ULONG                           RequestFlags;
+    LOUSTATUS                       Status;
+    ULONG                           ObjectCount;
+    SIZE_T                          ObjectBufferSize;
+    PEP_ACPI_OBJECT_NAME_WITH_TYPE* Objects;
+}PEP_ACPI_ENUMERATE_DEVICE_NAMESPACE, * PPEP_ACPI_ENUMERATE_DEVICE_NAMESPACE;
+
+typedef struct _PEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD{
+    PEPHANDLE             DeviceHandle;
+    ULONG                 RequestFlags;
+    union {
+        ULONG             MethodName;
+        ANSI_STRING       MethodNameString;
+    };
+    LOUSTATUS             MethodStatus;
+    PVOID                 CompletionContext;
+    ULONG                 InputArgumentCount;
+    SIZE_T                InputArgumentSize;
+    PACPI_METHOD_ARGUMENT InputArguments;
+    ULONG                 OutputArgumentCount;
+    SIZE_T                OutputArgumentSize;
+    PACPI_METHOD_ARGUMENT OutputArguments;
+}PEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD, * PPEP_ACPI_BUILD_CHILDREN_CONTROL_METHOD;
+
+typedef struct _PEP_ACPI_EXTENDED_ADDRESS{
+    PEP_ACPI_RESOURCE_TYPE  Type;
+    PEP_ACPI_RESOURCE_FLAGS Flags;
+    UCHAR                   ResourceFlags;
+    UCHAR                   GeneralFlags;
+    UCHAR                   TypeSpecificFlags;
+    UCHAR                   RevisionId;
+    UCHAR                   Reserved;
+    ULONGLONG               Granularity;
+    ULONGLONG               MinimumAddress;
+    ULONGLONG               MaximumAddress;
+    ULONGLONG               TranslationAddress;
+    ULONGLONG               AddressLength;
+    ULONGLONG               TypeAttribute;
+    PUNICODE_STRING         DescriptorName;
+} PEP_ACPI_EXTENDED_ADDRESS, * PPEP_ACPI_EXTENDED_ADDRESS;
+
+typedef struct _PEP_ACPI_GPIO_RESOURCE{
+    PEP_ACPI_RESOURCE_TYPE      Type;
+    PEP_ACPI_RESOURCE_FLAGS     Flags;
+    KINTERRUPT_MODE             InterruptType;
+    KINTERRUPT_POLARITY         InterruptPolarity;
+    GPIO_PIN_CONFIG_TYPE        PinConfig;
+    GPIO_PIN_IORESTRICTION_TYPE IoRestrictionType;
+    USHORT                      DriveStrength;
+    USHORT                      DebounceTimeout;
+    PUSHORT                     PinTable;
+    USHORT                      PinCount;
+    UCHAR                       ResourceSourceIndex;
+    PUNICODE_STRING             ResourceSourceName;
+    PUCHAR                      VendorData;
+    USHORT                      VendorDataLength;
+} PEP_ACPI_GPIO_RESOURCE, * PPEP_ACPI_GPIO_RESOURCE;
+
+typedef struct _PEP_ACPI_INTERRUPT_RESOURCE{
+    PEP_ACPI_RESOURCE_TYPE  Type;
+    KINTERRUPT_MODE         InterruptType;
+    KINTERRUPT_POLARITY     InterruptPolarity;
+    PEP_ACPI_RESOURCE_FLAGS Flags;
+    UCHAR                   Count;
+    PULONG                  Pins;
+} PEP_ACPI_INTERRUPT_RESOURCE, * PPEP_ACPI_INTERRUPT_RESOURCE;
+
+typedef struct _PEP_ACPI_IO_MEMORY_RESOURCE{
+    PEP_ACPI_RESOURCE_TYPE Type;
+    UCHAR                  Information;
+    PHYSICAL_ADDRESS       MinimumAddress;
+    PHYSICAL_ADDRESS       MaximumAddress;
+    ULONG                  Alignment;
+    ULONG                  Length;
+}PEP_ACPI_IO_MEMORY_RESOURCE, * PPEP_ACPI_IO_MEMORY_RESOURCE;
+
+typedef struct _PEP_ACPI_PREPARE_DEVICE{
+    PCUNICODE_STRING AcpiDeviceName;
+    ULONG            InputFlags;
+    BOOLEAN          DeviceAccepted;
+    ULONG            OutputFlags;
+}PEP_ACPI_PREPARE_DEVICE, * PPEP_ACPI_PREPARE_DEVICE;
+
+
+typedef struct _PEP_ACPI_QUERY_DEVICE_CONTROL_RESOURCES {
+    PEPHANDLE               DeviceHandle;
+    ULONG                   RequestFlags;
+    LOUSTATUS               Status;
+    SIZE_T                  BiosResourcesSize;
+    ACPI_METHOD_ARGUMENT*   BiosResources;
+}PEP_ACPI_QUERY_DEVICE_CONTROL_RESOURCES, * PPEP_ACPI_QUERY_DEVICE_CONTROL_RESOURCES;
+
+typedef struct _PEP_ACPI_QUERY_OBJECT_INFORMATION{
+    PEPHANDLE               DeviceHandle;
+    PEP_ACPI_OBJECT_NAME    Name;
+    PEP_ACPI_OBJECT_TYPE    Type;
+    ULONG                   ObjectFlags;
+    union {
+        struct {
+            ULONG           InputArgumentCount;
+            ULONG           OutputArgumentCount;
+        }                   MethodObject;
+    };
+}PEP_ACPI_QUERY_OBJECT_INFORMATION, * PPEP_ACPI_QUERY_OBJECT_INFORMATION;
+
+typedef struct _PEP_ACPI_REGISTER_DEVICE{
+    PCUNICODE_STRING AcpiDeviceName;
+    ULONG            InputFlags;
+    POHANDLE         KernelHandle;
+    PEPHANDLE        DeviceHandle;
+    ULONG            OutputFlags;
+}PEP_ACPI_REGISTER_DEVICE, * PPEP_ACPI_REGISTER_DEVICE;
+
+typedef struct _PEP_ACPI_SPB_RESOURCE{
+    PEP_ACPI_RESOURCE_TYPE  Type;
+    PEP_ACPI_RESOURCE_FLAGS Flags;
+    USHORT                  TypeSpecificFlags;
+    UCHAR                   ResourceSourceIndex;
+    PUNICODE_STRING         ResourceSourceName;
+    PCHAR                   VendorData;
+    USHORT                  VendorDataLength;
+}PEP_ACPI_SPB_RESOURCE, * PPEP_ACPI_SPB_RESOURCE;
+
+typedef struct _PEP_ACPI_SPB_I2C_RESOURCE{
+    PEP_ACPI_SPB_RESOURCE SpbCommon;
+    ULONG                 ConnectionSpeed;
+    USHORT                SlaveAddress;
+}PEP_ACPI_SPB_I2C_RESOURCE, * PPEP_ACPI_SPB_I2C_RESOURCE;
+
+
+typedef struct _PEP_ACPI_SPB_SPI_RESOURCE{
+    PEP_ACPI_SPB_RESOURCE SpbCommon;
+    ULONG                 ConnectionSpeed;
+    UCHAR                 DataBitLength;
+    UCHAR                 Phase;
+    UCHAR                 Polarity;
+    USHORT                DeviceSelection;
+}PEP_ACPI_SPB_SPI_RESOURCE, * PPEP_ACPI_SPB_SPI_RESOURCE;
+
+typedef struct _PEP_ACPI_SPB_UART_RESOURCE{
+    PEP_ACPI_SPB_RESOURCE SpbCommon;
+    ULONG                 BaudRate;
+    USHORT                RxBufferSize;
+    USHORT                TxBufferSize;
+    UCHAR                 Parity;
+    UCHAR                 LinesInUse;
+}PEP_ACPI_SPB_UART_RESOURCE, * PPEP_ACPI_SPB_UART_RESOURCE;
+
+
+typedef union _PEP_ACPI_RESOURCE{
+    PEP_ACPI_RESOURCE_TYPE      Type;
+    PEP_ACPI_IO_MEMORY_RESOURCE IoMemory;
+    PEP_ACPI_INTERRUPT_RESOURCE Interrupt;
+    PEP_ACPI_GPIO_RESOURCE      Gpio;
+    PEP_ACPI_SPB_I2C_RESOURCE   SpbI2c;
+    PEP_ACPI_SPB_SPI_RESOURCE   SpbSpi;
+    PEP_ACPI_SPB_UART_RESOURCE  SpbUart;
+    PEP_ACPI_EXTENDED_ADDRESS   ExtendedAddress;
+}PEP_ACPI_RESOURCE, * PPEP_ACPI_RESOURCE;
+
+typedef struct _PEP_PROCESSOR_IDLE_DEPENDENCY{
+    POHANDLE TargetProcessor;
+    UCHAR    ExpectedState;
+    BOOLEAN  AllowDeeperStates;
+    BOOLEAN  LooseDependency;
+}PEP_PROCESSOR_IDLE_DEPENDENCY, * PPEP_PROCESSOR_IDLE_DEPENDENCY;
+
+
+typedef struct _PEP_ACPI_REQUEST_CONVERT_TO_BIOS_RESOURCES{
+    LOUSTATUS           TranslationStatus;
+    PPEP_ACPI_RESOURCE  InputBuffer;
+    SIZE_T              InputBufferSize;
+    PVOID               OutputBuffer;
+    SIZE_T              OutputBufferSize;
+    ULONG               Flags;
+}PEP_ACPI_REQUEST_CONVERT_TO_BIOS_RESOURCES, * PPEP_ACPI_REQUEST_CONVERT_TO_BIOS_RESOURCES;
+
+typedef struct _PEP_PERF_STATE{
+    ULONGLONG           Value;
+    PVOID               Context;
+}PEP_PERF_STATE, * PPEP_PERF_STATE;
+
+typedef struct _PEP_ACPI_TRANSLATED_DEVICE_CONTROL_RESOURCES{
+    PEPHANDLE           DeviceHandle;
+    ULONG               RequestFlags;
+    LOUSTATUS           Status;
+    SIZE_T              TranslatedResourcesSize;
+    PCM_RESOURCE_LIST   TranslatedResources;
+}PEP_ACPI_TRANSLATED_DEVICE_CONTROL_RESOURCES, * PPEP_ACPI_TRANSLATED_DEVICE_CONTROL_RESOURCES;
+
+typedef struct _PEP_ACPI_UNREGISTER_DEVICE{
+   PEPHANDLE DeviceHandle;
+   ULONG     InputFlags;
+}PEP_ACPI_UNREGISTER_DEVICE, * PPEP_ACPI_UNREGISTER_DEVICE;
+
+typedef struct _PEP_COMPONENT_PERF_SET{
+    UNICODE_STRING              Name;
+    ULONGLONG                   Flags;
+    PEP_PERF_STATE_UNIT         Unit;
+    PEP_PERF_STATE_TYPE         Type;
+    union{
+        struct{
+            ULONG               Count;
+            PPEP_PERF_STATE     States;
+        }Discrete;
+        struct{
+            ULONGLONG           Minimum;
+            ULONGLONG           Maximum;
+        }                       Range;
+    };
+}PEP_COMPONENT_PERF_SET, * PPEP_COMPONENT_PERF_SET;
+
+typedef struct _PEP_COMPONENT_PERF_INFO{
+    ULONG                   SetCount;
+    PPEP_COMPONENT_PERF_SET PerfStateSets;
+} PEP_COMPONENT_PERF_INFO, * PPEP_COMPONENT_PERF_INFO;
+
+typedef struct _PEP_COMPONENT_PERF_STATE_REQUEST{
+    ULONG           Set;
+    union{
+        ULONG       StateIndex;
+        ULONGLONG   StateValue;
+    };
+}PEP_COMPONENT_PERF_STATE_REQUEST, * PPEP_COMPONENT_PERF_STATE_REQUEST;
+
+typedef struct _PEP_COMPONENT_PLATFORM_CONSTRAINTS{
+    PEPHANDLE DeviceHandle;
+    ULONG     Component;
+    PULONG    MinimumFStates;
+    ULONG     PlatformStateCount;
+}PEP_COMPONENT_PLATFORM_CONSTRAINTS, * PPEP_COMPONENT_PLATFORM_CONSTRAINTS;
+
+typedef struct _PEP_COMPONENT_V2{
+  GUID                        Id;
+  ULONGLONG                   Flags;
+  ULONG                       DeepestWakeableIdleState;
+  ULONG                       IdleStateCount;
+  PPO_FX_COMPONENT_IDLE_STATE IdleStates;
+}PEP_COMPONENT_V2, * PPEP_COMPONENT_V2;
+
+typedef struct _PEP_COORDINATED_DEPENDENCY_OPTION{
+    UCHAR       ExpectedStateIndex;
+    BOOLEAN     LooseDependency;
+    BOOLEAN     InitiatingState;
+    BOOLEAN     DependentState;
+}PEP_COORDINATED_DEPENDENCY_OPTION, * PPEP_COORDINATED_DEPENDENCY_OPTION;
+
+typedef struct _PEP_COORDINATED_IDLE_STATE {
+    ULONG   Latency;
+    ULONG   BreakEvenDuration;
+    ULONG   DependencyCount;
+    ULONG   MaximumDependencySize;
+} PEP_COORDINATED_IDLE_STATE, *PPEP_COORDINATED_IDLE_STATE;
+
+typedef struct _PEP_DEVICE_PLATFORM_CONSTRAINTS{
+    PEPHANDLE               DeviceHandle;
+    PDEVICE_POWER_STATE     MinimumDStates;
+    ULONG                   PlatformStateCount;
+} PEP_DEVICE_PLATFORM_CONSTRAINTS, *PPEP_DEVICE_PLATFORM_CONSTRAINTS;
+
+typedef struct _PEP_DEVICE_POWER_STATE{
+    PEPHANDLE               DeviceHandle;
+    DEVICE_POWER_STATE      PowerState;
+    BOOLEAN                 Complete;
+    BOOLEAN                 SystemTransition;
+}PEP_DEVICE_POWER_STATE, * PPEP_DEVICE_POWER_STATE;
+
+typedef struct _PEP_DEVICE_REGISTER_V2{
+    ULONGLONG             Flags;
+    ULONG                 ComponentCount;
+    PPEP_COMPONENT_V2*    Components;
+}PEP_DEVICE_REGISTER_V2, * PPEP_DEVICE_REGISTER_V2;
+
+typedef struct _PEP_DEVICE_STARTED{
+    PEPHANDLE   DeviceHandle;
+}PEP_DEVICE_STARTED, *PPEP_DEVICE_STARTED;
+
+typedef struct _PEP_INFORMATION{
+    USHORT                  Version;
+    USHORT                  Size;
+    PPEPCALLBACKNOTIFYDPM   AcceptDeviceNotification;
+    PPEPCALLBACKNOTIFYPPM   AcceptProcessorNotification;
+    PPEPCALLBACKNOTIFYACPI  AcceptAcpiNotification;
+} PEP_INFORMATION, *PPEP_INFORMATION;
+
+
+typedef struct _PEP_LOW_POWER_EPOCH{
+    BOOLEAN   LowPowerEpoch;
+}PEP_LOW_POWER_EPOCH, * PPEP_LOW_POWER_EPOCH;
+
+typedef struct _PEP_NOTIFY_COMPONENT_IDLE_STATE{
+    PEPHANDLE DeviceHandle;
+    ULONG     Component;
+    ULONG     IdleState;
+    BOOLEAN   DriverNotified;
+    BOOLEAN   Completed;
+} PEP_NOTIFY_COMPONENT_IDLE_STATE, * PPEP_NOTIFY_COMPONENT_IDLE_STATE;
+
+
+typedef struct _PEP_PLATFORM_IDLE_STATE{
+    POHANDLE                        InitiatingProcessor;
+    UCHAR                           InitiatingState;
+    ULONG                           Latency;
+    ULONG                           BreakEvenDuration;
+    ULONG                           DependencyArrayUsed;
+    ULONG                           DependencyArrayCount;
+    PEP_PROCESSOR_IDLE_DEPENDENCY*  DependencyArray;
+} PEP_PLATFORM_IDLE_STATE, *PPEP_PLATFORM_IDLE_STATE;
+
+typedef struct _PEP_POWER_CONTROL_COMPLETE {
+    PEPHANDLE   DeviceHandle;
+    LPCGUID     PowerControlCode;
+    PVOID       RequestContext;
+    SIZE_T      BytesReturned;
+    LOUSTATUS   Status;
+} PEP_POWER_CONTROL_COMPLETE, *PPEP_POWER_CONTROL_COMPLETE;
+
+typedef struct _PEP_POWER_CONTROL_REQUEST{
+    PEPHANDLE   DeviceHandle;
+    LPCGUID     PowerControlCode;
+    PVOID       InBuffer;
+    SIZE_T      InBufferSize;
+    PVOID       OutBuffer;
+    SIZE_T      OutBufferSize;
+    SIZE_T      BytesReturned;
+    LOUSTATUS   Status;
+} PEP_POWER_CONTROL_REQUEST, * PPEP_POWER_CONTROL_REQUEST;
+
+typedef struct _PEP_PPM_CONTEXT_QUERY_PARKING_PAGE{
+    PHYSICAL_ADDRESS PhysicalPageAddress;
+    PVOID            VirtualPageAddress;
+} PEP_PPM_CONTEXT_QUERY_PARKING_PAGE, * PPEP_PPM_CONTEXT_QUERY_PARKING_PAGE;
+
+typedef struct _PEP_PPM_CST_STATE{
+    UCHAR               Type;
+    USHORT              Latency;
+    ULONG               Power;
+    UCHAR               AddressSpaceId;
+    UCHAR               BitWidth;
+    UCHAR               BitOffset;
+    UCHAR               AccessSize;
+    PHYSICAL_ADDRESS    Address;
+}PEP_PPM_CST_STATE, * PPEP_PPM_CST_STATE;
+
+typedef struct _PEP_PPM_CST_STATES{
+    ULONG               Count;
+    PPEP_PPM_CST_STATE  IdleStates;
+} PEP_PPM_CST_STATES, * PPEP_PPM_CST_STATES;
+
+typedef struct _PEP_PPM_ENTER_SYSTEM_STATE{
+    SYSTEM_POWER_STATE  TargetState;
+}PEP_PPM_ENTER_SYSTEM_STATE, * PPEP_PPM_ENTER_SYSTEM_STATE;
+
+typedef struct _PEP_PPM_FEEDBACK_READ{
+  ULONG         CounterIndex;
+  union {
+    ULONG64     InstantaneousValue;
+    struct {
+      ULONG64   NominalCount;
+      ULONG64   ActualCount;
+    };
+  };
+}PEP_PPM_FEEDBACK_READ, * PPEP_PPM_FEEDBACK_READ;
+
+typedef struct _PEP_PPM_IDLE_CANCEL{
+   PEP_PROCESSOR_IDLE_CANCEL_CODE   CancelCode;
+}PEP_PPM_IDLE_CANCEL, * PPEP_PPM_IDLE_CANCEL;
+
+typedef struct _PEP_PPM_IDLE_COMPLETE{
+   ULONG ProcessorState;
+   ULONG PlatformState;
+}PEP_PPM_IDLE_COMPLETE, * PPEP_PPM_IDLE_COMPLETE;
+
+typedef struct _PEP_PPM_IDLE_COMPLETE_V2{
+    ULONG   ProcessorState;
+    ULONG   PlatformState;
+    ULONG   CoordinatedStateCount;
+    PULONG  CoordinatedStates;
+}PEP_PPM_IDLE_COMPLETE_V2, * PPEP_PPM_IDLE_COMPLETE_V2;
+
+typedef struct _PEP_PPM_IDLE_EXECUTE{
+    LOUSTATUS   Status;
+    ULONG       ProcessorState;
+    ULONG       PlatformState;
+}PEP_PPM_IDLE_EXECUTE, * PPEP_PPM_IDLE_EXECUTE;
+
+typedef struct _PEP_PPM_IDLE_EXECUTE_V2{
+    LOUSTATUS   Status;
+    ULONG       ProcessorState;
+    ULONG       PlatformState;
+    ULONG       CoordinatedStateCount;
+    PULONG      CoordinatedStates;
+} PEP_PPM_IDLE_EXECUTE_V2, *PPEP_PPM_IDLE_EXECUTE_V2;
+
+typedef struct _PEP_PROCESSOR_FEEDBACK_COUNTER{
+    struct {
+        ULONG   Affinitized     : 1;
+        ULONG   Type            : 2;
+        ULONG   Counter         : 4;
+        ULONG   DiscountIdle    : 1;
+        ULONG   Reserved        : 24;
+    };
+    ULONG       NominalRate;
+}PEP_PROCESSOR_FEEDBACK_COUNTER, * PPEP_PROCESSOR_FEEDBACK_COUNTER;
+
+typedef struct _PEP_PROCESSOR_PERF_STATE{
+    ULONG   Performance;
+    ULONG   Frequency;
+    ULONG   Reserved[4];
+}PEP_PROCESSOR_PERF_STATE, * PPEP_PROCESSOR_PERF_STATE;
 
 
 

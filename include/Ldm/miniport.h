@@ -1030,6 +1030,5 @@ typedef struct _AHCI_SRB_EXTENSION {
 
 #define STOR_MAP_NON_READ_WRITE_BUFFERS             (2)
 
-
 #endif
 #endif
