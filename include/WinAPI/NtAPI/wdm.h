@@ -1421,11 +1421,7 @@ typedef struct _CM_FLOPPY_DEVICE_DATA {
     UCHAR  DataTransferRate;
 } CM_FLOPPY_DEVICE_DATA, * PCM_FLOPPY_DEVICE_DATA;
 
-typedef struct _CM_FULL_RESOURCE_DESCRIPTOR {
-    INTERFACE_TYPE           InterfaceType;
-    ULONG                    BusNumber;
-    CM_PARTIAL_RESOURCE_LIST PartialResourceList;
-} CM_FULL_RESOURCE_DESCRIPTOR, * PCM_FULL_RESOURCE_DESCRIPTOR;
+
 
 typedef struct _CM_INT13_DRIVE_PARAMETER {
     USHORT DriveSelect;
@@ -1442,108 +1438,6 @@ typedef struct _CM_KEYBOARD_DEVICE_DATA {
     UCHAR  Subtype;
     USHORT KeyboardFlags;
 } CM_KEYBOARD_DEVICE_DATA, * PCM_KEYBOARD_DEVICE_DATA;
-
-typedef struct _CM_PARTIAL_RESOURCE_DESCRIPTOR {
-    UCHAR  Type;
-    UCHAR  ShareDisposition;
-    USHORT Flags;
-    union {
-        struct {
-            PHYSICAL_ADDRESS Start;
-            ULONG            Length;
-        } Generic;
-        struct {
-            PHYSICAL_ADDRESS Start;
-            ULONG            Length;
-        } Port;
-        struct {
-            USHORT    Level;
-            USHORT    Group;
-
-            //ULONG     Level;
-
-            ULONG     Vector;
-            KAFFINITY Affinity;
-        } Interrupt;
-        struct {
-            union {
-                struct {
-                    USHORT    Group;
-                    USHORT    Reserved;
-                    USHORT    MessageCount;
-                    ULONG     Vector;
-                    KAFFINITY Affinity;
-                } Raw;
-                struct {
-//#if ...
-                    USHORT    Level;
-                    USHORT    Group;
-//#else
-//                    ULONG     Level;
-//#endif
-                    ULONG     Vector;
-                    KAFFINITY Affinity;
-                } Translated;
-            } DUMMYUNIONNAME;
-        } MessageInterrupt;
-        struct {
-            PHYSICAL_ADDRESS Start;
-            ULONG            Length;
-        } Memory;
-        struct {
-            ULONG Channel;
-            ULONG Port;
-            ULONG Reserved1;
-        } Dma;
-        struct {
-            ULONG Channel;
-            ULONG RequestLine;
-            UCHAR TransferWidth;
-            UCHAR Reserved1;
-            UCHAR Reserved2;
-            UCHAR Reserved3;
-        } DmaV3;
-        struct {
-            ULONG Data[3];
-        } DevicePrivate;
-        struct {
-            ULONG Start;
-            ULONG Length;
-            ULONG Reserved;
-        } BusNumber;
-        struct {
-            ULONG DataSize;
-            ULONG Reserved1;
-            ULONG Reserved2;
-        } DeviceSpecificData;
-        struct {
-            PHYSICAL_ADDRESS Start;
-            ULONG            Length40;
-        } Memory40;
-        struct {
-            PHYSICAL_ADDRESS Start;
-            ULONG            Length48;
-        } Memory48;
-        struct {
-            PHYSICAL_ADDRESS Start;
-            ULONG            Length64;
-        } Memory64;
-        struct {
-            UCHAR Class;
-            UCHAR Type;
-            UCHAR Reserved1;
-            UCHAR Reserved2;
-            ULONG IdLowPart;
-            ULONG IdHighPart;
-        } Connection;
-    } u;
-} CM_PARTIAL_RESOURCE_DESCRIPTOR, * PCM_PARTIAL_RESOURCE_DESCRIPTOR;
-
-
-typedef struct _CM_RESOURCE_LIST {
-    ULONG                       Count;
-    CM_FULL_RESOURCE_DESCRIPTOR List[1];
-} CM_RESOURCE_LIST, * PCM_RESOURCE_LIST;
 
 
 typedef struct _CM_SCSI_DEVICE_DATA {

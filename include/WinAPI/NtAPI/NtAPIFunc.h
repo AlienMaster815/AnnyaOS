@@ -134,7 +134,6 @@ typedef void* PCLFS_RECORD_TYPE;
 typedef void* PCLFS_WRITE_ENTRY;
 typedef void* CLFS_CONTAINER_STATE;
 typedef void* CLFS_NODE_ID;
-typedef void* CM_PARTIAL_RESOURCE_LIST;
 typedef void* PEX_CALLBACK_FUNCTION;
 typedef void* PSET_D3COLD_SUPPORT;
 typedef void* PD3COLD_REQUEST_CORE_POWER_RAIL;

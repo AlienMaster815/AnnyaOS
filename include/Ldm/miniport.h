@@ -604,25 +604,157 @@ void WRITE_REGISTER_BUFFER_ULONGLONG(
 	}
 }
 
+typedef struct _SUPPORTED_RANGE{
+    PHYSICAL_ADDRESS 	SystemAddressSpace;
+    PHYSICAL_ADDRESS 	SystemLowAddress;
+    PHYSICAL_ADDRESS 	SystemHighAddress;
+    LONGLONG 			Base;
+    LONGLONG 			Limit;
+}SUPPORTED_RANGE, * PSUPPORTED_RANGE;
 
-struct _CM_RESOURCE_LIST;
+typedef struct _SUPPORTED_RANGES{
+    USHORT 				Version;
+    BOOLEAN 			Sorted;
+    UCHAR 				Reserved;
+    ULONG 				Count;
+    SUPPORTED_RANGE 	Ranges[1];
+}SUPPORTED_RANGES, * PSUPPORTED_RANGES;
+
+typedef struct _CM_PARTIAL_RESOURCE_DESCRIPTOR {
+  UCHAR  					Type;
+  UCHAR  					ShareDisposition;
+  USHORT 					Flags;
+  union {
+    struct{
+      PHYSICAL_ADDRESS 		Start;
+      ULONG            		Length;
+    } 						Generic;
+    struct{
+      PHYSICAL_ADDRESS 		Start;
+      ULONG            		Length;
+    } 						Port;
+    struct{
+#ifdef CM_PARTIAL_RESOURCE_DESCRIPTOR_INTERRUPT_GROUP
+      USHORT    			Level;
+      USHORT    			Group;
+#else
+      ULONG     			Level;
+#endif
+      ULONG     			Vector;
+      KAFFINITY 			Affinity;
+    } 						Interrupt;
+    struct{
+      union{
+        struct{
+          USHORT    		Group;
+          USHORT    		Reserved;
+          USHORT    		MessageCount;
+          ULONG     		Vector;
+          KAFFINITY 		Affinity;
+        } 					Raw;
+        struct{
+#ifdef CM_PARTIAL_RESOURCE_DESCRIPTOR_TRANSLATED_GROUP
+          USHORT    		Level;
+          USHORT    		Group;
+#else
+          ULONG     		Level;
+#endif
+          ULONG     		Vector;
+          KAFFINITY 		Affinity;
+        } 					Translated;
+      };
+    } 						MessageInterrupt;
+    struct {
+      PHYSICAL_ADDRESS 		Start;
+      ULONG            		Length;
+    } 						Memory;
+    struct {
+      ULONG 				Channel;
+      ULONG 				Port;
+      ULONG 				Reserved1;
+    } 						Dma;
+    struct {
+      ULONG 				Channel;
+      ULONG 				RequestLine;
+      UCHAR 				TransferWidth;
+      UCHAR 				Reserved1;
+      UCHAR 				Reserved2;
+      UCHAR 				Reserved3;
+    } 						DmaV3;
+    struct {
+      ULONG 				Data[3];
+    } 						DevicePrivate;
+    struct {
+      ULONG 				Start;
+      ULONG 				Length;
+      ULONG 				Reserved;
+    } 						BusNumber;
+    struct {
+      ULONG 				DataSize;
+      ULONG 				Reserved1;
+      ULONG 				Reserved2;
+    } 						DeviceSpecificData;
+    struct {
+      PHYSICAL_ADDRESS 		Start;
+      ULONG            		Length40;
+    } 						Memory40;
+    struct {
+      PHYSICAL_ADDRESS 		Start;
+      ULONG            		Length48;
+    } 						Memory48;
+    struct {
+      PHYSICAL_ADDRESS 		Start;
+      ULONG            		Length64;
+    } 						Memory64;
+    struct {
+      UCHAR 				Class;
+      UCHAR 				Type;
+      UCHAR 				Reserved1;
+      UCHAR 				Reserved2;
+      ULONG 				IdLowPart;
+      ULONG 				IdHighPart;
+    } 						Connection;
+  } 						u;
+}CM_PARTIAL_RESOURCE_DESCRIPTOR, * PCM_PARTIAL_RESOURCE_DESCRIPTOR;
+
+
+typedef struct _CM_PARTIAL_RESOURCE_LIST {
+    USHORT                         Version;
+    USHORT                         Revision;
+    ULONG                          Count;
+    CM_PARTIAL_RESOURCE_DESCRIPTOR PartialDescriptors[1];
+} CM_PARTIAL_RESOURCE_LIST, *PCM_PARTIAL_RESOURCE_LIST;
+
+
+typedef struct _CM_FULL_RESOURCE_DESCRIPTOR {
+    INTERFACE_TYPE           InterfaceType;
+    ULONG                    BusNumber;
+    CM_PARTIAL_RESOURCE_LIST PartialResourceList;
+}CM_FULL_RESOURCE_DESCRIPTOR, * PCM_FULL_RESOURCE_DESCRIPTOR;
+
+
+typedef struct _CM_RESOURCE_LIST{
+    ULONG                       Count;
+    CM_FULL_RESOURCE_DESCRIPTOR List[1];
+}CM_RESOURCE_LIST, * PCM_RESOURCE_LIST;
+
 
 typedef struct _BUS_HANDLER{
     ULONG                   Version;
-    //INTERFACE_TYPE          InterfaceType;
+    INTERFACE_TYPE          InterfaceType;
     BUS_DATA_TYPE           ConfigurationType;
     ULONG                   BusNumber;
     PDEVICE_OBJECT          DeviceObject;
     struct _BUS_HANDLER*    ParentHandler;
     PVOID                   BusData;
     ULONG                   DeviceControlExtentionSize;
-    //PSUPPORTED_RANGES       BusAddresses;
-    //ULONG                   Reserved[4];
-    //ULONG                   (*GetBusData)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, ULONG arg3, VOID* arg4, ULONG arg5, ULONG arg6);
-    //ULONG                   (*SetBusData)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, ULONG arg3, VOID* arg4, ULONG arg5, ULONG arg6);
-    //LONG                    (*AdjustResourceList)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, struct _IO_RESOURCE_REQUIREMENTS_LIST** arg3);
-    //LONG                    (*AssignSlotResources)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, struct _UNICODE_STRING* arg3, struct _UNICODE_STRING* arg4, struct _DRIVER_OBJECT* arg5, struct _DEVICE_OBJECT* arg6, ULONG arg7, struct _CM_RESOURCE_LIST** arg8);
-    //UCHAR                   (*TranslateBusAddress)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, union _LARGE_INTEGER arg3, ULONG* arg4, union _LARGE_INTEGER* arg5);
+    PSUPPORTED_RANGES       BusAddresses;
+    ULONG                   Reserved[4];
+    ULONG                   (*GetBusData)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, ULONG arg3, VOID* arg4, ULONG arg5, ULONG arg6);
+    ULONG                   (*SetBusData)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, ULONG arg3, VOID* arg4, ULONG arg5, ULONG arg6);
+    LONG                    (*AdjustResourceList)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, struct _IO_RESOURCE_REQUIREMENTS_LIST** arg3);
+    LONG                    (*AssignSlotResources)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, struct _UNICODE_STRING* arg3, struct _UNICODE_STRING* arg4, struct _DRIVER_OBJECT* arg5, struct _DEVICE_OBJECT* arg6, ULONG arg7, struct _CM_RESOURCE_LIST** arg8);
+    UCHAR                   (*TranslateBusAddress)(struct _BUS_HANDLER* arg1, struct _BUS_HANDLER* arg2, union _LARGE_INTEGER arg3, ULONG* arg4, union _LARGE_INTEGER* arg5);
     PVOID                   Spare1;
     PVOID                   Spare2;
     PVOID                   Spare3;
