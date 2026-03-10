@@ -10,6 +10,7 @@ extern "C" {
 #include <Firmware/Dmi.h>
 #include <Devices.h>
 #include <DRSD.h>
+#include <Ldm.h>
 
 typedef enum _HAL_QUERY_INFORMATION_CLASS{
     HalInstalledBusInformation = 0,
@@ -84,6 +85,60 @@ typedef LOUSTATUS HalQueryBusSlots(PBUS_HANDLER BusHandler, ULONG Index, PULONG 
 
 typedef HalQueryBusSlots* pHalQueryBusSlots;
 
+typedef LOUSTATUS HalIoReadPartitionTable(
+    PDEVICE_OBJECT              DeviceObject,
+    ULONG                       SectorSize,
+    BOOLEAN                     ReturnRecognizedPartitions,
+    PDRIVE_LAYOUT_INFORMATION*  PartitionBuffer
+);
+
+typedef HalIoReadPartitionTable* pHalIoReadPartitionTable;
+
+typedef LOUSTATUS HalIoSetPartitionInformation(
+    PDEVICE_OBJECT  DeviceObject, 
+    ULONG           SectorSize,
+    ULONG           PartitionNumber,
+    ULONG           PartitionType
+);
+
+typedef HalIoSetPartitionInformation* pHalIoSetPartitionInformation;
+
+typedef LOUSTATUS HalIoWritePartitionTable(
+    PDEVICE_OBJECT  DeviceObject,
+    ULONG           SectorSize,
+    ULONG           SectorsPerTrack,
+    ULONG           NumberOfHeads
+);
+
+typedef HalIoWritePartitionTable* pHalIoWritePartitionTable;
+
+typedef PBUS_HANDLER HalHandlerForBus(
+    INTERFACE_TYPE InterfaceType, 
+    ULONG BusNumber
+);
+
+typedef HalHandlerForBus* pHalHandlerForBus;
+
+typedef void HalReferenceBusHandler(PBUS_HANDLER BusHandler);
+
+typedef HalReferenceBusHandler* pHalReferenceBusHandler;
+
+typedef LOUSTATUS HalInitPnpDriver();
+
+typedef HalInitPnpDriver* pHalInitPnpDriver;
+
+typedef LOUSTATUS HalInitPowerManagement(PVOID Info);
+
+typedef HalInitPowerManagement* pHalInitPowerManagement;
+
+typedef PDMA_ADAPTER HalGetDmaAdapter(
+    PVOID                   Context,
+    PDEVICE_DESCRIPTION     DeviceDescription,
+    PULONG                  MapRegisterCount
+);
+
+typedef HalGetDmaAdapter* pHalGetDmaAdapter;
+
 
 
 #ifndef _USER_MODE_CODE_
@@ -111,6 +166,15 @@ KERNEL_EXPORT PDMI_SYSTEM_ID LouKeDmiGetFirstMatch(PDMI_SYSTEM_ID IdList);
 KERNEL_EXPORT UINT8 LouKeHalGetPciIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Irq);
 KERNEL_EXPORT LOUSTATUS LouKeHalQuerySystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer, PULONG ReturnedLength); //export as HalQuerySystemInformation as NTOSKRNL.EXE 
 KERNEL_EXPORT LOUSTATUS LouKeHalSetSystemInformation(HAL_QUERY_INFORMATION_CLASS InfoClass, ULONG BufferSize, PVOID Buffer);                          //export as HalSetSystemInformation as NTOSKRNL.EXE
+KERNEL_EXPORT LOUSTATUS LouKeHalQueryBusSlots(PBUS_HANDLER BusHandler, ULONG Index, PULONG Data, PULONG Remaining);
+KERNEL_EXPORT LOUSTATUS LouKeHalIoReadPartitionTable(PDEVICE_OBJECT DeviceObject, ULONG SectorSize, BOOLEAN ReturnRecognizedPartitions, PDRIVE_LAYOUT_INFORMATION* PartitionBuffer);
+KERNEL_EXPORT LOUSTATUS LouKeHalIoSetPartitionInformation(PDEVICE_OBJECT DeviceObject, ULONG SectorSize, ULONG PartitionNumber, ULONG PartitionType);
+KERNEL_EXPORT LOUSTATUS LouKeHalIoWritePartitionTable(PDEVICE_OBJECT DeviceObject, ULONG SectorSize, ULONG SectorsPerTrack, ULONG NumberOfHeads);
+KERNEL_EXPORT PBUS_HANDLER LouKeHalHandlerForBus(INTERFACE_TYPE InterfaceType,ULONG BusNumber);
+KERNEL_EXPORT void LouKeHalReferenceBusHandler(PBUS_HANDLER BusHandler);
+KERNEL_EXPORT LOUSTATUS LouKeHalInitPnpDriver();
+KERNEL_EXPORT LOUSTATUS LouKeHalInitPowerManagement(PVOID Info);
+KERNEL_EXPORT PDMA_ADAPTER LouKeHalGetDmaAdapter(PVOID Context, PDEVICE_DESCRIPTION DeviceDescription, PULONG MapRegisterCount);
 #ifndef _KERNEL_MODULE_
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);

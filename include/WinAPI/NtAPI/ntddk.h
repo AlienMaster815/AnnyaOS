@@ -223,14 +223,6 @@ void HalExamineMBR(
 );
 
 typedef void (*pHalExamineMBR)( struct _DEVICE_OBJECT*, ULONG,  ULONG,  PVOID*);
-typedef HalIoReadPartitionTable* pHalIoReadPartitionTable;
-typedef HalIoSetPartitionInformation* pHalIoSetPartitionInformation;
-typedef HalIoWritePartitionTable* pHalIoWritePartitionTable;
-typedef HalHandlerForBus* pHalHandlerForBus;
-typedef HalReferenceBusHandler* pHalReferenceBusHandler;
-typedef HalInitPnpDriver* pHalInitPnpDriver;
-typedef HalInitPowerManagement* pHalInitPowerManagement;
-typedef HalGetDmaAdapter* pHalGetDmaAdapter;
 typedef HalGetInterruptTranslator* pHalGetInterruptTranslator;
 typedef HalStartMirroring* pHalStartMirroring;
 typedef HalEndMirroring* pHalEndMirroring;

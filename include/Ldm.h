@@ -120,6 +120,12 @@ typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
 typedef VOID(*PINTERFACE_REFERENCE)(PVOID Context);
 typedef VOID(*PINTERFACE_DEREFERENCE)(PVOID Context);
 
+typedef ULONG NODE_REQUIREMENT;
+
+
+#include <Ldm/Drives.h>
+
+#include <Ldm/Dma.h>
 
 #include <Ldm/miniport.h>
 
@@ -128,6 +134,7 @@ typedef VOID(*PINTERFACE_DEREFERENCE)(PVOID Context);
 #include <Ldm/PepFramework.h>
 
 #include <Ldm/Lmilib.h>
+
 
 #ifdef __cplusplus
 }
