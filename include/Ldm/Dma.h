@@ -8,6 +8,10 @@ extern "C" {
 #include <Ldm.h>
 
 struct _DMA_ADAPTER;
+struct _IOMMU_DMA_DEVICE;
+struct _IOMMU_DMA_PASID_DEVICE;
+struct _IOMMU_DMA_DOMAIN;
+struct _IOMMU_DMA_DEVICE_INFORMATION;
 
 typedef ULONGLONG IOMMU_DMA_LOGICAL_ADDRESS;
 
@@ -56,12 +60,98 @@ typedef void GET_COMMON_BUFFER_FROM_VECTOR_BY_INDEX(
 );
 typedef GET_COMMON_BUFFER_FROM_VECTOR_BY_INDEX* PGET_COMMON_BUFFER_FROM_VECTOR_BY_INDEX;
 
-typedef void* PFREE_COMMON_BUFFER_FROM_VECTOR;
-typedef void* PFREE_COMMON_BUFFER_VECTOR;
-typedef void* PFREE_COMMON_BUFFER;
-typedef void* PFLUSH_ADAPTER_BUFFERS_EX;
-typedef void* PFLUSH_ADAPTER_BUFFERS;
-typedef void* PALLOCATE_ADAPTER_CHANNEL_EX;
+typedef void FREE_COMMON_BUFFER_FROM_VECTOR(
+    struct _DMA_ADAPTER*        DmaAdapter,
+    PDMA_COMMON_BUFFER_VECTOR   Vector,
+    ULONG                       Index
+);
+typedef FREE_COMMON_BUFFER_FROM_VECTOR* PFREE_COMMON_BUFFER_FROM_VECTOR;
+
+typedef void FREE_COMMON_BUFFER_VECTOR(
+    struct _DMA_ADAPTER*        DmaAdapter,
+    PDMA_COMMON_BUFFER_VECTOR   Vector
+);
+typedef FREE_COMMON_BUFFER_VECTOR* PFREE_COMMON_BUFFER_VECTOR;
+
+typedef void FREE_COMMON_BUFFER(
+    struct _DMA_ADAPTER*        DmaAdapter,
+    ULONG                       Length,
+    PVOID                       LogicalAddress,
+    PVOID                       VirtualAddress,
+    BOOLEAN                     CacheEnabled
+);
+typedef FREE_COMMON_BUFFER* PFREE_COMMON_BUFFER;
+
+typedef LOUSTATUS FLUSH_ADAPTER_BUFFERS_EX(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PMDL                    Mdl,
+    PVOID                   Offset,
+    ULONG                   Length,
+    BOOLEAN                 WriteToDevice
+);
+typedef FLUSH_ADAPTER_BUFFERS_EX* PFLUSH_ADAPTER_BUFFERS_EX;
+
+typedef BOOLEAN FLUSH_ADAPTER_BUFFERS(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PMDL                    Mdl,
+    PVOID                   MapRegisterBase,
+    PVOID                   CurrentVa,
+    ULONG                   Length,
+    BOOLEAN                 WriteToDevice
+);
+typedef FLUSH_ADAPTER_BUFFERS* PFLUSH_ADAPTER_BUFFERS;
+
+typedef LOUSTATUS ALLOCATE_ADAPTER_CHANNEL_EX(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    PVOID                   DmaTransferContext,
+    ULONG                   MapRegisterCount,
+    ULONG                   Flags,
+    PDRIVER_CONTROL         DriverControl,
+    PVOID                   Contex,
+    PVOID                   MapRegisterBase
+);
+typedef ALLOCATE_ADAPTER_CHANNEL_EX* PALLOCATE_ADAPTER_CHANNEL_EX;
+
+typedef 
+LOUSTATUS IOMMU_PASID_DEVICE_CREATE(
+    struct _IOMMU_DMA_DEVICE*           DmaDevice,
+    struct _IOMMU_DMA_PASID_DEVICE*     PasidDeviceOut,
+    PULONG                              AsidOut
+);
+typedef IOMMU_PASID_DEVICE_CREATE* PIOMMU_PASID_DEVICE_CREATE;
+
+typedef 
+LOUSTATUS IOMMU_PASID_DEVICE_DELETE(
+    struct _IOMMU_DMA_PASID_DEVICE* PasidDeviceOut
+);
+typedef IOMMU_PASID_DEVICE_DELETE* PIOMMU_PASID_DEVICE_DELETE;
+
+typedef 
+LOUSTATUS IOMMU_DOMAIN_ATTACH_PASID_DEVICE(
+    struct _IOMMU_DMA_DOMAIN*       Domain,
+    struct _IOMMU_DMA_PASID_DEVICE* PasidDevice
+);
+typedef IOMMU_DOMAIN_ATTACH_PASID_DEVICE* PIOMMU_DOMAIN_ATTACH_PASID_DEVICE;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_DETACH_PASID_DEVICE(
+    struct _IOMMU_DMA_PASID_DEVICE  PasidDevice
+);
+typedef IOMMU_DOMAIN_DETACH_PASID_DEVICE* PIOMMU_DOMAIN_DETACH_PASID_DEVICE;
+
+typedef 
+LOUSTATUS
+IOMMU_DEVICE_QUERY_INFORMATION(
+    struct _IOMMU_DMA_DEVICE*               DmaDevice,
+    ULONG                                   Size,
+    PULONG                                  BytesWriten,
+    struct _IOMMU_DMA_DEVICE_INFORMATION*   Buffer
+);
+typedef IOMMU_DEVICE_QUERY_INFORMATION* PIOMMU_DEVICE_QUERY_INFORMATION;
+
+
 typedef void* PALLOCATE_ADAPTER_CHANNEL;
 typedef void* PFREE_MAP_REGISTERS;
 typedef void* PFREE_ADAPTER_CHANNEL;
@@ -122,7 +212,6 @@ typedef void* PIOMMU_FREE_RESERVED_LOGICAL_ADDRESS_RANGE;
 typedef void* PIOMMU_MAP_RESERVED_LOGICAL_RANGE;
 typedef void* PIOMMU_UNMAP_RESERVED_LOGICAL_RANGE;
 typedef void* PIOMMU_DEVICE_CREATE;
-typedef void* DMA_IOMMU_INTERFACE_V3;
 
 
 typedef struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN{
@@ -185,44 +274,44 @@ typedef struct _DMA_ADAPTER{
     PDMA_OPERATIONS DmaOperations;
 }DMA_ADAPTER, *PADAPTER_OBJECT, * PDMA_ADAPTER;
 
-typedef struct _DEVICE_DESCRIPTION {
-  ULONG            Version;
-  BOOLEAN          Master;
-  BOOLEAN          ScatterGather;
-  BOOLEAN          DemandMode;
-  BOOLEAN          AutoInitialize;
-  BOOLEAN          Dma32BitAddresses;
-  BOOLEAN          IgnoreCount;
-  BOOLEAN          Reserved1;
-  BOOLEAN          Dma64BitAddresses;
-  ULONG            BusNumber;
-  ULONG            DmaChannel;
-  INTERFACE_TYPE   InterfaceType;
-  DMA_WIDTH        DmaWidth;
-  DMA_SPEED        DmaSpeed;
-  ULONG            MaximumLength;
-  ULONG            DmaPort;
-  ULONG            DmaAddressWidth;
-  ULONG            DmaControllerInstance;
-  ULONG            DmaRequestLine;
-  PHYSICAL_ADDRESS DeviceAddress;
-} DEVICE_DESCRIPTION, *PDEVICE_DESCRIPTION;
+typedef struct _DEVICE_DESCRIPTION{
+    ULONG            Version;
+    BOOLEAN          Master;
+    BOOLEAN          ScatterGather;
+    BOOLEAN          DemandMode;
+    BOOLEAN          AutoInitialize;
+    BOOLEAN          Dma32BitAddresses;
+    BOOLEAN          IgnoreCount;
+    BOOLEAN          Reserved1;
+    BOOLEAN          Dma64BitAddresses;
+    ULONG            BusNumber;
+    ULONG            DmaChannel;
+    INTERFACE_TYPE   InterfaceType;
+    DMA_WIDTH        DmaWidth;
+    DMA_SPEED        DmaSpeed;
+    ULONG            MaximumLength;
+    ULONG            DmaPort;
+    ULONG            DmaAddressWidth;
+    ULONG            DmaControllerInstance;
+    ULONG            DmaRequestLine;
+    PHYSICAL_ADDRESS DeviceAddress;
+}DEVICE_DESCRIPTION, * PDEVICE_DESCRIPTION;
 
-typedef struct _DMA_ADAPTER_INFO_CRASHDUMP {
-  DEVICE_DESCRIPTION DeviceDescription;
-  SIZE_T             DeviceIdSize;
-  PVOID              DeviceId;
-} DMA_ADAPTER_INFO_CRASHDUMP, *PDMA_ADAPTER_INFO_CRASHDUMP;
+typedef struct _DMA_ADAPTER_INFO_CRASHDUMP{
+    DEVICE_DESCRIPTION DeviceDescription;
+    SIZE_T             DeviceIdSize;
+    PVOID              DeviceId;
+}DMA_ADAPTER_INFO_CRASHDUMP, * PDMA_ADAPTER_INFO_CRASHDUMP;
 
-typedef struct _DMA_ADAPTER_INFO_V1 {
-  ULONG ReadDmaCounterAvailable;
-  ULONG ScatterGatherLimit;
-  ULONG DmaAddressWidth;
-  ULONG Flags;
-  ULONG MinimumTransferUnit;
-} DMA_ADAPTER_INFO_V1, *PDMA_ADAPTER_INFO_V1;
+typedef struct _DMA_ADAPTER_INFO_V1{
+    ULONG ReadDmaCounterAvailable;
+    ULONG ScatterGatherLimit;
+    ULONG DmaAddressWidth;
+    ULONG Flags;
+    ULONG MinimumTransferUnit;
+}DMA_ADAPTER_INFO_V1, * PDMA_ADAPTER_INFO_V1;
 
-typedef struct _DMA_IOMMU_INTERFACE_V1 {
+typedef struct _DMA_IOMMU_INTERFACE_V1{
     PIOMMU_DOMAIN_CREATE              CreateDomain;
     PIOMMU_DOMAIN_DELETE              DeleteDomain;
     PIOMMU_DOMAIN_ATTACH_DEVICE       AttachDevice;
@@ -236,7 +325,7 @@ typedef struct _DMA_IOMMU_INTERFACE_V1 {
     PIOMMU_UNMAP_IDENTITY_RANGE       UnmapIdentityRange;
     PIOMMU_SET_DEVICE_FAULT_REPORTING SetDeviceFaultReporting;
     PIOMMU_DOMAIN_CONFIGURE           ConfigureDomain;
-} DMA_IOMMU_INTERFACE_V1, * PDMA_IOMMU_INTERFACE_V1;
+}DMA_IOMMU_INTERFACE_V1, * PDMA_IOMMU_INTERFACE_V1;
 
 typedef enum _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE{
     CommonBufferConfigTypeLogicalAddressLimits = 0,
@@ -277,6 +366,35 @@ typedef struct _DMA_IOMMU_INTERFACE_V2 {
     PIOMMU_DEVICE_DELETE                              DeleteDevice;
 } DMA_IOMMU_INTERFACE_V2, * PDMA_IOMMU_INTERFACE_V2;
 
+typedef struct _DMA_IOMMU_INTERFACE_V3{
+    PIOMMU_DOMAIN_CREATE_EX                           CreateDomainEx;
+    PIOMMU_DOMAIN_DELETE                              DeleteDomain;
+    PIOMMU_DOMAIN_ATTACH_DEVICE_EX                    AttachDeviceEx;
+    PIOMMU_DOMAIN_DETACH_DEVICE_EX                    DetachDeviceEx;
+    PIOMMU_FLUSH_DOMAIN                               FlushDomain;
+    PIOMMU_FLUSH_DOMAIN_VA_LIST                       FlushDomainByVaList;
+    PIOMMU_QUERY_INPUT_MAPPINGS                       QueryInputMappings;
+    PIOMMU_MAP_LOGICAL_RANGE_EX                       MapLogicalRangeEx;
+    PIOMMU_UNMAP_LOGICAL_RANGE                        UnmapLogicalRange;
+    PIOMMU_MAP_IDENTITY_RANGE_EX                      MapIdentityRangeEx;
+    PIOMMU_UNMAP_IDENTITY_RANGE_EX                    UnmapIdentityRangeEx;
+    PIOMMU_SET_DEVICE_FAULT_REPORTING_EX              SetDeviceFaultReportingEx;
+    PIOMMU_DOMAIN_CONFIGURE                           ConfigureDomain;
+    PIOMMU_DEVICE_QUERY_DOMAIN_TYPES                  QueryAvailableDomainTypes;
+    PIOMMU_REGISTER_INTERFACE_STATE_CHANGE_CALLBACK   RegisterInterfaceStateChangeCallback;
+    PIOMMU_UNREGISTER_INTERFACE_STATE_CHANGE_CALLBACK UnregisterInterfaceStateChangeCallback;
+    PIOMMU_RESERVE_LOGICAL_ADDRESS_RANGE              ReserveLogicalAddressRange;
+    PIOMMU_FREE_RESERVED_LOGICAL_ADDRESS_RANGE        FreeReservedLogicalAddressRange;
+    PIOMMU_MAP_RESERVED_LOGICAL_RANGE                 MapReservedLogicalRange;
+    PIOMMU_UNMAP_RESERVED_LOGICAL_RANGE               UnmapReservedLogicalRange;
+    PIOMMU_DEVICE_CREATE                              CreateDevice;
+    PIOMMU_DEVICE_DELETE                              DeleteDevice;
+    PIOMMU_PASID_DEVICE_CREATE                        CreatePasidDevice;
+    PIOMMU_PASID_DEVICE_DELETE                        DeletePasidDevice;
+    PIOMMU_DOMAIN_ATTACH_PASID_DEVICE                 AttachPasidDevice;
+    PIOMMU_DOMAIN_DETACH_PASID_DEVICE                 DetachPasidDevice;
+    PIOMMU_DEVICE_QUERY_INFORMATION                   QueryDeviceInfo;
+}DMA_IOMMU_INTERFACE_V3, * PDMA_IOMMU_INTERFACE_V3;
 
 typedef struct _DMA_ADAPTER_INFO {
     ULONG Version;
@@ -285,9 +403,6 @@ typedef struct _DMA_ADAPTER_INFO {
         DMA_ADAPTER_INFO_CRASHDUMP Crashdump;
     };
 } DMA_ADAPTER_INFO, * PDMA_ADAPTER_INFO;
-
-
-
 
 typedef struct _DMA_IOMMU_INTERFACE{
     ULONG                             Version;
@@ -382,13 +497,42 @@ typedef struct _IOMMU_DMA_RESERVED_REGION{
     BOOLEAN                             ShouldMap;
 } IOMMU_DMA_RESERVED_REGION, *PIOMMU_DMA_RESERVED_REGION;
 
+typedef struct _IOMMU_DMA_DEVICE{
+    PVOID Todo;
+}IOMMU_DMA_DEVICE, * PIOMMU_DMA_DEVICE;
+
+typedef struct _IOMMU_DMA_PASID_DEVICE{
+    PVOID Todo;
+}IOMMU_DMA_PASID_DEVICE, * PIOMMU_DMA_PASID_DEVICE;
+
+typedef struct _IOMMU_DMA_DOMAIN{
+    PVOID Todo;
+}IOMMU_DMA_DOMAIN, * PIOMMU_DMA_DOMAIN;
+
+typedef struct _IOMMU_DMA_DEVICE_INFORMATION{
+    BOOLEAN DefaultPasidEnabled;
+    BOOLEAN PasidTaggedDmaEnabled;
+    BOOLEAN PasidFaultsSuppressed;
+}IOMMU_DMA_DEVICE_INFORMATION, * PIOMMU_DMA_DEVICE_INFORMATION;
+
+
+
 #ifndef _USER_MODE_CODE_
 KERNEL_EXPORT void LouKePutDmaAdapter(PDMA_ADAPTER DmaAdapter);
 KERNEL_EXPORT LOUSTATUS LouKeAllocateCommonBufferVector(PDMA_ADAPTER DmaAdapter, PHYSICAL_ADDRESS LowAdderss, PHYSICAL_ADDRESS HighAddress, MEMORY_CACHING_TYPE CachingType, NODE_REQUIREMENT IdealNode, ULONG Flags, ULONG ElementCount, ULONGLONG ElementSize, PDMA_COMMON_BUFFER_VECTOR VectorOut);
 KERNEL_EXPORT PVOID LouKeAllocateCommonBuffer(PDMA_ADAPTER DmaAdapter, ULONG Length, PPHYSICAL_ADDRESS LogicalAddress, BOOLEAN CacheEnabled);
 KERNEL_EXPORT void LouKeGetCommonBufferFromVectorByIndex(PDMA_COMMON_BUFFER_VECTOR Vector, ULONG Index, PVOID* VAddress, PPHYSICAL_ADDRESS LogicalAddress);
-
-
+KERNEL_EXPORT void LouKeFreeCommonBufferFromVector(PDMA_ADAPTER DmaAdapter, PDMA_COMMON_BUFFER_VECTOR Vector, ULONG Index);
+KERNEL_EXPORT void LouKeFreeCommonBufferVector(PDMA_ADAPTER DmaAdapter, PDMA_COMMON_BUFFER_VECTOR Vector);
+KERNEL_EXPORT void LouKeFreeCommonBuffer(PDMA_ADAPTER DmaAdapter, ULONG Length, PHYSICAL_ADDRESS LogicalAddress, PVOID VirtualAddress, BOOLEAN CacheEnabled);
+KERNEL_EXPORT LOUSTATUS LouKeFlushAdapterBuffersEx(PDMA_ADAPTER DmaAdapter, PMDL Mdl, PVOID Offset, ULONG Length, BOOLEAN WriteToDevice);
+KERNEL_EXPORT BOOLEAN LouKeFlushAdapterBuffers(PDMA_ADAPTER DmaAdapter, PMDL Mdl, PVOID MapRegisterBase, PVOID CurrentVa, ULONG Length, BOOLEAN WriteToDevice);
+KERNEL_EXPORT LOUSTATUS LouKeAllocateAdapterChannelEx(PDMA_ADAPTER DmaAdapter, PDEVICE_OBJECT DeviceObject, PVOID DmaTransferContext, ULONG MapRegisterCount, ULONG Flags, PDRIVER_CONTROL DriverControl, PVOID Contex, PVOID MapRegisterBase);
+KERNEL_EXPORT LOUSTATUS LouKeIommuPasidDeviceCreate(PIOMMU_DMA_DEVICE DmaDevice, PIOMMU_DMA_PASID_DEVICE PasidDeviceOut, PULONG AsidOut);
+KERNEL_EXPORT LOUSTATUS LouKeIommuPasidDeviceDelete(PIOMMU_DMA_PASID_DEVICE PasidDeviceOut);
+KERNEL_EXPORT LOUSTATUS LouKeIommuDomainAttatchPasidDevice(PIOMMU_DMA_DOMAIN Domain, PIOMMU_DMA_PASID_DEVICE PasidDevice);
+KERNEL_EXPORT LOUSTATUS LouKeIommuDomainDetatchPasidDevice(PIOMMU_DMA_PASID_DEVICE PasidDevice);
+KERNEL_EXPORT LOUSTATUS LouKeIommuDeviceQueryInformation(PIOMMU_DMA_DEVICE DmaDevice, ULONG Size, PULONG BytesWriten, PIOMMU_DMA_DEVICE_INFORMATION Buffer);
 
 #endif
 #ifdef __cplusplus
