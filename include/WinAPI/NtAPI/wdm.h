@@ -333,11 +333,7 @@ typedef enum POOL_EXTENDED_PARAMETER_TYPE {
 
 
 
-typedef struct _SCATTER_GATHER_LIST {
-    ULONG                  NumberOfElements;
-    ULONG_PTR              Reserved;
-    SCATTER_GATHER_ELEMENT Elements[];
-} SCATTER_GATHER_LIST, * PSCATTER_GATHER_LIST;
+
 
 typedef struct _SDEV_IDENTIFIER_INTERFACE {
     INTERFACE            InterfaceHeader;

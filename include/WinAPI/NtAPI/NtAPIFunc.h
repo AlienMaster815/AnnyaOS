@@ -169,7 +169,6 @@ typedef void* PIO_TIMER_ROUTINE;
 typedef void* _IORING_OBJECT;
 typedef void* POOL_EXTENDED_PARAMS_SECURE_POOL;
 typedef void* POOL_NODE_REQUIREMENT;
-typedef void* SCATTER_GATHER_ELEMENT;
 typedef void* PGET_SDEV_IDENTIFIER;
 typedef void* PREENUMERATE_SELF;
 typedef void* POBJECT_NAME_INFORMATION;

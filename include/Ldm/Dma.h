@@ -12,8 +12,65 @@ struct _IOMMU_DMA_DEVICE;
 struct _IOMMU_DMA_PASID_DEVICE;
 struct _IOMMU_DMA_DOMAIN;
 struct _IOMMU_DMA_DEVICE_INFORMATION;
+struct _DMA_TRANSFER_INFO;
+struct _DMA_ADAPTER_INFO;
+struct _DOMAIN_CONFIGURATION;
 
 typedef ULONGLONG IOMMU_DMA_LOGICAL_ADDRESS;
+
+typedef enum _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE{
+    CommonBufferConfigTypeLogicalAddressLimits = 0,
+    CommonBufferConfigTypeSubSection,
+    CommonBufferConfigTypeHardwareAccessPermissions,
+    CommonBufferConfigTypeMax
+}DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE, * PDMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE;
+
+typedef enum _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_ACCESS_TYPE{
+    CommonBufferHardwareAccessReadOnly = 0,
+    CommonBufferHardwareAccessWriteOnly,
+    CommonBufferHardwareAccessReadWrite,
+    CommonBufferHardwareAccessMax
+}DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_ACCESS_TYPE, * PDMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_ACCESS_TYPE;
+
+typedef struct _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION{
+    DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE               ConfigType;
+    union {
+        struct {
+            PHYSICAL_ADDRESS                                    MinimumAddress;
+            PHYSICAL_ADDRESS                                    MaximumAddress;
+        }                                                       LogicalAddressLimits;
+        struct {
+            ULONGLONG                                           Offset;
+            ULONG                                               Length;
+        }                                                       SubSection;
+        DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_ACCESS_TYPE    HardwareAccessType;
+        ULONGLONG                                               Reserved[4];
+    };
+}DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION, * PDMA_COMMON_BUFFER_EXTENDED_CONFIGURATION;
+
+typedef enum _DMA_WIDTH{
+    Width8Bits = 0,
+    Width16Bits,
+    Width32Bits,
+    Width64Bits,
+    MaximumDmaWidth,
+}DMA_WIDTH, * PDMA_WIDTH;
+
+typedef enum _DMA_SPEED{
+    Compatible = 0,
+    TypeA,
+    TypeB,
+    TypeC,
+    TypeF,
+    MaximumDmaSpeed,
+}DMA_SPEED, * PDMA_SPEED;
+
+typedef enum{
+    DmaComplete = 0,
+    DmaAborted,
+    DmaError,
+    DmaCancelled
+}DMA_COMPLETION_STATUS;
 
 typedef void PUT_DMA_ADAPTER(
     struct _DMA_ADAPTER* DmaAdapter
@@ -30,6 +87,21 @@ typedef struct _DMA_COMMON_BUFFER_VECTOR{
     ULONG                   ElementCount;
     ULONGLONG               ElementSize;
 }DMA_COMMON_BUFFER_VECTOR, * PDMA_COMMON_BUFFER_VECTOR;
+
+typedef struct _SCATTER_GATHER_ELEMENT {
+  PHYSICAL_ADDRESS Address;
+  ULONG            Length;
+  ULONG_PTR        Reserved;
+} SCATTER_GATHER_ELEMENT, *PSCATTER_GATHER_ELEMENT;
+
+typedef struct _SCATTER_GATHER_LIST {
+    ULONG                  NumberOfElements;
+    ULONG_PTR              Reserved;
+    SCATTER_GATHER_ELEMENT Elements[];
+} SCATTER_GATHER_LIST, * PSCATTER_GATHER_LIST;
+
+
+
 
 typedef LOUSTATUS ALLOCATE_COMMON_BUFFER_VECTOR(
     struct _DMA_ADAPTER*                DmaAdapter,
@@ -151,37 +223,347 @@ IOMMU_DEVICE_QUERY_INFORMATION(
 );
 typedef IOMMU_DEVICE_QUERY_INFORMATION* PIOMMU_DEVICE_QUERY_INFORMATION;
 
+//new stuff starts here
+typedef 
+LOUSTATUS 
+ALLOCATE_ADAPTER_CHANNEL(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    ULONG                   MapRegisterCount,
+    PDRIVER_CONTROL         DriverControl,
+    PVOID                   Context
+);
+typedef ALLOCATE_ADAPTER_CHANNEL* PALLOCATE_ADAPTER_CHANNEL;
 
-typedef void* PALLOCATE_ADAPTER_CHANNEL;
-typedef void* PFREE_MAP_REGISTERS;
-typedef void* PFREE_ADAPTER_CHANNEL;
-typedef void* PMAP_TRANSFER_EX;
-typedef void* PMAP_TRANSFER;
-typedef void* PGET_DMA_ALIGNMENT;
-typedef void* PCREATE_COMMON_BUFFER_FROM_MDL;
-typedef void* PALLOCATE_COMMON_BUFFER_WITH_BOUNDS;
-typedef void* PGET_DMA_DOMAIN;
-typedef void* PLEAVE_DMA_DOMAIN;
-typedef void* PJOIN_DMA_DOMAIN;
-typedef void* PFLUSH_DMA_BUFFER;
-typedef void* PALLOCATE_DOMAIN_COMMON_BUFFER;
-typedef void* PCANCEL_MAPPED_TRANSFER;
-typedef void* PFREE_ADAPTER_OBJECT;
-typedef void* PBUILD_SCATTER_GATHER_LIST_EX;
-typedef void* PGET_SCATTER_GATHER_LIST_EX;
-typedef void* PCANCEL_ADAPTER_CHANNEL;
-typedef void* PCONFIGURE_ADAPTER_CHANNEL;
-typedef void* PALLOCATE_COMMON_BUFFER_EX;
-typedef void* PINITIALIZE_DMA_TRANSFER_CONTEXT;
-typedef void* PGET_DMA_TRANSFER_INFO;
-typedef void* PGET_DMA_ADAPTER_INFO;
-typedef void* PBUILD_MDL_FROM_SCATTER_GATHER_LIST;
-typedef void* PBUILD_SCATTER_GATHER_LIST;
-typedef void* PCALCULATE_SCATTER_GATHER_LIST_SIZE;
-typedef void* PPUT_SCATTER_GATHER_LIST;
-typedef void* PGET_SCATTER_GATHER_LIST;
-typedef void* PREAD_DMA_COUNTER;
-typedef void* PIOMMU_DOMAIN_CONFIGURE;
+typedef 
+void 
+FREE_MAP_REGISTERS(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PVOID                   MapRegisterBase,
+    ULONG                   MapRegisterCount
+);
+typedef FREE_MAP_REGISTERS* PFREE_MAP_REGISTERS;
+
+typedef 
+void 
+FREE_ADAPTER_CHANNEL(
+    struct _DMA_ADAPTER DmaAdapter
+);
+typedef FREE_ADAPTER_CHANNEL* PFREE_ADAPTER_CHANNEL;
+
+typedef 
+void 
+DMA_COMPLETION_ROUTINE(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    PVOID                   CompletionContext,
+    DMA_COMPLETION_STATUS   Status
+);
+typedef DMA_COMPLETION_ROUTINE* PDMA_COMPLETION_ROUTINE;
+
+typedef 
+LOUSTATUS 
+MAP_TRANSFER_EX(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PMDL                    Mdl,
+    PVOID                   MapRegisterBase,
+    ULONGLONG               Offset,
+    ULONG                   DeviceOffset,
+    PULONG                  Length,
+    BOOLEAN                 WriteToDevice,
+    PSCATTER_GATHER_LIST    Sgb,
+    ULONG                   SgbLength,
+    PDMA_COMPLETION_ROUTINE DmaCompletionRoutine,
+    PVOID                   CompletionContext
+);
+typedef MAP_TRANSFER_EX* PMAP_TRANSFER_EX;
+
+typedef 
+PHYSICAL_ADDRESS
+MAP_TRANSFER(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PMDL                    Pmdl,
+    PVOID                   MapRegisterBase,
+    PVOID                   CurrentVa,
+    PULONG                  Length,
+    BOOLEAN                 WriteToDevice
+);
+typedef MAP_TRANSFER* PMAP_TRANSFER;
+
+typedef 
+ULONG
+GET_DMA_ALIGNMENT(
+    struct _DMA_ADAPTER DmaAdapter
+);
+typedef GET_DMA_ALIGNMENT* PGET_DMA_ALIGNMENT;
+
+typedef 
+LOUSTATUS
+CREATE_COMMON_BUFFER_FROM_MDL(
+    struct _DMA_ADAPTER*                            DmaAdapter,
+    PMDL                                            Mdl,
+    PDMA_COMMON_BUFFER_EXTENDED_CONFIGURATION       ExtendedConfigs,
+    ULONG                                           ExtendedConfigsCount,
+    PPHYSICAL_ADDRESS                               LogicalAddress
+);
+typedef CREATE_COMMON_BUFFER_FROM_MDL* PCREATE_COMMON_BUFFER_FROM_MDL;
+
+typedef 
+PVOID
+ALLOCATE_COMMON_BUFFER_WITH_BOUNDS(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PPHYSICAL_ADDRESS       MinimumAddress,
+    PPHYSICAL_ADDRESS       MaximumAddress,
+    ULONG                   Length,
+    ULONG                   Flags,
+    PMEMORY_CACHING_TYPE    CacheType,
+    NODE_REQUIREMENT        PerferredNode,
+    PPHYSICAL_ADDRESS       LogicalAddress
+);
+typedef ALLOCATE_COMMON_BUFFER_WITH_BOUNDS* PALLOCATE_COMMON_BUFFER_WITH_BOUNDS;
+
+typedef 
+HANDLE 
+GET_DMA_DOMAIN(
+    struct _DMA_ADAPTER* DmaAdapter
+);
+typedef GET_DMA_DOMAIN* PGET_DMA_DOMAIN;
+
+typedef 
+LOUSTATUS 
+LEAVE_DMA_DOMAIN(
+    struct _DMA_ADAPTER* DmaAdapter
+);
+typedef LEAVE_DMA_DOMAIN* PLEAVE_DMA_DOMAIN;
+
+typedef 
+LOUSTATUS 
+JOIN_DMA_DOMAIN(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    HANDLE                  DomainHandle
+);
+typedef JOIN_DMA_DOMAIN* PJOIN_DMA_DOMAIN;
+
+typedef 
+LOUSTATUS 
+FLUSH_DMA_BUFFER(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PMDL                    Mdl,
+    BOOLEAN                 ReadOperation
+);
+typedef FLUSH_DMA_BUFFER* PFLUSH_DMA_BUFFER;
+
+typedef 
+LOUSTATUS 
+ALLOCATE_DOMAIN_COMMON_BUFFER(
+    struct _DMA_ADAPTER     DmaAdapter,
+    HANDLE                  DomainHandle,
+    PPHYSICAL_ADDRESS       MaximumAddress,
+    ULONG                   Length,
+    ULONG                   Flags,
+    PMEMORY_CACHING_TYPE    CacheType,
+    NODE_REQUIREMENT        PreferredNode,
+    PPHYSICAL_ADDRESS       LogicalAddress,
+    PVOID*                  VirtualAddress
+);
+typedef ALLOCATE_DOMAIN_COMMON_BUFFER* PALLOCATE_DOMAIN_COMMON_BUFFER;
+
+typedef 
+LOUSTATUS 
+CANCEL_MAPPED_TRANSFER(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PVOID                   DmaTransferContext
+);
+typedef CANCEL_MAPPED_TRANSFER* PCANCEL_MAPPED_TRANSFER;
+
+typedef 
+void
+FREE_ADAPTER_OBJECT(
+    struct _DMA_ADAPTER     DmaAdapter,
+    IO_ALLOCATION_ACTION    AllocationAction
+);
+typedef FREE_ADAPTER_OBJECT* PFREE_ADAPTER_OBJECT;
+
+typedef 
+void
+DRIVER_LIST_CONTROL(
+    PDEVICE_OBJECT          DeviceObject,
+    struct _IRP*            Irp,
+    PSCATTER_GATHER_LIST    ScatterGather,
+    PVOID                   Context
+);
+typedef DRIVER_LIST_CONTROL* PDRIVER_LIST_CONTROL;
+
+typedef 
+LOUSTATUS
+BUILD_SCATTER_GATHER_LIST_EX(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    PVOID                   DmaTransferContext,
+    PMDL                    Mdl,
+    ULONGLONG               Offset,
+    ULONG                   Length,
+    ULONG                   Flags,
+    PDRIVER_LIST_CONTROL    ExeRoutine,
+    PVOID                   Context,
+    BOOLEAN                 WriteToDevice,
+    PVOID                   Sgb,
+    ULONG                   SgbLength,
+    PDMA_COMPLETION_ROUTINE DmaCompletionRoutine,
+    PVOID                   CompletionContext,
+    PVOID                   ScatterGatherList
+);
+typedef BUILD_SCATTER_GATHER_LIST_EX* PBUILD_SCATTER_GATHER_LIST_EX;
+
+typedef 
+LOUSTATUS 
+GET_SCATTER_GATHER_LIST_EX(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    PVOID                   DmaTransferContext,
+    PMDL                    Mdl,
+    ULONGLONG               Offset,
+    ULONG                   Length,
+    ULONG                   Flags,
+    PDRIVER_LIST_CONTROL    ExeRoutine,
+    PVOID                   Context,
+    BOOLEAN                 WriteToDevice,
+    PDMA_COMPLETION_ROUTINE DmaCompletionRoutine,
+    PVOID                   CompletionContext,
+    PSCATTER_GATHER_LIST*   ScatterGatherList
+);
+typedef GET_SCATTER_GATHER_LIST_EX* PGET_SCATTER_GATHER_LIST_EX;
+
+typedef 
+BOOLEAN 
+CANCEL_ADAPTER_CHANNEL(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    PVOID                   DmaTransferContext
+);
+typedef CANCEL_ADAPTER_CHANNEL* PCANCEL_ADAPTER_CHANNEL;
+
+typedef 
+LOUSTATUS 
+CONFIGURE_ADAPTER_CHANNEL(
+    struct _DMA_ADAPTER DmaAdapter,
+    ULONG               FunctionNumbr,
+    PVOID               Context
+);
+typedef CONFIGURE_ADAPTER_CHANNEL* PCONFIGURE_ADAPTER_CHANNEL;
+
+typedef 
+PVOID
+ALLOCATE_COMMON_BUFFER_EX(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PPHYSICAL_ADDRESS       MaximumAddress,
+    ULONG                   Length,
+    PPHYSICAL_ADDRESS       LogicalAddress,
+    BOOLEAN                 CacheEnabled,
+    NODE_REQUIREMENT        PreferredNode
+);
+typedef ALLOCATE_COMMON_BUFFER_EX* PALLOCATE_COMMON_BUFFER_EX;
+
+typedef 
+LOUSTATUS 
+INITIALIZE_DMA_TRANSFER_CONTEXT(
+    struct _DMA_ADAPTER     DmaAdapter,
+    PVOID                   DmaTransferContext
+);
+typedef INITIALIZE_DMA_TRANSFER_CONTEXT* PINITIALIZE_DMA_TRANSFER_CONTEXT;
+
+typedef 
+LOUSTATUS 
+GET_DMA_TRANSFER_INFO(
+    struct _DMA_ADAPTER*        DmaAdapter,
+    PMDL                        Mdl,
+    ULONGLONG                   Length,
+    ULONG                       WriteOnly,
+    struct _DMA_TRANSFER_INFO*  TransferInfo
+);
+typedef GET_DMA_TRANSFER_INFO* PGET_DMA_TRANSFER_INFO;
+
+typedef 
+LOUSTATUS 
+GET_DMA_ADAPTER_INFO(
+    struct _DMA_ADAPTER*        DmaAdapter,
+    struct _DMA_ADAPTER_INFO*    AdapterInfo
+);
+typedef GET_DMA_ADAPTER_INFO* PGET_DMA_ADAPTER_INFO;
+
+typedef 
+LOUSTATUS
+BUILD_MDL_FROM_SCATTER_GATHER_LIST(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PSCATTER_GATHER_LIST    ScatterGather,
+    PMDL                    OriginalMdl,
+    PMDL*                   TargetMdl
+);
+typedef BUILD_MDL_FROM_SCATTER_GATHER_LIST* PBUILD_MDL_FROM_SCATTER_GATHER_LIST;
+
+typedef 
+LOUSTATUS 
+BUILD_SCATTER_GATHER_LIST(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PDEVICE_OBJECT          DeviceObject,
+    PMDL                    Mdl,
+    PVOID                   CurrentVa,
+    ULONG                   Length,
+    PDRIVER_LIST_CONTROL    ExeRoutine,
+    PVOID                   Context,
+    BOOLEAN                 WriteToDevice,
+    PVOID                   Sgb,
+    ULONG                   SgbLength
+);
+typedef BUILD_SCATTER_GATHER_LIST* PBUILD_SCATTER_GATHER_LIST;
+
+typedef 
+LOUSTATUS 
+CALCULATE_SCATTER_GATHER_LIST_SIZE(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PMDL                    Mdl,
+    PVOID                   CurrentVa,
+    ULONG                   Length,
+    PULONG                  SglSize,
+    PULONG                  pMappedRegisrers
+);
+typedef CALCULATE_SCATTER_GATHER_LIST_SIZE* PCALCULATE_SCATTER_GATHER_LIST_SIZE;
+
+typedef 
+void
+PUT_SCATTER_GATHER_LIST(
+    struct _DMA_ADAPTER*    DmaAdapter,
+    PSCATTER_GATHER_LIST    ScatterGather,
+    BOOLEAN                 WriteToDevice
+);
+typedef PUT_SCATTER_GATHER_LIST* PPUT_SCATTER_GATHER_LIST;
+
+typedef 
+LOUSTATUS
+GET_SCATTER_GATHER_LIST(
+    struct _DMA_ADAPTER DmaAdapter,
+    PDEVICE_OBJECT      DeviceObject,
+    PMDL                Mdl
+
+);
+typedef GET_SCATTER_GATHER_LIST* PGET_SCATTER_GATHER_LIST;
+
+typedef 
+ULONG
+READ_DMA_COUNTER(
+    struct _DMA_ADAPTER* DmaAdapter
+);
+typedef READ_DMA_COUNTER* PREAD_DMA_COUNTER;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_CONFIGURE(
+    struct _IOMMU_DMA_DOMAIN*       Domain,
+    struct _DOMAIN_CONFIGURATION*   DomainConfiguration
+);
+typedef IOMMU_DOMAIN_CONFIGURE* PIOMMU_DOMAIN_CONFIGURE;
+
+
 typedef void* PIOMMU_SET_DEVICE_FAULT_REPORTING;
 typedef void* PIOMMU_SET_DEVICE_FAULT_REPORTING_EX;
 typedef void* PIOMMU_UNMAP_IDENTITY_RANGE;
@@ -193,8 +575,6 @@ typedef void* PIOMMU_MAP_LOGICAL_RANGE_EX;
 typedef void* PIOMMU_DOMAIN_DELETE;
 typedef void* PIOMMU_UNMAP_LOGICAL_RANGE;
 typedef void* PIOMMU_QUERY_INPUT_MAPPINGS;
-typedef void* DMA_WIDTH;
-typedef void* DMA_SPEED;
 typedef void* PIOMMU_DOMAIN_CREATE;
 typedef void* PIOMMU_DOMAIN_CREATE_EX;
 typedef void* PIOMMU_DOMAIN_ATTACH_DEVICE;
@@ -326,20 +706,6 @@ typedef struct _DMA_IOMMU_INTERFACE_V1{
     PIOMMU_SET_DEVICE_FAULT_REPORTING SetDeviceFaultReporting;
     PIOMMU_DOMAIN_CONFIGURE           ConfigureDomain;
 }DMA_IOMMU_INTERFACE_V1, * PDMA_IOMMU_INTERFACE_V1;
-
-typedef enum _DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE{
-    CommonBufferConfigTypeLogicalAddressLimits = 0,
-    CommonBufferConfigTypeSubSection,
-    CommonBufferConfigTypeHardwareAccessPermissions,
-    CommonBufferConfigTypeMax
-}DMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE, * PDMA_COMMON_BUFFER_EXTENDED_CONFIGURATION_TYPE;
-
-typedef enum{
-    DmaComplete = 0,
-    DmaAborted,
-    DmaError,
-    DmaCancelled
-}DMA_COMPLETION_STATUS;
 
 typedef struct _DMA_IOMMU_INTERFACE_V2 {
     PIOMMU_DOMAIN_CREATE_EX                           CreateDomainEx;

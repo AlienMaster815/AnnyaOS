@@ -87,7 +87,7 @@ typedef enum _MEMORY_CACHING_TYPE{
 	MmUSWCCached,
 	MmMaximumCacheType,
 	MmNotMapped
-}MEMORY_CACHING_TYPE;
+}MEMORY_CACHING_TYPE, * PMEMORY_CACHING_TYPE;
 
 typedef struct _IO_RESOURCE_DESCRIPTOR{
 	UCHAR                           Option;
