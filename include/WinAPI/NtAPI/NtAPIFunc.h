@@ -385,8 +385,6 @@ LOUAPI unsigned long DbgPrint(char const*, ...);
 #include "wdmsec.h"
 #include "procgrp.h"
 #include "ntstrsafe.h"
-#include "pep_x.h"
-#include "pepfx.h"
 #include "wdm.h"
 #include "../../kernel/loustatus.h"
 #include "iointx.h"

@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include "../../../LouAPI/Processes/ProcessPrivate.h"
+#include "../Processes/ProcessPrivate.h"
 
 //LouKeLoadCoffImageB
 
