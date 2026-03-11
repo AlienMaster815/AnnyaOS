@@ -136,9 +136,74 @@ typedef PDMA_ADAPTER HalGetDmaAdapter(
     PDEVICE_DESCRIPTION     DeviceDescription,
     PULONG                  MapRegisterCount
 );
-
 typedef HalGetDmaAdapter* pHalGetDmaAdapter;
 
+typedef enum _RESOURCE_TRANSLATION_DIRECTION{
+    DevicePropertyDeviceDescription = 0,
+    DevicePropertyHardwareID,
+    DevicePropertyCompatibleIDs,
+    DevicePropertyBootConfiguration,
+    DevicePropertyBootConfigurationTranslated,
+    DevicePropertyClassName,
+    DevicePropertyClassGuid,
+    DevicePropertyDriverKeyName,
+    DevicePropertyManufacturer,
+    DevicePropertyFreindlyName,
+    DevicePropertyLocationInformation,
+    DevicePropertyPhysicalDeviceObjectName,
+    DevicePropertyButTypeGuid,
+    DevicePropertyLegacyBusType,
+    DevicePropertyBusNumber,
+    DevicePropertyEnumeratorName,
+    DevicePropertyAddress,
+    DevicePropertyUINumber,
+    DevicePropertyInstallState,
+    DevicePropertyRemovalPolicy,
+    DevicePropertyResourceRequirements,
+    DevicePropertyAllocatedResources,
+    DevicePropertyContainorID,
+}RESOURCE_TRANSLATION_DIRECTION, * PRESOURCE_TRANSLATION_DIRECTION;
+
+typedef 
+LOUSTATUS 
+TRANSLATE_RESOURCE_HANDLER(
+    PVOID                               Context,
+    PCM_PARTIAL_RESOURCE_LIST           Source,
+    RESOURCE_TRANSLATION_DIRECTION      Direction,
+    ULONG                               AltCount
+);
+typedef TRANSLATE_RESOURCE_HANDLER* PTRANSLATE_RESOURCE_HANDLER;
+
+typedef 
+LOUSTATUS
+TRANSLATE_RESOURCE_REQUIREMENTS_HANDLER(
+    PVOID                   Context,
+    PIO_RESOURCE_DESCRIPTOR Source,
+    PDEVICE_OBJECT          PhyDeviceObject,
+    PULONG                  TargetCount,
+    PIO_RESOURCE_DESCRIPTOR Target
+);
+typedef TRANSLATE_RESOURCE_REQUIREMENTS_HANDLER* PTRANSLATE_RESOURCE_REQUIREMENTS_HANDLER;
+
+typedef struct _TRANSLATOR_INTERFACE{
+    USHORT                                      Size;
+    USHORT                                      Version;
+    PVOID                                       Context;
+    PINTERFACE_REFERENCE                        InterfaceReference;
+    PINTERFACE_DEREFERENCE                      InterfaceDereference;
+    PTRANSLATE_RESOURCE_HANDLER                 TranslateResource;
+    PTRANSLATE_RESOURCE_REQUIREMENTS_HANDLER    TranslateResourceReq;
+}TRANSLATOR_INTERFACE, * PTRANSLATOR_INTERFACE;
+
+typedef LOUSTATUS HalGetInterruptTranslator(
+    INTERFACE_TYPE          ParrentInterfaceType,
+    ULONG                   ParrentBussNumber,
+    INTERFACE_TYPE          BridgeInterfaceType,
+    USHORT                  Size,
+    USHORT                  VendorsDictionary,
+    PTRANSLATOR_INTERFACE   Translator,
+    PULONG                  BridgeBusNumber
+);
 
 
 #ifndef _USER_MODE_CODE_
@@ -175,6 +240,7 @@ KERNEL_EXPORT void LouKeHalReferenceBusHandler(PBUS_HANDLER BusHandler);
 KERNEL_EXPORT LOUSTATUS LouKeHalInitPnpDriver();
 KERNEL_EXPORT LOUSTATUS LouKeHalInitPowerManagement(PVOID Info);
 KERNEL_EXPORT PDMA_ADAPTER LouKeHalGetDmaAdapter(PVOID Context, PDEVICE_DESCRIPTION DeviceDescription, PULONG MapRegisterCount);
+KERNEL_EXPORT LOUSTATUS LouKeHalGetInterruptTranslator(INTERFACE_TYPE ParrentInterfaceType, ULONG ParrentBussNumber, INTERFACE_TYPE BridgeInterfaceType, USHORT Size, USHORT VendorsDictionary, PTRANSLATOR_INTERFACE Translator, PULONG BridgeBusNumber);
 #ifndef _KERNEL_MODULE_
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);

@@ -6,7 +6,6 @@
 
 //Filler Types Until Found
 
-typedef void* HalGetInterruptTranslator;
 typedef void* HalStartMirroring;
 typedef void* HalEndMirroring;
 typedef void* HalMirrorPhysicalMemory;
