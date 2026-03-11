@@ -15,7 +15,7 @@ typedef struct _OFFSETINSTANCEDATAANDLENGTH {
 } OFFSETINSTANCEDATAANDLENGTH, * POFFSETINSTANCEDATAANDLENGTH;
 
 typedef enum {
-    KernelMode,
+    KernelMode = 0,
     UserMode,
 }KPROCESSOR_MODE;
 
@@ -93,10 +93,10 @@ typedef enum _EMULATOR_PORT_ACCESS_TYPE{
     Ulong,
 }EMULATOR_PORT_ACCESS_TYPE, * PEMULATOR_PORT_ACCESS_TYPE;
 
-typedef PSTR NTSTRSAFE_PSTR;
-typedef PCSTR NTSTRSAFE_PCSTR;
-typedef PWSTR NTSTRSAFE_PWSTR;
-typedef PCWSTR NTSTRSAFE_PCWSTR;
+typedef PSTR LOUSTRSAFE_PSTR;
+typedef PCSTR LOUSTRSAFE_PCSTR;
+typedef PWSTR LOUSTRSAFE_PWSTR;
+typedef PCWSTR LOUSTRSAFE_PCWSTR;
 typedef const char* PCNZCH;
 typedef const wchar_t* PCNZWCH;
 typedef PCNZCH STRSAFE_PCNZCH;
@@ -121,6 +121,12 @@ typedef VOID(*PINTERFACE_REFERENCE)(PVOID Context);
 typedef VOID(*PINTERFACE_DEREFERENCE)(PVOID Context);
 
 typedef ULONG NODE_REQUIREMENT;
+
+typedef enum _LOU_PRODUCT_TYPE{
+    LouProductAnnyaLou = 1,
+    LouProductLanManLou = 2,
+    LouProductServer = 3,
+}LOU_PRODUCT_TYPE, * PLOU_PRODUCT_TYPE;
 
 
 #include <Ldm/Drives.h>

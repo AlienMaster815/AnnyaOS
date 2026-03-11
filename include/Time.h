@@ -17,7 +17,8 @@ typedef struct _FILETIME{
         };
         UINT64          DateTime;
     };
-}FILETIME, * PFILETIME, * LPFILETIME;
+}FILETIME, * PFILETIME, * LPFILETIME,
+    KSYSTEM_TIME, * PKSYSTEM_TIME, * LPKSYSTEM_TIME;
 
 
 typedef struct _TIME_T{

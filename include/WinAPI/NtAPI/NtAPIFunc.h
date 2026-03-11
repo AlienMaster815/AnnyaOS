@@ -6,9 +6,6 @@
 
 //Filler Types Until Found
 
-
-typedef void* KSYSTEM_TIME;
-typedef void* NT_PRODUCT_TYPE;
 typedef void* ALTERNATIVE_ARCHITECTURE_TYPE;
 typedef void* PPHYSICAL_COUNTER_EVENT_BUFFER_OVERFLOW_HANDLER;
 typedef void* PPHYSICAL_COUNTER_OVERFLOW_HANDLER;

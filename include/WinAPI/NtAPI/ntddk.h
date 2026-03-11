@@ -330,13 +330,13 @@ typedef struct _KUSER_SHARED_DATA {
 	ULONG                         GlobalValidationRunlevel;
 	LONG                          TimeZoneBiasStamp;
 	ULONG                         NtBuildNumber;
-	NT_PRODUCT_TYPE               NtProductType;
+	LOU_PRODUCT_TYPE              NtProductType;
 	BOOLEAN                       ProductTypeIsValid;
 	BOOLEAN                       Reserved0[1];
 	USHORT                        NativeProcessorArchitecture;
 	ULONG                         NtMajorVersion;
 	ULONG                         NtMinorVersion;
-	BOOLEAN*                       ProcessorFeatures;
+	BOOLEAN*                      ProcessorFeatures;
 	ULONG                         Reserved1;
 	ULONG                         Reserved3;
 	ULONG                         TimeSlip;
