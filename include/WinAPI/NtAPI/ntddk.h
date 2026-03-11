@@ -34,26 +34,6 @@ typedef enum _STATE_LOCATION_TYPE {
 } STATE_LOCATION_TYPE;
 
 
-typedef enum _BDCB_CALLBACK_TYPE {
-	BdCbStatusUpdate,
-	BdCbInitializeImage
-} BDCB_CALLBACK_TYPE, * PBDCB_CALLBACK_TYPE;
-
-typedef enum _BDCB_CLASSIFICATION {
-	BdCbClassificationUnknownImage,
-	BdCbClassificationKnownGoodImage,
-	BdCbClassificationKnownBadImage,
-	BdCbClassificationKnownBadImageBootCritical,
-	BdCbClassificationEnd
-} BDCB_CLASSIFICATION, * PBDCB_CLASSIFICATION;
-
-typedef enum _BDCB_STATUS_UPDATE_TYPE {
-	BdCbStatusPrepareForDependencyLoad,
-	BdCbStatusPrepareForDriverLoad,
-	BdCbStatusPrepareForUnload
-} BDCB_STATUS_UPDATE_TYPE, * PBDCB_STATUS_UPDATE_TYPE;
-
-
 typedef enum _HAL_SET_INFORMATION_CLASS {
 	HalProfileSourceInterval,
 	HalProfileSourceInterruptHandler,
@@ -103,20 +83,7 @@ typedef enum {
 	KdNameSpaceMax
 } KD_NAMESPACE_ENUM, * PKD_NAMESPACE_ENUM;
 
-typedef struct _BDCB_IMAGE_INFORMATION {
-	BDCB_CLASSIFICATION Classification;
-	ULONG               ImageFlags;
-	UNICODE_STRING      ImageName;
-	UNICODE_STRING      RegistryPath;
-	UNICODE_STRING      CertificatePublisher;
-	UNICODE_STRING      CertificateIssuer;
-	PVOID               ImageHash;
-	PVOID               CertificateThumbprint;
-	ULONG               ImageHashAlgorithm;
-	ULONG               ThumbprintHashAlgorithm;
-	ULONG               ImageHashLength;
-	ULONG               CertificateThumbprintLength;
-} BDCB_IMAGE_INFORMATION, * PBDCB_IMAGE_INFORMATION;
+
 
 typedef struct _CONFIGURATION_INFORMATION {
 	ULONG   DiskCount;
@@ -131,11 +98,6 @@ typedef struct _CONFIGURATION_INFORMATION {
 	ULONG   Version;
 	ULONG   MediumChangerCount;
 } CONFIGURATION_INFORMATION, * PCONFIGURATION_INFORMATION;
-
-
-typedef struct _BDCB_STATUS_UPDATE_CONTEXT {
-	BDCB_STATUS_UPDATE_TYPE StatusType;
-} BDCB_STATUS_UPDATE_CONTEXT, * PBDCB_STATUS_UPDATE_CONTEXT;
 
 
 typedef struct _CONTROLLER_OBJECT {

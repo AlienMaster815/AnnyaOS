@@ -123,10 +123,68 @@ typedef VOID(*PINTERFACE_DEREFERENCE)(PVOID Context);
 typedef ULONG NODE_REQUIREMENT;
 
 typedef enum _LOU_PRODUCT_TYPE{
-    LouProductAnnyaLou = 1,
+    LouProductAnnyaLou  = 1,
     LouProductLanManLou = 2,
-    LouProductServer = 3,
+    LouProductServer    = 3,
 }LOU_PRODUCT_TYPE, * PLOU_PRODUCT_TYPE;
+
+typedef enum _ALTERNATIVE_ARCHITECTURE_TYPE{
+    StandardDesign  = 0,
+    NEC98x86        = 1,
+    EndAlternitives = 2,
+}ALTERNATIVE_ARCHITECTURE_TYPE, * PALTERNATIVE_ARCHITECTURE_TYPE;
+
+typedef 
+void 
+PHYSICAL_COUNTER_EVENT_BUFFER_OVERFLOW_HANDLER(
+    PVOID   EventBuffer,
+    SIZE    EntrySize,
+    SIZE    EntryCount,
+    HANDLE  Owner
+);
+typedef PHYSICAL_COUNTER_EVENT_BUFFER_OVERFLOW_HANDLER* PPHYSICAL_COUNTER_EVENT_BUFFER_OVERFLOW_HANDLER;
+
+typedef 
+void 
+PHYSICAL_COUNTER_OVERFLOW_HANDLER(
+    ULONGLONG   OverflowBits,
+    HANDLE      Owner
+);
+typedef PHYSICAL_COUNTER_OVERFLOW_HANDLER* PPHYSICAL_COUNTER_OVERFLOW_HANDLER;
+
+typedef PVOID PKTHREAD;
+
+#include <Ldm/Bdcb.h>
+
+typedef 
+void
+BOOT_DRIVER_CALLBACK_FUNCTION(
+    PVOID                   CallbackContext,
+    BDCB_CALLBACK_TYPE      CallType,
+    PBDCB_IMAGE_INFORMATION ImageInformation
+);
+typedef BOOT_DRIVER_CALLBACK_FUNCTION* PBOOT_DRIVER_CALLBACK_FUNCTION;
+
+typedef 
+void 
+DRIVER_REINITIALIZE(
+    PDRIVER_OBJECT  DriverObject,
+    PVOID           Context,
+    ULONG           Count
+);
+typedef DRIVER_REINITIALIZE* PDRIVER_REINITIALIZE;
+
+typedef ULONGLONG LOGICAL;
+
+typedef 
+void
+EXPAND_STACK_CALLOUT(
+    PVOID   Parameter
+);
+typedef EXPAND_STACK_CALLOUT* PEXPAND_STACK_CALLOUT;
+
+typedef ULONG KPRIORITY;
+
 
 
 #include <Ldm/Drives.h>

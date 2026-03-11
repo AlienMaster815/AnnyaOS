@@ -6,15 +6,6 @@
 
 //Filler Types Until Found
 
-typedef void* ALTERNATIVE_ARCHITECTURE_TYPE;
-typedef void* PPHYSICAL_COUNTER_EVENT_BUFFER_OVERFLOW_HANDLER;
-typedef void* PPHYSICAL_COUNTER_OVERFLOW_HANDLER;
-typedef void* PKTHREAD;
-typedef void* PBOOT_DRIVER_CALLBACK_FUNCTION;
-typedef void* PDRIVER_REINITIALIZE;
-typedef void* LOGICAL;
-typedef void* PEXPAND_STACK_CALLOUT;
-typedef void* KPRIORITY;
 typedef void* KDPC_IMPORTANCE;
 typedef void* PPHYSICAL_MEMORY_RANGE;
 typedef void* PGET_LOCATION_STRING;
