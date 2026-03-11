@@ -31,8 +31,6 @@ typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE;
 typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE_EX;
 typedef void* PCORRELATION_VECTOR;
 
-
-
 typedef void* SILO_MONITOR_CREATE_CALLBACK;
 typedef void* SILO_MONITOR_TERMINATE_CALLBACK;
 typedef void* WHEA_ERROR_SOURCE_TYPE;
@@ -46,7 +44,6 @@ typedef void* WHEAP_DPC_ERROR_EVENT_TYPE;
 typedef void* PFN_NUMBER;
 typedef void* PWHEA_ERROR_SOURCE_CONFIGURATION;
 typedef void* WHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK;
-
 
 typedef void* PGPE_CONNECT_VECTOR2;
 typedef void* PGPE_DISCONNECT_VECTOR2;
@@ -94,7 +91,6 @@ typedef void* PDEVICE_RESET_HANDLER;
 typedef void* PDEVICE_QUERY_BUS_SPECIFIC_RESET_HANDLER;
 typedef void* PDEVICE_BUS_SPECIFIC_RESET_HANDLER;
 typedef void* PGET_DEVICE_RESET_STATUS;
-
 
 typedef void* REGHANDLE;
 typedef void* EVENT_INFO_CLASS;
@@ -248,9 +244,6 @@ typedef struct _TOKEN_PRIVALEDGES{
 #define POOL_EXTENDED_PARAMETER_RESERVED_BITS 1
 
 //ENDOF: TODO LIST\n
-
-
-
 
 #ifdef __cplusplus
 #define NTHALAPI extern "C"
