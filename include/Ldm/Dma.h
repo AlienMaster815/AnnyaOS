@@ -15,6 +15,16 @@ struct _IOMMU_DMA_DEVICE_INFORMATION;
 struct _DMA_TRANSFER_INFO;
 struct _DMA_ADAPTER_INFO;
 struct _DOMAIN_CONFIGURATION;
+struct _DEVICE_FAULT_CONFIGURATION;
+struct _IOMMU_MAP_PHYSICAL_ADDRESS;
+struct _IOMMU_DMA_LOGICAL_ADDRESS;
+struct _INPUT_MAPPING_ELEMENT;
+struct _IOMMU_DMA_RESERVED_REGION;
+struct _IOMMU_DMA_LOGICAL_ALLOCATOR_CONFIG;
+struct _IOMMU_INTERFACE_STATE_CHANGE;
+union _IOMMU_INTERFACE_STATE_CHANGE_FIELDS;
+struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN;
+struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT;
 
 typedef ULONGLONG IOMMU_DMA_LOGICAL_ADDRESS;
 
@@ -100,7 +110,20 @@ typedef struct _SCATTER_GATHER_LIST {
     SCATTER_GATHER_ELEMENT Elements[];
 } SCATTER_GATHER_LIST, * PSCATTER_GATHER_LIST;
 
+typedef union _IOMMU_DMA_DOMAIN_CREATION_FLAGS{
+    struct{
+        ULONGLONG   Reserved : 64;
+    };
+    ULONGLONG       AsUlonglong;
+}IOMMU_DMA_DOMAIN_CREATION_FLAGS, * PIOMMU_DMA_DOMAIN_CREATION_FLAGS;
 
+typedef enum _IOMMU_DMA_DOMAIN_TYPE{
+    DomainTypeTranslate = 0,
+    DomainTypePassThrough,
+    DomainTypeUnmanaged,
+    DomainTypeTranslateS1,
+    DomainTypeMax
+}IOMMU_DMA_DOMAIN_TYPE, * PIOMMU_DMA_DOMAIN_TYPE;
 
 
 typedef LOUSTATUS ALLOCATE_COMMON_BUFFER_VECTOR(
@@ -563,36 +586,258 @@ IOMMU_DOMAIN_CONFIGURE(
 );
 typedef IOMMU_DOMAIN_CONFIGURE* PIOMMU_DOMAIN_CONFIGURE;
 
+typedef 
+LOUSTATUS
+IOMMU_SET_DEVICE_FAULT_REPORTING(
+    PDEVICE_OBJECT                      PhysicalDeviceObject,
+    ULONG                               InMappingIdBase,
+    BOOLEAN                             Enable,
+    struct _DEVICE_FAULT_CONFIGURATION* FaultConfig
+);
+typedef IOMMU_SET_DEVICE_FAULT_REPORTING* PIOMMU_SET_DEVICE_FAULT_REPORTING;
 
-typedef void* PIOMMU_SET_DEVICE_FAULT_REPORTING;
-typedef void* PIOMMU_SET_DEVICE_FAULT_REPORTING_EX;
-typedef void* PIOMMU_UNMAP_IDENTITY_RANGE;
-typedef void* PIOMMU_UNMAP_IDENTITY_RANGE_EX;
-typedef void* PIOMMU_MAP_IDENTITY_RANGE;
-typedef void* PIOMMU_MAP_IDENTITY_RANGE_EX;
-typedef void* PIOMMU_MAP_LOGICAL_RANGE;
-typedef void* PIOMMU_MAP_LOGICAL_RANGE_EX;
-typedef void* PIOMMU_DOMAIN_DELETE;
-typedef void* PIOMMU_UNMAP_LOGICAL_RANGE;
-typedef void* PIOMMU_QUERY_INPUT_MAPPINGS;
-typedef void* PIOMMU_DOMAIN_CREATE;
-typedef void* PIOMMU_DOMAIN_CREATE_EX;
-typedef void* PIOMMU_DOMAIN_ATTACH_DEVICE;
-typedef void* PIOMMU_DOMAIN_ATTACH_DEVICE_EX;
-typedef void* PIOMMU_DOMAIN_DETACH_DEVICE;
-typedef void* PIOMMU_DOMAIN_DETACH_DEVICE_EX;
-typedef void* PIOMMU_FLUSH_DOMAIN;
-typedef void* PIOMMU_FLUSH_DOMAIN_VA_LIST;
-typedef void* PIOMMU_DEVICE_QUERY_DOMAIN_TYPES;
-typedef void* PIOMMU_REGISTER_INTERFACE_STATE_CHANGE_CALLBACK;
-typedef void* PIOMMU_UNREGISTER_INTERFACE_STATE_CHANGE_CALLBACK;
-typedef void* PIOMMU_RESERVE_LOGICAL_ADDRESS_RANGE;
-typedef void* PIOMMU_DEVICE_DELETE;
-typedef void* PIOMMU_FREE_RESERVED_LOGICAL_ADDRESS_RANGE;
-typedef void* PIOMMU_MAP_RESERVED_LOGICAL_RANGE;
-typedef void* PIOMMU_UNMAP_RESERVED_LOGICAL_RANGE;
+typedef 
+LOUSTATUS 
+IOMMU_SET_DEVICE_FAULT_REPORTING_EX(
+    struct _IOMMU_DMA_DEVICE*           DmaDevice,
+    ULONG                               InMappingIdBase,
+    BOOLEAN                             Enable,
+    struct _DEVICE_FAULT_CONFIGURATION* FaultConfig
+);
+typedef IOMMU_SET_DEVICE_FAULT_REPORTING_EX* PIOMMU_SET_DEVICE_FAULT_REPORTING_EX;
+
+typedef 
+LOUSTATUS
+IOMMU_UNMAP_IDENTITY_RANGE(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    PMDL                        Mdl
+);
+typedef IOMMU_UNMAP_IDENTITY_RANGE* PIOMMU_UNMAP_IDENTITY_RANGE;
+
+typedef 
+LOUSTATUS
+IOMMU_UNMAP_IDENTITY_RANGE_EX(
+    struct _IOMMU_DMA_DOMAIN*            Domain,
+    struct _IOMMU_MAP_PHYSICAL_ADDRESS*  MapPhyAddress
+);
+typedef IOMMU_UNMAP_IDENTITY_RANGE_EX* PIOMMU_UNMAP_IDENTITY_RANGE_EX;
+
+typedef 
+LOUSTATUS 
+IOMMU_MAP_IDENTITY_RANGE(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    ULONG                       Permissions,
+    PMDL                        Mdl
+);
+typedef IOMMU_MAP_IDENTITY_RANGE* PIOMMU_MAP_IDENTITY_RANGE;
+
+typedef 
+LOUSTATUS
+IOMMU_MAP_IDENTITY_RANGE_EX(
+    struct _IOMMU_DMA_DOMAIN*           Domain,
+    ULONG                               Permissions,
+    struct _IOMMU_MAP_PHYSICAL_ADDRESS* PhysicalAddressToMap
+);
+typedef IOMMU_MAP_IDENTITY_RANGE_EX* PIOMMU_MAP_IDENTITY_RANGE_EX;
+
+typedef 
+LOUSTATUS 
+IOMMU_MAP_LOGICAL_RANGE(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    ULONG                       Permissions,
+    PMDL                        Mdl,
+    ULONGLONG                   LogicalAddress
+);
+typedef IOMMU_MAP_LOGICAL_RANGE* PIOMMU_MAP_LOGICAL_RANGE;
+
+typedef 
+LOUSTATUS 
+IOMMU_MAP_LOGICAL_RANGE_EX(
+    struct _IOMMU_DMA_DOMAIN*           Domain,
+    ULONG                               Permissions,
+    struct _IOMMU_MAP_PHYSICAL_ADDRESS* PhysicalAddressToMap,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*  ExplicitLogicalAddress,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*  MinLogicalAddress,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*  MaxLogicalAddress,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*  LogicalAddressOut
+);
+typedef IOMMU_MAP_LOGICAL_RANGE_EX* PIOMMU_MAP_LOGICAL_RANGE_EX;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_DELETE(
+    struct _IOMMU_DMA_DOMAIN*   Domain
+);
+typedef IOMMU_DOMAIN_DELETE* PIOMMU_DOMAIN_DELETE;
+
+typedef 
+LOUSTATUS
+IOMMU_UNMAP_LOGICAL_RANGE(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    ULONGLONG                   LogicalAddress,
+    ULONGLONG                   PageCount
+);
+typedef IOMMU_UNMAP_LOGICAL_RANGE* PIOMMU_UNMAP_LOGICAL_RANGE;
+
+typedef 
+LOUSTATUS 
+IOMMU_QUERY_INPUT_MAPPINGS(
+    PDEVICE_OBJECT                  DeviceObject,
+    struct _INPUT_MAPPING_ELEMENT*  Buffer,
+    ULONG                           BufferLength,
+    PULONG                          ReturnLength
+);
+typedef IOMMU_QUERY_INPUT_MAPPINGS* PIOMMU_QUERY_INPUT_MAPPINGS;
+
+typedef
+LOUSTATUS
+IOMMU_DOMAIN_CREATE(
+    BOOLEAN                     OsManagedPageTable,
+    struct _IOMMU_DMA_DOMAIN**  DomainOut
+);
+typedef IOMMU_DOMAIN_CREATE* PIOMMU_DOMAIN_CREATE;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_CREATE_EX(
+    IOMMU_DMA_DOMAIN_TYPE                       DomainType,
+    IOMMU_DMA_DOMAIN_CREATION_FLAGS             Flags,
+    struct _IOMMU_DMA_LOGICAL_ALLOCATOR_CONFIG  Lac,
+    struct _IOMMU_DMA_RESERVED_REGION*          ReservedRegion,
+    struct _IOMMU_DMA_DOMAIN**                  DomainOut
+);
+typedef IOMMU_DOMAIN_CREATE_EX* PIOMMU_DOMAIN_CREATE_EX;
+
+typedef 
+LOUSTATUS
+IOMMU_DOMAIN_ATTACH_DEVICE(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    PDEVICE_OBJECT              DeviceObject,
+    ULONG                       InMappingIdBase,
+    ULONG                       MapCount
+);
+typedef IOMMU_DOMAIN_ATTACH_DEVICE* PIOMMU_DOMAIN_ATTACH_DEVICE;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_ATTACH_DEVICE_EX(
+    struct _IOMMU_DMA_DOMAIN    Domain,
+    struct _IOMMU_DMA_DEVICE    DmaDevice
+);
+typedef IOMMU_DOMAIN_ATTACH_DEVICE_EX* PIOMMU_DOMAIN_ATTACH_DEVICE_EX;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_DETACH_DEVICE(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    PDEVICE_OBJECT              PhyDeviceObject,
+    ULONG                       InMappingId
+);
+typedef IOMMU_DOMAIN_DETACH_DEVICE* PIOMMU_DOMAIN_DETACH_DEVICE;
+
+typedef 
+LOUSTATUS 
+IOMMU_DOMAIN_DETACH_DEVICE_EX(
+    struct _IOMMU_DMA_DEVICE*   DmaDevice
+);
+typedef IOMMU_DOMAIN_DETACH_DEVICE_EX* PIOMMU_DOMAIN_DETACH_DEVICE_EX;
+
+typedef 
+LOUSTATUS
+IOMMU_FLUSH_DOMAIN(
+    struct _IOMMU_DMA_DOMAIN*   Domain
+);
+typedef IOMMU_FLUSH_DOMAIN* PIOMMU_FLUSH_DOMAIN;
+
+typedef 
+LOUSTATUS 
+IOMMU_FLUSH_DOMAIN_VA_LIST(
+    struct _IOMMU_DMA_DOMAIN*   Domain,
+    BOOLEAN                     LastLevel,
+    ULONG                       Number,
+    PVOID                       VaList
+);
+typedef IOMMU_FLUSH_DOMAIN_VA_LIST* PIOMMU_FLUSH_DOMAIN_VA_LIST;
+
+typedef 
+void
+IOMMU_DEVICE_QUERY_DOMAIN_TYPES(
+    struct _IOMMU_DMA_DEVICE*   DmaDevice,
+    PULONG                      AvailableDomains
+);
+typedef IOMMU_DEVICE_QUERY_DOMAIN_TYPES* PIOMMU_DEVICE_QUERY_DOMAIN_TYPES;
+
+typedef
+void
+IOMMU_INTERFACE_STATE_CHANGE_CALLBACK(
+    struct _IOMMU_INTERFACE_STATE_CHANGE    StateChange,
+    PVOID                                   Context
+);
+typedef IOMMU_INTERFACE_STATE_CHANGE_CALLBACK* PIOMMU_INTERFACE_STATE_CHANGE_CALLBACK;
+
+typedef 
+LOUSTATUS
+IOMMU_REGISTER_INTERFACE_STATE_CHANGE_CALLBACK(
+    PIOMMU_INTERFACE_STATE_CHANGE_CALLBACK          StateChangeCallback,
+    PVOID                                           Context,
+    struct _IOMMU_DMA_DEVICE*                       DmaDevice,
+    union _IOMMU_INTERFACE_STATE_CHANGE_FIELDS*     StateFeilds
+);
+typedef IOMMU_REGISTER_INTERFACE_STATE_CHANGE_CALLBACK* PIOMMU_REGISTER_INTERFACE_STATE_CHANGE_CALLBACK;
+
+typedef 
+LOUSTATUS
+IOMMU_UNREGISTER_INTERFACE_STATE_CHANGE_CALLBACK(
+    PIOMMU_INTERFACE_STATE_CHANGE_CALLBACK  StateChangeCallback,
+    struct _IOMMU_DMA_DEVICE*               DmaDevice
+);
+typedef IOMMU_UNREGISTER_INTERFACE_STATE_CHANGE_CALLBACK* PIOMMU_UNREGISTER_INTERFACE_STATE_CHANGE_CALLBACK;
+
+typedef 
+LOUSTATUS
+IOMMU_RESERVE_LOGICAL_ADDRESS_RANGE(
+    struct _IOMMU_DMA_DOMAIN*                   Domain,
+    SIZE                                        Size,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*          ExplicitLogicalAddress,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*          MinLogicalAddress,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS*          MaxLogicalAddress,
+    struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN**   LogicalAddressToken
+);
+typedef IOMMU_RESERVE_LOGICAL_ADDRESS_RANGE* PIOMMU_RESERVE_LOGICAL_ADDRESS_RANGE;
+
+typedef
+LOUSTATUS
+IOMMU_DEVICE_DELETE(
+    struct _IOMMU_DMA_DEVICE*   DmaDevice
+);
+typedef IOMMU_DEVICE_DELETE* PIOMMU_DEVICE_DELETE;
+
+typedef 
+LOUSTATUS
+IOMMU_FREE_RESERVED_LOGICAL_ADDRESS_RANGE(
+    struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN* Lat
+);
+typedef IOMMU_FREE_RESERVED_LOGICAL_ADDRESS_RANGE* PIOMMU_FREE_RESERVED_LOGICAL_ADDRESS_RANGE;
+
+typedef 
+LOUSTATUS
+IOMMU_MAP_RESERVED_LOGICAL_RANGE(
+    struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN*                LogicalAddressToken,
+    SIZE                                                    Offset,
+    ULONG                                                   Permissions,
+    struct _IOMMU_MAP_PHYSICAL_ADDRESS                      PhyAddressToMap, 
+    struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT  MappedSegment
+);
+typedef IOMMU_MAP_RESERVED_LOGICAL_RANGE* PIOMMU_MAP_RESERVED_LOGICAL_RANGE;
+
+typedef 
+LOUSTATUS
+IOMMU_UNMAP_RESERVED_LOGICAL_RANGE(
+    struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT* MappedSegment
+);
+typedef IOMMU_UNMAP_RESERVED_LOGICAL_RANGE* PIOMMU_UNMAP_RESERVED_LOGICAL_RANGE;
+
 typedef void* PIOMMU_DEVICE_CREATE;
-
 
 typedef struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN{
     IOMMU_DMA_LOGICAL_ADDRESS LogicalAddressBase;
@@ -826,20 +1071,6 @@ PDMA_ADAPTER IoGetDmaAdapter(
     PULONG              NumberOfMapRegisters
 );
 
-typedef union _IOMMU_DMA_DOMAIN_CREATION_FLAGS{
-    struct{
-        ULONGLONG   Reserved : 64;
-    };
-    ULONGLONG       AsUlonglong;
-}IOMMU_DMA_DOMAIN_CREATION_FLAGS, * PIOMMU_DMA_DOMAIN_CREATION_FLAGS;
-
-typedef enum _IOMMU_DMA_DOMAIN_TYPE{
-    DomainTypeTranslate = 0,
-    DomainTypePassThrough,
-    DomainTypeUnmanaged,
-    DomainTypeTranslateS1,
-    DomainTypeMax
-}IOMMU_DMA_DOMAIN_TYPE, * PIOMMU_DMA_DOMAIN_TYPE;
 
 typedef struct _IOMMU_DMA_LOGICAL_ADDRESS_TOKEN_MAPPED_SEGMENT{
     PIOMMU_DMA_LOGICAL_ADDRESS_TOKEN OwningToken;
