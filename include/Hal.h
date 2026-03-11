@@ -138,6 +138,11 @@ typedef PDMA_ADAPTER HalGetDmaAdapter(
 );
 typedef HalGetDmaAdapter* pHalGetDmaAdapter;
 
+typedef 
+LOUSTATUS 
+HalStartMirroring();
+typedef HalStartMirroring* pHalStartMirroring;
+
 typedef enum _RESOURCE_TRANSLATION_DIRECTION{
     DevicePropertyDeviceDescription = 0,
     DevicePropertyHardwareID,
@@ -204,10 +209,60 @@ typedef LOUSTATUS HalGetInterruptTranslator(
     PTRANSLATOR_INTERFACE   Translator,
     PULONG                  BridgeBusNumber
 );
+typedef HalGetInterruptTranslator* pHalGetInterruptTranslator;
 
+typedef LOUSTATUS HalEndMirroring(ULONG Pass);
+typedef HalEndMirroring*    pHalEndMirroring;
+
+//start here
+
+typedef 
+LOUSTATUS 
+HalMirrorPhysicalMemory(
+    PHYSICAL_ADDRESS    PhysicalAddress,
+    LARGE_INTEGER       NumberOfBytes
+);
+typedef HalMirrorPhysicalMemory* pHalMirrorPhysicalMemory;
+
+typedef void HalExamineMBR(
+    PDEVICE_OBJECT  Object, 
+    ULONG           SectorSize,  
+    ULONG           MbrTypeIdentifier, 
+    PVOID*          Buffer
+);
+typedef HalExamineMBR* pHalExamineMBR;
+
+typedef void HalEndOfBoot();
+typedef HalEndOfBoot* pHalEndOfBoot;
+
+typedef 
+LOUSTATUS 
+HalMirrorVerify(
+    PHYSICAL_ADDRESS    PhyAddress,
+    LARGE_INTEGER       ByteCount
+);
+typedef HalMirrorVerify* pHalMirrorVerify;
+
+typedef 
+ULONG 
+HalGetAcpiTable(
+    PVOID   AcpiTableSignature,
+    ULONG   TableIndex,
+    PVOID   AcpiTableBuffer,
+    ULONG   AcpiTableBufferSize
+);
+typedef HalGetAcpiTable* pHalGetAcpiTable;
+
+typedef void PCI_ERROR_HANDLER_CALLBACK();
+typedef PCI_ERROR_HANDLER_CALLBACK* PPCI_ERROR_HANDLER_CALLBACK;
+
+typedef void HalSetPciErrorHandlerCallback(PPCI_ERROR_HANDLER_CALLBACK Callback);
+typedef HalSetPciErrorHandlerCallback* pHalSetPciErrorHandlerCallback;
+
+typedef LOUSTATUS HalGetPrmCache(PVOID PrmInterface, PVOID PrmCacheBuffer, ULONG PrmCacheBufferSize);
+typedef HalGetPrmCache* pHalGetPrmCache;
 
 #ifndef _USER_MODE_CODE_
-
 #define LouKeHalClosePciCompanions(x) LouKeFree((PVOID)x)
 #define LouKeClosePciDeviceGroup(x) LouKeFree((uint8_t*)x)
 KERNEL_EXPORT void* LouKeHalGetPciVirtualBaseAddress(PPCI_COMMON_CONFIG Config, uint8_t BarNumber);
@@ -241,6 +296,8 @@ KERNEL_EXPORT LOUSTATUS LouKeHalInitPnpDriver();
 KERNEL_EXPORT LOUSTATUS LouKeHalInitPowerManagement(PVOID Info);
 KERNEL_EXPORT PDMA_ADAPTER LouKeHalGetDmaAdapter(PVOID Context, PDEVICE_DESCRIPTION DeviceDescription, PULONG MapRegisterCount);
 KERNEL_EXPORT LOUSTATUS LouKeHalGetInterruptTranslator(INTERFACE_TYPE ParrentInterfaceType, ULONG ParrentBussNumber, INTERFACE_TYPE BridgeInterfaceType, USHORT Size, USHORT VendorsDictionary, PTRANSLATOR_INTERFACE Translator, PULONG BridgeBusNumber);
+KERNEL_EXPORT LOUSTATUS LouKeHalStartMirroring();
+KERNEL_EXPORT LOUSTATUS LouKeHalEndMirroring(ULONG Pass);
 #ifndef _KERNEL_MODULE_
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);

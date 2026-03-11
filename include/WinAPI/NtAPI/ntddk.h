@@ -215,24 +215,6 @@ typedef struct _FILE_VALID_DATA_LENGTH_INFORMATION {
 } FILE_VALID_DATA_LENGTH_INFORMATION, * PFILE_VALID_DATA_LENGTH_INFORMATION;
 
 
-void HalExamineMBR(
-	  struct _DEVICE_OBJECT* DeviceObject,
-	  ULONG          SectorSize,
-	  ULONG          MBRTypeIdentifier,
-	 PVOID* Buffer
-);
-
-typedef void (*pHalExamineMBR)( struct _DEVICE_OBJECT*, ULONG,  ULONG,  PVOID*);
-typedef HalGetInterruptTranslator* pHalGetInterruptTranslator;
-typedef HalStartMirroring* pHalStartMirroring;
-typedef HalEndMirroring* pHalEndMirroring;
-typedef HalMirrorPhysicalMemory* pHalMirrorPhysicalMemory;
-typedef HalEndOfBoot* pHalEndOfBoot;
-typedef HalMirrorVerify* pHalMirrorVerify;
-typedef HalGetAcpiTable* pHalGetAcpiTable;
-typedef HalSetPciErrorHandlerCallback* pHalSetPciErrorHandlerCallback;
-typedef HalGetPrmCache* pHalGetPrmCache;
-
 typedef struct {
 	ULONG                          Version;
 	pHalQuerySystemInformation     HalQuerySystemInformation;

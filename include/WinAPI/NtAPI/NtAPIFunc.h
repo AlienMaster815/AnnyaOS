@@ -6,14 +6,7 @@
 
 //Filler Types Until Found
 
-typedef void* HalStartMirroring;
-typedef void* HalEndMirroring;
-typedef void* HalMirrorPhysicalMemory;
-typedef void* HalEndOfBoot;
-typedef void* HalMirrorVerify;
-typedef void* HalGetAcpiTable;
-typedef void* HalSetPciErrorHandlerCallback;
-typedef void* HalGetPrmCache;
+
 typedef void* KSYSTEM_TIME;
 typedef void* NT_PRODUCT_TYPE;
 typedef void* ALTERNATIVE_ARCHITECTURE_TYPE;

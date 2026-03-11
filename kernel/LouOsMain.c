@@ -92,7 +92,6 @@ uint64_t GetGdtBase();
 void FlushTss();
 void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
-void InitializeNtKernelTransitionLayer();
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
 void InitializeBootGraphics();
@@ -381,8 +380,6 @@ void LouOsKrnlStart(
     }
 
     InitializeFileSystemManager();
-
-    InitializeNtKernelTransitionLayer();
 
     LouKeInitializeMouseHandling();
 
