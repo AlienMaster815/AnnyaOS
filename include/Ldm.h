@@ -185,6 +185,76 @@ typedef EXPAND_STACK_CALLOUT* PEXPAND_STACK_CALLOUT;
 
 typedef ULONG KPRIORITY;
 
+typedef UCHAR KDPC_IMPORTANCE;
+
+typedef struct  _PHYSICAL_MEMORY_RANGE{
+    PHYSICAL_ADDRESS    BaseAddress;
+    LARGE_INTEGER       NumberOfBytes;
+}PHYSICAL_MEMORY_RANGE, * PPHYSICAL_MEMORY_RANGE;
+
+typedef 
+LOUSTATUS
+GET_LOCATION_STRING(
+    PVOID           Context,
+    PUNICODE_STRING LocationString
+);
+typedef GET_LOCATION_STRING* PGET_LOCATION_STRING;
+
+typedef PVOID ESILO;
+typedef ESILO* PESILO;
+
+typedef 
+void
+SILO_CONTEXT_CLEANUP_CALLBACK(
+    PVOID   SiloContext
+);
+typedef SILO_CONTEXT_CLEANUP_CALLBACK* PSILO_CONTEXT_CLEANUP_CALLBACK;
+
+typedef PVOID EJOB;
+typedef EJOB* PEJOB;
+
+typedef PVOID           SILO_MONITOR;
+typedef SILO_MONITOR    PSILO_MONITOR;
+
+typedef 
+void
+CREATE_THREAD_NOTIFY_ROUTINE(
+    HANDLE  ProcessID,
+    HANDLE  ThreadID,
+    BOOLEAN Create
+);
+typedef CREATE_THREAD_NOTIFY_ROUTINE* PCREATE_THREAD_NOTIFY_ROUTINE;
+
+typedef struct _IMAGE_INFO{
+	union{
+		ULONG       Properties;
+		struct {
+			ULONG   ImageAddressingMode     : 8;
+			ULONG   SystemModeImage         : 1;
+			ULONG   ImageMappedToAllPids    : 1;
+			ULONG   ExtendedInfoPresent     : 1;
+			ULONG   MachineTypeMismatch     : 1;
+			ULONG   ImageSignatureLevel     : 4;
+			ULONG   ImageSignatureType      : 3;
+			ULONG   ImagePartialMap         : 1;
+			ULONG   Reserved                : 12;
+		};
+	};
+	PVOID           ImageBase;
+	ULONG           ImageSelector;
+	SIZE_T          ImageSize;
+	ULONG           ImageSectionNumber;
+} IMAGE_INFO, * PIMAGE_INFO;
+
+
+typedef 
+void 
+LOAD_IMAGE_NOTIFY_ROUTINE(
+    PUNICODE_STRING FullImageName,
+    HANDLE          ProcessID,
+    PIMAGE_INFO     ImageInfo
+);
+typedef void* PLOAD_IMAGE_NOTIFY_ROUTINE;
 
 
 #include <Ldm/Drives.h>

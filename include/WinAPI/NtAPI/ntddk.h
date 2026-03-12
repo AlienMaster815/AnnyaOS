@@ -216,27 +216,6 @@ typedef struct _HARDWARE_COUNTER {
 	ULONG64               Index;
 } HARDWARE_COUNTER, * PHARDWARE_COUNTER;
 
-typedef struct _IMAGE_INFO {
-	union {
-		ULONG Properties;
-		struct {
-			ULONG ImageAddressingMode : 8;
-			ULONG SystemModeImage : 1;
-			ULONG ImageMappedToAllPids : 1;
-			ULONG ExtendedInfoPresent : 1;
-			ULONG MachineTypeMismatch : 1;
-			ULONG ImageSignatureLevel : 4;
-			ULONG ImageSignatureType : 3;
-			ULONG ImagePartialMap : 1;
-			ULONG Reserved : 12;
-		};
-	};
-	PVOID  ImageBase;
-	ULONG  ImageSelector;
-	SIZE_T ImageSize;
-	ULONG  ImageSectionNumber;
-} IMAGE_INFO, * PIMAGE_INFO;
-
 typedef struct _IMAGE_INFO_EX {
 	SIZE_T              Size;
 	IMAGE_INFO          ImageInfo;

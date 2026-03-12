@@ -6,15 +6,6 @@
 
 //Filler Types Until Found
 
-typedef void* KDPC_IMPORTANCE;
-typedef void* PPHYSICAL_MEMORY_RANGE;
-typedef void* PGET_LOCATION_STRING;
-typedef void* PESILO;
-typedef void* SILO_CONTEXT_CLEANUP_CALLBACK;
-typedef void* PEJOB;
-typedef void* PSILO_MONITOR;
-typedef void* PCREATE_THREAD_NOTIFY_ROUTINE;
-typedef void* PLOAD_IMAGE_NOTIFY_ROUTINE;
 typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE;
 typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE_EX;
 typedef void* PCORRELATION_VECTOR;

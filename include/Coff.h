@@ -4,13 +4,17 @@
 #ifdef _LOUSINE_LOADER
 #include <LouLoad.h>
 #else
+#include <Ldm.h>
+
 #ifndef __cplusplus
 #include <LouAPI.h>
 #else
 #include <LouDDK.h>
 extern "C"{
 #endif
+
 #endif
+
 
 #define COFF_PE_SIGNATURE "PE\0\0"
 
@@ -755,7 +759,21 @@ typedef struct _CFI_OBJECT{
     UINT64                  StackSize;
     UINT64                  HeapSize;
     mutex_t                 LockOutTagOut;  
-    UINT64*                 ModDependencies;  
+    UINT64*                 ModDependencies;
+    union{
+        ULONG               ImageProperties;
+        struct {
+			ULONG   ImageAddressingMode     : 8;
+			ULONG   SystemModeImage         : 1;
+			ULONG   ImageMappedToAllPids    : 1;
+			ULONG   ExtendedInfoPresent     : 1;
+			ULONG   MachineTypeMismatch     : 1;
+			ULONG   ImageSignatureLevel     : 4;
+			ULONG   ImageSignatureType      : 3;
+			ULONG   ImagePartialMap         : 1;
+			ULONG   Reserved                : 12;   
+        };
+    };
     LOUSTATUS               (*CoffCommitSection)(HANDLE, UINT64);
 }CFI_OBJECT, * PCFI_OBJECT;
 
@@ -780,6 +798,20 @@ LouKeLoadCoffImageB(
     PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
 );
+
+
+static inline 
+void CloneCfiToImageInfo(
+    PCFI_OBJECT CfiIn, 
+    PIMAGE_INFO InfoOut
+){
+    InfoOut->ImageBase = CfiIn->LoadedAddress;
+    InfoOut->ImageSize = CfiIn->LoadedSize;
+    InfoOut->ImageSelector = 0;
+    InfoOut->ImageSectionNumber = 0;
+    InfoOut->Properties = CfiIn->ImageProperties;
+}
+
 
 #endif
 
