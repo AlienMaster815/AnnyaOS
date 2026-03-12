@@ -1464,14 +1464,14 @@ typedef enum _SUBSYSTEM_INFORMATION_TYPE {
 
 
 typedef struct _WHEA_ERROR_SOURCE_OVERRIDE_SETTINGS {
-  WHEA_ERROR_SOURCE_TYPE Type;
+  LHEA_ERROR_SOURCE_TYPE Type;
   ULONG                  MaxRawDataLength;
   ULONG                  NumRecordsToPreallocate;
   ULONG                  MaxSectionsPerRecord;
 } WHEA_ERROR_SOURCE_OVERRIDE_SETTINGS, *PWHEA_ERROR_SOURCE_OVERRIDE_SETTINGS;
 
 typedef struct _WHEA_FAILED_ADD_DEFECT_LIST_EVENT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
 } WHEA_FAILED_ADD_DEFECT_LIST_EVENT, *PWHEA_FAILED_ADD_DEFECT_LIST_EVENT;
 
 typedef struct _WHEA_PCI_RECOVERY_SECTION {
@@ -1497,12 +1497,12 @@ typedef enum _WHEA_PCI_RECOVERY_STATUS {
 } WHEA_PCI_RECOVERY_STATUS, *PWHEA_PCI_RECOVERY_STATUS;
 
 typedef struct _WHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
   LOUSTATUS             Status;
 } WHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT, *PWHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT;
 
 typedef struct _WHEA_PSHED_PLUGIN_INIT_FAILED_EVENT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
   LOUSTATUS             Status;
 } WHEA_PSHED_PLUGIN_INIT_FAILED_EVENT, *PWHEA_PSHED_PLUGIN_INIT_FAILED_EVENT;
 
@@ -1519,18 +1519,18 @@ typedef struct _WHEA_SEI_SECTION {
 } WHEA_SEI_SECTION, *PWHEA_SEI_SECTION;
 
 typedef struct _WHEA_SRAS_TABLE_ENTRIES_EVENT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
   UINT32               LogNumber;
   UINT32               NumberSignals;
   UINT8*               Data;
 } WHEA_SRAS_TABLE_ENTRIES_EVENT, *PWHEA_SRAS_TABLE_ENTRIES_EVENT;
 
 typedef struct _WHEA_SRAS_TABLE_ERROR {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
 } WHEA_SRAS_TABLE_ERROR, *PWHEA_SRAS_TABLE_ERROR;
 
 typedef struct _WHEA_SRAS_TABLE_NOT_FOUND {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
 } WHEA_SRAS_TABLE_NOT_FOUND, *PWHEA_SRAS_TABLE_NOT_FOUND;
 
 //void WheaAdd2Ptr(
@@ -1539,37 +1539,37 @@ typedef struct _WHEA_SRAS_TABLE_NOT_FOUND {
 //);
 
 PVOID WheaErrorRecordBuilderAddPacket(
-    PWHEA_ERROR_RECORD    Record,
-    PWHEA_ERROR_PACKET_V2 Packet,
+    PLHEA_ERROR_RECORD    Record,
+    LHEA_ERROR_PACKET_V2 Packet,
         UINT32                MaxSectionCount
 );
 
 PVOID WheaErrorRecordBuilderAddSection(
-              PWHEA_ERROR_RECORD                         Record,
+              PLHEA_ERROR_RECORD                         Record,
                   UINT32                                     MaxSectionCount,
                   UINT32                                     SectionLength,
-                  WHEA_ERROR_RECORD_SECTION_DESCRIPTOR_FLAGS Flags,
+                  LHEA_ERROR_RECORD_SECTION_DESCRIPTOR_FLAGS Flags,
                   GUID                                       SectionType,
     PVOID                                      DescriptorOut
 );
 
 void WheaErrorRecordBuilderInit(
-  PWHEA_ERROR_RECORD  Record,
+  PLHEA_ERROR_RECORD  Record,
   UINT32              RecordLength,
-  WHEA_ERROR_SEVERITY Severity,
+  LHEA_ERROR_SEVERITY Severity,
   GUID                Notify
 );
 
 typedef struct _WHEAP_BAD_HEST_NOTIFY_DATA_EVENT {
-  WHEA_EVENT_LOG_ENTRY         WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY         WheaEventLogEntry;
   USHORT                       SourceId;
   USHORT                       Reserved;
-  WHEA_NOTIFICATION_DESCRIPTOR NotifyDesc;
+  LHEA_NOTIFICATION_DESCRIPTOR NotifyDesc;
 } WHEAP_BAD_HEST_NOTIFY_DATA_EVENT, *PWHEAP_BAD_HEST_NOTIFY_DATA_EVENT;
 
 typedef struct _WHEAP_DPC_ERROR_EVENT {
-  WHEA_EVENT_LOG_ENTRY       WheaEventLogEntry;
-  WHEAP_DPC_ERROR_EVENT_TYPE ErrType;
+  LHEA_EVENT_LOG_ENTRY       WheaEventLogEntry;
+  LHEAP_DPC_ERROR_EVENT_TYPE ErrType;
   ULONG                      Bus;
   ULONG                      Device;
   ULONG                      Function;
@@ -1578,36 +1578,36 @@ typedef struct _WHEAP_DPC_ERROR_EVENT {
 } WHEAP_DPC_ERROR_EVENT, *PWHEAP_DPC_ERROR_EVENT;
 
 typedef struct _WHEAP_PLUGIN_DEFECT_LIST_CORRUPT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
 } WHEAP_PLUGIN_DEFECT_LIST_CORRUPT, *PWHEAP_PLUGIN_DEFECT_LIST_CORRUPT;
 
 typedef struct _WHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
 } WHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT, *PWHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT;
 
 typedef struct _WHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
 } WHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED, *PWHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED;
 
 typedef struct _WHEAP_ROW_FAILURE_EVENT {
-  WHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
+  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
   PFN_NUMBER           LowOrderPage;
   PFN_NUMBER           HighOrderPage;
 } WHEAP_ROW_FAILURE_EVENT, *PWHEAP_ROW_FAILURE_EVENT;
 
 LOUSTATUS WheaRegisterErrorSourceOverride(
    WHEA_ERROR_SOURCE_OVERRIDE_SETTINGS   OverrideSettings,
-   PWHEA_ERROR_SOURCE_CONFIGURATION      OverrideConfig,
-   WHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK OverrideCallback
+   PLHEA_ERROR_SOURCE_CONFIGURATION      OverrideConfig,
+   PLHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK OverrideCallback
 );
 
 BOOLEAN WheaSignalHandlerOverride(
-                  WHEA_ERROR_SOURCE_TYPE SourceType,
+                  LHEA_ERROR_SOURCE_TYPE SourceType,
     UINT_PTR               Context
 );
 
 void WheaUnregisterErrorSourceOverride(
-   WHEA_ERROR_SOURCE_TYPE Type,
+   LHEA_ERROR_SOURCE_TYPE Type,
    ULONG32                OverrideErrorSourceId
 );
 

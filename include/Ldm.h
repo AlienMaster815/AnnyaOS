@@ -295,6 +295,25 @@ typedef struct _CORRELATION_VECTOR{
     CHAR    Vector[1];
 }CORRELATION_VECTOR, * PCORRELATION_VECTOR;
 
+typedef 
+LOUSTATUS 
+SILO_MONITOR_CREATE_CALLBACK(
+    PESILO Silo
+);
+typedef SILO_MONITOR_CREATE_CALLBACK* PSILO_MONITOR_CREATE_CALLBACK;
+
+typedef 
+void 
+SILO_MONITOR_TERMINATE_CALLBACK(
+    PESILO Silo
+);
+typedef SILO_MONITOR_TERMINATE_CALLBACK* PSILO_MONITOR_TERMINATE_CALLBACK;
+
+#include <Ldm/Lhea.h>
+
+typedef void* PFN_NUMBER;
+
+
 
 #include <Ldm/Drives.h>
 
@@ -307,6 +326,7 @@ typedef struct _CORRELATION_VECTOR{
 #include <Ldm/PepFramework.h>
 
 #include <Ldm/Lmilib.h>
+
 
 
 #ifdef __cplusplus
