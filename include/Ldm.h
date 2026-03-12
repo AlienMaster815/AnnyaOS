@@ -246,7 +246,6 @@ typedef struct _IMAGE_INFO{
 	ULONG           ImageSectionNumber;
 } IMAGE_INFO, * PIMAGE_INFO;
 
-
 typedef 
 void 
 LOAD_IMAGE_NOTIFY_ROUTINE(
@@ -255,6 +254,46 @@ LOAD_IMAGE_NOTIFY_ROUTINE(
     PIMAGE_INFO     ImageInfo
 );
 typedef void* PLOAD_IMAGE_NOTIFY_ROUTINE;
+
+typedef struct _PS_CREATE_NOTIFY_INFO{
+    SIZE                    Size;
+    union{      
+    ULONG                   Flags;
+        struct {        
+            ULONG           FileOpenNamAvailable    : 1;
+            ULONG           IsSubsystemProcess      : 1;
+            ULONG           Reserved                : 30;
+        };      
+    };      
+    HANDLE                  ParrentProcessId;
+    CLIENT_ID               CreatingThreadId;
+    struct _FILE_OBJECT*    FileObjet;
+    PCUNICODE_STRING        ImageFileName;
+    PCUNICODE_STRING        CommandLine;
+}PS_CREATE_NOTIFY_INFO, * PPS_CREATE_NOTIFY_INFO;
+
+typedef 
+void 
+CREATE_PROCESS_NOTIFY_ROUTINE(
+    HANDLE                      ParrentId,
+    HANDLE                      ProcessId,
+    PPS_CREATE_NOTIFY_INFO      CreateInfo
+);
+typedef CREATE_PROCESS_NOTIFY_ROUTINE* PCREATE_PROCESS_NOTIFY_ROUTINE;
+
+typedef 
+void 
+CREATE_PROCESS_NOTIFY_ROUTINE_EX(
+    PEPROCESS               Process,
+    HANDLE                  ProcessId,
+    PPS_CREATE_NOTIFY_INFO  CreateInfo
+);
+typedef CREATE_PROCESS_NOTIFY_ROUTINE_EX* PCREATE_PROCESS_NOTIFY_ROUTINE_EX;
+
+typedef struct _CORRELATION_VECTOR{
+    CHAR    Version;
+    CHAR    Vector[1];
+}CORRELATION_VECTOR, * PCORRELATION_VECTOR;
 
 
 #include <Ldm/Drives.h>

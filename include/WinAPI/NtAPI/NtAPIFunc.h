@@ -3,12 +3,7 @@
 #include <NtAPI.h>
 #pragma once
 
-
 //Filler Types Until Found
-
-typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE;
-typedef void* PCREATE_PROCESS_NOTIFY_ROUTINE_EX;
-typedef void* PCORRELATION_VECTOR;
 
 typedef void* SILO_MONITOR_CREATE_CALLBACK;
 typedef void* SILO_MONITOR_TERMINATE_CALLBACK;

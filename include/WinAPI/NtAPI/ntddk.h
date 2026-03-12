@@ -109,11 +109,6 @@ typedef struct _CONTROLLER_OBJECT {
 	LARGE_INTEGER Spare2;
 } CONTROLLER_OBJECT, * PCONTROLLER_OBJECT;
 
-typedef struct CORRELATION_VECTOR {
-	CHAR Version;
-	CHAR* Vector;
-} CORRELATION_VECTOR;
-
 
 typedef struct _CUSTOM_SYSTEM_EVENT_TRIGGER_CONFIG {
 	ULONG  Size;
@@ -935,13 +930,7 @@ void MmUnsecureVirtualMemory(
    HANDLE SecureHandle
 );
 
-#ifndef _CLIENT_ID_
-#define _CLIENT_ID_
-typedef struct _CLIENT_ID{
-    HANDLE  UniqueProcess;
-    HANDLE  UniqueThread;
-}CLIENT_ID, * PCLIENT_ID;
-#endif
+
 
 KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenProcess(
             PHANDLE            ProcessHandle,
@@ -1081,24 +1070,6 @@ typedef struct _PROCESS_SYSCALL_PROVIDER_INFORMATION {
   UCHAR Level;
 } PROCESS_SYSCALL_PROVIDER_INFORMATION, *PPROCESS_SYSCALL_PROVIDER_INFORMATION;
 
-
-typedef struct _PS_CREATE_NOTIFY_INFO {
-  SIZE_T              Size;
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG FileOpenNameAvailable : 1;
-	  ULONG IsSubsystemProcess : 1;
-	  ULONG Reserved : 30;
-	};
-  };
-  HANDLE              ParentProcessId;
-  CLIENT_ID           CreatingThreadId;
-  struct _FILE_OBJECT *FileObject;
-  PCUNICODE_STRING    ImageFileName;
-  PCUNICODE_STRING    CommandLine;
-  LOUSTATUS            CreationStatus;
-} PS_CREATE_NOTIFY_INFO, *PPS_CREATE_NOTIFY_INFO;
 
 void PcreateProcessNotifyRoutineEx(
 	           PEPROCESS Process,

@@ -3533,13 +3533,6 @@ PKEVENT IoCreateSynchronizationEvent(
    PHANDLE         EventHandle
 );
 
-#ifndef _CLIENT_ID_
-#define _CLIENT_ID_
-typedef struct _CLIENT_ID{
-    HANDLE  UniqueProcess;
-    HANDLE  UniqueThread;
-}CLIENT_ID, * PCLIENT_ID;
-#endif
 
 LOUSTATUS IoCreateSystemThread(
          PVOID              IoObject,
