@@ -689,18 +689,14 @@ typedef LHEA_ERROR_SOURCE_INITIALIZE* PLHEA_ERROR_SOURCE_INITIALIZE;
 typedef 
 LOUSTATUS 
 LHEA_ERROR_SOURCE_CREATE_RECORD(
-    ULONG                           Phase,
-    PLHEA_ERROR_SOURCE_DESCRIPTOR   Descriptor,
-    PVOID                           Context
+    ...
 );
 typedef LHEA_ERROR_SOURCE_CREATE_RECORD* PLHEA_ERROR_SOURCE_CREATE_RECORD;
 
 typedef 
 LOUSTATUS 
 LHEA_ERROR_SOURCE_RECOVER(
-    ULONG                           Phase,
-    PLHEA_ERROR_SOURCE_DESCRIPTOR   Descriptor,
-    PVOID                           Context
+    ...
 );
 typedef LHEA_ERROR_SOURCE_RECOVER* PLHEA_ERROR_SOURCE_RECOVER;
 

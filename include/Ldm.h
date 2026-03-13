@@ -313,13 +313,101 @@ typedef SILO_MONITOR_TERMINATE_CALLBACK* PSILO_MONITOR_TERMINATE_CALLBACK;
 
 typedef void* PFN_NUMBER;
 
+typedef 
+LOUSTATUS
+GPE_SERVICE_ROUTINE(
+    PVOID,
+    PVOID
+);
+typedef GPE_SERVICE_ROUTINE* PGPE_SERVICE_ROUTINE;
 
+typedef 
+void 
+GPE_DISCONNECT_VECTOR2(
+    PVOID   Context,
+    PVOID   ObjectContext
+);
+typedef GPE_DISCONNECT_VECTOR2* PGPE_DISCONNECT_VECTOR2;
+
+typedef 
+LOUSTATUS
+GPE_ENABLE_EVENT2(
+    PVOID   Context,
+    PVOID   ObjectContext
+);
+typedef GPE_ENABLE_EVENT2* PGPE_ENABLE_EVENT2;
+
+typedef 
+LOUSTATUS
+GPE_DISABLE_EVENT2(
+    PVOID   Context,
+    PVOID   ObjectContext
+);
+typedef GPE_DISABLE_EVENT2* PGPE_DISABLE_EVENT2;
+
+typedef 
+LOUSTATUS
+GPE_CLEAR_STATUS2(
+    PVOID   Context,
+    PVOID   ObjectContext
+);
+typedef GPE_CLEAR_STATUS2* PGPE_CLEAR_STATUS2;
+
+typedef 
+ULONG 
+DEVICE_NOTIFTY_CALLBACK(
+    PVOID   Context,
+    ULONG   Type,
+    PVOID   Settings
+);
+typedef DEVICE_NOTIFTY_CALLBACK* PDEVICE_NOTIFTY_CALLBACK;
+
+typedef
+LOUSTATUS 
+REGISTER_FOR_DEVICE_NOTIFICATIONS2(
+    PVOID                       Context,
+    PDEVICE_NOTIFTY_CALLBACK    Notify,
+    PVOID                       NotificationContext
+);
+typedef REGISTER_FOR_DEVICE_NOTIFICATIONS2* PREGISTER_FOR_DEVICE_NOTIFICATIONS2;
 
 #include <Ldm/Drives.h>
 
 #include <Ldm/Dma.h>
 
 #include <Ldm/miniport.h>
+
+typedef 
+LOUSTATUS 
+GPE_CONNECT_VECTOR2(
+    PVOID                   Context,
+    ULONG                   GpeNumber,
+    KINTERRUPT_MODE         Mode,
+    BOOLEAN                 Shareable,
+    PGPE_SERVICE_ROUTINE    ServiceRoutine,
+    PVOID                   ServiceContext,
+    PVOID*                  ObjectContext
+);
+typedef GPE_CONNECT_VECTOR2* PGPE_CONNECT_VECTOR2;
+
+typedef 
+void
+UNREGISTER_FOR_DEVICE_NOTIFICATIONS2(
+    PVOID   Conteext
+);
+typedef UNREGISTER_FOR_DEVICE_NOTIFICATIONS2* PUNREGISTER_FOR_DEVICE_NOTIFICATIONS2;
+
+typedef
+BOOLEAN TRANSLATE_BUS_ADDRESS(
+    PVOID               Context,
+    PHYSICAL_ADDRESS    BusAddress,
+    ULONG               Length,
+    PULONG              AddressSpace,
+    PPHYSICAL_ADDRESS   TranslatedAddress
+);
+typedef TRANSLATE_BUS_ADDRESS *PTRANSLATE_BUS_ADDRESS;
+
+
 
 #include <Hal.h>
 

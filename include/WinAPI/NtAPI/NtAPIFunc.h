@@ -5,16 +5,6 @@
 
 //Filler Types Until Found
 
-
-typedef void* PGPE_CONNECT_VECTOR2;
-typedef void* PGPE_DISCONNECT_VECTOR2;
-typedef void* PGPE_ENABLE_EVENT2;
-typedef void* PGPE_DISABLE_EVENT2;
-typedef void* PGPE_CLEAR_STATUS2;
-typedef void* PREGISTER_FOR_DEVICE_NOTIFICATIONS2;
-typedef void* PUNREGISTER_FOR_DEVICE_NOTIFICATIONS2;
-typedef void* PTRANSLATE_BUS_ADDRESS;
-typedef void* PGET_DMA_ADAPTER;
 typedef void* PGET_SET_DEVICE_DATA;
 typedef void* PGET_UPDATED_BUS_RESOURCE;
 typedef void* PCLFS_CLIENT_ADVANCE_TAIL_CALLBACK;

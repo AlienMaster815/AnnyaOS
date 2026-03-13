@@ -1120,6 +1120,14 @@ typedef struct _IOMMU_DMA_DEVICE_INFORMATION{
     BOOLEAN PasidFaultsSuppressed;
 }IOMMU_DMA_DEVICE_INFORMATION, * PIOMMU_DMA_DEVICE_INFORMATION;
 
+typedef 
+PDMA_ADAPTER
+GET_DMA_ADAPTER(
+    PVOID                       Context,
+    struct _DEVICE_DESCRIPTION* DeviceDescriptor,
+    PULONG                      NumberOfMapRegisters    
+);
+typedef GET_DMA_ADAPTER* PGET_DMA_ADAPTER;
 
 
 #ifndef _USER_MODE_CODE_
