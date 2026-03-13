@@ -9,6 +9,8 @@ extern "C" {
 
 #define OPAQUE_ARRAY_SIZE 1
 
+typedef PVOID OPAQUE_PTR;
+
 typedef struct _OFFSETINSTANCEDATAANDLENGTH {
     ULONG OffsetInstanceData;
     ULONG LengthInstanceData;
@@ -781,7 +783,208 @@ typedef struct _POOL_EXTENDED_PARAMETER{
 
 typedef const POOL_EXTENDED_PARAMETER CPOOL_EXTENDED_PARAMETER, * PCPOOL_EXTENDED_PARAMETER;
 
+typedef PVOID PEX_TIMER;
 
+typedef struct _PCW_COUNTER_INFORMATION{
+    ULONG64             CounterMask;
+    PCUNICODE_STRING    InstanceMask;
+}PCW_COUNTER_INFORMATION, * PPCW_COUNTER_INFORMATION;
+
+typedef PVOID PCW_BUFFER, * PPCW_BUFFER;
+
+typedef struct _PCW_MASK_INFORMATION{
+    ULONG64           CounterMask;
+    PCUNICODE_STRING  InstanceMask;
+    ULONG             InstanceId;
+    BOOLEAN           CollectMultiple;
+    PPCW_BUFFER       Buffer;
+    PKEVENT           CancelEvent;
+}PCW_MASK_INFORMATION, * PPCW_MASK_INFORMATION;
+
+typedef union _PCW_CALLBACK_INFORMATION{
+    PCW_COUNTER_INFORMATION   AddCounter;
+    PCW_COUNTER_INFORMATION   RemoveCounter;
+    PCW_MASK_INFORMATION      EnumerateInstances;
+    PCW_MASK_INFORMATION      CollectData;
+}PCW_CALLBACK_INFORMATION, * PPCW_CALLBACK_INFORMATION;
+
+typedef enum _PCW_CALLBACK_TYPE{
+    PcwCallbackAddCounter = 0,
+    PcwCallbackRemoveCounter,
+    PcwCallbackEnumerateInstances,
+    PcwCallbackCollectData
+}PCW_CALLBACK_TYPE, * PPCW_CALLBACK_TYPE;
+
+typedef 
+LOUSTATUS 
+EXT_CALLBACK(
+    PCW_CALLBACK_TYPE           Type,
+    PPCW_CALLBACK_INFORMATION   Info,
+    PVOID                       Context
+);
+typedef EXT_CALLBACK* PEXT_CALLBACK;
+
+typedef OPAQUE_PTR PEXT_CANCEL_PARAMETERS;
+typedef OPAQUE_PTR PCALLBACK_OBJECT;
+typedef HANDLE TRACEHANDLE;
+typedef OPAQUE_PTR PAFFINITY_TOKEN;
+typedef OPAQUE_PTR PRKSEMAPHORE;
+typedef OPAQUE_PTR PKTIMER;
+typedef OPAQUE_PTR PKTRIAGE_DUMP_DATA_ARRAY;
+typedef OPAQUE_PTR PKGUARDED_MUTEX;
+typedef OPAQUE_PTR PPFN_NUMBER;
+typedef PVOID PVOID64;
+typedef KIRQL* PKIRQL;
+typedef HANDLE PKLOCK_QUEUE_HANDLE;
+typedef OPAQUE_PTR PUOW;
+typedef OPAQUE_PTR PRKTM;
+typedef OPAQUE_PTR PKTM;
+typedef OPAQUE_PTR DEVPROPTYPE, * PDEVPROPTYPE;
+typedef OPAQUE_PTR ERESOURCE_THREAD;
+typedef OPAQUE_PTR PXSTATE_SAVE;
+typedef OPAQUE_PTR PKFLOATING_SAVE;
+typedef OPAQUE_PTR PKRESOURCEMANAGER;
+typedef OPAQUE_PTR PRKRESOURCEMANAGER;
+typedef OPAQUE_PTR PKTRANSACTION;
+typedef OPAQUE_PTR PKENLISTMENT;
+typedef OPAQUE_PTR POBJECT_TYPE;
+typedef OPAQUE_PTR _IORING_OBJECT;
+typedef OPAQUE_PTR PIO_CSQ;
+typedef OPAQUE_PTR PPOWER_SEQUENCE;
+typedef OPAQUE_PTR PIO_CSQ_IRP_CONTEXT;
+typedef OPAQUE_PTR PIO_WORKITEM;
+typedef OPAQUE_PTR PSHARE_ACCESS;
+
+
+typedef enum _OB_OPERATION{
+    CreateHandle = 0,
+    DuplicateHandle,
+}OB_OPERATION, * POB_OPERATION;
+
+typedef enum _DIRECTORY_NOTIFY_INFORMATION_CLASS{
+    DirectoryNotifyInformation = 0,
+    DirectoryNotifyExtendedInformation,
+    DirectoryNotifyFullInformation,
+    DirectoryNotifyMaximumInformation,
+}DIRECTORY_NOTIFY_INFORMATION_CLASS, * PDIRECTORY_NOTIFY_INFORMATION_CLASS;
+
+typedef struct _OBJECT_HANDLE_INFORMATION{
+    ULONG       HandleAttributes;
+    ACCESS_MASK GrantedAccess;
+}OBJECT_HANDLE_INFORMATION, * POBJECT_HANDLE_INFORMATION;
+
+typedef 
+LOUSTATUS
+RTL_QUERY_REGISTRY_ROUTINE(
+    PWSTR   ValueName,
+    ULONG   ValueType,
+    PVOID   ValueData,
+    ULONG   ValueLength,
+    PVOID   Context,
+    PVOID   EntryContext
+);
+typedef RTL_QUERY_REGISTRY_ROUTINE* PRTL_QUERY_REGISTRY_ROUTINE;
+
+typedef struct _RTL_QUERY_REGISTRY_TABLE{
+    PRTL_QUERY_REGISTRY_ROUTINE QueryRoutine;
+    ULONG                       Flags;
+    PWSTR                       Name;
+    PVOID                       EntryContext;
+    ULONG                       DefaultType;
+    PVOID                       DefaultData;
+    ULONG                       DefaultLength;
+}RTL_QUERY_REGISTRY_TABLE, * PRTL_QUERY_REGISTRY_TABLE;
+
+typedef enum _MM_SYSTEMSIZE {
+    MmSmallSystem = 0,
+    MmMediumSystem,
+    MmLargeSystem,
+    MmMaximumSystemSize,
+}MM_SYSTEMSIZE, * PMM_SYSTEMSIZE;
+
+typedef PGUID REFGUID;
+
+typedef 
+LOUSTATUS 
+TM_RM_NOTIFICATION(
+    PVOID   EnlistmentObject,
+    PVOID   RMContext,
+    PVOID   TransactionContext,
+    ULONG   TransactionNotification,
+    PVOID   Argument,
+    ULONG   ArgumentLength
+);
+typedef TM_RM_NOTIFICATION* PTM_RM_NOTIFICATION;
+
+typedef struct _SECTION_OBJECT_POINTERS{
+    PVOID     DataSectionObject;
+    PVOID     SharedCacheMap;
+    PVOID     ImageSectionObject;
+}SECTION_OBJECT_POINTERS, * PSECTION_OBJECT_POINTERS;
+
+typedef struct _DEVPROPKEY{
+    GUID    Fmtid;
+    ULONG   Pid;
+}DEVPROPKEY, * PDEVPROPKEY;;
+
+typedef STRING UTF8_STRING, * PUTF8_STRING;
+
+typedef enum _TRANSACTIONMANAGER_INFORMATION_CLASS{
+    TransactionManagerBasicInformation = 0,
+    TransactionManagerLogInformation,
+    TransactionManagerLogPathInformation,
+    TransactionManagerRecoveryInformation,
+    TransactionManagerOnlineProbeInformation
+}TRANSACTIONMANAGER_INFORMATION_CLASS, * PTRANSACTIONMANAGER_INFORMATION_CLASS;
+
+typedef struct _SECURITY_SUBJECT_CONTEXT{
+    PACCESS_TOKEN                ClientToken;
+    SECURITY_IMPERSONATION_LEVEL ImpersonationLevel;
+    PACCESS_TOKEN                PrimaryToken;
+    PVOID                        ProcessAuditId;
+}SECURITY_SUBJECT_CONTEXT, * PSECURITY_SUBJECT_CONTEXT;
+
+typedef PRIVILEGE_SET INITIAL_PRIVILEGE_SET;
+
+typedef struct _ACCESS_STATE{
+    LUID                        OperationID;
+    BOOLEAN                     SecurityEvaluated;
+    BOOLEAN                     GenerateAudit;
+    BOOLEAN                     GenerateOnClose;
+    BOOLEAN                     PrivilegesAllocated;
+    ULONG                       Flags;
+    ACCESS_MASK                 RemainingDesiredAccess;
+    ACCESS_MASK                 PreviouslyGrantedAccess;
+    ACCESS_MASK                 OriginalDesiredAccess;
+    SECURITY_SUBJECT_CONTEXT    SubjectSecurityContext;
+    PSECURITY_DESCRIPTOR        SecurityDescriptor;
+    PVOID                       AuxData;
+    union {
+        INITIAL_PRIVILEGE_SET   InitialPrivilegeSet;
+        PRIVILEGE_SET           PrivilegeSet;
+    }                           Privileges;
+    BOOLEAN                     AuditPrivileges;
+    UNICODE_STRING              ObjectName;
+    UNICODE_STRING              ObjectTypeName;
+}ACCESS_STATE, * PACCESS_STATE;
+
+typedef 
+ULONG_PTR 
+KIPI_BROADCAST_WORKER(
+    ULONG_PTR   Arg
+);
+typedef KIPI_BROADCAST_WORKER* PKIPI_BROADCAST_WORKER;
+
+typedef 
+LOUSTATUS 
+FPGA_CONTROL_LINK(
+    PVOID       Context,
+    BOOLEAN     Enable
+);
+typedef FPGA_CONTROL_LINK* PFPGA_CONTROL_LINK;
+
+typedef USHORT RTL_ATOM;
+typedef RTL_ATOM* PRTL_ATOM;
 
 #include <Ldm/Clfs.h>
 
@@ -791,6 +994,10 @@ typedef const POOL_EXTENDED_PARAMETER CPOOL_EXTENDED_PARAMETER, * PCPOOL_EXTENDE
 
 #include <Ldm/Lmilib.h>
 
+typedef struct _TOKEN_PRIVALEDGES{
+    DWORD               PrivaledgeCount;
+    LUID_AND_ATTRIBUTES Priviledges[];
+}TOKEN_PRIVALEDGES, * PTOKEN_PRIVALEDGES;
 
 
 #ifdef __cplusplus

@@ -63,7 +63,7 @@ typedef uint32_t    uintptr_t;
 typedef int32_t     SSIZE_T;
 #endif
 
-typedef size_t      SIZE, SIZE_T; 
+typedef size_t      SIZE, SIZE_T, * PSIZE_T; 
 typedef uintptr_t   UINTPTR;
 
 typedef struct _uint48_t{

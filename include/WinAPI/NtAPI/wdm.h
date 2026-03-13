@@ -291,11 +291,7 @@ typedef enum _SE_IMAGE_TYPE {
 } SE_IMAGE_TYPE, * PSE_IMAGE_TYPE;
 
 
-typedef struct _SECTION_OBJECT_POINTERS {
-    PVOID DataSectionObject;
-    PVOID SharedCacheMap;
-    PVOID ImageSectionObject;
-} SECTION_OBJECT_POINTERS;
+
 
 typedef struct _REENUMERATE_SELF_INTERFACE_STANDARD {
    USHORT                 Size;
@@ -4333,8 +4329,8 @@ KIRQL KeAcquireInterruptSpinLock(
 );
 
 void KeAcquireSpinLock(
-   SpinLock,
-   OldIrql
+   PKSPIN_LOCK  SpinLock,
+   KIRQL        OldIrql
 );
 
 void KeAcquireSpinLockAtDpcLevel(
