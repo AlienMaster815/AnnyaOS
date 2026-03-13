@@ -85,7 +85,7 @@ typedef struct _MEMORY_RANGE_ENTRY{
 
 typedef const char* PCSZ;
 
-typedef const LPGUID LPCGUID;
+typedef const PGUID PCGUID, LPCGUID;
 
 typedef enum _EMULATOR_PORT_ACCESS_TYPE{
     Uchar = 0,
@@ -407,7 +407,302 @@ BOOLEAN TRANSLATE_BUS_ADDRESS(
 );
 typedef TRANSLATE_BUS_ADDRESS *PTRANSLATE_BUS_ADDRESS;
 
+typedef 
+ULONG 
+GET_SET_DEVICE_DATA(
+    PVOID Context,
+    ULONG DataType,
+    PVOID Buffer,
+    ULONG Offset,
+    ULONG Length
+);
+typedef GET_SET_DEVICE_DATA* PGET_SET_DEVICE_DATA;
 
+
+typedef 
+LOUSTATUS
+GET_UPDATED_BUS_RESOURCE(
+    PVOID               Context,
+    PCM_RESOURCE_LIST*  UpdatedResourceList,
+    PCM_RESOURCE_LIST*  UpdatedTranslatedResourceList
+);
+typedef GET_UPDATED_BUS_RESOURCE* PGET_UPDATED_BUS_RESOURCE;
+
+typedef void* PLOG_FILE_OBJECT;
+typedef PLOG_FILE_OBJECT* PPLOG_FILE_OBJECT;
+
+typedef enum _POOL_TYPE{
+    NonPagedPool                            = 0,
+    NonPagedPoolExecute                     = NonPagedPool,
+    PagedPool,
+    NonPagedPoolMustSucceed                 = NonPagedPool + 2,
+    DontUseThisType,
+    NonPagedPoolCacheAligned                = NonPagedPool + 4,
+    PagedPoolCacheAligned,
+    NonPagedPoolCacheAlignedMustS           = NonPagedPool + 6,
+    MaxPoolType,
+    NonPagedPoolBase                        = 0,
+    NonPagedPoolBaseMustSucceed             = NonPagedPoolBase + 2,
+    NonPagedPoolBaseCacheAligned            = NonPagedPoolBase + 4,
+    NonPagedPoolBaseCacheAlignedMustS       = NonPagedPoolBase + 6,
+    NonPagedPoolSession                     = 32,
+    PagedPoolSession                        = NonPagedPoolSession + 1,
+    NonPagedPoolMustSucceedSession          = PagedPoolSession + 1,
+    DontUseThisTypeSession                  = NonPagedPoolMustSucceedSession + 1,
+    NonPagedPoolCacheAlignedSession         = DontUseThisTypeSession + 1,
+    PagedPoolCacheAlignedSession            = NonPagedPoolCacheAlignedSession + 1,
+    NonPagedPoolCacheAlignedMustSSession    = PagedPoolCacheAlignedSession + 1,
+    NonPagedPoolNx                          = 512,
+    NonPagedPoolNxCacheAligned              = NonPagedPoolNx + 4,
+    NonPagedPoolSessionNx                   = NonPagedPoolNx + 32,
+}POOL_TYPE, * PPOOL_TYPE;
+
+typedef 
+PVOID 
+ALLOCATE_FUNCTION(
+    POOL_TYPE   PoolType,
+    SIZE        NumberOfBytes,
+    ULONG       Tag
+);
+typedef ALLOCATE_FUNCTION* PALLOCATE_FUNCTION;
+
+typedef 
+void 
+FREE_FUNCTION(
+    PVOID Buffer
+);
+typedef FREE_FUNCTION* PFREE_FUNCTION;
+
+typedef 
+LOUSTATUS
+EX_CALLBACK_FUNCTION(
+    PVOID   CallbackContext,
+    PVOID   Argument1,
+    PVOID   Argument2
+);
+typedef EX_CALLBACK_FUNCTION* PEX_CALLBACK_FUNCTION;
+
+typedef 
+void
+SET_D3COLD_SUPPORT(
+    PVOID   Context,
+    BOOLEAN D3ColdSupport
+);
+typedef SET_D3COLD_SUPPORT* PSET_D3COLD_SUPPORT;
+
+typedef 
+void 
+D3COLD_REQUEST_CORE_POWER_RAIL(
+    PVOID Context,
+    BOOLEAN CorePowerRailNeeded
+);
+typedef D3COLD_REQUEST_CORE_POWER_RAIL* PD3COLD_REQUEST_CORE_POWER_RAIL;
+
+typedef 
+LOUSTATUS 
+D3COLD_REQUEST_AUX_POWER(
+    PVOID   Context,
+    ULONG   AuxPortInMilliWats,
+    PULONG  RetryInSeconds
+);
+typedef D3COLD_REQUEST_AUX_POWER* PD3COLD_REQUEST_AUX_POWER;
+
+typedef 
+LOUSTATUS 
+D3COLD_REQUEST_PERST_DELAY(
+    PVOID   Context,
+    ULONG   DelayInMicroSeconds
+);
+typedef D3COLD_REQUEST_PERST_DELAY* PD3COLD_REQUEST_PERST_DELAY;
+
+typedef enum _DEVICE_WAKE_DEPTH{
+    DeviceWakeDepthNotWakeable = 0,
+    DeviceWakeDepthD0,
+    DeviceWakeDepthD1,
+    DeviceWakeDepthD2,
+    DeviceWakeDepthD3hot,
+    DeviceWakeDepthD3cold,
+    DeviceWakeDepthMaximum
+}DEVICE_WAKE_DEPTH, * PDEVICE_WAKE_DEPTH;
+
+typedef 
+LOUSTATUS 
+GET_IDLE_WAKE_INFO(
+    PVOID               Context,
+    SYSTEM_POWER_STATE  SystemPowerState,
+    PDEVICE_WAKE_DEPTH  DeepestWakeDepth
+);
+typedef GET_IDLE_WAKE_INFO* PGET_IDLE_WAKE_INFO;
+
+typedef 
+LOUSTATUS 
+GET_D3COLD_CAPABILITY(
+    PVOID       Context,
+    PBOOLEAN    D3ColdSupported
+);
+typedef GET_D3COLD_CAPABILITY* PGET_D3COLD_CAPABILITY;
+
+typedef enum _D3COLD_LAST_TRANSITION_STATUS{
+    LastDStateTransitionStatusUnknown = 0,
+    LastDStateTransitionD3hot,
+    LastDStateTransitionD3cold
+}D3COLD_LAST_TRANSITION_STATUS, * PD3COLD_LAST_TRANSITION_STATUS;
+
+typedef 
+void 
+GET_D3COLD_LAST_TRANSITION_STATUS(
+    PVOID                           Context,
+    PD3COLD_LAST_TRANSITION_STATUS  LastTransitionStatus
+);
+typedef GET_D3COLD_LAST_TRANSITION_STATUS* PGET_D3COLD_LAST_TRANSITION_STATUS;
+
+typedef enum _FAULT_INFORMATION_ARCH{
+    FaultInformationInvalid,
+    FaultInformationArm64,
+    FaultInformationX64
+}FAULT_INFORMATION_ARCH, * PFAULT_INFORMATION_ARCH;
+
+typedef enum _FAULT_INFORMATION_ARM64_TYPE{
+    UnsupportedUpstreamTransaction = 0,
+    AddressSizeFault,
+    TlbMatchConflict,
+    ExternalFault,
+    PermissionFault,
+    AccessFlagFault,
+    TranslationFault,
+    MaxFaultType
+}FAULT_INFORMATION_ARM64_TYPE, * PFAULT_INFORMATION_ARM64_TYPE, 
+    FAULT_INFORMATION_X64_TYPE, * PFAULT_INFORMATION_X64_TYPE;
+
+typedef struct _FAULT_INFORMATION_ARM64_FLAGS{
+    ULONG   WriteNotRead        :   1;
+    ULONG   InstructionNotData  :   1;
+    ULONG   Privaledged         :   1;
+    ULONG   FaultAddressValid   :   1;
+    ULONG   Reserved            :   28;
+}FAULT_INFORMATION_ARM64_FLAGS, * PFAULT_INFORMATION_ARM64_FLAGS,
+    FAULT_INFORMATION_X64_FLAGS, * PFAULT_INFORMATION_X64_FLAGS;
+
+typedef struct _FAULT_INFORMATION_ARM64{
+    PVOID                           DomainHandle;
+    PVOID                           FaultAddress;
+    PDEVICE_OBJECT                  DeviceObject;
+    FAULT_INFORMATION_ARM64_FLAGS   Flags;
+    FAULT_INFORMATION_ARM64_TYPE    Type;
+    ULONG64                         IommuBaseAddress;
+}FAULT_INFORMATION_ARM64, * PFAULT_INFORMATION_ARM64;
+
+typedef struct _FAULT_INFORMATION_X64{
+    PVOID                           DomainHandle;
+    PVOID                           FaultAddress;
+    PDEVICE_OBJECT                  DeviceObject;
+    FAULT_INFORMATION_X64_FLAGS     Flags;
+    FAULT_INFORMATION_X64_TYPE      Type;
+    ULONG64                         IommuBaseAddress;
+}FAULT_INFORMATION_X64, * PFAULT_INFORMATION_X64;
+
+typedef struct _FAULT_INFORMATION{
+    FAULT_INFORMATION_ARCH          Type;
+    BOOLEAN                         Stage1;
+    union{
+        FAULT_INFORMATION_ARM64     Arm64;
+        FAULT_INFORMATION_X64       X64;
+    };
+}FAULT_INFORMATION, * PFAULT_INFORMATION;
+
+typedef 
+void 
+IOMMU_DEVICE_FAULT_HANDLER(
+    PVOID               Context,
+    PFAULT_INFORMATION  FaultInfo
+);
+typedef IOMMU_DEVICE_FAULT_HANDLER* PIOMMU_DEVICE_FAULT_HANDLER;
+
+typedef enum _DEVICE_RESET_TYPE{
+    FunctionLevelDeviceReset = 0,
+    PlatformLevelDeviceReset,
+}DEVICE_RESET_TYPE, * PDEVICE_RESET_TYPE;
+
+typedef 
+LOUSTATUS 
+DEVICE_RESET_HANDLER(
+    PVOID               InterfaceContext,
+    DEVICE_RESET_TYPE   ResetType,
+    ULONG               Flags,
+    PVOID               ResetParameters
+);
+typedef DEVICE_RESET_HANDLER* PDEVICE_RESET_HANDLER;
+
+typedef union _BUS_SPECIFIC_RESET_FLAGS{
+    struct {
+        ULONGLONG KeepStackReset    : 1;
+        ULONGLONG Reserved          : 63;
+    };
+    ULONGLONG AsULONGLONG;
+}BUS_SPECIFIC_RESET_FLAGS, * PBUS_SPECIFIC_RESET_FLAGS;
+
+typedef union _DEVICE_BUS_SPECIFIC_RESET_TYPE{
+    struct {
+        ULONGLONG FunctionLevelDeviceReset : 1;
+        ULONGLONG PlatformLevelDeviceReset : 1;
+        ULONGLONG SecondaryBusReset : 1;
+        ULONGLONG Reserved : 61;
+    } Pci;
+    struct {
+        ULONGLONG FunctionLevelDeviceReset : 1;
+        ULONGLONG PlatformLevelDeviceReset : 1;
+        ULONGLONG Reserved : 62;
+    } Acpi;
+    ULONGLONG AsULONGLONG;
+}DEVICE_BUS_SPECIFIC_RESET_TYPE, * PDEVICE_BUS_SPECIFIC_RESET_TYPE;
+
+typedef struct _DEVICE_BUS_SPECIFIC_RESET_INFO{
+    GUID                           BusTypeGuid;
+    DEVICE_BUS_SPECIFIC_RESET_TYPE ResetTypeSupported;
+}DEVICE_BUS_SPECIFIC_RESET_INFO, * PDEVICE_BUS_SPECIFIC_RESET_INFO;
+
+typedef 
+LOUSTATUS 
+DEVICE_QUERY_BUS_SPECIFIC_RESET_HANDLER(
+    PVOID                               InterfaceContext,
+    PULONG                              ResetInfoCount,
+    PDEVICE_BUS_SPECIFIC_RESET_INFO     ResetInfoSupported
+);
+typedef DEVICE_QUERY_BUS_SPECIFIC_RESET_HANDLER* PDEVICE_QUERY_BUS_SPECIFIC_RESET_HANDLER;
+
+typedef 
+LOUSTATUS 
+DEVICE_BUS_SPECIFIC_RESET_HANDLER(
+    PVOID                               InterfaceContext,
+    PCGUID                              ButType,
+    DEVICE_BUS_SPECIFIC_RESET_TYPE      ResetTypeSelected,
+    PBUS_SPECIFIC_RESET_FLAGS           Flags,
+    PVOID                               ResetParameters
+);
+typedef DEVICE_BUS_SPECIFIC_RESET_HANDLER* PDEVICE_BUS_SPECIFIC_RESET_HANDLER;
+
+
+typedef union _DEVICE_RESET_STATUS_FLAGS{
+  struct{
+    ULONGLONG   KeepStackReset          : 1;
+    ULONGLONG   RecoveringFromBusError  : 1;
+    ULONGLONG   Reserved                : 62;
+  };
+  ULONGLONG     AsUlonglong;
+}DEVICE_RESET_STATUS_FLAGS, * PDEVICE_RESET_STATUS_FLAGS;
+
+typedef
+LOUSTATUS
+GET_DEVICE_RESET_STATUS(
+    PVOID                           InterfaceContext,
+    PBOOLEAN                        Resetting,
+    PDEVICE_BUS_SPECIFIC_RESET_TYPE ResetTypeSelected,
+    PDEVICE_RESET_STATUS_FLAGS      Flags
+); 
+typedef GET_DEVICE_RESET_STATUS* PGET_DEVICE_RESET_STATUS;
+
+
+#include <Ldm/Clfs.h>
 
 #include <Hal.h>
 

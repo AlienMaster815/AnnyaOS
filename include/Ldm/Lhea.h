@@ -1,6 +1,10 @@
 #ifndef _LHEA_H
 #define _LHEA_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum _LHEA_ERROR_SOURCE_TYPE{
     LheaErrSrcTypeMCE = 0,
     LheaErrSrcTypeCMC,
@@ -727,6 +731,7 @@ typedef LHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK *PLHEA_SIGNAL_HANDLER_OVERRIDE_CAL
 
 
 
-
-
+#ifdef __cplusplus
+}
+#endif
 #endif

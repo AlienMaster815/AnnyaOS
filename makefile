@@ -128,13 +128,13 @@ $(driver_cpp_object_files): build/drivers/%.o : drivers/%.cpp
 	
 
 
-$(x86_64_API_cpp_object_files): build/x86_64/API/%.o : API/%.cpp
+$(x86_64_API_cpp_object_files): build/x86_64/API/LouAPI%.o : API/LouAPI%.cpp
 	mkdir -p $(dir $@) && \
-	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/x86_64/API/%.o, API/%.cpp, $@) -o $@ -lc
+	$(CP) $(C_COMPILE_FLAGS) $(CPPFLAGS) $(patsubst build/x86_64/API/LouAPI%.o, API/LouAPI%.cpp, $@) -o $@ -lc
 
-$(x86_64_API_asm_object_files): build/x86_64/asm/API/%.o : API/%.asm
+$(x86_64_API_asm_object_files): build/x86_64/asm/API/LouAPI%.o : API/LouAPI%.asm
 	mkdir -p $(dir $@) && \
-	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/x86_64/asm/API/%.o, API/%.asm, $@) -o $@
+	nasm -f $(NASM_COMPILE_FLAGS) $(patsubst build/x86_64/asm/API/LouAPI%.o, API/LouAPI%.asm, $@) -o $@
 
 
 $(x86_64_asm_object_files): $(x86_64_asm_source_files)
@@ -165,8 +165,6 @@ lou.exe: Libs $(x86_64_object_files) $(kernel_object_files)
 release: lou.exe
 	mkdir -p release/x86_64 && \
 	cp dist/x86_64/LOUOSKRNL.EXE release/x86_64/LOUOSKRNL.exe
-
-
 
 KernelModules:
 

@@ -19,32 +19,6 @@ typedef enum _IO_NOTIFICATION_EVENT_CATEGORY {
     EventCategoryKernelSoftRestart
 } IO_NOTIFICATION_EVENT_CATEGORY;
 
-typedef enum _POOL_TYPE {
-    NonPagedPool,
-    NonPagedPoolExecute = NonPagedPool,
-    PagedPool,
-    NonPagedPoolMustSucceed = NonPagedPool + 2,
-    DontUseThisType,
-    NonPagedPoolCacheAligned = NonPagedPool + 4,
-    PagedPoolCacheAligned,
-    NonPagedPoolCacheAlignedMustS = NonPagedPool + 6,
-    MaxPoolType,
-    NonPagedPoolBase = 0,
-    NonPagedPoolBaseMustSucceed = NonPagedPoolBase + 2,
-    NonPagedPoolBaseCacheAligned = NonPagedPoolBase + 4,
-    NonPagedPoolBaseCacheAlignedMustS = NonPagedPoolBase + 6,
-    NonPagedPoolSession = 32,
-    PagedPoolSession = NonPagedPoolSession + 1,
-    NonPagedPoolMustSucceedSession = PagedPoolSession + 1,
-    DontUseThisTypeSession = NonPagedPoolMustSucceedSession + 1,
-    NonPagedPoolCacheAlignedSession = DontUseThisTypeSession + 1,
-    PagedPoolCacheAlignedSession = NonPagedPoolCacheAlignedSession + 1,
-    NonPagedPoolCacheAlignedMustSSession = PagedPoolCacheAlignedSession + 1,
-    NonPagedPoolNx = 512,
-    NonPagedPoolNxCacheAligned = NonPagedPoolNx + 4,
-    NonPagedPoolSessionNx = NonPagedPoolNx + 32,
-
-} POOL_TYPE;
 
 
 typedef enum _IOMMU_MAP_PHYSICAL_ADDRESS_TYPE {
@@ -1173,14 +1147,6 @@ typedef struct _BUS_RESOURCE_UPDATE_INTERFACE {
   PGET_UPDATED_BUS_RESOURCE GetUpdatedBusResource;
 } BUS_RESOURCE_UPDATE_INTERFACE, *PBUS_RESOURCE_UPDATE_INTERFACE;
 
-typedef union _BUS_SPECIFIC_RESET_FLAGS {
-  struct {
-    ULONGLONG KeepStackReset : 1;
-    ULONGLONG Reserved : 63;
-  } u;
-  ULONGLONG AsUlonglong;
-} BUS_SPECIFIC_RESET_FLAGS, *PBUS_SPECIFIC_RESET_FLAGS;
-
 typedef enum _CLFS_CONTEXT_MODE {
   ClfsContextNone,
   ClfsContextUndoNext,
@@ -1266,19 +1232,6 @@ typedef struct _CLFS_STREAM_ID_INFORMATION {
 } CLFS_STREAM_ID_INFORMATION, *PCLFS_STREAM_ID_INFORMATION, PPCLFS_STREAM_ID_INFORMATION;
 
 
-typedef struct _CLS_CONTAINER_INFORMATION {
-    ULONG                FileAttributes;
-    ULONGLONG            CreationTime;
-    ULONGLONG            LastAccessTime;
-    ULONGLONG            LastWriteTime;
-    LONGLONG             ContainerSize;
-    ULONG                FileNameActualLength;
-    ULONG                FileNameLength;
-    WCHAR*               FileName;
-    CLFS_CONTAINER_STATE State;
-    CLFS_CONTAINER_ID    PhysicalContainerId;
-    CLFS_CONTAINER_ID    LogicalContainerId;
-} CLS_CONTAINER_INFORMATION, * PCLS_CONTAINER_INFORMATION, PPCLS_CONTAINER_INFORMATION;
 
 typedef struct _CLS_INFORMATION {
     LONGLONG  TotalAvailable;
@@ -1310,14 +1263,6 @@ typedef struct _CLS_IO_STATISTICS_HEADER {
     ULONG              coffData;
 } CLS_IO_STATISTICS_HEADER, * PCLS_IO_STATISTICS_HEADER, PPCLS_IO_STATISTICS_HEADER;
 
-typedef enum _CLS_LOG_INFORMATION_CLASS {
-    ClfsLogBasicInformation,
-    ClfsLogBasicInformationPhysical,
-    ClfsLogPhysicalNameInformation,
-    ClfsLogStreamIdentifierInformation,
-    ClfsLogSystemMarkingInformation,
-    ClfsLogPhysicalLsnInformation
-} CLS_LOG_INFORMATION_CLASS, * PCLS_LOG_INFORMATION_CLASS, PPCLS_LOG_INFORMATION_CLASS;
 
 typedef struct _CLS_SCAN_CONTEXT {
     CLFS_NODE_ID               cidNode;
@@ -1941,26 +1886,6 @@ typedef struct _D3COLD_SUPPORT_INTERFACE {
   PGET_D3COLD_LAST_TRANSITION_STATUS GetLastTransitionStatus;
 } D3COLD_SUPPORT_INTERFACE, *PD3COLD_SUPPORT_INTERFACE;
 
-typedef union _DEVICE_BUS_SPECIFIC_RESET_TYPE {
-    struct {
-        ULONGLONG FunctionLevelDeviceReset : 1;
-        ULONGLONG PlatformLevelDeviceReset : 1;
-        ULONGLONG SecondaryBusReset : 1;
-        ULONGLONG Reserved : 61;
-    } Pci;
-    struct {
-        ULONGLONG FunctionLevelDeviceReset : 1;
-        ULONGLONG PlatformLevelDeviceReset : 1;
-        ULONGLONG Reserved : 62;
-    } Acpi;
-    ULONGLONG AsULONGLONG;
-} DEVICE_BUS_SPECIFIC_RESET_TYPE, * PDEVICE_BUS_SPECIFIC_RESET_TYPE;
-
-typedef struct _DEVICE_BUS_SPECIFIC_RESET_INFO {
-  GUID                           BusTypeGuid;
-  DEVICE_BUS_SPECIFIC_RESET_TYPE ResetTypeSupported;
-} DEVICE_BUS_SPECIFIC_RESET_INFO, *PDEVICE_BUS_SPECIFIC_RESET_INFO;
-
 typedef struct _DEVICE_CAPABILITIES {
   USHORT             Size;
   USHORT             Version;
@@ -2044,19 +1969,6 @@ typedef struct _DEVICE_RESET_INTERFACE_STANDARD {
   PGET_DEVICE_RESET_STATUS                 GetDeviceResetStatus;
 } DEVICE_RESET_INTERFACE_STANDARD, *PDEVICE_RESET_INTERFACE_STANDARD;
 
-typedef union _DEVICE_RESET_STATUS_FLAGS {
-  struct {
-    ULONGLONG KeepStackReset : 1;
-    ULONGLONG RecoveringFromBusError : 1;
-    ULONGLONG Reserved : 62;
-  } u;
-  ULONGLONG AsUlonglong;
-} DEVICE_RESET_STATUS_FLAGS, *PDEVICE_RESET_STATUS_FLAGS;
-
-typedef enum _DEVICE_RESET_TYPE {
-  FunctionLevelDeviceReset,
-  PlatformLevelDeviceReset
-} DEVICE_RESET_TYPE;
 
 typedef enum {
   DeviceTextDescription,
@@ -2072,16 +1984,6 @@ typedef enum _DEVICE_USAGE_NOTIFICATION_TYPE {
   DeviceUsageTypePostDisplay,
   DeviceUsageTypeGuestAssigned
 } DEVICE_USAGE_NOTIFICATION_TYPE;
-
-typedef enum _DEVICE_WAKE_DEPTH {
-  DeviceWakeDepthNotWakeable,
-  DeviceWakeDepthD0,
-  DeviceWakeDepthD1,
-  DeviceWakeDepthD2,
-  DeviceWakeDepthD3hot,
-  DeviceWakeDepthD3cold,
-  DeviceWakeDepthMaximum
-} DEVICE_WAKE_DEPTH, *PDEVICE_WAKE_DEPTH;
 
 
 

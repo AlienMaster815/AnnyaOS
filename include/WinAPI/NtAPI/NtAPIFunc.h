@@ -5,44 +5,6 @@
 
 //Filler Types Until Found
 
-typedef void* PGET_SET_DEVICE_DATA;
-typedef void* PGET_UPDATED_BUS_RESOURCE;
-typedef void* PCLFS_CLIENT_ADVANCE_TAIL_CALLBACK;
-typedef void* PCLFS_CLIENT_LFF_HANDLER_COMPLETE_CALLBACK;
-typedef void* PCLFS_CLIENT_LOG_UNPINNED_CALLBACK;
-typedef void* PLOG_FILE_OBJECT;
-typedef void* PCLFS_LSN;
-typedef void* PPLOG_FILE_OBJECT;
-typedef void* PALLOCATE_FUNCTION;
-typedef void* PFREE_FUNCTION;
-typedef void* CLFS_SCAN_MODE;
-typedef void* PCLFS_SCAN_CONTEXT;
-typedef void* CLFS_LSN;
-typedef void* CLFS_IOSTATS_CLASS;
-typedef void* CLFS_CONTAINER_ID;
-typedef void* CLFS_MGMT_CLIENT;
-typedef void* PCLFS_MGMT_CLIENT;
-typedef void* PCLFS_SET_LOG_SIZE_COMPLETE_CALLBACK;
-typedef void* CLFS_LOG_INFORMATION_CLASS;
-typedef void* PCLFS_RECORD_TYPE;
-typedef void* PCLFS_WRITE_ENTRY;
-typedef void* CLFS_CONTAINER_STATE;
-typedef void* CLFS_NODE_ID;
-typedef void* PEX_CALLBACK_FUNCTION;
-typedef void* PSET_D3COLD_SUPPORT;
-typedef void* PD3COLD_REQUEST_CORE_POWER_RAIL;
-typedef void* PD3COLD_REQUEST_AUX_POWER;
-typedef void* PD3COLD_REQUEST_PERST_DELAY;
-typedef void* PGET_IDLE_WAKE_INFO;
-typedef void* PGET_D3COLD_CAPABILITY;
-typedef void* PGET_D3COLD_LAST_TRANSITION_STATUS;
-
-typedef void* PIOMMU_DEVICE_FAULT_HANDLER;
-typedef void* PDEVICE_RESET_HANDLER;
-typedef void* PDEVICE_QUERY_BUS_SPECIFIC_RESET_HANDLER;
-typedef void* PDEVICE_BUS_SPECIFIC_RESET_HANDLER;
-typedef void* PGET_DEVICE_RESET_STATUS;
-
 typedef void* REGHANDLE;
 typedef void* EVENT_INFO_CLASS;
 typedef void* PFAST_MUTEX;
