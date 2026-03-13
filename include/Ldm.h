@@ -701,6 +701,87 @@ GET_DEVICE_RESET_STATUS(
 ); 
 typedef GET_DEVICE_RESET_STATUS* PGET_DEVICE_RESET_STATUS;
 
+typedef HANDLE REGHANDLE;
+
+typedef enum _EVENT_INFO_CLASS{
+    EventProviderBinaryTrackInfo = 0,
+    EventProviderSetReserved1,
+    EventProviderSetTraits,
+    EventProviderUseDescriptorType,
+    MaxEventInfo,
+}EVENT_INFO_CLASS, * PEVENT_INFO_CLASS;
+
+typedef PVOID PFAST_MUTEX;
+typedef PVOID PERESOURCE;
+typedef PVOID PEX_RUNDOWN_REF;
+typedef PVOID PEX_SPIN_LOCK;
+typedef PVOID PEX_RUNDOWN_REF_CACHE_AWARE;
+typedef PVOID PLOOKASIDE_LIST_EX;
+typedef PVOID PNPAGED_LOOKASIDE_LIST;
+typedef PVOID PPAGED_LOOKASIDE_LIST;
+
+typedef ULONG64 POOL_FLAGS;
+
+#define POOL_FLAG_REQUIRED_START          0x0000000000000001ULL
+#define POOL_FLAG_USE_QUOTA               0x0000000000000001ULL
+#define POOL_FLAG_UNINITIALIZED           0x0000000000000002ULL
+#define POOL_FLAG_SESSION                 0x0000000000000004ULL
+#define POOL_FLAG_CACHE_ALIGNED           0x0000000000000008ULL
+#define POOL_FLAG_RESERVED1               0x0000000000000010ULL
+#define POOL_FLAG_RAISE_ON_FAILURE        0x0000000000000020ULL
+#define POOL_FLAG_NON_PAGED               0x0000000000000040ULL
+#define POOL_FLAG_NON_PAGED_EXECUTE       0x0000000000000080ULL
+#define POOL_FLAG_PAGED                   0x0000000000000100ULL
+#define POOL_FLAG_RESERVED2               0x0000000000000200ULL
+#define POOL_FLAG_RESERVED3               0x0000000000000400ULL
+#define POOL_FLAG_REQUIRED_END            0x0000000080000000ULL
+#define POOL_FLAG_OPTIONAL_START          0x0000000100000000ULL
+#define POOL_FLAG_SPECIAL_POOL            0x0000000100000000ULL
+#define POOL_FLAG_OPTIONAL_END            0x8000000000000000ULL
+
+typedef enum _EX_POOL_PRIORITY{
+    LowPoolPriority = 0,
+    LowPoolPrioritySpecialPoolOverrun = 8,
+    LowPoolPrioritySpecialPoolUnderrun = 9,
+    NormalPoolPriority = 16,
+    NormalPoolPrioritySpecialPoolOverrun = 24,
+    NormalPoolPrioritySpecialPoolUnderrun = 25,
+    HighPoolPriority = 32,
+    HighPoolPrioritySpecialPoolOverrun = 40,
+    HighPoolPrioritySpecialPoolUnderrun = 41
+}EX_POOL_PRIORITY, * PEX_POOL_PRIORITY;
+
+#define POOL_EXTENDED_PARAMETER_TYPE_BITS           3
+#define POOL_EXTENDED_PARAMETER_REQUIRED_FIELD_BITS 1
+#define POOL_EXTENDED_PARAMETER_RESERVED_BITS       60
+
+typedef struct _POOL_EXTENDED_PARAMS_SECURE_POOL{
+  HANDLE    SecurePoolHandle;
+  PVOID     Buffer;
+  ULONG_PTR Cookie;
+  ULONG     SecurePoolFlags;
+}POOL_EXTENDED_PARAMS_SECURE_POOL, * PPOOL_EXTENDED_PARAMS_SECURE_POOL;
+
+typedef ULONG POOL_NODE_REQUIREMENT;
+
+typedef struct _POOL_EXTENDED_PARAMETER{
+    struct {
+        ULONG64                             Type        :  POOL_EXTENDED_PARAMETER_TYPE_BITS;
+        ULONG64                             Optional    :  POOL_EXTENDED_PARAMETER_REQUIRED_FIELD_BITS;
+        ULONG64                             Reserved    :  POOL_EXTENDED_PARAMETER_RESERVED_BITS;
+    };
+    union{
+        ULONG64                             Reserved2;
+        PVOID                               Reserved3;
+        EX_POOL_PRIORITY                    Priority;
+        POOL_EXTENDED_PARAMS_SECURE_POOL*   SecurePoolParams;
+        POOL_NODE_REQUIREMENT               PreferredNode;
+    };
+}POOL_EXTENDED_PARAMETER, * PPOOL_EXTENDED_PARAMETER;
+
+typedef const POOL_EXTENDED_PARAMETER CPOOL_EXTENDED_PARAMETER, * PCPOOL_EXTENDED_PARAMETER;
+
+
 
 #include <Ldm/Clfs.h>
 

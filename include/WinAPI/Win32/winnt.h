@@ -32,7 +32,7 @@ typedef UINT16 uint16_t;
 typedef unsigned int UINT32;
 typedef UINT32 uint32_t;
 typedef int int32_t;
-typedef unsigned long ULONG64;
+typedef unsigned long long ULONG64;
 typedef DWORD64 *PDWORD64;
 typedef unsigned char* PBYTE;
 typedef unsigned char BYTE;

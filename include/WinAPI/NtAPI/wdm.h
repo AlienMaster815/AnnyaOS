@@ -39,18 +39,6 @@ typedef enum _KEY_SET_INFORMATION_CLASS {
     MaxKeySetInfoClass
 } KEY_SET_INFORMATION_CLASS;
 
-//bitflag enum
-typedef enum _EX_POOL_PRIORITY {
-    LowPoolPriority,
-    LowPoolPrioritySpecialPoolOverrun = 8,
-    LowPoolPrioritySpecialPoolUnderrun = 9,
-    NormalPoolPriority = 16,
-    NormalPoolPrioritySpecialPoolOverrun = 24,
-    NormalPoolPrioritySpecialPoolUnderrun = 25,
-    HighPoolPriority = 32,
-    HighPoolPrioritySpecialPoolOverrun = 40,
-    HighPoolPrioritySpecialPoolUnderrun = 41
-} EX_POOL_PRIORITY;
 
 typedef enum _KEY_VALUE_INFORMATION_CLASS {
     KeyValueBasicInformation,
@@ -280,22 +268,6 @@ typedef struct _POOL_CREATE_EXTENDED_PARAMS {
 } POOL_CREATE_EXTENDED_PARAMS, * PPOOL_CREATE_EXTENDED_PARAMS;
 
 
-
-typedef struct _POOL_EXTENDED_PARAMETER {
-    struct {
-        ULONG64 Type : POOL_EXTENDED_PARAMETER_TYPE_BITS;
-        ULONG64 Optional : POOL_EXTENDED_PARAMETER_REQUIRED_FIELD_BITS;
-        ULONG64 Reserved : POOL_EXTENDED_PARAMETER_RESERVED_BITS;
-    } DUMMYSTRUCTNAME;
-    union {
-        ULONG64                          Reserved2;
-        PVOID                            Reserved3;
-        EX_POOL_PRIORITY                 Priority;
-        POOL_EXTENDED_PARAMS_SECURE_POOL* SecurePoolParams;
-        POOL_NODE_REQUIREMENT            PreferredNode;
-    } DUMMYUNIONNAME;
-} POOL_EXTENDED_PARAMETER, * PPOOL_EXTENDED_PARAMETER;
-
 typedef enum POOL_EXTENDED_PARAMETER_TYPE {
     PoolExtendedParameterInvalidType = 0,
     PoolExtendedParameterPriority,
@@ -303,10 +275,6 @@ typedef enum POOL_EXTENDED_PARAMETER_TYPE {
     PoolExtendedParameterNumaNode,
     PoolExtendedParameterMax
 }  *PPOOL_EXTENDED_PARAMETER_TYPE;
-
-
-
-
 
 
 typedef struct _SDEV_IDENTIFIER_INTERFACE {

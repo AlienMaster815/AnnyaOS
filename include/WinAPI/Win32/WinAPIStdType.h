@@ -82,7 +82,7 @@ typedef void* TASKDIALOG_BUTTON;
 typedef void* TASKDIALOG_COMMON_BUTTON_FLAGS;
 typedef void* TASKDIALOG_FLAGS;
 
-typedef unsigned long  ULONG64;
+typedef unsigned long long ULONG64;
 typedef void* PVOID;
 
 typedef uint32_t DWORD;

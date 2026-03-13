@@ -5,18 +5,6 @@
 
 //Filler Types Until Found
 
-typedef void* REGHANDLE;
-typedef void* EVENT_INFO_CLASS;
-typedef void* PFAST_MUTEX;
-typedef void* PERESOURCE;
-typedef void* PEX_RUNDOWN_REF;
-typedef void* PEX_SPIN_LOCK;
-typedef void* PEX_RUNDOWN_REF_CACHE_AWARE;
-typedef void* PLOOKASIDE_LIST_EX;
-typedef void* PNPAGED_LOOKASIDE_LIST;
-typedef void* PPAGED_LOOKASIDE_LIST;
-typedef void* POOL_FLAGS;
-typedef void* PCPOOL_EXTENDED_PARAMETER;
 typedef void* PEX_TIMER;
 typedef void* PEXT_CALLBACK;
 typedef void* PEXT_CANCEL_PARAMETERS;
@@ -68,8 +56,6 @@ typedef void* DRIVER_DIRECTORY_TYPE;
 typedef void* PIO_DPC_ROUTINE;
 typedef void* PIO_TIMER_ROUTINE;
 typedef void* _IORING_OBJECT;
-typedef void* POOL_EXTENDED_PARAMS_SECURE_POOL;
-typedef void* POOL_NODE_REQUIREMENT;
 typedef void* PGET_SDEV_IDENTIFIER;
 typedef void* PREENUMERATE_SELF;
 typedef void* POBJECT_NAME_INFORMATION;
@@ -151,10 +137,6 @@ typedef struct _TOKEN_PRIVALEDGES{
     DWORD PrivaledgeCount;
     LUID_AND_ATTRIBUTES Priviledges[];
 }TOKEN_PRIVALEDGES, * PTOKEN_PRIVALEDGES;
-
-#define POOL_EXTENDED_PARAMETER_TYPE_BITS 1
-#define POOL_EXTENDED_PARAMETER_REQUIRED_FIELD_BITS 1
-#define POOL_EXTENDED_PARAMETER_RESERVED_BITS 1
 
 //ENDOF: TODO LIST\n
 
