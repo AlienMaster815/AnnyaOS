@@ -243,18 +243,6 @@ typedef struct _TARGET_DEVICE_REMOVAL_NOTIFICATION {
     PFILE_OBJECT FileObject;
 } TARGET_DEVICE_REMOVAL_NOTIFICATION, * PTARGET_DEVICE_REMOVAL_NOTIFICATION;
 
-
-typedef struct _TIME_FIELDS {
-    CSHORT Year;
-    CSHORT Month;
-    CSHORT Day;
-    CSHORT Hour;
-    CSHORT Minute;
-    CSHORT Second;
-    CSHORT Milliseconds;
-    CSHORT Weekday;
-} TIME_FIELDS;
-
 typedef struct {
     ULONG                  Version;
     GUID                   Guid;
@@ -786,86 +774,19 @@ typedef struct _OB_CALLBACK_REGISTRATION {
 } OB_CALLBACK_REGISTRATION, * POB_CALLBACK_REGISTRATION;
 
 
-typedef struct _OB_POST_CREATE_HANDLE_INFORMATION {
-    ACCESS_MASK GrantedAccess;
-} OB_POST_CREATE_HANDLE_INFORMATION, * POB_POST_CREATE_HANDLE_INFORMATION;
-
-typedef struct _OB_POST_DUPLICATE_HANDLE_INFORMATION {
-    ACCESS_MASK GrantedAccess;
-} OB_POST_DUPLICATE_HANDLE_INFORMATION, * POB_POST_DUPLICATE_HANDLE_INFORMATION;
-
-typedef struct _OB_PRE_CREATE_HANDLE_INFORMATION {
-    ACCESS_MASK DesiredAccess;
-    ACCESS_MASK OriginalDesiredAccess;
-} OB_PRE_CREATE_HANDLE_INFORMATION, * POB_PRE_CREATE_HANDLE_INFORMATION;
-
-typedef struct _OB_PRE_DUPLICATE_HANDLE_INFORMATION {
-    ACCESS_MASK DesiredAccess;
-    ACCESS_MASK OriginalDesiredAccess;
-    PVOID       SourceProcess;
-    PVOID       TargetProcess;
-} OB_PRE_DUPLICATE_HANDLE_INFORMATION, * POB_PRE_DUPLICATE_HANDLE_INFORMATION;
-
-typedef union _OB_POST_OPERATION_PARAMETERS {
-    OB_POST_CREATE_HANDLE_INFORMATION    CreateHandleInformation;
-    OB_POST_DUPLICATE_HANDLE_INFORMATION DuplicateHandleInformation;
-} OB_POST_OPERATION_PARAMETERS, * POB_POST_OPERATION_PARAMETERS;
-
-typedef struct _OB_POST_OPERATION_INFORMATION {
-    OB_OPERATION                  Operation;
-    union {
-        ULONG Flags;
-        struct {
-            ULONG KernelHandle : 1;
-            ULONG Reserved : 31;
-        };
-    };
-    PVOID                         Object;
-    POBJECT_TYPE                  ObjectType;
-    PVOID                         CallContext;
-    LOUSTATUS                      ReturnStatus;
-    POB_POST_OPERATION_PARAMETERS Parameters;
-} OB_POST_OPERATION_INFORMATION, * POB_POST_OPERATION_INFORMATION;
-
-
-typedef union _OB_PRE_OPERATION_PARAMETERS {
-    OB_PRE_CREATE_HANDLE_INFORMATION    CreateHandleInformation;
-    OB_PRE_DUPLICATE_HANDLE_INFORMATION DuplicateHandleInformation;
-} OB_PRE_OPERATION_PARAMETERS, * POB_PRE_OPERATION_PARAMETERS;
-
-
-
-typedef struct _OB_PRE_OPERATION_INFORMATION {
-    OB_OPERATION                 Operation;
-    union {
-        ULONG Flags;
-        struct {
-            ULONG KernelHandle : 1;
-            ULONG Reserved : 31;
-        };
-    };
-    PVOID                        Object;
-    POBJECT_TYPE                 ObjectType;
-    PVOID                        CallContext;
-    POB_PRE_OPERATION_PARAMETERS Parameters;
-} OB_PRE_OPERATION_INFORMATION, * POB_PRE_OPERATION_INFORMATION;
-
-
-
-
 
 typedef struct {
     GUID Guid;
 } NOTIFY_USER_POWER_SETTING, * PNOTIFY_USER_POWER_SETTING;
 
 typedef struct _PCI_ATS_INTERFACE {
-    USHORT                 Size;
-    USHORT                 Version;
-    PVOID                  Context;
-    PINTERFACE_REFERENCE   InterfaceReference;
-    PINTERFACE_DEREFERENCE InterfaceDereference;
-    PPCI_SET_ATS           SetAddressTranslationServices;
-    UCHAR                  InvalidateQueueDepth;
+   USHORT                 Size;
+   USHORT                 Version;
+   PVOID                  Context;
+   PINTERFACE_REFERENCE   InterfaceReference;
+   PINTERFACE_DEREFERENCE InterfaceDereference;
+   PPCI_SET_ATS           SetAddressTranslationServices;
+   UCHAR                  InvalidateQueueDepth;
 } PCI_ATS_INTERFACE, * PPCI_ATS_INTERFACE;
 
 typedef struct _PO_FX_PERF_STATE {
@@ -1072,14 +993,6 @@ typedef struct _BOOTDISK_INFORMATION_EX {
   BOOLEAN  BootDeviceIsGpt;
   BOOLEAN  SystemDeviceIsGpt;
 } BOOTDISK_INFORMATION_EX, *PBOOTDISK_INFORMATION_EX;
-
-typedef enum _BOUND_CALLBACK_STATUS {
-  BoundExceptionContinueSearch,
-  BoundExceptionHandled,
-  BoundExceptionError,
-  BoundExceptionMaximum
-} BOUND_CALLBACK_STATUS, *PBOUND_CALLBACK_STATUS;
-
 
 typedef struct _BUS_INTERFACE_STANDARD {
   USHORT                 Size;
@@ -2767,30 +2680,6 @@ typedef struct _IO_ERROR_LOG_PACKET {
   ULONG         DumpData[1];
 } IO_ERROR_LOG_PACKET, *PIO_ERROR_LOG_PACKET;
 
-#define DISPATCH_LENGTH 106
-
-typedef struct _KINTERRUPT {
-    CSHORT Type;
-    CSHORT Size;
-    LIST_ENTRY InterruptListEntry;
-    KSPIN_LOCK SpinLock;
-    PKSERVICE_ROUTINE ServiceRoutine;
-    PVOID ServiceContext;
-    KIRQL Irql;
-    KIRQL SynchronizeIrql;
-    BOOLEAN FloatingSave;
-    BOOLEAN Connected;
-    KINTERRUPT_MODE Mode;
-    ULONG Vector;
-    KAFFINITY ProcessorEnableMask;
-    BOOLEAN ShareVector;
-    BOOLEAN IrqlFlags;
-    BOOLEAN IrqlRequested;
-    BOOLEAN Reserved;
-    PKINTERRUPT_ROUTINE DispatchAddress;
-    ULONG DispatchCode[DISPATCH_LENGTH];
-} KINTERRUPT, *PKINTERRUPT;
-
 
 
 typedef struct _IO_INTERRUPT_MESSAGE_INFO_ENTRY {
@@ -3720,18 +3609,6 @@ typedef struct _KBUGCHECK_ADD_PAGES {
     ULONG_PTR Count;
 } KBUGCHECK_ADD_PAGES, * PKBUGCHECK_ADD_PAGES;
 
-typedef enum _KBUGCHECK_CALLBACK_REASON {
-    KbCallbackInvalid,
-    KbCallbackReserved1,
-    KbCallbackSecondaryDumpData,
-    KbCallbackDumpIo,
-    KbCallbackAddPages,
-    KbCallbackSecondaryMultiPartDumpData,
-    KbCallbackRemovePages,
-    KbCallbackTriageDumpData,
-    KbCallbackReserved2
-} KBUGCHECK_CALLBACK_REASON;
-
 typedef enum _KBUGCHECK_DUMP_IO_TYPE {
     KbDumpIoInvalid,
     KbDumpIoHeader,
@@ -3765,19 +3642,6 @@ typedef struct _KDPC_WATCHDOG_INFORMATION {
     ULONG DpcWatchdogCount;
     ULONG Reserved;
 } KDPC_WATCHDOG_INFORMATION, * PKDPC_WATCHDOG_INFORMATION;
-
-typedef enum {
-    KeProcessorAddStartNotify,
-    KeProcessorAddCompleteNotify,
-    KeProcessorAddFailureNotify
-} KE_PROCESSOR_CHANGE_NOTIFY_STATE;
-
-typedef struct _KE_PROCESSOR_CHANGE_NOTIFY_CONTEXT {
-    KE_PROCESSOR_CHANGE_NOTIFY_STATE State;
-    ULONG                            NtNumber;
-    LOUSTATUS                         Status;
-    PROCESSOR_NUMBER                 ProcNumber;
-} KE_PROCESSOR_CHANGE_NOTIFY_CONTEXT, * PKE_PROCESSOR_CHANGE_NOTIFY_CONTEXT;
 
 typedef struct _IOMMU_DEVICE_CREATION_CONFIGURATION_ACPI {
     UINT32 InputMappingBase;
@@ -4250,9 +4114,9 @@ LOUSTATUS IoWMIRegistrationControl(
 );
 
 LOUSTATUS IoWMISetNotificationCallback(
-        PVOID                     Object,
-             WMI_NOTIFICATION_CALLBACK Callback,
-   PVOID                     Context
+   PVOID                      Object,
+   PWMI_NOTIFICATION_CALLBACK Callback,
+   PVOID                      Context
 );
 
 LOUSTATUS IoWMISetSingleInstance(

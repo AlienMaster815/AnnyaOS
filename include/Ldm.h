@@ -854,6 +854,9 @@ typedef OPAQUE_PTR PPOWER_SEQUENCE;
 typedef OPAQUE_PTR PIO_CSQ_IRP_CONTEXT;
 typedef OPAQUE_PTR PIO_WORKITEM;
 typedef OPAQUE_PTR PSHARE_ACCESS;
+typedef OPAQUE_PTR PEX_PUSH_LOCK;
+typedef OPAQUE_PTR PKBUGCHECK_CALLBACK_RECORD;
+
 
 
 typedef enum _OB_OPERATION{
@@ -986,6 +989,733 @@ typedef FPGA_CONTROL_LINK* PFPGA_CONTROL_LINK;
 typedef USHORT RTL_ATOM;
 typedef RTL_ATOM* PRTL_ATOM;
 
+typedef struct _OBJECT_NAME_INFORMATION{
+    UNICODE_STRING  Name;
+}OBJECT_NAME_INFORMATION, * POBJECT_NAME_INFORMATION;
+
+typedef 
+PVOID 
+ALLOCATE_FUNCTION_EX(
+    POOL_TYPE           PoolType,
+    SIZE                NumberOfBytes,
+    ULONG               Tag,
+    PLOOKASIDE_LIST_EX  Lookaside
+);
+typedef ALLOCATE_FUNCTION_EX* PALLOCATE_FUNCTION_EX;
+
+typedef 
+void
+FREE_FUNCTION_EX(
+    PVOID               Buffer,
+    PLOOKASIDE_LIST_EX  Lookaside
+);
+typedef FREE_FUNCTION_EX* PFREE_FUNCTION_EX;
+
+typedef 
+void 
+CALLBACK_FUNCTION(
+    PVOID   Context,
+    PVOID   Arg1,
+    PVOID   Arg2
+);
+typedef CALLBACK_FUNCTION* PCALLBACK_FUNCTION;
+
+typedef
+void 
+EXT_DELETE_CALLBACK(
+    PVOID   Context
+);
+typedef EXT_DELETE_CALLBACK* PEXT_DELETE_CALLBACK;
+
+typedef struct _IO_COMPLETION_CONTEXT{
+    PVOID   Port;
+    PVOID   Key;
+}IO_COMPLETION_CONTEXT, * PIO_COMPLETION_CONTEXT;
+
+typedef 
+void 
+FPGA_BUS_SCAN(
+    PVOID Context
+);
+typedef FPGA_BUS_SCAN* PFPGA_BUS_SCAN;
+
+typedef 
+LOUSTATUS
+FPGA_CONTROL_CONFIG_SPACE(
+    PVOID   Context,
+    BOOLEAN Enable
+);
+typedef FPGA_CONTROL_CONFIG_SPACE* PFPGA_CONTROL_CONFIG_SPACE;
+
+typedef 
+LOUSTATUS 
+FPGA_CONTROL_ERROR_REPORTING(
+    PVOID   Context,
+    BOOLEAN DisableErrorReporting
+);
+typedef FPGA_CONTROL_ERROR_REPORTING* PFPGA_CONTROL_ERROR_REPORTING;
+
+#define DISPATCH_LENGTH 106
+
+struct _KINTERRUPT;
+
+typedef 
+BOOLEAN
+KSERVICE_ROUTINE(
+    struct _KINTERRUPT* Interrupt,
+    PVOID               ServiceContext    
+);
+typedef KSERVICE_ROUTINE* PKSERVICE_ROUTINE, KINTERRUPT_ROUTINE, * PKINTERRUPT_ROUTINE;
+
+typedef struct _KINTERRUPT{
+    CSHORT                  Type;
+    CSHORT                  Size;
+    LIST_ENTRY              InterruptListEntry;
+    KSPIN_LOCK              SpinLock;
+    PKSERVICE_ROUTINE       ServiceRoutine;
+    PVOID                   ServiceContext;
+    KIRQL                   Irql;
+    KIRQL                   SynchronizeIrql;
+    BOOLEAN                 FloatingSave;
+    BOOLEAN                 Connected;
+    KINTERRUPT_MODE         Mode;
+    ULONG                   Vector;
+    KAFFINITY               ProcessorEnableMask;
+    BOOLEAN                 ShareVector;
+    BOOLEAN                 IrqlFlags;
+    BOOLEAN                 IrqlRequested;
+    BOOLEAN                 Reserved;
+    PKINTERRUPT_ROUTINE     DispatchAddress;
+    ULONG                   DispatchCode[DISPATCH_LENGTH];
+}KINTERRUPT, *PKINTERRUPT;
+
+typedef struct _IO_CONNECT_INTERRUPT_FULLY_SPECIFIED_PARAMETERS{
+    PDEVICE_OBJECT          DeviceObject;
+    PKINTERRUPT             Interruptobject;
+    PKSERVICE_ROUTINE       ServiceRoutine;
+    PVOID                   ServiceContext;
+    PKSPIN_LOCK             SpinLock;
+    KIRQL                   SynchronizeIrql;
+    BOOLEAN                 ShareVector;
+    UINT32                  Vector;
+    KIRQL                   Irql;
+    KINTERRUPT_MODE         InterruptMode;
+    SIZE                    ProcessorEnableMask;
+    UINT16                  Group;
+}IO_CONNECT_INTERRUPT_FULLY_SPECIFIED_PARAMETERS, * PIO_CONNECT_INTERRUPT_FULLY_SPECIFIED_PARAMETERS;
+
+typedef struct _IO_CONNECT_INTERRUPT_LINE_BASED_PARAMETERS{
+    PDEVICE_OBJECT          DeviceObject;
+    PKINTERRUPT             InterruptObject;
+    PKSERVICE_ROUTINE       ServiceRoutine;
+    PVOID                   ServiceContext;
+    PKSPIN_LOCK             SpinLock;
+    KIRQL                   Irql;
+    BOOLEAN                 FloatingSave;
+}IO_CONNECT_INTERRUPT_LINE_BASED_PARAMETERS, * PIO_CONNECT_INTERRUPT_LINE_BASED_PARAMETERS;
+
+typedef struct _NAMED_PIPE_CREATE_PARAMETERS{
+    ULONG           NamedPipeType;
+    ULONG           ReadModel;
+    ULONG           CompletionMode;
+    ULONG           MaximumInstances;
+    ULONG           InboundQuota;
+    ULONG           OutboundQuota;
+    LARGE_INTEGER   DefaultTimeout;
+    BOOLEAN         TimeoutSpecified;
+}NAMED_PIPE_CREATE_PARAMETERS, * PNAMED_PIPE_CREATE_PARAMETERS;
+
+typedef struct _FILE_GET_QUOTA_INFORMATION{
+    ULONG   NextEntryOffset;
+    ULONG   SidLength;
+    SID     Sid;
+}FILE_GET_QUOTA_INFORMATION, * PFILE_GET_QUOTA_INFORMATION;
+
+typedef enum _DEVICE_RELATION_TYPE{
+    BusRelations = 0,
+    EjectionRelations,
+    PowerRelations,
+    RemovalRelations,
+    TargetDeviceRelation,
+    SingleBusRelations,
+    TransportRelations
+}DEVICE_RELATION_TYPE, * PDEVICE_RELATION_TYPE;
+
+typedef 
+LOUSTATUS 
+IO_COMPLETION_ROUTINE(
+    PDEVICE_OBJECT  DeviceObject,
+    struct _IRP*    Irp,
+    PVOID           Context
+);
+typedef IO_COMPLETION_ROUTINE* PIO_COMPLETION_ROUTINE;
+
+typedef struct _IO_REMOVE_LOCK_COMMON_BLOCK{
+    BOOLEAN         Removed;
+    BOOLEAN         Reserved[3];
+    volatile LONG   IoCount;
+    KEVENT          RemoveEvent;
+} IO_REMOVE_LOCK_COMMON_BLOCK;
+
+typedef struct _IO_REMOVE_LOCK{
+    IO_REMOVE_LOCK_COMMON_BLOCK Common;
+}IO_REMOVE_LOCK, * PIO_REMOVE_LOCK;
+
+
+typedef enum _CREATE_FILE_TYPE{
+    CreateFileTypeNone = 0,
+    CreateFileTypeNamedPipe,
+    CreateFileTypeMailslot,
+    CreateFileTypeMax
+}CREATE_FILE_TYPE, * PCREATE_FILE_TYPE;
+
+typedef 
+VOID 
+KSTART_ROUTINE(
+    PVOID StartContext
+);
+typedef KSTART_ROUTINE* PKSTART_ROUTINE;
+
+typedef 
+void 
+IO_CSQ_INSERT_IRP(
+    PIO_CSQ         Csq,
+    struct _IRP*    Irp
+);
+typedef IO_CSQ_INSERT_IRP* PIO_CSQ_INSERT_IRP;
+
+typedef 
+void 
+IO_CSQ_REMOVE_IRP(
+    PIO_CSQ         Csq,
+    struct _IRP*    Irp
+);
+typedef IO_CSQ_REMOVE_IRP* PIO_CSQ_REMOVE_IRP;
+
+typedef 
+struct _IRP* 
+IO_CSQ_PEEK_NEXT_IRP(
+    PIO_CSQ     Csq,
+    struct _IRP Irp,
+    PVOID       PeekContext
+);
+typedef IO_CSQ_PEEK_NEXT_IRP* PIO_CSQ_PEEK_NEXT_IRP;
+
+typedef 
+void 
+IO_CSQ_ACQUIRE_LOCK(
+    PIO_CSQ
+);
+typedef IO_CSQ_ACQUIRE_LOCK* PIO_CSQ_ACQUIRE_LOCK;
+
+typedef 
+void 
+IO_CSQ_RELEASE_LOCK(
+    PIO_CSQ     Csq,
+    KIRQL       Irql
+);
+typedef IO_CSQ_RELEASE_LOCK* PIO_CSQ_RELEASE_LOCK;
+
+typedef 
+void 
+IO_CSQ_COMPLETE_CANCELED_IRP(
+    PIO_CSQ         Csq,
+    struct _IRP*    Irp
+);
+typedef IO_CSQ_COMPLETE_CANCELED_IRP* PIO_CSQ_COMPLETE_CANCELED_IRP;
+
+typedef 
+LOUSTATUS
+IO_CSQ_INSERT_IRP_EX(
+    PIO_CSQ         Csq,
+    struct _IRP*    Irp,
+    PVOID           InsertContext
+);
+typedef IO_CSQ_INSERT_IRP_EX* PIO_CSQ_INSERT_IRP_EX;
+
+typedef 
+LOUSTATUS
+IO_PERSISTED_MEMORY_ENUMERATION_CALLBACK(
+    PDRIVER_OBJECT  DriverObject,
+    PDEVICE_OBJECT  PhyDeviceObject,
+    PUNICODE_STRING PhyDeviceId,
+    UINT16          DataTag,
+    UINT32          DataVersion,
+    PVOID           Context
+);
+typedef IO_PERSISTED_MEMORY_ENUMERATION_CALLBACK* PIO_PERSISTED_MEMORY_ENUMERATION_CALLBACK;
+
+typedef enum _DRIVER_DIRECTORY_TYPE{
+    DriverDirectoryImage = 0,
+    DriverDirectoryData,
+    DriverDirectorySharedData
+}DRIVER_DIRECTORY_TYPE, * PDRIVER_DIRECTORY_TYPE;
+
+typedef 
+void 
+IO_DPC_ROUTINE(
+    PKDPC           Dpc,
+    PDEVICE_OBJECT  DeviceObject,
+    struct _IRP*    Irp,
+    PVOID           Context
+);
+typedef IO_DPC_ROUTINE* PIO_DPC_ROUTINE;
+
+typedef 
+void 
+IO_TIMER_ROUTINE(
+    PDEVICE_OBJECT  DeviceObject,
+    PVOID           Context
+);
+typedef IO_TIMER_ROUTINE* PIO_TIMER_ROUTINE;
+
+typedef 
+ULONGLONG 
+GET_SDEV_IDENTIFIER(
+    PVOID   InterfaceContext
+);
+typedef GET_SDEV_IDENTIFIER* PGET_SDEV_IDENTIFIER;
+
+typedef 
+void
+REENUMERATE_SELF(
+    PVOID   Context
+);
+typedef REENUMERATE_SELF* PREENUMERATE_SELF;
+
+typedef struct _OB_PRE_CREATE_HANDLE_INFORMATION{
+    ACCESS_MASK     DesiredAccess;
+    ACCESS_MASK     OriginalDesiredAccess;
+}OB_PRE_CREATE_HANDLE_INFORMATION, * POB_PRE_CREATE_HANDLE_INFORMATION;
+
+typedef struct _OB_PRE_DUPLICATE_HANDLE_INFORMATION{
+    ACCESS_MASK     DesiredAccess;
+    ACCESS_MASK     OriginalDesiredAccess;
+    PVOID           SourceProcess;
+    PVOID           TargetProcess;
+}OB_PRE_DUPLICATE_HANDLE_INFORMATION, * POB_PRE_DUPLICATE_HANDLE_INFORMATION;
+
+typedef union _OB_PRE_OPERATION_PARAMETERS{
+    OB_PRE_CREATE_HANDLE_INFORMATION        CreateHandleInformation;
+    OB_PRE_DUPLICATE_HANDLE_INFORMATION     DuplicateHandleInformation;
+}OB_PRE_OPERATION_PARAMETERS, * POB_PRE_OPERATION_PARAMETERS;
+
+typedef struct _OB_PRE_OPERATION_INFORMATION{
+    OB_OPERATION                    Operation;
+    union{
+        ULONG                       Flags;
+        struct{
+            ULONG                   KernelHandle    :   1;
+            ULONG                   Reserved        :   31;
+        };
+    };
+    PVOID                           Object;
+    POBJECT_TYPE                    ObjectType;
+    PVOID                           CallContext;
+    POB_PRE_OPERATION_PARAMETERS    Parameters;
+}OB_PRE_OPERATION_INFORMATION, * POB_PRE_OPERATION_INFORMATION;
+
+typedef enum _OB_PREOP_CALLBACK_STATUS{
+    OB_PREOP_SUCCESS = 0,
+}OB_PREOP_CALLBACK_STATUS, *POB_PREOP_CALLBACK_STATUS;
+
+typedef 
+OB_PREOP_CALLBACK_STATUS
+OB_PRE_OPERATION_CALLBACK(
+    PVOID                           RegistrationContext,
+    POB_PRE_OPERATION_INFORMATION   OperationInfo
+);
+typedef OB_PRE_OPERATION_CALLBACK* POB_PRE_OPERATION_CALLBACK;
+
+typedef struct _OB_POST_CREATE_HANDLE_INFORMATION{
+    ACCESS_MASK     GrantedAccess;
+} OB_POST_CREATE_HANDLE_INFORMATION, * POB_POST_CREATE_HANDLE_INFORMATION;
+
+typedef struct _OB_POST_DUPLICATE_HANDLE_INFORMATION{
+    ACCESS_MASK     GrantedAccess;
+} OB_POST_DUPLICATE_HANDLE_INFORMATION, * POB_POST_DUPLICATE_HANDLE_INFORMATION;
+
+typedef union _OB_POST_OPERATION_PARAMETERS{
+    OB_POST_CREATE_HANDLE_INFORMATION       CreateHandleInformation;
+    OB_POST_DUPLICATE_HANDLE_INFORMATION    DuplicateHandleInformation;
+}OB_POST_OPERATION_PARAMETERS, * POB_POST_OPERATION_PARAMETERS;
+
+typedef struct _OB_POST_OPERATION_INFORMATION{
+    OB_OPERATION                    Operation;
+    union {
+        ULONG                       Flags;
+        struct {
+            ULONG                   KernelHandle    :   1;
+            ULONG                   Reserved        :   31;
+        };
+    };
+    PVOID                           Object;
+    POBJECT_TYPE                    ObjectType;
+    PVOID                           CallContext;
+    LOUSTATUS                       ReturnStatus;
+    POB_POST_OPERATION_PARAMETERS   Parameters;
+}OB_POST_OPERATION_INFORMATION, * POB_POST_OPERATION_INFORMATION;
+
+typedef
+void
+OB_POST_OPERATION_CALLBACK(
+    PVOID                           RegistrationContext,
+    POB_POST_OPERATION_INFORMATION  OperationInfo
+);
+typedef OB_POST_OPERATION_CALLBACK* POB_POST_OPERATION_CALLBACK;
+
+typedef 
+LOUSTATUS 
+PCI_SET_ATS(
+    PVOID Context, 
+    ...
+);
+typedef PCI_SET_ATS* PPCI_SET_ATS;
+
+
+typedef 
+LOUSTATUS
+PCI_MSIX_SET_ENTRY(
+    PVOID   Context,
+    ULONG   TableEntry,
+    ULONG   MessageNumber
+);
+typedef PCI_MSIX_SET_ENTRY *PPCI_MSIX_SET_ENTRY;
+
+
+typedef 
+LOUSTATUS
+PCI_MSIX_MASKUNMASK_ENTRY(
+    PVOID   Context,
+    ULONG   TableEntry
+);
+typedef PCI_MSIX_MASKUNMASK_ENTRY *PPCI_MSIX_MASKUNMASK_ENTRY;
+
+typedef 
+LOUSTATUS
+PCI_MSIX_GET_ENTRY(
+    PVOID       Context,
+    ULONG       TableEntry,
+    PULONG      MessageNumber,
+    PBOOLEAN    Masked
+);
+typedef PCI_MSIX_GET_ENTRY *PPCI_MSIX_GET_ENTRY;
+
+typedef
+LOUSTATUS
+PCI_MSIX_GET_TABLE_SIZE(
+    PVOID   Context,
+    PULONG  TableSize
+);
+typedef PCI_MSIX_GET_TABLE_SIZE *PPCI_MSIX_GET_TABLE_SIZE;
+
+typedef
+LOUSTATUS
+PCI_SET_ACS2(
+    PVOID   Context,
+    ULONG   Flags,
+    ...
+);
+typedef PCI_SET_ACS2* PPCI_SET_ACS2;
+
+typedef enum _IOMMU_PASID_CONFIGURATION_TYPE{
+    PasidConfigTypeDefaultPasidOnly = 0,
+    PasidConfigTypePasidTaggedDma,
+    PasidConfigTypeMax
+}IOMMU_PASID_CONFIGURATION_TYPE, * PIOMMU_PASID_CONFIGURATION_TYPE;
+
+typedef struct _IOMMU_DEVICE_CREATION_CONFIGURATION_PASID{
+    IOMMU_PASID_CONFIGURATION_TYPE ConfigType;
+    BOOLEAN                        SuppressPasidFaults;
+}IOMMU_DEVICE_CREATION_CONFIGURATION_PASID, * PIOMMU_DEVICE_CREATION_CONFIGURATION_PASID;
+
+typedef 
+void 
+IO_WORKITEM_ROUTINE(
+    PDEVICE_OBJECT  DeviceObject,
+    PVOID           Context
+);
+typedef IO_WORKITEM_ROUTINE* PIO_WORKITEM_ROUTINE;
+
+typedef 
+void 
+IO_WORKITEM_ROUTINE_EX(
+    PVOID           IoObject,
+    PVOID           Context,
+    PIO_WORKITEM    IoWorkItem
+);
+typedef IO_WORKITEM_ROUTINE_EX* PIO_WORKITEM_ROUTINE_EX;
+
+typedef
+LOUSTATUS
+IO_CONTAINER_NOTIFICATION_FUNCTION();
+typedef IO_CONTAINER_NOTIFICATION_FUNCTION* PIO_CONTAINER_NOTIFICATION_FUNCTION;
+
+typedef 
+LOUSTATUS
+PDRIVER_NOTIFICATION_CALLBACK_ROUTINE(
+    PVOID   NotificationStructure,
+    PVOID   Context
+);
+
+typedef 
+void 
+DEVICE_CHANGE_COMPLETE_CALLBACK(
+    PVOID Context
+);
+typedef DEVICE_CHANGE_COMPLETE_CALLBACK* PDEVICE_CHANGE_COMPLETE_CALLBACK;
+
+typedef 
+void 
+WMI_NOTIFICATION_CALLBACK(
+    PVOID   WNode,
+    PVOID   Context
+);
+typedef WMI_NOTIFICATION_CALLBACK* PWMI_NOTIFICATION_CALLBACK;
+
+typedef enum _KBUGCHECK_CALLBACK_REASON{
+    KbCallbackInvalid = 0,
+    KbCallbackReserved1,
+    KbCallbackSecondaryDumpData,
+    KbCallbackDumpIo,
+    KbCallbackAddPages,
+    KbCallbackSecondaryMultiPartDumpData,
+    KbCallbackRemovePages,
+    KbCallbackTriageDumpData,
+    KbCallbackReserved2
+}KBUGCHECK_CALLBACK_REASON, * PKBUGCHECK_CALLBACK_REASON;
+
+struct _KBUGCHECK_REASON_CALLBACK_RECORD;
+
+typedef 
+void 
+KBUGCHECK_REASON_CALLBACK_ROUTINE(
+    KBUGCHECK_CALLBACK_REASON                   Reason,
+    struct _KBUGCHECK_REASON_CALLBACK_RECORD*   Record,
+    PVOID                                       ReasonSpecificData,
+    ULONG                                       ReasonSpecificDataLength
+);
+typedef KBUGCHECK_REASON_CALLBACK_ROUTINE* PKBUGCHECK_REASON_CALLBACK_ROUTINE;
+
+typedef struct _KBUGCHECK_REASON_CALLBACK_RECORD{
+    LIST_ENTRY                         Entry;
+    PKBUGCHECK_REASON_CALLBACK_ROUTINE CallbackRoutine;
+    PUCHAR                             Component;
+    ULONG_PTR                          Checksum;
+    KBUGCHECK_CALLBACK_REASON          Reason;
+    UCHAR                              State;
+}KBUGCHECK_REASON_CALLBACK_RECORD, * PKBUGCHECK_REASON_CALLBACK_RECORD;
+
+typedef enum _BOUND_CALLBACK_STATUS{
+    BoundExceptionContinueSearch = 0,
+    BoundExceptionHandled,
+    BoundExceptionError,
+    BoundExceptionMaximum
+}BOUND_CALLBACK_STATUS, *PBOUND_CALLBACK_STATUS;
+
+typedef
+BOUND_CALLBACK_STATUS
+BOUND_CALLBACK();
+typedef BOUND_CALLBACK* PBOUND_CALLBACK;
+
+typedef 
+void 
+KBUGCHECK_CALLBACK_ROUTINE(
+    PVOID   Buffer,
+    ULONG   Length
+);
+typedef KBUGCHECK_CALLBACK_ROUTINE* PKBUGCHECK_CALLBACK_ROUTINE;
+
+typedef 
+BOOLEAN
+NMI_CALLBACK(
+    PVOID   Context,
+    BOOLEAN Handled
+);
+typedef NMI_CALLBACK* PNMI_CALLBACK;
+
+
+typedef enum _KE_PROCESSOR_CHANGE_NOTIFY_STATE{
+    KeProcessorAddStartNotify = 0,
+    KeProcessorAddCompleteNotify,
+    KeProcessorAddFailureNotify
+}KE_PROCESSOR_CHANGE_NOTIFY_STATE, * PKE_PROCESSOR_CHANGE_NOTIFY_STATE;
+
+typedef struct _KE_PROCESSOR_CHANGE_NOTIFY_CONTEXT {
+    KE_PROCESSOR_CHANGE_NOTIFY_STATE    State;
+    ULONG                               LouNumber;
+    LOUSTATUS                           Status;
+    PROCESSOR_NUMBER                    ProcNumber;
+} KE_PROCESSOR_CHANGE_NOTIFY_CONTEXT, * PKE_PROCESSOR_CHANGE_NOTIFY_CONTEXT;
+
+typedef
+void 
+PROCESSOR_CALLBACK_FUNCTION(
+    PVOID                                   CallbackContext,
+    PKE_PROCESSOR_CHANGE_NOTIFY_CONTEXT     ChangeContext,
+    PLOUSTATUS                              OperationSatus
+);
+typedef PROCESSOR_CALLBACK_FUNCTION* PPROCESSOR_CALLBACK_FUNCTION;
+
+typedef 
+BOOLEAN
+KSYNCHRONIZE_ROUTINE(
+    PVOID   Context
+);
+typedef KSYNCHRONIZE_ROUTINE* PKSYNCHRONIZE_ROUTINE;
+
+typedef enum _KWAIT_REASON{
+    Executive = 0,
+    FreePage,
+    PageIn,
+    PoolAllocation,
+    DelayExecution,
+    Suspended,
+    UserRequest,
+    WrExecutive,
+    WrFreePage,
+    WrPageIn,
+    WrPoolAllocation,
+    WrDelayExecution,
+    WrSuspended,
+    WrUserRequest,
+    WrEventPair,
+    WrQueue,
+    WrLpcReceive,
+    WrLpcReply,
+    WrVirtualMemory,
+    WrPageOut,
+    WrRendezvous,
+    WrKeyedEvent,
+    WrTerminated,
+    WrProcessInSwap,
+    WrCpuRateControl,
+    WrCalloutStack,
+    WrKernel,
+    WrResource,
+    WrPushLock,
+    WrMutex,
+    WrQuantumEnd,
+    WrDispatchInt,
+    WrPreempted,
+    WrYieldExecution,
+    WrFastMutex,
+    WrGuardedMutex,
+    WrRundown,
+    MaximumWaitReason
+}KWAIT_REASON, * PKWAIT_REASON;
+
+typedef struct _KWAIT_BLOCK{
+  LIST_ENTRY            WaitListEntry;
+  PKTHREAD              Thread;
+  PVOID                 Object;
+  struct _KWAIT_BLOCK*  NextWaitBlock;
+  USHORT                WaitKey;
+  UCHAR                 WaitType;
+  volatile UCHAR        BlockState;
+  LONG                  SpareLong;
+}KWAIT_BLOCK, * PKWAIT_BLOCK, * PRKWAIT_BLOCK;
+
+typedef 
+void 
+MM_MDL_ROUTINE(
+    PVOID   DriverContext,
+    PVOID   MappedVa
+);
+typedef MM_MDL_ROUTINE* PMM_MDL_ROUTINE;
+
+typedef enum _LOCK_OPERATION{
+    IoReadAccess = 0,
+    IoWriteAccess,
+    IoModifyAccess
+}LOCK_OPERATION, * PLOCK_OPERATION;
+
+typedef ULONG NOTIFICATION_MASK;
+
+typedef struct _TRANSACTION_NOTIFICATION{
+    PVOID         TransactionKey;
+    ULONG         TransactionNotification;
+    LARGE_INTEGER TmVirtualClock;
+    ULONG         ArgumentLength;
+}TRANSACTION_NOTIFICATION, * PTRANSACTION_NOTIFICATION;
+
+typedef enum _PARTITION_INFORMATION_CLASS{
+    SystemMemoryPartitionInformation = 0,
+    SystemMemoryPartitionMoveMemory,
+    SystemMemoryPartitionAddPagefile,
+    SystemMemoryPartitionCombineMemory,
+    SystemMemoryPartitionInitialAddMemory,
+    SystemMemoryPartitionGetMemoryEvents,
+    SystemMemoryPartitionSetAttributes,
+    SystemMemoryPartitionNodeInformation,
+    SystemMemoryPartitionCreateLargePages,
+    SystemMemoryPartitionMax,
+}PARTITION_INFORMATION_CLASS, * PPARTITION_INFORMATION_CLASS;
+
+typedef union _POWER_STATE{
+    SYSTEM_POWER_STATE SystemState;
+    DEVICE_POWER_STATE DeviceState;
+}POWER_STATE, * PPOWER_STATE;
+
+typedef 
+void 
+REQUEST_POWER_COMPLETE(
+    PDEVICE_OBJECT      DeviceObject,
+    UCHAR               MinorFunction,
+    POWER_STATE         PowerState,
+    PIO_STATUS_BLOCK    IoStatus
+);
+typedef REQUEST_POWER_COMPLETE* PREQUEST_POWER_COMPLETE;
+
+typedef 
+LOUSTATUS
+PTM_DEVICE_QUERY_GRANULARITY(
+    PVOID   Context,
+    PULONG  Granularity
+);
+typedef PTM_DEVICE_QUERY_GRANULARITY* PPTM_DEVICE_QUERY_GRANULARITY;
+
+typedef 
+LOUSTATUS
+PTM_DEVICE_QUERY_TIME_SOURCE(
+    PVOID       Context,
+    PHANDLE     TimeSourceHandle
+);
+typedef PTM_DEVICE_QUERY_TIME_SOURCE* PPTM_DEVICE_QUERY_TIME_SOURCE;
+
+typedef 
+LOUSTATUS
+PTM_DEVICE_ENABLE(
+    PVOID   Context,
+    BOOLEAN Enable
+);
+typedef PTM_DEVICE_ENABLE* PPTM_DEVICE_ENABLE;
+
+typedef 
+LOUSTATUS 
+PTM_DEVICE_DISABLE(
+    PVOID Context
+);
+typedef PTM_DEVICE_DISABLE* PPTM_DEVICE_DISABLE;
+
+typedef struct _TIME_FIELDS{
+    CSHORT  Year;
+    CSHORT  Month;
+    CSHORT  Day;
+    CSHORT  Hour;
+    CSHORT  Minute;
+    CSHORT  Second;
+    CSHORT  Milliseconds;
+    CSHORT  Weekday;
+}TIME_FIELDS, * PTIME_FIELDS;
+
+typedef enum _SECTION_INHERIT{
+    ViewShare = 1,
+    ViewUnmap = 2,
+}SECTION_INHERIT, * PSECTION_INHERIT;
+
+
+
 #include <Ldm/Clfs.h>
 
 #include <Hal.h>
@@ -998,7 +1728,6 @@ typedef struct _TOKEN_PRIVALEDGES{
     DWORD               PrivaledgeCount;
     LUID_AND_ATTRIBUTES Priviledges[];
 }TOKEN_PRIVALEDGES, * PTOKEN_PRIVALEDGES;
-
 
 #ifdef __cplusplus
 }
