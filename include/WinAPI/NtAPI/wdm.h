@@ -2325,7 +2325,7 @@ ULONG ExInterlockedAddUlong(
 );
 
 
-NTKERNELAPI
+KERNEL_EXPORT
 PSLIST_ENTRY
 ExInterlockedFlushSList (
      PSLIST_HEADER ListHead
@@ -2348,7 +2348,7 @@ PSINGLE_LIST_ENTRY ExInterlockedPopEntryList(
    PKSPIN_LOCK        Lock
 );
 
-NTKERNELAPI
+KERNEL_EXPORT
 PSLIST_ENTRY
 ExInterlockedPopEntrySList (
      PSLIST_HEADER ListHead,
@@ -2361,7 +2361,7 @@ PSINGLE_LIST_ENTRY ExInterlockedPushEntryList(
    PKSPIN_LOCK                         Lock
 );
 
-NTKERNELAPI
+KERNEL_EXPORT
 PSLIST_ENTRY
 ExInterlockedPushEntrySList (
      PSLIST_HEADER ListHead,
@@ -4289,7 +4289,7 @@ void KefReleaseSpinLockFromDpcLevel(
    PKSPIN_LOCK SpinLock
 );
 
-NTHALAPI KIRQL KeGetCurrentIrql();
+KERNEL_EXPORT KIRQL KeGetCurrentIrql();
 
 USHORT KeGetCurrentNodeNumber();
 
@@ -4477,7 +4477,7 @@ USHORT KeQueryNodeMaximumProcessorCount(
 );
 
 
-NTHALAPI LARGE_INTEGER KeQueryPerformanceCounter(
+KERNEL_EXPORT LARGE_INTEGER KeQueryPerformanceCounter(
    PLARGE_INTEGER PerformanceFrequency
 );
 
@@ -4516,7 +4516,7 @@ VOID KeRaiseIrql(
    PKIRQL OldIrql
 );
 
-_DECL_HAL_KE_IMPORT KIRQL KeRaiseIrqlToDpcLevel();
+KERNEL_EXPORT KIRQL KeRaiseIrqlToDpcLevel();
 
 LONG KeReadStateEvent(
    PRKEVENT Event
@@ -4751,11 +4751,11 @@ BOOLEAN KeSetTimerEx(
 
 LOGICAL KeShouldYieldProcessor();
 
-NTHALAPI VOID KeStallExecutionProcessor(
+KERNEL_EXPORT VOID KeStallExecutionProcessor(
    ULONG MicroSeconds
 );
 
-NTHALAPI VOID KeStallExecutionProcessor(
+KERNEL_EXPORT VOID KeStallExecutionProcessor(
    ULONG MicroSeconds
 );
 
@@ -5100,12 +5100,12 @@ NtCommitEnlistment(
   PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtCommitTransaction(
+KERNEL_EXPORT LOUSTATUS NtCommitTransaction(
    HANDLE  TransactionHandle,
    BOOLEAN Wait
 );
 
-NTSYSCALLAPI LOUSTATUS NtCreateEnlistment(
+KERNEL_EXPORT LOUSTATUS NtCreateEnlistment(
             PHANDLE            EnlistmentHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             ResourceManagerHandle,
@@ -5116,7 +5116,7 @@ NTSYSCALLAPI LOUSTATUS NtCreateEnlistment(
    PVOID              EnlistmentKey
 );
 
-NTSYSCALLAPI LOUSTATUS NtCreateResourceManager(
+KERNEL_EXPORT LOUSTATUS NtCreateResourceManager(
             PHANDLE            ResourceManagerHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             TmHandle,
@@ -5126,7 +5126,7 @@ NTSYSCALLAPI LOUSTATUS NtCreateResourceManager(
    PUNICODE_STRING    Description
 );
 
-NTSYSCALLAPI LOUSTATUS NtCreateTransaction(
+KERNEL_EXPORT LOUSTATUS NtCreateTransaction(
             PHANDLE            TransactionHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -5139,7 +5139,7 @@ NTSYSCALLAPI LOUSTATUS NtCreateTransaction(
    PUNICODE_STRING    Description
 );
 
-NTSYSCALLAPI LOUSTATUS NtCreateTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtCreateTransactionManager(
             PHANDLE            TmHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -5148,7 +5148,7 @@ NTSYSCALLAPI LOUSTATUS NtCreateTransactionManager(
    ULONG              CommitStrength
 );
 
-NTSYSCALLAPI LOUSTATUS NtEnumerateTransactionObject(
+KERNEL_EXPORT LOUSTATUS NtEnumerateTransactionObject(
    HANDLE            RootObjectHandle,
              KTMOBJECT_TYPE    QueryType,
         PKTMOBJECT_CURSOR ObjectCursor,
@@ -5156,7 +5156,7 @@ NTSYSCALLAPI LOUSTATUS NtEnumerateTransactionObject(
             PULONG            ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtGetNotificationResourceManager(
+KERNEL_EXPORT LOUSTATUS NtGetNotificationResourceManager(
               HANDLE                    ResourceManagerHandle,
              PTRANSACTION_NOTIFICATION TransactionNotification,
               ULONG                     NotificationLength,
@@ -5166,7 +5166,7 @@ NTSYSCALLAPI LOUSTATUS NtGetNotificationResourceManager(
     ULONG_PTR                 AsynchronousContext
 );
 
-NTSYSCALLAPI LOUSTATUS NtManagePartition(
+KERNEL_EXPORT LOUSTATUS NtManagePartition(
              HANDLE                      TargetHandle,
    HANDLE                      SourceHandle,
              PARTITION_INFORMATION_CLASS PartitionInformationClass,
@@ -5174,7 +5174,7 @@ NTSYSCALLAPI LOUSTATUS NtManagePartition(
              ULONG                       PartitionInformationLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtOpenEnlistment(
+KERNEL_EXPORT LOUSTATUS NtOpenEnlistment(
             PHANDLE            EnlistmentHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             ResourceManagerHandle,
@@ -5182,7 +5182,7 @@ NTSYSCALLAPI LOUSTATUS NtOpenEnlistment(
    POBJECT_ATTRIBUTES ObjectAttributes
 );
 
-NTSYSCALLAPI LOUSTATUS NtOpenResourceManager(
+KERNEL_EXPORT LOUSTATUS NtOpenResourceManager(
             PHANDLE            ResourceManagerHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             TmHandle,
@@ -5190,7 +5190,7 @@ NTSYSCALLAPI LOUSTATUS NtOpenResourceManager(
    POBJECT_ATTRIBUTES ObjectAttributes
 );
 
-NTSYSCALLAPI LOUSTATUS NtOpenTransaction(
+KERNEL_EXPORT LOUSTATUS NtOpenTransaction(
             PHANDLE            TransactionHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -5198,7 +5198,7 @@ NTSYSCALLAPI LOUSTATUS NtOpenTransaction(
    HANDLE             TmHandle
 );
 
-NTSYSCALLAPI LOUSTATUS NtOpenTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtOpenTransactionManager(
             PHANDLE            TmHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -5207,7 +5207,7 @@ NTSYSCALLAPI LOUSTATUS NtOpenTransactionManager(
    ULONG              OpenOptions
 );
 
-NTSYSCALLAPI LOUSTATUS NtPowerInformation(
+KERNEL_EXPORT LOUSTATUS NtPowerInformation(
               POWER_INFORMATION_LEVEL InformationLevel,
     PVOID                   InputBuffer,
               ULONG                   InputBufferLength,
@@ -5215,27 +5215,27 @@ NTSYSCALLAPI LOUSTATUS NtPowerInformation(
               ULONG                   OutputBufferLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtPrepareComplete(
+KERNEL_EXPORT LOUSTATUS NtPrepareComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtPrepareEnlistment(
+KERNEL_EXPORT LOUSTATUS NtPrepareEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtPrePrepareComplete(
+KERNEL_EXPORT LOUSTATUS NtPrePrepareComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtPrePrepareEnlistment(
+KERNEL_EXPORT LOUSTATUS NtPrePrepareEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtQueryInformationEnlistment(
+KERNEL_EXPORT LOUSTATUS NtQueryInformationEnlistment(
               HANDLE                       EnlistmentHandle,
               ENLISTMENT_INFORMATION_CLASS EnlistmentInformationClass,
              PVOID                        EnlistmentInformation,
@@ -5243,7 +5243,7 @@ NTSYSCALLAPI LOUSTATUS NtQueryInformationEnlistment(
    PULONG                       ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtQueryInformationResourceManager(
+KERNEL_EXPORT LOUSTATUS NtQueryInformationResourceManager(
               HANDLE                            ResourceManagerHandle,
               RESOURCEMANAGER_INFORMATION_CLASS ResourceManagerInformationClass,
              PVOID                             ResourceManagerInformation,
@@ -5251,7 +5251,7 @@ NTSYSCALLAPI LOUSTATUS NtQueryInformationResourceManager(
    PULONG                            ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtQueryInformationTransaction(
+KERNEL_EXPORT LOUSTATUS NtQueryInformationTransaction(
               HANDLE                        TransactionHandle,
               TRANSACTION_INFORMATION_CLASS TransactionInformationClass,
              PVOID                         TransactionInformation,
@@ -5259,7 +5259,7 @@ NTSYSCALLAPI LOUSTATUS NtQueryInformationTransaction(
    PULONG                        ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtQueryInformationTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtQueryInformationTransactionManager(
               HANDLE                               TransactionManagerHandle,
               TRANSACTIONMANAGER_INFORMATION_CLASS TransactionManagerInformationClass,
              PVOID                                TransactionManagerInformation,
@@ -5267,78 +5267,78 @@ NTSYSCALLAPI LOUSTATUS NtQueryInformationTransactionManager(
    PULONG                               ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtReadOnlyEnlistment(
+KERNEL_EXPORT LOUSTATUS NtReadOnlyEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtRecoverEnlistment(
+KERNEL_EXPORT LOUSTATUS NtRecoverEnlistment(
              HANDLE EnlistmentHandle,
    PVOID  EnlistmentKey
 );
 
-NTSYSCALLAPI LOUSTATUS NtRecoverResourceManager(
+KERNEL_EXPORT LOUSTATUS NtRecoverResourceManager(
    HANDLE ResourceManagerHandle
 );
 
-NTSYSCALLAPI LOUSTATUS NtRecoverTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtRecoverTransactionManager(
    HANDLE TransactionManagerHandle
 );
 
-NTSYSCALLAPI LOUSTATUS NtRenameTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtRenameTransactionManager(
    PUNICODE_STRING LogFileName,
    LPGUID          ExistingTransactionManagerGuid
 );
 
-NTSYSCALLAPI LOUSTATUS NtRollbackComplete(
+KERNEL_EXPORT LOUSTATUS NtRollbackComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtRollbackEnlistment(
+KERNEL_EXPORT LOUSTATUS NtRollbackEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtRollbackTransaction(
+KERNEL_EXPORT LOUSTATUS NtRollbackTransaction(
    HANDLE  TransactionHandle,
    BOOLEAN Wait
 );
 
-NTSYSCALLAPI LOUSTATUS NtRollforwardTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtRollforwardTransactionManager(
              HANDLE         TransactionManagerHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS NtSetInformationEnlistment(
+KERNEL_EXPORT LOUSTATUS NtSetInformationEnlistment(
    HANDLE                       EnlistmentHandle,
    ENLISTMENT_INFORMATION_CLASS EnlistmentInformationClass,
    PVOID                        EnlistmentInformation,
    ULONG                        EnlistmentInformationLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtSetInformationResourceManager(
+KERNEL_EXPORT LOUSTATUS NtSetInformationResourceManager(
   HANDLE                            ResourceManagerHandle,
   RESOURCEMANAGER_INFORMATION_CLASS ResourceManagerInformationClass,
   PVOID                             ResourceManagerInformation,
   ULONG                             ResourceManagerInformationLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtSetInformationTransaction(
+KERNEL_EXPORT LOUSTATUS NtSetInformationTransaction(
    HANDLE                        TransactionHandle,
    TRANSACTION_INFORMATION_CLASS TransactionInformationClass,
    PVOID                         TransactionInformation,
    ULONG                         TransactionInformationLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtSetInformationTransactionManager(
+KERNEL_EXPORT LOUSTATUS NtSetInformationTransactionManager(
    HANDLE                               TmHandle,
              TRANSACTIONMANAGER_INFORMATION_CLASS TransactionManagerInformationClass,
              PVOID                                TransactionManagerInformation,
              ULONG                                TransactionManagerInformationLength
 );
 
-NTSYSCALLAPI LOUSTATUS NtSinglePhaseReject(
+KERNEL_EXPORT LOUSTATUS NtSinglePhaseReject(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
@@ -5952,11 +5952,11 @@ int RtlConstantTimeEqualMemory(
   unsigned long len
 );
 
-LARGE_INTEGER NTAPI_INLINE RtlConvertLongToLargeInteger(
+LOUAPI_INLINE LARGE_INTEGER RtlConvertLongToLargeInteger(
    LONG SignedInteger
 );
 
-LARGE_INTEGER NTAPI_INLINE RtlConvertUlongToLargeInteger(
+LOUAPI_INLINE LARGE_INTEGER RtlConvertUlongToLargeInteger(
    ULONG UnsignedInteger
 );
 
@@ -6598,17 +6598,17 @@ void WriteUInt32Release(
    HANDLE Handle
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCommitComplete(
+KERNEL_EXPORT LOUSTATUS ZwCommitComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCommitEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwCommitEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCommitTransaction(
+KERNEL_EXPORT LOUSTATUS ZwCommitTransaction(
    HANDLE  TransactionHandle,
    BOOLEAN Wait
 );
@@ -6619,7 +6619,7 @@ NTSYSCALLAPI LOUSTATUS ZwCommitTransaction(
     POBJECT_ATTRIBUTES ObjectAttributes
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCreateEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwCreateEnlistment(
             PHANDLE            EnlistmentHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             ResourceManagerHandle,
@@ -6665,7 +6665,7 @@ NTSYSCALLAPI LOUSTATUS ZwCreateEnlistment(
    PULONG             Disposition
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCreateResourceManager(
+KERNEL_EXPORT LOUSTATUS ZwCreateResourceManager(
             PHANDLE            ResourceManagerHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             TmHandle,
@@ -6685,7 +6685,7 @@ NTSYSCALLAPI LOUSTATUS ZwCreateResourceManager(
    HANDLE             FileHandle
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCreateTransaction(
+KERNEL_EXPORT LOUSTATUS ZwCreateTransaction(
             PHANDLE            TransactionHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -6698,7 +6698,7 @@ NTSYSCALLAPI LOUSTATUS ZwCreateTransaction(
    PUNICODE_STRING    Description
 );
 
-NTSYSCALLAPI LOUSTATUS ZwCreateTransactionManager(
+KERNEL_EXPORT LOUSTATUS ZwCreateTransactionManager(
             PHANDLE            TmHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -6725,7 +6725,7 @@ NTSYSCALLAPI LOUSTATUS ZwCreateTransactionManager(
              PULONG                ResultLength
 );
 
-NTSYSCALLAPI LOUSTATUS ZwEnumerateTransactionObject(
+KERNEL_EXPORT LOUSTATUS ZwEnumerateTransactionObject(
    HANDLE            RootObjectHandle,
              KTMOBJECT_TYPE    QueryType,
         PKTMOBJECT_CURSOR ObjectCursor,
@@ -6747,7 +6747,7 @@ NTSYSCALLAPI LOUSTATUS ZwEnumerateTransactionObject(
 );
 
 
-NTSYSCALLAPI LOUSTATUS ZwGetNotificationResourceManager(
+KERNEL_EXPORT LOUSTATUS ZwGetNotificationResourceManager(
               HANDLE                    ResourceManagerHandle,
              PTRANSACTION_NOTIFICATION TransactionNotification,
               ULONG                     NotificationLength,
@@ -6778,7 +6778,7 @@ NTSYSCALLAPI LOUSTATUS ZwGetNotificationResourceManager(
                   ULONG           Win32Protect
 );
 
-NTSYSCALLAPI LOUSTATUS ZwOpenEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwOpenEnlistment(
             PHANDLE            EnlistmentHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             RmHandle,
@@ -6786,7 +6786,7 @@ NTSYSCALLAPI LOUSTATUS ZwOpenEnlistment(
    POBJECT_ATTRIBUTES ObjectAttributes
 );
 
-NTSYSCALLAPI LOUSTATUS ZwOpenEvent(
+KERNEL_EXPORT LOUSTATUS ZwOpenEvent(
    PHANDLE            EventHandle,
     ACCESS_MASK        DesiredAccess,
     POBJECT_ATTRIBUTES ObjectAttributes
@@ -6829,7 +6829,7 @@ NTSYSCALLAPI LOUSTATUS ZwOpenEvent(
     HANDLE             TransactionHandle
 );
 
-NTSYSCALLAPI LOUSTATUS ZwOpenResourceManager(
+KERNEL_EXPORT LOUSTATUS ZwOpenResourceManager(
             PHANDLE            ResourceManagerHandle,
              ACCESS_MASK        DesiredAccess,
              HANDLE             TmHandle,
@@ -6849,7 +6849,7 @@ NTSYSCALLAPI LOUSTATUS ZwOpenResourceManager(
     POBJECT_ATTRIBUTES ObjectAttributes
 );
 
-NTSYSCALLAPI LOUSTATUS ZwOpenTransaction(
+KERNEL_EXPORT LOUSTATUS ZwOpenTransaction(
             PHANDLE            TransactionHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -6857,7 +6857,7 @@ NTSYSCALLAPI LOUSTATUS ZwOpenTransaction(
    HANDLE             TmHandle
 );
 
-NTSYSCALLAPI LOUSTATUS ZwOpenTransactionManager(
+KERNEL_EXPORT LOUSTATUS ZwOpenTransactionManager(
             PHANDLE            TmHandle,
              ACCESS_MASK        DesiredAccess,
    POBJECT_ATTRIBUTES ObjectAttributes,
@@ -6866,22 +6866,22 @@ NTSYSCALLAPI LOUSTATUS ZwOpenTransactionManager(
    ULONG              OpenOptions
 );
 
-NTSYSCALLAPI LOUSTATUS ZwPrepareComplete(
+KERNEL_EXPORT LOUSTATUS ZwPrepareComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwPrepareEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwPrepareEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwPrePrepareComplete(
+KERNEL_EXPORT LOUSTATUS ZwPrePrepareComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwPrePrepareEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwPrePrepareEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
@@ -6899,7 +6899,7 @@ NTSYSCALLAPI LOUSTATUS ZwPrePrepareEnlistment(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
-NTSYSCALLAPI LOUSTATUS ZwQueryInformationEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwQueryInformationEnlistment(
               HANDLE                       EnlistmentHandle,
               ENLISTMENT_INFORMATION_CLASS EnlistmentInformationClass,
              PVOID                        EnlistmentInformation,
@@ -6915,7 +6915,7 @@ NTSYSCALLAPI LOUSTATUS ZwQueryInformationEnlistment(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
-NTSYSCALLAPI LOUSTATUS ZwQueryInformationResourceManager(
+KERNEL_EXPORT LOUSTATUS ZwQueryInformationResourceManager(
               HANDLE                            ResourceManagerHandle,
               RESOURCEMANAGER_INFORMATION_CLASS ResourceManagerInformationClass,
              PVOID                             ResourceManagerInformation,
@@ -6923,7 +6923,7 @@ NTSYSCALLAPI LOUSTATUS ZwQueryInformationResourceManager(
    PULONG                            ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS ZwQueryInformationTransaction(
+KERNEL_EXPORT LOUSTATUS ZwQueryInformationTransaction(
               HANDLE                        TransactionHandle,
               TRANSACTION_INFORMATION_CLASS TransactionInformationClass,
              PVOID                         TransactionInformation,
@@ -6931,7 +6931,7 @@ NTSYSCALLAPI LOUSTATUS ZwQueryInformationTransaction(
    PULONG                        ReturnLength
 );
 
-NTSYSCALLAPI LOUSTATUS ZwQueryInformationTransactionManager(
+KERNEL_EXPORT LOUSTATUS ZwQueryInformationTransactionManager(
               HANDLE                               TransactionManagerHandle,
               TRANSACTIONMANAGER_INFORMATION_CLASS TransactionManagerInformationClass,
              PVOID                                TransactionManagerInformation,
@@ -6974,46 +6974,46 @@ NTSYSCALLAPI LOUSTATUS ZwQueryInformationTransactionManager(
    PULONG           Key
 );
 
-NTSYSCALLAPI LOUSTATUS ZwReadOnlyEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwReadOnlyEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwRecoverEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwRecoverEnlistment(
              HANDLE EnlistmentHandle,
    PVOID  EnlistmentKey
 );
 
 
-NTSYSCALLAPI LOUSTATUS ZwRecoverResourceManager(
+KERNEL_EXPORT LOUSTATUS ZwRecoverResourceManager(
    HANDLE ResourceManagerHandle
 );
 
-NTSYSCALLAPI LOUSTATUS ZwRecoverTransactionManager(
+KERNEL_EXPORT LOUSTATUS ZwRecoverTransactionManager(
    HANDLE TransactionManagerHandle
 );
 
-NTSYSCALLAPI LOUSTATUS ZwRollbackComplete(
+KERNEL_EXPORT LOUSTATUS ZwRollbackComplete(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwRollbackEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwRollbackEnlistment(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwRollbackTransaction(
+KERNEL_EXPORT LOUSTATUS ZwRollbackTransaction(
    HANDLE  TransactionHandle,
    BOOLEAN Wait
 );
 
-NTSYSCALLAPI LOUSTATUS ZwRollforwardTransactionManager(
+KERNEL_EXPORT LOUSTATUS ZwRollforwardTransactionManager(
              HANDLE         TransactionManagerHandle,
    PLARGE_INTEGER TmVirtualClock
 );
 
-NTSYSCALLAPI LOUSTATUS ZwSetInformationEnlistment(
+KERNEL_EXPORT LOUSTATUS ZwSetInformationEnlistment(
    HANDLE                       EnlistmentHandle,
    ENLISTMENT_INFORMATION_CLASS EnlistmentInformationClass,
    PVOID                        EnlistmentInformation,
@@ -7028,14 +7028,14 @@ NTSYSCALLAPI LOUSTATUS ZwSetInformationEnlistment(
     FILE_INFORMATION_CLASS FileInformationClass
 );
 
-NTSYSCALLAPI LOUSTATUS ZwSetInformationResourceManager(
+KERNEL_EXPORT LOUSTATUS ZwSetInformationResourceManager(
   HANDLE                            ResourceManagerHandle,
   RESOURCEMANAGER_INFORMATION_CLASS ResourceManagerInformationClass,
   PVOID                             ResourceManagerInformation,
   ULONG                             ResourceManagerInformationLength
 );
 
-NTSYSCALLAPI LOUSTATUS ZwSetInformationTransaction(
+KERNEL_EXPORT LOUSTATUS ZwSetInformationTransaction(
    HANDLE                        TransactionHandle,
    TRANSACTION_INFORMATION_CLASS TransactionInformationClass,
    PVOID                         TransactionInformation,
@@ -7051,7 +7051,7 @@ NTSYSCALLAPI LOUSTATUS ZwSetInformationTransaction(
              ULONG           DataSize
 );
 
-NTSYSCALLAPI LOUSTATUS ZwSinglePhaseReject(
+KERNEL_EXPORT LOUSTATUS ZwSinglePhaseReject(
              HANDLE         EnlistmentHandle,
    PLARGE_INTEGER TmVirtualClock
 );

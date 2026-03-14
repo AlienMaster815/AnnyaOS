@@ -237,7 +237,7 @@ UserSpace:
 #	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 #	$(MAKE) -C DLL/LouDLLs/GDI32 all
 
-annya.iso: release 
+annya: release 
 	rm -rf ISO
 	
 	$(MAKE) -C LouCoff clean
@@ -251,21 +251,13 @@ annya.iso: release
 	$(MAKEDIR64)
 	#Copy System Files To The Appropriate Directories
 	$(CPY64)
+
+
+annya.iso: annya
 	#Build The Image In One Shabang
 	$(OSBUILDX64)
-
-
 	rm -rf release
-	rm -rf ISO
-
-PxeInstall: annya.iso
-	cp annya.iso ~/iventoy-1.0.21/iso/annya.iso
-#uses 26000 protocol for flush
-
-
-PublicRelease: annya.iso
-	cp annya.iso $(RELEASE_PATH)
-	rm -rf annya.iso
+	rm -rf ISO	
 
 cleanall:
 	$(MAKE) -C Registry clean
@@ -293,5 +285,5 @@ cleanall:
 	$(MAKE) -C LouCoff clean
 	rm -rf release
 	rm -rf ISO
-	rm -rd dist
-	rm annya.iso
+	rm -rf dist
+	rm -rf annya.iso

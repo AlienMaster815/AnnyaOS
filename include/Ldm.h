@@ -1714,6 +1714,14 @@ typedef enum _SECTION_INHERIT{
     ViewUnmap = 2,
 }SECTION_INHERIT, * PSECTION_INHERIT;
 
+#ifdef _CLFS_LIBRARY
+#define CLFSUSER_API ANNA_EXPORT
+#else
+#define CLFSUSER_API ANNA_IMPORT
+#endif
+
+#define LOUAPI_INLINE inline
+
 
 
 #include <Ldm/Clfs.h>

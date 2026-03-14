@@ -3,23 +3,6 @@
 #include <NtAPI.h>
 #pragma once
 
-#ifdef __cplusplus
-#define NTHALAPI extern "C"
-#define NTSYSCALLAPI extern "C"
-#define CLFSUSER_API extern "C"
-#define NTAPI_INLINE inline
-#define NTKERNELAPI extern "C"
-#define _DECL_HAL_KE_IMPORT extern "C"
-#else
-
-#define NTHALAPI extern
-#define NTSYSCALLAPI extern
-#define CLFSUSER_API extern
-#define NTAPI_INLINE inline
-#define NTKERNELAPI extern
-#define _DECL_HAL_KE_IMPORT extern
-#endif
-
 
 
 #include "Misc/undocumentedTypes.h"

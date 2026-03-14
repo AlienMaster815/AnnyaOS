@@ -111,7 +111,7 @@ typedef struct _COUNTED_REASON_CONTEXT {
 
 
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtPowerInformation(
+KERNEL_ENTRY KERNEL_EXPORT LOUSTATUS NtPowerInformation(
               POWER_INFORMATION_LEVEL InformationLevel,
     PVOID                   InputBuffer,
               ULONG                   InputBufferLength,

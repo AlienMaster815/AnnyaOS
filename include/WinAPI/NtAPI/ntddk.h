@@ -795,7 +795,7 @@ KeQueryTickCount(
 	 PLARGE_INTEGER CurrentCount
 );
 
-KERNEL_ENTRY KIRQL KeRaiseIrqlToDpcLevel();
+KERNEL_EXPORT KIRQL KeRaiseIrqlToDpcLevel();
 
 LONG KeSetBasePriorityThread(
 	  PKTHREAD Thread,
@@ -932,7 +932,7 @@ void MmUnsecureVirtualMemory(
 
 
 
-KERNEL_ENTRY NTSYSCALLAPI LOUSTATUS NtOpenProcess(
+KERNEL_ENTRY KERNEL_EXPORT LOUSTATUS NtOpenProcess(
             PHANDLE            ProcessHandle,
              ACCESS_MASK        DesiredAccess,
              POBJECT_ATTRIBUTES ObjectAttributes,
@@ -1319,7 +1319,7 @@ LONG RtlCompareString(
    BOOLEAN      CaseInSensitive
 );
 
-//NTAPI_INLINE RtlConvertUlongToLuid(
+//LOUAPI_INLINE RtlConvertUlongToLuid(
 //   ULONG Ulong
 //);
 
