@@ -1722,8 +1722,6 @@ typedef enum _SECTION_INHERIT{
 
 #define LOUAPI_INLINE inline
 
-
-
 #include <Ldm/Clfs.h>
 
 #include <Hal.h>
@@ -1736,6 +1734,201 @@ typedef struct _TOKEN_PRIVALEDGES{
     DWORD               PrivaledgeCount;
     LUID_AND_ATTRIBUTES Priviledges[];
 }TOKEN_PRIVALEDGES, * PTOKEN_PRIVALEDGES;
+
+#define CONST const
+
+typedef  void* ETHREAD,* PETHREAD;
+
+
+typedef struct _KAPC {
+    UCHAR               Type;
+    UCHAR               AllFlags;
+    UCHAR               Size;
+    UCHAR               SpareByte1;
+    ULONG               SpareLong0;
+    struct _KTHREAD*    Thread;
+    LIST_ENTRY          ApcListEntry;
+    PVOID               Reserved[3];
+    PVOID               NormalContext;
+    PVOID               SystemArgument1;
+    PVOID               SystemArgument2;
+    CCHAR               ApcStateIndex;
+    KPROCESSOR_MODE     ApcMode;
+    BOOLEAN             Inserted;
+} KAPC, * PKAPC, * PRKAPC;
+
+typedef LONGLONG USN;
+
+typedef CONST OBJECT_ATTRIBUTES* PCOBJECT_ATTRIBUTES;
+
+typedef HANDLE* PHANDLE;
+
+typedef
+VOID 
+IO_APC_ROUTINE(
+    PVOID ApcContext,
+    PIO_STATUS_BLOCK IoStatusBlock,
+    ULONG Reserved
+);
+typedef IO_APC_ROUTINE* PIO_APC_ROUTINE;
+#define PIO_APC_ROUTINE_DEFINED
+
+typedef enum _FILE_INFORMATION_CLASS {
+    FileDirectoryInformation = 1,
+    FileFullDirectoryInformation,
+    FileBothDirectoryInformation,
+    FileBasicInformation,
+    FileStandardInformation,
+    FileInternalInformation,
+    FileEaInformation,
+    FileAccessInformation,
+    FileNameInformation,
+    FileRenameInformation,
+    FileLinkInformation,
+    FileNamesInformation,
+    FileDispositionInformation,
+    FilePositionInformation,
+    FileFullEaInformation,
+    FileModeInformation,
+    FileAlignmentInformation,
+    FileAllInformation,
+    FileAllocationInformation,
+    FileEndOfFileInformation,
+    FileAlternateNameInformation,
+    FileStreamInformation,
+    FilePipeInformation,
+    FilePipeLocalInformation,
+    FilePipeRemoteInformation,
+    FileMailslotQueryInformation,
+    FileMailslotSetInformation,
+    FileCompressionInformation,
+    FileObjectIdInformation,
+    FileCompletionInformation,
+    FileMoveClusterInformation,
+    FileQuotaInformation,
+    FileReparsePointInformation,
+    FileNetworkOpenInformation,
+    FileAttributeTagInformation,
+    FileTrackingInformation,
+    FileIdBothDirectoryInformation,
+    FileIdFullDirectoryInformation,
+    FileValidDataLengthInformation,
+    FileShortNameInformation,
+    FileIoCompletionNotificationInformation,
+    FileIoStatusBlockRangeInformation,
+    FileIoPriorityHintInformation,
+    FileSfioReserveInformation,
+    FileSfioVolumeInformation,
+    FileHardLinkInformation,
+    FileProcessIdsUsingFileInformation,
+    FileNormalizedNameInformation,
+    FileNetworkPhysicalNameInformation,
+    FileIdGlobalTxDirectoryInformation,
+    FileIsRemoteDeviceInformation,
+    FileUnusedInformation,
+    FileNumaNodeInformation,
+    FileStandardLinkInformation,
+    FileRemoteProtocolInformation,
+    FileRenameInformationBypassAccessCheck,
+    FileLinkInformationBypassAccessCheck,
+    FileVolumeNameInformation,
+    FileIdInformation,
+    FileIdExtdDirectoryInformation,
+    FileReplaceCompletionInformation,
+    FileHardLinkFullIdInformation,
+    FileIdExtdBothDirectoryInformation,
+    FileDispositionInformationEx,
+    FileRenameInformationEx,
+    FileRenameInformationExBypassAccessCheck,
+    FileDesiredStorageClassInformation,
+    FileStatInformation,
+    FileMemoryPartitionInformation,
+    FileStatLxInformation,
+    FileCaseSensitiveInformation,
+    FileLinkInformationEx,
+    FileLinkInformationExBypassAccessCheck,
+    FileStorageReserveIdInformation,
+    FileCaseSensitiveInformationForceAccessCheck,
+    FileKnownFolderInformation,
+    FileStatBasicInformation,
+    FileId64ExtdDirectoryInformation,
+    FileId64ExtdBothDirectoryInformation,
+    FileIdAllExtdDirectoryInformation,
+    FileIdAllExtdBothDirectoryInformation,
+    FileMaximumInformation,
+}FILE_INFORMATION_CLASS, * PFILE_INFORMATION_CLASS;
+
+typedef enum _FS_INFORMATION_CLASS{
+    FileFsVolumeInformation = 1,
+    FileFsLabelInformation,
+    FileFsSizeInformation,
+    FileFsDeviceInformation,
+    FileFsAttributeInformation,
+    FileFsControlInformation,
+    FileFsFullSizeInformation,
+    FileFsObjectIdInformation,
+    FileFsDriverPathInformation,
+    FileFsVolumeFlagsInformation,
+    FileFsSectorSizeInformation,
+    FileFsDataCopyInformation,
+    FileFsMetadataSizeInformation,
+    FileFsFullSizeInformationEx,
+    FileFsGuidInformation,
+    FileFsMaximumInformation,
+}FS_INFORMATION_CLASS, * PFS_INFORMATION_CLASS;
+
+typedef enum _THREADINFOCLASS{
+    ThreadBasicInformation = 0,
+    ThreadTimes = 1,
+    ThreadPriority = 2,
+    ThreadBasePriority = 3,
+    ThreadAffinityMask = 4,
+    ThreadImpersonationToken = 5,
+    ThreadDescriptorTableEntry = 6,
+    ThreadEnableAlignmentFaultFixup = 7,
+    ThreadEventPair_Reusable = 8,
+    ThreadQuerySetWin32StartAddress = 9,
+    ThreadZeroTlsCell = 10,
+    ThreadPerformanceCount = 11,
+    ThreadAmILastThread = 12,
+    ThreadIdealProcessor = 13,
+    ThreadPriorityBoost = 14,
+    ThreadSetTlsArrayAddress = 15,
+    ThreadIsIoPending = 16,
+    ThreadHideFromDebugger = 17,
+    ThreadBreakOnTermination = 18,
+    ThreadSwitchLegacyState = 19,
+    ThreadIsTerminated = 20,
+    ThreadLastSystemCall = 21,
+    ThreadIoPriority = 22,
+    ThreadCycleTime = 23,
+    ThreadPagePriority = 24,
+    ThreadActualBasePriority = 25,
+    ThreadTebInformation = 26,
+    ThreadCSwitchMon = 27,
+    ThreadCSwitchPmu = 28,
+    ThreadWow64Context = 29,
+    ThreadGroupInformation = 30,
+    ThreadUmsInformation = 31,
+    ThreadCounterProfiling = 32,
+    ThreadIdealProcessorEx = 33,
+    ThreadCpuAccountingInformation = 34,
+    ThreadSuspendCount = 35,
+    ThreadActualGroupAffinity = 41,
+    ThreadDynamicCodePolicyInfo = 42,
+    ThreadSubsystemInformation = 45,
+    MaxThreadInfoClass = 56,
+}THREADINFOCLASS, * PTHREADINFOCLASS;
+
+typedef
+LOUSTATUS
+POWER_SETTING_CALLBACK (
+     LPCGUID SettingGuid,
+     PVOID Value,
+     ULONG ValueLength,
+     PVOID Context
+);
+typedef POWER_SETTING_CALLBACK *PPOWER_SETTING_CALLBACK;
 
 #ifdef __cplusplus
 }

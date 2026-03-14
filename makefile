@@ -284,6 +284,7 @@ cleanall:
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C LouCoff clean
 	rm -rf release
+	rm -rf build
 	rm -rf ISO
 	rm -rf dist
 	rm -rf annya.iso

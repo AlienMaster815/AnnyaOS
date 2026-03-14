@@ -5,12 +5,9 @@
 #include <LouDDK.h>
 #include "ntoapi.h"
 #include "irp.h"
-#include "Misc/undocumentedTypes.h"
-
-
 
 LOUSTATUS AllocateVirtualMemoryExCallback(
-	HANDLE CallbackContext,
+   HANDLE CallbackContext,
 	HANDLE ProcessHandle,
 	PVOID* BaseAddress,
 	PSIZE_T RegionSize,

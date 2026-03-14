@@ -8,24 +8,7 @@
 #include "ntoapi.h"
 #include "wdm.h"
 
-typedef struct _SIGNAL_REG_VALUE {
-	UINT8* RegName;
-	UINT32 MsrAddr;
-	UINT64 Value;
-} SIGNAL_REG_VALUE, * PSIGNAL_REG_VALUE;
-
-
-typedef struct _WHEA_ACPI_HEADER {
-	UINT32 Signature;
-	UINT32 Length;
-	UINT8  Revision;
-	UINT8  Checksum;
-	UINT8  OemId[6];
-	UINT64 OemTableId;
-	UINT32 OemRevision;
-	UINT32 CreatorId;
-	UINT32 CreatorRevision;
-} WHEA_ACPI_HEADER, * PWHEA_ACPI_HEADER;
+#include <Ldm.h>
 
 typedef enum _STATE_LOCATION_TYPE {
 	LocationTypeRegistry,
@@ -139,7 +122,7 @@ typedef struct {
 } DEBUG_MEMORY_REQUIREMENTS, * PDEBUG_MEMORY_REQUIREMENTS;
 
 typedef struct _EFI_ACPI_RAS_SIGNAL_TABLE {
-	WHEA_ACPI_HEADER Header;
+	LHEA_ACPI_HEADER Header;
 	UINT32           NumberRecord;
 	SIGNAL_REG_VALUE* Entries;
 } EFI_ACPI_RAS_SIGNAL_TABLE, * PEFI_ACPI_RAS_SIGNAL_TABLE;

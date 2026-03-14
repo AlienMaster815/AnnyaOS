@@ -3,10 +3,6 @@
 #include <NtAPI.h>
 #pragma once
 
-
-
-#include "Misc/undocumentedTypes.h"
-#include "ioaccess.h"
 #include "ntddk.h"
 #include "ntddsfio.h"
 #include "ntddsysenv.h"
