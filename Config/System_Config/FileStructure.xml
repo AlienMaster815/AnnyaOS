@@ -12,6 +12,7 @@
 <MainDirectoryStructure>mkdir ISO/ANNYA/SYSTEM32/CONFIG</MainDirectoryStructure>
 <MainDirectoryStructure64>mkdir ISO/ANNYA/SYSTEM64</MainDirectoryStructure64>
 <MainDirectoryStructure64>mkdir ISO/ANNYA/SYSTEM64/DRIVERS</MainDirectoryStructure64>
+<MainDirectoryStructure64>mkdir ISO/ANNYA/SYSTEM64/FIRMWARE</MainDirectoryStructure64>
 
     
 

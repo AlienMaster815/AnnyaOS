@@ -22,3 +22,5 @@ if a driver or component is derived it will have this file header
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+NOTICE: firmware blobs in the final ISO file (annya.iso) will be in /ANNYA/SYSTEM64/FIRMWARE due to filesystem limitations it is named FIRMWARE this was not a change i wanted to do i had too
