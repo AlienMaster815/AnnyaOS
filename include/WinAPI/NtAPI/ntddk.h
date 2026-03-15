@@ -624,58 +624,8 @@ void SiloContextCleanupCallback(
    PVOID SiloContext
 );
 
-
-
 void SiloMonitorTerminateCallback(
    PESILO Silo
 );
-
-
-
-//void WheaAdd2Ptr(
-//   P,
-//   I
-//);
-
-PVOID WheaErrorRecordBuilderAddPacket(
-    PLHEA_ERROR_RECORD    Record,
-    LHEA_ERROR_PACKET_V2 Packet,
-        UINT32                MaxSectionCount
-);
-
-PVOID WheaErrorRecordBuilderAddSection(
-              PLHEA_ERROR_RECORD                         Record,
-                  UINT32                                     MaxSectionCount,
-                  UINT32                                     SectionLength,
-                  LHEA_ERROR_RECORD_SECTION_DESCRIPTOR_FLAGS Flags,
-                  GUID                                       SectionType,
-    PVOID                                      DescriptorOut
-);
-
-void WheaErrorRecordBuilderInit(
-  PLHEA_ERROR_RECORD  Record,
-  UINT32              RecordLength,
-  LHEA_ERROR_SEVERITY Severity,
-  GUID                Notify
-);
-
-
-LOUSTATUS WheaRegisterErrorSourceOverride(
-   LHEA_ERROR_SOURCE_OVERRIDE_SETTINGS   OverrideSettings,
-   PLHEA_ERROR_SOURCE_CONFIGURATION      OverrideConfig,
-   PLHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK OverrideCallback
-);
-
-BOOLEAN WheaSignalHandlerOverride(
-                  LHEA_ERROR_SOURCE_TYPE SourceType,
-    UINT_PTR               Context
-);
-
-void WheaUnregisterErrorSourceOverride(
-   LHEA_ERROR_SOURCE_TYPE Type,
-   ULONG32                OverrideErrorSourceId
-);
-
-
 
 #endif

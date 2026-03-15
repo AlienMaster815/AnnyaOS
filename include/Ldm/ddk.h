@@ -652,6 +652,13 @@ KERNEL_EXPORT LOUSTATUS LouKeIoVolumeDeviceToDosName(PVOID VolumeDeviceObject, P
 
 
 
+KERNEL_EXPORT PVOID LouKeLheaErrorRecordBuilderAddPacket(PLHEA_ERROR_RECORD Record, LHEA_ERROR_PACKET_V2 Packet, UINT32 MaxSectionCount);
+KERNEL_EXPORT PVOID LouKeLheaErrorRecordBuilderAddSection(PLHEA_ERROR_RECORD Record, UINT32 MaxSectionCount, UINT32 SectionLength, LHEA_ERROR_RECORD_SECTION_DESCRIPTOR_FLAGS Flags, GUID SectionType, PVOID DescriptorOut);
+KERNEL_EXPORT void LouKeLheaErrorRecordBuilderInit(PLHEA_ERROR_RECORD Record, UINT32 RecordLength, LHEA_ERROR_SEVERITY Severity, GUID Notify);
+KERNEL_EXPORT LOUSTATUS LouKeLheaRegisterErrorSourceOverride(LHEA_ERROR_SOURCE_OVERRIDE_SETTINGS OverrideSettings, PLHEA_ERROR_SOURCE_CONFIGURATION OverrideConfig, PLHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK OverrideCallback);
+KERNEL_EXPORT BOOLEAN LouKeLheaSignalHandlerOverride(LHEA_ERROR_SOURCE_TYPE SourceType, UINT_PTR Context);
+KERNEL_EXPORT void LouKeLheaUnregisterErrorSourceOverride(LHEA_ERROR_SOURCE_TYPE Type, ULONG32 OverrideErrorSourceId);
+
 KERNEL_EXPORT LOUSTATUS LouKeZwAllocateLocallyUniqueId(PLUID Luid);
 KERNEL_EXPORT LOUSTATUS LouKeZwDeviceIoControlFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE ApcRoutine, PVOID ApcContext, PIO_STATUS_BLOCK IoStatusBlock, ULONG IoControlCode, PVOID InputBuffer, ULONG InputBufferLength, PVOID OutputBuffer, ULONG OutputBufferLength);
 KERNEL_EXPORT LOUSTATUS LouKeZwOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
