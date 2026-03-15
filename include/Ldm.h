@@ -1930,6 +1930,8 @@ POWER_SETTING_CALLBACK (
 );
 typedef POWER_SETTING_CALLBACK *PPOWER_SETTING_CALLBACK;
 
+#include <Ldm/ddk.h>
+
 #ifdef __cplusplus
 }
 #endif

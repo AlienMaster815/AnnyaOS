@@ -729,7 +729,17 @@ LHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK(
 );
 typedef LHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK *PLHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK;
 
-
+typedef struct _LHEA_ACPI_HEADER {
+	UINT32  	Signature;
+	UINT32  	Length;
+	UINT8   	Revision;
+	UINT8   	Checksum;
+	UINT8   	OemId[6];
+	UINT64  	OemTableId;
+	UINT32  	OemRevision;
+	UINT32  	CreatorId;
+	UINT32  	CreatorRevision;
+} LHEA_ACPI_HEADER, * PLHEA_ACPI_HEADER;
 
 #ifdef __cplusplus
 }

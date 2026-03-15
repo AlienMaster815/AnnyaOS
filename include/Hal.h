@@ -263,6 +263,68 @@ typedef HalSetPciErrorHandlerCallback* pHalSetPciErrorHandlerCallback;
 typedef LOUSTATUS HalGetPrmCache(PVOID PrmInterface, PVOID PrmCacheBuffer, ULONG PrmCacheBufferSize);
 typedef HalGetPrmCache* pHalGetPrmCache;
 
+typedef enum _HAL_SET_INFORMATION_CLASS{
+	HalProfileSourceInterval = 0,
+	HalProfileSourceInterruptHandler,
+	HalMcaRegisterDriver,
+	HalKernelErrorHandler,
+	HalCmcRegisterDriver,
+	HalCpeRegisterDriver,
+	HalMcaLog,
+	HalCmcLog,
+	HalCpeLog,
+	HalGenerateCmcInterrupt,
+	HalProfileSourceTimerHandler,
+	HalEnlightenment,
+	HalProfileDpgoSourceInterruptHandler,
+	HalRegisterSecondaryInterruptInterface,
+	HalSetChannelPowerInformation,
+	HalI386ExceptionChainTerminatorInformation,
+	HalSetResetParkDisposition,
+	HalSetPsciSuspendMode,
+	HalSetHvciEnabled,
+	HalSetProcessorTraceInterruptHandler,
+	HalProfileSourceAdd,
+	HalProfileSourceRemove,
+	HalSetSwInterruptHandler,
+	HalSetClockTimerMinimumInterval,
+}HAL_SET_INFORMATION_CLASS, * PHAL_SET_INFORMATION_CLASS;
+
+typedef enum _HAL_APIC_DESTINATION_MODE{
+	ApicDestinationModePhysical = 0,
+	ApicDestinationModeLogicalFlat,
+	ApicDestinationModeLogicalClustered,
+	ApicDestinationModeUnknown,
+}HAL_APIC_DESTINATION_MODE, * PHAL_APIC_DESTINATION_MODE;
+
+typedef struct _HAL_DISPATCH{
+	ULONG                          Version;
+	pHalQuerySystemInformation     HalQuerySystemInformation;
+	pHalSetSystemInformation       HalSetSystemInformation;
+	pHalQueryBusSlots              HalQueryBusSlots;
+	ULONG                          Spare1;
+	pHalExamineMBR                 HalExamineMBR;
+	pHalIoReadPartitionTable       HalIoReadPartitionTable;
+	pHalIoSetPartitionInformation  HalIoSetPartitionInformation;
+	pHalIoWritePartitionTable      HalIoWritePartitionTable;
+	pHalHandlerForBus              HalReferenceHandlerForBus;
+	pHalReferenceBusHandler        HalReferenceBusHandler;
+	pHalReferenceBusHandler        HalDereferenceBusHandler;
+	pHalInitPnpDriver              HalInitPnpDriver;
+	pHalInitPowerManagement        HalInitPowerManagement;
+	pHalGetDmaAdapter              HalGetDmaAdapter;
+	pHalGetInterruptTranslator     HalGetInterruptTranslator;
+	pHalStartMirroring             HalStartMirroring;
+	pHalEndMirroring               HalEndMirroring;
+	pHalMirrorPhysicalMemory       HalMirrorPhysicalMemory;
+	pHalEndOfBoot                  HalEndOfBoot;
+	pHalMirrorVerify               HalMirrorVerify;
+	pHalGetAcpiTable               HalGetCachedAcpiTable;
+	pHalSetPciErrorHandlerCallback HalSetPciErrorHandlerCallback;
+	pHalGetPrmCache                HalGetPrmCache;
+}HAL_DISPATCH, * PHAL_DISPATCH;
+
+
 #ifndef _USER_MODE_CODE_
 #define LouKeHalClosePciCompanions(x) LouKeFree((PVOID)x)
 #define LouKeClosePciDeviceGroup(x) LouKeFree((uint8_t*)x)

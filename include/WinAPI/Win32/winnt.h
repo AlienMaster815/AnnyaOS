@@ -234,7 +234,7 @@ extern "C" {
 #define NTSYSAPI DECLSPEC_IMPORT
 #endif
 #else
-#define NTSYSAPI
+#define NTSYSAPI 
 #endif
 
 
