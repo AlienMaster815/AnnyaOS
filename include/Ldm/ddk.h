@@ -705,6 +705,63 @@ KERNEL_EXPORT HANDLE LouKeMmSecureVirtualMemoryEx(PVOID Address, SIZE_T Size, UL
 KERNEL_EXPORT LOUSTATUS LouKeMmUnmapViewInSystemSpace(PVOID MappedBase);
 KERNEL_EXPORT void LouKeMmUnsecureVirtualMemory(HANDLE SecureHandle);
 
+KERNEL_EXPORT LOUSTATUS LouKeOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+KERNEL_EXPORT void LouKePcreateProcessNotifyRoutine(HANDLE ParentId, HANDLE ProcessId, BOOLEAN Create);
+KERNEL_EXPORT void LouKePcreateThreadNotifyRoutine(HANDLE ProcessId, HANDLE ThreadId, BOOLEAN Create);
+KERNEL_EXPORT LOUSTATUS LouKePgetLocationString(PVOID Context, PZZWSTR* LocationStrings);
+KERNEL_EXPORT void LouKePcreateProcessNotifyRoutineEx(PEPROCESS Process, HANDLE ProcessId, PPS_CREATE_NOTIFY_INFO CreateInfo);
+KERNEL_EXPORT LOUSTATUS LouKePsAllocSiloContextSlot(ULONG_PTR Reserved, ULONG* ReturnedContextSlot);
+KERNEL_EXPORT PESILO LouKePsAttachSiloToCurrentThread(PESILO Silo);
+KERNEL_EXPORT LOUSTATUS LouKePsCreateSiloContext(PESILO Silo, ULONG Size, POOL_TYPE PoolType, SILO_CONTEXT_CLEANUP_CALLBACK ContextCleanupCallback, PVOID* ReturnedSiloContext);
+KERNEL_EXPORT void LouKePsDereferenceSiloContext(PVOID SiloContext);
+KERNEL_EXPORT void LouKePsDetachSiloFromCurrentThread(PESILO PreviousSilo);
+KERNEL_EXPORT LOUSTATUS LouKePsFreeSiloContextSlot(ULONG ContextSlot);
+KERNEL_EXPORT HANDLE LouKePsGetCurrentProcessId();
+KERNEL_EXPORT PESILO LouKePsGetCurrentServerSilo();
+KERNEL_EXPORT PESILO LouKePsGetCurrentSilo();
+KERNEL_EXPORT PETHREAD LouKePsGetCurrentThread();
+KERNEL_EXPORT HANDLE LouKePsGetCurrentThreadId();
+KERNEL_EXPORT PVOID LouKePsGetCurrentThreadTeb();
+KERNEL_EXPORT PESILO LouKePsGetEffectiveServerSilo(PESILO Silo);
+KERNEL_EXPORT PESILO LouKePsGetHostSilo();
+KERNEL_EXPORT LOUSTATUS LouKePsGetJobServerSilo(PEJOB Job, PESILO* ServerSilo);
+KERNEL_EXPORT LOUSTATUS LouKePsGetJobSilo(PEJOB Job, PESILO* Silo);
+KERNEL_EXPORT PESILO LouKePsGetParentSilo(PEJOB Job);
+KERNEL_EXPORT LOUSTATUS LouKePsGetPermanentSiloContext(PESILO Silo, ULONG ContextSlot, PVOID* ReturnedSiloContext);
+KERNEL_EXPORT LONGLONG LouKePsGetProcessCreateTimeQuadPart(PEPROCESS Process);
+KERNEL_EXPORT LOUSTATUS LouKePsGetProcessExitStatus(PEPROCESS Process);
+KERNEL_EXPORT HANDLE LouKePsGetProcessId(PEPROCESS Process);
+KERNEL_EXPORT ULONGLONG LouKePsGetProcessStartKey(PEPROCESS Process);
+KERNEL_EXPORT ULONG LouKePsGetServerSiloActiveConsoleId(PESILO Silo);
+KERNEL_EXPORT GUID* LouKePsGetSiloContainerId(PESILO Silo);
+KERNEL_EXPORT LOUSTATUS LouKePsGetSiloContext(PESILO Silo, ULONG ContextSlot, PVOID* ReturnedSiloContext);
+KERNEL_EXPORT ULONG LouKePsGetSiloMonitorContextSlot(PSILO_MONITOR Monitor);
+KERNEL_EXPORT LONGLONG LouKePsGetThreadCreateTime(PETHREAD Thread);
+KERNEL_EXPORT LOUSTATUS LouKePsGetThreadExitStatus(PETHREAD Thread);
+KERNEL_EXPORT HANDLE LouKePsGetThreadId(PETHREAD Thread);
+KERNEL_EXPORT HANDLE LouKePsGetThreadProcessId(PETHREAD Thread);
+KERNEL_EXPORT PESILO LouKePsGetThreadServerSilo(PETHREAD Thread);
+KERNEL_EXPORT LOUSTATUS LouKePsInsertPermanentSiloContext(PESILO Silo, ULONG ContextSlot, PVOID SiloContext);
+KERNEL_EXPORT LOUSTATUS LouKePsInsertSiloContext(PESILO Silo, ULONG ContextSlot, PVOID SiloContext);
+KERNEL_EXPORT BOOLEAN LouKePsIsHostSilo(PESILO Silo);
+KERNEL_EXPORT LOUSTATUS LouKePsMakeSiloContextPermanent(PESILO Silo, ULONG ContextSlot);
+KERNEL_EXPORT void LouKePsReferenceSiloContext(PVOID SiloContext);
+KERNEL_EXPORT LOUSTATUS LouKePsRemoveCreateThreadNotifyRoutine(PCREATE_THREAD_NOTIFY_ROUTINE NotifyRoutine);
+KERNEL_EXPORT LOUSTATUS LouKePsRemoveLoadImageNotifyRoutine(PLOAD_IMAGE_NOTIFY_ROUTINE NotifyRoutine);
+KERNEL_EXPORT LOUSTATUS LouKePsRemoveSiloContext(PESILO Silo, ULONG ContextSlot, PVOID* RemovedSiloContext);
+KERNEL_EXPORT LOUSTATUS LouKePsReplaceSiloContext(PESILO Silo, ULONG ContextSlot, PVOID NewSiloContext, PVOID* OldSiloContext);
+KERNEL_EXPORT LOUSTATUS LouKePsSetCreateProcessNotifyRoutine(PCREATE_PROCESS_NOTIFY_ROUTINE NotifyRoutine, BOOLEAN Remove);
+KERNEL_EXPORT LOUSTATUS LouKePsSetCreateProcessNotifyRoutineEx(PCREATE_PROCESS_NOTIFY_ROUTINE_EX NotifyRoutine, BOOLEAN Remove);
+KERNEL_EXPORT LOUSTATUS LouKePsSetCreateProcessNotifyRoutineEx2(PSCREATEPROCESSNOTIFYTYPE NotifyType, PVOID NotifyInformation, BOOLEAN Remove);
+KERNEL_EXPORT LOUSTATUS LouKePsSetCreateThreadNotifyRoutine(PCREATE_THREAD_NOTIFY_ROUTINE NotifyRoutine);
+KERNEL_EXPORT LOUSTATUS LouKePsSetCreateThreadNotifyRoutineEx(PSCREATETHREADNOTIFYTYPE NotifyType, PVOID NotifyInformation);
+KERNEL_EXPORT LOUSTATUS LouKePsSetLoadImageNotifyRoutine(PLOAD_IMAGE_NOTIFY_ROUTINE NotifyRoutine);
+KERNEL_EXPORT LOUSTATUS LouKePsSetLoadImageNotifyRoutineEx(PLOAD_IMAGE_NOTIFY_ROUTINE NotifyRoutine, ULONG_PTR Flags);
+KERNEL_EXPORT LOUSTATUS LouKePsStartSiloMonitor(PSILO_MONITOR Monitor);
+KERNEL_EXPORT void LouKePsTerminateServerSilo(PESILO ServerSilo, LOUSTATUS ExitStatus);
+KERNEL_EXPORT void LouKePsUnregisterSiloMonitor(PSILO_MONITOR Monitor);
+
+
 
 
 
