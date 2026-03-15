@@ -288,3 +288,43 @@ LouKeSetTargetProcessorDpc(
     LouPrint("LouKeSetTargetProcessorDpc()\n");
     while(1);
 }
+
+KERNEL_EXPORT 
+ULONG 
+LouKeKeGetProcessorIndexFromNumber(
+    PPROCESSOR_NUMBER ProcNumber
+){
+    LouPrint("LouKeKeGetProcessorIndexFromNumber()\n");
+    while(1);
+    return 0x00;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeKeGetProcessorNumberFromIndex(
+    ULONG ProcIndex, 
+    PPROCESSOR_NUMBER ProcNumber
+){
+    LouPrint("LouKeKeGetProcessorNumberFromIndex()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+BOOLEAN 
+LouKeSetKernelStackSwapEnable(
+    BOOLEAN Enable
+){
+    LouPrint("LouKeSetKernelStackSwapEnable()\n");
+    while(1);
+    return false;
+}
+
+KERNEL_EXPORT 
+VOID 
+LouKeStallExecutionProcessor(
+    ULONG MicroSeconds
+){
+    LouPrint("LouKeStallExecutionProcessor()\n");
+    while(1);
+}

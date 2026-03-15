@@ -109,12 +109,10 @@ KERNEL_EXPORT void LouKeIoStartTimer(PDEVICE_OBJECT DeviceObject);
 KERNEL_EXPORT void LouKeIoStopTimer(PDEVICE_OBJECT DeviceObject);
 KERNEL_EXPORT void LouKeIoWriteErrorLogEntry(PVOID ElEntry);
 
-//KE START
 KERNEL_EXPORT ULONG LouKeKeGetProcessorIndexFromNumber(PPROCESSOR_NUMBER ProcNumber);
 KERNEL_EXPORT LOUSTATUS LouKeKeGetProcessorNumberFromIndex(ULONG ProcIndex, PPROCESSOR_NUMBER ProcNumber);
 KERNEL_EXPORT BOOLEAN LouKeSetKernelStackSwapEnable(BOOLEAN Enable);
 KERNEL_EXPORT VOID LouKeStallExecutionProcessor(ULONG MicroSeconds);
-//KE END
 
 KERNEL_EXPORT LOUSTATUS LouKeAllocateVirtualMemory(HANDLE ProcessHandle, PVOID BaseAddress, ULONG_PTR ZeroBits, PSIZE_T RegionSize, ULONG AllocationType, ULONG Protect);
 KERNEL_EXPORT LOUSTATUS LouKeClose(HANDLE Handle);
