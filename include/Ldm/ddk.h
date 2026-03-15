@@ -650,6 +650,41 @@ KERNEL_EXPORT void LouKeIoUnregisterBootDriverCallback(PVOID CallbackHandle);
 KERNEL_EXPORT LOUSTATUS LouKeIoVerifyPartitionTable(struct _DEVICE_OBJECT* DeviceObject, BOOLEAN FixErrors);
 KERNEL_EXPORT LOUSTATUS LouKeIoVolumeDeviceToDosName(PVOID VolumeDeviceObject, PUNICODE_STRING DosName);
 
+KERNEL_EXPORT BOOLEAN LouKeAreApcsDisabled();
+KERNEL_EXPORT void LouKeBugCheck(ULONG BugCheckCode);
+KERNEL_EXPORT void LouKeEnterCriticalRegion();
+KERNEL_EXPORT void LouKeEnterGuardedRegion();
+KERNEL_EXPORT LOUSTATUS LouKeExpandKernelStackAndCallout(PEXPAND_STACK_CALLOUT Callout, PVOID Parameter, SIZE_T Size);
+KERNEL_EXPORT LOUSTATUS LouKeExpandKernelStackAndCalloutEx(PEXPAND_STACK_CALLOUT Callout, PVOID Parameter, SIZE_T Size, BOOLEAN Wait, PVOID Context);
+KERNEL_EXPORT USHORT LouKeGetCurrentNodeNumber();
+KERNEL_EXPORT ULONG LouKeGetCurrentProcessorNumber();
+KERNEL_EXPORT ULONG LouKeGetCurrentProcessorNumberEx(PPROCESSOR_NUMBER ProcNumber);
+KERNEL_EXPORT LOUSTATUS LouKeInitializeCrashDumpHeader(ULONG DumpType, ULONG Flags, PVOID Buffer, ULONG BufferSize, PULONG BufferNeeded);
+KERNEL_EXPORT BOOLEAN LouKeInvalidateAllCaches();
+KERNEL_EXPORT void LouKeInvalidateRangeAllCaches(PVOID BaseAddress, ULONG Length);
+KERNEL_EXPORT void LouKeLeaveCriticalRegion();
+KERNEL_EXPORT void LouKeLeaveGuardedRegion();
+KERNEL_EXPORT LONG LouKePulseEvent(PRKEVENT Event, KPRIORITY Increment, BOOLEAN Wait);
+KERNEL_EXPORT USHORT LouKeQueryActiveGroupCount();
+KERNEL_EXPORT ULONG LouKeQueryActiveProcessorCount(PKAFFINITY ActiveProcessors);
+KERNEL_EXPORT ULONG LouKeQueryActiveProcessorCountEx(USHORT GroupNumber);
+KERNEL_EXPORT KAFFINITY LouKeQueryActiveProcessors();
+KERNEL_EXPORT KAFFINITY LouKeQueryGroupAffinity(USHORT GroupNumber);
+KERNEL_EXPORT KAFFINITY LouKeQueryGroupAffinity(USHORT GroupNumber);
+KERNEL_EXPORT USHORT LouKeQueryHighestNodeNumber();
+KERNEL_EXPORT USHORT LouKeQueryMaximumGroupCount();
+KERNEL_EXPORT ULONG LouKeQueryMaximumProcessorCount();
+KERNEL_EXPORT ULONG LouKeQueryMaximumProcessorCountEx(USHORT GroupNumber);
+KERNEL_EXPORT USHORT LouKeQueryNodeMaximumProcessorCount(USHORT NodeNumber);
+KERNEL_EXPORT VOID LouKeQueryTickCount(PLARGE_INTEGER CurrentCount);
+KERNEL_EXPORT KIRQL LouKeRaiseIrqlToDpcLevel();
+KERNEL_EXPORT LONG LouKeSetBasePriorityThread(PKTHREAD Thread, LONG Increment);
+KERNEL_EXPORT LOUSTATUS LouKeSetHardwareCounterConfiguration(PHARDWARE_COUNTER CounterArray, ULONG Count);
+KERNEL_EXPORT void LouKeSetImportanceDpc(PRKDPC Dpc, KDPC_IMPORTANCE Importance);
+KERNEL_EXPORT void LouKeSetTargetProcessorDpc(PRKDPC Dpc, CCHAR  Number);
+
+
+
 
 
 KERNEL_EXPORT PVOID LouKeLheaErrorRecordBuilderAddPacket(PLHEA_ERROR_RECORD Record, LHEA_ERROR_PACKET_V2 Packet, UINT32 MaxSectionCount);
