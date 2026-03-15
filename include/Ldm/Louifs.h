@@ -100,7 +100,6 @@ KERNEL_EXPORT BOOLEAN LouKeCcCanIWrite(struct _FILE_OBJECT* FileObject, ULONG By
 KERNEL_EXPORT BOOLEAN LouKeIoCheckFileObjectOpenedAsCopyDestination(struct _FILE_OBJECT* FileObject);
 KERNEL_EXPORT BOOLEAN LouKeIoCheckFileObjectOpenedAsCopySource(struct _FILE_OBJECT* FileObject);
 KERNEL_EXPORT PDEVICE_OBJECT LouKeIoGetAttachedDeviceReference(PDEVICE_OBJECT DeviceObject);
-KERNEL_EXPORT PCONFIGURATION_INFORMATION LouKeIoGetConfigurationInformation();
 KERNEL_EXPORT void LouKeIoSetStartIoAttributes(PDEVICE_OBJECT DeviceObject, BOOLEAN DeferredStartIo, BOOLEAN NonCancelable);
 KERNEL_EXPORT void LouKeIoSizeOfIrp(uint64_t StackSize);
 KERNEL_EXPORT void LouKeIoStartNextPacket(PDEVICE_OBJECT DeviceObject, BOOLEAN Cancelable);

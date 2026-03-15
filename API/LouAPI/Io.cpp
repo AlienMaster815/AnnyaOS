@@ -405,3 +405,113 @@ LouKeIoVolumeDeviceToDosName(
     while(1);
     return STATUS_SUCCESS;
 }
+
+
+KERNEL_EXPORT 
+BOOLEAN 
+LouKeIoCheckFileObjectOpenedAsCopyDestination(
+    PFILE_OBJECT FileObject
+){
+    LouPrint("LouKeIoCheckFileObjectOpenedAsCopyDestination()\n");
+    while(1);
+    return false;
+}
+
+KERNEL_EXPORT 
+BOOLEAN 
+LouKeIoCheckFileObjectOpenedAsCopySource(
+    PFILE_OBJECT FileObject
+){
+    LouPrint("LouKeIoCheckFileObjectOpenedAsCopySource()\n");
+    while(1);
+    return false;
+}
+
+KERNEL_EXPORT 
+PDEVICE_OBJECT 
+LouKeIoGetAttachedDeviceReference(
+    PDEVICE_OBJECT DeviceObject
+){
+    LouPrint("LouKeIoGetAttachedDeviceReference()\n");
+    while(1);
+    return 0x00;
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoSetStartIoAttributes(
+    PDEVICE_OBJECT  DeviceObject, 
+    BOOLEAN         DeferredStartIo, 
+    BOOLEAN         NonCancelable
+){
+    LouPrint("LouKeIoSetStartIoAttributes()\n");
+    while(1);
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoSizeOfIrp(
+    uint64_t StackSize
+){
+    LouPrint("LouKeIoSizeOfIrp()\n");
+    while(1);
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoStartNextPacket(
+    PDEVICE_OBJECT DeviceObject, 
+    BOOLEAN Cancelable
+){
+    LouPrint("LouKeIoStartNextPacket()\n");
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoStartNextPacketByKey(
+    PDEVICE_OBJECT DeviceObject, 
+    BOOLEAN Cancelable, 
+    ULONG Key
+){
+    LouPrint("LouKeIoStartNextPacketByKey()\n");
+    while(1);
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoStartPacket(
+    PDEVICE_OBJECT DeviceObject, 
+    PIRP Irp, 
+    PULONG Key, 
+    PDRIVER_CANCEL CancelFunction
+){
+    LouPrint("LouKeIoStartPacket()\n");
+    while(1);
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoStartTimer(
+    PDEVICE_OBJECT DeviceObject
+){
+    LouPrint("LouKeIoStartTimer()\n");
+    while(1);
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoStopTimer(
+    PDEVICE_OBJECT DeviceObject
+){
+    LouPrint("LouKeIoStopTimer()\n");
+    while(1);
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIoWriteErrorLogEntry(
+    PVOID ElEntry
+){
+    LouPrint("LouKeIoWriteErrorLogEntry()\n");
+    while(1);
+}
