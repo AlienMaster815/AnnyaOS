@@ -1617,12 +1617,6 @@ typedef struct _FILE_IS_REMOTE_DEVICE_INFORMATION {
 
 
 
-
-typedef struct _FILE_POSITION_INFORMATION {
-    LARGE_INTEGER CurrentByteOffset;
-} FILE_POSITION_INFORMATION, * PFILE_POSITION_INFORMATION;
-
-
 typedef struct _FILE_STANDARD_INFORMATION_EX {
     LARGE_INTEGER AllocationSize;
     LARGE_INTEGER EndOfFile;
@@ -2988,13 +2982,6 @@ typedef struct _IO_STATUS_BLOCK64 {
 
 #ifndef _IRP_
 #define _IRP_
-typedef
-VOID
-(*PDRIVER_CANCEL) (
-     struct _DEVICE_OBJECT* DeviceObject,
-     struct _IRP* Irp
-    );
-
 
 typedef struct _IRP {
     CSHORT                    Type;
@@ -3980,14 +3967,6 @@ void IoStartPacket(
    PDRIVER_CANCEL CancelFunction
 );
 
-void IoStartTimer(
-   struct _DEVICE_OBJECT* DeviceObject
-);
-
-void IoStopTimer(
-   struct _DEVICE_OBJECT* DeviceObject
-);
-
 void IoUninitializeWorkItem(
    PIO_WORKITEM IoWorkItem
 );
@@ -4140,9 +4119,6 @@ LOUSTATUS IoWMIWriteEvent(
    PVOID WnodeEventItem
 );
 
-void IoWriteErrorLogEntry(
-   PVOID ElEntry
-);
 
 LOUSTATUS IoWriteKsrPersistentMemory(
   PVOID  DataHandle,
@@ -4292,14 +4268,6 @@ ULONG KeGetCurrentProcessorNumberEx(
 
 PKTHREAD KeGetCurrentThread();
 
-ULONG KeGetProcessorIndexFromNumber(
-   PPROCESSOR_NUMBER ProcNumber
-);
-
-LOUSTATUS KeGetProcessorNumberFromIndex(
-    ULONG             ProcIndex,
-   PPROCESSOR_NUMBER ProcNumber
-);
 
 ULONG KeGetRecommendedSharedDataAlignment();
 
@@ -4743,15 +4711,6 @@ BOOLEAN KeSetTimerEx(
 );
 
 LOGICAL KeShouldYieldProcessor();
-
-KERNEL_EXPORT VOID KeStallExecutionProcessor(
-   ULONG MicroSeconds
-);
-
-KERNEL_EXPORT VOID KeStallExecutionProcessor(
-   ULONG MicroSeconds
-);
-
 
 BOOLEAN KeSynchronizeExecution(
         PKINTERRUPT            Interrupt,
