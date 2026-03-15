@@ -783,6 +783,10 @@ KERNEL_EXPORT VOID LouKeRtlUpperString(PSTRING DestinationString, const STRING* 
 KERNEL_EXPORT LOUSTATUS LouKeRtlValidateCorrelationVector(PCORRELATION_VECTOR Vector);
 KERNEL_EXPORT LOUSTATUS LouKeRtlVolumeDeviceToDosName(PVOID VolumeDeviceObject, PUNICODE_STRING DosName);
 
+KERNEL_EXPORT BOOLEAN LouKeSeSinglePrivilegeCheck(LUID PrivilegeValue, KPROCESSOR_MODE PreviousMode);
+
+KERNEL_EXPORT void SiloMonitorTerminateCallback(PESILO Silo);
+KERNEL_EXPORT void SiloContextCleanupCallback(PVOID SiloContext);
 
 
 KERNEL_EXPORT PVOID LouKeLheaErrorRecordBuilderAddPacket(PLHEA_ERROR_RECORD Record, LHEA_ERROR_PACKET_V2 Packet, UINT32 MaxSectionCount);

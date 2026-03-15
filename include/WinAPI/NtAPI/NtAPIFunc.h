@@ -3,7 +3,6 @@
 #include <NtAPI.h>
 #pragma once
 
-#include "ntddk.h"
 #include "ntddsysenv.h"
 #include "ntifs.h"
 #include "wmistr.h"
