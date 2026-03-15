@@ -87,8 +87,8 @@ LouKeIoGetActivityIdIrp(
 
 KERNEL_EXPORT 
 LPCGUID 
-IoGetActivityIdThread(){
-    LouPrint("IoGetActivityIdThread()\n");
+LouKeIoGetActivityIdThread(){
+    LouPrint("LouKeIoGetActivityIdThread()\n");
     while(1);
     return 0x00;
 }

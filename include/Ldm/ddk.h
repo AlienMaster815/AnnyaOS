@@ -606,6 +606,7 @@ KERNEL_EXPORT LOUSTATUS LouKeIoAllocateAdapterChannel(PADAPTER_OBJECT AdapterObj
 KERNEL_EXPORT BOOLEAN LouKeLheaSignalHandlerOverrideCallback(UINT_PTR Context);
 KERNEL_EXPORT void LouKeCustomSystemEventTriggerInit(PCUSTOM_SYSTEM_EVENT_TRIGGER_CONFIG Config, PCWSTR TriggerId);
 KERNEL_EXPORT void LouKeDriverReinitialize(PDRIVER_OBJECT DriverObject, PVOID Context, ULONG Count);
+
 KERNEL_EXPORT void LouKeExFreePool(PVOID P);
 KERNEL_EXPORT void LouKeExpandStackCallout(PVOID Parameter);
 KERNEL_EXPORT void LouKeExRaiseDatatypeMisalignment();
@@ -619,7 +620,7 @@ KERNEL_EXPORT LOUSTATUS LouKeIoDecrementKeepAliveCount(struct _FILE_OBJECT* File
 KERNEL_EXPORT void LouKeIoDeleteController(PCONTROLLER_OBJECT ControllerObject);
 KERNEL_EXPORT void LouKeIoFreeController(PCONTROLLER_OBJECT ControllerObject);
 KERNEL_EXPORT LOUSTATUS LouKeIoGetActivityIdIrp(struct _IRP* Irp, PGUID Guid);
-KERNEL_EXPORT LPCGUID IoGetActivityIdThread();
+KERNEL_EXPORT LPCGUID LouKeIoGetActivityIdThread();
 KERNEL_EXPORT PCONFIGURATION_INFORMATION LouKeIoGetConfigurationInformation();
 KERNEL_EXPORT PGENERIC_MAPPING LouKeIoGetFileObjectGenericMapping();
 KERNEL_EXPORT PEPROCESS LouKeIoGetInitiatorProcess(struct _FILE_OBJECT* FileObject);
@@ -683,6 +684,26 @@ KERNEL_EXPORT LOUSTATUS LouKeSetHardwareCounterConfiguration(PHARDWARE_COUNTER C
 KERNEL_EXPORT void LouKeSetImportanceDpc(PRKDPC Dpc, KDPC_IMPORTANCE Importance);
 KERNEL_EXPORT void LouKeSetTargetProcessorDpc(PRKDPC Dpc, CCHAR  Number);
 
+KERNEL_EXPORT LOUSTATUS LouKeMmAddPhysicalMemory(PPHYSICAL_ADDRESS StartAddress, PLARGE_INTEGER NumberOfBytes);
+KERNEL_EXPORT PVOID LouKeMmAllocateContiguousMemory(SIZE_T NumberOfBytes, PHYSICAL_ADDRESS HighestAcceptableAddress);
+KERNEL_EXPORT PVOID LouKeMmAllocateContiguousMemorySpecifyCache(SIZE_T NumberOfBytes, PHYSICAL_ADDRESS LowestAcceptableAddress, PHYSICAL_ADDRESS HighestAcceptableAddress, PHYSICAL_ADDRESS BoundaryAddressMultiple, MEMORY_CACHING_TYPE CacheType);
+KERNEL_EXPORT PVOID LouKeMmAllocateContiguousMemorySpecifyCacheNode(SIZE_T NumberOfBytes, PHYSICAL_ADDRESS LowestAcceptableAddress, PHYSICAL_ADDRESS HighestAcceptableAddress, PHYSICAL_ADDRESS BoundaryAddressMultiple, MEMORY_CACHING_TYPE CacheType, NODE_REQUIREMENT PreferredNode);
+KERNEL_EXPORT PVOID LouKeMmAllocateContiguousNodeMemory(SIZE_T NumberOfBytes, PHYSICAL_ADDRESS LowestAcceptableAddress, PHYSICAL_ADDRESS HighestAcceptableAddress, PHYSICAL_ADDRESS BoundaryAddressMultiple, ULONG Protect, NODE_REQUIREMENT PreferredNode);
+KERNEL_EXPORT PVOID LouKeMmAllocateNonCachedMemory(SIZE_T NumberOfBytes);
+KERNEL_EXPORT LOUSTATUS LouKeMmCopyMemory(PVOID TargetAddress, MM_COPY_ADDRESS SourceAddress, SIZE_T NumberOfBytes, ULONG Flags, PSIZE_T NumberOfBytesTransferred);
+KERNEL_EXPORT void LouKeMmFreeContiguousMemory(PVOID BaseAddress);
+KERNEL_EXPORT void LouKeMmFreeContiguousMemorySpecifyCache(PVOID BaseAddress, SIZE_T NumberOfBytes, MEMORY_CACHING_TYPE CacheType);
+KERNEL_EXPORT void LouKeMmFreeNonCachedMemory(PVOID BaseAddress, SIZE_T NumberOfBytes);
+KERNEL_EXPORT PHYSICAL_ADDRESS LouKeMmGetPhysicalAddress(PVOID BaseAddress);
+KERNEL_EXPORT PPHYSICAL_MEMORY_RANGE LouKeMmGetPhysicalMemoryRangesEx2(PVOID PartitionObject, ULONG Flags);
+KERNEL_EXPORT BOOLEAN LouKeMmIsAddressValid(PVOID VirtualAddress);
+KERNEL_EXPORT BOOLEAN LouKeMmIsThisAnLouAsSystem();
+KERNEL_EXPORT void LouKeMmLockPagableSectionByHandle(PVOID ImageSectionHandle);
+KERNEL_EXPORT LOUSTATUS LouKeMmMapViewInSystemSpace(PVOID Section, PVOID* MappedBase, PSIZE_T ViewSize);
+KERNEL_EXPORT HANDLE LouKeMmSecureVirtualMemory(PVOID Address, SIZE_T Size, ULONG ProbeMode);
+KERNEL_EXPORT HANDLE LouKeMmSecureVirtualMemoryEx(PVOID Address, SIZE_T Size, ULONG ProbeMode, ULONG Flags);
+KERNEL_EXPORT LOUSTATUS LouKeMmUnmapViewInSystemSpace(PVOID MappedBase);
+KERNEL_EXPORT void LouKeMmUnsecureVirtualMemory(HANDLE SecureHandle);
 
 
 
