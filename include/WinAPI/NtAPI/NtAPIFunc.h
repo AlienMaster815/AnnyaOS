@@ -4,6 +4,7 @@
 #pragma once
 
 #include "ntifs.h"
+
 #include "wmistr.h"
 #include "wmilib.h"
 #include "irp.h"
