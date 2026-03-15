@@ -676,58 +676,6 @@ void WheaUnregisterErrorSourceOverride(
    ULONG32                OverrideErrorSourceId
 );
 
-NTSYSAPI LOUSTATUS ZwAllocateLocallyUniqueId(
-  PLUID Luid
-);
 
-
-NTSYSAPI LOUSTATUS ZwDeviceIoControlFile(
-              HANDLE           FileHandle,
-    HANDLE           Event,
-    PIO_APC_ROUTINE  ApcRoutine,
-    PVOID            ApcContext,
-             PIO_STATUS_BLOCK IoStatusBlock,
-              ULONG            IoControlCode,
-    PVOID            InputBuffer,
-              ULONG            InputBufferLength,
-   PVOID            OutputBuffer,
-              ULONG            OutputBufferLength
-);
-
-NTSYSAPI LOUSTATUS ZwOpenProcess(
-            PHANDLE            ProcessHandle,
-             ACCESS_MASK        DesiredAccess,
-             POBJECT_ATTRIBUTES ObjectAttributes,
-   PCLIENT_ID         ClientId
-);
-
-NTSYSAPI LOUSTATUS ZwPowerInformation(
-              POWER_INFORMATION_LEVEL InformationLevel,
-    PVOID                   InputBuffer,
-              ULONG                   InputBufferLength,
-   PVOID                   OutputBuffer,
-              ULONG                   OutputBufferLength
-);
-
-NTSYSAPI LOUSTATUS ZwQueryVolumeInformationFile(
-    HANDLE               FileHandle,
-   PIO_STATUS_BLOCK     IoStatusBlock,
-   PVOID                FsInformation,
-    ULONG                Length,
-    FS_INFORMATION_CLASS FsInformationClass
-);
-
-NTSYSAPI LOUSTATUS ZwSetInformationThread(
-   HANDLE          ThreadHandle,
-   THREADINFOCLASS ThreadInformationClass,
-   PVOID           ThreadInformation,
-   ULONG           ThreadInformationLength
-);
-
-
-NTSYSAPI LOUSTATUS ZwTerminateProcess(
-   HANDLE   ProcessHandle,
-             LOUSTATUS ExitStatus
-);
 
 #endif

@@ -650,6 +650,16 @@ KERNEL_EXPORT void LouKeIoUnregisterBootDriverCallback(PVOID CallbackHandle);
 KERNEL_EXPORT LOUSTATUS LouKeIoVerifyPartitionTable(struct _DEVICE_OBJECT* DeviceObject, BOOLEAN FixErrors);
 KERNEL_EXPORT LOUSTATUS LouKeIoVolumeDeviceToDosName(PVOID VolumeDeviceObject, PUNICODE_STRING DosName);
 
+
+
+KERNEL_EXPORT LOUSTATUS LouKeZwAllocateLocallyUniqueId(PLUID Luid);
+KERNEL_EXPORT LOUSTATUS LouKeZwDeviceIoControlFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE ApcRoutine, PVOID ApcContext, PIO_STATUS_BLOCK IoStatusBlock, ULONG IoControlCode, PVOID InputBuffer, ULONG InputBufferLength, PVOID OutputBuffer, ULONG OutputBufferLength);
+KERNEL_EXPORT LOUSTATUS LouKeZwOpenProcess(PHANDLE ProcessHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PCLIENT_ID ClientId);
+KERNEL_EXPORT LOUSTATUS LouKeZwPowerInformation(POWER_INFORMATION_LEVEL InformationLevel, PVOID InputBuffer, ULONG InputBufferLength, PVOID OutputBuffer, ULONG OutputBufferLength);
+KERNEL_EXPORT LOUSTATUS LouKeZwQueryVolumeInformationFile(HANDLE FileHandle, PIO_STATUS_BLOCK IoStatusBlock, PVOID FsInformation, ULONG Length, FS_INFORMATION_CLASS FsInformationClass);
+KERNEL_EXPORT LOUSTATUS LouKeZwSetInformationThread(HANDLE ThreadHandle, THREADINFOCLASS ThreadInformationClass, PVOID ThreadInformation, ULONG ThreadInformationLength);
+KERNEL_EXPORT LOUSTATUS LouKeZwTerminateProcess(HANDLE ProcessHandle, LOUSTATUS ExitStatus);
+
 #else
 
 
