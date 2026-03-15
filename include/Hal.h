@@ -215,8 +215,6 @@ typedef HalGetInterruptTranslator* pHalGetInterruptTranslator;
 typedef LOUSTATUS HalEndMirroring(ULONG Pass);
 typedef HalEndMirroring*    pHalEndMirroring;
 
-//start here
-
 typedef 
 LOUSTATUS 
 HalMirrorPhysicalMemory(
@@ -324,6 +322,7 @@ typedef struct _HAL_DISPATCH{
 	pHalGetPrmCache                HalGetPrmCache;
 }HAL_DISPATCH, * PHAL_DISPATCH;
 
+struct _PHYSICAL_COUNTER_RESOURCE_LIST;
 
 #ifndef _USER_MODE_CODE_
 #define LouKeHalClosePciCompanions(x) LouKeFree((PVOID)x)
@@ -361,6 +360,48 @@ KERNEL_EXPORT PDMA_ADAPTER LouKeHalGetDmaAdapter(PVOID Context, PDEVICE_DESCRIPT
 KERNEL_EXPORT LOUSTATUS LouKeHalGetInterruptTranslator(INTERFACE_TYPE ParrentInterfaceType, ULONG ParrentBussNumber, INTERFACE_TYPE BridgeInterfaceType, USHORT Size, USHORT VendorsDictionary, PTRANSLATOR_INTERFACE Translator, PULONG BridgeBusNumber);
 KERNEL_EXPORT LOUSTATUS LouKeHalStartMirroring();
 KERNEL_EXPORT LOUSTATUS LouKeHalEndMirroring(ULONG Pass);
+
+KERNEL_EXPORT LOUSTATUS LouKeHalMirrorPhysicalMemory(PHYSICAL_ADDRESS PhysicalAddress, LARGE_INTEGER NumberOfBytes);
+KERNEL_EXPORT void LouKeHalExamineMBR(PDEVICE_OBJECT Object, ULONG SectorSize, ULONG MbrTypeIdentifier, PVOID* Buffer);
+KERNEL_EXPORT void LouKeHalEndOfBoot(); 
+KERNEL_EXPORT LOUSTATUS LouKeHalMirrorVerify(PHYSICAL_ADDRESS PhyAddress, LARGE_INTEGER ByteCount);
+KERNEL_EXPORT ULONG LouKeHalGetAcpiTable(PVOID AcpiTableSignature, ULONG TableIndex, PVOID AcpiTableBuffer, ULONG AcpiTableBufferSize); 
+KERNEL_EXPORT void LouKePciErrorHandlerCallback(); //export as NTOSKRNL.EXE:PCI_ERROR_HANDLER_CALLBACK
+KERNEL_EXPORT LOUSTATUS LouKeHalAllocateHardwareCounters(PGROUP_AFFINITY GroupAffinty, ULONG GroupCount, struct _PHYSICAL_COUNTER_RESOURCE_LIST* ResourceList, PHANDLE CounterSetHandle);
+KERNEL_EXPORT void LouKeHalSetPciErrorHandlerCallback(PPCI_ERROR_HANDLER_CALLBACK Callback);
+KERNEL_EXPORT LOUSTATUS LouKeHalGetPrmCache(PVOID PrmInterface, PVOID PrmCacheBuffer, ULONG PrmCacheBufferSize);
+
+/*LOUSTATUS HalFreeHardwareCounters(
+	 HANDLE CounterSetHandle
+);
+
+
+//WARNING BACKPATIBLE FUNCTIONS STABILITY THREAT
+ULONG HalGetBusDataByOffset(
+	 BUS_DATA_TYPE BusDataType,
+	 ULONG         BusNumber,
+	 ULONG         SlotNumber,
+	 PVOID         Buffer,
+	 ULONG         Offset,
+	 ULONG         Length
+);
+
+ULONG HalSetBusDataByOffset(
+	 BUS_DATA_TYPE BusDataType,
+	 ULONG         BusNumber,
+	 ULONG         SlotNumber,
+	 PVOID         Buffer,
+	 ULONG         Offset,
+	 ULONG         Length
+);
+
+void Phalexaminembr(
+    struct _DEVICE_OBJECT* DeviceObject,
+    ULONG SectorSize,
+    ULONG MBRTypeIdentifier,
+    PVOID *Buffer
+);*/
+
 #ifndef _KERNEL_MODULE_
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);
 void LouKeInitializePciCommonPacketAnyType(PPCI_COMMON_CONFIG PciCommon);

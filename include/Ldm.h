@@ -14,7 +14,7 @@ typedef PVOID OPAQUE_PTR;
 typedef struct _OFFSETINSTANCEDATAANDLENGTH {
     ULONG OffsetInstanceData;
     ULONG LengthInstanceData;
-} OFFSETINSTANCEDATAANDLENGTH, * POFFSETINSTANCEDATAANDLENGTH;
+}OFFSETINSTANCEDATAANDLENGTH, * POFFSETINSTANCEDATAANDLENGTH;
 
 typedef enum {
     KernelMode = 0,
@@ -1932,6 +1932,48 @@ typedef POWER_SETTING_CALLBACK *PPOWER_SETTING_CALLBACK;
 
 #include <Ldm/ddk.h>
 
+typedef enum _IO_ACCESS_MODE{
+	SequentialAccess = 0,
+	RandomAccess,
+}IO_ACCESS_MODE, * PIO_ACCESS_MODE;
+
+typedef enum _IO_ACCESS_TYPE{
+	ReadAccess = 0,
+	WriteAccess,
+	ModifyAccess,
+}IO_ACCESS_TYPE, * PIO_ACCESS_TYPE;
+
+
+
+
+
+#include <kernel/loustatus.h>
+
+struct _IO_DISCONNECT_INTERRUPT_PARAMETERS;
+struct _IO_CONNECT_INTERRUPT_PARAMETERS;
+
+#ifndef _USER_MODE_CODE_
+
+KERNEL_EXPORT
+LOUSTATUS 
+LdmlibIoGetAffinityInterrupt(
+	PKINTERRUPT     InterruptObject,
+	PGROUP_AFFINITY GroupAffinity
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LdmlibIoDisconnectInterruptEx(
+	struct _IO_DISCONNECT_INTERRUPT_PARAMETERS* Parameters
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LdmlibIoConnectInterruptEx(
+	struct _IO_CONNECT_INTERRUPT_PARAMETERS* Parameters
+);
+
+#endif
 #ifdef __cplusplus
 }
 #endif

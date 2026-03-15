@@ -51,13 +51,6 @@ typedef enum _KEY_VALUE_INFORMATION_CLASS {
 } KEY_VALUE_INFORMATION_CLASS;
 
 
-typedef enum _IO_PAGING_PRIORITY {
-    IoPagingPriorityInvalid,
-    IoPagingPriorityNormal,
-    IoPagingPriorityHigh,
-    IoPagingPriorityReserved1,
-    IoPagingPriorityReserved2
-} IO_PAGING_PRIORITY;
 
 typedef enum _IO_PRIORITY_HINT {
     IoPriorityVeryLow,

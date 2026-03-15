@@ -589,6 +589,17 @@ typedef struct _LHEAP_ROW_FAILURE_EVENT{
   	PFN_NUMBER           	HighOrderPage;
 }LHEAP_ROW_FAILURE_EVENT, * PLHEAP_ROW_FAILURE_EVENT;
 
+typedef enum _IO_PAGING_PRIORITY{
+	IoPagingPriorityInvalid = 0,
+    IoPagingPriorityNormal,
+    IoPagingPriorityHigh,
+    IoPagingPriorityReserved1,
+    IoPagingPriorityReserved2
+}IO_PAGING_PRIORITY, * PIO_PAGING_PRIORITY;
+
+struct _FILE_OBJECT;
+struct _IRP;
+
 #ifndef _USER_MODE_CODE_
 
 KERNEL_EXPORT LOUSTATUS LouKeIoAllocateAdapterChannel(PADAPTER_OBJECT AdapterObject, PDEVICE_OBJECT DeviceObject, ULONG NumberOfMapRegisters, PDRIVER_CONTROL ExecutionRoutine, PVOID Context);
@@ -596,8 +607,51 @@ KERNEL_EXPORT BOOLEAN LouKeLheaSignalHandlerOverrideCallback(UINT_PTR Context);
 KERNEL_EXPORT void LouKeCustomSystemEventTriggerInit(PCUSTOM_SYSTEM_EVENT_TRIGGER_CONFIG Config, PCWSTR TriggerId);
 KERNEL_EXPORT void LouKeDriverReinitialize(PDRIVER_OBJECT DriverObject, PVOID Context, ULONG Count);
 KERNEL_EXPORT void LouKeExFreePool(PVOID P);
+KERNEL_EXPORT void LouKeExpandStackCallout(PVOID Parameter);
+KERNEL_EXPORT void LouKeExRaiseDatatypeMisalignment();
+KERNEL_EXPORT void LouKeExRaiseAccessViolation();
+KERNEL_EXPORT LOUSTATUS LouKeExUuidCreate(UUID* Uuid);
+
+KERNEL_EXPORT void LouKeIoAllocateController(PCONTROLLER_OBJECT ControllerObject, PDEVICE_OBJECT DeviceObject, PDRIVER_CONTROL ExecutionRoutine, PVOID Context);
+KERNEL_EXPORT void LouKeIoClearActivityIdThread(LPCGUID OriginalId);
+KERNEL_EXPORT PCONTROLLER_OBJECT LouKeIoCreateController(ULONG Size);
+KERNEL_EXPORT LOUSTATUS LouKeIoDecrementKeepAliveCount(struct _FILE_OBJECT* FileObject, struct _EPROCESS* Process);
+KERNEL_EXPORT void LouKeIoDeleteController(PCONTROLLER_OBJECT ControllerObject);
+KERNEL_EXPORT void LouKeIoFreeController(PCONTROLLER_OBJECT ControllerObject);
+KERNEL_EXPORT LOUSTATUS LouKeIoGetActivityIdIrp(struct _IRP* Irp, PGUID Guid);
+KERNEL_EXPORT LPCGUID IoGetActivityIdThread();
+KERNEL_EXPORT PCONFIGURATION_INFORMATION LouKeIoGetConfigurationInformation();
+KERNEL_EXPORT PGENERIC_MAPPING LouKeIoGetFileObjectGenericMapping();
+KERNEL_EXPORT PEPROCESS LouKeIoGetInitiatorProcess(struct _FILE_OBJECT* FileObject);
+KERNEL_EXPORT IO_PAGING_PRIORITY LouKeIoGetPagingIoPriority(struct _IRP* Irp);
+KERNEL_EXPORT PIO_FOEXT_SHADOW_FILE LouKeIoGetShadowFileInformation(struct _FILE_OBJECT* FileObject);
+KERNEL_EXPORT LOUSTATUS LouKeIoIncrementKeepAliveCount(struct _FILE_OBJECT* FileObject, PEPROCESS Process);
+KERNEL_EXPORT LOGICAL LouKeIoIsValidIrpStatus(LOUSTATUS Status);
+KERNEL_EXPORT struct _IRP* LouKeIoMakeAssociatedIrp(struct _IRP* Irp, CCHAR StackSize);
+KERNEL_EXPORT LOUSTATUS LouKeIoPropagateActivityIdToThread(struct _IRP* Irp, LPGUID  PropagatedId, LPCGUID* OriginalId);
+KERNEL_EXPORT LOUSTATUS LouKeIoQueryFullDriverPath(PDRIVER_OBJECT  DriverObject, PUNICODE_STRING FullPath);
+KERNEL_EXPORT void LouKeIoRaiseHardError(struct _IRP* Irp, PVPB Vpb, struct _DEVICE_OBJECT* RealDeviceObject);
+KERNEL_EXPORT BOOLEAN LouKeIoRaiseInformationalHardError(LOUSTATUS ErrorStatus, PUNICODE_STRING String, PKTHREAD Thread);
+KERNEL_EXPORT PVOID LouKeIoRegisterBootDriverCallback(PBOOT_DRIVER_CALLBACK_FUNCTION CallbackFunction, PVOID CallbackContext);
+KERNEL_EXPORT void LouKeIoRegisterBootDriverReinitialization(PDRIVER_OBJECT DriverObject, PDRIVER_REINITIALIZE DriverReinitializationRoutine,PVOID Context);
+KERNEL_EXPORT void LouKeIoRegisterDriverReinitialization(PDRIVER_OBJECT DriverObject, PDRIVER_REINITIALIZE DriverReinitializationRoutine, PVOID Context);
+KERNEL_EXPORT LOUSTATUS LouKeIoReportDetectedDevice(PDRIVER_OBJECT DriverObject, INTERFACE_TYPE LegacyBusType, ULONG BusNumber, ULONG SlotNumber, PCM_RESOURCE_LIST ResourceList, PIO_RESOURCE_REQUIREMENTS_LIST ResourceRequirements, BOOLEAN ResourceAssigned, struct _DEVICE_OBJECT** DeviceObject);
+KERNEL_EXPORT LOUSTATUS LouKeIoReportResourceForDetection(PDRIVER_OBJECT DriverObject, PCM_RESOURCE_LIST DriverList, ULONG DriverListSize, struct _DEVICE_OBJECT* DeviceObject, PCM_RESOURCE_LIST DeviceList, ULONG DeviceListSize, PBOOLEAN ConflictDetected);
+KERNEL_EXPORT LOUSTATUS LouKeIoReportRootDevice(PDRIVER_OBJECT DriverObject);
+KERNEL_EXPORT LOUSTATUS LouKeIoSetActivityIdIrp(struct _IRP* Irp, LPCGUID Guid);
+KERNEL_EXPORT LPCGUID LouKeIoSetActivityIdThread(LPCGUID ActivityId);
+KERNEL_EXPORT void LouKeIoSetHardErrorOrVerifyDevice(struct _IRP* Irp, struct _DEVICE_OBJECT* DeviceObject);
+KERNEL_EXPORT void LouKeIoSetMasterIrpStatus(struct _IRP* MasterIrp, LOUSTATUS Status);
+KERNEL_EXPORT LOUSTATUS LouKeIoSetShadowFileInformation(struct _FILE_OBJECT* FileObject, struct _FILE_OBJECT* BackingFileObject, PVOID BackingFltInstance);
+KERNEL_EXPORT LOUSTATUS LouKeIoSetSystemPartition(PUNICODE_STRING VolumeNameString);
+KERNEL_EXPORT BOOLEAN LouKeIoSetThreadHardErrorMode(BOOLEAN EnableHardErrors);
+KERNEL_EXPORT void LouKeIoTransferActivityId(LPCGUID ActivityId, LPCGUID RelatedActivityId);
+KERNEL_EXPORT void LouKeIoUnregisterBootDriverCallback(PVOID CallbackHandle);
+KERNEL_EXPORT LOUSTATUS LouKeIoVerifyPartitionTable(struct _DEVICE_OBJECT* DeviceObject, BOOLEAN FixErrors);
+KERNEL_EXPORT LOUSTATUS LouKeIoVolumeDeviceToDosName(PVOID VolumeDeviceObject, PUNICODE_STRING DosName);
 
 #else
+
 
 
 #endif
