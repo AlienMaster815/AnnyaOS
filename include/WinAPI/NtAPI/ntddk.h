@@ -10,10 +10,8 @@
 
 
 
-
-
 void ExpandStackCallout(
-	 PVOID Parameter
+	PVOID Parameter
 );
 
 void ExRaiseDatatypeMisalignment();
@@ -504,113 +502,6 @@ void Phalexaminembr(
    PVOID *Buffer
 );
 
-
-typedef struct _PNP_LOCATION_INTERFACE {
-  USHORT                 Size;
-  USHORT                 Version;
-  PVOID                  Context;
-  PINTERFACE_REFERENCE   InterfaceReference;
-  PINTERFACE_DEREFERENCE InterfaceDereference;
-  PGET_LOCATION_STRING   GetLocationString;
-} PNP_LOCATION_INTERFACE, *PPNP_LOCATION_INTERFACE;
-
-typedef struct _POWER_THROTTLING_PROCESS_STATE {
-  ULONG Version;
-  ULONG ControlMask;
-  ULONG StateMask;
-} POWER_THROTTLING_PROCESS_STATE, *PPOWER_THROTTLING_PROCESS_STATE;
-
-typedef struct _POWER_THROTTLING_THREAD_STATE {
-  ULONG Version;
-  ULONG ControlMask;
-  ULONG StateMask;
-} POWER_THROTTLING_THREAD_STATE, *PPOWER_THROTTLING_THREAD_STATE;
-
-
-typedef struct _PROCESS_MEMBERSHIP_INFORMATION {
-  ULONG ServerSiloId;
-} PROCESS_MEMBERSHIP_INFORMATION, *PPROCESS_MEMBERSHIP_INFORMATION;
-
-typedef struct _PROCESS_MITIGATION_ACTIVATION_CONTEXT_TRUST_POLICY {
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG AssemblyManifestRedirectionTrust : 1;
-	  ULONG ReservedFlags : 31;
-	} DUMMYSTRUCTNAME;
-  } DUMMYUNIONNAME;
-} PROCESS_MITIGATION_ACTIVATION_CONTEXT_TRUST_POLICY, *PPROCESS_MITIGATION_ACTIVATION_CONTEXT_TRUST_POLICY;
-
-typedef struct _PROCESS_MITIGATION_CHILD_PROCESS_POLICY {
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG NoChildProcessCreation : 1;
-	  ULONG AuditNoChildProcessCreation : 1;
-	  ULONG AllowSecureProcessCreation : 1;
-	  ULONG ReservedFlags : 29;
-	} DUMMYSTRUCTNAME;
-  } DUMMYUNIONNAME;
-} PROCESS_MITIGATION_CHILD_PROCESS_POLICY, *PPROCESS_MITIGATION_CHILD_PROCESS_POLICY;
-
-typedef struct _PROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY {
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG EnableExportAddressFilter : 1;
-	  ULONG AuditExportAddressFilter : 1;
-	  ULONG EnableExportAddressFilterPlus : 1;
-	  ULONG AuditExportAddressFilterPlus : 1;
-	  ULONG EnableImportAddressFilter : 1;
-	  ULONG AuditImportAddressFilter : 1;
-	  ULONG EnableRopStackPivot : 1;
-	  ULONG AuditRopStackPivot : 1;
-	  ULONG EnableRopCallerCheck : 1;
-	  ULONG AuditRopCallerCheck : 1;
-	  ULONG EnableRopSimExec : 1;
-	  ULONG AuditRopSimExec : 1;
-	  ULONG ReservedFlags : 20;
-	} DUMMYSTRUCTNAME;
-  } DUMMYUNIONNAME;
-} PROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY, *PPROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY;
-
-typedef struct _PROCESS_MITIGATION_SEHOP_POLICY {
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG EnableSehop : 1;
-	  ULONG ReservedFlags : 31;
-	} DUMMYSTRUCTNAME;
-  } DUMMYUNIONNAME;
-} PROCESS_MITIGATION_SEHOP_POLICY, *PPROCESS_MITIGATION_SEHOP_POLICY;
-
-typedef struct _PROCESS_MITIGATION_SYSTEM_CALL_FILTER_POLICY {
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG FilterId : 4;
-	  ULONG ReservedFlags : 28;
-	} DUMMYSTRUCTNAME;
-  } DUMMYUNIONNAME;
-} PROCESS_MITIGATION_SYSTEM_CALL_FILTER_POLICY, *PPROCESS_MITIGATION_SYSTEM_CALL_FILTER_POLICY;
-
-typedef struct _PROCESS_MITIGATION_USER_POINTER_AUTH_POLICY {
-  union {
-	ULONG Flags;
-	struct {
-	  ULONG EnablePointerAuthUserIp : 1;
-	  ULONG ReservedFlags : 31;
-	} DUMMYSTRUCTNAME;
-  } DUMMYUNIONNAME;
-} PROCESS_MITIGATION_USER_POINTER_AUTH_POLICY, *PPROCESS_MITIGATION_USER_POINTER_AUTH_POLICY;
-
-
-typedef struct _PROCESS_SYSCALL_PROVIDER_INFORMATION {
-  GUID  ProviderId;
-  UCHAR Level;
-} PROCESS_SYSCALL_PROVIDER_INFORMATION, *PPROCESS_SYSCALL_PROVIDER_INFORMATION;
-
-
 void PcreateProcessNotifyRoutineEx(
 	           PEPROCESS Process,
 	                HANDLE ProcessId,
@@ -627,9 +518,7 @@ PESILO PsAttachSiloToCurrentThread(
    PESILO Silo
 );
 
-typedef enum _PSCREATEPROCESSNOTIFYTYPE {
-  PsCreateProcessNotifySubsystems
-} PSCREATEPROCESSNOTIFYTYPE;
+
 
 LOUSTATUS PsCreateSiloContext(
              PESILO                        Silo,
@@ -638,11 +527,6 @@ LOUSTATUS PsCreateSiloContext(
    SILO_CONTEXT_CLEANUP_CALLBACK ContextCleanupCallback,
 				 PVOID                         *ReturnedSiloContext
 );
-
-typedef enum _PSCREATETHREADNOTIFYTYPE {
-  PsCreateThreadNotifyNonSystem,
-  PsCreateThreadNotifySubsystems
-} PSCREATETHREADNOTIFYTYPE;
 
 void PsDereferenceSiloContext(
    PVOID SiloContext
@@ -930,9 +814,9 @@ NTSYSAPI LOUSTATUS RtlQueryRegistryValueWithFallback(
     HANDLE          FallbackHandle,
     PUNICODE_STRING ValueName,
     ULONG           ValueLength,
-   PULONG          ValueType,
-   PVOID           ValueData,
-   PULONG          ResultLength
+   	PULONG          ValueType,
+   	PVOID           ValueData,
+   	PULONG          ResultLength
 );
 
 LOUSTATUS RtlRaiseCustomSystemEventTrigger(
@@ -977,101 +861,12 @@ void SiloContextCleanupCallback(
 );
 
 
-typedef struct _SILO_MONITOR_REGISTRATION {
-  UCHAR                           Version;
-  BOOLEAN                         MonitorHost;
-  BOOLEAN                         MonitorExistingSilos;
-  UCHAR                           Reserved[5];
-  union {
-	PUNICODE_STRING DriverObjectName;
-	PUNICODE_STRING ComponentName;
-  };
-  SILO_MONITOR_CREATE_CALLBACK    CreateCallback;
-  SILO_MONITOR_TERMINATE_CALLBACK TerminateCallback;
-} SILO_MONITOR_REGISTRATION, *PSILO_MONITOR_REGISTRATION;
 
 void SiloMonitorTerminateCallback(
    PESILO Silo
 );
 
 
-typedef enum _SUBSYSTEM_INFORMATION_TYPE {
-  SubsystemInformationTypeWin32,
-  SubsystemInformationTypeWSL,
-  MaxSubsystemInformationType
-} SUBSYSTEM_INFORMATION_TYPE, *PSUBSYSTEM_INFORMATION_TYPE;
-
-
-
-typedef struct _WHEA_ERROR_SOURCE_OVERRIDE_SETTINGS {
-  LHEA_ERROR_SOURCE_TYPE Type;
-  ULONG                  MaxRawDataLength;
-  ULONG                  NumRecordsToPreallocate;
-  ULONG                  MaxSectionsPerRecord;
-} WHEA_ERROR_SOURCE_OVERRIDE_SETTINGS, *PWHEA_ERROR_SOURCE_OVERRIDE_SETTINGS;
-
-typedef struct _WHEA_FAILED_ADD_DEFECT_LIST_EVENT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-} WHEA_FAILED_ADD_DEFECT_LIST_EVENT, *PWHEA_FAILED_ADD_DEFECT_LIST_EVENT;
-
-typedef struct _WHEA_PCI_RECOVERY_SECTION {
-  UINT8   SignalType;
-  BOOLEAN RecoveryAttempted;
-  UINT8   RecoveryStatus;
-} WHEA_PCI_RECOVERY_SECTION, *PWHEA_PCI_RECOVERY_SECTION;
-
-typedef enum _WHEA_PCI_RECOVERY_SIGNAL {
-  WheaPciRecoverySignalUnknown,
-  WheaPciRecoverySignalAer,
-  WheaPciRecoverySignalDpc
-} WHEA_PCI_RECOVERY_SIGNAL, *PWHEA_PCI_RECOVERY_SIGNAL;
-
-typedef enum _WHEA_PCI_RECOVERY_STATUS {
-  WheaPciREcoveryStatusUnknown,
-  WheaPciRecoveryStatusNoError,
-  WheaPciRecoveryStatusLinkDisableTimeout,
-  WheaPciRecoveryStatusLinkEnableTimeout,
-  WheaPciRecoveryStatusRpBusyTimeout,
-  WheaPciRecoveryStatusComplexTree,
-  WheaPciRecoveryStatusBusNotFound
-} WHEA_PCI_RECOVERY_STATUS, *PWHEA_PCI_RECOVERY_STATUS;
-
-typedef struct _WHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-  LOUSTATUS             Status;
-} WHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT, *PWHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT;
-
-typedef struct _WHEA_PSHED_PLUGIN_INIT_FAILED_EVENT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-  LOUSTATUS             Status;
-} WHEA_PSHED_PLUGIN_INIT_FAILED_EVENT, *PWHEA_PSHED_PLUGIN_INIT_FAILED_EVENT;
-
-typedef struct _WHEA_SEA_SECTION {
-  ULONG   Esr;
-  ULONG64 Far;
-  ULONG64 Par;
-  BOOLEAN WasKernel;
-} WHEA_SEA_SECTION, *PWHEA_SEA_SECTION;
-
-typedef struct _WHEA_SEI_SECTION {
-  ULONG   Esr;
-  ULONG64 Far;
-} WHEA_SEI_SECTION, *PWHEA_SEI_SECTION;
-
-typedef struct _WHEA_SRAS_TABLE_ENTRIES_EVENT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-  UINT32               LogNumber;
-  UINT32               NumberSignals;
-  UINT8*               Data;
-} WHEA_SRAS_TABLE_ENTRIES_EVENT, *PWHEA_SRAS_TABLE_ENTRIES_EVENT;
-
-typedef struct _WHEA_SRAS_TABLE_ERROR {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-} WHEA_SRAS_TABLE_ERROR, *PWHEA_SRAS_TABLE_ERROR;
-
-typedef struct _WHEA_SRAS_TABLE_NOT_FOUND {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-} WHEA_SRAS_TABLE_NOT_FOUND, *PWHEA_SRAS_TABLE_NOT_FOUND;
 
 //void WheaAdd2Ptr(
 //   P,
@@ -1100,43 +895,9 @@ void WheaErrorRecordBuilderInit(
   GUID                Notify
 );
 
-typedef struct _WHEAP_BAD_HEST_NOTIFY_DATA_EVENT {
-  LHEA_EVENT_LOG_ENTRY         WheaEventLogEntry;
-  USHORT                       SourceId;
-  USHORT                       Reserved;
-  LHEA_NOTIFICATION_DESCRIPTOR NotifyDesc;
-} WHEAP_BAD_HEST_NOTIFY_DATA_EVENT, *PWHEAP_BAD_HEST_NOTIFY_DATA_EVENT;
-
-typedef struct _WHEAP_DPC_ERROR_EVENT {
-  LHEA_EVENT_LOG_ENTRY       WheaEventLogEntry;
-  LHEAP_DPC_ERROR_EVENT_TYPE ErrType;
-  ULONG                      Bus;
-  ULONG                      Device;
-  ULONG                      Function;
-  USHORT                     DeviceId;
-  USHORT                     VendorId;
-} WHEAP_DPC_ERROR_EVENT, *PWHEAP_DPC_ERROR_EVENT;
-
-typedef struct _WHEAP_PLUGIN_DEFECT_LIST_CORRUPT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-} WHEAP_PLUGIN_DEFECT_LIST_CORRUPT, *PWHEAP_PLUGIN_DEFECT_LIST_CORRUPT;
-
-typedef struct _WHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-} WHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT, *PWHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT;
-
-typedef struct _WHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-} WHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED, *PWHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED;
-
-typedef struct _WHEAP_ROW_FAILURE_EVENT {
-  LHEA_EVENT_LOG_ENTRY WheaEventLogEntry;
-  PFN_NUMBER           LowOrderPage;
-  PFN_NUMBER           HighOrderPage;
-} WHEAP_ROW_FAILURE_EVENT, *PWHEAP_ROW_FAILURE_EVENT;
 
 LOUSTATUS WheaRegisterErrorSourceOverride(
-   WHEA_ERROR_SOURCE_OVERRIDE_SETTINGS   OverrideSettings,
+   LHEA_ERROR_SOURCE_OVERRIDE_SETTINGS   OverrideSettings,
    PLHEA_ERROR_SOURCE_CONFIGURATION      OverrideConfig,
    PLHEA_SIGNAL_HANDLER_OVERRIDE_CALLBACK OverrideCallback
 );

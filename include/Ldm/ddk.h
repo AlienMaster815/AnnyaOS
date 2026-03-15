@@ -351,6 +351,243 @@ typedef struct _PHYSICAL_COUNTER_RESOURCE_LIST{
   	PHYSICAL_COUNTER_RESOURCE_DESCRIPTOR* 		Descriptors;
 }PHYSICAL_COUNTER_RESOURCE_LIST, * PPHYSICAL_COUNTER_RESOURCE_LIST;
 
+typedef struct _PNP_LOCATION_INTERFACE{
+  	USHORT                 	Size;
+  	USHORT                 	Version;
+  	PVOID                  	Context;
+  	PINTERFACE_REFERENCE   	InterfaceReference;
+  	PINTERFACE_DEREFERENCE 	InterfaceDereference;
+  	PGET_LOCATION_STRING   	GetLocationString;
+}PNP_LOCATION_INTERFACE, * PPNP_LOCATION_INTERFACE;
+
+typedef struct _POWER_THROTTLING_PROCESS_STATE{
+  	ULONG 	Version;
+	ULONG 	ControlMask;
+  	ULONG 	StateMask;
+}POWER_THROTTLING_PROCESS_STATE, * PPOWER_THROTTLING_PROCESS_STATE;
+
+typedef struct _POWER_THROTTLING_THREAD_STATE{
+  	ULONG 	Version;
+  	ULONG 	ControlMask;
+  	ULONG 	StateMask;
+}POWER_THROTTLING_THREAD_STATE, * PPOWER_THROTTLING_THREAD_STATE;
+
+typedef struct _PROCESS_MEMBERSHIP_INFORMATION{
+  	ULONG 	ServerSiloId;
+}PROCESS_MEMBERSHIP_INFORMATION, * PPROCESS_MEMBERSHIP_INFORMATION;
+
+typedef struct _PROCESS_MITIGATION_ACTIVATION_CONTEXT_TRUST_POLICY{
+  	union {
+		ULONG 		Flags;
+		struct {
+	  		ULONG 	AssemblyManifestRedirectionTrust 	: 	1;
+	  		ULONG 	ReservedFlags 						: 	31;
+		};
+  	};
+} PROCESS_MITIGATION_ACTIVATION_CONTEXT_TRUST_POLICY, *PPROCESS_MITIGATION_ACTIVATION_CONTEXT_TRUST_POLICY;
+
+typedef struct _PROCESS_MITIGATION_CHILD_PROCESS_POLICY{
+  	union{
+		ULONG 		Flags;
+		struct {
+	  		ULONG 	NoChildProcessCreation			: 	1;
+	  		ULONG 	AuditNoChildProcessCreation 	: 	1;
+	  		ULONG 	AllowSecureProcessCreation 		: 	1;
+	  		ULONG 	ReservedFlags 					: 	29;
+		};
+  	};
+}PROCESS_MITIGATION_CHILD_PROCESS_POLICY, * PPROCESS_MITIGATION_CHILD_PROCESS_POLICY;
+
+typedef struct _PROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY{
+  	union {
+		ULONG Flags;
+		struct {
+		  	ULONG 	EnableExportAddressFilter 		: 	1;
+		  	ULONG 	AuditExportAddressFilter 		: 	1;
+		  	ULONG 	EnableExportAddressFilterPlus 	: 	1;
+		  	ULONG 	AuditExportAddressFilterPlus 	: 	1;
+		  	ULONG 	EnableImportAddressFilter 		: 	1;
+		  	ULONG 	AuditImportAddressFilter 		: 	1;
+		  	ULONG 	EnableRopStackPivot 			: 	1;
+		  	ULONG 	AuditRopStackPivot 				: 	1;
+		  	ULONG 	EnableRopCallerCheck 			: 	1;
+		  	ULONG 	AuditRopCallerCheck 			: 	1;
+		  	ULONG 	EnableRopSimExec 				: 	1;
+		  	ULONG 	AuditRopSimExec 				: 	1;
+		  	ULONG 	ReservedFlags 					: 	20;
+		};
+  	};
+}PROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY, * PPROCESS_MITIGATION_PAYLOAD_RESTRICTION_POLICY;
+
+typedef struct _PROCESS_MITIGATION_SEHOP_POLICY {
+  	union {
+		ULONG 		Flags;
+		struct {
+		  	ULONG 	EnableSehop 	: 	1;
+		  	ULONG 	ReservedFlags 	: 	31;
+		};
+  	};
+}PROCESS_MITIGATION_SEHOP_POLICY, * PPROCESS_MITIGATION_SEHOP_POLICY;
+
+typedef struct _PROCESS_MITIGATION_SYSTEM_CALL_FILTER_POLICY{
+  	union {
+		ULONG 		Flags;
+		struct {
+	  		ULONG 	FilterId 		: 	4;
+	  		ULONG 	ReservedFlags 	: 	28;
+		};
+  	};
+}PROCESS_MITIGATION_SYSTEM_CALL_FILTER_POLICY, * PPROCESS_MITIGATION_SYSTEM_CALL_FILTER_POLICY;
+
+typedef struct _PROCESS_MITIGATION_USER_POINTER_AUTH_POLICY{
+  	union {
+		ULONG 		Flags;
+		struct{
+		  	ULONG 	EnablePointerAuthUserIp 	: 	1;
+		  	ULONG 	ReservedFlags 				: 	31;
+		};
+  	};
+}PROCESS_MITIGATION_USER_POINTER_AUTH_POLICY, * PPROCESS_MITIGATION_USER_POINTER_AUTH_POLICY;
+
+
+typedef struct _PROCESS_SYSCALL_PROVIDER_INFORMATION{
+  	GUID	ProviderId;
+  	UCHAR	Level;
+}PROCESS_SYSCALL_PROVIDER_INFORMATION, * PPROCESS_SYSCALL_PROVIDER_INFORMATION;
+
+typedef enum _PSCREATEPROCESSNOTIFYTYPE{
+  	PsCreateProcessNotifySubsystems = 0,
+}PSCREATEPROCESSNOTIFYTYPE, * PPSCREATEPROCESSNOTIFYTYPE;
+
+typedef enum _PSCREATETHREADNOTIFYTYPE {
+  PsCreateThreadNotifyNonSystem = 0,
+  PsCreateThreadNotifySubsystems,
+}PSCREATETHREADNOTIFYTYPE, * PPSCREATETHREADNOTIFYTYPE;
+
+typedef struct _SILO_MONITOR_REGISTRATION{
+  	UCHAR                           	Version;
+  	BOOLEAN                         	MonitorHost;
+  	BOOLEAN                         	MonitorExistingSilos;
+  	UCHAR                           	Reserved[5];
+  	union {
+		PUNICODE_STRING 				DriverObjectName;
+		PUNICODE_STRING 				ComponentName;
+  	};
+  	PSILO_MONITOR_CREATE_CALLBACK    	CreateCallback;
+  	PSILO_MONITOR_TERMINATE_CALLBACK 	TerminateCallback;
+}SILO_MONITOR_REGISTRATION, * PSILO_MONITOR_REGISTRATION;
+
+
+typedef enum _SUBSYSTEM_INFORMATION_TYPE{
+  	SubsystemInformationTypeAnna32 = 0,
+  	SubsystemInformationTypeASL,
+  	MaxSubsystemInformationType,
+}SUBSYSTEM_INFORMATION_TYPE, * PSUBSYSTEM_INFORMATION_TYPE;
+
+typedef struct _LHEA_ERROR_SOURCE_OVERRIDE_SETTINGS {
+  	LHEA_ERROR_SOURCE_TYPE 	Type;
+  	ULONG                  	MaxRawDataLength;
+  	ULONG                  	NumRecordsToPreallocate;
+  	ULONG                  	MaxSectionsPerRecord;
+}LHEA_ERROR_SOURCE_OVERRIDE_SETTINGS, * PLHEA_ERROR_SOURCE_OVERRIDE_SETTINGS;
+
+typedef struct _LHEA_FAILED_ADD_DEFECT_LIST_EVENT {
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+}LHEA_FAILED_ADD_DEFECT_LIST_EVENT, * PLHEA_FAILED_ADD_DEFECT_LIST_EVENT;
+
+typedef struct _LHEA_PCI_RECOVERY_SECTION{
+  	UINT8   	SignalType;
+  	BOOLEAN 	RecoveryAttempted;
+  	UINT8   	RecoveryStatus;
+}LHEA_PCI_RECOVERY_SECTION, * PLHEA_PCI_RECOVERY_SECTION;
+
+typedef enum _LHEA_PCI_RECOVERY_SIGNAL{
+  	LheaPciRecoverySignalUnknown = 0,
+  	LheaPciRecoverySignalAer,
+  	LheaPciRecoverySignalDpc
+}LHEA_PCI_RECOVERY_SIGNAL, * PLHEA_PCI_RECOVERY_SIGNAL;
+
+typedef enum _LHEA_PCI_RECOVERY_STATUS{
+  	LheaPciREcoveryStatusUnknown = 0,
+  	LheaPciRecoveryStatusNoError,
+  	LheaPciRecoveryStatusLinkDisableTimeout,
+  	LheaPciRecoveryStatusLinkEnableTimeout,
+  	LheaPciRecoveryStatusRpBusyTimeout,
+  	LheaPciRecoveryStatusComplexTree,
+  	LheaPciRecoveryStatusBusNotFound
+}LHEA_PCI_RECOVERY_STATUS, * PLHEA_PCI_RECOVERY_STATUS;
+
+typedef struct _LHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT{
+  	LHEA_EVENT_LOG_ENTRY  	LheaEventLogEntry;
+  	LOUSTATUS             	Status;
+}LHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT, * PLHEA_PSHED_PI_CPU_BUSES_INIT_FAILED_EVENT;
+
+typedef struct _LHEA_PSHED_PLUGIN_INIT_FAILED_EVENT{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+  	LOUSTATUS             	Status;
+}LHEA_PSHED_PLUGIN_INIT_FAILED_EVENT, * PLHEA_PSHED_PLUGIN_INIT_FAILED_EVENT;
+
+typedef struct _LHEA_SEA_SECTION{
+  	ULONG   	Esr;
+  	ULONG64 	Far;
+  	ULONG64 	Par;
+  	BOOLEAN 	WasKernel;
+}LHEA_SEA_SECTION, * PLHEA_SEA_SECTION;
+
+typedef struct _LHEA_SEI_SECTION{
+  	ULONG   	Esr;
+  	ULONG64 	Far;
+}LHEA_SEI_SECTION, * PLHEA_SEI_SECTION;
+
+typedef struct _LHEA_SRAS_TABLE_ENTRIES_EVENT{
+  	LHEA_EVENT_LOG_ENTRY	LheaEventLogEntry;
+  	UINT32              	LogNumber;
+  	UINT32              	NumberSignals;
+  	UINT8*              	Data;
+}LHEA_SRAS_TABLE_ENTRIES_EVENT, * PLHEA_SRAS_TABLE_ENTRIES_EVENT;
+
+typedef struct _LHEA_SRAS_TABLE_ERRORs{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+}LHEA_SRAS_TABLE_ERROR, * PLHEA_SRAS_TABLE_ERROR;
+
+typedef struct _LHEA_SRAS_TABLE_NOT_FOUND{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+}LHEA_SRAS_TABLE_NOT_FOUND, * PLHEA_SRAS_TABLE_NOT_FOUND;
+
+typedef struct _LHEAP_BAD_HEST_NOTIFY_DATA_EVENT{
+  	LHEA_EVENT_LOG_ENTRY         	LheaEventLogEntry;
+  	USHORT                       	SourceId;
+  	USHORT                       	Reserved;
+  	LHEA_NOTIFICATION_DESCRIPTOR 	NotifyDesc;
+}LHEAP_BAD_HEST_NOTIFY_DATA_EVENT, * PLHEAP_BAD_HEST_NOTIFY_DATA_EVENT;
+
+typedef struct _WHEAP_DPC_ERROR_EVENT{
+  	LHEA_EVENT_LOG_ENTRY       		WheaEventLogEntry;
+  	LHEAP_DPC_ERROR_EVENT_TYPE 		ErrType;
+  	ULONG                      		Bus;
+  	ULONG                      		Device;
+  	ULONG                      		Function;
+  	USHORT                     		DeviceId;
+  	USHORT                     		VendorId;
+}WHEAP_DPC_ERROR_EVENT, * PWHEAP_DPC_ERROR_EVENT;
+
+typedef struct _LHEAP_PLUGIN_DEFECT_LIST_CORRUPT{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+}LHEAP_PLUGIN_DEFECT_LIST_CORRUPT, * PLHEAP_PLUGIN_DEFECT_LIST_CORRUPT;
+
+typedef struct _LHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+}LHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT, * PLHEAP_PLUGIN_DEFECT_LIST_FULL_EVENT;
+
+typedef struct _LHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+}LHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED, * PLHEAP_PLUGIN_DEFECT_LIST_UEFI_VAR_FAILED;
+
+typedef struct _LHEAP_ROW_FAILURE_EVENT{
+  	LHEA_EVENT_LOG_ENTRY 	LheaEventLogEntry;
+  	PFN_NUMBER           	LowOrderPage;
+  	PFN_NUMBER           	HighOrderPage;
+}LHEAP_ROW_FAILURE_EVENT, * PLHEAP_ROW_FAILURE_EVENT;
 
 #ifndef _USER_MODE_CODE_
 
