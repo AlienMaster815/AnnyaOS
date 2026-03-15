@@ -761,7 +761,27 @@ KERNEL_EXPORT LOUSTATUS LouKePsStartSiloMonitor(PSILO_MONITOR Monitor);
 KERNEL_EXPORT void LouKePsTerminateServerSilo(PESILO ServerSilo, LOUSTATUS ExitStatus);
 KERNEL_EXPORT void LouKePsUnregisterSiloMonitor(PSILO_MONITOR Monitor);
 
-
+KERNEL_EXPORT LOUSTATUS LouKeRtlCharToInteger(PCSZ String, ULONG Base, PULONG Value);
+KERNEL_EXPORT LONG LouKeRtlCompareString(const STRING* String1, const STRING* String2, BOOLEAN CaseInSensitive);
+KERNEL_EXPORT VOID LouKeRtlCopyString(PSTRING DestinationString, const STRING* SourceString);
+KERNEL_EXPORT BOOLEAN LouKeRtlEqualString(const STRING* String1, const STRING* String2, BOOLEAN CaseInSensitive);
+KERNEL_EXPORT ULONG64 LouKeRtlGetEnabledExtendedFeatures(ULONG64 FeatureMask);
+KERNEL_EXPORT LOUSTATUS LouKeRtlGetPersistedStateLocation(PCWSTR SourceID, PCWSTR CustomValue, PCWSTR DefaultPath, STATE_LOCATION_TYPE StateLocationType, PWCHAR TargetPath, ULONG BufferLengthIn, PULONG BufferLengthOut);
+KERNEL_EXPORT LOUSTATUS LouKeRtlIncrementCorrelationVector(PCORRELATION_VECTOR CorrelationVector);
+KERNEL_EXPORT LOUSTATUS LouKeRtlInitializeCorrelationVector(PCORRELATION_VECTOR CorrelationVector, int Version, const GUID* Guid);
+KERNEL_EXPORT BOOLEAN LouKeRtlIsStateSeparationEnabled();
+KERNEL_EXPORT BOOLEAN LouKeRtlIsZeroMemory(PVOID Buffer, SIZE_T Length);
+KERNEL_EXPORT VOID LouKeRtlMapGenericMask(PACCESS_MASK AccessMask, const GENERIC_MAPPING* GenericMapping);
+KERNEL_EXPORT BOOLEAN LouKeRtlNormalizeSecurityDescriptor(PSECURITY_DESCRIPTOR* SecurityDescriptor, ULONG SecurityDescriptorLength, PSECURITY_DESCRIPTOR* NewSecurityDescriptor, PULONG NewSecurityDescriptorLength, BOOLEAN CheckOnly);
+KERNEL_EXPORT BOOLEAN LouKeRtlPrefixUnicodeString(PCUNICODE_STRING String1, PCUNICODE_STRING String2, BOOLEAN CaseInSensitive);
+KERNEL_EXPORT LOUSTATUS LouKeRtlQueryRegistryValueWithFallback(HANDLE PrimaryHandle, HANDLE FallbackHandle, PUNICODE_STRING ValueName, ULONG ValueLength, PULONG ValueType, PVOID ValueData, PULONG ResultLength);
+KERNEL_EXPORT LOUSTATUS LouKeRtlRaiseCustomSystemEventTrigger(PCUSTOM_SYSTEM_EVENT_TRIGGER_CONFIG TriggerConfig);
+KERNEL_EXPORT VOID LouKeRtlRunOnceInitialize(PRTL_RUN_ONCE RunOnce);
+KERNEL_EXPORT LOUSTATUS LouKeRtlUpcaseUnicodeString(PUNICODE_STRING DestinationString, PCUNICODE_STRING SourceString, BOOLEAN AllocateDestinationString);
+KERNEL_EXPORT CHAR LouKeRtlUpperChar(CHAR Character);
+KERNEL_EXPORT VOID LouKeRtlUpperString(PSTRING DestinationString, const STRING* SourceString);
+KERNEL_EXPORT LOUSTATUS LouKeRtlValidateCorrelationVector(PCORRELATION_VECTOR Vector);
+KERNEL_EXPORT LOUSTATUS LouKeRtlVolumeDeviceToDosName(PVOID VolumeDeviceObject, PUNICODE_STRING DosName);
 
 
 
