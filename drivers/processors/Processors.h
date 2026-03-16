@@ -202,25 +202,12 @@ namespace CPU{
         RYZEN,
     }PROCCESSOR_ID;
 
-    typedef struct {
-        VENDOR_ID CpuVenId;
-        PROCCESSOR_ID ProccessorId;
-        uint64_t ProccessorVersion;
-        uint16_t NumberOfProcessors;
-    }CPUID_PACKET, * PCPUID_PACKET;
 
     class CPUID {
         public:
-            CPUID();
-            ~CPUID();
-            bool IsProcessorBrand(VENDOR_ID Ven);
-            bool IsProcessorId(PROCCESSOR_ID ProcID);
-            uint64_t GetProcessorVersion();
-            uint16_t GetNumberOfProcessors();
             bool IsFeatureSupported(FEATURE Feature);
         private:
             bool ParseCpuFeature(FEATURE Feature);
-            PCPUID_PACKET CpuIdPacket;
 
         #define FPU_MASK 0x01 //bit 1
         #define SMP_MASK 0x01 << 1 //bit 2

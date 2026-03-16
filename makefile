@@ -77,7 +77,6 @@ kernel_object_files := $(patsubst kernel/%.c, build/kernel/%.o, $(kernel_source_
 driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/FileSystems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/gpu/InternalGpuFunctions -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/io -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/ISA -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/pci_systems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/PnP -name *.cpp)

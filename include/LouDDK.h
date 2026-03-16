@@ -42,13 +42,11 @@ extern "C" {
 #include <DRSD.h>
 #include <kernel/Process.h>
 #include <Ldm.h>
-
-#include <drivers/Lou_drivers/FileSystem.h>
-#include <drivers/Lou_drivers/hardrive.h>
-#include <drivers/Lou_drivers/io.h>
-#include <drivers/Lou_drivers/keyboards.h>
+#include <drivers/FileSystem.h>
+#include <drivers/hardrive.h>
 #include <drivers/pci.h>
-#include <drivers/Lou_drivers/Processor.h>
+
+
 #include <drivers/Lou_drivers/storage_struct.h>
 #include <drivers/display/vga.h>
 #include <drivers/Vendors/VendorsDictionary.h>
@@ -100,7 +98,6 @@ typedef void* EventHandle;
 
 
 //define common used cpp functions with drivers
-#include <drivers/Lou_drivers/io.h>
 #include <stddef.h>
 #include <drivers/Vendors/VendorsDictionary.h>
 #include <kernel/memmory.h>
@@ -176,17 +173,12 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #endif
 
 #include <ListManagement.h>
-#include <drivers/Lou_drivers/hardrive.h> 
 #include <drivers/Lou_drivers/storage_struct.h>
-#include <drivers/Lou_drivers/FileSystem.h>
 #include <drivers/Lou_drivers/FileSystems/ISO.h>
-#include <drivers/Lou_drivers/hardrive.h>
 #include <cstdio.h>
-#include <drivers/Lou_drivers/io.h> 
 #include <drivers/pci.h>
 #include <cstdlib.h>
 #include <cstdint.h>
-#include <drivers/Lou_drivers/Processor.h>
 #include <fstream.h>
 #include <Time.h>
 #include <kernel/exec.h>
