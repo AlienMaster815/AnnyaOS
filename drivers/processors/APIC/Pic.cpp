@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 #include "../Processors.h"
 #include "apic.h"
 #include <LouACPI.h>

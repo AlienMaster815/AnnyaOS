@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 
 LOUAPI LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 	unsigned long FirmwareTableProvicerSignature,

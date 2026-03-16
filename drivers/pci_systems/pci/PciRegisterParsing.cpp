@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 
 //Up Until BAR0 everything is the same
 

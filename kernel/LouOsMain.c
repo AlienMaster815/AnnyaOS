@@ -389,6 +389,8 @@ void LouOsKrnlStart(
 
     ScanTheRestOfHarware();    
 
+    //TODO: stub Loustrsafe.h and LdmCore.h 
+
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
 

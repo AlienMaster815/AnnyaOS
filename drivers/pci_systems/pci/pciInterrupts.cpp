@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 
 LOUAPI uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV);
 

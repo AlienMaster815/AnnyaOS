@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 #include "../Processors.h"
 LOUAPI void ioapic_unmask_irq(uint8_t irq) ;
 // Structure representing the lower 32 bits of an IOAPIC redirection table entry

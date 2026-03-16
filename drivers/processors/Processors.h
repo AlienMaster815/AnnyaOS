@@ -2,7 +2,7 @@
 #define _PROCESRS_H
 
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 
 LOUAPI uint16_t GetNPROC();
 LOUAPI void UpgradeNPROC();

@@ -5,7 +5,7 @@
 // Define Data Types For ISO Filesystems
 
 #include <cstdint.h>
-#include <NtAPI.h>
+
 
 
 //8BitTypes

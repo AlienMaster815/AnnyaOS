@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 #include <Hal.h>
 
 void SetPciConfiguration(ULONG SystemIoBusNumber, ULONG SlotNumber, ULONG Function, PPCI_COMMON_CONFIG ConfigBuffer) {
@@ -78,7 +78,7 @@ void SetPciConfiguration(ULONG SystemIoBusNumber, ULONG SlotNumber, ULONG Functi
 PPCI_CONTEXT LouKeHalPciSaveContext(PPCI_DEVICE_OBJECT PDEV){
 
     PPCI_CONTEXT SavedContext = LouKeMallocType(PCI_CONTEXT, KERNEL_GENERIC_MEMORY);
-    GetPciConfiguration(PDEV->Group, PDEV->bus,PDEV->slot, PDEV->func, (PPCI_COMMON_CONFIG)LouKeCastToUnalignedPointer(&SavedContext->PciConfig));
+    LouKeHalGetPciConfiguration(PDEV, (PPCI_COMMON_CONFIG)LouKeCastToUnalignedPointer(&SavedContext->PciConfig));
     SavedContext->PDEV = PDEV;
 
     return SavedContext;

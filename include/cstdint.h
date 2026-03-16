@@ -36,7 +36,7 @@ typedef unsigned long long  UINT64, ULONGLONG, * PULONGLONG, QWORD, DWORD64, * P
 typedef long long           LONGLONG, * PLONGLONG;
 typedef void*               PVOID;
 
-typedef int32_t  INTEGER, INT32, LONG32, NTSTRSAFEDDI, INT;
+typedef int32_t  INTEGER, INT32, LONG32, LOUSTRSAFEDDI, INT;
 typedef uint32_t DWORD32, UINT32, DWORD, UINT, 
     * PDWORD32, * PUINT32, * PDWORD, * PUINT;
 

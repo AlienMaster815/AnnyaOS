@@ -139,7 +139,7 @@ typedef enum {
 
 #ifdef __cplusplus
 #include <LouDDK.h>
-#include <NtAPI.h>
+
 LOUAPI double GetProcessorSpeed();
 void PIC_remap(int offset1, int offset2);
 LOUAPI uint32_t GetProcessorBusSpeed();

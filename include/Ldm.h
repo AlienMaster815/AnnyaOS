@@ -2181,12 +2181,20 @@ typedef struct _WMI_CHANGER_PROBLEM_DEVICE_ERROR {
   ULONG ChangerProblemType;
 } WMI_CHANGER_PROBLEM_DEVICE_ERROR, *PWMI_CHANGER_PROBLEM_DEVICE_ERROR;
 
-
+#include <Ldm/LdmCore.h>
 
 #include <kernel/loustatus.h>
 
 struct _IO_DISCONNECT_INTERRUPT_PARAMETERS;
 struct _IO_CONNECT_INTERRUPT_PARAMETERS;
+
+#ifndef _ANNYA_DLL_CALL_REASONS
+#define _ANNYA_DLL_CALL_REASONS
+    #define DLL_PROCESS_ATTACH 1
+    #define DLL_PROCESS_DETACH 0
+    #define DLL_THREAD_ATTACH  2
+    #define DLL_THREAD_DETACH  3
+#endif
 
 #ifndef _USER_MODE_CODE_
 
@@ -2246,6 +2254,10 @@ LdmlibRtlInitUnicodeStringEx(
     PUNICODE_STRING DestinationString,
     PCWSTR          SourceString
 );
+
+KERNEL_EXPORT 
+void 
+LdmlibProcgrpInitialize();
 
 
 #endif
