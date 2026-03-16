@@ -40,6 +40,8 @@
 #include <Random.h>
 #include <geometry.h>
 #include <stdarg.h>
+#include <Hal.h>
+#include <math.h>
 
 
 

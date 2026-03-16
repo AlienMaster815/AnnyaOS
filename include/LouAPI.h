@@ -51,13 +51,13 @@ extern "C" {
 #include <Random.h>
 #include <geometry.h>
 #include <stdarg.h>
-
-
-
-#include "NtOsKrnlLib.h"
-
-//#include <Hal.h>
+#include <Hal.h>
 #include <math.h>
+
+
+
+
+
 #include <kernel/threads.h>
 #include <ListManagement.h>
 #include <kernel/LouQs.h>

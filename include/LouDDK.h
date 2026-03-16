@@ -51,6 +51,8 @@ extern "C" {
 #include <Random.h>
 #include <geometry.h>
 #include <stdarg.h>
+#include <Hal.h>
+#include <math.h>
 
 
 
@@ -109,7 +111,6 @@ typedef void* EventHandle;
 #include <kernel/threads.h>
 #include <DRSD.h>
 #include <kernel/LouQs.h>
-#include "NtOsKrnlLib.h"
 #include <HashTables.h>
 #include <drivers/Networking/IpV4.h>
 #include <WinAPI/Win32/Win32API.h>
