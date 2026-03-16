@@ -8,8 +8,6 @@
 #include <cstdio.h>
 #include <string.h>
 #include <cstdint.h>
-#include <drivers/display/vga.h>
-
 
 #include <stdarg.h>
 #include <cstdint.h>

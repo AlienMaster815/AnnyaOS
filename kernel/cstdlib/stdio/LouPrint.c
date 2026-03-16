@@ -1,17 +1,8 @@
 /*
-; Copyright(C) 2023 Tyler Grenier
+; Copyright(C) 2023 - 2026 Tyler Grenier
 */
 
-#ifdef __x86_64__
-    #include <limits.h>
-#endif
-
-#include <stdbool.h>
-#include <stdarg.h>
-#include <cstdio.h>
-#include <string.h>
-#include <cstdint.h>
-#include <drivers/display/vga.h>
+#include <LouAPI.h>
 
 LOUAPI void LouKeOsDosUpdateMapping();
 LOUAPI void LouKeOsDosPrintCharecter(char Character);

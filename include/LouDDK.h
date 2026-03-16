@@ -45,10 +45,6 @@ extern "C" {
 #include <drivers/FileSystem.h>
 #include <drivers/hardrive.h>
 #include <drivers/pci.h>
-
-
-#include <drivers/Lou_drivers/storage_struct.h>
-#include <drivers/display/vga.h>
 #include <drivers/Vendors/VendorsDictionary.h>
 
 
@@ -173,7 +169,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #endif
 
 #include <ListManagement.h>
-#include <drivers/Lou_drivers/storage_struct.h>
 #include <drivers/Lou_drivers/FileSystems/ISO.h>
 #include <cstdio.h>
 #include <drivers/pci.h>

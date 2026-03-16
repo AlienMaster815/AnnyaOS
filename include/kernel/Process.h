@@ -8,6 +8,7 @@ extern "C" {
 #include <cstdint.h>
 #include <cstdlib.h>
 #include <Time.h>
+#include "loustatus.h"
 
 typedef HANDLE PWINDHANDLE;
 

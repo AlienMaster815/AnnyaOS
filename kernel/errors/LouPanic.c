@@ -1,11 +1,4 @@
-#include <cstdlib.h>
-#include <cstdio.h>
-#include <kernel/errors.h>
-#include <drivers/display/vga.h>
-#include <kernel/Process.h>
-
-#ifdef ARCH_I386_VGA_H
-#define LOU_PANIC
+#include <LouAPI.h>
 
 typedef struct  PACKED _CPUContext{
     // General-Purpose Registers    
@@ -367,6 +360,4 @@ void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData){
     while(1);
 }
 
-
-#endif
 
