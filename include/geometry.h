@@ -1,8 +1,11 @@
 #ifndef _GEOMETRY_H
 #define _GEOMETRY_H
-#include <LouAPI.h>
 
+#include <cstdint.h>
+
+#ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_
+
 void circle (int cx, int cy, int radius, uint8_t r,uint8_t g,uint8_t b);
 void plot8points (int cx, int cy, int x, int y ,uint8_t r,uint8_t g,uint8_t b);
 void plot4points (int cx, int cy, int x, int y ,uint8_t r,uint8_t g,uint8_t b);
@@ -14,8 +17,7 @@ void raster_circle (int x0, int y0, int radius,uint8_t r,uint8_t g,uint8_t b);
 int64_t GetScreenBufferBaseX();
 int64_t GetScreenBufferBaseY();
 
-
-
+#endif
 #endif
 
 #endif

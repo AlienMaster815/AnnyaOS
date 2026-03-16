@@ -5,7 +5,7 @@ SRC = UsbCore.cpp \
 		UsbRequests.cpp 
 
 CC = x86_64-w64-mingw32-g++
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=UsbCoreSubsystemEntry
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=UsbCoreSubsystemEntry -fno-builtin
 
 # Tool and Flags
 DLLTOOL = x86_64-w64-mingw32-dlltool

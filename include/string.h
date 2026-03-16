@@ -70,6 +70,10 @@ string LouKeCombineStr_s(string String1, size_t Str1Size, string String2, size_t
 string LouKeCombineStr(string String1, string String2);
 string LouKeAddFileToPath(string Path, string FileName);
 string LouKeAddFileToPath_s(string Path, size_t PathLength, string FileName, size_t FileNameLength);
+int strncat_s(string Destination, size_t NumElements, string Source, size_t Count);
+string strncat(string Destination, string Source, size_t Count);
+int sprintf_s(char *buffer, size_t sizeOfBuffer, const char *format, ...);
+char* strstr(char* String1, char* String2);
 
 #define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
 

@@ -6,8 +6,11 @@
 
 #ifndef _KERNEL_MODULE_
 
-uint64_t get_cr3_value();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+uint64_t get_cr3_value();
 uint64_t get_rsp();
 void set_rsp(uint64_t new_rsp_value);
 uint64_t get_rbp();
@@ -27,6 +30,9 @@ void set_rdi(uint64_t new_rdi_value);
 
 void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
 
+#ifdef __cplusplus
+}
+#endif
 #endif //_KERNEL_MODULE_
 
 #endif    

@@ -8,7 +8,7 @@ INCLUDE = -I ../../include -I ../LouLoad
 
 CFLAGS = -m64 -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
-         -fstrict-aliasing $(INCLUDE)
+         -fstrict-aliasing $(INCLUDE) -fno-builtin
 
 NASM_COMPILE_FLAGS = elf64
 

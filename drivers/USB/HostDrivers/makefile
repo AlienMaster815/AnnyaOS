@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = x86_64-w64-mingw32-g++
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings 
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -fno-builtin
 
 LIBRARIES = -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc -L../UsbCore -lusbcore
 # Paths

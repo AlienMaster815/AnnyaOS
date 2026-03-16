@@ -35,6 +35,11 @@
 #include <drivers/hardrive.h>
 #include <drivers/pci.h>
 #include <drivers/Vendors/VendorsDictionary.h>
+#include <bootloader/grub/multiboot.h>
+#include <CPUInstructionSet/CPURegisters.h>
+#include <Random.h>
+#include <geometry.h>
+#include <stdarg.h>
 
 
 
@@ -79,7 +84,6 @@ typedef void* PTHREAD;
 
 #include <kernel/loustatus.h>
 #include <WinAPI/Win32/WinAPIStdType.h>
-#include <windows.h>
 #include "WinAPI/Win32/wmsdk/wmfsdk/wmfsdk.h"
 #include <WinAPI/Win32/winnls.h>
 #include <WinAPI/Win32/GdiCore.h>

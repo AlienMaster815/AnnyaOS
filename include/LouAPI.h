@@ -46,17 +46,14 @@ extern "C" {
 #include <drivers/hardrive.h>
 #include <drivers/pci.h>
 #include <drivers/Vendors/VendorsDictionary.h>
-
-
-
 #include <bootloader/grub/multiboot.h>
 #include <CPUInstructionSet/CPURegisters.h>
-
-
 #include <Random.h>
-
-#include <windows.h>
 #include <geometry.h>
+#include <stdarg.h>
+
+
+
 #include "NtOsKrnlLib.h"
 
 //#include <Hal.h>
