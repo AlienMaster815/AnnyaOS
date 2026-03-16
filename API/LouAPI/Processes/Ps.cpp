@@ -565,3 +565,13 @@ LouKePsUnregisterSiloMonitor(
     LouPrint("LouKePsUnregisterSiloMonitor()\n");
     while(1);
 }
+
+KERNEL_EXPORT 
+BOOLEAN 
+LouKePsIsSystemThread(
+    PETHREAD Thread
+){
+    LouPrint("LouKePsIsSystemThread(\n");
+    while(1);
+    return false;
+}

@@ -10,3 +10,12 @@ LouKeSeSinglePrivilegeCheck(
     while(1);
     return false;
 }
+
+KERNEL_EXPORT 
+void 
+LouKeSeFreePrivileges(
+    PPRIVILEGE_SET Privileges
+){
+    LouPrint("LouKeSeFreePrivileges()\n");
+    while(1);
+}

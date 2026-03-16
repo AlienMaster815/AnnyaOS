@@ -4,13 +4,12 @@
 #pragma once
 
 #include "ntifs.h"
-
 #include "wmistr.h"
-#include "wmilib.h"
-#include "irp.h"
+#include "wmilib.h" //done 
+#include "irp.h" //done
 #include "Ntintsafe.h"
+
 #include "ntoapi.h"
-#include "ntifs.h"
 #include "wmidata.h"
 #include "wdmsec.h"
 #include "procgrp.h"

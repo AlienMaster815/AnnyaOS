@@ -1946,6 +1946,107 @@ typedef enum _IO_ACCESS_TYPE{
 #include <Ldm/Louifs.h>
 
 
+typedef struct _LNODE_HEADER{
+    ULONG               BufferSize;
+    ULONG               ProviderId;
+    union {
+        ULONG64         HistoricalContext;
+        struct {
+            ULONG       Version;
+            ULONG       Linkage;
+        };
+    };
+    union {
+        ULONG           CountLost;
+        HANDLE          KernelHandle;
+        LARGE_INTEGER   TimeStamp;
+    };
+    GUID                Guid;
+    ULONG               ClientContext;
+    ULONG               Flags;
+}LNODE_HEADER, * PLNODE_HEADER;
+
+typedef struct _LMIREGGUIDW{
+    GUID                  Guid;
+    ULONG                 Flags;
+    ULONG                 InstanceCount;
+    union {
+        ULONG             InstanceNameList;
+        ULONG             BaseNameOffset;
+        ULONG_PTR         Pdo;
+        ULONG_PTR         InstanceInfo;
+    };
+}LMIREGGUIDW, * PLMIREGGUIDW;
+
+typedef struct _LMIREGINFOW{
+  ULONG       BufferSize;
+  ULONG       NextWmiRegInfo;
+  ULONG       RegistryPath;
+  ULONG       MofResourceName;
+  ULONG       GuidCount;
+  LMIREGGUIDW LmiRegGuid[];
+}LMIREGINFOW, * PLMIREGINFOW;
+
+typedef struct _LNODE_ALL_DATA{
+    LNODE_HEADER                        LnodeHeader;
+    ULONG                               DataBlockOffset;
+    ULONG                               InstanceCount;
+    ULONG                               OffsetInstanceNameOffsets;
+    union {
+        ULONG                           FixedInstanceSize;
+        OFFSETINSTANCEDATAANDLENGTH*    OffsetInstanceDataAndLength;
+    };
+}LNODE_ALL_DATA, * PLNODE_ALL_DATA;
+
+typedef struct _LNODE_EVENT_ITEM{
+    LNODE_HEADER  LnodeHeader;
+}LNODE_EVENT_ITEM, * PLNODE_EVENT_ITEM;
+
+typedef struct _LNODE_EVENT_REFERENCE {
+    LNODE_HEADER            LnodeHeader;
+    GUID                    TargetGuid;
+    ULONG                   TargetDataBlockSize;
+    union {
+        ULONG               TargetInstanceIndex;
+        WCHAR*              TargetInstanceName;
+    };
+}LNODE_EVENT_REFERENCE, * PLNODE_EVENT_REFERENCE;
+
+typedef struct _LNODE_METHOD_ITEM{
+    LNODE_HEADER          LnodeHeader;
+    ULONG                 OffsetInstanceName;
+    ULONG                 InstanceIndex;
+    ULONG                 MethodId;
+    ULONG                 DataBlockOffset;
+    ULONG                 SizeDataBlock;
+    UCHAR                 VariableData[];
+}LNODE_METHOD_ITEM, * PLNODE_METHOD_ITEM;
+
+typedef struct _LNODE_SINGLE_INSTANCE{
+    LNODE_HEADER          LnodeHeader;
+    ULONG                 OffsetInstanceName;
+    ULONG                 InstanceIndex;
+    ULONG                 DataBlockOffset;
+    ULONG                 SizeDataBlock;
+    UCHAR                 VariableData[];
+}LNODE_SINGLE_INSTANCE, * PLNODE_SINGLE_INSTANCE;
+
+typedef struct _LNODE_SINGLE_ITEM{
+    LNODE_HEADER          LnodeHeader;
+    ULONG                   OffsetInstanceName;
+    ULONG                   InstanceIndex;
+    ULONG                   ItemId;
+    ULONG                   DataBlockOffset;
+    ULONG                   SizeDataItem;
+    UCHAR                   VariableData[];
+}LNODE_SINGLE_ITEM, * PLNODE_SINGLE_ITEM;
+
+typedef struct _LNODE_TOO_SMALL {
+    LNODE_HEADER    LnodeHeader;
+    ULONG           SizeNeeded;
+}LNODE_TOO_SMALL, * PLNODE_TOO_SMALL;
+
+#include <Ldm/Louintsafe.h>
 
 #include <kernel/loustatus.h>
 

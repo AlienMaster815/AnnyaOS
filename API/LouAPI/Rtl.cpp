@@ -277,3 +277,2370 @@ LouKeRtlVolumeDeviceToDosName(
     return STATUS_SUCCESS;
 
 }
+
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInitStringEx(
+    PSTRING DestinationString, 
+    PCSZ SourceString
+){
+    LouPrint("LouKeRtlInitStringEx()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUTF8ToUnicodeN(
+    PWSTR UnicodeStringDestination, 
+    ULONG UnicodeStringMaxByteCount, 
+    PULONG UnicodeStringActualByteCount, 
+    PCCH UTF8StringSource, 
+    ULONG UTF8StringByteCount
+){
+    LouPrint("LouKeRtlUTF8ToUnicodeN()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlByteToChar(
+    BYTE bOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlByteToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlByteToInt8(
+    BYTE bOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlByteToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlDWordPtrAdd(
+    DWORD_PTR dwAugend, 
+    DWORD_PTR dwAddend, 
+    DWORD_PTR* pdwResult
+){
+    LouPrint("LouKeRtlDWordPtrAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlDWordPtrMult(
+    DWORD_PTR dwMultiplicand, 
+    DWORD_PTR dwMultiplier, 
+    DWORD_PTR* pdwResult
+){
+    LouPrint("LouKeRtlDWordPtrMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlDWordPtrSub(
+    DWORD_PTR dwMinuend, 
+    DWORD_PTR dwSubtrahend, 
+    DWORD_PTR* pdwResult
+){
+    LouPrint("LouKeRtlDWordPtrSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8Add(
+    INT8 i8Augend, 
+    INT8 i8Addend, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlInt8Add()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8Mult(
+    INT8 i8Multiplicand, 
+    INT8 i8Multiplier, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlInt8Mult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8Sub(
+    INT8 i8Minuend, 
+    INT8 i8Subtrahend, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlInt8Sub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToUChar(
+    INT8 i8Operand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlInt8ToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToUInt(
+    INT8 i8Operand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlInt8ToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToUInt8(
+    INT8 i8Operand, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlInt8ToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToUIntPtr(
+    INT8 i8Operand, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlInt8ToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToULong(
+    INT8 i8Operand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlInt8ToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToULongLong(
+    INT8 i8Operand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlInt8ToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToULongPtr(
+    INT8 i8Operand, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlInt8ToULongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlInt8ToUShort(
+    INT8 i8Operand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlInt8ToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntAdd(
+    INT iAugend, 
+    INT iAddend, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlIntAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntMult(
+    INT iMultiplicand, 
+    INT iMultiplier, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlIntMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrAdd(
+    INT_PTR iAugend, 
+    INT_PTR iAddend, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlIntPtrAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrMult(
+    INT_PTR iMultiplicand, 
+    INT_PTR iMultiplier, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlIntPtrMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrSub(
+    INT_PTR iMinuend, 
+    INT_PTR iSubtrahend, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlIntPtrSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToChar(
+    INT_PTR iOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlIntPtrToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToInt8(
+    INT_PTR iOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlIntPtrToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToLong(
+    INT_PTR iOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlIntPtrToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToLongPtr(
+    INT_PTR iOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlIntPtrToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToShort(
+    INT_PTR iOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlIntPtrToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToUChar(
+    INT_PTR iOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlIntPtrToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToUInt(
+    INT_PTR iOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlIntPtrToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToUInt8(
+    INT_PTR iOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlIntPtrToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToUIntPtr(
+    INT_PTR iOperand, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlIntPtrToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToULong(
+    INT_PTR iOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlIntPtrToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToULongLong(
+    INT_PTR iOperand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlIntPtrToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToULongPtr(
+    INT_PTR iOperand, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlIntPtrToULongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntPtrToUShort(
+    INT_PTR iOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlIntPtrToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntSub(
+    INT iMinuend, 
+    INT iSubtrahend,
+    INT* piResult
+){
+    LouPrint("LouKeRtlIntSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToChar(
+    INT iOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlIntToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToInt8(
+    INT iOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlIntToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToShort(
+    INT iOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlIntToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToUChar(
+    INT iOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlIntToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToUInt(
+    INT iOperand,
+    UINT* puResult
+){
+    LouPrint("LouKeRtlIntToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToUInt8(
+    INT iOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlIntToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToULong(
+    INT iOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlIntToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToULongLong(
+    INT iOperand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlIntToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlIntToUShort(
+    INT iOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlIntToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongAdd(
+    LONG lAugend, 
+    LONG lAddend, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlLongAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongAdd(
+    LONGLONG llAugend, 
+    LONGLONG llAddend, 
+    LONGLONG* pllResult
+){
+    LouPrint("LouKeRtlLongLongAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongMult(
+    LONGLONG llMultiplicand, 
+    LONGLONG llMultiplier,
+    LONGLONG* pllResult
+){
+    LouPrint("LouKeRtlLongLongMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongSub(
+    LONGLONG llMinuend, 
+    LONGLONG llSubtrahend, 
+    LONGLONG* pllResult
+){
+    LouPrint("LouKeRtlLongLongSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToChar(
+    LONGLONG llOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlLongLongToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToInt(
+    LONGLONG llOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlLongLongToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToInt8(
+    LONGLONG llOperand, INT8* pi8Result){
+    LouPrint("LouKeRtlLongLongToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToIntPtr(
+    LONGLONG llOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlLongLongToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToLong(
+    LONGLONG llOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlLongLongToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToLongPtr(
+    LONGLONG llOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlLongLongToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToShort(
+    LONGLONG llOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlLongLongToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToUChar(
+    LONGLONG llOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlLongLongToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToUInt(
+    LONGLONG llOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlLongLongToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToUInt8(
+    LONGLONG llOperand, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlLongLongToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToULong(
+    LONGLONG llOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlLongLongToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToULongLong(
+    LONGLONG llOperand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlLongLongToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongLongToUShort(
+    LONGLONG llOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlLongLongToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongMult(
+    LONG lMultiplicand, 
+    LONG lMultiplier, 
+    LONG *plResult
+){
+    LouPrint("LouKeRtlLongMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrAdd(
+    LONG_PTR lAugend, 
+    LONG_PTR lAddend, 
+    LONG_PTR *plResult
+){
+    LouPrint("LouKeRtlLongPtrAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrMult(
+    LONG_PTR lMultiplicand, 
+    LONG_PTR lMultiplier, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlLongPtrMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrSub(
+    LONG_PTR lMinuend, 
+    LONG_PTR lSubtrahend, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlLongPtrSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToChar(
+    LONG_PTR lOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlLongPtrToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToInt(
+    LONG_PTR lOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlLongPtrToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToInt8(
+    LONG_PTR lOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlLongPtrToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToIntPtr(
+    LONG_PTR lOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlLongPtrToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToLong(
+    LONG_PTR lOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlLongPtrToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToShort(
+    LONG_PTR lOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlLongPtrToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToUChar(
+    LONG_PTR lOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlLongPtrToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToUInt(
+    LONG_PTR lOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlLongPtrToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToUInt8(
+    LONG_PTR lOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlLongPtrToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToUIntPtr(
+    LONG_PTR lOperand, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlLongPtrToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToULong(
+    LONG_PTR lOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlLongPtrToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToULongLong(
+    LONG_PTR  lOperand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlLongPtrToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToULongPtr(
+    LONG_PTR lOperand, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlLongPtrToULongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongPtrToUShort(
+    LONG_PTR lOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlLongPtrToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongSub(
+    LONG lMinuend, 
+    LONG lSubtrahend, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlLongSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToChar(
+    LONG lOperand, 
+    CHAR *pch
+){
+    LouPrint("LouKeRtlLongToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToInt(
+    LONG lOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlLongToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToInt8(
+    LONG lOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlLongToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToIntPtr(
+    LONG lOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlLongToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToShort(
+    LONG lOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlLongToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToUChar(
+    LONG lOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlLongToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToUInt(
+    LONG lOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlLongToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToUInt8(
+    LONG  lOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlLongToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToUIntPtr(
+    LONG lOperand, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlLongToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToULong(
+    LONG lOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlLongToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToULongLong(
+    LONG lOperand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlLongToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToULongPtr(
+    LONG lOperand, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlLongToULongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlLongToUShort(
+    LONG lOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlLongToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlPtrdiffTAdd(
+    ptrdiff_t Augend,
+    ptrdiff_t Addend, 
+    ptrdiff_t* pResult
+){
+    LouPrint("LouKeRtlPtrdiffTAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlPtrdiffTMult(
+    ptrdiff_t Multiplicand, 
+    ptrdiff_t Multiplier, 
+    ptrdiff_t* pResult
+){
+    LouPrint("LouKeRtlPtrdiffTMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlPtrdiffTSub(
+    ptrdiff_t Minuend, 
+    ptrdiff_t Subtrahend, 
+    ptrdiff_t* pResult
+){
+    LouPrint("LouKeRtlPtrdiffTSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortAdd(
+    SHORT sAugend, 
+    SHORT sAddend, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlShortAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortMult(
+    SHORT sMultiplicand, 
+    SHORT sMultiplier, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlShortMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortSub(
+    SHORT sMinuend, 
+    SHORT sSubtrahend, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlShortSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToChar(
+    SHORT sOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlShortToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToDWordPtr(
+    SHORT sOperand, 
+    DWORD_PTR* pdwResult
+){
+    LouPrint("LouKeRtlShortToDWordPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToInt8(
+    SHORT sOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlShortToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToUChar(
+    SHORT sOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlShortToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToUInt(
+    SHORT sOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlShortToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToUInt8(
+    SHORT sOperand, 
+    UINT8 *pui8Result
+){
+    LouPrint("LouKeRtlShortToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToUIntPtr(
+    SHORT sOperand, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlShortToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToULong(
+    SHORT sOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlShortToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToULongLong(
+    SHORT sOperand, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlShortToULongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToULongPtr(
+    SHORT sOperand, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlShortToULongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlShortToUShort(
+    SHORT sOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlShortToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlSizeTAdd(
+    size_t Augend, 
+    size_t Addend, 
+    size_t* pResult
+){
+    LouPrint("LouKeRtlSizeTAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlSizeTMult(
+    size_t Multiplicand, 
+    size_t Multiplier, 
+    size_t* pResult
+){
+    LouPrint("LouKeRtlSizeTMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlSizeTSub(
+    size_t Minuend, 
+    size_t Subtrahend, 
+    size_t* pResult
+){
+    LouPrint("LouKeRtlSizeTSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlSSIZETAdd(
+    SSIZE_T Augend, 
+    SSIZE_T Addend, 
+    SSIZE_T* pResult
+){
+    LouPrint("LouKeRtlSSIZETAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlSSIZETMult(
+    SSIZE_T Multiplicand, 
+    SSIZE_T Multiplier, 
+    SSIZE_T* pResult
+){
+    LouPrint("LouKeRtlSSIZETMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlSSIZETSub(
+    SSIZE_T Minuend, 
+    SSIZE_T Subtrahend, 
+    SSIZE_T* pResult
+){
+    LouPrint("LouKeRtlSSIZETSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUInt8Add(
+    UINT8 u8Augend, 
+    UINT8 u8Addend, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlUInt8Add()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUInt8Mult(
+    UINT8 u8Multiplicand, 
+    UINT8 u8Multiplier, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlUInt8Mult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUInt8Sub(
+    UINT8 u8Minuend, 
+    UINT8 u8Subtrahend, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlUInt8Sub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUInt8ToChar(
+    UINT8 u8Operand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlUInt8ToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUInt8ToInt8(
+    UINT8 u8Operand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlUInt8ToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntAdd(
+    UINT uAugend, 
+    UINT uAddend, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlUIntAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntMult(
+    UINT uMultiplicand, 
+    UINT uMultiplier, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlUIntMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrAdd(
+    UINT_PTR uAugend, 
+    UINT_PTR uAddend, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlUIntPtrAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrMult(
+    UINT_PTR uMultiplicand, 
+    UINT_PTR uMultiplier, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlUIntPtrMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrSub(
+    UINT_PTR uMinuend, 
+    UINT_PTR uSubtrahend, 
+    UINT_PTR *puResult
+){
+    LouPrint("LouKeRtlUIntPtrSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToChar(
+    UINT_PTR uOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlUIntPtrToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToInt(
+    UINT_PTR uOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlUIntPtrToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToInt16(
+    UINT_PTR uOperand, 
+    INT16* pi16Result
+){
+    LouPrint("LouKeRtlUIntPtrToInt16()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToInt8(
+    UINT_PTR uOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlUIntPtrToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToIntPtr(
+    UINT_PTR uOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlUIntPtrToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToLong(
+    UINT_PTR uOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlUIntPtrToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToLongLong(
+    UINT_PTR uOperand, 
+    LONGLONG* pllResult
+){
+    LouPrint("LouKeRtlUIntPtrToLongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToLongPtr(
+    UINT_PTR uOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlUIntPtrToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToShort(
+    UINT_PTR uOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlUIntPtrToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToUChar(
+    UINT_PTR uOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlUIntPtrToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToUInt(
+    UINT_PTR uOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlUIntPtrToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToUInt16(
+    UINT_PTR uOperand, 
+    UINT16* pu16Result
+){
+    LouPrint("LouKeRtlUIntPtrToUInt16()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToUInt8(
+    UINT_PTR uOperand, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlUIntPtrToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToULong(
+    UINT_PTR uOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlUIntPtrToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntPtrToUShort(
+    UINT_PTR uOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlUIntPtrToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntSub(
+    UINT uMinuend, 
+    UINT uSubtrahend, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlUIntSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToChar(
+    UINT uOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlUIntToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToInt(
+    UINT uOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlUIntToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToInt8(
+    UINT uOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlUIntToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToIntPtr(
+    UINT uOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlUIntToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToLong(
+    UINT uOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlUIntToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToLongPtr(
+    UINT uOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlUIntToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToShort(
+    UINT uOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlUIntToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToUChar(
+    UINT uOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlUIntToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToUInt8(
+    UINT uOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlUIntToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUIntToUShort(
+    UINT uOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlUIntToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongAdd(
+    ULONG ulAugend, 
+    ULONG ulAddend, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlULongAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongAdd(
+    ULONGLONG ullAugend, 
+    ULONGLONG ullAddend, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlULongLongAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongMult(
+    ULONGLONG ullMultiplicand, 
+    ULONGLONG ullMultiplier, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlULongLongMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongSub(
+    ULONGLONG ullMinuend, 
+    ULONGLONG ullSubtrahend, 
+    ULONGLONG* pullResult
+){
+    LouPrint("LouKeRtlULongLongSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToChar(
+    ULONGLONG ullOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlULongLongToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToInt(
+    ULONGLONG ullOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlULongLongToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToInt8(
+    ULONGLONG ullOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlULongLongToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToLong(
+    ULONGLONG ullOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlULongLongToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToLongLong(
+    ULONGLONG ullOperand, 
+    LONGLONG* pllResult
+){
+    LouPrint("LouKeRtlULongLongToLongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToLongPtr(
+    ULONGLONG ullOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlULongLongToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToShort(
+    ULONGLONG ullOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlULongLongToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToUChar(
+    ULONGLONG ullOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlULongLongToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToUInt(
+    ULONGLONG ullOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlULongLongToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToUInt8(
+    ULONGLONG ullOperand, 
+    UINT8* pu8Result
+){
+    LouPrint("LouKeRtlULongLongToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToUIntPtr(
+    ULONGLONG ullOperand, 
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlULongLongToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToULong(
+    ULONGLONG ullOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlULongLongToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToULongPtr(
+    ULONGLONG ullOperand, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlULongLongToULongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongLongToUShort(
+    ULONGLONG ullOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlULongLongToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongMult(
+    ULONG ulMultiplicand, 
+    ULONG ulMultiplier, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlULongMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrAdd(
+    ULONG_PTR ulAugend, 
+    ULONG_PTR ulAddend, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlULongPtrAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrMult(
+    ULONG_PTR ulMultiplicand, 
+    ULONG_PTR ulMultiplier, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlULongPtrMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrSub(
+    ULONG_PTR ulMinuend, 
+    ULONG_PTR ulSubtrahend, 
+    ULONG_PTR* pulResult
+){
+    LouPrint("LouKeRtlULongPtrSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToChar(
+    ULONG_PTR ulOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlULongPtrToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToInt(
+    ULONG_PTR ulOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlULongPtrToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToInt8(
+    ULONG_PTR ulOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlULongPtrToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToIntPtr(
+    ULONG_PTR ulOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlULongPtrToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToLong(
+    ULONG_PTR ulOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlULongPtrToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToLongLong(
+    ULONG_PTR ulOperand, 
+    LONGLONG* pllResult
+){
+    LouPrint("LouKeRtlULongPtrToLongLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToLongPtr(
+    ULONG_PTR ulOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlULongPtrToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToShort(
+    ULONG_PTR ulOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlULongPtrToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToUInt(
+    ULONG_PTR ulOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlULongPtrToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToUInt8(
+    ULONG_PTR ulOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlULongPtrToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToUIntPtr(
+    ULONG_PTR ulOperand,
+    UINT_PTR* puResult
+){
+    LouPrint("LouKeRtlULongPtrToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToULong(
+    ULONG_PTR ulOperand, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlULongPtrToULong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongPtrToUShort(
+    ULONG_PTR ulOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlULongPtrToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongSub(
+    ULONG ulMinuend, 
+    ULONG ulSubtrahend, 
+    ULONG* pulResult
+){
+    LouPrint("LouKeRtlULongSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToChar(
+    ULONG ulOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlULongToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToInt(
+    ULONG ulOperand, 
+    INT* piResult
+){
+    LouPrint("LouKeRtlULongToInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToInt8(
+    ULONG ulOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlULongToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToIntPtr(
+    ULONG ulOperand, 
+    INT_PTR* piResult
+){
+    LouPrint("LouKeRtlULongToIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToLong(
+    ULONG ulOperand, 
+    LONG* plResult
+){
+    LouPrint("LouKeRtlULongToLong()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToLongPtr(
+    ULONG ulOperand, 
+    LONG_PTR* plResult
+){
+    LouPrint("LouKeRtlULongToLongPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToShort(
+    ULONG ulOperand, 
+    SHORT* psResult
+){
+    LouPrint("()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToUChar(
+    ULONG ulOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlULongToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToUInt(
+    ULONG ulOperand, 
+    UINT* puResult
+){
+    LouPrint("LouKeRtlULongToUInt()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToUInt8(
+    ULONG ulOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlULongToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToUIntPtr(
+    ULONG ulOperand, 
+    UINT_PTR* puiResult
+){
+    LouPrint("LouKeRtlULongToUIntPtr()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlULongToUShort(
+    ULONG ulOperand, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlULongToUShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortAdd(
+    USHORT usAugend, 
+    USHORT usAddend, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlUShortAdd()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortMult(
+    USHORT usMultiplicand, 
+    USHORT usMultiplier, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlUShortMult()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortSub(
+    USHORT usMinuend, 
+    USHORT usSubtrahend, 
+    USHORT* pusResult
+){
+    LouPrint("LouKeRtlUShortSub()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortToChar(
+    USHORT usOperand, 
+    CHAR* pch
+){
+    LouPrint("LouKeRtlUShortToChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortToInt8(
+    USHORT usOperand, 
+    INT8* pi8Result
+){
+    LouPrint("LouKeRtlUShortToInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortToShort(
+    USHORT usOperand, 
+    SHORT* psResult
+){
+    LouPrint("LouKeRtlUShortToShort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortToUChar(
+    USHORT usOperand, 
+    UCHAR* pch
+){
+    LouPrint("LouKeRtlUShortToUChar()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeRtlUShortToUInt8(
+    USHORT usOperand, 
+    UINT8* pui8Result
+){
+    LouPrint("LouKeRtlUShortToUInt8()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
