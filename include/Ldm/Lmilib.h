@@ -15,10 +15,10 @@ typedef void* PLMI_FUNCTION_CONTROL;
 typedef void* PLMI_EXECUTE_METHOD;
 
 typedef enum _SYSCTL_IRP_DISPOSITION{
-    IrpProcessed = 0,
-    IrpNotCompleted,
-    IrpNotLMI, 
-    IrpForward,
+  IrpProcessed = 0,
+  IrpNotCompleted,
+  IrpNotLMI, 
+  IrpForward,
 }SYSCTL_IRP_DISPOSITION, * PSYSCTL_IRP_DISPOSITION;
 
 typedef 
@@ -53,13 +53,13 @@ typedef struct _LMILIB_CONTEXT {
 
 
 //export as Wmi With Wmilib Kula Alias
-//LOUSTATUS LmiCompleteRequest(
-//    PDEVICE_OBJECT DeviceObject,
-//    PIRP           Irp,
-//    LOUSTATUS      Status,
-//    ULONG          BufferUsed,
-//    CCHAR          PriorityBoost
-//);
+LOUSTATUS LmiCompleteRequest(
+    PDEVICE_OBJECT  DeviceObject,
+    struct _IRP*    Irp,
+    LOUSTATUS       Status,
+    ULONG           BufferUsed,
+    CCHAR           PriorityBoost
+);
 
 //export as Wmi With Wmilib Kula Alias
 LOUSTATUS LmiFireEvent(
@@ -71,12 +71,12 @@ LOUSTATUS LmiFireEvent(
 );
 
 //export as Wmi With Wmilib Kula Alias
-//LOUSTATUS LMISystemControl(
-//    PLMILIB_CONTEXT         LMILibInfo,
-//    PDEVICE_OBJECT          DeviceObject,
-//    PIRP                    Irp,
-//    PSYSCTL_IRP_DISPOSITION IrpDisposition
-//);
+LOUSTATUS LMISystemControl(
+    PLMILIB_CONTEXT         LMILibInfo,
+    PDEVICE_OBJECT          DeviceObject,
+    struct _IRP*            Irp,
+    PSYSCTL_IRP_DISPOSITION IrpDisposition
+);
 
 
 #ifdef __cplusplus

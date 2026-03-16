@@ -164,3 +164,17 @@ LouKePoUnregisterSystemState(
     LouPrint("LouKePoUnregisterSystemState()\n");
     while(1);
 }
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouPowerInformation(
+    POWER_INFORMATION_LEVEL InformationLevel,
+    PVOID                   InputBuffer,
+    ULONG                   InputBufferLength,
+    PVOID                   OutputBuffer,
+    ULONG                   OutputBufferLength
+){
+    LouPrint("LouPowerInformation()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}

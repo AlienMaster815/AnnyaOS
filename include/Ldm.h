@@ -2048,6 +2048,141 @@ typedef struct _LNODE_TOO_SMALL {
 
 #include <Ldm/Louintsafe.h>
 
+typedef enum _PO_INTERNAL_WAKE_SOURCE_TYPE{
+    InternalWakeSourceDozeToHibernate = 0,
+    InternalWakeSourcePredictedUserPresence,
+    InternalWakeSourceTimerOverride
+}PO_INTERNAL_WAKE_SOURCE_TYPE, * PPO_INTERNAL_WAKE_SOURCE_TYPE;
+
+typedef enum _POWER_MONITOR_REQUEST_REASON{
+    MonitorRequestReasonUnknown = 0,
+    MonitorRequestReasonPowerButton,
+    MonitorRequestReasonRemoteConnection,
+    MonitorRequestReasonScMonitorpower,
+    MonitorRequestReasonUserInput,
+    MonitorRequestReasonAcDcDisplayBurst,
+    MonitorRequestReasonUserDisplayBurst,
+    MonitorRequestReasonPoSetSystemState,
+    MonitorRequestReasonSetThreadExecutionState,
+    MonitorRequestReasonFullWake,
+    MonitorRequestReasonSessionUnlock,
+    MonitorRequestReasonScreenOffRequest,
+    MonitorRequestReasonIdleTimeout,
+    MonitorRequestReasonPolicyChange,
+    MonitorRequestReasonSleepButton,
+    MonitorRequestReasonLid,
+    MonitorRequestReasonBatteryCountChange,
+    MonitorRequestReasonGracePeriod,
+    MonitorRequestReasonPnP,
+    MonitorRequestReasonDP,
+    MonitorRequestReasonSxTransition,
+    MonitorRequestReasonSystemIdle,
+    MonitorRequestReasonNearProximity,
+    MonitorRequestReasonThermalStandby,
+    MonitorRequestReasonResumePdc,
+    MonitorRequestReasonResumeS4,
+    MonitorRequestReasonTerminal,
+    MonitorRequestReasonPdcSignal,
+    MonitorRequestReasonAcDcDisplayBurstSuppressed,
+    MonitorRequestReasonSystemStateEntered,
+    MonitorRequestReasonWinrt,
+    MonitorRequestReasonUserInputKeyboard,
+    MonitorRequestReasonUserInputMouse,
+    MonitorRequestReasonUserInputTouchpad,
+    MonitorRequestReasonUserInputPen,
+    MonitorRequestReasonUserInputAccelerometer,
+    MonitorRequestReasonUserInputHid,
+    MonitorRequestReasonUserInputPoUserPresent,
+    MonitorRequestReasonUserInputSessionSwitch,
+    MonitorRequestReasonUserInputInitialization,
+    MonitorRequestReasonPdcSignalWindowsMobilePwrNotif,
+    MonitorRequestReasonPdcSignalWindowsMobileShell,
+    MonitorRequestReasonPdcSignalHeyCortana,
+    MonitorRequestReasonPdcSignalHolographicShell,
+    MonitorRequestReasonPdcSignalFingerprint,
+    MonitorRequestReasonDirectedDrips,
+    MonitorRequestReasonDim,
+    MonitorRequestReasonBuiltinPanel,
+    MonitorRequestReasonDisplayRequiredUnDim,
+    MonitorRequestReasonBatteryCountChangeSuppressed,
+    MonitorRequestReasonResumeModernStandby,
+    MonitorRequestReasonTerminalInit,
+    MonitorRequestReasonPdcSignalSensorsHumanPresence,
+    MonitorRequestReasonBatteryPreCritical,
+    MonitorRequestReasonUserInputTouch,
+    MonitorRequestReasonMax
+} POWER_MONITOR_REQUEST_REASON, * PPOWER_MONITOR_REQUEST_REASON;
+
+typedef enum _MONITOR_DISPLAY_STATE {
+    PowerMonitorOff = 0,
+    PowerMonitorOn,
+    PowerMonitorDim
+} MONITOR_DISPLAY_STATE, * PMONITOR_DISPLAY_STATE;
+
+typedef struct CM_Power_Data_s {
+    ULONG                   PD_Size;
+    DEVICE_POWER_STATE      PD_MostRecentPowerState;
+    ULONG                   PD_Capabilities;
+    ULONG                   PD_D1Latency;
+    ULONG                   PD_D2Latency;
+    ULONG                   PD_D3Latency;
+    PDEVICE_POWER_STATE     PD_PowerStateMapping;
+    SYSTEM_POWER_STATE      PD_DeepestSystemWake;
+}CM_POWER_DATA, *PCM_POWER_DATA;
+
+typedef struct _COUNTED_REASON_CONTEXT{
+    ULONG                       Version;
+    ULONG                       Flags;
+    union {
+        struct {
+            UNICODE_STRING      ResourceFileName;
+            USHORT              ResourceReasonId;
+            ULONG               StringCount;
+            PUNICODE_STRING     ReasonStrings;
+        };
+        UNICODE_STRING          SimpleString;
+    };
+}COUNTED_REASON_CONTEXT, * PCOUNTED_REASON_CONTEXT;
+
+typedef struct _PO_SPR_ACTIVE_SESSION_DATA{
+    BOOLEAN   Start;
+    GUID      ActiveSessionGuid;
+}PO_SPR_ACTIVE_SESSION_DATA, * PPO_SPR_ACTIVE_SESSION_DATA;
+
+
+
+typedef struct _POWER_PLATFORM_INFORMATION{
+    BOOLEAN     AoAc;
+}POWER_PLATFORM_INFORMATION, * PPOWER_PLATFORM_INFORMATION;
+
+
+typedef struct _POWER_SESSION_ALLOW_EXTERNAL_DMA_DEVICES{
+    BOOLEAN     IsAllowed;
+}POWER_SESSION_ALLOW_EXTERNAL_DMA_DEVICES, * PPOWER_SESSION_ALLOW_EXTERNAL_DMA_DEVICES;
+
+typedef struct _SYSTEM_POWER_STATE_CONTEXT{
+    union {
+        struct {
+          ULONG     Reserved1                   :   8;
+          ULONG     TargetSystemState           :   4;
+          ULONG     EffectiveSystemState        :   4;
+          ULONG     CurrentSystemState          :   4;
+          ULONG     IgnoreHibernationPath       :   1;
+          ULONG     PseudoTransition            :   1;
+          ULONG     KernelSoftReboot            :   1;
+          ULONG     DirectedDripsTransition     :   1;
+          ULONG     Reserved2                   :   8;
+        };
+        ULONG       ContextAsUlong;
+    };
+} SYSTEM_POWER_STATE_CONTEXT, *PSYSTEM_POWER_STATE_CONTEXT;
+
+typedef struct _WMI_CHANGER_PROBLEM_DEVICE_ERROR {
+  ULONG ChangerProblemType;
+} WMI_CHANGER_PROBLEM_DEVICE_ERROR, *PWMI_CHANGER_PROBLEM_DEVICE_ERROR;
+
+
+
 #include <kernel/loustatus.h>
 
 struct _IO_DISCONNECT_INTERRUPT_PARAMETERS;
@@ -2073,6 +2208,45 @@ LOUSTATUS
 LdmlibIoConnectInterruptEx(
 	struct _IO_CONNECT_INTERRUPT_PARAMETERS* Parameters
 );
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouPowerInformation(
+    POWER_INFORMATION_LEVEL InformationLevel,
+    PVOID                   InputBuffer,
+    ULONG                   InputBufferLength,
+    PVOID                   OutputBuffer,
+    ULONG                   OutputBufferLength
+);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+WdmlibIoCreateDeviceSecure(
+    PDRIVER_OBJECT      DriverObject,
+    ULONG               DeviceExtensionSize,
+    PUNICODE_STRING     DeviceName,
+    DEVICE_TYPE         DeviceType,
+    ULONG               DeviceCharacteristics,
+    BOOLEAN             Exclusive,
+    PCUNICODE_STRING    DefaultSDDLString,
+    LPCGUID             DeviceClassGuid,
+    PDEVICE_OBJECT*     DeviceObject
+);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LdmlibIoValidateDeviceIoControlAccess(
+   struct _IRP*     Irp,
+   ULONG            RequiredAccess
+);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LdmlibRtlInitUnicodeStringEx(
+    PUNICODE_STRING DestinationString,
+    PCWSTR          SourceString
+);
+
 
 #endif
 #ifdef __cplusplus

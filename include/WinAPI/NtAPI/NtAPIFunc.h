@@ -8,9 +8,9 @@
 #include "wmilib.h" //done 
 #include "irp.h" //done
 #include "Ntintsafe.h"
-
 #include "ntoapi.h"
 #include "wmidata.h"
+
 #include "wdmsec.h"
 #include "procgrp.h"
 #include "ntstrsafe.h"

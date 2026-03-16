@@ -4,35 +4,6 @@
 #include <NtAPI.h>
 #include <Ldm/CommonTypes.h>
 
-LOUSTATUS WdmlibIoCreateDeviceSecure(
-             PDRIVER_OBJECT   DriverObject,
-             ULONG            DeviceExtensionSize,
-   PUNICODE_STRING  DeviceName,
-             DEVICE_TYPE      DeviceType,
-             ULONG            DeviceCharacteristics,
-             BOOLEAN          Exclusive,
-             PCUNICODE_STRING DefaultSDDLString,
-   LPCGUID          DeviceClassGuid,
-                 struct _DEVICE_OBJECT*   *DeviceObject
-);
-
-LOUSTATUS WdmlibIoValidateDeviceIoControlAccess(
-   PIRP  Irp,
-   ULONG RequiredAccess
-);
-
-LOUSTATUS WdmlibRtlInitUnicodeStringEx(
-            PUNICODE_STRING DestinationString,
-   PCWSTR          SourceString
-);
-
-#ifndef _WMI_CHANGER_PROBLEM_DEVICE_ERROR
-#define _WMI_CHANGER_PROBLEM_DEVICE_ERROR
-typedef struct _WMI_CHANGER_PROBLEM_DEVICE_ERROR {
-  ULONG ChangerProblemType;
-} WMI_CHANGER_PROBLEM_DEVICE_ERROR, *PWMI_CHANGER_PROBLEM_DEVICE_ERROR;
-#endif
-
 
 
 
