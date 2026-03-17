@@ -1,5 +1,5 @@
-#ifndef _LOUDDK_H
-#define _LOUDDK_H
+#ifndef _LOUAPI_H
+#define _LOUAPI_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,6 +83,8 @@ extern "C" {
 #include <kernel/LazyAllocations.h>
 #include <kernel/Stack.h>
 #include <WinAPI/Win32/GdiCore.h>
+#include <LKDM.h>
+#include <Time.h>
 
 #ifndef KERNEL_MAIN_FILE
 EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
@@ -94,6 +96,7 @@ EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
 #define ACPIBUFFER 512
 #define ERRMAPPINGIO -1
 
+KERNEL_EXPORT
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName

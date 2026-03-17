@@ -35,8 +35,9 @@ typedef struct _TIME_T{
 #define  TIME_SEED T.MilliSeconds + (T.Second * 60) + (T.Minute * (60 * 60))
 
 #ifndef _USER_MODE_CODE_
-uint64_t GetCurrentTimeInMilliseconds();
 KERNEL_EXPORT void sleep(uint64_t Time);
+#ifndef _KERNEL_MODULE_
+uint64_t GetCurrentTimeInMilliseconds();
 void sleepEx(uint8_t Interval, uint64_t Time);
 void LouKeThreadSleep(size_t Ms);
 uint64_t GetTscFromNowMilliseconds(uint64_t ms);
@@ -50,6 +51,7 @@ void LouKeGetFutureTime(
 void LouKeGetTime(
     PTIME_T TimeStruct
 );
+#endif
 #endif
 #ifdef __cplusplus
 }

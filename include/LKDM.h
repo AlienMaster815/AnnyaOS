@@ -2,10 +2,7 @@
 #define _LKDM_H
 
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C" {
-#else
-#include <LouAPI.h>
 #endif 
 
 #define LkdmDeviceObjectToPciDevice(DevObj) (DevObj)->PDEV

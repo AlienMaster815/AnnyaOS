@@ -74,7 +74,7 @@ int strncat_s(string Destination, size_t NumElements, string Source, size_t Coun
 string strncat(string Destination, string Source, size_t Count);
 int sprintf_s(char *buffer, size_t sizeOfBuffer, const char *format, ...);
 char* strstr(char* String1, char* String2);
-
+int snprintf(char* String, size_t Size, const char* Format, ...);
 #define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
 
 #endif

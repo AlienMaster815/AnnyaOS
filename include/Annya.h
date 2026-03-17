@@ -70,6 +70,7 @@
 #include <kernel/LazyAllocations.h>
 #include <kernel/Stack.h>
 #include <WinAPI/Win32/GdiCore.h>
+#include <LKDM.h>
 
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE

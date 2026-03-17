@@ -1030,5 +1030,17 @@ typedef struct _AHCI_SRB_EXTENSION {
 
 #define STOR_MAP_NON_READ_WRITE_BUFFERS             (2)
 
+#ifndef _USER_MODE_CODE_
+
+KERNEL_EXPORT LOUSTATUS 
+LouKeWaitForUlongRegisterCondition(
+    PULONG  Mmio, 
+    size_t  MsWait,
+    ULONG   Mask, 
+    ULONG   Value
+);
+
+#endif
+
 #endif
 #endif
