@@ -1,7 +1,7 @@
 #include <LouAPI.h>
 
-/*
- * NTDLL wide-char functions
+/* 
+ * NTDLL wide-char functions : re-written by Tyler Grenier for the Lousine Kernel (2026)
  *
  * Copyright 2000 Alexandre Julliard
  * Copyright 2000 Jon Griffiths
@@ -113,6 +113,7 @@ wctoint(
 }
 
 
+KERNEL_EXPORT
 int
 _wcsicmp(
     LPCWSTR String1,
@@ -130,7 +131,7 @@ _wcsicmp(
     return 0;
 }
 
-
+KERNEL_EXPORT
 LPWSTR _wcslwr(
     LPWSTR Str
 ){
@@ -143,7 +144,7 @@ LPWSTR _wcslwr(
     return Result;
 }
 
-
+KERNEL_EXPORT
 size_t 
 wcslen(LPCWSTR str){
     const WCHAR *s = str;
@@ -151,13 +152,14 @@ wcslen(LPCWSTR str){
     return s - str;
 }
 
+KERNEL_EXPORT
 size_t wcsnlen(const WCHAR *str, size_t len){
     const WCHAR *s;
     for (s = str; len && *s; s++, len--) ;
     return s - str;
 }
 
-
+KERNEL_EXPORT
 errno_t
 _wcslwr_s(
     LPWSTR Str, 
@@ -172,7 +174,7 @@ _wcslwr_s(
     return 0;
 }
 
-
+KERNEL_EXPORT
 int
 _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
     int Result = 0;
@@ -184,7 +186,7 @@ _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n){
     return Result;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 _wcsupr(
     LPWSTR Str
@@ -198,7 +200,7 @@ _wcsupr(
     return Result;
 }
 
-
+KERNEL_EXPORT
 errno_t 
 _wcsupr_s(
     LPWSTR Str, 
@@ -215,7 +217,7 @@ _wcsupr_s(
     return 0;
 }
 
- 
+KERNEL_EXPORT
 LPWSTR
 wcscpy(
     LPWSTR Destination,
@@ -226,7 +228,7 @@ wcscpy(
     return Destination;
 }
 
-
+KERNEL_EXPORT
 errno_t wcscpy_s(
     LPWSTR Destination,
     size_t Length, 
@@ -248,7 +250,7 @@ errno_t wcscpy_s(
     return ERANGE;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcscat(
     LPWSTR Destination,
@@ -258,7 +260,7 @@ wcscat(
     return Destination;
 }
 
-
+KERNEL_EXPORT
 errno_t
 wcscat_s(
     LPWSTR Destination,
@@ -286,7 +288,7 @@ wcscat_s(
     return ERANGE;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcschr(
     LPWSTR Str,
@@ -300,7 +302,7 @@ wcschr(
     return 0x00;
 }
 
-
+KERNEL_EXPORT
 int
 wcscmp(
     LPWSTR Str1,
@@ -313,7 +315,7 @@ wcscmp(
     return *Str1 - *Str2;
 }
 
-
+KERNEL_EXPORT
 size_t 
 wcscspn(
     LPWSTR Str,
@@ -328,7 +330,7 @@ wcscspn(
     return Tmp - Str;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcsncat(
     LPWSTR Str1,
@@ -349,7 +351,7 @@ wcsncat(
     return Result;
 }
 
-
+KERNEL_EXPORT
 errno_t
 wcsncat_s(
     LPWSTR Destination, 
@@ -392,7 +394,7 @@ wcsncat_s(
     return ERANGE;
 }
 
-
+KERNEL_EXPORT
 int 
 wcsncmp(
     LPWSTR String1,
@@ -409,7 +411,7 @@ wcsncmp(
     return *String1 - *String2;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcsncpy(
     LPWSTR String1,
@@ -426,7 +428,7 @@ wcsncpy(
     return String1;
 }
 
-
+KERNEL_EXPORT
 errno_t
 wcsncpy_s(
     LPWSTR Destination,
@@ -471,6 +473,7 @@ wcsncpy_s(
 }
 
 
+KERNEL_EXPORT
 LPWSTR 
 wcsrchr(
     LPWSTR Str,
@@ -485,7 +488,7 @@ wcsrchr(
     return Result;
 }
 
-
+KERNEL_EXPORT
 LPWSTR
 wcspbrk(
     LPWSTR Str,
@@ -500,7 +503,7 @@ wcspbrk(
 }
 
 
-
+KERNEL_EXPORT
 size_t
 wcsspn(
     LPWSTR Str,
@@ -515,7 +518,7 @@ wcsspn(
     return Tmp - Str;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcsstr(
     LPWSTR Str,
@@ -537,6 +540,7 @@ wcsstr(
     return 0x00;
 }
 
+KERNEL_EXPORT
 LPWSTR 
 wcsnstr(
     LPWSTR Str,
@@ -559,7 +563,7 @@ wcsnstr(
     return 0x00;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcstok(
     LPWSTR Str,
@@ -590,7 +594,7 @@ wcstok(
     return Result;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 wcstok_s(
     LPWSTR Str,
@@ -625,7 +629,7 @@ wcstok_s(
     return Str;
 }
 
-
+KERNEL_EXPORT
 size_t 
 wcstombs(
     string Destination,
@@ -650,7 +654,7 @@ wcstombs(
     return Result;*/
 }
 
-
+KERNEL_EXPORT
 size_t 
 mbstowcs(
     LPWSTR Destination,
@@ -673,7 +677,7 @@ mbstowcs(
     return Result / sizeof(WCHAR);*/
 }
 
-
+KERNEL_EXPORT
 int 
 iswctype(
     WCHAR           Wc,
@@ -683,7 +687,7 @@ iswctype(
     return wctypes[Wc] & Type;
 }
 
-
+KERNEL_EXPORT
 int 
 iswalnum(
     WCHAR Wc
@@ -691,7 +695,7 @@ iswalnum(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT);
 }
 
-
+KERNEL_EXPORT
 int 
 iswalpha(
     WCHAR Wc
@@ -699,7 +703,7 @@ iswalpha(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER);
 }
 
-
+KERNEL_EXPORT
 int 
 iswascii(
     WCHAR Wc
@@ -707,7 +711,7 @@ iswascii(
     return Wc < 0x80;
 }
 
-
+KERNEL_EXPORT
 int 
 iswdigit(
     WCHAR Wc
@@ -715,7 +719,7 @@ iswdigit(
     return iswctype(Wc, C1_DIGIT);
 }
 
-
+KERNEL_EXPORT
 int
 iswgraph(
    WCHAR Wc
@@ -723,7 +727,7 @@ iswgraph(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT | C1_PUNCT);
 }
 
-
+KERNEL_EXPORT
 int 
 iswlower(
     WCHAR Wc
@@ -731,7 +735,7 @@ iswlower(
     return iswctype(Wc, C1_LOWER);
 }
 
-
+KERNEL_EXPORT
 int 
 iswprint(
     WCHAR Wc
@@ -739,7 +743,7 @@ iswprint(
     return iswctype(Wc, C1_ALPHA | C1_UPPER | C1_LOWER | C1_DIGIT | C1_PUNCT | C1_BLANK);
 }
 
-
+KERNEL_EXPORT
 int 
 iswspace(
     WCHAR Wc
@@ -747,7 +751,7 @@ iswspace(
     return iswctype(Wc, C1_SPACE);
 }
 
- 
+KERNEL_EXPORT
 int 
 iswxdigit(
     WCHAR Wc
@@ -755,7 +759,7 @@ iswxdigit(
     return iswctype(Wc, C1_DIGIT);
 }
 
-
+KERNEL_EXPORT
 long 
 wcstol(
     LPWSTR  Str,
@@ -820,7 +824,7 @@ wcstol(
     return Result;
 }
 
-
+KERNEL_EXPORT
 unsigned long 
 wcstoul(
     LPWSTR  Str,
@@ -878,7 +882,7 @@ wcstoul(
 }
 
 
-
+KERNEL_EXPORT
 INT64 
 wcstoi64(
     LPWSTR  Str,
@@ -943,7 +947,7 @@ wcstoi64(
     return Result;
 }
 
-
+KERNEL_EXPORT
 UINT64 
 wcstoui64(
     LPWSTR  Str,
@@ -1000,7 +1004,7 @@ wcstoui64(
     return Result;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 _ultow(
     unsigned long   V, 
@@ -1030,7 +1034,7 @@ _ultow(
     return Str;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 _ltow(
     long    V,
@@ -1073,7 +1077,7 @@ _ltow(
     return Str;
 }
 
-
+KERNEL_EXPORT
 LPWSTR
 _itow(
     int     Value,
@@ -1083,7 +1087,7 @@ _itow(
     return _ltow(Value, Str, Radix);
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 _ui64tow(
     UINT64  Value,
@@ -1112,7 +1116,7 @@ _ui64tow(
     return Str;
 }
 
-
+KERNEL_EXPORT
 LPWSTR 
 _i64tow(
     INT64   Value,
@@ -1156,7 +1160,7 @@ _i64tow(
     return Str;
 }
 
-
+KERNEL_EXPORT
 errno_t
 _ui64tow_s(
     UINT64  Value,
@@ -1193,6 +1197,7 @@ _ui64tow_s(
     return 0;
 }
 
+KERNEL_EXPORT
 errno_t
 _ui64towUppr_s(
     UINT64  Value,
@@ -1207,6 +1212,7 @@ _ui64towUppr_s(
     return _wcsupr_s(Str, Length); 
 }
 
+KERNEL_EXPORT
 errno_t
 _ultow_s(
     unsigned long   Value,
@@ -1217,7 +1223,7 @@ _ultow_s(
     return _ui64tow_s(Value, Str, Length, Radix);
 }
 
-
+KERNEL_EXPORT
 errno_t
 _i64tow_s(
     INT64   Value,
@@ -1270,7 +1276,7 @@ _i64tow_s(
     return 0;
 }
 
-
+KERNEL_EXPORT
 errno_t
 _ltow_s(
     long            Value,
@@ -1284,7 +1290,7 @@ _ltow_s(
     return _ui64tow_s((UINT64)Value, Str, Length, Radix);
 }
 
-
+KERNEL_EXPORT
 errno_t
 _itow_s(
     int             Value,
@@ -1298,7 +1304,7 @@ _itow_s(
     return _ui64tow_s((UINT64)Value, Str, Length, Radix);
 }
 
-
+KERNEL_EXPORT
 long 
 _wtol(
     LPWSTR Str
@@ -1318,7 +1324,7 @@ _wtol(
     return Negative ? -TotalRun : TotalRun;
 }
 
-
+KERNEL_EXPORT
 int 
 _wtoi(
     LPWSTR Str
@@ -1326,7 +1332,7 @@ _wtoi(
     return (int)_wtol(Str);
 }
 
- 
+KERNEL_EXPORT
 UINT64
 _wtoi64(
     LPWSTR Str
@@ -1349,7 +1355,7 @@ _wtoi64(
     return Negative ? -TotalRun : TotalRun;
 }
 
-
+KERNEL_EXPORT
 errno_t
 _wsplitpath_s(
     LPWSTR InPath, 
@@ -1459,7 +1465,7 @@ _wsplitpath_s(
         return ERANGE;
 }
 
-
+KERNEL_EXPORT
 errno_t
 _wmakepath_s(
     LPWSTR Path,
@@ -1561,6 +1567,7 @@ LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len){
     wcsncpy(New, Str, Len);
     return New;
 }
+
 
 LPWSTR LouKeCreateCombineWcsStr(
     LPWSTR Str1, 

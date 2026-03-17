@@ -62,6 +62,13 @@ extern "C" {
 #include <drivers/Processors.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
+#include <kernel/XArray.h>
+#include <Dispatching.h>
+#include <drivers/Busses.h>
+#include <kernel/Objects.h>
+#include <drivers/Ecam.h>
+#include <kwstring.h>
+#include <WinAPI/Win32/winnls.h>
 
 
 
@@ -211,7 +218,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 #include <drivers/Ecam.h>
 #include <kwstring.h>
 #include <WinAPI/Win32/winnls.h>
-#include <FileHandleing/Coff.h>
 #include <drivers/Processors.h>
 #include <Coff.h>
 #include <LouLoad.h>

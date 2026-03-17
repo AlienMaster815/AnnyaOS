@@ -1,37 +1,8 @@
-// Header: HeaderName.h
-
 #ifndef _BUSSES_H
 #define _BUSSES_H
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-// ------------------- UNIVERSAL DATA ------------------- //
-// Define shared types or macros here
-// Example:
-// typedef struct HeaderCommon { int CommonID; } HeaderCommon;
-
-#if defined(_USER_MODE_CODE_)
-
-// ------------------- USER MODE ------------------------ //
-#include <Annya.h>    // User mode system includes
-
-// --- Global user-mode data (visible across all DLLs) ---
-
-#ifdef _MODULE_NAME
-// --- Private user-mode data (specific to MODULE_NAME.DLL) ---
-#else
-// --- Shared user-mode data ---
-#endif
-
-#else // Kernel mode section
-
-// ------------------- KERNEL MODE ---------------------- //
-#ifdef __cplusplus
-#include <LouDDK.h>
-#else
-#include <LouAPI.h>
 #endif
 
 typedef struct _LOU_BUS_OBJECT{
@@ -49,19 +20,14 @@ typedef struct _LOU_BUS{
     LOUSTATUS           (*DeInitializeBus)(struct _LOU_BUS* BusData, PLOU_BUS_OBJECT BusObject);
 }LOU_BUS, * PLOU_BUS;
 
-// --- Module-specific data (MODULE_NAME.SYS) ---
+#ifndef _USER_MODE_CODE_
 KERNEL_EXPORT
 LOUSTATUS 
 LouKeCreateBusClass(
     PLOU_BUS    Bus
 );
-
-
-
-#endif // end user vs kernel
-
+#endif
 #ifdef __cplusplus
 }
 #endif
-
-#endif // HEADERNAME_H
+#endif

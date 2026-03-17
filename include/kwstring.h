@@ -1,12 +1,6 @@
 #ifndef _KWSTRING_H
 #define _KWSTRING_H
-
-#ifndef _KERNEL_MODULE_
-
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else 
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C" {
 #endif    
 
@@ -21,23 +15,28 @@ typedef int errno_t;
 
 #define _TRUNCATE ((size_t)-1)
 
+#ifndef _USER_MODE_CODE_
 
-
+KERNEL_EXPORT 
 int
 _wcsicmp(
     LPCWSTR String1,
     LPCWSTR String2
 );
 
+KERNEL_EXPORT 
 LPWSTR _wcslwr(
     LPWSTR Str
 );
 
+KERNEL_EXPORT 
 size_t 
 wcslen(LPCWSTR str);
 
+KERNEL_EXPORT 
 size_t wcsnlen(const WCHAR *str, size_t len);
 
+KERNEL_EXPORT 
 errno_t
 _wcslwr_s(
     LPWSTR Str, 
@@ -45,15 +44,18 @@ _wcslwr_s(
 );
 
 
+KERNEL_EXPORT 
 int
 _wcsnicmp(LPWSTR str1, LPWSTR str2, size_t n);
 
+KERNEL_EXPORT 
 LPWSTR 
 _wcsupr(
     LPWSTR Str
 );
 
 
+KERNEL_EXPORT 
 errno_t 
 _wcsupr_s(
     LPWSTR Str, 
@@ -61,18 +63,21 @@ _wcsupr_s(
 );
 
  
+KERNEL_EXPORT 
 LPWSTR
 wcscpy(
     LPWSTR Destination,
     LPWSTR Source
 );
 
+KERNEL_EXPORT 
 errno_t wcscpy_s(
     LPWSTR Destination,
     size_t Length, 
     LPWSTR Source
 );
 
+KERNEL_EXPORT 
 LPWSTR 
 wcscat(
     LPWSTR Destination,
@@ -80,6 +85,7 @@ wcscat(
 );
 
 
+KERNEL_EXPORT 
 errno_t
 wcscat_s(
     LPWSTR Destination,
@@ -88,12 +94,14 @@ wcscat_s(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR 
 wcschr(
     LPWSTR Str,
     WCHAR  Token
 );
 
+KERNEL_EXPORT 
 int
 wcscmp(
     LPWSTR Str1,
@@ -101,12 +109,14 @@ wcscmp(
 );
 
 
+KERNEL_EXPORT 
 size_t 
 wcscspn(
     LPWSTR Str,
     LPWSTR Reject
 );
 
+KERNEL_EXPORT 
 LPWSTR 
 wcsncat(
     LPWSTR Str1,
@@ -114,6 +124,7 @@ wcsncat(
     size_t Length
 );
 
+KERNEL_EXPORT 
 errno_t
 wcsncat_s(
     LPWSTR Destination, 
@@ -122,6 +133,7 @@ wcsncat_s(
     size_t Count
 );
 
+KERNEL_EXPORT 
 int 
 wcsncmp(
     LPWSTR String1,
@@ -130,6 +142,7 @@ wcsncmp(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR 
 wcsncpy(
     LPWSTR String1,
@@ -138,6 +151,7 @@ wcsncpy(
 );
 
 
+KERNEL_EXPORT 
 errno_t
 wcsncpy_s(
     LPWSTR Destination,
@@ -147,6 +161,7 @@ wcsncpy_s(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR 
 wcsrchr(
     LPWSTR Str,
@@ -154,18 +169,21 @@ wcsrchr(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR
 wcspbrk(
     LPWSTR Str,
     LPWSTR Accept
 );
 
+KERNEL_EXPORT 
 size_t
 wcsspn(
     LPWSTR Str,
     LPWSTR Accept
 );
 
+KERNEL_EXPORT 
 LPWSTR 
 wcsstr(
     LPWSTR Str,
@@ -173,6 +191,7 @@ wcsstr(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR 
 wcstok(
     LPWSTR Str,
@@ -180,6 +199,7 @@ wcstok(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR 
 wcstok_s(
     LPWSTR Str,
@@ -187,6 +207,7 @@ wcstok_s(
     LPWSTR* Context
 );
 
+KERNEL_EXPORT 
 size_t 
 wcstombs(
     string Destination,
@@ -195,6 +216,7 @@ wcstombs(
 );
 
 
+KERNEL_EXPORT 
 size_t 
 mbstowcs(
     LPWSTR Destination,
@@ -203,6 +225,7 @@ mbstowcs(
 );
 
 
+KERNEL_EXPORT 
 int 
 iswctype(
     WCHAR           Wc,
@@ -210,59 +233,69 @@ iswctype(
 );
 
 
+KERNEL_EXPORT 
 int 
 iswalnum(
     WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 int 
 iswalpha(
     WCHAR Wc
 );
 
+KERNEL_EXPORT 
 int 
 iswascii(
     WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 int 
 iswdigit(
     WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 int
 iswgraph(
    WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 int 
 iswlower(
     WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 int 
 iswprint(
     WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 int 
 iswspace(
     WCHAR Wc
 );
 
  
+KERNEL_EXPORT 
 int 
 iswxdigit(
     WCHAR Wc
 );
 
 
+KERNEL_EXPORT 
 long 
 wcstol(
     LPWSTR  Str,
@@ -270,6 +303,7 @@ wcstol(
     int     Base
 );
 
+KERNEL_EXPORT 
 unsigned long 
 wcstoul(
     LPWSTR  Str,
@@ -278,6 +312,7 @@ wcstoul(
 );
 
 
+KERNEL_EXPORT 
 INT64 
 wcstoi64(
     LPWSTR  Str,
@@ -286,6 +321,7 @@ wcstoi64(
 );
 
 
+KERNEL_EXPORT 
 UINT64 
 wcstoui64(
     LPWSTR  Str,
@@ -294,6 +330,7 @@ wcstoui64(
 );
 
 
+KERNEL_EXPORT 
 LPWSTR 
 _ultow(
     unsigned long   V, 
@@ -301,6 +338,7 @@ _ultow(
     int             Radix
 );
 
+KERNEL_EXPORT 
 LPWSTR 
 _ltow(
     long    V,
@@ -308,6 +346,7 @@ _ltow(
     int     Radix    
 );
 
+KERNEL_EXPORT 
 LPWSTR
 _itow(
     int     Value,
@@ -315,6 +354,7 @@ _itow(
     int     Radix
 );
 
+KERNEL_EXPORT 
 LPWSTR 
 _ui64tow(
     UINT64  Value,
@@ -322,6 +362,7 @@ _ui64tow(
     int     Radix
 );
 
+KERNEL_EXPORT 
 LPWSTR 
 _i64tow(
     INT64  Value,
@@ -330,6 +371,7 @@ _i64tow(
 );
 
 
+KERNEL_EXPORT 
 errno_t
 _ui64tow_s(
     UINT64  Value,
@@ -339,6 +381,7 @@ _ui64tow_s(
 );
 
 
+KERNEL_EXPORT 
 errno_t
 _ultow_s(
     unsigned long   Value,
@@ -348,6 +391,7 @@ _ultow_s(
 );
 
 
+KERNEL_EXPORT 
 errno_t
 _i64tow_s(
     INT64   Value,
@@ -356,6 +400,7 @@ _i64tow_s(
     int     Radix
 );
 
+KERNEL_EXPORT 
 errno_t
 _ltow_s(
     long            Value,
@@ -365,6 +410,7 @@ _ltow_s(
 );
 
 
+KERNEL_EXPORT 
 errno_t
 _itow_s(
     int             Value,
@@ -373,22 +419,26 @@ _itow_s(
     int             Radix
 );
 
+KERNEL_EXPORT 
 long 
 _wtol(
     LPWSTR Str
 );
 
+KERNEL_EXPORT 
 int 
 _wtoi(
     LPWSTR Str
 );
  
+KERNEL_EXPORT 
 UINT64
 _wtoi64(
     LPWSTR Str
 );
 
 
+KERNEL_EXPORT 
 errno_t
 _wsplitpath_s(
     LPWSTR InPath, 
@@ -402,6 +452,7 @@ _wsplitpath_s(
     size_t SzExtention
 );
 
+KERNEL_EXPORT 
 errno_t
 _wmakepath_s(
     LPWSTR Path,
@@ -412,14 +463,15 @@ _wmakepath_s(
     LPWSTR Extention
 );
 
-LPWSTR LouKeForkWcsStr(LPWSTR Str);
-LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len);
 
+
+KERNEL_EXPORT 
 LPWSTR LouKeCreateCombineWcsStr(
     LPWSTR Str1, 
     LPWSTR Str2
 );
 
+KERNEL_EXPORT 
 errno_t
 _ui64towUppr_s(
     UINT64  Value,
@@ -428,13 +480,13 @@ _ui64towUppr_s(
     int     Radix
 );
 
-#ifdef __cplusplus
-}
+#ifndef _KERNEL_MODULE_
+LPWSTR LouKeForkWcsStr(LPWSTR Str);
+LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len);
+#endif
 #endif
 
-#else
-//#include <LouDDK.h>
-
-
+#ifdef __cplusplus
+}
 #endif
 #endif

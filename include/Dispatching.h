@@ -7,13 +7,6 @@
 extern "C" {
 #endif
 
-
-
-// ------------------- UNIVERSAL DATA ------------------- //
-// Define shared types or macros here
-// Example:
-// typedef struct HeaderCommon { int CommonID; } HeaderCommon;
-
 typedef enum {
     ANY_PRIORITY = 0,
     LOW_PRIORITY,
@@ -48,13 +41,7 @@ typedef struct _LOUSINE_USER_SHARED_MESSAGE{
 
 #if defined(_USER_MODE_CODE_)
 
-// ------------------- USER MODE ------------------------ //
-#include <Annya.h>    // User mode system includes
-
-// --- Global user-mode data (visible across all DLLs) ---
-
 typedef void (*LOUSINE_MESSAGE_HANDLER)(PLOUSINE_USER_SHARED_MESSAGE);
-
 
 #ifdef _LOUDLL_
 // --- Private user-mode data (specific to MODULE_NAME.DLL) ---
@@ -105,16 +92,7 @@ LouRegisterMouseHandler(
 
 #endif
 
-#else // Kernel mode section
-
-// ------------------- KERNEL MODE ---------------------- //
-#ifdef __cplusplus
-#include <LouDDK.h>
 #else
-#include <LouAPI.h>
-#endif
-
-// --- Module-specific data (MODULE_NAME.SYS) ---
 
 KERNEL_EXPORT
 PLOUSINE_USER_SHARED_MESSAGE LouKeMouseAllocateMessageDevice();
@@ -132,8 +110,6 @@ PLOUSINE_USER_SHARED_MESSAGE LouKeCreateNewUserMessage(
 void LouKeDispatchNewUserMessage(
     PLOUSINE_USER_SHARED_MESSAGE Message
 );
-
-
 
 #endif // end user vs kernel
 

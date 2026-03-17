@@ -63,11 +63,6 @@ extern "C" {
 #include <drivers/Processors.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
-
-
-
-
-
 #include <kernel/XArray.h>
 #include <Dispatching.h>
 #include <drivers/Busses.h>
@@ -75,7 +70,10 @@ extern "C" {
 #include <drivers/Ecam.h>
 #include <kwstring.h>
 #include <WinAPI/Win32/winnls.h>
-#include <FileHandleing/Coff.h>
+
+
+
+
 #include <drivers/Processors.h>
 #include <Coff.h>
 #include <LouLoad.h>
