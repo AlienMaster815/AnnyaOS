@@ -18,8 +18,6 @@
         <!--Smp Trampoline-->
         <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
         <!--Kernel Drivers-->
-        <!--Firmware-->
-        <FILETOCPY64>cp -r LinuxFirmware ISO/ANNYA/SYSTEM64/FIRMWARE/</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
         <!--NIC Drivers-->
         <FILETOCPY64>cp drivers/Networking/PCNET32/PCNET32.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCNET32.SYS</FILETOCPY64>         <!--Amd PCNet 2 and 3-->
         <!--Audio Drivers-->
