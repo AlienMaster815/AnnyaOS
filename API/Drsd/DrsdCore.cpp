@@ -26,6 +26,7 @@
 #include "DrsdCore.h"
 
 KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
+    LouPrint("DrsdCoreSubsystemEntry()\n");
 
     LOUSTATUS Result = STATUS_SUCCESS;
 
@@ -33,5 +34,8 @@ KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
 
     //TODO:Finish this
     
+    LouPrint("DrsdCoreSubsystemEntry() STATUS_SUCCESS\n");
+    while(1);
+
     return Result;
 }

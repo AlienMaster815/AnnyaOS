@@ -31,10 +31,10 @@ UNUSED static LIST_OBJECT ConnectorList = {0};
 typedef struct _DRSD_CONNECTOR_PROP_ENUM_LIST{
     INTEGER     Type;
     LOUSTR      Name;
-    LIST_OBJECT List; //TODO Replace With XARRAY
+    XARRAY      Ida;
 }DRSD_CONNECTOR_PROP_ENUM_LIST, * PDRSD_CONNECTOR_PROP_ENUM_LIST;
-
-UNUSED DRSD_CONNECTOR_PROP_ENUM_LIST DrsdConnectorEnumList[21] = {
+ 
+static  DRSD_CONNECTOR_PROP_ENUM_LIST DrsdConnectorEnumList[] = {
     {DRSD_CONNECTOR_MODE_UNKOWN, "Unkown"},
     {DRSD_CONNECTOR_MODE_VGA, "VGA"},
     {DRSD_CONNECTOR_MODE_DVII, "DVI-I"},
@@ -59,11 +59,15 @@ UNUSED DRSD_CONNECTOR_PROP_ENUM_LIST DrsdConnectorEnumList[21] = {
 };
 
 void DrsdConnectorIdaInitialize(){
-    //TODO: Initialize Each XArray List
+    for(int i = 0; i < (ARRAY_SIZE(DrsdConnectorEnumList)); i++){
+        LouKeXaInit(&DrsdConnectorEnumList[i].Ida);
+    }
 }
 
 void DrsdConnectorIdaDestroy(){
-    //TODO: Destroy Each XArray
+    for(int i = 0; i < (ARRAY_SIZE(DrsdConnectorEnumList)); i++){
+        LouKeXaDestroy(&DrsdConnectorEnumList[i].Ida);
+    }
 }
 
 DRIVER_EXPORT
@@ -73,10 +77,6 @@ LOUSTR DrsdGetConnectorTypeName(UINT Type){
     }
 
     return DrsdConnectorEnumList[Type].Name;
-}
-
-UNUSED static void DrsdConnectorGetCommandLineMode(PDRSD_CONNECTOR Connector){
-    return;
 }
 
 static void DrsdConnectorFree(PKERNEL_REFERENCE Ref){
