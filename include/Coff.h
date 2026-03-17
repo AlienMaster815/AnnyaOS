@@ -1,23 +1,12 @@
 #ifndef _COFF_H
 #define _COFF_H
 
-#ifdef _LOUSINE_LOADER
-#include <LouLoad.h>
-#else
-#include <Ldm.h>
-
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
-extern "C"{
-#endif
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 
 #define COFF_PE_SIGNATURE "PE\0\0"
-
 
 #define CFI_HEADER_LOUCOFF_SIGNATURE                    "LPE\0"
 
@@ -777,6 +766,10 @@ typedef struct _CFI_OBJECT{
     LOUSTATUS               (*CoffCommitSection)(HANDLE, UINT64);
 }CFI_OBJECT, * PCFI_OBJECT;
 
+
+#ifndef _USER_MODE_CODE_
+#ifndef _KERNEL_MODULE_
+
 LOUSTATUS
 LouKeLoadCoffImageExA(
     string          FileNameAndPath,
@@ -811,13 +804,10 @@ void CloneCfiToImageInfo(
     InfoOut->ImageSectionNumber = 0;
     InfoOut->Properties = CfiIn->ImageProperties;
 }
-
-
 #endif
-
-#ifndef _LOUSINE_LOADER
+#endif
+#endif
 #ifdef __cplusplus
 }
-#endif
 #endif
 #endif

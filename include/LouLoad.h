@@ -5,38 +5,17 @@
 #include <stddef.h>
 #include <cstdlib.h>
 
-#ifndef __cplusplus
 
-#define UNUSED __attribute__((unused))
-#define PACKED __attribute__((packed))
-#define ROUND_UP64(value, multiple) \
-    (((value) + (multiple) - 1) / (multiple) * (multiple))
 
-#define ROUND_DOWN64(value, multiple) \
-    ((value) / (multiple) * (multiple))
-
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-
+#ifdef __cplusplus
+#define EXTERNAL extern "C"
+extern "C" {
+#else
+#define EXTERNAL extern
 #endif
 
 #define NTAPI __stdcall //copied over from wines winnt.h see /AnnyaOS/include/WinAPI/Win32/winnt.h
 
-
-typedef void* PVOID;
-typedef unsigned short USHORT;
-typedef wchar_t*       LPWSTR;
-
-typedef char        CHAR;
-typedef uint8_t     UINT8, BYTE;
-typedef uint16_t    UINT16;
-typedef uint32_t    UINT32;
-typedef uint64_t    UINT64;
-
-typedef uintptr_t   UINTPTR;
-
-typedef bool BOOL;
-typedef BYTE BOOLEAN;
 
 typedef struct _LOUSINE_KERNEL_VM_TABLE{
     UINT8       KernelPml4;
@@ -84,15 +63,16 @@ typedef struct _LOUSINE_LOADER_INFO{
     PVOID                       KernelImportTable;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
-#ifdef __cplusplus
-LOUAPI LOUSINE_LOADER_INFO KernelLoaderInfo;
-#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
-#define GetBootStackTop() KernelLoaderInfo.BootStack
-#else
-#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
-#define GetBootStackTop() KernelLoaderInfo.BootStack
+#ifndef KERNEL_MAIN_FILE
+EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
 #endif
+
+#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
+#define GetBootStackTop() KernelLoaderInfo.BootStack
 #define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif

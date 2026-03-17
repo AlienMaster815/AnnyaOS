@@ -58,6 +58,8 @@
 #include <drivers/Ecam.h>
 #include <kwstring.h>
 #include <WinAPI/Win32/winnls.h>
+#include <Coff.h>
+#include <LouLoad.h>
 
 
 

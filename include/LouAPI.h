@@ -70,13 +70,12 @@ extern "C" {
 #include <drivers/Ecam.h>
 #include <kwstring.h>
 #include <WinAPI/Win32/winnls.h>
-
-
-
-
-#include <drivers/Processors.h>
 #include <Coff.h>
 #include <LouLoad.h>
+
+
+
+
 #include <Power.h>
 #include <kernel/Events.h>
 #include <drivers/fpu.h>

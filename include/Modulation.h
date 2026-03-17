@@ -5,9 +5,11 @@
 #ifdef __cplusplus
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
 #define LOUAPI extern "C"
+#define EXTERNAL extern "C"
 #else
 #define DRIVER_IMPORT __declspec(dllimport)
 #define LOUAPI 
+#define EXTERNAL extern
 #endif
 #endif
 
