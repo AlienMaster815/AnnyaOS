@@ -1,10 +1,7 @@
 #ifndef _EVENTS_H
 #define _EVENTS_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else 
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C"{
 #endif
 
@@ -23,17 +20,13 @@ static inline void LouKeInitializeEventTimeOut(
     Event->TimeOut = TimeOut;
 }
 
-#ifndef _KERNEL_MODULE_
-
-KERNEL_EXPORT LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event);
-KERNEL_EXPORT void      LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event);
-
-#else
+#ifndef _USER_MODE_CODE_
 
 KERNEL_EXPORT LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event);
 KERNEL_EXPORT void      LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event);
 
 #endif
+
 #ifdef __cplusplus
 }
 #endif

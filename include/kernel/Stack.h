@@ -1,16 +1,12 @@
 #ifndef _STACK_H
 #define _STACK_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifndef _STACK_INTERNALS_
 typedef PVOID PLOUSINE_STACK; 
-
 #else
 
 typedef struct _LOUSINE_STACK{  

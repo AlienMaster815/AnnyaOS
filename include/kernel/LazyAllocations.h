@@ -1,10 +1,7 @@
 #ifndef _LAZY_ALLOCATIONS_H
 #define _LAZY_ALLOCATIONS_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -20,6 +17,7 @@ typedef struct _LAZY_ALLOCATION_TRACKER{
 }LAZY_ALLOCATION_TRACKER, * PLAZY_ALLOCATION_TRACKER;
 
 
+#ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_
 
 PLAZY_ALLOCATION_TRACKER 
@@ -51,13 +49,8 @@ LouKeMallocFromLazyBuffer(
     PLAZY_ALLOCATION_TRACKER    LazyBuffer,
     SIZE                        Size
 );
-
-
-#else
-
-
 #endif
-
+#endif
 #ifdef __cplusplus
 }
 #endif

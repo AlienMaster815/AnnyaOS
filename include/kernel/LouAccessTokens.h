@@ -1,16 +1,12 @@
-#ifndef _USER_MODE_CODE_
 #ifndef _ACCESS_TOKENS_H
 #define _ACCESS_TOKENS_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C"{
 #endif
 
 /*
--- The WINAPI Documentation doesent actuallu have OR
+-- The WINAPI Documentation doesent actually have OR
 -- expose an actual definition of the access token and
 -- only exposes handles but for the LouAPI this is for
 -- Lousine Kernel Implementations
@@ -21,6 +17,9 @@ typedef struct _LOUSINE_ACCESS_TOKEN{
     ACCESS_MASK             CurrentAccess;      //If Access Is A System Access Token Then This Is Set To 0
     PSECURITY_DESCRIPTOR    SecurityDescriptor; //If Access Is A System Access Token Then This Is Set To 0
 }LOUSINE_ACCESS_TOKEN, * PLOUSINE_ACCESS_TOKEN;
+
+#ifndef _USER_MODE_CODE_
+#ifndef _KERNEL_MODULE_
 
 LOUSTATUS LouKeZwCreateAccessToken(
     PLOUSINE_ACCESS_TOKEN*  OutToken, 
@@ -41,9 +40,9 @@ LOUSTATUS LouKeZwRegisterAccessTokenToObjectManager(
     PLOUSINE_ACCESS_TOKEN   AccessToken,
     int                     MaxHandles
 );
-
+#endif
+#endif
 #ifdef __cplusplus
 }
-#endif
 #endif
 #endif

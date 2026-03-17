@@ -1,23 +1,8 @@
 #ifndef GDI_CORE_H
 #define GDI_CORE_H
 
-#ifndef _USER_MODE_CODE_
-
-    #ifndef __cplusplus
-    #include <LouAPI.h>
-    #else
-    #include <LouDDK.h>
-    extern "C" {
-    #endif
-
-#else
-
-    #include <Annya.h>
-
-    #ifdef __cplusplus
-    extern "C" {
-    #endif
-
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 typedef float FLOAT, * PFLOAT;

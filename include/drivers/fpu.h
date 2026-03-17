@@ -1,10 +1,7 @@
 #ifndef _FPU_H
 #define _FPU_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C"{
 #endif
 

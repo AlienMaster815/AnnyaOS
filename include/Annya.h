@@ -60,8 +60,21 @@
 #include <WinAPI/Win32/winnls.h>
 #include <Coff.h>
 #include <LouLoad.h>
+#include <Power.h>
+#include <kernel/Events.h>
+#include <drivers/fpu.h>
+#include <kernel/LKPCB.h>
+#include <kernel/LouAccessTokens.h>
+#include <Riff.h>
+#include <Security.h>
+#include <kernel/LazyAllocations.h>
+#include <kernel/Stack.h>
+#include <WinAPI/Win32/GdiCore.h>
 
-
+//THIS is not exposed to user mode
+//#ifndef KERNEL_MAIN_FILE
+//EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
+//#endif
 
 
 #include <stdalign.h>
@@ -577,14 +590,6 @@ RtlAllocateHeap(
     size_t      HeapSize
 );
 
-#ifndef _SHUTDOWN_ACTION_DEF 
-#define _SHUTDOWN_ACTION_DEF 
-typedef enum _SHUTDOWN_ACTION{
-    ShutdownNoReboot = 0,
-    ShutdownReboot = 1,
-    ShutdownPowerOff = 2,
-}SHUTDOWN_ACTION;
-#endif
 
 __declspec(dllimport)
 void 
