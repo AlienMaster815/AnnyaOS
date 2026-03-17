@@ -264,6 +264,7 @@ annya.iso: annya
 cleanall:
 	$(MAKE) -C Registry clean
 	$(MAKE) -C KernelLibraries clean
+	$(MAKE) -C API clean
 	$(MAKE) -C drivers clean
 	$(MAKE) -C UserLibraries/KernelBase clean
 	$(MAKE) -C UserLibraries/LouDll clean
