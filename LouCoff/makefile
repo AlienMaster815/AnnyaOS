@@ -23,7 +23,7 @@ clean:
 modifications:
 	./LPEModifier -E../drivers/storage/Ahci/AHCI.SYS -PKernel
 	./LPEModifier -E../drivers/gpu/Virtualbox/VBOXGPU.SYS -PKernel
-	./LPEModifier -E../drivers/gpu/DrsdCore/DRSDCORE.SYS -PKernel
+	./LPEModifier -E../API/Drsd/DRSDCORE.SYS -PKernel
 	./LPEModifier -E../drivers/Serial/Ps2Bus/PS2IO.SYS -PKernel
 	./LPEModifier -E../drivers/Input/Mouse/Ps2Mouse/PS2MOUSE.SYS -PKernel
 	./LPEModifier -E../drivers/Input/Keyboard/Mf2Ps2/MF2KBD.SYS -PKernel

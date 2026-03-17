@@ -89,16 +89,16 @@ driver_cpp_source_files += $(shell find drivers/Subsystems -name *.cpp)
 
 driver_cpp_object_files := $(patsubst drivers/%.cpp, build/drivers/%.o, $(driver_cpp_source_files))
 
-x86_64_API_cpp_source_files := $(shell find API -name *.cpp)
-x86_64_API_cpp_object_files := $(patsubst API/%.cpp, build/x86_64/API/%.o, $(x86_64_API_cpp_source_files))
+x86_64_API_cpp_source_files := $(shell find API/LouAPI -name *.cpp)
+x86_64_API_cpp_object_files := $(patsubst API/LouAPI/%.cpp, build/x86_64/API/LouAPI/%.o, $(x86_64_API_cpp_source_files))
 
 
 
-x86_64_API_cpp_source_files := $(shell find API -name *.cpp)
-x86_64_API_cpp_object_filee := $(patsubst API/%.cpp, build/x86_64/API/%.o, $(x86_64_API_cpp_source_files))
+x86_64_API_cpp_source_files := $(shell find API/LouAPI -name *.cpp)
+x86_64_API_cpp_object_filee := $(patsubst API/LouAPI/%.cpp, build/x86_64/API/LouAPI/%.o, $(x86_64_API_cpp_source_files))
 
-x86_64_API_asm_source_files := $(shell find API -name *.asm)
-x86_64_API_asm_object_files := $(patsubst API/%.asm, build/x86_64/asm/API/%.o, $(x86_64_API_asm_source_files))
+x86_64_API_asm_source_files := $(shell find API/LouAPI -name *.asm)
+x86_64_API_asm_object_files := $(patsubst API/LouAPI/%.asm, build/x86_64/asm/API/LouAPI/%.o, $(x86_64_API_asm_source_files))
 
 kernel_s_source_files := $(shell find kernel -name *.s)
 kernel_asm_object_files := $(patsubst kernel/%.asm, build/x86_64/kernelasm/%.o, $(kernel_asm_source_files))
@@ -174,6 +174,9 @@ KernelModules:
 
 	$(MAKE) -C KernelLibraries clean
 	$(MAKE) -C KernelLibraries all
+
+	$(MAKE) -C API clean
+	$(MAKE) -C API all
 
 	$(MAKE) -C drivers clean
 	$(MAKE) -C drivers all

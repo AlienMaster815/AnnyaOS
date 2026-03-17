@@ -1,4 +1,4 @@
-INCLUDES = -I../../../include
+INCLUDES = -I../../include
 TARGET = DRSDCORE.SYS
 SRC = DrsdCore.cpp \
 		DrsdConnector.cpp \
@@ -22,7 +22,7 @@ LIB_FILE = drsdcore.lib  # Output directory is set to the parent directory
 all: $(TARGET) $(LIB_FILE)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../KernelLibraries -llouoskrnl $(INCLUDES)
 
 # Build Rule
 $(LIB_FILE): $(DEF_FILE)
