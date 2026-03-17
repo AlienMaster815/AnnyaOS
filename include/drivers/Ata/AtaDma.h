@@ -2,10 +2,7 @@
 #define _ATA_DMA_H
 
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C"{
-#else
-#include <LouAPI.h>
 #endif
 
 #define ATA_PRIMARY_DMA_COMMAND_BYTE_OFFSET             0x00

@@ -1,13 +1,10 @@
 #ifndef _ATA_DEVICE_LIBRARY_H
 #define _ATA_DEVICE_LIBRARY_H
+
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C" {
-#else
-#include <LouAPI.h>
 #endif
 
-#include "../CdRom.h"
 #include "../Notifications.h"
 #include "../ExternalDevices.h"
 #include "../usb/usb.h"
@@ -1095,12 +1092,11 @@ typedef struct _LOUSINE_ATA_PORT_INFORMATION{
 #include "AtaDma.h"
 #include "Ahci.h"
 
+#ifndef _USER_MODE_CODE_
+
 KERNEL_EXPORT
 PLOUSINE_KERNEL_DEVICE_ATA_HOST
 LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount);
-
-PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJECT PDEV);
-
 
 KERNEL_EXPORT
 void
@@ -1116,6 +1112,8 @@ KERNEL_EXPORT void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA
 
 void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq);
 
+PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJECT PDEV);
+
 LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
     void* IdBuffer
@@ -1127,7 +1125,7 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
 );
 
 LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
-
+#endif
 #ifdef __cplusplus
 }
 #endif

@@ -1,6 +1,10 @@
 #ifndef _EXTERNAL_DEVICES_H
 #define _EXTERNAL_DEVICES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "Notifications.h"
 #include "Networking/NetFrame.h"
 
@@ -8,11 +12,7 @@ typedef struct _EXTERNALLY_CONNECTED_DEVICE{
     string                                  DeviceName;
     uint32_t*                               CableSupportID;
     uint32_t*                               MutualExclusionID;
-    #ifdef __cplusplus
-    struct _DEVICE_OBJECT*                          PlatformDevice;    
-    #else
-    void*                                   PlatformDevice;
-    #endif
+    PDEVICE_OBJECT                          PlatformDevice;    
     uint32_t                                Identification;
     PLOUSINE_KERNEL_RAW_NOTIFICATION_HEAD   AllNotifierHeads;
     PLOUSINE_KERNEL_RAW_NOTIFICATION_HEAD   NotifierHead;
@@ -27,4 +27,7 @@ typedef struct _EXTERNALLY_CONNECTED_DEVICE{
     void*                                   DeviceAttributesData;
 }EXTERNALLY_CONNECTED_DEVICE, * PEXTERNALLY_CONNECTED_DEVICE;
 
+#ifdef __cplusplus
+}
+#endif
 #endif

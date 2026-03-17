@@ -1,9 +1,6 @@
 #ifndef _KERNEL_PM_H
 #define _KERNEL_PM_H
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -30,25 +27,10 @@ typedef struct _SYSTEM_POWER_OFF_STATE_DATA{
 
 typedef PVOID HANDLE; 
 
-HANDLE LouKeRegisterPowerOffMechanism(
-    SYSTEM_POWER_OFF_STATES         State,
-    INTEGER                         Priority,
-    LOUSTATUS                       (*Callback)(PSYSTEM_POWER_OFF_STATE_DATA),
-    PSYSTEM_POWER_OFF_STATE_DATA    CallData
-);
-
-void LouKeUnRegisterPowerOffMechanism(
-    HANDLE PowerOffHandle
-);
-
 typedef struct _LOUSINE_POWER_TRANSITION_OPERATIONS{
     void (*SuspendOperation)();
     void (*ResumeOperation)();
 }LOUSINE_POWER_TRANSITION_OPERATIONS, * PLOUSINE_POWER_TRANSITION_OPERATIONS;
-
-void LouKeRegisterPowerTransitionOperations(
-    PLOUSINE_POWER_TRANSITION_OPERATIONS Operations
-);
 
 typedef struct _WAKE_INTERRUPT_REQUEST{
     PVOID       PlatformDevice;
@@ -81,6 +63,22 @@ typedef struct _WAKEUP_SOURCE{
     BOOL                        AutoSleepEnabled;
 }WAKEUP_SOURCE, * PWAKEUP_SOURCE;
 
+#ifndef _USER_MODE_CODE_
+#ifndef _KERNEL_MODULE_
+void LouKeRegisterPowerTransitionOperations(
+    PLOUSINE_POWER_TRANSITION_OPERATIONS Operations
+);
+HANDLE LouKeRegisterPowerOffMechanism(
+    SYSTEM_POWER_OFF_STATES         State,
+    INTEGER                         Priority,
+    LOUSTATUS                       (*Callback)(PSYSTEM_POWER_OFF_STATE_DATA),
+    PSYSTEM_POWER_OFF_STATE_DATA    CallData
+);
+void LouKeUnRegisterPowerOffMechanism(
+    HANDLE PowerOffHandle
+);
+#endif
+#endif
 #ifdef __cplusplus
 }
 #endif

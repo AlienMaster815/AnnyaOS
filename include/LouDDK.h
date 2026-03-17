@@ -53,6 +53,15 @@ extern "C" {
 #include <stdarg.h>
 #include <Hal.h>
 #include <math.h>
+#include <kernel/threads.h>
+#include <ListManagement.h>
+#include <kernel/LouQs.h>
+#include <drivers/Scsi/Sam5.h>
+#include <drivers/Ata/ata.h>
+#include <WinTEB.h>
+#include <drivers/Processors.h>
+#include <kernel/Firmware.h>
+#include <kernel/KernelPm.h>
 
 
 
@@ -192,7 +201,6 @@ KERNEL_EXPORT uint64_t LouKeLinkerGetAddress(
 
 #include <FileHandleing/LDDDS.h>
 #include <WinTEB.h>
-#include <drivers/cpu/Apic.h>
 #include <drivers/Processors.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>

@@ -2,17 +2,14 @@
 #define _SERIAL_ATA_H
 
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C"{
-#else 
-#include <LouAPI.h>
 #endif
 
 //The Following Code Was Created from information from
 //the Serial Ata 1.0a Specification, Ahci Specification
 //and the Ahci Page Of osdev.org: https://wiki.osdev.org/AHCI
 //and is copyright By the GPL2 Licesnce By: 
-//Tyler Grenier (2025)
+//Tyler Grenier (2025 - 2026)
 
 #define FIS_TYPE_REGISTER_HOST_TO_DEVICE    0x27
 #define FIS_TYPE_REGISTER_DEVICE_TO_HOST    0x34

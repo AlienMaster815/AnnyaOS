@@ -1,22 +1,14 @@
 #ifndef _NETFRAME_H
 #define _NETFRAME_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else 
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C"{
 #endif
 
 typedef struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER{
-    PPCI_DEVICE_OBJECT     PDEV;
-    #ifdef __cplusplus
-    struct _DRIVER_OBJECT*          DriverObject;
-    struct _DEVICE_OBJECT*          PlatformDevice;
-    #else
-    void*                   DriverObject;
-    void*                   PlatformDevice;
-    #endif
+    PPCI_DEVICE_OBJECT      PDEV;
+    PDRIVER_OBJECT          DriverObject;
+    PDEVICE_OBJECT          PlatformDevice;
     uint8_t                 MacAddress[6];
     void*                   DriverPrivateData;
     LOUSTATUS               (*HardwareInitialize)(struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER* DriverData);

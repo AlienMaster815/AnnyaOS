@@ -1,9 +1,6 @@
 #ifndef _SMBIOS_H
 #define _SMBIOS_H
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C" {
 #endif
 

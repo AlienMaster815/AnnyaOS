@@ -1,10 +1,7 @@
 #ifndef _EFI_STUBS_H
 #define _EFI_STUBS_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C" {
 #endif
 

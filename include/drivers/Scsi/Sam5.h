@@ -7,34 +7,9 @@
 extern "C" {
 #endif
 
-// ------------------- UNIVERSAL DATA ------------------- //
-// Define shared types or macros here
-// Example:
-// typedef struct HeaderCommon { int CommonID; } HeaderCommon;
-
-#if defined(_USER_MODE_CODE_)
-
-// ------------------- USER MODE ------------------------ //
-#include <Annya.h>    // User mode system includes
-
-// --- Global user-mode data (visible across all DLLs) ---
-
-#ifdef _MODULE_NAME
-// --- Private user-mode data (specific to LOUDLL.DLL) ---
-#else
-// --- Shared user-mode data ---
-#endif
-
-#else // Kernel mode section
-
-// ------------------- KERNEL MODE ---------------------- //
-#ifdef __cplusplus
-#include <LouDDK.h>
-#else
-#include <LouAPI.h>
-#endif
-
 //command descriptor block
+
+#include <cstdint.h> 
 
 typedef struct __attribute__((packed)) _SCSI_CDB8{
     UINT8   OperationCode;
@@ -112,16 +87,7 @@ typedef struct __attribute__((packed)) _SCSI_CDB16{
 
 
 
-#ifdef _KERNEL_MODULE_
-// --- Module-specific data (LOUOSKRNL.EXPORT) ---
-#else
-// --- LOUOSKRNL.EXE-specific data ---
-#endif
-
-#endif // end user vs kernel
-
 #ifdef __cplusplus
 }
 #endif
-
 #endif // _SAM5_H

@@ -2,10 +2,7 @@
 #define _AHCI_H
 
 #ifdef __cplusplus
-#include <LouDDK.h>
 extern "C"{
-#else 
-#include <LouAPI.h>
 #endif
 
 #include "SerialAta.h"

@@ -1,6 +1,13 @@
 #ifndef _NOTIFICATIONS_H
 #define _NOTIFICATIONS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <cstdlib.h>
+#include <kernel/loustatus.h>
+
 typedef struct _LOUSINE_KERNEL_NOTIFICATION_BLOCK{
     struct _LOUSINE_KERNEL_NOTIFICATION_BLOCK*  NextNotification;
     LOUSTATUS                                   (*NotificationCall)(struct _LOUSINE_KERNEL_NOTIFICATION_BLOCK Block, void* Data);
@@ -21,5 +28,7 @@ typedef struct _LOUSINE_KERNEL_RAW_NOTIFICATION_HEAD{
     PLOUSINE_KERNEL_NOTIFICATION_BLOCK  Head;
 }LOUSINE_KERNEL_RAW_NOTIFICATION_HEAD, * PLOUSINE_KERNEL_RAW_NOTIFICATION_HEAD;
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,10 +1,7 @@
 #ifndef _KERNEL_EFI_H
 #define _KERNEL_EFI_H
 
-#ifndef __cplusplus
-#include <LouAPI.h>
-#else
-#include <LouDDK.h>
+#ifdef __cplusplus
 extern "C"{
 #endif
 

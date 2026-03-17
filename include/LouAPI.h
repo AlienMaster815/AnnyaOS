@@ -53,22 +53,21 @@ extern "C" {
 #include <stdarg.h>
 #include <Hal.h>
 #include <math.h>
-
-
-
-
-
 #include <kernel/threads.h>
 #include <ListManagement.h>
 #include <kernel/LouQs.h>
 #include <drivers/Scsi/Sam5.h>
-#include "drivers/Ata/ata.h"
+#include <drivers/Ata/ata.h>
 #include <drivers/Networking/IpV4.h>
 #include <WinTEB.h>
-#include <drivers/cpu/Apic.h>
 #include <drivers/Processors.h>
 #include <kernel/Firmware.h>
 #include <kernel/KernelPm.h>
+
+
+
+
+
 #include <kernel/XArray.h>
 #include <Dispatching.h>
 #include <drivers/Busses.h>
