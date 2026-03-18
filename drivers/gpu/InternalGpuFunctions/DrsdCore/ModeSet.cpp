@@ -64,7 +64,7 @@ void DrsdModeSetLockContext(PDRSD_MODE_SET_CONTEXT Context){
 
 void DrsdModeSetWarnIfLocked(PDRSD_DEVICE Device){
     MutexLockEx(&ModeSetManagerLock, true);
-    if(MutexIsLocked(&Device->ModeConfig.ConnectionMutex)){
+    if(MutexIsLocked(&Device->ModeConfig.ConnectionMutex.Mutex)){
         LouPrint("WARNING:DrsdModeSetWarnIfLocked() CONFIG IS LOCKED\n");
     }    
     MutexUnlock(&ModeSetManagerLock);

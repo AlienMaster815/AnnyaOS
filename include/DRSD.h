@@ -973,9 +973,14 @@ typedef struct _DRSD_VBLANK_CRTC{
     size_t      InModeset;
 }DRSD_VBLANK_CRTC, * PDRSD_VBLANK_CRTC;
 
+typedef struct _DRSD_MODESET_LOCK{
+    mutex_t     Mutex;
+    ListHeader  Head;
+}DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
+
 typedef struct _DRSD_MODE_CONFIGURATION{
     mutex_t                                 ConfigLock;
-    mutex_t                                 ConnectionMutex;
+    DRSD_MODESET_LOCK                       ConnectionMutex;
     spinlock_t                              ConnectorListLock;
     mutex_t                                 IdLock;
     PDRSD_MODE_CONFIGURATION_CALLBACKS      Callbacks;
@@ -1811,11 +1816,6 @@ typedef struct _DRSD_LAYERED_CLIP{
     PDRSD_CLIP  RearClip;
     DRSD_CLIP   CurrentClip; 
 }DRSD_LAYERED_CLIP, * PDRSD_LAYERED_CLIP;
-
-typedef struct _DRSD_MODESET_LOCK{
-    mutex_t     Mutex;
-    ListHeader  Head;
-}DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
 
 struct _DRSD_PRIVATE_OBJECT;
 struct _DRSD_COLOR_OP;

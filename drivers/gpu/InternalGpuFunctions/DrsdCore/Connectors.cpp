@@ -220,3 +220,26 @@ KERNEL_EXPORT
 LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid){
     return DrsdEdidConnectorUdate(Connector, DrsdEdidCreateObject(Edid));
 }
+
+KERNEL_EXPORT 
+LOUSTATUS 
+DrsdModesetLock(
+    PDRSD_MODESET_LOCK Lock, 
+    PDRSD_MODESET_ACQURE_CONTEXT Ctx
+){
+    
+    MutexLock(&Lock->Mutex);
+
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+LOUSTATUS 
+DrsdModesetUnlock(
+    PDRSD_MODESET_LOCK Lock
+){
+
+    MutexUnlock(&Lock->Mutex);
+
+    return STATUS_SUCCESS;
+}

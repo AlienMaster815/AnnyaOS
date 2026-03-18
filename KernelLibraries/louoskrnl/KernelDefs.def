@@ -200,3 +200,5 @@ EXPORTS
     LouKeHalFreePciIrqVectors
     DrsdModeConfigCleanup
     strchr
+    DrsdModesetUnlock
+    DrsdModesetLock

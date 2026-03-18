@@ -56,3 +56,4 @@ DRSD_CONNECTOR_STATUS DrsdDetectConnectorStatus(
 
 KERNEL_EXPORT int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector);
 
+

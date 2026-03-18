@@ -5,7 +5,8 @@ SRC = DrsdCore.c \
 		DrsdCache.c \
 		DrsdModes.c \
 		DrsdModeObjects.c \
-		DrsdBridgeHelper.c
+		DrsdBridgeHelper.c \
+		DrsdModesetLock.c
 
 
 CC = x86_64-w64-mingw32-gcc

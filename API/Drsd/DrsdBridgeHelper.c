@@ -37,7 +37,7 @@ DrsdBridgeHelperResetCrtc(
     UNUSED PDRSD_CRTC Crtc;
     LOUSTATUS Status;
 
-    //Status = DrsdModesetLock(&Device->ModeConfig.);
+    Status = DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, Context);
     
 
     return STATUS_SUCCESS;

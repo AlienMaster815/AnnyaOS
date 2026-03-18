@@ -122,4 +122,18 @@ static inline void VBOX_IO_WRITE(uint16_t Index, uint16_t Data){
     outw(VIRTUALBOX_VBE_DISPI_IO_DATA_PORT, Data);
 }
 
+
+KERNEL_EXPORT 
+LOUSTATUS 
+DrsdModesetLock(
+    PDRSD_MODESET_LOCK Lock, 
+    PDRSD_MODESET_ACQURE_CONTEXT Ctx
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+DrsdModesetUnlock(
+    PDRSD_MODESET_LOCK Lock
+);
+
 #endif//_VIRTUALBOX_DRIVER_H
