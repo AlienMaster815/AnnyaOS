@@ -220,8 +220,6 @@ typedef struct _DRSD_FRAMEBUFFER_CALLBACKS{
     semaphore_t CallbackLock;
 }DRSD_FRAMEBUFFER_CALLBACKS, * PDRSD_FRAMEBUFFER_CALLBACKS;
 
-
-
 typedef struct _DRSD_VMA_OFFSET_NODE{
     mutex_t                     VmLock;
     struct _DRSD_MM_NODE*       VmNode;
@@ -1177,7 +1175,7 @@ typedef struct _TTM_RESOURCE{
     TTM_LRU_ITEM                LruItem;
 }TTM_RESOURCE, * PTTM_RESOURCE;
 
-#define TTM_MEM_TYPES_COUT                  9
+#define TTM_MEM_TYPES_COUNT                 9
 #define TTM_MAX_BUFFER_OBJECT_PRIORITIES    4
 
 typedef struct _TTM_LRU_BULK_MOVE_POSITION{
@@ -1186,7 +1184,7 @@ typedef struct _TTM_LRU_BULK_MOVE_POSITION{
 }TTM_LRU_BULK_MOVE_POSITION, * PTTM_LRU_BULK_MOVE_POSITION;
 
 typedef struct _TTM_LRU_BULK_MOVE{
-    TTM_LRU_BULK_MOVE_POSITION  Position[TTM_MEM_TYPES_COUT][TTM_MAX_BUFFER_OBJECT_PRIORITIES];
+    TTM_LRU_BULK_MOVE_POSITION  Position[TTM_MEM_TYPES_COUNT][TTM_MAX_BUFFER_OBJECT_PRIORITIES];
     ListHeader                  CursorList;
 }TTM_LRU_BULK_MOVE, * PTTM_LRU_BULK_MOVE;
 
@@ -1207,26 +1205,75 @@ typedef struct _TTM_BUFFER_OBJECT{
     HANDLE                      ScatterGatherTable;
 }TTM_BUFFER_OBJECT, * PTTM_BUFFER_OBJECT;
 
+typedef struct _TTM_OPERATION_CONTEXT{
+    BOOLEAN     Interruptable;
+    BOOLEAN     NoWaitGpu;
+    BOOLEAN     GfpRetryMayFail;
+    BOOLEAN     AllowResEvict;
+    HANDLE      Reserve;
+    UINT64      BytesMoved;    
+}TTM_OPERATION_CONTEXT, * PTTM_OPERATION_CONTEXT;
+
+typedef struct _TTM_PLACE{
+    UINT        Fpfn;
+    UINT        Lpfn;
+    UINT32      Flags;
+}TTM_PLACE, * PTTM_PLACE;
+
 typedef struct _TTM_DEVICE_FUNCTIONS{
-    PTTM_TT     (*TtmTtCreate)();
+    PTTM_TT     (*TtmTtCreate)(PTTM_BUFFER_OBJECT BufferObject, UINT32 TtmPageFlags);
+    LOUSTATUS   (*TtmTtPopulate)(struct _DRSD_TTM_DEVICE* Device, struct _TTM_TT* Ttm, PTTM_OPERATION_CONTEXT Context);
+    void        (*TtmTtUnpopulate)(struct _DRSD_TTM_DEVICE* Device, struct _TTM_TT* Ttm);
+    void        (*TtmTtDestroy)(struct _DRSD_TTM_DEVICE* Device, struct _TTM_TT* Ttm);
+    BOOLEAN     (*EvictionValuable)(struct _DRSD_TTM_DEVICE* Device, PTTM_PLACE Place);
+    BOOLEAN     (*EvictFlags)(PTTM_BUFFER_OBJECT BufferObject, PTTM_PLACE Place);
+    LOUSTATUS   (*Move)(PTTM_BUFFER_OBJECT BufferObject, BOOLEAN Evict, PTTM_OPERATION_CONTEXT Context, PTTM_RESOURCE NewMem, PTTM_PLACE Hop);
+    void        (*DeleteMemNotify)(PTTM_BUFFER_OBJECT BufferObject);
+    void        (*SwapNotify)(PTTM_BUFFER_OBJECT BufferObject);
+    LOUSTATUS   (*IoMemReserve)(struct _DRSD_TTM_DEVICE* Device, PTTM_RESOURCE Mem);
+    void        (*IoMemFree)(struct _DRSD_TTM_DEVICE* Device, PTTM_RESOURCE Mem);
+    UINT64      (*IoMemPfn)(PTTM_BUFFER_OBJECT BufferObject, UINT64 PageOffset);
+    LOUSTATUS   (*AccessMemory)(PTTM_BUFFER_OBJECT BufferObject, UINT64 Offset, PVOID Buffer, int Length, int Write);
+    void        (*ReleaseNotify)(PTTM_BUFFER_OBJECT BufferObject);
 }TTM_DEVICE_FUNCTIONS, * PTTM_DEVICE_FUNCTIONS;
 
+struct _TTM_RESOURCE_MANAGER;
 
+typedef struct _TTM_RESOURCE_MANAGER_FUNCTION{
+    LOUSTATUS   (*Alloc)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_BUFFER_OBJECT BufferObject, PTTM_PLACE TtmPlace, PTTM_RESOURCE* Resource);
+    LOUSTATUS   (*Free)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource);
+    BOOLEAN     (*Intersects)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource, PTTM_PLACE Place, SIZE Size);
+    BOOLEAN     (*Compatible)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource, PTTM_PLACE Place, SIZE Size);
+    void        (*Debug)(struct _TTM_RESOURCE_MANAGER* Manager, HANDLE DrsdClfsServer);
+}TTM_RESOURCE_MANAGER_FUNCTION, * PTTM_RESOURCE_MANAGER_FUNCTION;
+
+#define TTM_MOVE_FENCES_COUNT 8
 
 typedef struct _TTM_RESOURCE_MANAGER{
-    BOOLEAN                     UseType;
-    BOOLEAN                     UseTt;
-    struct _DRSD_TTM_DEVICE*    TtmDevice;    
-    UINT64                      Size;
-
+    BOOLEAN                             UseType;
+    BOOLEAN                             UseTt;
+    struct _DRSD_TTM_DEVICE*            TtmDevice;    
+    UINT64                              Size;
+    PTTM_RESOURCE_MANAGER_FUNCTION      Functions;
+    spinlock_t                          EvictionLock;
+    HANDLE                              DmaFences[TTM_MOVE_FENCES_COUNT];
+    ListHeader                          Lcu[TTM_MAX_BUFFER_OBJECT_PRIORITIES];
+    UINT64                              Usage;
+    HANDLE                              CGroupRegion;
 }TTM_RESOURCE_MANAGER, * PTTM_RESOURCE_MANAGER;
 
 typedef struct _DRSD_TTM_DEVICE{
-    ListHeader              DeviceList;
-    UINT                    AllocaFlags;
-    PTTM_DEVICE_FUNCTIONS   Functions;
-    TTM_RESOURCE_MANAGER    SystemManager;
-
+    ListHeader                  DeviceList;
+    UINT                        AllocaFlags;
+    PTTM_DEVICE_FUNCTIONS       Functions;
+    TTM_RESOURCE_MANAGER        SystemManager;
+    PTTM_RESOURCE_MANAGER       ManagerDriver[TTM_MEM_TYPES_COUNT];
+    PDRSD_VMA_OFFSET_MANAGER    VmaManager;
+    TTM_POOL                    Pool;
+    spinlock_t                  LruLock;
+    ListHeader                  Unevictable;
+    HANDLE                      DevMapping;
+    PLOUQ_WORK_QUEUE            WorkQueue;
 }DRSD_TTM_DEVICE, * PDRSD_TTM_DEVICE;
 
 typedef struct _DRSD_VRAM_MM{
@@ -1234,6 +1281,284 @@ typedef struct _DRSD_VRAM_MM{
     SIZE                VRamSize;
     DRSD_TTM_DEVICE     TtmDevice;
 }DRSD_VRAM_MM, * PDRSD_VRAM_MM;
+
+typedef enum _DRSD_SWITCH_POWER_STATE{
+    DRSD_SWITCH_POWER_ON = 0,
+    DRSD_SWITCH_POWER_OFF,
+    DRSD_SWITCH_POWER_CHANGING,
+    DRSD_SWITCH_POWER_DYNAMIC_OFF,
+}DRSD_SWITCH_POWER_STATE, * PDRSD_SWITCH_POWER_STATE;
+
+struct _DRSD_CLIENT_DEVICE;
+
+typedef struct _DRSD_CLIENT_FUNCTIONS{
+    PDRIVER_OBJECT      Owner;
+    void                (*Free)(struct _DRSD_CLIENT_DEVICE* Client);
+    void                (*Unregister)(struct _DRSD_CLIENT_DEVICE* Client);
+    LOUSTATUS           (*Restore)(struct _DRSD_CLIENT_DEVICE* Client, BOOLEAN Force);
+    LOUSTATUS           (*Hotplug)(struct _DRSD_CLIENT_DEVICE* Client);
+    LOUSTATUS           (*Suspend)(struct _DRSD_CLIENT_DEVICE* Client);
+    LOUSTATUS           (*Resume)(struct _DRSD_CLIENT_DEVICE* Client);
+}DRSD_CLIENT_FUNCTIONS, * PDRSD_CLIENT_FUNCTIONS;
+
+typedef struct _DRSD_MODE_SET{
+    PDRSD_FRAME_BUFFER      FrameBuffer;
+    PDRSD_CRTC              Crtc;
+    PDRSD_DISPLAY_MODE      Mode;
+    UINT32                  X;
+    UINT32                  Y;
+    PDRSD_CONNECTOR*        Connectors;
+    SIZE                    ConnectorCount;
+}DRSD_MODE_SET, * PDRSD_MODE_SET;
+
+typedef struct _DRSD_CLIENT_DEVICE{
+    struct _DRSD_DEVICE*    Device;
+    LOUSTR                  Name;
+    ListHeader              List;
+    PDRSD_CLIENT_FUNCTIONS  Functions;
+    DRSD_FILE               File;
+    mutex_t                 ModesetMutex;
+    PDRSD_MODE_SET          ModeSets;
+    BOOLEAN                 Suspend;
+    BOOLEAN                 HotplugPending;
+    BOOLEAN                 HotplugFailed;
+}DRSD_CLIENT_DEVICE, * PDRSD_CLIENT_DEVICE;
+
+typedef struct _DRSD_CLIENT_BUFFER{
+    PDRSD_CLIENT_DEVICE             ClientDevice;
+    PDRSD_GXE_OBJECT                GxeObject;
+    HANDLE                          IoMap;
+    PDRSD_FRAME_BUFFER              FrameBuffer;
+}DRSD_CLIENT_BUFFER, * PDRSD_CLIENT_BUFFER;
+
+typedef struct _DRSD_CLIP_RECT{
+    USHORT  X1;
+    USHORT  Y1;
+    USHORT  X2;
+    USHORT  Y2;
+}DRSD_CLIP_RECT, * PDRSD_CLIP_RECT;
+
+struct _DRSD_FB_HELPER;
+
+typedef struct _DRSD_FB_HELPER_FUNCTIONS{
+    LOUSTATUS   (*FbDirty)(struct _DRSD_FB_HELPER* Helper, PDRSD_CLIP_RECT Clip);
+    void        (*FbRestore)(struct _DRSD_FB_HELPER* Helper);
+    void        (*FbSetSuspend)(struct _DRSD_FB_HELPER* Helper, BOOLEAN Suspend);
+}DRSD_FB_HELPER_FUNCTIONS, * PDRSD_FB_HELPER_FUNCTIONS;
+
+typedef struct _FB_BITFIELD{
+    UINT32      Offset;
+    UINT32      Length;
+    UINT32      MsbRight;
+}FB_BITFIELD, * PFB_BITFIELD;
+
+typedef struct _FB_VAR_SCREEN_INFO{
+    UINT32          XRes;
+    UINT32          YRes;
+    UINT32          XResVirt;
+    UINT32          YResVirt;
+    UINT32          XOffset;
+    UINT32          YOffset;
+    UINT32          Bpp;
+    UINT32          Grayscale;
+    FB_BITFIELD     Red;
+    FB_BITFIELD     Green;
+    FB_BITFIELD     Blue;
+    FB_BITFIELD     Transparent;
+    UINT32          NonStd;
+    UINT32          Activate;
+    UINT32          Height;
+    UINT32          Width;
+    UINT32          AccelFlags;
+    UINT32          PixelClock;
+    UINT32          LeftMargin;
+    UINT32          RightMargin;
+    UINT32          UpperMargin;
+    UINT32          LowerMargin;
+    UINT32          HSyncLength;
+    UINT32          YSyncLength;
+    UINT32          Sync;
+    UINT32          VMode;
+    UINT32          Rotate;
+    UINT32          ColorSpace;
+    UINT32          Reserved[4];       
+}FB_VAR_SCREEN_INFO, * PFB_VAR_SCREEN_INFO;
+
+typedef struct _DRSD_FB_FIX_SCREEN_INFO{
+    CHAR        Id[16];
+    UINT64      SMemStart;
+    UINT32      SMemLength;
+    UINT32      Type;
+    UINT32      TypeAux;
+    UINT32      Visual;
+    UINT16      XPanStep;
+    UINT16      YPanStep;
+    UINT16      YWrapStep;
+    UINT32      LineLength;
+    UINT64      MmioStart;
+    UINT32      MmioLength;
+    UINT32      Accel;
+    UINT16      Cap;
+    UINT16      Reserved[2];
+}DRSD_FB_FIX_SCREEN_INFO, * PDRSD_FB_FIX_SCREEN_INFO;
+
+typedef struct _DRSD_FB_CHROMA{
+    UINT32  Redx;
+    UINT32  Greenx;
+    UINT32  Bluex;
+    UINT32  Whitex;
+    UINT32  Redy;
+    UINT32  ReGreeny;
+    UINT32  Bluey;
+    UINT32  Whitey;
+}DRSD_FB_CHROMA, * PDRSD_FB_CHROMA;
+
+typedef struct _DRSD_FB_VIDEO_MODE{
+    LOUSTR  Name;
+    UINT32  Refresh;
+    UINT32  XRes;
+    UINT32  YRes;
+    UINT32  PixelClock;
+    UINT32  LeftMargin;
+    UINT32  RightMargin;
+    UINT32  UpperMargin;
+    UINT32  LowerMargin;
+    UINT32  HSyncLength;
+    UINT32  VSyncLength;
+    UINT32  Sync;
+    UINT32  VMode;
+    UINT32  Flag;
+}DRSD_FB_VIDEO_MODE, * PDRSD_FB_VIDEO_MODE;
+
+typedef struct _DRSD_FB_MONSPECS{
+    DRSD_FB_CHROMA          Chroma;
+    PDRSD_FB_VIDEO_MODE     ModeDataBase;
+    UINT8                   Manufacturer[4];
+    UINT8                   Monitor[14];
+    UINT8                   SerialNo[14];
+    UINT8                   Ascii[14];
+    UINT32                  ModeDataBaseLength;
+    UINT32                  Model;
+    UINT32                  Serial;
+    UINT32                  Year;
+    UINT32                  Week;
+    UINT32                  HfMin;
+    UINT32                  HfMax;
+    UINT32                  DclMin;
+    UINT32                  DclMax;
+    UINT16                  Input;
+    UINT16                  Dpms;
+    UINT16                  Signal;
+    UINT16                  VfMin;
+    UINT16                  VfMax;
+    UINT16                  Gamma;
+    UINT16                  Misc;
+    BOOLEAN                 Gtf;
+    UINT8                   Version;
+    UINT8                   Revision;
+    UINT8                   MaxX;                 
+    UINT8                   MaxY;                 
+}DRSD_FB_MONSPECS, * PDRSD_FB_MONSPECS;
+
+struct _DRSD_FB_INFO;
+
+typedef struct _DRSD_FB_PIXMAP{
+    UINT8*      Address;
+    UINT32      Size;
+    UINT32      BufferAlignment;
+    UINT32      ScanAlignment;
+    UINT32      AccessAlignment;
+    UINT32      Flags;
+    SIZE        BLitX;
+    SIZE        BLitY;
+    void        (*WriteIo)(struct _DRSD_FB_INFO* Info, PVOID Destination, PVOID Source, SIZE Size);
+    void        (*ReadIo)(struct _DRSD_FB_INFO* Info, PVOID Destination, PVOID Source, SIZE Size);
+}DRSD_FB_PIXMAP, * PDRSD_FB_PIXMAP;
+
+typedef struct _DRSD_FB_CMAP{
+    UINT32      Start;
+    UINT32      Length;
+    UINT16*     Red;
+    UINT16*     Green;
+    UINT16*     Blue;
+    UINT16*     Transparent;
+}DRSD_FB_CMAP, * PDRSD_FB_CMAP;
+
+typedef struct _DRSD_BACKLIGHT_DEVICE{
+    UINT64 Todo; //TODO
+}DRSD_BACKLIGHT_DEVICE, * PDRSD_BACKLIGHT_DEVICE;
+
+#define FB_BACKLIGHT_LEVELS 128
+
+typedef struct _DRSD_LCD_DEVICE{
+    UINT64 Todo; //TODO
+}DRSD_LCD_DEVICE, * PDRSD_LCD_DEVICE;
+
+typedef struct _DRSD_FB_DEFERRED_IO_PAGE_REFERENCES{
+    UINT64 Todo; //TODO
+}DRSD_FB_DEFERRED_IO_PAGE_REFERENCES, * PDRSD_FB_DEFERRED_IO_PAGE_REFERENCES;
+
+typedef struct _DRSD_FB_DEFERRED_IO{
+    UINT64 Todo; //TODO
+}DRSD_FB_DEFERRED_IO, * PDRSD_FB_DEFERRED_IO;
+
+typedef struct _DRSD_FB_TITLE_BLITTING{
+    UINT64 Todo; //TODO
+}DRSD_FB_TITLE_BLITTING, * PDRSD_FB_TITLE_BLITTING;
+
+typedef struct _DRSD_FBCON_PAR{
+    UINT64 Todo; //TODO
+}DRSD_FBCON_PAR, * PDRSD_FBCON_PAR; 
+
+typedef struct _DRSD_FB_INFO{
+    KERNEL_REFERENCE                        Count;
+    int                                     Node;
+    int                                     Flags;
+    int                                     FbConRototateHint;
+    mutex_t                                 Lock;
+    mutex_t                                 MmLock;
+    FB_VAR_SCREEN_INFO                      Var;
+    DRSD_FB_FIX_SCREEN_INFO                 Fix;
+    DRSD_FB_MONSPECS                        MonoSpecs;
+    DRSD_FB_PIXMAP                          PixMap;
+    DRSD_FB_PIXMAP                          Sprite;
+    DRSD_FB_CMAP                            Cmap;
+    ListHeader                              ModeList;
+    DRSD_FB_VIDEO_MODE                      VideoMode;
+    int                                     Blank;
+    PDRSD_BACKLIGHT_DEVICE                  BackLightDevice;
+    mutex_t                                 BlCurveMutex;
+    UINT8                                   BlCurve[FB_BACKLIGHT_LEVELS];
+    PDRSD_LCD_DEVICE                        LcdDevice;
+    PLOUQ_DELAYED_WORK                      DeferredWork;
+    UINT64                                  PageReferenceCount;
+    PDRSD_FB_DEFERRED_IO_PAGE_REFERENCES    PageReferences;
+    PDRSD_FB_DEFERRED_IO                    FbDefIo;
+    PLATFORM_DEVICE                         ParrentDevice;
+    PLATFORM_DEVICE                         Device;
+    PDRSD_FB_TITLE_BLITTING                 TileOps;
+    union {
+        LOUSTR                              ScreenBase;
+        LOUSTR                              ScreenBuffer;
+    };
+    UINT64                                  ScreenSize;
+    PVOID                                   PseudoPallette;
+    UINT32                                  State;
+    PDRSD_FBCON_PAR                         FbConPar;
+    PVOID                                   Par;
+    BOOLEAN                                 VtSkipSwitch;
+    BOOLEAN                                 SkipPanic;
+}DRSD_FB_INFO, * PDRSD_FB_INFO;
+
+typedef struct _DRSD_FB_HELPER{
+    DRSD_CLIENT_DEVICE              ClientDevice;
+    PDRSD_CLIENT_BUFFER             Buffer;
+    DRSD_FRAME_BUFFER               FrameBuffer;
+    struct _DRSD_DEVICE*            Device;
+    PDRSD_FB_HELPER_FUNCTIONS       Functions;
+    PDRSD_FB_INFO                   Info;
+    //TODO 
+}DRSD_FB_HELPER, * PDRSD_FB_HELPER;
 
 typedef struct _DRSD_DEVICE{
     ListHeader                      Peers;
@@ -1291,8 +1616,9 @@ typedef struct _DRSD_DEVICE{
     mutex_t                         ObjectNameLock;
     XARRAY                          ObjectNameIdr;
     PDRSD_VMA_OFFSET_MANAGER        VmaOffsetManager;
-
-
+    PDRSD_VRAM_MM                   VramManager;
+    DRSD_SWITCH_POWER_STATE         SwitchPowerState;
+    HANDLE                          DrsdClfsServer;
 }DRSD_DEVICE, * PDRSD_DEVICE;
 
 #define STANDARD_INTEL_CHIPSET_EDID_SIZE 128
