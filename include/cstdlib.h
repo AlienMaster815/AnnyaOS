@@ -15,6 +15,10 @@ extern "C" {
 #define ERANGE 34
 
 
+#define LOU_KE_ALLOC_PTR_ERROR(x) ((UINT64)x < 0xFFFF800000000000ULL ? true : false)
+#define LOUPTR_ERROR(x) ((LOUSTATUS)(UINTPTR)x)
+
+
 #define IS_CPP __cplusplus
 #define IS_X86 __i386__
 #define IS_X86_64 __x86_64__

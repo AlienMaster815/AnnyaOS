@@ -793,6 +793,10 @@ typedef struct _DRSD_CONNECTOR{
     size_t                              ProbeModeCount;
     struct _DRSD_ENCODER*               Encoder;
     struct _DRSD_CRTC*                  Crtc;
+
+    //TODO: make new structure and then move to the new structure
+
+    PDRSD_CONNECTOR_STATE               State;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
 
 typedef struct _DRSD_EDID_IDENTIFICATION{

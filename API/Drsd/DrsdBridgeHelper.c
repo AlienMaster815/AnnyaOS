@@ -38,7 +38,28 @@ DrsdBridgeHelperResetCrtc(
     LOUSTATUS Status;
 
     Status = DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, Context);
-    
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
 
-    return STATUS_SUCCESS;
+    Connector = DrsdAtomicGetConnectorForEncoder(Encoder, Context);
+    if(LOU_KE_ALLOC_PTR_ERROR(Connector)){
+        Status = LOUPTR_ERROR(Connector);
+        goto _HELPER_IS_DONE;
+    }
+
+    if(!Connector->State){
+        Status = STATUS_INVALID_PARAMETER;
+        goto _HELPER_IS_DONE;
+    }
+
+    Crtc = Connector->State->Crtc;
+    Status = DrsdAtomicHelperResetCrtc(Crtc, Context);
+    if(Status != STATUS_SUCCESS){
+        goto _HELPER_IS_DONE;
+    }
+    
+    _HELPER_IS_DONE:
+    DrsdModesetUnlock(&Device->ModeConfig.ConnectionMutex);
+    return Status;
 }

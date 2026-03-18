@@ -8,7 +8,7 @@
 #include "DrsdCache.h"
 #include "DrsdModes.h"
 #include "DrsdModesetLock.h"
-
-
+#include "DrsdAtomic.h"
+#include "DrsdAtomicHelper.h"
 
 #endif
