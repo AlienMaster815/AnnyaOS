@@ -4,7 +4,8 @@ SRC = DrsdCore.cpp \
 		DrsdConnector.cpp \
 		DrsdCache.cpp \
 		DrsdModes.cpp \
-		DrsdModeObjects.cpp 
+		DrsdModeObjects.cpp \
+		DrsdBridgeHelper.cpp
 
 
 CC = x86_64-w64-mingw32-g++

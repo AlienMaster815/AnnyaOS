@@ -1111,6 +1111,311 @@ typedef struct _DRSD_LAYERED_CLIP{
     DRSD_CLIP   CurrentClip; 
 }DRSD_LAYERED_CLIP, * PDRSD_LAYERED_CLIP;
 
+typedef struct _DRSD_MODESET_LOCK{
+    mutex_t     Mutex;
+    ListHeader  Head;
+}DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
+
+struct _DRSD_PRIVATE_OBJECT;
+struct _DRSD_COLOR_OP;
+struct _DRSD_ATOMIC_STATE;
+
+typedef enum _DRSD_COLOR_OP_CURVE_1D_TYPE{
+    DRSD_COLOR_OP_1D_CURVE_SRGB_EOTF = 0,
+    DRSD_COLOR_OP_1D_CURVE_SRGB_INV_EOTF,
+    DRSD_COLOR_OP_1D_CURVE_PQ_125_EOTF,
+    DRSD_COLOR_OP_1D_CURVE_PQ_125_INV_EOTF,
+    DRSD_COLOR_OP_1D_CURVE_BT2020_INV_OETF,
+    DRSD_COLOR_OP_1D_CURVE_BT2020_OETF,
+    DRSD_COLOR_OP_1D_CURVE_GAMMA22,
+    DRSD_COLOR_OP_1D_CURVE_GAMMA22_INV,
+    DRSD_COLOR_OP_1D_CURVE_MAX,
+}DRSD_COLOR_OP_CURVE_1D_TYPE, * PDRSD_COLOR_OP_CURVE_1D_TYPE;
+
+typedef struct _DRSD_PROPRIETARY_BLOB{
+    PDRSD_MODE_OBJECT       ModeObject;
+    PDRSD_DEVICE            DrsdDevice;
+    ListHeader              GlobalHead;
+    ListHeader              FileHead;
+    SIZE                    Length;
+    PVOID                   Data;
+}DRSD_PROPRIETARY_BLOB, * PDRSD_PROPRIETARY_BLOB;
+
+typedef struct _DRSD_COLOR_OP_STATE{
+    struct _DRSD_COLOR_OP*          ColorOp;
+    BOOLEAN                         Bypass;
+    DRSD_COLOR_OP_CURVE_1D_TYPE     Curve1DType;
+    UINT64                          Multiplier;
+    PDRSD_PROPRIETARY_BLOB          Data;
+    struct _DRSD_ATOMIC_STATE*      State;
+}DRSD_COLOR_OP_STATE, * PDRSD_COLOR_OP_STATE;
+
+typedef enum _DRSD_COLOR_OP_TYPE{
+    DRSD_COLOR_OP_1D_CURVE = 0,
+    DRSD_COLOR_OP_1D_LUT,
+    DRSD_COLOR_OP_CTM_3X4,
+    DRSD_COLOR_OP_MULTIPLIER,
+    DRSD_COLOR_OP_3D_LUT,
+}DRSD_COLOR_OP_TYPE, * PDRSD_COLOR_OP_TYPE;
+
+struct _DRSD_COLOR_OP;
+
+typedef enum _DRSD_COLOR_OP_LUT1D_INTERPOLATION_TYPE{
+    DRSD_COLOR_OP_LUT1D_INTERPOLATION_LINEAR = 0,
+}DRSD_COLOR_OP_LUT1D_INTERPOLATION_TYPE, * PDRSD_COLOR_OP_LUT1D_INTERPOLATION_TYPE;
+
+typedef enum _DRSD_COLOR_OP_LUT3D_INTERPOLATION_TYPE{
+    DRSD_COLOR_OP_LUT3d_INTERPOLATION_TETRAHEDRAL = 0,
+}DRSD_COLOR_OP_LUT3D_INTERPOLATION_TYPE, * PDRSD_COLOR_OP_LUT3D_INTERPOLATION_TYPE;
+
+typedef struct _DRSD_COLOR_OP{
+    PDRSD_DEVICE                                Device;
+    ListHeader                                  Head;
+    UINT                                        Index;
+    DRSD_MODE_OBJECT                            Base;
+    PDRSD_PLANE                                 Plane;
+    PDRSD_COLOR_OP_STATE                        State;
+    PDRSD_OBJECT_PROPERTIES                     Properties;
+    DRSD_COLOR_OP_TYPE                          Type;
+    struct _DRSD_COLOR_OP*                      Next;
+    PDRSD_PROPERTY                              TypeProperty;
+    PDRSD_PROPERTY                              BypassProperty;
+    UINT32                                      Size;
+    DRSD_COLOR_OP_LUT1D_INTERPOLATION_TYPE      Lut1dInterpolation;
+    DRSD_COLOR_OP_LUT3D_INTERPOLATION_TYPE      Lut3dInterpolation;
+    PDRSD_PROPERTY                              Lut1dInterpolationProperty;
+    PDRSD_PROPERTY                              Curve1dTypeProperty;
+    PDRSD_PROPERTY                              MultiplierProperty;
+    PDRSD_PROPERTY                              SizeProperty;
+    PDRSD_PROPERTY                              Lut3dInterpolationProperty;
+    PDRSD_PROPERTY                              DataProperty;
+    PDRSD_PROPERTY                              NextProperty;
+}DRSD_COLOR_OP, * PDRSD_COLOR_OP;
+
+typedef struct _DRSD_COLOR_OPS{
+    PDRSD_COLOR_OP          Op;
+    PDRSD_COLOR_OP_STATE    State; 
+    PDRSD_COLOR_OP_STATE    OldState; 
+    PDRSD_COLOR_OP_STATE    NewState; 
+}DRSD_COLOR_OPS, * PDRSD_COLOR_OPS;
+
+typedef struct _DRSD_PLANES_STATE{
+    PDRSD_PLANE             Plane;
+    PDRSD_PLANE_STATE       StateToDestroy;
+    PDRSD_PLANE_STATE       OldState;
+    PDRSD_PLANE_STATE       NewState;
+}DRSD_PLANES_STATE, * PDRSD_PLANES_STATE;
+
+typedef struct _DRSD_CRTCS_STATE{
+    PDRSD_CRTC          Crtc;
+    PDRSD_CRTC_STATE    StateToDestroy;
+    PDRSD_CRTC_STATE    OldState;
+    PDRSD_CRTC_STATE    NewState;
+    PDRSD_CRTC_COMMIT   Commit;
+    INT32*              OutFence;
+    UINT64              LastVBlankCount;
+}DRSD_CRTCS_STATE, * PDRSD_CRTCS_STATE;
+
+typedef struct _DRSD_CONNECTORS_STATE{
+    PDRSD_CONNECTOR         Connector;
+    PDRSD_CONNECTOR_STATE   StateToDestroy;         
+    PDRSD_CONNECTOR_STATE   OldState;         
+    PDRSD_CONNECTOR_STATE   NewState;
+    INT32*                  OutFence;         
+}DRSD_CONNECTORS_STATE, * PDRSD_CONNECTORS_STATE;
+
+struct _DRSD_PRIVATE_OBJECTS_STATE;
+
+typedef struct _DRSD_MODESET_ACQURE_CONTEXT{
+    PVOID               AcquireContext;
+    PDRSD_MODESET_LOCK  Contended;
+    PVOID               DebugStack;
+    ListHeader          Locked;
+    BOOLEAN             TryLockOnly;
+    BOOLEAN             Interruptable;
+}DRSD_MODESET_ACQURE_CONTEXT, * PDRSD_MODESET_ACQURE_CONTEXT;
+
+typedef struct _DRSD_ATOMIC_STATE{
+    KERNEL_REFERENCE                        KRef;
+    PDRSD_DEVICE                            Device;
+    BOOLEAN                                 AllowModeSet;
+    BOOLEAN                                 LegacyCurrsorUpdate;
+    BOOLEAN                                 AsyncUpdate;
+    BOOLEAN                                 Duplicated;
+    BOOLEAN                                 Checked;
+    BOOLEAN                                 PlaneColorPipeline;
+    PDRSD_COLOR_OPS                         ColorOpsWrapper;
+    PDRSD_PLANES_STATE                      Planes;
+    PDRSD_CRTCS_STATE                       Crtcs;
+    INT32                                   ConnectorCount;
+    PDRSD_CONNECTORS_STATE                  Connectors;
+    INT32                                   PrivObjCount;
+    struct _DRSD_PRIVATE_OBJECTS_STATE*     PrivObjs;
+    PDRSD_MODESET_ACQURE_CONTEXT            AcquireContext;
+    PDRSD_CRTC_COMMIT                       FakeCommit;
+    LOUQ_WORK                               CommitWork;
+}DRSD_ATOMIC_STATE, * PDRSD_ATOMIC_STATE;       
+
+typedef struct _DRSD_PRIVATE_STATE{
+    PDRSD_ATOMIC_STATE              State;
+    struct _DRSD_PRIVATE_OBJECT*    Object;
+}DRSD_PRIVATE_STATE, * PDRSD_PRIVATE_STATE;
+
+typedef struct _DRSD_PRIVATE_OBJECTS_STATE{
+    struct _DRSD_PRIVATE_OBJECT*    Object;
+    PDRSD_PRIVATE_STATE             StateToDestroy;
+    PDRSD_PRIVATE_STATE             OldState;
+    PDRSD_PRIVATE_STATE             NewState;
+}DRSD_PRIVATE_OBJECTS_STATE, * PDRSD_PRIVATE_OBJECTS_STATE;
+
+struct _DRSD_PRIVATE_STATE_FUNCTIONS;
+
+typedef struct _DRSD_PRIVATE_OBJECT{
+    PDRSD_DEVICE                            Device;
+    ListHeader                              Head;
+    DRSD_MODESET_LOCK                       Lock;
+    PDRSD_PRIVATE_STATE                     State;
+    struct _DRSD_PRIVATE_STATE_FUNCTIONS*   Functions;
+}DRSD_PRIVATE_OBJECT, * PDRSD_PRIVATE_OBJECT;   
+
+typedef struct _DRSD_PRIVATE_STATE_FUNCTIONS{
+    DRSD_PRIVATE_STATE  (*AtomicDupicateState)(PDRSD_PRIVATE_OBJECT Object);
+    void                (*AtomicDestroyState)(PDRSD_PRIVATE_OBJECT Object, PDRSD_PRIVATE_STATE State);
+    void                (*AtomicPrintState)(PVOID Server, PDRSD_PRIVATE_STATE State);
+}DRSD_PRIVATE_STATE_FUNCTIONS, * PDRSD_PRIVATE_STATE_FUNCTIONS;
+
+typedef struct _DRSD_BRIDGE_TIMINGS{
+    UINT32  InputBusFlags;
+    UINT32  SetupTimePs;
+    UINT32  HoldTimePs;
+    BOOLEAN DualLink;    
+}DRSD_BRIDGE_TIMINGS, * PDRSD_BRIDGE_TIMINGS;
+
+typedef enum _DRSD_BRIDGE_ATTATCH_FLAGS{
+    DRSD_BRIDGE_ATTATCH_NO_CONNECTOR = 0,
+}DRSD_BRIDGE_ATTATCH_FLAGS, * PDRSD_BRIDGE_ATTATCH_FLAGS;
+
+struct _DRSD_BRIDGE;
+
+typedef struct _DRSD_BUS_CONFIG{
+    UINT32      Format;
+    UINT32      Flags;
+}DRSD_BUS_CONFIG, * PDRSD_BUS_CONFIG;   
+
+typedef struct _DRSD_BRIDGE_STATE{
+    PDRSD_PRIVATE_STATE     Base;
+    struct _DRSD_BRIDGE*    Bridge;
+    DRSD_BUS_CONFIG         InputBusConfig;
+    DRSD_BUS_CONFIG         OutputBusConfig;
+}DRSD_BRIDGE_STATE, * PDRSD_BRIDGE_STATE;
+
+#include <drivers/Hdmi/Sound.h>
+#include <drivers/Hdmi/Cec.h>
+
+typedef struct _DRSD_BRIDGE_FUNCTIONS{
+    LOUSTATUS                       (*Attatch)(struct _DRSD_BRIDGE* Bridge, PDRSD_ENCODER Encoder, DRSD_BRIDGE_ATTATCH_FLAGS Flags);
+    void                            (*Destroy)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*Detatch)(struct _DRSD_BRIDGE* Bridge);
+    DRSD_MODE_STATUS                (*ModeValid)(struct _DRSD_BRIDGE* Bridge, PDRSD_DISPLAY_INFORMATION DisplayInfo, PDRSD_DISPLAY_MODE DisplayMode);
+    BOOLEAN                         (*ModeFixup)(struct _DRSD_BRIDGE* Bridge, PDRSD_DISPLAY_MODE Mode, PDRSD_DISPLAY_MODE AdjustedMode);
+    void                            (*Disable)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*PostDisable)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*ModeSet)(struct _DRSD_BRIDGE* Bridge, PDRSD_DISPLAY_MODE DisplayMode, PDRSD_DISPLAY_MODE AdjustedMode);
+    void                            (*PreEnable)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*Enable)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*AtomicPreEnable)(struct _DRSD_BRIDGE* Bridge, PDRSD_ATOMIC_STATE State);
+    void                            (*AtomicEnable)(struct _DRSD_BRIDGE* Bridge, PDRSD_ATOMIC_STATE State);
+    void                            (*AtomicDisable)(struct _DRSD_BRIDGE* Bridge, PDRSD_ATOMIC_STATE State);
+    void                            (*AtomicPostDisable)(struct _DRSD_BRIDGE* Bridge, PDRSD_ATOMIC_STATE State);
+    PDRSD_BRIDGE_STATE              (*AtomicDuplicateState)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*AtomicDestroyState)(struct _DRSD_BRIDGE* Bridge, PDRSD_BRIDGE_STATE State);
+    PUINT32                         (*AtomicGetOutputBusFormats)(struct _DRSD_BRIDGE* Bridge, PDRSD_BRIDGE_STATE BridgeState, PDRSD_CRTC_STATE CrtcState, PDRSD_CONNECTOR_STATE ConnectorState, UINT32 OutputFormat, UINT* NumOutputFormats);
+    PUINT32                         (*AtmoicGetInputBusFormats)(struct _DRSD_BRIDGE* Bridge, PDRSD_BRIDGE_STATE BridgeState, PDRSD_CRTC_STATE CrtcState, PDRSD_CONNECTOR_STATE ConnectorState, UINT32 InputFormat, UINT* NumInputFormats);
+    LOUSTATUS                       (*AtomicCheck)(struct _DRSD_BRIDGE* Bridge, PDRSD_BRIDGE_STATE RidgeState, PDRSD_CRTC_STATE CrtcState, PDRSD_CONNECTOR_STATE ConnectorState);
+    PDRSD_BRIDGE_STATE              (*AtomicReset)(struct _DRSD_BRIDGE* Bridge);
+    DRSD_CONNECTOR_STATUS           (*Detect)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    LOUSTATUS                       (*GetModes)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    PDRSD_EDID_TRACKER              (*EdidRead)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    void                            (*HpdNotify)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector, DRSD_CONNECTOR_STATUS Status);
+    void                            (*HpdEnable)(struct _DRSD_BRIDGE* Bridge);
+    void                            (*HpdDisable)(struct _DRSD_BRIDGE* Bridge);
+    DRSD_MODE_STATUS                (*HdmiTmdsCharRateValid)(struct _DRSD_BRIDGE* Bridge, PDRSD_DISPLAY_MODE Mode, ULONGLONG TmdsRate);
+    LOUSTATUS                       (*HdmiClearAviInfoFrame)(struct _DRSD_BRIDGE* Bridge);
+    LOUSTATUS                       (*HdmiWriteAviInfoFrame)(struct _DRSD_BRIDGE* Bridge, UINT8* Buffer, SIZE Length);
+    LOUSTATUS                       (*HdmiClearHdmiInfoFrame)(struct _DRSD_BRIDGE* Bridge);
+    LOUSTATUS                       (*HdmiWriteHdmiInfoFrame)(struct _DRSD_BRIDGE* Bridge, UINT8* Buffer, SIZE Length);
+    LOUSTATUS                       (*HdmiClearDrsdInfoFrame)(struct _DRSD_BRIDGE* Bridge);
+    LOUSTATUS                       (*HdmiWriteDrsdInfoFrame)(struct _DRSD_BRIDGE* Bridge, UINT8* Buffer, SIZE Length);
+    LOUSTATUS                       (*HdmiClearSpdInfoFrame)(struct _DRSD_BRIDGE* Bridge);
+    LOUSTATUS                       (*HdmiWriteSpdInfoFrame)(struct _DRSD_BRIDGE* Bridge, UINT8* Buffer, SIZE Length);
+    LOUSTATUS                       (*HdmiClearAudioInfoFrame)(struct _DRSD_BRIDGE* Bridge);
+    LOUSTATUS                       (*HdmiWriteAudioInfoFrame)(struct _DRSD_BRIDGE* Bridge, UINT8* Buffer, SIZE Length);
+    LOUSTATUS                       (*HdmiAudioStartup)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    LOUSTATUS                       (*HdmiAudioPrepare)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connecor, PHDMI_CODEC_DAIFMT Format, PHDMI_CODEC_PARAMETERS hParams);
+    void                            (*HdmiAudioShutdown)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    LOUSTATUS                       (*HdmiAudioMuteStream)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector, BOOLEAN Enable, int Direction);
+    LOUSTATUS                       (*HdmiCecInit)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    LOUSTATUS                       (*HdmiCecEnable)(struct _DRSD_BRIDGE* Bridge, BOOLEAN Enable);
+    LOUSTATUS                       (*HdmiCecLogAddress)(struct _DRSD_BRIDGE* Bridge, UINT8 LogicalAddress);
+    LOUSTATUS                       (*HdmiCecTransmit)(struct _DRSD_BRIDGE* Bridge, UINT8 Atempts, UINT32 SignalFreeTime, PCEC_MESSAGE CecMassage);
+    LOUSTATUS                       (*DpAudioStartup)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    LOUSTATUS                       (*DpAudioPrepare)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector, PHDMI_CODEC_DAIFMT Format, PHDMI_CODEC_PARAMETERS hParams);
+    void                            (*DpAudioShutdown)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector);
+    LOUSTATUS                       (*DpAudioMuteStream)(struct _DRSD_BRIDGE* Bridge, PDRSD_CONNECTOR Connector, BOOLEAN Enable, int Direction);
+    void                            (*DrsdClfsCreateFile)(struct _DRSD_BRIDGE* Bridge, LOUSTR Path);
+}DRSD_BRIDGE_FUNCTIONS, * PDRSD_BRIDGE_FUNCTIONS;
+
+typedef enum _DRSD_BRIDGE_OPS{
+    DRSD_BRIDGE_OP_DETECT = (1),
+    DRSD_BRIDGE_OP_EDID = (1 << 1),
+    DRSD_BRIDGE_OP_HPD = (1 << 2),
+    DRSD_BRIDGE_OP_MODES = (1 << 3),
+    DRSD_BRIDGE_OP_HDMI = (1 << 4), 
+    DRSD_BRIDGE_OP_HDMI_AUDIO = (1 << 5),
+    DRSD_BRIDGE_OP_DP_AUDIO = (1 << 6),
+    DRSD_BRIDGE_OP_HDMI_CEC_NATIFIER = (1 << 7),
+    DRSD_BRIDGE_OP_HDMI_CEC_ADAPTER = (1 << 7), 
+    DRSD_BRIDGE_OP_HDMI_HDR_DRSD_INFO_FREAM = (1 << 9),
+    DRSD_BRIDGE_OP_HDMI_SPD_INFO_FRAME = (1 << 10),
+}DRSD_BRIDGE_OPS, * PDRSD_BRIDGE_OPS;
+
+typedef struct _DRSD_BRIDGE{
+    DRSD_PRIVATE_OBJECT             Base;
+    PDRSD_DEVICE                    Device;
+    PDRSD_ENCODER                   Encoder;
+    ListHeader                      ChainMode;
+    PVOID                           DeviceNode;
+    ListHeader                      List;
+    PDRSD_BRIDGE_TIMINGS            Timing;
+    PDRSD_BRIDGE_FUNCTIONS          Functions;
+    PVOID                           Conatiner;
+    KERNEL_REFERENCE                RefCount;
+    BOOLEAN                         Unplugger;
+    PVOID                           DriverPrivate;
+    DRSD_BRIDGE_OPS                 Ops;
+    INT32                           Type;
+    BOOLEAN                         InterlaceAllowed;
+    BOOLEAN                         Ycbcr420Allowed;
+    BOOLEAN                         PreEnablePreFirst;
+    BOOLEAN                         SupportHdcp;
+    PVOID                           I2cDdc;
+    LOUSTR                          Vendor;
+    LOUSTR                          Product;
+    UINT                            SupportedFormats;
+    UINT                            MaxBpc;
+    PVOID                           HdmiCecDevice;
+    PVOID                           HdmiAudioDevice;
+    int                             HdmiAudioMaxI2csPlaybackChannels;
+    BOOLEAN                         HdmiAudioSpdifPlaback;
+    int                             HdmiAudioDaiPort;
+    LOUSTR                          HdmiCecAdapterName;
+    uint8_t                         HdmiCecAvailableLas;
+    mutex_t                         HdpMutex;
+    void                            (*HpdCb)(PVOID Data, DRSD_CONNECTOR_STATUS Status);
+    PVOID                           HpdData;
+    struct _DRSD_BRIDGE*            NextBridge;                
+}DRSD_BRIDGE, * PDRSD_BRIDGE;
+
 
 #ifndef _USER_MODE_CODE_
 
