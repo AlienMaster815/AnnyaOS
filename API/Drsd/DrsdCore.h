@@ -7,6 +7,7 @@
 #include "DrsdCrtcInternals.h"
 #include "DrsdCache.h"
 #include "DrsdModes.h"
+#include "DrsdModesetLock.h"
 
 
 

@@ -88,8 +88,8 @@ static void DrsdConnectorFree(PKERNEL_REFERENCE Ref){
 
 void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
     PDRSD_CONNECTOR Connector, N;
-    PDRSD_DEVICE Device = CONTAINER_OF(Work, DRSD_DEVICE, ModeConfiguration.ConnectorFreeWork);
-    PDRSD_MODE_CONFIGURATION ModeConfig = &Device->ModeConfiguration;
+    PDRSD_DEVICE Device = CONTAINER_OF(Work, DRSD_DEVICE, ModeConfig.ConnectorFreeWork);
+    PDRSD_MODE_CONFIGURATION ModeConfig = &Device->ModeConfig;
     LouKIRQL Irql;
 
     LouKeAcquireSpinLock(&ModeConfig->ConnectorListLock, &Irql);

@@ -149,7 +149,7 @@ EXPORTS
     DrsdInternalAtomicConnectorDuplicateState
     DrsdInternalResetConnector
     DrsdConnectorInitialize
-    DrsdModeConfigurationReset
+    DrsdModeConfigReset
     DrsdInternalProbeSingleConnectorModes
     LouKeGetThreadIdentification
     LouKeHalGetPciConfiguration
@@ -198,5 +198,5 @@ EXPORTS
     InitializeGenericAtaDevice
     outsw
     LouKeHalFreePciIrqVectors
-    DrsdModeConfigurationCleanup
+    DrsdModeConfigCleanup
     strchr

@@ -28,9 +28,9 @@
 
 #include "DrsdCore.h"
 
-void        DrsdConnectorIdaInitialize();
-void        DrsdConnectorIdaDestroy();
-extern "C"  LOUSTR DrsdGetConnectorTypeName(UINT Type);
-void        DrsdUnregisterModeObject(PDRSD_DEVICE Device, PDRSD_MODE_OBJECT Object);
+void    DrsdConnectorIdaInitialize();
+void    DrsdConnectorIdaDestroy();
+LOUSTR  DrsdGetConnectorTypeName(UINT Type);
+void    DrsdUnregisterModeObject(PDRSD_DEVICE Device, PDRSD_MODE_OBJECT Object);
 
 #endif

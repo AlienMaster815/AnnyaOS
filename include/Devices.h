@@ -170,6 +170,7 @@ LOUSTATUS* State
 
 void ReleaseDriveHandle(void* DriveHandle);
 
+typedef PVOID PLATFORM_DEVICE;
 
 #ifdef __cplusplus
 }

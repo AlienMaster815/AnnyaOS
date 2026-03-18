@@ -3,7 +3,7 @@
 
 #include "DrsdCore.h"
 
-extern "C" BOOL DrsdModeParseCommandLineForConnector(
+BOOL DrsdModeParseCommandLineForConnector(
     LOUSTR              ModeOption,
     PDRSD_CONNECTOR     Connector,
     PDRSD_CMDLINE_MODE  Mode

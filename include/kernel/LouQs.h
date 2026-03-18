@@ -49,6 +49,11 @@ typedef struct _LOUQ_WORK_QUEUE{
     PTHREAD             QueueThread;
 }LOUQ_WORK_QUEUE, * PLOUQ_WORK_QUEUE;
 
+typedef struct _LOUQ_WAIT_QUEUE{
+    ListHeader          Peers;
+    
+}LOUQ_WAIT_QUEUE, * PLOUQ_WAIT_QUEUE;
+
 static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(struct _LOUQ_WORK*)){
     Work->Work.DelayedFunction = Function;
 }

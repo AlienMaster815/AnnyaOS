@@ -33,6 +33,8 @@ extern "C" {
 #include <kernel/LouQs.h>
 #include <ListManagement.h>
 #include <kernel/Objects.h>
+#include <Ldm/CommonTypes.h>
+#include <kernel/XArray.h>
 
 #define DRSD_ROTATION_MODE_0 1
 
@@ -218,15 +220,118 @@ typedef struct _DRSD_FRAMEBUFFER_CALLBACKS{
     semaphore_t CallbackLock;
 }DRSD_FRAMEBUFFER_CALLBACKS, * PDRSD_FRAMEBUFFER_CALLBACKS;
 
+
+
+typedef struct _DRSD_VMA_OFFSET_NODE{
+    mutex_t                     VmLock;
+    struct _DRSD_MM_NODE*       VmNode;
+    HANDLE                      VmFiles;
+    PVOID                       DriverPrivate;
+}DRSD_VMA_OFFSET_NODE, * PDRSD_VMA_OFFSET_NODE;
+
+struct _DRSD_GXE_OBJECT;
+
+typedef UINT DRSD_MAGIC;
+
+typedef struct _DRSD_PRIME_FILE_PRIVATE{
+    mutex_t     Lock;
+    HANDLE      DmaBuffers;
+    PHANDLE     Handles;
+}DRSD_PRIME_FILE_PRIVATE, * PDRSD_PRIME_FILE_PRIVATE;
+
+typedef struct _DRSD_FILE{
+    BOOLEAN                 Authenticated;
+    BOOLEAN                 StereoAllowed;
+    BOOLEAN                 UniversalPlanes;
+    BOOLEAN                 Atomic;
+    BOOLEAN                 AspectRatioAllowed;
+    BOOLEAN                 WritebackConnectors;
+    BOOLEAN                 PlaneColorPipeline;
+    BOOLEAN                 WasMaster;
+    BOOLEAN                 IsMaster;
+    BOOLEAN                 SupportsVirtualizedCursorPlane;
+    struct _DRSD_MASTER*    Master;
+    spinlock_t              MasterLookupLock;
+    HANDLE                  Pid;
+    UINT64                  ClientId;
+    DRSD_MAGIC              DrsdMagic;
+    ListHeader              Head;
+    struct _DRSD_MINOR*     Minor;
+    XARRAY                  ObjectIdr;
+    spinlock_t              TableLock;
+    XARRAY                  SyncObjectXArray;
+    FILE*                   Filp;
+    PVOID                   DriverPrivate;
+    ListHeader              Fbs;
+    mutex_t                 FbsLock;
+    ListHeader              Blobs;
+    LOUQ_WAIT_QUEUE         EventWait;
+    ListHeader              PendingEventList;
+    ListHeader              EventList;
+    int                     EventSpace;
+    mutex_t                 EventReadLock;
+    DRSD_PRIME_FILE_PRIVATE Prime;
+    LOUSTR                  ClientName;
+    mutex_t                 ClientNameLock;
+    HANDLE                  ClfsClient;
+}DRSD_FILE, * PDRSD_FILE;
+
+typedef enum _DRSD_GXE_OBJECT_STATUS{
+    DRSD_GXE_OBJECT_RESIDENT  = (1 << 0),
+    DRSD_GXE_OBJECT_PURGEABLE = (1 << 1),
+    DRSD_GXE_OBJECT_ACTIVE    = (1 << 2),
+}DRSD_GXE_OBJECT_STATUS, * PDRSD_GXE_OBJECT_STATUS;
+
+typedef struct _DRSD_GXE_OBJECT_FUNCTIONS{
+    void                        (*Free)(struct _DRSD_GXE_OBJECT* Object);
+    LOUSTATUS                   (*Open)(struct _DRSD_GXE_OBJECT* Object, PDRSD_FILE File);
+    LOUSTATUS                   (*Close)(struct _DRSD_GXE_OBJECT* Object, PDRSD_FILE File);
+    LOUSTATUS                   (*PrintInfo)(HANDLE DrsdClfsServer, UINT Indent, struct _DRSD_GXE_OBJECT* Object);
+    HANDLE                      (*Export)(struct _DRSD_GXE_OBJECT* Object, int Flags);
+    LOUSTATUS                   (*Pin)(struct _DRSD_GXE_OBJECT* Object);
+    void                        (*Unpin)(struct _DRSD_GXE_OBJECT* Object);
+    HANDLE                      (*GetScatterGatherTable)(struct _DRSD_GXE_OBJECT* Object);
+    LOUSTATUS                   (*Vmap)(struct _DRSD_GXE_OBJECT* Object, HANDLE IoMap);
+    void                        (*Vunmap)(struct _DRSD_GXE_OBJECT* Object, HANDLE IoMap);
+    LOUSTATUS                   (*Mmap)(struct _DRSD_GXE_OBJECT* Object, HANDLE Vma);
+    LOUSTATUS                   (*Evict)(struct _DRSD_GXE_OBJECT* Object);
+    DRSD_GXE_OBJECT_STATUS      (*Status)(struct _DRSD_GXE_OBJECT* Object);
+    SIZE                        (*Rss)(struct _DRSD_GXE_OBJECT* Object);
+    HANDLE                      VmmOperations;
+}DRSD_GXE_OBJECT_FUNCTIONS, * PDRSD_GXE_OBJECT_FUNCTIONS;
+
+
+typedef struct  DRSD_GXE_LRU{
+    mutex_t     Lock;
+    SIZE        Count;
+    ListHeader  List;
+}DRSD_GXE_LRU, * PDRSD_GXE_LRU;
+
 typedef struct _DRSD_GXE_OBJECT{
-    semaphore_t                 ObjectLock;
-    size_t                      HandleCount;
+    KERNEL_REFERENCE            KRef;
+    UINT                        HandleCount;
     struct _DRSD_DEVICE*        Device;
+    FILE                        Filp;
+    DRSD_VMA_OFFSET_NODE        VmaNode;
+    SIZE                        Size;
+    int                         Name;
+    HANDLE                      DmaBuffer;
+    HANDLE                      ImportAttatch;
+    HANDLE                      DmaReserve;
+    HANDLE                      _DmaReserved;
+    struct{
+        ListHeader              List;
+        mutex_t                 Lock;
+    }GpuVA;
+    DRSD_GXE_OBJECT_FUNCTIONS   Functions;
+    ListHeader                  LruNode;        
+    PDRSD_GXE_LRU               Lru;
+
+    //old data
+    semaphore_t                 ObjectLock;
     void*                       Buffers;
     struct _LMPOOL_DIRECTORY*   GxeVmaPool;
     size_t                      GxeSize;
-    uint64_t                    Name;
-    uintptr_t                   DmaBuffer;
     void*                       DmaPropertiesBuffer;
 }DRSD_GXE_OBJECT, * PDRSD_GXE_OBJECT;
 
@@ -902,22 +1007,292 @@ typedef struct _DRSD_MODE_SET_CONTEXT{
     size_t                  EpochCounter;
 }DRSD_MODE_SET_CONTEXT, * PDRSD_MODE_SET_CONTEXT;
 
+
+
+typedef struct _DRSD_MINOR{
+    int                     Index;
+    int                     Type;
+    PLATFORM_DEVICE         KernelDevice;
+    struct _DRSD_DEVICE*    Device;
+    HANDLE                  ClfsServer;
+    HANDLE                  ClfsPath;
+}DRSD_MINOR, * PDRSD_MINOR;
+
+
+struct _DRSD_MASTER;
+
+typedef struct _DRSD_MASTER{
+    KERNEL_REFERENCE        KRef;
+    struct _DRSD_DEVICE*    Device;
+    LOUSTR                  Uid;
+    int                     UidLength;
+    XARRAY                  MagicMap;
+    PVOID                   DriverPrivate;
+    struct _DRSD_MASTER*    Lessor;
+    int32_t                 LesseeId;
+    ListHeader              Lessees;
+    XARRAY                  Leases;
+    XARRAY                  LeasesIdr;
+}DRSD_MASTER, * PDRSD_MASTER;
+
+struct _DRSD_MM;
+
+#define DRSD_MM_NODE_ALLOCATED_BIT	0
+#define DRSD_MM_NODE_SCANNED_BIT    1
+
+typedef struct _DRSD_MM_NODE{
+    UINT64              Color;
+    UINT64              Start;
+    UINT64              Size;
+    struct _DRSD_MM*    Mm;
+    ListHeader          NodeList;
+    ListHeader          HoleStack;
+    HANDLE              Rb;
+    HANDLE              HolesSize;
+    HANDLE              HolesAddr;
+    UINT64              SubtreeLast;
+    UINT64              HoleSize;
+    UINT64              SubtreeMaxHole;
+    UINT64              Flags;
+    HANDLE              Stack;
+}DRSD_MM_NODE, * PDRSD_MM_NODE;
+
+typedef struct _DRSD_MM{
+    void            (*ColorAdjust)(PDRSD_MM_NODE Node, UINT64 Color, UINT64* Start, UINT64* End);
+    ListHeader      HoleStack;
+    DRSD_MM_NODE    HeadNode;
+    HANDLE          IntervalTree;
+    HANDLE          HolesSize;
+    HANDLE          HolesAddress;
+    UINT64          ScanActive; 
+}DRSD_MM, * PDRSD_MM;
+
+typedef struct _DRSD_VMA_OFFSET_MANAGER{
+    spinlock_t      Lock;
+    PDRSD_MM        VmAddressSpaceMm;
+}DRSD_VMA_OFFSET_MANAGER, * PDRSD_VMA_OFFSET_MANAGER;
+
+struct _DRSD_TTM_DEVICE;
+
+#define TTM_TT_FLAGS_SWAPPED                (1 << 0)
+#define TTM_TT_FLAGS_ZERO_ALLOC             (1 << 1)
+#define TTM_TT_FLAGS_EXTERNAL               (1 << 2)
+#define TTM_TT_FLAGS_EXTERNAL_MAPPABLE      (1 << 3)
+#define TTM_TT_FLAGS_DECRYPTED              (1 << 4)
+#define TTM_TT_FLAGS_BACKED_UP              (1 << 5)
+#define TTM_TT_FLAGS_PRIVATE_POPULATED      (1 << 6)
+
+typedef enum _TTM_CACHING{
+    TtmUncached = 0 ,
+    TtmWriteCombined,
+    TtmCached,
+}TTM_CACHING, * PTTM_CACHING;
+
+#define TTM_CACHING_TYPES_COUNT 3
+
+struct _TTM_POOL;
+
+typedef struct _TTM_POOL_TYPE{
+    struct _TTM_POOL*   Pool;
+    UINT                Order;
+    TTM_CACHING         Caching;
+    ListHeader          ShrinkerList;
+    spinlock_t          Lock;
+    ListHeader          Pages;           
+}TTM_POOL_TYPE, * PTTM_POOL_TYPE;
+
+typedef struct _TTM_POOL{
+    PLATFORM_DEVICE     Device;
+    int                 Nid;
+    UINT                AllocationFlags;
+    struct{
+        SIZE            OrderCount;
+        PTTM_POOL_TYPE  Orders;   
+    }Caching;   
+}TTM_POOL, * PTTM_POOL;
+
+typedef struct _TTM_POOL_ALLOCATION_STATE{
+    HANDLE                  TtmPageData;
+    HANDLE                  TtmCacheDivide;
+    UINT64                  DmaAddress;
+    SIZE                    RemainingPages;
+    TTM_CACHING             TtmCaching;
+}TTM_POOL_ALLOCATION_STATE, * PTTM_POOL_ALLOCATION_STATE;
+
+typedef struct _TTM_POOL_TT_RESTORE{
+    PTTM_POOL                       Pool;
+    TTM_POOL_ALLOCATION_STATE       SnapshotAllocation;
+    HANDLE                          AllocedPages;
+    UINT64                          FirstDma;
+    SIZE                            AllocatedPages;
+    SIZE                            RestoredPages;
+    TTM_CACHING                     PageCaching;
+    UINT                            Order;
+}TTM_POOL_TT_RESTORE, * PTTM_POOL_TT_RESTORE;
+
+typedef struct _TTM_TT{
+    HANDLE                  TtmPageData;
+    UINT32                  TtmPageFlags;
+    UINT32                  PageCount;
+    HANDLE                  ScatterGather;
+    UINT64                  DmaAddress;
+    FILE*                   SwapStorage;
+    FILE*                   Backup;
+    PTTM_POOL_TT_RESTORE    Restore;
+}TTM_TT, * PTTM_TT;
+
+typedef enum _TTM_BUFFER_OBJECT_TYPE{
+    TtmBoTypeDevice = 0,
+    TtmBoTypeKernel,
+    TtmBoTypeScatterGather,
+}TTM_BUFFER_OBJECT_TYPE, * PTTM_BUFFER_OBJECT_TYPE;
+
+struct _TTM_BUFFER_OBJECT;
+
+typedef enum _TTM_LRU_TYPE{
+    TTM_LRU_RESOURCE = 0,
+    TTM_LRU_HITCH,
+}TTM_LRU_TYPE, * PTTM_LRU_TYPE;
+
+typedef struct _TTM_LRU_ITEM{   
+    ListHeader      Link;
+    TTM_LRU_TYPE    Type;
+}TTM_LRU_ITEM, * PTTM_LRU_ITEM;
+
+typedef struct _TTM_BUS_PLACEMENT{
+    PVOID       Address;
+    UINT64      PhyAddress;
+    BOOLEAN     IsIoMem;
+    TTM_CACHING Cahcing;
+}TTM_BUS_PLACEMENT, * PTTM_BUS_PLACEMENT;
+
+typedef struct _TTM_RESOURCE{
+    UINT64                      State;
+    SIZE                        Size;
+    UINT32                      MemType;
+    UINT32                      Placement;
+    TTM_BUS_PLACEMENT           Bus;
+    struct _TTM_BUFFER_OBJECT*  BufferObject;
+    HANDLE                      CssPoolState;
+    TTM_LRU_ITEM                LruItem;
+}TTM_RESOURCE, * PTTM_RESOURCE;
+
+#define TTM_MEM_TYPES_COUT                  9
+#define TTM_MAX_BUFFER_OBJECT_PRIORITIES    4
+
+typedef struct _TTM_LRU_BULK_MOVE_POSITION{
+    struct _TTM_RESOURCE*   First;  //if you aint first,
+    struct _TTM_RESOURCE*   Last;   //your last
+}TTM_LRU_BULK_MOVE_POSITION, * PTTM_LRU_BULK_MOVE_POSITION;
+
+typedef struct _TTM_LRU_BULK_MOVE{
+    TTM_LRU_BULK_MOVE_POSITION  Position[TTM_MEM_TYPES_COUT][TTM_MAX_BUFFER_OBJECT_PRIORITIES];
+    ListHeader                  CursorList;
+}TTM_LRU_BULK_MOVE, * PTTM_LRU_BULK_MOVE;
+
+typedef struct _TTM_BUFFER_OBJECT{
+    DRSD_GXE_OBJECT             Base;    
+    struct _DRSD_TTM_DEVICE*    TtmDevice;
+    TTM_BUFFER_OBJECT_TYPE      Type;
+    UINT32                      PageAlignment;
+    void                        (*Destroy)(struct _TTM_BUFFER_OBJECT* TtmObject);
+    KERNEL_REFERENCE            KRef;
+    PTTM_RESOURCE               Resource;
+    struct _TTM_TT*             Ttm;
+    BOOLEAN                     Deleted;
+    PTTM_LRU_BULK_MOVE          BulkMove;
+    UINT                        Priority;
+    UINT                        PinCount;
+    LOUQ_WORK                   DelayedDelete;
+    HANDLE                      ScatterGatherTable;
+}TTM_BUFFER_OBJECT, * PTTM_BUFFER_OBJECT;
+
+typedef struct _TTM_DEVICE_FUNCTIONS{
+    PTTM_TT     (*TtmTtCreate)();
+}TTM_DEVICE_FUNCTIONS, * PTTM_DEVICE_FUNCTIONS;
+
+
+
+typedef struct _TTM_RESOURCE_MANAGER{
+    BOOLEAN                     UseType;
+    BOOLEAN                     UseTt;
+    struct _DRSD_TTM_DEVICE*    TtmDevice;    
+    UINT64                      Size;
+
+}TTM_RESOURCE_MANAGER, * PTTM_RESOURCE_MANAGER;
+
+typedef struct _DRSD_TTM_DEVICE{
+    ListHeader              DeviceList;
+    UINT                    AllocaFlags;
+    PTTM_DEVICE_FUNCTIONS   Functions;
+    TTM_RESOURCE_MANAGER    SystemManager;
+
+}DRSD_TTM_DEVICE, * PDRSD_TTM_DEVICE;
+
+typedef struct _DRSD_VRAM_MM{
+    UINT64              VRamBase;
+    SIZE                VRamSize;
+    DRSD_TTM_DEVICE     TtmDevice;
+}DRSD_VRAM_MM, * PDRSD_VRAM_MM;
+
 typedef struct _DRSD_DEVICE{
     ListHeader                      Peers;
     struct _PCI_DEVICE_OBJECT*      PDEV;
     struct _LMPOOL_DIRECTORY*       VramPool;
-    DRSD_MODE_CONFIGURATION         ModeConfiguration;
     DRSD_MODE_OBJECT                BaseMode;
     PDRSD_DISPLAY_MODE              DisplayModes;
     uint32_t                        PossibleCrtcs;
-    size_t                          CrtcCount;
     PDRSD_PLANE                     Planes;
     PDRSD_CRTC                      Crtcs;
     PDRSD_ENCODER                   Encoders;
     PDRSD_CONNECTOR                 Connectors;
     spinlock_t                      VBlankLock;
-    size_t                          VBlankCount;
     PDRSD_VBLANK_CRTC               VBlanks;
+
+    //New Drsd data
+    int                             InterfaceVersion;
+    KERNEL_REFERENCE                KRef;
+    PLATFORM_DEVICE                 BusDevice;
+    PLATFORM_DEVICE                 DmaDevice;
+    struct {    
+        ListHeader                  Resources;
+        PVOID                       FinalFree;
+        spinlock_t                  Lock;
+    }Managed;
+    PDRIVER_OBJECT                  DeviceDriver;
+    PVOID                           DevicePrivateData;
+    PDRSD_MINOR                     Primary;
+    PDRSD_MINOR                     Rendor;
+    PDRSD_MINOR                     Acceleration;
+    BOOL                            Registered;
+    PDRSD_MASTER                    Master;
+    LOUSTR                          HugeMount;
+    UINT32                          DriverFeatures;
+    BOOLEAN                         Unplugged;
+    HANDLE                          Inode;
+    LOUSTR                          Uid;
+    mutex_t                         MasterMutex;
+    atomic_t                        OpenCount;
+    mutex_t                         FileListMutex;
+    ListHeader                      FileList;
+    ListHeader                      FileListInternal;
+    mutex_t                         ClientListMutex;
+    ListHeader                      ClientList;
+    ListHeader                      ClientSysrqList;
+    BOOLEAN                         VBlankImmediateDisable;
+    PDRSD_VBLANK_CRTC               VBlankCount;
+    spinlock_t                      VBlankTimeLock;
+    spinlock_t                      VblLock;
+    UINT32                          MaxVBlankCount;
+    ListHeader                      VBlankEventList;
+    spinlock_t                      EventLock;
+    UINT                            CrtcCount;
+    DRSD_MODE_CONFIGURATION         ModeConfig;
+    mutex_t                         ObjectNameLock;
+    XARRAY                          ObjectNameIdr;
+    PDRSD_VMA_OFFSET_MANAGER        VmaOffsetManager;
+
+
 }DRSD_DEVICE, * PDRSD_DEVICE;
 
 #define STANDARD_INTEL_CHIPSET_EDID_SIZE 128
@@ -1625,7 +2000,7 @@ LOUSTATUS DrsdConnectorInitialize(
     int                         ConnectorType
 );
 
-void DrsdModeConfigurationReset(PDRSD_DEVICE Device);
+void DrsdModeConfigReset(PDRSD_DEVICE Device);
 
 KERNEL_EXPORT LOUSTATUS DrsdInternalProbeSingleConnectorModes(
     PDRSD_CONNECTOR Connector,
@@ -1659,7 +2034,7 @@ PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE P
 void LouKeDrsdClearScreen(PDRSD_PLANE Plane);
 
 KERNEL_EXPORT
-void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice);
+void DrsdModeConfigCleanup(PDRSD_DEVICE DrsdDevice);
 
 #endif
 #ifdef __cplusplus

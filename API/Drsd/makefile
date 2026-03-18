@@ -1,14 +1,14 @@
 INCLUDES = -I../../include
 TARGET = DRSDCORE.SYS
-SRC = DrsdCore.cpp \
-		DrsdConnector.cpp \
-		DrsdCache.cpp \
-		DrsdModes.cpp \
-		DrsdModeObjects.cpp \
-		DrsdBridgeHelper.cpp
+SRC = DrsdCore.c \
+		DrsdConnector.c \
+		DrsdCache.c \
+		DrsdModes.c \
+		DrsdModeObjects.c \
+		DrsdBridgeHelper.c
 
 
-CC = x86_64-w64-mingw32-g++
+CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreSubsystemEntry -fno-builtin
 
 # Tool and Flags
@@ -33,3 +33,4 @@ $(LIB_FILE): $(DEF_FILE)
 # Clean rule
 clean:
 	rm -f $(TARGET)
+	rm -f $(LIB_FILE)

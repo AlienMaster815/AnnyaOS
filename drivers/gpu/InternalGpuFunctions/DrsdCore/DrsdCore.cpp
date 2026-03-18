@@ -296,8 +296,8 @@ LouKeDrsdInitializeDevice(
 
         Connector->ProbeModeCount = Connector->Callbacks->ConnectorFillModes(
             Connector, 
-            Device->ModeConfiguration.MaximumWidth, 
-            Device->ModeConfiguration.MaximumHeight
+            Device->ModeConfig.MaximumWidth, 
+            Device->ModeConfig.MaximumHeight
         );
 
         Crtc = Connector->Crtc;

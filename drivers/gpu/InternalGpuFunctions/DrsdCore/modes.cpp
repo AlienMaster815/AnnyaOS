@@ -252,7 +252,7 @@ PDRSD_DISPLAY_MODE DrsdCvtMode(
 }
 
 KERNEL_EXPORT
-void DrsdModeConfigurationCleanup(PDRSD_DEVICE DrsdDevice){
-    LouPrint("DrsdModeConfigurationCleanup()\n");
+void DrsdModeConfigCleanup(PDRSD_DEVICE DrsdDevice){
+    LouPrint("DrsdModeConfigCleanup()\n");
     while(1);
 }

@@ -2,3 +2,4 @@ LIBRARY DRSDCORE.SYS
 
 EXPORTS	
     DrsdGetConnectorTypeName
+    DrsdBridgeHelperResetCrtc

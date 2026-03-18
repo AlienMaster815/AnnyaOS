@@ -341,7 +341,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[148] = "DrsdInternalAtomicConnectorDestroyState";
     ImportTables[0].FunctionName[149] = "DrsdInternalAtomicConnectorDuplicateState";
     ImportTables[0].FunctionName[150] = "DrsdInternalResetConnector";
-    ImportTables[0].FunctionName[152] = "DrsdModeConfigurationReset";
+    ImportTables[0].FunctionName[152] = "DrsdModeConfigReset";
     ImportTables[0].FunctionName[153] = "DrsdInternalProbeSingleConnectorModes";
     ImportTables[0].FunctionName[154] = "LouKeGetThreadIdentification";
     ImportTables[0].FunctionName[155] = "LouKeHalGetPciConfiguration";
@@ -509,7 +509,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[148] = (uint64_t)DrsdInternalAtomicConnectorDestroyState;
     ImportTables[0].VirtualAddress[149] = (uint64_t)DrsdInternalAtomicConnectorDuplicateState;
     ImportTables[0].VirtualAddress[150] = (uint64_t)DrsdInternalResetConnector;
-    ImportTables[0].VirtualAddress[152] = (uint64_t)DrsdModeConfigurationReset;
+    ImportTables[0].VirtualAddress[152] = (uint64_t)DrsdModeConfigReset;
     ImportTables[0].VirtualAddress[153] = (uint64_t)DrsdInternalProbeSingleConnectorModes;
     ImportTables[0].VirtualAddress[154] = (uint64_t)LouKeGetThreadIdentification;
     ImportTables[0].VirtualAddress[155] = (uint64_t)LouKeHalGetPciConfiguration;

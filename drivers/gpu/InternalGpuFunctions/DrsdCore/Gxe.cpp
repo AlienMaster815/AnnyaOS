@@ -465,7 +465,7 @@ LOUSTATUS DrsdConnectorInitialize(
 }
 
 KERNEL_EXPORT
-void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
+void DrsdModeConfigReset(PDRSD_DEVICE Device){
 
     PDRSD_PLANE Plane = Device->Planes;
     PDRSD_CRTC  Crtc = Device->Crtcs;
@@ -499,7 +499,7 @@ void DrsdModeConfigurationReset(PDRSD_DEVICE Device){
         }
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
     }
-    LouPrint("DrsdModeConfigurationReset() STATUS_SUCCESS\n");
+    LouPrint("DrsdModeConfigReset() STATUS_SUCCESS\n");
 }
 
 KERNEL_EXPORT

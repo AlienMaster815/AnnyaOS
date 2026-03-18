@@ -653,8 +653,8 @@ static LOUSTATUS VirtualboxConnectorInitialize(
     Connector->InterlaceAble = false;
     Connector->DoubleScanAble = false;
 
-    Device->ModeConfiguration.SuggestedX = 0;
-    Device->ModeConfiguration.SuggestedY = 0;
+    Device->ModeConfig.SuggestedX = 0;
+    Device->ModeConfig.SuggestedY = 0;
         
     ((PVIRTUALBOX_CONNECTOR)Connector)->VBOXCrtc = Crtc;
 
@@ -670,12 +670,12 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
     
     VBox->SingleFramebuffer = true;
 
-    Device->ModeConfiguration.Callbacks = (PDRSD_MODE_CONFIGURATION_CALLBACKS)&VirtualboxModeCallbacks; 
-    Device->ModeConfiguration.MinimalWidth = 0;
-    Device->ModeConfiguration.MinimalHeight = 0;
-    Device->ModeConfiguration.MaximumWidth = VIRTUALBOX_VBE_DISPI_MAX_XRESOLUTION; 
-    Device->ModeConfiguration.MaximumHeight = VIRTUALBOX_VBE_DISPI_MAX_YRESOLUTION;
-    Device->ModeConfiguration.PreferedDepth = 24;
+    Device->ModeConfig.Callbacks = (PDRSD_MODE_CONFIGURATION_CALLBACKS)&VirtualboxModeCallbacks; 
+    Device->ModeConfig.MinimalWidth = 0;
+    Device->ModeConfig.MinimalHeight = 0;
+    Device->ModeConfig.MaximumWidth = VIRTUALBOX_VBE_DISPI_MAX_XRESOLUTION; 
+    Device->ModeConfig.MaximumHeight = VIRTUALBOX_VBE_DISPI_MAX_YRESOLUTION;
+    Device->ModeConfig.PreferedDepth = 24;
 
     memcpy(&PlaneFormats[0], DRSD_COLOR_FORMAT_XRGB8888, 4); 
     memcpy(&PlaneFormats[1], DRSD_COLOR_FORMAT_ARGB8888, 4); 
@@ -697,7 +697,7 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     }
 
-    DrsdModeConfigurationReset(Device);
+    DrsdModeConfigReset(Device);
 
     VBoxEdid = LouKeMalloc(STANDARD_INTEL_CHIPSET_EDID_SIZE, KERNEL_GENERIC_MEMORY);
 
@@ -705,5 +705,5 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
 }
 
 void VirtualBoxModeFaildInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
-    DrsdModeConfigurationCleanup(&VBox->DrsdDevice);
+    DrsdModeConfigCleanup(&VBox->DrsdDevice);
 }

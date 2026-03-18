@@ -28,9 +28,16 @@
 DRIVER_EXPORT
 LOUSTATUS 
 DrsdBridgeHelperResetCrtc(
-    
+    PDRSD_BRIDGE Bridge,
+    PDRSD_MODESET_ACQURE_CONTEXT Context
 ){
+    UNUSED PDRSD_CONNECTOR Connector;
+    UNUSED PDRSD_ENCODER Encoder = Bridge->Encoder;
+    UNUSED PDRSD_DEVICE Device = Encoder->Device; 
+    UNUSED PDRSD_CRTC Crtc;
+    LOUSTATUS Status;
 
+    //Status = DrsdModesetLock(&Device->ModeConfig.);
     
 
     return STATUS_SUCCESS;

@@ -37,7 +37,7 @@ static DRSD_MODE_SET_CONTEXT ModeSetManagerContextList;
 static mutex_t ModeSetManagerLock;
 
 PDRSD_MODE_SET_CONTEXT DrsdInitializeModeContext(PDRSD_DEVICE Device){
-    MutexLock(&Device->ModeConfiguration.ConfigLock);
+    MutexLock(&Device->ModeConfig.ConfigLock);
     MutexLockEx(&ModeSetManagerLock, true);
     
     PDRSD_MODE_SET_CONTEXT TmpContextList = &ModeSetManagerContextList;
@@ -64,7 +64,7 @@ void DrsdModeSetLockContext(PDRSD_MODE_SET_CONTEXT Context){
 
 void DrsdModeSetWarnIfLocked(PDRSD_DEVICE Device){
     MutexLockEx(&ModeSetManagerLock, true);
-    if(MutexIsLocked(&Device->ModeConfiguration.ConnectionMutex)){
+    if(MutexIsLocked(&Device->ModeConfig.ConnectionMutex)){
         LouPrint("WARNING:DrsdModeSetWarnIfLocked() CONFIG IS LOCKED\n");
     }    
     MutexUnlock(&ModeSetManagerLock);
@@ -88,5 +88,5 @@ void DrsdModeSetDestroyModeContext(PDRSD_DEVICE Device, PDRSD_MODE_SET_CONTEXT S
         TmpContextList = (PDRSD_MODE_SET_CONTEXT)TmpContextList->Peers.NextHeader;
     }
     MutexUnlock(&ModeSetManagerLock);
-    MutexUnlock(&Device->ModeConfiguration.ConfigLock);
+    MutexUnlock(&Device->ModeConfig.ConfigLock);
 }

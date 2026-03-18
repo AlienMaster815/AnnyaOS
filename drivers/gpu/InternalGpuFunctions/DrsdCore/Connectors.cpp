@@ -113,8 +113,8 @@ LOUSTATUS DrsdInternalProbeSingleConnectorModes(
 
     }    
 
-    if(!Device->ModeConfiguration.UsingPolling){
-        Device->ModeConfiguration.UsingPolling = true;
+    if(!Device->ModeConfig.UsingPolling){
+        Device->ModeConfig.UsingPolling = true;
     }
 
     //TODO Get Connection Enabled if not so

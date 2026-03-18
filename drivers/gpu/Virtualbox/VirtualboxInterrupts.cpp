@@ -84,7 +84,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
     }
 
     ValidateOrSetPositionHints(VBox);
-    MutexLock(&Device->ModeConfiguration.ConnectionMutex);
+    MutexLock(&Device->ModeConfig.ConnectionMutex);
     while(Connector){
         LouPrint("Initializing Connector:%h Mode Hints\n", Connector);
         CrtcID = Connector->VBOXCrtc->CrtcId;
@@ -133,7 +133,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
         Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
     }
     
-    MutexUnlock(&Device->ModeConfiguration.ConnectionMutex);
+    MutexUnlock(&Device->ModeConfig.ConnectionMutex);
 
 }
 

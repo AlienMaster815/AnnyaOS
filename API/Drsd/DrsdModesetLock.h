@@ -1,0 +1,8 @@
+#ifndef _DRSD_MODESET_LOCK_H
+#define _DRSD_MODESET_LOCK_H
+
+#include "DrsdCore.h"
+
+LOUSTATUS DrsdModesetLock(PDRSD_MODESET_LOCK Lock, PDRSD_MODESET_ACQURE_CONTEXT Ctx);
+
+#endif
