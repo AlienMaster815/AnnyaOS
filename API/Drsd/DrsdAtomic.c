@@ -23,7 +23,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
+
 #include "DrsdCore.h"
+
+KERNEL_EXPORT
+void 
+__DrsdCrtcCommitFree(PKERNEL_REFERENCE Kref){
+    PDRSD_CRTC_COMMIT Commit = CONTAINER_OF(Kref, DRSD_CRTC_COMMIT, Reference);
+    LouKeFree(Commit);
+}
+
 
 DRIVER_EXPORT
 PDRSD_CONNECTOR 

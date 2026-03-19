@@ -18,3 +18,4 @@ EXPORTS
     DrsdDrawFill16
     DrsdDrawFill24
     DrsdDrawFill32
+    __DrsdCrtcCommitFree

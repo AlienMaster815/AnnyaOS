@@ -462,8 +462,56 @@ typedef struct  _DRSD_DISPLAY_MODE{
     HDMI_ASPECT_RATIO       AspectRatio;
 }DRSD_DISPLAY_MODE, * PDRSD_DISPLAY_MODE;
 
+typedef struct _DRSD_PENDING_EVENT{
+    PLOUQ_COMPLETION        Completion;
+    void                  (*CompletionRelease)(PLOUQ_COMPLETION Completion);
+    HANDLE                  DmaFence;
+    ListHeader              Link;
+    ListHeader              PendingList;
+}DRSD_PENDING_EVENT, * PDRSD_PENDING_EVENT;
+
+typedef struct _DRSD_EVENT{
+    UINT32 Type;
+    UINT32 Length;
+}DRSD_EVENT, * PDRSD_EVENT;
+
+typedef struct _DRSD_EVENT_BLANK{
+    DRSD_EVENT      Base;
+    UINT64          UserData;
+    UINT32          TvSec;
+    UINT32          TvUsec;
+    UINT32          Sequence;
+    UINT32          CrtcID;
+}DRSD_EVENT_BLANK, * PDRSD_EVENT_BLANK;
+
+typedef struct _DRSD_CRTC_SEQUENCE{
+    DRSD_EVENT      Base;
+    UINT64          UserData;
+    INT64           TimeNs;
+    UINT64          Sequence;
+}DRSD_CRTC_SEQUENCE, * PDRSD_CRTC_SEQUENCE;
+
+typedef struct _DRSD_PENDING_VBLANK_EVENT{
+    DRSD_PENDING_EVENT      Base;
+    UINT                    Pipe;
+    UINT64                  Sequence;
+    union{
+        DRSD_EVENT          Base;
+        DRSD_EVENT_BLANK    VBlank;
+        DRSD_CRTC_SEQUENCE  Sequence;
+    }Event;
+}DRSD_PENDING_VBLANK_EVENT, * PDRSD_PENDING_VBLANK_EVENT;
+
+
 typedef struct _DRSD_CRTC_COMMIT{
-    atomic_t        Reference;
+    struct _DRSD_CRTC*              Crtc;
+    atomic_t                        Reference;
+    PLOUQ_COMPLETION                FlipDone;
+    PLOUQ_COMPLETION                HwDone;
+    PLOUQ_COMPLETION                CleanupDone;
+    ListHeader                      CommitEntry;
+    PDRSD_PENDING_VBLANK_EVENT      Event;
+    BOOLEAN                         AbortCompletion;
 }DRSD_CRTC_COMMIT, * PDRSD_CRTC_COMMIT;
 
 typedef struct _DRSD_PLANE_STATE{
