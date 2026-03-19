@@ -509,6 +509,56 @@ VOID WRITE_REGISTER_ULONGLONG(volatile PULONGLONG Register, ULONGLONG Value){
 }
 
 FORCE_INLINE
+void LouKeIoObjectWriteMmIo(PIO_MAP_OBJECT IoMap, SIZE Offset, UINT8 Size, UINT64 Value){
+    switch(Size){
+        case sizeof(UINT8):{
+            WRITE_REGISTER_UCHAR((volatile PUCHAR)((SIZE)IoMap->MmIoAddress + Offset), (UCHAR)Value);
+			break;
+		}
+        case sizeof(UINT16):{
+            WRITE_REGISTER_USHORT((volatile PUSHORT)((SIZE)IoMap->MmIoAddress + Offset), (USHORT)Value);
+			break;
+		}
+		case sizeof(UINT32):{
+            WRITE_REGISTER_ULONG((volatile PULONG)((SIZE)IoMap->MmIoAddress + Offset), (ULONG)Value);
+            break;
+        }
+		case sizeof(UINT64):{
+            WRITE_REGISTER_ULONGLONG((volatile PULONGLONG)((SIZE)IoMap->MmIoAddress + Offset), (ULONGLONG)Value);
+			break;
+		}
+    }
+}
+
+FORCE_INLINE
+UINT64 LouKeIoObjectReadMmIo(PIO_MAP_OBJECT IoMap, SIZE Offset, UINT8 Size){
+    switch(Size){
+        case sizeof(UINT8):{
+            return (UINT64)READ_REGISTER_UCHAR((volatile PUCHAR)((SIZE)IoMap->MmIoAddress + Offset));
+		}
+        case sizeof(UINT16):{
+            return (UINT64)READ_REGISTER_USHORT((volatile PUSHORT)((SIZE)IoMap->MmIoAddress + Offset));
+		}
+		case sizeof(UINT32):{
+            return (UINT64)READ_REGISTER_ULONG((volatile PULONG)((SIZE)IoMap->MmIoAddress + Offset));
+        }
+		case sizeof(UINT64):{
+            return (UINT64)READ_REGISTER_ULONGLONG((volatile PULONGLONG)((SIZE)IoMap->MmIoAddress + Offset));
+		}
+    }
+}
+
+#define LouKeIoObjectWriteIo(IoMap, Offset, Type, Value)({ \
+	if(IoMap->Mmio){LouKeIoObjectWriteMmIo(IoMap, Offset, sizeof(Type), Value);} \
+	else{*(Type*)((SIZE)IoMap + Offset) = (Type)Value;} \
+})
+
+#define LouKeIoObjectReadIo(IoMap, Offset, Type)({ \
+	if(IoMap->Mmio){LouKeIoObjectReadMmIo(IoMap, Offset, sizeof(Type));} \
+	else{*(Type*)((SIZE)IoMap + Offset);} \
+})
+
+FORCE_INLINE
 STRIP_OPTIMIZATIONS
 void READ_REGISTER_BUFFER_UCHAR(
 	volatile UCHAR* Register,

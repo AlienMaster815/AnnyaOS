@@ -1,7 +1,7 @@
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -m64 -O3 -fPIC -fno-stack-protector -nostdlib -nodefaultlibs -fno-builtin
 LDFLAGS = \
-    -Wl,--entry=AnnyaSmssProcessStartup \
+    -Wl,--entry=InitMain \
     -Wl,--subsystem,console \
     -Wl,--dynamicbase \
     -Wl,--high-entropy-va \

@@ -10,6 +10,28 @@ extern "C" {
 
 typedef void* FILE;
 
+
+typedef struct _IO_MAP_OBJECT{ //reading and writing for this structure is in Ldm/miniport.h
+    union{
+        PVOID   MmIoAddress;
+        PVOID   SharedAddress;
+    };
+    BOOL        Mmio;
+}IO_MAP_OBJECT, * PIO_MAP_OBJECT;
+
+#define IO_MAP_OBJECT_INITIALIZE_SYSTEM_ADDRESS(IoAddr) { \
+    .SharedAddress = IoAddr, \
+    .Mmio = false, \
+}
+
+#define IO_MAP_OBJECT_INITIALIZE_MMIO_ADDRESS(IoAddr) { \
+    .MmIoAddress = IoAddr, \
+    .Mmio = true, \
+}
+
+
+
+
 #ifndef _USER_MODE_CODE_
 
 int LouPrint(char* format, ...);
@@ -71,8 +93,8 @@ KERNEL_EXPORT void      outl(uint64_t port, uint32_t  data);
 KERNEL_EXPORT void      insl(uint16_t port, void *buf, unsigned long count);
 KERNEL_EXPORT void      outsl(uint16_t port, const void *buf, unsigned long count);
 
-void outbSlow(uint64_t port,uint8_t data);
 
+void outbSlow(uint64_t port,uint8_t data);
 
 #endif
 #ifdef __cplusplus

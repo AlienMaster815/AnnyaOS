@@ -37,6 +37,8 @@
 #include "DrsdAtomicHelper.h"
 #include "DrsdEdid.h"
 #include "DrsdEld.h"
+#include "DrsdDraw.h"
+#include "DrsdFormat.h"
 
 
 #endif

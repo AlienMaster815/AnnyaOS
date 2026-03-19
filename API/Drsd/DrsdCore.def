@@ -3,3 +3,18 @@ LIBRARY DRSDCORE.SYS
 EXPORTS	
     DrsdGetConnectorTypeName
     DrsdBridgeHelperResetCrtc
+    DrsdAtomicGetConnectorForEncoder
+    DrsdAtomicHelperResetCrtc
+    DrsdEldSadGet
+    DrsdEldSadSet
+    DrsdModeParseCommandLineForConnector
+    DrsdModesetLock
+    DrsdModesetUnlock
+    DrsdDrawCanConvertFromXrgb8888
+    DrsdDrawColorFromXrgb8888
+    DrsdDrawBlit16
+    DrsdDrawBlit24
+    DrsdDrawBlit32
+    DrsdDrawFill16
+    DrsdDrawFill24
+    DrsdDrawFill32

@@ -108,7 +108,7 @@ static void FillOutInitializationMode(PDRSD_CONNECTOR Connector, PDRSD_PLANE_STA
     State->FrameBuffer->Height = State->Height;
     size_t i;
     for(i = 0; i < State->FormatCount; i++){
-        if(strncmp(DRSD_COLOR_FORMAT_XRGB8888, (string)&State->Formats[i] ,4) == 0){
+        if(DRSD_COLOR_FORMAT_XRGB8888 == State->Formats[i]){
             State->FrameBuffer->Bpp = 32;
             State->FrameBuffer->Pitch = 4 * State->Width;
             State->FrameBuffer->FramebufferSize = State->FrameBuffer->Pitch * State->FrameBuffer->Height;
@@ -306,7 +306,7 @@ LouKeDrsdInitializeDevice(
         Formats = PrimaryPlane->Formats;
 
         for(INT64 foo = 0 ; foo < FormatCount; foo++){
-            if(memcmp(&Formats[foo] , DRSD_COLOR_FORMAT_XRGB8888, 4) == 0){
+            if(Formats[foo] == DRSD_COLOR_FORMAT_XRGB8888){
                 PrimaryPlane->AlphaShift = 24;
                 PrimaryPlane->RedShift = 16;
                 PrimaryPlane->GreenShift = 8;

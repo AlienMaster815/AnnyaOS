@@ -10,11 +10,13 @@ SRC = DrsdCore.c \
 		DrsdAtomic.c \
 		DrsdAtomicHelper.c \
 		DrsdEld.c \
-		DrsdEdid.c
+		DrsdEdid.c \
+		DrsdDraw.c \
+		DrsdFormatHelper.c 
 
 
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreSubsystemEntry -fno-builtin
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreSubsystemEntry -fno-builtin -Wno-multichar
 
 # Tool and Flags
 DLLTOOL = x86_64-w64-mingw32-dlltool

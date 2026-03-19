@@ -677,9 +677,9 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
     Device->ModeConfig.MaximumHeight = VIRTUALBOX_VBE_DISPI_MAX_YRESOLUTION;
     Device->ModeConfig.PreferedDepth = 24;
 
-    memcpy(&PlaneFormats[0], DRSD_COLOR_FORMAT_XRGB8888, 4); 
-    memcpy(&PlaneFormats[1], DRSD_COLOR_FORMAT_ARGB8888, 4); 
-    memcpy(&CursorPlaneFormats[0], DRSD_COLOR_FORMAT_ARGB8888, 4);
+    PlaneFormats[0] = DRSD_COLOR_FORMAT_XRGB8888; 
+    PlaneFormats[1] = DRSD_COLOR_FORMAT_ARGB8888; 
+    CursorPlaneFormats[0] = DRSD_COLOR_FORMAT_ARGB8888;
 
     for(size_t  i = 0 ; i < VBox->CrtcCount; i++){
         VBoxCrtc = VirtualboxCrtcInitialize(Device, i);

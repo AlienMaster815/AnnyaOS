@@ -2259,6 +2259,13 @@ KERNEL_EXPORT
 void 
 LdmlibProcgrpInitialize();
 
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeSwapEndianess(
+    void* InStreamTmp, 
+    void* OutStreamTmp, 
+    size_t StreamSize
+);
 
 #endif
 #ifdef __cplusplus

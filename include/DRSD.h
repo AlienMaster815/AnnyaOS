@@ -52,45 +52,62 @@ struct _DRSD_CONNECTOR;
 struct _DRSD_PROPERTY;
 struct _DRSD_MODE_SET_CONTEXT;
 
-
-
 //8 bit color
-#define DRSD_COLOR_FORMAT_RGB332    "RGB8"
-#define DRSD_COLOR_FORMAT_BGR233    "BGR8"
+#define DRSD_COLOR_FORMAT_RGB332    'RGB8'
+#define DRSD_COLOR_FORMAT_BGR233    'BGR8'
 
 //16 bit Color
-#define DRSD_COLOR_FORMAT_XRGB4444  "XR12"
-#define DRSD_COLOR_FORMAT_XBGR4444  "XB12"
-#define DRSD_COLOR_FORMAT_RGBX4444  "RX12"
-#define DRSD_COLOR_FORMAT_BGRX4444  "XB12"
+#define DRSD_COLOR_FORMAT_XRGB4444  'XR12'
+#define DRSD_COLOR_FORMAT_XBGR4444  'XB12'
+#define DRSD_COLOR_FORMAT_RGBX4444  'RX12'
+#define DRSD_COLOR_FORMAT_BGRX4444  'XB12'
 //Alpha 16 bit color
-#define DRSD_COLOR_FORMAT_ARGB4444  "AR12"
-#define DRSD_COLOR_FORMAT_ABGR4444  "AB12"
-#define DRSD_COLOR_FORMAT_RGBA4444  "RA12"
-#define DRSD_COLOR_FORMAT_BGRA4444  "BA12"
+#define DRSD_COLOR_FORMAT_ARGB4444  'AR12'
+#define DRSD_COLOR_FORMAT_ABGR4444  'AB12'
+#define DRSD_COLOR_FORMAT_RGBA4444  'RA12'
+#define DRSD_COLOR_FORMAT_BGRA4444  'BA12'
 //PBD 16 bit color
-#define DRSD_COLOR_FORMAT_XRGB1555  "XR15"
-#define DRSD_COLOR_FORMAT_XBGR1555  "XB15"
-#define DRSD_COLOR_FORMAT_RGBX1555  "RX15"
-#define DRSD_COLOR_FORMAT_BGRX1555  "BX15"
-#define DRSD_COLOR_FORMAT_RGB565    "RG16"
-#define DRSD_COLOR_FORMAT_GRB565    "BG16"
+#define DRSD_COLOR_FORMAT_XRGB1555  'XR15'
+#define DRSD_COLOR_FORMAT_XBGR1555  'XB15'
+#define DRSD_COLOR_FORMAT_RGBX5551  'RX15'
+#define DRSD_COLOR_FORMAT_BGRX5551  'BX15'
+
+#define DRSD_COLOR_FORMAT_ARGB1555  'AR15'
+#define DRSD_COLOR_FORMAT_ABGR1555  'AB15'
+#define DRSD_COLOR_FORMAT_RGBA5551  'RA15'
+#define DRSD_COLOR_FORMAT_BGRA5551  'BA15'
+
+
+#define DRSD_COLOR_FORMAT_RGB565    'RG16'
+#define DRSD_COLOR_FORMAT_GRB565    'BG16'
 
 //24 true RGB
-#define DRSD_COLOR_FORMAT_RGB888    "RG24"
-#define DRSD_COLOR_FORMAT_BBR888    "BG24"
+#define DRSD_COLOR_FORMAT_RGB888    'RG24'
+#define DRSD_COLOR_FORMAT_BBR888    'BG24'
 
 //32 true RGB
-#define DRSD_COLOR_FORMAT_XRGB8888  "XR24"
-#define DRSD_COLOR_FORMAT_XBGR8888  "XB24"
-#define DRSD_COLOR_FORMAT_RGBX8888  "RX24"
-#define DRSD_COLOR_FORMAT_BGRX8888  "BX24"
+#define DRSD_COLOR_FORMAT_XRGB8888  'XR24'
+#define DRSD_COLOR_FORMAT_XBGR8888  'XB24'
+#define DRSD_COLOR_FORMAT_RGBX8888  'RX24'
+#define DRSD_COLOR_FORMAT_BGRX8888  'BX24'
 //Alpha True RGB
-#define DRSD_COLOR_FORMAT_ARGB8888  "AR24"
-#define DRSD_COLOR_FORMAT_ABGR8888  "AB24"
-#define DRSD_COLOR_FORMAT_RGBA8888  "RA24"
-#define DRSD_COLOR_FORMAT_BGRA8888  "BA24"
+#define DRSD_COLOR_FORMAT_ARGB8888  'AR24'
+#define DRSD_COLOR_FORMAT_ABGR8888  'AB24'
+#define DRSD_COLOR_FORMAT_RGBA8888  'RA24'
+#define DRSD_COLOR_FORMAT_BGRA8888  'BA24'
 //PBD 32 bit True RGB
+
+//48 Bit RGB
+#define DRSD_COLOR_FORMAT_XRGB2101010 'XR30'
+#define DRSD_COLOR_FORMAT_XBGR2101010 'XB30'
+#define DRSD_COLOR_FORMAT_RGBX1010102 'RX30'
+#define DRSD_COLOR_FORMAT_BGRX1010102 'BX30'
+
+#define DRSD_COLOR_FORMAT_ARGB2101010 'AR30'
+#define DRSD_COLOR_FORMAT_ABGR2101010 'AB30'
+#define DRSD_COLOR_FORMAT_RGBA1010102 'RX30'
+#define DRSD_COLOR_FORMAT_BGRA1010102 'BX30'
+
 
 typedef enum{
     DRSD_CONNECTOR_CONNECTED = 1,
@@ -289,8 +306,8 @@ typedef struct _DRSD_GXE_OBJECT_FUNCTIONS{
     LOUSTATUS                   (*Pin)(struct _DRSD_GXE_OBJECT* Object);
     void                        (*Unpin)(struct _DRSD_GXE_OBJECT* Object);
     HANDLE                      (*GetScatterGatherTable)(struct _DRSD_GXE_OBJECT* Object);
-    LOUSTATUS                   (*Vmap)(struct _DRSD_GXE_OBJECT* Object, HANDLE IoMap);
-    void                        (*Vunmap)(struct _DRSD_GXE_OBJECT* Object, HANDLE IoMap);
+    LOUSTATUS                   (*Vmap)(struct _DRSD_GXE_OBJECT* Object, PIO_MAP_OBJECT IoMap);
+    void                        (*Vunmap)(struct _DRSD_GXE_OBJECT* Object, PIO_MAP_OBJECT IoMap);
     LOUSTATUS                   (*Mmap)(struct _DRSD_GXE_OBJECT* Object, HANDLE Vma);
     LOUSTATUS                   (*Evict)(struct _DRSD_GXE_OBJECT* Object);
     DRSD_GXE_OBJECT_STATUS      (*Status)(struct _DRSD_GXE_OBJECT* Object);
@@ -463,7 +480,7 @@ typedef struct _DRSD_PLANE_STATE{
     uint32_t*                       Formats;
     size_t                          FormatCount;
     struct _DRSD_CRTC*              Crtc;
-    string                          FormatUsed;
+    UINT32                          FormatUsed;
 }DRSD_PLANE_STATE, * PDRSD_PLANE_STATE;
 
 typedef struct _SHADOW_PLANE_STATE{
@@ -1336,7 +1353,7 @@ typedef struct _DRSD_CLIENT_DEVICE{
 typedef struct _DRSD_CLIENT_BUFFER{
     PDRSD_CLIENT_DEVICE             ClientDevice;
     PDRSD_GXE_OBJECT                GxeObject;
-    HANDLE                          IoMap;
+    PIO_MAP_OBJECT                  IoMap;
     PDRSD_FRAME_BUFFER              FrameBuffer;
 }DRSD_CLIENT_BUFFER, * PDRSD_CLIENT_BUFFER;
 

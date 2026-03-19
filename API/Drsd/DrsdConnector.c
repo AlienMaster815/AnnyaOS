@@ -71,7 +71,8 @@ void DrsdConnectorIdaDestroy(){
 }
 
 DRIVER_EXPORT
-LOUSTR DrsdGetConnectorTypeName(UINT Type){
+LOUSTR 
+DrsdGetConnectorTypeName(UINT Type){
     if(Type >= 21){
         return 0x00;
     }

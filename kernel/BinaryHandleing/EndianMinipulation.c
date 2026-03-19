@@ -8,6 +8,33 @@
 //}
 
 
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeSwapEndianess(
+    void* InStreamTmp, 
+    void* OutStreamTmp, 
+    size_t StreamSize
+){
+    uint8_t* InStream = (uint8_t*)InStreamTmp; 
+    uint8_t* OutStream = (uint8_t*)OutStreamTmp;
+
+    if(RangeInterferes(
+        (UINT64)InStreamTmp,
+        (UINT64)OutStreamTmp,
+        StreamSize,
+        StreamSize
+    )){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    for(size_t i = 0 ; i < StreamSize; i++){
+        OutStream[(StreamSize - 1) - i] = InStream[i]; 
+    }
+    return STATUS_SUCCESS;
+}
+
+
+
 wchar_t* LookForUTF16LEBuffer(wchar_t* BufferOfSearch ,wchar_t* UTF16LEString, size_t BufferSize, size_t StringSize){
 
     if ((!BufferOfSearch) || (!UTF16LEString) || (BufferSize > StringSize)) {

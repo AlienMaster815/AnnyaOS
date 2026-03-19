@@ -202,3 +202,4 @@ EXPORTS
     strchr
     DrsdModesetUnlock
     DrsdModesetLock
+    LouKeSwapEndianess

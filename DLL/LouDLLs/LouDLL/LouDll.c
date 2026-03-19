@@ -213,7 +213,12 @@ LouSwapEndianess(
     uint8_t* InStream = (uint8_t*)InStreamTmp; 
     uint8_t* OutStream = (uint8_t*)OutStreamTmp;
 
-    if((!InStream) || (!OutStream) || ((uintptr_t)InStream == (uintptr_t)OutStream)){
+    if(RangeInterferes(
+        (UINT64)InStreamTmp,
+        (UINT64)OutStreamTmp,
+        StreamSize,
+        StreamSize
+    )){
         return STATUS_INVALID_PARAMETER;
     }
 
