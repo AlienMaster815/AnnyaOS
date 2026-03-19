@@ -8,7 +8,9 @@ SRC = DrsdCore.c \
 		DrsdBridgeHelper.c \
 		DrsdModesetLock.c \
 		DrsdAtomic.c \
-		DrsdAtomicHelper.c 
+		DrsdAtomicHelper.c \
+		DrsdEld.c \
+		DrsdEdid.c
 
 
 CC = x86_64-w64-mingw32-gcc

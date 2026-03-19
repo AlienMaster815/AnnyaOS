@@ -22,15 +22,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
+
 #include "DrsdCore.h"
 
-DRIVER_EXPORT
-BOOL DrsdModeParseCommandLineForConnector(
-    LOUSTR              ModeOption,
-    PDRSD_CONNECTOR     Connector,
-    PDRSD_CMDLINE_MODE  Mode
+void DrsdEdidCtaSadGet(
+    PCEA_SAD    CtaSad, 
+    UINT8*      Sad
 ){
 
-    return false;
+    Sad[0] = CtaSad->Format << 3 | CtaSad->Channels;
+    Sad[1] = CtaSad->Frequency;
+    Sad[2] = CtaSad->Byte2;
+
+}
+
+void DrsdEdidCtaSadSet(
+    PCEA_SAD    CtaSad, 
+    UINT8*      Sad
+){
+
+	CtaSad->Format = (Sad[0] & 0x78) >> 3;
+	CtaSad->Channels = Sad[0] & 0x07;
+	CtaSad->Frequency = Sad[1] & 0x7F;
+	CtaSad->Byte2 = Sad[2];
+
 }

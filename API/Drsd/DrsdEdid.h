@@ -22,15 +22,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
+
+#ifndef _DRSD_EDID_H
+#define _DRSD_EDID_H
+
 #include "DrsdCore.h"
 
-DRIVER_EXPORT
-BOOL DrsdModeParseCommandLineForConnector(
-    LOUSTR              ModeOption,
-    PDRSD_CONNECTOR     Connector,
-    PDRSD_CMDLINE_MODE  Mode
-){
+typedef struct _CEA_SAD{
+    UINT8       Format;
+    UINT8       Channels;
+    UINT8       Frequency;
+    UINT8       Byte2;
+}CEA_SAD, * PCEA_SAD;
 
-    return false;
-}
+void DrsdEdidCtaSadSet(
+    PCEA_SAD    CtaSad, 
+    UINT8*      Sad
+);
+
+void DrsdEdidCtaSadGet(
+    PCEA_SAD    CtaSad, 
+    UINT8*      Sad
+);
+
+
+#endif

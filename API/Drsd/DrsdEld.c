@@ -22,15 +22,42 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
+
 #include "DrsdCore.h"
 
+DRIVER_EXPORT 
+LOUSTATUS 
+DrsdEldSadGet(
+    UINT8*      Eld,
+    int         SadIndex,
+    PCEA_SAD    CtaSad
+){
+    if(SadIndex >= DrsdEldSadCount(Eld)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    UINT8* Sad = Eld + DRSD_ELD_CEA_SAD(DrsdEldMnl(Eld), SadIndex);
+
+    DrsdEdidCtaSadSet(CtaSad, Sad);
+
+    return STATUS_SUCCESS;
+}
+
 DRIVER_EXPORT
-BOOL DrsdModeParseCommandLineForConnector(
-    LOUSTR              ModeOption,
-    PDRSD_CONNECTOR     Connector,
-    PDRSD_CMDLINE_MODE  Mode
+LOUSTATUS 
+DrsdEldSadSet(
+    UINT8*      Eld,
+    int         SadIndex,
+    PCEA_SAD    CtaSad
 ){
 
-    return false;
+    if(SadIndex >= DrsdEldSadCount(Eld)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    UINT8* Sad = Eld + DRSD_ELD_CEA_SAD(DrsdEldMnl(Eld), SadIndex);
+
+    DrsdEdidCtaSadGet(CtaSad, Sad);
+
+    return STATUS_SUCCESS;
 }
