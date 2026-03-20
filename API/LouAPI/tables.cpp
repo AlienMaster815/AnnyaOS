@@ -293,7 +293,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[98] = "AtaStdQcDefer";
     ImportTables[0].FunctionName[99] = "LouGeneralAllocateMemoryEx";
     ImportTables[0].FunctionName[100] = "memset";
-    ImportTables[0].FunctionName[101] = "LouKeWaitForUlongRegisterCondition";
+    ImportTables[0].FunctionName[101] = "LouKeWaitForUlongRegisterConditionMs";
     ImportTables[0].FunctionName[102] = "LouKeCreateFixedPool";
     ImportTables[0].FunctionName[103] = "outw";
     ImportTables[0].FunctionName[106] = "inw";
@@ -461,7 +461,7 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[92] = (uint64_t)LouKeHalMallocPciIrqVectors;
     ImportTables[0].VirtualAddress[99] = (uint64_t)LouGeneralAllocateMemoryEx;
     ImportTables[0].VirtualAddress[100] = (uint64_t)memset;
-    ImportTables[0].VirtualAddress[101] = (uint64_t)LouKeWaitForUlongRegisterCondition;
+    ImportTables[0].VirtualAddress[101] = (uint64_t)LouKeWaitForUlongRegisterConditionMs;
     ImportTables[0].VirtualAddress[102] = (uint64_t)LouKeCreateFixedPool;
     ImportTables[0].VirtualAddress[103] = (uint64_t)outw; 
     ImportTables[0].VirtualAddress[106] = (uint64_t)inw;

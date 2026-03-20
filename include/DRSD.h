@@ -506,9 +506,9 @@ typedef struct _DRSD_PENDING_VBLANK_EVENT{
 typedef struct _DRSD_CRTC_COMMIT{
     struct _DRSD_CRTC*              Crtc;
     atomic_t                        Reference;
-    PLOUQ_COMPLETION                FlipDone;
-    PLOUQ_COMPLETION                HwDone;
-    PLOUQ_COMPLETION                CleanupDone;
+    LOUQ_COMPLETION                 FlipDone;
+    LOUQ_COMPLETION                 HwDone;
+    LOUQ_COMPLETION                 CleanupDone;
     ListHeader                      CommitEntry;
     PDRSD_PENDING_VBLANK_EVENT      Event;
     BOOLEAN                         AbortCompletion;
@@ -1034,7 +1034,8 @@ typedef struct _DRSD_MODE_CONFIGURATION_CALLBACKS{
     void*                           (*AcquireAtomic)(struct _DRSD_DEVICE* Device);
     void*                           (*AtomicReset)(void* Ah);
     void*                           (*ReleaseAtomic)(struct _DRSD_DEVICE* Device);
-}DRSD_MODE_CONFIGURATION_CALLBACKS, * PDRSD_MODE_CONFIGURATION_CALLBACKS;
+}DRSD_MODE_CONFIGURATION_CALLBACKS, * PDRSD_MODE_CONFIGURATION_CALLBACKS,
+    DRSD_MODE_CONFIGURATION_FUNCTIONS, * PDRSD_MODE_CONFIGURATION_FUNCTIONS;
 
 typedef struct _DRSD_VBLANK_CRTC{
     ListHeader  Peers;
@@ -1047,14 +1048,123 @@ typedef struct _DRSD_MODESET_LOCK{
     ListHeader  Head;
 }DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
 
+typedef struct _DRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS{
+    PVOID TODO;
+}DRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS, * PDRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS;
+
 typedef struct _DRSD_MODE_CONFIGURATION{
-    mutex_t                                 ConfigLock;
-    DRSD_MODESET_LOCK                       ConnectionMutex;
-    spinlock_t                              ConnectorListLock;
+    mutex_t                                     Mutex;
+    DRSD_MODESET_LOCK                           ConnectionMutex;
+    struct _DRSD_MODESET_ACQURE_CONTEXT*        AcquireContext;
+    mutex_t                                     IdrMutex;
+    XARRAY                                      ObjectIdr;
+    XARRAY                                      TitleIdr;
+    mutex_t                                     FbLock;
+    SIZE                                        FbCount;
+    ListHeader                                  FbList;
+    spinlock_t                                  ConnectorListLock;
+    SIZE                                        ConnectorCount;
+    XARRAY                                      ConnectorIda;
+    ListHeader                                  ConnectorList;
+    ListHeader                                  ConnectorFreeList;
+    LOUQ_WORK                                   ConnectorFreeWork;
+    SIZE                                        EncoderCount;
+    ListHeader                                  EncoderList;
+    SIZE                                        TotalPlaneCount;
+    ListHeader                                  PlaneList;
+    spinlock_t                                  PanicLock;
+    SIZE                                        ColorOpCount;
+    ListHeader                                  ColorOpList;
+    SIZE                                        CrtcCount;
+    ListHeader                                  CrtcList;
+    ListHeader                                  PropertyList;
+    ListHeader                                  PrivateObjectsList;
+    UINT                                        MinWidth;
+    UINT                                        MinHeight;
+    UINT                                        MaxWidth;
+    UINT                                        MaxHeight;
+    PDRSD_MODE_CONFIGURATION_FUNCTIONS          Functions;
+    BOOLEAN                                     PollEnabeld;
+    BOOLEAN                                     PollRunning;
+    BOOLEAN                                     DelayedEvent;
+    LOUQ_DELAYED_WORK                           OutputPollWork;
+    mutex_t                                     BlobLock;
+    ListHeader                                  PropertyBlobList;
+    struct _DRSD_PROPERTY*                      EdidProperty;
+    struct _DRSD_PROPERTY*                      DpmsProperty;
+    struct _DRSD_PROPERTY*                      PathProperty;
+    struct _DRSD_PROPERTY*                      TitleProperty;
+    struct _DRSD_PROPERTY*                      LinkStatusProperty;
+    struct _DRSD_PROPERTY*                      PlaneTypeProperty;
+    struct _DRSD_PROPERTY*                      PropSrcX;
+    struct _DRSD_PROPERTY*                      PropSrcY;
+    struct _DRSD_PROPERTY*                      PropSrcW;
+    struct _DRSD_PROPERTY*                      PropSrcH;
+    struct _DRSD_PROPERTY*                      PropCrtcX;
+    struct _DRSD_PROPERTY*                      PropCrtcY;
+    struct _DRSD_PROPERTY*                      PropCrtcW;
+    struct _DRSD_PROPERTY*                      PropCrtcH;
+    struct _DRSD_PROPERTY*                      PropFbId;
+    struct _DRSD_PROPERTY*                      PropInFenceFb;
+    struct _DRSD_PROPERTY*                      PropOutFencePtr;
+    struct _DRSD_PROPERTY*                      PropCrtcId;
+    struct _DRSD_PROPERTY*                      PropFbDamageClips;
+    struct _DRSD_PROPERTY*                      PropActive;
+    struct _DRSD_PROPERTY*                      PropModeId;
+    struct _DRSD_PROPERTY*                      PropVrrEnabled;
+    struct _DRSD_PROPERTY*                      DviISubConnectorProperty;
+    struct _DRSD_PROPERTY*                      DviISelsectSubConnectorProperty;
+    struct _DRSD_PROPERTY*                      DpSubConnectorProperty;
+    struct _DRSD_PROPERTY*                      TvSubConnectorProperty;
+    struct _DRSD_PROPERTY*                      LegacyTvModeProperty;
+    struct _DRSD_PROPERTY*                      TvModeProperty;
+    struct _DRSD_PROPERTY*                      TvLeftMarginProperty;
+    struct _DRSD_PROPERTY*                      TvRightMarginProperty;
+    struct _DRSD_PROPERTY*                      TvTopMarginProperty;
+    struct _DRSD_PROPERTY*                      TvBottomMarginProperty;
+    struct _DRSD_PROPERTY*                      TvBrightnessProperty;
+    struct _DRSD_PROPERTY*                      TvContrastMarginProperty;
+    struct _DRSD_PROPERTY*                      TvFlickerReductionProperty;
+    struct _DRSD_PROPERTY*                      TvOverScanProperty;
+    struct _DRSD_PROPERTY*                      TvSaturationProperty;
+    struct _DRSD_PROPERTY*                      TvHueProperty;
+    struct _DRSD_PROPERTY*                      ScalingModeProperty;
+    struct _DRSD_PROPERTY*                      AspectRatioProperty;
+    struct _DRSD_PROPERTY*                      ContentTypeProperty;
+    struct _DRSD_PROPERTY*                      DeGammaLutProperty;
+    struct _DRSD_PROPERTY*                      DeGammaLutSizeProperty;
+    struct _DRSD_PROPERTY*                      CtmProperty;
+    struct _DRSD_PROPERTY*                      GammaLutProperty;
+    struct _DRSD_PROPERTY*                      GammaLutSizeProperty;
+    struct _DRSD_PROPERTY*                      SuggestedXProperty;
+    struct _DRSD_PROPERTY*                      SuggestedYProperty;
+    struct _DRSD_PROPERTY*                      NonDesktopProperty;
+    struct _DRSD_PROPERTY*                      PanelOrientationProperty;
+    struct _DRSD_PROPERTY*                      WritebackFbIdProperty;
+    struct _DRSD_PROPERTY*                      WriteBackPixelFormatsProperty;
+    struct _DRSD_PROPERTY*                      WriteBackOutFencePtrProperty;
+    struct _DRSD_PROPERTY*                      HdrOutputMetadataProperty;
+    struct _DRSD_PROPERTY*                      ContentProtectionProperty;
+    struct _DRSD_PROPERTY*                      HdcpContentTypeProperty;
+    UINT32                                      PreferredDepth;
+    UINT32                                      PreferredShadow;
+    BOOLEAN                                     QuirkAddFbPreferXbgr30Bpp;
+    BOOLEAN                                     QuirkAddFbPreferHostOrder;
+    BOOLEAN                                     AsyncPageFlip;
+    BOOLEAN                                     FbModifiersNotSupported;
+    BOOLEAN                                     NormalizeZPos;
+    struct _DRSD_PROPERTY*                      ASyncModifiersProperty;
+    struct _DRSD_PROPERTY*                      ModifiersProperty;
+    struct _DRSD_PROPERTY*                      SizeHintsProperty;
+    UINT32                                      CursorWidth;
+    UINT32                                      CursorHeight;
+    struct _DRSD_ATOMIC_STATE*                  SuspendState;
+    PDRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS   HelperPrivate;
+
+    //old functions    
     mutex_t                                 IdLock;
     PDRSD_MODE_CONFIGURATION_CALLBACKS      Callbacks;
     LIST_OBJECT                             FreeList;         
-    LOUQ_WORK                               ConnectorFreeWork;
     size_t                                  MinimalWidth;
     size_t                                  MinimalHeight;
     size_t                                  MaximumWidth;
@@ -1650,7 +1760,7 @@ typedef struct _DRSD_DEVICE{
 
     //New Drsd data
     int                             InterfaceVersion;
-    KERNEL_REFERENCE                KRef;
+    KERNEL_REFERENCE                Reference;
     PLATFORM_DEVICE                 BusDevice;
     PLATFORM_DEVICE                 DmaDevice;
     struct {    
@@ -2006,7 +2116,7 @@ typedef struct _DRSD_MODESET_ACQURE_CONTEXT{
 }DRSD_MODESET_ACQURE_CONTEXT, * PDRSD_MODESET_ACQURE_CONTEXT;
 
 typedef struct _DRSD_ATOMIC_STATE{
-    KERNEL_REFERENCE                        KRef;
+    KERNEL_REFERENCE                        Reference;
     PDRSD_DEVICE                            Device;
     BOOLEAN                                 AllowModeSet;
     BOOLEAN                                 LegacyCurrsorUpdate;
@@ -2014,13 +2124,13 @@ typedef struct _DRSD_ATOMIC_STATE{
     BOOLEAN                                 Duplicated;
     BOOLEAN                                 Checked;
     BOOLEAN                                 PlaneColorPipeline;
-    PDRSD_COLOR_OPS                         ColorOpsWrapper;
+    PDRSD_COLOR_OPS                         ColorOps;
     PDRSD_PLANES_STATE                      Planes;
     PDRSD_CRTCS_STATE                       Crtcs;
     INT32                                   ConnectorCount;
     PDRSD_CONNECTORS_STATE                  Connectors;
-    INT32                                   PrivObjCount;
-    struct _DRSD_PRIVATE_OBJECTS_STATE*     PrivObjs;
+    INT32                                   PrivateObjectsCount;
+    struct _DRSD_PRIVATE_OBJECTS_STATE*     PrivateObjects;
     PDRSD_MODESET_ACQURE_CONTEXT            AcquireContext;
     PDRSD_CRTC_COMMIT                       FakeCommit;
     LOUQ_WORK                               CommitWork;

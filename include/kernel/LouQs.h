@@ -34,7 +34,7 @@ typedef enum{
 }WORK_QUEUE_PRIORITY;
 
 typedef struct _LOUQ_WORK{
-    ListHeader          CurrentWorkList;
+    LOUQ                QueueObject;
     PVOID               Data;//TODO change to ATOMIC64
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
@@ -61,7 +61,8 @@ typedef struct _LOUQ_DELAYED_WORK{
 
 typedef struct _LOUQ_COMPLETION{
     ListHeader          Peers;
-    
+    ATOMIC_BOOLEAN      Completed;
+    PLOUQ               QueueObject;
 }LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
 static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(struct _LOUQ_WORK*)){
@@ -73,6 +74,8 @@ static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)
 KERNEL_EXPORT LOUSTATUS LouKeQueueWork(string QueueName, PLOUQ_WORK WorkItem);
 KERNEL_EXPORT LOUSTATUS LouKeQueueDelayedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
 KERNEL_EXPORT LOUSTATUS LouKeQueueTimedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
+
+KERNEL_EXPORT LOUSTATUS LouKeWaitForCompletionTimeout(PLOUQ_COMPLETION Completion, SIZE Hz);
 
 LOUSTATUS LouKeCreateWorkQueue(
     PLOUQ_WORK_QUEUE*   OutQueue,

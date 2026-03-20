@@ -37,7 +37,7 @@ static DRSD_MODE_SET_CONTEXT ModeSetManagerContextList;
 static mutex_t ModeSetManagerLock;
 
 PDRSD_MODE_SET_CONTEXT DrsdInitializeModeContext(PDRSD_DEVICE Device){
-    MutexLock(&Device->ModeConfig.ConfigLock);
+    MutexLock(&Device->ModeConfig.Mutex);
     MutexLockEx(&ModeSetManagerLock, true);
     
     PDRSD_MODE_SET_CONTEXT TmpContextList = &ModeSetManagerContextList;
@@ -88,5 +88,5 @@ void DrsdModeSetDestroyModeContext(PDRSD_DEVICE Device, PDRSD_MODE_SET_CONTEXT S
         TmpContextList = (PDRSD_MODE_SET_CONTEXT)TmpContextList->Peers.NextHeader;
     }
     MutexUnlock(&ModeSetManagerLock);
-    MutexUnlock(&Device->ModeConfig.ConfigLock);
+    MutexUnlock(&Device->ModeConfig.Mutex);
 }

@@ -1083,11 +1083,27 @@ typedef struct _AHCI_SRB_EXTENSION {
 #ifndef _USER_MODE_CODE_
 
 KERNEL_EXPORT LOUSTATUS 
-LouKeWaitForUlongRegisterCondition(
+LouKeWaitForUlongRegisterConditionMs(
     PULONG  Mmio, 
     size_t  MsWait,
     ULONG   Mask, 
     ULONG   Value
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeWaitForAtomicBooleanRegisterConditionHz(
+    PATOMIC_BOOLEAN     Mmio, 
+    size_t              HzWait, 
+    BOOLEAN             Test
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeWaitForAtomicBooleanRegisterConditionHz(
+    PATOMIC_BOOLEAN     Mmio, 
+    size_t              MsWait, 
+    BOOLEAN             Test
 );
 
 #endif

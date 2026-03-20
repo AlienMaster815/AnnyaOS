@@ -49,6 +49,8 @@ typedef OBJECT_ATTRIBUTES* POBJECT_ATTRIBUTES;
 typedef LOUSTATUS (*LOUSINE_OBJECT_CONSTRUCTOR)(PVOID Object, PVOID ConstructParams);
 typedef LOUSTATUS (*LOUSINE_OBJECT_DECONSTRUCTOR)(PVOID Object);
 
+#define LouKeInitializeKernelRefence(Ref) memset(Ref, 0 , sizeof(KERNEL_REFERENCE))
+
 static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     if(MutexIsLocked(&KRef->IncrementLock)){
         return false;

@@ -25,6 +25,17 @@
 
 #include "DrsdCore.h"
 
+
+
+DRIVER_EXPORT
+void DrsdAcquireDevice(
+    PDRSD_DEVICE Device
+){
+    if(Device){
+        LouKeAcquireReference(&Device->Reference);
+    }
+}
+
 KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
     LouPrint("DrsdCoreSubsystemEntry()\n");
 

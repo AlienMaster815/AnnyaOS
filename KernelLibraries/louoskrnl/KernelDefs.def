@@ -96,7 +96,7 @@ EXPORTS
     LouKeHalPciSetMaster
     LouKeRegisterDevice
     AtaStdQcDefer
-    LouKeWaitForUlongRegisterCondition
+    LouKeWaitForUlongRegisterConditionMs
     LouKeCreateFixedPool
     outw
     LouKeMalloc
@@ -203,3 +203,14 @@ EXPORTS
     DrsdModesetUnlock
     DrsdModesetLock
     LouKeSwapEndianess
+    LouKeWaitForAtomicBooleanRegisterConditionMs
+    LouKeWaitForAtomicBooleanRegisterConditionHz
+    LouKeWaitForUlonglongRegisterConditionHz
+    LouKeWaitForUlonglongRegisterConditionMs
+    LouKeWaitForUlongRegisterConditionHz
+    LouKeWaitForUshortRegisterConditionHz
+    LouKeWaitForUshortRegisterConditionMs
+    LouKeWaitForUcharRegisterConditionHz
+    LouKeWaitForUcharRegisterConditionMs
+    LouKeWaitForCompletionTimeout
+    DrsdAtomicStateDefaultRelease

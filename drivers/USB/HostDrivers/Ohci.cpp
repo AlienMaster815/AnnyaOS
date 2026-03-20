@@ -38,7 +38,7 @@ LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
 
     OpRegs->HcRhPortStatus[Port] = Tmp;
 
-    Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterConditionMs(
         (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcRhPortStatus[Port]), //it actually is aligned the compiler just gives a warning
         100,
         OHCI_PORT_STATUS_PRS,
@@ -229,7 +229,7 @@ LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice){
     OhciDevice->Fminterval = OhciDevice->OperationalRegisters->HcFmInterval;
     OhciDevice->OperationalRegisters->HcCommandStatus |= OHCI_COMMAND_STATUS_HCR;
 
-    Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterConditionMs(
         (PULONG)LouKeCastToUnalignedPointer(&OhciDevice->OperationalRegisters->HcCommandStatus),//it actually is aligned the compiler just gives a warning
         10,
         OHCI_COMMAND_STATUS_HCR,
@@ -306,7 +306,7 @@ LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice){
 
     OpRegs->HcControl = SET_OHCI_COTROL_HCFS(OpRegs->HcControl , OHCI_HCFS_USBSUSPEND);
 
-    Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterConditionMs(
         (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcControl),
         10,
         OHCI_CONTROL_HCFS,
@@ -329,7 +329,7 @@ LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice){
 
     if(GET_OHCI_CONTROL_HCFS(OpRegs->HcControl) == OHCI_HCFS_USBSUSPEND){
         OpRegs->HcControl = SET_OHCI_COTROL_HCFS(OpRegs->HcControl , OHCI_HCFS_USBOPERATIONAL);
-        Status = LouKeWaitForUlongRegisterCondition(
+        Status = LouKeWaitForUlongRegisterConditionMs(
             (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcControl),
             10,
             OHCI_CONTROL_HCFS,

@@ -56,7 +56,7 @@ LOUSTATUS AddDevice(
     }
 
     OpRegs->UsbStatus = EHCI_USBSTS_SET_USBINT(OpRegs->UsbStatus, 1);
-    Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterConditionMs(
         (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
         10,
         EHCI_USBSTS_USBINT,
@@ -70,7 +70,7 @@ LOUSTATUS AddDevice(
 
     OpRegs->UsbCommand = EHCI_SET_USBCMD_RS(OpRegs->UsbCommand, 1);
 
-    Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterConditionMs(
         (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
         10,
         EHCI_USBSTS_HC_HALTED,

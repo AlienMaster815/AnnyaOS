@@ -40,5 +40,10 @@
 #include "DrsdDraw.h"
 #include "DrsdFormat.h"
 
+DRIVER_EXPORT
+void DrsdAcquireDevice(
+    PDRSD_DEVICE Device
+);
+
 
 #endif

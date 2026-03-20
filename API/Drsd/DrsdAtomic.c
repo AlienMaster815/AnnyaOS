@@ -26,13 +26,83 @@
 
 #include "DrsdCore.h"
 
-KERNEL_EXPORT
+DRIVER_EXPORT
 void 
 __DrsdCrtcCommitFree(PKERNEL_REFERENCE Kref){
     PDRSD_CRTC_COMMIT Commit = CONTAINER_OF(Kref, DRSD_CRTC_COMMIT, Reference);
     LouKeFree(Commit);
 }
 
+DRIVER_EXPORT
+LOUSTATUS
+DrsdCrtcCommitWait(
+    PDRSD_CRTC_COMMIT Commit
+){
+    LOUSTATUS Status;
+    if(!Commit){
+        return STATUS_SUCCESS;
+    }
+
+    Status = LouKeWaitForCompletionTimeout(&Commit->HwDone, 10);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("DRSD.SYS:Crtc:%h HwDone Timed Out\n", Commit->Crtc->Device);
+        return STATUS_TIMEOUT;
+    }
+
+    Status = LouKeWaitForCompletionTimeout(&Commit->FlipDone, 10);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("DRSD.SYS:Crtc:%h FlipDone Timed Out\n", Commit->Crtc->Device);
+        return STATUS_TIMEOUT;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT 
+void 
+DrsdAtomicStateDefaultRelease(
+    PDRSD_ATOMIC_STATE State
+){
+    LouKeFree(State->Connectors);
+    LouKeFree(State->Crtcs);
+    LouKeFree(State->Planes);
+    LouKeFree(State->ColorOps);
+    LouKeFree(State->PrivateObjects);
+}
+
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicStateInitalize(
+    PDRSD_DEVICE        Device,
+    PDRSD_ATOMIC_STATE  State
+){
+    LouKeInitializeKernelRefence(&State->Reference);
+    State->AllowModeSet = true;
+    State->Crtcs = LouKeMallocArray(DRSD_CRTCS_STATE, Device->ModeConfig.CrtcCount, KERNEL_GENERIC_MEMORY);
+    if(!State->Crtcs){
+        goto _INIT_FAILED;
+    }
+    State->Planes = LouKeMallocArray(DRSD_PLANES_STATE, Device->ModeConfig.TotalPlaneCount, KERNEL_GENERIC_MEMORY);
+    if(State->Planes){
+        goto _INIT_FAILED;
+    }
+    State->ColorOps = LouKeMallocArray(DRSD_COLOR_OPS, Device->ModeConfig.ColorOpCount, KERNEL_GENERIC_MEMORY);
+    if(State->ColorOps){
+        goto _INIT_FAILED;
+    }
+
+    DrsdAcquireDevice(Device);
+    State->Device = Device;
+
+    LouPrint("DRSD.SYS:Allocated Device State:%h\n", State);
+
+    return STATUS_SUCCESS;
+
+    _INIT_FAILED:
+        DrsdAtomicStateDefaultRelease(State);
+        return STATUS_INSUFFICIENT_RESOURCES;
+
+}
 
 DRIVER_EXPORT
 PDRSD_CONNECTOR 

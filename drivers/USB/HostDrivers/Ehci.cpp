@@ -10,7 +10,7 @@ LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice){
     LOUSTATUS Status;
     if(!EHCI_GET_USBSTS_HC_HALTED(OpRegs->UsbStatus)){
         OpRegs->UsbCommand = EHCI_SET_USBCMD_RS(OpRegs->UsbCommand, 0);
-        Status = LouKeWaitForUlongRegisterCondition(
+        Status = LouKeWaitForUlongRegisterConditionMs(
             (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus), //this is not unaligned the compiler is a bitch
             10,
             EHCI_USBSTS_HC_HALTED,
@@ -37,7 +37,7 @@ LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice){
     LOUSTATUS Status;
 
     OpRegs->UsbCommand = EHCI_SET_USBCMD_HCRESET(OpRegs->UsbCommand, 1);
-    Status = LouKeWaitForUlongRegisterCondition(
+    Status = LouKeWaitForUlongRegisterConditionMs(
         (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbCommand), //this is not unaligned the compiler is a bitch
         10,
         EHCI_USBCMD_HCRESET,

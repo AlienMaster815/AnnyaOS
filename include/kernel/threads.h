@@ -42,7 +42,7 @@ static inline void LouKeSetAtomicBoolean(PATOMIC_BOOLEAN b, int Boolean){
     LouKeSetAtomic(b, Boolean);
 }
 
-static inline bool LouKeCheckAtomicBoolean(PATOMIC_BOOLEAN b){
+static inline bool LouKeGetAtomicBoolean(PATOMIC_BOOLEAN b){
     return (bool)LouKeGetAtomic(b);
 }
 
