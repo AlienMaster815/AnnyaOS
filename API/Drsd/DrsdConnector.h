@@ -22,31 +22,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
- 
-#define _KERNEL_MODULE_
-#ifndef _DRSD_CORE_H
-#define _DRSD_CORE_H
 
-#include <LouDDK.h>
+#ifndef _DRSD_CONNECTOR_INTERNAL_H
+#define _DRSD_CONNECTOR_INTERNAL_H
 
-#include "DrsdCrtcInternals.h"
-#include "DrsdCache.h"
-#include "DrsdModes.h"
-#include "DrsdModesetLock.h"
-#include "DrsdAtomic.h"
-#include "DrsdAtomicHelper.h"
-#include "DrsdEdid.h"
-#include "DrsdEld.h"
-#include "DrsdDraw.h"
-#include "DrsdFormat.h"
-#include "DrsdModeObject.h"
-#include "DrsdConnector.h"
+#include "DrsdCore.h"
 
-
-DRIVER_EXPORT
-void DrsdAcquireDevice(
-    PDRSD_DEVICE Device
-);
-
+static inline void DrsdConnectorPut(PDRSD_CONNECTOR Connector){
+    DrsdModeObjectPut(&Connector->Base);
+}
 
 #endif

@@ -45,9 +45,10 @@ LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, 
 
 KERNEL_EXPORT
 PDRSD_FRAME_BUFFER DrsdGxeCreateAsyncFramebuffer(
-    PDRSD_DEVICE    Device,
-    void*           DrsdBuffer,
-    void*           DrsdCommandBuffer
+    PDRSD_DEVICE                Device,
+    PDRSD_FILE                  FilePrivate,
+    PDRSD_FORMAT_INFORMATION    Info,
+    PDRSD_MODE_FB_COMMAND2      ModeCommand
 ){
 
     LouPrint("DrsdGxeCreateAsyncFramebuffer()\n");
@@ -68,8 +69,8 @@ DRSD_MODE_STATUS DrsdGxeVramInternalModeValid(
 
 KERNEL_EXPORT
 LOUSTATUS DrsdInternalAtomicCheck(
-    PDRSD_DEVICE        Device,
-    void*               AtomicHandle
+    PDRSD_DEVICE Device, 
+    PDRSD_ATOMIC_STATE State
 ){
     LouPrint("DrsdInternalAtomicCheck()\n");
     while(1);
@@ -77,10 +78,10 @@ LOUSTATUS DrsdInternalAtomicCheck(
 }
 
 KERNEL_EXPORT
-LOUSTATUS DrsdInternalAtomicUpdate(
+LOUSTATUS DrsdInternalAtomicCommit(
     PDRSD_DEVICE        Device,
-    void*               AtomicHandle,
-    bool                NonBlock
+    PDRSD_ATOMIC_STATE  State,
+    BOOLEAN             NonBlock
 ){
 
     LouPrint("DrsdInternalAtomicUpdate()\n");
@@ -342,7 +343,7 @@ KERNEL_EXPORT
 LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
     PDRSD_CRTC                      Crtc,
     PDRSD_FRAME_BUFFER              FrameBuffer,
-    void*                           VBlankEvent,
+    PDRSD_PENDING_VBLANK_EVENT      VBlankEvent,
     uint32_t                        Flags,
     struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 ){
@@ -480,8 +481,8 @@ void DrsdModeConfigReset(PDRSD_DEVICE Device){
     }
 
     while(Crtc){
-        if(Crtc->CrtcCallbacks->ResetCrtc){
-            Crtc->CrtcCallbacks->ResetCrtc(Crtc);
+        if(Crtc->CrtcCallbacks->Reset){
+            Crtc->CrtcCallbacks->Reset(Crtc);
         }
         Crtc = (PDRSD_CRTC)Crtc->Peers.NextHeader;
     }   
@@ -494,8 +495,8 @@ void DrsdModeConfigReset(PDRSD_DEVICE Device){
     }
 
     while(Connector){
-        if(Connector->Callbacks->ResetConnector){
-            Connector->Callbacks->ResetConnector(Connector);
+        if(Connector->Callbacks->Reset){
+            Connector->Callbacks->Reset(Connector);
         }
         Connector = (PDRSD_CONNECTOR)Connector->Peers.NextHeader;
     }

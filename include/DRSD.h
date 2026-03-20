@@ -51,6 +51,9 @@ struct _DRSD_CRTC_STATE;
 struct _DRSD_CONNECTOR;
 struct _DRSD_PROPERTY;
 struct _DRSD_MODE_SET_CONTEXT;
+struct _DRSD_PRIVATE_OBJECT;
+struct _DRSD_COLOR_OP;
+struct _DRSD_ATOMIC_STATE;
 
 //8 bit color
 #define DRSD_COLOR_FORMAT_RGB332    'RGB8'
@@ -182,6 +185,11 @@ typedef enum {
 
 #define DRSD_MODE_OBJECT_ID_PLANE 1
 
+typedef struct _DRSD_MODESET_LOCK{
+    mutex_t     Mutex;
+    ListHeader  Head;
+}DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
+
 typedef struct _DRSD_PROPERTY{
     uintptr_t Foo;
 }DRSD_PROPERTY, * PDRSD_PROPERTY;
@@ -192,7 +200,7 @@ typedef struct _DRSD_MODE_OBJECT{
     uint32_t                            ModeType;
     struct _DRSD_OBJECT_PROPERTIES*     Properties;
     KERNEL_REFERENCE                    ReferenceCount;
-    void                                (*FreeCb)(int Reference);
+    void                                (*FreeCb)(PKERNEL_REFERENCE Reference);
 }DRSD_MODE_OBJECT, * PDRSD_MODE_OBJECT;
 
 typedef struct _DRSD_OBJECT_PROPERTIES{
@@ -505,7 +513,7 @@ typedef struct _DRSD_PENDING_VBLANK_EVENT{
 
 typedef struct _DRSD_CRTC_COMMIT{
     struct _DRSD_CRTC*              Crtc;
-    atomic_t                        Reference;
+    KERNEL_REFERENCE                Reference;
     LOUQ_COMPLETION                 FlipDone;
     LOUQ_COMPLETION                 HwDone;
     LOUQ_COMPLETION                 CleanupDone;
@@ -554,17 +562,18 @@ typedef struct _DRSD_PLANE_CALLBACKS{
     LOUSTATUS                   (*DisablePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     void                        (*DestroyPlane)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState);
     void                        (*ResetPlane)(struct _DRSD_PLANE* Plane);
-    LOUSTATUS                   (*SetPlaneProperty)(struct _DRSD_PLANE* Plane, void* PropertyBuffer, uint64_t Value);
-    struct _DRSD_PLANE_STATE*   (*DuplicatePlaneAtomicState)(struct _DRSD_PLANE* Plane);
-    void                        (*DestroyPlaneAtomic)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState);
-    LOUSTATUS                   (*SetPropertyAtomic)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState, void* Property, uint64_t Value);
-    LOUSTATUS                   (*GetPropertyAtomic)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState, void* Property, uint64_t* Value);
-    LOUSTATUS                   (*PlaneLateRegister)(struct _DRSD_PLANE* Planem);
-    LOUSTATUS                   (*PlaneEarlyRegister)(struct _DRSD_PLANE* Planem);
-    void                        (*PrintPlaneStateAtomic)(struct _DRSD_PLANE_STATE* State);
+    LOUSTATUS                   (*SetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PROPERTY* Property, uint64_t Value);
+    struct _DRSD_PLANE_STATE*   (*AtomicDuplicateState)(struct _DRSD_PLANE* Plane);
+    void                        (*AtomicDestroyState)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState);
+    LOUSTATUS                   (*AtomicSetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState, struct _DRSD_PROPERTY* Property, uint64_t Value);
+    LOUSTATUS                   (*AtomicGetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState, struct _DRSD_PROPERTY* Property, uint64_t* Value);
+    LOUSTATUS                   (*LateRegister)(struct _DRSD_PLANE* Planem);
+    LOUSTATUS                   (*EarlyRegister)(struct _DRSD_PLANE* Planem);
+    void                        (*PrintAtomicState)(struct _DRSD_PLANE_STATE* State);
     bool                        (*ModifierFormatSupported)(struct _DRSD_PLANE* Plane, uint32_t Format, uint64_t Modifier);
     bool                        (*AsyncModifierFormatSupported)(struct _DRSD_PLANE* Plane, uint32_t Format, uint64_t Modifier);
-}DRSD_PLANE_CALLBACKS, * PDRSD_PLANE_CALLBACKS;
+}DRSD_PLANE_CALLBACKS, * PDRSD_PLANE_CALLBACKS, 
+    DRSD_PLANE_FUNCTIONS, * PDRSD_PLANE_FUNCTIONS;
 
 typedef enum{
     OVERLAY_PLANE = 0,
@@ -573,19 +582,32 @@ typedef enum{
 }DRSD_PLANE_TYPE;
 
 typedef struct _DRSD_PLANE{
-    ListHeader                      Peers;
+
     struct _DRSD_DEVICE*            Device;
+    ListHeader                      Head;
+    LOUSTR                          Name;
+    DRSD_MODESET_LOCK               Mutex;
+    DRSD_MODE_OBJECT                Base;
+    UINT32                          PossibleCrtcs;
+    UINT32*                         FormatTypes;
+    UINT                            FormatCount;
+    BOOLEAN                         FormatDefault;
+    UINT64*                         Modifiers;
+    UINT                            ModifierCount;
+    struct _DRSD_CRTC*              Crtc;
+    PDRSD_FRAME_BUFFER              Fb;
+    PDRSD_FRAME_BUFFER              OldFb;
+    PDRSD_PLANE_FUNCTIONS           Functions;
+
+
+    //TODO Yatah Yatah Ya
+
+    ListHeader                      Peers;
+    DRSD_MODE_OBJECT                BaseMode;
     string                          PlaneName;
     mutex_t                         PlaneLock;
-    DRSD_MODE_OBJECT                BaseMode;
-    uint32_t*                       FormatTypes;
-    size_t                          FormatCount;
     uint32_t*                       Formats;
-    bool                            FormatDefault;
-    uint64_t*                       Modifiers;
-    uint64_t                        ModifierCount;
     bool                            ModifierDefault;
-    struct _DRSD_CRTC*              Crtc;
     PDRSD_FRAME_BUFFER              FrameBuffer;
     PDRSD_FRAME_BUFFER              OldBuffer;
     PDRSD_PLANE_CALLBACKS           Callbacks;
@@ -724,21 +746,22 @@ typedef struct _DRSD_CONNECTOR_STATE{
 }DRSD_CONNECTOR_STATE, * PDRSD_CONNECTOR_STATE;
 
 typedef struct _DRSD_CONNECTOR_CALLBACKS{
-    LOUSTATUS                   (*ConnectorSetPowerMode)(struct _DRSD_CONNECTOR* Connector, int Mode);
-    void                        (*ResetConnector)(struct _DRSD_CONNECTOR* Connector);
-    DRSD_CONNECTOR_STATUS       (*DetectConnector)(struct _DRSD_CONNECTOR* Connector, bool Force);
-    void                        (*ForceConnector)(struct _DRSD_CONNECTOR* Connector);
-    LOUSTATUS                   (*ConnectorFillModes)(struct _DRSD_CONNECTOR* Connector, uint32_t MaxWidth, uint32_t MaxHeight);
-    LOUSTATUS                   (*SetConnectorProperty)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_PROPERTY* Property, uint64_t Value);
-    LOUSTATUS                   (*ConnectorLateRegister)(struct _DRSD_CONNECTOR* Connector);
-    void                        (*ConnectorEarlyUnregister)(struct _DRSD_CONNECTOR* Connector);
-    void                        (*DestroyConnector)(struct _DRSD_CONNECTOR* Connector);
-    PDRSD_CONNECTOR_STATE       (*ConnectorAtomicDuplicateState)(struct _DRSD_CONNECTOR* Connector);
-    void                        (*ConnectorDestroyStateAtomic)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State);
-    LOUSTATUS                   (*ConnectorSetPropertyAtomic)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State, struct _DRSD_PROPERTY* Property, uint64_t Value);
-    LOUSTATUS                   (*ConnectorGetPropertyAtomic)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State, struct _DRSD_PROPERTY* Property, uint64_t* Value);
+    LOUSTATUS                   (*Dpms)(struct _DRSD_CONNECTOR* Connector, int Mode);
+    void                        (*Reset)(struct _DRSD_CONNECTOR* Connector);
+    DRSD_CONNECTOR_STATUS       (*Detect)(struct _DRSD_CONNECTOR* Connector, bool Force);
+    void                        (*Force)(struct _DRSD_CONNECTOR* Connector);
+    LOUSTATUS                   (*FillModes)(struct _DRSD_CONNECTOR* Connector, uint32_t MaxWidth, uint32_t MaxHeight);
+    LOUSTATUS                   (*SetProperty)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_PROPERTY* Property, uint64_t Value);
+    LOUSTATUS                   (*LateRegister)(struct _DRSD_CONNECTOR* Connector);
+    void                        (*EarlyUnregister)(struct _DRSD_CONNECTOR* Connector);
+    void                        (*Destroy)(struct _DRSD_CONNECTOR* Connector);
+    PDRSD_CONNECTOR_STATE       (*AtomicDuplicateState)(struct _DRSD_CONNECTOR* Connector);
+    void                        (*AtomicDestroyState)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State);
+    LOUSTATUS                   (*AtomicSetProperty)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State, struct _DRSD_PROPERTY* Property, uint64_t Value);
+    LOUSTATUS                   (*AtomicGetProperty)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State, struct _DRSD_PROPERTY* Property, uint64_t* Value);
     void                        (*OobHotplugEvent)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_CONNECTOR_STATE* State);
-}DRSD_CONNECTOR_CALLBACKS , * PDRSD_CONNECTOR_CALLBACKS;
+}DRSD_CONNECTOR_CALLBACKS , * PDRSD_CONNECTOR_CALLBACKS, 
+    DRSD_CONNECTOR_FUNCTIONS , * PDRSD_CONNECTOR_FUNCTIONS;
 
 typedef struct _DRSD_PROPERTY_BLOB{
     ListHeader              Peers;
@@ -814,26 +837,54 @@ typedef struct _DRSD_CMDLINE_MODE{
     BOOL                        TvModeSpecified;
 }DRSD_CMDLINE_MODE, * PDRSD_CMDLINE_MODE;
 
+typedef enum _DRSD_CONNECTOR_REISTRATION_STATE{
+    DRSD_CONNECTOR_INITIALIZING = 0,
+    DRSD_CONNECTOR_REGISTERED,
+    DRSD_CONNECTRO_UNREGISTERED,
+}DRSD_CONNECTOR_REISTRATION_STATE, * PDRSD_CONNECTOR_REISTRATION_STATE;
+
 typedef struct _DRSD_CONNECTOR{
-    ListHeader                          Peers;
     struct _DRSD_DEVICE*                Device;
-    void*                               PrivateData;
-    void*                               DownwireDevices;//some setups have smart systems down the wire
+    PLATFORM_DEVICE                     KernelDevice;
+    HANDLE                              DeviceAttributes;
+    HANDLE                              FwNodeHandle;
+    ListHeader                          Head;
     ListHeader                          GlobalConectorList;
     DRSD_MODE_OBJECT                    Base;
     string                              Name;
     mutex_t                             ConnectorLock;
     size_t                              Index;
+    int                                 ConnectorType;
+    int                                 ConnectorTypeId;
+    BOOLEAN                             InterlacedAllowed;
+    BOOLEAN                             DoublescanAllowed;
+    BOOLEAN                             StereoAllowed;
+    BOOLEAN                             Ycbcr420Allowed;
+    DRSD_CONNECTOR_REISTRATION_STATE    RegistrationState;
+    ListHeader                          Modes;
+    DRSD_CONNECTOR_STATUS               Status;
+    ListHeader                          ProbedModes;
+    PDRSD_DISPLAY_INFORMATION           DisplayInfo;
+    PDRSD_CONNECTOR_FUNCTIONS           Functions;
+    
+    //TODO: make new structure and then move to the new structure
+
+
+
+    //TODO Finish cleaning the old stuff below
+
+    ListHeader                          Peers;
+    void*                               PrivateData;
+    void*                               DownwireDevices;//some setups have smart systems down the wire
+
     int32_t                             CType;
     int32_t                             CTypeID;
     bool                                InterlaceAble;
     bool                                DoubleScanAble;
     bool                                StereoAble;
     bool                                Ycbcr420Able;
-    DRSD_REGISTRATION_STATE             RegistrationState;
     ListHeader                          SupportedModes;
     DRSD_CONNECTOR_STATUS               ConnectorStatus;
-    ListHeader                          ProbedModes;//these modes may burn out things so carefull implementing this in user
     DRSD_CMDLINE_MODE                   CommandLineMode;
     DRSD_DISPLAY_INFORMATION            DisplayInformation;
     PDRSD_CONNECTOR_CALLBACKS           Callbacks;
@@ -859,7 +910,6 @@ typedef struct _DRSD_CONNECTOR{
     struct _DRSD_ENCODER*               Encoder;
     struct _DRSD_CRTC*                  Crtc;
 
-    //TODO: make new structure and then move to the new structure
 
     PDRSD_CONNECTOR_STATE               State;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
@@ -983,14 +1033,14 @@ typedef struct _DRSD_CRTC_ASSIST_CALLBACK{
 }DRSD_CRTC_ASSIST_CALLBACK, * PDRSD_CRTC_ASSIST_CALLBACK;
 
 typedef struct _DRSD_CRTC_CALLBACK{
-    void                        (*ResetCrtc)(struct _DRSD_CRTC* Crtc);
-    LOUSTATUS                   (*SetCursor)(struct _DRSD_CRTC* Crtc, void* DrsdBuffer, uint32_t Handle, uint32_t Width, uint32_t Height);
-    LOUSTATUS                   (*SetCursorEx)(struct _DRSD_CRTC* Crtc, void* DrsdBuffer, uint32_t Handle, uint32_t Width, uint32_t Height, int32_t HotX, int32_t HotY);
+    void                        (*Reset)(struct _DRSD_CRTC* Crtc);
+    LOUSTATUS                   (*SetCursor)(struct _DRSD_CRTC* Crtc, struct _DRSD_FILE* DrsdFile, uint32_t Handle, uint32_t Width, uint32_t Height);
+    LOUSTATUS                   (*SetCursorEx)(struct _DRSD_CRTC* Crtc, struct _DRSD_FILE* DrsdFile, uint32_t Handle, uint32_t Width, uint32_t Height, int32_t HotX, int32_t HotY);
     LOUSTATUS                   (*MoveCursor)(struct _DRSD_CRTC* Crtc, int X, int Y);
-    LOUSTATUS                   (*SetGamma)(struct _DRSD_CRTC* Crtc, uint16_t* R, uint16_t* G, uint16_t* B);
-    void                        (*DestroyCrtc)(struct _DRSD_CRTC* Crtc);
+    LOUSTATUS                   (*SetGamma)(struct _DRSD_CRTC* Crtc, uint16_t* R, uint16_t* G, uint16_t* B, struct _DRSD_MODE_SET_CONTEXT* Context);
+    void                        (*Destroy)(struct _DRSD_CRTC* Crtc);
     LOUSTATUS                   (*SetConfiguration)(void* ModeSet, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
-    LOUSTATUS                   (*PageFlip)(struct _DRSD_CRTC* Crtc, DRSD_FRAME_BUFFER* FrameBuffer, void* VBlankEvent, uint32_t Flags, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*PageFlip)(struct _DRSD_CRTC* Crtc, DRSD_FRAME_BUFFER* FrameBuffer, struct _DRSD_PENDING_VBLANK_EVENT* VBlankEvent, uint32_t Flags, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*PageFlipTarget)(struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* Event, uint32_t Flags, uint32_t Target, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*SetProperty)(struct _DRSD_CRTC* Crtc,  struct _DRSD_PROPERTY* Property, uint64_t Value);
     struct _DRSD_CRTC_STATE*    (*AtomicDuplicateState)(struct _DRSD_CRTC* Crtc);
@@ -1007,12 +1057,32 @@ typedef struct _DRSD_CRTC_CALLBACK{
     LOUSTATUS                   (*EnableVBlank)(struct _DRSD_CRTC* Crtc);
     void                        (*DsiableVBlank)(struct _DRSD_CRTC* Crtc);
     bool                        (*GetVBlankTimeStamp)(struct _DRSD_CRTC* Crtc, int* MaxErrors, uint64_t Time, bool IRQ);
-}DRSD_CRTC_CALLBACK, * PDRSD_CRTC_CALLBACK;
+}DRSD_CRTC_CALLBACK, * PDRSD_CRTC_CALLBACK, DRSD_CRTC_FUNCTIONS, * PDRSD_CRTC_FUNCTIONS;
 
 typedef struct _DRSD_CRTC{
-    ListHeader                      Peers;
+
     struct _DRSD_DEVICE*            Device;
-    bool                            Enabled;
+    PLATFORM_DEVICE                 Port;
+    ListHeader                      Head;
+    LOUSTR                          Name;
+    DRSD_MODESET_LOCK               Mutex;
+    DRSD_MODE_OBJECT                ModeObject;
+    PDRSD_PLANE                     Primary;
+    PDRSD_PLANE                     Cursor;
+    UINT                            Index;
+    int                             CursorX;
+    int                             CursorY;
+    BOOLEAN                         Enabled;
+    DRSD_DISPLAY_MODE               Mode;
+    DRSD_DISPLAY_MODE               HwMode;
+    int                             X;
+    int                             Y;
+    PDRSD_CRTC_FUNCTIONS            Functions;
+
+
+    //TODO: Clean Up Old And Set Up New
+
+    ListHeader                      Peers;
     PDRSD_FRAME_BUFFER              Framebuffer;
     DRSD_DISPLAY_MODE               DisplayMode;
     PDRSD_PLANE                     PrimaryPlane;
@@ -1024,16 +1094,27 @@ typedef struct _DRSD_CRTC{
     PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 
+typedef struct _DRSD_MODE_FB_COMMAND2{
+    UINT32  FbId;
+    UINT32  Width;
+    UINT32  Height;
+    UINT32  PixelFormat;
+    UINT32  Flags;
+    UINT32  Handles[4];
+    UINT32  Pitches[4];
+    UINT32  Offsets[4];
+    UINT64  Modifiers[4];
+}DRSD_MODE_FB_COMMAND2, * PDRSD_MODE_FB_COMMAND2;
 
 typedef struct _DRSD_MODE_CONFIGURATION_CALLBACKS{
-    PDRSD_FRAME_BUFFER              (*CreateFrameBuffer)(struct _DRSD_DEVICE* Device, void* DrsdBuffer, void* CommandBuffer);
-    PDRSD_FORMAT_INFORMATION        (*GetFormatInformation)(void* CommandBuffer);
+    PDRSD_FRAME_BUFFER              (*FbCreate)(struct _DRSD_DEVICE* Device, struct _DRSD_FILE* FilePrivate, PDRSD_FORMAT_INFORMATION Info, DRSD_MODE_FB_COMMAND2* ModeCommand);
+    PDRSD_FORMAT_INFORMATION        (*GetFormatInfo)(UINT32 PixelFormat, UINT64 Modifier);
     DRSD_MODE_STATUS                (*ModeValid)(struct _DRSD_DEVICE* Device, PDRSD_DISPLAY_MODE DisplayMode);
-    LOUSTATUS                       (*AtomicCheck)(struct _DRSD_DEVICE* Device, void* Ah);
-    LOUSTATUS                       (*AtomicSet)(struct _DRSD_DEVICE* Device, void* Ah, bool NonBlock);
-    void*                           (*AcquireAtomic)(struct _DRSD_DEVICE* Device);
-    void*                           (*AtomicReset)(void* Ah);
-    void*                           (*ReleaseAtomic)(struct _DRSD_DEVICE* Device);
+    LOUSTATUS                       (*AtomicCheck)(struct _DRSD_DEVICE* Device, struct _DRSD_ATOMIC_STATE* State);
+    LOUSTATUS                       (*AtomicCommit)(struct _DRSD_DEVICE* Device, struct _DRSD_ATOMIC_STATE* State, BOOLEAN  NonBlock);
+    struct _DRSD_ATOMIC_STATE*      (*AtomicStateAllocate)(struct _DRSD_DEVICE* Device);
+    void                            (*AtomicStateClear)(struct _DRSD_ATOMIC_STATE*);
+    void*                           (*AtomicStateFree)(struct _DRSD_ATOMIC_STATE* State);
 }DRSD_MODE_CONFIGURATION_CALLBACKS, * PDRSD_MODE_CONFIGURATION_CALLBACKS,
     DRSD_MODE_CONFIGURATION_FUNCTIONS, * PDRSD_MODE_CONFIGURATION_FUNCTIONS;
 
@@ -1042,11 +1123,6 @@ typedef struct _DRSD_VBLANK_CRTC{
     atomic_t    Count;
     size_t      InModeset;
 }DRSD_VBLANK_CRTC, * PDRSD_VBLANK_CRTC;
-
-typedef struct _DRSD_MODESET_LOCK{
-    mutex_t     Mutex;
-    ListHeader  Head;
-}DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
 
 typedef struct _DRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS{
     PVOID TODO;
@@ -1996,9 +2072,7 @@ typedef struct _DRSD_LAYERED_CLIP{
     DRSD_CLIP   CurrentClip; 
 }DRSD_LAYERED_CLIP, * PDRSD_LAYERED_CLIP;
 
-struct _DRSD_PRIVATE_OBJECT;
-struct _DRSD_COLOR_OP;
-struct _DRSD_ATOMIC_STATE;
+
 
 typedef enum _DRSD_COLOR_OP_CURVE_1D_TYPE{
     DRSD_COLOR_OP_1D_CURVE_SRGB_EOTF = 0,
@@ -2335,9 +2409,10 @@ void DirectAccessDrsdHotplugEvent(PDRSD_DEVICE Device);
 LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
 PDRSD_FRAME_BUFFER DrsdGxeCreateAsyncFramebuffer(
-    PDRSD_DEVICE    Device,
-    void*           DrsdBuffer,
-    void*           DrsdCommandBuffer
+    PDRSD_DEVICE                Device,
+    PDRSD_FILE                  FilePrivate,
+    PDRSD_FORMAT_INFORMATION    Info,
+    PDRSD_MODE_FB_COMMAND2      ModeCommand
 );
 
 DRSD_MODE_STATUS DrsdGxeVramInternalModeValid(
@@ -2346,14 +2421,14 @@ DRSD_MODE_STATUS DrsdGxeVramInternalModeValid(
 );
 
 LOUSTATUS DrsdInternalAtomicCheck(
-    PDRSD_DEVICE        Device,
-    void*               AtomicHandle
+    PDRSD_DEVICE        Device, 
+    PDRSD_ATOMIC_STATE  State
 );
 
-LOUSTATUS DrsdInternalAtomicUpdate(
+LOUSTATUS DrsdInternalAtomicCommit(
     PDRSD_DEVICE        Device,
-    void*               AtomicHandle,
-    bool                NonBlock
+    PDRSD_ATOMIC_STATE  State,
+    BOOLEAN             NonBlock
 );
 
 LOUSTATUS DrsdInternalPlaneUpdateAtomic(
@@ -2469,7 +2544,7 @@ void DrsdInternalCrtcResetAtomic(
 LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
     PDRSD_CRTC                      Crtc,
     PDRSD_FRAME_BUFFER              FrameBuffer,
-    void*                           VBlankEvent,
+    PDRSD_PENDING_VBLANK_EVENT      VBlankEvent,
     uint32_t                        Flags,
     struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 );

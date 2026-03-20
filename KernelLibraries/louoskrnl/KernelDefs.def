@@ -122,7 +122,7 @@ EXPORTS
     DrsdGxeCreateAsyncFramebuffer
     DrsdGxeVramInternalModeValid
     DrsdInternalAtomicCheck
-    DrsdInternalAtomicUpdate
+    DrsdInternalAtomicCommit
     DrsdInternalResetPlane
     DrsdInternalDestroyPlane
     DrsdInternalPlaneDisableAtomic

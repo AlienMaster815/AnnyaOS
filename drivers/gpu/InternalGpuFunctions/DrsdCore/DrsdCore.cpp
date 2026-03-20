@@ -294,7 +294,7 @@ LouKeDrsdInitializeDevice(
 
     while(Connector){
 
-        Connector->ProbeModeCount = Connector->Callbacks->ConnectorFillModes(
+        Connector->ProbeModeCount = Connector->Callbacks->FillModes(
             Connector, 
             Device->ModeConfig.MaximumWidth, 
             Device->ModeConfig.MaximumHeight

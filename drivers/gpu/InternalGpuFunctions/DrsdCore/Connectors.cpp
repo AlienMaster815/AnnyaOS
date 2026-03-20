@@ -42,8 +42,8 @@ DRSD_CONNECTOR_STATUS DrsdDetectConnectorStatus(
         return Connector->AssistCallbacks->ConnectorDetectContext(Connector, Setex, Force);
     }else if(Connector->AssistCallbacks->ConnectorDetect){
         return Connector->AssistCallbacks->ConnectorDetect(Connector, Force);
-    }else if(Connector->Callbacks->DetectConnector){
-        Connector->Callbacks->DetectConnector(Connector, Force);
+    }else if(Connector->Callbacks->Detect){
+        Connector->Callbacks->Detect(Connector, Force);
     }
     return DRSD_CONNECTOR_CONNECTED;
 }
@@ -99,8 +99,8 @@ LOUSTATUS DrsdInternalProbeSingleConnectorModes(
         }else {
             Connector->ConnectorStatus = DRSD_CONNECTOR_DISCONNECTED;
         }
-        if(Connector->Callbacks->ForceConnector){
-            Connector->Callbacks->ForceConnector(Connector);
+        if(Connector->Callbacks->Force){
+            Connector->Callbacks->Force(Connector);
         }
     }else{
         Status = DrsdInternalProbeDetection(Connector, Setex, true);

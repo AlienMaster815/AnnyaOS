@@ -71,6 +71,16 @@ static inline void LouKeReleaseReference(PKERNEL_REFERENCE KRef){
     MutexUnlock(&KRef->RaceLock);
 }
 
+static inline void LouKeReleaseReferenceAndCall(
+    PKERNEL_REFERENCE       KRef,
+    void                  (*Callback)(PKERNEL_REFERENCE)
+){
+    LouKeReleaseReference(KRef);
+    if(Callback){
+        Callback(KRef);
+    }
+} 
+
 static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
     MutexLock(&KRef->RaceLock);
     UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);

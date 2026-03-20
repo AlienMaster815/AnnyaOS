@@ -28,6 +28,16 @@
 #include "DrsdCore.h"
 
 DRIVER_EXPORT
+void 
+__DrsdCrtcCommitFree(PKERNEL_REFERENCE Kref);
+
+static inline void DrsdCrtcCommitPut(
+    PDRSD_CRTC_COMMIT CrtcCommit
+){
+    LouKeReleaseReferenceAndCall(&CrtcCommit->Reference, __DrsdCrtcCommitFree);
+}
+
+DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
     PDRSD_ENCODER                   Encoder,

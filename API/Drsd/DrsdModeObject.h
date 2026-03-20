@@ -22,14 +22,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
  
+#ifndef _DRSD_MODE_OBJECT_INTERNAL_H
+#define _DRSD_MODE_OBJECT_INTERNAL_H
+
 #include "DrsdCore.h"
 
-void DrsdUnregisterModeObject(
-    PDRSD_DEVICE Device, 
-    PDRSD_MODE_OBJECT Object
-){
+DRIVER_EXPORT
+void 
+DrsdModeObjectPut(
+    PDRSD_MODE_OBJECT ModeObject
+);
 
-    
-
-}
+#endif

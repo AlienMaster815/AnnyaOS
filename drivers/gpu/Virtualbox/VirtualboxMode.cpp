@@ -178,11 +178,11 @@ static  DRSD_CONNECTOR_ASSIST_CALLBACKS VirtualboxConnectorAssistCallbacks = {
 };
 
 static  DRSD_CONNECTOR_CALLBACKS VirtualboxConnectorCalbacks = {
-    .DetectConnector = VirtualboxConnectorDetect,
-    .ConnectorFillModes = VirtualboxFillModes,
-    .DestroyConnector = VirtualboxConnectorDestroy,
-    .ConnectorAtomicDuplicateState = DrsdInternalAtomicConnectorDuplicateState,
-    .ConnectorDestroyStateAtomic = DrsdInternalAtomicConnectorDestroyState,
+    .Detect = VirtualboxConnectorDetect,
+    .FillModes = VirtualboxFillModes,
+    .Destroy = VirtualboxConnectorDestroy,
+    .AtomicDuplicateState = DrsdInternalAtomicConnectorDuplicateState,
+    .AtomicDestroyState = DrsdInternalAtomicConnectorDestroyState,
 };
 
 static void VirtualboxEncoderDestroy(
@@ -218,8 +218,8 @@ static void VirtualboxCrtcDestroy(PDRSD_CRTC Crtc){
 }
 
 static  DRSD_CRTC_CALLBACK VBoxCrtcCallbacks = {
-    .ResetCrtc = DrsdInternalCrtcResetAtomic,
-    .DestroyCrtc = VirtualboxCrtcDestroy,
+    .Reset = DrsdInternalCrtcResetAtomic,
+    .Destroy = VirtualboxCrtcDestroy,
     .SetConfiguration = DrsdInternalCrtcSetConfigurationAtomic,
     .PageFlip = DrsdInternalCrtcPageFlipAtomic,
     .AtomicDuplicateState = DrsdInternalCrtcDuplicateStateAtomic,
@@ -456,8 +456,8 @@ static  DRSD_PLANE_CALLBACKS CursorPlaneFunctions = {
     .DisablePlane = DrsdInternalPlaneDisableAtomic,
     .DestroyPlane = DrsdInternalDestroyPlaneAtomic,
     .ResetPlane = DrsdGxeResetShadowPlane,
-    .DuplicatePlaneAtomicState = DrsdGxeDuplicateShadowPlaneState,
-    .DestroyPlaneAtomic = DrsdGxeDestroyShadowPlane,
+    .AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
+    .AtomicDestroyState = DrsdGxeDestroyShadowPlane,
 };
 
 
@@ -474,15 +474,15 @@ static  DRSD_PLANE_CALLBACKS PlaneCallbacks = {
     .DisablePlane = DrsdInternalPlaneDisableAtomic,
     .DestroyPlane = DrsdInternalDestroyPlaneAtomic,
     .ResetPlane = DrsdInternalResetPlane,
-    .DuplicatePlaneAtomicState = DrsdInternalDuplicateAtomicState,
-    .DestroyPlaneAtomic = DrsdInternalDestroyPlaneAtomic, 
+    .AtomicDuplicateState = DrsdInternalDuplicateAtomicState,
+    .AtomicDestroyState = DrsdInternalDestroyPlaneAtomic, 
 };
 
 static  DRSD_MODE_CONFIGURATION_CALLBACKS VirtualboxModeCallbacks = {
-    .CreateFrameBuffer = DrsdGxeCreateAsyncFramebuffer,
+    .FbCreate = DrsdGxeCreateAsyncFramebuffer,
     .ModeValid = DrsdGxeVramInternalModeValid,
     .AtomicCheck = DrsdInternalAtomicCheck,
-    .AtomicSet = DrsdInternalAtomicUpdate,
+    .AtomicCommit = DrsdInternalAtomicCommit,
 };
 
 static PDRSD_PLANE VirtualboxCreatePlane(

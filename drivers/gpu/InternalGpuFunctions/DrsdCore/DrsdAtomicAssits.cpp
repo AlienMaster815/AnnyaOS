@@ -43,15 +43,18 @@ void DrsdAtomicDestroyPlaneState(
     PDRSD_PLANE_STATE PlaneState
 ){
     if(PlaneState->FrameBuffer){
-        DrsdModeObjectObjectFree(&PlaneState->FrameBuffer->Base);
+        //this is no longer safe but at this time is not used - Tyler Grenier
+        //DrsdModeObjectObjectFree(&PlaneState->FrameBuffer->Base);
     }
 
     if(LouKeGetAtomic(&PlaneState->Fence)){
         LouKeSetAtomic(&PlaneState->Fence, 0);
     }
 
-    if(LouKeGetAtomic(&PlaneState->Commit.Reference)){
-        LouKeSetAtomic(&PlaneState->Commit.Reference, 0);
+    if(LouKeGetReferenceCount(&PlaneState->Commit.Reference)){
+        while(LouKeGetReferenceCount(&PlaneState->Commit.Reference)){
+            LouKeReleaseReference(&PlaneState->Commit.Reference);
+        }
     }    
 
     DrsdPropertyDestroyBlob(PlaneState->Base);

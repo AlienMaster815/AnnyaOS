@@ -84,7 +84,7 @@ static void DrsdConnectorFree(PKERNEL_REFERENCE Ref){
     PDRSD_CONNECTOR Connector = CONTAINER_OF(Ref, DRSD_CONNECTOR, Base.ReferenceCount);
     PDRSD_DEVICE Device = Connector->Device;
     DrsdUnregisterModeObject(Device, &Connector->Base);
-    Connector->Callbacks->DestroyConnector(Connector);
+    Connector->Callbacks->Destroy(Connector);
 }
 
 void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){

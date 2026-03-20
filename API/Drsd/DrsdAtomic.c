@@ -105,6 +105,89 @@ DrsdAtomicStateInitalize(
 }
 
 DRIVER_EXPORT
+PDRSD_ATOMIC_STATE 
+DrsdAtomicStateAllocate(
+    PDRSD_DEVICE    Device
+){
+    PDRSD_MODE_CONFIGURATION Config = &Device->ModeConfig;
+    if(!Config->Functions->AtomicStateAllocate){
+        PDRSD_ATOMIC_STATE State = LouKeMallocType(DRSD_ATOMIC_STATE, KERNEL_GENERIC_MEMORY);   
+        if(!State){
+            return  0x00;
+        }
+        if(DrsdAtomicStateInitalize(Device, State) != STATUS_SUCCESS){
+            LouKeFree(State);
+            return 0x00;
+        }
+        return State;
+    }
+    return Config->Functions->AtomicStateAllocate(Device);
+}
+
+DRIVER_EXPORT
+void 
+DrsdAtomicStateDefaultClear(
+    PDRSD_ATOMIC_STATE State
+){
+    PDRSD_DEVICE                Device = State->Device;
+    PDRSD_MODE_CONFIGURATION    Config = &Device->ModeConfig;
+    SIZE                        i;
+
+    LouPrint("DRSD.SYS:Clearing Atomic State:%h\n", State);
+
+    State->Checked = false;
+
+    for(i = 0 ; i < State->ConnectorCount; i++){
+        PDRSD_CONNECTOR Connector = State->Connectors[i].Connector;
+        if(!Connector){
+            continue;
+        }
+
+        Connector->Functions->AtomicDestroyState(Connector, State->Connectors[i].StateToDestroy);
+
+        State->Connectors[i].Connector = 0x00;
+        State->Connectors[i].StateToDestroy = 0x00;
+        State->Connectors[i].OldState = 0x00;
+        State->Connectors[i].NewState = 0x00;
+        DrsdConnectorPut(Connector);
+    }
+
+    for(i = 0 ; i < Config->CrtcCount; i++){
+        PDRSD_CRTC Crtc = State->Crtcs[i].Crtc;
+        if(!Crtc){
+            continue;
+        }
+
+        Crtc->Functions->AtomicDestroyState(Crtc, State->Crtcs[i].StateToDestroy);
+
+        State->Crtcs[i].Crtc = 0x00;
+        State->Crtcs[i].StateToDestroy = 0x00;
+        State->Crtcs[i].OldState = 0x00;
+        State->Crtcs[i].NewState = 0x00;
+
+        if(State->Crtcs[i].Commit){
+            DrsdCrtcCommitPut(State->Crtcs[i].Commit);
+            State->Crtcs[i].Commit = 0x00;
+        }
+    }
+
+    for(i = 0 ; i < Config->TotalPlaneCount; i++){
+        PDRSD_PLANE Plane = State->Planes[i].Plane;
+
+        if(!Plane){
+            continue;
+        }
+
+        Plane->Functions->AtomicDestroyState(Plane, State->Planes[i].StateToDestroy);
+        State->Planes[i].Plane = 0x00;
+        State->Planes[i].StateToDestroy = 0x00;
+        State->Planes[i].OldState = 0x00;
+        State->Planes[i].NewState = 0x00;
+    }
+
+}
+
+DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
     PDRSD_ENCODER                   Encoder,

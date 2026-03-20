@@ -21,3 +21,5 @@ EXPORTS
     __DrsdCrtcCommitFree
     DrsdCrtcCommitWait
     DrsdAcquireDevice
+    DrsdAtomicStateAllocate
+    DrsdAtomicStateDefaultClear
