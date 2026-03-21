@@ -257,7 +257,7 @@ DrsdAtomicGetCrtcState(
     if(!State->AcquireContext){
         LouPrint("DRSD.SYS:WARNING:DrsdAtomicGetCrtcState():Atomic State Acquire Context is NULL\n");
     }
-    if(State->Device && State->Checked){
+    if((State->Device) && (State->Checked)){
         LouPrint("DRSD.SYS:WARNING:DrsdAtomicGetCrtcState():Device And Check are true\n");
     }
 
@@ -285,6 +285,39 @@ DrsdAtomicGetCrtcState(
     LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:%h State to %h\n", State->Device, Crtc->Base.Identification, Crtc->Name, CrtcState, State);
 
     return CrtcState;
+}
+
+UNUSED 
+static 
+LOUSTATUS
+DrsdAtomicCrtcCheck(
+    PDRSD_CRTC_STATE    OldCrtcState,
+    PDRSD_CRTC_STATE    NewCrtcState
+){
+    PDRSD_CRTC Crtc = NewCrtcState->Crtc;
+    BOOLEAN DriverSupportsAtomic = DrsdCoreCheckFeature(Crtc->Device, DRIVER_ATOMIC);
+
+    if((NewCrtcState->Active) && (!NewCrtcState->Enable)){
+        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Active Withought Enable\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        return STATUS_INVALID_PARAMETER; 
+    }
+
+    if((DriverSupportsAtomic) && (NewCrtcState->Enable) && (!NewCrtcState->ModeBlob)){
+        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Enabled Withought Mode Blob\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if((DriverSupportsAtomic) && (!NewCrtcState->Enable) && (NewCrtcState->ModeBlob)){
+        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Disabled With Mode Blob\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
+    
+    if((NewCrtcState->Event) && (!NewCrtcState->Active)){
+        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Requesting Event But Is Off\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT

@@ -1889,6 +1889,22 @@ typedef struct _DRSD_FB_HELPER{
     //TODO 
 }DRSD_FB_HELPER, * PDRSD_FB_HELPER;
 
+typedef struct _DRSD_DRIVER{
+    LOUSTATUS           (*Load)(struct _DRSD_DEVICE* Device, UINT64 Flags); //Notice: Dont use this for new drivers
+    LOUSTATUS           (*Open)(struct _DRSD_DEVICE* Device, PDRSD_FILE DrsdFile);
+    void                (*PostClose)(struct _DRSD_DEVICE* Device, PDRSD_FILE DrsdFile);
+    void                (*Unload)(struct _DRSD_DEVICE* Device);
+    void                (*Release)(struct _DRSD_DEVICE* Device);
+    void                (*MasterSet)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate, BOOLEAN FromOpen);
+    //struct              (*MasterDrop)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate); //this is commented out because i forgot the name of the struct to return
+    void                (*ClfsServerInitialze)(PDRSD_MINOR Minor);
+    PDRSD_GXE_OBJECT    (*GxeCreateObject)(struct _DRSD_DEVICE* Device, SIZE Size);
+    LOUSTATUS           (*PrimeHandleToFd)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate, UINT32 Handle, UINT32 Flags, int* PrimeFd);
+    LOUSTATUS           (*PrimeFdToHandle)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate, int PrimeFd, UINT32* Handle);
+    
+    UINT32              DriverFeatures;
+}DRSD_DRIVER, * PDRSD_DRIVER;
+
 typedef struct _DRSD_DEVICE{
     ListHeader                      Peers;
     struct _PCI_DEVICE_OBJECT*      PDEV;
@@ -1913,7 +1929,7 @@ typedef struct _DRSD_DEVICE{
         PVOID                       FinalFree;
         spinlock_t                  Lock;
     }Managed;
-    PDRIVER_OBJECT                  DeviceDriver;
+    PDRSD_DRIVER                    DeviceDriver;
     PVOID                           DevicePrivateData;
     PDRSD_MINOR                     Primary;
     PDRSD_MINOR                     Rendor;

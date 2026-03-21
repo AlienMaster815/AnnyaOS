@@ -44,6 +44,39 @@
 #include "DrsdColorOp.h"
 #include "DrsdCrtc.h"
 
+typedef enum _DRSD_DRIVER_FEATURE{
+    DRIVER_GXE = (1 << 0),
+    DRIVER_MODESET = (1 << 1),
+    DRIVER_RENDER = (1 << 3),
+    DRIVER_ATOMIC = (1 << 4),
+    DRIVER_SYNCOBJ = (1 << 5),
+    DRIVER_SYNCOBJ_TIMELINE = (1 << 6),
+    DRIVER_COMPUTE_ACCEL = (1 << 7),
+    DRIVER_GXE_GPUA = (1 << 8),
+    DRIVER_CURSOR_HOTSPOT = (1 << 9),
+    DRIVER_USE_AGP = (1 << 25),
+    DRIVER_LEGACY = (1 << 26),
+    DRIVER_PCI_DMA = (1 << 27),
+    DRIVER_SG = (1 << 28),
+    DRIVER_HAVE_DMA = (1 << 29),
+    DRIVER_HAVE_IRQ = (1 << 30),
+}DRSD_DRIVER_FEATURE, * PDRSD_DRIVER_FEATURE;
+
+static inline BOOLEAN DrsdCoreCheckAllFeatures(
+    PDRSD_DEVICE    Device, 
+    UINT32          Features
+){
+    UINT32 Support = Device->DeviceDriver->DriverFeatures & Device->DriverFeatures;
+    return Features && ((Support & Features) == Features);
+}
+
+static inline BOOLEAN DrsdCoreCheckFeature(
+    PDRSD_DEVICE            Device, 
+    DRSD_DRIVER_FEATURE     Feature
+){
+    DrsdCoreCheckAllFeatures(Device, Feature);
+}
+
 DRIVER_EXPORT
 void DrsdAcquireDevice(
     PDRSD_DEVICE Device
