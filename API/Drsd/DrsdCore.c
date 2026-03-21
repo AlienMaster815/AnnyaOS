@@ -25,6 +25,9 @@
 
 #include "DrsdCore.h"
 
+static void DrsdDeviceRelease(PKERNEL_REFERENCE Reference){
+    
+}
 
 
 DRIVER_EXPORT
@@ -33,6 +36,15 @@ void DrsdAcquireDevice(
 ){
     if(Device){
         LouKeAcquireReference(&Device->Reference);
+    }
+}
+
+DRIVER_EXPORT
+void DrsdReleaseDevice(
+    PDRSD_DEVICE Device
+){
+    if(Device){
+        LouKeReleaseReferenceAndCall(&Device->Reference, DrsdDeviceRelease);
     }
 }
 

@@ -23,3 +23,5 @@ EXPORTS
     DrsdAcquireDevice
     DrsdAtomicStateAllocate
     DrsdAtomicStateDefaultClear
+    DrsdAtomicStateClear
+    __DrsdAtomicStateFree

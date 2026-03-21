@@ -2147,7 +2147,7 @@ typedef struct _DRSD_COLOR_OP{
 }DRSD_COLOR_OP, * PDRSD_COLOR_OP;
 
 typedef struct _DRSD_COLOR_OPS{
-    PDRSD_COLOR_OP          Op;
+    PDRSD_COLOR_OP          ColorOp;
     PDRSD_COLOR_OP_STATE    State; 
     PDRSD_COLOR_OP_STATE    OldState; 
     PDRSD_COLOR_OP_STATE    NewState; 

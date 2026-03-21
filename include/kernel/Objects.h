@@ -28,7 +28,6 @@ typedef struct _IDENTIFICATION_RANGE{
     }Identities[];
 }IDENTIFICATION_RANGE, * PIDENTIFICATION_RANGE;
 
-
 typedef struct _KERNEL_REFERENCE{
     mutex_t     IncrementLock;
     mutex_t     RaceLock;

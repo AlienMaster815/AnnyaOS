@@ -12,7 +12,8 @@ SRC = DrsdCore.c \
 		DrsdEdid.c \
 		DrsdDraw.c \
 		DrsdFormatHelper.c \
-		DrsdModeObject.c
+		DrsdModeObject.c \
+		DrsdColorOp.c
 
 
 CC = x86_64-w64-mingw32-gcc

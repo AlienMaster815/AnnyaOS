@@ -41,6 +41,7 @@
 #include "DrsdFormat.h"
 #include "DrsdModeObject.h"
 #include "DrsdConnector.h"
+#include "DrsdColorOp.h"
 
 
 DRIVER_EXPORT
@@ -48,5 +49,9 @@ void DrsdAcquireDevice(
     PDRSD_DEVICE Device
 );
 
+DRIVER_EXPORT
+void DrsdReleaseDevice(
+    PDRSD_DEVICE Device
+);
 
 #endif

@@ -185,7 +185,66 @@ DrsdAtomicStateDefaultClear(
         State->Planes[i].NewState = 0x00;
     }
 
+    for(i = 0 ; i < Config->ColorOpCount; i++){
+        PDRSD_COLOR_OP ColorOp = State->ColorOps[i].ColorOp;
+        if(!ColorOp){
+            continue;
+        }
+
+        DrsdColorOpAtomicDestroyState(ColorOp, State->ColorOps[i].State);
+        State->ColorOps[i].ColorOp = 0x00;
+        State->ColorOps[i].State = 0x00;
+        State->ColorOps[i].OldState = 0x00;
+        State->ColorOps[i].NewState = 0x00;
+    }
+
+    for(i = 0 ; i < State->PrivateObjectsCount; i++){
+        PDRSD_PRIVATE_OBJECT Object = State->PrivateObjects[i].Object;
+        
+        Object->Functions->AtomicDestroyState(Object, State->PrivateObjects[i].StateToDestroy);
+        State->PrivateObjects[i].Object = 0x00;
+        State->PrivateObjects[i].StateToDestroy = 0x00;
+        State->PrivateObjects[i].OldState = 0x00;
+        State->PrivateObjects[i].NewState = 0x00;
+    }
+    State->PrivateObjectsCount = 0;
+
+    if(State->FakeCommit){
+        DrsdCrtcCommitPut(State->FakeCommit);
+        State->FakeCommit = 0x00;
+    }
 }
+
+void DrsdAtomicStateClear(PDRSD_ATOMIC_STATE State){
+    PDRSD_DEVICE Device = State->Device;
+    PDRSD_MODE_CONFIGURATION Config = &Device->ModeConfig;
+
+    if(Config->Functions->AtomicStateClear){
+        Config->Functions->AtomicStateClear(State);
+    }else{
+        DrsdAtomicStateDefaultClear(State);
+    }
+}
+
+void __DrsdAtomicStateFree(PKERNEL_REFERENCE Reference){
+    PDRSD_ATOMIC_STATE          State = CONTAINER_OF(Reference, DRSD_ATOMIC_STATE, Reference);
+    PDRSD_DEVICE                Device = State->Device;
+    PDRSD_MODE_CONFIGURATION    Config = &Device->ModeConfig;
+
+    DrsdAtomicStateClear(State);
+
+    LouPrint("DRSD.SYS:Freeing Atomic State:%h\n", State);
+
+    if(Config->Functions->AtomicStateFree){
+        Config->Functions->AtomicStateFree(State);
+    }else {
+        DrsdAtomicStateDefaultRelease(State);
+        LouKeFree(State);
+    }
+    DrsdReleaseDevice(Device);
+}
+
+//365
 
 DRIVER_EXPORT
 PDRSD_CONNECTOR 
