@@ -25,3 +25,4 @@ EXPORTS
     DrsdAtomicStateDefaultClear
     DrsdAtomicStateClear
     __DrsdAtomicStateFree
+    DrsdAtomicGetCrtcState

@@ -320,6 +320,43 @@ DrsdAtomicCrtcCheck(
     return STATUS_SUCCESS;
 }
 
+UNUSED 
+static 
+void DrsdAtomicCrtcPrintState(
+    HANDLE              ClfsServer,
+    PDRSD_CRTC_STATE    State
+){
+    PDRSD_CRTC Crtc = State->Crtc;
+    LouPrint("DRSD.SYS:CRTC[%h]:%s\n", Crtc->Base.Identification, Crtc->Name);
+    LouPrint("DRSD.SYS:Enable:%d\n", State->Enable);
+    LouPrint("DRSD.SYS:Active:%d\n", State->Active);
+    LouPrint("DRSD.SYS:SelfRefreshActive:%d\n", State->SelfRefreshActive);
+    LouPrint("DRSD.SYS:PlanesChanged:%d\n", State->PlanesChanged);
+    LouPrint("DRSD.SYS:ModeChanged:%d\n", State->ModeChanged);
+    LouPrint("DRSD.SYS:ActiveChanged:%d\n", State->ActiveChanged);
+    LouPrint("DRSD.SYS:ConnectorsChanged:%d\n", State->ConnectorsChanged);
+    LouPrint("DRSD.SYS:ColorMgmtChanged:%d\n", State->ColorMgmtChanged);
+    LouPrint("DRSD.SYS:PlaneMask:%h\n", State->PlaneMask);
+    LouPrint("DRSD.SYS:ConnectorMask:%h\n", State->ConnectorMask);
+    LouPrint("DRSD.SYS:EncoderMask:%h\n", State->EncoderMask);
+    //LouPrint("DRSD.SYS:\n"); TODO mode Print and atomic print state
+
+}
+
+UNUSED 
+static
+LOUSTATUS 
+DrsdAtomicConnectorCheck(
+    PDRSD_CONNECTOR         Connector,
+    PDRSD_CONNECTOR_STATE   State
+){
+    //PDRSD_CRTC_STATE CrtcState;
+    //PDRSD_WRITEBACK_JOB WriteBackJob = State->WriteBackJob;
+
+
+    return STATUS_SUCCESS;
+} 
+
 DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(

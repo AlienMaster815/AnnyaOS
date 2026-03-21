@@ -35,6 +35,7 @@ extern "C" {
 #include <kernel/Objects.h>
 #include <Ldm/CommonTypes.h>
 #include <kernel/XArray.h>
+#include <drivers/Hdmi/Picture.h>
 
 #define DRSD_ROTATION_MODE_0 1
 
@@ -173,6 +174,43 @@ typedef enum {
     DRSD_FORCE_DIGITAL = 3,
 }DRSD_CONNECTOR_FORCE;
 
+typedef enum _DRSD_MODE_SUB_CONNECTOR{
+    DRSD_MODE_SUBCONNECTOR_AUTOMATIC = 0,
+    DRSD_MODE_SUBCONNECTOR_UNKOWN = 0,
+    DRSD_MODE_SUBCONNECTOR_VGA = 1,
+    DRSD_MODE_SUBCONNECTOR_DVID = 3,
+    DRSD_MODE_SUBCONNECTOR_DVIA = 4,
+    DRSD_MODE_SUBCONNECTOR_COMPOSITE = 5,
+    DRSD_MODE_SUBCONNECTOR_SVIDEO = 6,
+    DRSD_MODE_SUBCONNECTOR_COMPONENT = 8,
+    DRSD_MODE_SUBCONNECTOR_SCART = 9,
+    DRSD_MODE_SUBCONNECTOR_DISPLAY_PORT = 10,
+    DRSD_MODE_SUBCONNECTOR_HDMIA = 11,
+    DRSD_MODE_SUBCONNECTOR_NATIVE = 15,
+    DRSD_MODE_SUBCONNECTOR_WIRELESS = 18
+}DRSD_MODE_SUB_CONNECTOR, * PDRSD_MODE_SUB_CONNECTOR;
+
+typedef enum _DRSD_COLOR_SPACE{
+    DRSD_MODE_COLORIMETRY_DEFAULT = 0,
+    DRSD_MODE_COLORIMETRY_NO_DATA = 0,
+    DRSD_MODE_COLORIMETRY_SMPTE_170M_YCC = 1,
+    DRSD_MODE_COLORIMETRY_BT_709_YCC = 2,
+    DRSD_MODE_COLORIMETRY_XVYCC_601 = 3,
+    DRSD_MODE_COLORIMETRY_XVYCC_709 = 4,
+    DRSD_MODE_COLORIMETRY_SYCC_601 = 5,
+    DRSD_MODE_COLORIMETRY_OPYCC_601 = 6,
+    DRSD_MODE_COLORIMETRY_OPRGB = 7,
+    DRSD_MODE_COLORIMETRY_BT2020_CYCC = 8,
+    DRSD_MODE_COLORIMETRY_BT2020_RGB = 9,
+    DRSD_MODE_COLORIMETRY_BT2020_YCC = 10,
+    DRSD_MODE_COLORIMETRY_DCI_P3_RGB_D65 = 11,
+    DRSD_MODE_COLORIMETRY_DCI_P3_RGB_THEATER = 12,
+    DRSD_MODE_COLORIMETRY_RGB_WIDE_FIXED = 13,
+    DRSD_MODE_COLORIMETRY_RGB_WIDE_FLOAT = 14,
+    DRSD_MODE_COLORIMETRY_BT601_YCC = 15,
+    DRSD_MODE_COLORIMETRY_COUNT,
+}DRSD_COLOR_SPACE, * PDRSD_COLOR_SPACE;
+
 #define DRSD_ENCODER_MODE_NONE  0
 #define DRSD_ENCODER_MODE_DAC   1
 #define DRSD_ENCODER_MODE_TMDS  2
@@ -184,6 +222,13 @@ typedef enum {
 #define DRSD_ENCODER_MODE_DPI   8
 
 #define DRSD_MODE_OBJECT_ID_PLANE 1
+
+typedef struct _DRSD_CONNECTOR_TV_MARGINS{
+    UINT    Bottom;
+    UINT    Left;
+    UINT    Right;
+    UINT    Top;
+}DRSD_CONNECTOR_TV_MARGINS, * PDRSD_CONNECTOR_TV_MARGINS;
 
 typedef struct _DRSD_MODESET_LOCK{
     mutex_t     Mutex;
@@ -735,14 +780,56 @@ typedef struct _DRSD_DISPLAY_INFORMATION{
     uint16_t                            SourcePhysicalAddress;
 }DRSD_DISPLAY_INFORMATION , * PDRSD_DISPLAY_INFORMATION;
 
+typedef struct _DRSD_TV_CONNECTOR_STATE{
+    DRSD_MODE_SUB_CONNECTOR     SelectSubConnector;
+    DRSD_MODE_SUB_CONNECTOR     SubConnector;
+    DRSD_CONNECTOR_TV_MARGINS   Margins;
+    UINT                        LegacyMode;
+    UINT                        Mode;
+    UINT                        Brightness;
+    UINT                        Contrast;
+    UINT                        FlickerReduction;
+    UINT                        Overscan;
+    UINT                        Saturation;
+    UINT                        Hue;
+}DRSD_TV_CONNECTOR_STATE, * PDRSD_TV_CONNECTOR_STATE;
+
+typedef enum _DRSD_PRIVACY_SCREEN_STATUS{
+    PRIVACY_SCREEN_DISABLED = 0,
+    PRIVACY_SCREEN_ENABLED,
+    PRIVACY_SCREEN_DISABLED_LOCKED,
+    PRIVACY_SCREEN_ENABLED_LOCKED,
+}DRSD_PRIVACY_SCREEN_STATUS, * PDRSD_PRIVACY_SCREEN_STATUS;
+
+typedef struct _DRSD_WRITEBACK_JOB{
+    PVOID Todo;
+}DRSD_WRITEBACK_JOB, * PDRSD_WRITEBACK_JOB;
+
+typedef struct _DRSD_CONNECTOR_HDMI_STATE{
+    PVOID Todo;
+}DRSD_CONNECTOR_HDMI_STATE, * PDRSD_CONNECTOR_HDMI_STATE;
+
 typedef struct _DRSD_CONNECTOR_STATE{
     struct _DRSD_CONNECTOR*     Connector;
     struct _DRSD_CRTC*          Crtc;
     struct _DRSD_ENCODER*       Encoder;
     DRSD_LINK_STATUS            LinkStatus;
-    void*                       AtomicState;
+    struct _DRSD_ATOMIC_STATE*  State;
     struct _DRSD_CRTC_COMMIT*   Commit;
-    //TODO
+    DRSD_TV_CONNECTOR_STATE     Tv;
+    BOOLEAN                     SelfRefreshAware;
+    HDMI_PICTURE_ASPECT         PictureAspectRatio;
+    UINT                        ContentType;
+    UINT                        HdcpContentType;
+    UINT                        ScalingMode;
+    UINT                        ContentProtection;
+    DRSD_COLOR_SPACE            ColorSpace;
+    PDRSD_WRITEBACK_JOB         WritebackJob;
+    UINT8                       MaxRequestedBpc;
+    UINT8                       MaxBpc;
+    DRSD_PRIVACY_SCREEN_STATUS  PrivacyScreenSwState;
+    struct _DRSD_PROPERTY_BLOB* HdrOutputMetaData;
+    DRSD_CONNECTOR_HDMI_STATE   Hdmi;  
 }DRSD_CONNECTOR_STATE, * PDRSD_CONNECTOR_STATE;
 
 typedef struct _DRSD_CONNECTOR_CALLBACKS{
@@ -795,13 +882,6 @@ typedef enum _DRSD_PANEL_ORIENTATION{
 	DRSD_MODE_PANEL_ORIENTATION_LEFT_UP,
 	DRSD_MODE_PANEL_ORIENTATION_RIGHT_UP,
 }DRSD_PANEL_ORIENTATION;
-
-typedef struct _DRSD_CONNECTOR_TV_MARGINS{
-    UINT    Bottom;
-    UINT    Left;
-    UINT    Right;
-    UINT    Top;
-}DRSD_CONNECTOR_TV_MARGINS, * PDRSD_CONNECTOR_TV_MARGINS;
 
 typedef enum _DRSD_CONNECTOR_TV_MODE{
 	DRSD_MODE_TV_MODE_NTSC = 0,
