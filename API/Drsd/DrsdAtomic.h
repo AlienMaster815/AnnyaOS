@@ -25,6 +25,8 @@
  
 #ifndef _DRSD_ATOMIC_H
 #define _DRSD_ATOMIC_H
+
+#include "DrsdCrtc.h"
 #include "DrsdCore.h"
 
 DRIVER_EXPORT
@@ -35,6 +37,13 @@ static inline void DrsdCrtcCommitPut(
     PDRSD_CRTC_COMMIT CrtcCommit
 ){
     LouKeReleaseReferenceAndCall(&CrtcCommit->Reference, __DrsdCrtcCommitFree);
+}
+
+static inline PDRSD_CRTC_STATE DrsdAtomicGetNewCrtcState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_CRTC          Crtc
+){
+    return State->Crtcs[DrsdCrtcIndex(Crtc)].NewState;
 }
 
 DRIVER_EXPORT

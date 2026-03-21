@@ -42,7 +42,7 @@
 #include "DrsdModeObject.h"
 #include "DrsdConnector.h"
 #include "DrsdColorOp.h"
-
+#include "DrsdCrtc.h"
 
 DRIVER_EXPORT
 void DrsdAcquireDevice(

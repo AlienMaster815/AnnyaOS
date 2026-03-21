@@ -1004,12 +1004,43 @@ typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
     LOUSTATUS                   (*CheckAtomic)(struct _DRSD_ENCODER* Encoder, struct _DRSD_CRTC_STATE* State, void* ConnectorState);
 }DRSD_ENCODER_ASSISTED_CALLBACKS, * PDRSD_ENCODER_ASSISTED_CALLBACKS;
 
+typedef enum _DRSD_SCALING_FILTER{
+    DRSD_SCALING_FILTER_DEFAULT = 0,
+    DRSD_SCALING_FILTER_NEAREST_NEIGHBOR ,
+}DRSD_SCALING_FILTER, * PDRSD_SCALING_FILTER;
 
 typedef struct _DRSD_CRTC_STATE{
-    struct _DRSD_CRTC*  Crtc;
-    bool                NeedsModeset;
-    bool                Enable;
-    DRSD_DISPLAY_MODE   DisplayMode;
+    struct _DRSD_CRTC*              Crtc;
+    BOOLEAN                         Enable              :   1;
+    BOOLEAN                         Active              :   1;
+    BOOLEAN                         PlanesChanged       :   1;
+    BOOLEAN                         ModeChanged         :   1;
+    BOOLEAN                         ActiveChanged       :   1;
+    BOOLEAN                         ConnectorsChanged   :   1;
+    BOOLEAN                         ZPosChanged         :   1;
+    BOOLEAN                         ColorMgmtChanged    :   1;
+    BOOLEAN                         NoVBlank;
+    UINT32                          PlaneMask;
+    UINT32                          ConnectorMask;
+    UINT32                          EncoderMask;
+    DRSD_DISPLAY_MODE               AdjustedMode;
+    DRSD_DISPLAY_MODE               Mode;
+    struct _DRSD_PROPERTY_BLOB*     ModeBlob;
+    struct _DRSD_PROPERTY_BLOB*     DegammaLut;
+    struct _DRSD_PROPERTY_BLOB*     Ctm;
+    struct _DRSD_PROPERTY_BLOB*     GammaLut;
+    UINT32                          TargetVBlank;
+    BOOLEAN                         AsyncFlip;
+    BOOLEAN                         VrrEnabled;
+    BOOLEAN                         SelfRefreshActive;
+    DRSD_SCALING_FILTER             ScalingFilter;
+    UINT8                           SharpnesStrength;
+    PDRSD_PENDING_VBLANK_EVENT      Event;
+    struct _DRSD_CRTC_COMMIT*       Commit;
+    struct _DRSD_ATOMIC_STATE*      State;
+    //TODO remove the following
+    BOOLEAN                         NeedsModeset;
+    DRSD_DISPLAY_MODE               DisplayMode;
 }DRSD_CRTC_STATE, * PDRSD_CRTC_STATE;   
 
 
@@ -1059,14 +1090,41 @@ typedef struct _DRSD_CRTC_CALLBACK{
     bool                        (*GetVBlankTimeStamp)(struct _DRSD_CRTC* Crtc, int* MaxErrors, uint64_t Time, bool IRQ);
 }DRSD_CRTC_CALLBACK, * PDRSD_CRTC_CALLBACK, DRSD_CRTC_FUNCTIONS, * PDRSD_CRTC_FUNCTIONS;
 
-typedef struct _DRSD_CRTC{
+#define DRSD_MAX_CRC_NR 10
 
+typedef struct _DRSD_CRTC_CRC_ENTRY{
+    BOOLEAN     HasFrameCounter;
+    UINT32      Frame;
+    UINT32      Crcs[DRSD_MAX_CRC_NR];
+}DRSD_CRTC_CRC_ENTRY, * PDRSD_CRTC_CRC_ENTRY;
+
+typedef struct _DRSD_CRTC_CRC{
+    spinlock_t              Lock;
+    LOUSTR                  Source;
+    BOOLEAN                 Opened;
+    BOOLEAN                 Overflow;
+    PDRSD_CRTC_CRC_ENTRY    Entries;
+    int                     Head;
+    int                     Tail;
+    SIZE                    ValuesCount;
+    PLOUQ_WAIT_QUEUE        Wq;
+}DRSD_CRTC_CRC, * PDRSD_CRTC_CRC;
+
+typedef struct _DRSD_SELF_REFRESH_DATA{
+    struct _DRSD_CRTC*      Crtc;
+    PLOUQ_DELAYED_WORK      EntryWork;
+    mutex_t                 AvgMutex;
+    SIZE                    EntryAvgMs;   
+    SIZE                    ExitAvgMs;   
+}DRSD_SELF_REFRESH_DATA, * PDRSD_SELF_REFRESH_DATA;
+
+typedef struct _DRSD_CRTC{
     struct _DRSD_DEVICE*            Device;
     PLATFORM_DEVICE                 Port;
     ListHeader                      Head;
     LOUSTR                          Name;
     DRSD_MODESET_LOCK               Mutex;
-    DRSD_MODE_OBJECT                ModeObject;
+    DRSD_MODE_OBJECT                Base;
     PDRSD_PLANE                     Primary;
     PDRSD_PLANE                     Cursor;
     UINT                            Index;
@@ -1078,7 +1136,20 @@ typedef struct _DRSD_CRTC{
     int                             X;
     int                             Y;
     PDRSD_CRTC_FUNCTIONS            Functions;
-
+    UINT32                          GammaSize;
+    UINT16*                         GammaStore;
+    DRSD_OBJECT_PROPERTIES          Properties;
+    PDRSD_PROPERTY                  ScalingFilterProperty;
+    PDRSD_PROPERTY                  SharpnesStrengthProperty;
+    PDRSD_CRTC_STATE                State;
+    ListHeader                      CommitList;
+    spinlock_t                      CommitLock;
+    HANDLE                          ClfsServer;
+    DRSD_CRTC_CRC                   Crc;
+    UINT                            FenceContext;
+    spinlock_t                      FenceSeqNo;
+    CHAR                            TimelineName[32];
+    PDRSD_SELF_REFRESH_DATA         SlefRefreshData;    
 
     //TODO: Clean Up Old And Set Up New
 
@@ -1089,8 +1160,6 @@ typedef struct _DRSD_CRTC{
     PDRSD_PLANE                     CursorPlane;
     PDRSD_CRTC_CALLBACK             CrtcCallbacks;
     PDRSD_CRTC_ASSIST_CALLBACK      AssistCallbacks;
-    size_t                          GammaSize;
-    uint16_t*                       GammaStore;
     PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 

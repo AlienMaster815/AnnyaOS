@@ -244,7 +244,48 @@ void __DrsdAtomicStateFree(PKERNEL_REFERENCE Reference){
     DrsdReleaseDevice(Device);
 }
 
-//365
+DRIVER_EXPORT 
+PDRSD_CRTC_STATE
+DrsdAtomicGetCrtcState(
+    PDRSD_ATOMIC_STATE  State,  
+    PDRSD_CRTC          Crtc
+){
+    LOUSTATUS           Status;
+    UINT                Index = DrsdCrtcIndex(Crtc); 
+    PDRSD_CRTC_STATE    CrtcState;
+
+    if(!State->AcquireContext){
+        LouPrint("DRSD.SYS:WARNING:DrsdAtomicGetCrtcState():Atomic State Acquire Context is NULL\n");
+    }
+    if(State->Device && State->Checked){
+        LouPrint("DRSD.SYS:WARNING:DrsdAtomicGetCrtcState():Device And Check are true\n");
+    }
+
+    CrtcState = DrsdAtomicGetNewCrtcState(State, Crtc);
+    if(CrtcState){
+        return CrtcState;
+    }
+
+    Status = DrsdModesetLock(&Crtc->Mutex, State->AcquireContext);
+    if(Status != STATUS_SUCCESS){
+        return (PDRSD_CRTC_STATE)(UINTPTR)Status;
+    }
+
+    CrtcState = Crtc->Functions->AtomicDuplicateState(Crtc);
+    if(!CrtcState){
+        return (PDRSD_CRTC_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    State->Crtcs[Index].StateToDestroy = CrtcState; 
+    State->Crtcs[Index].OldState = Crtc->State;
+    State->Crtcs[Index].NewState = CrtcState;
+    State->Crtcs[Index].Crtc = Crtc;
+    CrtcState->State = State;
+
+    LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:%h State to %h\n", State->Device, Crtc->Base.Identification, Crtc->Name, CrtcState, State);
+
+    return CrtcState;
+}
 
 DRIVER_EXPORT
 PDRSD_CONNECTOR 
