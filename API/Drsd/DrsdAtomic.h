@@ -27,6 +27,7 @@
 #define _DRSD_ATOMIC_H
 
 #include "DrsdCrtc.h"
+#include "DrsdPlane.h"
 #include "DrsdCore.h"
 
 DRIVER_EXPORT
@@ -46,6 +47,10 @@ static inline PDRSD_CRTC_STATE DrsdAtomicGetNewCrtcState(
     return State->Crtcs[DrsdCrtcIndex(Crtc)].NewState;
 }
 
+static inline PDRSD_PLANE_STATE DrsdAtomicGetNewPlaneState(PDRSD_ATOMIC_STATE State, PDRSD_PLANE Plane){
+    return State->Planes[DrsdPlaneIndex(Plane)].NewState;
+}
+
 DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
@@ -57,6 +62,20 @@ DRIVER_EXPORT
 BOOLEAN 
 IsDrsdAtomicGetConnectorForEncoderError(
     PDRSD_CONNECTOR Connector
+);
+
+DRIVER_EXPORT
+PDRSD_COLOR_OP_STATE 
+DrsdAtomicGetNewColorOpState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_COLOR_OP      ColorOp
+);
+
+DRIVER_EXPORT
+PDRSD_COLOR_OP_STATE 
+DrsdAtomicGetOldColorOpState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_COLOR_OP      ColorOp
 );
 
 #endif

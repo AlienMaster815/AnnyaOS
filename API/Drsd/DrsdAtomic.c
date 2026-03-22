@@ -390,6 +390,121 @@ DrsdAtomicConnectorCheck(
 } 
 
 DRIVER_EXPORT
+PDRSD_PLANE_STATE
+DrsdAtomicGetPlaneState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_PLANE         Plane
+){
+    LOUSTATUS Status;
+    UINT Index = DrsdPlaneIndex(Plane);
+    PDRSD_PLANE_STATE PlaneState;
+
+    PlaneState = DrsdAtomicGetNewPlaneState(State, Plane);
+    if(PlaneState){
+        return PlaneState;
+    }
+
+    Status = DrsdModesetLock(&Plane->Mutex, State->AcquireContext);
+    if(Status != STATUS_SUCCESS){
+        return (PDRSD_PLANE_STATE)(UINTPTR)Status;
+    }
+
+    PlaneState = Plane->Functions->AtomicDuplicateState(Plane);
+    if(!PlaneState){
+        return (PDRSD_PLANE_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+    State->Planes[Index].StateToDestroy = PlaneState;
+    State->Planes[Index].Plane = Plane;
+    State->Planes[Index].OldState = Plane->State;
+    State->Planes[Index].NewState = PlaneState;
+    PlaneState->State = State;
+
+    LouPrint("DRSD.SYS:Device:%h: Added Plane:%d:%s: %h State %h\n", Plane->Device, Plane->Base.Identification, Plane->Name, PlaneState, State);
+
+    if(PlaneState->Crtc){
+        PDRSD_CRTC_STATE CrtcState;
+        CrtcState = DrsdAtomicGetCrtcState(State, PlaneState->Crtc);
+        if(LOU_KE_PTR_ERROR(CrtcState)){
+            return (PDRSD_PLANE_STATE)(UINTPTR)CrtcState;
+        }
+    }
+
+    return PlaneState;
+}
+
+DRIVER_EXPORT
+PDRSD_COLOR_OP_STATE
+DrsdAtomicGetColorOpState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_COLOR_OP      ColorOp
+){
+    LOUSTATUS               Status;
+    UINT                    Index;
+    PDRSD_COLOR_OP_STATE    ColorOpState;
+
+    ColorOpState = DrsdAtomicGetNewColorOpState(State, ColorOp);
+    if(ColorOpState){
+        return ColorOpState;
+    }
+
+    Status = DrsdModesetLock(&ColorOp->Plane->Mutex, State->AcquireContext);
+    if(Status != STATUS_SUCCESS){
+        return (PDRSD_COLOR_OP_STATE)(UINTPTR)Status;
+    }
+
+    ColorOpState = DrsdAtomicHelperColorOpDuplicateState(ColorOp);
+    if(!ColorOpState){
+        return (PDRSD_COLOR_OP_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+    
+    State->ColorOps[Index].ColorOp = ColorOp; 
+    State->ColorOps[Index].State = ColorOpState;
+    State->ColorOps[Index].OldState = ColorOp->State;
+    State->ColorOps[Index].NewState = ColorOpState;
+    ColorOpState->State = State;
+
+    LouPrint("DRSD.SYS:Device:%h: Added ColorOp:%d:%d: %h State %h\n", ColorOp->Device, ColorOp->Base.Identification, ColorOp->Type, ColorOpState, State);
+
+    return ColorOpState;
+}
+
+DRIVER_EXPORT
+PDRSD_COLOR_OP_STATE 
+DrsdAtomicGetOldColorOpState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_COLOR_OP      ColorOp
+){
+    State->ColorOps[DrsdColorOpIndex(ColorOp)].OldState;
+} 
+
+DRIVER_EXPORT
+PDRSD_COLOR_OP_STATE 
+DrsdAtomicGetNewColorOpState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_COLOR_OP      ColorOp
+){
+    State->ColorOps[DrsdColorOpIndex(ColorOp)].NewState;
+}
+
+UNUSED 
+static
+BOOLEAN 
+PlaneSwitchingCrtc(
+    PDRSD_PLANE_STATE OldPlaneState,
+    PDRSD_PLANE_STATE NewPlaneState
+){
+    if((!OldPlaneState->Crtc) || (!NewPlaneState->Crtc)){
+        return false;
+    }
+    if(OldPlaneState->Crtc == NewPlaneState->Crtc){
+        return false;
+    }
+    return true;
+}
+
+//703
+
+DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
     PDRSD_ENCODER                   Encoder,

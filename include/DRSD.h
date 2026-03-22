@@ -114,6 +114,10 @@ struct _DRSD_ATOMIC_STATE;
 #define DRSD_COLOR_FORMAT_RGBA1010102 'RX30'
 #define DRSD_COLOR_FORMAT_BGRA1010102 'BX30'
 
+typedef enum _DRSD_SCALING_FILTER{
+    DRSD_SCALING_FILTER_DEFAULT = 0,
+    DRSD_SCALING_FILTER_NEAREST_NEIGHBOR ,
+}DRSD_SCALING_FILTER, * PDRSD_SCALING_FILTER;
 
 typedef enum{
     DRSD_CONNECTOR_CONNECTED = 1,
@@ -592,20 +596,66 @@ typedef struct _DRSD_CRTC_COMMIT{
     BOOLEAN                         AbortCompletion;
 }DRSD_CRTC_COMMIT, * PDRSD_CRTC_COMMIT;
 
+typedef enum _DRSD_COLOR_ENCODING {
+	DRSD_COLOR_YCBCR_BT601,
+	DRSD_COLOR_YCBCR_BT709,
+	DRSD_COLOR_YCBCR_BT2020,
+	DRSD_COLOR_ENCODING_MAX,
+}DRSD_COLOR_ENCODING, * PDRSD_COLOR_ENCODING;
+
+typedef enum _DRSD_COLOR_RANGE {
+	DRSD_COLOR_YCBCR_LIMITED_RANGE,
+	DRSD_COLOR_YCBCR_FULL_RANGE,
+	DRSD_COLOR_RANGE_MAX,
+}DRSD_COLOR_RANGE, * PDRSD_COLOR_RANGE;
+
+typedef struct _DRSD_RECT{
+    int X1;
+    int Y1;
+    int X2;
+    int Y2;
+}DRSD_RECT, * PDRSD_RECT;
+
 typedef struct _DRSD_PLANE_STATE{
-    struct _DRSD_FRAME_BUFFER*      FrameBuffer;
+    struct _DRSD_PLANE*         Plane;
+    struct _DRSD_CRTC*          Crtc;
+    struct _DRSD_FRAME_BUFFER*  FrameBuffer;
+    HANDLE                      DmaFence;
+    INT32                       CrtcX;
+    INT32                       CrtcY;
+    UINT32                      CrtcWidth;
+    UINT32                      CrtcHeight;
+    UINT32                      SourceX;
+    UINT32                      SourceY;
+    UINT32                      SourceWidth;
+    UINT32                      SourceHeight;
+    INT32                       HotSpotX;
+    INT32                       HotSpotY;
+    UINT16                      Alpha;
+    UINT16                      PixelBlend;
+    UINT                        Rotation;
+    UINT                        ZPos;
+    UINT                        NormalizedZPos;
+    DRSD_COLOR_ENCODING         ColorEncoding;
+    DRSD_COLOR_RANGE            ColorRange;
+    struct _DRSD_PROPERTY_BLOB* FbDamageClips;
+    BOOLEAN                     IgnoreDamageClips;
+    DRSD_RECT                   Source;
+    DRSD_RECT                   Destiantion;
+    BOOLEAN                     Visable;
+    DRSD_SCALING_FILTER         ScalingFilter;
+    struct _DRSD_COLOR_OP*      ColorPipeline;
+    struct _DRSD_CRTC_COMMIT*   Commit; 
+    struct _DRSD_ATOMIC_STATE*  State;
+    BOOLEAN                     ColorMgmtChanged : 1;
+
+    //TODO: Get rid of old members
     atomic_t                        Fence;
-    DRSD_CRTC_COMMIT                Commit;
     struct _DRSD_PROPERTY_BLOB*     Base;
-    uint32_t                        Rotation;
-    uint32_t                        PixelBlend;
-    int32_t                         SourceX;
-    int32_t                         SourceY;
     uint32_t                        Height;
     uint32_t                        Width;
     uint32_t*                       Formats;
     size_t                          FormatCount;
-    struct _DRSD_CRTC*              Crtc;
     UINT32                          FormatUsed;
 }DRSD_PLANE_STATE, * PDRSD_PLANE_STATE;
 
@@ -613,19 +663,20 @@ typedef struct _SHADOW_PLANE_STATE{
     DRSD_PLANE_STATE Base;
 }SHADOW_PLANE_STATE, * PSHADOW_PLANE_STATE;
 
-typedef struct _DRSD_PLANE_ASSIST_CALLBACKS{
+typedef struct _DRSD_PLANE_ASSIST_FUNCTIONS{
     LOUSTATUS   (*PrepareFrameBuffer)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* NewState);
     void        (*CleanupFrameBuffer)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* OldState);
-    LOUSTATUS   (*StartFrameBufferProcessing)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* NewState);
-    void        (*StopFrameBufferProcessing)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* OldState);
-    LOUSTATUS   (*AtomicCheck)(struct _DRSD_PLANE* Plane, void* LockHandle);
-    void        (*AtomicUpdate)(struct _DRSD_PLANE* Plane, void* LockHandle);
-    void        (*AtomicSetState)(struct _DRSD_PLANE* Plane, void* LockHandle, bool Enable);
-    LOUSTATUS   (*AtomicAsyncCheck)(struct _DRSD_PLANE* Plane, void* State, bool Flip);
-    void        (*AtomicAsyncUpdate)(struct _DRSD_PLANE* Plane, void* LockHandle);
-    LOUSTATUS   (*GetCanoutBuffer)(struct _DRSD_PLANE* Plane, void* ScanBuffer);
+    LOUSTATUS   (*BeginFrameBufferAccess)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* NewState);
+    void        (*EndFrameBufferAccess)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* OldState);
+    LOUSTATUS   (*AtomicCheck)(struct _DRSD_PLANE* Plane, struct _DRSD_ATOMIC_STATE* State);
+    void        (*AtomicUpdate)(struct _DRSD_PLANE* Plane, struct _DRSD_ATOMIC_STATE* State);
+    void        (*AtomicEnable)(struct _DRSD_PLANE* Plane, struct _DRSD_ATOMIC_STATE* State);
+    void        (*AtomicDisable)(struct _DRSD_PLANE* Plane, struct _DRSD_ATOMIC_STATE* State);
+    LOUSTATUS   (*AtomicAsyncCheck)(struct _DRSD_PLANE* Plane, struct _DRSD_ATOMIC_STATE* State, bool Flip);
+    void        (*AtomicAsyncUpdate)(struct _DRSD_PLANE* Plane, struct _DRSD_ATOMIC_STATE* State);
+    LOUSTATUS   (*GetScanoutBuffer)(struct _DRSD_PLANE* Plane, void* ScanBuffer);
     void        (*PanicFlush)(struct _DRSD_PLANE* Plane);
-}DRSD_PLANE_ASSIST_CALLBACKS, * PDRSD_PLANE_ASSIST_CALLBACKS;
+}DRSD_PLANE_ASSIST_FUNCTIONS, * PDRSD_PLANE_ASSIST_FUNCTIONS;
 
 typedef struct _DRSD_PLANE_CALLBACKS{
     LOUSTATUS                   (*UpdatePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int CrtcX, int CrtcY, int CrtcWidth, int CrtcHeight, uint32_t SourceX, uint32_t SourceY, uint32_t SourceWidth, uint32_t SourceHeight, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
@@ -651,8 +702,9 @@ typedef enum{
     CURSOR_PLANE  = 2,
 }DRSD_PLANE_TYPE;
 
-typedef struct _DRSD_PLANE{
 
+
+typedef struct _DRSD_PLANE{
     struct _DRSD_DEVICE*            Device;
     ListHeader                      Head;
     LOUSTR                          Name;
@@ -668,6 +720,21 @@ typedef struct _DRSD_PLANE{
     PDRSD_FRAME_BUFFER              Fb;
     PDRSD_FRAME_BUFFER              OldFb;
     PDRSD_PLANE_FUNCTIONS           Functions;
+    DRSD_PROPERTY                   Properties;
+    DRSD_PLANE_TYPE                 PlaneType;
+    UINT                            Index;
+    PDRSD_PLANE_ASSIST_FUNCTIONS    AssistFunctions;
+    PDRSD_PLANE_STATE               State;
+    PDRSD_PROPERTY                  AlphaProperty;
+    PDRSD_PROPERTY                  ZPositionProperty;
+    PDRSD_PROPERTY                  RotationProperty;
+    PDRSD_PROPERTY                  BlendModeProperty;
+    PDRSD_PROPERTY                  ColorEncodingProperty;
+    PDRSD_PROPERTY                  ColorRangeProperty;
+    PDRSD_PROPERTY                  ColorPipelineProperty;
+    PDRSD_PROPERTY                  ScalingFilterProperty;
+    PDRSD_PROPERTY                  HotSpotXProperty;
+    PDRSD_PROPERTY                  HotSpotYProperty;
 
 
     //TODO Yatah Yatah Ya
@@ -681,15 +748,9 @@ typedef struct _DRSD_PLANE{
     PDRSD_FRAME_BUFFER              FrameBuffer;
     PDRSD_FRAME_BUFFER              OldBuffer;
     PDRSD_PLANE_CALLBACKS           Callbacks;
-    PDRSD_PLANE_ASSIST_CALLBACKS    AssistCallbacks;
-    DRSD_OBJECT_PROPERTIES          Properties;
-    DRSD_PLANE_TYPE                 PlaneType;
     PDRSD_PLANE_STATE               PlaneState;
-    size_t                          ColorEncodingProperty;
-    size_t                          ColorRangeProperty;
-    size_t                          ZPositionProperty;
-    size_t                          HotSpotXProperty;
-    size_t                          HotSpotYProperty;
+
+
     bool                            PlaneInUse;
     uint64_t                        DrsdPutPixelCase;
     size_t                          AlphaShift;
@@ -1121,7 +1182,7 @@ typedef struct _DRSD_CONNECTOR{
     PDRSD_PROPERTY_BLOB                 EdidPropertiesBlob;
     DRSD_OBJECT_PROPERTIES              ConnectorProperties;
     int                                 PowerMode;
-    PDRSD_CONNECTOR_ASSIST_CALLBACKS    AssistCallbacks;
+    PDRSD_CONNECTOR_ASSIST_CALLBACKS    AssistFunctions;
     DRSD_CONNECTOR_FORCE                Force;
     HDMI_SYNCRONIZATION_INFORMATION     HdmiSyncInformation;
     mutex_t                             EldTex;
@@ -1231,11 +1292,6 @@ typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
     void                        (*Enable)(struct _DRSD_ENCODER* Encoder);
     LOUSTATUS                   (*CheckAtomic)(struct _DRSD_ENCODER* Encoder, struct _DRSD_CRTC_STATE* State, void* ConnectorState);
 }DRSD_ENCODER_ASSISTED_CALLBACKS, * PDRSD_ENCODER_ASSISTED_CALLBACKS;
-
-typedef enum _DRSD_SCALING_FILTER{
-    DRSD_SCALING_FILTER_DEFAULT = 0,
-    DRSD_SCALING_FILTER_NEAREST_NEIGHBOR ,
-}DRSD_SCALING_FILTER, * PDRSD_SCALING_FILTER;
 
 typedef struct _DRSD_CRTC_STATE{
     struct _DRSD_CRTC*              Crtc;
@@ -1387,7 +1443,7 @@ typedef struct _DRSD_CRTC{
     PDRSD_PLANE                     PrimaryPlane;
     PDRSD_PLANE                     CursorPlane;
     PDRSD_CRTC_CALLBACK             CrtcCallbacks;
-    PDRSD_CRTC_ASSIST_CALLBACK      AssistCallbacks;
+    PDRSD_CRTC_ASSIST_CALLBACK      AssistFunctions;
     PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 

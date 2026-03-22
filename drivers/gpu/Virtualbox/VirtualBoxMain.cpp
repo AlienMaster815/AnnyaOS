@@ -236,6 +236,7 @@ DriverEntry(
 ){
 
     LouPrint("VBOXGPU::DriverEntry()\n");
+    while(1);
     //tell the System where are key Nt driver functions are
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;

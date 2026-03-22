@@ -173,7 +173,7 @@ static void VirtualboxConnectorDestroy(
     while(1);
 }
 
-static  DRSD_CONNECTOR_ASSIST_CALLBACKS VirtualboxConnectorAssistCallbacks = {
+static  DRSD_CONNECTOR_ASSIST_CALLBACKS VirtualboxConnectorAssistFunctions = {
     .ConnectorGetModes = VirtualboxGetModes,
 };
 
@@ -226,7 +226,7 @@ static  DRSD_CRTC_CALLBACK VBoxCrtcCallbacks = {
     .AtomicDestroyState = DrsdInternalCrtcDestroyStateAtomic,
 };
 
-static  DRSD_CRTC_ASSIST_CALLBACK VBoxCrtcAssistCallbacks = {
+static  DRSD_CRTC_ASSIST_CALLBACK VBoxCrtcAssistFunctions = {
     .FlushAtomic = VirtualboxCrtcAtomicFlush,
     .EnableAtomic = VirtualboxCrtcAtomicEnable,
     .DisableAtomic = VirtualboxCrtcAtomicDisable,
@@ -443,12 +443,12 @@ static void VirtualboxAtomicSetState(
 }
 
 
-static  DRSD_PLANE_ASSIST_CALLBACKS CursorPlaneAssistFunctions = {
-    .StartFrameBufferProcessing = DrsdGxeInternalStartFrameBufferProcessing,
-    .StopFrameBufferProcessing = DrsdGxeInternalStopFrameBufferProcessing,
-    .AtomicCheck = VirtualboxCursorAtomicCheck,
-    .AtomicUpdate = VirtualboxCursorAtomicUpdate,
-    .AtomicSetState = VirtualboxCursorAtomicSetState,
+static  DRSD_PLANE_ASSIST_FUNCTIONS CursorPlaneAssistFunctions = {
+    .BeginFrameBufferAccess = DrsdGxeInternalStartFrameBufferProcessing,
+    .EndFrameBufferAccess = DrsdGxeInternalStopFrameBufferProcessing,
+//    .AtomicCheck = VirtualboxCursorAtomicCheck,
+//    .AtomicUpdate = VirtualboxCursorAtomicUpdate,
+//    .AtomicSetState = VirtualboxCursorAtomicSetState,
 };
 
 static  DRSD_PLANE_CALLBACKS CursorPlaneFunctions = {
@@ -461,12 +461,12 @@ static  DRSD_PLANE_CALLBACKS CursorPlaneFunctions = {
 };
 
 
-static  DRSD_PLANE_ASSIST_CALLBACKS PlaneAssistedCallbacks = {
+static  DRSD_PLANE_ASSIST_FUNCTIONS PlaneAssistedCallbacks = {
     .PrepareFrameBuffer = DrsdGxeInternalPrepareFrameBuffer,
     .CleanupFrameBuffer = DrsdGxeInternalCleanupFrameBuffer,
-    .AtomicCheck = VirtualboxAtomicCheck,
-    .AtomicUpdate = VirtualboxAtomicUpdate,
-    .AtomicSetState = VirtualboxAtomicSetState,
+    //.AtomicCheck = VirtualboxAtomicCheck,
+    //.AtomicUpdate = VirtualboxAtomicUpdate,
+    //.AtomicSetState = VirtualboxAtomicSetState,
 };
 
 static  DRSD_PLANE_CALLBACKS PlaneCallbacks = {
@@ -490,7 +490,7 @@ static PDRSD_PLANE VirtualboxCreatePlane(
     uint64_t                    CrtcLimit,
     DRSD_PLANE_TYPE             Type
 ){
-    PDRSD_PLANE_ASSIST_CALLBACKS AssistFunctions = 0x00;
+    PDRSD_PLANE_ASSIST_FUNCTIONS AssistFunctions = 0x00;
     PDRSD_PLANE_CALLBACKS Functions = 0x00;
     PDRSD_PLANE NewPlane;
     uint32_t*   Formats;
@@ -500,13 +500,13 @@ static PDRSD_PLANE VirtualboxCreatePlane(
     switch(Type){
         case PRIMARY_PLANE:
             Functions = (PDRSD_PLANE_CALLBACKS)&PlaneCallbacks;
-            AssistFunctions = (PDRSD_PLANE_ASSIST_CALLBACKS)&PlaneAssistedCallbacks;
+            AssistFunctions = (PDRSD_PLANE_ASSIST_FUNCTIONS)&PlaneAssistedCallbacks;
             Formats = PlaneFormats;
             FormatCount = 2;
             break;
         case CURSOR_PLANE:
             Functions = (PDRSD_PLANE_CALLBACKS)&CursorPlaneFunctions;
-            AssistFunctions = (PDRSD_PLANE_ASSIST_CALLBACKS)&CursorPlaneAssistFunctions;
+            AssistFunctions = (PDRSD_PLANE_ASSIST_FUNCTIONS)&CursorPlaneAssistFunctions;
             Formats = CursorPlaneFormats;
             FormatCount = 1; 
             break;
@@ -533,7 +533,7 @@ static PDRSD_PLANE VirtualboxCreatePlane(
         return 0x00;
     }
 
-    NewPlane->AssistCallbacks = AssistFunctions;
+    NewPlane->AssistFunctions = AssistFunctions;
 
     LouPrint("VirtualboxCreatePlane() STATUS_SUCCESS\n");
     return NewPlane;
@@ -601,7 +601,7 @@ static PVIRTUALBOX_CRTC VirtualboxCrtcInitialize(
 
     DrsdInitializeCrtcGammaSize(&VBoxCrtc->Base, 256);
 
-    VBoxCrtc->Base.AssistCallbacks = (PDRSD_CRTC_ASSIST_CALLBACK)&VBoxCrtcAssistCallbacks;
+    VBoxCrtc->Base.AssistFunctions = (PDRSD_CRTC_ASSIST_CALLBACK)&VBoxCrtcAssistFunctions;
 
     VBoxCrtc->CrtcId = i;
 
@@ -648,7 +648,7 @@ static LOUSTATUS VirtualboxConnectorInitialize(
         DRSD_CONNECTOR_MODE_VGA
     );
 
-    Connector->AssistCallbacks = (PDRSD_CONNECTOR_ASSIST_CALLBACKS)&VirtualboxConnectorAssistCallbacks;
+    Connector->AssistFunctions = (PDRSD_CONNECTOR_ASSIST_CALLBACKS)&VirtualboxConnectorAssistFunctions;
 
     Connector->InterlaceAble = false;
     Connector->DoubleScanAble = false;

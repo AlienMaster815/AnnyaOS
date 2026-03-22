@@ -36,7 +36,7 @@
 KERNEL_EXPORT
 int DrsdInternalProbeModes(PDRSD_CONNECTOR Connector){
 
-    int Count = Connector->AssistCallbacks->ConnectorGetModes(Connector);
+    int Count = Connector->AssistFunctions->ConnectorGetModes(Connector);
 
     if(Count < 1){
         LouPrint("ERROR No Modes Available\n");

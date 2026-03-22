@@ -336,14 +336,14 @@ LouKeDrsdInitializeDevice(
 
         Crtc->CrtcState->NeedsModeset = false;
 
-        if(PrimaryPlane->AssistCallbacks->AtomicUpdate){
-            PrimaryPlane->AssistCallbacks->AtomicUpdate(PrimaryPlane, PrimaryPlane->PlaneState);
+        if(PrimaryPlane->AssistFunctions->AtomicUpdate){
+            PrimaryPlane->AssistFunctions->AtomicUpdate(PrimaryPlane, (PDRSD_ATOMIC_STATE)(PVOID)PrimaryPlane->PlaneState);
         }
 
         Crtc->CrtcState->NeedsModeset = false;
 
         PDRSD_PLANE_CHAIN Chain = LouKeDrsdAcquireClipChainMember(PrimaryPlane);
-        Chain->PrimaryAtomicUpdate = PrimaryPlane->AssistCallbacks->AtomicUpdate;
+        Chain->PrimaryAtomicUpdate = (void (*)(PDRSD_PLANE, void*))PrimaryPlane->AssistFunctions->AtomicUpdate;
 
         PDRSD_CLIP Background = LouKeDrsdCreateClip(
             PrimaryPlane->PlaneState->SourceX, PrimaryPlane->PlaneState->SourceY,

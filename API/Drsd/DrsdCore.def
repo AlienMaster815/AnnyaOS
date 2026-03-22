@@ -26,3 +26,6 @@ EXPORTS
     DrsdAtomicStateClear
     __DrsdAtomicStateFree
     DrsdAtomicGetCrtcState
+    DrsdAtomicGetPlaneState
+    DrsdAtomicGetOldColorOpState
+    DrsdAtomicGetColorOpState

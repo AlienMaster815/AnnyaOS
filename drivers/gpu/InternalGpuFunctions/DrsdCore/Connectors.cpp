@@ -38,10 +38,10 @@ DRSD_CONNECTOR_STATUS DrsdDetectConnectorStatus(
     PDRSD_MODE_SET_CONTEXT  Setex,
     bool                    Force
 ){
-    if(Connector->AssistCallbacks->ConnectorDetectContext){
-        return Connector->AssistCallbacks->ConnectorDetectContext(Connector, Setex, Force);
-    }else if(Connector->AssistCallbacks->ConnectorDetect){
-        return Connector->AssistCallbacks->ConnectorDetect(Connector, Force);
+    if(Connector->AssistFunctions->ConnectorDetectContext){
+        return Connector->AssistFunctions->ConnectorDetectContext(Connector, Setex, Force);
+    }else if(Connector->AssistFunctions->ConnectorDetect){
+        return Connector->AssistFunctions->ConnectorDetect(Connector, Force);
     }else if(Connector->Callbacks->Detect){
         Connector->Callbacks->Detect(Connector, Force);
     }

@@ -51,9 +51,9 @@ void DrsdAtomicDestroyPlaneState(
         LouKeSetAtomic(&PlaneState->Fence, 0);
     }
 
-    if(LouKeGetReferenceCount(&PlaneState->Commit.Reference)){
-        while(LouKeGetReferenceCount(&PlaneState->Commit.Reference)){
-            LouKeReleaseReference(&PlaneState->Commit.Reference);
+    if(LouKeGetReferenceCount(&PlaneState->Commit->Reference)){
+        while(LouKeGetReferenceCount(&PlaneState->Commit->Reference)){
+            LouKeReleaseReference(&PlaneState->Commit->Reference);
         }
     }    
 
