@@ -350,10 +350,42 @@ DrsdAtomicConnectorCheck(
     PDRSD_CONNECTOR         Connector,
     PDRSD_CONNECTOR_STATE   State
 ){
-    //PDRSD_CRTC_STATE CrtcState;
-    //PDRSD_WRITEBACK_JOB WriteBackJob = State->WriteBackJob;
+    PDRSD_CRTC_STATE CrtcState;
+    PDRSD_WRITEBACK_JOB WritebackJob = State->WritebackJob;
+    PDRSD_DISPLAY_INFORMATION Info = &Connector->DisplayInfo;
+    
+    State->MaxBpc = Info->Bpc ? Info->Bpc : 8;
+    if(Connector->MaxBpcProperty){
+        State->MaxBpc = MIN(State->MaxBpc, State->MaxRequestedBpc);
+    }
 
+    if((Connector->ConnectorType != DRSD_MODE_CONNECTOR_WRITEBACK) || (!WritebackJob)){
+        return STATUS_SUCCESS;
+    }
 
+    if((WritebackJob->FrameBuffer) && (!State->Crtc)){
+        LouPrint("DRSD.SYS:Connector:%d:%s:FrameBuffer Withought Crtc\n", Connector->Base.Identification, Connector->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if(State->Crtc){
+        CrtcState = DrsdAtomicGetNewCrtcState(State->State, State->Crtc);
+    }
+
+    if((WritebackJob->FrameBuffer) && (!CrtcState->Active)){
+        LouPrint("DRSD.SYS:Connector:%d:%s:Has a FrameBuffer Byt Crtc:%d Is Off\n", Connector->Base.Identification, Connector->Name, State->Crtc->Base.Identification);
+        return STATUS_INVALID_PARAMETER;
+    }
+ 
+    if(!WritebackJob->FrameBuffer){
+        if(WritebackJob->DmaOutFence){
+            LouPrint("DRSD.SYS:Connector:%d:%s:Is Requesting Out Fence Withought Framebuffer\n", Connector->Base.Identification, Connector->Name);
+            return STATUS_INVALID_PARAMETER;
+        }
+        DrsdWritebackCleanupJob(WritebackJob);
+        State->WritebackJob = 0x00;
+    }
+    
     return STATUS_SUCCESS;
 } 
 

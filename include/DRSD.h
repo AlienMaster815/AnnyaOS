@@ -225,6 +225,29 @@ typedef enum _DRSD_COLOR_SPACE{
 
 #define DRSD_MODE_OBJECT_ID_PLANE 1
 
+#define DRSD_MODE_CONNECTOR_UNKOWN	        0
+#define DRSD_MODE_CONNECTOR_VGA		        1
+#define DRSD_MODE_CONNECTOR_DVII		    2
+#define DRSD_MODE_CONNECTOR_DVID		    3
+#define DRSD_MODE_CONNECTOR_DVIA		    4
+#define DRSD_MODE_CONNECTOR_COMPOSITE	    5
+#define DRSD_MODE_CONNECTOR_SVIDEO	        6
+#define DRSD_MODE_CONNECTOR_LVDS		    7
+#define DRSD_MODE_CONNECTOR_Component	    8
+#define DRSD_MODE_CONNECTOR_9PINDIN	        9
+#define DRSD_MODE_CONNECTOR_DISPLAY_PORT	10
+#define DRSD_MODE_CONNECTOR_HDMIA	        11
+#define DRSD_MODE_CONNECTOR_HDMIB	        12
+#define DRSD_MODE_CONNECTOR_TV		        13
+#define DRSD_MODE_CONNECTOR_eDP		        14
+#define DRSD_MODE_CONNECTOR_VIRTUAL         15
+#define DRSD_MODE_CONNECTOR_DSI		        16
+#define DRSD_MODE_CONNECTOR_DPI		        17
+#define DRSD_MODE_CONNECTOR_WRITEBACK	    18
+#define DRSD_MODE_CONNECTOR_SPI		        19
+#define DRSD_MODE_CONNECTOR_USB		        20
+
+
 typedef struct _DRSD_CONNECTOR_TV_MARGINS{
     UINT    Bottom;
     UINT    Left;
@@ -753,7 +776,7 @@ typedef struct _DRSD_LUMINANCE_RANGE_INFORMATION{
 typedef struct _DRSD_DISPLAY_INFORMATION{
     uint32_t                            MetricWidth;
     uint32_t                            MetricHeight;
-    uint32_t                            BitsPerChannel;
+    uint32_t                            Bpc;
     SUBPIXEL_ORDER                      SubpixelOrder;
     int32_t                             PanelOrientation;
     uint32_t                            ColorFormats;
@@ -1027,7 +1050,7 @@ typedef struct _DRSD_CONNECTOR{
     ListHeader                          Modes;
     DRSD_CONNECTOR_STATUS               Status;
     ListHeader                          ProbedModes;
-    PDRSD_DISPLAY_INFORMATION           DisplayInfo;
+    DRSD_DISPLAY_INFORMATION            DisplayInfo;
     PDRSD_CONNECTOR_FUNCTIONS           Functions;
     struct _DRSD_PROPERTY_BLOB*         EdidBlobPointer;
     DRSD_OBJECT_PROPERTIES              Properties;

@@ -145,7 +145,7 @@ static void DrsdResetDisplayInformation(PDRSD_CONNECTOR Connector){
     PDRSD_DISPLAY_INFORMATION Tmp = &Connector->DisplayInformation;
     Tmp->MetricWidth = 0;
     Tmp->MetricHeight = 0;
-    Tmp->BitsPerChannel = 0;
+    Tmp->Bpc = 0;
     Tmp->ColorFormats = 0;
     Tmp->CEARevision = 0;
     Tmp->MaxTmdsClock = 0;

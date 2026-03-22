@@ -43,6 +43,8 @@
 #include "DrsdConnector.h"
 #include "DrsdColorOp.h"
 #include "DrsdCrtc.h"
+#include "DrsdWriteback.h"
+
 
 typedef enum _DRSD_DRIVER_FEATURE{
     DRIVER_GXE = (1 << 0),
