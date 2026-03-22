@@ -1107,18 +1107,6 @@ typedef struct _DRSD_CONNECTOR{
 
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
 
-typedef struct _DRSD_WRITEBACK_CONNECTOR{
-    DRSD_CONNECTOR                  Base;
-    DRSD_ENCODER                    Encoder;
-    struct _DRSD_PROPERTY_BLOB*     PixelFormatsBlopPointer;
-    spinlock_t                      JobLock;
-    ListHeader                      JobQueue;
-    UINT                            FenceContext;
-    spinlock_t                      FenceLock;
-    UINT64                          FenceSequenceNumber;
-    CHAR                            TimeLineName[32];
-}DRSD_WRITEBACK_CONNECTOR, * PDRSD_WRITEBACK_CONNECTOR;
-
 typedef struct _DRSD_EDID_IDENTIFICATION{
     uint32_t    PannelIdentification;
     string      EdidName;
@@ -1185,6 +1173,18 @@ typedef struct _DRSD_ENCODER{
     struct _DRSD_ENCODER_CALLBACKS*             Callbacks;
     struct _DRSD_ENCODER_ASSISTED_CALLBACKS*    AssistedCallbacks;
 }DRSD_ENCODER, * PDRSD_ENCODER; 
+
+typedef struct _DRSD_WRITEBACK_CONNECTOR{
+    DRSD_CONNECTOR                  Base;
+    DRSD_ENCODER                    Encoder;
+    struct _DRSD_PROPERTY_BLOB*     PixelFormatsBlopPointer;
+    spinlock_t                      JobLock;
+    ListHeader                      JobQueue;
+    UINT                            FenceContext;
+    spinlock_t                      FenceLock;
+    UINT64                          FenceSequenceNumber;
+    CHAR                            TimeLineName[32];
+}DRSD_WRITEBACK_CONNECTOR, * PDRSD_WRITEBACK_CONNECTOR;
 
 typedef struct _DRSD_ENCODER_CALLBACKS{
     void        (*ResetEncoder)(struct _DRSD_ENCODER* Encoder);
