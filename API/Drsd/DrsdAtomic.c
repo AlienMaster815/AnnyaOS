@@ -502,7 +502,48 @@ PlaneSwitchingCrtc(
     return true;
 }
 
-//703
+UNUSED 
+static
+LOUSTATUS
+DrsdAtomicPlaneCheck(
+    PDRSD_PLANE_STATE OldPlaneState,
+    PDRSD_PLANE_STATE NewPlaneState
+){
+    PDRSD_PLANE         Plane = NewPlaneState->Plane;
+    PDRSD_CRTC          Crtc = NewPlaneState->Crtc;
+    PDRSD_FRAME_BUFFER  FrameBuffer = NewPlaneState->FrameBuffer;
+    UINT                FbWidth;
+    UINT                FbHeight;
+    PDRSD_MODE_RECT     Clips;
+    UINT32              ClipCount;
+
+    if((Crtc) && (!FrameBuffer)){
+        LouPrint("DRSD.SYS:Device:%h:Plane:%d:%s:CRTC Set But Not FB\n", Plane->Device, Plane->Base.Identification, Plane->Name);
+        return STATUS_INVALID_PARAMETER;
+    }else if((FrameBuffer) && (!Crtc)){
+        LouPrint("DRSD.SYS:Device:%h:Plane:%d:%s:FB Set But Not CRTC\n", Plane->Device, Plane->Base.Identification, Plane->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
+    
+    if(!Crtc){
+        return STATUS_SUCCESS;
+    }
+
+    if(!(Plane->PossibleCrtcs & DrsdCrtcMask(Crtc))){
+        LouPrint("DRSD.SYS:Device:%h:Invalid Crtc:%h:%s: For Plane:%d:%s:\n", Plane->Device, Crtc->Base.Identification, Crtc->Name, Plane->Base.Identification, Plane->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if(!DrsdPlaneHasFormat(Plane, FrameBuffer->Format->Format, FrameBuffer->Modifier)){
+        LouPrint("DRSD.SYS:Device:%h:Plane:%d:%s:Has INvalid Pixel Format:%h Modifier:%h\n", Plane->Device, Plane->Base.Identification, Plane->Name, FrameBuffer->Format->Format, FrameBuffer->Modifier);
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    //747
+
+    return STATUS_SUCCESS;
+}
+
 
 DRIVER_EXPORT
 PDRSD_CONNECTOR 

@@ -7,4 +7,8 @@ static inline UINT DrsdCrtcIndex(PDRSD_CRTC Crtc){
     return Crtc->Index;
 } 
 
+static inline UINT32 DrsdCrtcMask(PDRSD_CRTC Crtc){
+    return (1 << DrsdCrtcIndex(Crtc));
+}
+
 #endif

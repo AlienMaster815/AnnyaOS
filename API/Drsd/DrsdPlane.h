@@ -7,4 +7,12 @@ static inline UINT DrsdPlaneIndex(PDRSD_PLANE Plane){
     return Plane->Index;
 }
 
+DRIVER_EXPORT
+BOOLEAN
+DrsdPlaneHasFormat(
+    PDRSD_PLANE Plane,
+    UINT32      Format,
+    UINT64      Modifier
+);
+
 #endif

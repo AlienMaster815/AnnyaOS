@@ -614,7 +614,8 @@ typedef struct _DRSD_RECT{
     int Y1;
     int X2;
     int Y2;
-}DRSD_RECT, * PDRSD_RECT;
+}DRSD_RECT, * PDRSD_RECT, 
+    DRSD_MODE_RECT, * PDRSD_MODE_RECT;
 
 typedef struct _DRSD_PLANE_STATE{
     struct _DRSD_PLANE*         Plane;
