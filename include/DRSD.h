@@ -36,6 +36,8 @@ extern "C" {
 #include <Ldm/CommonTypes.h>
 #include <kernel/XArray.h>
 #include <drivers/Hdmi/Picture.h>
+#include <drivers/Notifications.h>
+#include <drivers/Hdmi/Info.h>
 
 #define DRSD_ROTATION_MODE_0 1
 
@@ -802,11 +804,17 @@ typedef enum _DRSD_PRIVACY_SCREEN_STATUS{
 }DRSD_PRIVACY_SCREEN_STATUS, * PDRSD_PRIVACY_SCREEN_STATUS;
 
 typedef struct _DRSD_WRITEBACK_JOB{
-    PVOID Todo;
+    struct _DRSD_WRITEBACK_CONNECTOR*   Connector;
+    BOOLEAN                             Prepared;
+    LOUQ_WORK                           CleanupWork;
+    ListHeader                          ListEntry;
+    struct _DRSD_FRAME_BUFFER*          FrameBuffer;
+    HANDLE                              DmaOutFence;
+    PVOID                               PrivateData;
 }DRSD_WRITEBACK_JOB, * PDRSD_WRITEBACK_JOB;
 
 typedef struct _DRSD_CONNECTOR_HDMI_STATE{
-    PVOID Todo;
+    PVOID Todo; 
 }DRSD_CONNECTOR_HDMI_STATE, * PDRSD_CONNECTOR_HDMI_STATE;
 
 typedef struct _DRSD_CONNECTOR_STATE{
@@ -923,6 +931,81 @@ typedef enum _DRSD_CONNECTOR_REISTRATION_STATE{
     DRSD_CONNECTRO_UNREGISTERED,
 }DRSD_CONNECTOR_REISTRATION_STATE, * PDRSD_CONNECTOR_REISTRATION_STATE;
 
+#define DRSD_CONNECTOR_POLL_HPD         (1 << 0)
+#define DRSD_CONNECTOR_POLL_CONNECT     (1 << 1)
+#define DRSD_CONNECTOR_POLL_DISCONNECT  (1 << 2)
+
+#define DRSD_MAX_ELD_BYTES 128
+
+typedef struct _DRSD_TITLE_GROUP{
+    KERNEL_REFERENCE        Reference;
+    struct _DRSD_DEVICE*    Device;
+    int                     Id;
+    UINT8                   GroupData[8];
+}DRSD_TITLE_GROUP, * PDRSD_TITLE_GROUP;
+
+typedef struct _DRSD_CONNECTOR_INFOFRAME_FUNCTIONS{
+    LOUSTATUS   (*ClearInfoFrame)(struct _DRSD_CONNECTOR* Connector);
+    LOUSTATUS   (*WriteInfoFrame)(struct _DRSD_CONNECTOR* Connector, UINT8* Buffer, SIZE Length);
+}DRSD_CONNECTOR_INFOFRAME_FUNCTIONS, * PDRSD_CONNECTOR_INFOFRAME_FUNCTIONS;
+
+typedef struct _DRSD_CONNECTOR_HDMI_FUNCTIONS{
+    DRSD_MODE_STATUS                        (*TmdsCHarRateValid)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_DISPLAY_MODE* Mode, ULONGLONG TmdsRate);
+    struct _DRSD_EDID_TRACKER*              (*ReadEdid)(struct _DRSD_CONNECTOR* Connector);
+    DRSD_CONNECTOR_INFOFRAME_FUNCTIONS      Avi;
+    DRSD_CONNECTOR_INFOFRAME_FUNCTIONS      Hdmi;
+    DRSD_CONNECTOR_INFOFRAME_FUNCTIONS      Audio;
+    DRSD_CONNECTOR_INFOFRAME_FUNCTIONS      HdrDrsd;
+    DRSD_CONNECTOR_INFOFRAME_FUNCTIONS      Spd;
+}DRSD_CONNECTOR_HDMI_FUNCTIONS, * PDRSD_CONNECTOR_HDMI_FUNCTIONS;
+
+typedef struct _DRSD_CONNECTOR_HDMI_INFOFRAME{
+    HDMI_INFOFRAME  Data;
+    BOOLEAN         Set;
+}DRSD_CONNECTOR_HDMI_INFOFRAME, * PDRSD_CONNECTOR_HDMI_INFOFRAME;
+
+#define DRSD_CONNECTOR_HDMI_VENDOR_LENGTH  8
+#define DRSD_CONNECTOR_HDMI_PRODUCT_LENGTH 16
+
+typedef struct _DRSD_CONNECTOR_HDMI{
+    UCHAR                               Vendor[DRSD_CONNECTOR_HDMI_VENDOR_LENGTH];
+    UCHAR                               Product[DRSD_CONNECTOR_HDMI_PRODUCT_LENGTH];
+    UINT64                              SupportedFormats;
+    PDRSD_CONNECTOR_HDMI_FUNCTIONS      Functions;
+    struct{
+        mutex_t                         Lock;
+        DRSD_CONNECTOR_HDMI_INFOFRAME   Audio;
+    }InfoFrames;    
+}DRSD_CONNECTOR_HDMI, * PDRSD_CONNECTOR_HDMI;
+
+typedef struct _DRSD_CONNECTOR_HDMI_AUDIO_FUNCTIONS{
+    LOUSTATUS   (*StartUp)(struct _DRSD_CONNECTOR* Connector);
+    LOUSTATUS   (*Prepare)(struct _DRSD_CONNECTOR* Connector, struct _HDMI_CODEC_DAIFMT* Format, struct _HDMI_CODEC_PARAMETERS* Parameters);
+    void        (*ShutDown)(struct _DRSD_CONNECTOR* Connector);
+    LOUSTATUS   (*MuteStream)(struct _DRSD_CONNECTOR* Connector, BOOLEAN Enable, int Direction);
+}DRSD_CONNECTOR_HDMI_AUDIO_FUNCTIONS, * PDRSD_CONNECTOR_HDMI_AUDIO_FUNCTIONS;
+
+typedef struct _DRSD_CONNECTOR_HDMI_AUDIO{
+    PDRSD_CONNECTOR_HDMI_AUDIO_FUNCTIONS    Functions;
+    PLATFORM_DEVICE                         CodecPDev;
+    mutex_t                                 Lock;
+    void                                    (*PluggedCb)(PLATFORM_DEVICE Device, BOOLEAN Plugged);
+    PLATFORM_DEVICE                         PluggedCbDevice;
+    BOOLEAN                                 LastState;
+    int                                     DaiPort;
+}DRSD_CONNECTOR_HDMI_AUDIO, * PDRSD_CONNECTOR_HDMI_AUDIO;
+
+typedef struct _DRSD_CONNECTOR_CEC_FUNCTIONS{
+    void    (*PhysAddressInvalidate)(struct _DRSD_CONNECTOR* Connector);
+    void    (*PhysAddressSet)(struct _DRSD_CONNECTOR* Connector, UINT16 Address);
+}DRSD_CONNECTOR_CEC_FUNCTIONS, PDRSD_CONNECTOR_CEC_FUNCTIONS;
+
+typedef struct _DRSD_CONNECTOR_CEC{
+    mutex_t                         Mutex;
+    PDRSD_CONNECTOR_CEC_FUNCTIONS   Functions;
+    PVOID                           Data;
+}DRSD_CONNECTOR_CEC, * PDRSD_CONNECTOR_CEC;
+
 typedef struct _DRSD_CONNECTOR{
     struct _DRSD_DEVICE*                Device;
     PLATFORM_DEVICE                     KernelDevice;
@@ -946,7 +1029,51 @@ typedef struct _DRSD_CONNECTOR{
     ListHeader                          ProbedModes;
     PDRSD_DISPLAY_INFORMATION           DisplayInfo;
     PDRSD_CONNECTOR_FUNCTIONS           Functions;
-    
+    struct _DRSD_PROPERTY_BLOB*         EdidBlobPointer;
+    DRSD_OBJECT_PROPERTIES              Properties;
+    struct _DRSD_PROPERTY*              ScalingModeProperty;
+    struct _DRSD_PROPERTY*              VrrCapableProperty;
+    struct _DRSD_PROPERTY*              ColorSpaceProperty;
+    struct _DRSD_PROPERTY_BLOB*         PathBlobPointer;
+    UINT                                MaxBpc;
+    struct _DRSD_PROPERTY*              MaxBpcProperty;
+    struct _DRSD_PRIVACY_SCREEN*        PrivacyScreen;
+    LOUSINE_KERNEL_NOTIFICATION_BLOCK   PrivacyScreenNotifier;
+    struct _DRSD_PROPERTY*              PrivacyScreenSwStateProperty;
+    struct _DRSD_PROPERTY*              PrivacyScreenHwStateProperty;
+    struct _DRSD_PROPERTY*              BroadcastRgbProperty;
+    UINT8                               Polled;    
+    int                                 Dpms;
+    struct _DRSD_EDID_TRACKER*          EdidOverride;
+    mutex_t                             EdidOverrideMutex;
+    UINT64                              EpochCounter;
+    UINT32                              PossibleEncoders;
+    struct _DRSD_ENCODER*               Encoder;
+    UINT8                               Eld[DRSD_MAX_ELD_BYTES];
+    BOOLEAN                             LatencyPresent[2];
+    int                                 VideoLatency[2];
+    int                                 AudioLatency[2];
+    PLATFORM_DEVICE                     Ddc;
+    int                                 NullEdidCounter;
+    UINT                                BadEdidCounter;
+    BOOLEAN                             EdidCurrupt;
+    UINT8                               RealEdidChecksum;
+    HANDLE                              ClfsServer;
+    struct _DRSD_CONNECTOR_STATE*       State;
+    struct _DRSD_PROPERTY_BLOB*         TitleBlobPointer;
+    BOOLEAN                             HasTitle;
+    PDRSD_TITLE_GROUP                   TitleGroup;
+    BOOLEAN                             TitleIsSingleMonitor;
+    UINT8                               HTileCount;
+    UINT8                               VTileCount;
+    UINT8                               HTileLocation;
+    UINT8                               VTileLocation;
+    UINT16                              HTileSize;
+    UINT16                              VTileSize;
+    ListHeader                          FreeNode;
+    DRSD_CONNECTOR_HDMI                 Hdmi;
+    DRSD_CONNECTOR_HDMI                 HdmiAudio;
+    DRSD_CONNECTOR_CEC                  Cec;
     //TODO: make new structure and then move to the new structure
 
 
@@ -970,29 +1097,27 @@ typedef struct _DRSD_CONNECTOR{
     PDRSD_CONNECTOR_CALLBACKS           Callbacks;
     PDRSD_PROPERTY_BLOB                 EdidPropertiesBlob;
     DRSD_OBJECT_PROPERTIES              ConnectorProperties;
-    PDRSD_PROPERTY                      ScalingModeProperties;
-    PDRSD_PROPERTY                      VrrCapabilitiesProperties;
-    PDRSD_PROPERTY                      ColorspaceProperties;
-    PDRSD_PROPERTY_BLOB                 PathPropertyBlob;
-    size_t                              MaxBpc;
-    PDRSD_PROPERTY                      MaxBpcProperty;
-    PDRSD_PROPERTY                      BroadcastRgbProperty;
     int                                 PowerMode;
     PDRSD_CONNECTOR_ASSIST_CALLBACKS    AssistCallbacks;
     DRSD_CONNECTOR_FORCE                Force;
     HDMI_SYNCRONIZATION_INFORMATION     HdmiSyncInformation;
-    bool                                LatencyPresent[2];
-    size_t                              AudioLatency[2];
-    size_t                              VideoLatency[2];
-    uint8_t                             Eld[128];
     mutex_t                             EldTex;
     size_t                              ProbeModeCount;
-    struct _DRSD_ENCODER*               Encoder;
     struct _DRSD_CRTC*                  Crtc;
 
-
-    PDRSD_CONNECTOR_STATE               State;
 }DRSD_CONNECTOR, * PDRSD_CONNECTOR;
+
+typedef struct _DRSD_WRITEBACK_CONNECTOR{
+    DRSD_CONNECTOR                  Base;
+    DRSD_ENCODER                    Encoder;
+    struct _DRSD_PROPERTY_BLOB*     PixelFormatsBlopPointer;
+    spinlock_t                      JobLock;
+    ListHeader                      JobQueue;
+    UINT                            FenceContext;
+    spinlock_t                      FenceLock;
+    UINT64                          FenceSequenceNumber;
+    CHAR                            TimeLineName[32];
+}DRSD_WRITEBACK_CONNECTOR, * PDRSD_WRITEBACK_CONNECTOR;
 
 typedef struct _DRSD_EDID_IDENTIFICATION{
     uint32_t    PannelIdentification;
