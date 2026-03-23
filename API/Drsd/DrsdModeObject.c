@@ -59,6 +59,16 @@ DrsdModeObjectAdd(
 }
 
 
+BOOLEAN DrsdModeObjectLeaseRequires(UINT32 Type){
+    switch(Type){
+        case DRSD_MODE_OBJECT_CRTC:
+        case DRSD_MODE_OBJECT_CONNECTOR:
+        case DRSD_MODE_OBJECT_PLANE:
+            return true;
+        default:
+            return false;
+    }
+}
 
 DRIVER_EXPORT
 void 
