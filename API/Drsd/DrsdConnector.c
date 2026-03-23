@@ -28,6 +28,8 @@
 UNUSED static mutex_t ConnectorListLock = {0};
 UNUSED static LIST_OBJECT ConnectorList = {0};
 
+static mutex_t ConnectorListIterationLock = {0};
+
 typedef struct _DRSD_CONNECTOR_PROP_ENUM_LIST{
     INTEGER     Type;
     LOUSTR      Name;
@@ -99,4 +101,77 @@ void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
 
 
 
+}
+
+DRIVER_EXPORT
+void 
+DrsdConnectorListIterationBegin(
+    PDRSD_DEVICE                    Device,
+    PDRSD_CONNECTOR_LIST_ITERATION  Iteration
+){
+    Iteration->Device = Device;
+    Iteration->Connector = 0x00;
+    MutexLockEx(&ConnectorListIterationLock, false);
+}
+
+static 
+void
+DrsdConnectorPutSafe(
+    PDRSD_CONNECTOR Connector
+){
+    PDRSD_MODE_CONFIGURATION    Config = &Connector->Device->ModeConfig;
+
+    if(!LouKeGetReferenceCount(&Connector->Base.ReferenceCount)){
+        return;
+    }
+
+    LouKeListAddTail(&Connector->FreeNode, &Config->ConnectorFreeList);
+    LouKeQueueWork(&Config->ConnectorFreeWork);
+}
+
+DRIVER_EXPORT
+PDRSD_CONNECTOR
+DrsdConnectorListNextIteration(
+    PDRSD_CONNECTOR_LIST_ITERATION Iteration
+){
+    PDRSD_CONNECTOR             OldConnector = Iteration->Connector;
+    PDRSD_MODE_CONFIGURATION    Config = &Iteration->Device->ModeConfig;
+    PListHeader                 lHeader;
+    LouKIRQL                    Irql;
+
+    LouKeAcquireSpinLock(&Config->ConnectorListLock, &Irql);
+    lHeader = OldConnector ? &OldConnector->Head : &Config->ConnectorList;
+
+    do{
+        if(lHeader->NextHeader == &Config->ConnectorList){
+            Iteration->Connector = 0x00;
+            break;
+        }
+        lHeader = lHeader->NextHeader;
+
+        Iteration->Connector = CONTAINER_OF(lHeader, DRSD_CONNECTOR, Head);
+
+    }while(!LouKeAcquireReferenceIfNotZero(&Iteration->Connector->Base.ReferenceCount));
+
+    if(OldConnector){
+        DrsdConnectorPutSafe(OldConnector);
+    }
+    LouKeReleaseSpinLock(&Config->ConnectorListLock, &Irql);
+    return Iteration->Connector;
+}
+
+DRIVER_EXPORT
+void 
+DrsdConnectorListIterationEnd(
+    PDRSD_CONNECTOR_LIST_ITERATION  Iteration
+){
+    PDRSD_MODE_CONFIGURATION Config = &Iteration->Device->ModeConfig;
+    LouKIRQL Flags;
+    Iteration->Device = 0x00;
+    if(Iteration->Connector){
+        LouKeAcquireSpinLock(&Config->ConnectorListLock, &Flags);
+        DrsdConnectorPutSafe(Iteration->Connector);
+        LouKeReleaseSpinLock(&Config->ConnectorListLock, &Flags);
+    }
+    MutexLockEx(&ConnectorListIterationLock, false);
 }

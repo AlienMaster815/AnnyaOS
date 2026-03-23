@@ -85,11 +85,10 @@ DWORD LouKeWorkStackDemon(PVOID Data){
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeQueueWork(
-    string QueueName,
     PLOUQ_WORK WorkItem
 ){
-
-
+    LouPrint("LouKeQueueWork()\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 

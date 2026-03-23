@@ -524,11 +524,10 @@ void LouOsKrnlStart(
 
 
 //TODO:
-// check and optimize Lousine Kernel Exports in API/LouAPI/tables.c
+// Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 
 //BUGS TO FIX:
 
-//Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 
 /*	
 USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).

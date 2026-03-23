@@ -397,6 +397,10 @@ typedef struct _DRSD_GXE_OBJECT_FUNCTIONS{
     HANDLE                      VmmOperations;
 }DRSD_GXE_OBJECT_FUNCTIONS, * PDRSD_GXE_OBJECT_FUNCTIONS;
 
+typedef struct _DRSD_CONNECTOR_LIST_ITERATION{
+    struct _DRSD_DEVICE*    Device;
+    struct _DRSD_CONNECTOR* Connector;
+}DRSD_CONNECTOR_LIST_ITERATION, * PDRSD_CONNECTOR_LIST_ITERATION;
 
 typedef struct  DRSD_GXE_LRU{
     mutex_t     Lock;
@@ -905,7 +909,7 @@ typedef struct _DRSD_CONNECTOR_HDMI_STATE{
 typedef struct _DRSD_CONNECTOR_STATE{
     struct _DRSD_CONNECTOR*     Connector;
     struct _DRSD_CRTC*          Crtc;
-    struct _DRSD_ENCODER*       Encoder;
+    struct _DRSD_ENCODER*       BestEncoder;
     DRSD_LINK_STATUS            LinkStatus;
     struct _DRSD_ATOMIC_STATE*  State;
     struct _DRSD_CRTC_COMMIT*   Commit;
@@ -2557,7 +2561,7 @@ typedef struct _DRSD_MODESET_ACQURE_CONTEXT{
     ListHeader          Locked;
     BOOLEAN             TryLockOnly;
     BOOLEAN             Interruptable;
-}DRSD_MODESET_ACQURE_CONTEXT, * PDRSD_MODESET_ACQURE_CONTEXT;
+}DRSD_MODESET_ACQURE_CONTEXT, * PDRSD_MODESET_ACQUIRE_CONTEXT;
 
 typedef struct _DRSD_ATOMIC_STATE{
     KERNEL_REFERENCE                        Reference;
@@ -2575,7 +2579,7 @@ typedef struct _DRSD_ATOMIC_STATE{
     PDRSD_CONNECTORS_STATE                  Connectors;
     INT32                                   PrivateObjectsCount;
     struct _DRSD_PRIVATE_OBJECTS_STATE*     PrivateObjects;
-    PDRSD_MODESET_ACQURE_CONTEXT            AcquireContext;
+    PDRSD_MODESET_ACQUIRE_CONTEXT            AcquireContext;
     PDRSD_CRTC_COMMIT                       FakeCommit;
     LOUQ_WORK                               CommitWork;
 }DRSD_ATOMIC_STATE, * PDRSD_ATOMIC_STATE;       
@@ -2603,9 +2607,9 @@ typedef struct _DRSD_PRIVATE_OBJECT{
 }DRSD_PRIVATE_OBJECT, * PDRSD_PRIVATE_OBJECT;   
 
 typedef struct _DRSD_PRIVATE_STATE_FUNCTIONS{
-    DRSD_PRIVATE_STATE  (*AtomicDupicateState)(PDRSD_PRIVATE_OBJECT Object);
+    PDRSD_PRIVATE_STATE (*AtomicDuplicateState)(PDRSD_PRIVATE_OBJECT Object);
     void                (*AtomicDestroyState)(PDRSD_PRIVATE_OBJECT Object, PDRSD_PRIVATE_STATE State);
-    void                (*AtomicPrintState)(PVOID Server, PDRSD_PRIVATE_STATE State);
+    void                (*AtomicPrintState)(HANDLE Server, PDRSD_PRIVATE_STATE State);
 }DRSD_PRIVATE_STATE_FUNCTIONS, * PDRSD_PRIVATE_STATE_FUNCTIONS;
 
 typedef struct _DRSD_BRIDGE_TIMINGS{

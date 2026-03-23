@@ -536,12 +536,13 @@ SIZE LouKeGetAllocationSize(PVOID Address){
 
 KERNEL_EXPORT
 void* LouKeReallocEx(
-    void* Address, 
-    size_t Alignment, 
-    size_t NewSize
+    void*       Address, 
+    size_t      Alignment, 
+    size_t      NewSize,
+    uint64_t    PageFlags
 ){
     if(!Address){
-        return 0x00;
+        return LouKeMallocEx(NewSize, Alignment, PageFlags);
     }
     if(!NewSize){
         LouKeFree(Address);
@@ -550,7 +551,6 @@ void* LouKeReallocEx(
     MutexLock(&GenMallocLock);
     uint64_t TmpPageTrackBase = KeMallocPageTracks;
     uint64_t TmpVMemTrackBase;
-
     
     while(PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase)){
         if(RangeInterferes(
@@ -564,8 +564,9 @@ void* LouKeReallocEx(
                 if(VMEM_TRACK_DEREFERENCE_READ_ADDRESS(TmpVMemTrackBase) == (uint64_t)Address){
                     bool Relocation = false;
                     uint64_t Flags = PAGE_TRACK_DEREFERENCE_READ_FLAGS(TmpPageTrackBase);
+                    
                     size_t AllocationSize = VMEM_TRACK_DEREFERENCE_READ_SIZE(TmpVMemTrackBase);
-                    if(AllocationSize < NewSize){
+                    if((Flags != PageFlags) || (AllocationSize < NewSize)){
                         Relocation = true;
                     }else{
                         VMEM_TRACK_DEREFERENCE_WRITE_SIZE(TmpVMemTrackBase, NewSize);
@@ -590,13 +591,15 @@ void* LouKeReallocEx(
 
 KERNEL_EXPORT
 void* LouKeRealloc(
-    void* Address, 
-    size_t NewSize
+    void*       Address, 
+    size_t      NewSize,
+    uint64_t    PageFlags
 ){
     return LouKeReallocEx(
         Address, 
         GetAlignmentBySize(NewSize),
-        NewSize        
+        NewSize,
+        PageFlags 
     );
 }
 

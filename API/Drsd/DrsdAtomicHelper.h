@@ -32,7 +32,7 @@ DRIVER_EXPORT
 LOUSTATUS 
 DrsdAtomicHelperResetCrtc(
     PDRSD_CRTC                      Crtc,
-    PDRSD_MODESET_ACQURE_CONTEXT    Context
+    PDRSD_MODESET_ACQUIRE_CONTEXT    Context
 );
 
 

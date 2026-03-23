@@ -32,4 +32,29 @@ static inline void DrsdConnectorPut(PDRSD_CONNECTOR Connector){
     DrsdModeObjectPut(&Connector->Base);
 }
 
+static inline void DrsdConnectorGet(PDRSD_CONNECTOR Connector){
+    DrsdModeObjectGet(&Connector->Base);
+}
+
+DRIVER_EXPORT
+void 
+DrsdConnectorListIterationEnd(
+    PDRSD_CONNECTOR_LIST_ITERATION  Iteration
+);
+
+DRIVER_EXPORT
+void 
+DrsdConnectorListIterationBegin(
+    PDRSD_DEVICE                    Device,
+    PDRSD_CONNECTOR_LIST_ITERATION  Iteration
+);
+
+DRIVER_EXPORT
+PDRSD_CONNECTOR
+DrsdConnectorListNextIteration(
+    PDRSD_CONNECTOR_LIST_ITERATION Iteration
+);
+
+#define DrsdForEachConnectorIteration(Connector, Iteration) while((Connector = DrsdConnectorListNextIteration(Iteration)))
+
 #endif

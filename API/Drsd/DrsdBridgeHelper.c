@@ -29,7 +29,7 @@ DRIVER_EXPORT
 LOUSTATUS 
 DrsdBridgeHelperResetCrtc(
     PDRSD_BRIDGE Bridge,
-    PDRSD_MODESET_ACQURE_CONTEXT Context
+    PDRSD_MODESET_ACQUIRE_CONTEXT Context
 ){
     UNUSED PDRSD_CONNECTOR Connector;
     UNUSED PDRSD_ENCODER Encoder = Bridge->Encoder;

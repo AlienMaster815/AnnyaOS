@@ -35,4 +35,10 @@ DrsdModeObjectPut(
     PDRSD_MODE_OBJECT ModeObject
 );
 
+DRIVER_EXPORT
+void 
+DrsdModeObjectGet(
+    PDRSD_MODE_OBJECT ModeObject
+);
+
 #endif

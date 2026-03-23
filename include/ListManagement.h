@@ -21,11 +21,28 @@ typedef struct _LIST_OBJECT{
 
 typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params); 
 
+static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
+    while(Header->NextHeader){
+        Header = Header->NextHeader;
+    }
+    Header->NextHeader = Tail;
+    Tail->LastHeader = Header;
+}
+
+static inline void LouKeListDeleteItem(PListHeader Item){
+    PListHeader LastHeader = Item->LastHeader;
+    PListHeader NextHeader = Item->NextHeader;
+    LastHeader->NextHeader = NextHeader;
+    NextHeader->LastHeader = LastHeader;
+}
+
 void  LouKeLinkObjectToListHead(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void  LouKeLinkObjectToListTail(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void  LouKeUnlinkObjectFromList(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void* LouKeLinkGetMemberWithFunction(PLIST_OBJECT ListObject, LIST_SEARCH_FUNC Func, void* Param);
 
+
+#define ForEachIf(Condition) if(!(Condition)){} else
 
 #ifdef __cplusplus
 }

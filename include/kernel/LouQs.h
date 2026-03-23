@@ -71,7 +71,7 @@ static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)
 
 #ifndef _USER_MODE_CODE_
 
-KERNEL_EXPORT LOUSTATUS LouKeQueueWork(string QueueName, PLOUQ_WORK WorkItem);
+KERNEL_EXPORT LOUSTATUS LouKeQueueWork(PLOUQ_WORK WorkItem);
 KERNEL_EXPORT LOUSTATUS LouKeQueueDelayedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
 KERNEL_EXPORT LOUSTATUS LouKeQueueTimedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
 

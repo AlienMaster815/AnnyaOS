@@ -50,6 +50,13 @@ typedef LOUSTATUS (*LOUSINE_OBJECT_DECONSTRUCTOR)(PVOID Object);
 
 #define LouKeInitializeKernelRefence(Ref) memset(Ref, 0 , sizeof(KERNEL_REFERENCE))
 
+static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
+    MutexLock(&KRef->RaceLock);
+    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
+    MutexUnlock(&KRef->RaceLock);
+    return Tmp;
+}
+
 static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     if(MutexIsLocked(&KRef->IncrementLock)){
         return false;
@@ -61,6 +68,14 @@ static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     MutexUnlock(&KRef->RaceLock);
     return true;
 }
+
+static inline bool LouKeAcquireReferenceIfNotZero(PKERNEL_REFERENCE KRef){
+    if(LouKeGetReferenceCount(KRef)){
+        return LouKeAcquireReference(KRef);
+    }
+    return false;
+}
+
 
 static inline void LouKeReleaseReference(PKERNEL_REFERENCE KRef){
     MutexLock(&KRef->RaceLock);
@@ -79,14 +94,6 @@ static inline void LouKeReleaseReferenceAndCall(
         Callback(KRef);
     }
 } 
-
-static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
-    MutexLock(&KRef->RaceLock);
-    UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
-    MutexUnlock(&KRef->RaceLock);
-    return Tmp;
-}
-
 
 #ifndef _USER_MODE_CODE_
 

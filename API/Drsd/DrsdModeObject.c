@@ -32,10 +32,22 @@ DrsdModeObjectPut(
 ){
 
     if(ModeObject->FreeCb){
-        LouPrint("DRSD.SYS:DrsdModeObjectPut():Object ID:%d", ModeObject->Identification);
+        LouPrint("DRSDCORE.SYS:DrsdModeObjectPut():Object ID:%d", ModeObject->Identification);
         LouKeReleaseReferenceAndCall(&ModeObject->ReferenceCount, ModeObject->FreeCb);
     }
 }
+
+DRIVER_EXPORT
+void 
+DrsdModeObjectGet(
+    PDRSD_MODE_OBJECT ModeObject
+){
+    if(ModeObject->FreeCb){
+        LouPrint("DRSDCORE.SYS:DrsdModeObjectGet():Object ID:%d", ModeObject->Identification);
+        LouKeAcquireReference(&ModeObject->ReferenceCount);
+    }
+}
+
 
 void DrsdUnregisterModeObject(
     PDRSD_DEVICE Device, 

@@ -30,6 +30,10 @@
 #include "DrsdPlane.h"
 #include "DrsdCore.h"
 
+static inline UINT DrsdConnectorIndex(PDRSD_CONNECTOR Connector){
+    return Connector->Index;
+}
+
 DRIVER_EXPORT
 void 
 __DrsdCrtcCommitFree(PKERNEL_REFERENCE Kref);
@@ -51,11 +55,31 @@ static inline PDRSD_PLANE_STATE DrsdAtomicGetNewPlaneState(PDRSD_ATOMIC_STATE St
     return State->Planes[DrsdPlaneIndex(Plane)].NewState;
 }
 
+static inline PDRSD_CONNECTOR_STATE DrsdAtomicGetOldConnectorState(PDRSD_ATOMIC_STATE State, PDRSD_CONNECTOR Connector){
+    UINT Index = DrsdConnectorIndex(Connector);
+    if(Index >= State->ConnectorCount){
+        return 0x00;
+    }
+    return State->Connectors[Index].OldState;
+}
+
+static inline PDRSD_CONNECTOR_STATE DrsdAtomicGetNewConnectorState(PDRSD_ATOMIC_STATE State, PDRSD_CONNECTOR Connector){
+    UINT Index = DrsdConnectorIndex(Connector);
+    if(Index >= State->ConnectorCount){
+        return 0x00;
+    }
+    return State->Connectors[Index].NewState;
+}
+
+static inline PDRSD_BRIDGE_STATE DrsdPrivateToBridgeState(PDRSD_PRIVATE_STATE State){
+    return CONTAINER_OF(State, DRSD_BRIDGE_STATE, Base);
+}
+
 DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
     PDRSD_ENCODER                   Encoder,
-    PDRSD_MODESET_ACQURE_CONTEXT    Context
+    PDRSD_MODESET_ACQUIRE_CONTEXT    Context
 );
 
 DRIVER_EXPORT 
@@ -77,5 +101,21 @@ DrsdAtomicGetOldColorOpState(
     PDRSD_ATOMIC_STATE  State,
     PDRSD_COLOR_OP      ColorOp
 );
+
+DRIVER_EXPORT
+PDRSD_PRIVATE_STATE
+DrsdAtomicGetNewPrivateObjectState(
+    PDRSD_ATOMIC_STATE      State,
+    PDRSD_PRIVATE_OBJECT    Object
+);
+
+#define ForEachOldConnectorInState(State, Connector, OldConnectorState, Index) \
+    for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
+        ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (OldConnectorState) = (State)->Connectors[Index].OldState, 1))
+
+#define ForEachNewConnectorInState(State, Connector, NewConnectorState, Index) \
+    for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
+        ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (NewConnectorState) = (State)->Connectors[Index].NewState, 1))
+
 
 #endif

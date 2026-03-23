@@ -32,7 +32,7 @@ DRIVER_EXPORT
 LOUSTATUS 
 DrsdModesetLock(
     PDRSD_MODESET_LOCK Lock, 
-    PDRSD_MODESET_ACQURE_CONTEXT Ctx
+    PDRSD_MODESET_ACQUIRE_CONTEXT Ctx
 );
 
 DRIVER_EXPORT
@@ -40,5 +40,14 @@ LOUSTATUS
 DrsdModesetUnlock(
     PDRSD_MODESET_LOCK Lock
 );
+
+DRIVER_EXPORT
+void DrsdModesetLockInitialize(
+    PDRSD_MODESET_LOCK Lock
+);
+
+static inline void DrsdModesetLockDeInitialize(PDRSD_MODESET_LOCK Lock){
+    //TODO: Warn User on empty list
+}
 
 #endif

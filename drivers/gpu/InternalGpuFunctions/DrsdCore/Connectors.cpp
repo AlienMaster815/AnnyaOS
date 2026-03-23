@@ -225,7 +225,7 @@ KERNEL_EXPORT
 LOUSTATUS 
 DrsdModesetLock(
     PDRSD_MODESET_LOCK Lock, 
-    PDRSD_MODESET_ACQURE_CONTEXT Ctx
+    PDRSD_MODESET_ACQUIRE_CONTEXT Ctx
 ){
     
     MutexLock(&Lock->Mutex);

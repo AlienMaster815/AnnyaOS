@@ -214,3 +214,5 @@ EXPORTS
     LouKeWaitForUcharRegisterConditionMs
     LouKeWaitForCompletionTimeout
     DrsdAtomicStateDefaultRelease
+    LouKeRealloc
+    LouKeReallocEx

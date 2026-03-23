@@ -29,3 +29,4 @@ EXPORTS
     DrsdAtomicGetPlaneState
     DrsdAtomicGetOldColorOpState
     DrsdAtomicGetColorOpState
+    DrsdPlaneGetDamageClipsCount

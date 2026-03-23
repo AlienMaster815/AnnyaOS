@@ -164,6 +164,7 @@ static inline size_t GetAlignmentBySize(size_t Size){
 #ifndef _USER_MODE_CODE_
 #define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
+
 void LouKeFreePhysical(void* AddressToFree);
 void LouFree(PVOID Addr);
 void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
@@ -474,7 +475,7 @@ void LouKeFreeFromFixedPool(
     void* Object
 );
 
-void* LouKeRealloc(void* Address, size_t NewSide);
+void* LouKeRealloc(void* Address, size_t NewSide, uint64_t PageFlags);
 
 void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 

@@ -45,13 +45,13 @@ DrsdCrtcCommitWait(
 
     Status = LouKeWaitForCompletionTimeout(&Commit->HwDone, 10);
     if(Status != STATUS_SUCCESS){
-        LouPrint("DRSD.SYS:Crtc:%h HwDone Timed Out\n", Commit->Crtc->Device);
+        LouPrint("DRSDCORE.SYS:Crtc:%h HwDone Timed Out\n", Commit->Crtc->Device);
         return STATUS_TIMEOUT;
     }
 
     Status = LouKeWaitForCompletionTimeout(&Commit->FlipDone, 10);
     if(Status != STATUS_SUCCESS){
-        LouPrint("DRSD.SYS:Crtc:%h FlipDone Timed Out\n", Commit->Crtc->Device);
+        LouPrint("DRSDCORE.SYS:Crtc:%h FlipDone Timed Out\n", Commit->Crtc->Device);
         return STATUS_TIMEOUT;
     }
 
@@ -94,7 +94,7 @@ DrsdAtomicStateInitalize(
     DrsdAcquireDevice(Device);
     State->Device = Device;
 
-    LouPrint("DRSD.SYS:Allocated Device State:%h\n", State);
+    LouPrint("DRSDCORE.SYS:Allocated Device State:%h\n", State);
 
     return STATUS_SUCCESS;
 
@@ -133,7 +133,7 @@ DrsdAtomicStateDefaultClear(
     PDRSD_MODE_CONFIGURATION    Config = &Device->ModeConfig;
     SIZE                        i;
 
-    LouPrint("DRSD.SYS:Clearing Atomic State:%h\n", State);
+    LouPrint("DRSDCORE.SYS:Clearing Atomic State:%h\n", State);
 
     State->Checked = false;
 
@@ -233,7 +233,7 @@ void __DrsdAtomicStateFree(PKERNEL_REFERENCE Reference){
 
     DrsdAtomicStateClear(State);
 
-    LouPrint("DRSD.SYS:Freeing Atomic State:%h\n", State);
+    LouPrint("DRSDCORE.SYS:Freeing Atomic State:%h\n", State);
 
     if(Config->Functions->AtomicStateFree){
         Config->Functions->AtomicStateFree(State);
@@ -255,10 +255,10 @@ DrsdAtomicGetCrtcState(
     PDRSD_CRTC_STATE    CrtcState;
 
     if(!State->AcquireContext){
-        LouPrint("DRSD.SYS:WARNING:DrsdAtomicGetCrtcState():Atomic State Acquire Context is NULL\n");
+        LouPrint("DRSDCORE.SYS:WARNING:DrsdAtomicGetCrtcState():Atomic State Acquire Context is NULL\n");
     }
     if((State->Device) && (State->Checked)){
-        LouPrint("DRSD.SYS:WARNING:DrsdAtomicGetCrtcState():Device And Check are true\n");
+        LouPrint("DRSDCORE.SYS:WARNING:DrsdAtomicGetCrtcState():Device And Check are true\n");
     }
 
     CrtcState = DrsdAtomicGetNewCrtcState(State, Crtc);
@@ -282,7 +282,7 @@ DrsdAtomicGetCrtcState(
     State->Crtcs[Index].Crtc = Crtc;
     CrtcState->State = State;
 
-    LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:%h State to %h\n", State->Device, Crtc->Base.Identification, Crtc->Name, CrtcState, State);
+    LouPrint("DRSDCORE.SYS:Device:%h:Added[CRTC:%d:%s]:%h State to %h\n", State->Device, Crtc->Base.Identification, Crtc->Name, CrtcState, State);
 
     return CrtcState;
 }
@@ -298,22 +298,22 @@ DrsdAtomicCrtcCheck(
     BOOLEAN DriverSupportsAtomic = DrsdCoreCheckFeature(Crtc->Device, DRIVER_ATOMIC);
 
     if((NewCrtcState->Active) && (!NewCrtcState->Enable)){
-        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Active Withought Enable\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Added[CRTC:%d:%s]:Active Withought Enable\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
         return STATUS_INVALID_PARAMETER; 
     }
 
     if((DriverSupportsAtomic) && (NewCrtcState->Enable) && (!NewCrtcState->ModeBlob)){
-        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Enabled Withought Mode Blob\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Added[CRTC:%d:%s]:Enabled Withought Mode Blob\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
         return STATUS_INVALID_PARAMETER;
     }
 
     if((DriverSupportsAtomic) && (!NewCrtcState->Enable) && (NewCrtcState->ModeBlob)){
-        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Disabled With Mode Blob\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Added[CRTC:%d:%s]:Disabled With Mode Blob\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
         return STATUS_INVALID_PARAMETER;
     }
     
     if((NewCrtcState->Event) && (!NewCrtcState->Active)){
-        LouPrint("DRSD.SYS:Device:%h:Added[CRTC:%d:%s]:Requesting Event But Is Off\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Added[CRTC:%d:%s]:Requesting Event But Is Off\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -327,19 +327,19 @@ void DrsdAtomicCrtcPrintState(
     PDRSD_CRTC_STATE    State
 ){
     PDRSD_CRTC Crtc = State->Crtc;
-    LouPrint("DRSD.SYS:CRTC[%h]:%s\n", Crtc->Base.Identification, Crtc->Name);
-    LouPrint("DRSD.SYS:Enable:%d\n", State->Enable);
-    LouPrint("DRSD.SYS:Active:%d\n", State->Active);
-    LouPrint("DRSD.SYS:SelfRefreshActive:%d\n", State->SelfRefreshActive);
-    LouPrint("DRSD.SYS:PlanesChanged:%d\n", State->PlanesChanged);
-    LouPrint("DRSD.SYS:ModeChanged:%d\n", State->ModeChanged);
-    LouPrint("DRSD.SYS:ActiveChanged:%d\n", State->ActiveChanged);
-    LouPrint("DRSD.SYS:ConnectorsChanged:%d\n", State->ConnectorsChanged);
-    LouPrint("DRSD.SYS:ColorMgmtChanged:%d\n", State->ColorMgmtChanged);
-    LouPrint("DRSD.SYS:PlaneMask:%h\n", State->PlaneMask);
-    LouPrint("DRSD.SYS:ConnectorMask:%h\n", State->ConnectorMask);
-    LouPrint("DRSD.SYS:EncoderMask:%h\n", State->EncoderMask);
-    //LouPrint("DRSD.SYS:\n"); TODO mode Print and atomic print state
+    LouPrint("DRSDCORE.SYS:CRTC[%h]:%s\n", Crtc->Base.Identification, Crtc->Name);
+    LouPrint("DRSDCORE.SYS:Enable:%d\n", State->Enable);
+    LouPrint("DRSDCORE.SYS:Active:%d\n", State->Active);
+    LouPrint("DRSDCORE.SYS:SelfRefreshActive:%d\n", State->SelfRefreshActive);
+    LouPrint("DRSDCORE.SYS:PlanesChanged:%d\n", State->PlanesChanged);
+    LouPrint("DRSDCORE.SYS:ModeChanged:%d\n", State->ModeChanged);
+    LouPrint("DRSDCORE.SYS:ActiveChanged:%d\n", State->ActiveChanged);
+    LouPrint("DRSDCORE.SYS:ConnectorsChanged:%d\n", State->ConnectorsChanged);
+    LouPrint("DRSDCORE.SYS:ColorMgmtChanged:%d\n", State->ColorMgmtChanged);
+    LouPrint("DRSDCORE.SYS:PlaneMask:%h\n", State->PlaneMask);
+    LouPrint("DRSDCORE.SYS:ConnectorMask:%h\n", State->ConnectorMask);
+    LouPrint("DRSDCORE.SYS:EncoderMask:%h\n", State->EncoderMask);
+    //LouPrint("DRSDCORE.SYS:\n"); TODO mode Print and atomic print state
 
 }
 
@@ -364,7 +364,7 @@ DrsdAtomicConnectorCheck(
     }
 
     if((WritebackJob->FrameBuffer) && (!State->Crtc)){
-        LouPrint("DRSD.SYS:Connector:%d:%s:FrameBuffer Withought Crtc\n", Connector->Base.Identification, Connector->Name);
+        LouPrint("DRSDCORE.SYS:Connector:%d:%s:FrameBuffer Withought Crtc\n", Connector->Base.Identification, Connector->Name);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -373,13 +373,13 @@ DrsdAtomicConnectorCheck(
     }
 
     if((WritebackJob->FrameBuffer) && (!CrtcState->Active)){
-        LouPrint("DRSD.SYS:Connector:%d:%s:Has a FrameBuffer Byt Crtc:%d Is Off\n", Connector->Base.Identification, Connector->Name, State->Crtc->Base.Identification);
+        LouPrint("DRSDCORE.SYS:Connector:%d:%s:Has a FrameBuffer Byt Crtc:%d Is Off\n", Connector->Base.Identification, Connector->Name, State->Crtc->Base.Identification);
         return STATUS_INVALID_PARAMETER;
     }
  
     if(!WritebackJob->FrameBuffer){
         if(WritebackJob->DmaOutFence){
-            LouPrint("DRSD.SYS:Connector:%d:%s:Is Requesting Out Fence Withought Framebuffer\n", Connector->Base.Identification, Connector->Name);
+            LouPrint("DRSDCORE.SYS:Connector:%d:%s:Is Requesting Out Fence Withought Framebuffer\n", Connector->Base.Identification, Connector->Name);
             return STATUS_INVALID_PARAMETER;
         }
         DrsdWritebackCleanupJob(WritebackJob);
@@ -419,7 +419,7 @@ DrsdAtomicGetPlaneState(
     State->Planes[Index].NewState = PlaneState;
     PlaneState->State = State;
 
-    LouPrint("DRSD.SYS:Device:%h: Added Plane:%d:%s: %h State %h\n", Plane->Device, Plane->Base.Identification, Plane->Name, PlaneState, State);
+    LouPrint("DRSDCORE.SYS:Device:%h: Added Plane:%d:%s: %h State %h\n", Plane->Device, Plane->Base.Identification, Plane->Name, PlaneState, State);
 
     if(PlaneState->Crtc){
         PDRSD_CRTC_STATE CrtcState;
@@ -463,7 +463,7 @@ DrsdAtomicGetColorOpState(
     State->ColorOps[Index].NewState = ColorOpState;
     ColorOpState->State = State;
 
-    LouPrint("DRSD.SYS:Device:%h: Added ColorOp:%d:%d: %h State %h\n", ColorOp->Device, ColorOp->Base.Identification, ColorOp->Type, ColorOpState, State);
+    LouPrint("DRSDCORE.SYS:Device:%h: Added ColorOp:%d:%d: %h State %h\n", ColorOp->Device, ColorOp->Base.Identification, ColorOp->Type, ColorOpState, State);
 
     return ColorOpState;
 }
@@ -516,12 +516,13 @@ DrsdAtomicPlaneCheck(
     UINT                FbHeight;
     PDRSD_MODE_RECT     Clips;
     UINT32              ClipCount;
+    int                 i;
 
     if((Crtc) && (!FrameBuffer)){
-        LouPrint("DRSD.SYS:Device:%h:Plane:%d:%s:CRTC Set But Not FB\n", Plane->Device, Plane->Base.Identification, Plane->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:CRTC Set But Not FB\n", Plane->Device, Plane->Base.Identification, Plane->Name);
         return STATUS_INVALID_PARAMETER;
     }else if((FrameBuffer) && (!Crtc)){
-        LouPrint("DRSD.SYS:Device:%h:Plane:%d:%s:FB Set But Not CRTC\n", Plane->Device, Plane->Base.Identification, Plane->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:FB Set But Not CRTC\n", Plane->Device, Plane->Base.Identification, Plane->Name);
         return STATUS_INVALID_PARAMETER;
     }
     
@@ -530,18 +531,210 @@ DrsdAtomicPlaneCheck(
     }
 
     if(!(Plane->PossibleCrtcs & DrsdCrtcMask(Crtc))){
-        LouPrint("DRSD.SYS:Device:%h:Invalid Crtc:%h:%s: For Plane:%d:%s:\n", Plane->Device, Crtc->Base.Identification, Crtc->Name, Plane->Base.Identification, Plane->Name);
+        LouPrint("DRSDCORE.SYS:Device:%h:Invalid Crtc:%h:%s: For Plane:%d:%s:\n", Plane->Device, Crtc->Base.Identification, Crtc->Name, Plane->Base.Identification, Plane->Name);
         return STATUS_INVALID_PARAMETER;
     }
 
     if(!DrsdPlaneHasFormat(Plane, FrameBuffer->Format->Format, FrameBuffer->Modifier)){
-        LouPrint("DRSD.SYS:Device:%h:Plane:%d:%s:Has INvalid Pixel Format:%h Modifier:%h\n", Plane->Device, Plane->Base.Identification, Plane->Name, FrameBuffer->Format->Format, FrameBuffer->Modifier);
+        LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:Has Invalid Pixel Format:%h Modifier:%h\n", Plane->Device, Plane->Base.Identification, Plane->Name, FrameBuffer->Format->Format, FrameBuffer->Modifier);
         return STATUS_INVALID_PARAMETER;
     }
 
-    //747
+    if(
+        (NewPlaneState->CrtcWidth > INT32_MAX) || 
+        (NewPlaneState->CrtcX > (INT32_MAX - NewPlaneState->CrtcWidth)) ||
+        (NewPlaneState->CrtcHeight > INT32_MAX) || 
+        (NewPlaneState->CrtcY > (INT32_MAX - NewPlaneState->CrtcHeight))
+    ){
+        LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:Has Invalid CRTC Coordinates:Width%d:Height:%d:X:%d:Y:%d\n", Plane->Device, Plane->Base.Identification, Plane->Name, NewPlaneState->Width, NewPlaneState->Height, NewPlaneState->CrtcX, NewPlaneState->CrtcY);
+        return STATUS_INTEGER_OVERFLOW;
+    }
+
+    FbWidth = FrameBuffer->Width << 16;
+    FbHeight = FrameBuffer->Height << 16;
+
+    if(
+        (NewPlaneState->SourceWidth > FbWidth) ||
+        (NewPlaneState->SourceX > (FbWidth - NewPlaneState->SourceWidth)) ||
+        (NewPlaneState->SourceHeight > FbHeight) ||
+        (NewPlaneState->SourceY > (FbHeight - NewPlaneState->SourceHeight))
+    ){
+        LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:Has Invalid Source Coordinates:Width%d:Height:%d:X:%d:Y:%d\n", Plane->Device, Plane->Base.Identification, Plane->Name, NewPlaneState->SourceWidth, NewPlaneState->SourceHeight, NewPlaneState->SourceX, NewPlaneState->SourceY);
+        return STATUS_DISK_FULL;
+    }
+
+    Clips = __DrsdPlaneGetDamageClips(NewPlaneState);
+    ClipCount = DrsdPlaneGetDamageClipsCount(NewPlaneState);
+    
+    for(i = 0; i < ClipCount; i++){
+        if(
+            (Clips[i].X1 >= Clips[i].X2) ||
+            (Clips[i].Y1 >= Clips[i].Y2) ||
+            (Clips[i].X1 < 0) ||
+            (Clips[i].Y1 < 0) ||
+            (Clips[i].X2 > FbWidth) ||
+            (Clips[i].Y2 > FbHeight)
+        ){
+            LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:Has Invalid Damage Clip:X1%d:Y1:%d:X2:%d:Y2:%d\n", Plane->Device, Plane->Base.Identification, Plane->Name, Clips[i].X1, Clips[i].Y1, Clips[i].X2, Clips[i].Y2);
+            return STATUS_INVALID_PARAMETER;
+        } 
+    }
+
+    if(PlaneSwitchingCrtc(OldPlaneState, NewPlaneState)){
+        LouPrint("DRSDCORE.SYS:Device:%h:Plane:%d:%s:Switching CRTC Directly\n", Plane->Device, Plane->Base.Identification, Plane->Name);
+        return STATUS_INVALID_PARAMETER;
+    }
 
     return STATUS_SUCCESS;
+}
+
+//TODO 814 to 930
+
+DRIVER_EXPORT
+void
+DrsdAtomicPrivateObjectInitialize(
+    PDRSD_DEVICE                    Device,
+    PDRSD_PRIVATE_OBJECT            Object,
+    PDRSD_PRIVATE_STATE             State,
+    PDRSD_PRIVATE_STATE_FUNCTIONS   Functions
+){
+    memset(Object, 0, sizeof(DRSD_PRIVATE_OBJECT));
+
+    DrsdModesetLockInitialize(&Object->Lock);
+
+    Object->Device = Device;
+    Object->State = State;
+    Object->Functions = Functions;
+
+    LouKeListAddTail(&Object->Head, &Device->ModeConfig.PrivateObjectsList);
+
+    State->Object = Object;
+}
+
+DRIVER_EXPORT
+void 
+DrsdAtomicPrivateObjectDeInitialize(
+    PDRSD_PRIVATE_OBJECT    Object
+){
+    LouKeListDeleteItem(&Object->Head);
+    Object->Functions->AtomicDestroyState(Object, Object->State);
+    DrsdModesetLockDeInitialize(&Object->Lock);
+}
+
+DRIVER_EXPORT
+PDRSD_PRIVATE_STATE
+DrsdAtomicGetPrivateObjectState(
+    PDRSD_ATOMIC_STATE      State,
+    PDRSD_PRIVATE_OBJECT    Object    
+){
+    int                         Index;
+    UINT                        ObjectCount;
+    SIZE                        Size;
+    LOUSTATUS                   Status;
+    PDRSD_PRIVATE_OBJECTS_STATE Arr;
+    PDRSD_PRIVATE_STATE         ObjectState;
+
+    ObjectState = DrsdAtomicGetNewPrivateObjectState(State, Object);
+    if(ObjectState){
+        return ObjectState;
+    }
+
+    Status = DrsdModesetLock(&Object->Lock, State->AcquireContext);
+    if(Status != STATUS_SUCCESS){
+        return (PDRSD_PRIVATE_STATE)(UINTPTR)Status;
+    }
+
+    ObjectCount = State->PrivateObjectsCount + 1;
+    Size = sizeof(DRSD_PRIVATE_OBJECTS_STATE) * ObjectCount;
+    Arr = LouKeRealloc(State->PrivateObjects, Size, KERNEL_GENERIC_MEMORY);
+    if(!Arr){
+        return (PDRSD_PRIVATE_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    State->PrivateObjects = Arr;
+    Index = State->PrivateObjectsCount;
+    memset(&State->PrivateObjects[Index], 0, sizeof(DRSD_PRIVATE_OBJECTS_STATE));
+
+    ObjectState = Object->Functions->AtomicDuplicateState(Object);
+    if(!ObjectState){
+        return (PDRSD_PRIVATE_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }    
+
+    State->PrivateObjects[Index].StateToDestroy = ObjectState;
+    State->PrivateObjects[Index].OldState = Object->State;
+    State->PrivateObjects[Index].NewState = ObjectState;
+    State->PrivateObjects[Index].Object = Object;
+    ObjectState->State = State;
+
+    State->PrivateObjectsCount = ObjectCount;
+
+    LouPrint("DRSDCORE.SYS:Device:%h:Added New Private Object:%h State:%h To:%h\n", State->Device, Object, ObjectState, State);
+
+    return ObjectState;
+}
+
+DRIVER_EXPORT
+PDRSD_PRIVATE_STATE
+DrsdAtomicGetOldPrivateObjectState(
+    PDRSD_ATOMIC_STATE      State,
+    PDRSD_PRIVATE_OBJECT    Object
+){
+    for(int i = 0 ; i < State->PrivateObjectsCount; i++){
+        if(Object == State->PrivateObjects[i].Object){
+            return State->PrivateObjects[i].OldState;
+        }
+    }
+    return 0x00;
+}
+
+DRIVER_EXPORT
+PDRSD_PRIVATE_STATE
+DrsdAtomicGetNewPrivateObjectState(
+    PDRSD_ATOMIC_STATE      State,
+    PDRSD_PRIVATE_OBJECT    Object
+){
+    for(int i = 0 ; i < State->PrivateObjectsCount; i++){
+        if(Object == State->PrivateObjects[i].Object){
+            return State->PrivateObjects[i].NewState;
+        }
+    }
+    return 0x00;
+}
+
+DRIVER_EXPORT
+PDRSD_CONNECTOR 
+DrsdAtomicGetOldConnectorForEncoder(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_ENCODER       Encoder
+){
+    PDRSD_CONNECTOR_STATE   ConnectorState;
+    PDRSD_CONNECTOR         Connector;
+    UINT                    i;
+
+    ForEachOldConnectorInState(State, Connector, ConnectorState, i){
+        if(ConnectorState->BestEncoder == Encoder){
+            return Connector;
+        }        
+    }
+    return 0x00;
+}
+
+DRIVER_EXPORT
+PDRSD_CONNECTOR 
+DrsdAtomicGetNewConnectorForEncoder(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_ENCODER       Encoder
+){
+    PDRSD_CONNECTOR_STATE   ConnectorState;
+    PDRSD_CONNECTOR         Connector;
+    UINT                    i;
+
+    ForEachNewConnectorInState(State, Connector, ConnectorState, i){
+        if(ConnectorState->BestEncoder == Encoder){
+            return Connector;
+        }        
+    }
+    return 0x00;
 }
 
 
@@ -549,9 +742,176 @@ DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
     PDRSD_ENCODER                   Encoder,
-    PDRSD_MODESET_ACQURE_CONTEXT    Context
+    PDRSD_MODESET_ACQUIRE_CONTEXT   Context
 ){
+    DRSD_CONNECTOR_LIST_ITERATION       ConnectorIteration;
+    PDRSD_CONNECTOR                     OutConnector;
+    PDRSD_CONNECTOR                     Connector;
+    PDRSD_DEVICE                        Device = Encoder->Device;
+    LOUSTATUS                           Status;
 
-
-    return 0x00;
+    Status = DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, Context);
+    if(Status != STATUS_SUCCESS){
+        return (PDRSD_CONNECTOR)(UINTPTR)Status;
+    }
+    DrsdConnectorListIterationBegin(Device, &ConnectorIteration);
+    DrsdForEachConnectorIteration(Connector, &ConnectorIteration){
+        if(!Connector->State){
+            continue;
+        }
+        if(Encoder == Connector->State->BestEncoder){
+            OutConnector = Connector;
+            break;
+        }
+    }
+    DrsdConnectorListIterationEnd(&ConnectorIteration);
+    DrsdModesetUnlock(&Device->ModeConfig.ConnectionMutex);
+    return OutConnector;
 }
+
+DRIVER_EXPORT
+PDRSD_CRTC
+DrsdAtomicGetOldCrtcForEncoder(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_ENCODER       Encoder
+){
+    PDRSD_CONNECTOR         Connector;
+    PDRSD_CONNECTOR_STATE   ConnectorState;
+
+    Connector = DrsdAtomicGetOldConnectorForEncoder(State, Encoder);
+    if(!Connector){
+        return 0x00;
+    }
+    ConnectorState = DrsdAtomicGetOldConnectorState(State, Connector);
+    if(!ConnectorState){
+        return 0x00;
+    }
+    return ConnectorState->Crtc;
+}
+
+DRIVER_EXPORT
+PDRSD_CRTC
+DrsdAtomicGetNewCrtcForEncoder(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_ENCODER       Encoder
+){
+    PDRSD_CONNECTOR         Connector;
+    PDRSD_CONNECTOR_STATE   ConnectorState;
+
+    Connector = DrsdAtomicGetNewConnectorForEncoder(State, Encoder);
+    if(!Connector){
+        return 0x00;
+    }
+    ConnectorState = DrsdAtomicGetNewConnectorState(State, Connector);
+    if(!ConnectorState){
+        return 0x00;
+    }
+    return ConnectorState->Crtc;
+}
+
+DRIVER_EXPORT
+PDRSD_CONNECTOR_STATE
+DrsdAtomicGetConnectorState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_CONNECTOR     Connector
+){
+    LOUSTATUS                   Status;
+    UINT                        Index;
+    PDRSD_MODE_CONFIGURATION    Config;
+    PDRSD_CONNECTOR_STATE       ConnectorState;
+
+    Status = DrsdModesetLock(&Config->ConnectionMutex, State->AcquireContext);
+    if(Status != STATUS_SUCCESS){
+        return (PDRSD_CONNECTOR_STATE)(UINTPTR)Status;
+    }
+
+    Index = DrsdConnectorIndex(Connector);
+
+    if(Index >= State->ConnectorCount){
+        PDRSD_CONNECTORS_STATE C;
+        int Alloc = MAX(Index + 1, Config->ConnectorCount);
+
+        C = LouKeRealloc(State->Connectors, Alloc * sizeof(DRSD_CONNECTORS_STATE), KERNEL_GENERIC_MEMORY);
+        if(!C){
+            return (PDRSD_CONNECTOR_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+        }
+        State->Connectors = C;
+        memset(&State->Connectors[State->ConnectorCount], 0, sizeof(DRSD_CONNECTORS_STATE) * (Alloc - State->ConnectorCount));
+
+        State->ConnectorCount = Alloc;
+    }
+
+    ConnectorState = DrsdAtomicGetNewConnectorState(State, Connector);
+    if(ConnectorState){
+        return ConnectorState;
+    }
+
+    ConnectorState = Connector->Functions->AtomicDuplicateState(Connector);
+    if(!ConnectorState){
+        return (PDRSD_CONNECTOR_STATE)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    DrsdConnectorGet(Connector);
+    State->Connectors[Index].StateToDestroy = ConnectorState;
+    State->Connectors[Index].OldState = Connector->State;
+    State->Connectors[Index].NewState = ConnectorState;
+    ConnectorState->State = State;
+
+    LouPrint("DRSDCORE.SYS:Device:%h:Added Connector:%d:%s:%h State To:%h\n", State->Device, Connector->Base.Identification, Connector->Name, ConnectorState, State);
+
+    if(ConnectorState->Crtc){
+        PDRSD_CRTC_STATE CrtcState;
+        CrtcState = DrsdAtomicGetCrtcState(State, ConnectorState->Crtc);
+        if(LOU_KE_PTR_ERROR(CrtcState)){
+            return (PDRSD_CONNECTOR_STATE)(UINTPTR)CrtcState;
+        }
+    }
+
+    return ConnectorState;
+}
+
+//TODO 1337 to 1383
+
+DRIVER_EXPORT
+PDRSD_BRIDGE_STATE 
+DrsdAtomicGetBridgeState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_BRIDGE        Bridge
+){
+    PDRSD_PRIVATE_STATE ObjectState;
+    ObjectState = DrsdAtomicGetPrivateObjectState(State, &Bridge->Base);
+    if(LOU_KE_PTR_ERROR(ObjectState)){
+        return (PDRSD_BRIDGE_STATE)(UINTPTR)ObjectState;
+    }
+    return DrsdPrivateToBridgeState(ObjectState);
+}
+
+DRIVER_EXPORT
+PDRSD_BRIDGE_STATE
+DrsdAtomicGetOldBridgeState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_BRIDGE        Bridge
+){
+    PDRSD_PRIVATE_STATE ObjectState;
+    ObjectState = DrsdAtomicGetOldPrivateObjectState(State, &Bridge->Base);
+    if(!ObjectState){
+        return 0x00;
+    }
+    return DrsdPrivateToBridgeState(ObjectState);
+}
+
+DRIVER_EXPORT
+PDRSD_BRIDGE_STATE
+DrsdAtomicGetNewBridgeState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_BRIDGE        Bridge
+){
+    PDRSD_PRIVATE_STATE ObjectState;
+    ObjectState = DrsdAtomicGetNewPrivateObjectState(State, &Bridge->Base);
+    if(!ObjectState){
+        return 0x00;
+    }
+    return DrsdPrivateToBridgeState(ObjectState);
+}
+
+//1457

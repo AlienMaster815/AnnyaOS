@@ -15,4 +15,13 @@ DrsdPlaneHasFormat(
     UINT64      Modifier
 );
 
+DRIVER_EXPORT
+UINT
+DrsdPlaneGetDamageClipsCount(PDRSD_PLANE_STATE State);
+
+PDRSD_MODE_RECT
+__DrsdPlaneGetDamageClips(
+    PDRSD_PLANE_STATE State
+);
+
 #endif
