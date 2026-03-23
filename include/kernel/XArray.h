@@ -6,9 +6,8 @@ extern "C"{
 #endif
 
 typedef enum _XARRAY_LOCK_TYPE{
-    NoLock = 0,
+    Mutex = 0,
     Spinlock,
-    Mutex,
     Semaphore,
 }XARRAY_LOCK_TYPE, * PXARRAY_LOCK_TYPE;
 
@@ -23,12 +22,12 @@ typedef enum _XARRAY_LOCK_TYPE{
 
 typedef UINT64 XARRAY_FLAGS;
 
-typedef struct _XARRAY_ENTRY{
-    ListHeader          Peers;
-    struct _XARRAY*     Parrent;
-    BOOLEAN             Marked;
-    PVOID               Data;
-}XARRAY_ENTRY, * PXARRAY_ENTRY;
+typedef struct _XARRAY_NODE{
+    ListHeader      Peers;
+    UINT64          Base;
+    UINT64          Bitmap;
+    UINT64          Entries[512];
+}XARRAY_NODE, * PXARRAY_NODE;
 
 typedef struct _XARRAY{
     XARRAY_LOCK_TYPE    LockType;
@@ -39,11 +38,7 @@ typedef struct _XARRAY{
         semaphore_t     Semaphore;        
     }Lock;    
     XARRAY_FLAGS        Flags;
-    atomic_t            MemberCount;
-    SIZE                MinimalCount;
-    POOL                ArrayPool;
-    POOL                MemberPool;
-    PXARRAY_ENTRY       Array;    
+    ListHeader          Nodes;    
 }XARRAY, * PXARRAY;
 
 
@@ -87,17 +82,7 @@ BOOLEAN
 LouKeXaEmpty(
     PXARRAY Array
 ){
-    if(Array->Flags & XARRAY_FLAGS_STATIC_ALLOCATED){
-        int Members = LouKeGetAtomic(&Array->MemberCount);
-        for(int i = 0; i < Members; i++){
-            if(Array->Array[i].Data){
-                return false;
-            }
-        }
-        return true;
-    }else{
-        return (Array->Array->Peers.NextHeader ? false : true);
-    }   
+    return (Array->Nodes.NextHeader ? false : true);   
 } 
 
 //TODO: put this in the kernel {
@@ -137,29 +122,53 @@ void
 LouKeXaDestroy(
     PXARRAY Array
 ){  
-    LouKeXaLockArray(Array);
-    if(Array->Flags & XARRAY_FLAGS_STATIC_ALLOCATED){
-        int Members = LouKeGetAtomic(&Array->MemberCount);
-        for(int i = 0 ; i < Members; i++){
-            LouKeFree(Array->Array[i].Data);
-        }
-        LouKeFree(Array->Array);
-        Array->Array = 0x00;
-    }else{
-        PXARRAY_ENTRY Leader = Array->Array;
-        PXARRAY_ENTRY Follower;
-        while(Leader){
-            Follower = Leader;
-            Leader = (PXARRAY_ENTRY)Leader->Peers.NextHeader;
-            LouKeFree(Follower->Data);
-            LouKeFree(Follower);
-        }         
-        Array->Array = 0x00;
-    }
-    LouKeXaUnlockArray(Array);
+
 }
 
+
 //}
+
+KERNEL_EXPORT
+PVOID 
+LouKeXaStore(
+    PXARRAY     Array,
+    UINT64      Index,
+    PVOID       Pointer,
+    UINT64      PageFlags
+);
+
+KERNEL_EXPORT
+BOOLEAN 
+LouKeXaIsIndexUsed(
+    PXARRAY     Array,
+    UINT64      Index
+);
+
+KERNEL_EXPORT
+BOOLEAN 
+LouKeXaIsIndexUsedEx(
+    PXARRAY     Array,
+    UINT64      Index
+);
+
+KERNEL_EXPORT
+PVOID 
+LouKeXaStoreEx(
+    PXARRAY     Array,
+    UINT64      Index,
+    PVOID       Pointer,
+    UINT64      PageFlags
+);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeXaIdrAllocate(
+    PXARRAY     Array,
+    PVOID       Pointer,
+    int*        Start,
+    int         End,
+    UINT64      PageFlags 
+);
 
 #else 
 

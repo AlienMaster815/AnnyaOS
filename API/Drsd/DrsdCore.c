@@ -58,7 +58,7 @@ KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
     //TODO:Finish this
     
     LouPrint("DrsdCoreSubsystemEntry() STATUS_SUCCESS\n");
-    while(1);
+    //while(1);
 
     return Result;
 }

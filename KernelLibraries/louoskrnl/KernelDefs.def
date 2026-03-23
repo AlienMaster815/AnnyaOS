@@ -216,3 +216,4 @@ EXPORTS
     DrsdAtomicStateDefaultRelease
     LouKeRealloc
     LouKeReallocEx
+    LouKeXaIdrAllocate

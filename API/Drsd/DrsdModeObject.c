@@ -25,6 +25,41 @@
 
 #include "DrsdCore.h"
 
+LOUSTATUS 
+DrsdModeObjectAddEx(
+    PDRSD_DEVICE            Device,
+    PDRSD_MODE_OBJECT       Object,
+    UINT32                  ObjectType,
+    BOOLEAN                 RegisterObject,
+    void                  (*ObjectFreeCb)(PKERNEL_REFERENCE)
+){
+    LOUSTATUS Result;
+    MutexLock(&Device->ModeConfig.IdrMutex);
+    int Out = 1;
+    Result = LouKeXaIdrAllocate(&Device->ModeConfig.ObjectIdr, RegisterObject ? Object : 0x00, &Out, 0, KERNEL_GENERIC_MEMORY);    
+    if(Result == STATUS_SUCCESS){
+        Object->Identification = Out;
+        Object->ModeType = ObjectType;
+        if(ObjectFreeCb){
+            Object->FreeCb = ObjectFreeCb;
+            LouKeInitializeKernelRefence(&Object->ReferenceCount);   
+        }
+    }
+    MutexUnlock(&Device->ModeConfig.IdrMutex);
+    return Result; 
+}
+
+LOUSTATUS 
+DrsdModeObjectAdd(
+    PDRSD_DEVICE            Device,
+    PDRSD_MODE_OBJECT       Object,
+    UINT32                  ObjectType
+){
+    return DrsdModeObjectAddEx(Device, Object, ObjectType, true, 0x00);
+}
+
+
+
 DRIVER_EXPORT
 void 
 DrsdModeObjectPut(

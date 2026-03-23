@@ -370,6 +370,8 @@ void LouOsKrnlStart(
     InitializeBootGraphics();
 
     AdvancedLousineKernelInitialization();
+    
+    while(1);
 
     LookForStorageDevices();
         

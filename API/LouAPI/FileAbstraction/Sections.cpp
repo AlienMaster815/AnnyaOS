@@ -71,7 +71,7 @@ static PSECTION_OBJECT VAddressToSectionObject(PVOID VAddress){
     PSECTION_OBJECT TmpSection = &MasterSectionList;
     MutexLock(&SectionListLock);
     while(TmpSection->Peers.NextHeader){
-        TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
+        TmpSection = ListItemToType(TmpSection->Peers.NextHeader, SECTION_OBJECT, Peers);
         if(TmpSection->SectionVBase == VAddress){
             MutexUnlock(&SectionListLock);
             return TmpSection;
@@ -102,7 +102,7 @@ LouKeVmmCreateSharedSectionEx(
     PPML4_LIST TmpList = &Pml4MasterList;
     MutexLock(&Pml4MasterLock);
     while(TmpList->Peers.NextHeader){
-        TmpList = (PPML4_LIST)TmpList->Peers.NextHeader;
+        TmpList = ListItemToType(TmpList->Peers.NextHeader, PML4_LIST, Peers);
         LouKeMapContinuousMemoryBlockEx((UINT64)PBase, (UINT64)VBase, Size, SectionObject->FrameFlags, TmpList->Pml4);
     }
     MutexUnlock(&Pml4MasterLock);
