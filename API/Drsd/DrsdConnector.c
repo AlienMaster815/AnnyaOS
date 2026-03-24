@@ -78,7 +78,6 @@ DrsdGetConnectorTypeName(UINT Type){
     if(Type >= 21){
         return 0x00;
     }
-
     return DrsdConnectorEnumList[Type].Name;
 }
 
@@ -94,12 +93,16 @@ void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
     PDRSD_DEVICE Device = CONTAINER_OF(Work, DRSD_DEVICE, ModeConfig.ConnectorFreeWork);
     PDRSD_MODE_CONFIGURATION ModeConfig = &Device->ModeConfig;
     LouKIRQL Irql;
+    PListHeader Freed;
 
     LouKeAcquireSpinLock(&ModeConfig->ConnectorListLock, &Irql);
-    //finish this
+    LouKeLListDeleteAll(&ModeConfig->ConnectorFreeList);
     LouKeReleaseSpinLock(&ModeConfig->ConnectorListLock, &Irql);
 
-
+    ForEachLListEntrySafe(Connector, N, Freed, FreeNode){
+        DrsdUnregisterModeObject(Device, &Connector->Base);
+        Connector->Functions->Destroy(Connector);
+    }
 
 }
 

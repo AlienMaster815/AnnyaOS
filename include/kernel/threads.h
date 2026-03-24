@@ -10,6 +10,9 @@ extern "C" {
 #include <kernel/LKPCB.h>
 #include <Modulation.h>
 
+//TODO: Add 64 bit atomic values tp lock out tag out 
+//mechanism now that the kernel supports them
+
 typedef struct _mutex_t{
     atomic_t locked;
     atomic_t Handle;
@@ -36,6 +39,22 @@ static inline void LouKeSetAtomic(atomic_t* A, int Value){
 
 static inline int LouKeGetAtomic(atomic_t* A){
     return atomic_read(A);
+}
+
+static inline void LouKeSetAtomic64(atomic_int64_t* A, int64_t Value){
+    atomic64_set(A, Value);
+}
+
+static inline int64_t LouKeGetAtomic64(atomic_int64_t* A){
+    return atomic64_read(A);
+}
+
+static inline void LouKeSetAtomic64FromUint64(UINT64* A, int64_t Value){
+    atomic64_set((atomic_int64_t*)A, Value);
+}
+
+static inline int64_t LouKeGetAtomic64FromUint64(UINT64* A){
+    return atomic64_read((atomic_int64_t*)A);
 }
 
 static inline void LouKeSetAtomicBoolean(PATOMIC_BOOLEAN b, int Boolean){
