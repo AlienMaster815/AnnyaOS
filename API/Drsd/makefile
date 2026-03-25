@@ -14,7 +14,8 @@ SRC = DrsdCore.c \
 		DrsdFormatHelper.c \
 		DrsdModeObject.c \
 		DrsdColorOp.c \
-		DrsdWriteback.c
+		DrsdWriteback.c \
+		DrsdBridge.c
 
 
 CC = x86_64-w64-mingw32-gcc

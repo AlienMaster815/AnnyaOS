@@ -84,6 +84,7 @@ extern "C" {
 #include <LKDM.h>
 #include <drivers/FileSystems/ISO.h>
 #include <Time.h>
+#include <kernel/Rcu.h>
 
 
 #ifndef KERNEL_MAIN_FILE

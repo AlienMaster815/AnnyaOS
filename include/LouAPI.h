@@ -85,6 +85,7 @@ extern "C" {
 #include <WinAPI/Win32/GdiCore.h>
 #include <LKDM.h>
 #include <Time.h>
+#include <kernel/Rcu.h>
 
 #ifndef KERNEL_MAIN_FILE
 EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

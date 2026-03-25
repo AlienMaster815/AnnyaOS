@@ -27,6 +27,23 @@ extern "C" {
 #define STRIP_OPTIMIZATIONS __attribute__((optimize(0))) 
 #define SET_OPTIMIZATION(x) __attribute__((optimize(x)))
 
+
+#ifndef __always_inline
+#define __always_inline __attribute__((__always_inline__)) inline
+#endif
+
+#ifndef __cleanup
+#define __cleanup(_func) __attribute__((__cleanup__(_func)))
+#endif
+
+#define DEFINE_FREE(_name, _type, _free) \
+    static __always_inline void __free_##_name(void *p) { \
+        _type _T = *(_type *)p; \
+        _free; \
+    }
+
+#define __free(_name) __cleanup(__free_##_name)
+
 #define KILOBYTE        (1      * 1024ULL)
 #define MEGABYTE        (1024   * KILOBYTE)
 #define GIGABYTE        (1024   * MEGABYTE)

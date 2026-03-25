@@ -1263,7 +1263,9 @@ typedef struct _EDID_QUIRK{
 typedef struct _DRSD_ENCODER{
     ListHeader                                  Peers;
     struct _DRSD_DEVICE*                        Device;
-    struct _DRSD_MODE_OBJECT*                   Base;
+    DRSD_MODE_OBJECT                            Base;
+    LOUSTR                                      Name;
+
     string                                      EncoderName;
     int32_t                                     EncoderType;
     size_t                                      Index;
@@ -2727,9 +2729,9 @@ typedef struct _DRSD_BRIDGE{
     ListHeader                      List;
     PDRSD_BRIDGE_TIMINGS            Timing;
     PDRSD_BRIDGE_FUNCTIONS          Functions;
-    PVOID                           Conatiner;
-    KERNEL_REFERENCE                RefCount;
-    BOOLEAN                         Unplugger;
+    PVOID                           Container;
+    KERNEL_REFERENCE                ReferenceCount;
+    BOOLEAN                         Unplugged;
     PVOID                           DriverPrivate;
     DRSD_BRIDGE_OPS                 Ops;
     INT32                           Type;

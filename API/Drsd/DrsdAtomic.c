@@ -914,4 +914,19 @@ DrsdAtomicGetNewBridgeState(
     return DrsdPrivateToBridgeState(ObjectState);
 }
 
-//1457
+DRIVER_EXPORT
+LOUSTATUS
+DrsdAtomicAddEncoderBridges(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_ENCODER       Encoder
+){
+    PDRSD_BRIDGE_STATE BridgeState;
+    if(!Encoder){
+        return STATUS_SUCCESS;
+    }
+
+    LouPrint("Device:%h:Adding All Bridges For Encoder:%d:%s To:%h\n", Encoder->Device, Encoder->Base.Identification, Encoder->Name, State);
+
+    
+
+}
