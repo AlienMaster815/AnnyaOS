@@ -118,51 +118,12 @@ EXPORTS
     LouKeCreateGenericPool
     LouKeGenricAllocateDmaPool
     LouKeGenericPoolGetPhyAddress
-    LouKePassVramToDrsdMemoryManager
-    DrsdGxeCreateAsyncFramebuffer
-    DrsdGxeVramInternalModeValid
-    DrsdInternalAtomicCheck
-    DrsdInternalAtomicCommit
-    DrsdInternalResetPlane
-    DrsdInternalDestroyPlane
-    DrsdInternalPlaneDisableAtomic
-    DrsdInternalPlaneUpdateAtomic
-    DrsdInternalDestroyPlaneAtomic
-    DrsdInternalDuplicateAtomicState
-    DrsdGxeInternalCleanupFrameBuffer
-    DrsdGxeInternalPrepareFrameBuffer
-    DrsdGxeInternalStartFrameBufferProcessing
-    DrsdGxeInternalStopFrameBufferProcessing
-    DrsdGxeDestroyShadowPlane
-    DrsdGxeDuplicateShadowPlaneState
-    DrsdGxeResetShadowPlane
-    DrsdInitializeGenericPlane
-    DrsdInitializeCrtcWithPlanes
-    DrsdInitializeCrtcGammaSize
-    DrsdInternalCrtcSetConfigurationAtomic
-    DrsdInternalCrtcPageFlipAtomic
-    DrsdInternalCrtcResetAtomic
-    DrsdInternalCrtcDuplicateStateAtomic
-    DrsdInternalCrtcDestroyStateAtomic
-    DrsdInitializeEncoder
-    DrsdInternalAtomicConnectorDestroyState
-    DrsdInternalAtomicConnectorDuplicateState
-    DrsdInternalResetConnector
-    DrsdConnectorInitialize
-    DrsdModeConfigReset
-    DrsdInternalProbeSingleConnectorModes
     LouKeGetThreadIdentification
     LouKeHalGetPciConfiguration
     LouKeFree
     LouKeForkAtaHostPrivateDataToPorts
     LouKeMallocAtaPrivateData
     LouKeMallocAtaDevice
-    DrsdAddModesNoEDID
-    DrsdCvtMode
-    DrsdAddProbedDisplayModeToConnector
-    DrsdUpdateEdidConnectorProperties
-    DrsdGetNewPlaneState
-    LouKeDrsdHandleConflictingDevices
     inb
     outb
     LouKeCreateBusClass
@@ -198,10 +159,7 @@ EXPORTS
     InitializeGenericAtaDevice
     outsw
     LouKeHalFreePciIrqVectors
-    DrsdModeConfigCleanup
     strchr
-    DrsdModesetUnlock
-    DrsdModesetLock
     LouKeSwapEndianess
     LouKeWaitForAtomicBooleanRegisterConditionMs
     LouKeWaitForAtomicBooleanRegisterConditionHz
@@ -213,7 +171,6 @@ EXPORTS
     LouKeWaitForUcharRegisterConditionHz
     LouKeWaitForUcharRegisterConditionMs
     LouKeWaitForCompletionTimeout
-    DrsdAtomicStateDefaultRelease
     LouKeRealloc
     LouKeReallocEx
     LouKeXaIdrAllocate

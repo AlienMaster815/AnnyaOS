@@ -84,9 +84,9 @@ LOUSTATUS LouKeRegisterDevice(
             return DeviceManagerInitializeAtaHostDevice(TmpDevice);
         }
         case GRAPHICS_DEVICE_T:{
-            return LouKeDrsdInitializeDevice(
-                TmpDevice->DevicePrivateData
-            );
+            //return LouKeDrsdInitializeDevice(
+            //    TmpDevice->DevicePrivateData
+            //);
         }
         case NETWORK_DEVICE_T:{
             break;

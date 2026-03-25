@@ -22,7 +22,7 @@ TARGET = VBOXGPU.SYS
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc -L../../../API/Drsd -ldrsdcore $(INCLUDES)
 
 # Clean rule
 clean:

@@ -164,7 +164,7 @@ LOUAPI
 LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
-    
+    while(1);
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     
     PVIRTUALBOX_PRIVATE_DATA VBox;

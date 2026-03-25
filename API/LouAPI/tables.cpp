@@ -329,7 +329,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[136] = "DrsdGxeDestroyShadowPlane";
     ImportTables[0].FunctionName[137] = "DrsdGxeDuplicateShadowPlaneState";
     ImportTables[0].FunctionName[138] = "DrsdGxeResetShadowPlane";
-    ImportTables[0].FunctionName[139] = "DrsdInitializeGenericPlane";
     ImportTables[0].FunctionName[140] = "DrsdInitializeCrtcWithPlanes";
     ImportTables[0].FunctionName[141] = "DrsdInitializeCrtcGammaSize";
     ImportTables[0].FunctionName[142] = "DrsdInternalCrtcSetConfigurationAtomic";
@@ -496,7 +495,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[136] = (uint64_t)DrsdGxeDestroyShadowPlane;
     ImportTables[0].VirtualAddress[137] = (uint64_t)DrsdGxeDuplicateShadowPlaneState;
     ImportTables[0].VirtualAddress[138] = (uint64_t)DrsdGxeResetShadowPlane;
-    ImportTables[0].VirtualAddress[139] = (uint64_t)DrsdInitializeGenericPlane;
     ImportTables[0].VirtualAddress[140] = (uint64_t)DrsdInitializeCrtcWithPlanes;
     ImportTables[0].VirtualAddress[141] = (uint64_t)DrsdInitializeCrtcGammaSize;
     ImportTables[0].VirtualAddress[142] = (uint64_t)DrsdInternalCrtcSetConfigurationAtomic;

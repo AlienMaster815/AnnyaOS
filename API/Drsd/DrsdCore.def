@@ -30,3 +30,40 @@ EXPORTS
     DrsdAtomicGetOldColorOpState
     DrsdAtomicGetColorOpState
     DrsdPlaneGetDamageClipsCount
+    DrsdInternalAtomicConnectorDestroyState
+    DrsdInternalAtomicConnectorDuplicateState
+    DrsdInternalCrtcDestroyStateAtomic
+    DrsdInternalCrtcDuplicateStateAtomic
+    DrsdInternalCrtcPageFlipAtomic
+    DrsdInternalCrtcSetConfigurationAtomic
+    DrsdInternalCrtcResetAtomic
+    DrsdGxeInternalStopFrameBufferProcessing
+    DrsdGxeInternalStartFrameBufferProcessing
+    LouKePassVramToDrsdMemoryManager
+    LouKeDrsdHandleConflictingDevices
+    DrsdAddModesNoEDID
+    DrsdCvtMode
+    DrsdAddProbedDisplayModeToConnector
+    DrsdUpdateEdidConnectorProperties
+    DrsdInternalProbeSingleConnectorModes
+    DrsdInitializeGenericPlane
+    DrsdInitializeCrtcWithPlanes
+    DrsdInitializeCrtcGammaSize
+    DrsdInitializeEncoder
+    DrsdConnectorInitialize
+    DrsdModeConfigReset
+    DrsdModeConfigCleanup
+    DrsdGxeCreateAsyncFramebuffer
+    DrsdGxeVramInternalModeValid
+    DrsdInternalAtomicCheck
+    DrsdInternalAtomicCommit
+    DrsdInternalPlaneUpdateAtomic
+    DrsdInternalPlaneDisableAtomic
+    DrsdInternalResetPlane
+    DrsdInternalDuplicateAtomicState
+    DrsdInternalDestroyPlaneAtomic
+    DrsdGxeInternalPrepareFrameBuffer
+    DrsdGxeInternalCleanupFrameBuffer
+    DrsdGxeResetShadowPlane
+    DrsdGxeDuplicateShadowPlaneState
+    DrsdGxeDestroyShadowPlane

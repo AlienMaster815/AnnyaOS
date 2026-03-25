@@ -36,7 +36,7 @@ extern uint64_t RSPPoint;
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
 HANDLE LouKeLoadLibraryA(string Name);
 void* LouKeDrsdGetPlaneInformation(size_t* CountHandle);
-LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context);
+//LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context);
 void* LouKeGenericAllocateHeapEx(
     void* HeapHandle, 
     size_t AllocationSize,
@@ -45,11 +45,11 @@ void* LouKeGenericAllocateHeapEx(
 uint64_t LouKeGetThreadIdentification();
 void LouKeExitDosMode();
 void LouKeDrsdSyncScreen();
-PDRSD_CLIP LouKeDrsdCreateClip(
-    INT64    X, INT64 Y, 
-    INT64 Width, INT64 Height, 
-    uint8_t R, uint8_t G, uint8_t B, uint8_t A
-);
+//PDRSD_CLIP LouKeDrsdCreateClip(
+//    INT64    X, INT64 Y, 
+//    INT64 Width, INT64 Height, 
+//    uint8_t R, uint8_t G, uint8_t B, uint8_t A
+//);
 
 //returns a void* to a new heap
 void* LouKeVirtualAllocUser(
@@ -69,7 +69,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         } 
         case LOUEXITDOSMODE:{
-            LouKeExitDosMode();
+            //LouKeExitDosMode();
             return;
         }
         case LOULOADFILE:{
@@ -92,36 +92,36 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUDRSDGETPLANEINFO:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[0] = (uint64_t)LouKeDrsdGetPlaneInformation((size_t*)Tmp[1]);
+            //uint64_t* Tmp = (uint64_t*)Data;
+            //Tmp[0] = (uint64_t)LouKeDrsdGetPlaneInformation((size_t*)Tmp[1]);
             return;
         }
         case LOUDRSDSETPLANEINFO:{
-            UINT64* Tmp = (UINT64*)Data;
-            Tmp[0] = (UINT64)LouKeDrsdSetPlaneInformation((PVOID)Tmp[1]);
+            //UINT64* Tmp = (UINT64*)Data;
+            //Tmp[0] = (UINT64)LouKeDrsdSetPlaneInformation((PVOID)Tmp[1]);
             return;
         }
         case LOUDRSDCREATECLIP:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[0] = (uint64_t)LouKeDrsdCreateClip(
-                (INT64)Tmp[1], //X
-                (INT64)Tmp[2], //Y
-                (INT64)Tmp[3], //Width
-                (INT64)Tmp[4], //Height
-                (uint8_t)Tmp[5], //R
-                (uint8_t)Tmp[6], //G
-                (uint8_t)Tmp[7], //B
-                (uint8_t)Tmp[8] //A
-            );
+            //uint64_t* Tmp = (uint64_t*)Data;
+            //Tmp[0] = (uint64_t)LouKeDrsdCreateClip(
+            //    (INT64)Tmp[1], //X
+            //    (INT64)Tmp[2], //Y
+            //    (INT64)Tmp[3], //Width
+            //    (INT64)Tmp[4], //Height
+            //    (uint8_t)Tmp[5], //R
+            //    (uint8_t)Tmp[6], //G
+            //    (uint8_t)Tmp[7], //B
+            //    (uint8_t)Tmp[8] //A
+            //);
             return;
         }
         case LOUDRSDSYNCSCREEN:{
-            LouKeDrsdSyncScreen();
+            //LouKeDrsdSyncScreen();
             return;
         }
         case LOUUPDTATECLIP:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateClipState((PDRSD_CLIP)Tmp[0]);
+            //uint64_t* Tmp = (uint64_t*)Data;
+            //LouKeUpdateClipState((PDRSD_CLIP)Tmp[0]);
             return;
         }
         case LOUGLOBALFREE:{
@@ -140,8 +140,8 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUDPDATESHADOWCLIP:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateShadowClipState((PDRSD_CLIP)Tmp[0]);
+            //uint64_t* Tmp = (uint64_t*)Data;
+            //LouKeUpdateShadowClipState((PDRSD_CLIP)Tmp[0]);
             return;
         }
         case LOUREGISTERCALLBACK:{
@@ -206,13 +206,13 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUDRSDUPDATECLIPSUBSTATE:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
+            //uint64_t* Tmp = (uint64_t*)Data;
+            //LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
             return;
         }
         case LOUDRSDUPDATESHADOWCLIPSUBSTATE:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeUpdateShadowClipSubState((PDRSD_CLIP)Tmp[0],(INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
+            //uint64_t* Tmp = (uint64_t*)Data;
+            //LouKeUpdateShadowClipSubState((PDRSD_CLIP)Tmp[0],(INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
             return;
         }
         case LOUSHUTDOWN:{

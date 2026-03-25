@@ -2767,7 +2767,7 @@ void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color);
 void LouKeUpdateClipState(PDRSD_CLIP Clip);
 
 void LouKeDrsdHandleConflictingDevices(struct _PCI_DEVICE_OBJECT* PDEV);
-LOUAPI void LouKeOsDosUpdateMapping();
+//LOUAPI void LouKeOsDosUpdateMapping();
 
 void LouKeDrsdCoreClipPlotLine(
   PDRSD_CLIP Clip,
@@ -2789,7 +2789,7 @@ void LouKeDrsdClipPutPixel(
     uint32_t Color
 );
 
-LOUAPI void LouKeOsDosPrintCharecter(char Character);
+//LOUAPI void LouKeOsDosPrintCharecter(char Character);
 
 void DirectAccessDrsdHotplugEvent(PDRSD_DEVICE Device);
 
