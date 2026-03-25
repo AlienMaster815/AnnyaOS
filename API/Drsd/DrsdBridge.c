@@ -42,3 +42,12 @@ DrsdBridgePut(
         LouKeReleaseReferenceAndCall(&Bridge->ReferenceCount, DrsdBridgeFree);
     }
 }
+
+DRIVER_EXPORT
+PDRSD_BRIDGE
+DrsdBridgeGet(PDRSD_BRIDGE Bridge){
+    if(Bridge){
+        LouKeAcquireReference(&Bridge->ReferenceCount);
+    }
+    return Bridge;
+}

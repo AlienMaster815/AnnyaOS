@@ -1265,13 +1265,13 @@ typedef struct _DRSD_ENCODER{
     struct _DRSD_DEVICE*                        Device;
     DRSD_MODE_OBJECT                            Base;
     LOUSTR                                      Name;
+    ListHeader                                  BridgeChain;
 
     string                                      EncoderName;
     int32_t                                     EncoderType;
     size_t                                      Index;
     uint32_t                                    CrtcLimit;
     uint32_t                                    CloneLimit;
-    ListHeader                                  BridgeLink;
     struct _DRSD_ENCODER_CALLBACKS*             Callbacks;
     struct _DRSD_ENCODER_ASSISTED_CALLBACKS*    AssistedCallbacks;
 }DRSD_ENCODER, * PDRSD_ENCODER; 
@@ -2724,7 +2724,7 @@ typedef struct _DRSD_BRIDGE{
     DRSD_PRIVATE_OBJECT             Base;
     PDRSD_DEVICE                    Device;
     PDRSD_ENCODER                   Encoder;
-    ListHeader                      ChainMode;
+    ListHeader                      ChainNode;
     PVOID                           DeviceNode;
     ListHeader                      List;
     PDRSD_BRIDGE_TIMINGS            Timing;

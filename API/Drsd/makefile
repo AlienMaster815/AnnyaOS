@@ -15,7 +15,8 @@ SRC = DrsdCore.c \
 		DrsdModeObject.c \
 		DrsdColorOp.c \
 		DrsdWriteback.c \
-		DrsdBridge.c
+		DrsdBridge.c \
+		DrsdAtomicUapi.c
 
 
 CC = x86_64-w64-mingw32-gcc

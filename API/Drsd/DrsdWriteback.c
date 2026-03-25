@@ -25,9 +25,22 @@
  
 #include "DrsdCore.h"
 
-#define FenceToWbConnector(x) (CONTAINER_OF(x->Lock, DRSD_WRITEBACK_CONNECTOR, FenceLock))
+//static LOUSTR DrsdWritebackFenceGetDriverName(HANDLE Fence)
 
 
+DRIVER_EXPORT 
+LOUSTATUS
+DrsdWritebackConnectorInit(
+    PDRSD_DEVICE                        Device,
+    PDRSD_WRITEBACK_CONNECTOR           WbConnector,
+    PDRSD_CONNECTOR_FUNCTIONS           ConnectorFunctions,
+    //PDRSD_ENCODER_HELPER_FUNCTIONS      EncoderHelperFunctions,
+    UINT32*                             Formats,
+    int                                 FormatCount,
+    UINT32                              PossibleCrtcs
+){
+
+}
 
 DRIVER_EXPORT
 void

@@ -36,6 +36,10 @@ static inline void DrsdConnectorGet(PDRSD_CONNECTOR Connector){
     DrsdModeObjectGet(&Connector->Base);
 }
 
+static inline UINT32 DrsdConnectorMask(PDRSD_CONNECTOR Connector){
+    return 1 << Connector->Index;
+}
+
 DRIVER_EXPORT
 void 
 DrsdConnectorListIterationEnd(

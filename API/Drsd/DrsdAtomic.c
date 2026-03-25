@@ -928,7 +928,73 @@ DrsdAtomicAddEncoderBridges(
     LouPrint("Device:%h:Adding All Bridges For Encoder:%d:%s To:%h\n", Encoder->Device, Encoder->Base.Identification, Encoder->Name, State);
 
     DrsdForEachBridgeInChainScoped(Encoder, Bridge){
+        if(!Bridge->Functions->AtomicDuplicateState){
+            continue;
+        }
+        BridgeState = DrsdAtomicGetBridgeState(State, Bridge);
+        if(LOU_KE_PTR_ERROR(BridgeState)){
+            return (LOUSTATUS)(UINTPTR)BridgeState;
+        }
+    }
+    return STATUS_SUCCESS;
+}
 
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicAddAffectedConnectors(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_CRTC          Crtc
+){
+    PDRSD_MODE_CONFIGURATION        Config = &State->Device->ModeConfig;
+    PDRSD_CONNECTOR                 Connector;
+    PDRSD_CONNECTOR_STATE           ConnectorState;
+    DRSD_CONNECTOR_LIST_ITERATION   ConnectorItter;
+    PDRSD_CRTC_STATE                CrtcState;
+    LOUSTATUS                       Status;
+
+    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
+    if(LOU_KE_PTR_ERROR(CrtcState)){
+        return (LOUSTATUS)(UINTPTR)CrtcState;
     }
 
+    Status = DrsdModesetLock(&Config->ConnectionMutex, State->AcquireContext);
+    if(State != STATUS_SUCCESS){
+        return Status;
+    }
+
+    LouPrint("DRSDCORE.SYS:Deice:%h Adding All Current Connectors For [CRTC:%d:%s] To:%h\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name, State);
+
+    DrsdConnectorListIterationBegin(State->Device, &ConnectorItter);
+    DrsdForEachConnectorIteration(Connector, &ConnectorItter){
+        if(!(CrtcState->ConnectorMask & DrsdConnectorMask(Connector))){
+            continue;
+        }
+        ConnectorState = DrsdAtomicGetConnectorState(State, Connector);
+        if(LOU_KE_PTR_ERROR(ConnectorState)){
+            DrsdConnectorListIterationEnd(&ConnectorItter);
+            return (LOUSTATUS)(UINTPTR)ConnectorState;
+        }
+    }    
+    DrsdConnectorListIterationEnd(&ConnectorItter);
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicAddAffectedPlanes(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_CRTC          Crtc
+){
+    PDRSD_CRTC_STATE    OldCrtcState = DrsdAtomicGetOldCrtcState(State, Crtc);
+    PDRSD_PLANE         Plane;
+    
+    LouPrint("DRSDCORE.SYS:Device:%h Adding All Current Planes For [CRTC:%d:%s] To:%h\n", Crtc->Device, Crtc->Base.Identification, Crtc->Name, State);    
+
+    DrsdForEachPlaneMask(Plane, State->Device, OldCrtcState->PlaneMask){
+        PDRSD_PLANE_STATE PlaneState = DrsdAtomicGetPlaneState(State, Plane);
+        if(LOU_KE_PTR_ERROR(PlaneState)){
+            return (LOUSTATUS)(UINTPTR)PlaneState;
+        }
+    }
+    return STATUS_SUCCESS;
 }

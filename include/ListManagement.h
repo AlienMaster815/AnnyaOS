@@ -35,6 +35,9 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
 #define ForEachLListEntry(Position, N, Node, Member) ForEachListEntry(Position, N, Node, Member)
 #define ForEachLListEntrySafe(Position, N, Node, Member) ForEachListEntrySafe(Position, N, Node, Member)
 
+#define ListItemToTypeOrNull(Header, Type, Member) ((Type*)(UINTPTR)(Header ? CONTAINER_OF(Header, Type, Member) : 0x00))
+
+
 static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
     while(Header->NextHeader){
         Header = Header->NextHeader;

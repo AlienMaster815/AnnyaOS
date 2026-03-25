@@ -75,6 +75,10 @@ static inline PDRSD_BRIDGE_STATE DrsdPrivateToBridgeState(PDRSD_PRIVATE_STATE St
     return CONTAINER_OF(State, DRSD_BRIDGE_STATE, Base);
 }
 
+static inline PDRSD_CRTC_STATE DrsdAtomicGetOldCrtcState(PDRSD_ATOMIC_STATE State, PDRSD_CRTC Crtc){
+    return State->Crtcs[DrsdCrtcIndex(Crtc)].OldState;
+}
+
 DRIVER_EXPORT
 PDRSD_CONNECTOR 
 DrsdAtomicGetConnectorForEncoder(
