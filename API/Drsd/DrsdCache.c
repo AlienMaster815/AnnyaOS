@@ -24,3 +24,7 @@
  */
  
 #include "DrsdCore.h"
+
+void DrsdMemcpyEarlyInit(){
+    //TODO check XMM4_1 Hypervisor VEX quirk
+}

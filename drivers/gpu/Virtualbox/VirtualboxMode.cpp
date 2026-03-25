@@ -125,7 +125,7 @@ static size_t VirtualboxGetModes(PDRSD_CONNECTOR Connector){
     LouPrint("Prefered Width :%d\n", PreferedWidth);
     LouPrint("Prefered Height:%d\n", PreferedHeight);
 
-    PDRSD_DISPLAY_MODE NewGenuineMode = DrsdCvtMode(Connector->Device, PreferedWidth, PreferedHeight, 60, false, false, false);
+    PDRSD_DISPLAY_MODE NewGenuineMode = 0x00; //DrsdCvtMode(Connector->Device, PreferedWidth, PreferedHeight, 60, false, false, false);
     if(NewGenuineMode){
         NewGenuineMode->ModeType |= DRSD_MODE_TYPE_PREFERED;
         DrsdAddProbedDisplayModeToConnector(Connector, NewGenuineMode);
@@ -444,45 +444,45 @@ static void VirtualboxAtomicSetState(
 
 
 static  DRSD_PLANE_ASSIST_FUNCTIONS CursorPlaneAssistFunctions = {
-    .BeginFrameBufferAccess = DrsdGxeInternalStartFrameBufferProcessing,
-    .EndFrameBufferAccess = DrsdGxeInternalStopFrameBufferProcessing,
+//    .BeginFrameBufferAccess = DrsdGxeInternalStartFrameBufferProcessing,
+//    .EndFrameBufferAccess = DrsdGxeInternalStopFrameBufferProcessing,
 //    .AtomicCheck = VirtualboxCursorAtomicCheck,
 //    .AtomicUpdate = VirtualboxCursorAtomicUpdate,
 //    .AtomicSetState = VirtualboxCursorAtomicSetState,
 };
 
 static  DRSD_PLANE_CALLBACKS CursorPlaneFunctions = {
-    .UpdatePlane = DrsdInternalPlaneUpdateAtomic,
+    /*.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
     .DisablePlane = DrsdInternalPlaneDisableAtomic,
     .DestroyPlane = DrsdInternalDestroyPlaneAtomic,
     .ResetPlane = DrsdGxeResetShadowPlane,
     .AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
-    .AtomicDestroyState = DrsdGxeDestroyShadowPlane,
+    .AtomicDestroyState = DrsdGxeDestroyShadowPlane,*/
 };
 
 
 static  DRSD_PLANE_ASSIST_FUNCTIONS PlaneAssistedCallbacks = {
-    .PrepareFrameBuffer = DrsdGxeInternalPrepareFrameBuffer,
-    .CleanupFrameBuffer = DrsdGxeInternalCleanupFrameBuffer,
+    //.PrepareFrameBuffer = DrsdGxeInternalPrepareFrameBuffer,
+    //.CleanupFrameBuffer = DrsdGxeInternalCleanupFrameBuffer,
     //.AtomicCheck = VirtualboxAtomicCheck,
     //.AtomicUpdate = VirtualboxAtomicUpdate,
     //.AtomicSetState = VirtualboxAtomicSetState,
 };
 
 static  DRSD_PLANE_CALLBACKS PlaneCallbacks = {
-    .UpdatePlane = DrsdInternalPlaneUpdateAtomic,
+    /*.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
     .DisablePlane = DrsdInternalPlaneDisableAtomic,
     .DestroyPlane = DrsdInternalDestroyPlaneAtomic,
     .ResetPlane = DrsdInternalResetPlane,
     .AtomicDuplicateState = DrsdInternalDuplicateAtomicState,
-    .AtomicDestroyState = DrsdInternalDestroyPlaneAtomic, 
+    .AtomicDestroyState = DrsdInternalDestroyPlaneAtomic, */
 };
 
 static  DRSD_MODE_CONFIGURATION_CALLBACKS VirtualboxModeCallbacks = {
-    .FbCreate = DrsdGxeCreateAsyncFramebuffer,
+    /*.FbCreate = DrsdGxeCreateAsyncFramebuffer,
     .ModeValid = DrsdGxeVramInternalModeValid,
     .AtomicCheck = DrsdInternalAtomicCheck,
-    .AtomicCommit = DrsdInternalAtomicCommit,
+    .AtomicCommit = DrsdInternalAtomicCommit,*/
 };
 
 static PDRSD_PLANE VirtualboxCreatePlane(
@@ -518,7 +518,7 @@ static PDRSD_PLANE VirtualboxCreatePlane(
         return 0x00;
     }
 
-    Status = DrsdInitializeGenericPlane(
+    /*Status = DrsdInitializeGenericPlane(
         &VBox->DrsdDevice, 
         NewPlane,
         CrtcLimit,
@@ -531,7 +531,7 @@ static PDRSD_PLANE VirtualboxCreatePlane(
     );
     if(Status != STATUS_SUCCESS){
         return 0x00;
-    }
+    }*/
 
     NewPlane->AssistFunctions = AssistFunctions;
 
@@ -588,7 +588,7 @@ static PVIRTUALBOX_CRTC VirtualboxCrtcInitialize(
 
     VBoxCrtc->CrtcId = i;
 
-    Status = DrsdInitializeCrtcWithPlanes(
+    /*Status = DrsdInitializeCrtcWithPlanes(
         Device, 
         &VBoxCrtc->Base,
         Primary,
@@ -597,9 +597,9 @@ static PVIRTUALBOX_CRTC VirtualboxCrtcInitialize(
     );
     if(Status != STATUS_SUCCESS){
         return 0x00;
-    }
+    }*/
 
-    DrsdInitializeCrtcGammaSize(&VBoxCrtc->Base, 256);
+    //DrsdInitializeCrtcGammaSize(&VBoxCrtc->Base, 256);
 
     VBoxCrtc->Base.AssistFunctions = (PDRSD_CRTC_ASSIST_CALLBACK)&VBoxCrtcAssistFunctions;
 
@@ -617,13 +617,13 @@ static PDRSD_ENCODER VirtualboxEncoderInitialize(
     if(!VBoxEncoder){
         return 0x00;
     }
-    DrsdInitializeEncoder(
+    /*DrsdInitializeEncoder(
         Device,
         &VBoxEncoder->Base,
         (PDRSD_ENCODER_CALLBACKS)&VirtualboxEncoderCallbacks,
         DRSD_ENCODER_MODE_DAC, 
         0x00
-    );
+    );*/
     LouPrint("VirtualboxEncoderInitialize() STATUS_SUCCESS\n");
 
     return &VBoxEncoder->Base;
@@ -640,13 +640,13 @@ static LOUSTATUS VirtualboxConnectorInitialize(
 
     Connector = &VBoxConnector->Base;
 
-    DrsdConnectorInitialize(
+    /*DrsdConnectorInitialize(
         Device, 
         &Crtc->Base,
         Connector, 
         (PDRSD_CONNECTOR_CALLBACKS)&VirtualboxConnectorCalbacks, 
         DRSD_CONNECTOR_MODE_VGA
-    );
+    );*/
 
     Connector->AssistFunctions = (PDRSD_CONNECTOR_ASSIST_CALLBACKS)&VirtualboxConnectorAssistFunctions;
 
@@ -697,7 +697,7 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     }
 
-    DrsdModeConfigReset(Device);
+    //DrsdModeConfigReset(Device);
 
     VBoxEdid = LouKeMalloc(STANDARD_INTEL_CHIPSET_EDID_SIZE, KERNEL_GENERIC_MEMORY);
 
@@ -705,5 +705,5 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
 }
 
 void VirtualBoxModeFaildInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
-    DrsdModeConfigCleanup(&VBox->DrsdDevice);
+    //DrsdModeConfigCleanup(&VBox->DrsdDevice);
 }

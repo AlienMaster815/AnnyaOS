@@ -9,19 +9,6 @@
 #include <Hal.h>
 #include <drivers/VBoxError.h>
 
-KERNEL_EXPORT 
-LOUSTATUS 
-DrsdModesetLock(
-    PDRSD_MODESET_LOCK Lock, 
-    PDRSD_MODESET_ACQUIRE_CONTEXT Ctx
-);
-
-KERNEL_EXPORT
-LOUSTATUS 
-DrsdModesetUnlock(
-    PDRSD_MODESET_LOCK Lock
-);
-
 static void VirtualBoxClearIrq(){
     outl((UINT32)~0, VIRTUALBOX_VGA_HGSMI_HOST);
 }
@@ -98,7 +85,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     ValidateOrSetPositionHints(VBox);
     
-    DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, 0x00);
+    //DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, 0x00);
 
     while(Connector){
         LouPrint("Initializing Connector:%h Mode Hints\n", Connector);
@@ -148,7 +135,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
         Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
     }
     
-    DrsdModesetUnlock(&Device->ModeConfig.ConnectionMutex);
+    //DrsdModesetUnlock(&Device->ModeConfig.ConnectionMutex);
 
 }
 

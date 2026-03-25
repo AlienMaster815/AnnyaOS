@@ -178,3 +178,27 @@ DrsdConnectorListIterationEnd(
     }
     MutexLockEx(&ConnectorListIterationLock, false);
 }
+
+DRIVER_EXPORT
+void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode){
+    LouPrint("DrsdAddProbedDisplayModeToConnector()\n");
+    while(1);
+}
+
+DRIVER_EXPORT
+LOUSTATUS DrsdInternalProbeSingleConnectorModes(
+    PDRSD_CONNECTOR Connector,
+    uint32_t        MaxX,
+    uint32_t        MaxY
+){
+    LouPrint("DrsdInternalProbeSingleConnectorModes()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid){
+    LouPrint("DrsdUpdateEdidConnectorProperties()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}

@@ -2759,8 +2759,7 @@ typedef struct _DRSD_BRIDGE{
 
 
 #ifndef _USER_MODE_CODE_
-
-
+#ifndef _DRSD_CORE_H
 void LouKeDestroyClip(PDRSD_CLIP Clip);
 
 void LouKeDrsdUpdateClipColor(PDRSD_CLIP Clip, uint32_t Color);
@@ -2969,7 +2968,7 @@ LOUSTATUS DrsdConnectorInitialize(
 
 void DrsdModeConfigReset(PDRSD_DEVICE Device);
 
-KERNEL_EXPORT LOUSTATUS DrsdInternalProbeSingleConnectorModes(
+DRIVER_IMPORT LOUSTATUS DrsdInternalProbeSingleConnectorModes(
     PDRSD_CONNECTOR Connector,
     uint32_t        MaxX,
     uint32_t        MaxY
@@ -2993,16 +2992,16 @@ PDRSD_DISPLAY_MODE DrsdCvtMode(
 );
 void DrsdAddProbedDisplayModeToConnector(PDRSD_CONNECTOR Connector, PDRSD_DISPLAY_MODE Mode);
 
-KERNEL_EXPORT
+DRIVER_IMPORT
 LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid);
 
 PDRSD_PLANE_STATE DrsdGetNewPlaneState(PDRSD_PLANE_STATE OldState, PDRSD_PLANE Plane);
 
 void LouKeDrsdClearScreen(PDRSD_PLANE Plane);
 
-KERNEL_EXPORT
+DRIVER_IMPORT
 void DrsdModeConfigCleanup(PDRSD_DEVICE DrsdDevice);
-
+#endif
 #endif
 #ifdef __cplusplus
 }

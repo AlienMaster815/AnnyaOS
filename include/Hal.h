@@ -340,7 +340,6 @@ KERNEL_EXPORT void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV);
 KERNEL_EXPORT void LouKeHalAcpiShutdown();
 KERNEL_EXPORT size_t LouKeHalGetPciBaseAddressSize(PPCI_DEVICE_OBJECT PciConfig, uint8_t BarNum);
 KERNEL_EXPORT void* LouKePciGetIoRegion(PPCI_DEVICE_OBJECT PDEV, uint8_t BarNumber, size_t BarOffset);
-KERNEL_EXPORT LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 KERNEL_EXPORT uint64_t LouKePciGetVirtualBarAddress(uint64_t PhyAddress);
 KERNEL_EXPORT PPCI_DEVICE_OBJECT LouKeHalGetPDEV(uint16_t Group, uint8_t Bus, uint8_t Slot, uint8_t Function);
 KERNEL_EXPORT UINT16 LouKeHalGetChipsetVendor();

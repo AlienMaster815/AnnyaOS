@@ -28,5 +28,6 @@
 
 #include "DrsdCore.h"
 
+void DrsdMemcpyEarlyInit();
 
 #endif

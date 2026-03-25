@@ -165,10 +165,10 @@ LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
     while(1);
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    LOUSTATUS Status = STATUS_SUCCESS;
+    /*PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     
     PVIRTUALBOX_PRIVATE_DATA VBox;
-    LOUSTATUS Status;
     if(!VboxCheckSupport(VIRTUALBOX_VBE_DISPI_ID_HGSMI)){
         return STATUS_NO_SUCH_DEVICE;
     }
@@ -224,7 +224,7 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     ERROR_MODE_FAILED_INIT:
         VirtualBoxModeFaildInitialization(VBox);
     ERROR_HARDWARE_FAILED_INIT:
-        VirtualBoxHardwareFailedInitialization(VBox);
+        VirtualBoxHardwareFailedInitialization(VBox);*/
     return Status;
 }
 

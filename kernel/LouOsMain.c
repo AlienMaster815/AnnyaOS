@@ -371,8 +371,6 @@ void LouOsKrnlStart(
 
     AdvancedLousineKernelInitialization();
     
-    while(1);
-
     LookForStorageDevices();
         
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
@@ -395,6 +393,8 @@ void LouOsKrnlStart(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
+
+    while(1);
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;

@@ -25,10 +25,27 @@
 
 #include "DrsdCore.h"
 
+static BOOLEAN DrsdCoreInitCompleted = false;
+
 static void DrsdDeviceRelease(PKERNEL_REFERENCE Reference){
     
 }
 
+DRIVER_EXPORT
+void LouKeDrsdHandleConflictingDevices(PPCI_DEVICE_OBJECT PDEV){
+    LouPrint("LouKeDrsdHandleConflictingDevices()\n");
+    while(1);
+}
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeDrsdInitializeDevice(
+    PDRSD_DEVICE Device
+){
+    LouPrint("LouKeDrsdInitializeDevice()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
 
 DRIVER_EXPORT
 void DrsdAcquireDevice(
@@ -54,11 +71,53 @@ KERNEL_ENTRY LOUSTATUS DrsdCoreSubsystemEntry(){
     LOUSTATUS Result = STATUS_SUCCESS;
 
     DrsdConnectorIdaInitialize();
+    DrsdMemcpyEarlyInit();
 
     //TODO:Finish this
     
     LouPrint("DrsdCoreSubsystemEntry() STATUS_SUCCESS\n");
     //while(1);
+    
+    DrsdCoreInitCompleted = true;
 
     return Result;
+}
+
+//EDID
+
+DRIVER_EXPORT
+size_t DrsdAddModesNoEDID(
+    PDRSD_CONNECTOR Connector, 
+    int32_t Width, 
+    int32_t Height
+){
+    LouPrint("DrsdAddModesNoEDID()\n");
+    while(1);
+    return 0x00;
+}
+
+//GXE
+DRIVER_EXPORT
+LOUSTATUS 
+LouKePassVramToDrsdMemoryManager(
+    PDRSD_DEVICE Device, 
+    void* VramBase, 
+    size_t size, 
+    void* PAddress
+){
+    LouPrint("LouKePassVramToDrsdMemoryManager()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+PDRSD_FRAME_BUFFER DrsdGxeCreateAsyncFramebuffer(
+    PDRSD_DEVICE                Device,
+    PDRSD_FILE                  FilePrivate,
+    PDRSD_FORMAT_INFORMATION    Info,
+    PDRSD_MODE_FB_COMMAND2      ModeCommand
+){
+    LouPrint("DrsdGxeCreateAsyncFramebuffer()\n");
+    while(1);
+    return 0x00;
 }
