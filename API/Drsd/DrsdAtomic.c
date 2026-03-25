@@ -927,6 +927,8 @@ DrsdAtomicAddEncoderBridges(
 
     LouPrint("Device:%h:Adding All Bridges For Encoder:%d:%s To:%h\n", Encoder->Device, Encoder->Base.Identification, Encoder->Name, State);
 
-    
+    DrsdForEachBridgeInChainScoped(Encoder, Bridge){
+
+    }
 
 }
