@@ -67,3 +67,6 @@ EXPORTS
     DrsdGxeResetShadowPlane
     DrsdGxeDuplicateShadowPlaneState
     DrsdGxeDestroyShadowPlane
+    DrsdDeviceManagerAllocateDeviceEx
+    DrsdGxeVRamDriverDumbCreate
+    DrsdGxeTtmDumbMapOffset

@@ -160,29 +160,42 @@ LOUSTATUS VBoxInitializeHardware(
 
 }
 
+static DRSD_DRIVER Driver = {
+    .DriverFeatures = DRIVER_MODESET | DRIVER_GXE | DRIVER_ATOMIC | DRIVER_CURSOR_HOTSPOT,
+    DRSD_GXE_VRAM_DRIVER,
+    DRSD_FBDEV_TTM_DRIVER_OPS,
+};
+
 LOUAPI
 LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
-    while(1);
     LOUSTATUS Status = STATUS_SUCCESS;
-    /*PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     
     PVIRTUALBOX_PRIVATE_DATA VBox;
     if(!VboxCheckSupport(VIRTUALBOX_VBE_DISPI_ID_HGSMI)){
         return STATUS_NO_SUCH_DEVICE;
     }
-    VBox = LouKeMallocType(VIRTUALBOX_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);
-    if(!VBox){
+    VBox = (PVIRTUALBOX_PRIVATE_DATA)DrsdDeviceManagerAllocateDevice(PDEV, &Driver, VIRTUALBOX_PRIVATE_DATA, DrsdDevice);
+    if(LOU_KE_PTR_ERROR(VBox)){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-
-    LouKeDrsdHandleConflictingDevices(PDEV);
+    
+    //LouKeDrsdHandleConflictingDevices(PDEV);
+    //TODO handle conflicting devices
 
     Status = LouKeHalEnablePciDevice(PDEV);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
+
+    LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
+    while(1);
+    return Status;
+/*
+
+
 
     VBox->PDEV = PDEV;
     VBox->DrsdDevice.PDEV = PDEV;
@@ -216,7 +229,6 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
         (void*)VBox, 
         (void*)VBox
     );
-    LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
     return Status;
 
     ERROR_IRQ_FAILED_INIT:
@@ -236,7 +248,6 @@ DriverEntry(
 ){
 
     LouPrint("VBOXGPU::DriverEntry()\n");
-    while(1);
     //tell the System where are key Nt driver functions are
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;

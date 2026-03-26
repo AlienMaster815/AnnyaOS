@@ -27,8 +27,125 @@
 
 static BOOLEAN DrsdCoreInitCompleted = false;
 
+static XARRAY DrsdMinorsXa;
+static XARRAY AccelMinorsXa;
+
 static void DrsdDeviceRelease(PKERNEL_REFERENCE Reference){
     
+}
+
+static PXARRAY DrsdMinorGetXa(DRSD_MINOR_TYPE Type){
+    if((Type == DRSD_MINOR_PRIMARY) || (Type == DRSD_MINOR_RENDER)){
+        return &DrsdMinorsXa;
+    }else if(Type == DRSD_MINOR_ACCEL){
+        return &AccelMinorsXa;
+    }
+    return 0x00;
+}
+
+static inline LOUSTATUS DrsdMinorAllocate(
+    PDRSD_DEVICE    Device, 
+    DRSD_MINOR_TYPE Type
+){
+    PDRSD_MINOR Minor;
+    LOUSTATUS   Status;
+    Minor = LouKeMallocType(DRSD_MINOR, KERNEL_GENERIC_MEMORY);
+    if(!Minor){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Minor->Type = Type;
+    Minor->Device = Device;
+
+    //Status = LouKeAllocateXarray(
+    //    DrsdMinorGetXa(Type),
+    //    &Minor->Index,
+    //    0x00,
+    //    DRSD_MINOR_LIMIT,
+    //    KERNEL_GENERIC_MEMORY
+    //);
+    //if(Status != STATUS_SUCCESS){
+    //    return Status;
+    //}
+
+    return STATUS_SUCCESS;
+}
+
+static LOUSTATUS DrsdInitializeDevice(
+    PPCI_DEVICE_OBJECT  Pdev,
+    PDRSD_DEVICE        Device,
+    PDRSD_DRIVER        Driver
+){
+    LOUSTATUS Status;
+    if(!DrsdCoreInitCompleted){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+
+    if(!Pdev){
+        LouPrint("DRSDCOR.SYS:ERROR:No Parent");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    LouKeInitializeKernelRefence(&Device->Reference);
+
+    Device->PDEV = Pdev;
+    Device->DeviceDriver = Driver;
+    Device->DriverFeatures = ~0u;
+
+    if(DrsdCoreCheckFeature(Device, DRIVER_COMPUTE_ACCEL) && (DrsdCoreCheckFeature(Device, DRIVER_RENDER) || DrsdCoreCheckFeature(Device, DRIVER_MODESET))){
+        LouPrint("DRSDCORE.SYS:ERROR:Drsd Driver Cannot Be Both A Compute Acceleration And Graphics Driver\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if(DrsdCoreCheckFeature(Device, DRIVER_COMPUTE_ACCEL)){
+        LouPrint("DRSDCORE.SYS:DrsdInitializeDevice():DRIVER_COMPUTE_ACCEL\n");
+        while(1);
+    }else{
+        if(DrsdCoreCheckFeature(Device, DRIVER_RENDER)){
+            LouPrint("DRSDCORE.SYS:DrsdInitializeDevice():DRIVER_RENDER\n");
+            while(1);
+        }
+        
+        Status = DrsdMinorAllocate(Device, DRSD_MINOR_PRIMARY);
+    }
+
+}
+
+static LOUSTATUS DrsdDeviceManagerInitializeDevice(
+    PPCI_DEVICE_OBJECT  Pdev,
+    PDRSD_DEVICE        Device,
+    PDRSD_DRIVER        Driver
+){
+    LOUSTATUS Status = DrsdInitializeDevice(Pdev, Device, Driver);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    //TODO: track the manager
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+PVOID
+DrsdDeviceManagerAllocateDeviceEx(
+    PPCI_DEVICE_OBJECT  Pdev, 
+    PDRSD_DRIVER        Driver, 
+    SIZE                Size, 
+    SIZE                Offset
+){
+    PVOID           Container;
+    PDRSD_DEVICE    Device;
+    LOUSTATUS       Status;
+
+    Container = LouKeMalloc(Size, KERNEL_GENERIC_MEMORY);
+    if(!Container){
+        return (PVOID)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Device = Container + Offset;
+    Status = DrsdDeviceManagerInitializeDevice(Pdev, Device, Driver);
+
+    LouPrint("DrsdDeviceManagerAllocateDeviceEx()\n");
+    while(1);
 }
 
 DRIVER_EXPORT

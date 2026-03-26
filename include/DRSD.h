@@ -45,6 +45,12 @@ extern "C" {
 
 #define DRSD_MAXIMUM_OBJECT_PROPERTIES 64
 
+#define DRSD_GXE_VRAM_DRIVER \
+    .DumbCreate = DrsdGxeVRamDriverDumbCreate, \
+    .DumbMapOffset = DrsdGxeTtmDumbMapOffset
+
+
+
 struct _DRSD_FRAME_BUFFER;
 struct _DRSD_PLANE;
 struct _DRSD_CRTC;
@@ -124,6 +130,8 @@ struct _DRSD_ATOMIC_STATE;
 #define DRSD_MODE_OBJECT_PLANE          0xEEEEEEEE
 #define DRSD_MODE_OBJECT_COLOROP        0xFAFAFAFA
 #define DRSD_MODE_OBJECT_ANY            0
+
+
 
 typedef enum _DRSD_SCALING_FILTER{
     DRSD_SCALING_FILTER_DEFAULT = 0,
@@ -228,6 +236,31 @@ typedef enum _DRSD_COLOR_SPACE{
     DRSD_MODE_COLORIMETRY_COUNT,
 }DRSD_COLOR_SPACE, * PDRSD_COLOR_SPACE;
 
+typedef enum _DRSD_DRIVER_FEATURES{
+    DRIVER_GXE = (1 << 0),
+    DRIVER_MODESET = (1 << 1),
+    DRIVER_RENDER = (1 << 3),
+    DRIVER_ATOMIC = (1 << 4),
+    DRIVER_SYNCOBJ = (1 << 5),
+    DRIVER_SYNCOBJ_TIMELINE = (1 << 6),
+    DRIVER_COMPUTE_ACCEL = (1 << 7),
+    DRIVER_GXE_GPUVA = (1 << 8),
+    DRIVER_CURSOR_HOTSPOT = (1 << 9),
+    DRIVER_USE_AGP = (1 << 25),
+    DRIVER_LEGACY = (1 << 26),
+    DRIVER_PCI_DMA = (1 << 27),
+    DRIVER_SG = (1 << 28),
+    DRIVER_HAVE_DMA = (1 << 29),
+    DRIVER_HAVE_IRQ = (1 << 30),
+}DRSD_DRIVER_FEATURES, * PDRSD_DRIVER_FEATURES;
+
+typedef enum _DRSD_MINOR_TYPE{
+    DRSD_MINOR_PRIMARY = 0,
+    DRSD_MINOR_CONTROL,
+    DRSD_MINOR_RENDER,
+    DRSD_MINOR_ACCEL,
+}DRSD_MINOR_TYPE, * PDRSD_MINOR_TYPE;
+
 #define DRSD_ENCODER_MODE_NONE  0
 #define DRSD_ENCODER_MODE_DAC   1
 #define DRSD_ENCODER_MODE_TMDS  2
@@ -321,14 +354,14 @@ typedef struct _DRSD_FORMAT_INFORMATION{
     bool        IsCollorIndexed;
 }DRSD_FORMAT_INFORMATION, * PDRSD_FORMAT_INFORMATION;
 
-typedef struct _DRSD_FRAMEBUFFER_CALLBACKS{
+typedef struct _DRSD_FRAMEBUFFER_FUNCTIONS{
     void        (*DestroyFramebuffer)(struct _DRSD_FRAME_BUFFER* FrameBuffer);
     LOUSTATUS   (*CreateHandle)(struct _DRSD_FRAME_BUFFER* FrameBuffer, void* DrsdBuffer, uint32_t* Handle);
     LOUSTATUS   (*DrsdFlushFramebufferSyscall)(struct _DRSD_FRAME_BUFFER* FrameBuffer, void* DrsdBuffer, 
                                                                  uint64_t Flags, uint64_t Color, 
                                                                  void* Clip , uint64_t ClipCount);
     semaphore_t CallbackLock;
-}DRSD_FRAMEBUFFER_CALLBACKS, * PDRSD_FRAMEBUFFER_CALLBACKS;
+}DRSD_FRAMEBUFFER_FUNCTIONS, * PDRSD_FRAMEBUFFER_FUNCTIONS;
 
 typedef struct _DRSD_VMA_OFFSET_NODE{
     mutex_t                     VmLock;
@@ -453,7 +486,7 @@ typedef struct _DRSD_FRAME_BUFFER{
     DRSD_MODE_OBJECT                        Base;
     string                                  Comm;
     PDRSD_FORMAT_INFORMATION                FormatInfo;
-    PDRSD_FRAMEBUFFER_CALLBACKS             Callbacks;
+    PDRSD_FRAMEBUFFER_FUNCTIONS             Callbacks;
     uint32_t                                Offset;
     uint64_t                                Modifier;
     uint32_t                                Width;
@@ -2188,23 +2221,54 @@ typedef struct _DRSD_FB_HELPER{
     struct _DRSD_DEVICE*            Device;
     PDRSD_FB_HELPER_FUNCTIONS       Functions;
     PDRSD_FB_INFO                   Info;
-    //TODO 
+    UINT32                          SudoPalette[17];
+    DRSD_CLIP_RECT                  DamageClip;
+    spinlock_t                      DamageLock;
+    LOUQ_WORK                       DamageWork;
+    LOUQ_WORK                       ResumeWork;
+    mutex_t                         Lock;
+    BOOLEAN                         DelayedHotplug;
+    BOOLEAN                         DeferredSetup;
+    int                             PreferedBpp;
+    DRSD_FB_DEFERRED_IO             FbDeferredIo;
 }DRSD_FB_HELPER, * PDRSD_FB_HELPER;
 
+typedef struct _DRSE_MODE_CREATE_DUMB{
+    UINT32      Height;
+    UINT32      Width;
+    UINT32      Bpp;
+    UINT32      Flags;
+    UINT32      Handle;
+    UINT32      Pitch;
+    UINT64      Size;
+}DRSE_MODE_CREATE_DUMB, * PDRSE_MODE_CREATE_DUMB;
+
+typedef struct _DRSD_FB_HELPER_SURFACE_SIZE{
+    UINT32 FbWidth;
+    UINT32 FbHeight;
+    UINT32 SurfaceWidth;
+    UINT32 SurfaceHeight;
+    UINT32 SurfaceBpp;
+    UINT32 SurfaceDepth;
+}DRSD_FB_HELPER_SURFACE_SIZE, * PDRSD_FB_HELPER_SURFACE_SIZE;
+
 typedef struct _DRSD_DRIVER{
+    UINT32              DriverFeatures;
     LOUSTATUS           (*Load)(struct _DRSD_DEVICE* Device, UINT64 Flags); //Notice: Dont use this for new drivers
     LOUSTATUS           (*Open)(struct _DRSD_DEVICE* Device, PDRSD_FILE DrsdFile);
     void                (*PostClose)(struct _DRSD_DEVICE* Device, PDRSD_FILE DrsdFile);
     void                (*Unload)(struct _DRSD_DEVICE* Device);
     void                (*Release)(struct _DRSD_DEVICE* Device);
     void                (*MasterSet)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate, BOOLEAN FromOpen);
-    //struct              (*MasterDrop)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate); //this is commented out because i forgot the name of the struct to return
+    void                (*MasterDrop)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate);
     void                (*ClfsServerInitialze)(PDRSD_MINOR Minor);
     PDRSD_GXE_OBJECT    (*GxeCreateObject)(struct _DRSD_DEVICE* Device, SIZE Size);
     LOUSTATUS           (*PrimeHandleToFd)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate, UINT32 Handle, UINT32 Flags, int* PrimeFd);
     LOUSTATUS           (*PrimeFdToHandle)(struct _DRSD_DEVICE* Device, PDRSD_FILE FilePrivate, int PrimeFd, UINT32* Handle);
     
-    UINT32              DriverFeatures;
+    LOUSTATUS           (*DumbCreate)(PDRSD_FILE File, struct _DRSD_DEVICE* Device, PDRSE_MODE_CREATE_DUMB Args);
+    LOUSTATUS           (*DumbMapOffset)(PDRSD_FILE File, struct _DRSD_DEVICE* Device, UINT32 Handle, UINT64* Offset);
+    LOUSTATUS           (*FbDevProbe)(PDRSD_FB_HELPER FbDevHelpers, PDRSD_FB_HELPER_SURFACE_SIZE Sizes);
 }DRSD_DRIVER, * PDRSD_DRIVER;
 
 typedef struct _DRSD_DEVICE{
@@ -3001,6 +3065,38 @@ void LouKeDrsdClearScreen(PDRSD_PLANE Plane);
 
 DRIVER_IMPORT
 void DrsdModeConfigCleanup(PDRSD_DEVICE DrsdDevice);
+
+DRIVER_IMPORT
+PVOID
+DrsdDeviceManagerAllocateDeviceEx(PPCI_DEVICE_OBJECT Pdev, PDRSD_DRIVER Driver, SIZE Size, SIZE Offset);
+
+#define DrsdDeviceManagerAllocateDevice(Parent, Driver, Type, Member) \
+    DrsdDeviceManagerAllocateDeviceEx(Parent, Driver, sizeof(Type), offsetof(Type, Member))
+
+DRIVER_IMPORT
+LOUSTATUS 
+DrsdGxeVRamDriverDumbCreate(
+    PDRSD_FILE Dile, 
+    PDRSD_DEVICE Device, 
+    PDRSE_MODE_CREATE_DUMB Args
+);
+
+DRIVER_IMPORT
+LOUSTATUS
+DrsdGxeTtmDumbMapOffset(
+    PDRSD_FILE      File,
+    PDRSD_DEVICE    Device,
+    UINT32          Handle,
+    UINT64*         Offset 
+);
+
+#ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 
+//TODO
+#else
+#define DRSD_FBDEV_TTM_DRIVER_OPS \
+    .FbDevProbe = 0x00
+#endif
+
 #endif
 #endif
 #ifdef __cplusplus

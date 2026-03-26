@@ -55,7 +55,7 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 
 typedef int pci_power_t;
 
-typedef struct _PCI_DEVICE_OBJECT {
+typedef struct _PCI_DEVICE_OBJECT{
 	uint16_t 			VendorID;
 	uint16_t 			DeviceID;
 	uint16_t 			Group;
@@ -81,6 +81,7 @@ typedef struct _PCI_DEVICE_OBJECT {
 	uintptr_t 			DevicePrivateData;
 	uintptr_t 			VgaDecode; //only video devces
 	bool				DeviceManaged;
+	UINT64				DriverFeatures;
 }PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 
 typedef struct _AGP_BRIDGE_DATA{
