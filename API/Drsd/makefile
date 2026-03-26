@@ -19,7 +19,10 @@ SRC = DrsdCore.c \
 		DrsdAtomicUapi.c \
 		DrsdCrtc.c \
 		DrsdGxeVRamHelper.c \
-		DrsdGxeTtmHelper.c
+		DrsdGxeTtmHelper.c \
+		DrsdGxe.c \
+		Ttm/TtmRangeManager.c \
+		Ttm/TtmDevice.c 
 
 
 CC = x86_64-w64-mingw32-gcc

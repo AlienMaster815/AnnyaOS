@@ -95,3 +95,55 @@ LouKeXaStore(
     LouKeXaUnlockArray(Array);
     return Result;
 }
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeXarrayAllocateUint64(
+    PXARRAY Array,
+    UINT64* Id,
+    PVOID   Entry, 
+    UINT64  Limit,
+    UINT64  PageFlags
+){
+    LouKeXaLockArray(Array);
+    for(UINT64 i = 0; i < Limit; i++){
+        if(!LouKeXaIsIndexUsedEx(Array, i)){
+            LouKeXaStoreEx(
+                Array,
+                i,
+                Entry,
+                PageFlags
+            );
+            *Id = i;
+            return STATUS_SUCCESS;
+        }
+    }   
+    LouKeXaUnlockArray(Array);
+    return STATUS_DEVICE_BUSY;
+}
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeXarrayAllocateInt(
+    PXARRAY Array,
+    int*    Id,
+    PVOID   Entry, 
+    int     Limit,
+    UINT64  PageFlags
+){
+    LouKeXaLockArray(Array);
+    for(int i = 0; i < Limit; i++){
+        if(!LouKeXaIsIndexUsedEx(Array, i)){
+            LouKeXaStoreEx(
+                Array,
+                i,
+                Entry,
+                PageFlags
+            );
+            *Id = i;
+            return STATUS_SUCCESS;
+        }
+    }   
+    LouKeXaUnlockArray(Array);
+    return STATUS_DEVICE_BUSY;
+}

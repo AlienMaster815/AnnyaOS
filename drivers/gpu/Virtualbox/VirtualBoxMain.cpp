@@ -9,8 +9,8 @@
 #include <Hal.h>
 #include <drivers/VBoxError.h>
 
-static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
-    //PATA Devices
+static LOUSINE_PCI_DEVICE_TABLE VBoxGpuPciDeviceTable[] = {
+    //VBOXGPU Devices
     {0x80EE, 0xBEEF, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
     {0},
 };
@@ -69,6 +69,7 @@ static void VirtualboxAccellerationFailedInitialization(PVIRTUALBOX_PRIVATE_DATA
 static LOUSTATUS VBoxAccelerationInitialize(
     PVIRTUALBOX_PRIVATE_DATA VBox
 ){
+    LouPrint("VBOXGPU.SYS:VBoxAccelerationInitialize()\n");
     PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
     VBVA_BUFFER* VBva;
 
@@ -90,10 +91,9 @@ static LOUSTATUS VBoxAccelerationInitialize(
         VBva = (VBVA_BUFFER*)(VBox->VbvaBuffers + i * VBVA_MINIMUM_BUFFER_SIZE);
         if(!VbvaEnable(&VBox->VbvaInformation[i], VBox->GuestPool, VBva, i)){
             LouPrint("VBOXVIDEO ERROR: Unable To Start Crtc:%d\n", i + 1);
-        }
-        
+        }    
     }
-
+    LouPrint("VBOXGPU.SYS:VBoxAccelerationInitialize() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -103,11 +103,13 @@ LOUSTATUS VBoxMemoryManagementInitialization(
 ){
     PDRSD_DEVICE Device = &VBox->DrsdDevice;
     PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
-    void* VramBase = LouKePciGetIoRegion(PDEV, 0, 0);
+    UINT64 VramBase = (UINT64)LouKePciGetIoRegion(PDEV, 0, 0);
     LOUSTATUS Result;
 
-    Result = LouKePassVramToDrsdMemoryManager(Device, VramBase, VBox->AvailableVramSize, 0);
-
+    Result = DrsdVRamHelperInitialize(Device, VramBase, VBox->AvailableVramSize);
+    if(Result != STATUS_SUCCESS){
+        LouPrint("VBOXGPU.SYS:Unable To Initialize VRam Helper\n");
+    }
     return Result;
 }
 
@@ -181,7 +183,8 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     if(LOU_KE_PTR_ERROR(VBox)){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-    
+    VBox->PDEV = PDEV;
+
     //LouKeDrsdHandleConflictingDevices(PDEV);
     //TODO handle conflicting devices
 
@@ -190,24 +193,20 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
         return Status;
     }
 
-    LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
-    while(1);
-    return Status;
-/*
-
-
-
-    VBox->PDEV = PDEV;
-    VBox->DrsdDevice.PDEV = PDEV;
     Status = VBoxInitializeHardware(VBox);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
-
+    
     Status = VBoxMemoryManagementInitialization(VBox);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
+
+    LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
+    while(1);
+    return Status;
+/*
 
     Status = VirtualboxModeInitialization(VBox);
     if(Status != STATUS_SUCCESS){
@@ -257,7 +256,7 @@ DriverEntry(
     //out the extra information relating to the LKDM
     DriverObject->DriverUsingLkdm = true;
     //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)PiixPciDeviceTable;
+    DriverObject->DeviceTable = (uintptr_t)VBoxGpuPciDeviceTable;
     LouPrint("VBOXGPU::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }

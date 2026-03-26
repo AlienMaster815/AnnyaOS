@@ -25,6 +25,12 @@
 
 #include "DrsdCore.h"
 
+//TODO: Put this in DrsdGxe.h
+LOUSTATUS 
+DrsdGxeInitialize(
+    PDRSD_DEVICE Device
+);
+
 static BOOLEAN DrsdCoreInitCompleted = false;
 
 static XARRAY DrsdMinorsXa;
@@ -32,6 +38,23 @@ static XARRAY AccelMinorsXa;
 
 static void DrsdDeviceRelease(PKERNEL_REFERENCE Reference){
     
+}
+
+static PDRSD_MINOR* DrsdMinorGetSlot(
+    PDRSD_DEVICE    Device, 
+    DRSD_MINOR_TYPE Type
+){
+    switch(Type){
+        case DRSD_MINOR_PRIMARY:
+            &Device->Primary;
+        case DRSD_MINOR_RENDER:
+            return &Device->Render;
+        case DRSD_MINOR_ACCEL:
+            return &Device->Accel;
+        default:
+            LouPrint("DRSDCORE.SYS:BUGBUG:DrsdMinorGetSlot()\n");
+            while(1);
+    }
 }
 
 static PXARRAY DrsdMinorGetXa(DRSD_MINOR_TYPE Type){
@@ -57,17 +80,18 @@ static inline LOUSTATUS DrsdMinorAllocate(
     Minor->Type = Type;
     Minor->Device = Device;
 
-    //Status = LouKeAllocateXarray(
-    //    DrsdMinorGetXa(Type),
-    //    &Minor->Index,
-    //    0x00,
-    //    DRSD_MINOR_LIMIT,
-    //    KERNEL_GENERIC_MEMORY
-    //);
-    //if(Status != STATUS_SUCCESS){
-    //    return Status;
-    //}
+    Status = LouKeXarrayAllocateInt(
+        DrsdMinorGetXa(Type),
+        &Minor->Index,
+        0x00,
+        191,
+        KERNEL_GENERIC_MEMORY
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
 
+    *DrsdMinorGetSlot(Device, Type) = Minor;
     return STATUS_SUCCESS;
 }
 
@@ -102,13 +126,29 @@ static LOUSTATUS DrsdInitializeDevice(
         while(1);
     }else{
         if(DrsdCoreCheckFeature(Device, DRIVER_RENDER)){
-            LouPrint("DRSDCORE.SYS:DrsdInitializeDevice():DRIVER_RENDER\n");
-            while(1);
+            Status = DrsdMinorAllocate(Device, DRSD_MINOR_RENDER);
+            if(Status != STATUS_SUCCESS){
+                return Status;
+            }
         }
         
         Status = DrsdMinorAllocate(Device, DRSD_MINOR_PRIMARY);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
     }
 
+    if(DrsdCoreCheckFeature(Device, DRIVER_GXE)){
+        Status = DrsdGxeInitialize(Device);
+        if(Status){
+            LouPrint("DRSD.SYS:ERROR:Could Not Initialize Graphecis EXecution Ststem\n");
+            return Status;
+        }
+    }
+
+    //TODO Add Device Unique Name
+    
+    return STATUS_SUCCESS;
 }
 
 static LOUSTATUS DrsdDeviceManagerInitializeDevice(
@@ -143,9 +183,12 @@ DrsdDeviceManagerAllocateDeviceEx(
 
     Device = Container + Offset;
     Status = DrsdDeviceManagerInitializeDevice(Pdev, Device, Driver);
-
-    LouPrint("DrsdDeviceManagerAllocateDeviceEx()\n");
-    while(1);
+    if(Status != STATUS_SUCCESS){
+        LouKeFree(Container);
+        return (PVOID)(UINTPTR)Status;
+    }
+    Device->Managed.FinalFree = Container;
+    return Container;
 }
 
 DRIVER_EXPORT

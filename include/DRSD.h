@@ -1928,7 +1928,7 @@ typedef struct _TTM_RESOURCE_MANAGER{
 
 typedef struct _DRSD_TTM_DEVICE{
     ListHeader                  DeviceList;
-    UINT                        AllocaFlags;
+    UINT                        AllocationFlags;
     PTTM_DEVICE_FUNCTIONS       Functions;
     TTM_RESOURCE_MANAGER        SystemManager;
     PTTM_RESOURCE_MANAGER       ManagerDriver[TTM_MEM_TYPES_COUNT];
@@ -1936,7 +1936,6 @@ typedef struct _DRSD_TTM_DEVICE{
     TTM_POOL                    Pool;
     spinlock_t                  LruLock;
     ListHeader                  Unevictable;
-    HANDLE                      DevMapping;
     PLOUQ_WORK_QUEUE            WorkQueue;
 }DRSD_TTM_DEVICE, * PDRSD_TTM_DEVICE;
 
@@ -2298,8 +2297,8 @@ typedef struct _DRSD_DEVICE{
     PDRSD_DRIVER                    DeviceDriver;
     PVOID                           DevicePrivateData;
     PDRSD_MINOR                     Primary;
-    PDRSD_MINOR                     Rendor;
-    PDRSD_MINOR                     Acceleration;
+    PDRSD_MINOR                     Render;
+    PDRSD_MINOR                     Accel;
     BOOL                            Registered;
     PDRSD_MASTER                    Master;
     LOUSTR                          HugeMount;
@@ -3088,6 +3087,14 @@ DrsdGxeTtmDumbMapOffset(
     PDRSD_DEVICE    Device,
     UINT32          Handle,
     UINT64*         Offset 
+);
+
+DRIVER_IMPORT
+LOUSTATUS 
+DrsdVRamHelperInitialize(
+    PDRSD_DEVICE    Device,
+    UINT64          VRamBase,
+    SIZE            VRamSize
 );
 
 #ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 

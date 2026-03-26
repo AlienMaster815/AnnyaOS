@@ -170,6 +170,26 @@ LouKeXaIdrAllocate(
     UINT64      PageFlags 
 );
 
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeXarrayAllocateUint64(
+    PXARRAY Array,
+    UINT64* Id,
+    PVOID   Entry, 
+    UINT64  Limit,
+    UINT64  PageFlags
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeXarrayAllocateInt(
+    PXARRAY Array,
+    int*    Id,
+    PVOID   Entry, 
+    int     Limit,
+    UINT64  PageFlags
+);
+
 #else 
 
 #endif

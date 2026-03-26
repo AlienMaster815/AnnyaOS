@@ -174,3 +174,5 @@ EXPORTS
     LouKeRealloc
     LouKeReallocEx
     LouKeXaIdrAllocate
+    LouKeXarrayAllocateUint64
+    LouKeXarrayAllocateInt
