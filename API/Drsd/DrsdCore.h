@@ -48,6 +48,7 @@
 #include "DrsdBridge.h"
 #include "Ttm/TtmDevice.h"
 #include "Ttm/TtmRangeManager.h"
+#include "Ttm/TtmPool.h"
 
 static inline BOOLEAN DrsdCoreCheckAllFeatures(
     PDRSD_DEVICE    Device, 

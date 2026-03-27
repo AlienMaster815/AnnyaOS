@@ -1939,6 +1939,15 @@ typedef struct _DRSD_TTM_DEVICE{
     PLOUQ_WORK_QUEUE            WorkQueue;
 }DRSD_TTM_DEVICE, * PDRSD_TTM_DEVICE;
 
+typedef struct _TTM_GLOBAL{
+    PVOID       DumbyReadPhysBase;
+    PVOID       DumbyReadVirtBase;
+    UINT64      DumbyReadMemFlags;
+    UINT64      DumbyReadSize;
+    ListHeader  DeviceList;
+    atomic_t    BoCount;
+}TTM_GLOBAL, * PTTM_GLOBAL;
+
 typedef struct _DRSD_VRAM_MM{
     UINT64              VRamBase;
     SIZE                VRamSize;
