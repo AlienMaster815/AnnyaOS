@@ -24,7 +24,8 @@ SRC = LouDll.c \
 	Nt/NtDll.c \
 	Nt/Sha.c \
 	Nt/Locale.c \
-	Nt/string.c
+	Nt/string.c \
+	Rtl.c
 
 ASM_SRC = Lou.asm
 ASM_OBJ = Lou.o
