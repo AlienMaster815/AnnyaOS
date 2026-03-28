@@ -60,7 +60,7 @@ typedef enum _AMD_VI_TRANSLATION_TABLE_LEVELS{
 
 //Generic IOMMU Read And Write
 #define AMD_VI_IOMMU_READ_ULONGLONG(Reg, Mask, Shift)     ((READ_REGISTER_ULONGLONG(Reg, Shift, Mask) >> Shift) & Mask)
-#define AMD_VI_IOMMU_WRITE_ULONGLONG(Reg, Mask, Shift, Val) WRITE_REGISTER_ULONGLONG(Reg, (READ_REGISTER_ULONGLONG(Reg, 0, ULONGLONG_MAX) & ~(Mask << Shift)) | ((Val & Mask) << Shift))
+#define AMD_VI_IOMMU_WRITE_ULONGLONG(Reg, Mask, Shift, Val) WRITE_REGISTER_ULONGLONG(Reg, ((Val & Mask) << Shift))
 //end
 //Device Table Base Address Register
 #define AMD_VI_READ_DTBAR(Register)                         AMD_VI_IOMMU_READ_ULONGLONG(Register, ULONGLONG_MAX, 0)
@@ -90,8 +90,23 @@ typedef enum _AMD_VI_TRANSLATION_TABLE_LEVELS{
 #define AMD_VI_READ_CBBAR_COMLEN(Register)                  AMD_VI_IOMMU_READ_ULONGLONG(Register, AMD_VI_CBBAR_COMLEN_MASK, AMD_VI_CBBAR_COMLEN_SHIFT)
 #define AMD_VI_WRITE_CBBAR_COMLEN(Register, Val)            AMD_VI_IOMMU_WRITE_ULONGLONG(Register, AMD_VI_CBBAR_COMLEN_MASK, AMD_VI_CBBAR_COMLEN_SHIFT, Val)
 //end
+//Event Log Base Address Reguster
+#define AMD_VI_READ_ELBAR(Register)                         AMD_VI_IOMMU_READ_ULONGLONG(Register, ULONGLONG_MAX, 0)
+#define AMD_VI_WRITE_ELBAR(Register, Val)                   AMD_VI_IOMMU_WRITE_ULONGLONG(Register, ULONGLONG_MAX, 0, Val)
 
+#define AMD_VI_ELBAR_EVENT_BASE_MASK                        0xFFFFFFFFFF
+#define AMD_VI_ELBAR_EVENT_BASE_SHIFT                       12
+#define AMD_VI_READ_ELBAR_EVANT_BASE(Register)              AMD_VI_IOMMU_READ_ULONGLONG(Register, AMD_VI_ELBAR_EVENT_BASE_MASK, AMD_VI_ELBAR_EVENT_BASE_SHIFT)
+#define AMD_VI_WRITE_ELBAR_EVENT_BASE(Register, Val)        AMD_VI_IOMMU_WRITE_ULONGLONG(Register, AMD_VI_ELBAR_EVENT_BASE_MASK, AMD_VI_ELBAR_EVENT_BASE_SHIFT, Val)  
 
+#define AMD_VI_ELBAR_EVENTLEN_MASK                          0x0F
+#define AMD_VI_ELBAR_EVENTLEN_SHIFT                         56
+#define AMD_VI_ELBAR_EVENTLEN_GET_ENTRY_COUNT(Value)        ((Value & (1 << 3)) ? Value & 0x07 : 0)                 
+#define AMD_VI_READ_ELBAR_EVENTLEN(Register)                AMD_VI_IOMMU_READ_ULONGLONG(Register, AMD_VI_ELBAR_EVENTLEN_MASK, AMD_VI_ELBAR_EVENTLEN_SHIFT)
+#define AMD_VI_WRITE_ELBAR_EVENTLEN(Register, Val)          AMD_VI_IOMMU_WRITE_ULONGLONG(Register, AMD_VI_ELBAR_EVENTLEN_MASK, AMD_VI_ELBAR_EVENTLEN_SHIFT, Val)
+//end
+
+//211
 
 typedef struct PACKED _AMD_VI_IOMMU_MMIO_REGISTERS{
     PULONGLONG      Dtbar; //Device Table Base Address Register
