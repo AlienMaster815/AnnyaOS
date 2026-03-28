@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "ProcessPrivate.h"
 
 static GENERIC_PROCESS_DATA MasterProcessList = {0};

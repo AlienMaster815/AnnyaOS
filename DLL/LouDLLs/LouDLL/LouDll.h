@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #ifndef _LOUDLL_
 #define _LOUDLL_
 #define _INCLUDE_DRSD_LIBRARY_

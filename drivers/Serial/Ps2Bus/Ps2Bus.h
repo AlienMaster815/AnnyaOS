@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2024 - 2026)
 #define _KERNEL_MODULE_
 #ifndef _PS2_BUS_H
 #define _PS2_BUS_H

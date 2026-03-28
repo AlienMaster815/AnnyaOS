@@ -21,6 +21,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
  */
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 
 static const unsigned short wctypes[256] = {
     //0x00 

@@ -1,3 +1,5 @@
+
+<!--//Copyright GPL-2 Tyler Grenier (2023 - 2026)-->
 <!--File Map For Operating System-->
 <MainDirectoryStructure>mkdir ISO</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/EFI</MainDirectoryStructure>

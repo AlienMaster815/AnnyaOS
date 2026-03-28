@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #ifndef _XHCI_H
 #define _XHCI_H
 #define _KERNEL_MODULE_

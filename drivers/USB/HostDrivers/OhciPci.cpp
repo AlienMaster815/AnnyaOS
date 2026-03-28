@@ -1,5 +1,5 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "OHCI.h"
-
 
 static const USB_HOST_OPERATIONS OhciOperations = {
     .UsbHcdResetHostController = OhciResetHostController,

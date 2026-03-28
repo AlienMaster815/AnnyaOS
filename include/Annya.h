@@ -72,6 +72,7 @@
 #include <WinAPI/Win32/GdiCore.h>
 #include <LKDM.h>
 #include <kernel/Rcu.h>
+#include <kernel/Virtualization.h>
 
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE

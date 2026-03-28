@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2023 - 2026)
 #include <LouDDK.h>
 #include <LouACPI.h>
 #include <Hal.h>

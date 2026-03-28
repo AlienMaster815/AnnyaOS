@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2024 - 2026)
 #ifndef _PROCESRS_H
 #define _PROCESRS_H
 

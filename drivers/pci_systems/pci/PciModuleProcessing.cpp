@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2023 - 2026)
 #include <LouDDK.h>
 
 #define DEVICE_TABLE_TERMINATOR (DeviceTable[DeviceNumber].VendorID == 0x00) && (DeviceTable[DeviceNumber].DeviceID == 0x00) && (DeviceTable[DeviceNumber].GenericEntry == false)

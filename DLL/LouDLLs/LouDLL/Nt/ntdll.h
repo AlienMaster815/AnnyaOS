@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #ifndef NTDLL_H
 #define NTDLL_H
 

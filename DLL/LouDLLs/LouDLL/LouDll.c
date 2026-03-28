@@ -1,4 +1,5 @@
 
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 //x86_64-w64-mingw32-gcc -shared -o LouDll.dll LouDll.c -nostdlib -nodefaultlibs -I../../../Include
 #include "LouDll.h"
 #include <Security.h>

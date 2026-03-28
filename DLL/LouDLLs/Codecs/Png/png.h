@@ -1,4 +1,5 @@
 
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 
 #define PNG_SIGNATURE 0x89504E470D0A1A0A
 

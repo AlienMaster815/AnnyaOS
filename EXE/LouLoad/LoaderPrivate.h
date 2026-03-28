@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #ifndef _LOADER_PRIVATE_H
 #define _LOADER_PRIVATE_H
 #include <LouLoad.h>

@@ -1,5 +1,5 @@
 #include <LouDDK.h>
-
+//Copyright GPL-2 Tyler Grenier (2024 - 2026)
 
 LOUAPI LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 	unsigned long FirmwareTableProvicerSignature,

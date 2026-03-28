@@ -1,4 +1,4 @@
-
+#//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 all:
 	$(MAKE) -C UsbCore all
 	$(MAKE) -C HostDrivers all

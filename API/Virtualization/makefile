@@ -1,6 +1,8 @@
+#Copyright GPL-2 Tyler Grenier (2026)
 INCLUDES = -I../../include
 TARGET = VMCORE.SYS
-SRC = VmCore.c
+SRC = VmCore.c \
+		AmdVi.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=VmCoreEntry -fno-builtin -Wno-multichar

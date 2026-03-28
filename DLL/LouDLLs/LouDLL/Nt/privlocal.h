@@ -10,6 +10,7 @@
  * This implementation is NOT a derivative of Wine source code and is not
  * subject to Wine licensing terms.
  */
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 
 #ifndef _PRIVATE_LOCALE
 #define _PRIVATE_LOCALE

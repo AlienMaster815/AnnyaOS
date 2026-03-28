@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2024 - 2026)
 #include <LouDDK.h>
 
 int LouWStrnCpy(PWSTR WString, ULONG StrLen, PWSTR StringCopy);

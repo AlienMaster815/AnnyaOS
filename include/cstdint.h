@@ -98,6 +98,10 @@ typedef struct _INT_512{
 #define INT16_MIN   -0x7FFF
 #define INT8_MIN    -0x7F
 
+#define ULONG_MAX       UINT32_MAX //MSVC Uses 32 Bit Long
+#define ULONGLONG_MAX   UINT64_MAX
+
+
 typedef void* PVOID, * LPVOID;
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))

@@ -1,3 +1,4 @@
+//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "Mf2Kbd.h"
 
 static void LouKeMf2KbdIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){
