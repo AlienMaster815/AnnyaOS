@@ -76,6 +76,10 @@ extern "C" {
 #define KERNEL_WRITEABLE_PAGE_PRESENT 0b10000011
 #define KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT 0b10010011
 
+//power of 2 pages
+#define NR_PAGE_ORDERS      11
+#define NR_MAX_PAGE_ORDERS  10
+
 typedef uint64_t pde_t; // Page Directory Entry
 typedef uint64_t pte_t; // Page Table Entry
 
