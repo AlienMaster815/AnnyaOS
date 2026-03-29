@@ -1921,7 +1921,7 @@ struct _TTM_RESOURCE_MANAGER;
 
 typedef struct _TTM_RESOURCE_MANAGER_FUNCTION{
     LOUSTATUS   (*Alloc)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_BUFFER_OBJECT BufferObject, PTTM_PLACE TtmPlace, PTTM_RESOURCE* Resource);
-    LOUSTATUS   (*Free)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource);
+    void        (*Free)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource);
     BOOLEAN     (*Intersects)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource, PTTM_PLACE Place, SIZE Size);
     BOOLEAN     (*Compatible)(struct _TTM_RESOURCE_MANAGER* Manager, PTTM_RESOURCE Resource, PTTM_PLACE Place, SIZE Size);
     void        (*Debug)(struct _TTM_RESOURCE_MANAGER* Manager, HANDLE DrsdClfsServer);
@@ -2842,6 +2842,11 @@ typedef struct _DRSD_BRIDGE{
     struct _DRSD_BRIDGE*            NextBridge;                
 }DRSD_BRIDGE, * PDRSD_BRIDGE;
 
+typedef struct _TTM_RANGE_MANAGER{
+    TTM_RESOURCE_MANAGER    Manager;
+    DRSD_MM                 Mm;
+    spinlock_t              Lock;
+}TTM_RANGE_MANAGER, * PTTM_RANGE_MANAGER;
 
 #ifndef _USER_MODE_CODE_
 #ifndef _DRSD_CORE_H

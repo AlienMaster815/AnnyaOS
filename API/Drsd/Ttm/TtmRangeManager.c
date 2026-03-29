@@ -24,6 +24,63 @@
  */
 #include "../DrsdCore.h"
 
+static 
+LOUSTATUS
+TtmRangeManagerAlloc(
+    PTTM_RESOURCE_MANAGER   Manager,
+    PTTM_BUFFER_OBJECT      Bo,
+    PTTM_PLACE              Place,
+    PTTM_RESOURCE*          Resource
+){
+    LouPrint("TtmRangeManagerAlloc()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+static
+void 
+TtmRangeManagerFree(
+    PTTM_RESOURCE_MANAGER   Manager,
+    PTTM_RESOURCE           Resource
+){
+    LouPrint("TtmRangeManagerFree()\n");
+    while(1);
+}
+
+static 
+BOOLEAN
+TtmRangeManagerIntersects(
+    PTTM_RESOURCE_MANAGER   Manager,
+    PTTM_RESOURCE           Resource,
+    PTTM_PLACE              Place,
+    SIZE                    Size
+){
+    LouPrint("TtmRangeManagerIntersects()\n");
+    while(1);
+    return false;
+}
+
+static 
+BOOLEAN
+TtmRangeManagerCompatible(
+    PTTM_RESOURCE_MANAGER   Manager,
+    PTTM_RESOURCE           Resource,
+    PTTM_PLACE              Place,
+    SIZE                    Size
+){
+    LouPrint("TtmRangeManagerCompatible()\n");
+    while(1);
+    return false;
+}
+
+static TTM_RESOURCE_MANAGER_FUNCTION TtmRangeManagerFunctions = {
+    .Alloc = TtmRangeManagerAlloc,
+    .Free = TtmRangeManagerFree,
+    .Intersects = TtmRangeManagerIntersects,
+    .Compatible = TtmRangeManagerCompatible,
+    //TODO: Debug function  
+};
+
 LOUSTATUS 
 TtmRangeManagerInitializeNoCheck(
     PDRSD_TTM_DEVICE    TtmDevice,
@@ -31,7 +88,7 @@ TtmRangeManagerInitializeNoCheck(
     BOOLEAN             UseTt,
     UINT64              Size
 ){
-    /*PTTM_RESOURCE_MANAGER   Manager;
+    PTTM_RESOURCE_MANAGER   Manager;
     PTTM_RANGE_MANAGER      RManager;
 
     RManager = LouKeMallocType(TTM_RANGE_MANAGER, KERNEL_GENERIC_MEMORY);
@@ -39,8 +96,11 @@ TtmRangeManagerInitializeNoCheck(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    Manager = &RManager;
-    Manager->UseTt = UseTt;*/
+    Manager = &RManager->Manager;
+    Manager->UseTt = UseTt;
+    Manager->Functions = &TtmRangeManagerFunctions;
+
+    //196
 
     LouPrint("TtmRangeManagerInitializeNoCheck()\n");
     while(1);
