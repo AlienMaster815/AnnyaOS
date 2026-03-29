@@ -4,7 +4,7 @@
 #include "LouDll.h"
 #include <Security.h>
 
-#define NTDLL_RVA_ENTRIES 78
+#define NTDLL_RVA_ENTRIES 78//79
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
@@ -98,6 +98,7 @@ static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "NtAccessCheckByTypeResultListAndAuditAlarm",
     "NtAccessCheckByTypeResultListAndAuditAlarmByHandle",
     "NtAcquireCMFViewOwnership",
+    //"RtlCharToInteger"
 };
 
 static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
@@ -179,6 +180,7 @@ static KULA_RVA_ADDRESS NtDllAddresses[NTDLL_RVA_ENTRIES] = {
     (PVOID)LouAccessCheckByTypeResultListAndAuditAlarm,
     (PVOID)LouAccessCheckByTypeResultListAndAuditAlarmByHandle,
     (PVOID)LouAcquireCMFViewOwnership,
+    //(PVOID)LouRtlCharToInteger,
 };
 
 static KULA_TBALE_ENTRIES KulaEntries[LOUDLL_EMULATED_BINARIES] = {

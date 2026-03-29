@@ -99,8 +99,8 @@ LouKeQueueDelayedWork(
     PLOUQ_WORK WorkItem, 
     PTIME_T Delay
 ){
-
-
+    LouPrint("QUEUE:%s Requesting Delayed Work\n", QueueName);
+    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -120,13 +120,13 @@ LouKeQueueTimedWork(
 KERNEL_EXPORT 
 LOUSTATUS LouKeCreateWorkQueue(
     PLOUQ_WORK_QUEUE*   OutQueue,
-    WORK_QUEUE_PRIORITY QueuePriority,
+    UINT8               QueuePriority,
     string              QueueName
 ){
     PLOUQ_WORK_QUEUE TmpQueue = &MainWorkQueue;
     while(TmpQueue->Peers.NextHeader){
         TmpQueue = (PLOUQ_WORK_QUEUE)TmpQueue->Peers.NextHeader;
-        if(strcmp(TmpQueue->QueueName, QueueName)){
+        if(!strcmp(TmpQueue->QueueName, QueueName)){
             if(OutQueue){
                 *OutQueue = TmpQueue;
             }
@@ -141,7 +141,7 @@ LOUSTATUS LouKeCreateWorkQueue(
     strcpy(TmpQueue->QueueName, QueueName);
     TmpQueue->QueuePriority = QueuePriority;
 
-    TmpQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)TmpQueue, 16 * KILOBYTE, 31);
+    TmpQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)TmpQueue, 16 * KILOBYTE, QueuePriority);
 
     if(OutQueue){
         *OutQueue = TmpQueue;

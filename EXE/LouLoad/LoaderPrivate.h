@@ -16,7 +16,7 @@ int memcmp(void* pSource1, void* pSource2, size_t Count);
 void memzero(void* pDestination, size_t Count);
 void* LoaderAllocateMemory(size_t size);
 void* LoaderAllocateMemoryEx(size_t size, size_t Alignment);
-size_t GetRamSize();
+size_t LouKeGetRamSize();
 void LoaderCreateKernelSpace();
 void memcpy(void* pDestination, void* pSource, size_t Count);
 void LoaderMapKernelMemoryBlock(UINT64 PAddress, UINT64 VAddress, UINT64 Size, UINT64 Flags);

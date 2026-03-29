@@ -45,3 +45,6 @@ EXPORTS
     LouSystemShutdown
     LouCreateSectionEx
     _errno
+    LouRtlCharToUint64
+    LouRtlCharToUint32
+    LouRtlCharToInteger

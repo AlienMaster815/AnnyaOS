@@ -38,7 +38,7 @@ TtmGlobalRelease(){
         goto _DONE;
     }
     TtmPoolManagerDeInitialize();
-    LouKeFreePage(Global->DumbyReadVirtBase);
+    LouKeFreePage(Global->DumbyReadPage);
     memset(Global, 0, sizeof(TTM_GLOBAL));
 _DONE:
     MutexUnlock(&TtmGlobalMutex);
@@ -57,12 +57,25 @@ TtmGlobalInitialize(){
         goto _DONE;
     }
 
-    PageCount = GetRamSize() / MEGABYTE_PAGE;
+    PageCount = LouKeGetRamSize() / KILOBYTE_PAGE;
     PageCount /= 2;
     
-    Dma32Count = MIN(GetRamSize(), 2 * GIGABYTE) / MEGABYTE_PAGE;
+    Dma32Count = MIN(LouKeGetRamSize(), 2 * GIGABYTE) / KILOBYTE_PAGE;
 
     TtmPoolManagerInitialize(PageCount);
+    TtmTtManagerInitialize(PageCount, Dma32Count);
+
+    Global->DumbyReadPage = LouKeMallocPagePhy32(KILOBYTE_PAGE, 1, KERNEL_DMA_MEMORY);
+    if(!Global->DumbyReadPage){
+        Global->DumbyReadPage = LouKeMallocPage(KILOBYTE_PAGE, 1, KERNEL_DMA_MEMORY);
+        if(!Global->DumbyReadPage){
+            Status = STATUS_INSUFFICIENT_RESOURCES;
+            goto _DONE;
+        }
+        LouPrint("DRSDCORE.SYS:Warning DMA32 Not Available Using DMA64\n");
+    }
+
+    LouKeSetAtomic(&Global->BoCount, 0);
 
 _DONE:
     if(Status != STATUS_SUCCESS){
@@ -79,16 +92,35 @@ TtmDeviceInitialize(
     PTTM_DEVICE_FUNCTIONS       Functions,
     PPCI_DEVICE_OBJECT          PDEV,
     PDRSD_VMA_OFFSET_MANAGER    VmaManager,
-    UINT64                      PageFlags
+    UINT64                      AllocationFlags
 ){
+    PTTM_GLOBAL Global = &TtmGlobal;
+    LOUSTATUS Status;
 
-    Device->AllocationFlags = PageFlags;
+    Status = TtmGlobalInitialize();
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = LouKeCreateWorkQueue(
+        &Device->WorkQueue,
+        31,
+        "Ttm"
+    );
+    if(Status != STATUS_SUCCESS){
+        TtmGlobalRelease();
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->AllocationFlags = AllocationFlags;
     Device->Functions = Functions;
-    
+  
+    TtmPoolInitialize(&Device->Pool, (PLATFORM_DEVICE)PDEV, 0x00, AllocationFlags);
     
     Device->VmaManager = VmaManager;
 
-    LouPrint("TtmDeviceInitialize()\n");
-    while(1);
+    MutexLock(&TtmGlobalMutex);
+    LouKeListAddTail(&Device->DeviceList, &Global->DeviceList);
+    MutexUnlock(&TtmGlobalMutex);
+
     return STATUS_SUCCESS;
 }

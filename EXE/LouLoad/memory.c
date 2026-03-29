@@ -135,7 +135,7 @@ static void MapKernelSpace(){
     LoaderMapKernelMemoryBlock(
         0, 
         GetKSpaceBase(), 
-        ROUND_UP64(GetRamSize(), 2 * MEGABYTE), 
+        ROUND_UP64(LouKeGetRamSize(), 2 * MEGABYTE), 
         0b011
     );
         
@@ -144,7 +144,7 @@ static void MapKernelSpace(){
 void LoaderCreateKernelSpace(){
 
     UNUSED UINT64 KSpaceBase = KERNEL_SPACE_DEFAULT_BASE;
-    UINT64 KSpaceLimit = ROUND_UP64(GetRamSize(), 4096);
+    UINT64 KSpaceLimit = ROUND_UP64(LouKeGetRamSize(), 4096);
     UINT64 Frames = 1; //PML4
     UINT64 L4, L3, L2, L1;
 

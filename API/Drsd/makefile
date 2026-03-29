@@ -23,7 +23,8 @@ SRC = DrsdCore.c \
 		DrsdGxe.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
-		Ttm/TtmPool.c
+		Ttm/TtmPool.c \
+		Ttm/TtmTt.c 
 
 
 CC = x86_64-w64-mingw32-gcc

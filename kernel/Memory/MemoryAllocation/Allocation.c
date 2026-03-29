@@ -16,7 +16,7 @@ void* LouMalloc(size_t BytesToAllocate);
 #define BITMAP_TABLE_BASE 0
 #define TABLE_SIZE  8
 
-uint64_t GetRamSize();
+uint64_t LouKeGetRamSize();
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 
@@ -574,7 +574,7 @@ void LouFree(PVOID Addr) {
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
 
     MutexLock(&MemmoryMapLock);
-    uint64_t AlignmentCheck = (GetKSpaceBase() + GetRamSize());
+    uint64_t AlignmentCheck = (GetKSpaceBase() + LouKeGetRamSize());
     if(!AlignmentCheck){
         AlignmentCheck = 4 * GIGABYTE;
     }

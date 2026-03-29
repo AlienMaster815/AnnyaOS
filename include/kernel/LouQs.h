@@ -26,13 +26,6 @@ typedef struct  _LOUQ{
     struct _LOUQ_COMPLETION*    Completion;
 }LOUQ, * PLOUQ;
 
-typedef enum{
-    IMEDIATE_WORK = 0,
-    KERNEL_QUEUE = 1,
-    SUBSYSTEM_WORK = 2,
-    DRIVER_WORK = 3,
-}WORK_QUEUE_PRIORITY;
-
 typedef struct _LOUQ_WORK{
     LOUQ                QueueObject;
     PVOID               Data;//TODO change to ATOMIC64
@@ -45,7 +38,7 @@ typedef struct _LOUQ_WORK_QUEUE{
     string              QueueName;
     LOUQ_WORK           WorkEntries;
     PLOUQ_WORK          LastWorkEntry;
-    WORK_QUEUE_PRIORITY QueuePriority;
+    UINT8               QueuePriority;
     PTHREAD             QueueThread;
 }LOUQ_WORK_QUEUE, * PLOUQ_WORK_QUEUE;
 
@@ -77,9 +70,10 @@ KERNEL_EXPORT LOUSTATUS LouKeQueueTimedWork(string QueueName, PLOUQ_WORK WorkIte
 
 KERNEL_EXPORT LOUSTATUS LouKeWaitForCompletionTimeout(PLOUQ_COMPLETION Completion, SIZE Hz);
 
+KERNEL_EXPORT
 LOUSTATUS LouKeCreateWorkQueue(
     PLOUQ_WORK_QUEUE*   OutQueue,
-    WORK_QUEUE_PRIORITY QueuePriority,
+    UINT8               QueuePriority,
     string              QueueName
 );
 

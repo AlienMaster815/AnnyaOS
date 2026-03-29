@@ -80,7 +80,7 @@ void VirtualizationException(UINT64 Rsp);
 void ControlProtectionException(UINT64 Rsp);
 void CookieCheckFail(UINT64 Rsp);
 void ParseMBootTags(struct multiboot_tag* MBOOT);
-uint64_t GetRamSize();
+uint64_t LouKeGetRamSize();
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
 void initializeInterruptRouter();

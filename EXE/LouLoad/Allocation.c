@@ -13,7 +13,7 @@ extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 
 static uint64_t mlimit = 0;
 
-size_t GetRamSize(){
+size_t LouKeGetRamSize(){
     return  mlimit;
 }
 

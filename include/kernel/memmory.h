@@ -12,7 +12,7 @@ extern "C" {
 #include <kernel/threads.h>
 #include <string.h>
 #include <kernel/loustatus.h>
-
+#include <Modulation.h>
 
 
 #define HighQuad(v) ((__int128)v >> 64)
@@ -201,7 +201,9 @@ uint32_t Get32BitValueFromAddress(uint64_t Address);
 void Write64BitValueToAddress(uint64_t Address, uint64_t Value);
 uint64_t Get64BitValueFromAddress(uint64_t Address);
 
+KERNEL_EXPORT
 void LouKeFreePage(void* PageAddress);
+
 void LouKeFreePage32(void* PageAddress);
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
 bool LouMapAddress32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize);
@@ -210,7 +212,10 @@ bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uin
 void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLength, uint64_t* PageFlags);
 uint64_t GetPageOfFaultValue(uint64_t VAddress);
 extern uint64_t GetPageValue(uint64_t PAddress, uint64_t FLAGS);
-uint64_t GetRamSize();
+
+KERNEL_EXPORT
+uint64_t LouKeGetRamSize();
+
 void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
 void* LouGeneralAllocateMemoryEx32(UINT64 Size,UINT64 Alignment);
 void* LouGeneralAllocateMemory(UINT64 Size);
@@ -377,13 +382,13 @@ void LouKeUnMapContinuousMemoryBlock(
     uint64_t size
 );
 
+KERNEL_EXPORT void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 
-void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 void* LouKeMallocPageExPhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
-void* LouKeMallocPagePhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
+KERNEL_EXPORT void* LouKeMallocPagePhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);
 void* LouKeMallocExVirt32(
     size_t      AllocationSize,

@@ -176,3 +176,8 @@ EXPORTS
     LouKeXaIdrAllocate
     LouKeXarrayAllocateUint64
     LouKeXarrayAllocateInt
+    LouKeCreateWorkQueue
+    LouKeFreePage
+    LouKeGetRamSize
+    LouKeMallocPage
+    LouKeMallocPagePhy32

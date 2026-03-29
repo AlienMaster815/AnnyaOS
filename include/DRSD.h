@@ -1744,13 +1744,25 @@ struct _DRSD_TTM_DEVICE;
 #define TTM_TT_FLAGS_BACKED_UP              (1 << 5)
 #define TTM_TT_FLAGS_PRIVATE_POPULATED      (1 << 6)
 
+#define TTM_ALLOCATION_POOL_BENIFICIAL_ORDER(n) (n & 0xFF)
+#define TTM_ALLOCATION_POOL_USE_DMA_ALLOC       (1 << 8) 
+#define TTM_ALLOCATION_POOL_USE_DMA32           (1 << 9)
+#define TTM_ALLOCATION_PROPAGATE_ENOSPC         (1 << 10)
+
+#define TTM_NUM_CACHING_TYPES 3
+
 typedef enum _TTM_CACHING{
-    TtmUncached = 0 ,
+    TtmUncached = 0,
     TtmWriteCombined,
     TtmCached,
 }TTM_CACHING, * PTTM_CACHING;
 
 #define TTM_CACHING_TYPES_COUNT 3
+
+#define TTM_PL_SYSTEM   0
+#define TTM_PL_TT       1
+#define TTM_PL_VRAM     2
+#define TTM_PL_PRIV     3
 
 struct _TTM_POOL;
 
@@ -1767,10 +1779,9 @@ typedef struct _TTM_POOL{
     PLATFORM_DEVICE     Device;
     int                 Nid;
     UINT                AllocationFlags;
-    struct{
-        SIZE            OrderCount;
-        PTTM_POOL_TYPE  Orders;   
-    }Caching;   
+    struct {
+        TTM_POOL_TYPE   Orders[NR_PAGE_ORDERS];
+    }                   Caching[TTM_NUM_CACHING_TYPES];
 }TTM_POOL, * PTTM_POOL;
 
 typedef struct _TTM_POOL_ALLOCATION_STATE{
@@ -1884,13 +1895,18 @@ typedef struct _TTM_PLACE{
     UINT32      Flags;
 }TTM_PLACE, * PTTM_PLACE;
 
+typedef struct _TTM_PLACEMENT{
+    UINT        NumPlacement;
+    PTTM_PLACE  Placement;
+}TTM_PLACEMENT, * PTTM_PLACEMENT;
+
 typedef struct _TTM_DEVICE_FUNCTIONS{
-    PTTM_TT     (*TtmTtCreate)(PTTM_BUFFER_OBJECT BufferObject, UINT32 TtmPageFlags);
+    PTTM_TT     (*TtmTtCreate)(PTTM_BUFFER_OBJECT BufferObject, UINT64 TtmPageFlags);
     LOUSTATUS   (*TtmTtPopulate)(struct _DRSD_TTM_DEVICE* Device, struct _TTM_TT* Ttm, PTTM_OPERATION_CONTEXT Context);
     void        (*TtmTtUnpopulate)(struct _DRSD_TTM_DEVICE* Device, struct _TTM_TT* Ttm);
     void        (*TtmTtDestroy)(struct _DRSD_TTM_DEVICE* Device, struct _TTM_TT* Ttm);
-    BOOLEAN     (*EvictionValuable)(struct _DRSD_TTM_DEVICE* Device, PTTM_PLACE Place);
-    BOOLEAN     (*EvictFlags)(PTTM_BUFFER_OBJECT BufferObject, PTTM_PLACE Place);
+    BOOLEAN     (*EvictionValuable)(PTTM_BUFFER_OBJECT Bo, PTTM_PLACE Place);
+    void        (*EvictFlags)(PTTM_BUFFER_OBJECT BufferObject, PTTM_PLACEMENT Placement);
     LOUSTATUS   (*Move)(PTTM_BUFFER_OBJECT BufferObject, BOOLEAN Evict, PTTM_OPERATION_CONTEXT Context, PTTM_RESOURCE NewMem, PTTM_PLACE Hop);
     void        (*DeleteMemNotify)(PTTM_BUFFER_OBJECT BufferObject);
     void        (*SwapNotify)(PTTM_BUFFER_OBJECT BufferObject);
@@ -1940,10 +1956,7 @@ typedef struct _DRSD_TTM_DEVICE{
 }DRSD_TTM_DEVICE, * PDRSD_TTM_DEVICE;
 
 typedef struct _TTM_GLOBAL{
-    PVOID       DumbyReadPhysBase;
-    PVOID       DumbyReadVirtBase;
-    UINT64      DumbyReadMemFlags;
-    UINT64      DumbyReadSize;
+    PVOID       DumbyReadPage;
     ListHeader  DeviceList;
     atomic_t    BoCount;
 }TTM_GLOBAL, * PTTM_GLOBAL;

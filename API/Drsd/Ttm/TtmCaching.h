@@ -22,38 +22,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _TTM_POOL_INTERNAL_H
-#define _TTM_POOL_INTERNAL_H
+
+#ifndef _TTM_CACHING_H
+#define _TTM_CACHING_H
 
 #include "../DrsdCore.h"
 
-void 
-TtmPoolManagerDeInitialize();
-
-LOUSTATUS 
-TtmPoolManagerInitialize(
-    SIZE PageCount
+void TtmTtManagerInitialize(
+    SIZE    PageCount,
+    SIZE    Dma32PageCount
 );
-
-
-DRIVER_EXPORT
-void 
-TtmPoolInitialize(
-    PTTM_POOL           Pool,
-    PLATFORM_DEVICE     Device,
-    int                 Nid,
-    UINT64              AllocationFlags
-);
-
-static inline BOOLEAN TtmPoolUsesDmaAlloc(PTTM_POOL Pool){
-    return Pool->AllocationFlags & TTM_ALLOCATION_POOL_USE_DMA_ALLOC;
-}
-
-static inline BOOLEAN TtmPoolUsesDma32(PTTM_POOL Pool){
-    return Pool->AllocationFlags & TTM_ALLOCATION_POOL_USE_DMA32;
-}
-static inline UINT TtmPoolBenificialOrder(PTTM_POOL Pool){
-    return TTM_ALLOCATION_POOL_BENIFICIAL_ORDER(Pool->AllocationFlags);
-}
 
 #endif

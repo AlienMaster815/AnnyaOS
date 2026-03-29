@@ -5,7 +5,8 @@ void SendMapToAllocation(struct master_multiboot_mmap_entry* mmap);
 
 static uint64_t mlimit;
 
-uint64_t GetRamSize() {
+KERNEL_EXPORT
+uint64_t LouKeGetRamSize() {
     return mlimit;
 }
 

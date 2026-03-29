@@ -268,10 +268,15 @@ void* LouKeMallocExPhy32(
         }
         TmpPageTrackBase = PAGE_TRACK_DEREFERENCE_READ_NEXT(TmpPageTrackBase);//get the next value
     }
+    uint64_t Foobar = (uint64_t)LouKeMallocPagePhy32(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags);
+    if(!Foobar){
+        LouPrint("LouKeMallocExPhy32():!Foobar\n");
+        while(1);
+    }
 
     PAGE_TRACK_DEREFERENCE_WRITE_NEXT(TmpPageTrackBase, (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_PAGE_TRACK_SIZE, 8));
     PAGE_TRACK_DEREFERENCE_WRITE_FLAGS(TmpPageTrackBase, AllocationFlags);
-    PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, (uint64_t)LouKeMallocPagePhy32(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, AllocationFlags));
+    PAGE_TRACK_DEREFERENCE_WRITE_PAGE_ADDRESS(TmpPageTrackBase, Foobar);
     PAGE_TRACK_DEREFERENCE_WRITE_PAGE_SIZE(TmpPageTrackBase, RoundUpSize);
     PAGE_TRACK_DEREFERENCE_WRITE_TRACK_COUNT(TmpPageTrackBase, 1);
     TmpVMemTrackBase = (uint64_t)LouGeneralAllocateMemoryEx(KMALLOC_VMEM_TRACK_SIZE, 8);

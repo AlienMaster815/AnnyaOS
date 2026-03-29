@@ -12,7 +12,7 @@ typedef struct _VADDRESS_RESERVE_POOL_TRACKER{
 static VADDRESS_RESERVE_POOL_TRACKER VaPoolTracker = {0};
 static mutex_t VaPoolMutex = {0};
 
-uint64_t GetRamSize();
+uint64_t LouKeGetRamSize();
 
 UNUSED static void LouKeRegisterPAddressToReserveVAddresses(
     UINT64 PAddress,
@@ -126,7 +126,13 @@ void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlag
     return Result;
 }
 
-void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags){    
+KERNEL_EXPORT
+void* 
+LouKeMallocPage(
+    uint64_t PageSize, 
+    uint64_t PageCount, 
+    uint64_t PageFlags
+){    
     if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
         return 0x00;
     }
@@ -156,13 +162,19 @@ void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t Page
     return LouKeMallocPageExVirt32(PageSize, PageCount, PageFlags, (uint64_t)LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize));
 }
 
-
+KERNEL_EXPORT
 void* LouKeMallocPagePhy32(UINT64 PageSize, UINT64 PageCount, UINT64 PageFlags){
-    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (UINT64)LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize));
+    UINT64 Tmp = (UINT64)LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
+    if(Tmp > UINT32_MAX){
+        LouFree((PVOID)Tmp);
+        return 0x00;
+    }
+    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (UINT64)Tmp);
 }
 
 uint64_t GetAllocationBlockSize(uint64_t Address);
 
+KERNEL_EXPORT
 void LouKeFreePage(void* PageAddress){
     uint64_t PhysicalAddres = 0;
     RequestPhysicalAddress((uint64_t)PageAddress, &PhysicalAddres);

@@ -231,7 +231,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
 
     VAddress &= ~(KILOBYTE_PAGE - 1);
 
-    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), GetRamSize())){
+    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), LouKeGetRamSize())){
         DEBUG_TRAP
         while(1);
     }
@@ -313,7 +313,7 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
         &L1Entry
     );
 
-    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), GetRamSize())){
+    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), LouKeGetRamSize())){
         DEBUG_TRAP
         while(1);
     }
@@ -372,7 +372,7 @@ bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uin
         &L1Entry
     );
 
-    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), GetRamSize())){
+    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), LouKeGetRamSize())){
         DEBUG_TRAP
         while(1);
     }
