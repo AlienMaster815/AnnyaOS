@@ -387,7 +387,7 @@ void LouOsKrnlStart(
 
     LouKeProbeSbIsa();
 
-    ScanTheRestOfHarware();    
+    //ScanTheRestOfHarware();    
 
     //TODO: stub Loustrsafe.h and LdmCore.h 
 
