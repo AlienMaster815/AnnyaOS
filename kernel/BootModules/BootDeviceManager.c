@@ -20,8 +20,9 @@ void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top){
     BootCount++;
 }
 
-
-void* LouKeGetBootDevice(size_t Index){
+KERNEL_EXPORT
+void* 
+LouKeGetBootDevice(size_t Index){
     size_t i = 0;
     PBOOT_DRIVER_LIST Tmp = &BootDriverList;
     for(; i < Index && Tmp->Peers.NextHeader; i++){

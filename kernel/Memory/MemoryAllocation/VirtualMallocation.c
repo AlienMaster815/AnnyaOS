@@ -46,6 +46,7 @@ uint64_t LouKeVMemmoryGetSize(uint64_t VAddress){
     return 0x00;
 }
 
+KERNEL_EXPORT
 void LouKeMapContinuousMemoryBlockEx(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -68,6 +69,7 @@ void LouKeMapContinuousMemoryBlockEx(
     }
 }
 
+KERNEL_EXPORT
 void LouKeMapContinuousMemoryBlockEx32(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -90,6 +92,7 @@ void LouKeMapContinuousMemoryBlockEx32(
     }
 }
 
+KERNEL_EXPORT
 void LouKeMapContinuousMemoryBlock(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -111,6 +114,7 @@ void LouKeMapContinuousMemoryBlock(
     }
 }
 
+KERNEL_EXPORT
 void LouKeMapContinuousMemoryBlock32(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -132,6 +136,7 @@ void LouKeMapContinuousMemoryBlock32(
     }
 }
 
+KERNEL_EXPORT
 void LouKeMapContinuousMemoryBlockKB(
     uint64_t PAddress, 
     uint64_t VAddress,
@@ -174,6 +179,7 @@ void LouKeUnMapContinuousMemoryBlock(
 
 //allocates Virtual Page 
 
+KERNEL_EXPORT
 void LouKeMallocVMmIO(
     uint64_t PAddress,
     uint64_t size,

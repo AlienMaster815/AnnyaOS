@@ -181,3 +181,10 @@ EXPORTS
     LouKeGetRamSize
     LouKeMallocPage
     LouKeMallocPagePhy32
+    LouKeGetBootFrameBuffer
+    LouKePciGetVirtualBarAddress
+    EnforceSystemMemoryMap
+    LouKeCreateDeviceSection
+    LouKeOpenRegistryHandle
+    LouKeReadRegistryWordValue
+    LouKeGetBootDevice

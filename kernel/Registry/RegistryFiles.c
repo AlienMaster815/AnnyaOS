@@ -50,6 +50,7 @@ LouKeReadRegistryValue(
     return STATUS_UNSUCCESSFUL;
 }
 
+KERNEL_EXPORT
 PVOID 
 LouKeOpenRegistryHandle(
     LPWSTR  Key,
@@ -144,6 +145,7 @@ LOUSTATUS LouKeReadRegistryWcsValue(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 LOUSTATUS LouKeReadRegistryWordValue(
     PVOID Key, 
     WORD* Data

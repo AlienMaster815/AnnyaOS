@@ -129,7 +129,7 @@ LouKeVmmCreateSharedSection(
     );
 }
 
-LOUAPI
+KERNEL_EXPORT
 LOUSTATUS 
 LouKeCreateDeviceSection(
     PVOID   PBase,

@@ -1,6 +1,5 @@
 #include <LouAPI.h>
 
-void* LouKeGetBootDevice(size_t Index);
 size_t LouKeGetBootDeviceSize(size_t Index);
 INTEGER GetCpuTrackMemberFromID(UINT32 CpuID);
 void LouKeSendProcessorWakeupSignal(INTEGER TrackMember);

@@ -28,6 +28,24 @@ LouKeDrsdInitializeBootDevice(
     PDRSD_DEVICE Device
 );
 
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeGetBootFrameBuffer(
+	struct multiboot_tag_framebuffer_common** pBootGraphics
+){
+	if(!pBootGraphics){
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	if(!BootGraphics){
+		return STATUS_NO_SUCH_DEVICE;
+	}
+
+	*pBootGraphics = BootGraphics;
+
+	return STATUS_SUCCESS;
+}
+
 LOUAPI
 void InitializeBootGraphics(){
 	if(!BootGraphics){

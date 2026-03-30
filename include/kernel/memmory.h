@@ -223,6 +223,8 @@ void* LouGeneralAllocateMemory32(UINT64 Size);
 void  LouGeneralFreeMemory(void* Address);
 bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical,uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
+
+KERNEL_EXPORT
 bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
@@ -255,6 +257,7 @@ void MapIoMemory(
     uint64_t MapSize
 );
 
+KERNEL_EXPORT
 LOUSTATUS LouKeCreateDeviceSection(
     void*   PBase,
     void*   VBase,

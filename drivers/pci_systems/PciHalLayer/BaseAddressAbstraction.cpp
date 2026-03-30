@@ -285,7 +285,7 @@ void* LouKePciGetIoRegion(
     return (void*)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarBase[BarNumber] + BarOffset);
 }
 
-LOUAPI
+KERNEL_EXPORT
 SET_OPTIMIZATION(0) 
 uint64_t 
 LouKePciGetVirtualBarAddress(uint64_t PhyAddress){

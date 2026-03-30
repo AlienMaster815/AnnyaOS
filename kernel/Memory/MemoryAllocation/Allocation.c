@@ -201,6 +201,7 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
     return NULL;    
 }
 
+KERNEL_EXPORT
 bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
