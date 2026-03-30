@@ -7,6 +7,7 @@
 #include <LouDDK.h>
 #include <bootloader/grub/multiboot2.h>
 #include "OpenType.h"
+#include "TtfCmap.h"
 
 typedef struct _BOOTVID_FRAMEBUFFER{
     ListHeader  Head;

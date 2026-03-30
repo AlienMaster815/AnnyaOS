@@ -43,6 +43,18 @@ TtfCopyFileTableDirectoriesToObject(
         TtfObject->TableDirectories[i].Checksum = TtfReadUint32(&TmpTable[i].Checksum);
         TtfObject->TableDirectories[i].Offset = TtfReadUint32(&TmpTable[i].Offset);
         TtfObject->TableDirectories[i].Length = TtfReadUint32(&TmpTable[i].Length);
+
+        switch(TtfObject->TableDirectories[i].Tag){
+
+            case TTF_CHARECTER_TO_GLYPH_MAPPING:
+                TtfParseCmapData(
+                    (PVOID)FileOffsetSubTable,
+                    &TtfObject->TableDirectories[i]
+                );
+                break;
+            default:
+                break;
+        }
     }
 
     return STATUS_SUCCESS;
