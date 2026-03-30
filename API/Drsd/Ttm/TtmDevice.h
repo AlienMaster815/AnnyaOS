@@ -28,6 +28,19 @@
 
 #include "../DrsdCore.h"
 
+static inline void TtmSetDriverManager(
+    PDRSD_TTM_DEVICE        Device,
+    int                     Type,
+    PTTM_RESOURCE_MANAGER   Manager
+){
+    if(TTM_MEM_TYPES_COUNT > Type){
+        Device->ManagerDriver[Type] = Manager;
+    }else{
+        LouPrint("DRSDCORE.SYS:TtmSetDriverManager():BUGBUG\n");
+        while(1); //TODO:SysExit 
+    } 
+}
+
 DRIVER_EXPORT
 LOUSTATUS
 TtmDeviceInitialize(

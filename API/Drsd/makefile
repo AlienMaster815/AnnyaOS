@@ -21,10 +21,12 @@ SRC = DrsdCore.c \
 		DrsdGxeVRamHelper.c \
 		DrsdGxeTtmHelper.c \
 		DrsdGxe.c \
+		DrsdMm.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \
-		Ttm/TtmTt.c 
+		Ttm/TtmTt.c \
+		Ttm/TtmResource.c 
 
 
 CC = x86_64-w64-mingw32-gcc

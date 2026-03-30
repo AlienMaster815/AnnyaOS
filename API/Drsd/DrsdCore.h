@@ -46,11 +46,13 @@
 #include "DrsdWriteback.h"
 #include "DrsdPlane.h"
 #include "DrsdBridge.h"
+#include "DrsdMm.h"
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"
 #include "Ttm/TtmRangeManager.h"
 #include "Ttm/TtmPool.h"
 #include "Ttm/TtmTt.h"
+#include "Ttm/TtmResource.h"
 
 static inline BOOLEAN DrsdCoreCheckAllFeatures(
     PDRSD_DEVICE    Device, 

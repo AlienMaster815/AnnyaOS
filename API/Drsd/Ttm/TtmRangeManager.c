@@ -100,9 +100,11 @@ TtmRangeManagerInitializeNoCheck(
     Manager->UseTt = UseTt;
     Manager->Functions = &TtmRangeManagerFunctions;
 
-    //196
+    TtmResourceManagerInitialize(Manager, TtmDevice, Size);
+    
+    DrsdMmInitialize(&RManager->Mm, 0 , Size);
 
-    LouPrint("TtmRangeManagerInitializeNoCheck()\n");
-    while(1);
+    TtmSetDriverManager(TtmDevice, Type, Manager);
+    TtmResourceManagerSetUsed(Manager, true);
     return STATUS_SUCCESS;
 }

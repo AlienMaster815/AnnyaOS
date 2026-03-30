@@ -1814,6 +1814,8 @@ typedef struct _TTM_TT{
     PTTM_POOL_TT_RESTORE    Restore;
 }TTM_TT, * PTTM_TT;
 
+
+
 typedef enum _TTM_BUFFER_OBJECT_TYPE{
     TtmBoTypeDevice = 0,
     TtmBoTypeKernel,
@@ -1936,7 +1938,7 @@ typedef struct _TTM_RESOURCE_MANAGER{
     UINT64                              Size;
     PTTM_RESOURCE_MANAGER_FUNCTION      Functions;
     spinlock_t                          EvictionLock;
-    HANDLE                              DmaFences[TTM_MOVE_FENCES_COUNT];
+    HANDLE                              EvictionDmaFences[TTM_MOVE_FENCES_COUNT];
     ListHeader                          Lcu[TTM_MAX_BUFFER_OBJECT_PRIORITIES];
     UINT64                              Usage;
     HANDLE                              CGroupRegion;

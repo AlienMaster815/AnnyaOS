@@ -140,8 +140,6 @@ DrsdVRamManagerInitialize(
         return Status;
     }
 
-    LouPrint("DrsdVRamManagerInitialize()\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -195,8 +193,9 @@ DrsdVRamHelperInitialize(
     }
 
     VramManager = DrsdVRamHelperAllocateManager(Device, VRamBase, VRamSize);
+    if(LOU_KE_PTR_ERROR(VramManager)){
+        return (LOUSTATUS)(UINTPTR)VramManager;
+    }
 
-    LouPrint("DrsdVRamHelperInitialize()\n");
-    while(1);
     return STATUS_SUCCESS;
 }
