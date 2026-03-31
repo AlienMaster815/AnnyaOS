@@ -1,6 +1,8 @@
 #ifndef _STRING_H
 #define _STRING_H
 
+#include <Unicode.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -7,7 +7,6 @@ typedef unsigned int ULONG;
 typedef void* PVOID;
 typedef PVOID HANDLE;
 typedef HANDLE* PHANDLE;
-typedef bool BOOLEAN;
 
 typedef uint8_t BYTE;
 typedef uint16_t WORD;

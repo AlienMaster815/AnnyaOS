@@ -1,4 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+#define _USER_MODE_CODE_
 #include "../codecs.h"
 #include "png.h"
 

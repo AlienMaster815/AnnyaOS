@@ -60,7 +60,6 @@ typedef struct _FILE_TIMESTAMPS{
     LARGE_INTEGER   ChangeTime;
 }FILE_TIMESTAMPS, * PFILE_TIMESTAMPS;
 
-typedef BOOLEAN* PBOOLEAN;
 
 typedef enum _OBJECT_INFORMATION_CLASS{
     ObjectBasicInformation = 0,
