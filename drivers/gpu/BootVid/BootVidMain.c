@@ -62,7 +62,7 @@ BootVidEntry(){
         while(1);
     }
 
-    ScalerType = TtfReadUint32(DefaultFontFile);
+    ScalerType = TtfReadUint32(*(UINT32*)DefaultFontFile);
 
     LouPrint("BOOTVID.SYS:Default Font File:%h\n", ScalerType);
 

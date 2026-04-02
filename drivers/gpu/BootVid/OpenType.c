@@ -39,10 +39,10 @@ TtfCopyFileTableDirectoriesToObject(
     PTTF_TABLE_DIRECTORY TmpTable = (PTTF_TABLE_DIRECTORY)((UINT8*)FileOffsetSubTable + sizeof(TTF_OFFSET_SUBTABLE));
 
     for(size_t i = 0 ; i < TableCount; i++){
-        TtfObject->TableDirectories[i].Tag = TtfReadUint32(&TmpTable[i].Tag);
-        TtfObject->TableDirectories[i].Checksum = TtfReadUint32(&TmpTable[i].Checksum);
-        TtfObject->TableDirectories[i].Offset = TtfReadUint32(&TmpTable[i].Offset);
-        TtfObject->TableDirectories[i].Length = TtfReadUint32(&TmpTable[i].Length);
+        TtfObject->TableDirectories[i].Tag = TtfReadUint32(TmpTable[i].Tag);
+        TtfObject->TableDirectories[i].Checksum = TtfReadUint32(TmpTable[i].Checksum);
+        TtfObject->TableDirectories[i].Offset = TtfReadUint32(TmpTable[i].Offset);
+        TtfObject->TableDirectories[i].Length = TtfReadUint32(TmpTable[i].Length);
 
         switch(TtfObject->TableDirectories[i].Tag){
 
@@ -73,11 +73,11 @@ TtfCopyFileToObject(
         return STATUS_INVALID_PARAMETER;
     }
 
-    TtfObject->OffsetSubTable.ScalerType = TtfReadUint32(&FileOffsetSubTable->ScalerType); 
-    TtfObject->OffsetSubTable.TableCount = TtfReadUint16(&FileOffsetSubTable->TableCount);
-    TtfObject->OffsetSubTable.SearchRange = TtfReadUint16(&FileOffsetSubTable->SearchRange);
-    TtfObject->OffsetSubTable.EntrySelector = TtfReadUint16(&FileOffsetSubTable->EntrySelector);
-    TtfObject->OffsetSubTable.RangeShift = TtfReadUint16(&FileOffsetSubTable);
+    TtfObject->OffsetSubTable.ScalerType = TtfReadUint32(FileOffsetSubTable->ScalerType); 
+    TtfObject->OffsetSubTable.TableCount = TtfReadUint16(FileOffsetSubTable->TableCount);
+    TtfObject->OffsetSubTable.SearchRange = TtfReadUint16(FileOffsetSubTable->SearchRange);
+    TtfObject->OffsetSubTable.EntrySelector = TtfReadUint16(FileOffsetSubTable->EntrySelector);
+    TtfObject->OffsetSubTable.RangeShift = TtfReadUint16(FileOffsetSubTable->RangeShift);
     
     Status = TtfCopyFileTableDirectoriesToObject(FileOffsetSubTable, TtfObject);
     if(Status != STATUS_SUCCESS){
@@ -110,25 +110,25 @@ LOUSTATUS TtfCreateTtfObject(
     return STATUS_SUCCESS;
 }
 
-UINT8 TtfReadUint8(PVOID Data){
-    return *(UINT8*)Data;
+UINT8 TtfReadUint8(UINT8 Data){
+    return Data;
 }
 
-UINT16 TtfReadUint16(PVOID Data){
+UINT16 TtfReadUint16(UINT16 Data){
     UINT16 Tmp;
-    LouKeSwapEndianess(Data, &Tmp, sizeof(UINT16));
+    LouKeSwapEndianess(&Data, &Tmp, sizeof(UINT16));
     return Tmp;
 }
 
-UINT32 TtfReadUint32(PVOID Data){
+UINT32 TtfReadUint32(UINT32 Data){
     UINT32 Tmp;
-    LouKeSwapEndianess(Data, &Tmp, sizeof(UINT32));
+    LouKeSwapEndianess(&Data, &Tmp, sizeof(UINT32));
     return Tmp;   
 }
 
-UINT64 TtfReadUint64(PVOID Data){
+UINT64 TtfReadUint64(UINT64 Data){
     UINT64 Tmp;
-    LouKeSwapEndianess(Data, &Tmp, sizeof(UINT64));
+    LouKeSwapEndianess(&Data, &Tmp, sizeof(UINT64));
     return Tmp;
 }
 
@@ -156,7 +156,7 @@ TtfInitializeFile(
         return Status;
     }   
 
-    TtfPrintTtfObjectData(NewTtfObject);
+    //TtfPrintTtfObjectData(NewTtfObject);
 
     LouPrint("BOOTVID.SYS:TtfInitializeFile() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

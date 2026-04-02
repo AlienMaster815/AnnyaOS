@@ -60,13 +60,13 @@ typedef struct PACKED _TTF_CMAP_FORMAT4{
     UINT16      SearchRange;
     UINT16      EntrySelector;
     UINT16      RangeShift;
-    #define     TTF_CMAP_FORMAT4_END_CODE(x, y)             (x->VariableData[y])
-    #define     TTF_CMAP_FORMAT4_START_CODE(x, y)           (x->VariableData[ ((x->SegCountX2 / 2)      + 1) + y])        //EndCode is SegCountX2 / 2 + 1 for the padding word 
-    #define     TTF_CMAP_FORMAT4_ID_DELTA(x, y)             (x->VariableData[(((x->SegCountX2 / 2) * 2) + 1) + y]) 
-    #define     TTF_CMAP_FORMAT4_ID_RANGE_OFFSET(x, y)      (x->VariableData[(((x->SegCountX2 / 2) * 3) + 1) + y]) 
-    #define     TTF_CMAP_FORMAT4_GLYPH_INDEX_ARRAY(x, y)    (x->VariableData[(((x->SegCountX2 / 2) * 4) + 1) + y]) 
+    #define     TTF_CMAP_FORMAT4_END_CODE_PTR(x, y)          ((UINT16*)LouKeCastToUnalignedPointer(&(x)->VariableData[y]))
+    #define     TTF_CMAP_FORMAT4_START_CODE_PTR(x, y)        ((UINT16*)LouKeCastToUnalignedPointer(&(x)->VariableData[(TtfReadUint16((x)->SegCountX2) / 2)     + 1 + (y)]))
+    #define     TTF_CMAP_FORMAT4_ID_DELTA_PTR(x, y)          ((UINT16*)LouKeCastToUnalignedPointer(&(x)->VariableData[(TtfReadUint16((x)->SegCountX2) / 2) * 2 + 1 + (y)]))
+    #define     TTF_CMAP_FORMAT4_ID_RANGE_OFFSET_PTR(x, y)   ((UINT16*)LouKeCastToUnalignedPointer(&(x)->VariableData[(TtfReadUint16((x)->SegCountX2) / 2) * 3 + 1 + (y)]))
     UINT16      VariableData[];
 }TTF_CMAP_FORMAT4, * PTTF_CMAP_FORMAT4;
+
 
 typedef struct PACKED _TTF_CMAP_FORMAT_HEADER{
     UINT16      Format;
@@ -91,6 +91,8 @@ typedef struct _TTFOBJ_CMAP_SUBTABLE{
 typedef struct _TTF_OBJECT_CMAP_META_DATA{
     TTFOBJ_CMAP_INDEX       Index;
     PTTFOBJ_CMAP_SUBTABLE   SubTables;
+    UINT16                  AsciiSpace[127];
+    UINT16                  RussianSpace[256];
 }TTF_OBJECT_CMAP_META_DATA, * PTTF_OBJECT_CMAP_META_DATA;
 
 //end
@@ -132,10 +134,10 @@ typedef struct _TTF_OBJECT{
     TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
 }TTF_OBJECT, * PTTF_OBJECT; 
 
-UINT8       TtfReadUint8(PVOID Data);
-UINT16      TtfReadUint16(PVOID Data);
-UINT32      TtfReadUint32(PVOID Data);
-UINT64      TtfReadUint64(PVOID Data);
+UINT8       TtfReadUint8(UINT8 Data);
+UINT16      TtfReadUint16(UINT16 Data);
+UINT32      TtfReadUint32(UINT32 Data);
+UINT64      TtfReadUint64(UINT64 Data);
 int         TtfMemCmp(PVOID Data, PVOID Check, size_t Size);
 LOUSTATUS   TtfInitializeFile(PVOID TtfStream);
 
