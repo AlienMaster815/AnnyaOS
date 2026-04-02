@@ -289,7 +289,6 @@ KERNEL_EXPORT
 SET_OPTIMIZATION(0) 
 uint64_t 
 LouKePciGetVirtualBarAddress(uint64_t PhyAddress){
-
     PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
 	Config.Header.DeviceID = ANY_PCI_ID;

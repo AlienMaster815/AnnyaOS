@@ -49,7 +49,8 @@ TtfCopyFileTableDirectoriesToObject(
             case TTF_CHARECTER_TO_GLYPH_MAPPING:
                 TtfParseCmapData(
                     (PVOID)FileOffsetSubTable,
-                    &TtfObject->TableDirectories[i]
+                    &TtfObject->TableDirectories[i],
+                    TtfObject
                 );
                 break;
             default:

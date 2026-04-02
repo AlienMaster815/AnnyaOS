@@ -25,6 +25,76 @@
 #define TTF_CONTROL_VALUE_PROGRAM       'prep'
 //end
 
+//CMAP Spec Meta Data
+typedef struct PACKED _TTF_CMAP_SUBTABLE{
+    UINT16  PlatformID;
+    UINT16  PlatformSpecID;
+    UINT32  Offset;
+}TTF_CMAP_SUBTABLE, * PTTF_CMAP_SUBTABLE;
+
+typedef struct PACKED _TTF_CMAP_INDEX{
+    UINT16  Version;
+    UINT16  SubTableCount;
+}TTF_CMAP_INDEX, * PTTF_CMAP_INDEX;
+
+typedef struct PACKED _TTF_CMAP_FORMAT0{
+    UINT16      Format;     //0
+    UINT16      Length;     //262
+    UINT16      Language;   //Macintosh only
+    UINT8       GlyphArrayIndex[256];
+}TTF_CMAP_FORMAT0, * PTTF_CMAP_FORMAT0;
+
+typedef struct PACKED _TTF_CMAP_FORMAT2{
+    UINT16      Format;     //0
+    UINT16      Length;     //262
+    UINT16      Language;   //Macintosh only
+    UINT16      SubHeaderKeys[256];
+    UINT16      VariableData[];
+}TTF_CMAP_FORMAT2, * PTTF_CMAP_FORMAT2;
+
+typedef struct PACKED _TTF_CMAP_FORMAT4{
+    UINT16      Format;     //0
+    UINT16      Length;     //262
+    UINT16      Language;   //Macintosh only
+    UINT16      SegCountX2;
+    UINT16      SearchRange;
+    UINT16      EntrySelector;
+    UINT16      RangeShift;
+    #define     TTF_CMAP_FORMAT4_END_CODE(x, y)             (x->VariableData[y])
+    #define     TTF_CMAP_FORMAT4_START_CODE(x, y)           (x->VariableData[ ((x->SegCountX2 / 2)      + 1) + y])        //EndCode is SegCountX2 / 2 + 1 for the padding word 
+    #define     TTF_CMAP_FORMAT4_ID_DELTA(x, y)             (x->VariableData[(((x->SegCountX2 / 2) * 2) + 1) + y]) 
+    #define     TTF_CMAP_FORMAT4_ID_RANGE_OFFSET(x, y)      (x->VariableData[(((x->SegCountX2 / 2) * 3) + 1) + y]) 
+    #define     TTF_CMAP_FORMAT4_GLYPH_INDEX_ARRAY(x, y)    (x->VariableData[(((x->SegCountX2 / 2) * 4) + 1) + y]) 
+    UINT16      VariableData[];
+}TTF_CMAP_FORMAT4, * PTTF_CMAP_FORMAT4;
+
+typedef struct PACKED _TTF_CMAP_FORMAT_HEADER{
+    UINT16      Format;
+    UINT16      Length;
+    UINT16      Language;//Macintosh only
+}TTF_CMAP_FORMAT_HEADER, * PTTF_CMAP_FORMAT_HEADER;
+
+//end
+
+//CMAP Bootvid Meta Data
+typedef struct _TTFOBJ_CMAP_INDEX{
+    UINT16  Version;
+    UINT16  SubTableCount;
+}TTFOBJ_CMAP_INDEX, * PTTFOBJ_CMAP_INDEX;
+
+typedef struct _TTFOBJ_CMAP_SUBTABLE{
+    UINT16  PlatformID;
+    UINT16  PlatformSpecID;
+    UINT32  Offset;
+}TTFOBJ_CMAP_SUBTABLE, * PTTFOBJ_CMAP_SUBTABLE;
+
+typedef struct _TTF_OBJECT_CMAP_META_DATA{
+    TTFOBJ_CMAP_INDEX       Index;
+    PTTFOBJ_CMAP_SUBTABLE   SubTables;
+}TTF_OBJECT_CMAP_META_DATA, * PTTF_OBJECT_CMAP_META_DATA;
+
+//end
+
 typedef struct PACKED _TTF_OFFSET_SUBTABLE{
     UINT32  ScalerType;
     UINT16  TableCount;
@@ -57,8 +127,9 @@ typedef struct _TTFOBJ_TABLE_DIRECTORY{
 }TTFOBJ_TABLE_DIRECTORY, * PTTFOBJ_TABLE_DIRECTORY;
 
 typedef struct _TTF_OBJECT{
-    TTFOBJ_OFFSET_SUBTABLE     OffsetSubTable;
-    PTTFOBJ_TABLE_DIRECTORY    TableDirectories;
+    TTFOBJ_OFFSET_SUBTABLE      OffsetSubTable;
+    PTTFOBJ_TABLE_DIRECTORY     TableDirectories;
+    TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
 }TTF_OBJECT, * PTTF_OBJECT; 
 
 UINT8       TtfReadUint8(PVOID Data);

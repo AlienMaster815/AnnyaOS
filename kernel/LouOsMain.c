@@ -94,7 +94,6 @@ void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
-void InitializeBootGraphics();
 void InitializeInterruptRouter();
 void LouKeProbeSbIsa();
 void SetupGDT();
@@ -361,13 +360,11 @@ void LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
-    LouKeInitializeKernelRuntimeEnviornment();
-
     LouKeInitializePciDevices();
 
     LouKeSantyCheckPciDevices();
 
-    InitializeBootGraphics();
+    LouKeInitializeKernelRuntimeEnviornment();
 
     AdvancedLousineKernelInitialization();
     

@@ -30,11 +30,12 @@ BootVidEntry(){
     NewBuffer->Width = BootGraphics->framebuffer_width;
 	NewBuffer->Height = BootGraphics->framebuffer_height;
     NewBuffer->Bpp = BootGraphics->framebuffer_bpp;
-    NewBuffer->RawData = (UINT8*)LouKePciGetVirtualBarAddress(BootGraphics->framebuffer_addr);
+    NewBuffer->RawData = (UINT8*)LouKePciGetVirtualBarAddress(BootGraphics->framebuffer_addr);//check PCI space for framebuffer in case device is a "NON-VGA, kernel Accelerated device" 
     NewBuffer->FramebufferSize = NewBuffer->Width * NewBuffer->Height * (NewBuffer->Bpp / 8);
     NewBuffer->DrsdDevice = false;
 
     if((!NewBuffer->RawData) && (BootGraphics->framebuffer_addr)){
+        //Fallback for VGA emulation if the device is in VGA Emulation
         EnforceSystemMemoryMap(BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE));
 		LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
 		LouKeCreateDeviceSection((PVOID)BootGraphics->framebuffer_addr, (PVOID)BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), PAGE_READWRITE | SEC_NOCACHE);

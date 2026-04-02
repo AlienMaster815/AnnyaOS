@@ -6,7 +6,8 @@
 LOUSTATUS 
 TtfParseCmapData(
     PVOID                   File, 
-    PTTFOBJ_TABLE_DIRECTORY Directory
+    PTTFOBJ_TABLE_DIRECTORY Directory,
+    PTTF_OBJECT             Object
 );
 
 #endif
