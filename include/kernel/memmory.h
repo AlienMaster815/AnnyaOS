@@ -14,6 +14,8 @@ extern "C" {
 #include <kernel/loustatus.h>
 #include <Modulation.h>
 
+#define POOL_FLAG_NORMAL            0
+#define POOL_FLAG_NO_WRAP_ARROUND   (1 << 0)
 
 #define HighQuad(v) ((__int128)v >> 64)
 #define LowQuad(v) ((__int128)v & 0xFFFFFFFFFFFFFFFF)
@@ -96,7 +98,6 @@ typedef struct _POOL_MEMORY_TRACKS{
     uint64_t Address;
     size_t MemorySize; //used if not fixed
 }POOL_MEMORY_TRACKS, * PPOOL_MEMORY_TRACKS;
-
 
 
 typedef struct _LMPOOL_DIRECTORY{
@@ -388,8 +389,10 @@ void LouKeUnMapContinuousMemoryBlock(
 KERNEL_EXPORT void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
-void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
-void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
+void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres, BOOLEAN CreateDevSection);
+void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection);
+void* LouKeMallocPageExVirt64(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres, BOOLEAN CreateDevSection);
+void* LouKeMallocPageVirt64(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection);
 void* LouKeMallocPageExPhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 KERNEL_EXPORT void* LouKeMallocPagePhy32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 uint64_t LouKeVMemmoryGetSize(uint64_t VAddress);

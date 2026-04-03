@@ -217,11 +217,18 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
     if (Pool->FixedSizePool) {
         LouPrint("LouKeMallocFromDynamicPoolEx(): ERROR - FixedSizePool input\n");
         return NULL;
-    }
+    }   
+
+    BOOLEAN NoWrapArround = Pool->Flags & POOL_FLAG_NO_WRAP_ARROUND;
 
     size_t Base = Pool->VLocation;
     size_t Limit = Base + Pool->PoolSize;
-    uint64_t Start = Pool->LastOut ? Pool->LastOut : Base;
+    uint64_t Start; 
+    if(!NoWrapArround){
+        Start = Pool->LastOut ? Pool->LastOut : Base;
+    }else{
+        Start = Base;
+    }
     uint64_t Result = Start;
     bool Wrapped = false;
 
@@ -245,19 +252,21 @@ retry_search:
             NewTrack->MemorySize = AllocationSize;
             NewTrack->Peers.NextHeader = Pool->MemoryTracks.Peers.NextHeader;
             Pool->MemoryTracks.Peers.NextHeader = (PListHeader)NewTrack;
-            Pool->LastOut = Result + AllocationSize;
+            if(!NoWrapArround){
+                Pool->LastOut = Result + AllocationSize;
+            }
             memset((void*)Result, 0, AllocationSize);
             return (void*)Result;
         }
     }
 
-    if (!Wrapped && Start != Base) {
+    if ((!Wrapped && Start != Base) && (!NoWrapArround)) {
         Result = Base;
         Wrapped = true;
         goto retry_search;
     }
 
-    LouPrint("LouKeMallocFromDynamicPoolEx(): OUT OF MEMORY: Requested=%h PoolSize=%h\n", AllocationSize, Pool->PoolSize);
+    //LouPrint("LouKeMallocFromDynamicPoolEx(): OUT OF MEMORY: Requested=%h PoolSize=%h\n", AllocationSize, Pool->PoolSize);
     return NULL;
 }
 

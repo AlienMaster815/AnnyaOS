@@ -70,9 +70,10 @@ LouKeGetCurrentNodeNumber(){
 KERNEL_EXPORT 
 ULONG 
 LouKeGetCurrentProcessorNumber(){
-    LouPrint("LouKeGetCurrentProcessorNumber()\n");
-    while(1);
-    return 0x00;
+    if(GetLKPCB()){
+        return (ULONG)((PLKPCB)GetLKPCB())->ProcID;    
+    }
+    return (ULONG)GetCurrentCpuTrackMember();
 }
 
 KERNEL_EXPORT 
@@ -292,7 +293,7 @@ LouKeSetTargetProcessorDpc(
 
 KERNEL_EXPORT 
 ULONG 
-LouKeKeGetProcessorIndexFromNumber(
+LouKeGetProcessorIndexFromNumber(
     PPROCESSOR_NUMBER ProcNumber
 ){
     LouPrint("LouKeKeGetProcessorIndexFromNumber()\n");
@@ -302,7 +303,7 @@ LouKeKeGetProcessorIndexFromNumber(
 
 KERNEL_EXPORT 
 LOUSTATUS 
-LouKeKeGetProcessorNumberFromIndex(
+LouKeGetProcessorNumberFromIndex(
     ULONG ProcIndex, 
     PPROCESSOR_NUMBER ProcNumber
 ){

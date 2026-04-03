@@ -30,13 +30,12 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
 #define ForEachLListItem(Position, Node) ForEachListItem(Position, Node)
 
 #define ForEachListEntry(Position, Node, Member) for((Position) = ListItemToType((Node), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member); (Position) = ListItemToType((Position)->Member.NextHeader, typeof(*(Position)), Member)) 
-#define ForEachListEntrySafe(Position,N, Node, Member) for((Position) = ListItemToType((Node), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member) && (N = ListItemToType(Position->Member.NextHeader, typeof(*N), Member), true); Position = N) 
+#define ForEachListEntrySafe(Position, N, Node, Member) for((Position) = ListItemToType((Node), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member) && (N = ListItemToType(Position->Member.NextHeader, typeof(*N), Member), true); Position = N) 
 
 #define ForEachLListEntry(Position, N, Node, Member) ForEachListEntry(Position, N, Node, Member)
 #define ForEachLListEntrySafe(Position, N, Node, Member) ForEachListEntrySafe(Position, N, Node, Member)
 
 #define ListItemToTypeOrNull(Header, Type, Member) ((Type*)(UINTPTR)(Header ? CONTAINER_OF(Header, Type, Member) : 0x00))
-
 
 static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
     while(Header->NextHeader){

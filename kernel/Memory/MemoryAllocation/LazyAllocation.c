@@ -52,7 +52,7 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
     NewTracker->PageFlags = PageFlags;
     NewTracker->PhyMappingCount = VirtualSize / PageSize;
     NewTracker->PhysicalMappings = LouKeMallocArray(PVOID, NewTracker->PhyMappingCount, KERNEL_GENERIC_MEMORY);
-    NewTracker->DynamicAllocations = LouKeMapDynamicPool((UINT64)VirtualLocation, VirtualSize, "LAZY_POOL", 0);
+    NewTracker->DynamicAllocations = LouKeMapDynamicPool((UINT64)VirtualLocation, VirtualSize, "LAZY_POOL", POOL_FLAG_NO_WRAP_ARROUND);
     return NewTracker;
 }
 

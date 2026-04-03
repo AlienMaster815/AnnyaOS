@@ -223,7 +223,7 @@ LOUAPI void IoApicMaskIrq(uint8_t tirq) {
 bool InitializeIoApic(PACPI_MADT_IO_APIC IoApic){
     LouPrint("Starting IO/APIC:%d At Address:%h\n", IoApic->IOAPICID, IoApic->IOAPICAddress);
     LouPrint("Creating An Address In Virtual Memory\n");
-    UINT64 IoApicBase  = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, IoApic->IOAPICAddress);
+    UINT64 IoApicBase  = (uint64_t)LouKeMallocPageExVirt32(KILOBYTE_PAGE, 1,KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, IoApic->IOAPICAddress, true);
     IoApic->IOAPICAddress = IoApicBase;
     UINT8 InterruptCount = (IoApicRead(IoApicBase, 0x01) >> 16) + 1;
     if(IoApic->GlobalSystemInterruptBase == TotalApicInterrupts){

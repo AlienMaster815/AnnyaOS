@@ -160,6 +160,22 @@ LouKeXaStoreEx(
     UINT64      PageFlags
 );
 
+KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGetEx(
+    PXARRAY     Array,
+    UINT64      Index,
+    UINT64*     Out
+);
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGet(
+    PXARRAY     Array,
+    UINT64      Index,
+    UINT64*     Out
+);
+
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeXaIdrAllocate(

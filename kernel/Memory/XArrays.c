@@ -66,6 +66,57 @@ LouKeXaIsIndexUsedEx(
 }
 
 KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGetEx(
+    PXARRAY     Array,
+    UINT64      Index,
+    UINT64*     Out
+){
+    if((!Out) || (!Array)){
+        return STATUS_INVALID_PARAMETER;
+    }    
+
+    PXARRAY_NODE TmpNode = ListItemToType(Array->Nodes.NextHeader, XARRAY_NODE, Peers);
+    BOOLEAN NodePreExists = false;
+    UINT64 Member;
+    while(TmpNode){
+        if(RangeInterferes(
+            TmpNode->Base, 512,
+            Index, 1
+        )){
+            NodePreExists = true;
+            break;
+        }       
+        TmpNode = ListItemToType(TmpNode->Peers.NextHeader, XARRAY_NODE, Peers);
+    }
+    if(!NodePreExists){
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    Member = Index - TmpNode->Base;
+    *Out = TmpNode->Entries[Member];
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGet(
+    PXARRAY     Array,
+    UINT64      Index,
+    UINT64*     Out
+){
+    LOUSTATUS Result;
+    LouKeXaLockArray(Array);
+    Result = LouKeXaGetEx(
+        Array,
+        Index,
+        Out
+    );
+    LouKeXaUnlockArray(Array);
+    return Result;
+}
+
+KERNEL_EXPORT
 BOOLEAN 
 LouKeXaIsIndexUsed(
     PXARRAY     Array,

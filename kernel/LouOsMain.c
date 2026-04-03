@@ -523,6 +523,8 @@ void LouOsKrnlStart(
 
 
 //TODO:
+//Test the new Vmm Allocation Subsystem
+
 // Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 
 //BUGS TO FIX:
