@@ -466,6 +466,18 @@ uint64_t LouKeGetThreadIdentification(){
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread->ThreadID;
 }
 
+KERNEL_EXPORT
+uint64_t
+LouKeGetProcessIdentification(){
+    UINT32 ProcessorID = LouKeGetCurrentProcessorNumber();
+    if(!ProcessBlock.ProcStateBlock){
+        return 0;
+    }else if(!ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentProcess){
+        return 0;
+    }
+    return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentProcess->ProcessID;
+}
+
 LOUAPI
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData(){

@@ -388,6 +388,78 @@ void LouKeUnMapContinuousMemoryBlock(
 
 KERNEL_EXPORT void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags);
 
+typedef void (*KERNEL_REMAP_EMPTY_CALLBACK)(PVOID);
+
+LOUSTATUS
+LouKeVmmCreatePageReserveVm64(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount,
+    BOOLEAN SetPhysUser,
+    BOOLEAN SetVirtUser
+);
+
+LOUSTATUS
+LouKeVmmCreatePageReserveVm32(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount,
+    BOOLEAN SetPhysUser,
+    BOOLEAN SetVirtUser
+);
+
+LOUSTATUS
+LouKeVmmGetVPageReserveVm64(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+);
+
+LOUSTATUS 
+LouKeVmmGetPPageReserveVm64(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+);
+
+LOUSTATUS
+LouKeVmmGetVPageReserveVm32(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+);
+
+LOUSTATUS 
+LouKeVmmGetPPageReserveVm32(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+);
+
+LOUSTATUS 
+LouKeVmmPutVPageReserveAddressVm64(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+);
+
+LOUSTATUS 
+LouKeVmmPutPPageReserveAddressVm64(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+);
+
+LOUSTATUS 
+LouKeVmmPutVPageReserveAddressVm32(
+    PVOID                       VAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+);
+
+LOUSTATUS 
+LouKeVmmPutPPageReserveAddressVm32(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+);
+
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres, BOOLEAN CreateDevSection);
 void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection);

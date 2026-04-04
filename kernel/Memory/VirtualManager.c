@@ -1,0 +1,311 @@
+#include <LouAPI.h>
+
+typedef struct _KERNEL_PAGE_REMAP{
+    ListHeader          Peers;
+    PVOID               PageAddress;
+    SIZE                PageCount;
+    SIZE                PageSize;
+    ATOMIC_BOOLEAN      PhysicalUser;
+    ATOMIC_BOOLEAN      VirtualUser;
+}KERNEL_PAGE_REMAP, * PKERNEL_PAGE_REMAP;
+
+typedef struct _KERNEL_PAGE_REMAP_MANAGER{
+    mutex_t             Lock;
+    ListHeader          Remaps;
+}KERNEL_PAGE_REMAP_MANAGER, * PKERNEL_PAGE_REMAP_MANAGER;
+
+static KERNEL_PAGE_REMAP_MANAGER KernelPageRemap64 = {0};
+static KERNEL_PAGE_REMAP_MANAGER KernelPageRemap32 = {0};
+
+LOUSTATUS
+LouKeVmmCreatePageReserveVm64(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount,
+    BOOLEAN SetPhysUser,
+    BOOLEAN SetVirtUser
+){
+    if((!PageAddress) || (!PageSize) || (!PageCount)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PKERNEL_PAGE_REMAP NewRemap = LouGeneralAllocateMemoryEx(sizeof(KERNEL_PAGE_REMAP), GET_ALIGNMENT(KERNEL_PAGE_REMAP));
+    if(!NewRemap){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    NewRemap->PageAddress = PageAddress;
+    NewRemap->PageSize = PageSize;
+    NewRemap->PageCount = PageCount;
+    if(SetVirtUser)LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
+    if(SetPhysUser)LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
+    LouKeListAddTail(&NewRemap->Peers, &KernelPageRemap64.Remaps);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS
+LouKeVmmCreatePageReserveVm32(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount,
+    BOOLEAN SetPhysUser,
+    BOOLEAN SetVirtUser
+){
+    if((!PageAddress) || (!PageSize) || (!PageCount)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PKERNEL_PAGE_REMAP NewRemap = LouGeneralAllocateMemoryEx(sizeof(KERNEL_PAGE_REMAP), GET_ALIGNMENT(KERNEL_PAGE_REMAP));
+    if(!NewRemap){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    NewRemap->PageAddress = PageAddress;
+    NewRemap->PageSize = PageSize;
+    NewRemap->PageCount = PageCount;
+    if(SetVirtUser)LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
+    if(SetPhysUser)LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
+    LouKeListAddTail(&NewRemap->Peers, &KernelPageRemap32.Remaps);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS
+LouKeVmmGetVPageReserveVm64(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+
+    MutexLock(&KernelPageRemap64.Lock);
+    ForEachListEntry(TmpRemap, &KernelPageRemap64.Remaps, Peers){
+        if(
+            (TmpRemap->PageSize == PageSize) && 
+            (TmpRemap->PageCount == PageCount) &&
+            (!LouKeGetAtomicBoolean(&TmpRemap->VirtualUser))
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->VirtualUser, 1);
+            *Out = TmpRemap->PageAddress;
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap64.Lock);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeVmmGetPPageReserveVm64(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+
+    MutexLock(&KernelPageRemap64.Lock);
+    ForEachListEntry(TmpRemap, &KernelPageRemap64.Remaps, Peers){
+        if(
+            (TmpRemap->PageSize == PageSize) && 
+            (TmpRemap->PageCount == PageCount) &&
+            (!LouKeGetAtomicBoolean(&TmpRemap->PhysicalUser))
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->PhysicalUser, 1);
+            *Out = TmpRemap->PageAddress;
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap64.Lock);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS
+LouKeVmmGetVPageReserveVm32(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+
+    MutexLock(&KernelPageRemap32.Lock);
+    ForEachListEntry(TmpRemap, &KernelPageRemap32.Remaps, Peers){
+        if(
+            (TmpRemap->PageSize == PageSize) && 
+            (TmpRemap->PageCount == PageCount) &&
+            (!LouKeGetAtomicBoolean(&TmpRemap->VirtualUser))
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->VirtualUser, 1);
+            *Out = TmpRemap->PageAddress;
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap32.Lock);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeVmmGetPPageReserveVm32(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+
+    MutexLock(&KernelPageRemap32.Lock);
+    ForEachListEntry(TmpRemap, &KernelPageRemap32.Remaps, Peers){
+        if(
+            (TmpRemap->PageSize == PageSize) && 
+            (TmpRemap->PageCount == PageCount) &&
+            (!LouKeGetAtomicBoolean(&TmpRemap->PhysicalUser))
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->PhysicalUser, 1);
+            *Out = TmpRemap->PageAddress;
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap32.Lock);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeVmmPutVPageReserveAddressVm64(
+    PVOID                       VAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+){
+    if(!VAddress){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+    PKERNEL_PAGE_REMAP  ForwardTmpRemap;
+
+    MutexLock(&KernelPageRemap64.Lock);
+    ForEachListEntrySafe(TmpRemap, ForwardTmpRemap, &KernelPageRemap64.Remaps, Peers){
+        if(
+            TmpRemap->PageAddress == VAddress
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->VirtualUser, 0);
+            if(!LouKeGetAtomicBoolean(&TmpRemap->PhysicalUser)){
+                LouKeListDeleteItem(&TmpRemap->Peers);
+                if(Callback){
+                    Callback(TmpRemap->PageAddress);
+                }
+            }
+            LouGeneralFreeMemory(TmpRemap);
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap64.Lock);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS 
+LouKeVmmPutPPageReserveAddressVm64(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+){
+    if(!PAddress){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+    PKERNEL_PAGE_REMAP  ForwardTmpRemap;
+
+    MutexLock(&KernelPageRemap64.Lock);
+    ForEachListEntrySafe(TmpRemap, ForwardTmpRemap, &KernelPageRemap64.Remaps, Peers){
+        if(
+            TmpRemap->PageAddress == PAddress
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->PhysicalUser, 0);
+            if(!LouKeGetAtomicBoolean(&TmpRemap->VirtualUser)){
+                LouKeListDeleteItem(&TmpRemap->Peers);
+                if(Callback){
+                    Callback(TmpRemap->PageAddress);
+                }
+            }
+            LouGeneralFreeMemory(TmpRemap);
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap64.Lock);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS 
+LouKeVmmPutVPageReserveAddressVm32(
+    PVOID                       VAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+){
+    if(!VAddress){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+    PKERNEL_PAGE_REMAP  ForwardTmpRemap;
+
+    MutexLock(&KernelPageRemap32.Lock);
+    ForEachListEntrySafe(TmpRemap, ForwardTmpRemap, &KernelPageRemap32.Remaps, Peers){
+        if(
+            TmpRemap->PageAddress == VAddress
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->VirtualUser, 0);
+            if(!LouKeGetAtomicBoolean(&TmpRemap->PhysicalUser)){
+                LouKeListDeleteItem(&TmpRemap->Peers);
+                if(Callback){
+                    Callback(TmpRemap->PageAddress);
+                }
+            }
+            LouGeneralFreeMemory(TmpRemap);
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap32.Lock);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS 
+LouKeVmmPutPPageReserveAddressVm32(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+){
+    if(!PAddress){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+    PKERNEL_PAGE_REMAP  ForwardTmpRemap;
+
+    MutexLock(&KernelPageRemap32.Lock);
+    ForEachListEntrySafe(TmpRemap, ForwardTmpRemap, &KernelPageRemap32.Remaps, Peers){
+        if(
+            TmpRemap->PageAddress == PAddress
+        ){
+            LouKeSetAtomicBoolean(&TmpRemap->PhysicalUser, 0);
+            if(!LouKeGetAtomicBoolean(&TmpRemap->VirtualUser)){
+                LouKeListDeleteItem(&TmpRemap->Peers);
+                if(Callback){
+                    Callback(TmpRemap->PageAddress);
+                }
+            }
+            LouGeneralFreeMemory(TmpRemap);
+            break;
+        }
+    }
+    MutexUnlock(&KernelPageRemap32.Lock);
+    return STATUS_SUCCESS;
+}

@@ -148,7 +148,13 @@ typedef enum{
 }THREAD_TYPE;
 
 #ifndef _USER_MODE_CODE_
+
+KERNEL_EXPORT
+uint64_t
+LouKeGetProcessIdentification();
+KERNEL_EXPORT
 uint64_t LouKeGetThreadIdentification();
+
 uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 void LouKeInitializeDelayedWork(
     void (*DelayedFunction)(uint64_t PrivateData),
