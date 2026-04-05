@@ -1,5 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2026)
-#include "BootVid.h"
+#include "../BootVid.h"
 
 UNUSED
 static 
@@ -47,16 +47,45 @@ TtfCopyFileTableDirectoriesToObject(
         switch(TtfObject->TableDirectories[i].Tag){
 
             case TTF_CHARECTER_TO_GLYPH_MAPPING:
-                TtfParseCmapData(
-                    (PVOID)FileOffsetSubTable,
-                    &TtfObject->TableDirectories[i],
-                    TtfObject
-                );
+                TtfObject->CmapOffset = i;
+                break;
+            case TTF_INDEX_TO_LOCATION:
+                TtfObject->LocaOffset = i;
+                break;
+            case TTF_GLYPH_DATA:
+                TtfObject->GlyphOffset = i;
+                break;
+            case TTF_FONT_HEADER:
+                TtfObject->HeadOffset = i;
                 break;
             default:
                 break;
         }
     }
+
+    TtfParseCmapData(
+        (PVOID)FileOffsetSubTable,
+        &TtfObject->TableDirectories[TtfObject->CmapOffset],
+        TtfObject
+    );
+    
+    TtfParseHeadData(
+        (PVOID)FileOffsetSubTable,
+        &TtfObject->TableDirectories[TtfObject->HeadOffset],
+        TtfObject
+    );
+
+    TtfParseLocaData(
+        (PVOID)FileOffsetSubTable,
+        &TtfObject->TableDirectories[TtfObject->LocaOffset],
+        TtfObject
+    );
+
+    TtfParseGlyphData(
+        (PVOID)FileOffsetSubTable,
+        &TtfObject->TableDirectories[TtfObject->GlyphOffset],
+        TtfObject
+    );
 
     return STATUS_SUCCESS;
 }

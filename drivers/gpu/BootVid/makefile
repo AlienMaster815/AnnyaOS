@@ -1,8 +1,12 @@
 INCLUDES = -I../../../include
 TARGET = BOOTVID.SYS
-SRC = BootVidMain.c \
-		OpenType.c \
-		TtfCmap.c
+SRC = 	BootVidMain.c \
+		BootRender.c \
+		Ttf/OpenType.c \
+		Ttf/TtfCmap.c \
+		Ttf/TtfGlyph.c \
+		Ttf/TtfLoca.c \
+		Ttf/TtfHead.c 
 
 
 CC = x86_64-w64-mingw32-gcc

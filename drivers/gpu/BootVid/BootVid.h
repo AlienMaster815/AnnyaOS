@@ -6,8 +6,11 @@
 
 #include <LouDDK.h>
 #include <bootloader/grub/multiboot2.h>
-#include "OpenType.h"
-#include "TtfCmap.h"
+#include "Ttf/OpenType.h"
+#include "Ttf/TtfCmap.h"
+#include "Ttf/TtfGlyph.h"
+#include "Ttf/TtfHead.h"
+#include "Ttf/TtfLoca.h"
 
 typedef struct _BOOTVID_FRAMEBUFFER{
     ListHeader  Head;
@@ -37,5 +40,10 @@ LouKeGetBootFrameBuffer(
 	struct multiboot_tag_framebuffer_common** pBootGraphics
 );
 
+LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer);
+
+void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb);
+void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B);
+void BootRenderSyncScreen();
 
 #endif

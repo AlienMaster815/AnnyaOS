@@ -1,4 +1,4 @@
-#include "BootVid.h" 
+#include "../BootVid.h"
 
 
 UNUSED 
@@ -95,6 +95,7 @@ TtfCmapParseUnicode(
             );
             if(Status != STATUS_SUCCESS){
                 //LouPrint("Ascii UTF8 Code:%d Not Mapped\n", i);
+                TtfObject->CmapMetaData.AsciiSpace[i] = 0xFFFF;
             }
         }
 
@@ -106,6 +107,7 @@ TtfCmapParseUnicode(
             );
             if(Status != STATUS_SUCCESS){
                 //LouPrint("Russian UTF16 Code:%d Not Mapped\n", i + 0x0400);
+                TtfObject->CmapMetaData.RussianSpace[i] = 0xFFFF;
             }
         }
 

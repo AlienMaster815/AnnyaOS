@@ -2,7 +2,15 @@
 #ifndef _MINI_OPEN_TYPE_H
 #define _MINI_OPEN_TYPE_H
 
-#include "BootVid.h"
+#include "../BootVid.h"
+
+typedef union PACKED _TTF_FIXED{
+    UINT32      RawData;
+    struct{
+        UINT16  HighWord;
+        UINT16  LowWord;
+    };
+}TTF_FIXED, * PTTF_FIXED;
 
 //TTF Required Tables
 #define TTF_CHARECTER_TO_GLYPH_MAPPING  'cmap'
@@ -67,7 +75,6 @@ typedef struct PACKED _TTF_CMAP_FORMAT4{
     UINT16      VariableData[];
 }TTF_CMAP_FORMAT4, * PTTF_CMAP_FORMAT4;
 
-
 typedef struct PACKED _TTF_CMAP_FORMAT_HEADER{
     UINT16      Format;
     UINT16      Length;
@@ -95,6 +102,35 @@ typedef struct _TTF_OBJECT_CMAP_META_DATA{
     UINT16                  RussianSpace[256];
 }TTF_OBJECT_CMAP_META_DATA, * PTTF_OBJECT_CMAP_META_DATA;
 
+//end
+
+//TTF spec Head structs
+typedef struct PACKED _TTF_HEAD_TABLE{
+    UINT16 VersionMajor;
+    UINT16 VersionMinor;
+    UINT16 FontRevMajor;
+    UINT16 FontRevMinor;
+    UINT32 ChecksumAdjustment;
+    UINT32 MagicNumber;
+    UINT16 Flags;
+    UINT16 UnitsPerEm;
+    UINT32 Created[2];
+    UINT32 Modified[2];
+    INT16  XMin;
+    INT16  YMin;
+    INT16  XMax;
+    INT16  YMax;
+    UINT16 MacStyle;
+    UINT16 LowestRecPPEM;
+    INT16  FontDirectionHint;
+    INT16  IndexToLocFormat;
+    INT16  GlyphDataFormat;
+}TTF_HEAD_TABLE, * PTTF_HEAD_TABLE;
+//end
+
+//loca spec head
+typedef UINT16 TTF_LOCA_SHORT, * PTTF_LOCA_SHORT;
+typedef UINT32 TTF_LOCA_LONG,  * PTTF_LOCA_LONG;
 //end
 
 typedef struct PACKED _TTF_OFFSET_SUBTABLE{
@@ -130,8 +166,15 @@ typedef struct _TTFOBJ_TABLE_DIRECTORY{
 
 typedef struct _TTF_OBJECT{
     TTFOBJ_OFFSET_SUBTABLE      OffsetSubTable;
+    SIZE                        CmapOffset;
+    SIZE                        LocaOffset;
+    SIZE                        GlyphOffset;
+    SIZE                        HeadOffset;
     PTTFOBJ_TABLE_DIRECTORY     TableDirectories;
     TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
+    TTF_LOCA_LONG               AsciiGlyphOffsets[127];
+    TTF_LOCA_LONG               RussianGlyphOffsets[256];
+    BOOLEAN                     UsesLongLocaTableFormat;
 }TTF_OBJECT, * PTTF_OBJECT; 
 
 UINT8       TtfReadUint8(UINT8 Data);

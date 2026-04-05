@@ -1,7 +1,8 @@
+//Copyright GPL-2 Tyler Grenier (2026)
 #ifndef _TTF_GLYPH_H
 #define _TTF_GLYPH_H
 
-#include "BootVid.h"
+#include "../BootVid.h"
 
 typedef WORD FWORD, PFWORD;
 
@@ -21,5 +22,12 @@ typedef struct PACKED _TTF_GLPYH_DESCRIPTION{
 
 
 //end
+
+LOUSTATUS 
+TtfParseGlyphData(
+    PVOID                   File, 
+    PTTFOBJ_TABLE_DIRECTORY Directory,
+    PTTF_OBJECT             TtfObject
+);
 
 #endif

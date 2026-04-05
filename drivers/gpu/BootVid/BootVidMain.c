@@ -44,6 +44,11 @@ BootVidEntry(){
 
     //UINT32* Tmp = (UINT32*)NewBuffer->RawData;
 
+    Status = BootVidRegisterBootFrameBuffer(NewBuffer);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
     DefaultFontKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\BootDev\\DefaultFont\\LoadOrder", 0x00);    
     if(!DefaultFontKey){
         LouPrint("BOOTVID.SYS:ERROR:Unable To Open Default Font Key\n");

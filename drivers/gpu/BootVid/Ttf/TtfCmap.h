@@ -1,7 +1,8 @@
+//Copyright GPL-2 Tyler Grenier (2026)
 #ifndef _TTF_CMAP_H
 #define _TTF_CMAP_H
 
-#include "BootVid.h"
+#include "../BootVid.h"
 
 LOUSTATUS 
 TtfParseCmapData(
