@@ -40,8 +40,7 @@ void BootRenderSwap(int* A, int* B){
 }
 
 float BootRenderAbsolute(float x){
-    if(x < 0)return x;
-    else return x;
+    return (x < 0) ? -x : x;
 }
 
 int BootRenderIntegerPartOfNumber(float x){
@@ -53,9 +52,11 @@ int BootRenderRoundNumber(float x){
 }
 
 float BootRenderFloatPartOfNumber(float x){
-    if(x > 0) return x - (float)BootRenderIntegerPartOfNumber(x);
-    else return x - (float)(BootRenderIntegerPartOfNumber(x) + 1);
+    float fraction = x - (float)((int)x);
+    if (fraction < 0) fraction += 1.0f; 
+    return fraction;
 }
+
 
 float BootRenderRoundFloatPartOfNumber(float x){
     return 1.0f - BootRenderFloatPartOfNumber(x);
@@ -94,6 +95,24 @@ void BootRenderDrawLineEx(
     int     X2, int Y2,
     UINT32  Color
 ){
+
+    if((X1 == X2) && (Y1 == Y2)){
+        BootRenderPutPixelEx(X1, Y1, Color);
+        return;
+    }
+    else if(X1 == X2){
+        for(int i = MIN(Y1, Y2); i <= MAX(Y1, Y2); i++){
+            BootRenderPutPixelEx(X1, i, Color);
+        }
+        return;
+    }else if(Y1 == Y2){
+        for(int i = MIN(X1, X2); i <= MAX(X1, X2); i++){
+            BootRenderPutPixelEx(i, Y1, Color);
+        }
+        return;
+    }
+
+
     int Steep = BootRenderAbsolute(Y2 - Y1) > BootRenderAbsolute(X2 - X1);
 
     if(Steep){
@@ -101,16 +120,14 @@ void BootRenderDrawLineEx(
         BootRenderSwap(&X2, &Y2);
     }
     if(X1 > X2){
-        BootRenderSwap(&X1, &X1);
-        BootRenderSwap(&Y2, &Y2);
+        BootRenderSwap(&X1, &X2);
+        BootRenderSwap(&Y1, &Y2);
     }
 
     float Dx = X2 - X1;
     float Dy = Y2 - Y1;
-    float Gradient = Dy / Dx;
-    if(Dx == 0.0){
-        Gradient = 1;
-    }
+    float Gradient = (Dx == 0) ? 1.0f : Dy / Dx; 
+
     int     XPxl1 = X1;
     int     XPxl2 = X2;
     float   IntersectY = Y1;
@@ -125,7 +142,7 @@ void BootRenderDrawLineEx(
                 BootRenderRoundFloatPartOfNumber(IntersectY)
             );
             BootRenderPutPixelBrightnesEx(
-                BootRenderIntegerPartOfNumber(IntersectY) - 1,
+                BootRenderIntegerPartOfNumber(IntersectY) + 1,
                 x,
                 Color,
                 BootRenderFloatPartOfNumber(IntersectY)
@@ -136,15 +153,15 @@ void BootRenderDrawLineEx(
         int x;
         for(x = XPxl1; x <= XPxl2; x++){
             BootRenderPutPixelBrightnesEx(
-                x,
-                BootRenderIntegerPartOfNumber(IntersectY),
-                Color,
+                x, 
+                BootRenderIntegerPartOfNumber(IntersectY), 
+                Color, 
                 BootRenderRoundFloatPartOfNumber(IntersectY)
             );
             BootRenderPutPixelBrightnesEx(
-                x,
-                BootRenderIntegerPartOfNumber(IntersectY) - 1,
-                Color,
+                x, 
+                BootRenderIntegerPartOfNumber(IntersectY) + 1,
+                Color, 
                 BootRenderFloatPartOfNumber(IntersectY)
             );
             IntersectY += Gradient;

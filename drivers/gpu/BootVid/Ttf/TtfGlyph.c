@@ -1,6 +1,119 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include "../BootVid.h"
 
+static
+void DrawBezier(int x0, int y0, int x1, int y1, int x2, int y2, UINT32 Color) {
+    int prevX = x0, prevY = y0;
+    for (int i = 1; i <= 10; i++) {
+        float t = i / 10.0f;
+        int x = (1-t)*(1-t)*x0 + 2*(1-t)*t*x1 + t*t*x2;
+        int y = (1-t)*(1-t)*y0 + 2*(1-t)*t*y1 + t*t*y2;
+        BootRenderDrawLineEx(prevX, prevY, x, y, Color);
+        prevX = x; prevY = y;
+    }
+}
+
+/*void 
+TtfDrawGlyphEx(
+    PTTF_OBJECT         TtfObject,
+    PTTFOBJ_GLYPH_DATA  GlyphData,
+    int                 x,
+    int                 y,
+    int                 Width,
+    int                 Height,
+    UINT32              Color
+){
+
+    int LastX = 0;
+    int LastY = 0;
+    int Contour = 0;
+    BOOLEAN LastPointOn = false;
+    BOOLEAN BrushLifted = false;
+    for(size_t i = 0; i < GlyphData->VectorCount; i++){
+        int CurrentX = x + TtfGetPixelX(GlyphData->XCoordinates[i], Width, TtfObject->UnitsPerEm);
+        int CurrentY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[i], Height, TtfObject->UnitsPerEm);
+        LouPrint("GlyphData->Flags      [%d]:%bc\n", i, GlyphData->Flags[i]);
+        LouPrint("GlyphData->XCoordinate[%d]:%d\n", i, CurrentX);
+        LouPrint("GlyphData->YCoordinate[%d]:%d\n", i, CurrentY);
+
+        if(i > GlyphData->EndPoints[Contour]){
+            Contour++;
+            BrushLifted = true;
+        }
+
+        if(!BrushLifted && LastPointOn && (GlyphData->Flags[i] & TTF_ON_CURVE)){
+            BootRenderDrawLineEx(LastX, LastY, CurrentX, CurrentY, Color);
+        }
+
+
+        
+        if(!(GlyphData->Flags[i] & TTF_ON_CURVE)){
+            LastPointOn = false;
+        }else{
+            LastPointOn = true;
+        }
+        
+
+        LastX = CurrentX;
+        LastY = CurrentY;
+    
+        BootRenderSyncScreen();
+        BrushLifted = false;
+    }
+}*/
+
+void TtfDrawGlyphEx(
+    PTTF_OBJECT         TtfObject,
+    PTTFOBJ_GLYPH_DATA  GlyphData,
+    int                 x,
+    int                 y,
+    int                 Width,
+    int                 Height,
+    UINT32              Color
+) {
+    int StartIdx = 0;
+
+    for (int c = 0; c < GlyphData->ContourCount; c++) {
+        int EndIdx = GlyphData->EndPoints[c];
+        int FirstX = x + TtfGetPixelX(GlyphData->XCoordinates[StartIdx], Width, TtfObject->UnitsPerEm);
+        int FirstY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[StartIdx], Height, TtfObject->UnitsPerEm);        
+        int PrevX = FirstX;
+        int PrevY = FirstY;
+        for (int i = StartIdx + 1; i <= EndIdx; i++) {
+            int CurrX = x + TtfGetPixelX(GlyphData->XCoordinates[i], Width, TtfObject->UnitsPerEm);
+            int CurrY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[i], Height, TtfObject->UnitsPerEm);
+            if (GlyphData->Flags[i] & TTF_ON_CURVE) {
+                BootRenderDrawLineEx(PrevX, PrevY, CurrX, CurrY, Color);
+                PrevX = CurrX;
+                PrevY = CurrY;
+            } 
+            else {
+                int NextIdx = (i == EndIdx) ? StartIdx : i + 1;
+                int NextX = x + TtfGetPixelX(GlyphData->XCoordinates[NextIdx], Width, TtfObject->UnitsPerEm);
+                int NextY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[NextIdx], Height, TtfObject->UnitsPerEm);
+                if (!(GlyphData->Flags[NextIdx] & TTF_ON_CURVE)) {
+                    int MidX = (CurrX + NextX) / 2;
+                    int MidY = (CurrY + NextY) / 2;
+                    DrawBezier(PrevX, PrevY, CurrX, CurrY, MidX, MidY, Color);
+                    PrevX = MidX;
+                    PrevY = MidY;
+                } 
+                else {
+                    DrawBezier(PrevX, PrevY, CurrX, CurrY, NextX, NextY, Color);
+                    PrevX = NextX;
+                    PrevY = NextY;
+                    i++;
+                }
+            }
+        }
+        if (PrevX != FirstX || PrevY != FirstY) {
+            BootRenderDrawLineEx(PrevX, PrevY, FirstX, FirstY, Color);
+        }
+        StartIdx = EndIdx + 1; 
+    }
+}
+
+
 static 
 LOUSTATUS
 TtfUnpackGlyphObject(
@@ -14,7 +127,15 @@ TtfUnpackGlyphObject(
     UINT16  InstructionLength = TtfReadUint16(EndPoints[Countours]);
     UINT8*  RawFlags = (UINT8*)(((UINTPTR)&EndPoints[Countours]) + (UINTPTR)InstructionLength + (UINTPTR)2);
 
+
     GlyphData->VectorCount  = TtfReadUint16(EndPoints[Countours - 1]) + 1;
+    GlyphData->ContourCount = Countours;
+    GlyphData->EndPoints    = LouKeMallocArray(UINT16, Countours, KERNEL_GENERIC_MEMORY); 
+
+    for(size_t i = 0 ; i < Countours; i++){
+        GlyphData->EndPoints[i] = TtfReadUint16(EndPoints[i]);
+    }
+
     GlyphData->Flags        = LouKeMallocArray(UINT8, GlyphData->VectorCount, KERNEL_GENERIC_MEMORY);
     GlyphData->XCoordinates = LouKeMallocArray(INT16, GlyphData->VectorCount, KERNEL_GENERIC_MEMORY);
     GlyphData->YCoordinates = LouKeMallocArray(INT16, GlyphData->VectorCount, KERNEL_GENERIC_MEMORY);
@@ -76,38 +197,9 @@ TtfUnpackGlyphObject(
         GlyphData->YCoordinates[i] = CurrentY; 
     }
     
-    BOOLEAN LastPoint = false;
-
-    for(size_t i = 0 ; i < 2; i++){
-    
-        LouPrint("Flag  :%bc\n", GlyphData->Flags[i]);
-        LouPrint("XPoint:%d\n", GlyphData->XCoordinates[i]);
-        LouPrint("YPoint:%d\n", GlyphData->YCoordinates[i]);
-        int x = TtfGetPixelX(GlyphData->XCoordinates[i], 16, TtfObject->UnitsPerEm) + 10;
-        int y = TtfGetPixelY(GlyphData->YCoordinates[i], 16, TtfObject->UnitsPerEm) + 10;
-
-        if(LastPoint && (GlyphData->Flags[i] & TTF_ON_CURVE)){
-
-        }
-        
-        if(GlyphData->Flags[i] & TTF_ON_CURVE){
-            LastPoint = true;
-        }else{
-            LastPoint = false;
-        }
-
-        //BootRenderPutPixel(x, y, 0, 255, 0);
-    
-    }
-
-    BootRenderDrawLine(
-        30, 30,
-        50, 50,
-        0, 255, 0
-    );
-
-    BootRenderSyncScreen();
+    TtfDrawGlyphEx(TtfObject, GlyphData, 10, 10, 64, 64, SET_RGB(0, 255, 0));
     //UINT8* Flags;
+    BootRenderSyncScreen();
 
     return STATUS_SUCCESS;
 }
