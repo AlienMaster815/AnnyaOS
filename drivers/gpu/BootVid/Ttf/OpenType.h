@@ -135,6 +135,7 @@ typedef UINT32 TTF_LOCA_LONG,  * PTTF_LOCA_LONG;
 
 //TTF Glyph Data
 typedef struct _TTFOBJ_GLYPH_DATA{
+    float   Aspect;
     SIZE    VectorCount;
     SIZE    ContourCount;
     UINT16* EndPoints;
@@ -181,6 +182,7 @@ typedef struct _TTF_OBJECT{
     SIZE                        LocaOffset;
     SIZE                        GlyphOffset;
     SIZE                        HeadOffset;
+    SIZE                        HmtxOffset;
     SIZE                        UnitsPerEm;
     PTTFOBJ_TABLE_DIRECTORY     TableDirectories;
     TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
@@ -210,6 +212,26 @@ int TtfGetPixelY(
     int CoordinateY,
     int DesireCharHeight,
     int UnitsPerEm
+);
+
+void TtfDrawGlyphEx(
+    PTTF_OBJECT         TtfObject,
+    PTTFOBJ_GLYPH_DATA  GlyphData,
+    int                 x,
+    int                 y,
+    int                 Height,
+    UINT32              Color
+);
+
+void TtfDrawGlyph(
+    PTTF_OBJECT         TtfObject,
+    PTTFOBJ_GLYPH_DATA  GlyphData,
+    int                 x,
+    int                 y,
+    int                 Height,
+    UINT8               R,
+    UINT8               G,
+    UINT8               B
 );
 
 #endif

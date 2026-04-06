@@ -58,6 +58,8 @@ TtfCopyFileTableDirectoriesToObject(
             case TTF_FONT_HEADER:
                 TtfObject->HeadOffset = i;
                 break;
+            case TTF_HORIZONTAL_METRICS:
+                TtfObject->HmtxOffset = i;
             default:
                 break;
         }
@@ -84,6 +86,12 @@ TtfCopyFileTableDirectoriesToObject(
     TtfParseGlyphData(
         (PVOID)FileOffsetSubTable,
         &TtfObject->TableDirectories[TtfObject->GlyphOffset],
+        TtfObject
+    );
+
+    TtfParseHmtxData(
+        (PVOID)FileOffsetSubTable,
+        &TtfObject->TableDirectories[TtfObject->HmtxOffset],
         TtfObject
     );
 

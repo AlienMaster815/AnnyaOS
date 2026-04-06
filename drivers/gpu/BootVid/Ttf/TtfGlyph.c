@@ -13,65 +13,16 @@ void DrawBezier(int x0, int y0, int x1, int y1, int x2, int y2, UINT32 Color) {
     }
 }
 
-/*void 
-TtfDrawGlyphEx(
-    PTTF_OBJECT         TtfObject,
-    PTTFOBJ_GLYPH_DATA  GlyphData,
-    int                 x,
-    int                 y,
-    int                 Width,
-    int                 Height,
-    UINT32              Color
-){
-
-    int LastX = 0;
-    int LastY = 0;
-    int Contour = 0;
-    BOOLEAN LastPointOn = false;
-    BOOLEAN BrushLifted = false;
-    for(size_t i = 0; i < GlyphData->VectorCount; i++){
-        int CurrentX = x + TtfGetPixelX(GlyphData->XCoordinates[i], Width, TtfObject->UnitsPerEm);
-        int CurrentY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[i], Height, TtfObject->UnitsPerEm);
-        LouPrint("GlyphData->Flags      [%d]:%bc\n", i, GlyphData->Flags[i]);
-        LouPrint("GlyphData->XCoordinate[%d]:%d\n", i, CurrentX);
-        LouPrint("GlyphData->YCoordinate[%d]:%d\n", i, CurrentY);
-
-        if(i > GlyphData->EndPoints[Contour]){
-            Contour++;
-            BrushLifted = true;
-        }
-
-        if(!BrushLifted && LastPointOn && (GlyphData->Flags[i] & TTF_ON_CURVE)){
-            BootRenderDrawLineEx(LastX, LastY, CurrentX, CurrentY, Color);
-        }
-
-
-        
-        if(!(GlyphData->Flags[i] & TTF_ON_CURVE)){
-            LastPointOn = false;
-        }else{
-            LastPointOn = true;
-        }
-        
-
-        LastX = CurrentX;
-        LastY = CurrentY;
-    
-        BootRenderSyncScreen();
-        BrushLifted = false;
-    }
-}*/
-
 void TtfDrawGlyphEx(
     PTTF_OBJECT         TtfObject,
     PTTFOBJ_GLYPH_DATA  GlyphData,
     int                 x,
     int                 y,
-    int                 Width,
     int                 Height,
     UINT32              Color
-) {
+){
     int StartIdx = 0;
+    int Width = (int)(((float)Height) * GlyphData->Aspect);
 
     for (int c = 0; c < GlyphData->ContourCount; c++) {
         int EndIdx = GlyphData->EndPoints[c];
@@ -127,6 +78,7 @@ TtfUnpackGlyphObject(
     UINT16  InstructionLength = TtfReadUint16(EndPoints[Countours]);
     UINT8*  RawFlags = (UINT8*)(((UINTPTR)&EndPoints[Countours]) + (UINTPTR)InstructionLength + (UINTPTR)2);
 
+    GlyphData->Aspect = (float)((INT16)TtfReadUint16(GlyphDescription->XMax) - (INT16)TtfReadUint16(GlyphDescription->XMin)) / (float)TtfObject->UnitsPerEm;
 
     GlyphData->VectorCount  = TtfReadUint16(EndPoints[Countours - 1]) + 1;
     GlyphData->ContourCount = Countours;
@@ -139,6 +91,7 @@ TtfUnpackGlyphObject(
     GlyphData->Flags        = LouKeMallocArray(UINT8, GlyphData->VectorCount, KERNEL_GENERIC_MEMORY);
     GlyphData->XCoordinates = LouKeMallocArray(INT16, GlyphData->VectorCount, KERNEL_GENERIC_MEMORY);
     GlyphData->YCoordinates = LouKeMallocArray(INT16, GlyphData->VectorCount, KERNEL_GENERIC_MEMORY);
+
     SIZE    Index = 0;
     UINT8*  CurrentByte = RawFlags;
     UINT8   TmpFlag;
@@ -197,10 +150,6 @@ TtfUnpackGlyphObject(
         GlyphData->YCoordinates[i] = CurrentY; 
     }
     
-    TtfDrawGlyphEx(TtfObject, GlyphData, 10, 10, 64, 64, SET_RGB(0, 255, 0));
-    //UINT8* Flags;
-    BootRenderSyncScreen();
-
     return STATUS_SUCCESS;
 }
 
@@ -213,19 +162,18 @@ TtfParseGlyphData(
     LouPrint("TtfParseGlyphData()\n");
     
     
-    //for(size_t i = 0; i < 127; i++){
-        SIZE Offset = TtfObject->AsciiGlyphOffsets['A'];
+    for(size_t i = 0; i < 127; i++){
+        SIZE Offset = TtfObject->AsciiGlyphOffsets[i];
         if(Offset == UINT32_MAX){
-            //continue;
+            continue;
         }
         PTTF_GLYPH_DESCRIPTION GlyphDescription = (PTTF_GLYPH_DESCRIPTION)(((UINTPTR)Directory->Offset + (UINTPTR)File) + (UINTPTR)Offset);    
-        TtfObject->AsciiGlyphData['A'] = LouKeMallocType(TTFOBJ_GLYPH_DATA, KERNEL_GENERIC_MEMORY);
+        TtfObject->AsciiGlyphData[i] = LouKeMallocType(TTFOBJ_GLYPH_DATA, KERNEL_GENERIC_MEMORY);
         TtfUnpackGlyphObject(
             GlyphDescription,
-            TtfObject->AsciiGlyphData['A'],
+            TtfObject->AsciiGlyphData[i],
             TtfObject
         );
-    //}
-
+    }
 
 }

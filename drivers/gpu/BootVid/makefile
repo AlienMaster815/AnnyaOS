@@ -6,7 +6,8 @@ SRC = 	BootVidMain.c \
 		Ttf/TtfCmap.c \
 		Ttf/TtfGlyph.c \
 		Ttf/TtfLoca.c \
-		Ttf/TtfHead.c 
+		Ttf/TtfHead.c \
+		Ttf/TtfHmtx.c 
 
 
 CC = x86_64-w64-mingw32-gcc

@@ -11,6 +11,7 @@
 #include "Ttf/TtfGlyph.h"
 #include "Ttf/TtfHead.h"
 #include "Ttf/TtfLoca.h"
+#include "Ttf/TtfHmtx.h"
 
 typedef struct _BOOTVID_FRAMEBUFFER{
     ListHeader  Head;
