@@ -133,6 +133,15 @@ typedef UINT16 TTF_LOCA_SHORT, * PTTF_LOCA_SHORT;
 typedef UINT32 TTF_LOCA_LONG,  * PTTF_LOCA_LONG;
 //end
 
+//TTF Glyph Data
+typedef struct _TTFOBJ_GLYPH_DATA{
+    SIZE    VectorCount;
+    UINT8*  Flags;
+    INT16*  XCoordinates;
+    INT16*  YCoordinates;
+}TTFOBJ_GLYPH_DATA, * PTTFOBJ_GLYPH_DATA;
+//end
+
 typedef struct PACKED _TTF_OFFSET_SUBTABLE{
     UINT32  ScalerType;
     UINT16  TableCount;
@@ -170,12 +179,17 @@ typedef struct _TTF_OBJECT{
     SIZE                        LocaOffset;
     SIZE                        GlyphOffset;
     SIZE                        HeadOffset;
+    SIZE                        UnitsPerEm;
     PTTFOBJ_TABLE_DIRECTORY     TableDirectories;
     TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
     TTF_LOCA_LONG               AsciiGlyphOffsets[127];
     TTF_LOCA_LONG               RussianGlyphOffsets[256];
     BOOLEAN                     UsesLongLocaTableFormat;
+    PTTFOBJ_GLYPH_DATA          AsciiGlyphData[127];
+    PTTFOBJ_GLYPH_DATA          RussianGlyphData[256];
 }TTF_OBJECT, * PTTF_OBJECT; 
+
+#define TTF_ON_CURVE    (1 << 0)
 
 UINT8       TtfReadUint8(UINT8 Data);
 UINT16      TtfReadUint16(UINT16 Data);
@@ -183,5 +197,17 @@ UINT32      TtfReadUint32(UINT32 Data);
 UINT64      TtfReadUint64(UINT64 Data);
 int         TtfMemCmp(PVOID Data, PVOID Check, size_t Size);
 LOUSTATUS   TtfInitializeFile(PVOID TtfStream);
+
+int TtfGetPixelX(
+    int CoordinateX,
+    int DesireCharWidth,
+    int UnitsPerEm
+);
+
+int TtfGetPixelY(
+    int CoordinateY,
+    int DesireCharHeight,
+    int UnitsPerEm
+);
 
 #endif

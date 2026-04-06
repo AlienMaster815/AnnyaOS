@@ -9,6 +9,7 @@ TtfParseHeadData(
     PTTF_HEAD_TABLE HeadTable = (PTTF_HEAD_TABLE)((UINTPTR)File + Directory->Offset);
 
     TtfObject->UsesLongLocaTableFormat =  TtfReadUint16(HeadTable->IndexToLocFormat) ? true : false;
+    TtfObject->UnitsPerEm = TtfReadUint16(HeadTable->UnitsPerEm);
 
     return STATUS_SUCCESS;
 }

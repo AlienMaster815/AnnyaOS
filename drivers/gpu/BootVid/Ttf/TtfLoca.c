@@ -15,12 +15,16 @@ TtfParseLocaData(
             LocaTableIndex = TtfObject->CmapMetaData.AsciiSpace[i];
             if(LocaTableIndex != 0xFFFF){
                 TtfObject->AsciiGlyphOffsets[i] = (UINT32)TtfReadUint32(TmpOffset[LocaTableIndex]);
+            }else{
+                TtfObject->AsciiGlyphOffsets[i] = UINT32_MAX;
             }
         }
         for(size_t i = 0 ; i < 256; i++){
             LocaTableIndex = TtfObject->CmapMetaData.RussianSpace[i];
             if(LocaTableIndex != 0xFFFF){
                 TtfObject->RussianGlyphOffsets[i] = (UINT32)TtfReadUint32(TmpOffset[LocaTableIndex]);
+            }else{
+                TtfObject->RussianGlyphOffsets[i] = UINT32_MAX;
             }
         }
     }else{
@@ -29,12 +33,16 @@ TtfParseLocaData(
             LocaTableIndex = TtfObject->CmapMetaData.AsciiSpace[i];
             if(LocaTableIndex != 0xFFFF){
                 TtfObject->AsciiGlyphOffsets[i] = (UINT32)TtfReadUint16(TmpOffset[LocaTableIndex]) * 2;
+            }else{
+                TtfObject->AsciiGlyphOffsets[i] = UINT32_MAX;
             }
         }
         for(size_t i = 0 ; i < 256; i++){
             LocaTableIndex = TtfObject->CmapMetaData.RussianSpace[i];
             if(LocaTableIndex != 0xFFFF){
                 TtfObject->RussianGlyphOffsets[i] = (UINT32)TtfReadUint16(TmpOffset[LocaTableIndex]) * 2;
+            }else{
+                TtfObject->RussianGlyphOffsets[i] = UINT32_MAX;
             }
         }
     }

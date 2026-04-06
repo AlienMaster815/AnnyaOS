@@ -32,6 +32,10 @@ typedef struct _BOOTVID_FRAMEBUFFER{
 #define SET_GREEN(g)    ((g & 0xFF) << 8)
 #define SET_BLUE(b)     ((b & 0xFF))
 
+#define GET_RED(c)      ((c >> 16) & 0xFF)
+#define GET_GREEN(c)    ((c >> 8) & 0xFF)
+#define GET_BLUE(c)     (c & 0xFF)
+
 #define SET_RGB(r, g, b) (SET_RED(r) | SET_GREEN(g) | SET_BLUE(b))
 
 KERNEL_EXPORT 
@@ -45,5 +49,18 @@ LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer);
 void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb);
 void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B);
 void BootRenderSyncScreen();
+void BootRenderDrawLineEx(
+    int     X1, int Y1,
+    int     X2, int Y2,
+    UINT32  Color
+);
+
+void BootRenderDrawLine(
+    int     X1, int Y1,
+    int     X2, int Y2,
+    UINT8   R,
+    UINT8   G,
+    UINT8   B
+);
 
 #endif

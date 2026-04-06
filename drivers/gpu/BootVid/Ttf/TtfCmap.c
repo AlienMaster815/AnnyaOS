@@ -206,3 +206,20 @@ TtfParseCmapData(
 
     return STATUS_SUCCESS;
 }
+
+int TtfGetPixelX(
+    int CoordinateX,
+    int DesireCharWidth,
+    int UnitsPerEm
+){
+    return (CoordinateX * DesireCharWidth) / UnitsPerEm;
+}
+
+int TtfGetPixelY(
+    int CoordinateY,
+    int DesireCharHeight,
+    int UnitsPerEm
+){
+    return (CoordinateY * DesireCharHeight) / UnitsPerEm;
+}
+

@@ -7,13 +7,13 @@
 typedef WORD FWORD, PFWORD;
 
 //TTF Spec Glphy Metadata
-typedef struct PACKED _TTF_GLPYH_DESCRIPTION{
+typedef struct PACKED _TTF_GLYPH_DESCRIPTION{
     INT16       ContourCount;
     FWORD       XMin;
     FWORD       YMin;
     FWORD       XMax;
     FWORD       YMax;
-}TTF_GLPYH_DESCRIPTION, * PTTF_GLPYH_DESCRIPTION;
+}TTF_GLYPH_DESCRIPTION, * PTTF_GLYPH_DESCRIPTION;
 
 //typedef struct PACKED _TTF_SIMPLE_GLYPH_DEFINITION{
 
