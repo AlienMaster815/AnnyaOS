@@ -1,15 +1,24 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include "../BootVid.h"
 
-static
-void DrawBezier(int x0, int y0, int x1, int y1, int x2, int y2, UINT32 Color) {
+UINT32 BootRenderGetPixel(
+    INT32 x, INT32 y
+);
+
+static void DrawBezier(int x0, int y0, int x1, int y1, int x2, int y2, UINT32 Color) {
     int prevX = x0, prevY = y0;
-    for (int i = 1; i <= 10; i++) {
-        float t = i / 10.0f;
-        int x = (1-t)*(1-t)*x0 + 2*(1-t)*t*x1 + t*t*x2;
-        int y = (1-t)*(1-t)*y0 + 2*(1-t)*t*y1 + t*t*y2;
-        BootRenderDrawLineEx(prevX, prevY, x, y, Color);
-        prevX = x; prevY = y;
+    const int segments = 10; 
+    for (int i = 1; i <= segments; i++) {
+        float t = (float)i / segments;
+        float xa = x0 + t * (x1 - x0);
+        float ya = y0 + t * (y1 - y0);
+        float xb = x1 + t * (x2 - x1);
+        float yb = y1 + t * (y2 - y1);
+        int x = (int)(xa + t * (xb - xa));
+        int y = (int)(ya + t * (yb - ya));
+        BootRenderDrawLineEx(prevX, prevY, x, y, Color);        
+        prevX = x;
+        prevY = y;
     }
 }
 
@@ -20,48 +29,56 @@ void TtfDrawGlyphEx(
     int                 y,
     int                 Height,
     UINT32              Color
-){
+) {
     int StartIdx = 0;
-    int Width = (int)(((float)Height) * GlyphData->Aspect);
+    float Scale = (float)Height / (float)TtfObject->UnitsPerEm;
+    int Width = (int)((float)Height * GlyphData->Aspect);
 
     for (int c = 0; c < GlyphData->ContourCount; c++) {
         int EndIdx = GlyphData->EndPoints[c];
-        int FirstX = x + TtfGetPixelX(GlyphData->XCoordinates[StartIdx], Width, TtfObject->UnitsPerEm);
-        int FirstY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[StartIdx], Height, TtfObject->UnitsPerEm);        
+        
+        int FirstX = x + (int)(GlyphData->XCoordinates[StartIdx] * Scale + 0.5f);
+        int FirstY = (y + Height) - (int)(GlyphData->YCoordinates[StartIdx] * Scale + 0.5f);
+        
         int PrevX = FirstX;
         int PrevY = FirstY;
+
         for (int i = StartIdx + 1; i <= EndIdx; i++) {
-            int CurrX = x + TtfGetPixelX(GlyphData->XCoordinates[i], Width, TtfObject->UnitsPerEm);
-            int CurrY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[i], Height, TtfObject->UnitsPerEm);
+            int CurrX = x + (int)(GlyphData->XCoordinates[i] * Scale + 0.5f);
+            int CurrY = (y + Height) - (int)(GlyphData->YCoordinates[i] * Scale + 0.5f);
+
             if (GlyphData->Flags[i] & TTF_ON_CURVE) {
                 BootRenderDrawLineEx(PrevX, PrevY, CurrX, CurrY, Color);
-                PrevX = CurrX;
+                PrevX = CurrX; 
                 PrevY = CurrY;
             } 
             else {
                 int NextIdx = (i == EndIdx) ? StartIdx : i + 1;
-                int NextX = x + TtfGetPixelX(GlyphData->XCoordinates[NextIdx], Width, TtfObject->UnitsPerEm);
-                int NextY = (y + Height) - TtfGetPixelX(GlyphData->YCoordinates[NextIdx], Height, TtfObject->UnitsPerEm);
+                int NextX = x + (int)(GlyphData->XCoordinates[NextIdx] * Scale + 0.5f);
+                int NextY = (y + Height) - (int)(GlyphData->YCoordinates[NextIdx] * Scale + 0.5f);
+
                 if (!(GlyphData->Flags[NextIdx] & TTF_ON_CURVE)) {
                     int MidX = (CurrX + NextX) / 2;
                     int MidY = (CurrY + NextY) / 2;
                     DrawBezier(PrevX, PrevY, CurrX, CurrY, MidX, MidY, Color);
-                    PrevX = MidX;
+                    PrevX = MidX; 
                     PrevY = MidY;
                 } 
                 else {
                     DrawBezier(PrevX, PrevY, CurrX, CurrY, NextX, NextY, Color);
-                    PrevX = NextX;
+                    PrevX = NextX; 
                     PrevY = NextY;
                     i++;
                 }
             }
-        }
+        }        
         if (PrevX != FirstX || PrevY != FirstY) {
             BootRenderDrawLineEx(PrevX, PrevY, FirstX, FirstY, Color);
         }
-        StartIdx = EndIdx + 1; 
+        StartIdx = EndIdx + 1;
     }
+    TtfFillGlyph(x, y, Width, Height);
+
 }
 
 
@@ -175,5 +192,11 @@ TtfParseGlyphData(
             TtfObject
         );
     }
+
+
+    TtfDrawGlyphEx(TtfObject, TtfObject->AsciiGlyphData['A'], 10, 10, 18, SET_RGB(0, 255, 0));
+    TtfDrawGlyphEx(TtfObject, TtfObject->AsciiGlyphData['a'], 36, 10, 18, SET_RGB(0, 255, 0));
+
+    BootRenderSyncScreen();
 
 }

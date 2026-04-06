@@ -17,6 +17,14 @@ LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer){
     return STATUS_SUCCESS;
 }
 
+UINT32 BootRenderGetPixel(
+    INT32 x, INT32 y
+){
+    if((!BootBuffer) || (x >= Width) || (y >= Height)){
+        return 0xFFFFFFFF;
+    }
+    return Canvas[x + y * Width]; 
+}
 
 void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb){
     if((!BootBuffer) || (x >= Width) || (y >= Height)){
@@ -90,7 +98,44 @@ void BootRenderPutPixelBrightnes(int x, int y, UINT8 R, UINT8 G, UINT8 B, float 
     BootRenderPutPixelBrightnesEx(x, y, SET_RGB(R, G, B), Brightness);
 }
 
-void BootRenderDrawLineEx(
+void BootRenderDrawLineEx(int x1, int y1, int x2, int y2, UINT32 Color) {
+    // 1. Handle special cases: single point
+    if (x1 == x2 && y1 == y2) {
+        BootRenderPutPixelEx(x1, y1, Color);
+        return;
+    }
+
+    // 2. Calculate distances and directions
+    int dx = BootRenderAbsolute(x2 - x1);
+    int dy = -BootRenderAbsolute(y2 - y1); // Negative because of error calculation
+    int sx = x1 < x2 ? 1 : -1;             // Step X
+    int sy = y1 < y2 ? 1 : -1;             // Step Y
+    int err = dx + dy;                     // Error accumulator
+
+    while (1) {
+        // Since Bresenham isn't anti-aliased, we use standard PutPixel
+        BootRenderPutPixelEx(x1, y1, Color);
+
+        if (x1 == x2 && y1 == y2) break;
+
+        int e2 = 2 * err;
+
+        // Move in X direction
+        if (e2 >= dy) { 
+            err += dy; 
+            x1 += sx; 
+        }
+        
+        // Move in Y direction
+        if (e2 <= dx) { 
+            err += dx; 
+            y1 += sy; 
+        }
+    }
+}
+
+
+void BootRenderDrawAaLineEx(
     int     X1, int Y1,
     int     X2, int Y2,
     UINT32  Color
@@ -177,4 +222,14 @@ void BootRenderDrawLine(
     UINT8   B
 ){
     BootRenderDrawLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B));
+}
+
+void BootRenderDrawAaLine(
+    int     X1, int Y1,
+    int     X2, int Y2,
+    UINT8   R,
+    UINT8   G,
+    UINT8   B
+){
+    BootRenderDrawAaLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B));
 }
