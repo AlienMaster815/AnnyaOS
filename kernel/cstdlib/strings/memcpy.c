@@ -32,41 +32,51 @@ void simd_copy(uint64_t Destination, uint64_t Source);
 __attribute__((target("avx2")))
 static void* memcpy_avx2(void* destination, const void* source, size_t num) {
     SaveEverything(SavedState);
-    uintptr_t dest_ptr = (uintptr_t)destination;
-    uintptr_t src_ptr = (uintptr_t)source;
+    uintptr_t d = (uintptr_t)destination;
+    uintptr_t s = (uintptr_t)source;
 
-    size_t count = num / 32;
-    for(size_t i = 0; i < count; ++i){
-        __m256i tmp = _mm256_loadu_si256((const __m256i*)(src_ptr + i * 32));
-        _mm256_storeu_si256((__m256i*)(dest_ptr + i * 32), tmp);
-    }
+    if (d == s || num == 0) return destination;
 
-    // Copy remaining bytes
-    size_t remaining = num % 32;
-    uint8_t* c_dest = (uint8_t*)(dest_ptr + count * 32);
-    const uint8_t* c_src = (const uint8_t*)(src_ptr + count * 32);
-    for(size_t i = 0; i < remaining; ++i){
-        c_dest[i] = c_src[i];
+    if (d < s || d >= (s + num)) {
+        size_t count = num / 32;
+        for (size_t i = 0; i < count; ++i) {
+            __m256i tmp = _mm256_loadu_si256((const __m256i*)(s + i * 32));
+            _mm256_storeu_si256((__m256i*)(d + i * 32), tmp);
+        }
+        for (size_t i = count * 32; i < num; ++i) {
+            ((uint8_t*)d)[i] = ((const uint8_t*)s)[i];
+        }
+    } 
+    else {
+        size_t remaining = num % 32;
+        for (size_t i = 1; i <= remaining; ++i) {
+            ((uint8_t*)d)[num - i] = ((const uint8_t*)s)[num - i];
+        }
+        size_t count = num / 32;
+        for (size_t i = count; i > 0; --i) {
+            size_t offset = (i - 1) * 32;
+            __m256i tmp = _mm256_loadu_si256((const __m256i*)(s + offset));
+            _mm256_storeu_si256((__m256i*)(d + offset), tmp);
+        }
+
     }
     RestoreEverything(SavedState);
     return destination;
 }
 
 void* memcpy_basic(void* destination, const void* source, size_t num) {
-    volatile char* dest = (char*)destination;
-    volatile const char* src = (const char*)source;
+    uint8_t* d = (uint8_t*)destination;
+    const uint8_t* s = (const uint8_t*)source;
 
-    // Handle overlapping memory regions (copy backward)
-    if (dest > src && dest < src + num) {
-        for(size_t i = num; i > 0;){
-            dest[i] = src[i];
-            i -= 1;
+    if (d == s || num == 0) return destination;
+
+    if (d > s && d < s + num) {
+        for (size_t i = num; i > 0; i--) {
+            d[i - 1] = s[i - 1];
         }
     } else {
-        // Normal forward copy (non-overlapping memory)
-        for(size_t i = 0; i < num;){
-            dest[i] = src[i];
-            i += 1;
+        for (size_t i = 0; i < num; i++) {
+            d[i] = s[i];
         }
     }
     return destination;
@@ -75,19 +85,32 @@ void* memcpy_basic(void* destination, const void* source, size_t num) {
 __attribute__((target("sse2")))
 UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t num) {
     SaveEverything(SavedState);
-    __m128i* dest = (__m128i*)destination;
-    const __m128i* src = (const __m128i*)source;
+unsigned char* d = (unsigned char*)destination;
+    const unsigned char* s = (const unsigned char*)source;
 
-    size_t count = num / 16;
-    for(size_t i = 0; i < count; ++i){
-        __m128i tmp = _mm_loadu_si128(&src[i]);
-        _mm_storeu_si128(&dest[i], tmp);
-    }
-    size_t remaining = num % 16;
-    char* c_dest = (char*)dest + count * 16;
-    const char* c_src = (const char*)src + count * 16;
-    for(size_t i = 0; i < remaining; ++i){
-        c_dest[i] = c_src[i];
+    if (d == s || num == 0) return destination;
+
+    if (d < s || d >= (s + num)) {
+        size_t count = num / 16;
+        for (size_t i = 0; i < count; ++i) {
+            __m128i tmp = _mm_loadu_si128((const __m128i*)(s + i * 16));
+            _mm_storeu_si128((__m128i*)(d + i * 16), tmp);
+        }
+        for (size_t i = count * 16; i < num; ++i) {
+            d[i] = s[i];
+        }
+    } 
+    else {
+        size_t remaining = num % 16;
+        for (size_t i = 1; i <= remaining; ++i) {
+            d[num - i] = s[num - i];
+        }
+        size_t count = num / 16;
+        for (size_t i = count; i > 0; --i) {
+            size_t offset = (i - 1) * 16;
+            __m128i tmp = _mm_loadu_si128((const __m128i*)(s + offset));
+            _mm_storeu_si128((__m128i*)(d + offset), tmp);
+        }
     }
     RestoreEverything(SavedState);
     return destination;
@@ -96,22 +119,33 @@ UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t nu
 __attribute__((target("avx512f")))
 UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t num) {
     SaveEverything(SavedState);
-    
-    uintptr_t dest_ptr = (uintptr_t)destination;
-    uintptr_t src_ptr = (uintptr_t)source;
+    uint8_t* d = (uint8_t*)destination;
+    const uint8_t* s = (const uint8_t*)source;
 
-    size_t count = num / 64;
-    for(size_t i = 0; i < count; ++i){
-        __m512i tmp = _mm512_loadu_si512((const void*)(src_ptr + i * 64));
-        _mm512_storeu_si512((void*)(dest_ptr + i * 64), tmp);
-    }
+    if (d == s || num == 0) return destination;
 
-    // Copy remaining bytes
-    size_t remaining = num % 64;
-    uint8_t* c_dest = (uint8_t*)(dest_ptr + count * 64);
-    const uint8_t* c_src = (const uint8_t*)(src_ptr + count * 64);
-    for(size_t i = 0; i < remaining; ++i){
-        c_dest[i] = c_src[i];
+    if (d < s || d >= (s + num)) {
+        size_t count = num / 64;
+        for (size_t i = 0; i < count; ++i) {
+            __m512i tmp = _mm512_loadu_si512((const void*)(s + i * 64));
+            _mm512_storeu_si512((void*)(d + i * 64), tmp);
+        }
+        for (size_t i = count * 64; i < num; ++i) {
+            d[i] = s[i];
+        }
+    } 
+    else {
+        size_t remaining = num % 64;
+        for (size_t i = 1; i <= remaining; ++i) {
+            d[num - i] = s[num - i];
+        }
+
+        size_t count = num / 64;
+        for (size_t i = count; i > 0; --i) {
+            size_t offset = (i - 1) * 64;
+            __m512i tmp = _mm512_loadu_si512((const void*)(s + offset));
+            _mm512_storeu_si512((void*)(d + offset), tmp);
+        }
     }
     RestoreEverything(SavedState);
     return destination;

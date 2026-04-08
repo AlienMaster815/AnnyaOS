@@ -138,6 +138,7 @@ typedef struct _TTFOBJ_GLYPH_DATA{
     float   Aspect;
     SIZE    VectorCount;
     SIZE    ContourCount;
+    SIZE    EdgeCount;
     UINT16* EndPoints;
     UINT8*  Flags;
     INT16*  XCoordinates;

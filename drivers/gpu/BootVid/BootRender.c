@@ -99,41 +99,42 @@ void BootRenderPutPixelBrightnes(int x, int y, UINT8 R, UINT8 G, UINT8 B, float 
 }
 
 void BootRenderDrawLineEx(int x1, int y1, int x2, int y2, UINT32 Color) {
-    // 1. Handle special cases: single point
     if (x1 == x2 && y1 == y2) {
         BootRenderPutPixelEx(x1, y1, Color);
         return;
     }
+    else if(x1 == x2){
+        for(int i = MIN(y1, y2); i <= MAX(y1, y2); i++){
+            BootRenderPutPixelEx(x1, i, Color);
+        }
+        return;
+    }else if(y1 == y2){
+        for(int i = MIN(x1, x2); i <= MAX(x1, x2); i++){
+            BootRenderPutPixelEx(i, y1, Color);
+        }
+        return;
+    }
 
-    // 2. Calculate distances and directions
     int dx = BootRenderAbsolute(x2 - x1);
-    int dy = -BootRenderAbsolute(y2 - y1); // Negative because of error calculation
-    int sx = x1 < x2 ? 1 : -1;             // Step X
-    int sy = y1 < y2 ? 1 : -1;             // Step Y
-    int err = dx + dy;                     // Error accumulator
+    int dy = -BootRenderAbsolute(y2 - y1);
+    int sx = x1 < x2 ? 1 : -1;
+    int sy = y1 < y2 ? 1 : -1;
+    int err = dx + dy;
 
     while (1) {
-        // Since Bresenham isn't anti-aliased, we use standard PutPixel
         BootRenderPutPixelEx(x1, y1, Color);
-
         if (x1 == x2 && y1 == y2) break;
-
         int e2 = 2 * err;
-
-        // Move in X direction
         if (e2 >= dy) { 
             err += dy; 
             x1 += sx; 
         }
-        
-        // Move in Y direction
         if (e2 <= dx) { 
             err += dx; 
             y1 += sy; 
         }
     }
 }
-
 
 void BootRenderDrawAaLineEx(
     int     X1, int Y1,
