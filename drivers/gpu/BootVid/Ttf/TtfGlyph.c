@@ -56,11 +56,11 @@ LOUSTATUS GlyphLineDoSomthing(
     int err = dx + dy;
 
     while (1) {
+        if (x1 == x2 && y1 == y2) break;
         Status = Somthing(x1, y1, Context);
         if(Status != STATUS_SUCCESS){
             return Status;
         }
-        if (x1 == x2 && y1 == y2) break;
         int e2 = 2 * err;
         if (e2 >= dy) { 
             err += dy; 
@@ -401,7 +401,7 @@ GlyphSortTopBottom(PGET_VECTOR_STRUCT Gvs){
         Gvs->VectorOut[j * 2 + 1]   = TmpY;
         Gvs->CurrentOut++;
     }
-    Gvs->CurrentOut = i * 2;
+    Gvs->CurrentOut *= 2;
     memset(Gvs->ReorganizorStack, 0, Gvs->Count * sizeof(UINT16));
 }
 
@@ -442,101 +442,87 @@ GlyphSortLeftRigt(
         Gvs->VectorOut[j * 2 + 1]   = TmpY;
         Gvs->CurrentOut++;
     }
-    Gvs->CurrentOut = i * 2;
+    Gvs->CurrentOut *= 2;
     memset(Gvs->ReorganizorStack, 0, Gvs->Count * sizeof(UINT16));
 }
 
-static
-SIZE GetYLines(
-    UINT16* OutLine,
-    SIZE    PointCount
+static 
+UINT16
+GlyphGetYCount(
+    PGET_VECTOR_STRUCT Gvs
 ){
-    SIZE Count = 0;
-    for(SIZE i = 0 ; i < PointCount / 2; i++){
-        Count++;
-        SIZE CurrentYLine = OutLine[i * 2 + 1];
-        while(OutLine[i * 2 + 1] == CurrentYLine){
-            i++;
+    SIZE TotalYCount = Gvs->Count / 2;
+    UINT16 CurrentY = Gvs->VectorOut[1];
+    UINT16 Result = 0;
+    for(SIZE i = 0 ; i < TotalYCount; i++){ 
+        Result++;
+        for(;(i < TotalYCount) && (Gvs->VectorOut[i * 2 + 1] == CurrentY); i++){
+        
         }
+        CurrentY = Gvs->VectorOut[i * 2 + 1];
     }
-    return Count;
+    return Result;
 }
 
-size_t GetXLines(
-    UINT16* OutLine,
-    SIZE    PointsLeft
+static 
+UINT16
+GlyphGetXCount(
+    PGET_VECTOR_STRUCT Gvs
 ){
-    SIZE Count = 0;
-    SIZE CurrentY = OutLine[1];
-    SIZE Index = 0;
-    while(
-        (PointsLeft - (Index * 2)) &&
-        (OutLine[Index * 2 + 1] == CurrentY)
-    ){
-        Count++;
-        while(
-            (PointsLeft - (Index * 2)) &&
-            ((OutLine[(Index + 1) * 2] == OutLine[Index * 2]) ||
-            (OutLine[(Index + 1) * 2] == (OutLine[Index * 2] + 1)))
-        ){
-            if((OutLine[Index * 2 + 1] != CurrentY)){
-                goto _OUT;
-            }
-            Index++;
-        }
-        Index++;
-    }
-    _OUT:
-    return Count;
+
 }
 
-#define VTX_EVEN(Vtx) (((Vtx / 2) * 2) == Vtx)
+void 
+GlyphScanlineFill(
+    PGET_VECTOR_STRUCT Gvs
+){  
 
-void FillScanline(
-    SIZE    PointCount,
-    UINT16* OutLine
-){
-    SIZE YLines = GetYLines(OutLine, PointCount);
-    SIZE XLines;
+    SIZE YCount = GlyphGetYCount(Gvs);
+    SIZE CurrentY;
+    UINT16 CurrentYLine = Gvs->VectorOut[1];
     SIZE Index = 0;
-    for(SIZE YLineIndex = 0; YLineIndex < YLines; YLineIndex++){
-        SIZE CurrentYLine = OutLine[Index * 2 + 1];
-        XLines = GetXLines(&OutLine[Index * 2], PointCount - (Index * 2));
+    SIZE Next = 0;
+    for(SIZE YLine = 0 ; YLine < YCount; YLine++){
+        CurrentY = Gvs->VectorOut[Index * 2 + 1];
         BOOLEAN Inside = true;
-        while(OutLine[Index * 2 + 1] == CurrentYLine){
-            SIZE LastX = OutLine[Index * 2];
-            SIZE LastY = OutLine[Index * 2 + 1];
-            while((OutLine[Index * 2]) == OutLine[(Index + 1) * 2]){
-                if(OutLine[Index * 2 + 1] != CurrentYLine){
-                    goto _SKIP_TO_NEXT_LINE; 
-                }
-                Index++;
-            }
-            if((OutLine[Index * 2] + 1) == (OutLine[(Index + 1) * 2])){
-                while((OutLine[Index * 2] + 1) == (OutLine[(Index + 1) * 2])){
-                    BootRenderPutPixel(OutLine[Index * 2], OutLine[Index * 2 + 1], 255, 255,255);
-                    if(OutLine[Index * 2 + 1] != CurrentYLine){
-                        goto _SKIP_TO_NEXT_LINE; 
-                    }
-                    Index++;
+        while(Gvs->VectorOut[Index * 2 + 1] == CurrentY){
+            Next = Index;
+            if((Gvs->VectorOut[(Next + 1) * 2] == (Gvs->VectorOut[Next * 2] + 1))){
+                while((Gvs->VectorOut[Next * 2 + 1] == CurrentY) && (Gvs->VectorOut[(Next + 1) * 2] == (Gvs->VectorOut[Next * 2] + 1))){
+                    BootRenderPutPixel(Gvs->VectorOut[Next * 2], Gvs->VectorOut[Next * 2 + 1], 0,255,0);
+                    Next++;
                 }
                 Inside = false;
+                goto _GOTO_NEXT_VERTECES;
             }else{
-                Index++;
-                if(OutLine[Index * 2 + 1] != CurrentYLine){
-                    goto _SKIP_TO_NEXT_LINE; 
-                }
+                Next++;
             }
+            if(Gvs->VectorOut[Next * 2 + 1] != CurrentY){
+                goto _GOTO_NEXT_VERTECES;
+            }else if(Gvs->VectorOut[(Next + 1) * 2 + 1] != CurrentY){
+                BootRenderDrawLine(Gvs->VectorOut[Index * 2], Gvs->VectorOut[Index * 2 + 1],Gvs->VectorOut[Next * 2], Gvs->VectorOut[Next * 2 + 1], 0,255,0);
+                goto _GOTO_NEXT_VERTECES;
+            }
+            
 
             if(Inside){
-                BootRenderDrawLine(LastX, LastY, OutLine[Index * 2], OutLine[Index * 2 + 1], 255, 255,255);
+                BootRenderDrawLine(Gvs->VectorOut[Index * 2], Gvs->VectorOut[Index * 2 + 1],Gvs->VectorOut[Next * 2], Gvs->VectorOut[Next * 2 + 1], 0,255,0);
                 Inside = false;
             }else{
                 Inside = true;
             }
+            
+            _GOTO_NEXT_VERTECES:
+            if(Index == Next) {
+                Index++;
+            }
+            else{
+                Index = Next;
+            }
         }
-        _SKIP_TO_NEXT_LINE:
+        //LouPrint("X:%d : Y:%d\n", Gvs->VectorOut[i * 2], Gvs->VectorOut[i * 2 + 1]);
     }
+
 }
 
 void BootRenderGlyph(
@@ -555,8 +541,8 @@ void BootRenderGlyph(
         &Gvs.Count
     );
 
-    Gvs.VectorOut           = LouKeMallocArray(UINT16, Gvs.Count, KERNEL_GENERIC_MEMORY);
-    Gvs.ReorganizorStack    = LouKeMallocArray(UINT16, Gvs.Count, KERNEL_GENERIC_MEMORY);
+    Gvs.VectorOut           = LouKeMallocArray(UINT16, Gvs.Count + 2, KERNEL_GENERIC_MEMORY);
+    Gvs.ReorganizorStack    = LouKeMallocArray(UINT16, Gvs.Count + 2, KERNEL_GENERIC_MEMORY);
 
     GlpyhDoSomthing(
         TtfObject,
@@ -570,8 +556,8 @@ void BootRenderGlyph(
     GlyphSortTopBottom(&Gvs);
 
     GlyphSortLeftRigt(&Gvs);
-
-    FillScanline(Gvs.Count, Gvs.VectorOut);
+    
+    GlyphScanlineFill(&Gvs);
 
 }
 
