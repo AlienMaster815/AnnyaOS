@@ -1,260 +1,6 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include "../BootVid.h"
 
-//void 
-//TtfSortEdgesTopTown(
-//    UINT16* OutSort,
-//    UINT16* Vector,
-//    SIZE    VectorSize
-//    SIZE    VectorCount
-//){
-//
-//}
-
-
-UINT32 BootRenderGetPixel(
-    INT32 x, INT32 y
-);
-
-static void DrawBezier(int x0, int y0, int x1, int y1, int x2, int y2, UINT32 Color) {
-    int prevX = x0, prevY = y0;
-    const int segments = 10; 
-    for (int i = 1; i <= segments; i++) {
-        float t = (float)i / segments;
-        float xa = x0 + t * (x1 - x0);
-        float ya = y0 + t * (y1 - y0);
-        float xb = x1 + t * (x2 - x1);
-        float yb = y1 + t * (y2 - y1);
-        int x = (int)(xa + t * (xb - xa));
-        int y = (int)(ya + t * (yb - ya));
-        BootRenderDrawLineEx(prevX, prevY, x, y, Color);        
-        prevX = x;
-        prevY = y;
-    }
-}
-
-float BootRenderAbsolute(float x);
-
-UNUSED
-static 
-LOUSTATUS GlyphLineDoSomthing(
-    int x1, int y1,
-    int x2, int y2,
-    LOUSTATUS (*Somthing)(int, int, PVOID),
-    PVOID       Context
-){
-    LOUSTATUS Status;
-    if (x1 == x2 && y1 == y2) {
-        Status = Somthing(x1, y1, Context);
-        return Status;
-    }
-
-    int dx = BootRenderAbsolute(x2 - x1);
-    int dy = -BootRenderAbsolute(y2 - y1);
-    int sx = x1 < x2 ? 1 : -1;
-    int sy = y1 < y2 ? 1 : -1;
-    int err = dx + dy;
-
-    while (1) {
-        if (x1 == x2 && y1 == y2) break;
-        Status = Somthing(x1, y1, Context);
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-        int e2 = 2 * err;
-        if (e2 >= dy) { 
-            err += dy; 
-            x1 += sx; 
-        }
-        if (e2 <= dx) { 
-            err += dx; 
-            y1 += sy; 
-        }
-    }
-    return STATUS_SUCCESS;
-}
-
-static LOUSTATUS GlyphBezierDoSomthing(
-    int x0, int y0, 
-    int x1, int y1, 
-    int x2, int y2, 
-    LOUSTATUS (*Somthing)(int, int, PVOID),
-    PVOID       Context
-) {
-    LOUSTATUS Status;
-    int prevX = x0, prevY = y0;
-    const int segments = 10; 
-    for (int i = 1; i <= segments; i++) {
-        float t = (float)i / segments;
-        float xa = x0 + t * (x1 - x0);
-        float ya = y0 + t * (y1 - y0);
-        float xb = x1 + t * (x2 - x1);
-        float yb = y1 + t * (y2 - y1);
-        int x = (int)(xa + t * (xb - xa));
-        int y = (int)(ya + t * (yb - ya));
-        Status = GlyphLineDoSomthing(prevX, prevY, x, y, Somthing, Context);        
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-        prevX = x;
-        prevY = y;
-    }
-    return STATUS_SUCCESS;
-}
-
-UNUSED 
-static 
-LOUSTATUS
-GlpyhDoSomthing(
-    PTTF_OBJECT         TtfObject,
-    PTTFOBJ_GLYPH_DATA  GlyphData,
-    int                 x,
-    int                 y,
-    int                 Height,
-    LOUSTATUS           (*Somthing)(int, int, PVOID),
-    PVOID               Context
-){
-    if(!Somthing){
-        return STATUS_INVALID_PARAMETER;
-    }
-    LOUSTATUS Status;
-
-    int StartIdx = 0;
-    float Scale = (float)Height / (float)TtfObject->UnitsPerEm;
-    int Width = (int)((float)Height * GlyphData->Aspect);
-
-    for (int c = 0; c < GlyphData->ContourCount; c++) {
-        int EndIdx = GlyphData->EndPoints[c];
-        
-        int FirstX = x + (int)(GlyphData->XCoordinates[StartIdx] * Scale + 0.5f);
-        int FirstY = (y + Height) - (int)(GlyphData->YCoordinates[StartIdx] * Scale + 0.5f);
-        
-        int PrevX = FirstX;
-        int PrevY = FirstY;
-
-        for (int i = StartIdx + 1; i <= EndIdx; i++) {
-            int CurrX = x + (int)(GlyphData->XCoordinates[i] * Scale + 0.5f);
-            int CurrY = (y + Height) - (int)(GlyphData->YCoordinates[i] * Scale + 0.5f);
-
-            if (GlyphData->Flags[i] & TTF_ON_CURVE) {
-                Status = GlyphLineDoSomthing(PrevX, PrevY, CurrX, CurrY, Somthing, Context);
-                if(Status != STATUS_SUCCESS){
-                    return Status;
-                }
-                PrevX = CurrX; 
-                PrevY = CurrY;
-            } 
-            else {
-                int NextIdx = (i == EndIdx) ? StartIdx : i + 1;
-                int NextX = x + (int)(GlyphData->XCoordinates[NextIdx] * Scale + 0.5f);
-                int NextY = (y + Height) - (int)(GlyphData->YCoordinates[NextIdx] * Scale + 0.5f);
-
-                if (!(GlyphData->Flags[NextIdx] & TTF_ON_CURVE)) {
-                    int MidX = (CurrX + NextX) / 2;
-                    int MidY = (CurrY + NextY) / 2;
-                    Status = GlyphBezierDoSomthing(PrevX, PrevY, CurrX, CurrY, MidX, MidY, Somthing, Context);
-                    if(Status != STATUS_SUCCESS){
-                        return Status;
-                    }
-                    PrevX = MidX; 
-                    PrevY = MidY;
-                } 
-                else {
-                    Status = GlyphBezierDoSomthing(PrevX, PrevY, CurrX, CurrY, NextX, NextY, Somthing, Context);
-                    if(Status != STATUS_SUCCESS){
-                        return Status;
-                    }
-                    PrevX = NextX; 
-                    PrevY = NextY;
-                    i++;
-                }
-            }
-        }        
-        if (PrevX != FirstX || PrevY != FirstY) {
-            Status = GlyphLineDoSomthing(PrevX, PrevY, FirstX, FirstY, Somthing, Context);
-            if(Status != STATUS_SUCCESS){
-                return Status;
-            }
-        }
-        StartIdx = EndIdx + 1;
-    }
-}
-
-LOUSTATUS 
-TtfGetVectorEdgeCount(
-    PTTFOBJ_GLYPH_DATA  GlyphData,             
-    SIZE*               VectorCount,
-    SIZE*               EdgeCount
-){
-    if((!GlyphData) || (!VectorCount) || (!EdgeCount)){
-        return STATUS_INVALID_PARAMETER;
-    }
-
-
-
-    return STATUS_SUCCESS;
-}
-
-
-void TtfDrawGlyphEx(
-    PTTF_OBJECT         TtfObject,
-    PTTFOBJ_GLYPH_DATA  GlyphData,
-    int                 x,
-    int                 y,
-    int                 Height,
-    UINT32              Color
-) {
-    int StartIdx = 0;
-    float Scale = (float)Height / (float)TtfObject->UnitsPerEm;
-    int Width = (int)((float)Height * GlyphData->Aspect);
-
-    for (int c = 0; c < GlyphData->ContourCount; c++) {
-        int EndIdx = GlyphData->EndPoints[c];
-        
-        int FirstX = x + (int)(GlyphData->XCoordinates[StartIdx] * Scale + 0.5f);
-        int FirstY = (y + Height) - (int)(GlyphData->YCoordinates[StartIdx] * Scale + 0.5f);
-        
-        int PrevX = FirstX;
-        int PrevY = FirstY;
-
-        for (int i = StartIdx + 1; i <= EndIdx; i++) {
-            int CurrX = x + (int)(GlyphData->XCoordinates[i] * Scale + 0.5f);
-            int CurrY = (y + Height) - (int)(GlyphData->YCoordinates[i] * Scale + 0.5f);
-
-            if (GlyphData->Flags[i] & TTF_ON_CURVE) {
-                BootRenderDrawLineEx(PrevX, PrevY, CurrX, CurrY, Color);
-                PrevX = CurrX; 
-                PrevY = CurrY;
-            } 
-            else {
-                int NextIdx = (i == EndIdx) ? StartIdx : i + 1;
-                int NextX = x + (int)(GlyphData->XCoordinates[NextIdx] * Scale + 0.5f);
-                int NextY = (y + Height) - (int)(GlyphData->YCoordinates[NextIdx] * Scale + 0.5f);
-
-                if (!(GlyphData->Flags[NextIdx] & TTF_ON_CURVE)) {
-                    int MidX = (CurrX + NextX) / 2;
-                    int MidY = (CurrY + NextY) / 2;
-                    DrawBezier(PrevX, PrevY, CurrX, CurrY, MidX, MidY, Color);
-                    PrevX = MidX; 
-                    PrevY = MidY;
-                } 
-                else {
-                    DrawBezier(PrevX, PrevY, CurrX, CurrY, NextX, NextY, Color);
-                    PrevX = NextX; 
-                    PrevY = NextY;
-                    i++;
-                }
-            }
-        }        
-        if (PrevX != FirstX || PrevY != FirstY) {
-            BootRenderDrawLineEx(PrevX, PrevY, FirstX, FirstY, Color);
-        }
-        StartIdx = EndIdx + 1;
-    }
-
-}
-
-
 static 
 LOUSTATUS
 TtfUnpackGlyphObject(
@@ -464,15 +210,7 @@ GlyphGetYCount(
     return Result;
 }
 
-static 
-UINT16
-GlyphGetXCount(
-    PGET_VECTOR_STRUCT Gvs
-){
-
-}
-
-void 
+/*void 
 GlyphScanlineFill(
     PGET_VECTOR_STRUCT Gvs
 ){  
@@ -485,80 +223,158 @@ GlyphScanlineFill(
     for(SIZE YLine = 0 ; YLine < YCount; YLine++){
         CurrentY = Gvs->VectorOut[Index * 2 + 1];
         BOOLEAN Inside = true;
+        BOOLEAN Hopped = false;
         while(Gvs->VectorOut[Index * 2 + 1] == CurrentY){
-            Next = Index;
-            if((Gvs->VectorOut[(Next + 1) * 2] == (Gvs->VectorOut[Next * 2] + 1))){
-                while((Gvs->VectorOut[Next * 2 + 1] == CurrentY) && (Gvs->VectorOut[(Next + 1) * 2] == (Gvs->VectorOut[Next * 2] + 1))){
-                    BootRenderPutPixel(Gvs->VectorOut[Next * 2], Gvs->VectorOut[Next * 2 + 1], 0,255,0);
-                    Next++;
-                }
-                Inside = false;
-                goto _GOTO_NEXT_VERTECES;
-            }else{
-                Next++;
-            }
-            if(Gvs->VectorOut[Next * 2 + 1] != CurrentY){
-                goto _GOTO_NEXT_VERTECES;
-            }else if(Gvs->VectorOut[(Next + 1) * 2 + 1] != CurrentY){
-                BootRenderDrawLine(Gvs->VectorOut[Index * 2], Gvs->VectorOut[Index * 2 + 1],Gvs->VectorOut[Next * 2], Gvs->VectorOut[Next * 2 + 1], 0,255,0);
-                goto _GOTO_NEXT_VERTECES;
-            }
-            
 
-            if(Inside){
-                BootRenderDrawLine(Gvs->VectorOut[Index * 2], Gvs->VectorOut[Index * 2 + 1],Gvs->VectorOut[Next * 2], Gvs->VectorOut[Next * 2 + 1], 0,255,0);
-                Inside = false;
-            }else{
-                Inside = true;
-            }
-            
-            _GOTO_NEXT_VERTECES:
-            if(Index == Next) {
-                Index++;
-            }
-            else{
-                Index = Next;
-            }
         }
         //LouPrint("X:%d : Y:%d\n", Gvs->VectorOut[i * 2], Gvs->VectorOut[i * 2 + 1]);
     }
 
+}*/
+
+
+static LOUSTATUS GlyphLineToVectors(
+    int x1, int y1, int x2, int y2, 
+    LOUSTATUS (*Somthing)(int, int, PVOID), PVOID Context
+) {
+    if (y1 == y2){
+        return STATUS_SUCCESS;
+    } 
+
+    if (y1 > y2) {
+        int tx = x1; x1 = x2; x2 = tx;
+        int ty = y1; y1 = y2; y2 = ty;
+    }
+
+    float dx = (float)(x2 - x1) / (float)(y2 - y1);
+    float currentX = (float)x1;
+
+    for (int y = y1; y < y2; y++) {
+        LOUSTATUS Status = Somthing((int)(currentX + 0.5f), y, Context);
+        if (Status != STATUS_SUCCESS) return Status;
+        currentX += dx;
+    }
+    return STATUS_SUCCESS;
 }
 
-void BootRenderGlyph(
-    PTTF_OBJECT         TtfObject,
-    PTTFOBJ_GLYPH_DATA  GlyphData,
-    SIZE                Height
-){
+static LOUSTATUS GlyphBezierToVectors(
+    int x0, int y0, int x1, int y1, int x2, int y2, 
+    LOUSTATUS (*Somthing)(int, int, PVOID), PVOID Context
+) {
+    int prevX = x0, prevY = y0;
+    const int segments = 10; 
+    for (int i = 1; i <= segments; i++) {
+        float t = (float)i / segments;
+        float invT = 1.0f - t;
+        
+        int x = (int)(invT * invT * x0 + 2 * invT * t * x1 + t * t * x2 + 0.5f);
+        int y = (int)(invT * invT * y0 + 2 * invT * t * y1 + t * t * y2 + 0.5f);
+        
+        LOUSTATUS Status = GlyphLineToVectors(prevX, prevY, x, y, Somthing, Context);
+        if (Status != STATUS_SUCCESS) return Status;
+        
+        prevX = x;
+        prevY = y;
+    }
+    return STATUS_SUCCESS;
+}
+
+
+
+static LOUSTATUS GlpyhDoSomthing(
+    PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData,
+    int x, int y, int Height,
+    LOUSTATUS (*Somthing)(int, int, PVOID), PVOID Context
+) {
+    if (!Somthing) return STATUS_INVALID_PARAMETER;
+
+    float Scale = (float)Height / (float)TtfObject->UnitsPerEm;
+    int StartIdx = 0;
+
+    for (int c = 0; c < GlyphData->ContourCount; c++) {
+        int EndIdx = GlyphData->EndPoints[c];
+        
+        int FirstX = x + (int)(GlyphData->XCoordinates[StartIdx] * Scale + 0.5f);
+        int FirstY = (y + Height) - (int)(GlyphData->YCoordinates[StartIdx] * Scale + 0.5f);
+        
+        int PrevX = FirstX;
+        int PrevY = FirstY;
+
+        for (int i = StartIdx + 1; i <= EndIdx; i++) {
+            int CurrX = x + (int)(GlyphData->XCoordinates[i] * Scale + 0.5f);
+            int CurrY = (y + Height) - (int)(GlyphData->YCoordinates[i] * Scale + 0.5f);
+
+            if (GlyphData->Flags[i] & TTF_ON_CURVE) {
+                GlyphLineToVectors(PrevX, PrevY, CurrX, CurrY, Somthing, Context);
+                PrevX = CurrX; PrevY = CurrY;
+            } else {
+                int NextIdx = (i == EndIdx) ? StartIdx : i + 1;
+                int NextX = x + (int)(GlyphData->XCoordinates[NextIdx] * Scale + 0.5f);
+                int NextY = (y + Height) - (int)(GlyphData->YCoordinates[NextIdx] * Scale + 0.5f);
+
+                if (!(GlyphData->Flags[NextIdx] & TTF_ON_CURVE)) {
+                    int MidX = (CurrX + NextX) / 2;
+                    int MidY = (CurrY + NextY) / 2;
+                    GlyphBezierToVectors(PrevX, PrevY, CurrX, CurrY, MidX, MidY, Somthing, Context);
+                    PrevX = MidX; PrevY = MidY;
+                } else {
+                    GlyphBezierToVectors(PrevX, PrevY, CurrX, CurrY, NextX, NextY, Somthing, Context);
+                    PrevX = NextX; PrevY = NextY;
+                    i++;
+                }
+            }
+        }
+        GlyphLineToVectors(PrevX, PrevY, FirstX, FirstY, Somthing, Context);
+        StartIdx = EndIdx + 1;
+    }
+    return STATUS_SUCCESS;
+}
+
+void GlyphScanlineFill(PGET_VECTOR_STRUCT Gvs) {
+    SIZE TotalPoints = Gvs->Count / 2;
+    for (SIZE i = 0; i < (TotalPoints & ~1); i += 2) {
+        UINT16 x1 = Gvs->VectorOut[i * 2];
+        UINT16 y1 = Gvs->VectorOut[i * 2 + 1];
+        UINT16 x2 = Gvs->VectorOut[(i + 1) * 2];
+        UINT16 y2 = Gvs->VectorOut[(i + 1) * 2 + 1];
+
+        if (y1 == y2) {
+            for (UINT16 x = x1; x <= x2; x++) {
+                BootRenderPutPixel(x, y1, 255, 255, 255);
+            }
+        } else {
+            i--; 
+        }
+    }
+}
+
+
+void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE Height) {
     GET_VECTOR_STRUCT Gvs = {0};   
+    
+    GlpyhDoSomthing(TtfObject, GlyphData, 0, 0, Height, GlpyCountVectors, &Gvs.Count);
+    
+    Gvs.VectorOut = LouKeMallocArray(UINT16, Gvs.Count + 2, KERNEL_GENERIC_MEMORY);
+    if (!Gvs.VectorOut) return;
 
-    GlpyhDoSomthing(
-        TtfObject,
-        GlyphData,
-        0, 0,
-        Height,
-        GlpyCountVectors,
-        &Gvs.Count
-    );
+    GlpyhDoSomthing(TtfObject, GlyphData, 0, 0, Height, GlpyhGetVectors, &Gvs);
 
-    Gvs.VectorOut           = LouKeMallocArray(UINT16, Gvs.Count + 2, KERNEL_GENERIC_MEMORY);
-    Gvs.ReorganizorStack    = LouKeMallocArray(UINT16, Gvs.Count + 2, KERNEL_GENERIC_MEMORY);
-
-    GlpyhDoSomthing(
-        TtfObject,
-        GlyphData,
-        0, 0,
-        Height,
-        GlpyhGetVectors,
-        &Gvs
-    );
-
-    GlyphSortTopBottom(&Gvs);
-
-    GlyphSortLeftRigt(&Gvs);
+    SIZE TotalPoints = Gvs.Count / 2;
+    for (SIZE i = 0; i < TotalPoints - 1; i++) {
+        for (SIZE j = 0; j < TotalPoints - i - 1; j++) {
+            if (Gvs.VectorOut[j*2+1] > Gvs.VectorOut[(j+1)*2+1] || 
+               (Gvs.VectorOut[j*2+1] == Gvs.VectorOut[(j+1)*2+1] && Gvs.VectorOut[j*2] > Gvs.VectorOut[(j+1)*2])) {
+                UINT16 tx = Gvs.VectorOut[j*2];
+                Gvs.VectorOut[j*2] = Gvs.VectorOut[(j+1)*2];
+                Gvs.VectorOut[(j+1)*2] = tx;
+                UINT16 ty = Gvs.VectorOut[j*2+1];
+                Gvs.VectorOut[j*2+1] = Gvs.VectorOut[(j+1)*2+1];
+                Gvs.VectorOut[(j+1)*2+1] = ty;
+            }
+        }
+    }
     
     GlyphScanlineFill(&Gvs);
-
 }
 
 LOUSTATUS 
@@ -593,7 +409,7 @@ TtfParseGlyphData(
     BootRenderGlyph(
         TtfObject,
         TtfObject->AsciiGlyphData['A'],
-        64
+        24
     );
 
     BootRenderSyncScreen();
