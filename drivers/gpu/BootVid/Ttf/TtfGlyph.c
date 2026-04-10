@@ -210,29 +210,6 @@ GlyphGetYCount(
     return Result;
 }
 
-/*void 
-GlyphScanlineFill(
-    PGET_VECTOR_STRUCT Gvs
-){  
-
-    SIZE YCount = GlyphGetYCount(Gvs);
-    SIZE CurrentY;
-    UINT16 CurrentYLine = Gvs->VectorOut[1];
-    SIZE Index = 0;
-    SIZE Next = 0;
-    for(SIZE YLine = 0 ; YLine < YCount; YLine++){
-        CurrentY = Gvs->VectorOut[Index * 2 + 1];
-        BOOLEAN Inside = true;
-        BOOLEAN Hopped = false;
-        while(Gvs->VectorOut[Index * 2 + 1] == CurrentY){
-
-        }
-        //LouPrint("X:%d : Y:%d\n", Gvs->VectorOut[i * 2], Gvs->VectorOut[i * 2 + 1]);
-    }
-
-}*/
-
-
 static LOUSTATUS GlyphLineToVectors(
     int x1, int y1, int x2, int y2, 
     LOUSTATUS (*Somthing)(int, int, PVOID), PVOID Context
@@ -399,12 +376,6 @@ TtfParseGlyphData(
             TtfObject
         );
     }
-
-
-    //TtfDrawGlyphEx(TtfObject, TtfObject->AsciiGlyphData['A'], 10, 10, 18, SET_RGB(0, 255, 0));
-    //TtfDrawGlyphEx(TtfObject, TtfObject->AsciiGlyphData['a'], 36, 10, 18, SET_RGB(0, 255, 0));
-
-    //BootRenderSyncScreen();
 
     BootRenderGlyph(
         TtfObject,
