@@ -188,3 +188,4 @@ EXPORTS
     LouKeOpenRegistryHandle
     LouKeReadRegistryWordValue
     LouKeGetBootDevice
+    LouKeRegisterEcsDriver

@@ -4,9 +4,6 @@
 
 #include <LouAPI.h>
 
-//LOUAPI void LouKeOsDosUpdateMapping();
-//LOUAPI void LouKeOsDosPrintCharecter(char Character);
-
 void LouKeDebuggerCommunicationsSendCharecter(char Charecter);
 
 int _vsnprintf(char *buffer, size_t buffer_size, const char *format, ...);
@@ -34,10 +31,10 @@ void print_binary64(uint64_t number) {
     for(uint8_t BitMask = 0; BitMask < 64; BitMask++){
         if(number & (1 << (63 - BitMask))){
             LouKeDebuggerCommunicationsSendCharecter('1');
-            //LouKeOsDosPrintCharecter('1');
+            LouKeEcsPrintAsciiCharecter('1');
         }else{
             LouKeDebuggerCommunicationsSendCharecter('0');
-            //LouKeOsDosPrintCharecter('1');
+            LouKeEcsPrintAsciiCharecter('1');
         }
     }
 }
@@ -46,10 +43,10 @@ void print_binary32(uint32_t number) {
     for(uint8_t BitMask = 0; BitMask < 32; BitMask++){
         if(number & (1 << (31 - BitMask))){
             LouKeDebuggerCommunicationsSendCharecter('1');
-            //LouKeOsDosPrintCharecter('1');
+            LouKeEcsPrintAsciiCharecter('1');
         }else{
             LouKeDebuggerCommunicationsSendCharecter('0');
-            //LouKeOsDosPrintCharecter('0');
+            LouKeEcsPrintAsciiCharecter('0');
         }
     }
 }
@@ -58,10 +55,10 @@ void print_binary16(uint16_t number) {
     for(uint8_t BitMask = 0; BitMask < 16; BitMask++){
         if(number & (1 << (15 - BitMask))){
             LouKeDebuggerCommunicationsSendCharecter('1');
-            //LouKeOsDosPrintCharecter('1');
+            LouKeEcsPrintAsciiCharecter('1');
         }else{
             LouKeDebuggerCommunicationsSendCharecter('0');
-            //LouKeOsDosPrintCharecter('0');
+            LouKeEcsPrintAsciiCharecter('0');
         }
     }
 }
@@ -70,10 +67,10 @@ void print_binary8(uint8_t number) {
     for(uint8_t BitMask = 0; BitMask < 8; BitMask++){
         if(number & (1 << (7 - BitMask))){
             LouKeDebuggerCommunicationsSendCharecter('1');
-            //LouKeOsDosPrintCharecter('1');
+            LouKeEcsPrintAsciiCharecter('1');
         }else{
             LouKeDebuggerCommunicationsSendCharecter('0');
-            //LouKeOsDosPrintCharecter('0');
+            LouKeEcsPrintAsciiCharecter('0');
         }
     }
 }
@@ -90,7 +87,7 @@ int LouPrint_s(char* format, va_list args){
                     char* p = PrintString;
                     while (*p != '\0') {
                         LouKeDebuggerCommunicationsSendCharecter(*p);
-                        //LouKeOsDosPrintCharecter(*p);
+                        LouKeEcsPrintAsciiCharecter(*p);
                         p++;
                     }
                     break;
@@ -103,14 +100,14 @@ int LouPrint_s(char* format, va_list args){
                         char* p = PrintString;
                         while (*p != '\0') {
                             LouKeDebuggerCommunicationsSendCharecter(*p);
-                            //LouKeOsDosPrintCharecter(*p);
+                            LouKeEcsPrintAsciiCharecter(*p);
                             p++;
                         }
                     }else{
                         char* text = va_arg(args, char*);
                         while (*text != '\0') {
                             LouKeDebuggerCommunicationsSendCharecter(*text);
-                            //LouKeOsDosPrintCharecter(*text);
+                            LouKeEcsPrintAsciiCharecter(*text);
                             text++;
                         }
                     }
@@ -119,7 +116,7 @@ int LouPrint_s(char* format, va_list args){
                 case 'c': {
                     char c = va_arg(args, int);
                     LouKeDebuggerCommunicationsSendCharecter(c);
-                    //LouKeOsDosPrintCharecter(c);
+                    LouKeEcsPrintAsciiCharecter(c);
                     break;
                 }
                 case 'h': {                 
@@ -128,7 +125,7 @@ int LouPrint_s(char* format, va_list args){
                     char* p = PrintString;
                     while (*p  != '\0') {
                         LouKeDebuggerCommunicationsSendCharecter(*p);
-                        //LouKeOsDosPrintCharecter(*p);
+                        LouKeEcsPrintAsciiCharecter(*p);
                         p++;
                     }
                     break;
@@ -173,7 +170,7 @@ int LouPrint_s(char* format, va_list args){
                             char* p = str;
                             while (*p  != '\0') {
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
-                                //LouKeOsDosPrintCharecter(*p);
+                                LouKeEcsPrintAsciiCharecter(*p);
                                 p++;
                             }
                             break;
@@ -185,7 +182,7 @@ int LouPrint_s(char* format, va_list args){
                             char* p = str;
                             while (*p  != '\0') {
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
-                                //LouKeOsDosPrintCharecter(*p);
+                                LouKeEcsPrintAsciiCharecter(*p);
                                 p++;
                             }
                             break;
@@ -198,7 +195,7 @@ int LouPrint_s(char* format, va_list args){
                             char* p = str;
                             while (*p  != '\0') {
                                 LouKeDebuggerCommunicationsSendCharecter(*p);
-                                //LouKeOsDosPrintCharecter(*p);
+                                LouKeEcsPrintAsciiCharecter(*p);
                                 p++;
                             }
                             break;
@@ -209,8 +206,8 @@ int LouPrint_s(char* format, va_list args){
                 default: {
                     LouKeDebuggerCommunicationsSendCharecter('%');
                     LouKeDebuggerCommunicationsSendCharecter(*format);
-                    //LouKeOsDosPrintCharecter('%');
-                    //LouKeOsDosPrintCharecter(*format);
+                    LouKeEcsPrintAsciiCharecter('%');
+                    LouKeEcsPrintAsciiCharecter(*format);
                     break;
                 }
             }
@@ -220,11 +217,11 @@ int LouPrint_s(char* format, va_list args){
 //        } 
         else {    
             LouKeDebuggerCommunicationsSendCharecter(*format);
-            //LouKeOsDosPrintCharecter(*format);
+            LouKeEcsPrintAsciiCharecter(*format);
             format++;
         }
     }
-    //LouKeOsDosUpdateMapping();
+    LouKeEcsEndofData();
     return 0;
 }
 

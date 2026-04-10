@@ -135,14 +135,16 @@ typedef UINT32 TTF_LOCA_LONG,  * PTTF_LOCA_LONG;
 
 //TTF Glyph Data
 typedef struct _TTFOBJ_GLYPH_DATA{
-    float   Aspect;
-    SIZE    VectorCount;
-    SIZE    ContourCount;
-    SIZE    EdgeCount;
-    UINT16* EndPoints;
-    UINT8*  Flags;
-    INT16*  XCoordinates;
-    INT16*  YCoordinates;
+    SIZE                VectorCount;
+    SIZE                ContourCount;
+    SIZE                EdgeCount;
+    SIZE                XMin;
+    SIZE                XMax;
+    UINT16*             EndPoints;
+    UINT8*              Flags;
+    INT16*              XCoordinates;
+    INT16*              YCoordinates;
+    PVOID               Bitmap;
 }TTFOBJ_GLYPH_DATA, * PTTFOBJ_GLYPH_DATA;
 //end
 

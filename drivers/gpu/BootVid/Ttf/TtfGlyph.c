@@ -14,11 +14,11 @@ TtfUnpackGlyphObject(
     UINT16  InstructionLength = TtfReadUint16(EndPoints[Countours]);
     UINT8*  RawFlags = (UINT8*)(((UINTPTR)&EndPoints[Countours]) + (UINTPTR)InstructionLength + (UINTPTR)2);
 
-    GlyphData->Aspect = (float)((INT16)TtfReadUint16(GlyphDescription->XMax) - (INT16)TtfReadUint16(GlyphDescription->XMin)) / (float)TtfObject->UnitsPerEm;
-
     GlyphData->VectorCount  = TtfReadUint16(EndPoints[Countours - 1]) + 1;
     GlyphData->ContourCount = Countours;
     GlyphData->EndPoints    = LouKeMallocArray(UINT16, Countours, KERNEL_GENERIC_MEMORY); 
+    GlyphData->XMin = GlyphDescription->XMin;
+    GlyphData->XMax = GlyphDescription->XMax;
 
     for(size_t i = 0 ; i < Countours; i++){
         GlyphData->EndPoints[i] = TtfReadUint16(EndPoints[i]);
@@ -307,7 +307,7 @@ static LOUSTATUS GlpyhDoSomthing(
     return STATUS_SUCCESS;
 }
 
-void GlyphScanlineFill(PGET_VECTOR_STRUCT Gvs) {
+void GlyphScanlineFill(PGET_VECTOR_STRUCT Gvs, PBOOTVID_BITMAP Map) {
     SIZE TotalPoints = Gvs->Count / 2;
     for (SIZE i = 0; i < (TotalPoints & ~1); i += 2) {
         UINT16 x1 = Gvs->VectorOut[i * 2];
@@ -317,7 +317,7 @@ void GlyphScanlineFill(PGET_VECTOR_STRUCT Gvs) {
 
         if (y1 == y2) {
             for (UINT16 x = x1; x <= x2; x++) {
-                BootRenderPutPixel(x, y1, 255, 255, 255);
+                BootVidBitmapPutPixelEx(Map, x, y1, SET_RGB(0, 255, 0));
             }
         } else {
             i--; 
@@ -350,8 +350,17 @@ void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE H
             }
         }
     }
-    
-    GlyphScanlineFill(&Gvs);
+    PBOOTVID_BITMAP NewMap;
+    float Scale = (float)Height / (float)TtfObject->UnitsPerEm;
+
+    BootVidCreateBitmap(&NewMap, Height, Height); //create a cube and trim after
+
+    GlyphData->Bitmap = (PVOID)NewMap;
+
+    GlyphScanlineFill(&Gvs, NewMap);
+
+    BootVidTrimBitmap(NewMap, 0);
+
 }
 
 LOUSTATUS 
@@ -375,13 +384,13 @@ TtfParseGlyphData(
             TtfObject->AsciiGlyphData[i],
             TtfObject
         );
+        BootRenderGlyph(
+            TtfObject,
+            TtfObject->AsciiGlyphData[i],
+            16
+        );
     }
 
-    BootRenderGlyph(
-        TtfObject,
-        TtfObject->AsciiGlyphData['A'],
-        24
-    );
 
     BootRenderSyncScreen();
 

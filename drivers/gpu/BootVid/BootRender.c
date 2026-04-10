@@ -2,9 +2,9 @@
 
 PBOOTVID_FRAMEBUFFER BootBuffer = 0;
 
-static UINT32* Canvas = 0;
-static INT32 Width = 0;
-static INT32 Height = 0;
+UINT32* Canvas = 0;
+INT32 Width = 0;
+INT32 Height = 0;
 
 LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer){
     if(BootBuffer){

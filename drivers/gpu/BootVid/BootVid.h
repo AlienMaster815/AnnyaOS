@@ -24,6 +24,12 @@ typedef struct _BOOTVID_FRAMEBUFFER{
     UINT8       Bpp;
 }BOOTVID_FRAMEBUFFER, * PBOOTVID_FRAMEBUFFER;
 
+typedef struct _BOOTVID_BITMAP{
+    int         Width;
+    int         Height;
+    UINT32*     Map;
+}BOOTVID_BITMAP, * PBOOTVID_BITMAP;
+
 #define BLUE_MASK       (0xFF)
 #define GREEN_MASK      (0xFF << 8)
 #define RED_MASK        (0xFF << 16)
@@ -62,6 +68,47 @@ void BootRenderDrawLine(
     UINT8   R,
     UINT8   G,
     UINT8   B
+);
+
+LOUSTATUS 
+BootVidInitializeTerminalDriver();
+
+LOUSTATUS
+BootVidBitmapPutPixel(
+    PBOOTVID_BITMAP Bitmap,
+    int             x,
+    int             y,
+    UINT8           R,
+    UINT8           G,
+    UINT8           B
+);
+
+LOUSTATUS
+BootVidBitmapPutPixelEx(
+    PBOOTVID_BITMAP Bitmap,
+    int             x,
+    int             y,
+    UINT32          Color
+);
+
+LOUSTATUS 
+BootVidCreateBitmap(
+    PBOOTVID_BITMAP*    Bitmap,
+    int                 Width,
+    int                 Height
+);
+
+void 
+BootVidPlaceBitmap(
+    PBOOTVID_BITMAP Bitmap,
+    int             x,
+    int             y
+);
+
+void 
+BootVidTrimBitmap(
+    PBOOTVID_BITMAP Bitmap,
+    UINT32          Background
 );
 
 #endif

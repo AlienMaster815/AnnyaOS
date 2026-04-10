@@ -80,6 +80,8 @@ BootVidEntry(){
         LouPrint("BOOTVID.SYS:ERROR:File Type Is Not Supported By BOOTVID.SYS\n");
     }
 
+    //BootVidInitializeTerminalDriver();
+
     LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;

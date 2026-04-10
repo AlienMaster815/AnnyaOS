@@ -22,6 +22,7 @@ typedef struct _LIST_OBJECT{
 typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params); 
 
 #define ListMemberIsNotNull(Item, Member) ((UINTPTR)(Item) + offsetof(typeof(*(Item)), Member) != 0x00)
+#define ListMemberIsNull(Item, Member) ((UINTPTR)(Item) + offsetof(typeof(*(Item)), Member) == 0x00)
 
 #define ListItemToType(Header, Type, Member) ((Type*)(UINTPTR)(CONTAINER_OF(Header, Type, Member)))
 #define LListItemToType(Header, Type, Member) ((Type*)(UINTPTR)(CONTAINER_OF(Header, Type, Member)))
@@ -92,8 +93,7 @@ void  LouKeLinkObjectToListTail(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void  LouKeUnlinkObjectFromList(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void* LouKeLinkGetMemberWithFunction(PLIST_OBJECT ListObject, LIST_SEARCH_FUNC Func, void* Param);
 
-
-
+#define LouKeListIsEmpty(Node) ((Node)->NextHeader == 0x00)
 
 #define ForEachIf(Condition) if(!(Condition)){} else
 
