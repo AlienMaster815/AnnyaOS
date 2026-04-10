@@ -1,6 +1,10 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include "../BootVid.h"
 
+void BootVidRegisterBootFont(
+    PTTF_OBJECT TtfObject
+);
+
 UNUSED
 static 
 void
@@ -194,6 +198,8 @@ TtfInitializeFile(
     }   
 
     //TtfPrintTtfObjectData(NewTtfObject);
+
+    BootVidRegisterBootFont(NewTtfObject);
 
     LouPrint("BOOTVID.SYS:TtfInitializeFile() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

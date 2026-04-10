@@ -35,7 +35,6 @@ LouKeEcsPrintAsciiCharecter(
     if(LouKeListIsEmpty(&EcsDriverManager.Drivers)){
         return 0x00;
     }
-    MutexLock(&EcsDriverManager.DriversLock);
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
         ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
             if(Tracker->DriverObject->EcsOperations.PrintAsciiCharecter){
@@ -45,7 +44,6 @@ LouKeEcsPrintAsciiCharecter(
             }
         }
     } 
-    MutexUnlock(&EcsDriverManager.DriversLock);
     return 0x00;
 }
 
@@ -57,7 +55,6 @@ LouKeEcsPrintUnicodeCharecter(
     if(LouKeListIsEmpty(&EcsDriverManager.Drivers)){
         return 0x00;
     }
-    MutexLock(&EcsDriverManager.DriversLock);
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
         ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
             if(Tracker->DriverObject->EcsOperations.PrintUnicodeCharecter){
@@ -67,7 +64,6 @@ LouKeEcsPrintUnicodeCharecter(
             }
         }
     } 
-    MutexUnlock(&EcsDriverManager.DriversLock);
     return 0x00;
 }
 
@@ -78,7 +74,6 @@ LouKeEcsEndofData(){
         return;
     }
     PLOUSINE_ECS_DRIVER_TACKER Tracker;
-    MutexLock(&EcsDriverManager.DriversLock);
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
         ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
             if(Tracker->DriverObject->EcsOperations.EndofData){
@@ -88,5 +83,4 @@ LouKeEcsEndofData(){
             }
         }
     } 
-    MutexUnlock(&EcsDriverManager.DriversLock);
 }

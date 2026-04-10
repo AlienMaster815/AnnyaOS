@@ -3,6 +3,8 @@
 
 static struct multiboot_tag_framebuffer_common* BootGraphics = 0x00;
 
+
+
 LOUAPI
 LOUSTATUS
 BootVidEntry(){
@@ -80,7 +82,7 @@ BootVidEntry(){
         LouPrint("BOOTVID.SYS:ERROR:File Type Is Not Supported By BOOTVID.SYS\n");
     }
 
-    //BootVidInitializeTerminalDriver();
+    BootVidInitializeTerminalDriver();
 
     LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
     while(1);

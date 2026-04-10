@@ -387,11 +387,8 @@ TtfParseGlyphData(
         BootRenderGlyph(
             TtfObject,
             TtfObject->AsciiGlyphData[i],
-            16
+            14
         );
     }
-
-
-    BootRenderSyncScreen();
 
 }
