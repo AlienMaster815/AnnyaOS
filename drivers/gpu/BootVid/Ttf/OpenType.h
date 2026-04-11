@@ -187,6 +187,8 @@ typedef struct _TTF_OBJECT{
     SIZE                        HeadOffset;
     SIZE                        HmtxOffset;
     SIZE                        UnitsPerEm;
+    INT16                       ShiftX;
+    INT16                       ShiftY;
     PTTFOBJ_TABLE_DIRECTORY     TableDirectories;
     TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
     TTF_LOCA_LONG               AsciiGlyphOffsets[127];

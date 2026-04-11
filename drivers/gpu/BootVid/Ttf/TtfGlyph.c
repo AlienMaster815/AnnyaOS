@@ -104,8 +104,10 @@ GlpyCountVectors(
 typedef struct _GET_VECTOR_STRUCT{
     SIZE        Count;
     SIZE        CurrentOut;
-    UINT16*     VectorOut;
-    UINT16*     ReorganizorStack;
+    INT16       ShiftX;
+    INT16       ShiftY;
+    INT16*      VectorOut;
+    INT16*      ReorganizorStack;
 }GET_VECTOR_STRUCT, * PGET_VECTOR_STRUCT;
 
 static 
@@ -116,8 +118,8 @@ GlpyhGetVectors(
     PVOID Context
 ){
     PGET_VECTOR_STRUCT Gvs = (PGET_VECTOR_STRUCT)Context;
-    Gvs->VectorOut[Gvs->CurrentOut + 0] = X;
-    Gvs->VectorOut[Gvs->CurrentOut + 1] = Y;
+    Gvs->VectorOut[Gvs->CurrentOut + 0] = X + Gvs->ShiftX;
+    Gvs->VectorOut[Gvs->CurrentOut + 1] = Y - Gvs->ShiftY;
     Gvs->CurrentOut += 2;
 }
 
@@ -329,6 +331,11 @@ void GlyphScanlineFill(PGET_VECTOR_STRUCT Gvs, PBOOTVID_BITMAP Map) {
 void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE Height) {
     GET_VECTOR_STRUCT Gvs = {0};   
     
+    Gvs.ShiftX = (INT16)(((float)TtfObject->ShiftX / TtfObject->UnitsPerEm) * (float)Height + 0.0f);
+    Gvs.ShiftY = (INT16)(((float)TtfObject->ShiftY / TtfObject->UnitsPerEm) * (float)Height + 0.5f);
+
+    Height += Gvs.ShiftY;
+
     GlpyhDoSomthing(TtfObject, GlyphData, 0, 0, Height, GlpyCountVectors, &Gvs.Count);
     
     Gvs.VectorOut = LouKeMallocArray(UINT16, Gvs.Count + 2, KERNEL_GENERIC_MEMORY);
