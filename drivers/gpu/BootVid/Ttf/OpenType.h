@@ -191,6 +191,7 @@ typedef struct _TTF_OBJECT{
     INT16                       ShiftY;
     PTTFOBJ_TABLE_DIRECTORY     TableDirectories;
     TTF_OBJECT_CMAP_META_DATA   CmapMetaData;
+    float                       Scale;
     TTF_LOCA_LONG               AsciiGlyphOffsets[127];
     TTF_LOCA_LONG               RussianGlyphOffsets[256];
     BOOLEAN                     UsesLongLocaTableFormat;

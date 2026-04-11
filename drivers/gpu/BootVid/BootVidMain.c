@@ -85,6 +85,6 @@ BootVidEntry(){
     BootVidInitializeTerminalDriver();
 
     LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
-    while(1);
+
     return STATUS_SUCCESS;
 }

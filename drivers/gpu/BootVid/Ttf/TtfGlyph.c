@@ -334,7 +334,12 @@ void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE H
     Gvs.ShiftX = (INT16)(((float)TtfObject->ShiftX / TtfObject->UnitsPerEm) * (float)Height + 0.0f);
     Gvs.ShiftY = (INT16)(((float)TtfObject->ShiftY / TtfObject->UnitsPerEm) * (float)Height + 0.5f);
 
-    Height += Gvs.ShiftY;
+    Height -= Gvs.ShiftY; //scale height down so negative minimal also fits
+
+    Gvs.ShiftX = (INT16)(((float)TtfObject->ShiftX / TtfObject->UnitsPerEm) * (float)Height + 0.0f);
+    Gvs.ShiftY = (INT16)(((float)TtfObject->ShiftY / TtfObject->UnitsPerEm) * (float)Height + 0.5f);
+
+    Height += Gvs.ShiftY; //scale back up within original height
 
     GlpyhDoSomthing(TtfObject, GlyphData, 0, 0, Height, GlpyCountVectors, &Gvs.Count);
     
@@ -367,7 +372,6 @@ void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE H
     GlyphScanlineFill(&Gvs, NewMap);
 
     BootVidTrimBitmap(NewMap, 0);
-
 }
 
 LOUSTATUS 
@@ -382,6 +386,7 @@ TtfParseGlyphData(
     for(size_t i = 0; i < 127; i++){
         SIZE Offset = TtfObject->AsciiGlyphOffsets[i];
         if(Offset == UINT32_MAX){
+            TtfObject->AsciiGlyphData[i] = 0x00;
             continue;
         }
         PTTF_GLYPH_DESCRIPTION GlyphDescription = (PTTF_GLYPH_DESCRIPTION)(((UINTPTR)Directory->Offset + (UINTPTR)File) + (UINTPTR)Offset);    

@@ -7,8 +7,16 @@ extern UINT32* Canvas;
 extern INT32 Width;
 extern INT32 Height;
 
+
 #define TERMINAL_INCX(bWidth)   (bWidth + 2)
-#define TERMINAL_INCY(bHeight)  (bHeight + 2)
+#define TERMINAL_INCY           (18)
+#define TERMINAL_INCX_SPC       (12)
+
+static void BootVidScrollTerminal(){
+    for(SIZE y = TERMINAL_INCY; y < Height; y++){
+        memcpy(&Canvas[((y - TERMINAL_INCY) * Width)], &Canvas[(y * Width)], Width * sizeof(UINT32));
+    }
+}
 
 void BootVidRegisterBootFont(
     PTTF_OBJECT TtfObject
@@ -22,6 +30,28 @@ static void BootVidEndofData(){
 
 
 static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
+
+    if((AsciiCharecter == '\n') || ((CurrentX + (TERMINAL_INCX_SPC * 2)) > Width)){
+        if((CurrentY + (TERMINAL_INCY * 2)) <= Height){
+            CurrentY += TERMINAL_INCY;
+            CurrentX = 0;
+            if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){
+                return 0x00;
+            }
+        }else{
+            BootVidScrollTerminal();
+            CurrentX = 0;
+            if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){
+                return 0x00;
+            }
+        }
+    }
+
+    if(AsciiCharecter == ' '){
+        CurrentX += TERMINAL_INCX_SPC;
+        return 0x00;
+    }
+
     if(!TerminalFont->AsciiGlyphData[(SIZE)AsciiCharecter]){
         return 0x00; 
     }
@@ -29,10 +59,7 @@ static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
     if(!Bitmap){
         return 0x00;
     }
-    if((CurrentX + TERMINAL_INCX(Bitmap->Width)) >= Width){
-        return 0x00;
-    //    while(1);
-    }
+
 
     BootVidPlaceBitmap(Bitmap, CurrentX, CurrentY);
     

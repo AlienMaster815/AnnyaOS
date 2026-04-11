@@ -33,7 +33,7 @@ uintptr_t RBP_Current;
 -- with allocation functions
 */
 
-string KERNEL_VERSION = "0.6.05 RSC-2";
+string KERNEL_VERSION = "0.6.06";
 
 string KERNEL_ARCH = "64-BIT";
 
@@ -369,12 +369,13 @@ void LouOsKrnlStart(
     AdvancedLousineKernelInitialization();
     
     LookForStorageDevices();
-        
+         
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){
         LouPrint("No Storage Devices Detected\n");
         while(1);
     }
+
 
     InitializeFileSystemManager();
 
@@ -390,8 +391,6 @@ void LouOsKrnlStart(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-
-    while(1);
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;
