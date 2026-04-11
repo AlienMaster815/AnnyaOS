@@ -165,7 +165,7 @@ struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
 uint64_t GetCr3();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
-
+LOUSTATUS LouKeCreateSystemWorkQeueue();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -248,11 +248,9 @@ void AdvancedLousineKernelInitialization(){
         31
     );
 
-    
+    LouKeCreateSystemWorkQeueue();    
 
     LouKeUnmaskSmpInterrupts();
-
-    
 
     LouPrint("Kernel Advanced System Initialized\n");
     
@@ -385,7 +383,7 @@ void LouOsKrnlStart(
 
     LouKeProbeSbIsa();
 
-    //ScanTheRestOfHarware();    
+    ScanTheRestOfHarware();    
 
     //TODO: stub Loustrsafe.h and LdmCore.h 
 

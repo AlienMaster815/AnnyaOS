@@ -35,9 +35,9 @@ typedef struct _LOUQ_WORK{
 
 typedef struct _LOUQ_WORK_QUEUE{
     ListHeader          Peers;
+    spinlock_t          AddLock;
     string              QueueName;
-    LOUQ_WORK           WorkEntries;
-    PLOUQ_WORK          LastWorkEntry;
+    ListHeader          QueuedWork;
     UINT8               QueuePriority;
     PTHREAD             QueueThread;
 }LOUQ_WORK_QUEUE, * PLOUQ_WORK_QUEUE;
@@ -58,8 +58,9 @@ typedef struct _LOUQ_COMPLETION{
     PLOUQ               QueueObject;
 }LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
-static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(struct _LOUQ_WORK*)){
+static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(struct _LOUQ_WORK*), PVOID Data){
     Work->Work.DelayedFunction = Function;
+    Work->Work.WorkData = Data;
 }
 
 #ifndef _USER_MODE_CODE_

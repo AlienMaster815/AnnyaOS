@@ -20,9 +20,9 @@ LouKeRegisterEcsDriver(
 ){
     PLOUSINE_ECS_DRIVER_TACKER NewTracker = LouKeMallocType(LOUSINE_ECS_DRIVER_TACKER, KERNEL_GENERIC_MEMORY);
     NewTracker->DriverObject = EcsDriver;
-    //MutexLock(&EcsDriverManager.DriversLock);
+    MutexLock(&EcsDriverManager.DriversLock);
     LouKeListAddTail(&NewTracker->Peers, &EcsDriverManager.Drivers);
-    //MutexUnlock(&EcsDriverManager.DriversLock);
+    MutexUnlock(&EcsDriverManager.DriversLock);
     return STATUS_SUCCESS;
 }
 
@@ -36,13 +36,13 @@ LouKeEcsPrintAsciiCharecter(
         return 0x00;
     }
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
-        //ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
-            //if(Tracker->DriverObject->EcsOperations.PrintAsciiCharecter){
-                //MutexLock(&Tracker->LockOut);
+        ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
+            if(Tracker->DriverObject->EcsOperations.PrintAsciiCharecter){
+                MutexLock(&Tracker->LockOut);
                 Tracker->DriverObject->EcsOperations.PrintAsciiCharecter(Charecter);
-                //MutexUnlock(&Tracker->LockOut);
-            //}
-        //}
+                MutexUnlock(&Tracker->LockOut);
+            }
+        }
     } 
     return 0x00;
 }
@@ -56,13 +56,13 @@ LouKeEcsPrintUnicodeCharecter(
         return 0x00;
     }
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
-        //ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
-            //if(Tracker->DriverObject->EcsOperations.PrintUnicodeCharecter){
-                //MutexLock(&Tracker->LockOut);
+        ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
+            if(Tracker->DriverObject->EcsOperations.PrintUnicodeCharecter){
+                MutexLock(&Tracker->LockOut);
                 Tracker->DriverObject->EcsOperations.PrintUnicodeCharecter(Charecter);
-                //MutexUnlock(&Tracker->LockOut);
-            //}
-        //}
+                MutexUnlock(&Tracker->LockOut);
+            }
+        }
     } 
     return 0x00;
 }
@@ -75,12 +75,12 @@ LouKeEcsEndofData(){
     }
     PLOUSINE_ECS_DRIVER_TACKER Tracker;
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
-        //ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
-            //if(Tracker->DriverObject->EcsOperations.EndofData){
-                //MutexLock(&Tracker->LockOut);
+        ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
+            if(Tracker->DriverObject->EcsOperations.EndofData){
+                MutexLock(&Tracker->LockOut);
                 Tracker->DriverObject->EcsOperations.EndofData();
-                //MutexUnlock(&Tracker->LockOut);
-            //}
-        //}
+                MutexUnlock(&Tracker->LockOut);
+            }
+        }
     } 
 }

@@ -49,7 +49,7 @@ LouKeHalInitializePs2Mouse(
     Private->Scaling = MOUSE_COMMAND_SET_SCALLING_1_1;
     Private->Resolution = MOUSE_RESOLUTION_1_COUNT_MM;
 
-    LouKeLouQInitializeWork(&Ps2Device->Work, LouKePs2MouseUpdate);
+    LouKeLouQInitializeWork(&Ps2Device->Work, LouKePs2MouseUpdate, &Ps2Device->Work);
 
     LouKeHalPs2InstallInterruptHandler(Ps2Device, (void(*)(uint64_t))LouKePs2MouseIrqHandler);
     UINT8 Command;
@@ -69,9 +69,10 @@ LouKeHalInitializePs2Mouse(
         LouPrint("Error Starting Scanning\n");
     }
 
-    LouKeHalPs2EnableInterrupt(Ps2Device);    
 
     Private->MouseMessage = LouKeMouseAllocateMessageDevice();
+
+    LouKeHalPs2EnableInterrupt(Ps2Device);    
 
     LouPrint("LouKeHalInitializePs2Mouse() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

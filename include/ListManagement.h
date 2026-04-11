@@ -33,7 +33,7 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
 #define ForEachListEntry(Position, Node, Member) for((Position) = ListItemToType(((Node)->NextHeader), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member); (Position) = ListItemToType((Position)->Member.NextHeader, typeof(*(Position)), Member)) 
 #define ForEachListEntrySafe(Position, N, Node, Member) for((Position) = ListItemToType(((Node)->NextHeader), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member) && (N = ListItemToType(Position->Member.NextHeader, typeof(*N), Member), true); Position = N) 
 
-#define ForEachLListEntry(Position, N, Node, Member) ForEachListEntry(Position, N, Node, Member)
+#define ForEachLListEntry(Position, Node, Member) ForEachListEntry(Position, Node, Member)
 #define ForEachLListEntrySafe(Position, N, Node, Member) ForEachListEntrySafe(Position, N, Node, Member)
 
 #define ListItemToTypeOrNull(Header, Type, Member) ((Type*)(UINTPTR)(Header ? CONTAINER_OF(Header, Type, Member) : 0x00))

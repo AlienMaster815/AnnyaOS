@@ -32,5 +32,5 @@ void LouKeMouseUpdateInput(PLOUSINE_USER_SHARED_MESSAGE Message, INT64 X, INT64 
 
 
 void LouKeInitializeMouseHandling(){
-    LouKeCreateWorkQueue(0x00, 31, "MouseWork");
+    //LouKeCreateWorkQueue(0x00, 31, "MouseWork");
 }

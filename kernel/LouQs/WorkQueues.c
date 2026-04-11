@@ -1,84 +1,42 @@
 #include <LouAPI.h>
 
-/*static LOUQ_WORK MainWorkQueue = {0};
-
-LOUSTATUS LouKeStartWork(PLOUQ_WORK Work){
-    MutexLock(&MainWorkQueue.LouQHeader.LouQtex);
-
-    if(!MainWorkQueue.CurrentWorkList.NextHeader){
-        MainWorkQueue.CurrentWorkList.NextHeader = (PListHeader)Work;
-        goto _DONE_ASSIGNING_WORK;
-    }
-
-    PLOUQ_WORK NextQueue = (PLOUQ_WORK)MainWorkQueue.CurrentWorkList.NextHeader;
-    if(NextQueue == Work){
-        goto _DONE_ASSIGNING_WORK;
-    }
-
-    while(NextQueue->CurrentWorkList.NextHeader){
-        NextQueue = (PLOUQ_WORK)NextQueue->CurrentWorkList.NextHeader;
-        if(NextQueue == Work){
-            goto _DONE_ASSIGNING_WORK;
-        }
-    }
-
-    NextQueue->CurrentWorkList.NextHeader = (PListHeader)Work;
-
-    _DONE_ASSIGNING_WORK:
-    MutexUnlock(&MainWorkQueue.LouQHeader.LouQtex);
-    return STATUS_SUCCESS;
-}
-
-static PLOUQ_WORK LouKeGetFreeWork(PLOUQ_WORK HeadWork){
-    PLOUQ_WORK NextQueue = (PLOUQ_WORK)MainWorkQueue.CurrentWorkList.NextHeader;
-    while(NextQueue){
-        NextQueue = (PLOUQ_WORK)NextQueue->CurrentWorkList.NextHeader;
-        if(!MutexIsLocked(&NextQueue->LouQHeader.LouQtex)){
-            break;
-        }
-    }
-    return NextQueue;
-}
-
-int LouKeMainWorkDemon(){
-    PLOUQ_WORK NextQueue = 0x00;
-    while(1){
-        NextQueue = (PLOUQ_WORK)MainWorkQueue.CurrentWorkList.NextHeader;
-        if((!NextQueue) || (MutexIsLocked(&MainWorkQueue.LouQHeader.LouQtex))){
-            asm("INT $200");//yeild
-            continue;
-        }
-
-        if(MutexIsLocked(&NextQueue->LouQHeader.LouQtex)){
-            NextQueue = LouKeGetFreeWork(&MainWorkQueue);
-        }else{
-            MainWorkQueue.CurrentWorkList.NextHeader = NextQueue->CurrentWorkList.NextHeader;
-        }
-
-        if(NextQueue){
-            MutexLock(&NextQueue->LouQHeader.LouQtex);
-            NextQueue->Work.DelayedFunction(NextQueue);
-            if(NextQueue->LouQHeader.Completion){
-                //TODO:handle completion
-            }
-            MutexUnlock(&NextQueue->LouQHeader.LouQtex);
-            NextQueue = 0x00;
-        }else{
-            asm("INT $200");//yeild
-        }
-    }
-}*/
-
-UNUSED static LOUQ_WORK_QUEUE MainWorkQueue = {0};
+static LOUQ_WORK_QUEUE MainWorkQueue = {
+    .QueueName = "Losine Kernel Main System Queue",
+    .QueuePriority = 31,
+};
 
 DWORD LouKeWorkStackDemon(PVOID Data){
     UNUSED PLOUQ_WORK_QUEUE WorkQueueData = (PLOUQ_WORK_QUEUE)Data;
     LouPrint("Work Queue Started:%s\n", WorkQueueData->QueueName);
+    LouKIRQL Irql;
     while(1){
-        
+        if(!LouKeListIsEmpty(&WorkQueueData->QueuedWork)){
+            LouKeAcquireSpinLock(&WorkQueueData->AddLock, &Irql);
+            ListHeader TmpList = WorkQueueData->QueuedWork;
+            LouKeListDeleteAll(&WorkQueueData->QueuedWork);
+            LouKeReleaseSpinLock(&WorkQueueData->AddLock, &Irql);
 
+            PLOUQ_WORK TmpWork;
+            PLOUQ_WORK ForwardWork;
+            ForEachListEntrySafe(TmpWork, ForwardWork, &TmpList, QueueObject.Peers){
+                TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
+                LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
+            }
+        }
         LouKeYeildExecution();
     }
+    return STATUS_SUCCESS;
+}
+
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeWqQueueWork(
+    PLOUQ_WORK_QUEUE    WorkQueue,
+    PLOUQ_WORK          WorkItem
+){
+    SpinlockSyncronize(&WorkQueue->AddLock);
+    LouKeListAddTail(&WorkItem->QueueObject.Peers, &WorkQueue->QueuedWork);
     return STATUS_SUCCESS;
 }
 
@@ -87,10 +45,12 @@ LOUSTATUS
 LouKeQueueWork(
     PLOUQ_WORK WorkItem
 ){
-    LouPrint("LouKeQueueWork()\n");
-    while(1);
-    return STATUS_SUCCESS;
+    return LouKeWqQueueWork(
+        &MainWorkQueue,
+        WorkItem
+    );
 }
+
 
 KERNEL_EXPORT 
 LOUSTATUS 
@@ -123,28 +83,28 @@ LOUSTATUS LouKeCreateWorkQueue(
     UINT8               QueuePriority,
     string              QueueName
 ){
-    PLOUQ_WORK_QUEUE TmpQueue = &MainWorkQueue;
-    while(TmpQueue->Peers.NextHeader){
-        TmpQueue = (PLOUQ_WORK_QUEUE)TmpQueue->Peers.NextHeader;
-        if(!strcmp(TmpQueue->QueueName, QueueName)){
-            if(OutQueue){
-                *OutQueue = TmpQueue;
-            }
-            return STATUS_SUCCESS;
-        }
-    }
     
-    TmpQueue->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUQ_WORK_QUEUE, KERNEL_GENERIC_MEMORY);
-    TmpQueue = (PLOUQ_WORK_QUEUE)TmpQueue->Peers.NextHeader;
+    PLOUQ_WORK_QUEUE NewQueue = LouKeMallocType(LOUQ_WORK_QUEUE, KERNEL_GENERIC_MEMORY);
+    NewQueue->QueueName = LouKeMallocArray(CHAR, strlen(QueueName) + 1, KERNEL_GENERIC_MEMORY);
+    strcpy(NewQueue->QueueName, QueueName);
+    NewQueue->QueuePriority = QueuePriority;
+    NewQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)NewQueue, 16 * KILOBYTE, QueuePriority);
 
-    TmpQueue->QueueName = LouKeMallocArray(CHAR, strlen(QueueName) + 1, KERNEL_GENERIC_MEMORY);
-    strcpy(TmpQueue->QueueName, QueueName);
-    TmpQueue->QueuePriority = QueuePriority;
-
-    TmpQueue->QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)TmpQueue, 16 * KILOBYTE, QueuePriority);
+    LouKeListAddTail(&NewQueue->Peers, &MainWorkQueue.Peers);
 
     if(OutQueue){
-        *OutQueue = TmpQueue;
+        *OutQueue = NewQueue;
     }
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS LouKeCreateSystemWorkQeueue(){
+
+    if(MainWorkQueue.QueueThread){
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    MainWorkQueue.QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)&MainWorkQueue, 16 * KILOBYTE, 31);
+
     return STATUS_SUCCESS;
 }
