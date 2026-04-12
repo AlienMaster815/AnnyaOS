@@ -66,7 +66,7 @@ extern "C" {
 struct _DRSD_FRAME_BUFFER;
 struct _DRSD_PLANE;
 struct _DRSD_CRTC;
-struct _DRSD_ENCODER_CALLBACKS;
+struct _DRSD_ENCODER_FUNCTIONS;
 struct _DRSD_ENCODER_ASSISTED_CALLBACKS;
 struct _DRSD_CRTC_STATE;
 struct _DRSD_CONNECTOR;
@@ -767,14 +767,14 @@ typedef struct _DRSD_PLANE_ASSIST_FUNCTIONS{
     void        (*PanicFlush)(struct _DRSD_PLANE* Plane);
 }DRSD_PLANE_ASSIST_FUNCTIONS, * PDRSD_PLANE_ASSIST_FUNCTIONS;
 
-typedef struct _DRSD_PLANE_CALLBACKS{
+typedef struct _DRSD_PLANE_FUNCTIONS{
     LOUSTATUS                   (*UpdatePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int CrtcX, int CrtcY, int CrtcWidth, int CrtcHeight, uint32_t SourceX, uint32_t SourceY, uint32_t SourceWidth, uint32_t SourceHeight, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*DisablePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
-    void                        (*DestroyPlane)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState);
+    void                        (*Destroy)(struct _DRSD_PLANE* Plane);
     void                        (*ResetPlane)(struct _DRSD_PLANE* Plane);
     LOUSTATUS                   (*SetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PROPERTY* Property, uint64_t Value);
     struct _DRSD_PLANE_STATE*   (*AtomicDuplicateState)(struct _DRSD_PLANE* Plane);
-    void                        (*AtomicDestroyState)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState);
+    void                        (*AtomicDestroyState)(struct _DRSD_PLANE* Plan);
     LOUSTATUS                   (*AtomicSetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState, struct _DRSD_PROPERTY* Property, uint64_t Value);
     LOUSTATUS                   (*AtomicGetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* PlaneState, struct _DRSD_PROPERTY* Property, uint64_t* Value);
     LOUSTATUS                   (*LateRegister)(struct _DRSD_PLANE* Planem);
@@ -782,8 +782,7 @@ typedef struct _DRSD_PLANE_CALLBACKS{
     void                        (*PrintAtomicState)(struct _DRSD_PLANE_STATE* State);
     bool                        (*ModifierFormatSupported)(struct _DRSD_PLANE* Plane, uint32_t Format, uint64_t Modifier);
     bool                        (*AsyncModifierFormatSupported)(struct _DRSD_PLANE* Plane, uint32_t Format, uint64_t Modifier);
-}DRSD_PLANE_CALLBACKS, * PDRSD_PLANE_CALLBACKS, 
-    DRSD_PLANE_FUNCTIONS, * PDRSD_PLANE_FUNCTIONS;
+}DRSD_PLANE_FUNCTIONS, * PDRSD_PLANE_FUNCTIONS;
 
 typedef enum{
     OVERLAY_PLANE = 0,
@@ -836,7 +835,7 @@ typedef struct _DRSD_PLANE{
     bool                            ModifierDefault;
     PDRSD_FRAME_BUFFER              FrameBuffer;
     PDRSD_FRAME_BUFFER              OldBuffer;
-    PDRSD_PLANE_CALLBACKS           Callbacks;
+    PDRSD_PLANE_FUNCTIONS           Callbacks;
     PDRSD_PLANE_STATE               PlaneState;
 
 
@@ -1032,7 +1031,7 @@ typedef struct _DRSD_CONNECTOR_CALLBACKS{
     DRSD_CONNECTOR_FUNCTIONS , * PDRSD_CONNECTOR_FUNCTIONS;
 
 typedef struct _DRSD_PROPERTY_BLOB{
-    ListHeader              Peers;
+    ListHeader              HeadGlobal;
     struct _DRSD_DEVICE*    Device;
     DRSD_MODE_OBJECT        Base;
     size_t                  Length;
@@ -1334,7 +1333,7 @@ typedef struct _EDID_QUIRK{
 #define DRSD_CONNECTOR_MODE_USB             20
 
 typedef struct _DRSD_ENCODER{
-    ListHeader                                  Peers;
+    ListHeader                                  Head;
     struct _DRSD_DEVICE*                        Device;
     DRSD_MODE_OBJECT                            Base;
     LOUSTR                                      Name;
@@ -1345,8 +1344,8 @@ typedef struct _DRSD_ENCODER{
     size_t                                      Index;
     uint32_t                                    CrtcLimit;
     uint32_t                                    CloneLimit;
-    struct _DRSD_ENCODER_CALLBACKS*             Callbacks;
-    struct _DRSD_ENCODER_ASSISTED_CALLBACKS*    AssistedCallbacks;
+    struct _DRSD_ENCODER_FUNCTIONS*             Functions;
+    struct _DRSD_ENCODER_ASSISTED_CALLBACKS*    AssistedFunctions;
 }DRSD_ENCODER, * PDRSD_ENCODER; 
 
 typedef struct _DRSD_WRITEBACK_CONNECTOR{
@@ -1361,12 +1360,12 @@ typedef struct _DRSD_WRITEBACK_CONNECTOR{
     CHAR                            TimeLineName[32];
 }DRSD_WRITEBACK_CONNECTOR, * PDRSD_WRITEBACK_CONNECTOR;
 
-typedef struct _DRSD_ENCODER_CALLBACKS{
-    void        (*ResetEncoder)(struct _DRSD_ENCODER* Encoder);
-    void        (*DestroyEnocder)(struct _DRSD_ENCODER* Encoder);
-    void        (*LateRegisterEnocder)(struct _DRSD_ENCODER* Encoder);
-    void        (*EarlyUnregisterEncoder)(struct _DRSD_ENCODER* Encoder);
-}DRSD_ENCODER_CALLBACKS, * PDRSD_ENCODER_CALLBACKS;
+typedef struct _DRSD_ENCODER_FUNCTIONS{
+    void        (*Reset)(struct _DRSD_ENCODER* Encoder);
+    void        (*Destroy)(struct _DRSD_ENCODER* Encoder);
+    void        (*LateRegister)(struct _DRSD_ENCODER* Encoder);
+    void        (*EarlyUnregister)(struct _DRSD_ENCODER* Encoder);
+}DRSD_ENCODER_FUNCTIONS, * PDRSD_ENCODER_FUNCTIONS;
 
 typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
     void                        (*EncoderSetPowerMode)(struct _DRSD_ENCODER* Encoder, int PowerMode);
@@ -2979,8 +2978,7 @@ PDRSD_PLANE_STATE DrsdInternalDuplicateAtomicState(
 );
 
 void DrsdInternalDestroyPlaneAtomic(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
+    PDRSD_PLANE         Plane
 );
 
 void DrsdGxeInternalCleanupFrameBuffer(
@@ -3012,15 +3010,14 @@ PDRSD_PLANE_STATE DrsdGxeDuplicateShadowPlaneState(
 );
 
 void DrsdGxeDestroyShadowPlane(
-    PDRSD_PLANE         Plane,
-    PDRSD_PLANE_STATE   PlaneState
+    PDRSD_PLANE         Plane
 );
 
 LOUSTATUS DrsdInitializeGenericPlane(
     PDRSD_DEVICE            Device, 
     PDRSD_PLANE             Plane,
     size_t                  CrtcLimit,
-    PDRSD_PLANE_CALLBACKS   PlaneCallbacks,
+    PDRSD_PLANE_FUNCTIONS   PlaneCallbacks,
     uint32_t*               PlaneFormats,
     size_t                  FormatCount,
     uint64_t*               FormatModifiers,
@@ -3072,7 +3069,7 @@ LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
 LOUSTATUS DrsdInitializeEncoder(
     PDRSD_DEVICE                Device,
     PDRSD_ENCODER               Encoder,
-    PDRSD_ENCODER_CALLBACKS     Callbacks,
+    PDRSD_ENCODER_FUNCTIONS     Callbacks,
     int                         EncoderType,
     string                      EncoderName,
     ...

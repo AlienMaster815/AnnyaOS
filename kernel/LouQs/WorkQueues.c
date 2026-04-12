@@ -20,6 +20,7 @@ DWORD LouKeWorkStackDemon(PVOID Data){
             PLOUQ_WORK ForwardWork;
             ForEachListEntrySafe(TmpWork, ForwardWork, &TmpList, QueueObject.Peers){
                 TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
+                LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
                 LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
             }
         }
@@ -35,9 +36,20 @@ LouKeWqQueueWork(
     PLOUQ_WORK_QUEUE    WorkQueue,
     PLOUQ_WORK          WorkItem
 ){
+    LouKeSetAtomicBoolean(&WorkItem->QueueObject.InQueue, 1);
     SpinlockSyncronize(&WorkQueue->AddLock);
     LouKeListAddTail(&WorkItem->QueueObject.Peers, &WorkQueue->QueuedWork);
     return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+void 
+LouKeFlushWork(
+    PLOUQ_WORK  WorkItem
+){
+    while(
+        LouKeGetAtomicBoolean(&WorkItem->QueueObject.InQueue)
+    );
 }
 
 KERNEL_EXPORT 

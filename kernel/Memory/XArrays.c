@@ -1,6 +1,7 @@
 #include <LouAPI.h>
 
 
+
 KERNEL_EXPORT
 PVOID 
 LouKeXaStoreEx(
@@ -45,10 +46,10 @@ LouKeXaIsIndexUsedEx(
     PXARRAY     Array,
     UINT64      Index
 ){
-    PXARRAY_NODE TmpNode = ListItemToType(Array->Nodes.NextHeader, XARRAY_NODE, Peers);
+    PXARRAY_NODE TmpNode;
     BOOLEAN NodePreExists = false;
     UINT64 Member;
-    while(TmpNode){
+    ForEachListEntry(TmpNode, &Array->Nodes, Peers){
         if(RangeInterferes(
             TmpNode->Base, 512,
             Index, 1
@@ -56,7 +57,6 @@ LouKeXaIsIndexUsedEx(
             NodePreExists = true;
             break;
         }       
-        TmpNode = ListItemToType(TmpNode->Peers.NextHeader, XARRAY_NODE, Peers);
     }
     if(!NodePreExists){
         return false;
@@ -76,10 +76,10 @@ LouKeXaGetEx(
         return STATUS_INVALID_PARAMETER;
     }    
 
-    PXARRAY_NODE TmpNode = ListItemToType(Array->Nodes.NextHeader, XARRAY_NODE, Peers);
+    PXARRAY_NODE TmpNode;
     BOOLEAN NodePreExists = false;
     UINT64 Member;
-    while(TmpNode){
+    ForEachListEntry(TmpNode, &Array->Nodes, Peers){
         if(RangeInterferes(
             TmpNode->Base, 512,
             Index, 1
@@ -87,7 +87,6 @@ LouKeXaGetEx(
             NodePreExists = true;
             break;
         }       
-        TmpNode = ListItemToType(TmpNode->Peers.NextHeader, XARRAY_NODE, Peers);
     }
     if(!NodePreExists){
         return STATUS_UNSUCCESSFUL;
@@ -201,4 +200,64 @@ LouKeXarrayAllocateInt(
     }   
     LouKeXaUnlockArray(Array);
     return STATUS_DEVICE_BUSY;
+}
+
+static void DeleteNodeIfEmpty(
+    PXARRAY_NODE Node
+){
+
+    for(size_t i = 0 ; i < 64; i++){
+        if(Node->Bitmap & (1 << i)){
+            return;
+        }
+    }
+    LouKeListDeleteItem(&Node->Peers);
+    LouKeFree(Node);
+}
+
+KERNEL_EXPORT
+void 
+LouKeXaFree(
+    PXARRAY Array,
+    UINT64  Id
+){
+    LouKeXaLockArray(Array);
+    PXARRAY_NODE TmpNode;
+    UINT64 Member;
+    ForEachListEntry(TmpNode, &Array->Nodes, Peers){
+        if(RangeInterferes(
+            TmpNode->Base, 512,
+            Id, 1
+        )){
+            break;
+        }       
+    }
+
+    if(!TmpNode){
+        LouPrint("LouKeXaFree():Array:%h ID:%d Is Not Used\n", Array, Id);
+    }else{
+        Member = Id - TmpNode->Base;
+        TmpNode->Entries[Member] = 0x00;
+        (TmpNode->Bitmap &= ~(1 << Member));
+        DeleteNodeIfEmpty(TmpNode);
+    }    
+    LouKeXaUnlockArray(Array);
+}
+
+KERNEL_EXPORT
+void 
+LouKeXaDestroy(
+    PXARRAY Array
+){
+    LouKeXaLockArray(Array);
+    PXARRAY_NODE TmpNode;
+    PXARRAY_NODE ForwardNode;
+    ForEachListEntrySafe(TmpNode, ForwardNode, &Array->Nodes, Peers){
+        for(size_t i = 0 ; i < 64; i++){
+            TmpNode->Entries[i] = 0x00;
+            (TmpNode->Bitmap &= ~(1 << i));   
+        }
+        DeleteNodeIfEmpty(TmpNode); //it is
+    }    
+    LouKeXaUnlockArray(Array);
 }

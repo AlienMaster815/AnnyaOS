@@ -192,8 +192,8 @@ static void VirtualboxEncoderDestroy(
     while(1);
 }
 
-static  DRSD_ENCODER_CALLBACKS VirtualboxEncoderCallbacks = {
-    .DestroyEnocder = VirtualboxEncoderDestroy,
+static  DRSD_ENCODER_FUNCTIONS VirtualboxEncoderCallbacks = {
+    .Destroy = VirtualboxEncoderDestroy,
 };
 
 static void VirtualboxCrtcAtomicEnable(
@@ -451,13 +451,13 @@ static  DRSD_PLANE_ASSIST_FUNCTIONS CursorPlaneAssistFunctions = {
 //    .AtomicSetState = VirtualboxCursorAtomicSetState,
 };
 
-static  DRSD_PLANE_CALLBACKS CursorPlaneFunctions = {
-    /*.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
-    .DisablePlane = DrsdInternalPlaneDisableAtomic,
-    .DestroyPlane = DrsdInternalDestroyPlaneAtomic,
-    .ResetPlane = DrsdGxeResetShadowPlane,
-    .AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
-    .AtomicDestroyState = DrsdGxeDestroyShadowPlane,*/
+static  DRSD_PLANE_FUNCTIONS CursorPlaneFunctions = {
+    //.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
+    //.DisablePlane = DrsdInternalPlaneDisableAtomic,
+    //.Destroy = DrsdInternalDestroyPlaneAtomic,
+    //.ResetPlane = DrsdGxeResetShadowPlane,
+    //.AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
+    //.AtomicDestroyState = DrsdGxeDestroyShadowPlane,
 };
 
 
@@ -469,13 +469,13 @@ static  DRSD_PLANE_ASSIST_FUNCTIONS PlaneAssistedCallbacks = {
     //.AtomicSetState = VirtualboxAtomicSetState,
 };
 
-static  DRSD_PLANE_CALLBACKS PlaneCallbacks = {
-    /*.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
+static  DRSD_PLANE_FUNCTIONS PlaneCallbacks = {
+    .UpdatePlane = DrsdInternalPlaneUpdateAtomic,
     .DisablePlane = DrsdInternalPlaneDisableAtomic,
-    .DestroyPlane = DrsdInternalDestroyPlaneAtomic,
+    .Destroy = DrsdInternalDestroyPlaneAtomic,
     .ResetPlane = DrsdInternalResetPlane,
     .AtomicDuplicateState = DrsdInternalDuplicateAtomicState,
-    .AtomicDestroyState = DrsdInternalDestroyPlaneAtomic, */
+    .AtomicDestroyState = DrsdInternalDestroyPlaneAtomic,
 };
 
 static  DRSD_MODE_CONFIGURATION_CALLBACKS VirtualboxModeCallbacks = {
@@ -491,7 +491,7 @@ static PDRSD_PLANE VirtualboxCreatePlane(
     DRSD_PLANE_TYPE             Type
 ){
     PDRSD_PLANE_ASSIST_FUNCTIONS AssistFunctions = 0x00;
-    PDRSD_PLANE_CALLBACKS Functions = 0x00;
+    PDRSD_PLANE_FUNCTIONS Functions = 0x00;
     PDRSD_PLANE NewPlane;
     uint32_t*   Formats;
     size_t      FormatCount;
@@ -499,13 +499,13 @@ static PDRSD_PLANE VirtualboxCreatePlane(
 
     switch(Type){
         case PRIMARY_PLANE:
-            Functions = (PDRSD_PLANE_CALLBACKS)&PlaneCallbacks;
+            Functions = (PDRSD_PLANE_FUNCTIONS)&PlaneCallbacks;
             AssistFunctions = (PDRSD_PLANE_ASSIST_FUNCTIONS)&PlaneAssistedCallbacks;
             Formats = PlaneFormats;
             FormatCount = 2;
             break;
         case CURSOR_PLANE:
-            Functions = (PDRSD_PLANE_CALLBACKS)&CursorPlaneFunctions;
+            Functions = (PDRSD_PLANE_FUNCTIONS)&CursorPlaneFunctions;
             AssistFunctions = (PDRSD_PLANE_ASSIST_FUNCTIONS)&CursorPlaneAssistFunctions;
             Formats = CursorPlaneFormats;
             FormatCount = 1; 
@@ -620,7 +620,7 @@ static PDRSD_ENCODER VirtualboxEncoderInitialize(
     /*DrsdInitializeEncoder(
         Device,
         &VBoxEncoder->Base,
-        (PDRSD_ENCODER_CALLBACKS)&VirtualboxEncoderCallbacks,
+        (PDRSD_ENCODER_FUNCTIONS)&VirtualboxEncoderCallbacks,
         DRSD_ENCODER_MODE_DAC, 
         0x00
     );*/

@@ -116,15 +116,18 @@ static inline void LouKeXaUnlockArray(PXARRAY Array){
     }
 }
 
+KERNEL_EXPORT
+void 
+LouKeXaFree(
+    PXARRAY Array,
+    UINT64  Id
+);
 
-static inline 
+KERNEL_EXPORT 
 void 
 LouKeXaDestroy(
     PXARRAY Array
-){  
-
-}
-
+);
 
 //}
 

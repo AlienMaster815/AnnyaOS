@@ -85,6 +85,12 @@ DrsdCreateObjectProperty(
     UINT32          Type
 );
 
+DRIVER_EXPORT
+void
+DrsdPutBlobProperty(
+    PDRSD_PROPERTY_BLOB Blob
+);
+
 static inline BOOLEAN DrsdPropertyTypeIs(PDRSD_PROPERTY Property, UINT32 Type){
     if(Property->Flags & DRSD_MODE_PROPERTY_EXTENDED_TYPE){
         return ((Property->Flags & DRSD_MODE_PROPERTY_EXTENDED_TYPE) == Type);

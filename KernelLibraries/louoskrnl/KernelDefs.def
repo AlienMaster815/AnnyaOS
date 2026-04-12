@@ -190,3 +190,6 @@ EXPORTS
     LouKeGetBootDevice
     LouKeRegisterEcsDriver
     strlen
+    LouKeFlushWork
+    LouKeXaDestroy
+    LouKeXaFree

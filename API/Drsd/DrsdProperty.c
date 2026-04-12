@@ -283,3 +283,20 @@ DrsdCreateBitmaskProperty(
     }
     return Property;
 }
+
+DRIVER_EXPORT
+PDRSD_PROPERTY_BLOB
+DrsdCreateBlobProperty(){
+
+}
+
+DRIVER_EXPORT
+void
+DrsdPutBlobProperty(
+    PDRSD_PROPERTY_BLOB Blob
+){  
+    if(!Blob){
+        return;
+    }
+    DrsdModeObjectPut(&Blob->Base);
+}

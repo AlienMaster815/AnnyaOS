@@ -48,6 +48,7 @@
 #include "DrsdBridge.h"
 #include "DrsdMm.h"
 #include "DrsdProperty.h"
+#include "DrsdModeConfig.h"
 
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"

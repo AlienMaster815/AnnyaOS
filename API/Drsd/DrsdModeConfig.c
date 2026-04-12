@@ -179,8 +179,7 @@ DrsdModeConfigInit(
     Status = DrsdModeCreateStandardProperties(Device);
     if(Status != STATUS_SUCCESS){
         LouPrint("DrsdModeConfigInit:ERROR Unable To Create Standard Properties\n");
-        //TODO:Mode Config Cleanup
-        while(1);
+        DrsdModeConfigCleanup(Device);
         return Status;
     }
 
@@ -195,4 +194,69 @@ DrsdModeConfigInit(
 
     LouPrint("DrsdModeConfigInit STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+void 
+DrsdModeConfigCleanup(
+    PDRSD_DEVICE    Device
+){
+    DRSD_CONNECTOR_LIST_ITERATION       ConnectorIteration;
+    PDRSD_CONNECTOR                     Connector;
+    PDRSD_CRTC                          TmpCrtc;
+    PDRSD_CRTC                          ForwardCrtc;
+    PDRSD_ENCODER                       TmpEncoder;
+    PDRSD_ENCODER                       ForwardEncoder;
+    PDRSD_FRAME_BUFFER                  TmpFb;
+    PDRSD_FRAME_BUFFER                  ForwardFb;
+    PDRSD_PROPERTY                      TmpProperty;
+    PDRSD_PROPERTY                      ForwardProperty;
+    PDRSD_PROPERTY_BLOB                 TmpBlob;
+    PDRSD_PROPERTY_BLOB                 ForwardBlob;
+    PDRSD_PLANE                         TmpPlane;
+    PDRSD_PLANE                         ForwardPlane;
+
+    
+    ForEachListEntrySafe(TmpEncoder, ForwardEncoder, &Device->ModeConfig.EncoderList, Head){
+        TmpEncoder->Functions->Destroy(TmpEncoder);
+    }
+
+    DrsdConnectorListIterationBegin(Device, &ConnectorIteration);
+    DrsdForEachConnectorIteration(Connector, &ConnectorIteration){
+        DrsdConnectorPut(Connector);
+    }
+    DrsdConnectorListIterationEnd(&ConnectorIteration);
+
+    LouKeFlushWork(&Device->ModeConfig.ConnectorFreeWork);    
+
+    if(!LouKeListIsEmpty(&Device->ModeConfig.ConnectorList)){
+        DrsdConnectorListIterationBegin(Device, &ConnectorIteration);
+        DrsdForEachConnectorIteration(Connector, &ConnectorIteration){
+            LouPrint("Connector %s Leaked\n", Connector->Name);
+        }
+        DrsdConnectorListIterationEnd(&ConnectorIteration);
+    }
+
+    ForEachListEntrySafe(TmpProperty, ForwardProperty, &Device->ModeConfig.PropertyList, Head){
+        DrsdDestroyProperty(Device, TmpProperty);
+    }
+
+    ForEachListEntrySafe(TmpPlane, ForwardPlane, &Device->ModeConfig.PlaneList, Head){
+        TmpPlane->Functions->Destroy(TmpPlane);
+    }
+
+    ForEachListEntrySafe(TmpCrtc, ForwardCrtc, &Device->ModeConfig.CrtcList, Head){
+        TmpCrtc->Functions->Destroy(TmpCrtc);
+    }
+
+    ForEachListEntrySafe(TmpBlob, ForwardBlob, &Device->ModeConfig.PropertyBlobList, HeadGlobal){
+        DrsdPutBlobProperty(TmpBlob);
+    }
+
+    //TODO: Print leaks
+
+    LouKeXaDestroy(&Device->ModeConfig.ConnectorIda);
+    LouKeXaDestroy(&Device->ModeConfig.TitleIdr);
+    LouKeXaDestroy(&Device->ModeConfig.ObjectIdr);
+    DrsdModesetLockDeInitialize(&Device->ModeConfig.ConnectionMutex);
 }

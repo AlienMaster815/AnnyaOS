@@ -321,13 +321,11 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[127] = "DrsdInternalDestroyPlane";
     ImportTables[0].FunctionName[128] = "DrsdInternalPlaneDisableAtomic";
     ImportTables[0].FunctionName[129] = "DrsdInternalPlaneUpdateAtomic";
-    ImportTables[0].FunctionName[130] = "DrsdInternalDestroyPlaneAtomic";
     ImportTables[0].FunctionName[131] = "DrsdInternalDuplicateAtomicState";
     ImportTables[0].FunctionName[132] = "DrsdGxeInternalPrepareFrameBuffer";
     ImportTables[0].FunctionName[133] = "DrsdGxeInternalCleanupFrameBuffer";
     ImportTables[0].FunctionName[134] = "DrsdGxeInternalStartFrameBufferProcessing";
     ImportTables[0].FunctionName[135] = "DrsdGxeInternalStopFrameBufferProcessing";
-    ImportTables[0].FunctionName[136] = "DrsdGxeDestroyShadowPlane";
     ImportTables[0].FunctionName[137] = "DrsdGxeDuplicateShadowPlaneState";
     ImportTables[0].FunctionName[138] = "DrsdGxeResetShadowPlane";
     ImportTables[0].FunctionName[140] = "DrsdInitializeCrtcWithPlanes";
@@ -487,13 +485,11 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[127] = (uint64_t)DrsdInternalDestroyPlane;
     ImportTables[0].VirtualAddress[128] = (uint64_t)DrsdInternalPlaneDisableAtomic;
     ImportTables[0].VirtualAddress[129] = (uint64_t)DrsdInternalPlaneUpdateAtomic;
-    ImportTables[0].VirtualAddress[130] = (uint64_t)DrsdInternalDestroyPlaneAtomic;
     ImportTables[0].VirtualAddress[131] = (uint64_t)DrsdInternalDuplicateAtomicState;
     ImportTables[0].VirtualAddress[132] = (uint64_t)DrsdGxeInternalPrepareFrameBuffer;
     ImportTables[0].VirtualAddress[133] = (uint64_t)DrsdGxeInternalCleanupFrameBuffer;
     ImportTables[0].VirtualAddress[134] = (uint64_t)DrsdGxeInternalStartFrameBufferProcessing;
     ImportTables[0].VirtualAddress[135] = (uint64_t)DrsdGxeInternalStopFrameBufferProcessing;
-    ImportTables[0].VirtualAddress[136] = (uint64_t)DrsdGxeDestroyShadowPlane;
     ImportTables[0].VirtualAddress[137] = (uint64_t)DrsdGxeDuplicateShadowPlaneState;
     ImportTables[0].VirtualAddress[138] = (uint64_t)DrsdGxeResetShadowPlane;
     ImportTables[0].VirtualAddress[140] = (uint64_t)DrsdInitializeCrtcWithPlanes;

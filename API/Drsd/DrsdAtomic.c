@@ -178,7 +178,7 @@ DrsdAtomicStateDefaultClear(
             continue;
         }
 
-        Plane->Functions->AtomicDestroyState(Plane, State->Planes[i].StateToDestroy);
+        Plane->Functions->AtomicDestroyState(Plane);
         State->Planes[i].Plane = 0x00;
         State->Planes[i].StateToDestroy = 0x00;
         State->Planes[i].OldState = 0x00;
