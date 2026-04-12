@@ -21,23 +21,39 @@ typedef struct _LIST_OBJECT{
 
 typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params); 
 
-#define ListMemberIsNotNull(Item, Member) ((UINTPTR)(Item) + offsetof(typeof(*(Item)), Member) != 0x00)
-#define ListMemberIsNull(Item, Member) ((UINTPTR)(Item) + offsetof(typeof(*(Item)), Member) == 0x00)
+#define ListMemberIsNotNull(Item, Member) ((Item) != NULL)
+#define ListMemberIsNull(Item, Member)    ((Item) == NULL)
 
-#define ListItemToType(Header, Type, Member) ((Type*)(UINTPTR)(CONTAINER_OF(Header, Type, Member)))
-#define LListItemToType(Header, Type, Member) ((Type*)(UINTPTR)(CONTAINER_OF(Header, Type, Member)))
+#define ListItemToType(Header, Type, Member) \
+    ((Type*)(UINTPTR)(CONTAINER_OF((Header), Type, Member)))
 
-#define ListItemToTypeOrNull(Header, Type, Member) ((Type*)(UINTPTR)(Header ? CONTAINER_OF(Header, Type, Member) : 0x00))
+#define LListItemToType(Header, Type, Member) \
+    ListItemToType((Header), Type, Member)
 
-#define ForEachListItem(Position, Node) for((Position) = Node; Position; (Position) = (Position)->NextHeader)
-#define ForEachLListItem(Position, Node) ForEachListItem(Position, Node)
+#define ListItemToTypeOrNull(Header, Type, Member) \
+    ((Type*)(UINTPTR)((Header) ? CONTAINER_OF((Header), Type, Member) : 0x00))
 
-#define ForEachListEntry(Position, Node, Member) for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member); (Position) = ListItemToTypeOrNull((Position)->Member.NextHeader, typeof(*(Position)), Member)) 
-#define ForEachListEntrySafe(Position, N, Node, Member) for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); ListMemberIsNotNull(Position, Member) && (N = ListItemToTypeOrNull(Position->Member.NextHeader, typeof(*N), Member), true); Position = N) 
+#define ForEachListItem(Position, Node) \
+    for((Position) = (Node); (Position); (Position) = (Position)->NextHeader)
 
-#define ForEachLListEntry(Position, Node, Member) ForEachListEntry(Position, Node, Member)
-#define ForEachLListEntrySafe(Position, N, Node, Member) ForEachListEntrySafe(Position, N, Node, Member)
+#define ForEachLListItem(Position, Node) \
+    ForEachListItem((Position), (Node))
 
+#define ForEachListEntry(Position, Node, Member) \
+    for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member); \
+        (Position) = ListItemToTypeOrNull((Position)->Member.NextHeader, typeof(*(Position)), Member))
+
+#define ForEachListEntrySafe(Position, N, Node, Member) \
+    for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member) && ((N) = ListItemToTypeOrNull((Position)->Member.NextHeader, typeof(*(N)), Member), true); \
+        (Position) = (N))
+
+#define ForEachLListEntry(Position, Node, Member) \
+    ForEachListEntry((Position), (Node), Member)
+
+#define ForEachLListEntrySafe(Position, N, Node, Member) \
+    ForEachListEntrySafe((Position), (N), (Node), Member)
 
 static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
     while(Header->NextHeader){

@@ -66,6 +66,25 @@ DrsdCreateBooleanProperty(
     LOUSTR          Name
 );
 
+DRIVER_EXPORT 
+PDRSD_PROPERTY 
+DrsdCreateSignedRangeProperty(
+    PDRSD_DEVICE    Device,
+    UINT32          Flags,
+    LOUSTR          Name,
+    INT64           Min,
+    INT64           Max
+);
+
+DRIVER_EXPORT
+PDRSD_PROPERTY
+DrsdCreateObjectProperty(
+    PDRSD_DEVICE    Device,
+    UINT32          Flags,
+    LOUSTR          Name,
+    UINT32          Type
+);
+
 static inline BOOLEAN DrsdPropertyTypeIs(PDRSD_PROPERTY Property, UINT32 Type){
     if(Property->Flags & DRSD_MODE_PROPERTY_EXTENDED_TYPE){
         return ((Property->Flags & DRSD_MODE_PROPERTY_EXTENDED_TYPE) == Type);

@@ -36,6 +36,7 @@ DrsdModeObjectAddEx(
     LOUSTATUS Result;
     MutexLock(&Device->ModeConfig.IdrMutex);
     int Out = 1;
+
     Result = LouKeXaIdrAllocate(&Device->ModeConfig.ObjectIdr, RegisterObject ? Object : 0x00, &Out, 0, KERNEL_GENERIC_MEMORY);    
     if(Result == STATUS_SUCCESS){
         Object->Identification = Out;

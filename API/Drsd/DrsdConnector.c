@@ -221,6 +221,8 @@ LOUSTATUS
 DrsdConnectorCreateStandardProperties(
     PDRSD_DEVICE Device
 ){
+
+
     PDRSD_PROPERTY Property = DrsdCreateProperty(Device, DRSD_MODE_PROPERTY_BLOB | DRSD_MODE_PROPERTY_IMMUTABLE, "EDID", 0);
     if(!Property){
         return STATUS_INSUFFICIENT_RESOURCES;

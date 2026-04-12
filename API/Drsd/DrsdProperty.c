@@ -8,10 +8,12 @@ DrsdCreateProperty(
     LOUSTR          Name,
     int             ValueCount
 ){
+    //LouPrint("DRSDCORE.SYS:DrsdCreateProperty():%s\n", Name);
     PDRSD_PROPERTY NewProperty;
     LOUSTATUS Status;
 
-    if((!Device) || (DRSD_MODE_PROPERTY_EXTENDED_TYPE <= Flags) || (strlen(Name) > DRSD_PROPERTY_NAME_LENGTH)){
+
+    if((!Device) || (strlen(Name) > DRSD_PROPERTY_NAME_LENGTH)){
         return 0x00;
     }
 
@@ -40,6 +42,8 @@ DrsdCreateProperty(
 
     LouKeListAddTail(&NewProperty->Head, &Device->ModeConfig.PropertyList);
 
+    //LouPrint("DRSDCORE.SYS:DrsdCreateProperty():%s STATUS_SUCCESS\n", Name);
+
     return NewProperty;
 
 _PROPERTY_CREATE_FAILED:
@@ -62,6 +66,9 @@ DrsdCreateEnumProperty(
 
     PDRSD_PROPERTY NewProperty;
     LOUSTATUS Status;
+
+    Flags |= DRSD_MODE_PROPERTY_ENUM;
+
     NewProperty = DrsdCreateProperty(Device, Flags, Name, ValueCount);
     if(!NewProperty){
         return 0x00;
@@ -109,11 +116,11 @@ DrsdAddEnumProperty(
 ){
     PDRSD_PROPERTY_ENUM PropertyEnum;
     int Index = 0;
-    if((!Property) || (strlen(Name) > DRSD_PROPERTY_NAME_LENGTH) || (!Name)){
+    if((!Property) || (strlen(Name) >= DRSD_PROPERTY_NAME_LENGTH) || (!Name)){
         return STATUS_INVALID_PARAMETER;
     }
 
-    if((!DrsdPropertyTypeIs(Property , DRSD_MODE_PROPERTY_ENUM)) || (!DrsdPropertyTypeIs(Property , DRSD_MODE_PROPERTY_BITMASK))){
+    if((!DrsdPropertyTypeIs(Property , DRSD_MODE_PROPERTY_ENUM)) && (!DrsdPropertyTypeIs(Property , DRSD_MODE_PROPERTY_BITMASK))){
         LouPrint("DRSDCORE.SYS:DrsdAddEnumProperty():Input Not Enum Or Bitmask\n");
         return STATUS_INVALID_PARAMETER;
     }else if((DrsdPropertyTypeIs(Property , DRSD_MODE_PROPERTY_BITMASK)) && (Value > 63)){
@@ -184,6 +191,46 @@ DrsdCreateRangeProperty(
 
 DRIVER_EXPORT 
 PDRSD_PROPERTY 
+DrsdCreateSignedRangeProperty(
+    PDRSD_DEVICE    Device,
+    UINT32          Flags,
+    LOUSTR          Name,
+    INT64           Min,
+    INT64           Max
+){
+    return CreateRangeProperty(
+        Device,
+        Flags,
+        Name,
+        (UINT64)Min,
+        (UINT64)Max
+    );
+}
+
+DRIVER_EXPORT
+PDRSD_PROPERTY
+DrsdCreateObjectProperty(
+    PDRSD_DEVICE    Device,
+    UINT32          Flags,
+    LOUSTR          Name,
+    UINT32          Type
+){
+    PDRSD_PROPERTY NewProperty;
+    if(!(Flags & DRSD_MODE_PROPERTY_ATOMIC)){
+        LouPrint("DRSDCORE.SYS:DrsdCreateObjectProperty():Non Atomic Objects Forbiden\n");
+        return 0x00;
+    }
+    Flags |= DRSD_MODE_PROPERTY_OBJECT;
+    NewProperty = DrsdCreateProperty(Device, Flags, Name, 1);
+    if(!NewProperty){
+        return 0x00;
+    }
+    NewProperty->Values[0] = Type;
+    return NewProperty;
+}
+
+DRIVER_EXPORT 
+PDRSD_PROPERTY 
 DrsdCreateBooleanProperty(
     PDRSD_DEVICE    Device,
     UINT32          Flags,
@@ -210,7 +257,9 @@ DrsdCreateBitmaskProperty(
     LOUSTATUS Status;
     int Count;
     PDRSD_PROPERTY Property;
+    
     Flags |= DRSD_MODE_PROPERTY_BITMASK;
+
     for(size_t i = 0 ; i < 64; i++){
         if(SupportedBits & (1ULL << i)){
             Count = i;

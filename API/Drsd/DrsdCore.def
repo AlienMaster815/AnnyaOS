@@ -78,3 +78,5 @@ EXPORTS
     DrsdDestroyProperty
     DrsdCreateBitmaskProperty
     DrsdCreateRangeProperty
+    DrsdCreateSignedRangeProperty
+    DrsdCreateObjectProperty

@@ -166,6 +166,7 @@ LouKeXarrayAllocateUint64(
                 PageFlags
             );
             *Id = i;
+            LouKeXaUnlockArray(Array);
             return STATUS_SUCCESS;
         }
     }   
@@ -194,6 +195,7 @@ LouKeXarrayAllocateInt(
                 PageFlags
             );
             *Id = i;
+            LouKeXaUnlockArray(Array);
             return STATUS_SUCCESS;
         }
     }   

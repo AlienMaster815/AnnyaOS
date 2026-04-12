@@ -58,7 +58,10 @@ extern "C" {
 #define DRSD_MODE_PROPERTY_BITMASK      (1 << 5)
 
 #define DRSD_MODE_PROPERTY_EXTENDED_TYPE 0x0000FFC0
+#define DRSD_MODE_PROPERTY_TYPE(foo)     ((foo) << 6)
+#define DRSD_MODE_PROPERTY_OBJECT        DRSD_MODE_PROPERTY_TYPE(1)
 
+#define DRSD_MODE_PROPERTY_ATOMIC       0x80000000
 
 struct _DRSD_FRAME_BUFFER;
 struct _DRSD_PLANE;
@@ -1622,7 +1625,7 @@ typedef struct _DRSD_MODE_CONFIGURATION{
     struct _DRSD_PROPERTY*                      PropCrtcW;
     struct _DRSD_PROPERTY*                      PropCrtcH;
     struct _DRSD_PROPERTY*                      PropFbId;
-    struct _DRSD_PROPERTY*                      PropInFenceFb;
+    struct _DRSD_PROPERTY*                      PropInFenceFd;
     struct _DRSD_PROPERTY*                      PropOutFencePtr;
     struct _DRSD_PROPERTY*                      PropCrtcId;
     struct _DRSD_PROPERTY*                      PropFbDamageClips;
