@@ -32,9 +32,6 @@ LouKeEcsPrintAsciiCharecter(
     CHAR    Charecter
 ){
     PLOUSINE_ECS_DRIVER_TACKER Tracker;
-    if(LouKeListIsEmpty(&EcsDriverManager.Drivers)){
-        return 0x00;
-    }
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
         ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
             if(Tracker->DriverObject->EcsOperations.PrintAsciiCharecter){
@@ -52,9 +49,6 @@ LouKeEcsPrintUnicodeCharecter(
     UINT32  Charecter
 ){
     PLOUSINE_ECS_DRIVER_TACKER Tracker;
-    if(LouKeListIsEmpty(&EcsDriverManager.Drivers)){
-        return 0x00;
-    }
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
         ForEachIf(!MutexIsLocked(&Tracker->LockOut)){
             if(Tracker->DriverObject->EcsOperations.PrintUnicodeCharecter){
@@ -69,10 +63,6 @@ LouKeEcsPrintUnicodeCharecter(
 
 void
 LouKeEcsEndofData(){
-    
-    if(LouKeListIsEmpty(&EcsDriverManager.Drivers)){
-        return;
-    }
     PLOUSINE_ECS_DRIVER_TACKER Tracker;
     ForEachListEntry(Tracker, &EcsDriverManager.Drivers, Peers){
         ForEachIf(!MutexIsLocked(&Tracker->LockOut)){

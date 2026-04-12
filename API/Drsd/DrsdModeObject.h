@@ -41,4 +41,11 @@ DrsdModeObjectGet(
     PDRSD_MODE_OBJECT ModeObject
 );
 
+LOUSTATUS 
+DrsdModeObjectAdd(
+    PDRSD_DEVICE            Device,
+    PDRSD_MODE_OBJECT       Object,
+    UINT32                  ObjectType
+);
+
 #endif

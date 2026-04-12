@@ -1,5 +1,7 @@
+#include <Modulation.h>
 #include <stddef.h>
 
+KERNEL_EXPORT
 size_t strlen(const char* str) {
     const char* ptr = str;
     while (*ptr != '\0') {

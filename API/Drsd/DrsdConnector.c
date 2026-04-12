@@ -30,6 +30,18 @@ UNUSED static LIST_OBJECT ConnectorList = {0};
 
 static mutex_t ConnectorListIterationLock = {0};
 
+static DRSD_PROPERTY_ENUM_LIST DrsdDpmsEnumList[] = {
+    {DRSD_MODE_DPMS_ON, "On"},
+    {DRSD_MODE_DPMS_STANDBY, "Standby"},
+    {DRSD_MODE_DPMS_SUSPEND, "Suspend"},
+    {DRSD_MODE_DPMS_OFF, "Off"},
+};
+
+static DRSD_PROPERTY_ENUM_LIST DrsdLinkStatusEnumList[] = {
+    {DRSD_MODE_LINK_STATUS_GOOD, "Good"},
+    {DRSD_MODE_LINK_STATUS_BAD, "Bad"},
+};
+
 typedef struct _DRSD_CONNECTOR_PROP_ENUM_LIST{
     INTEGER     Type;
     LOUSTR      Name;
@@ -88,7 +100,8 @@ static void DrsdConnectorFree(PKERNEL_REFERENCE Ref){
     Connector->Callbacks->Destroy(Connector);
 }
 
-void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
+LOUSTATUS
+DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
     PDRSD_CONNECTOR Connector, N;
     PDRSD_DEVICE Device = CONTAINER_OF(Work, DRSD_DEVICE, ModeConfig.ConnectorFreeWork);
     PDRSD_MODE_CONFIGURATION ModeConfig = &Device->ModeConfig;
@@ -104,6 +117,7 @@ void DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work){
         Connector->Functions->Destroy(Connector);
     }
 
+    return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT
@@ -200,5 +214,54 @@ DRIVER_EXPORT
 LOUSTATUS DrsdUpdateEdidConnectorProperties(PDRSD_CONNECTOR Connector, PINTEL_STANDARD_EDID Edid){
     LouPrint("DrsdUpdateEdidConnectorProperties()\n");
     while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+DrsdConnectorCreateStandardProperties(
+    PDRSD_DEVICE Device
+){
+    PDRSD_PROPERTY Property = DrsdCreateProperty(Device, DRSD_MODE_PROPERTY_BLOB | DRSD_MODE_PROPERTY_IMMUTABLE, "EDID", 0);
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->ModeConfig.EdidProperty = Property;
+
+    Property = DrsdCreateEnumProperty(Device, 0, "DPMS", DrsdDpmsEnumList, ARRAY_SIZE(DrsdDpmsEnumList));
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->ModeConfig.DpmsProperty = Property;
+
+    Property = DrsdCreateProperty(Device, DRSD_MODE_PROPERTY_BLOB | DRSD_MODE_PROPERTY_IMMUTABLE, "PATH", 0);
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->ModeConfig.PathProperty = Property;
+
+    Property = DrsdCreateProperty(Device, DRSD_MODE_PROPERTY_BLOB | DRSD_MODE_PROPERTY_IMMUTABLE, "TILE", 0);
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->ModeConfig.TileProperty = Property;
+    
+    Property = DrsdCreateEnumProperty(Device, 0, "Link-Status", DrsdLinkStatusEnumList, ARRAY_SIZE(DrsdLinkStatusEnumList)); 
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    } 
+    Device->ModeConfig.LinkStatusProperty = Property;
+
+    Property = DrsdCreateBooleanProperty(Device, DRSD_MODE_PROPERTY_IMMUTABLE, "Non-Desktop");
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->ModeConfig.NonDesktopProperty = Property;
+
+    Property = DrsdCreateProperty(Device, DRSD_MODE_PROPERTY_BLOB | DRSD_MODE_PROPERTY_IMMUTABLE, "HDR_OUTPUT_METADATA", 0);
+    if(!Property){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    Device->ModeConfig.HdrOutputMetadataProperty = Property;
+
     return STATUS_SUCCESS;
 }

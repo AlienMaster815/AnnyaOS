@@ -50,6 +50,15 @@ extern "C" {
     .DumbMapOffset = DrsdGxeTtmDumbMapOffset
 
 
+#define DRSD_MODE_PROPERTY_PENDING      (1)
+#define DRSD_MODE_PROPERTY_RANGE        (1 << 1)
+#define DRSD_MODE_PROPERTY_IMMUTABLE    (1 << 2)
+#define DRSD_MODE_PROPERTY_ENUM         (1 << 3)
+#define DRSD_MODE_PROPERTY_BLOB         (1 << 4)
+#define DRSD_MODE_PROPERTY_BITMASK      (1 << 5)
+
+#define DRSD_MODE_PROPERTY_EXTENDED_TYPE 0x0000FFC0
+
 
 struct _DRSD_FRAME_BUFFER;
 struct _DRSD_PLANE;
@@ -261,6 +270,11 @@ typedef enum _DRSD_MINOR_TYPE{
     DRSD_MINOR_ACCEL,
 }DRSD_MINOR_TYPE, * PDRSD_MINOR_TYPE;
 
+#define DRSD_MODE_DPMS_ON       0
+#define DRSD_MODE_DPMS_STANDBY  1
+#define DRSD_MODE_DPMS_SUSPEND  2
+#define DRSD_MODE_DPMS_OFF      3
+
 #define DRSD_ENCODER_MODE_NONE  0
 #define DRSD_ENCODER_MODE_DAC   1
 #define DRSD_ENCODER_MODE_TMDS  2
@@ -308,10 +322,6 @@ typedef struct _DRSD_MODESET_LOCK{
     ListHeader  Head;
 }DRSD_MODESET_LOCK, * PDRSD_MODESET_LOCK;
 
-typedef struct _DRSD_PROPERTY{
-    uintptr_t Foo;
-}DRSD_PROPERTY, * PDRSD_PROPERTY;
-
 typedef struct _DRSD_MODE_OBJECT{
     ListHeader                          Peers;
     uint32_t                            Identification;
@@ -320,6 +330,33 @@ typedef struct _DRSD_MODE_OBJECT{
     KERNEL_REFERENCE                    ReferenceCount;
     void                                (*FreeCb)(PKERNEL_REFERENCE Reference);
 }DRSD_MODE_OBJECT, * PDRSD_MODE_OBJECT;
+
+#define DRSD_MODE_LINK_STATUS_GOOD  0
+#define DRSD_MODE_LINK_STATUS_BAD   1
+
+typedef struct _DRSD_PROPERTY_ENUM_LIST{
+    int     Type;
+    LOUSTR  Name;
+}DRSD_PROPERTY_ENUM_LIST, * PDRSD_PROPERTY_ENUM_LIST;
+
+#define DRSD_PROPERTY_NAME_LENGTH 32
+
+typedef struct _DRSD_PROPERTY_ENUM{
+    UINT64          Value;
+    ListHeader      Head;
+    CHAR            Name[DRSD_PROPERTY_NAME_LENGTH];
+}DRSD_PROPERTY_ENUM, * PDRSD_PROPERTY_ENUM;
+
+typedef struct _DRSD_PROPERTY{
+    ListHeader              Head;
+    DRSD_MODE_OBJECT        Base;
+    UINT32                  Flags;
+    CHAR                    Name[DRSD_PROPERTY_NAME_LENGTH];
+    UINT32                  ValueCount;
+    UINT64*                 Values;
+    struct _DRSD_DEVICE*    Device;
+    ListHeader              EnumList;
+}DRSD_PROPERTY, * PDRSD_PROPERTY;
 
 typedef struct _DRSD_OBJECT_PROPERTIES{
     size_t                              CurrentProperties;
@@ -1573,7 +1610,7 @@ typedef struct _DRSD_MODE_CONFIGURATION{
     struct _DRSD_PROPERTY*                      EdidProperty;
     struct _DRSD_PROPERTY*                      DpmsProperty;
     struct _DRSD_PROPERTY*                      PathProperty;
-    struct _DRSD_PROPERTY*                      TitleProperty;
+    struct _DRSD_PROPERTY*                      TileProperty;
     struct _DRSD_PROPERTY*                      LinkStatusProperty;
     struct _DRSD_PROPERTY*                      PlaneTypeProperty;
     struct _DRSD_PROPERTY*                      PropSrcX;
@@ -3121,6 +3158,21 @@ DrsdVRamHelperInitialize(
     PDRSD_DEVICE    Device,
     UINT64          VRamBase,
     SIZE            VRamSize
+);
+
+DRIVER_IMPORT
+LOUSTATUS 
+DrsdModeConfigInit(
+    PDRSD_DEVICE Device
+);
+
+DRIVER_IMPORT 
+PDRSD_PROPERTY 
+DrsdCreateProperty(
+    PDRSD_DEVICE    Device,
+    UINT32          Flags,
+    LOUSTR          Name,
+    int             ValueCount
 );
 
 #ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 

@@ -4,6 +4,7 @@ SRC = DrsdCore.c \
 		DrsdConnector.c \
 		DrsdCache.c \
 		DrsdModes.c \
+		DrsdModeConfig.c \
 		DrsdBridgeHelper.c \
 		DrsdModesetLock.c \
 		DrsdAtomic.c \
@@ -22,6 +23,7 @@ SRC = DrsdCore.c \
 		DrsdGxeTtmHelper.c \
 		DrsdGxe.c \
 		DrsdMm.c \
+		DrsdProperty.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \

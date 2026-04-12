@@ -663,11 +663,19 @@ static LOUSTATUS VirtualboxConnectorInitialize(
 }
 
 LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
+    LouPrint("VirtualboxModeInitialization()\n");
+   
     PDRSD_DEVICE Device = &VBox->DrsdDevice;
-    PVIRTUALBOX_CRTC    VBoxCrtc;
+    PVIRTUALBOX_CRTC VBoxCrtc;
     PDRSD_ENCODER VBoxEncoder;
     LOUSTATUS Result;
-    
+   
+
+    DrsdModeConfigInit(Device);
+
+    LouPrint("VirtualboxModeInitialization():STATUS_SUCCESS\n");
+    while(1);
+
     VBox->SingleFramebuffer = true;
 
     Device->ModeConfig.Callbacks = (PDRSD_MODE_CONFIGURATION_CALLBACKS)&VirtualboxModeCallbacks; 

@@ -1,5 +1,6 @@
 #include <LouAPI.h>
 
+KERNEL_EXPORT
 char* strncpy(char* dest, const char* src, size_t n) {
     char* original_dest = dest;
 

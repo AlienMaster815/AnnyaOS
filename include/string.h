@@ -31,10 +31,10 @@ void* memcpy(void* destination, const void* source, size_t num);
 int strncmp(const char* str1, const char* str2, size_t n);
 int strcmp(const char* str1, const char* str2);
 int memcmp(const void* ptr1, const void* ptr2, size_t num);
-char* strncpy(char* dest, const char* src, size_t n);
+KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
 char* strcpy(char* dest, const char* src);
 char* strcat(char* dest, const char* src);
-size_t strlen(const char* str);
+KERNEL_EXPORT size_t strlen(const char* str);
 size_t wstrlen(const wchar_t* str);
 unsigned long strtoul(const char* nptr, char** endptr, int base);
 

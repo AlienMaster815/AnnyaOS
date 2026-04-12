@@ -189,3 +189,4 @@ EXPORTS
     LouKeReadRegistryWordValue
     LouKeGetBootDevice
     LouKeRegisterEcsDriver
+    strlen

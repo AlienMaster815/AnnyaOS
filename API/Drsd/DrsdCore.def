@@ -71,3 +71,10 @@ EXPORTS
     DrsdGxeVRamDriverDumbCreate
     DrsdGxeTtmDumbMapOffset
     DrsdVRamHelperInitialize
+    DrsdModeConfigInit
+    DrsdCreateProperty
+    DrsdCreateEnumProperty
+    DrsdAddEnumProperty
+    DrsdDestroyProperty
+    DrsdCreateBitmaskProperty
+    DrsdCreateRangeProperty

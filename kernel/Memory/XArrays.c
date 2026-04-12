@@ -183,7 +183,9 @@ LouKeXarrayAllocateInt(
     UINT64  PageFlags
 ){
     LouKeXaLockArray(Array);
-    for(int i = 0; i < Limit; i++){
+    int i = *Id;
+    Limit = Limit ? Limit : INT32_MAX;
+    for(; i <= Limit; i++){
         if(!LouKeXaIsIndexUsedEx(Array, i)){
             LouKeXaStoreEx(
                 Array,

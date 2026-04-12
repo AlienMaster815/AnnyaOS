@@ -59,6 +59,15 @@ DrsdConnectorListNextIteration(
     PDRSD_CONNECTOR_LIST_ITERATION Iteration
 );
 
+DRIVER_EXPORT
+LOUSTATUS
+DrsdConnectorFreeWorkFunction(PLOUQ_WORK Work);
+
+LOUSTATUS 
+DrsdConnectorCreateStandardProperties(
+    PDRSD_DEVICE Device
+);
+
 #define DrsdForEachConnectorIteration(Connector, Iteration) while((Connector = DrsdConnectorListNextIteration(Iteration)))
 
 #endif

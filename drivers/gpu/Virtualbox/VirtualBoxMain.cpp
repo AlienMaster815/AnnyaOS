@@ -203,15 +203,16 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
         return Status;
     }
 
-    LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
-    while(1);
-    return Status;
-/*
-
     Status = VirtualboxModeInitialization(VBox);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
+
+    LouPrint("VBOXGPU::AddDevice() STATUS_SUCCESS\n");
+    while(1);
+    return Status;
+
+/*
 
     Status = InitializeVirtualboxInterrupts(VBox);    
     if(Status != STATUS_SUCCESS){
