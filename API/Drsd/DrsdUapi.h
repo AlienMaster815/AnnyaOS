@@ -17,4 +17,25 @@ DrsdAtomicSetCrtcForPlane(
     PDRSD_CRTC          Crtc
 );
 
+DRIVER_EXPORT
+void
+DrsdAtomicSetFbForPlane(
+    PDRSD_PLANE_STATE   State,
+    PDRSD_FRAME_BUFFER  FrameBuffer
+);
+
+DRIVER_EXPORT 
+LOUSTATUS
+DrsdAtomicSetCrtcForConnector(
+    PDRSD_CONNECTOR_STATE   State,
+    PDRSD_CRTC              Crtc
+);
+
+DRIVER_EXPORT
+LOUSTATUS
+DrsdAtomicSetModePropForCrtc(
+    PDRSD_CRTC_STATE    State,
+    PDRSD_PROPERTY_BLOB Blob
+);
+
 #endif 

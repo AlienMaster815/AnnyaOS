@@ -50,6 +50,7 @@
 #include "DrsdProperty.h"
 #include "DrsdModeConfig.h"
 #include "DrsdUapi.h"
+#include "DrsdFramebuffer.h"
 
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"

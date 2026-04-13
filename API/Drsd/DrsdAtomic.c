@@ -26,6 +26,67 @@
 
 #include "DrsdCore.h"
 
+static
+LOUSTATUS 
+UpdateOutputState(
+    PDRSD_ATOMIC_STATE  State, 
+    PDRSD_MODE_SET      Set
+){
+    PDRSD_DEVICE            Device = Set->Crtc->Device;
+    PDRSD_CRTC              Crtc;
+    PDRSD_CRTC_STATE        NewCrtcState;
+    PDRSD_CONNECTOR         Connector;
+    PDRSD_CONNECTOR_STATE   NewConnectorState;
+    LOUSTATUS Status;
+    int i;
+
+    Status = DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, State->AcquireContext);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = DrsdAtomicAddAffectedConnectors(State, Set->Crtc);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    ForEachNewConnectorInState(State, Connector, NewConnectorState, i){
+        if(NewConnectorState->Crtc == Set->Crtc){
+            Status = DrsdAtomicSetCrtcForConnector(NewConnectorState, 0x00);
+            if(Status != STATUS_SUCCESS){
+                return Status;
+            }
+            NewConnectorState->LinkStatus = DRSD_MODE_LINK_STATUS_GOOD;
+        }
+    }
+
+    for(i = 0 ; i < Set->ConnectorCount; i++){
+        NewConnectorState = DrsdAtomicGetConnectorState(State, Set->Connectors[i]);
+        if(LOU_KE_PTR_ERROR(NewConnectorState)){
+            return (LOUSTATUS)(UINTPTR)NewConnectorState;
+        }
+        Status = DrsdAtomicSetCrtcForConnector(NewConnectorState, Set->Crtc);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+    }
+
+    ForEachNewCrtcInState(State, Crtc, NewCrtcState, i){
+        if(Crtc == Set->Crtc){
+            continue;
+        }
+        if(!NewCrtcState->ConnectorMask){
+            Status = DrsdAtomicSetModePropForCrtc(NewCrtcState, 0x00);
+            if(Status != STATUS_SUCCESS){
+                return Status;
+            }
+            NewCrtcState->Active = false;
+        }
+    }
+
+    return STATUS_SUCCESS;
+}
+
 DRIVER_EXPORT
 void 
 __DrsdCrtcCommitFree(PKERNEL_REFERENCE Kref){
@@ -997,4 +1058,52 @@ DrsdAtomicAddAffectedPlanes(
         }
     }
     return STATUS_SUCCESS;
+}
+
+
+DRIVER_EXPORT 
+LOUSTATUS
+__DrsdAtomicHelperSetConfig(
+    PDRSD_MODE_SET      Set,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_CRTC_STATE CrtcState;
+    PDRSD_PLANE_STATE PrimaryState;
+    PDRSD_CRTC Crtc = Set->Crtc;
+    int HorizontalDisplay, VerticalDisplay;
+    LOUSTATUS Status;
+
+    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
+    if(LOU_KE_PTR_ERROR(CrtcState)){
+        return (LOUSTATUS)(UINTPTR)CrtcState;
+    }
+
+    PrimaryState = DrsdAtomicGetPlaneState(State, Crtc->Primary);
+    if(LOU_KE_PTR_ERROR(PrimaryState)){
+        return (LOUSTATUS)(UINTPTR)PrimaryState;
+    }
+
+    if(!Set->Mode){
+        Status = DrsdAtomicSetModeForCrtc(CrtcState, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+
+        CrtcState->Active = false;
+
+        Status = DrsdAtomicSetCrtcForPlane(PrimaryState, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+
+        DrsdAtomicSetFbForPlane(PrimaryState, 0x00);
+
+        goto _COMMIT;
+
+    }
+
+
+
+_COMMIT:
+    return UpdateOutputState(State, Set);
 }

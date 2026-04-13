@@ -25,10 +25,12 @@
  
 #include "DrsdCore.h"
 
+
+
 DRIVER_EXPORT
 LOUSTATUS 
 DrsdAtomicHelperResetCrtc(
-    PDRSD_CRTC                      Crtc,
+    PDRSD_CRTC                       Crtc,
     PDRSD_MODESET_ACQUIRE_CONTEXT    Context
 ){
 
@@ -36,47 +38,7 @@ DrsdAtomicHelperResetCrtc(
     return STATUS_SUCCESS;
 }
 
-DRIVER_EXPORT 
-LOUSTATUS
-__DrsdAtomicHelperSetConfig(
-    PDRSD_MODE_SET      Set,
-    PDRSD_ATOMIC_STATE  State
-){
-    PDRSD_CRTC_STATE CrtcState;
-    PDRSD_PLANE_STATE PrimaryState;
-    PDRSD_CRTC Crtc = Set->Crtc;
-    int HorizontalDisplay, VerticalDisplay;
-    LOUSTATUS Status;
 
-    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
-    if(LOU_KE_PTR_ERROR(CrtcState)){
-        return (LOUSTATUS)(UINTPTR)CrtcState;
-    }
-
-    PrimaryState = DrsdAtomicGetPlaneState(State, Crtc->Primary);
-    if(LOU_KE_PTR_ERROR(PrimaryState)){
-        return (LOUSTATUS)(UINTPTR)PrimaryState;
-    }
-
-    if(!Set->Mode){
-        Status = DrsdAtomicSetModeForCrtc(CrtcState, 0x00);
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-
-        CrtcState->Active = false;
-
-        Status = DrsdAtomicSetCrtcForPlane(PrimaryState, 0x00);
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-
-        
-
-    }
-
-    return STATUS_SUCCESS;
-}
 
 DRIVER_EXPORT
 LOUSTATUS 

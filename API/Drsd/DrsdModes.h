@@ -41,6 +41,14 @@ DrsdModeConvertToUMode(
 );
 
 DRIVER_EXPORT
+LOUSTATUS
+DrsdModeConvertUMode(
+    PDRSD_DEVICE        Device,
+    PDRSD_DISPLAY_MODE  Out,
+    PDRSD_MODE_MODEINFO In
+);
+
+DRIVER_EXPORT
 void DrsdModeCopy(
     PDRSD_DISPLAY_MODE Destination, 
     PDRSD_DISPLAY_MODE Source

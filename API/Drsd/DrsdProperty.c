@@ -345,3 +345,12 @@ DrsdPutBlobProperty(
     }
     DrsdModeObjectPut(&Blob->Base);
 }
+
+DRIVER_EXPORT
+PDRSD_PROPERTY_BLOB
+DrsdGetPropertBlob(
+    PDRSD_PROPERTY_BLOB Blob
+){
+    DrsdModeObjectGet(&Blob->Base);
+    return Blob;
+}

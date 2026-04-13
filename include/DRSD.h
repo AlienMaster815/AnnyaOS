@@ -629,6 +629,10 @@ typedef struct  _DRSD_DISPLAY_MODE{
     uint16_t                CrtcVerticalSyncStart;
     uint16_t                CrtcVerticalSyncEnd;
     uint16_t                CrtcVerticalTotal;
+    uint16_t                CrtcVBlankStart;
+    uint16_t                CrtcVBlankEnd;
+    uint16_t                CrtcHBlankStart;
+    uint16_t                CrtcHBlankEnd;
     uint16_t                Type;
     bool                    GiveToUser;
     HDMI_ASPECT_RATIO       AspectRatio;
@@ -2920,6 +2924,12 @@ typedef struct _DRSD_MODE_MODEINFO{
 
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 
+#define CRTC_INTERLACE_HALVE_V	    (1 << 0)
+#define CRTC_STEREO_DOUBLE	        (1 << 1)
+#define CRTC_NO_DBLSCAN		        (1 << 2)
+#define CRTC_NO_VSCAN		        (1 << 3)
+#define CRTC_STEREO_DOUBLE_ONLY	    (CRTC_STEREO_DOUBLE | CRTC_NO_DBLSCAN | CRTC_NO_VSCAN)
+
 #define DRSD_MODE_FLAG_PHSYNC			        (1 << 0)
 #define DRSD_MODE_FLAG_NHSYNC			        (1 << 1)
 #define DRSD_MODE_FLAG_PVSYNC			        (1 << 2)
@@ -2944,6 +2954,7 @@ typedef struct _DRSD_MODE_MODEINFO{
 #define DRSD_MODE_FLAG_3D_L_DEPTH_GFX_GFX_DEPTH	(6 << 14)
 #define DRSD_MODE_FLAG_3D_TOP_AND_BOTTOM	    (7 << 14)
 #define DRSD_MODE_FLAG_3D_SIDE_BY_SIDE_HALF	    (8 << 14)
+#define DRSD_MODE_FLAG_3D_MAX                   DRSD_MODE_FLAG_3D_SIDE_BY_SIDE_HALF
 
 
 #define DRSD_MODE_PICTURE_ASPECT_NONE		0
@@ -2958,6 +2969,21 @@ typedef struct _DRSD_MODE_MODEINFO{
 #define DRSD_MODE_FLAG_PIC_AR_16_9       (DRSD_MODE_PICTURE_ASPECT_16_9 << 19)
 #define DRSD_MODE_FLAG_PIC_AR_64_27      (DRSD_MODE_PICTURE_ASPECT_64_27 << 19)
 #define DRSD_MODE_FLAG_PIC_AR_256_135    (DRSD_MODE_PICTURE_ASPECT_256_135 << 19)
+
+#define DRSD_MODE_FLAG_ALL     (DRSD_MODE_FLAG_PHSYNC |		\
+				                DRSD_MODE_FLAG_NHSYNC |		\
+				                DRSD_MODE_FLAG_PVSYNC |		\
+				                DRSD_MODE_FLAG_NVSYNC |		\
+				                DRSD_MODE_FLAG_INTERLACE |	\
+				                DRSD_MODE_FLAG_DBLSCAN |	\
+				                DRSD_MODE_FLAG_CSYNC |		\
+				                DRSD_MODE_FLAG_PCSYNC |		\
+				                DRSD_MODE_FLAG_NCSYNC |		\
+				                DRSD_MODE_FLAG_HSKEW |		\
+				                DRSD_MODE_FLAG_DBLCLK |		\
+				                DRSD_MODE_FLAG_CLKDIV2 |	\
+				                DRSD_MODE_FLAG_3D_MASK)
+
 
 static inline PDRSD_GXE_VRAM_OBJECT DrsdGxeVramOfGem(PDRSD_GXE_OBJECT Gxe){
     return CONTAINER_OF(Gxe, DRSD_GXE_VRAM_OBJECT, Bo.Base);

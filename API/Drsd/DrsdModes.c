@@ -25,6 +25,131 @@
  
 #include "DrsdCore.h"
 
+static 
+DRSD_MODE_STATUS
+DrsdModeValidateBasic(
+    PDRSD_DISPLAY_MODE Mode
+){
+    if(Mode->Type & ~(DRSD_MODE_TYPE_ALL)){
+        return DRSD_MODE_BAD;
+    }
+    if(Mode->Type & ~(DRSD_MODE_FLAG_ALL)){
+        return DRSD_MODE_BAD;
+    }
+    if((Mode->Flags & DRSD_MODE_FLAG_3D_MASK) > DRSD_MODE_FLAG_3D_MAX){
+        return DRSD_MODE_BAD;
+    }
+
+    if(!Mode->KhzClock){
+        return DRSD_MODE_CLOCK_TOO_LOW;
+    }
+
+    if(
+        (Mode->HorizontalDisplay == 0) ||
+        (Mode->HorizontalSyncStart < Mode->HorizontalDisplay) ||
+        (Mode->HorizontalSyncStart < Mode->HorizontalSyncStart) ||
+        (Mode->HorizontalTotal < Mode->HorizontalSyncEnd)
+    ){
+        return DRSD_MODE_H_ILLEGAL;
+    }
+    
+    if(
+        (Mode->VerticalDisplay == 0) ||
+        (Mode->VerticalSyncStart < Mode->VerticalDisplay) ||
+        (Mode->VerticalSyncStart < Mode->VerticalSyncStart) ||
+        (Mode->VerticalTotal < Mode->VerticalSyncEnd)
+    ){
+        return DRSD_MODE_V_ILLEGAL;
+    }
+
+    return DRSD_MODE_OK;
+} 
+
+DRIVER_EXPORT 
+DRSD_MODE_STATUS 
+DrsdModeValidateDriver(
+    PDRSD_DEVICE        Device,
+    PDRSD_DISPLAY_MODE  Mode
+){
+    DRSD_MODE_STATUS Status = DrsdModeValidateBasic(Mode);
+    if(Status != DRSD_MODE_OK){
+        return Status;
+    }
+
+    if(Device->ModeConfig.Functions->ModeValid){
+        return Device->ModeConfig.Functions->ModeValid(Device, Mode);
+    }
+
+    return DRSD_MODE_OK;
+}
+
+DRIVER_EXPORT
+void
+DrsdModeSetCrtcInfo(
+    PDRSD_DISPLAY_MODE  Mode,
+    int                 AdjustFlags
+){
+    if(!Mode){
+        return;
+    }
+
+    Mode->CrtcClock = Mode->KhzClock;
+    Mode->CrtcHorizontalDisplay = Mode->HorizontalDisplay;
+    Mode->CrtcHorizontalSyncStart = Mode->HorizontalSyncStart;
+    Mode->CrtcHorizontalSyncEnd = Mode->HorizontalSyncEnd;
+    Mode->CrtcHorizontalTotal = Mode->HorizontalTotal;
+    Mode->CrtcHorizontalSkew = Mode->HorizontalSkew;
+    Mode->CrtcVerticalDisplay = Mode->VerticalDisplay;
+    Mode->CrtcVerticalSyncStart = Mode->VerticalSyncStart;
+    Mode->CrtcVerticalSyncEnd = Mode->VerticalSyncEnd;
+    Mode->CrtcVerticalTotal = Mode->VerticalTotal;
+
+    if(Mode->Flags & DRSD_MODE_FLAG_INTERLACE){
+        if(AdjustFlags & CRTC_INTERLACE_HALVE_V){
+            Mode->CrtcVerticalDisplay /= 2;
+            Mode->CrtcVerticalSyncStart /= 2;
+            Mode->CrtcVerticalSyncEnd /= 2;
+            Mode->CrtcVerticalTotal /= 2;
+        }
+    }
+    
+    if(!(AdjustFlags & CRTC_NO_DBLSCAN)){
+        if(Mode->Flags & DRSD_MODE_FLAG_DBLSCAN){
+            Mode->CrtcVerticalDisplay *= 2;
+            Mode->CrtcVerticalSyncStart *= 2;
+            Mode->CrtcVerticalSyncEnd *= 2;
+            Mode->CrtcVerticalTotal *= 2;
+        }
+    }
+        
+    if(!(AdjustFlags & CRTC_NO_VSCAN)){
+        if(Mode->VerticalScan > 1){
+            Mode->CrtcVerticalDisplay *= Mode->VerticalScan;
+            Mode->CrtcVerticalSyncStart *= Mode->VerticalScan;
+            Mode->CrtcVerticalSyncEnd *= Mode->VerticalScan;
+            Mode->CrtcVerticalTotal *= Mode->VerticalScan;
+        }
+    }
+
+    if(AdjustFlags & CRTC_STEREO_DOUBLE){
+        UINT Layout = Mode->Flags & DRSD_MODE_FLAG_3D_MASK;
+        switch(Layout){
+            case DRSD_MODE_FLAG_3D_FRAME_PACKING:
+                Mode->CrtcClock *= 2;
+                Mode->CrtcVerticalDisplay += Mode->VerticalTotal;
+                Mode->CrtcVerticalSyncStart += Mode->VerticalTotal;
+                Mode->CrtcVerticalSyncEnd += Mode->VerticalTotal;
+                Mode->CrtcVerticalTotal += Mode->VerticalTotal;
+                break;
+        }
+    }    
+
+    Mode->CrtcVBlankStart = MIN(Mode->CrtcVerticalSyncStart, Mode->CrtcVerticalDisplay);
+    Mode->CrtcVBlankEnd = MAX(Mode->CrtcVerticalSyncEnd, Mode->CrtcVerticalTotal);
+    Mode->CrtcHBlankStart = MIN(Mode->CrtcHorizontalSyncStart, Mode->CrtcHorizontalDisplay);
+    Mode->CrtcHBlankEnd = MAX(Mode->CrtcHorizontalSyncEnd, Mode->CrtcHorizontalTotal);
+}
+
 DRIVER_EXPORT
 BOOL DrsdModeParseCommandLineForConnector(
     LOUSTR              ModeOption,
@@ -127,4 +252,62 @@ DrsdModeConvertToUMode(
 		break;
 	}
 	strncpy(Out->Name, In->Name, sizeof(DRSD_DISPLAY_MODE_LENGTH));
+}
+
+DRIVER_EXPORT
+LOUSTATUS
+DrsdModeConvertUMode(
+    PDRSD_DEVICE        Device,
+    PDRSD_DISPLAY_MODE  Out,
+    PDRSD_MODE_MODEINFO In
+){
+    if((In->Clock > INT32_MAX) || (In->VRefresh > INT32_MAX)){
+        return STATUS_INTEGER_OVERFLOW;
+    }
+
+    Out->KhzClock = In->Clock;
+    Out->HorizontalDisplay = In->HorizontalDisplay;
+    Out->HorizontalSyncStart = In->HSyncStart;
+    Out->HorizontalSyncEnd = In->HSyncEnd;
+    Out->HorizontalTotal = In->HTotal;
+    Out->HorizontalSkew = In->HSkew;
+    Out->VerticalDisplay = In->VerticalDisplay;
+    Out->VerticalSyncStart = In->VSyncStart;
+    Out->VerticalSyncEnd = In->VSyncEnd;
+    Out->VerticalTotal = In->VTotal;
+    Out->VerticalScan = In->VScan;
+    Out->Flags = In->Flags;
+
+    Out->Type = In->Type & DRSD_MODE_TYPE_ALL;
+    strncpy(Out->Name, In->Name, sizeof(Out->Name));
+
+    Out->Flags &= ~(DRSD_MODE_FLAG_PIC_AR_MASK); 
+
+	switch (In->Flags & DRSD_MODE_FLAG_PIC_AR_MASK) {
+	case DRSD_MODE_FLAG_PIC_AR_4_3:
+		Out->Flags |= HDMI_PICTURE_ASPECT_4_3;
+		break;
+	case DRSD_MODE_FLAG_PIC_AR_16_9:
+		Out->Flags |= HDMI_PICTURE_ASPECT_16_9;
+		break;
+	case DRSD_MODE_FLAG_PIC_AR_64_27:
+		Out->Flags |= HDMI_PICTURE_ASPECT_64_27;
+		break;
+	case DRSD_MODE_FLAG_PIC_AR_256_135:
+		Out->Flags |= HDMI_PICTURE_ASPECT_256_135;
+		break;
+	default:
+	case DRSD_MODE_FLAG_PIC_AR_NONE:
+		Out->Flags |= HDMI_PICTURE_ASPECT_NONE;
+		break;
+	}
+
+    Out->ModeStatus = DrsdModeValidateDriver(Device, Out);
+    if(Out->ModeStatus != DRSD_MODE_OK){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    DrsdModeSetCrtcInfo(Out, CRTC_INTERLACE_HALVE_V);
+
+    return STATUS_SUCCESS;
 }
