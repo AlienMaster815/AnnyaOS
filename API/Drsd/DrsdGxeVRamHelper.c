@@ -25,6 +25,24 @@
 
 #include "DrsdCore.h"
 
+static SIZE DrsdGxeVramPgOffset(PDRSD_GXE_VRAM_OBJECT Gbo){
+    if(!Gbo->Bo.Resource || Gbo->Bo.Resource->MemType != TTM_PL_SYSTEM){
+        return 0x00;
+    }
+    return Gbo->Bo.Resource->Start;
+}
+
+DRIVER_EXPORT
+INT64 
+DrsdGxeVramOffset(
+    PDRSD_GXE_VRAM_OBJECT Gbo
+){
+    if(!Gbo->Bo.PinCount){
+        return (INT64)STATUS_NO_SUCH_DEVICE;
+    }
+    return (INT64)DrsdGxeVramPgOffset(Gbo);
+}
+
 static PTTM_TT BoDriverTtmTtCreate(
     PTTM_BUFFER_OBJECT  Bo, 
     UINT64              PageFlags

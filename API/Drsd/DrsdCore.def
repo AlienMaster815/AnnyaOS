@@ -80,3 +80,5 @@ EXPORTS
     DrsdCreateRangeProperty
     DrsdCreateSignedRangeProperty
     DrsdCreateObjectProperty
+    DrsdGxeVramOffset
+    DrsdCrtcCleanup

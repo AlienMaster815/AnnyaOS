@@ -9,6 +9,186 @@
 #include <Hal.h>
 #include <drivers/VBoxError.h>
 
+
+static void VboxDoModeSet(
+    PDRSD_CRTC          Crtc
+){
+    PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)Crtc->Device;
+    PVIRTUALBOX_CRTC VBoxCrtc = (PVIRTUALBOX_CRTC)Crtc;
+    PDRSD_FRAME_BUFFER Fb = Crtc->PrimaryPlane->FrameBuffer;
+    int32_t Width = VBoxCrtc->Width, Height = VBoxCrtc->Height, Bpp = Fb->Bpp, Pitch = Fb->Pitch, 
+        X = VBoxCrtc->X ? VBoxCrtc->X : VBoxCrtc->XHint, Y = VBoxCrtc->Y ? VBoxCrtc->Y : VBoxCrtc->YHint;
+    UNUSED uint16_t Flags = 0;
+
+    if((VBoxCrtc->CrtcId == 0) && (Fb) && 
+        ((VBoxCrtc->FramebufferOffset / Pitch) < (0xFFFF - Y)) && 
+        ((VBoxCrtc->FramebufferOffset % (Bpp / 8)) == 0x00)){
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_XRESOLUTION, Width);
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_YRESOLUTION, Height);
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_VIRTUAL_WIDTH, Pitch * 8 / Bpp);
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_BPP, Bpp);
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_ENABLE, VIRTUALBOX_VBE_DISPI_ENABLED);
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_X_OFFSET, VBoxCrtc->FramebufferOffset % Pitch / Bpp * 8 + VBoxCrtc->X);
+            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_Y_OFFSET, VBoxCrtc->FramebufferOffset / Pitch + VBoxCrtc->Y);
+    }
+
+    Flags = VBVA_SCREEN_F_ACTIVE;
+    Flags |= (Fb && Crtc->CrtcState->Enable) ? 0 : VBVA_SCREEN_F_BLANK;
+    Flags |= VBoxCrtc->Disconnected ? VBVA_SCREEN_F_DISABLED : 0;
+
+    HgsmiProccessDisplayInformation(
+        VBox->GuestPool, 
+        VBoxCrtc->CrtcId, 
+        X, Y, 
+        VBoxCrtc->X * Bpp / 8 + VBoxCrtc->Y * Pitch, 
+        Pitch, Width, Height, Bpp, Flags
+    );
+
+    //LouPrint("VboxDoModeSet() STATUS_SUCCESS\n");
+}
+
+
+static LOUSTATUS VBoxSetView(PDRSD_CRTC DrsdCrtc){
+    PVIRTUALBOX_CRTC VBoxCrtc = (PVIRTUALBOX_CRTC)DrsdCrtc;
+    PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)DrsdCrtc->Device;
+    PVBVA_INFORMATION_VIEW View = (PVBVA_INFORMATION_VIEW)HgsmiBufferAllocate(VBox->GuestPool, sizeof(VBVA_INFORMATION_VIEW), HGSMI_CH_VBVA, VBVA_INFORMATION_VIEW_COMMAND);
+    if(!View){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    View->ViewIndex = VBoxCrtc->CrtcId;
+    View->ViewOffset = VBoxCrtc->FramebufferOffset;
+    View->ViewSize = VBox->AvailableVramSize - VBoxCrtc->FramebufferOffset + VBoxCrtc->CrtcId * VBVA_MINIMUM_BUFFER_SIZE;
+    View->MaximumScreenSize = VBox->AvailableVramSize - VBoxCrtc->FramebufferOffset;
+    HgsmiBufferSubmit(VBox->GuestPool, View);
+    HgsmiBufferFree(VBox->GuestPool, View);
+    //LouPrint("VBoxSetView() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+
+static bool VBoxSetUpInputMapping(PVIRTUALBOX_PRIVATE_DATA VBox){
+    PDRSD_CRTC Crtc;
+    PDRSD_CONNECTOR Connector;
+    BOOL SingleFrameBuffer = true;
+    BOOL OldSingleFrameBuffer = VBox->SingleFramebuffer;
+    PDRSD_FRAME_BUFFER FrameBuffer = Crtc->PrimaryPlane->FrameBuffer;
+    PDRSD_FRAME_BUFFER FrameBuffer1 = 0x00;
+    UINT16 Width = 0;
+    UINT16 Height = 0;
+
+    ForEachListEntry(Crtc, &VBox->DrsdDevice.ModeConfig.CrtcList, Head){
+        FrameBuffer = Crtc->Primary->State->FrameBuffer;
+        if(!FrameBuffer){
+            continue;
+        }
+        if(!FrameBuffer1){
+            FrameBuffer1 = FrameBuffer;
+            if(FrameBuffer1 == VBox->DrsdDevice.FbHelper.FrameBuffer){
+                break;
+            }
+        }else if(FrameBuffer != FrameBuffer1){
+            SingleFrameBuffer = false;
+        }
+    }
+    if(!FrameBuffer1){
+        return false;
+    }
+
+    if(SingleFrameBuffer){
+        VBox->SingleFramebuffer = true;
+        VBox->InputMappingWidth = FrameBuffer1->Width; 
+        VBox->InputMappingHeight = FrameBuffer1->Height; 
+        return (VBox->SingleFramebuffer != OldSingleFrameBuffer);
+    }    
+
+    ForEachListEntry(Connector, &VBox->DrsdDevice.ModeConfig.ConnectorList, Head){
+        PVIRTUALBOX_CONNECTOR VBoxConnector = (PVIRTUALBOX_CONNECTOR)Connector;
+        PVIRTUALBOX_CRTC VBoxCrtc = (PVIRTUALBOX_CRTC)VBoxConnector->VBOXCrtc;
+        Width = MIN(UINT16_MAX, MAX(Width, VBoxCrtc->XHint + VBoxConnector->ModeHint.Width));
+        Width = MIN(UINT16_MAX, MAX(Height, VBoxCrtc->YHint + VBoxConnector->ModeHint.Height));
+    }
+
+    VBox->SingleFramebuffer = false;
+    VBox->InputMappingWidth = Width;
+    VBox->InputMappingHeight = Height;
+    return (VBox->SingleFramebuffer != OldSingleFrameBuffer);
+}
+
+
+static void VirtualCrtcSetBaseAndMode(
+    PDRSD_CRTC          Crtc,
+    PDRSD_FRAME_BUFFER  FrameBuffer,
+    int32_t             X,
+    int32_t             Y
+){
+    PDRSD_GXE_VRAM_OBJECT       Gbo = DrsdGxeVramOfGem(&FrameBuffer->Objects[0]); 
+    PVIRTUALBOX_PRIVATE_DATA    VBox = (PVIRTUALBOX_PRIVATE_DATA)FrameBuffer->Device;
+    PVIRTUALBOX_CRTC            VBoxCrtc = (PVIRTUALBOX_CRTC)Crtc;
+    BOOLEAN                     NeedsModeSet = DrsdAtomicCrtcNeedsModeset(Crtc->State); 
+
+    MutexLock(&VBox->HardwareMutex);
+
+    if(Crtc->State->Enable){
+        VBoxCrtc->Width = Crtc->State->Mode.HorizontalDisplay;
+        VBoxCrtc->Height = Crtc->State->Mode.VerticalDisplay;
+    }
+
+    VBoxCrtc->X = X;
+    VBoxCrtc->Y = Y;
+    VBoxCrtc->FramebufferOffset = DrsdGxeVramOffset(Gbo);
+
+    if(NeedsModeSet && (VBoxSetUpInputMapping(VBox))){
+        PDRSD_CRTC CrtcIndex;
+        ForEachListEntry(CrtcIndex, &VBox->DrsdDevice.ModeConfig.CrtcList, Head){
+            if(CrtcIndex == Crtc){
+                continue;
+            }
+            VboxDoModeSet(CrtcIndex);
+        }
+
+    }
+
+    VBoxSetView(Crtc);
+    VboxDoModeSet(Crtc);
+
+    if(NeedsModeSet){
+        HgsmiUpdateInputMappings(VBox->GuestPool, 0, 0, VBox->InputMappingWidth, VBox->InputMappingHeight);
+    }
+
+    MutexUnlock(&VBox->HardwareMutex);
+    //LouPrint("VirtualCrtcSetBaseAndMode() STATUS_SUCCESS\n");*/
+}
+
+static void VirtualboxCrtcAtomicEnable(
+    PDRSD_CRTC          Crtc,
+    PDRSD_ATOMIC_STATE  AtomicData
+){
+}
+
+static void VirtualboxCrtcAtomicDisable(
+    PDRSD_CRTC          Crtc,
+    PDRSD_ATOMIC_STATE  AtomicData
+){
+}
+
+static void VirtualboxCrtcAtomicFlush(
+    PDRSD_CRTC          Crtc,
+    PDRSD_ATOMIC_STATE  AtomicData
+){
+}
+
+static  DRSD_CRTC_ASSIST_FUNCTIONS VBoxCrtcAssistFunctions = {
+    .FlushAtomic = VirtualboxCrtcAtomicFlush,
+    .EnableAtomic = VirtualboxCrtcAtomicEnable,
+    .DisableAtomic = VirtualboxCrtcAtomicDisable,
+};
+
+static void VirtualboxCrtcDestroy(PDRSD_CRTC Crtc){
+    DrsdCrtcCleanup(Crtc);
+    LouKeFree(Crtc);
+}
+
 static void* VBoxEdid = 0x00;
 static uint32_t PlaneFormats[2] = {0};
 static uint32_t CursorPlaneFormats[1] = {0};
@@ -196,26 +376,9 @@ static  DRSD_ENCODER_FUNCTIONS VirtualboxEncoderCallbacks = {
     .Destroy = VirtualboxEncoderDestroy,
 };
 
-static void VirtualboxCrtcAtomicEnable(
-    PDRSD_CRTC  Crtc,
-    void*       AtomicData
-){
-}
 
-static void VirtualboxCrtcAtomicDisable(
-    PDRSD_CRTC  Crtc,
-    void*       AtomicData
-){
-}
 
-static void VirtualboxCrtcAtomicFlush(
-    PDRSD_CRTC  Crtc,
-    void*       AtomicData
-){
-}
 
-static void VirtualboxCrtcDestroy(PDRSD_CRTC Crtc){
-}
 
 static  DRSD_CRTC_CALLBACK VBoxCrtcCallbacks = {
     .Reset = DrsdInternalCrtcResetAtomic,
@@ -226,11 +389,7 @@ static  DRSD_CRTC_CALLBACK VBoxCrtcCallbacks = {
     .AtomicDestroyState = DrsdInternalCrtcDestroyStateAtomic,
 };
 
-static  DRSD_CRTC_ASSIST_CALLBACK VBoxCrtcAssistFunctions = {
-    .FlushAtomic = VirtualboxCrtcAtomicFlush,
-    .EnableAtomic = VirtualboxCrtcAtomicEnable,
-    .DisableAtomic = VirtualboxCrtcAtomicDisable,
-};
+
 
 static void VirtualboxCursorAtomicUpdate(
     PDRSD_PLANE Plane,
@@ -259,148 +418,7 @@ static void VirtualboxCursorAtomicSetState(
     while(1);
 }
 
-static bool VBoxSetUpInputMapping(PVIRTUALBOX_PRIVATE_DATA VBox){
-    PDRSD_CRTC Crtc = VBox->DrsdDevice.Crtcs;
-    PDRSD_CONNECTOR Connector = VBox->DrsdDevice.Connectors;
-    PDRSD_CONNECTOR ConnectorIndex;
-    PVIRTUALBOX_CRTC VBoxCrtc;
-    BOOL SingleFrameBuffer = (VBox->DrsdDevice.CrtcCount <= 1) ? true : false;
-    BOOL OldSingleFrameBuffer = VBox->SingleFramebuffer;
-    PDRSD_FRAME_BUFFER FrameBuffer = Crtc->PrimaryPlane->FrameBuffer;
-    PVIRTUALBOX_CONNECTOR VBoxConnector;
-    SIZE Width = 0;
-    SIZE Height = 0;
 
-    if(SingleFrameBuffer){
-        VBox->SingleFramebuffer = true;
-        VBox->InputMappingWidth = FrameBuffer->Width;
-        VBox->InputMappingHeight = FrameBuffer->Height;
-        return (VBox->SingleFramebuffer != OldSingleFrameBuffer);
-    }
-
-    ConnectorIndex = Connector;
-    while(ConnectorIndex){
-        VBoxConnector = (PVIRTUALBOX_CONNECTOR)ConnectorIndex;
-        VBoxCrtc = VBoxConnector->VBOXCrtc;
-
-        Width = MAX(Width, VBoxCrtc->XHint + VBoxConnector->ModeHint.Width);
-        Height = MAX(Height, VBoxCrtc->YHint + VBoxConnector->ModeHint.Height);
-
-        ConnectorIndex = (PDRSD_CONNECTOR)ConnectorIndex->Peers.NextHeader;
-    }
-    Width = MIN(Width, 0xFFFF);
-    Height = MIN(Height, 0xFFFF);
-
-    //TODO: im going to do this later once i know everything is working
-    VBox->SingleFramebuffer = false;
-    VBox->InputMappingHeight = Height;
-    VBox->InputMappingWidth = Width;
-    return (VBox->SingleFramebuffer != OldSingleFrameBuffer);
-}
-
-static LOUSTATUS VBoxSetView(PDRSD_CRTC DrsdCrtc, size_t FbSize){
-    PVIRTUALBOX_CRTC VBoxCrtc = (PVIRTUALBOX_CRTC)DrsdCrtc;
-    PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)DrsdCrtc->Device;
-    PVBVA_INFORMATION_VIEW View = (PVBVA_INFORMATION_VIEW)HgsmiBufferAllocate(VBox->GuestPool, sizeof(VBVA_INFORMATION_VIEW), HGSMI_CH_VBVA, VBVA_INFORMATION_VIEW_COMMAND);
-    if(!View){
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
-
-    View->ViewIndex = VBoxCrtc->CrtcId;
-    View->ViewOffset = VBoxCrtc->FramebufferOffset;
-    View->ViewSize = FbSize;
-    View->MaximumScreenSize = FbSize;
-    HgsmiBufferSubmit(VBox->GuestPool, View);
-    HgsmiBufferFree(VBox->GuestPool, View);
-    //LouPrint("VBoxSetView() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
-static void VboxDoModeSet(
-    PDRSD_CRTC          Crtc
-){
-    PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)Crtc->Device;
-    PVIRTUALBOX_CRTC VBoxCrtc = (PVIRTUALBOX_CRTC)Crtc;
-    PDRSD_FRAME_BUFFER Fb = Crtc->PrimaryPlane->FrameBuffer;
-    int32_t Width = VBoxCrtc->Width, Height = VBoxCrtc->Height, Bpp = Fb->Bpp, Pitch = Fb->Pitch, 
-        X = VBoxCrtc->X ? VBoxCrtc->X : VBoxCrtc->XHint, Y = VBoxCrtc->Y ? VBoxCrtc->Y : VBoxCrtc->YHint;
-    UNUSED uint16_t Flags = 0;
-
-    if((VBoxCrtc->CrtcId == 0) && (Fb) && 
-        ((VBoxCrtc->FramebufferOffset / Pitch) < (0xFFFF - Y)) && 
-        ((VBoxCrtc->FramebufferOffset % (Bpp / 8)) == 0x00)){
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_XRESOLUTION, Width);
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_YRESOLUTION, Height);
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_VIRTUAL_WIDTH, Pitch * 8 / Bpp);
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_BPP, Bpp);
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_ENABLE, VIRTUALBOX_VBE_DISPI_ENABLED);
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_X_OFFSET, VBoxCrtc->FramebufferOffset % Pitch / Bpp * 8 + VBoxCrtc->X);
-            VBOX_IO_WRITE(VIRTUALBOX_VBE_DISPI_INDEX_Y_OFFSET, VBoxCrtc->FramebufferOffset / Pitch + VBoxCrtc->Y);
-    }
-
-    Flags = VBVA_SCREEN_F_ACTIVE;
-    Flags |= (Fb && Crtc->CrtcState->Enable) ? 0 : VBVA_SCREEN_F_BLANK;
-    Flags |= VBoxCrtc->Disconnected ? VBVA_SCREEN_F_DISABLED : 0;
-
-    HgsmiProccessDisplayInformation(
-        VBox->GuestPool, 
-        VBoxCrtc->CrtcId, 
-        X, Y, 
-        VBoxCrtc->X * Bpp / 8 + VBoxCrtc->Y * Pitch, 
-        Pitch, Width, Height, Bpp, Flags
-    );
-
-    //LouPrint("VboxDoModeSet() STATUS_SUCCESS\n");
-}
-
-static void VirtualCrtcSetBaseAndMode(
-    PDRSD_CRTC          Crtc,
-    PDRSD_FRAME_BUFFER  FrameBuffer,
-    int32_t             X,
-    int32_t             Y
-){
-    PVIRTUALBOX_PRIVATE_DATA VBox = (PVIRTUALBOX_PRIVATE_DATA)FrameBuffer->Device;
-    uintptr_t           FrameVBase = FrameBuffer->FramebufferBase;
-    uintptr_t           FramePBase = FrameBuffer->Offset;
-    size_t              FrameSize = FrameBuffer->FramebufferSize;
-    bool                ModeSet = Crtc->CrtcState->NeedsModeset; 
-    PVIRTUALBOX_CRTC    VBoxCrtc = (PVIRTUALBOX_CRTC)Crtc;
-    
-    MutexLock(&VBox->HardwareMutex);
-
-    if(Crtc->CrtcState->Enable){
-        VBoxCrtc->Width = Crtc->CrtcState->DisplayMode.HorizontalDisplay;
-        VBoxCrtc->Height = Crtc->CrtcState->DisplayMode.VirticalDisplay;
-        //LouPrint("VBOXGPU:Setting Width:%d And Height:%d\n", VBoxCrtc->Width, VBoxCrtc->Height);
-    }
-
-    VBoxCrtc->X = X;
-    VBoxCrtc->Y = X;
-    VBoxCrtc->FramebufferOffset = FramePBase;
-
-    if(ModeSet && VBoxSetUpInputMapping(VBox)){
-        PDRSD_CRTC CrtcIndex = (PDRSD_CRTC)Crtc;
-        
-        while(CrtcIndex){
-
-            if(CrtcIndex != Crtc){
-                VboxDoModeSet(CrtcIndex);
-            }
-
-            CrtcIndex = (PDRSD_CRTC)CrtcIndex->Peers.NextHeader;
-        }
-    }
-    
-    VBoxSetView(Crtc, FrameSize);
-    VboxDoModeSet(Crtc);
-
-    if(ModeSet){
-        HgsmiUpdateInputMappings(VBox->GuestPool, 0, 0, VBox->InputMappingWidth, VBox->InputMappingHeight);
-    }
-
-    MutexUnlock(&VBox->HardwareMutex);
-    //LouPrint("VirtualCrtcSetBaseAndMode() STATUS_SUCCESS\n");
-}
 
 static void VirtualboxAtomicUpdate(
     PDRSD_PLANE Plane,
@@ -601,7 +619,7 @@ static PVIRTUALBOX_CRTC VirtualboxCrtcInitialize(
 
     //DrsdInitializeCrtcGammaSize(&VBoxCrtc->Base, 256);
 
-    VBoxCrtc->Base.AssistFunctions = (PDRSD_CRTC_ASSIST_CALLBACK)&VBoxCrtcAssistFunctions;
+    VBoxCrtc->Base.AssistFunctions = (PDRSD_CRTC_ASSIST_FUNCTIONS)&VBoxCrtcAssistFunctions;
 
     VBoxCrtc->CrtcId = i;
 

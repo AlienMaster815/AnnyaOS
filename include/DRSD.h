@@ -533,7 +533,7 @@ typedef struct _DRSD_FRAME_BUFFER{
     uint32_t                                Height;
     int32_t                                 Flags;
     ListHeader                              Buffers;
-    PDRSD_GXE_OBJECT                        GxeObjects;
+    PDRSD_GXE_OBJECT                        Objects;
     //following is legacy and here for old linear framebuffers
     uint64_t                                FramebufferBase;
     uint64_t                                SecondaryFrameBufferBase;
@@ -597,7 +597,7 @@ typedef enum {
 
 #define DEFINE_DRSD_MODE(Name, Type, Clock, Hd, Hss, Hse, Ht, Hsk, Vd, Vss, Vse, Vt, Vs, Flags) \
     .ModeName = Name, .ModeStatus = (DRSD_MODE_STATUS)0, .KhzClock = Clock, .HorizontalDisplay = Hd, .HorizontalSyncStart = Hss, \
-    .HorizontalSyncEnd = Hse,  .HorizontalTotal = Ht, .HorizontalSkew = Hsk, .VirticalDisplay = Vd, \
+    .HorizontalSyncEnd = Hse,  .HorizontalTotal = Ht, .HorizontalSkew = Hsk, .VerticalDisplay = Vd, \
     .VirticalSyncStart = Vss, .VirticalSyncEnd = Vse, .VirticalTotal = Vt, .VirticalScan = Vs, .DdmFlags = Flags, .ModeType = Type
 
 
@@ -611,11 +611,11 @@ typedef struct  _DRSD_DISPLAY_MODE{
     uint16_t                HorizontalSyncEnd;
     uint16_t                HorizontalTotal;
     uint16_t                HorizontalSkew;
-    uint16_t                VirticalDisplay;
-    uint16_t                VirticalSyncStart;
-    uint16_t                VirticalSyncEnd;
-    uint16_t                VirticalTotal;
-    uint16_t                VirticalScan;
+    uint16_t                VerticalDisplay;
+    uint16_t                VerticalSyncStart;
+    uint16_t                VerticalSyncEnd;
+    uint16_t                VerticalTotal;
+    uint16_t                VerticalScan;
     uint32_t                DdmFlags;
     size_t                  CrtcClock;
     uint16_t                CrtcHorizontalDisplay;
@@ -623,10 +623,10 @@ typedef struct  _DRSD_DISPLAY_MODE{
     uint16_t                CrtcHorizontalSyncEnd;
     uint16_t                CrtcHorizontalTotal;
     uint16_t                CrtcHorizontalSkew;
-    uint16_t                CrtcVirticalDisplay;
-    uint16_t                CrtcVirticalSyncStart;
-    uint16_t                CrtcVirticalSyncEnd;
-    uint16_t                CrtcVirticalTotal;
+    uint16_t                CrtcVerticalDisplay;
+    uint16_t                CrtcVerticalSyncStart;
+    uint16_t                CrtcVerticalSyncEnd;
+    uint16_t                CrtcVerticalTotal;
     uint16_t                ModeType;
     bool                    GiveToUser;
     HDMI_ASPECT_RATIO       AspectRatio;
@@ -1418,7 +1418,7 @@ typedef struct _DRSD_CRTC_STATE{
 }DRSD_CRTC_STATE, * PDRSD_CRTC_STATE;   
 
 
-typedef struct _DRSD_CRTC_ASSIST_CALLBACK{
+typedef struct _DRSD_CRTC_ASSIST_FUNCTIONS{
     void                        (*CrtcSetPowerMode)(struct _DRSD_CRTC* Crtc, int Mode);
     void                        (*PrepareCtrc)(struct _DRSD_CRTC* Crtc);
     void                        (*CommitMode)(struct _DRSD_CRTC* Crtc);
@@ -1429,13 +1429,13 @@ typedef struct _DRSD_CRTC_ASSIST_CALLBACK{
     LOUSTATUS                   (*ModeSetBase)(struct _DRSD_CRTC* Crtc, int x, int y, PDRSD_FRAME_BUFFER OldFrameBuffer);
     LOUSTATUS                   (*ModeSetBaseAtomic)(struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int x, int y, void* AtomicData);
     void                        (*DisableCrtc)(struct _DRSD_CRTC* Crtc);
-    LOUSTATUS                   (*AtomicCheck)(struct _DRSD_CRTC* Crtc, void* AtomicBuffer);
-    void                        (*BeginAtomic)(struct _DRSD_CRTC* Crtc, void* AtomicBuffer);
-    void                        (*FlushAtomic)(struct _DRSD_CRTC* Crtc, void* AtomicBuffer);
-    void                        (*EnableAtomic)(struct _DRSD_CRTC* Crtc, void* AtomicBuffer);
-    void                        (*DisableAtomic)(struct _DRSD_CRTC* Crtc, void* AtomicBuffer);
+    LOUSTATUS                   (*AtomicCheck)(struct _DRSD_CRTC* Crtc, struct _DRSD_ATOMIC_STATE* AtomicState);
+    void                        (*BeginAtomic)(struct _DRSD_CRTC* Crtc, struct _DRSD_ATOMIC_STATE* AtomicState);
+    void                        (*FlushAtomic)(struct _DRSD_CRTC* Crtc, struct _DRSD_ATOMIC_STATE* AtomicState);
+    void                        (*EnableAtomic)(struct _DRSD_CRTC* Crtc, struct _DRSD_ATOMIC_STATE* AtomicState);
+    void                        (*DisableAtomic)(struct _DRSD_CRTC* Crtc, struct _DRSD_ATOMIC_STATE* AtomicState);
     bool                        (*GetCrtcScanoutPosition)(struct _DRSD_CRTC* Crtc, bool IRQ, int* VPosition, int* HPosition, uint64_t STime, uint64_t ETime, struct _DRSD_DISPLAY_MODE* Mode);
-}DRSD_CRTC_ASSIST_CALLBACK, * PDRSD_CRTC_ASSIST_CALLBACK;
+}DRSD_CRTC_ASSIST_FUNCTIONS, * PDRSD_CRTC_ASSIST_FUNCTIONS;
 
 typedef struct _DRSD_CRTC_CALLBACK{
     void                        (*Reset)(struct _DRSD_CRTC* Crtc);
@@ -1533,7 +1533,7 @@ typedef struct _DRSD_CRTC{
     PDRSD_PLANE                     PrimaryPlane;
     PDRSD_PLANE                     CursorPlane;
     PDRSD_CRTC_CALLBACK             CrtcCallbacks;
-    PDRSD_CRTC_ASSIST_CALLBACK      AssistFunctions;
+    PDRSD_CRTC_ASSIST_FUNCTIONS      AssistFunctions;
     PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 
@@ -1881,7 +1881,7 @@ typedef struct _TTM_BUS_PLACEMENT{
 }TTM_BUS_PLACEMENT, * PTTM_BUS_PLACEMENT;
 
 typedef struct _TTM_RESOURCE{
-    UINT64                      State;
+    UINT64                      Start;
     SIZE                        Size;
     UINT32                      MemType;
     UINT32                      Placement;
@@ -2279,7 +2279,7 @@ typedef struct _DRSD_FB_INFO{
 typedef struct _DRSD_FB_HELPER{
     DRSD_CLIENT_DEVICE              ClientDevice;
     PDRSD_CLIENT_BUFFER             Buffer;
-    DRSD_FRAME_BUFFER               FrameBuffer;
+    PDRSD_FRAME_BUFFER              FrameBuffer;
     struct _DRSD_DEVICE*            Device;
     PDRSD_FB_HELPER_FUNCTIONS       Functions;
     PDRSD_FB_INFO                   Info;
@@ -2391,6 +2391,7 @@ typedef struct _DRSD_DEVICE{
     PDRSD_VMA_OFFSET_MANAGER        VmaOffsetManager;
     PDRSD_VRAM_MM                   VramManager;
     DRSD_SWITCH_POWER_STATE         SwitchPowerState;
+    DRSD_FB_HELPER                  FbHelper;
     HANDLE                          DrsdClfsServer;
 }DRSD_DEVICE, * PDRSD_DEVICE;
 
@@ -2889,6 +2890,24 @@ typedef struct _TTM_RANGE_MANAGER{
     spinlock_t              Lock;
 }TTM_RANGE_MANAGER, * PTTM_RANGE_MANAGER;
 
+typedef struct _DRSD_GXE_VRAM_OBJECT{
+    TTM_BUFFER_OBJECT   Bo;
+    IO_MAP_OBJECT       IoMap;
+    UINT                VmapUseCount;
+    TTM_PLACEMENT       Placement;
+    TTM_PLACE           Placements[2];
+}DRSD_GXE_VRAM_OBJECT, * PDRSD_GXE_VRAM_OBJECT;
+
+#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+
+static inline PDRSD_GXE_VRAM_OBJECT DrsdGxeVramOfGem(PDRSD_GXE_OBJECT Gxe){
+    return CONTAINER_OF(Gxe, DRSD_GXE_VRAM_OBJECT, Bo.Base);
+}
+
+static inline BOOLEAN DrsdAtomicCrtcNeedsModeset(PDRSD_CRTC_STATE State){
+    return State->ModeChanged || State->ActiveChanged || State->ConnectorsChanged;
+}
+
 #ifndef _USER_MODE_CODE_
 #ifndef _DRSD_CORE_H
 void LouKeDestroyClip(PDRSD_CLIP Clip);
@@ -3173,6 +3192,18 @@ DrsdCreateProperty(
     UINT32          Flags,
     LOUSTR          Name,
     int             ValueCount
+);
+
+DRIVER_IMPORT
+INT64 
+DrsdGxeVramOffset(
+    PDRSD_GXE_VRAM_OBJECT Gbo
+);
+
+DRIVER_IMPORT
+void
+DrsdCrtcCleanup(
+    PDRSD_CRTC  Crtc
 );
 
 #ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 
