@@ -35,3 +35,69 @@ DrsdAtomicHelperResetCrtc(
 
     return STATUS_SUCCESS;
 }
+
+DRIVER_EXPORT 
+LOUSTATUS
+__DrsdAtomicHelperSetConfig(
+    PDRSD_MODE_SET      Set,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_CRTC_STATE CrtcState;
+    PDRSD_PLANE_STATE PrimaryState;
+    PDRSD_CRTC Crtc = Set->Crtc;
+    int HorizontalDisplay, VerticalDisplay;
+    LOUSTATUS Status;
+
+    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
+    if(LOU_KE_PTR_ERROR(CrtcState)){
+        return (LOUSTATUS)(UINTPTR)CrtcState;
+    }
+
+    PrimaryState = DrsdAtomicGetPlaneState(State, Crtc->Primary);
+    if(LOU_KE_PTR_ERROR(PrimaryState)){
+        return (LOUSTATUS)(UINTPTR)PrimaryState;
+    }
+
+    if(!Set->Mode){
+        Status = DrsdAtomicSetModeForCrtc(CrtcState, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+
+        CrtcState->Active = false;
+
+        Status = DrsdAtomicSetCrtcForPlane(PrimaryState, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+
+        
+
+    }
+
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicHelperCrtcSetConfiguration(
+    PDRSD_MODE_SET                  Mode,
+    PDRSD_MODESET_ACQUIRE_CONTEXT   ModeSetAquireContext
+){
+    PDRSD_ATOMIC_STATE  State;
+    PDRSD_CRTC          Crtc = Mode->Crtc;
+    LOUSTATUS Status;
+
+    State = DrsdAtomicStateAllocate(Crtc->Device);
+    if(!State){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    State->AcquireContext = ModeSetAquireContext;
+    Status = __DrsdAtomicHelperSetConfig(Mode, State);
+
+
+_SET_CONFIG_FAILED:
+    DrsdAtomicStatePut(State);
+    return STATUS_SUCCESS;
+}

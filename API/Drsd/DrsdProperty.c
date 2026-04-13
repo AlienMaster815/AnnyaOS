@@ -1,5 +1,17 @@
 #include "DrsdCore.h"
 
+static void DrsdPropertyFreeBlob(
+    PKERNEL_REFERENCE   Reference
+){
+    PDRSD_PROPERTY_BLOB Blob = CONTAINER_OF(Reference, DRSD_PROPERTY_BLOB, Base.ReferenceCount);
+
+    MutexLock(&Blob->Device->ModeConfig.BlobLock);
+    LouKeListDeleteItem(&Blob->HeadGlobal);
+    MutexUnlock(&Blob->Device->ModeConfig.BlobLock);
+    DrsdUnregisterModeObject(Blob->Device, &Blob->Base);
+    LouKeFree(Blob);
+}
+
 DRIVER_EXPORT 
 PDRSD_PROPERTY 
 DrsdCreateProperty(
@@ -286,8 +298,41 @@ DrsdCreateBitmaskProperty(
 
 DRIVER_EXPORT
 PDRSD_PROPERTY_BLOB
-DrsdCreateBlobProperty(){
+DrsdCreateBlobProperty(
+    PDRSD_DEVICE    Device, 
+    SIZE            Length,
+    PVOID           Data
+){
+    PDRSD_PROPERTY_BLOB Blob;
+    LOUSTATUS           Status;
 
+    if((!Length) || (Length > (INT32_MAX - sizeof(DRSD_PROPERTY_BLOB)))){
+        return (PDRSD_PROPERTY_BLOB)(UINTPTR)STATUS_INVALID_PARAMETER;
+    }
+
+    Blob = LouKeMallocEx(sizeof(DRSD_PROPERTY_BLOB) + Length, GET_ALIGNMENT(DRSD_PROPERTY_BLOB), KERNEL_GENERIC_MEMORY);
+    if(!Blob){
+        return (PDRSD_PROPERTY_BLOB)(UINTPTR)STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    Blob->Data = (PVOID)Blob + sizeof(DRSD_PROPERTY_BLOB);
+    Blob->Length = Length;
+    Blob->Device = Device;
+
+    if(Data){
+        memcpy(Blob->Data, Data, Length);
+    }
+
+    Status = DrsdModeObjectAddEx(Device, &Blob->Base, DRSD_MODE_OBJECT_BLOB, true, DrsdPropertyFreeBlob);
+    if(Status != STATUS_SUCCESS){
+        LouKeFree(Blob);
+        return (PDRSD_PROPERTY_BLOB)(UINTPTR)STATUS_INVALID_PARAMETER;
+    }
+
+    MutexLock(&Device->ModeConfig.BlobLock);
+    LouKeListAddTail(&Blob->HeadGlobal, &Device->ModeConfig.PropertyBlobList);
+    MutexUnlock(&Device->ModeConfig.BlobLock);
+    return Blob;
 }
 
 DRIVER_EXPORT

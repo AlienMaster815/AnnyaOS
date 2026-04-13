@@ -193,3 +193,4 @@ EXPORTS
     LouKeFlushWork
     LouKeXaDestroy
     LouKeXaFree
+    LouKeRtlUIntMult

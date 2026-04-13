@@ -49,6 +49,7 @@
 #include "DrsdMm.h"
 #include "DrsdProperty.h"
 #include "DrsdModeConfig.h"
+#include "DrsdUapi.h"
 
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"

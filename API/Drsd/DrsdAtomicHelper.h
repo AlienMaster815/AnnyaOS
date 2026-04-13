@@ -28,6 +28,8 @@
 
 #include "DrsdCore.h"
 
+void __DrsdAtomicStateFree(PKERNEL_REFERENCE Reference);
+
 DRIVER_EXPORT
 LOUSTATUS 
 DrsdAtomicHelperResetCrtc(
@@ -35,6 +37,10 @@ DrsdAtomicHelperResetCrtc(
     PDRSD_MODESET_ACQUIRE_CONTEXT    Context
 );
 
-
+static inline void DrsdAtomicStatePut(
+    PDRSD_ATOMIC_STATE State
+){
+    LouKeReleaseReferenceAndCall(&State->Reference, __DrsdAtomicStateFree);  
+}
 
 #endif

@@ -91,6 +91,14 @@ DrsdPutBlobProperty(
     PDRSD_PROPERTY_BLOB Blob
 );
 
+DRIVER_EXPORT
+PDRSD_PROPERTY_BLOB
+DrsdCreateBlobProperty(
+    PDRSD_DEVICE    Device, 
+    SIZE            Length,
+    PVOID           Data
+);
+
 static inline BOOLEAN DrsdPropertyTypeIs(PDRSD_PROPERTY Property, UINT32 Type){
     if(Property->Flags & DRSD_MODE_PROPERTY_EXTENDED_TYPE){
         return ((Property->Flags & DRSD_MODE_PROPERTY_EXTENDED_TYPE) == Type);

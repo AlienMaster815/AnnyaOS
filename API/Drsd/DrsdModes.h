@@ -34,4 +34,22 @@ BOOL DrsdModeParseCommandLineForConnector(
     PDRSD_CMDLINE_MODE  Mode
 );
 
+void 
+DrsdModeConvertToUMode(
+    PDRSD_MODE_MODEINFO Out, 
+    PDRSD_DISPLAY_MODE  In
+);
+
+DRIVER_EXPORT
+void DrsdModeCopy(
+    PDRSD_DISPLAY_MODE Destination, 
+    PDRSD_DISPLAY_MODE Source
+);
+
+DRIVER_EXPORT 
+int 
+DrsdModeVRefresh(
+    PDRSD_DISPLAY_MODE Mode
+);
+
 #endif

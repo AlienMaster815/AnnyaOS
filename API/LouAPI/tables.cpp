@@ -330,7 +330,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].FunctionName[138] = "DrsdGxeResetShadowPlane";
     ImportTables[0].FunctionName[140] = "DrsdInitializeCrtcWithPlanes";
     ImportTables[0].FunctionName[141] = "DrsdInitializeCrtcGammaSize";
-    ImportTables[0].FunctionName[142] = "DrsdInternalCrtcSetConfigurationAtomic";
     ImportTables[0].FunctionName[143] = "DrsdInternalCrtcPageFlipAtomic";
     ImportTables[0].FunctionName[144] = "DrsdInternalCrtcResetAtomic";
     ImportTables[0].FunctionName[145] = "DrsdInternalCrtcDuplicateStateAtomic";
@@ -494,7 +493,6 @@ void InitializeLousineKernelTables(){
     ImportTables[0].VirtualAddress[138] = (uint64_t)DrsdGxeResetShadowPlane;
     ImportTables[0].VirtualAddress[140] = (uint64_t)DrsdInitializeCrtcWithPlanes;
     ImportTables[0].VirtualAddress[141] = (uint64_t)DrsdInitializeCrtcGammaSize;
-    ImportTables[0].VirtualAddress[142] = (uint64_t)DrsdInternalCrtcSetConfigurationAtomic;
     ImportTables[0].VirtualAddress[143] = (uint64_t)DrsdInternalCrtcPageFlipAtomic;
     ImportTables[0].VirtualAddress[144] = (uint64_t)DrsdInternalCrtcResetAtomic;
     ImportTables[0].VirtualAddress[145] = (uint64_t)DrsdInternalCrtcDuplicateStateAtomic;

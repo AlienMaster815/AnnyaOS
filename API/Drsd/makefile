@@ -24,6 +24,7 @@ SRC = DrsdCore.c \
 		DrsdGxe.c \
 		DrsdMm.c \
 		DrsdProperty.c \
+		DrsdUapi.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \

@@ -75,6 +75,8 @@ struct _DRSD_MODE_SET_CONTEXT;
 struct _DRSD_PRIVATE_OBJECT;
 struct _DRSD_COLOR_OP;
 struct _DRSD_ATOMIC_STATE;
+struct _DRSD_MODE_SET;
+struct _DRSD_MODESET_ACQUIRE_CONTEXT;
 
 //8 bit color
 #define DRSD_COLOR_FORMAT_RGB332    'RGB8'
@@ -602,8 +604,8 @@ typedef enum {
 
 
 typedef struct  _DRSD_DISPLAY_MODE{
-    ListHeader              Peers;
-    string                  ModeName;
+    ListHeader              Head;
+    string                  Name;
     DRSD_MODE_STATUS        ModeStatus;
     size_t                  KhzClock;
     uint16_t                HorizontalDisplay;
@@ -616,7 +618,7 @@ typedef struct  _DRSD_DISPLAY_MODE{
     uint16_t                VerticalSyncEnd;
     uint16_t                VerticalTotal;
     uint16_t                VerticalScan;
-    uint32_t                DdmFlags;
+    uint32_t                Flags;
     size_t                  CrtcClock;
     uint16_t                CrtcHorizontalDisplay;
     uint16_t                CrtcHorizontalSyncStart;
@@ -627,7 +629,7 @@ typedef struct  _DRSD_DISPLAY_MODE{
     uint16_t                CrtcVerticalSyncStart;
     uint16_t                CrtcVerticalSyncEnd;
     uint16_t                CrtcVerticalTotal;
-    uint16_t                ModeType;
+    uint16_t                Type;
     bool                    GiveToUser;
     HDMI_ASPECT_RATIO       AspectRatio;
 }DRSD_DISPLAY_MODE, * PDRSD_DISPLAY_MODE;
@@ -1437,14 +1439,14 @@ typedef struct _DRSD_CRTC_ASSIST_FUNCTIONS{
     bool                        (*GetCrtcScanoutPosition)(struct _DRSD_CRTC* Crtc, bool IRQ, int* VPosition, int* HPosition, uint64_t STime, uint64_t ETime, struct _DRSD_DISPLAY_MODE* Mode);
 }DRSD_CRTC_ASSIST_FUNCTIONS, * PDRSD_CRTC_ASSIST_FUNCTIONS;
 
-typedef struct _DRSD_CRTC_CALLBACK{
+typedef struct _DRSD_CRTC_FUNCTIONS{
     void                        (*Reset)(struct _DRSD_CRTC* Crtc);
     LOUSTATUS                   (*SetCursor)(struct _DRSD_CRTC* Crtc, struct _DRSD_FILE* DrsdFile, uint32_t Handle, uint32_t Width, uint32_t Height);
     LOUSTATUS                   (*SetCursorEx)(struct _DRSD_CRTC* Crtc, struct _DRSD_FILE* DrsdFile, uint32_t Handle, uint32_t Width, uint32_t Height, int32_t HotX, int32_t HotY);
     LOUSTATUS                   (*MoveCursor)(struct _DRSD_CRTC* Crtc, int X, int Y);
     LOUSTATUS                   (*SetGamma)(struct _DRSD_CRTC* Crtc, uint16_t* R, uint16_t* G, uint16_t* B, struct _DRSD_MODE_SET_CONTEXT* Context);
     void                        (*Destroy)(struct _DRSD_CRTC* Crtc);
-    LOUSTATUS                   (*SetConfiguration)(void* ModeSet, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*SetConfiguration)(struct _DRSD_MODE_SET* ModeSet, struct _DRSD_MODESET_ACQUIRE_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*PageFlip)(struct _DRSD_CRTC* Crtc, DRSD_FRAME_BUFFER* FrameBuffer, struct _DRSD_PENDING_VBLANK_EVENT* VBlankEvent, uint32_t Flags, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*PageFlipTarget)(struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* Event, uint32_t Flags, uint32_t Target, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
     LOUSTATUS                   (*SetProperty)(struct _DRSD_CRTC* Crtc,  struct _DRSD_PROPERTY* Property, uint64_t Value);
@@ -1462,7 +1464,7 @@ typedef struct _DRSD_CRTC_CALLBACK{
     LOUSTATUS                   (*EnableVBlank)(struct _DRSD_CRTC* Crtc);
     void                        (*DsiableVBlank)(struct _DRSD_CRTC* Crtc);
     bool                        (*GetVBlankTimeStamp)(struct _DRSD_CRTC* Crtc, int* MaxErrors, uint64_t Time, bool IRQ);
-}DRSD_CRTC_CALLBACK, * PDRSD_CRTC_CALLBACK, DRSD_CRTC_FUNCTIONS, * PDRSD_CRTC_FUNCTIONS;
+}DRSD_CRTC_FUNCTIONS, * PDRSD_CRTC_FUNCTIONS;
 
 #define DRSD_MAX_CRC_NR 10
 
@@ -1532,8 +1534,8 @@ typedef struct _DRSD_CRTC{
     DRSD_DISPLAY_MODE               DisplayMode;
     PDRSD_PLANE                     PrimaryPlane;
     PDRSD_PLANE                     CursorPlane;
-    PDRSD_CRTC_CALLBACK             CrtcCallbacks;
-    PDRSD_CRTC_ASSIST_FUNCTIONS      AssistFunctions;
+    PDRSD_CRTC_FUNCTIONS            CrtcCallbacks;
+    PDRSD_CRTC_ASSIST_FUNCTIONS     AssistFunctions;
     PDRSD_CRTC_STATE                CrtcState;    
 }DRSD_CRTC, * PDRSD_CRTC;
 
@@ -1574,7 +1576,7 @@ typedef struct _DRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS{
 typedef struct _DRSD_MODE_CONFIGURATION{
     mutex_t                                     Mutex;
     DRSD_MODESET_LOCK                           ConnectionMutex;
-    struct _DRSD_MODESET_ACQURE_CONTEXT*        AcquireContext;
+    struct _DRSD_MODESET_ACQUIRE_CONTEXT*       AcquireContext;
     mutex_t                                     IdrMutex;
     XARRAY                                      ObjectIdr;
     XARRAY                                      TitleIdr;
@@ -2694,14 +2696,14 @@ typedef struct _DRSD_CONNECTORS_STATE{
 
 struct _DRSD_PRIVATE_OBJECTS_STATE;
 
-typedef struct _DRSD_MODESET_ACQURE_CONTEXT{
+typedef struct _DRSD_MODESET_ACQUIRE_CONTEXT{
     PVOID               AcquireContext;
     PDRSD_MODESET_LOCK  Contended;
     PVOID               DebugStack;
     ListHeader          Locked;
     BOOLEAN             TryLockOnly;
     BOOLEAN             Interruptable;
-}DRSD_MODESET_ACQURE_CONTEXT, * PDRSD_MODESET_ACQUIRE_CONTEXT;
+}DRSD_MODESET_ACQUIRE_CONTEXT, * PDRSD_MODESET_ACQUIRE_CONTEXT;
 
 typedef struct _DRSD_ATOMIC_STATE{
     KERNEL_REFERENCE                        Reference;
@@ -2898,7 +2900,64 @@ typedef struct _DRSD_GXE_VRAM_OBJECT{
     TTM_PLACE           Placements[2];
 }DRSD_GXE_VRAM_OBJECT, * PDRSD_GXE_VRAM_OBJECT;
 
+typedef struct _DRSD_MODE_MODEINFO{
+    UINT32      Clock;
+    UINT16      HorizontalDisplay;
+    UINT16      HSyncStart;
+    UINT16      HSyncEnd;
+    UINT16      HTotal;
+    UINT16      HSkew;
+    UINT16      VerticalDisplay;
+    UINT16      VSyncStart;
+    UINT16      VSyncEnd;
+    UINT16      VTotal;
+    UINT16      VScan;
+    UINT32      VRefresh;
+    UINT32      Flags;
+    UINT32      Type;
+    CHAR        Name[DRSD_DISPLAY_MODE_LENGTH];
+}DRSD_MODE_MODEINFO, * PDRSD_MODE_MODEINFO;
+
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+
+#define DRSD_MODE_FLAG_PHSYNC			        (1 << 0)
+#define DRSD_MODE_FLAG_NHSYNC			        (1 << 1)
+#define DRSD_MODE_FLAG_PVSYNC			        (1 << 2)
+#define DRSD_MODE_FLAG_NVSYNC			        (1 << 3)
+#define DRSD_MODE_FLAG_INTERLACE			    (1 << 4)
+#define DRSD_MODE_FLAG_DBLSCAN			        (1 << 5)
+#define DRSD_MODE_FLAG_CSYNC			        (1 << 6)
+#define DRSD_MODE_FLAG_PCSYNC			        (1 << 7)
+#define DRSD_MODE_FLAG_NCSYNC			        (1 << 8)
+#define DRSD_MODE_FLAG_HSKEW			        (1 << 9) 
+#define DRSD_MODE_FLAG_BCAST			        (1 << 10)
+#define DRSD_MODE_FLAG_PIXMUX			        (1 << 11)
+#define DRSD_MODE_FLAG_DBLCLK			        (1 << 12)
+#define DRSD_MODE_FLAG_CLKDIV2			        (1 << 13)
+#define DRSD_MODE_FLAG_3D_MASK			        (0x1F << 14)
+#define DRSD_MODE_FLAG_3D_NONE		            (0 << 14)
+#define DRSD_MODE_FLAG_3D_FRAME_PACKING		    (1 << 14)
+#define DRSD_MODE_FLAG_3D_FIELD_ALTERNATIVE	    (2 << 14)
+#define DRSD_MODE_FLAG_3D_LINE_ALTERNATIVE	    (3 << 14)
+#define DRSD_MODE_FLAG_3D_SIDE_BY_SIDE_FULL	    (4 << 14)
+#define DRSD_MODE_FLAG_3D_L_DEPTH		        (5 << 14)
+#define DRSD_MODE_FLAG_3D_L_DEPTH_GFX_GFX_DEPTH	(6 << 14)
+#define DRSD_MODE_FLAG_3D_TOP_AND_BOTTOM	    (7 << 14)
+#define DRSD_MODE_FLAG_3D_SIDE_BY_SIDE_HALF	    (8 << 14)
+
+
+#define DRSD_MODE_PICTURE_ASPECT_NONE		0
+#define DRSD_MODE_PICTURE_ASPECT_4_3		1
+#define DRSD_MODE_PICTURE_ASPECT_16_9		2
+#define DRSD_MODE_PICTURE_ASPECT_64_27		3
+#define DRSD_MODE_PICTURE_ASPECT_256_135	4
+
+#define DRSD_MODE_FLAG_PIC_AR_MASK		 (0x0F << 19)
+#define DRSD_MODE_FLAG_PIC_AR_NONE       (DRSD_MODE_PICTURE_ASPECT_NONE << 19)
+#define DRSD_MODE_FLAG_PIC_AR_4_3        (DRSD_MODE_PICTURE_ASPECT_4_3 << 19)
+#define DRSD_MODE_FLAG_PIC_AR_16_9       (DRSD_MODE_PICTURE_ASPECT_16_9 << 19)
+#define DRSD_MODE_FLAG_PIC_AR_64_27      (DRSD_MODE_PICTURE_ASPECT_64_27 << 19)
+#define DRSD_MODE_FLAG_PIC_AR_256_135    (DRSD_MODE_PICTURE_ASPECT_256_135 << 19)
 
 static inline PDRSD_GXE_VRAM_OBJECT DrsdGxeVramOfGem(PDRSD_GXE_OBJECT Gxe){
     return CONTAINER_OF(Gxe, DRSD_GXE_VRAM_OBJECT, Bo.Base);
@@ -3050,7 +3109,7 @@ LOUSTATUS DrsdInitializeCrtcWithPlanes(
     PDRSD_CRTC              Crtc,
     PDRSD_PLANE             Primary,
     PDRSD_PLANE             Cursor,
-    PDRSD_CRTC_CALLBACK     CrtcCallbacks
+    PDRSD_CRTC_FUNCTIONS     CrtcCallbacks
 );
 
 
@@ -3080,9 +3139,11 @@ LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
     struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
 );
 
-LOUSTATUS DrsdInternalCrtcSetConfigurationAtomic(
-    void*                           Mode,
-    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
+DRIVER_IMPORT
+LOUSTATUS 
+DrsdAtomicHelperCrtcSetConfiguration(
+    PDRSD_MODE_SET                  Mode,
+    PDRSD_MODESET_ACQUIRE_CONTEXT   ModeSetAquireContext
 );
 
 LOUSTATUS DrsdInitializeEncoder(

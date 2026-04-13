@@ -35,7 +35,7 @@ EXPORTS
     DrsdInternalCrtcDestroyStateAtomic
     DrsdInternalCrtcDuplicateStateAtomic
     DrsdInternalCrtcPageFlipAtomic
-    DrsdInternalCrtcSetConfigurationAtomic
+    DrsdAtomicHelperCrtcSetConfiguration
     DrsdInternalCrtcResetAtomic
     DrsdGxeInternalStopFrameBufferProcessing
     DrsdGxeInternalStartFrameBufferProcessing

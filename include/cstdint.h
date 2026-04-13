@@ -101,6 +101,7 @@ typedef struct _INT_512{
 #define ULONG_MAX       UINT32_MAX //MSVC Uses 32 Bit Long
 #define ULONGLONG_MAX   UINT64_MAX
 
+#define DIVIDE_ROUND_CLOSEST_ULL(n, d) (((n) + ((d) / 2)) / (d))
 
 typedef void* PVOID, * LPVOID;
 

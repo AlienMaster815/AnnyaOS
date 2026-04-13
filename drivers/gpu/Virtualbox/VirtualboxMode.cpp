@@ -189,6 +189,16 @@ static void VirtualboxCrtcDestroy(PDRSD_CRTC Crtc){
     LouKeFree(Crtc);
 }
 
+static DRSD_CRTC_FUNCTIONS VBoxCrtcCallbacks = {
+    .Reset = DrsdInternalCrtcResetAtomic,
+    .Destroy = VirtualboxCrtcDestroy,
+    .SetConfiguration = DrsdAtomicHelperCrtcSetConfiguration,
+    .PageFlip = DrsdInternalCrtcPageFlipAtomic,
+    .AtomicDuplicateState = DrsdInternalCrtcDuplicateStateAtomic,
+    .AtomicDestroyState = DrsdInternalCrtcDestroyStateAtomic,
+};
+
+
 static void* VBoxEdid = 0x00;
 static uint32_t PlaneFormats[2] = {0};
 static uint32_t CursorPlaneFormats[1] = {0};
@@ -307,7 +317,7 @@ static size_t VirtualboxGetModes(PDRSD_CONNECTOR Connector){
 
     PDRSD_DISPLAY_MODE NewGenuineMode = 0x00; //DrsdCvtMode(Connector->Device, PreferedWidth, PreferedHeight, 60, false, false, false);
     if(NewGenuineMode){
-        NewGenuineMode->ModeType |= DRSD_MODE_TYPE_PREFERED;
+        NewGenuineMode->Type |= DRSD_MODE_TYPE_PREFERED;
         DrsdAddProbedDisplayModeToConnector(Connector, NewGenuineMode);
         ++ModeCount;
     }
@@ -375,20 +385,6 @@ static void VirtualboxEncoderDestroy(
 static  DRSD_ENCODER_FUNCTIONS VirtualboxEncoderCallbacks = {
     .Destroy = VirtualboxEncoderDestroy,
 };
-
-
-
-
-
-static  DRSD_CRTC_CALLBACK VBoxCrtcCallbacks = {
-    .Reset = DrsdInternalCrtcResetAtomic,
-    .Destroy = VirtualboxCrtcDestroy,
-    .SetConfiguration = DrsdInternalCrtcSetConfigurationAtomic,
-    .PageFlip = DrsdInternalCrtcPageFlipAtomic,
-    .AtomicDuplicateState = DrsdInternalCrtcDuplicateStateAtomic,
-    .AtomicDestroyState = DrsdInternalCrtcDestroyStateAtomic,
-};
-
 
 
 static void VirtualboxCursorAtomicUpdate(
@@ -611,7 +607,7 @@ static PVIRTUALBOX_CRTC VirtualboxCrtcInitialize(
         &VBoxCrtc->Base,
         Primary,
         Cursor,
-        (PDRSD_CRTC_CALLBACK)&VBoxCrtcCallbacks
+        (PDRSD_CRTC_FUNCTIONS)&VBoxCrtcCallbacks
     );
     if(Status != STATUS_SUCCESS){
         return 0x00;

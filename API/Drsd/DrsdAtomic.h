@@ -113,6 +113,26 @@ DrsdAtomicGetNewPrivateObjectState(
     PDRSD_PRIVATE_OBJECT    Object
 );
 
+DRIVER_EXPORT
+PDRSD_ATOMIC_STATE 
+DrsdAtomicStateAllocate(
+    PDRSD_DEVICE    Device
+);
+
+DRIVER_EXPORT 
+PDRSD_CRTC_STATE
+DrsdAtomicGetCrtcState(
+    PDRSD_ATOMIC_STATE  State,  
+    PDRSD_CRTC          Crtc
+);
+
+DRIVER_EXPORT
+PDRSD_PLANE_STATE
+DrsdAtomicGetPlaneState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_PLANE         Plane
+);
+
 #define ForEachOldConnectorInState(State, Connector, OldConnectorState, Index) \
     for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
         ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (OldConnectorState) = (State)->Connectors[Index].OldState, 1))

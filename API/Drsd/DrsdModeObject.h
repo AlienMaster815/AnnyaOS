@@ -48,4 +48,13 @@ DrsdModeObjectAdd(
     UINT32                  ObjectType
 );
 
+LOUSTATUS 
+DrsdModeObjectAddEx(
+    PDRSD_DEVICE            Device,
+    PDRSD_MODE_OBJECT       Object,
+    UINT32                  ObjectType,
+    BOOLEAN                 RegisterObject,
+    void                  (*ObjectFreeCb)(PKERNEL_REFERENCE)
+);
+
 #endif

@@ -2064,12 +2064,20 @@ LouKeRtlUIntAdd(
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeRtlUIntMult(
-    UINT uMultiplicand, 
-    UINT uMultiplier, 
-    UINT* puResult
+    UINT    uMultiplicand, 
+    UINT    uMultiplier, 
+    UINT*   puResult
 ){
-    LouPrint("LouKeRtlUIntMult()\n");
-    while(1);
+    if(!puResult){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if(Uint32MultiplicationWillOverflow(uMultiplicand, uMultiplier)){
+        return STATUS_INTEGER_OVERFLOW; 
+    }
+
+    *puResult = uMultiplicand * uMultiplier;
+    
     return STATUS_SUCCESS;
 }
 
