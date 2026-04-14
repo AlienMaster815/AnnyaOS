@@ -248,6 +248,9 @@ void ScanTheRestOfHarware(){
         }
         PDRIVER_OBJECT DriverObject;
         DRIVER_MODULE_ENTRY Driver = LouKeLoadKernelModule(DriverPath, (void**)&DriverObject, sizeof(DRIVER_OBJECT));
+        if(!Driver){
+            continue;
+        }
         if(!DriverObject->DriverExtension){
             DriverObject->DriverExtension = (PDRIVER_EXTENSION)LouKeMallocType(DRIVER_EXTENSION, KERNEL_GENERIC_MEMORY);
             Driver(DriverObject, (PUNICODE_STRING)DriverPath);

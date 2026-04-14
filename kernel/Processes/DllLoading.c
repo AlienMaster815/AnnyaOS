@@ -35,9 +35,9 @@ LouKeLoadCoffImageB(
     BOOL            KernelObject
 );
 
-DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize){
+DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize){ //TODO
     PDRIVER_MODULE_HANDLES TmpHandle = &DriverHandles;
-    
+    LOUSTATUS Status;
     for(size_t i = 0 ; i < DriveHandlesCount; i++){
         if(TmpHandle->Paths){
             if(strcmp(ModuleNameAndPath, TmpHandle->Paths) == 0){
@@ -56,7 +56,11 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
     string NewMod = (string)LouKeMallocArray(char, strlen(ModuleNameAndPath) + 1, KERNEL_GENERIC_MEMORY);
     strncpy(NewMod, ModuleNameAndPath, strlen(ModuleNameAndPath));
 
-    LouKeLoadCoffImageExA(NewMod, &TmpHandle->CfiObject, true);
+    Status = LouKeLoadCoffImageExA(NewMod, &TmpHandle->CfiObject, true);
+    if(Status != STATUS_SUCCESS){
+        LouKeFree(NewMod);
+        return 0x00;
+    }
 
     TmpHandle->Paths = NewMod;
     TmpHandle->ModuleEntry = TmpHandle->CfiObject.Entry;

@@ -118,19 +118,20 @@ static FILE* ISOLouKeFindDirectory(
         &BufferSize,
         &Status
     );
+    uint8_t* FOO = (uint8_t*)(uint64_t)Test;
 
     if(Status != STATUS_SUCCESS){
         ReleaseDriveHandle((PVOID)Test);
         return 0x00;
     }
 
-    uint8_t* FOO = (uint8_t*)(uint64_t)Test;
     
     string NewDir = GetNextDirectoryName(Dir);
 
     string SearchDirectory = NewDir;
 
     while(1){
+        //LouPrint("SearchDirectory:%s\n", SearchDirectory);
         //LouPrint("String Length:%d\n", FOO[32]);
         //LouPrint("String Value :%s\n", &FOO[33]);
 
@@ -173,7 +174,7 @@ static FILE* ISOLouKeFindDirectory(
             //Now We Can read the next sector
             //now that we cleaned up the last 
             //sector
-            uint16_t* Test = (uint16_t*)ReadDrive(
+            Test = (uint16_t*)ReadDrive(
                 DrvNum,
                 RootLBA,
                 BufferSize / 2048,
@@ -216,7 +217,6 @@ static FILE* ISOLouKeFindDirectory(
     }
 
     LouPrint("Done With Recursion: Could Not Find File\n");
-    ReleaseDriveHandle((PVOID)Test);  //Free before exiting
     return 0;
 }
 
@@ -241,7 +241,6 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
             VD.Identifier = 0x0000;
             VD.Version = 0;
             //LouPrint("VD Parsed\n");
-            ReleaseDriveHandle((PVOID)Test);
             return VD;
         }
         

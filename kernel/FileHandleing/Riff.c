@@ -3,7 +3,9 @@
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile){
     PRIFF_OBJECT RiffObject = LouKeMallocType(RIFF_OBJECT, KERNEL_GENERIC_MEMORY);
     FILE* RiffFile = fopen(PathAndFile, KERNEL_GENERIC_MEMORY);
-
+    if(!RiffFile){
+        return 0x00;
+    }
     if(memcmp((UINT8*)RiffFile, "RIFF", 4)){
         LouPrint("LouKeOpenRiffFile():File Is Not Riff\n");
         fclose(RiffFile);

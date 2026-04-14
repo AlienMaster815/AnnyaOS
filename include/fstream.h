@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <cstdio.h>
+#include <kernel/memmory.h>
 
 typedef char* FILE_NAME;
 
@@ -28,7 +29,12 @@ void fclose(FILE* File);
 size_t fsize(FILE* File);
 
 #define LouKeMallocFileData(x, y)   LouKeMallocEx(x, y, WRITEABLE_PAGE | PRESENT_PAGE)
-#define LouKeFreeFileData(x)        LouKeFree(x)
+static inline void LouKeFreeFileData(PVOID x){
+    if(!x){
+        return;
+    }
+    LouKeFree(x);
+}        
 
 FILE_TYPE LouKeGetFileType(FILE File);
 

@@ -77,5 +77,8 @@ void* Data
 
 LOUAPI
 void ReleaseDriveHandle(void* DriveHandle){
+	if(!DriveHandle){
+		return;
+	}
 	LouKeFree((PVOID)DriveHandle);
 }

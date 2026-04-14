@@ -58,6 +58,10 @@ static bool LoadCoffLoadSupport(string Path, string System){
     string File = LouKeAddFileToPath(Path, System);
     FILE* NewCoff = fopen(File, KERNEL_GENERIC_MEMORY);
 
+    if(!NewCoff){
+        return false;
+    }
+
     LOUSTATUS Status = LouKeVmmCreateSectionEx(
         &SectionHandle,
         0x00,
