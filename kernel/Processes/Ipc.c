@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-typedef LOUSTATUS (*LOU_IPC_CALLBACK)(UINT64 MessageID, PVOID DataIn, POVID* DataOut);
+typedef LOUSTATUS (*LOU_IPC_CALLBACK)(UINT64 MessageID, PVOID DataIn, PVOID* DataOut);
 
 typedef struct _LOU_IPC_MESSAGE{
     ListHeader          Peers;
@@ -19,16 +19,16 @@ typedef struct _LOU_IPC_MANAGER{
 KERNEL_EXPORT
 LOUSTATUS
 LouKeIpcCreateIpcMessage(
-    PLOU_IPC_MESSAGE*   NewMessage,
+    PLOU_IPC_MESSAGE*   OutMessage,
     LOU_IPC_CALLBACK    Callback,
     UINT64              MessageID,
     PVOID               DataIn,
     PVOID*              DataOut
 ){
-    if(!NewMessage){
+    if(!OutMessage){
         return STATUS_INVALID_PARAMETER;
     }
-    PLOU_IPC_MESSAGE NewMessage = *NewMessage;
+    PLOU_IPC_MESSAGE NewMessage = *OutMessage;
     if(!NewMessage){
         NewMessage = LouKeMallocType(LOU_IPC_MESSAGE, USER_GENERIC_MEMORY);
     }
@@ -38,14 +38,14 @@ LouKeIpcCreateIpcMessage(
     NewMessage->DataIn = DataIn;
     NewMessage->DataOut = DataOut;
 
-    *NewMessage = NewMessage;
+    *OutMessage = NewMessage;
     return STATUS_SUCCESS;
 }
 
 KERNEL_EXPORT
 LOUSTATUS 
 LouKeIpcSendIpc(
-    PLOU_IPC_MANAGER    Manager
+    PLOU_IPC_MANAGER    Manager,
     PLOU_IPC_MESSAGE    Message
 ){
     LouKIRQL Irql;
@@ -66,14 +66,14 @@ LouKeIpcGetIpc(
         return STATUS_INVALID_PARAMETER;
     }
     LouKIRQL Irql;
-    while(!ListItemToTypeOrNull(Manager->Messages.NextHeader)){
+    while(!ListItemToTypeOrNull(Manager->Messages.NextHeader, LOU_IPC_MESSAGE, Peers)){
         if(!WaitForMessage){
             return STATUS_UNSUCCESSFUL;
         }
         LouKeYeildExecution();
     }   
     LouKeAcquireSpinLock(&Manager->Lock, &Irql);
-    *OutMessage = ListItemToTypeOrNull(Manager->Messages.NextHeader);
+    *OutMessage = ListItemToTypeOrNull(Manager->Messages.NextHeader, LOU_IPC_MESSAGE, Peers);
     LouKeListDeleteItem(Manager->Messages.NextHeader);
     LouKeReleaseSpinLock(&Manager->Lock, &Irql);
     return STATUS_SUCCESS;
@@ -87,10 +87,6 @@ LouKeIpcDestroyMessage(
     if(!Message){
         return STATUS_INVALID_PARAMETER;
     }
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&Manager->Lock, &Irql);
-    LouKeListDeleteItem(&Message->Peers);
     LouKeFree(Message);
-    LouKeReleasSpinLock(&Manager->Lock, &Irql);
     return STATUS_SUCCESS;
 }
