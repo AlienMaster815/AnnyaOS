@@ -309,3 +309,88 @@ LouKeVmmPutPPageReserveAddressVm32(
     MutexUnlock(&KernelPageRemap32.Lock);
     return STATUS_SUCCESS;
 }
+
+LOUSTATUS
+LouKeVmmCreatePageReserveVm(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount,
+    BOOLEAN SetPhysUser,
+    BOOLEAN SetVirtUser
+){
+    LOUSTATUS Status;
+    if(((UINTPTR)PageAddress > (4 * GIGABYTE))){
+        Status = LouKeVmmCreatePageReserveVm64(PageAddress, PageSize, PageCount, SetPhysUser, SetVirtUser);
+    }else{
+        Status = LouKeVmmCreatePageReserveVm32(PageAddress, PageSize, PageCount, SetPhysUser, SetVirtUser);
+    }
+    return Status;
+}
+
+LOUSTATUS 
+LouKeVmmGetPPageReserveVm(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    *Out = 0x00;    
+    LouKeVmmGetPPageReserveVm64(PageSize, PageCount, Out);
+    if(Out){
+        return STATUS_SUCCESS;
+    }
+    return LouKeVmmGetPPageReserveVm32(PageSize, PageCount, Out);
+}
+
+LOUSTATUS 
+LouKeVmmGetVPageReserveVm(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    *Out = 0x00;    
+    LouKeVmmGetVPageReserveVm64(PageSize, PageCount, Out);
+    if(Out){
+        return STATUS_SUCCESS;
+    }
+    return LouKeVmmGetVPageReserveVm32(PageSize, PageCount, Out);
+}
+
+
+
+LOUSTATUS 
+LouKeVmmPutPPageReserveAddressVm(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+){
+    LOUSTATUS Status;
+    if(((UINTPTR)PAddress > (4 * GIGABYTE))){
+        Status = LouKeVmmPutPPageReserveAddressVm64(PAddress, Callback);
+    }else{
+        Status = LouKeVmmPutPPageReserveAddressVm32(PAddress, Callback);
+    }
+    return Status;
+}
+
+
+LOUSTATUS 
+LouKeVmmPutVPageReserveAddressVm(
+    PVOID                       VAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+){
+    LOUSTATUS Status;
+    if(((UINTPTR)VAddress > (4 * GIGABYTE))){
+        Status = LouKeVmmPutVPageReserveAddressVm64(VAddress, Callback);
+    }else{
+        Status = LouKeVmmPutVPageReserveAddressVm32(VAddress, Callback);
+    }
+    return Status;
+}
+
+
+

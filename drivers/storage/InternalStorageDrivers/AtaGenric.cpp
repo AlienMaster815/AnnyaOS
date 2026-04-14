@@ -300,7 +300,7 @@ static void AtaGenericGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT Port){
 
 }
 
-LOUAPI 
+KERNEL_EXPORT
 LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT  AtapiPort,
     void*                            IdBuffer

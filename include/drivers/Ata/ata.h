@@ -1112,6 +1112,7 @@ KERNEL_EXPORT void LouKeForkAtaHostPrivateDataToPorts(PLOUSINE_KERNEL_DEVICE_ATA
 
 void QueuedCommandToFis(PATA_QUEUED_COMMAND, uint8_t PortMultiplier, uint8_t IsCommand, uint8_t* Fis, uint8_t IsNcq);
 
+KERNEL_EXPORT
 PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 
 LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
@@ -1119,6 +1120,7 @@ LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     void* IdBuffer
 );
 
+KERNEL_EXPORT
 LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT  AtapiPort,
     void*                            IdBuffer

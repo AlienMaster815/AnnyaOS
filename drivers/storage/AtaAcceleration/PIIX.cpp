@@ -86,6 +86,7 @@ static LOUSTATUS PiixAllocateDmaTransfer(
     SIZE Tables = ROUND_UP64(DmaTransferSize, 64 * KILOBYTE) / (64 * KILOBYTE);
     PVOID BufferOut = LouKeMallocExPhy32(DmaTransferSize, 64 * KILOBYTE, KERNEL_DMA_MEMORY);
     *OutDma = BufferOut; 
+    LouPrint("FOOBAR\n");
     PPIIX3_DMA_PRD PrdtBuffer = (PPIIX3_DMA_PRD)LouKeMallocExPhy32(Tables * sizeof(PIIX3_DMA_PRD), 64 * KILOBYTE, KERNEL_DMA_MEMORY);
     *OutPrdt = (PVOID)PrdtBuffer;
     UINT64 PhyAddress = 0x00;
@@ -355,7 +356,7 @@ LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* Platform
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeDeviceManagerGetAtaDevice(PDEV);
 
     if(!AtaHost){
-        LouPrint("PIIX.SYS:Error Controller Not In Ata Manager\n");
+        LouPrint("PIIX.SYS:Error Controller Not In Ata Device\n");
         return STATUS_NO_SUCH_DEVICE;
     }
 

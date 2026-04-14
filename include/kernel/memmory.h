@@ -391,6 +391,15 @@ KERNEL_EXPORT void* LouKeMallocPage(uint64_t PageSize, uint64_t PageCount, uint6
 typedef void (*KERNEL_REMAP_EMPTY_CALLBACK)(PVOID);
 
 LOUSTATUS
+LouKeVmmCreatePageReserveVm(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount,
+    BOOLEAN SetPhysUser,
+    BOOLEAN SetVirtUser
+);
+
+LOUSTATUS
 LouKeVmmCreatePageReserveVm64(
     PVOID   PageAddress, 
     SIZE    PageSize,  
@@ -406,6 +415,20 @@ LouKeVmmCreatePageReserveVm32(
     SIZE    PageCount,
     BOOLEAN SetPhysUser,
     BOOLEAN SetVirtUser
+);
+
+LOUSTATUS
+LouKeVmmGetVPageReserveVm(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+);
+
+LOUSTATUS
+LouKeVmmGetPPageReserveVm(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
 );
 
 LOUSTATUS
@@ -435,6 +458,20 @@ LouKeVmmGetPPageReserveVm32(
     SIZE    PageCount,
     PVOID*  Out
 );
+
+LOUSTATUS 
+LouKeVmmPutVPageReserveAddressVm(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+);
+
+
+LOUSTATUS 
+LouKeVmmPutPPageReserveAddressVm(
+    PVOID                       PAddress,
+    KERNEL_REMAP_EMPTY_CALLBACK Callback
+);
+
 
 LOUSTATUS 
 LouKeVmmPutVPageReserveAddressVm64(

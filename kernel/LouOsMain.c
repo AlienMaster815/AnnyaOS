@@ -253,7 +253,7 @@ void AdvancedLousineKernelInitialization(){
     LouKeUnmaskSmpInterrupts();
 
     LouPrint("Kernel Advanced System Initialized\n");
-    
+
 }
 
 void KillDebuger(){
@@ -383,7 +383,7 @@ void LouOsKrnlStart(
 
     LouKeProbeSbIsa();
 
-    ScanTheRestOfHarware();    
+    //ScanTheRestOfHarware();    
 
     //TODO: stub Loustrsafe.h and LdmCore.h 
 

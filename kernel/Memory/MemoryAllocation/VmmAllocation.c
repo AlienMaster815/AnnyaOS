@@ -1,10 +1,5 @@
 #include <LouAPI.h>
 
-void LouKeRegisterPAddressToReserveVAddresses(
-    UINT64 PAddress,
-    UINT64 PageSize,
-    UINT64 PageCount
-);
 void RemoveAddressFromReservePool(UINT64 Address);
 bool IsAddressRemaped(UINT64 Address);
 
@@ -36,7 +31,7 @@ static VMM_MEMORY_MANAGER VmmMemoryManager64 = {0};
 static VMM_MEMORY_MANAGER VmmMemoryManager32 = {0};
 
 static void LouKeVmmFreeHelper(PVOID Address){
-    LouFree(Address);
+    LouGeneralFreeMemory(Address);
 }
 
 static 

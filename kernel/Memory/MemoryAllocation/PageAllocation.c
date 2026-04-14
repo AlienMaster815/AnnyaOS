@@ -1,119 +1,6 @@
 #include <LouAPI.h>
 
-typedef struct _VADDRESS_RESERVE_POOL_TRACKER{
-    ListHeader  Peers;
-    bool        AddressUsed;
-    UINT64      VAddress;
-    UINT64      PAddress;
-    UINT64      PageSize;
-    UINT64      PageCount;
-}VADDRESS_RESERVE_POOL_TRACKER, * PVADDRESS_RESERVE_POOL_TRACKER;
-
-static VADDRESS_RESERVE_POOL_TRACKER VaPoolTracker = {0};
-static mutex_t VaPoolMutex = {0};
-
 uint64_t LouKeGetRamSize();
-
-void LouKeRegisterPAddressToReserveVAddresses(
-    UINT64 PAddress,
-    UINT64 PageSize,
-    UINT64 PageCount
-){
-    PVADDRESS_RESERVE_POOL_TRACKER TmpTracker = &VaPoolTracker;
-    MutexLock(&VaPoolMutex);
-    while(TmpTracker->Peers.NextHeader){
-        TmpTracker = (PVADDRESS_RESERVE_POOL_TRACKER)TmpTracker->Peers.NextHeader;
-    }
-
-    TmpTracker->Peers.NextHeader = (PListHeader)LouGeneralAllocateMemoryEx(sizeof(VADDRESS_RESERVE_POOL_TRACKER), GET_ALIGNMENT(VADDRESS_RESERVE_POOL_TRACKER));
-    TmpTracker->PAddress = PAddress; 
-    TmpTracker->PageSize = PageSize;
-    TmpTracker->PageCount = PageCount;
-
-    MutexUnlock(&VaPoolMutex);
-}
-
-UNUSED static void* LouKeGetFreeReservePage(
-    UINT64 PageSize,
-    UINT64 PageCount
-){
-    PVADDRESS_RESERVE_POOL_TRACKER TmpTracker = &VaPoolTracker;
-    void* Result = 0x00;
-    MutexLock(&VaPoolMutex);
-    while(TmpTracker->Peers.NextHeader){
-        if((TmpTracker->PageCount == PageCount) && (TmpTracker->PageSize == PageSize) && (!TmpTracker->AddressUsed)){
-            Result = (void*)TmpTracker->PAddress;
-            TmpTracker->AddressUsed = true;
-            break; 
-        }
-        TmpTracker = (PVADDRESS_RESERVE_POOL_TRACKER)TmpTracker->Peers.NextHeader;
-    }
-    MutexUnlock(&VaPoolMutex);
-    return Result;
-}
-
-static bool IsAddressBeingUsed(UINT64 Address){
-    PVADDRESS_RESERVE_POOL_TRACKER TmpTracker = &VaPoolTracker;
-    bool Result = false;
-    MutexLock(&VaPoolMutex);
-    while(TmpTracker->Peers.NextHeader){
-
-        if(TmpTracker->VAddress == Address){
-            Result = TmpTracker->AddressUsed;
-            break;             
-        }
-        TmpTracker = (PVADDRESS_RESERVE_POOL_TRACKER)TmpTracker->Peers.NextHeader;
-    }
-    MutexUnlock(&VaPoolMutex);
-    return Result;
-}
-
-static void RemoveAddressFromReservePool(UINT64 Address){
-    PVADDRESS_RESERVE_POOL_TRACKER TmpTracker = &VaPoolTracker;
-    PVADDRESS_RESERVE_POOL_TRACKER Follower = &VaPoolTracker;
-
-    MutexLock(&VaPoolMutex);
-    while(TmpTracker->Peers.NextHeader){
-
-        if(TmpTracker->PAddress == Address){
-            if(Follower == TmpTracker){
-                LouFree((PVOID)TmpTracker->PAddress);
-                LouFree((PVOID)TmpTracker->VAddress);
-                TmpTracker->PageCount = 0;
-                TmpTracker->PageSize = 0;
-                TmpTracker->VAddress = 0x00;
-                TmpTracker->PAddress = 0x00;
-                break;
-            }else{
-                LouFree((PVOID)TmpTracker->PAddress);
-                LouFree((PVOID)TmpTracker->VAddress);
-                Follower->Peers.NextHeader = TmpTracker->Peers.NextHeader;
-                LouFree((PVOID)TmpTracker);
-                break;
-            }
-        }
-        Follower = TmpTracker;
-        TmpTracker = (PVADDRESS_RESERVE_POOL_TRACKER)TmpTracker->Peers.NextHeader;
-    }
-    MutexUnlock(&VaPoolMutex);
-}
-
-static bool IsAddressRemaped(UINT64 Address){
-    PVADDRESS_RESERVE_POOL_TRACKER TmpTracker = &VaPoolTracker;
-    bool Result = false;
-    MutexLock(&VaPoolMutex);
-    while(TmpTracker->Peers.NextHeader){
-
-        if(TmpTracker->PAddress == Address){
-            Result = true;
-            break;             
-        }
-        TmpTracker = (PVADDRESS_RESERVE_POOL_TRACKER)TmpTracker->Peers.NextHeader;
-    }
-    MutexUnlock(&VaPoolMutex);
-    return Result;
-}
-
 
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres){
     if(((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)) || (!PhysicalAddres) || ((PageSize == KILOBYTE_PAGE) && (PageCount >= 512))){
@@ -136,9 +23,11 @@ LouKeMallocPage(
     if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
         return 0x00;
     }
-    void* Resurve = LouKeGetFreeReservePage(PageSize, PageCount);
+    void* Resurve = 0x00;
+    LouKeVmmGetPPageReserveVm64(PageSize, PageCount, &Resurve);
     if(!Resurve){
         Resurve = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
+        LouKeVmmCreatePageReserveVm(Resurve, PageSize, PageCount, true, false);
     }
     return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (uint64_t)Resurve);
 }
@@ -147,8 +36,14 @@ void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t Pa
     if(((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)) || (!PhysicalAddres) || ((PageSize == KILOBYTE_PAGE) && (PageCount >= 512))){
         return 0x00;
     }
-    void* Result = LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
-    LouKeRegisterPAddressToReserveVAddresses((UINT64)Result, PageSize, PageCount);
+
+    void* Result = 0x00;
+    LouKeVmmGetVPageReserveVm32(PageSize, PageCount, &Result);
+    if(!Result){
+        Result = LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
+        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, false, true);
+    }
+
     if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
     LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
     return Result;
@@ -158,17 +53,28 @@ void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t Page
     if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
         return 0x00;
     }
-    return LouKeMallocPageExVirt32(PageSize, PageCount, PageFlags, (uint64_t)LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize), CreateDevSection);
+    PVOID Result = 0x00;
+    LouKeVmmGetPPageReserveVm(PageSize, PageCount, &Result);
+    if(!Result){
+        Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
+        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, true, false);
+    }
+    return LouKeMallocPageExVirt32(PageSize, PageCount, PageFlags, (UINT64)Result, CreateDevSection);
 }
 
 KERNEL_EXPORT
 void* LouKeMallocPagePhy32(UINT64 PageSize, UINT64 PageCount, UINT64 PageFlags){
-    UINT64 Tmp = (UINT64)LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
-    if(Tmp > UINT32_MAX){
-        LouFree((PVOID)Tmp);
-        return 0x00;
+    PVOID Result = 0x00;
+    LouKeVmmGetPPageReserveVm32(PageSize, PageCount, &Result);
+    if(!Result){
+        Result = LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
+        if((UINTPTR)Result > (4 * GIGABYTE)){
+            LouFree(Result);
+            return 0x00;
+        }
+        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, true, false);
     }
-    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (UINT64)Tmp);
+    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (UINT64)Result);
 }
 
 //this is specifically for NON kernel 64 bit memory e.g. sections, heaps, stacks, ect...
@@ -184,8 +90,13 @@ LouKeMallocPageExVirt64(
     if(((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)) || (!PhysicalAddres) || ((PageSize == KILOBYTE_PAGE) && (PageCount >= 512))){
         return 0x00;
     }
-    void* Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
-    LouKeRegisterPAddressToReserveVAddresses((UINT64)Result, PageSize, PageCount);
+    void* Result = 0x00; 
+    LouKeVmmGetVPageReserveVm64(PageSize, PageCount, &Result);
+    if(!Result){
+        Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
+        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, false, true);
+    }
+
     if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
     LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
     return Result;
@@ -196,29 +107,26 @@ void* LouKeMallocPageVirt64(uint64_t PageSize, uint64_t PageCount, uint64_t Page
     if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
         return 0x00;
     }
-    return LouKeMallocPageExVirt64(PageSize, PageCount, PageFlags, (uint64_t)LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize), CreateDevSection);
+    PVOID Result = 0x00;
+    LouKeVmmGetPPageReserveVm64(PageSize, PageCount, &Result); 
+    if(!Result){
+        Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
+        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, true, false);
+    }
+    return LouKeMallocPageExVirt64(PageSize, PageCount, PageFlags, (UINT64)Result, CreateDevSection);
 }
 
 uint64_t GetAllocationBlockSize(uint64_t Address);
+
+static void LouKePutPage(PVOID Address){
+    LouGeneralFreeMemory(Address);
+}
 
 KERNEL_EXPORT
 void LouKeFreePage(void* PageAddress){
     uint64_t PhysicalAddres = 0;
     RequestPhysicalAddress((uint64_t)PageAddress, &PhysicalAddres);
-    uint64_t AllocationBlockSize = GetAllocationBlockSize((uint64_t)PageAddress);
-    LouKeUnMapContinuousMemoryBlock(
-        (uint64_t)PageAddress,
-        AllocationBlockSize
-    );
-    LouKeMapContinuousMemoryBlock(PhysicalAddres, PhysicalAddres, AllocationBlockSize, KERNEL_GENERIC_MEMORY);
-    if(PhysicalAddres != (uint64_t)PageAddress){
-        LouFree((PVOID)PhysicalAddres);
-    }
-    
-    if(IsAddressRemaped((UINT64)PageAddress)){
-        RemoveAddressFromReservePool((UINT64)PageAddress);
-    }
-    else if(!IsAddressBeingUsed((UINT64)PageAddress)){
-        LouFree((PVOID)PageAddress);
-    }
+
+    LouKeVmmPutPPageReserveAddressVm((PVOID)PhysicalAddres, LouKePutPage);
+    LouKeVmmPutVPageReserveAddressVm(PageAddress, LouKePutPage);
 }

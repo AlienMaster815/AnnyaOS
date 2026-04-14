@@ -11,11 +11,13 @@ LOUSTATUS LouRegisterStorageDevice(
     PDEVICE_DIRECTORY_TABLE Table
 );
 
+KERNEL_EXPORT
 LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
     void* IdBuffer
 );
  
+KERNEL_EXPORT
 LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
     PLOUSINE_KERNEL_DEVICE_ATA_PORT  AtapiPort,
     void*                           IdBuffer

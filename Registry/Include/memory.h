@@ -63,24 +63,10 @@ typedef struct _LMPOOL_DIRECTORY{
 #include <stdalign.h>
 #define GET_ALIGNMENT(x) (alignof(x))
 
-static inline
-bool RangeInterferes(
-    uint64_t AddressForCheck, 
-    uint64_t SizeOfCheck,
-    uint64_t AddressOfBlock, 
-    uint64_t SizeOfBlock
-) {   
-    uint64_t Start = AddressOfBlock;
-    uint64_t End = AddressOfBlock + SizeOfBlock;
-    if (
-        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
-        (((AddressForCheck + SizeOfCheck) >= Start) && ((AddressForCheck + SizeOfCheck) < End)) ||
-        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
-    ) {
-        return true;
-    }
-    return false;
+static inline bool RangeInterferes(uint64_t AddrA, uint64_t SizeA, uint64_t AddrB, uint64_t SizeB){
+    return (AddrA < (AddrB + SizeB)) && (AddrB < (AddrA + SizeA));
 }
+
 
 static inline size_t GetAlignmentBySize(size_t Size){
     if(Size <= 2)    return 2;
