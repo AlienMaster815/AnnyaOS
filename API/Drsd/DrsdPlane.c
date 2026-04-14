@@ -48,5 +48,5 @@ PDRSD_MODE_RECT
 __DrsdPlaneGetDamageClips(
     PDRSD_PLANE_STATE State
 ){
-    return (PDRSD_PLANE_STATE)((State && State->FbDamageClips) > State->FbDamageClips->Data : 0x00);
+    return (PDRSD_MODE_RECT)((State && State->FbDamageClips) ? State->FbDamageClips->Data : 0x00);
 }

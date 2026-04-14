@@ -69,5 +69,6 @@ DrsdConnectorCreateStandardProperties(
 );
 
 #define DrsdForEachConnectorIteration(Connector, Iteration) while((Connector = DrsdConnectorListNextIteration(Iteration)))
+#define DrsdConnectorForEachPossibleEncoder(Connector, Encoder) DrsdForEachEncoderMask(Encoder, (Connector)->Device, (Connector->PossibleEncoders))
 
 #endif

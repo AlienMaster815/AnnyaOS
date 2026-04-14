@@ -1102,8 +1102,121 @@ __DrsdAtomicHelperSetConfig(
 
     }
 
+    Status = DrsdAtomicSetModeForCrtc(CrtcState, Set->Mode);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    CrtcState->Active = true;
+
+    Status = DrsdAtomicSetCrtcForPlane(PrimaryState, Crtc);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    DrsdModeGetHvTiming(Set->Mode, &HorizontalDisplay, &VerticalDisplay);
+
+    DrsdAtomicSetFbForPlane(PrimaryState, Set->FrameBuffer);
+    PrimaryState->CrtcX = 0;
+    PrimaryState->CrtcY = 0;
+    PrimaryState->CrtcWidth = HorizontalDisplay;
+    PrimaryState->CrtcHeight = VerticalDisplay;
+    PrimaryState->SourceX = Set->X << 16;
+    PrimaryState->SourceY = Set->Y << 16;
+    if(DrsdRotation90Or270(PrimaryState->Rotation)){
+        PrimaryState->SourceWidth = VerticalDisplay << 16;
+        PrimaryState->SourceHeight = HorizontalDisplay << 16;
+    }else{
+        PrimaryState->SourceWidth =  HorizontalDisplay << 16;
+        PrimaryState->SourceHeight = VerticalDisplay << 16;
+    }
 
 
 _COMMIT:
     return UpdateOutputState(State, Set);
+}
+
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicCheckOnly(
+    PDRSD_ATOMIC_STATE  State
+){
+
+    PDRSD_DEVICE                Device = State->Device;
+    PDRSD_MODE_CONFIGURATION    ModeConfig = &Device->ModeConfig;
+    PDRSD_PLANE                 Plane;
+    PDRSD_PLANE_STATE           OldPlaneState;
+    PDRSD_PLANE_STATE           NewPlaneState;
+    PDRSD_CRTC                  Crtc;
+    PDRSD_CRTC_STATE            OldCrtcState;
+    PDRSD_CRTC_STATE            NewCrtcState;
+    PDRSD_CONNECTOR             Connector;
+    PDRSD_CONNECTOR_STATE       ConnectorState;
+    UINT                        RequestedCrtc;
+    UINT                        AffectedCrtc;
+    int                         i;
+    LOUSTATUS                   Status;
+
+    LouPrint("DEVICE:%h Checking:%h\n", Device, State);
+
+    ForEachNewCrtcInState(State, Crtc, NewCrtcState, i){
+        if(NewCrtcState->Enable){
+            RequestedCrtc |= DrsdCrtcMask(Crtc);
+        }
+    }
+
+    ForEachOldNewPlaneInState(State, Plane, OldPlaneState, NewPlaneState, i){
+        Status = DrsdAtomicPlaneCheck(OldPlaneState, NewPlaneState);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("DEVICE:%h Plane:%d:%s Atomic Core Check Failed\n", Plane->Base.Identification, Plane->Name);
+            return Status;
+        }
+    }
+
+    ForEachOldNewCrtcInState(State, Crtc, OldCrtcState, NewCrtcState, i){
+        Status = DrsdAtomicCrtcCheck(OldCrtcState, NewCrtcState);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("DEVICE:%h CRTC:%d:%s Atomic Core Check Failed\n", Crtc->Base.Identification, Crtc->Name);
+            return Status;
+        }
+    }
+
+    ForEachNewConnectorInState(State, Connector, ConnectorState, i){
+        Status = DrsdAtomicConnectorCheck(Connector, ConnectorState);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("DEVICE:%h Connector:%d:%s Atomic Core Check Failed\n", Connector->Base.Identification, Connector->Name);
+            return Status;
+        }
+    }
+
+    if(ModeConfig->Functions->AtomicCheck){
+        Status = ModeConfig->Functions->AtomicCheck(State->Device, State);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("Atomic Driver State:%h Failed:%h\n", State, Status);
+            return Status;
+        }
+    }
+
+    if(!State->AllowModeSet){
+        ForEachNewCrtcInState(State, Crtc, NewCrtcState, i){
+            if(DrsdAtomicCrtcNeedsModeset(NewCrtcState)){
+                LouPrint("DEVICE:%h ERROR CRTC:%d:%h Requires Full Modeset", Device, Crtc->Base.Identification, Crtc->Name);
+                return STATUS_INVALID_PARAMETER;
+            }
+        }
+    }
+
+    ForEachNewCrtcInState(State, Crtc, NewCrtcState, i){
+        if(NewCrtcState->Enable){
+            AffectedCrtc |= DrsdCrtcMask(Crtc);
+        }
+    }
+
+    if(AffectedCrtc != RequestedCrtc){
+        LouPrint("DEVICE:%h Driver Added Crtc To Commit: Requested:%h Affected:%h\n", Device, RequestedCrtc, AffectedCrtc);
+    }
+
+    State->Checked = true;
+
+    return STATUS_SUCCESS;
 }

@@ -3,6 +3,12 @@
 
 #include "DrsdCore.h"
 
+PDRSD_ENCODER
+DrsdConnectorGetSingleEncoder(
+    PDRSD_CONNECTOR Connector
+);
+
+
 static inline UINT DrsdCrtcIndex(PDRSD_CRTC Crtc){
     return Crtc->Index;
 } 

@@ -60,4 +60,12 @@ DrsdModeVRefresh(
     PDRSD_DISPLAY_MODE Mode
 );
 
+DRIVER_EXPORT
+void 
+DrsdModeGetHvTiming(
+    PDRSD_DISPLAY_MODE  Mode,
+    int*                HDisplay,
+    int*                VDisplay
+);
+
 #endif

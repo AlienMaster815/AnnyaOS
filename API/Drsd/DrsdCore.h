@@ -51,6 +51,8 @@
 #include "DrsdModeConfig.h"
 #include "DrsdUapi.h"
 #include "DrsdFramebuffer.h"
+#include "DrsdBlend.h"
+#include "DrsdEncoder.h"
 
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"

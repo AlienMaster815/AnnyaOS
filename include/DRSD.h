@@ -1044,20 +1044,21 @@ typedef struct _DRSD_PROPERTY_BLOB{
     void*                   Data;
 }DRSD_PROPERTY_BLOB, * PDRSD_PROPERTY_BLOB;
 
-typedef struct _DRSD_CONNECTOR_ASSIST_CALLBACKS{
-    size_t                  (*ConnectorGetModes)(struct _DRSD_CONNECTOR* Connector);
-    DRSD_CONNECTOR_STATUS   (*ConnectorDetectContext)(struct _DRSD_CONNECTOR* Connector, void*  ModeSetAquireContext, bool Force);
-    DRSD_CONNECTOR_STATUS   (*ConnectorDetect)(struct _DRSD_CONNECTOR* Connector, bool Force);
-    DRSD_MODE_STATUS        (*ConnectorModeValid)(struct _DRSD_CONNECTOR* Connector, PDRSD_DISPLAY_MODE Mode);
-    LOUSTATUS               (*ConnectorModeValidContext)(struct _DRSD_CONNECTOR* Connector, PDRSD_DISPLAY_MODE Mode, void* ModeSetAquireContext, DRSD_MODE_STATUS* Status);
-    struct _DRSD_ENCODER*   (*ConnectorBestEncoder)(struct _DRSD_CONNECTOR* Connector);
-    struct _DRSD_ENCODER*   (*ConnectorBestEncoderAtomic)(struct _DRSD_CONNECTOR* Connector);
-    LOUSTATUS               (*ConnectorCheckAtomic)(struct _DRSD_CONNECTOR* Connector, void* AtomicData);
-    void                    (*ConnectorAtomicCommit)(struct _DRSD_CONNECTOR* Connector, void* AtomicData);
-    void                    (*ConnectorEnableHpd)(struct _DRSD_CONNECTOR* Connector);
-    void                    (*ConnectorDisableHpd)(struct _DRSD_CONNECTOR* Connector);
-    //TODO  
-}DRSD_CONNECTOR_ASSIST_CALLBACKS, * PDRSD_CONNECTOR_ASSIST_CALLBACKS;
+typedef struct _DRSD_CONNECTOR_ASSIST_FUNCTIONS{
+    size_t                  (*GetModes)(struct _DRSD_CONNECTOR* Connector);
+    DRSD_CONNECTOR_STATUS   (*DetectContext)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_MODESET_ACQUIRE_CONTEXT* ModeSetAquireContext, bool Force);
+    DRSD_CONNECTOR_STATUS   (*Detect)(struct _DRSD_CONNECTOR* Connector, bool Force);
+    DRSD_MODE_STATUS        (*ModeValid)(struct _DRSD_CONNECTOR* Connector, PDRSD_DISPLAY_MODE Mode);
+    LOUSTATUS               (*ModeValidContext)(struct _DRSD_CONNECTOR* Connector, PDRSD_DISPLAY_MODE Mode, struct _DRSD_MODESET_ACQUIRE_CONTEXT* ModeSetAquireContext, DRSD_MODE_STATUS* Status);
+    struct _DRSD_ENCODER*   (*BestEncoder)(struct _DRSD_CONNECTOR* Connector);
+    struct _DRSD_ENCODER*   (*AtomicBestEncoder)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_ATOMIC_STATE* State);
+    LOUSTATUS               (*CheckAtomic)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_ATOMIC_STATE* State);
+    void                    (*AtomicCommit)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_ATOMIC_STATE* State);
+    LOUSTATUS               (*PrepareWritebackJob)(struct _DRSD_WRITEBACK_CONNECTOR* Connector, struct _DRSD_WRITEBACK_JOB* Job);
+    void                    (*CleanupWritebackJob)(struct _DRSD_WRITEBACK_CONNECTOR* Connector, struct _DRSD_WRITEBACK_JOB* Job);
+    void                    (*EnableHpd)(struct _DRSD_CONNECTOR* Connector);
+    void                    (*DisableHpd)(struct _DRSD_CONNECTOR* Connector);
+}DRSD_CONNECTOR_ASSIST_FUNCTIONS, * PDRSD_CONNECTOR_ASSIST_FUNCTIONS;
 
 #define DRSD_DISPLAY_MODE_LENGTH    32
 
@@ -1276,7 +1277,7 @@ typedef struct _DRSD_CONNECTOR{
     PDRSD_PROPERTY_BLOB                 EdidPropertiesBlob;
     DRSD_OBJECT_PROPERTIES              ConnectorProperties;
     int                                 PowerMode;
-    PDRSD_CONNECTOR_ASSIST_CALLBACKS    AssistFunctions;
+    PDRSD_CONNECTOR_ASSIST_FUNCTIONS    AssistFunctions;
     DRSD_CONNECTOR_FORCE                Force;
     HDMI_SYNCRONIZATION_INFORMATION     HdmiSyncInformation;
     mutex_t                             EldTex;
@@ -2984,6 +2985,15 @@ typedef struct _DRSD_MODE_MODEINFO{
 				                DRSD_MODE_FLAG_CLKDIV2 |	\
 				                DRSD_MODE_FLAG_3D_MASK)
 
+#define DRSD_MODE_ROTATE_0       (1 << 0)
+#define DRSD_MODE_ROTATE_90      (1 << 1)
+#define DRSD_MODE_ROTATE_180     (1 << 2)
+#define DRSD_MODE_ROTATE_270     (1 << 3)
+#define DRSD_MODE_ROTATE_MASK  \
+        (DRSD_MODE_ROTATE_0  | \
+		DRSD_MODE_ROTATE_90  | \
+		DRSD_MODE_ROTATE_180 | \
+		DRSD_MODE_ROTATE_270)
 
 static inline PDRSD_GXE_VRAM_OBJECT DrsdGxeVramOfGem(PDRSD_GXE_OBJECT Gxe){
     return CONTAINER_OF(Gxe, DRSD_GXE_VRAM_OBJECT, Bo.Base);

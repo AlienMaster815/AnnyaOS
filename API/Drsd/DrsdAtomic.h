@@ -154,6 +154,12 @@ DrsdAtomicGetConnectorState(
     PDRSD_CONNECTOR     Connector
 );
 
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicCheckOnly(
+    PDRSD_ATOMIC_STATE  State
+);
+
 #define ForEachOldConnectorInState(State, Connector, OldConnectorState, Index) \
     for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
         ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (OldConnectorState) = (State)->Connectors[Index].OldState, 1))
@@ -169,5 +175,13 @@ DrsdAtomicGetConnectorState(
 #define ForEachNewCrtcInState(State, Crtc, NewCrtcState, Index) \
     for((Index) = 0; (Index) < (State)->Device->ModeConfig.CrtcCount; (Index)++) \
         ForEachIf((State)->Crtcs[Index].Crtc && ((State)->Crtcs[Index].Crtc, (NewCrtcState) = (State)->Crtcs[Index].NewState, 1)) 
+
+#define ForEachOldNewPlaneInState(State, Plane, OldPlaneState, NewPlaneState, i) \
+    for((i) = 0; (i) < (State)->Device->ModeConfig.TotalPlaneCount; (i)++) \
+        ForEachIf((State)->Planes[i].Plane && ((Plane) = (State)->Planes[i].Plane, (OldPlaneState) = (State)->Planes[i].OldState, (NewPlaneState) = (State)->Planes[i].NewState, 1))
+
+#define ForEachOldNewCrtcInState(State, Crtc, OldCrtcState, NewCrtcState, i) \
+    for((i) = 0 ; (i) < (State)->Device->ModeConfig.CrtcCount; (i)++) \
+        ForEachIf((State)->Crtcs[i].Crtc && ((Crtc) = (State)->Crtcs[i].Crtc, (OldCrtcState) = (State)->Crtcs[i].OldState, (NewCrtcState) = (State)->Crtcs[i].NewState, 1))
 
 #endif

@@ -311,3 +311,27 @@ DrsdModeConvertUMode(
 
     return STATUS_SUCCESS;
 }
+
+DRIVER_EXPORT
+void
+DrsdModeInitialize(
+    PDRSD_DISPLAY_MODE  Destination,
+    PDRSD_DISPLAY_MODE  Source
+){  
+    memset(Destination, 0, sizeof(DRSD_DISPLAY_MODE));
+    DrsdModeCopy(Destination, Source);
+}
+
+DRIVER_EXPORT
+void 
+DrsdModeGetHvTiming(
+    PDRSD_DISPLAY_MODE  Mode,
+    int*                HDisplay,
+    int*                VDisplay
+){
+    DRSD_DISPLAY_MODE Adjusted;
+    DrsdModeInitialize(&Adjusted, Mode);
+    DrsdModeSetCrtcInfo(&Adjusted, CRTC_STEREO_DOUBLE_ONLY);
+    *HDisplay = Adjusted.CrtcHorizontalDisplay;
+    *VDisplay = Adjusted.CrtcVerticalDisplay;
+}

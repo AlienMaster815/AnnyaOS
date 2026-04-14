@@ -1,14 +1,16 @@
 INCLUDES = -I../../include
 TARGET = DRSDCORE.SYS
 SRC = DrsdCore.c \
+		DrsdAtomic.c \
+		DrsdAtomicHelper.c \
+		DrsdAtomicUapi.c \
+		DrsdBridge.c \
+		DrsdBridgeHelper.c \
 		DrsdConnector.c \
 		DrsdCache.c \
 		DrsdModes.c \
 		DrsdModeConfig.c \
-		DrsdBridgeHelper.c \
 		DrsdModesetLock.c \
-		DrsdAtomic.c \
-		DrsdAtomicHelper.c \
 		DrsdEld.c \
 		DrsdEdid.c \
 		DrsdDraw.c \
@@ -16,8 +18,6 @@ SRC = DrsdCore.c \
 		DrsdModeObject.c \
 		DrsdColorOp.c \
 		DrsdWriteback.c \
-		DrsdBridge.c \
-		DrsdAtomicUapi.c \
 		DrsdCrtc.c \
 		DrsdGxeVRamHelper.c \
 		DrsdGxeTtmHelper.c \
@@ -25,6 +25,8 @@ SRC = DrsdCore.c \
 		DrsdMm.c \
 		DrsdProperty.c \
 		DrsdUapi.c \
+		DrsdCrtcHelper.c \
+		DrsdPlane.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \

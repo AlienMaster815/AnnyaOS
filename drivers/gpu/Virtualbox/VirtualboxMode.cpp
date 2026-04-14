@@ -363,8 +363,8 @@ static void VirtualboxConnectorDestroy(
     while(1);
 }
 
-static  DRSD_CONNECTOR_ASSIST_CALLBACKS VirtualboxConnectorAssistFunctions = {
-    .ConnectorGetModes = VirtualboxGetModes,
+static  DRSD_CONNECTOR_ASSIST_FUNCTIONS VirtualboxConnectorAssistFunctions = {
+    .GetModes = VirtualboxGetModes,
 };
 
 static  DRSD_CONNECTOR_CALLBACKS VirtualboxConnectorCalbacks = {
@@ -662,7 +662,7 @@ static LOUSTATUS VirtualboxConnectorInitialize(
         DRSD_CONNECTOR_MODE_VGA
     );*/
 
-    Connector->AssistFunctions = (PDRSD_CONNECTOR_ASSIST_CALLBACKS)&VirtualboxConnectorAssistFunctions;
+    Connector->AssistFunctions = (PDRSD_CONNECTOR_ASSIST_FUNCTIONS)&VirtualboxConnectorAssistFunctions;
 
     Connector->InterlaceAble = false;
     Connector->DoubleScanAble = false;
