@@ -190,13 +190,35 @@ static void VirtualboxCrtcDestroy(PDRSD_CRTC Crtc){
 }
 
 static DRSD_CRTC_FUNCTIONS VBoxCrtcCallbacks = {
-    .Reset = DrsdInternalCrtcResetAtomic,
+    .Reset = DrsdAtomicHelperCrtcReset,
     .Destroy = VirtualboxCrtcDestroy,
     .SetConfiguration = DrsdAtomicHelperCrtcSetConfiguration,
-    .PageFlip = DrsdInternalCrtcPageFlipAtomic,
-    .AtomicDuplicateState = DrsdInternalCrtcDuplicateStateAtomic,
-    .AtomicDestroyState = DrsdInternalCrtcDestroyStateAtomic,
+    .PageFlip = DrsdAtomicHelperPageFlip,
+    .AtomicDuplicateState = DrsdAtomicHelperCrtcDuplicateState,
+    .AtomicDestroyState = DrsdAtomicHelperCrtcDestroyState,
 };
+
+static 
+LOUSTATUS 
+VirtualboxPrimaryAtomicCheck(
+    PDRSD_PLANE         Plane,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_PLANE_STATE   NewState = DrsdAtomicGetNewPlaneState(State, Plane);
+    PDRSD_CRTC_STATE    CrtcState = 0x00;
+    if(NewState->Crtc){
+        CrtcState = DrsdAtomicGetNewCrtcState(State, NewState->Crtc);
+        if(!CrtcState){
+            return STATUS_INVALID_PARAMETER;
+        }
+    }
+    return DrsdAtomicHelperCheckPlaneState(
+        NewState, CrtcState,
+        DRSD_PLANE_NO_SCALING,
+        DRSD_PLANE_NO_SCALING,
+        false, true
+    );
+}
 
 
 static void* VBoxEdid = 0x00;
@@ -437,14 +459,7 @@ static void VirtualboxAtomicUpdate(
     //LouPrint("VirtualboxAtomicUpdate() STATUS_SUCCES\n");
 }
 
-static LOUSTATUS VirtualboxAtomicCheck(
-    PDRSD_PLANE Plane,
-    void*       Handle
-){
-    LouPrint("VirtualboxAtomicCheck()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
+
 
 //disable and enable
 static void VirtualboxAtomicSetState(

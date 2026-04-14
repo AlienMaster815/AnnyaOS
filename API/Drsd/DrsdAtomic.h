@@ -44,16 +44,8 @@ static inline void DrsdCrtcCommitPut(
     LouKeReleaseReferenceAndCall(&CrtcCommit->Reference, __DrsdCrtcCommitFree);
 }
 
-static inline PDRSD_CRTC_STATE DrsdAtomicGetNewCrtcState(
-    PDRSD_ATOMIC_STATE  State,
-    PDRSD_CRTC          Crtc
-){
-    return State->Crtcs[DrsdCrtcIndex(Crtc)].NewState;
-}
 
-static inline PDRSD_PLANE_STATE DrsdAtomicGetNewPlaneState(PDRSD_ATOMIC_STATE State, PDRSD_PLANE Plane){
-    return State->Planes[DrsdPlaneIndex(Plane)].NewState;
-}
+
 
 static inline PDRSD_CONNECTOR_STATE DrsdAtomicGetOldConnectorState(PDRSD_ATOMIC_STATE State, PDRSD_CONNECTOR Connector){
     UINT Index = DrsdConnectorIndex(Connector);
@@ -160,6 +152,12 @@ DrsdAtomicCheckOnly(
     PDRSD_ATOMIC_STATE  State
 );
 
+DRIVER_EXPORT 
+LOUSTATUS 
+DrsdAtomicNonBlockingCommit(
+    PDRSD_ATOMIC_STATE  State
+);
+
 #define ForEachOldConnectorInState(State, Connector, OldConnectorState, Index) \
     for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
         ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (OldConnectorState) = (State)->Connectors[Index].OldState, 1))
@@ -183,5 +181,11 @@ DrsdAtomicCheckOnly(
 #define ForEachOldNewCrtcInState(State, Crtc, OldCrtcState, NewCrtcState, i) \
     for((i) = 0 ; (i) < (State)->Device->ModeConfig.CrtcCount; (i)++) \
         ForEachIf((State)->Crtcs[i].Crtc && ((Crtc) = (State)->Crtcs[i].Crtc, (OldCrtcState) = (State)->Crtcs[i].OldState, (NewCrtcState) = (State)->Crtcs[i].NewState, 1))
+
+static inline BOOLEAN DrsdAtomicCrtcEffectivlyActive(
+    PDRSD_CRTC_STATE State
+){
+    return (State->Active || State->SelfRefreshActive);
+}
 
 #endif

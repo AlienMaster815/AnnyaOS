@@ -61,8 +61,8 @@ static const ISO646_ALPHA_NUMERIC_DATA_CHART IsoAlphaNumericLibrary[] = {
     {0},
 };
 
-LOUSTATUS ISO646StandardAlphaNumericToAsciiAlphaNumeric(string Destiantion, uint8_t* Source, size_t BytesToConvert) {
-    if ((!Destiantion) || (!Source) || (!BytesToConvert)) {
+LOUSTATUS ISO646StandardAlphaNumericToAsciiAlphaNumeric(string Destination, uint8_t* Source, size_t BytesToConvert) {
+    if ((!Destination) || (!Source) || (!BytesToConvert)) {
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -73,7 +73,7 @@ LOUSTATUS ISO646StandardAlphaNumericToAsciiAlphaNumeric(string Destiantion, uint
 
         while (TmpData[Index].ISO646Map) {
             if (Source[i] == TmpData[Index].ISO646Map) {
-                Destiantion[i] = TmpData[Index].ASCIIMap;
+                Destination[i] = TmpData[Index].ASCIIMap;
                 FoundMatch = true;
                 break;
             }

@@ -61,7 +61,7 @@ uint64_t GetSysBinaryChunk(uint64_t Address, uint32_t ChunkSize);
 void ReleaseSysBinaryChunk(uint64_t Address, uint32_t ChunkSize);
 wchar_t* LookForUTF16LEBuffer(wchar_t* BufferOfSearch, wchar_t* UTF16LEString, size_t BufferSize,size_t StringSize);
 
-LOUSTATUS ISO646StandardAlphaNumericToAsciiAlphaNumeric(string Destiantion, uint8_t* Source, size_t BytesToConvert);
+LOUSTATUS ISO646StandardAlphaNumericToAsciiAlphaNumeric(string Destination, uint8_t* Source, size_t BytesToConvert);
 
 #endif
 

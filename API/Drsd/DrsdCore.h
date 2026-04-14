@@ -53,6 +53,7 @@
 #include "DrsdFramebuffer.h"
 #include "DrsdBlend.h"
 #include "DrsdEncoder.h"
+#include "DrsdVBlank.h"
 
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"

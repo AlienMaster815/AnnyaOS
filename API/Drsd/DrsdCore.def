@@ -32,11 +32,11 @@ EXPORTS
     DrsdPlaneGetDamageClipsCount
     DrsdInternalAtomicConnectorDestroyState
     DrsdInternalAtomicConnectorDuplicateState
-    DrsdInternalCrtcDestroyStateAtomic
-    DrsdInternalCrtcDuplicateStateAtomic
-    DrsdInternalCrtcPageFlipAtomic
+    DrsdAtomicHelperCrtcDestroyState
+    DrsdAtomicHelperCrtcDuplicateState
+    DrsdAtomicHelperPageFlip
     DrsdAtomicHelperCrtcSetConfiguration
-    DrsdInternalCrtcResetAtomic
+    DrsdAtomicHelperCrtcReset
     DrsdGxeInternalStopFrameBufferProcessing
     DrsdGxeInternalStartFrameBufferProcessing
     LouKePassVramToDrsdMemoryManager
@@ -82,3 +82,5 @@ EXPORTS
     DrsdCreateObjectProperty
     DrsdGxeVramOffset
     DrsdCrtcCleanup
+    DrsdAtomicNonBlockingCommit
+    DrsdAtomicHelperCheckPlaneState

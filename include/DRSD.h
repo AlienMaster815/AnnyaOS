@@ -736,7 +736,7 @@ typedef struct _DRSD_PLANE_STATE{
     struct _DRSD_PROPERTY_BLOB* FbDamageClips;
     BOOLEAN                     IgnoreDamageClips;
     DRSD_RECT                   Source;
-    DRSD_RECT                   Destiantion;
+    DRSD_RECT                   Destination;
     BOOLEAN                     Visable;
     DRSD_SCALING_FILTER         ScalingFilter;
     struct _DRSD_COLOR_OP*      ColorPipeline;
@@ -1569,9 +1569,9 @@ typedef struct _DRSD_MODE_CONFIGURATION_CALLBACKS{
     DRSD_MODE_CONFIGURATION_FUNCTIONS, * PDRSD_MODE_CONFIGURATION_FUNCTIONS;
 
 typedef struct _DRSD_VBLANK_CRTC{
-    ListHeader  Peers;
-    atomic_t    Count;
-    size_t      InModeset;
+    ListHeader          Peers;
+    KERNEL_REFERENCE    ReferenceCount;
+    size_t              InModeset;
 }DRSD_VBLANK_CRTC, * PDRSD_VBLANK_CRTC;
 
 typedef struct _DRSD_MODE_CONFIGURATION_HELPER_FUNCTIONS{
@@ -2726,8 +2726,8 @@ typedef struct _DRSD_ATOMIC_STATE{
     PDRSD_CONNECTORS_STATE                  Connectors;
     INT32                                   PrivateObjectsCount;
     struct _DRSD_PRIVATE_OBJECTS_STATE*     PrivateObjects;
-    PDRSD_MODESET_ACQUIRE_CONTEXT            AcquireContext;
-    PDRSD_CRTC_COMMIT                       FakeCommit;
+    PDRSD_MODESET_ACQUIRE_CONTEXT           AcquireContext;
+    PDRSD_CRTC_COMMIT                       Commit;
     LOUQ_WORK                               CommitWork;
 }DRSD_ATOMIC_STATE, * PDRSD_ATOMIC_STATE;       
 
@@ -2995,12 +2995,69 @@ typedef struct _DRSD_MODE_MODEINFO{
 		DRSD_MODE_ROTATE_180 | \
 		DRSD_MODE_ROTATE_270)
 
+#define DRSD_MODE_PAGE_FLIP_ASYNC           0x02
+#define DRSD_MODE_PAGE_FLIP_TARGET_ABSOLUTE 0x4
+#define DRSD_MODE_PAGE_FLIP_TARGET_RELATIVE 0x8
+#define DRSD_MODE_PAGE_FLIP_TARGET          (DRSD_MODE_PAGE_FLIP_TARGET_ABSOLUTE | DRSD_MODE_PAGE_FLIP_TARGET_RELATIVE)
+#define DRSD_MODE_PAGE_FLIP_FLAGS           (DRSD_MODE_PAGE_FLIP_EVENT | \
+				                             DRSD_MODE_PAGE_FLIP_ASYNC | \
+				                             DRSD_MODE_PAGE_FLIP_TARGET)
+#define DRSD_PLANE_NO_SCALING               (1<<16)
+
+static inline UINT DrsdPlaneIndex(PDRSD_PLANE Plane){
+    return Plane->Index;
+}
+
+static inline UINT32 DrsdPlaneMask(PDRSD_PLANE Plane){
+    return 1 << DrsdPlaneIndex(Plane);
+}
+
+#define DrsdForEachPlaneMask(Plane, Device, PlaneMask) \
+    ForEachListEntry((Plane), &(Device)->ModeConfig.PlaneList, Head) \
+        ForEachIf((PlaneMask) & DrsdPlaneMask(Plane))
+
+static inline PDRSD_PLANE_STATE DrsdAtomicGetNewPlaneState(PDRSD_ATOMIC_STATE State, PDRSD_PLANE Plane){
+    return State->Planes[DrsdPlaneIndex(Plane)].NewState;
+}
+
+static inline UINT DrsdCrtcIndex(PDRSD_CRTC Crtc){
+    return Crtc->Index;
+} 
+
+static inline PDRSD_CRTC_STATE DrsdAtomicGetNewCrtcState(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_CRTC          Crtc
+){
+    return State->Crtcs[DrsdCrtcIndex(Crtc)].NewState;
+}
+
+
 static inline PDRSD_GXE_VRAM_OBJECT DrsdGxeVramOfGem(PDRSD_GXE_OBJECT Gxe){
     return CONTAINER_OF(Gxe, DRSD_GXE_VRAM_OBJECT, Bo.Base);
 }
 
 static inline BOOLEAN DrsdAtomicCrtcNeedsModeset(PDRSD_CRTC_STATE State){
     return State->ModeChanged || State->ActiveChanged || State->ConnectorsChanged;
+}
+
+static inline DRSD_RECT DrsdPlaneStateSource(PDRSD_PLANE_STATE State){
+    DRSD_RECT Source = {
+        .X1 = (INT32)State->SourceX,
+        .Y1 = (INT32)State->SourceY,
+        .X2 = (INT32)State->SourceX + (INT32)State->SourceWidth,
+        .Y2 = (INT32)State->SourceY + (INT32)State->SourceHeight,
+    };
+    return Source;
+}
+
+static inline DRSD_RECT DrsdPlaneStateDestination(PDRSD_PLANE_STATE State){
+    DRSD_RECT Destination = {
+        .X1 = (INT32)State->CrtcX,
+        .Y1 = (INT32)State->CrtcY,
+        .X2 = (INT32)State->CrtcX + (INT32)State->CrtcWidth,
+        .Y2 = (INT32)State->CrtcY + (INT32)State->CrtcHeight,
+    };
+    return Destination;
 }
 
 #ifndef _USER_MODE_CODE_
@@ -3154,20 +3211,27 @@ LOUSTATUS DrsdInitializeCrtcGammaSize(
     size_t      GammaSize
 );
 
-void DrsdInternalCrtcDestroyStateAtomic(
+DRIVER_IMPORT
+void 
+DrsdAtomicHelperCrtcDestroyState(
     PDRSD_CRTC         Crtc,
     PDRSD_CRTC_STATE   StateData
 );
 
-PDRSD_CRTC_STATE DrsdInternalCrtcDuplicateStateAtomic(
+DRIVER_IMPORT
+PDRSD_CRTC_STATE 
+DrsdAtomicHelperCrtcDuplicateState(
     PDRSD_CRTC          Crtc
 );
 
-void DrsdInternalCrtcResetAtomic(
+DRIVER_IMPORT
+void DrsdAtomicHelperCrtcReset(
     PDRSD_CRTC          Crtc 
 );
 
-LOUSTATUS DrsdInternalCrtcPageFlipAtomic(
+DRIVER_IMPORT
+LOUSTATUS 
+DrsdAtomicHelperPageFlip(
     PDRSD_CRTC                      Crtc,
     PDRSD_FRAME_BUFFER              FrameBuffer,
     PDRSD_PENDING_VBLANK_EVENT      VBlankEvent,
@@ -3301,6 +3365,17 @@ DRIVER_IMPORT
 void
 DrsdCrtcCleanup(
     PDRSD_CRTC  Crtc
+);
+
+DRIVER_IMPORT
+LOUSTATUS
+DrsdAtomicHelperCheckPlaneState(
+    PDRSD_PLANE_STATE   PlaneState,
+    PDRSD_CRTC_STATE    CrtcState,
+    int                 MinScale,
+    int                 MaxScale,
+    BOOLEAN             CanPosition,
+    BOOLEAN             CanUpdateDisabled
 );
 
 #ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 

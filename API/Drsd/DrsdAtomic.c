@@ -270,9 +270,9 @@ DrsdAtomicStateDefaultClear(
     }
     State->PrivateObjectsCount = 0;
 
-    if(State->FakeCommit){
-        DrsdCrtcCommitPut(State->FakeCommit);
-        State->FakeCommit = 0x00;
+    if(State->Commit){
+        DrsdCrtcCommitPut(State->Commit);
+        State->Commit = 0x00;
     }
 }
 
@@ -1219,4 +1219,22 @@ DrsdAtomicCheckOnly(
     State->Checked = true;
 
     return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT 
+LOUSTATUS 
+DrsdAtomicNonBlockingCommit(
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_MODE_CONFIGURATION    ModeConfig = &State->Device->ModeConfig;
+    LOUSTATUS                   Status;
+
+    Status = DrsdAtomicCheckOnly(State);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    LouPrint("Commiting %h Nonblocking\n", State);
+
+    return ModeConfig->Functions->AtomicCommit(State->Device, State, true);
 }

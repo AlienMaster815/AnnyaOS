@@ -3,6 +3,7 @@ TARGET = DRSDCORE.SYS
 SRC = DrsdCore.c \
 		DrsdAtomic.c \
 		DrsdAtomicHelper.c \
+		DrsdAtomicStateHelpers.c \
 		DrsdAtomicUapi.c \
 		DrsdBridge.c \
 		DrsdBridgeHelper.c \
@@ -27,6 +28,7 @@ SRC = DrsdCore.c \
 		DrsdUapi.c \
 		DrsdCrtcHelper.c \
 		DrsdPlane.c \
+		DrsdVBlank.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \

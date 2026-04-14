@@ -28,17 +28,6 @@
 
 #include "DrsdCore.h"
 
-static inline UINT DrsdPlaneIndex(PDRSD_PLANE Plane){
-    return Plane->Index;
-}
-
-static inline UINT32 DrsdPlaneMask(PDRSD_PLANE Plane){
-    return 1 << DrsdPlaneIndex(Plane);
-}
-
-#define DrsdForEachPlaneMask(Plane, Device, PlaneMask) \
-    ForEachListEntry((Plane), &(Device)->ModeConfig.PlaneList, Head) \
-        ForEachIf((PlaneMask) & DrsdPlaneMask(Plane))
 
 DRIVER_EXPORT
 BOOLEAN
