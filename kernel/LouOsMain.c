@@ -161,7 +161,7 @@ void ParserLouLoaderInformation(
 );
 void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
-struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT64 ThreadID);
+struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT32 ThreadID);
 uint64_t GetCr3();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
@@ -526,6 +526,7 @@ void LouOsKrnlStart(
 
 //BUGS TO FIX:
 
+//232076
 
 /*	
 USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).

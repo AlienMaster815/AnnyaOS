@@ -41,7 +41,7 @@ LOUSTATUS UpdateIDT(bool Init);
 
 LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle);
 
-LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT32 ThreadID);
 
 static mutex_t CoreIrqReadyLock = {0};
 static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
@@ -407,7 +407,7 @@ LOUAPI void InitializeProcessManager(){
     
     InitializationProcessor = GetCurrentCpuTrackMember();
     HANDLE KernelProcess = 0x00;
-    LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, &KernelProcess);
+    LouKePsmGetProcessData(KERNEL_PROCESS_NAME, &KernelProcess);
     for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetSystemProcess(KernelProcess);
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmInitializeSchedualerObject(

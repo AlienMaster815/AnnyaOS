@@ -95,7 +95,7 @@ typedef struct _GENERIC_THREAD_DATA{
     struct _GENERIC_PROCESS_DATA*   Process;
     KERNEL_REFERENCE                EFBY;
     TEB                             Teb;
-    UINT64                          ThreadID;
+    UINT32                          ThreadID;
     UINT8                           ThreadPriority;
     UINT64                          StackBase;
     UINT64                          StackTop;
@@ -191,7 +191,7 @@ typedef struct _GENERIC_PROCESS_DATA{
     string                                  ProcessName;
     mutex_t                                 LockOutTagOut;
     UINT64                                  PMLTree;
-    UINT16                                  ProcessID;
+    UINT32                                  ProcessID;
     UINT8                                   ProcessPriority;
     PTHREAD_SCHEDUAL_MANAGER                ThreadObjects;    
     PEB                                     Peb;
@@ -267,7 +267,7 @@ void SetTEB(uint64_t Teb);
 
 UINT64 LouKeVmmCreatePmlTable();
 void LouKeVmmCloneSectionToPml(UINT64* Pml4);
-LOUSTATUS LouKePsmGetProcessHandle(
+LOUSTATUS LouKePsmGetProcessData(
     string  ProcessName,
     PHANDLE OutHandle
 );

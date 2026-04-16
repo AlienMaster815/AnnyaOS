@@ -182,14 +182,48 @@ LouKeXarrayAllocateInt(
     int     Limit,
     UINT64  PageFlags
 ){
-    LouKeXaLockArray(Array);
     int i = *Id;
+    if((i < 0) && (Limit > 0)){
+        i = 0;
+    }else if(i < 0){
+        return STATUS_INVALID_PARAMETER;   
+    }
+    LouKeXaLockArray(Array);
     Limit = Limit ? Limit : INT32_MAX;
     for(; i <= Limit; i++){
         if(!LouKeXaIsIndexUsedEx(Array, i)){
             LouKeXaStoreEx(
                 Array,
                 i,
+                Entry,
+                PageFlags
+            );
+            *Id = i;
+            LouKeXaUnlockArray(Array);
+            return STATUS_SUCCESS;
+        }
+    }   
+    LouKeXaUnlockArray(Array);
+    return STATUS_DEVICE_BUSY;
+}
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeXarrayAllocateUint32(
+    PXARRAY Array,
+    UINT32* Id,
+    PVOID   Entry, 
+    UINT32  Limit,
+    UINT64  PageFlags
+){
+    LouKeXaLockArray(Array);
+    UINT32 i = *Id;
+    Limit = Limit ? Limit : UINT32_MAX;
+    for(; i <= Limit; i++){
+        if(!LouKeXaIsIndexUsedEx(Array, (UINT64)i)){
+            LouKeXaStoreEx(
+                Array,
+                (UINT64)i,
                 Entry,
                 PageFlags
             );
@@ -217,7 +251,7 @@ static void DeleteNodeIfEmpty(
 
 KERNEL_EXPORT
 void 
-LouKeXaFree(
+LouKeXaFreeUint64(
     PXARRAY Array,
     UINT64  Id
 ){
@@ -243,6 +277,36 @@ LouKeXaFree(
     }    
     LouKeXaUnlockArray(Array);
 }
+
+KERNEL_EXPORT
+void 
+LouKeXaFreeUint32(
+    PXARRAY Array,
+    UINT32  Id
+){
+    LouKeXaLockArray(Array);
+    PXARRAY_NODE TmpNode;
+    UINT64 Member;
+    ForEachListEntry(TmpNode, &Array->Nodes, Peers){
+        if(RangeInterferes(
+            TmpNode->Base, 512,
+            (UINT64)Id, 1
+        )){
+            break;
+        }       
+    }
+
+    if(!TmpNode){
+        LouPrint("LouKeXaFree():Array:%h ID:%d Is Not Used\n", Array, Id);
+    }else{
+        Member = Id - TmpNode->Base;
+        TmpNode->Entries[Member] = 0x00;
+        (TmpNode->Bitmap &= ~(1 << Member));
+        DeleteNodeIfEmpty(TmpNode);
+    }    
+    LouKeXaUnlockArray(Array);
+}
+
 
 KERNEL_EXPORT
 void 

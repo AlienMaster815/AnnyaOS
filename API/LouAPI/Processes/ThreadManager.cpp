@@ -5,7 +5,7 @@
 LOUAPI
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData();
-LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID);
+LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT32 ThreadID);
 LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle);
 
 LOUAPI UINT64 GetRFLAGS();
@@ -163,23 +163,7 @@ void DebugThreadContext(){
     }
 }
 
-static UINT64 AllocateThreadID(){
-    UINT64 Result = 1;
-    BOOL FoundID = false;
-    while(!FoundID){
-        FoundID = true;
-        PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
-        while(TmpThreadHandle->Peers.NextHeader){
-            TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
-            if(Result == TmpThreadHandle->ThreadID){
-                Result++;
-                FoundID = false;
-                break;
-            }
-        }
-    }
-    return Result;
-}
+UINT32 AllocateThreadID();
 
 static PGENERIC_THREAD_DATA AllocateThreadHandle(){
     PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
@@ -191,8 +175,7 @@ static PGENERIC_THREAD_DATA AllocateThreadHandle(){
     return TmpThreadHandle;
 }
 
-UNUSED 
-static void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread){
+void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread){
     PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
     while(TmpThreadHandle->Peers.NextHeader){
         if((PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader == Thread){
@@ -255,6 +238,7 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     NewThreadHandle->Process = Process;
     //allocate thread ID
     NewThreadHandle->ThreadID = AllocateThreadID();
+    LouPrint("Creating Thread With ID:%d\n", NewThreadHandle->ThreadID);
     NewThreadHandle->TotalMsSlice = TimeSliceMs;
     NewThreadHandle->Cs = CodeSegment;
     NewThreadHandle->Ss = StackSegment;
@@ -364,7 +348,7 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
 
 }
 
-LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
+LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT32 ThreadID){
     if(ThreadID == 0){
         return 0x00;
     }
@@ -378,17 +362,10 @@ LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT64 ThreadID){
     return 0x00;
 }
 
-LOUAPI void DeAllocateSaveContext(uint64_t Context);
 
 void LouKeTsmDestroyThreadHandle(
     PGENERIC_THREAD_DATA Thread
-){
-    LouKeFree(Thread->AfinityBitmap);
-    LouKeFree((PVOID)Thread->StackBase);
-    DeAllocateSaveContext(Thread->ContextStorage);
-    DeAllocateSaveContext(Thread->InterruptStorage);
-    DeallocateThreadHandle(Thread);
-}
+);
 
 
 

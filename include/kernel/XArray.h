@@ -118,9 +118,16 @@ static inline void LouKeXaUnlockArray(PXARRAY Array){
 
 KERNEL_EXPORT
 void 
-LouKeXaFree(
+LouKeXaFreeUint64(
     PXARRAY Array,
     UINT64  Id
+);
+
+KERNEL_EXPORT
+void 
+LouKeXaFreeUint32(
+    PXARRAY Array,
+    UINT32  Id
 );
 
 KERNEL_EXPORT 
@@ -206,6 +213,16 @@ LouKeXarrayAllocateInt(
     int*    Id,
     PVOID   Entry, 
     int     Limit,
+    UINT64  PageFlags
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeXarrayAllocateUint32(
+    PXARRAY Array,
+    UINT32* Id,
+    PVOID   Entry, 
+    UINT32  Limit,
     UINT64  PageFlags
 );
 

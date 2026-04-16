@@ -31,8 +31,7 @@ LOUSTATUS CreateDemonThreadHandle(
     PVOID       UnblockTime
 ){
     PGENERIC_PROCESS_DATA ProcessData = 0x00;
-    LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);    
-    
+    LouKePsmGetProcessData(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);    
     
     LOUSTATUS Status = LouKeTsmCreateThreadHandle(
         (PGENERIC_THREAD_DATA*)ThreadOut,
@@ -99,7 +98,7 @@ LouKeCreateDeferedDemonEx(
     }
 
     PGENERIC_PROCESS_DATA ProcessData = 0x00;
-    Status = LouKePsmGetProcessHandle(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);
+    Status = LouKePsmGetProcessData(KERNEL_PROCESS_NAME, (PHANDLE)&ProcessData);
     if(Status != STATUS_SUCCESS){
         LouPrint("LouKeCreateDeferedDemonEx() Unable To Get Kernel Process Handle\n");
         return 0x00;

@@ -1,10 +1,33 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "ProcessPrivate.h"
 
-static GENERIC_PROCESS_DATA MasterProcessList = {0};
-static mutex_t ProcessListLock = {0};
+static ListHeader MasterProcessList = {0};
+static spinlock_t ProcessListLock = {0};
 static KERNEL_REFERENCE TotalProcesses = {0};
+static XARRAY ProcessThreadIDXa = {};
+
+LOUAPI void DeAllocateSaveContext(uint64_t Context);
+void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread);
+
+void LouKeTsmDestroyThreadHandle(
+    PGENERIC_THREAD_DATA Thread
+){
+    LouKeFree(Thread->AfinityBitmap);
+    LouKeFree((PVOID)Thread->StackBase);
+    DeAllocateSaveContext(Thread->ContextStorage);
+    DeAllocateSaveContext(Thread->InterruptStorage);
+    LouKeXaFreeUint32(&ProcessThreadIDXa, Thread->ThreadID);
+    DeallocateThreadHandle(Thread);
+}
+
+
 LOUAPI UINT64 GetCr3();
+
+UINT32 AllocateThreadID(){
+    UINT32 NewID = 1;
+    LouKeXarrayAllocateUint32(&ProcessThreadIDXa, &NewID, 0x00, 0, KERNEL_GENERIC_MEMORY);
+    return NewID;
+}
 
 LOUAPI
 SIZE LouKePmGetProcessCount(){
@@ -18,59 +41,43 @@ uint64_t LouKeLinkerGetAddress(
 );
 
 
-static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){
+static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){    
+    LouKIRQL Irql; 
+    PGENERIC_PROCESS_DATA NewProcessObject = LouKeMallocType(GENERIC_PROCESS_DATA , KERNEL_GENERIC_MEMORY);
+    NewProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, KERNEL_GENERIC_MEMORY);
+    strncpy(NewProcessObject->ProcessName, ProcessName, strlen(ProcessName));
 
-    PGENERIC_PROCESS_DATA TmpProcessObject = &MasterProcessList;
-    MutexLock(&ProcessListLock);
-    while(TmpProcessObject->Peers.NextHeader){
-        TmpProcessObject = (PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader;
-    }
-    TmpProcessObject->Peers.NextHeader = (PListHeader)LouKeMallocType(GENERIC_PROCESS_DATA, KERNEL_GENERIC_MEMORY);
-    TmpProcessObject = (PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader;
-    TmpProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, KERNEL_GENERIC_MEMORY);
-    strncpy(TmpProcessObject->ProcessName, ProcessName, strlen(ProcessName));
+    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
+    LouKeListAddTail(&NewProcessObject->Peers, &MasterProcessList);
     LouKeAcquireReference(&TotalProcesses);
-    MutexUnlock(&ProcessListLock);
-    
-    return TmpProcessObject;
+    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+
+    return NewProcessObject;
 }
 
 UNUSED static void DestroyProcessObject(
     PGENERIC_PROCESS_DATA ProcessObject
 ){
-    PGENERIC_PROCESS_DATA TmpProcessObject = &MasterProcessList;
-    MutexLock(&ProcessListLock);
-    while(TmpProcessObject->Peers.NextHeader){
-        if((PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader == ProcessObject){
-            TmpProcessObject->Peers.NextHeader = ((PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader)->Peers.NextHeader;
+    PGENERIC_PROCESS_DATA   TmpProcessObject;    
+    PGENERIC_PROCESS_DATA   ForwardProcessObject;    
+    LouKIRQL                Irql;
+    ForEachListEntrySafe(TmpProcessObject, ForwardProcessObject, &MasterProcessList, Peers){
+        ForEachIf(TmpProcessObject == ProcessObject){
+            LouKeAcquireSpinLock(&ProcessListLock, &Irql);
+            LouKeListDeleteItem(&TmpProcessObject->Peers);
+            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
             LouKeFree(ProcessObject->ProcessName);
             LouKeFree(ProcessObject);
-            MutexUnlock(&ProcessListLock);
-            LouKeReleaseReference(&TotalProcesses);
-
+            LouKeXaFreeUint32(&ProcessThreadIDXa, ProcessObject->ProcessID);
             return;
         }
-        TmpProcessObject = (PGENERIC_PROCESS_DATA)TmpProcessObject->Peers.NextHeader;
     }
-    MutexUnlock(&ProcessListLock);
 }
 
-static UINT16 AllocateProcessID(){
-    UINT16 Result = 1;
-    BOOL FoundID = false;
-    while(!FoundID){
-        FoundID = true;
-        PGENERIC_PROCESS_DATA TmpProcessHandle = &MasterProcessList;
-        while(TmpProcessHandle->Peers.NextHeader){
-            TmpProcessHandle = (PGENERIC_PROCESS_DATA)TmpProcessHandle->Peers.NextHeader;
-            if(Result == TmpProcessHandle->ProcessID){
-                Result++;
-                FoundID = false;
-                break;
-            }
-        }
-    }
-    return Result;
+static UINT32 AllocateProcessID(){
+    UINT32 NewID = 0;
+    LouKeXarrayAllocateUint32(&ProcessThreadIDXa, &NewID, 0x00, 0, KERNEL_GENERIC_MEMORY);
+    return NewID;
 }
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc);
 
@@ -112,7 +119,8 @@ LOUSTATUS LouKePmCreateProcessEx(
     NewProcessObject->ProcessPriority = Priority;
     NewProcessObject->ProcessSection = Section;
     NewProcessObject->ProcessAccessToken = AccessToken;
-
+    NewProcessObject->ProcessID = AllocateProcessID();
+    LouPrint("Creating Process With ID:%d\n", NewProcessObject->ProcessID);
     if(Params){
         //TODO::
         LouPrint("LouKePmCreateProcessEx()::TODO\n");
@@ -120,6 +128,7 @@ LOUSTATUS LouKePmCreateProcessEx(
 
         }
     }else{
+        
         NewProcessObject->ThreadObjects = LouKeMallocArray(THREAD_SCHEDUAL_MANAGER, Processors , KERNEL_GENERIC_MEMORY);
         PTHREAD_SCHEDUAL_MANAGER Tsm = NewProcessObject->ThreadObjects;
         for(size_t i = 0 ; i < Processors; i++){
@@ -134,7 +143,6 @@ LOUSTATUS LouKePmCreateProcessEx(
         NewProcessObject->ProcessState = PROCESS_BLOCKED;   
     }
 
-    NewProcessObject->ProcessID = AllocateProcessID();
     if(strcmp(ProcessName, KERNEL_PROCESS_NAME)){
         NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
     }else {
@@ -207,7 +215,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS LouKePsmGetProcessHandle(
+LOUSTATUS LouKePsmGetProcessData(
     string  ProcessName,
     PHANDLE OutHandle
 ){
@@ -215,10 +223,9 @@ LOUSTATUS LouKePsmGetProcessHandle(
         return STATUS_INVALID_PARAMETER;
     }
 
-    PGENERIC_PROCESS_DATA TmpHandle = &MasterProcessList;
-    while(TmpHandle->Peers.NextHeader){
-        TmpHandle = (PGENERIC_PROCESS_DATA)TmpHandle->Peers.NextHeader;
-        if(!strcmp(TmpHandle->ProcessName, ProcessName)){
+    PGENERIC_PROCESS_DATA TmpHandle;
+    ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
+        ForEachIf(!strcmp(TmpHandle->ProcessName, ProcessName)){
             *OutHandle = (HANDLE)TmpHandle;
             return STATUS_SUCCESS;
         }
