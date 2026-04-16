@@ -44,41 +44,34 @@ typedef struct _PML4_LIST {
     UINT64*     Pml4;
 }PML4_LIST, * PPML4_LIST;
 
-static PML4_LIST Pml4MasterList = {0};
+static ListHeader Pml4MasterList = {0};
 static mutex_t Pml4MasterLock = {0};
 
 LOUAPI PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
 
-static SECTION_OBJECT   MasterSectionList = {0};
+static ListHeader       MasterSectionList = {0};
 static mutex_t          SectionListLock = {0};
+
 static 
 PSECTION_OBJECT 
 AllocateSectionObject(
     PVOID   SectionPrivateData
 ){  
-    PSECTION_OBJECT TmpSection = &MasterSectionList;
+    PSECTION_OBJECT NewSection = (PSECTION_OBJECT)LouGeneralAllocateMemoryEx(sizeof(SECTION_OBJECT), GET_ALIGNMENT(SECTION_OBJECT));
+    NewSection->SectionPrivateData = SectionPrivateData;
     MutexLock(&SectionListLock);
-    while(TmpSection->Peers.NextHeader){
-        TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
-    }    
-    TmpSection->Peers.NextHeader = (PListHeader)LouGeneralAllocateMemoryEx(sizeof(SECTION_OBJECT), GET_ALIGNMENT(SECTION_OBJECT));
-    TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
-    TmpSection->SectionPrivateData = SectionPrivateData;
+    LouKeListAddTail(&NewSection->Peers, &MasterSectionList);
     MutexUnlock(&SectionListLock);
-    return  TmpSection;
+    return NewSection;
 }    
 
 static PSECTION_OBJECT VAddressToSectionObject(PVOID VAddress){
-    PSECTION_OBJECT TmpSection = &MasterSectionList;
-    MutexLock(&SectionListLock);
-    while(TmpSection->Peers.NextHeader){
-        TmpSection = ListItemToType(TmpSection->Peers.NextHeader, SECTION_OBJECT, Peers);
-        if(TmpSection->SectionVBase == VAddress){
-            MutexUnlock(&SectionListLock);
+    PSECTION_OBJECT TmpSection;
+    ForEachListEntry(TmpSection, &MasterSectionList, Peers){
+        ForEachIf(TmpSection->SectionVBase == VAddress){
             return TmpSection;
         }
-    }    
-    MutexUnlock(&SectionListLock);
+    }
     return 0x00;
 }
 
@@ -100,16 +93,13 @@ LouKeVmmCreateSharedSectionEx(
     SectionObject->SectionPageProtection = NtFlags;
     SectionObject->FrameFlags = FrameFlags;
 
-    PPML4_LIST TmpList = &Pml4MasterList;
+    PPML4_LIST TmpList;
     MutexLock(&Pml4MasterLock);
-    while(TmpList->Peers.NextHeader){
-        TmpList = ListItemToType(TmpList->Peers.NextHeader, PML4_LIST, Peers);
+    ForEachListEntry(TmpList, &Pml4MasterList, Peers){
         LouKeMapContinuousMemoryBlockEx((UINT64)PBase, (UINT64)VBase, Size, SectionObject->FrameFlags, TmpList->Pml4);
     }
     MutexUnlock(&Pml4MasterLock);
-
     return STATUS_SUCCESS;
-
 }
 
 LOUAPI
@@ -255,28 +245,20 @@ LOUSTATUS LouKeGetVAddressPageInformation(
 
 void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     LouPrint("LouKeVmmCloneSectionToPml()\n");
-    PSECTION_OBJECT TmpSection = &MasterSectionList;
-    MutexLock(&SectionListLock);
-    while(TmpSection->Peers.NextHeader){
-        TmpSection = (PSECTION_OBJECT)TmpSection->Peers.NextHeader;
-        if(!TmpSection->Private){
+    PSECTION_OBJECT TmpSection;
+    ForEachListEntry(TmpSection, &MasterSectionList, Peers){
+        ForEachIf(!TmpSection->Private){
             LouKeMapContinuousMemoryBlockEx((UINT64)TmpSection->SectionPBase, (UINT64)TmpSection->SectionVBase, TmpSection->SectionSize, TmpSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
         }
-        //LouPrint("%h:%h:%h:%bc:%d\n", TmpSection->SectionVBase, TmpSection->SectionPBase, TmpSection->SectionSize, TmpSection->FrameFlags, (((UINT64)FrameMember - (UINT64)FrameBase) / 8));
-    }    
-    MutexUnlock(&SectionListLock);
+    }
     LouPrint("LouKeVmmCloneSectionToPml() DONE\n");
 }
 
 void LouKeSendPml4ToSections(UINT64* Pml4){
-    PPML4_LIST TmpList = &Pml4MasterList;
+    PPML4_LIST NewPml4List = LouKeMallocType(PML4_LIST, KERNEL_GENERIC_MEMORY);
+    NewPml4List->Pml4 = Pml4;
     MutexLock(&Pml4MasterLock);
-    while(TmpList->Peers.NextHeader){
-        TmpList = (PPML4_LIST)TmpList->Peers.NextHeader;
-    }
-    TmpList->Peers.NextHeader = (PListHeader)LouKeMallocType(PML4_LIST, KERNEL_GENERIC_MEMORY);
-    TmpList = (PPML4_LIST)TmpList->Peers.NextHeader;
-    TmpList->Pml4 = Pml4;
+    LouKeListAddTail(&NewPml4List->Peers, &Pml4MasterList);
     MutexUnlock(&Pml4MasterLock);
 }
 
