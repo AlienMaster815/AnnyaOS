@@ -1,36 +1,22 @@
 #include <LouAPI.h>
 
 
-static LAZY_ALLOCATION_TRACKER MasterList = {0};
+static ListHeader MasterList = {0};
 static mutex_t MasterLock = {0};
 
 static PLAZY_ALLOCATION_TRACKER AllocateLazyTracker(){
-    PLAZY_ALLOCATION_TRACKER TmpTracker = &MasterList;
+    PLAZY_ALLOCATION_TRACKER NewTracker = LouKeMallocType(LAZY_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
     MutexLock(&MasterLock);
-    while(TmpTracker->Peers.NextHeader){
-        TmpTracker = (PLAZY_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
-    }
-    TmpTracker->Peers.NextHeader = (PListHeader)LouKeMallocType(LAZY_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
-    ((PLAZY_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader)->Peers.LastHeader = (PListHeader)TmpTracker;
-    TmpTracker = (PLAZY_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
+    LouKeListAddTail(&NewTracker->Peers, &MasterList);
     MutexUnlock(&MasterLock);
-    return TmpTracker;
+    return NewTracker;
 }
 
 static void FreeLazyTracker(PLAZY_ALLOCATION_TRACKER TrackMember){
-    PLAZY_ALLOCATION_TRACKER TmpTracker = &MasterList;
-    PLAZY_ALLOCATION_TRACKER Follower;
     MutexLock(&MasterLock);
-    while(TmpTracker->Peers.NextHeader){
-        Follower = TmpTracker;
-        TmpTracker = (PLAZY_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
-        if(TmpTracker == TrackMember){
-            Follower->Peers.NextHeader = TmpTracker->Peers.NextHeader;
-            LouKeFree(TmpTracker);
-            break;
-        }
-    }
+    LouKeListDeleteItem(&TrackMember->Peers);
     MutexUnlock(&MasterLock);
+    LouKeFree(TrackMember);
 }
 
 PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE VirtualSize, UINT64 PageFlags){
@@ -41,7 +27,7 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
     }else if(ROUND_UP64(VirtualSize, KILOBYTE_PAGE) == VirtualSize){
         PageSize = KILOBYTE_PAGE;
     }else {
-        LouPrint("LouKeAllocateLazyBufferEx() ERROR EINVAL\n");
+        LouPrint("LouKeAllocateLazyBuffer() ERROR EINVAL\n");
         return 0x00;
     }
     
@@ -56,24 +42,16 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
     return NewTracker;
 }
 
-void LouKeFreeLazyBuffer(PLAZY_ALLOCATION_TRACKER Tracker){
-    LouKeFree(Tracker->PhysicalMappings);
-    LouKeDestroyDynamicPool(Tracker->DynamicAllocations);
-    FreeLazyTracker(Tracker);
-}
-
-BOOL LouKePageFaultIsDueToLazyBuffer(PVOID Location){
+BOOL LouKePageFaultIsDueToLazyBuffer(PVOID Location, PLAZY_ALLOCATION_TRACKER* Out){
     BOOL Result = false;
-    PLAZY_ALLOCATION_TRACKER TmpTracker = &MasterList;
-    MutexLock(&MasterLock);
-    while(TmpTracker->Peers.NextHeader){
-        TmpTracker = (PLAZY_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
+    PLAZY_ALLOCATION_TRACKER TmpTracker;
+    ForEachListEntry(TmpTracker, &MasterList, Peers){
         if(RangeInterferes((UINT64)TmpTracker->VirtualLocation, TmpTracker->VirtualSize, (UINT64)Location, 1)){
             Result = true;
+            *Out = TmpTracker;
             break;
         }
     }
-    MutexUnlock(&MasterLock);
     return Result;
 }
 
@@ -98,4 +76,73 @@ PVOID LouKeMallocFromLazyBuffer(
         Size, 
         GetAlignmentBySize(Size)
     );
+}
+
+LOUSTATUS 
+LouKeLazyBufferCommitPage(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count    //Optional
+){
+    SIZE i;
+    if(!Count){
+        Count = 1;
+    }
+    if(!Address){
+        BOOLEAN Found = false;
+        for(i = 0 ; (i + Count) < LazyBuffer->PhyMappingCount; i++){
+            Found = true;
+            for(SIZE j = 0 ; j < Count; j++){
+                if(!LazyBuffer->PhysicalMappings[i + j]){
+                    Found = false;
+                    break;
+                }
+            }
+            if(Found){
+                break;
+            }
+        }
+        if(!Found){
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
+        Address = (PVOID)(LazyBuffer->VirtualLocation + i * LazyBuffer->PageSize);
+    }else{
+        if(RangeDoesNotInterfere((UINT64)Address, 1, (UINT64)LazyBuffer->VirtualLocation, (UINT64)LazyBuffer->VirtualSize)){
+            //LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope\n");
+            return STATUS_INVALID_PARAMETER;
+        }
+        Address = (PVOID)ROUND_DOWN64((UINT64)Address, LazyBuffer->PageSize);
+        i = ((UINT64)(Address - LazyBuffer->VirtualLocation) / LazyBuffer->PageSize);
+        for(SIZE j = 0; j < Count; j++){
+            if(LazyBuffer->PhysicalMappings[i + j]){
+                //LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Address Taken\n");
+                return STATUS_INVALID_PARAMETER;
+            }
+        }
+    }
+    for(SIZE foo = 0; foo < Count; foo++){
+        PVOID NewPAddress = LouAllocatePhysical64UpEx(LazyBuffer->PageSize, LazyBuffer->PageSize);
+        LazyBuffer->PhysicalMappings[i + foo] = NewPAddress;
+        LouMapAddress((UINT64)NewPAddress, (UINT64)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), LazyBuffer->PageFlags, LazyBuffer->PageSize);
+        LouKeVmmCreatePageReserveVm(NewPAddress, LazyBuffer->PageSize, 1, true, false);
+    }
+    return STATUS_SUCCESS;
+}
+
+void LouKeLazyBufferUnCommitPage(PLAZY_ALLOCATION_TRACKER Tracker, PVOID VAddress){
+    LouPrint("LouKeLazyBufferUnCommitPage()\n");
+    while(1);
+}
+
+void LouKeLazyBufferUnCommitAllPages(PLAZY_ALLOCATION_TRACKER Tracker){
+    for(SIZE i = 0; i < Tracker->PhyMappingCount; i++){
+        LouKeLazyBufferUnCommitPage(Tracker, Tracker->VirtualLocation + (i * Tracker->PageSize));
+    }
+}
+
+void LouKeFreeLazyBuffer(PLAZY_ALLOCATION_TRACKER Tracker){
+    LouKeLazyBufferUnCommitAllPages(Tracker);
+    LouKeFree(Tracker->PhysicalMappings);
+    LouKeDestroyDynamicPool(Tracker->DynamicAllocations);
+    FreeLazyTracker(Tracker);
 }

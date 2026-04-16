@@ -3,6 +3,7 @@ bits 64
 default rel
 
 global GetPageValue
+global clear_cr2
 
 GetPageValue:
     ;rcx has the address

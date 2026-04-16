@@ -57,21 +57,14 @@ static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){
 
 UNUSED static void DestroyProcessObject(
     PGENERIC_PROCESS_DATA ProcessObject
-){
-    PGENERIC_PROCESS_DATA   TmpProcessObject;    
-    PGENERIC_PROCESS_DATA   ForwardProcessObject;    
+){    
     LouKIRQL                Irql;
-    ForEachListEntrySafe(TmpProcessObject, ForwardProcessObject, &MasterProcessList, Peers){
-        ForEachIf(TmpProcessObject == ProcessObject){
-            LouKeAcquireSpinLock(&ProcessListLock, &Irql);
-            LouKeListDeleteItem(&TmpProcessObject->Peers);
-            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
-            LouKeFree(ProcessObject->ProcessName);
-            LouKeFree(ProcessObject);
-            LouKeXaFreeUint32(&ProcessThreadIDXa, ProcessObject->ProcessID);
-            return;
-        }
-    }
+    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
+    LouKeListDeleteItem(&ProcessObject->Peers);
+    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+    LouKeFree(ProcessObject->ProcessName);
+    LouKeFree(ProcessObject);
+    LouKeXaFreeUint32(&ProcessThreadIDXa, ProcessObject->ProcessID);
 }
 
 static UINT32 AllocateProcessID(){

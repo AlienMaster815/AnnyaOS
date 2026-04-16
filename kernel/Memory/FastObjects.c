@@ -1,20 +1,16 @@
 #include "PrivMem.h"
 
 //TODO Change Mutexing to compensate for error loops
-static FAST_ALLOCATION_TEMPLATE FastAllocationTemplateList = {0};
+static ListHeader FastAllocationTemplateList = {0};
 //static mutex_t FastAllocationTemplateLock = {0};
 
 static bool CheckTemplatesForDuplicate(LOUSTR ClassName){
-    PFAST_ALLOCATION_TEMPLATE TmpTemplate = &FastAllocationTemplateList;
-    //MutexLock(&FastAllocationTemplateLock);
-    while(TmpTemplate->Peers.NextHeader){
-        TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
-        if(!strcmp(TmpTemplate->TrackingTag, ClassName)){
-    //        MutexUnlock(&FastAllocationTemplateLock);
+    PFAST_ALLOCATION_TEMPLATE TmpTemplate;
+    ForEachListEntry(TmpTemplate, &FastAllocationTemplateList, Peers){
+        ForEachIf(!strcmp(TmpTemplate->TrackingTag, ClassName)){
             return true;
         }
     }
-    //MutexUnlock(&FastAllocationTemplateLock);
     return false;
 }
 
@@ -28,39 +24,31 @@ static PFAST_ALLOCATION_TEMPLATE AllocateFastObjectClassTemplate(
     LOUSINE_OBJECT_CONSTRUCTOR      Constructor,
     LOUSINE_OBJECT_DECONSTRUCTOR    DeConstructor
 ){
-    PFAST_ALLOCATION_TEMPLATE TmpTemplate = &FastAllocationTemplateList;
-    //MutexLock(&FastAllocationTemplateLock);
-    while(TmpTemplate->Peers.NextHeader){
-        TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
-    }
-
-    TmpTemplate->Peers.NextHeader = (PListHeader)LouKeMallocType(FAST_ALLOCATION_TEMPLATE, KERNEL_GENERIC_MEMORY);
-    TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
-    TmpTemplate->TrackingTag = LouKeMallocArray(CHAR, strlen(ClassName) + 1, KERNEL_GENERIC_MEMORY);
-    strcpy(TmpTemplate->TrackingTag, ClassName);
-    TmpTemplate->ObjectSize = ObjectSize;
-    TmpTemplate->ObjectCount = ObjectCount;
-    TmpTemplate->ObjectAlignment = ObjectAlignment;
-    TmpTemplate->Flags = Flags;
-    TmpTemplate->PageFlags = PageFlags;
-    TmpTemplate->Constructor = Constructor;
-    TmpTemplate->DeConstructor = DeConstructor;
-    LouPrint("NewTemplate:%h With Identifier:%s\n", TmpTemplate, ClassName);
+    PFAST_ALLOCATION_TEMPLATE NewTemplate = LouKeMallocType(FAST_ALLOCATION_TEMPLATE, KERNEL_GENERIC_MEMORY);
+    NewTemplate->TrackingTag = LouKeMallocArray(CHAR, strlen(ClassName) + 1, KERNEL_GENERIC_MEMORY);
+    strcpy(NewTemplate->TrackingTag, ClassName);
+    NewTemplate->ObjectSize = ObjectSize;
+    NewTemplate->ObjectCount = ObjectCount;
+    NewTemplate->ObjectAlignment = ObjectAlignment;
+    NewTemplate->Flags = Flags;
+    NewTemplate->PageFlags = PageFlags;
+    NewTemplate->Constructor = Constructor;
+    NewTemplate->DeConstructor = DeConstructor;
+    
+    LouKeListAddTail(&NewTemplate->Peers, &FastAllocationTemplateList);
+    
+    LouPrint("NewTemplate:%h With Identifier:%s\n", NewTemplate, ClassName);
     //MutexUnlock(&FastAllocationTemplateLock);
-    return TmpTemplate;
+    return NewTemplate;
 } 
 
 static PFAST_ALLOCATION_TEMPLATE AcquireFastObjectTemplate(LOUSTR ClassName){
-    PFAST_ALLOCATION_TEMPLATE TmpTemplate = &FastAllocationTemplateList;
-    //MutexLock(&FastAllocationTemplateLock);
-    while(TmpTemplate->Peers.NextHeader){
-        TmpTemplate = (PFAST_ALLOCATION_TEMPLATE)TmpTemplate->Peers.NextHeader;
-        if(!strcmp(TmpTemplate->TrackingTag, ClassName)){
-            //MutexUnlock(&FastAllocationTemplateLock);
+    PFAST_ALLOCATION_TEMPLATE TmpTemplate;
+    ForEachListEntry(TmpTemplate, &FastAllocationTemplateList, Peers){
+        ForEachIf(!strcmp(TmpTemplate->TrackingTag, ClassName)){
             return TmpTemplate;
         }
     }
-    //MutexUnlock(&FastAllocationTemplateLock);
     return 0x00;
 }
 
@@ -178,15 +166,18 @@ LOUSTATUS LouKeCreateFastObjectClass(
     );
 }
 
+
 PVOID LouKeAllocateFastObjectEx(
     LOUSTR  ObjectLookup,
     PVOID   ConstructData
 ){
+
     PFAST_ALLOCATION_TEMPLATE Template = AcquireFastObjectTemplate(ObjectLookup);
     if(!Template){
         LouPrint("LouKeAllocateFastObjectEx():Object Dosent Exist:%s\n", ObjectLookup);
         return 0x00;
     }
+
 
     PVOID Result = 0;
     PFAST_ALLOCATION_TRACKER TmpTracker = &Template->PoolTrackers;

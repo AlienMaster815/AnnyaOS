@@ -14,6 +14,24 @@ extern "C" {
 #include <kernel/loustatus.h>
 #include <Modulation.h>
 
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmBufferEx64(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Shared,
+    UINT64  Flags
+);
+
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmBufferEx32(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Shared,
+    UINT64  Flags
+);
+
 #define POOL_FLAG_NORMAL            0
 #define POOL_FLAG_NO_WRAP_ARROUND   (1 << 0)
 
@@ -127,27 +145,6 @@ typedef struct _BO{
 }BO, *PBO;
 
 
-
-static inline
-bool RangeDoesNotInterfere(
-    uint64_t AddressForCheck, 
-    uint64_t SizeOfCheck,
-    uint64_t AddressOfBlock, 
-    uint64_t SizeOfBlock
-) {   
-    uint64_t Start = AddressOfBlock;
-    uint64_t End = AddressOfBlock + SizeOfBlock;
-
-    if (
-        ((AddressForCheck >= Start) && (AddressForCheck < End)) ||
-        (((AddressForCheck + SizeOfCheck) > Start) && ((AddressForCheck + SizeOfCheck) <= End)) ||
-        ((AddressForCheck <= Start) && ((AddressForCheck + SizeOfCheck) >= End))
-    ) {
-        return false;
-    }
-    return true;
-}
-
 static inline
 bool RangeInterferes(
     uint64_t AddressForCheck, 
@@ -166,6 +163,17 @@ bool RangeInterferes(
     }
     return false;
 }
+
+static inline
+bool RangeDoesNotInterfere(
+    uint64_t AddressForCheck, 
+    uint64_t SizeOfCheck,
+    uint64_t AddressOfBlock, 
+    uint64_t SizeOfBlock
+) {   
+    return (RangeInterferes(AddressForCheck, SizeOfCheck, AddressOfBlock, SizeOfBlock) == false);
+}
+
 
 static inline size_t GetAlignmentBySize(size_t Size){
     if(Size <= 2)    return 2;

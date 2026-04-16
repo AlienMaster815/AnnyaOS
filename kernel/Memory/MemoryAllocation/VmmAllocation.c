@@ -1,3 +1,5 @@
+#define _VMM_ALLOCATION_INTERNALS_
+
 #include <LouAPI.h>
 
 void RemoveAddressFromReservePool(UINT64 Address);
@@ -45,15 +47,16 @@ LouKeAlocateVmmAllocationTracker(
 ){
     PVMM_ALLOCATION_TRACKER NewTracker = LouKeMallocType(VMM_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
     Size = ROUND_UP64(Size, MEGABYTE_PAGE);
+    SIZE PageSize = (Size >= MEGABYTE_PAGE) ? MEGABYTE_PAGE : KILOBYTE_PAGE;
     PVOID NewVSpace = 0x00;
     PVOID NewPSpace = 0x00;
 
 
     if(Shared){
         if(HighMem){
-            NewVSpace = LouKeMallocPageVirt64(MEGABYTE_PAGE, Size / MEGABYTE_PAGE, Flags, true); //create device section AKA use in all VMs
+            NewVSpace = LouKeMallocPageVirt64(PageSize, Size / PageSize, Flags, true); //create device section AKA use in all VMs
         }else{
-            NewVSpace = LouKeMallocPageVirt32(MEGABYTE_PAGE, Size / MEGABYTE_PAGE, Flags, true); //create device section AKA use in all VMs
+            NewVSpace = LouKeMallocPageVirt32(PageSize, Size / PageSize, Flags, true); //create device section AKA use in all VMs
         }
         if(!NewVSpace){
             LouKeFree(NewTracker);  //LouKeFree:    for the Kernel Global Allocator
@@ -71,9 +74,15 @@ LouKeAlocateVmmAllocationTracker(
         }
     }else{
         if(HighMem){
-            NewVSpace = LouAllocatePhysical64UpEx(Size, ROUND_UP64(Alignment, MEGABYTE_PAGE));
+            LouKeVmmGetVPageReserveVm64(PageSize, Size / PageSize, &NewVSpace);
+            if(!NewVSpace){
+                NewVSpace = LouAllocatePhysical64UpEx(Size, ROUND_UP64(Alignment, PageSize));
+            }
         }else {
-            NewVSpace = LouAllocatePhysical32UpEx(Size, ROUND_UP64(Alignment, MEGABYTE_PAGE));
+            LouKeVmmGetVPageReserveVm32(PageSize, Size / PageSize, &NewVSpace);
+            if(!NewVSpace){
+                NewVSpace = LouAllocatePhysical32UpEx(Size, ROUND_UP64(Alignment, PageSize));
+            }
         }
         if(!NewVSpace){
             LouKeFree(NewTracker);  //LouKeFree:    for the Kernel Global Allocator
@@ -84,23 +93,13 @@ LouKeAlocateVmmAllocationTracker(
             LouKeFree(NewTracker);  //LouKeFree:    for the Kernel Global Allocator
             return 0x00;
         }
-        if(HighMem){
-            LouKeVmmCreatePageReserveVm64(
-                NewVSpace,
-                MEGABYTE_PAGE,
-                Size / MEGABYTE_PAGE,
-                false, //not a physical registration
-                true // virtual registration 
-            );
-        }else{
-            LouKeVmmCreatePageReserveVm32(
-                NewVSpace,
-                MEGABYTE_PAGE,
-                Size / MEGABYTE_PAGE,
-                false, //not a physical registration
-                true // virtual registration 
-            );
-        }
+        LouKeVmmCreatePageReserveVm(
+            NewVSpace,
+            PageSize,
+            Size / PageSize,
+            false, 
+            true 
+        );
     }
     NewTracker->VBase = (UINTPTR)NewVSpace;
     NewTracker->VSize = Size;
@@ -122,11 +121,7 @@ LouKeFreeVmmAllocationTracker(
         LouKeFreeLazyBuffer(Tracker->SharedTracker);
         LouKeFreePage((PVOID)Tracker->VBase);
     }else{
-        if(Tracker->HighMem){
-            LouKeVmmPutVPageReserveAddressVm64((PVOID)Tracker->VBase, LouKeVmmFreeHelper);
-        }else{
-            LouKeVmmPutVPageReserveAddressVm32((PVOID)Tracker->VBase, LouKeVmmFreeHelper);
-        }
+        LouKeVmmPutVPageReserveAddressVm((PVOID)Tracker->VBase, LouKeVmmFreeHelper);
     }   
     LouKeFree(Tracker);  //LouKeFree:    for the Kernel Global Allocator
 }    
@@ -163,7 +158,7 @@ VmmAllocationTrackerAllocate(
             //store the new process tracker in its xarray
             LouKeXaStore(
                 &AllocationTracker->VmmData,
-                LouKeGetCurrentProcessorNumber(),
+                LouKeGetProcessIdentification(),
                 NewData,
                 KERNEL_GENERIC_MEMORY
             );
@@ -231,7 +226,7 @@ LouKeAllocateVmmBufferEx64(
             Alignment,
             false,
             Flags,
-            false //not high mem for 32 bit allocations
+            true
         );
         if(NewTracker){
             Result = VmmAllocationTrackerAllocate(
@@ -279,7 +274,7 @@ LouKeAllocateVmmBufferEx32(
             Alignment,
             false,
             Flags,
-            true
+            false
         );
         if(NewTracker){
             Result = VmmAllocationTrackerAllocate(
@@ -292,5 +287,4 @@ LouKeAllocateVmmBufferEx32(
     }
     MutexUnlock(&VmmMemoryManager32.Lock);
     return Result;
-
 }

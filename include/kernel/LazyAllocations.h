@@ -34,7 +34,15 @@ LouKeFreeLazyBuffer(
 
 BOOL 
 LouKePageFaultIsDueToLazyBuffer(
-    PVOID Location
+    PVOID Location,
+    PLAZY_ALLOCATION_TRACKER* Out
+);
+
+LOUSTATUS 
+LouKeLazyBufferCommitPage(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count    //Optional
 );
 
 PVOID 

@@ -230,7 +230,7 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
 
     //Allocate a new stack
-    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags);
+    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags); //(UINT64)LouKeCreateStack(StackSize, true, PageFlags);
     NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
     //thread prioirties are backwards 0 being the highest +x being lowest 
     NewThreadHandle->ThreadPriority = (THREAD_PRIORITY_RINGS - 1) - ThreadPriority;

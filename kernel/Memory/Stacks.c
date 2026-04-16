@@ -1,46 +1,32 @@
 #define _STACK_INTERNALS_
 #include <LouAPI.h>
 
-UNUSED static LOUSINE_STACK    StackObjectList = {0};
-UNUSED static mutex_t          StackObjectLock = {0}; 
+static ListHeader   StackObjectList = {0};
+static mutex_t      StackObjectLock = {0}; 
 
 static PLOUSINE_STACK AllocateNewStackObject(){
-    PLOUSINE_STACK TmpStack = &StackObjectList;
+    PLOUSINE_STACK NewStack = LouKeMallocType(LOUSINE_STACK, KERNEL_GENERIC_MEMORY);
     MutexLock(&StackObjectLock);
-    while(TmpStack->Peers.NextHeader){
-        TmpStack = (PLOUSINE_STACK)TmpStack->Peers.NextHeader;
-    }
-    TmpStack->Peers.NextHeader = (PListHeader)LouKeMallocType(LOUSINE_STACK, KERNEL_GENERIC_MEMORY);
-    TmpStack = (PLOUSINE_STACK)TmpStack->Peers.NextHeader;
+    LouKeListAddTail(&NewStack->Peers, &StackObjectList);
     MutexUnlock(&StackObjectLock);
-    return TmpStack;
+    return NewStack;
 }
 
 UNUSED static void FreeStackObject(PLOUSINE_STACK StackObject){
-    PLOUSINE_STACK TmpStack = &StackObjectList;
-    PLOUSINE_STACK Follower;
     MutexLock(&StackObjectLock);
-    while(TmpStack->Peers.NextHeader){
-        Follower = TmpStack;
-        TmpStack = (PLOUSINE_STACK)TmpStack->Peers.NextHeader;
-        if(TmpStack == StackObject){
-            Follower->Peers.NextHeader = TmpStack->Peers.NextHeader;
-            LouKeFree(StackObject);
-            break;
-        }
-    }
+    LouKeListDeleteItem(&StackObject->Peers);
     MutexUnlock(&StackObjectLock);
+    LouKeFree(StackObject);
 }
 
-PLOUSINE_STACK 
+PVOID 
 LouKeCreateStack(
-    SIZE VSize,
-    SIZE CommitSize,
-    UINT64 PageFlags
+    SIZE    VSize,
+    BOOLEAN HighMem,
+    UINT64  PageFlags
 ){
-    //LouVMalloc(VSize, );
     PLOUSINE_STACK NewStack = AllocateNewStackObject();
+    NewStack->Stack = HighMem ? LouKeAllocateVmmBufferEx64(VSize, 16, false, PageFlags) : LouKeAllocateVmmBufferEx32(VSize, 16, false, PageFlags);
 
-
-    return NewStack;
+    return NewStack->Stack;
 }

@@ -389,6 +389,7 @@ void LouOsKrnlStart(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
+    
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;
@@ -445,7 +446,6 @@ void LouOsKrnlStart(
     }
 
     
-
     LouKeVmmCreateSectionEx(
         &SectionHandle,
         0x00,
@@ -456,9 +456,7 @@ void LouOsKrnlStart(
         AsmssExe,
         0x00,
         0x00
-    );
-        
-    
+    );    
 
     Status = LouKeZwCreateAccessToken(
         &AccessToken,

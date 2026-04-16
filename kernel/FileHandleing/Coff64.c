@@ -481,7 +481,7 @@ void LouKeLibTraceInitializeLibrarary(
 LOUSTATUS LouKeLoadCoffImage64(
     PCFI_OBJECT CfiObject
 ){
-
+        
     CfiObject->CoffCommitSection = Coff64CommitSection;
 
     PCOFF_IMAGE_HEADER Pe64ImageHeader = CfiObject->ImageHeader; 
@@ -500,6 +500,7 @@ LOUSTATUS LouKeLoadCoffImage64(
             ISize,
             &CfiObject->PhysicalLoadedAddress
         );
+    
     }
 
     if(Status != STATUS_SUCCESS){
@@ -578,8 +579,6 @@ LOUSTATUS LouKeLoadCoffImage64(
     EnableCoffImageProtection(CfiObject);
         
     LouPrint("Coff Loaded At Address:%h\n", CfiObject->LoadedAddress);
-
-
 
     return STATUS_SUCCESS;
 }

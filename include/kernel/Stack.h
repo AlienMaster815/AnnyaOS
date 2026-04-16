@@ -7,12 +7,19 @@ extern "C" {
 
 #ifndef _STACK_INTERNALS_
 typedef PVOID PLOUSINE_STACK; 
+
+PVOID 
+LouKeCreateStack(
+    SIZE    VSize,
+    BOOLEAN HighMem,
+    UINT64  PageFlags
+);
+
 #else
 
 typedef struct _LOUSINE_STACK{  
     ListHeader                  Peers;
-    PLAZY_ALLOCATION_TRACKER    AllocationData;
-
+    PVOID                       Stack;
 }LOUSINE_STACK, * PLOUSINE_STACK;
 
 #endif
