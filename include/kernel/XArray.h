@@ -26,7 +26,7 @@ typedef struct _XARRAY_NODE{
     ListHeader      Peers;
     UINT64          Base;
     UINT64          Bitmap;
-    UINT64          Entries[512];
+    UINT64          Entries[64];
 }XARRAY_NODE, * PXARRAY_NODE;
 
 typedef struct _XARRAY{

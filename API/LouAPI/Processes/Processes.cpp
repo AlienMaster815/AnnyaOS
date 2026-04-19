@@ -13,7 +13,11 @@ void LouKeTsmDestroyThreadHandle(
     PGENERIC_THREAD_DATA Thread
 ){
     LouKeFree(Thread->AfinityBitmap);
-    LouKeFree((PVOID)Thread->StackBase);
+    if(Thread->StackBase > GetKSpaceBase()){
+        LouKeFree((PVOID)Thread->StackBase);
+    }else{
+        LouKeVmmFreemVmBuffer((PVOID)Thread->StackBase); 
+    }
     DeAllocateSaveContext(Thread->ContextStorage);
     DeAllocateSaveContext(Thread->InterruptStorage);
     LouKeXaFreeUint32(&ProcessThreadIDXa, Thread->ThreadID);

@@ -138,6 +138,7 @@ VmmAllocationTrackerAllocate(
     BOOLEAN                     Zero,
     UINT64                      Flags
 ){
+
     PVOID Result = 0x00;
     if(AllocationTracker->Shared){
         Result = LouKeMallocFromLazyBufferEx(
@@ -202,6 +203,8 @@ VmmAllocationTrackerAllocate(
     }
     return Result;
 }
+
+
 
 UNUSED
 static 
@@ -367,4 +370,36 @@ LouKeVmmCommitPageAddress(
     PVMM_DATA Tracker = (PVMM_DATA)VmmOutData;
 
     return LouKeLazyBufferCommitPage(Tracker->AllocationTracker, Address, 1);
+}
+
+KERNEL_EXPORT 
+void
+LouKeVmmFreemVmBuffer64(
+    PVOID Address
+){
+
+
+
+}
+
+KERNEL_EXPORT 
+void
+LouKeVmmFreemVmBuffer32(
+    PVOID Address
+){
+
+
+
+}
+
+KERNEL_EXPORT 
+void
+LouKeVmmFreemVmBuffer(
+    PVOID Address
+){
+    if((UINT64)Address > (4 * GIGABYTE)){
+        LouKeVmmFreemVmBuffer64(Address);
+    }else{
+        LouKeVmmFreemVmBuffer32(Address);
+    }
 }

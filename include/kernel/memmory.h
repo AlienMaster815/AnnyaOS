@@ -14,7 +14,11 @@ extern "C" {
 #include <kernel/loustatus.h>
 #include <Modulation.h>
 
-
+KERNEL_EXPORT 
+void
+LouKeVmmFreemVmBuffer(
+    PVOID Address
+);
 
 KERNEL_EXPORT 
 PVOID 

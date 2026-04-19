@@ -10,28 +10,25 @@ LouKeXaStoreEx(
     PVOID       Pointer,
     UINT64      PageFlags
 ){
-
-    PXARRAY_NODE TmpNode = ListItemToType(Array->Nodes.NextHeader, XARRAY_NODE, Peers);
-
+    PXARRAY_NODE TmpNode;
     BOOLEAN NodePreExists = false;
     UINTPTR Result;
     UINT64 Member;
-    while(TmpNode){
+    ForEachListEntry(TmpNode, &Array->Nodes, Peers){
         if(RangeInterferes(
-            TmpNode->Base, 512,
+            TmpNode->Base, 64,
             Index, 1
         )){
             NodePreExists = true;
             break;
         }       
-        TmpNode = ListItemToType(TmpNode->Peers.NextHeader, XARRAY_NODE, Peers);
     }
     if(!NodePreExists){
         TmpNode = LouKeMallocType(XARRAY_NODE, PageFlags);
+        TmpNode->Base = ROUND_DOWN64(Index, 64);
         LouKeListAddTail(&TmpNode->Peers, &Array->Nodes);  
     }
 
-    TmpNode->Base = ROUND_DOWN64(Index, 512);
     Member = Index - TmpNode->Base;
     Result = TmpNode->Entries[Member];
     TmpNode->Entries[Member] = (UINT64)Pointer;
@@ -51,7 +48,7 @@ LouKeXaIsIndexUsedEx(
     UINT64 Member;
     ForEachListEntry(TmpNode, &Array->Nodes, Peers){
         if(RangeInterferes(
-            TmpNode->Base, 512,
+            TmpNode->Base, 64,
             Index, 1
         )){
             NodePreExists = true;
@@ -81,7 +78,7 @@ LouKeXaGetEx(
     UINT64 Member;
     ForEachListEntry(TmpNode, &Array->Nodes, Peers){
         if(RangeInterferes(
-            TmpNode->Base, 512,
+            TmpNode->Base, 64,
             Index, 1
         )){
             NodePreExists = true;

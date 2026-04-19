@@ -510,7 +510,6 @@ void LouOsKrnlStart(
         while(1);
     }
     LouPrint("Lousine Kernel Successfully Initialized\n");
-    while(1);
     //sleep(3000);
     //LouKeSystemShutdown(ShutdownReboot);
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
