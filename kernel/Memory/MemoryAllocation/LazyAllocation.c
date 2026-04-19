@@ -92,6 +92,16 @@ PVOID LouKeMallocFromLazyBuffer(
     );
 }
 
+void LouKeFreeFromLazyBuffer(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address
+){
+    LouKeFreeFromDynamicPool(
+        LazyBuffer->DynamicAllocations, 
+        Address
+    );
+}
+
 LOUSTATUS 
 LouKeLazyBufferCommitPage(
     PLAZY_ALLOCATION_TRACKER    LazyBuffer,

@@ -16,7 +16,7 @@ void LouKeTsmDestroyThreadHandle(
     if(Thread->StackBase > GetKSpaceBase()){
         LouKeFree((PVOID)Thread->StackBase);
     }else{
-        LouKeVmmFreemVmBuffer((PVOID)Thread->StackBase); 
+        LouKeVmmFreeVmBuffer((PVOID)Thread->StackBase); 
     }
     DeAllocateSaveContext(Thread->ContextStorage);
     DeAllocateSaveContext(Thread->InterruptStorage);

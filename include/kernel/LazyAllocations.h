@@ -58,6 +58,12 @@ LouKeMallocFromLazyBuffer(
     PLAZY_ALLOCATION_TRACKER    LazyBuffer,
     SIZE                        Size
 );
+
+void LouKeFreeFromLazyBuffer(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address
+);
+
 #endif
 #endif
 #ifdef __cplusplus

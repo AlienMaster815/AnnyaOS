@@ -16,7 +16,7 @@ extern "C" {
 
 KERNEL_EXPORT 
 void
-LouKeVmmFreemVmBuffer(
+LouKeVmmFreeVmBuffer(
     PVOID Address
 );
 

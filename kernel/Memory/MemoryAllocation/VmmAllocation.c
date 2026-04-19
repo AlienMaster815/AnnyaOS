@@ -204,7 +204,37 @@ VmmAllocationTrackerAllocate(
     return Result;
 }
 
-
+UNUSED 
+static 
+void 
+LouKeVmmFreeAddressFromTracker(
+    UINT32                      ProcessID,
+    PVMM_ALLOCATION_TRACKER     AllocationTracker,
+    PVOID                       Address
+){
+    if(AllocationTracker->Shared){
+        LouKeFreeFromLazyBuffer(
+            AllocationTracker->SharedTracker,
+            Address
+        );
+        LouKeReleaseReference(&AllocationTracker->ProcessesHandling);
+    }else if(LouKeXaIsIndexUsed(
+        &AllocationTracker->VmmData,
+        ProcessID
+    )){
+        UINT64 VmmOutData = 0x00;
+        LouKeXaGet(
+            &AllocationTracker->VmmData,
+            ProcessID,
+            &VmmOutData
+        );
+        if(VmmOutData){
+            PVMM_DATA Tracker = (PVMM_DATA)VmmOutData;
+            LouKeFreeFromLazyBuffer(Tracker->AllocationTracker, Address);
+            LouKeReleaseReference(&Tracker->ItemsUsed);
+        }
+    }
+}
 
 UNUSED
 static 
@@ -289,7 +319,7 @@ LouKeAllocateVmmBuffer32Ex2(
     PVMM_ALLOCATION_TRACKER ForwardTmpTracker;
     PVOID Result = 0x00;
     MutexLock(&VmmMemoryManager32.Lock);
-    ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
+    ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager32.AllocationTrackers, Peers){
         ForEachIf((!TmpTracker->Shared) && (TmpTracker->VSize >= Size)){
             Result = VmmAllocationTrackerAllocate(
                 ProcessID,
@@ -374,32 +404,79 @@ LouKeVmmCommitPageAddress(
 
 KERNEL_EXPORT 
 void
-LouKeVmmFreemVmBuffer64(
-    PVOID Address
+LouKeVmmFreeVmBuffer64Ex(
+    UINT32  ProcessID,
+    PVOID   Address
 ){
-
-
-
+    PVMM_ALLOCATION_TRACKER TmpTracker;
+    PVMM_ALLOCATION_TRACKER ForwardTmpTracker;
+    MutexLock(&VmmMemoryManager64.Lock);
+    ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
+        ForEachIf((!TmpTracker->Shared) && (RangeInterferes((UINT64)Address, 1, TmpTracker->VBase, TmpTracker->VSize))){
+            LouKeVmmFreeAddressFromTracker(
+                ProcessID,
+                TmpTracker,
+                Address
+            );
+            break;
+        }
+    }
+    MutexUnlock(&VmmMemoryManager64.Lock);
 }
 
 KERNEL_EXPORT 
 void
-LouKeVmmFreemVmBuffer32(
+LouKeVmmFreeVmBuffer32Ex(
+    UINT32  ProcessID,
+    PVOID   Address
+){
+    PVMM_ALLOCATION_TRACKER TmpTracker;
+    PVMM_ALLOCATION_TRACKER ForwardTmpTracker;
+    MutexLock(&VmmMemoryManager32.Lock);
+    ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager32.AllocationTrackers, Peers){
+        ForEachIf((!TmpTracker->Shared) && (RangeInterferes((UINT64)Address, 1, TmpTracker->VBase, TmpTracker->VSize))){
+            LouKeVmmFreeAddressFromTracker(
+                ProcessID,
+                TmpTracker,
+                Address
+            );
+            break;
+        }
+    }
+    MutexUnlock(&VmmMemoryManager32.Lock);
+}
+
+
+KERNEL_EXPORT 
+void
+LouKeVmmFreeVmBuffer64(
     PVOID Address
 ){
-
-
-
+    LouKeVmmFreeVmBuffer64Ex(
+        LouKeGetProcessIdentification(),
+        Address
+    );
 }
 
 KERNEL_EXPORT 
 void
-LouKeVmmFreemVmBuffer(
+LouKeVmmFreeVmBuffer32(
+    PVOID Address
+){
+    LouKeVmmFreeVmBuffer32Ex(
+        LouKeGetProcessIdentification(),
+        Address
+    );
+}
+
+KERNEL_EXPORT 
+void
+LouKeVmmFreeVmBuffer(
     PVOID Address
 ){
     if((UINT64)Address > (4 * GIGABYTE)){
-        LouKeVmmFreemVmBuffer64(Address);
+        LouKeVmmFreeVmBuffer64(Address);
     }else{
-        LouKeVmmFreemVmBuffer32(Address);
+        LouKeVmmFreeVmBuffer32(Address);
     }
 }
