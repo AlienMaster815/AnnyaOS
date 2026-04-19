@@ -1,0 +1,4 @@
+LIBRARY Shell32.dll
+
+EXPORTS
+    SHChangeNotify

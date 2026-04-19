@@ -66,7 +66,7 @@ LouKeAlocateVmmAllocationTracker(
         RequestPhysicalAddress((UINT64)NewVSpace, &TmpOut);
         NewPSpace = (PVOID)TmpOut;
         
-        NewTracker->SharedTracker = LouKeAllocateLazyBuffer(NewVSpace, Size, Flags);
+        NewTracker->SharedTracker = LouKeAllocateLazyBuffer(NewVSpace, Size, 0, Flags);
         if(!NewTracker->SharedTracker){
             LouKeFreePage(NewVSpace);
             LouKeFree(NewTracker);  //LouKeFree:    for the Kernel Global Allocator
@@ -131,9 +131,11 @@ UNUSED
 static
 PVOID 
 VmmAllocationTrackerAllocate(
+    UINT32                      ProcessID,
     PVMM_ALLOCATION_TRACKER     AllocationTracker,
     SIZE                        Size,
     SIZE                        Alignment,
+    BOOLEAN                     Zero,
     UINT64                      Flags
 ){
     PVOID Result = 0x00;
@@ -149,16 +151,16 @@ VmmAllocationTrackerAllocate(
     }else {
         if(!LouKeXaIsIndexUsed(
             &AllocationTracker->VmmData,
-            LouKeGetProcessIdentification()
+            ProcessID
         )){ 
             //allocate new tracker for current process
             PVMM_DATA NewData = LouKeMallocType(VMM_DATA, KERNEL_GENERIC_MEMORY);
             NewData->Flags = Flags;
-            NewData->AllocationTracker = LouKeAllocateLazyBuffer((PVOID)AllocationTracker->VBase, AllocationTracker->VSize, Flags);
+            NewData->AllocationTracker = LouKeAllocateLazyBuffer((PVOID)AllocationTracker->VBase, AllocationTracker->VSize, 0, Flags);
             //store the new process tracker in its xarray
             LouKeXaStore(
                 &AllocationTracker->VmmData,
-                LouKeGetProcessIdentification(),
+                ProcessID,
                 NewData,
                 KERNEL_GENERIC_MEMORY
             );
@@ -174,7 +176,7 @@ VmmAllocationTrackerAllocate(
             //get the pre allocated xarray data
             LouKeXaGet(
                 &AllocationTracker->VmmData,
-                LouKeGetProcessIdentification(),
+                ProcessID,
                 &VmmOutData
             );
             //sanity check data
@@ -191,14 +193,38 @@ VmmAllocationTrackerAllocate(
             }
         }
     }
+    if(Result && Zero){
+        if(LouKeGetProcessIdentification() == ProcessID){
+            memset(Result, 0, Size);
+        }else{
+            LouKeMemSetVmSpace(ProcessID, Result, 0, Size);
+        }
+    }
     return Result;
+}
+
+UNUSED
+static 
+PVMM_ALLOCATION_TRACKER
+LouKeVmmGetAllocationTracker64(
+    PVOID   Address
+){
+    PVMM_ALLOCATION_TRACKER TmpTracker;
+    ForEachListEntry(TmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
+        if(RangeInterferes(TmpTracker->VBase, TmpTracker->VSize, (UINT64)Address, 1)){
+            return TmpTracker;
+        }
+    }
+    return 0x00;
 }
 
 KERNEL_EXPORT 
 PVOID 
-LouKeAllocateVmmBufferEx64(
+LouKeAllocateVmmBuffer64Ex2(
+    UINT32  ProcessID,
     SIZE    Size,
     SIZE    Alignment,
+    BOOLEAN Zero,
     BOOLEAN Shared,
     UINT64  Flags
 ){
@@ -209,9 +235,11 @@ LouKeAllocateVmmBufferEx64(
     ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
         ForEachIf((!TmpTracker->Shared) && (TmpTracker->VSize >= Size)){
             Result = VmmAllocationTrackerAllocate(
+                ProcessID,
                 TmpTracker,
                 Size,
                 Alignment,
+                Zero,
                 Flags
             );        
             if(Result){
@@ -230,9 +258,11 @@ LouKeAllocateVmmBufferEx64(
         );
         if(NewTracker){
             Result = VmmAllocationTrackerAllocate(
+                ProcessID,
                 NewTracker,
                 Size,
                 Alignment,
+                Zero,
                 Flags
             );        
         }
@@ -243,9 +273,11 @@ LouKeAllocateVmmBufferEx64(
 
 KERNEL_EXPORT 
 PVOID 
-LouKeAllocateVmmBufferEx32(
+LouKeAllocateVmmBuffer32Ex2(
+    UINT32  ProcessID,
     SIZE    Size,
     SIZE    Alignment,
+    BOOLEAN Zero,
     BOOLEAN Shared,
     UINT64  Flags
 ){
@@ -257,9 +289,11 @@ LouKeAllocateVmmBufferEx32(
     ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
         ForEachIf((!TmpTracker->Shared) && (TmpTracker->VSize >= Size)){
             Result = VmmAllocationTrackerAllocate(
+                ProcessID,
                 TmpTracker,
                 Size,
                 Alignment,
+                Zero,
                 Flags
             );        
             if(Result){
@@ -278,13 +312,59 @@ LouKeAllocateVmmBufferEx32(
         );
         if(NewTracker){
             Result = VmmAllocationTrackerAllocate(
+                ProcessID,
                 NewTracker,
                 Size,
                 Alignment,
+                Zero,
                 Flags
             );        
         }
     }
     MutexUnlock(&VmmMemoryManager32.Lock);
     return Result;
+}
+
+BOOLEAN
+LouKeVmmAddressCausePageFault(
+    PVOID Address, 
+    PVMM_ALLOCATION_TRACKER* Out
+){
+    *Out = LouKeVmmGetAllocationTracker64(Address);
+    return *Out ?  true : false;
+}
+
+LOUSTATUS
+LouKeVmmCommitPageAddress(
+    PVOID                   Address, 
+    PVMM_ALLOCATION_TRACKER In
+){
+    if(In->Shared){
+        LouPrint("LouKeVmmCommitPageAddress():Address Is Shared\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+    if(!LouKeXaIsIndexUsed(
+        &In->VmmData,
+        LouKeGetProcessIdentification()
+    )){     
+
+        LouPrint("LouKeVmmCommitPageAddress():Address Not Used By Process:%d\n", LouKeGetProcessIdentification());
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    UINT64 VmmOutData = 0x00;
+    //get the pre allocated xarray data
+    LouKeXaGet(
+        &In->VmmData,
+        LouKeGetProcessIdentification(),
+        &VmmOutData
+    );
+    //sanity check data
+    if(!VmmOutData){
+        LouPrint("LouKeVmmCommitPageAddress():VM Data NULL\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    PVMM_DATA Tracker = (PVMM_DATA)VmmOutData;
+
+    return LouKeLazyBufferCommitPage(Tracker->AllocationTracker, Address, 1);
 }

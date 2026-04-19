@@ -470,7 +470,8 @@ LOUSTATUS SetBasicInterrupts(bool Init){
         }
         set_idt_gate(0x80, Handler[0x80], cs_value, 1, 0xEE); //MSVC Systemcall Stack
         set_idt_gate(0x81, Handler[0x81], cs_value, 2, 0xEE); //System V Systemcall Stacl
-        set_idt_gate(  32, Handler[  32], cs_value, 3, 0x8E);   //Everything else
+        set_idt_gate(  32, Handler[  32], cs_value, 3, 0x8E); //Process Manager
+        set_idt_gate(0x0E, Handler[0x0E], cs_value, 4, 0x8E); //PF Manager
 
         return 0;
     }

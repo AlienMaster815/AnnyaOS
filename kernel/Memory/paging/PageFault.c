@@ -1,5 +1,17 @@
 #include <LouAPI.h>
 
+typedef PVOID PVMM_ALLOCATION_TRACKER;
+BOOLEAN
+LouKeVmmAddressCausePageFault(
+    PVOID Address, 
+    PVMM_ALLOCATION_TRACKER* Out
+);
+LOUSTATUS
+LouKeVmmCommitPageAddress(
+    PVOID                   Address, 
+    PVMM_ALLOCATION_TRACKER In
+);
+
 int LouPrintPanic(char* format, ...);
 
 extern uint64_t InterruptCode;
@@ -81,15 +93,20 @@ void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData);
 void PageFault(uint64_t FaultingStackP) {
     uint64_t VAddress = get_cr2();
     uint64_t PAddress = 0x00;
-    PLAZY_ALLOCATION_TRACKER Out;
-    LOUSTATUS Status;
-    if(VAddress && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &Out)){
-        //LouPrint("Lazy Buffer Page Fault:VAddress:%h\n", VAddress);
-        Status = LouKeLazyBufferCommitPage(Out, (PVOID)VAddress, 1);
+    PVMM_ALLOCATION_TRACKER Out;
+    UNUSED LOUSTATUS Status;
+
+    RequestPhysicalAddress(VAddress, &PAddress);
+
+    if((!PAddress) && (VAddress) && LouKeVmmAddressCausePageFault((PVOID)VAddress, &Out)){
+        Status = LouKeVmmCommitPageAddress((PVOID)VAddress, Out);
         if(Status == STATUS_SUCCESS){
             clear_cr2();
             return;
         }
+
+        LouPrint("VAddress:%h\n", VAddress);
+        while(1);
     }
 
     //DEBUG_TRAP
@@ -97,8 +114,6 @@ void PageFault(uint64_t FaultingStackP) {
     LouPrint("PAGE FUALT:%h\n", ((CPUContext*)FaultingStackP)->rip);
 
     LouPrint("\nPage Fault Detected At Address %h Handleing Now :: Error Code:%h\n",VAddress, InterruptCode);
-
-    RequestPhysicalAddress(VAddress, &PAddress);
 
     LouPrint("Physical Address:%h\n", PAddress);
 

@@ -204,7 +204,6 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     PTIME_T                 StartTime,
     UINT8*                  AfinityBitmap
 ){
-
     //check for certain required parameters/values
     if(
         (!OutHandle)    || (!StackSize) || 
@@ -214,7 +213,11 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
         LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
         return STATUS_INVALID_PARAMETER;
     }
-     
+    UINT32 ProcessID = 0;
+    if(Process){
+        ProcessID = Process->ProcessID;
+    } 
+
     UINT64 PageFlags;
     if((CodeSegment & 0b11) == 3){
         PageFlags = USER_GENERIC_MEMORY;
@@ -230,8 +233,11 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
 
     //Allocate a new stack
-    NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags); //(UINT64)LouKeCreateStack(StackSize, true, PageFlags);
+    NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(ProcessID, StackSize, true, PageFlags);
+    LouPrint("New StackBase:%h\n", NewThreadHandle->StackBase);
     NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
+    LouPrint("New StackTop :%h\n", NewThreadHandle->StackTop);
+    
     //thread prioirties are backwards 0 being the highest +x being lowest 
     NewThreadHandle->ThreadPriority = (THREAD_PRIORITY_RINGS - 1) - ThreadPriority;
 

@@ -215,14 +215,33 @@ LOUSTATUS LouKePsmGetProcessData(
     if((!ProcessName) || (!OutHandle)){
         return STATUS_INVALID_PARAMETER;
     }
-
+    LouKIRQL Irql;
     PGENERIC_PROCESS_DATA TmpHandle;
+    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
     ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
         ForEachIf(!strcmp(TmpHandle->ProcessName, ProcessName)){
             *OutHandle = (HANDLE)TmpHandle;
+            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
             return STATUS_SUCCESS;
         }
     }
+    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
     *OutHandle = 0x00;
     return STATUS_NO_SUCH_FILE;
+}
+
+LOUAPI
+uint64_t 
+LouKePsmGetProcessPml4(uint32_t ProcessID){
+    PGENERIC_PROCESS_DATA TmpHandle;
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
+    ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
+        if(ProcessID == TmpHandle->ProcessID){
+            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+            return (TmpHandle->PMLTree - GetKSpaceBase());
+        }
+    }
+    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+    return 0x00;
 }

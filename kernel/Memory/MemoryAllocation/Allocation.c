@@ -20,7 +20,7 @@ uint64_t LouKeGetRamSize();
 
 extern LOUSINE_LOADER_INFO KernelLoaderInfo;
 
-static mutex_t MemmoryMapLock;
+static spinlock_t MemmoryMapLock = {0};
 
 static struct master_multiboot_mmap_entry* LousineMemoryMapTable;
 
@@ -65,22 +65,23 @@ uint64_t GetUsedMemory(){
 }
 
 uint64_t GetAllocationBlockSize(uint64_t Address){
-    MutexLock(&MemmoryMapLock);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     for(uint16_t i = 0; i < AddressesLogged; i++){
         if(AddressBlock[i].Address == Address){
-            MutexUnlock(&MemmoryMapLock);    
+            LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
             return AddressBlock[i].size;
         }
     }
     for(uint64_t k = 0; k < AllocationBlocksConfigured; k++){
         for (uint32_t i = 0; i < TotalAllocations[k]; i++) {
             if(AllocationBlocks[k][i].Address == Address){
-                MutexUnlock(&MemmoryMapLock);    
+                LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
                 return AllocationBlocks[k][i].size;
             }
         }
     }
-    MutexUnlock(&MemmoryMapLock);    
+    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
     return 0x00;
 }
 
@@ -206,16 +207,17 @@ bool EnforceSystemMemoryMap(
     uint64_t Address, 
     uint64_t size
 ){
-    MutexLock(&MemmoryMapLock);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
         if(AddressBlock[i].Address == Address){
-            MutexUnlock(&MemmoryMapLock);    
+            LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
             return false; //System Already Mapped Address
         }
         if(AddressBlock[i].Address == 0x00){
             AddressBlock[i].Address = Address;
             AddressBlock[i].size = size;
-            MutexUnlock(&MemmoryMapLock);    
+            LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
             return true;
         }
     }
@@ -225,7 +227,7 @@ bool EnforceSystemMemoryMap(
                 if (AllocationBlocks[k][j].Address == 0x00) {
                     AllocationBlocks[k][j].Address = Address;
                     AllocationBlocks[k][j].size = size;
-                    MutexUnlock(&MemmoryMapLock);    
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
                     return true;
                 }
             }
@@ -241,14 +243,14 @@ bool EnforceSystemMemoryMap(
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = Address;
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = size;
         TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
-        MutexUnlock(&MemmoryMapLock);    
+        LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
         return true;
     }
     if(AddressesLogged < 512){
         AddressBlock[AddressesLogged].Address = Address;
         AddressBlock[AddressesLogged].size = size;
         AddressesLogged++;
-        MutexUnlock(&MemmoryMapLock);  
+        LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);  
         return true;
     }
     LouPrint("KERNEL_PANIC:Out Of Memory EnforceSystemMemoryMap()\n");
@@ -264,7 +266,8 @@ static void* _LouMallocEx(
     SIZE BytesToAllocate, 
     UINT64 Alignment
 ){
-    MutexLock(&MemmoryMapLock);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     uint16_t Number_Of_Entries = (LousineMemoryMapTable->tag.size - sizeof(struct master_multiboot_mmap_entry)) / LousineMemoryMapTable->entry_size;
     if (LousineMemoryMapTable->entry_version == 0) {
         struct multiboot_mmap_entry* mmap_entry;
@@ -337,7 +340,7 @@ static void* _LouMallocEx(
                             if (AllocationBlocks[k][j].Address == 0x00) {
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
-                                MutexUnlock(&MemmoryMapLock); 
+                                LouKeReleaseSpinLock(&MemmoryMapLock, &Irql); 
                                 memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                                 return (void*)AlignmentCheck;
                             }
@@ -355,7 +358,7 @@ static void* _LouMallocEx(
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
-                    MutexUnlock(&MemmoryMapLock);    
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
                     memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                     return (void*)AlignmentCheck;
                 }
@@ -375,7 +378,8 @@ static void* _LouMallocEx64(
     SIZE BytesToAllocate, 
     UINT64 Alignment
 ){
-    MutexLock(&MemmoryMapLock);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     uint16_t Number_Of_Entries = (LousineMemoryMapTable->tag.size - sizeof(struct master_multiboot_mmap_entry)) / LousineMemoryMapTable->entry_size;
     if (LousineMemoryMapTable->entry_version == 0) {
         struct multiboot_mmap_entry* mmap_entry;
@@ -448,7 +452,7 @@ static void* _LouMallocEx64(
                             if (AllocationBlocks[k][j].Address == 0x00) {
                                 AllocationBlocks[k][j].Address = AlignmentCheck;
                                 AllocationBlocks[k][j].size = BytesToAllocate;
-                                MutexUnlock(&MemmoryMapLock);  
+                                LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);  
                                 memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                                 return (void*)AlignmentCheck;
                             }
@@ -466,7 +470,7 @@ static void* _LouMallocEx64(
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
                     TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
-                    MutexUnlock(&MemmoryMapLock); 
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql); 
                     memset((void*)(AlignmentCheck + GetKSpaceBase()), 0 , BytesToAllocate);
                     return (void*)AlignmentCheck;
                 }
@@ -477,7 +481,7 @@ static void* _LouMallocEx64(
             else continue;
         }
     }
-    MutexUnlock(&MemmoryMapLock);    
+    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
     return NULL; 
 }
 
@@ -543,12 +547,13 @@ void LouGeneralFreeMemory(void* Address){
 }
 
 void LouFree(PVOID Addr) {
-    MutexLock(&MemmoryMapLock);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
         if(AddressBlock[i].Address == (uint64_t)Addr){
             AddressBlock[i].Address     = 0x00;
             AddressBlock[i].size        = 0x00;
-            MutexUnlock(&MemmoryMapLock);    
+            LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
             return;
         }
     }
@@ -557,19 +562,19 @@ void LouFree(PVOID Addr) {
             if(AllocationBlocks[i][j].Address == (uint64_t)Addr){
                 AllocationBlocks[i][j].Address  = 0x00;
                 AllocationBlocks[i][j].size     = 0x00;
-                MutexUnlock(&MemmoryMapLock);    
+                LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
                 return;
             }
         }
     }
-    MutexUnlock(&MemmoryMapLock);  
+    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);  
     LouPrint("Address Not Freed:%h\n", Addr);
     while(1);
 }
 
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
-
-    MutexLock(&MemmoryMapLock);
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     uint64_t AlignmentCheck = (GetKSpaceBase() + LouKeGetRamSize());
     if(!AlignmentCheck){
         AlignmentCheck = 4 * GIGABYTE;
@@ -620,7 +625,7 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                 if (AllocationBlocks[k][j].Address == 0x00) {
                     AllocationBlocks[k][j].Address = AlignmentCheck;
                     AllocationBlocks[k][j].size = BytesToAllocate;
-                    MutexUnlock(&MemmoryMapLock);    
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
                     return (void*)AlignmentCheck;
                 }
             }
@@ -631,7 +636,7 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                     AllocationBlocks[k][j].Address = AlignmentCheck;
                     AllocationBlocks[k][j].size = BytesToAllocate;
                     //LouPrint("Address:%h\n", AlignmentCheck);
-                    MutexUnlock(&MemmoryMapLock);    
+                    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
                     return (void*)AlignmentCheck;
                 }
             }
@@ -648,13 +653,13 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = BytesToAllocate;
         TotalAllocations[CURRENT_ALLOCATION_BLOCK]++;
-        MutexUnlock(&MemmoryMapLock);    
+        LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
         return (void*)AlignmentCheck;
     }
 
     while(1);
 
-    MutexUnlock(&MemmoryMapLock);
+    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);
     while(1);
     return NULL;
 }

@@ -220,6 +220,7 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
     }   
 
     BOOLEAN NoWrapArround = Pool->Flags & POOL_FLAG_NO_WRAP_ARROUND;
+    BOOLEAN NoMemset = Pool->Flags & POOL_FLAG_NO_MEMSET; 
 
     size_t Base = Pool->VLocation;
     size_t Limit = Base + Pool->PoolSize;
@@ -255,7 +256,9 @@ retry_search:
             if(!NoWrapArround){
                 Pool->LastOut = Result + AllocationSize;
             }
-            memset((void*)Result, 0, AllocationSize);
+            if(!NoMemset){
+                memset((void*)Result, 0, AllocationSize);
+            }
             return (void*)Result;
         }
     }

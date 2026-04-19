@@ -343,7 +343,7 @@ LOUSTATUS LouKeTsmInitializeIdleThreads();
 
 LOUAPI void InitializeProcessManager(){
     LouPrint("Initializing Process Manager\n");
-
+    
     ProcessBlock.ProcessorCount = GetNPROC();
     ProcessBlock.ProcStateBlock = LouKeMallocArray(PROCESSOR_STATE_BLOCK, ProcessBlock.ProcessorCount, KERNEL_GENERIC_MEMORY);
 
@@ -357,6 +357,7 @@ LOUAPI void InitializeProcessManager(){
     MutexLock(&CoreIrqReadyLock);
     
     LouKeTsmInitializeIdleThreads();
+
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     

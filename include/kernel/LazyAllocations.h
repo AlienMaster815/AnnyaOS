@@ -24,6 +24,7 @@ PLAZY_ALLOCATION_TRACKER
 LouKeAllocateLazyBuffer(
     PVOID VirtualLocation, 
     SIZE VirtualSize, 
+    SIZE CommitSize,
     UINT64 PageFlags
 );
 

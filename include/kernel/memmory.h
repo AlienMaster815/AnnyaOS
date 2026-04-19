@@ -14,26 +14,37 @@ extern "C" {
 #include <kernel/loustatus.h>
 #include <Modulation.h>
 
+
+
 KERNEL_EXPORT 
 PVOID 
-LouKeAllocateVmmBufferEx64(
+LouKeAllocateVmmBuffer64Ex2(
+    UINT32  ProcessID,
     SIZE    Size,
     SIZE    Alignment,
+    BOOLEAN Zero,
     BOOLEAN Shared,
     UINT64  Flags
 );
 
 KERNEL_EXPORT 
 PVOID 
-LouKeAllocateVmmBufferEx32(
+LouKeAllocateVmmBuffer32Ex2(
+    UINT32  ProcessID,
     SIZE    Size,
     SIZE    Alignment,
+    BOOLEAN Zero,
     BOOLEAN Shared,
     UINT64  Flags
 );
+
+
 
 #define POOL_FLAG_NORMAL            0
 #define POOL_FLAG_NO_WRAP_ARROUND   (1 << 0)
+#define POOL_FLAG_NO_MEMSET         (1 << 1)
+
+#define POOL_FLAG_LAZY_POOL         (POOL_FLAG_NO_WRAP_ARROUND | POOL_FLAG_NO_MEMSET)
 
 #define HighQuad(v) ((__int128)v >> 64)
 #define LowQuad(v) ((__int128)v & 0xFFFFFFFFFFFFFFFF)
@@ -524,9 +535,23 @@ void* LouKeMallocVirt32(
 );
 size_t LouKeGetAllocationSize(PVOID Addrress);
 
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(
+    uint64_t  VAddress,
+    uint64_t* PAddress,
+    uint64_t  Pml4Base 
+);
+
 KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     uint64_t VAddress,
     uint64_t* PAddress
+);
+
+LOUSTATUS 
+LouKeMemSetVmSpace(
+    UINT32 ProcessID, 
+    PVOID Addres, 
+    int v, 
+    SIZE Count
 );
 
 PLMPOOL_DIRECTORY LouKeMapPool(

@@ -389,8 +389,9 @@ void LouOsKrnlStart(
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-    
 
+    //TODO: Debug new stack allocators
+    
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;
 
@@ -444,7 +445,6 @@ void LouOsKrnlStart(
         LouPrint("ERROR Unable To Open File\n");
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
-
     
     LouKeVmmCreateSectionEx(
         &SectionHandle,
@@ -464,6 +464,7 @@ void LouOsKrnlStart(
         0x00,
         0x00
     );
+
 
     if(Status != STATUS_SUCCESS){
         LouPrint("PANIC:Unable To Create System Token\n");
@@ -509,6 +510,7 @@ void LouOsKrnlStart(
         while(1);
     }
     LouPrint("Lousine Kernel Successfully Initialized\n");
+    while(1);
     //sleep(3000);
     //LouKeSystemShutdown(ShutdownReboot);
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
@@ -517,8 +519,7 @@ void LouOsKrnlStart(
 }
 
 
-//TODO:
-//Test the new Vmm Allocation Subsystem
+//TODO: xAPIC has been depreciated work on x2APIC
 
 // Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 

@@ -218,6 +218,9 @@ UserSpace:
 	$(MAKE) -C EXE/Init clean
 	$(MAKE) -C EXE/Init all
 
+	$(MAKE) -C EXE/cmd clean
+	$(MAKE) -C EXE/cmd all
+
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/User32 all
 
@@ -274,6 +277,7 @@ cleanall:
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C EXE/Explorer clean
 	$(MAKE) -C EXE/Init clean
+	$(MAKE) -C EXE/cmd clean
 	$(MAKE) -C EXE/LouLoad clean
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/VCRUNTIME140 clean 

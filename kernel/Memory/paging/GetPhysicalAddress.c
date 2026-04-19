@@ -19,12 +19,11 @@ void CalculateTableMarks(
 PML* GetPageBase();
 bool IsMegabytePage(uint64_t* PageAddress);
 
-KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
-    uint64_t VAddress,
-    uint64_t* PAddress
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(
+    uint64_t  VAddress,
+    uint64_t* PAddress,
+    uint64_t  Pml4Base 
 ){
-    
-    // Calculate the entries for each page level
     uint64_t L4Entry = 0;
     uint64_t L3Entry = 0;
     uint64_t L2Entry = 0;
@@ -38,13 +37,8 @@ KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
         &L2Entry,
         &L1Entry
     );
-    //LouPrint("VAddress:%h\n",VAddress);
-    //LouPrint("L4Entry:%h\n", L4Entry);
-    //LouPrint("L3Entry:%h\n", L3Entry);
-    //LouPrint("L2Entry:%h\n", L2Entry);
-    //LouPrint("L1Entry:%h\n", L1Entry);  
 
-    UINT64* Tmp = (UINT64*)((UINT64)GetPageBase() + GetKSpaceBase());
+    UINT64* Tmp = (UINT64*)((UINT64)Pml4Base + GetKSpaceBase());
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (uint64_t*)(Tmp[L4Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
@@ -72,4 +66,15 @@ KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
     *PAddress += AddressToPageOffset;
 
     return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT LOUSTATUS RequestPhysicalAddress(
+    uint64_t VAddress,
+    uint64_t* PAddress
+){
+    return RequestPhysicalAddressEx(
+        VAddress,
+        PAddress,
+        (UINT64)GetPageBase()
+    );
 }

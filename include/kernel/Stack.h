@@ -10,6 +10,7 @@ typedef PVOID PLOUSINE_STACK;
 
 PVOID 
 LouKeCreateStack(
+    UINT32  ProcessID,
     SIZE    VSize,
     BOOLEAN HighMem,
     UINT64  PageFlags

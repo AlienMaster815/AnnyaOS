@@ -21,12 +21,14 @@ UNUSED static void FreeStackObject(PLOUSINE_STACK StackObject){
 
 PVOID 
 LouKeCreateStack(
+    UINT32  ProcessID,
     SIZE    VSize,
     BOOLEAN HighMem,
     UINT64  PageFlags
 ){
     PLOUSINE_STACK NewStack = AllocateNewStackObject();
-    NewStack->Stack = HighMem ? LouKeAllocateVmmBufferEx64(VSize, 16, false, PageFlags) : LouKeAllocateVmmBufferEx32(VSize, 16, false, PageFlags);
+    NewStack->Stack = HighMem ? LouKeAllocateVmmBuffer64Ex2(ProcessID, VSize, 16, false, false, PageFlags) : LouKeAllocateVmmBuffer32Ex2(ProcessID, VSize, 16, false, false, PageFlags);
+
 
     return NewStack->Stack;
 }

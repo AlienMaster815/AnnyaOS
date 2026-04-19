@@ -19,9 +19,9 @@ static void FreeLazyTracker(PLAZY_ALLOCATION_TRACKER TrackMember){
     LouKeFree(TrackMember);
 }
 
-PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE VirtualSize, UINT64 PageFlags){
+PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE VirtualSize, SIZE CommitSize, UINT64 PageFlags){
 
-    UINT64 PageSize = 0;
+    SIZE PageSize = 0; 
     if(ROUND_UP64(VirtualSize, MEGABYTE_PAGE) == VirtualSize){
         PageSize = MEGABYTE_PAGE;
     }else if(ROUND_UP64(VirtualSize, KILOBYTE_PAGE) == VirtualSize){
@@ -31,6 +31,14 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
         return 0x00;
     }
     
+    if(PageSize == MEGABYTE_PAGE && CommitSize){
+        if(ROUND_UP64(CommitSize, MEGABYTE_PAGE) != CommitSize){
+            PageSize = KILOBYTE_PAGE;
+        }else if(ROUND_UP64(CommitSize, KILOBYTE_PAGE) != CommitSize){
+            return 0x00;
+        }
+    }
+
     PLAZY_ALLOCATION_TRACKER NewTracker = AllocateLazyTracker();
     NewTracker->VirtualSize = VirtualSize;
     NewTracker->VirtualLocation = VirtualLocation;
@@ -38,7 +46,13 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
     NewTracker->PageFlags = PageFlags;
     NewTracker->PhyMappingCount = VirtualSize / PageSize;
     NewTracker->PhysicalMappings = LouKeMallocArray(PVOID, NewTracker->PhyMappingCount, KERNEL_GENERIC_MEMORY);
-    NewTracker->DynamicAllocations = LouKeMapDynamicPool((UINT64)VirtualLocation, VirtualSize, "LAZY_POOL", POOL_FLAG_NO_WRAP_ARROUND);
+    NewTracker->DynamicAllocations = LouKeMapDynamicPool((UINT64)VirtualLocation, VirtualSize, "LAZY_POOL", POOL_FLAG_LAZY_POOL);
+    if(CommitSize){
+        PVOID CommitPhyAddress = LouAllocatePhysical64UpEx(CommitSize, PageSize);//TODO: add 32 bit buffers too
+        for(SIZE i = 0 ; i < NewTracker->PhyMappingCount; i++){
+            NewTracker->PhysicalMappings[i]= CommitPhyAddress + (i * PageSize);
+        }
+    }
     return NewTracker;
 }
 
@@ -108,14 +122,14 @@ LouKeLazyBufferCommitPage(
         Address = (PVOID)(LazyBuffer->VirtualLocation + i * LazyBuffer->PageSize);
     }else{
         if(RangeDoesNotInterfere((UINT64)Address, 1, (UINT64)LazyBuffer->VirtualLocation, (UINT64)LazyBuffer->VirtualSize)){
-            //LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope\n");
+            LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope\n");
             return STATUS_INVALID_PARAMETER;
         }
         Address = (PVOID)ROUND_DOWN64((UINT64)Address, LazyBuffer->PageSize);
         i = ((UINT64)(Address - LazyBuffer->VirtualLocation) / LazyBuffer->PageSize);
         for(SIZE j = 0; j < Count; j++){
             if(LazyBuffer->PhysicalMappings[i + j]){
-                //LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Address Taken\n");
+                LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Address Taken\n");
                 return STATUS_INVALID_PARAMETER;
             }
         }
@@ -124,6 +138,7 @@ LouKeLazyBufferCommitPage(
         PVOID NewPAddress = LouAllocatePhysical64UpEx(LazyBuffer->PageSize, LazyBuffer->PageSize);
         LazyBuffer->PhysicalMappings[i + foo] = NewPAddress;
         LouMapAddress((UINT64)NewPAddress, (UINT64)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), LazyBuffer->PageFlags, LazyBuffer->PageSize);
+        memset((PVOID)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), 0, LazyBuffer->PageSize);
         LouKeVmmCreatePageReserveVm(NewPAddress, LazyBuffer->PageSize, 1, true, false);
     }
     return STATUS_SUCCESS;
