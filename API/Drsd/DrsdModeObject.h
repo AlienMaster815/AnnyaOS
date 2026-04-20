@@ -57,4 +57,10 @@ DrsdModeObjectAddEx(
     void                  (*ObjectFreeCb)(PKERNEL_REFERENCE)
 );
 
+PDRSD_PROPERTY
+DrsdModeObjectFindPropertyId(
+    PDRSD_MODE_OBJECT   Object,
+    UINT32              PropertyID
+);
+
 #endif

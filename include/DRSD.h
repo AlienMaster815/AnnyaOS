@@ -364,21 +364,10 @@ typedef struct _DRSD_PROPERTY{
 }DRSD_PROPERTY, * PDRSD_PROPERTY;
 
 typedef struct _DRSD_OBJECT_PROPERTIES{
-    size_t                              CurrentProperties;
-    struct _DRSD_PROPERTY_OBJECT*       Properties[DRSD_MAXIMUM_OBJECT_PROPERTIES];
+    size_t                              Count;
+    PDRSD_PROPERTY                      Properties[DRSD_MAXIMUM_OBJECT_PROPERTIES];
     uint64_t                            Values[DRSD_MAXIMUM_OBJECT_PROPERTIES];
 }DRSD_OBJECT_PROPERTIES, * PDRSD_OBJECT_PROPERTIES;
-
-typedef struct _DRSD_PROPERTY_OBJECT{
-    ListHeader              Peers;
-    DRSD_MODE_OBJECT        BaseMode;
-    uint32_t                PropertyFlags;
-    string                  Name;
-    size_t                  ValueCount;
-    uint64_t*               Value;
-    struct _DRSD_DEVICE*    Device;
-    ListHeader              Enums;
-}DRSD_PROPERTY_OBJECT, DRSD_PROPERTY_OBJECT; 
 
 typedef struct _DRSD_FORMAT_INFORMATION{
     uint32_t    Format;
@@ -2995,6 +2984,9 @@ typedef struct _DRSD_MODE_MODEINFO{
 		DRSD_MODE_ROTATE_180 | \
 		DRSD_MODE_ROTATE_270)
 
+#define DRSD_MODE_REFLECT_X     (1 << 4)
+#define DRSD_MODE_REFLECT_Y     (1 << 5)
+
 #define DRSD_MODE_PAGE_FLIP_ASYNC           0x02
 #define DRSD_MODE_PAGE_FLIP_TARGET_ABSOLUTE 0x4
 #define DRSD_MODE_PAGE_FLIP_TARGET_RELATIVE 0x8
@@ -3377,6 +3369,16 @@ DrsdAtomicHelperCheckPlaneState(
     BOOLEAN             CanPosition,
     BOOLEAN             CanUpdateDisabled
 );
+
+DRIVER_IMPORT
+PDRSD_MODE_RECT
+DrsdPlaneGetDamageClips(
+    PDRSD_PLANE_STATE State
+);
+
+DRIVER_IMPORT
+UINT
+DrsdPlaneGetDamageClipsCount(PDRSD_PLANE_STATE State);
 
 #ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 
 //TODO

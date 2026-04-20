@@ -29,6 +29,7 @@ SRC = DrsdCore.c \
 		DrsdCrtcHelper.c \
 		DrsdPlane.c \
 		DrsdVBlank.c \
+		DrsdRect.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \

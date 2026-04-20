@@ -104,7 +104,7 @@ typedef struct PACKED _VBVA_BUFFER{
     uint32_t            RecordFreeIndex;
     uint32_t            PartialWriteTresh;
     uint32_t            DataLength;
-    uint8_t             DataBlock[];
+    uint8_t             Data[];
 }VBVA_BUFFER, * PVBVA_BUFFER;
 
 typedef struct PACKED _VBVA_CONFIGURATION32{
@@ -186,5 +186,9 @@ typedef struct PACKED _VBVA_CURSOR_POSITION{
     uint32_t X;
     uint32_t Y;
 }VBVA_CURSOR_POSITION, * PVBVA_CURSOR_POSITION;
+
+typedef struct PACKED _VBVA_FLUSH{
+    UINT32  Reserved;
+}VBVA_FLUSH, * PVBVA_FLUSH;
 
 #endif//_VBOX_VIDEO_H

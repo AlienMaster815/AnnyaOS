@@ -50,3 +50,18 @@ __DrsdPlaneGetDamageClips(
 ){
     return (PDRSD_MODE_RECT)((State && State->FbDamageClips) ? State->FbDamageClips->Data : 0x00);
 }
+
+DRIVER_EXPORT
+PDRSD_MODE_RECT
+DrsdPlaneGetDamageClips(
+    PDRSD_PLANE_STATE State
+){
+    PDRSD_DEVICE Device = State->Plane->Device;
+    PDRSD_MODE_CONFIGURATION Config = &Device->ModeConfig;
+
+    if(!DrsdModeObjectFindPropertyId(&State->Plane->Base, Config->PropFbDamageClips->Base.Identification)){
+        LouPrint("DRSDCORE.SYS:DrsdPlaneEnableFbDamageClips() Not Called\n");
+    }
+
+    return __DrsdPlaneGetDamageClips(State);
+}

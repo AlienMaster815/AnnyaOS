@@ -102,3 +102,17 @@ void DrsdUnregisterModeObject(
     
 
 }
+
+PDRSD_PROPERTY
+DrsdModeObjectFindPropertyId(
+    PDRSD_MODE_OBJECT   Object,
+    UINT32              PropertyID
+){
+    int i;
+    for(i = 0 ; i < Object->Properties->Count; i++){
+        if(Object->Properties->Properties[i]->Base.Identification == PropertyID){
+            return Object->Properties->Properties[i];
+        }
+    }
+    return 0x00;
+}

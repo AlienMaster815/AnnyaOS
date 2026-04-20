@@ -436,8 +436,6 @@ void LouOsKrnlStart(
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
 
-    
-
     LouPrint("Session Manager:%s\n", PathKey);    
 
     FILE* AsmssExe = fopen(PathKey, KERNEL_GENERIC_MEMORY);

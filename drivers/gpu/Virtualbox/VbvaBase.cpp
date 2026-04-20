@@ -8,18 +8,38 @@
  #include <drivers/VBoxError.h>
 
 
-UNUSED static uint32_t VbvaBufferAvailable(PVBVA_BUFFER Vbva){
+static uint32_t VbvaBufferAvailable(PVBVA_BUFFER Vbva){
 
+    INT32 Difference = Vbva->DataOffset - Vbva->FreeOffset;
 
-    return 0;
+    return Difference > 0 ? Difference : Vbva->DataLength + Difference;
 }
 
-UNUSED static void VbvaBufferPlaceDataAt(PVBVA_BUFFER_CONTEXT VbvaContext, void* Pointer, uint32_t Length, uint32_t Offset){
+static void VbvaBufferPlaceDataAt(PVBVA_BUFFER_CONTEXT VbvaContext, void* Pointer, uint32_t Length, uint32_t Offset){
+    PVBVA_BUFFER Vbva = VbvaContext->VbvaBuffer;
+    UINT32 BytesTillBoundry = Vbva->DataLength - Offset;
+    UINT8* Destination = &Vbva->Data[Offset];
+    INT32 Difference = Length - BytesTillBoundry;
 
+    if(Difference <= 0){
+        memcpy(Destination, Pointer, Length);
+    }else{
+        memcpy(Destination, Pointer, BytesTillBoundry);
+        memcpy(&Vbva->Data[0], (UINT8*)Pointer + BytesTillBoundry, Difference);
+    }
 }
 
-UNUSED static void VbvaBufferFlush(POOL Context){
+static void VbvaBufferFlush(POOL Context){
+    PVBVA_FLUSH Flush;
 
+    Flush = (PVBVA_FLUSH)HgsmiBufferAllocate(Context, sizeof(VBVA_FLUSH), HGSMI_CH_VBVA, VBVA_FLUSH_COMMAND);
+    if(!Flush){
+        return;
+    }
+    Flush->Reserved = 0;
+
+    HgsmiBufferSubmit(Context, Flush);
+    HgsmiBufferFree(Context, Flush);
 }
 
 static bool VbvaInformHost(PVBVA_BUFFER_CONTEXT VbvaContext, POOL Context, int32_t Screen, bool Enable){
@@ -81,16 +101,75 @@ bool VbvaEnable(PVBVA_BUFFER_CONTEXT VbvaContext, POOL Context, PVBVA_BUFFER  Vb
 
 bool VbvaBufferBeginUpdate(PVBVA_BUFFER_CONTEXT VbvaContext, POOL Context){
 
-    return false;
+    PVBVA_RECORD Record;
+    UINT32 Next;
+
+    if((!VbvaContext->VbvaBuffer) || (!(VbvaContext->VbvaBuffer->VbVaHostFlags.HostEvents & VBVA_F_MODE_ENABLED))){
+        return false;
+    }
+
+    Next = (VbvaContext->VbvaBuffer->RecordFreeIndex + 1) % VBVA_MAXIMUM_RECORDS;
+
+    if(Next == VbvaContext->VbvaBuffer->RecordFirstIndex){
+        VbvaBufferFlush(Context);
+    }
+
+    if(Next == VbvaContext->VbvaBuffer->RecordFirstIndex){
+        return false;
+    }
+
+    Record = &VbvaContext->VbvaBuffer->VbVaRecords[VbvaContext->VbvaBuffer->RecordFreeIndex];
+    Record->LengthAndFlags = VBVA_F_RECORD_PARTIAL;
+    VbvaContext->VbvaBuffer->RecordFreeIndex = Next;    
+    VbvaContext->Record = Record;
+    return true;
 }
 
 void VbvaBufferEndUpdate(PVBVA_BUFFER_CONTEXT VbvaContext){
+    PVBVA_RECORD Record = VbvaContext->Record;
 
+    Record->LengthAndFlags &= VBVA_F_RECORD_PARTIAL;
+    VbvaContext->BufferOverflow = false;
+    VbvaContext->Record = 0x00;
 }
 
 bool VbvaWrite(PVBVA_BUFFER_CONTEXT BufferContext, POOL Context, void* Pixels, uint32_t Length){
+    PVBVA_RECORD Record;
+    PVBVA_BUFFER Vbva;
+    UINT32 Available;
 
-    return false;
+    Vbva = BufferContext->VbvaBuffer;
+    Record = BufferContext->Record;
+
+    if((!Vbva) || (BufferContext->BufferOverflow) || (!Record) || (!(Record->LengthAndFlags & VBVA_F_RECORD_PARTIAL))){
+        return false;
+    }
+
+    Available = VbvaBufferAvailable(Vbva);
+
+    while(Length > 0){
+        UINT32 Chunk = Length;
+        if(Chunk >= Available){
+            VbvaBufferFlush(Context);
+            Available = VbvaBufferAvailable(Vbva);
+        }
+        if(Chunk >= Available){
+            if(Available <= Vbva->PartialWriteTresh){
+                BufferContext->BufferOverflow = true;
+                return false;
+            }
+            Chunk = Available - Vbva->PartialWriteTresh;
+        }
+
+        VbvaBufferPlaceDataAt(BufferContext, Pixels, Chunk, Vbva->FreeOffset);
+
+        Vbva->FreeOffset = ((Vbva->FreeOffset + Chunk) % Vbva->DataLength);
+        Record->LengthAndFlags += Chunk;
+        Available -= Chunk;
+        Pixels = (PVOID)((UINTPTR)Pixels + Chunk);
+    }
+
+    return true;
 }
 
 void VbvaSetupBufferContext(

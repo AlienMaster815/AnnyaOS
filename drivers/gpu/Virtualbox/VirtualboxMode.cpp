@@ -221,6 +221,50 @@ VirtualboxPrimaryAtomicCheck(
 }
 
 
+static void VirtualboxAtomicUpdate(
+    PDRSD_PLANE         Plane,
+    PDRSD_ATOMIC_STATE  State
+){
+
+    PDRSD_PLANE_STATE NewState = DrsdAtomicGetNewPlaneState(State, Plane);
+    PDRSD_CRTC Crtc = NewState->Crtc;
+    PDRSD_FRAME_BUFFER FrameBuffer = NewState->FrameBuffer;
+    PVIRTUALBOX_PRIVATE_DATA Vbox = (PVIRTUALBOX_PRIVATE_DATA)FrameBuffer->Device;
+    PDRSD_MODE_RECT Clips;
+    UINT32 ClipCount, i;
+
+    VirtualCrtcSetBaseAndMode(
+        Crtc, 
+        FrameBuffer, 
+        NewState->SourceX >> 16,
+        NewState->SourceX >> 16
+    );
+
+    Clips = DrsdPlaneGetDamageClips(NewState);
+    ClipCount = DrsdPlaneGetDamageClipsCount(NewState);
+
+    MutexLock(&Vbox->HardwareMutex);
+
+    for(i = 0 ; i < ClipCount; ++i, ++Clips){
+        VBVA_COMMAND_HEADER CommandHeader;
+        UINT CrtcID = ((PVIRTUALBOX_CRTC)Crtc)->CrtcId;
+        CommandHeader.X = (INT16)Clips->X1;
+        CommandHeader.Y = (INT16)Clips->Y1;
+        CommandHeader.W = (INT16)(Clips->X2 - Clips->X1);
+        CommandHeader.H = (INT16)(Clips->Y2 - Clips->Y1);
+
+        if(!VbvaBufferBeginUpdate(&Vbox->VbvaInformation[CrtcID], Vbox->GuestPool)){
+            continue;
+        }
+
+        VbvaWrite(&Vbox->VbvaInformation[CrtcID], Vbox->GuestPool, &CommandHeader, sizeof(VBVA_COMMAND_HEADER));
+        VbvaBufferEndUpdate(&Vbox->VbvaInformation[CrtcID]);
+    }
+
+    MutexUnlock(&Vbox->HardwareMutex);
+}
+
+
 static void* VBoxEdid = 0x00;
 static uint32_t PlaneFormats[2] = {0};
 static uint32_t CursorPlaneFormats[1] = {0};
@@ -437,27 +481,6 @@ static void VirtualboxCursorAtomicSetState(
 }
 
 
-
-static void VirtualboxAtomicUpdate(
-    PDRSD_PLANE Plane,
-    void*       Handle
-){
-
-    PDRSD_PLANE_STATE NewState = Plane->PlaneState;
-    PDRSD_FRAME_BUFFER FrameBuffer = NewState->FrameBuffer;
-    PVIRTUALBOX_PRIVATE_DATA Vbox = (PVIRTUALBOX_PRIVATE_DATA)FrameBuffer->Device;
-    PDRSD_CRTC Crtc = NewState->Crtc;
-
-    VirtualCrtcSetBaseAndMode(
-        Crtc, 
-        FrameBuffer, 
-        NewState->SourceX, 
-        NewState->SourceX
-    );
-
-
-    //LouPrint("VirtualboxAtomicUpdate() STATUS_SUCCES\n");
-}
 
 
 

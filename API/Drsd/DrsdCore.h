@@ -54,6 +54,7 @@
 #include "DrsdBlend.h"
 #include "DrsdEncoder.h"
 #include "DrsdVBlank.h"
+#include "DrsdRect.h"
 
 #include "Ttm/TtmCaching.h"
 #include "Ttm/TtmDevice.h"

@@ -106,7 +106,8 @@ typedef struct _INT_512{
 typedef void* PVOID, * LPVOID;
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-#define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+#define DIVIDE_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+#define DIVIDE_ROUND_DOWN(n, d) ((n) / (d))
 
 
 typedef union _LARGE_INTEGER {

@@ -292,8 +292,44 @@ DrsdAtomicHelperCheckPlaneState(
         //TODO: Debug print
         return STATUS_INVALID_PARAMETER;
     }
+    
+    DrsdRectRotate(Source, FrameBuffer->Width << 16, FrameBuffer->Height << 16, Rotation);
 
-    //929 :: https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/drm_atomic_helper.c#L893
+    LOUSTATUS Status = DrsdRectCalcHScale(Source, Destination, MinScale, MaxScale, &HScale);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("DRSDCORE.SYS:DrsdAtomicHelperCheckPlaneState():ERROR Calculating HScale\n");
+        return Status;
+    }
+    Status = DrsdRectCalcHScale(Source, Destination, MinScale, MaxScale, &VScale);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("DRSDCORE.SYS:DrsdAtomicHelperCheckPlaneState():ERROR Calculating VScale\n");
+        return Status;
+    }
 
+    if((HScale < 0) || (VScale < 0)){
+        LouPrint("DRSDCORE.SYS:DrsdAtomicHelperCheckPlaneState():ERROR Invalid PlaneState\n");
+        return STATUS_INTEGER_OVERFLOW;
+    }
+
+    if(CrtcState->Enable){
+        DrsdModeGetHvTiming(&CrtcState->Mode, &Clip.X2, &Clip.Y2);
+    }
+
+    Status = DrsdRectClipScaled(Source, Destination, &Clip, &PlaneState->Visable);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("DRSDCORE.SYS:DrsdAtomicHelperCheckPlaneState():ERROR Unable To Set Visability\n");
+        return Status;
+    }
+
+    DrsdRectRotateInv(Source, FrameBuffer->Width << 16, FrameBuffer->Height << 16, Rotation);
+
+    if(!PlaneState->Visable){
+        return STATUS_SUCCESS;
+    }
+
+    if((!CanPosition) && (DrsdRectEquals(Destination, &Clip))){
+        LouPrint("DRSDCORE.SYS:DrsdAtomicHelperCheckPlaneState():ERROR Plane Must Cover Entire CRTC\n");
+        return STATUS_INVALID_PARAMETER;
+    } 
     return STATUS_SUCCESS;
 }
