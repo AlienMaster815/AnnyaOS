@@ -743,9 +743,22 @@ typedef struct _DRSD_PLANE_STATE{
     UINT32                          FormatUsed;
 }DRSD_PLANE_STATE, * PDRSD_PLANE_STATE;
 
-typedef struct _SHADOW_PLANE_STATE{
-    DRSD_PLANE_STATE Base;
-}SHADOW_PLANE_STATE, * PSHADOW_PLANE_STATE;
+typedef struct _DRSD_FORMAT_CONV_STATE{
+    struct {
+        PVOID   Mem;
+        SIZE    Size;
+        BOOLEAN Prallocated;
+    }Tmp;
+}DRSD_FORMAT_CONV_STATE, * PDRSD_FORMAT_CONV_STATE;
+
+#define DRSD_FORMAT_MAX_PLANES 4
+
+typedef struct _DRSD_SHADOW_PLANE_STATE{
+    DRSD_PLANE_STATE        Base;
+    DRSD_FORMAT_CONV_STATE  FmtCnvState;
+    IO_MAP_OBJECT           Map[DRSD_FORMAT_MAX_PLANES];
+    IO_MAP_OBJECT           Data[DRSD_FORMAT_MAX_PLANES];
+}DRSD_SHADOW_PLANE_STATE, * PDRSD_SHADOW_PLANE_STATE;
 
 typedef struct _DRSD_PLANE_ASSIST_FUNCTIONS{
     LOUSTATUS   (*PrepareFrameBuffer)(struct _DRSD_PLANE* Plane, struct _DRSD_PLANE_STATE* NewState);
@@ -3012,6 +3025,10 @@ static inline PDRSD_PLANE_STATE DrsdAtomicGetNewPlaneState(PDRSD_ATOMIC_STATE St
     return State->Planes[DrsdPlaneIndex(Plane)].NewState;
 }
 
+static inline PDRSD_PLANE_STATE DrsdAtomicGetOldPlaneState(PDRSD_ATOMIC_STATE State, PDRSD_PLANE Plane){
+    return State->Planes[DrsdPlaneIndex(Plane)].OldState;
+}
+
 static inline UINT DrsdCrtcIndex(PDRSD_CRTC Crtc){
     return Crtc->Index;
 } 
@@ -3023,6 +3040,10 @@ static inline PDRSD_CRTC_STATE DrsdAtomicGetNewCrtcState(
     return State->Crtcs[DrsdCrtcIndex(Crtc)].NewState;
 }
 
+
+static inline PDRSD_SHADOW_PLANE_STATE ToDrsdShadowPlaneState(PDRSD_PLANE_STATE State){
+    return CONTAINER_OF(State, DRSD_SHADOW_PLANE_STATE, Base);
+}
 
 static inline PDRSD_GXE_VRAM_OBJECT DrsdGxeVramOfGem(PDRSD_GXE_OBJECT Gxe){
     return CONTAINER_OF(Gxe, DRSD_GXE_VRAM_OBJECT, Bo.Base);

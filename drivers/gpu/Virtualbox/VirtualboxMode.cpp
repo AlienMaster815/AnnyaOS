@@ -264,10 +264,170 @@ static void VirtualboxAtomicUpdate(
     MutexUnlock(&Vbox->HardwareMutex);
 }
 
+static 
+void 
+VirtualboxPromaryAtomicDisable(
+    PDRSD_PLANE         Plane,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_PLANE_STATE OldState = DrsdAtomicGetOldPlaneState(State, Plane);
+    PDRSD_CRTC Crtc = OldState->Crtc;
+    VirtualCrtcSetBaseAndMode(
+        Crtc, OldState->FrameBuffer,
+        OldState->SourceX >> 16,
+        OldState->SourceY >> 16
+    );
+}
+
+static LOUSTATUS VirtualboxCursorAtomicCheck(
+    PDRSD_PLANE         Plane,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_PLANE_STATE NewState = DrsdAtomicGetNewPlaneState(State, Plane);
+    PDRSD_CRTC_STATE CrtcState = 0x00;
+    UINT32 Width = NewState->CrtcWidth;
+    UINT32 Height = NewState->CrtcHeight;
+    LOUSTATUS Status;
+
+    if(NewState->Crtc){
+        CrtcState = DrsdAtomicGetNewCrtcState(State, NewState->Crtc);
+        if(!CrtcState){
+            return STATUS_INVALID_PARAMETER;
+        }
+    }
+
+    Status = DrsdAtomicHelperCheckPlaneState(
+        NewState, CrtcState,
+        DRSD_PLANE_NO_SCALING,
+        DRSD_PLANE_NO_SCALING,
+        true, true
+    );
+
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    if(!NewState->FrameBuffer){
+        return STATUS_SUCCESS;
+    }
+
+    if(
+        (Width > VIRTUALBOX_MAXIMUM_CURSOR_WIDTH) ||
+        (Height > VIRTUALBOX_MAXIMUM_CURSOR_HEIGHT) ||
+        (Width == 0) ||
+        (Height == 0) 
+    ){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+static 
+void 
+CopyCursorImage(
+    UINT8*  Source,
+    UINT8*  Destination,
+    UINT32  Width,
+    UINT32  Height,
+    SIZE    MaskSize
+){
+    SIZE LineSize = (Width + 7) / 8;
+    UINT32 i, j;
+    
+    memcpy(Destination + MaskSize, Source, Width * Height * 4);
+    for(i = 0 ; i < Height; ++i){
+        for(j = 0;j <Width; ++j){
+            if(((UINT32*)Source)[i * Width + j] > 0xF0000000){
+                Destination[i * LineSize + j / 8] |= (0x80 >> (j % 8));
+            }
+        }
+    }
+}
+
+static 
+void 
+VirtualboxCursorAtomicUpdate(
+    PDRSD_PLANE         Plane,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_PLANE_STATE NewState = DrsdAtomicGetNewPlaneState(State, Plane);
+    PDRSD_PLANE_STATE OldState = DrsdAtomicGetOldPlaneState(State, Plane);
+    PVIRTUALBOX_PRIVATE_DATA Vbox = CONTAINER_OF(Plane->Device, VIRTUALBOX_PRIVATE_DATA, DrsdDevice);
+    PVIRTUALBOX_CRTC VboxCrtc = (PVIRTUALBOX_CRTC)NewState->Crtc;
+    PDRSD_FRAME_BUFFER FrameBuffer = NewState->FrameBuffer;
+    UINT32 Width = NewState->CrtcWidth;
+    UINT32 Height = NewState->CrtcHeight;
+    PDRSD_SHADOW_PLANE_STATE ShadowPlaneState = ToDrsdShadowPlaneState(NewState);
+    IO_MAP_OBJECT Map = ShadowPlaneState->Data[0];
+    UINT8* Source = (UINT8*)Map.MmIoAddress;
+    SIZE DataSize, MaskSize;
+    UINT32 Flags;
+
+    if(FrameBuffer == OldState->FrameBuffer){
+        return;
+    }
+
+    MutexLock(&Vbox->HardwareMutex);
+
+    VboxCrtc->CursorEnabled = true;
+
+    MaskSize = ((Width + 7) / 8 * Height + 3) & ~3;
+    DataSize = Width * Height * 4 + MaskSize;
+
+    CopyCursorImage(Source, Vbox->CursorData, Width, Height, MaskSize);
+
+    Flags = VBOX_MOUSE_POINTER_VISABLE | VBOX_MOUSE_POINTER_SHAPE | VBOX_MOUSE_POINTER_ALPHA;
+    HgsmiUpdatePointerShape(
+        Vbox->GuestPool,
+        Flags,
+        MIN(MIN(MAX(NewState->HotSpotX, 0), Width), 0xFFFFFFFF),
+        MIN(MIN(MAX(NewState->HotSpotY, 0), Height), 0xFFFFFFFF),
+        Width,
+        Height,
+        Vbox->CursorData,
+        DataSize
+    );
+    MutexUnlock(&Vbox->HardwareMutex);
+}
+
+static 
+void
+VirtualboxCursorAtomicDisable(
+    PDRSD_PLANE         Plane,
+    PDRSD_ATOMIC_STATE  State
+){
+
+    PDRSD_PLANE_STATE OldState = DrsdAtomicGetOldPlaneState(State, Plane);
+    PVIRTUALBOX_PRIVATE_DATA Vbox = CONTAINER_OF(Plane->Device, VIRTUALBOX_PRIVATE_DATA, DrsdDevice);
+    PVIRTUALBOX_CRTC VboxCrtc = (PVIRTUALBOX_CRTC)OldState->Crtc;
+    BOOLEAN CursorEnabled = false;
+    PDRSD_CRTC Crtci;
+
+    MutexLock(&Vbox->HardwareMutex);
+
+    VboxCrtc->CursorEnabled = false;
+
+    ForEachListEntry(Crtci, &Vbox->DrsdDevice.ModeConfig.CrtcList, Head){
+        if(((PVIRTUALBOX_CRTC)Crtci)->CursorEnabled){
+            CursorEnabled = true;
+        }
+    }
+
+    if(!CursorEnabled){
+        HgsmiUpdatePointerShape(
+            Vbox->GuestPool,
+            0,0,0,0,0,0,0
+        );
+    }
+
+    MutexUnlock(&Vbox->HardwareMutex);
+} 
 
 static void* VBoxEdid = 0x00;
 static uint32_t PlaneFormats[2] = {0};
 static uint32_t CursorPlaneFormats[1] = {0};
+
 
 
 static const uint8_t VBoxMasterEdid[] ={
@@ -459,15 +619,6 @@ static void VirtualboxCursorAtomicUpdate(
 ){
     LouPrint("VirtualboxCursorAtomicUpdate()\n");
     while(1);
-}
-
-static LOUSTATUS VirtualboxCursorAtomicCheck(
-    PDRSD_PLANE Plane,
-    void*       Handle
-){
-    LouPrint("VirtualboxCursorAtomicCheck()\n");
-    while(1);
-    return STATUS_SUCCESS;
 }
 
 //disable and enable
