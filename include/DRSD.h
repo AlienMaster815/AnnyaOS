@@ -39,6 +39,8 @@ extern "C" {
 #include <drivers/Notifications.h>
 #include <drivers/Hdmi/Info.h>
 
+#define DRSD_FORMAT_MAX_PLANES 4
+
 #define DRSD_ROTATION_MODE_0 1
 
 #define DRSD_PIXEL_BLEND_PRE_MULTI 1
@@ -371,16 +373,17 @@ typedef struct _DRSD_OBJECT_PROPERTIES{
 
 typedef struct _DRSD_FORMAT_INFORMATION{
     uint32_t    Format;
-    uint8_t     PlaneDepth;
+    uint8_t     Depth;
+    uint8_t     PlaneCount;
     union{
-        uint8_t Bpp[4];
-        uint8_t Bpb[4];
+        uint8_t Bpp[DRSD_FORMAT_MAX_PLANES];
+        uint8_t Bpb[DRSD_FORMAT_MAX_PLANES];
     }ByteData;
-    uint8_t     BlockWidth[4];
-    uint8_t     BlockHeight[4];
-    uint8_t     HorizontalChromaFactor;
-    uint8_t     VerticalChromaFactor;
-    bool        AlphaChannelPresent;
+    uint8_t     BlockWidth[DRSD_FORMAT_MAX_PLANES];
+    uint8_t     BlockHeight[DRSD_FORMAT_MAX_PLANES];
+    uint8_t     HSub;
+    uint8_t     VSub;
+    bool        HasAlpha;
     bool        IsYUV;
     bool        IsCollorIndexed;
 }DRSD_FORMAT_INFORMATION, * PDRSD_FORMAT_INFORMATION;
@@ -493,8 +496,8 @@ typedef struct _DRSD_GXE_OBJECT{
     int                         Name;
     HANDLE                      DmaBuffer;
     HANDLE                      ImportAttatch;
-    HANDLE                      DmaReserve;
-    HANDLE                      _DmaReserved;
+    DMA_RESERVE                 DmaReserve;
+    DMA_RESERVE                 _DmaReserved;
     struct{
         ListHeader              List;
         mutex_t                 Lock;
@@ -517,14 +520,15 @@ typedef struct _DRSD_FRAME_BUFFER{
     DRSD_MODE_OBJECT                        Base;
     string                                  Comm;
     PDRSD_FORMAT_INFORMATION                FormatInfo;
-    PDRSD_FRAMEBUFFER_FUNCTIONS             Callbacks;
-    uint32_t                                Offset;
+    PDRSD_FRAMEBUFFER_FUNCTIONS             Functions;
+    uint32_t                                Pitches[DRSD_FORMAT_MAX_PLANES];
+    uint32_t                                Offsets[DRSD_FORMAT_MAX_PLANES];
     uint64_t                                Modifier;
     uint32_t                                Width;
     uint32_t                                Height;
     int32_t                                 Flags;
     ListHeader                              Buffers;
-    PDRSD_GXE_OBJECT                        Objects;
+    PDRSD_GXE_OBJECT*                       Objects;
     //following is legacy and here for old linear framebuffers
     uint64_t                                FramebufferBase;
     uint64_t                                SecondaryFrameBufferBase;
@@ -751,7 +755,6 @@ typedef struct _DRSD_FORMAT_CONV_STATE{
     }Tmp;
 }DRSD_FORMAT_CONV_STATE, * PDRSD_FORMAT_CONV_STATE;
 
-#define DRSD_FORMAT_MAX_PLANES 4
 
 typedef struct _DRSD_SHADOW_PLANE_STATE{
     DRSD_PLANE_STATE        Base;
@@ -3009,6 +3012,10 @@ typedef struct _DRSD_MODE_MODEINFO{
 				                             DRSD_MODE_PAGE_FLIP_TARGET)
 #define DRSD_PLANE_NO_SCALING               (1<<16)
 
+#define DRSD_GXE_SHADOW_PLANE_ASSIST_FUNCTIONS \
+    .BeginFrameBufferAccess = DrsdGxeBeginShadowFbAccess, \
+    .EndFrameBufferAccess = DrsdGxeEndShadowFbAccess
+
 static inline UINT DrsdPlaneIndex(PDRSD_PLANE Plane){
     return Plane->Index;
 }
@@ -3400,6 +3407,20 @@ DrsdPlaneGetDamageClips(
 DRIVER_IMPORT
 UINT
 DrsdPlaneGetDamageClipsCount(PDRSD_PLANE_STATE State);
+
+DRIVER_IMPORT
+LOUSTATUS 
+DrsdGxeBeginShadowFbAccess(
+    PDRSD_PLANE         Plane,
+    PDRSD_PLANE_STATE   State
+);
+
+DRIVER_IMPORT
+void 
+DrsdGxeEndShadowFbAccess(
+    PDRSD_PLANE         Plane,
+    PDRSD_PLANE_STATE   State
+);
 
 #ifdef DRSD_DRIVER_CONFIG_FBDEV_EMULATION 
 //TODO

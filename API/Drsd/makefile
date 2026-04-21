@@ -30,6 +30,7 @@ SRC = DrsdCore.c \
 		DrsdPlane.c \
 		DrsdVBlank.c \
 		DrsdRect.c \
+		DrsdGxeFrameBufferHelper.c \
 		Ttm/TtmRangeManager.c \
 		Ttm/TtmDevice.c \
 		Ttm/TtmPool.c \

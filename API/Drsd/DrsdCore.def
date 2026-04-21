@@ -85,3 +85,6 @@ EXPORTS
     DrsdAtomicNonBlockingCommit
     DrsdAtomicHelperCheckPlaneState
     DrsdPlaneGetDamageClips
+    DrsdGxeBeginShadowFbAccess
+    DrsdGxeEndShadowFbAccess
+    

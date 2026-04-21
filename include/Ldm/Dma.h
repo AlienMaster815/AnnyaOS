@@ -1129,6 +1129,17 @@ GET_DMA_ADAPTER(
 );
 typedef GET_DMA_ADAPTER* PGET_DMA_ADAPTER;
 
+typedef struct _DMA_RESERVE{
+    mutex_t     Lock;
+    ListHeader  Fences;
+}DMA_RESERVE, * PDMA_RESERVE;
+
+static void LouKeDmaReserveLock(PDMA_RESERVE Reserve, PVOID Context){
+    MutexLock(&Reserve->Lock);
+}
+static void LouKeDmaReserveUnlock(PDMA_RESERVE Reserve){
+    MutexUnlock(&Reserve->Lock);
+}
 
 #ifndef _USER_MODE_CODE_
 KERNEL_EXPORT void LouKePutDmaAdapter(PDMA_ADAPTER DmaAdapter);

@@ -29,8 +29,54 @@ typedef struct _IO_MAP_OBJECT{ //reading and writing for this structure is in Ld
     .Mmio = true, \
 }
 
+static inline void LouKeIoMapObjSetSystemAddress(PIO_MAP_OBJECT IoMapObject, PVOID Vaddress){
+    IoMapObject->SharedAddress = Vaddress;
+    IoMapObject->Mmio = false;
+}
 
+static inline void LouKeIoMapObjSetMmioAddress(PIO_MAP_OBJECT IoMapObject, PVOID Vaddress){
+    IoMapObject->MmIoAddress = Vaddress;
+    IoMapObject->Mmio = true;
+}
 
+static inline BOOLEAN LouKeIoMapObjIsEqual(
+    PIO_MAP_OBJECT Obj1,
+    PIO_MAP_OBJECT Obj2
+){
+    if(Obj1->Mmio != Obj2->Mmio){
+        return false;
+    }
+    if(Obj1->Mmio){
+        return (Obj1->MmIoAddress == Obj2->MmIoAddress);
+    }
+    return (Obj1->SharedAddress == Obj2->SharedAddress);
+}
+
+static inline BOOLEAN LouKeIoMapObjIsNull(
+    PIO_MAP_OBJECT Object
+){
+    if(Object->Mmio){
+        return !Object->MmIoAddress;
+    }
+    return !Object->SharedAddress;
+}
+
+static inline BOOLEAN LouKeIoMapObjIsSet(
+    PIO_MAP_OBJECT Object
+){
+    return !LouKeIoMapObjIsNull(Object);
+}
+
+static inline void LouKeIoMapObjIncrement(
+    PIO_MAP_OBJECT  Object,
+    SIZE            Incrementor
+){
+    if(Object->Mmio){
+        Object->MmIoAddress = (PVOID)((UINTPTR)Object->MmIoAddress + Incrementor);
+    }else{
+        Object->SharedAddress = (PVOID)((UINTPTR)Object->SharedAddress + Incrementor);
+    }
+}
 
 #ifndef _USER_MODE_CODE_
 

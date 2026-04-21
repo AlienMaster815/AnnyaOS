@@ -122,7 +122,7 @@ static void VirtualCrtcSetBaseAndMode(
     int32_t             X,
     int32_t             Y
 ){
-    PDRSD_GXE_VRAM_OBJECT       Gbo = DrsdGxeVramOfGem(&FrameBuffer->Objects[0]); 
+    PDRSD_GXE_VRAM_OBJECT       Gbo = DrsdGxeVramOfGem(FrameBuffer->Objects[0]); 
     PVIRTUALBOX_PRIVATE_DATA    VBox = (PVIRTUALBOX_PRIVATE_DATA)FrameBuffer->Device;
     PVIRTUALBOX_CRTC            VBoxCrtc = (PVIRTUALBOX_CRTC)Crtc;
     BOOLEAN                     NeedsModeSet = DrsdAtomicCrtcNeedsModeset(Crtc->State); 
@@ -157,7 +157,7 @@ static void VirtualCrtcSetBaseAndMode(
     }
 
     MutexUnlock(&VBox->HardwareMutex);
-    //LouPrint("VirtualCrtcSetBaseAndMode() STATUS_SUCCESS\n");*/
+    //LouPrint("VirtualCrtcSetBaseAndMode() STATUS_SUCCESS\n");
 }
 
 static void VirtualboxCrtcAtomicEnable(
@@ -221,7 +221,7 @@ VirtualboxPrimaryAtomicCheck(
 }
 
 
-static void VirtualboxAtomicUpdate(
+static void VirtualboxPrimaryAtomicUpdate(
     PDRSD_PLANE         Plane,
     PDRSD_ATOMIC_STATE  State
 ){
@@ -266,7 +266,7 @@ static void VirtualboxAtomicUpdate(
 
 static 
 void 
-VirtualboxPromaryAtomicDisable(
+VirtualboxPrimaryAtomicDisable(
     PDRSD_PLANE         Plane,
     PDRSD_ATOMIC_STATE  State
 ){
@@ -425,10 +425,35 @@ VirtualboxCursorAtomicDisable(
 } 
 
 static void* VBoxEdid = 0x00;
-static uint32_t PlaneFormats[2] = {0};
-static uint32_t CursorPlaneFormats[1] = {0};
+static uint32_t PlaneFormats[] = {DRSD_COLOR_FORMAT_XRGB8888, DRSD_COLOR_FORMAT_ARGB8888};
+static uint32_t CursorPlaneFormats[] = {DRSD_COLOR_FORMAT_ARGB8888};
+
+static  DRSD_PLANE_ASSIST_FUNCTIONS CursorPlaneAssistFunctions = {
+    DRSD_GXE_SHADOW_PLANE_ASSIST_FUNCTIONS,
+    .AtomicCheck = VirtualboxCursorAtomicCheck,
+    .AtomicUpdate = VirtualboxCursorAtomicUpdate,
+    .AtomicDisable = VirtualboxCursorAtomicDisable,
+};
+
+static  DRSD_PLANE_FUNCTIONS CursorPlaneFunctions = {
+    //.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
+    //.DisablePlane = DrsdInternalPlaneDisableAtomic,
+    //.Destroy = DrsdInternalDestroyPlaneAtomic,
+    //.ResetPlane = DrsdGxeResetShadowPlane,
+    //.AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
+    //.AtomicDestroyState = DrsdGxeDestroyShadowPlane,
+};
 
 
+
+
+static  DRSD_PLANE_ASSIST_FUNCTIONS PlaneAssistedCallbacks = {
+    //.PrepareFrameBuffer = DrsdGxeInternalPrepareFrameBuffer,
+    //.CleanupFrameBuffer = DrsdGxeInternalCleanupFrameBuffer,
+    //.AtomicCheck = VirtualboxPrimaryAtomicCheck,
+    //.AtomicUpdate = VirtualboxPrimaryAtomicUpdate,
+    //.AtomicSetState = VirtualboxPrimaryAtomicSetState,
+};
 
 static const uint8_t VBoxMasterEdid[] ={
 //directly coppied from Linux https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/vboxvideo/vbox_mode.c
@@ -646,31 +671,8 @@ static void VirtualboxAtomicSetState(
 }
 
 
-static  DRSD_PLANE_ASSIST_FUNCTIONS CursorPlaneAssistFunctions = {
-//    .BeginFrameBufferAccess = DrsdGxeInternalStartFrameBufferProcessing,
-//    .EndFrameBufferAccess = DrsdGxeInternalStopFrameBufferProcessing,
-//    .AtomicCheck = VirtualboxCursorAtomicCheck,
-//    .AtomicUpdate = VirtualboxCursorAtomicUpdate,
-//    .AtomicSetState = VirtualboxCursorAtomicSetState,
-};
-
-static  DRSD_PLANE_FUNCTIONS CursorPlaneFunctions = {
-    //.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
-    //.DisablePlane = DrsdInternalPlaneDisableAtomic,
-    //.Destroy = DrsdInternalDestroyPlaneAtomic,
-    //.ResetPlane = DrsdGxeResetShadowPlane,
-    //.AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
-    //.AtomicDestroyState = DrsdGxeDestroyShadowPlane,
-};
 
 
-static  DRSD_PLANE_ASSIST_FUNCTIONS PlaneAssistedCallbacks = {
-    //.PrepareFrameBuffer = DrsdGxeInternalPrepareFrameBuffer,
-    //.CleanupFrameBuffer = DrsdGxeInternalCleanupFrameBuffer,
-    //.AtomicCheck = VirtualboxAtomicCheck,
-    //.AtomicUpdate = VirtualboxAtomicUpdate,
-    //.AtomicSetState = VirtualboxAtomicSetState,
-};
 
 static  DRSD_PLANE_FUNCTIONS PlaneCallbacks = {
     .UpdatePlane = DrsdInternalPlaneUpdateAtomic,
@@ -705,13 +707,13 @@ static PDRSD_PLANE VirtualboxCreatePlane(
             Functions = (PDRSD_PLANE_FUNCTIONS)&PlaneCallbacks;
             AssistFunctions = (PDRSD_PLANE_ASSIST_FUNCTIONS)&PlaneAssistedCallbacks;
             Formats = PlaneFormats;
-            FormatCount = 2;
+            FormatCount = ARRAY_SIZE(PlaneFormats);
             break;
         case CURSOR_PLANE:
             Functions = (PDRSD_PLANE_FUNCTIONS)&CursorPlaneFunctions;
             AssistFunctions = (PDRSD_PLANE_ASSIST_FUNCTIONS)&CursorPlaneAssistFunctions;
             Formats = CursorPlaneFormats;
-            FormatCount = 1; 
+            FormatCount = ARRAY_SIZE(CursorPlaneFormats); 
             break;
         default:
             return 0x00;
@@ -887,10 +889,6 @@ LOUSTATUS VirtualboxModeInitialization(PVIRTUALBOX_PRIVATE_DATA VBox){
     Device->ModeConfig.MaximumWidth = VIRTUALBOX_VBE_DISPI_MAX_XRESOLUTION; 
     Device->ModeConfig.MaximumHeight = VIRTUALBOX_VBE_DISPI_MAX_YRESOLUTION;
     Device->ModeConfig.PreferedDepth = 24;
-
-    PlaneFormats[0] = DRSD_COLOR_FORMAT_XRGB8888; 
-    PlaneFormats[1] = DRSD_COLOR_FORMAT_ARGB8888; 
-    CursorPlaneFormats[0] = DRSD_COLOR_FORMAT_ARGB8888;
 
     for(size_t  i = 0 ; i < VBox->CrtcCount; i++){
         VBoxCrtc = VirtualboxCrtcInitialize(Device, i);
