@@ -36,7 +36,7 @@ DrsdGxeVMap(
 ){
     LOUSTATUS Status = STATUS_SUCCESS
     LouKeDmaReserveLock(Object->DmaReserve, 0x00);
-    //TODO:Status = DrsdGxeVMapLocked(Object, IoMap)
+    //TODO:Status = DrsdGxeVMapLocked(Object, IoMap);
     LouKeDmaReserveUnlock(Object->DmaReserve);
 
     return Status;
