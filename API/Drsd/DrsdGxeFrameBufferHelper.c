@@ -30,14 +30,35 @@ DrsdGxeVUnMap(
 
 DRIVER_EXPORT
 LOUSTATUS
+DrsdGxeVMapLocked(
+    PDRSD_GXE_OBJECT    Object,
+    PIO_MAP_OBJECT      IoMap
+){
+    LOUSTATUS Status;
+
+    if(!Object->Functions->Vmap){
+        return STATUS_NOT_SUPPORTED; 
+    }
+    Status = Object->Functions->Vmap(Object, IoMap);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }else if(LouKeIoMapObjIsNull(IoMap)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+LOUSTATUS
 DrsdGxeVMap(
     PDRSD_GXE_OBJECT    Object,
     PIO_MAP_OBJECT      IoMap
 ){
-    LOUSTATUS Status = STATUS_SUCCESS
-    LouKeDmaReserveLock(Object->DmaReserve, 0x00);
-    //TODO:Status = DrsdGxeVMapLocked(Object, IoMap);
-    LouKeDmaReserveUnlock(Object->DmaReserve);
+    LOUSTATUS Status;
+    LouKeDmaReserveLock(&Object->DmaReserve, 0x00);
+    Status = DrsdGxeVMapLocked(Object, IoMap);
+    LouKeDmaReserveUnlock(&Object->DmaReserve);
 
     return Status;
 }

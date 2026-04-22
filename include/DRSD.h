@@ -80,6 +80,19 @@ struct _DRSD_ATOMIC_STATE;
 struct _DRSD_MODE_SET;
 struct _DRSD_MODESET_ACQUIRE_CONTEXT;
 
+//special DMA Additions for DRSD
+typedef struct _DMA_RESERVE{
+    mutex_t     Lock;
+    ListHeader  Fences;
+}DMA_RESERVE, * PDMA_RESERVE;
+
+static inline void LouKeDmaReserveLock(PDMA_RESERVE Reserve, PVOID Context){
+    MutexLock(&Reserve->Lock);
+}
+static inline void LouKeDmaReserveUnlock(PDMA_RESERVE Reserve){
+    MutexUnlock(&Reserve->Lock);
+}
+
 //8 bit color
 #define DRSD_COLOR_FORMAT_RGB332    'RGB8'
 #define DRSD_COLOR_FORMAT_BGR233    'BGR8'
@@ -502,7 +515,7 @@ typedef struct _DRSD_GXE_OBJECT{
         ListHeader              List;
         mutex_t                 Lock;
     }GpuVA;
-    DRSD_GXE_OBJECT_FUNCTIONS   Functions;
+    PDRSD_GXE_OBJECT_FUNCTIONS  Functions;
     ListHeader                  LruNode;        
     PDRSD_GXE_LRU               Lru;
 
