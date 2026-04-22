@@ -133,7 +133,7 @@ void memmove(){
 }
 
 
-MSVCRT_API 
+/*MSVCRT_API 
 void* memset(void* dest, int value, size_t count) {
     unsigned char* ptr = (unsigned char*)dest;
     unsigned char val = (unsigned char)value;
@@ -143,7 +143,7 @@ void* memset(void* dest, int value, size_t count) {
     }
 
     return dest;
-}
+}*/
 
 MSVCRT_API
 void realloc(){

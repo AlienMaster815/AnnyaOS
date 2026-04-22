@@ -19,13 +19,29 @@ DrsdGxeFbGetObject(
 
 DRIVER_EXPORT
 void
+DrsdGxeVUnMapLocked(
+    PDRSD_GXE_OBJECT    Object,
+    PIO_MAP_OBJECT      IoMap
+){
+    if(LouKeIoMapObjIsNull(IoMap)){
+        return;
+    }
+
+    if(Object->Functions->Vunmap){
+        Object->Functions->Vunmap(Object, IoMap);
+    }
+    LouKeIoMapObjClear(IoMap);
+}
+
+DRIVER_EXPORT
+void
 DrsdGxeVUnMap(
     PDRSD_GXE_OBJECT    Object,
     PIO_MAP_OBJECT      IoMap
 ){
-
-
-
+    LouKeDmaReserveLock(&Object->DmaReserve, 0x00);
+    DrsdGxeVUnMapLocked(Object, IoMap);
+    LouKeDmaReserveUnlock(&Object->DmaReserve);
 }
 
 DRIVER_EXPORT
@@ -45,7 +61,6 @@ DrsdGxeVMapLocked(
     }else if(LouKeIoMapObjIsNull(IoMap)){
         return STATUS_INVALID_PARAMETER;
     }
-
     return STATUS_SUCCESS;
 }
 
@@ -59,7 +74,6 @@ DrsdGxeVMap(
     LouKeDmaReserveLock(&Object->DmaReserve, 0x00);
     Status = DrsdGxeVMapLocked(Object, IoMap);
     LouKeDmaReserveUnlock(&Object->DmaReserve);
-
     return Status;
 }
 
@@ -109,4 +123,26 @@ _ERROR_GXE_UNMAP:
     }
 
     return Status;
+}
+
+DRIVER_EXPORT
+void 
+DrsdGxeFbVUnMap(
+    PDRSD_FRAME_BUFFER  Fb,
+    PIO_MAP_OBJECT      IoMap
+){
+    UINT i = Fb->Format->PlaneCount;
+    PDRSD_GXE_OBJECT Object;
+    while(i){
+        --i;
+        Object = DrsdGxeFbGetObject(Fb , i);
+        if(!Object){
+            continue;
+        }
+        if(LouKeIoMapObjIsNull(&IoMap[i])){
+            continue;
+        }
+        DrsdGxeVUnMap(Object, &IoMap[i]);
+    }
+
 }

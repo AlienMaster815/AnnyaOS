@@ -1,4 +1,5 @@
 # Compiler and Tools
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreSubsystemEntry -fno-builtin -Wno-multichar
 CC = x86_64-w64-mingw32-gcc
 AR = x86_64-w64-mingw32-ar
 
@@ -15,7 +16,7 @@ all: $(LIB_FILE)
 
 # Compile C file into object file
 $(OBJ_FILE): $(CFILE)
-	$(CC) -c $(CFILE) -Wno-return-type -o $(OBJ_FILE) $(INCLUDES)
+	$(CC) $(CFLAGS) -c $(CFILE) -Wno-return-type -o $(OBJ_FILE) $(INCLUDES)
 
 # Build .lib file from object file
 $(LIB_FILE): $(OBJ_FILE)

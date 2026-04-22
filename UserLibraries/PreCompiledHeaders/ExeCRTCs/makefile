@@ -1,6 +1,7 @@
 # Compiler and Tools
 CC = x86_64-w64-mingw32-gcc
 AR = x86_64-w64-mingw32-ar
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreSubsystemEntry -fno-builtin -Wno-multichar
 
 # Source and Target
 CFILE = ExeCrtcs.c
@@ -18,7 +19,7 @@ all: $(LIB_FILE)
 # Compile C file into object file
 $(OBJ_FILE): $(CFILE)
 	@echo "Compiling $(CFILE) into $(OBJ_FILE)..."
-	$(CC) -c $(CFILE) -o $(OBJ_FILE) $(INCLUDES) $(LIBRARIES) -fmax-errors=1
+	$(CC) $(CFLAGS) -c $(CFILE) -o $(OBJ_FILE) $(INCLUDES) $(LIBRARIES) -fmax-errors=1
 
 # Build .lib file from object file
 $(LIB_FILE): $(OBJ_FILE)

@@ -1,5 +1,6 @@
 
 //#include <LouAPI.h>
+#define _KERNEL_MODULE_
 #include <cstdint.h>
 #include <stdbool.h>
 #include <kernel/loustatus.h>

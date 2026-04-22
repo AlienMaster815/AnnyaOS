@@ -2,6 +2,7 @@
 #define _STDIO_H
 
 #include <cstdint.h>
+#include <kernel/memmory.h>
 #include <Modulation.h>
 
 #ifdef __cplusplus
@@ -76,6 +77,12 @@ static inline void LouKeIoMapObjIncrement(
     }else{
         Object->SharedAddress = (PVOID)((UINTPTR)Object->SharedAddress + Incrementor);
     }
+}
+
+static inline void LouKeIoMapObjClear(
+    PIO_MAP_OBJECT MapObject
+){
+    memset(MapObject, 0, sizeof(IO_MAP_OBJECT));
 }
 
 #ifndef _USER_MODE_CODE_

@@ -67,7 +67,7 @@ int StdIoSPrintf(char* Buffer, const char* Format, ...);
 int StdIoSnPrintf(char* Buffer, size_t Count, const char* Format, ...);
 int StdIoVsnPrintf(char* Buffer, size_t Count, const char* Format, va_list Arguments);
 int StdIoVPrintf(const char* Format, va_list Arguments);
-void* memset(void* dest, int value, size_t count);
+KERNEL_EXPORT void* memset(void* dest, int value, size_t count);
 string LouKeCombineStr_s(string String1, size_t Str1Size, string String2, size_t Str2Size);
 string LouKeCombineStr(string String1, string String2);
 string LouKeAddFileToPath(string Path, string FileName);
@@ -78,6 +78,12 @@ int sprintf_s(char *buffer, size_t sizeOfBuffer, const char *format, ...);
 char* strstr(char* String1, char* String2);
 int snprintf(char* String, size_t Size, const char* Format, ...);
 #define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
+
+#else 
+
+#ifndef _LOUDLL_
+ANNA_IMPORT void* memset(void* dest, int value, size_t count);
+#endif
 
 #endif
 #ifdef __cplusplus
