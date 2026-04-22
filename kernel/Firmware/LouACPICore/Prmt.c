@@ -46,7 +46,7 @@ static LOUSTATUS AcpiParsePrmt(
     UNUSED PVOID TempMmio;
 
     ModuleInfo = (ACPI_PRMT_MODULE_INFO*)Header;
-    ModuleInfoSize = GetStructureSize(Tm, Handlers, ModuleInfo->HandlerInfoCount);
+    ModuleInfoSize = GetStructureSize(PRM_MODULE_INFORMATION, Handlers, ModuleInfo->HandlerInfoCount);
     Tm = LouKeMalloc(ModuleInfoSize, KERNEL_GENERIC_MEMORY);
     memcpy(&Tm->Guid, ModuleInfo->ModuleGuid, sizeof(GUID));
     Tm->MajorRevision = ModuleInfo->MajorRev;

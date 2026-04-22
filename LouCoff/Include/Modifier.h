@@ -51,6 +51,10 @@ static inline PVOID LouKeMallocExUnix(
 
 #define SECTION_ALIGNMENT               4096
 
+#define GetStructureSize(type, member, count) \
+    ((size_t)((uintptr_t)(&((type*)0x00)->member[count])))
+
+
 typedef struct _FILE_CONTEXT{
     string      FilePath;
     void*       FileContext;
@@ -62,6 +66,7 @@ typedef struct _LOUCOFF_MODIFIER_CONTEXT{
     string*             Arguments;
     FILE_CONTEXT        CoffFile;
     FILE_CONTEXT        SourceFile;//opt
+    PVOID               KulaSection;
     bool                KernelObject;
 }LOUCOFF_MODIFIER_CONTEXT, * PLOUCOFF_MODIFIER_CONTEXT;
 
@@ -71,6 +76,7 @@ void StrToLower(string Str);
 LOUSTATUS MakeCoffModifications(PLOUCOFF_MODIFIER_CONTEXT Context);
 LOUSTATUS FileContextOpenFile(PFILE_CONTEXT FileContext);
 void FileContextCloseFile(PFILE_CONTEXT FileContext);
+LOUSTATUS MakeKulaSection(PLOUCOFF_MODIFIER_CONTEXT Context);
 
 #include "Coff.h"
 

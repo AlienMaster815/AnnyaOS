@@ -51,7 +51,7 @@ LouKeCreateIdentificationRange(
         return 0x00;
     }
     MemberCount = (RangeEnd - RangeStart) + 1;
-    Result = LouKeMallocEx(GetStructureSize(Result, Identities, MemberCount), GET_ALIGNMENT(IDENTIFICATION_RANGE), KERNEL_GENERIC_MEMORY);
+    Result = LouKeMallocEx(GetStructureSize(IDENTIFICATION_RANGE, Identities, MemberCount), GET_ALIGNMENT(IDENTIFICATION_RANGE), KERNEL_GENERIC_MEMORY);
     Result->RangeStart = RangeStart; 
     Result->Entries = MemberCount;
 

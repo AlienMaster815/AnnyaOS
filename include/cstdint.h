@@ -79,8 +79,8 @@ typedef struct _INT_512{
 } int512_t, INT_512, * PINT_512;
 
 
-#define GetStructureSize(p, member, count) \
-    ((size_t)((uintptr_t)(&((p)->member[count])) - (uintptr_t)(p)))
+#define GetStructureSize(type, member, count) \
+    ((size_t)((uintptr_t)(&((type*)0x00)->member[count])))
 
 
 #define UINT64_MAX  0xFFFFFFFFFFFFFFFF

@@ -68,7 +68,7 @@ static void DestroyModifierCOntext(
 }
 
 int main(int Argc, char *Argv[]){
-    LOUCOFF_MODIFIER_CONTEXT CompilerContext;
+    LOUCOFF_MODIFIER_CONTEXT CompilerContext = {};
     LOUSTATUS Status;
     Status = ModifierParseInput(
         &CompilerContext,
@@ -79,10 +79,12 @@ int main(int Argc, char *Argv[]){
         DestroyModifierCOntext(
             &CompilerContext
         );
-        return -1;
+        return 0;
     }
 
-
+    if(CompilerContext.SourceFile.FilePath){
+        MakeKulaSection(&CompilerContext);   
+    }
 
     Status = MakeCoffModifications(&CompilerContext);
     if(Status != STATUS_SUCCESS){
