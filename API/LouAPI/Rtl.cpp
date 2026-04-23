@@ -185,6 +185,45 @@ AsciiHexToDecimal(CHAR Hex){
 
 static 
 BOOLEAN 
+Uint64SubtractionWillOverflow(
+    UINT64 A,
+    UINT64 B
+){
+    return (B > A);
+}
+
+UNUSED
+static 
+BOOLEAN 
+Uint32SubtractionWillOverflow(
+    UINT32 A,
+    UINT32 B
+){
+    return (B > A);
+}
+
+UNUSED
+static 
+BOOLEAN 
+Int64SubtractionWillOverflow(
+    INT64 A,
+    INT64 B
+){
+    return ((B < 0 && A > (INT64_MAX + B)) || (B > 0 && A < (INT64_MIN + B)));
+}
+
+UNUSED
+static 
+BOOLEAN 
+Int32SubtractionWillOverflow(
+    INT32 A,
+    INT32 B
+){
+    return ((((INT64)A - (INT64)B) < INT64_MIN) || (((INT64)A - (INT64)B) > INT64_MAX));
+}
+
+static 
+BOOLEAN 
 Uint64AdditionWillOverflow(
     UINT64 A,
     UINT64 B
@@ -433,6 +472,7 @@ LouKeRtlCopyString(
     for(SIZE i = 0 ; i < Length; i++){
         DestinationString->Buffer[i] = SourceString->Buffer[i];
     }
+    DestinationString->Length = Length;
 }
 
 KERNEL_EXPORT 
@@ -517,11 +557,12 @@ LouKeRtlIsZeroMemory(
     PVOID   Buffer, 
     SIZE_T  Length
 ){
-
-    LouPrint("LouKeRtlIsZeroMemory()\n");
-    while(1);
-    return false;
-    
+    for(SIZE i = 0 ; i < Length; i++){
+        if(((UINT8*)Buffer)[i]){
+            return false;
+        }
+    }
+    return true;    
 }
 
 KERNEL_EXPORT 
@@ -626,11 +667,7 @@ CHAR
 LouKeRtlUpperChar(
     CHAR Character
 ){
-
-    LouPrint("LouKeRtlUpperChar()\n");
-    while(1);
-    return 0x00;
-
+    return toupper(Character);
 }
 
 KERNEL_EXPORT 
@@ -639,10 +676,11 @@ LouKeRtlUpperString(
     PSTRING DestinationString, 
     const STRING* SourceString
 ){
-
-    LouPrint("LouKeRtlUpperString()\n");
-    while(1);
-
+    LouKeRtlCopyString(DestinationString, SourceString);
+    SIZE Length = DestinationString->Length;
+    for(SIZE i = 0; i < Length; i++){
+        DestinationString->Buffer[i] = LouKeRtlUpperChar(DestinationString->Buffer[i]);
+    }
 }
 
 KERNEL_EXPORT 
@@ -675,10 +713,17 @@ KERNEL_EXPORT
 LOUSTATUS 
 LouKeRtlInitStringEx(
     PSTRING DestinationString, 
-    PCSZ SourceString
+    PCSZ    SourceString
 ){
-    LouPrint("LouKeRtlInitStringEx()\n");
-    while(1);
+    if(!DestinationString || !SourceString){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    //change to heap later
+    DestinationString->Buffer = (LPSTR)SourceString;
+    DestinationString->Length = strlen(SourceString);
+    DestinationString->MaximumLength = DestinationString->Length;
+    
     return STATUS_SUCCESS;
 }
 
@@ -700,11 +745,13 @@ LouKeRtlUTF8ToUnicodeN(
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeRtlByteToChar(
-    BYTE bOperand, 
-    CHAR* pch
+    BYTE    bOperand, 
+    CHAR*   pch
 ){
-    LouPrint("LouKeRtlByteToChar()\n");
-    while(1);
+    if(!pch){
+        return STATUS_INVALID_PARAMETER;
+    }
+    *pch = (CHAR)bOperand; 
     return STATUS_SUCCESS;
 }
 
@@ -714,8 +761,10 @@ LouKeRtlByteToInt8(
     BYTE bOperand, 
     INT8* pi8Result
 ){
-    LouPrint("LouKeRtlByteToInt8()\n");
-    while(1);
+    if(!pi8Result){
+        return STATUS_INVALID_PARAMETER;
+    }
+    *pi8Result = (INT8)bOperand;
     return STATUS_SUCCESS;
 }
 
@@ -726,8 +775,16 @@ LouKeRtlDWordPtrAdd(
     DWORD_PTR dwAddend, 
     DWORD_PTR* pdwResult
 ){
-    LouPrint("LouKeRtlDWordPtrAdd()\n");
-    while(1);
+    if(!pdwResult){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINTPTR T1 = (UINTPTR)dwAugend, T2 = (UINTPTR)dwAddend;
+
+    if(Uint64AdditionWillOverflow((UINT64)T1, (UINT64)T2)){
+        *pdwResult = 0;
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pdwResult = (DWORD_PTR)(T1 + T2);
     return STATUS_SUCCESS;
 }
 
@@ -738,20 +795,36 @@ LouKeRtlDWordPtrMult(
     DWORD_PTR dwMultiplier, 
     DWORD_PTR* pdwResult
 ){
-    LouPrint("LouKeRtlDWordPtrMult()\n");
-    while(1);
+    if(!pdwResult){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINTPTR T1 = (UINTPTR)dwMultiplicand, T2 = (UINTPTR)dwMultiplier;
+
+    if(Uint64MultiplicationWillOverflow((UINT64)T1, (UINT64)T2)){
+        *pdwResult = 0;
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pdwResult = (DWORD_PTR)(T1 * T2);
     return STATUS_SUCCESS;
 }
 
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeRtlDWordPtrSub(
-    DWORD_PTR dwMinuend, 
-    DWORD_PTR dwSubtrahend, 
+    DWORD_PTR  dwMinuend, 
+    DWORD_PTR  dwSubtrahend, 
     DWORD_PTR* pdwResult
 ){
-    LouPrint("LouKeRtlDWordPtrSub()\n");
-    while(1);
+    if(!pdwResult){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    UINTPTR T1 = (UINTPTR)dwMinuend, T2 = (UINTPTR)dwSubtrahend;
+
+    if(Uint64SubtractionWillOverflow((UINT64)T1, (UINT64)T2)){
+        *pdwResult = 0;
+    }
+    *pdwResult = (DWORD_PTR)(T1 - T2);
     return STATUS_SUCCESS;
 }
 
