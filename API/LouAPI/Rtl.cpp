@@ -3031,3 +3031,1211 @@ LouKeRtlUShortToUInt8(
     while(1);
     return STATUS_SUCCESS;
 }
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCSTR    pszSrc
+){
+    LouPrint("LouKeRtlStringCbCatA()\n");
+    while(1);
+    return 0;    
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatExA(
+    LOUSTRSAFE_PSTR     pszDest,
+    size_t              cbDest, 
+    LOUSTRSAFE_PCSTR    pszSrc, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCatExA()\n");
+    while(1);
+    return 0;   
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining,
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCatExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatNA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cbToAppend
+){
+    LouPrint("LouKeRtlStringCbCatNA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatNExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cbToAppend, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCatNExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatNExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cbToAppend, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCatNExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatNW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cbToAppend
+){
+    LouPrint("LouKeRtlStringCbCatNW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCatW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlStringCbCatW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCSTR    pszSrc
+){
+    LouPrint("LouKeRtlStringCbCopyA()");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCSTR    pszSrc, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCopyExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCopyExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyNA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cbToCopy
+){
+    LouPrint("LouKeRtlStringCbCopyNA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyNExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cbToCopy, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCopyNExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyNExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cbToCopy, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCopyNExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyNW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cbToCopy
+){
+    LouPrint("LouKeRtlStringCbCopyNW()");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyUnicodeString(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    PCUNICODE_STRING    SourceString
+){
+    LouPrint("LouKeRtlStringCbCopyUnicodeString()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyUnicodeStringEx(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    PCUNICODE_STRING    SourceString, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCbCopyUnicodeStringEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbCopyW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlStringCbCopyW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbLengthA(
+    STRSAFE_PCNZCH      psz, 
+    size_t              cbMax, 
+    size_t*             pcbLength
+){
+    LouPrint("LouKeRtlStringCbLengthA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbLengthW(
+    STRSAFE_PCNZWCH     psz, 
+    size_t              cbMax, 
+    size_t*             pcbLength
+){
+    LouPrint("LouKeRtlStringCbLengthW()\n");
+    while(1);
+    return 0;
+}
+
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbPrintfA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCbPrintfA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbPrintfExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    ...                 
+){
+    LouPrint("LouKeRtlStringCbPrintfExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbPrintfExW(
+    LOUSTRSAFE_PWSTR    pszDest,
+    size_t              cbDest, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags,
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCbPrintfExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbPrintfW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCbPrintfW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbVPrintfA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCSTR    pszFormat,
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCbVPrintfA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbVPrintfExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCbVPrintfExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbVPrintfExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcbRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCbVPrintfExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCbVPrintfW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cbDest, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCbVPrintfW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCSTR    pszSrc
+){
+    LouPrint("LouKeRtlStringCchCatA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCSTR    pszSrc, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCatExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest,
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCatExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatNA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cchToAppend
+){
+    LouPrint("LouKeRtlStringCchCatNA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatNExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cchToAppend, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCatNExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatNExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cchToAppend, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCatNExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatNW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cchToAppend
+){
+    LouPrint("LouKeRtlStringCchCatNW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCatW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlStringCchCatW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCSTR    pszSrc
+){
+    LouPrint("LouKeRtlStringCchCopyA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCSTR    pszSrc, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCopyExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCopyExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyNA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cchToCopy
+){
+    LouPrint("LouKeRtlStringCchCopyNA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyNExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZCH      pszSrc, 
+    size_t              cchToCopy, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCopyNExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyNExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cchToCopy, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCopyNExW()\n");
+    while(1);
+    return 0;
+}
+
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyNW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    STRSAFE_PCNZWCH     pszSrc, 
+    size_t              cchToCopy
+){
+    LouPrint("LouKeRtlStringCchCopyUnicodeString()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyUnicodeString(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    PCUNICODE_STRING    SourceString
+){
+    LouPrint("LouKeRtlStringCchCopyUnicodeString()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyUnicodeStringEx(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    PCUNICODE_STRING    SourceString, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlStringCchCopyUnicodeStringEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchCopyW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlStringCchCopyW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchLengthA(
+    STRSAFE_PCNZCH  psz, 
+    size_t          cchMax, 
+    size_t*         pcchLength
+){
+    LouPrint("LouKeRtlStringCchLengthA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchLengthW(
+    STRSAFE_PCNZWCH     psz, 
+    size_t              cchMax, 
+    size_t*             pcchLength
+){
+    LouPrint("LouKeRtlStringCchLengthW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchPrintfA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCchPrintfA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchPrintfExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCchPrintfExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchPrintfExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCchPrintfW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchPrintfW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlStringCchPrintfW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchVPrintfA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCchVPrintfA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchVPrintfExA(
+    LOUSTRSAFE_PSTR     pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PSTR*    ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCSTR    pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCchVPrintfExA()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchVPrintfExW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PWSTR*   ppszDestEnd, 
+    size_t*             pcchRemaining, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCchVPrintfExW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlStringCchVPrintfW(
+    LOUSTRSAFE_PWSTR    pszDest, 
+    size_t              cchDest, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlStringCchVPrintfW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnalignedStringCbLengthW(
+    STRSAFE_PCUNZWCH    psz, 
+    size_t              cbMax, 
+    size_t*             pcbLength
+){
+    LouPrint("LouKeRtlUnalignedStringCbLengthW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnalignedStringCchLengthW(
+    STRSAFE_PCUNZWCH    psz, 
+    size_t              cchMax, 
+    size_t*             pcchLength
+){
+    LouPrint("LouKeRtlUnalignedStringCchLengthW()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCat(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString
+){
+    LouPrint("LouKeRtlUnicodeStringCat()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCatEx(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCatEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCatString(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlUnicodeStringCatString()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCatStringEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCatStringEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCatN(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cbToAppend
+){
+    LouPrint("LouKeRtlUnicodeStringCbCatN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCatNEx(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cbToAppend, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCbCatNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCatStringN(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cbToAppend
+){
+    LouPrint("LouKeRtlUnicodeStringCbCatStringN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCatStringNEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cbToAppend, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCbCatStringNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCopyN(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cbToCopy
+){
+    LouPrint("LouKeRtlUnicodeStringCbCopyN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCopyNEx(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cbToCopy, 
+    PUNICODE_STRING     RemainingString,
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCbCopyNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCopyStringN(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cbToCopy
+){
+    LouPrint("LouKeRtlUnicodeStringCbCopyStringN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCbCopyStringNEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cbToCopy, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCbCopyStringNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCatN(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cchToAppend
+){
+    LouPrint("LouKeRtlUnicodeStringCchCatN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCatNEx(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cchToAppend, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCchCatNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCatStringN(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cchToAppend
+){
+    LouPrint("LouKeRtlUnicodeStringCchCatStringN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCatStringNEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cchToAppend, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCchCatStringNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCopyN(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cchToCopy
+){
+    LouPrint("LouKeRtlUnicodeStringCchCopyN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCopyNEx(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    size_t              cchToCopy, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCchCopyNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCopyStringN(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cchToCopy
+){
+    LouPrint("LouKeRtlUnicodeStringCchCopyStringN()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCchCopyStringNEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    size_t              cchToCopy, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCchCopyStringNEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCopy(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString
+){
+    LouPrint("LouKeRtlUnicodeStringCopy()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCopyEx(
+    PUNICODE_STRING     DestinationString, 
+    PCUNICODE_STRING    SourceString, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCopyEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCopyString(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlUnicodeStringCopyString()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringCopyStringEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringCopyStringEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringInit(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc
+){
+    LouPrint("LouKeRtlUnicodeStringInit()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringInitEx(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszSrc, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringInitEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringPrintf(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlUnicodeStringPrintf()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringPrintfEx(
+    PUNICODE_STRING     DestinationString, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    ...
+){
+    LouPrint("LouKeRtlUnicodeStringPrintfEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringValidate(
+    PCUNICODE_STRING SourceString
+){
+    LouPrint("LouKeRtlUnicodeStringValidate()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringValidateEx(
+    PCUNICODE_STRING    SourceString, 
+    DWORD               dwFlags
+){
+    LouPrint("LouKeRtlUnicodeStringValidateEx()\n");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringVPrintf(
+    PUNICODE_STRING     DestinationString, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlUnicodeStringVPrintf()");
+    while(1);
+    return 0;
+}
+
+KERNEL_EXPORT 
+LOUSTRSAFEDDI 
+LouKeRtlUnicodeStringVPrintfEx(
+    PUNICODE_STRING     DestinationString, 
+    PUNICODE_STRING     RemainingString, 
+    DWORD               dwFlags, 
+    LOUSTRSAFE_PCWSTR   pszFormat, 
+    va_list             argList
+){
+    LouPrint("LouKeRtlUnicodeStringVPrintfEx()\n");
+    while(1);
+    return 0;
+}

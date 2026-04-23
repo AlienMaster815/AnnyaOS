@@ -385,12 +385,10 @@ void LouOsKrnlStart(
 
     //ScanTheRestOfHarware();    
 
-    //TODO: stub Loustrsafe.h and LdmCore.h 
+    //TODO: stub LdmCore.h 
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
-
-    //TODO: Debug new stack allocators
     
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;
