@@ -25,6 +25,12 @@ LouKeRegisterEcsDriver(
     PLOUSINE_ECS_DRIVER EcsDriver
 );
 
+KERNEL_EXPORT 
+void 
+LouKeUnRegisterEcsDriver(
+    PLOUSINE_ECS_DRIVER EcsDriver
+);
+
 #ifndef _KERNEL_MODULE_
 
 int

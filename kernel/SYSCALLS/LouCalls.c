@@ -43,7 +43,7 @@ void* LouKeGenericAllocateHeapEx(
     size_t Alignment
 );
 uint64_t LouKeGetThreadIdentification();
-void LouKeExitDosMode();
+DRIVER_IMPORT void LouKeExitDosMode();
 void LouKeDrsdSyncScreen();
 //PDRSD_CLIP LouKeDrsdCreateClip(
 //    INT64    X, INT64 Y, 
@@ -69,7 +69,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         } 
         case LOUEXITDOSMODE:{
-            //LouKeExitDosMode();
+            LouKeExitDosMode();
             return;
         }
         case LOULOADFILE:{

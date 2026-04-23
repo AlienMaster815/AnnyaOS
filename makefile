@@ -36,7 +36,7 @@ MAKEDIR64 := $(shell awk -F '[<>]' '/<MainDirectoryStructure64>/{print " " $$3 "
 CPY32 := $(shell awk -F '[<>]' '/<FILETOCPY32>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 CPY64 := $(shell awk -F '[<>]' '/<FILETOCPY64>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 
-EXPORT := $(KernelEXPORTS) $(WDFLDRModuleEXPORTS)
+LIBS = drivers/gpu/BootVid/BootVid.lib
 
 CC = x86_64-w64-mingw32-gcc
 CP = x86_64-w64-mingw32-g++
@@ -158,7 +158,7 @@ Libs: KernelModules UserSpace
 
 lou.exe: Libs $(x86_64_object_files) $(kernel_object_files) 
 	mkdir -p dist/x86_64
-	$(LD) -n -o dist/x86_64/LOUOSKRNL.EXE $(x86_64_object_files)
+	$(LD) -n -o dist/x86_64/LOUOSKRNL.EXE $(x86_64_object_files) $(LIBS)
 	rm -r build
 
 release: lou.exe

@@ -19,7 +19,7 @@ static HANDLE SessionManagerProcessHandle = 0x00;
 
 LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
-    //LouExitDosMode();
+    LouExitDosMode();
 
     LouPrint("ASMSS: Hello User Mode\n");
     

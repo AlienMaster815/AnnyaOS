@@ -26,6 +26,25 @@ LouKeRegisterEcsDriver(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
+void
+LouKeUnRegisterEcsDriver(
+    PLOUSINE_ECS_DRIVER EcsDriver
+){
+    PLOUSINE_ECS_DRIVER_TACKER TmpTracker;
+    PLOUSINE_ECS_DRIVER_TACKER ForwardTracker;
+
+    MutexLock(&EcsDriverManager.DriversLock);    
+    ForEachListEntrySafe(TmpTracker, ForwardTracker, &EcsDriverManager.Drivers, Peers){
+        ForEachIf((UINTPTR)TmpTracker->DriverObject == (UINTPTR)EcsDriver){
+            MutexLock(&TmpTracker->LockOut);
+            LouKeListDeleteItem(&TmpTracker->Peers);
+            MutexUnlock(&TmpTracker->LockOut);
+        }
+    }
+    MutexUnlock(&EcsDriverManager.DriversLock);
+
+}
 
 int
 LouKeEcsPrintAsciiCharecter(

@@ -73,6 +73,9 @@ void BootRenderDrawLine(
 LOUSTATUS 
 BootVidInitializeTerminalDriver();
 
+void
+BootVidDeInitializeTerminalDriver();
+
 LOUSTATUS
 BootVidBitmapPutPixel(
     PBOOTVID_BITMAP Bitmap,
@@ -99,6 +102,11 @@ BootVidCreateBitmap(
 );
 
 void 
+BootVidDestroyBitmap(
+    PBOOTVID_BITMAP Bitmap
+);
+
+void 
 BootVidPlaceBitmap(
     PBOOTVID_BITMAP Bitmap,
     int             x,
@@ -110,5 +118,10 @@ BootVidTrimBitmap(
     PBOOTVID_BITMAP Bitmap,
     UINT32          Background
 );
+
+void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B);
+void BootRenderSetScreenColorEx(UINT32 Color);
+
+
 
 #endif

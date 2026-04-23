@@ -11,4 +11,9 @@ TtfParseCmapData(
     PTTF_OBJECT             Object
 );
 
+void 
+TtfCloseCmapData(
+    PTTF_OBJECT TtfObject
+);
+
 #endif

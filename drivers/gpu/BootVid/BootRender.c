@@ -234,3 +234,13 @@ void BootRenderDrawAaLine(
 ){
     BootRenderDrawAaLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B));
 }
+
+void BootRenderSetScreenColorEx(UINT32 Color){
+    for(SIZE i = 0 ; i < (BootBuffer->FramebufferSize / sizeof(UINT32)); i++){
+        Canvas[i] = Color;
+    }
+}
+
+void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B){
+    BootRenderSetScreenColorEx(SET_RGB(R, G, B));
+}

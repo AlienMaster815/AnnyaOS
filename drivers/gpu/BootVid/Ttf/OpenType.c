@@ -204,3 +204,12 @@ TtfInitializeFile(
     LouPrint("BOOTVID.SYS:TtfInitializeFile() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
+
+void TtfDeInitializeFile(
+    PTTF_OBJECT TtfObject
+){
+    TtfCloseGlyphData(TtfObject);
+    TtfCloseCmapData(TtfObject);   
+    LouKeFree(TtfObject->TableDirectories);
+    LouKeFree(TtfObject);
+}

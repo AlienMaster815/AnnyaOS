@@ -223,3 +223,9 @@ int TtfGetPixelY(
     return (CoordinateY * DesireCharHeight) / UnitsPerEm;
 }
 
+void 
+TtfCloseCmapData(
+    PTTF_OBJECT TtfObject
+){
+    LouKeFree(TtfObject->CmapMetaData.SubTables);   
+}

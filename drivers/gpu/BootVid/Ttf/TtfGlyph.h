@@ -29,5 +29,9 @@ TtfParseGlyphData(
     PTTFOBJ_TABLE_DIRECTORY Directory,
     PTTF_OBJECT             TtfObject
 );
+void 
+TtfCloseGlyphData(
+    PTTF_OBJECT TtfObject
+);
 
 #endif

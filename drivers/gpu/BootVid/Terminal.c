@@ -88,9 +88,15 @@ LOUSTATUS
 BootVidInitializeTerminalDriver(){
     LOUSTATUS Status;
     
-
-
     Status = LouKeRegisterEcsDriver(&BootVidEcsDriver);
 
     return Status;
+}
+
+void
+BootVidDeInitializeTerminalDriver(){
+    LouKeUnRegisterEcsDriver(&BootVidEcsDriver);
+    BootRenderSetScreenColorEx(SET_RGB(0, 128, 128));
+    BootRenderSyncScreen();
+    TtfDeInitializeFile(TerminalFont);
 }

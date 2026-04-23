@@ -207,6 +207,7 @@ UINT32      TtfReadUint32(UINT32 Data);
 UINT64      TtfReadUint64(UINT64 Data);
 int         TtfMemCmp(PVOID Data, PVOID Check, size_t Size);
 LOUSTATUS   TtfInitializeFile(PVOID TtfStream);
+void        TtfDeInitializeFile(PTTF_OBJECT TtfObject);
 
 int TtfGetPixelX(
     int CoordinateX,

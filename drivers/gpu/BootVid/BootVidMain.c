@@ -2,7 +2,7 @@
 #include "BootVid.h"
 
 static struct multiboot_tag_framebuffer_common* BootGraphics = 0x00;
-
+static BOOLEAN BootVidInitialized = false;
 
 
 LOUAPI
@@ -86,5 +86,19 @@ BootVidEntry(){
 
     LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
 
+    BootVidInitialized = true;
+
     return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT 
+void 
+LouKeExitDosMode(){
+    if(!BootVidInitialized){
+        return;
+    }
+    BootVidDeInitializeTerminalDriver();
+
+
+
 }

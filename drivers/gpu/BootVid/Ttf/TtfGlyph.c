@@ -372,6 +372,7 @@ void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE H
     GlyphScanlineFill(&Gvs, NewMap);
 
     BootVidTrimBitmap(NewMap, 0);
+    LouKeFree(Gvs.VectorOut);
 }
 
 LOUSTATUS 
@@ -403,4 +404,20 @@ TtfParseGlyphData(
         );
     }
 
+}
+
+void 
+TtfCloseGlyphData(
+    PTTF_OBJECT TtfObject
+){
+    for(size_t i = 0 ; i < 127; i++){
+        if(!TtfObject->AsciiGlyphData[i]){
+            continue;
+        }
+        BootVidDestroyBitmap(TtfObject->AsciiGlyphData[i]->Bitmap);
+        LouKeFree(TtfObject->AsciiGlyphData[i]->YCoordinates);
+        LouKeFree(TtfObject->AsciiGlyphData[i]->XCoordinates);
+        LouKeFree(TtfObject->AsciiGlyphData[i]->Flags);
+        LouKeFree(TtfObject->AsciiGlyphData[i]->EndPoints);
+    }
 }
