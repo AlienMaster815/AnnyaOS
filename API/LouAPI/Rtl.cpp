@@ -392,6 +392,8 @@ LouKeRtlCharToInteger(
     return STATUS_SUCCESS;
 }
 
+
+
 KERNEL_EXPORT 
 LONG 
 LouKeRtlCompareString(
@@ -399,11 +401,26 @@ LouKeRtlCompareString(
     const STRING*   String2,
     BOOLEAN         CaseInSensitive
 ){
-
-    LouPrint("LouKeRtlCompareString()\n");
-    while(1);
-    return 0x00;
-
+    LOUSTR  Raw1 = String1->Buffer;
+    LOUSTR  Raw2 = String2->Buffer;
+    if(CaseInSensitive){
+        while(
+            (toupper(*Raw1) == toupper(*Raw2)) &&
+            (*Raw1) && (*Raw2)
+        ){  
+            Raw1++;
+            Raw2++;
+        }        
+        return (toupper(*Raw1) - toupper(*Raw2));
+    }
+    while(
+        (*Raw1 == *Raw2) &&
+        (*Raw1) && (*Raw2)
+    ){  
+        Raw1++;
+        Raw2++;
+    }        
+    return (*Raw1 - *Raw2);
 }
 
 KERNEL_EXPORT 
@@ -412,10 +429,10 @@ LouKeRtlCopyString(
     PSTRING         DestinationString, 
     const STRING*   SourceString
 ){
-
-    LouPrint("LouKeRtlCopyString()\n");
-    while(1);
-
+    SIZE Length = SourceString->Length;
+    for(SIZE i = 0 ; i < Length; i++){
+        DestinationString->Buffer[i] = SourceString->Buffer[i];
+    }
 }
 
 KERNEL_EXPORT 
@@ -425,11 +442,7 @@ LouKeRtlEqualString(
     const STRING*   String2, 
     BOOLEAN         CaseInSensitive
 ){
-
-    LouPrint("LouKeRtlEqualString()\n");
-    while(1);
-    return false;
-
+    return LouKeRtlCompareString(String1, String2, CaseInSensitive) ? false : true;
 }
 
 KERNEL_EXPORT 
