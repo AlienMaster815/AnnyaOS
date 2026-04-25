@@ -244,3 +244,17 @@ void BootRenderSetScreenColorEx(UINT32 Color){
 void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B){
     BootRenderSetScreenColorEx(SET_RGB(R, G, B));
 }
+
+DRIVER_EXPORT
+LOUSTATUS
+GetBootVidFrameBuffer(
+    UINT64* KulaPacket
+){
+    LouPrint("GetBootVidFrameBuffer()\n");
+    while(1);
+    if(!KulaPacket){
+        return STATUS_INVALID_PARAMETER;
+    }
+    *KulaPacket = (UINT64)BootBuffer;
+    return STATUS_SUCCESS;
+}

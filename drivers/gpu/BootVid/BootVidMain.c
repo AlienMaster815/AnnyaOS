@@ -98,7 +98,4 @@ LouKeExitDosMode(){
         return;
     }
     BootVidDeInitializeTerminalDriver();
-
-
-
 }

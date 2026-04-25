@@ -205,6 +205,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             LouKeCloseFileCall((uint64_t*)Data);
             return;
         }
+        case LOUINITIOCTLTABLE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[1] = (UINT64)LouKeInitializeIoCtlTable((PVOID)Tmp[0]);
+            return;
+        }
         case LOUDRSDUPDATECLIPSUBSTATE:{
             //uint64_t* Tmp = (uint64_t*)Data;
             //LouKeUpdateClipSubState((PDRSD_CLIP)Tmp[0], (INT64)Tmp[1], (INT64)Tmp[2], (INT64)Tmp[3], (INT64)Tmp[4]);
@@ -227,6 +232,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUCREATESECTIONEX:{
             LouPrint("LOUCREATESECTION\n");
             while(1);
+        }
+        case LOUIOCTLCALLFUNC:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[2] = (UINT64)LouKeCallIoCtlFunction((PLOU_IOCTL_TABLE_ENTRY)Tmp[0], (UINT64*)Tmp[1]);
+            return;
         }
         default:
         LouPrint("Unkown Call:%d\n", Call);

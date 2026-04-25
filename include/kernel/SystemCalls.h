@@ -122,13 +122,16 @@ extern "C" {
 #define LOUAGLFN                                106
 #define LOUCLOSEFILE                            107
 #define LOUALPCSETINFORMATION                   108
-//#define LOUGETSYSTEMSTATE                       109 Open for replacement
+#define LOUINITIOCTLTABLE                       109
 #define LOUDRSDUPDATECLIPSUBSTATE               110
 #define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
 #define LOUDRSDSETPLANEINFO                     112
 #define LOUSHUTDOWN                             113
 #define LOUYEILDEXE                             114
 #define LOUCREATESECTIONEX                      115
+#define LOUIOCTLCALLFUNC                        116
+
+
 
 #define WINECALL                                1   
 #define WINECALL_FASTFAIL                       1

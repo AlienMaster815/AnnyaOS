@@ -48,3 +48,5 @@ EXPORTS
     LouRtlCharToUint64
     LouRtlCharToUint32
     LouRtlCharToInteger
+    LouInitializeIoCtlTable
+    LouCallIoCtlFunction

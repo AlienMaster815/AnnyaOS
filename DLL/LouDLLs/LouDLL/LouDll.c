@@ -252,11 +252,19 @@ int LouPrint(char* Str, ...){
     return Data[3];
 }
 
+static DEFINE_LOU_IOCTL_TABLE(
+    LouDllIoCalls,
+    DEFINE_OPTIONAL_LOU_IOCTL_ENTRY("BOOTVID.SYS", "GetBootVidFrameBuffer"),
+);
+
 LOUDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     BOOL Tmp = true;
     if(ul_reason_for_call == DLL_PROCESS_ATTACH){
         LouPrint("LOUDLL.DLL Attatched To New Process\n");
+        if(LouInitializeIoCtlTable(LouDllIoCalls) != STATUS_SUCCESS){
+            LouPrint("LOUDLL.DLL Failed To Register IOCTLs\n");
+        }
     }
     
     //Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
@@ -780,3 +788,28 @@ LouSystemShutdown(SHUTDOWN_ACTION ShutDown){
     }
 }
 
+LOUDLL_API 
+LOUSTATUS 
+LouInitializeIoCtlTable(
+    PVOID Table
+){
+    UINT64 KulaPacket[3] = {0, (UINT64)Table, 0};
+
+    while(KulaPacket[0] != 1){
+        LouCALL(LOUINITIOCTLTABLE, (UINT64)&KulaPacket[0], 0);
+    }
+    return (LOUSTATUS)KulaPacket[2];
+}
+
+LOUDLL_API 
+LOUSTATUS 
+LouCallIoCtlFunction(
+    PLOU_IOCTL_TABLE_ENTRY  Entry, 
+    UINT64*                 IoKulaPacket
+){
+    UINT64 KulaPacket[4] = {0, (UINT64)Entry, (UINT64)IoKulaPacket, 0};
+    while(KulaPacket[0] != 1){
+        LouCALL(LOUIOCTLCALLFUNC, (UINT64)&KulaPacket[0], 0);
+    }
+    return (LOUSTATUS)KulaPacket[3];
+}

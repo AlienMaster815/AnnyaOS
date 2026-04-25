@@ -74,6 +74,8 @@
 #include <kernel/Rcu.h>
 #include <kernel/Virtualization.h>
 
+#include <IoCtl.h>
+
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

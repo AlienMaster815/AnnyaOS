@@ -87,6 +87,7 @@ extern "C" {
 #include <kernel/Rcu.h>
 #include <kernel/Services.h>
 
+#include <IoCtl.h>
 
 #ifndef KERNEL_MAIN_FILE
 EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
