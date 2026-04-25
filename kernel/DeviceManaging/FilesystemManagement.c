@@ -161,7 +161,6 @@ void InitializeFileSystemManager(){
                                     NewMountedFileSystem->SystemDisk = true;
                                     NewMountedFileSystem->DriveID = 'C';
                                     MountedFileSystemTableMembers++;
-                                    while(1);
                                     continue;
                                 }
                             }
