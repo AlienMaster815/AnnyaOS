@@ -212,6 +212,9 @@ UserSpace:
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C EXE/asmss/ all
 
+	$(MAKE) -C EXE/Awm/ clean
+	$(MAKE) -C EXE/Awm/ all
+
 	$(MAKE) -C EXE/Explorer clean
 	$(MAKE) -C EXE/Explorer all
 
@@ -276,6 +279,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C EXE/asmss/ clean
+	$(MAKE) -C EXE/Awm/ clean
 	$(MAKE) -C LouCoff clean
 	rm -rf release
 	rm -rf build
