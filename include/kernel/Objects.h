@@ -147,6 +147,8 @@ size_t LouKeGetRegistryKeySize(PVOID Key);
 
 LOUSTATUS LouKeReadRegistryWcsValue(PVOID Key, LPWSTR String);
 
+LOUSTATUS LouKeReadRegistryCsValue(PVOID Key, LOUSTR String);
+
 LOUSTATUS LouKeReadRegistryByteValue(
     PVOID Key, 
     BYTE* Data

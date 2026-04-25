@@ -524,15 +524,6 @@ void GetRtcTimeData(TIME_T* PTIME){
     }
 }
 
-LOUDLL_API
-void AnnyaUpdateButton(
-    int64_t x, int64_t y,
-    uint32_t Width, uint32_t Height,
-    PVOID HBUTTON
-){
-    LouPrint("AnnyaUpdateButton()\n");
-    while(1);
-}
 
 static mutex_t LouCallLock;
 
@@ -668,6 +659,21 @@ LouOpenFileA(
     uint64_t KulaPacket[4] = {0};
     KulaPacket[1] = (uint64_t)FileName;
     KulaPacket[3] = (uint64_t)ACCESS_MASK_GENERIC_ALL;
+    while(!KulaPacket[0]){
+        LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
+    }
+    return (void*)KulaPacket[1]; 
+}
+
+LOUDLL_API
+FILE*
+LouOpenFileExA(
+    string          FileName,
+    ACCESS_MASK     AccessMask
+){
+    uint64_t KulaPacket[4] = {0};
+    KulaPacket[1] = (uint64_t)FileName;
+    KulaPacket[3] = (uint64_t)AccessMask;
     while(!KulaPacket[0]){
         LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     }

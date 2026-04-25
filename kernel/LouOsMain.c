@@ -514,7 +514,9 @@ void LouOsKrnlStart(
 }
 
 
-//TODO: xAPIC has been depreciated work on x2APIC
+//TODO: 
+//xAPIC has been depreciated work on x2APIC
+//Add mutex to the registry keys and a close function
 
 // Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
 

@@ -48,6 +48,11 @@ typedef struct _sint32_LSB_MSB{
     sint32_MSB MSB;
 }sint32_LSB_MSB, *psint32_LSB_MSB;
 
+typedef struct _PVD_GENERIC{
+    int8 Type;
+    strA Identifier;
+    int8 Version;   
+}PVD_GENERIC, PVD_GENERIC;
 
 typedef struct _VolumeDescriptor{
     int8 Type;

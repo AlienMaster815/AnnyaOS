@@ -129,6 +129,11 @@ FILE*
 LouOpenFileA(
     string FileName
 );
+FILE*
+LouOpenFileExA(
+    string      FileName,
+    ACCESS_MASK AccessMask
+);
 int LouPrint(char* Str, ...);
 void 
 LouDrsdSyncScreen();

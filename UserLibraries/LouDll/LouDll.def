@@ -17,6 +17,7 @@ EXPORTS
     LouVirtualAllocUser
     AnnyaGetLibraryFunctionN
     LouOpenFileA
+    LouOpenFileExA
     LouSwapEndianess
     LouMemCpy
     LouCloseFile
@@ -50,3 +51,4 @@ EXPORTS
     LouRtlCharToInteger
     LouInitializeIoCtlTable
     LouCallIoCtlFunction
+    LouCreateProcessA

@@ -478,4 +478,23 @@ void LouAccessCheckByTypeResultListAndAuditAlarmByHandle();
 
 void LouAcquireCMFViewOwnership();
 
+FILE*
+LouOpenFileExA(
+    string      FileName,
+    ACCESS_MASK AccessMask
+);
+
+LOUSTATUS 
+LouCreateSectionEx(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
+);
+
 #endif

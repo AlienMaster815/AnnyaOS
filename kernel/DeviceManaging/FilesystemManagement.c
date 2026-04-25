@@ -88,8 +88,30 @@ static DRIVE_ID_TABLE DriveIdTable[25] = {
 
 void InitializeFileSystemManager(){
     
+    PVOID SystemIdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER_TYPE", 0x00);
+    PVOID IdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER", 0x00);
+    UINT8 RawByteId;
+    LouKeReadRegistryByteValue(SystemIdHandle, &RawByteId);
+    SYSTEM_IDENTIFIER_TYPE SystemIdType = (SYSTEM_IDENTIFIER_TYPE)RawByteId;
+
+    PVOID IdData = 0;
+    switch(SystemIdType){
+        case VOLUME_IDENTIFER:{
+            IdData = (PVOID)LouKeMallocArray(CHAR, LouKeGetRegistryKeySize(IdHandle) + 1, KERNEL_GENERIC_MEMORY);
+            LouKeReadRegistryCsValue(IdHandle, (LOUSTR)IdData);
+            break;
+        }
+        case VOLUME_SERIAL_NUMBER:{
+            LouKeReadRegistryQWordValue(IdHandle, (UINT64*)&IdData);
+            break;
+        }
+        default:
+            break;
+    }
+
     Iso9660DriverEntry(); 
     //FatDriverEntry();      
+
     uint8_t PortCount = LouKeGetNumberOfStorageDevices();
     PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
     for(size_t FileSystemIndex = 0 ; FileSystemIndex < FileSystemTableMembers; FileSystemIndex++){
@@ -107,17 +129,47 @@ void InitializeFileSystemManager(){
                 }
                 TmpMfs->List.NextHeader = (PListHeader)LouKeMallocType(LOUSINE_KERNEL_MOUNTED_FILESYSTEMS, KERNEL_GENERIC_MEMORY);
                 TmpMfs->FileSystem = NewMountedFileSystem;
-                if(NewMountedFileSystem->FileSystemSeek){
-                    //Seek Kernel Image tto identify if its a system disk
-                    //TODO Change This
-                    bool KernelImage = NewMountedFileSystem->FileSystemSeek("/ANNYA/SYSTEM64/LOUOSKRN.EXE", NewMountedFileSystem);
-                    if(KernelImage){
-                        LouPrint("Storage Device Is A System Disk\n");
-                        NewMountedFileSystem->SystemDisk = true;
-                        NewMountedFileSystem->DriveID = 'C';
-                        MountedFileSystemTableMembers++;
-                        continue;
+                switch(SystemIdType){
+
+                    case VOLUME_IDENTIFER:{
+                        if(NewMountedFileSystem->FileSystemGetVid){
+                            LOUSTR VidString = 0;
+                            LOUSTATUS Status = NewMountedFileSystem->FileSystemGetVid(NewMountedFileSystem, &VidString);
+                            BOOLEAN IsSystemDrive = false;
+                            if(Status == STATUS_SUCCESS){
+                                if(!strcmp(VidString, (LOUSTR)IdData)){
+                                    IsSystemDrive = true;
+                                }
+                                LouKeFree(VidString);
+                            }
+                            if(IsSystemDrive){
+                                NewMountedFileSystem->SystemDisk = true;
+                                NewMountedFileSystem->DriveID = 'C';
+                                MountedFileSystemTableMembers++;
+                                continue;
+                            }
+                        }
+                        break;
                     }
+                    case VOLUME_SERIAL_NUMBER:{
+                        if(NewMountedFileSystem->FileSystemGetVsi){
+                            UINT64 VsnQuad = 0;
+                            LOUSTATUS Status = NewMountedFileSystem->FileSystemGetVsi(NewMountedFileSystem, &VsnQuad);
+                            if(Status == STATUS_SUCCESS){
+                                if(!memcmp(&VsnQuad, &IdData, sizeof(UINT64))){
+                                    LouPrint("Storage Device Is A System Disk\n");
+                                    NewMountedFileSystem->SystemDisk = true;
+                                    NewMountedFileSystem->DriveID = 'C';
+                                    MountedFileSystemTableMembers++;
+                                    while(1);
+                                    continue;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    default:
+                        break;
                 }
                 for(uint8_t Drive = 0; Drive < 25; Drive++){
                     if(DriveIdTable[Drive].DriveTaken){
@@ -131,6 +183,13 @@ void InitializeFileSystemManager(){
         if(Tmp->List.NextHeader){
             Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
         }
+    }
+    switch(SystemIdType){
+        case VOLUME_IDENTIFER:{
+            LouKeFree(IdData);
+        }
+        default:
+            break;
     }
 }
 

@@ -145,6 +145,37 @@ LOUSTATUS LouKeReadRegistryWcsValue(
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS LouKeReadRegistryCsValue(
+    PVOID  Key, 
+    LOUSTR String
+){
+
+    if(!String){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!Key){
+        String[0] = L'\0';
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    PCOMPILED_NODE_ENTRY Node = (PCOMPILED_NODE_ENTRY)Key;
+
+    if(GET_ITEM_OPCODE(&Node->Node) != STRING_OPCODE){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    SIZE StrSize = (Node->Node.ItemSize / 2);
+
+    for(SIZE i = 0 ; i < StrSize; i++){
+        if(((LPWSTR)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node)))[i] > UINT8_MAX){
+            memset(String, 0, i);
+            return STATUS_INVALID_PARAMETER;
+        }
+        String[i] = (UINT8)((LPWSTR)((size_t)&Node->Node + GET_REG_ITEM_OFFSET(&Node->Node)))[i];
+    }
+
+    return STATUS_SUCCESS;
+}
+
 KERNEL_EXPORT
 LOUSTATUS LouKeReadRegistryWordValue(
     PVOID Key, 

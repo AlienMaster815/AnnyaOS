@@ -8,6 +8,13 @@ extern "C" {
 typedef char LOUSINE_KERNEL_DRIVE_ID;
 typedef uint8_t LOUSINE_KERNEL_STORAGE_DEVICE_ID;
 
+typedef enum _SYSTEM_IDENTIFIER_TYPE{
+    VOLUME_IDENTIFER        = 0,
+    VOLUME_SERIAL_NUMBER    = 1,
+}SYSTEM_IDENTIFIER_TYPE;
+
+
+
 typedef struct _LOUSINE_KERNEL_FILESYSTEM{
     LOUSINE_KERNEL_DRIVE_ID                     DriveID;
     uint8_t                                     PortID;
@@ -17,6 +24,8 @@ typedef struct _LOUSINE_KERNEL_FILESYSTEM{
     FILE*                                       (*FileSystemOpen)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem, uint64_t PageFlags);
     bool                                        (*FileSystemSeek)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
     void                                        (*FileSystemClose)(string FilePath, FILE* File, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
+    LOUSTATUS                                   (*FileSystemGetVsi)(struct _LOUSINE_KERNEL_FILESYSTEM*, UINT64* OutVsi);
+    LOUSTATUS                                   (*FileSystemGetVid)(struct _LOUSINE_KERNEL_FILESYSTEM*, LOUSTR* OutVsi);
     uint64_t                                    FileAllocationTableSector;
 }LOUSINE_KERNEL_FILESYSTEM, * PLOUSINE_KERNEL_FILESYSTEM;
 

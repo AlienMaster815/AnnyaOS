@@ -444,6 +444,13 @@ LouOpenFileA(
 );
 
 __declspec(dllimport)
+FILE*
+LouOpenFileExA(
+    string      FileName,
+    ACCESS_MASK AccessMask
+);
+
+__declspec(dllimport)
 int LouPrint(char* Str, ...);
 
 __declspec(dllimport)
@@ -504,6 +511,16 @@ LouCreateSectionEx(
     HANDLE                  FileHandle,
     PMEM_EXTENDED_PARAMETER ExtendedParameters,
     ULONG                   ExtendedParameterCount
+);
+
+__declspec(dllimport)
+LOUSTATUS
+LouCreateProcessA(
+    LOUSTR      ProcessName,
+    LOUSTR      FilePath,
+    HPROCESS    ParrentProcess,
+    ACCESS_MASK AccessMask,
+    HPROCESS*   OutProcess     
 );
 
 #endif

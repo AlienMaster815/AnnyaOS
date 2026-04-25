@@ -339,6 +339,7 @@ FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
         false,
         PageFlags
     );
+    
 }
 
 LOUAPI
@@ -371,6 +372,43 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
 }
 
 LOUAPI
+LOUSTATUS
+Iso9660FileSystemGetVid(
+    PLOUSINE_KERNEL_FILESYSTEM  FilesystemHandle,
+    LOUSTR*                     OutVid
+){
+    if(!OutVid){
+        return STATUS_INVALID_PARAMETER;
+    }
+    
+    LOUSTATUS Status = STATUS_SUCCESS;
+    uint64_t BufferSize = 2048;
+
+    UINT8* Data = (UINT8*)ReadDrive(
+        FilesystemHandle->PortID,
+        0x10,
+        1,
+        &BufferSize,
+        &Status
+    );
+
+    if(!Data){
+        return STATUS_NO_SUCH_FILE;
+    }
+    LOUSTR TmpData = (LOUSTR)(Data + 40);
+    SIZE i = 0; 
+    for(i = 32 ; i > 0; i--){
+        if(TmpData[i - 1] != ' '){
+            break;
+        }
+    }
+    LOUSTR NewString = LouKeMallocArray(CHAR, i + 1, KERNEL_GENERIC_MEMORY);
+    strncpy(NewString, TmpData, i);
+    *OutVid = NewString;
+    return STATUS_SUCCESS;
+}
+
+LOUAPI
 PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
     VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
     //Create A File System Structure
@@ -382,6 +420,7 @@ PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
         Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
         Iso9660FileSystem->FileSystemOpen = Iso9660FileSystemOpen;
         Iso9660FileSystem->FileSystemSeek = Iso9660FileSystemSeek;
+        Iso9660FileSystem->FileSystemGetVid = Iso9660FileSystemGetVid;
         return Iso9660FileSystem;
     }
     return 0x00;

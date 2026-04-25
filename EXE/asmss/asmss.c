@@ -23,10 +23,11 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");
     
-    FILE* SessionManagerBinary = LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
-    if(!SessionManagerBinary){
-        return STATUS_UNSUCCESSFUL;
-    }
+
+    //FILE* SessionManagerBinary = LouOpenFileA("C:/ANNYA/SYSTEM64/INIT.EXE");
+    //if(!SessionManagerBinary){
+    //    return STATUS_UNSUCCESSFUL;
+    //}
 
     //LouCreateSectionEx(
     //    &SessionManagerProcessHandle,
@@ -35,7 +36,17 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
     //    0,0
     //);
 
-    
+    /*
+    HPROCESS WindowManager;
+
+    LouCreateProcessA(
+        "AnnyaOS Window Manager",
+        "C:/ANNYA/SYSTEM64/AWM.EXE",
+        0x00,
+        ACCESS_MASK_GENERIC_ALL,
+        &WindowManager
+    );
+    */
 
     LouPrint("Session Manager Successfully Initialized\n");
     while(1);
