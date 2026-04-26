@@ -56,7 +56,7 @@ LOUSTATUS Coff64CommitSection(
 static bool LoadCoffLoadSupport(string Path, string System){
     HANDLE SectionHandle;
     string File = LouKeAddFileToPath(Path, System);
-    FILE* NewCoff = fopen(File, KERNEL_GENERIC_MEMORY);
+    FILE* NewCoff = LouKeZwOpenFile(File, FOPEN_KERNEL_GENERIC_MEMORY);
 
     if(!NewCoff){
         return false;

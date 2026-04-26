@@ -50,7 +50,7 @@ PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE Vir
     if(CommitSize){
         PVOID CommitPhyAddress = LouAllocatePhysical64UpEx(CommitSize, PageSize);//TODO: add 32 bit buffers too
         for(SIZE i = 0 ; i < NewTracker->PhyMappingCount; i++){
-            NewTracker->PhysicalMappings[i]= CommitPhyAddress + (i * PageSize);
+            NewTracker->PhysicalMappings[i] = CommitPhyAddress + (i * PageSize);
         }
     }
     return NewTracker;

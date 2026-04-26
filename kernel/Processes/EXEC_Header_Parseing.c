@@ -125,8 +125,6 @@ void GetAllPEHeaders(
     }
 }
 
-DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
-
 static inline uint8_t FilePathCountBackToDirectory(string FilePath){
     uint16_t i = strlen(FilePath);
     //i know this looks weird this is not
@@ -373,115 +371,6 @@ static inline void SetupConfigTable(
 }
 
 
-DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath){
-    PCOFF_HEADER CoffHeader;
-    PPE64_OPTIONAL_HEADER PE64Header;
-    PSECTION_HEADER SectionHeader;
-
-    if (CheckDosHeaderValidity((PDOS_HEADER)(Start))) {
-        //LouPrint("Found A Valid Module\n");
-        GetAllPEHeaders(
-            (PDOS_HEADER)Start,
-            &CoffHeader,
-            &PE64Header,
-            &SectionHeader,
-            0x00
-        );
-
-        //UNUSED PLOADED_WIN32_BINARY_OBJECT BinaryObject = LouKeCreateBinaryObjectLog(ExecutablePath);
-        //LouKeLogBinaryTotalSize(BinaryObject, TotalNeededVM);
-
-        uint64_t allocatedModuleVirtualAddress =
-        (uint64_t)LouKeMallocEx(
-            TotalNeededVM,
-            PE64Header->sectionAlignment,
-            USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
-        );
-        //LouPrint("User DLL:%s Loaded At Address:%h ans Size:%h\n", ExecutablePath, allocatedModuleVirtualAddress, TotalNeededVM);
-
-        //LouKeMapContinuousMemoryBlock(allocatedModuleVirtualAddress, allocatedModuleVirtualAddress, TotalNeededVM, USER_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
-        
-        //LouKeLogBinaryPhysicalAddress(BinaryObject, allocatedModulePhysicalAddress);
-
-        //LouKeMallocBinarySectionLogs(BinaryObject, CoffHeader->numberOfSections);
-        for (uint16_t i = 0; i < CoffHeader->numberOfSections; i++) {
-            uint64_t alignedVirtualAddress = (allocatedModuleVirtualAddress + SectionHeader[i].virtualAddress);
-
-            //LouKeLogBinarySection(
-            //    BinaryObject,
-            //    i,
-            //    &SectionHeader[i]
-            //);
-
-           // LouPrint("Section %s: aligned address %h\n", SectionHeader[i].name, alignedVirtualAddress);
-            memcpy(
-                (void*)alignedVirtualAddress,
-                (void*)(Start + SectionHeader[i].pointerToRawData),
-                SectionHeader[i].sizeOfRawData
-            );
-
-            //LouPrint("Copied section %s to address %h\n", SectionHeader[i].name, alignedVirtualAddress);
-        }
-
-        PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[1].VirtualAddress);
-        PEXPORT_DIRECTORY_ENTRY ExportTable = (PEXPORT_DIRECTORY_ENTRY)(allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[0].VirtualAddress);
-
-        string ModuleName;
-
-        if(PE64Header->PE_Data_Directory_Entries[0].VirtualAddress){
-            ParseExportTables(
-                allocatedModuleVirtualAddress,  
-                ExportTable,
-                true,
-                &ModuleName
-            );
-        }
-
-        if(PE64Header->PE_Data_Directory_Entries[1].VirtualAddress){
-            ParseImportTables(
-                allocatedModuleVirtualAddress,
-                ImportTable,
-                ExecutablePath
-            );
-        }
-
-        // Locate the relocation table
-        uint64_t relocationTable = (uint64_t)((uint64_t)allocatedModuleVirtualAddress + (uint64_t)PE64Header->PE_Data_Directory_Entries[5].VirtualAddress);
-        size_t relocationTableSize = PE64Header->PE_Data_Directory_Entries[5].Size;
-
-        SetupConfigTable(
-            allocatedModuleVirtualAddress,
-            PE64Header->imageBase,
-            allocatedModuleVirtualAddress + PE64Header->PE_Data_Directory_Entries[10].VirtualAddress,
-            PE64Header->PE_Data_Directory_Entries[10].Size
-        );
-
-        RelocateBaseAddresses(
-            relocationTable,
-            allocatedModuleVirtualAddress,
-            PE64Header->imageBase,
-            relocationTableSize
-        );
-
-        PKULA_TABLE NewTable = (PKULA_TABLE)LouKeLinkerGetAddress(ModuleName, "KulaTable"); 
-        if(NewTable){
-            LouKeInitializeKulaEmulatedFunctions(
-                ModuleName,
-                NewTable
-            );
-        }
-
-        //LouPrint("Program Base:%h\n", allocatedModuleVirtualAddress);
-        // Print function address debug info
-        //LouPrint("Entry Point Address:%h\n", (uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
-        if(!PE64Header->addressOfEntryPoint){
-            return 0x00;
-        }
-        return (DllModuleEntry)((uint64_t)PE64Header->addressOfEntryPoint + allocatedModuleVirtualAddress);
-    } else {
-        return 0x00;
-    }
-}
 
 void* LoadPeExecutable(uintptr_t Start,string ExecutablePath){
     PCOFF_HEADER CoffHeader;

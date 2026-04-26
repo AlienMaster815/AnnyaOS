@@ -158,6 +158,7 @@ void SetupGDT(){
         0x89,
         0x00
     );
+
         
     uint64_t GsBase = (uint64_t)LouKeMallocEx(0xB080, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
 
@@ -184,5 +185,6 @@ void SetupGDT(){
     LouPrint("Done Setting Up GDT\n");
 
     SetLKPCB((UINT64)NewProcControllBlock);
+    
 
 }

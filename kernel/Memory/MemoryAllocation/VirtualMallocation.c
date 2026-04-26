@@ -57,7 +57,11 @@ void LouKeMapContinuousMemoryBlockEx(
     uint64_t i = 0;
 
     while(i < size){
-        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+        if(
+            (
+                (VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1)) &&
+                (PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))
+            ) && ((i + MEGABYTE_PAGE) <= size)){
             LouMapAddressEx(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE, Pml4);
             i += MEGABYTE_PAGE;
         }
@@ -80,7 +84,10 @@ void LouKeMapContinuousMemoryBlockEx32(
     uint64_t i = 0;
 
     while(i < size){
-        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+        if((
+                (VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1)) &&
+                (PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))
+            ) && ((i + MEGABYTE_PAGE) <= size)){
             LouMapAddressEx32(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE, Pml4);
             i += MEGABYTE_PAGE;
         }
@@ -102,7 +109,11 @@ void LouKeMapContinuousMemoryBlock(
     uint64_t i = 0;
 
     while(i < size){
-        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+        if(
+            (
+                (VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1)) &&
+                (PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))
+            ) && ((i + MEGABYTE_PAGE) <= size)){
             LouMapAddress(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE);
             i += MEGABYTE_PAGE;
         }
@@ -124,7 +135,11 @@ void LouKeMapContinuousMemoryBlock32(
     uint64_t i = 0;
 
     while(i < size){
-        if(((PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))) && ((i + MEGABYTE_PAGE) <= size)){
+        if(            
+            (
+                (VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1)) &&
+                (PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))
+            ) && ((i + MEGABYTE_PAGE) <= size)){
             LouMapAddress32(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE);
             i += MEGABYTE_PAGE;
         }

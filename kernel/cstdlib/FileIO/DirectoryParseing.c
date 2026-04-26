@@ -49,7 +49,7 @@ LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
         return STATUS_SUCCESS;
     }
 
-    FILE* File = fopen(PathToFile, KERNEL_GENERIC_MEMORY);   
+    FILE* File = LouKeZwOpenFile(PathToFile, FOPEN_KERNEL_GENERIC_MEMORY);   
     
     if(!File){
         LouPrint("LouKeLoadFileCall() Unable To Open File\n");
@@ -97,5 +97,5 @@ LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
 }
 
 void LouKeCloseFileCall(uint64_t* Data){
-    fclose((FILE*)*Data);
+    //fclose((FILE*)*Data);
 }

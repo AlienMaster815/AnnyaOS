@@ -349,7 +349,7 @@ void LouOsKrnlStart(
     }                      
 
     LouKeInitializeRegistry();
-     
+         
     LousineKernelEarlyInitialization();
     
     InitializePoolsPool();
@@ -418,8 +418,6 @@ void LouOsKrnlStart(
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
 
-    
-
     string PathKey;
     HANDLE SectionHandle;
 
@@ -436,12 +434,12 @@ void LouOsKrnlStart(
 
     LouPrint("Session Manager:%s\n", PathKey);    
 
-    FILE* AsmssExe = fopen(PathKey, KERNEL_GENERIC_MEMORY);
+    FILE* AsmssExe = LouKeZwOpenFile(PathKey, FOPEN_KERNEL_GENERIC_MEMORY);
     if(!AsmssExe){
         LouPrint("ERROR Unable To Open File\n");
         goto _SESSION_MANAGER_LAUNCH_FAILURE;
     }
-    
+
     LouKeVmmCreateSectionEx(
         &SectionHandle,
         0x00,

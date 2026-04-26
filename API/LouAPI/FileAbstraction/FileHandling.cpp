@@ -1,6 +1,6 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include <LouDDK.h>
-
+#include "file.h"
 
 LOUAPI FSStruct* GetDriveFss(uint8_t DriveNumber);
 LOUAPI FSStruct* GetSystemDiskFss();
@@ -54,7 +54,7 @@ bool fseek(string FileName){
 }
 
 LOUAPI
-FILE* fopen(string FileName, uint64_t PageFlags){
+PVOID fopen(string FileName, uint64_t PageFlags){
     
     PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
 
@@ -98,14 +98,20 @@ FILE* fopen(string FileName, uint64_t PageFlags){
 }
 
 LOUAPI
-void fclose(FILE* File){
+void fclose(PVOID File){
     LouKeFreeFileData(File);
 }
+
+LOUAPI
+SIZE
+GetDriveHandleSize(
+	void* DriveHandle
+);
 
 LOUAPI 
 SIZE 
 fsize(
-    FILE* File
+    PVOID File
 ){
-    return LouKeGetAllocationSize((PVOID)File);
+    return GetDriveHandleSize(File);
 }

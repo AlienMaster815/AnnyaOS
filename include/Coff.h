@@ -733,7 +733,8 @@ typedef struct _CFI_IMPORT_HEADER{
 
 #ifndef _LOUSINE_LOADER
 typedef struct _CFI_OBJECT{
-    FILE*                   CoffFile;
+    FILE*                   FileObject;
+    PVOID                   CoffFile;
     string                  FormalName;
     BOOL                    AOA64;
     BOOL                    KernelObject;
@@ -787,6 +788,13 @@ LouKeLoadCoffImageA(
 
 LOUSTATUS 
 LouKeLoadCoffImageB(
+    FILE*           FileObject,
+    PCFI_OBJECT     CfiObject,
+    BOOL            KernelObject
+);
+
+LOUSTATUS 
+LouKeLoadCoffImageBNs(
     PVOID           Base,
     PCFI_OBJECT     CfiObject,
     BOOL            KernelObject

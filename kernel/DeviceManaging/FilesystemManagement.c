@@ -143,6 +143,7 @@ void InitializeFileSystemManager(){
                                 LouKeFree(VidString);
                             }
                             if(IsSystemDrive){
+                                LouPrint("Storage Device Is A System Disk\n");
                                 NewMountedFileSystem->SystemDisk = true;
                                 NewMountedFileSystem->DriveID = 'C';
                                 MountedFileSystemTableMembers++;

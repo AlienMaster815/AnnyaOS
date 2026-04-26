@@ -96,7 +96,7 @@ BootVidInitializeTerminalDriver(){
 void
 BootVidDeInitializeTerminalDriver(){
     LouKeUnRegisterEcsDriver(&BootVidEcsDriver);
-    BootRenderSetScreenColorEx(SET_RGB(0, 128, 128));
+    BootRenderSetScreenColorEx(SET_RGB(0, 192, 192));
     BootRenderSyncScreen();
     TtfDeInitializeFile(TerminalFont);
 }

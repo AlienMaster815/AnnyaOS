@@ -28,6 +28,18 @@ LouKeVmmCreatePageReserveVm64(
     if((!PageAddress) || (!PageSize) || (!PageCount)){
         return STATUS_INVALID_PARAMETER;
     }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+
+    MutexLock(&KernelPageRemap64.Lock);
+    ForEachListEntry(TmpRemap, &KernelPageRemap64.Remaps, Peers){
+        if(RangeInterferes((UINT64)TmpRemap->PageAddress, TmpRemap->PageSize * TmpRemap->PageCount, (UINT64)PageAddress, PageSize * PageCount)){
+            LouPrint("Map%h:%h:%h Temp:%h:%h:%h\n", TmpRemap->PageAddress, TmpRemap->PageSize, TmpRemap->PageCount, PageAddress, PageSize, PageCount);
+            return STATUS_UNSUCCESSFUL;
+        }
+    }   
+    MutexUnlock(&KernelPageRemap64.Lock);
+
     PKERNEL_PAGE_REMAP NewRemap = LouGeneralAllocateMemoryEx(sizeof(KERNEL_PAGE_REMAP), GET_ALIGNMENT(KERNEL_PAGE_REMAP));
     if(!NewRemap){
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -35,8 +47,13 @@ LouKeVmmCreatePageReserveVm64(
     NewRemap->PageAddress = PageAddress;
     NewRemap->PageSize = PageSize;
     NewRemap->PageCount = PageCount;
-    if(SetVirtUser)LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
-    if(SetPhysUser)LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
+    if(SetVirtUser){
+        LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
+        LouKeUnMapContinuousMemoryBlock((UINT64)PageAddress, NewRemap->PageSize * NewRemap->PageCount); 
+    }
+    if(SetPhysUser){
+        LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
+    }
     LouKeListAddTail(&NewRemap->Peers, &KernelPageRemap64.Remaps);
     return STATUS_SUCCESS;
 }
@@ -52,6 +69,17 @@ LouKeVmmCreatePageReserveVm32(
     if((!PageAddress) || (!PageSize) || (!PageCount)){
         return STATUS_INVALID_PARAMETER;
     }
+
+    PKERNEL_PAGE_REMAP  TmpRemap;
+
+    MutexLock(&KernelPageRemap32.Lock);
+    ForEachListEntry(TmpRemap, &KernelPageRemap32.Remaps, Peers){
+        if(RangeInterferes((UINT64)TmpRemap->PageAddress, TmpRemap->PageSize * TmpRemap->PageCount, (UINT64)PageAddress, PageSize * PageCount)){
+            return STATUS_UNSUCCESSFUL;
+        }
+    }   
+    MutexUnlock(&KernelPageRemap32.Lock);
+
     PKERNEL_PAGE_REMAP NewRemap = LouGeneralAllocateMemoryEx(sizeof(KERNEL_PAGE_REMAP), GET_ALIGNMENT(KERNEL_PAGE_REMAP));
     if(!NewRemap){
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -59,7 +87,10 @@ LouKeVmmCreatePageReserveVm32(
     NewRemap->PageAddress = PageAddress;
     NewRemap->PageSize = PageSize;
     NewRemap->PageCount = PageCount;
-    if(SetVirtUser)LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
+    if(SetVirtUser){
+        LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
+        LouKeUnMapContinuousMemoryBlock((UINT64)PageAddress, NewRemap->PageSize * NewRemap->PageCount); 
+    }
     if(SetPhysUser)LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
     LouKeListAddTail(&NewRemap->Peers, &KernelPageRemap32.Remaps);
     return STATUS_SUCCESS;
@@ -75,6 +106,8 @@ LouKeVmmGetVPageReserveVm64(
     if((!PageSize) || (!PageCount) || (!Out)){
         return STATUS_INVALID_PARAMETER;
     }
+
+    *Out = 0;
 
     PKERNEL_PAGE_REMAP  TmpRemap;
 
@@ -103,6 +136,8 @@ LouKeVmmGetPPageReserveVm64(
     if((!PageSize) || (!PageCount) || (!Out)){
         return STATUS_INVALID_PARAMETER;
     }
+
+    *Out = 0;
 
     PKERNEL_PAGE_REMAP  TmpRemap;
 
@@ -133,6 +168,8 @@ LouKeVmmGetVPageReserveVm32(
         return STATUS_INVALID_PARAMETER;
     }
 
+    *Out = 0;
+
     PKERNEL_PAGE_REMAP  TmpRemap;
 
     MutexLock(&KernelPageRemap32.Lock);
@@ -160,6 +197,8 @@ LouKeVmmGetPPageReserveVm32(
     if((!PageSize) || (!PageCount) || (!Out)){
         return STATUS_INVALID_PARAMETER;
     }
+
+    *Out = 0;
 
     PKERNEL_PAGE_REMAP  TmpRemap;
 
@@ -202,8 +241,8 @@ LouKeVmmPutVPageReserveAddressVm64(
                 if(Callback){
                     Callback(TmpRemap->PageAddress);
                 }
+                LouGeneralFreeMemory(TmpRemap);
             }
-            LouGeneralFreeMemory(TmpRemap);
             break;
         }
     }
@@ -235,8 +274,8 @@ LouKeVmmPutPPageReserveAddressVm64(
                 if(Callback){
                     Callback(TmpRemap->PageAddress);
                 }
+                LouGeneralFreeMemory(TmpRemap);
             }
-            LouGeneralFreeMemory(TmpRemap);
             break;
         }
     }
@@ -268,8 +307,8 @@ LouKeVmmPutVPageReserveAddressVm32(
                 if(Callback){
                     Callback(TmpRemap->PageAddress);
                 }
+                LouGeneralFreeMemory(TmpRemap);
             }
-            LouGeneralFreeMemory(TmpRemap);
             break;
         }
     }
@@ -301,8 +340,8 @@ LouKeVmmPutPPageReserveAddressVm32(
                 if(Callback){
                     Callback(TmpRemap->PageAddress);
                 }
+                LouGeneralFreeMemory(TmpRemap);
             }
-            LouGeneralFreeMemory(TmpRemap);
             break;
         }
     }

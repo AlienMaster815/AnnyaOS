@@ -259,7 +259,6 @@ void GetAllPEHeaders(
     PRICH_HEADER* RichHeader       //out opt
 );
 DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* ImageBase);
-void* LouKeLoadPeExecutable(string ExecutablePath);
 DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize);
 DRIVER_MODULE_ENTRY LouKeGetJitlManagedFunction(string SectionName, string FunctionName);
 void* LouKeGetJitlManagedDataLocation(string SectionName, string FunctionName);

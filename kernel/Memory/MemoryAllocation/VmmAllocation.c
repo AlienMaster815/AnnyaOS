@@ -77,11 +77,25 @@ LouKeAlocateVmmAllocationTracker(
             LouKeVmmGetVPageReserveVm64(PageSize, Size / PageSize, &NewVSpace);
             if(!NewVSpace){
                 NewVSpace = LouAllocatePhysical64UpEx(Size, ROUND_UP64(Alignment, PageSize));
+                LouKeVmmCreatePageReserveVm(
+                    NewVSpace,
+                    PageSize,
+                    Size / PageSize,
+                    false, 
+                    true 
+                );
             }
         }else {
             LouKeVmmGetVPageReserveVm32(PageSize, Size / PageSize, &NewVSpace);
             if(!NewVSpace){
                 NewVSpace = LouAllocatePhysical32UpEx(Size, ROUND_UP64(Alignment, PageSize));
+                LouKeVmmCreatePageReserveVm(
+                    NewVSpace,
+                    PageSize,
+                    Size / PageSize,
+                    false, 
+                    true 
+                );
             }
         }
         if(!NewVSpace){
@@ -93,13 +107,7 @@ LouKeAlocateVmmAllocationTracker(
             LouKeFree(NewTracker);  //LouKeFree:    for the Kernel Global Allocator
             return 0x00;
         }
-        LouKeVmmCreatePageReserveVm(
-            NewVSpace,
-            PageSize,
-            Size / PageSize,
-            false, 
-            true 
-        );
+
     }
     NewTracker->VBase = (UINTPTR)NewVSpace;
     NewTracker->VSize = Size;

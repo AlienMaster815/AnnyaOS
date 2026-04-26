@@ -84,7 +84,9 @@ LouKeMallocFromTrackers(
     }
 
     TmpPageTrack = (PKMALLOC_PAGE_TRACK)LouGeneralAllocateMemoryEx(sizeof(KMALLOC_PAGE_TRACK), GET_ALIGNMENT(KMALLOC_PAGE_TRACK));
+
     Result = PageAllocatorEx ? PageAllocatorEx(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, PageFlags, true) : PageAllocator(MEGABYTE_PAGE , RoundUpSize / MEGABYTE_PAGE, PageFlags);
+
     TmpPageTrack->PageSize = RoundUpSize;
     TmpPageTrack->Flags = PageFlags;
     TmpPageTrack->PageAddress = Result;
@@ -95,8 +97,15 @@ LouKeMallocFromTrackers(
     TmpVMemTrack->Address = Result;
     TmpVMemTrack->Size = Size;
     LouKeListAddTail(&TmpVMemTrack->Peers, &TmpPageTrack->VMemTracks);
-
     MutexUnlock(Lock);
+
+    //0xFFFF800221806000 //0xFFFF800220005000
+    //if((UINTPTR)Result == ){
+    //    LouPrint("HERE\n");
+    //    while(1);
+    //}
+
+
     memset(Result, 0, Size);
     return Result;
 }
@@ -167,6 +176,7 @@ LouKeReallocFromTrackers(
                         LouGeneralFreeMemory(TmpVMemTrack);
                         if(LouKeListIsEmpty(&TmpPageTrack->VMemTracks)){
                             LouKeListDeleteItem(&TmpPageTrack->Peers);
+                            LouKeFreePage(TmpPageTrack->PageAddress);
                             LouGeneralFreeMemory(TmpPageTrack);
                         }
                     }else{
@@ -190,6 +200,7 @@ LouKeReallocFromTrackers(
                         LouGeneralFreeMemory(TmpVMemTrack);
                         if(LouKeListIsEmpty(&TmpPageTrack->VMemTracks)){
                             LouKeListDeleteItem(&TmpPageTrack->Peers);
+                            LouKeFreePage(TmpPageTrack->PageAddress);
                             LouGeneralFreeMemory(TmpPageTrack);
                         }
                     }

@@ -82,3 +82,11 @@ void ReleaseDriveHandle(void* DriveHandle){
 	}
 	LouKeFree((PVOID)DriveHandle);
 }
+
+LOUAPI
+SIZE
+GetDriveHandleSize(
+	void* DriveHandle
+){
+    return LouKeGetAllocationSize(DriveHandle);
+}

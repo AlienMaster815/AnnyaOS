@@ -1,22 +1,5 @@
 #include <LouAPI.h>
 
-DllModuleEntry LoadUserDllModule(uintptr_t Start, string ExecutablePath);
-
-DllModuleEntry LouKeLoadUserModule(string ModuleNameAndPath, uintptr_t* BaseOfImage){
-
-    FILE* ModuleHandle = fopen(ModuleNameAndPath, KERNEL_GENERIC_MEMORY);
-    
-    
-    if(!ModuleHandle){
-        LouPrint("Could Not Load Module:%s\n", ModuleNameAndPath);
-        while(1);
-        return 0x00;
-    }
-
-    return LoadUserDllModule((uintptr_t)ModuleHandle, ModuleNameAndPath); 
-}
-
-
 typedef struct _DRIVER_MODULE_HANDLES{
     ListHeader          Neighbors;
     string              Paths;
@@ -27,13 +10,6 @@ typedef struct _DRIVER_MODULE_HANDLES{
 
 static DRIVER_MODULE_HANDLES DriverHandles = {0};
 static size_t DriveHandlesCount = 0;
-
-LOUSTATUS 
-LouKeLoadCoffImageB(
-    PVOID           Base,
-    PCFI_OBJECT     CfiObject,
-    BOOL            KernelObject
-);
 
 DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize){ //TODO
     PDRIVER_MODULE_HANDLES TmpHandle = &DriverHandles;
@@ -95,7 +71,7 @@ DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObjec
     
     DRIVER_MODULE_ENTRY Entry;
     TmpHandle->Paths = (string)Base;
-    LouKeLoadCoffImageB((PVOID)Base, &TmpHandle->CfiObject, true);
+    LouKeLoadCoffImageBNs((PVOID)Base, &TmpHandle->CfiObject, true);
     Entry = (DRIVER_MODULE_ENTRY)TmpHandle->CfiObject.Entry;
     TmpHandle->ModuleEntry = Entry;
     if(DriverObject && DriverObjectSize){

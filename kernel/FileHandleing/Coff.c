@@ -68,8 +68,8 @@ static void DestroyLoadedImageEntry(PCFI_OBJECT Object){
     MutexUnlock(&LITMutex);
 }
 
-LOUSTATUS 
-LouKeLoadCoffImageB(
+LOUSTATUS
+LouKeLoadCoffImageBNs(
     PVOID           Base,
     PCFI_OBJECT     CfiObject,
     BOOL            KernelObject
@@ -93,7 +93,7 @@ LouKeLoadCoffImageB(
 
     CreateLoadedImageEntry(CfiObject);
 
-    CfiObject->CoffFile = (FILE*)Base;
+    CfiObject->CoffFile = (PVOID)Base;
 
     CoffStdHeader = CoffGetImageHeader((UINT8*)CfiObject->CoffFile);
     if(
@@ -152,6 +152,32 @@ LouKeLoadCoffImageB(
     if(LoaderStatus != STATUS_SUCCESS){
         DestroyLoadedImageEntry(CfiObject);
     }
+    return LoaderStatus;
+}
+
+LOUSTATUS 
+LouKeLoadCoffImageB(
+    FILE*           FileObject,
+    PCFI_OBJECT     CfiObject,
+    BOOL            KernelObject
+){
+    LOUSTATUS LoaderStatus;
+    CfiObject->FileObject = FileObject;
+    SIZE FileSize = LouKeZwGetFileSize(FileObject);
+    PVOID Data = LouKeMallocEx(FileSize, KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
+    LoaderStatus = LouKeZwReadFileBuffer(FileObject, 0, FileSize, Data);
+    if(LoaderStatus != STATUS_SUCCESS){
+        LouKeFree(Data);
+        return LoaderStatus;
+    }
+
+    LoaderStatus = LouKeLoadCoffImageBNs(
+        Data, 
+        CfiObject,
+        KernelObject
+    );
+    //CfiObject->CoffFile = 0x00;
+    //LouKeFree(Data);
     return LoaderStatus;
 }
 

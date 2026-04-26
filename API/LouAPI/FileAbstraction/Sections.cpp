@@ -208,15 +208,15 @@ LouKeVmmCreateSectionEx(
 
     if(FileHandle){
 
-        FILE_TYPE FileType = LouKeGetFileType(FileHandle);
+        UINT64 FileType = LouKeZwGetFileClass((FILE*)FileHandle);
 
-        switch(FileType){
-            case COFF_FILE_TYPE:{
+        switch((UINT64)FileType){
+            case LOU_FILE_COFF:{
                 PVOID PrivateData = LouGeneralAllocateMemoryEx(sizeof(COFF_PRIVATE_DATA), GET_ALIGNMENT(COFF_PRIVATE_DATA));
                 PSECTION_OBJECT NewSection = AllocateSectionObject(PrivateData);
-                NewSection->Coff = true;                
+                NewSection->Coff = true;  
                 LouKeLoadCoffImageB(
-                    (UINT8*)FileHandle,
+                    (FILE*)FileHandle,
                     (PCFI_OBJECT)PrivateData,
                     false
                 );

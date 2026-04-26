@@ -79,6 +79,9 @@ char* strstr(char* String1, char* String2);
 int snprintf(char* String, size_t Size, const char* Format, ...);
 #define strstart(s1, s2) (!strncmp(s1 , s2, strlen(s2)))
 
+LOUSTR StrFingFirstFromEndSafe(LOUSTR String, LOUSTR Token, int64_t Limit);
+LOUSTR StrFingFirstFromEnd(LOUSTR String, LOUSTR Token);
+
 #else 
 
 #ifndef _LOUDLL_
