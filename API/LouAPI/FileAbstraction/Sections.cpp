@@ -12,38 +12,6 @@ LOUAPI uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-typedef struct _COFF_PRIVATE_DATA{
-    CFI_OBJECT      CfiObject;
-}COFF_PRIVATE_DATA, * PCOFF_PRIVATE_DATA;
-
-typedef struct _SECTION_OBJECT{
-    ListHeader                  Peers;
-    bool                        Coff;
-    ACCESS_MASK                 AccessMask;
-    POBJECT_ATTRIBUTES          Attribute;
-    PLARGE_INTEGER              MaxSize;
-    ULONG                       SectionPageProtection;
-    ULONG                       AllocationAttributes;
-    HANDLE                      FileHandle;
-    PMEM_EXTENDED_PARAMETER     ExtendedParameters;
-    ULONG                       ExtendedParameterCount;
-    PVOID                       SectionVBase;
-    PVOID                       SectionPBase;
-    SIZE                        SectionSize;
-    SIZE                        SectionAlignment;
-    PVOID                       SectionPrivateData;
-    PVOID                       InitializedDataCopy;
-    UINT64                      FrameFlags;
-    BOOL                        Cow;
-    BOOL                        Bss;
-    BOOL                        Private;
-}SECTION_OBJECT, * PSECTION_OBJECT;
-
-typedef struct _PML4_LIST {
-    ListHeader  Peers;
-    UINT64*     Pml4;
-}PML4_LIST, * PPML4_LIST;
-
 static ListHeader Pml4MasterList = {0};
 static mutex_t Pml4MasterLock = {0};
 

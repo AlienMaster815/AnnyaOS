@@ -33,7 +33,7 @@ LOUSTATUS Coff64CommitSection(
 
     for(size_t i = 0; i < SectionCount; i++){
         UNUSED UINT32 SectionCharacteristics = PeImageHeader->OptionalHeader.PE64.SectionTables[i].Characteristics;
-        if(!CfiObject->KernelObject){
+        if(!CfiObject->KernelObject && !CfiObject->IgnoreVmManager){
             if(SectionCharacteristics & CFI_SCN_MEM_WRITE){
                 LouKeVmmCommitPrivateSectionVAddress(
                     (PVOID)LoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 

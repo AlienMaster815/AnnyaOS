@@ -75,6 +75,7 @@
 #include <kernel/Virtualization.h>
 
 #include <IoCtl.h>
+#include <kernel/Sections.h>
 
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE

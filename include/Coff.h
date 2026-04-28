@@ -768,6 +768,9 @@ typedef struct _CFI_OBJECT{
     LOUSTATUS               (*CoffCommitSection)(HANDLE, UINT64);
 }CFI_OBJECT, * PCFI_OBJECT;
 
+typedef struct _COFF_PRIVATE_DATA{
+    CFI_OBJECT      CfiObject;
+}COFF_PRIVATE_DATA, * PCOFF_PRIVATE_DATA;
 
 #ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_

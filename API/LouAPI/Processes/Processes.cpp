@@ -8,6 +8,7 @@ static XARRAY ProcessThreadIDXa = {};
 
 LOUAPI void DeAllocateSaveContext(uint64_t Context);
 void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread);
+LOUAPI PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
 
 void LouKeTsmDestroyThreadHandle(
     PGENERIC_THREAD_DATA Thread
@@ -188,6 +189,16 @@ LOUSTATUS LouKePmCreateProcessEx(
         }
 
         MutexLock(&Tmp->Lock);
+
+        PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)((PSECTION_OBJECT)Section)->SectionPrivateData; 
+        PCFI_OBJECT TmpCfiObject;
+        UINT64* DependList = CfiData->CfiObject.ModDependencies;
+        for(size_t i = 0 ; i < *DependList; i++){
+            TmpCfiObject = LouKeLookupHandleToCfiObject((HANDLE)DependList[i + 1], CfiData->CfiObject.AOA64);
+            TmpCfiObject->CoffCommitSection(TmpCfiObject, NewProcessObject->PMLTree);
+        }
+
+
 
         LouKePsmCreateThreadForProcess(
             &ThreadOut,

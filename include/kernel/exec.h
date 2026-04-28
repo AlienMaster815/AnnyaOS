@@ -248,7 +248,6 @@ typedef struct PACKED _PE32_PROCESS_EXECUTION_DATA{
     size_t      ProcessStackReserved;
 }PE32_PROCESS_EXECUTION_DATA, * PPE32_PROCESS_EXECUTION_DATA;
 
-
 #ifndef _USER_MODE_CODE_
 bool CheckDosHeaderValidity(PDOS_HEADER PHeader);
 void GetAllPEHeaders(
