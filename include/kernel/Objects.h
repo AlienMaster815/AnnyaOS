@@ -259,6 +259,7 @@ LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject);
 
 BOOLEAN ObjectHeaderInObjectManager(POBJECT_HEADER ObjectHeader);
 POBJECT_HEADER LouKeGetObjectHeaderFromHandle(HANDLE Handle);
+void LouKeUnRegisterObjectToObjectManager(POBJECT_HEADER Header);
 
 #endif
 
