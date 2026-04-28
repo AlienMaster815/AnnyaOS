@@ -226,17 +226,44 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     //initialize contexts for accelerated CPU cmponents
     NewThreadHandle->ContextStorage = (UINT64)AllocateSaveContext();
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
+    
+    UINT64 Cs = CodeSegment;
+    UINT64 Ss = StackSegment;
+    const UINT64 Rflags = 0x0202;
 
     //Allocate a new stack
-    //if(Process){
-    //    NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, true, PageFlags);
-    //}else{
-        NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags);
+    if(Process){
+        NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, KILOBYTE, true, PageFlags);
+        NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
+        
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rip, &CtxEntry, sizeof(UINT64));
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rcx, &CtxFunction, sizeof(UINT64));
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rdx, &CtxParams , sizeof(UINT64));
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.r8,  &NewThreadHandle, sizeof(UINT64));
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rsp, &NewThreadHandle->StackTop, sizeof(UINT64));
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rbp, &NewThreadHandle->SavedState.rsp, sizeof(UINT64));
 
-    //}
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.cs, &Cs, sizeof(UINT64)); 
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.ss, &Ss, sizeof(UINT64));
+        LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rflags, (PVOID)&Rflags, sizeof(UINT64));
+
+    }else{
+        NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags);
+        NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
+        
+        NewThreadHandle->SavedState.rip = (UINT64)CtxEntry;                 //worker subsystem liftoff stub     : iretq Location
+        NewThreadHandle->SavedState.rcx = (UINT64)CtxFunction;              //requested work                    : MSVC PARAM 1
+        NewThreadHandle->SavedState.rdx = (UINT64)CtxParams;                //work params                       : MSVC PARAM 2
+        NewThreadHandle->SavedState.r8  = (UINT64)NewThreadHandle;          //Identity for worker subsystem     : MSVC PARAM 3
+        NewThreadHandle->SavedState.rsp = NewThreadHandle->StackTop;        //stack pointer
+        NewThreadHandle->SavedState.rbp = NewThreadHandle->SavedState.rsp;  //stack base
+
+        NewThreadHandle->SavedState.cs = CodeSegment;       //Desired Code Segment
+        NewThreadHandle->SavedState.ss = StackSegment;      //Desired Stack segment
+        NewThreadHandle->SavedState.rflags = 0x0202;        //interrupts enabled no operation normal
+    }
 
     LouPrint("New StackBase:%h\n", NewThreadHandle->StackBase);
-    NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
     LouPrint("New StackTop :%h\n", NewThreadHandle->StackTop);
     
     //thread prioirties are backwards 0 being the highest +x being lowest 
@@ -270,16 +297,6 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
         }
     }
 
-    NewThreadHandle->SavedState.rip = (UINT64)CtxEntry;                 //worker subsystem liftoff stub     : iretq Location
-    NewThreadHandle->SavedState.rcx = (UINT64)CtxFunction;              //requested work                    : MSVC PARAM 1
-    NewThreadHandle->SavedState.rdx = (UINT64)CtxParams;                //work params                       : MSVC PARAM 2
-    NewThreadHandle->SavedState.r8  = (UINT64)NewThreadHandle;          //Identity for worker subsystem     : MSVC PARAM 3
-    NewThreadHandle->SavedState.rsp = NewThreadHandle->StackTop;        //stack pointer
-    NewThreadHandle->SavedState.rbp = NewThreadHandle->SavedState.rsp;  //stack base
-
-    NewThreadHandle->SavedState.cs = CodeSegment;       //Desired Code Segment
-    NewThreadHandle->SavedState.ss = StackSegment;      //Desired Stack segment
-    NewThreadHandle->SavedState.rflags = 0x0202;        //interrupts enabled no operation normal
 
     NewThreadHandle->SystemStackBase = (UINT64)LouKeMallocEx(16 * KILOBYTE, 16, PageFlags);
     NewThreadHandle->SystemStackTop = (NewThreadHandle->SystemStackBase + ((16 * KILOBYTE) - 16)) & ~(16);

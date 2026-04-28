@@ -47,7 +47,7 @@ LouKeAlocateVmmAllocationTracker(
 ){
     PVMM_ALLOCATION_TRACKER NewTracker = LouKeMallocType(VMM_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
     Size = ROUND_UP64(Size, MEGABYTE_PAGE);
-    SIZE PageSize = (Size >= MEGABYTE_PAGE) ? MEGABYTE_PAGE : KILOBYTE_PAGE;
+    SIZE PageSize = MEGABYTE_PAGE;
     PVOID NewVSpace = 0x00;
     PVOID NewPSpace = 0x00;
 
@@ -259,6 +259,21 @@ LouKeVmmGetAllocationTracker64(
     return 0x00;
 }
 
+UNUSED
+static 
+PVMM_ALLOCATION_TRACKER
+LouKeVmmGetAllocationTracker32(
+    PVOID   Address
+){
+    PVMM_ALLOCATION_TRACKER TmpTracker;
+    ForEachListEntry(TmpTracker, &VmmMemoryManager32.AllocationTrackers, Peers){
+        if(RangeInterferes(TmpTracker->VBase, TmpTracker->VSize, (UINT64)Address, 1)){
+            return TmpTracker;
+        }
+    }
+    return 0x00;
+}
+
 KERNEL_EXPORT 
 PVOID 
 LouKeAllocateVmmBuffer64Ex2(
@@ -390,31 +405,53 @@ LouKeVmmAddressCausePageFault(
     PVMM_ALLOCATION_TRACKER* Out
 ){
     *Out = LouKeVmmGetAllocationTracker64(Address);
+    if(!(*Out)){
+        *Out = LouKeVmmGetAllocationTracker32(Address);
+    }
     return *Out ?  true : false;
 }
 
+LOUSTATUS 
+LouKeLazyBufferCommitPageForce(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count    //Optional
+);
+
+LOUSTATUS 
+LouKeLazyBufferCommitPageEx(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count,   //Optional
+    UINT32                      ProcessID
+);
+
+LOUSTATUS 
+LouKeLazyBufferCommitPageForceEx(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count,   //Optional
+    UINT32                      ProcessID
+);
+
 LOUSTATUS
-LouKeVmmCommitPageAddress(
+LouKeVmmCommitPageAddressEx(
     PVOID                   Address, 
-    PVMM_ALLOCATION_TRACKER In
+    PVMM_ALLOCATION_TRACKER In,
+    SIZE                    Commits,
+    UINT32                  ProcessID,
+    BOOLEAN                 Force
 ){
-
-    if(LouKeGetProcessIdentification() == 2){
-
-        LouPrint("WOOHOO!!!\n");
-        while(1);
-    }
-
     if(In->Shared){
         LouPrint("LouKeVmmCommitPageAddress():Address Is Shared\n");
         return STATUS_INVALID_PARAMETER;
     }
     if(!LouKeXaIsIndexUsed(
         &In->VmmData,
-        LouKeGetProcessIdentification()
+        ProcessID
     )){     
 
-        LouPrint("LouKeVmmCommitPageAddress():Address Not Used By Process:%d\n", LouKeGetProcessIdentification());
+        LouPrint("LouKeVmmCommitPageAddress():Address Not Used By Process:%d\n", ProcessID);
         return STATUS_INVALID_PARAMETER;
     }
 
@@ -422,7 +459,7 @@ LouKeVmmCommitPageAddress(
     //get the pre allocated xarray data
     LouKeXaGet(
         &In->VmmData,
-        LouKeGetProcessIdentification(),
+        ProcessID,
         &VmmOutData
     );
     //sanity check data
@@ -431,8 +468,10 @@ LouKeVmmCommitPageAddress(
         return STATUS_UNSUCCESSFUL;
     }
     PVMM_DATA Tracker = (PVMM_DATA)VmmOutData;
-
-    return LouKeLazyBufferCommitPage(Tracker->AllocationTracker, Address, 1);
+    if(Force){
+        return LouKeLazyBufferCommitPageForceEx(Tracker->AllocationTracker, Address, Commits, ProcessID);
+    } 
+    return LouKeLazyBufferCommitPageEx(Tracker->AllocationTracker, Address, Commits, ProcessID);
 }
 
 KERNEL_EXPORT 
@@ -455,6 +494,20 @@ LouKeVmmFreeVmBuffer64Ex(
         }
     }
     MutexUnlock(&VmmMemoryManager64.Lock);
+}
+
+LOUSTATUS
+LouKeVmmCommitPageAddress(
+    PVOID                   Address, 
+    PVMM_ALLOCATION_TRACKER In
+){
+    return LouKeVmmCommitPageAddressEx(
+        Address,
+        In,
+        1,
+        LouKeGetProcessIdentification(),
+        false
+    );
 }
 
 KERNEL_EXPORT 

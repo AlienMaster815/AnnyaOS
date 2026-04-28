@@ -26,6 +26,7 @@ PVOID
 LouKeCreateStack(
     UINT32  ProcessID,
     SIZE    VSize,
+    SIZE    CommitSize,
     BOOLEAN HighMem,
     UINT64  PageFlags
 );

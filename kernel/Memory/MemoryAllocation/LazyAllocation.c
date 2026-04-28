@@ -1,5 +1,8 @@
 #include <LouAPI.h>
 
+LOUAPI
+uint64_t 
+LouKePsmGetProcessPml4(uint32_t ProcessID);
 
 static ListHeader MasterList = {0};
 static mutex_t MasterLock = {0};
@@ -103,10 +106,11 @@ void LouKeFreeFromLazyBuffer(
 }
 
 LOUSTATUS 
-LouKeLazyBufferCommitPage(
+LouKeLazyBufferCommitPageEx(
     PLAZY_ALLOCATION_TRACKER    LazyBuffer,
     PVOID                       Address, //Optional
-    SIZE                        Count    //Optional
+    SIZE                        Count,    //Optional
+    UINT32                      ProcessID
 ){
     SIZE i;
     if(!Count){
@@ -147,11 +151,74 @@ LouKeLazyBufferCommitPage(
     for(SIZE foo = 0; foo < Count; foo++){
         PVOID NewPAddress = LouAllocatePhysical64UpEx(LazyBuffer->PageSize, LazyBuffer->PageSize);
         LazyBuffer->PhysicalMappings[i + foo] = NewPAddress;
-        LouMapAddress((UINT64)NewPAddress, (UINT64)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), LazyBuffer->PageFlags, LazyBuffer->PageSize);
-        memset((PVOID)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), 0, LazyBuffer->PageSize);
+        LouMapAddressEx((UINT64)NewPAddress, (UINT64)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), LazyBuffer->PageFlags, LazyBuffer->PageSize, (UINT64*)LouKePsmGetProcessPml4(ProcessID));
+        LouKeMemSetVmSpace(ProcessID, (PVOID)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), 0, LazyBuffer->PageSize);
         LouKeVmmCreatePageReserveVm(NewPAddress, LazyBuffer->PageSize, 1, true, false);
     }
     return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeLazyBufferCommitPage(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count    //Optional
+){
+    return LouKeLazyBufferCommitPageEx(
+        LazyBuffer,
+        Address,
+        Count,
+        LouKeGetProcessIdentification()
+    );
+}
+
+LOUSTATUS 
+LouKeLazyBufferCommitPageForceEx(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count,   //Optional
+    UINT32                      ProcessID
+){
+    SIZE i;
+    if(!Count){
+        Count = 1;
+    }
+    if(!Address){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else{
+        if(RangeDoesNotInterfere((UINT64)Address, 1, (UINT64)LazyBuffer->VirtualLocation, (UINT64)LazyBuffer->VirtualSize)){
+            LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope\n");
+            return STATUS_INVALID_PARAMETER;
+        }
+        Address = (PVOID)ROUND_DOWN64((UINT64)Address, LazyBuffer->PageSize);
+        i = ((UINT64)(Address - LazyBuffer->VirtualLocation) / LazyBuffer->PageSize);
+    }
+    for(SIZE foo = 0; foo < Count; foo++){
+        if(!LazyBuffer->PhysicalMappings[i + foo]){
+            PVOID NewPAddress = LouAllocatePhysical64UpEx(LazyBuffer->PageSize, LazyBuffer->PageSize);
+            LazyBuffer->PhysicalMappings[i + foo] = NewPAddress;
+            LouMapAddressEx((UINT64)NewPAddress, (UINT64)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), LazyBuffer->PageFlags, LazyBuffer->PageSize, (UINT64*)LouKePsmGetProcessPml4(ProcessID));
+            LouKeMemSetVmSpace(ProcessID, (PVOID)(LazyBuffer->VirtualLocation + ((i + foo) * LazyBuffer->PageSize)), 0, LazyBuffer->PageSize);
+            LouKeVmmCreatePageReserveVm(NewPAddress, LazyBuffer->PageSize, 1, true, false);
+        }
+    }
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS 
+LouKeLazyBufferCommitPageForce(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count    //Optional
+){
+    return LouKeLazyBufferCommitPageForceEx(
+        LazyBuffer,
+        Address,
+        Count,
+        LouKeGetProcessIdentification()
+    );
 }
 
 void LouKeLazyBufferUnCommitPage(PLAZY_ALLOCATION_TRACKER Tracker, PVOID VAddress){

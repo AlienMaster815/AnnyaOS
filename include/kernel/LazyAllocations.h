@@ -46,6 +46,8 @@ LouKeLazyBufferCommitPage(
     SIZE                        Count    //Optional
 );
 
+
+
 PVOID 
 LouKeMallocFromLazyBufferEx(
     PLAZY_ALLOCATION_TRACKER    LazyBuffer,
