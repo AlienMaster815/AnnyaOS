@@ -95,6 +95,19 @@ LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
     return STATUS_UNSUCCESSFUL;
 }
 
+
 void LouKeCloseFileCall(uint64_t* Data){
-    //fclose((FILE*)*Data);
+    HANDLE FileHandle = (HANDLE)*Data;
+    BOOLEAN ReleasedObject;
+    FILE* FileObject = (FILE*)LouKeGetObjectFromHandle(FileHandle); 
+    LOUSTATUS Status = LouKeReleaseHandleFromObject(FileHandle, &ReleasedObject);
+    
+    if(Status != STATUS_SUCCESS){
+        LouPrint("LouKeCloseFileCall()\n WARNING: Release Was Not Successful\n");
+        return;
+    }
+
+    if(ReleasedObject){
+        LouKeCloseFile(FileObject);
+    }
 }

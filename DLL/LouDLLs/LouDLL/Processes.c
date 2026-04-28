@@ -53,6 +53,11 @@ LouCreateProcessA(
         0x00,
         0x00
     );
+
+    LouCloseFileA(
+        ProcessFile
+    );
+
     if(Status != STATUS_SUCCESS){
         return Status;
     }
@@ -74,10 +79,9 @@ LouCreateProcessA(
         0
     );
     if(Status != STATUS_SUCCESS){
+        //TODO: Destroy Section
+        LouPrint("LouCreateProcessA()\n");
         return Status;
     }
-
-    //TODO: close file
-
     return STATUS_SUCCESS;
 }

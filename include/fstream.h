@@ -58,6 +58,8 @@ FILE* LouKeZwOpenFile(
     UINT64  PageFlags
 );
 
+void LouKeCloseFile(FILE* KFileHandle);
+
 LOUAPI
 SIZE 
 LouKeZwGetFileSize(

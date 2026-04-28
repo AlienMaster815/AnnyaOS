@@ -251,6 +251,18 @@ LOUSTATUS LouKeZwAcquireHandleForObject(
 
 PVOID LouKeGetObjectFromHandle(HANDLE Handle);
 
+LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject);
+
+#ifndef _OBJECT_MANAGER_H
+
+#define POBJECT_HEADER PVOID
+
+BOOLEAN ObjectHeaderInObjectManager(POBJECT_HEADER ObjectHeader);
+POBJECT_HEADER LouKeGetObjectHeaderFromHandle(HANDLE Handle);
+
+#endif
+
+
 #endif
 
 #ifdef __cplusplus

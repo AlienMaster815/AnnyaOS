@@ -653,17 +653,14 @@ AnnyaGetLibraryFunctionH(
 }
 
 LOUDLL_API
-FILE*
-LouOpenFileA(
-    string FileName
+void
+LouCloseFileA(
+    FILE* File
 ){
-    uint64_t KulaPacket[4] = {0};
-    KulaPacket[1] = (uint64_t)FileName;
-    KulaPacket[3] = (uint64_t)ACCESS_MASK_GENERIC_ALL;
+    UINT64 KulaPacket[2] = {0, (UINT64)File};
     while(!KulaPacket[0]){
-        LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
+        LouCALL(LOUCLOSEFILE, (uint64_t)&KulaPacket[0], 0);
     }
-    return (void*)KulaPacket[1]; 
 }
 
 LOUDLL_API
@@ -679,6 +676,17 @@ LouOpenFileExA(
         LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     }
     return (void*)KulaPacket[1]; 
+}
+
+LOUDLL_API
+FILE*
+LouOpenFileA(
+    string FileName
+){
+    return LouOpenFileExA(
+        FileName,
+        ACCESS_MASK_GENERIC_ALL
+    );
 }
 
 LOUDLL_API

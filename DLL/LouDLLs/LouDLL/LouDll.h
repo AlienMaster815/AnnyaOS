@@ -504,6 +504,11 @@ LouCreateAccessToken(
     PSECURITY_DESCRIPTOR    SecurityDescriptor
 );
 
+void
+LouCloseFileA(
+    FILE* File
+);
+
 #define GetRSP() ({ \
     unsigned long long rsp; \
     __asm__ __volatile__ ("mov %%rsp, %0" : "=r"(rsp)); \

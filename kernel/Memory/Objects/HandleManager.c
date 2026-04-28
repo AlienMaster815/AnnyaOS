@@ -25,6 +25,10 @@ static LOUSTATUS CreateHandleForObject(
     return STATUS_SUCCESS;
 }
 
+void LouKeDestroyHandleFromObject(POBJECT_HANDLE ObjectHandle){
+
+}
+
 LOUSTATUS LouKeZwCreateHandleForObject(
     POBJECT_HEADER  ObjectHeader,
     ACCESS_MASK     RequestedAccess

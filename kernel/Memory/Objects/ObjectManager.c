@@ -32,6 +32,9 @@ static POBJECT_HEADER GetObjectHeaderFromObject(PVOID Object){
     return 0x00;
 }
 
+BOOLEAN ObjectHeaderInObjectManager(POBJECT_HEADER Header){
+    return (Header == GetObjectHeaderFromObject(Header->ObjectPointer));
+}
 
 static void LinkObjectHeaderToList(
     POBJECT_HEADER  NewObject
@@ -159,6 +162,12 @@ LOUSTATUS LouKeRegisterObjectToObjectManager(
     return STATUS_SUCCESS;
 }
 
+void LouKeUnRegisterObjectToObjectManager(
+    POBJECT_HEADER Header
+){
+    LouKeFreeFastObject("OBJECT_HEADER", Header);
+}
+
 LOUSTATUS LouKeGetObjectHeaderByName(
     LOUSTR  ObjectName,
     PVOID*  ObjectHeader
@@ -201,6 +210,10 @@ LOUSTATUS LouKeAcquireHandleForObject(
         );
     }
 
+    Status = LouKeCheckRequestedAccessToProcessAccessToken(RequestedAccess);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
 
     POBJECT_HEADER ObjectHeader = GetObjectHeaderFromObject(Object);
     
@@ -234,6 +247,27 @@ LOUSTATUS LouKeAcquireHandleForObject(
     return STATUS_UNSUCCESSFUL;
 }
 
+LOUSTATUS 
+LouKeZwReleaseHandleFromObject(
+    POBJECT_HANDLE  ObjectHandle,
+    BOOLEAN*        ReleasedObject
+){
+    POBJECT_HEADER ObjectHeader = LouKeGetObjectHeaderFromHandle(ObjectHandle);
+    if(!ObjectHeader){
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    LouKeNotifyHandleOfRelease(ObjectHandle);
+    LouKeReleaseReference(&ObjectHeader->Handles);
+    if(!LouKeGetReferenceCount(&ObjectHeader->Handles)){
+        *ReleasedObject = true;
+    }else {
+        *ReleasedObject = false;
+    }
+
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS LouKeZwAcquireHandleForObjectEx(
     PHANDLE     OutHandle,
     PVOID       Object
@@ -247,6 +281,7 @@ LOUSTATUS LouKeZwAcquireHandleForObjectEx(
 
     UNUSED POBJECT_HEADER ObjectHeader = GetObjectHeaderFromObject(Object);
     LouKeNotifyHandleOfAcquisition(&ObjectHeader->ObjectHandles);
+    LouKeAcquireReference(&ObjectHeader->Handles);
     *OutHandle = &ObjectHeader->ObjectHandles;
     return STATUS_SUCCESS;
 }
@@ -259,4 +294,24 @@ LOUSTATUS LouKeZwAcquireHandleForObject(
         OutHandle, 
         Object
     );
+}
+
+void LouKeDestroyHandleFromObject(POBJECT_HANDLE ObjectHandle);
+
+LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject){
+    PLOUSINE_ACCESS_TOKEN AccessToken;
+    LOUSTATUS Status = LouKeZwGetAccessTokenData(&AccessToken, LouKePsmGetCurrentProcessAccessToken());
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    if(AccessToken->SystemAccessToken){
+        return LouKeZwReleaseHandleFromObject(
+            (POBJECT_HANDLE)Handle,
+            ReleasedObject
+        );
+    }
+    
+    //LouKeDestroyHandleFromObject((POBJECT_HANDLE)Handle);
+    return STATUS_SUCCESS;
 }
