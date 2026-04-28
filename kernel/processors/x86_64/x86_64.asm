@@ -14,8 +14,6 @@ global GetPEB
 global GetGSValue
 global GetWinIRQL
 global SetWinIRQL
-global GetRSP
-global GetRBP
 global SetNewBootStack
 global GetRFLAGS
 
@@ -120,13 +118,6 @@ GetGSValue:
     mov rax, qword[gs:rcx]
     ret
 
-GetRSP:
-    mov rax, rsp
-    ret
-
-GetRBP:
-    mov rax, rbp
-    ret
 
 GetRFLAGS:
     pushfq

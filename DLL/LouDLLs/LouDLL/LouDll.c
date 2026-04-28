@@ -8,6 +8,7 @@
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
+
 void LouYeildExecution();
 
 static KULA_RVA_NAME KernelBaseNames[KERNELBASE_RVA_ENTRIES] = {
@@ -513,7 +514,6 @@ int _vsprintf(char* Buffer, size_t BufferCount, const char* Format, ...) {
     return result;
 }
 
-
 LOUDLL_API
 void GetRtcTimeData(TIME_T* PTIME){
     uint64_t Data[2];
@@ -545,6 +545,7 @@ void LouCALL(
     TailLouCall(Call, Data, SystemEmulation);
 }
 
+static int i = 0;
 
 LOUDLL_API
 void AnnyaUserThreadStub(DWORD(*Work)(PVOID), PVOID Param, PVOID Thread){

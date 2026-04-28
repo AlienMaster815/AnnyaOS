@@ -228,11 +228,12 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     NewThreadHandle->InterruptStorage = (UINT64)AllocateSaveContext();
 
     //Allocate a new stack
-    if(Process){
-        NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, true, PageFlags);
-    }else{
+    //if(Process){
+    //    NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, true, PageFlags);
+    //}else{
         NewThreadHandle->StackBase = (UINT64)LouKeMallocEx(StackSize, 16, PageFlags);
-    }
+
+    //}
 
     LouPrint("New StackBase:%h\n", NewThreadHandle->StackBase);
     NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
@@ -280,6 +281,9 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     NewThreadHandle->SavedState.ss = StackSegment;      //Desired Stack segment
     NewThreadHandle->SavedState.rflags = 0x0202;        //interrupts enabled no operation normal
 
+    NewThreadHandle->SystemStackBase = (UINT64)LouKeMallocEx(16 * KILOBYTE, 16, PageFlags);
+    NewThreadHandle->SystemStackTop = (NewThreadHandle->SystemStackBase + ((16 * KILOBYTE) - 16)) & ~(16);
+
     LouKeGetTime(&NewThreadHandle->ThreadStart); //time of creation for thread object manager
     
     return STATUS_SUCCESS;
@@ -302,7 +306,7 @@ LOUSTATUS LouKeTsmInitializeIdleThreads(){
             (PVOID)ThreadManagerIdleFallback,
             0,
             0,
-            2048,
+            16 * KILOBYTE,
             10,
             0x08,
             0x10,

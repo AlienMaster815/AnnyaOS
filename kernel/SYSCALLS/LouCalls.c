@@ -45,12 +45,6 @@ void* LouKeGenericAllocateHeapEx(
 uint64_t LouKeGetThreadIdentification();
 DRIVER_IMPORT void LouKeExitDosMode();
 void LouKeDrsdSyncScreen();
-//PDRSD_CLIP LouKeDrsdCreateClip(
-//    INT64    X, INT64 Y, 
-//    INT64 Width, INT64 Height, 
-//    uint8_t R, uint8_t G, uint8_t B, uint8_t A
-//);
-
 //returns a void* to a new heap
 void* LouKeVirtualAllocUser(
     size_t      CommitSize,     //allocated PhysicalMemory
@@ -59,6 +53,36 @@ void* LouKeVirtualAllocUser(
 );
 
 VOID LouKeDestroyThreadSyscall(PVOID ThreadHandle);
+
+LOUSTATUS
+LouKeCreateAccessTokenCall(
+    PHANDLE                 OutToken, 
+    ACCESS_MASK             CurrentAccess,
+    PSECURITY_DESCRIPTOR    SecurityDescriptor
+);
+
+LOUAPI
+LOUSTATUS LouKeVmmCreateSectionExCall(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
+);
+
+LOUSTATUS LouKePmCreateProcessExCall(
+    PHPROCESS                       HandleOut,                       
+    string                          ProcessName,
+    HPROCESS                        ParentProcess,  
+    UINT8                           Priority,                 
+    HANDLE                          Section,
+    HANDLE                          AccessToken,
+    PLOUSINE_CREATE_PROCESS_PARAMS  Params 
+);
 
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
@@ -230,12 +254,41 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUCREATESECTIONEX:{
-            LouPrint("LOUCREATESECTION\n");
-            while(1);
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[9] = (UINT64)LouKeVmmCreateSectionExCall(
+                (PHANDLE)Tmp[0],
+                (ACCESS_MASK)Tmp[1],
+                (POBJECT_ATTRIBUTES)Tmp[2],
+                (PLARGE_INTEGER)Tmp[3],
+                (ULONG)Tmp[4],
+                (ULONG)Tmp[5],
+                (HANDLE)Tmp[6],
+                (PMEM_EXTENDED_PARAMETER)Tmp[7],
+                (ULONG)Tmp[8]
+            );
+            return;
         }
         case LOUIOCTLCALLFUNC:{
             uint64_t* Tmp = (uint64_t*)Data;
             Tmp[2] = (UINT64)LouKeCallIoCtlFunction((PLOU_IOCTL_TABLE_ENTRY)Tmp[0], (UINT64*)Tmp[1]);
+            return;
+        }
+        case LOUCREATEACCESSTOKEN:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeCreateAccessTokenCall((PHANDLE)Tmp[1], (ACCESS_MASK)Tmp[2], (PSECURITY_DESCRIPTOR)Tmp[3]);
+            return;
+        }
+        case LOUCREATEPROCESS:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = LouKePmCreateProcessExCall(
+                (PHPROCESS)Tmp[1],                       
+                (string)Tmp[2],
+                (HPROCESS)Tmp[3],  
+                (UINT8)Tmp[4],                 
+                (HANDLE)Tmp[5],
+                (HANDLE)Tmp[6],
+                (PLOUSINE_CREATE_PROCESS_PARAMS)Tmp[7]
+            );
             return;
         }
         default:

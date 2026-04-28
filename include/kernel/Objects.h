@@ -249,6 +249,7 @@ LOUSTATUS LouKeZwAcquireHandleForObject(
     PVOID       Object
 );
 
+PVOID LouKeGetObjectFromHandle(HANDLE Handle);
 
 #endif
 

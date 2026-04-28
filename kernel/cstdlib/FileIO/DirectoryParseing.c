@@ -27,7 +27,6 @@ string GetNextDirectoryName(string PATH){
     }
 }
 
-
 LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK RequestedAccess){
     string PathToFile = (string)*Data;
     LOUSTATUS Status;

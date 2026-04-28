@@ -38,6 +38,30 @@ typedef struct PACKED _LongModeGdt{
     uint64_t                           TSSHi;
 }LongModeGdt, * PLongModeGdt;
 
+static ListHeader GdtRecords = {0};
+
+static void LouKeInitializeGdtRecord(
+    UINT32 ProcessorID,
+    UINT64 GdtBase,
+    UINT64 TssBase
+){
+    PGDT_RECORD NewRecord = LouKeMallocType(GDT_RECORD, KERNEL_GENERIC_MEMORY);
+    NewRecord->ProcessorID = ProcessorID;
+    NewRecord->GdtBase = GdtBase;
+    NewRecord->TssBase = TssBase;
+    LouKeListAddTail(&NewRecord->Peers, &GdtRecords);
+}
+
+PGDT_RECORD LouKeGetGdtRecord(UINT32 ProcessorID){
+    PGDT_RECORD TmpRecord;
+    ForEachListEntry(TmpRecord, &GdtRecords, Peers){
+        if(TmpRecord->ProcessorID == ProcessorID){
+            return TmpRecord;
+        }
+    }
+    return 0x00;
+}
+
 void SetGDTSegmentEntry(
     uint8_t* GDTEntry,
     uint32_t Base, 
@@ -107,7 +131,9 @@ void DebugValueTrap(UINT64 Value){
     while(1);
 }
 
-void SetupGDT(){
+
+
+void SetupGDT(UINT32 ProcessorID){
     LouPrint("Setting Up GDT\n");
 
     PLongModeGdt GDT = (PLongModeGdt)LouKeMallocExVirt32(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
@@ -144,13 +170,8 @@ void SetupGDT(){
 
     PTSS Tss = (PTSS)LouKeMallocExVirt32(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
 
-    Tss->RSP0 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
-    Tss->RSP1 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
-    Tss->RSP2 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
     Tss->IST1 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
     Tss->IST2 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
-    Tss->IST3 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
-    Tss->IST4 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
 
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
@@ -159,6 +180,11 @@ void SetupGDT(){
         0x00
     );
 
+    LouKeInitializeGdtRecord(
+        ProcessorID,
+        (UINT64)GDT,
+        (UINT64)Tss
+    );
         
     uint64_t GsBase = (uint64_t)LouKeMallocEx(0xB080, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
 

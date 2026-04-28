@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -m64 -O3 -fPIC -fno-stack-protector -nostdlib -nodefaultlibs -fno-builtin
+CFLAGS = -m64 -O3 -mabi=ms -mno-red-zone -fno-stack-protector -nostdlib -nodefaultlibs -fno-builtin
 LDFLAGS = \
     -Wl,--entry=AnnyAwmProcessStartup \
     -Wl,--subsystem,console \

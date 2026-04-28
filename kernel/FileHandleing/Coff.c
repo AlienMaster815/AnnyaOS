@@ -88,6 +88,7 @@ LouKeLoadCoffImageBNs(
     if(Loaded){
         LouPrint("Image Already Loaded\n");
         MutexSynchronize(&CfiObject->LockOutTagOut);
+        while(1);
         return STATUS_SUCCESS;
     }
 

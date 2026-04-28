@@ -299,7 +299,6 @@ LouKeSectionGetEntryList(
         PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)SectionData->SectionPrivateData; 
         UINT64 CurrentEntry = (UINT64)CfiData->CfiObject.Entry;
         UINT64* DependList = CfiData->CfiObject.ModDependencies;
-
         UINT64* NewList = LouKeMallocArray(UINT64, *DependList + 2, USER_GENERIC_MEMORY);
         NewList[0] = *DependList + 1;
         for(size_t i = 0 ; i < *DependList; i++){
@@ -395,4 +394,89 @@ void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4){
     memcpy((UINT8*)((UINTPTR)Section + GetKSpaceBase()), CommitSection->InitializedDataCopy, CommitSection->SectionSize);
     LouKeMemoryBarrier();
     LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+}
+
+LOUAPI
+LOUSTATUS 
+LouKeZwVmmCreateSectionExCall(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
+){
+
+    LOUSTATUS Status = LouKeVmmCreateSectionEx(
+        OutSectionHandle,
+        DesiredAccess,
+        ObjectAttributes,
+        MaximumSize,
+        SectionPageProtection,
+        AllocationAttributes,
+        LouKeGetObjectFromHandle(FileHandle),
+        ExtendedParameters,
+        ExtendedParameterCount
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = LouKeRegisterObjectToObjectManager(
+        *OutSectionHandle,
+        sizeof(HANDLE),
+        "KERNEL_SECTION_HANDLE",
+        1,
+        0x00
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    HANDLE UserHandle;
+    Status = LouKeAcquireHandleForObject(
+        &UserHandle,
+        *OutSectionHandle, 
+        DesiredAccess
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    *OutSectionHandle = UserHandle;
+
+    return STATUS_SUCCESS;
+}
+
+LOUAPI
+LOUSTATUS 
+LouKeVmmCreateSectionExCall(
+    PHANDLE                 OutSectionHandle,
+    ACCESS_MASK             DesiredAccess,
+    POBJECT_ATTRIBUTES      ObjectAttributes,
+    PLARGE_INTEGER          MaximumSize,
+    ULONG                   SectionPageProtection,
+    ULONG                   AllocationAttributes,
+    HANDLE                  FileHandle,
+    PMEM_EXTENDED_PARAMETER ExtendedParameters,
+    ULONG                   ExtendedParameterCount
+){
+    LOUSTATUS Status = LouKeCheckRequestedAccessToProcessAccessToken(DesiredAccess);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("Requsted Access Denied\n");
+        return Status;
+    }
+    return LouKeZwVmmCreateSectionExCall(
+        OutSectionHandle,
+        DesiredAccess,
+        ObjectAttributes,
+        MaximumSize,
+        SectionPageProtection,
+        AllocationAttributes,
+        FileHandle,
+        ExtendedParameters,
+        ExtendedParameterCount
+    );
 }

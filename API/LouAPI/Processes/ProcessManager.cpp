@@ -6,6 +6,8 @@
 
 static spinlock_t ProcLock = {0};
 
+LOUAPI PGDT_RECORD LouKeGetGdtRecord(UINT32 ProcessorID);
+
 void LouKeLockProcManager(LouKIRQL* Irql){
     LouKeAcquireSpinLock(&ProcLock, Irql);
 }
@@ -21,7 +23,7 @@ uint64_t LouKeLinkerGetAddress(
 );
 
 LOUAPI
-void SetupGDT();
+void SetupGDT(UINT32 ProcessorID);
 
 LOUAPI
 void HandleApProccessorInitialization();
@@ -83,6 +85,32 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
     return STATUS_SUCCESS;
 }
 
+typedef struct PACKED _TSS{
+    uint32_t RESVD;
+    uint64_t RSP0;
+    uint64_t RSP1;
+    uint64_t RSP2;
+    uint64_t RSV2;
+    uint64_t IST1;
+    uint64_t IST2;
+    uint64_t IST3;
+    uint64_t IST4;
+    uint64_t IST5;
+    uint64_t IST6;
+    uint64_t IST7;
+    uint64_t RSV3;
+    uint32_t RSV4;
+}TSS, * PTSS;
+
+void PsmProcessScedualManagerObject::PsmSetThreadSystemState(
+    PGDT_RECORD             GdtRecord, 
+    PGENERIC_THREAD_DATA    Thread
+){
+    PTSS Tss = (PTSS)(UINTPTR)GdtRecord->TssBase;
+    Tss->RSP0 = Thread->SystemStackTop;
+}
+
+
 UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     BOOL ProcessSwitch = false;
     UNUSED PGENERIC_THREAD_DATA    NextThread;
@@ -113,6 +141,7 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                         this->CurrentProcess = TmpProcessRing->ProcessData;
                         PsmSetProcessTransitionState();
                         NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
+                        PsmSetThreadSystemState(this->ProcessorGdtData, NextThread);
                         IrqState = LouKeSwitchToTask(
                             IrqState,
                             CurrentThread,
@@ -134,6 +163,7 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
             }
             if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
                 NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
+                PsmSetThreadSystemState(this->ProcessorGdtData, NextThread);
                 IrqState = LouKeSwitchToTask(
                     IrqState,
                     CurrentThread,
@@ -156,6 +186,7 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     }
         
     NextThread = this->SystemProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, ProcessSwitch);
+    PsmSetThreadSystemState(this->ProcessorGdtData, NextThread);
     IrqState = LouKeSwitchToTask(
         IrqState,
         CurrentThread,
@@ -274,9 +305,11 @@ static mutex_t InitLock = {0};
 
 UNUSED static void ProcessorIdleTask(){
     HandleApProccessorInitialization();
-    SetupGDT();
+    INTEGER ProcID = GetCurrentCpuTrackMember();
+    SetupGDT(ProcID);
+    ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
-    KernelProcBlock->ProcID = GetCurrentCpuTrackMember();
+    KernelProcBlock->ProcID = ProcID;
     UpdateIDT(true);
     SetUpTimers();
     LouKeInitializeCurrentApApic();
@@ -295,9 +328,11 @@ LOUAPI void SignalProcessorsInitPending();
 
 UNUSED static void InitializeIdleProcess(){
     HandleApProccessorInitialization();
-    SetupGDT();
+    INTEGER ProcID = GetCurrentCpuTrackMember();
+    SetupGDT(ProcID);
+    ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
-    KernelProcBlock->ProcID = GetCurrentCpuTrackMember();
+    KernelProcBlock->ProcID = ProcID;
     UpdateIDT(true);
     SetUpTimers();
     LouKeInitializeCurrentApApic();
@@ -336,8 +371,6 @@ void LouKeUnmaskSmpInterrupts(){
 
 }
 
-LOUAPI UINT64 GetRSP();
-LOUAPI UINT64 GetRBP();
 LOUAPI void SetNewBootStack(UINT64 Base, UINT64 Pointer);
 LOUSTATUS LouKeTsmInitializeIdleThreads();
 
@@ -407,6 +440,7 @@ LOUAPI void InitializeProcessManager(){
     );
     
     InitializationProcessor = GetCurrentCpuTrackMember();
+    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(InitializationProcessor);
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessData(KERNEL_PROCESS_NAME, &KernelProcess);
     for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){

@@ -33,10 +33,11 @@ typedef HANDLE HPROCESS, * PHPROCESS;
 
 #ifndef _USER_MODE_CODE_
 
+LOUAPI
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,          //Optional                       
     LOUSTR                          ProcessName,        //Process Name
-    PHPROCESS                       ParrentProcess,     //Parent Process Handle           
+    HPROCESS                        ParrentProcess,     //Parent Process Handle           
     UINT8                           Priority,           //Process Schedualer Priority
     HANDLE                          Section,            //Section of the Executable Image
     HANDLE                          AccessToken,        //Access Token

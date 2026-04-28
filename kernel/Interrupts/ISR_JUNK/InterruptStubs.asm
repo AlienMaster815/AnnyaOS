@@ -571,7 +571,6 @@ ISR32:
 	iretq
 
 ISR33:
-	
 	pusha
 	push 33
 	mov [InterruptNum], ah

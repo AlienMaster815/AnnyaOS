@@ -111,6 +111,8 @@ typedef struct _GENERIC_THREAD_DATA{
     UINT8*                          AfinityBitmap;
     HANDLE                          ThreadAccessToken;
     BOOL                            Resting;
+    UINT64                          SystemStackBase;
+    UINT64                          SystemStackTop;
     CPUContext                      SavedState;
 }GENERIC_THREAD_DATA, * PGENERIC_THREAD_DATA;
 
@@ -218,10 +220,12 @@ typedef class PsmProcessScedualManagerObject{
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
         PGENERIC_PROCESS_DATA               SystemProcess;
         void                                PsmSetProcessTransitionState();
+        void                                PsmSetThreadSystemState(PGDT_RECORD GdtRecord, PGENERIC_THREAD_DATA Thread);
     public:
         PGENERIC_THREAD_DATA                OwnerThread;
         PGENERIC_THREAD_DATA                CurrentThread;
         PGENERIC_PROCESS_DATA               CurrentProcess;
+        PGDT_RECORD                         ProcessorGdtData;
         LOUSTATUS                           PsmInitializeSchedualerObject(
                                                 UINT64 ProcessorID, 
                                                 UINT64 DistibutionLimitor,

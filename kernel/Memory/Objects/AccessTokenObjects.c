@@ -17,7 +17,7 @@ LOUSTATUS LouKeZwGetAccessTokenData(PLOUSINE_ACCESS_TOKEN* Out, HANDLE TokenHand
     if((!Out) || (!TokenHandle)){
         return STATUS_INVALID_PARAMETER;
     }
-    POBJECT_HEADER Header = LouKeGetObjectHEaderFromHandle(TokenHandle);
+    POBJECT_HEADER Header = LouKeGetObjectHeaderFromHandle(TokenHandle);
     *Out = (PLOUSINE_ACCESS_TOKEN)Header->ObjectPointer;
     return STATUS_SUCCESS;
 }

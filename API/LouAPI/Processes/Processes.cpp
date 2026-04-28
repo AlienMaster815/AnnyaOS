@@ -91,10 +91,11 @@ LouKeSectionGetEntryList(
     UINT64**    OutList
 );
 
+LOUAPI
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,                       
     string                          ProcessName,
-    PHPROCESS                       ParentProcess,  
+    HPROCESS                        ParentProcess,  
     UINT8                           Priority,                 
     HANDLE                          Section,
     HANDLE                          AccessToken,
@@ -111,7 +112,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     if(HandleOut){
         *HandleOut = NewProcessObject; 
     }
-    
+
     NewProcessObject->ParentProcess = (PGENERIC_PROCESS_DATA)ParentProcess;
     NewProcessObject->ProcessPriority = Priority;
     NewProcessObject->ProcessSection = Section;
@@ -158,9 +159,6 @@ LOUSTATUS LouKePmCreateProcessEx(
         }
     }
 
-
-    
-
     if(Params){
 
     }else{
@@ -180,8 +178,7 @@ LOUSTATUS LouKePmCreateProcessEx(
 
         struct ProcessLoaderParameters* Tmp = LouKeMallocType(struct ProcessLoaderParameters, USER_GENERIC_MEMORY);
 
-        UINT64* EntryList;
-        Status = LouKeSectionGetEntryList(Section, &EntryList);
+        Status = LouKeSectionGetEntryList(Section, &Tmp->ModEntrys);
         //HPROCESS    Process,
         //PVOID       Entry,
         //PVOID       Params,
@@ -189,26 +186,26 @@ LOUSTATUS LouKePmCreateProcessEx(
         if(Status != STATUS_SUCCESS){
             return Status;
         }
-        MutexLock(&Tmp->Lock);
 
-        Tmp->ModEntrys = EntryList;
+        MutexLock(&Tmp->Lock);
 
         LouKePsmCreateThreadForProcess(
             &ThreadOut,
             (HPROCESS)NewProcessObject,
             (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", "LouProcessInitThread"),
             Tmp,
-            15
+            31
         );
 
         MutexSynchronize(&Tmp->Lock);
-
-        LouKeFree(EntryList);
-
+        LouKeFree(Tmp->ModEntrys);
         LouKeFree(Tmp);
-    }
 
+    }
+    
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
+    
+
     return STATUS_SUCCESS;
 }
 
@@ -248,4 +245,64 @@ LouKePsmGetProcessPml4(uint32_t ProcessID){
     }
     LouKeReleaseSpinLock(&ProcessListLock, &Irql);
     return 0x00;
+}
+
+LOUAPI
+LOUSTATUS LouKePmCreateProcessExCall(
+    PHPROCESS                       HandleOut,                       
+    string                          ProcessName,
+    HPROCESS                        ParentProcess,  
+    UINT8                           Priority,                 
+    HANDLE                          Section,
+    HANDLE                          AccessToken,
+    PLOUSINE_CREATE_PROCESS_PARAMS  Params 
+){
+    HANDLE NewHandle;
+    LOUSTATUS Status = LouKePmCreateProcessEx(
+        &NewHandle,                       
+        ProcessName,
+        LouKeGetObjectFromHandle((HANDLE)ParentProcess),  
+        Priority,                 
+        LouKeGetObjectFromHandle(Section),
+        LouKeGetObjectFromHandle(AccessToken),
+        Params 
+    );
+    if(Status != STATUS_SUCCESS){
+        NewHandle = 0;
+        return Status;
+    }
+
+    Status = LouKeRegisterObjectToObjectManager(
+        NewHandle,
+        sizeof(HANDLE),
+        "KERNEL_SECTION_HANDLE",
+        1,
+        0x00
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    PLOUSINE_ACCESS_TOKEN CurrentAccessToken;
+    HANDLE AccessTokenHandle = LouKePsmGetCurrentProcessAccessToken();
+    Status = LouKeZwGetAccessTokenData(&CurrentAccessToken, AccessTokenHandle);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR:Invalid Parameter To LouKeZwGetAccessTokenData()\n");
+        return STATUS_ACCESS_DENIED;
+    }
+    
+    if(HandleOut){
+        HANDLE UserHandle;
+        Status = LouKeAcquireHandleForObject(
+            &UserHandle,
+            NewHandle, 
+            CurrentAccessToken->CurrentAccess
+        );
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+
+        *HandleOut = UserHandle;
+    }
+    return STATUS_SUCCESS;
 }

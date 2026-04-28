@@ -117,11 +117,12 @@ void PageFault(uint64_t FaultingStackP) {
 
     LouPrint("Physical Address:%h\n", PAddress);
 
+    LouPrint("Process:%d\n", LouKeGetProcessIdentification());
     
     //LouPrintPanic("\nPage Fault Detected At Address %h Handleing Now\n",VAddress);
     string PanicMessage = (string)LouGeneralAllocateMemoryEx(strlen("Page Fault Protection Violation At Address:%h") + 21, 1);
 
-    _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:\n%h",  VAddress);
+    _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:%h\n",  VAddress);
     // Check for specific error causes, e.g.:
     //if (InterruptCode & 0x1) {
 

@@ -40,6 +40,15 @@ LOUSTATUS LouKeZwRegisterAccessTokenToObjectManager(
     PLOUSINE_ACCESS_TOKEN   AccessToken,
     int                     MaxHandles
 );
+
+LOUSTATUS 
+LouKeCheckRequestedAccessToProcessAccessToken(
+    ACCESS_MASK AccessMask
+);
+
+LOUSTATUS LouKeZwGetAccessTokenData(PLOUSINE_ACCESS_TOKEN* Out, HANDLE TokenHandle);
+
+
 #endif
 #endif
 #ifdef __cplusplus

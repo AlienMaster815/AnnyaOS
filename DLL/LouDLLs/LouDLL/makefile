@@ -1,7 +1,7 @@
 # Compiler and Flags
 CC = x86_64-w64-mingw32-gcc
 NASM = nasm
-CFLAGS = -shared -nostdlib -nodefaultlibs
+CFLAGS = -shared -nostdlib -nodefaultlibs -mabi=ms -mno-red-zone -mstackrealign
 ASFLAGS = -f win64
 
 # Paths

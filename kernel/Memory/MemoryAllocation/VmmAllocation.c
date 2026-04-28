@@ -274,7 +274,7 @@ LouKeAllocateVmmBuffer64Ex2(
     PVOID Result = 0x00;
     MutexLock(&VmmMemoryManager64.Lock);
     ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
-        ForEachIf((!TmpTracker->Shared) && (TmpTracker->VSize >= Size)){
+        ForEachIf((TmpTracker->Shared == Shared) && (TmpTracker->VSize >= Size)){
             Result = VmmAllocationTrackerAllocate(
                 ProcessID,
                 TmpTracker,
@@ -293,7 +293,7 @@ LouKeAllocateVmmBuffer64Ex2(
         PVMM_ALLOCATION_TRACKER NewTracker = LouKeAlocateVmmAllocationTracker(
             Size,
             Alignment,
-            false,
+            Shared,
             Flags,
             true
         );
@@ -310,6 +310,24 @@ LouKeAllocateVmmBuffer64Ex2(
     }
     MutexUnlock(&VmmMemoryManager64.Lock);
     return Result;
+}
+
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmSharedBuffer64(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
+    UINT64  Flags
+){
+    return LouKeAllocateVmmBuffer64Ex2(
+        0,
+        Size,
+        Alignment,
+        Zero,
+        true,
+        Flags
+    );
 }
 
 KERNEL_EXPORT 
@@ -380,6 +398,13 @@ LouKeVmmCommitPageAddress(
     PVOID                   Address, 
     PVMM_ALLOCATION_TRACKER In
 ){
+
+    if(LouKeGetProcessIdentification() == 2){
+
+        LouPrint("WOOHOO!!!\n");
+        while(1);
+    }
+
     if(In->Shared){
         LouPrint("LouKeVmmCommitPageAddress():Address Is Shared\n");
         return STATUS_INVALID_PARAMETER;

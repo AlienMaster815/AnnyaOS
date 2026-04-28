@@ -58,7 +58,7 @@ RELEASE_PATH = Releases/Annya.iso
 
 #Wextra
 CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
-         -fno-omit-frame-pointer -O2 -fno-common -fno-builtin -fno-asynchronous-unwind-tables \
+         -fno-omit-frame-pointer -O2 -fno-common -fno-builtin \
          -fstrict-aliasing $(INCLUDE) 
 
 

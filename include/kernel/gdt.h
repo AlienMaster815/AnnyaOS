@@ -9,7 +9,12 @@
 extern "C" {
 #endif
 
-
+typedef struct _GDT_RECORD{
+    ListHeader  Peers;
+    UINT32      ProcessorID;
+    UINT64      GdtBase;
+    UINT64      TssBase;
+}GDT_RECORD, * PGDT_RECORD;
 
 #ifndef _USER_MODE_CODE_
 

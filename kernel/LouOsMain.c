@@ -3,25 +3,7 @@
 #include <LouAPI.h>
 #include <bootloader/grub/multiboot2.h>
 #endif
-#ifdef __i386__
-#include <kernel/errors.h>
-#include <KernelAPI/IOManager.h>
-#include <kernel/interrupts.h>
-#include <drivers/Lou_drivers/FileSystem.h>
-#include <cstdio.h>
-#include <drivers/display/vga.h>
-#include <LouACPI.h>
 
-LOUAPI
-LOUSTATUS 
-InitializeStartupInterruptHandleing();
-
-#define DEBUG 1
-
-extern void SetInterruptFlags();
-extern void UnSetInterruptFlags();
-
-#endif
 
 uintptr_t RSP_Current;
 uintptr_t RBP_Current;
@@ -96,7 +78,7 @@ void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
 void InitializeInterruptRouter();
 void LouKeProbeSbIsa();
-void SetupGDT();
+void SetupGDT(UINT32 ProcessorID);
 extern void ReloadGdt();
 extern void LoadTaskRegister();
 uint64_t GetCurrentTimeIn100ns();
@@ -137,7 +119,6 @@ void LouKePollIoApicPinForAssertion(uint8_t Pin);
 uint64_t GetUsedMemory();
 uint32_t Random32(uint32_t Seed);
 void SetGSBase(uint64_t gs_base);
-extern uint64_t GetRBP();
 extern uint64_t RecreateDisasemblyIssue();
 extern void SetTEB();
 void* LouKeVirtualAllocUser(
@@ -170,7 +151,7 @@ LOUSTATUS LouKeCreateSystemWorkQeueue();
 LOUSTATUS LousineKernelEarlyInitialization(){
 
     //basic kernel initialization for IR Exceptions to keep the guru away
-    SetupGDT();
+    SetupGDT(0);
 
     HandleProccessorInitialization();
 
@@ -397,18 +378,6 @@ void LouOsKrnlStart(
 
     //LouKePlayWaveFile(StartupWave);
 
-    //while(1);
-
-    //LOUSTATUS LouKePmCreateProcessEx(
-    //    PHPROCESS                       HandleOut,          //Optional                       
-    //    string                          ProcessName,        //Process Name
-    //    PHPROCESS                       ParrentProcess,     //Parent Process Handle           
-    //    UINT8                           Priority,           //Process Schedualer Priority
-    //    HANDLE                          Section,            //Section of the Executable Image
-    //    HANDLE                          AccessToken,        //Access Token
-    //    PLOUSINE_CREATE_PROCESS_PARAMS  Params              //otpional Params
-    //);
-
     PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
         0x00
@@ -458,7 +427,6 @@ void LouOsKrnlStart(
         0x00,
         0x00
     );
-
 
     if(Status != STATUS_SUCCESS){
         LouPrint("PANIC:Unable To Create System Token\n");
@@ -515,12 +483,10 @@ void LouOsKrnlStart(
 //TODO: 
 //xAPIC has been depreciated work on x2APIC
 //Add mutex to the registry keys and a close function
-
-// Intel Corporation	8086	Skylake GT2 [HD Graphics 520]	1916
+//Add a function to cancel APIC timer or set apic timer to present whe yeilding
+//Add inter process copying for process and thread creation
 
 //BUGS TO FIX:
-
-//232076
 
 /*	
 USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).

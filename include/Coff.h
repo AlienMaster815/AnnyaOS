@@ -750,6 +750,7 @@ typedef struct _CFI_OBJECT{
     UINT64                  HeapSize;
     mutex_t                 LockOutTagOut;  
     UINT64*                 ModDependencies;
+    BOOLEAN                 IgnoreVmManager;
     union{
         ULONG               ImageProperties;
         struct {

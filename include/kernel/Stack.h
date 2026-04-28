@@ -5,6 +5,20 @@
 extern "C" {
 #endif
 
+#define GET_RETURN_ADDRESS(x) __builtin_return_address(x)
+
+#define GetRSP() ({ \
+    unsigned long long rsp; \
+    __asm__ __volatile__ ("mov %%rsp, %0" : "=r"(rsp)); \
+    rsp; \
+})
+
+#define GetRBP() ({ \
+    unsigned long long rbp; \
+    __asm__ __volatile__ ("mov %%rbp, %0" : "=r"(rbp)); \
+    rbp; \
+})
+
 #ifndef _STACK_INTERNALS_
 typedef PVOID PLOUSINE_STACK; 
 

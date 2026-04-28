@@ -117,7 +117,7 @@ UNUSED void EnableCoffImageProtection(
 
         CfiObject->SectionMapping[i] = VirtualSize | PageFlags;
 
-        if(!CfiObject->KernelObject){
+        if(!CfiObject->KernelObject && !CfiObject->IgnoreVmManager){
             if(!(SectionCharacteristics & CFI_SCN_MEM_WRITE)){
                 LouKeVmmCreateSharedSection(
                     (PVOID)PhysicalLoadedAddress + (UINT64)PeImageHeader->OptionalHeader.PE64.SectionTables[i].VirtualAddress, 
@@ -481,7 +481,7 @@ void LouKeLibTraceInitializeLibrarary(
 LOUSTATUS LouKeLoadCoffImage64(
     PCFI_OBJECT CfiObject
 ){
-        
+    LOUSTATUS Status;
     CfiObject->CoffCommitSection = Coff64CommitSection;
 
     PCOFF_IMAGE_HEADER Pe64ImageHeader = CfiObject->ImageHeader; 
@@ -493,34 +493,33 @@ LOUSTATUS LouKeLoadCoffImage64(
 
     CfiObject->LoadedSize = ISize;
 
-    LOUSTATUS Status = STATUS_INVALID_PARAMETER;
-    if(!CfiObject->KernelObject){ //only user objects are allowed non aslr addresses
-        Status = LouKeRequestVirtualAddressAllocation(
-            Pe64ImageHeader->OptionalHeader.PE64.ImageBase,
-            ISize,
-            &CfiObject->PhysicalLoadedAddress
+    if(CfiObject->KernelObject){
+        if(!(Pe64ImageHeader->OptionalHeader.PE64.DllCharacteristics & CFI_DLLCHARACTERISTICS_DYNAMIC_BASE)){
+            LouPrint("Error Loading Coff Image: Image Cannot Be Relocated\n");
+            while(1);
+            return STATUS_UNSUCCESSFUL;
+        }
+        CfiObject->LoadedAddress = LouVMallocEx(        
+            ISize, 
+            Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment
         );
-    
+        CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(ISize, Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment);
+        LouKeMapContinuousMemoryBlock((UINT64)CfiObject->PhysicalLoadedAddress, (UINT64)CfiObject->LoadedAddress, ISize, KERNEL_GENERIC_MEMORY);
+    }else{
+        CfiObject->LoadedAddress = LouKeAllocateVmmSharedBuffer64(
+            ISize,
+            Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment,
+            true,
+            KERNEL_GENERIC_MEMORY
+        );
+        UINT64 NewPhyAddress;
+        Status = RequestPhysicalAddress((UINT64)CfiObject->LoadedAddress, &NewPhyAddress);
+        if(Status != STATUS_SUCCESS){
+            return STATUS_UNSUCCESSFUL;
+        }
+        CfiObject->PhysicalLoadedAddress = (PVOID)NewPhyAddress;
     }
 
-    if(Status != STATUS_SUCCESS){
-        if(!CfiObject->KernelObject){
-            LouPrint("WARNING:Prefered Image Base Is Not Available\n");
-            while(1);
-        }else {
-            if(!(Pe64ImageHeader->OptionalHeader.PE64.DllCharacteristics & CFI_DLLCHARACTERISTICS_DYNAMIC_BASE)){
-                LouPrint("Error Loading Coff Image: Image Cannot Be Relocated\n");
-                return STATUS_UNSUCCESSFUL;
-            }
-            CfiObject->LoadedAddress = LouVMallocEx(        
-                ISize, 
-                Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment
-            );
-        }
-    }
-        
-    CfiObject->PhysicalLoadedAddress = LouAllocatePhysical64UpEx(ISize, Pe64ImageHeader->OptionalHeader.PE64.SectionAlignment);
-    LouKeMapContinuousMemoryBlock((UINT64)CfiObject->PhysicalLoadedAddress, (UINT64)CfiObject->LoadedAddress, ISize, KERNEL_GENERIC_MEMORY);
 
     UnpackCoffImage(CfiObject);
 

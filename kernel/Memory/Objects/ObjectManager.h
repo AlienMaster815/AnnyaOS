@@ -54,8 +54,8 @@ void LouKeNotifyHandleOfRelease(
     POBJECT_HANDLE  ObjectHandle
 );
 
-POBJECT_HEADER LouKeGetObjectHEaderFromHandle(HANDLE Handle);
-LOUSTATUS LouKeZwGetAccessTokenData(PLOUSINE_ACCESS_TOKEN* Out, HANDLE TokenHandle);
+POBJECT_HEADER LouKeGetObjectHeaderFromHandle(HANDLE Handle);
+
 
 //Objects TODO:
 

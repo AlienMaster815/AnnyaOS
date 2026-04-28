@@ -59,6 +59,14 @@ void LouKeNotifyHandleOfRelease(
     LouKeReleaseReference(&ObjectHandle->KRef);
 }
 
-POBJECT_HEADER LouKeGetObjectHEaderFromHandle(HANDLE Handle){
+POBJECT_HEADER LouKeGetObjectHeaderFromHandle(HANDLE Handle){
     return ((POBJECT_HANDLE)Handle)->Header;
+}
+
+PVOID LouKeGetObjectFromHandle(HANDLE Handle){
+    if(!Handle){
+        return 0x00;
+    }
+    POBJECT_HEADER Header = LouKeGetObjectHeaderFromHandle(Handle);
+    return Header->ObjectPointer;
 }

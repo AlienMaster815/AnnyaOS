@@ -2,6 +2,20 @@
 #include "LouDll.h"
 
 LOUDLL_API
+LOUSTATUS 
+LouCreateAccessToken(
+    PHANDLE                 OutTokenHandle, 
+    ACCESS_MASK             RequestedAccess,
+    PSECURITY_DESCRIPTOR    SecurityDescriptor
+){
+    UINT64 KulaPacket[6] = {0, 0, (UINT64)OutTokenHandle, (UINT64)RequestedAccess, (UINT64)SecurityDescriptor};
+    while(!KulaPacket[0]){
+        LouCALL(LOUCREATEACCESSTOKEN, (UINT64)&KulaPacket[0], 0);
+    }
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+LOUDLL_API
 void LouAccessCheckAndAuditAlarm(){
     LouPrint("LouAccessCheckAndAuditAlarm()\n");
     while(1);

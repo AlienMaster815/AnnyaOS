@@ -451,3 +451,20 @@ LouKeMemSetVmSpace(UINT32 ProcessID, PVOID Addres, int v, SIZE Count){
     }
     return STATUS_SUCCESS;
 }
+
+LOUSTATUS 
+LouKeMemCpyVmSpace(UINT32 ProcessID, PVOID Destination, PVOID Source, SIZE Count){
+    uint64_t TmpPml = LouKePsmGetProcessPml4(ProcessID);
+    if(!TmpPml){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    uint64_t PhyOut;
+    if(RequestPhysicalAddressEx((uint64_t)Destination, &PhyOut, TmpPml) != STATUS_SUCCESS){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    if(PhyOut){
+        uint8_t* Foo = (uint8_t*)(GetKSpaceBase() + PhyOut);
+        memcpy(Foo, Source, Count);
+    }
+    return STATUS_SUCCESS;
+}

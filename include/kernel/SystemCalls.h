@@ -130,8 +130,8 @@ extern "C" {
 #define LOUYEILDEXE                             114
 #define LOUCREATESECTIONEX                      115
 #define LOUIOCTLCALLFUNC                        116
-
-
+#define LOUCREATEACCESSTOKEN                    117
+#define LOUCREATEPROCESS                        118
 
 #define WINECALL                                1   
 #define WINECALL_FASTFAIL                       1

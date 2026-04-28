@@ -520,8 +520,29 @@ LouCreateProcessA(
     LOUSTR      FilePath,
     HPROCESS    ParrentProcess,
     ACCESS_MASK AccessMask,
+    UINT8       Priority,
     HPROCESS*   OutProcess     
 );
+
+__declspec(dllimport)
+LOUSTATUS 
+LouCreateAccessToken(
+    PHANDLE                 OutToken, 
+    ACCESS_MASK             RequestedAccess,
+    PSECURITY_DESCRIPTOR    SecurityDescriptor
+);
+
+#define GetRSP() ({ \
+    unsigned long long rsp; \
+    __asm__ __volatile__ ("mov %%rsp, %0" : "=r"(rsp)); \
+    rsp; \
+})
+
+#define GetRBP() ({ \
+    unsigned long long rbp; \
+    __asm__ __volatile__ ("mov %%rbp, %0" : "=r"(rbp)); \
+    rbp; \
+})
 
 #endif
 
@@ -571,6 +592,7 @@ void InitializeCriticalSectionEx(
 
 #ifndef NTDLL_H
 #ifndef _LOUDLL_
+
 
 __declspec(dllimport)
 void* AnnyaNtGetProcessHeap();

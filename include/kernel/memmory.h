@@ -33,6 +33,16 @@ LouKeAllocateVmmBuffer64Ex2(
 
 KERNEL_EXPORT 
 PVOID 
+LouKeAllocateVmmSharedBuffer64(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
+    UINT64  Flags
+);
+
+
+KERNEL_EXPORT 
+PVOID 
 LouKeAllocateVmmBuffer32Ex2(
     UINT32  ProcessID,
     SIZE    Size,
@@ -99,6 +109,7 @@ LouKeAllocateVmmBuffer32Ex2(
 #define KERNEL_GENERIC_MEMORY   WRITEABLE_PAGE | PRESENT_PAGE
 #define KERNEL_DMA_MEMORY       UNCACHEABLE_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
 #define USER_GENERIC_MEMORY     USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE
+#define USER_READ_ONLY_MEMORY   USER_PAGE | PRESENT_PAGE
 #define USER_DMA_MEMORY         USER_PAGE | WRITEABLE_PAGE |PRESENT_PAGE
 #define USER_RO_DMA_MEMORY      UNCACHEABLE_PAGE | USER_PAGE | PRESENT_PAGE
 #define USER_RO_GENERIC_MEMORY  USER_PAGE | PRESENT_PAGE
@@ -543,6 +554,8 @@ LouKeMemSetVmSpace(
     int v, 
     SIZE Count
 );
+
+LOUSTATUS LouKeMemCpyVmSpace(UINT32 ProcessID, PVOID Destination, PVOID Source, SIZE Count);
 
 PLMPOOL_DIRECTORY LouKeMapPool(
     uint64_t LocationOfPool,

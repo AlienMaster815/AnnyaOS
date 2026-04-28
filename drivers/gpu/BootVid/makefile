@@ -15,7 +15,7 @@ SRC = 	BootVidMain.c \
 
 
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=BootVidEntry -fno-builtin -Wno-multichar
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=BootVidEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
 
 # Tool and Flags
 DLLTOOL = x86_64-w64-mingw32-dlltool

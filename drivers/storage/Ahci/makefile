@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = x86_64-w64-mingw32-g++
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -fno-builtin
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -fno-builtin -mabi=ms -mno-red-zone
 
 # Paths
 INCLUDES = -I../../../include
