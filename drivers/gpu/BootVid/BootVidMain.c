@@ -28,7 +28,7 @@ BootVidEntry(){
     }
 
     LouPrint("BOOTVID.SYS:Using Framebuffer:%h\n", BootGraphics); 
-    PBOOTVID_FRAMEBUFFER NewBuffer = LouKeMallocType(BOOTVID_FRAMEBUFFER, KERNEL_GENERIC_MEMORY);
+    PBOOTVID_FRAMEBUFFER NewBuffer = LouKeMallocType(BOOTVID_FRAMEBUFFER, USER_GENERIC_MEMORY);
     NewBuffer->Width = BootGraphics->framebuffer_width;
 	NewBuffer->Height = BootGraphics->framebuffer_height;
     NewBuffer->Bpp = BootGraphics->framebuffer_bpp;
@@ -39,7 +39,7 @@ BootVidEntry(){
     if((!NewBuffer->RawData) && (BootGraphics->framebuffer_addr)){
         //Fallback for VGA emulation if the device is in VGA Emulation
         EnforceSystemMemoryMap(BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE));
-		LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+		LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), USER_DMA_MEMORY);
 		LouKeCreateDeviceSection((PVOID)BootGraphics->framebuffer_addr, (PVOID)BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), PAGE_READWRITE | SEC_NOCACHE);
 		NewBuffer->RawData = (UINT8*)BootGraphics->framebuffer_addr;
     }

@@ -654,6 +654,15 @@ void LouKeFreeFromFixedPool(
 
 void* LouKeRealloc(void* Address, size_t NewSide, uint64_t PageFlags);
 
+void* LouKeReallocEx(
+    void*       Address, 
+    size_t      Alignment, 
+    size_t      NewSize,
+    uint64_t    PageFlags
+);
+
+#define LouKeReallocArray(Pointer, type, count, tag) LouKeReallocEx(Pointer, sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
+
 void LouKeFreeFromPool(PLMPOOL_DIRECTORY Pool, void* Address, uint64_t size);
 
 void LouKeDestroyDynamicPool(

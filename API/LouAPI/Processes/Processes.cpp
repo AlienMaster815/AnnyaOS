@@ -88,8 +88,9 @@ LOUSTATUS LouKeSectionInitNewProcess(
 LOUAPI
 LOUSTATUS 
 LouKeSectionGetEntryList(
-    HANDLE      Section,
-    UINT64**    OutList
+    PGENERIC_PROCESS_DATA   Process,
+    HANDLE                  Section,
+    UINT64**                OutList
 );
 
 LOUAPI
@@ -179,7 +180,7 @@ LOUSTATUS LouKePmCreateProcessEx(
 
         struct ProcessLoaderParameters* Tmp = LouKeMallocType(struct ProcessLoaderParameters, USER_GENERIC_MEMORY);
 
-        Status = LouKeSectionGetEntryList(Section, &Tmp->ModEntrys);
+        Status = LouKeSectionGetEntryList(NewProcessObject, Section, &Tmp->ModEntrys);
         //HPROCESS    Process,
         //PVOID       Entry,
         //PVOID       Params,
@@ -197,8 +198,6 @@ LOUSTATUS LouKePmCreateProcessEx(
             TmpCfiObject = LouKeLookupHandleToCfiObject((HANDLE)DependList[i + 1], CfiData->CfiObject.AOA64);
             TmpCfiObject->CoffCommitSection(TmpCfiObject, NewProcessObject->PMLTree);
         }
-
-
 
         LouKePsmCreateThreadForProcess(
             &ThreadOut,

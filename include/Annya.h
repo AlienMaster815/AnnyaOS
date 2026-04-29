@@ -263,7 +263,16 @@ typedef struct _ANNYA_DESKTOP_SETUP_PACKET{
     ANNYA_WINDOW_CALLBACK WindowCallback;
 }ANNYA_DESKTOP_SETUP_PACKET, * PANNYA_DESKTOP_SETUP_PACKET;
 
-
+typedef struct _BOOTVID_FRAMEBUFFER{
+    ListHeader  Head;
+    BOOLEAN     DrsdDevice;
+    SIZE        FramebufferSize;
+    UINT8*      RawData;
+    UINT16      Width;
+    UINT16      Height;
+    UINT16      Pitch;
+    UINT8       Bpp;
+}BOOTVID_FRAMEBUFFER, * PBOOTVID_FRAMEBUFFER;
 
 #ifndef _USER_32_
 
@@ -533,6 +542,10 @@ LouCreateAccessToken(
     PSECURITY_DESCRIPTOR    SecurityDescriptor
 );
 
+__declspec(dllimport)
+LOUSTATUS
+LouGetBootFrameBuffer(PBOOTVID_FRAMEBUFFER* OutFb);
+
 #define GetRSP() ({ \
     unsigned long long rsp; \
     __asm__ __volatile__ ("mov %%rsp, %0" : "=r"(rsp)); \
@@ -769,6 +782,19 @@ typedef int errno_t;
 //#include "../DLL/LouDLLs/User32/AnnyaUser.h"
 
 #include <Power.h>
+
+#ifndef _DRSD_DLL_H
+
+__declspec(dllimport)
+LOUSTATUS  
+DrsdGetCurrentScreenArea(
+    int* x,
+    int* y,
+    int* Width,
+    int* Height
+);
+
+#endif
 
 #ifdef IS_X86_64
 

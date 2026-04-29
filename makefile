@@ -209,6 +209,9 @@ UserSpace:
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs clean
 	$(MAKE) -C UserLibraries/PreCompiledHeaders/ExeCRTCs all
 
+	$(MAKE) -C UserLibraries/Drsd clean
+	$(MAKE) -C UserLibraries/Drsd all
+
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C EXE/asmss/ all
 
@@ -232,6 +235,9 @@ UserSpace:
 
 	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C DLL/LouDLLs/Codecs all
+
+	$(MAKE) -C DLL/LouDLLs/Drsd clean
+	$(MAKE) -C DLL/LouDLLs/Drsd all
 
 #	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 #	$(MAKE) -C DLL/LouDLLs/GDI32 all

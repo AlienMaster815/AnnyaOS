@@ -253,6 +253,8 @@ int LouPrint(char* Str, ...){
     return Data[3];
 }
 
+#define BOOTVID_GETBOOTVIDFB 0
+
 static DEFINE_LOU_IOCTL_TABLE(
     LouDllIoCalls,
     DEFINE_OPTIONAL_LOU_IOCTL_ENTRY("BOOTVID.SYS", "GetBootVidFrameBuffer"),
@@ -827,4 +829,20 @@ LouCallIoCtlFunction(
         LouCALL(LOUIOCTLCALLFUNC, (UINT64)&KulaPacket[0], 0);
     }
     return (LOUSTATUS)KulaPacket[3];
+}
+
+LOUDLL_API
+LOUSTATUS
+LouGetBootFrameBuffer(
+    PBOOTVID_FRAMEBUFFER* OutFb
+){
+    if(!OutFb){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT64 FbOut = 0x00;
+    LOUSTATUS Status = LouCallIoCtlFunction(&LouDllIoCalls[BOOTVID_GETBOOTVIDFB], &FbOut);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    *OutFb = (PBOOTVID_FRAMEBUFFER)FbOut;
 }

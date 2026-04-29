@@ -99,4 +99,5 @@ BootVidDeInitializeTerminalDriver(){
     BootRenderSetScreenColorEx(SET_RGB(0, 192, 192));
     BootRenderSyncScreen();
     TtfDeInitializeFile(TerminalFont);
+    LouKeFree(Canvas);
 }

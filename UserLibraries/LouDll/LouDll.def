@@ -52,3 +52,4 @@ EXPORTS
     LouInitializeIoCtlTable
     LouCallIoCtlFunction
     LouCreateProcessA
+    LouGetBootFrameBuffer

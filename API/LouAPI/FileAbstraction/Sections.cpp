@@ -125,7 +125,7 @@ ULONG LouPageFlagsToNtPageFlags(UINT64 PageFlags, BOOL PageFault, BOOL NxExists)
 
 LOUAPI
 UINT64 NtPageFlagsToLouPageFlags(ULONG PageFlags, BOOL PageFault, BOOL NxExists){ //todo Take Parameter for NX
-    UINT64 Result = 0;
+    UINT64 Result = USER_PAGE;
     UNUSED bool ExecuteBit = false;
     if((PageFlags & 0xFF) > 0xF){
         PageFlags >>= 4;
@@ -252,11 +252,59 @@ LOUSTATUS LouKeSectionInitNewProcess(
     return STATUS_SUCCESS;
 }
 
+typedef struct _CFI_ENTRY_LIST{
+    ListHeader  Peers;
+    UINT64      Entry;
+}CFI_ENTRY_LIST, * PCFI_ENTRY_LIST;
+
+LOUAPI
+LOUSTATUS 
+LouKeGetListEntryByOrder(
+    PGENERIC_PROCESS_DATA   Process,
+    PCFI_OBJECT             CurrentObject,
+    SIZE*                   ListCount,
+    PListHeader             TmpGetEntryListHeader
+){
+    UINT64* DependList = CurrentObject->ModDependencies;
+    PCFI_OBJECT TmpObject;
+    for(SIZE i = 0 ; i < DependList[0]; i++){
+        TmpObject = LouKeLookupHandleToCfiObject((HANDLE)DependList[i + 1], CurrentObject->AOA64);
+        if(*TmpObject->ModDependencies){
+            LouKeGetListEntryByOrder(
+                Process,
+                TmpObject,
+                ListCount,
+                TmpGetEntryListHeader
+            );
+        }
+    }
+    for(SIZE Foo = 0 ; Foo < DependList[0]; Foo++){
+        PCFI_ENTRY_LIST TmpList;
+        TmpObject = LouKeLookupHandleToCfiObject((HANDLE)DependList[Foo + 1], CurrentObject->AOA64);
+        BOOLEAN Add = true;
+        ForEachListEntry(TmpList, TmpGetEntryListHeader, Peers){
+            if((UINT64)TmpList->Entry == (UINT64)TmpObject->Entry){
+                Add = false;
+                break;
+            }
+        }
+        if(Add){
+            PCFI_ENTRY_LIST NewListEntry = LouKeMallocType(CFI_ENTRY_LIST, KERNEL_GENERIC_MEMORY);
+            NewListEntry->Entry = (UINT64)TmpObject->Entry;
+            LouKeListAddTail(&NewListEntry->Peers, TmpGetEntryListHeader);
+            //TmpObject->CoffCommitSection(TmpObject, Process->PMLTree);
+            (*ListCount)++;
+        }
+    }
+    return STATUS_SUCCESS;
+}
+
 LOUAPI
 LOUSTATUS 
 LouKeSectionGetEntryList(
-    HANDLE      Section,
-    UINT64**    OutList
+    PGENERIC_PROCESS_DATA   Process,
+    HANDLE                  Section,
+    UINT64**                OutList
 ){
     if((!Section) || (!OutList)){
         return STATUS_INVALID_PARAMETER;
@@ -264,15 +312,21 @@ LouKeSectionGetEntryList(
 
     UNUSED PSECTION_OBJECT SectionData = (PSECTION_OBJECT)Section;
     if(SectionData->Coff){
+        ListHeader TmpGetEntryListHeader = {0};
         PCOFF_PRIVATE_DATA CfiData = (PCOFF_PRIVATE_DATA)SectionData->SectionPrivateData; 
-        UINT64 CurrentEntry = (UINT64)CfiData->CfiObject.Entry;
-        UINT64* DependList = CfiData->CfiObject.ModDependencies;
-        UINT64* NewList = LouKeMallocArray(UINT64, *DependList + 2, USER_GENERIC_MEMORY);
-        NewList[0] = *DependList + 1;
-        for(size_t i = 0 ; i < *DependList; i++){
-            NewList[i + 1] = (UINT64)(LouKeLookupHandleToCfiObject((HANDLE)DependList[i + 1], CfiData->CfiObject.AOA64))->Entry;
+        SIZE ListCount = 0;
+        LouKeGetListEntryByOrder(Process, &CfiData->CfiObject, &ListCount, &TmpGetEntryListHeader);
+        UINT64* NewList = LouKeMallocArray(UINT64, ListCount + 2, USER_GENERIC_MEMORY);
+        NewList[0] = ListCount + 1;
+
+        PCFI_ENTRY_LIST TmpList = 0;
+        PCFI_ENTRY_LIST ForwardList = 0;
+        SIZE i = 1;
+        ForEachListEntrySafe(TmpList, ForwardList, &TmpGetEntryListHeader, Peers){
+            NewList[i++] = TmpList->Entry;
+            LouKeFree(TmpList);
         }
-        NewList[NewList[0]] = CurrentEntry;
+        NewList[NewList[0]] = (UINT64)CfiData->CfiObject.Entry;
         *OutList = NewList;
     }else {
         LouPrint("LouKeSectionGetEntryList() : NON COFF\n");

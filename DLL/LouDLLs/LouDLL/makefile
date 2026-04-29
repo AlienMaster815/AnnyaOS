@@ -16,8 +16,6 @@ SRC = LouDll.c \
 	Atom.c \
 	wcstring.c \
 	Sections.c \
-	DrsdUserCore/Drsd.c \
-	DrsdUserCore/DrsdDraw.c \
 	Nt/Syncronization.c \
 	Nt/Allocation.c \
 	Nt/Alpc.c \
