@@ -17,7 +17,8 @@ extern "C" {
 KERNEL_EXPORT 
 void
 LouKeVmmFreeVmBuffer(
-    PVOID Address
+    PVOID   Address,
+    BOOLEAN Shared
 );
 
 KERNEL_EXPORT 

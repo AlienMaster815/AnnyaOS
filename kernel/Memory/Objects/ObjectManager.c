@@ -221,11 +221,18 @@ LOUSTATUS LouKeAcquireHandleForObject(
         return STATUS_UNSUCCESSFUL;
     }
 
-    return LouKeCreateHandleForObject(
+    Status = LouKeCreateHandleForObject(
         (POBJECT_HANDLE*)OutHandle,
         ObjectHeader,
         RequestedAccess
     );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    LouKeAcquireReference(&ObjectHeader->Handles);
+    
+    return STATUS_SUCCESS;
 }
 
 LOUSTATUS 
@@ -238,7 +245,6 @@ LouKeZwReleaseHandleFromObject(
         return STATUS_UNSUCCESSFUL;
     }
 
-    LouKeNotifyHandleOfRelease(ObjectHandle);
     LouKeReleaseReference(&ObjectHeader->Handles);
     
     if(ReleasedObject){
@@ -287,17 +293,19 @@ LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject){
         return Status;
     }
 
-    if(AccessToken->SystemAccessToken){
-        return LouKeZwReleaseHandleFromObject(
-            (POBJECT_HANDLE)Handle,
-            ReleasedObject
-        );
+    Status = LouKeZwReleaseHandleFromObject(
+        (POBJECT_HANDLE)Handle,
+        ReleasedObject
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
     }
 
-
-
-    //LouKeDestroyHandleFromObject((POBJECT_HANDLE)Handle);
-    LouPrint("LouKeReleaseHandleFromObject()\n");
-    while(1);
+    if(AccessToken->SystemAccessToken){
+        return STATUS_SUCCESS;
+    }
+    
+    LouKeDestroyHandleFromObject((POBJECT_HANDLE)Handle);
+    
     return STATUS_SUCCESS;
 }

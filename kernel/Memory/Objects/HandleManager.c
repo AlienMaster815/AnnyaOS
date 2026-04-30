@@ -28,12 +28,21 @@ LOUSTATUS LouKeCreateHandleForObject(
     return STATUS_SUCCESS;
 }
 
+int LouKeGetHandleReferenceCount(
+    POBJECT_HANDLE ObjectHandle
+){  
+    return LouKeGetReferenceCount(&ObjectHandle->KRef);
+}
+
 void LouKeDestroyHandleFromObject(
     POBJECT_HANDLE ObjectHandle
 ){
-
-
-
+    LouKeNotifyHandleOfRelease(ObjectHandle);
+    if(LouKeGetHandleReferenceCount(ObjectHandle)){
+        return;
+    }
+    LouKeListDeleteItem(&ObjectHandle->Peers);
+    LouKeVmmFreeVmBuffer(ObjectHandle, true);
 }
 
 void LouKeNotifyHandleOfAcquisition(

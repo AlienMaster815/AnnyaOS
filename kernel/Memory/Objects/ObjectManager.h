@@ -41,6 +41,10 @@ LOUSTATUS LouKeCreateHandleForObject(
     ACCESS_MASK     RequestedAccess
 );
 
+void LouKeDestroyHandleFromObject(
+    POBJECT_HANDLE ObjectHandle
+);
+
 void LouKeNotifyHandleOfAcquisition(
     POBJECT_HANDLE  ObjectHandle
 );
