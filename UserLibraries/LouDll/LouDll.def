@@ -53,3 +53,7 @@ EXPORTS
     LouCallIoCtlFunction
     LouCreateProcessA
     LouGetBootFrameBuffer
+    LouGetProcessName
+    LouGetCurrentProccessHandle
+    LouPutCurrentProcessHandle
+    LouGetCurrentProccessName

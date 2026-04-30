@@ -25,7 +25,7 @@ typedef struct _SYSTEM_POWER_OFF_STATE_DATA{
 #define SYSTEM_POWER_OFF_PRIORITY_HIGH          192
 #define SYSTEM_POWER_OFF_PRIORITY_FIRMWARE      256
 
-typedef PVOID HANDLE; 
+typedef PVOID HANDLE, KHANDLE, * PKHANDLE;
 
 typedef struct _LOUSINE_POWER_TRANSITION_OPERATIONS{
     void (*SuspendOperation)();

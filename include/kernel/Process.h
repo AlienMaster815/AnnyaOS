@@ -30,6 +30,7 @@ typedef HANDLE HPROCESS, * PHPROCESS;
 
 #define KERNEL_PROCESS_NAME         "The Lousine Kernel"
 #define ASMSS_PROCESS_NAME          "Annya Os Session Manager Subsystem"
+#define AWM_PROCESS_NAME            "Annya OS Window Manager"
 
 #ifndef _USER_MODE_CODE_
 
@@ -45,6 +46,40 @@ LOUSTATUS LouKePmCreateProcessEx(
 );
 
 HANDLE LouKePsmGetCurrentProcessAccessToken();
+
+LOUAPI
+LOUSTATUS
+LouKeGetProcessName(
+    KHANDLE                 ProcessHandle,
+    PSTRING                 ProcessNameOut 
+);
+
+LOUAPI
+LOUSTATUS
+LouKeGetProcessNameCall(
+    HANDLE  ProcessHandle,
+    PSTRING ProcessNameOut
+);
+
+LOUAPI 
+LOUSTATUS
+LouKeGetCurrentProcessHandle(
+    PKHANDLE     OutHandle
+);
+
+LOUAPI 
+LOUSTATUS
+LouKeGetCurrentProcessHandleCall(
+    PHANDLE     OutHandle,
+    ACCESS_MASK RequestedAccess
+);
+
+LOUAPI
+void
+LouKePutCurrentProcessHandleCall(
+    HANDLE Handle
+);
+
 #endif
 
 #ifdef __cplusplus

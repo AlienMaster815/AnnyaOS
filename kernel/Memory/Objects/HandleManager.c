@@ -1,54 +1,39 @@
 #include "ObjectManager.h"
 
-static LOUSTATUS CreateHandleForObject(
-    POBJECT_HEADER ObjectHeader, 
-    ACCESS_MASK RequestedAccess, 
-    bool SkipAccessTokenCheck //for access token creations and kernel privaledge allocations
+LOUSTATUS LouKeCreateHandleForObject(
+    POBJECT_HANDLE* OutHandle,
+    POBJECT_HEADER  ObjectHeader, 
+    ACCESS_MASK     RequestedAccess
 ){
-    if(!SkipAccessTokenCheck){
-        PLOUSINE_ACCESS_TOKEN AccessToken;
-        LOUSTATUS Status = LouKeZwGetAccessTokenData(&AccessToken, LouKePsmGetCurrentProcessAccessToken());
-
-        if((Status != STATUS_SUCCESS) || (!AccessToken)){
-            LouPrint("CreateHandleForObject() Unable To Get Token\n");
-            return Status;
-        }
-
-        LouPrint("CreateHandleForObject():SkipAccessTokenCheck\n");
-        while(1);
+    if(!OutHandle || !ObjectHeader){
+        return STATUS_INVALID_PARAMETER;
     }
+
+    if(LouKeGetReferenceCount(&ObjectHeader->MaxHandles) && ((LouKeGetReferenceCount(&ObjectHeader->Handles) >= LouKeGetReferenceCount(&ObjectHeader->MaxHandles)))){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    *OutHandle = (POBJECT_HANDLE)LouKeAllocateVmmSharedBuffer32(sizeof(POBJECT_HANDLE), GET_ALIGNMENT(OBJECT_HANDLE) , true, USER_GENERIC_MEMORY);
+    if(!(*OutHandle)){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    (*OutHandle)->Header = ObjectHeader;
+    (*OutHandle)->AccessMask = RequestedAccess;
+
+    LouKeNotifyHandleOfAcquisition(*OutHandle);
+
+    LouKeListAddTail(&(*OutHandle)->Peers, &ObjectHeader->ObjectHandles.Peers);
     
-
-
-    LouPrint("CreateHandleForObject()\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
-void LouKeDestroyHandleFromObject(POBJECT_HANDLE ObjectHandle){
-
-}
-
-LOUSTATUS LouKeZwCreateHandleForObject(
-    POBJECT_HEADER  ObjectHeader,
-    ACCESS_MASK     RequestedAccess
+void LouKeDestroyHandleFromObject(
+    POBJECT_HANDLE ObjectHandle
 ){
-    return CreateHandleForObject(
-        ObjectHeader,
-        RequestedAccess,
-        true
-    );
-}
 
-LOUSTATUS LouKeCreateHandleForObject(
-    POBJECT_HEADER ObjectHeader, 
-    ACCESS_MASK RequestedAccess
-){
-    return CreateHandleForObject(
-        ObjectHeader,
-        RequestedAccess,
-        false
-    );
+
+
 }
 
 void LouKeNotifyHandleOfAcquisition(
@@ -72,5 +57,8 @@ PVOID LouKeGetObjectFromHandle(HANDLE Handle){
         return 0x00;
     }
     POBJECT_HEADER Header = LouKeGetObjectHeaderFromHandle(Handle);
+    if(!Header){
+        return 0x00;
+    }
     return Header->ObjectPointer;
 }

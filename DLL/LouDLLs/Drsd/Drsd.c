@@ -8,6 +8,8 @@ static int gX = 0;
 static int gY = 0;
 static UINT32* Canvas = 0x00;
 static UINT32* UserBuffer = 0x00;
+static STRING ProcessName = {0};
+static BOOLEAN WindowManager = false;
 
 DRSD_API
 LOUSTATUS  
@@ -74,12 +76,21 @@ DrsdPutPixelEx(int X , int Y, UINT32 Color){
 DRSD_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved){
 
-    LOUSTATUS Status = LouGetBootFrameBuffer(&BootFrameBuffer);
-    if((Status == STATUS_SUCCESS) && (BootFrameBuffer)){
-        LouPrint("Using Boot Framebuffer\n");
-        UsingBootFramebuffer = true;
-    }else {
-        LouPrint("Unable To Get BootFrameBuffer\n");
+    LOUSTATUS Status = LouGetCurrentProccessName(
+        &ProcessName
+    );
+
+    if((Status == STATUS_SUCCESS) && (ProcessName.Buffer)){
+        if(!strcmp(ProcessName.Buffer, AWM_PROCESS_NAME)){
+            WindowManager = true;
+            Status = LouGetBootFrameBuffer(&BootFrameBuffer);
+            if((Status == STATUS_SUCCESS) && (BootFrameBuffer)){
+                LouPrint("Using Boot Framebuffer\n");
+                UsingBootFramebuffer = true;
+            }else {
+                LouPrint("Unable To Get BootFrameBuffer\n");
+            }
+        }
     }
 
     LouPrint("DRSD.DLL Attatched To New Process\n");

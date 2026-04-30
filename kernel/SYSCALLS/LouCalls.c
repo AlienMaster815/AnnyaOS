@@ -291,6 +291,29 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             );
             return;
         }
+        case LOUGETPROCNAME:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeGetProcessNameCall(
+                (HANDLE)Tmp[1],
+                (PSTRING)Tmp[2]
+            );
+            return;
+        }
+        case LOUGETCURRENTPROCHANDLE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeGetCurrentProcessHandleCall(
+                (PHANDLE)Tmp[1],
+                (ACCESS_MASK)Tmp[2]
+            );
+            return;
+        }
+        case LOUPUTCURRENTPROCHANDLE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKePutCurrentProcessHandleCall(
+                (HANDLE)Tmp[0]
+            );
+            return;
+        }
         default:
         LouPrint("Unkown Call:%d\n", Call);
     }

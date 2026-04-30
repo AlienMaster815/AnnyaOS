@@ -26,7 +26,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
     //HPROCESS WindowManager;
 
     LouCreateProcessA(
-        "AnnyaOS Window Manager",
+        AWM_PROCESS_NAME,
         "C:/ANNYA/SYSTEM64/AWM.EXE",
         0x00,
         ACCESS_MASK_GENERIC_ALL,

@@ -49,7 +49,7 @@ uint64_t LouKeLinkerGetAddress(
 static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){    
     LouKIRQL Irql; 
     PGENERIC_PROCESS_DATA NewProcessObject = LouKeMallocType(GENERIC_PROCESS_DATA , KERNEL_GENERIC_MEMORY);
-    NewProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, KERNEL_GENERIC_MEMORY);
+    NewProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, USER_GENERIC_MEMORY);
     strncpy(NewProcessObject->ProcessName, ProcessName, strlen(ProcessName));
 
     LouKeAcquireSpinLock(&ProcessListLock, &Irql);
@@ -95,7 +95,7 @@ LouKeSectionGetEntryList(
 
 LOUAPI
 LOUSTATUS LouKePmCreateProcessEx(
-    PHPROCESS                       HandleOut,                       
+    PKHANDLE                        HandleOut,                       
     string                          ProcessName,
     HPROCESS                        ParentProcess,  
     UINT8                           Priority,                 
@@ -115,12 +115,25 @@ LOUSTATUS LouKePmCreateProcessEx(
         *HandleOut = NewProcessObject; 
     }
 
+
+    Status = LouKeRegisterObjectToObjectManager(
+        NewProcessObject,
+        sizeof(PGENERIC_PROCESS_DATA),
+        ProcessName,
+        0,
+        0x00
+    );
+    if(Status != STATUS_SUCCESS){
+        DestroyProcessObject(NewProcessObject);
+        return Status;
+    }
+
     NewProcessObject->ParentProcess = (PGENERIC_PROCESS_DATA)ParentProcess;
     NewProcessObject->ProcessPriority = Priority;
     NewProcessObject->ProcessSection = Section;
     NewProcessObject->ProcessAccessToken = AccessToken;
     NewProcessObject->ProcessID = AllocateProcessID();
-    LouPrint("Creating Process With ID:%d\n", NewProcessObject->ProcessID);
+    LouPrint("Creating Process:%s With ID:%d\n", ProcessName, NewProcessObject->ProcessID);
     if(Params){
         //TODO::
         LouPrint("LouKePmCreateProcessEx()::TODO\n");
@@ -212,16 +225,15 @@ LOUSTATUS LouKePmCreateProcessEx(
         LouKeFree(Tmp);
 
     }
-    
+
     LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
     
-
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS LouKePsmGetProcessData(
-    string  ProcessName,
-    PHANDLE OutHandle
+    string   ProcessName,
+    PKHANDLE OutHandle
 ){
     if((!ProcessName) || (!OutHandle)){
         return STATUS_INVALID_PARAMETER;
@@ -274,22 +286,11 @@ LOUSTATUS LouKePmCreateProcessExCall(
         LouKeGetObjectFromHandle((HANDLE)ParentProcess),  
         Priority,                 
         LouKeGetObjectFromHandle(Section),
-        LouKeGetObjectFromHandle(AccessToken),
+        AccessToken,
         Params 
     );
     if(Status != STATUS_SUCCESS){
         NewHandle = 0;
-        return Status;
-    }
-
-    Status = LouKeRegisterObjectToObjectManager(
-        NewHandle,
-        sizeof(HANDLE),
-        "KERNEL_SECTION_HANDLE",
-        1,
-        0x00
-    );
-    if(Status != STATUS_SUCCESS){
         return Status;
     }
 
@@ -298,7 +299,7 @@ LOUSTATUS LouKePmCreateProcessExCall(
     Status = LouKeZwGetAccessTokenData(&CurrentAccessToken, AccessTokenHandle);
     if(Status != STATUS_SUCCESS){
         LouPrint("ERROR:Invalid Parameter To LouKeZwGetAccessTokenData()\n");
-        return STATUS_ACCESS_DENIED;
+        return Status;
     }
     
     if(HandleOut){
@@ -315,4 +316,81 @@ LOUSTATUS LouKePmCreateProcessExCall(
         *HandleOut = UserHandle;
     }
     return STATUS_SUCCESS;
+}
+
+LOUAPI
+LOUSTATUS
+LouKeGetProcessName(
+    KHANDLE                 ProcessHandle,
+    PSTRING                 ProcessNameOut 
+){
+    if(!ProcessHandle || !ProcessNameOut){
+        return STATUS_INVALID_PARAMETER;
+    }   
+    return LouKeRtlInitStringEx(
+        ProcessNameOut,
+        (PCSTR)((PGENERIC_PROCESS_DATA)ProcessHandle)->ProcessName
+    );
+}
+
+LOUAPI
+LOUSTATUS
+LouKeGetProcessNameCall(
+    HANDLE  ProcessHandle,
+    PSTRING ProcessNameOut
+){
+    return LouKeGetProcessName(
+        LouKeGetObjectFromHandle(ProcessHandle),
+        ProcessNameOut
+    );
+}
+
+LOUAPI 
+LOUSTATUS
+LouKeGetCurrentProcessHandle(
+    PKHANDLE     OutHandle
+){
+    if(!OutHandle){
+        return STATUS_INVALID_PARAMETER;
+    }
+    *OutHandle = (KHANDLE)LouKeGetCurrentProcessData();
+    return (*OutHandle ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL);
+}
+
+LOUAPI 
+LOUSTATUS
+LouKeGetCurrentProcessHandleCall(
+    PHANDLE     OutHandle,
+    ACCESS_MASK RequestedAccess
+){
+    LOUSTATUS Status;
+    PLOUSINE_ACCESS_TOKEN CurrentAccessToken;
+    HANDLE AccessTokenHandle = LouKePsmGetCurrentProcessAccessToken();
+    Status = LouKeZwGetAccessTokenData(&CurrentAccessToken, AccessTokenHandle);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ERROR:Invalid Parameter To LouKeZwGetAccessTokenData()\n");
+        return Status;
+    }
+    KHANDLE ProcessData = 0x00;
+    Status = LouKeGetCurrentProcessHandle(&ProcessData);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Status = LouKeAcquireHandleForObject(
+        OutHandle,
+        ProcessData, 
+        RequestedAccess
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    return STATUS_SUCCESS;
+}
+
+LOUAPI
+void
+LouKePutCurrentProcessHandleCall(
+    HANDLE Handle
+){
+    LouKeReleaseHandleFromObject(Handle, 0x00);
 }

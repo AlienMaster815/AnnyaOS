@@ -29,7 +29,7 @@ typedef BYTE BOOLEAN, * PBOOLEAN;
 #define VOID 	void
 #define VOIDP	void*
 
-typedef PVOID HANDLE, * PHANDLE;
+typedef PVOID HANDLE, * PHANDLE, KHANDLE, * PKHANDLE;
 
 typedef struct _UNICODE_STRING{
     USHORT  Length;

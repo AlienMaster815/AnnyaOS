@@ -40,6 +40,14 @@ LouKeAllocateVmmSharedBuffer64(
     UINT64  Flags
 );
 
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmSharedBuffer32(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
+    UINT64  Flags
+);
 
 KERNEL_EXPORT 
 PVOID 

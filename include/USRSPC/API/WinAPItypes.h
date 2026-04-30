@@ -5,7 +5,7 @@
 
 typedef unsigned int ULONG;
 typedef void* PVOID;
-typedef PVOID HANDLE;
+typedef PVOID HANDLE, KHANDLE, * PKHANDLE;
 typedef HANDLE* PHANDLE;
 
 typedef uint8_t BYTE;

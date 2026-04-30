@@ -9,7 +9,7 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
         &Width, &Height 
     );
 
-    LouPrint("Hello AnnyaOS Window Manager\n");
+    LouPrint("Hello Annya OS Window Manager\n");
 
     /*LouPrint("X     :%d\n", x);
     LouPrint("Y     :%d\n", y);

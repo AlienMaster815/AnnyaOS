@@ -361,7 +361,7 @@ LouKeAllocateVmmBuffer32Ex2(
     PVOID Result = 0x00;
     MutexLock(&VmmMemoryManager32.Lock);
     ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager32.AllocationTrackers, Peers){
-        ForEachIf((!TmpTracker->Shared) && (TmpTracker->VSize >= Size)){
+        ForEachIf((TmpTracker->Shared == Shared) && (TmpTracker->VSize >= Size)){
             Result = VmmAllocationTrackerAllocate(
                 ProcessID,
                 TmpTracker,
@@ -380,7 +380,7 @@ LouKeAllocateVmmBuffer32Ex2(
         PVMM_ALLOCATION_TRACKER NewTracker = LouKeAlocateVmmAllocationTracker(
             Size,
             Alignment,
-            false,
+            Shared,
             Flags,
             false
         );
@@ -397,6 +397,24 @@ LouKeAllocateVmmBuffer32Ex2(
     }
     MutexUnlock(&VmmMemoryManager32.Lock);
     return Result;
+}
+
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmSharedBuffer32(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
+    UINT64  Flags
+){
+    return LouKeAllocateVmmBuffer32Ex2(
+        0,
+        Size,
+        Alignment,
+        Zero,
+        true,
+        Flags
+    );
 }
 
 BOOLEAN

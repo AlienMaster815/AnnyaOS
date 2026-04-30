@@ -9,8 +9,6 @@ typedef struct _OBJECT_HANDLE{
     ListHeader              Peers;
     struct _OBJECT_HEADER*  Header;
     KERNEL_REFERENCE        KRef;
-    PVOID                   ObjectData;
-    SIZE                    ObjectSize;
     ACCESS_MASK             AccessMask;
 }OBJECT_HANDLE, * POBJECT_HANDLE;
 
@@ -36,14 +34,11 @@ typedef struct _OBJHDR_CONSTRUCTOR_PARAMS{
     int                     MaxHandles;
 }OBJHDR_CONSTRUCTOR_PARAMS, * POBJHDR_CONSTRUCTOR_PARAMS;
 
-LOUSTATUS LouKeZwCreateHandleForObject(
-    POBJECT_HEADER  ObjectHeader,
-    ACCESS_MASK     RequestedAccess
-);
 
 LOUSTATUS LouKeCreateHandleForObject(
-    POBJECT_HEADER ObjectHeader, 
-    ACCESS_MASK RequestedAccess
+    POBJECT_HANDLE* OutHandle,
+    POBJECT_HEADER  ObjectHeader, 
+    ACCESS_MASK     RequestedAccess
 );
 
 void LouKeNotifyHandleOfAcquisition(

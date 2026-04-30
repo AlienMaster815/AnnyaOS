@@ -91,8 +91,7 @@ UNUSED static LOUSTATUS ObjectHeaderConstructor(PVOID Object, PVOID Params){
 
 
     NewObject->ObjectHandles.Header = NewObject;
-    NewObject->ObjectHandles.ObjectData = NewObject->ObjectPointer;
-    NewObject->ObjectHandles.ObjectSize = NewObject->ObjectSize;
+    
     LouKeNotifyHandleOfAcquisition(&NewObject->ObjectHandles);
 
     LinkObjectHeaderToList(NewObject);
@@ -222,29 +221,11 @@ LOUSTATUS LouKeAcquireHandleForObject(
         return STATUS_UNSUCCESSFUL;
     }
 
-    for(SIZE i = 0 ; i < 2; i++){
-
-        POBJECT_HANDLE TmpHandle = &ObjectHeader->ObjectHandles;
-        //TODO LockObject during Parsing
-        while(TmpHandle->Peers.NextHeader){
-            TmpHandle = (POBJECT_HANDLE)TmpHandle->Peers.NextHeader;
-            if(TmpHandle->AccessMask == RequestedAccess){
-                LouKeNotifyHandleOfAcquisition(TmpHandle);
-                *OutHandle = (HANDLE)TmpHandle;
-                return STATUS_SUCCESS;
-            }
-        }
-
-        Status = LouKeCreateHandleForObject(ObjectHeader, RequestedAccess);
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-    }
-
-    //*OutHandle = ;
-    LouPrint("LouKeAcquireHandleForObject()\n");
-    while(1);
-    return STATUS_UNSUCCESSFUL;
+    return LouKeCreateHandleForObject(
+        (POBJECT_HANDLE*)OutHandle,
+        ObjectHeader,
+        RequestedAccess
+    );
 }
 
 LOUSTATUS 
@@ -259,14 +240,15 @@ LouKeZwReleaseHandleFromObject(
 
     LouKeNotifyHandleOfRelease(ObjectHandle);
     LouKeReleaseReference(&ObjectHeader->Handles);
-    if(!LouKeGetReferenceCount(&ObjectHeader->Handles)){
-        *ReleasedObject = true;
-    }else {
-        *ReleasedObject = false;
+    
+    if(ReleasedObject){
+        *ReleasedObject = LouKeGetReferenceCount(&ObjectHeader->Handles) ? false : true;
     }
 
     return STATUS_SUCCESS;
 }
+
+
 
 LOUSTATUS LouKeZwAcquireHandleForObjectEx(
     PHANDLE     OutHandle,
@@ -311,7 +293,11 @@ LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject){
             ReleasedObject
         );
     }
-    
+
+
+
     //LouKeDestroyHandleFromObject((POBJECT_HANDLE)Handle);
+    LouPrint("LouKeReleaseHandleFromObject()\n");
+    while(1);
     return STATUS_SUCCESS;
 }

@@ -246,9 +246,7 @@ int LouPrint(char* Str, ...){
     Data[0] = 0;
     Data[1] = (uint64_t)Str;
     Data[2] = (uint64_t)&Arg;
-    while(Data[0] != 1){
-        LouCALL(LOUPRINTCALL, (uint64_t)&Data[0], 0);
-    }
+    LouCALL(LOUPRINTCALL, (uint64_t)&Data[0], 0);
     va_end(Arg);
     return Data[3];
 }
@@ -287,9 +285,7 @@ PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters){
     Data[0] = 0;
     Data[1] = (uint64_t)Function;
     Data[2] = (uint64_t)FunctionParameters;
-    while(Data[0] != 1){
-        LouCALL(LOUCREATETHREAD, (uint64_t)&Data[0] ,0);
-    }
+    LouCALL(LOUCREATETHREAD, (uint64_t)&Data[0] ,0);
     return (PTHREAD)Data[1];
 }
 
@@ -298,9 +294,7 @@ LOUDLL_API
 void AnnyaDestroyThread(PTHREAD Thread){
     uint64_t Data[2] = {0};
     Data[1] = (uint64_t)Thread;
-    while(Data[0] != 1){
-        LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data[0], 0);
-    }
+    LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data[0], 0);
 }
 
 LOUAPI
@@ -411,32 +405,24 @@ int strncmp(const char* str1, const char* str2, size_t n) {
     return 0;
 }
 
+//strcmp from ACPICA
 LOUDLL_API
-int strcmp(const char* str1, const char* str2) {
+int
+strcmp (
+    const char              *String1,
+    const char              *String2)
+{
 
-    // Compare characters until we reach the specified number of characters (n)
-    while (1) {
-        // Compare the current characters in both strings
-        char c1 = *str1++;
-        char c2 = *str2++;
 
-        // If the characters are equal or both are null terminators, continue
-        if (c1 == c2 || c1 == '\0' || c2 == '\0') {
-            // If we've compared n characters or reached the end of either string, return 0
-            if (c1 == '\0' && c2 == '\0') {
-                return 0;
-            }
+    for ( ; (*String1 == *String2); String2++)
+    {
+        if (!*String1++)
+        {
+            return (0);
         }
-        else {
-            // The characters are not equal, return the difference
-            return c1 - c2;
-        }
-
     }
 
-    // If we've reached here, the first n characters are equal
-
-    return 0;
+    return ((unsigned char) *String1 - (unsigned char) *String2);
 }
 
 
@@ -521,9 +507,7 @@ void GetRtcTimeData(TIME_T* PTIME){
     uint64_t Data[2];
     Data[0] = 0;
     Data[1] = (uint64_t)PTIME;
-    while(Data[0] != 1){
-        LouCALL(LOUGETRTCDATA,(uint64_t)&Data[0],0);
-    }
+    LouCALL(LOUGETRTCDATA,(uint64_t)&Data[0],0);
 }
 
 
@@ -594,9 +578,7 @@ void* LouGenericAllocateHeapEx(
     KulaPacket[1] = (uint64_t)Heap;
     KulaPacket[2] = (uint64_t)AllocationSize;
     KulaPacket[3] = (uint64_t)Alginment;
-    while(!KulaPacket[0]){
-        LouCALL(LOUALLOCHEAPGENERICEX, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUALLOCHEAPGENERICEX, (uint64_t)&KulaPacket[0], 0);
     return (void*)KulaPacket[4];
 }
 
@@ -605,9 +587,7 @@ void LouGenericFreeHeap(void* Heap, void* Address){
     uint64_t KulaPacket[3] = {0};
     KulaPacket[1] = (uint64_t)Heap;
     KulaPacket[2] = (uint64_t)Address;
-    while(!KulaPacket){
-        LouCALL(LOUFREEGENERICHEAP, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUFREEGENERICHEAP, (uint64_t)&KulaPacket[0], 0);
 }
 
 
@@ -622,9 +602,7 @@ void* LouVirtualAllocUser(
     KulaPacket[1] = CommitSize;
     KulaPacket[2] = ReservedSize;
     KulaPacket[3] = PageFlags;
-    while(!KulaPacket[0]){
-        LouCALL(LOUVIRTUALALLOCUSER, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUVIRTUALALLOCUSER, (uint64_t)&KulaPacket[0], 0);
     return (void*)KulaPacket[4];
 }
 
@@ -637,9 +615,7 @@ AnnyaGetLibraryFunctionN(
     uint64_t KulaPacket[4] = {0};
     KulaPacket[1] = (uint64_t)ModuleName;
     KulaPacket[2] = (uint64_t)FunctionName;
-    while(!KulaPacket[0]){
-        LouCALL(LOUAGLFN, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUAGLFN, (uint64_t)&KulaPacket[0], 0);
     return (void*)KulaPacket[3]; 
 }
 
@@ -660,9 +636,7 @@ LouCloseFileA(
     FILE* File
 ){
     UINT64 KulaPacket[2] = {0, (UINT64)File};
-    while(!KulaPacket[0]){
-        LouCALL(LOUCLOSEFILE, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUCLOSEFILE, (uint64_t)&KulaPacket[0], 0);
 }
 
 LOUDLL_API
@@ -674,9 +648,7 @@ LouOpenFileExA(
     uint64_t KulaPacket[4] = {0};
     KulaPacket[1] = (uint64_t)FileName;
     KulaPacket[3] = (uint64_t)AccessMask;
-    while(!KulaPacket[0]){
-        LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOULOADFILE, (uint64_t)&KulaPacket[0], 0);
     return (void*)KulaPacket[1]; 
 }
 
@@ -692,34 +664,17 @@ LouOpenFileA(
 }
 
 LOUDLL_API
-void
-LouCloseFile(
-    FILE* ClosingFile
-){
-    LouPrint("LouCloseFile\n");
-    uint64_t KulaPacket[2] = {0};
-    KulaPacket[1] = (uint64_t)ClosingFile;
-    while(!KulaPacket[0]){
-
-    } 
-}
-
-LOUDLL_API
 void 
 LouExitDosMode(){
     uint64_t KulaPacket = 0;
-    while(!KulaPacket){
-        LouCALL(LOUEXITDOSMODE, (uint64_t)&KulaPacket, 0);
-    } 
+    LouCALL(LOUEXITDOSMODE, (uint64_t)&KulaPacket, 0);
 }
 
 LOUDLL_API
 void LouGlobalUserFree(void* Addr){
     uint64_t KulaPacket[2] = {0};
     KulaPacket[1] = (uint64_t)Addr;
-    while(!KulaPacket[0]){
-        LouCALL(LOUGLOBALFREE, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUGLOBALFREE, (uint64_t)&KulaPacket[0], 0);
 }
 
 LOUDLL_API 
@@ -728,9 +683,7 @@ LouGlobalUserMallocEx(size_t Size, uint64_t Alignment){
     uint64_t KulaPacket[4] = {0};
     KulaPacket[2] = Size;
     KulaPacket[3] = Alignment;
-    while(!KulaPacket[0]){
-        LouCALL(LOUGLOBALMALLOC, (uint64_t)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUGLOBALMALLOC, (uint64_t)&KulaPacket[0], 0);
     return (void*)KulaPacket[1];
 }
 
@@ -755,9 +708,7 @@ void* memset(void* dest, int value, size_t count) {
 LOUDLL_API
 void LouYeildExecution(){
     uint64_t KulaPacket;
-    while(KulaPacket != 1){
-        LouCALL(LOUYEILDEXE, (uint64_t)&KulaPacket, 0);
-    }
+    LouCALL(LOUYEILDEXE, (uint64_t)&KulaPacket, 0);
 }
 
 LOUDLL_API
@@ -800,9 +751,7 @@ void
 LouSystemShutdown(SHUTDOWN_ACTION ShutDown){
     uint64_t Data[2] = {0};
     Data[1] = (uint64_t)ShutDown;
-    while(Data[0] != 1){
-        LouCALL(LOUSHUTDOWN, (uint64_t)&Data[0], 0);
-    }
+    LouCALL(LOUSHUTDOWN, (uint64_t)&Data[0], 0);
 }
 
 LOUDLL_API 
@@ -811,10 +760,7 @@ LouInitializeIoCtlTable(
     PVOID Table
 ){
     UINT64 KulaPacket[3] = {0, (UINT64)Table, 0};
-
-    while(KulaPacket[0] != 1){
-        LouCALL(LOUINITIOCTLTABLE, (UINT64)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUINITIOCTLTABLE, (UINT64)&KulaPacket[0], 0);
     return (LOUSTATUS)KulaPacket[2];
 }
 
@@ -825,9 +771,7 @@ LouCallIoCtlFunction(
     UINT64*                 IoKulaPacket
 ){
     UINT64 KulaPacket[4] = {0, (UINT64)Entry, (UINT64)IoKulaPacket, 0};
-    while(KulaPacket[0] != 1){
-        LouCALL(LOUIOCTLCALLFUNC, (UINT64)&KulaPacket[0], 0);
-    }
+    LouCALL(LOUIOCTLCALLFUNC, (UINT64)&KulaPacket[0], 0);
     return (LOUSTATUS)KulaPacket[3];
 }
 
@@ -847,4 +791,58 @@ LouGetBootFrameBuffer(
     }
     *OutFb = (PBOOTVID_FRAMEBUFFER)FbOut;
     return STATUS_SUCCESS;
+}
+
+LOUDLL_API
+LOUSTATUS 
+LouGetProcessName(
+    HANDLE  ProcessHandle,
+    PSTRING OutString
+){
+    UINT64 KulaPacket[4] = {0, 0, (UINT64)ProcessHandle, (UINT64)OutString};
+    LouCALL(LOUGETPROCNAME, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+LOUDLL_API
+LOUSTATUS
+LouGetCurrentProccessHandle(
+    PHANDLE     OutHandle,
+    ACCESS_MASK RequestedAccess
+){
+    UINT64 KulaPacket[4] = {0, 0 , (UINT64)OutHandle, (UINT64)RequestedAccess};
+    LouCALL(LOUGETCURRENTPROCHANDLE, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+LOUDLL_API
+void
+LouPutCurrentProcessHandle(
+    HANDLE ProcessHandle
+){
+    UINT64 KulaPacket[2] = {0, (UINT64)ProcessHandle};
+    LouCALL(LOUPUTCURRENTPROCHANDLE, (UINT64)&KulaPacket, 0);
+}
+
+LOUDLL_API
+LOUSTATUS
+LouGetCurrentProccessName(
+    PSTRING NameOut
+){
+    LOUSTATUS Status;
+    ACCESS_MASK RequestedAccess = PROCESS_QUERY_INFORMATION;
+    HANDLE CurrentProcessHandle = 0x00;
+    Status = LouGetCurrentProccessHandle(
+        &CurrentProcessHandle,
+        RequestedAccess
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Status = LouGetProcessName(
+        CurrentProcessHandle,
+        NameOut
+    );
+    LouPutCurrentProcessHandle(CurrentProcessHandle);
+    return Status;
 }

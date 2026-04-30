@@ -280,25 +280,25 @@ typedef struct _BOOTVID_FRAMEBUFFER{
 
 //Copy Changes of the following to the Annya.h system from Awm.h
 
-__declspec(dllimport)
+ANNA_IMPORT
 BOOL 
 UpdateWindow(
     HWND WindowHandle
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 BOOL
 ShowWindow(
     HWND        WindowHandle,
     INTEGER     nCmdShow
 );
 
-//__declspec(dllimport)
+//ANNA_IMPORT
 //uint64_t AnnyaRegisterCallbackProcedure(
 //    void* CallbackHandler
 //);
 
-__declspec(dllimport)
+ANNA_IMPORT
 HWND 
 CreateWindowA(
     LPCSTR      ClassName,
@@ -314,14 +314,14 @@ CreateWindowA(
     LPVOID      Parameter
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* malloc(size_t BytesNeeded);
 
 
 
 
 
-__declspec(dllimport)
+ANNA_IMPORT
 PVOID AnnyaCreateCanvasBuffer(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
@@ -336,7 +336,33 @@ PVOID AnnyaCreateCanvasBuffer(
 #ifndef _LOUDLL_
 #include <Time.h>
 
-__declspec(dllimport)
+ANNA_IMPORT
+LOUSTATUS
+LouGetCurrentProccessName(
+    PSTRING NameOut
+);
+
+ANNA_IMPORT
+void
+LouPutCurrentProcessHandle(
+    HANDLE ProcessHandle
+);
+
+ANNA_IMPORT
+LOUSTATUS
+LouGetCurrentProccessHandle(
+    PHANDLE     OutHandle,
+    ACCESS_MASK RequestedAccess
+);
+
+ANNA_IMPORT
+LOUSTATUS 
+LouGetProcessName(
+    HANDLE  ProcessHandle,
+    PSTRING OutString
+);
+
+ANNA_IMPORT
 void 
 LouDrsdClipToClip(
     struct _DRSD_CLIP* BackClip,
@@ -345,75 +371,75 @@ LouDrsdClipToClip(
     INT64 Y
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void 
 LouUpdateClipLocation(struct _DRSD_CLIP* Clip, INT64 DeltaX, INT64 DeltaY);
 
-__declspec(dllimport)
+ANNA_IMPORT
 int strcmp(const char* str1, const char* str2);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouUpdateShadowClipSubState(
     void* Clip, 
     size_t X, size_t Y, 
     size_t Width, size_t Height
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouYeildExecution();
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouUpdateClipSubState(
     void* Clip,
     size_t X, size_t Y, 
     size_t Width, size_t Height
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void 
 LouUpdateShadowClipState(
     void* Clip
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouGenericFreeHeap(void* Heap, void* Address);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void*
 LouDrsdGetPlaneInformation(size_t* CountHandle);
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS
 LouDrsdSetPlaneInformation(void* Context);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void*
 LouGlobalUserMallocEx(size_t Size, uint64_t Alignment);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouGlobalUserFree(void* Addr);
 
 #define LouGlobalUserMallocArray(type, count) (type*)LouGlobalUserMallocEx((ROUND_UP64(sizeof(type), GET_ALIGNMENT(type))) * (count), GET_ALIGNMENT(type))
 #define LouGlobalUserMallocType(Type) (Type*)LouGlobalUserMallocEx(sizeof(Type), GET_ALIGNMENT(Type))
 
-__declspec(dllimport)
+ANNA_IMPORT
 void*
 LouGlobalUserMalloc(size_t Size);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void 
 LouExitDosMode();
 
-__declspec(dllimport)
+ANNA_IMPORT
 int strncmp(const char* str1, const char* str2, size_t n);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void
 LouCloseFile(
     FILE* ClosingFile
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void*
 LouMemCpy(
     void* OutStream,
@@ -421,7 +447,7 @@ LouMemCpy(
     size_t ByteCount
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS 
 LouSwapEndianess(
     void* InStreamTmp, 
@@ -429,63 +455,63 @@ LouSwapEndianess(
     size_t StreamSize
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* LouGenericAllocateHeapEx(
     void* Heap, 
     size_t AllocationSize,
     size_t Alginment
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* AnnyaGetLibraryFunctionN(string ModuleName,string FunctionName);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* AnnyaGetLibraryFunctionH(HANDLE ModuleHandle, string FunctionName);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* LouVirtualAllocUser(
     size_t      CommitSize,     //allocated PhysicalMemory
     size_t      ReservedSize,   //AllocatedVirtual
     uint64_t    PageFlags
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 FILE*
 LouOpenFileA(
     string FileName
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 FILE*
 LouOpenFileExA(
     string      FileName,
     ACCESS_MASK AccessMask
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 int LouPrint(char* Str, ...);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void 
 LouDrsdSyncScreen();
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouUpdateClipState(void* Clip);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* LouDrsdCreateClip(
     INT64 X, INT64 Y, 
     INT64 Width, INT64 Height, 
     uint8_t R, uint8_t G, uint8_t B, uint8_t A
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 PTHREAD AnnyaCreateThread(DWORD (*Function)(PVOID), PVOID FunctionParameters);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void AnnyaDestroyThread(PTHREAD Thread);
 
-__declspec(dllimport)
+ANNA_IMPORT
 int _vsprintf(
     char* Buffer, 
     size_t BufferCount, 
@@ -493,25 +519,25 @@ int _vsprintf(
     ...
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void GetRtcTimeData(TIME_T* PTIME);
 
-__declspec(dllimport)
+ANNA_IMPORT
 void AnnyaUpdateButton(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
     PVOID HBUTTON
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void LouTrashAndDumpProcess();
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* LouGenericAllocateHeapEx(void* Heap, size_t AllocationSize, size_t Alignment);
 
 #include <kernel/Objects.h>
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS 
 LouCreateSectionEx(
     PHANDLE                 OutSectionHandle,
@@ -525,7 +551,7 @@ LouCreateSectionEx(
     ULONG                   ExtendedParameterCount
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS
 LouCreateProcessA(
     LOUSTR      ProcessName,
@@ -536,7 +562,7 @@ LouCreateProcessA(
     HPROCESS*   OutProcess     
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS 
 LouCreateAccessToken(
     PHANDLE                 OutToken, 
@@ -544,7 +570,7 @@ LouCreateAccessToken(
     PSECURITY_DESCRIPTOR    SecurityDescriptor
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS
 LouGetBootFrameBuffer(PBOOTVID_FRAMEBUFFER* OutFb);
 
@@ -565,29 +591,29 @@ LouGetBootFrameBuffer(PBOOTVID_FRAMEBUFFER* OutFb);
 
 #ifndef _KERNEL32_
 
-__declspec(dllimport)
+ANNA_IMPORT
 void EnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
-__declspec(dllimport)
+ANNA_IMPORT
 HMODULE LoadLibraryA(string DllName);
 
-__declspec(dllimport)
+ANNA_IMPORT
 HMODULE LoadLibraryW(wchar_t* DllName);
 
-__declspec(dllimport)
+ANNA_IMPORT
 HMODULE LoadLibraryExA(
     string DllName, 
     HANDLE File, 
     DWORD Flags
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 HMODULE LoadLibraryExyW(
     wchar_t* DllName, 
     HANDLE File, 
@@ -597,7 +623,7 @@ HMODULE LoadLibraryExyW(
 
 #ifndef _KERNELBASE_H
 
-__declspec(dllimport)
+ANNA_IMPORT
 void InitializeCriticalSectionEx(
     PMSVC_CRITICAL_SECTION CriticalSection, 
     uint32_t SpinCount, 
@@ -610,31 +636,31 @@ void InitializeCriticalSectionEx(
 #ifndef _LOUDLL_
 
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* AnnyaNtGetProcessHeap();
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS RtlInitializeCriticalSectionEx(
     PMSVC_CRITICAL_SECTION CriticalSection,
     uint32_t SpinCount,
     uint32_t Flags
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS RtlEnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS RtlLeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
 
 #ifndef _KERNEL32_
-__declspec(dllimport)
+ANNA_IMPORT
 void* GetProcessHeap();
 #endif
 
-__declspec(dllimport)
+ANNA_IMPORT
 uint16_t NtGetProcessorCount();
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* RtlAllocateHeapEx(
     PVOID       HeapHandle,
     uint64_t    HeapAllocationFlags,
@@ -642,7 +668,7 @@ void* RtlAllocateHeapEx(
     size_t      Alignment
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void* 
 RtlAllocateHeap(
     PVOID       HeapHandle,
@@ -651,7 +677,7 @@ RtlAllocateHeap(
 );
 
 
-__declspec(dllimport)
+ANNA_IMPORT
 void 
 LouSystemShutdown(SHUTDOWN_ACTION ShutDown);
 
@@ -787,7 +813,7 @@ typedef int errno_t;
 
 #ifndef _DRSD_DLL_H
 
-__declspec(dllimport)
+ANNA_IMPORT
 LOUSTATUS  
 DrsdGetCurrentScreenArea(
     int* x,
@@ -796,11 +822,11 @@ DrsdGetCurrentScreenArea(
     int* Height
 );
 
-__declspec(dllimport)
+ANNA_IMPORT
 void 
 DrsdSyncScreens();
 
-__declspec(dllimport)
+ANNA_IMPORT
 void
 DrsdPutPixelEx(int X , int Y, UINT32 Color);
 

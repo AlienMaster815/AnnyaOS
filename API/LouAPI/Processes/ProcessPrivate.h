@@ -302,4 +302,8 @@ LouKePsmCreateThreadForProcess(
     UINT8       Priority
 );
 
+LOUAPI
+PGENERIC_PROCESS_DATA
+LouKeGetCurrentProcessData();
+
 #endif

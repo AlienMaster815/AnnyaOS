@@ -1,6 +1,15 @@
 #ifndef _MODULATION_H
 #define _MODULATION_H
 
+#ifdef __cplusplus
+#define ANNA_IMPORT extern "C" __declspec(dllimport)
+#define ANNA_EXPORT extern "C" __declspec(dllexport)
+#else
+#define ANNA_IMPORT __declspec(dllimport)
+#define ANNA_EXPORT __declspec(dllexport)
+#endif
+
+
 #ifndef _USER_MODE_CODE_
 #ifdef __cplusplus
 #define DRIVER_IMPORT extern "C" __declspec(dllimport)
@@ -31,13 +40,6 @@
 #endif
 #endif
 
-#ifdef _USER_MODE_CODE_
-#define ANNA_IMPORT __declspec(dllimport)
-#define ANNA_EXPORT __declspec(dllexport)
-#else
-#define ANNA_IMPORT
-#define ANNA_EXPORT 
-#endif
 
 #ifndef _KERNEL_ENTRY_
 #define _KERNEL_ENTRY_

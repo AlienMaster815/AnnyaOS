@@ -251,7 +251,7 @@ LOUSTATUS LouKeZwAcquireHandleForObject(
 
 PVOID LouKeGetObjectFromHandle(HANDLE Handle);
 
-LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject);
+LOUAPI LOUSTATUS LouKeReleaseHandleFromObject(HANDLE Handle, BOOLEAN* ReleasedObject);
 
 #ifndef _OBJECT_MANAGER_H
 

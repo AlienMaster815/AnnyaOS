@@ -230,12 +230,6 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL all
 
-	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
-	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc PREFIX=x86_64-w64-mingw32-
-
-	$(MAKE) -C DLL/LouDLLs/Codecs clean
-	$(MAKE) -C DLL/LouDLLs/Codecs all
-
 	$(MAKE) -C DLL/LouDLLs/Drsd clean
 	$(MAKE) -C DLL/LouDLLs/Drsd all
 
@@ -281,8 +275,6 @@ cleanall:
 	$(MAKE) -C EXE/LouLoad clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C drivers/Networking/PCNET32 clean
-	$(MAKE) -C DLL/3rdParty/zlib -f win32/Makefile.gcc clean
-	$(MAKE) -C DLL/LouDLLs/Codecs clean
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C EXE/Awm/ clean

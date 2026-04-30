@@ -132,6 +132,9 @@ extern "C" {
 #define LOUIOCTLCALLFUNC                        116
 #define LOUCREATEACCESSTOKEN                    117
 #define LOUCREATEPROCESS                        118
+#define LOUGETPROCNAME                          119
+#define LOUGETCURRENTPROCHANDLE                 120
+#define LOUPUTCURRENTPROCHANDLE                 121
 
 #define WINECALL                                1   
 #define WINECALL_FASTFAIL                       1
