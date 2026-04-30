@@ -250,8 +250,6 @@ LOUSTATUS
 GetBootVidFrameBuffer(
     UINT64* KulaPacket
 ){
-    LouPrint("GetBootVidFrameBuffer()\n");
-    while(1);
     if(!KulaPacket){
         return STATUS_INVALID_PARAMETER;
     }

@@ -3,3 +3,5 @@ LIBRARY
 
 EXPORTS
     DrsdGetCurrentScreenArea
+    DrsdPutPixelEx
+    DrsdSyncScreens

@@ -172,7 +172,7 @@ typedef struct _BO{
 
 
 static inline bool RangeInterferes(uint64_t AddrA, uint64_t SizeA, uint64_t AddrB, uint64_t SizeB){
-    return (AddrA < (AddrB + SizeB)) && (AddrB < (AddrA + SizeA));
+    return !( (AddrA + SizeA <= AddrB) || (AddrB + SizeB <= AddrA));
 }
 
 

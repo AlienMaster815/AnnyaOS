@@ -37,17 +37,11 @@ LouKeCallIoCtlFunction(
     UINT64*                 KulaPacket
 ){
         
-    LouPrint("HERE\n");
-    while(1);
-
     if(!Entry->IoFunction){
-        while(1);
         return STATUS_UNSUCCESSFUL;
     }else if(!(*Entry->IoFunction)){
         return STATUS_UNSUCCESSFUL;
     }
-    
-
 
     IOCTL_FUNCTION Function = *Entry->IoFunction;
     

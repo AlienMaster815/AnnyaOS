@@ -76,6 +76,7 @@
 
 #include <IoCtl.h>
 #include <kernel/Sections.h>
+#include <kernel/States.h>
 
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
@@ -272,6 +273,7 @@ typedef struct _BOOTVID_FRAMEBUFFER{
     UINT16      Height;
     UINT16      Pitch;
     UINT8       Bpp;
+    UINT32*     UserBuffer;
 }BOOTVID_FRAMEBUFFER, * PBOOTVID_FRAMEBUFFER;
 
 #ifndef _USER_32_
@@ -794,7 +796,32 @@ DrsdGetCurrentScreenArea(
     int* Height
 );
 
+__declspec(dllimport)
+void 
+DrsdSyncScreens();
+
+__declspec(dllimport)
+void
+DrsdPutPixelEx(int X , int Y, UINT32 Color);
+
 #endif
+
+#define SET_RGB(r, g, b) (SET_RED(r) | SET_GREEN(g) | SET_BLUE(b))
+
+#define BLUE_MASK       (0xFF)
+#define GREEN_MASK      (0xFF << 8)
+#define RED_MASK        (0xFF << 16)
+#define UNUSED_MASK     (0xFF << 24)
+
+#define SET_RED(r)      ((r & 0xFF) << 16)
+#define SET_GREEN(g)    ((g & 0xFF) << 8)
+#define SET_BLUE(b)     ((b & 0xFF))
+
+#define GET_RED(c)      ((c >> 16) & 0xFF)
+#define GET_GREEN(c)    ((c >> 8) & 0xFF)
+#define GET_BLUE(c)     (c & 0xFF)
+
+
 
 #ifdef IS_X86_64
 

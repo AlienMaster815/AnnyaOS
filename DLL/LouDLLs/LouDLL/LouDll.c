@@ -842,7 +842,9 @@ LouGetBootFrameBuffer(
     UINT64 FbOut = 0x00;
     LOUSTATUS Status = LouCallIoCtlFunction(&LouDllIoCalls[BOOTVID_GETBOOTVIDFB], &FbOut);
     if(Status != STATUS_SUCCESS){
+        LouPrint("LouGetBootFrameBuffer():IOCTL Call Failed\n");
         return Status;
     }
     *OutFb = (PBOOTVID_FRAMEBUFFER)FbOut;
+    return STATUS_SUCCESS;
 }

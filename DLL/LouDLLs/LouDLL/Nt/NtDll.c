@@ -1633,7 +1633,6 @@ NTDLL_API void RtlSetDynamicTimeZoneInformation() {LouPrint("Hello nt Dll\n"); w
 NTDLL_API void RtlSetEnvironmentStrings() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetEnvironmentVar() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetEnvironmentVariable() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlSetExtendedFeaturesMask() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetFeatureConfigurations() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetGroupSecurityDescriptor() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlSetHeapInformation() {LouPrint("Hello nt Dll\n"); while(1);}

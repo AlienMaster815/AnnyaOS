@@ -141,6 +141,16 @@ UNUSED static const UCHAR AsciiMap[] = {
     ASCII_CHAR_IS_CONTROL_CHAR,                                 //DEL     
 };
 
+LOUDLL_API
+bool LouRtlCharIsLower(int c){
+    return RangeInterferes(c, 1, 'a', 26);
+}
+
+LOUDLL_API
+int LouRtlCharToUpper(int c){
+    if(LouRtlCharIsLower(c)) return ((c - 'a') + 'A');
+    else return c;
+}
 
 static
 BOOLEAN 
@@ -391,4 +401,57 @@ LouRtlCharToInteger(
     }
     *Value = (ULONG)Tmp;
     return STATUS_SUCCESS;
+}
+
+
+LOUDLL_API 
+LONG 
+LouKeRtlCompareString(
+    const STRING*   String1, 
+    const STRING*   String2,
+    BOOLEAN         CaseInSensitive
+){
+    LOUSTR  Raw1 = String1->Buffer;
+    LOUSTR  Raw2 = String2->Buffer;
+    if(CaseInSensitive){
+        while(
+            (LouRtlCharToUpper(*Raw1) == LouRtlCharToUpper(*Raw2)) &&
+            (*Raw1) && (*Raw2)
+        ){  
+            Raw1++;
+            Raw2++;
+        }        
+        return (LouRtlCharToUpper(*Raw1) - LouRtlCharToUpper(*Raw2));
+    }
+    while(
+        (*Raw1 == *Raw2) &&
+        (*Raw1) && (*Raw2)
+    ){  
+        Raw1++;
+        Raw2++;
+    }        
+    return (*Raw1 - *Raw2);
+}
+
+LOUDLL_API 
+VOID 
+LouKeRtlCopyString(
+    PSTRING         DestinationString, 
+    const STRING*   SourceString
+){
+    SIZE Length = SourceString->Length;
+    for(SIZE i = 0 ; i < Length; i++){
+        DestinationString->Buffer[i] = SourceString->Buffer[i];
+    }
+    DestinationString->Length = Length;
+}
+
+LOUDLL_API 
+BOOLEAN 
+LouKeRtlEqualString(
+    const STRING*   String1, 
+    const STRING*   String2, 
+    BOOLEAN         CaseInSensitive
+){
+    return LouKeRtlCompareString(String1, String2, CaseInSensitive) ? false : true;
 }

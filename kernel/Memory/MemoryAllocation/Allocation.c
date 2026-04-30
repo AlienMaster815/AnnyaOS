@@ -104,7 +104,7 @@ uint64_t GetAllocationBlockBase(uint64_t Address){
 static bool IsEarlyMallocation = true;
 
 
-
+KERNEL_EXPORT
 void* LouVMalloc(size_t BytesToAllocate){
     return LouVMallocEx(BytesToAllocate, GetAlignmentBySize(BytesToAllocate));
 }
@@ -572,6 +572,7 @@ void LouFree(PVOID Addr) {
     while(1);
 }
 
+KERNEL_EXPORT
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);

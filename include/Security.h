@@ -2,6 +2,7 @@
 #define _KERNEL_SECURITY_H
 
 #include <cstdint.h>
+#include <Modulation.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,14 @@ typedef PVOID PSECURITY_DESCRIPTOR;
 //#define SYNCHRONIZE                 0x00100000
 //#define PROCESS_ALL_ACCESS          0x001FFFFF   
 
+#ifndef _USER_MODE_CODE_
+
+KERNEL_EXPORT 
+void LouKeMapGenericMask(
+    PACCESS_MASK            AccessMask,
+    const GENERIC_MAPPING*  GenericMapping
+);
+#endif
 
 #ifdef __cplusplus
 }

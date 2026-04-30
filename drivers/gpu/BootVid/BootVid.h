@@ -22,6 +22,7 @@ typedef struct _BOOTVID_FRAMEBUFFER{
     UINT16      Height;
     UINT16      Pitch;
     UINT8       Bpp;
+    UINT32*     UserBuffer;
 }BOOTVID_FRAMEBUFFER, * PBOOTVID_FRAMEBUFFER;
 
 typedef struct _BOOTVID_BITMAP{

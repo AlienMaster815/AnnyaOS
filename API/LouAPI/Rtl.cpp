@@ -545,10 +545,8 @@ KERNEL_EXPORT
 BOOLEAN 
 LouKeRtlIsStateSeparationEnabled(){
 
-    LouPrint("LouKeRtlIsStateSeparationEnabled()\n");
-    while(1);
+    //TODO:Adopt State Seperation
     return false;
-
 }
 
 KERNEL_EXPORT 
@@ -571,10 +569,10 @@ LouKeRtlMapGenericMask(
     PACCESS_MASK            AccessMask, 
     const GENERIC_MAPPING*  GenericMapping
 ){
-
-    LouPrint("LouKeRtlMapGenericMask()\n");
-    while(1);
-
+    LouKeMapGenericMask(
+        AccessMask, 
+        GenericMapping
+    );
 }
 
 KERNEL_EXPORT 
