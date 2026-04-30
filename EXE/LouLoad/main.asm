@@ -11,10 +11,10 @@ MBOOTHEADER:
     dd 0x100000000 - (0xE85250D6 + 0x00 + (MBOOTEND - MBOOTHEADER))
     dw 5                      ; Tag type: Framebuffer
     dw 0                      
-    dd 20                     
-    dd 640                    ; Width
-    dd 480                    ; Height
-    dd 32                     ; Depth (bits per pixel)
+    dd 8 ;20                     
+    ;dd 640                    ; Width
+    ;dd 480                    ; Height
+    ;dd 32                     ; Depth (bits per pixel)
     align 8
     dw 0                      ; Tag type: End
     dw 0                      ; Flags
@@ -115,7 +115,7 @@ LouLoaderSetup:
     call LouLoaderEnableLoaderPages
 
     lgdt [gdt64.pointer]
-    
+
     jmp gdt64.code_segment:LouLoaderLongModeTrampoline
 
 LouLoaderSetupError:
@@ -179,7 +179,7 @@ LouLoaderLongModeTrampoline:
 
     mov ecx, [MulitibootInfo]    
     mov rdx, rbp
-
+    
     call LouLoaderStart
     
     jmp $

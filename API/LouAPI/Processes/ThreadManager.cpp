@@ -3,6 +3,10 @@
 #include "ProcessPrivate.h"
 
 LOUAPI
+void 
+LouKeConfigureNextApicTimerEvent(SIZE Ms);
+
+LOUAPI
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData();
 LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT32 ThreadID);
@@ -597,7 +601,8 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeUnlockProcManager(&Irql);
-    asm("INT $32");
+    LouKeConfigureNextApicTimerEvent(0);
+
 }
 
 LOUAPI
@@ -614,7 +619,7 @@ LouKeYeildExecution(){
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeUnlockProcManager(&Irql);
-    asm("INT $32");
+    LouKeConfigureNextApicTimerEvent(0);
 }
 
 LOUAPI void LouKeUnblockThread(UINT64 ThreadID){

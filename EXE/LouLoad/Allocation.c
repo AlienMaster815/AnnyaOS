@@ -86,7 +86,7 @@ void ParseRamMap(
     struct multiboot_mmap_entry* MapEntry;
     for(UINT64 i = 0 ; i < EntryCount; i++){
         MapEntry = MapIndexToEntry(mmap, i);
-        if((MapEntry->addr + MapEntry->len) > mlimit){
+        if((MapEntry->type == 1) && ((MapEntry->addr + MapEntry->len) > mlimit)){
             mlimit = MapEntry->addr + MapEntry->len;
         }
         if(MapEntry->type != 1){

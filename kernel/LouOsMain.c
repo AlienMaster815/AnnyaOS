@@ -303,7 +303,7 @@ PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-    
+
     memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
     
     UINT64 Cr3 =  (UINT64)GetCr3();
@@ -332,7 +332,7 @@ void LouOsKrnlStart(
     LouKeInitializeRegistry();
          
     LousineKernelEarlyInitialization();
-    
+
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
@@ -483,10 +483,12 @@ void LouOsKrnlStart(
 //TODO: 
 //xAPIC has been depreciated work on x2APIC
 //Add mutex to the registry keys and a close function
-//Add a function to cancel APIC timer or set apic timer to present whe yeilding
 //Add inter process copying for process and thread creation
+//Fix SMP Booting
 
 //BUGS TO FIX:
+
+//58015
 
 /*	
 USB 1.1 (UHCI / OHCI)	Moderate	Fits here (simpler linked list design).

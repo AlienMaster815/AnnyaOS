@@ -85,8 +85,8 @@ static void GetTableBases(
     UINT64* L3Base,
     UINT64* L2Base
 ){
-    UINT64 TL3Base = 512; // L3 Semment starts at 512th quadword
-    UINT64 TL2Base = (KernelLoaderInfo.KernelVm.KernelPml4 * 512) + 512; //L2 segment starts after the allocates L3 segment
+    UINT64 TL3Base = KernelLoaderInfo.KernelVm.KernelPml4 * 512; // L3 Semment starts at 512th quadword
+    UINT64 TL2Base = (KernelLoaderInfo.KernelVm.KernelPml3 * 512) + TL3Base; //L2 segment starts after the allocates L3 segment
 
     TL3Base += (512 * L4); //segmentation is 512 quads per L4
     TL2Base += ((512 * 512) * L3); //segmentations i 512 quads for 512 entries per L3
@@ -159,12 +159,12 @@ void LoaderCreateKernelSpace(){
     SetKSpaceBase(KSpaceBase);
     //KernelLoaderInfo.KernelVm.KernelVmBase = KSpaceBase;
     KernelLoaderInfo.KernelVm.KernelVmLimit = KSpaceLimit;
-    KernelLoaderInfo.KernelVm.KernelPml4 = (UINT8)L4 + 1;
-    KernelLoaderInfo.KernelVm.KernelPml3 = (UINT8)L3 + 1;
-    KernelLoaderInfo.KernelVm.KernelPml2 = (UINT8)L2 + 1;
+    KernelLoaderInfo.KernelVm.KernelPml4 = (UINT8)1;
+    KernelLoaderInfo.KernelVm.KernelPml3 = (UINT8)L4 + 1;
+    KernelLoaderInfo.KernelVm.KernelPml2 = (UINT8)L3 + 1;
 
-    Frames += KernelLoaderInfo.KernelVm.KernelPml4;
-    Frames += (KernelLoaderInfo.KernelVm.KernelPml3 * 512); //L2s
+    Frames += KernelLoaderInfo.KernelVm.KernelPml3;
+    Frames += ((KernelLoaderInfo.KernelVm.KernelPml3 * KernelLoaderInfo.KernelVm.KernelPml2) * 512); //L2s
     void* KSpaceManager = LoaderAllocateMemoryEx(
         Frames * 4096, 4096
     );
@@ -177,7 +177,6 @@ void LoaderCreateKernelSpace(){
     SetCr3((UINT64)KSpaceManager);
 
     MapKernelSpace();
-
     
 }
 

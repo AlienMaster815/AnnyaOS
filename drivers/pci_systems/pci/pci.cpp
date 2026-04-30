@@ -208,9 +208,11 @@ void InitializeBARHalLayer();
 LOUAPI 
 void LouKeMapPciMemory(){
     LouKeCreateFastObjectClass("PDEV", 256, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), 0, KERNEL_GENERIC_MEMORY);
-    InitializeBARHalLayer();
+    InitializeBARHalLayer();     
     PCI_Scan_Bus();
+    //DEBUG_TRAP;
 }
+
 
 LOUSTATUS LouKeInitializeNetworkManager();
 

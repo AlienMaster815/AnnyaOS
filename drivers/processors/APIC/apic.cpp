@@ -667,6 +667,8 @@ LOUAPI void LouKeSendProcessorWakeupSignal(INTEGER TrackMember){
 LOUAPI
 void 
 LouKeConfigureNextApicTimerEvent(SIZE Ms){
+    BOOLEAN IsAYeild = Ms ? false : true;
+    Ms = Ms ? Ms : 1;
     PLOUSINE_KERNEL_APIC_DATA ApicData = &((PLKPCB)GetLKPCB())->ApicData;
     UNUSED UINT64 ApicBase = ApicData->ApicBase;
     if(ApicData->TscDeadlineEnabled){
@@ -680,5 +682,7 @@ LouKeConfigureNextApicTimerEvent(SIZE Ms){
     }
 
     WRITE_REGISTER_ULONG(LVT_INITIAL_COUNT_REGISTER, ApicData->CurrentTimerTicks);
-
+    if(IsAYeild){
+        sleep(2); //if MS is a yeild command then sleep 2 ms to make sure the thread yeilds
+    }
 }

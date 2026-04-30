@@ -140,6 +140,7 @@ InitializeLoaderMultibootInformation(
         }
     }
 
+
     MBoot = Tmp;
     LoaderCreateKernelSpace();
 
@@ -159,4 +160,5 @@ InitializeLoaderMultibootInformation(
             MBoot = (struct multiboot_tag*)((uint8_t*)MBoot + ROUND_UP64(MBoot->size, 8));
         }        
     }
+
 }
