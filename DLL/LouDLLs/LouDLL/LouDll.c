@@ -8,7 +8,6 @@
 #define KERNELBASE_RVA_ENTRIES 1
 #define LOUDLL_EMULATED_BINARIES 2
 
-
 void LouYeildExecution();
 
 static KULA_RVA_NAME KernelBaseNames[KERNELBASE_RVA_ENTRIES] = {
