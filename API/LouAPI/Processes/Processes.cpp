@@ -189,6 +189,11 @@ LOUSTATUS LouKePmCreateProcessEx(
         struct ProcessLoaderParameters{
             mutex_t                 Lock;
             UINT64*                 ModEntrys;
+            SIZE                    StackReserve;
+            SIZE                    StackCommit;
+            SIZE                    HeapReserve;
+            SIZE                    HeapCommit;
+            UINT16                  Subsystem;
         };
 
         struct ProcessLoaderParameters* Tmp = LouKeMallocType(struct ProcessLoaderParameters, USER_GENERIC_MEMORY);
@@ -211,12 +216,19 @@ LOUSTATUS LouKePmCreateProcessEx(
             TmpCfiObject = LouKeLookupHandleToCfiObject((HANDLE)DependList[i + 1], CfiData->CfiObject.AOA64);
             TmpCfiObject->CoffCommitSection(TmpCfiObject, NewProcessObject->PMLTree);
         }
+        
+        Tmp->StackReserve = CfiData->CfiObject.StackReserve;
+        Tmp->StackCommit = CfiData->CfiObject.StackCommit;
+        Tmp->HeapReserve = CfiData->CfiObject.HeapReserve;
+        Tmp->HeapCommit = CfiData->CfiObject.HeapCommit;
 
         LouKePsmCreateThreadForProcess(
             &ThreadOut,
             (HPROCESS)NewProcessObject,
             (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", "LouProcessInitThread"),
             Tmp,
+            Tmp->StackReserve,
+            Tmp->StackCommit,
             31
         );
 

@@ -193,7 +193,7 @@ void DeallocateThreadHandle(PGENERIC_THREAD_DATA Thread){
 
 LOUAPI uint64_t AllocateSaveContext();
 
-LOUSTATUS LouKeTsmCreateThreadHandleNs(
+LOUSTATUS LouKeTsmCreateThreadHandleNsEx(
     PGENERIC_THREAD_DATA*   OutHandle,    
     PGENERIC_PROCESS_DATA   Process,
     PVOID                   CtxEntry,
@@ -201,6 +201,7 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     PVOID                   CtxParams,
     UINT8                   ThreadPriority,
     UINT64                  StackSize,
+    UINT64                  StackCommit,
     UINT64                  TimeSliceMs,
     UINT8                   CodeSegment,
     UINT8                   StackSegment,
@@ -237,7 +238,7 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
 
     //Allocate a new stack
     if(Process){
-        NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, KILOBYTE, true, PageFlags);
+        NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, StackCommit, true, PageFlags);
         NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
         
         LouKeMemCpyVmSpace(Process->ProcessID, &NewThreadHandle->SavedState.rip, &CtxEntry, sizeof(UINT64));
@@ -310,6 +311,41 @@ LOUSTATUS LouKeTsmCreateThreadHandleNs(
     return STATUS_SUCCESS;
 }
 
+
+LOUSTATUS LouKeTsmCreateThreadHandleNs(
+    PGENERIC_THREAD_DATA*   OutHandle,    
+    PGENERIC_PROCESS_DATA   Process,
+    PVOID                   CtxEntry,
+    PVOID                   CtxFunction,
+    PVOID                   CtxParams,
+    UINT8                   ThreadPriority,
+    UINT64                  StackSize,
+    UINT64                  TimeSliceMs,
+    UINT8                   CodeSegment,
+    UINT8                   StackSegment,
+    INSTRUCTION_MODE        InstructionMode,
+    PTIME_T                 StartTime,
+    UINT8*                  AfinityBitmap
+){
+    return LouKeTsmCreateThreadHandleNsEx(
+        OutHandle,    
+        Process,
+        CtxEntry,
+        CtxFunction,
+        CtxParams,
+        ThreadPriority,
+        StackSize,
+        StackSize,
+        TimeSliceMs,
+        CodeSegment,
+        StackSegment,
+        InstructionMode,
+        StartTime,
+        AfinityBitmap
+    );
+}
+
+
 LOUSTATUS LouKeTsmInitializeIdleThreads(){
     LOUSTATUS Status = STATUS_SUCCESS;
     size_t ProcCount = GetNPROC();
@@ -341,6 +377,45 @@ LOUSTATUS LouKeTsmInitializeIdleThreads(){
     return Status;
 }
 
+LOUSTATUS LouKeTsmCreateThreadHandleEx(
+    PGENERIC_THREAD_DATA*   OutHandle,    
+    PGENERIC_PROCESS_DATA   Process,
+    PVOID                   CtxEntry,
+    PVOID                   CtxFunction,
+    PVOID                   CtxParams,
+    UINT8                   ThreadPriority,
+    UINT64                  StackSize,
+    UINT64                  StackCommit,
+    UINT64                  TimeSliceMs,
+    UINT8                   CodeSegment,
+    UINT8                   StackSegment,
+    INSTRUCTION_MODE        InstructionMode,
+    PTIME_T                 StartTime,
+    UINT8*                  AfinityBitmap
+){
+    if(!Process){
+        LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return LouKeTsmCreateThreadHandleNsEx(
+        OutHandle,    
+        Process,
+        CtxEntry,
+        CtxFunction,
+        CtxParams,
+        ThreadPriority,
+        StackSize,
+        StackCommit,
+        TimeSliceMs,
+        CodeSegment,
+        StackSegment,
+        InstructionMode,
+        StartTime,
+        AfinityBitmap
+    );
+}
+
 LOUSTATUS LouKeTsmCreateThreadHandle(
     PGENERIC_THREAD_DATA*   OutHandle,    
     PGENERIC_PROCESS_DATA   Process,
@@ -356,18 +431,15 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     PTIME_T                 StartTime,
     UINT8*                  AfinityBitmap
 ){
-    if(!Process){
-        LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
-        return STATUS_INVALID_PARAMETER;
-    }
 
-    return LouKeTsmCreateThreadHandleNs(
+    return LouKeTsmCreateThreadHandleEx(
         OutHandle,
         Process,
         CtxEntry,
         CtxFunction,
         CtxParams,
         ThreadPriority,
+        StackSize,
         StackSize,
         TimeSliceMs,
         CodeSegment,

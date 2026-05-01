@@ -292,6 +292,23 @@ LOUSTATUS LouKeTsmCreateThreadHandle(
     UINT8*                  AfinityBitmap
 );
 
+LOUSTATUS LouKeTsmCreateThreadHandleEx(
+    PGENERIC_THREAD_DATA*   OutHandle,    
+    PGENERIC_PROCESS_DATA   Process,
+    PVOID                   CtxEntry,
+    PVOID                   CtxFunction,
+    PVOID                   CtxParams,
+    UINT8                   ThreadPriority,
+    UINT64                  StackSize,
+    UINT64                  StackCommit,
+    UINT64                  TimeSliceMs,
+    UINT8                   CodeSegment,
+    UINT8                   StackSegment,
+    INSTRUCTION_MODE        InstructionMode,
+    PTIME_T                 StartTime,
+    UINT8*                  AfinityBitmap
+);
+
 LOUAPI
 LOUSTATUS 
 LouKePsmCreateThreadForProcess(
@@ -299,6 +316,8 @@ LouKePsmCreateThreadForProcess(
     HPROCESS    Process,
     PVOID       Entry,
     PVOID       Params,
+    SIZE        StackReserve,
+    SIZE        StackCommit,
     UINT8       Priority
 );
 

@@ -718,6 +718,11 @@ void ReleaseLoadLibraryALock(mutex_t* Mutex){
 struct ProcessLoaderParameters{
     mutex_t                 Lock;
     UINT64*                 ModEntrys;
+    SIZE                    StackReserve;
+    SIZE                    StackCommit;
+    SIZE                    HeapReserved;
+    SIZE                    HeapCommit;
+    UINT16                  Subsystem;
 };
 
 UINT64 LouGetPeb();
@@ -904,3 +909,4 @@ LouAllocateVirtualMemory(
         Flags  
     );
 }
+

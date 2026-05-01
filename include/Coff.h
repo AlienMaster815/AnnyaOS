@@ -746,23 +746,25 @@ typedef struct _CFI_OBJECT{
     PVOID                   ExecututionLoading;
     KERNEL_REFERENCE        Reference;
     PVOID                   Entry;
-    UINT64                  StackSize;
-    UINT64                  HeapSize;
+    UINT64                  StackReserve;
+    UINT64                  StackCommit;
+    UINT64                  HeapReserve;
+    UINT64                  HeapCommit;
     mutex_t                 LockOutTagOut;  
     UINT64*                 ModDependencies;
     BOOLEAN                 IgnoreVmManager;
     union{
         ULONG               ImageProperties;
         struct {
-			ULONG   ImageAddressingMode     : 8;
-			ULONG   SystemModeImage         : 1;
-			ULONG   ImageMappedToAllPids    : 1;
-			ULONG   ExtendedInfoPresent     : 1;
-			ULONG   MachineTypeMismatch     : 1;
-			ULONG   ImageSignatureLevel     : 4;
-			ULONG   ImageSignatureType      : 3;
-			ULONG   ImagePartialMap         : 1;
-			ULONG   Reserved                : 12;   
+			ULONG           ImageAddressingMode     : 8;
+			ULONG           SystemModeImage         : 1;
+			ULONG           ImageMappedToAllPids    : 1;
+			ULONG           ExtendedInfoPresent     : 1;
+			ULONG           MachineTypeMismatch     : 1;
+			ULONG           ImageSignatureLevel     : 4;
+			ULONG           ImageSignatureType      : 3;
+			ULONG           ImagePartialMap         : 1;
+			ULONG           Reserved                : 12;   
         };
     };
     LOUSTATUS               (*CoffCommitSection)(HANDLE, UINT64);

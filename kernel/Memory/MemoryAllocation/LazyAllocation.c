@@ -136,7 +136,7 @@ LouKeLazyBufferCommitPageEx(
         Address = (PVOID)(LazyBuffer->VirtualLocation + i * LazyBuffer->PageSize);
     }else{
         if(RangeDoesNotInterfere((UINT64)Address, 1, (UINT64)LazyBuffer->VirtualLocation, (UINT64)LazyBuffer->VirtualSize)){
-            LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope\n");
+            LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope:%h\n", Address);
             return STATUS_INVALID_PARAMETER;
         }
         Address = (PVOID)ROUND_DOWN64((UINT64)Address, LazyBuffer->PageSize);
@@ -188,7 +188,7 @@ LouKeLazyBufferCommitPageForceEx(
     }
     else{
         if(RangeDoesNotInterfere((UINT64)Address, 1, (UINT64)LazyBuffer->VirtualLocation, (UINT64)LazyBuffer->VirtualSize)){
-            LouPrint("LouKeLazyBufferCommitPage():INVALID_PARAMETER:Not In Scope\n");
+            LouPrint("LouKeLazyBufferCommitPageForceEx():INVALID_PARAMETER:Not In Scope:%h\n", Address);
             return STATUS_INVALID_PARAMETER;
         }
         Address = (PVOID)ROUND_DOWN64((UINT64)Address, LazyBuffer->PageSize);

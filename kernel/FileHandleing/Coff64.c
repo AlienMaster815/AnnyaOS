@@ -575,6 +575,11 @@ LOUSTATUS LouKeLoadCoffImage64(
         CfiObject->Entry = (PVOID)((UINT64)CfiObject->ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)CfiObject->LoadedAddress);
     }
 
+    CfiObject->StackReserve = Pe64ImageHeader->OptionalHeader.PE64.SizeOfStackReserve;
+    CfiObject->StackCommit = Pe64ImageHeader->OptionalHeader.PE64.SizeOfStackCommit;
+    CfiObject->HeapReserve = Pe64ImageHeader->OptionalHeader.PE64.SizeOfHeapReserve;
+    CfiObject->HeapCommit = Pe64ImageHeader->OptionalHeader.PE64.SizeOfHeapCommit;
+
     EnableCoffImageProtection(CfiObject);
         
     LouPrint("Coff Loaded At Address:%h\n", CfiObject->LoadedAddress);

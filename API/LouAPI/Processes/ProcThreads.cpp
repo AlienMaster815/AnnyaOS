@@ -9,6 +9,8 @@ uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
+
+
 LOUAPI
 LOUSTATUS 
 LouKePsmCreateDeferedThreadForProcessEx(
@@ -16,19 +18,22 @@ LouKePsmCreateDeferedThreadForProcessEx(
     HPROCESS    Process,
     PVOID       Entry,
     PVOID       Params,
+    SIZE        StackReserve,
+    SIZE        StackCommit,
     UINT8       Priority,
     UINT8*      ProcMask,
     PVOID       UnblockTime
 ){
 
-    LOUSTATUS Status = LouKeTsmCreateThreadHandle(
+    LOUSTATUS Status = LouKeTsmCreateThreadHandleEx(
         (PGENERIC_THREAD_DATA*)ThreadOut,
         (PGENERIC_PROCESS_DATA)Process,
         (PVOID)LouKeLinkerGetAddress("LOUDLL.DLL", USER_THREAD_STUB),
         Entry,
         Params,
         Priority,
-        2 * MEGABYTE,
+        StackReserve,
+        StackCommit,
         30,
         0x1B,
         0x23,
@@ -60,6 +65,8 @@ LouKePsmCreateDeferedThreadForProcess(
     HPROCESS    Process,
     PVOID       Entry,
     PVOID       Params,
+    SIZE        StackReserve,
+    SIZE        StackCommit,
     UINT8       Priority,
     PVOID       UnblockTime
 ){
@@ -68,6 +75,8 @@ LouKePsmCreateDeferedThreadForProcess(
         Process,
         Entry,
         Params,
+        StackReserve,
+        StackCommit,
         Priority,
         0x00,
         UnblockTime
@@ -81,6 +90,8 @@ LouKePsmCreateThreadForProcessEx(
     HPROCESS    Process,
     PVOID       Entry,
     PVOID       Params,
+    SIZE        StackReserve,
+    SIZE        StackCommit,
     UINT8       Priority,
     UINT8*      ProcMask
 ){
@@ -91,6 +102,8 @@ LouKePsmCreateThreadForProcessEx(
         Process,
         Entry, 
         Params,
+        StackReserve,
+        StackCommit,
         Priority,
         ProcMask,
         (PVOID)&CurrentTime
@@ -104,6 +117,8 @@ LouKePsmCreateThreadForProcess(
     HPROCESS    Process,
     PVOID       Entry,
     PVOID       Params,
+    SIZE        StackReserve,
+    SIZE        StackCommit,
     UINT8       Priority
 ){
     return LouKePsmCreateThreadForProcessEx(
@@ -111,6 +126,8 @@ LouKePsmCreateThreadForProcess(
         Process,
         Entry,
         Params,
+        StackReserve,
+        StackCommit,
         Priority,
         0x00
     );

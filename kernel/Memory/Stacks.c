@@ -48,12 +48,11 @@ LouKeCreateStack(
     PVMM_ALLOCATION_TRACKER StackTracker;
     LouKeVmmAddressCausePageFault(NewStack->Stack, &StackTracker);
     
-    UINT64 CommitBase = ROUND_DOWN64((((UINT64)NewStack->Stack + (VSize - 16)) & ~(16)) - CommitSize, MEGABYTE_PAGE);
+    UINT64 CommitBase = ROUND_DOWN64(((UINT64)NewStack->Stack + VSize) - CommitSize, MEGABYTE_PAGE);
     CommitSize = ROUND_UP64(CommitSize, MEGABYTE_PAGE);
 
 
     LouKeVmmCommitPageAddressEx((PVOID)CommitBase, StackTracker, CommitSize / MEGABYTE_PAGE, ProcessID, true);
-
 
     return NewStack->Stack;
 }
