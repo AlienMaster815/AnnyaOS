@@ -77,7 +77,7 @@
 #include <IoCtl.h>
 #include <kernel/Sections.h>
 #include <kernel/States.h>
-
+#include <USRSPC/Heap.h>
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

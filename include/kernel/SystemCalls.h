@@ -135,6 +135,7 @@ extern "C" {
 #define LOUGETPROCNAME                          119
 #define LOUGETCURRENTPROCHANDLE                 120
 #define LOUPUTCURRENTPROCHANDLE                 121
+#define LOUALLOCVMMBUFF64                       122
 
 #define WINECALL                                1   
 #define WINECALL_FASTFAIL                       1

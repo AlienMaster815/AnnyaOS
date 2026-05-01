@@ -485,6 +485,7 @@ void LouOsKrnlStart(
 //Add mutex to the registry keys and a close function
 //Add inter process copying for process and thread creation
 //Fix SMP Booting
+//tighten read only security
 
 //BUGS TO FIX:
 

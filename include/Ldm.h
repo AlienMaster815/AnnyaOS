@@ -2,6 +2,7 @@
 #define _LDM_H
 
 #include <Ldm/CommonTypes.h>
+#include <kernel/Objects.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -712,8 +713,24 @@ typedef enum _EVENT_INFO_CLASS{
     MaxEventInfo,
 }EVENT_INFO_CLASS, * PEVENT_INFO_CLASS;
 
+typedef enum _ERESOURCE_TYPE_ENUM{
+    ERESOURCE_TYPE_INVAL = 0,
+    ERESOURCE_TYPE_LOCK = 1,
+}ERESOURCE_TYPE_ENUM;
+
+typedef struct _ERESOURCE_LOCK{
+    mutex_t             WriteLock;
+    KERNEL_REFERENCE    Readers; 
+}ERESOURCE_LOCK, * PERESOURCE_LOCK;
+
+typedef struct _ERESOURCE_OBJECT{
+    ERESOURCE_LOCK  Lock;
+}ERESOURCE_OBJECT, * PERESOURCE_OBJECT;
+
+typedef PERESOURCE_OBJECT ERESOURCE, PERESOURCE;
+
+
 typedef PVOID PFAST_MUTEX;
-typedef PVOID PERESOURCE;
 typedef PVOID PEX_RUNDOWN_REF;
 typedef PVOID PEX_SPIN_LOCK;
 typedef PVOID PEX_RUNDOWN_REF_CACHE_AWARE;

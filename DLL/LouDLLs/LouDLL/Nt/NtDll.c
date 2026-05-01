@@ -1005,7 +1005,6 @@ NTDLL_API void RtlCreateEnvironment() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlCreateEnvironmentEx() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlCreateHashTable() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlCreateHashTableEx() {LouPrint("Hello nt Dll\n"); while(1);}
-NTDLL_API void RtlCreateHeap() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlCreateMemoryBlockLookaside() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlCreateMemoryZone() {LouPrint("Hello nt Dll\n"); while(1);}
 NTDLL_API void RtlCreateProcessParameters() {LouPrint("Hello nt Dll\n"); while(1);}

@@ -455,3 +455,20 @@ LouKeRtlEqualString(
 ){
     return LouKeRtlCompareString(String1, String2, CaseInSensitive) ? false : true;
 }
+
+
+ANNA_EXPORT
+PUSER_PROCESS_HEAP
+LouRtlCreateHeap(
+    ULONG                   Flags,
+    PVOID                   HeapBase,
+    SIZE                    ReservedSize,
+    SIZE                    CommitSize,
+    PERESOURCE_OBJECT       ResourceLock,
+    PUSER_HEAP_PARAMETERS   Parameters
+){
+
+    
+
+    return 0x00;
+}

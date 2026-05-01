@@ -846,3 +846,62 @@ LouGetCurrentProccessName(
     LouPutCurrentProcessHandle(CurrentProcessHandle);
     return Status;
 }
+
+LOUDLL_API 
+PVOID 
+LouKeAllocateVmmIsolatedBuffer64(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
+    BOOLEAN Shared,
+    UINT64  Flags
+){
+    UINT64 KulaPacket[7] = {0, 0, (UINT64)Size, (UINT64)Alignment, (UINT64)Zero, (UINT64)Shared, (UINT64)Flags};
+    LouCALL(LOUALLOCVMMBUFF64, (UINT64)&KulaPacket[0], 0);
+    return (PVOID)KulaPacket[1];
+}
+
+LOUDLL_API
+PVOID 
+LouAllocateVirtualMemoryEx2(
+    SIZE        Size,
+    SIZE        Alignment,
+    BOOLEAN     Shared,
+    UINT64      Flags
+){
+    return LouKeAllocateVmmIsolatedBuffer64(
+        Size,
+        Alignment,
+        false,
+        Shared,
+        Flags
+    );
+}
+
+LOUDLL_API
+PVOID 
+LouAllocateVirtualMemoryEx(
+    SIZE        Size,
+    SIZE        Alignment,
+    UINT64      Flags
+){
+    return LouAllocateVirtualMemoryEx2(
+        Size,
+        Alignment,
+        false,
+        Flags
+    );
+}
+
+LOUDLL_API
+PVOID 
+LouAllocateVirtualMemory(
+    SIZE        Size,
+    UINT64      Flags
+){
+    return LouAllocateVirtualMemoryEx(
+        Size,
+        GetAlignmentBySize(Size),
+        Flags  
+    );
+}

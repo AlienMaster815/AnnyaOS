@@ -314,6 +314,17 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             );
             return;
         }
+        case LOUALLOCVMMBUFF64:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeAllocateVmmIsolatedBuffer64(
+                (SIZE)Tmp[1],
+                (SIZE)Tmp[2],
+                (BOOLEAN)Tmp[3],
+                (BOOLEAN)Tmp[4],
+                Tmp[5]
+            );
+            return;
+        }
         default:
         LouPrint("Unkown Call:%d\n", Call);
     }
