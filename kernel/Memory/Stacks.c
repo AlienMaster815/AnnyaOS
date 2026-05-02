@@ -51,7 +51,6 @@ LouKeCreateStack(
     UINT64 CommitBase = ROUND_DOWN64(((UINT64)NewStack->Stack + VSize) - CommitSize, MEGABYTE_PAGE);
     CommitSize = ROUND_UP64(CommitSize, MEGABYTE_PAGE);
 
-
     LouKeVmmCommitPageAddressEx((PVOID)CommitBase, StackTracker, CommitSize / MEGABYTE_PAGE, ProcessID, true);
 
     return NewStack->Stack;

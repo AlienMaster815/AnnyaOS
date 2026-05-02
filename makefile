@@ -274,6 +274,7 @@ cleanall:
 	$(MAKE) -C EXE/cmd clean
 	$(MAKE) -C EXE/LouLoad clean
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
+	$(MAKE) -C DLL/LouDLLs/Drsd clean
 	$(MAKE) -C drivers/Networking/PCNET32 clean
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C EXE/asmss/ clean

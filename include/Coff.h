@@ -1,3 +1,4 @@
+//Copyright (C) GPL-2 Tyler Grenier 2026
 #ifndef _COFF_H
 #define _COFF_H
 
@@ -5,6 +6,7 @@
 extern "C" {
 #endif
 
+#include <kernel/loustatus.h>
 
 #define COFF_PE_SIGNATURE "PE\0\0"
 
@@ -508,11 +510,164 @@ typedef struct _CFI_HINT_NAME_TABLE{
     UINT8       Name[];
 }CFI_HINT_NAME_TABLE, * PCFI_HINT_NAME_TABLE;
 
-typedef struct _X66_PLATFORM_FUNCTION_TABLE{
+typedef struct _X64_PLATFORM_FUNCTION_TABLE{
     UINT32      BeginAddress;
     UINT32      EndAddress;
     UINT32      UnwindInformation;
-}X66_PLATFORM_FUNCTION_TABLE, * PX66_PLATFORM_FUNCTION_TABLE;
+}X64_PLATFORM_FUNCTION_TABLE, * PX64_PLATFORM_FUNCTION_TABLE;
+
+typedef struct PACKED _CFI_UNWIND_INFO{
+    union{
+        struct {
+            UINT8   Version                 : 3;
+            UINT8   Flags                   : 5;
+            UINT8   SizeOfProlog;
+            UINT8   UnwindCodeCount;
+            UINT8   FrameRegister           : 4;  
+            UINT8   FrameRegisterOffset     : 4;   
+        };
+        UINT32      Sanity32;
+    };
+}CFI_UNWIND_INFO, * PCFI_UNWIND_INFO;
+
+#define CFI_UI_VDATA_EXCEPTION_HANDLER     1
+#define CFI_UI_VDATA_CHAINED_UNWIND_INFO   2
+
+#define CFI_UI_OPINFO_RAX           0
+#define CFI_UI_OPINFO_RCX           1
+#define CFI_UI_OPINFO_RDX           2
+#define CFI_UI_OPINFO_RBX           3
+#define CFI_UI_OPINFO_RSP           4
+#define CFI_UI_OPINFO_RBP           5
+#define CFI_UI_OPINFO_RSI           6
+#define CFI_UI_OPINFO_RDI           7
+#define CFI_UI_OPINFO_RD8           8
+#define CFI_UI_OPINFO_RD9           9
+#define CFI_UI_OPINFO_RD10          10
+#define CFI_UI_OPINFO_RD11          11
+#define CFI_UI_OPINFO_RD12          12
+#define CFI_UI_OPINFO_RD13          13
+#define CFI_UI_OPINFO_RD14          14
+#define CFI_UI_OPINFO_RD15          15
+
+#define CFI_UI_FRAME_REGISTER_RAX   CFI_UI_OPINFO_RAX
+#define CFI_UI_FRAME_REGISTER_RCX   CFI_UI_OPINFO_RCX
+#define CFI_UI_FRAME_REGISTER_RDX   CFI_UI_OPINFO_RDX
+#define CFI_UI_FRAME_REGISTER_RBX   CFI_UI_OPINFO_RBX
+#define CFI_UI_FRAME_REGISTER_RSP   CFI_UI_OPINFO_RSP
+#define CFI_UI_FRAME_REGISTER_RBP   CFI_UI_OPINFO_RBP
+#define CFI_UI_FRAME_REGISTER_RSI   CFI_UI_OPINFO_RSI
+#define CFI_UI_FRAME_REGISTER_RDI   CFI_UI_OPINFO_RDI
+#define CFI_UI_FRAME_REGISTER_RD8   CFI_UI_OPINFO_R8
+#define CFI_UI_FRAME_REGISTER_RD9   CFI_UI_OPINFO_R9
+#define CFI_UI_FRAME_REGISTER_RD10  CFI_UI_OPINFO_R10
+#define CFI_UI_FRAME_REGISTER_RD11  CFI_UI_OPINFO_R11
+#define CFI_UI_FRAME_REGISTER_RD12  CFI_UI_OPINFO_R12
+#define CFI_UI_FRAME_REGISTER_RD13  CFI_UI_OPINFO_R13
+#define CFI_UI_FRAME_REGISTER_RD14  CFI_UI_OPINFO_R14
+#define CFI_UI_FRAME_REGISTER_RD15  CFI_UI_OPINFO_R15
+
+#define CFI_UI_VERSION              1
+#define CFI_UI_FLAG_EHANDLER        (0x01)
+#define CFI_UI_FLAG_UHANDLER        (0x02)
+#define CFI_UI_FLAG_CHAININFO       (0x04)
+
+typedef struct PACKED _CFI_UNWIND_CODE{
+    union{
+        struct{
+            UINT8   Offset;
+            UINT8   UnwindOpCode  : 4;
+            UINT8   OperationInfo : 4;
+        };
+        UINT16      Sanity16;
+    };
+}CFI_UNWIND_CODE, * PCFI_UNWIND_CODE;
+
+#define CFI_UI_UWOP_PUSH_NONVOL         0
+#define CFI_UI_UWOP_ALLOC_LARGE         1
+#define CFI_UI_UWOP_ALLOC_SMALL         2
+#define CFI_UI_UWOP_SET_FPREG           3
+#define CFI_UI_UWOP_SAVE_NONVOL         4
+#define CFI_UI_UWOP_SAVE_NONVOL_FAR     5
+#define CFI_UI_UWOP_SAVE_XMM128         8
+#define CFI_UI_UWOP_SAVE_XMM128_FAR     9
+#define CFI_UI_UWOP_PUSH_MACHFRAME      10
+
+#define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
+
+typedef struct PACKED _MACHINE_FRAME_NOECODE{
+    FORCE_ALIGNMENT(16) UINT64      Ss;
+    FORCE_ALIGNMENT(16) UINT64      Sp;
+    FORCE_ALIGNMENT(16) UINT64      Flags;
+    FORCE_ALIGNMENT(16) UINT64      Ip;
+}MACHINE_FRAME_NOECODE, * PMACHINE_FRAME_NOECODE;
+
+typedef struct PACKED _MACHINE_FRAME_ECODE{
+    FORCE_ALIGNMENT(16) UINT64      Ss;
+    FORCE_ALIGNMENT(16) UINT64      Sp;
+    FORCE_ALIGNMENT(16) UINT64      Flags;
+    FORCE_ALIGNMENT(16) UINT64      Ip;
+    FORCE_ALIGNMENT(16) UINT64      Ec;
+}MACHINE_FRAME_ECODE, * PMACHINE_FRAME_ECODE;
+
+static inline 
+LOUSTATUS PushMachFrameErrorCodeSaved(
+    PCFI_UNWIND_CODE    UnwindCode,
+    BOOLEAN*            Result
+){
+    if((!UnwindCode)|| (!Result)){//I dont trust my compiler to not null dereference
+        return STATUS_INVALID_PARAMETER;
+    }else if(UnwindCode->UnwindOpCode != CFI_UI_UWOP_PUSH_MACHFRAME){ 
+        return STATUS_INVALID_PARAMETER;
+    }
+    *Result = UnwindCode->OperationInfo ? true : false;
+    return STATUS_SUCCESS;
+} 
+
+static inline
+LOUSTATUS
+CfiGetUnwindCode(
+    PCFI_UNWIND_INFO    UnwindInfo, 
+    PCFI_UNWIND_CODE*   CodeArray,
+    UINT8*              OptionalCodeCount
+){
+    if(!UnwindInfo || !CodeArray){
+        return STATUS_INVALID_PARAMETER;
+    }
+    if(!UnwindInfo->UnwindCodeCount){
+        return STATUS_NO_SUCH_FILE;
+    }else if(OptionalCodeCount){
+        *OptionalCodeCount = UnwindInfo->UnwindCodeCount;
+    }
+    *CodeArray = (PCFI_UNWIND_CODE)(UINT8*)((UINTPTR)UnwindInfo + sizeof(UnwindInfo->Sanity32)); 
+    return STATUS_SUCCESS; 
+}
+
+static inline
+LOUSTATUS 
+CfiGetChainedUnwindInfo(
+    PCFI_UNWIND_INFO                UnwindInfo,
+    PX64_PLATFORM_FUNCTION_TABLE*   ChainedInfo
+){
+    LOUSTATUS           Status;
+    PCFI_UNWIND_CODE    UnwindCodes;
+    if(!UnwindInfo || !ChainedInfo){
+        return STATUS_INVALID_PARAMETER;
+    }else if(!(UnwindInfo->Flags & CFI_UI_FLAG_CHAININFO)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    Status = CfiGetUnwindCode(
+        UnwindInfo,
+        &UnwindCodes, 
+        0x00
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    *ChainedInfo = (PX64_PLATFORM_FUNCTION_TABLE)(UINT8*)((UINTPTR)&UnwindCodes[(UnwindInfo->UnwindCodeCount + 1) & ~1]);
+    return STATUS_SUCCESS;
+}
+
 
 typedef struct _CFI_BASE_RELOCATION_BLOCK{
     UINT32              PageRVA;
@@ -732,42 +887,55 @@ typedef struct _CFI_IMPORT_HEADER{
 #define CFI_IMPORT_NAME_TYPE_UNDECORATE 3
 
 #ifndef _LOUSINE_LOADER
+
+typedef enum _EXCEPTION_TABLE_TYPE{
+    INVALID_EXCEPTION_TABLE = 0,
+    X86_EXCEPTION_TABLE     = 1,
+    X86_64_EXCEPTION_TABLE  = 2,
+}EXCEPTION_TABLE_TYPE, * PEXCEPTION_TABLE_TYPE;
+
 typedef struct _CFI_OBJECT{
-    FILE*                   FileObject;
-    PVOID                   CoffFile;
-    string                  FormalName;
-    BOOL                    AOA64;
-    BOOL                    KernelObject;
-    PCOFF_IMAGE_HEADER      ImageHeader;
-    PVOID                   LoadedAddress;
-    PVOID                   PhysicalLoadedAddress;
-    SIZE                    LoadedSize;
-    UINT64*                 SectionMapping;
-    PVOID                   ExecututionLoading;
-    KERNEL_REFERENCE        Reference;
-    PVOID                   Entry;
-    UINT64                  StackReserve;
-    UINT64                  StackCommit;
-    UINT64                  HeapReserve;
-    UINT64                  HeapCommit;
-    mutex_t                 LockOutTagOut;  
-    UINT64*                 ModDependencies;
-    BOOLEAN                 IgnoreVmManager;
+    FILE*                           FileObject;
+    PVOID                           CoffFile;
+    string                          FormalName;
+    BOOL                            AOA64;
+    BOOL                            KernelObject;
+    PCOFF_IMAGE_HEADER              ImageHeader;
+    PVOID                           LoadedAddress;
+    PVOID                           PhysicalLoadedAddress;
+    SIZE                            LoadedSize;
+    UINT64*                         SectionMapping;
+    PVOID                           ExecututionLoading;
+    KERNEL_REFERENCE                Reference;
+    PVOID                           Entry;
+    UINT64                          StackReserve;
+    UINT64                          StackCommit;
+    UINT64                          HeapReserve;
+    UINT64                          HeapCommit;
+    mutex_t                         LockOutTagOut;  
+    UINT64*                         ModDependencies;
+    BOOLEAN                         IgnoreSeh;
+    BOOLEAN                         IgnoreVmManager;
+    struct{
+        EXCEPTION_TABLE_TYPE        ExceptionTableType;
+        PVOID                       ExceptionTable;
+        SIZE                        ExceptionTableSize;
+    }                               ExceptionData;
     union{
-        ULONG               ImageProperties;
+        ULONG                       ImageProperties;
         struct {
-			ULONG           ImageAddressingMode     : 8;
-			ULONG           SystemModeImage         : 1;
-			ULONG           ImageMappedToAllPids    : 1;
-			ULONG           ExtendedInfoPresent     : 1;
-			ULONG           MachineTypeMismatch     : 1;
-			ULONG           ImageSignatureLevel     : 4;
-			ULONG           ImageSignatureType      : 3;
-			ULONG           ImagePartialMap         : 1;
-			ULONG           Reserved                : 12;   
+			ULONG                   ImageAddressingMode     : 8;
+			ULONG                   SystemModeImage         : 1;
+			ULONG                   ImageMappedToAllPids    : 1;
+			ULONG                   ExtendedInfoPresent     : 1;
+			ULONG                   MachineTypeMismatch     : 1;
+			ULONG                   ImageSignatureLevel     : 4;
+			ULONG                   ImageSignatureType      : 3;
+			ULONG                   ImagePartialMap         : 1;
+			ULONG                   Reserved                : 12;   
         };
     };
-    LOUSTATUS               (*CoffCommitSection)(HANDLE, UINT64);
+    LOUSTATUS                       (*CoffCommitSection)(HANDLE, UINT64);
 }CFI_OBJECT, * PCFI_OBJECT;
 
 typedef struct _COFF_PRIVATE_DATA{

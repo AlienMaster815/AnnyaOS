@@ -579,6 +579,25 @@ LOUSTATUS LouKeLoadCoffImage64(
     CfiObject->StackCommit = Pe64ImageHeader->OptionalHeader.PE64.SizeOfStackCommit;
     CfiObject->HeapReserve = Pe64ImageHeader->OptionalHeader.PE64.SizeOfHeapReserve;
     CfiObject->HeapCommit = Pe64ImageHeader->OptionalHeader.PE64.SizeOfHeapCommit;
+    CfiObject->IgnoreSeh = (Pe64ImageHeader->OptionalHeader.PE64.DllCharacteristics & (CFI_DLLCHARACTERISTICS_NO_SEH)) ? true : false;
+
+    if(Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_TLS_TABLE].VirtualAddress){
+
+        LouPrint("TLS Section:%h\n", Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_TLS_TABLE].VirtualAddress); //TODO:
+        while(1);
+    }
+
+    if((!CfiObject->IgnoreSeh) && (Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXCEPTION_TABLE].VirtualAddress) && (Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXCEPTION_TABLE].Size)){
+        PX64_PLATFORM_FUNCTION_TABLE SehTable = (PX64_PLATFORM_FUNCTION_TABLE)((UINTPTR)Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXCEPTION_TABLE].VirtualAddress + (UINTPTR)CfiObject->LoadedAddress);
+        SIZE SehItemCount = Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXCEPTION_TABLE].Size / sizeof(X64_PLATFORM_FUNCTION_TABLE);
+        
+        CfiObject->ExceptionData.ExceptionTableType = X86_64_EXCEPTION_TABLE;
+        CfiObject->ExceptionData.ExceptionTable = (PVOID)SehTable;
+        CfiObject->ExceptionData.ExceptionTableSize = SehItemCount;
+
+
+        LouPrint("SEH Data:%h :: Seh Item Count:%d\n", SehTable, SehItemCount);
+    }
 
     EnableCoffImageProtection(CfiObject);
         
