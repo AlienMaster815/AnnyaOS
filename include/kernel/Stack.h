@@ -5,7 +5,9 @@
 extern "C" {
 #endif
 
-#define GET_RETURN_ADDRESS(x) __builtin_return_address(x)
+#define GET_RETURN_ADDRESS(x)           __builtin_return_address(x)
+#define GET_FRAME_POINTER_ADDRESS(x)    __builtin_frame_address(x)
+
 
 #define GetRSP() ({ \
     unsigned long long rsp; \

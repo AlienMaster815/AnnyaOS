@@ -4,7 +4,7 @@ global NtGetPeb
 global NtGetTeb
 global LouGetPeb
 global LouGetTeb
-
+global LouRaiseException
 
 NtGetPeb:
 LouGetPeb:
@@ -14,4 +14,11 @@ LouGetPeb:
 NtGetTeb:
 LouGetTeb:
     mov rax, qword[gs:0x30]
+    ret
+
+
+
+
+LouRaiseException:
+
     ret

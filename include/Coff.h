@@ -945,6 +945,10 @@ typedef struct _COFF_PRIVATE_DATA{
 #ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_
 
+void LouKeSehHandleExceptionCall(
+    UINT64* Data
+);
+
 LOUSTATUS
 LouKeLoadCoffImageExA(
     string          FileNameAndPath,
@@ -986,6 +990,27 @@ void CloneCfiToImageInfo(
     InfoOut->ImageSectionNumber = 0;
     InfoOut->Properties = CfiIn->ImageProperties;
 }
+#endif
+#else
+
+#ifdef _LOUDLL_
+ANNA_EXPORT
+void
+LouRaiseException(
+            DWORD   ExceptionCode,
+            DWORD   ExceptionFlags,
+            DWORD   ArgCount,
+    const   DWORD*  Args
+);
+#else
+ANNA_EXPORT
+void
+LouRaiseException(
+            DWORD   ExceptionCode,
+            DWORD   ExceptionFlags,
+            DWORD   ArgCount,
+    const   DWORD*  Args
+);
 #endif
 #endif
 #endif

@@ -325,6 +325,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             );
             return;
         }
+        case LOURAISEEXCEPTION:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeSehHandleExceptionCall(Tmp);
+            return;
+        }
         default:
         LouPrint("Unkown Call:%d\n", Call);
     }

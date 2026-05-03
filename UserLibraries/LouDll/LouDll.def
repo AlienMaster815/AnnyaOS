@@ -8,7 +8,6 @@ EXPORTS
     vsprintf_s
     _vsprintf
     GetRtcTimeData
-    AnnyaUpdateButton
     LouCALL
     AnnyaUserThreadStub
     AnnyaDestroyThread
@@ -20,32 +19,18 @@ EXPORTS
     LouOpenFileExA
     LouSwapEndianess
     LouMemCpy
-    LouCloseFile
     LouExitDosMode
     LouGlobalUserMallocEx
     LouGlobalUserMalloc
-    LouDrsdGetPlaneInformation
-    LouDrsdCreateClip
-    LouDrsdSyncScreen
-    LouUpdateClipState
     LouGlobalUserFree
     LouGenericFreeHeap
-    LouUpdateShadowClipState
-    LouUpdateClipSubState
-    LouUpdateShadowClipSubState
     strcmp
     LouUserGetMessage
     LouUserDispatchMessage
     LouRegisterMouseHandler
-    LouDrsdDrawLine32
-    LouDrsdPutPixel32
     LouYeildExecution
-    LouUpdateClipLocation
-    LouDrsdClipToClip
-    LouDrsdSetPlaneInformation
     LouSystemShutdown
     LouCreateSectionEx
-    _errno
     LouRtlCharToUint64
     LouRtlCharToUint32
     LouRtlCharToInteger
@@ -58,3 +43,4 @@ EXPORTS
     LouPutCurrentProcessHandle
     LouGetCurrentProccessName
     LouRtlCreateHeap
+    LouRaiseException
