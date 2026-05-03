@@ -148,4 +148,46 @@
 #define AZX_DRIVER_LOONGSON                     1 << 42
 #define AZX_DECAPS_NO_TCSEL                     1 << 43
 
+typedef struct PACKED _HDA_CONTROLLER_REGISTERS{
+    UINT16      GlobalCap;
+    UINT8       MinorVersion;
+    UINT8       MajorVersion;
+    UINT16      OuputPayloadCap;
+    UINT16      InputPayloadCap;
+    UINT32      GlobalControl;
+    UINT16      WakeEnable;
+    UINT16      WakeStatus;
+    UINT16      GlobalStatus;
+    UINT8       Reserved1[6];
+    UINT16      OutputStreamPayloadCap;
+    UINT16      InputStreamPayloadCap;
+    UINT32      Reserved2;
+    UINT32      InterruptControl;
+    UINT32      InterruptStatus;
+    UINT8       Reserved3[8];
+    UINT32      WallClockCounter;
+    UINT32      Reserved4;
+    UINT32      StreamSyncronization;
+    UINT32      Reserved5;
+    UINT32      CorbLowerBaseAddress;
+    UINT32      CorbUpperBaseAddress;
+    UINT16      CorbWritePointer;
+    UINT16      CorbReadPointer;
+    UINT8       CorbControl;
+    UINT8       CorbStatus;
+    UINT8       CorbSize;
+    UINT8       Reserved6;
+    UINT32      RirbLowerBaseAddress;
+    UINT32      RirbUpperBaseAddress;
+    UINT16      RirbWritePointer;
+    UINT16      ResponceInterruptCount;
+    UINT8       RirbControl;
+    UINT8       RirbStatus;
+    UINT8       RirbSize;
+    UINT8       Reserved7;
+    //26
+}HDA_CONTROLLER_REGISTERS, * PHDA_CONTROLLER_REGISTERS;
+
+
+
 #endif //_HDAPCI_H
