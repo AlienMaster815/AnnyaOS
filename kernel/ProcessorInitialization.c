@@ -65,6 +65,12 @@ extern void enable_fxsave();
 extern void initialize_fpu();
 extern void InitializeXSave();
 
+static UINT8 FsiLevel = 0;
+
+UINT64 LouKeGetProcessorFSI(){
+    return (UINT64)FsiLevel;
+}
+
 void HandleProccessorInitialization(){
     //the processor should be up by now
     //for apic however now we need to 
@@ -76,14 +82,16 @@ void HandleProccessorInitialization(){
     if(rcx & (1 << 26)){
         //InitializeXSave();
         //LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
+        FsiLevel = 3;
     }
     if(rdx & (1 << 25)){
         enable_fxsave();
-        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);       
-
+        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);       \
+        FsiLevel = 2;
     }else{
         initialize_fpu();
         LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[0]);
+        FsiLevel = 1;
     }
 
     ProcessorFeatures.Sse1Supported = (rdx & (1 << 25)) ? true : false; 

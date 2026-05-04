@@ -44,3 +44,4 @@ EXPORTS
     LouGetCurrentProccessName
     LouRtlCreateHeap
     LouRaiseException
+    LouCaptureNtContext

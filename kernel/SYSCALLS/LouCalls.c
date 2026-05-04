@@ -23,9 +23,7 @@ LouKeVmmCreateSectionEx(
     PMEM_EXTENDED_PARAMETER ExtendedParameters,
     ULONG                   ExtendedParameterCount
 );
-
-
-
+UINT64 LouKeGetProcessorFSI();
 uint64_t LouKeLinkerGetAddress(
     string ModuleName,
     string FunctionName
@@ -328,6 +326,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOURAISEEXCEPTION:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouKeSehHandleExceptionCall(Tmp);
+            return;
+        }
+        case LOUGETPROCFSI:{
+            *((UINT64*)Data) = LouKeGetProcessorFSI();
             return;
         }
         default:

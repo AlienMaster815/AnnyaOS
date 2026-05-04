@@ -18,6 +18,22 @@ static KULA_RVA_ADDRESS KernelBaseAddresses[KERNELBASE_RVA_ENTRIES] = {
     (PVOID)RtlInitializeCriticalSectionEx,
 };
 
+#define FSI_NONE    0
+#define FSI_FSAVE   1
+#define FSI_XSAVE   2
+#define FSI_FXSAVE  3
+
+static UINT64 FsiLevel = 0;
+
+UINT64 LouGetFloatStoreImplementation(){
+    return FsiLevel;
+}
+
+UINT64 LouGetFSI(){
+    UINT64 KulaPacket[2] = {0};
+    LouCALL(LOUGETPROCFSI, (UINT64)&KulaPacket[0], 0);
+    return KulaPacket[1];
+}
 
 static KULA_RVA_NAME NtDllNames[NTDLL_RVA_ENTRIES] = {
     "RtlInitializeCriticalSectionEx",
@@ -261,6 +277,7 @@ LOUDLL_API
 BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     BOOL Tmp = true;
     if(ul_reason_for_call == DLL_PROCESS_ATTACH){
+        FsiLevel = LouGetFSI();
         LouPrint("LOUDLL.DLL Attatched To New Process\n");
         if(LouInitializeIoCtlTable(LouDllIoCalls) != STATUS_SUCCESS){
             LouPrint("LOUDLL.DLL Failed To Register IOCTLs\n");
