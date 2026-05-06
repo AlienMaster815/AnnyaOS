@@ -40,10 +40,12 @@ LouKeUnRegisterEcsDriver(
             MutexLock(&TmpTracker->LockOut);
             LouKeListDeleteItem(&TmpTracker->Peers);
             MutexUnlock(&TmpTracker->LockOut);
+            LouPrint("Unregistered Ecs Driver:%h\n", EcsDriver);
+            MutexUnlock(&EcsDriverManager.DriversLock);
+            return;
         }
     }
     MutexUnlock(&EcsDriverManager.DriversLock);
-
 }
 
 int

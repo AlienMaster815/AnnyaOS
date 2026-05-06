@@ -11,7 +11,7 @@ LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer){
         return STATUS_UNSUCCESSFUL;
     }
     BootBuffer = FrameBuffer;
-    Canvas = (UINT32*)LouKeMallocEx(BootBuffer->FramebufferSize, 512, KERNEL_GENERIC_MEMORY);
+    Canvas = (UINT32*)LouKeMallocEx(BootBuffer->FramebufferSize, MEGABYTE_PAGE, KERNEL_GENERIC_MEMORY);
     Width = BootBuffer->Width;
     Height = BootBuffer->Height;
     return STATUS_SUCCESS;

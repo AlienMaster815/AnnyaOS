@@ -43,3 +43,6 @@ EXPORTS
     LouRtlRaiseNtException
     LouRaiseNtException
     LouCaptureNtContext
+    LouRtlAllocateHeapEx
+    LouRtlAllocateHeap
+    LouRtlFreeHeap

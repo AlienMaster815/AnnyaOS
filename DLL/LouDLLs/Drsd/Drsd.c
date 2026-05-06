@@ -10,6 +10,7 @@ static UINT32* Canvas = 0x00;
 static UINT32* UserBuffer = 0x00;
 static STRING ProcessName = {0};
 static BOOLEAN WindowManager = false;
+static PUSER_PROCESS_HEAP CanvasHeap = 0x00;
 
 DRSD_API
 LOUSTATUS  
@@ -51,11 +52,9 @@ DRSD_API
 void 
 DrsdSyncScreens(){
     if(UsingBootFramebuffer){
-        //LouMemCpy(BootFrameBuffer->RawData, Canvas, BootFrameBuffer->FramebufferSize);
+        LouMemCpy(UserBuffer, Canvas, BootFrameBuffer->FramebufferSize);
         return;
     }
-
-    
 }
 
 DRSD_API
@@ -69,8 +68,7 @@ DrsdPutPixelEx(int X , int Y, UINT32 Color){
     }
     X = X - gX;
     Y = Y - gY;
-    //Canvas[X + (Y * gWidth)] = Color;    
-    UserBuffer[X + (Y * gWidth)] = Color;
+    Canvas[X + (Y * gWidth)] = Color;    
 }
 
 DRSD_API
@@ -85,10 +83,21 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
             WindowManager = true;
             Status = LouGetBootFrameBuffer(&BootFrameBuffer);
             if((Status == STATUS_SUCCESS) && (BootFrameBuffer)){
-                LouPrint("Using Boot Framebuffer\n");
+                LouPrint("DRSD.DLL:Using Boot Framebuffer\n");
                 UsingBootFramebuffer = true;
+                CanvasHeap = LouRtlCreateHeap(
+                                USER_HEAP_FLAG_ZERO_MEMORY, 
+                                0x00, 
+                                BootFrameBuffer->FramebufferSize, 
+                                BootFrameBuffer->FramebufferSize,
+                                0x00, 0x00
+                            );
+                Canvas = (UINT32*)LouRtlAllocateHeapEx(CanvasHeap, BootFrameBuffer->FramebufferSize, MEGABYTE_PAGE, 0x00);
+                if(!Canvas){
+                    LouPrint("DRSD.DLL:Error Allocating Offscreen Canvas\n");
+                }
             }else {
-                LouPrint("Unable To Get BootFrameBuffer\n");
+                LouPrint("DRSD.DLL:Unable To Get BootFrameBuffer\n");
             }
         }
     }

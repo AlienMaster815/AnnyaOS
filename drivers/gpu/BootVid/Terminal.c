@@ -99,5 +99,7 @@ BootVidDeInitializeTerminalDriver(){
     BootRenderSetScreenColorEx(SET_RGB(0, 192, 192));
     BootRenderSyncScreen();
     TtfDeInitializeFile(TerminalFont);
-    LouKeFree(Canvas);
+    LouPrint("BOOTVID.SYS:Freeing Canvas Buffer\n");
+    LouKeFree((PVOID)Canvas);
+    LouPrint("BOOTVID.SYS:Done Freeing Canvas Buffer\n");
 }

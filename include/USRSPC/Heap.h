@@ -6,6 +6,7 @@
 #define USER_HEAP_FLAG_GENERATE_EXCEPTIONS      (1 << 0)
 #define USER_HEAP_FLAG_GROWABLE                 (1 << 1)
 #define USER_HEAP_FLAG_NO_SERIALIZE             (1 << 2)
+#define USER_HEAP_FLAG_ZERO_MEMORY              (1 << 3)
 
 #define USER_HEAP_PARAM_LENGTH                  sizeof(USER_HEAP_PARAMETERS)
 #define USER_HEAP_PARAM_SEGRES(x)               (x ? x : (2 * MEGABYTE_PAGE))
@@ -18,42 +19,6 @@
 
 
 #define USER_HEAP_RESERVE_ROUND_UP(Commit)  ROUND_UP64(Commit, MEGABYTE_PAGE * 16)
-
-static inline LOUSTATUS LouUserHeapCalculateSize(
-    SIZE* Reserve,
-    SIZE* Commit
-){
-    if(!Reserve || !Commit){
-        return STATUS_INVALID_PARAMETER;
-    }
-    SIZE TmpReserve = *Reserve;
-    SIZE TmpCommit = *Commit;
-
-    if((TmpReserve) && (TmpCommit)){
-        
-        TmpCommit = MIN(TmpCommit, TmpReserve);
-    
-    }else if((TmpReserve) && (!TmpCommit)){
-    
-        TmpCommit = MEGABYTE_PAGE;
-    
-    }else if((TmpCommit) && (!TmpReserve)){
-    
-        TmpReserve = TmpCommit;
-        TmpReserve = USER_HEAP_RESERVE_ROUND_UP(TmpReserve);
-    
-    }else{
-    
-        TmpReserve = 64 * MEGABYTE_PAGE;
-        TmpCommit  = MEGABYTE_PAGE;
-    
-    }
-
-
-    *Reserve = TmpReserve;
-    *Commit = TmpCommit;
-    return STATUS_SUCCESS;
-}
 
 typedef LOUSTATUS (*USER_HEAP_COMMIT_ROUTINE)(
     PVOID   Base,
@@ -76,7 +41,14 @@ typedef struct _USER_HEAP_PARAMETERS{
 }USER_HEAP_PARAMETERS, * PUSER_HEAP_PARAMETERS,
     RTL_HEAP_PARAMETERS, RTL_HEAP_PARAMETERS;
 
+typedef struct _USER_HEAP_ALLOCATION_TRACKER{
+    ListHeader      Peers;
+    UINT64          Base;
+    UINT64          Size;
+}USER_HEAP_ALLOCATION_TRACKER, * PUSER_HEAP_ALLOCATION_TRACKER;
+
 typedef struct _USER_PROCESS_HEAP{
+    mutex_t                 HeapLock;
     PVOID                   HeapBase;
     SIZE                    ReservedSize;
     SIZE                    CommitSize;
@@ -99,6 +71,31 @@ LouRtlCreateHeap(
     SIZE                    CommitSize,
     PERESOURCE_OBJECT       ResourceLock,
     PUSER_HEAP_PARAMETERS   Parameters
+);
+
+ANNA_IMPORT
+PVOID
+LouRtlAllocateHeapEx(
+    PUSER_PROCESS_HEAP  Heap,
+    SIZE                Size,
+    SIZE                Alignment,
+    ULONG               Flags
+);
+
+ANNA_IMPORT
+PVOID
+LouRtlAllocateHeap(
+    PUSER_PROCESS_HEAP  Heap,
+    SIZE                Size,
+    ULONG               Flags
+);
+
+ANNA_IMPORT
+LOGICAL
+LouRtlFreeHeap(
+    PUSER_PROCESS_HEAP  Heap,
+    PVOID               Address,
+    ULONG               Flags
 );
 
 #else //_LOUDLL_

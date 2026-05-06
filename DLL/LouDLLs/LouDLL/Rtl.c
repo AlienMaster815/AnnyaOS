@@ -456,6 +456,40 @@ LouKeRtlEqualString(
     return LouKeRtlCompareString(String1, String2, CaseInSensitive) ? false : true;
 }
 
+static LOUSTATUS LouUserHeapCalculateSize(
+    SIZE* Reserve,
+    SIZE* Commit
+){
+    if(!Reserve || !Commit){
+        return STATUS_INVALID_PARAMETER;
+    }
+    SIZE TmpReserve = *Reserve;
+    SIZE TmpCommit = *Commit;
+
+    if((TmpReserve) && (TmpCommit)){
+        
+        TmpCommit = MIN(TmpCommit, TmpReserve);
+    
+    }else if((TmpReserve) && (!TmpCommit)){
+    
+        TmpCommit = MEGABYTE_PAGE;
+    
+    }else if((TmpCommit) && (!TmpReserve)){
+    
+        TmpReserve = TmpCommit;
+        TmpReserve = USER_HEAP_RESERVE_ROUND_UP(TmpReserve);
+    
+    }else{
+    
+        TmpReserve = 64 * MEGABYTE_PAGE;
+        TmpCommit  = MEGABYTE_PAGE;
+    
+    }
+
+    *Reserve = TmpReserve;
+    *Commit = TmpCommit;
+    return STATUS_SUCCESS;
+}
 
 ANNA_EXPORT
 PUSER_PROCESS_HEAP
@@ -475,10 +509,11 @@ LouRtlCreateHeap(
     }
     
     NewHeap = (PUSER_PROCESS_HEAP)LouAllocateVirtualMemoryEx(sizeof(USER_PROCESS_HEAP), GET_ALIGNMENT(USER_PROCESS_HEAP), USER_GENERIC_MEMORY);
-
     if(!NewHeap){
         goto _DONE;
     }
+
+    memset(NewHeap, 0, sizeof(USER_PROCESS_HEAP));
 
     NewHeap->HeapFlags = Flags;
     NewHeap->ReservedSize = ReservedSize;
@@ -498,7 +533,9 @@ LouRtlCreateHeap(
     if(!HeapBase){
         NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, MEGABYTE_PAGE, USER_GENERIC_MEMORY);
     }
-    memset(NewHeap->HeapBase, 0, NewHeap->CommitSize);
+    if(NewHeap->HeapBase){
+        memset(NewHeap->HeapBase, 0, NewHeap->CommitSize);
+    }
 
     _DONE:
     if(ResourceLock){
@@ -507,4 +544,97 @@ LouRtlCreateHeap(
         while(1);
     }
     return NewHeap;
+}
+
+
+LOUDLL_API
+PVOID
+LouRtlAllocateHeapEx(
+    PUSER_PROCESS_HEAP  Heap,
+    SIZE                Size,
+    SIZE                Alignment,
+    ULONG               Flags
+){
+    Flags |= Heap->HeapFlags;
+    PVOID Result = 0x00;
+    if(Flags & USER_HEAP_FLAG_GENERATE_EXCEPTIONS){
+        LouPrint("LOUDLL.DLL:LouRtlAllocateHeapEx() GENERATE_EXCEPTIONS\n");
+        while(1);
+    }
+    if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
+        MutexLock(&Heap->HeapLock);
+    }
+    PUSER_HEAP_ALLOCATION_TRACKER TmpTracker;
+    PVOID TmpResult = Heap->HeapBase;
+    BOOLEAN Found = false;
+    while((TmpResult + Size) <= (Heap->HeapBase + Heap->ReservedSize) && (!Found)){
+        Found = true;
+        ForEachListEntry(TmpTracker, &Heap->Allocations, Peers){
+            if(RangeInterferes(
+                (UINT64)TmpResult, Size,
+                TmpTracker->Base,
+                TmpTracker->Size
+            )){
+                Found = false;
+                goto _CONTINUE_SEARCH; //somtimes my compiler gets funky in nested loops
+            }
+        }
+        _CONTINUE_SEARCH:
+        if(!Found){
+            TmpResult = (PVOID)((UINT64)TmpTracker + ROUND_UP64(TmpTracker->Size, Alignment));
+        }
+    }
+        
+    if(Found){
+        Result = TmpResult;
+        PUSER_HEAP_ALLOCATION_TRACKER NewTracker = LouAllocateVirtualMemoryEx(sizeof(USER_HEAP_ALLOCATION_TRACKER), GET_ALIGNMENT(USER_HEAP_ALLOCATION_TRACKER), USER_GENERIC_MEMORY);
+        if(!NewTracker){
+            //TODO: Kill Proces
+            LouPrint("LouRtlAllocateHeapEx()\n");
+            while(1);
+        }
+        memset(NewTracker, 0, sizeof(USER_HEAP_ALLOCATION_TRACKER));
+        NewTracker->Base = (UINT64)Result;
+        NewTracker->Size = Size;
+        LouKeListAddTail(&NewTracker->Peers, &Heap->Allocations);
+        if(Flags & USER_HEAP_FLAG_ZERO_MEMORY){
+            memset(TmpResult, 0, Size);
+        }
+        
+    }
+
+    if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
+        MutexUnlock(&Heap->HeapLock);
+    }
+    if((Flags & USER_HEAP_FLAG_GROWABLE) && (!Result)){
+        LouPrint("LOUDLL.DLL:LouRtlAllocateHeapEx() GROWABLE\n");
+        while(1);
+    }
+    return Result;
+}
+
+LOUDLL_API
+PVOID
+LouRtlAllocateHeap(
+    PUSER_PROCESS_HEAP  Heap,
+    SIZE                Size,
+    ULONG               Flags
+){
+    return LouRtlAllocateHeapEx(
+        Heap,
+        Size,
+        GetAlignmentBySize(Size),
+        Flags
+    );
+}
+
+LOUDLL_API
+LOGICAL
+LouRtlFreeHeap(
+    PUSER_PROCESS_HEAP  Heap,
+    PVOID               Address,
+    ULONG               Flags
+){
+    LouPrint("LOUDLL.DLL:LouRtlFreeHeap()\n");
+    while(1);
 }

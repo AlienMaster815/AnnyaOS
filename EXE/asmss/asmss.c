@@ -21,7 +21,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");
 
-    //LouExitDosMode();
+    LouExitDosMode();
 
     //HPROCESS WindowManager;
 

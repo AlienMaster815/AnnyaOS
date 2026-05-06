@@ -11,7 +11,7 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
 
     LouPrint("Hello Annya OS Window Manager\n");
 
-    /*LouPrint("X     :%d\n", x);
+    LouPrint("X     :%d\n", x);
     LouPrint("Y     :%d\n", y);
     LouPrint("Width :%d\n", Width);
     LouPrint("Height:%d\n", Height);
@@ -22,7 +22,7 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
         }
     }
 
-    DrsdSyncScreens();*/
+    DrsdSyncScreens();
 
     while(1);
     return STATUS_SUCCESS;

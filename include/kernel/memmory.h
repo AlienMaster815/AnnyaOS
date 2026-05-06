@@ -226,7 +226,6 @@ static inline size_t GetAlignmentBySize(size_t Size){
 #define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 
-void LouKeFreePhysical(void* AddressToFree);
 void LouFree(PVOID Addr);
 void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, uint64_t Alignment);

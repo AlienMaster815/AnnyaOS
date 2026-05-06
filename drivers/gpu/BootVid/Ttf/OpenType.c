@@ -208,8 +208,13 @@ TtfInitializeFile(
 void TtfDeInitializeFile(
     PTTF_OBJECT TtfObject
 ){
+    LouPrint("BOOTVID.SYS:Closing Glyphs\n");
     TtfCloseGlyphData(TtfObject);
+    LouPrint("BOOTVID.SYS:Closing Cmap Data\n");
     TtfCloseCmapData(TtfObject);   
+    LouPrint("BOOTVID.SYS:Closing Table Directories\n");
     LouKeFree(TtfObject->TableDirectories);
+    LouPrint("BOOTVID.SYS:Closing Ttf Object\n");
     LouKeFree(TtfObject);
+    LouPrint("BOOTVID.SYS:Done Closing Ttf Object\n");
 }

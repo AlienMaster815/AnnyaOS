@@ -119,7 +119,7 @@ void* LouKeMallocPageVirt64(uint64_t PageSize, uint64_t PageCount, uint64_t Page
 uint64_t GetAllocationBlockSize(uint64_t Address);
 
 static void LouKePutPage(PVOID Address){
-    LouGeneralFreeMemory(Address);
+    LouFree(Address);
 }
 
 KERNEL_EXPORT
