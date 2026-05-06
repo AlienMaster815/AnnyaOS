@@ -291,8 +291,8 @@ void StartupConfigureImportTable(PVOID Table){
                             goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
                         }
                     }
+                    LouPrint("ERROR M:E is 0 :: %s:%s\n", SYSName, FunctionName);
                 }
-                LouPrint("HERE:%s\n", SYSName);
                 while(1);
             }
 
@@ -453,8 +453,8 @@ LOUSTATUS ConfigureImportTables(
                             goto _NULL_LINKER_ADDRESS_ERROR_RESOLVED_LABEL;
                         }
                     }
+                    LouPrint("ERROR M:E is 0 :: %s:%s\n", SYSName, FunctionName);
                 }
-                LouPrint("HERE:%s\n", SYSName);
                 while(1);
                 return STATUS_UNSUCCESSFUL;
             }

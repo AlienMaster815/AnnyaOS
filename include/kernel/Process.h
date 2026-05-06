@@ -30,7 +30,8 @@ typedef HANDLE HPROCESS, * PHPROCESS;
 
 #define KERNEL_PROCESS_NAME         "The Lousine Kernel"
 #define ASMSS_PROCESS_NAME          "Annya Os Session Manager Subsystem"
-#define AWM_PROCESS_NAME            "Annya OS Window Manager"
+#define AWM_PROCESS_NAME            "Annya Os Window Manager"
+#define EXPLORER_PROCESS_NAME       "Annya Os Explorer"
 
 #ifndef _USER_MODE_CODE_
 

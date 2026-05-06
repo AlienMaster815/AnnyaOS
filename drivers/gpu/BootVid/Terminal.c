@@ -96,7 +96,7 @@ BootVidInitializeTerminalDriver(){
 void
 BootVidDeInitializeTerminalDriver(){
     LouKeUnRegisterEcsDriver(&BootVidEcsDriver);
-    BootRenderSetScreenColorEx(SET_RGB(0, 192, 192));
+    BootRenderSetScreenColorEx(SET_RGB(0, 0, 0));
     BootRenderSyncScreen();
     TtfDeInitializeFile(TerminalFont);
     LouPrint("BOOTVID.SYS:Freeing Canvas Buffer\n");

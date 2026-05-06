@@ -21,7 +21,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");
 
-    LouExitDosMode();
+    //LouExitDosMode();
 
     //HPROCESS WindowManager;
 
@@ -31,6 +31,15 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
         0x00,
         ACCESS_MASK_GENERIC_ALL,
         PROCESS_PRIORITY_HIGH,
+        0x00
+    );
+
+    LouCreateProcessA(
+        EXPLORER_PROCESS_NAME,
+        "C:/ANNYA/EXPLORER.EXE",
+        0x00,
+        ACCESS_MASK_GENERIC_ALL,
+        PROCESS_PRIORITY_NORMAL,
         0x00
     );
 

@@ -78,6 +78,7 @@
 #include <kernel/Sections.h>
 #include <kernel/States.h>
 #include <USRSPC/Heap.h>
+#include <USRSPC/Syncapi.h>
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
@@ -588,38 +589,6 @@ LouGetBootFrameBuffer(PBOOTVID_FRAMEBUFFER* OutFb);
 
 #endif
 
-
-#ifndef _KERNEL32_
-
-ANNA_IMPORT
-void EnterCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
-
-ANNA_IMPORT
-LOUSTATUS DeleteCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
-
-ANNA_IMPORT
-LOUSTATUS LeaveCriticalSection(PMSVC_CRITICAL_SECTION CriticalSection);
-
-ANNA_IMPORT
-HMODULE LoadLibraryA(string DllName);
-
-ANNA_IMPORT
-HMODULE LoadLibraryW(wchar_t* DllName);
-
-ANNA_IMPORT
-HMODULE LoadLibraryExA(
-    string DllName, 
-    HANDLE File, 
-    DWORD Flags
-);
-
-ANNA_IMPORT
-HMODULE LoadLibraryExyW(
-    wchar_t* DllName, 
-    HANDLE File, 
-    DWORD Flags
-);
-#endif
 
 #ifndef _KERNELBASE_H
 
