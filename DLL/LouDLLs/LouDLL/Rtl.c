@@ -467,8 +467,44 @@ LouRtlCreateHeap(
     PERESOURCE_OBJECT       ResourceLock,
     PUSER_HEAP_PARAMETERS   Parameters
 ){
-
+    PUSER_PROCESS_HEAP NewHeap = 0x00;
+    if(ResourceLock){
+        //TODO Lock
+        LouPrint("LOUDLL.DLL:LouRtlCreateHeap():ResourceLock\n");
+        while(1);
+    }
     
+    NewHeap = (PUSER_PROCESS_HEAP)LouAllocateVirtualMemoryEx(sizeof(USER_PROCESS_HEAP), GET_ALIGNMENT(USER_PROCESS_HEAP), USER_GENERIC_MEMORY);
 
-    return 0x00;
+    if(!NewHeap){
+        goto _DONE;
+    }
+
+    NewHeap->HeapFlags = Flags;
+    NewHeap->ReservedSize = ReservedSize;
+    NewHeap->CommitSize = CommitSize;
+    NewHeap->HeapBase = HeapBase;
+    LouUserHeapCalculateSize(
+        &NewHeap->ReservedSize, 
+        &NewHeap->CommitSize
+    );
+
+    if(Parameters){
+        //TODO Check Parameters
+        LouPrint("LOUDLL.DLL:LouRtlCreateHeap():Parameters\n");
+        while(1);
+    }
+
+    if(!HeapBase){
+        NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, MEGABYTE_PAGE, USER_GENERIC_MEMORY);
+    }
+    memset(NewHeap->HeapBase, 0, NewHeap->CommitSize);
+
+    _DONE:
+    if(ResourceLock){
+        //TODO Unlock
+        LouPrint("LOUDLL.DLL:LouRtlCreateHeap():ResourceLock\n");
+        while(1);
+    }
+    return NewHeap;
 }

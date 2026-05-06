@@ -108,11 +108,6 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
 
             return;
         }
-        case LOUGLOBALMALLOC:{
-            uint64_t* Tmp = (uint64_t*)Data; 
-            Tmp[0] = (uint64_t)LouKeMallocEx(Tmp[1], Tmp[2], USER_GENERIC_MEMORY);            
-            return;
-        }
         case LOUDRSDGETPLANEINFO:{
             //uint64_t* Tmp = (uint64_t*)Data;
             //Tmp[0] = (uint64_t)LouKeDrsdGetPlaneInformation((size_t*)Tmp[1]);
@@ -144,11 +139,6 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUUPDTATECLIP:{
             //uint64_t* Tmp = (uint64_t*)Data;
             //LouKeUpdateClipState((PDRSD_CLIP)Tmp[0]);
-            return;
-        }
-        case LOUGLOBALFREE:{
-            uint64_t* Tmp = (uint64_t*)Data;
-            LouKeFree((void*)Tmp[0]);
             return;
         }
         case LOUFREEGENERICHEAP:{

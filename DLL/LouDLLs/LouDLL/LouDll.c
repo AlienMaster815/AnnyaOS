@@ -687,29 +687,6 @@ LouExitDosMode(){
 }
 
 LOUDLL_API
-void LouGlobalUserFree(void* Addr){
-    uint64_t KulaPacket[2] = {0};
-    KulaPacket[1] = (uint64_t)Addr;
-    LouCALL(LOUGLOBALFREE, (uint64_t)&KulaPacket[0], 0);
-}
-
-LOUDLL_API 
-void*
-LouGlobalUserMallocEx(size_t Size, uint64_t Alignment){
-    uint64_t KulaPacket[4] = {0};
-    KulaPacket[2] = Size;
-    KulaPacket[3] = Alignment;
-    LouCALL(LOUGLOBALMALLOC, (uint64_t)&KulaPacket[0], 0);
-    return (void*)KulaPacket[1];
-}
-
-LOUDLL_API
-void*
-LouGlobalUserMalloc(size_t Size){
-    LouGlobalUserMallocEx(Size, GetAlignmentBySize(Size));
-}
-
-LOUDLL_API
 void* memset(void* dest, int value, size_t count) {
     unsigned char* ptr = (unsigned char*)dest;
     unsigned char val = (unsigned char)value;
@@ -927,3 +904,38 @@ LouAllocateVirtualMemory(
     );
 }
 
+void LouCaptureNtContext(UINT64);
+
+LOUSTATUS 
+LouUnwindTillException(
+    PNT_CONTEXT         NtContext,
+    PEXCEPTION_RECORD   ExRecord
+){
+    LouPrint("LOUDLL.DLL:LouUnwindTillException()\n");
+
+    return STATUS_UNSUCCESSFUL;
+}
+
+ANNA_EXPORT
+void 
+LouRtlRaiseNtException(
+    PEXCEPTION_RECORD   ExRecord
+){
+    LouPrint("LOUDLL.DLL:LouRtlRaiseException()\n");
+    //PNT_CONTEXT Context = LouGlobalUserMallocEx(sizeof(NT_CONTEXT), GET_ALIGNMENT(NT_CONTEXT));
+    //LouCaptureNtContext((UINT64)&Context->Amd64);
+    //LouUnwindTillException(Context, ExRecord);
+    
+    while(1);
+}
+
+ANNA_EXPORT
+void
+LouRaiseNtException(
+    DWORD           ExceptionCode,
+    DWORD           ExceptionFlags,
+    ULONG_PTR*      Args
+){
+    LouPrint("LOUDLL.DLL:LouRaiseException()\n");
+    while(1);
+}

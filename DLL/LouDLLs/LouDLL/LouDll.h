@@ -521,4 +521,11 @@ LouCloseFileA(
     rbp; \
 })
 
+PVOID 
+LouAllocateVirtualMemoryEx(
+    SIZE        Size,
+    SIZE        Alignment,
+    UINT64      Flags
+);
+
 #endif

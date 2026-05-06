@@ -20,12 +20,6 @@ LouGetTeb:
     mov rax, qword[gs:0x30]
     ret
 
-
-
-LouRaiseException:
-
-    ret
-
 LouCaptureNtCtxHomeRegs:
     push r15
     lea r15, [rsp + 24] 
@@ -37,7 +31,7 @@ LouCaptureNtCtxHomeRegs:
     push rax
     push rdx
 
-    xor r11, r11 
+    xor r11, r11            
     .loop:
     mov r12, rcx            ;   PNT_AMD64_CONTEXT 
     mov r14, r15            ;   Shadow[0]
@@ -49,7 +43,7 @@ LouCaptureNtCtxHomeRegs:
     mov qword r10, [r14]    ;   PNT_AMD64_CONTEXT->P[i]Home = Shadow[i]
     mov qword [r12], r10
     inc r11                 ;   i++
-    cmp r11, 7              ;   while(i < 7) || == P6Home
+    cmp r11, 6              ;   while(i < 6) || == P6Home
     jne .loop               ;   {}
 
     pop rdx
@@ -62,7 +56,10 @@ LouCaptureNtCtxHomeRegs:
     ret
 
 LouCaputreControl:
-    mov qword [rcx + 0x98], rsp
+    push r15
+    lea r15, [rsp + 0x18] 
+    mov qword [rcx + 0x98], r15
+    pop r15
     mov qword [rcx + 0xA0], rbp
     push rax
     mov qword rax, [rsp + 0x10]
@@ -74,7 +71,20 @@ LouCaputreControl:
 ret
 
 LouCaptureInteger:
-    ;gp
+    mov qword [rcx + 0x0078], rax
+    mov qword [rcx + 0x0080], rcx
+    mov qword [rcx + 0x0088], rdx
+    mov qword [rcx + 0x0090], rbx
+    mov qword [rcx + 0x00A8], rsi
+    mov qword [rcx + 0x00B0], rdi
+    mov qword [rcx + 0x00B8], r8
+    mov qword [rcx + 0x00C0], r9
+    mov qword [rcx + 0x00C8], r10
+    mov qword [rcx + 0x00D0], r11
+    mov qword [rcx + 0x00D8], r12
+    mov qword [rcx + 0x00E0], r13
+    mov qword [rcx + 0x00E8], r14
+    mov qword [rcx + 0x00F0], r15
 ret 
 
 LouCaptureSegments:
@@ -248,6 +258,7 @@ LouCaptureNtContext:
         call LouCaputreControl
         call LouCaptureInteger
         call LouCaptureSegments
+        ret
     .CtxCIF:
         pop rax
         pop rbx

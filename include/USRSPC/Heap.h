@@ -78,12 +78,13 @@ typedef struct _USER_HEAP_PARAMETERS{
 
 typedef struct _USER_PROCESS_HEAP{
     PVOID                   HeapBase;
-    SIZE                    ReserveSize;
+    SIZE                    ReservedSize;
     SIZE                    CommitSize;
     ULONG                   HeapFlags;
     USER_HEAP_PARAMETERS    HeapParametersCopy;
     ULONG                   ThreadID;
     ListHeader              ExtraSpaces;
+    ListHeader              Allocations;
 }USER_PROCESS_HEAP, * PUSER_PROCESS_HEAP;
 
 #ifdef  _USER_MODE_CODE_
