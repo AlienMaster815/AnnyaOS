@@ -85,7 +85,10 @@ LOUSTR StrFingFirstFromEnd(LOUSTR String, LOUSTR Token);
 #else 
 
 #ifndef _LOUDLL_
-ANNA_IMPORT void* memset(void* dest, int value, size_t count);
+ANNA_IMPORT void* LouMemSet(void* dest, int value, size_t count);
+#else 
+void* LouMemSet(void* dest, int value, size_t count);
+int strncmp(const char* str1, const char* str2, size_t n);
 #endif
 
 #endif

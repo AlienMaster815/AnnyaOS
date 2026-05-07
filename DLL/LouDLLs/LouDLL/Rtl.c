@@ -513,7 +513,7 @@ LouRtlCreateHeap(
         goto _DONE;
     }
 
-    memset(NewHeap, 0, sizeof(USER_PROCESS_HEAP));
+    LouMemSet(NewHeap, 0, sizeof(USER_PROCESS_HEAP));
 
     NewHeap->HeapFlags = Flags;
     NewHeap->ReservedSize = ReservedSize;
@@ -534,7 +534,7 @@ LouRtlCreateHeap(
         NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, MEGABYTE_PAGE, USER_GENERIC_MEMORY);
     }
     if(NewHeap->HeapBase){
-        memset(NewHeap->HeapBase, 0, NewHeap->CommitSize);
+        LouMemSet(NewHeap->HeapBase, 0, NewHeap->CommitSize);
     }
 
     _DONE:
@@ -593,12 +593,12 @@ LouRtlAllocateHeapEx(
             LouPrint("LouRtlAllocateHeapEx()\n");
             while(1);
         }
-        memset(NewTracker, 0, sizeof(USER_HEAP_ALLOCATION_TRACKER));
+        LouMemSet(NewTracker, 0, sizeof(USER_HEAP_ALLOCATION_TRACKER));
         NewTracker->Base = (UINT64)Result;
         NewTracker->Size = Size;
         LouKeListAddTail(&NewTracker->Peers, &Heap->Allocations);
         if(Flags & USER_HEAP_FLAG_ZERO_MEMORY){
-            memset(TmpResult, 0, Size);
+            LouMemSet(TmpResult, 0, Size);
         }
         
     }

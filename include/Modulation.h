@@ -52,9 +52,11 @@
 
 typedef void* HMODULE;
 
-#include <string.h>
 
 #ifndef _USER_MODE_CODE_
+
+#include <string.h>
+
 LOUAPI bool IsSystemEfi();
 KERNEL_EXPORT
 void* 

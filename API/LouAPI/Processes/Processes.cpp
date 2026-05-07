@@ -94,6 +94,12 @@ LouKeSectionGetEntryList(
 );
 
 LOUAPI
+PVOID LouKeCreateTlsArray(
+    UINT64  ProcessID,
+    PVOID** CallbackAddress
+);
+
+LOUAPI
 LOUSTATUS LouKePmCreateProcessEx(
     PKHANDLE                        HandleOut,                       
     string                          ProcessName,
@@ -194,6 +200,8 @@ LOUSTATUS LouKePmCreateProcessEx(
             SIZE                    HeapReserve;
             SIZE                    HeapCommit;
             UINT16                  Subsystem;
+            PVOID                   TlsData;
+            PVOID*                  TlsCallbacks;
         };
 
         struct ProcessLoaderParameters* Tmp = LouKeMallocType(struct ProcessLoaderParameters, USER_GENERIC_MEMORY);
@@ -221,6 +229,8 @@ LOUSTATUS LouKePmCreateProcessEx(
         Tmp->StackCommit = CfiData->CfiObject.StackCommit;
         Tmp->HeapReserve = CfiData->CfiObject.HeapReserve;
         Tmp->HeapCommit = CfiData->CfiObject.HeapCommit;
+        Tmp->TlsData = LouKeCreateTlsArray(NewProcessObject->ProcessID, &Tmp->TlsCallbacks);
+
 
         LouKePsmCreateThreadForProcess(
             &ThreadOut,

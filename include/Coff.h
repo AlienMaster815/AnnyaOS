@@ -698,7 +698,7 @@ typedef struct _CFI_BASE_RELOCATION_BLOCK{
 
 typedef struct _CFI_TLS_DIRECTORY32{
     UINT32      RawDataStartVA;
-    UINT32      RawDaraEndVA;
+    UINT32      RawDataEndVA;
     UINT32      AddressOfIndex;
     UINT32      AddressOfCallbacks;
     UINT32      SizeOfZeroFill;
@@ -707,7 +707,7 @@ typedef struct _CFI_TLS_DIRECTORY32{
 
 typedef struct _CFI_TLS_DIRECTORY64{
     UINT64      RawDataStartVA;
-    UINT64      RawDaraEndVA;
+    UINT64      RawDataEndVA;
     UINT64      AddressOfIndex;
     UINT64      AddressOfCallbacks;
     UINT32      SizeOfZeroFill;
@@ -916,6 +916,7 @@ typedef struct _CFI_OBJECT{
     UINT64*                         ModDependencies;
     BOOLEAN                         IgnoreSeh;
     BOOLEAN                         IgnoreVmManager;
+    PVOID                           TlsDirectory;
     struct{
         EXCEPTION_TABLE_TYPE        ExceptionTableType;
         PVOID                       ExceptionTable;
@@ -941,6 +942,40 @@ typedef struct _CFI_OBJECT{
 typedef struct _COFF_PRIVATE_DATA{
     CFI_OBJECT      CfiObject;
 }COFF_PRIVATE_DATA, * PCOFF_PRIVATE_DATA;
+
+static inline UINT64 CfiGetImageSectionAlignment(UINT64 In){
+    switch(In & 0x00F00000){
+        case CFI_SCN_ALIGN_1BYTES:
+            return 1;
+        case CFI_SCN_ALIGN_2BYTES:
+            return 2;
+        case CFI_SCN_ALIGN_4BYTES:
+            return 4;
+        case CFI_SCN_ALIGN_8BYTES:
+            return 8;
+        case CFI_SCN_ALIGN_16BYTES:
+            return 16;
+        case CFI_SCN_ALIGN_32BYTES:
+            return 32;
+        case CFI_SCN_ALIGN_64BYTES:
+            return 64;
+        case CFI_SCN_ALIGN_128BYTES:
+            return 128;
+        case CFI_SCN_ALIGN_256BYTES:
+            return 256;
+        case CFI_SCN_ALIGN_512BYTES:
+            return 512;
+        case CFI_SCN_ALIGN_1024BYTES:
+            return 1024;
+        case CFI_SCN_ALIGN_2048BYTES:
+            return 2048;
+        case CFI_SCN_ALIGN_4096BYTES:   
+            return 4096;
+        default:
+            return 8192;
+    }
+    return 0x00;
+}
 
 #ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_

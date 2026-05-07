@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+
 typedef void* FILE;
 
 
@@ -19,6 +20,8 @@ typedef struct _IO_MAP_OBJECT{ //reading and writing for this structure is in Ld
     };
     BOOL        Mmio;
 }IO_MAP_OBJECT, * PIO_MAP_OBJECT;
+
+#ifndef _USER_MODE_CODE_
 
 #define IO_MAP_OBJECT_INITIALIZE_SYSTEM_ADDRESS(IoAddr) { \
     .SharedAddress = IoAddr, \
@@ -85,7 +88,6 @@ static inline void LouKeIoMapObjClear(
     memset(MapObject, 0, sizeof(IO_MAP_OBJECT));
 }
 
-#ifndef _USER_MODE_CODE_
 
 int LouPrint(char* format, ...);
 

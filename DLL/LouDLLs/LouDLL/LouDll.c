@@ -118,7 +118,7 @@ void AnnyaDestroyThread(PTHREAD Thread){
     LouCALL(LOUDESTROYTHREAD, (uint64_t)&Data[0], 0);
 }
 
-LOUAPI
+LOUDLL_API
 void 
 uintToHexString(
     uint64_t number, 
@@ -492,7 +492,7 @@ LouExitDosMode(){
 }
 
 LOUDLL_API
-void* memset(void* dest, int value, size_t count) {
+void* LouMemSet(void* dest, int value, size_t count) {
     unsigned char* ptr = (unsigned char*)dest;
     unsigned char val = (unsigned char)value;
 
@@ -522,9 +522,12 @@ struct ProcessLoaderParameters{
     SIZE                    HeapReserved;
     SIZE                    HeapCommit;
     UINT16                  Subsystem;
+    PVOID                   TlsData;
+    PVOID*                  TlsCallbacks;
 };
 
 UINT64 LouGetPeb();
+UINT64 LouGetTeb();
 
 LOUDLL_API
 DWORD LouProcessInitThread(
@@ -535,13 +538,44 @@ DWORD LouProcessInitThread(
     UINT64 CurrentEntry = Tmp[Tmp[0]];
     bool   (*DllEntry)(uint64_t, uint64_t, uint64_t);
 
+    
+    UINT64 Peb = LouGetPeb();
+    PTEB Teb = (PTEB)LouGetTeb();
+
+
+    Teb->ThreadLocalStoragePointer = LoaderData->TlsData;
+
+
+
+    if(LoaderData->TlsCallbacks){
+        LouPrint("Tls Trees:%d\n", (SIZE)LoaderData->TlsCallbacks[0]);
+        SIZE Trees = (SIZE)LoaderData->TlsCallbacks[0];
+        for(SIZE i = 0 ; i < Trees; i++){
+            PVOID* TmpBranch = (PVOID*)LoaderData->TlsCallbacks[i + 1];
+            if(TmpBranch){
+                LouPrint("Tls Branches:%d\n", TmpBranch[0]);
+                SIZE Branches = (SIZE)TmpBranch[0];
+                for(SIZE j = 0 ; j < i; j++){
+                    DllEntry = TmpBranch[j + 1];
+                    if(DllEntry){
+                        DllEntry((uint64_t)DllEntry, DLL_PROCESS_ATTACH, 0);
+                    }
+                }
+            }
+        }
+    }
+
     for(size_t i = 0 ; Tmp[i + 1] != CurrentEntry; i++){
         DllEntry = (PVOID)Tmp[i + 1];
         DllEntry((uint64_t)DllEntry, DLL_PROCESS_ATTACH, 0);
     }
 
     MutexUnlock(&LoaderData->Lock);
-    UINT64 Peb = LouGetPeb();
+
+    if(Teb->ThreadLocalStoragePointer){
+        LouPrint("HERE\n");
+        while(1);
+    }
 
     int (*ProcessEntry)(UINT64);
     ProcessEntry = (PVOID)CurrentEntry;

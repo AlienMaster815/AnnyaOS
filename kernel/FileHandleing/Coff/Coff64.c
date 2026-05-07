@@ -1,5 +1,50 @@
 #include "Coff.h"
 
+static XARRAY   Coff64VmmTlsIds = {0};
+static SIZE     Coff64VmmTlsSectionsLoaded = 0;
+
+PVOID LouKeCreateTlsArray(
+    UINT64   ProcessID,
+    PVOID**  CallbackAddress
+){
+    UINT64* TlsData = LouKeAllocateVmmBuffer64Ex2(ProcessID, Coff64VmmTlsSectionsLoaded * sizeof(UINT64), GET_ALIGNMENT(UINT64), true, false, USER_GENERIC_MEMORY);
+    PVOID* CallbackData = 0x00;
+    if(CallbackAddress){
+        CallbackData = LouKeAllocateVmmBuffer64Ex2(ProcessID, (Coff64VmmTlsSectionsLoaded + 1) * sizeof(PVOID*), GET_ALIGNMENT(PVOID*), true, false, USER_GENERIC_MEMORY);
+        LouKeMemCpyVmSpace(ProcessID, CallbackData[0], &Coff64VmmTlsSectionsLoaded, sizeof(UINT64));
+    }
+
+    for(SIZE i = 0 ; i < Coff64VmmTlsSectionsLoaded; i++){
+        UINT64 Data = 0x00;
+        if(LouKeXaGet(&Coff64VmmTlsIds, i, &Data) == STATUS_SUCCESS){
+            PCFI_TLS_DIRECTORY64 TlsDirectory = (PCFI_TLS_DIRECTORY64)Data;
+            if(CallbackAddress){
+                if(TlsDirectory->AddressOfCallbacks){
+                    SIZE CallbackCount = 0;
+                    PVOID* TmpCallback = (PVOID)TlsDirectory->AddressOfCallbacks;
+                    while(TmpCallback[CallbackCount++]);
+                    PVOID* NewTree = LouKeAllocateVmmBuffer64Ex2(ProcessID, (CallbackCount + 1) * sizeof(PVOID), GET_ALIGNMENT(PVOID), true, false, USER_GENERIC_MEMORY);
+                    LouKeMemCpyVmSpace(ProcessID, &CallbackData[i + 1], &NewTree, sizeof(PVOID));
+                    LouKeMemCpyVmSpace(ProcessID, &NewTree[0], &CallbackCount, sizeof(UINT64)); 
+                    for(SIZE foo = 0 ; foo < CallbackCount; foo++){
+                        LouKeMemCpyVmSpace(ProcessID, &NewTree[foo + 1], &TmpCallback[foo], sizeof(PVOID));
+                    }
+                }
+            }
+            SIZE RawDataSize = (SIZE)TlsDirectory->RawDataEndVA - (SIZE)TlsDirectory->RawDataStartVA;
+            SIZE TotalSize = (RawDataSize) + TlsDirectory->SizeOfZeroFill;
+            SIZE Alignment = CfiGetImageSectionAlignment(TlsDirectory->Characteristics);
+            PVOID NewTlsObject = LouKeAllocateVmmBuffer64Ex2(ProcessID, TotalSize, Alignment, true, false, USER_GENERIC_MEMORY);
+            LouKeMemCpyVmSpace(ProcessID, NewTlsObject, (PVOID)TlsDirectory->RawDataStartVA, RawDataSize);
+            TlsData[i] = (UINT64)(UINTPTR)NewTlsObject;
+        }else{
+            Data = 0x00;
+            LouKeMemCpyVmSpace(ProcessID, &TlsData[i], &Data, sizeof(UINT64));
+        }
+    }
+    return (PVOID)TlsData;
+}
+
 PCFI_OBJECT LouKeLookupHandleToCfiObject(HANDLE LookupHandle, BOOL AOA64);
 void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4);
 
@@ -582,9 +627,15 @@ LOUSTATUS LouKeLoadCoffImage64(
     CfiObject->IgnoreSeh = (Pe64ImageHeader->OptionalHeader.PE64.DllCharacteristics & (CFI_DLLCHARACTERISTICS_NO_SEH)) ? true : false;
 
     if(Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_TLS_TABLE].VirtualAddress){
-
-        LouPrint("TLS Section:%h\n", Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_TLS_TABLE].VirtualAddress); //TODO:
-        while(1);
+        if(CfiObject->KernelObject){
+            LouPrint("ERROR:Kernel Object Cannot Have TLS Data\n");
+            while(1);
+        }
+        PCFI_TLS_DIRECTORY64 TlsDirectory = (PCFI_TLS_DIRECTORY64)((UINTPTR)CfiObject->LoadedAddress + (UINTPTR)Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_TLS_TABLE].VirtualAddress);
+        TlsDirectory->AddressOfIndex = 0x00;
+        LouKeXarrayAllocateUint64(&Coff64VmmTlsIds, &TlsDirectory->AddressOfIndex, TlsDirectory, UINT64_MAX, KERNEL_GENERIC_MEMORY);
+        Coff64VmmTlsSectionsLoaded++;
+        CfiObject->TlsDirectory = TlsDirectory;
     }
 
     if((!CfiObject->IgnoreSeh) && (Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXCEPTION_TABLE].VirtualAddress) && (Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXCEPTION_TABLE].Size)){

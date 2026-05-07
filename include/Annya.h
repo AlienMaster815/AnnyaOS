@@ -1,11 +1,12 @@
 #ifndef _ANNYA_API_H
 #define _ANNYA_API_H
 
+#define _USER_MODE_CODE_
+
 #include <Modulation.h>
 
 #define WINAPI __stdcall
 
-#define _USER_MODE_CODE_
 
 #include <cstdint.h>
 #include <WinAPI/Win32/winternl.h>
@@ -316,13 +317,6 @@ CreateWindowA(
 );
 
 ANNA_IMPORT
-void* malloc(size_t BytesNeeded);
-
-
-
-
-
-ANNA_IMPORT
 PVOID AnnyaCreateCanvasBuffer(
     int64_t x, int64_t y,
     uint32_t Width, uint32_t Height,
@@ -431,8 +425,6 @@ ANNA_IMPORT
 void 
 LouExitDosMode();
 
-ANNA_IMPORT
-int strncmp(const char* str1, const char* str2, size_t n);
 
 ANNA_IMPORT
 void

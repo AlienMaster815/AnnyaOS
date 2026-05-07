@@ -236,6 +236,9 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/Kernel32 clean
 	$(MAKE) -C DLL/LouDLLs/Kernel32 all
 
+	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
+	$(MAKE) -C DLL/LouDLLs/MSVCRT all
+
 #	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 #	$(MAKE) -C DLL/LouDLLs/GDI32 all
 
