@@ -41,7 +41,6 @@ LouKePsmCreateDeferedThreadForProcessEx(
         (PTIME_T)UnblockTime,
         (UINT8*)ProcMask
     );
-
     if(Status != STATUS_SUCCESS){
         LouPrint("LouKePsmCreateDeferedThreadForProcessEx() ERROR:Unable To Create Thread Handle\n");
         return Status;

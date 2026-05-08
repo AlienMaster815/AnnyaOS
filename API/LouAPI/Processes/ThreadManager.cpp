@@ -238,6 +238,11 @@ LOUSTATUS LouKeTsmCreateThreadHandleNsEx(
 
     //Allocate a new stack
     if(Process){
+
+        StackSize = ROUND_UP64(StackSize, MEGABYTE_PAGE);
+        StackCommit = ROUND_UP64(StackCommit, MEGABYTE_PAGE);
+        StackSize = MAX(StackSize, StackCommit);
+
         NewThreadHandle->StackBase = (UINT64)LouKeCreateStack(Process->ProcessID, StackSize, StackCommit, true, PageFlags);
         NewThreadHandle->StackTop = (NewThreadHandle->StackBase + (StackSize - 16)) & ~(16);
         

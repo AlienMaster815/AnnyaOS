@@ -116,7 +116,6 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     UNUSED PGENERIC_THREAD_DATA    NextThread;
     UNUSED PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
 
-    PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     PPROCESS_RING CurrentProcessRing;
     PPROCESS_RING TmpProcessRing;
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
@@ -162,7 +161,10 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
                 }
             }
             if(CurrentProcessRing->ProcessData->ProcessState == PROCESS_RUNNING){
-                NextThread = CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, false);
+                this->Processes[NextRing] = CurrentProcessRing;
+                this->CurrentProcess = CurrentProcessRing->ProcessData;
+                PsmSetProcessTransitionState();
+                NextThread = this->CurrentProcess->ThreadObjects[this->ProcessorID].TsmSchedual(CurrentThread, true);
                 PsmSetThreadSystemState(this->ProcessorGdtData, NextThread);
                 IrqState = LouKeSwitchToTask(
                     IrqState,

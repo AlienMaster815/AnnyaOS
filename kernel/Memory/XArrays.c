@@ -59,7 +59,7 @@ LouKeXaIsIndexUsedEx(
         return false;
     }
     Member = Index - TmpNode->Base;
-    return (TmpNode->Bitmap & (1 << Member));
+    return (TmpNode->Bitmap & (1 << Member)) ? true : false;
 }
 
 KERNEL_EXPORT

@@ -162,6 +162,7 @@ VmmAllocationTrackerAllocate(
             &AllocationTracker->VmmData,
             ProcessID
         )){ 
+            //LouPrint("Allocating New Tracker For Vmm:%d:Base:%h:Size:%h\n", ProcessID, AllocationTracker->VBase, AllocationTracker->VSize);
             //allocate new tracker for current process
             PVMM_DATA NewData = LouKeMallocType(VMM_DATA, KERNEL_GENERIC_MEMORY);
             NewData->Flags = Flags;
@@ -487,8 +488,8 @@ LouKeVmmCommitPageAddressEx(
         &In->VmmData,
         ProcessID
     )){     
-
         LouPrint("LouKeVmmCommitPageAddress():Address Not Used By Process:%d\n", ProcessID);
+        LouPrint("Address:%h\n", Address);
         return STATUS_INVALID_PARAMETER;
     }
 

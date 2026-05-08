@@ -13,8 +13,8 @@
         <FILETOCPY64>cp EXE/LouLoad/LOULOAD.EXE ISO/ANNYA/SYSTEM64/LOULOAD.EXE</FILETOCPY64>  
         <!--THEE KERNEL-->
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
-        <FILETOCPY64>cp API/Drsd/DRSDCORE.SYS ISO/ANNYA/SYSTEM64/DRSDCORE.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
-        <FILETOCPY64>cp API/Virtualization/VMCORE.SYS ISO/ANNYA/SYSTEM64/VMCORE.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp API/Drsd/DRSDCORE.SYS ISO/ANNYA/SYSTEM64/DRSDCORE.SYS</FILETOCPY64>                                 <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp API/Virtualization/VMCORE.SYS ISO/ANNYA/SYSTEM64/VMCORE.SYS</FILETOCPY64>                           <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/USB/UsbCore/USBCORE.SYS ISO/ANNYA/SYSTEM64/USBCORE.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/gpu/BootVid/BOOTVID.SYS ISO/ANNYA/SYSTEM64/BOOTVID.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
         <!--Smp Trampoline-->
@@ -66,7 +66,8 @@
         <FILETOCPY64>cp SpriteAssets/Folder.ICO ISO/ANNYA/FOLDER.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                              <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/KING.ICO ISO/ANNYA/KING.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/Mouse.png ISO/ANNYA/MOUSE.PNG</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/Mouse.bmp ISO/ANNYA/MOUSE.BMP</FILETOCPY64>                                            <!--Annya OS Asset-->
+        <FILETOCPY64>cp SpriteAssets/Start.bmp ISO/ANNYA/START.BMP</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/NUCLEAR.ICO ISO/ANNYA/NUCLEAR.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/POWER.ICO ISO/ANNYA/POWER.ICO</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/TRASH.ICO ISO/ANNYA/TRASH.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->

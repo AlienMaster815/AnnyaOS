@@ -572,11 +572,6 @@ DWORD LouProcessInitThread(
 
     MutexUnlock(&LoaderData->Lock);
 
-    if(Teb->ThreadLocalStoragePointer){
-        LouPrint("HERE\n");
-        while(1);
-    }
-
     int (*ProcessEntry)(UINT64);
     ProcessEntry = (PVOID)CurrentEntry;
 

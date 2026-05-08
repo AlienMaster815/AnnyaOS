@@ -43,13 +43,17 @@ LouKeCreateStack(
     BOOLEAN HighMem,
     UINT64  PageFlags
 ){
+    
     PLOUSINE_STACK NewStack = AllocateNewStackObject();
     NewStack->Stack = HighMem ? LouKeAllocateVmmBuffer64Ex2(ProcessID, VSize, 16, false, false, PageFlags) : LouKeAllocateVmmBuffer32Ex2(ProcessID, VSize, 16, false, false, PageFlags);
+
     PVMM_ALLOCATION_TRACKER StackTracker;
-    LouKeVmmAddressCausePageFault(NewStack->Stack, &StackTracker);
-    
-    UINT64 CommitBase = ROUND_DOWN64(((UINT64)NewStack->Stack + VSize) - CommitSize, MEGABYTE_PAGE);
-    CommitSize = ROUND_UP64(CommitSize, MEGABYTE_PAGE);
+    UINT64 CommitBase = ((UINT64)NewStack->Stack + VSize) - CommitSize;
+
+    if(!LouKeVmmAddressCausePageFault((PVOID)CommitBase, &StackTracker)){
+        LouPrint("ERROR: Unable To Get Tracker\n");
+        while(1);
+    }
 
     LouKeVmmCommitPageAddressEx((PVOID)CommitBase, StackTracker, CommitSize / MEGABYTE_PAGE, ProcessID, true);
 
