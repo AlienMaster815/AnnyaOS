@@ -434,6 +434,7 @@ LOUAPI void InitializeProcessManager(){
     LouKePmCreateProcessEx(
         0x00,
         KERNEL_PROCESS_NAME,
+        "C:\\ANNYA\\SYSTEM64\\LOUOSKRNL.EXE",
         0x00, 
         PROCESS_PRIORITY_HIGH,
         0x00,

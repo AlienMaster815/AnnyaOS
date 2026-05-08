@@ -71,7 +71,7 @@ LouKeAllocateVmmBuffer32Ex2(
     UINT64  Flags
 );
 
-
+BOOLEAN LouKeVmmIsAddressCow(PVOID VAddress);
 
 #define POOL_FLAG_NORMAL            0
 #define POOL_FLAG_NO_WRAP_ARROUND   (1 << 0)

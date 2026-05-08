@@ -12,6 +12,27 @@ extern "C" {
 
 typedef HANDLE PWINDHANDLE;
 
+typedef struct _STARTUPINFOA {
+    DWORD     Size;
+    LPSTR     Reserved;
+    LPSTR     Desktop;
+    LPSTR     Title;
+    DWORD     X;
+    DWORD     Y;
+    DWORD     XSize;
+    DWORD     YSize;
+    DWORD     XCountChars;
+    DWORD     YCountChars;
+    DWORD     FillAttribute;
+    DWORD     Flags;
+    WORD      ShowWindow;
+    WORD      Reserved2;
+    BYTE*     Reserved3;
+    HANDLE    StdInput;
+    HANDLE    StdOutput;
+    HANDLE    StdError;
+}STARTUPINFOA, * PSTARTUPINFOA;
+
 typedef struct _LOUSINE_CREATE_PROCESS_PARAMS{
     TIME_T      OptionalStartTime;   //null for default
     UINT64      TimeQuantum;         //0 for default
@@ -39,6 +60,7 @@ LOUAPI
 LOUSTATUS LouKePmCreateProcessEx(
     PHPROCESS                       HandleOut,          //Optional                       
     LOUSTR                          ProcessName,        //Process Name
+    LOUSTR                          ProcessPath,        //Process Path
     HPROCESS                        ParrentProcess,     //Parent Process Handle           
     UINT8                           Priority,           //Process Schedualer Priority
     HANDLE                          Section,            //Section of the Executable Image

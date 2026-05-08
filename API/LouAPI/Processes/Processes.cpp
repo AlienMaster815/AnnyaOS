@@ -46,11 +46,14 @@ uint64_t LouKeLinkerGetAddress(
 );
 
 
-static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName){    
+static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName, string ProcessPath){    
     LouKIRQL Irql; 
     PGENERIC_PROCESS_DATA NewProcessObject = LouKeMallocType(GENERIC_PROCESS_DATA , KERNEL_GENERIC_MEMORY);
     NewProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, USER_GENERIC_MEMORY);
     strncpy(NewProcessObject->ProcessName, ProcessName, strlen(ProcessName));
+    
+    NewProcessObject->ProcessPath = LouKeMallocArray(CHAR, strlen(ProcessPath) + 1, USER_GENERIC_MEMORY);
+    strncpy(NewProcessObject->ProcessPath, ProcessPath, strlen(ProcessPath));
 
     LouKeAcquireSpinLock(&ProcessListLock, &Irql);
     LouKeListAddTail(&NewProcessObject->Peers, &MasterProcessList);
@@ -68,6 +71,7 @@ UNUSED static void DestroyProcessObject(
     LouKeListDeleteItem(&ProcessObject->Peers);
     LouKeReleaseSpinLock(&ProcessListLock, &Irql);
     LouKeFree(ProcessObject->ProcessName);
+    LouKeFree(ProcessObject->ProcessPath);
     LouKeFree(ProcessObject);
     LouKeXaFreeUint32(&ProcessThreadIDXa, ProcessObject->ProcessID);
 }
@@ -103,6 +107,7 @@ LOUAPI
 LOUSTATUS LouKePmCreateProcessEx(
     PKHANDLE                        HandleOut,                       
     string                          ProcessName,
+    string                          ProcessPath,
     HPROCESS                        ParentProcess,  
     UINT8                           Priority,                 
     HANDLE                          Section,
@@ -113,10 +118,10 @@ LOUSTATUS LouKePmCreateProcessEx(
     LouPrint("LouKePmCreateProcessEx()\n");
     size_t Processors = GetNPROC();
 
-    if(!ProcessName){
+    if(!ProcessName || !ProcessPath){
         return STATUS_INVALID_PARAMETER;
     }
-    PGENERIC_PROCESS_DATA NewProcessObject = CreateProcessObject(ProcessName);
+    PGENERIC_PROCESS_DATA NewProcessObject = CreateProcessObject(ProcessName, ProcessPath);
     if(HandleOut){
         *HandleOut = NewProcessObject; 
     }
@@ -295,6 +300,7 @@ LOUAPI
 LOUSTATUS LouKePmCreateProcessExCall(
     PHPROCESS                       HandleOut,                       
     string                          ProcessName,
+    string                          ProcessPath,
     HPROCESS                        ParentProcess,  
     UINT8                           Priority,                 
     HANDLE                          Section,
@@ -305,6 +311,7 @@ LOUSTATUS LouKePmCreateProcessExCall(
     LOUSTATUS Status = LouKePmCreateProcessEx(
         &NewHandle,                       
         ProcessName,
+        ProcessPath,
         LouKeGetObjectFromHandle((HANDLE)ParentProcess),  
         Priority,                 
         LouKeGetObjectFromHandle(Section),

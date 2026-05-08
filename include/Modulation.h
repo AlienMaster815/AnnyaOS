@@ -1,6 +1,9 @@
 #ifndef _MODULATION_H
 #define _MODULATION_H
 
+#define LOU_CDECL       __cdecl
+#define LOU_STDCALL     __stdcall
+
 #ifdef __cplusplus
 #define ANNA_IMPORT extern "C" __declspec(dllimport)
 #define ANNA_EXPORT extern "C" __declspec(dllexport)

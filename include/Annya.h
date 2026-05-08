@@ -80,6 +80,7 @@
 #include <kernel/States.h>
 #include <USRSPC/Heap.h>
 #include <USRSPC/Syncapi.h>
+#include <USRSPC/msvcrt.h>
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

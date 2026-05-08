@@ -457,6 +457,7 @@ void LouOsKrnlStart(
     Status = LouKePmCreateProcessEx(
         0x00,
         ASMSS_PROCESS_NAME,
+        PathKey,
         0x00,
         PROCESS_PRIORITY_HIGH,
         SectionHandle,

@@ -5,13 +5,14 @@ LOUSTATUS
 LouCreateProcessEx2(
     PHPROCESS                       HandleOut,                       
     string                          ProcessName,
+    string                          ProcessPath,
     HPROCESS                        ParentProcess,  
     UINT8                           Priority,                 
     HANDLE                          Section,
     HANDLE                          AccessToken,
     PLOUSINE_CREATE_PROCESS_PARAMS  Params 
 ){
-    UINT64 KulaPacket[9] = {0, 0, (UINT64)HandleOut, (UINT64)ProcessName, (UINT64)ParentProcess, (UINT64)Priority, (UINT64)Section, (UINT64)AccessToken, (UINT64)Params};
+    UINT64 KulaPacket[10] = {0, 0, (UINT64)HandleOut, (UINT64)ProcessName, (UINT64)ProcessPath, (UINT64)ParentProcess, (UINT64)Priority, (UINT64)Section, (UINT64)AccessToken, (UINT64)Params};
 
     while(KulaPacket[0] != 1){
         LouCALL(LOUCREATEPROCESS, (UINT64)&KulaPacket[0], 0);
@@ -72,6 +73,7 @@ LouCreateProcessA(
     Status = LouCreateProcessEx2(
         OutProcess,
         ProcessName,
+        FilePath,
         0x00,
         Priority,
         NewProcessSection,

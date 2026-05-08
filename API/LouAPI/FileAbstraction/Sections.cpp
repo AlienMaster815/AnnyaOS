@@ -43,6 +43,14 @@ static PSECTION_OBJECT VAddressToSectionObject(PVOID VAddress){
     return 0x00;
 }
 
+LOUAPI BOOLEAN LouKeVmmIsAddressCow(PVOID VAddress){
+    UNUSED PSECTION_OBJECT Object = VAddressToSectionObject(VAddress);
+    if(!Object){
+        return false;
+    }
+    return Object->Cow;
+}
+
 LOUAPI
 LOUSTATUS 
 LouKeVmmCreateSharedSectionEx(

@@ -75,6 +75,7 @@ LOUSTATUS LouKeVmmCreateSectionExCall(
 LOUSTATUS LouKePmCreateProcessExCall(
     PHPROCESS                       HandleOut,                       
     string                          ProcessName,
+    string                          ProcessPath,
     HPROCESS                        ParentProcess,  
     UINT8                           Priority,                 
     HANDLE                          Section,
@@ -271,11 +272,12 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             Tmp[0] = LouKePmCreateProcessExCall(
                 (PHPROCESS)Tmp[1],                       
                 (string)Tmp[2],
-                (HPROCESS)Tmp[3],  
-                (UINT8)Tmp[4],                 
-                (HANDLE)Tmp[5],
+                (string)Tmp[3],
+                (HPROCESS)Tmp[4],  
+                (UINT8)Tmp[5],                 
                 (HANDLE)Tmp[6],
-                (PLOUSINE_CREATE_PROCESS_PARAMS)Tmp[7]
+                (HANDLE)Tmp[7],
+                (PLOUSINE_CREATE_PROCESS_PARAMS)Tmp[8]
             );
             return;
         }

@@ -109,6 +109,11 @@ void PageFault(uint64_t FaultingStackP) {
         while(1);
     }
 
+    if(LouKeVmmIsAddressCow((PVOID)VAddress)){
+        LouPrint("Address Is COW:%h\n", VAddress);
+        while(1);
+    }
+
     //DEBUG_TRAP
 
     LouPrint("PAGE FUALT:%h\n", ((CPUContext*)FaultingStackP)->rip);

@@ -575,7 +575,10 @@ DWORD LouProcessInitThread(
     int (*ProcessEntry)(UINT64);
     ProcessEntry = (PVOID)CurrentEntry;
 
-    return ProcessEntry(Peb);
+    int ProcessResult = ProcessEntry(Peb);
+
+    LouPrint("Process Exited With Code:%h\n", ProcessResult);
+    while(1);
 }
 
 LOUDLL_API

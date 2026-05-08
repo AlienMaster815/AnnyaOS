@@ -1,5 +1,10 @@
 #include "msvcrt.h"
 
+MSVCRT_API int _commode = COMMODE_O_NO_COMMIT;
+MSVCRT_API int _fmode = FMODE_O_TEXT;
+static int AppType = 0;
+static string Path = "";
+
 MSVCRT_API
 void
 __C_specific_handler(){
@@ -9,7 +14,13 @@ __C_specific_handler(){
 
 MSVCRT_API
 void 
-__getmainargs(){
+__getmainargs(
+    int*            ArgCount,
+    char***         Argv,
+    char***         Env,
+    int             DoWildCard,
+    PSTARTUPINFOA   StartupInfo
+){
     LouPrint("__getmainargs()\n");
     while(1);
 }
@@ -30,9 +41,19 @@ __iob_func(){
 
 MSVCRT_API
 void 
-__set_app_type(){
-    LouPrint("__set_app_type()\n");
-    while(1);
+__set_app_type(
+    int Type
+){
+    AppType = Type;
+    switch(Type){
+        case SET_APP_TYPE_CONSOLE_APP:{
+            //TODO Initialize Application to a Console API
+            LouPrint("__set_app_type() _CONSOLE\n");
+            while(1);
+        }
+        default:
+            break;
+    }
 }
 
 MSVCRT_API
@@ -63,25 +84,19 @@ _cexit(){
     while(1);
 }
 
-MSVCRT_API
-void 
-_commode(){
-    LouPrint("_commode()\n");
-    while(1);
-}
+
 
 MSVCRT_API
 void 
-_fmode(){
-    LouPrint("_fmode()\n");
-    while(1);
-}
-
-MSVCRT_API
-void 
-_initterm(){
-    LouPrint("_initterm()\n");
-    while(1);
+_initterm(
+    PVFV* StartFunction,
+    PVFV* EndFunction
+){
+    for(; StartFunction < EndFunction; StartFunction++){
+        if(*StartFunction){
+            (*StartFunction)();
+        }
+    }
 }
 
 MSVCRT_API
@@ -186,6 +201,16 @@ MSVCRT_API
 BOOL 
 DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved){
 
+    switch(ul_reason_for_call){
+        case DLL_PROCESS_ATTACH:{
 
+
+
+            LouPrint("MSVCRT.DLL Attatched To New Process()\n");
+            break;
+        }
+    }
+
+    while(1);
     return true;
 }
