@@ -206,7 +206,7 @@ DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved){
 
 
 
-            LouPrint("MSVCRT.DLL Attatched To New Process()\n");
+            LouPrint("MSVCRT.DLL Attatched To New Process\n");
             break;
         }
     }
