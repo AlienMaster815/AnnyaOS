@@ -104,22 +104,6 @@ vDbgPrintExWithPrefix (
 );
 
 
-LOUAPI
-LOUSTATUS
-NtAddAtom(
-    PWSTR       AtomName,
-    ULONG       Length,
-    PRTL_ATOM   Atom
-);
-
-LOUAPI
-LOUSTATUS
-NtAddAtomEx(
-    PWSTR AtomName,
-    ULONG Length,
-    PRTL_ATOM Atom,
-    ULONG Flags
-);
 
 LOUSTATUS NtAdjustPrivilegesToken(
     HANDLE TokenHandle,
