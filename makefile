@@ -282,6 +282,7 @@ cleanall:
 	$(MAKE) -C DLL/LouDLLs/LouDLL clean
 	$(MAKE) -C DLL/LouDLLs/Drsd clean
 	$(MAKE) -C DLL/LouDLLs/Kernel32 clean
+	$(MAKE) -C DLL/LouDLLs/MSVCRT clean
 	$(MAKE) -C drivers/Networking/PCNET32 clean
 	$(MAKE) -C boot/x86_64 clean
 	$(MAKE) -C EXE/asmss/ clean

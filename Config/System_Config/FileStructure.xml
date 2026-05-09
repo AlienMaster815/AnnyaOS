@@ -5,6 +5,11 @@
 <MainDirectoryStructure>mkdir ISO/EFI</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/EFI/BOOT</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/boot</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/USERS</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/USERS/PUBLIC</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/USERS/PUBLIC/APPDATA</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/USERS/PUBLIC/APPDATA/ROAMING</MainDirectoryStructure>
+<MainDirectoryStructure>mkdir ISO/USERS/PUBLIC/DESKTOP</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES</MainDirectoryStructure>
 <MainDirectoryStructure>mkdir ISO/ANNYA/PROFILES/DEFAULT</MainDirectoryStructure>

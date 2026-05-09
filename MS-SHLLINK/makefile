@@ -1,10 +1,9 @@
 GCC = gcc
 SRC = main.c
 TGT = shllink 
-INC = -I ../include
 
 all:
-	gcc $(SRC) -o $(TGT) $(INC)
+	gcc $(SRC) -o $(TGT)
 
 clean:
 	rm -rf $(TGT)
