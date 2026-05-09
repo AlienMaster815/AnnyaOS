@@ -1,18 +1,12 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
-#ifndef UNICODE
-#define UNICODE
-#endif
 
-#include <windows.h>
+#include <Annya.h> 
 
-int WINAPI WinMain(
-    HINSTANCE   Instance,
-    HINSTANCE   PrevInstance,
-    LPSTR       CommandLine,
-    int         nCmdShow
-) {
+LOUSTATUS AnnyaExplorerProcessStartup(HANDLE Peb){
     
-
+    LouPrint("Hello Annya OS Explorer\n");
+    
+    while(1);
     return 0x00;
 }
 

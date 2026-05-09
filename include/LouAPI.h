@@ -93,6 +93,8 @@ extern "C" {
 #include <kernel/States.h>
 #include <USRSPC/Heap.h>
 #include <USRSPC/Syncapi.h>
+#include <USRSPC/msvcrt.h>
+#include <USRSPC/User.h>
 
 #ifndef KERNEL_MAIN_FILE
 EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

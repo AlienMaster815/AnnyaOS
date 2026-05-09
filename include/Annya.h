@@ -81,6 +81,7 @@
 #include <USRSPC/Heap.h>
 #include <USRSPC/Syncapi.h>
 #include <USRSPC/msvcrt.h>
+#include <USRSPC/User.h>
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
@@ -151,10 +152,6 @@ struct _AWM_CLIP_TREE;
 //typedef int LONG;
 #endif
 
-typedef LONG    LRESULT;
-typedef PVOID   WNDPROC;
-
-typedef LRESULT (*ANNYA_WINDOW_CALLBACK)(WNDPROC LastFunc, HWND WindowHandle, UINT32 Message, WPARAM wParam, LPARAM lParam);
 
 struct _WINDOW_HANDLE;
 
@@ -183,7 +180,7 @@ typedef struct _WINDOW_HANDLE{
     INTEGER                 WindowVisability;
     mutex_t                 CallbackMutex;
     SIZE                    CallbackCount;
-    ANNYA_WINDOW_CALLBACK*  WindowCallbacks;
+    WNDPROC                 WindowCallbacks;
     string                  WindowClass;
     HWND                    WinApiHandleChecksum; //used for winAPI applications and to check the indegrity of the AnnyaHandle
     PVOID                   Parameter;
@@ -264,7 +261,7 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
 
 //Pivate Data for Shell/Annya API Windows
 typedef struct _ANNYA_DESKTOP_SETUP_PACKET{
-    ANNYA_WINDOW_CALLBACK WindowCallback;
+    WNDPROC WindowCallback;
 }ANNYA_DESKTOP_SETUP_PACKET, * PANNYA_DESKTOP_SETUP_PACKET;
 
 typedef struct _BOOTVID_FRAMEBUFFER{

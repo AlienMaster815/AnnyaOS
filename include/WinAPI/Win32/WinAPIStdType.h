@@ -7,14 +7,13 @@ extern "C"{
 
 #include <cstdint.h>
 
-typedef void* LPARAM;
+typedef LONG LPARAM;
 
 #ifdef _USER_MODE_CODE_
 
 
 typedef void* HTREEITEM;
 typedef void* PFNTVCOMPARE;
-typedef void* WPARAM;
 
 typedef wchar_t*        LPWSTR;
 typedef char*           LPSTR;
@@ -67,15 +66,6 @@ typedef struct _ICONINFOEXW{
     short*      ModeName[256];
     short*      ResName[256];       
 }ICONINFOEXW, * PICONINFOEXW;
-
-typedef struct _HICON{
-    string      IconResourceName;
-    void*       IconHandle;
-    int         Width;
-    int         Height;
-    ICONINFOEXA InfoA;
-    ICONINFOEXW InfoW;
-}HICON, * PHICON;
 
 
 typedef void* TASKDIALOG_BUTTON;
