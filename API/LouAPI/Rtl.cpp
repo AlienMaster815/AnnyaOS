@@ -431,7 +431,40 @@ LouKeRtlCharToInteger(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
+LONG 
+LouKeRtlCompareUtf16StringSafe(
+    LPWSTR  String1,
+    LPWSTR  String2,
+    BOOLEAN CaseInSensitive
+){
+    LONG Result = 0;
+    SIZE Index = 0;
+    
 
+}   
+
+KERNEL_EXPORT 
+LONG 
+LouKeRtlCompareUtf16String(
+    LPWSTR  String1,
+    LPWSTR  String2,
+    BOOLEAN CaseInSensitive
+){
+    SIZE Index = 0;
+    if(CaseInSensitive){
+        while(
+            (String1[Index]) &&
+            (String2[Index]) &&
+            (String1[Index] == String2[Index])
+        ){
+            Index++:
+        }
+        return String1[Index] - String2[Index];
+    }else{
+        
+    }
+}
 
 KERNEL_EXPORT 
 LONG 

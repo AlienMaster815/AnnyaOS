@@ -484,9 +484,9 @@ void LouOsKrnlStart(
 //TODO: 
 //xAPIC has been depreciated work on x2APIC
 //Add mutex to the registry keys and a close function
-//Add inter process copying for process and thread creation
 //Fix SMP Booting
 //tighten read only security
+//finish UTF and stress test LouAtoms.cpp new API
 
 //BUGS TO FIX:
 

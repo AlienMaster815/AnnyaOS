@@ -108,7 +108,7 @@ static LOUSTATUS AllocateGlobalAtom(
     return STATUS_SUCCESS;
 }
 
-static LOUSTATUS AllocateLocalAtomTracker(
+static LOUSTATUS AllocateLocalGlobalAtomTracker(
     PATOM_TRACKER*  TrackerOut,
     LPWSTR          AtomName,
     ULONG           NameLength,
@@ -166,7 +166,7 @@ static LOUSTATUS AllocateLocalAtom(
     }
 
     PATOM_TRACKER GlobalTracker; 
-    Status = AllocateLocalAtomTracker(
+    Status = AllocateLocalGlobalAtomTracker(
         &GlobalTracker,
         AtomName, 
         NameLength,
@@ -184,7 +184,6 @@ static LOUSTATUS AllocateLocalAtom(
 
     *OutAtom = (RTL_ATOM)GlobalTracker->AtomID; 
     LouKeXaStore(&GlobalTracker->LocalTable, Process, LocalTracker, KERNEL_GENERIC_MEMORY);
-
     MutexUnlock(&LousineAtomManager.ManagerLock);
     return STATUS_SUCCESS;
 }
@@ -240,8 +239,43 @@ LOUSTATUS
 LouKeDeleteAtom(
     RTL_ATOM    Atom
 ){
-
+    if(!Atom){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT64 Out;
+    PATOM_TRACKER GlobalTracker = 0; 
+    PATOM_TRACKER LocalTracker = 0; 
     
-
+    MutexLock(&LousineAtomManager.ManagerLock);
+    LOUSTATUS Status = LouKeXaGet(&LousineAtomManager.GlobalTable, Atom, &Out);
+    if(Status != STATUS_SUCCESS){
+        MutexUnlock(&LousineAtomManager.ManagerLock);
+        return Status;
+    }
+    if(GlobalTracker->LocalAtom){
+        ULONG ProcessID = LouKeGetProcessIdentification();
+        LOUSTATUS Status = LouKeXaGet(&GlobalTracker->LocalTable, ProcessID, &Out);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        LocalTracker = (PATOM_TRACKER)Out;
+        LouKeReleaseReference(&LocalTracker->Reference);
+        if(!LouKeGetReferenceCount(&LocalTracker->Reference)){
+            LouKeXaFreeUint64(&GlobalTracker->LocalTable, ProcessID);
+            LouKeFree(LocalTracker->AtomName);
+            LouKeFree(LocalTracker);
+        }
+        goto _CHECK_FREE_GLOBAL;
+    }else{
+        _CHECK_FREE_GLOBAL:
+        LouKeReleaseReference(&GlobalTracker->Reference);
+        if(!LouKeGetReferenceCount(&GlobalTracker->Reference)){
+            LouKeListDeleteItem(&GlobalTracker->Peers);
+            LouKeXaFreeUint64(&LousineAtomManager.GlobalTable, Atom);
+            if(GlobalTracker->AtomName)LouKeFree(GlobalTracker->AtomName);
+            LouKeFree(GlobalTracker);
+        }  
+    }
+    MutexUnlock(&LousineAtomManager.ManagerLock);
     return STATUS_SUCCESS;
 }
