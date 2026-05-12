@@ -1,7 +1,10 @@
 #include <LouAPI.h>
 #include "Registry.h"
 
-
+typedef struct _KERNEL_REGISTRY_TRACKER{
+    ListHeader      Peers;
+    FILE*           RegFile;
+}KERNEL_REGISTRY_TRACKER, * PKERNEL_REGISTRY_TRACKER;
 
 static uintptr_t BootRegistryBase = 0; 
 static uintptr_t BootRegistryTop = 0; 
@@ -24,8 +27,8 @@ PVOID GetRegHiveOffsetHandle(PVOID Key){
     return (PVOID)(Key - (PVOID)RegistryHandle);
 }
 
-LOUSTATUS LouKeInitializeRegistry(){
-    LouPrint("LouKeInitializeRegistry()\n");
+LOUSTATUS LouKeInitializeBootRegistry(){
+    LouPrint("LouKeInitializeBootRegistry()\n");
 
     if(wcscmp((LPWSTR)BootRegistryBase, L"LOUSINE_SYSTEM_FILE")){
         LouPrint("File Is Not Registry File\n");
@@ -36,6 +39,7 @@ LOUSTATUS LouKeInitializeRegistry(){
 
     return STATUS_SUCCESS;
 }
+
 
 
 LOUSTATUS 
@@ -95,8 +99,6 @@ LouKeOpenRegistryHandle(
             if(!EndKey){
                 EndKey = TmpKey + wcslen(TmpKey);
             }
-
-
 
             if(!TmpNode->NodePeers.Downward){
                 return 0x00;

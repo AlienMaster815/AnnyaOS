@@ -1,7 +1,6 @@
 #ifndef _FILE_ABSTRACTION_INTERNAL_H
 #define _FILE_ABSTRACTION_INTERNAL_H
 
-
 typedef struct _LOU_FILE_SEGMENT{
     ListHeader  Peers;
     SIZE        SegmentBase;

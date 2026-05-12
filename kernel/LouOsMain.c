@@ -132,7 +132,7 @@ void LouKeLoadLousineBootTrampoline();
 int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
 void LouKePcieProbeEcam();
-LOUSTATUS LouKeInitializeRegistry();
+LOUSTATUS LouKeInitializeBootRegistry();
 HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
 void LouKeInitializeSmpLouPrint();
@@ -329,7 +329,7 @@ void LouOsKrnlStart(
         InitializeEfiCore();
     }                      
 
-    LouKeInitializeRegistry();
+    LouKeInitializeBootRegistry();
          
     LousineKernelEarlyInitialization();
 
