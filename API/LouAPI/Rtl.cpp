@@ -436,12 +436,23 @@ LONG
 LouKeRtlCompareUtf16StringSafe(
     LPWSTR  String1,
     LPWSTR  String2,
-    BOOLEAN CaseInSensitive
+    BOOLEAN CaseInSensitive,
+    SIZE    Length
 ){
-    LONG Result = 0;
     SIZE Index = 0;
-    
+    if(CaseInSensitive){
 
+    }
+    while(
+        (Length)         &&
+        (String1[Index]) &&
+        (String2[Index]) &&
+        (String1[Index] == String2[Index])
+    ){
+        Index++;
+        Length--;
+    }
+    return String1[Index] - String2[Index];  
 }   
 
 KERNEL_EXPORT 
@@ -453,17 +464,16 @@ LouKeRtlCompareUtf16String(
 ){
     SIZE Index = 0;
     if(CaseInSensitive){
-        while(
-            (String1[Index]) &&
-            (String2[Index]) &&
-            (String1[Index] == String2[Index])
-        ){
-            Index++:
-        }
-        return String1[Index] - String2[Index];
-    }else{
-        
+
     }
+    while(
+        (String1[Index]) &&
+        (String2[Index]) &&
+        (String1[Index] == String2[Index])
+    ){
+        Index++;
+    }
+    return String1[Index] - String2[Index];        
 }
 
 KERNEL_EXPORT 
