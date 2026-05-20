@@ -299,6 +299,14 @@ void LouKeSantyCheckPciDevices();
 LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 
+LOUAPI
+LONG 
+LouKeRtlCompareUtf16StringSafe(
+    LPWSTR  String1,
+    LPWSTR  String2,
+    BOOLEAN CaseInSensitive,
+    SIZE    Length
+);
 
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo

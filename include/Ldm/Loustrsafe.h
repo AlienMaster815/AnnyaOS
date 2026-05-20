@@ -97,7 +97,6 @@ KERNEL_EXPORT LOUSTRSAFEDDI LouKeRtlUnicodeStringValidateEx(PCUNICODE_STRING Sou
 KERNEL_EXPORT LOUSTRSAFEDDI LouKeRtlUnicodeStringVPrintf(PUNICODE_STRING DestinationString, LOUSTRSAFE_PCWSTR pszFormat, va_list argList);
 KERNEL_EXPORT LOUSTRSAFEDDI LouKeRtlUnicodeStringVPrintfEx(PUNICODE_STRING DestinationString, PUNICODE_STRING RemainingString, DWORD dwFlags, LOUSTRSAFE_PCWSTR pszFormat, va_list argList);
 
-
 #ifdef __cplusplus
 }
 #endif

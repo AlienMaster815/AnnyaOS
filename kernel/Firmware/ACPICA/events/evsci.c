@@ -231,7 +231,7 @@ AcpiEvSciDispatch (
  *              control method to call to deal with a SCI.
  *
  ******************************************************************************/
-void LouKeThrowPc();
+void LouKeDebugTrap();
 
 static UINT32 ACPI_SYSTEM_XFACE
 AcpiEvSciXruptHandler (
@@ -282,7 +282,7 @@ AcpiEvSciXruptHandler (
  *
  ******************************************************************************/
 
-void LouKeThrowPc();
+void LouKeDebugTrap();
 
 UINT32 ACPI_SYSTEM_XFACE
 AcpiEvGpeXruptHandler (

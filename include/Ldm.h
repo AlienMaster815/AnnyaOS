@@ -1007,6 +1007,8 @@ typedef USHORT ATOM;
 typedef RTL_ATOM* PRTL_ATOM;
 typedef ATOM* PATOM;
 
+#define ADD_ATOM_FLAG_LOCAL (1 << 0)
+
 typedef struct _OBJECT_NAME_INFORMATION{
     UNICODE_STRING  Name;
 }OBJECT_NAME_INFORMATION, * POBJECT_NAME_INFORMATION;
@@ -2283,6 +2285,29 @@ LouKeSwapEndianess(
     void* InStreamTmp, 
     void* OutStreamTmp, 
     size_t StreamSize
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeAddAtomEx(
+    LPWSTR      AtomName,
+    ULONG       NameLength,
+    PRTL_ATOM   OutAtom,
+    UINT64      Flags
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeAddAtom(
+    LPWSTR      AtomName,
+    ULONG       Length,
+    PRTL_ATOM   Atom
+);
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeDeleteAtom(
+    RTL_ATOM    Atom
 );
 
 #endif

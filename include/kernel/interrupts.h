@@ -100,7 +100,7 @@ typedef struct PACKED  _IDTP{
 
 
 #ifndef _USER_MODE_CODE_
-void LouKeThrowPc();
+void LouKeDebugTrap();
 void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql

@@ -1392,23 +1392,17 @@ typedef enum _DEVICE_USAGE_NOTIFICATION_TYPE {
   DeviceUsageTypeGuestAssigned
 } DEVICE_USAGE_NOTIFICATION_TYPE;
 
-
-
 typedef enum _DOMAIN_CONFIGURATION_ARCH {
     DomainConfigurationArm64 = 0,
     DomainConfigurationX64,
     DomainConfigurationInvalid
 } DOMAIN_CONFIGURATION_ARCH, * PDOMAIN_CONFIGURATION_ARCH;
 
-
-
 typedef enum _DRIVER_REGKEY_TYPE {
     DriverRegKeyParameters = 0,
     DriverRegKeyPersistentState,
     DriverRegKeySharedPersistentState
 } DRIVER_REGKEY_TYPE, * PDRIVER_REGKEY_TYPE;
-
-
 
 typedef enum _ENLISTMENT_INFORMATION_CLASS {
     EnlistmentBasicInformation = 0,

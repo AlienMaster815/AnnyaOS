@@ -136,7 +136,7 @@ void DeAllocateSaveContext(uint64_t Context){
     ProcessorCallbacks->DeAllocateSaveContext(Context);
 }
 
-void LouKeThrowPc();
+void LouKeDebugTrap();
 
 void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL  NewIrql,

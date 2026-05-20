@@ -150,6 +150,8 @@ typedef struct PACKED _FLOATING_SAVE_AREA{
     UINT32  Cr0NpxState;
 }FLOATING_SAVE_AREA, * PFLOATING_SAVE_AREA;
 
+
+
 #ifndef _USER_MODE_CODE_
 #define ABS(x) (((x) < 0) ? -(x) : (x)) 
 int abs(int x);

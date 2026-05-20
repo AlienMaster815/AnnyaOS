@@ -431,6 +431,10 @@ LouKeRtlCharToInteger(
     return STATUS_SUCCESS;
 }
 
+LOUAPI SIZE Utf16EncodedLength(UINT16* Charecter);
+LOUAPI UINT32 LouKeUtf32ToUpper(UINT32 C);
+LOUAPI UINT32 Utf16ToUint32(UINT16* Charecter);
+
 KERNEL_EXPORT
 LONG 
 LouKeRtlCompareUtf16StringSafe(
@@ -439,20 +443,35 @@ LouKeRtlCompareUtf16StringSafe(
     BOOLEAN CaseInSensitive,
     SIZE    Length
 ){
-    SIZE Index = 0;
+    SIZE    Index = 0;
+    UINT32  Tmp1;
+    UINT32  Tmp2;
+    SIZE    Increment = 0;
     if(CaseInSensitive){
-
+        while(Length){
+            Tmp1 = Utf16ToUint32((UINT16*)&String1[Index]);
+            Tmp2 = Utf16ToUint32((UINT16*)&String2[Index]);
+            Tmp1 = LouKeUtf32ToUpper(Tmp1);
+            Tmp2 = LouKeUtf32ToUpper(Tmp2);
+            if(!Tmp1 || !Tmp2 || (Tmp1 != Tmp2)){
+                return Tmp1 - Tmp2;
+            }
+            Increment = Utf16EncodedLength((UINT16*)&String1[Index]);
+            Index += Increment;
+            Length--;
+        }
+        return 0;
     }
     while(
-        (Length)         &&
-        (String1[Index]) &&
-        (String2[Index]) &&
-        (String1[Index] == String2[Index])
+        Length
     ){
+        if(!String1[Index] || !String2[Index] || (String1[Index] != String2[Index])){
+            return String1[Index] - String2[Index];
+        }
         Index++;
         Length--;
     }
-    return String1[Index] - String2[Index];  
+    return 0;  
 }   
 
 KERNEL_EXPORT 
@@ -462,18 +481,30 @@ LouKeRtlCompareUtf16String(
     LPWSTR  String2,
     BOOLEAN CaseInSensitive
 ){
-    SIZE Index = 0;
+    SIZE    Index = 0;
+    UINT32  Tmp1;
+    UINT32  Tmp2;
+    SIZE    Increment = 0;
     if(CaseInSensitive){
-
+        while(1){
+            Tmp1 = Utf16ToUint32((UINT16*)&String1[Index]);
+            Tmp2 = Utf16ToUint32((UINT16*)&String2[Index]);
+            Tmp1 = LouKeUtf32ToUpper(Tmp1);
+            Tmp2 = LouKeUtf32ToUpper(Tmp2);
+            if(!Tmp1 || !Tmp2 || (Tmp1 != Tmp2)){
+                return Tmp1 - Tmp2;
+            }
+            Increment = Utf16EncodedLength((UINT16*)&String1[Index]);
+            Index += Increment;
+        }
     }
-    while(
-        (String1[Index]) &&
-        (String2[Index]) &&
-        (String1[Index] == String2[Index])
-    ){
+    while(1){
+        if(!String1[Index] || !String2[Index] || (String1[Index] != String2[Index])){
+            return String1[Index] - String2[Index];
+        }
         Index++;
     }
-    return String1[Index] - String2[Index];        
+    return 0;        
 }
 
 KERNEL_EXPORT 
