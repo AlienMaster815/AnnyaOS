@@ -16,7 +16,7 @@ extern "C" {
 #define LOULOADFILE         3
 #define LOUPRINTCALL        4
 #define LOULOADBITMAP       5
-//#define      6 Free to replace
+#define LOUADDATOMEX        6 
 #define LOUDRSDGETPLANEINFO 7
 #define LOUDRSDCREATECLIP   8
 #define LOUDRSDSYNCSCREEN   10

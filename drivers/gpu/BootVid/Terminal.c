@@ -31,8 +31,8 @@ static void BootVidEndofData(){
 
 static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
 
-    if((AsciiCharecter == '\n') || ((CurrentX + (TERMINAL_INCX_SPC * 2)) > Width)){
-        if((CurrentY + (TERMINAL_INCY * 2)) <= Height){
+    if((AsciiCharecter == '\n') || ((CurrentX + (TERMINAL_INCX_SPC * 3)) >= Width)){
+        if((CurrentY + (TERMINAL_INCY * 3)) <= Height){
             CurrentY += TERMINAL_INCY;
             CurrentX = 0;
             if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){

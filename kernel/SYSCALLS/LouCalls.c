@@ -83,6 +83,15 @@ LOUSTATUS LouKePmCreateProcessExCall(
     PLOUSINE_CREATE_PROCESS_PARAMS  Params 
 );
 
+LOUAPI
+LOUSTATUS 
+LouKeAddAtomEx(
+    LPWSTR      AtomName,
+    ULONG       NameLength,
+    PRTL_ATOM   OutAtom,
+    UINT64      Flags
+);
+
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
     uint64_t Data = (uint64_t)&Tmp2[1];
@@ -107,6 +116,16 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOULOADBITMAP:{
 
+            return;
+        }
+        case LOUADDATOMEX:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeAddAtomEx(
+                (LPWSTR)Tmp[1],
+                (ULONG)Tmp[2],
+                (PRTL_ATOM)Tmp[3],
+                (UINT64)Tmp[4]
+            );
             return;
         }
         case LOUDRSDGETPLANEINFO:{

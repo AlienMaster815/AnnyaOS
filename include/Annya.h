@@ -82,6 +82,7 @@
 #include <USRSPC/Syncapi.h>
 #include <USRSPC/msvcrt.h>
 #include <USRSPC/User.h>
+#include <USRSPC/LouDll.h>
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

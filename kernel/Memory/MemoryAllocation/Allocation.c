@@ -370,6 +370,9 @@ static void* _LouMallocEx(
         }
     }
     LouPrint("Out Of Memory Needed:%h\n", BytesToAllocate);
+    if(BytesToAllocate == 4096){
+        //DEBUG_TRAP
+    }
     while(1);
     return NULL; 
 }

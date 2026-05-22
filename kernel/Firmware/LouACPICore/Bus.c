@@ -129,6 +129,7 @@ LOUSTATUS AcpiBusInitialize(){
         goto _ACPI_BUS_INITIALIZE_ERROR;
     }
     
+    LouPrint("Probing ECDT\n");
     AcpiEcEcdtProbe();
 
     LouPrint("Enabling System\n");
@@ -225,8 +226,11 @@ void LouKeInitializeFullLouACPISubsystem(){
         LouPrint("AcpiInitializeTables failed\n");
         return;
     }
+    LouPrint("Initializing Runtime\n");
     AcpiInitializePlatformRuntime();
+    LouPrint("Initializing Communications\n");
     AcpiInitializePlatformCommunications();
+    LouPrint("Initializing Bus\n");
     St = AcpiBusInitialize();
     if(St != STATUS_SUCCESS){
         //DisableAcpi();
@@ -235,12 +239,13 @@ void LouKeInitializeFullLouACPISubsystem(){
         while(1);
         return;
     }
-
+    LouPrint("Initializing Ffh\n");
     AcpiInitializeFfh();
-
+    LouPrint("Initializing VIOT\n");
     EarlyInitializeViot();
+    LouPrint("Initializing HEST\n");
     AcpiInitializeHest();
+    LouPrint("Initializing Scan\n");
     AcpiInitializeScan();
-
     LouPrint("LouKeInitializeFullLouACPISubsystem()\n");
 }

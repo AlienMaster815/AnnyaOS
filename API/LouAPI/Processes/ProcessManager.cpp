@@ -469,7 +469,7 @@ LOUAPI void InitializeProcessManager(){
         
     for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         //first available AP gets a procInit and idle
-        if(i != InitializationProcessor){
+        /*if(i != InitializationProcessor){
             NewThread = LouKeCreateDeferedDemonEx(
                 0x00,
                 0x00,
@@ -484,7 +484,7 @@ LOUAPI void InitializeProcessManager(){
             LouKeSmpWakeAssistant(i, ((PGENERIC_THREAD_DATA)NewThread)->StackTop, (UINT64)InitializeIdleProcess);
 
             break;
-        }
+        }*/
     }
 
 

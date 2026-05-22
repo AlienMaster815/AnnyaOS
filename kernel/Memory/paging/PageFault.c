@@ -90,10 +90,18 @@ void LouKeSetPanicInfo(
 
 void LouKePanic(string Message, CPUContext* CpuContext, uint64_t PageFaultData);
 
+LOUSTATUS 
+LouKeLazyBufferCommitPageForce(
+    PLAZY_ALLOCATION_TRACKER    LazyBuffer,
+    PVOID                       Address, //Optional
+    SIZE                        Count    //Optional
+);
+
 void PageFault(uint64_t FaultingStackP) {
     uint64_t VAddress = get_cr2();
     uint64_t PAddress = 0x00;
     PVMM_ALLOCATION_TRACKER Out;
+    PLAZY_ALLOCATION_TRACKER LazyOut;
     UNUSED LOUSTATUS Status;
 
     RequestPhysicalAddress(VAddress, &PAddress);
@@ -106,6 +114,15 @@ void PageFault(uint64_t FaultingStackP) {
         }
 
         LouPrint("VAddress:%h\n", VAddress);
+        while(1);
+    }
+    if((!PAddress) && (VAddress) && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &LazyOut)){
+        Status = LouKeLazyBufferCommitPageForce(LazyOut, (PVOID)VAddress, 1);
+        if(Status == STATUS_SUCCESS){
+            clear_cr2();
+            return;
+        }
+        LouPrint("VAddress Lazy:%h\n", VAddress);
         while(1);
     }
 

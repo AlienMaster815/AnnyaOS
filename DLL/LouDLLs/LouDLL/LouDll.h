@@ -460,8 +460,6 @@ void LouAcceptConnectPort();
 
 void LouAccessCheck();
 
-void LouAddAtom();
-
 int LouPrint(char* Str, ...);
 
 void LouAccessCheckAndAuditAlarm();

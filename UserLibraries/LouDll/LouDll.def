@@ -46,3 +46,6 @@ EXPORTS
     LouRtlAllocateHeapEx
     LouRtlAllocateHeap
     LouRtlFreeHeap
+    wcslen
+    LouAddAtom
+    LouAddAtomEx

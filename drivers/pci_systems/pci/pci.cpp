@@ -28,6 +28,7 @@ void checkBus(uint16_t Group, uint8_t bus) {
     for (size_t device = 0; device < 32; device++) {
         checkDevice(Group, bus, device);
     }
+    
 }
 
 PPCI_DEVICE_OBJECT LouKeAllocPciDevObject(){
@@ -87,7 +88,9 @@ LOUAPI void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         LouKeHalRegisterPciDevice(
             PDev
         );
+
     }   
+
 }
 
 
@@ -121,14 +124,14 @@ LOUAPI void PCI_Scan_Bus(){
 
     PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAquireAcpiTable(PCI_EXSPRESS_MEMORY_MAPPED_CONFIGURATION);
     if(!McfgTable){
-        for(uint8_t i = 0 ; i < 255; i++){
+        for(size_t i = 0 ; i < 255; i++){
             checkBus(0, i);
         }
         return;
     }
     Count = LouKeGetMcfgCount((void*)McfgTable);
     bool PcieDevice;
-    for (uint8_t i = 0; i < 255; i++) {
+    for (size_t i = 0; i < 255; i++) {
         PcieDevice = false;
         for (size_t j = 0; j < Count; j++) {
             if ((McfgTable->TableEntries[j].Group == 0) && (McfgTable->TableEntries[j].ConfigurationBaseAddress)) {
@@ -210,7 +213,6 @@ void LouKeMapPciMemory(){
     LouKeCreateFastObjectClass("PDEV", 256, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), 0, KERNEL_GENERIC_MEMORY);
     InitializeBARHalLayer();     
     PCI_Scan_Bus();
-    //DEBUG_TRAP;
 }
 
 
