@@ -135,6 +135,47 @@ void LouKeHalRegisterPciDevice(
 
     PDEV->CommonConfig = (void*)Config;
 
+    if(!(Config->Header.HeaderType & 0x7F)){
+        LouPrint("General PCI Device Detected\n");
+        for(size_t i = 0 ; i < 6; i++){
+            if(!(Config->Header.u.type0.BaseAddresses[i] & 1)){
+                if((((Config->Header.u.type0.BaseAddresses[i] >> 1) & 0x03) == 0x02) && (i != 5)){
+                    //handle 64 bit
+                    Config->BarFlags[i] = Config->Header.u.type0.BaseAddresses[i] & 0x0F;
+                    Config->RawBarBase[i] = (Config->Header.u.type0.BaseAddresses[i] & ~(0xF)) | ((uint64_t)Config->Header.u.type0.BaseAddresses[i + 1] << 32);
+                    Config->BarSize[i] = 0x00;
+                    LouPrint("64 Bit MMIO Base:%h\n", Config->RawBarBase[i]);
+                    i++;
+                }else if(((Config->Header.u.type0.BaseAddresses[i] >> 1) & 0x03) == 0x02){
+                    LouPrint("WARNING:64 Bit BAR Is Not Allowed On Bar 5\n");
+                }
+                else if(Config->Header.u.type0.BaseAddresses[i] & ~(0xF)){
+                    //handle 16 bit and 32 bit NOTE:remapping is done through paging
+                    Config->BarFlags[i] = Config->Header.u.type0.BaseAddresses[i] & 0x0F;
+                    Config->RawBarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0xF);
+                    Config->BarSize[i] = 0x00;
+                    if(!((Config->Header.u.type0.BaseAddresses[i] >> 1) & 0x03)){
+                        LouPrint("32 Bit MMIO Base:%h\n", Config->RawBarBase[i]);
+                    }else if(((Config->Header.u.type0.BaseAddresses[i] >> 1) & 0x03) == 0x01){
+                        LouPrint("16 Bit MMIO Base:%h\n", Config->RawBarBase[i]);
+
+                    }else {
+                        LouPrint("WARNING:Unkonwn BAR Type MMIO Base:%h\n", Config->RawBarBase[i]);
+                    }
+                }else{
+                    LouPrint("WARNING:Unused BAR:%d\n", i);
+                }    
+            }else{
+                Config->RawBarBase[i] = Config->Header.u.type0.BaseAddresses[i] & ~(0x3);
+                Config->BarFlags[i] = Config->Header.u.type0.BaseAddresses[i] & 0x3;
+                LouPrint("IO Base:%h\n", Config->RawBarBase[i]);
+                Config->BarSize[i] = 0x00;
+            }
+        }
+    }else{
+        LouPrint("WARNING:PCI Header Type Unkown\n");
+    }
+
     RegisterPciDeviceToDeviceManager(
         PDEV,
         0x00,
@@ -144,6 +185,99 @@ void LouKeHalRegisterPciDevice(
     LouKeReleaseSpinLock(&Lock, &OldIrql);
 }
 
+KERNEL_EXPORT
+LOUSTATUS
+LouKeHalMapPciResourceEx(
+    PPCI_DEVICE_OBJECT  PDEV, 
+    uint8_t             Bar, 
+    UINT64              Size,
+    UINT64              PageFlags
+){
+    PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig; 
+    if(Config->BarSize[Bar] || Config->BarBase[Bar] || (Config->BarFlags[Bar] & 0x01)){
+        return STATUS_UNSUCCESSFUL;
+    }
+    UINT64  RoundBase = ROUND_DOWN64(Config->RawBarBase[Bar], KILOBYTE_PAGE);
+    UINT64  RoundOffset = Config->RawBarBase[Bar] - RoundBase;
+    UINT64  RoundSize = ROUND_UP64(Size + RoundOffset, KILOBYTE_PAGE);
+    PVOID NewVAddress = LouVMallocEx(RoundSize, KILOBYTE_PAGE);
+    if(!NewVAddress){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    LouKeMapContinuousMemoryBlock(RoundBase, (UINT64)NewVAddress, RoundSize, PageFlags);
+    Config->BarBase[Bar] = (UINT64)NewVAddress + RoundOffset;
+    Config->BarSize[Bar] = Size;
+    
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeHalMapPciResource(
+    PPCI_DEVICE_OBJECT  PDEV,
+    uint8_t             Bar,
+    UINT64              PageFlags
+){
+    UINT64 TotalBarSize = 0x00;    
+    PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig; 
+    if(!Config->RawBarBase[Bar]){
+        LouPrint("WARNING:Unconfigured Or 64 Bit BAR\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    if(!(Config->Header.HeaderType & 0x7F)){
+        if(!(Config->Header.u.type0.BaseAddresses[Bar] & 1)){
+            if((((Config->Header.u.type0.BaseAddresses[Bar] >> 1) & 0x03) == 0x02) && (Bar != 5)){
+                //handle 64 bit
+                UINT32 Low = Config->Header.u.type0.BaseAddresses[Bar];
+                UINT32 High = Config->Header.u.type0.BaseAddresses[Bar + 1];
+                UINT32 SzLow;
+                UINT32 SzHigh;
+                LouKeWritePciUint32(PDEV, 0x10 + Bar * 4, 0xFFFFFFFF);
+                LouKeWritePciUint32(PDEV, 0x10 + (Bar + 1) * 4, 0xFFFFFFFF);
+
+                SzLow = LouKeReadPciUint32(PDEV, 0x10 + Bar * 4);
+                SzHigh = LouKeReadPciUint32(PDEV, 0x10 + (Bar + 1) * 4);
+
+                LouKeWritePciUint32(PDEV, 0x10 + Bar * 4, Low);
+                LouKeWritePciUint32(PDEV, 0x10 + (Bar + 1) * 4, High);
+
+                TotalBarSize = ((UINT64)SzHigh << 32) | (SzLow & 0xFFFFFFF0);
+                TotalBarSize = (~TotalBarSize + 1);
+            }else if(((Config->Header.u.type0.BaseAddresses[Bar] >> 1) & 0x03) == 0x02){
+                LouPrint("WARNING:64 Bit BAR Is Not Allowed On Bar 5\n");
+                return STATUS_UNSUCCESSFUL;
+            }
+            else if(Config->Header.u.type0.BaseAddresses[Bar] & ~(0xF)){
+                //handle 16 bit and 32 bit NOTE:remapping is done through paging
+                if(!((Config->Header.u.type0.BaseAddresses[Bar] >> 1) & 0x03)){
+                    LouKeWritePciUint32(PDEV, 0x10 + Bar * 4, 0xFFFFFFFF);
+                    TotalBarSize = LouKeReadPciUint32(PDEV, 0x10 + Bar * 4);
+                    LouKeWritePciUint32(PDEV, 0x10 + Bar * 4, Config->Header.u.type0.BaseAddresses[Bar]);
+                    TotalBarSize &= 0xFFFFFFF0;
+                    TotalBarSize = (~TotalBarSize + 1) & 0xFFFFFFFF;
+                }else if(((Config->Header.u.type0.BaseAddresses[Bar] >> 1) & 0x03) == 0x01){
+                    LouKeWritePciUint32(PDEV, 0x10 + Bar * 4, 0xFFFFFFFF);
+                    TotalBarSize = LouKeReadPciUint32(PDEV, 0x10 + Bar * 4);
+                    LouKeWritePciUint32(PDEV, 0x10 + Bar * 4, Config->Header.u.type0.BaseAddresses[Bar]);
+                    TotalBarSize &= 0xFFF0;
+                    TotalBarSize = (~TotalBarSize + 1) & 0xFFFF;
+                }else {
+                    LouPrint("WARNING:Unkonwn BAR Type MMIO Base:%d\n", Bar);
+                    return STATUS_UNSUCCESSFUL;
+                }
+            }else{
+                LouPrint("WARNING:Unused BAR:%d\n", Bar);
+                return STATUS_UNSUCCESSFUL;
+            }    
+        }else{
+            return STATUS_UNSUCCESSFUL;
+        }
+    }else{
+        LouPrint("WARNING:PCI Header Type Unkown\n");
+    }
+    return LouKeHalMapPciResourceEx(PDEV, Bar, TotalBarSize, PageFlags);
+}   
 
 void* LouKeHalPnpInitializeBaseRegister(
     PPCI_DEVICE_OBJECT PDEV,
@@ -166,8 +300,6 @@ LouKeHalGetPciBaseAddressSize(
     PPCI_DEVICE_OBJECT PDEV,
     uint8_t BarNum  
 ){
-    LouPrint("LouKeHalGetPciBaseAddressSize()\n");
-    while(1);
     return (size_t)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarSize[BarNum]);
 }
 
@@ -178,7 +310,5 @@ LouKePciGetIoRegion(
     uint8_t BarNumber,
     size_t BarOffset
 ){
-    LouPrint("LouKePciGetIoRegion()\n");
-    while(1);
     return (void*)(((PPCI_COMMON_CONFIG)PDEV->CommonConfig)->BarBase[BarNumber] + BarOffset);
 }

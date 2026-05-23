@@ -39,6 +39,8 @@ LOUSTATUS AddDevice(
     LouKeHalEnablePciDevice(PDEV);
     LouKeHalPciSetMaster(PDEV);
 
+    LouKeHalMapPciResource(PDEV, OHCI_OPERATIONAL_REGISTER_BAR, KERNEL_DMA_MEMORY);
+
     OhciDevice->OperationalRegisters = (POHCI_OPERATIONAL_REGISTERS)LouKePciGetIoRegion(
         PDEV,
         OHCI_OPERATIONAL_REGISTER_BAR,

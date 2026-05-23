@@ -234,6 +234,7 @@ typedef struct _PCI_COMMON_CONFIG {
     UCHAR   			DeviceSpecific[192];
 	uint64_t 			BarSize[6];
 	uint64_t 			BarBase[6];
+	uint64_t 			RawBarBase[6];
 	uint8_t  			BarFlags[6];
 } PCI_COMMON_CONFIG, * PPCI_COMMON_CONFIG;
 
@@ -386,6 +387,7 @@ KERNEL_EXPORT void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, 
 KERNEL_EXPORT void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
 KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+KERNEL_EXPORT LOUSTATUS LouKeHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, uint8_t Bar, UINT64 PageFlags);
 #ifndef _KERNEL_MODULE_
 uint8_t LouKePciReadHeaderType(PPCI_DEVICE_OBJECT PDEV);
 uint32_t LouKeReadPciVendorId(PPCI_DEVICE_OBJECT PDEV);

@@ -77,6 +77,8 @@ static LOUSTATUS VBoxAccelerationInitialize(
     
     VBox->AvailableVramSize -= VBox->CrtcCount * VBVA_MINIMUM_BUFFER_SIZE;
 
+    LouKeHalMapPciResource(PDEV, 0, KERNEL_DMA_MEMORY);
+
     VBox->VbvaBuffers = (uint8_t*)LouKePciGetIoRegion(PDEV, 0, VBox->AvailableVramSize);
     if(!VBox->VbvaBuffers){
         return STATUS_INSUFFICIENT_RESOURCES;

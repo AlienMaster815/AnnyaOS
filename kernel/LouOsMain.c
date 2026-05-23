@@ -358,10 +358,6 @@ void LouOsKrnlStart(
 
     LouKeSantyCheckPciDevices();
 
-    LouPrint("Successful Boot\n");
-
-    while(1);
-
     LookForStorageDevices();
          
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
@@ -370,6 +366,8 @@ void LouOsKrnlStart(
         while(1);
     }
 
+    LouPrint("Successful Boot\n");
+    while(1);
 
     InitializeFileSystemManager();
 

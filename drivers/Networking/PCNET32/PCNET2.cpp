@@ -95,6 +95,8 @@ LOUSTATUS InitializePcNetIIDevice(
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
     uint64_t PortBase = 0;
    
+    LouKeHalMapPciResource(PDEV, 0, KERNEL_DMA_MEMORY);
+   
     PortBase = (uint64_t)LouKePciGetIoRegion(PDEV, 0, 0);
     if(PortBase > 0xFFFF){
         LouPrint("PCNET32::ERROR::This Driver Cannot Run This Device Invalid Base Address\n");

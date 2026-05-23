@@ -1160,6 +1160,9 @@ LOUSTATUS AddAhciDevice(
 
     //At this point we are able to grab the host and start filling out
     //private data from the information on the controller
+
+    LouKeHalMapPciResource(PDEV, Abar, KERNEL_DMA_MEMORY);
+
     PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKePciGetIoRegion(PDEV, Abar, 0);
 
     PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;

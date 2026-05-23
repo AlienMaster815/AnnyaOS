@@ -196,3 +196,5 @@ EXPORTS
     LouKeXaFree
     LouKeRtlUIntMult
     LouKeGetKSpaceBase
+    LouKeHalMapPciResource
+    LouKeHalMapPciResourceEx
