@@ -354,14 +354,13 @@ void LouOsKrnlStart(
 
     AdvancedLousineKernelInitialization();
     
-    LouPrint("Successful Boot\n");
-
-    while(1);
-
-
     LouKeInitializePciDevices();
 
     LouKeSantyCheckPciDevices();
+
+    LouPrint("Successful Boot\n");
+
+    while(1);
 
     LookForStorageDevices();
          

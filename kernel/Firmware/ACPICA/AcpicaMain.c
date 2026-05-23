@@ -266,7 +266,6 @@ ACPI_STATUS AcpiOsEnterSleep(
     UINT32                  RegbValue
 ){
     LouPrint("AcpiOsEnterSleep()\n");
-    while(1);
     return AE_OK;   
 }
 
