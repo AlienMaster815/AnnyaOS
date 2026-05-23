@@ -18,9 +18,9 @@ void LouKeUnlockProcManager(LouKIRQL* Irql);
 
 void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
     DWORD Result = 0;
-    LouPrint("Thread:%d Has Started\n", Thread->ThreadID);
+    LouKeSchedDbgPrint("Thread:%d Has Started\n", Thread->ThreadID);
     Result = Work(Param);
-    LouPrint("Thread:%d Exited With Code:%h\n", Thread->ThreadID, Result);
+    LouKeSchedDbgPrint("Thread:%d Exited With Code:%h\n", Thread->ThreadID, Result);
     LouKeDestroyThread(Thread);
     while(1){
         asm("hlt");
@@ -161,9 +161,9 @@ void DebugThreadContext(){
     PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
     while(TmpThreadHandle->Peers.NextHeader){
         TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
-        LouPrint("TmpThreadHandle->ThreadID         :%h\n", TmpThreadHandle->ThreadID);
-        LouPrint("TmpThreadHandle->ContextStorage   :%h\n", TmpThreadHandle->ContextStorage);
-        LouPrint("TmpThreadHandle->InterruptStorage :%h\n", TmpThreadHandle->InterruptStorage);
+        LouKeSchedDbgPrint("TmpThreadHandle->ThreadID         :%h\n", TmpThreadHandle->ThreadID);
+        LouKeSchedDbgPrint("TmpThreadHandle->ContextStorage   :%h\n", TmpThreadHandle->ContextStorage);
+        LouKeSchedDbgPrint("TmpThreadHandle->InterruptStorage :%h\n", TmpThreadHandle->InterruptStorage);
     }
 }
 
@@ -215,7 +215,7 @@ LOUSTATUS LouKeTsmCreateThreadHandleNsEx(
         (!CtxEntry)     || (!CodeSegment) || 
         (!StackSegment) 
     ){
-        LouPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
+        LouKeSchedDbgPrint("LouKeTsmCreateThreadHandle(): Invalid Parameters\n");
         return STATUS_INVALID_PARAMETER;
     }
     UINT64 PageFlags;
@@ -273,8 +273,8 @@ LOUSTATUS LouKeTsmCreateThreadHandleNsEx(
         NewThreadHandle->SavedState.rflags = 0x0202;        //interrupts enabled no operation normal
     }
 
-    LouPrint("New StackBase:%h\n", NewThreadHandle->StackBase);
-    LouPrint("New StackTop :%h\n", NewThreadHandle->StackTop);
+    LouKeSchedDbgPrint("New StackBase:%h\n", NewThreadHandle->StackBase);
+    LouKeSchedDbgPrint("New StackTop :%h\n", NewThreadHandle->StackTop);
     
     //thread prioirties are backwards 0 being the highest +x being lowest 
     NewThreadHandle->ThreadPriority = (THREAD_PRIORITY_RINGS - 1) - ThreadPriority;
@@ -282,7 +282,7 @@ LOUSTATUS LouKeTsmCreateThreadHandleNsEx(
     NewThreadHandle->Process = Process;
     //allocate thread ID
     NewThreadHandle->ThreadID = AllocateThreadID();
-    LouPrint("Creating Thread With ID:%d\n", NewThreadHandle->ThreadID);
+    LouKeSchedDbgPrint("Creating Thread With ID:%d\n", NewThreadHandle->ThreadID);
     NewThreadHandle->TotalMsSlice = TimeSliceMs;
     NewThreadHandle->Cs = CodeSegment;
     NewThreadHandle->Ss = StackSegment;
@@ -551,7 +551,7 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
     UINT64                  DistributerIncrementation
 ){
     LOUSTATUS Status;
-    LouPrint("TsmInitializeSchedualerObject()\n");
+    LouKeSchedDbgPrint("TsmInitializeSchedualerObject()\n");
 
     this->ProcessorID = ProcessorID;
     
@@ -568,7 +568,7 @@ LOUSTATUS TsmThreadSchedualManagerObject::TsmInitializeSchedualerObject(
 
     this->IdleTask = ProcessorIdleThreads[ProcessorID];
 
-    LouPrint("TsmInitializeSchedualerObject() STATUS_SUCCESS\n");
+    LouKeSchedDbgPrint("TsmInitializeSchedualerObject() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -709,7 +709,7 @@ LOUAPI void LouKeUnblockThread(UINT64 ThreadID){
 }
 
 LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
-    LouPrint("Thread Manager Demon Started\n");
+    LouKeSchedDbgPrint("Thread Manager Demon Started\n");
     UNUSED INTEGER Processors = GetNPROC();
 
     while(1){
@@ -725,7 +725,7 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
                         }
                     }
                 }
-                LouPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
+                LouKeSchedDbgPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
                 LouKeTsmDestroyThreadHandle(TmpThreadHandle);
             }
         }

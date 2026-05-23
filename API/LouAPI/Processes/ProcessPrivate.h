@@ -4,6 +4,8 @@
 #include <LouDDK.h>
 #include <KulaAPI.h>
 
+void LouKeSchedDbgPrint(char* format, ...);
+
 typedef enum {
     THREAD_READY = 0,
     THREAD_RUNNING = 1,

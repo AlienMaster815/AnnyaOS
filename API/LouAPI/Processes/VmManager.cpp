@@ -8,7 +8,7 @@ LOUAPI uint64_t GetCr3();
 void LouKeSendPml4ToSections(UINT64* Pml4);
 
 UINT64 LouKeVmmCreatePmlTable(){
-    LouPrint("LouKeVmmCreatePmlTable()\n");
+    LouKeSchedDbgPrint("LouKeVmmCreatePmlTable()\n");
     UINT64* Pml4 = (UINT64*)LouGeneralAllocateMemory(KILOBYTE_PAGE);
     UINT64* Cloner = (UINT64*)(GetCr3() + GetKSpaceBase());
 

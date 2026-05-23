@@ -115,7 +115,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     PLOUSINE_CREATE_PROCESS_PARAMS  Params 
 ){
     LOUSTATUS Status;
-    LouPrint("LouKePmCreateProcessEx()\n");
+    LouKeSchedDbgPrint("LouKePmCreateProcessEx()\n");
     size_t Processors = GetNPROC();
 
     if(!ProcessName || !ProcessPath){
@@ -144,7 +144,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     NewProcessObject->ProcessSection = Section;
     NewProcessObject->ProcessAccessToken = AccessToken;
     NewProcessObject->ProcessID = AllocateProcessID();
-    LouPrint("Creating Process:%s With ID:%d\n", ProcessName, NewProcessObject->ProcessID);
+    LouKeSchedDbgPrint("Creating Process:%s With ID:%d\n", ProcessName, NewProcessObject->ProcessID);
     if(Params){
         //TODO::
         LouPrint("LouKePmCreateProcessEx()::TODO\n");
@@ -253,7 +253,7 @@ LOUSTATUS LouKePmCreateProcessEx(
 
     }
 
-    LouPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
+    LouKeSchedDbgPrint("LouKePmCreateProcessEx() STATUS_SUCCESS\n");
     
     return STATUS_SUCCESS;
 }

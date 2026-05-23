@@ -5,6 +5,16 @@
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
 static spinlock_t ProcLock = {0};
+static BOOLEAN SchedDebugOn = false;
+
+void LouKeSchedDbgPrint(char* format, ...){
+    if(SchedDebugOn){
+        va_list args;
+        va_start(args, format);
+        LouPrintEx(format, args);
+        va_end(args);
+    }
+}
 
 LOUAPI PGDT_RECORD LouKeGetGdtRecord(UINT32 ProcessorID);
 
@@ -64,7 +74,7 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
     UINT64 DistibutionLimitor,
     UINT64 DistributerIncrementation
 ){
-    LouPrint("PsmInitializeSchedualerObject()\n");   
+    LouKeSchedDbgPrint("PsmInitializeSchedualerObject()\n");   
     if((!DistibutionLimitor) || (!DistributerIncrementation)){
         return STATUS_INVALID_PARAMETER;
     }
@@ -79,9 +89,10 @@ LOUSTATUS PsmProcessScedualManagerObject::PsmInitializeSchedualerObject(
 
     if(Status != STATUS_SUCCESS){
         LouPrint("PSM ERROR:Unable To Initialize Schedualer Object\n");
+        while(1);
     }
 
-    LouPrint("PsmInitializeSchedualerObject() STATUS_SUCCESS\n");
+    LouKeSchedDbgPrint("PsmInitializeSchedualerObject() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -317,11 +328,11 @@ UNUSED static void ProcessorIdleTask(){
     LouKeInitializeCurrentApApic();
     INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;
     KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[CurrentCpu].Schedualer;
-    LouPrint("AP Now Idleing\n");
+    LouKeSchedDbgPrint("AP Now Idleing\n");
     MutexUnlock(&InitLock);
     MutexSynchronize(&CoreIrqReadyLock);
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    LouPrint("AP Interrupts Enabled\n");
+    LouKeSchedDbgPrint("AP Interrupts Enabled\n");
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
@@ -360,10 +371,10 @@ UNUSED static void InitializeIdleProcess(){
         }
     }
 
-    LouPrint("AP Now Idleing\n");
+    LouKeSchedDbgPrint("AP Now Idleing\n");
     MutexSynchronize(&CoreIrqReadyLock);
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    LouPrint("AP Interrupts Enabled\n");
+    LouKeSchedDbgPrint("AP Interrupts Enabled\n");
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
@@ -377,7 +388,13 @@ LOUAPI void SetNewBootStack(UINT64 Base, UINT64 Pointer);
 LOUSTATUS LouKeTsmInitializeIdleThreads();
 
 LOUAPI void InitializeProcessManager(){
-    LouPrint("Initializing Process Manager\n");
+
+    HANDLE SchedDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\SCHED_DEBUG", 0x00);
+    BYTE DbgValue = 0;
+    LouKeReadRegistryByteValue(SchedDebugKey, &DbgValue);
+    SchedDebugOn = DbgValue ? true : false;
+
+    LouKeSchedDbgPrint("Initializing Process Manager\n");
     
     ProcessBlock.ProcessorCount = GetNPROC();
     ProcessBlock.ProcStateBlock = LouKeMallocArray(PROCESSOR_STATE_BLOCK, ProcessBlock.ProcessorCount, KERNEL_GENERIC_MEMORY);
@@ -408,7 +425,7 @@ LOUAPI void InitializeProcessManager(){
         while(1);
     }
 
-    LouPrint("Access Token:%h\n", AccessToken);
+    LouKeSchedDbgPrint("Access Token:%h\n", AccessToken);
 
     Status = LouKeZwRegisterAccessTokenToObjectManager(
         AccessToken,
@@ -490,7 +507,7 @@ LOUAPI void InitializeProcessManager(){
 
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
-    LouPrint("Finished Initializing Process Manager\n");
+    LouKeSchedDbgPrint("Finished Initializing Process Manager\n");
 }
 
 KERNEL_EXPORT

@@ -73,7 +73,7 @@ LouKeCreateDeferedDemonEx(
         LouPrint("Unable To Create Thread: INVALID_PRIORITY\n");
         return 0x00;
     }
-    LouPrint("Creating Demon\n");
+    LouKeSchedDbgPrint("Creating Demon\n");
     if(ProcessorSpcific){
         AfinityMask = LouKeMallocArray(UINT8, PROCESSOR_BITMAP_LENGTH, KERNEL_GENERIC_MEMORY);
         MARK_PROCESSOR_AFFILIATED(AfinityMask, Processor);
