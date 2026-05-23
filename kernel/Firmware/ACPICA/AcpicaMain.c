@@ -10,7 +10,7 @@ ACPI_STATUS AcpiOsInitialize(){
         16 * MEGABYTE,
         KILOBYTE_PAGE,
         "ACPICAPool",
-        0,
+        POOL_FLAG_NO_MEMSET,
         KERNEL_GENERIC_MEMORY
     );
 

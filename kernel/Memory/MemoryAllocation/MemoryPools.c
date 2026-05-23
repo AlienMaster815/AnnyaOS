@@ -195,19 +195,15 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
 
 KERNEL_EXPORT
 void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
-    PPOOL_MEMORY_TRACKS Prev = (PPOOL_MEMORY_TRACKS)&Pool->MemoryTracks;
-    PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Prev->Peers.NextHeader;
 
-    while (Node) {
+    PPOOL_MEMORY_TRACKS Node;
+    ForEachListEntry(Node, &Pool->MemoryTracks.Peers, Peers){
         if (Node->Address == (uint64_t)Address) {
-            Prev->Peers.NextHeader = Node->Peers.NextHeader;
+            LouKeListDeleteItem(&Node->Peers);
             LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
             return;
         }
-        Prev = Node;
-        Node = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
     }
-
     LouPrint("LouKeFreeFromDynamicPool(): ERROR - Address not found: %h\n", Address);
 }
 
@@ -226,9 +222,9 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
     size_t Limit = Base + Pool->PoolSize;
     uint64_t Start; 
     if(!NoWrapArround){
-        Start = Pool->LastOut ? Pool->LastOut : Base;
+        Start = ROUND_UP64(Pool->LastOut ? Pool->LastOut : Base, Alignment);
     }else{
-        Start = Base;
+        Start = ROUND_UP64(Base, Alignment);
     }
     uint64_t Result = Start;
     bool Wrapped = false;
@@ -236,23 +232,19 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
 retry_search:
     while ((Result + AllocationSize) <= Limit) {
         bool Conflict = false;
-        PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Pool->MemoryTracks.Peers.NextHeader;
-
-        while (Node) {
+        PPOOL_MEMORY_TRACKS Node;
+        ForEachListEntry(Node, &Pool->MemoryTracks.Peers, Peers){
             if (RangeInterferes(Result, AllocationSize, Node->Address, Node->MemorySize)) {
                 Result = ROUND_UP64(Node->Address + Node->MemorySize, Alignment);
                 Conflict = true;
                 break;
             }
-            Node = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
         }
-
         if (!Conflict) {
             PPOOL_MEMORY_TRACKS NewTrack = (PPOOL_MEMORY_TRACKS)LouKeAllocateFastObject("DYNAMIC_POOL_HELPER");
             NewTrack->Address = Result;
             NewTrack->MemorySize = AllocationSize;
-            NewTrack->Peers.NextHeader = Pool->MemoryTracks.Peers.NextHeader;
-            Pool->MemoryTracks.Peers.NextHeader = (PListHeader)NewTrack;
+            LouKeListAddTail(&NewTrack->Peers, &Pool->MemoryTracks.Peers);
             if(!NoWrapArround){
                 Pool->LastOut = Result + AllocationSize;
             }
@@ -285,13 +277,12 @@ void* LouKeMallocFromDynamicPool(
 void LouKeDestroyDynamicPool(
     POOL Pool
 ){
-    PPOOL_MEMORY_TRACKS Node = (PPOOL_MEMORY_TRACKS)Pool->MemoryTracks.Peers.NextHeader;
-    PPOOL_MEMORY_TRACKS Leader = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
-    while(Node){
-        Node = (PPOOL_MEMORY_TRACKS)Leader->Peers.NextHeader;
-        Leader = (PPOOL_MEMORY_TRACKS)Node->Peers.NextHeader;
+    PPOOL_MEMORY_TRACKS Node;
+    ForEachListEntry(Node, &Pool->MemoryTracks.Peers, Peers){
         LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
     }
+    LouKeFree((void*)Pool->VLocation);
+    LouKeFree((void*)Pool);
 }
 
 KERNEL_EXPORT

@@ -72,6 +72,7 @@ EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
 #define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
 
 
+
 #ifdef __cplusplus
 }
 #endif

@@ -2,7 +2,6 @@
 
 //TODO Change Mutexing to compensate for error loops
 static ListHeader FastAllocationTemplateList = {0};
-//static mutex_t FastAllocationTemplateLock = {0};
 
 static bool CheckTemplatesForDuplicate(LOUSTR ClassName){
     PFAST_ALLOCATION_TEMPLATE TmpTemplate;
@@ -38,7 +37,6 @@ static PFAST_ALLOCATION_TEMPLATE AllocateFastObjectClassTemplate(
     LouKeListAddTail(&NewTemplate->Peers, &FastAllocationTemplateList);
     
     LouPrint("NewTemplate:%h With Identifier:%s\n", NewTemplate, ClassName);
-    //MutexUnlock(&FastAllocationTemplateLock);
     return NewTemplate;
 } 
 
@@ -53,16 +51,9 @@ static PFAST_ALLOCATION_TEMPLATE AcquireFastObjectTemplate(LOUSTR ClassName){
 }
 
 static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Template){
-    PFAST_ALLOCATION_TRACKER NewTracker = &Template->PoolTrackers;
-    PFAST_ALLOCATION_TRACKER Follower = &Template->PoolTrackers;
-    MutexLock(&Template->PoolTrackerLock);
-    while(NewTracker->Peers.NextHeader){
-        Follower = NewTracker;
-        NewTracker = (PFAST_ALLOCATION_TRACKER)NewTracker->Peers.NextHeader;
-    }
+    PFAST_ALLOCATION_TRACKER NewTracker;
 
-    NewTracker->Peers.NextHeader = (PListHeader)LouKeMallocType(FAST_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
-    NewTracker = (PFAST_ALLOCATION_TRACKER)NewTracker->Peers.NextHeader;
+    NewTracker = LouKeMallocType(FAST_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
     NewTracker->AllocationPool = LouKeCreateFixedPool(
         Template->ObjectCount,
         Template->ObjectSize,
@@ -75,40 +66,22 @@ static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Te
     LouPrint("NewPool:%h With Size:%h ObjSize:%h For Template:%h :: %s\n", NewTracker->AllocationPool->VLocation, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment) * Template->ObjectCount, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment), Template, Template->TrackingTag);
     
     if(!NewTracker->AllocationPool){
-        Follower->Peers.NextHeader = 0x00;
         LouKeFree(NewTracker);
-        MutexUnlock(&Template->PoolTrackerLock);
         return 0x00;
     }
 
-    MutexUnlock(&Template->PoolTrackerLock);
+    LouKeListAddTail(&NewTracker->Peers, &Template->PoolTrackers);
+
     return NewTracker;
 }
 
 static void FreePoolTracker(PFAST_ALLOCATION_TEMPLATE Template, PFAST_ALLOCATION_TRACKER Tracker){
-
-    PFAST_ALLOCATION_TRACKER TmpTracker = &Template->PoolTrackers;
-    
-    MutexLock(&Template->PoolTrackerLock);
-
-    while((TmpTracker) && ((PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader != Tracker)){
-        TmpTracker = (PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
+    LouKeListDeleteItem(&Tracker->Peers);
+    if(Tracker->AllocationPool){
+        LouKeDestroyFixedPool(Tracker->AllocationPool);
+        Tracker->AllocationPool = 0x00;
     }
-
-    if(!TmpTracker){
-        goto _FINISH_CLEANUP;
-    }
-
-    TmpTracker->Peers.NextHeader = Tracker->Peers.NextHeader;
-
-    _FINISH_CLEANUP:
-    if(Tracker != &Template->PoolTrackers){
-        if(Tracker->AllocationPool){
-            LouKeDestroyFixedPool(Tracker->AllocationPool);
-        }
-        LouKeFree(Tracker);
-    }
-    MutexUnlock(&Template->PoolTrackerLock);
+    LouKeFree(Tracker);
 }
 
 LOUSTATUS LouKeCreateFastObjectClassEx(
@@ -180,27 +153,22 @@ PVOID LouKeAllocateFastObjectEx(
 
 
     PVOID Result = 0;
-    PFAST_ALLOCATION_TRACKER TmpTracker = &Template->PoolTrackers;
+    PFAST_ALLOCATION_TRACKER TmpTracker;
     MutexLock(&Template->PoolTrackerLock);
-
-    while(TmpTracker->Peers.NextHeader){
-        TmpTracker = (PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
+    ForEachListEntry(TmpTracker, &Template->PoolTrackers, Peers){
         if(LouKeGetReferenceCount(&TmpTracker->KRef) >= Template->ObjectCount)continue;
         Result = LouKeMallocFromFixedPool(TmpTracker->AllocationPool);
         if(Result){
             LouKeAcquireReference(&TmpTracker->KRef);
-            MutexUnlock(&Template->PoolTrackerLock);
             if(Template->Constructor){
                 MutexLock(&Template->BuildLock);
                 Template->Constructor(Result, ConstructData);
                 MutexUnlock(&Template->BuildLock);
             }
             goto _ALLOCATION_FINISHED;
-        }
+        }        
     }
-
-    MutexUnlock(&Template->PoolTrackerLock);
-  
+      
     PFAST_ALLOCATION_TRACKER NewPool = AllocatePoolTracker(Template);
 
     if(!NewPool){
@@ -219,8 +187,8 @@ PVOID LouKeAllocateFastObjectEx(
     }
 
     _ALLOCATION_FINISHED:
+    MutexUnlock(&Template->PoolTrackerLock);
     return Result;
-
 }
 
 PVOID LouKeAllocateFastObject(
@@ -236,11 +204,10 @@ void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address){
         return;
     }
 
-    PFAST_ALLOCATION_TRACKER TmpTracker = &Template->PoolTrackers;
+    PFAST_ALLOCATION_TRACKER TmpTracker;
     UINT64 PoolSize = (ROUND_UP64(Template->ObjectSize, Template->ObjectAlignment) * Template->ObjectCount);
     MutexLock(&Template->PoolTrackerLock);
-    while(TmpTracker->Peers.NextHeader){
-        TmpTracker = (PFAST_ALLOCATION_TRACKER)TmpTracker->Peers.NextHeader;
+    ForEachListEntry(TmpTracker, &Template->PoolTrackers, Peers){
         POOL TmpPool = TmpTracker->AllocationPool;
         if(RangeInterferes((UINT64)Address, 1, TmpPool->VLocation, PoolSize)){
             if(Template->DeConstructor){
@@ -254,9 +221,8 @@ void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address){
                 FreePoolTracker(Template, TmpTracker);
             }
             goto _FREE_FINISHED;
-        }        
+        }
     }
-
     _FREE_FINISHED:
     MutexUnlock(&Template->PoolTrackerLock);
 } 

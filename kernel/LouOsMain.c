@@ -21,6 +21,9 @@ string KERNEL_ARCH = "64-BIT";
 
 LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
+KERNEL_EXPORT UINT64 LouKeGetKSpaceBase(){
+    return GetKSpaceBase();
+}
 
 typedef struct _PROCESSOR_FEATURES{
     bool    Sse1Supported;
@@ -347,14 +350,19 @@ void LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
-    LouKeInitializePciDevices();
-
-    LouKeSantyCheckPciDevices();
-
     LouKeInitializeKernelRuntimeEnviornment();
 
     AdvancedLousineKernelInitialization();
     
+    LouPrint("Successful Boot\n");
+
+    while(1);
+
+
+    LouKeInitializePciDevices();
+
+    LouKeSantyCheckPciDevices();
+
     LookForStorageDevices();
          
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();

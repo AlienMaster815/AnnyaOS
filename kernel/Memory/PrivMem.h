@@ -13,7 +13,7 @@ typedef struct _FAST_ALLOCATION_TEMPLATE{
     ListHeader                      Peers;
     KERNEL_REFERENCE                KRef; 
     LOUSTR                          TrackingTag;
-    FAST_ALLOCATION_TRACKER         PoolTrackers;
+    ListHeader                      PoolTrackers;
     mutex_t                         PoolTrackerLock;
     SIZE                            ObjectSize;
     SIZE                            ObjectCount;
