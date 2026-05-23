@@ -63,7 +63,7 @@ static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Te
         Template->PageFlags
     );    
 
-    LouPrint("NewPool:%h With Size:%h ObjSize:%h For Template:%h :: %s\n", NewTracker->AllocationPool->VLocation, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment) * Template->ObjectCount, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment), Template, Template->TrackingTag);
+    //LouPrint("NewPool:%h With Size:%h ObjSize:%h For Template:%h :: %s\n", NewTracker->AllocationPool->VLocation, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment) * Template->ObjectCount, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment), Template, Template->TrackingTag);
     
     if(!NewTracker->AllocationPool){
         LouKeFree(NewTracker);
