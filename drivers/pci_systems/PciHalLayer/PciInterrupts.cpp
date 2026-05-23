@@ -4,6 +4,7 @@
 
 LOUAPI uint16_t GetNPROC();
 LOUAPI uint8_t GetTotalHardwareInterrupts();
+void LouKePciDbgPrint(char* format, ...);
 
 
 UINT8 LouKeHalPciGetCapabilityPointer(

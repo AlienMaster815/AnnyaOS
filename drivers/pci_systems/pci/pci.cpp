@@ -3,6 +3,17 @@
 #include <LouACPI.h>
 #include <Hal.h>
 
+static BOOLEAN PciDebugOn = false;
+
+void LouKePciDbgPrint(char* format, ...){
+    if(PciDebugOn){
+        va_list args;
+        va_start(args, format);
+        LouPrintEx(format, args);
+        va_end(args);
+    }
+}
+
 #define NOT_A_PCI_DEVICE 0xFFFF 
 
 bool isUsb(uint8_t bus, uint8_t slot, uint8_t function);
@@ -40,16 +51,16 @@ void LouKeFreePciDevObject(PPCI_DEVICE_OBJECT PDEV){
 }
 
 LOUAPI void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
-    //LouPrint("Here\n");
+    //LouKePciDbgPrint("Here\n");
 
     uint8_t function = 0;
     uint16_t vendorID = PciGetVendorID(Group, bus, device);
 
     if (vendorID == NOT_A_PCI_DEVICE) return; // Device doesn't exist
     uint8_t headerType = getHeaderType(Group, bus, device, function);
-    LouPrint("HeaderType:%d\n", headerType);
+    LouKePciDbgPrint("HeaderType:%d\n", headerType);
     if ((headerType & 0x80) != 0) {
-        LouPrint("Device Is MultiFunction\n");
+        LouKePciDbgPrint("Device Is MultiFunction\n");
         // It's a multi-function device, so check remaining functions
         for (function = 0; function < 8; function++) {
             if (PciGetVendorID(Group, bus, device) != NOT_A_PCI_DEVICE) {
@@ -59,7 +70,7 @@ LOUAPI void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
                     if(!PDev){
                         PDev = LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);                    
                     }
-                    LouPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
+                    LouKePciDbgPrint("Multi Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
                     PDev->Group = Group;
                     PDev->bus = bus;
                     PDev->slot = device;
@@ -78,7 +89,7 @@ LOUAPI void checkDevice(uint16_t Group, uint8_t bus, uint8_t device) {
         if(!PDev){
             PDev = (PPCI_DEVICE_OBJECT)LouKeMallocType(PCI_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
         }
-        LouPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
+        LouKePciDbgPrint("Single Function PCI Device Found Vedor Is: %h and Device Is: %h\n", vendorID, PciGetDeviceID(Group, bus, device, function));
         PDev->Group = Group;
         PDev->bus = bus;
         PDev->slot = device;
@@ -114,7 +125,12 @@ LOUAPI size_t LouKeGetMcfgCount(void* Table);
 
 LOUAPI void PCI_Scan_Bus(){
 
-    LouPrint("Scanning PCI Bus\n");
+    HANDLE PciDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\PCI_DEBUG", 0x00);
+    BYTE DbgValue = 0;
+    LouKeReadRegistryByteValue(PciDebugKey, &DbgValue);
+    PciDebugOn = DbgValue ? true : false;
+
+    LouKePciDbgPrint("Scanning PCI Bus\n");
     
     //uint16_t GroupIndex = 0;
     size_t Count = 0x00;

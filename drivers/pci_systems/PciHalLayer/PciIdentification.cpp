@@ -3,6 +3,8 @@
 
 #include <Hal.h>
 
+void LouKePciDbgPrint(char* format, ...);
+
 LOUAPI size_t GetBootDeviceCount();
 
 UNUSED static void SanityCheck(LPWSTR Str, size_t Length){
@@ -110,7 +112,7 @@ PVOID LouKeGetPciDeviceRegistryHandle(
     PVOID SubClassKey = 0;
     PVOID ProgIfKey = 0;
     if(!PciKeys){
-        LouPrint("Unable To Open PCI Keys\n");
+        LouKePciDbgPrint("Unable To Open PCI Keys\n");
         return 0x00;
     }
     //what im about to do is about to piss

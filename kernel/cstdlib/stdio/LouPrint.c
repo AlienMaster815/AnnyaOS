@@ -241,7 +241,7 @@ INTEGER
 GetCurrentCpuTrackMember();
 
 KERNEL_EXPORT
-int LouPrint(char* format, ...) {
+int LouPrintEx(char* format, va_list args) {
     LouKIRQL OldLevel;
         
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
@@ -254,13 +254,20 @@ int LouPrint(char* format, ...) {
             _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
         }
     }
+    
+    result = LouPrint_s(format, args);
+    LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
+    return result;
+}
+
+
+
+KERNEL_EXPORT
+int LouPrint(char* format, ...) {
     va_list args;
     va_start(args, format);
-    result = LouPrint_s(format, args);
+    int result = LouPrintEx(format, args);
     va_end(args);
-    LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
-    
-    
     return result;
 }
 

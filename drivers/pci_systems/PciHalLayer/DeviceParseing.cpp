@@ -2,8 +2,7 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-
-
+void LouKePciDbgPrint(char* format, ...);
 
 LOUAPI
 PPCI_MANAGER_DATA LouKeGetPciDataTable();
@@ -90,8 +89,8 @@ PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
     uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
     uint8_t LocalMembers = LouKeGetPciCountByType(PciConfig);
 
-    LouPrint("Global Members:%d\n", GlobalMembers);
-    LouPrint("Local Members:%d\n", LocalMembers);
+    LouKePciDbgPrint("Global Members:%d\n", GlobalMembers);
+    LouKePciDbgPrint("Local Members:%d\n", LocalMembers);
 
     // Allocate memory for result group based on number of matching devices
     if(!LocalMembers){

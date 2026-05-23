@@ -90,6 +90,7 @@ static inline void LouKeIoMapObjClear(
 
 
 int LouPrint(char* format, ...);
+int LouPrintEx(char* format, va_list Args);
 
 void 
 uintToHexString(
