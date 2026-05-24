@@ -57,8 +57,8 @@ typedef struct _WINDOW_CLASS_EX_A{
     HICON       ClassIcon;
     HCURSOR     ClassCursor;
     HBRUSH      BackgroundBrush;
-    LPCSTR      MenuName;
-    LPCSTR      ClassName;
+    LPSTR       MenuName;
+    LPSTR       ClassName;
     HICON       TaskbarIcon;
 }WINDOW_CLASS_EX_A, * PWINDOW_CLASS_EX_A,
     WNDCLASSEXA, * PWNDCLASSEXA, * NPWNDCLASSEXA, * LPWNDCLASSEXA;
@@ -73,10 +73,15 @@ typedef struct _WINDOW_CLASS_EX_W{
     HICON       ClassIcon;
     HCURSOR     ClassCursor;
     HBRUSH      BackgroundBrush;
-    LPCWSTR     MenuName;
-    LPCWSTR     ClassName;
+    LPWSTR      MenuName;
+    LPWSTR      ClassName;
     HICON       TaskbarIcon;
 }WINDOW_CLASS_EX_W, * PWINDOW_CLASS_EX_W,
     WNDCLASSEXW, * PWNDCLASSEXW, * NPWNDCLASSEXW, * LPWNDCLASSEXW;
 
+#ifndef _USER32_INTERNAL_H
+ANNA_IMPORT ATOM RegisterClassExW(
+    const WINDOW_CLASS_EX_W* NewClass
+);
+#endif
 #endif

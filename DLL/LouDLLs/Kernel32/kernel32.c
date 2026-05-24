@@ -1,5 +1,6 @@
 #include "kernel32.h"
 
+ANNA_IMPORT PUSER_PROCESS_HEAP LouDllHeap;
 
 KERNEL32_API
 ATOM
@@ -20,7 +21,13 @@ AddAtomA(
     LPCSTR String
 ){
     ATOM Result = 0x00;
-
+    PWSTR NewString = (PWSTR)LouRtlAllocateHeapEx(LouDllHeap, (strlen(String) + 1) * sizeof(WCHAR), GET_ALIGNMENT(WCHAR), 0x00);
+    LouMemSet(NewString, 0, (strlen(String) + 1) * sizeof(WCHAR));
+    for(SIZE i = 0 ; String[i]; i++){
+        NewString[i] = (WCHAR)String[i];
+    }
+    Result = AddAtomW(NewString);
+    LouRtlFreeHeap(LouDllHeap, NewString, 0x00);
     return Result;
 }
 

@@ -221,4 +221,3 @@ LouMemCpy(
 ){
     return MemcopyHandler(OutStream, InStream, ByteCount);
 }
-

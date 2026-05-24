@@ -5,4 +5,6 @@
 
 #define KERNEL32_API __declspec(dllexport)
 
+ANNA_IMPORT size_t strlen(string Str);
+
 #endif

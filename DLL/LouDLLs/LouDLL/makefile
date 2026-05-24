@@ -22,7 +22,6 @@ SRC = LouDll.c \
 	Nt/NtDll.c \
 	Nt/Sha.c \
 	Nt/Locale.c \
-	Nt/string.c \
 	Rtl.c \
 	Processes.c
 

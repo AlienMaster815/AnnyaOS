@@ -13,6 +13,8 @@ void LouYeildExecution();
 
 static UINT64 FsiLevel = 0;
 
+ANNA_EXPORT PUSER_PROCESS_HEAP LouDllHeap = 0x00;
+
 UINT64 LouGetFloatStoreImplementation(){
     return FsiLevel;
 }
@@ -87,6 +89,16 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         if(LouInitializeIoCtlTable(LouDllIoCalls) != STATUS_SUCCESS){
             LouPrint("LOUDLL.DLL Failed To Register IOCTLs\n");
         }
+
+        LouDllHeap = LouRtlCreateHeap(
+            USER_HEAP_FLAG_GROWABLE,
+            0x00, 
+            MEGABYTE_PAGE,
+            MEGABYTE_PAGE,
+            0x00,
+            0x00
+        );
+
     }
     
     //Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
@@ -271,7 +283,7 @@ int vsprintf_s(char* Buffer, size_t BufferCount, const char* Format, va_list arg
 
             if (Format[Index] == 's') { // String
                 const char* strArg = va_arg(args, const char*);
-                Addition = strlen(strArg);
+                Addition = strlen((string)strArg);
                 if (Addition > remainingBuffer) return BUFFER_OVERFLOW_ERROR;
                 strncpy(Buffer, strArg, Addition);
                 Buffer += Addition;

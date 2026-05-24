@@ -209,10 +209,7 @@ RtlMultiByteToUnicodeN(
     DWORD   SrcLength
 );
 
-size_t 
-strlen(
-    const char* str
-);
+LOUDLL_API size_t strlen(string Str);
 
 size_t
 wcsspn(

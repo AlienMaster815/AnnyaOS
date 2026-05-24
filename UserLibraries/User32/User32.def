@@ -2,13 +2,4 @@
 LIBRARY User32.dll
 
 EXPORTS	
-    AnnyaStartUserMode
-    AnnyaCreateWindow
-    AnnyaCreateCanvasBuffer
-    AnnyaRegisterCallbackProcedure
-    malloc
-    free
-    InitializeAwmUserSubsystem
-    UpdateWindow
-    ShowWindow
-    CreateWindowA
+    RegisterClassExW

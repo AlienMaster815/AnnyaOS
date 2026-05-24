@@ -249,7 +249,7 @@ LouRtlCharToUint64(
         String++;
     }
 
-    int Index = strlen(String);
+    int Index = strlen((string)String);
     *Value = 0x00;
 
     if((strncmp(String, "0x", 2)) || (strncmp(String, "0X", 2))){
@@ -325,7 +325,7 @@ if((!Value) || (!String)){
         String++;
     }
 
-    int Index = strlen(String);
+    int Index = strlen((string)String);
     *Value = 0x00;
 
     if((strncmp(String, "0x", 2)) || (strncmp(String, "0X", 2))){
@@ -601,6 +601,9 @@ LouRtlAllocateHeapEx(
             LouMemSet(TmpResult, 0, Size);
         }
         
+    }else{
+        LouPrint("LouDLL.DLL:LouRtlAllocateHeapEx()\n");
+        while(1);
     }
 
     if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
@@ -637,4 +640,12 @@ LouRtlFreeHeap(
 ){
     LouPrint("LOUDLL.DLL:LouRtlFreeHeap()\n");
     while(1);
+}
+
+LOUDLL_API size_t strlen(string Str){
+    size_t i = 0;
+    while(Str[i]){
+        i++;
+    }
+    return i;
 }

@@ -49,3 +49,6 @@ EXPORTS
     wcslen
     LouAddAtom
     LouAddAtomEx
+    LouDllHeap
+    strlen
+    LouMemSet

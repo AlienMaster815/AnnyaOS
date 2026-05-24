@@ -18,7 +18,7 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
 
     for(SIZE Tx = 0; Tx < Width; Tx++){
         for(SIZE Ty = 0; Ty < Height; Ty++){
-            DrsdPutPixelEx(Tx + x, Ty + y, SET_RGB(255, 255,255));
+            DrsdPutPixelEx(Tx + x, Ty + y, SET_RGB(0, 0xC0, 0xC0));
         }
     }
 

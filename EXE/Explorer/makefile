@@ -8,7 +8,7 @@ LDFLAGS = \
     -Wl,--high-entropy-va \
     -L../../UserLibraries
 INCLUDES = -I../../include
-LIBS = -lLouDll
+LIBS = -lLouDll -luser32
 
 # Source and target
 SRC = Explorer.c
