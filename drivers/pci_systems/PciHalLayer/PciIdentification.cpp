@@ -3,7 +3,7 @@
 
 #include <Hal.h>
 
-void LouKePciDbgPrint(char* format, ...);
+LOUAPI void LouKePciDbgPrint(char* format, ...);
 
 LOUAPI size_t GetBootDeviceCount();
 

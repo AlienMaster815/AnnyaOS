@@ -2,7 +2,7 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-void LouKePciDbgPrint(char* format, ...);
+LOUAPI void LouKePciDbgPrint(char* format, ...);
 
 LOUAPI
 PPCI_MANAGER_DATA LouKeGetPciDataTable();

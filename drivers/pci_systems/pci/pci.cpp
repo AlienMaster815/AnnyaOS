@@ -5,7 +5,7 @@
 
 static BOOLEAN PciDebugOn = false;
 
-void LouKePciDbgPrint(char* format, ...){
+LOUAPI void LouKePciDbgPrint(char* format, ...){
     if(PciDebugOn){
         va_list args;
         va_start(args, format);
@@ -123,6 +123,8 @@ LOUAPI void AddPcieGroup(ACPI_MCFG_ALLOCATION* PciManagerData);
 
 LOUAPI size_t LouKeGetMcfgCount(void* Table);
 
+#define ACPI_SIG_MCFG           "MCFG"      /* PCI Memory Mapped Configuration table */
+
 LOUAPI void PCI_Scan_Bus(){
 
     HANDLE PciDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\PCI_DEBUG", 0x00);
@@ -136,9 +138,7 @@ LOUAPI void PCI_Scan_Bus(){
     size_t Count = 0x00;
     //PPCIE_SYSTEM_MANAGER Psm = 0x00;
 
-    
-
-    PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAquireAcpiTable(PCI_EXSPRESS_MEMORY_MAPPED_CONFIGURATION);
+    PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAquireAcpiTable(ACPI_SIG_MCFG);
     if(!McfgTable){
         for(size_t i = 0 ; i < 255; i++){
             checkBus(0, i);
@@ -151,7 +151,7 @@ LOUAPI void PCI_Scan_Bus(){
         PcieDevice = false;
         for (size_t j = 0; j < Count; j++) {
             if ((McfgTable->TableEntries[j].Group == 0) && (McfgTable->TableEntries[j].ConfigurationBaseAddress)) {
-                if (RangeInterferes(i, 0, McfgTable->TableEntries[j].StartBus, McfgTable->TableEntries[j].EndBus)) {
+                if (RangeInterferes(i, 1, McfgTable->TableEntries[j].StartBus, McfgTable->TableEntries[j].EndBus)) {
                     PcieDevice = true;
                     break;
                 }

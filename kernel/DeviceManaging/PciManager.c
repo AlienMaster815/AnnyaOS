@@ -4,14 +4,16 @@
 static PCI_MANAGER_DATA PciData = {0};
 static size_t RegisteredPciDevices = 0;
 
+LOUAPI void LouKePciDbgPrint(char* format, ...);
+
 LOUSTATUS RegisterPciDeviceToDeviceManager(
     PPCI_DEVICE_OBJECT PDEV,
     string RegistryEntry,
     string DeviceManagerString
 ){
 
-    LouPrint("Registered Pci Device:%d\n", RegisteredPciDevices);
-    LouPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
+    LouKePciDbgPrint("Registered Pci Device:%d\n", RegisteredPciDevices);
+    LouKePciDbgPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
 
 
     PPCI_MANAGER_DATA Tmp = &PciData;

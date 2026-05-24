@@ -2,6 +2,8 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
+LOUAPI void LouKePciDbgPrint(char* format, ...);
+
 PPCI_DEVICE_OBJECT LouKeAllocPciDevObject();
 void LouKeFreePciDevObject(PPCI_DEVICE_OBJECT PDEV);
 
@@ -26,7 +28,7 @@ void LouKeInitializeEcamAbstractionDevice(
 
     NewDevice->Phys = Phys;
     NewDevice->Virt = Virt;
-    LouPrint("Virtual:%h\n", Virt);
+    LouKePciDbgPrint("Virtual:%h\n", Virt);
     NewDevice->Group = Group;
     NewDevice->StartBus = StartBus;
     NewDevice->EndBus = EndBus;

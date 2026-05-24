@@ -3,7 +3,7 @@
 
 #include <Hal.h>
 
-void LouKePciDbgPrint(char* format, ...);
+LOUAPI void LouKePciDbgPrint(char* format, ...);
 
 #define BUS PDEV->bus
 #define SLOT PDEV->slot
