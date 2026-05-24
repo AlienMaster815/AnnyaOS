@@ -1,6 +1,8 @@
 #include <LouACPI.h>
 #include <acpi.h>
 
+void LouKeAcpiDbgPrint(char* format, ...);
+
 static PACPI_EMBEDDED_CONTROLLER BootEc = 0x00;
 static INTEGER EcFlagsCorectEcdt = 0;
 static INTEGER EcFlagTrustDsdGpe = 0;
@@ -20,19 +22,19 @@ static PACPI_EMBEDDED_CONTROLLER AllocateAcpiEc(){
 }
 
 static INTEGER EcCorrectEcdt(PDMI_SYSTEM_ID Id){
-    LouPrint("LouACPI Core: System Detected ECDT Address Needs Corection\n");
+    LouKeAcpiDbgPrint("LouACPI Core: System Detected ECDT Address Needs Corection\n");
     EcFlagsCorectEcdt = 1;
     return 0;
 }
 
 static INTEGER EcHonorDsdtGpe(PDMI_SYSTEM_ID Id){
-    LouPrint("LouACPI Core: System Detected DSDT Gpe To Be Honored\n");
+    LouKeAcpiDbgPrint("LouACPI Core: System Detected DSDT Gpe To Be Honored\n");
     EcFlagTrustDsdGpe = 1;
     return 0;
 }
 
 static INTEGER EcClearOnResume(PDMI_SYSTEM_ID Id){
-    LouPrint("LouACPI Core: System Detected Ec Poll On Resume\n");
+    LouKeAcpiDbgPrint("LouACPI Core: System Detected Ec Poll On Resume\n");
     EcFlagsClearOnResume = 1;
     AcpiEventClearing = ACPI_EC_EVENT_TIMING_STATUS;
     return 0;

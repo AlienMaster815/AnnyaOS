@@ -1,6 +1,8 @@
 #include <LouACPI.h>
 #include <acpi.h>
 
+void LouKeAcpiDbgPrint(char* format, ...);
+
 static void AcpiOsiLateSetup(){
     //were im not gonna modify firmware at this time
     //but i would midify the firmware to use my kernels
@@ -10,7 +12,7 @@ static void AcpiOsiLateSetup(){
 
 static uint32_t AcpiOsiHandler(ACPI_STRING Interface, uint32_t Supported){
 
-    LouPrint("Using Interface Behavior:[%s]\n", Interface);
+    LouKeAcpiDbgPrint("Using Interface Behavior:[%s]\n", Interface);
 
     return Supported;
 }

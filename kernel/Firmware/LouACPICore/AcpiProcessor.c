@@ -1,6 +1,7 @@
 #include <LouACPI.h>
 #include <acpi.h>
 
+void LouKeAcpiDbgPrint(char* format, ...);
 
 static LOUSTATUS MapLapicId(
     ACPI_SUBTABLE_HEADER*   Entry,
@@ -87,7 +88,7 @@ static UINT64 MapMatEntry(
     UINT64                  PhyID = UINT64_MAX;
     
     if(ACPI_FAILURE(AcpiEvaluateObject(AcpiHandle, "_MAT", NULL, &Buffer))){
-        LouPrint("Unable To Evaluate _MAT Table\n");
+        LouKeAcpiDbgPrint("Unable To Evaluate _MAT Table\n");
         goto _MAP_MAT_ENTRY_EXIT;
     }
     
@@ -259,7 +260,7 @@ static void AcpiEarlyProcessorSetPdc(){
 
 void AcpiEarlyProcessorControlSetup(){
     if(AcpiEarlyProcessorOsc()){
-        LouPrint("_OSC Evaluated Successfully For All Processors\n");
+        LouKeAcpiDbgPrint("_OSC Evaluated Successfully For All Processors\n");
     }else{
         LouPrint("_OSC Evaluation Failed Trying _PDC\n");
         AcpiEarlyProcessorSetPdc();

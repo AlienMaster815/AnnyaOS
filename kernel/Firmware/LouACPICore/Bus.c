@@ -9,6 +9,17 @@ void AcpiEarlyProcessorControlSetup();
 void AcpiEcProbDsdt();
 LOUSTATUS AcpiInitializeSleep();
 
+static BOOLEAN AcpiDebugOn = false;
+
+void LouKeAcpiDbgPrint(char* format, ...){
+    if(AcpiDebugOn){
+        va_list args;
+        va_start(args, format);
+        LouPrintEx(format, args);
+        va_end(args);
+    }
+}
+
 static ACPI_STATUS AcpiBusTableHandler(
     UINT32 Event, 
     PVOID Table, 
@@ -122,24 +133,24 @@ LOUSTATUS AcpiBusInitialize(){
 
     AcpiStatus = AcpiOsInitialize1();
 
-    LouPrint("Loading Tables\n");
+    LouKeAcpiDbgPrint("Loading Tables\n");
     AcpiStatus = AcpiLoadTables();
     if (ACPI_FAILURE(AcpiStatus)) {
         LouPrint("AcpiLoadTables failed\n");
         goto _ACPI_BUS_INITIALIZE_ERROR;
     }
     
-    LouPrint("Probing ECDT\n");
+    LouKeAcpiDbgPrint("Probing ECDT\n");
     AcpiEcEcdtProbe();
 
-    LouPrint("Enabling System\n");
+    LouKeAcpiDbgPrint("Enabling System\n");
     AcpiStatus = AcpiEnableSubsystem(ACPI_NO_ACPI_ENABLE);
     if (ACPI_FAILURE(AcpiStatus)) {
         LouPrint("AcpiEnableSubsystem failed\n");
         goto _ACPI_BUS_INITIALIZE_ERROR;
     }
 
-    LouPrint("Initializing Objects\n");
+    LouKeAcpiDbgPrint("Initializing Objects\n");
     AcpiStatus = AcpiInitializeObjects(ACPI_FULL_INITIALIZATION);
     if (ACPI_FAILURE(AcpiStatus)) {
         LouPrint("AcpiInitializeObjects failed\n");
@@ -155,13 +166,13 @@ LOUSTATUS AcpiBusInitialize(){
     
     AcpiEcProbDsdt();
 
-    LouPrint("Interpreter Enabled\n");
+    LouKeAcpiDbgPrint("Interpreter Enabled\n");
 
     AcpiInitializeSleep();
 
     AcpiStatus = AcpiGetHandle(NULL, "\\_PIC", &PicHandle);
     if(ACPI_SUCCESS(AcpiStatus)) {
-        LouPrint("_PIC method located\n");
+        LouKeAcpiDbgPrint("_PIC method located\n");
         ACPI_OBJECT Arg;
         Arg.Type = ACPI_TYPE_INTEGER;
         Arg.Integer.Value = 1; // APIC mode
@@ -174,7 +185,7 @@ LOUSTATUS AcpiBusInitialize(){
         if (ACPI_FAILURE(AcpiStatus)) {
             LouPrint("Failed to evaluate _PIC method\n");
         } else {
-            LouPrint("_PIC method executed successfully\n");
+            LouKeAcpiDbgPrint("_PIC method executed successfully\n");
         }
     }
 
@@ -210,9 +221,14 @@ void AcpiInitializePlatformCommunications();
 void AcpiInitializeFfh();
 
 void LouKeInitializeFullLouACPISubsystem(){
+    HANDLE AcpiDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\SCHED_DEBUG", 0x00);
+    BYTE DbgValue = 0;
+    LouKeReadRegistryByteValue(AcpiDebugKey, &DbgValue);
+    AcpiDebugOn = DbgValue ? true : false;
+    
     ACPI_STATUS Status;
     LOUSTATUS St;
-    LouPrint("Initializing Acpica Subsystem\n");
+    LouKeAcpiDbgPrint("Initializing Acpica Subsystem\n");
 
     Status = AcpiInitializeSubsystem();
     if (ACPI_FAILURE(Status)) {
@@ -220,17 +236,17 @@ void LouKeInitializeFullLouACPISubsystem(){
         return;
     }
     
-    LouPrint("Initializing Tables\n");
+    LouKeAcpiDbgPrint("Initializing Tables\n");
     Status = AcpiInitializeTables(NULL, LouKeAcpiGetTableCount(), FALSE);
     if (ACPI_FAILURE(Status)) {
         LouPrint("AcpiInitializeTables failed\n");
         return;
     }
-    LouPrint("Initializing Runtime\n");
+    LouKeAcpiDbgPrint("Initializing Runtime\n");
     AcpiInitializePlatformRuntime();
-    LouPrint("Initializing Communications\n");
+    LouKeAcpiDbgPrint("Initializing Communications\n");
     AcpiInitializePlatformCommunications();
-    LouPrint("Initializing Bus\n");
+    LouKeAcpiDbgPrint("Initializing Bus\n");
     St = AcpiBusInitialize();
     if(St != STATUS_SUCCESS){
         //DisableAcpi();
@@ -239,13 +255,13 @@ void LouKeInitializeFullLouACPISubsystem(){
         while(1);
         return;
     }
-    LouPrint("Initializing Ffh\n");
+    LouKeAcpiDbgPrint("Initializing Ffh\n");
     AcpiInitializeFfh();
-    LouPrint("Initializing VIOT\n");
+    LouKeAcpiDbgPrint("Initializing VIOT\n");
     EarlyInitializeViot();
-    LouPrint("Initializing HEST\n");
+    LouKeAcpiDbgPrint("Initializing HEST\n");
     AcpiInitializeHest();
-    LouPrint("Initializing Scan\n");
+    LouKeAcpiDbgPrint("Initializing Scan\n");
     AcpiInitializeScan();
-    LouPrint("LouKeInitializeFullLouACPISubsystem()\n");
+    LouKeAcpiDbgPrint("LouKeInitializeFullLouACPISubsystem()\n");
 }

@@ -1,6 +1,8 @@
 #include <LouACPI.h>
 #include <acpi.h>
 
+void LouKeAcpiDbgPrint(char* format, ...);
+
 PVOID UnusedFfhCtx = 0x00;
 
 static ACPI_STATUS AcpiFfhAddressSpaceSetup(
@@ -31,5 +33,5 @@ void AcpiInitializeFfh(){
         LouPrint("Operation Region Handler Could Not Be Installed\n");
     }
 
-    LouPrint("AcpiInitializeFfh()\n");
+    LouKeAcpiDbgPrint("AcpiInitializeFfh()\n");
 } 

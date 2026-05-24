@@ -5,6 +5,8 @@ static BOOL PciHasE820 = true;
 static BOOL PciIgnoreSeg = false;
 static BOOL PciUseCrs = true;
 
+void LouKeAcpiDbgPrint(char* format, ...);
+
 static INTEGER SetNoE820(PDMI_SYSTEM_ID Id){
     PciHasE820 = false;
     return 0x00;
@@ -157,7 +159,7 @@ void PciMmcfgEarlyInit(){
 		return;
 	}
 
-	LouPrint("Initializing PCIe ECAM System\n");
+	LouKeAcpiDbgPrint("Initializing PCIe ECAM System\n");
 
 	size_t CfgCount = LouKeGetMcfgCount((PVOID)Mcfg);
 	size_t TotalDevices = 0;
