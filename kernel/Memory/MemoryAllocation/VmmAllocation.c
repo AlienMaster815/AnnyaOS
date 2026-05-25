@@ -46,8 +46,8 @@ LouKeAlocateVmmAllocationTracker(
     BOOLEAN HighMem
 ){
     PVMM_ALLOCATION_TRACKER NewTracker = LouKeMallocType(VMM_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
-    Size = ROUND_UP64(Size, MEGABYTE_PAGE);
-    SIZE PageSize = MEGABYTE_PAGE;
+    Size = ROUND_UP64(Size, KILOBYTE_PAGE);
+    SIZE PageSize = KILOBYTE_PAGE;
     PVOID NewVSpace = 0x00;
     PVOID NewPSpace = 0x00;
 

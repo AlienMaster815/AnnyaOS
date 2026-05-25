@@ -55,7 +55,7 @@ LouKeCreateStack(
         while(1);
     }
 
-    LouKeVmmCommitPageAddressEx((PVOID)CommitBase, StackTracker, CommitSize / MEGABYTE_PAGE, ProcessID, true);
+    LouKeVmmCommitPageAddressEx((PVOID)CommitBase, StackTracker, CommitSize / KILOBYTE_PAGE, ProcessID, true);
 
     return NewStack->Stack;
 }

@@ -472,7 +472,7 @@ static LOUSTATUS LouUserHeapCalculateSize(
     
     }else if((TmpReserve) && (!TmpCommit)){
     
-        TmpCommit = MEGABYTE_PAGE;
+        TmpCommit = KILOBYTE_PAGE;
     
     }else if((TmpCommit) && (!TmpReserve)){
     
@@ -481,8 +481,8 @@ static LOUSTATUS LouUserHeapCalculateSize(
     
     }else{
     
-        TmpReserve = 64 * MEGABYTE_PAGE;
-        TmpCommit  = MEGABYTE_PAGE;
+        TmpReserve = 64 * KILOBYTE_PAGE;
+        TmpCommit  = KILOBYTE_PAGE;
     
     }
 
@@ -531,7 +531,7 @@ LouRtlCreateHeap(
     }
 
     if(!HeapBase){
-        NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, MEGABYTE_PAGE, USER_GENERIC_MEMORY);
+        NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
     }
     if(NewHeap->HeapBase){
         LouMemSet(NewHeap->HeapBase, 0, NewHeap->CommitSize);

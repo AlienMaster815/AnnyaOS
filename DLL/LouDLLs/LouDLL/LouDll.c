@@ -93,8 +93,8 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         LouDllHeap = LouRtlCreateHeap(
             USER_HEAP_FLAG_GROWABLE,
             0x00, 
-            MEGABYTE_PAGE,
-            MEGABYTE_PAGE,
+            0x00,
+            0x00,
             0x00,
             0x00
         );

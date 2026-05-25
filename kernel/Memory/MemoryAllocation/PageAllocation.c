@@ -3,12 +3,12 @@
 uint64_t LouKeGetRamSize();
 
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres){
-    if(((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)) || (!PhysicalAddres) || ((PageSize == KILOBYTE_PAGE) && (PageCount >= 512))){
+    if((PageSize != KILOBYTE_PAGE) || (!PhysicalAddres)){
         return 0x00;
     }
     void* Result = LouVMallocEx(PageSize * PageCount, PageSize);
 
-    LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
+    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
 
     return Result;
 }
@@ -20,7 +20,7 @@ LouKeMallocPage(
     uint64_t PageCount, 
     uint64_t PageFlags
 ){    
-    if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
+    if(PageSize != KILOBYTE_PAGE){
         return 0x00;
     }
     void* Resurve = 0x00;
@@ -33,7 +33,7 @@ LouKeMallocPage(
 }
 
 void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres, BOOLEAN CreateDevSection){
-    if(((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)) || (!PhysicalAddres) || ((PageSize == KILOBYTE_PAGE) && (PageCount >= 512))){
+    if((PageSize != KILOBYTE_PAGE) || (!PhysicalAddres)){
         return 0x00;
     }
 
@@ -45,12 +45,12 @@ void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t Pa
     }
 
     if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
-    LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
+    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
     return Result;
 }
 
 void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection){
-    if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
+    if(PageSize != KILOBYTE_PAGE){
         return 0x00;
     }
     PVOID Result = 0x00;
@@ -87,7 +87,7 @@ LouKeMallocPageExVirt64(
     UINT64  PhysicalAddres,
     BOOLEAN CreateDevSection
 ){ 
-    if(((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)) || (!PhysicalAddres) || ((PageSize == KILOBYTE_PAGE) && (PageCount >= 512))){
+    if((PageSize != KILOBYTE_PAGE) || (!PhysicalAddres)){
         return 0x00;
     }
     void* Result = 0x00; 
@@ -98,13 +98,13 @@ LouKeMallocPageExVirt64(
     }
 
     if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
-    LouKeMapContinuousMemoryBlock(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
+    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
     return Result;
 }
 
 //this is specifically for NON kernel 64 bit memory e.g. sections, heaps, stacks, ect...
 void* LouKeMallocPageVirt64(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection){
-    if((PageSize != KILOBYTE_PAGE) && (PageSize != MEGABYTE_PAGE)){
+    if(PageSize != KILOBYTE_PAGE){
         return 0x00;
     }
     PVOID Result = 0x00;

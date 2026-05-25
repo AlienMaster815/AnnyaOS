@@ -9,16 +9,16 @@
 #define USER_HEAP_FLAG_ZERO_MEMORY              (1 << 3)
 
 #define USER_HEAP_PARAM_LENGTH                  sizeof(USER_HEAP_PARAMETERS)
-#define USER_HEAP_PARAM_SEGRES(x)               (x ? x : (2 * MEGABYTE_PAGE))
-#define USER_HEAP_PARAM_SEGCOM(x)               (x ? x : (2 * MEGABYTE_PAGE))
-#define USER_HEAP_PARAM_DECOM_FBT(x)            (x ? x : (MEGABYTE_PAGE))
+#define USER_HEAP_PARAM_SEGRES(x)               (x ? x : (2 * KILOBYTE_PAGE))
+#define USER_HEAP_PARAM_SEGCOM(x)               (x ? x : (2 * KILOBYTE_PAGE))
+#define USER_HEAP_PARAM_DECOM_FBT(x)            (x ? x : (KILOBYTE_PAGE))
 #define USER_HEAP_PARAM_DECOM_TFT(x)            (x ? x : 0xFFFF)
-#define USER_HEAP_PARAM_MAS(x, ReserveSize)     (x ? x : (ReserveSize - MEGABYTE_PAGE))    
-#define USER_HEAP_PARAM_VMT(x, ReservedSize)    (((x < (ReserveSize - MEGABYTE_PAGE)) && x) ? x : 0x7F000)
+#define USER_HEAP_PARAM_MAS(x, ReserveSize)     (x ? x : (ReserveSize - KILOBYTE_PAGE))    
+#define USER_HEAP_PARAM_VMT(x, ReservedSize)    (((x < (ReserveSize - KILOBYTE_PAGE)) && x) ? x : 0x7F000)
 
 
 
-#define USER_HEAP_RESERVE_ROUND_UP(Commit)  ROUND_UP64(Commit, MEGABYTE_PAGE * 16)
+#define USER_HEAP_RESERVE_ROUND_UP(Commit)  ROUND_UP64(Commit * 16, KILOBYTE_PAGE)
 
 typedef LOUSTATUS (*USER_HEAP_COMMIT_ROUTINE)(
     PVOID   Base,

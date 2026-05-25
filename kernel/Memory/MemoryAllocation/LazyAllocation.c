@@ -25,23 +25,13 @@ static void FreeLazyTracker(PLAZY_ALLOCATION_TRACKER TrackMember){
 PLAZY_ALLOCATION_TRACKER LouKeAllocateLazyBuffer(PVOID VirtualLocation, SIZE VirtualSize, SIZE CommitSize, UINT64 PageFlags){
 
     SIZE PageSize = 0; 
-    if(ROUND_UP64(VirtualSize, MEGABYTE_PAGE) == VirtualSize){
-        PageSize = MEGABYTE_PAGE;
-    }else if(ROUND_UP64(VirtualSize, KILOBYTE_PAGE) == VirtualSize){
+    if(ROUND_UP64(VirtualSize, KILOBYTE_PAGE) == VirtualSize){
         PageSize = KILOBYTE_PAGE;
     }else {
         LouPrint("LouKeAllocateLazyBuffer() ERROR EINVAL\n");
         return 0x00;
     }
     
-    if(PageSize == MEGABYTE_PAGE && CommitSize){
-        if(ROUND_UP64(CommitSize, MEGABYTE_PAGE) != CommitSize){
-            PageSize = KILOBYTE_PAGE;
-        }else if(ROUND_UP64(CommitSize, KILOBYTE_PAGE) != CommitSize){
-            return 0x00;
-        }
-    }
-
     PLAZY_ALLOCATION_TRACKER NewTracker = AllocateLazyTracker();
     NewTracker->VirtualSize = VirtualSize;
     NewTracker->VirtualLocation = VirtualLocation;

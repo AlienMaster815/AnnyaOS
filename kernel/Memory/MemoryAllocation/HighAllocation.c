@@ -65,7 +65,7 @@ LouKeMallocFromTrackers(
     ListHeader*                 Track = &KernelMemorySpaces[MemorySpace];
     PVOID                       Result = 0x00;
     PKMALLOC_PAGE_TRACK         TmpPageTrack = 0x00;
-    uint64_t                    RoundUpSize = ROUND_UP64(Size, MAX(MEGABYTE_PAGE, ROUND_UP64(Alignment, MEGABYTE_PAGE)));
+    uint64_t                    RoundUpSize = ROUND_UP64(Size, KILOBYTE_PAGE);
     PAGE_ALLOCATOR_FUNCTION     PageAllocator = KernelMemorySpacesPageAllocators[MemorySpace];
     PAGE_ALLOCATOR_FUNCTION_EX  PageAllocatorEx = MemorySpace > 1 ? (PAGE_ALLOCATOR_FUNCTION_EX)KernelMemorySpacesPageAllocators[MemorySpace] : 0x00;
     PKMALLOC_VMEM_TRACK         TmpVMemTrack;
@@ -85,7 +85,7 @@ LouKeMallocFromTrackers(
 
     TmpPageTrack = (PKMALLOC_PAGE_TRACK)LouGeneralAllocateMemoryEx(sizeof(KMALLOC_PAGE_TRACK), GET_ALIGNMENT(KMALLOC_PAGE_TRACK));
 
-    Result = PageAllocatorEx ? PageAllocatorEx(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, PageFlags, true) : PageAllocator(MEGABYTE_PAGE , RoundUpSize / MEGABYTE_PAGE, PageFlags);
+    Result = PageAllocatorEx ? PageAllocatorEx(KILOBYTE_PAGE, RoundUpSize / KILOBYTE_PAGE, PageFlags, true) : PageAllocator(KILOBYTE_PAGE , RoundUpSize / KILOBYTE_PAGE, PageFlags);
 
     TmpPageTrack->PageSize = RoundUpSize;
     TmpPageTrack->Flags = PageFlags;

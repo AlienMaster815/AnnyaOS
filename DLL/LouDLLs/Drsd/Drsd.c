@@ -92,7 +92,7 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
                                 BootFrameBuffer->FramebufferSize,
                                 0x00, 0x00
                             );
-                Canvas = (UINT32*)LouRtlAllocateHeapEx(CanvasHeap, BootFrameBuffer->FramebufferSize, MEGABYTE_PAGE, 0x00);
+                Canvas = (UINT32*)LouRtlAllocateHeapEx(CanvasHeap, BootFrameBuffer->FramebufferSize, KILOBYTE_PAGE, 0x00);
                 if(!Canvas){
                     LouPrint("DRSD.DLL:Error Allocating Offscreen Canvas\n");
                 }
