@@ -46,14 +46,25 @@ uint64_t LouKeLinkerGetAddress(
 );
 
 
-static PGENERIC_PROCESS_DATA CreateProcessObject(string ProcessName, string ProcessPath){    
+static PGENERIC_PROCESS_DATA CreateProcessObjectA(string ProcessName, string ProcessPath){    
     LouKIRQL Irql; 
     PGENERIC_PROCESS_DATA NewProcessObject = LouKeMallocType(GENERIC_PROCESS_DATA , KERNEL_GENERIC_MEMORY);
-    NewProcessObject->ProcessName = LouKeMallocArray(CHAR, strlen(ProcessName) + 1, USER_GENERIC_MEMORY);
-    strncpy(NewProcessObject->ProcessName, ProcessName, strlen(ProcessName));
-    
-    NewProcessObject->ProcessPath = LouKeMallocArray(CHAR, strlen(ProcessPath) + 1, USER_GENERIC_MEMORY);
-    strncpy(NewProcessObject->ProcessPath, ProcessPath, strlen(ProcessPath));
+
+    SIZE ProcessNameLen = strlen(ProcessName);
+    NewProcessObject->ProcessName = LouKeMallocArray(CHAR, ProcessNameLen + 1, USER_GENERIC_MEMORY);
+    strncpy(NewProcessObject->ProcessName, ProcessName, ProcessNameLen);
+    NewProcessObject->ProcessNameUnicode = LouKeMallocArray(WCHAR, ProcessNameLen + 1, USER_GENERIC_MEMORY);
+    for(SIZE i = 0; i < ProcessNameLen; i++){
+        NewProcessObject->ProcessNameUnicode[i] = (WCHAR)NewProcessObject->ProcessName[i];
+    }
+
+    SIZE ProcessPathLen = strlen(ProcessPath);
+    NewProcessObject->ProcessPath = LouKeMallocArray(CHAR, ProcessPathLen + 1, USER_GENERIC_MEMORY);
+    strncpy(NewProcessObject->ProcessPath, ProcessPath, ProcessPathLen);
+    NewProcessObject->ProcessPathUnicode = LouKeMallocArray(WCHAR, ProcessPathLen + 1, USER_GENERIC_MEMORY);
+    for(SIZE i = 0; i < ProcessPathLen; i++){
+        NewProcessObject->ProcessPathUnicode[i] = (WCHAR)NewProcessObject->ProcessPath[i];
+    }
 
     LouKeAcquireSpinLock(&ProcessListLock, &Irql);
     LouKeListAddTail(&NewProcessObject->Peers, &MasterProcessList);
@@ -121,7 +132,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     if(!ProcessName || !ProcessPath){
         return STATUS_INVALID_PARAMETER;
     }
-    PGENERIC_PROCESS_DATA NewProcessObject = CreateProcessObject(ProcessName, ProcessPath);
+    PGENERIC_PROCESS_DATA NewProcessObject = CreateProcessObjectA(ProcessName, ProcessPath);
     if(HandleOut){
         *HandleOut = NewProcessObject; 
     }
@@ -280,6 +291,28 @@ LOUSTATUS LouKePsmGetProcessData(
     return STATUS_NO_SUCH_FILE;
 }
 
+LOUSTATUS LouKePsmGetProcessDataW(
+    LPWSTR   ProcessName,
+    PKHANDLE OutHandle
+){
+    if((!ProcessName) || (!OutHandle)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    LouKIRQL Irql;
+    PGENERIC_PROCESS_DATA TmpHandle;
+    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
+    ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
+        ForEachIf(!wcscmp(TmpHandle->ProcessNameUnicode, ProcessName)){
+            *OutHandle = (HANDLE)TmpHandle;
+            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+            return STATUS_SUCCESS;
+        }
+    }
+    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+    *OutHandle = 0x00;
+    return STATUS_NO_SUCH_FILE;
+}
+
 LOUAPI
 uint64_t 
 LouKePsmGetProcessPml4(uint32_t ProcessID){
@@ -422,4 +455,12 @@ LouKePutCurrentProcessHandleCall(
     HANDLE Handle
 ){
     LouKeReleaseHandleFromObject(Handle, 0x00);
+}
+
+LOUAPI 
+ULONG 
+LouKeGetHProcessID(
+    PKHANDLE Process
+){
+    return ((PGENERIC_PROCESS_DATA)Process)->ProcessID;
 }

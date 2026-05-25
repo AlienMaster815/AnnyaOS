@@ -49,10 +49,16 @@ typedef HANDLE HPROCESS, * PHPROCESS;
 #define PROCESS_PRIORITY_LOW        4
 #define PROCESS_PRIORITY_RINGS      5
 
-#define KERNEL_PROCESS_NAME         "The Lousine Kernel"
-#define ASMSS_PROCESS_NAME          "Annya Os Session Manager Subsystem"
-#define AWM_PROCESS_NAME            "Annya Os Window Manager"
-#define EXPLORER_PROCESS_NAME       "Annya Os Explorer"
+#define KERNEL_PROCESS_NAME             "The Lousine Kernel"
+#define ASMSS_PROCESS_NAME              "Annya Os Session Manager Subsystem"
+#define AWM_PROCESS_NAME                "Annya Os Window Manager"
+#define EXPLORER_PROCESS_NAME           "Annya Os Explorer"
+
+#define KERNEL_PROCESS_NAME_UNICODE     L"The Lousine Kernel"
+#define ASMSS_PROCESS_NAME_UNICODE      L"Annya Os Session Manager Subsystem"
+#define AWM_PROCESS_NAME_UNICODE        L"Annya Os Window Manager"
+#define EXPLORER_PROCESS_NAME_UNICODE   L"Annya Os Explorer"
+
 
 typedef LOUSTATUS (*LOU_IPC_CALLBACK)(UINT64 MessageID, PVOID DataIn, SIZE DataInSize);
 #ifndef _IPC_INTERNALS
@@ -107,6 +113,17 @@ LOUAPI
 void
 LouKePutCurrentProcessHandleCall(
     HANDLE Handle
+);
+
+LOUSTATUS LouKePsmGetProcessDataW(
+    LPWSTR  ProcessName,
+    PHANDLE OutHandle
+);
+
+LOUAPI 
+ULONG 
+LouKeGetHProcessID(
+    PKHANDLE Process
 );
 
 #endif

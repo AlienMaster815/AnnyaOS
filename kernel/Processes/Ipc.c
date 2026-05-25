@@ -5,13 +5,14 @@ typedef struct _LOU_IPC_MESSAGE{
     ListHeader          Peers;
     BOOLEAN             MessageCompleted;
     UINT64              MessageID;
-    PVOID               DataIn;
-    SIZE                DataInSize;
+    PVOID               Data;
+    SIZE                DataSize;
+    LOU_IPC_CALLBACK    Callback;
 }LOU_IPC_MESSAGE, * PLOU_IPC_MESSAGE;
 
 typedef struct _LOU_IPC_MANAGER{
     HPROCESS            Process;
-    spinlock_t          Lock;
+    mutex_t             Lock;
     ListHeader          Messages;
     LOU_IPC_CALLBACK    Callback;
 }LOU_IPC_MANAGER, * PLOU_IPC_MANAGER;
@@ -54,24 +55,21 @@ LOUSTATUS
 LouKeIpcCreateIpcMessage(
     PLOU_IPC_MESSAGE*   OutMessage,
     UINT64              MessageID,
-    PVOID               DataIn,
-    SIZE                DataInSize
+    PVOID               Data,
+    SIZE                DataSize
 ){
     if(!OutMessage){
         return STATUS_INVALID_PARAMETER;
     }
-    PLOU_IPC_MESSAGE NewMessage = *OutMessage;
-    if(!NewMessage){
-        NewMessage = LouKeMallocType(LOU_IPC_MESSAGE, USER_GENERIC_MEMORY);
-    }
+    PLOU_IPC_MESSAGE NewMessage = LouKeMallocType(LOU_IPC_MESSAGE, USER_GENERIC_MEMORY);
     NewMessage->MessageID = MessageID;
-    if(DataIn && DataInSize){
-        NewMessage->DataIn = LouKeMalloc(DataInSize, USER_GENERIC_MEMORY);
-        memcpy(NewMessage->DataIn, DataIn, DataInSize);
-    }else if(DataIn){
-        NewMessage->DataIn = DataIn; 
+    if(Data && DataSize){
+        NewMessage->Data = LouKeMalloc(DataSize, USER_GENERIC_MEMORY);
+        memcpy(NewMessage->Data, Data, DataSize);
+    }else{
+        NewMessage->Data = Data; 
     }
-    NewMessage->DataInSize = DataInSize;
+    NewMessage->DataSize = DataSize;
     *OutMessage = NewMessage;
     return STATUS_SUCCESS;
 }
@@ -82,10 +80,10 @@ LouKeIpcSendIpcEx(
     PLOU_IPC_MANAGER    Manager,
     PLOU_IPC_MESSAGE    Message
 ){
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&Manager->Lock, &Irql);
+    MutexLock(&Manager->Lock);
+    Message->Callback = Manager->Callback;
     LouKeListAddTail(&Message->Peers, &Manager->Messages);
-    LouKeReleaseSpinLock(&Manager->Lock, &Irql);
+    MutexUnlock(&Manager->Lock);
     return STATUS_SUCCESS;
 }
 
@@ -95,9 +93,20 @@ LouKeIpcSendIpc(
     LPWSTR              ProcessName,
     PLOU_IPC_MESSAGE    Message
 ){
-    
-
-    return STATUS_SUCCESS; //LouKeIpcSendIpcEx(ProcessManager, Message);
+    KHANDLE KHandle;
+    LOUSTATUS Status = LouKePsmGetProcessDataW(ProcessName, &KHandle);    
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    ULONG ProcessID = LouKeGetHProcessID(KHandle);
+    UINT64 Out;
+    LouKeXaGet(
+        &ProcessIpcManagers,
+        ProcessID,
+        &Out
+    );
+    PLOU_IPC_MANAGER ProcessManager = (PLOU_IPC_MANAGER)Out;    
+    return LouKeIpcSendIpcEx(ProcessManager, Message);
 }
 
 KERNEL_EXPORT
@@ -110,17 +119,17 @@ LouKeIpcGetIpcEx(
     if((!Manager) || (!OutMessage)){
         return STATUS_INVALID_PARAMETER;
     }
-    LouKIRQL Irql;
+    MutexLock(&Manager->Lock);
     while(!ListItemToTypeOrNull(Manager->Messages.NextHeader, LOU_IPC_MESSAGE, Peers)){
         if(!WaitForMessage){
+            *OutMessage = 0x00;
             return STATUS_UNSUCCESSFUL;
         }
         LouKeYeildExecution();
     }   
-    LouKeAcquireSpinLock(&Manager->Lock, &Irql);
     *OutMessage = ListItemToTypeOrNull(Manager->Messages.NextHeader, LOU_IPC_MESSAGE, Peers);
     LouKeListDeleteItem(Manager->Messages.NextHeader);
-    LouKeReleaseSpinLock(&Manager->Lock, &Irql);
+    MutexUnlock(&Manager->Lock);    
     return STATUS_SUCCESS;
 }
 
@@ -147,16 +156,12 @@ LouKeIpcGetIpc(
 }
 
 KERNEL_EXPORT
-LOUSTATUS
+void
 LouKeIpcDestroyMessage(
     PLOU_IPC_MESSAGE Message
 ){
-    if(!Message){
-        return STATUS_INVALID_PARAMETER;
-    }
-    if(Message->DataIn && Message->DataInSize){
-        LouKeFree(Message->DataIn);
+    if(Message->Data && Message->DataSize){
+        LouKeFree(Message->Data);
     }
     LouKeFree(Message);
-    return STATUS_SUCCESS;
 }

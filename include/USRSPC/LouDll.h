@@ -67,7 +67,13 @@ LouIpcCreateIpcMessage(
     SIZE                DataInSize
 );
 
-#define AWM_IPC_MSGID_REGISTER_CLASS  0x01
+ANNA_IMPORT 
+void 
+LouIpcDestroyIpcMessage(
+    PLOU_IPC_MESSAGE    Message
+);
+
+#define AWM_IPC_MSGID_REGISTER_CLASS_EX_W  0x01
 
 
 #endif

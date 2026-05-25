@@ -193,7 +193,9 @@ typedef struct _GENERIC_PROCESS_DATA{
     ListHeader                              Peers;
     struct _GENERIC_PROCESS_DATA*           ParentProcess;
     string                                  ProcessName;
+    LPWSTR                                  ProcessNameUnicode;
     string                                  ProcessPath;
+    LPWSTR                                  ProcessPathUnicode;
     mutex_t                                 LockOutTagOut;
     UINT64                                  PMLTree;
     UINT32                                  ProcessID;

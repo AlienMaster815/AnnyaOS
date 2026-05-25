@@ -57,3 +57,4 @@ EXPORTS
     LouIpcProcessIpcMessage
     LouIpcCreateIpcMessage
     LouIpcSendIpcMessage
+    LouIpcDestroyIpcMessage

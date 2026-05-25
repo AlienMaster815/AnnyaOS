@@ -104,7 +104,7 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         }
     }
 
-    LouPrint("DRSD.DLL Attatched To New Process\n");
+    LouPrint("DRSD.DLL:Attatched To New Process\n");
 
     return true;
 }

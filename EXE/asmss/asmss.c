@@ -70,7 +70,8 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
 LOUSTATUS AnnyaSmssIpcClallback(UINT64 MessageID, PVOID DataIn, SIZE DataInSize){
 
-
+    LouPrint("ASMSS.EXE:AnnyaSmssIpcClallback():%d\n", MessageID);
+    while(1);
 
     return STATUS_SUCCESS;
 }

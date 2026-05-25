@@ -122,6 +122,12 @@ LouKeIpcSendIpc(
     PLOU_IPC_MESSAGE    Message
 );
 
+KERNEL_EXPORT
+void
+LouKeIpcDestroyMessage(
+    PLOU_IPC_MESSAGE Message
+);
+
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
     uint64_t Data = (uint64_t)&Tmp2[1];
@@ -402,6 +408,11 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUSENDIPCMESSAGE:{
             uint64_t* Tmp = (uint64_t*)Data;
             Tmp[0] = (UINT64)LouKeIpcSendIpc((LPWSTR)Tmp[1], (PLOU_IPC_MESSAGE)Tmp[2]);
+            return;
+        }
+        case LOUDESTROYIPCMESSAGE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            LouKeIpcDestroyMessage((PLOU_IPC_MESSAGE)Tmp[0]);
             return;
         }
         default:

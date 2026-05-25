@@ -1,8 +1,27 @@
 
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 //x86_64-w64-mingw32-gcc -shared -o LouDll.dll LouDll.c -nostdlib -nodefaultlibs -I../../../Include
+
+#define _IPC_INTERNALS
+
 #include "LouDll.h"
 #include <Security.h>
+
+typedef struct _LOU_IPC_MESSAGE{
+    ListHeader          Peers;
+    BOOLEAN             MessageCompleted;
+    UINT64              MessageID;
+    PVOID               Data;
+    SIZE                DataSize;
+    LOU_IPC_CALLBACK    Callback;
+}LOU_IPC_MESSAGE, * PLOU_IPC_MESSAGE;
+
+typedef struct _LOU_IPC_MANAGER{
+    HPROCESS            Process;
+    mutex_t             Lock;
+    ListHeader          Messages;
+    LOU_IPC_CALLBACK    Callback;
+}LOU_IPC_MANAGER, * PLOU_IPC_MANAGER;
 
 void LouYeildExecution();
 
@@ -85,11 +104,9 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
     BOOL Tmp = true;
     if(ul_reason_for_call == DLL_PROCESS_ATTACH){
         FsiLevel = LouGetFSI();
-        LouPrint("LOUDLL.DLL Attatched To New Process\n");
         if(LouInitializeIoCtlTable(LouDllIoCalls) != STATUS_SUCCESS){
             LouPrint("LOUDLL.DLL Failed To Register IOCTLs\n");
         }
-
         LouDllHeap = LouRtlCreateHeap(
             USER_HEAP_FLAG_GROWABLE,
             0x00, 
@@ -98,7 +115,7 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
             0x00,
             0x00
         );
-
+        LouPrint("LOUDLL.DLL:Attatched To New Process\n");
     }
     
     //Tmp = NtDllMainCRTStartup(hModule, ul_reason_for_call, lpReserved);
@@ -815,9 +832,10 @@ LOUSTATUS
 LouIpcProcessIpcMessage(
     PLOU_IPC_MESSAGE Message
 ){
-    LouPrint("LOUDLL.DLL:LouIpcProcessIpcMessage()\n");
-    while(1);
-    return STATUS_SUCCESS;
+    if(!Message){
+        return STATUS_INVALID_PARAMETER;
+    }
+    return Message->Callback(Message->MessageID, Message->Data, Message->DataSize);
 }
 
 ANNA_EXPORT
@@ -842,4 +860,13 @@ LouIpcSendIpcMessage(
     UINT64 KulaPacket[4] = {0, 0, (UINT64)ProcessName, (UINT64)Message};
     LouCALL(LOUSENDIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
     return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT 
+void 
+LouIpcDestroyIpcMessage(
+    PLOU_IPC_MESSAGE    Message
+){
+    UINT64 KulaPacket[2] = {0, (UINT64)Message};
+    LouCALL(LOUDESTROYIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
 }
