@@ -533,9 +533,6 @@ LouRtlCreateHeap(
     if(!HeapBase){
         NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
     }
-    if(NewHeap->HeapBase){
-        LouMemSet(NewHeap->HeapBase, 0, NewHeap->CommitSize);
-    }
 
     _DONE:
     if(ResourceLock){

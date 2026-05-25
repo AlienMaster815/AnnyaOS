@@ -85,13 +85,15 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
             if((Status == STATUS_SUCCESS) && (BootFrameBuffer)){
                 LouPrint("DRSD.DLL:Using Boot Framebuffer\n");
                 UsingBootFramebuffer = true;
+                LouPrint("DRSD.DLL:Creating Video Heap\n");
                 CanvasHeap = LouRtlCreateHeap(
-                                USER_HEAP_FLAG_ZERO_MEMORY, 
+                                0x00, 
                                 0x00, 
                                 BootFrameBuffer->FramebufferSize, 
                                 BootFrameBuffer->FramebufferSize,
                                 0x00, 0x00
                             );
+                LouPrint("DRSD.DLL:Allocating Video Memory\n");
                 Canvas = (UINT32*)LouRtlAllocateHeapEx(CanvasHeap, BootFrameBuffer->FramebufferSize, KILOBYTE_PAGE, 0x00);
                 if(!Canvas){
                     LouPrint("DRSD.DLL:Error Allocating Offscreen Canvas\n");
