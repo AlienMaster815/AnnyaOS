@@ -92,6 +92,36 @@ LouKeAddAtomEx(
     UINT64      Flags
 );
 
+KERNEL_EXPORT 
+LOUSTATUS
+LouKeCreateIpcManagerForProcess(
+    PLOU_IPC_MANAGER*   OutManagerOpt,
+    LOU_IPC_CALLBACK    Callback
+);
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeIpcGetIpc(
+    PLOU_IPC_MESSAGE*   OutMessage,
+    BOOLEAN             WaitForMessage
+);
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeIpcCreateIpcMessage(
+    PLOU_IPC_MESSAGE*   OutMessage,
+    UINT64              MessageID,
+    PVOID               DataIn,
+    SIZE                DataInSize
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeIpcSendIpc(
+    LPWSTR              ProcessName,
+    PLOU_IPC_MESSAGE    Message
+);
+
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
     uint64_t Data = (uint64_t)&Tmp2[1];
@@ -159,6 +189,14 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUUPDTATECLIP:{
             //uint64_t* Tmp = (uint64_t*)Data;
             //LouKeUpdateClipState((PDRSD_CLIP)Tmp[0]);
+            return;
+        }
+        case LOUCREATEIPCMANAGER:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeCreateIpcManagerForProcess(
+                (PLOU_IPC_MANAGER*)0x00,
+                (LOU_IPC_CALLBACK)Tmp[1]
+            );
             return;
         }
         case LOUFREEGENERICHEAP:{
@@ -341,6 +379,29 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUGETPROCFSI:{
             *((UINT64*)Data) = LouKeGetProcessorFSI();
+            return;
+        }
+        case LOUGETIPCMESSAGE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeIpcGetIpc(
+                (PLOU_IPC_MESSAGE*)Tmp[1],
+                (BOOLEAN)Tmp[2]
+            );
+            return;
+        }
+        case LOUCREATEIPCMESSAGE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeIpcCreateIpcMessage(
+                (PLOU_IPC_MESSAGE*)Tmp[1],
+                (UINT64)Tmp[2],
+                (PVOID)Tmp[3],
+                (SIZE)Tmp[4]
+            );
+            return;
+        }
+        case LOUSENDIPCMESSAGE:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeIpcSendIpc((LPWSTR)Tmp[1], (PLOU_IPC_MESSAGE)Tmp[2]);
             return;
         }
         default:

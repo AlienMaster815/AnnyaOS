@@ -54,6 +54,12 @@ typedef HANDLE HPROCESS, * PHPROCESS;
 #define AWM_PROCESS_NAME            "Annya Os Window Manager"
 #define EXPLORER_PROCESS_NAME       "Annya Os Explorer"
 
+typedef LOUSTATUS (*LOU_IPC_CALLBACK)(UINT64 MessageID, PVOID DataIn, SIZE DataInSize);
+#ifndef _IPC_INTERNALS
+typedef PVOID PLOU_IPC_MESSAGE;
+typedef PVOID PLOU_IPC_MANAGER;
+#endif
+
 #ifndef _USER_MODE_CODE_
 
 LOUAPI

@@ -10,135 +10,136 @@ extern "C" {
 #include <cstdlib.h>
 
 //Original Great 18
-#define LOUVMALLOC          0
-#define LOUCREATETHREAD     1
-#define LOUEXITDOSMODE      2
-#define LOULOADFILE         3
-#define LOUPRINTCALL        4
-#define LOULOADBITMAP       5
-#define LOUADDATOMEX        6 
-#define LOUDRSDGETPLANEINFO 7
-#define LOUDRSDCREATECLIP   8
-#define LOUDRSDSYNCSCREEN   10
-#define LOUUPDTATECLIP      11
-//#define        12 Free to raplace
-#define LOUFREEGENERICHEAP  13
-#define LOUGETRTCDATA       14
-#define LOUREGISTERCALLBACK 15
-#define LOUDPDATESHADOWCLIP 16
-#define LOUVFREE            17
-#define LOUDESTROYTHREAD    18
+#define LOUVMALLOC                              0
+#define LOUCREATETHREAD                         1
+#define LOUEXITDOSMODE                          2
+#define LOULOADFILE                             3
+#define LOUPRINTCALL                            4
+#define LOULOADBITMAP                           5
+#define LOUADDATOMEX                            6 
+#define LOUDRSDGETPLANEINFO                     7
+#define LOUDRSDCREATECLIP                       8
+#define LOUDRSDSYNCSCREEN                       10
+#define LOUUPDTATECLIP                          11
+#define LOUCREATEIPCMANAGER                     12
+#define LOUFREEGENERICHEAP                      13
+#define LOUGETRTCDATA                           14
+#define LOUREGISTERCALLBACK                     15
+#define LOUDPDATESHADOWCLIP                     16
+#define LOUVFREE                                17
+#define LOUDESTROYTHREAD                        18
+#define LOULOADLIBRARYA                         19
+#define LOULOADLIBRARYW                         20
+#define LOULOADLIBRARYEXA                       21
+#define LOULOADLIBRARYEXW                       22
+#define LOUALLOCHEAPGENERICEX                   23
+#define LOUGETTHREADID                          24
+#define LOUVIRTUALALLOCUSER                     25
+#define LOUAGLFN                                26
+#define LOUCLOSEFILE                            27
+#define LOUALPCSETINFORMATION                   28
+#define LOUINITIOCTLTABLE                       29
+#define LOUDRSDUPDATECLIPSUBSTATE               30
+#define LOUDRSDUPDATESHADOWCLIPSUBSTATE         31
+#define LOUDRSDSETPLANEINFO                     32
+#define LOUSHUTDOWN                             33
+#define LOUYEILDEXE                             34
+#define LOUCREATESECTIONEX                      35
+#define LOUIOCTLCALLFUNC                        36
+#define LOUCREATEACCESSTOKEN                    37
+#define LOUCREATEPROCESS                        38
+#define LOUGETPROCNAME                          39
+#define LOUGETCURRENTPROCHANDLE                 40
+#define LOUPUTCURRENTPROCHANDLE                 41
+#define LOUALLOCVMMBUFF64                       42
+#define LOURAISEEXCEPTION                       43
+#define LOUGETPROCFSI                           44
+#define LOUGETIPCMESSAGE                        45
+#define LOUCREATEIPCMESSAGE                     46
+#define LOUSENDIPCMESSAGE                       47
 
-//User System Calls
-#define LOU_KE_ISCSI_CREATE_SESSION             19
-#define LOU_KE_ISCSI_DESTROY_SESSION            20
-#define LOU_KE_ISCSI_CREATE_CONNECTION          21
-#define LOU_KE_ISCSI_DESTORY_CONNECTION         22
-#define LOU_KE_ISCSI_BIND_CONNECTION            23
-#define LOU_KE_ISCSI_SET_PARAMETER              24
-#define LOU_KE_ISCSI_START_CONNECTION           25
-#define LOU_KE_ISCSI_STOP_CONNECTION            26
-#define LOU_KE_ISCSI_SEND_PDU                   27
-#define LOU_KE_ISCSI_GET_STATUS                 28
-#define LOU_KE_ISCSI_GET_PARAMETER              29
-#define LOU_KE_ISCSI_TRANSPORT_EP_CONNECT       30
-#define LOU_KE_ISCSI_TRANSPORT_EP_POLL          31
-#define LOU_KE_ISCSI_TRANSPORT_EP_DISCONNECT    32
-#define LOU_KE_ISCSI_TARGET_DISCOVER            33
-#define LOU_KE_ISCSI_SET_HOST_PARAMETER         34
-#define LOU_KE_ISCSI_UNBIND_SESSION             35
-#define LOU_KE_ISCSI_CREATE_BOUND_SESSION       36
-#define LOU_KE_ISCSI_TRANSPORT_EP_CONNECTION_TH 37
-#define LOU_KE_ISCSI_PATH_UPDATE                38
-#define LOU_KE_ISCSI_SET_INTERFACE_PARAMETERS   39
-#define LOU_KE_ISCSI_PING                       40
-#define LOU_KE_ISCSI_GET_CHAP                   41
-#define LOU_KE_ISCSI_DELETE_CHAP                42
-#define LOU_KE_ISCSI_SET_FLASHNODE_PRAMETERS    43
-#define LOU_KE_ISCSI_NEW_FLASHNODE              44
-#define LOU_KE_ISCSI_DELETE_FLASHNODE           45
-#define LOU_KE_ISCSI_LOGIN_FLASHNODE            46
-#define LOU_KE_ISCSI_LOGOUT_FLASHNODE           47
-#define LOU_KE_ISCSI_LOGOUT_FLASHNODE_SID       48
-#define LOU_KE_ISCSI_SET_CHAP                   49
-#define LOU_KE_ISCSI_GET_HOST_STATUS            50
-#define LOU_KE_ISCSI_DESTROY_SESSION_ASYNC      51
+//TODO Move The following to IOCTL 
+/*#define LOU_KE_ISCSI_CREATE_SESSION
+#define LOU_KE_ISCSI_DESTROY_SESSION
+#define LOU_KE_ISCSI_CREATE_CONNECTION
+#define LOU_KE_ISCSI_DESTORY_CONNECTION
+#define LOU_KE_ISCSI_BIND_CONNECTION
+#define LOU_KE_ISCSI_SET_PARAMETER
+#define LOU_KE_ISCSI_START_CONNECTION
+#define LOU_KE_ISCSI_STOP_CONNECTION
+#define LOU_KE_ISCSI_SEND_PDU
+#define LOU_KE_ISCSI_GET_STATUS
+#define LOU_KE_ISCSI_GET_PARAMETER
+#define LOU_KE_ISCSI_TRANSPORT_EP_CONNECT
+#define LOU_KE_ISCSI_TRANSPORT_EP_POLL
+#define LOU_KE_ISCSI_TRANSPORT_EP_DISCONNECT
+#define LOU_KE_ISCSI_TARGET_DISCOVER
+#define LOU_KE_ISCSI_SET_HOST_PARAMETER
+#define LOU_KE_ISCSI_UNBIND_SESSION
+#define LOU_KE_ISCSI_CREATE_BOUND_SESSION
+#define 
+#define LOU_KE_ISCSI_PATH_UPDATE
+#define LOU_KE_ISCSI_SET_INTERFACE_PARAMETERS
+#define LOU_KE_ISCSI_PING
+#define LOU_KE_ISCSI_GET_CHAP
+#define LOU_KE_ISCSI_DELETE_CHAP
+#define LOU_KE_ISCSI_SET_FLASHNODE_PRAMETERS
+#define LOU_KE_ISCSI_NEW_FLASHNODE
+#define LOU_KE_ISCSI_DELETE_FLASHNODE
+#define LOU_KE_ISCSI_LOGIN_FLASHNODE
+#define LOU_KE_ISCSI_LOGOUT_FLASHNODE
+#define LOU_KE_ISCSI_LOGOUT_FLASHNODE_SID
+#define LOU_KE_ISCSI_SET_CHAP
+#define LOU_KE_ISCSI_GET_HOST_STATUS
+#define LOU_KE_ISCSI_DESTROY_SESSION_ASYNC
 
-#define LOU_KE_CDROM_PAUSE_AUDIO                52
-#define LOU_KE_CDROM_RESUME_AUDIO               53
-#define LOU_KE_CDROM_PLAY_MSF                   54
-#define LOU_KE_CDROM_PLAY_TRACK                 55
-#define LOU_KE_CDROM_READ_TOC_HEADER            56
-#define LOU_KE_CDROM_READ_TOC_ENTRY             57
-#define LOU_KE_CDROM_STOP                       58
-#define LOU_KE_CDROM_START                      59
-#define LOU_KE_CDROM_EJECT                      60
-#define LOU_KE_CDROM_VOLUME_CONTROL             61
-#define LOU_KE_CDROM_SUB_CHANNEL                62
-#define LOU_KE_CDROM_READ_MODE2                 63  
-#define LOU_KE_CDROM_READ_MODE1                 64
-#define LOU_KE_CDROM_READ_AUDIO                 65
-#define LOU_KE_CDROM_EJECT_SW                   66
-#define LOU_KE_CDROM_MULTI_SESSION              67
-#define LOU_KE_CDROM_GET_MCN                    68
-#define LOU_KE_CDROM_GET_UPC                    69
-#define LOU_KE_CDROM_RESET                      70
-#define LOU_KE_CDROM_VOLUME_READ                71
-#define LOU_KE_CDROM_READ_RAW_MODE              72
-#define LOU_KE_CDROM_READ_COOKED                73
-#define LOU_KE_CDROM_SEEK                       74
-#define LOU_KE_CDROM_PLAY_BLOCK                 75
-#define LOU_KE_CDROM_READ_ALL                   76
-#define LOU_KE_CDROM_GET_SPINDOWN               77
-#define LOU_KE_CDROM_SET_SPINDOWN               78
-#define LOU_KE_CDROM_CLOSE_TRAY                 79
-#define LOU_KE_CDROM_SET_OPTIONS                80
-#define LOU_KE_CDROM_CLEAR_OPTIONS              81
-#define LOU_KE_CDROM_SELECT_SPEED               82
-#define LOU_KE_CDROM_SELECT_DISKS               83
-#define LOU_KE_CDROM_MEDIA_CHANGED              84
-#define LOU_KE_CDROM_DRIVE_STATUS               85
-#define LOU_KE_CDROM_DISC_STATUS                86
-#define LOU_KE_CDROM_GET_SLOTS                  87
-#define LOU_KE_CDROM_LOCK_DOOR                  88
-#define LOU_KE_CDROM_DEBUG                      89
-#define LOU_KE_CDROM_GET_CAPABILITIES           90
-#define LOU_KE_CDROM_AUDIO_BUFFER_SIZE          91
-#define LOU_KE_CDROM_DVD_READ_STRUCTURE         92
-#define LOU_KE_CDROM_DVD_WRITE_STRUCTURE        93
-#define LOU_KE_DVD_AUTHENTICATION               94
-#define LOU_KE_CDROM_SEND_PACKET                95
-#define LOU_KE_CDROM_NEXT_WRITEABLE             96
-#define LOU_KE_CDROM_LAST_WRITTEN               97
-#define LOU_KE_CDROM_TIMED_MEDIA_CHANGE         98
-
-#define LOULOADLIBRARYA                         99
-#define LOULOADLIBRARYW                         100
-#define LOULOADLIBRARYEXA                       101
-#define LOULOADLIBRARYEXW                       102
-#define LOUALLOCHEAPGENERICEX                   103
-#define LOUGETTHREADID                          104
-#define LOUVIRTUALALLOCUSER                     105
-#define LOUAGLFN                                106
-#define LOUCLOSEFILE                            107
-#define LOUALPCSETINFORMATION                   108
-#define LOUINITIOCTLTABLE                       109
-#define LOUDRSDUPDATECLIPSUBSTATE               110
-#define LOUDRSDUPDATESHADOWCLIPSUBSTATE         111
-#define LOUDRSDSETPLANEINFO                     112
-#define LOUSHUTDOWN                             113
-#define LOUYEILDEXE                             114
-#define LOUCREATESECTIONEX                      115
-#define LOUIOCTLCALLFUNC                        116
-#define LOUCREATEACCESSTOKEN                    117
-#define LOUCREATEPROCESS                        118
-#define LOUGETPROCNAME                          119
-#define LOUGETCURRENTPROCHANDLE                 120
-#define LOUPUTCURRENTPROCHANDLE                 121
-#define LOUALLOCVMMBUFF64                       122
-#define LOURAISEEXCEPTION                       123
-#define LOUGETPROCFSI                           124
-
+#define LOU_KE_CDROM_PAUSE_AUDIO
+#define LOU_KE_CDROM_RESUME_AUDIO
+#define LOU_KE_CDROM_PLAY_MSF
+#define LOU_KE_CDROM_PLAY_TRACK
+#define LOU_KE_CDROM_READ_TOC_HEADER
+#define LOU_KE_CDROM_READ_TOC_ENTRY
+#define LOU_KE_CDROM_STOP
+#define LOU_KE_CDROM_START
+#define LOU_KE_CDROM_EJECT
+#define LOU_KE_CDROM_VOLUME_CONTROL
+#define LOU_KE_CDROM_SUB_CHANNEL
+#define LOU_KE_CDROM_READ_MODE2  
+#define LOU_KE_CDROM_READ_MODE1
+#define LOU_KE_CDROM_READ_AUDIO
+#define LOU_KE_CDROM_EJECT_SW
+#define LOU_KE_CDROM_MULTI_SESSION
+#define LOU_KE_CDROM_GET_MCN
+#define LOU_KE_CDROM_GET_UPC
+#define LOU_KE_CDROM_RESET
+#define LOU_KE_CDROM_VOLUME_READ
+#define LOU_KE_CDROM_READ_RAW_MODE
+#define LOU_KE_CDROM_READ_COOKED
+#define LOU_KE_CDROM_SEEK
+#define LOU_KE_CDROM_PLAY_BLOCK
+#define LOU_KE_CDROM_READ_ALL
+#define LOU_KE_CDROM_GET_SPINDOWN
+#define LOU_KE_CDROM_SET_SPINDOWN
+#define LOU_KE_CDROM_CLOSE_TRAY
+#define LOU_KE_CDROM_SET_OPTIONS
+#define LOU_KE_CDROM_CLEAR_OPTIONS
+#define LOU_KE_CDROM_SELECT_SPEED
+#define LOU_KE_CDROM_SELECT_DISKS
+#define LOU_KE_CDROM_MEDIA_CHANGED
+#define LOU_KE_CDROM_DRIVE_STATUS
+#define LOU_KE_CDROM_DISC_STATUS
+#define LOU_KE_CDROM_GET_SLOTS
+#define LOU_KE_CDROM_LOCK_DOOR
+#define LOU_KE_CDROM_DEBUG
+#define LOU_KE_CDROM_GET_CAPABILITIES
+#define LOU_KE_CDROM_AUDIO_BUFFER_SIZE
+#define LOU_KE_CDROM_DVD_READ_STRUCTURE
+#define LOU_KE_CDROM_DVD_WRITE_STRUCTURE
+#define LOU_KE_DVD_AUTHENTICATION
+#define LOU_KE_CDROM_SEND_PACKET
+#define LOU_KE_CDROM_NEXT_WRITEABLE
+#define LOU_KE_CDROM_LAST_WRITTEN
+#define LOU_KE_CDROM_TIMED_MEDIA_CHANGE*/
 
 #define WINECALL                                1   
 #define WINECALL_FASTFAIL                       1

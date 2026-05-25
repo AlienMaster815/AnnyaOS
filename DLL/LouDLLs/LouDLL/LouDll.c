@@ -788,3 +788,58 @@ LouRaiseNtException(
     LouPrint("LOUDLL.DLL:LouRaiseException()\n");
     while(1);
 }
+
+ANNA_EXPORT
+LOUSTATUS
+LouCreateIpcManagerForProcess(
+    LOU_IPC_CALLBACK    Callback
+){
+    UINT64 KulaPacket[3] = {0, 0, (UINT64)Callback};
+    LouCALL(LOUCREATEIPCMANAGER, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouIpcGetIpcMessage(
+    PLOU_IPC_MESSAGE*   OutMessage,
+    BOOLEAN             WaitForMessage
+){
+    UINT64 KulaPacket[4] = {0, 0, (UINT64)OutMessage, (UINT64)WaitForMessage};
+    LouCALL(LOUGETIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT
+LOUSTATUS 
+LouIpcProcessIpcMessage(
+    PLOU_IPC_MESSAGE Message
+){
+    LouPrint("LOUDLL.DLL:LouIpcProcessIpcMessage()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouIpcCreateIpcMessage(
+    PLOU_IPC_MESSAGE*   OutMessage,
+    UINT64              MessageID,
+    PVOID               DataIn,
+    SIZE                DataInSize
+){
+    UINT64 KulaPacket[6] = {0, 0, (UINT64)OutMessage, (UINT64)MessageID, (UINT64)DataIn, (UINT64)DataInSize};
+    LouCALL(LOUCREATEIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];    
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouIpcSendIpcMessage(
+    LPWSTR              ProcessName,
+    PLOU_IPC_MESSAGE    Message
+){
+    UINT64 KulaPacket[4] = {0, 0, (UINT64)ProcessName, (UINT64)Message};
+    LouCALL(LOUSENDIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}

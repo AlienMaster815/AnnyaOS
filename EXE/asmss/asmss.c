@@ -17,9 +17,24 @@ LouCreateSectionEx(
 
 static HANDLE SessionManagerProcessHandle = 0x00;
 
+LOUSTATUS AnnyaSmssIpcClallback(UINT64 MessageID, PVOID DataIn, SIZE DataInSize);
+
 LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");
+    LOUSTATUS Status;
+    Status = LouGetCurrentProccessHandle(
+        &SessionManagerProcessHandle,
+        ACCESS_MASK_GENERIC_ALL
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = LouCreateIpcManagerForProcess(AnnyaSmssIpcClallback);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
 
     //LouExitDosMode();
 
@@ -44,7 +59,18 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
     );
 
     //TODO: Check object manager to make sure its safe to continue
+    LouPrint("Session Manager Successfully Initialized\n");    
+    PLOU_IPC_MESSAGE Message;
+    while(1){
+        LouIpcGetIpcMessage(&Message, true);
+        LouIpcProcessIpcMessage(Message);
+    }
+}
 
-    LouPrint("Session Manager Successfully Initialized\n");
-    while(1);
+
+LOUSTATUS AnnyaSmssIpcClallback(UINT64 MessageID, PVOID DataIn, SIZE DataInSize){
+
+
+
+    return STATUS_SUCCESS;
 }

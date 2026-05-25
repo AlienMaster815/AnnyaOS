@@ -32,6 +32,44 @@ wcslen(
     LPCWSTR str
 );
 
+ANNA_IMPORT
+LOUSTATUS
+LouCreateIpcManagerForProcess(
+    LOU_IPC_CALLBACK    Callback
+);
+
+ANNA_IMPORT
+LOUSTATUS
+LouIpcGetIpcMessage(
+    PLOU_IPC_MESSAGE*   OutMessage,
+    BOOLEAN             WaitForMessage
+);
+
+ANNA_IMPORT
+LOUSTATUS 
+LouIpcProcessIpcMessage(
+    PLOU_IPC_MESSAGE Message
+);
+
+ANNA_IMPORT
+LOUSTATUS
+LouIpcSendIpcMessage(
+    LPWSTR              ProcessName,
+    PLOU_IPC_MESSAGE    Message
+);
+
+ANNA_IMPORT
+LOUSTATUS
+LouIpcCreateIpcMessage(
+    PLOU_IPC_MESSAGE*   OutMessage,
+    UINT64              MessageID,
+    PVOID               DataIn,
+    SIZE                DataInSize
+);
+
+#define AWM_IPC_MSGID_REGISTER_CLASS  0x01
+
+
 #endif
 #endif
 #endif
