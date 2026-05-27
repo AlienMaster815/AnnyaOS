@@ -106,7 +106,7 @@ void PageFault(uint64_t FaultingStackP) {
 
     RequestPhysicalAddress(VAddress, &PAddress);
 
-    if((VAddress) && LouKeVmmAddressCausePageFault((PVOID)VAddress, &Out)){
+    if((!PAddress) && (VAddress) && LouKeVmmAddressCausePageFault((PVOID)VAddress, &Out)){
         Status = LouKeVmmCommitPageAddress((PVOID)VAddress, Out);
         if(Status == STATUS_SUCCESS){
             clear_cr2();
@@ -116,7 +116,7 @@ void PageFault(uint64_t FaultingStackP) {
         LouPrint("VAddress:%h\n", VAddress);
         while(1);
     }
-    if((VAddress) && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &LazyOut)){
+    if((!PAddress) && (VAddress) && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &LazyOut)){
         Status = LouKeLazyBufferCommitPageForce(LazyOut, (PVOID)VAddress, 1);
         if(Status == STATUS_SUCCESS){
             clear_cr2();
@@ -145,24 +145,8 @@ void PageFault(uint64_t FaultingStackP) {
     string PanicMessage = (string)LouGeneralAllocateMemoryEx(strlen("Page Fault Protection Violation At Address:%h") + 21, 1);
 
     _vsnprintf(PanicMessage, strlen("Page Fault Protection Violation At Address:%h") + 21, "Page Fault Protection Violation At Address:%h\n",  VAddress);
-    // Check for specific error causes, e.g.:
-    //if (InterruptCode & 0x1) {
-
 
     LouKePanic(PanicMessage, (CPUContext*)FaultingStackP, InterruptCode);
-    //} else {
-    //    if(PAddress != 0x00){
-    //        //PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
-    //        LouPrintPanic("Physicall Address Is:%h\n", PAddress);
-    //        LouKeMapContinuousMemoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_WRITEABLE_PAGE_PRESENT);
-    //    }
-    //    else{
-    //        LouPrintPanic("Allocateing New Page\n");
-    //        PAddress = (uint64_t)LouMalloc(KILOBYTE_PAGE);
-    //        //LouKeMapcontinuousMemmoryBlock(PAddress, VAddress, KILOBYTE_PAGE, KERNEL_WRITEABLE_PAGE_PRESENT);
-    //        LouKeMapContinuousMemoryBlock(VAddress, VAddress, KILOBYTE_PAGE, KERNEL_WRITEABLE_PAGE_PRESENT);
-    //    }
-    //}
 
     while(1);
 }

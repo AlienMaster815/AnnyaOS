@@ -63,8 +63,10 @@ KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(
     AlteredVAddress = VAddress & ~(KILOBYTE_PAGE - 1);
     AddressToPageOffset = VAddress - AlteredVAddress;
     *PAddress = Tmp[L1Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1);
+    if(!(*PAddress)){
+        return STATUS_UNSUCCESSFUL;
+    }
     *PAddress += AddressToPageOffset;
-
     return STATUS_SUCCESS;
 }
 
