@@ -16,9 +16,6 @@ LOUSTATUS AnnyaExplorerProcessStartup(HANDLE Peb){
     ATOM Foo = RegisterClassExW(&NewWindowClass);
     ATOM Bar = RegisterClassExW(&NewWindowClass);
 
-    LouPrint("FOO:%d\n", Foo);
-    LouPrint("BAR:%d\n", Bar);
-
     LouPrint("Annya OS Explorer Successfully Initialized\n");
     while(1);
     return 0x00;
