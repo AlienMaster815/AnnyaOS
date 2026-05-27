@@ -61,6 +61,7 @@ extern "C" {
 #define LOUREGISTERGLOBALOBJECT                 49
 #define LOUUNREGISTERGLOBALOBJECT               50
 #define LOUGETGLOBALOBJECT                      51
+#define LOUDELETEATOM                           52
 
 //TODO Move The following to IOCTL 
 /*#define LOU_KE_ISCSI_CREATE_SESSION

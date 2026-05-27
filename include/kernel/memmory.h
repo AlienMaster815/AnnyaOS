@@ -17,8 +17,7 @@ extern "C" {
 KERNEL_EXPORT 
 void
 LouKeVmmFreeVmBuffer(
-    PVOID   Address,
-    BOOLEAN Shared
+    PVOID   Address
 );
 
 KERNEL_EXPORT 
@@ -81,6 +80,9 @@ LouKeAllocateVmmBuffer32Ex2(
 );
 
 BOOLEAN LouKeVmmIsAddressCow(PVOID VAddress);
+
+#define LouKeAllocateVmmType(Type, Shared, Flags) LouKeAllocateVmmBuffer64Ex(sizeof(Type), GET_ALIGNMENT(Type), true, Shared, Flags)
+#define LouKeFreeVmmType(Address) LouKeVmmFreeVmBuffer(Address)
 
 #define POOL_FLAG_NORMAL            0
 #define POOL_FLAG_NO_WRAP_ARROUND   (1 << 0)

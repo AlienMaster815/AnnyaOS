@@ -99,6 +99,10 @@ LouRtlFreeHeap(
     ULONG               Flags
 );
 
+
+#define LouRtlAllocateHeapArray(Heap, Type, Count) LouRtlAllocateHeapEx(Heap, ROUND_UP64(sizeof(Type), GET_ALIGNMENT(Type)) * Count, GET_ALIGNMENT(Type), USER_HEAP_FLAG_ZERO_MEMORY)
+#define LouRtlAllocateHeapType(Heap, Type) LouRtlAllocateHeapEx(Heap, sizeof(Type), GET_ALIGNMENT(Type), USER_HEAP_FLAG_ZERO_MEMORY)
+
 #else //_LOUDLL_
 
 ANNA_EXPORT
@@ -111,6 +115,9 @@ LouRtlCreateHeap(
     PERESOURCE_OBJECT       ResourceLock,
     PUSER_HEAP_PARAMETERS   Parameters
 );
+
+#define LouRtlAllocateHeapArray(Heap, Type, Count) LouRtlAllocateHeapEx(Heap, ROUND_UP64(sizeof(Type), GET_ALIGNMENT(Type)) * Count, GET_ALIGNMENT(Type), USER_HEAP_FLAG_ZERO_MEMORY)
+#define LouRtlAllocateHeapType(Heap, Type) LouRtlAllocateHeapEx(Heap, sizeof(Type), GET_ALIGNMENT(Type), USER_HEAP_FLAG_ZERO_MEMORY)
 
 #endif
 #endif//_USER_MODE_CODE_

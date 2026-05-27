@@ -152,8 +152,12 @@ LouKeXarrayAllocateUint64(
     UINT64  Limit,
     UINT64  PageFlags
 ){
+    if(!Id){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT64 i = *Id;
     LouKeXaLockArray(Array);
-    for(UINT64 i = 0; i < Limit; i++){
+    for(; i < Limit; i++){
         if(!LouKeXaIsIndexUsedEx(Array, i)){
             LouKeXaStoreEx(
                 Array,
@@ -179,6 +183,9 @@ LouKeXarrayAllocateInt(
     int     Limit,
     UINT64  PageFlags
 ){
+    if(!Id){
+        return STATUS_INVALID_PARAMETER;
+    }
     int i = *Id;
     if((i < 0) && (Limit > 0)){
         i = 0;
@@ -213,6 +220,9 @@ LouKeXarrayAllocateUint32(
     UINT32  Limit,
     UINT64  PageFlags
 ){
+    if(!Id){
+        return STATUS_INVALID_PARAMETER;
+    }
     LouKeXaLockArray(Array);
     UINT32 i = *Id;
     Limit = Limit ? Limit : UINT32_MAX;

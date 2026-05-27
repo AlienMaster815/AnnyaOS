@@ -42,7 +42,7 @@ static LOUSTATUS GetAtomTracker(
                     continue;
                 }
                 PATOM_TRACKER ProcessTracker = (PATOM_TRACKER)Out;
-                if((ProcessTracker->NameLength == NameLength) && (!LouKeRtlCompareUtf16StringSafe(AtomName, TmpTracker->AtomName, true, NameLength))){
+                if((ProcessTracker->NameLength == NameLength) && (!LouKeRtlCompareUtf16StringSafe(AtomName, ProcessTracker->AtomName, true, NameLength))){
                     LouKeAcquireReference(&TmpTracker->Reference);
                     LouKeAcquireReference(&ProcessTracker->Reference);
                     *OutAtom = (RTL_ATOM)TmpTracker->AtomID;
@@ -55,8 +55,6 @@ static LOUSTATUS GetAtomTracker(
                     return STATUS_SUCCESS;
                 }
             }      
-        }else if((TmpTracker->NameLength == NameLength) && (!LouKeRtlCompareUtf16StringSafe(AtomName, TmpTracker->AtomName, true, NameLength))){
-            return STATUS_INVALID_PARAMETER;
         }
     }
 
@@ -221,7 +219,6 @@ LouKeAddAtomEx(
             return Status;
         }
     }
-
     return STATUS_SUCCESS;
 }
 

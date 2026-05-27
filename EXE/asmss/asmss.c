@@ -75,27 +75,8 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
 
 LOUSTATUS AnnyaSmssIpcClallback(PVOID Message, UINT64 MessageID){
-    REGISTER_CLASS_EX_W_MESSAGE_DATA RegisterMessageData;
 
     switch(MessageID){
-
-        case AWM_IPC_MSGID_REGISTER_CLASS_EX_W:{
-
-            LOUSTATUS Status = LouIpcGetIpcMessageData(Message, &RegisterMessageData, sizeof(REGISTER_CLASS_EX_W_MESSAGE_DATA));
-            if(Status != STATUS_SUCCESS){
-                LouPrint("ASMSS.EXE:AnnyaSmssIpcClallback() ERROR Unable To Get Message\n");
-                return Status;
-            }
-
-
-            RegisterMessageData.Done = true;
-            Status = LouIpcSetIpcMessageData(Message, &RegisterMessageData, sizeof(REGISTER_CLASS_EX_W_MESSAGE_DATA));
-            if(Status != STATUS_SUCCESS){
-                LouPrint("ASMSS.EXE:AnnyaSmssIpcClallback() ERROR Unable To Set Message\n");
-                return Status;
-            }
-            return STATUS_SUCCESS;
-        }
 
         default:
             break;

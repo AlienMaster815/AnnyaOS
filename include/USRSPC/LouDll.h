@@ -128,6 +128,26 @@ LouRtlCreateSharedHeap(
     PUSER_HEAP_PARAMETERS   Parameters
 );
 
+ANNA_IMPORT
+LPWSTR
+wcscpy(
+    LPWSTR Destination,
+    LPWSTR Source
+);
+
+ANNA_IMPORT
+int
+wcscmp(
+    LPWSTR Str1,
+    LPWSTR Str2
+);
+
+ANNA_IMPORT
+LOUSTATUS 
+LouDeleteAtom(
+    RTL_ATOM Atom
+);
+
 #endif
 #endif
 #endif

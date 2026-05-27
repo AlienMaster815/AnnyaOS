@@ -534,14 +534,13 @@ KERNEL_EXPORT
 void
 LouKeVmmFreeVmBuffer64Ex(
     UINT32  ProcessID,
-    BOOLEAN Shared,
     PVOID   Address
 ){
     PVMM_ALLOCATION_TRACKER TmpTracker;
     PVMM_ALLOCATION_TRACKER ForwardTmpTracker;
     MutexLock(&VmmMemoryManager64.Lock);
     ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager64.AllocationTrackers, Peers){
-        ForEachIf((TmpTracker->Shared == Shared) && (RangeInterferes((UINT64)Address, 1, TmpTracker->VBase, TmpTracker->VSize))){
+        ForEachIf(RangeInterferes((UINT64)Address, 1, TmpTracker->VBase, TmpTracker->VSize)){
             LouKeVmmFreeAddressFromTracker(
                 ProcessID,
                 TmpTracker,
@@ -571,14 +570,13 @@ KERNEL_EXPORT
 void
 LouKeVmmFreeVmBuffer32Ex(
     UINT32  ProcessID,
-    BOOLEAN Shared,
     PVOID   Address
 ){
     PVMM_ALLOCATION_TRACKER TmpTracker;
     PVMM_ALLOCATION_TRACKER ForwardTmpTracker;
     MutexLock(&VmmMemoryManager32.Lock);
     ForEachListEntrySafe(TmpTracker, ForwardTmpTracker, &VmmMemoryManager32.AllocationTrackers, Peers){
-        ForEachIf((TmpTracker->Shared == Shared) && (RangeInterferes((UINT64)Address, 1, TmpTracker->VBase, TmpTracker->VSize))){
+        ForEachIf(RangeInterferes((UINT64)Address, 1, TmpTracker->VBase, TmpTracker->VSize)){
             LouKeVmmFreeAddressFromTracker(
                 ProcessID,
                 TmpTracker,
@@ -594,12 +592,10 @@ LouKeVmmFreeVmBuffer32Ex(
 KERNEL_EXPORT 
 void
 LouKeVmmFreeVmBuffer64(
-    PVOID   Address,
-    BOOLEAN Shared
+    PVOID   Address
 ){
     LouKeVmmFreeVmBuffer64Ex(
         LouKeGetProcessIdentification(),
-        Shared,
         Address
     );
 }
@@ -607,12 +603,10 @@ LouKeVmmFreeVmBuffer64(
 KERNEL_EXPORT 
 void
 LouKeVmmFreeVmBuffer32(
-    PVOID   Address,
-    BOOLEAN Shared
+    PVOID   Address
 ){
     LouKeVmmFreeVmBuffer32Ex(
         LouKeGetProcessIdentification(),
-        Shared,
         Address
     );
 }
@@ -620,12 +614,11 @@ LouKeVmmFreeVmBuffer32(
 KERNEL_EXPORT 
 void
 LouKeVmmFreeVmBuffer(
-    PVOID       Address,
-    BOOLEAN     Shared
+    PVOID       Address
 ){
     if((UINT64)Address > (4 * GIGABYTE)){
-        LouKeVmmFreeVmBuffer64(Address, Shared);
+        LouKeVmmFreeVmBuffer64(Address);
     }else{
-        LouKeVmmFreeVmBuffer32(Address, Shared);
+        LouKeVmmFreeVmBuffer32(Address);
     }
 }

@@ -13,7 +13,11 @@ LOUSTATUS AnnyaExplorerProcessStartup(HANDLE Peb){
     NewWindowClass.WindowProcedure = NewWindowProc;
     NewWindowClass.ClassName = L"MyNewClass";
 
-    RegisterClassExW(&NewWindowClass);
+    ATOM Foo = RegisterClassExW(&NewWindowClass);
+    ATOM Bar = RegisterClassExW(&NewWindowClass);
+
+    LouPrint("FOO:%d\n", Foo);
+    LouPrint("BAR:%d\n", Bar);
 
     LouPrint("Annya OS Explorer Successfully Initialized\n");
     while(1);

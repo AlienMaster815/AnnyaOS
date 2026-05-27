@@ -24,3 +24,13 @@ LouAddAtom(
 ){
     return LouAddAtomEx(AtomName, Length, Atom, 0);
 }
+
+LOUDLL_API
+LOUSTATUS 
+LouDeleteAtom(
+    RTL_ATOM Atom
+){
+    UINT64 KulaPacket[3] = {0, 0, (UINT64)Atom};
+    LouCALL(LOUDELETEATOM, (UINT64)&KulaPacket[0], 0);
+    return KulaPacket[1];
+}

@@ -42,7 +42,7 @@ void LouKeDestroyHandleFromObject(
         return;
     }
     LouKeListDeleteItem(&ObjectHandle->Peers);
-    LouKeVmmFreeVmBuffer(ObjectHandle, true);
+    LouKeVmmFreeVmBuffer(ObjectHandle);
 }
 
 void LouKeNotifyHandleOfAcquisition(

@@ -61,7 +61,7 @@ LouKeIpcCreateIpcMessage(
     if(!OutMessage){
         return STATUS_INVALID_PARAMETER;
     }
-    PLOU_IPC_MESSAGE NewMessage = LouKeMallocType(LOU_IPC_MESSAGE, USER_GENERIC_MEMORY);
+    PLOU_IPC_MESSAGE NewMessage = LouKeAllocateVmmType(LOU_IPC_MESSAGE, true, USER_GENERIC_MEMORY);
     NewMessage->MessageID = MessageID;
     NewMessage->Data = Data; 
     NewMessage->DataSize = DataSize;
@@ -155,5 +155,5 @@ void
 LouKeIpcDestroyMessage(
     PLOU_IPC_MESSAGE Message
 ){
-    LouKeFree(Message);
+    LouKeFreeVmmType(Message);
 }

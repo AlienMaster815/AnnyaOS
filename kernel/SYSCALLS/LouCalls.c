@@ -455,6 +455,13 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             );
             return;
         }
+        case LOUDELETEATOM:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeDeleteAtom(
+                (RTL_ATOM)Tmp[1]
+            );
+            return;
+        }
         default:
         LouPrint("Unkown Call:%d\n", Call);
     }
