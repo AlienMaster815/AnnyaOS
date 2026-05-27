@@ -33,6 +33,13 @@ void LouYeildExecution();
 static UINT64 FsiLevel = 0;
 
 ANNA_EXPORT PUSER_PROCESS_HEAP LouDllHeap = 0x00;
+ANNA_EXPORT PUSER_PROCESS_HEAP LouDllGlobalHeap = 0x00;
+
+LOUSTATUS
+LouGetGlobalObject(
+    LPWSTR ObjectName,
+    PVOID* Object
+);
 
 UINT64 LouGetFloatStoreImplementation(){
     return FsiLevel;
@@ -115,6 +122,15 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
             0x00,
             0x00
         );
+        //NOTICE: this will fail for the session manager startup 
+        //the error should be ignored because the session manager
+        //creates the global heap and sets the session managers
+        //value personaly this logic is for non session manager 
+        //processes 
+        PVOID GlobalHeap = 0;
+        LouGetGlobalObject(L"LouDllGlobalHeap", &GlobalHeap);
+        LouDllGlobalHeap = (PUSER_PROCESS_HEAP)GlobalHeap;
+        //LouPrint("LouDllGlobalHeap:%h\n", LouDllGlobalHeap);
         LouPrint("LOUDLL.DLL:Attatched To New Process\n");
     }
     
@@ -713,7 +729,7 @@ LouGetCurrentProccessName(
 
 LOUDLL_API 
 PVOID 
-LouKeAllocateVmmIsolatedBuffer64(
+LouAllocateVmmIsolatedBuffer64(
     SIZE    Size,
     SIZE    Alignment,
     BOOLEAN Zero,
@@ -726,6 +742,15 @@ LouKeAllocateVmmIsolatedBuffer64(
 }
 
 LOUDLL_API
+void
+LouFreeVirtualMemory(
+    PVOID   Address
+){
+    LouPrint("LouFreeVirtualMemory()\n");
+    while(1);
+}
+
+LOUDLL_API
 PVOID 
 LouAllocateVirtualMemoryEx2(
     SIZE        Size,
@@ -733,7 +758,7 @@ LouAllocateVirtualMemoryEx2(
     BOOLEAN     Shared,
     UINT64      Flags
 ){
-    return LouKeAllocateVmmIsolatedBuffer64(
+    return LouAllocateVmmIsolatedBuffer64(
         Size,
         Alignment,
         false,
@@ -835,7 +860,7 @@ LouIpcProcessIpcMessage(
     if(!Message){
         return STATUS_INVALID_PARAMETER;
     }
-    return Message->Callback(Message->MessageID, Message->Data, Message->DataSize);
+    return Message->Callback((PVOID)Message, Message->MessageID);
 }
 
 ANNA_EXPORT
@@ -850,6 +875,52 @@ LouIpcCreateIpcMessage(
     LouCALL(LOUCREATEIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
     return (LOUSTATUS)KulaPacket[1];    
 }
+
+ANNA_EXPORT
+LOUSTATUS
+LouIpcGetIpcMessageData(
+    PLOU_IPC_MESSAGE    Message,
+    PVOID               DataOut,
+    SIZE                DataOutSize
+){
+    if(!Message || !DataOut){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(DataOutSize > Message->DataSize){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(!Message->DataSize && !DataOutSize){
+        LouMemCpy(DataOut, &Message->Data, sizeof(PVOID));
+        goto _DONE;
+    }
+    LouMemCpy(DataOut, Message->Data, DataOutSize);
+_DONE:
+    LouMemoryBarrier();    
+    return STATUS_SUCCESS;
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouIpcSetIpcMessageData(
+    PLOU_IPC_MESSAGE Message,
+    PVOID            Data,
+    SIZE             DataSize
+){
+    if(!Message || !Data){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(DataSize > Message->DataSize){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(!Message->DataSize && !DataSize){
+        LouMemCpy(&Message->Data, Data, sizeof(PVOID));
+        goto _DONE;
+    }
+    LouMemCpy(Message->Data, Data, DataSize);
+_DONE:
+    LouMemoryBarrier();    
+    return STATUS_SUCCESS;
+}   
 
 ANNA_EXPORT
 LOUSTATUS
@@ -869,4 +940,36 @@ LouIpcDestroyIpcMessage(
 ){
     UINT64 KulaPacket[2] = {0, (UINT64)Message};
     LouCALL(LOUDESTROYIPCMESSAGE, (UINT64)&KulaPacket[0], 0);
+}
+
+ANNA_EXPORT
+LOUSTATUS 
+LouRegisterGlobalObject(
+    LPWSTR  ObjectName, 
+    PVOID   Object
+){
+    UINT64 KulaPacket[4] = {0, 0, (UINT64)ObjectName, (UINT64)Object};
+    LouCALL(LOUREGISTERGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouUnRegisterGlobalObject(
+    LPWSTR  ObjectName
+){
+    UINT64 KulaPacket[3] = {0, 0, (UINT64)ObjectName};
+    LouCALL(LOUUNREGISTERGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouGetGlobalObject(
+    LPWSTR ObjectName,
+    PVOID* Object
+){
+    UINT64 KulaPacket[4] = {0, 0, (UINT64)ObjectName, (UINT64)Object};
+    LouCALL(LOUGETGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
 }

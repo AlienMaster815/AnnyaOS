@@ -8,6 +8,14 @@
 #ifndef _LOUDLL_
 
 ANNA_IMPORT
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
+);
+
+ANNA_IMPORT
 LOUSTATUS
 LouAddAtomEx(
     LPWSTR      AtomName,
@@ -73,8 +81,52 @@ LouIpcDestroyIpcMessage(
     PLOU_IPC_MESSAGE    Message
 );
 
-#define AWM_IPC_MSGID_REGISTER_CLASS_EX_W  0x01
+ANNA_IMPORT
+LOUSTATUS
+LouIpcGetIpcMessageData(
+    PLOU_IPC_MESSAGE    Message,
+    PVOID               DataOut,
+    SIZE                DataOutSize
+);
 
+ANNA_IMPORT
+LOUSTATUS
+LouIpcSetIpcMessageData(
+    PLOU_IPC_MESSAGE Message,
+    PVOID            Data,
+    SIZE             DataSize
+);
+
+ANNA_IMPORT
+LOUSTATUS
+LouGetGlobalObject(
+    LPWSTR ObjectName,
+    PVOID* Object
+);
+
+ANNA_IMPORT
+LOUSTATUS
+LouUnRegisterGlobalObject(
+    LPWSTR  ObjectName
+);
+
+ANNA_IMPORT
+LOUSTATUS 
+LouRegisterGlobalObject(
+    LPWSTR  ObjectName, 
+    PVOID   Object
+);
+
+ANNA_IMPORT
+PUSER_PROCESS_HEAP
+LouRtlCreateSharedHeap(
+    ULONG                   Flags,
+    PVOID                   HeapBase,
+    SIZE                    ReservedSize,
+    SIZE                    CommitSize,
+    PERESOURCE_OBJECT       ResourceLock,
+    PUSER_HEAP_PARAMETERS   Parameters
+);
 
 #endif
 #endif

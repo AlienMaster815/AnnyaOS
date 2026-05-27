@@ -58,3 +58,10 @@ EXPORTS
     LouIpcCreateIpcMessage
     LouIpcSendIpcMessage
     LouIpcDestroyIpcMessage
+    LouIpcGetIpcMessageData
+    LouIpcSetIpcMessageData
+    LouRtlCreateSharedHeap
+    LouDllGlobalHeap
+    LouRegisterGlobalObject
+    LouUnRegisterGlobalObject
+    LouGetGlobalObject

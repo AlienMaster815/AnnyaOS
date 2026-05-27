@@ -1,28 +1,34 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "asmss.h"
 
-/*__declspec(dllimport)
-LOUSTATUS 
-LouCreateSectionEx(
-    PHANDLE                 OutSectionHandle,
-    ACCESS_MASK             DesiredAccess,
-    POBJECT_ATTRIBUTES      ObjectAttributes,
-    PLARGE_INTEGER          MaximumSize,
-    ULONG                   SectionPageProtection,
-    ULONG                   AllocationAttributes,
-    HANDLE                  FileHandle,
-    PMEM_EXTENDED_PARAMETER ExtendedParameters,
-    ULONG                   ExtendedParameterCount
-);*/
+ANNA_IMPORT PUSER_PROCESS_HEAP LouDllHeap;
+ANNA_IMPORT PUSER_PROCESS_HEAP LouDllGlobalHeap;
 
 static HANDLE SessionManagerProcessHandle = 0x00;
 
-LOUSTATUS AnnyaSmssIpcClallback(UINT64 MessageID, PVOID DataIn, SIZE DataInSize);
+LOUSTATUS AnnyaSmssIpcClallback(PVOID Message, UINT64 MessageID);
 
 LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 
     LouPrint("ASMSS: Hello User Mode\n");
-    LOUSTATUS Status;
+    
+    LouDllGlobalHeap = LouRtlCreateSharedHeap(
+        USER_HEAP_FLAG_GROWABLE,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00
+    );
+
+    //LouPrint("LouDllGlobalHeap:%h\n", LouDllGlobalHeap);
+
+    LOUSTATUS Status = LouRegisterGlobalObject(L"LouDllGlobalHeap", (PVOID)LouDllGlobalHeap);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ASMSS.EXE:ERROR Unable To Register Global Heap\n");
+        return Status;
+    }
+
     Status = LouGetCurrentProccessHandle(
         &SessionManagerProcessHandle,
         ACCESS_MASK_GENERIC_ALL
@@ -68,7 +74,33 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
 }
 
 
-LOUSTATUS AnnyaSmssIpcClallback(UINT64 MessageID, PVOID DataIn, SIZE DataInSize){
+LOUSTATUS AnnyaSmssIpcClallback(PVOID Message, UINT64 MessageID){
+    REGISTER_CLASS_EX_W_MESSAGE_DATA RegisterMessageData;
+
+    switch(MessageID){
+
+        case AWM_IPC_MSGID_REGISTER_CLASS_EX_W:{
+
+            LOUSTATUS Status = LouIpcGetIpcMessageData(Message, &RegisterMessageData, sizeof(REGISTER_CLASS_EX_W_MESSAGE_DATA));
+            if(Status != STATUS_SUCCESS){
+                LouPrint("ASMSS.EXE:AnnyaSmssIpcClallback() ERROR Unable To Get Message\n");
+                return Status;
+            }
+
+
+            RegisterMessageData.Done = true;
+            Status = LouIpcSetIpcMessageData(Message, &RegisterMessageData, sizeof(REGISTER_CLASS_EX_W_MESSAGE_DATA));
+            if(Status != STATUS_SUCCESS){
+                LouPrint("ASMSS.EXE:AnnyaSmssIpcClallback() ERROR Unable To Set Message\n");
+                return Status;
+            }
+            return STATUS_SUCCESS;
+        }
+
+        default:
+            break;
+    }
+
 
     LouPrint("ASMSS.EXE:AnnyaSmssIpcClallback():%d\n", MessageID);
     while(1);

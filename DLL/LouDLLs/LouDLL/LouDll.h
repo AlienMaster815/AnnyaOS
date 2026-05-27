@@ -517,10 +517,31 @@ LouCloseFileA(
 })
 
 PVOID 
+LouAllocateVirtualMemoryEx2(
+    SIZE        Size,
+    SIZE        Alignment,
+    BOOLEAN     Shared,
+    UINT64      Flags
+);
+
+PVOID 
 LouAllocateVirtualMemoryEx(
     SIZE        Size,
     SIZE        Alignment,
     UINT64      Flags
+);
+
+void
+LouFreeVirtualMemory(
+    PVOID   Address
+);
+
+LOUDLL_API
+void*
+LouMemCpy(
+    void* OutStream,
+    void* InStream,
+    size_t ByteCount
 );
 
 #endif

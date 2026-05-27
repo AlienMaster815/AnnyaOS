@@ -55,6 +55,7 @@ typedef struct _USER_PROCESS_HEAP{
     ULONG                   HeapFlags;
     USER_HEAP_PARAMETERS    HeapParametersCopy;
     ULONG                   ThreadID;
+    BOOLEAN                 Shared;
     ListHeader              ExtraSpaces;
     ListHeader              Allocations;
 }USER_PROCESS_HEAP, * PUSER_PROCESS_HEAP;

@@ -58,6 +58,9 @@ extern "C" {
 #define LOUCREATEIPCMESSAGE                     46
 #define LOUSENDIPCMESSAGE                       47
 #define LOUDESTROYIPCMESSAGE                    48
+#define LOUREGISTERGLOBALOBJECT                 49
+#define LOUUNREGISTERGLOBALOBJECT               50
+#define LOUGETGLOBALOBJECT                      51
 
 //TODO Move The following to IOCTL 
 /*#define LOU_KE_ISCSI_CREATE_SESSION

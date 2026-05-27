@@ -65,7 +65,7 @@ LouKeAlocateVmmAllocationTracker(
         UINT64 TmpOut;
         RequestPhysicalAddress((UINT64)NewVSpace, &TmpOut);
         NewPSpace = (PVOID)TmpOut;
-        
+
         NewTracker->SharedTracker = LouKeAllocateLazyBuffer(NewVSpace, Size, 0, Flags);
         if(!NewTracker->SharedTracker){
             LouKeFreePage(NewVSpace);
@@ -330,11 +330,29 @@ LouKeAllocateVmmBuffer64Ex2(
 
 KERNEL_EXPORT 
 PVOID 
-LouKeAllocateVmmIsolatedBuffer64(
+LouKeAllocateVmmBuffer64Ex(
     SIZE    Size,
     SIZE    Alignment,
     BOOLEAN Zero,
     BOOLEAN Shared,
+    UINT64  Flags
+){
+    return LouKeAllocateVmmBuffer64Ex2(
+        LouKeGetProcessIdentification(),
+        Size,
+        Alignment,
+        Zero,
+        Shared,
+        Flags
+    );
+}
+
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmIsolatedBuffer64(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
     UINT64  Flags
 ){
     return LouKeAllocateVmmBuffer64Ex2(

@@ -90,7 +90,7 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
                                 0x00, 
                                 0x00, 
                                 BootFrameBuffer->FramebufferSize, 
-                                BootFrameBuffer->FramebufferSize,
+                                0x00,
                                 0x00, 0x00
                             );
                 LouPrint("DRSD.DLL:Allocating Video Memory\n");

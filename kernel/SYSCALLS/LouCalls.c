@@ -128,6 +128,23 @@ LouKeIpcDestroyMessage(
     PLOU_IPC_MESSAGE Message
 );
 
+LOUSTATUS 
+LouKeRegisterSharedObject(
+    LPWSTR  ObjectName,
+    PVOID   Object
+);
+
+LOUSTATUS 
+LouKeUnRegisterSharedObject(
+    LPWSTR ObjectName
+);
+
+LOUSTATUS 
+LouKeGetSharedObject(
+    LPWSTR  ObjectName,
+    PVOID*  OutPtr
+);
+
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
     uint64_t* Tmp2 = (uint64_t*)DataTmp;
     uint64_t Data = (uint64_t)&Tmp2[1];
@@ -369,7 +386,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUALLOCVMMBUFF64:{
             uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[0] = (UINT64)LouKeAllocateVmmIsolatedBuffer64(
+            Tmp[0] = (UINT64)LouKeAllocateVmmBuffer64Ex(
                 (SIZE)Tmp[1],
                 (SIZE)Tmp[2],
                 (BOOLEAN)Tmp[3],
@@ -413,6 +430,29 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         case LOUDESTROYIPCMESSAGE:{
             uint64_t* Tmp = (uint64_t*)Data;
             LouKeIpcDestroyMessage((PLOU_IPC_MESSAGE)Tmp[0]);
+            return;
+        }
+        case LOUREGISTERGLOBALOBJECT:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeRegisterSharedObject(
+                (LPWSTR)Tmp[1],
+                (PVOID)Tmp[2]
+            );
+            return;
+        }   
+        case LOUUNREGISTERGLOBALOBJECT:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeUnRegisterSharedObject(
+                (LPWSTR)Tmp[1]
+            );
+            return;
+        }
+        case LOUGETGLOBALOBJECT:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeGetSharedObject(
+                (LPWSTR)Tmp[1],
+                (PVOID*)Tmp[2]
+            );
             return;
         }
         default:

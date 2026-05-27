@@ -106,7 +106,7 @@ void PageFault(uint64_t FaultingStackP) {
 
     RequestPhysicalAddress(VAddress, &PAddress);
 
-    if((!PAddress) && (VAddress) && LouKeVmmAddressCausePageFault((PVOID)VAddress, &Out)){
+    if((VAddress) && LouKeVmmAddressCausePageFault((PVOID)VAddress, &Out)){
         Status = LouKeVmmCommitPageAddress((PVOID)VAddress, Out);
         if(Status == STATUS_SUCCESS){
             clear_cr2();
@@ -116,7 +116,7 @@ void PageFault(uint64_t FaultingStackP) {
         LouPrint("VAddress:%h\n", VAddress);
         while(1);
     }
-    if((!PAddress) && (VAddress) && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &LazyOut)){
+    if((VAddress) && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &LazyOut)){
         Status = LouKeLazyBufferCommitPageForce(LazyOut, (PVOID)VAddress, 1);
         if(Status == STATUS_SUCCESS){
             clear_cr2();

@@ -493,13 +493,14 @@ static LOUSTATUS LouUserHeapCalculateSize(
 
 ANNA_EXPORT
 PUSER_PROCESS_HEAP
-LouRtlCreateHeap(
+LouRtlCreateHeapEx(
     ULONG                   Flags,
     PVOID                   HeapBase,
     SIZE                    ReservedSize,
     SIZE                    CommitSize,
     PERESOURCE_OBJECT       ResourceLock,
-    PUSER_HEAP_PARAMETERS   Parameters
+    PUSER_HEAP_PARAMETERS   Parameters,
+    BOOLEAN                 Shared
 ){
     PUSER_PROCESS_HEAP NewHeap = 0x00;
     if(ResourceLock){
@@ -508,13 +509,16 @@ LouRtlCreateHeap(
         while(1);
     }
     
-    NewHeap = (PUSER_PROCESS_HEAP)LouAllocateVirtualMemoryEx(sizeof(USER_PROCESS_HEAP), GET_ALIGNMENT(USER_PROCESS_HEAP), USER_GENERIC_MEMORY);
+    
+    NewHeap = (PUSER_PROCESS_HEAP)LouAllocateVirtualMemoryEx2(sizeof(USER_PROCESS_HEAP), GET_ALIGNMENT(USER_PROCESS_HEAP), Shared, USER_GENERIC_MEMORY);
     if(!NewHeap){
+        LouPrint("LOUDLL.DLL:LouRtlCreateHeapEx():Unable To Allocate Tracker\n");
         goto _DONE;
     }
 
     LouMemSet(NewHeap, 0, sizeof(USER_PROCESS_HEAP));
 
+    NewHeap->Shared = Shared; 
     NewHeap->HeapFlags = Flags;
     NewHeap->ReservedSize = ReservedSize;
     NewHeap->CommitSize = CommitSize;
@@ -531,8 +535,10 @@ LouRtlCreateHeap(
     }
 
     if(!HeapBase){
-        NewHeap->HeapBase = LouAllocateVirtualMemoryEx(NewHeap->ReservedSize, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
+        NewHeap->HeapBase = LouAllocateVirtualMemoryEx2(NewHeap->ReservedSize, KILOBYTE_PAGE, Shared, USER_GENERIC_MEMORY);
     }
+
+    LouMemSet(NewHeap->HeapBase, 0, CommitSize);
 
     _DONE:
     if(ResourceLock){
@@ -540,7 +546,52 @@ LouRtlCreateHeap(
         LouPrint("LOUDLL.DLL:LouRtlCreateHeap():ResourceLock\n");
         while(1);
     }
+    if(Shared){
+        LouMemoryBarrier();
+    }
     return NewHeap;
+}
+
+ANNA_EXPORT
+PUSER_PROCESS_HEAP
+LouRtlCreateHeap(
+    ULONG                   Flags,
+    PVOID                   HeapBase,
+    SIZE                    ReservedSize,
+    SIZE                    CommitSize,
+    PERESOURCE_OBJECT       ResourceLock,
+    PUSER_HEAP_PARAMETERS   Parameters
+){
+    return LouRtlCreateHeapEx(
+        Flags, 
+        HeapBase,
+        ReservedSize,
+        CommitSize,
+        ResourceLock,
+        Parameters,
+        false
+    );
+}
+
+ANNA_EXPORT
+PUSER_PROCESS_HEAP
+LouRtlCreateSharedHeap(
+    ULONG                   Flags,
+    PVOID                   HeapBase,
+    SIZE                    ReservedSize,
+    SIZE                    CommitSize,
+    PERESOURCE_OBJECT       ResourceLock,
+    PUSER_HEAP_PARAMETERS   Parameters
+){
+    return LouRtlCreateHeapEx(
+        Flags, 
+        HeapBase,
+        ReservedSize,
+        CommitSize,
+        ResourceLock,
+        Parameters,
+        true
+    );
 }
 
 
@@ -578,13 +629,13 @@ LouRtlAllocateHeapEx(
         }
         _CONTINUE_SEARCH:
         if(!Found){
-            TmpResult = (PVOID)((UINT64)TmpTracker + ROUND_UP64(TmpTracker->Size, Alignment));
+            TmpResult = (PVOID)((UINT64)TmpResult + ROUND_UP64(TmpTracker->Size, Alignment));
         }
     }
-        
+    
     if(Found){
         Result = TmpResult;
-        PUSER_HEAP_ALLOCATION_TRACKER NewTracker = LouAllocateVirtualMemoryEx(sizeof(USER_HEAP_ALLOCATION_TRACKER), GET_ALIGNMENT(USER_HEAP_ALLOCATION_TRACKER), USER_GENERIC_MEMORY);
+        PUSER_HEAP_ALLOCATION_TRACKER NewTracker = LouAllocateVirtualMemoryEx2(sizeof(USER_HEAP_ALLOCATION_TRACKER), GET_ALIGNMENT(USER_HEAP_ALLOCATION_TRACKER), Heap->Shared, USER_GENERIC_MEMORY);
         if(!NewTracker){
             //TODO: Kill Proces
             LouPrint("LouRtlAllocateHeapEx()\n");
@@ -597,16 +648,15 @@ LouRtlAllocateHeapEx(
         if(Flags & USER_HEAP_FLAG_ZERO_MEMORY){
             LouMemSet(TmpResult, 0, Size);
         }
-        
-    }else{
-        LouPrint("LouDLL.DLL:LouRtlAllocateHeapEx()\n");
-        while(1);
+        if(Heap->Shared){
+            LouMemoryBarrier();
+        }
     }
 
     if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
         MutexUnlock(&Heap->HeapLock);
     }
-    if((Flags & USER_HEAP_FLAG_GROWABLE) && (!Result)){
+    if((Flags & USER_HEAP_FLAG_GROWABLE) && (!Found)){
         LouPrint("LOUDLL.DLL:LouRtlAllocateHeapEx() GROWABLE\n");
         while(1);
     }
@@ -635,9 +685,33 @@ LouRtlFreeHeap(
     PVOID               Address,
     ULONG               Flags
 ){
-    LouPrint("LOUDLL.DLL:LouRtlFreeHeap()\n");
-    while(1);
+    Flags |= Heap->HeapFlags;
+    if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
+        MutexLock(&Heap->HeapLock);
+    }
+    PUSER_HEAP_ALLOCATION_TRACKER TmpTracker;
+    ForEachListEntry(TmpTracker, &Heap->Allocations, Peers){
+        if(RangeInterferes(
+            (UINT64)Address, 1,
+            TmpTracker->Base,
+            TmpTracker->Size
+        )){
+            LouKeListDeleteItem(&TmpTracker->Peers);
+            LouFreeVirtualMemory(TmpTracker);
+            if(Heap->Shared){
+                LouMemoryBarrier();
+            }
+            goto _DONE;
+        }
+    }
+_DONE:
+    if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
+        MutexUnlock(&Heap->HeapLock);
+    }
+    return 0x00;
 }
+
+
 
 LOUDLL_API size_t strlen(string Str){
     size_t i = 0;

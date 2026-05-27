@@ -83,6 +83,7 @@
 #include <USRSPC/msvcrt.h>
 #include <USRSPC/User.h>
 #include <USRSPC/LouDll.h>
+#include <USRSPC/Asmss.h>
 //THIS is not exposed to user mode
 //#ifndef KERNEL_MAIN_FILE
 //EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
@@ -432,14 +433,6 @@ LouCloseFile(
 );
 
 ANNA_IMPORT
-void*
-LouMemCpy(
-    void* OutStream,
-    void* InStream,
-    size_t ByteCount
-);
-
-ANNA_IMPORT
 LOUSTATUS 
 LouSwapEndianess(
     void* InStreamTmp, 
@@ -654,7 +647,9 @@ typedef void* HINSTANCE;
 #include <Dispatching.h>
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouMemoryBarrier() asm volatile("mfence" : : : "memory")
 #define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
+#define LouPauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 #ifndef _ANNYA_DLL_CALL_REASONS
 #define _ANNYA_DLL_CALL_REASONS

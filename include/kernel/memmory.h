@@ -38,6 +38,15 @@ LouKeAllocateVmmIsolatedBuffer64(
     SIZE    Size,
     SIZE    Alignment,
     BOOLEAN Zero,
+    UINT64  Flags
+);
+
+KERNEL_EXPORT 
+PVOID 
+LouKeAllocateVmmBuffer64Ex(
+    SIZE    Size,
+    SIZE    Alignment,
+    BOOLEAN Zero,
     BOOLEAN Shared,
     UINT64  Flags
 );

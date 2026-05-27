@@ -63,12 +63,7 @@ LouKeIpcCreateIpcMessage(
     }
     PLOU_IPC_MESSAGE NewMessage = LouKeMallocType(LOU_IPC_MESSAGE, USER_GENERIC_MEMORY);
     NewMessage->MessageID = MessageID;
-    if(Data && DataSize){
-        NewMessage->Data = LouKeMalloc(DataSize, USER_GENERIC_MEMORY);
-        memcpy(NewMessage->Data, Data, DataSize);
-    }else{
-        NewMessage->Data = Data; 
-    }
+    NewMessage->Data = Data; 
     NewMessage->DataSize = DataSize;
     *OutMessage = NewMessage;
     return STATUS_SUCCESS;
@@ -160,8 +155,5 @@ void
 LouKeIpcDestroyMessage(
     PLOU_IPC_MESSAGE Message
 ){
-    if(Message->Data && Message->DataSize){
-        LouKeFree(Message->Data);
-    }
     LouKeFree(Message);
 }
