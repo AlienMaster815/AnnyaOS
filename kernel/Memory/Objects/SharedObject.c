@@ -32,10 +32,11 @@ LouKeUnRegisterSharedObject(
     return Status;        
 }
 
-LOUSTATUS 
-LouKeRegisterSharedObject(
-    LPWSTR  ObjectName,
-    PVOID   Object
+LOUSTATUS
+LouKeRegisterSharedObjectEx(
+    LPWSTR      ObjectName,
+    PVOID       Object,
+    PRTL_ATOM   OutAtom
 ){
     if(!ObjectName || !Object){
         return STATUS_INVALID_PARAMETER;
@@ -58,14 +59,52 @@ LouKeRegisterSharedObject(
         return STATUS_INVALID_PARAMETER;
     }
     LouKeXaStore(&GlobalPointerManager, Atom, Object, KERNEL_GENERIC_MEMORY);
+    if(OutAtom){
+        *OutAtom = Atom;
+    }
     MutexUnlock(&GlobalPointerManagerLock);
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS 
-LouKeGetSharedObject(
+LouKeRegisterSharedObject(
     LPWSTR  ObjectName,
-    PVOID*  OutPtr
+    PVOID   Object
+){
+   return LouKeRegisterSharedObjectEx(ObjectName, Object, 0);
+}
+
+LOUSTATUS LouKeGetSharedObjectFromAtom(
+    RTL_ATOM    Atom,
+    PVOID*      OutPtr
+){
+    if(!Atom || !OutPtr){
+        return STATUS_INVALID_PARAMETER;
+    }
+    MutexLock(&GlobalPointerManagerLock);
+    if(!LouKeXaIsIndexUsed(&GlobalPointerManager, Atom)){
+        //delete Atom Reference and Return error
+        LouKeDeleteAtom(Atom);
+        MutexUnlock(&GlobalPointerManagerLock);
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT64 Out;
+    LOUSTATUS Status = LouKeXaGet(&GlobalPointerManager, Atom, &Out);
+    if(Status != STATUS_SUCCESS){
+        LouKeDeleteAtom(Atom);
+        MutexUnlock(&GlobalPointerManagerLock);
+        return Status;
+    }
+    *OutPtr = (PVOID)Out;
+    MutexUnlock(&GlobalPointerManagerLock);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeGetSharedObjectEx(
+    LPWSTR      ObjectName,
+    PVOID*      OutPtr,
+    PRTL_ATOM   OutAtom
 ){
     if(!ObjectName || !OutPtr){
         return STATUS_INVALID_PARAMETER;
@@ -94,7 +133,17 @@ LouKeGetSharedObject(
         return Status;
     }
     *OutPtr = (PVOID)Out;
-    LouKeDeleteAtom(Atom);
+    if(OutAtom){
+        *OutAtom = Atom;
+    }
     MutexUnlock(&GlobalPointerManagerLock);
     return STATUS_SUCCESS;
+}
+
+LOUSTATUS 
+LouKeGetSharedObject(
+    LPWSTR  ObjectName,
+    PVOID*  OutPtr
+){
+    return LouKeGetSharedObjectEx(ObjectName, OutPtr, 0x00);  
 }

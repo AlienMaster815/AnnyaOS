@@ -1,5 +1,6 @@
 CC = x86_64-w64-mingw32-gcc
-SRC = user32.c
+SRC = 	user32.c \
+		WindowClass.c
 CFLAGS = -shared -nostdlib -nodefaultlibs -mabi=ms -mno-red-zone -mstackrealign -fno-builtin
 INCLUDES = -I../../../include
 TARGET = user32.dll

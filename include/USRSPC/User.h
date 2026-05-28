@@ -59,9 +59,23 @@ typedef struct _WINDOW_CLASS_EX_A{
     HBRUSH      BackgroundBrush;
     LPSTR       MenuName;
     LPSTR       ClassName;
-    HICON       TaskbarIcon;
+    HICON       SmallClassIcon;
 }WINDOW_CLASS_EX_A, * PWINDOW_CLASS_EX_A,
     WNDCLASSEXA, * PWNDCLASSEXA, * NPWNDCLASSEXA, * LPWNDCLASSEXA;
+
+typedef struct _WINDOW_CLASS_A{
+    UINT        Style;
+    WNDPROC     WindowProcedure;
+    int         ExtraClassDataSize;
+    int         ExtraWindowDataSize;
+    HINSTANCE   WndProcInstance;
+    HICON       ClassIcon;
+    HCURSOR     ClassCursor;
+    HBRUSH      BackgroundBrush;
+    LPSTR       MenuName;
+    LPSTR       ClassName;
+}WINDOW_CLASS_A, * PWINDOW_CLASS_A,
+    WNDCLASSA, * PWNDCLASSA, * NPWNDCLASSA, * LPWNDCLASSA;
 
 typedef struct _WINDOW_CLASS_EX_W{
     UINT        Size;
@@ -75,9 +89,24 @@ typedef struct _WINDOW_CLASS_EX_W{
     HBRUSH      BackgroundBrush;
     LPWSTR      MenuName;
     LPWSTR      ClassName;
-    HICON       TaskbarIcon;
+    HICON       SmallClassIcon;
 }WINDOW_CLASS_EX_W, * PWINDOW_CLASS_EX_W,
     WNDCLASSEXW, * PWNDCLASSEXW, * NPWNDCLASSEXW, * LPWNDCLASSEXW;
+
+typedef struct _WINDOW_CLASS_W{
+    UINT        Style;
+    WNDPROC     WindowProcedure;
+    int         ExtraClassDataSize;
+    int         ExtraWindowDataSize;
+    HINSTANCE   WndProcInstance;
+    HICON       ClassIcon;
+    HCURSOR     ClassCursor;
+    HBRUSH      BackgroundBrush;
+    LPWSTR      MenuName;
+    LPWSTR      ClassName;
+}WINDOW_CLASS_W, * PWINDOW_CLASS_W,
+    WNDCLASSW, * PWNDCLASSW, * NPWNDCLASSW, * LPWNDCLASSW;
+
 
 #define WINDOW_CS_BYTE_ALIGN_CLIENT     0x00001000
 #define WINDOW_CS_BYTE_ALIGN_WINDOW     0x00002000

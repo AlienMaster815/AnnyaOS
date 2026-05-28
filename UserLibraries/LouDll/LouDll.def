@@ -68,3 +68,6 @@ EXPORTS
     wcscpy
     LouDeleteAtom
     wcscmp
+    LouGetGlobalObjectEx
+    LouRegisterGlobalObjectEx
+    LouGetGlobalObjectFromAtom

@@ -41,6 +41,7 @@ LouGetGlobalObject(
     PVOID* Object
 );
 
+
 UINT64 LouGetFloatStoreImplementation(){
     return FsiLevel;
 }
@@ -944,13 +945,23 @@ LouIpcDestroyIpcMessage(
 
 ANNA_EXPORT
 LOUSTATUS 
+LouRegisterGlobalObjectEx(
+    LPWSTR      ObjectName, 
+    PVOID       Object,
+    PRTL_ATOM   OutAtom
+){
+    UINT64 KulaPacket[5] = {0, 0, (UINT64)ObjectName, (UINT64)Object, (UINT64)OutAtom};
+    LouCALL(LOUREGISTERGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT
+LOUSTATUS 
 LouRegisterGlobalObject(
     LPWSTR  ObjectName, 
     PVOID   Object
 ){
-    UINT64 KulaPacket[4] = {0, 0, (UINT64)ObjectName, (UINT64)Object};
-    LouCALL(LOUREGISTERGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
-    return (LOUSTATUS)KulaPacket[1];
+    LouRegisterGlobalObjectEx(ObjectName, Object, 0);
 }
 
 ANNA_EXPORT
@@ -964,12 +975,32 @@ LouUnRegisterGlobalObject(
 }
 
 ANNA_EXPORT
+LOUSTATUS LouGetGlobalObjectFromAtom(
+    RTL_ATOM    Atom,
+    PVOID*      Object
+){
+    UINT64 KulaPacket[4] = {0, 0, (UINT64)Atom, (UINT64)Object};
+    LouCALL(LOUGETGLOBALOBJECTFROMATOM, (UINT64)&KulaPacket[0], 0);
+    return KulaPacket[1];
+}
+
+ANNA_EXPORT
+LOUSTATUS
+LouGetGlobalObjectEx(
+    LPWSTR      ObjectName,
+    PVOID*      Object,
+    PRTL_ATOM   OutAtom
+){
+    UINT64 KulaPacket[5] = {0, 0, (UINT64)ObjectName, (UINT64)Object, (UINT64)OutAtom};
+    LouCALL(LOUGETGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
+    return (LOUSTATUS)KulaPacket[1];
+}
+
+ANNA_EXPORT
 LOUSTATUS
 LouGetGlobalObject(
     LPWSTR ObjectName,
     PVOID* Object
 ){
-    UINT64 KulaPacket[4] = {0, 0, (UINT64)ObjectName, (UINT64)Object};
-    LouCALL(LOUGETGLOBALOBJECT, (UINT64)&KulaPacket[0], 0);
-    return (LOUSTATUS)KulaPacket[1];
+    return LouGetGlobalObjectEx(ObjectName, Object, 0x00);
 }

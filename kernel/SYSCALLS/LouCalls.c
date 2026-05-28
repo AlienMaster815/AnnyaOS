@@ -134,15 +134,28 @@ LouKeRegisterSharedObject(
     PVOID   Object
 );
 
+LOUSTATUS
+LouKeRegisterSharedObjectEx(
+    LPWSTR      ObjectName,
+    PVOID       Object,
+    PRTL_ATOM   OutAtom
+);
+
 LOUSTATUS 
 LouKeUnRegisterSharedObject(
     LPWSTR ObjectName
 );
 
 LOUSTATUS 
-LouKeGetSharedObject(
-    LPWSTR  ObjectName,
-    PVOID*  OutPtr
+LouKeGetSharedObjectEx(
+    LPWSTR      ObjectName,
+    PVOID*      OutPtr,
+    PRTL_ATOM   OutAtom
+);
+
+LOUSTATUS LouKeGetSharedObjectFromAtom(
+    RTL_ATOM    Atom,
+    PVOID*      OutPtr
 );
 
 void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
@@ -434,9 +447,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUREGISTERGLOBALOBJECT:{
             uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[0] = (UINT64)LouKeRegisterSharedObject(
+            Tmp[0] = (UINT64)LouKeRegisterSharedObjectEx(
                 (LPWSTR)Tmp[1],
-                (PVOID)Tmp[2]
+                (PVOID)Tmp[2],
+                (PRTL_ATOM)Tmp[3]
             );
             return;
         }   
@@ -449,9 +463,10 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
         }
         case LOUGETGLOBALOBJECT:{
             uint64_t* Tmp = (uint64_t*)Data;
-            Tmp[0] = (UINT64)LouKeGetSharedObject(
+            Tmp[0] = (UINT64)LouKeGetSharedObjectEx(
                 (LPWSTR)Tmp[1],
-                (PVOID*)Tmp[2]
+                (PVOID*)Tmp[2],
+                (PRTL_ATOM)Tmp[3]
             );
             return;
         }
@@ -459,6 +474,14 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             uint64_t* Tmp = (uint64_t*)Data;
             Tmp[0] = (UINT64)LouKeDeleteAtom(
                 (RTL_ATOM)Tmp[1]
+            );
+            return;
+        }
+        case LOUGETGLOBALOBJECTFROMATOM:{
+            uint64_t* Tmp = (uint64_t*)Data;
+            Tmp[0] = (UINT64)LouKeGetSharedObjectFromAtom(
+                (RTL_ATOM)Tmp[1],
+                (PVOID*)Tmp[2]
             );
             return;
         }

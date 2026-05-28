@@ -106,6 +106,14 @@ LouGetGlobalObject(
 
 ANNA_IMPORT
 LOUSTATUS
+LouGetGlobalObjectEx(
+    LPWSTR      ObjectName,
+    PVOID*      Object,
+    PRTL_ATOM   OutAtom
+);
+
+ANNA_IMPORT
+LOUSTATUS
 LouUnRegisterGlobalObject(
     LPWSTR  ObjectName
 );
@@ -147,6 +155,26 @@ LOUSTATUS
 LouDeleteAtom(
     RTL_ATOM Atom
 );
+
+ANNA_IMPORT
+LOUSTATUS 
+LouRegisterGlobalObjectEx(
+    LPWSTR      ObjectName, 
+    PVOID       Object,
+    PRTL_ATOM   OutAtom
+);
+
+ANNA_IMPORT
+LOUSTATUS LouGetGlobalObjectFromAtom(
+    RTL_ATOM    Atom,
+    PVOID*      Object
+);
+
+#ifndef _MSVCRT_H
+
+ANNA_IMPORT size_t strlen(string Str); //TODO: change to LouStrLen
+
+#endif
 
 #endif
 #endif
