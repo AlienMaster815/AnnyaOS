@@ -3142,10 +3142,6 @@ LONG InterlockedXor(
         LONG          Value
 );
 
-
-
-
-
 void IoAcquireCancelSpinLock(
   PKIRQL Irql
 );

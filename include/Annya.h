@@ -74,6 +74,7 @@
 #include <LKDM.h>
 #include <kernel/Rcu.h>
 #include <kernel/Virtualization.h>
+#include <DRSD3D.h>
 
 #include <IoCtl.h>
 #include <kernel/Sections.h>

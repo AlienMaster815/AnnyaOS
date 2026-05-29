@@ -10,6 +10,7 @@ extern "C" {
 #define WINAPI __stdcall
 
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+#define OFFSET_OF(Type, Field) offsetof(Type, Field)
 
 //Include API Headers
 #include <cstdint.h>
@@ -87,6 +88,7 @@ extern "C" {
 #include <Time.h>
 #include <kernel/Rcu.h>
 #include <kernel/Services.h>
+#include <DRSD3D.h>
 
 #include <IoCtl.h>
 #include <kernel/Sections.h>

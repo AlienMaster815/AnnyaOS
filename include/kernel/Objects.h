@@ -35,6 +35,8 @@ typedef struct _KERNEL_REFERENCE{
     //TODO: Add variables as needed
 }KERNEL_REFERENCE, * PKERNEL_REFERENCE;
 
+typedef GUID REFIID, * PREFIID;
+
 typedef struct _OBJECT_ATTRIBUTES {
     ULONG Length;
     HANDLE RootDirectory;

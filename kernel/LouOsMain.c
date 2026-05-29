@@ -387,10 +387,6 @@ void LouOsKrnlStart(
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;
 
-    //PRIFF_OBJECT StartupWave = LouKeOpenRiffFile("C:/ANNYA/STARTUP.WAV");
-
-    //LouKePlayWaveFile(StartupWave);
-
     PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",
         0x00
