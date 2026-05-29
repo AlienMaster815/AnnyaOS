@@ -211,8 +211,8 @@ DrsdVRamHelperInitialize(
     }
 
     VramManager = DrsdVRamHelperAllocateManager(Device, VRamBase, VRamSize);
-    if(LOU_KE_PTR_ERROR(VramManager)){
-        return (LOUSTATUS)(UINTPTR)VramManager;
+    if(IS_LOU_KE_PTR_ERROR(VramManager)){
+        return LOU_KE_PTR_ERROR(VramManager);
     }
 
     return STATUS_SUCCESS;

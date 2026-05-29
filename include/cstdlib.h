@@ -17,8 +17,8 @@ typedef BYTE BOOLEAN, * PBOOLEAN;
 #define ERANGE 34
 
 
-#define LOU_KE_PTR_ERROR(x) ((UINT64)x < 0xFFFF800000000000ULL ? true : false)
-#define LOUPTR_ERROR(x) ((LOUSTATUS)(UINTPTR)x)
+#define IS_LOU_KE_PTR_ERROR(x) ((UINT64)x < 0xFFFF800000000000ULL ? true : false)
+#define LOU_KE_PTR_ERROR(x) ((LOUSTATUS)(UINTPTR)x)
 
 
 #define IS_CPP __cplusplus

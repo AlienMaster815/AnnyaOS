@@ -77,7 +77,7 @@ static LOUSTATUS VBoxAccelerationInitialize(
     
     VBox->AvailableVramSize -= VBox->CrtcCount * VBVA_MINIMUM_BUFFER_SIZE;
 
-    LouKeHalMapPciResource(PDEV, 0, KERNEL_DMA_MEMORY);
+    LouKeHalMapPciResource(PDEV, 0, USER_WRITE_COMBINE_MEMORY);
 
     VBox->VbvaBuffers = (uint8_t*)LouKePciGetIoRegion(PDEV, 0, VBox->AvailableVramSize);
     if(!VBox->VbvaBuffers){
@@ -127,6 +127,8 @@ LOUSTATUS VBoxInitializeHardware(
     LouPrint("Virtualbox VRAM Size:%h\n", VBox->FullVRamSize);    
     LouPrint("Support For Any Pitch : %s\n", VBox->AnyPitch ? "YES" : "NO");
     LouPrint("Support For VBVA      : %s\n", VBox->VBoxVideo ? "YES" : "NO");
+
+    LouKeHalMapPciResource(PDEV, 0, KERNEL_GENERIC_MEMORY);
 
     VBox->GuestHeap = (uint8_t*)((uint64_t)LouKePciGetIoRegion(
         PDEV, 
@@ -182,7 +184,7 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
         return STATUS_NO_SUCH_DEVICE;
     }
     VBox = (PVIRTUALBOX_PRIVATE_DATA)DrsdDeviceManagerAllocateDevice(PDEV, &Driver, VIRTUALBOX_PRIVATE_DATA, DrsdDevice);
-    if(LOU_KE_PTR_ERROR(VBox)){
+    if(IS_LOU_KE_PTR_ERROR(VBox)){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
     VBox->PDEV = PDEV;

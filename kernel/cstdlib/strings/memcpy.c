@@ -5,7 +5,7 @@
 #include <emmintrin.h> 
 #include <immintrin.h> 
 
-static uint64_t SavedState = 0;
+static uint64_t* SavedState = 0;
 
 void* LouGeneralAllocateMemoryEx(size_t BytesToAllocate, size_t Aligned);
 
@@ -31,7 +31,7 @@ void simd_copy(uint64_t Destination, uint64_t Source);
 
 __attribute__((target("avx2")))
 static void* memcpy_avx2(void* destination, const void* source, size_t num) {
-    SaveEverything(SavedState);
+    SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     uintptr_t d = (uintptr_t)destination;
     uintptr_t s = (uintptr_t)source;
 
@@ -60,7 +60,7 @@ static void* memcpy_avx2(void* destination, const void* source, size_t num) {
         }
 
     }
-    RestoreEverything(SavedState);
+    RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     return destination;
 }
 
@@ -84,8 +84,8 @@ void* memcpy_basic(void* destination, const void* source, size_t num) {
  
 __attribute__((target("sse2")))
 UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t num) {
-    SaveEverything(SavedState);
-unsigned char* d = (unsigned char*)destination;
+    SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    unsigned char* d = (unsigned char*)destination;
     const unsigned char* s = (const unsigned char*)source;
 
     if (d == s || num == 0) return destination;
@@ -112,13 +112,13 @@ unsigned char* d = (unsigned char*)destination;
             _mm_storeu_si128((__m128i*)(d + offset), tmp);
         }
     }
-    RestoreEverything(SavedState);
+    RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     return destination;
 }
 
 __attribute__((target("avx512f")))
 UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t num) {
-    SaveEverything(SavedState);
+    SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     uint8_t* d = (uint8_t*)destination;
     const uint8_t* s = (const uint8_t*)source;
 
@@ -147,15 +147,20 @@ UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t 
             _mm512_storeu_si512((void*)(d + offset), tmp);
         }
     }
-    RestoreEverything(SavedState);
+    RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     return destination;
 }
 
+LOUAPI uint16_t GetNPROC();
 
 void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
     
     if(!SavedState){
-        SavedState = (uintptr_t)LouGeneralAllocateMemoryEx(2688, 64);
+        UINT16 ProcCount = GetNPROC();
+        SavedState = LouKeMallocArray(UINT64, ProcCount, KERNEL_GENERIC_MEMORY);
+        for(SIZE i = 0 ; i < ProcCount; i++){
+            SavedState[i] = (uintptr_t)LouGeneralAllocateMemoryEx(2688, 64);
+        }
     }
 
     if(ProcessorFeatures->Avx512Supported){
@@ -175,7 +180,6 @@ void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
 }
 
 void InitializeBasicMemcpy(){
-    SavedState = (uintptr_t)LouGeneralAllocateMemoryEx(2688, 64);
     MemcopyHandler = memcpy_basic;
 }
 

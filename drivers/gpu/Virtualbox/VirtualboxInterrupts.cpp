@@ -85,7 +85,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     ValidateOrSetPositionHints(VBox);
     
-    //DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, 0x00);
+    DrsdModesetLock(&Device->ModeConfig.ConnectionMutex, 0x00);
 
     while(Connector){
         LouPrint("Initializing Connector:%h Mode Hints\n", Connector);
@@ -135,7 +135,7 @@ void VirtualboxUpdateModeHints(PVIRTUALBOX_PRIVATE_DATA VBox){
         Connector = (PVIRTUALBOX_CONNECTOR)Connector->Base.Peers.NextHeader;
     }
     
-    //DrsdModesetUnlock(&Device->ModeConfig.ConnectionMutex);
+    DrsdModesetUnlock(&Device->ModeConfig.ConnectionMutex);
 
 }
 
@@ -147,7 +147,9 @@ void VirtualboxInterruptHandler(uint64_t VBoxPrivate){
         return;
     }
 
-    
+    if(HostFlags & (HGSMIHOSTFLAGS_HOTPLUG | HGSMIHOSTFLAGS_CURSOR_CAPABILITIES) && !(HostFlags & HGSMIHOSTFLAGS_VSYNC)){
+        //VirtualboxReportHotplug(VBox);
+    }
 
     VirtualBoxClearIrq();
 }

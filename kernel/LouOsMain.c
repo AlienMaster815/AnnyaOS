@@ -150,6 +150,7 @@ uint64_t GetCr3();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
 LOUSTATUS LouKeCreateSystemWorkQeueue();
+void LouKeLateProcessorInitialization();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -216,6 +217,8 @@ void AdvancedLousineKernelInitialization(){
     LouKeInitializeSecuritySubsystem();
 
     if (InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
+    
+    LouKeLateProcessorInitialization();
     
     InitializeSymmetricMultiProcessing();
 

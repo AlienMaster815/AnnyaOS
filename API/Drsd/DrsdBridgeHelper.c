@@ -43,8 +43,8 @@ DrsdBridgeHelperResetCrtc(
     }
 
     Connector = DrsdAtomicGetConnectorForEncoder(Encoder, Context);
-    if(LOU_KE_PTR_ERROR(Connector)){
-        Status = LOUPTR_ERROR(Connector);
+    if(IS_LOU_KE_PTR_ERROR(Connector)){
+        Status = LOU_KE_PTR_ERROR(Connector);
         goto _HELPER_IS_DONE;
     }
 

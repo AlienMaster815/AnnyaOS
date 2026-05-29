@@ -792,8 +792,8 @@ typedef struct _DRSD_PLANE_ASSIST_FUNCTIONS{
 }DRSD_PLANE_ASSIST_FUNCTIONS, * PDRSD_PLANE_ASSIST_FUNCTIONS;
 
 typedef struct _DRSD_PLANE_FUNCTIONS{
-    LOUSTATUS                   (*UpdatePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int CrtcX, int CrtcY, int CrtcWidth, int CrtcHeight, uint32_t SourceX, uint32_t SourceY, uint32_t SourceWidth, uint32_t SourceHeight, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
-    LOUSTATUS                   (*DisablePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_MODE_SET_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*UpdatePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_CRTC* Crtc, struct _DRSD_FRAME_BUFFER* FrameBuffer, int CrtcX, int CrtcY, int CrtcWidth, int CrtcHeight, uint32_t SourceX, uint32_t SourceY, uint32_t SourceWidth, uint32_t SourceHeight, struct _DRSD_MODESET_ACQUIRE_CONTEXT* ModeSetAquireContext);
+    LOUSTATUS                   (*DisablePlane)(struct _DRSD_PLANE* Plane, struct _DRSD_MODESET_ACQUIRE_CONTEXT* ModeSetAquireContext);
     void                        (*Destroy)(struct _DRSD_PLANE* Plane);
     void                        (*ResetPlane)(struct _DRSD_PLANE* Plane);
     LOUSTATUS                   (*SetProperty)(struct _DRSD_PLANE* Plane, struct _DRSD_PROPERTY* Property, uint64_t Value);
@@ -1062,7 +1062,7 @@ typedef struct _DRSD_PROPERTY_BLOB{
     void*                   Data;
 }DRSD_PROPERTY_BLOB, * PDRSD_PROPERTY_BLOB;
 
-typedef struct _DRSD_CONNECTOR_ASSIST_FUNCTIONS{
+typedef struct _DRSD_CONNECTOR_HELPER_FUNCTIONS{
     size_t                  (*GetModes)(struct _DRSD_CONNECTOR* Connector);
     DRSD_CONNECTOR_STATUS   (*DetectContext)(struct _DRSD_CONNECTOR* Connector, struct _DRSD_MODESET_ACQUIRE_CONTEXT* ModeSetAquireContext, bool Force);
     DRSD_CONNECTOR_STATUS   (*Detect)(struct _DRSD_CONNECTOR* Connector, bool Force);
@@ -1076,7 +1076,7 @@ typedef struct _DRSD_CONNECTOR_ASSIST_FUNCTIONS{
     void                    (*CleanupWritebackJob)(struct _DRSD_WRITEBACK_CONNECTOR* Connector, struct _DRSD_WRITEBACK_JOB* Job);
     void                    (*EnableHpd)(struct _DRSD_CONNECTOR* Connector);
     void                    (*DisableHpd)(struct _DRSD_CONNECTOR* Connector);
-}DRSD_CONNECTOR_ASSIST_FUNCTIONS, * PDRSD_CONNECTOR_ASSIST_FUNCTIONS;
+}DRSD_CONNECTOR_HELPER_FUNCTIONS, * PDRSD_CONNECTOR_HELPER_FUNCTIONS;
 
 #define DRSD_DISPLAY_MODE_LENGTH    32
 
@@ -1125,7 +1125,7 @@ typedef struct _DRSD_CMDLINE_MODE{
 typedef enum _DRSD_CONNECTOR_REISTRATION_STATE{
     DRSD_CONNECTOR_INITIALIZING = 0,
     DRSD_CONNECTOR_REGISTERED,
-    DRSD_CONNECTRO_UNREGISTERED,
+    DRSD_CONNECTOR_UNREGISTERED,
 }DRSD_CONNECTOR_REISTRATION_STATE, * PDRSD_CONNECTOR_REISTRATION_STATE;
 
 #define DRSD_CONNECTOR_POLL_HPD         (1 << 0)
@@ -1295,7 +1295,7 @@ typedef struct _DRSD_CONNECTOR{
     PDRSD_PROPERTY_BLOB                 EdidPropertiesBlob;
     DRSD_OBJECT_PROPERTIES              ConnectorProperties;
     int                                 PowerMode;
-    PDRSD_CONNECTOR_ASSIST_FUNCTIONS    AssistFunctions;
+    PDRSD_CONNECTOR_HELPER_FUNCTIONS    AssistFunctions;
     DRSD_CONNECTOR_FORCE                Force;
     HDMI_SYNCRONIZATION_INFORMATION     HdmiSyncInformation;
     mutex_t                             EldTex;
@@ -2732,7 +2732,7 @@ typedef struct _DRSD_ATOMIC_STATE{
     KERNEL_REFERENCE                        Reference;
     PDRSD_DEVICE                            Device;
     BOOLEAN                                 AllowModeSet;
-    BOOLEAN                                 LegacyCurrsorUpdate;
+    BOOLEAN                                 LegacyCursorUpdate;
     BOOLEAN                                 AsyncUpdate;
     BOOLEAN                                 Duplicated;
     BOOLEAN                                 Checked;
@@ -3149,24 +3149,24 @@ LOUSTATUS DrsdInternalAtomicCommit(
     BOOLEAN             NonBlock
 );
 
-LOUSTATUS DrsdInternalPlaneUpdateAtomic(
+LOUSTATUS DrsdAtomicHelperUpdatePlane(
     PDRSD_PLANE                     Plane,
     PDRSD_CRTC                      Crtc,
     PDRSD_FRAME_BUFFER              FrameBuffer,
     int                             CrtcX, 
-    int                             CrctY, 
+    int                             CrtcY, 
     int                             CrtcWidth, 
     int                             CrtcHeight,
     uint32_t                        SourceX, 
     uint32_t                        SourceY, 
     uint32_t                        SourceWidth, 
     uint32_t                        SourceHeight,
-    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext
+    PDRSD_MODESET_ACQUIRE_CONTEXT   Context
 );
 
-LOUSTATUS DrsdInternalPlaneDisableAtomic(
+LOUSTATUS DrsdAtomicHelperDisablePlane(
     PDRSD_PLANE                     Plane,
-    struct _DRSD_MODE_SET_CONTEXT*  ModeSetAquireContext            
+    PDRSD_MODESET_ACQUIRE_CONTEXT   Context            
 );
 
 void DrsdInternalDestroyPlane(

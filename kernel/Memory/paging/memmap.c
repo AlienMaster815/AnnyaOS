@@ -11,7 +11,7 @@ void CacheFlush(void* addr) {
     asm volatile ("mfence");
 }
 
-static inline void ReloadCR3() {
+void LouKeReloadCR3() {
     uint64_t cr3;
     asm volatile ("mov %%cr3, %0" : "=r"(cr3));
     asm volatile ("mov %0, %%cr3" :: "r"(cr3));
@@ -288,7 +288,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
         TmpPageBase[L1Entry] = TmpPageValue;
     }
 
-    ReloadCR3();
+    LouKeReloadCR3();
     MutexUnlock(&PageTableLock);
 }
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase);
@@ -350,7 +350,7 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
     }
 
     PageFlush(VAddress);
-    ReloadCR3();
+    LouKeReloadCR3();
     MutexUnlock(&PageTableLock);
 
     return true;
@@ -409,7 +409,7 @@ bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uin
     }
 
     PageFlush(VAddress);
-    ReloadCR3();
+    LouKeReloadCR3();
     MutexUnlock(&PageTableLock);
 
     return true;

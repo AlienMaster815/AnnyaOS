@@ -26,47 +26,31 @@
 #include "DrsdCore.h"
 
 static 
-LOUSTATUS
-PageFlipCommon(
-    PDRSD_ATOMIC_STATE          State,
-    PDRSD_CRTC                  Crtc,
-    PDRSD_FRAME_BUFFER          FrameBuffer,
-    PDRSD_PENDING_VBLANK_EVENT  VBlankEvent,
-    UINT32                      Flags
+void
+DrsdAtomicHelperPlaneChanged(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_PLANE_STATE   OldPlaneState,
+    PDRSD_PLANE_STATE   PlaneState,
+    PDRSD_PLANE         Plane
 ){
-    
-    PDRSD_PLANE             Plane = Crtc->Primary;
-    PDRSD_PLANE_STATE       PlaneState;
-    PDRSD_CRTC_STATE        CrtcState;
-    LOUSTATUS               Status = STATUS_SUCCESS;
-
-    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
-    if(LOU_KE_PTR_ERROR(CrtcState)){
-        return (LOUSTATUS)(UINTPTR)CrtcState;
+    PDRSD_CRTC_STATE CrtcState;
+    if(OldPlaneState->Crtc){
+        CrtcState = DrsdAtomicGetNewCrtcState(State, OldPlaneState->Crtc);
+        if(!CrtcState){
+            LouPrint("DRSD.SYS:WARNING:DrsdAtomicHelperPlaneChanged() OldPlaneState CrtcState Null\n");
+            return;
+        }
+        CrtcState->PlanesChanged = true;
     }
 
-    CrtcState->Event = VBlankEvent;
-    CrtcState->AsyncFlip = Flags & DRSD_MODE_PAGE_FLIP_ASYNC;
-
-    PlaneState = DrsdAtomicGetPlaneState(State, Plane);
-    if(LOU_KE_PTR_ERROR(PlaneState)){
-        return (LOUSTATUS)(UINTPTR)PlaneState;
+    if(PlaneState->Crtc){
+        CrtcState = DrsdAtomicGetNewCrtcState(State, PlaneState->Crtc);
+        if(!CrtcState){
+            LouPrint("DRSD.SYS:WARNING:DrsdAtomicHelperPlaneChanged() PlaneState CrtcState Null\n");
+            return;
+        }
+        CrtcState->PlanesChanged = true;
     }
-
-    Status = DrsdAtomicSetCrtcForPlane(PlaneState, Crtc);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
-
-    DrsdAtomicSetFbForPlane(PlaneState, FrameBuffer);
-
-    State->AllowModeSet = false;
-    if(!CrtcState->Active){
-        LouPrint("DEVICE:%h CRTC:%d:%h Disabled Rejecting Legacy Flip\n");
-        return STATUS_INVALID_PARAMETER;
-    }
-
-    return Status;
 }
 
 static
@@ -84,7 +68,7 @@ HandleConflictingEncoders(
     int                             i;
 
     ForEachNewConnectorInState(State, Connector, NewConnectorState, i){
-        PDRSD_CONNECTOR_ASSIST_FUNCTIONS Functions = Connector->AssistFunctions;
+        PDRSD_CONNECTOR_HELPER_FUNCTIONS Functions = Connector->AssistFunctions;
         PDRSD_ENCODER NewEncdoder;
 
         if(!NewConnectorState->Crtc){
@@ -109,7 +93,7 @@ HandleConflictingEncoders(
         }
     }
 
-    if(!Encoder){
+    if(!EncoderMask){
         return 0x00;
     }
 
@@ -133,8 +117,8 @@ HandleConflictingEncoders(
         }
         
         NewConnectorState = DrsdAtomicGetConnectorState(State, Connector);
-        if(LOU_KE_PTR_ERROR(NewConnectorState)){
-            Status = (LOUSTATUS)(UINTPTR)NewConnectorState;
+        if(IS_LOU_KE_PTR_ERROR(NewConnectorState)){
+            Status = LOU_KE_PTR_ERROR(NewConnectorState);
             goto _OUT;
         }   
         LouPrint("DEVICE:%s Encoder:%d:%s On CRTC:%d:%s Disabling Connector:%d:%s\n", Connector->Device, Encoder->Base.Identification, Encoder->Name, NewConnectorState->Crtc->Base.Identification, NewConnectorState->Crtc->Name, Connector->Base.Identification, Connector->Name);
@@ -160,6 +144,151 @@ _OUT:
 }
 
 
+
+static 
+LOUSTATUS
+PageFlipCommon(
+    PDRSD_ATOMIC_STATE          State,
+    PDRSD_CRTC                  Crtc,
+    PDRSD_FRAME_BUFFER          FrameBuffer,
+    PDRSD_PENDING_VBLANK_EVENT  VBlankEvent,
+    UINT32                      Flags
+){
+    
+    PDRSD_PLANE             Plane = Crtc->Primary;
+    PDRSD_PLANE_STATE       PlaneState;
+    PDRSD_CRTC_STATE        CrtcState;
+    LOUSTATUS               Status = STATUS_SUCCESS;
+
+    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
+    if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+        return LOU_KE_PTR_ERROR(CrtcState);
+    }
+
+    CrtcState->Event = VBlankEvent;
+    CrtcState->AsyncFlip = Flags & DRSD_MODE_PAGE_FLIP_ASYNC;
+
+    PlaneState = DrsdAtomicGetPlaneState(State, Plane);
+    if(IS_LOU_KE_PTR_ERROR(PlaneState)){
+        return LOU_KE_PTR_ERROR(PlaneState);
+    }
+
+    Status = DrsdAtomicSetCrtcForPlane(PlaneState, Crtc);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    DrsdAtomicSetFbForPlane(PlaneState, FrameBuffer);
+
+    State->AllowModeSet = false;
+    if(!CrtcState->Active){
+        LouPrint("DEVICE:%h CRTC:%d:%h Disabled Rejecting Legacy Flip\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return Status;
+}
+
+static 
+void 
+SetBestEncoder(
+    PDRSD_ATOMIC_STATE      State,
+    PDRSD_CONNECTOR_STATE   ConnectorState,
+    PDRSD_ENCODER           Encoder
+){
+    PDRSD_CRTC_STATE    CrtcState;
+    PDRSD_CRTC          Crtc;
+    if(ConnectorState->BestEncoder){
+        Crtc = ConnectorState->Connector->State->Crtc;
+        if(!Crtc && Encoder != ConnectorState->BestEncoder){
+            LouPrint("DRSD.SYS:WARNING:SetBestEncoder():Crtc Is Null In AN NON Duplicate Atomic State Restoration\n");
+        }
+        if(Crtc){
+           CrtcState = DrsdAtomicGetNewCrtcState(State, Crtc);
+           CrtcState->EncoderMask &= ~DrsdEncoderMask(ConnectorState->BestEncoder); 
+        }
+    }
+    if(Encoder){
+        Crtc = ConnectorState->Crtc;
+        if(Crtc){
+            CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
+            CrtcState->EncoderMask |= DrsdEncoderMask(Encoder); 
+        }else{
+            LouPrint("DRSD.SYS:WARNING:SetBestEncoder():Crtc Is Null\n");                        
+        }
+    }   
+    ConnectorState->BestEncoder = Encoder;
+}
+
+static 
+void
+StealEncoder(
+    PDRSD_ATOMIC_STATE  State,
+    PDRSD_ENCODER       Encoder
+){
+    PDRSD_CRTC_STATE        CrtcState;
+    PDRSD_CONNECTOR         Connector;
+    PDRSD_CONNECTOR_STATE   OldConnectorState;
+    PDRSD_CONNECTOR_STATE   NewConnectorState;
+    int Index;
+
+    ForEachOldNewConnectorInState(State, Connector, OldConnectorState, NewConnectorState, Index){
+        PDRSD_CRTC EncoderCrtc;
+        if(NewConnectorState->BestEncoder != Encoder){
+            continue;
+        }
+
+        EncoderCrtc = NewConnectorState->Crtc;
+        LouPrint("DRSD.SYS:StealEncoder():Device:%h [ENCODER:%d:%s] In Use On [CRTC:%d:%s], Stealing It\n", Encoder->Device , Encoder->Base.Identification, Encoder->Name, EncoderCrtc->Base.Identification, EncoderCrtc->Name);
+        
+        SetBestEncoder(State, NewConnectorState, 0x00);
+
+        CrtcState = DrsdAtomicGetNewCrtcState(State, EncoderCrtc);
+        CrtcState->ConnectorsChanged = true;
+        return;
+    }
+}
+
+static 
+LOUSTATUS
+UpdateConnectorRouting(
+    PDRSD_ATOMIC_STATE      State,
+    PDRSD_CONNECTOR         Connector,
+    PDRSD_CONNECTOR_STATE   OldConnectorState,
+    PDRSD_CONNECTOR_STATE   NewConnectorState,
+    BOOLEAN                 AddedByUser
+){
+    PDRSD_CONNECTOR_HELPER_FUNCTIONS    Functions;
+    PDRSD_ENCODER                       Encoder;
+    PDRSD_CRTC_STATE                    CrtcState;
+
+    LouPrint("DRSD.SYS:Device:%h Updating Routing For [CONNECTOR:%d:%s]\n", Connector->Device, Connector->Base.Identification, Connector->Name);
+
+    if(OldConnectorState->Crtc != NewConnectorState->Crtc){
+        if(!OldConnectorState->Crtc){
+            CrtcState = DrsdAtomicGetNewCrtcState(State, OldConnectorState->Crtc);
+            CrtcState->ConnectorsChanged = true;
+        }
+        if(NewConnectorState->Crtc){
+            CrtcState = DrsdAtomicGetNewCrtcState(State, NewConnectorState->Crtc);
+            CrtcState->ConnectorsChanged = true;
+        }
+    }
+
+    if(!NewConnectorState->Crtc){
+        LouPrint("DRSD.SYS:Device:%h [CONNECTOR:%d:%s]\n", Connector->Device, Connector->Base.Identification, Connector->Name);
+        SetBestEncoder(State, NewConnectorState, 0x00);
+        return STATUS_SUCCESS;
+    }
+
+    CrtcState = DrsdAtomicGetNewCrtcState(State, NewConnectorState->Crtc);
+
+    if(State->Duplicated && DrsdConnectorIsUnRegistered(Connector) && AddedByUser && CrtcState->Active){
+        //LouPrint("DRSD.SYS:Device");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+}
 
 DRIVER_EXPORT
 LOUSTATUS 
@@ -332,4 +461,125 @@ DrsdAtomicHelperCheckPlaneState(
         return STATUS_INVALID_PARAMETER;
     } 
     return STATUS_SUCCESS;
+}
+
+
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicHelperUpdatePlane(
+    PDRSD_PLANE                     Plane,
+    PDRSD_CRTC                      Crtc,
+    PDRSD_FRAME_BUFFER              FrameBuffer,
+    int                             CrtcX, 
+    int                             CrtcY, 
+    int                             CrtcWidth, 
+    int                             CrtcHeight,
+    uint32_t                        SourceX, 
+    uint32_t                        SourceY, 
+    uint32_t                        SourceWidth, 
+    uint32_t                        SourceHeight,
+    PDRSD_MODESET_ACQUIRE_CONTEXT   Context
+){
+    PDRSD_ATOMIC_STATE  State;
+    PDRSD_PLANE_STATE   PlaneState;
+    LOUSTATUS Status =  STATUS_SUCCESS; 
+ 
+    State = DrsdAtomicStateAllocate(Plane->Device);
+    if(!State){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    State->AcquireContext = Context;
+    PlaneState = DrsdAtomicGetPlaneState(State, Plane);
+    if(IS_LOU_KE_PTR_ERROR(PlaneState)){
+        Status = LOU_KE_PTR_ERROR(PlaneState);
+        goto _FAIL;
+    }
+
+    Status = DrsdAtomicSetCrtcForPlane(PlaneState, Crtc);
+    if(Status != STATUS_SUCCESS){
+        goto _FAIL;
+    }
+
+    DrsdAtomicSetFbForPlane(PlaneState, FrameBuffer);
+    PlaneState->CrtcX = CrtcX;
+    PlaneState->CrtcY = CrtcY;
+    PlaneState->CrtcWidth = CrtcWidth;
+    PlaneState->CrtcHeight = CrtcHeight;
+    PlaneState->SourceX = SourceX;
+    PlaneState->SourceY = SourceY;
+    PlaneState->SourceWidth = SourceWidth;
+    PlaneState->SourceHeight = SourceHeight;
+
+    if(Plane == Crtc->Cursor){
+        State->LegacyCursorUpdate = true;
+    }
+
+    Status = DrsdAtomicCommit(State);
+
+_FAIL:
+    DrsdAtomicStatePut(State);
+    return Status;
+}
+
+DRIVER_EXPORT 
+LOUSTATUS
+__DrsdAtomicHelperDisablePlane(
+    PDRSD_PLANE             Plane,
+    PDRSD_PLANE_STATE       PlaneState
+){
+    LOUSTATUS Status = DrsdAtomicSetCrtcForPlane(PlaneState, 0x00);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    DrsdAtomicSetFbForPlane(PlaneState, 0x00);
+    PlaneState->CrtcX = 0;
+    PlaneState->CrtcY = 0;
+    PlaneState->CrtcWidth = 0;
+    PlaneState->CrtcHeight = 0;
+    PlaneState->SourceX = 0;
+    PlaneState->SourceY = 0;
+    PlaneState->SourceWidth = 0;
+    PlaneState->SourceHeight = 0;
+
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT
+LOUSTATUS 
+DrsdAtomicHelperDisablePlane(
+    PDRSD_PLANE                     Plane,
+    PDRSD_MODESET_ACQUIRE_CONTEXT   Context            
+){
+    PDRSD_ATOMIC_STATE  State;
+    PDRSD_PLANE_STATE   PlaneState;
+    LOUSTATUS           Status = STATUS_SUCCESS;
+
+    State = DrsdAtomicStateAllocate(Plane->Device);
+    if(!State){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    State->AcquireContext = Context;
+    PlaneState = DrsdAtomicGetPlaneState(State, Plane);
+    if(IS_LOU_KE_PTR_ERROR(PlaneState)){
+        Status = LOU_KE_PTR_ERROR(PlaneState);
+        goto _FAIL;
+    }
+
+    if(PlaneState->Crtc && PlaneState->Crtc->Cursor == Plane){
+        State->LegacyCursorUpdate = true;
+    }
+
+    Status = __DrsdAtomicHelperDisablePlane(Plane, PlaneState);
+    if(Status != STATUS_SUCCESS){
+        goto _FAIL;
+    }
+
+    Status = DrsdAtomicCommit(State);
+
+_FAIL:
+    DrsdAtomicStatePut(State);
+    return Status;
 }

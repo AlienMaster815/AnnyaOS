@@ -62,8 +62,8 @@ UpdateOutputState(
 
     for(i = 0 ; i < Set->ConnectorCount; i++){
         NewConnectorState = DrsdAtomicGetConnectorState(State, Set->Connectors[i]);
-        if(LOU_KE_PTR_ERROR(NewConnectorState)){
-            return (LOUSTATUS)(UINTPTR)NewConnectorState;
+        if(IS_LOU_KE_PTR_ERROR(NewConnectorState)){
+            return LOU_KE_PTR_ERROR(NewConnectorState);
         }
         Status = DrsdAtomicSetCrtcForConnector(NewConnectorState, Set->Crtc);
         if(Status != STATUS_SUCCESS){
@@ -485,7 +485,7 @@ DrsdAtomicGetPlaneState(
     if(PlaneState->Crtc){
         PDRSD_CRTC_STATE CrtcState;
         CrtcState = DrsdAtomicGetCrtcState(State, PlaneState->Crtc);
-        if(LOU_KE_PTR_ERROR(CrtcState)){
+        if(IS_LOU_KE_PTR_ERROR(CrtcState)){
             return (PDRSD_PLANE_STATE)(UINTPTR)CrtcState;
         }
     }
@@ -923,7 +923,7 @@ DrsdAtomicGetConnectorState(
     if(ConnectorState->Crtc){
         PDRSD_CRTC_STATE CrtcState;
         CrtcState = DrsdAtomicGetCrtcState(State, ConnectorState->Crtc);
-        if(LOU_KE_PTR_ERROR(CrtcState)){
+        if(IS_LOU_KE_PTR_ERROR(CrtcState)){
             return (PDRSD_CONNECTOR_STATE)(UINTPTR)CrtcState;
         }
     }
@@ -941,7 +941,7 @@ DrsdAtomicGetBridgeState(
 ){
     PDRSD_PRIVATE_STATE ObjectState;
     ObjectState = DrsdAtomicGetPrivateObjectState(State, &Bridge->Base);
-    if(LOU_KE_PTR_ERROR(ObjectState)){
+    if(IS_LOU_KE_PTR_ERROR(ObjectState)){
         return (PDRSD_BRIDGE_STATE)(UINTPTR)ObjectState;
     }
     return DrsdPrivateToBridgeState(ObjectState);
@@ -993,8 +993,8 @@ DrsdAtomicAddEncoderBridges(
             continue;
         }
         BridgeState = DrsdAtomicGetBridgeState(State, Bridge);
-        if(LOU_KE_PTR_ERROR(BridgeState)){
-            return (LOUSTATUS)(UINTPTR)BridgeState;
+        if(IS_LOU_KE_PTR_ERROR(BridgeState)){
+            return LOU_KE_PTR_ERROR(BridgeState);
         }
     }
     return STATUS_SUCCESS;
@@ -1014,8 +1014,8 @@ DrsdAtomicAddAffectedConnectors(
     LOUSTATUS                       Status;
 
     CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
-    if(LOU_KE_PTR_ERROR(CrtcState)){
-        return (LOUSTATUS)(UINTPTR)CrtcState;
+    if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+        return LOU_KE_PTR_ERROR(CrtcState);
     }
 
     Status = DrsdModesetLock(&Config->ConnectionMutex, State->AcquireContext);
@@ -1031,9 +1031,9 @@ DrsdAtomicAddAffectedConnectors(
             continue;
         }
         ConnectorState = DrsdAtomicGetConnectorState(State, Connector);
-        if(LOU_KE_PTR_ERROR(ConnectorState)){
+        if(IS_LOU_KE_PTR_ERROR(ConnectorState)){
             DrsdConnectorListIterationEnd(&ConnectorItter);
-            return (LOUSTATUS)(UINTPTR)ConnectorState;
+            return LOU_KE_PTR_ERROR(ConnectorState);
         }
     }    
     DrsdConnectorListIterationEnd(&ConnectorItter);
@@ -1053,8 +1053,8 @@ DrsdAtomicAddAffectedPlanes(
 
     DrsdForEachPlaneMask(Plane, State->Device, OldCrtcState->PlaneMask){
         PDRSD_PLANE_STATE PlaneState = DrsdAtomicGetPlaneState(State, Plane);
-        if(LOU_KE_PTR_ERROR(PlaneState)){
-            return (LOUSTATUS)(UINTPTR)PlaneState;
+        if(IS_LOU_KE_PTR_ERROR(PlaneState)){
+            return LOU_KE_PTR_ERROR(PlaneState);
         }
     }
     return STATUS_SUCCESS;
@@ -1074,13 +1074,13 @@ __DrsdAtomicHelperSetConfig(
     LOUSTATUS Status;
 
     CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
-    if(LOU_KE_PTR_ERROR(CrtcState)){
-        return (LOUSTATUS)(UINTPTR)CrtcState;
+    if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+        return LOU_KE_PTR_ERROR(CrtcState);
     }
 
     PrimaryState = DrsdAtomicGetPlaneState(State, Crtc->Primary);
-    if(LOU_KE_PTR_ERROR(PrimaryState)){
-        return (LOUSTATUS)(UINTPTR)PrimaryState;
+    if(IS_LOU_KE_PTR_ERROR(PrimaryState)){
+        return LOU_KE_PTR_ERROR(PrimaryState);
     }
 
     if(!Set->Mode){

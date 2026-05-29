@@ -57,8 +57,7 @@ EXPORTS
     DrsdGxeVramInternalModeValid
     DrsdInternalAtomicCheck
     DrsdInternalAtomicCommit
-    DrsdInternalPlaneUpdateAtomic
-    DrsdInternalPlaneDisableAtomic
+    DrsdAtomicHelperDisablePlane
     DrsdInternalResetPlane
     DrsdInternalDuplicateAtomicState
     DrsdInternalDestroyPlaneAtomic
@@ -87,4 +86,4 @@ EXPORTS
     DrsdPlaneGetDamageClips
     DrsdGxeBeginShadowFbAccess
     DrsdGxeEndShadowFbAccess
-    
+    DrsdAtomicHelperUpdatePlane

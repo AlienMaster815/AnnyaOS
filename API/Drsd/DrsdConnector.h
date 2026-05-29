@@ -40,6 +40,10 @@ static inline UINT32 DrsdConnectorMask(PDRSD_CONNECTOR Connector){
     return 1 << Connector->Index;
 }
 
+static inline BOOLEAN DrsdConnectorIsUnRegistered(PDRSD_CONNECTOR Connector){
+    return (Connector->RegistrationState == DRSD_CONNECTOR_UNREGISTERED); 
+}
+
 DRIVER_EXPORT
 void 
 DrsdConnectorListIterationEnd(

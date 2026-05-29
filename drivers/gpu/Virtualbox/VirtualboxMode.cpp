@@ -436,8 +436,8 @@ static  DRSD_PLANE_ASSIST_FUNCTIONS CursorPlaneAssistFunctions = {
 };
 
 static  DRSD_PLANE_FUNCTIONS CursorPlaneFunctions = {
-    //.UpdatePlane = DrsdInternalPlaneUpdateAtomic,
-    //.DisablePlane = DrsdInternalPlaneDisableAtomic,
+    .UpdatePlane = DrsdAtomicHelperUpdatePlane,
+    .DisablePlane = DrsdAtomicHelperDisablePlane,
     //.Destroy = DrsdInternalDestroyPlaneAtomic,
     //.ResetPlane = DrsdGxeResetShadowPlane,
     //.AtomicDuplicateState = DrsdGxeDuplicateShadowPlaneState,
@@ -614,7 +614,7 @@ static void VirtualboxConnectorDestroy(
     while(1);
 }
 
-static  DRSD_CONNECTOR_ASSIST_FUNCTIONS VirtualboxConnectorAssistFunctions = {
+static  DRSD_CONNECTOR_HELPER_FUNCTIONS VirtualboxConnectorAssistFunctions = {
     .GetModes = VirtualboxGetModes,
 };
 
@@ -675,8 +675,8 @@ static void VirtualboxAtomicSetState(
 
 
 static  DRSD_PLANE_FUNCTIONS PlaneCallbacks = {
-    .UpdatePlane = DrsdInternalPlaneUpdateAtomic,
-    .DisablePlane = DrsdInternalPlaneDisableAtomic,
+    .UpdatePlane = DrsdAtomicHelperUpdatePlane,
+    .DisablePlane = DrsdAtomicHelperDisablePlane,
     .Destroy = DrsdInternalDestroyPlaneAtomic,
     .ResetPlane = DrsdInternalResetPlane,
     .AtomicDuplicateState = DrsdInternalDuplicateAtomicState,
@@ -853,7 +853,7 @@ static LOUSTATUS VirtualboxConnectorInitialize(
         DRSD_CONNECTOR_MODE_VGA
     );*/
 
-    Connector->AssistFunctions = (PDRSD_CONNECTOR_ASSIST_FUNCTIONS)&VirtualboxConnectorAssistFunctions;
+    Connector->AssistFunctions = (PDRSD_CONNECTOR_HELPER_FUNCTIONS)&VirtualboxConnectorAssistFunctions;
 
     Connector->InterlaceAble = false;
     Connector->DoubleScanAble = false;

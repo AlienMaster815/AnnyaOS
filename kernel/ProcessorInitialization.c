@@ -71,6 +71,17 @@ UINT64 LouKeGetProcessorFSI(){
     return (UINT64)FsiLevel;
 }
 
+#define DEFAULT_PAT_VALUE   0x0007040600070106ULL
+#define PAT_MSR             0x277
+
+void LouKeReloadCR3();
+void write_msr(uint32_t msr, uint64_t value);
+
+void LouKeInitializePat(){
+    write_msr(PAT_MSR, DEFAULT_PAT_VALUE);
+    LouKeReloadCR3();
+}
+
 void HandleProccessorInitialization(){
     //the processor should be up by now
     //for apic however now we need to 
@@ -80,8 +91,8 @@ void HandleProccessorInitialization(){
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
     if(rcx & (1 << 26)){
-        //InitializeXSave();
-        //LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
+        InitializeXSave();
+        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
         FsiLevel = 3;
     }
     if(rdx & (1 << 25)){
@@ -110,23 +121,29 @@ void HandleProccessorInitialization(){
         ProcessorFeatures.Avx512Supported = false; 
     }
 
-    SendProcessorFeaturesToMemCpy(&ProcessorFeatures);
+    LouKeInitializePat();
     
     PPROCESSOR_FEATURES UserCopy = LouKeMallocType(PROCESSOR_FEATURES, USER_GENERIC_MEMORY);
     memcpy(UserCopy, &ProcessorFeatures, sizeof(PROCESSOR_FEATURES));
     LouKeInitProcessorAcceleratedFeaturesList(UserCopy);
 }
 
+void LouKeLateProcessorInitialization(){
+    SendProcessorFeaturesToMemCpy(&ProcessorFeatures);
+}
+
 void HandleApProccessorInitialization(){
     unsigned int  rax, rbx, rcx, rdx;
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
-    //if(rcx & (1 << 26)){
-    //    InitializeXSave();
-    //}
+    if(rcx & (1 << 26)){
+        InitializeXSave();
+    }
     if(rdx & (1 << 25)){
         enable_fxsave();
     }else{
         initialize_fpu();
     }
+
+    LouKeInitializePat();
 }

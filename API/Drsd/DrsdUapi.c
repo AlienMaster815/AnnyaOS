@@ -61,8 +61,8 @@ DrsdAtomicSetCrtcForConnector(
 
     if(Crtc){
         CrtcState = DrsdAtomicGetNewCrtcState(State->State, Crtc);
-        if(LOU_KE_PTR_ERROR(CrtcState)){
-            return (LOUSTATUS)(UINTPTR)CrtcState;
+        if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+            return LOU_KE_PTR_ERROR(CrtcState);
         }
 
         CrtcState->ConnectorMask |= DrsdConnectorMask(State->Connector);
@@ -95,8 +95,8 @@ DrsdAtomicSetModeForCrtc(
 
         DrsdModeConvertToUMode(&UMode, Mode);
         Blob = DrsdCreateBlobProperty(Crtc->Device, sizeof(DRSD_MODE_MODEINFO), &UMode);
-        if(LOU_KE_PTR_ERROR(Blob)){
-            return (LOUSTATUS)(UINTPTR)Blob;
+        if(IS_LOU_KE_PTR_ERROR(Blob)){
+            return LOU_KE_PTR_ERROR(Blob);
         }
 
         DrsdModeCopy(&State->Mode, Mode);
@@ -125,8 +125,8 @@ DrsdAtomicSetCrtcForPlane(
     }
     if(PlaneState->Crtc){
         CrtcState = DrsdAtomicGetCrtcState(PlaneState->State, PlaneState->Crtc);
-        if(LOU_KE_PTR_ERROR(CrtcState)){
-            return (LOUSTATUS)(UINTPTR)CrtcState;
+        if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+            return LOU_KE_PTR_ERROR(CrtcState);
         }
         CrtcState->PlaneMask &= ~DrsdPlaneMask(Plane);
     }
@@ -135,8 +135,8 @@ DrsdAtomicSetCrtcForPlane(
 
     if(Crtc){
         CrtcState = DrsdAtomicGetCrtcState(PlaneState->State, Crtc);
-        if(LOU_KE_PTR_ERROR(CrtcState)){
-            return (LOUSTATUS)(UINTPTR)CrtcState;
+        if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+            return LOU_KE_PTR_ERROR(CrtcState);
         }
         CrtcState->PlaneMask |= DrsdPlaneMask(Plane);
     }

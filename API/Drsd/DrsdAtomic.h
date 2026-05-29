@@ -166,6 +166,10 @@ DrsdAtomicNonBlockingCommit(
     for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
         ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (NewConnectorState) = (State)->Connectors[Index].NewState, 1))
 
+#define ForEachOldNewConnectorInState(State, Connector, OldConnectorState, NewConnectorState, Index) \
+    for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
+        ForEachIf((State)->Connectors[Index].Connector && ((Connector) = (State)->Connectors[Index].Connector, (void)(Connector), (OldConnectorState) = (State)->Connectors[Index].OldState, (NewConnectorState) = (State)->Connectors[Index].NewState, 1))
+
 #define ForEachOldCrtcInState(State, Crtc, OldCrtcState, Index) \
     for((Index) = 0; (Index) < (State)->Device->ModeConfig.CrtcCount; (Index)++) \
         ForEachIf((State)->Crtcs[Index].Crtc && ((State)->Crtcs[Index].Crtc, (OldCrtcState) = (State)->Crtcs[Index].OldState, 1))
