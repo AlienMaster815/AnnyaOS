@@ -1,13 +1,17 @@
 #include <kernel/memmory.h>
 
 
-STRIP_OPTIMIZATIONS void* memset(void* dest, int value, size_t count) {
-    unsigned char* ptr = (unsigned char*)dest;
+KERNEL_EXPORT void* memset(void* dest, int value, size_t count) {
+    if (count == 0) return dest;
+
     unsigned char val = (unsigned char)value;
-
-    for (size_t i = 0; i < count; i++) {
-        ptr[i] = (unsigned char)val;
-    }
-
+    void* temp_dest = dest;
+    __asm__ volatile (
+        "cld\n\t"
+        "rep stosb"
+        : "+D"(temp_dest), "+c"(count)
+        : "a"(val)
+        : "memory"
+    );
     return dest;
 }

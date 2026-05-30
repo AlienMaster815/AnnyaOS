@@ -138,7 +138,7 @@ LOUAPI void PCI_Scan_Bus(){
     size_t Count = 0x00;
     //PPCIE_SYSTEM_MANAGER Psm = 0x00;
 
-    PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAquireAcpiTable(ACPI_SIG_MCFG);
+    PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAcquireAcpiTable(ACPI_SIG_MCFG);
     if(!McfgTable){
         for(size_t i = 0 ; i < 255; i++){
             checkBus(0, i);
@@ -285,6 +285,7 @@ void ScanTheRestOfHarware(){
         DriverObject->DriverExtension->AddDevice(DriverObject, PlatformDevice);
         LouKeReleasePciDriverPath(DriverPath);
     }
+    LouKeClosePciDeviceGroup(SecondWaveDevices);
 }
 
 LOUAPI
@@ -296,17 +297,43 @@ bool IsAhciController(PPCI_DEVICE_OBJECT PDEV);
 LOUSTATUS InitializeStartupAhciImplementation(PPCI_DEVICE_OBJECT PDEV);
 
 LOUAPI
-void LouKeSantyCheckPciDevices(){
+void LouKeSanityCheckPciDevices(){
+
+    PMCFG_TABLE McfgTable = (PMCFG_TABLE)LouKeAcquireAcpiTable(ACPI_SIG_MCFG);
+    if(!McfgTable){
+        return; //no PCIE Support
+    }
+    SIZE Count = LouKeGetMcfgCount((void*)McfgTable);
 
     PCI_COMMON_CONFIG Config;
     LouKeInitializePciCommonPacketAnyType(&Config);
 
     UINT16 Members = LouKeGetPciCountByType(&Config);
-
-    if(!Members){
-        for(size_t i = 0; i < 255; i++){
-            checkBus(0, i);
+	PPCI_DEVICE_GROUP* PciDevices = LouKeOpenPciDeviceGroup(&Config);
+    SIZE Start;
+    SIZE End;
+    BOOLEAN ReProbePcieBus;
+    for (size_t j = 0; j < Count; j++) {
+        if ((McfgTable->TableEntries[j].Group == 0) && (McfgTable->TableEntries[j].ConfigurationBaseAddress)) {
+            Start = McfgTable->TableEntries[j].StartBus;
+            End = McfgTable->TableEntries[j].EndBus;
+            for(size_t i = Start; i <= End; i++){
+                ReProbePcieBus = true;
+                //check each bus for a member
+                for(SIZE TmpMember = 0; TmpMember < Members; TmpMember++){
+                    PPCI_DEVICE_OBJECT Pdev = PciDevices[TmpMember]->PDEV;
+                    if((!Pdev->Group) && (Pdev->bus == i)){
+                        //if a member exists no reprobe
+                        ReProbePcieBus = false;
+                        goto _REPROBE; //i dont trust break in my compiler in a loop this nested
+                    }
+                }
+            _REPROBE:
+                if(ReProbePcieBus){
+                    checkBus(0, i);
+                }
+            }
         }
-    }
-
+    }    
+    LouKeClosePciDeviceGroup(PciDevices);
 }

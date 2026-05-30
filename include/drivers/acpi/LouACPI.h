@@ -21,7 +21,7 @@ extern "C" {
 void LouKeAcpiPrintTableSignature(void* TableBase);
 void LouKeInitializeLouACPISubsystem();
 void LouKeInitializeLouACPITable(void* TableBase);
-void* LouKeAquireAcpiTable(string TableName);
+void* LouKeAcquireAcpiTable(string TableName);
 void LouKeInitializeFixedAcpiDescriptionTable(void* TableBase);
 uint8_t LouKeAcpiGetVersion();
 void LouKeAcpiInitializeFacs(void* TableBase);
@@ -160,15 +160,15 @@ typedef struct _LOU_ACPI_INFORMATION{
 LOUSTATUS LouKeAcpiInformationQuery(LOU_ACPI_INFORMATION_ID OutputID, PLOU_ACPI_INFORMATION InfoOutput);
 
 static inline PFIXED_ACPI_DESCRIPTION_TABLE LouKeAcpiGetFadtTable(){
-    return (PFIXED_ACPI_DESCRIPTION_TABLE)LouKeAquireAcpiTable(FIXED_ACPI_DESCRIPTION);
+    return (PFIXED_ACPI_DESCRIPTION_TABLE)LouKeAcquireAcpiTable(FIXED_ACPI_DESCRIPTION);
 }
 
 static inline PFIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE LouKeAcpiGetFacsTable(){
-    return (PFIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE)LouKeAquireAcpiTable(FIRMWARE_ACPI_CONTROL_STRUCTURE);
+    return (PFIRMWARE_ACPI_CONTROL_STRUCTURE_TABLE)LouKeAcquireAcpiTable(FIRMWARE_ACPI_CONTROL_STRUCTURE);
 }
 
 static inline PDIFFERETIATED_SYSTEM_DESCRIPTION_TABLE LouKeAcpiGetDsdtTable(){
-    return (PDIFFERETIATED_SYSTEM_DESCRIPTION_TABLE)LouKeAquireAcpiTable(DIFFERENTIATED_SYSTEM_DESCRIPTION);
+    return (PDIFFERETIATED_SYSTEM_DESCRIPTION_TABLE)LouKeAcquireAcpiTable(DIFFERENTIATED_SYSTEM_DESCRIPTION);
 }
 
 static inline bool NonZeroGasValue(PGENERAL_ADRESS_STRUCTURE pGas){

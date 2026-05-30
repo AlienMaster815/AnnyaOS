@@ -538,10 +538,10 @@ LOUAPI LOUSTATUS InitApicSystems() {
     LOUSTATUS Status = STATUS_SUCCESS;  
     LouPrint(DRV_VERSION_APIC);
 
-    PACPI_MADT ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("APIC");
+    PACPI_MADT ApicTable = (PACPI_MADT)LouKeAcquireAcpiTable("APIC");
 
     if(!ApicTable){
-        ApicTable = (PACPI_MADT)LouKeAquireAcpiTable("MADT");
+        ApicTable = (PACPI_MADT)LouKeAcquireAcpiTable("MADT");
     }
     if(!ApicTable){
         LouPrint("Unable To Find APIC Using Backup Pic\n");

@@ -153,7 +153,7 @@ void LouKeInitializeEcamAbstractionDevice(
 
 void PciMmcfgEarlyInit(){
 
-	ACPI_TABLE_MCFG* Mcfg = LouKeAquireAcpiTable(ACPI_SIG_MCFG);	
+	ACPI_TABLE_MCFG* Mcfg = LouKeAcquireAcpiTable(ACPI_SIG_MCFG);	
 	if(!Mcfg){
 		LouPrint("Pc Does Not Support PCIe\n");
 		return;

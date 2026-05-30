@@ -26,7 +26,7 @@ void VirtualboxDebuggerPrintCharecter(char Charecter){
 
 void InitializeDebuggerComunications(){
 
-    PFIXED_ACPI_DESCRIPTION_TABLE Fadt = LouKeAquireAcpiTable(FIXED_ACPI_DESCRIPTION);
+    PFIXED_ACPI_DESCRIPTION_TABLE Fadt = LouKeAcquireAcpiTable(FIXED_ACPI_DESCRIPTION);
     PDEBUGGER_COMMUNICATIONS_DEVICE Com;
     if(!Fadt){
         return;

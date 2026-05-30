@@ -167,25 +167,25 @@ LOUAPI uint16_t GetNPROC();
 KERNEL_EXPORT void* memcpy(void* destination, const void* source, size_t num) {
     if (destination == source || num == 0) return destination;
     if (destination > source && (uintptr_t)destination < (uintptr_t)source + num) {
-        uint8_t* d = (uint8_t*)destination + num;
-        const uint8_t* s = (const uint8_t*)source + num;
-        while (num--) {
-            *(--d) = *(--s);
-        }
+        uint8_t* d_end = (uint8_t*)destination + num - 1;
+        const uint8_t* s_end = (const uint8_t*)source + num - 1;
+        __asm__ volatile (
+            "std\n\t"
+            "rep movsb\n\t"
+            "cld"
+            : "+D"(d_end), "+S"(s_end), "+c"(num)
+            :
+            : "memory"
+        );
     } 
     else {
-        uint64_t* d64 = (uint64_t*)destination;
-        const uint64_t* s64 = (const uint64_t*)source;
-        size_t blocks = num / 8;
-        for (size_t i = 0; i < blocks; i++) {
-            d64[i] = s64[i];
-        }
-        uint8_t* d8 = (uint8_t*)(d64 + blocks);
-        const uint8_t* s8 = (const uint8_t*)(s64 + blocks);
-        size_t remainder = num % 8;
-        for (size_t i = 0; i < remainder; i++) {
-            d8[i] = s8[i];
-        }
+        __asm__ volatile (
+            "cld\n\t"
+            "rep movsb"
+            : "+D"(destination), "+S"(source), "+c"(num)
+            :
+            : "memory"
+        );
     }
     return destination;
 }

@@ -295,7 +295,7 @@ void LouKeInitializePciDevices(){
     LouKePcieProbeEcam();
 }
 
-void LouKeSantyCheckPciDevices();
+void LouKeSanityCheckPciDevices();
 
 LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
@@ -351,7 +351,7 @@ void LouOsKrnlStart(
     
     LouKeInitializePciDevices();
 
-    LouKeSantyCheckPciDevices();
+    LouKeSanityCheckPciDevices();
 
     LookForStorageDevices();
          
