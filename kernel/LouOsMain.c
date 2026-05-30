@@ -75,7 +75,6 @@ uint64_t getTrampolineAddress();
 uint8_t GetTotalHardwareInterrupts();
 uint64_t GetGdtBase();
 void FlushTss();
-void InitializeBasicMemcpy();
 void Spurious(uint64_t FaultingStackP);
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
@@ -143,14 +142,12 @@ void LouKeUnmaskSmpInterrupts();
 void ParserLouLoaderInformation(
     PLOUSINE_LOADER_INFO LoaderInfo
 );
-void* memcpy_basic(void* destination, const void* source, size_t num);
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT32 ThreadID);
 uint64_t GetCr3();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
 LOUSTATUS LouKeCreateSystemWorkQeueue();
-void LouKeLateProcessorInitialization();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -217,9 +214,7 @@ void AdvancedLousineKernelInitialization(){
     LouKeInitializeSecuritySubsystem();
 
     if (InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
-    
-    LouKeLateProcessorInitialization();
-    
+                
     InitializeSymmetricMultiProcessing();
 
     InitializeProcessManager();
@@ -317,8 +312,7 @@ LouKeRtlCompareUtf16StringSafe(
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-
-    memcpy_basic((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
+    memcpy((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
     
     UINT64 Cr3 =  (UINT64)GetCr3();
     Cr3 += GetKSpaceBase();
@@ -333,8 +327,6 @@ void LouOsKrnlStart(
         &KernelLoaderInfo
     );
 
-    InitializeBasicMemcpy();
-
     ///vga set for debug
     if(!LouKeMapEfiMemory()){
         LouKeHandleSystemIsBios();
@@ -344,7 +336,7 @@ void LouOsKrnlStart(
     }                      
 
     LouKeInitializeBootRegistry();
-         
+
     LousineKernelEarlyInitialization();
 
     InitializePoolsPool();
@@ -369,8 +361,8 @@ void LouOsKrnlStart(
         while(1);
     }
 
-    //LouPrint("Successful Boot\n");
-    //while(1);
+    LouPrint("Successful Boot\n");
+    while(1);
 
     InitializeFileSystemManager();
 

@@ -59,14 +59,14 @@ RELEASE_PATH = Releases/Annya.iso
 #Wextra
 CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
          -fno-omit-frame-pointer -O2 -fno-common -fno-builtin \
-         -fstrict-aliasing $(INCLUDE) 
+         -fstrict-aliasing -mno-mmx -mno-sse -mno-avx $(INCLUDE) 
 
 
 #Wextra
 CPPFLAGS = -c -ffreestanding -Wall -fno-exceptions -fno-rtti -Werror \
            -fno-use-cxa-atexit -fno-threadsafe-statics -fno-common \
            -fno-builtin -fstrict-aliasing -O2 -I include \
-		   -Wno-write-strings -Wno-multichar $(INCLUDE)
+		   -Wno-write-strings -Wno-multichar -mno-mmx -mno-sse -mno-avx $(INCLUDE)
 
 
 

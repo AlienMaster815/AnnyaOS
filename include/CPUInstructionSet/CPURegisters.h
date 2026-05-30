@@ -29,6 +29,9 @@ uint64_t get_rdi();
 void set_rdi(uint64_t new_rdi_value);
 
 void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
+void cpuid_subleaf(unsigned int leaf, unsigned int subleaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);
+
+
 
 #ifdef __cplusplus
 }

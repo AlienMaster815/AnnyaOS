@@ -11,7 +11,8 @@ SRC = 	BootVidMain.c \
 		Ttf/TtfHmtx.c \
 		Bitmap/Allocation.c \
 		Bitmap/Drawing.c \
-		Bitmap/Render.c
+		Bitmap/Render.c \
+		Bitmap/TerminalTracking.c
 
 
 CC = x86_64-w64-mingw32-gcc

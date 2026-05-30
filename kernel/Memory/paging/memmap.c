@@ -11,12 +11,6 @@ void CacheFlush(void* addr) {
     asm volatile ("mfence");
 }
 
-void LouKeReloadCR3() {
-    uint64_t cr3;
-    asm volatile ("mov %%cr3, %0" : "=r"(cr3));
-    asm volatile ("mov %0, %%cr3" :: "r"(cr3));
-}
-
 void CalculateTableMarks(
     uint64_t VAddress,
     uint64_t* L4Entry,

@@ -31,7 +31,7 @@ static inline void PageFlush(uint64_t addr) {
 }
 
 
-void LouKeReloadCR3() {
+static inline void ReloadCR3() {
     uint64_t cr3;
     asm volatile ("mov %%cr3, %0" : "=r"(cr3));
     asm volatile ("mov %0, %%cr3" :: "r"(cr3));
@@ -121,7 +121,7 @@ static void LoaderMapKernelMemory(UINT64 PAddress, UINT64 VAddress, UINT64 Flags
     ClusterBase[L4]             = GetPageValue((UINT64)&ClusterBase[L3Base], 0b111);
 
     PageFlush(VAddress);
-    LouKeReloadCR3();
+    ReloadCR3();
 }
 
 

@@ -4,6 +4,8 @@ section .text
 
 extern GetFxSaveForkPointer
 extern SetFxSaveForkPointerData
+extern GetXSaveForkPointer
+extern SetXSaveForkPointerData
 
 global StoreAdvancedRegisters
 global RestoreAdvancedRegisters
@@ -17,6 +19,7 @@ global fxrstor_handler
 global fxsave_handler
 global save_fpu_state
 global restore_fpu_state
+
 
 restore_fpu_state:
     frstor [rcx]
@@ -109,8 +112,9 @@ initialize_thread_fxsave_state: ;RCX holds new context RDX holds current
     ret
 
 InitializeXSave:
-    
-    jmp $
+    push rax 
+    push rcx
+    push rdx 
 
     mov rax, cr4
     or  rax, (1 << 9)
@@ -118,17 +122,24 @@ InitializeXSave:
     mov cr4, rax
     
     mov ecx, 0
-    mov eax, 0b11
+    mov eax, 0b111
     mov edx, 0
     xsetbv
     
     fninit
+    
+    call GetXSaveForkPointer
+    mov rcx, rax
+    xsave [rcx]
+    call SetXSaveForkPointerData
+
+    pop rdx
+    pop rcx
+    pop rax
     ret
 
 InitializeXSaveThread: ; RCX=new, RDX=current
     ; caller at HIGH_LEVEL
-
-    jmp $
 
     mov eax, 0b11
     xor edx, edx

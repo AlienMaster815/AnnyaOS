@@ -218,6 +218,17 @@ void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int
         : "a" (code));
 }
 
+
+void cpuid_subleaf(unsigned int leaf, unsigned int subleaf, 
+                                 unsigned int *eax, unsigned int *ebx, 
+                                 unsigned int *ecx, unsigned int *edx) {
+    __asm__ __volatile__(
+        "cpuid"
+        : "=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
+        : "a"(leaf), "c"(subleaf)
+    );
+}
+
 uint64_t GetGSBase() {
     uint32_t low, high;
     asm volatile("rdmsr" : "=a"(low), "=d"(high) : "c"(0xC0000101)); // IA32_GS_BASE

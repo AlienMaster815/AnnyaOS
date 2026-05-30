@@ -16,6 +16,7 @@ static void BootVidScrollTerminal(){
     for(SIZE y = TERMINAL_INCY; y < Height; y++){
         memcpy(&Canvas[((y - TERMINAL_INCY) * Width)], &Canvas[(y * Width)], Width * sizeof(UINT32));
     }
+    BootVidScrollTracking();
 }
 
 void BootVidRegisterBootFont(
@@ -25,7 +26,8 @@ void BootVidRegisterBootFont(
 }
 
 static void BootVidEndofData(){
-    BootRenderSyncScreen();
+    BootVidModifyTracking(CurrentY, CurrentX);
+    BootVidSyncScreenWithTracking();
 }
 
 
@@ -64,7 +66,9 @@ static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
     BootVidPlaceBitmap(Bitmap, CurrentX, CurrentY);
     
     CurrentX += TERMINAL_INCX(Bitmap->Width);
-    
+
+    BootVidModifyTracking(CurrentY, CurrentX);
+
     return 0x00;
 }
     
@@ -88,6 +92,8 @@ LOUSTATUS
 BootVidInitializeTerminalDriver(){
     LOUSTATUS Status;
     
+    BootVidInitializeArtifactTracking();
+
     Status = LouKeRegisterEcsDriver(&BootVidEcsDriver);
 
     return Status;

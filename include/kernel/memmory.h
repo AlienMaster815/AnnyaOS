@@ -14,6 +14,13 @@ extern "C" {
 #include <kernel/loustatus.h>
 #include <Modulation.h>
 
+static inline void LouKeReloadCR3() {
+    uint64_t cr3;
+    asm volatile ("mov %%cr3, %0" : "=r"(cr3));
+    asm volatile ("mov %0, %%cr3" :: "r"(cr3));
+}
+
+
 KERNEL_EXPORT 
 void
 LouKeVmmFreeVmBuffer(

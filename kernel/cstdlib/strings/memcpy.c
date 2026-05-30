@@ -5,7 +5,7 @@
 #include <emmintrin.h> 
 #include <immintrin.h> 
 
-static uint64_t* SavedState = 0;
+/*static uint64_t* SavedState = 0;
 
 void* LouGeneralAllocateMemoryEx(size_t BytesToAllocate, size_t Aligned);
 
@@ -25,13 +25,32 @@ typedef struct _PROCESSOR_FEATURES{
     bool    Avx512Supported;
 }PROCESSOR_FEATURES, * PPROCESSOR_FEATURES;
 
-static void* (*MemcopyHandler)(void*, const void*, size_t);
-
 void simd_copy(uint64_t Destination, uint64_t Source);
+
+void* memcpy_basic(void* destination, const void* source, size_t num) {
+    uint8_t* d = (uint8_t*)destination;
+    const uint8_t* s = (const uint8_t*)source;
+
+    if (d == s || num == 0) return destination;
+
+    if (d > s && d < s + num) {
+        for (size_t i = num; i > 0; i--) {
+            d[i - 1] = s[i - 1];
+        }
+    } else {
+        for (size_t i = 0; i < num; i++) {
+            d[i] = s[i];
+        }
+    }
+    return destination;
+}
 
 __attribute__((target("avx2")))
 static void* memcpy_avx2(void* destination, const void* source, size_t num) {
-    SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    if(num < 256){
+        return memcpy_basic(destination, source, num);
+    }
+    if(SavedState)SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     uintptr_t d = (uintptr_t)destination;
     uintptr_t s = (uintptr_t)source;
 
@@ -60,31 +79,17 @@ static void* memcpy_avx2(void* destination, const void* source, size_t num) {
         }
 
     }
-    RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    if(SavedState)RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     return destination;
 }
 
-void* memcpy_basic(void* destination, const void* source, size_t num) {
-    uint8_t* d = (uint8_t*)destination;
-    const uint8_t* s = (const uint8_t*)source;
-
-    if (d == s || num == 0) return destination;
-
-    if (d > s && d < s + num) {
-        for (size_t i = num; i > 0; i--) {
-            d[i - 1] = s[i - 1];
-        }
-    } else {
-        for (size_t i = 0; i < num; i++) {
-            d[i] = s[i];
-        }
-    }
-    return destination;
-}
  
 __attribute__((target("sse2")))
 UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t num) {
-    SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    if(num < 128){
+        return memcpy_basic(destination, source, num);
+    }
+    if(SavedState)SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     unsigned char* d = (unsigned char*)destination;
     const unsigned char* s = (const unsigned char*)source;
 
@@ -112,13 +117,17 @@ UNUSED static void* memcpy_sse2(void* destination, const void* source, size_t nu
             _mm_storeu_si128((__m128i*)(d + offset), tmp);
         }
     }
-    RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    if(SavedState)RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     return destination;
 }
 
 __attribute__((target("avx512f")))
 UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t num) {
-    SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    if(num < 512){
+        return memcpy_basic(destination, source, num);
+    }
+
+    if(SavedState)SaveEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     uint8_t* d = (uint8_t*)destination;
     const uint8_t* s = (const uint8_t*)source;
 
@@ -147,43 +156,36 @@ UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t 
             _mm512_storeu_si512((void*)(d + offset), tmp);
         }
     }
-    RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
+    if(SavedState)RestoreEverything(SavedState[LouKeGetCurrentProcessorNumber()]);
     return destination;
 }
+*/
 
 LOUAPI uint16_t GetNPROC();
 
-void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures){
-    
-    if(!SavedState){
-        UINT16 ProcCount = GetNPROC();
-        SavedState = LouKeMallocArray(UINT64, ProcCount, KERNEL_GENERIC_MEMORY);
-        for(SIZE i = 0 ; i < ProcCount; i++){
-            SavedState[i] = (uintptr_t)LouGeneralAllocateMemoryEx(2688, 64);
+
+KERNEL_EXPORT void* memcpy(void* destination, const void* source, size_t num) {
+    if (destination == source || num == 0) return destination;
+    if (destination > source && (uintptr_t)destination < (uintptr_t)source + num) {
+        uint8_t* d = (uint8_t*)destination + num;
+        const uint8_t* s = (const uint8_t*)source + num;
+        while (num--) {
+            *(--d) = *(--s);
+        }
+    } 
+    else {
+        uint64_t* d64 = (uint64_t*)destination;
+        const uint64_t* s64 = (const uint64_t*)source;
+        size_t blocks = num / 8;
+        for (size_t i = 0; i < blocks; i++) {
+            d64[i] = s64[i];
+        }
+        uint8_t* d8 = (uint8_t*)(d64 + blocks);
+        const uint8_t* s8 = (const uint8_t*)(s64 + blocks);
+        size_t remainder = num % 8;
+        for (size_t i = 0; i < remainder; i++) {
+            d8[i] = s8[i];
         }
     }
-
-    if(ProcessorFeatures->Avx512Supported){
-        //MemcopyHandler = memcpy_sse;
-        MemcopyHandler = memcpy_avx512;
-        return;
-    }
-    else if(ProcessorFeatures->Avx2Supported){
-        MemcopyHandler = memcpy_avx2;
-        return;
-    }
-    else if(ProcessorFeatures->Sse2Supported){
-        MemcopyHandler = memcpy_sse2;
-        return;
-    }
-    MemcopyHandler = memcpy_basic;
-}
-
-void InitializeBasicMemcpy(){
-    MemcopyHandler = memcpy_basic;
-}
-
-KERNEL_EXPORT
-void* memcpy(void* destination, const void* source, size_t num) {
-    return MemcopyHandler(destination, source, num);
+    return destination;
 }

@@ -46,6 +46,10 @@ typedef struct _BOOTVID_BITMAP{
 
 #define SET_RGB(r, g, b) (SET_RED(r) | SET_GREEN(g) | SET_BLUE(b))
 
+#define TERMINAL_INCX(bWidth)   (bWidth + 2)
+#define TERMINAL_INCY           (18)
+#define TERMINAL_INCX_SPC       (12)
+
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeGetBootFrameBuffer(
@@ -123,6 +127,9 @@ BootVidTrimBitmap(
 void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B);
 void BootRenderSetScreenColorEx(UINT32 Color);
 
-
+void BootVidInitializeArtifactTracking();
+void BootVidSyncScreenWithTracking();
+void BootVidModifyTracking(SIZE Y, SIZE LineWidth);
+void BootVidScrollTracking();
 
 #endif

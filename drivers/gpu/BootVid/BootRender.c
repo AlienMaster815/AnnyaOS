@@ -37,6 +37,8 @@ void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B){
     BootRenderPutPixelEx(x, y, SET_RGB(R, G, B));
 }
 
+static size_t i = 0;
+
 void BootRenderSyncScreen(){
     memcpy((PVOID)BootBuffer->RawData, (PVOID)Canvas, BootBuffer->FramebufferSize);
 }

@@ -29,7 +29,6 @@ typedef struct _PROCESSOR_FEATURES{
 }PROCESSOR_FEATURES, * PPROCESSOR_FEATURES;
 
 void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback);
-void SendProcessorFeaturesToMemCpy(PPROCESSOR_FEATURES ProcessorFeatures);
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features);
 uint64_t LouKeAllocateFxSaveMemory();
 void LouKeDeAllocateFxSaveMemory(uint64_t Context);
@@ -37,6 +36,9 @@ void LouKeDeAllocateFxSaveMemory(uint64_t Context);
 extern void initialize_thread_fpu_state(uint8_t* New, uint8_t* Current);
 extern void initialize_thread_fxsave_state(uint8_t* New, uint8_t* Current);
 extern void InitializeXSaveThread(uint8_t* New, uint8_t* Current);
+
+uint64_t LouKeAllocateXSaveMemory();
+void LouKeDeAllocateXSaveMemory(uint64_t OldData);
 
 static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
     {
@@ -55,6 +57,8 @@ static const PROCESSOR_CALLBACKS ProcessorHandlerTable[] = {
         .SaveHandler = StoreAdvancedRegisters,
         .RestoreHandler = RestoreAdvancedRegisters,
         .InitializeThreadDataHandler = InitializeXSaveThread,
+        .AllocateSaveContext = LouKeAllocateXSaveMemory,
+        .DeAllocateSaveContext = LouKeDeAllocateXSaveMemory,
     },
     { 0 },
 };
@@ -74,13 +78,13 @@ UINT64 LouKeGetProcessorFSI(){
 #define DEFAULT_PAT_VALUE   0x0007040600070106ULL
 #define PAT_MSR             0x277
 
-void LouKeReloadCR3();
 void write_msr(uint32_t msr, uint64_t value);
 
 void LouKeInitializePat(){
     write_msr(PAT_MSR, DEFAULT_PAT_VALUE);
     LouKeReloadCR3();
 }
+void SetAvxAllocationSize(SIZE Size);
 
 void HandleProccessorInitialization(){
     //the processor should be up by now
@@ -91,13 +95,15 @@ void HandleProccessorInitialization(){
     cpuid(1, &rax, &rbx, &rcx, &rdx);
 
     if(rcx & (1 << 26)){
+        cpuid_subleaf(0xD, 0, &rax, &rbx, &rcx, &rdx);
+        SetAvxAllocationSize(rcx);
         InitializeXSave();
         LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[2]);        
         FsiLevel = 3;
     }
-    if(rdx & (1 << 25)){
+    else if(rdx & (1 << 25)){
         enable_fxsave();
-        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);       \
+        LouKeRegisterProcessorCallback((PPROCESSOR_CALLBACKS)&ProcessorHandlerTable[1]);
         FsiLevel = 2;
     }else{
         initialize_fpu();
@@ -128,10 +134,6 @@ void HandleProccessorInitialization(){
     LouKeInitProcessorAcceleratedFeaturesList(UserCopy);
 }
 
-void LouKeLateProcessorInitialization(){
-    SendProcessorFeaturesToMemCpy(&ProcessorFeatures);
-}
-
 void HandleApProccessorInitialization(){
     unsigned int  rax, rbx, rcx, rdx;
     cpuid(1, &rax, &rbx, &rcx, &rdx);
@@ -139,7 +141,7 @@ void HandleApProccessorInitialization(){
     if(rcx & (1 << 26)){
         InitializeXSave();
     }
-    if(rdx & (1 << 25)){
+    else if(rdx & (1 << 25)){
         enable_fxsave();
     }else{
         initialize_fpu();
