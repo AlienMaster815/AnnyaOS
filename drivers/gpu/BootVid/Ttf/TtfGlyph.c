@@ -372,6 +372,10 @@ void BootRenderGlyph(PTTF_OBJECT TtfObject, PTTFOBJ_GLYPH_DATA GlyphData, SIZE H
     GlyphScanlineFill(&Gvs, NewMap);
 
     BootVidTrimBitmap(NewMap, 0);
+
+    TtfObject->AvgWidth = MAX(NewMap->Width, TtfObject->AvgWidth);
+    TtfObject->AvgHeight = MAX(NewMap->Height, TtfObject->AvgHeight);
+
     LouKeFree(Gvs.VectorOut);
 }
 

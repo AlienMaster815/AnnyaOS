@@ -46,9 +46,7 @@ typedef struct _BOOTVID_BITMAP{
 
 #define SET_RGB(r, g, b) (SET_RED(r) | SET_GREEN(g) | SET_BLUE(b))
 
-#define TERMINAL_INCX(bWidth)   (bWidth + 2)
 #define TERMINAL_INCY           (18)
-#define TERMINAL_INCX_SPC       (12)
 
 KERNEL_EXPORT 
 LOUSTATUS 

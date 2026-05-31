@@ -8,10 +8,6 @@ extern INT32 Width;
 extern INT32 Height;
 
 
-#define TERMINAL_INCX(bWidth)   (bWidth + 2)
-#define TERMINAL_INCY           (18)
-#define TERMINAL_INCX_SPC       (12)
-
 static void BootVidScrollTerminal(){
     for(SIZE y = TERMINAL_INCY; y < Height; y++){
         memcpy(&Canvas[((y - TERMINAL_INCY) * Width)], &Canvas[(y * Width)], Width * sizeof(UINT32));
@@ -33,7 +29,7 @@ static void BootVidEndofData(){
 
 static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
 
-    if((AsciiCharecter == '\n') || ((CurrentX + (TERMINAL_INCX_SPC * 3)) >= Width)){
+    if((AsciiCharecter == '\n') || ((CurrentX + (TerminalFont->AvgWidth * 3)) >= Width)){
         if((CurrentY + (TERMINAL_INCY * 3)) <= Height){
             CurrentY += TERMINAL_INCY;
             CurrentX = 0;
@@ -50,7 +46,7 @@ static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
     }
 
     if(AsciiCharecter == ' '){
-        CurrentX += TERMINAL_INCX_SPC;
+        CurrentX += TerminalFont->AvgWidth;
         return 0x00;
     }
 
@@ -65,7 +61,7 @@ static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
 
     BootVidPlaceBitmap(Bitmap, CurrentX, CurrentY);
     
-    CurrentX += TERMINAL_INCX(Bitmap->Width);
+    CurrentX += TerminalFont->AvgWidth;
 
     BootVidModifyTracking(CurrentY, CurrentX);
 

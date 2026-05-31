@@ -9,7 +9,9 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC1 = Xhci.cpp
+SRC1 =  XhciPci.cpp \
+		Xhci.cpp \
+		XhciCap.cpp
 TARGET1 = XHCI.SYS
 
 SRC2 = Ohci.cpp \

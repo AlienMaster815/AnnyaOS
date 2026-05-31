@@ -197,6 +197,8 @@ typedef struct _TTF_OBJECT{
     BOOLEAN                     UsesLongLocaTableFormat;
     PTTFOBJ_GLYPH_DATA          AsciiGlyphData[127];
     PTTFOBJ_GLYPH_DATA          RussianGlyphData[256];
+    UINT8                       AvgWidth;
+    UINT8                       AvgHeight;
 }TTF_OBJECT, * PTTF_OBJECT; 
 
 #define TTF_ON_CURVE    (1 << 0)
