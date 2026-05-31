@@ -361,8 +361,8 @@ void LouOsKrnlStart(
         while(1);
     }
 
-    LouPrint("Successful Boot\n");
-    while(1);
+    //LouPrint("Successful Boot\n");
+    //while(1);
 
     InitializeFileSystemManager();
 
@@ -490,7 +490,8 @@ void LouOsKrnlStart(
 //Add mutex to the registry keys and a close function
 //Fix SMP Booting
 //tighten read only security
-//finish UTF and stress test LouAtoms.cpp new API
+//Add SIMD Context Saving for System Calls
+
 
 //BUGS TO FIX:
 

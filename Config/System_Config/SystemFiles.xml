@@ -15,8 +15,10 @@
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
         <FILETOCPY64>cp API/Drsd/DRSDCORE.SYS ISO/ANNYA/SYSTEM64/DRSDCORE.SYS</FILETOCPY64>                                 <!--Lousine Kernel Core-->
         <FILETOCPY64>cp API/Virtualization/VMCORE.SYS ISO/ANNYA/SYSTEM64/VMCORE.SYS</FILETOCPY64>                           <!--Lousine Kernel Core-->
-        <FILETOCPY64>cp drivers/USB/UsbCore/USBCORE.SYS ISO/ANNYA/SYSTEM64/USBCORE.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
-        <FILETOCPY64>cp drivers/gpu/BootVid/BOOTVID.SYS ISO/ANNYA/SYSTEM64/BOOTVID.SYS</FILETOCPY64>                         <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp drivers/USB/UsbCore/USBCORE.SYS ISO/ANNYA/SYSTEM64/USBCORE.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp drivers/gpu/BootVid/BOOTVID.SYS ISO/ANNYA/SYSTEM64/BOOTVID.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
+        <!--PCI Driver-->
+        <FILETOCPY64>cp drivers/PCI/PCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCI.SYS</FILETOCPY64>                                        <!--Lousine Kernel Core-->
         <!--Smp Trampoline-->
         <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
         <!--Kernel Drivers-->
@@ -58,21 +60,18 @@
         <!--User Backgrounds-->
         <FILETOCPY64>cp BackgroundImages/Annya.bmp ISO/ANNYA/PROFILES/DEFAULT/BG/ANNYA.BMP</FILETOCPY64>                    <!--Annya OS Default Desktop Image-->
         <!--ANNYAEXP Assets-->
-        <FILETOCPY64>cp SpriteAssets/ANNA.ICO ISO/ANNYA/ANNA.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSCHIP.ICO ISO/ANNYA/AOSCHIP.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSHDD.ICO ISO/ANNYA/AOSHDD.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSMC.ICO ISO/ANNYA/AOSMC.ICO</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSODD.ICO ISO/ANNYA/AOSODD.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/AOSPROG.ICO ISO/ANNYA/AOSPROG.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/Folder.ICO ISO/ANNYA/FOLDER.ICO</FILETOCPY64>                                          <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/GB.png ISO/ANNYA/BUTTON.PNG</FILETOCPY64>                                              <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/KING.ICO ISO/ANNYA/KING.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/Mouse.bmp ISO/ANNYA/MOUSE.BMP</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/Start.bmp ISO/ANNYA/START.BMP</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/NUCLEAR.ICO ISO/ANNYA/NUCLEAR.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/POWER.ICO ISO/ANNYA/POWER.ICO</FILETOCPY64>                                            <!--Annya OS Asset-->
         <FILETOCPY64>cp SpriteAssets/TRASH.ICO ISO/ANNYA/TRASH.ICO</FILETOCPY64>                                        <!--Annya OS Asset-->
-        <FILETOCPY64>cp SpriteAssets/XBUTTON.png ISO/ANNYA/XBUTTON.PNG</FILETOCPY64>                                        <!--Annya OS Asset-->
         <!--ANNYAEXP Sounds-->
         <FILETOCPY64>cp Music/STARTUP.WAV ISO/ANNYA/STARTUP.WAV</FILETOCPY64>                                               <!--Annya OS Asset-->
         <FILETOCPY64>cp Music/SHUTDOWN.WAV ISO/ANNYA/SHUTDOWN.WAV</FILETOCPY64>                                                     <!--Annya OS Asset-->
