@@ -26,15 +26,18 @@ LOUSTATUS AddDevice(
     
     LouKeHalEnablePciDevice(PDEV);
     LouKeHalPciSetMaster(PDEV);
-
+    
     LouKeHalMapPciResource(PDEV, XHCI_MMIO_REGISTERS_BAR, KERNEL_DMA_MEMORY);
 
     NewXhciDevice->CapRegisters = (PXHCI_CAPABILITIES_REGISTER)LouKePciGetIoRegion(PDEV, XHCI_MMIO_REGISTERS_BAR, XHCI_MMIO_REGISTERS_OFFSET);
-    NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
-    NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
-    NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
 
-    XhciGetCapabilities(NewXhciDevice);
+    LouPrint("XHCI.SYS:CAP_REG:%h\n", NewXhciDevice->CapRegisters);
+
+    //NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
+    //NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
+    //NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
+
+    //XhciGetCapabilities(NewXhciDevice);
 
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
