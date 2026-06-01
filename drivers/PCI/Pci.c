@@ -2,6 +2,8 @@
 
 static BOOLEAN PciDebugOn = false;
 
+
+
 void PciHalPciDbgPrint(char* format, ...){
     if(PciDebugOn){
         va_list args;

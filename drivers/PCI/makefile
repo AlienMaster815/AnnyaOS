@@ -7,7 +7,10 @@ SRC = 	Pci.c \
 		LegacyCommon.c \
 		LegacyGeneral.c \
 		LegacyPciBridge.c \
-		LegacyCardBus.c
+		LegacyCardBus.c \
+		Native.c \
+		NativeCommon.c \
+		NativeGeneral.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=PciEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

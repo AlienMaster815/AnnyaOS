@@ -21,6 +21,7 @@ clean:
 	rm -rf build $(TARGET)
 
 modifications:
+	./LPEModifier -E../drivers/PCI/PCI.SYS -PKernel
 	./LPEModifier -E../drivers/storage/Ahci/AHCI.SYS -PKernel
 	./LPEModifier -E../drivers/gpu/Virtualbox/VBOXGPU.SYS -PKernel
 	./LPEModifier -E../API/Drsd/DRSDCORE.SYS -PKernel

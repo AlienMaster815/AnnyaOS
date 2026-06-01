@@ -15,9 +15,11 @@
 //3 bits to shift the 32 bit results and masking according
 //to the size of the required type for example
 //0b00 = 0, 0b01 = 8, 0b10 = 16, 0b11 = 24 
-//and then masking either 0x02 OR 0b10 or 0x03 0b11    
+//and then masking either 0x02 OR 0b10 or 0x03 0b11
 
 #include "Pci.h"
+
+static spinlock_t GlobalPciConfigLock = {0};
 
 static UINT32 LegacyPciConfigLongAddress(
     UINT8   Bus,
@@ -28,7 +30,7 @@ static UINT32 LegacyPciConfigLongAddress(
     return ((UINT32)Bus << 16) | ((UINT32)Slot << 11) | ((UINT32)Function << 8) | ((UINT32)Offset & 0xFC) | ((UINT32)0x80000000);
 }
 
-UINT32 LegacyPciReadUint32Ex(
+static UINT32 LegacyPciReadUint32ExNs(
     UINT8   Bus,
     UINT8   Slot,
     UINT8   Function,
@@ -44,7 +46,7 @@ UINT32 LegacyPciReadUint32Ex(
     return inl(PCI_CONFIG_DATA_PORT);
 }
 
-void LegacyPciWriteUint32Ex(
+static void LegacyPciWriteUint32ExNs(
     UINT8   Bus,
     UINT8   Slot,
     UINT8   Function,
@@ -61,18 +63,61 @@ void LegacyPciWriteUint32Ex(
     outl(PCI_CONFIG_DATA_PORT, Data);
 }
 
+UINT32 LegacyPciReadUint32Ex(
+    UINT8   Bus,
+    UINT8   Slot,
+    UINT8   Function,
+    UINT32  Offset
+){
+    UINT32 Result;
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&GlobalPciConfigLock, &Irql);
+    Result = LegacyPciReadUint32ExNs(
+        Bus,
+        Slot,
+        Function,
+        Offset
+    );
+    LouKeReleaseSpinLock(&GlobalPciConfigLock, &Irql);
+    return Result;
+}
+
+
+void LegacyPciWriteUint32Ex(
+    UINT8   Bus,
+    UINT8   Slot,
+    UINT8   Function,
+    UINT32  Offset,
+    UINT32  Data
+){
+    UINT32 Result;
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&GlobalPciConfigLock, &Irql);
+    LegacyPciWriteUint32ExNs(
+        Bus,
+        Slot,
+        Function,
+        Offset,
+        Data
+    );
+    LouKeReleaseSpinLock(&GlobalPciConfigLock, &Irql);
+}
+
 UINT16 LegacyPciReadUint16Ex(
     UINT8   Bus,
     UINT8   Slot,
     UINT8   Function,
     UINT32  Offset
 ){
-    UINT32 Tmp = LegacyPciReadUint32Ex(
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&GlobalPciConfigLock, &Irql);
+    UINT32 Tmp = LegacyPciReadUint32ExNs(
         Bus, 
         Slot, 
         Function, 
         Offset
     );
+    LouKeReleaseSpinLock(&GlobalPciConfigLock, &Irql);
     return (UINT16)((Tmp >> ((Offset & 0x02) * 8)) & UINT16_MAX);
 }
 
@@ -83,7 +128,9 @@ void LegacyPciWriteUint16Ex(
     UINT32  Offset,
     UINT16  Value
 ){
-    UINT32 Tmp = LegacyPciReadUint32Ex(
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&GlobalPciConfigLock, &Irql);
+    UINT32 Tmp = LegacyPciReadUint32ExNs(
         Bus,
         Slot, 
         Function,
@@ -92,13 +139,14 @@ void LegacyPciWriteUint16Ex(
     UINT8 Shift = ((Offset & 0x02) * 8);
     Tmp &= ~((UINT32)UINT16_MAX << Shift);
     Tmp |= ((UINT32)Value << Shift);
-    LegacyPciWriteUint32Ex(
+    LegacyPciWriteUint32ExNs(
         Bus,
         Slot,
         Function,
         Offset,
         Tmp
     );
+    LouKeReleaseSpinLock(&GlobalPciConfigLock, &Irql);
 }
 
 UINT8
@@ -108,12 +156,15 @@ LegacyPciReadUint8Ex(
     UINT8   Function,
     UINT32  Offset
 ){
-    UINT32 Tmp = LegacyPciReadUint32Ex(
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&GlobalPciConfigLock, &Irql);
+    UINT32 Tmp = LegacyPciReadUint32ExNs(
         Bus,
         Slot,
         Function,
         Offset
     );
+    LouKeReleaseSpinLock(&GlobalPciConfigLock, &Irql);
     return (UINT8)((Tmp >> ((Offset & 0x03) * 8)) & UINT8_MAX);
 }
 
@@ -125,7 +176,9 @@ LegacyPciWriteUint8Ex(
     UINT32  Offset,
     UINT8   Value
 ){
-    UINT32 Tmp = LegacyPciReadUint32Ex(
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&GlobalPciConfigLock, &Irql);
+    UINT32 Tmp = LegacyPciReadUint32ExNs(
         Bus,
         Slot, 
         Function,
@@ -134,13 +187,14 @@ LegacyPciWriteUint8Ex(
     UINT8 Shift = ((Offset & 0x03) * 8);
     Tmp &= ~((UINT32)UINT8_MAX << Shift);
     Tmp |= ((UINT32)Value << Shift);
-    LegacyPciWriteUint32Ex(
+    LegacyPciWriteUint32ExNs(
         Bus,
         Slot,
         Function,
         Offset,
         Tmp
     );
+    LouKeReleaseSpinLock(&GlobalPciConfigLock, &Irql);
 }
 
 UINT32 LegacyPciReadUint32(

@@ -63,6 +63,8 @@ typedef struct _PCI_DEVICE_OBJECT{
 	UINT8				Slot;
 	UINT8				Function;
 	PVOID 				PciSysPrivateData;
+	spinlock_t 			ConfigSpaceLock;
+	UINT32*				EcamDeviceBase;
 	//remove start
 	uint8_t 			bus;
 	uint8_t 			slot;
@@ -165,7 +167,7 @@ typedef struct _AGP_BRIDGE_DATA{
 #define PCI_CARDBUS_DEVICE_CONFIG_SUBSYSTEM_VENDOR_ID		0x42
 #define PCI_CARDBUS_DEVICE_CONFIG_16BIT_PC_CARD_LEGACY_BASE	0x44
 
-
+#define PCIE_BUS_CONFIG_SIZE 0x00100000
 
 #define PCI_D0		((pci_power_t) 0)
 #define PCI_D1		((pci_power_t) 1)

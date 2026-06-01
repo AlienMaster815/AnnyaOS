@@ -169,5 +169,82 @@ UINT16 LegacyPciCardBusGetSubsystemVendorId(PPCI_DEVICE_OBJECT PDEV);
 UINT16 LegacyPciCardBusGetSubsystemDeviceId(PPCI_DEVICE_OBJECT PDEV);
 UINT32 LegacyPciCardBusGet16BitPcCardLegacyModeBaseAddress(PPCI_DEVICE_OBJECT PDEV);
 
+UINT32 NativePciReadUint32Ex(UINT32* DeviceBase, UINT32 Offset);
+void NativePciWriteUint32Ex(UINT32* DeviceBase, UINT32 Offset, UINT32 Value);
+UINT16 NativePciReadUint16Ex(UINT32* DeviceBase, UINT32 Offset);
+void NativePciWriteUint16Ex(UINT32* DeviceBase, UINT32 Offset, UINT16 Value);
+UINT8 NativePciReadUint8Ex(UINT32* DeviceBase, UINT32 Offset);
+void NativePciWriteUint8Ex(UINT32* DeviceBase, UINT32 Offset, UINT8 Value);
+
+UINT32 NativePciReadUint32(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset);
+void NativePciWriteUint32(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset, UINT32 Value);
+UINT16 NativePciReadUint16(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset);
+void NativePciWriteUint16(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset, UINT16 Value);
+UINT8 NativePciReadUint8(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset);
+void NativePciWriteUint8(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset, UINT8 Value);
+
+UINT16 NativePciGetVendorIdEx(UINT32* DeviceBase);
+UINT16 NativePciGetDeviceIdEx(UINT32* DeviceBase);
+UINT16 NativePciGetCommandEx(UINT32* DeviceBase);
+void NativePciSetCommandEx(UINT32* DeviceBase, UINT16 Value);
+UINT16 NativePciGetStatusEx(UINT32* DeviceBase);
+void NativePciSetStatusEx(UINT32* DeviceBase, UINT16 Value);
+UINT8 NativePciGetRevisionIdEx(UINT32* DeviceBase);
+UINT8 NativePciGetProgIfEx(UINT32* DeviceBase);
+UINT8 NativePciGetSubClassEx(UINT32* DeviceBase);
+UINT8 NativePciGetClassCodeEx(UINT32* DeviceBase);
+UINT8 NativePciGetCacheLineSizeEx(UINT32* DeviceBase);
+void NativePciSetCacheLineSizeEx(UINT32* DeviceBase, UINT8 Value);
+UINT8 NativePciGetLatencyTimerEx(UINT32* DeviceBase);
+void NativePciSetLatencyTimerEx(UINT32* DeviceBase, UINT8 Value);
+UINT8 NativePciGetHeaderTypeEx(UINT32* DeviceBase);
+UINT8 NativePciGetBistEx(UINT32* DeviceBase);
+void NativePciSetBistEx(UINT32* DeviceBase, UINT8 Value);
+
+UINT16 NativePciGetVendorId(PPCI_DEVICE_OBJECT PDEV);
+UINT16 NativePciGetDeviceId(PPCI_DEVICE_OBJECT PDEV);
+UINT16 NativePciGetCommand(PPCI_DEVICE_OBJECT PDEV);
+void NativePciSetCommand(PPCI_DEVICE_OBJECT PDEV, UINT16 Value);
+UINT16 NativePciGetStatus(PPCI_DEVICE_OBJECT PDEV);
+void NativePciSetStatus(PPCI_DEVICE_OBJECT PDEV, UINT16 Value);
+UINT8 NativePciGetRevisionId(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGetProgIf(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGetSubClass(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGetClassCode(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGetCacheLineSize(PPCI_DEVICE_OBJECT PDEV);
+void NativePciSetCacheLineSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+UINT8 NativePciGetLatencyTimer(PPCI_DEVICE_OBJECT PDEV);
+void NativePciSetLatencyTimer(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+UINT8 NativePciGetHeaderType(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGetBist(PPCI_DEVICE_OBJECT PDEV);
+void NativePciSetBist(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+
+UINT32 NativePciGeneralDeviceGetBarEx(UINT32* DeviceBase, UINT8 Bar);
+void NativePciGeneralDeviceSetBarEx(UINT32* DeviceBase, UINT8 Bar, UINT32 Value);
+UINT32 NativePciGeneralDeviceGetCardBusCisPointerEx(UINT32* DeviceBase);
+UINT16 NativePciGeneralDeviceGetSubsystemVendorIdEx(UINT32* DeviceBase);
+UINT16 NativePciGeneralDeviceGetSubsystemIdEx(UINT32* DeviceBase);
+UINT32 NativePciGeneralDeviceGetExpansionRomBaseEx(UINT32* DeviceBase);
+UINT8 NativePciGeneralDeviceGetCapabilitiesPointerEx(UINT32* DeviceBase);
+UINT8 NativePciGeneralDeviceGetInterruptLineEx(UINT32* DeviceBase);
+void NativePciGeneralDeviceSetInterruptLineEx(UINT32* DeviceBase, UINT8 Value);
+UINT8 NativePciGeneralDeviceGetInterruptPinEx(UINT32* DeviceBase);
+UINT8 NativePciGeneralDeviceGetMinGrantEx(UINT32* DeviceBase);
+UINT8 NativePciGeneralDeviceGetMaxLatencyEx(UINT32* DeviceBase);
+
+UINT32 NativePciGeneralDeviceGetBar(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
+void NativePciGeneralDeviceSetBar(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT32 Value);
+UINT32 NativePciGeneralDeviceGetCardBusCisPointer(PPCI_DEVICE_OBJECT PDEV);
+UINT16 NativePciGeneralDeviceGetSubsystemVendorId(PPCI_DEVICE_OBJECT PDEV);
+UINT16 NativePciGeneralDeviceGetSubsystemId(PPCI_DEVICE_OBJECT PDEV);
+UINT32 NativePciGeneralDeviceGetExpansionRomBase(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGeneralDeviceGetCapabilitiesPointer(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGeneralDeviceGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+void NativePciGeneralDeviceSetInterruptLine(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+UINT8 NativePciGeneralDeviceGetInterruptPin(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGeneralDeviceGetMinGrant(PPCI_DEVICE_OBJECT PDEV);
+UINT8 NativePciGeneralDeviceGetMaxLatency(PPCI_DEVICE_OBJECT PDEV);
+
+
 
 #endif
