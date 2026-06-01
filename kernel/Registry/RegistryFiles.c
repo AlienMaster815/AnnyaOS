@@ -202,7 +202,7 @@ LOUSTATUS LouKeReadRegistryWordValue(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS LouKeReadRegistryByteValue(
+KERNEL_EXPORT LOUSTATUS LouKeReadRegistryByteValue(
     PVOID Key, 
     BYTE* Data
 ){

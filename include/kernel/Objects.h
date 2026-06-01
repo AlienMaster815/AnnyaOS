@@ -151,7 +151,7 @@ LOUSTATUS LouKeReadRegistryWcsValue(PVOID Key, LPWSTR String);
 
 LOUSTATUS LouKeReadRegistryCsValue(PVOID Key, LOUSTR String);
 
-LOUSTATUS LouKeReadRegistryByteValue(
+KERNEL_EXPORT LOUSTATUS LouKeReadRegistryByteValue(
     PVOID Key, 
     BYTE* Data
 );

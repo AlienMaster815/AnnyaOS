@@ -4,10 +4,8 @@
 
 LOUAPI void LouKePciDbgPrint(char* format, ...);
 
-LOUAPI
-PPCI_MANAGER_DATA LouKeGetPciDataTable();
-LOUAPI
-uint8_t LouKeGetPciGlobalMembers();
+DRIVER_IMPORT PPCI_MANAGER_DATA PciHalGetPciDataTable();
+DRIVER_IMPORT uint8_t PciHalGetPciGlobalMembers();
 
 #define DEVICE_ID_MATCH ((SearchConfig->Header.DeviceID == DeviceConfig->Header.DeviceID) || (SearchConfig->Header.DeviceID == ANY_PCI_ID))
 #define VENDOR_ID_MATCH ((SearchConfig->Header.VendorID == DeviceConfig->Header.VendorID) || (SearchConfig->Header.VendorID == ANY_PCI_ID))
@@ -60,14 +58,14 @@ LOUAPI
 uint8_t LouKeGetPciCountByType(
     PPCI_COMMON_CONFIG PciConfig
 ) {
-    PPCI_MANAGER_DATA PciData = LouKeGetPciDataTable();
-    uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
+    PPCI_MANAGER_DATA PciData = PciHalGetPciDataTable();
+    uint8_t GlobalMembers = PciHalGetPciGlobalMembers();
     uint8_t LocalMembers = 0;
 
     // First pass: Count matching devices
     for (uint8_t i = 0; i < GlobalMembers; i++) {
-        if (PciData->Neigbors.NextHeader) {
-            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
+        if (PciData->Peers.NextHeader) {
+            PciData = (PPCI_MANAGER_DATA)PciData->Peers.NextHeader;
         } else {
             break;
         }
@@ -85,8 +83,8 @@ PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
     PPCI_COMMON_CONFIG PciConfig
 ) {
 
-    PPCI_MANAGER_DATA PciData = LouKeGetPciDataTable();
-    uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
+    PPCI_MANAGER_DATA PciData = PciHalGetPciDataTable();
+    uint8_t GlobalMembers = PciHalGetPciGlobalMembers();
     uint8_t LocalMembers = LouKeGetPciCountByType(PciConfig);
 
     LouKePciDbgPrint("Global Members:%d\n", GlobalMembers);
@@ -96,15 +94,15 @@ PPCI_DEVICE_GROUP* LouKeOpenPciDeviceGroup(
     if(!LocalMembers){
         return 0x00;
     }
-    PciData = LouKeGetPciDataTable();
+    PciData = PciHalGetPciDataTable();
 
     PPCI_DEVICE_GROUP* Result = LouKeMallocArray(PPCI_DEVICE_GROUP, LocalMembers, KERNEL_GENERIC_MEMORY);
 
     // Second pass: Populate Result with matching devices
     uint8_t index = 0;
     for (uint8_t i = 0; i < GlobalMembers && index < LocalMembers; i++) {
-        if (PciData->Neigbors.NextHeader) {
-            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
+        if (PciData->Peers.NextHeader) {
+            PciData = (PPCI_MANAGER_DATA)PciData->Peers.NextHeader;
         } else {
             break;
         }        
@@ -137,12 +135,12 @@ PPCI_DEVICE_OBJECT LouKeHalGetPDEV(
     uint8_t Function
 ){
 
-    PPCI_MANAGER_DATA PciData = LouKeGetPciDataTable();
-    uint8_t GlobalMembers = LouKeGetPciGlobalMembers();
+    PPCI_MANAGER_DATA PciData = PciHalGetPciDataTable();
+    uint8_t GlobalMembers = PciHalGetPciGlobalMembers();
 
     for(uint8_t i = 0 ; i  < GlobalMembers; i++){
-        if (PciData->Neigbors.NextHeader) {
-            PciData = (PPCI_MANAGER_DATA)PciData->Neigbors.NextHeader;
+        if (PciData->Peers.NextHeader) {
+            PciData = (PPCI_MANAGER_DATA)PciData->Peers.NextHeader;
         } else {
             break;
         }

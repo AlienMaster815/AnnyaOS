@@ -1,7 +1,13 @@
 #//Copyright GPL-2 Tyler Grenier (2026)
 INCLUDES = -I../../include
 TARGET = PCI.SYS
-SRC = Pci.c
+SRC = 	Pci.c \
+		DevMan.c \
+		Legacy.c \
+		LegacyCommon.c \
+		LegacyGeneral.c \
+		LegacyPciBridge.c \
+		LegacyCardBus.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=PciEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

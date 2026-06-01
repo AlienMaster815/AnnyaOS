@@ -105,8 +105,8 @@ LOUAPI void LouKeHalGetPciConfiguration(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CON
 
 static spinlock_t Lock;
 
-LOUAPI
-LOUSTATUS RegisterPciDeviceToDeviceManager(
+DRIVER_IMPORT 
+LOUSTATUS PciHalRegisterPciDevice(
     PPCI_DEVICE_OBJECT PDEV,
     string RegistryEntry,
     string DeviceManagerString
@@ -178,7 +178,7 @@ void LouKeHalRegisterPciDevice(
         LouKePciDbgPrint("WARNING:PCI Header Type Unkown\n");
     }
 
-    RegisterPciDeviceToDeviceManager(
+    PciHalRegisterPciDevice(
         PDEV,
         0x00,
         0x00

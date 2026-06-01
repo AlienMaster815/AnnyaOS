@@ -1,0 +1,6 @@
+LIBRARY PCI.SYS
+
+EXPORTS	
+    PciHalGetPciDataTable
+    PciHalRegisterPciDevice
+    PciHalGetPciGlobalMembers
