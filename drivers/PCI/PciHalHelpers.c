@@ -123,11 +123,11 @@ DRIVER_EXPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_
     while(1);
 }
 
-DRIVER_EXPORT SIZE PciHalGetBarSize(
+DRIVER_EXPORT SIZE PciHalGetIoRegionSize(
     PPCI_DEVICE_OBJECT PDEV, 
     UINT8 Bar
 ){
-    LouPrint("PCI.SYS:PciHalGetBarSize()\n");
+    LouPrint("PCI.SYS:PciHalGetIoRegionSize()\n");
     while(1);
     return 0;
 }

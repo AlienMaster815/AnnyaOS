@@ -180,3 +180,5 @@ EXPORTS
     LouKeCreateFastObjectClass
     LouKeAllocateFastObject
     LouKeMapContinuousMemoryBlockKB
+    LouKeUnMapContinuousMemoryBlock
+    

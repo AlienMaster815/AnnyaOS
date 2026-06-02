@@ -6,7 +6,7 @@ static mutex_t PciDataLock = {0};
 
 //TODO Implement Registry loopkup
 
-DRIVER_EXPORT LOUSTATUS PciHalRegisterPciDevice(
+LOUSTATUS PciHalRegisterPciDevice(
     PPCI_DEVICE_OBJECT  PDEV,
     string              RegistryEntry,
     string              DeviceManagerString
@@ -28,11 +28,11 @@ DRIVER_EXPORT LOUSTATUS PciHalRegisterPciDevice(
     return STATUS_SUCCESS;
 }
 
-DRIVER_EXPORT PPCI_MANAGER_DATA PciHalGetPciDataTable(){
+PPCI_MANAGER_DATA PciHalGetPciDataTable(){
     return (PPCI_MANAGER_DATA)&PciData;
 }
 
-DRIVER_EXPORT uint8_t PciHalGetPciGlobalMembers(){
+uint8_t PciHalGetPciGlobalMembers(){
     return RegisteredPciDevices;
 }
 

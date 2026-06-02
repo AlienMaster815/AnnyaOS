@@ -732,12 +732,12 @@ static void AhciRemapCheck(
     PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
     if(
         (PciConfig->Header.VendorID != 0x8086) || 
-        (PciHalGetBarSize(PDEV, Bar) < (512 * KILOBYTE)) ||
+        (PciHalGetIoRegionSize(PDEV, Bar) < (512 * KILOBYTE)) ||
         (Bar != AHCI_STANDARD_ABAR) ||
         (!(READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_VS_CAPABILITIES))) & 0x01))
     ){
         //LouPrint("AHCI.SYS:Vendor:%h\n", PciConfig->Header.VendorID);
-        //LouPrint("AHCI.SYS:BarSize:%h\n", PciHalGetBarSize(PDEV, Bar));
+        //LouPrint("AHCI.SYS:BarSize:%h\n", PciHalGetIoRegionSize(PDEV, Bar));
         //LouPrint("AHCI.SYS:Capabilities:%h\n", READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_VS_CAPABILITIES))));
         LouPrint("AHCI.SYS:This AHCI Device Does Not Support NVME\n");
         return;

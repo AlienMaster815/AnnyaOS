@@ -1,9 +1,6 @@
 LIBRARY PCI.SYS
 
 EXPORTS	
-    PciHalGetPciDataTable
-    PciHalRegisterPciDevice
-    PciHalGetPciGlobalMembers
     PciHalReadUint32
     PciHalWriteUint32
     PciHalReadUint16
@@ -98,5 +95,5 @@ EXPORTS
     PciHalFreeIrqVectors
     PciHalGetIrqVectorCount
     PciHalGetConfigurationSnapshot
-    PciHalGetBarSize
+    PciHalGetIoRegionSize
     PciHalGetDeviceFromBusAddress

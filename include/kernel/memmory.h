@@ -440,7 +440,7 @@ void LouKeMapContinuousMemoryBlockKB32(
 );
 
 
-void LouKeUnMapContinuousMemoryBlock(
+KERNEL_EXPORT void LouKeUnMapContinuousMemoryBlock(
     uint64_t VAddress,
     uint64_t size
 );

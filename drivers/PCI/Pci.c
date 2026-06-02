@@ -4,6 +4,7 @@ static BOOLEAN PciDebugOn = false;
 static PMCFG_TABLE McfgTable = 0x00;
 static SIZE McfgEntryCount = 0;
 static SIZE MaxGroups = 0;
+static mutex_t EcamRemapsLock = {0};
 
 typedef struct _PCIE_ECAM_REMAPS{
     ListHeader  Peers;
@@ -32,8 +33,25 @@ static UINT32* PciHalMapEcamDevice(
     NewEcamRemap->Phy = PhyAddress;
     NewEcamRemap->Virt = LouVMallocEx(4096, KILOBYTE_PAGE);
     LouKeMapContinuousMemoryBlockKB((UINTPTR)PhyAddress, (UINTPTR)NewEcamRemap->Virt, 4096, KERNEL_DMA_MEMORY);
+    MutexLock(&EcamRemapsLock);
     LouKeListAddTail(&NewEcamRemap->Peers, &EcamRemapList);
+    MutexUnlock(&EcamRemapsLock);
     return NewEcamRemap->Virt;
+}
+
+static void PciHalUnMapEcamDevice(PVOID VirtualAddress){
+    PPCIE_ECAM_REMAPS TmpRemamp;
+    MutexLock(&EcamRemapsLock);
+    ForEachListEntry(TmpRemamp, &EcamRemapList, Peers){
+        if(TmpRemamp->Virt == VirtualAddress){
+            LouKeListDeleteItem(&TmpRemamp->Peers);
+            LouKeFree(TmpRemamp);
+            LouKeUnMapContinuousMemoryBlock((UINTPTR)VirtualAddress, 4096);
+            LouFree(VirtualAddress);
+            break;
+        }
+    }
+    MutexUnlock(&EcamRemapsLock);
 }
 
 void PciHalPciDbgPrint(char* format, ...){
@@ -129,7 +147,7 @@ void PciHalLegacyFallbackCheckSlot(
         0
     );
 
-    if((HeaderType & 0x03) == 2){
+    if((HeaderType & 0x03) == 1){
         PciHalInitializePciBridge(NewPciDevice);
     }
 
@@ -160,7 +178,7 @@ void PciHalLegacyFallbackCheckSlot(
                 0,
                 0
             );
-            if((HeaderType & 0x03) == 2){
+            if((HeaderType & 0x03) == 1){
                 PciHalInitializePciBridge(NewPciDevice);
             }
         }
@@ -201,16 +219,30 @@ BOOLEAN PciHalNativeCheckSlot(
         0
     );
 
-    if((HeaderType & 0x03) == 2){
+    if((HeaderType & 0x03) == 1){
         PciHalInitializePciBridge(NewPciDevice);
     }
 
     if(HeaderType & (1 << 7) && (HeaderType != 0xFF)){
-        /*for(SIZE i = 1; i < 8; i++){
+        for(SIZE i = 1; i < 8; i++){
+            EcamDeviceBase = PciHalGetNativePciPhysicalAddress(
+                Group,
+                Bus,
+                Slot,
+                i
+            );
+            if(!EcamDeviceBase){
+                continue;
+            }
+            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+            EcamDeviceBase = PciHalMapEcamDevice(Group, Bus, i, 0, EcamDeviceBase);
+            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+
             VendorID = NativePciGetVendorIdEx(EcamDeviceBase);
             HeaderType = NativePciGetHeaderTypeEx(EcamDeviceBase);
 
             if(VendorID == 0xFFFF){
+                PciHalUnMapEcamDevice(EcamDeviceBase);
                 continue;
             }
 
@@ -230,10 +262,10 @@ BOOLEAN PciHalNativeCheckSlot(
                 0,
                 0
             );
-            if((HeaderType & 0x03) == 2){
+            if((HeaderType & 0x03) == 1){
                 PciHalInitializePciBridge(NewPciDevice);
             }
-        }*/
+        }
     }
     return true;
 }

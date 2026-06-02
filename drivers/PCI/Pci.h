@@ -1,3 +1,7 @@
+//Tyler Grenier - Pci.h :: Lousine Kernel:PCI.SYS :: (C) 2026 GPL2
+
+//Developer Notes:
+
 #ifndef _PCI_INTERNALS_H
 #define _PCI_INTERNALS_H
 #define _KERNEL_MODULE_
@@ -468,10 +472,11 @@ DRIVER_EXPORT void PciHalFreeIrqVectors(PPCI_DEVICE_OBJECT PDEV);
 DRIVER_EXPORT UINT8 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV);
 DRIVER_EXPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(UINT16 Group, UINT8 Bus, UINT8 Slot, UINT8 Function);
 
-DRIVER_EXPORT SIZE PciHalGetBarSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
+DRIVER_EXPORT SIZE PciHalGetIoRegionSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
 
 DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT64 OverideFlags);
 
 LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV,string RegistryEntry, string DeviceManagerString);
 void PciHalInitializePciBridge(PPCI_DEVICE_OBJECT PDEV);
+
 #endif

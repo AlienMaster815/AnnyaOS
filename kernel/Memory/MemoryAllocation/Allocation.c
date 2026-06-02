@@ -549,7 +549,7 @@ void LouGeneralFreeMemory(void* Address){
     LouFree((PVOID)Tmp);
 }
 
-void LouFree(PVOID Addr) {
+KERNEL_EXPORT void LouFree(PVOID Addr) {
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
