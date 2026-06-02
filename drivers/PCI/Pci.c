@@ -111,7 +111,7 @@ void PciHalLegacyFallbackCheckSlot(
     if(VendorID == 0xFFFF){
         return;
     }
-    LouPrint("VendorID:%h\n", (UINT64)VendorID);
+    //LouPrint("VendorID:%h\n", (UINT64)VendorID);
 
     PPCI_DEVICE_OBJECT NewPciDevice = (PPCI_DEVICE_OBJECT)LouKeAllocateFastObject("PDEV");
     NewPciDevice->Group = 0;
@@ -119,9 +119,9 @@ void PciHalLegacyFallbackCheckSlot(
     NewPciDevice->Slot = Slot;
     NewPciDevice->Function = 0;
 
-    LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
+    //LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
 
-    NewPciDevice->Dispatch = (HeaderType == 0xFF) ? PciInvalidDispatch : HeaderType & 0x03;
+    NewPciDevice->Dispatch = PciLegacyDispatch;
 
     PciHalRegisterPciDevice(
         NewPciDevice,
@@ -129,8 +129,8 @@ void PciHalLegacyFallbackCheckSlot(
         0
     );
 
-    if(NewPciDevice->Dispatch == PciLegacyPciBridgeDispatch){
-        LegacyPciInitializePciBus(NewPciDevice);
+    if((HeaderType & 0x03) == 2){
+        PciHalInitializePciBridge(NewPciDevice);
     }
 
     if(HeaderType & (1 << 7) && (HeaderType != 0xFF)){
@@ -142,7 +142,7 @@ void PciHalLegacyFallbackCheckSlot(
                 continue;
             }
 
-            LouPrint("VendorID:%h\n", (UINT64)VendorID);
+            //LouPrint("VendorID:%h\n", (UINT64)VendorID);
 
             NewPciDevice = (PPCI_DEVICE_OBJECT)LouKeAllocateFastObject("PDEV");
             
@@ -151,18 +151,17 @@ void PciHalLegacyFallbackCheckSlot(
             NewPciDevice->Slot = Slot;
             NewPciDevice->Function = i;
 
+            //LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
             
-            LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
-            
-            NewPciDevice->Dispatch = (HeaderType == 0xFF) ? PciInvalidDispatch : HeaderType & 0x03;
+            NewPciDevice->Dispatch = PciLegacyDispatch;
             
             PciHalRegisterPciDevice(
                 NewPciDevice,
                 0,
                 0
             );
-            if(NewPciDevice->Dispatch == PciLegacyPciBridgeDispatch){
-                LegacyPciInitializePciBus(NewPciDevice);
+            if((HeaderType & 0x03) == 2){
+                PciHalInitializePciBridge(NewPciDevice);
             }
         }
     }
@@ -174,9 +173,68 @@ BOOLEAN PciHalNativeCheckSlot(
     UINT8   Bus,
     UINT8   Slot
 ){
-    PciHalPciDbgPrint("PCI.SYS:PciHalNativeCheckSlot()\n");
+    UINT16 VendorID = NativePciGetVendorIdEx(EcamDeviceBase);
+    UINT8 HeaderType = NativePciGetHeaderTypeEx(EcamDeviceBase);
+    
+    if(VendorID == 0xFFFF){
+        return false;
+    }
 
-    while(1);
+    //LouPrint("VendorID:%h\n", (UINT64)VendorID);
+
+    PPCI_DEVICE_OBJECT NewPciDevice = (PPCI_DEVICE_OBJECT)LouKeAllocateFastObject("PDEV");
+    NewPciDevice->EcamDeviceBase = EcamDeviceBase;
+    NewPciDevice->Group = Group;
+    NewPciDevice->Bus = Bus;
+    NewPciDevice->Slot = Slot;
+    NewPciDevice->Function = 0;
+
+    //LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
+
+    NewPciDevice->Dispatch = PciNativeDispatch;
+
+    //LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
+
+    PciHalRegisterPciDevice(
+        NewPciDevice,
+        0,
+        0
+    );
+
+    if((HeaderType & 0x03) == 2){
+        PciHalInitializePciBridge(NewPciDevice);
+    }
+
+    if(HeaderType & (1 << 7) && (HeaderType != 0xFF)){
+        /*for(SIZE i = 1; i < 8; i++){
+            VendorID = NativePciGetVendorIdEx(EcamDeviceBase);
+            HeaderType = NativePciGetHeaderTypeEx(EcamDeviceBase);
+
+            if(VendorID == 0xFFFF){
+                continue;
+            }
+
+            NewPciDevice = (PPCI_DEVICE_OBJECT)LouKeAllocateFastObject("PDEV");
+            NewPciDevice->EcamDeviceBase = EcamDeviceBase;
+            NewPciDevice->Group = 0;
+            NewPciDevice->Bus = Bus;
+            NewPciDevice->Slot = Slot;
+            NewPciDevice->Function = i;
+
+            //LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
+            
+            NewPciDevice->Dispatch = PciNativeDispatch;
+            
+            PciHalRegisterPciDevice(
+                NewPciDevice,
+                0,
+                0
+            );
+            if((HeaderType & 0x03) == 2){
+                PciHalInitializePciBridge(NewPciDevice);
+            }
+        }*/
+    }
     return true;
 }
 
@@ -193,8 +251,9 @@ void PciHalInitializePciBus(
             0
         );
         if(EcamDeviceBase){
+            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
             EcamDeviceBase = PciHalMapEcamDevice(Group, Bus, i, 0, EcamDeviceBase);
-            PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
             BOOLEAN Success = PciHalNativeCheckSlot(
                 EcamDeviceBase,
                 Group,

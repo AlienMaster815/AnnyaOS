@@ -95,6 +95,11 @@ void NativePciBridgeDeviceSetInterruptLineEx(UINT32* DeviceBase, UINT8 Value){
     NativePciWriteUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_INTERRUPT_LINE, Value);
 }
 
+UINT8 NativePciBridgeDeviceGetInterruptPinEx(UINT32* DeviceBase){
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_INTERRUPT_PIN);
+}
+
+
 UINT16 NativePciBridgeDeviceGetBridgeControlEx(UINT32* DeviceBase){
     return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_INTERRUPT_PIN);
 }
@@ -196,6 +201,10 @@ void NativePciBridgeDeviceSetInterruptLine(PPCI_DEVICE_OBJECT PDEV, UINT8 Value)
     LouKeAcquireSpinLock(&PDEV->ConfigSpaceLock, &Irql);
     NativePciBridgeDeviceSetInterruptLineEx(PDEV->EcamDeviceBase, Value);
     LouKeReleaseSpinLock(&PDEV->ConfigSpaceLock, &Irql);
+}
+
+UINT8 NativePciBridgeDeviceGetInterruptPin(PPCI_DEVICE_OBJECT PDEV){
+    return NativePciBridgeDeviceGetInterruptPinEx(PDEV->EcamDeviceBase);
 }
 
 UINT16 NativePciBridgeDeviceGetBridgeControl(PPCI_DEVICE_OBJECT PDEV){

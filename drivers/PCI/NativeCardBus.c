@@ -89,7 +89,7 @@ UINT16 NativePciCardBusGetSubsystemDeviceIdEx(UINT32* DeviceBase){
     return NativePciReadUint16Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_SUBSYSTEM_DEVICE_ID);
 }
 
-UINT32 NativePciCardBusGet16BitPcCardNativeModeBaseAddressEx(UINT32* DeviceBase){
+UINT32 NativePciCardBusGet16BitPcCardLegacyModeBaseAddressEx(UINT32* DeviceBase){
     return NativePciReadUint32Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_16BIT_PC_CARD_LEGACY_BASE);
 }
 
@@ -173,6 +173,6 @@ UINT16 NativePciCardBusGetSubsystemDeviceId(PPCI_DEVICE_OBJECT PDEV){
     return NativePciCardBusGetSubsystemDeviceIdEx(PDEV->EcamDeviceBase);
 }
 
-UINT32 NativePciCardBusGet16BitPcCardNativeModeBaseAddress(PPCI_DEVICE_OBJECT PDEV){
-    return NativePciCardBusGet16BitPcCardNativeModeBaseAddressEx(PDEV->EcamDeviceBase);
+UINT32 NativePciCardBusGet16BitPcCardLegacyModeBaseAddress(PPCI_DEVICE_OBJECT PDEV){
+    return NativePciCardBusGet16BitPcCardLegacyModeBaseAddressEx(PDEV->EcamDeviceBase);
 }

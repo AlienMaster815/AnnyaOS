@@ -2,7 +2,7 @@
 INCLUDES = -I../../include
 TARGET = PCI.SYS
 SRC = 	Pci.c \
-		Bus.c \
+		Bridge.c \
 		DevMan.c \
 		Legacy.c \
 		LegacyCommon.c \
@@ -13,7 +13,9 @@ SRC = 	Pci.c \
 		NativeCommon.c \
 		NativeGeneral.c \
 		NativePciBridge.c \
-		NativeCardBus.c 
+		NativeCardBus.c \
+		PciHal.c \
+		PciHalHelpers.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=PciEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

@@ -56,13 +56,9 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 typedef int pci_power_t;
 
 typedef enum{
-	PciLegacyGeneralDispatch = 0,
-	PciLegacyPciBridgeDispatch,
-	PciLegacyCardBusDispatch,
-	PciNativeGeneralDispatch,
-	PciNativePciBridgeDispatch,
-	PciNativeCardBusDispatch,
-	PciInvalidDispatch,
+	PciLegacyDispatch = 0,
+	PciNativeDispatch,
+	PciTotalDispatch,
 }PCI_DRIVER_DISPATCH;
 
 typedef struct _PCI_DEVICE_OBJECT{

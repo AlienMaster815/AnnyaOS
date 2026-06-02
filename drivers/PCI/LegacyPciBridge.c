@@ -553,6 +553,15 @@ void LegacyPciBridgeDeviceSetInterruptLine(PPCI_DEVICE_OBJECT PDEV, UINT8 Value)
     );
 }
 
+UINT8 LegacyPciBridgeDeviceGetInterruptPin(PPCI_DEVICE_OBJECT PDEV){
+    return LegacyPciBridgeDeviceGetInterruptPinEx(
+        PDEV->Bus,
+        PDEV->Slot,
+        PDEV->Function
+    );
+}
+
+
 UINT16 LegacyPciBridgeDeviceGetBridgeControl(
     PPCI_DEVICE_OBJECT PDEV
 ){
