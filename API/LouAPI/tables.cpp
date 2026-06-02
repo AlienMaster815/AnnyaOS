@@ -182,12 +182,6 @@ LOUAPI uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
-LOUAPI void* LouKePciGetIoRegion(
-    PPCI_DEVICE_OBJECT PDEV, 
-    uint8_t BarNumber,
-    size_t BarOffset
-);
-
 static inline 
 void InitializeLousineKernelTables(){
     

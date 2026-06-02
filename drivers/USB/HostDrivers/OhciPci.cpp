@@ -36,12 +36,14 @@ LOUSTATUS AddDevice(
 
     LouKeInitializeEventTimeOut(&OhciDevice->OhciCommitEvent, 5000);
 
-    LouKeHalEnablePciDevice(PDEV);
-    LouKeHalPciSetMaster(PDEV);
+    PciHalEnableMemorySpace(PDEV);
+    PciHalEnableIoSpace(PDEV);
 
-    LouKeHalMapPciResource(PDEV, OHCI_OPERATIONAL_REGISTER_BAR, KERNEL_DMA_MEMORY);
+    PciHalEnableBusMaster(PDEV);
 
-    OhciDevice->OperationalRegisters = (POHCI_OPERATIONAL_REGISTERS)LouKePciGetIoRegion(
+    PciHalMapPciResource(PDEV, OHCI_OPERATIONAL_REGISTER_BAR, KERNEL_DMA_MEMORY);
+
+    OhciDevice->OperationalRegisters = (POHCI_OPERATIONAL_REGISTERS)PciHalGetIoRegion(
         PDEV,
         OHCI_OPERATIONAL_REGISTER_BAR,
         OHCI_OPERATIONAL_REGISTER_OFFSET
@@ -64,7 +66,7 @@ LOUSTATUS AddDevice(
 
     OhciDevice->UsbHost.Operations = OhciOperations;
 
-    Status = LouKeHalMallocPciIrqVectors(
+    Status = PciHalAllocatePciIrqVectors(
         PDEV,
         1,
         PCI_IRQ_USE_LEGACY
@@ -75,7 +77,7 @@ LOUSTATUS AddDevice(
         return Status;
     }
 
-    RegisterInterruptHandler(OhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
+    RegisterInterruptHandler(OhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
 
     Status = OhciInitializeDefaultControl(OhciDevice);
     if(Status != STATUS_SUCCESS){

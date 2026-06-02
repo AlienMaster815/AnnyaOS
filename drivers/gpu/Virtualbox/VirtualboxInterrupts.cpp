@@ -159,12 +159,12 @@ LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
 
     VirtualboxUpdateModeHints(VBox);
     
-    if(LouKeHalMallocPciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY) != STATUS_SUCCESS){
+    if(PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY) != STATUS_SUCCESS){
         LouPrint("VBOX.SYS:ERROR:Unable To Allocate IRQ\n");
         return STATUS_UNSUCCESSFUL;
     }
 
-    RegisterInterruptHandler(VirtualboxInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)VBox);
+    RegisterInterruptHandler(VirtualboxInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)VBox);
 
     LouPrint("InitializeVirtualboxInterrupts() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
@@ -173,5 +173,5 @@ LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
 void VirtualBoxInterruptsFailedInitialization(
     PVIRTUALBOX_PRIVATE_DATA VBox
 ){
-    LouKeHalFreePciIrqVectors(VBox->PDEV);
+   PciHalFreeIrqVectors(VBox->PDEV);
 }

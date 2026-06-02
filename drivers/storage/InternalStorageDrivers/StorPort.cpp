@@ -21,7 +21,6 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 //static PDRIVER_OBJECT AhciDriverObject = 0x00;
 
 //LOUSTATUS AhciDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryEntry);
-uint64_t LouKeGetLdmModuleDeviceID(PPCI_COMMON_CONFIG Config, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 LOUAPI void* LouKeGetBootDevice(size_t Index);
 LOUSTATUS LouKeInitializeNetworkManager();
 LOUAPI size_t GetBootDeviceCount();
@@ -32,8 +31,9 @@ size_t LouKeGetBootDeviceIndex(PPCI_COMMON_CONFIG Config);
 LOUAPI 
 LOUSTATUS LookForStorageDevices(){
 
-
-    PCI_COMMON_CONFIG Config;
+    LouPrint("LookForStorageDevices()\n");
+    while(1);
+    /*PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
 	Config.Header.DeviceID = ANY_PCI_ID;
 	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
@@ -77,6 +77,6 @@ LOUSTATUS LookForStorageDevices(){
         }
     }
     LouKeClosePciDeviceGroup(FirstWaveDevices);
-    LouPrint("Done Scanning For Storage Devices\n");
+    LouPrint("Done Scanning For Storage Devices\n");*/
     return STATUS_SUCCESS;
 }

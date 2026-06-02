@@ -354,7 +354,7 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
     IdeGenericOperations.IssueCommand = AtaGenricPIOIssueCommand;
 
     PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
-    LouKeHalGetPciConfiguration(PDEV, Config);
+    PciHalGetConfigurationSnapshot(PDEV, Config);
 
     //LouPrint("Dma Port Is:%h\n", Config->Header.u.type0.BaseAddresses[4]);
     //uint16_t DmaPort = (uint16_t)Config->Header.u.type0.BaseAddresses[4];

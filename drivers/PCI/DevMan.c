@@ -36,3 +36,26 @@ DRIVER_EXPORT uint8_t PciHalGetPciGlobalMembers(){
     return RegisteredPciDevices;
 }
 
+DRIVER_EXPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(
+    UINT16  Group,
+    UINT8   Bus,
+    UINT8   Slot,
+    UINT8   Function
+){
+    PPCI_MANAGER_DATA TmpObject;
+    MutexLock(&PciDataLock);
+    ForEachListEntry(TmpObject, &PciData.Peers, Peers){
+        PPCI_DEVICE_OBJECT PDEV = TmpObject->PDEV;
+        if(
+            (PDEV->Group == Group) &&
+            (PDEV->Bus == Bus) &&
+            (PDEV->Slot == Slot) &&
+            (PDEV->Function == Function)
+        ){
+            MutexUnlock(&PciDataLock);
+            return PDEV;
+        }
+    }
+    MutexUnlock(&PciDataLock);
+    return 0x00;
+}

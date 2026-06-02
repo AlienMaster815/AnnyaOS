@@ -468,10 +468,10 @@ static void AhciIntelPcs(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA Priv
     //according to linux documentation some PCS systems do not 
     //automatically or faild to enable all the ports so we can
     //try to do this now
-    Tmp = LouKeReadPciUint16(PDEV, PCS6_PCI_REGISTER);
+    Tmp = PciHalReadUint16(PDEV, PCS6_PCI_REGISTER);
     if((Tmp & PrivateData->PortMap) != PrivateData->PortMap){
         Tmp |= PrivateData->PortMap;
-        LouKeWritePciUint16(PDEV, PCS6_PCI_REGISTER, Tmp);
+        PciHalWriteUint16(PDEV, PCS6_PCI_REGISTER, Tmp);
     }
 
 }
@@ -575,33 +575,33 @@ static void NvidiaMcp89AppleBiosUnlockAhciChip(PPCI_DEVICE_OBJECT PDEV){
     
     //tell the device we are going to be accessing the controllers
     //Bios Settings
-    Tmp = LouKeReadPciUint32(PDEV, 0xF8);
+    Tmp = PciHalReadUint32(PDEV, 0xF8);
     Tmp |= (1 << 0x1B);
-    LouKeWritePciUint32(PDEV, 0xF8, Tmp);
+    PciHalWriteUint32(PDEV, 0xF8, Tmp);
     //we have offically broken the terms and conditions of apples 
     //product use aggrement by modifying a device congratz everybody
     //(Hosnetly we all broke it when you deviceded to run this sofware
     //on your macbook)... just fair warning to end user;
     //now we need to Make Changes withought changing the Device ID
     //By setting Unsetting Bit 0xF0000000 and setting Bit 0x80000000
-    Tmp = LouKeReadPciUint32(PDEV, 0x054C);
+    Tmp = PciHalReadUint32(PDEV, 0x054C);
     Tmp |= (1 << 0x0C);
-    LouKeWritePciUint32(PDEV, 0x054C, Tmp);
+    PciHalWriteUint32(PDEV, 0x054C, Tmp);
 
     //change the data
-    Tmp = LouKeReadPciUint32(PDEV, 0x04A4);
+    Tmp = PciHalReadUint32(PDEV, 0x04A4);
     Tmp &= ~(0xFF);
     Tmp |= 0x01060100;
-    LouKeWritePciUint32(PDEV, 0x04A4, Tmp);
+    PciHalWriteUint32(PDEV, 0x04A4, Tmp);
 
     //cleanup the bios 
-    Tmp = LouKeReadPciUint32(PDEV, 0x054C);
+    Tmp = PciHalReadUint32(PDEV, 0x054C);
     Tmp &= ~(1 << 0x0C);
-    LouKeWritePciUint32(PDEV, 0x054C, Tmp);
+    PciHalWriteUint32(PDEV, 0x054C, Tmp);
 
-    Tmp = LouKeReadPciUint32(PDEV, 0xF8);
+    Tmp = PciHalReadUint32(PDEV, 0xF8);
     Tmp &= ~(1 << 0x1B);
-    LouKeWritePciUint32(PDEV, 0xF8, Tmp);
+    PciHalWriteUint32(PDEV, 0xF8, Tmp);
     //Ahci On Apple Bios Should Now Be Unlocked
 }
 
@@ -732,12 +732,12 @@ static void AhciRemapCheck(
     PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
     if(
         (PciConfig->Header.VendorID != 0x8086) || 
-        (LouKeHalGetPciBaseAddressSize(PDEV, Bar) < (512 * KILOBYTE)) ||
+        (PciHalGetBarSize(PDEV, Bar) < (512 * KILOBYTE)) ||
         (Bar != AHCI_STANDARD_ABAR) ||
         (!(READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_VS_CAPABILITIES))) & 0x01))
     ){
         //LouPrint("AHCI.SYS:Vendor:%h\n", PciConfig->Header.VendorID);
-        //LouPrint("AHCI.SYS:BarSize:%h\n", LouKeHalGetPciBaseAddressSize(PDEV, Bar));
+        //LouPrint("AHCI.SYS:BarSize:%h\n", PciHalGetBarSize(PDEV, Bar));
         //LouPrint("AHCI.SYS:Capabilities:%h\n", READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_VS_CAPABILITIES))));
         LouPrint("AHCI.SYS:This AHCI Device Does Not Support NVME\n");
         return;
@@ -989,16 +989,16 @@ static void  AhciInitializeInterrupts(
     //1722
     UINT64 Flags = (PrivateData->AhciFlags & AHCI_FLAG_NO_MSI) ? PCI_IRQ_USE_LEGACY : (PCI_IRQ_USE_MSI | PCI_IRQ_USE_MSI_X) | (PCI_IRQ_USE_LEGACY);
     
-    if(!NT_SUCCESS(LouKeHalMallocPciIrqVectors(
+    if((PciHalAllocatePciIrqVectors(
         PDEV, 
         PortCount,
         Flags  
-    ))){
+    )) != STATUS_SUCCESS){
         LouPrint("AHCI.SYS:Interrupts For PCI Devices Could Not Be Allocated\n");
         return;
     }
 
-    UINT8 Vectors = LouKeHalGetPciIrqVectorCount(PDEV);
+    UINT8 Vectors = PciHalGetIrqVectorCount(PDEV);
     if(Vectors == 1){
         LouPrint("AHCI.SYS:Interrupts For Ahci Device Initialized\n");
         return;
@@ -1055,12 +1055,12 @@ static LOUSTATUS AhciConfigureDmaMasks(
 
 static void AhciSetupInterruptHandler(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     PPCI_DEVICE_OBJECT PDEV = AtaHost->PDEV;
-    if(LouKeHalGetPciIrqVectorCount(PDEV) > 1){
+    if(PciHalGetIrqVectorCount(PDEV) > 1){
         LouPrint("AhciSetupInterruptHandler()\n");
         while(1);
     } 
     else{
-        RegisterInterruptHandler(AhciInterruptHandler, LouKeHalGetPciIrqVector(PDEV, 0), false, (uint64_t)AtaHost);
+        RegisterInterruptHandler(AhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)AtaHost);
     }
 }
 
@@ -1081,7 +1081,7 @@ LOUSTATUS AddAhciDevice(
     uint8_t PortCount;
     //Get Pci Config Handle and update the handle
     PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
-    LouKeHalGetPciConfiguration(PDEV, PciConfig);
+    PciHalGetConfigurationSnapshot(PDEV, PciConfig);
 
     //According to linux documentation An AHCI Driver Cannot Driver
     //Parrellel Devices such as those with MARVELL Designs due to a 
@@ -1130,7 +1130,12 @@ LOUSTATUS AddAhciDevice(
     }
 
     //now we are finally ready to start the controller
-    Status = LouKeHalEnablePciDevice(PDEV);
+    Status = PciHalEnableMemorySpace(PDEV);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = PciHalEnableIoSpace(PDEV);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
@@ -1151,7 +1156,7 @@ LOUSTATUS AddAhciDevice(
         //leave this controller alone
         uint8_t ICHMap;
 
-        ICHMap = LouKeReadPciUint8(PDEV, ICH_PCI_MAP_REGISTER);
+        ICHMap = PciHalReadUint8(PDEV, ICH_PCI_MAP_REGISTER);
         if(ICHMap & 0x03){
             LouPrint("AHCI.SYS:WARNING: Controller is in combined mode and connot enable AHCI Mode\n");
             return STATUS_NO_SUCH_DEVICE;
@@ -1161,9 +1166,9 @@ LOUSTATUS AddAhciDevice(
     //At this point we are able to grab the host and start filling out
     //private data from the information on the controller
 
-    LouKeHalMapPciResource(PDEV, Abar, KERNEL_DMA_MEMORY);
+    PciHalMapPciResource(PDEV, Abar, KERNEL_DMA_MEMORY);
 
-    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)LouKePciGetIoRegion(PDEV, Abar, 0);
+    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)PciHalGetIoRegion(PDEV, Abar, 0);
 
     PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
 
@@ -1272,7 +1277,7 @@ LOUSTATUS AddAhciDevice(
 
     AhciInitializeInterrupts(PDEV, PortCount, PrivateAhciData);
         
-    PrivateAhciData->InterruptRequestVector = LouKeHalGetPciIrqVector(PDEV, 0);
+    PrivateAhciData->InterruptRequestVector = PciHalGetIrqVector(PDEV, 0);
 
     UNUSED UINT32 TmpCap = (PrivateAhciData->CapOveride ? PrivateAhciData->CapOveride : Ghc->Capabilities);
 
@@ -1327,7 +1332,8 @@ LOUSTATUS AddAhciDevice(
     ResetAhcPciController(AtaHost);
 
     AhciPciInitializeController(AtaHost);
-    LouKeHalPciSetMaster(PDEV);
+    
+    PciHalEnableBusMaster(PDEV);
 
     AhciSetupInterruptHandler(AtaHost);
 

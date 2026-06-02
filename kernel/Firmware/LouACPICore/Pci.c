@@ -159,72 +159,18 @@ void PciMmcfgEarlyInit(){
 		return;
 	}
 
-	LouKeAcpiDbgPrint("Initializing PCIe ECAM System\n");
 
-	size_t CfgCount = LouKeGetMcfgCount((PVOID)Mcfg);
-	size_t TotalDevices = 0;
-	//never ever ever ever
-	ACPI_MCFG_ALLOCATION* Allocations = (ACPI_MCFG_ALLOCATION*)(UINT8*)((UINTPTR)Mcfg + (UINTPTR)sizeof(ACPI_TABLE_MCFG));
-
-	ACPI_MCFG_ALLOCATION* Tmp = LouKeMallocArray(ACPI_MCFG_ALLOCATION, CfgCount, KERNEL_GENERIC_MEMORY);
-
-	for(size_t i = 0 ; i < CfgCount; i++){
-		if(!Allocations[i].Address)continue;
-
-		//i hate hardware companies
-		for(size_t j = 0 ; j < TotalDevices; j++){
-			if(Tmp[j].Address == Allocations[i].Address){
-				//i guess trust the second one if bios updates currupted but continuing is still a bad idea...
-				Tmp[j].Address = Allocations[i].Address;
-				Tmp[j].PciSegment = Allocations[i].PciSegment;
-				Tmp[j].StartBusNumber = Allocations[i].StartBusNumber;
-				Tmp[j].EndBusNumber = Allocations[i].EndBusNumber;
-				goto _FINISHED_PARSE_ROUND;
-			}
-		}
-
-		Tmp[TotalDevices].Address = Allocations[i].Address;
-		Tmp[TotalDevices].PciSegment = Allocations[i].PciSegment;
-		Tmp[TotalDevices].StartBusNumber = Allocations[i].StartBusNumber;
-		Tmp[TotalDevices].EndBusNumber = Allocations[i].EndBusNumber;
-		TotalDevices++;
-
-		_FINISHED_PARSE_ROUND:
-	}
-
-	for (size_t i = 0; i < TotalDevices; i++) {
-		size_t NumBuses = (Tmp[i].EndBusNumber - Tmp[i].StartBusNumber) + 1;
-		size_t TmpSize  = NumBuses * (1 * MEGABYTE);
-		TmpSize = ROUND_UP64(TmpSize, KILOBYTE_PAGE);
-
-		EnforceSystemMemoryMap(Tmp[i].Address, TmpSize);
-
-		UINTPTR Virt = (UINTPTR)LouVMallocEx(TmpSize, Tmp[i].Address);
-		LouKeMapContinuousMemoryBlock(
-			Tmp[i].Address,
-			Virt,
-			TmpSize,
-			ECAM_DMA_MEMORY_FLAGS
-		);
-
-		LouKeInitializeEcamAbstractionDevice(
-			Tmp[i].Address,
-			Virt,
-			Tmp[i].PciSegment,
-			Tmp[i].StartBusNumber,
-			Tmp[i].EndBusNumber
-		);
-	}
-
-	LouKeFree(Tmp);
 }
 
 void AcpiCheckPciCrsQuirks(){
     INTEGER Year = DmiGetBiosYear();
 
-    if((Year >= 0) && (Year < 2008) && (GetIoMemEnd() <= UINT32_MAX)){
-        PciUseCrs = false;
-    }
+    //if((Year >= 0) && (Year < 2008) && (GetIoMemEnd() <= UINT32_MAX)){
+    //    PciUseCrs = false;
+    //}
+	
+	LouPrint("AcpiCheckPciCrsQuirks()\n");
+	while(1);
 
     if(Year >= 2023){
         PciHasE820 = false;

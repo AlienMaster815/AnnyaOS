@@ -280,25 +280,23 @@ ACPI_STATUS AcpiOsReadPciConfiguration(
     UINT64 *Value,
     UINT32 Width
 ){
-    uint16_t Group      = PciId->Segment;
-    uint8_t bus         = (uint8_t)PciId->Bus;
-    uint8_t device      = (uint8_t)PciId->Device;
-    uint8_t func        = (uint8_t)PciId->Function;
     
-    if(Group){
-        LouPrint("Group:%h\n", Group);
-        while(1);
-    }
+    PPCI_DEVICE_OBJECT PDEV = PciHalGetDeviceFromBusAddress(
+        PciId->Segment,
+        PciId->Bus,
+        PciId->Device,
+        PciId->Function
+    );
 
     switch(Width){
         case 8:
-            *Value = pciConfigReadByte(Group, bus, device, func, Reg);
+            *Value = PciHalReadUint8(PDEV, Reg);
             break;
         case 16:
-            *Value = pciConfigReadWord(Group, bus, device, func, Reg);
+            *Value = PciHalReadUint16(PDEV, Reg);
             break;
         case 32:
-            *Value = pci_read(Group, bus, device, func, Reg);
+            *Value = PciHalReadUint32(PDEV, Reg);
             break;
         default:
             return AE_BAD_PARAMETER;
@@ -313,25 +311,23 @@ ACPI_STATUS AcpiOsWritePciConfiguration(
     UINT64 Value,
     UINT32 Width
 ){
-    uint16_t Group      = PciId->Segment;
-    uint8_t bus         = (uint8_t)PciId->Bus;
-    uint8_t device      = (uint8_t)PciId->Device;
-    uint8_t func        = (uint8_t)PciId->Function;
 
-    if(Group){
-        LouPrint("Group:%h\n", Group);
-        while(1);
-    }
+    PPCI_DEVICE_OBJECT PDEV = PciHalGetDeviceFromBusAddress(
+        PciId->Segment,
+        PciId->Bus,
+        PciId->Device,
+        PciId->Function
+    );
 
     switch(Width){
         case 8:
-            pciConfigWriteByte(Group, bus, device, func, Reg, (uint8_t)Value);
+            PciHalWriteUint8(PDEV, Reg, (uint8_t)Value);
             break;
         case 16:
-            pciConfigWriteWord(Group, bus, device, func, Reg, (uint16_t)Value);
+            PciHalWriteUint16(PDEV, Reg, (uint16_t)Value);
             break;
         case 32:
-            write_pci(Group, bus, device, func, Reg, (uint32_t)Value);
+            PciHalWriteUint32(PDEV, Reg, (uint32_t)Value);
             break;
         default:
             return AE_BAD_PARAMETER;

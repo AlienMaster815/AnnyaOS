@@ -95,9 +95,9 @@ LOUSTATUS InitializePcNetIIDevice(
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
     uint64_t PortBase = 0;
    
-    LouKeHalMapPciResource(PDEV, 0, KERNEL_DMA_MEMORY);
+    PciHalMapPciResource(PDEV, 0, KERNEL_DMA_MEMORY);
    
-    PortBase = (uint64_t)LouKePciGetIoRegion(PDEV, 0, 0);
+    PortBase = (uint64_t)PciHalGetIoRegion(PDEV, 0, 0);
     if(PortBase > 0xFFFF){
         LouPrint("PCNET32::ERROR::This Driver Cannot Run This Device Invalid Base Address\n");
         LouPrint("PortBase:%h\n", PortBase);
@@ -123,11 +123,17 @@ LOUSTATUS InitializePcNetIIDevice(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    LousineKernelStatus = LouKeHalEnablePciDevice(PDEV);
+    LousineKernelStatus = PciHalEnableIoSpace(PDEV);
     if(LousineKernelStatus != STATUS_SUCCESS){
         return (LOUSTATUS)LousineKernelStatus;
     }
-    LouKeHalPciSetMaster(PDEV);
+
+    LousineKernelStatus = PciHalEnableMemorySpace(PDEV);
+    if(LousineKernelStatus != STATUS_SUCCESS){
+        return (LOUSTATUS)LousineKernelStatus;
+    }
+
+    PciHalEnableBusMaster(PDEV);
 
     HardwareDriver->HardwareInterruptHandler = PcNetIIHardwareInterruptHandler;
     HardwareDriver->HardwareActivate = PcNetIIHardwareActivate;
@@ -198,11 +204,12 @@ LOUSTATUS InitializePcNetIIDevice(
         Recieve[i].Available = 0;
     }
 
-    RegisterInterruptHandler(PcNetIIHardwareInterruptHandler, LouKePciGetInterruptLine(PDEV), false, (uint64_t)HardwareDriver);
+    //RegisterInterruptHandler(PcNetIIHardwareInterruptHandler, LouKePciGetInterruptLine(PDEV), false, (uint64_t)HardwareDriver);
 
 
     LoukeRegisterNetFrameHardwareDriver(HardwareDriver);
 
     LouPrint("InitializePcNetIIDevice() STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }

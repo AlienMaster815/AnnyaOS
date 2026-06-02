@@ -82,3 +82,21 @@ EXPORTS
     PciHalCardBusDeviceGetSubsystemVendorId
     PciHalCardBusDeviceGetSubsystemDeviceId
     PciHalCardBusDeviceGet16BitPcCardLegacyModeBaseAddress
+    PciHalEnableIoSpace
+    PciHalDisableIoSpace
+    PciHalIsIoSpaceEnabled
+    PciHalEnableMemorySpace
+    PciHalDisableBusMaster
+    PciHalEnableBusMaster
+    PciHalIsBusMasterEnabled
+    PciHalDisableMemorySpace  
+    PciHalIsMemorySpaceEnabled
+    PciHalMapPciResource
+    PciHalGetIoRegion
+    PciHalAllocatePciIrqVectors
+    PciHalGetIrqVector
+    PciHalFreeIrqVectors
+    PciHalGetIrqVectorCount
+    PciHalGetConfigurationSnapshot
+    PciHalGetBarSize
+    PciHalGetDeviceFromBusAddress

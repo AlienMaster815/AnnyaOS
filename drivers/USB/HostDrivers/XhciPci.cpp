@@ -24,12 +24,14 @@ LOUSTATUS AddDevice(
     PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
     NewXhciDevice->PDEV = PDEV;
     
-    LouKeHalEnablePciDevice(PDEV);
-    LouKeHalPciSetMaster(PDEV);
-    
-    LouKeHalMapPciResource(PDEV, XHCI_MMIO_REGISTERS_BAR, KERNEL_DMA_MEMORY);
+    PciHalEnableMemorySpace(PDEV);
+    PciHalEnableIoSpace(PDEV);
 
-    NewXhciDevice->CapRegisters = (PXHCI_CAPABILITIES_REGISTER)LouKePciGetIoRegion(PDEV, XHCI_MMIO_REGISTERS_BAR, XHCI_MMIO_REGISTERS_OFFSET);
+    PciHalEnableBusMaster(PDEV);
+    
+    PciHalMapPciResource(PDEV, XHCI_MMIO_REGISTERS_BAR, KERNEL_DMA_MEMORY);
+
+    NewXhciDevice->CapRegisters = (PXHCI_CAPABILITIES_REGISTER)PciHalGetIoRegion(PDEV, XHCI_MMIO_REGISTERS_BAR, XHCI_MMIO_REGISTERS_OFFSET);
 
     LouPrint("XHCI.SYS:CAP_REG:%h\n", NewXhciDevice->CapRegisters);
 

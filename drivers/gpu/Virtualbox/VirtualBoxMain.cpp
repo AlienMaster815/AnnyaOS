@@ -77,9 +77,9 @@ static LOUSTATUS VBoxAccelerationInitialize(
     
     VBox->AvailableVramSize -= VBox->CrtcCount * VBVA_MINIMUM_BUFFER_SIZE;
 
-    LouKeHalMapPciResource(PDEV, 0, USER_WRITE_COMBINE_MEMORY);
+    PciHalMapPciResource(PDEV, 0, USER_WRITE_COMBINE_MEMORY);
 
-    VBox->VbvaBuffers = (uint8_t*)LouKePciGetIoRegion(PDEV, 0, VBox->AvailableVramSize);
+    VBox->VbvaBuffers = (uint8_t*)PciHalGetIoRegion(PDEV, 0, VBox->AvailableVramSize);
     if(!VBox->VbvaBuffers){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
@@ -105,7 +105,7 @@ LOUSTATUS VBoxMemoryManagementInitialization(
 ){
     PDRSD_DEVICE Device = &VBox->DrsdDevice;
     PPCI_DEVICE_OBJECT PDEV = VBox->PDEV;
-    UINT64 VramBase = (UINT64)LouKePciGetIoRegion(PDEV, 0, 0);
+    UINT64 VramBase = (UINT64)PciHalGetIoRegion(PDEV, 0, 0);
     LOUSTATUS Result;
 
     Result = DrsdVRamHelperInitialize(Device, VramBase, VBox->AvailableVramSize);
@@ -128,9 +128,9 @@ LOUSTATUS VBoxInitializeHardware(
     LouPrint("Support For Any Pitch : %s\n", VBox->AnyPitch ? "YES" : "NO");
     LouPrint("Support For VBVA      : %s\n", VBox->VBoxVideo ? "YES" : "NO");
 
-    LouKeHalMapPciResource(PDEV, 0, KERNEL_GENERIC_MEMORY);
+    PciHalMapPciResource(PDEV, 0, KERNEL_GENERIC_MEMORY);
 
-    VBox->GuestHeap = (uint8_t*)((uint64_t)LouKePciGetIoRegion(
+    VBox->GuestHeap = (uint8_t*)((uint64_t)PciHalGetIoRegion(
         PDEV, 
         0, 
         VIRTUALBOX_GUEST_HEAP_OFFSET(VBox)
@@ -192,7 +192,12 @@ AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     //LouKeDrsdHandleConflictingDevices(PDEV);
     //TODO handle conflicting devices
 
-    Status = LouKeHalEnablePciDevice(PDEV);
+    Status = PciHalEnableIoSpace(PDEV);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = PciHalEnableMemorySpace(PDEV);
     if(Status != STATUS_SUCCESS){
         return Status;
     }

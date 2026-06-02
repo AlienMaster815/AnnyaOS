@@ -76,24 +76,9 @@ EXPORTS
     LouKeAcquireSpinLock
     LouKeReleaseSpinLock
     LouMalloc
-    GetPciConfiguration
-    pci_read
-    write_pci
-    LouKeReadPciUint8
-    LouKeReadPciUint16
-    LouKeReadPciUint32
-    LouKeWritePciUint8
-    LouKeWritePciUint16
-    LouKeWritePciUint32
-    LouKeHalEnablePciDevice
-    LouKeHalPciSaveContext
-    LouKeHalPciRestoreContext
-    LouKeHalPciClearMaster
     READ_REGISTER_ULONG
     LouMallocAtaHost
-    LouKeHalMallocPciIrqVectors
     sleep
-    LouKeHalPciSetMaster
     LouKeRegisterDevice
     AtaStdQcDefer
     LouKeWaitForUlongRegisterConditionMs
@@ -105,7 +90,6 @@ EXPORTS
     outw
     LouKeLinkerGetAddress
     LoukeRegisterNetFrameHardwareDriver
-    LouKePciGetInterruptLine
     inl
     LouKeMapDynamicPool
     LouKeMallocFromDynamicPoolEx
@@ -113,13 +97,10 @@ EXPORTS
     memset
     outl
     LouKeFreeFromDynamicPool
-    LouKeHalGetPciBaseAddressSize
-    LouKePciGetIoRegion
     LouKeCreateGenericPool
     LouKeGenricAllocateDmaPool
     LouKeGenericPoolGetPhyAddress
     LouKeGetThreadIdentification
-    LouKeHalGetPciConfiguration
     LouKeFree
     LouKeForkAtaHostPrivateDataToPorts
     LouKeMallocAtaPrivateData
@@ -144,9 +125,7 @@ EXPORTS
     LouKeMallocExPhy32
     LouKeQueueWork
     LouKeCheckDmiSystem
-    LouKeHalGetPciIrqVectorCount
     LouKeMallocPhy32
-    LouKeHalGetPciIrqVector
     LouKeFreePhy32
     LouKeSignalEvent
     LouKeWaitForEvent
@@ -158,7 +137,6 @@ EXPORTS
     LouKeAtaSendAtapiIdentifyCommand
     InitializeGenericAtaDevice
     outsw
-    LouKeHalFreePciIrqVectors
     strchr
     LouKeSwapEndianess
     LouKeWaitForAtomicBooleanRegisterConditionMs
@@ -182,7 +160,6 @@ EXPORTS
     LouKeMallocPage
     LouKeMallocPagePhy32
     LouKeGetBootFrameBuffer
-    LouKePciGetVirtualBarAddress
     EnforceSystemMemoryMap
     LouKeCreateDeviceSection
     LouKeOpenRegistryHandle
@@ -196,8 +173,6 @@ EXPORTS
     LouKeXaFree
     LouKeRtlUIntMult
     LouKeGetKSpaceBase
-    LouKeHalMapPciResource
-    LouKeHalMapPciResourceEx
     LouKeReadRegistryByteValue
     LouPrintEx
     LouKeAcquireAcpiTable

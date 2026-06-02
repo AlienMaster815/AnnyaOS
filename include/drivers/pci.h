@@ -452,65 +452,119 @@ typedef struct _PCI_VENDOR_SPECIFIC_CAPABILITY {
 
 
 
+
 #ifndef _USER_MODE_CODE_
-KERNEL_EXPORT uint8_t LouKeReadPciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-KERNEL_EXPORT uint16_t LouKeReadPciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-KERNEL_EXPORT uint32_t LouKeReadPciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset);
-KERNEL_EXPORT void LouKeWritePciUint8(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint8_t Value);
-KERNEL_EXPORT void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint16_t Value);
-KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
-KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
-KERNEL_EXPORT LOUSTATUS LouKeHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, uint8_t Bar, UINT64 PageFlags);
-KERNEL_EXPORT size_t LouKeGetMcfgCount(void* Table);
-#ifndef _KERNEL_MODULE_
-uint8_t LouKePciReadHeaderType(PPCI_DEVICE_OBJECT PDEV);
-uint32_t LouKeReadPciVendorId(PPCI_DEVICE_OBJECT PDEV);
-uint32_t LouKeReadPciDeviceId(PPCI_DEVICE_OBJECT PDEV);
-uint8_t LouKePciReadSubClass(PPCI_DEVICE_OBJECT PDEV);
-uint8_t LouKePciReadClass(PPCI_DEVICE_OBJECT PDEV);
-uint8_t LouKeGetPciInterruptPin(PPCI_DEVICE_OBJECT PDEV);
-uint8_t LouKeGetPciInterruptLine(PPCI_DEVICE_OBJECT PDEV);
-void LouKeConfigureInterrupt(PPCI_DEVICE_OBJECT PDEV,  bool Mask, uint8_t Pin, uint8_t Destination);
-void LouKeWritePciCommandRegister(PPCI_DEVICE_OBJECT PDEV,uint16_t Value);
-uint16_t LouKeReadPciCommandRegister(PPCI_DEVICE_OBJECT PDEV);
-uint32_t pci_read(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
-void write_pci(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset,uint32_t Value);
-uint16_t pciConfigReadWord(uint16_t Group,uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
-uint8_t pciConfigReadByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-uint8_t getBaseClass(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
-uint8_t getSubClass(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
-uint8_t getSecondaryBus(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
-uint16_t PciGetVendorID(uint16_t Group, uint8_t bus, uint8_t slot);
-uint8_t getHeaderType(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
-uint16_t PciGetDeviceID(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
-bool PciEnableDevice(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function);
-bool IsPciEnable(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
-void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value);
-void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
-void PCI_Scan_Bus();
-void checkDevice(uint16_t Group, uint8_t bus, uint8_t device);
-void checkBus(uint16_t Group, uint8_t bus);
-void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
-void PCI_Scan_Bus();
-uint32_t pciConfigAddress(uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-uintptr_t PcieConfigAddress(uint16_t Group,uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-void pciConfigWriteByte(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg, uint8_t value);
-void pciConfigWriteWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset, uint16_t value);
-void PCI_Scan_Bus();
-uint16_t PciGetVendorID(uint16_t Group, uint8_t bus, uint8_t slot);
-void checkDevice(uint16_t Group, uint8_t bus, uint8_t device);
-void checkBus(uint16_t Group, uint8_t bus);
-void checkFunction(uint16_t Group, uint8_t bus, uint8_t device, uint8_t function);
-void PCI_Scan_Bus();
-uint16_t PciGetDeviceID(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
-bool IsPciEnable(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func);
-uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
-void PCI_Setup();
-bool PciEnableDevice(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t function);
-uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
-uint8_t pciConfigReadByte(uint16_t Greoup, uint8_t bus, uint8_t device, uint8_t function, uint32_t reg);
-uint16_t pciConfigReadWord(uint16_t Group, uint8_t bus, uint8_t slot, uint8_t func, uint32_t offset);
+#ifndef _PCI_INTERNALS_H
+DRIVER_IMPORT UINT32 PciHalReadUint32(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset);
+DRIVER_IMPORT void PciHalWriteUint32(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset, UINT32 Value);
+DRIVER_IMPORT UINT16 PciHalReadUint16(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset);
+DRIVER_IMPORT void PciHalWriteUint16(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset, UINT16 Value);
+DRIVER_IMPORT UINT8 PciHalReadUint8(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset);
+DRIVER_IMPORT void PciHalWriteUint8(PPCI_DEVICE_OBJECT PDEV, UINT32 Offset, UINT8 Value);
+DRIVER_IMPORT UINT16 PciHalGetVendorId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalGetDeviceId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalGetCommand(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalSetCommand(PPCI_DEVICE_OBJECT PDEV, UINT16 Value);
+DRIVER_IMPORT UINT16 PciHalGetStatus(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalSetStatus(PPCI_DEVICE_OBJECT PDEV, UINT16 Value);
+DRIVER_IMPORT UINT8 PciHalGetRevisionId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetProgIf(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetSubClass(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetClassCode(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetCacheLineSize(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalSetCacheLineSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+DRIVER_IMPORT void PciHalSetLatencyTimer(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+DRIVER_IMPORT UINT8 PciHalGetLatencyTimer(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetHeaderType(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetBist(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalSetBist(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+
+DRIVER_IMPORT UINT32 PciHalGeneralDeviceGetBar(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
+DRIVER_IMPORT void PciHalGeneralDeviceSetBar(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT32 Value);
+DRIVER_IMPORT UINT32 PciHalGeneralDeviceGetCardBusCisPointer(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalGeneralDeviceGetSubsystemVendorId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalGeneralDeviceGetSubsystemId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT32 PciHalGeneralDeviceGetExpansionRomBase(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGeneralDeviceGetCapabilitiesPointer(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGeneralDeviceGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalGeneralDeviceSetInterruptLine(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+DRIVER_IMPORT UINT8 PciHalGeneralDeviceGetInterruptPin(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGeneralDeviceGetMinGrant(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGeneralDeviceGetMaxLatency(PPCI_DEVICE_OBJECT PDEV);
+
+DRIVER_IMPORT UINT32 PciHalBridgeDeviceGetBar(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
+DRIVER_IMPORT void PciHalBridgeDeviceSetBar(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT32 Value);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetPrimaryBusNumber(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetSecondaryBusNumber(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetSubordinateBusNumber(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetSecondaryLatencyTimer(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetIoBase(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetIoLimit(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetSecondaryStatus(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void  PciHalBridgeDeviceSetSecondaryStatus(PPCI_DEVICE_OBJECT PDEV, UINT16 Value);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetMemoryBase(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetMemoryLimit(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetPrefetchableMemoryBase(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetPrefetchableMemoryLimit(PPCI_DEVICE_OBJECT PDEV); 
+DRIVER_IMPORT UINT32 PciHalBridgeDeviceGetPrefetchableMemoryUpper32Base(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT32 PciHalBridgeDeviceGetPrefetchableMemoryUpper32Limit(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetIoUpper16Base(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetIoUpper16Limit(PPCI_DEVICE_OBJECT PDEV);    
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetCapabilitiesPointer(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT32 PciHalBridgeDeviceGetExpansionRomBase(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalBridgeDeviceSetInterruptLine(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+DRIVER_IMPORT UINT8 PciHalBridgeDeviceGetInterruptPin(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalBridgeDeviceGetBridgeControl(PPCI_DEVICE_OBJECT PDEV);
+
+DRIVER_IMPORT UINT32 PciHalCardBusDeviceGetCardBusSocketExCaBaseAddress(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetOffsetCapabilities(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalCardBusDeviceGetSecondaryStatus(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalCardBusDeviceSetSecondaryStatus(PPCI_DEVICE_OBJECT PDEV, UINT16 Value);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetPciBusNumber(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetCardBusNumber(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetSubordinateBusNumber(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetCardBusLatencyTimer(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT32 PciHalCardBusDeviceGetMemoryBaseAddress(PPCI_DEVICE_OBJECT PDEV, UINT8 x);
+DRIVER_IMPORT UINT32 PciHalCardBusDeviceGetMemoryLimit(PPCI_DEVICE_OBJECT PDEV, UINT8 x);
+DRIVER_IMPORT UINT32 PciHalCardBusDeviceGetIoBaseAddress(PPCI_DEVICE_OBJECT PDEV, UINT8 x);
+DRIVER_IMPORT UINT32 PciHalCardBusDeviceGetIoLimit(PPCI_DEVICE_OBJECT PDEV, UINT8 x);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalCardBusDeviceSetInterruptLine(PPCI_DEVICE_OBJECT PDEV, UINT8 Value);
+DRIVER_IMPORT UINT8 PciHalCardBusDeviceGetInterruptPin(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalCardBusDeviceGetBridgeControl(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalCardBusDeviceGetSubsystemVendorId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalCardBusDeviceGetSubsystemDeviceId(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT32 PciHalCardBusDeviceGet16BitPcCardLegacyModeBaseAddress(PPCI_DEVICE_OBJECT PDEV);
+
+
+DRIVER_IMPORT LOUSTATUS PciHalEnableIoSpace(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT LOUSTATUS PciHalDisableIoSpace(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT BOOLEAN PciHalIsIoSpaceEnabled(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT LOUSTATUS PciHalEnableMemorySpace(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT LOUSTATUS PciHalEnableBusMaster(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT LOUSTATUS PciHalDisableBusMaster(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT BOOLEAN PciHalIsBusMasterEnabled(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT LOUSTATUS PciHalDisableMemorySpace(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT BOOLEAN PciHalIsMemorySpaceEnabled(PPCI_DEVICE_OBJECT PDEV);
+
+
+DRIVER_IMPORT PVOID PciHalGetIoRegion(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, SIZE Offset);
+DRIVER_IMPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags);
+DRIVER_IMPORT UINT8 PciHalGetIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Member);
+DRIVER_IMPORT void PciHalFreeIrqVectors(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT8 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config);
+DRIVER_IMPORT SIZE PciHalGetBarSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
+DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(UINT16 Group, UINT8 Bus, UINT8 Slot, UINT8 Function);
+
+
+DRIVER_IMPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT64 OverideFlags);
+
 #endif
+
+KERNEL_EXPORT size_t LouKeGetMcfgCount(void* Table);
+
 #endif
 
 #ifdef __cplusplus

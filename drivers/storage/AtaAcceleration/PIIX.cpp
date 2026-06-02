@@ -360,9 +360,14 @@ LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* Platform
         return STATUS_NO_SUCH_DEVICE;
     }
 
-    Status = LouKeHalEnablePciDevice(PDEV);
+    Status = PciHalEnableMemorySpace(PDEV);
     if(Status != STATUS_SUCCESS){
-        return (LOUSTATUS)Status;
+        return Status;
+    }
+
+    Status = PciHalEnableIoSpace(PDEV);
+    if(Status != STATUS_SUCCESS){
+        return Status;
     }
 
     if(PiixPciDeviceTable[DeviceID].BoardID == PIIX_CONTROLLER_ID_PATA_MWDMA){
@@ -459,11 +464,11 @@ LOUSTATUS PiixSetPioTiming(
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&PiixLock, &Irql);
 
-    MasterData = LouKeReadPciUint16(PDEV, MasterTimingPort);
+    MasterData = PciHalReadUint16(PDEV, MasterTimingPort);
     if(SlaveDevice){
         MasterData &= (0xFF0F);
         MasterData |= (Control << 4);
-        SlaveData = LouKeReadPciUint8(PDEV, SlaveTimeingPort);
+        SlaveData = PciHalReadUint8(PDEV, SlaveTimeingPort);
         SlaveData &= (MasterChannel ? 0xF0 : 0x0F);
         SlaveData |= ((((PiixTimingModes[TimingMode][0] & 0b11) << 2) | (PiixTimingModes[TimingMode][1] & 0b11)) << (MasterChannel ? 0 : 4));
     }else{
@@ -474,9 +479,9 @@ LOUSTATUS PiixSetPioTiming(
 
     MasterData |= IDETIM_SITRE;
 
-    LouKeWritePciUint16(PDEV, MasterTimingPort, MasterData);
+    PciHalWriteUint16(PDEV, MasterTimingPort, MasterData);
     if(SlaveDevice){
-        LouKeWritePciUint8(PDEV, SlaveTimeingPort, SlaveData);
+        PciHalWriteUint8(PDEV, SlaveTimeingPort, SlaveData);
     }
 
     if(((PPIIX_HOST_PRIVATE_DATA)Port->PortPrivateData)->UsesUDMA){

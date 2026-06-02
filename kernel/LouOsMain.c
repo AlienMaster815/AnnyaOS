@@ -99,7 +99,6 @@ uint64_t GetThreadContext(
 void UsrJmp(uint64_t Entry);
 void read_rtc();
 void ManualContextSwitch(uint64_t Context1, uint64_t Context_2);
-void LouKeMapPciMemory();
 bool LouKeMapEfiMemory();
 void ListAllocatedPorts();
 void ScanTheRestOfHarware();
@@ -133,7 +132,6 @@ LOUSTATUS LouKeInitializeDefaultDemons();
 void LouKeLoadLousineBootTrampoline();
 int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
-void LouKePcieProbeEcam();
 LOUSTATUS LouKeInitializeBootRegistry();
 HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
@@ -288,14 +286,10 @@ void PrintProcessManagerSwaps();
 
 void LouKeInitializePciDevices(){
 
-    LouKeMapPciMemory();
-
-    PciMmcfgEarlyInit();
-
-    LouKePcieProbeEcam();
+    LouPrint("LouKeInitializePciDevices()\n");
+    while(1);
 }
 
-void LouKeSanityCheckPciDevices();
 
 LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
@@ -350,8 +344,6 @@ void LouOsKrnlStart(
     AdvancedLousineKernelInitialization();
     
     LouKeInitializePciDevices();
-
-    LouKeSanityCheckPciDevices();
 
     LookForStorageDevices();
          

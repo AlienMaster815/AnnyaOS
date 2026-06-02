@@ -16,7 +16,7 @@ PIIX_TARGET = PIIX.SYS
 all: $(PIIX_TARGET)
 
 $(PIIX_TARGET): $(PIIX_SRC)
-	$(CC) $(CFLAGS) -o $(PIIX_TARGET) $(PIIX_SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(PIIX_TARGET) $(PIIX_SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES) -L../../PCI -lPCI
 
 # Clean rule
 clean:

@@ -50,19 +50,6 @@ LouKeMallocAtaDevice(PPCI_DEVICE_OBJECT PDEV, uint8_t PortCount){
     return NewHost;
 }
 
-
-
-bool IsAtaController(PPCI_DEVICE_OBJECT PDEV){
-    PCI_COMMON_CONFIG PciConfig;
-    LouKeHalGetPciConfiguration(PDEV, &PciConfig);
-
-    if((PciConfig.Header.BaseClass == 0x01) && PciConfig.Header.SubClass == 0x01){
-        LouPrint("Found ATA Controller\n");
-        return true;
-    }
-    return false;
-}
-
 KERNEL_EXPORT
 LOUSTATUS 
 LouKeAtaSendAtaIdentifyCommand(

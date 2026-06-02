@@ -5,8 +5,8 @@
 LOUAPI
 UINT16 
 LouKeHalGetChipsetVendor(){
-    PCI_COMMON_CONFIG Config;
     UINT16 Vendor = 0xFFFF;
+    /*PCI_COMMON_CONFIG Config;
     LouKeInitializePciCommonPacketAnyType(&Config);
     Config.Header.BaseClass = 0x06;
     Config.Header.SubClass = 0x01;
@@ -19,6 +19,8 @@ LouKeHalGetChipsetVendor(){
 
     LouKeClosePciDeviceGroup(Group);
 
-    Vendor = ((PPCI_COMMON_CONFIG)Group[0]->PDEV->CommonConfig)->Header.VendorID;
+    Vendor = ((PPCI_COMMON_CONFIG)Group[0]->PDEV->CommonConfig)->Header.VendorID;*/
+    LouPrint("LouKeHalGetChipsetVendor()\n");
+    while(1);
     return Vendor;
 }
