@@ -151,8 +151,7 @@ void LouKeMapContinuousMemoryBlock32(
     }
 }
 
-KERNEL_EXPORT
-void LouKeMapContinuousMemoryBlockKB(
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockKB(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 

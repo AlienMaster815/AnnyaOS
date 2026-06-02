@@ -248,7 +248,7 @@ void AcpiInitializePciLink(){
 	while(1);
 }
 
-size_t LouKeGetMcfgCount(void* Table){
+KERNEL_EXPORT size_t LouKeGetMcfgCount(void* Table){
 
 	ACPI_TABLE_MCFG* McfgTable = (ACPI_TABLE_MCFG*)Table;
 

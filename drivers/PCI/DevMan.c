@@ -4,14 +4,13 @@ static PCI_MANAGER_DATA PciData = {0};
 static size_t RegisteredPciDevices = 0;
 static mutex_t PciDataLock = {0};
 
+//TODO Implement Registry loopkup
+
 DRIVER_EXPORT LOUSTATUS PciHalRegisterPciDevice(
     PPCI_DEVICE_OBJECT  PDEV,
     string              RegistryEntry,
     string              DeviceManagerString
 ){
-
-    PciHalPciDbgPrint("Registered Pci Device:%d\n", RegisteredPciDevices);
-    PciHalPciDbgPrint("PCI BUS:%h :: SLOT:%h :: FUNC:%h\n", PDEV->bus, PDEV->slot, PDEV->func);
 
     PPCI_MANAGER_DATA Tmp = LouKeMallocType(PCI_MANAGER_DATA, KERNEL_GENERIC_MEMORY);
     Tmp->PDEV = PDEV;
@@ -22,6 +21,10 @@ DRIVER_EXPORT LOUSTATUS PciHalRegisterPciDevice(
     LouKeListAddTail(&Tmp->Peers, &PciData.Peers);
     RegisteredPciDevices++;
     MutexUnlock(&PciDataLock);
+
+    PciHalPciDbgPrint("Registered Pci Device:%d\n", RegisteredPciDevices);
+    PciHalPciDbgPrint("PCI BUS:%d :: SLOT:%d :: FUNC:%d\n", (UINT64)PDEV->Bus, (UINT64)PDEV->Slot, (UINT64)PDEV->Function);
+
     return STATUS_SUCCESS;
 }
 

@@ -119,7 +119,7 @@ LOUSTATUS LouKeCreateFastObjectClassEx(
 }
 
 
-LOUSTATUS LouKeCreateFastObjectClass(
+KERNEL_EXPORT LOUSTATUS LouKeCreateFastObjectClass(
     LOUSTR  ClassName,
     SIZE    ObjectCount,
     SIZE    ObjectSize,
@@ -138,7 +138,6 @@ LOUSTATUS LouKeCreateFastObjectClass(
         0x00        
     );
 }
-
 
 PVOID LouKeAllocateFastObjectEx(
     LOUSTR  ObjectLookup,
@@ -191,7 +190,7 @@ PVOID LouKeAllocateFastObjectEx(
     return Result;
 }
 
-PVOID LouKeAllocateFastObject(
+KERNEL_EXPORT PVOID LouKeAllocateFastObject(
     LOUSTR  ObjectLookup
 ){
     return LouKeAllocateFastObjectEx(ObjectLookup, 0x00);

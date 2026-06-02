@@ -200,3 +200,8 @@ EXPORTS
     LouKeHalMapPciResourceEx
     LouKeReadRegistryByteValue
     LouPrintEx
+    LouKeAcquireAcpiTable
+    LouKeGetMcfgCount
+    LouKeCreateFastObjectClass
+    LouKeAllocateFastObject
+    LouKeMapContinuousMemoryBlockKB

@@ -6,79 +6,91 @@
 
 
 UINT32 NativePciCardBusGetCardBusSocketExCaBaseAddressEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint32Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_CARDBUS_SOCKET_EXCA_BASE);
 }
 
 UINT8 NativePciCardBusGetOffsetCapabilitiesEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_OFFSET_CAPABILITIES_LIST);
 }
 
 UINT16 NativePciCardBusGetSecondaryStatusEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_SECONDARY_STATUS);
 }
 
 void NativePciCardBusSetSecondaryStatusEx(UINT32* DeviceBase, UINT16 Value){
-
+    NativePciWriteUint16Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_SECONDARY_STATUS, Value);
 }
 
 UINT8 NativePciCardBusGetPciBusNumberEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_PCI_BUS_NUMBER);
 }
 
 UINT8 NativePciCardBusGetCardBusNumberEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_CARDBUS_NUMBER);
 }
 
 UINT8 NativePciCardBusGetSubordinateBusNumberEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_SUBORDINATE_BUS_NUMBER);
 }
 
 UINT8 NativePciCardBusGetCardBusLatencyTimerEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_CARDBUS_LATENCY_TIMER);
 }
 
 UINT32 NativePciCardBusGetMemoryBaseAddressEx(UINT32* DeviceBase, UINT8 x){
-    return 0;
+    return NativePciReadUint32Ex(
+        DeviceBase, 
+        PCI_CARDBUS_DEVICE_CONFIG_MEMORY_BASE_ADDRESS_0 + ((x & 1) * 8)
+    );
 }
 
 UINT32 NativePciCardBusGetMemoryLimitEx(UINT32* DeviceBase, UINT8 x){
-    return 0;
+    return NativePciReadUint32Ex(
+        DeviceBase, 
+        PCI_CARDBUS_DEVICE_CONFIG_MEMORY_LIMIT_0 + ((x & 1) * 8)
+    );
 }
 
 UINT32 NativePciCardBusGetIoBaseAddressEx(UINT32* DeviceBase, UINT8 x){
-    return 0;
+    return NativePciReadUint32Ex(
+        DeviceBase, 
+        PCI_CARDBUS_DEVICE_CONFIG_IO_BASE_ADDRESS_0 + ((x & 1) * 8)
+    );
 }
 
 UINT32 NativePciCardBusGetIoLimitEx(UINT32* DeviceBase, UINT8 x){
-    return 0;
+    return NativePciReadUint32Ex(
+        DeviceBase, 
+        PCI_CARDBUS_DEVICE_CONFIG_IO_LIMIT_0 + ((x & 1) * 8)
+    );
 }
 
 UINT8 NativePciCardBusGetInterruptLineEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_INTERRUPT_LINE);
 }
 
 void NativePciCardBusSetInterruptLineEx(UINT32* DeviceBase, UINT8 Value){
-
+    NativePciWriteUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_INTERRUPT_LINE, Value);
 }
 
 UINT8 NativePciCardBusGetInterruptPinEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_INTERRUPT_PIN);
 }
 
 UINT16 NativePciCardBusGetBridgeControlEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_BRIDGE_CONTROL);
 }
 
 UINT16 NativePciCardBusGetSubsystemVendorIdEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_SUBSYSTEM_VENDOR_ID);
 }
 
 UINT16 NativePciCardBusGetSubsystemDeviceIdEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_SUBSYSTEM_DEVICE_ID);
 }
 
 UINT32 NativePciCardBusGet16BitPcCardNativeModeBaseAddressEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint32Ex(DeviceBase, PCI_CARDBUS_DEVICE_CONFIG_16BIT_PC_CARD_LEGACY_BASE);
 }
 
 

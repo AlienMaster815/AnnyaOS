@@ -410,7 +410,7 @@ void LouKeMapContinuousMemoryBlockEx(
     UINT64*  Pml4
 );
 
-void LouKeMapContinuousMemoryBlockKB(
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockKB(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 

@@ -5,95 +5,98 @@
 #include "Pci.h"
 
 UINT32 NativePciBridgeDeviceGetBarEx(UINT32* DeviceBase, UINT8 Bar){
-    return 0;
+    return NativePciReadUint32Ex(
+        DeviceBase,
+        (UINT32)(Bar * 0x04 + PCI_BRIDGE_DEVICE_CONFIG_BAR_STACK)
+    );
 }
 
 void NativePciBridgeDeviceSetBarEx(UINT32* DeviceBase, UINT8 Bar, UINT32 Value){
-    
+    NativePciWriteUint32Ex(DeviceBase, Bar, Value);
 }
 
 UINT8 NativePciBridgeDeviceGetPrimaryBusNumberEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_PRIMARY_BUS_NUMBER);
 }
 
 UINT8 NativePciBridgeDeviceGetSecondaryBusNumberEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_SECONDARY_BUS_NUMBER);
 }
 
 UINT8 NativePciBridgeDeviceGetSubordinateBusNumberEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_SUBORDINATE_BUS_NUMBER);
 }
 
 UINT8 NativePciBridgeDeviceGetSecondaryLatencyTimerEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_SECONDARY_LATENCY_TIMER);
 }
 
 UINT8 NativePciBridgeDeviceGetIoBaseEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_IO_BASE);
 }
 
 UINT8 NativePciBridgeDeviceGetIoLimitEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_IO_LIMIT);
 }
 
 UINT16 NativePciBridgeDeviceGetSecondaryStatusEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_SECONDARY_STATUS);
 }
 
 void NativePciBridgeDeviceSetSecondaryStatusEx(UINT32* DeviceBase, UINT16 Value){
-
+    NativePciWriteUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_SECONDARY_STATUS, Value);
 }
 
 UINT16 NativePciBridgeDeviceGetMemoryBaseEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_MEMORY_BASE);
 }
 
 UINT16 NativePciBridgeDeviceGetMemoryLimitEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_MEMORY_LIMIT);
 }
 
 UINT16 NativePciBridgeDeviceGetPrefetchableMemoryBaseEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_PREFETCH_MEMORY_BASE);
 }
 
 UINT16 NativePciBridgeDeviceGetPrefetchableMemoryLimitEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_PREFETCH_MEMORY_LIMIT);
 }
 
 UINT32 NativePciBridgeDeviceGetPrefetchableMemoryUpper32BaseEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint32Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_PREFETCH_UPPER32_BASE);
 }
 
 UINT32 NativePciBridgeDeviceGetPrefetchableMemoryUpper32LimitEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint32Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_PREFETCH_UPPER32_BASE);
 }
 
 UINT16 NativePciBridgeDeviceGetIoUpper16BaseEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_IO_BASE_UPPER16);
 }
 
 UINT16 NativePciBridgeDeviceGetIoUpper16LimitEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_IO_LIMIT_UPPER16);
 }
 
 UINT8 NativePciBridgeDeviceGetCapabilitiesPointerEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_CAPABILITIES_POINTER);
 }
 
 UINT32 NativePciBridgeDeviceGetExpansionRomBaseEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint32Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_EXPANSION_ROM_BASE);
 }
 
 UINT8 NativePciBridgeDeviceGetInterruptLineEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_INTERRUPT_LINE);
 }
 
 void NativePciBridgeDeviceSetInterruptLineEx(UINT32* DeviceBase, UINT8 Value){
-
+    NativePciWriteUint8Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_INTERRUPT_LINE, Value);
 }
 
 UINT16 NativePciBridgeDeviceGetBridgeControlEx(UINT32* DeviceBase){
-    return 0;
+    return NativePciReadUint16Ex(DeviceBase, PCI_BRIDGE_DEVICE_CONFIG_INTERRUPT_PIN);
 }
 
 

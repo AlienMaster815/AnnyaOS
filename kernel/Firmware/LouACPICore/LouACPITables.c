@@ -97,7 +97,7 @@ void LouKeInitializeLouACPITable(void* TableBase){
 }
 
 
-void* LouKeAcquireAcpiTable(string TableName){
+KERNEL_EXPORT void* LouKeAcquireAcpiTable(string TableName){
     PLOU_ACPI_TABLE_TRACK TmpTrack = &TableTracks;
     for(size_t i = 0 ; i < TableCount; i++){
         if(strncmp((string)TableName, (string)TmpTrack->TableEntry, 4) == 0){

@@ -3,6 +3,33 @@
 #define _KERNEL_MODULE_
 #include <LouDDK.h>
 
+#define ACPI_SIG_MCFG           "MCFG"      /* PCI Memory Mapped Configuration table */
+
+KERNEL_EXPORT void* LouKeAcquireAcpiTable(string TableName);
+KERNEL_EXPORT LOUSTATUS LouKeCreateFastObjectClass(LOUSTR ClassName, SIZE ObjectCount, SIZE ObjectSize, SIZE ObjectAlignment, SIZE Flags, SIZE PageFlags);
+
+typedef struct _MCFG_TABLE_ENTRY{
+    UINT64      ConfigurationBaseAddress;
+    UINT16      Group;
+    UINT8       StartBus;
+    UINT8       EndBus;
+    UINT32      Reserved;
+}MCFG_TABLE_ENTRY, * PMCFG_TABLE_ENTRY;
+
+typedef struct PACKED _MCFG_TABLE{
+    UINT32              TableHeader;
+    UINT32              TableLength;
+    UINT8               Revision;
+    UINT8               Checksum;
+    UINT8               OemID[6];
+    UINT8               OemTableID[8];
+    UINT32              OemRevision;
+    UINT32              CreatorID;
+    UINT32              CreatorRevision;
+    UINT64              Reserved;
+    MCFG_TABLE_ENTRY    TableEntries[];
+}MCFG_TABLE, * PMCFG_TABLE;
+
 LOUAPI void PciHalPciDbgPrint(char* format, ...);
 
 UINT32 LegacyPciReadUint32Ex(UINT8 Bus, UINT8 Slot, UINT8 Function, UINT32 Offset);
@@ -334,5 +361,8 @@ UINT16 NativePciCardBusGetSubsystemDeviceId(PPCI_DEVICE_OBJECT PDEV);
 UINT32 NativePciCardBusGet16BitPcCardNativeModeBaseAddress(PPCI_DEVICE_OBJECT PDEV);
 
 
+
+LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV,string RegistryEntry, string DeviceManagerString);
+void LegacyPciInitializePciBus(PPCI_DEVICE_OBJECT PDEV);
 
 #endif

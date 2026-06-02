@@ -55,6 +55,16 @@ typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 
 typedef int pci_power_t;
 
+typedef enum{
+	PciLegacyGeneralDispatch = 0,
+	PciLegacyPciBridgeDispatch,
+	PciLegacyCardBusDispatch,
+	PciNativeGeneralDispatch,
+	PciNativePciBridgeDispatch,
+	PciNativeCardBusDispatch,
+	PciInvalidDispatch,
+}PCI_DRIVER_DISPATCH;
+
 typedef struct _PCI_DEVICE_OBJECT{
 	uint16_t 			VendorID;
 	uint16_t 			DeviceID;
@@ -62,7 +72,7 @@ typedef struct _PCI_DEVICE_OBJECT{
 	UINT8				Bus;
 	UINT8				Slot;
 	UINT8				Function;
-	PVOID 				PciSysPrivateData;
+	PCI_DRIVER_DISPATCH	Dispatch;
 	spinlock_t 			ConfigSpaceLock;
 	UINT32*				EcamDeviceBase;
 	//remove start
@@ -455,6 +465,7 @@ KERNEL_EXPORT void LouKeWritePciUint16(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset,
 KERNEL_EXPORT void LouKeWritePciUint32(PPCI_DEVICE_OBJECT PDEV, uint32_t Offset, uint32_t Value);
 KERNEL_EXPORT uint8_t LouKePciGetInterruptLine(PPCI_DEVICE_OBJECT PDEV);
 KERNEL_EXPORT LOUSTATUS LouKeHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, uint8_t Bar, UINT64 PageFlags);
+KERNEL_EXPORT size_t LouKeGetMcfgCount(void* Table);
 #ifndef _KERNEL_MODULE_
 uint8_t LouKePciReadHeaderType(PPCI_DEVICE_OBJECT PDEV);
 uint32_t LouKeReadPciVendorId(PPCI_DEVICE_OBJECT PDEV);
