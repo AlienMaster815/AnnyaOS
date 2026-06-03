@@ -353,19 +353,19 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
 
     IdeGenericOperations.IssueCommand = AtaGenricPIOIssueCommand;
 
-    PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    PPCI_COMMON_CONFIG Config = PDEV->CommonConfig;
     PciHalGetConfigurationSnapshot(PDEV, Config);
 
-    //LouPrint("Dma Port Is:%h\n", Config->Header.u.type0.BaseAddresses[4]);
-    //uint16_t DmaPort = (uint16_t)Config->Header.u.type0.BaseAddresses[4];
+    //LouPrint("Dma Port Is:%h\n", Config->Header.Type0.BaseAddresses[4]);
+    //uint16_t DmaPort = (uint16_t)Config->Header.Type0.BaseAddresses[4];
 
-    LegacyAtaHost->Ports[0].DmaIoAddress = (void*)(uintptr_t)Config->Header.u.type0.BaseAddresses[4];
+    LegacyAtaHost->Ports[0].DmaIoAddress = (void*)(uintptr_t)Config->Header.Type0.BaseAddresses[4];
     LegacyAtaHost->Ports[0].PrdtBoundry = 64 * KILOBYTE;
-    LegacyAtaHost->Ports[1].DmaIoAddress = (void*)(uintptr_t)Config->Header.u.type0.BaseAddresses[4];
+    LegacyAtaHost->Ports[1].DmaIoAddress = (void*)(uintptr_t)Config->Header.Type0.BaseAddresses[4];
     LegacyAtaHost->Ports[1].PrdtBoundry = 64 * KILOBYTE;
-    LegacyAtaHost->Ports[2].DmaIoAddress = (void*)(uintptr_t)Config->Header.u.type0.BaseAddresses[4];
+    LegacyAtaHost->Ports[2].DmaIoAddress = (void*)(uintptr_t)Config->Header.Type0.BaseAddresses[4];
     LegacyAtaHost->Ports[2].PrdtBoundry = 64 * KILOBYTE;
-    LegacyAtaHost->Ports[3].DmaIoAddress = (void*)(uintptr_t)Config->Header.u.type0.BaseAddresses[4];
+    LegacyAtaHost->Ports[3].DmaIoAddress = (void*)(uintptr_t)Config->Header.Type0.BaseAddresses[4];
     LegacyAtaHost->Ports[3].PrdtBoundry = 64 * KILOBYTE;
 
     LouPrint("Adding Ata Device To Device Manager\n");    

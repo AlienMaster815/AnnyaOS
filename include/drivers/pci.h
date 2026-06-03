@@ -61,41 +61,29 @@ typedef enum{
 	PciTotalDispatch,
 }PCI_DRIVER_DISPATCH;
 
+struct _PCI_MANAGER_DATA;
+struct _PCI_COMMON_CONFIG;
+
 typedef struct _PCI_DEVICE_OBJECT{
-	uint16_t 			VendorID;
-	uint16_t 			DeviceID;
-	UINT16 				Group;
-	UINT8				Bus;
-	UINT8				Slot;
-	UINT8				Function;
-	PCI_DRIVER_DISPATCH	Dispatch;
-	spinlock_t 			ConfigSpaceLock;
-	UINT32*				EcamDeviceBase;
-	//remove start
-	uint8_t 			bus;
-	uint8_t 			slot;
-	uint8_t 			func;
-	//remove end
-	bool				InterruptsEnabled;
-	int 				NumberOfSAssignedVectors;
-	uint8_t* 			InterruptVectors;
-	void* 				Dev;
-	void* 				CommonConfig;
-	void*				EcamDevice;//literal base
-	struct{
-		LOUSTATUS 		(*PcieReadEcam)(struct _PCI_DEVICE_OBJECT* Device, size_t Offset, size_t Width, uint32_t* Value);
-		LOUSTATUS 		(*PcieWriteEcam)(struct _PCI_DEVICE_OBJECT* Device, size_t Offset, size_t Width, uint32_t Value);
-	}EcamOperations;
-	pci_power_t 		CurrentState;
-	uint8_t 			PmCap;
-	atomic_t 			enable_cnt;
-	uint8_t	  			InterruptLine;
-	uint8_t	  			InterruptPin;
-	uintptr_t 			DeviceExtendedObject; 
-	uintptr_t 			DevicePrivateData;
-	uintptr_t 			VgaDecode; //only video devces
-	bool				DeviceManaged;
-	UINT64				DriverFeatures;
+	UINT16 						Group;
+	UINT8						Bus;
+	UINT8						Slot;
+	UINT8						Function;
+	PCI_DRIVER_DISPATCH			Dispatch;
+	spinlock_t 					ConfigSpaceLock;
+	UINT32*						EcamDeviceBase;
+	struct _PCI_MANAGER_DATA* 	MangerData;
+	struct _PCI_COMMON_CONFIG*	CommonConfig;
+	bool						InterruptsEnabled;
+	int 						NumberOfSAssignedVectors;
+	uint8_t* 					InterruptVectors;
+	uint8_t						InterruptPin;
+	void* 						Dev;
+	uintptr_t 					DeviceExtendedObject; 
+	uintptr_t 					DevicePrivateData;
+	uintptr_t 					VgaDecode; //only video devces
+	bool						DeviceManaged;
+	UINT64						DriverFeatures;
 }PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 
 typedef struct _AGP_BRIDGE_DATA{
@@ -212,8 +200,15 @@ typedef struct _PCIE_SYSTEM_MANAGER{
 typedef struct _PCI_MANAGER_DATA{
     ListHeader 			Peers;
     PPCI_DEVICE_OBJECT 	PDEV;
-    string 				RegistryEntry;
-    string 				DeviceManagerString;
+	LPWSTR 				DeviceManagerName;
+	UINT16				VendorID;
+	UINT16				DeviceID;
+	UINT16				SubVendorID;
+	UINT16				SubSystemID;
+	UINT8				ClassCode;
+	UINT8				SubClass;
+	UINT8				ProgIf;
+	//TODO 				Add Remaps
 }PCI_MANAGER_DATA, * PPCI_MANAGER_DATA, PCI_DEVICE_GROUP,* PPCI_DEVICE_GROUP;
 
 typedef struct _PCI_CAPABILITIES_HEADER {
@@ -244,7 +239,7 @@ typedef struct _PCI_COMMON_HEADER{
     UCHAR   			HeaderType;          
     UCHAR   			BIST;                
     union{
-        struct _PCI_HEADER_TYPE_0{
+        struct{
             ULONG   	BaseAddresses[PCI_TYPE0_ADDRESSES];
             ULONG   	CIS;
             USHORT  	SubVendorID;
@@ -257,8 +252,8 @@ typedef struct _PCI_COMMON_HEADER{
             UCHAR   	InterruptPin;
             UCHAR   	MinimumGrant;
             UCHAR   	MaximumLatency;
-        }				type0;
-        struct _PCI_HEADER_TYPE_1 {
+        }				Type0;
+        struct{
             ULONG   	BaseAddresses[PCI_TYPE1_ADDRESSES];
             UCHAR   	PrimaryBus;
             UCHAR   	SecondaryBus;
@@ -281,8 +276,8 @@ typedef struct _PCI_COMMON_HEADER{
             UCHAR   	InterruptLine;
             UCHAR   	InterruptPin;
             USHORT  	BridgeControl;
-        } 				type1;
-        struct _PCI_HEADER_TYPE_2 {
+        } 				Type1;
+        struct{
             ULONG   	SocketRegistersBaseAddress;
             UCHAR   	CapabilitiesPtr;
             UCHAR   	Reserved;
@@ -298,17 +293,13 @@ typedef struct _PCI_COMMON_HEADER{
             UCHAR   	InterruptLine;
             UCHAR   	InterruptPin;
             USHORT  	BridgeControl;
-        } 				type2;
-    } u;
+        } 				Type2;
+    };
 } PCI_COMMON_HEADER, *PPCI_COMMON_HEADER;
 
 typedef struct _PCI_COMMON_CONFIG {
     PCI_COMMON_HEADER 	Header;
     UCHAR   			DeviceSpecific[192];
-	uint64_t 			BarSize[6];
-	uint64_t 			BarBase[6];
-	uint64_t 			RawBarBase[6];
-	uint8_t  			BarFlags[6];
 } PCI_COMMON_CONFIG, * PPCI_COMMON_CONFIG;
 
 typedef struct  _PCI_CONTEXT{
@@ -558,6 +549,7 @@ DRIVER_IMPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_
 DRIVER_IMPORT SIZE PciHalGetIoRegionSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
 DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(UINT16 Group, UINT8 Bus, UINT8 Slot, UINT8 Function);
 
+DRIVER_IMPORT LOUSTATUS PciHalScanBootDevices();
 
 DRIVER_IMPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT64 OverideFlags);
 

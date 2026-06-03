@@ -563,8 +563,8 @@ static bool ChipHasAppleBios(PPCI_COMMON_CONFIG PciConfig){
     return (
         PciConfig->Header.VendorID == PCI_VENDOR_ID_NVIDIA && 
         PciConfig->Header.DeviceID == PCI_DEVICE_ID_NVIDIA_NFORCE_MCP89_SATA &&
-        PciConfig->Header.u.type0.SubVendorID == PCI_VENDOR_ID_APPLE && 
-        PciConfig->Header.u.type0.SubSystemID == 0xCB89
+        PciConfig->Header.Type0.SubVendorID == PCI_VENDOR_ID_APPLE && 
+        PciConfig->Header.Type0.SubSystemID == 0xCB89
     ) ? true : false;
 }
 
@@ -699,7 +699,7 @@ static AhciSb600Enable64Bit(
     CHAR Buffer[9];
 
     Match = LouKeDmiGetFirstMatch((PDMI_SYSTEM_ID)SystemIds);
-    if((PDEV->bus != 0x00) || (PDEV->func == 0x12) || (!Match)){
+    if((PDEV->Bus != 0x00) || (PDEV->Function == 0x12) || (!Match)){
         return false;
     }
 
@@ -729,7 +729,7 @@ static void AhciRemapCheck(
 ){
     int     i;
     UINT32  Capabilities;
-    PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    PPCI_COMMON_CONFIG PciConfig = PDEV->CommonConfig;
     if(
         (PciConfig->Header.VendorID != 0x8086) || 
         (PciHalGetIoRegionSize(PDEV, Bar) < (512 * KILOBYTE)) ||
@@ -792,7 +792,7 @@ static bool AhciHasBrokenSystemPowerOff(
     PDMI_SYSTEM_ID Match = LouKeDmiGetFirstMatch((PDMI_SYSTEM_ID)BrokenSystems);
 
     if(Match){
-        return (((UINT8)(UINTPTR)Match->DriverData) == PDEV->slot);
+        return (((UINT8)(UINTPTR)Match->DriverData) == PDEV->Slot);
     }
 
     return false;
@@ -913,7 +913,7 @@ static bool AhciHasBrokenSuspend(PPCI_DEVICE_OBJECT PDEV){
     INTEGER Year, Month, Date;
     CHAR Buffer[9];
 
-    if((!Dmi) || (PDEV->bus) || ((PDEV->slot != 0x1F) && (PDEV->func != 2))) {
+    if((!Dmi) || (PDEV->Bus) || ((PDEV->Slot != 0x1F) && (PDEV->Function != 2))) {
         return false;
     }
 
@@ -952,7 +952,7 @@ static bool AhciHasBrokenOnline(
     UINT8 Bus, Slot, Func;
     AHCI_DECODE_BUSDEVFUNC(&Bus, &Slot, &Func, Dmi->DriverData); 
 
-    return ((PDEV->bus == Bus) && (PDEV->slot == Slot) && (PDEV->func == Func));
+    return ((PDEV->Bus == Bus) && (PDEV->Slot == Slot) && (PDEV->Function == Func));
 }
 
 static void AcerSa5_271WorkAround(
@@ -1080,7 +1080,7 @@ LOUSTATUS AddAhciDevice(
     int Abar = AHCI_STANDARD_ABAR;
     uint8_t PortCount;
     //Get Pci Config Handle and update the handle
-    PPCI_COMMON_CONFIG PciConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    PPCI_COMMON_CONFIG PciConfig = PDEV->CommonConfig;
     PciHalGetConfigurationSnapshot(PDEV, PciConfig);
 
     //According to linux documentation An AHCI Driver Cannot Driver

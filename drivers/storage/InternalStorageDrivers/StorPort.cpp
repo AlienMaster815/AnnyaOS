@@ -36,8 +36,8 @@ LOUSTATUS LookForStorageDevices(){
     /*PCI_COMMON_CONFIG Config;
 	Config.Header.VendorID = ANY_PCI_ID;
 	Config.Header.DeviceID = ANY_PCI_ID;
-	Config.Header.u.type0.SubVendorID = ANY_PCI_ID;
-	Config.Header.u.type0.SubSystemID = ANY_PCI_ID;
+	Config.Header.Type0.SubVendorID = ANY_PCI_ID;
+	Config.Header.Type0.SubSystemID = ANY_PCI_ID;
 	Config.Header.BaseClass = ANY_PCI_CLASS;
 	Config.Header.SubClass = ANY_PCI_CLASS;
 	Config.Header.ProgIf = ANY_PCI_CLASS;
@@ -49,7 +49,7 @@ LOUSTATUS LookForStorageDevices(){
     for(size_t i = 0 ; i < NumberOfPciDevices; i++){
         _DRIVER_NOT_SUCCESSFULL:
         DeviceIndex = LouKeGetBootDeviceIndex((PPCI_COMMON_CONFIG)FirstWaveDevices[i]->PDEV->CommonConfig);
-        PPCI_COMMON_CONFIG PConfig = (PPCI_COMMON_CONFIG)FirstWaveDevices[i]->PDEV->CommonConfig;
+        PPCI_COMMON_CONFIG PConfig = PDEV->CommonConfig;
 
         if(DeviceIndex < BootDeviceCount){
             FirstWaveDevices[i]->PDEV->DeviceManaged = true;

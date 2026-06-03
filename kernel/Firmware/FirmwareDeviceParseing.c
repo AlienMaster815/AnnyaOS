@@ -39,7 +39,7 @@ uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV){
     ACPI_BUFFER     PrtBuffer = {ACPI_ALLOCATE_BUFFER, 0x00};
     ACPI_HANDLE     PciRootBusHandle = LouKeGetPciRootBridge();
     ACPI_OBJECT*    PrtObject;
-    UINT8           PciDevice = PDEV->slot;
+    UINT8           PciDevice = PDEV->Slot;
     UINT8           PciPin = PDEV->InterruptPin;
     UINT32          WantedAddress = (PciDevice << 16) | 0xFFFF;
     UINT8           WantedPin = PciPin - 1;

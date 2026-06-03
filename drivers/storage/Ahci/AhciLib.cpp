@@ -447,7 +447,7 @@ void AhciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
 void AhciPciInitializeController(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
     PAHCI_DRIVER_PRIVATE_DATA AhciPrivate = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
     PPCI_DEVICE_OBJECT PDEV = AhciPrivate->PDEV;
-    PPCI_COMMON_CONFIG CommonConfig = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    PPCI_COMMON_CONFIG CommonConfig = PDEV->CommonConfig;
     UINT32 Tmp;
     UINT8 Mv;
 

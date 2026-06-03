@@ -101,7 +101,6 @@ void read_rtc();
 void ManualContextSwitch(uint64_t Context1, uint64_t Context_2);
 bool LouKeMapEfiMemory();
 void ListAllocatedPorts();
-void ScanTheRestOfHarware();
 void LouKeHandleSystemIsBios();
 void SetContext(uint64_t Context, uint64_t Function);
 void SMPInit();
@@ -284,13 +283,6 @@ bool IsSystemEfi(){
 
 void PrintProcessManagerSwaps();
 
-void LouKeInitializePciDevices(){
-
-    LouPrint("LouKeInitializePciDevices()\n");
-    while(1);
-}
-
-
 LOUSTATUS LouKePlayWaveFile(FILE* WaveFile);
 PRIFF_OBJECT LouKeOpenRiffFile(LOUSTR PathAndFile);
 
@@ -343,7 +335,7 @@ void LouOsKrnlStart(
 
     AdvancedLousineKernelInitialization();
     
-    LouKeInitializePciDevices();
+    PciHalScanBootDevices();
 
     LookForStorageDevices();
          
@@ -371,6 +363,8 @@ void LouOsKrnlStart(
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
+    while(1);
+
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;
 

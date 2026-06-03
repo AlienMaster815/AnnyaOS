@@ -5,7 +5,7 @@ LOUSTATUS VgaSwitchClientDefer(
     PPCI_DEVICE_OBJECT PDEV
 ){
 
-    UNUSED PPCI_COMMON_CONFIG Config = (PPCI_COMMON_CONFIG)PDEV->CommonConfig;
+    UNUSED PPCI_COMMON_CONFIG Config = PDEV->CommonConfig;
 
     if(Config->Header.BaseClass == 0x03){
         //TODO: AppleGmuxPresent() && PDEV != VgaDefaultDevice()

@@ -2,7 +2,6 @@
 INCLUDES = -I../../include
 TARGET = PCI.SYS
 SRC = 	Pci.c \
-		Bridge.c \
 		DevMan.c \
 		Legacy.c \
 		LegacyCommon.c \

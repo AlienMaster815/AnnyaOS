@@ -141,11 +141,7 @@ void PciHalLegacyFallbackCheckSlot(
 
     NewPciDevice->Dispatch = PciLegacyDispatch;
 
-    PciHalRegisterPciDevice(
-        NewPciDevice,
-        0,
-        0
-    );
+    PciHalRegisterPciDevice(NewPciDevice);
 
     if((HeaderType & 0x03) == 1){
         PciHalInitializePciBridge(NewPciDevice);
@@ -173,11 +169,8 @@ void PciHalLegacyFallbackCheckSlot(
             
             NewPciDevice->Dispatch = PciLegacyDispatch;
             
-            PciHalRegisterPciDevice(
-                NewPciDevice,
-                0,
-                0
-            );
+            PciHalRegisterPciDevice(NewPciDevice);
+            
             if((HeaderType & 0x03) == 1){
                 PciHalInitializePciBridge(NewPciDevice);
             }
@@ -213,11 +206,7 @@ BOOLEAN PciHalNativeCheckSlot(
 
     //LouPrint("HeaderType:%h\n", (UINT64)HeaderType);
 
-    PciHalRegisterPciDevice(
-        NewPciDevice,
-        0,
-        0
-    );
+    PciHalRegisterPciDevice(NewPciDevice);
 
     if((HeaderType & 0x03) == 1){
         PciHalInitializePciBridge(NewPciDevice);
@@ -257,11 +246,8 @@ BOOLEAN PciHalNativeCheckSlot(
             
             NewPciDevice->Dispatch = PciNativeDispatch;
             
-            PciHalRegisterPciDevice(
-                NewPciDevice,
-                0,
-                0
-            );
+            PciHalRegisterPciDevice(NewPciDevice);
+            
             if((HeaderType & 0x03) == 1){
                 PciHalInitializePciBridge(NewPciDevice);
             }
@@ -274,6 +260,7 @@ void PciHalInitializePciBus(
     UINT16  Group,
     UINT8   Bus
 ){
+    PciHalPciDbgPrint("PCI.SYS:Scaning Group:%d::Bus:%d\n", (UINT64)Group, (UINT64)Bus);
     for(SIZE i = 0 ; i < 32; i++){
         BOOLEAN Success = false;
         UINT32* EcamDeviceBase = PciHalGetNativePciPhysicalAddress(
@@ -286,7 +273,7 @@ void PciHalInitializePciBus(
             //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
             EcamDeviceBase = PciHalMapEcamDevice(Group, Bus, i, 0, EcamDeviceBase);
             //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
-            BOOLEAN Success = PciHalNativeCheckSlot(
+            Success = PciHalNativeCheckSlot(
                 EcamDeviceBase,
                 Group,
                 Bus,
@@ -300,6 +287,15 @@ void PciHalInitializePciBus(
             );
         }
     }
+}
+
+void PciHalInitializePciBridge(
+    PPCI_DEVICE_OBJECT PDEV
+){
+    PciHalInitializePciBus(
+        PDEV->Group,
+        PciHalBridgeDeviceGetSecondaryBusNumber(PDEV)
+    );
 }
 
 LOUSTATUS PciEntry(){
@@ -344,8 +340,16 @@ LOUSTATUS PciEntry(){
         }
     }
     
-
     PciHalPciDbgPrint("PCI.SYS:PciEntry() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
+
+
+    PciHalPciDbgPrint("PCI.SYS:PciHalScanBootDevices()\n");
+
+    
     while(1);
     return STATUS_SUCCESS;
 }

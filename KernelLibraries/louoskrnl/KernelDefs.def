@@ -181,4 +181,7 @@ EXPORTS
     LouKeAllocateFastObject
     LouKeMapContinuousMemoryBlockKB
     LouKeUnMapContinuousMemoryBlock
-    
+    wcscat
+    _ui64tow
+    wcscpy
+    wcslen
