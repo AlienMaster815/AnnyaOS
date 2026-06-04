@@ -1354,7 +1354,7 @@ LOUSTATUS AddAhciDevice(
 LOUAPI
 LOUSTATUS 
 DriverEntry(
-    PDRIVER_OBJECT DriverObject, 
+    PDRIVER_OBJECT  DriverObject, 
     PUNICODE_STRING RegistryEntry
 ){
     LouPrint(AHCI_SYSTEM_MODULE_VERSION_MESSAGE);
@@ -1367,9 +1367,9 @@ DriverEntry(
     //Lousine Kernel Driver Module (LKDM) alongside the
     //NT Kernel Moudle Subsystem so it fills
     //out the extra information relating to the LKDM
-    DriverObject->DriverUsingLkdm = true;
+    //DriverObject->DriverUsingLkdm = true;
     //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)AhciDevices;
+    //DriverObject->DeviceTable = (uintptr_t)AhciDevices;
     
     LouPrint("AHCI.SYS:DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

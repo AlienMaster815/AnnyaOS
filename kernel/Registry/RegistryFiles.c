@@ -120,11 +120,11 @@ LouKeOpenRegistryHandle(
     return 0x00;
 }
 
-size_t LouKeGetRegistryKeySize(PVOID Key){
+KERNEL_EXPORT size_t LouKeGetRegistryKeySize(PVOID Key){
     return ((PCOMPILED_NODE_ENTRY)Key)->Node.ItemSize;
 }
 
-LOUSTATUS LouKeReadRegistryWcsValue(
+KERNEL_EXPORT LOUSTATUS LouKeReadRegistryWcsValue(
     PVOID Key, 
     LPWSTR String
 ){
@@ -147,7 +147,7 @@ LOUSTATUS LouKeReadRegistryWcsValue(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS LouKeReadRegistryCsValue(
+KERNEL_EXPORT LOUSTATUS LouKeReadRegistryCsValue(
     PVOID  Key, 
     LOUSTR String
 ){
@@ -225,7 +225,7 @@ KERNEL_EXPORT LOUSTATUS LouKeReadRegistryByteValue(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS LouKeReadRegistryDWordValue(
+KERNEL_EXPORT LOUSTATUS LouKeReadRegistryDWordValue(
     PVOID Key, 
     DWORD* Data
 ){
@@ -248,7 +248,7 @@ LOUSTATUS LouKeReadRegistryDWordValue(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS LouKeReadRegistryQWordValue(
+KERNEL_EXPORT LOUSTATUS LouKeReadRegistryQWordValue(
     PVOID Key, 
     QWORD* Data
 ){

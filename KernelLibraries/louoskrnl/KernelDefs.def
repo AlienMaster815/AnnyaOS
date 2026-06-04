@@ -191,3 +191,8 @@ EXPORTS
     _ui64towUppr_s
     _ui64towUppr
     _wcsupr
+    LouKeLoadBootKernelModule
+    wcscmp
+    LouKeGetRegistryKeySize
+    LouKeReadRegistryWcsValue
+    LouKeLoadKernelModule

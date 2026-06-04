@@ -64,9 +64,9 @@ DriverEntry(
     //Lousine Kernel Driver Module (LKDM) alongside the
     //NT Kernel Moudle Subsystem so it fills
     //out the extra information relating to the LKDM
-    DriverObject->DriverUsingLkdm = true;
+    //DriverObject->DriverUsingLkdm = true;
     //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)PcNet32SupportedDevices;
+    //DriverObject->DeviceTable = (uintptr_t)PcNet32SupportedDevices;
 
     LouPrint("PCNET32::DriverEntry() STATUS SUCCESS\n");
     return STATUS_SUCCESS;

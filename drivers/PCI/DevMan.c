@@ -4,10 +4,14 @@
 
 #include "Pci.h"
 
+DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
+
 static PCI_MANAGER_DATA PciData = {0};
 static size_t RegisteredPciDevices = 0;
 static mutex_t PciDataLock = {0};
 static mutex_t PciTmpGenericLock = {0};
+static ListHeader PciLoadedModules = {0};
+static mutex_t PciLoadedModulesLock = {0};
 
 //TODO Implement Registry loopkup
 
@@ -19,6 +23,132 @@ static WCHAR PciTmpGeneric[80] = {0};
     }
     LouPrint("\n");
 }*/
+
+static HANDLE PciHalGetNextSpecificKey(
+    LPWSTR  StartSearch,
+    HANDLE  ParrentKey   
+){
+    WCHAR   TmpSearch[8] = {0};
+    LPWSTR  EndSeach = wcschr(StartSearch, L'\\');
+    SIZE    Length = wcslen(StartSearch);
+    if(EndSeach){
+        Length = EndSeach - StartSearch;
+    }
+    wcscpy_s(TmpSearch, Length, StartSearch);
+    return LouKeOpenRegistryHandle(TmpSearch, ParrentKey);
+}
+
+static HANDLE PciHalGetNextGenericUint16Key(
+    HANDLE ParrentKey
+){
+    return LouKeOpenRegistryHandle(L"0xFFFF", ParrentKey);   
+}
+
+static HANDLE PciHalGetNextGenericUint8Key(
+    HANDLE ParrentKey
+){
+    return LouKeOpenRegistryHandle(L"0xFF", ParrentKey);   
+}
+
+
+static HANDLE PciHalWalkPnpIds(
+    LPWSTR  PnpString, 
+    HANDLE  ParrentKey,
+    SIZE    Recursion
+){
+    //SanityCheckString(PnpString);
+    HANDLE ReturnKey = (HANDLE)0x00;
+    HANDLE DownKey = PciHalGetNextSpecificKey(PnpString, ParrentKey);
+    if(DownKey && Recursion < 3){
+        ReturnKey = PciHalWalkPnpIds(
+            wcschr(PnpString, L'\\') + 1, 
+            DownKey,
+            Recursion + 1
+        );
+    }else if(Recursion == 3){
+        ReturnKey = DownKey;
+    }
+    if(!ReturnKey){
+        DownKey = PciHalGetNextGenericUint16Key(ParrentKey);
+        if(DownKey && Recursion < 3){
+            ReturnKey = PciHalWalkPnpIds(
+                wcschr(PnpString, L'\\') + 1,
+                DownKey,
+                Recursion + 1 
+            );
+        }else if(Recursion == 3){
+            ReturnKey = DownKey;
+        }
+    }
+    return ReturnKey;
+}
+
+static HANDLE PciHalWalkPnpCodes(
+    LPWSTR  PnpString, 
+    HANDLE  ParrentKey,
+    SIZE    Recursion
+){
+    //SanityCheckString(PnpString);
+    HANDLE ReturnKey = (HANDLE)0x00;
+    HANDLE DownKey = PciHalGetNextSpecificKey(PnpString, ParrentKey);
+    if(DownKey && Recursion < 2){
+        ReturnKey = PciHalWalkPnpCodes(
+            wcschr(PnpString, L'\\') + 1, 
+            DownKey,
+            Recursion + 1
+        );
+    }else if(Recursion == 2){
+        ReturnKey = DownKey;
+    }
+    if(!ReturnKey){
+        DownKey = PciHalGetNextGenericUint8Key(ParrentKey);
+        if(DownKey && Recursion < 2){
+            ReturnKey = PciHalWalkPnpCodes(
+                wcschr(PnpString, L'\\') + 1,
+                DownKey,
+                Recursion + 1 
+            );
+        }else if(Recursion == 2){
+            ReturnKey = DownKey;
+        }
+    }
+    return ReturnKey;
+}
+
+
+static PVOID PciHalWalkPnpTree(
+    LPWSTR DeviceManagerName
+){
+    LPWSTR Tmp = DeviceManagerName; 
+    LPWSTR Tmp2;
+    Tmp = wcsstr(Tmp, L"PCI");
+    if(!Tmp){
+        return 0x00;
+    }
+    Tmp += wcslen(L"PCI\\");;
+    HANDLE Key = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\Drivers\\PCI", 0x00);
+    if(!Key){
+        return 0x00;
+    }
+    
+    //TODO
+    //SanityCheckString(DeviceManagerName);
+    
+    Key = PciHalWalkPnpIds(Tmp, Key, 0);
+    if(!Key){
+        return 0x00;
+    }
+
+    for(size_t i = 0; i < 4; i++){
+        Tmp = wcschr(Tmp, L'\\');
+        if(!Tmp){
+            return 0;
+        }
+        Tmp++;
+    }
+
+    return PciHalWalkPnpCodes(Tmp, Key, 0);
+}
 
 LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV){
 
@@ -166,130 +296,181 @@ DRIVER_EXPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(
     return 0x00;
 }
 
-static HANDLE PciHalGetNextSpecificKey(
-    LPWSTR  StartSearch,
-    HANDLE  ParrentKey   
+PLOADED_PCI_MODULE PciHalGetLoadedPciModule(
+    LPWSTR RegistryEntry
 ){
-    WCHAR   TmpSearch[8] = {0};
-    LPWSTR  EndSeach = wcschr(StartSearch, L'\\');
-    SIZE    Length = wcslen(StartSearch);
-    if(EndSeach){
-        Length = EndSeach - StartSearch;
-    }
-    wcscpy_s(TmpSearch, Length, StartSearch);
-    return LouKeOpenRegistryHandle(TmpSearch, ParrentKey);
-}
-
-static HANDLE PciHalGetNextGenericUint16Key(
-    HANDLE ParrentKey
-){
-    return LouKeOpenRegistryHandle(L"0xFFFF", ParrentKey);   
-}
-
-static HANDLE PciHalGetNextGenericUint8Key(
-    HANDLE ParrentKey
-){
-    return LouKeOpenRegistryHandle(L"0xFF", ParrentKey);   
-}
-
-
-static HANDLE PciHalWalkPnpIds(
-    LPWSTR  PnpString, 
-    HANDLE  ParrentKey,
-    SIZE    Recursion
-){
-    //SanityCheckString(PnpString);
-    HANDLE ReturnKey = (HANDLE)0x00;
-    HANDLE DownKey = PciHalGetNextSpecificKey(PnpString, ParrentKey);
-    if(DownKey && Recursion < 3){
-        ReturnKey = PciHalWalkPnpIds(
-            wcschr(PnpString, L'\\') + 1, 
-            DownKey,
-            Recursion + 1
-        );
-    }else if(Recursion == 3){
-        ReturnKey = DownKey;
-    }
-    if(!ReturnKey){
-        DownKey = PciHalGetNextGenericUint16Key(ParrentKey);
-        if(DownKey && Recursion < 3){
-            ReturnKey = PciHalWalkPnpIds(
-                wcschr(PnpString, L'\\') + 1,
-                DownKey,
-                Recursion + 1 
-            );
-        }else if(Recursion == 3){
-            ReturnKey = DownKey;
+    PLOADED_PCI_MODULE TmpModule;
+    MutexLock(&PciLoadedModulesLock);
+    ForEachListEntry(TmpModule, &PciLoadedModules, Peers){
+        LPWSTR TmpRegistryEntry = TmpModule->RegistryEntry.Buffer;
+        if(!wcscmp(RegistryEntry, TmpRegistryEntry)){
+            MutexUnlock(&PciLoadedModulesLock);
+            return TmpModule;
         }
     }
-    return ReturnKey;
+    MutexUnlock(&PciLoadedModulesLock);
+    return 0x00;
 }
 
-static HANDLE PciHalWalkPnpCodes(
-    LPWSTR  PnpString, 
-    HANDLE  ParrentKey,
-    SIZE    Recursion
+PLOADED_PCI_MODULE PciHalGetLoadedPciModuleObjectFromDriverObject(
+    PDRIVER_OBJECT  DriverObject
 ){
-    //SanityCheckString(PnpString);
-    HANDLE ReturnKey = (HANDLE)0x00;
-    HANDLE DownKey = PciHalGetNextSpecificKey(PnpString, ParrentKey);
-    if(DownKey && Recursion < 2){
-        ReturnKey = PciHalWalkPnpCodes(
-            wcschr(PnpString, L'\\') + 1, 
-            DownKey,
-            Recursion + 1
-        );
-    }else if(Recursion == 2){
-        ReturnKey = DownKey;
-    }
-    if(!ReturnKey){
-        DownKey = PciHalGetNextGenericUint8Key(ParrentKey);
-        if(DownKey && Recursion < 2){
-            ReturnKey = PciHalWalkPnpCodes(
-                wcschr(PnpString, L'\\') + 1,
-                DownKey,
-                Recursion + 1 
-            );
-        }else if(Recursion == 2){
-            ReturnKey = DownKey;
+    PLOADED_PCI_MODULE TmpModule;
+    MutexLock(&PciLoadedModulesLock);
+    ForEachListEntry(TmpModule, &PciLoadedModules, Peers){
+        if(TmpModule->DriverObject == DriverObject){
+            MutexUnlock(&PciLoadedModulesLock);
+            return TmpModule;
         }
     }
-    return ReturnKey;
+    MutexUnlock(&PciLoadedModulesLock);
+    return 0x00;
 }
 
-
-static PVOID PciHalWalkPnpTree(
-    LPWSTR DeviceManagerName
+PLOADED_PCI_MODULE PciHalLoadAndInitializePciModule(
+    LPWSTR  RegistryEntry,
+    BOOLEAN OnlyLoadBootModules
 ){
-    LPWSTR Tmp = DeviceManagerName; 
-    LPWSTR Tmp2;
-    Tmp = wcsstr(Tmp, L"PCI");
-    if(!Tmp){
-        return 0x00;
-    }
-    Tmp += wcslen(L"PCI\\");;
-    HANDLE Key = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\Drivers\\PCI", 0x00);
-    if(!Key){
-        return 0x00;
-    }
     
-    //TODO
-    //SanityCheckString(DeviceManagerName);
+    DRIVER_MODULE_ENTRY Driver;
+    PLOADED_PCI_MODULE NewModule = PciHalGetLoadedPciModule(RegistryEntry);
+    if(NewModule){
+        return NewModule;
+    }
+    HANDLE RegistryHandle = LouKeOpenRegistryHandle(RegistryEntry, 0);
+    HANDLE LoadOrderKeyHandle = LouKeOpenRegistryHandle(L"LoadOrder", RegistryHandle);
     
-    Key = PciHalWalkPnpIds(Tmp, Key, 0);
-    if(!Key){
+    if(!RegistryHandle){
+        LouPrint("PCI.SYS:ERROR:Unable To Get Devices Registry Handle\n");
+        return 0x00;
+    }
+    if(OnlyLoadBootModules && !LoadOrderKeyHandle){
         return 0x00;
     }
 
-    for(size_t i = 0; i < 4; i++){
-        Tmp = wcschr(Tmp, L'\\');
-        if(!Tmp){
-            return 0;
+    //TODO use Rtl
+    NewModule = LouKeMallocType(LOADED_PCI_MODULE, KERNEL_GENERIC_MEMORY);
+    //Regisry Entry Path
+    NewModule->RegistryEntry.Length = wcslen(RegistryEntry);
+    NewModule->RegistryEntry.MaximumLength = NewModule->RegistryEntry.Length;
+    NewModule->RegistryEntry.Buffer = RegistryEntry;
+
+    //Registry Entry Handle    
+    NewModule->RegistryHandle = RegistryHandle;
+    if(!LoadOrderKeyHandle){
+        /*NewModule->BootModule = false;
+        NewModule->LoadOrder = 0;
+        HANDLE DeviceNameHandle = LouKeOpenRegistryHandle(L"DeviceName", RegistryHandle);
+        SIZE StringLength = LouKeGetRegistryKeySize(DeviceNameHandle);
+        LPWSTR wDevName = LouKeMallocArray(WCHAR, StringLength + 1, KERNEL_GENERIC_MEMORY);
+        string cDevName = LouKeMallocArray(CHAR, StringLength + 1, KERNEL_GENERIC_MEMORY);
+        LouKeReadRegistryWcsValue(DeviceNameHandle, wDevName);
+        for(SIZE i = 0 ; i <  StringLength; i++){
+            cDevName[i] = (CHAR)wDevName[i];
         }
-        Tmp++;
+        LouKeFree(wDevName);
+        Driver = LouKeLoadKernelModule(cDevName, (PVOID*)&NewModule->DriverObject, sizeof(DRIVER_OBJECT));
+        LouKeFree(cDevName);*/
+        LouPrint("PCI.SYS:!LoadOrderKeyHandle\n");
+        while(1);
+    }else{
+        NewModule->BootModule = true;
+        LouKeReadRegistryWordValue(LoadOrderKeyHandle, &NewModule->LoadOrder);
+        NewModule->DriverFile = LouKeGetBootDevice(NewModule->LoadOrder);
+        Driver = LouKeLoadBootKernelModule((uintptr_t)NewModule->DriverFile, (PVOID*)&NewModule->DriverObject, sizeof(DRIVER_OBJECT));
     }
 
-    return PciHalWalkPnpCodes(Tmp, Key, 0);
+    MutexLock(&PciLoadedModulesLock);
+    LouKeListAddTail(&NewModule->Peers, &PciLoadedModules);
+    MutexUnlock(&PciLoadedModulesLock);
+
+    if(!NewModule->DriverObject->DriverExtension){
+        NewModule->DriverObject->DriverExtension = LouKeMallocType(DRIVER_EXTENSION,  KERNEL_GENERIC_MEMORY);
+        if(Driver(NewModule->DriverObject, (PUNICODE_STRING)&NewModule->RegistryEntry) != STATUS_SUCCESS){
+            LouPrint("PSI.SYS:PciHalLoadAndInitializePciModule():ERROR");
+            while(1);
+        }
+    }
+
+    NewModule->DriverEntry = Driver;
+
+    return NewModule;
+}
+
+LOUSTATUS PciHalGetDeviceListId(
+    PLOADED_PCI_MODULE  Module, 
+    SIZE*               DeviceID
+){
+
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS PciHalInitializePciDeviceToDriver(
+    PLOADED_PCI_MODULE Module,
+    PPCI_DEVICE_OBJECT PDEV
+){
+    LOUSTATUS Status = PciHalGetDeviceListId(Module, &PDEV->DeviceID);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    PPCI_DEVICE_GROUP PGROUP = LouKeMallocType(PCI_DEVICE_GROUP, KERNEL_GENERIC_MEMORY);
+    PGROUP->PciDeviceobject = PDEV;
+    //TODO:use Rtl Function
+    PGROUP->DeviceName.Buffer = PDEV->MangerData->DeviceManagerName;
+    PGROUP->DeviceName.Length = wcslen(PDEV->MangerData->DeviceManagerName); 
+    PGROUP->DeviceName.MaximumLength = PGROUP->DeviceName.Length;
+    
+
+    MutexLock(&Module->UninitializedDeviceGroupLock);
+    LouKeListAddTail(&PGROUP->Peers, &Module->UninitializedDeviceGroup);
+    MutexUnlock(&Module->UninitializedDeviceGroupLock);
+
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS PciHalInitializeUninitializedDevices(
+    PLOADED_PCI_MODULE Module
+){
+    ListHeader TmpList = {0};
+    PPCI_DEVICE_GROUP TmpUninitializedDevice;
+    if(!Module->DriverObject->DriverExtension->AddDevice){
+        return STATUS_UNSUCCESSFUL;
+    }
+    MutexLock(&Module->UninitializedDeviceGroupLock);
+    
+    TmpList = Module->UninitializedDeviceGroup;
+    LouKeListDeleteAll(&Module->UninitializedDeviceGroup);
+    
+    MutexUnlock(&Module->UninitializedDeviceGroupLock);
+    
+    LOUSTATUS Status;
+    MutexLock(&Module->InitializedDeviceGroupLock);
+    ForEachListEntry(TmpUninitializedDevice, &TmpList, Peers){
+        Status = Module->DriverObject->DriverExtension->AddDevice(Module->DriverObject, &TmpUninitializedDevice->LdmDeviceObject);    
+        if(!NT_SUCCESS(Status)){
+            MutexUnlock(&Module->InitializedDeviceGroupLock);
+            return Status;
+        }
+        LouKeListAddTail(&TmpUninitializedDevice->Peers, &Module->InitializedDeviceGroup);
+    }
+    MutexUnlock(&Module->InitializedDeviceGroupLock);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS PciHalInitializeAllUninitializedDevices(){
+    PLOADED_PCI_MODULE TmpModule;
+    LOUSTATUS Status;
+    MutexLock(&PciLoadedModulesLock);
+    ForEachListEntry(TmpModule, &PciLoadedModules, Peers){
+        Status = PciHalInitializeUninitializedDevices(TmpModule);
+        if(!NT_SUCCESS(Status)){
+            return Status;
+        }
+    }
+    MutexUnlock(&PciLoadedModulesLock);
+    return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
@@ -304,14 +485,47 @@ DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
         if(!BootDriver){
             continue;
         }
-        //cross locking
+        HANDLE DriverKeyHandle = LouKeOpenRegistryHandle(L"DriverKey", BootDriver);
+        SIZE KeySize = LouKeGetRegistryKeySize(DriverKeyHandle);
+        LPWSTR RegistryKey = LouKeMallocArray(WCHAR, KeySize + 1, KERNEL_GENERIC_MEMORY);
+        LouKeReadRegistryWcsValue(DriverKeyHandle, RegistryKey);
+        PLOADED_PCI_MODULE NewBootModule = PciHalLoadAndInitializePciModule(RegistryKey, true);
+        if(!NewBootModule){
+            LouKeFree(RegistryKey);
+            continue;
+        }
 
-        LouPrint("PCI.SYS:HERE\n");
-        while(1);
+        PciHalInitializePciDeviceToDriver(NewBootModule, TmpObject->PDEV);
+
     }
     MutexUnlock(&PciDataLock);
+
+    PciHalInitializeAllUninitializedDevices();
 
     PciHalPciDbgPrint("PCI.SYS:PciHalScanBootDevices() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT LOUSTATUS PciHalRegisterLousinePciDeviceTable(
+    PDRIVER_OBJECT              DriverObject,
+    PLOUSINE_PCI_DEVICE_TABLE   DeviceTable
+){
+    PLOADED_PCI_MODULE Module = PciHalGetLoadedPciModuleObjectFromDriverObject(DriverObject);
+    if(!Module){
+        LouPrint("PCI.SYS:PciHalRegisterLousinePciDeviceTable():ERROR Module Doesnt Exist\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+    if(Module->DeviceTable){
+        LouPrint("PCI.SYS:PciHalRegisterLousinePciDeviceTable():ERROR Table Already Exist\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    Module->DeviceTable = DeviceTable;
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT PPCI_DEVICE_OBJECT PciHalGetPciDeviceObjectFromLdmDeviceObject(
+    PDEVICE_OBJECT DeviceObject
+){
+    return (CONTAINER_OF(DeviceObject, PCI_DEVICE_GROUP, LdmDeviceObject))->PciDeviceobject;
 }

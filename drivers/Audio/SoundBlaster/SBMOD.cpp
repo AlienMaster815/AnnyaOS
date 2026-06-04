@@ -122,17 +122,14 @@ LOUSTATUS DriverEntry(
     PUNICODE_STRING RegistryEntry
 ){
     LouPrint("SBMOD.SYS::DriverEntry()\n");
-    //tell the System where are key Nt driver functions are
+
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;
-    //tell the lousine kernel we will be using the
-    //Lousine Kernel Driver Module (LKDM) alongside the
-    //NT Kernel Moudle Subsystem so it fills
-    //out the extra information relating to the LKDM
-    DriverObject->DriverUsingLkdm = true;
-    //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)SupportedSoundBalsters;
 
+    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedSoundBalsters);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("SBMOD.SYSDriverEntry():ERROR Unable To Register Pci Device Table\n");
+    }
     LouKeLoadDriver("8237A.SYS", 0x00);
     Initialize8237ADmaTransfer = (LOUSTATUS(*)(PDMA16_TRANSFER_PACKET))LouKeLinkerGetAddress("8237A.SYS", "Initialize8237ADmaTransfer");
 

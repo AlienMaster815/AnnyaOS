@@ -35,16 +35,26 @@ typedef struct PACKED _MCFG_TABLE{
 }MCFG_TABLE, * PMCFG_TABLE;
 
 typedef struct _PCI_DEVICE_GROUP{
-
+    ListHeader              Peers;
+    UNICODE_STRING          DeviceName;
+    PPCI_DEVICE_OBJECT      PciDeviceobject;
+    DEVICE_OBJECT           LdmDeviceObject;
 }PCI_DEVICE_GROUP, * PPCI_DEVICE_GROUP;
 
 typedef struct _LOADED_PCI_MODULE{
-    ListHeader              Peers;
-    LPWSTR                  RegistryEntry;
-    PDRIVER_OBJECT          DriverObject;
-    ListHeader              PlatformDevices;
-    BOOLEAN                 BootModule;
-
+    ListHeader                  Peers;
+    UNICODE_STRING              RegistryEntry;
+    HANDLE                      RegistryHandle;
+    DRIVER_MODULE_ENTRY         DriverEntry;
+    FILE*                       DriverFile;
+    PDRIVER_OBJECT              DriverObject;
+    mutex_t                     UninitializedDeviceGroupLock;
+    ListHeader                  UninitializedDeviceGroup;
+    mutex_t                     InitializedDeviceGroupLock;
+    ListHeader                  InitializedDeviceGroup;
+    BOOLEAN                     BootModule;
+    UINT16                      LoadOrder;
+    PLOUSINE_PCI_DEVICE_TABLE   DeviceTable;
 }LOADED_PCI_MODULE, * PLOADED_PCI_MODULE;
 
 
@@ -492,6 +502,10 @@ DRIVER_EXPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_
 DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT64 OverideFlags);
 
 DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices();
+DRIVER_EXPORT LOUSTATUS PciHalRegisterLousinePciDeviceTable(PDRIVER_OBJECT DriverObject, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
+DRIVER_EXPORT PPCI_DEVICE_OBJECT PciHalGetPciDeviceObjectFromLdmDeviceObject(PDEVICE_OBJECT DeviceObject);
+
+
 
 LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV);
 void PciHalInitializePciBridge(PPCI_DEVICE_OBJECT PDEV);

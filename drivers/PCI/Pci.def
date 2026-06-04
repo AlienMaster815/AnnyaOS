@@ -98,3 +98,4 @@ EXPORTS
     PciHalGetIoRegionSize
     PciHalGetDeviceFromBusAddress
     PciHalScanBootDevices
+    PciHalRegisterLousinePciDeviceTable

@@ -108,16 +108,14 @@ LOUSTATUS DriverEntry(
     PUNICODE_STRING RegistryEntry
 ){
     LouPrint("EHCI.SYS::DriverEntry()\n");
-    //tell the System where are key Nt driver functions are
+
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;
-    //tell the lousine kernel we will be using the
-    //Lousine Kernel Driver Module (LKDM) alongside the
-    //NT Kernel Moudle Subsystem so it fills
-    //out the extra information relating to the LKDM
-    DriverObject->DriverUsingLkdm = true;
-    //fill LDM information
-    DriverObject->DeviceTable = (uintptr_t)SupportedEhciPciDevices;
+    
+    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedEhciPciDevices);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    }
 
     LouPrint("EHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

@@ -11,7 +11,7 @@ typedef struct _DRIVER_MODULE_HANDLES{
 static DRIVER_MODULE_HANDLES DriverHandles = {0};
 static size_t DriveHandlesCount = 0;
 
-DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize){ //TODO
+KERNEL_EXPORT DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** DriverObject, size_t DriverObjectSize){ //TODO
     PDRIVER_MODULE_HANDLES TmpHandle = &DriverHandles;
     LOUSTATUS Status;
     for(size_t i = 0 ; i < DriveHandlesCount; i++){
@@ -47,7 +47,7 @@ DRIVER_MODULE_ENTRY LouKeLoadKernelModule(string ModuleNameAndPath, void** Drive
 }
 
 
-DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize){
+KERNEL_EXPORT DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize){
     if(!Base){
         return 0x00;
     }

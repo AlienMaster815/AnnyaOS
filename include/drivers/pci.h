@@ -22,6 +22,9 @@ extern "C" {
 #include <kernel/atomic.h>
 #include "PciIds.h"
 
+struct _DRIVER_OBJECT;
+struct _DEVICE_OBJECT;
+
 typedef struct _LOUSINE_PCI_DEVICE_TABLE{
 	uint16_t VendorID;
 	uint16_t DeviceID;
@@ -72,10 +75,11 @@ typedef struct _PCI_DEVICE_OBJECT{
 	PCI_DRIVER_DISPATCH			Dispatch;
 	spinlock_t 					ConfigSpaceLock;
 	UINT32*						EcamDeviceBase;
+    SIZE                    	DeviceID;
 	struct _PCI_MANAGER_DATA* 	MangerData;
 	struct _PCI_COMMON_CONFIG*	CommonConfig;
 	bool						InterruptsEnabled;
-	int 						NumberOfSAssignedVectors;
+	int 						NumberOfAssignedVectors;
 	uint8_t* 					InterruptVectors;
 	uint8_t						InterruptPin;
 	void* 						Dev;
@@ -552,6 +556,11 @@ DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(UINT16 Group, UIN
 DRIVER_IMPORT LOUSTATUS PciHalScanBootDevices();
 
 DRIVER_IMPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, UINT64 OverideFlags);
+
+DRIVER_IMPORT LOUSTATUS PciHalRegisterLousinePciDeviceTable(struct _DRIVER_OBJECT* DriverObject, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
+DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetPciDeviceObjectFromLdmDeviceObject(struct _DEVICE_OBJECT* DeviceObject);
+
+
 
 #endif
 
