@@ -394,7 +394,6 @@ void Phalexaminembr(
 );*/
 
 #ifndef _KERNEL_MODULE_
-PPCI_DEVICE_GROUP LouKeHalOpenPciCompanions(PPCI_DEVICE_OBJECT PDEV);
 bool LouKeHalIsDevicePcie(PPCI_DEVICE_OBJECT PDEV);
 uint8_t LouKeHalFindCompatibility(PPCI_DEVICE_OBJECT PDEV, int32_t Capability);
 void LouKeHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV);

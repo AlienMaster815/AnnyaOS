@@ -1069,13 +1069,14 @@ LOUSTATUS AddAhciDevice(
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AHCI.SYS:AddAhciDevice()\n");
+    while(1);
     //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
     LOUSTATUS Status = STATUS_SUCCESS;
 
     //get the device ID and Pci Device from the LKDM
-    uint64_t AhciDeviceID = Device->DeviceID;
+    uint64_t AhciDeviceID = 0;//Device->DeviceID;
     uint8_t BoardID = AhciDevices[AhciDeviceID].BoardID;
-    PPCI_DEVICE_OBJECT PDEV = LkdmDeviceObjectToPciDevice(Device);    
+    PPCI_DEVICE_OBJECT PDEV = 0x00;//LkdmDeviceObjectToPciDevice(Device);    
     UNUSED PAHCI_DRIVER_BOARD_INFORMATION BoardInformation = &AhciBoardInfomationTable[BoardID];
     int Abar = AHCI_STANDARD_ABAR;
     uint8_t PortCount;

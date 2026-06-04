@@ -185,3 +185,9 @@ EXPORTS
     _ui64tow
     wcscpy
     wcslen
+    wcsstr
+    wcscpy_s
+    wcschr
+    _ui64towUppr_s
+    _ui64towUppr
+    _wcsupr

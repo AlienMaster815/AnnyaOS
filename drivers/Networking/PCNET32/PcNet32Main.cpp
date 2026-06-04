@@ -27,7 +27,8 @@ AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("PCNET32::AddDevice()\n");
-    uint8_t DeviceID = PlatformDevice->DeviceID;
+    while(1);
+    uint8_t DeviceID = 0x00; //PlatformDevice->DeviceID;
     LOUSTATUS Status = STATUS_SUCCESS;
     LouPrint("DeviceID:%d\n", DeviceID);
 

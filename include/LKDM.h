@@ -5,7 +5,6 @@
 extern "C" {
 #endif 
 
-#define LkdmDeviceObjectToPciDevice(DevObj) (DevObj)->PDEV
 #define LkdmAtaHostToPciDevice(AtaHost)     (AtaHost)->PDEV
 #define LkdmAtaPortToPciDevice(AtaPort)     (AtaPort)->PDEV
 #define LkdmAtaHostToPrivateData(AtaHost)   (AtaHost)->HostPrivateData

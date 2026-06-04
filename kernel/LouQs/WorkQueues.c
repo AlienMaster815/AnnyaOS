@@ -1,7 +1,7 @@
 #include <LouAPI.h>
 
 static LOUQ_WORK_QUEUE MainWorkQueue = {
-    .QueueName = "Losine Kernel Main System Queue",
+    .QueueName = "Lousine Kernel Main System Queue",
     .QueuePriority = 31,
 };
 

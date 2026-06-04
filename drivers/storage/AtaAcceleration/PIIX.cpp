@@ -349,10 +349,11 @@ LOUSTATUS PiixInitializePiix4Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
 LOUAPI
 LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("PIIX.SYS:AddDevice()\n");
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    while(1);
+    PPCI_DEVICE_OBJECT PDEV = 0x00; //PlatformDevice->PDEV;
     LOUSTATUS Status;
 
-    uint8_t DeviceID = PlatformDevice->DeviceID;
+    uint8_t DeviceID = 0;//PlatformDevice->DeviceID;
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = LouKeDeviceManagerGetAtaDevice(PDEV);
 
     if(!AtaHost){

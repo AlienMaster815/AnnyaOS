@@ -23,12 +23,13 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("HDAPCI::AddDevice()\n");
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
-    uint8_t DeviceID = PlatformDevice->DeviceID;
+    while(1);
+    //PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    //uint8_t DeviceID = PlatformDevice->DeviceID;
 
-    LouPrint("Pci Device ID:%d\n", DeviceID);
+    //LouPrint("Pci Device ID:%d\n", DeviceID);
 
-    LouPrint("PCI Device Flags:%bl\n", SupportedHdaPciDevices[DeviceID].DriverData);
+    //LouPrint("PCI Device Flags:%bl\n", SupportedHdaPciDevices[DeviceID].DriverData);
 
     LouPrint("HDAPCI::AddDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

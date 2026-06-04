@@ -740,9 +740,7 @@ typedef struct _DEVICE_OBJECT {
   USHORT                        Spare1;
   struct _DEVOBJ_EXTENSION*     DeviceObjectExtension;
   PVOID                         Reserved;
-  //LDM 
-  struct _PCI_DEVICE_OBJECT*    PDEV;
-  uint64_t                      DeviceID;
+
 } DEVICE_OBJECT,*  PDEVICE_OBJECT;
 
 typedef struct _DEVOBJ_EXTENSION {

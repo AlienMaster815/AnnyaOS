@@ -34,6 +34,20 @@ typedef struct PACKED _MCFG_TABLE{
     MCFG_TABLE_ENTRY    TableEntries[];
 }MCFG_TABLE, * PMCFG_TABLE;
 
+typedef struct _PCI_DEVICE_GROUP{
+
+}PCI_DEVICE_GROUP, * PPCI_DEVICE_GROUP;
+
+typedef struct _LOADED_PCI_MODULE{
+    ListHeader              Peers;
+    LPWSTR                  RegistryEntry;
+    PDRIVER_OBJECT          DriverObject;
+    ListHeader              PlatformDevices;
+    BOOLEAN                 BootModule;
+
+}LOADED_PCI_MODULE, * PLOADED_PCI_MODULE;
+
+
 LOUAPI void PciHalPciDbgPrint(char* format, ...);
 
 UINT32 LegacyPciReadUint32Ex(UINT8 Bus, UINT8 Slot, UINT8 Function, UINT32 Offset);

@@ -125,6 +125,7 @@ LouKeReadRegistryValue(
     size_t  Count
 );
 
+KERNEL_EXPORT
 PVOID 
 LouKeOpenRegistryHandle(
     LPWSTR  Key,

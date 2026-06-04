@@ -26,9 +26,10 @@ LOUSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
     struct _DEVICE_OBJECT* PlatformDevice
 ){
-    LOUSTATUS Status;
-    PPCI_DEVICE_OBJECT PDEV = (PPCI_DEVICE_OBJECT)PlatformDevice->PDEV;
     LouPrint("OHCI.SYS::AddDevice()\n");
+    while(1);
+    LOUSTATUS Status;
+    PPCI_DEVICE_OBJECT PDEV = 0x00;//(PPCI_DEVICE_OBJECT)PlatformDevice->PDEV;
 
     POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
 

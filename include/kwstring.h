@@ -480,6 +480,14 @@ _ui64towUppr_s(
     int     Radix
 );
 
+KERNEL_EXPORT
+LPWSTR
+_ui64towUppr(
+    UINT64  Value,
+    LPWSTR  Str, 
+    int     Radix
+);
+
 #ifndef _KERNEL_MODULE_
 LPWSTR LouKeForkWcsStr(LPWSTR Str);
 LPWSTR LouKeForkWcsStr_s(LPWSTR Str, size_t Len);

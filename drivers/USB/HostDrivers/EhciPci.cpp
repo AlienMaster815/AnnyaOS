@@ -19,7 +19,8 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("EHCI.SYS::AddDevice()\n");
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    while(1);
+    PPCI_DEVICE_OBJECT PDEV = 0x00;//PlatformDevice->PDEV;
 
     PciHalMapPciResource(PDEV, EHCI_OPERATIONAL_REGISTER_BAR, KERNEL_DMA_MEMORY);
 

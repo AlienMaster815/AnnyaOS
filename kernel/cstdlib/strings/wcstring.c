@@ -1213,6 +1213,17 @@ _ui64towUppr_s(
 }
 
 KERNEL_EXPORT
+LPWSTR
+_ui64towUppr(
+    UINT64  Value,
+    LPWSTR  Str, 
+    int     Radix
+){
+    _ui64tow(Value, Str, Radix);
+    return _wcsupr(Str); 
+}
+
+KERNEL_EXPORT
 errno_t
 _ultow_s(
     unsigned long   Value,

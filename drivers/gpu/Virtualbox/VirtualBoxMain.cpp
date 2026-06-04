@@ -176,8 +176,9 @@ LOUAPI
 LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
+    while(1);
     LOUSTATUS Status = STATUS_SUCCESS;
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = 0;//PlatformDevice->PDEV;
     
     PVIRTUALBOX_PRIVATE_DATA VBox;
     if(!VboxCheckSupport(VIRTUALBOX_VBE_DISPI_ID_HGSMI)){

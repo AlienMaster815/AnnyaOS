@@ -247,7 +247,7 @@ BOOLEAN PciHalNativeCheckSlot(
             NewPciDevice->Dispatch = PciNativeDispatch;
             
             PciHalRegisterPciDevice(NewPciDevice);
-            
+
             if((HeaderType & 0x03) == 1){
                 PciHalInitializePciBridge(NewPciDevice);
             }
@@ -341,15 +341,5 @@ LOUSTATUS PciEntry(){
     }
     
     PciHalPciDbgPrint("PCI.SYS:PciEntry() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
-DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
-
-
-    PciHalPciDbgPrint("PCI.SYS:PciHalScanBootDevices()\n");
-
-    
-    while(1);
     return STATUS_SUCCESS;
 }

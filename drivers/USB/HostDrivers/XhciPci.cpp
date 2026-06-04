@@ -20,8 +20,9 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("XHCI.SYS::AddDevice()\n");
+    while(1);
     PXHCI_DEVICE NewXhciDevice = LouKeMallocType(XHCI_DEVICE, KERNEL_GENERIC_MEMORY);
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = 0x00; //PlatformDevice->PDEV;
     NewXhciDevice->PDEV = PDEV;
     
     PciHalEnableMemorySpace(PDEV);

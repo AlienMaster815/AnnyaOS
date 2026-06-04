@@ -17,8 +17,8 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("DRIVER_NAME::AddDevice()\n");
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
-    uint8_t DeviceID = PlatformDevice->DeviceID;
+    //PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    //uint8_t DeviceID = PlatformDevice->DeviceID;
 
     LouPrint("Pci Device ID:%d\n", DeviceID);
 

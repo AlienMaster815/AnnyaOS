@@ -89,9 +89,10 @@ LOUSTATUS InitializePcNetIIDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("InitializePcNetIIDevice()\n");
+    while(1);
     PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver;
     PPCNET_II_DRIVER_DATA PcNetPrivate;
-    PPCI_DEVICE_OBJECT PDEV = PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = 0;//PlatformDevice->PDEV;
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
     uint64_t PortBase = 0;
    

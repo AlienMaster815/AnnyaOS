@@ -363,40 +363,40 @@ void ParseAPIC(uint8_t* entryAddress, uint8_t* endAddress) {
             }
             UpgradeNPROC();
             LouKeCreateCpuTracker(localAPIC->ProcessorID, localAPIC->APICID);
-            LouPrint("Processor ID:%d, APIC ID:%d, Flags:%d\n", localAPIC->ProcessorID, localAPIC->APICID, localAPIC->Flags);
+            LouPrint("Processor ID:%d, APIC ID:%d, Flags:%d\n", (UINT64)localAPIC->ProcessorID, (UINT64)localAPIC->APICID, (UINT64)localAPIC->Flags);
             break;
         }
         case 1: {
             ACPI_MADT_IO_APIC* ioAPIC = (ACPI_MADT_IO_APIC*)entryAddress;
             LouKeInitializeIoApicTracker(ioAPIC);
-            LouPrint("I/O APIC ID:%d, Address:%h, Global System Interrupt Base:%d\n", ioAPIC->IOAPICID, ioAPIC->IOAPICAddress, ioAPIC->GlobalSystemInterruptBase);
+            LouPrint("I/O APIC ID:%d, Address:%h, Global System Interrupt Base:%d\n", (UINT64)ioAPIC->IOAPICID, (UINT64)ioAPIC->IOAPICAddress, (UINT64)ioAPIC->GlobalSystemInterruptBase);
             break;
         }
         case 2: {
             ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE* iso = (ACPI_MADT_INTERRUPT_SOURCE_OVERRIDE*)entryAddress;
             LouKeInitializeOverideEntry(iso);            
-            LouPrint("Bus: %d, Source:%d, Global System Interrupt:%d, Flags:%d\n", iso->Bus, iso->Source, iso->GlobalSystemInterrupt, iso->Flags);
+            LouPrint("Bus: %d, Source:%d, Global System Interrupt:%d, Flags:%d\n", (UINT64)iso->Bus, (UINT64)iso->Source, (UINT64)iso->GlobalSystemInterrupt, (UINT64)iso->Flags);
             break;
         }
         case 3: {
             ACPI_MADT_NMI* nmi = (ACPI_MADT_NMI*)entryAddress;
-            LouPrint("Flags:%d, Global System Interrupt:%d\n", nmi->Flags, nmi->GlobalSystemInterrupt);
+            LouPrint("Flags:%d, Global System Interrupt:%d\n", (UINT64)nmi->Flags, (UINT64)nmi->GlobalSystemInterrupt);
             break;
         }
         case 4: {
             ACPI_MADT_LOCAL_APIC_NMI* localAPICNMI = (ACPI_MADT_LOCAL_APIC_NMI*)entryAddress;
-            LouPrint("Processor ID: %d, Flags: %d, LINT:%d\n", localAPICNMI->ProcessorID, localAPICNMI->Flags, localAPICNMI->LocalAPICLint);
+            LouPrint("Processor ID: %d, Flags: %d, LINT:%d\n", (UINT64)localAPICNMI->ProcessorID, (UINT64)localAPICNMI->Flags, (UINT64)localAPICNMI->LocalAPICLint);
             break;
         }
         case 5: {
             ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE* laa = (ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE*)entryAddress;
-            LouPrint("Local APIC Address:%h\n", laa->LocalApicAddress);
+            LouPrint("Local APIC Address:%h\n", (UINT64)laa->LocalApicAddress);
             //LocalApicBase = laa->LocalApicAddress;
             while(1);
             break;
         }
         default:
-            LouPrint("Unknown entry type:%d\n", header->Type);
+            LouPrint("Unknown entry type:%d\n", (UINT64)header->Type);
             while(1);
             break;
         }
