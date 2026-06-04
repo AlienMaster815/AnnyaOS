@@ -58,7 +58,7 @@ typedef struct _LOADED_PCI_MODULE{
 }LOADED_PCI_MODULE, * PLOADED_PCI_MODULE;
 
 
-LOUAPI void PciHalPciDbgPrint(char* format, ...);
+LOUAPI void PciHalDbgPrint(char* format, ...);
 
 UINT32 LegacyPciReadUint32Ex(UINT8 Bus, UINT8 Slot, UINT8 Function, UINT32 Offset);
 void LegacyPciWriteUint32Ex(UINT8 Bus, UINT8 Slot, UINT8 Function, UINT32 Offset, UINT32 Data);

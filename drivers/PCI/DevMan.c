@@ -260,9 +260,9 @@ LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV){
     MutexUnlock(&PciTmpGenericLock);
 
 
-    PciHalPciDbgPrint("PCI.SYS:Registered Pci Device:%d\n", RegisteredPciDevices);
-    PciHalPciDbgPrint("PCI.SYS:VendorID:%h ::  DeviceID:%h\n", (UINT64)Tmp->VendorID, (UINT64)Tmp->DeviceID);
-    PciHalPciDbgPrint("PCI.SYS:PCI BUS:%d  ::  SLOT:%d  ::  FUNC:%d\n", (UINT64)PDEV->Bus, (UINT64)PDEV->Slot, (UINT64)PDEV->Function);
+    PciHalDbgPrint("PCI.SYS:Registered Pci Device:%d\n", RegisteredPciDevices);
+    PciHalDbgPrint("PCI.SYS:VendorID:%h ::  DeviceID:%h\n", (UINT64)Tmp->VendorID, (UINT64)Tmp->DeviceID);
+    PciHalDbgPrint("PCI.SYS:PCI BUS:%d  ::  SLOT:%d  ::  FUNC:%d\n", (UINT64)PDEV->Bus, (UINT64)PDEV->Slot, (UINT64)PDEV->Function);
 
     return STATUS_SUCCESS;
 }
@@ -557,7 +557,7 @@ LOUSTATUS PciHalInitializeAllUninitializedDevices(){
 DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
 
 
-    PciHalPciDbgPrint("PCI.SYS:PciHalScanBootDevices()\n");
+    PciHalDbgPrint("PCI.SYS:PciHalScanBootDevices()\n");
 
     PPCI_MANAGER_DATA TmpObject;
     MutexLock(&PciDataLock);
@@ -583,7 +583,7 @@ DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
 
     PciHalInitializeAllUninitializedDevices();
 
-    PciHalPciDbgPrint("PCI.SYS:PciHalScanBootDevices() STATUS_SUCCESS\n");
+    PciHalDbgPrint("PCI.SYS:PciHalScanBootDevices() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;
 }

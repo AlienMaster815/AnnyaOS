@@ -4,77 +4,225 @@
 
 #include "Pci.h"
 
-/*
-    BOOLEAN     (*PciHalPciSupportsSpecialCycles)           (PPCI_DEVICE_OBJECT PDEV);
-    BOOLEAN     (*PciHalPciSupportsMemoryWriteInvalidate)   (PPCI_DEVICE_OBJECT PDEV);
-    BOOLEAN     (*PciHalPciSupportsVgaPaletteSnooping)      (PPCI_DEVICE_OBJECT PDEV);
-    LOUSTATUS   (*PciHalEnableParityErrorResponce)          (PPCI_DEVICE_OBJECT PDEV);
-    LOUSTATUS   (*PciHalDisableParityErrorResponce)         (PPCI_DEVICE_OBJECT PDEV);
-    BOOLEAN     (*PciHalIsParityErrorResponceEnabled)       (PPCI_DEVICE_OBJECT PDEV);
-    LOUSTATUS   (*PciHalEnableSerr)                         (PPCI_DEVICE_OBJECT PDEV);
-    LOUSTATUS   (*PciHalDisableSerr)                        (PPCI_DEVICE_OBJECT PDEV);
-    BOOLEAN     (*PciHalIsSerrEnabled)                      (PPCI_DEVICE_OBJECT PDEV);
-    BOOLEAN     (*PciHalIsFastBackToBackEnabled)            (PPCI_DEVICE_OBJECT PDEV);
-    LOUSTATUS   (*PciHalEnableInterrupts)                   (PPCI_DEVICE_OBJECT PDEV);
-    LOUSTATUS   (*PciHalDisableInterrupts)                  (PPCI_DEVICE_OBJECT PDEV);
-    BOOLEAN     (*PciHalAreInterruptsEnabled)               (PPCI_DEVICE_OBJECT PDEV);
-*/
-
 DRIVER_EXPORT LOUSTATUS PciHalEnableIoSpace(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalEnableIoSpace()\n");
-    while(1);
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & 1){
+        PciHalDbgPrint("PCI.SYS:IO Space Already Enabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command | 1);
+    Command = PciHalGetCommand(PDEV);
+    if(!(Command & 1)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Enable IO Space\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalDisableIoSpace(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalDisableIoSpace()\n");
-    while(1);
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(!(Command & 1)){
+        PciHalDbgPrint("PCI.SYS:IO Space Already Disabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command & ~1);
+    Command = PciHalGetCommand(PDEV);
+    if(Command & 1){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Disabled IO Space\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT BOOLEAN PciHalIsIoSpaceEnabled(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalIsIoSpaceEnabled()\n");
-    while(1);
-    return true;
+    return (PciHalGetCommand(PDEV) & 1) ? true : false;
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalEnableMemorySpace(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalEnableMemorySpace()\n");
-    while(1);
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 1)){
+        PciHalDbgPrint("PCI.SYS:Memory Space Already Enabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command | (1 << 1));
+    Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 1))){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Enable Memory Space\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalDisableMemorySpace(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalDisableMemorySpace()\n");
-    while(1);
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 1))){
+        PciHalDbgPrint("PCI.SYS:Memory Space Already Disabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command & ~(1 << 1));
+    Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 1)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Disabled Memory Space\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT BOOLEAN PciHalIsMemorySpaceEnabled(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalDisableMemorySpace()\n");
-    while(1);
-    return true;
+    return (PciHalGetCommand(PDEV) & (1 << 1)) ? true : false;
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalEnableBusMaster(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalEnableBusMaster()\n");
-    while(1);
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 2)){
+        PciHalDbgPrint("PCI.SYS:Bus Master Already Enabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command | (1 << 2));
+    Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 2))){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Enable Bus Master\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalDisableBusMaster(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalDisableBusMaster()");
-    while(1);
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 2))){
+        PciHalDbgPrint("PCI.SYS:Bus Master Already Disabled\n");
+        return STATUS_SUCCESS;
+    } 
+    PciHalSetCommand(PDEV, Command & ~(1 << 2));
+    Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 2)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Disable Bus Mastering\n");
+        return STATUS_UNSUCCESSFUL;
+    }
     return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT BOOLEAN PciHalIsBusMasterEnabled(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalIsBusMasterEnabled()\n");
-    while(1);
-    return true;
+    return (PciHalGetCommand(PDEV) & (1 << 2)) ? true : false;
 }
 
+BOOLEAN PciHalPciSupportsSpecialCycles(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 3)) ? true : false;
+}
 
+BOOLEAN PciHalPciSupportsMemoryWriteInvalidate(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 4)) ? true : false;
+}
+
+BOOLEAN PciHalPciSupportsVgaPaletteSnooping(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 5)) ? true : false;
+}
+
+LOUSTATUS PciHalEnableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 6)){
+        PciHalDbgPrint("PCI.SYS:Parrity Error Responce Already Enabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command | (1 << 6));
+    Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 6))){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Enable Parrity Error Responce\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS PciHalDisableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 6))){
+        PciHalDbgPrint("PCI.SYS:Parrity Error Responce Already Disabled\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetCommand(PDEV, Command & ~(1 << 6));
+    Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 6)){
+        PciHalDbgPrint("PCI.SYS:Unable To Disable Parrity Error Responce\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+BOOLEAN PciHalIsParityErrorResponceEnabled(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 6)) ? true : false;
+}
+
+LOUSTATUS PciHalEnableSerr(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 8)){
+        PciHalDbgPrint("PCI.SYS:SERR Is Already Enabled\n");
+        return STATUS_SUCCESS;   
+    }
+    PciHalSetCommand(PDEV, Command | (1 << 8));
+    Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 8))){
+        PciHalDbgPrint("PCI.SYS:Unable To Enable SERR\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS PciHalDisableSerr(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 8)){
+        PciHalDbgPrint("PCI.SYS:SERR Is Already Disabled\n");
+        return STATUS_SUCCESS;   
+    }
+    PciHalSetCommand(PDEV, Command & ~(1 << 8));
+    Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 8)){
+        PciHalDbgPrint("PCI.SYS:Unable To Disable SERR\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+BOOLEAN PciHalIsSerrEnabled(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 8)) ? true : false;
+}
+
+BOOLEAN PciHalIsFastBackToBackEnabled(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 9)) ? true : false;
+}
+
+LOUSTATUS PciHalEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 10))){
+        PciHalDbgPrint("PCI.SYS:Interrupt Are Already Enabled\n");
+        return STATUS_SUCCESS;
+    } 
+    PciHalSetCommand(PDEV, Command & ~(1 << 10));
+    Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 10)){
+        PciHalDbgPrint("PCI.SYS:Unable To Enable Interrupts\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS PciHalDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Command = PciHalGetCommand(PDEV);
+    if(Command & (1 << 10)){
+        PciHalDbgPrint("PCI.SYS:Interrupt Are Already Disabled\n");
+        return STATUS_SUCCESS;
+    } 
+    PciHalSetCommand(PDEV, Command | (1 << 10));
+    Command = PciHalGetCommand(PDEV);
+    if(!(Command & (1 << 10))){
+        PciHalDbgPrint("PCI.SYS:Unable To Disable Interrupts\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+BOOLEAN PciHalAreInterruptsEnabled(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 10)) ? false : true;
+}
 
 
 DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(

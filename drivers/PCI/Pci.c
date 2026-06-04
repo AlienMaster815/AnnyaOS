@@ -54,7 +54,7 @@ static void PciHalUnMapEcamDevice(PVOID VirtualAddress){
     MutexUnlock(&EcamRemapsLock);
 }
 
-void PciHalPciDbgPrint(char* format, ...){
+void PciHalDbgPrint(char* format, ...){
     if(PciDebugOn){
         va_list args;
         va_start(args, format);
@@ -223,9 +223,9 @@ BOOLEAN PciHalNativeCheckSlot(
             if(!EcamDeviceBase){
                 continue;
             }
-            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+            //PciHalDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
             EcamDeviceBase = PciHalMapEcamDevice(Group, Bus, i, 0, EcamDeviceBase);
-            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+            //PciHalDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
 
             VendorID = NativePciGetVendorIdEx(EcamDeviceBase);
             HeaderType = NativePciGetHeaderTypeEx(EcamDeviceBase);
@@ -260,7 +260,7 @@ void PciHalInitializePciBus(
     UINT16  Group,
     UINT8   Bus
 ){
-    PciHalPciDbgPrint("PCI.SYS:Scaning Group:%d::Bus:%d\n", (UINT64)Group, (UINT64)Bus);
+    PciHalDbgPrint("PCI.SYS:Scaning Group:%d::Bus:%d\n", (UINT64)Group, (UINT64)Bus);
     for(SIZE i = 0 ; i < 32; i++){
         BOOLEAN Success = false;
         UINT32* EcamDeviceBase = PciHalGetNativePciPhysicalAddress(
@@ -270,9 +270,9 @@ void PciHalInitializePciBus(
             0
         );
         if(EcamDeviceBase){
-            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+            //PciHalDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
             EcamDeviceBase = PciHalMapEcamDevice(Group, Bus, i, 0, EcamDeviceBase);
-            //PciHalPciDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
+            //PciHalDbgPrint("PCI.SYS:Group:%d::Bus:%d::Slot:%d:Ecam:%h\n", (UINT64)Group, (UINT64)Bus, (UINT64)i, (UINT64)EcamDeviceBase);
             Success = PciHalNativeCheckSlot(
                 EcamDeviceBase,
                 Group,
@@ -304,31 +304,31 @@ LOUSTATUS PciEntry(){
     LouKeReadRegistryByteValue(PciDebugKey, &DbgValue);
     PciDebugOn = DbgValue ? true : false;
 
-    PciHalPciDbgPrint("PCI.SYS:PciEntry()\n");
+    PciHalDbgPrint("PCI.SYS:PciEntry()\n");
 
-    PciHalPciDbgPrint("PCI.SYS:Initializing PCI Objects\n");
+    PciHalDbgPrint("PCI.SYS:Initializing PCI Objects\n");
 
     LouKeCreateFastObjectClass("PDEV", 256, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), 0, KERNEL_GENERIC_MEMORY);
     LouKeCreateFastObjectClass("PCICONFIG", 256, sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG), 0 , KERNEL_GENERIC_MEMORY);
     
-    PciHalPciDbgPrint("PCI.SYS:Acquirng MCFG Table\n");
+    PciHalDbgPrint("PCI.SYS:Acquirng MCFG Table\n");
 
     McfgTable = (PMCFG_TABLE)LouKeAcquireAcpiTable(ACPI_SIG_MCFG);
 
     if(McfgTable){
         McfgEntryCount = LouKeGetMcfgCount((void*)McfgTable);
     }else{
-        PciHalPciDbgPrint("PCI.SYS:WARNING No MCFG Table Detected On System\n");
+        PciHalDbgPrint("PCI.SYS:WARNING No MCFG Table Detected On System\n");
     }
 
-    PciHalPciDbgPrint("PCI.SYS:Getting Max Groups\n");
+    PciHalDbgPrint("PCI.SYS:Getting Max Groups\n");
     
     MaxGroups = PcieGetMaxGroups();
 
-    PciHalPciDbgPrint("PCI.SYS:Max Groups:%d\n", MaxGroups);
+    PciHalDbgPrint("PCI.SYS:Max Groups:%d\n", MaxGroups);
 
 
-    PciHalPciDbgPrint("PCI.SYS:Scanning PCI Bus\n");
+    PciHalDbgPrint("PCI.SYS:Scanning PCI Bus\n");
 
     
     for(SIZE i = 0 ; i < MaxGroups; i++){
@@ -340,6 +340,6 @@ LOUSTATUS PciEntry(){
         }
     }
     
-    PciHalPciDbgPrint("PCI.SYS:PciEntry() STATUS_SUCCESS\n");
+    PciHalDbgPrint("PCI.SYS:PciEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
