@@ -1069,14 +1069,12 @@ LOUSTATUS AddAhciDevice(
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AHCI.SYS:AddAhciDevice()\n");
-    while(1);
-    //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
     LOUSTATUS Status = STATUS_SUCCESS;
 
-    //get the device ID and Pci Device from the LKDM
-    uint64_t AhciDeviceID = 0;//Device->DeviceID;
+    PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(Device);    
+    uint64_t AhciDeviceID = PDEV->DeviceID;
     uint8_t BoardID = AhciDevices[AhciDeviceID].BoardID;
-    PPCI_DEVICE_OBJECT PDEV = 0x00;//LkdmDeviceObjectToPciDevice(Device);    
+    //LouPrint("Ahci DeviceID:%d\r\n", Device->DeviceID);
     UNUSED PAHCI_DRIVER_BOARD_INFORMATION BoardInformation = &AhciBoardInfomationTable[BoardID];
     int Abar = AHCI_STANDARD_ABAR;
     uint8_t PortCount;
@@ -1363,13 +1361,11 @@ DriverEntry(
     //tell the System where are key Nt driver functions are
     DriverObject->DriverUnload = AhciUnloadDriver;
     DriverObject->DriverExtension->AddDevice = AddAhciDevice;
-    //tell the lousine kernel we will be using the
-    //Lousine Kernel Driver Module (LKDM) alongside the
-    //NT Kernel Moudle Subsystem so it fills
-    //out the extra information relating to the LKDM
-    //DriverObject->DriverUsingLkdm = true;
-    //fill LDM information
-    //DriverObject->DeviceTable = (uintptr_t)AhciDevices;
+
+    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, AhciDevices);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("AHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    }
     
     LouPrint("AHCI.SYS:DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
