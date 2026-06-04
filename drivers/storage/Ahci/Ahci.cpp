@@ -1165,7 +1165,7 @@ LOUSTATUS AddAhciDevice(
     //At this point we are able to grab the host and start filling out
     //private data from the information on the controller
 
-    PciHalMapPciResource(PDEV, Abar, KERNEL_DMA_MEMORY);
+    PciHalMapPciResource(PDEV, Abar, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
 
     PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)PciHalGetIoRegion(PDEV, Abar, 0);
 

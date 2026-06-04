@@ -228,12 +228,91 @@ BOOLEAN PciHalAreInterruptsEnabled(PPCI_DEVICE_OBJECT PDEV){
 DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
     PPCI_DEVICE_OBJECT  PDEV, 
     UINT8               Bar, 
-    UINT64              PageFlags
+    UINT64              OverideFlags
 ){
+    if(PDEV->BarMapping[Bar]){
+        return STATUS_INVALID_PARAMETER;
+    }
 
-    LouPrint("PciHalMapPciResource()\n");
-    while(1);
-    return STATUS_SUCCESS;
+    BOOLEAN IoOn = PciHalIsIoSpaceEnabled(PDEV);
+    BOOLEAN MemOn = PciHalIsMemorySpaceEnabled(PDEV);
+    UINT8 HeaderType = PciHalGetHeaderType(PDEV); 
+    LOUSTATUS Status = STATUS_SUCCESS;
+    if(IoOn)PciHalDisableIoSpace(PDEV);
+    if(MemOn)PciHalDisableMemorySpace(PDEV);
+    
+    UINT32 BarSize;
+    UINT32 TmpBarValue;
+    UINT64 BarPhyAddress = 0;
+    UINT64 BarVAddress = 0;
+    BOOLEAN WriteThroght = false;
+    BOOLEAN Using32BitAllocator = false;
+
+    switch(HeaderType){
+        case 0:{
+            if(Bar > 5){
+                LouPrint("PCI.SYS:Error Bar Parameter Exceedes PCI Bar Limit\n");
+                Status = STATUS_INVALID_PARAMETER;
+                break;
+            }
+            
+            TmpBarValue = PciHalGeneralDeviceGetBar(PDEV, Bar);
+            if(TmpBarValue & 1){
+                break; //TODO:IO_BAR
+            }
+            PciHalGeneralDeviceSetBar(PDEV, Bar, UINT32_MAX);
+            BarSize = PciHalGeneralDeviceGetBar(PDEV, Bar);
+            if(!((TmpBarValue >> 1) & 0x03)){
+                BarSize &= 0xFFFFFFF0;
+                BarSize = ~(BarSize) + 1;
+                BarPhyAddress = TmpBarValue & 0xFFFFFFF0;
+                Using32BitAllocator = true;
+            }else if(!((TmpBarValue >> 1) & 0x03) == 1){
+                LouPrint("PCI.SYS:Pci HAL Cannot Allocate 16 Bit Memory At This Time\n");
+                Status = STATUS_INVALID_PARAMETER;
+                break;
+            }else if(((TmpBarValue >> 1) & 0x03) == 2){
+
+                LouPrint("PCI.SYS:PciHalMapPciResource():HERE\n");
+                while(1);
+            }else{
+                LouPrint("PCI.SYS:Unkown PCI Bar Type\n");
+                Status = STATUS_INVALID_PARAMETER;
+                break;
+            }
+            BarVAddress = (UINT64)LouVMallocEx(BarSize, BarSize);
+            if(!BarPhyAddress && Using32BitAllocator){
+                BarPhyAddress = (UINT64)LouAllocatePhysical32UpEx(BarSize, BarSize);
+            }else if(!BarPhyAddress){
+                BarPhyAddress = (UINT64)LouAllocatePhysical64UpEx(BarSize, BarSize);
+            }
+            else{
+                EnforceSystemMemoryMap(BarPhyAddress, BarSize);
+            }
+            PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress);
+            if(PCI_IOMAP_FLAGS_NO_WRITE_THROUGH){
+                LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
+            }else if(PCI_IOMAP_FLAGS_USE_WRITE_COMBINE){
+                LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_WRITE_COMBINE_MEMORY);
+            }else {
+                LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
+            }
+
+            PDEV->BarMapping[Bar] = BarVAddress;
+            PDEV->BarSize[Bar] = BarSize;
+            PDEV->BarFlags[Bar] = OverideFlags; 
+            break;
+        }
+        default:{
+            LouPrint("PCI.SYS:ERROR Unable To Map PCI Resources\n");
+            Status = STATUS_INVALID_PARAMETER;
+            break;
+        } 
+    }
+
+    if(IoOn)PciHalEnableIoSpace(PDEV);
+    if(MemOn)PciHalEnableMemorySpace(PDEV);
+    return Status;
 }
 
 DRIVER_EXPORT PVOID PciHalGetIoRegion(
@@ -241,9 +320,7 @@ DRIVER_EXPORT PVOID PciHalGetIoRegion(
     UINT8               Bar,
     SIZE                Offset
 ){
-    LouPrint("PCI.SYS:PciHalGetIoRegion()\n");
-    while(1);
-    return 0x00;
+    return (PVOID)(UINTPTR)(PDEV->BarMapping[Bar] + Offset);
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags){
@@ -355,7 +432,5 @@ DRIVER_EXPORT SIZE PciHalGetIoRegionSize(
     PPCI_DEVICE_OBJECT PDEV, 
     UINT8 Bar
 ){
-    LouPrint("PCI.SYS:PciHalGetIoRegionSize()\n");
-    while(1);
-    return 0;
+    return PDEV->BarSize[Bar];
 }

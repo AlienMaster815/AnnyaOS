@@ -196,3 +196,5 @@ EXPORTS
     LouKeGetRegistryKeySize
     LouKeReadRegistryWcsValue
     LouKeLoadKernelModule
+    LouAllocatePhysical32UpEx
+    LouAllocatePhysical64UpEx

@@ -77,8 +77,6 @@ static LOUSTATUS VBoxAccelerationInitialize(
     
     VBox->AvailableVramSize -= VBox->CrtcCount * VBVA_MINIMUM_BUFFER_SIZE;
 
-    PciHalMapPciResource(PDEV, 0, USER_WRITE_COMBINE_MEMORY);
-
     VBox->VbvaBuffers = (uint8_t*)PciHalGetIoRegion(PDEV, 0, VBox->AvailableVramSize);
     if(!VBox->VbvaBuffers){
         return STATUS_INSUFFICIENT_RESOURCES;
@@ -128,7 +126,7 @@ LOUSTATUS VBoxInitializeHardware(
     LouPrint("Support For Any Pitch : %s\n", VBox->AnyPitch ? "YES" : "NO");
     LouPrint("Support For VBVA      : %s\n", VBox->VBoxVideo ? "YES" : "NO");
 
-    PciHalMapPciResource(PDEV, 0, KERNEL_GENERIC_MEMORY);
+    PciHalMapPciResource(PDEV, 0, PCI_IOMAP_FLAGS_USE_WRITE_COMBINE);
 
     VBox->GuestHeap = (uint8_t*)((uint64_t)PciHalGetIoRegion(
         PDEV, 

@@ -28,7 +28,7 @@ LOUSTATUS PiixInitializePiix3Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
     LouKeInitializeEventTimeOut(&PiixPrivateData->PrimaryEvent, 10000);
     LouKeInitializeEventTimeOut(&PiixPrivateData->SecondaryEvent, 10000);
 
-    PciHalMapPciResource(PDEV, BMBIA_BAR, KERNEL_DMA_MEMORY);
+    PciHalMapPciResource(PDEV, BMBIA_BAR, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
 
     PiixPrivateData->Bmiba = (UINT32)(UINTPTR)PciHalGetIoRegion(PDEV, BMBIA_BAR, 0);
     PiixPrivateData->MaxPioMode = 4;

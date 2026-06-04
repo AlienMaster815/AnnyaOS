@@ -42,7 +42,7 @@ LOUSTATUS AddDevice(
 
     PciHalEnableBusMaster(PDEV);
 
-    PciHalMapPciResource(PDEV, OHCI_OPERATIONAL_REGISTER_BAR, KERNEL_DMA_MEMORY);
+    PciHalMapPciResource(PDEV, OHCI_OPERATIONAL_REGISTER_BAR, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
 
     OhciDevice->OperationalRegisters = (POHCI_OPERATIONAL_REGISTERS)PciHalGetIoRegion(
         PDEV,

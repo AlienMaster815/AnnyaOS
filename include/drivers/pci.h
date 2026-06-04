@@ -88,6 +88,9 @@ typedef struct _PCI_DEVICE_OBJECT{
 	uintptr_t 					VgaDecode; //only video devces
 	bool						DeviceManaged;
 	UINT64						DriverFeatures;
+	UINT64 						BarSize[6];
+	UINT64 						BarMapping[6];
+	UINT64						BarFlags[6];
 }PCI_DEVICE_OBJECT, * PPCI_DEVICE_OBJECT;
 
 typedef struct _AGP_BRIDGE_DATA{
@@ -166,6 +169,12 @@ typedef struct _AGP_BRIDGE_DATA{
 #define PCI_CARDBUS_DEVICE_CONFIG_16BIT_PC_CARD_LEGACY_BASE	0x44
 
 #define PCIE_BUS_CONFIG_SIZE 0x00100000
+
+#define PCI_IOMAP_FLAGS_DEFAULT_MAPPING		(0)
+#define PCI_IOMAP_FLAGS_NO_WRITE_THROUGH	(1)
+#define PCI_IOMAP_FLAGS_USE_WRITE_COMBINE	(1 << 1)
+
+
 
 #define PCI_D0		((pci_power_t) 0)
 #define PCI_D1		((pci_power_t) 1)

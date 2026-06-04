@@ -488,11 +488,11 @@ static void* _LouMallocEx64(
     return NULL; 
 }
 
-void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, uint64_t Alignment) {
+KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, uint64_t Alignment) {
    return _LouMallocEx(BytesToAllocate, Alignment);
 }
 
-void* LouAllocatePhysical64UpEx(SIZE BytesToAllocate, UINT64 Alignment){
+KERNEL_EXPORT void* LouAllocatePhysical64UpEx(SIZE BytesToAllocate, UINT64 Alignment){
     void* Result = _LouMallocEx64(BytesToAllocate, Alignment);
     if(!Result){
         return _LouMallocEx(BytesToAllocate, Alignment);

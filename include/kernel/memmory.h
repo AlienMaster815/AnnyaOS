@@ -248,8 +248,8 @@ static inline size_t GetAlignmentBySize(size_t Size){
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 
 void LouFree(PVOID Addr);
-void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
-void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, uint64_t Alignment);
+KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
+KERNEL_EXPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, uint64_t Alignment);
 uint64_t GetStackBackset(uint64_t Offset);
 
 void Write16BitValueToAddress(uint64_t Address, uint16_t Value);
