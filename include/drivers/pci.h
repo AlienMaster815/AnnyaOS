@@ -604,7 +604,7 @@ DRIVER_IMPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar,
 
 DRIVER_IMPORT LOUSTATUS PciHalRegisterLousinePciDeviceTable(struct _DRIVER_OBJECT* DriverObject, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetPciDeviceObjectFromLdmDeviceObject(struct _DEVICE_OBJECT* DeviceObject);
-
+DRIVER_IMPORT LOUSTATUS PciHalScanRuntimeDevices();
 
 
 #endif

@@ -74,7 +74,10 @@ static inline void LouKeLListDeleteItem(PListHeader Item){
     }
 }
 
-#define LouKeLListDeleteAll(Head) LouKeLListDeleteItem(Head)
+static inline void LouKeLListDeleteAll(PListHeader Head){
+    LouKeSetAtomic64FromUint64((UINT64*)&Head->NextHeader, (int64_t)(UINT64)(UINTPTR)0);
+    LouKeSetAtomic64FromUint64((UINT64*)&Head->LastHeader, (int64_t)(UINT64)(UINTPTR)0);
+}
 
 
 static inline void LouKeListDeleteItem(PListHeader Item){
@@ -88,7 +91,10 @@ static inline void LouKeListDeleteItem(PListHeader Item){
     }
 }
 
-#define LouKeListDeleteAll(Head) LouKeListDeleteItem(Head)
+static inline void LouKeListDeleteAll(PListHeader Head){
+    Head->NextHeader = 0;
+    Head->LastHeader = 0;
+}
 
 static inline void LouKeListInsertInFront(
     PListHeader Item, 

@@ -11,7 +11,7 @@
 
 static LOUSINE_PCI_DEVICE_TABLE VBoxGpuPciDeviceTable[] = {
     //VBOXGPU Devices
-    {0x80EE, 0xBEEF, ANY_PCI_ID, ANY_PCI_ID, 0, 0, 0},
+    {0x80EE, 0xBEEF, .SimpleEntry = true},
     {0},
 };
 
@@ -174,9 +174,8 @@ LOUAPI
 LOUSTATUS
 AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("VBOXGPU::AddDevice()\n");
-    while(1);
     LOUSTATUS Status = STATUS_SUCCESS;
-    PPCI_DEVICE_OBJECT PDEV = 0;//PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);
     
     PVIRTUALBOX_PRIVATE_DATA VBox;
     if(!VboxCheckSupport(VIRTUALBOX_VBE_DISPI_ID_HGSMI)){
@@ -259,13 +258,10 @@ DriverEntry(
     //tell the System where are key Nt driver functions are
     DriverObject->DriverExtension->AddDevice = AddDevice;
     DriverObject->DriverUnload = UnloadDriver;
-    //tell the lousine kernel we will be using the
-    //Lousine Kernel Driver Module (LKDM) alongside the
-    //NT Kernel Moudle Subsystem so it fills
-    //out the extra information relating to the LKDM
-    //DriverObject->DriverUsingLkdm = true;
-    //fill LDM information
-    //DriverObject->DeviceTable = (uintptr_t)VBoxGpuPciDeviceTable;
+    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, VBoxGpuPciDeviceTable);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("VBOXGPU::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    }
     LouPrint("VBOXGPU::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }

@@ -199,3 +199,4 @@ EXPORTS
     LouAllocatePhysical32UpEx
     LouAllocatePhysical64UpEx
     LouKeGetPciInterruptLineFromPin
+    strcpy

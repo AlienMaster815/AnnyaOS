@@ -348,14 +348,14 @@ void LouOsKrnlStart(
 
     LouKeProbeSbIsa();
 
-    //ScanTheRestOfHarware();    
+    //PciHalScanRuntimeDevices();    
 
     //TODO: stub LdmCore.h 
 
     LouPrint("Lousine Kernel Version %s %s\n", KERNEL_VERSION ,KERNEL_ARCH);
     LouPrint("Hello Im Lousine Getting Things Ready\n");
     
-    while(1);
+    //while(1);
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     LOUSTATUS Status;

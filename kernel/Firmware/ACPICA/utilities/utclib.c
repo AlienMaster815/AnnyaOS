@@ -493,6 +493,7 @@ strtok (
  *
  ******************************************************************************/
 
+__declspec(dllexport)
 char *
 strcpy (
     char                    *DstString,

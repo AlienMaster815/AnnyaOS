@@ -32,7 +32,7 @@ int strncmp(const char* str1, const char* str2, size_t n);
 int strcmp(const char* str1, const char* str2);
 int memcmp(const void* ptr1, const void* ptr2, size_t num);
 KERNEL_EXPORT char* strncpy(char* dest, const char* src, size_t n);
-char* strcpy(char* dest, const char* src);
+KERNEL_EXPORT char* strcpy(char* dest, const char* src);
 char* strcat(char* dest, const char* src);
 KERNEL_EXPORT size_t strlen(const char* str);
 size_t wstrlen(const wchar_t* str);
