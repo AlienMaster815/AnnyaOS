@@ -1,4 +1,4 @@
-//Tyler Grenier - PciHal.c :: Lousine Kernel:PCI.SYS :: (C) 2026 GPL2
+//Tyler Grenier - PciHalHelpers.c :: Lousine Kernel:PCI.SYS :: (C) 2026 GPL2
 
 //Developer Notes:
 
@@ -106,19 +106,19 @@ DRIVER_EXPORT BOOLEAN PciHalIsBusMasterEnabled(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 2)) ? true : false;
 }
 
-BOOLEAN PciHalPciSupportsSpecialCycles(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT BOOLEAN PciHalPciSupportsSpecialCycles(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 3)) ? true : false;
 }
 
-BOOLEAN PciHalPciSupportsMemoryWriteInvalidate(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT BOOLEAN PciHalPciHasMemoryWriteInvalidateEnabled(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 4)) ? true : false;
 }
 
-BOOLEAN PciHalPciSupportsVgaPaletteSnooping(PPCI_DEVICE_OBJECT PDEV){
-    return (PciHalGetCommand(PDEV) & (1 << 5)) ? true : false;
+DRIVER_EXPORT BOOLEAN PciHalPciSupportsVgaPaletteSnooping(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetCommand(PDEV) & (1 << 5)) ? false : true;
 }
 
-LOUSTATUS PciHalEnableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT LOUSTATUS PciHalEnableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
     UINT16 Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 6)){
         PciHalDbgPrint("PCI.SYS:Parrity Error Responce Already Enabled\n");
@@ -133,7 +133,7 @@ LOUSTATUS PciHalEnableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS PciHalDisableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT LOUSTATUS PciHalDisableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
     UINT16 Command = PciHalGetCommand(PDEV);
     if(!(Command & (1 << 6))){
         PciHalDbgPrint("PCI.SYS:Parrity Error Responce Already Disabled\n");
@@ -142,17 +142,17 @@ LOUSTATUS PciHalDisableParityErrorResponce(PPCI_DEVICE_OBJECT PDEV){
     PciHalSetCommand(PDEV, Command & ~(1 << 6));
     Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 6)){
-        PciHalDbgPrint("PCI.SYS:Unable To Disable Parrity Error Responce\n");
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Disable Parrity Error Responce\n");
         return STATUS_UNSUCCESSFUL;
     }
     return STATUS_SUCCESS;
 }
 
-BOOLEAN PciHalIsParityErrorResponceEnabled(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT BOOLEAN PciHalIsParityErrorResponceEnabled(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 6)) ? true : false;
 }
 
-LOUSTATUS PciHalEnableSerr(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT LOUSTATUS PciHalEnableSerr(PPCI_DEVICE_OBJECT PDEV){
     UINT16 Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 8)){
         PciHalDbgPrint("PCI.SYS:SERR Is Already Enabled\n");
@@ -161,13 +161,13 @@ LOUSTATUS PciHalEnableSerr(PPCI_DEVICE_OBJECT PDEV){
     PciHalSetCommand(PDEV, Command | (1 << 8));
     Command = PciHalGetCommand(PDEV);
     if(!(Command & (1 << 8))){
-        PciHalDbgPrint("PCI.SYS:Unable To Enable SERR\n");
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Enable SERR\n");
         return STATUS_UNSUCCESSFUL;
     }
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS PciHalDisableSerr(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT LOUSTATUS PciHalDisableSerr(PPCI_DEVICE_OBJECT PDEV){
     UINT16 Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 8)){
         PciHalDbgPrint("PCI.SYS:SERR Is Already Disabled\n");
@@ -176,21 +176,21 @@ LOUSTATUS PciHalDisableSerr(PPCI_DEVICE_OBJECT PDEV){
     PciHalSetCommand(PDEV, Command & ~(1 << 8));
     Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 8)){
-        PciHalDbgPrint("PCI.SYS:Unable To Disable SERR\n");
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Disable SERR\n");
         return STATUS_UNSUCCESSFUL;
     }
     return STATUS_SUCCESS;
 }
 
-BOOLEAN PciHalIsSerrEnabled(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT BOOLEAN PciHalIsSerrEnabled(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 8)) ? true : false;
 }
 
-BOOLEAN PciHalIsFastBackToBackEnabled(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT BOOLEAN PciHalIsFastBackToBackEnabled(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 9)) ? true : false;
 }
 
-LOUSTATUS PciHalEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT LOUSTATUS PciHalEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     UINT16 Command = PciHalGetCommand(PDEV);
     if(!(Command & (1 << 10))){
         PciHalDbgPrint("PCI.SYS:Interrupt Are Already Enabled\n");
@@ -199,13 +199,13 @@ LOUSTATUS PciHalEnableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     PciHalSetCommand(PDEV, Command & ~(1 << 10));
     Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 10)){
-        PciHalDbgPrint("PCI.SYS:Unable To Enable Interrupts\n");
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Enable Interrupts\n");
         return STATUS_UNSUCCESSFUL;
     }
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS PciHalDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT LOUSTATUS PciHalDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     UINT16 Command = PciHalGetCommand(PDEV);
     if(Command & (1 << 10)){
         PciHalDbgPrint("PCI.SYS:Interrupt Are Already Disabled\n");
@@ -214,16 +214,154 @@ LOUSTATUS PciHalDisableInterrupts(PPCI_DEVICE_OBJECT PDEV){
     PciHalSetCommand(PDEV, Command | (1 << 10));
     Command = PciHalGetCommand(PDEV);
     if(!(Command & (1 << 10))){
-        PciHalDbgPrint("PCI.SYS:Unable To Disable Interrupts\n");
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Disable Interrupts\n");
         return STATUS_UNSUCCESSFUL;
     }
     return STATUS_SUCCESS;
 }
 
-BOOLEAN PciHalAreInterruptsEnabled(PPCI_DEVICE_OBJECT PDEV){
+DRIVER_EXPORT BOOLEAN PciHalAreInterruptsEnabled(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCommand(PDEV) & (1 << 10)) ? false : true;
 }
 
+DRIVER_EXPORT BOOLEAN PciHalGetPciInterruptStatus(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 3)) ? true : false;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciHasCapabiltiesList(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 4)) ? true : false;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciSupports66Mhz(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 5)) ? true : false; 
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciSupportsFastBackToBack(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 7)) ? true : false;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciIsAssertingMasterDataParrityError(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 8)) ? true : false;
+}
+
+DRIVER_EXPORT LOUSTATUS PciHalClearMasterDataParrityError(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    if(!(Status & (1 << 8))){
+        PciHalDbgPrint("PCI.SYS:Master Data Parrity Error Is Already Cleard\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetStatus(PDEV, (1 << 8));
+    Status = PciHalGetStatus(PDEV);
+    if(Status & (1 << 8)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Clear Master Data Parrity Error\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT UINT8 PciHalGetDevselTiming(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    return (UINT8)((Status >> 9) & 0x03);
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciIsAssertingSignaledTargetAbort(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 11)) ? true : false;
+}
+
+DRIVER_EXPORT LOUSTATUS PciHalClearSignaledTargetAbort(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    if(!(Status & (1 << 11))){
+        PciHalDbgPrint("PCI.SYS:Signaled Target Abort Is Already Cleared\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetStatus(PDEV, (1 << 11));
+    Status = PciHalGetStatus(PDEV);
+    if(Status & (1 << 11)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Clear Signaled Target Abort\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciIsAssertingReceivedTargetAbort(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 12)) ? true : false;
+}
+
+
+DRIVER_EXPORT LOUSTATUS PciHalClearReceivedTargetAbort(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    if(!(Status & (1 << 12))){
+        PciHalDbgPrint("PCI.SYS:Received Target Abort Is Already Cleared\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetStatus(PDEV, (1 << 12));
+    Status = PciHalGetStatus(PDEV);
+    if(Status & (1 << 12)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Clear Received Target Abort\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciIsAssertingReceivedMasterAbort(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 13)) ? true : false;
+}
+
+
+DRIVER_EXPORT LOUSTATUS PciHalClearReceivedMasterAbort(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    if(!(Status & (1 << 13))){
+        PciHalDbgPrint("PCI.SYS:Received Master Abort Is Already Cleared\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetStatus(PDEV, (1 << 13));
+    Status = PciHalGetStatus(PDEV);
+    if(Status & (1 << 13)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Clear Received Master Abort\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciIsAssertingSignaledSystemError(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 14)) ? true : false;
+}
+
+
+DRIVER_EXPORT LOUSTATUS PciHalClearSignaledSystemError(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    if(!(Status & (1 << 14))){
+        PciHalDbgPrint("PCI.SYS:Signaled System Error Is Already Cleared\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetStatus(PDEV, (1 << 14));
+    Status = PciHalGetStatus(PDEV);
+    if(Status & (1 << 14)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Clear Signaled System Error\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT BOOLEAN PciHalPciIsAssertingDetectedParrityError(PPCI_DEVICE_OBJECT PDEV){
+    return (PciHalGetStatus(PDEV) & (1 << 15)) ? true : false;
+}
+
+
+DRIVER_EXPORT LOUSTATUS PciHalClearDetectedParrityError(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Status = PciHalGetStatus(PDEV);
+    if(!(Status & (1 << 15))){
+        PciHalDbgPrint("PCI.SYS:Detected Parrity Error Is Already Cleared\n");
+        return STATUS_SUCCESS;
+    }
+    PciHalSetStatus(PDEV, (1 << 15));
+    Status = PciHalGetStatus(PDEV);
+    if(Status & (1 << 15)){
+        PciHalDbgPrint("PCI.SYS:WARNING:Unable To Clear Detected Parrity Error\n");
+        return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
 
 DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
     PPCI_DEVICE_OBJECT  PDEV, 
@@ -338,28 +476,6 @@ DRIVER_EXPORT PVOID PciHalGetIoRegion(
     return (PVOID)(UINTPTR)(PDEV->BarMapping[Bar] + Offset);
 }
 
-DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags){
-    LouPrint("PCI.SYS:PciHalAllocatePciIrqVectors()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-DRIVER_EXPORT UINT8 PciHalGetIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Member){
-    LouPrint("PCI.SYS:PciHalGetIrqVector()\n");
-    while(1);
-    return 0;
-}
-
-DRIVER_EXPORT void PciHalFreeIrqVectors(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalFreeIrqVectors()\n");
-    while(1);
-}
-
-DRIVER_EXPORT UINT8 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV){
-    LouPrint("PCI.SYS:PciHalGetIrqVectorCount()\n");
-    while(1);
-    return 0;
-}
 
 DRIVER_EXPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config){
     Config->Header.VendorID = PciHalGetVendorId(PDEV);
@@ -448,4 +564,71 @@ DRIVER_EXPORT SIZE PciHalGetIoRegionSize(
     UINT8 Bar
 ){
     return PDEV->BarSize[Bar];
+}
+
+UINT16 PciHalGetCapabilitiesPointerEx(PPCI_DEVICE_OBJECT PDEV, UINT16 CapPtr, UINT16 Capability, BOOLEAN PcieCap){
+    if(!PciHalPciHasCapabiltiesList(PDEV)){
+        return 0x00;
+    } 
+    UINT16 TmpPtr = 0x00;
+    UINT32 TmpCap = 0x00;
+    if((PCI_DEIVICE_IS_PCIE(PDEV)) && (PcieCap)){
+        return 0x00;
+    }
+    else if(PcieCap){
+        TmpPtr = 0x100;
+        TmpCap = PciHalReadUint32(PDEV, 0x0100);
+        while(1){
+            if((TmpCap & UINT16_MAX) == Capability){
+                return TmpPtr;
+            }
+            if(!((TmpCap >> 20) & 0x0FFF)){
+                break;
+            }
+            TmpPtr = (TmpCap >> 20) & 0x0FFF;
+            TmpCap = PciHalReadUint32(PDEV, TmpPtr);
+        }
+        return 0x00;
+    }
+
+    TmpPtr = CapPtr;
+    TmpCap = PciHalReadUint16(PDEV, TmpPtr);
+    while(1){
+        if((TmpCap & UINT8_MAX) == Capability){
+            return TmpPtr;
+        }
+        if(!((TmpCap >> 8) & UINT8_MAX)){
+            break;
+        }
+        TmpPtr = (TmpCap >> 8) & UINT8_MAX;
+        TmpCap = PciHalReadUint16(PDEV, TmpPtr);
+    }
+    return 0x00;
+}
+
+DRIVER_EXPORT UINT8 PciHalGetCapabilitiesPointer(PPCI_DEVICE_OBJECT PDEV, UINT16 Capability, BOOLEAN PcieCap){
+    if(!PciHalPciHasCapabiltiesList(PDEV)){
+        return 0x00;
+    } 
+    UINT8 HeaderType = PciHalGetHeaderType(PDEV) & 0x03;
+    UINT16 CapPtr = 0x00;
+    switch(HeaderType){
+        case 0x00:
+            CapPtr = (UINT16)PciHalGeneralDeviceGetCapabilitiesPointer(PDEV);
+            CapPtr = PciHalGetCapabilitiesPointerEx(PDEV, CapPtr, Capability, PcieCap);
+            break;
+        case 0x01:
+            CapPtr = (UINT16)PciHalBridgeDeviceGetCapabilitiesPointer(PDEV);
+            CapPtr = PciHalGetCapabilitiesPointerEx(PDEV, CapPtr, Capability, PcieCap);
+            break;
+        case 0x02:
+            CapPtr = (UINT16)PciHalCardBusDeviceGetOffsetCapabilities(PDEV);
+            CapPtr = PciHalGetCapabilitiesPointerEx(PDEV, CapPtr, Capability, PcieCap);
+            break;
+        default:{
+            LouPrint("PCI.SYS:PciHalGetCapabilitiesPointer():ERROR Invalid Header Type:%h\n", HeaderType);
+            break;
+        }
+    }
+    return CapPtr;
 }

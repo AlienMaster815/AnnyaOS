@@ -237,7 +237,7 @@ BOOLEAN PciHalNativeCheckSlot(
 
             NewPciDevice = (PPCI_DEVICE_OBJECT)LouKeAllocateFastObject("PDEV");
             NewPciDevice->EcamDeviceBase = EcamDeviceBase;
-            NewPciDevice->Group = 0;
+            NewPciDevice->Group = Group;
             NewPciDevice->Bus = Bus;
             NewPciDevice->Slot = Slot;
             NewPciDevice->Function = i;

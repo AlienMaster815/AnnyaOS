@@ -88,7 +88,6 @@ int TestLoop2();
 void LouKeInitializeFullLouACPISubsystem();
 extern void MachineCodeDebug(uint64_t FOO);
 void LouKeSwitchContext(void (*Function)(), uint64_t StackSize);
-LOUSTATUS LookForStorageDevices();
 void LouKeRunThreadContext(
     uint64_t Ctex,
     uint64_t CCTex
@@ -331,8 +330,6 @@ void LouOsKrnlStart(
     AdvancedLousineKernelInitialization();
     
     PciHalScanBootDevices();
-
-    LookForStorageDevices();
          
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     if(!StorageDevices){

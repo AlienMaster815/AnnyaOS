@@ -998,7 +998,7 @@ static void  AhciInitializeInterrupts(
         return;
     }
 
-    UINT8 Vectors = PciHalGetIrqVectorCount(PDEV);
+    UINT16 Vectors = PciHalGetIrqVectorCount(PDEV);
     if(Vectors == 1){
         LouPrint("AHCI.SYS:Interrupts For Ahci Device Initialized\n");
         return;

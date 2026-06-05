@@ -96,7 +96,7 @@ LOUSTATUS InitializePcNetIIDevice(
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
     uint64_t PortBase = 0;
    
-    PciHalMapPciResource(PDEV, 0, KERNEL_DMA_MEMORY);
+    PciHalMapPciResource(PDEV, 0, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
    
     PortBase = (uint64_t)PciHalGetIoRegion(PDEV, 0, 0);
     if(PortBase > 0xFFFF){

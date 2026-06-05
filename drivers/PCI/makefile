@@ -14,7 +14,8 @@ SRC = 	Pci.c \
 		NativePciBridge.c \
 		NativeCardBus.c \
 		PciHal.c \
-		PciHalHelpers.c
+		PciHalHelpers.c \
+		PciInterrupts.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=PciEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

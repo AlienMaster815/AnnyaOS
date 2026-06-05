@@ -64,6 +64,12 @@ typedef enum{
 	PciTotalDispatch,
 }PCI_DRIVER_DISPATCH;
 
+typedef enum {
+	PciIntx = 0,
+	PciMsi,
+	PciMsix,
+}PCI_INTERRUPT_MECHANISM;
+
 struct _PCI_MANAGER_DATA;
 struct _PCI_COMMON_CONFIG;
 
@@ -80,8 +86,9 @@ typedef struct _PCI_DEVICE_OBJECT{
 	struct _PCI_COMMON_CONFIG*	CommonConfig;
 	bool						InterruptsEnabled;
 	int 						NumberOfAssignedVectors;
-	uint8_t* 					InterruptVectors;
+	UINT16* 					InterruptVectors;
 	uint8_t						InterruptPin;
+	PCI_INTERRUPT_MECHANISM		InterruptMechanism;
 	void* 						Dev;
 	uintptr_t 					DeviceExtendedObject; 
 	uintptr_t 					DevicePrivateData;
@@ -96,6 +103,8 @@ typedef struct _PCI_DEVICE_OBJECT{
 typedef struct _AGP_BRIDGE_DATA{
 	uint64_t Foo;
 }AGP_BRIDGE_DATA, *PAGP_BRIDGE_DATA;
+
+#define PCI_DEIVICE_IS_PCIE(PDEV) (PDEV->Dispatch == PciNativeDispatch)
 
 #define PCI_CONFIG_ADDRESS_PORT 	0xCF8
 #define PCI_CONFIG_DATA_PORT    	0xCFC
@@ -174,6 +183,33 @@ typedef struct _AGP_BRIDGE_DATA{
 #define PCI_IOMAP_FLAGS_NO_WRITE_THROUGH	(1)
 #define PCI_IOMAP_FLAGS_USE_WRITE_COMBINE	(1 << 1)
 
+#define PCI_CAPABILITY_PM 				0x01 //power management
+#define PCI_CAPABILITY_VPD				0x03 //vital product data
+#define PCI_CAPABILITY_MSI 				0x05
+#define PCI_CAPABILITY_VEN_SPEC			0x09 //vendor specific
+#define PCI_CAPABILITY_POW_BUDGET		0x0D //power budget
+#define PCI_CAPABILITY_PCIE 			0x10
+#define PCI_CAPABILITY_MSI_X			0x11 
+#define PCI_CAPABILITY_AF				0x13 //advanced feature
+
+#define PCI_LEGACY_CAPABILITY_AGP		0x02
+#define PCI_LEGACY_CAPABILITY_SLOT_ID	0x04
+#define PCI_LEGACY_CAPABILITY_CPCI_HS	0x06 //compact hot swap
+#define PCI_LEGACY_CAPABILITY_PCI_X		0x07
+#define PCI_LEGACY_CAPABILITY_HT 		0x08 //Hyper Transport
+#define PCI_LEGACY_CAPABILITY_DBGPORT	0x0A //debug port
+#define PCI_LEGACY_CAPABILITY_CCRC		0x0B //compact pci central resource control
+#define PCI_LEGACY_CAPABILITY_SHPC		0x0C //pci standard hot plug controller
+#define PCI_LEGACY_CAPABILITY_SUBSYSID	0x0E //Subsystem Ven/Dev Bridge ID
+
+#define PCIE_CAPABILITY_AER 			0x0001 //Advanced Error Reporting
+#define PCIE_CAPABILITY_DEVSERNUM		0x0003 //device serial number
+#define PCIE_CAPABILITY_POW_BUDGET_EXT	0x0004
+#define PCIE_CAPABILITY_VSEC			0x000B //Modern Vendor Specific Modifications
+#define PCIE_CAPABILITY_SR_IOV 			0x0010 //single root IO virtualization
+#define PCIE_CAPABILITY_RESIZEABLE_BAR	0x0015
+#define PCIE_CAPABILITY_SECONDARY_PCIE	0x0019
+#define PCIE_CAPABILITY_PTM				0x0024 //Precision Time Measurement
 
 
 #define PCI_D0		((pci_power_t) 0)
@@ -557,7 +593,7 @@ DRIVER_IMPORT PVOID PciHalGetIoRegion(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar, SIZE O
 DRIVER_IMPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags);
 DRIVER_IMPORT UINT8 PciHalGetIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Member);
 DRIVER_IMPORT void PciHalFreeIrqVectors(PPCI_DEVICE_OBJECT PDEV);
-DRIVER_IMPORT UINT8 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV);
+DRIVER_IMPORT UINT16 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV);
 DRIVER_IMPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_COMMON_CONFIG Config);
 DRIVER_IMPORT SIZE PciHalGetIoRegionSize(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar);
 DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetDeviceFromBusAddress(UINT16 Group, UINT8 Bus, UINT8 Slot, UINT8 Function);

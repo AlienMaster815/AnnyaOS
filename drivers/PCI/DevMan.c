@@ -174,14 +174,17 @@ LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV){
         case 0x00:
             Tmp->SubVendorID = PciHalGeneralDeviceGetSubsystemVendorId(PDEV);
             Tmp->SubSystemID = PciHalGeneralDeviceGetSubsystemId(PDEV);
+            PDEV->InterruptPin = PciHalGeneralDeviceGetInterruptPin(PDEV);
             break;
         case 0x01: //PCI Bridges Dont Have Subvendors
             Tmp->SubVendorID = PciHalGetVendorId(PDEV);
             Tmp->SubSystemID = PciHalGetDeviceId(PDEV);
+            PDEV->InterruptPin = PciHalBridgeDeviceGetInterruptPin(PDEV);
             break;
         case 0x02:
             Tmp->SubVendorID = PciHalCardBusDeviceGetSubsystemVendorId(PDEV);    
-            Tmp->SubSystemID = PciHalCardBusDeviceGetSubsystemDeviceId(PDEV);    
+            Tmp->SubSystemID = PciHalCardBusDeviceGetSubsystemDeviceId(PDEV); 
+            PDEV->InterruptPin = PciHalCardBusDeviceGetInterruptPin(PDEV);   
             break;   
         default:
             LouPrint("PCI.SYS:ERROR:PciHalRegisterPciDevice():Unkown Device Type:%h\n", (UINT64)DeviceType);
@@ -585,7 +588,6 @@ DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices(){
     PciHalInitializeAllUninitializedDevices();
 
     PciHalDbgPrint("PCI.SYS:PciHalScanBootDevices() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
