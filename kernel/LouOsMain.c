@@ -235,11 +235,6 @@ void AdvancedLousineKernelInitialization(){
 
 }
 
-void KillDebuger(){
-    //DetatchWindowToKrnlDebug(HWind);
-    //LouDestroyWindow(HWind);
-}
-
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
     if(!ProcAcceleratedFeatures){
         ProcAcceleratedFeatures = Features;

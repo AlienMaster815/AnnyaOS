@@ -20,13 +20,11 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("XHCI.SYS::AddDevice()\n");
-    while(1);
     PXHCI_DEVICE NewXhciDevice = LouKeMallocType(XHCI_DEVICE, KERNEL_GENERIC_MEMORY);
-    PPCI_DEVICE_OBJECT PDEV = 0x00; //PlatformDevice->PDEV;
+    PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
     NewXhciDevice->PDEV = PDEV;
     
     PciHalEnableMemorySpace(PDEV);
-    PciHalEnableIoSpace(PDEV);
 
     PciHalEnableBusMaster(PDEV);
     
@@ -36,11 +34,11 @@ LOUSTATUS AddDevice(
 
     LouPrint("XHCI.SYS:CAP_REG:%h\n", NewXhciDevice->CapRegisters);
 
-    //NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
-    //NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
-    //NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
+    NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
+    NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
+    NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
 
-    //XhciGetCapabilities(NewXhciDevice);
+    XhciGetCapabilities(NewXhciDevice);
 
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");

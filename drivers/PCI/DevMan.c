@@ -493,6 +493,7 @@ LOUSTATUS PciHalInitializePciDeviceToDriver(
     SIZE DeviceID = 0x00;
     LOUSTATUS Status = PciHalGetDeviceListId(Module, PDEV, &DeviceID);
     if(Status != STATUS_SUCCESS){
+        LouPrint("PCI.SYS:ERROR Unable To Get Devices ID\n");
         return Status;
     }
     PDEV->DeviceID = DeviceID;

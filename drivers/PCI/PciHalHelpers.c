@@ -236,13 +236,14 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
 
     BOOLEAN IoOn = PciHalIsIoSpaceEnabled(PDEV);
     BOOLEAN MemOn = PciHalIsMemorySpaceEnabled(PDEV);
-    UINT8 HeaderType = PciHalGetHeaderType(PDEV); 
+    UINT8 HeaderType = PciHalGetHeaderType(PDEV) & 0x3; 
     LOUSTATUS Status = STATUS_SUCCESS;
     if(IoOn)PciHalDisableIoSpace(PDEV);
     if(MemOn)PciHalDisableMemorySpace(PDEV);
     
-    UINT32 BarSize;
-    UINT32 TmpBarValue;
+    UINT32 BarSize = 0;
+    UINT32 TmpBarValue = 0;
+    UINT32 TmpUpperBarValue = 0;
     UINT64 BarPhyAddress = 0;
     UINT64 BarVAddress = 0;
     BOOLEAN WriteThroght = false;
@@ -272,9 +273,13 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
                 Status = STATUS_INVALID_PARAMETER;
                 break;
             }else if(((TmpBarValue >> 1) & 0x03) == 2){
-
-                LouPrint("PCI.SYS:PciHalMapPciResource():HERE\n");
-                while(1);
+                BarSize &= 0xFFFFFFF0;
+                TmpUpperBarValue = PciHalGeneralDeviceGetBar(PDEV, Bar + 1);
+                PciHalGeneralDeviceSetBar(PDEV, Bar + 1, UINT32_MAX);
+                BarSize |= ((UINT64)PciHalGeneralDeviceGetBar(PDEV, Bar + 1) << 32);
+                BarSize = ~(BarSize) + 1;
+                BarPhyAddress = TmpBarValue & 0xFFFFFFF0;
+                BarPhyAddress |= ((UINT64)TmpUpperBarValue << 32);
             }else{
                 LouPrint("PCI.SYS:Unkown PCI Bar Type\n");
                 Status = STATUS_INVALID_PARAMETER;
@@ -289,7 +294,14 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             else{
                 EnforceSystemMemoryMap(BarPhyAddress, BarSize);
             }
-            PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress);
+            
+            if(Using32BitAllocator){
+                PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress);
+            }else{
+                PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress & UINT32_MAX);
+                PciHalGeneralDeviceSetBar(PDEV, Bar + 1, (BarPhyAddress >> 32) & UINT32_MAX);
+            }
+
             if(PCI_IOMAP_FLAGS_NO_WRITE_THROUGH){
                 LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
             }else if(PCI_IOMAP_FLAGS_USE_WRITE_COMBINE){
@@ -301,6 +313,9 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             PDEV->BarMapping[Bar] = BarVAddress;
             PDEV->BarSize[Bar] = BarSize;
             PDEV->BarFlags[Bar] = OverideFlags; 
+            PciHalDbgPrint("PCI.SYS:BAR Physical Address:%h\n", BarPhyAddress);
+            PciHalDbgPrint("PCI.SYS:BAR Virtual  Address:%h\n", BarVAddress);
+            PciHalDbgPrint("PCI.SYS:BAR Size            :%h\n", BarSize);
             break;
         }
         default:{
@@ -353,7 +368,7 @@ DRIVER_EXPORT void PciHalGetConfigurationSnapshot(PPCI_DEVICE_OBJECT PDEV, PPCI_
     Config->Header.Status = PciHalGetStatus(PDEV);
     Config->Header.RevisionID = PciHalGetRevisionId(PDEV);
     Config->Header.ProgIf = PciHalGetProgIf(PDEV);
-    Config->Header.SubClass = PciHalGetProgIf(PDEV);
+    Config->Header.SubClass = PciHalGetSubClass(PDEV);
     Config->Header.BaseClass = PciHalGetClassCode(PDEV);
     Config->Header.CacheLineSize = PciHalGetCacheLineSize(PDEV);
     Config->Header.LatencyTimer = PciHalGetLatencyTimer(PDEV);
