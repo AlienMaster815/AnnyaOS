@@ -1667,7 +1667,7 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     BOOLEAN                         ScratchpadRestore;
     UINT8                           U1DeviceExitLatency;
     UINT8                           U2DeviceExitLatency;
-/*
+    //TODO 
     BOOLEAN                         Dma64Supported;
     BOOLEAN                         BncSupport;
     BOOLEAN                         Context64Byte;
@@ -1682,8 +1682,11 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     BOOLEAN                         CfcSupport;
     UINT8                           MaxPsaSize;
     UINT16                          xEcp;
-*/
 }XHCI_DEVICE_OBJECT_CAPABILITIES, * PXHCI_DEVICE_OBJECT_CAPABILITIES;
+
+
+
+//slot management at 94
 
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
