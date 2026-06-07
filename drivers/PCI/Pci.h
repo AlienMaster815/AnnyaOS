@@ -505,7 +505,7 @@ DRIVER_EXPORT LOUSTATUS PciHalScanBootDevices();
 DRIVER_EXPORT LOUSTATUS PciHalRegisterLousinePciDeviceTable(PDRIVER_OBJECT DriverObject, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 DRIVER_EXPORT PPCI_DEVICE_OBJECT PciHalGetPciDeviceObjectFromLdmDeviceObject(PDEVICE_OBJECT DeviceObject);
 DRIVER_EXPORT UINT8 PciHalGetCapabilitiesPointer(PPCI_DEVICE_OBJECT PDEV, UINT16 Capability, BOOLEAN PcieCap);
-
+DRIVER_EXPORT LOUSTATUS PciHalScanRuntimeDevices();
 
 LOUSTATUS PciHalRegisterPciDevice(PPCI_DEVICE_OBJECT PDEV);
 void PciHalInitializePciBridge(PPCI_DEVICE_OBJECT PDEV);

@@ -1667,7 +1667,6 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     BOOLEAN                         ScratchpadRestore;
     UINT8                           U1DeviceExitLatency;
     UINT8                           U2DeviceExitLatency;
-    //TODO 
     BOOLEAN                         Dma64Supported;
     BOOLEAN                         BncSupport;
     BOOLEAN                         Context64Byte;
@@ -1684,9 +1683,10 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     UINT16                          xEcp;
 }XHCI_DEVICE_OBJECT_CAPABILITIES, * PXHCI_DEVICE_OBJECT_CAPABILITIES;
 
-
-
 //slot management at 94
+
+typedef LOUSTATUS (*XHCI_ALLOCATION_FUNCTION)(SIZE, SIZE, PVOID*);
+typedef void (*XHCI_FREE_FUNCTION)(PVOID);
 
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
@@ -1696,11 +1696,26 @@ typedef struct _XHCI_DEVICE{
     PXHCI_DOORBELL_REGISTERS        DoorbellRegisters;
     PXHCI_RUNTIME_REGISTERS         RuntimeRegisters;
     XHCI_DEVICE_OBJECT_CAPABILITIES Capabilities;
+    XHCI_ALLOCATION_FUNCTION        XhciAllocationFunction;
+    XHCI_FREE_FUNCTION              XhciFreeFunction;
+    XARRAY                          DeviceContexts;
 }XHCI_DEVICE, * PXHCI_DEVICE;
 
-LOUSTATUS 
-XhciGetCapabilities(
-    PXHCI_DEVICE     XhciDevice
-);
+LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
+LOUSTATUS XhciAllocateDmaMemory32(SIZE Size, SIZE Alignment, PVOID Out);
+LOUSTATUS XhciAllocateDmaMemory64(SIZE Size, SIZE Alignment, PVOID Out);
+LOUSTATUS XhciAllocateDmaMemory(PXHCI_DEVICE Device, SIZE Size, SIZE Alignment, PVOID* Out);
+LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device);
+UINT64 XhciGetDmaAddress(PVOID Address);
+LOUSTATUS XhciInitializeDevice(PXHCI_DEVICE Device);
+void XhciSetPortxHlpmc(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
+UINT32 XhciGetPortxHlpmc(PXHCI_DEVICE Device, UINT8 Port);
+void XhciSetPortxLi(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
+UINT32 XhciGetPortxLi(PXHCI_DEVICE Device, UINT8 Port);
+void XhciSetPortxPmsc(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
+UINT32 XhciGetPortxPmsc(PXHCI_DEVICE Device, UINT8 Port);
+void XhciSetPortxPsc(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
+UINT32 XhciGetPortxPsc(PXHCI_DEVICE Device, UINT8 Port);
+
 
 #endif

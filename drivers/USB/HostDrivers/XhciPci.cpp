@@ -20,6 +20,7 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("XHCI.SYS::AddDevice()\n");
+    LOUSTATUS Status;
     PXHCI_DEVICE NewXhciDevice = LouKeMallocType(XHCI_DEVICE, KERNEL_GENERIC_MEMORY);
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
     NewXhciDevice->PDEV = PDEV;
@@ -40,6 +41,19 @@ LOUSTATUS AddDevice(
 
     XhciGetCapabilities(NewXhciDevice);
 
+    Status = XhciInitializeMemoryManagement(NewXhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS::AddDevice():XhciInitializeMemoryManagement():FAILED\n");
+        while(1);
+    }
+
+    Status = XhciInitializeDevice(
+        NewXhciDevice
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS::AddDevice():XhciInitializeDevice():FAILED\n");
+        while(1);
+    }
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
     while(1);

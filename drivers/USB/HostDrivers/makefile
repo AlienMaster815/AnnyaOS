@@ -11,7 +11,11 @@ INCLUDES = -I../../../include
 # Source and target
 SRC1 =  XhciPci.cpp \
 		Xhci.cpp \
-		XhciCap.cpp
+		XhciCap.cpp \
+		XhciSlots.cpp \
+		XhciMem.cpp \
+		XhciPorts.cpp
+
 TARGET1 = XHCI.SYS
 
 SRC2 = Ohci.cpp \
