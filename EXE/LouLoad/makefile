@@ -29,6 +29,7 @@ TARGET = LOULOAD.EXE
 all: $(LOADER_OBJECTS)
 	$(LD) -n -o LOULOAD.bin -T linker.ld $(LOADER_OBJECTS)
 	cp LOULOAD.bin $(TARGET)
+	rm -f LOULOAD.bin
 	rm -rf build
 
 clean:

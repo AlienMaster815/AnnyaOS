@@ -46,8 +46,32 @@ uint64_t LouKeVMemmoryGetSize(uint64_t VAddress){
     return 0x00;
 }
 
-KERNEL_EXPORT
-void LouKeMapContinuousMemoryBlockEx(
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockMb(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+){
+    uint64_t i = 0;
+
+    while(i < size){
+        if(
+            (
+                (VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1)) &&
+                (PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))
+            ) && ((i + MEGABYTE_PAGE) <= size)){
+            LouMapAddress(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE);
+            i += MEGABYTE_PAGE;
+        }
+        else{
+            LouMapAddress(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE);
+            i += KILOBYTE_PAGE;
+        }
+        //LouPrint("I:%h : Size:%h\n",i, size);
+    }
+}
+
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockMbEx(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 
@@ -71,6 +95,18 @@ void LouKeMapContinuousMemoryBlockEx(
         }
         //LouPrint("I:%h : Size:%h\n",i, size);
     }
+}
+
+KERNEL_EXPORT
+void LouKeMapContinuousMemoryBlockEx(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
+){
+    LouPrint("LouKeMapContinuousMemoryBlockEx()\n");
+    while(1);
 }
 
 KERNEL_EXPORT
@@ -105,24 +141,9 @@ void LouKeMapContinuousMemoryBlock(
     uint64_t VAddress,
     uint64_t size, 
     uint64_t FLAGS
-    ){
-    uint64_t i = 0;
-
-    while(i < size){
-        if(
-            (
-                (VAddress + i) == ((VAddress + i) & ~(MEGABYTE_PAGE-1)) &&
-                (PAddress + i) == ((PAddress + i) & ~(MEGABYTE_PAGE-1))
-            ) && ((i + MEGABYTE_PAGE) <= size)){
-            LouMapAddress(PAddress + i, VAddress + i, FLAGS, MEGABYTE_PAGE);
-            i += MEGABYTE_PAGE;
-        }
-        else{
-            LouMapAddress(PAddress + i, VAddress + i, FLAGS, KILOBYTE_PAGE);
-            i += KILOBYTE_PAGE;
-        }
-        //LouPrint("I:%h : Size:%h\n",i, size);
-    }
+){
+    LouPrint("LouKeMapContinuousMemoryBlock()\n");
+    while(1);        
 }
 
 KERNEL_EXPORT

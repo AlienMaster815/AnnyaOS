@@ -302,10 +302,11 @@ void LouOsKrnlStart(
     }
 
     EnableCR0WriteProtection();
-    
+     
     ParserLouLoaderInformation(
         &KernelLoaderInfo
     );
+
 
     ///vga set for debug
     if(!LouKeMapEfiMemory()){

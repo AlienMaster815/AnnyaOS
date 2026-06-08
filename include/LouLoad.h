@@ -18,9 +18,9 @@ extern "C" {
 
 
 typedef struct _LOUSINE_KERNEL_VM_TABLE{
-    UINT8       KernelPml4;
-    UINT8       KernelPml3;
-    UINT8       KernelPml2;
+    UINT16      KernelPml4;
+    UINT16      KernelPml3;
+    UINT16      KernelPml2;
     UINT64      LargePageClusters;
     UINT64      vLargePageClusters;
     UINT64      KernelVmBase;

@@ -395,14 +395,29 @@ void* LouKeAllocateUncachedVMemoryEx(
 void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment);
 void* LouVMalloc(size_t BytesToAllocate);
 
-void LouKeMapContinuousMemoryBlock(
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlock(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 
     uint64_t FLAGS
 );
 
-void LouKeMapContinuousMemoryBlockEx(
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockEx(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS,
+    UINT64*  Pml4
+);
+
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockMb(
+    uint64_t PAddress, 
+    uint64_t VAddress,
+    uint64_t size, 
+    uint64_t FLAGS
+);
+
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockMbEx(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 
