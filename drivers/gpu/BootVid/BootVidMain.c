@@ -44,11 +44,10 @@ BootVidEntry(){
     //Fallback for VGA emulation if the device is in VGA Emulation
     EnforceSystemMemoryMap(BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE));
     EnforceSystemMemoryMap(BootGraphics->framebuffer_addr + BootGraphics->framebuffer_addr + LouKeGetKSpaceBase(), ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE));
-	NewBuffer->RawData = (UINT8*)BootGraphics->framebuffer_addr + LouKeGetKSpaceBase();
 
     NewBuffer->UserBuffer = LouVMallocEx(ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), KILOBYTE_PAGE);
     LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, (UINT64)NewBuffer->UserBuffer, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), USER_WRITE_COMBINE_MEMORY);
-    //UINT32* Tmp = (UINT32*)NewBuffer->RawData;
+    NewBuffer->RawData = (UINT8*)NewBuffer->UserBuffer;
 
     Status = BootVidRegisterBootFrameBuffer(NewBuffer);
     if(Status != STATUS_SUCCESS){
@@ -88,9 +87,9 @@ BootVidEntry(){
 
     BootVidInitializeTerminalDriver();
 
-    LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
-
     BootVidInitialized = true;
+
+    LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
 
     return STATUS_SUCCESS;
 }

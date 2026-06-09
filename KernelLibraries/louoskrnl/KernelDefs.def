@@ -179,7 +179,7 @@ EXPORTS
     LouKeGetMcfgCount
     LouKeCreateFastObjectClass
     LouKeAllocateFastObject
-    LouKeMapContinuousMemoryBlockKB
+    LouKeMapContinuousMemoryBlockKb
     LouKeUnMapContinuousMemoryBlock
     wcscat
     _ui64tow

@@ -441,11 +441,11 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             }
 
             if(PCI_IOMAP_FLAGS_NO_WRITE_THROUGH){
-                LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
+                LouKeMapContinuousMemoryBlockKb(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
             }else if(PCI_IOMAP_FLAGS_USE_WRITE_COMBINE){
-                LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_WRITE_COMBINE_MEMORY);
+                LouKeMapContinuousMemoryBlockKb(BarPhyAddress, BarVAddress, BarSize, KERNEL_WRITE_COMBINE_MEMORY);
             }else {
-                LouKeMapContinuousMemoryBlockKB(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
+                LouKeMapContinuousMemoryBlockKb(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
             }
 
             PDEV->BarMapping[Bar] = BarVAddress;

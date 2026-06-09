@@ -10,7 +10,7 @@ UNUSED static bool SmBiosSupported = false;
 UNUSED static void* SmBiosAddress;
 
 static void* SearchForSmBiosBiosEntry(){
-    UINT8* VirtualScanArea = LouKeMallocPageEx(KILOBYTE_PAGE, (SMBIOS_BIOS_SCAN_RANGE / KILOBYTE_PAGE), KERNEL_GENERIC_MEMORY, SMBIOS_BIOS_ENTRY);
+    UINT8* VirtualScanArea = LouKeMallocKbPageEx((SMBIOS_BIOS_SCAN_RANGE / KILOBYTE_PAGE), KERNEL_GENERIC_MEMORY, SMBIOS_BIOS_ENTRY);
 
     for(size_t i = 0 ; i < (SMBIOS_BIOS_SCAN_RANGE - 4); i++){
         if(!memcmp(&VirtualScanArea[i], "_SM_", 4)){
@@ -86,7 +86,7 @@ void InitializeSmbiosTables(void* Entry){
         PSMBIOS_ENTRY_3_64  Entry64 = (PSMBIOS_ENTRY_3_64)Entry;
         Offset = Entry64->TableAddress - (Entry64->TableAddress & ~(KILOBYTE_PAGE - 1));
         EnforceSystemMemoryMap(Entry64->TableAddress - Offset, ROUND_UP64(Entry64->MaxSize + Offset, KILOBYTE_PAGE));
-        SmBiosAddress = LouKeMallocPageEx(KILOBYTE_PAGE, ROUND_UP64(Entry64->MaxSize + Offset, KILOBYTE_PAGE) / KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY, Entry64->TableAddress - Offset);
+        SmBiosAddress = LouKeMallocKbPageEx(ROUND_UP64(Entry64->MaxSize + Offset, KILOBYTE_PAGE) / KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY, Entry64->TableAddress - Offset);
         SmBiosSupported = true;
         SmBiosAddress += Offset;
         IterateSmbiosTables((uint8_t*)SmBiosAddress, (uint8_t*)((uintptr_t)SmBiosAddress + Entry64->MaxSize));
@@ -95,7 +95,7 @@ void InitializeSmbiosTables(void* Entry){
         PSMBIOS_ENTRY_2_32  Entry32 = (PSMBIOS_ENTRY_2_32)Entry;
         Offset = Entry32->TableAddress - (Entry32->TableAddress & ~(KILOBYTE_PAGE - 1));
         EnforceSystemMemoryMap(Entry32->TableAddress - Offset, ROUND_UP64(Entry32->TableLength + Offset, KILOBYTE_PAGE));
-        SmBiosAddress = LouKeMallocPageEx(KILOBYTE_PAGE, ROUND_UP64(Entry32->TableLength + Offset, KILOBYTE_PAGE) / KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY, Entry32->TableAddress - Offset);
+        SmBiosAddress = LouKeMallocKbPageEx(ROUND_UP64(Entry32->TableLength + Offset, KILOBYTE_PAGE) / KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY, Entry32->TableAddress - Offset);
         SmBiosSupported = true;
         SmBiosAddress += Offset;
         IterateSmbiosTables((uint8_t*)(uintptr_t)SmBiosAddress , (uint8_t*)((uintptr_t)SmBiosAddress + (uintptr_t)Entry32->TableLength));

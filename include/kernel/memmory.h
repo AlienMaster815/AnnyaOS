@@ -425,7 +425,7 @@ KERNEL_EXPORT void LouKeMapContinuousMemoryBlockMbEx(
     UINT64*  Pml4
 );
 
-KERNEL_EXPORT void LouKeMapContinuousMemoryBlockKB(
+KERNEL_EXPORT void LouKeMapContinuousMemoryBlockKb(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 
@@ -447,7 +447,7 @@ void LouKeMapContinuousMemoryBlockEx32(
     UINT64*  Pml4
 );
 
-void LouKeMapContinuousMemoryBlockKB32(
+void LouKeMapContinuousMemoryBlockKb32(
     uint64_t PAddress, 
     uint64_t VAddress,
     uint64_t size, 
@@ -570,6 +570,22 @@ LouKeVmmPutPPageReserveAddressVm32(
     PVOID                       PAddress,
     KERNEL_REMAP_EMPTY_CALLBACK Callback
 );
+
+KERNEL_EXPORT PVOID LouKeMallocKbPageEx(SIZE PageCount, UINT64 PageFlags, UINT64 PhysicalAddres);
+KERNEL_EXPORT PVOID LouKeMallocMbPageEx(SIZE PageCount, UINT64 PageFlags, UINT64 PhysicalAddres);
+KERNEL_EXPORT PVOID LouKeMallocKbPage(UINT64 PageCount, UINT64 PageFlags);
+KERNEL_EXPORT PVOID LouKeMallocMbPage(UINT64 PageCount, UINT64 PageFlags);
+KERNEL_EXPORT PVOID LouKeMallocKbPageExVirt32(UINT64 PageCount, UINT64 PageFlags, UINT64 PhysicalAddres, BOOLEAN CreateDevSection);
+KERNEL_EXPORT PVOID LouKeMallocMbPageExVirt32(UINT64 PageCount, UINT64 PageFlags, UINT64 PhysicalAddres, BOOLEAN CreateDevSection);
+KERNEL_EXPORT PVOID LouKeMallocKbPageVirt32(UINT64 PageCount, UINT64 PageFlags, BOOLEAN CreateDevSection);
+KERNEL_EXPORT PVOID LouKeMallocMbPageVirt32(UINT64 PageCount, UINT64 PageFlags, BOOLEAN CreateDevSection);
+KERNEL_EXPORT PVOID LouKeMallocKbPagePhy32(UINT64 PageCount, UINT64 PageFlags);
+KERNEL_EXPORT PVOID LouKeMallocMbPagePhy32(UINT64 PageCount, UINT64 PageFlags);
+KERNEL_EXPORT PVOID LouKeMallocKbPageExVirt64(UINT64 PageCount, UINT64 PageFlags, UINT64 PhysicalAddres, BOOLEAN CreateDevSection);
+KERNEL_EXPORT PVOID LouKeMallocMbPageExVirt64(UINT64 PageCount, UINT64 PageFlags, UINT64 PhysicalAddres, BOOLEAN CreateDevSection);
+
+void* LouKeMallocKbPageVirt64(uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection);
+void* LouKeMallocMbPageVirt64(uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection);
 
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres);
 void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres, BOOLEAN CreateDevSection);

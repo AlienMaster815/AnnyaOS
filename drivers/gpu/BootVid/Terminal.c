@@ -28,7 +28,6 @@ static void BootVidEndofData(){
 
 
 static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
-
     if((AsciiCharecter == '\n') || ((CurrentX + (TerminalFont->AvgWidth * 3)) >= Width)){
         if((CurrentY + (TERMINAL_INCY * 3)) <= Height){
             CurrentY += TERMINAL_INCY;
@@ -57,7 +56,6 @@ static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
     if(!Bitmap){
         return 0x00;
     }
-
 
     BootVidPlaceBitmap(Bitmap, CurrentX, CurrentY);
     

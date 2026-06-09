@@ -32,7 +32,7 @@ static UINT32* PciHalMapEcamDevice(
     NewEcamRemap->Function = Function;
     NewEcamRemap->Phy = PhyAddress;
     NewEcamRemap->Virt = LouVMallocEx(4096, KILOBYTE_PAGE);
-    LouKeMapContinuousMemoryBlockKB((UINTPTR)PhyAddress, (UINTPTR)NewEcamRemap->Virt, 4096, KERNEL_DMA_MEMORY);
+    LouKeMapContinuousMemoryBlockKb((UINTPTR)PhyAddress, (UINTPTR)NewEcamRemap->Virt, 4096, KERNEL_DMA_MEMORY);
     MutexLock(&EcamRemapsLock);
     LouKeListAddTail(&NewEcamRemap->Peers, &EcamRemapList);
     MutexUnlock(&EcamRemapsLock);

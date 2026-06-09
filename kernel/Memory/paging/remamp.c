@@ -12,8 +12,7 @@ void* LouKeMemReMap(void* PhyAddress, size_t Length, uint64_t Flags){
     //LouPrint("Offset         :%h\n", Offset);
     //LouPrint("TotalSize      :%h\n", TotalSize);
 
-    return (void*)((uintptr_t)LouKeMallocPageEx(
-        KILOBYTE_PAGE, 
+    return (void*)((uintptr_t)LouKeMallocKbPageEx(
         TotalSize / KILOBYTE_PAGE, 
         KERNEL_DMA_MEMORY, 
         AlignedAddress) + Offset

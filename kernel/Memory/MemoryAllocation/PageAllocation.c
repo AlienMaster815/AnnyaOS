@@ -15,7 +15,7 @@ PVOID LouKeMallocKbPageEx(
     if(!Result){
         return 0x00;
     }
-    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (UINT64)Result, (KILOBYTE_PAGE * PageCount), PageFlags);
+    LouKeMapContinuousMemoryBlockMb(PhysicalAddres, (UINT64)Result, (KILOBYTE_PAGE * PageCount), PageFlags);
     return Result;
 }
 
@@ -86,7 +86,7 @@ PVOID LouKeMallocKbPageExVirt32(UINT64 PageCount, UINT64 PageFlags, UINT64 Physi
     }
 
     if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (KILOBYTE_PAGE * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
-    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (KILOBYTE_PAGE * PageCount) , PageFlags);
+    LouKeMapContinuousMemoryBlockMb(PhysicalAddres, (uint64_t)Result, (KILOBYTE_PAGE * PageCount) , PageFlags);
     return Result;
 }
 
@@ -185,7 +185,7 @@ LouKeMallocKbPageExVirt64(
     }
 
     if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (KILOBYTE_PAGE * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
-    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (KILOBYTE_PAGE * PageCount) , PageFlags);
+    LouKeMapContinuousMemoryBlockMb(PhysicalAddres, (uint64_t)Result, (KILOBYTE_PAGE * PageCount) , PageFlags);
     return Result;
 }
 
@@ -239,16 +239,13 @@ void* LouKeMallocMbPageVirt64(uint64_t PageCount, uint64_t PageFlags, BOOLEAN Cr
 }
 
 
-//TODO:Update Functions To Use New Paging System 
 void* LouKeMallocPageEx(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres){
-    if((PageSize != KILOBYTE_PAGE) || (!PhysicalAddres)){
-        return 0x00;
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPageEx(PageCount, PageFlags, PhysicalAddres);
+    }else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){//if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPageEx(PageCount / 512, PageFlags, PhysicalAddres);
     }
-    void* Result = LouVMallocEx(PageSize * PageCount, PageSize);
-
-    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
-
-    return Result;
+    return LouKeMallocKbPageEx(PageCount, PageFlags, PhysicalAddres);
 }
 
 KERNEL_EXPORT
@@ -258,61 +255,44 @@ LouKeMallocPage(
     uint64_t PageCount, 
     uint64_t PageFlags
 ){    
-    if(PageSize != KILOBYTE_PAGE){
-        return 0x00;
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPage(PageCount, PageFlags);
     }
-    void* Resurve = 0x00;
-    LouKeVmmGetPPageReserveVm64(PageSize, PageCount, &Resurve);
-    if(!Resurve){
-        Resurve = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
-        LouKeVmmCreatePageReserveVm(Resurve, PageSize, PageCount, true, false);
+    else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){//if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPage(PageCount / 512, PageFlags);
     }
-    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (uint64_t)Resurve);
+    return LouKeMallocKbPage(PageCount, PageFlags);
 }
 
 void* LouKeMallocPageExVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, uint64_t PhysicalAddres, BOOLEAN CreateDevSection){
-    if((PageSize != KILOBYTE_PAGE) || (!PhysicalAddres)){
-        return 0x00;
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPageExVirt32(PageCount, PageFlags, PhysicalAddres, CreateDevSection);
     }
-
-    void* Result = 0x00;
-    LouKeVmmGetVPageReserveVm32(PageSize, PageCount, &Result);
-    if(!Result){
-        Result = LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
-        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, false, true);
+    else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){ //if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPageExVirt32(PageCount / 512, PageFlags, PhysicalAddres, CreateDevSection);
     }
-
-    if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
-    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
-    return Result;
+    return LouKeMallocKbPageExVirt32(PageCount, PageFlags, PhysicalAddres, CreateDevSection);
 }
 
 void* LouKeMallocPageVirt32(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection){
-    if(PageSize != KILOBYTE_PAGE){
-        return 0x00;
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPageVirt32(PageCount, PageFlags, CreateDevSection);
     }
-    PVOID Result = 0x00;
-    LouKeVmmGetPPageReserveVm(PageSize, PageCount, &Result);
-    if(!Result){
-        Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
-        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, true, false);
+    else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){ //if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPageVirt32(PageCount / 512, PageFlags, CreateDevSection);
     }
-    return LouKeMallocPageExVirt32(PageSize, PageCount, PageFlags, (UINT64)Result, CreateDevSection);
+    return LouKeMallocKbPageVirt32(PageCount, PageFlags, CreateDevSection);
 }
 
 KERNEL_EXPORT
 void* LouKeMallocPagePhy32(UINT64 PageSize, UINT64 PageCount, UINT64 PageFlags){
-    PVOID Result = 0x00;
-    LouKeVmmGetPPageReserveVm32(PageSize, PageCount, &Result);
-    if(!Result){
-        Result = LouAllocatePhysical32UpEx(PageSize * PageCount, PageSize);
-        if((UINTPTR)Result > (4 * GIGABYTE)){
-            LouFree(Result);
-            return 0x00;
-        }
-        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, true, false);
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPagePhy32(PageCount, PageFlags);
     }
-    return LouKeMallocPageEx(PageSize, PageCount, PageFlags, (UINT64)Result);
+    else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){ //if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPagePhy32(PageCount / 512, PageFlags);
+    }
+    return LouKeMallocKbPagePhy32(PageCount, PageFlags);
 }
 
 //this is specifically for NON kernel 64 bit memory e.g. sections, heaps, stacks, ect...
@@ -325,33 +305,24 @@ LouKeMallocPageExVirt64(
     UINT64  PhysicalAddres,
     BOOLEAN CreateDevSection
 ){ 
-    if((PageSize != KILOBYTE_PAGE) || (!PhysicalAddres)){
-        return 0x00;
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPageExVirt64(PageCount, PageFlags, PhysicalAddres, CreateDevSection);
     }
-    void* Result = 0x00; 
-    LouKeVmmGetVPageReserveVm64(PageSize, PageCount, &Result);
-    if(!Result){
-        Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
-        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, false, true);
+    else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){ //if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPageExVirt64(PageCount / 512, PageFlags, PhysicalAddres, CreateDevSection);
     }
-
-    if(CreateDevSection)LouKeCreateDeviceSection((PVOID)PhysicalAddres, Result, (PageSize * PageCount), LouPageFlagsToNtPageFlags(PageFlags, false, false));
-    LouKeMapContinuousMemoryBlockKB(PhysicalAddres, (uint64_t)Result, (PageSize * PageCount) , PageFlags);
-    return Result;
+    return LouKeMallocKbPageExVirt64(PageCount, PageFlags, PhysicalAddres, CreateDevSection);
 }
 
 //this is specifically for NON kernel 64 bit memory e.g. sections, heaps, stacks, ect...
 void* LouKeMallocPageVirt64(uint64_t PageSize, uint64_t PageCount, uint64_t PageFlags, BOOLEAN CreateDevSection){
-    if(PageSize != KILOBYTE_PAGE){
-        return 0x00;
+    if(PageSize == MEGABYTE_PAGE){
+        return LouKeMallocMbPageVirt64(PageCount, PageFlags, CreateDevSection);
     }
-    PVOID Result = 0x00;
-    LouKeVmmGetPPageReserveVm64(PageSize, PageCount, &Result); 
-    if(!Result){
-        Result = LouAllocatePhysical64UpEx(PageSize * PageCount, PageSize);
-        LouKeVmmCreatePageReserveVm(Result, PageSize, PageCount, true, false);
+    else if((PageSize == KILOBYTE_PAGE) && (ROUND_UP64(PageCount, 512) == PageCount)){ //if the kilobyte page is a multiple of 512 it can be mapped as a megabyte
+        return LouKeMallocMbPageVirt64(PageCount / 512, PageFlags, CreateDevSection);
     }
-    return LouKeMallocPageExVirt64(PageSize, PageCount, PageFlags, (UINT64)Result, CreateDevSection);
+    return LouKeMallocKbPageVirt64(PageCount, PageFlags, CreateDevSection);
 }
 
 uint64_t GetAllocationBlockSize(uint64_t Address);
