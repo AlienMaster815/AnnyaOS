@@ -59,7 +59,7 @@ static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
     return Tmp;
 }
 
-static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
+static inline int LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     if(MutexIsLocked(&KRef->IncrementLock)){
         return false;
     }
@@ -68,7 +68,7 @@ static inline bool LouKeAcquireReference(PKERNEL_REFERENCE KRef){
     Tmp++;
     LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
     MutexUnlock(&KRef->RaceLock);
-    return true;
+    return (int)Tmp;
 }
 
 static inline bool LouKeAcquireReferenceIfNotZero(PKERNEL_REFERENCE KRef){

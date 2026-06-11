@@ -98,15 +98,12 @@ void ParseMBootTags(struct multiboot_tag* MBOOT) {
     }
 }
 
-void SetRamSize(UINT64 Size);
-
 void ParserLouLoaderInformation(
     PLOUSINE_LOADER_INFO LoaderInfo
 ){
     PLOUSINE_RAT_PARTITION BootRamAllocationTable = (PLOUSINE_RAT_PARTITION)&LoaderInfo->RatPartition;  
     PLOULOAD_MEMORY_TRACKER BootPartition = (PLOULOAD_MEMORY_TRACKER)BootRamAllocationTable->BootPartition; 
     size_t RamAllocations = BootRamAllocationTable->PartitionItems;
-    SetRamSize(LoaderInfo->KernelVm.KernelVmLimit);
         
     for(size_t i = 0 ; i < RamAllocations; i++){
         EnforceSystemMemoryMap(

@@ -144,6 +144,9 @@ uint64_t GetCr3();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
 LOUSTATUS LouKeCreateSystemWorkQeueue();
+void SetRamSize(UINT64 Size);
+
+
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -293,6 +296,7 @@ void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
     memcpy((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
+    SetRamSize(KernelLoaderInfo.KernelVm.KernelVmLimit); //setting this early to reduce the chance of bugs
     
     UINT64 Cr3 =  (UINT64)GetCr3();
     Cr3 += GetKSpaceBase();
@@ -326,9 +330,9 @@ void LouOsKrnlStart(
 
     InitializeDebuggerComunications();
 
-    LouKeInitializeKernelRuntimeEnviornment();
-
     AdvancedLousineKernelInitialization();
+
+    LouKeInitializeKernelRuntimeEnviornment();
     
     PciHalScanBootDevices();
          
@@ -465,12 +469,12 @@ void LouOsKrnlStart(
 
 
 //TODO: 
+//Check on NULL references as i go through code : I Updated How The Memory Manager Handles Errors
 //xAPIC has been depreciated work on x2APIC
 //Add mutex to the registry keys and a close function
 //Fix SMP Booting
 //tighten read only security
-//Add SIMD Context Saving for System Calls
-
+//add a schedualer stop for DISPATCH_LEVEL
 
 //BUGS TO FIX:
 

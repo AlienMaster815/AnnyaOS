@@ -143,52 +143,6 @@ _OUT:
     return Status;
 }
 
-
-
-static 
-LOUSTATUS
-PageFlipCommon(
-    PDRSD_ATOMIC_STATE          State,
-    PDRSD_CRTC                  Crtc,
-    PDRSD_FRAME_BUFFER          FrameBuffer,
-    PDRSD_PENDING_VBLANK_EVENT  VBlankEvent,
-    UINT32                      Flags
-){
-    
-    PDRSD_PLANE             Plane = Crtc->Primary;
-    PDRSD_PLANE_STATE       PlaneState;
-    PDRSD_CRTC_STATE        CrtcState;
-    LOUSTATUS               Status = STATUS_SUCCESS;
-
-    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
-    if(IS_LOU_KE_PTR_ERROR(CrtcState)){
-        return LOU_KE_PTR_ERROR(CrtcState);
-    }
-
-    CrtcState->Event = VBlankEvent;
-    CrtcState->AsyncFlip = Flags & DRSD_MODE_PAGE_FLIP_ASYNC;
-
-    PlaneState = DrsdAtomicGetPlaneState(State, Plane);
-    if(IS_LOU_KE_PTR_ERROR(PlaneState)){
-        return LOU_KE_PTR_ERROR(PlaneState);
-    }
-
-    Status = DrsdAtomicSetCrtcForPlane(PlaneState, Crtc);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
-
-    DrsdAtomicSetFbForPlane(PlaneState, FrameBuffer);
-
-    State->AllowModeSet = false;
-    if(!CrtcState->Active){
-        LouPrint("DEVICE:%h CRTC:%d:%h Disabled Rejecting Legacy Flip\n");
-        return STATUS_INVALID_PARAMETER;
-    }
-
-    return Status;
-}
-
 static 
 void 
 SetBestEncoder(
@@ -289,6 +243,98 @@ UpdateConnectorRouting(
     }
 
 }
+
+static 
+LOUSTATUS 
+ModeFixup(
+    PDRSD_ATOMIC_STATE State
+){
+    PDRSD_CRTC              Crtc;
+    PDRSD_CRTC_STATE        NewCrtcState;
+    PDRSD_CONNECTOR         Connector;
+    PDRSD_CONNECTOR_STATE   NewConnectorState;
+    LOUSTATUS               Status;
+    int                     i;
+    
+    ForEachNewCrtcInState(State, Crtc, NewCrtcState, i){
+        if(
+            (!NewCrtcState->ModeChanged) && 
+            (!NewCrtcState->ConnectorsChanged)
+        ){
+            continue;
+        }
+        DrsdModeCopy(&NewCrtcState->AdjustedMode, &NewCrtcState->Mode);
+    }
+
+    ForEachNewConnectorInState(State, Connector, NewConnectorState, i){
+        PDRSD_ENCODER_HELPER_FUNCTIONS  Functions;
+        PDRSD_ENCODER                   Encoder;
+        PDRSD_BRIDGE                    Bridge;
+
+        if(!NewConnectorState->Crtc || !NewConnectorState->BestEncoder){
+            continue;
+        }
+
+        NewCrtcState = DrsdAtomicGetNewCrtcState(State, NewConnectorState->Crtc);
+
+        Encoder = NewConnectorState->BestEncoder;
+        Functions = Encoder->Helpers;
+
+        Bridge = DrsdBridgeChainGetFirstBridge(Encoder);
+
+        //TODO:Status = DrsdAtomicBridgeChainCheck
+
+    }
+
+    return STATUS_SUCCESS;
+}
+
+static 
+LOUSTATUS
+PageFlipCommon(
+    PDRSD_ATOMIC_STATE          State,
+    PDRSD_CRTC                  Crtc,
+    PDRSD_FRAME_BUFFER          FrameBuffer,
+    PDRSD_PENDING_VBLANK_EVENT  VBlankEvent,
+    UINT32                      Flags
+){
+    
+    PDRSD_PLANE             Plane = Crtc->Primary;
+    PDRSD_PLANE_STATE       PlaneState;
+    PDRSD_CRTC_STATE        CrtcState;
+    LOUSTATUS               Status = STATUS_SUCCESS;
+
+    CrtcState = DrsdAtomicGetCrtcState(State, Crtc);
+    if(IS_LOU_KE_PTR_ERROR(CrtcState)){
+        return LOU_KE_PTR_ERROR(CrtcState);
+    }
+
+    CrtcState->Event = VBlankEvent;
+    CrtcState->AsyncFlip = Flags & DRSD_MODE_PAGE_FLIP_ASYNC;
+
+    PlaneState = DrsdAtomicGetPlaneState(State, Plane);
+    if(IS_LOU_KE_PTR_ERROR(PlaneState)){
+        return LOU_KE_PTR_ERROR(PlaneState);
+    }
+
+    Status = DrsdAtomicSetCrtcForPlane(PlaneState, Crtc);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    DrsdAtomicSetFbForPlane(PlaneState, FrameBuffer);
+
+    State->AllowModeSet = false;
+    if(!CrtcState->Active){
+        LouPrint("DEVICE:%h CRTC:%d:%h Disabled Rejecting Legacy Flip\n");
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    return Status;
+}
+
+
+
 
 DRIVER_EXPORT
 LOUSTATUS 

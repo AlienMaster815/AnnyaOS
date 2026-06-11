@@ -109,7 +109,7 @@ static void MapKernelSpace(){
 
 void LoaderCreateKernelSpace(){ 
     UNUSED UINT64 KSpaceBase = KERNEL_SPACE_DEFAULT_BASE; 
-    UINT64 KSpaceLimit = ROUND_UP64(LouKeGetRamSize(), 2 * MEGABYTE); 
+    UINT64 KSpaceLimit = ROUND_DOWN64(LouKeGetRamSize(), 2 * MEGABYTE); 
     UINT64 Pml3Count, Pml2Count; 
     CalculateTableCounts(KSpaceLimit, &Pml3Count, &Pml2Count); 
     UINT64 Frames = 1 + Pml3Count + Pml2Count; 

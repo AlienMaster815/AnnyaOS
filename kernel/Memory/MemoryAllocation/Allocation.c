@@ -24,8 +24,10 @@ static spinlock_t MemmoryMapLock = {0};
 
 static struct master_multiboot_mmap_entry* LousineMemoryMapTable;
 
+static SIZE MemoryPrecentSize = 0;
 
 void SendMapToAllocation(struct master_multiboot_mmap_entry* mmap) {
+    MemoryPrecentSize = LouKeGetRamSize() / 100;
     LousineMemoryMapTable = mmap;
 }
 
@@ -198,8 +200,7 @@ void* LouMallocExFromStartup(size_t BytesToAllocate, uint64_t Alignment) {
             else continue;
         }
     }
-    while(1);
-    return NULL;    
+    return 0x00;    
 }
 
 KERNEL_EXPORT
@@ -232,13 +233,18 @@ bool EnforceSystemMemoryMap(
                 }
             }
         }
-        if((TotalAllocations[CURRENT_ALLOCATION_BLOCK] * sizeof(LOU_MALLOC_TRACKER)) > (10 * MEGABYTE)){
+        if(((TotalAllocations[CURRENT_ALLOCATION_BLOCK] + 1) * sizeof(LOU_MALLOC_TRACKER)) >= (MemoryPrecentSize)){
             AllocationBlocksConfigured++;
             if(AllocationBlocksConfigured == 100){
                 LouPrint("error using 100% memory is imposible\n");
                 while(1);//error using 100 % memory is imposible
             }
-            AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+            AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(MemoryPrecentSize, sizeof(LOU_MALLOC_TRACKER));
+            if(!AllocationBlocks[CURRENT_ALLOCATION_BLOCK]){
+                AllocationBlocksConfigured--;
+                LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
+                return false;
+            }
         }
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = Address;
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].size = size;
@@ -285,7 +291,11 @@ static void* _LouMallocEx(
                     address = StartMap;
                 }
                 if(!AllocationBlocksConfigured){
-                    AllocationBlocks[0] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+                    AllocationBlocks[0] = LouMallocExFromStartup(MemoryPrecentSize, sizeof(LOU_MALLOC_TRACKER));
+                    if(!AllocationBlocks[0]){
+                        LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
+                        return 0x00;
+                    }
                     AllocationBlocksConfigured++;
                 }
                 
@@ -346,13 +356,18 @@ static void* _LouMallocEx(
                             }
                         }
                     }
-                    if((TotalAllocations[CURRENT_ALLOCATION_BLOCK] * sizeof(LOU_MALLOC_TRACKER)) > (10 * MEGABYTE)){
+                    if(((TotalAllocations[CURRENT_ALLOCATION_BLOCK] + 1) * sizeof(LOU_MALLOC_TRACKER)) >= (MemoryPrecentSize)){
                         AllocationBlocksConfigured++;
                         if(AllocationBlocksConfigured == 100){
                             LouPrint("error using 100% memory is imposible\n");
                             while(1);//error using 100 % memory is imposible
                         }
                         AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+                        if(AllocationBlocks[CURRENT_ALLOCATION_BLOCK]){
+                            AllocationBlocksConfigured--;
+                            LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
+                            return 0x00;
+                        }
                     }
 
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
@@ -370,11 +385,8 @@ static void* _LouMallocEx(
         }
     }
     LouPrint("Out Of Memory Needed:%h\n", BytesToAllocate);
-    if(BytesToAllocate == 4096){
-        //DEBUG_TRAP
-    }
-    while(1);
-    return NULL; 
+    LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
+    return 0x00; 
 }
 
 static void* _LouMallocEx64(
@@ -400,7 +412,10 @@ static void* _LouMallocEx64(
                     address = StartMap64;
                 }
                 if(!AllocationBlocksConfigured){
-                    AllocationBlocks[0] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+                    AllocationBlocks[0] = LouMallocExFromStartup(MemoryPrecentSize, sizeof(LOU_MALLOC_TRACKER));
+                    if(!AllocationBlocks[0]){
+                        return 0x00;
+                    }
                     AllocationBlocksConfigured++;
                 }
                 
@@ -461,13 +476,18 @@ static void* _LouMallocEx64(
                             }
                         }
                     }
-                    if((TotalAllocations[CURRENT_ALLOCATION_BLOCK] * sizeof(LOU_MALLOC_TRACKER)) > (10 * MEGABYTE)){
+                    if(((TotalAllocations[CURRENT_ALLOCATION_BLOCK] + 1) * sizeof(LOU_MALLOC_TRACKER)) >= (MemoryPrecentSize)){
                         AllocationBlocksConfigured++;
                         if(AllocationBlocksConfigured == 100){
                             LouPrint("error using 100% memory is imposible\n");
                             while(1);//error using 100 % memory is imposible
                         }
-                        AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+                        AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(MemoryPrecentSize, sizeof(LOU_MALLOC_TRACKER));
+                        if(!AllocationBlocks[CURRENT_ALLOCATION_BLOCK]){
+                            AllocationBlocksConfigured--;
+                            LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);  
+                            return 0x00;
+                        }
                     }
 
                     AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
@@ -485,7 +505,7 @@ static void* _LouMallocEx64(
         }
     }
     LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
-    return NULL; 
+    return 0x00; 
 }
 
 KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, uint64_t Alignment) {
@@ -518,6 +538,9 @@ LouGeneralAllocateMemoryEx(
     UINT64 Alignment
 ){
     void* Result = LouAllocatePhysical64UpEx(Size, Alignment);
+    if(!Result){
+        return 0x00;
+    }
     Result += GetKSpaceBase();
     memset(Result, 0, Size);
     return Result;
@@ -529,6 +552,9 @@ LouGeneralAllocateMemoryEx32(
     UINT64 Alignment
 ){
     void* Result = LouAllocatePhysical32UpEx(Size, Alignment);
+    if(!Result){
+        return 0x00;
+    }
     Result += GetKSpaceBase();
     memset(Result, 0, Size);
     return Result;
@@ -544,12 +570,20 @@ void* LouGeneralAllocateMemory32(UINT64 Size){
 }
 
 void LouGeneralFreeMemory(void* Address){
+    if(!Address){
+        LouPrint("LouGeneralFreeMemory():Address NULL\n");
+        while(1);
+    }
     UINT64 Tmp = (UINT64)Address;
     Tmp -= GetKSpaceBase();
     LouFree((PVOID)Tmp);
 }
 
 KERNEL_EXPORT void LouFree(PVOID Addr) {
+    if(!Addr){
+        LouPrint("LouFree():Address NULL\n");
+        while(1);
+    }
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&MemmoryMapLock, &Irql);
     for(uint32_t i = 0 ; i < AddressesLogged; i++){
@@ -645,13 +679,18 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
                 }
             }
         }
-        if((TotalAllocations[CURRENT_ALLOCATION_BLOCK] * sizeof(LOU_MALLOC_TRACKER)) > (10 * MEGABYTE)){
+        if(((TotalAllocations[CURRENT_ALLOCATION_BLOCK] + 1) * sizeof(LOU_MALLOC_TRACKER)) >= (MemoryPrecentSize)){
             AllocationBlocksConfigured++;
             if(AllocationBlocksConfigured >= 100){
                 LouPrint("error using 100% memory is imposible\n");
                 while(1);//error using 100 % memory is imposible
             }
-            AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(10 * MEGABYTE,sizeof(LOU_MALLOC_TRACKER));
+            AllocationBlocks[CURRENT_ALLOCATION_BLOCK] = LouMallocExFromStartup(MemoryPrecentSize, sizeof(LOU_MALLOC_TRACKER));
+            if(!AllocationBlocks[CURRENT_ALLOCATION_BLOCK]){
+                AllocationBlocksConfigured--;
+                LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);    
+                return 0x00;
+            }
         }
 
         AllocationBlocks[CURRENT_ALLOCATION_BLOCK][TotalAllocations[CURRENT_ALLOCATION_BLOCK]].Address = AlignmentCheck;
@@ -661,11 +700,8 @@ void* LouVMallocEx(size_t BytesToAllocate, uint64_t Alignment){
         return (void*)AlignmentCheck;
     }
 
-    while(1);
-
     LouKeReleaseSpinLock(&MemmoryMapLock, &Irql);
-    while(1);
-    return NULL;
+    return 0x00;
 }
 
 static mutex_t ReserveCheckMutex = {0}; 

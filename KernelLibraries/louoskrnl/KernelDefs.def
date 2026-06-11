@@ -200,3 +200,13 @@ EXPORTS
     LouAllocatePhysical64UpEx
     LouKeGetPciInterruptLineFromPin
     strcpy
+    LouKeInitializeSrcuObject
+    LouKeInitializeRcuObject
+    LouKeDeInitializeSrcuObject
+    LouKeDeInitializeRcuObject
+    LouKeForceSrcuMbAfterReadUnlock
+    LouKeForceRcuMbAfterReadUnlock
+    LouKeSrcuAcquireReadLock
+    LouKeRcuAcquireReadLock
+    LouKeSrcuReleaseReadLock
+    LouKeRcuReleaseReadLock

@@ -69,7 +69,7 @@ struct _DRSD_FRAME_BUFFER;
 struct _DRSD_PLANE;
 struct _DRSD_CRTC;
 struct _DRSD_ENCODER_FUNCTIONS;
-struct _DRSD_ENCODER_ASSISTED_CALLBACKS;
+struct _DRSD_ENCODER_HELPER_FUNCTIONS;
 struct _DRSD_CRTC_STATE;
 struct _DRSD_CONNECTOR;
 struct _DRSD_PROPERTY;
@@ -1370,7 +1370,7 @@ typedef struct _DRSD_ENCODER{
     uint32_t                                    CrtcLimit;
     uint32_t                                    CloneLimit;
     struct _DRSD_ENCODER_FUNCTIONS*             Functions;
-    struct _DRSD_ENCODER_ASSISTED_CALLBACKS*    AssistedFunctions;
+    struct _DRSD_ENCODER_HELPER_FUNCTIONS*      Helpers;
 }DRSD_ENCODER, * PDRSD_ENCODER; 
 
 typedef struct _DRSD_WRITEBACK_CONNECTOR{
@@ -1392,7 +1392,7 @@ typedef struct _DRSD_ENCODER_FUNCTIONS{
     void        (*EarlyUnregister)(struct _DRSD_ENCODER* Encoder);
 }DRSD_ENCODER_FUNCTIONS, * PDRSD_ENCODER_FUNCTIONS;
 
-typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
+typedef struct _DRSD_ENCODER_HELPER_FUNCTIONS{
     void                        (*EncoderSetPowerMode)(struct _DRSD_ENCODER* Encoder, int PowerMode);
     DRSD_MODE_STATUS            (*EncoderIsModeValid)(struct _DRSD_ENCODER* Encoder, struct _DRSD_DISPLAY_MODE* Mode);
     bool                        (*EncoderModeFixup)(struct _DRSD_ENCODER* Encoder, struct _DRSD_DISPLAY_MODE* Mode);
@@ -1406,7 +1406,7 @@ typedef struct _DRSD_ENCODER_ASSISTED_CALLBACKS{
     void                        (*Disable)(struct _DRSD_ENCODER* Encoder);
     void                        (*Enable)(struct _DRSD_ENCODER* Encoder);
     LOUSTATUS                   (*CheckAtomic)(struct _DRSD_ENCODER* Encoder, struct _DRSD_CRTC_STATE* State, void* ConnectorState);
-}DRSD_ENCODER_ASSISTED_CALLBACKS, * PDRSD_ENCODER_ASSISTED_CALLBACKS;
+}DRSD_ENCODER_HELPER_FUNCTIONS, * PDRSD_ENCODER_HELPER_FUNCTIONS;
 
 typedef struct _DRSD_CRTC_STATE{
     struct _DRSD_CRTC*              Crtc;

@@ -1,39 +1,57 @@
 #ifndef _RCU_H
 #define _RCU_H
 
-struct _SRCU_NODE_LIST_ITEM;
+typedef struct _SRCU_PER_CPU_OBJECT{
+    LouKIRQL                Irql;
+    int                     NonRcuSleepableProcessorIndex;
+    KERNEL_REFERENCE        Readers;
+    PVOID                   CurrentReader;
+}SRCU_PER_CPU_OBJECT, * PSRCU_PER_CPU_OBJECT,
+  RCU_PER_CPU_OBJECT, *  PRCU_PER_CPU_OBJECT;
 
-typedef struct _SRCU_NODE{
-    ATOMIC64        CurrentWriteItem; //this becomes the ReadItem when the Reader Count goes to 0 and is set to 0
-    ATOMIC64        CurrentReadItem;
-    ATOMIC64        ReaderCount;
-    struct{
-        ATOMIC64    CurrentReadItem; //this checks against the current Write item to see if its poisoned
-    }               PerCpuRcuData[]; //depends on cpu count
-}SRCU_NODE, * PSRCU_NODE, 
-    RCU_NODE, * PRCU_NODE;
-
-typedef struct _SRCU_NODE_LIST_ITEM{
+typedef struct _SRCU_OBJECT{
     BOOLEAN                 Sleepable;
-    KERNEL_EVENT_OBJECT     SyncSleeperWakeEvent;
-    void                    (*FreeReadItemWorker)(struct _SRCU_NODE_LIST_ITEM* Context);
-    SRCU_NODE               SRcuItem;
-}SRCU_NODE_LIST_ITEM, * PSRCU_NODE_LIST_ITEM;
+    BOOLEAN                 MbAfterReadUnlock;
+    PVOID                   Writer;
+    PSRCU_PER_CPU_OBJECT    PerCpuData;
+}SRCU_OBJECT, * PSRCU_OBJECT,
+  RCU_OBJECT, *  PRCU_OBJECT;
 
-FORCE_INLINE
-BOOLEAN
-IsRcuPoisoned(PSRCU_NODE Node, UINT64* New){
-    UINT64 TmpOld = LouKeGetAtomic64(&Node->CurrentWriteItem); 
-    if(TmpOld){
-        *New = TmpOld;
-        return true;
+#define DEFINE_SRCU(Name) \
+    SRCU_OBJECT Name = { \
+        .Sleepable = true, \
     }
-    return false;
-}
 
-typedef struct _SRCU_MANAGER{
-    mutex_t         SRcuManagerLock;
-    ListHeader      SRcus;
-}SRCU_MANAGER, * PSRCU_MANAGER;
+#define DEFINE_RCU(Name) \
+    SRCU_OBJECT Name = { \
+        .Sleepable = false, \
+    }
+
+#define DEFINE_STATIC_SRCU(Name) \
+    static SRCU_OBJECT Name = { \
+        .Sleepable = true, \
+    }
+
+#define DEFINE_STATIC_RCU(Name) \
+    static SRCU_OBJECT Name = { \
+        .Sleepable = false, \
+    }
+
+//TODO: Fast
+KERNEL_EXPORT LOUSTATUS LouKeInitializeSrcuObject(PSRCU_OBJECT SrcuObject);
+KERNEL_EXPORT LOUSTATUS LouKeInitializeRcuObject(PRCU_OBJECT RcuObject);
+
+KERNEL_EXPORT void LouKeDeInitializeSrcuObject(PSRCU_OBJECT SrcuObject);
+KERNEL_EXPORT void LouKeDeInitializeRcuObject(PRCU_OBJECT RcuObject);
+
+KERNEL_EXPORT void LouKeForceSrcuMbAfterReadUnlock(PSRCU_OBJECT SrcuObject);
+KERNEL_EXPORT void LouKeForceRcuMbAfterReadUnlock(PRCU_OBJECT RcuObject);
+
+KERNEL_EXPORT int LouKeSrcuAcquireReadLock(PRCU_OBJECT RcuObject);
+KERNEL_EXPORT void LouKeRcuAcquireReadLock();
+
+KERNEL_EXPORT void LouKeSrcuReleaseReadLock(PSRCU_OBJECT SrcuObject, int Processor);
+KERNEL_EXPORT void LouKeRcuReleaseReadLock(PSRCU_OBJECT SrcuObject);
+
 
 #endif

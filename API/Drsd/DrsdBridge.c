@@ -1,6 +1,22 @@
 #include "DrsdCore.h"
 
 static mutex_t BridgeLock = {0};
+static ListHeader BridgeList = {0};
+static ListHeader BridgeLingerList = {0};
+DEFINE_STATIC_SRCU(DrsdBridgeUnplugSrcu);
+
+DRIVER_EXPORT
+BOOLEAN
+DrsdBridgeEntry(
+    PDRSD_BRIDGE    Bridge,
+    int*            Index
+){  
+    *Index = LouKeSrcuAcquireReadLock(&DrsdBridgeUnplugSrcu);
+
+    if(Bridge->Unplugged){
+        LouKeSrcuReleaseReadLock(&DrsdBridgeUnplugSrcu, *Index);
+    }
+}
 
 DRIVER_EXPORT
 void
