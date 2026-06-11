@@ -53,5 +53,7 @@ KERNEL_EXPORT void LouKeRcuAcquireReadLock();
 KERNEL_EXPORT void LouKeSrcuReleaseReadLock(PSRCU_OBJECT SrcuObject, int Processor);
 KERNEL_EXPORT void LouKeRcuReleaseReadLock(PSRCU_OBJECT SrcuObject);
 
+KERNEL_EXPORT void LouKeSrcuSynchronize(PSRCU_OBJECT SrcuObject);
+KERNEL_EXPORT void LouKeRcuSynchronize(PRCU_OBJECT RcuObject);
 
 #endif

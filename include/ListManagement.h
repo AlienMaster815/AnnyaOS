@@ -111,12 +111,31 @@ static inline void LouKeListInsertInFront(
     Item->LastHeader = LastItem;
 }
 
+static inline void LouKeListMoveToTail(PListHeader Item, PListHeader Head){
+    LouKeListDeleteItem(Item);
+    LouKeListAddTail(Item, Head);
+}
+
+
+
 void  LouKeLinkObjectToListHead(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void  LouKeLinkObjectToListTail(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void  LouKeUnlinkObjectFromList(PLIST_OBJECT ListObject, PLIST_LINK Link);
 void* LouKeLinkGetMemberWithFunction(PLIST_OBJECT ListObject, LIST_SEARCH_FUNC Func, void* Param);
 
 #define LouKeListIsEmpty(Node) ((Node)->NextHeader == 0x00)
+
+static inline void INITIALIZE_LIST_HEADER(PListHeader Head){
+    Head->NextHeader = 0x00; 
+    Head->LastHeader = 0x00;
+}
+
+static inline void LouKeListDeleteInitialize(
+    PListHeader Item
+){
+    LouKeListDeleteItem(Item);
+    INITIALIZE_LIST_HEADER(Item);
+}
 
 #define ForEachIf(Condition) if(!(Condition)){} else
 

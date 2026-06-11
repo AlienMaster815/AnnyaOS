@@ -290,6 +290,13 @@ typedef enum _DRSD_MINOR_TYPE{
     DRSD_MINOR_ACCEL,
 }DRSD_MINOR_TYPE, * PDRSD_MINOR_TYPE;
 
+typedef enum{
+    DRSD_OUTPUT_COLOR_FORMAT_RGB444 = 0,
+    DRSD_OUTPUT_COLOR_FORMAT_YCBCR444,
+    DRSD_OUTPUT_COLOR_FORMAT_YCBCR422,
+    DRSD_OUTPUT_COLOR_FORMAT_YCBCR420,
+}DRSD_OUTPUT_COLOR_FORMAT;
+
 #define DRSD_MODE_DPMS_ON       0
 #define DRSD_MODE_DPMS_STANDBY  1
 #define DRSD_MODE_DPMS_SUSPEND  2
@@ -2903,7 +2910,7 @@ typedef struct _DRSD_BRIDGE{
     int                             HdmiAudioDaiPort;
     LOUSTR                          HdmiCecAdapterName;
     uint8_t                         HdmiCecAvailableLas;
-    mutex_t                         HdpMutex;
+    mutex_t                         HpdMutex;
     void                            (*HpdCb)(PVOID Data, DRSD_CONNECTOR_STATUS Status);
     PVOID                           HpdData;
     struct _DRSD_BRIDGE*            NextBridge;                

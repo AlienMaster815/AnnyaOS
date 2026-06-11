@@ -72,14 +72,18 @@ KERNEL_EXPORT void LouKeRcuAssignPointer(PRCU_OBJECT RcuObject, PVOID NewPointer
     LouKeMemoryBarrier();
 }
 
-KERNEL_EXPORT void LouKeRcuSynchronize(PRCU_OBJECT RcuObject){
+KERNEL_EXPORT void LouKeSrcuSynchronize(PSRCU_OBJECT SrcuObject){
     int ProcCount = GetNPROC();
 
     for(int i = 0; i < ProcCount; i++){
-        while(LouKeGetReferenceCount(&RcuObject->PerCpuData[i].Readers)){
+        while(LouKeGetReferenceCount(&SrcuObject->PerCpuData[i].Readers)){
             LouKeYeildExecution();
         }
-        RcuObject->PerCpuData[i].CurrentReader = RcuObject->Writer;
+        SrcuObject->PerCpuData[i].CurrentReader = SrcuObject->Writer;
         LouKeMemoryBarrier();
     }
+}
+
+KERNEL_EXPORT void LouKeRcuSynchronize(PRCU_OBJECT RcuObject){
+    LouKeSrcuSynchronize(RcuObject);
 }

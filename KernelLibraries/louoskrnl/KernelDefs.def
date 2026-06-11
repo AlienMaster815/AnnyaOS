@@ -210,3 +210,7 @@ EXPORTS
     LouKeRcuAcquireReadLock
     LouKeSrcuReleaseReadLock
     LouKeRcuReleaseReadLock
+    LouKeSrcuSynchronize
+    LouKeRcuSynchronize
+    MutexDestroy
+    MutexInitialize

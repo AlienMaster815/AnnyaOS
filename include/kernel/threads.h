@@ -366,7 +366,11 @@ LouKeCreateDeferedImpEx(
 
 void LouKeYeildExecution();
 
+
 #endif
+
+KERNEL_EXPORT void MutexDestroy(mutex_t* m);
+KERNEL_EXPORT void MutexInitialize(mutex_t* m);
 
 
 static void MutexLockEx(mutex_t* m, bool LockOutTagOut){

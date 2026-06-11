@@ -4,6 +4,12 @@
 #include "DrsdCore.h"
 
 DRIVER_EXPORT
+void 
+DrsdBridgeRemove(
+    PDRSD_BRIDGE Bridge
+);
+
+DRIVER_EXPORT
 PDRSD_BRIDGE
 DrsdBridgeGet(
     PDRSD_BRIDGE Bridge

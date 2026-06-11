@@ -19,7 +19,7 @@ typedef BYTE BOOLEAN, * PBOOLEAN;
 
 #define IS_LOU_KE_PTR_ERROR(x) ((UINT64)x < 0xFFFF800000000000ULL ? true : false)
 #define LOU_KE_PTR_ERROR(x) ((LOUSTATUS)(UINTPTR)x)
-
+#define LOU_KE_ERROR_PTR(x) ((PVOID)(UINTPTR)x)
 
 #define IS_CPP __cplusplus
 #define IS_X86 __i386__
