@@ -2779,6 +2779,7 @@ typedef struct _DRSD_PRIVATE_OBJECT{
 }DRSD_PRIVATE_OBJECT, * PDRSD_PRIVATE_OBJECT;   
 
 typedef struct _DRSD_PRIVATE_STATE_FUNCTIONS{
+    PDRSD_PRIVATE_STATE (*AtomicCreateState)(PDRSD_PRIVATE_OBJECT Object);
     PDRSD_PRIVATE_STATE (*AtomicDuplicateState)(PDRSD_PRIVATE_OBJECT Object);
     void                (*AtomicDestroyState)(PDRSD_PRIVATE_OBJECT Object, PDRSD_PRIVATE_STATE State);
     void                (*AtomicPrintState)(HANDLE Server, PDRSD_PRIVATE_STATE State);
@@ -2803,7 +2804,7 @@ typedef struct _DRSD_BUS_CONFIG{
 }DRSD_BUS_CONFIG, * PDRSD_BUS_CONFIG;   
 
 typedef struct _DRSD_BRIDGE_STATE{
-    PDRSD_PRIVATE_STATE     Base;
+    DRSD_PRIVATE_STATE      Base;
     struct _DRSD_BRIDGE*    Bridge;
     DRSD_BUS_CONFIG         InputBusConfig;
     DRSD_BUS_CONFIG         OutputBusConfig;

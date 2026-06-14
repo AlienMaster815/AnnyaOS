@@ -12,8 +12,7 @@ static void XhciPrintCapabilities(
 
     LouPrint("XHCI.SYS:DEV_CAP:IST                              :%d\n", XhciDevice->Capabilities.IsochSchedThreshold);
     LouPrint("XHCI.SYS:DEV_CAP:ErstMax                          :%d\n", XhciDevice->Capabilities.ErstMax);
-    LouPrint("XHCI.SYS:DEV_CAP:MaxScrPadLo                      :%d\n", XhciDevice->Capabilities.MaxScratchpageBufsLo);
-    LouPrint("XHCI.SYS:DEV_CAP:MaxScrPadHi                      :%d\n", XhciDevice->Capabilities.MaxScratchpageBufsHi);
+    LouPrint("XHCI.SYS:DEV_CAP:MaxScrPad                        :%d\n", XhciDevice->Capabilities.MaxScratchpageBufs);
     LouPrint("XHCI.SYS:DEV_CAP:ScrPadRestore                    :%d\n", XhciDevice->Capabilities.ScratchpadRestore);
 
     LouPrint("XHCI.SYS:DEV_CAP:U1ExitLatency                    :%d\n", XhciDevice->Capabilities.U1DeviceExitLatency);
@@ -53,8 +52,7 @@ XhciGetCapabilities(
     Tmp = CapRegs->HcsParams2;
     XhciDevice->Capabilities.IsochSchedThreshold = (UINT8)((Tmp >> XHCI_CAP_IST_SHIFT) & XHCI_CAP_IST_MASK);
     XhciDevice->Capabilities.ErstMax = (UINT8)((Tmp >> XHCI_CAP_MAX_ERST_SHIFT) & XHCI_CAP_MAX_ERST_MASK);
-    XhciDevice->Capabilities.MaxScratchpageBufsLo = (UINT8)((Tmp >> XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_SHIFT) & XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_MASK);
-    XhciDevice->Capabilities.MaxScratchpageBufsHi = (UINT8)((Tmp >> XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_SHIFT) & XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_MASK);
+    XhciDevice->Capabilities.MaxScratchpageBufs = (UINT16)((Tmp >> XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_SHIFT) & XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_MASK) | ((UINT16)((Tmp >> XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_SHIFT) & XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_MASK) << 8);
     XhciDevice->Capabilities.ScratchpadRestore = ((Tmp & XHCI_CAP_SCRATCHPAD_RESTORE) ? true : false);
 
     Tmp = CapRegs->HcsParams3;

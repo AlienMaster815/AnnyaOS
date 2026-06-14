@@ -158,6 +158,20 @@ DrsdAtomicNonBlockingCommit(
     PDRSD_ATOMIC_STATE  State
 );
 
+DRIVER_EXPORT
+LOUSTATUS
+DrsdAtomicPrivateObjectInitialize(
+    PDRSD_DEVICE                    Device,
+    PDRSD_PRIVATE_OBJECT            Object,
+    PDRSD_PRIVATE_STATE_FUNCTIONS   Functions
+);
+
+DRIVER_EXPORT
+void 
+DrsdAtomicPrivateObjectDeInitialize(
+    PDRSD_PRIVATE_OBJECT    Object
+);
+
 #define ForEachOldConnectorInState(State, Connector, OldConnectorState, Index) \
     for((Index) = 0; (Index) < (State)->ConnectorCount; (Index)++) \
         ForEachIf((State)->Connectors[Index].Connector && ((Connector) = ((State)->Connectors[Index].Connector), (void)(Connector), (OldConnectorState) = (State)->Connectors[Index].OldState, 1))

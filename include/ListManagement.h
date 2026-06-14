@@ -63,6 +63,18 @@ static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
     Tail->LastHeader = Header;
 }
 
+static inline BOOLEAN LouKeListIsHead(PListHeader List, PListHeader Head){
+    return List == Head;
+}
+
+#define LouKeListEntryIsHead(Position, Head, Member) \
+    LouKeListIsHead(&Position->Member, (Head))
+
+#define LouKeListNextEntry(Position, Member)
+
+#define ForEachListEntryFrom(Position, Head, Member) \
+    for(;!LouKeListEntryIsHead(Position, Head, Member); Position = ListItemToType((Position)->Member.NextHeader, typeof(*(Position)), Member)) \
+
 static inline void LouKeLListDeleteItem(PListHeader Item){
     PListHeader LastHeader = (PListHeader)(UINT64)LouKeGetAtomic64FromUint64((UINT64*)&Item->LastHeader);
     PListHeader NextHeader = (PListHeader)(UINT64)LouKeGetAtomic64FromUint64((UINT64*)&Item->NextHeader);
@@ -135,6 +147,24 @@ static inline void LouKeListDeleteInitialize(
 ){
     LouKeListDeleteItem(Item);
     INITIALIZE_LIST_HEADER(Item);
+}
+
+static inline void LouKeListAddEx(
+    PListHeader     New,
+    PListHeader     Previous,
+    PListHeader     Next
+){
+    Next->LastHeader = Previous;
+    New->NextHeader = Next;
+    New->LastHeader = Previous;
+    Previous->NextHeader = Next;
+}
+
+static inline void LouKeListAdd(
+    PListHeader New, 
+    PListHeader Head
+){
+    LouKeListAddEx(New, Head, Head->NextHeader);
 }
 
 #define ForEachIf(Condition) if(!(Condition)){} else

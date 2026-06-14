@@ -652,24 +652,30 @@ DrsdAtomicPlaneCheck(
 //TODO 814 to 930
 
 DRIVER_EXPORT
-void
+LOUSTATUS
 DrsdAtomicPrivateObjectInitialize(
     PDRSD_DEVICE                    Device,
     PDRSD_PRIVATE_OBJECT            Object,
-    PDRSD_PRIVATE_STATE             State,
     PDRSD_PRIVATE_STATE_FUNCTIONS   Functions
 ){
+    PDRSD_PRIVATE_STATE State;
     memset(Object, 0, sizeof(DRSD_PRIVATE_OBJECT));
 
     DrsdModesetLockInitialize(&Object->Lock);
 
     Object->Device = Device;
-    Object->State = State;
     Object->Functions = Functions;
 
     LouKeListAddTail(&Object->Head, &Device->ModeConfig.PrivateObjectsList);
 
-    State->Object = Object;
+    State = Object->Functions->AtomicCreateState(Object);
+    if(IS_LOU_KE_PTR_ERROR(State)){
+        return LOU_KE_PTR_ERROR(State);
+    }
+
+    Object->State = State;
+
+    return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT

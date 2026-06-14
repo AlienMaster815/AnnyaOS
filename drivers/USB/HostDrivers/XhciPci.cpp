@@ -1,6 +1,14 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "Xhci.h"
 
+static const USB_HOST_OPERATIONS XhciOperations = {
+    .UsbHcdResetHostController = XhciResetHostController,
+    .UsbHcdStopHostController = XhciStopHostController,
+    .UsbHcdStartHostController = XhciStartHostController,
+    .UsbHcdProbeRootHub = XhciProbeRootHub,
+    .UsbHcdCommitRequest = XhciCommitRequest,
+};
+
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
     {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .GenericEntry = true},
@@ -25,6 +33,8 @@ LOUSTATUS AddDevice(
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
     NewXhciDevice->PDEV = PDEV;
     
+    NewXhciDevice->HostDevice.BusAddresses = LouKeCreateIdentificationRange(1, 256);
+
     PciHalEnableMemorySpace(PDEV);
 
     PciHalEnableBusMaster(PDEV);
@@ -47,12 +57,24 @@ LOUSTATUS AddDevice(
         while(1);
     }
 
-    Status = XhciInitializeDevice(
-        NewXhciDevice
+    Status = PciHalAllocatePciIrqVectors(
+        PDEV,
+        1, //TODO:check spec to see how many interrupts XHCI actually supports
+        PCI_IRQ_USE_LEGACY
     );
     if(Status != STATUS_SUCCESS){
-        LouPrint("XHCI.SYS::AddDevice():XhciInitializeDevice():FAILED\n");
+        LouPrint("XHCI.SYS::AddDevice():Unable To Allocate IRQs\n");
         while(1);
+    }
+
+    NewXhciDevice->HostDevice.Operations = XhciOperations;
+    
+    RegisterInterruptHandler(XhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)NewXhciDevice);
+
+    Status = LouKeUsbAddHcd(&NewXhciDevice->HostDevice);
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS::AddDevice():Unable To Register XHCI Host Device\n");
     }
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");

@@ -1,3 +1,28 @@
+ /*
+ * Copyright (c) 2026 AnnyaOS
+ *
+ * This file is a derivative work based on Linux DRM,
+ * Copyright (c) 1994 - current
+ *   - Dave Airlie          <airlied@linux.ie>
+ *   - Daniel Vetter        <daniel.vetter@ffwll.ch>
+ *   - Thomas Hellstrom     <thomas@vmware.com>
+ *   - Alex Deucher         <alexander.deucher@amd.com>
+ *   - Michel Dänzer        <michel@daenzer.net>
+ *   - The X.Org / Mesa / DRM community
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+ 
 #include "DrsdCore.h"
 
 static mutex_t BridgeLock = {0};
@@ -63,6 +88,58 @@ static void DrsdBridgePutVoid(PVOID Data){
 
 static void DrsdBridgeRemoveVoid(PVOID Data){
     DrsdBridgeRemove((PDRSD_BRIDGE)Data);
+}
+
+static 
+PDRSD_PRIVATE_STATE 
+DrsdBridgeAtomicDuplicatePrivateState(
+    PDRSD_PRIVATE_OBJECT    Object
+){
+
+    PDRSD_BRIDGE        Bridge = DrsdPrivateToBridge(Object);
+    PDRSD_BRIDGE_STATE  State;
+
+    State = Bridge->Functions->AtomicDuplicateState(Bridge);
+    return State ? &State->Base : 0x00;
+}
+
+static 
+void
+DrsdBridgeAtomicDestroyPrivateState(
+    PDRSD_PRIVATE_OBJECT    Object,
+    PDRSD_PRIVATE_STATE     PrivateState
+){
+    PDRSD_BRIDGE_STATE  BridgeState = DrsdPrivateToBridgeState(PrivateState);
+    PDRSD_BRIDGE        Bridge = DrsdPrivateToBridge(Object);
+
+    Bridge->Functions->AtomicDestroyState(Bridge, BridgeState);
+}
+
+static 
+PDRSD_PRIVATE_STATE
+DrsdBridgeAtomicCreatePrivateState(
+    PDRSD_PRIVATE_OBJECT    PrivateObject
+){
+    PDRSD_BRIDGE            Bridge = DrsdPrivateToBridge(PrivateObject);
+    PDRSD_BRIDGE_STATE      State;
+
+    State = Bridge->Functions->AtomicReset(Bridge);
+
+    if(IS_LOU_KE_PTR_ERROR(State)){
+        return LOU_KE_ERROR_PTR(State);
+    }
+
+    return &State->Base;
+}
+
+static DRSD_PRIVATE_STATE_FUNCTIONS DrsdBridgePrivateStateFunctions = {
+    .AtomicCreateState = DrsdBridgeAtomicCreatePrivateState,
+    .AtomicDuplicateState = DrsdBridgeAtomicDuplicatePrivateState,
+    .AtomicDestroyState = DrsdBridgeAtomicDestroyPrivateState,
+};
+
+static BOOLEAN DrsdBridgeIsAtomic(PDRSD_BRIDGE Bridge){
+    return Bridge->Functions->AtomicReset ? true : false;
 }
 
 DRIVER_EXPORT
@@ -181,4 +258,146 @@ DrsdBridgeRemove(
     DrsdBridgePut(Bridge);
 }
 
-//477
+
+DRIVER_EXPORT
+LOUSTATUS
+DrsdBridgeAttatch(
+    PDRSD_ENCODER               Encoder,
+    PDRSD_BRIDGE                Bridge,
+    PDRSD_BRIDGE                Previous,
+    DRSD_BRIDGE_ATTATCH_FLAGS   Flags
+){
+    LOUSTATUS Status;
+
+    if(!Encoder || !Bridge){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if(!Bridge->Container){
+        LouPrint("DRSD.SYS:Drsd Bridge Currupted Or Not Allocated Bt Device Manager\n");
+    }
+
+    if(LouKeListIsEmpty(&Bridge->List)){
+        LouPrint("DRSD.SYS:Missing DrsdBridgeAdd() Before Attatch\n");
+    }
+
+    DrsdBridgeGet(Bridge);
+
+    if(Previous && (!Previous->Device || Previous->Encoder != Encoder)){
+        Status = STATUS_INVALID_PARAMETER;
+        goto _ERROR_PUT_BRIDGE;
+    }
+
+    if(Previous){
+        LouKeListAddTail(&Bridge->ChainNode, &Previous->ChainNode);
+    }else{
+        LouKeListAddTail(&Bridge->ChainNode, &Encoder->BridgeChain);
+    }
+
+    if(Bridge->Functions->Attatch){
+        Status = Bridge->Functions->Attatch(Bridge, Encoder, Flags);
+        if(Status != STATUS_SUCCESS){
+            goto _ERROR_RESET_BRIDGE;
+        }
+    }
+
+    if(DrsdBridgeIsAtomic(Bridge)){
+        DrsdAtomicPrivateObjectInitialize(
+            Bridge->Device,
+            &Bridge->Base,
+            &DrsdBridgePrivateStateFunctions
+        );
+    }
+
+    return STATUS_SUCCESS;
+
+_ERROR_RESET_BRIDGE:
+    Bridge->Device = 0x00;
+    Bridge->Encoder = 0x00;
+    LouKeListDeleteAll(&Bridge->ChainNode);
+_ERROR_PUT_BRIDGE:
+    DrsdBridgePut(Bridge);
+    return STATUS_SUCCESS;
+}
+
+void DrsdBridgeDetatch(PDRSD_BRIDGE Bridge){
+    if(!Bridge){
+        return;
+    }
+    if(!Bridge->Device){
+        return;
+    }
+    if(DrsdBridgeIsAtomic(Bridge)){
+        DrsdAtomicPrivateObjectDeInitialize(&Bridge->Base);
+    }
+    if(Bridge->Functions->Detatch){
+        Bridge->Functions->Detatch(Bridge);
+    }
+    LouKeListDeleteAll(&Bridge->ChainNode);
+    Bridge->Device = 0x00;
+    DrsdBridgePut(Bridge);
+}
+
+DRIVER_EXPORT
+DRSD_MODE_STATUS 
+DrsdBridgeChainModeValid(
+    PDRSD_BRIDGE                Bridge,
+    PDRSD_DISPLAY_INFORMATION   Info,
+    PDRSD_DISPLAY_MODE          Mode
+){
+    PDRSD_ENCODER   Encoder;
+    if(!Bridge){
+        return DRSD_MODE_OK;
+    }
+
+    Encoder = Bridge->Encoder;
+    ForEachListEntryFrom(Bridge, &Encoder->BridgeChain, ChainNode){
+        DRSD_MODE_STATUS Status;
+        if(!Bridge->Functions->ModeValid){
+            continue;
+        }
+        Status = Bridge->Functions->ModeValid(Bridge, Info, Mode);
+        if(Status != DRSD_MODE_OK){
+            return Status;
+        }
+    }
+
+    return DRSD_MODE_OK;
+}
+
+DRIVER_EXPORT
+void 
+DrsdBridgeChainModeSet(
+    PDRSD_BRIDGE        Bridge,
+    PDRSD_DISPLAY_MODE  Mode,
+    PDRSD_DISPLAY_MODE  AdjustedMode
+){
+    PDRSD_ENCODER Encoder;
+    if(!Bridge){
+        return;
+    }
+    Encoder = Bridge->Encoder;
+    ForEachListEntryFrom(Bridge, &Encoder->BridgeChain, ChainNode){
+        if(Bridge->Functions->ModeSet){
+            Bridge->Functions->ModeSet(Bridge, Mode, AdjustedMode);
+        }
+    }
+}
+
+//804
+/*DRIVER_EXPORT
+void 
+DrsdAtomicBridgeChainDisable(
+    PDRSD_BRIDGE        Bridge,
+    PDRSD_ATOMIC_STATE  State
+){
+    PDRSD_ENCODER   Encoder;
+    PDRSD_BRIDGE    Iteration;
+    if(!Bridge){
+        return;
+    }
+
+    Encoder = Bridge->Encoder;
+    
+
+}*/

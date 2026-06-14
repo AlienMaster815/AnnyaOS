@@ -1,105 +1,184 @@
 #include "Xhci.h"
 
-UINT32 XhciGetUsbCommand(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->UsbCommand;
+void XhciInterruptHandler(uint64_t UsbHostData){
+    LouPrint("XhciInterruptHandler()\n");
+    while(1);
 }
 
-void XhciSetUsbCommand(
-    PXHCI_DEVICE    Device,
-    UINT32          Value
-){
-    Device->OperationalRegisters->UsbCommand = Value;
-}
+LOUSTATUS XhciResetHostController(PUSB_HOST_DEVICE HostDevice){
 
-UINT32 XhciGetUsbStatus(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->UsbStatus;
-}
+    LOUSTATUS Status;
+    PXHCI_DEVICE XhciDevice = LouKeUsbHostDeviceToXhciDevice(HostDevice);
+    PXHCI_OPERATIONAL_REGISTERS OpRegs = XhciDevice->OperationalRegisters;
+    UINT32 Tmp = OpRegs->UsbCommand;
+    Tmp |= XHCI_USBCMD_HCRST;
+    OpRegs->UsbCommand = Tmp;
 
-void XhciSetUsbStatus(
-    PXHCI_DEVICE    Device,
-    UINT32          Value
-){
-    Device->OperationalRegisters->UsbStatus = Value;
-}
+    Status = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+        1000,
+        XHCI_USBSTS_CNR,
+        0
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:XhciResetHostController() CNR Did Not Clear\n");
+        while(1);
+    }
 
-UINT32 XhciGetUsbPageSize(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->PageSize;
-}
+    Status = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbCommand),
+        1000,
+        XHCI_USBCMD_HCRST,
+        0
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:XhciResetHostController() HCRST Did Not Clear\n");
+        while(1);
+    }
+    if(XhciDevice->Capabilities.MaxScratchpageBufs && !XhciDevice->VirtualScratchpadAddress){
+        Status = XhciAllocateDmaMemory(XhciDevice, XhciDevice->Capabilities.MaxScratchpageBufs * OpRegs->PageSize, 64, &XhciDevice->VirtualScratchpadAddress);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("XHCI.SYS:XhciResetHostController():Unable To Allocate Scratchpad Buffer\n");
+            while(1);
+        }
+    }
+    if(XhciDevice->Capabilities.MaxScratchpageBufs && !XhciDevice->VirtualScratchpadArrayAddress){
+        Status = XhciAllocateDmaMemory(XhciDevice, XhciDevice->Capabilities.MaxScratchpageBufs * sizeof(UINT64), 64, &XhciDevice->VirtualScratchpadArrayAddress);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("XHCI.SYS:XhciResetHostController():Unable To Allocate Scratchpad Array Buffer\n");
+            while(1);
+        }
+    }
 
-void XhciSetUsbPageSize(
-    PXHCI_DEVICE    Device,
-    UINT32          Value
-){
-    Device->OperationalRegisters->PageSize = Value;
-}
-
-UINT32 XhciGetDncCtrl(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->DncCtrl;
-}
-
-void XhciSetDncCtrl(
-    PXHCI_DEVICE    Device,
-    UINT32          Value
-){
-    Device->OperationalRegisters->DncCtrl = Value;
-}
-
-UINT32 XhciGetCrcr(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->Crcr;
-}
-
-void XhciSetCrcr(
-    PXHCI_DEVICE    Device,
-    UINT32          Value
-){
-    Device->OperationalRegisters->Crcr = Value;
-}
-
-UINT64 XhciGetDcbaap(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->Dcbaap;
-}
-
-void XhciSetDcbaap(
-    PXHCI_DEVICE    Device,
-    UINT64          Value
-){
-    Device->OperationalRegisters->Dcbaap = Value;
-}
-
-UINT32 XhciGetConfig(
-    PXHCI_DEVICE    Device
-){
-    return Device->OperationalRegisters->Config;
-}
-
-void XhciSetConfig(
-    PXHCI_DEVICE    Device,
-    UINT32          Value
-){
-    Device->OperationalRegisters->Config = Value;
-}
-
-
-
-LOUSTATUS XhciInitializeDevice(
-    PXHCI_DEVICE Device
-){
-    LouPrint("XHCI.SYS:XhciInitializeDevice()\n");
+    UINT64 ScratchpadDma = 0x00; 
+    UINT64 ScratchpadArrayDma = 0x00; 
+    if(XhciDevice->VirtualScratchpadAddress && XhciDevice->VirtualScratchpadArrayAddress){
+        ScratchpadDma = XhciGetDmaAddress(XhciDevice->VirtualScratchpadAddress);
+        for(SIZE i = 0 ; i < XhciDevice->Capabilities.MaxScratchpageBufs; i++){
+            ((UINT64*)XhciDevice->VirtualScratchpadArrayAddress)[i] = ScratchpadDma + (i + GET_XHCI_PAGE_SIZE(OpRegs->PageSize));
+        }
+        ScratchpadArrayDma = XhciGetDmaAddress(XhciDevice->VirtualScratchpadArrayAddress);
+    }
     
+    if(!XhciDevice->VirtualDcbaapAddress){
+        Status = XhciAllocateDmaMemory(XhciDevice, XHCI_DEVICE_CONTEXT_BASE_ADDRESS_ARRAY_ALLOCATION_SIZE(XhciDevice->Capabilities.MaxSlots), 64, &XhciDevice->VirtualDcbaapAddress);//round up to page size
+        if(Status != STATUS_SUCCESS){
+            LouPrint("XHCI.SYS:XhciResetHostController() Unable To Allocate Dcbaa\n");
+            while(1);
+        }
+    }
 
+    ((UINT64*)XhciDevice->VirtualDcbaapAddress)[0] = ScratchpadArrayDma; 
 
-    LouPrint("XHCI.SYS:XhciInitializeDevice() STATUS_SUCCESS\n");
+    UINT64 DcbaaDma = XhciGetDmaAddress(XhciDevice->VirtualDcbaapAddress);
+
+    OpRegs->Dcbaap = DcbaaDma;
+
+    Tmp = OpRegs->Config;
+    Tmp &= ~(XHCI_CONFIG_MAX_SLOTS_EN);
+    Tmp |= ((XhciDevice->Capabilities.MaxSlots & XHCI_CONFIG_MAX_SLOTS_EN_MASK) << XHCI_CONFIG_MAX_SLOTS_EN_SHIFT);
+    OpRegs->Config = Tmp;
+
+    XhciAllocateDmaMemory(XhciDevice, XHCI_COMMAND_RING_SEGMENT_SIZE, XHCI_COMMAND_RING_SEGMENT_BOUNDRY, &XhciDevice->VirtualCommandRingAddress);
+    if(!XhciDevice->VirtualCommandRingAddress){
+        LouPrint("XHCI.SYS:XhciResetHostController():Unable To Allocate CRCR Register\n");
+        while(1);
+    }
+    UINT64 CrcrDma = XhciGetDmaAddress(XhciDevice->VirtualCommandRingAddress);
+    Tmp = OpRegs->Crcr;
+    Tmp &= ~(XHCI_CRCR_CRP);
+    Tmp |= CrcrDma & XHCI_CRCR_CRP;
+    OpRegs->Crcr = Tmp;
+
+    XhciAllocateDmaMemory(XhciDevice, XHCI_EVENT_RING_SEGMENT_TABLE_SIZE, XHCI_EVENT_RING_SEGMENT_TABLE_ALIGNMENT, &XhciDevice->VirtualErstbaAddress);
+
+    PXHCI_ERDP_VA_POINTER XhciErdp = LouKeMallocType(XHCI_ERDP_VA_POINTER, KERNEL_GENERIC_MEMORY);
+    XhciErdp->TableEntry = (PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY)XhciDevice->VirtualErstbaAddress;
+    XhciAllocateDmaMemory(XhciDevice, XHCI_EVENT_RING_SEGMENT_SIZE , XHCI_EVENT_RING_SEGMENT_BOUNDRY, &XhciErdp->VirtualErdp);
+    if(!XhciErdp->VirtualErdp){
+        LouPrint("XHCI.SYS:XhciResetHostController():Unable To Allocate Event Ring Register\n");
+        while(1);
+    }
+    UINT64 ErdpDma = XhciGetDmaAddress(XhciErdp->VirtualErdp);
+    XhciErdp->TableEntry->SegmentBuffer = ErdpDma;
+    XhciErdp->TableEntry->SegmentSize = 4096;
+
+    PXHCI_RUNTIME_REGISTERS RunRegs = XhciDevice->RuntimeRegisters;
+
+    RunRegs->Irqx[0].Erstba = XhciGetDmaAddress(XhciDevice->VirtualErstbaAddress);
+    RunRegs->Irqx[0].Erstsz = 1;
+    RunRegs->Irqx[0].Erdp = ErdpDma;
+    RunRegs->Irqx[0].Imod = 4000;
+    RunRegs->Irqx[0].Iman = XHCI_INT_REG_IMAN_IP;
+    
+    Tmp = OpRegs->UsbCommand;
+    Tmp |= XHCI_USBCMD_INTE;
+    OpRegs->UsbCommand = Tmp;
+
+    LouPrint("XHCI.SYS:XhciResetHostController():STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciStopHostController(PUSB_HOST_DEVICE HostDevice){
+    LouPrint("XHCI.SYS:XhciStopHostController()\n");
+    LOUSTATUS Status;
+    PXHCI_DEVICE XhciDevice = LouKeUsbHostDeviceToXhciDevice(HostDevice);
+    PXHCI_OPERATIONAL_REGISTERS OpRegs = XhciDevice->OperationalRegisters;
+    UINT32 Tmp = OpRegs->UsbCommand;
+    Tmp &= ~(XHCI_USBCMD_RUN_STOP);
+    OpRegs->UsbCommand = Tmp;
+
+    Status = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+        1000,
+        XHCI_USBSTS_HCH,
+        XHCI_USBSTS_HCH
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:XhciStopHostController():HCH Timeout\n");
+        return Status;
+    }
+
+    LouPrint("XHCI.SYS:XhciStopHostController():STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciStartHostController(PUSB_HOST_DEVICE HostDevice){
+    LouPrint("XHCI.SYS:XhciStartHostController()\n");
+    LOUSTATUS Status;
+    PXHCI_DEVICE XhciDevice = LouKeUsbHostDeviceToXhciDevice(HostDevice);
+    PXHCI_OPERATIONAL_REGISTERS OpRegs = XhciDevice->OperationalRegisters;
+    UINT32 Tmp = OpRegs->UsbCommand;
+    Tmp |= XHCI_USBCMD_RUN_STOP;
+    OpRegs->UsbCommand = Tmp;
+
+    Status = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+        1000,
+        XHCI_USBSTS_HCH,
+        0
+    );
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:XhciStartHostController():HCH Timeout\n");
+        return Status;
+    }
+
+    LouPrint("XHCI.SYS:XhciStartHostController():STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciProbeRootHub(PUSB_HOST_DEVICE HostDevice){
+
+    LouPrint("XhciProbeRootHub()\n");
+    while(1);   
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket){
+
+    LouPrint("XhciCommitRequest()\n");
+    while(1);
     return STATUS_SUCCESS;
 }

@@ -191,6 +191,7 @@ typedef struct PACKED _XHCI_OPERATIONAL_REGISTERS{
     XHCI_USB_PORT_REGISTER_SET      Ports[];
 }XHCI_OPERATIONAL_REGISTERS, * PXHCI_OPERATIONAL_REGISTERS;
 
+#define GET_XHCI_PAGE_SIZE(PageSize)        (2^(PageSize+12))
 
 #define GET_XHCI_OPERATIONAL_REGISTERS(Cap)         ((PXHCI_OPERATIONAL_REGISTERS)((UINT64)((PXHCI_CAPABILITIES_REGISTER)Cap)->CapLength + (UINT64)Cap))
 
@@ -621,6 +622,14 @@ typedef struct PACKED _XHCI_VTIO_REGISTERS{
 //#define XHCI_SCRATCHPAD_BUFFERS_SIZE                      PAGESIZE
 //#define XHCI_SCRATCHPAD_BUFFERS_BOUNDRY                   PAGESIZE
 //#define XHCI_SCRATCHPAD_BUFFERS_ALIGNMENT                 PAGE
+
+typedef struct PACKED _XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY{
+    UINT64  SegmentBuffer;
+    UINT16  SegmentSize;
+    UINT8   Reserved[6];
+}XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY, * PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY;
+
+
 
 #define XHCI_DEVICE_CONTEXT_BASE_ADDRESS_ARRAY_ALLOCATION_SIZE(MaxSlotsEn) ((MaxSlotsEn + 1) * sizeof(UINT64))
 
@@ -1131,7 +1140,7 @@ typedef struct PACKED _XHCI_COMMAND_COMPLETION_EVENT{
 
 //offset 4
 #define XHCI_COMMAND_COMPLETION_EVENT_TRB_HI_MASK                   UINT32_MAX
-#define XHCI_COMMAND_COMPLETION_EVENT_TRB_HI_SHIFT                     0
+#define XHCI_COMMAND_COMPLETION_EVENT_TRB_HI_SHIFT                  0
 #define XHCI_COMMAND_COMPLETION_EVENT_TRB_HI                        (XHCI_COMMAND_COMPLETION_EVENT_TRB_HI_MASK << XHCI_COMMAND_COMPLETION_EVENT_TRB_HI_SHIFT)
 
 //offset 8
@@ -1662,8 +1671,7 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     UINT8                           MaxPorts;
     UINT8                           IsochSchedThreshold;
     UINT8                           ErstMax;
-    UINT8                           MaxScratchpageBufsLo;
-    UINT8                           MaxScratchpageBufsHi;
+    UINT16                          MaxScratchpageBufs;
     BOOLEAN                         ScratchpadRestore;
     UINT8                           U1DeviceExitLatency;
     UINT8                           U2DeviceExitLatency;
@@ -1688,6 +1696,12 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
 typedef LOUSTATUS (*XHCI_ALLOCATION_FUNCTION)(SIZE, SIZE, PVOID*);
 typedef void (*XHCI_FREE_FUNCTION)(PVOID);
 
+typedef struct _XHCI_ERDP_VA_POINTER{
+    ListHeader                              Peers;
+    PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY    TableEntry;
+    PVOID                                   VirtualErdp;
+}XHCI_ERDP_VA_POINTER, * PXHCI_ERDP_VA_POINTER;
+
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
     USB_HOST_DEVICE                 HostDevice;
@@ -1699,7 +1713,17 @@ typedef struct _XHCI_DEVICE{
     XHCI_ALLOCATION_FUNCTION        XhciAllocationFunction;
     XHCI_FREE_FUNCTION              XhciFreeFunction;
     XARRAY                          DeviceContexts;
+    PVOID                           VirtualScratchpadAddress;
+    PVOID                           VirtualScratchpadArrayAddress;
+    PVOID                           VirtualDcbaapAddress;
+    PVOID                           VirtualCommandRingAddress;
+    PVOID                           VirtualErstbaAddress;
+    ListHeader                      VirtualErdpAddresses;
 }XHCI_DEVICE, * PXHCI_DEVICE;
+
+static inline PXHCI_DEVICE LouKeUsbHostDeviceToXhciDevice(PUSB_HOST_DEVICE HostDevice){
+    return (PXHCI_DEVICE)CONTAINER_OF(HostDevice, XHCI_DEVICE, HostDevice);
+}
 
 LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciAllocateDmaMemory32(SIZE Size, SIZE Alignment, PVOID Out);
@@ -1708,14 +1732,13 @@ LOUSTATUS XhciAllocateDmaMemory(PXHCI_DEVICE Device, SIZE Size, SIZE Alignment, 
 LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device);
 UINT64 XhciGetDmaAddress(PVOID Address);
 LOUSTATUS XhciInitializeDevice(PXHCI_DEVICE Device);
-void XhciSetPortxHlpmc(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
-UINT32 XhciGetPortxHlpmc(PXHCI_DEVICE Device, UINT8 Port);
-void XhciSetPortxLi(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
-UINT32 XhciGetPortxLi(PXHCI_DEVICE Device, UINT8 Port);
-void XhciSetPortxPmsc(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
-UINT32 XhciGetPortxPmsc(PXHCI_DEVICE Device, UINT8 Port);
-void XhciSetPortxPsc(PXHCI_DEVICE Device, UINT8 Port, UINT32 Value);
-UINT32 XhciGetPortxPsc(PXHCI_DEVICE Device, UINT8 Port);
 
+LOUSTATUS XhciResetHostController(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS XhciStopHostController(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS XhciStartHostController(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS XhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
+LOUSTATUS XhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
+
+void XhciInterruptHandler(uint64_t UsbHostData);
 
 #endif

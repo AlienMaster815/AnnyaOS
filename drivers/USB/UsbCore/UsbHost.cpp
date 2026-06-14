@@ -11,15 +11,17 @@ LOUSTATUS LouKeUsbAddHcd(
     LouPrint("LouKeUsbAddHcd()\n");
 
     if(HostDevice->Operations.UsbHcdStopHostController){
+        LouPrint("Stopping Usb Host Controller\n");
         HostDevice->Operations.UsbHcdStopHostController(HostDevice);
     }
 
     if(HostDevice->Operations.UsbHcdResetHostController){
-        LouPrint("Reseting Usb Host Controller\n");
+        LouPrint("Resetting Usb Host Controller\n");
         HostDevice->Operations.UsbHcdResetHostController(HostDevice);
     }    
 
     if(HostDevice->Operations.UsbHcdStartHostController){
+        LouPrint("Starting Usb Host Controller\n");
         HostDevice->Operations.UsbHcdStartHostController(HostDevice);
     }
 
