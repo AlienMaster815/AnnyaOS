@@ -1,8 +1,12 @@
-# Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl
-#git clone https://github.com/limine-bootloader/limine.git --branch=v9.x-binary --depth=1
+# Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl llvm clang lld automake autoconf bdf2psf
+
+#git clone https://github.com/limine-bootloader/limine
 #cd limine
+#./bootstrap
+#./configure CC=clang --enable-bios --enable-bios-cd --enable-uefi-cd --enable-uefi-x86-64 --enable-uefi-ia32
 #make
 #sudo make install
+#rm -rf limine
 
 #EFI Systems :: grub-efi-amd64
 
@@ -242,7 +246,6 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/User32 all
 
-
 #	$(MAKE) -C DLL/LouDLLs/GDI32 clean
 #	$(MAKE) -C DLL/LouDLLs/GDI32 all
 
@@ -252,6 +255,8 @@ annya: release
 	$(MAKE) -C LouCoff clean
 	$(MAKE) -C LouCoff all
 	$(MAKE) -C LouCoff modifications
+	$(MAKE) -C boot/limine clean
+	$(MAKE) -C boot/limine all
 
 	#Make The System Directories
 	$(MAKEDIR)
@@ -293,6 +298,7 @@ cleanall:
 	$(MAKE) -C EXE/asmss/ clean
 	$(MAKE) -C EXE/Awm/ clean
 	$(MAKE) -C LouCoff clean
+	$(MAKE) -C boot/limine clean
 	rm -rf release
 	rm -rf build
 	rm -rf ISO

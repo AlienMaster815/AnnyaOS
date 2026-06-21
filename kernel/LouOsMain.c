@@ -342,6 +342,8 @@ void LouOsKrnlStart(
         while(1);
     }
 
+    //TODO: update main workstation to use the new toolchain/build process
+
     //LouPrint("Successful Boot\n");
     //while(1);
 
