@@ -121,10 +121,12 @@ abort(){
 }
 
 MSVCRT_API
-void 
-calloc(){
-    LouPrint("calloc()\n");
-    while(1);
+void* 
+calloc(size_t count, size_t size){
+    size_t total = count * size;
+    void* ptr = LouGeneralAllocateMemory((UINT64)total);
+    if (ptr) memset(ptr, 0, total);
+    return ptr;
 }
 
 MSVCRT_API
@@ -143,9 +145,8 @@ fprintf(){
 
 MSVCRT_API
 void 
-free(){
-    LouPrint("free()\n");
-    while(1);
+free(void* ptr){
+    if (ptr) LouFree(ptr);
 }
 
 MSVCRT_API
@@ -156,10 +157,9 @@ fwrite(){
 }
 
 MSVCRT_API
-void 
-malloc(){
-    LouPrint("malloc()\n");
-    while(1);
+void* 
+malloc(size_t size){
+    return LouGeneralAllocateMemory((UINT64)size);
 }
 
 MSVCRT_API
@@ -211,6 +211,5 @@ DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved){
         }
     }
 
-    while(1);
     return true;
 }
