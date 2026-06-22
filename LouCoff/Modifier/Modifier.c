@@ -25,10 +25,13 @@ static bool IsModifierValid(
                 string ModifierValue = &Modifier[strlen(MODIFIER_PARAMETER_PRIVLEDGE)];
                 StrToLower(ModifierValue);
                 if(!strcmp(ModifierValue, "kernel")){
-                    Context->KernelObject = true;
+                    Context->ObjectType = LOUCOFF_KERNEL_OBJECT;
                 }else if(!strcmp(ModifierValue, "user")){
-                    Context->KernelObject = false;
-                }else{
+                    Context->ObjectType = LOUCOFF_USER_OBJECT;
+                }else if(!strcmp(ModifierValue, "loader")){
+                    Context->ObjectType = LOUCOFF_LOADER_OBJECT;
+                }
+                else{
                     printf("ERROR:Invalid Privledge:%s\n", Modifier);
                     return false;
                 }
@@ -46,7 +49,7 @@ static LOUSTATUS ModifierParseInput(
     char*                       ArgStrings[],
     int                         ArgCount
 ){
-    Context->KernelObject = false;//this will be set in the modifier valid function
+    Context->ObjectType = LOUCOFF_USER_OBJECT;//this will be set in the modifier valid function
     Context->Arguments = LouKeMallocArray(string, ArgCount, KERNEL_GENERIC_MEMORY);
     Context->ArgumentCount = ArgCount;
     for(int i = 0 ; i < ArgCount; i++){

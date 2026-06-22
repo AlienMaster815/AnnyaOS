@@ -6,9 +6,13 @@
 
 #define CFI_HEADER_LOUCOFF_SIGNATURE                    "LPE\0"
 
+#ifndef _CFI_SUBSYSTEM_SANITY_DEFINE
+#define _CFI_SUBSYSTEM_SANITY_DEFINE
 #define CFI_SUBSYSTEM_LOUSINE_UNKOWN_OBJECT             0
 #define CFI_SUBSYSTEM_LOUSINE_USER_OBJECT               1
 #define CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT             2
+#define CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT             3
+#endif
 
 #define CoffGetImageHeader(x) ((PCOFF_IMAGE_HEADER)((UINT8*)(x) + *(UINT32*)((UINT8*)(x) + 0x3C)))
 

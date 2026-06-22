@@ -1,16 +1,14 @@
 # Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl llvm clang lld automake autoconf bdf2psf
-
 #git clone https://github.com/limine-bootloader/limine
 #cd limine
 #./bootstrap
 #./configure CC=clang --enable-bios --enable-bios-cd --enable-uefi-cd --enable-uefi-x86-64 --enable-uefi-ia32
 #make
 #sudo make install
+#cd ..
 #rm -rf limine
 
-#EFI Systems :: grub-efi-amd64
-
-# Target Architecture Supported x86_64 ARM 
+# Target Architecture Supported x86_64
 
 #dll targets
 #x86_64-w64-mingw32-gcc -shared -o mydll.dll mydll.c -nostdlib -nodefaultlibs 
@@ -21,9 +19,6 @@
 #AnnyaExp Compile Line
 #x86_64-w64-mingw32-gcc -shared -ffreestanding -nostdlib -nostartfiles -o AnnyaExp.exe AnnyaExp.c -L/path/to/library -lname
 
-#target OS can be WINDOWS or LINUX
-
-#qemu-system-x86_64 -m 8192M -cdrom annya.iso
 #VirtualBoxVM --startvm "AnnyaOS" --dbg
 
 

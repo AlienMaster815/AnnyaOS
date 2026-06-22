@@ -61,13 +61,27 @@ typedef struct _FILE_CONTEXT{
     size_t      FileSize;
 }FILE_CONTEXT, * PFILE_CONTEXT;
 
+#ifndef _CFI_SUBSYSTEM_SANITY_DEFINE
+#define _CFI_SUBSYSTEM_SANITY_DEFINE
+#define CFI_SUBSYSTEM_LOUSINE_UNKOWN_OBJECT             0
+#define CFI_SUBSYSTEM_LOUSINE_USER_OBJECT               1
+#define CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT             2
+#define CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT             3
+#endif
+
+typedef enum{
+    LOUCOFF_USER_OBJECT = CFI_SUBSYSTEM_LOUSINE_USER_OBJECT,
+    LOUCOFF_KERNEL_OBJECT = CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT,
+    LOUCOFF_LOADER_OBJECT = CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT,
+}VMSPACE_SELECTOR;
+
 typedef struct _LOUCOFF_MODIFIER_CONTEXT{
     int                 ArgumentCount;
     string*             Arguments;
     FILE_CONTEXT        CoffFile;
     FILE_CONTEXT        SourceFile;//opt
     PVOID               KulaSection;
-    bool                KernelObject;
+    VMSPACE_SELECTOR    ObjectType;
 }LOUCOFF_MODIFIER_CONTEXT, * PLOUCOFF_MODIFIER_CONTEXT;
 
 void StrToLower_s(string Str, size_t Size);

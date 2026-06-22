@@ -18,19 +18,19 @@ static void SetLouCoffSignature(PFILE_CONTEXT CoffFile){
     memcpy((PVOID)(UINT8*)&CoffHeader->StandardHeader.PeSignature, (PVOID)(UINT8*)CFI_HEADER_LOUCOFF_SIGNATURE, 4);
 }
 
-static void _SetLouCoffSubsystem(UINT16* Subsystem, bool KernelObject){
-    *Subsystem = (KernelObject ? CFI_SUBSYSTEM_LOUSINE_KERNEL_OBJECT : CFI_SUBSYSTEM_LOUSINE_USER_OBJECT);
+static void _SetLouCoffSubsystem(UINT16* Subsystem, VMSPACE_SELECTOR ObjectType){
+    *Subsystem = ObjectType;
 }
 
 
-static void SetLouCoffSubsystem(PFILE_CONTEXT CoffFile, bool KernelObject){
+static void SetLouCoffSubsystem(PFILE_CONTEXT CoffFile, VMSPACE_SELECTOR ObjectType){
     PVOID FileData = CoffFile->FileContext;
     PCOFF_IMAGE_HEADER CoffHeader = CoffGetImageHeader(FileData);
 
     if(CoffHeader->OptionalHeader.PE64.Magic == CFI_OPTIONAL_HEADER_PE3264_MAGIC){
-        _SetLouCoffSubsystem(&CoffHeader->OptionalHeader.PE64.Subsystem, KernelObject);
+        _SetLouCoffSubsystem(&CoffHeader->OptionalHeader.PE64.Subsystem, ObjectType);
     }else if(CoffHeader->OptionalHeader.PE32.Magic == CFI_OPTIONAL_HEADER_PE32_MAGIC){
-        _SetLouCoffSubsystem(&CoffHeader->OptionalHeader.PE32.Subsystem, KernelObject);
+        _SetLouCoffSubsystem(&CoffHeader->OptionalHeader.PE32.Subsystem, ObjectType);
     }else{
         printf("ERROR:Coff Version Not Recognized\n");
     }
@@ -57,7 +57,7 @@ MakeCoffModifications(
 
     SetLouCoffSignature(&Context->CoffFile);
 
-    SetLouCoffSubsystem(&Context->CoffFile, Context->KernelObject);
+    SetLouCoffSubsystem(&Context->CoffFile, Context->ObjectType);
 
     FileContextCloseFile(&Context->CoffFile);
 
