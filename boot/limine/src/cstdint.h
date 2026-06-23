@@ -46,4 +46,9 @@ typedef char bool;
 #define FALSE false
 #define TRUE  
 
+typedef PVOID HANDLE;
+typedef PVOID KHANDLE;
+
+typedef bool BOOLEAN;
+
 #endif
