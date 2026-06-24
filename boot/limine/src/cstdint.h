@@ -2,6 +2,8 @@
 #ifndef _CSTDINT_H
 #define _CSTDINT_H
 
+//TODO:fix the ABI i got the ABI backwards 
+
 typedef char        CHAR,     BYTE,  INT8,  int8_t,  *PCHAR,    *PBYTE,     *PINT8;
 typedef short       SHORT,    WORD,  INT16, int16_t, *PSHORT,   *PWORD,     *PINT16;
 typedef int         INTEGER,  DWORD, INT32, int32_t, *PINTEGER, *PDWORD,    *PINT32, INT,    *PINT;

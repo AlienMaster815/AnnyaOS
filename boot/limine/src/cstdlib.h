@@ -4,6 +4,8 @@
 
 #include "cstdint.h"
 
+#define PACKED __attribute__((packed))
+
 #define LIMINE_REQUEST          __attribute__((used, section(".limine_requests"))) static volatile
 #define LIMINE_REQUEST_START    __attribute__((used, section(".limine_requests_start"))) static volatile
 #define LIMINE_REQUEST_END      __attribute__((used, section(".limine_requests_end"))) static volatile

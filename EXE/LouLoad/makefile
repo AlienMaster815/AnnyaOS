@@ -1,7 +1,6 @@
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -c -ffreestanding -Werror -Wall -Wno-multichar \
-         -fno-omit-frame-pointer -O3 -fno-common -fno-builtin \
-         -fstrict-aliasing -mno-mmx -mno-sse -mno-avx
+CFLAGS = -m64 -fPIC -fno-stack-protector -nostdlib -nodefaultlibs -fno-builtin -ffreestanding -Werror -Wall -Wno-multichar \
+         -fno-omit-frame-pointer -fno-common -fstrict-aliasing -mno-mmx -mno-sse -mno-avx
 LDFLAGS = \
     -Wl,--entry=LouLoadStartLoader \
     -Wl,--subsystem,console \

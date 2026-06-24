@@ -13,6 +13,7 @@ typedef enum {
     LOADER_MODULE_MEMORY,
     LOADER_FRAMEBUFFER_MEMORY,
     LOADER_RESERVED_MAPED_MEMORY, 
+    LOADER_ANY_ATTRIBUTE_MEMORY, 
 }LOADER_MEMORY_MAP_ATTRIBUTE;
 
 typedef struct _RAT_TRACKER{
@@ -40,12 +41,16 @@ typedef struct _LOADER_FB_MEMORY_MAP{
 
 typedef struct _LOADER_RAT_MBR_CHUNK{
     SIZE                Count; 
-    RAT_TRACKER         Mbr[512];
+    SIZE                ChunkSize;
+    SIZE                MbrChunksAllocated;
+    SIZE                ChunkAllocatorIndexor[100];
+    RAT_TRACKER         Mbr[100];
     LOADER_MEMORY_MAP   Entries[];
 }LOADER_RAT_MBR_CHUNK, * PLOADER_RAT_MBR_CHUNK;
 
 typedef struct _LOADER_INFORMATION{
     UINT64                  TscCount;
+    SIZE                    RamSize;
     KHANDLE                 EfiSystemTable;
     KHANDLE                 LoaderHandle;
     PLOADER_RAT_MBR_CHUNK   RatMbr;
@@ -55,6 +60,7 @@ typedef struct _LOADER_INFORMATION{
     PLOADER_MEMORY_MAP      LoadedModules;
     SIZE                    FrameBufferCount;
     PLOADER_FB_MEMORY_MAP   FrameBuffers;
+    PLOADER_MEMORY_MAP      BootModulesBase;
 }LOADER_INFORMATION, * PLOADER_INFORMATION;
 
 
@@ -86,6 +92,10 @@ PVOID LimineGetVirtualAddress(PVOID Address);
 PVOID LimineGetPhysicalAddress(PVOID Address);
 PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr();
 BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info);
+BOOLEAN InitializeRatSubsystem(PLOADER_INFORMATION Info);
+PVOID LoaderAllocateSpace(SIZE AllocationSize, SIZE Alignment);
+PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment);
 
+#include "Coff.h"
 
 #endif

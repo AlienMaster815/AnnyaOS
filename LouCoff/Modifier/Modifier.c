@@ -84,7 +84,6 @@ int main(int Argc, char *Argv[]){
         );
         return 0;
     }
-    
     Status = MakeCoffModifications(&CompilerContext);
     if(Status != STATUS_SUCCESS){
         printf("Error Making Modifications\n");

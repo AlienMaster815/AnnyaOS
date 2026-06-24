@@ -39,9 +39,12 @@ LIMINE_REQUEST struct limine_tsc_frequency_request tsc_frequency_request = {
     .revision = 0,
 };
 
+static PLOADER_RAT_MBR_CHUNK RatMbrTable = 0x00;
+
 static BOOLEAN AllocationLocationOk(UINTPTR Location, SIZE Size){
-    return ((Location >= (64 * KILOBYTE)) && ((Location + Size) < (12 * MEGABYTE)));
+    return ((Location >= (64 * KILOBYTE)) && ((Location + Size) < (GIGABYTE)));
 }
+
 
 void CalculateTableMarks(
     UINT64 VirtualAddressess,
@@ -148,7 +151,7 @@ PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(){
         Result->Entries[i].Tracker.Base = memmap_request.response->entries[i]->base;;
         Result->Entries[i].Tracker.Length = memmap_request.response->entries[i]->length;
     }
-
+    RatMbrTable = Result;
     return Result;
 }
 
@@ -162,16 +165,16 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
     }
 
     SIZE Offset;
-    SIZE MapCount = memmap_request.response->entry_count;
+    SIZE MapCount = RatMbrTable->Count;
     SIZE AllocationSizeNeeded =  sizeof(LOADER_FB_MEMORY_MAP) * framebuffer_request.response->framebuffer_count;
     PVOID Result = 0x00;
     for(SIZE i = 0; i < MapCount; i++){
-        if(memmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE){
-            if((memmap_request.response->entries[i]->length > AllocationSizeNeeded) && (AllocationLocationOk(memmap_request.response->entries[i]->base, AllocationSizeNeeded))){
-                Result = (PVOID)ROUND_UP64(memmap_request.response->entries[i]->base, GET_ALIGNMENT(LOADER_FB_MEMORY_MAP));
-                Offset = (UINTPTR)Result - memmap_request.response->entries[i]->base;
-                memmap_request.response->entries[i]->base += (AllocationSizeNeeded + Offset);
-                memmap_request.response->entries[i]->length -= (AllocationSizeNeeded + Offset);
+        if(RatMbrTable->Entries[i].Attributes == LIMINE_MEMMAP_USABLE){
+            if((RatMbrTable->Entries[i].Tracker.Length > AllocationSizeNeeded) && (AllocationLocationOk(RatMbrTable->Entries[i].Tracker.Base, AllocationSizeNeeded))){
+                Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(LOADER_FB_MEMORY_MAP));
+                Offset = (UINTPTR)Result - RatMbrTable->Entries[i].Tracker.Base;
+                RatMbrTable->Entries[i].Tracker.Base += (AllocationSizeNeeded + Offset);
+                RatMbrTable->Entries[i].Tracker.Length -= (AllocationSizeNeeded + Offset);
                 break;
             }
         }
@@ -207,12 +210,12 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
     Result = 0x00;
 
     for(SIZE i = 0; i < MapCount; i++){
-        if(memmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE){
-            if((memmap_request.response->entries[i]->length > AllocationSizeNeeded) && (AllocationLocationOk(memmap_request.response->entries[i]->base, AllocationSizeNeeded))){
-                Result = (PVOID)ROUND_UP64(memmap_request.response->entries[i]->base, GET_ALIGNMENT(LOADER_MEMORY_MAP));
-                Offset = (UINTPTR)Result - memmap_request.response->entries[i]->base;
-                memmap_request.response->entries[i]->base += (AllocationSizeNeeded + Offset);
-                memmap_request.response->entries[i]->length -= (AllocationSizeNeeded + Offset);
+        if(RatMbrTable->Entries[i].Attributes == LIMINE_MEMMAP_USABLE){
+            if((RatMbrTable->Entries[i].Tracker.Length > AllocationSizeNeeded) && (AllocationLocationOk(RatMbrTable->Entries[i].Tracker.Base, AllocationSizeNeeded))){
+                Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(LOADER_MEMORY_MAP));
+                Offset = (UINTPTR)Result - RatMbrTable->Entries[i].Tracker.Base;
+                RatMbrTable->Entries[i].Tracker.Base += (AllocationSizeNeeded + Offset);
+                RatMbrTable->Entries[i].Tracker.Length -= (AllocationSizeNeeded + Offset);
             }
         }
     }
@@ -243,5 +246,204 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
         Info->TscCount = tsc_frequency_request.response->frequency;
     }
 
+    for(SIZE i = 0; i < MapCount; i++){
+        if(memmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE){
+            if((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->RamSize){
+                Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
+            }
+        }
+    }
+
     return true;
 }
+
+static inline bool RangeInterferes(uint64_t AddrA, uint64_t SizeA, uint64_t AddrB, uint64_t SizeB){
+    return !( (AddrA + SizeA <= AddrB) || (AddrB + SizeB <= AddrA));
+}
+
+BOOLEAN InitializeRatSubsystem(PLOADER_INFORMATION Info){
+
+    RatMbrTable->ChunkSize = Info->RamSize / 100;
+    RatMbrTable->ChunkSize /= sizeof(RAT_TRACKER);
+    PVOID Result = 0x00;
+    for(SIZE i = 0 ; i < RatMbrTable->Count; i++){
+        if(
+            (RatMbrTable->Entries[i].Attributes == LOADER_USABLE_MEMORY) && \
+            (RatMbrTable->Entries[i].Tracker.Length > (RatMbrTable->ChunkSize * sizeof(RAT_TRACKER))) && 
+            (AllocationLocationOk(ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)), RatMbrTable->ChunkSize * sizeof(RAT_TRACKER)))
+        ){
+            Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)); 
+            break;
+        }
+    }
+    if(!Result){
+        return false;
+    }
+    RatMbrTable->Mbr[0].Base = (UINTPTR)Result;
+    RatMbrTable->Mbr[0].Length = RatMbrTable->ChunkSize * sizeof(RAT_TRACKER);
+    RatMbrTable->MbrChunksAllocated = 1;
+    memset(Result, 0, RatMbrTable->ChunkSize * sizeof(RAT_TRACKER));
+    return true;
+}
+
+BOOLEAN LouKeRatIsAddressFreeEx(PVOID Address, SIZE Size, UINTPTR* EndofAllocations){
+    if(!Address || !Size){
+        return false;
+    }
+    PRAT_TRACKER Mbr = &RatMbrTable->Mbr[0];
+    SIZE MbrChunksAllocated = RatMbrTable->MbrChunksAllocated;
+    PRAT_TRACKER MbrChunkIndex = 0x00;
+    SIZE MbrChunkAllocations = 0;
+    for(SIZE i = 0; i < MbrChunksAllocated; i++){
+        if(RangeInterferes(Mbr[i].Base, Mbr[i].Length, (UINT64)Address, Size)){
+            if(EndofAllocations){
+                *EndofAllocations = (Mbr[i].Base + Mbr[i].Length);  
+            }
+            return false;
+        }
+        MbrChunkIndex = (PRAT_TRACKER)Mbr[i].Base;
+        MbrChunkAllocations = RatMbrTable->ChunkAllocatorIndexor[i];
+        for(SIZE j = 0; j < MbrChunkAllocations; j++){
+            if(RangeInterferes(MbrChunkIndex[j].Base, MbrChunkIndex[j].Length, (UINT64)Address, Size)){
+                if(EndofAllocations){
+                    *EndofAllocations = (MbrChunkIndex[j].Base + MbrChunkIndex[j].Length);  
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+BOOLEAN LouKeRatIsAddressFree(PVOID Address, SIZE Size){
+    return LouKeRatIsAddressFreeEx(Address, Size, 0x00);
+}
+
+typedef BOOLEAN (*RAT_ENTRY_HANDLER)(PVOID Context, PRAT_TRACKER Tracker);
+
+BOOLEAN LouKeRatForEachRatEntriesTillTrue(RAT_ENTRY_HANDLER Handler, PVOID Context, LOADER_MEMORY_MAP_ATTRIBUTE Attributes){
+    SIZE Count = RatMbrTable->Count;
+    BOOLEAN Result;
+    for(SIZE i = 0; i < Count; i++){
+        if((Attributes == LOADER_ANY_ATTRIBUTE_MEMORY) || (RatMbrTable->Entries[i].Attributes == Attributes)){
+            Result = Handler(Context, &RatMbrTable->Entries[i].Tracker);
+            if(Result){
+                return Result;
+            }
+        }
+    }
+    return false;
+}
+
+typedef struct _REP_GET_ALLOCATION_CTX{
+    UINTPTR     Base;
+    SIZE        Length;
+    SIZE        Alignment;
+}REP_GET_ALLOCATION_CTX, * PREP_GET_ALLOCATION_CTX;
+
+static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
+    PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
+
+    PVOID Result = (PVOID)Tracker->Base;
+    Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
+
+    while((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
+        UINTPTR NextHint;
+        if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
+            AllocContext->Base = (UINTPTR)Result;
+            return true;
+        }        
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+    }
+    return false;
+}
+
+static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker){
+    if(Tracker->Base > GIGABYTE){
+        return false;
+    }
+    PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
+    PVOID Result = (PVOID)Tracker->Base;
+    Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
+
+    while(((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) && (((UINTPTR)Result + AllocContext->Length) < (GIGABYTE))){
+        UINTPTR NextHint;
+        if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
+            AllocContext->Base = (UINTPTR)Result;
+            return true;
+        }        
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+    }
+    return false;
+}
+
+PRAT_TRACKER LouKeRatGetNextFreeAllocationTracker(){
+    PRAT_TRACKER Mbr = &RatMbrTable->Mbr[0];
+    SIZE MbrChunksAllocated = RatMbrTable->MbrChunksAllocated;
+    PRAT_TRACKER MbrChunkIndex = 0x00;
+    SIZE MbrChunkAllocations = 0;
+    SIZE i;
+    //check for fragmentation and defragment
+    for(i = 0; i < MbrChunksAllocated; i++){
+        MbrChunkIndex = (PRAT_TRACKER)Mbr[i].Base;
+        MbrChunkAllocations = RatMbrTable->ChunkAllocatorIndexor[i];
+        for(SIZE j = 0; j < MbrChunkAllocations; j++){
+            //defragment if posible
+            if(!MbrChunkIndex[j].Base){
+                return &MbrChunkIndex[j];
+            }
+        }
+    }
+    if(MbrChunkAllocations == RatMbrTable->ChunkSize){
+        i++;
+        REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = RatMbrTable->ChunkSize * sizeof(RAT_TRACKER), .Alignment = GET_ALIGNMENT(RAT_TRACKER)};
+        BOOLEAN Successfull = LouKeRatForEachRatEntriesTillTrue(GetFirstFreeAddressUnder1Gig, (PVOID)&Context, LOADER_USABLE_MEMORY);
+        if(!Successfull){
+            return 0x00;
+        }
+        Mbr[i].Base = Context.Base;
+        Mbr[i].Length = RatMbrTable->ChunkSize * sizeof(RAT_TRACKER);
+        RatMbrTable->MbrChunksAllocated++;
+        MbrChunkIndex = (PRAT_TRACKER)Mbr[i].Base;
+        MbrChunkAllocations = RatMbrTable->ChunkAllocatorIndexor[i]; //should be 0
+    }
+    PRAT_TRACKER Result = &MbrChunkIndex[MbrChunkAllocations];
+    MbrChunkAllocations++;
+    RatMbrTable->ChunkAllocatorIndexor[i] = MbrChunkAllocations;
+    return Result;
+}
+
+
+PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment){
+    PRAT_TRACKER NewTracker = LouKeRatGetNextFreeAllocationTracker();
+    if(!NewTracker){
+        return 0x00;
+    }
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, Alignment = Alignment};
+    BOOLEAN Successfull = LouKeRatForEachRatEntriesTillTrue(GetFirstFreeAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
+    if(!Successfull){
+        return 0x00;
+    } 
+    NewTracker->Base = Context.Base;
+    NewTracker->Length = Context.Length;
+    return (PVOID)Context.Base;
+}
+
+PVOID LoaderAllocateSpace(SIZE Size, SIZE Alignment){
+    PRAT_TRACKER NewTracker = LouKeRatGetNextFreeAllocationTracker();
+    if(!NewTracker){
+        return 0x00;
+    }
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, Alignment = Alignment};
+    BOOLEAN Successfull = LouKeRatForEachRatEntriesTillTrue(GetFirstFreeAddressUnder1Gig, (PVOID)&Context, LOADER_USABLE_MEMORY);
+    if(!Successfull){
+        return 0x00;
+    } 
+    NewTracker->Base = Context.Base;
+    NewTracker->Length = Context.Length;
+
+    memset((PVOID)Context.Base, 0, Context.Length);
+    
+    return (PVOID)Context.Base;
+}
+

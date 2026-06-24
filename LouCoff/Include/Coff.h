@@ -508,7 +508,7 @@ typedef struct _CFI_BASE_RELOCATION_BLOCK{
             UINT16      Type   : 4; 
         };
         UINT16          SanityIndexor;//compiler rounds to 16 bit indexing
-    }                   RelocationEntires[];
+    }                   RelocationEntries[];
 }CFI_BASE_RELOCATION_BLOCK, * PCFI_BASE_RELOCATION_BLOCK;
 
 #define CFI_BASE_RELOCATION_TYPE_BASED_ABSOLUTE         0
@@ -656,7 +656,7 @@ typedef struct _CFI_RESOURCE_DIRECTORY_TABLE{
     UINT16                              MinorVersion;
     UINT16                              NumberOfNameEntries;
     UINT16                              NumberOfIDEntries;
-    CFI_RESOURCE_DIRECTORY_ENTRIES      Entires[];
+    CFI_RESOURCE_DIRECTORY_ENTRIES      Entries[];
 }CFI_RESOURCE_DIRECTORY_TABLE, * PCFI_RESOURCE_DIRECTORY_TABLE;
 
 typedef struct _UNICODE_STRING{

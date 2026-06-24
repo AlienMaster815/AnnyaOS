@@ -240,8 +240,8 @@ LOUSTATUS ApplyCoffRelocations(
     }
     UINT64 PreferedBase = PeImageHeader->OptionalHeader.PE64.ImageBase;
     UINT64 NewBase = (UINT64)(UINT8*)CfiObject->LoadedAddress;
-    UNUSED UINT64 BaseDelta;
-    UNUSED BOOL AddressDrop = false;
+    UINT64 BaseDelta;
+    BOOL AddressDrop = false;
 
     RelocAddress += NewBase;
 
@@ -258,9 +258,9 @@ LOUSTATUS ApplyCoffRelocations(
         PCFI_BASE_RELOCATION_BLOCK TmpReloc = (PCFI_BASE_RELOCATION_BLOCK)(UINT8*)(RelocAddress + Offset);
         size_t EntryCount = ((TmpReloc->BlockSize - sizeof(UINT64)) / sizeof(UINT16)); 
         for(size_t i = 0 ; i < EntryCount; i++){            
-            switch(TmpReloc->RelocationEntires[i].Type){
+            switch(TmpReloc->RelocationEntries[i].Type){
                 case CFI_BASE_RELOCATION_TYPE_BASED_DIR64:{
-                    UINT64* Target = (UINT64*)(UINT8*)(((UINT64)TmpReloc->PageRVA + (UINT64)TmpReloc->RelocationEntires[i].Offset) + NewBase);
+                    UINT64* Target = (UINT64*)(UINT8*)(((UINT64)TmpReloc->PageRVA + (UINT64)TmpReloc->RelocationEntries[i].Offset) + NewBase);
                     if(AddressDrop){
                         *Target -= BaseDelta;
                     }else{

@@ -1,4 +1,4 @@
-//Copyright (C) GPL-2 Tyler Grenier 2026
+//Copyright (C) GPL-2 Tyler Grenier 2026 : modified for LIMINE/SYSTEM V
 #ifndef _COFF_H
 #define _COFF_H
 
@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include <kernel/loustatus.h>
+#include "cstdlib.h"
 
 #define COFF_PE_SIGNATURE "PE\0\0"
 
@@ -599,80 +599,6 @@ typedef struct PACKED _CFI_UNWIND_CODE{
 
 #define FORCE_ALIGNMENT(alignment) __attribute__((aligned(alignment)))
 
-typedef struct PACKED _MACHINE_FRAME_NOECODE{
-    FORCE_ALIGNMENT(16) UINT64      Ss;
-    FORCE_ALIGNMENT(16) UINT64      Sp;
-    FORCE_ALIGNMENT(16) UINT64      Flags;
-    FORCE_ALIGNMENT(16) UINT64      Ip;
-}MACHINE_FRAME_NOECODE, * PMACHINE_FRAME_NOECODE;
-
-typedef struct PACKED _MACHINE_FRAME_ECODE{
-    FORCE_ALIGNMENT(16) UINT64      Ss;
-    FORCE_ALIGNMENT(16) UINT64      Sp;
-    FORCE_ALIGNMENT(16) UINT64      Flags;
-    FORCE_ALIGNMENT(16) UINT64      Ip;
-    FORCE_ALIGNMENT(16) UINT64      Ec;
-}MACHINE_FRAME_ECODE, * PMACHINE_FRAME_ECODE;
-
-static inline 
-LOUSTATUS PushMachFrameErrorCodeSaved(
-    PCFI_UNWIND_CODE    UnwindCode,
-    BOOLEAN*            Result
-){
-    if((!UnwindCode)|| (!Result)){//I dont trust my compiler to not null dereference
-        return STATUS_INVALID_PARAMETER;
-    }else if(UnwindCode->UnwindOpCode != CFI_UI_UWOP_PUSH_MACHFRAME){ 
-        return STATUS_INVALID_PARAMETER;
-    }
-    *Result = UnwindCode->OperationInfo ? true : false;
-    return STATUS_SUCCESS;
-} 
-
-static inline
-LOUSTATUS
-CfiGetUnwindCode(
-    PCFI_UNWIND_INFO    UnwindInfo, 
-    PCFI_UNWIND_CODE*   CodeArray,
-    UINT8*              OptionalCodeCount
-){
-    if(!UnwindInfo || !CodeArray){
-        return STATUS_INVALID_PARAMETER;
-    }
-    if(!UnwindInfo->UnwindCodeCount){
-        return STATUS_NO_SUCH_FILE;
-    }else if(OptionalCodeCount){
-        *OptionalCodeCount = UnwindInfo->UnwindCodeCount;
-    }
-    *CodeArray = (PCFI_UNWIND_CODE)(UINT8*)((UINTPTR)UnwindInfo + sizeof(UnwindInfo->Sanity32)); 
-    return STATUS_SUCCESS; 
-}
-
-static inline
-LOUSTATUS 
-CfiGetChainedUnwindInfo(
-    PCFI_UNWIND_INFO                UnwindInfo,
-    PX64_PLATFORM_FUNCTION_TABLE*   ChainedInfo
-){
-    LOUSTATUS           Status;
-    PCFI_UNWIND_CODE    UnwindCodes;
-    if(!UnwindInfo || !ChainedInfo){
-        return STATUS_INVALID_PARAMETER;
-    }else if(!(UnwindInfo->Flags & CFI_UI_FLAG_CHAININFO)){
-        return STATUS_INVALID_PARAMETER;
-    }
-    Status = CfiGetUnwindCode(
-        UnwindInfo,
-        &UnwindCodes, 
-        0x00
-    );
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
-    *ChainedInfo = (PX64_PLATFORM_FUNCTION_TABLE)(UINT8*)((UINTPTR)&UnwindCodes[(UnwindInfo->UnwindCodeCount + 1) & ~1]);
-    return STATUS_SUCCESS;
-}
-
-
 typedef struct _CFI_BASE_RELOCATION_BLOCK{
     UINT32              PageRVA;
     UINT32              BlockSize;
@@ -723,7 +649,6 @@ typedef union _CFI_TLS_DIRECTORY{
     CFI_TLS_DIRECTORY64     Directory64;
 }CFI_TLS_DIRECTORY, * PCFI_TLS_DIRECTORY;
 
-typedef VOID (NTAPI *PCFI_IMAGE_TLS_CALLBACK)(PVOID DllHandle, UINT32 Reason, PVOID Reserved);
 
 #define CFI_DLL_PROCESS_DETATCH 0
 #define CFI_DLL_PROCESS_ATTATCH 1
@@ -833,8 +758,6 @@ typedef struct _CFI_RESOURCE_DIRECTORY_TABLE{
     CFI_RESOURCE_DIRECTORY_ENTRIES      Entries[];
 }CFI_RESOURCE_DIRECTORY_TABLE, * PCFI_RESOURCE_DIRECTORY_TABLE;
 
-typedef UNICODE_STRING CFI_RESOURCE_DIRECTORY_STRING, * PCFI_RESOURCE_DIRECTORY_STRING;
-
 typedef struct _CFI_RESOURCE_DATA_ENTRY{
     UINT32      DataRva;
     UINT32      Size;
@@ -890,169 +813,6 @@ typedef struct _CFI_IMPORT_HEADER{
 #define CFI_IMPORT_NAME_TYPE_NOPREFIX   2
 #define CFI_IMPORT_NAME_TYPE_UNDECORATE 3
 
-#ifndef _LOUSINE_LOADER
-
-typedef enum _EXCEPTION_TABLE_TYPE{
-    INVALID_EXCEPTION_TABLE = 0,
-    X86_EXCEPTION_TABLE     = 1,
-    X86_64_EXCEPTION_TABLE  = 2,
-}EXCEPTION_TABLE_TYPE, * PEXCEPTION_TABLE_TYPE;
-
-typedef struct _CFI_OBJECT{
-    FILE*                           FileObject;
-    PVOID                           CoffFile;
-    string                          FormalName;
-    BOOL                            AOA64;
-    BOOL                            KernelObject;
-    PCOFF_IMAGE_HEADER              ImageHeader;
-    PVOID                           LoadedAddress;
-    PVOID                           PhysicalLoadedAddress;
-    SIZE                            LoadedSize;
-    UINT64*                         SectionMapping;
-    PVOID                           ExecututionLoading;
-    KERNEL_REFERENCE                Reference;
-    PVOID                           Entry;
-    UINT64                          StackReserve;
-    UINT64                          StackCommit;
-    UINT64                          HeapReserve;
-    UINT64                          HeapCommit;
-    mutex_t                         LockOutTagOut;  
-    UINT64*                         ModDependencies;
-    BOOLEAN                         IgnoreSeh;
-    BOOLEAN                         IgnoreVmManager;
-    PVOID                           TlsDirectory;
-    struct{
-        EXCEPTION_TABLE_TYPE        ExceptionTableType;
-        PVOID                       ExceptionTable;
-        SIZE                        ExceptionTableSize;
-    }                               ExceptionData;
-    union{
-        ULONG                       ImageProperties;
-        struct {
-			ULONG                   ImageAddressingMode     : 8;
-			ULONG                   SystemModeImage         : 1;
-			ULONG                   ImageMappedToAllPids    : 1;
-			ULONG                   ExtendedInfoPresent     : 1;
-			ULONG                   MachineTypeMismatch     : 1;
-			ULONG                   ImageSignatureLevel     : 4;
-			ULONG                   ImageSignatureType      : 3;
-			ULONG                   ImagePartialMap         : 1;
-			ULONG                   Reserved                : 12;   
-        };
-    };
-    LOUSTATUS                       (*CoffCommitSection)(HANDLE, UINT64);
-}CFI_OBJECT, * PCFI_OBJECT;
-
-typedef struct _COFF_PRIVATE_DATA{
-    CFI_OBJECT      CfiObject;
-}COFF_PRIVATE_DATA, * PCOFF_PRIVATE_DATA;
-
-static inline UINT64 CfiGetImageSectionAlignment(UINT64 In){
-    switch(In & 0x00F00000){
-        case CFI_SCN_ALIGN_1BYTES:
-            return 1;
-        case CFI_SCN_ALIGN_2BYTES:
-            return 2;
-        case CFI_SCN_ALIGN_4BYTES:
-            return 4;
-        case CFI_SCN_ALIGN_8BYTES:
-            return 8;
-        case CFI_SCN_ALIGN_16BYTES:
-            return 16;
-        case CFI_SCN_ALIGN_32BYTES:
-            return 32;
-        case CFI_SCN_ALIGN_64BYTES:
-            return 64;
-        case CFI_SCN_ALIGN_128BYTES:
-            return 128;
-        case CFI_SCN_ALIGN_256BYTES:
-            return 256;
-        case CFI_SCN_ALIGN_512BYTES:
-            return 512;
-        case CFI_SCN_ALIGN_1024BYTES:
-            return 1024;
-        case CFI_SCN_ALIGN_2048BYTES:
-            return 2048;
-        case CFI_SCN_ALIGN_4096BYTES:   
-            return 4096;
-        default:
-            return 8192;
-    }
-    return 0x00;
-}
-
-#ifndef _USER_MODE_CODE_
-#ifndef _KERNEL_MODULE_
-
-void LouKeSehHandleExceptionCall(
-    UINT64* Data
-);
-
-LOUSTATUS
-LouKeLoadCoffImageExA(
-    string          FileNameAndPath,
-    PCFI_OBJECT     LoadedObjectCheck,
-    BOOL            KernelObject
-);
-
-LOUSTATUS 
-LouKeLoadCoffImageA(
-    string          Path,
-    string          FileName,      
-    PCFI_OBJECT     CfiObject,
-    BOOL            KernelObject
-);
-
-LOUSTATUS 
-LouKeLoadCoffImageB(
-    FILE*           FileObject,
-    PCFI_OBJECT     CfiObject,
-    BOOL            KernelObject
-);
-
-LOUSTATUS 
-LouKeLoadCoffImageBNs(
-    PVOID           Base,
-    PCFI_OBJECT     CfiObject,
-    BOOL            KernelObject
-);
-
-
-static inline 
-void CloneCfiToImageInfo(
-    PCFI_OBJECT CfiIn, 
-    PIMAGE_INFO InfoOut
-){
-    InfoOut->ImageBase = CfiIn->LoadedAddress;
-    InfoOut->ImageSize = CfiIn->LoadedSize;
-    InfoOut->ImageSelector = 0;
-    InfoOut->ImageSectionNumber = 0;
-    InfoOut->Properties = CfiIn->ImageProperties;
-}
-#endif
-#else
-
-#ifdef _LOUDLL_
-ANNA_EXPORT
-void
-LouRaiseException(
-            DWORD   ExceptionCode,
-            DWORD   ExceptionFlags,
-            DWORD   ArgCount,
-    const   DWORD*  Args
-);
-#else
-ANNA_EXPORT
-void
-LouRaiseException(
-            DWORD   ExceptionCode,
-            DWORD   ExceptionFlags,
-            DWORD   ArgCount,
-    const   DWORD*  Args
-);
-#endif
-#endif
-#endif
 #ifdef __cplusplus
 }
 #endif

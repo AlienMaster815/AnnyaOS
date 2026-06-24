@@ -21,6 +21,7 @@ clean:
 	rm -rf build $(TARGET)
 
 modifications:
+	./LPEModifier -E../EXE/LouLoad/LOULOAD.EXE -PLoader
 	./LPEModifier -E../drivers/PCI/PCI.SYS -PKernel
 	./LPEModifier -E../drivers/storage/Ahci/AHCI.SYS -PKernel
 	./LPEModifier -E../drivers/gpu/Virtualbox/VBOXGPU.SYS -PKernel

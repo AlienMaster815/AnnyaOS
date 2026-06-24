@@ -48,12 +48,13 @@ MakeCoffModifications(
         return Status;
     }
     
-
     if(!IsPeFileCoff(&Context->CoffFile)){
         printf("ERROR:File Is Not Coff File\n");
         FileContextCloseFile(&Context->CoffFile);
         return STATUS_INVALID_PARAMETER;
     }
+
+    printf("HERE\n");
 
     SetLouCoffSignature(&Context->CoffFile);
 

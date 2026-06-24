@@ -1,6 +1,4 @@
-#define _KERNEL_MODULE_
-#include <LouAPI.h>
-
+#include "LouLoadPrivate.h"
 
 static void HaltAndCatchFile() {
     for (;;) {
@@ -13,7 +11,6 @@ LOUSTATUS LouLoadStartLoader(
     UINT64  LimineData
 ){
 
-    
 
     HaltAndCatchFile();
     return (LOUSTATUS)~0;
