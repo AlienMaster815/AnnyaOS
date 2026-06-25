@@ -160,7 +160,17 @@ void kmain() {
 
     UINT64 LoaderStack = (UINT64)LoaderAllocateSpace(16 * KILOBYTE, 16);
     LoaderInformation.StackHandle = (KHANDLE)LoaderStack;
-    
+
+    for(SIZE i = 0 ; i < LoaderInformation.LoadedModulesCount; i++){
+        LoaderInformation.LoadedModules[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((PVOID)LoaderInformation.LoadedModules[i].Tracker.Base);
+    }
+
+    for(SIZE i = 0; i < LoaderInformation.RatMbr->Count; i++){
+        if(LoaderInformation.RatMbr->Entries[i].Tracker.Base >= KSpaceBase){
+            LoaderInformation.RatMbr->Entries[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((PVOID)LoaderInformation.RatMbr->Entries[i].Tracker.Base);
+        }
+    }
+
     MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE));
 
     HaltAndCatchFile();

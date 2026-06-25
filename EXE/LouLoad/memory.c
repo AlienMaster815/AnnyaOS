@@ -164,7 +164,7 @@ static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
-        UINTPTR NextHint;
+        UINTPTR NextHint = 0x00;
         if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
             AllocContext->Base = (UINTPTR)Result;
             return true;
@@ -183,7 +183,7 @@ static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker)
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while(((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) && (AllocationLocationOk((UINT64)Result, AllocContext->Length))){
-        UINTPTR NextHint;
+        UINTPTR NextHint = 0x00;
         if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
             AllocContext->Base = (UINTPTR)Result;
             return true;
@@ -328,12 +328,7 @@ static void InitializeGdt(){
 }
 
 static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, UINT64 Size){
-    if(
-        ((PhysicalAddress & ~(Size - 1)) != PhysicalAddress) || 
-        ((VirtualAddress & ~(Size - 1)) != VirtualAddress)
-    ){
-        return false;
-    }
+
     UINT64 L4Entry, L3Entry, L2Entry, L1Entry;
 
     CalculateTableMarks(
@@ -361,18 +356,16 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
     //Gigabyte Logic
     if(((((!Tmp) || (Tmp & (1 << 7))) && (Size == GIGABYTE)))){
         L3Table[L3Entry] = PhysicalAddress | 0b11 | (1 << 7);
-        LouKeReloadCR3();
         return true;           
     }else if((Tmp) && (Size == GIGABYTE)){
         L2Table = (UINT64*)(Tmp & ~(KILOBYTE_PAGE - 1));
         for(SIZE i = 0 ; i < 512; i++){
             if(!(L2Table[i] & (1 << 7))){
-                LouKeRatFreeAddress((UINT64)L2Table[i] & (KILOBYTE_PAGE - 1));
+                LouKeRatFreeAddress((UINT64)L2Table[i] & ~(KILOBYTE_PAGE - 1));
             }
         }
         LouKeRatFreeAddress(Tmp & ~(KILOBYTE_PAGE - 1));
         L3Table[L3Entry] = PhysicalAddress | 0b11 | (1 << 7);
-        LouKeReloadCR3();
         return true;
     }
 
@@ -382,7 +375,6 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         Tmp = L3Table[L3Entry] & ~(KILOBYTE_PAGE - 1);
         L2Table = (UINT64*)Tmp; 
         L2Table[L2Entry] = PhysicalAddress | 0b11 | (1 << 7);
-        LouKeReloadCR3(); //just reload for the loader for sanity
         return true;  
     }
     else if((Tmp & (1 << 7)) && (Size == MEGABYTE_PAGE)){
@@ -395,18 +387,17 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
             L2Table[i] = (Tmp + (i * MEGABYTE_PAGE)) | TmpFlags;
         }
         L2Table[L2Entry] = PhysicalAddress | 0b11 | (1 << 7);
-        LouKeReloadCR3(); //just reload for the loader for sanity
         return true;
     }else if((Tmp) && (Size == MEGABYTE_PAGE)){
         L2Table = (UINT64*)(Tmp & ~(KILOBYTE_PAGE - 1));
         if(!(L2Table[L2Entry] & (1 << 7))){
-            LouKeRatFreeAddress(L2Table[L2Entry] & (KILOBYTE_PAGE - 1));
+            LouKeRatFreeAddress(L2Table[L2Entry] & ~(KILOBYTE_PAGE - 1));
         }
         L2Table[L2Entry] = PhysicalAddress | 0b11 | (1 << 7);
-        LouKeReloadCR3(); //just reload for the loader for sanity
         return true;
     }
 
+    //kilobyte logic
     if((!Tmp) && (Size == KILOBYTE_PAGE)){
         L3Table[L3Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         Tmp = L3Table[L3Entry] & ~(KILOBYTE_PAGE - 1);
@@ -414,8 +405,7 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         L2Table[L2Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         Tmp = L2Table[L2Entry] & ~(KILOBYTE_PAGE - 1);
         L1Table = (UINT64*)Tmp;
-        L1Table[L1Entry] = PhysicalAddress | 0b11 | (1 << 7);
-        LouKeReloadCR3(); //just reload for the loader for sanity
+        L1Table[L1Entry] = PhysicalAddress | 0b11;
         return true;
     }else if((Tmp & (1 << 7)) && (Size == KILOBYTE_PAGE)){
         L3Table[L3Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
@@ -429,10 +419,9 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         L2Table[L2Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         L1Table = (UINT64*)(L2Table[L2Entry] & ~(KILOBYTE_PAGE - 1)); 
         for(SIZE i = 0 ; i < 512; i++){
-            L1Table[L1Entry] = (Tmp + (L2Entry * MEGABYTE_PAGE) + (i * KILOBYTE_PAGE)) | TmpFlags;
+            L1Table[i] = (Tmp + (L2Entry * MEGABYTE_PAGE) + (i * KILOBYTE_PAGE)) | TmpFlags;
         }
         L1Table[L1Entry] = PhysicalAddress | 0b11;
-        LouKeReloadCR3(); //just reload for the loader for sanity
         return true;
     }else if((Tmp) && (Size == KILOBYTE_PAGE)){
         L2Table = (UINT64*)(Tmp & ~(KILOBYTE_PAGE - 1));
@@ -445,9 +434,11 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
             for(SIZE i = 0; i < 512; i++){
                 L1Table[i] = (Tmp + (i * KILOBYTE_PAGE)) | TmpFlags;
             }
+        }else if(!L2Table[L2Entry]){
+            L2Table[L2Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         }
+        L1Table = (UINT64*)(L2Table[L2Entry] & ~(KILOBYTE_PAGE - 1));
         L1Table[L1Entry] = PhysicalAddress | 0b11;
-        LouKeReloadCR3(); //just reload for the loader for sanity
         return true;
     }
 
@@ -516,7 +507,7 @@ static BOOLEAN MapKernelSpaceAddresses(PVOID Context, PRAT_TRACKER Tracker){
 }
 
 static BOOLEAN MapAllFreeKernelSpaceAddresses(PLOADER_INFORMATION Info){
-    return LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ANY_ATTRIBUTE_MEMORY);
+    return LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_USABLE_MEMORY);
 }
 
 static volatile FORCE_ALIGNMENT(KILOBYTE_PAGE) UINT64 Pml3[512];
@@ -545,7 +536,6 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
     if(!LoaderMapContinuiousMemoryBlock(MbrPage, MbrPage + KSpaceBase, MbrSize, Info)){
         return false;
     }
-    RatMbrTable = (PLOADER_RAT_MBR_CHUNK)((UINT64)RatMbrTable + KSpaceBase);
     
     if(!MapAllFreeKernelSpaceAddresses(Info)){
         return false;
@@ -562,6 +552,8 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
         return false;
     }
 
+    Info->LoadedModules = (PLOADER_MEMORY_MAP)((UINT64)Info->LoadedModules + KSpaceBase);
+
     TmpPageBase = ((UINT64)Info->FrameBuffers & ~(KILOBYTE_PAGE - 1));
     TmpPageLength = Info->FrameBufferCount * sizeof(LOADER_FB_MEMORY_MAP);
     TmpPageLength += (UINT64)Info->FrameBuffers - TmpPageBase;
@@ -570,6 +562,22 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
         return false;
     }
 
+    Info->FrameBuffers = ((PLOADER_FB_MEMORY_MAP)(UINT64)Info->FrameBuffers + KSpaceBase);
 
+    for(SIZE i = 0 ; i < Info->LoadedModulesCount; i++){
+        TmpPageBase = (UINT64)Info->LoadedModules[i].Tracker.Base & ~(KILOBYTE_PAGE - 1);
+        TmpPageLength = Info->LoadedModules[i].Tracker.Length;
+        TmpPageLength += (UINT64)Info->LoadedModules[i].Tracker.Base - TmpPageBase;
+        TmpPageLength = ROUND_UP64(TmpPageLength, KILOBYTE_PAGE);
+        if(!LoaderMapContinuiousMemoryBlock(TmpPageBase, TmpPageBase + KSpaceBase, TmpPageLength, Info)){
+            return false;
+        }   
+        Info->LoadedModules[i].Tracker.Base += KSpaceBase;
+    }
+    LouKeReloadCR3(); //just reload for the loader for sanity
+    
+    //NOTE: BOOTVID.SYS will handle framebuffers after the 
+    //      kernel initializes cpu specific features such as
+    //      Write Combined memory access 
     return true;
 }

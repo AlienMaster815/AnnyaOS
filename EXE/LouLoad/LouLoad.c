@@ -27,7 +27,16 @@ LOUSTATUS LouLoadStartLoader(
         asm("INT $0");
     }
 
+    LoaderData.RatMbr = (PLOADER_RAT_MBR_CHUNK)((UINT64)LoaderData.RatMbr + KSpaceBase);
 
+    PVOID LoaderBase = (PVOID)LoaderData.LoadedModules[1].Tracker.Base;
+    PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(LoaderBase);
+
+    if(memcmp(&ImageHeader->StandardHeader.PeSignature, COFF_PE_SIGNATURE, 4)){
+        asm("INT $0");
+    }
+
+    
 
     HaltAndCatchFile();
     return (LOUSTATUS)~0;

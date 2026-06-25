@@ -67,6 +67,7 @@ typedef struct _LOADER_INFORMATION{
     PLOADER_MEMORY_MAP      BootModulesBase;
 }LOADER_INFORMATION, * PLOADER_INFORMATION;
 
+#define KSpaceBase 0xFFFF800000000000
 
 #include <stdalign.h>
 

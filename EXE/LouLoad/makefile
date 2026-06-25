@@ -1,7 +1,7 @@
 CC = x86_64-w64-mingw32-gcc
 AS = nasm
 
-CFLAGS = -m64 -fPIC -fno-stack-protector -nostdlib -nodefaultlibs -fno-builtin \
+CFLAGS = -m64 -fPIC -O3 -fno-stack-protector -nostdlib -nodefaultlibs -fno-builtin \
          -ffreestanding -Werror -Wall -Wno-multichar -fno-omit-frame-pointer \
          -fno-common -fstrict-aliasing -mno-mmx -mno-sse -mno-avx
 

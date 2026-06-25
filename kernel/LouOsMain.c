@@ -295,6 +295,9 @@ LouKeRtlCompareUtf16StringSafe(
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
+
+    while(1);
+
     memcpy((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
     SetRamSize(KernelLoaderInfo.KernelVm.KernelVmLimit); //setting this early to reduce the chance of bugs
     
