@@ -49,10 +49,13 @@ typedef struct _LOADER_RAT_MBR_CHUNK{
 }LOADER_RAT_MBR_CHUNK, * PLOADER_RAT_MBR_CHUNK;
 
 typedef struct _LOADER_INFORMATION{
+    UINT64                  LoaderCpuFeatures;
     UINT64                  TscCount;
     SIZE                    RamSize;
+    KHANDLE                 StackHandle;
     KHANDLE                 EfiSystemTable;
     KHANDLE                 LoaderHandle;
+    KHANDLE                 KernelHandle;
     PLOADER_RAT_MBR_CHUNK   RatMbr;
     LOADER_MEMORY_MAP       LouLoadCoff;
     LOADER_MEMORY_MAP       LousineCoff;
@@ -60,6 +63,7 @@ typedef struct _LOADER_INFORMATION{
     PLOADER_MEMORY_MAP      LoadedModules;
     SIZE                    FrameBufferCount;
     PLOADER_FB_MEMORY_MAP   FrameBuffers;
+    SIZE                    BootModulesCount;
     PLOADER_MEMORY_MAP      BootModulesBase;
 }LOADER_INFORMATION, * PLOADER_INFORMATION;
 

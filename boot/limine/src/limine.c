@@ -19,6 +19,8 @@ static void HaltAndCatchFile() {
 static volatile FORCE_ALIGNMENT(4096) UINT64 L3Tables[512] = {0};
 static volatile FORCE_ALIGNMENT(4096) UINT64 L2Tables[512] = {0};
 
+void MsvcAbiJump(UINT64 Info, UINT64 Jmp, UINT64 Stack);
+
 void UnpackLoader(PCOFF_IMAGE_HEADER* ImageHeaderp, PVOID PhysicalAddress, PVOID CoffData){
     PCOFF_IMAGE_HEADER ImageHeader = *ImageHeaderp;
 
@@ -119,6 +121,9 @@ void kmain() {
         asm("INT $0");
     }
 
+    LoaderInformation.BootModulesCount = LoaderInformation.LoadedModulesCount - 2;
+    LoaderInformation.BootModulesBase = &LoaderInformation.LoadedModules[2];
+
     //Locked and loaded we are ocsar mike
     PVOID LoaderBase = (PVOID)LoaderInformation.LoadedModules[0].Tracker.Base;
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(LoaderBase);
@@ -151,9 +156,12 @@ void kmain() {
         asm("INT $0");
     }
     
-    UINT32 (*LoaderEntry)(UINT64) = (UINT32 (*)(UINT64))(UINTPTR)(ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINTPTR)LoaderInformation.LoaderHandle); 
+    UINT64 LoaderEntry = (UINT64)(ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)LoaderInformation.LoaderHandle); 
 
-    LoaderEntry((UINT64)&LoaderInformation);
+    UINT64 LoaderStack = (UINT64)LoaderAllocateSpace(16 * KILOBYTE, 16);
+    LoaderInformation.StackHandle = (KHANDLE)LoaderStack;
+    
+    MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE));
 
     HaltAndCatchFile();
 }

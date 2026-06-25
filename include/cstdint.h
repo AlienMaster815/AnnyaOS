@@ -22,17 +22,17 @@ typedef int                 int32_t;
 typedef long                LONG;
 typedef long long           int64_t;
 
-typedef uint8_t             UINT8, BYTE;
-typedef uint16_t            UINT16, WORD;
+typedef uint8_t             UINT8, BYTE, * PUINT8;
+typedef uint16_t            UINT16, WORD, * PUINT16;
 typedef unsigned int        UINT;
-typedef char                CHAR, INT8;
+typedef char                CHAR, INT8, * PINT8;
 typedef wchar_t             WCHAR, * PWCHAR, * LPWSTR;
 typedef wchar_t             WCHAR, * LPWSTR;
-typedef short               INT16; 
-typedef int                 INT32; 
-typedef long long           INT64; 
+typedef short               INT16, * PINT16; 
+typedef int                 INT32, * PINT32; 
+typedef long long           INT64, * PINT64; 
 
-typedef unsigned long long  UINT64, ULONGLONG, * PULONGLONG, QWORD, DWORD64, * PDWORD64;
+typedef unsigned long long  UINT64, ULONGLONG, * PULONGLONG, QWORD, DWORD64, * PDWORD64, * PUINT64;
 typedef long long           LONGLONG, * PLONGLONG;
 typedef void*               PVOID;
 
@@ -104,6 +104,7 @@ typedef struct _INT_512{
 #define DIVIDE_ROUND_CLOSEST_ULL(n, d) (((n) + ((d) / 2)) / (d))
 
 typedef void* PVOID, * LPVOID;
+typedef const void* PCVOID, * LPCVOID; 
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define DIVIDE_ROUND_UP(n, d) (((n) + (d) - 1) / (d))

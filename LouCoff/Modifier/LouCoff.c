@@ -54,8 +54,6 @@ MakeCoffModifications(
         return STATUS_INVALID_PARAMETER;
     }
 
-    printf("HERE\n");
-
     SetLouCoffSignature(&Context->CoffFile);
 
     SetLouCoffSubsystem(&Context->CoffFile, Context->ObjectType);
