@@ -6,6 +6,7 @@
 #include <LouLoad.h>
 #include <Coff.h>
 
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 
 static inline void LouKeReloadCR3(){
     uint64_t cr3;
@@ -23,6 +24,7 @@ UINT64* GetPageBase();
 UINT64 GetCr3();
 BOOLEAN LoaderInitializeMemoryManager(PLOADER_INFORMATION Info);
 BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info);
+PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment);
 
 void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
 void cpuid_subleaf(unsigned int leaf, unsigned int subleaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx);

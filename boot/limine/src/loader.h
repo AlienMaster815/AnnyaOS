@@ -53,12 +53,13 @@ typedef struct _LOADER_INFORMATION{
     UINT64                  TscCount;
     SIZE                    RamSize;
     KHANDLE                 StackHandle;
+    KHANDLE                 KernelStackHandle;
     KHANDLE                 EfiSystemTable;
     KHANDLE                 LoaderHandle;
     KHANDLE                 KernelHandle;
     PLOADER_RAT_MBR_CHUNK   RatMbr;
-    LOADER_MEMORY_MAP       LouLoadCoff;
-    LOADER_MEMORY_MAP       LousineCoff;
+    PLOADER_MEMORY_MAP      LouLoadCoff;
+    PLOADER_MEMORY_MAP      LousineCoff;
     SIZE                    LoadedModulesCount;
     PLOADER_MEMORY_MAP      LoadedModules;
     SIZE                    FrameBufferCount;

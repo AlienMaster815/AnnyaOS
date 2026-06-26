@@ -124,6 +124,9 @@ void kmain() {
     LoaderInformation.BootModulesCount = LoaderInformation.LoadedModulesCount - 2;
     LoaderInformation.BootModulesBase = &LoaderInformation.LoadedModules[2];
 
+    LoaderInformation.LouLoadCoff = &LoaderInformation.LoadedModules[0];
+    LoaderInformation.LousineCoff = &LoaderInformation.LoadedModules[1];
+
     //Locked and loaded we are ocsar mike
     PVOID LoaderBase = (PVOID)LoaderInformation.LoadedModules[0].Tracker.Base;
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(LoaderBase);
@@ -172,6 +175,6 @@ void kmain() {
     }
 
     MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE));
-
+    
     HaltAndCatchFile();
 }

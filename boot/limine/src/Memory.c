@@ -231,12 +231,6 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
         Info->LoadedModules[i].Tracker.Base = (UINT64)module_request.response->modules[i]->address;
         Info->LoadedModules[i].Tracker.Length = module_request.response->modules[i]->size;
     }
- 
-    Info->LouLoadCoff.Tracker.Base = Info->LoadedModules[0].Tracker.Base;
-    Info->LouLoadCoff.Tracker.Length = Info->LoadedModules[0].Tracker.Length;
-
-    Info->LouLoadCoff.Tracker.Base = Info->LoadedModules[1].Tracker.Base;
-    Info->LouLoadCoff.Tracker.Length = Info->LoadedModules[1].Tracker.Length;
 
     if(efi_system_table_request.response){
         Info->EfiSystemTable = efi_system_table_request.response->address;
@@ -423,7 +417,7 @@ PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment){
     if(!NewTracker){
         return 0x00;
     }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, Alignment = Alignment};
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         return 0x00;
@@ -438,7 +432,7 @@ PVOID LoaderAllocateSpace(SIZE Size, SIZE Alignment){
     if(!NewTracker){
         return 0x00;
     }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, Alignment = Alignment};
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddressUnder1Gig, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         return 0x00;

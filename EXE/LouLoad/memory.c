@@ -159,11 +159,10 @@ typedef struct _REP_GET_ALLOCATION_CTX{
 
 static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-
     PVOID Result = (PVOID)Tracker->Base;
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
-    while((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
+    while(((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
         UINTPTR NextHint = 0x00;
         if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
             AllocContext->Base = (UINTPTR)Result;
@@ -173,6 +172,7 @@ static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
     }
     return false;
 }
+
 
 static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker){
     if(Tracker->Base > GIGABYTE){
@@ -240,7 +240,7 @@ PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment){
     if(!NewTracker){
         return 0x00;
     }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, Alignment = Alignment};
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         return 0x00;
@@ -255,7 +255,7 @@ PVOID LoaderAllocateSpace(SIZE Size, SIZE Alignment){
     if(!NewTracker){
         return 0x00;
     }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, Alignment = Alignment};
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddressUnder1Gig, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         return 0x00;
@@ -329,7 +329,9 @@ static void InitializeGdt(){
 
 static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, UINT64 Size){
 
-    UINT64 L4Entry, L3Entry, L2Entry, L1Entry;
+
+
+    UINT64 L4Entry = 0, L3Entry = 0, L2Entry = 0, L1Entry = 0;
 
     CalculateTableMarks(
         VirtualAddress,
@@ -339,11 +341,11 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         &L1Entry 
     );
 
-    UINT64 Tmp;
+    UINT64 Tmp = 0x00;
     UINT64* L4Table = (UINT64*)GetPageBase();
-    UINT64* L3Table;
-    UINT64* L2Table;
-    UINT64* L1Table;
+    UINT64* L3Table = 0x00;
+    UINT64* L2Table = 0x00;
+    UINT64* L1Table = 0x00;
 
     Tmp = (L4Table[L4Entry] & ~(KILOBYTE_PAGE - 1));
     if(!Tmp){
@@ -381,7 +383,6 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         L3Table[L3Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         L2Table = (UINT64*)(L3Table[L3Entry] & ~(KILOBYTE_PAGE - 1)); 
         UINT64 TmpFlags = Tmp & ((1 << 13) - 1);
-        TmpFlags &= ~(1 << 7);
         Tmp &= ~(KILOBYTE_PAGE - 1);
         for(SIZE i = 0 ; i < 512; i++){
             L2Table[i] = (Tmp + (i * MEGABYTE_PAGE)) | TmpFlags;
@@ -408,13 +409,16 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         L1Table[L1Entry] = PhysicalAddress | 0b11;
         return true;
     }else if((Tmp & (1 << 7)) && (Size == KILOBYTE_PAGE)){
+        if(RangeInterferes(VirtualAddress, 1, VirtualAddress, Size)){
+            while(1);
+        }
         L3Table[L3Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         L2Table = (UINT64*)(L3Table[L3Entry] & ~(KILOBYTE_PAGE - 1)); 
         UINT64 TmpFlags = Tmp & ((1 << 13) - 1);
         TmpFlags &= ~(1 << 7);
         Tmp &= ~(KILOBYTE_PAGE - 1);
         for(SIZE i = 0 ; i < 512; i++){
-            L2Table[i] = (Tmp + (i * MEGABYTE_PAGE)) | TmpFlags;
+            L2Table[i] = (Tmp + (i * MEGABYTE_PAGE)) | TmpFlags | (1 << 7);
         }
         L2Table[L2Entry] = (UINT64)LoaderAllocateSpace(KILOBYTE_PAGE, KILOBYTE_PAGE) | 0b111;
         L1Table = (UINT64*)(L2Table[L2Entry] & ~(KILOBYTE_PAGE - 1)); 
@@ -423,7 +427,7 @@ static BOOLEAN LoaderMapMemory(UINTPTR PhysicalAddress, UINTPTR VirtualAddress, 
         }
         L1Table[L1Entry] = PhysicalAddress | 0b11;
         return true;
-    }else if((Tmp) && (Size == KILOBYTE_PAGE)){
+    }else if((Tmp) && (Size == KILOBYTE_PAGE)){\
         L2Table = (UINT64*)(Tmp & ~(KILOBYTE_PAGE - 1));
         if(L2Table[L2Entry] & (1 << 7)){
             Tmp = L2Table[L2Entry] & ~(KILOBYTE_PAGE - 1);
@@ -463,36 +467,37 @@ static BOOLEAN LoaderMapContinuiousMemoryBlock(
 
     BOOLEAN Status = false;
     BOOLEAN GigPageSupport = Info->LoaderCpuFeatures & LOADER_CPU_FEATURES_GB_PAGES ? true : false;
-    
-    while(Size > 0){
+    SIZE i = 0;
+
+    while(i < Size){
         if(
-            (Size >= GIGABYTE) &&
-            ((PhysicalAddress & ~(GIGABYTE - 1)) == PhysicalAddress) &&
-            ((VirtualAddress & ~(GIGABYTE - 1)) == VirtualAddress) && 
+            ((Size - i) >= GIGABYTE) &&
+            (((PhysicalAddress + i) & ~(GIGABYTE - 1)) == (PhysicalAddress + i)) &&
+            (((VirtualAddress + i) & ~(GIGABYTE - 1)) == (VirtualAddress + i)) && 
             (GigPageSupport)
         ){
-            Status = LoaderMapMemory(PhysicalAddress, VirtualAddress, GIGABYTE);
+            Status = LoaderMapMemory(PhysicalAddress + i, VirtualAddress + i, GIGABYTE);
             if(!Status){
                 return Status;
             }
-            Size -= GIGABYTE;
+            i += GIGABYTE;
         }
         else if(
-            (Size >= MEGABYTE_PAGE) && 
-            ((PhysicalAddress & ~(MEGABYTE_PAGE - 1)) == PhysicalAddress) && 
-            ((VirtualAddress & ~(MEGABYTE_PAGE - 1)) == VirtualAddress)
+            ((Size - i) >= MEGABYTE_PAGE) && 
+            (((PhysicalAddress + i) & ~(MEGABYTE_PAGE - 1)) == (PhysicalAddress + i)) && 
+            (((VirtualAddress + i) & ~(MEGABYTE_PAGE - 1)) == (VirtualAddress + i))
         ){
-            Status = LoaderMapMemory(PhysicalAddress, VirtualAddress, MEGABYTE_PAGE);
+            Status = LoaderMapMemory(PhysicalAddress + i, VirtualAddress + i, MEGABYTE_PAGE);
             if(!Status){
                 return Status;
             }
-            Size -= MEGABYTE_PAGE;
+            i += MEGABYTE_PAGE;
         }else{
-            Status = LoaderMapMemory(PhysicalAddress, VirtualAddress, KILOBYTE_PAGE);
+            Status = LoaderMapMemory(PhysicalAddress + i, VirtualAddress + i, KILOBYTE_PAGE);
             if(!Status){
                 return Status;
             }
-            Size -= KILOBYTE_PAGE;
+            i += KILOBYTE_PAGE;
         }
     }
     return Status;
@@ -526,7 +531,7 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
 
     Pml4[0] = (UINT64)&Pml3[0] | 0b111;
 
-    SetCr3((UINT64)&Pml4[0] | 0b111);
+    SetCr3((UINT64)&Pml4[0]);
 
     UINT64 MbrPage = (UINT64)RatMbrTable & ~(KILOBYTE_PAGE - 1);
     UINT64 MbrSize = GetStructureSize(LOADER_RAT_MBR_CHUNK, Entries, RatMbrTable->Count);
@@ -552,7 +557,6 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
         return false;
     }
 
-    Info->LoadedModules = (PLOADER_MEMORY_MAP)((UINT64)Info->LoadedModules + KSpaceBase);
 
     TmpPageBase = ((UINT64)Info->FrameBuffers & ~(KILOBYTE_PAGE - 1));
     TmpPageLength = Info->FrameBufferCount * sizeof(LOADER_FB_MEMORY_MAP);
@@ -561,8 +565,6 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
     if(!LoaderMapContinuiousMemoryBlock(TmpPageBase, TmpPageBase + KSpaceBase, TmpPageLength, Info)){
         return false;
     }
-
-    Info->FrameBuffers = ((PLOADER_FB_MEMORY_MAP)(UINT64)Info->FrameBuffers + KSpaceBase);
 
     for(SIZE i = 0 ; i < Info->LoadedModulesCount; i++){
         TmpPageBase = (UINT64)Info->LoadedModules[i].Tracker.Base & ~(KILOBYTE_PAGE - 1);
@@ -574,6 +576,13 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
         }   
         Info->LoadedModules[i].Tracker.Base += KSpaceBase;
     }
+
+    Info->LoadedModules = (PLOADER_MEMORY_MAP)((UINT64)Info->LoadedModules + KSpaceBase);
+    Info->FrameBuffers = ((PLOADER_FB_MEMORY_MAP)(UINT64)Info->FrameBuffers + KSpaceBase);
+    Info->RatMbr = (PLOADER_RAT_MBR_CHUNK)((UINT64)Info->RatMbr + KSpaceBase);
+
+    LouKeMemoryBarrier();
+
     LouKeReloadCR3(); //just reload for the loader for sanity
     
     //NOTE: BOOTVID.SYS will handle framebuffers after the 

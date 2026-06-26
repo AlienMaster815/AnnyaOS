@@ -27,8 +27,6 @@ LOUSTATUS LouLoadStartLoader(
         asm("INT $0");
     }
 
-    LoaderData.RatMbr = (PLOADER_RAT_MBR_CHUNK)((UINT64)LoaderData.RatMbr + KSpaceBase);
-
     PVOID LoaderBase = (PVOID)LoaderData.LoadedModules[1].Tracker.Base;
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(LoaderBase);
 
@@ -36,7 +34,14 @@ LOUSTATUS LouLoadStartLoader(
         asm("INT $0");
     }
 
-    
+    LoaderData.KernelHandle = (KHANDLE)LouKeRatAllocatePhysicalAddress(ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageHeader->OptionalHeader.PE64.SectionAlignment);
+    if(!LoaderData.KernelHandle){
+        asm("INT $0");
+    }
+    LoaderData.KernelHandle = (KHANDLE)((UINT64)LoaderData.KernelHandle + KSpaceBase); 
+    memset(LoaderData.KernelHandle, 0, ImageHeader->OptionalHeader.PE64.SizeOfImage);
+
+
 
     HaltAndCatchFile();
     return (LOUSTATUS)~0;
