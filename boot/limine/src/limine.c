@@ -51,6 +51,8 @@ BOOLEAN ApplyLoaderRelocation(
     UINT64  BaseDelta;
     BOOLEAN AddressDrop = false;
 
+    RelocAddress += (UINT64)PhysicalAddress;
+
     if((UINT64)PhysicalAddress < PreferedBase){
         AddressDrop = true;
         BaseDelta = PreferedBase - (UINT64)PhysicalAddress;
@@ -175,6 +177,6 @@ void kmain() {
     }
 
     MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE));
-    
+
     HaltAndCatchFile();
 }

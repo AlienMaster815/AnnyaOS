@@ -5,6 +5,7 @@ section .text
 global InstallGDT
 global SetCr3
 global SetNewStack
+global MsvcAbiJump
 
 InstallGDT:
     lgdt [rcx]
@@ -27,3 +28,7 @@ SetCr3:
     mov cr3, rcx
     ret
 
+MsvcAbiJump:
+    mov rsp, rdx
+    mov rbp, rsp
+    jmp r8

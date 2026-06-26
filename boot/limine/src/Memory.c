@@ -200,7 +200,7 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
         volatile UINT32* Fb = framebuffer_request.response->framebuffers[i]->address;
         for(y = 0; y < Info->FrameBuffers[i].Tracker.Height; y++){
             for(x = 0; x < Info->FrameBuffers[i].Tracker.Width; x++){
-                Fb[(y * (pitch / sizeof(UINT32))) + x] = 0x00C0C0;
+                Fb[(y * (pitch / sizeof(UINT32))) + x] = 0x00;//0x00C0C0;
             }
         }
     }
