@@ -97,6 +97,8 @@ LouKeLazyBufferCommitPageForce(
     SIZE                        Count    //Optional
 );
 
+UINT64 LouKeGetKernelBase();
+
 void PageFault(uint64_t FaultingStackP) {
     uint64_t VAddress = get_cr2();
     uint64_t PAddress = 0x00;
@@ -133,7 +135,9 @@ void PageFault(uint64_t FaultingStackP) {
 
     //DEBUG_TRAP
 
-    LouPrint("PAGE FUALT:%h\n", ((CPUContext*)FaultingStackP)->rip);
+    LouPrint("Kernel Base:%h\n", LouKeGetKernelBase());
+
+    LouPrint("PAGE FAULT :%h\n", ((CPUContext*)FaultingStackP)->rip);
 
     LouPrint("\nPage Fault Detected At Address %h Handleing Now :: Error Code:%h\n",VAddress, InterruptCode);
 

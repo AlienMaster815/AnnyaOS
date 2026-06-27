@@ -3,12 +3,14 @@
 DRIVER_MODULE_ENTRY LouKeLoadBootKernelModule(uintptr_t Base, void** DriverObject, size_t DriverObjectSize);
 void* LouKeGetBootDevice(size_t Index);
 
-void StartupConfigureExportTable(PVOID Table);
-void StartupConfigureImportTable(PVOID Table);
+void StartupConfigureExportTable(KHANDLE KernelHandle);
+void StartupConfigureImportTable(KHANDLE KernelHandle);
 
-void LouKeInitializeKernelRuntimeEnviornment(){
+void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle){
 
-    StartupConfigureExportTable(KernelLoaderInfo.KernelExportTable);
+    LouPrint("Hello World\n");
+    while(1);
+    StartupConfigureExportTable(KernelHandle);
 
     size_t StrLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x");
     size_t TotalLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x                ");
@@ -51,6 +53,6 @@ void LouKeInitializeKernelRuntimeEnviornment(){
 
     LouKeFree(SearchBuffer);
 
-    StartupConfigureImportTable(KernelLoaderInfo.KernelImportTable);
+    StartupConfigureImportTable(KernelHandle);
 
 }

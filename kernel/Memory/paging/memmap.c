@@ -253,6 +253,19 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
     TmpPageBase = PageDown(TmpPageBase, L3Entry);
     TmpPageValue = TmpPageBase[L2Entry];
 
+    if(!(TmpPageValue & ~(PAGE_FLAGSSPACE))){
+        if(PAddress){
+            *PAddress = 0x00;
+        }
+        if(UnmapedLength){
+            *UnmapedLength = MEGABYTE_PAGE;
+        }
+        if(PageFlags){
+            *PageFlags = 0x00;
+        }
+        return;
+    }
+
     if(TmpPageValue & (1 << 7)){
         if(UnmapedLength){
             *UnmapedLength = MEGABYTE_PAGE;

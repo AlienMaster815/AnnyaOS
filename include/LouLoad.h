@@ -152,10 +152,6 @@ typedef struct _LOUSINE_LOADER_INFO{
     PVOID                       KernelImportTable;
 }LOUSINE_LOADER_INFO, * PLOUSINE_LOADER_INFO;
 
-#ifndef KERNEL_MAIN_FILE
-EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
-#endif
-
 
 
 #ifdef __cplusplus

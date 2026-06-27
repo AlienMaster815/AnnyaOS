@@ -77,6 +77,7 @@ extern void MsvcAbiJump(UINT64 Param1, UINT64 Stack, UINT64 Entry);
 LOUSTATUS LouLoadStartLoader(
     UINT64  LimineData
 ){
+  
     
     PLOADER_INFORMATION pLoaderData = (PLOADER_INFORMATION)LimineData;
     memcpy(&LoaderData, pLoaderData, sizeof(LOADER_INFORMATION));    
@@ -95,7 +96,7 @@ LOUSTATUS LouLoadStartLoader(
 
     PVOID KernelBase = (PVOID)LoaderData.LoadedModules[1].Tracker.Base;
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(KernelBase);
-
+    
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, COFF_PE_SIGNATURE, 4)){
         asm("INT $0");
     }
@@ -120,7 +121,8 @@ LOUSTATUS LouLoadStartLoader(
     }
 
 
-    UINT64 KernelStack = ((UINT64)LouKeRatAllocatePhysicalAddress(16 * KILOBYTE, 16) + (16 * KILOBYTE)) + KSpaceBase;
+    UINT64 KernelStack = (UINT64)LouKeRatAllocatePhysicalAddress(16 * KILOBYTE, 16);
+    KernelStack += KSpaceBase;
     LoaderData.KernelStackHandle = (KHANDLE)KernelStack;
 
     MsvcAbiJump((UINT64)&LoaderData, KernelStack, KernelEntry);

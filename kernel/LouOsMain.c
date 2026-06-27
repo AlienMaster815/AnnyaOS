@@ -19,7 +19,6 @@ string KERNEL_VERSION = "0.6.06";
 
 string KERNEL_ARCH = "64-BIT";
 
-LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
 KERNEL_EXPORT UINT64 LouKeGetSpaceBase(){
     return KSpaceBase;
@@ -69,7 +68,7 @@ uint64_t LouKeGetRamSize();
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
 void initializeInterruptRouter();
-void LouKeInitializeKernelRuntimeEnviornment();
+void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle);
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
 uint8_t GetTotalHardwareInterrupts();
@@ -199,12 +198,13 @@ LOUSTATUS LousineKernelEarlyInitialization(){
 void InitializeSymmetricMultiProcessing(){
     LouPrint("Checking If System Supports SMP\n");
     if(GetNPROC() < 2)return;
-    LouPrint("InitializeSymmetricMultiProcessing()\n");    
-    LouKeLoadLousineBootTrampoline();
+    //TODO: redo SMP
+    //LouPrint("InitializeSymmetricMultiProcessing()\n");    
+    //LouKeLoadLousineBootTrampoline();
 
-    LouKeInitializeSmpLouPrint();
+    //LouKeInitializeSmpLouPrint();
 
-    LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
+    //LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
 
 }
 
@@ -217,7 +217,7 @@ void AdvancedLousineKernelInitialization(){
     LouKeInitializeSecuritySubsystem();
 
     if (InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
-                
+        
     InitializeSymmetricMultiProcessing();
 
     InitializeProcessManager();
@@ -298,6 +298,10 @@ LouKeRtlCompareUtf16StringSafe(
 
 static LOADER_INFORMATION LousineKernelLoaderInformation = {0};
 
+UINT64 LouKeGetKernelBase(){
+    return (UINT64)LousineKernelLoaderInformation.KernelHandle;
+}
+
 LOUSTATUS SetUpTimers() {
 	LOUSTATUS Status = STATUS_SUCCESS;
 	SetTSCFrequency(LousineKernelLoaderInformation.TscCount);
@@ -333,13 +337,19 @@ void ParserLouLoaderInformation(
     }
 
 }
+/* TODO:Destroy loader States
+
+*/
 
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
+    DEBUG_TRAP;
+    while(1);
     EnableCR0WriteProtection();
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
-     
+    UINT64* Pml4 = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
+
     LOUSTATUS Status = LouKeInitializeRatSubsystem(&LousineKernelLoaderInformation);
     if(Status != STATUS_SUCCESS){
         HaltAndCatchFile();
@@ -348,6 +358,12 @@ void LouOsKrnlStart(
     ParserLouLoaderInformation(
         &LousineKernelLoaderInformation
     );
+
+    for(SIZE i = 0 ; i < 255; i++){
+        Pml4[i] = 0x00;
+    }
+    LouKeReloadCR3();
+    LouKeRatFreeAddress((UINTPTR)LousineKernelLoaderInformation.LoaderHandle);
 
     if(!LousineKernelLoaderInformation.EfiSystemTable){
         LouKeHandleSystemIsBios();
@@ -363,18 +379,13 @@ void LouOsKrnlStart(
     InitializePoolsPool();
 
     LouKeInitializeLouACPISubsystem();
-
     
     InitializeDebuggerComunications();
 
-
-    while(1);
-
-
     AdvancedLousineKernelInitialization();
 
-    LouKeInitializeKernelRuntimeEnviornment();
-    
+    LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
+
     PciHalScanBootDevices();
          
     uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
@@ -383,7 +394,6 @@ void LouOsKrnlStart(
         while(1);
     }
 
-    //TODO: update main workstation to use the new toolchain/build process
 
     //LouPrint("Successful Boot\n");
     //while(1);

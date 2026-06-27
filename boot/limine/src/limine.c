@@ -118,6 +118,7 @@ void kmain() {
         asm("INT $0");
     }
 
+
     LockedAndLoaded = InitializeRatSubsystem(&LoaderInformation);
     if(!LockedAndLoaded){
         asm("INT $0");

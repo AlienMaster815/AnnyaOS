@@ -296,15 +296,17 @@ LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
 
 //continue from here on with coff 32
 
-void StartupConfigureImportTable(PVOID Table){
-    if(!Table){
+void StartupConfigureImportTable(KHANDLE KernelHandle){
+    
+    UINTPTR ModuleStart = (UINTPTR)KernelHandle;
+    PCOFF_IMAGE_HEADER ImageHeader = (PCOFF_IMAGE_HEADER)ModuleStart;
+
+    if(!ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress){
         return;
     }
-
-    PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)Table;
+    PIMPORT_DIRECTORY_ENTRY ImportTable = (PIMPORT_DIRECTORY_ENTRY)(ModuleStart + (UINT64)ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress);
     SIZE j = 0;
     SIZE i = 0;
-    UINTPTR ModuleStart = KernelLoaderInfo.KernelBase;
     uint64_t TableEntry;
     uint64_t TableOffset;
     string FunctionName;
@@ -353,14 +355,17 @@ void StartupConfigureImportTable(PVOID Table){
 
 }
 
-void StartupConfigureExportTable(PVOID Table){
-    
-    if(!Table){
+void StartupConfigureExportTable(KHANDLE KernelHandle){
+
+    UINTPTR ModuleStart = (UINTPTR)KernelHandle;
+    PCOFF_IMAGE_HEADER ImageHeader = (PCOFF_IMAGE_HEADER)ModuleStart;
+
+    if(!ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress){
         return;
     }
 
-    PCFI_EXPORT_DIRECTORY_TABLE ExportTable = (PCFI_EXPORT_DIRECTORY_TABLE)Table;
-    string FormalName = (string)(KernelLoaderInfo.KernelBase + ExportTable->NameRVA);
+    PCFI_EXPORT_DIRECTORY_TABLE ExportTable = (PCFI_EXPORT_DIRECTORY_TABLE)(ModuleStart + (UINT64)ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress);
+    string FormalName = (string)(ModuleStart + ExportTable->NameRVA);
     size_t Koo = strlen(FormalName);
     for(size_t Foo = 0 ; Foo < Koo; Foo++){
         FormalName[Foo] = toupper(FormalName[Foo]);
@@ -369,16 +374,16 @@ void StartupConfigureExportTable(PVOID Table){
     uint64_t* FunctionPointers = LouKeMallocArray(uint64_t, ExportTable->NumberOfNamePointers, KERNEL_GENERIC_MEMORY);
     string* FunctionNames = LouKeMallocArray(string, ExportTable->NumberOfNamePointers, KERNEL_GENERIC_MEMORY);
 
-    uint16_t* OTR = (uint16_t*)(KernelLoaderInfo.KernelBase + ExportTable->OrdinalTableRVA);
-    uint32_t* NPR = (uint32_t*)(KernelLoaderInfo.KernelBase + ExportTable->NamePointerTableRVA);
-    uint32_t* ATR = (uint32_t*)(KernelLoaderInfo.KernelBase + ExportTable->ExportAddressTableRVA);
+    uint16_t* OTR = (uint16_t*)(ModuleStart + ExportTable->OrdinalTableRVA);
+    uint32_t* NPR = (uint32_t*)(ModuleStart + ExportTable->NamePointerTableRVA);
+    uint32_t* ATR = (uint32_t*)(ModuleStart + ExportTable->ExportAddressTableRVA);
 
     for (uint32_t i = 0; i < ExportTable->NumberOfNamePointers; i++) {
 
         uint16_t OTRIndex = OTR[i];
 
-        FunctionNames[i] = (string)(KernelLoaderInfo.KernelBase + (uint64_t)(uint32_t)NPR[i]);
-        FunctionPointers[i] = KernelLoaderInfo.KernelBase + (uint64_t)(uint32_t)ATR[OTRIndex];
+        FunctionNames[i] = (string)(ModuleStart + (uint64_t)(uint32_t)NPR[i]);
+        FunctionPointers[i] = ModuleStart + (uint64_t)(uint32_t)ATR[OTRIndex];
         
         //LouPrint("Function Name:%s\n", FunctionNames[i]);
         //LouPrint("Function Pointer:%h\n", FunctionPointers[i]);

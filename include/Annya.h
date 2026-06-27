@@ -85,10 +85,7 @@
 #include <USRSPC/User.h>
 #include <USRSPC/LouDll.h>
 #include <USRSPC/Asmss.h>
-//THIS is not exposed to user mode
-//#ifndef KERNEL_MAIN_FILE
-//EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
-//#endif
+
 
 
 #include <stdalign.h>

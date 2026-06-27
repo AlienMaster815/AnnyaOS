@@ -98,9 +98,6 @@ extern "C" {
 #include <USRSPC/User.h>
 #include <Rat.h>
 
-#ifndef KERNEL_MAIN_FILE
-EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
-#endif
 
 #ifndef _USER_MODE_CODE_
 

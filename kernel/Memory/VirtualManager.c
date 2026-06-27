@@ -49,7 +49,6 @@ LouKeVmmCreatePageReserveVm64(
     NewRemap->PageCount = PageCount;
     if(SetVirtUser){
         LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
-        LouKeUnMapContinuousMemoryBlock((UINT64)PageAddress, NewRemap->PageSize * NewRemap->PageCount); 
     }
     if(SetPhysUser){
         LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
@@ -89,7 +88,6 @@ LouKeVmmCreatePageReserveVm32(
     NewRemap->PageCount = PageCount;
     if(SetVirtUser){
         LouKeSetAtomicBoolean(&NewRemap->VirtualUser, 1);
-        LouKeUnMapContinuousMemoryBlock((UINT64)PageAddress, NewRemap->PageSize * NewRemap->PageCount); 
     }
     if(SetPhysUser)LouKeSetAtomicBoolean(&NewRemap->PhysicalUser, 1);
     LouKeListAddTail(&NewRemap->Peers, &KernelPageRemap32.Remaps);
@@ -358,10 +356,10 @@ LouKeVmmCreatePageReserveVm(
     BOOLEAN SetVirtUser
 ){
     LOUSTATUS Status;
-    if(((UINTPTR)PageAddress > (4 * GIGABYTE))){
-        Status = LouKeVmmCreatePageReserveVm64(PageAddress, PageSize, PageCount, SetPhysUser, SetVirtUser);
-    }else{
+    if(((UINTPTR)PageAddress < (4 * GIGABYTE))){
         Status = LouKeVmmCreatePageReserveVm32(PageAddress, PageSize, PageCount, SetPhysUser, SetVirtUser);
+    }else{
+        Status = LouKeVmmCreatePageReserveVm64(PageAddress, PageSize, PageCount, SetPhysUser, SetVirtUser);
     }
     return Status;
 }
@@ -408,10 +406,10 @@ LouKeVmmPutPPageReserveAddressVm(
     KERNEL_REMAP_EMPTY_CALLBACK Callback
 ){
     LOUSTATUS Status;
-    if(((UINTPTR)PAddress > (4 * GIGABYTE))){
-        Status = LouKeVmmPutPPageReserveAddressVm64(PAddress, Callback);
-    }else{
+    if(((UINTPTR)PAddress < (4 * GIGABYTE))){
         Status = LouKeVmmPutPPageReserveAddressVm32(PAddress, Callback);
+    }else{
+        Status = LouKeVmmPutPPageReserveAddressVm64(PAddress, Callback);
     }
     return Status;
 }
@@ -423,10 +421,10 @@ LouKeVmmPutVPageReserveAddressVm(
     KERNEL_REMAP_EMPTY_CALLBACK Callback
 ){
     LOUSTATUS Status;
-    if(((UINTPTR)VAddress > (4 * GIGABYTE))){
-        Status = LouKeVmmPutVPageReserveAddressVm64(VAddress, Callback);
-    }else{
+    if(((UINTPTR)VAddress < (4 * GIGABYTE))){
         Status = LouKeVmmPutVPageReserveAddressVm32(VAddress, Callback);
+    }else{
+        Status = LouKeVmmPutVPageReserveAddressVm64(VAddress, Callback);
     }
     return Status;
 }

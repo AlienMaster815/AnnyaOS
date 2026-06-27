@@ -77,7 +77,7 @@ PVOID LouKeMallocKbPageExVirt32(UINT64 PageCount, UINT64 PageFlags, UINT64 Physi
     if((!PageCount) || (!PhysicalAddres)){
         return 0x00;
     }
-
+    
     void* Result = 0x00;
     LouKeVmmGetVPageReserveVm32(KILOBYTE_PAGE, PageCount, &Result);
     if(!Result){
