@@ -2,6 +2,11 @@
 #ifndef _CSTDINT_H
 #define _CSTDINT_H
 
+#define UINT64_MAX  0xFFFFFFFFFFFFFFFF
+#define UINT32_MAX  0xFFFFFFFF
+#define UINT16_MAX  0xFFFF
+#define UINT8_MAX   0xFF
+
 //TODO:fix the ABI i got the ABI backwards 
 
 typedef char        CHAR,     BYTE,  INT8,  int8_t,  *PCHAR,    *PBYTE,     *PINT8;

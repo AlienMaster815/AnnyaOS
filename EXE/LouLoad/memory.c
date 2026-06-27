@@ -158,8 +158,11 @@ typedef struct _REP_GET_ALLOCATION_CTX{
 }REP_GET_ALLOCATION_CTX, * PREP_GET_ALLOCATION_CTX;
 
 static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
+    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    PVOID Result = (PVOID)Tracker->Base;
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while(((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
@@ -168,8 +171,16 @@ static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
+    
+    if((AllocContext->Length == (16 * KILOBYTE)) && (AllocContext->Alignment == 16)){
+        DEBUG_TRAP;
+    }
+
     return false;
 }
 
@@ -188,7 +199,10 @@ static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker)
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
     return false;
 }
@@ -240,6 +254,7 @@ PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment){
     if(!NewTracker){
         return 0x00;
     }
+    
     REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){

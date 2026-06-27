@@ -133,7 +133,7 @@ void PageFault(uint64_t FaultingStackP) {
         while(1);
     }
 
-    //DEBUG_TRAP
+    //DEBUG_TRAP;
 
     LouPrint("Kernel Base:%h\n", LouKeGetKernelBase());
 

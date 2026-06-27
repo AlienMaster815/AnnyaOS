@@ -361,9 +361,11 @@ typedef struct _REP_GET_ALLOCATION_CTX{
 }REP_GET_ALLOCATION_CTX, * PREP_GET_ALLOCATION_CTX;
 
 static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
+    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-
-    PVOID Result = (PVOID)Tracker->Base;
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
@@ -371,18 +373,24 @@ static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
         if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
             AllocContext->Base = (UINTPTR)Result;
             return true;
-        }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        }     
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
     return false;
 }
 
 static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
+    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
     if(Tracker->Base > GIGABYTE){
         return false;
     }
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    PVOID Result = (PVOID)Tracker->Base;
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while(((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) && (AllocationLocationOk((UINT64)Result, AllocContext->Length))){
@@ -391,7 +399,10 @@ static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker)
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
     return false;
 }

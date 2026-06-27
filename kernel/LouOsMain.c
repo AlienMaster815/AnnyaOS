@@ -344,8 +344,7 @@ void ParserLouLoaderInformation(
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-    DEBUG_TRAP;
-    while(1);
+
     EnableCR0WriteProtection();
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
     UINT64* Pml4 = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
@@ -354,7 +353,6 @@ void LouOsKrnlStart(
     if(Status != STATUS_SUCCESS){
         HaltAndCatchFile();
     }
-
     ParserLouLoaderInformation(
         &LousineKernelLoaderInformation
     );
@@ -381,6 +379,7 @@ void LouOsKrnlStart(
     LouKeInitializeLouACPISubsystem();
     
     InitializeDebuggerComunications();
+    while(1);
 
     AdvancedLousineKernelInitialization();
 

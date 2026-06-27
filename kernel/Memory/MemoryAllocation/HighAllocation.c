@@ -33,7 +33,7 @@ LouKeTrackAllocationFits(
     PKMALLOC_PAGE_TRACK PageTrack,
     UINT64              Address,
     UINT64              Size,
-    PVOID*              NextHint    
+    UINTPTR*            NextHint    
 ){  
     PKMALLOC_VMEM_TRACK TmpVMemTrack;
     ForEachListEntry(TmpVMemTrack, &PageTrack->VMemTracks, Peers){
@@ -42,7 +42,7 @@ LouKeTrackAllocationFits(
             Address, Size
         )){
             if(NextHint){
-                *NextHint = (PVOID)((UINTPTR)Address + (UINTPTR)TmpVMemTrack->Size);
+                *NextHint = ((UINTPTR)TmpVMemTrack->Address + (UINTPTR)TmpVMemTrack->Size);
             }
             return false;
         }
@@ -69,16 +69,19 @@ LouKeMallocFromTrackers(
     PAGE_ALLOCATOR_FUNCTION     PageAllocator = KernelMemorySpacesPageAllocators[MemorySpace];
     PAGE_ALLOCATOR_FUNCTION_EX  PageAllocatorEx = MemorySpace > 1 ? (PAGE_ALLOCATOR_FUNCTION_EX)KernelMemorySpacesPageAllocators[MemorySpace] : 0x00;
     PKMALLOC_VMEM_TRACK         TmpVMemTrack;
-    
+    UINTPTR Checksum;
     MutexLock(Lock);
     ForEachListEntry(TmpPageTrack, Track, Peers){
         ForEachIf((TmpPageTrack->Flags == PageFlags) && (TmpPageTrack->PageSize >= Size)){
             Result = (PVOID)ROUND_UP64((UINT64)TmpPageTrack->PageAddress, Alignment);
             while(((UINTPTR)Result + Size) <= ((UINT64)TmpPageTrack->PageAddress + TmpPageTrack->PageSize)){
-                if(LouKeTrackAllocationFits(TmpPageTrack, (UINT64)Result, Size, &Result)){
+                if(LouKeTrackAllocationFits(TmpPageTrack, (UINT64)Result, Size, &Checksum)){
                     goto _DONE;
                 }
-                Result = (PVOID)ROUND_UP64((UINT64)Result, Alignment);
+                Result = (PVOID)ROUND_UP64((UINT64)Checksum, Alignment);
+                if((UINTPTR)Result == Checksum){
+                    Result = (PVOID)((UINTPTR)Result + Alignment);
+                }
             }
         }
     }

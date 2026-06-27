@@ -105,5 +105,6 @@ PVOID LoaderAllocateSpace(SIZE AllocationSize, SIZE Alignment);
 PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment);
 
 #include "Coff.h"
+#include "../../../include/Debug.h"
 
 #endif

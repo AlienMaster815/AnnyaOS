@@ -5,6 +5,7 @@
 
 #include <LouLoad.h>
 #include <Coff.h>
+#include <Debug.h>
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 

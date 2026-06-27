@@ -57,7 +57,7 @@ void LouKeDebuggerCommunicationsSendCharecter(char Charecter){
 }
 
 void LouKeDebugTrap(){
-    //DEBUG_TRAP
+    //DEBUG_TRAP;
     LouPrint("Error:LouKeDebugTrap()\n");
     while(1);
 }

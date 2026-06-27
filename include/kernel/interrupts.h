@@ -13,15 +13,7 @@ extern "C" {
 #include <Modulation.h>
 #include <kernel/loustatus.h>
 #include <cstdio.h>
-
-#define DEBUG_TRAP \
-    struct { \
-        uint16_t limit; \
-        uint64_t base; \
-    } PACKED idtr = {0, 0}; \
-    __asm__ volatile("lidt %0" : : "m"(idtr)); \
-    __asm__ volatile("int $3"); \
-
+#include <Debug.h>
 
 #define INTERRUPT_SERVICE_ROUTINE_0 0
 #define INTERRUPT_SERVICE_ROUTINE_1 1

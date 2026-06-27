@@ -32,7 +32,7 @@ BOOLEAN LouKeRatIsAddressFreeEx(PVOID Address, SIZE Size, UINTPTR* EndofAllocati
 }
 
 void LouKeRatFreeAddress(UINTPTR Address){
-    LouPrint("FREE:%h\n", Address);
+    //LouPrint("FREE:%h\n", Address);
     PRAT_TRACKER Mbr = &RatMbrTable->Mbr[0];
     SIZE MbrChunksAllocated = RatMbrTable->MbrChunksAllocated;
     PRAT_TRACKER MbrChunkIndex = 0x00;
@@ -100,10 +100,12 @@ typedef struct _REP_GET_ALLOCATION_CTX{
 static SIZE VirtualBase = 0;
 
 static BOOLEAN GetFirstFree32BitAddress(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
     SIZE SpaceLimit = (4 * GIGABYTE);
-
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    PVOID Result = (PVOID)Tracker->Base;
+    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while((((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) && (((UINT64)Result + AllocContext->Length) <= SpaceLimit)){
@@ -112,7 +114,10 @@ static BOOLEAN GetFirstFree32BitAddress(PVOID Context, PRAT_TRACKER Tracker){
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
     return false;
 }
@@ -133,7 +138,10 @@ static BOOLEAN GetFirstFree64BitAddress(PVOID Context, PRAT_TRACKER Tracker){
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
     return false;
 }
@@ -150,22 +158,27 @@ static BOOLEAN GetFirstFreeVirtualAddress(PVOID Context, PRAT_TRACKER Tracker){
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Status = LouKeRtlUintptrAdd(NextHint, AllocContext->Alignment, &Checksum);
-        if(Status != STATUS_SUCCESS){
-            return false;
+        Result = (UINTPTR)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if(Result < KSpaceBase){
+            break;
         }
-        Result = ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
-        Status = LouKeRtlUintptrAdd(Result, AllocContext->Length, &Checksum);
-        if(Status != STATUS_SUCCESS){
-            return false;
+        if((UINTPTR)Result == NextHint){
+            Status = LouKeRtlUintptrAdd(Result, AllocContext->Alignment, &Checksum);
+            if(Status != STATUS_SUCCESS){
+                break;
+            }
+            Result = Checksum;
         }
     }
     return false;
 }
 
 static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
+    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    PVOID Result = (PVOID)Tracker->Base;
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
     while(((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
@@ -174,7 +187,10 @@ static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
             AllocContext->Base = (UINTPTR)Result;
             return true;
         }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
     }
     return false;
 }

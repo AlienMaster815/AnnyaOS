@@ -10,6 +10,9 @@
 #define LIMINE_REQUEST_START    __attribute__((used, section(".limine_requests_start"))) static volatile
 #define LIMINE_REQUEST_END      __attribute__((used, section(".limine_requests_end"))) static volatile
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
 void* memcpy(PVOID Dest, PCVOID Src, SIZE Size);
 PVOID memset(PVOID Dest, int Val, SIZE Size);
 int memcmp (void *VBuffer1, void *VBuffer2, UINT64 Count);
