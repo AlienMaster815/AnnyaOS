@@ -1,23 +1,31 @@
 #include <LouAPI.h>
-#include <bootloader/grub/multiboot2.h>
 
-struct multiboot_tag_framebuffer* FramebufferInformation;
-
-void DRSD_OVERIDE_EGA();
-void LouKeDeferBootGraphics(
-	struct multiboot_tag_framebuffer_common* BootGraphicsDefer
-);
+static SIZE gFramebuffers = 0;
+static PLOADER_FB_MEMORY_MAP gFbMaps;
 
 void InitializeFrameBuffer(
-    struct multiboot_tag_framebuffer* Frambuffer
+    PLOADER_FB_MEMORY_MAP   FbMaps,
+    SIZE                    Framebuffers
 ){
-    //LouPrint("Parseing Framebuffer\n");
-    FramebufferInformation = Frambuffer;
+    gFramebuffers = Framebuffers;
+    gFbMaps = FbMaps;
+}
 
-    struct multiboot_tag_framebuffer_common* Common = &FramebufferInformation->common;
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeGetBootFrameBuffer(
+	PLOADER_FB_MEMORY_MAP*  pBootGraphics,
+    SIZE*                   FbCount 
+){
+	if(!pBootGraphics || !FbCount){
+		return STATUS_INVALID_PARAMETER;
+	}
 
-    if(Common->framebuffer_type == 1){
-        LouKeDeferBootGraphics(Common);
-    }
+	if(!gFbMaps || !gFramebuffers){
+		return STATUS_NO_SUCH_DEVICE;
+	}
 
+	*pBootGraphics = gFbMaps;
+    *FbCount = gFramebuffers;
+	return STATUS_SUCCESS;
 }

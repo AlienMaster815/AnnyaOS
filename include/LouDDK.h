@@ -96,6 +96,7 @@ extern "C" {
 #include <USRSPC/Syncapi.h>
 #include <USRSPC/msvcrt.h>
 #include <USRSPC/User.h>
+#include <Rat.h>
 
 #ifndef KERNEL_MAIN_FILE
 EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;

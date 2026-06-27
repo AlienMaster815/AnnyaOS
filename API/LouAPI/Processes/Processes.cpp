@@ -14,7 +14,7 @@ void LouKeTsmDestroyThreadHandle(
     PGENERIC_THREAD_DATA Thread
 ){
     LouKeFree(Thread->AfinityBitmap);
-    if(Thread->StackBase > GetKSpaceBase()){
+    if(Thread->StackBase > KSpaceBase){
         LouKeFree((PVOID)Thread->StackBase);
     }else{
         LouKeVmmFreeVmBuffer((PVOID)Thread->StackBase); 
@@ -181,7 +181,7 @@ LOUSTATUS LouKePmCreateProcessEx(
     if(strcmp(ProcessName, KERNEL_PROCESS_NAME)){
         NewProcessObject->PMLTree = LouKeVmmCreatePmlTable(); 
     }else {
-        NewProcessObject->PMLTree = (GetCr3() + GetKSpaceBase());
+        NewProcessObject->PMLTree = (GetCr3() + KSpaceBase);
     }
 
     if(Section){
@@ -322,7 +322,7 @@ LouKePsmGetProcessPml4(uint32_t ProcessID){
     ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
         if(ProcessID == TmpHandle->ProcessID){
             LouKeReleaseSpinLock(&ProcessListLock, &Irql);
-            return (TmpHandle->PMLTree - GetKSpaceBase());
+            return (TmpHandle->PMLTree - KSpaceBase);
         }
     }
     LouKeReleaseSpinLock(&ProcessListLock, &Irql);

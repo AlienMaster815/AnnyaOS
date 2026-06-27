@@ -3,9 +3,7 @@
 LOUSTATUS InitHPET();
 uint64_t calibrate_tsc();
 
-void SetTSCFrequency(uint64_t Frequency);
 uint64_t GetTscMaster();
-void SetTSC();
 
 static inline uint64_t read_tsc(void) {
     uint32_t lo, hi;
@@ -15,29 +13,7 @@ static inline uint64_t read_tsc(void) {
 
 
 
-LOUSTATUS SetUpTimers() {
-	LOUSTATUS Status = STATUS_SUCCESS;
 
-	//Start With the Most Reliable And Work From There
-
-	//if (STATUS_SUCCESS != InitHPET()) {
-		//if no hpet use tsc
-		//LouPrint("HPET Not Found Using TSC\n");
-		
-		uint64_t TSC_Ticks = 0;
-		while(TSC_Ticks == 0){
-		TSC_Ticks = calibrate_tsc();
-		}
-		LouPrint("TSC Ticks Are:%d\n",TSC_Ticks);
-
-		SetTSCFrequency(TSC_Ticks);
-		SetTSC();
-	//}
-
-	
-
-	return Status;
-}
 
 uint64_t GetCurrentTimeInMilliseconds() {
     uint64_t current_tsc = read_tsc();

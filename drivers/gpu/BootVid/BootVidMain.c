@@ -1,7 +1,8 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include "BootVid.h"
 
-static struct multiboot_tag_framebuffer_common* BootGraphics = 0x00;
+static SIZE FbCount = 0;
+static PLOADER_FB_MEMORY_MAP BootGraphics = 0x00;
 static BOOLEAN BootVidInitialized = false;
 
 KERNEL_EXPORT UINT64 LouKeGetKSpaceBase();
@@ -16,8 +17,8 @@ BootVidEntry(){
     UINT32 ScalerType;
 
     LouPrint("BOOTVID.SYS:BootVidEntry()\n");
-
-    Status = LouKeGetBootFrameBuffer(&BootGraphics);
+    while(1);
+    /*Status = LouKeGetBootFrameBuffer(&BootGraphics, &FbCount);
     if(Status != STATUS_SUCCESS){
         LouPrint("BOOTVID.SYS:ERROR Unable To Get Boot Frame Buffer\n");
         return STATUS_SUCCESS;
@@ -87,7 +88,7 @@ BootVidEntry(){
 
     BootVidInitializeTerminalDriver();
 
-    BootVidInitialized = true;
+    BootVidInitialized = true;*/
 
     LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
 

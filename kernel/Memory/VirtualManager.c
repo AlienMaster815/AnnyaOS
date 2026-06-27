@@ -446,7 +446,7 @@ LouKeMemSetVmSpace(UINT32 ProcessID, PVOID Addres, int v, SIZE Count){
         return STATUS_NO_SUCH_DEVICE;
     }
     if(PhyOut){
-        uint8_t* Foo = (uint8_t*)(GetKSpaceBase() + PhyOut);
+        uint8_t* Foo = (uint8_t*)(KSpaceBase + PhyOut);
         memset(Foo, v, Count);
     }
     return STATUS_SUCCESS;
@@ -463,7 +463,7 @@ LouKeMemCpyVmSpace(UINT32 ProcessID, PVOID Destination, PVOID Source, SIZE Count
         return STATUS_NO_SUCH_DEVICE;
     }
     if(PhyOut){
-        uint8_t* Foo = (uint8_t*)(GetKSpaceBase() + PhyOut);
+        uint8_t* Foo = (uint8_t*)(KSpaceBase + PhyOut);
         memcpy(Foo, Source, Count);
     }
     return STATUS_SUCCESS;

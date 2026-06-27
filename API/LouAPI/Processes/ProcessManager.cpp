@@ -65,7 +65,7 @@ LOUAPI void SetLKPCB(UINT64 KernelProcBlock);
 
 //static LouKeManagerProcessSwap();
 void PsmProcessScedualManagerObject::PsmSetProcessTransitionState(){
-    SetCr3(this->CurrentProcess->PMLTree - GetKSpaceBase());
+    SetCr3(this->CurrentProcess->PMLTree - KSpaceBase);
     SetPEB((UINT64)&this->CurrentProcess->Peb);
 }
 

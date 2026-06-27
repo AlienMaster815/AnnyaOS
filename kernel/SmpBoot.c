@@ -97,7 +97,7 @@ void LouKeLoadLousineBootTrampoline(){
 
     *Pml4Address     = (UINT64)GetPageBase();
     *FunctionAddress = (UINT64)LouKeSmpWakeFunction; 
-    *Pml4Address32   = (UINT64)(LouGeneralAllocateMemory32(4096) - GetKSpaceBase());
+    *Pml4Address32   = (UINT64)(LouGeneralAllocateMemory32(4096) - KSpaceBase);
 
     LouKeMapContinuousMemoryBlockEx32(0x7000, 0x7000, TrampolineSize, KERNEL_DMA_MEMORY, (UINT64*)*Pml4Address32);
 

@@ -201,9 +201,9 @@ static UINT64* PageDown(UINT64* PageUpperBase, UINT64 UpperIndex){
     UINT64 Base = PageUpperBase[UpperIndex] & ~(PAGE_FLAGSSPACE);
     if(!Base){
         Base = (UINT64)LouGeneralAllocateMemoryEx(4096, 4096);
-        PageUpperBase[UpperIndex] = GetPageValue(Base - GetKSpaceBase(), 0b111);
+        PageUpperBase[UpperIndex] = GetPageValue(Base - KSpaceBase, 0b111);
     }else {
-        Base += GetKSpaceBase();
+        Base += KSpaceBase;
     }
 
     return (UINT64*)Base;
@@ -213,9 +213,9 @@ static UINT64* PageDown32(UINT64* PageUpperBase, UINT64 UpperIndex){
     UINT64 Base = PageUpperBase[UpperIndex] & ~(PAGE_FLAGSSPACE);
     if(!Base){
         Base = (UINT64)LouGeneralAllocateMemoryEx32(4096, 4096);
-        PageUpperBase[UpperIndex] = GetPageValue(Base - GetKSpaceBase(), 0b111);
+        PageUpperBase[UpperIndex] = GetPageValue(Base - KSpaceBase, 0b111);
     }else {
-        Base += GetKSpaceBase();
+        Base += KSpaceBase;
     }
 
     return (UINT64*)Base;
@@ -225,7 +225,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
 
     VAddress &= ~(KILOBYTE_PAGE - 1);
 
-    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), LouKeGetRamSize())){
+    if(RangeInterferes(VAddress, 1, KSpaceBase, LouKeGetRamSize())){
         DEBUG_TRAP
         while(1);
     }
@@ -248,7 +248,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
     
     UINT64* TmpPageBase = GetPageBase();
     UINT64  TmpPageValue;
-    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
+    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + KSpaceBase);
     TmpPageBase = PageDown(TmpPageBase, L4Entry);    
     TmpPageBase = PageDown(TmpPageBase, L3Entry);
     TmpPageValue = TmpPageBase[L2Entry];
@@ -267,7 +267,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
         TmpPageBase[L2Entry] = TmpPageValue;
     }else{
         TmpPageValue &= ~(PAGE_FLAGSSPACE);
-        TmpPageBase = (UINT64*)(UINT8*)(TmpPageValue + GetKSpaceBase());
+        TmpPageBase = (UINT64*)(UINT8*)(TmpPageValue + KSpaceBase);
         TmpPageValue = TmpPageBase[L1Entry];
         if(UnmapedLength){
             *UnmapedLength = KILOBYTE_PAGE;
@@ -307,13 +307,13 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
         &L1Entry
     );
 
-    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), LouKeGetRamSize())){
+    if(RangeInterferes(VAddress, 1, KSpaceBase, LouKeGetRamSize())){
         DEBUG_TRAP
         while(1);
     }
     MutexLock(&PageTableLock);
     
-    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
+    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + KSpaceBase);
     TmpPageBase = PageDown(TmpPageBase, L4Entry);    
     TmpPageBase = PageDown(TmpPageBase, L3Entry);
     UINT64* NewPage;
@@ -327,13 +327,13 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
         if(TmpPageBase[L2Entry] & (1 << 7)){
             NewPage = LouGeneralAllocateMemory(4096);
             InitializePageTableWithIndex(NewPage, TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE), KILOBYTE_PAGE);
-            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
+            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - KSpaceBase), 0b111);
         }else if(!(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE))){
             NewPage = LouGeneralAllocateMemory(4096);
-            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
+            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - KSpaceBase), 0b111);
         }
         else{
-            NewPage = (UINT64*)((UINT64)(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE)) + GetKSpaceBase()); 
+            NewPage = (UINT64*)((UINT64)(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE)) + KSpaceBase); 
         }
         NewPage[L1Entry] = GetPageValue(PAddress, FLAGS);
     } 
@@ -366,13 +366,13 @@ bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uin
         &L1Entry
     );
 
-    if(RangeInterferes(VAddress, 1, GetKSpaceBase(), LouKeGetRamSize())){
+    if(RangeInterferes(VAddress, 1, KSpaceBase, LouKeGetRamSize())){
         DEBUG_TRAP
         while(1);
     }
     MutexLock(&PageTableLock);
     
-    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + GetKSpaceBase());
+    TmpPageBase = (UINT64*)((UINT64)TmpPageBase + KSpaceBase);
     TmpPageBase = PageDown32(TmpPageBase, L4Entry);    
     TmpPageBase = PageDown32(TmpPageBase, L3Entry);
     UINT64* NewPage;
@@ -386,13 +386,13 @@ bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uin
         if(TmpPageBase[L2Entry] & (1 << 7)){
             NewPage = LouGeneralAllocateMemory32(4096);
             InitializePageTableWithIndex(NewPage, TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE), KILOBYTE_PAGE);
-            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
+            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - KSpaceBase), 0b111);
         }else if(!(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE))){
             NewPage = LouGeneralAllocateMemory32(4096);
-            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - GetKSpaceBase()), 0b111);
+            TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - KSpaceBase), 0b111);
         }
         else{
-            NewPage = (UINT64*)((UINT64)(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE)) + GetKSpaceBase()); 
+            NewPage = (UINT64*)((UINT64)(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE)) + KSpaceBase); 
         }
         NewPage[L1Entry] = GetPageValue(PAddress, FLAGS);
     } 

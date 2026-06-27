@@ -21,11 +21,11 @@ UNUSED static void LouACPIParseRsdt(
     PROOT_SYSTEM_DISCRIPTION_POINTER Rsdp
 ){
     LouPrint("Parseing Rsdt At:%h\n", Rsdp->RsdtAddress);
-    PROOT_SYSTEM_DISCRIPTION_TABLE  Rsdt = (PROOT_SYSTEM_DISCRIPTION_TABLE)(uintptr_t)(Rsdp->RsdtAddress + GetKSpaceBase());
+    PROOT_SYSTEM_DISCRIPTION_TABLE  Rsdt = (PROOT_SYSTEM_DISCRIPTION_TABLE)(uintptr_t)(Rsdp->RsdtAddress + KSpaceBase);
 
     LouKeInitializeLouACPITable((void*)(uintptr_t)Rsdt);
     FOR_EACH_PRSDT_ENTRY(Rsdt){
-        LouKeInitializeLouACPITable((void*)((uintptr_t)Rsdt->DescriptionHeaders[RsdtEntry] + GetKSpaceBase()));
+        LouKeInitializeLouACPITable((void*)((uintptr_t)Rsdt->DescriptionHeaders[RsdtEntry] + KSpaceBase));
     }
 
 }
@@ -35,12 +35,12 @@ UNUSED static void LouACPIParseXsdt(
     PROOT_SYSTEM_DISCRIPTION_POINTER Rsdp
 ){
     LouPrint("Parseing Xsdt At:%h\n", Rsdp->XsdtAddress);
-    PEXTENDED_SYSTEM_DESCRIPTION_TABLE  Xsdt = (PEXTENDED_SYSTEM_DESCRIPTION_TABLE)((uintptr_t)Rsdp->XsdtAddress + GetKSpaceBase());
+    PEXTENDED_SYSTEM_DESCRIPTION_TABLE  Xsdt = (PEXTENDED_SYSTEM_DESCRIPTION_TABLE)((uintptr_t)Rsdp->XsdtAddress + KSpaceBase);
 
     LouKeInitializeLouACPITable((void*)(uintptr_t)Xsdt);
 
     FOR_EACH_PXSDT_ENTRY(Xsdt){
-        LouKeInitializeLouACPITable((void*)((uintptr_t)Xsdt->DescriptionHeaders[XsdtEntry] + GetKSpaceBase()));
+        LouKeInitializeLouACPITable((void*)((uintptr_t)Xsdt->DescriptionHeaders[XsdtEntry] + KSpaceBase));
     }
 }
 

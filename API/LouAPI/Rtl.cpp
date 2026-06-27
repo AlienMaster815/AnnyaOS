@@ -840,6 +840,24 @@ LouKeRtlByteToInt8(
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeRtlUintptrAdd(
+    UINTPTR     upAugend,
+    UINTPTR     upAddend,
+    UINTPTR*    pupResult
+){
+    if(!pupResult){
+        return STATUS_INVALID_PARAMETER;
+    }
+    if(Uint64AdditionWillOverflow((UINT64)upAugend, (UINT64)upAddend)){
+        *pupResult = 0;
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pupResult = (UINTPTR)(upAugend + upAddend);
+    return STATUS_SUCCESS;
+}
+
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeRtlDWordPtrAdd(

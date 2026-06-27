@@ -55,6 +55,8 @@ typedef struct _LOADER_RAT_MBR_CHUNK{
 }LOADER_RAT_MBR_CHUNK, * PLOADER_RAT_MBR_CHUNK;
 
 typedef struct _LOADER_INFORMATION{
+    UINT64                  RsdpPointer;
+    UINT64                  RsdpVersion;
     UINT64                  LoaderCpuFeatures;
     UINT64                  TscCount;
     SIZE                    RamSize;
@@ -153,10 +155,6 @@ typedef struct _LOUSINE_LOADER_INFO{
 #ifndef KERNEL_MAIN_FILE
 EXTERNAL LOUSINE_LOADER_INFO KernelLoaderInfo;
 #endif
-
-#define GetKSpaceBase() KernelLoaderInfo.KernelVm.KernelVmBase
-#define GetBootStackTop() KernelLoaderInfo.BootStack
-#define SetKSpaceBase(x) KernelLoaderInfo.KernelVm.KernelVmBase = x
 
 
 

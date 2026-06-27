@@ -132,6 +132,7 @@ KERNEL_EXPORT LOUSTATUS LouKeRtlUInt8ToChar(UINT8 u8Operand, CHAR* pch);
 KERNEL_EXPORT LOUSTATUS LouKeRtlUInt8ToInt8(UINT8 u8Operand, INT8* pi8Result);
 KERNEL_EXPORT LOUSTATUS LouKeRtlUIntAdd(UINT uAugend, UINT uAddend, UINT* puResult);
 KERNEL_EXPORT LOUSTATUS LouKeRtlUIntMult(UINT uMultiplicand, UINT uMultiplier, UINT* puResult);
+KERNEL_EXPORT LOUSTATUS LouKeRtlUintptrAdd(UINTPTR upAugend, UINTPTR upAddend, UINTPTR* pupResult);
 KERNEL_EXPORT LOUSTATUS LouKeRtlUIntPtrAdd(UINT_PTR uAugend, UINT_PTR uAddend, UINT_PTR* puResult);
 KERNEL_EXPORT LOUSTATUS LouKeRtlUIntPtrMult(UINT_PTR uMultiplicand, UINT_PTR uMultiplier, UINT_PTR* puResult);
 KERNEL_EXPORT LOUSTATUS LouKeRtlUIntPtrSub(UINT_PTR uMinuend, UINT_PTR uSubtrahend, UINT_PTR *puResult);

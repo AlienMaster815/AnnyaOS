@@ -21,8 +21,8 @@ string KERNEL_ARCH = "64-BIT";
 
 LOUSINE_LOADER_INFO KernelLoaderInfo = {0};
 
-KERNEL_EXPORT UINT64 LouKeGetKSpaceBase(){
-    return GetKSpaceBase();
+KERNEL_EXPORT UINT64 LouKeGetSpaceBase(){
+    return KSpaceBase;
 }
 
 typedef struct _PROCESSOR_FEATURES{
@@ -135,18 +135,22 @@ HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
 void LouKeInitializeSmpLouPrint();
 void LouKeUnmaskSmpInterrupts();
-void ParserLouLoaderInformation(
-    PLOUSINE_LOADER_INFO LoaderInfo
-);
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT32 ThreadID);
 uint64_t GetCr3();
+UINT64* GetPageBase();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
 LOUSTATUS LouKeCreateSystemWorkQeueue();
 void SetRamSize(UINT64 Size);
-
-
+LOUSTATUS LouKeInitializeRatSubsystem(PLOADER_INFORMATION Info);
+LOUSTATUS LouKeSetEfiTable(uint64_t Address);
+LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type);
+void InitializeFrameBuffer(PLOADER_FB_MEMORY_MAP FbMaps, SIZE Framebuffers);
+void InitializeBootRegistry(uintptr_t Base, uintptr_t Top);
+void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
+void SetTSCFrequency(uint64_t Frequency);
+void SetTSC();
 
 LOUSTATUS LousineKernelEarlyInitialization(){
 
@@ -272,10 +276,10 @@ void DisableCR0WriteProtection() {
 }
 
 
-UNUSED static bool SystemIsEfiv = false;
+UNUSED static bool SystemIsEfi = false;
 
 bool IsSystemEfi(){
-    return SystemIsEfiv;
+    return SystemIsEfi;
 }
 
 void PrintProcessManagerSwaps();
@@ -292,36 +296,65 @@ LouKeRtlCompareUtf16StringSafe(
     SIZE    Length
 );
 
+static LOADER_INFORMATION LousineKernelLoaderInformation = {0};
+
+LOUSTATUS SetUpTimers() {
+	LOUSTATUS Status = STATUS_SUCCESS;
+	SetTSCFrequency(LousineKernelLoaderInformation.TscCount);
+	SetTSC();
+	return Status;
+}
+
+KERNEL_EXPORT
+uint64_t LouKeGetRamSize() {
+    return LousineKernelLoaderInformation.RamSize;
+}
+
+static void HaltAndCatchFile() {
+    for (;;) {
+        asm ("hlt");
+    }
+}
+
+void ParserLouLoaderInformation(
+    PLOADER_INFORMATION LoaderInfo
+){
+
+    LouKeSetEfiTable((UINT64)LoaderInfo->EfiSystemTable);
+
+    LouKeSetRsdp((UINT64)LoaderInfo->RsdpPointer, (UINT64)LoaderInfo->RsdpVersion);
+
+    InitializeFrameBuffer(LoaderInfo->FrameBuffers, LoaderInfo->FrameBufferCount);
+
+    InitializeBootRegistry(LoaderInfo->BootModulesBase[0].Tracker.Base, LoaderInfo->BootModulesBase[0].Tracker.Length);
+
+    for(SIZE i = 1 ; i < LoaderInfo->BootModulesCount; i++){
+        AddDriverToBootDeviceManager(LoaderInfo->BootModulesBase[i].Tracker.Base, LoaderInfo->BootModulesBase[i].Tracker.Length);
+    }
+
+}
+
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-
-    while(1);
-
-    memcpy((void*)&KernelLoaderInfo, (void*)pKernelLoaderInfo, sizeof(LOUSINE_LOADER_INFO));
-    SetRamSize(KernelLoaderInfo.KernelVm.KernelVmLimit); //setting this early to reduce the chance of bugs
-    
-    UINT64 Cr3 =  (UINT64)GetCr3();
-    Cr3 += GetKSpaceBase();
-
-    for(size_t i = 0 ; i < 255; i++){
-        ((UINT64*)Cr3)[i] = 0;
+    EnableCR0WriteProtection();
+    memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
+     
+    LOUSTATUS Status = LouKeInitializeRatSubsystem(&LousineKernelLoaderInformation);
+    if(Status != STATUS_SUCCESS){
+        HaltAndCatchFile();
     }
 
-    EnableCR0WriteProtection();
-     
     ParserLouLoaderInformation(
-        &KernelLoaderInfo
+        &LousineKernelLoaderInformation
     );
 
-
-    ///vga set for debug
-    if(!LouKeMapEfiMemory()){
+    if(!LousineKernelLoaderInformation.EfiSystemTable){
         LouKeHandleSystemIsBios();
     }else {
-        SystemIsEfiv = true;
+        SystemIsEfi = true;
         InitializeEfiCore();
-    }                      
+    }
 
     LouKeInitializeBootRegistry();
 
@@ -331,7 +364,12 @@ void LouOsKrnlStart(
 
     LouKeInitializeLouACPISubsystem();
 
+    
     InitializeDebuggerComunications();
+
+
+    while(1);
+
 
     AdvancedLousineKernelInitialization();
 
@@ -368,7 +406,6 @@ void LouOsKrnlStart(
     //while(1);
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
-    LOUSTATUS Status;
 
     PVOID AsmssKey = LouKeOpenRegistryHandle(
         L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Asmss",

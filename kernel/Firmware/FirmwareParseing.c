@@ -25,7 +25,7 @@ static uint8_t TYPE_MASTER = 0x00;
 static spinlock_t FirmwareLock;
 
 uintptr_t LouKeGetRsdp(){
-	return RSDP_MASTER;
+	return RSDP_MASTER + KSpaceBase;
 }
 
 typedef struct PACKED _ACPI_STD_HEADER {
@@ -87,7 +87,7 @@ LOUSTATUS LouKeSetSmbios(uintptr_t SMBIOS) {
 	return STATUS_SUCCESS;
 }
 
-LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type) {
+LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type){
 
 	RSDP_MASTER = RSDP;
 	TYPE_MASTER = Type;
@@ -96,13 +96,6 @@ LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type) {
 
 	return STATUS_SUCCESS;
 }
-
-LOUSTATUS LouKeSetApm(struct multiboot_tag_apm* APM) {
-
-	APM_MASTER = APM;
-	return STATUS_SUCCESS;
-}
-
 
 LOUSTATUS LouKeGetSystemFirmwareTableProviderSignature(
 	unsigned long FirmwareTableProviderSignature, 
@@ -286,25 +279,9 @@ typedef struct {
 } RSDP_DESCRIPTOR_2;
 
 
-
-static uint64_t EfiMemMap = 0x00;
-
-void SetEfiMap(uint64_t Map){
-	EfiMemMap = Map;
-}
-
-
-
 //static EFI_GUID SMBIOS_GUID = { 0xEB9D2D31, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D } };
 
-bool LouKeMapEfiMemory(){
-	if(EfiMemMap){
 
-		return true;
-	}
-
-	return false;
-}
 #define BIOS_START 0xF0000
 #define BIOS_END   0xFFFFF
 void InitializeSmBiosSystem(void* Entry);

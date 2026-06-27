@@ -224,7 +224,7 @@ void LouKeVmmCloneSectionToPml(UINT64* Pml4){
     PSECTION_OBJECT TmpSection;
     ForEachListEntry(TmpSection, &MasterSectionList, Peers){
         ForEachIf(!TmpSection->Private){
-            LouKeMapContinuousMemoryBlockEx((UINT64)TmpSection->SectionPBase, (UINT64)TmpSection->SectionVBase, TmpSection->SectionSize, TmpSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+            LouKeMapContinuousMemoryBlockEx((UINT64)TmpSection->SectionPBase, (UINT64)TmpSection->SectionVBase, TmpSection->SectionSize, TmpSection->FrameFlags, (UINT64*)((UINT64)Pml4 - KSpaceBase));
         }
     }
     LouPrint("LouKeVmmCloneSectionToPml() DONE\n");
@@ -408,22 +408,22 @@ void LouKeVmmCommitPrivateSectionVAddress(PVOID VAddress, UINT64 Pml4){
 
     if(CommitSection->Bss){
         PVOID Section = LouAllocatePhysical64UpEx(CommitSection->SectionSize, CommitSection->SectionAlignment);
-        memset((UINT8*)((UINTPTR)Section + GetKSpaceBase()), 0, CommitSection->SectionSize);
+        memset((UINT8*)((UINTPTR)Section + KSpaceBase), 0, CommitSection->SectionSize);
         LouKeMemoryBarrier();
-        LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+        LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - KSpaceBase));
         return;
     }
 
     if(CommitSection->Cow){
         LouKeMemoryBarrier();
-        LouKeMapContinuousMemoryBlockEx((UINT64)CommitSection->SectionPBase, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags & ~(WRITEABLE_PAGE), (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+        LouKeMapContinuousMemoryBlockEx((UINT64)CommitSection->SectionPBase, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags & ~(WRITEABLE_PAGE), (UINT64*)((UINT64)Pml4 - KSpaceBase));
         return;
     }
     
     PVOID Section = LouAllocatePhysical64UpEx(CommitSection->SectionSize, CommitSection->SectionAlignment);
-    memcpy((UINT8*)((UINTPTR)Section + GetKSpaceBase()), CommitSection->InitializedDataCopy, CommitSection->SectionSize);
+    memcpy((UINT8*)((UINTPTR)Section + KSpaceBase), CommitSection->InitializedDataCopy, CommitSection->SectionSize);
     LouKeMemoryBarrier();
-    LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+    LouKeMapContinuousMemoryBlockEx((UINT64)Section, (UINT64)VAddress, CommitSection->SectionSize, CommitSection->FrameFlags, (UINT64*)((UINT64)Pml4 - KSpaceBase));
 }
 
 LOUAPI

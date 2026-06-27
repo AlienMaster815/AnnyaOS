@@ -10,7 +10,7 @@ void LouKeSendPml4ToSections(UINT64* Pml4);
 UINT64 LouKeVmmCreatePmlTable(){
     LouKeSchedDbgPrint("LouKeVmmCreatePmlTable()\n");
     UINT64* Pml4 = (UINT64*)LouGeneralAllocateMemory(KILOBYTE_PAGE);
-    UINT64* Cloner = (UINT64*)(GetCr3() + GetKSpaceBase());
+    UINT64* Cloner = (UINT64*)(GetCr3() + KSpaceBase);
 
     
     
@@ -20,7 +20,7 @@ UINT64 LouKeVmmCreatePmlTable(){
 
     LouKeVmmCloneSectionToPml(Pml4);
     
-    LouKeSendPml4ToSections((UINT64*)((UINT64)Pml4 - GetKSpaceBase()));
+    LouKeSendPml4ToSections((UINT64*)((UINT64)Pml4 - KSpaceBase));
 
     LouKeMemoryBarrier();
     return (UINT64)Pml4;

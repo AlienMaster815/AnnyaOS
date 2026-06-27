@@ -512,7 +512,7 @@ static BOOLEAN MapKernelSpaceAddresses(PVOID Context, PRAT_TRACKER Tracker){
 }
 
 static BOOLEAN MapAllFreeKernelSpaceAddresses(PLOADER_INFORMATION Info){
-    return LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_USABLE_MEMORY);
+    return LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ANY_ATTRIBUTE_MEMORY);
 }
 
 static volatile FORCE_ALIGNMENT(KILOBYTE_PAGE) UINT64 Pml3[512];

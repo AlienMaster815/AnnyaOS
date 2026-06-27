@@ -38,15 +38,15 @@ KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(
         &L1Entry
     );
 
-    UINT64* Tmp = (UINT64*)((UINT64)Pml4Base + GetKSpaceBase());
+    UINT64* Tmp = (UINT64*)((UINT64)Pml4Base + KSpaceBase);
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (uint64_t*)(Tmp[L4Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
-    Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
+    Tmp = (UINT64*)((UINT64)Tmp + KSpaceBase);
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
     Tmp = (uint64_t*)(Tmp[L3Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
-    Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
+    Tmp = (UINT64*)((UINT64)Tmp + KSpaceBase);
 
     if(IsMegabytePage(&Tmp[L2Entry])){
         AlteredVAddress = VAddress & ~(MEGABYTE_PAGE - 1);
@@ -58,7 +58,7 @@ KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(
 
     Tmp = (uint64_t*)(Tmp[L2Entry] & ~(PAGE_TABLE_ALLIGNMENT - 1));
     if(!Tmp){return STATUS_UNSUCCESSFUL;}
-    Tmp = (UINT64*)((UINT64)Tmp + GetKSpaceBase());
+    Tmp = (UINT64*)((UINT64)Tmp + KSpaceBase);
 
     AlteredVAddress = VAddress & ~(KILOBYTE_PAGE - 1);
     AddressToPageOffset = VAddress - AlteredVAddress;

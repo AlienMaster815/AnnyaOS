@@ -49,6 +49,8 @@ typedef struct _LOADER_RAT_MBR_CHUNK{
 }LOADER_RAT_MBR_CHUNK, * PLOADER_RAT_MBR_CHUNK;
 
 typedef struct _LOADER_INFORMATION{
+    UINT64                  RsdpPointer;
+    UINT64                  RsdpVersion;
     UINT64                  LoaderCpuFeatures;
     UINT64                  TscCount;
     SIZE                    RamSize;

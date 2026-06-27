@@ -51,7 +51,8 @@ typedef struct _BOOTVID_BITMAP{
 KERNEL_EXPORT 
 LOUSTATUS 
 LouKeGetBootFrameBuffer(
-	struct multiboot_tag_framebuffer_common** pBootGraphics
+	PLOADER_FB_MEMORY_MAP*  pBootGraphics,
+    SIZE*                   FbCount 
 );
 
 LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer);

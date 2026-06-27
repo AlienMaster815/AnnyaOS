@@ -3,6 +3,20 @@
 #include "cstdlib.h"
 #include "cstdint.h"
 
+struct rsdp_v1 {
+    char signature[8];      // Must be "RSD PTR "
+    uint8_t checksum;
+    char oem_id[6];
+    uint8_t revision;     
+    uint32_t rsdt_address;
+} __attribute__((packed));
+
+
+LIMINE_REQUEST struct limine_rsdp_request rsdp_request = {
+    .id = LIMINE_RSDP_REQUEST_ID,
+    .revision = 0
+};
+
 LIMINE_REQUEST struct limine_hhdm_request hhdm_request = {
     .id = LIMINE_HHDM_REQUEST_ID,
     .revision = 0
@@ -233,11 +247,22 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
     }
 
     if(efi_system_table_request.response){
+        if((UINTPTR)efi_system_table_request.response->address > KSpaceBase){
+            efi_system_table_request.response->address = LimineGetPhysicalAddress(efi_system_table_request.response->address);
+        }
         Info->EfiSystemTable = efi_system_table_request.response->address;
     }
 
     if(tsc_frequency_request.response){
         Info->TscCount = tsc_frequency_request.response->frequency;
+    }
+
+    if(rsdp_request.response){
+        struct rsdp_v1* Rsdp = (struct rsdp_v1*)rsdp_request.response->address;
+        Info->RsdpPointer = (UINT64)LimineGetPhysicalAddress((PVOID)Rsdp);
+        if(Rsdp->revision){
+            Info->RsdpVersion = Rsdp->revision;
+        }
     }
 
     for(SIZE i = 0; i < MapCount; i++){

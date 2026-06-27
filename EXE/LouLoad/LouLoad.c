@@ -120,7 +120,7 @@ LOUSTATUS LouLoadStartLoader(
     }
 
 
-    UINT64 KernelStack = (UINT64)LouKeRatAllocatePhysicalAddress(16 * KILOBYTE, 16) + KSpaceBase;
+    UINT64 KernelStack = ((UINT64)LouKeRatAllocatePhysicalAddress(16 * KILOBYTE, 16) + (16 * KILOBYTE)) + KSpaceBase;
     LoaderData.KernelStackHandle = (KHANDLE)KernelStack;
 
     MsvcAbiJump((UINT64)&LoaderData, KernelStack, KernelEntry);

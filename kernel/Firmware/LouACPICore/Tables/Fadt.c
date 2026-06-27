@@ -8,14 +8,14 @@ void LouKeInitializeFixedAcpiDescriptionTable(void* TableBase){
     uint64_t FirmwareControlAddress = 0;
     uint64_t DifferentialSystemsAdddress = 0;
     if((LouKeAcpiGetVersion() > 1) && (Fadt->XFirmwareControl)){
-        FirmwareControlAddress = Fadt->XFirmwareControl + GetKSpaceBase();
+        FirmwareControlAddress = Fadt->XFirmwareControl + KSpaceBase;
     }else {
-        FirmwareControlAddress = Fadt->FacsTablePhyPointer + GetKSpaceBase();
+        FirmwareControlAddress = Fadt->FacsTablePhyPointer + KSpaceBase;
     }
     if((LouKeAcpiGetVersion() > 1) && (Fadt->XDsdtPhyAddress)){
-        DifferentialSystemsAdddress = Fadt->XDsdtPhyAddress + GetKSpaceBase();
+        DifferentialSystemsAdddress = Fadt->XDsdtPhyAddress + KSpaceBase;
     }else {
-        DifferentialSystemsAdddress = Fadt->DsdtTablePhyPointer + GetKSpaceBase();
+        DifferentialSystemsAdddress = Fadt->DsdtTablePhyPointer + KSpaceBase;
     }
 
     //log tables and initialize them

@@ -23,7 +23,7 @@ ACPI_STATUS AcpiOsTerminate(){
 }
 
 ACPI_PHYSICAL_ADDRESS AcpiOsGetRootPointer(){
-    return (ACPI_PHYSICAL_ADDRESS)LouKeGetRsdp() - GetKSpaceBase();
+    return (ACPI_PHYSICAL_ADDRESS)LouKeGetRsdp() - KSpaceBase;
 }
 
 ACPI_STATUS AcpiOsPredefinedOverride(
@@ -56,7 +56,7 @@ void* AcpiOsMapMemory(
     ACPI_PHYSICAL_ADDRESS   PhyAddress,
     ACPI_SIZE               Length
 ){
-    return (void*)((UINT64)PhyAddress + GetKSpaceBase());
+    return (void*)((UINT64)PhyAddress + KSpaceBase);
 }
 
 void AcpiOsUnmapMemory(

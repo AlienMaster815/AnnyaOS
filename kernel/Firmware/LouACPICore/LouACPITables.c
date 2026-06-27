@@ -75,8 +75,8 @@ void LouKeInitializeLouACPITable(void* TableBase){
     }
 
     PTABLE_DESCRIPTION_HEADER TmpHeader = 0;
-    if((uint64_t)((uintptr_t)TableBase - GetKSpaceBase()) >= (65 * MEGABYTE)){ //if system is in the memory allocations area then map it
-        TmpHeader = (PTABLE_DESCRIPTION_HEADER)(uint64_t)((uintptr_t)TableBase - GetKSpaceBase());
+    if((uint64_t)((uintptr_t)TableBase - KSpaceBase) >= (65 * MEGABYTE)){ //if system is in the memory allocations area then map it
+        TmpHeader = (PTABLE_DESCRIPTION_HEADER)(uint64_t)((uintptr_t)TableBase - KSpaceBase);
         EnforceSystemMemoryMap((uint64_t)TmpHeader, ((PTABLE_DESCRIPTION_HEADER)TableBase)->Length);
     }
     

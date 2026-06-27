@@ -767,8 +767,6 @@ PLOU_PFN_TABLE_ENTRY LouKePageToPFN(
 void* LouKeMemReMap(void* Location, size_t Size, uint64_t Flags);
 void  LouKeMemReleaseReMap(void* Address);
 
-uint64_t GetAllocationBlockBase(uint64_t Address);
-
 void LouKeFreePhy32(void*);
 
 #ifndef _KERNEL_MODULE_
