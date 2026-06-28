@@ -106,24 +106,22 @@ void kmain() {
     LouKeReloadCR3();
 
     //set up RAT Mbr
-    PLOADER_RAT_MBR_CHUNK RatMbr = LoaderSetUpRatMbr();
+    PLOADER_RAT_MBR_CHUNK RatMbr = LoaderSetUpRatMbr(&LoaderInformation);
     if(!RatMbr){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
     LoaderInformation.RatMbr = RatMbr;
 
-    //get everything else
-    BOOLEAN LockedAndLoaded = LoaderInitializeLoaderInformation(&LoaderInformation);
+    BOOLEAN LockedAndLoaded = InitializeRatSubsystem(&LoaderInformation);
     if(!LockedAndLoaded){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
 
-
-    LockedAndLoaded = InitializeRatSubsystem(&LoaderInformation);
+    LockedAndLoaded = LoaderInitializeLoaderInformation(&LoaderInformation);
     if(!LockedAndLoaded){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
-
+        
     LoaderInformation.BootModulesCount = LoaderInformation.LoadedModulesCount - 2;
     LoaderInformation.BootModulesBase = &LoaderInformation.LoadedModules[2];
 
@@ -135,31 +133,31 @@ void kmain() {
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(LoaderBase);
 
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, CFI_HEADER_LOUCOFF_SIGNATURE, 4)){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
 
     if(ImageHeader->OptionalHeader.PE64.Subsystem != CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
 
     LoaderInformation.LoaderHandle = (KHANDLE)LoaderAllocateSpace(ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageHeader->OptionalHeader.PE64.SectionAlignment);
     if(!LoaderInformation.LoaderHandle){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
 
     UnpackLoader(&ImageHeader, LoaderInformation.LoaderHandle, LoaderBase);
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, CFI_HEADER_LOUCOFF_SIGNATURE, 4)){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
 
     if(ImageHeader->OptionalHeader.PE64.Subsystem != CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
 
     ApplyLoaderRelocation(ImageHeader, LoaderInformation.LoaderHandle);
 
     if(!ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint){
-        asm("INT $0");
+        DEBUG_TRAP;
     }
     
     UINT64 LoaderEntry = (UINT64)(ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)LoaderInformation.LoaderHandle); 

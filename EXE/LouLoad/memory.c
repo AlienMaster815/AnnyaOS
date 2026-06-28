@@ -588,7 +588,7 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
     }
 
     Info->LoadedModules = (PLOADER_MEMORY_MAP)((UINT64)Info->LoadedModules + KSpaceBase);
-    Info->FrameBuffers = ((PLOADER_FB_MEMORY_MAP)(UINT64)Info->FrameBuffers + KSpaceBase);
+    Info->FrameBuffers = (PLOADER_FB_MEMORY_MAP)((UINT64)Info->FrameBuffers + KSpaceBase);
     Info->RatMbr = (PLOADER_RAT_MBR_CHUNK)((UINT64)Info->RatMbr + KSpaceBase);
 
     LouKeMemoryBarrier();

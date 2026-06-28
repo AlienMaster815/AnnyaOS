@@ -1,18 +1,14 @@
 #include "BootVid.h"
 
 static PTTF_OBJECT TerminalFont = 0x00;
-static int CurrentX = 0;
-static int CurrentY = 0;
-extern UINT32* Canvas;
-extern INT32 Width;
-extern INT32 Height;
+extern PFB_BOOT_RENDERER BootFbRenderers;
+extern SIZE gFbCount;
 
-
-static void BootVidScrollTerminal(){
-    for(SIZE y = TERMINAL_INCY; y < Height; y++){
-        memcpy(&Canvas[((y - TERMINAL_INCY) * Width)], &Canvas[(y * Width)], Width * sizeof(UINT32));
+static void BootVidScrollTerminal(PFB_BOOT_RENDERER Renderer){
+    for(SIZE y = TERMINAL_INCY; y < Renderer->Height; y++){
+        memcpy(&Renderer->Canvas[((y - TERMINAL_INCY) * (Renderer->Pitch / 4))], &Renderer->Canvas[(y * (Renderer->Pitch / 4))], Renderer->Width * sizeof(UINT32));
     }
-    BootVidScrollTracking();
+    BootVidScrollTracking(Renderer);
 }
 
 void BootVidRegisterBootFont(
@@ -22,46 +18,50 @@ void BootVidRegisterBootFont(
 }
 
 static void BootVidEndofData(){
-    BootVidModifyTracking(CurrentY, CurrentX);
-    BootVidSyncScreenWithTracking();
+    for(SIZE i = 0 ; i < gFbCount; i++){
+        BootVidModifyTracking(BootFbRenderers[i].CurrentY, BootFbRenderers[i].CurrentX, &BootFbRenderers[i]);
+        BootVidSyncScreenWithTracking(&BootFbRenderers[i]);
+    }
 }
 
 
 static int BootVidPrintAsciiCharecter(CHAR AsciiCharecter){
-    if((AsciiCharecter == '\n') || ((CurrentX + (TerminalFont->AvgWidth * 3)) >= Width)){
-        if((CurrentY + (TERMINAL_INCY * 3)) <= Height){
-            CurrentY += TERMINAL_INCY;
-            CurrentX = 0;
-            if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){
-                return 0x00;
-            }
-        }else{
-            BootVidScrollTerminal();
-            CurrentX = 0;
-            if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){
-                return 0x00;
+    for(SIZE i = 0 ; i < gFbCount; i++){
+        if((AsciiCharecter == '\n') || ((BootFbRenderers[i].CurrentX + (TerminalFont->AvgWidth * 3)) >= BootFbRenderers[i].Width)){
+            if((BootFbRenderers[i].CurrentY + (TERMINAL_INCY * 3)) <= BootFbRenderers[i].Height){
+                BootFbRenderers[i].CurrentY += TERMINAL_INCY;
+                BootFbRenderers[i].CurrentX = 0;
+                if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){
+                    return 0x00;
+                }
+            }else{
+                BootVidScrollTerminal(&BootFbRenderers[i]);
+                BootFbRenderers[i].CurrentX = 0;
+                if((AsciiCharecter == '\n') || (AsciiCharecter == ' ')){
+                    return 0x00;
+                }
             }
         }
-    }
 
-    if(AsciiCharecter == ' '){
-        CurrentX += TerminalFont->AvgWidth;
-        return 0x00;
-    }
+        if(AsciiCharecter == ' '){
+            BootFbRenderers[i].CurrentX += TerminalFont->AvgWidth;
+            return 0x00;
+        }
 
-    if(!TerminalFont->AsciiGlyphData[(SIZE)AsciiCharecter]){
-        return 0x00; 
-    }
-    PBOOTVID_BITMAP Bitmap = (PBOOTVID_BITMAP)TerminalFont->AsciiGlyphData[(SIZE)AsciiCharecter]->Bitmap;
-    if(!Bitmap){
-        return 0x00;
-    }
+        if(!TerminalFont->AsciiGlyphData[(SIZE)AsciiCharecter]){
+            return 0x00; 
+        }
+        PBOOTVID_BITMAP Bitmap = (PBOOTVID_BITMAP)TerminalFont->AsciiGlyphData[(SIZE)AsciiCharecter]->Bitmap;
+        if(!Bitmap){
+            return 0x00;
+        }
 
-    BootVidPlaceBitmap(Bitmap, CurrentX, CurrentY);
-    
-    CurrentX += TerminalFont->AvgWidth;
+        BootVidPlaceBitmap(Bitmap, BootFbRenderers[i].CurrentX, BootFbRenderers[i].CurrentY, &BootFbRenderers[i]);
 
-    BootVidModifyTracking(CurrentY, CurrentX);
+        BootFbRenderers[i].CurrentX += TerminalFont->AvgWidth;
+
+        BootVidModifyTracking(BootFbRenderers[i].CurrentY, BootFbRenderers[i].CurrentX, &BootFbRenderers[i]);
+    }
 
     return 0x00;
 }
@@ -85,10 +85,13 @@ static LOUSINE_ECS_DRIVER BootVidEcsDriver = {
 LOUSTATUS 
 BootVidInitializeTerminalDriver(){
     LOUSTATUS Status;
+    for(SIZE i = 0 ; i < gFbCount; i++){
+        BootVidInitializeArtifactTracking(&BootFbRenderers[i]);
+    }
     
-    BootVidInitializeArtifactTracking();
-
     Status = LouKeRegisterEcsDriver(&BootVidEcsDriver);
+
+    LouPrint("BootVidInitializeTerminalDriver() STATUS_SUCCESS\n");
 
     return Status;
 }
@@ -96,10 +99,13 @@ BootVidInitializeTerminalDriver(){
 void
 BootVidDeInitializeTerminalDriver(){
     LouKeUnRegisterEcsDriver(&BootVidEcsDriver);
-    BootRenderSetScreenColorEx(SET_RGB(0, 0, 0));
-    BootRenderSyncScreen();
+    for(SIZE i = 0 ; i < gFbCount; i++){
+        BootRenderSetScreenColorEx(SET_RGB(0, 0, 0), &BootFbRenderers[i]);
+        BootRenderSyncScreen(&BootFbRenderers[i]);
+        LouKeFree((PVOID)BootFbRenderers[i].Canvas);
+        LouKeFree((PVOID)BootFbRenderers[i].LineSystem);
+    }
     TtfDeInitializeFile(TerminalFont);
     LouPrint("BOOTVID.SYS:Freeing Canvas Buffer\n");
-    LouKeFree((PVOID)Canvas);
     LouPrint("BOOTVID.SYS:Done Freeing Canvas Buffer\n");
 }

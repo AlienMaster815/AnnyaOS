@@ -299,7 +299,7 @@ LOUSTATUS ConfigureConfigurationStructure(PCFI_OBJECT CfiObject){
 void StartupConfigureImportTable(KHANDLE KernelHandle){
     
     UINTPTR ModuleStart = (UINTPTR)KernelHandle;
-    PCOFF_IMAGE_HEADER ImageHeader = (PCOFF_IMAGE_HEADER)ModuleStart;
+    PCOFF_IMAGE_HEADER ImageHeader = (PCOFF_IMAGE_HEADER)CoffGetImageHeader(ModuleStart);
 
     if(!ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_IMPORT_TABLE].VirtualAddress){
         return;
@@ -358,7 +358,7 @@ void StartupConfigureImportTable(KHANDLE KernelHandle){
 void StartupConfigureExportTable(KHANDLE KernelHandle){
 
     UINTPTR ModuleStart = (UINTPTR)KernelHandle;
-    PCOFF_IMAGE_HEADER ImageHeader = (PCOFF_IMAGE_HEADER)ModuleStart;
+    PCOFF_IMAGE_HEADER ImageHeader = (PCOFF_IMAGE_HEADER)CoffGetImageHeader(ModuleStart);
 
     if(!ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_EXPORT_TABLE].VirtualAddress){
         return;

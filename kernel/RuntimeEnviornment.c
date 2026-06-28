@@ -8,8 +8,7 @@ void StartupConfigureImportTable(KHANDLE KernelHandle);
 
 void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle){
 
-    LouPrint("Hello World\n");
-    while(1);
+
     StartupConfigureExportTable(KernelHandle);
 
     size_t StrLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x");
@@ -55,4 +54,6 @@ void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle){
 
     StartupConfigureImportTable(KernelHandle);
 
+    LouPrint("Hello World\n");
+    while(1);
 }

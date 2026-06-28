@@ -379,11 +379,12 @@ void LouOsKrnlStart(
     LouKeInitializeLouACPISubsystem();
     
     InitializeDebuggerComunications();
-    while(1);
 
     AdvancedLousineKernelInitialization();
 
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
+
+    while(1);
 
     PciHalScanBootDevices();
          

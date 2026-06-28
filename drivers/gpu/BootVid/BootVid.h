@@ -31,6 +31,18 @@ typedef struct _BOOTVID_BITMAP{
     UINT32*     Map;
 }BOOTVID_BITMAP, * PBOOTVID_BITMAP;
 
+typedef struct _FB_BOOT_RENDERER{
+    UINT32*                 Canvas;
+    SIZE*                   LineSystem;
+    SIZE                    TotalLines;
+    INT32                   Width;
+    INT32                   Height;
+    INT32                   Pitch;
+    INT32                   CurrentX;
+    INT32                   CurrentY;
+    PBOOTVID_FRAMEBUFFER    Fb;
+}FB_BOOT_RENDERER, * PFB_BOOT_RENDERER;
+
 #define BLUE_MASK       (0xFF)
 #define GREEN_MASK      (0xFF << 8)
 #define RED_MASK        (0xFF << 16)
@@ -55,15 +67,15 @@ LouKeGetBootFrameBuffer(
     SIZE*                   FbCount 
 );
 
-LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer);
+LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer, SIZE FbCount);
 
-void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb);
-void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B);
-void BootRenderSyncScreen();
+void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb, PFB_BOOT_RENDERER Renderer);
+void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B, PFB_BOOT_RENDERER Renderer);
+void BootRenderSyncScreen(PFB_BOOT_RENDERER Renderer);
 void BootRenderDrawLineEx(
     int     X1, int Y1,
     int     X2, int Y2,
-    UINT32  Color
+    UINT32  Color, PFB_BOOT_RENDERER Renderer
 );
 
 void BootRenderDrawLine(
@@ -71,7 +83,7 @@ void BootRenderDrawLine(
     int     X2, int Y2,
     UINT8   R,
     UINT8   G,
-    UINT8   B
+    UINT8   B, PFB_BOOT_RENDERER Renderer
 );
 
 LOUSTATUS 
@@ -114,7 +126,7 @@ void
 BootVidPlaceBitmap(
     PBOOTVID_BITMAP Bitmap,
     int             x,
-    int             y
+    int             y, PFB_BOOT_RENDERER Renderer
 );
 
 void 
@@ -123,12 +135,12 @@ BootVidTrimBitmap(
     UINT32          Background
 );
 
-void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B);
-void BootRenderSetScreenColorEx(UINT32 Color);
+void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B, PFB_BOOT_RENDERER Renderer);
+void BootRenderSetScreenColorEx(UINT32 Color, PFB_BOOT_RENDERER Renderer);
 
-void BootVidInitializeArtifactTracking();
+void BootVidInitializeArtifactTracking(PFB_BOOT_RENDERER Renderer);
 void BootVidSyncScreenWithTracking();
-void BootVidModifyTracking(SIZE Y, SIZE LineWidth);
-void BootVidScrollTracking();
+void BootVidModifyTracking(SIZE Y, SIZE LineWidth, PFB_BOOT_RENDERER Renderer);
+void BootVidScrollTracking(PFB_BOOT_RENDERER Renderer);
 
 #endif

@@ -1,46 +1,55 @@
 #include "BootVid.h"
 
-PBOOTVID_FRAMEBUFFER BootBuffer = 0;
+static PBOOTVID_FRAMEBUFFER BootBuffer = 0;
+PFB_BOOT_RENDERER BootFbRenderers = 0x00;
 
-UINT32* Canvas = 0;
-INT32 Width = 0;
-INT32 Height = 0;
-
-LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer){
+LOUSTATUS BootVidRegisterBootFrameBuffer(PBOOTVID_FRAMEBUFFER FrameBuffer, SIZE FbCount){
     if(BootBuffer){
         return STATUS_UNSUCCESSFUL;
     }
     BootBuffer = FrameBuffer;
-    Canvas = (UINT32*)LouKeMallocEx(BootBuffer->FramebufferSize, KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
-    Width = BootBuffer->Width;
-    Height = BootBuffer->Height;
+    BootFbRenderers = LouKeMallocArray(FB_BOOT_RENDERER, FbCount, KERNEL_GENERIC_MEMORY);
+    if(!BootFbRenderers){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    for(SIZE i = 0; i < FbCount; i++){
+        BootFbRenderers[i].Canvas = LouKeMallocEx(FrameBuffer[i].FramebufferSize, KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY);
+        if(!BootFbRenderers[i].Canvas){
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
+        BootFbRenderers[i].Width = FrameBuffer[i].Width;
+        BootFbRenderers[i].Height = FrameBuffer[i].Height;
+        BootFbRenderers[i].Pitch = FrameBuffer[i].Pitch;
+        BootFbRenderers[i].Fb = &FrameBuffer[i];
+    }
+
     return STATUS_SUCCESS;
 }
 
 UINT32 BootRenderGetPixel(
-    INT32 x, INT32 y
+    INT32 x, INT32 y, PFB_BOOT_RENDERER Renderer
 ){
-    if((!BootBuffer) || (x >= Width) || (y >= Height)){
+    if((!BootBuffer) || (x >= Renderer->Width) || (y >= Renderer->Height)){
         return 0xFFFFFFFF;
     }
-    return Canvas[x + y * Width]; 
+    return Renderer->Canvas[x + y * (Renderer->Pitch / 4)]; 
 }
 
-void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb){
-    if((!BootBuffer) || (x >= Width) || (y >= Height)){
+void BootRenderPutPixelEx(INT32 x, INT32 y, UINT32 Rgb, PFB_BOOT_RENDERER Renderer){
+    if((!BootBuffer) || (x >= Renderer->Width) || (y >= Renderer->Height)){
         return;
     }
-    Canvas[x + y * Width] = Rgb;
+    Renderer->Canvas[x + y * (Renderer->Pitch / 4)] = Rgb;
 }
 
-void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B){
-    BootRenderPutPixelEx(x, y, SET_RGB(R, G, B));
+void BootRenderPutPixel(INT32 x, INT32 y, UINT8 R, UINT8 G, UINT8 B, PFB_BOOT_RENDERER Renderer){
+    BootRenderPutPixelEx(x, y, SET_RGB(R, G, B), Renderer);
 }
 
 static size_t i = 0;
 
-void BootRenderSyncScreen(){
-    memcpy((PVOID)BootBuffer->RawData, (PVOID)Canvas, BootBuffer->FramebufferSize);
+void BootRenderSyncScreen(PFB_BOOT_RENDERER Renderer){
+    memcpy((PVOID)Renderer->Fb->RawData, (PVOID)Renderer->Canvas, Renderer->Fb->FramebufferSize);
 }
 
 void BootRenderSwap(int* A, int* B){
@@ -91,28 +100,28 @@ UINT32 BootRenderGetColorBrightness(UINT32 Color, float Brightness) {
     return SET_RGB((UINT8)NewR, (UINT8)NewG, (UINT8)NewB);
 }
 
-void BootRenderPutPixelBrightnesEx(int x, int y, UINT32 Color, float Brightness){
+void BootRenderPutPixelBrightnesEx(int x, int y, UINT32 Color, float Brightness, PFB_BOOT_RENDERER Renderer){
     Color = BootRenderGetColorBrightness(Color, Brightness);
-    BootRenderPutPixelEx(x, y, Color);
+    BootRenderPutPixelEx(x, y, Color, Renderer);
 }
 
-void BootRenderPutPixelBrightnes(int x, int y, UINT8 R, UINT8 G, UINT8 B, float Brightness){
-    BootRenderPutPixelBrightnesEx(x, y, SET_RGB(R, G, B), Brightness);
+void BootRenderPutPixelBrightnes(int x, int y, UINT8 R, UINT8 G, UINT8 B, float Brightness, PFB_BOOT_RENDERER Renderer){
+    BootRenderPutPixelBrightnesEx(x, y, SET_RGB(R, G, B), Brightness, Renderer);
 }
 
-void BootRenderDrawLineEx(int x1, int y1, int x2, int y2, UINT32 Color) {
+void BootRenderDrawLineEx(int x1, int y1, int x2, int y2, UINT32 Color, PFB_BOOT_RENDERER Renderer) {
     if (x1 == x2 && y1 == y2) {
-        BootRenderPutPixelEx(x1, y1, Color);
+        BootRenderPutPixelEx(x1, y1, Color, Renderer);
         return;
     }
     else if(x1 == x2){
         for(int i = MIN(y1, y2); i <= MAX(y1, y2); i++){
-            BootRenderPutPixelEx(x1, i, Color);
+            BootRenderPutPixelEx(x1, i, Color, Renderer);
         }
         return;
     }else if(y1 == y2){
         for(int i = MIN(x1, x2); i <= MAX(x1, x2); i++){
-            BootRenderPutPixelEx(i, y1, Color);
+            BootRenderPutPixelEx(i, y1, Color, Renderer);
         }
         return;
     }
@@ -124,7 +133,7 @@ void BootRenderDrawLineEx(int x1, int y1, int x2, int y2, UINT32 Color) {
     int err = dx + dy;
 
     while (1) {
-        BootRenderPutPixelEx(x1, y1, Color);
+        BootRenderPutPixelEx(x1, y1, Color, Renderer);
         if (x1 == x2 && y1 == y2) break;
         int e2 = 2 * err;
         if (e2 >= dy) { 
@@ -141,21 +150,22 @@ void BootRenderDrawLineEx(int x1, int y1, int x2, int y2, UINT32 Color) {
 void BootRenderDrawAaLineEx(
     int     X1, int Y1,
     int     X2, int Y2,
-    UINT32  Color
+    UINT32  Color,
+    PFB_BOOT_RENDERER Renderer
 ){
 
     if((X1 == X2) && (Y1 == Y2)){
-        BootRenderPutPixelEx(X1, Y1, Color);
+        BootRenderPutPixelEx(X1, Y1, Color, Renderer);
         return;
     }
     else if(X1 == X2){
         for(int i = MIN(Y1, Y2); i <= MAX(Y1, Y2); i++){
-            BootRenderPutPixelEx(X1, i, Color);
+            BootRenderPutPixelEx(X1, i, Color, Renderer);
         }
         return;
     }else if(Y1 == Y2){
         for(int i = MIN(X1, X2); i <= MAX(X1, X2); i++){
-            BootRenderPutPixelEx(i, Y1, Color);
+            BootRenderPutPixelEx(i, Y1, Color, Renderer);
         }
         return;
     }
@@ -187,13 +197,15 @@ void BootRenderDrawAaLineEx(
                 BootRenderIntegerPartOfNumber(IntersectY),
                 x,
                 Color,
-                BootRenderRoundFloatPartOfNumber(IntersectY)
+                BootRenderRoundFloatPartOfNumber(IntersectY),
+                Renderer
             );
             BootRenderPutPixelBrightnesEx(
                 BootRenderIntegerPartOfNumber(IntersectY) + 1,
                 x,
                 Color,
-                BootRenderFloatPartOfNumber(IntersectY)
+                BootRenderFloatPartOfNumber(IntersectY),
+                Renderer
             );
             IntersectY += Gradient;
         }
@@ -204,13 +216,15 @@ void BootRenderDrawAaLineEx(
                 x, 
                 BootRenderIntegerPartOfNumber(IntersectY), 
                 Color, 
-                BootRenderRoundFloatPartOfNumber(IntersectY)
+                BootRenderRoundFloatPartOfNumber(IntersectY),
+                Renderer
             );
             BootRenderPutPixelBrightnesEx(
                 x, 
                 BootRenderIntegerPartOfNumber(IntersectY) + 1,
                 Color, 
-                BootRenderFloatPartOfNumber(IntersectY)
+                BootRenderFloatPartOfNumber(IntersectY),
+                Renderer
             );
             IntersectY += Gradient;
         }
@@ -222,9 +236,10 @@ void BootRenderDrawLine(
     int     X2, int Y2,
     UINT8   R,
     UINT8   G,
-    UINT8   B
+    UINT8   B,
+    PFB_BOOT_RENDERER Renderer
 ){
-    BootRenderDrawLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B));
+    BootRenderDrawLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B), Renderer);
 }
 
 void BootRenderDrawAaLine(
@@ -232,19 +247,20 @@ void BootRenderDrawAaLine(
     int     X2, int Y2,
     UINT8   R,
     UINT8   G,
-    UINT8   B
+    UINT8   B,
+    PFB_BOOT_RENDERER Renderer
 ){
-    BootRenderDrawAaLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B));
+    BootRenderDrawAaLineEx(X1, Y1, X2, Y2, SET_RGB(R,G,B), Renderer);
 }
 
-void BootRenderSetScreenColorEx(UINT32 Color){
-    for(SIZE i = 0 ; i < (BootBuffer->FramebufferSize / sizeof(UINT32)); i++){
-        Canvas[i] = Color;
+void BootRenderSetScreenColorEx(UINT32 Color, PFB_BOOT_RENDERER Renderer){
+    for(SIZE i = 0 ; i < (Renderer->Fb->FramebufferSize / sizeof(UINT32)); i++){
+        Renderer->Canvas[i] = Color;
     }
 }
 
-void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B){
-    BootRenderSetScreenColorEx(SET_RGB(R, G, B));
+void BootRenderSetScreenColor(UINT8 R, UINT8 G, UINT8 B, PFB_BOOT_RENDERER Renderer){
+    BootRenderSetScreenColorEx(SET_RGB(R, G, B), Renderer);
 }
 
 DRIVER_EXPORT

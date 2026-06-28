@@ -1,7 +1,7 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include "BootVid.h"
 
-static SIZE FbCount = 0;
+SIZE gFbCount = 0;
 static PLOADER_FB_MEMORY_MAP BootGraphics = 0x00;
 static BOOLEAN BootVidInitialized = false;
 
@@ -15,42 +15,35 @@ BootVidEntry(){
     PVOID DefaultFontKey;
     PVOID DefaultFontFile;
     UINT32 ScalerType;
-
     LouPrint("BOOTVID.SYS:BootVidEntry()\n");
-    while(1);
-    /*Status = LouKeGetBootFrameBuffer(&BootGraphics, &FbCount);
+
+    Status = LouKeGetBootFrameBuffer(&BootGraphics, &gFbCount);
     if(Status != STATUS_SUCCESS){
         LouPrint("BOOTVID.SYS:ERROR Unable To Get Boot Frame Buffer\n");
         return STATUS_SUCCESS;
     }
 
-    if(!BootGraphics->framebuffer_addr){
-        LouPrint("BOOTVID.SYS:ERROR Vesa/Gop Never Set The Frame Buffer\n");
-        return STATUS_SUCCESS;
+    LouPrint("BootGraphics:%h\n", (UINT64)BootGraphics);
+
+    PBOOTVID_FRAMEBUFFER NewBuffer = LouKeMallocArray(BOOTVID_FRAMEBUFFER, gFbCount, USER_GENERIC_MEMORY);
+    for(SIZE i = 0 ; i < gFbCount; i++){
+        NewBuffer[i].Width = BootGraphics[i].Tracker.Width;
+	    NewBuffer[i].Height = BootGraphics[i].Tracker.Height;
+        NewBuffer[i].Bpp = BootGraphics[i].Tracker.Bpp;
+        NewBuffer[i].Pitch = BootGraphics[i].Tracker.Pitch;
+        NewBuffer[i].FramebufferSize = BootGraphics[i].Tracker.Pitch * BootGraphics[i].Tracker.Height;
+        NewBuffer[i].DrsdDevice = false;
+        SIZE Offset = BootGraphics[i].Tracker.Base & (KILOBYTE_PAGE - 1);
+
+
+        NewBuffer->UserBuffer = LouVMallocEx(ROUND_UP64(NewBuffer[i].FramebufferSize + Offset, KILOBYTE_PAGE), KILOBYTE_PAGE);
+        LouKeMapContinuousMemoryBlock(BootGraphics[i].Tracker.Base - Offset, (UINT64)NewBuffer[i].UserBuffer, ROUND_UP64(NewBuffer[i].FramebufferSize + Offset, KILOBYTE_PAGE), USER_WRITE_COMBINE_MEMORY);
+        NewBuffer[i].UserBuffer = (UINT32*)((UINTPTR)NewBuffer[i].UserBuffer + Offset);
+        NewBuffer[i].RawData = (UINT8*)NewBuffer[i].UserBuffer;
+        
     }
 
-    LouPrint("BOOTVID.SYS:Using Framebuffer:%h\n", BootGraphics); 
-    if(!BootGraphics->framebuffer_addr){
-        LouPrint("BOOTVID.SYS:ERROR No Framebuffer\n");
-        return STATUS_UNSUCCESSFUL;
-    }
-
-    PBOOTVID_FRAMEBUFFER NewBuffer = LouKeMallocType(BOOTVID_FRAMEBUFFER, USER_GENERIC_MEMORY);
-    NewBuffer->Width = BootGraphics->framebuffer_width;
-	NewBuffer->Height = BootGraphics->framebuffer_height;
-    NewBuffer->Bpp = BootGraphics->framebuffer_bpp;
-    NewBuffer->FramebufferSize = NewBuffer->Width * NewBuffer->Height * (NewBuffer->Bpp / 8);
-    NewBuffer->DrsdDevice = false;
-
-    //Fallback for VGA emulation if the device is in VGA Emulation
-    EnforceSystemMemoryMap(BootGraphics->framebuffer_addr, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE));
-    EnforceSystemMemoryMap(BootGraphics->framebuffer_addr + BootGraphics->framebuffer_addr + LouKeGetKSpaceBase(), ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE));
-
-    NewBuffer->UserBuffer = LouVMallocEx(ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), KILOBYTE_PAGE);
-    LouKeMapContinuousMemoryBlock(BootGraphics->framebuffer_addr, (UINT64)NewBuffer->UserBuffer, ROUND_UP64(NewBuffer->FramebufferSize, KILOBYTE_PAGE), USER_WRITE_COMBINE_MEMORY);
-    NewBuffer->RawData = (UINT8*)NewBuffer->UserBuffer;
-
-    Status = BootVidRegisterBootFrameBuffer(NewBuffer);
+    Status = BootVidRegisterBootFrameBuffer(NewBuffer, gFbCount);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
@@ -88,9 +81,10 @@ BootVidEntry(){
 
     BootVidInitializeTerminalDriver();
 
-    BootVidInitialized = true;*/
+    BootVidInitialized = true;
 
     LouPrint("BOOTVID.SYS:BootVidEntry():STATUS_SUCCESS\n");
+    while(1);
 
     return STATUS_SUCCESS;
 }

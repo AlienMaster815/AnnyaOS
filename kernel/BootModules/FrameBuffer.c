@@ -1,14 +1,14 @@
 #include <LouAPI.h>
 
 static SIZE gFramebuffers = 0;
-static PLOADER_FB_MEMORY_MAP gFbMaps;
+static PLOADER_FB_MEMORY_MAP gFbMaps = 0x00;
 
 void InitializeFrameBuffer(
     PLOADER_FB_MEMORY_MAP   FbMaps,
     SIZE                    Framebuffers
-){
-    gFramebuffers = Framebuffers;
-    gFbMaps = FbMaps;
+){	
+	gFramebuffers = Framebuffers;
+	gFbMaps = FbMaps;
 }
 
 KERNEL_EXPORT 

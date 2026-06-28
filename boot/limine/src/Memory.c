@@ -134,20 +134,29 @@ PVOID LimineGetPhysicalAddress(PVOID Address) {
     return (PVOID)(PhysicalBase + PageOffset);
 }
 
-PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(){
+PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(PLOADER_INFORMATION Info){
     if(!memmap_request.response || !module_request.response){
         return 0x00;
     }
     SIZE MapCount = memmap_request.response->entry_count;
-    SIZE AllocationSizeNeeded = GetStructureSize(LOADER_RAT_MBR_CHUNK, Entries, MapCount);
+    SIZE AllocationSizeNeeded = ROUND_UP64(GetStructureSize(LOADER_RAT_MBR_CHUNK, Entries, MapCount), GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK));
     PLOADER_RAT_MBR_CHUNK Result = 0x00;
 
     for(SIZE i = 0; i < MapCount; i++){
+        if((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->RamSize){
+            Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
+        }
+    }
+
+    for(SIZE i = 0; i < MapCount; i++){
         if(memmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE){
-            if((memmap_request.response->entries[i]->length > AllocationSizeNeeded) && (AllocationLocationOk(memmap_request.response->entries[i]->base, AllocationSizeNeeded))){
-                memmap_request.response->entries[i]->length -= AllocationSizeNeeded;
-                Result = (PLOADER_RAT_MBR_CHUNK)memmap_request.response->entries[i]->base;
-                memmap_request.response->entries[i]->base += AllocationSizeNeeded;
+            if(
+                (((memmap_request.response->entries[i]->base + GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK)) + (AllocationSizeNeeded)) < (memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length)) && 
+                (AllocationLocationOk(memmap_request.response->entries[i]->base + GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK), AllocationSizeNeeded))
+            ){
+                Result = (PLOADER_RAT_MBR_CHUNK)(UINTPTR)(memmap_request.response->entries[i]->base + GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK));
+                memmap_request.response->entries[i]->length -= (((UINTPTR)Result - memmap_request.response->entries[i]->base) + AllocationSizeNeeded);
+                memmap_request.response->entries[i]->base = ((UINTPTR)Result + AllocationSizeNeeded); 
                 break;
             }
         }
@@ -178,27 +187,11 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
         return false;
     }
 
-    SIZE Offset;
-    SIZE MapCount = RatMbrTable->Count;
-    SIZE AllocationSizeNeeded =  sizeof(LOADER_FB_MEMORY_MAP) * framebuffer_request.response->framebuffer_count;
-    PVOID Result = 0x00;
-    for(SIZE i = 0; i < MapCount; i++){
-        if(RatMbrTable->Entries[i].Attributes == LIMINE_MEMMAP_USABLE){
-            if((RatMbrTable->Entries[i].Tracker.Length > AllocationSizeNeeded) && (AllocationLocationOk(RatMbrTable->Entries[i].Tracker.Base, AllocationSizeNeeded))){
-                Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(LOADER_FB_MEMORY_MAP));
-                Offset = (UINTPTR)Result - RatMbrTable->Entries[i].Tracker.Base;
-                RatMbrTable->Entries[i].Tracker.Base += (AllocationSizeNeeded + Offset);
-                RatMbrTable->Entries[i].Tracker.Length -= (AllocationSizeNeeded + Offset);
-                break;
-            }
-        }
-    }
-
+    SIZE AllocationSizeNeeded =  ROUND_UP64(sizeof(LOADER_FB_MEMORY_MAP), GET_ALIGNMENT(LOADER_FB_MEMORY_MAP)) * framebuffer_request.response->framebuffer_count;
+    PVOID Result = LoaderAllocateSpace(AllocationSizeNeeded, GET_ALIGNMENT(LOADER_FB_MEMORY_MAP));
     if(!Result){
         return false;
     }
-
-    memset(Result, 0, AllocationSizeNeeded);
 
     Info->FrameBufferCount = framebuffer_request.response->framebuffer_count;
     Info->FrameBuffers = (PLOADER_FB_MEMORY_MAP)Result;
@@ -220,24 +213,11 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
     }
     
     Info->LoadedModulesCount = module_request.response->module_count;
-    AllocationSizeNeeded = sizeof(LOADER_MEMORY_MAP) * Info->LoadedModulesCount;
-    Result = 0x00;
-
-    for(SIZE i = 0; i < MapCount; i++){
-        if(RatMbrTable->Entries[i].Attributes == LIMINE_MEMMAP_USABLE){
-            if((RatMbrTable->Entries[i].Tracker.Length > AllocationSizeNeeded) && (AllocationLocationOk(RatMbrTable->Entries[i].Tracker.Base, AllocationSizeNeeded))){
-                Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(LOADER_MEMORY_MAP));
-                Offset = (UINTPTR)Result - RatMbrTable->Entries[i].Tracker.Base;
-                RatMbrTable->Entries[i].Tracker.Base += (AllocationSizeNeeded + Offset);
-                RatMbrTable->Entries[i].Tracker.Length -= (AllocationSizeNeeded + Offset);
-            }
-        }
-    }
+    AllocationSizeNeeded = ROUND_UP64(sizeof(LOADER_MEMORY_MAP), GET_ALIGNMENT(LOADER_MEMORY_MAP)) * Info->LoadedModulesCount;
+    Result = LoaderAllocateSpace(AllocationSizeNeeded, GET_ALIGNMENT(LOADER_MEMORY_MAP));
     if(!Result){
         return false;
     }
-
-    memset(Result, 0, AllocationSizeNeeded);
 
     Info->LoadedModules = (PLOADER_MEMORY_MAP)Result;
     for(SIZE i = 0 ; i < Info->LoadedModulesCount; i++){
@@ -265,13 +245,6 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
         }
     }
 
-    for(SIZE i = 0; i < MapCount; i++){
-        if(memmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE){
-            if((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->RamSize){
-                Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
-            }
-        }
-    }
 
     return true;
 }
@@ -288,8 +261,8 @@ BOOLEAN InitializeRatSubsystem(PLOADER_INFORMATION Info){
     for(SIZE i = 0 ; i < RatMbrTable->Count; i++){
         if(
             (RatMbrTable->Entries[i].Attributes == LOADER_USABLE_MEMORY) && \
-            (RatMbrTable->Entries[i].Tracker.Length > (RatMbrTable->ChunkSize * sizeof(RAT_TRACKER))) && 
-            (AllocationLocationOk(ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)), RatMbrTable->ChunkSize * sizeof(RAT_TRACKER)))
+            ((RatMbrTable->Entries[i].Tracker.Base + RatMbrTable->Entries[i].Tracker.Length) > ((RatMbrTable->Entries[i].Tracker.Base + GET_ALIGNMENT(RAT_TRACKER)) + ROUND_UP64(RatMbrTable->ChunkSize * sizeof(RAT_TRACKER), GET_ALIGNMENT(RAT_TRACKER)))) && 
+            (AllocationLocationOk(ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)), ROUND_UP64(RatMbrTable->ChunkSize * sizeof(RAT_TRACKER), GET_ALIGNMENT(RAT_TRACKER))))
         ){
             Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)); 
             break;
@@ -360,27 +333,6 @@ typedef struct _REP_GET_ALLOCATION_CTX{
     SIZE        Alignment;
 }REP_GET_ALLOCATION_CTX, * PREP_GET_ALLOCATION_CTX;
 
-static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
-    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
-        return false;
-    }
-    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
-    PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
-
-    while((UINTPTR)((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
-        UINTPTR NextHint;
-        if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
-            AllocContext->Base = (UINTPTR)Result;
-            return true;
-        }     
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
-        if((UINTPTR)Result == NextHint){
-            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
-        }
-    }
-    return false;
-}
 
 static BOOLEAN GetFirstFreeAddressUnder1Gig(PVOID Context, PRAT_TRACKER Tracker){
     if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
@@ -448,20 +400,6 @@ PRAT_TRACKER LouKeRatGetNextFreeAllocationTracker(){
 }
 
 
-PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment){
-    PRAT_TRACKER NewTracker = LouKeRatGetNextFreeAllocationTracker();
-    if(!NewTracker){
-        return 0x00;
-    }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
-    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
-    if(!Successfull){
-        return 0x00;
-    } 
-    NewTracker->Base = Context.Base;
-    NewTracker->Length = Context.Length;
-    return (PVOID)Context.Base;
-}
 
 PVOID LoaderAllocateSpace(SIZE Size, SIZE Alignment){
     PRAT_TRACKER NewTracker = LouKeRatGetNextFreeAllocationTracker();
