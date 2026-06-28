@@ -78,7 +78,6 @@ LOUSTATUS LouLoadStartLoader(
     UINT64  LimineData
 ){
   
-    
     PLOADER_INFORMATION pLoaderData = (PLOADER_INFORMATION)LimineData;
     memcpy(&LoaderData, pLoaderData, sizeof(LOADER_INFORMATION));    
 
@@ -91,19 +90,22 @@ LOUSTATUS LouLoadStartLoader(
 
     BOOLEAN LockedAndLoaded = LoaderInitializeKernelSpace(&LoaderData);
     if(!LockedAndLoaded){
-        asm("INT $0");
+        DEBUG_TRAP;
+        while(1);
     }
 
     PVOID KernelBase = (PVOID)LoaderData.LoadedModules[1].Tracker.Base;
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(KernelBase);
     
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, COFF_PE_SIGNATURE, 4)){
-        asm("INT $0");
+        DEBUG_TRAP;
+        while(1);
     }
 
     LoaderData.KernelHandle = (KHANDLE)LouKeRatAllocatePhysicalAddress(ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageHeader->OptionalHeader.PE64.SectionAlignment);
     if(!LoaderData.KernelHandle){
-        asm("INT $0");
+        DEBUG_TRAP;
+        while(1);
     }
     LoaderData.KernelHandle = (KHANDLE)((UINT64)LoaderData.KernelHandle + KSpaceBase); 
     memset(LoaderData.KernelHandle, 0, ImageHeader->OptionalHeader.PE64.SizeOfImage);
@@ -111,13 +113,15 @@ LOUSTATUS LouLoadStartLoader(
     UnpackKernel(&ImageHeader, LoaderData.KernelHandle, KernelBase);
 
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, COFF_PE_SIGNATURE, 4)){
-        asm("INT $0");
+        DEBUG_TRAP;
+        while(1);
     }
 
     ApplyKernelRelocation(ImageHeader, LoaderData.KernelHandle);
     UINT64 KernelEntry = (UINT64)(ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)LoaderData.KernelHandle); 
     if(!KernelEntry){
-        asm("INT $0");
+        DEBUG_TRAP;
+        while(1);
     }
 
 
@@ -126,7 +130,6 @@ LOUSTATUS LouLoadStartLoader(
         DEBUG_TRAP;
         while(1);
     }
-    
     KernelStack += (KSpaceBase + (16 * KILOBYTE));
     LoaderData.KernelStackHandle = (KHANDLE)KernelStack;
 

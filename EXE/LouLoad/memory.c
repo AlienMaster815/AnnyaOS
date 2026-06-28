@@ -177,10 +177,6 @@ static BOOLEAN GetFirstFreeAddress(PVOID Context, PRAT_TRACKER Tracker){
         }
     }
     
-    if((AllocContext->Length == (16 * KILOBYTE)) && (AllocContext->Alignment == 16)){
-        DEBUG_TRAP;
-    }
-
     return false;
 }
 
@@ -254,12 +250,11 @@ PVOID LouKeRatAllocatePhysicalAddress(SIZE Size, SIZE Alignment){
     if(!NewTracker){
         return 0x00;
     }
-    
     REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         return 0x00;
-    } 
+    }
     NewTracker->Base = Context.Base;
     NewTracker->Length = Context.Length;
     return (PVOID)Context.Base;
