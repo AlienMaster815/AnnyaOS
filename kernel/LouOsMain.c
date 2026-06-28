@@ -69,6 +69,7 @@ void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
 void initializeInterruptRouter();
 void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle);
+void LouKeInitializeEarlyKernelRuntimeEnviornment(KHANDLE KernelHandle);
 void ListUsedAddresses();
 uint64_t getTrampolineAddress();
 uint8_t GetTotalHardwareInterrupts();
@@ -357,6 +358,13 @@ void LouOsKrnlStart(
         &LousineKernelLoaderInformation
     );
 
+    LouKeInitializeBootRegistry();
+
+    LousineKernelEarlyInitialization();
+   
+    LouKeInitializeEarlyKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
+    while(1);
+
     for(SIZE i = 0 ; i < 255; i++){
         Pml4[i] = 0x00;
     }
@@ -369,10 +377,6 @@ void LouOsKrnlStart(
         SystemIsEfi = true;
         InitializeEfiCore();
     }
-
-    LouKeInitializeBootRegistry();
-
-    LousineKernelEarlyInitialization();
 
     InitializePoolsPool();
 

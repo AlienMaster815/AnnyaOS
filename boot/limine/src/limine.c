@@ -109,19 +109,22 @@ void kmain() {
     PLOADER_RAT_MBR_CHUNK RatMbr = LoaderSetUpRatMbr(&LoaderInformation);
     if(!RatMbr){
         DEBUG_TRAP;
+        while(1);
     }
     LoaderInformation.RatMbr = RatMbr;
 
     BOOLEAN LockedAndLoaded = InitializeRatSubsystem(&LoaderInformation);
     if(!LockedAndLoaded){
         DEBUG_TRAP;
+        while(1);
     }
 
     LockedAndLoaded = LoaderInitializeLoaderInformation(&LoaderInformation);
     if(!LockedAndLoaded){
         DEBUG_TRAP;
+        while(1);
     }
-        
+
     LoaderInformation.BootModulesCount = LoaderInformation.LoadedModulesCount - 2;
     LoaderInformation.BootModulesBase = &LoaderInformation.LoadedModules[2];
 
@@ -134,30 +137,36 @@ void kmain() {
 
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, CFI_HEADER_LOUCOFF_SIGNATURE, 4)){
         DEBUG_TRAP;
+        while(1);
     }
 
     if(ImageHeader->OptionalHeader.PE64.Subsystem != CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT){
         DEBUG_TRAP;
+        while(1);
     }
 
     LoaderInformation.LoaderHandle = (KHANDLE)LoaderAllocateSpace(ImageHeader->OptionalHeader.PE64.SizeOfImage, ImageHeader->OptionalHeader.PE64.SectionAlignment);
     if(!LoaderInformation.LoaderHandle){
         DEBUG_TRAP;
+        while(1);
     }
 
     UnpackLoader(&ImageHeader, LoaderInformation.LoaderHandle, LoaderBase);
     if(memcmp(&ImageHeader->StandardHeader.PeSignature, CFI_HEADER_LOUCOFF_SIGNATURE, 4)){
         DEBUG_TRAP;
+        while(1);
     }
 
     if(ImageHeader->OptionalHeader.PE64.Subsystem != CFI_SUBSYSTEM_LOUSINE_LOADER_OBJECT){
         DEBUG_TRAP;
+        while(1);
     }
 
     ApplyLoaderRelocation(ImageHeader, LoaderInformation.LoaderHandle);
 
     if(!ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint){
         DEBUG_TRAP;
+        while(1);
     }
     
     UINT64 LoaderEntry = (UINT64)(ImageHeader->OptionalHeader.PE64.AddressOfEntryPoint + (UINT64)LoaderInformation.LoaderHandle); 

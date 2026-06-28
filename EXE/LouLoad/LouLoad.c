@@ -130,10 +130,10 @@ LOUSTATUS LouLoadStartLoader(
         DEBUG_TRAP;
         while(1);
     }
-    KernelStack += (KSpaceBase + (16 * KILOBYTE));
+    KernelStack += KSpaceBase;
     LoaderData.KernelStackHandle = (KHANDLE)KernelStack;
 
-    MsvcAbiJump((UINT64)&LoaderData, KernelStack, KernelEntry);
+    MsvcAbiJump((UINT64)&LoaderData, KernelStack + (16 * KILOBYTE), KernelEntry);
 
     HaltAndCatchFile();
     return (LOUSTATUS)~0;

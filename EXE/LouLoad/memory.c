@@ -522,7 +522,23 @@ static BOOLEAN MapKernelSpaceAddresses(PVOID Context, PRAT_TRACKER Tracker){
 }
 
 static BOOLEAN MapAllFreeKernelSpaceAddresses(PLOADER_INFORMATION Info){
-    return LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ANY_ATTRIBUTE_MEMORY);
+    BOOLEAN Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_USABLE_MEMORY);
+    if(!Tmp){
+        return false;
+    }
+    Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ACPI_RECLAIM_MEMORY);
+    if(!Tmp){
+        return false;
+    }
+    Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ACPI_NVS_MEMORY);
+    if(!Tmp){
+        return false;
+    }
+    Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_RECLAIMABLE_MEMORY);
+    if(!Tmp){
+        return false;
+    }
+    return true;
 }
 
 static volatile FORCE_ALIGNMENT(KILOBYTE_PAGE) UINT64 Pml3[512];
@@ -556,44 +572,32 @@ BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info){
         return false;
     }
 
-    UINT64 TmpPageBase;
-    UINT64 TmpPageLength;
+    LouKeMemoryBarrier();
 
-    TmpPageBase = ((UINT64)Info->LoadedModules & ~(KILOBYTE_PAGE - 1));
-    TmpPageLength = Info->LoadedModulesCount * sizeof(LOADER_MEMORY_MAP);
-    TmpPageLength += (UINT64)Info->LoadedModules - TmpPageBase;
-    TmpPageLength = ROUND_UP64(TmpPageLength, KILOBYTE_PAGE);
-    if(!LoaderMapContinuiousMemoryBlock(TmpPageBase, TmpPageBase + KSpaceBase, TmpPageLength, Info)){
-        return false;
-    }
-
-
-    TmpPageBase = ((UINT64)Info->FrameBuffers & ~(KILOBYTE_PAGE - 1));
-    TmpPageLength = Info->FrameBufferCount * sizeof(LOADER_FB_MEMORY_MAP);
-    TmpPageLength += (UINT64)Info->FrameBuffers - TmpPageBase;
-    TmpPageLength = ROUND_UP64(TmpPageLength, KILOBYTE_PAGE); 
-    if(!LoaderMapContinuiousMemoryBlock(TmpPageBase, TmpPageBase + KSpaceBase, TmpPageLength, Info)){
-        return false;
-    }
-
-    for(SIZE i = 0 ; i < Info->LoadedModulesCount; i++){
-        TmpPageBase = (UINT64)Info->LoadedModules[i].Tracker.Base & ~(KILOBYTE_PAGE - 1);
-        TmpPageLength = Info->LoadedModules[i].Tracker.Length;
-        TmpPageLength += (UINT64)Info->LoadedModules[i].Tracker.Base - TmpPageBase;
-        TmpPageLength = ROUND_UP64(TmpPageLength, KILOBYTE_PAGE);
-        if(!LoaderMapContinuiousMemoryBlock(TmpPageBase, TmpPageBase + KSpaceBase, TmpPageLength, Info)){
-            return false;
-        }   
-        Info->LoadedModules[i].Tracker.Base += KSpaceBase;
-    }
+    LouKeReloadCR3(); //just reload for the loader for sanity
 
     Info->LoadedModules = (PLOADER_MEMORY_MAP)((UINT64)Info->LoadedModules + KSpaceBase);
     Info->FrameBuffers = (PLOADER_FB_MEMORY_MAP)((UINT64)Info->FrameBuffers + KSpaceBase);
     Info->RatMbr = (PLOADER_RAT_MBR_CHUNK)((UINT64)Info->RatMbr + KSpaceBase);
 
+    UINT64 TmpPageBase;
+    UINT64 TmpPageLength;
+
+    for(SIZE i = 0 ; i < Info->LoadedModulesCount; i++){
+        TmpPageBase = ((UINT64)Info->LoadedModules[i].Tracker.Base & ~(KILOBYTE_PAGE - 1));
+        TmpPageLength = ((UINT64)Info->LoadedModules[i].Tracker.Length);
+        TmpPageLength += (UINT64)Info->LoadedModules[i].Tracker.Base - TmpPageBase;
+        TmpPageLength = ROUND_UP64(TmpPageLength, KILOBYTE_PAGE);
+        if(!LoaderMapContinuiousMemoryBlock(TmpPageBase, TmpPageBase + KSpaceBase, TmpPageLength, Info)){
+            return false;
+        }
+        Info->LoadedModules[i].Tracker.Base += KSpaceBase;
+    }
+
     LouKeMemoryBarrier();
 
     LouKeReloadCR3(); //just reload for the loader for sanity
+
     
     //NOTE: BOOTVID.SYS will handle framebuffers after the 
     //      kernel initializes cpu specific features such as

@@ -6,10 +6,50 @@ void* LouKeGetBootDevice(size_t Index);
 void StartupConfigureExportTable(KHANDLE KernelHandle);
 void StartupConfigureImportTable(KHANDLE KernelHandle);
 
+void LouKeInitializeEarlyKernelRuntimeEnviornment(KHANDLE KernelHandle){
+
+    WORD LoadOrder = 0x00;
+
+    StartupConfigureExportTable(KernelHandle);
+
+    PVOID Key = LouKeOpenRegistryHandle(
+        L"KERNEL_DEFAULT_CONFIG\\Subsystems\\BOOTVID",
+        0x00
+    );
+    if(!Key){
+        return;
+    }
+     
+
+    Key = LouKeOpenRegistryHandle(
+        L"LoadOrder",
+        Key
+    );
+
+    if(!Key){
+        return;
+    }
+
+    LouKeReadRegistryWordValue(Key, &LoadOrder);
+        
+    if(!LoadOrder){
+        return;
+    }
+
+    void* DriverBase = LouKeGetBootDevice(LoadOrder);    
+    void (*Driver)() = (void(*)())LouKeLoadBootKernelModule((uintptr_t)DriverBase, 0, 0x00);
+    if(Driver){
+        Driver();
+    }
+
+    LouPrint("Hello World\n");
+    while(1);
+}
+
+
 void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle){
 
 
-    StartupConfigureExportTable(KernelHandle);
 
     size_t StrLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x");
     size_t TotalLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x                ");
