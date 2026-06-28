@@ -86,14 +86,14 @@ BOOLEAN ApplyLoaderRelocation(
 }
 
 void kmain() {
-
+    
     //check revision
     if(LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false){
         HaltAndCatchFile();
     }
 
     //set up the first gig of data
-    L3Tables[0] = (UINT64)LimineGetPhysicalAddress((PVOID)&L2Tables[0]) | 0b11;
+    L3Tables[0] = (UINT64)LimineGetPhysicalAddress((UINTPTR)&L2Tables[0]) | 0b11;
 
     for(SIZE i = 0 ; i < 512; i++){
         L2Tables[i] = ((MEGABYTE_PAGE * i) | ((1 << 7) | 0b11));
@@ -101,7 +101,7 @@ void kmain() {
 
     UINT64* L4Tables = (UINT64*)LimineGetVirtualAddress(GetPageBase());
 
-    L4Tables[0] = (UINT64)LimineGetPhysicalAddress((PVOID)&L3Tables[0]) | 0b11;
+    L4Tables[0] = (UINT64)LimineGetPhysicalAddress((UINTPTR)&L3Tables[0]) | 0b11;
     //reload new tables
     LouKeReloadCR3();
 
@@ -118,6 +118,7 @@ void kmain() {
         DEBUG_TRAP;
         while(1);
     }
+
 
     LockedAndLoaded = LoaderInitializeLoaderInformation(&LoaderInformation);
     if(!LockedAndLoaded){
@@ -175,12 +176,12 @@ void kmain() {
     LoaderInformation.StackHandle = (KHANDLE)LoaderStack;
 
     for(SIZE i = 0 ; i < LoaderInformation.LoadedModulesCount; i++){
-        LoaderInformation.LoadedModules[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((PVOID)LoaderInformation.LoadedModules[i].Tracker.Base);
+        LoaderInformation.LoadedModules[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((UINTPTR)LoaderInformation.LoadedModules[i].Tracker.Base);
     }
 
     for(SIZE i = 0; i < LoaderInformation.RatMbr->Count; i++){
         if(LoaderInformation.RatMbr->Entries[i].Tracker.Base >= KSpaceBase){
-            LoaderInformation.RatMbr->Entries[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((PVOID)LoaderInformation.RatMbr->Entries[i].Tracker.Base);
+            LoaderInformation.RatMbr->Entries[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((UINTPTR)LoaderInformation.RatMbr->Entries[i].Tracker.Base);
         }
     }
 

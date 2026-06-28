@@ -54,6 +54,7 @@ typedef struct _LOADER_INFORMATION{
     UINT64                  LoaderCpuFeatures;
     UINT64                  TscCount;
     SIZE                    RamSize;
+    SIZE                    MachineSize;
     KHANDLE                 StackHandle;
     KHANDLE                 KernelStackHandle;
     KHANDLE                 EfiSystemTable;
@@ -95,9 +96,9 @@ static inline void LouKeReloadCR3() {
 }
 
 UINT64 GetCr3();
-UINT64* GetPageBase();
-PVOID LimineGetVirtualAddress(PVOID Address);
-PVOID LimineGetPhysicalAddress(PVOID Address);
+UINT64 GetPageBase();
+UINTPTR LimineGetVirtualAddress(UINTPTR Address);
+UINTPTR LimineGetPhysicalAddress(UINTPTR Address);
 PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(PLOADER_INFORMATION Info);
 BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info);
 BOOLEAN InitializeRatSubsystem(PLOADER_INFORMATION Info);

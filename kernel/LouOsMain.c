@@ -138,7 +138,7 @@ void LouKeUnmaskSmpInterrupts();
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT32 ThreadID);
 uint64_t GetCr3();
-UINT64* GetPageBase();
+UINT64 GetPageBase();
 LOUSTATUS LouKeObjManInitialize();
 void LouKeInitializeSecuritySubsystem();
 LOUSTATUS LouKeCreateSystemWorkQeueue();
@@ -345,7 +345,6 @@ void ParserLouLoaderInformation(
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-
     EnableCR0WriteProtection();
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
     UINT64* Pml4 = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);

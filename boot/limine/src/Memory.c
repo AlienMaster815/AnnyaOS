@@ -73,25 +73,32 @@ void CalculateTableMarks(
     *L1Entry = (VirtualAddressess >> 12) & 0x1FF;
 }
 
-UINT64 GetCr3() {
-    UINT64 cr3_value;
-    __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3_value));
-    return cr3_value;
+UINT64 GetCr3() { 
+    UINT64 cr3_value; 
+    __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3_value)); 
+    return cr3_value; 
+} 
+
+UINT64 GetPageBase() { 
+    return GetCr3() & 0x000FFFFFFFFFF000ULL; 
 }
 
-UINT64* GetPageBase() {
-    return (UINT64*)(GetCr3() & 0x000FFFFFFFFFF000ULL);
-}
-
-
-PVOID LimineGetVirtualAddress(PVOID Address){
+UINTPTR LimineGetVirtualAddress(UINTPTR Address){
     if(!hhdm_request.response){
         return 0x00;
     }
-    return (PVOID)((UINTPTR)hhdm_request.response->offset + (UINTPTR)Address);
+    return (hhdm_request.response->offset + Address);
 }
 
-PVOID LimineGetPhysicalAddress(PVOID Address) {
+UINTPTR LimineGetHhdmPhysicalAddress(UINTPTR Address){
+    if(!hhdm_request.response){
+        return 0x00;
+    }
+    return (Address - hhdm_request.response->offset);
+}
+
+
+UINTPTR LimineGetPhysicalAddress(UINTPTR Address) {
     if(!hhdm_request.response){
         return 0x00;
     }
@@ -101,37 +108,37 @@ PVOID LimineGetPhysicalAddress(PVOID Address) {
     
     CalculateTableMarks(VirtualAddress, &L4, &L3, &L2, &L1);
 
-    UINT64* Pml4 = (UINT64*)LimineGetVirtualAddress((PVOID)GetPageBase());
+    UINT64* Pml4 = (UINT64*)LimineGetVirtualAddress((UINTPTR)GetPageBase());
     UINT64 Pml4Entry = Pml4[L4];
     if(!(Pml4Entry & 0b1))return 0x00;
 
-    UINT64* PageDirectoryTable = (UINT64*)LimineGetVirtualAddress((PVOID)(Pml4Entry & 0x000FFFFFFFFFF000ULL));
+    UINT64* PageDirectoryTable = (UINT64*)LimineGetVirtualAddress((UINTPTR)(Pml4Entry & 0x000FFFFFFFFFF000ULL));
     UINT64 PageDirectoryTableEntry = PageDirectoryTable[L3];
     if(!(PageDirectoryTableEntry & 0b1))return 0x00;
 
     if(PageDirectoryTableEntry & (1<< 7)){
         UINT64 PhysicalBase = PageDirectoryTableEntry & 0x000FFFFFFFFFF000ULL;
         UINT64 PageOffset = VirtualAddress & 0x3FFFFFFFULL;
-        return (PVOID)(PhysicalBase + PageOffset);
+        return (UINTPTR)(PhysicalBase + PageOffset);
     }
 
-    UINT64* PageDirectory = (UINT64*)LimineGetVirtualAddress((PVOID)(PageDirectoryTableEntry & 0x000FFFFFFFFFF000ULL));
+    UINT64* PageDirectory = (UINT64*)LimineGetVirtualAddress((UINTPTR)(PageDirectoryTableEntry & 0x000FFFFFFFFFF000ULL));
     UINT64 PageDirectoryEntry = PageDirectory[L2];
     if(!(PageDirectoryEntry & 0b1))return 0x00;
 
     if(PageDirectoryEntry & (1 << 7)){
         UINT64 PhysicalBase = PageDirectoryEntry & 0x000FFFFFFFFFF000ULL;
         UINT64 PageOffset = VirtualAddress & 0x1FFFFFULL;
-        return (PVOID)(PhysicalBase + PageOffset);
+        return (UINTPTR)(PhysicalBase + PageOffset);
     }
 
-    UINT64* PageTable = (UINT64*)LimineGetVirtualAddress((PVOID)(PageDirectoryEntry & 0x000FFFFFFFFFF000ULL));
+    UINT64* PageTable = (UINT64*)LimineGetVirtualAddress((UINTPTR)(PageDirectoryEntry & 0x000FFFFFFFFFF000ULL));
     UINT64 PageTableEntry = PageTable[L1];
     if(!(PageTableEntry & 0b1))return 0x00;
 
     UINT64 PhysicalBase = PageTableEntry & 0x000FFFFFFFFFF000ULL;
     UINT64 PageOffset = VirtualAddress & 0xFFFULL;
-    return (PVOID)(PhysicalBase + PageOffset);
+    return (UINTPTR)(PhysicalBase + PageOffset);
 }
 
 PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(PLOADER_INFORMATION Info){
@@ -144,18 +151,25 @@ PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(PLOADER_INFORMATION Info){
 
     for(SIZE i = 0; i < MapCount; i++){
         if((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->RamSize){
-            Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
+            Info->MachineSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
+            if(memmap_request.response->entries[i]->type == LOADER_USABLE_MEMORY){
+                Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
+            }
         }
+
     }
 
     for(SIZE i = 0; i < MapCount; i++){
         if(memmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE){
-            if(
-                (((memmap_request.response->entries[i]->base + GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK)) + (AllocationSizeNeeded)) < (memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length)) && 
-                (AllocationLocationOk(memmap_request.response->entries[i]->base + GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK), AllocationSizeNeeded))
+            UINT64 Base = ROUND_UP64(memmap_request.response->entries[i]->base,  GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK));
+            UINT64 Offset = Base - memmap_request.response->entries[i]->base;
+
+            if( 
+                ((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > (Base + AllocationSizeNeeded)) && 
+                (AllocationLocationOk(Base, AllocationSizeNeeded))
             ){
-                Result = (PLOADER_RAT_MBR_CHUNK)(UINTPTR)(memmap_request.response->entries[i]->base + GET_ALIGNMENT(LOADER_RAT_MBR_CHUNK));
-                memmap_request.response->entries[i]->length -= (((UINTPTR)Result - memmap_request.response->entries[i]->base) + AllocationSizeNeeded);
+                Result = (PLOADER_RAT_MBR_CHUNK)(UINTPTR)(Base);
+                memmap_request.response->entries[i]->length -= (Offset + AllocationSizeNeeded);
                 memmap_request.response->entries[i]->base = ((UINTPTR)Result + AllocationSizeNeeded); 
                 break;
             }
@@ -197,7 +211,7 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
     Info->FrameBuffers = (PLOADER_FB_MEMORY_MAP)Result;
     for(SIZE i = 0 ; i < Info->FrameBufferCount; i++){
         Info->FrameBuffers[i].Attributes = LOADER_FRAMEBUFFER_MEMORY;
-        Info->FrameBuffers[i].Tracker.Base = (UINTPTR)LimineGetPhysicalAddress(framebuffer_request.response->framebuffers[i]->address);
+        Info->FrameBuffers[i].Tracker.Base = (UINTPTR)LimineGetHhdmPhysicalAddress((UINTPTR)framebuffer_request.response->framebuffers[i]->address);
         Info->FrameBuffers[i].Tracker.Width = framebuffer_request.response->framebuffers[i]->width;
         Info->FrameBuffers[i].Tracker.Height = framebuffer_request.response->framebuffers[i]->height;
         Info->FrameBuffers[i].Tracker.Pitch = framebuffer_request.response->framebuffers[i]->pitch;
@@ -228,18 +242,19 @@ BOOLEAN LoaderInitializeLoaderInformation(PLOADER_INFORMATION Info){
 
     if(efi_system_table_request.response){
         if((UINTPTR)efi_system_table_request.response->address > KSpaceBase){
-            efi_system_table_request.response->address = LimineGetPhysicalAddress(efi_system_table_request.response->address);
+            Info->EfiSystemTable = (KHANDLE)LimineGetHhdmPhysicalAddress((UINTPTR)efi_system_table_request.response->address);
         }
-        Info->EfiSystemTable = efi_system_table_request.response->address;
+        else {
+            Info->EfiSystemTable = (KHANDLE)(UINTPTR)efi_system_table_request.response->address;
+        }
     }
-
     if(tsc_frequency_request.response){
         Info->TscCount = tsc_frequency_request.response->frequency;
     }
 
     if(rsdp_request.response){
         struct rsdp_v1* Rsdp = (struct rsdp_v1*)rsdp_request.response->address;
-        Info->RsdpPointer = (UINT64)LimineGetPhysicalAddress((PVOID)Rsdp);
+        Info->RsdpPointer = (UINT64)LimineGetHhdmPhysicalAddress((UINTPTR)Rsdp);
         if(Rsdp->revision){
             Info->RsdpVersion = Rsdp->revision;
         }
@@ -258,13 +273,17 @@ BOOLEAN InitializeRatSubsystem(PLOADER_INFORMATION Info){
     RatMbrTable->ChunkSize = Info->RamSize / 100;
     RatMbrTable->ChunkSize /= sizeof(RAT_TRACKER);
     PVOID Result = 0x00;
+    UINT64 Base = 0;
+    UINT64 Size = 0;
     for(SIZE i = 0 ; i < RatMbrTable->Count; i++){
+        Base = ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base,  GET_ALIGNMENT(RAT_TRACKER));
+        Size = ROUND_UP64(RatMbrTable->ChunkSize * sizeof(RAT_TRACKER), GET_ALIGNMENT(RAT_TRACKER));
         if(
-            (RatMbrTable->Entries[i].Attributes == LOADER_USABLE_MEMORY) && \
-            ((RatMbrTable->Entries[i].Tracker.Base + RatMbrTable->Entries[i].Tracker.Length) > ((RatMbrTable->Entries[i].Tracker.Base + GET_ALIGNMENT(RAT_TRACKER)) + ROUND_UP64(RatMbrTable->ChunkSize * sizeof(RAT_TRACKER), GET_ALIGNMENT(RAT_TRACKER)))) && 
-            (AllocationLocationOk(ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)), ROUND_UP64(RatMbrTable->ChunkSize * sizeof(RAT_TRACKER), GET_ALIGNMENT(RAT_TRACKER))))
+            (RatMbrTable->Entries[i].Attributes == LOADER_USABLE_MEMORY) &&
+            ((RatMbrTable->Entries[i].Tracker.Base + RatMbrTable->Entries[i].Tracker.Length) > (Base + Size)) && 
+            (AllocationLocationOk(Base, Size))
         ){
-            Result = (PVOID)ROUND_UP64(RatMbrTable->Entries[i].Tracker.Base, GET_ALIGNMENT(RAT_TRACKER)); 
+            Result = (PVOID)(UINTPTR)Base; 
             break;
         }
     }
@@ -272,9 +291,9 @@ BOOLEAN InitializeRatSubsystem(PLOADER_INFORMATION Info){
         return false;
     }
     RatMbrTable->Mbr[0].Base = (UINTPTR)Result;
-    RatMbrTable->Mbr[0].Length = RatMbrTable->ChunkSize * sizeof(RAT_TRACKER);
+    RatMbrTable->Mbr[0].Length = Size;
     RatMbrTable->MbrChunksAllocated = 1;
-    memset(Result, 0, RatMbrTable->ChunkSize * sizeof(RAT_TRACKER));
+    memset(Result, 0, Size);
     return true;
 }
 

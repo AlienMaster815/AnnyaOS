@@ -60,6 +60,7 @@ typedef struct _LOADER_INFORMATION{
     UINT64                  LoaderCpuFeatures;
     UINT64                  TscCount;
     SIZE                    RamSize;
+    SIZE                    MachineSize;
     KHANDLE                 StackHandle;
     KHANDLE                 KernelStackHandle;
     KHANDLE                 EfiSystemTable;

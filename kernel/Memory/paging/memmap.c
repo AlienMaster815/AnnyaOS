@@ -127,8 +127,8 @@ uint64_t GetCr3() {
     return cr3_value;
 }
 
-UINT64* GetPageBase() {
-    return (UINT64*)(GetCr3() & 0x000FFFFFFFFFF000ULL);
+UINT64 GetPageBase() {
+    return (UINT64)(GetCr3() & 0x000FFFFFFFFFF000ULL);
 }
 
 static inline void PageFlush(uint64_t addr) {
@@ -246,7 +246,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
         &L1Entry
     );
     
-    UINT64* TmpPageBase = GetPageBase();
+    UINT64* TmpPageBase = (UINT64*)GetPageBase();
     UINT64  TmpPageValue;
     TmpPageBase = (UINT64*)((UINT64)TmpPageBase + KSpaceBase);
     TmpPageBase = PageDown(TmpPageBase, L4Entry);    
@@ -301,7 +301,7 @@ void LouUnMapAddress(uint64_t VAddress, uint64_t* PAddress, uint64_t* UnmapedLen
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase);
 
 bool LouMapAddress(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize){
-    return LouMapAddressEx(PAddress, VAddress, FLAGS, PageSize,  GetPageBase());
+    return LouMapAddressEx(PAddress, VAddress, FLAGS, PageSize,  (UINT64*)GetPageBase());
 }
 
 bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize, UINT64* TmpPageBase){
@@ -423,7 +423,7 @@ bool LouMapAddressEx32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uin
 }
 
 bool LouMapAddress32(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint64_t PageSize){
-    return LouMapAddressEx32(PAddress, VAddress, FLAGS, PageSize,  GetPageBase());
+    return LouMapAddressEx32(PAddress, VAddress, FLAGS, PageSize,  (UINT64*)GetPageBase());
 }
 
 uint64_t GetPageOfFaultValue(uint64_t VAddress) {

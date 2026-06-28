@@ -21,7 +21,7 @@ PVOID memmove(PVOID Dest, PCVOID Src, SIZE Size);
 int memcmp(void *VBuffer1, void *VBuffer2, UINT64 Count);
 
 PVOID LoaderGetPhysicalAddress(PVOID Address);
-UINT64* GetPageBase();
+UINT64 GetPageBase();
 UINT64 GetCr3();
 BOOLEAN LoaderInitializeMemoryManager(PLOADER_INFORMATION Info);
 BOOLEAN LoaderInitializeKernelSpace(PLOADER_INFORMATION Info);

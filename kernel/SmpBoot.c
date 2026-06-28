@@ -8,7 +8,7 @@ GetCurrentCpuTrackMember();
 
 uint16_t GetNPROC();
 
-PML* GetPageBase();
+UINT64 GetPageBase();
 
 static mutex_t* TrampolineLock;
 static UINT64* TrampolineStack;

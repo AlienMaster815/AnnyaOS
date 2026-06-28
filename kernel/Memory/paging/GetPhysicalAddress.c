@@ -2,8 +2,6 @@
 
 //later were going to add thread checks for other modes
 
-//PML* GetPageBase();
-
 uint64_t* LouKeVirtualAddresToPageValue(
     uint64_t VAddress
 );
@@ -16,7 +14,7 @@ void CalculateTableMarks(
     uint64_t* L1Entry
 );
 
-PML* GetPageBase();
+UINT64 GetPageBase();
 bool IsMegabytePage(uint64_t* PageAddress);
 
 KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(

@@ -342,7 +342,7 @@ LOUSTATUS LouKeInitializeRatSubsystem(
     if((UINT64)RatMbrTable < KSpaceBase){
         RatMbrTable = (PLOADER_RAT_MBR_CHUNK)((UINT64)RatMbrTable + KSpaceBase);
     }
-    VirtualBase = LouKeGetRamSize() + KSpaceBase;
+    VirtualBase = KSpaceBase + Info->MachineSize;
 
     return STATUS_SUCCESS;
 }
