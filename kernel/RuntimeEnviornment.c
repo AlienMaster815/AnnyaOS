@@ -42,14 +42,10 @@ void LouKeInitializeEarlyKernelRuntimeEnviornment(KHANDLE KernelHandle){
         Driver();
     }
 
-    LouPrint("Hello World\n");
-    while(1);
 }
 
 
 void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle){
-
-
 
     size_t StrLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x");
     size_t TotalLen = wcslen(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\0x                ");
@@ -93,7 +89,4 @@ void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle){
     LouKeFree(SearchBuffer);
 
     StartupConfigureImportTable(KernelHandle);
-
-    LouPrint("Hello World\n");
-    while(1);
 }

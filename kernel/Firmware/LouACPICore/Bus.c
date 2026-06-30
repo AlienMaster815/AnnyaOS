@@ -221,7 +221,7 @@ void AcpiInitializePlatformCommunications();
 void AcpiInitializeFfh();
 
 void LouKeInitializeFullLouACPISubsystem(){
-    HANDLE AcpiDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\SCHED_DEBUG", 0x00);
+    HANDLE AcpiDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\ACPI_DEBUG", 0x00);
     BYTE DbgValue = 0;
     LouKeReadRegistryByteValue(AcpiDebugKey, &DbgValue);
     AcpiDebugOn = DbgValue ? true : false;

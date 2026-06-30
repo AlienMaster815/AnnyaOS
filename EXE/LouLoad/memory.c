@@ -522,23 +522,7 @@ static BOOLEAN MapKernelSpaceAddresses(PVOID Context, PRAT_TRACKER Tracker){
 }
 
 static BOOLEAN MapAllFreeKernelSpaceAddresses(PLOADER_INFORMATION Info){
-    BOOLEAN Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_USABLE_MEMORY);
-    if(!Tmp){
-        return false;
-    }
-    Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ACPI_RECLAIM_MEMORY);
-    if(!Tmp){
-        return false;
-    }
-    Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ACPI_NVS_MEMORY);
-    if(!Tmp){
-        return false;
-    }
-    Tmp = LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_RECLAIMABLE_MEMORY);
-    if(!Tmp){
-        return false;
-    }
-    return true;
+    return LouKeRatForEachRatEntry(MapKernelSpaceAddresses, (PVOID)Info, LOADER_ANY_ATTRIBUTE_MEMORY);
 }
 
 static volatile FORCE_ALIGNMENT(KILOBYTE_PAGE) UINT64 Pml3[512];

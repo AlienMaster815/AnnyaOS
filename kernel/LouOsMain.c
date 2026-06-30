@@ -67,7 +67,7 @@ void ParseMBootTags(struct multiboot_tag* MBOOT);
 uint64_t LouKeGetRamSize();
 void InitializeEfiCore();
 LOUSTATUS InitializeDirecAccess();
-void initializeInterruptRouter();
+void InitializeInterruptRouter();
 void LouKeInitializeKernelRuntimeEnviornment(KHANDLE KernelHandle);
 void LouKeInitializeEarlyKernelRuntimeEnviornment(KHANDLE KernelHandle);
 void ListUsedAddresses();
@@ -78,7 +78,6 @@ void FlushTss();
 void Spurious(uint64_t FaultingStackP);
 void LouKeInitializeLouACPISubsystem();
 void HandleProccessorInitialization();
-void InitializeInterruptRouter();
 void LouKeProbeSbIsa();
 void SetupGDT(UINT32 ProcessorID);
 extern void ReloadGdt();
@@ -188,7 +187,6 @@ LOUSTATUS LousineKernelEarlyInitialization(){
     //RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
     //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
     RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);
-
 
     SetUpTimers();
     //DeterminCPU();
@@ -338,16 +336,12 @@ void ParserLouLoaderInformation(
     }
 
 }
-/* TODO:Destroy loader States
-
-*/
 
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
     EnableCR0WriteProtection();
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
-    UINT64* Pml4 = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
 
     LOUSTATUS Status = LouKeInitializeRatSubsystem(&LousineKernelLoaderInformation);
     if(Status != STATUS_SUCCESS){
@@ -362,13 +356,6 @@ void LouOsKrnlStart(
     LousineKernelEarlyInitialization();
    
     LouKeInitializeEarlyKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
-    while(1);
-
-    for(SIZE i = 0 ; i < 255; i++){
-        Pml4[i] = 0x00;
-    }
-    LouKeReloadCR3();
-    LouKeRatFreeAddress((UINTPTR)LousineKernelLoaderInformation.LoaderHandle);
 
     if(!LousineKernelLoaderInformation.EfiSystemTable){
         LouKeHandleSystemIsBios();
@@ -379,15 +366,14 @@ void LouOsKrnlStart(
 
     InitializePoolsPool();
 
+
     LouKeInitializeLouACPISubsystem();
-    
+        
     InitializeDebuggerComunications();
 
     AdvancedLousineKernelInitialization();
 
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
-
-    while(1);
 
     PciHalScanBootDevices();
          
