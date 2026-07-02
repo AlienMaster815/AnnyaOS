@@ -150,13 +150,15 @@ PLOADER_RAT_MBR_CHUNK LoaderSetUpRatMbr(PLOADER_INFORMATION Info){
     PLOADER_RAT_MBR_CHUNK Result = 0x00;
 
     for(SIZE i = 0; i < MapCount; i++){
-        if((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->RamSize){
+        if((memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->MachineSize){
             Info->MachineSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
-            if(memmap_request.response->entries[i]->type == LOADER_USABLE_MEMORY){
-                Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
-            }
         }
-
+        if(
+            (memmap_request.response->entries[i]->type == LOADER_USABLE_MEMORY) &&
+            (memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length) > Info->RamSize
+        ){
+            Info->RamSize = memmap_request.response->entries[i]->base + memmap_request.response->entries[i]->length;
+        }
     }
 
     for(SIZE i = 0; i < MapCount; i++){

@@ -127,10 +127,10 @@ void kmain() {
     }
 
     LoaderInformation.BootModulesCount = LoaderInformation.LoadedModulesCount - 2;
-    LoaderInformation.BootModulesBase = &LoaderInformation.LoadedModules[2];
+    LoaderInformation.BootModulesBase = (PLOADER_MEMORY_MAP)((UINTPTR)&LoaderInformation.LoadedModules[2] + KSpaceBase);
 
-    LoaderInformation.LouLoadCoff = &LoaderInformation.LoadedModules[0];
-    LoaderInformation.LousineCoff = &LoaderInformation.LoadedModules[1];
+    LoaderInformation.LouLoadCoff = (PLOADER_MEMORY_MAP)((UINTPTR)&LoaderInformation.LoadedModules[0] + KSpaceBase);
+    LoaderInformation.LousineCoff = (PLOADER_MEMORY_MAP)((UINTPTR)&LoaderInformation.LoadedModules[1] + KSpaceBase);
 
     //Locked and loaded we are ocsar mike
     PVOID LoaderBase = (PVOID)LoaderInformation.LoadedModules[0].Tracker.Base;
@@ -177,12 +177,6 @@ void kmain() {
 
     for(SIZE i = 0 ; i < LoaderInformation.LoadedModulesCount; i++){
         LoaderInformation.LoadedModules[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((UINTPTR)LoaderInformation.LoadedModules[i].Tracker.Base);
-    }
-
-    for(SIZE i = 0; i < LoaderInformation.RatMbr->Count; i++){
-        if(LoaderInformation.RatMbr->Entries[i].Tracker.Base >= KSpaceBase){
-            LoaderInformation.RatMbr->Entries[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((UINTPTR)LoaderInformation.RatMbr->Entries[i].Tracker.Base);
-        }
     }
 
     MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE));

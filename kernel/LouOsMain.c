@@ -222,6 +222,9 @@ void AdvancedLousineKernelInitialization(){
     InitializeProcessManager();
 
     LouKeInitializeFullLouACPISubsystem();
+    
+    LouPrint("HERE:STATUS_SUCCESS\n");
+    while(1);
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
     
@@ -324,7 +327,7 @@ void ParserLouLoaderInformation(
 ){
 
     LouKeSetEfiTable((UINT64)LoaderInfo->EfiSystemTable);
-
+    
     LouKeSetRsdp((UINT64)LoaderInfo->RsdpPointer, (UINT64)LoaderInfo->RsdpVersion);
 
     InitializeFrameBuffer(LoaderInfo->FrameBuffers, LoaderInfo->FrameBufferCount);
@@ -342,11 +345,18 @@ void LouOsKrnlStart(
 ){    
     EnableCR0WriteProtection();
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
+    pKernelLoaderInfo = 0x00;
+    UINT64* Pml4  = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
+    for(SIZE i = 0 ; i < 255; i++){
+        Pml4[i] = 0x00;
+    }
+    LouKeReloadCR3();
 
     LOUSTATUS Status = LouKeInitializeRatSubsystem(&LousineKernelLoaderInformation);
     if(Status != STATUS_SUCCESS){
         HaltAndCatchFile();
     }
+
     ParserLouLoaderInformation(
         &LousineKernelLoaderInformation
     );
@@ -384,8 +394,8 @@ void LouOsKrnlStart(
     }
 
 
-    //LouPrint("Successful Boot\n");
-    //while(1);
+    LouPrint("Successful Boot\n");
+    while(1);
 
     InitializeFileSystemManager();
 

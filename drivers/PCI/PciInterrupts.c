@@ -25,10 +25,10 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
     }
 
     if(PciSupportsMsix){
-        PciHalDbgPrint("PCI.SYS:Allocating MSI-X Vectors\n");
+        LouPrint("PCI.SYS:Allocating MSI-X Vectors\n");
         while(1);
     }else if(PciSupportsMsi){
-        PciHalDbgPrint("PCI.SYS:Allocating MSI Vectors\n");
+        LouPrint("PCI.SYS:Allocating MSI Vectors\n");
         while(1);
     }else{ 
         PciHalDbgPrint("PCI.SYS:Allocating INT-X Vectors\n");
