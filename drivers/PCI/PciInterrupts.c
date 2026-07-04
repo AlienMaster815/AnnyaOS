@@ -15,20 +15,49 @@ static BOOLEAN PciHalPciSupportsMsi(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCapabilitiesPointer(PDEV, PCI_CAPABILITY_MSI, false)) ? true : false; 
 }
 
+static void InitializeRequestsAndGroupsToHardwareLimitation(
+    UINT32* RequestedVectorsp,
+    UINT32* Groupedp,
+    UINT32  HardwareLimitation
+){
+    UINT32 RequestedVectors = *RequestedVectorsp;
+    UINT32 Grouped = 1;
+    if(RequestedVectors > HardwareLimitation){
+        Grouped++;
+        RequestedVectors = ROUND_UP64(RequestedVectors, HardwareLimitation);
+        RequestedVectors /= HardwareLimitation;
+        while(RequestedVectors > HardwareLimitation){
+            Grouped++;
+            RequestedVectors =  ROUND_UP64(RequestedVectors, HardwareLimitation) / HardwareLimitation;
+        }
+    }
+    *RequestedVectorsp = RequestedVectors; 
+    *Groupedp = Grouped;   
+}
+
+
+
 DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags){
-    BOOLEAN PciSupportsMsix = PciHalPciSupportsMsix(PDEV);
-    BOOLEAN PciSupportsMsi = PciHalPciSupportsMsi(PDEV);
-    UINT16* NewVectors;
-    
+    UINT16* NewVectors;    
     if(PDEV->InterruptVectors){
         return STATUS_UNSUCCESSFUL;
     }
 
-    if(PciSupportsMsix){
-        LouPrint("PCI.SYS:Allocating MSI-X Vectors\n");
-        while(1);
-    }else if(PciSupportsMsi){
-        LouPrint("PCI.SYS:Allocating MSI Vectors\n");
+    //if(PciHalPciSupportsMsix(PDEV)){
+    //    LouPrint("PCI.SYS:Allocating MSI-X Vectors\n");
+    //    while(1);
+    //}else 
+    if(PciHalPciSupportsMsi(PDEV)){
+        UINT32 Grouped;
+        InitializeRequestsAndGroupsToHardwareLimitation(
+            &RequestedVectors,
+            &Grouped,
+            32
+        );
+
+
+
+        LouPrint("PCI.SYS:Allocating:%d MSI Vectors Handling:%d Items\n", (UINT64)RequestedVectors, (UINT64)Grouped);
         while(1);
     }else{ 
         PciHalDbgPrint("PCI.SYS:Allocating INT-X Vectors\n");

@@ -56,14 +56,18 @@ void* AcpiOsMapMemory(
     ACPI_PHYSICAL_ADDRESS   PhyAddress,
     ACPI_SIZE               Length
 ){
-    return (void*)((UINT64)PhyAddress + KSpaceBase);
+    UINT64 Base = (UINTPTR)PhyAddress & ~(KILOBYTE_PAGE - 1);
+    UINT64 Offset = (UINTPTR)PhyAddress - Base;
+    UINT64 NewPage = (UINTPTR)LouKeMallocPageEx(KILOBYTE_PAGE, ROUND_UP64(Length + Offset, KILOBYTE_PAGE) / KILOBYTE_PAGE, KERNEL_GENERIC_MEMORY, Base);
+    return (void*)(NewPage + Offset);
 }
 
 void AcpiOsUnmapMemory(
     void*       Address,
     ACPI_SIZE   Length
 ){
-    
+    UINT64 Page = (UINTPTR)Address & ~(KILOBYTE_PAGE - 1);
+    LouKeFreePage((PVOID)Page);
 }
 
 ACPI_STATUS AcpiOsGetPhysicalAddress(

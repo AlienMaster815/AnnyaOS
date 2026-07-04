@@ -215,19 +215,16 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeSecuritySubsystem();
 
-    if (InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
+    if(InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
         
     InitializeSymmetricMultiProcessing();
 
     InitializeProcessManager();
 
     LouKeInitializeFullLouACPISubsystem();
-    
-    LouPrint("HERE:STATUS_SUCCESS\n");
-    while(1);
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
-    
+
     LouKeCreateDemon(
         LouKeThreadManagerDemon,
         0,
@@ -240,7 +237,7 @@ void AdvancedLousineKernelInitialization(){
     LouKeUnmaskSmpInterrupts();
 
     LouPrint("Kernel Advanced System Initialized\n");
-
+    
 }
 
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){

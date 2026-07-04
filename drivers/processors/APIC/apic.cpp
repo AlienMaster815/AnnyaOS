@@ -517,6 +517,9 @@ bool InitializeLapic(UINT32 CpuID){
             }
         }
     }
+
+    while(1);
+
     return true;
 }
 
