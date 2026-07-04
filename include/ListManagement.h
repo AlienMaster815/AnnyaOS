@@ -34,10 +34,10 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
     ((Type*)(UINTPTR)((Header) ? CONTAINER_OF((Header), Type, Member) : 0x00))
 
 #define ForEachListItem(Position, Node) \
-    for((Position) = (Node); (Position); (Position) = (Position)->NextHeader)
+    for((Position) = (Node); (Position); (Position) = (PListHeader)LouKeGetAtomic64FromUint64((UINT64*)&(Position)->NextHeader))
 
 #define ForEachLListItem(Position, Node) \
-    ForEachListItem((Position), (Node))
+    for((Position) = (Node); (Position); (Position) = (Position)->NextHeader)
 
 #define ForEachListEntry(Position, Node, Member) \
     for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); \
@@ -50,10 +50,14 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
         (Position) = (N))
 
 #define ForEachLListEntry(Position, Node, Member) \
-    ForEachListEntry((Position), (Node), Member)
+    for((Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((UINT64*)&(Node)->NextHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member); \
+        (Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((UINT64*)&(Position)->Member.NextHeader), typeof(*(Position)), Member))
 
 #define ForEachLListEntrySafe(Position, N, Node, Member) \
-    ForEachListEntrySafe((Position), (N), (Node), Member)
+    for((Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((UINT64*)&(Node)->NextHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member) && ((N) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((UINT64*)&(Position)->Member.NextHeader), typeof(*(N)), Member), true); \
+        (Position) = (N))
 
 static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
     while(Header->NextHeader){
@@ -62,6 +66,15 @@ static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
     Header->NextHeader = Tail;
     Tail->LastHeader = Header;
 }
+
+static inline void LouKeLListAddTail(PListHeader Tail, PListHeader Header){
+    while(LouKeGetAtomic64FromUint64((UINT64*)&Header->NextHeader)){
+        Header = (PListHeader)LouKeGetAtomic64FromUint64((UINT64*)&Header->NextHeader);
+    }
+    LouKeSetAtomic64FromUint64((UINT64*)Header->NextHeader, (UINT64)(UINTPTR)Tail);
+    LouKeSetAtomic64FromUint64((UINT64*)Header->LastHeader, (UINT64)(UINTPTR)Header);
+}
+
 
 static inline BOOLEAN LouKeListIsHead(PListHeader List, PListHeader Head){
     return List == Head;

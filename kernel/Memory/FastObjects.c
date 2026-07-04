@@ -143,7 +143,7 @@ PVOID LouKeAllocateFastObjectEx(
     LOUSTR  ObjectLookup,
     PVOID   ConstructData
 ){
-
+    LOUSTATUS Status;
     PFAST_ALLOCATION_TEMPLATE Template = AcquireFastObjectTemplate(ObjectLookup);
     if(!Template){
         LouPrint("LouKeAllocateFastObjectEx():Object Dosent Exist:%s\n", ObjectLookup);
@@ -161,8 +161,14 @@ PVOID LouKeAllocateFastObjectEx(
             LouKeAcquireReference(&TmpTracker->KRef);
             if(Template->Constructor){
                 MutexLock(&Template->BuildLock);
-                Template->Constructor(Result, ConstructData);
+                Status = Template->Constructor(Result, ConstructData);
                 MutexUnlock(&Template->BuildLock);
+                if(Status != STATUS_SUCCESS){
+                    LouKeFreeFromFixedPool(TmpTracker->AllocationPool, Result);
+                    LouKeReleaseReference(&TmpTracker->KRef);
+                    Result = 0x00;
+                    goto _ALLOCATION_FINISHED;
+                }
             }
             goto _ALLOCATION_FINISHED;
         }        
@@ -180,11 +186,16 @@ PVOID LouKeAllocateFastObjectEx(
         LouKeAcquireReference(&NewPool->KRef);
         if(Template->Constructor){
             MutexLock(&Template->BuildLock);
-            Template->Constructor(Result, ConstructData);
+            Status = Template->Constructor(Result, ConstructData);
             MutexUnlock(&Template->BuildLock);
+            if(Status != STATUS_SUCCESS){
+                LouKeFreeFromFixedPool(TmpTracker->AllocationPool, Result);
+                LouKeReleaseReference(&TmpTracker->KRef);
+                FreePoolTracker(Template, NewPool);
+                Result = 0x00;
+            }
         }
     }
-
     _ALLOCATION_FINISHED:
     MutexUnlock(&Template->PoolTrackerLock);
     return Result;

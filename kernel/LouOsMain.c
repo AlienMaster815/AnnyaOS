@@ -215,6 +215,7 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeSecuritySubsystem();
 
+
     if(InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
         
     InitializeSymmetricMultiProcessing();

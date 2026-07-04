@@ -106,6 +106,7 @@ LOUSTATUS UpdateIDT(bool Init);
 void SetInterruptFlags();
 void UnSetInterruptFlags();
 void WaitForInterrupt();
+UINT64 LouKeInterruptFallbackRounter(UINT64 StackPtr);
 #endif
 #ifdef __cplusplus
 }
