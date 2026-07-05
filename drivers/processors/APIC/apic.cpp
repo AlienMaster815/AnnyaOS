@@ -479,7 +479,6 @@ bool InitializeLapic(UINT32 CpuID){
         LouPrint("CRC IS:%h\n",CRC);
 
         ((PLKPCB)GetLKPCB())->ApicData.CurrentTimerTicks = CRC * 30;
-        //40000 is tsc deadline
 
         WRITE_REGISTER_ULONG(LVT_TIMER_REGISTER, 32);
         WRITE_REGISTER_ULONG(LVT_DIVIDE_CONFIGURATION_REGISTER, 0b1010);

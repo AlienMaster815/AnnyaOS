@@ -12,17 +12,11 @@ StackTop dd 0
 ;StackBase dd 0
 
 section .text
-
-;global ___chkstk_ms
-;global __chkstk ;ntoskrnl too
 global RunStack
 
 
 extern LouKeStackPanic
 extern LouKeGetStackSize
 
-;___chkstk_ms:
 
-
-;	jmp $
 

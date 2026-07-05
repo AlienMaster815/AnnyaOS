@@ -15,6 +15,12 @@ extern "C" {
 #include <cstdio.h>
 #include <Debug.h>
 
+typedef enum{
+    IsrRoutine = 0,
+    LirRoutine, 
+    LirExRoutine, 
+}IPIC_ROUTINE_TYPE;
+
 #define INTERRUPT_SERVICE_ROUTINE_0 0
 #define INTERRUPT_SERVICE_ROUTINE_1 1
 #define INTERRUPT_SERVICE_ROUTINE_2 2
@@ -106,7 +112,7 @@ LOUSTATUS UpdateIDT(bool Init);
 void SetInterruptFlags();
 void UnSetInterruptFlags();
 void WaitForInterrupt();
-UINT64 LouKeInterruptFallbackRounter(UINT64 StackPtr);
+UINT64 LouKeRouterFallbackIsr(UINT64 StackPtr);
 #endif
 #ifdef __cplusplus
 }

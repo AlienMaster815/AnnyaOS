@@ -1,7 +1,7 @@
 #include <LouAPI.h>
 
 
-UINT64 LouKeInterruptFallbackRounter(UINT64 StackPtr){
+UINT64 LouKeRouterFallbackIsr(UINT64 StackPtr){
   
     return StackPtr;
 } 
