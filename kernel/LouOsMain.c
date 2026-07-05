@@ -150,49 +150,8 @@ void InitializeBootRegistry(uintptr_t Base, uintptr_t Top);
 void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
 void SetTSCFrequency(uint64_t Frequency);
 void SetTSC();
+LOUSTATUS LouKeInitializeInterruptSubsystems();
 
-LOUSTATUS LousineKernelEarlyInitialization(){
-
-    //basic kernel initialization for IR Exceptions to keep the guru away
-    SetupGDT(0);
-
-    HandleProccessorInitialization();
-
-    InitializeInterruptRouter();
-
-    InitializeStartupInterruptHandleing();
-
-    RegisterInterruptHandler(DivideByZero, INTERRUPT_SERVICE_ROUTINE_0, false, 0);
-    RegisterInterruptHandler(Debug, INTERRUPT_SERVICE_ROUTINE_1, false, 0);
-    RegisterInterruptHandler(NMI, INTERRUPT_SERVICE_ROUTINE_2, false, 0);
-    RegisterInterruptHandler(BreakPoint, INTERRUPT_SERVICE_ROUTINE_3, false, 0);
-    RegisterInterruptHandler(OverFlow, INTERRUPT_SERVICE_ROUTINE_4, false, 0);
-    RegisterInterruptHandler(BoundRange, INTERRUPT_SERVICE_ROUTINE_5, false, 0);
-    RegisterInterruptHandler(InvalidOpcode, INTERRUPT_SERVICE_ROUTINE_6, false, 0);
-    RegisterInterruptHandler(FloatDeviceNotAvailable, INTERRUPT_SERVICE_ROUTINE_7, false, 0);
-    RegisterInterruptHandler(DoubleFault, INTERRUPT_SERVICE_ROUTINE_8, false, 0);
-    RegisterInterruptHandler(CpOverun, INTERRUPT_SERVICE_ROUTINE_9, false, 0);
-    //RegisterInterruptHandler(TSS, INTERRUPT_SERVICE_ROUTINE_10);//
-    RegisterInterruptHandler(SegmentNotPresent, INTERRUPT_SERVICE_ROUTINE_11, false, 0);
-    RegisterInterruptHandler(StackSegmentFault, INTERRUPT_SERVICE_ROUTINE_12, false, 0);
-    RegisterInterruptHandler(GPF, INTERRUPT_SERVICE_ROUTINE_13, false, 0);
-    RegisterInterruptHandler(PageFault, INTERRUPT_SERVICE_ROUTINE_14, false, 0);
-    RegisterInterruptHandler(x87FloatPointError, INTERRUPT_SERVICE_ROUTINE_16, false, 0);
-    RegisterInterruptHandler(AlignmentCheck, INTERRUPT_SERVICE_ROUTINE_17, false, 0);
-    RegisterInterruptHandler(MachineCheck, INTERRUPT_SERVICE_ROUTINE_18, false, 0);
-    RegisterInterruptHandler(SIMDFloatPointException, INTERRUPT_SERVICE_ROUTINE_19, false, 0);
-    RegisterInterruptHandler(VirtualizationException, INTERRUPT_SERVICE_ROUTINE_20, false, 0);
-    RegisterInterruptHandler(ControlProtectionException, INTERRUPT_SERVICE_ROUTINE_21, false, 0);
-    //RegisterInterruptHandler(UpdateProcessManager, INTERRUPT_SERVICE_ROUTINE_32, false, 0);
-    //RegisterInterruptHandler(CookieCheckFail, 0x29, false, 0);
-    //RegisterInterruptHandler((void(*))getTrampolineAddress(), 0x50, false, 0);
-    RegisterInterruptHandler((void(*))Spurious, 0xFF, true, 0);
-
-    SetUpTimers();
-    //DeterminCPU();
-
-    return STATUS_SUCCESS;
-}
 
 void InitializeSymmetricMultiProcessing(){
     LouPrint("Checking If System Supports SMP\n");
@@ -215,8 +174,7 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeSecuritySubsystem();
 
-
-    if(InitializeMainInterruptHandleing() != STATUS_SUCCESS)LouPrint("Unable To Setup Interrupt Controller System\n");
+    LouKeInitializeInterruptSubsystems();
         
     InitializeSymmetricMultiProcessing();
 
@@ -361,7 +319,11 @@ void LouOsKrnlStart(
 
     LouKeInitializeBootRegistry();
 
-    LousineKernelEarlyInitialization();
+    SetupGDT(0);
+
+    HandleProccessorInitialization();
+
+    SetUpTimers();
    
     LouKeInitializeEarlyKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
 

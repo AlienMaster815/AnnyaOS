@@ -49,7 +49,7 @@ LOUAPI
 void LouKeInitializeCurrentApApic();
 
 LOUAPI
-LOUSTATUS UpdateIDT(bool Init);
+LOUSTATUS UpdateIDT();
 
 LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle);
 
@@ -323,7 +323,7 @@ UNUSED static void ProcessorIdleTask(){
     ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = ProcID;
-    UpdateIDT(true);
+    UpdateIDT();
     SetUpTimers();
     LouKeInitializeCurrentApApic();
     INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;
@@ -346,7 +346,7 @@ UNUSED static void InitializeIdleProcess(){
     ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = ProcID;
-    UpdateIDT(true);
+    UpdateIDT();
     SetUpTimers();
     LouKeInitializeCurrentApApic();
     INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;

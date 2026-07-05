@@ -48,6 +48,8 @@ void LouKeInitializeEarlyKernelRuntimeEnviornment(KHANDLE KernelHandle){
     LouKeEarlyRuntimeLoadModule(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\BOOTVID", KernelHandle);
     
     LouKeEarlyRuntimeLoadModule(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\PCI", KernelHandle);
+    
+    LouKeEarlyRuntimeLoadModule(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\APIC", KernelHandle);
 
     StartupConfigureImportTable(KernelHandle);
 

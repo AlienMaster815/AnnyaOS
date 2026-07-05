@@ -103,12 +103,12 @@ void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );
-LOUSTATUS SetBasicInterrupts(bool init);
+LOUSTATUS SetBasicInterrupts();
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
 KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 LOUSTATUS InitializeMainInterruptHandleing();
 LOUSTATUS InitializeStartupInterruptHandleing();
-LOUSTATUS UpdateIDT(bool Init);
+LOUSTATUS UpdateIDT();
 void SetInterruptFlags();
 void UnSetInterruptFlags();
 void WaitForInterrupt();

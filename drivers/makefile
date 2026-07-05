@@ -1,5 +1,6 @@
 #//Copyright GPL-2 Tyler Grenier (2025 - 2026)
 all:
+	$(MAKE) -C Apic all
 	$(MAKE) -C PCI all
 	$(MAKE) -C Networking all
 	$(MAKE) -C DMA all
@@ -11,6 +12,7 @@ all:
 	$(MAKE) -C USB all
 
 clean:
+	$(MAKE) -C Apic clean
 	$(MAKE) -C PCI clean
 	$(MAKE) -C Networking clean
 	$(MAKE) -C DMA clean

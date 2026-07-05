@@ -456,15 +456,13 @@ void SetPicIDTGate(int index, void (*handler)()) {
     #endif
 }
 
-LOUSTATUS SetBasicInterrupts(bool Init){
+LOUSTATUS SetBasicInterrupts(){
     unsigned short cs_value;
 
     // Inline assembly to read the CS register
     asm("mov %%cs, %0" : "=r" (cs_value));
 
     #ifdef __x86_64__
-    if(Init){
-
         for (uint8_t i = 0; i <= 200; i++ ) {
             set_idt_gate(i, Handler[i], cs_value, 0, 0x8E);   //Everything else
         }
@@ -473,50 +471,19 @@ LOUSTATUS SetBasicInterrupts(bool Init){
         set_idt_gate(  32, Handler[  32], cs_value, 1, 0x8E); //Process Manager
         set_idt_gate(0x0E, Handler[0x0E], cs_value, 2, 0x8E); //PF Manager
 
-        return 0;
-    }
-    else{
-
-        return 0;
-    }
-    #endif
-    #ifdef __i386__
-    if(Init){
-        for (uint8_t i = 0; i <= 200; i++) {
-            SetPicIDTGate(i, Handler[i]);
-        }
-        return 0;
-    }
-
-    else{
-
-        //TODO: Finish Apic Interrupts when We Get That Far
-
-        return 0;
-
-    }
+        return STATUS_SUCCESS;
     #endif
 
+    return STATUS_UNSUCCESSFUL;
 }
 
 
-LOUSTATUS UpdateIDT(bool Init){
+LOUSTATUS UpdateIDT(){
     IDTP idtp;
-    if(Init){// Using PIC With Legacy Interrupt Descriptor Table
-        idtp.base = (uint64_t)(uintptr_t)&IDT;
-        idtp.limit = 256*sizeof(Interrupt_Descriptor_Table) - 1;
-        asm volatile("lidt %0" : : "m" (idtp) : "memory");
-        return 0;
-    }
-    else{ // Using APIC With Interrupt Descriptor Table 64
-        idtp.base = (uint64_t)(uintptr_t)&IDT;
-        idtp.limit = 256*sizeof(Interrupt_Descriptor_Table) - 1;
-        asm volatile("lidt %0" : : "m" (idtp) : "memory");
-        return 0;
-    }
-    
-    return 1;
-
+    idtp.base = (uint64_t)(uintptr_t)&IDT;
+    idtp.limit = 256*sizeof(Interrupt_Descriptor_Table) - 1;
+    asm volatile("lidt %0" : : "m" (idtp) : "memory");
+    return STATUS_SUCCESS;
 }
 
 void SetInterruptFlags(){

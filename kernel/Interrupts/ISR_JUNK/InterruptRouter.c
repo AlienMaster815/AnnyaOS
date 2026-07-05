@@ -41,39 +41,13 @@ typedef struct _INTERRUPT_ROUTER_ENTRY{
 }INTERRUPT_ROUTER_ENTRY, * PINTERRUPT_ROUTER_ENTRY;
 
 static INTERRUPT_ROUTER_ENTRY InterruptRouterTable[256] = {0};
-uint64_t GetAdvancedRegisterInterruptsStorage();
 
 void LouKeIcUnmaskIrq(uint8_t irq);
 
 
-void InitializeInterruptRouter(){
-    LouKeCreateFastObjectClass("IRQROUTE", 256, sizeof(INTERRUPT_ROUTER_ENTRY), GET_ALIGNMENT(INTERRUPT_ROUTER_ENTRY), 0, KERNEL_GENERIC_MEMORY);
-}
-
 KERNEL_EXPORT
 void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData) {
-    //LouPrint("Handler:%h Installed For Vector:%d\n", Handler, InterruptNumber);
 
-    PINTERRUPT_ROUTER_ENTRY TmpRouter = &InterruptRouterTable[InterruptNumber]; 
-	if(NeedFlotationSave){
-        InterruptRouterTable[InterruptNumber].NeedFlotationSave = true;
-    }
-    while(TmpRouter->List.NextHeader){
-        TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
-    }
-    TmpRouter->List.NextHeader = LouKeAllocateFastObject("IRQROUTE");
-    if(!TmpRouter->List.NextHeader){
-        TmpRouter->List.NextHeader = (PListHeader)LouKeMallocType(INTERRUPT_ROUTER_ENTRY, KERNEL_GENERIC_MEMORY);
-    }
-    TmpRouter = (PINTERRUPT_ROUTER_ENTRY)TmpRouter->List.NextHeader;
-    TmpRouter->InterruptHandler = Handler;
-    TmpRouter->OverideData = OverideData;
-	InterruptRouterTable[InterruptNumber].ListCount++;
-    if((InterruptNumber > 32) && (!InterruptRouterTable[InterruptNumber].InterruptUnMasked)){
-        InterruptNumber -= 32;
-        LouKeIcUnmaskIrq(InterruptNumber);
-        InterruptRouterTable[InterruptNumber].InterruptUnMasked = true;
-    }
 }
 
 
@@ -84,73 +58,17 @@ int LouPrintPanic(char* format, ...);
 void StoreAdvancedRegisters(uint64_t ContextHandle);
 void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
-typedef struct _PROCESSOR_CALLBACKS{
-    void        (*SaveHandler)(uint8_t*);
-    void        (*RestoreHandler)(uint8_t*);
-    void        (*InitializeThreadDataHandler)(uint8_t*, uint8_t*);
-    uint64_t    (*AllocateSaveContext)();
-    void        (*DeAllocateSaveContext)(uint64_t);
-}PROCESSOR_CALLBACKS, * PPROCESSOR_CALLBACKS;
 
-static PPROCESSOR_CALLBACKS ProcessorCallbacks;
 
-void LouKeRegisterProcessorCallback(PPROCESSOR_CALLBACKS Callback){
-    ProcessorCallbacks = Callback;
-}
-
-//Fuck It Well do it live
-void SaveEverythingWithInterruptBuffer(uint64_t* ContextHandle){
-    if(!ContextHandle)return;   
-    *ContextHandle = GetAdvancedRegisterInterruptsStorage();
-    if(!(*ContextHandle))return;
-    ProcessorCallbacks->SaveHandler((uint8_t*)(*ContextHandle));
-}
-
-void RestoreEverythingWithInterruptBuffer(uint64_t* ContextHandle){
-    if(!ContextHandle)return;
-    if(!(*ContextHandle))return;
-    ProcessorCallbacks->RestoreHandler((uint8_t*)(*ContextHandle));
-}
-
-void SaveEverything(uint64_t ContextHandle){
-    if(!ContextHandle)return;
-    ProcessorCallbacks->SaveHandler((uint8_t*)ContextHandle);
-}
-
-void RestoreEverything(uint64_t ContextHandle){
-    if(!ContextHandle)return;
-    ProcessorCallbacks->RestoreHandler((uint8_t*)ContextHandle);
-}
-
-uint64_t AllocateSaveContext(){
-    if(!ProcessorCallbacks->AllocateSaveContext){
-        return 0x00;
-    }
-    return ProcessorCallbacks->AllocateSaveContext();
-}
-
-void DeAllocateSaveContext(uint64_t Context){
-    if(!ProcessorCallbacks->DeAllocateSaveContext){
-        return;
-    }
-    ProcessorCallbacks->DeAllocateSaveContext(Context);
-}
-
-void LouKeDebugTrap();
-
-void LouKeSetIrqlNoFlagUpdate(
-    LouKIRQL  NewIrql,
-    LouKIRQL* OldIrql
-);
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
-    LouKIRQL Irql;
-    LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, &Irql);
-    uint64_t ContextHandle = 0x00;
+    //LouKIRQL Irql;
+    //LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, &Irql);
+    //uint64_t ContextHandle = 0x00;
     PINTERRUPT_ROUTER_ENTRY TmpEntry = &InterruptRouterTable[Interrupt]; 
     if(InterruptRouterTable[Interrupt].ListCount){
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
-            SaveEverythingWithInterruptBuffer(&ContextHandle);
+            //SaveEverythingWithInterruptBuffer(&ContextHandle);
         }
         while(TmpEntry){
             if(TmpEntry->InterruptHandler){
@@ -164,13 +82,13 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
             TmpEntry = (PINTERRUPT_ROUTER_ENTRY)TmpEntry->List.NextHeader;
         }
         if(InterruptRouterTable[Interrupt].NeedFlotationSave){
-            RestoreEverythingWithInterruptBuffer(&ContextHandle);
+            //RestoreEverythingWithInterruptBuffer(&ContextHandle);
         }
-        LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
+        //LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
         LouKeSendIcEOI();
         return;
     }
-    LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
+    //LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
     LouKeSendIcEOI();
     return;
     
@@ -219,9 +137,3 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 		asm("hlt");
 	}
 }
-
-
-void PrintRegister(uint64_t Register){
-    LouPrint("Register Is :: %h\n", Register);
-}
-

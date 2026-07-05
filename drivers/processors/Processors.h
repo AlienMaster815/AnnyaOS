@@ -8,9 +8,9 @@
 LOUAPI uint16_t GetNPROC();
 LOUAPI void UpgradeNPROC();
 LOUAPI void DowngradeNPROC();
-void LouKeInitializeEoiHandler(PVOID Handler, UINT16 Cpu);
-void LouKeInitializeUnmaskHandler(PVOID Handler, UINT16 Cpu);
-void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu);
+LOUAPI void LouKeInitializeEoiHandler(PVOID Handler, UINT16 Cpu);
+LOUAPI void LouKeInitializeUnmaskHandler(PVOID Handler, UINT16 Cpu);
+LOUAPI void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu);
 LOUAPI void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
 LOUAPI void cpuid_subleaf(unsigned int leaf, unsigned int subleaf, 
                                  unsigned int *eax, unsigned int *ebx, 

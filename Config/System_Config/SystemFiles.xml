@@ -21,6 +21,7 @@
         <FILETOCPY64>cp drivers/gpu/BootVid/BOOTVID.SYS ISO/ANNYA/SYSTEM64/BOOTVID.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
         <!--PCI Driver-->
         <FILETOCPY64>cp drivers/PCI/PCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCI.SYS</FILETOCPY64>                                        <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp drivers/Apic/APIC.SYS ISO/ANNYA/SYSTEM64/DRIVERS/APIC.SYS</FILETOCPY64>                                        <!--Lousine Kernel Core-->
         <!--Smp Trampoline-->
         <FILETOCPY64>cp boot/x86_64/SmpBoot.bin ISO/ANNYA/SYSTEM64/SMPBOOT.LTB</FILETOCPY64>                                <!--Lousine Kernel SMP Trampoline-->
         <!--Kernel Drivers-->
