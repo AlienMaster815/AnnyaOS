@@ -1,4 +1,4 @@
-# Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl llvm clang lld automake autoconf bdf2psf
+#Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl llvm clang lld automake autoconf bdf2psf
 #git clone https://github.com/limine-bootloader/limine
 #cd limine
 #./bootstrap

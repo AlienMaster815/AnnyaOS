@@ -175,8 +175,8 @@
 #define GET_X1APIC_PMC_DELIVERY_STATUS(PmcRegister)                             ((PmcRegister >> X1APIC_PMC_DELIVERY_STATUS_SHIFT) & X1APIC_PMC_DELIVERY_STATUS_MASK)
 #define X1APIC_PMC_DELIVERY_MODE_MASK                                           0x07
 #define X1APIC_PMC_DELIVERY_MODE_SHIFT                                          8
-#define GET_X1APIC_ERROR_DELIVERY_MODE(PmcRegister)                             ((PmcRegister >> X1APIC_PMC_DELIVERY_MODE_SHIFT) & X1APIC_PMC_DELIVERY_MODE_MASK)
-#define SET_X1APIC_ERROR_DELIVERY_MODE(PmcRegister, x)                          (PmcRegister = ((PmcRegister & ~(X1APIC_PMC_DELIVERY_MODE_MASK << X1APIC_PMC_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_PMC_DELIVERY_MODE_MASK) << X1APIC_PMC_DELIVERY_MODE_SHIFT)))
+#define GET_X1APIC_PMC_DELIVERY_MODE(PmcRegister)                               ((PmcRegister >> X1APIC_PMC_DELIVERY_MODE_SHIFT) & X1APIC_PMC_DELIVERY_MODE_MASK)
+#define SET_X1APIC_PMC_DELIVERY_MODE(PmcRegister, x)                            (PmcRegister = ((PmcRegister & ~(X1APIC_PMC_DELIVERY_MODE_MASK << X1APIC_PMC_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_PMC_DELIVERY_MODE_MASK) << X1APIC_PMC_DELIVERY_MODE_SHIFT)))
 #define X1APIC_PMC_VECTOR_MASK                                                  0xFF
 #define X1APIC_PMC_VECTOR_SHIFT                                                 0
 #define GET_X1APIC_PMC_VECTOR(PmcRegister)                                      ((PmcRegister >> X1APIC_PMC_VECTOR_SHIFT) & X1APIC_PMC_VECTOR_MASK)
@@ -191,8 +191,8 @@
 #define GET_X1APIC_TS_DELIVERY_STATUS(TsRegister)                               ((TsRegister >> X1APIC_TS_DELIVERY_STATUS_SHIFT) & X1APIC_TS_DELIVERY_STATUS_MASK)
 #define X1APIC_TS_DELIVERY_MODE_MASK                                            0x07
 #define X1APIC_TS_DELIVERY_MODE_SHIFT                                           8
-#define GET_X1APIC_ERROR_DELIVERY_MODE(TsRegister)                              ((TsRegister >> X1APIC_TS_DELIVERY_MODE_SHIFT) & X1APIC_TS_DELIVERY_MODE_MASK)
-#define SET_X1APIC_ERROR_DELIVERY_MODE(TsRegister, x)                           (TsRegister = ((TsRegister & ~(X1APIC_TS_DELIVERY_MODE_MASK << X1APIC_TS_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_TS_DELIVERY_MODE_MASK) << X1APIC_TS_DELIVERY_MODE_SHIFT)))
+#define GET_X1APIC_TS_DELIVERY_MODE(TsRegister)                                 ((TsRegister >> X1APIC_TS_DELIVERY_MODE_SHIFT) & X1APIC_TS_DELIVERY_MODE_MASK)
+#define SET_X1APIC_TS_DELIVERY_MODE(TsRegister, x)                              (TsRegister = ((TsRegister & ~(X1APIC_TS_DELIVERY_MODE_MASK << X1APIC_TS_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_TS_DELIVERY_MODE_MASK) << X1APIC_TS_DELIVERY_MODE_SHIFT)))
 #define X1APIC_TS_VECTOR_MASK                                                   0xFF
 #define X1APIC_TS_VECTOR_SHIFT                                                  0
 #define GET_X1APIC_TS_VECTOR(TsRegister)                                        ((TsRegister >> X1APIC_TS_VECTOR_SHIFT) & X1APIC_TS_VECTOR_MASK)
