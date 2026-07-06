@@ -1,7 +1,6 @@
 #ifndef _X1APIC_INTERNALS_H
 #define _X1APIC_INTERNALS_H
 
-#include <LouDDK.h>
 #include "ApicInternals.h"
 
 #define X1APIC_ID_REGISTER_OFFSET                                               0x20
@@ -103,7 +102,7 @@
 #define X1APIC_ID_SHIFT                                         24
 #define X1APIC_ID_MASK                                          0xFF
 #define GET_X1APIC_ID_VALUE(IdRegister)                         ((IdRegister >> X1APIC_ID_SHIFT) & X1APIC_ID_MASK)
-
+#define SET_X1APIC_ID_VALUE(IdRegister, Value)                  (IdRegister = ((IdRegister & ~(X1APIC_ID_MASK << X1APIC_ID_SHIFT)) | ((Value & X1APIC_ID_MASK) << X1APIC_ID_SHIFT)))
 
 
 #define X1APIC_VERSION_SHIFT                                    0
@@ -116,6 +115,94 @@
 #define X1APIC_SUPPORT_EOI_SUPRESS_MASK                         0x01
 #define X1APIC_SUPPORT_EOI_SUPRESS_VALUE(VersionRegister)       ((VersionRegister >> X1APIC_SUPPORT_EOI_SUPRESS_SHIFT) & X1APIC_SUPPORT_EOI_SUPRESS_MASK)
 
+UINT32 ApicHalGetX1ApicIdRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicVersionRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicTaskPriorityRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicArbitrationPriorityRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicProcessorPriorityRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicRemoteReadRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLogicalDestinationRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicDestinationFormatRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicSpuriousInterruptVectorRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicInServiceRegisterX32Ex(PVOID ApicBase, SIZE Offset);
+UINT32 ApicHalGetX1ApicTriggerModeRegisterX32Ex(PVOID ApicBase, SIZE Offset);
+UINT32 ApicHalGetX1ApicInterruptRequestRegisterX32Ex(PVOID ApicBase, SIZE Offset);
+UINT32 ApicHalGetX1ApicErrorStatusRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtCmciRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicInterruptControlRegisterLowEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase);
+UINT64 ApicHalGetX1ApicInterruptControlRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtTimerRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtInt0RegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtInt1RegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtErrorRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicInitialCountRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicCurrentCountRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicDivideConfigurationRegisterEx(PVOID ApicBase);
+void ApicHalSetX1ApicIdRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicTaskPriorityRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicEndOfInterruptRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLogicalDestinationRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicDestinationFormatRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicSpuriousInterruptVectorRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtCmciRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicInterruptControlRegisterLowEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicInterruptControlRegisterEx(PVOID ApicBase, UINT64 Value);
+void ApicHalSetX1ApicLvtTimerRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCounterRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtLint0RegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtLint1RegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtErrorRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicInitialCountRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicDivisionConfigurationRegisterEx(PVOID ApicBase, UINT32 Value);
 
+UINT32 ApicHalGetX1ApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicVersionRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicArbitrationPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicProcessorPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicRemoteReadRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicSpuriousInterruptVectorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicInServiceRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset);
+UINT32 ApicHalGetX1ApicTriggerModeRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset);
+UINT32 ApicHalGetX1ApicInterruptRequestRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset);
+UINT32 ApicHalGetX1ApicErrorStatusRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT64 ApicHalGetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtInt0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtInt1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicInitialCountRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicCurrentCountRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicDivideConfigurationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+void ApicHalSetX1ApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicEndOfInterruptRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicSpuriousInterruptVectorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value);
+void ApicHalSetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCounterRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtLint0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtLint1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicInitialCountRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicDivisionConfigurationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 
 #endif

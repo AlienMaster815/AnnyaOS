@@ -1,7 +1,7 @@
 #ifndef _APIC_INTERNALS_H
 #define _APIC_INTERNALS_H
 
-#include "X1ApicInternals.h"
+#include <LouAPI.h>
 
 typedef struct _APIC_DEVICE_OBJECT{
 

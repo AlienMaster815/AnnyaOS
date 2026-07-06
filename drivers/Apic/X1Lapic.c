@@ -78,7 +78,7 @@ UINT32 ApicHalGetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase){
     return GET_X1APIC_LVT_THERMAL_SENSOR_REGISTER(ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegistrEx(PVOID ApicBase){
+UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase){
     return GET_X1APIC_LVT_PERFORMANCE_MONITORING_COUNTERS_REGISTER(ApicBase);
 }
 
@@ -177,4 +177,180 @@ void ApicHalSetX1ApicInitialCountRegisterEx(PVOID ApicBase, UINT32 Value){
 
 void ApicHalSetX1ApicDivisionConfigurationRegisterEx(PVOID ApicBase, UINT32 Value){
     SET_X1APIC_DIVIDE_CONFIGURATION_REGISTER(ApicBase, Value);
+}
+
+UINT32 ApicHalGetX1ApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicIdRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicVersionRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicVersionRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicTaskPriorityRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicArbitrationPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicArbitrationPriorityRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicProcessorPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicProcessorPriorityRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicRemoteReadRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicRemoteReadRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLogicalDestinationRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicDestinationFormatRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicSpuriousInterruptVectorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicSpuriousInterruptVectorRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicInServiceRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset){
+    return ApicHalGetX1ApicInServiceRegisterX32Ex(ApicDeviceObject->ApicBase, Offset);
+}
+
+UINT32 ApicHalGetX1ApicTriggerModeRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset){
+    return ApicHalGetX1ApicTriggerModeRegisterX32Ex(ApicDeviceObject->ApicBase, Offset);
+}
+
+UINT32 ApicHalGetX1ApicInterruptRequestRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset){
+    return ApicHalGetX1ApicInterruptRequestRegisterX32Ex(ApicDeviceObject->ApicBase, Offset);
+}
+
+UINT32 ApicHalGetX1ApicErrorStatusRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicErrorStatusRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtCmciRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInterruptControlRegisterLowEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInterruptControlRegisterHighEx(ApicDeviceObject->ApicBase);
+}
+
+UINT64 ApicHalGetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInterruptControlRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtTimerRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtInt0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtInt0RegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtInt1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtInt1RegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtErrorRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicInitialCountRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInitialCountRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicCurrentCountRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicCurrentCountRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+UINT32 ApicHalGetX1ApicDivideConfigurationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicDivideConfigurationRegisterEx(ApicDeviceObject->ApicBase);
+}
+
+void ApicHalSetX1ApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicIdRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicTaskPriorityRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicEndOfInterruptRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicEndOfInterruptRegister(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLogicalDestinationRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicDestinationFormatRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicSpuriousInterruptVectorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicSpuriousInterruptVectorRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtCmciRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicInterruptControlRegisterLowEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicInterruptControlRegisterHighEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value){
+    ApicHalSetX1ApicInterruptControlRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtTimerRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtThermalSensorRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtPerformanceMonitoringCounterRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtPerformanceMonitoringCounterRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtLint0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtLint0RegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtLint1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtLint1RegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicLvtErrorRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicInitialCountRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicInitialCountRegisterEx(ApicDeviceObject->ApicBase, Value);
+}
+
+void ApicHalSetX1ApicDivisionConfigurationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicDivisionConfigurationRegister(ApicDeviceObject->ApicBase, Value);
 }
