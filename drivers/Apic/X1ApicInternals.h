@@ -102,7 +102,7 @@
 #define X1APIC_ID_SHIFT                                                         24
 #define X1APIC_ID_MASK                                                          0xFF
 #define GET_X1APIC_ID_VALUE(IdRegister)                                         ((IdRegister >> X1APIC_ID_SHIFT) & X1APIC_ID_MASK)
-#define SET_X1APIC_ID_VALUE(IdRegister, Value)                                  (IdRegister = ((IdRegister & ~(X1APIC_ID_MASK << X1APIC_ID_SHIFT)) | ((Value & X1APIC_ID_MASK) << X1APIC_ID_SHIFT)))
+#define SET_X1APIC_ID_VALUE(IdRegister, Value)                                  ((IdRegister & ~(X1APIC_ID_MASK << X1APIC_ID_SHIFT)) | ((Value & X1APIC_ID_MASK) << X1APIC_ID_SHIFT))
 
 
 #define X1APIC_VERSION_SHIFT                                                    0
@@ -118,7 +118,7 @@
 #define X1APIC_LVT_TIMER_MODE_MASK                                              0x03
 #define X1APIC_LVT_TIMER_MODE_SHIFT                                             17
 #define GET_X1APIC_LVT_TIMER_MODE(TimerRegister)                                ((TimerRegister >> X1APIC_LVT_TIMER_MODE_SHIFT) & X1APIC_LVT_TIMER_MODE_MASK)
-#define SET_X1APIC_LVT_TIMER_MODE(TimerRegister, x)                             (TimerRegister = ((TimerRegister & ~(X1APIC_LVT_TIMER_MODE_MASK << X1APIC_LVT_TIMER_MODE_SHIFT)) | ((x & X1APIC_LVT_TIMER_MODE_MASK) << X1APIC_LVT_TIMER_MODE_SHIFT)))                    
+#define SET_X1APIC_LVT_TIMER_MODE(TimerRegister, x)                             ((TimerRegister & ~(X1APIC_LVT_TIMER_MODE_MASK << X1APIC_LVT_TIMER_MODE_SHIFT)) | ((x & X1APIC_LVT_TIMER_MODE_MASK) << X1APIC_LVT_TIMER_MODE_SHIFT))                    
 #define X1APIC_LVT_TIMER_MASK_MASK                                              1
 #define X1APIC_LVT_TIMER_MASK_SHIFT                                             16
 #define GET_X1APIC_LVT_TIMER_MASK(TimerRegister)                                ((TimerRegister >> X1APIC_LVT_TIMER_MASK_SHIFT) & X1APIC_LVT_TIMER_MASK_MASK)
@@ -129,67 +129,67 @@
 #define X1APIC_LVT_TIMER_VECTOR_MASK                                            0xFF
 #define X1APIC_LVT_TIMER_VECTOR_SHIFT                                           0
 #define GET_X1APIC_LVT_TIMER_VECTOR(TimerRegister)                              ((TimerRegister >> X1APIC_LVT_TIMER_VECTOR_SHIFT) & X1APIC_LVT_TIMER_VECTOR_MASK)
-#define SET_X1APIC_LVT_TIMER_VECTOR(TimerRegister, x)                           (TimerRegister = ((TimerRegister & ~(X1APIC_LVT_TIMER_VECTOR_MASK << X1APIC_LVT_TIMER_VECTOR_SHIFT)) | ((x & X1APIC_LVT_TIMER_VECTOR_MASK) << X1APIC_LVT_TIMER_VECTOR_SHIFT)))
+#define SET_X1APIC_LVT_TIMER_VECTOR(TimerRegister, x)                           ((TimerRegister & ~(X1APIC_LVT_TIMER_VECTOR_MASK << X1APIC_LVT_TIMER_VECTOR_SHIFT)) | ((x & X1APIC_LVT_TIMER_VECTOR_MASK) << X1APIC_LVT_TIMER_VECTOR_SHIFT))
 
 
 #define X1APIC_LVT_CMCI_MASK_MASK                                               1
 #define X1APIC_LVT_CMCI_MASK_SHIFT                                              16
 #define GET_X1APIC_LVT_CMCI_MASK(CmciRegister)                                  ((CmciRegister >> X1APIC_LVT_CMCI_MASK_SHIFT) & X1APIC_LVT_CMCI_MASK_MASK)
-#define SET_X1APIC_LVT_CMCI_MASK(CmciRegister, x)                               (CmciRegister = ((CmciRegister & ~(X1APIC_LVT_CMCI_MASK_MASK << X1APIC_LVT_CMCI_MASK_SHIFT)) | ((x & X1APIC_LVT_CMCI_MASK_MASK) << X1APIC_LVT_CMCI_MASK_SHIFT)))
+#define SET_X1APIC_LVT_CMCI_MASK(CmciRegister, x)                               ((CmciRegister & ~(X1APIC_LVT_CMCI_MASK_MASK << X1APIC_LVT_CMCI_MASK_SHIFT)) | ((x & X1APIC_LVT_CMCI_MASK_MASK) << X1APIC_LVT_CMCI_MASK_SHIFT))
 #define X1APIC_LVT_CMCI_DELIVERY_STATUS_MASK                                    1
 #define X1APIC_LVT_CMCI_DELIVERY_STATUS_SHIFT                                   12
 #define GET_X1APIC_LVT_CMCI_DELIVERY_STATUS(CmciRegister)                       ((CmciRegister >> X1APIC_LVT_CMCI_DELIVERY_STATUS_SHIFT) & X1APIC_LVT_CMCI_DELIVERY_STATUS_MASK)
 #define X1APIC_LVT_CMCI_DELIVERY_MODE_MASK                                      0x07
 #define X1APIC_LVT_CMCI_DELIVERY_MODE_SHIFT                                     8
 #define GET_X1APIC_LVT_CMCI_DELIVERY_MODE(CmciRegister)                         ((CmciRegister >> X1APIC_LVT_CMCI_DELIVERY_MODE_SHIFT) & X1APIC_LVT_CMCI_DELIVERY_MODE_MASK)
-#define SET_X1APIC_LVT_CMCI_DELIVERY_MODE(CmciRegister, x)                      (CmciRegister = ((CmciRegister & ~(X1APIC_LVT_CMCI_DELIVERY_MODE_MASK << X1APIC_LVT_CMCI_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_LVT_CMCI_DELIVERY_MODE_MASK) << X1APIC_LVT_CMCI_DELIVERY_MODE_SHIFT)))
+#define SET_X1APIC_LVT_CMCI_DELIVERY_MODE(CmciRegister, x)                      ((CmciRegister & ~(X1APIC_LVT_CMCI_DELIVERY_MODE_MASK << X1APIC_LVT_CMCI_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_LVT_CMCI_DELIVERY_MODE_MASK) << X1APIC_LVT_CMCI_DELIVERY_MODE_SHIFT))
 #define X1APIC_LVT_CMCI_VECTOR_MASK                                             0xFF
 #define X1APIC_LVT_CMCI_VECTOR_SHIFT                                            0
 #define GET_X1APIC_LVT_CMCI_VECTOR(CmciRegister)                                ((CmciRegister >> X1APIC_LVT_CMCI_VECTOR_SHIFT) & X1APIC_LVT_CMCI_VECTOR_MASK)
-#define SET_X1APIC_LVT_CMCI_VECTOR(CmciRegister, x)                             (CmciRegister = ((CmciRegister & ~(X1APIC_LVT_CMCI_VECTOR_MASK << X1APIC_LVT_CMCI_VECTOR_SHIFT)) | ((x & X1APIC_LVT_CMCI_VECTOR_MASK) << X1APIC_LVT_CMCI_VECTOR_SHIFT)))
+#define SET_X1APIC_LVT_CMCI_VECTOR(CmciRegister, x)                             ((CmciRegister & ~(X1APIC_LVT_CMCI_VECTOR_MASK << X1APIC_LVT_CMCI_VECTOR_SHIFT)) | ((x & X1APIC_LVT_CMCI_VECTOR_MASK) << X1APIC_LVT_CMCI_VECTOR_SHIFT))
 
 #define X1APIC_LINT0_MASK_MASK                                                  1
 #define X1APIC_LINT0_MASK_SHIFT                                                 16
 #define GET_X1APIC_LINT0_MASK(LintRegister)                                     ((LintRegister >> X1APIC_LINT0_MASK_SHIFT) & X1APIC_LINT0_MASK_MASK)
-#define SET_X1APIC_LINT0_MASK(LintRegister, x)                                  (LintRegister = ((LintRegister & ~(X1APIC_LINT0_MASK_MASK << X1APIC_LINT0_MASK_SHIFT)) | ((x & X1APIC_LINT0_MASK_MASK) << X1APIC_LINT0_MASK_SHIFT)))
+#define SET_X1APIC_LINT0_MASK(LintRegister, x)                                  ((LintRegister & ~(X1APIC_LINT0_MASK_MASK << X1APIC_LINT0_MASK_SHIFT)) | ((x & X1APIC_LINT0_MASK_MASK) << X1APIC_LINT0_MASK_SHIFT))
 #define X1APIC_LINT0_TRIGGER_MODE_MASK                                          1
 #define X1APIC_LINT0_TRIGGER_MODE_SHIFT                                         15
 #define GET_X1APIC_LINT0_TRIGGER_MODE(LintRegister)                             ((LintRegister >> X1APIC_LINT0_TRIGGER_MODE_SHIFT) & X1APIC_LINT0_TRIGGER_MODE_MASK)
-#define SET_X1APIC_LINT0_TRIGGER_MODE(LintRegister, x)                          (LintRegister = ((LintRegister & ~(X1APIC_LINT0_TRIGGER_MODE_MASK << X1APIC_LINT0_TRIGGER_MODE_SHIFT)) | ((x & X1APIC_LINT0_TRIGGER_MODE_MASK) << X1APIC_LINT0_TRIGGER_MODE_SHIFT)))
+#define SET_X1APIC_LINT0_TRIGGER_MODE(LintRegister, x)                          ((LintRegister & ~(X1APIC_LINT0_TRIGGER_MODE_MASK << X1APIC_LINT0_TRIGGER_MODE_SHIFT)) | ((x & X1APIC_LINT0_TRIGGER_MODE_MASK) << X1APIC_LINT0_TRIGGER_MODE_SHIFT))
 #define X1APIC_LINT0_REMOTE_IRR_MASK                                            1
 #define X1APIC_LINT0_REMOTE_IRR_SHIFT                                           14
 #define GET_X1APIC_LINT0_REMOTE_IRR(LintRegister)                               ((LintRegister >> X1APIC_LINT0_REMOTE_IRR_SHIFT) & X1APIC_LINT0_REMOTE_IRR_MASK)
 #define X1APIC_LINT0_INT_PIN_POLARITY_MASK                                      1
 #define X1APIC_LINT0_INT_PIN_POLARITY_SHIFT                                     13
 #define GET_X1APIC_LINT0_INT_PIN_POLARITY(LintRegister)                         ((LintRegister >> X1APIC_LINT0_INT_PIN_POLARITY_SHIFT) & X1APIC_LINT0_INT_PIN_POLARITY_MASK)
-#define SET_X1APIC_LINT0_INT_PIN_POLARITY(LintRegister, x)                      (LintRegister = ((LintRegister & ~(X1APIC_LINT0_INT_PIN_POLARITY_MASK << X1APIC_LINT0_INT_PIN_POLARITY_SHIFT)) | ((x & X1APIC_LINT0_INT_PIN_POLARITY_MASK) << X1APIC_LINT0_INT_PIN_POLARITY_SHIFT)))
+#define SET_X1APIC_LINT0_INT_PIN_POLARITY(LintRegister, x)                      ((LintRegister & ~(X1APIC_LINT0_INT_PIN_POLARITY_MASK << X1APIC_LINT0_INT_PIN_POLARITY_SHIFT)) | ((x & X1APIC_LINT0_INT_PIN_POLARITY_MASK) << X1APIC_LINT0_INT_PIN_POLARITY_SHIFT))
 #define X1APIC_LINT0_DELIVERY_STATUS_MASK                                       1
 #define X1APIC_LINT0_DELIVERY_STATUS_SHIFT                                      12
 #define GET_X1APIC_LINT0_DELIVERY_STATUS(LintRegister)                          ((LintRegister >> X1APIC_LINT0_DELIVERY_STATUS_SHIFT) & X1APIC_LINT0_DELIVERY_STATUS_MASK)
 #define X1APIC_LINT0_DELIVERY_MODE_MASK                                         0x07
 #define X1APIC_LINT0_DELIVERY_MODE_SHIFT                                        8
 #define GET_X1APIC_LINT0_DELIVERY_MODE(LintRegister)                            ((LintRegister >> X1APIC_LINT0_DELIVERY_MODE_SHIFT) & X1APIC_LINT0_DELIVERY_MODE_MASK)
-#define SET_X1APIC_LINT0_DELIVERY_MODE(LintRegister, x)                         (LintRegister = ((LintRegister & ~(X1APIC_LINT0_DELIVERY_MODE_MASK << X1APIC_LINT0_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_LINT0_DELIVERY_MODE_MASK) << X1APIC_LINT0_DELIVERY_MODE_SHIFT)))
+#define SET_X1APIC_LINT0_DELIVERY_MODE(LintRegister, x)                         ((LintRegister & ~(X1APIC_LINT0_DELIVERY_MODE_MASK << X1APIC_LINT0_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_LINT0_DELIVERY_MODE_MASK) << X1APIC_LINT0_DELIVERY_MODE_SHIFT))
 #define X1APIC_LINT0_VECTOR_MASK                                                0xFF
 #define X1APIC_LINT0_VECTOR_SHIFT                                               0
 #define GET_X1APIC_LINT0_VECTOR(LintRegister)                                   ((LintRegister >> X1APIC_LINT0_VECTOR_SHIFT) & X1APIC_LINT0_VECTOR_MASK)
-#define SET_X1APIC_LINT0_VECTOR(LintRegister, x)                                (LintRegister = ((LintRegister & ~(X1APIC_LINT0_VECTOR_MASK << X1APIC_LINT0_VECTOR_SHIFT)) | ((x & X1APIC_LINT0_VECTOR_MASK) << X1APIC_LINT0_VECTOR_SHIFT)))
+#define SET_X1APIC_LINT0_VECTOR(LintRegister, x)                                ((LintRegister & ~(X1APIC_LINT0_VECTOR_MASK << X1APIC_LINT0_VECTOR_SHIFT)) | ((x & X1APIC_LINT0_VECTOR_MASK) << X1APIC_LINT0_VECTOR_SHIFT))
 
 #define X1APIC_LINT1_MASK_MASK                                                  1
 #define X1APIC_LINT1_MASK_SHIFT                                                 16
 #define GET_X1APIC_LINT1_MASK(LintRegister)                                     ((LintRegister >> X1APIC_LINT1_MASK_SHIFT) & X1APIC_LINT1_MASK_MASK)
-#define SET_X1APIC_LINT1_MASK(LintRegister, x)                                  (LintRegister = ((LintRegister & ~(X1APIC_LINT1_MASK_MASK << X1APIC_LINT1_MASK_SHIFT)) | ((x & X1APIC_LINT1_MASK_MASK) << X1APIC_LINT1_MASK_SHIFT)))
+#define SET_X1APIC_LINT1_MASK(LintRegister, x)                                  ((LintRegister & ~(X1APIC_LINT1_MASK_MASK << X1APIC_LINT1_MASK_SHIFT)) | ((x & X1APIC_LINT1_MASK_MASK) << X1APIC_LINT1_MASK_SHIFT))
 #define X1APIC_LINT1_TRIGGER_MODE_MASK                                          1
 #define X1APIC_LINT1_TRIGGER_MODE_SHIFT                                         15
 #define GET_X1APIC_LINT1_TRIGGER_MODE(LintRegister)                             ((LintRegister >> X1APIC_LINT1_TRIGGER_MODE_SHIFT) & X1APIC_LINT1_TRIGGER_MODE_MASK)
-#define SET_X1APIC_LINT1_TRIGGER_MODE(LintRegister, x)                          (LintRegister = ((LintRegister & ~(X1APIC_LINT1_TRIGGER_MODE_MASK << X1APIC_LINT1_TRIGGER_MODE_SHIFT)) | ((x & X1APIC_LINT1_TRIGGER_MODE_MASK) << X1APIC_LINT1_TRIGGER_MODE_SHIFT)))
+#define SET_X1APIC_LINT1_TRIGGER_MODE(LintRegister, x)                          ((LintRegister & ~(X1APIC_LINT1_TRIGGER_MODE_MASK << X1APIC_LINT1_TRIGGER_MODE_SHIFT)) | ((x & X1APIC_LINT1_TRIGGER_MODE_MASK) << X1APIC_LINT1_TRIGGER_MODE_SHIFT))
 #define X1APIC_LINT1_REMOTE_IRR_MASK                                            1
 #define X1APIC_LINT1_REMOTE_IRR_SHIFT                                           14
 #define GET_X1APIC_LINT1_REMOTE_IRR(LintRegister)                               ((LintRegister >> X1APIC_LINT1_REMOTE_IRR_SHIFT) & X1APIC_LINT1_REMOTE_IRR_MASK)
 #define X1APIC_LINT1_INT_PIN_POLARITY_MASK                                      1
 #define X1APIC_LINT1_INT_PIN_POLARITY_SHIFT                                     13
 #define GET_X1APIC_LINT1_INT_PIN_POLARITY(LintRegister)                         ((LintRegister >> X1APIC_LINT1_INT_PIN_POLARITY_SHIFT) & X1APIC_LINT1_INT_PIN_POLARITY_MASK)
-#define SET_X1APIC_LINT1_INT_PIN_POLARITY(LintRegister, x)                      (LintRegister = ((LintRegister & ~(X1APIC_LINT1_INT_PIN_POLARITY_MASK << X1APIC_LINT1_INT_PIN_POLARITY_SHIFT)) | ((x & X1APIC_LINT1_INT_PIN_POLARITY_MASK) << X1APIC_LINT1_INT_PIN_POLARITY_SHIFT)))
+#define SET_X1APIC_LINT1_INT_PIN_POLARITY(LintRegister, x)                      ((LintRegister & ~(X1APIC_LINT1_INT_PIN_POLARITY_MASK << X1APIC_LINT1_INT_PIN_POLARITY_SHIFT)) | ((x & X1APIC_LINT1_INT_PIN_POLARITY_MASK) << X1APIC_LINT1_INT_PIN_POLARITY_SHIFT))
 #define X1APIC_LINT1_DELIVERY_STATUS_MASK                                       1
 #define X1APIC_LINT1_DELIVERY_STATUS_SHIFT                                      12
 #define GET_X1APIC_LINT1_DELIVERY_STATUS(LintRegister)                          ((LintRegister >> X1APIC_LINT1_DELIVERY_STATUS_SHIFT) & X1APIC_LINT1_DELIVERY_STATUS_MASK)
@@ -199,55 +199,55 @@
 #define X1APIC_LINT1_VECTOR_MASK                                                0xFF
 #define X1APIC_LINT1_VECTOR_SHIFT                                               0
 #define GET_X1APIC_LINT1_VECTOR(LintRegister)                                   ((LintRegister >> X1APIC_LINT1_VECTOR_SHIFT) & X1APIC_LINT1_VECTOR_MASK)
-#define SET_X1APIC_LINT1_VECTOR(LintRegister, x)                                (LintRegister = ((LintRegister & ~(X1APIC_LINT1_VECTOR_MASK << X1APIC_LINT1_VECTOR_SHIFT)) | ((x & X1APIC_LINT1_VECTOR_MASK) << X1APIC_LINT1_VECTOR_SHIFT)))
+#define SET_X1APIC_LINT1_VECTOR(LintRegister, x)                                ((LintRegister & ~(X1APIC_LINT1_VECTOR_MASK << X1APIC_LINT1_VECTOR_SHIFT)) | ((x & X1APIC_LINT1_VECTOR_MASK) << X1APIC_LINT1_VECTOR_SHIFT))
 
 #define X1APIC_ERROR_MASK_MASK                                                  1
 #define X1APIC_ERROR_MASK_SHIFT                                                 16
 #define GET_X1APIC_ERROR_MASK(ErrorRegister)                                    ((ErrorRegister >> X1APIC_ERROR_MASK_SHIFT) & X1APIC_ERROR_MASK_MASK)
-#define SET_X1APIC_ERROR_MASK(ErrorRegister, x)                                 (ErrorRegister = ((ErrorRegister & ~(X1APIC_ERROR_MASK_MASK << X1APIC_ERROR_MASK_SHIFT)) | ((x & X1APIC_ERROR_MASK_MASK) << X1APIC_ERROR_MASK_SHIFT)))
+#define SET_X1APIC_ERROR_MASK(ErrorRegister, x)                                 ((ErrorRegister & ~(X1APIC_ERROR_MASK_MASK << X1APIC_ERROR_MASK_SHIFT)) | ((x & X1APIC_ERROR_MASK_MASK) << X1APIC_ERROR_MASK_SHIFT))
 #define X1APIC_ERROR_DELIVERY_STATUS_MASK                                       1
 #define X1APIC_ERROR_DELIVERY_STATUS_SHIFT                                      12
 #define GET_X1APIC_ERROR_DELIVERY_STATUS(ErrorRegister)                         ((ErrorRegister >> X1APIC_ERROR_DELIVERY_STATUS_SHIFT) & X1APIC_ERROR_DELIVERY_STATUS_MASK)
 #define X1APIC_ERROR_DELIVERY_MODE_MASK                                         0x07
 #define X1APIC_ERROR_DELIVERY_MODE_SHIFT                                        8
 #define GET_X1APIC_ERROR_DELIVERY_MODE(ErrorRegister)                           ((ErrorRegister >> X1APIC_ERROR_DELIVERY_MODE_SHIFT) & X1APIC_ERROR_DELIVERY_MODE_MASK)
-#define SET_X1APIC_ERROR_DELIVERY_MODE(ErrorRegister, x)                        (ErrorRegister = ((ErrorRegister & ~(X1APIC_ERROR_DELIVERY_MODE_MASK << X1APIC_ERROR_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_ERROR_DELIVERY_MODE_MASK) << X1APIC_ERROR_DELIVERY_MODE_SHIFT)))
+#define SET_X1APIC_ERROR_DELIVERY_MODE(ErrorRegister, x)                        ((ErrorRegister & ~(X1APIC_ERROR_DELIVERY_MODE_MASK << X1APIC_ERROR_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_ERROR_DELIVERY_MODE_MASK) << X1APIC_ERROR_DELIVERY_MODE_SHIFT))
 #define X1APIC_ERROR_VECTOR_MASK                                                0xFF
 #define X1APIC_ERROR_VECTOR_SHIFT                                               0
 #define GET_X1APIC_ERROR_VECTOR(ErrorRegister)                                  ((ErrorRegister >> X1APIC_ERROR_VECTOR_SHIFT) & X1APIC_ERROR_VECTOR_MASK)
-#define SET_X1APIC_ERROR_VECTOR(ErrorRegister, x)                               (ErrorRegister = ((ErrorRegister & ~(X1APIC_ERROR_VECTOR_MASK << X1APIC_ERROR_VECTOR_SHIFT)) | ((x & X1APIC_ERROR_VECTOR_MASK) << X1APIC_ERROR_VECTOR_SHIFT)))
+#define SET_X1APIC_ERROR_VECTOR(ErrorRegister, x)                               ((ErrorRegister & ~(X1APIC_ERROR_VECTOR_MASK << X1APIC_ERROR_VECTOR_SHIFT)) | ((x & X1APIC_ERROR_VECTOR_MASK) << X1APIC_ERROR_VECTOR_SHIFT))
 
 #define X1APIC_PMC_MASK_MASK                                                    1
 #define X1APIC_PMC_MASK_SHIFT                                                   16
 #define GET_X1APIC_PMC_MASK(PmcRegister)                                        ((PmcRegister >> X1APIC_PMC_MASK_SHIFT) & X1APIC_PMC_MASK_MASK)
-#define SET_X1APIC_PMC_MASK(PmcRegister, x)                                     (PmcRegister = ((PmcRegister & ~(X1APIC_PMC_MASK_MASK << X1APIC_PMC_MASK_SHIFT)) | ((x & X1APIC_PMC_MASK_MASK) << X1APIC_PMC_MASK_SHIFT)))
+#define SET_X1APIC_PMC_MASK(PmcRegister, x)                                     ((PmcRegister & ~(X1APIC_PMC_MASK_MASK << X1APIC_PMC_MASK_SHIFT)) | ((x & X1APIC_PMC_MASK_MASK) << X1APIC_PMC_MASK_SHIFT))
 #define X1APIC_PMC_DELIVERY_STATUS_MASK                                         1
 #define X1APIC_PMC_DELIVERY_STATUS_SHIFT                                        12
 #define GET_X1APIC_PMC_DELIVERY_STATUS(PmcRegister)                             ((PmcRegister >> X1APIC_PMC_DELIVERY_STATUS_SHIFT) & X1APIC_PMC_DELIVERY_STATUS_MASK)
 #define X1APIC_PMC_DELIVERY_MODE_MASK                                           0x07
 #define X1APIC_PMC_DELIVERY_MODE_SHIFT                                          8
 #define GET_X1APIC_PMC_DELIVERY_MODE(PmcRegister)                               ((PmcRegister >> X1APIC_PMC_DELIVERY_MODE_SHIFT) & X1APIC_PMC_DELIVERY_MODE_MASK)
-#define SET_X1APIC_PMC_DELIVERY_MODE(PmcRegister, x)                            (PmcRegister = ((PmcRegister & ~(X1APIC_PMC_DELIVERY_MODE_MASK << X1APIC_PMC_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_PMC_DELIVERY_MODE_MASK) << X1APIC_PMC_DELIVERY_MODE_SHIFT)))
+#define SET_X1APIC_PMC_DELIVERY_MODE(PmcRegister, x)                            ((PmcRegister & ~(X1APIC_PMC_DELIVERY_MODE_MASK << X1APIC_PMC_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_PMC_DELIVERY_MODE_MASK) << X1APIC_PMC_DELIVERY_MODE_SHIFT))
 #define X1APIC_PMC_VECTOR_MASK                                                  0xFF
 #define X1APIC_PMC_VECTOR_SHIFT                                                 0
 #define GET_X1APIC_PMC_VECTOR(PmcRegister)                                      ((PmcRegister >> X1APIC_PMC_VECTOR_SHIFT) & X1APIC_PMC_VECTOR_MASK)
-#define SET_X1APIC_PMC_VECTOR(PmcRegister, x)                                   (PmcRegister = ((PmcRegister & ~(X1APIC_PMC_VECTOR_MASK << X1APIC_PMC_VECTOR_SHIFT)) | ((x & X1APIC_PMC_VECTOR_MASK) << X1APIC_PMC_VECTOR_SHIFT)))
+#define SET_X1APIC_PMC_VECTOR(PmcRegister, x)                                   ((PmcRegister & ~(X1APIC_PMC_VECTOR_MASK << X1APIC_PMC_VECTOR_SHIFT)) | ((x & X1APIC_PMC_VECTOR_MASK) << X1APIC_PMC_VECTOR_SHIFT))
 
 #define X1APIC_TS_MASK_MASK                                                     1
 #define X1APIC_TS_MASK_SHIFT                                                    16
 #define GET_X1APIC_TS_MASK(TsRegister)                                          ((TsRegister >> X1APIC_TS_MASK_SHIFT) & X1APIC_TS_MASK_MASK)
-#define SET_X1APIC_TS_MASK(TsRegister, x)                                       (TsRegister = ((TsRegister & ~(X1APIC_TS_MASK_MASK << X1APIC_TS_MASK_SHIFT)) | ((x & X1APIC_TS_MASK_MASK) << X1APIC_TS_MASK_SHIFT)))
+#define SET_X1APIC_TS_MASK(TsRegister, x)                                       ((TsRegister & ~(X1APIC_TS_MASK_MASK << X1APIC_TS_MASK_SHIFT)) | ((x & X1APIC_TS_MASK_MASK) << X1APIC_TS_MASK_SHIFT))
 #define X1APIC_TS_DELIVERY_STATUS_MASK                                          1
 #define X1APIC_TS_DELIVERY_STATUS_SHIFT                                         12
 #define GET_X1APIC_TS_DELIVERY_STATUS(TsRegister)                               ((TsRegister >> X1APIC_TS_DELIVERY_STATUS_SHIFT) & X1APIC_TS_DELIVERY_STATUS_MASK)
 #define X1APIC_TS_DELIVERY_MODE_MASK                                            0x07
 #define X1APIC_TS_DELIVERY_MODE_SHIFT                                           8
 #define GET_X1APIC_TS_DELIVERY_MODE(TsRegister)                                 ((TsRegister >> X1APIC_TS_DELIVERY_MODE_SHIFT) & X1APIC_TS_DELIVERY_MODE_MASK)
-#define SET_X1APIC_TS_DELIVERY_MODE(TsRegister, x)                              (TsRegister = ((TsRegister & ~(X1APIC_TS_DELIVERY_MODE_MASK << X1APIC_TS_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_TS_DELIVERY_MODE_MASK) << X1APIC_TS_DELIVERY_MODE_SHIFT)))
+#define SET_X1APIC_TS_DELIVERY_MODE(TsRegister, x)                              ((TsRegister & ~(X1APIC_TS_DELIVERY_MODE_MASK << X1APIC_TS_DELIVERY_MODE_SHIFT)) | ((x & X1APIC_TS_DELIVERY_MODE_MASK) << X1APIC_TS_DELIVERY_MODE_SHIFT))
 #define X1APIC_TS_VECTOR_MASK                                                   0xFF
 #define X1APIC_TS_VECTOR_SHIFT                                                  0
 #define GET_X1APIC_TS_VECTOR(TsRegister)                                        ((TsRegister >> X1APIC_TS_VECTOR_SHIFT) & X1APIC_TS_VECTOR_MASK)
-#define SET_X1APIC_TS_VECTOR(TsRegister, x)                                     (TsRegister = ((TsRegister & ~(X1APIC_TS_VECTOR_MASK << X1APIC_TS_VECTOR_SHIFT)) | ((x & X1APIC_TS_VECTOR_MASK) << X1APIC_TS_VECTOR_SHIFT)))
+#define SET_X1APIC_TS_VECTOR(TsRegister, x)                                     ((TsRegister & ~(X1APIC_TS_VECTOR_MASK << X1APIC_TS_VECTOR_SHIFT)) | ((x & X1APIC_TS_VECTOR_MASK) << X1APIC_TS_VECTOR_SHIFT))
 
 
 
@@ -271,8 +271,8 @@ UINT64 ApicHalGetX1ApicInterruptControlRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtTimerRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase);
-UINT32 ApicHalGetX1ApicLvtInt0RegisterEx(PVOID ApicBase);
-UINT32 ApicHalGetX1ApicLvtInt1RegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtLint0RegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicLvtLint1RegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtErrorRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicInitialCountRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicCurrentCountRegisterEx(PVOID ApicBase);

@@ -82,11 +82,11 @@ UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase
     return GET_X1APIC_LVT_PERFORMANCE_MONITORING_COUNTERS_REGISTER(ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicLvtInt0RegisterEx(PVOID ApicBase){
+UINT32 ApicHalGetX1ApicLvtLint0RegisterEx(PVOID ApicBase){
     return GET_X1APIC_LVT_LINT0_REGISTER(ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicLvtInt1RegisterEx(PVOID ApicBase){
+UINT32 ApicHalGetX1ApicLvtLint1RegisterEx(PVOID ApicBase){
     return GET_X1APIC_LVT_LINT1_REGISTER(ApicBase);
 }
 
@@ -259,12 +259,12 @@ UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(PAPIC_DEVICE_OBJ
     return ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicDeviceObject->ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicLvtInt0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtInt0RegisterEx(ApicDeviceObject->ApicBase);
+UINT32 ApicHalGetX1ApicLvtLint0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtLint0RegisterEx(ApicDeviceObject->ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicLvtInt1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtInt1RegisterEx(ApicDeviceObject->ApicBase);
+UINT32 ApicHalGetX1ApicLvtLint1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicLvtLint1RegisterEx(ApicDeviceObject->ApicBase);
 }
 
 UINT32 ApicHalGetX1ApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){

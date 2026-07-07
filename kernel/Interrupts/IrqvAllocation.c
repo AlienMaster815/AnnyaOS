@@ -142,7 +142,7 @@ LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
     PIPIC TmpIpic = &Ipics[Processor];
 
     SIZE GroundStates = UINT32_MAX;
-    SIZE GroundStatesVector = 0x21;
+    SIZE GroundStatesVector = 0x30;
     for(SIZE TmpVector = GroundStatesVector; TmpVector < (0xFF - Vectors); TmpVector++){
         SIZE Sum = 0;
         for(SIZE i = 0 ; i < Vectors; i++){
