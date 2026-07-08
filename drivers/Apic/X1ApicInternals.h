@@ -289,7 +289,7 @@ void ApicHalSetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase, UINT32 Value
 void ApicHalSetX1ApicInterruptControlRegisterEx(PVOID ApicBase, UINT64 Value);
 void ApicHalSetX1ApicLvtTimerRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase, UINT32 Value);
-void ApicHalSetX1ApicLvtPerformanceMonitoringCounterRegisterEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtLint0RegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtLint1RegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtErrorRegisterEx(PVOID ApicBase, UINT32 Value);
@@ -334,7 +334,7 @@ void ApicHalSetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDevice
 void ApicHalSetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value);
 void ApicHalSetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
-void ApicHalSetX1ApicLvtPerformanceMonitoringCounterRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtLint0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtLint1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
