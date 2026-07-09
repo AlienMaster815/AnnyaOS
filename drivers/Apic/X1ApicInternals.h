@@ -65,8 +65,8 @@
 #define GET_X1APIC_INTERRUPT_REQUEST_REGISTER_X32(ApicBase, x)                  ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_REQUEST_REGISTER_BITS_0_31_OFFSET + (x * 0x10))))
 #define GET_X1APIC_ERROR_STATUS_REGISTER(ApicBase)                              ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_ERROR_STATUS_REGISTER_OFFSET)))
 #define GET_X1APIC_LVT_CMCI_REGISTER(ApicBase)                                  ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_CMCI_REGISTER_OFFSET)))
-#define GET_X1APIC_INTERRUPT_CONTROL_REGISTER_LOW(ApicBase)                     ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_LOW_OFFSET)))
-#define GET_X1APIC_INTERRUPT_CONTROL_REGISTER_HIGH(ApicBase)                    ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH_OFFSET)))
+#define GET_X1APIC_INTERRUPT_COMMAND_REGISTER_LOW(ApicBase)                     ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_LOW_OFFSET)))
+#define GET_X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH(ApicBase)                    ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH_OFFSET)))
 #define GET_X1APIC_LVT_TIMER_REGISTER(ApicBase)                                 ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_TIMER_REGISTER_OFFSET)))
 #define GET_X1APIC_LVT_THERMAL_SENSOR_REGISTER(ApicBase)                        ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_THERMAL_SENSOR_REGISTER_OFFSET)))
 #define GET_X1APIC_LVT_PERFORMANCE_MONITORING_COUNTERS_REGISTER(ApicBase)       ((UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_PERFORMANCE_MONITORING_COUNTERS_REGISTER_OFFSET)))
@@ -86,8 +86,8 @@
 #define SET_X1APIC_DESTINATION_FORMAT_REGISTER(ApicBase, x)                     WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_DESTINATION_FORMAT_REGISTER_OFFSET), x)
 #define SET_X1APIC_SPURIOUS_INTERRUPT_VECTOR_REGISTER(ApicBase, x)              WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_SPURIOUS_INTERRUPT_VECTOR_REGISTER_OFFSET), x)
 #define SET_X1APIC_LVT_CMCI_REGISTER(ApicBase, x)                               WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_CMCI_REGISTER_OFFSET), x)
-#define SET_X1APIC_INTERRUPT_CONTROL_REGISTER_LOW(ApicBase, x)                  WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_LOW_OFFSET), x)
-#define SET_X1APIC_INTERRUPT_CONTROL_REGISTER_HIGH(ApicBase, x)                 WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH_OFFSET), x)
+#define SET_X1APIC_INTERRUPT_COMMAND_REGISTER_LOW(ApicBase, x)                  WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_LOW_OFFSET), x)
+#define SET_X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH(ApicBase, x)                 WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH_OFFSET), x)
 #define SET_X1APIC_LVT_TIMER_REGISTER(ApicBase, x)                              WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_TIMER_REGISTER_OFFSET), x)
 #define SET_X1APIC_LVT_THERMAL_SENSOR_REGISTER(ApicBase, x)                     WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_THERMAL_SENSOR_REGISTER_OFFSET), x)
 #define SET_X1APIC_LVT_PERFORMANCE_MONITORING_COUNTERS_REGISTER(ApicBase, x)    WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + X1APIC_LVT_PERFORMANCE_MONITORING_COUNTERS_REGISTER_OFFSET), x)
@@ -265,9 +265,9 @@ UINT32 ApicHalGetX1ApicTriggerModeRegisterX32Ex(PVOID ApicBase, SIZE Offset);
 UINT32 ApicHalGetX1ApicInterruptRequestRegisterX32Ex(PVOID ApicBase, SIZE Offset);
 UINT32 ApicHalGetX1ApicErrorStatusRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtCmciRegisterEx(PVOID ApicBase);
-UINT32 ApicHalGetX1ApicInterruptControlRegisterLowEx(PVOID ApicBase);
-UINT32 ApicHalGetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase);
-UINT64 ApicHalGetX1ApicInterruptControlRegisterEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterLowEx(PVOID ApicBase);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterHighEx(PVOID ApicBase);
+UINT64 ApicHalGetX1ApicInterruptCommandRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtTimerRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase);
 UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase);
@@ -284,9 +284,9 @@ void ApicHalSetX1ApicLogicalDestinationRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicDestinationFormatRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicSpuriousInterruptVectorRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtCmciRegisterEx(PVOID ApicBase, UINT32 Value);
-void ApicHalSetX1ApicInterruptControlRegisterLowEx(PVOID ApicBase, UINT32 Value);
-void ApicHalSetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase, UINT32 Value);
-void ApicHalSetX1ApicInterruptControlRegisterEx(PVOID ApicBase, UINT64 Value);
+void ApicHalSetX1ApicInterruptCommandRegisterLowEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicInterruptCommandRegisterHighEx(PVOID ApicBase, UINT32 Value);
+void ApicHalSetX1ApicInterruptCommandRegisterEx(PVOID ApicBase, UINT64 Value);
 void ApicHalSetX1ApicLvtTimerRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtThermalSensorRegisterEx(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterEx(PVOID ApicBase, UINT32 Value);
@@ -310,9 +310,9 @@ UINT32 ApicHalGetX1ApicTriggerModeRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObje
 UINT32 ApicHalGetX1ApicInterruptRequestRegisterX32(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset);
 UINT32 ApicHalGetX1ApicErrorStatusRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
 UINT32 ApicHalGetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
-UINT32 ApicHalGetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject);
-UINT32 ApicHalGetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject);
-UINT64 ApicHalGetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject);
+UINT64 ApicHalGetX1ApicInterruptCommandRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
 UINT32 ApicHalGetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
 UINT32 ApicHalGetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
 UINT32 ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject);
@@ -329,9 +329,9 @@ void ApicHalSetX1ApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceOb
 void ApicHalSetX1ApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicSpuriousInterruptVectorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
-void ApicHalSetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
-void ApicHalSetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
-void ApicHalSetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value);
+void ApicHalSetX1ApicInterruptCommandRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicInterruptCommandRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+void ApicHalSetX1ApicInterruptCommandRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value);
 void ApicHalSetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 void ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);

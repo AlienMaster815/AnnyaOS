@@ -56,17 +56,17 @@ UINT32 ApicHalGetX1ApicLvtCmciRegisterEx(PVOID ApicBase){
     return GET_X1APIC_LVT_CMCI_REGISTER(ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicInterruptControlRegisterLowEx(PVOID ApicBase){
-    return GET_X1APIC_INTERRUPT_CONTROL_REGISTER_LOW(ApicBase);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterLowEx(PVOID ApicBase){
+    return GET_X1APIC_INTERRUPT_COMMAND_REGISTER_LOW(ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase){
-    return GET_X1APIC_INTERRUPT_CONTROL_REGISTER_HIGH(ApicBase);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterHighEx(PVOID ApicBase){
+    return GET_X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH(ApicBase);
 }
 
-UINT64 ApicHalGetX1ApicInterruptControlRegisterEx(PVOID ApicBase){
-    UINT64 Register = ApicHalGetX1ApicInterruptControlRegisterLowEx(ApicBase);
-    Register |= (UINT64)ApicHalGetX1ApicInterruptControlRegisterHighEx(ApicBase) << 32;
+UINT64 ApicHalGetX1ApicInterruptCommandRegisterEx(PVOID ApicBase){
+    UINT64 Register = ApicHalGetX1ApicInterruptCommandRegisterLowEx(ApicBase);
+    Register |= (UINT64)ApicHalGetX1ApicInterruptCommandRegisterHighEx(ApicBase) << 32;
     return Register;
 }
 
@@ -134,17 +134,17 @@ void ApicHalSetX1ApicLvtCmciRegisterEx(PVOID ApicBase, UINT32 Value){
     SET_X1APIC_LVT_CMCI_REGISTER(ApicBase, Value);
 }
 
-void ApicHalSetX1ApicInterruptControlRegisterLowEx(PVOID ApicBase, UINT32 Value){
-    SET_X1APIC_INTERRUPT_CONTROL_REGISTER_LOW(ApicBase, Value);
+void ApicHalSetX1ApicInterruptCommandRegisterLowEx(PVOID ApicBase, UINT32 Value){
+    SET_X1APIC_INTERRUPT_COMMAND_REGISTER_LOW(ApicBase, Value);
 }
 
-void ApicHalSetX1ApicInterruptControlRegisterHighEx(PVOID ApicBase, UINT32 Value){
-    SET_X1APIC_INTERRUPT_CONTROL_REGISTER_HIGH(ApicBase, Value);
+void ApicHalSetX1ApicInterruptCommandRegisterHighEx(PVOID ApicBase, UINT32 Value){
+    SET_X1APIC_INTERRUPT_COMMAND_REGISTER_HIGH(ApicBase, Value);
 }
 
-void ApicHalSetX1ApicInterruptControlRegisterEx(PVOID ApicBase, UINT64 Value){
-    ApicHalSetX1ApicInterruptControlRegisterLowEx(ApicBase, Value & UINT32_MAX);
-    ApicHalSetX1ApicInterruptControlRegisterHighEx(ApicBase, (Value >> 32) & UINT32_MAX);
+void ApicHalSetX1ApicInterruptCommandRegisterEx(PVOID ApicBase, UINT64 Value){
+    ApicHalSetX1ApicInterruptCommandRegisterLowEx(ApicBase, Value & UINT32_MAX);
+    ApicHalSetX1ApicInterruptCommandRegisterHighEx(ApicBase, (Value >> 32) & UINT32_MAX);
 }
 
 void ApicHalSetX1ApicLvtTimerRegisterEx(PVOID ApicBase, UINT32 Value){
@@ -235,16 +235,16 @@ UINT32 ApicHalGetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     return ApicHalGetX1ApicLvtCmciRegisterEx(ApicDeviceObject->ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicInterruptControlRegisterLowEx(ApicDeviceObject->ApicBase);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInterruptCommandRegisterLowEx(ApicDeviceObject->ApicBase);
 }
 
-UINT32 ApicHalGetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicInterruptControlRegisterHighEx(ApicDeviceObject->ApicBase);
+UINT32 ApicHalGetX1ApicInterruptCommandRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInterruptCommandRegisterHighEx(ApicDeviceObject->ApicBase);
 }
 
-UINT64 ApicHalGetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicInterruptControlRegisterEx(ApicDeviceObject->ApicBase);
+UINT64 ApicHalGetX1ApicInterruptCommandRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return ApicHalGetX1ApicInterruptCommandRegisterEx(ApicDeviceObject->ApicBase);
 }
 
 UINT32 ApicHalGetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject){
@@ -311,16 +311,16 @@ void ApicHalSetX1ApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT3
     ApicHalSetX1ApicLvtCmciRegisterEx(ApicDeviceObject->ApicBase, Value);
 }
 
-void ApicHalSetX1ApicInterruptControlRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
-    ApicHalSetX1ApicInterruptControlRegisterLowEx(ApicDeviceObject->ApicBase, Value);
+void ApicHalSetX1ApicInterruptCommandRegisterLow(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicInterruptCommandRegisterLowEx(ApicDeviceObject->ApicBase, Value);
 }
 
-void ApicHalSetX1ApicInterruptControlRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
-    ApicHalSetX1ApicInterruptControlRegisterHighEx(ApicDeviceObject->ApicBase, Value);
+void ApicHalSetX1ApicInterruptCommandRegisterHigh(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
+    ApicHalSetX1ApicInterruptCommandRegisterHighEx(ApicDeviceObject->ApicBase, Value);
 }
 
-void ApicHalSetX1ApicInterruptControlRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value){
-    ApicHalSetX1ApicInterruptControlRegisterEx(ApicDeviceObject->ApicBase, Value);
+void ApicHalSetX1ApicInterruptCommandRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value){
+    ApicHalSetX1ApicInterruptCommandRegisterEx(ApicDeviceObject->ApicBase, Value);
 }
 
 void ApicHalSetX1ApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){

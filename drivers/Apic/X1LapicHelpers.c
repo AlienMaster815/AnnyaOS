@@ -82,12 +82,12 @@ BOOLEAN ApicHalIsX1ApicLvtCmciInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceObj
     return ApicHalIsX1ApicLvtCmciInterruptPendingEx(ApicDeviceObject->ApicBase);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryModeEx(PVOID ApicBase){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryModeEx(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
-    return (APIC_DELIVERY_MODE)GET_X1APIC_LVT_CMCI_DELIVERY_MODE(Register);
+    return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_LVT_CMCI_DELIVERY_MODE(Register);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     return ApicHalGetX1ApicLvtCmciDeliveryModeEx(ApicDeviceObject->ApicBase);
 }
 
@@ -141,12 +141,12 @@ BOOLEAN ApicHalIsX1ApicLvtLint0InterruptPendingEx(PVOID ApicBase){
     return GET_X1APIC_LINT0_DELIVERY_STATUS(Register) ? true : false;
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryModeEx(PVOID ApicBase){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryModeEx(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
-    return (APIC_DELIVERY_MODE)GET_X1APIC_LINT0_DELIVERY_MODE(Register);
+    return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_LINT0_DELIVERY_MODE(Register);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     return ApicHalGetX1ApicLvtLint0DeliveryModeEx(ApicDeviceObject->ApicBase);
 }
 
@@ -201,12 +201,12 @@ BOOLEAN ApicHalIsX1ApicLvtLint1InterruptPendingEx(PVOID ApicBase){
     return GET_X1APIC_LINT0_DELIVERY_STATUS(Register) ? true : false;
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryModeEx(PVOID ApicBase){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryModeEx(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
-    return (APIC_DELIVERY_MODE)GET_X1APIC_LINT1_DELIVERY_MODE(Register);
+    return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_LINT1_DELIVERY_MODE(Register);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     return ApicHalGetX1ApicLvtLint1DeliveryModeEx(ApicDeviceObject->ApicBase);
 }
 
@@ -237,12 +237,12 @@ BOOLEAN ApicHalIsX1ApicLvtErrorInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceOb
     return ApicHalIsX1ApicLvtErrorInterruptPendingEx(ApicDeviceObject->ApicBase);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryModeEx(PVOID ApicBase){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryModeEx(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
-    return (APIC_DELIVERY_MODE)GET_X1APIC_ERROR_DELIVERY_MODE(Register);
+    return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_ERROR_DELIVERY_MODE(Register);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     return ApicHalGetX1ApicLvtErrorDeliveryModeEx(ApicDeviceObject->ApicBase);
 }
 
@@ -270,12 +270,12 @@ BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersInterruptPending(PAPIC_DE
 }
 
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(PVOID ApicBase){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
-    return (APIC_DELIVERY_MODE)GET_X1APIC_PMC_DELIVERY_MODE(Register);
+    return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_PMC_DELIVERY_MODE(Register);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     return ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(ApicDeviceObject->ApicBase);
 }
 
@@ -306,13 +306,13 @@ BOOLEAN ApicHalIsX1ApicThermalSensorInterruptPending(PAPIC_DEVICE_OBJECT ApicDev
     return ApicHalIsX1ApicThermalSensorInterruptPendingEx(ApicDeviceObject->ApicBase);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryModeEx(PVOID ApicBase){
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryModeEx(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
     return GET_X1APIC_TS_DELIVERY_MODE(Register);
 }
 
-APIC_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return (APIC_DELIVERY_MODE)ApicHalGetX1ApicThermalSensorDeliveryModeEx(ApicDeviceObject->ApicBase); 
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    return (APIC_LVT_DELIVERY_MODE)ApicHalGetX1ApicThermalSensorDeliveryModeEx(ApicDeviceObject->ApicBase); 
 }
 
 UINT8 ApicHalGetX1ApicThermalSensorVectorEx(PVOID ApicBase){
@@ -379,13 +379,13 @@ void ApicHalMaskX1ApicLvtCmci(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Mask
     ApicHalMaskX1ApicLvtCmciEx(ApicDeviceObject->ApicBase, Masked);
 }
 
-void ApicHalSetX1ApicLvtCmciDeliveryModeEx(PVOID ApicBase, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtCmciDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
     UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
     Register = SET_X1APIC_LVT_CMCI_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
     ApicHalSetX1ApicLvtCmciRegisterEx(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtCmciDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtCmciDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
     ApicHalSetX1ApicLvtCmciDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
 }
 
@@ -489,13 +489,13 @@ void ApicHalMaskX1ApicLvtError(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Mas
     ApicHalMaskX1ApicLvtErrorEx(ApicDeviceObject->ApicBase, Masked);
 }
 
-void ApicHalSetX1ApicLvtErrorDeliveryModeEx(PVOID ApicBase, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtErrorDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
     UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
     Register = SET_X1APIC_ERROR_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
     ApicHalSetX1ApicLvtErrorRegisterEx(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtErrorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtErrorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
     ApicHalSetX1ApicLvtErrorDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
 }
 
@@ -519,13 +519,13 @@ void ApicHalSetX1ApicLvtPerformanceMonitoringCountersMask(PAPIC_DEVICE_OBJECT Ap
     ApicHalSetX1ApicLvtPerformanceMonitoringCountersMaskEx(ApicDeviceObject->ApicBase, Masked);
 }
 
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(PVOID ApicBase, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
     UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
     Register = SET_X1APIC_PMC_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
     ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
     ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
 }
 
@@ -549,13 +549,13 @@ void ApicHalMaskX1ApicLvtThermalSensor(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOO
     ApicHalMaskX1ApicLvtThermalSensorEx(ApicDeviceObject->ApicBase, Masked);
 }
 
-void ApicHalSetX1ApicLvtThermalSensorDeliveryModeEx(PVOID ApicBase, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtThermalSensorDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
     UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
     Register = SET_X1APIC_TS_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
     ApicHalSetX1ApicLvtThermalSensorRegisterEx(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtThermalSensorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_DELIVERY_MODE DeliveryMode){
+void ApicHalSetX1ApicLvtThermalSensorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
     ApicHalSetX1ApicLvtThermalSensorDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
 }
 
@@ -567,4 +567,40 @@ void ApicHalSetX1ApicLvtThermalSensorVectorEx(PVOID ApicBase, UINT8 Vector){
 
 void ApicHalSetX1ApicLvtThermalSensorVector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
     ApicHalSetX1ApicLvtThermalSensorVectorEx(ApicDeviceObject->ApicBase, Vector);
+}
+
+void ApicHalSetX1ApicSendInterruptCommandEx(
+    PVOID                           ApicBase, 
+    UINT8                           DestinationField, 
+    APIC_DESTINATION_SHORTHAND      Shorthand,
+    APIC_TRIGGER_MODE               TriggerMode,
+    APIC_LEVEL                      Level,
+    APIC_DESTINATION_MODE           DestinationMode,
+    APIC_ICR_DELIVERY_MODE          DeliveryMode,
+    UINT8                           Vector
+){
+    UINT64 Register = ((UINT64)DestinationField << 56) | ((UINT64)Shorthand << 18) | ((UINT64)TriggerMode << 15) | ((UINT64)Level << 14) | ((UINT64)DestinationMode << 11) | ((UINT64)DeliveryMode << 8) | (UINT64)Vector;  
+    ApicHalSetX1ApicInterruptCommandRegisterEx(ApicBase, Register);
+}
+
+void ApicHalSetX1ApicSendInterruptCommand(
+    PVOID                           ApicBase, 
+    UINT8                           DestinationField, 
+    APIC_DESTINATION_SHORTHAND      Shorthand,
+    APIC_TRIGGER_MODE               TriggerMode,
+    APIC_LEVEL                      Level,
+    APIC_DESTINATION_MODE           DestinationMode,
+    APIC_ICR_DELIVERY_MODE          DeliveryMode,
+    UINT8                           Vector
+){
+    ApicHalSetX1ApicSendInterruptCommandEx(
+        ApicBase, 
+        DestinationField, 
+        Shorthand, 
+        TriggerMode, 
+        Level, 
+        DestinationMode, 
+        DeliveryMode, 
+        Vector
+    );
 }
