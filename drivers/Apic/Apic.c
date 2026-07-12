@@ -1,6 +1,14 @@
 #include <LouDDK.h>
 
+DRIVER_EXPORT 
+LOUSTATUS 
+ApicInitializeAdvancedProgramableInterruptController(
+    SIZE Cpu
+){
 
+
+    return STATUS_SUCCESS;
+}
 
 LOUAPI
 LOUSTATUS 

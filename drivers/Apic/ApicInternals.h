@@ -76,9 +76,16 @@ typedef enum{
     APIC_DESTINATION_SHORTHAND_ALL_ES, //excluding self
 }APIC_DESTINATION_SHORTHAND;
 
+typedef enum {
+    X1_LOCAL_APIC_DEVICE_TYPE = 0,
+    X2_LOCAL_APIC_DEVICE_TYPE,
+    IO_APIC_DEVICE_TYPE,
+    TOTAL_APIC_DEVICE_TYPES,
+}APIC_DEVICE_TYPE;
+
 typedef struct _APIC_DEVICE_OBJECT{
-    mutex_t     WriteLock;
-    PVOID       ApicBase;
+    APIC_DEVICE_TYPE    ApicDeviceType;
+    PVOID               ApicBase;
 }APIC_DEVICE_OBJECT, * PAPIC_DEVICE_OBJECT;
 
 //TODO: 

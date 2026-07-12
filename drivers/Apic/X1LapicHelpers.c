@@ -1,586 +1,400 @@
 #include "X1ApicInternals.h"
 
-UINT32 ApicHalGetX1ApicIdEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicIdRegisterEx(ApicBase);
+UINT32 ApicHalGetX1ApicId(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicIdRegister(ApicBase);
     return GET_X1APIC_ID_VALUE(Register);
 }
 
-UINT32 ApicHalGetX1ApicId(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicIdEx(ApicDeviceObject->ApicBase);
-}
-
-UINT32 ApicHalGetX1ApicVersionEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicVersionRegisterEx(ApicBase);
+UINT32 ApicHalGetX1ApicVersion(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicVersionRegister(ApicBase);
     return GET_X1APIC_VERSION_VALUE(Register);
 }
 
-UINT32 ApicHalGetX1ApicVersion(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicVersionEx(ApicDeviceObject->ApicBase);
-}
-
-UINT32 ApicHalGetX1ApicMaxLvtEntryEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicVersionRegisterEx(ApicBase);
+UINT32 ApicHalGetX1ApicMaxLvtEntry(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicVersionRegister(ApicBase);
     return GET_X1APIC_MAX_LVT_ENTRY_VALUE(Register);   
 }
 
-UINT32 ApicHalGetX1ApicMaxLvtEntry(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicMaxLvtEntryEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalX1ApicSupportsEoiSuppresionEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicVersionRegisterEx(ApicBase);
+BOOLEAN ApicHalX1ApicSupportsEoiSuppresion(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicVersionRegister(ApicBase);
     return GET_X1APIC_SUPPORT_EOI_SUPRESS_VALUE(Register) ? true : false;
 }
 
-APIC_TIMER_MODE ApicHalGetX1ApicLvtTimerModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+APIC_TIMER_MODE ApicHalGetX1ApicLvtTimerMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     return (APIC_TIMER_MODE)GET_X1APIC_LVT_TIMER_MODE(Register);
 }
 
-APIC_TIMER_MODE ApicHalGetX1ApicLvtTimerMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtTimerModeEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtTimerMaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtTimerMasked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     return GET_X1APIC_LVT_TIMER_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtTimerMasked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtTimerMaskedEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtTimerInterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtTimerInterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     return GET_X1APIC_LVT_TIMER_DELIVERY_STATUS(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtTimerInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtTimerInterruptPendingEx(ApicDeviceObject->ApicBase);
-}
-
-UINT8 ApicHalGetX1ApicLvtTimerVectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicLvtTimerVector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     return (UINT8)GET_X1APIC_LVT_TIMER_VECTOR(Register);
 }
 
-BOOLEAN ApicHalIsX1ApicLvtCmciMaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtCmciMasked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     return GET_X1APIC_LVT_CMCI_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtCmciMasked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtCmciMaskedEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtCmciInterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtCmciInterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     return GET_X1APIC_LVT_CMCI_DELIVERY_STATUS(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtCmciInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtCmciInterruptPendingEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_LVT_CMCI_DELIVERY_MODE(Register);
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtCmciDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtCmciDeliveryModeEx(ApicDeviceObject->ApicBase);
-}
-
-UINT8 ApicHalGetX1ApicLvtCmciVectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicLvtCmciVector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     return (UINT8)GET_X1APIC_LVT_CMCI_VECTOR(Register);
 }
 
-UINT8 ApicHalGetX1ApicLvtCmciVector(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtCmciVectorEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtLint0MaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtLint0Masked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return GET_X1APIC_LINT0_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtLint0Masked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtLint0MaskedEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_TRIGGER_MODE ApicHalGetX1ApicLvtLint0TriggerModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+APIC_TRIGGER_MODE ApicHalGetX1ApicLvtLint0TriggerMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return (APIC_TRIGGER_MODE)GET_X1APIC_LINT0_TRIGGER_MODE(Register);
 }
 
-APIC_TRIGGER_MODE ApicHalGetX1ApicLvtLint0TriggerMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint0TriggerModeEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtLint0IrrSetEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtLint0IrrSet(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return GET_X1APIC_LINT0_REMOTE_IRR(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtLint0IrrSet(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtLint0IrrSetEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_IN_PIN_POLARITY ApicHalGetX1ApicLvtLint0InPinPolarityEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+APIC_IN_PIN_POLARITY ApicHalGetX1ApicLvtLint0InPinPolarity(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return (APIC_IN_PIN_POLARITY)GET_X1APIC_LINT0_INT_PIN_POLARITY(Register);
 }
 
-APIC_IN_PIN_POLARITY ApicHalGetX1ApicLvtLint0InPinPolarity(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint0InPinPolarityEx(ApicDeviceObject->ApicBase);
-}
 
-BOOLEAN ApicHalIsX1ApicLvtLint0InterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtLint0InterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return GET_X1APIC_LINT0_DELIVERY_STATUS(Register) ? true : false;
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_LINT0_DELIVERY_MODE(Register);
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint0DeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint0DeliveryModeEx(ApicDeviceObject->ApicBase);
-}
-
-UINT8 ApicHalGetX1ApicLvtLint0VectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicLvtLint0Vector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     return (UINT8)GET_X1APIC_LINT0_VECTOR(Register);
 }
 
-UINT8 ApicHalGetX1ApicLvtLint0Vector(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint0VectorEx(ApicDeviceObject->ApicBase);
-}
-
-
-BOOLEAN ApicHalIsX1ApicLvtLint1MaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtLint1Masked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return GET_X1APIC_LINT1_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtLint1Masked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtLint1MaskedEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_TRIGGER_MODE ApicHalGetX1ApicLvtLint1TriggerModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+APIC_TRIGGER_MODE ApicHalGetX1ApicLvtLint1TriggerMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return (APIC_TRIGGER_MODE)GET_X1APIC_LINT1_TRIGGER_MODE(Register);
 }
 
-APIC_TRIGGER_MODE ApicHalGetX1ApicLvtLint1TriggerMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint1TriggerModeEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtLint1IrrSetEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtLint1IrrSet(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return GET_X1APIC_LINT1_REMOTE_IRR(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtLint1IrrSet(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtLint1IrrSetEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_IN_PIN_POLARITY ApicHalGetX1ApicLvtLint1InPinPolarityEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+APIC_IN_PIN_POLARITY ApicHalGetX1ApicLvtLint1InPinPolarity(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return (APIC_IN_PIN_POLARITY)GET_X1APIC_LINT1_INT_PIN_POLARITY(Register);
 }
 
-APIC_IN_PIN_POLARITY ApicHalGetX1ApicLvtLint1InPinPolarity(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint1InPinPolarityEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtLint1InterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtLint1InterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return GET_X1APIC_LINT0_DELIVERY_STATUS(Register) ? true : false;
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_LINT1_DELIVERY_MODE(Register);
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtLint1DeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint1DeliveryModeEx(ApicDeviceObject->ApicBase);
-}
-
-UINT8 ApicHalGetX1ApicLvtLint1VectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicLvtLint1Vector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     return (UINT8)GET_X1APIC_LINT1_VECTOR(Register);
 }
 
-UINT8 ApicHalGetX1ApicLvtLint1Vector(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtLint1VectorEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtErrorMaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtErrorMasked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     return GET_X1APIC_ERROR_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtErrorMasked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtErrorMaskedEx(ApicDeviceObject->ApicBase); 
-}
-
-BOOLEAN ApicHalIsX1ApicLvtErrorInterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtErrorInterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     return GET_X1APIC_ERROR_DELIVERY_STATUS(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtErrorInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtErrorInterruptPendingEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_ERROR_DELIVERY_MODE(Register);
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtErrorDeliveryModeEx(ApicDeviceObject->ApicBase);
-}
-
-UINT8 ApicHalGetX1ApicLvtErrorVectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicLvtErrorVector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     return (UINT8)GET_X1APIC_ERROR_MASK(Register);
 }
 
-BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersMaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersMasked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     return GET_X1APIC_PMC_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersMasked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtPerformanceMonitoringCountersMaskedEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersInterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersInterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     return GET_X1APIC_PMC_DELIVERY_STATUS(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicLvtPerformanceMonitoringCountersInterruptPendingEx(ApicDeviceObject->ApicBase);
-}
-
-
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     return (APIC_LVT_DELIVERY_MODE)GET_X1APIC_PMC_DELIVERY_MODE(Register);
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(ApicDeviceObject->ApicBase);
-}
-
-UINT8 ApicHalGetX1ApicLvtPerformanceMonitoringCountersVectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicLvtPerformanceMonitoringCountersVector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     return (UINT8)GET_X1APIC_PMC_VECTOR(Register);
 }
 
-UINT8 ApicHalGetX1ApicLvtPerformanceMonitoringCountersVector(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicLvtPerformanceMonitoringCountersVector(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicThermalSensorMaskedEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicThermalSensorMasked(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     return GET_X1APIC_TS_MASK(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicThermalSensorMasked(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicThermalSensorMaskedEx(ApicDeviceObject->ApicBase);
-}
-
-BOOLEAN ApicHalIsX1ApicThermalSensorInterruptPendingEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+BOOLEAN ApicHalIsX1ApicThermalSensorInterruptPending(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     return GET_X1APIC_TS_DELIVERY_STATUS(Register) ? true : false;
 }
 
-BOOLEAN ApicHalIsX1ApicThermalSensorInterruptPending(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalIsX1ApicThermalSensorInterruptPendingEx(ApicDeviceObject->ApicBase);
-}
-
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryModeEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryMode(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     return GET_X1APIC_TS_DELIVERY_MODE(Register);
 }
 
-APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicThermalSensorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return (APIC_LVT_DELIVERY_MODE)ApicHalGetX1ApicThermalSensorDeliveryModeEx(ApicDeviceObject->ApicBase); 
-}
-
-UINT8 ApicHalGetX1ApicThermalSensorVectorEx(PVOID ApicBase){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+UINT8 ApicHalGetX1ApicThermalSensorVector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     return (UINT8)GET_X1APIC_TS_VECTOR(Register);
 }
 
-UINT8 ApicHalGetX1ApicThermalSensorVector(PAPIC_DEVICE_OBJECT ApicDeviceObject){
-    return ApicHalGetX1ApicThermalSensorVectorEx(ApicDeviceObject->ApicBase);
+UINT32 ApicHalGetX1ApicLogicalDestinationLogicalApicId(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicLogicalDestinationRegister(ApicBase);
+    return GET_X1APIC_LDR_LOGICAL_APIC_ID(Register);
 }
 
+UINT32 ApicHalGetX1ApicDestinationFormatRegisterModel(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicDestinationFormatRegister(ApicBase);
+    return GET_X1APIC_DFR_MODEL(Register);
+}
+
+UINT32 ApicHalGetX1ApicArbitrationPriorityRegisterClass(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicArbitrationPriorityRegister(ApicBase);
+    return GET_X1APIC_APR_CLASS(Register);
+}
+
+UINT32 ApicHalGetX1ApicArbitrationPriorityRegisterSubClass(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicArbitrationPriorityRegister(ApicBase);
+    return GET_X1APIC_APR_SUB_CLASS(Register);
+}
+
+UINT32 ApicHalGetX1ApicTaskPriorityRegisterClass(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicTaskPriorityRegister(ApicBase);
+    return GET_X1APIC_TPR_CLASS(Register);
+}
+
+UINT32 ApicHalGetX1ApicTaskPriorityRegisterSubClass(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicTaskPriorityRegister(ApicBase);
+    return GET_X1APIC_TPR_SUB_CLASS(Register);
+}
+
+UINT32 ApicHalGetX1ApicProcessorPriorityRegisterClass(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicProcessorPriorityRegister(ApicBase);
+    return GET_X1APIC_PPR_CLASS(Register);
+}
+
+UINT32 ApicHalGetX1ApicProcessorPriorityRegisterSubClass(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicProcessorPriorityRegister(ApicBase);
+    return GET_X1APIC_PPR_SUB_CLASS(Register);
+}
+
+BOOLEAN ApicHalIsX1ApicEoiBroadcastSuppressed(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    return GET_X1APIC_SVR_EOI_BROADCAST_SUPPRESS(Register) ? true : false;
+}
+
+BOOLEAN ApicHalIsX1ApicFocusProcessorCheckingEnabled(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    return GET_X1APIC_SVR_FOCUS_PROCESSOR_CHECKING(Register) ? true : false;
+}
+
+BOOLEAN ApicHalIsX1ApicSoftwareEnabled(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    return GET_X1APIC_SVR_APIC_SOFTWARE_ENABLE(Register) ? true : false;
+}
+
+UINT8 ApicHalGetX1ApicSpurriousInterruptVector(PVOID ApicBase){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    return (UINT8)GET_X1APIC_SVR_VECTOR(Register);
+}   
 
 
 
-
-
-void ApicHalSetX1ApicIdEx(PVOID ApicBase, UINT32 Value){
-    UINT32 Tmp = ApicHalGetX1ApicIdRegisterEx(ApicBase);
+void ApicHalSetX1ApicId(PVOID ApicBase, UINT32 Value){
+    UINT32 Tmp = ApicHalGetX1ApicIdRegister(ApicBase);
     Tmp = SET_X1APIC_ID_VALUE(Tmp, Value);
-    ApicHalSetX1ApicIdRegisterEx(ApicBase, Value);
+    ApicHalSetX1ApicIdRegister(ApicBase, Value);
 }
 
-void ApicHalSetX1ApicId(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value){
-    ApicHalSetX1ApicIdEx(ApicDeviceObject->ApicBase, Value);
-}
-
-void ApicHalSetX1ApicLvtTimerModeEx(PVOID ApicBase, APIC_TIMER_MODE TimerMode){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtTimerMode(PVOID ApicBase, APIC_TIMER_MODE TimerMode){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     Register = SET_X1APIC_LVT_TIMER_MODE(Register, (UINT32)TimerMode);
-    ApicHalSetX1ApicLvtTimerRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtTimerRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtTimerMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_TIMER_MODE TimerMode){
-    ApicHalSetX1ApicLvtTimerModeEx(ApicDeviceObject->ApicBase, TimerMode);
-}
-
-void ApicHalSetX1ApicLvtTimerMaskEx(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtTimerMask(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     Register = SET_X1APIC_LVT_TIMER_MASK(Register, (Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtTimerRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtTimerRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtTimerMask(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalSetX1ApicLvtTimerMaskEx(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtTimerVectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtTimerRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtTimerVector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtTimerRegister(ApicBase);
     Register = SET_X1APIC_LVT_TIMER_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtTimerRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtTimerRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtTimerVector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtTimerVectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalMaskX1ApicLvtCmciEx(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+void ApicHalMaskX1ApicLvtCmci(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     Register = SET_X1APIC_LVT_CMCI_MASK(Register, (UINT32)(Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtCmciRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtCmciRegister(ApicBase, Register);
 }
 
-void ApicHalMaskX1ApicLvtCmci(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalMaskX1ApicLvtCmciEx(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtCmciDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtCmciDeliveryMode(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     Register = SET_X1APIC_LVT_CMCI_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
-    ApicHalSetX1ApicLvtCmciRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtCmciRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtCmciDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    ApicHalSetX1ApicLvtCmciDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
-}
-
-void ApicHalSetX1ApicLvtCmciVectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtCmciRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtCmciVector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtCmciRegister(ApicBase);
     Register = SET_X1APIC_LVT_CMCI_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtCmciRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtCmciRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtCmciVector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtCmciVectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalMaskX1ApicLvtLint0Ex(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+void ApicHalMaskX1ApicLvtLint0(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     Register = SET_X1APIC_LINT0_MASK(Register, (UINT32)(Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtLint0RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint0Register(ApicBase, Register);
 }
 
-void ApicHalMaskX1ApicLvtLint0(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalMaskX1ApicLvtLint0Ex(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtLint0TriggerModeEx(PVOID ApicBase, APIC_TRIGGER_MODE TriggerMode){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtLint0TriggerMode(PVOID ApicBase, APIC_TRIGGER_MODE TriggerMode){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     Register = SET_X1APIC_LINT0_TRIGGER_MODE(Register, (UINT32)TriggerMode);
-    ApicHalSetX1ApicLvtLint0RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint0Register(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtLint0TriggerMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_TRIGGER_MODE TriggerMode){
-    ApicHalSetX1ApicLvtLint0TriggerMode(ApicDeviceObject->ApicBase, TriggerMode);
-}
-
-void ApicHalSetX1ApicLvtLint0InPinPolarityEx(PVOID ApicBase, APIC_IN_PIN_POLARITY Polarity){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtLint0InPinPolarity(PVOID ApicBase, APIC_IN_PIN_POLARITY Polarity){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     Register = SET_X1APIC_LINT0_INT_PIN_POLARITY(Register,(UINT32)Polarity);
-    ApicHalSetX1ApicLvtLint0RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint0Register(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtLint0InPinPolarity(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_IN_PIN_POLARITY Polarity){
-    ApicHalSetX1ApicLvtLint0InPinPolarityEx(ApicDeviceObject->ApicBase, Polarity);
-}
-
-void ApicHalSetX1ApicLvtLint0VectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtLint0RegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtLint0Vector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtLint0Register(ApicBase);
     Register = SET_X1APIC_LINT0_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtLint0RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint0Register(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtLint0Vector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtLint0VectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalMaskX1ApicLvtLint1Ex(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+void ApicHalMaskX1ApicLvtLint1(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     Register = SET_X1APIC_LINT1_MASK(Register, (UINT32)(Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtLint1RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint1Register(ApicBase, Register);
 }
 
-void ApicHalMaskX1ApicLvtLint1(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalMaskX1ApicLvtLint1Ex(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtLint1TriggerModeEx(PVOID ApicBase, APIC_TRIGGER_MODE TriggerMode){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtLint1TriggerMode(PVOID ApicBase, APIC_TRIGGER_MODE TriggerMode){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     Register = SET_X1APIC_LINT1_TRIGGER_MODE(Register, (UINT32)TriggerMode);
-    ApicHalSetX1ApicLvtLint1RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint1Register(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtLint1TriggerMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_TRIGGER_MODE TriggerMode){
-    ApicHalSetX1ApicLvtLint1TriggerMode(ApicDeviceObject->ApicBase, TriggerMode);
-}
-
-void ApicHalSetX1ApicLvtLint1InPinPolarityEx(PVOID ApicBase, APIC_IN_PIN_POLARITY Polarity){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtLint1InPinPolarity(PVOID ApicBase, APIC_IN_PIN_POLARITY Polarity){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     Register = SET_X1APIC_LINT1_INT_PIN_POLARITY(Register,(UINT32)Polarity);
-    ApicHalSetX1ApicLvtLint1RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint1Register(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtLint1InPinPolarity(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_IN_PIN_POLARITY Polarity){
-    ApicHalSetX1ApicLvtLint1InPinPolarityEx(ApicDeviceObject->ApicBase, Polarity);
-}
-
-void ApicHalSetX1ApicLvtLint1VectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtLint1RegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtLint1Vector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtLint1Register(ApicBase);
     Register = SET_X1APIC_LINT1_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtLint1RegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtLint1Register(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtLint1Vector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtLint1VectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalMaskX1ApicLvtErrorEx(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+void ApicHalMaskX1ApicLvtError(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     Register = SET_X1APIC_ERROR_MASK(Register, (UINT32)(Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtErrorRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtErrorRegister(ApicBase, Register);
 }
 
-void ApicHalMaskX1ApicLvtError(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalMaskX1ApicLvtErrorEx(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtErrorDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtErrorDeliveryMode(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     Register = SET_X1APIC_ERROR_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
-    ApicHalSetX1ApicLvtErrorRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtErrorRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtErrorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    ApicHalSetX1ApicLvtErrorDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
-}
-
-void ApicHalSetX1ApicLvtErrorVectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtErrorRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtErrorVector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
     Register = SET_X1APIC_ERROR_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtErrorRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtErrorRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtErrorVector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtErrorVectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersMaskEx(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersMask(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     Register = SET_X1APIC_PMC_MASK(Register, (UINT32)(Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersMask(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalSetX1ApicLvtPerformanceMonitoringCountersMaskEx(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     Register = SET_X1APIC_PMC_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
-    ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    ApicHalSetX1ApicLvtPerformanceMonitoringCountersDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
-}
-
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersVectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtPerformanceMonitoringCountersVector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase);
     Register = SET_X1APIC_PMC_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtPerformanceMonitoringCountersRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtPerformanceMonitoringCountersVector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtPerformanceMonitoringCountersVectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalMaskX1ApicLvtThermalSensorEx(PVOID ApicBase, BOOLEAN Masked){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+void ApicHalMaskX1ApicLvtThermalSensor(PVOID ApicBase, BOOLEAN Masked){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     Register = SET_X1APIC_TS_MASK(Register, (UINT32)(Masked ? 1 : 0));
-    ApicHalSetX1ApicLvtThermalSensorRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtThermalSensorRegister(ApicBase, Register);
 }
 
-void ApicHalMaskX1ApicLvtThermalSensor(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN Masked){
-    ApicHalMaskX1ApicLvtThermalSensorEx(ApicDeviceObject->ApicBase, Masked);
-}
-
-void ApicHalSetX1ApicLvtThermalSensorDeliveryModeEx(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtThermalSensorDeliveryMode(PVOID ApicBase, APIC_LVT_DELIVERY_MODE DeliveryMode){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     Register = SET_X1APIC_TS_DELIVERY_MODE(Register, (UINT32)DeliveryMode);
-    ApicHalSetX1ApicLvtThermalSensorRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtThermalSensorRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLvtThermalSensorDeliveryMode(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_LVT_DELIVERY_MODE DeliveryMode){
-    ApicHalSetX1ApicLvtThermalSensorDeliveryModeEx(ApicDeviceObject->ApicBase, DeliveryMode);
-}
-
-void ApicHalSetX1ApicLvtThermalSensorVectorEx(PVOID ApicBase, UINT8 Vector){
-    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegisterEx(ApicBase);
+void ApicHalSetX1ApicLvtThermalSensorVector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicLvtThermalSensorRegister(ApicBase);
     Register = SET_X1APIC_TS_VECTOR(Register, (UINT32)Vector);
-    ApicHalSetX1ApicLvtThermalSensorRegisterEx(ApicBase, Register);
-}
-
-void ApicHalSetX1ApicLvtThermalSensorVector(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Vector){
-    ApicHalSetX1ApicLvtThermalSensorVectorEx(ApicDeviceObject->ApicBase, Vector);
-}
-
-void ApicHalSetX1ApicSendInterruptCommandEx(
-    PVOID                           ApicBase, 
-    UINT8                           DestinationField, 
-    APIC_DESTINATION_SHORTHAND      Shorthand,
-    APIC_TRIGGER_MODE               TriggerMode,
-    APIC_LEVEL                      Level,
-    APIC_DESTINATION_MODE           DestinationMode,
-    APIC_ICR_DELIVERY_MODE          DeliveryMode,
-    UINT8                           Vector
-){
-    UINT64 Register = ((UINT64)DestinationField << 56) | ((UINT64)Shorthand << 18) | ((UINT64)TriggerMode << 15) | ((UINT64)Level << 14) | ((UINT64)DestinationMode << 11) | ((UINT64)DeliveryMode << 8) | (UINT64)Vector;  
-    ApicHalSetX1ApicInterruptCommandRegisterEx(ApicBase, Register);
+    ApicHalSetX1ApicLvtThermalSensorRegister(ApicBase, Register);
 }
 
 void ApicHalSetX1ApicSendInterruptCommand(
@@ -593,14 +407,54 @@ void ApicHalSetX1ApicSendInterruptCommand(
     APIC_ICR_DELIVERY_MODE          DeliveryMode,
     UINT8                           Vector
 ){
-    ApicHalSetX1ApicSendInterruptCommandEx(
-        ApicBase, 
-        DestinationField, 
-        Shorthand, 
-        TriggerMode, 
-        Level, 
-        DestinationMode, 
-        DeliveryMode, 
-        Vector
-    );
+    UINT64 Register = ((UINT64)DestinationField << 56) | ((UINT64)Shorthand << 18) | ((UINT64)TriggerMode << 15) | ((UINT64)Level << 14) | ((UINT64)DestinationMode << 11) | ((UINT64)DeliveryMode << 8) | (UINT64)Vector;  
+    ApicHalSetX1ApicInterruptCommandRegister(ApicBase, Register);
+}
+
+void ApicHalSetX1ApicLogicalDestinationLogicalApicId(PVOID ApicBase, UINT32 Value){
+    UINT32 Register = ApicHalGetX1ApicLogicalDestinationRegister(ApicBase);
+    Register = SET_X1APIC_LDR_LOGICAL_APIC_ID(Register, Value);
+    ApicHalSetX1ApicLogicalDestinationRegister(ApicBase, Register);
+}
+
+void ApicHalSetX1ApicDestinationFormatRegisterModel(PVOID ApicBase, UINT32 Value){
+    UINT32 Register = ApicHalGetX1ApicDestinationFormatRegister(ApicBase);
+    Register = SET_X1APIC_DFR_MODEL(Register, Value);
+    ApicHalSetX1ApicDestinationFormatRegister(ApicBase, Register);
+}
+
+void ApicHalSetX1ApicTaskPriorityRegisterClass(PVOID ApicBase, UINT32 Value){
+    UINT32 Register = ApicHalGetX1ApicTaskPriorityRegister(ApicBase);
+    Register = SET_X1APIC_TPR_CLASS(Register, Value);
+    ApicHalSetX1ApicTaskPriorityRegister(ApicBase, Register);
+}
+
+void ApicHalSetX1ApicTaskPriorityRegisterSubClass(PVOID ApicBase, UINT32 Value){
+    UINT32 Register = ApicHalGetX1ApicTaskPriorityRegister(ApicBase);
+    Register = SET_X1APIC_TPR_SUB_CLASS(Register, Value);
+    ApicHalSetX1ApicTaskPriorityRegister(ApicBase, Register);
+}
+
+void ApicHalEnableX1ApicEoiBroadcastSuppression(PVOID ApicBase, BOOLEAN Enabled){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    Register = SET_X1APIC_SVR_EOI_BROADCAST_SUPPRESS(Register, (Enabled ? 1 : 0));
+    ApicHalSetX1ApicSpuriousInterruptVectorRegister(ApicBase, Register);
+}
+
+void ApicHalEnableX1ApicFocusProcessorChecking(PVOID ApicBase, BOOLEAN Enabled){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    Register = SET_X1APIC_SVR_FOCUS_PROCESSOR_CHECKING(Register, (Enabled ? 1 : 0));
+    ApicHalSetX1ApicSpuriousInterruptVectorRegister(ApicBase, Register);   
+}
+
+void ApicHalEnableX1ApicSoftware(PVOID ApicBase, BOOLEAN Enabled){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    Register = SET_X1APIC_SVR_APIC_SOFTWARE_ENABLE(Register, (Enabled ? 1 : 0));
+    ApicHalSetX1ApicSpuriousInterruptVectorRegister(ApicBase, Register);   
+}
+
+void ApicHalSetX1ApicSpuriousInterruptVector(PVOID ApicBase, UINT8 Vector){
+    UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
+    Register = SET_X1APIC_SVR_VECTOR(Register, (UINT32)Vector);
+    ApicHalSetX1ApicSpuriousInterruptVectorRegister(ApicBase, Register);   
 }
