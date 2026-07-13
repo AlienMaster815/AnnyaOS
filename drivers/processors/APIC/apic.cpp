@@ -122,8 +122,8 @@ typedef struct {
 #define APICADDRESSCAST (volatile uint32_t*)(uintptr_t)
 #define LEGACY_IRQ_SCOPE 16
 
-LOUAPI uint64_t read_msr(uint32_t msr);
-LOUAPI void write_msr(uint32_t msr, uint64_t Value);
+LOUAPI uint64_t LouKeReadMsr(uint32_t msr);
+LOUAPI void LouKeWriteMsr(uint32_t msr, uint64_t Value);
 
 string DRV_VERSION_APIC = "\nLousine Internal Kernel APIC.SYS Module Version 1.10\n";
 string DRV_UNLOAD_STRING_SUCCESS_APIC = "Driver Execution Completed Successfully Exiting Proccess\n\n"; 
@@ -417,14 +417,14 @@ LOUAPI bool GetAPICStatus() {
 
 
 uint64_t GetLocalApicBase() {
-   uint64_t msr_value = read_msr(IA32_APIC_BASE_MSR);
+   uint64_t msr_value = LouKeReadMsr(IA32_APIC_BASE_MSR);
    return msr_value & 0xFFFFFFFFFFFFF000;
 }
 
 // Function to set the APIC base address
 void cpu_set_apic_base(uintptr_t apic) {
    uint64_t msr_value = (apic & 0xFFFFFFFFFFFFF000) | IA32_APIC_BASE_MSR_ENABLE;
-   write_msr(IA32_APIC_BASE_MSR, msr_value);
+   LouKeWriteMsr(IA32_APIC_BASE_MSR, msr_value);
 }
 
 void ApcInstallIoApicHandlers();
@@ -531,7 +531,7 @@ void LouKeInitializeCurrentApApic(){
 
 bool InitializeApic(){
     LouPrint("Setting Up APIC\n");
-    uint64_t MSR = read_msr(IA32_APIC_BASE_MSR);
+    uint64_t MSR = LouKeReadMsr(IA32_APIC_BASE_MSR);
     if(!(MSR >> 11) & 0x01) return false;
     return true;
 }

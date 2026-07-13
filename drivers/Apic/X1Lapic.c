@@ -143,8 +143,8 @@ void ApicHalSetX1ApicInterruptCommandRegisterHigh(PVOID ApicBase, UINT32 Value){
 }
 
 void ApicHalSetX1ApicInterruptCommandRegister(PVOID ApicBase, UINT64 Value){
-    ApicHalSetX1ApicInterruptCommandRegisterLow(ApicBase, Value & UINT32_MAX);
     ApicHalSetX1ApicInterruptCommandRegisterHigh(ApicBase, (Value >> 32) & UINT32_MAX);
+    ApicHalSetX1ApicInterruptCommandRegisterLow(ApicBase, Value & UINT32_MAX);
 }
 
 void ApicHalSetX1ApicLvtTimerRegister(PVOID ApicBase, UINT32 Value){

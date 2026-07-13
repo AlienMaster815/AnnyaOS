@@ -78,10 +78,10 @@ UINT64 LouKeGetProcessorFSI(){
 #define DEFAULT_PAT_VALUE   0x0007040600070106ULL
 #define PAT_MSR             0x277
 
-void write_msr(uint32_t msr, uint64_t value);
+void LouKeWriteMsr(uint32_t msr, uint64_t value);
 
 void LouKeInitializePat(){
-    write_msr(PAT_MSR, DEFAULT_PAT_VALUE);
+    LouKeWriteMsr(PAT_MSR, DEFAULT_PAT_VALUE);
     LouKeReloadCR3();
 }
 void SetAvxAllocationSize(SIZE Size);

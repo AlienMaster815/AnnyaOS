@@ -214,3 +214,5 @@ EXPORTS
     LouKeRcuSynchronize
     MutexDestroy
     MutexInitialize
+    LouKeWriteMsr
+    LouKeReadMsr

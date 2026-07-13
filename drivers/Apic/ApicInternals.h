@@ -77,15 +77,26 @@ typedef enum{
 }APIC_DESTINATION_SHORTHAND;
 
 typedef enum {
-    X1_LOCAL_APIC_DEVICE_TYPE = 0,
-    X2_LOCAL_APIC_DEVICE_TYPE,
-    IO_APIC_DEVICE_TYPE,
-    TOTAL_APIC_DEVICE_TYPES,
-}APIC_DEVICE_TYPE;
+    X1_LOCAL_APIC_OBJECT_TYPE = 0,
+    X2_LOCAL_APIC_OBJECT_TYPE,
+    IO_APIC_OBJECT_TYPE,
+    TOTAL_APIC_OBJECT_TYPES,
+}APIC_OBJECT_TYPE;
+
+typedef struct _X1LOCAL_APIC_DEVICE_OBJECT{
+    PVOID                           ApicBase;
+}X1LOCAL_APIC_DEVICE_OBJECT, * PX1LOCAL_APIC_DEVICE_OBJECT;
+
+typedef struct _IO_APIC_DEVICE_OBJECT{
+    PVOID                           ApicBase;
+}IO_APIC_DEVICE_OBJECT, * PIO_APIC_DEVICE_OBJECT;
 
 typedef struct _APIC_DEVICE_OBJECT{
-    APIC_DEVICE_TYPE    ApicDeviceType;
-    PVOID               ApicBase;
+    APIC_OBJECT_TYPE                ApicObjectType;
+    union{
+        X1LOCAL_APIC_DEVICE_OBJECT  X1ApicObject;
+        IO_APIC_DEVICE_OBJECT       IoApicObject;
+    };
 }APIC_DEVICE_OBJECT, * PAPIC_DEVICE_OBJECT;
 
 //TODO: 

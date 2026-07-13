@@ -67,7 +67,7 @@ KERNEL_EXPORT void outbSlow(uint64_t port64, uint8_t data) {
                          : "a"(data), "Nd"(port));
 }
 
-uint64_t read_msr(uint32_t msr_id) {
+KERNEL_EXPORT uint64_t LouKeReadMsr(uint32_t msr_id) {
     uint32_t low, high;
     __asm__ __volatile__("rdmsr"
                          : "=a"(low), "=d"(high)
@@ -75,7 +75,7 @@ uint64_t read_msr(uint32_t msr_id) {
     return ((uint64_t)high << 32) | low;
 }
 
-void write_msr(uint32_t msr, uint64_t value) {
+KERNEL_EXPORT void LouKeWriteMsr(uint32_t msr, uint64_t value) {
     uint32_t low = (uint32_t)(value & 0xFFFFFFFF);
     uint32_t high = (uint32_t)(value >> 32);
     __asm__ __volatile__("wrmsr"
