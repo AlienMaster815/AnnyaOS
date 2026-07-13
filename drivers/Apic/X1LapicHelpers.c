@@ -148,7 +148,7 @@ APIC_LVT_DELIVERY_MODE ApicHalGetX1ApicLvtErrorDeliveryMode(PVOID ApicBase){
 
 UINT8 ApicHalGetX1ApicLvtErrorVector(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLvtErrorRegister(ApicBase);
-    return (UINT8)GET_X1APIC_ERROR_MASK(Register);
+    return (UINT8)GET_X1APIC_ERROR_VECTOR(Register);
 }
 
 BOOLEAN ApicHalIsX1ApicLvtPerformanceMonitoringCountersMasked(PVOID ApicBase){
@@ -191,7 +191,7 @@ UINT8 ApicHalGetX1ApicThermalSensorVector(PVOID ApicBase){
     return (UINT8)GET_X1APIC_TS_VECTOR(Register);
 }
 
-UINT32 ApicHalGetX1ApicLogicalDestinationLogicalApicId(PVOID ApicBase){
+UINT32 ApicHalGetX1ApicLogicalDestinationRegisterLogicalApicId(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicLogicalDestinationRegister(ApicBase);
     return GET_X1APIC_LDR_LOGICAL_APIC_ID(Register);
 }
@@ -399,7 +399,7 @@ void ApicHalSetX1ApicLvtThermalSensorVector(PVOID ApicBase, UINT8 Vector){
 
 void ApicHalSetX1ApicSendInterruptCommand(
     PVOID                           ApicBase, 
-    UINT8                           DestinationField, 
+    UINT32                          DestinationField, 
     APIC_DESTINATION_SHORTHAND      Shorthand,
     APIC_TRIGGER_MODE               TriggerMode,
     APIC_LEVEL                      Level,
@@ -411,7 +411,7 @@ void ApicHalSetX1ApicSendInterruptCommand(
     ApicHalSetX1ApicInterruptCommandRegister(ApicBase, Register);
 }
 
-void ApicHalSetX1ApicLogicalDestinationLogicalApicId(PVOID ApicBase, UINT32 Value){
+void ApicHalSetX1ApicLogicalDestinationRegisterLogicalApicId(PVOID ApicBase, UINT32 Value){
     UINT32 Register = ApicHalGetX1ApicLogicalDestinationRegister(ApicBase);
     Register = SET_X1APIC_LDR_LOGICAL_APIC_ID(Register, Value);
     ApicHalSetX1ApicLogicalDestinationRegister(ApicBase, Register);

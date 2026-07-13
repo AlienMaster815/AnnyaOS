@@ -56,7 +56,7 @@ UINT32 ApicHalGetX2ApicLvtThermalSensorRegister(){
     return (UINT32)(LouKeReadMsr(X2APIC_LVT_THERMAL_SENSOR_REGISTER_OFFSET) & UINT32_MAX);
 }
 
-UINT32 ApicHalGetX2ApicLvtPerformanceMonitoringRegister(){
+UINT32 ApicHalGetX2ApicLvtPerformanceMonitoringCountersRegister(){
     return (UINT32)(LouKeReadMsr(X2APIC_LVT_PERFORMANCE_MONITORING_REGISTER_OFFSET) & UINT32_MAX);
 }
 
@@ -93,7 +93,7 @@ void ApicHalSetX2ApicEndOfInterruptRegister(UINT32 Value){
     LouKeWriteMsr(X2APIC_END_OF_INTERRUPT_REGISTER_OFFSET, (UINT64)Value);
 }
 
-void ApicHalSetX2ApicSpuriousInterruptVector(UINT32 Value){
+void ApicHalSetX2ApicSpuriousInterruptVectorRegister(UINT32 Value){
     LouKeWriteMsr(X2APIC_SPURIOUS_INTERRUPT_VECTOR_REGISTER_OFFSET, (UINT64)Value);
 }
 
@@ -113,11 +113,11 @@ void ApicHalSetX2ApicLvtTimerRegister(UINT32 Value){
     LouKeWriteMsr(X2APIC_LVT_TIMER_REGISTER_OFFSET, (UINT64)Value);
 }
 
-void ApicHalSetX2ApicThermalSensorRegister(UINT32 Value){
+void ApicHalSetX2ApicLvtThermalSensorRegister(UINT32 Value){
     LouKeWriteMsr(X2APIC_LVT_THERMAL_SENSOR_REGISTER_OFFSET, (UINT64)Value);
 }
 
-void ApicHalSetX2ApicLvtPerformanceMonitoringRegister(UINT32 Value){
+void ApicHalSetX2ApicLvtPerformanceMonitoringCountersRegister(UINT32 Value){
     LouKeWriteMsr(X2APIC_LVT_PERFORMANCE_MONITORING_REGISTER_OFFSET, (UINT64)Value);
 }
 
