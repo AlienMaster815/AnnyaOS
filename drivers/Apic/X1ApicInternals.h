@@ -405,7 +405,7 @@ UINT32 ApicHalGetX1ApicProcessorPriorityRegisterSubClass(PVOID ApicBase);
 BOOLEAN ApicHalIsX1ApicEoiBroadcastSuppressed(PVOID ApicBase);
 BOOLEAN ApicHalIsX1ApicFocusProcessorCheckingEnabled(PVOID ApicBase);
 BOOLEAN ApicHalIsX1ApicSoftwareEnabled(PVOID ApicBase);
-UINT8 ApicHalGetX1ApicSpurriousInterruptVector(PVOID ApicBase);
+UINT8 ApicHalGetX1ApicSpuriousInterruptVector(PVOID ApicBase);
 void ApicHalSetX1ApicId(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicLvtTimerMode(PVOID ApicBase, APIC_TIMER_MODE TimerMode);
 void ApicHalSetX1ApicLvtTimerMask(PVOID ApicBase, BOOLEAN Masked);

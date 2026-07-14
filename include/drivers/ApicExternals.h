@@ -1,7 +1,9 @@
 #ifndef _APIC_INTERNALS_H
-#define _APIC_INTERNALS_H
+#ifndef _APIC_EXTERNAL_H
+#define _APIC_EXTERNAL_H
 
-#include <LouAPI.h>
+#include <Modulation.h>
+#include <cstdint.h>
 
 typedef enum{
     APIC_TIMER_MODE_ONE_SHOT = 0,
@@ -83,53 +85,9 @@ typedef enum {
     TOTAL_APIC_OBJECT_TYPES,
 }APIC_OBJECT_TYPE;
 
-typedef struct _X1LOCAL_APIC_DEVICE_OBJECT{
-    PVOID                           ApicBase;
-}X1LOCAL_APIC_DEVICE_OBJECT, * PX1LOCAL_APIC_DEVICE_OBJECT;
-
-typedef struct _IO_APIC_DEVICE_OBJECT{
-    PVOID                           ApicBase;
-}IO_APIC_DEVICE_OBJECT, * PIO_APIC_DEVICE_OBJECT;
-
-typedef struct _APIC_DEVICE_OBJECT{
-    APIC_OBJECT_TYPE                ApicObjectType;
-    union{
-        X1LOCAL_APIC_DEVICE_OBJECT  X1ApicObject;
-        IO_APIC_DEVICE_OBJECT       IoApicObject;
-    };
-}APIC_DEVICE_OBJECT, * PAPIC_DEVICE_OBJECT;
-
-void ApicHalDbgPrint(char* format, ...);
+typedef PVOID PAPIC_DEVICE_OBJECT;
 
 
 
-LOUSTATUS ApicHalGetApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicVersionRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicArbitrationPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicProcessorPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicRemoteReadRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-
-
-
-
-//TODO: 
-
-//if ESR bit 4 is set then a redirectable IPI with lowest prioirty 
-//is not supported so an IPI sender must check this in an error to 
-//verify if this caused and error
-
-//if ESR bit 5 is set the handler must scan through all local 
-//tables and if the vector is 0 through 15 and print
-
-//if ESR bit 6 is set the handler must scan through all local 
-//tables and if the vector is 0 through 15 and print
-
-//if ESR bit 7 is set the handler must attatch to the GPF Handler
-//and disable whatever kernel thread or user process accessed 
-//created the GPF
-
-
+#endif
 #endif

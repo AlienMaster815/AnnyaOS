@@ -246,7 +246,7 @@ BOOLEAN ApicHalIsX1ApicSoftwareEnabled(PVOID ApicBase){
     return GET_X1APIC_SVR_APIC_SOFTWARE_ENABLE(Register) ? true : false;
 }
 
-UINT8 ApicHalGetX1ApicSpurriousInterruptVector(PVOID ApicBase){
+UINT8 ApicHalGetX1ApicSpuriousInterruptVector(PVOID ApicBase){
     UINT32 Register = ApicHalGetX1ApicSpuriousInterruptVectorRegister(ApicBase);
     return (UINT8)GET_X1APIC_SVR_VECTOR(Register);
 }   

@@ -98,6 +98,7 @@ extern "C" {
 #include <USRSPC/msvcrt.h>
 #include <USRSPC/User.h>
 #include <Rat.h>
+#include <drivers/ApicExternals.h>
 
 #ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_

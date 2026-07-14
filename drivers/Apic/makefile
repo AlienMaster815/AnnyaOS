@@ -7,7 +7,10 @@ SRC = 	Apic.c \
 		X1Lapic.c \
 		X2Lapic.c \
 		X1LapicHelpers.c \
-		X2LapicHelpers.c
+		X2LapicHelpers.c \
+		LapicAbstraction.c \
+		LapicHelpers.c \
+		LapicHelpersAbstraction.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=ApicSubsystemEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
