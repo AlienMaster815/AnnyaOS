@@ -99,18 +99,102 @@ typedef struct _APIC_DEVICE_OBJECT{
     };
 }APIC_DEVICE_OBJECT, * PAPIC_DEVICE_OBJECT;
 
+typedef enum {
+    REGISTER_COMMUNICATION_INTERRUPT = 0,
+    TOTAL_IPI_INTERRUPT_PACKET_TYPES,
+}IPI_INTERRUPT_PACKET_TYPE;
+
+typedef struct _REGISTER_COMMUNICATION_INTERRUPT_PACKET{
+    UINTPTR Foo;
+}REGISTER_COMMUNICATION_INTERRUPT_PACKET, * PREGISTER_COMMUNICATION_INTERRUPT_PACKET;
+
+typedef struct _IPI_INTERRUPT_PACKET{
+    IPI_INTERRUPT_PACKET_TYPE                       PacketType;
+    union{
+        REGISTER_COMMUNICATION_INTERRUPT_PACKET     RegisterCommunicationData;
+    };
+}IPI_INTERRUPT_PACKET, * PIPI_INTERRUPT_PACKET;
+
+typedef struct _PER_PROCESSOR_IPI_DATA{
+    OPAQUE_PTR                      IpiVectorObject;
+    mutex_t                         ProcessorLock;
+    IPI_INTERRUPT_PACKET            InterruptPacket;
+}PER_PROCESSOR_IPI_DATA, * PPER_PROCESSOR_IPI_DATA;
+
+typedef struct _PER_PROCESSOR_APIC_DATA{
+    UINT32                          ApicID;
+    UINT32                          ProcessorID;
+    APIC_DEVICE_OBJECT              ApicDeviceObject;
+    PER_PROCESSOR_IPI_DATA          IpiData;
+}PER_PROCESSOR_APIC_DATA, * PPER_PROCESSOR_APIC_DATA;
+
+#ifndef APIC_MAIN
+extern PPER_PROCESSOR_APIC_DATA PerProcessorApicData;
+#endif
+
 void ApicHalDbgPrint(char* format, ...);
 
+LOUSTATUS ApicHalGetApicIdRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicVersionRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicTaskPriorityRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicArbitrationPriorityRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicProcessorPriorityRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicRemoteReadRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLogicalDestinationRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicDestinationFormatRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicSpuriousInterruptVectorRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicInServiceRegisterX32Ex(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset, UINT32* Out);
+LOUSTATUS ApicHalGetApicTriggerModeRegisterX32Ex(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset, UINT32* Out);
+LOUSTATUS ApicHalGetApicInterruptRequestRegisterX32Ex(PAPIC_DEVICE_OBJECT ApicDeviceObject, SIZE Offset, UINT32* Out);
+LOUSTATUS ApicHalGetApicErrorStatusRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLvtCmciRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicInterruptCommandRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64* Out);
+LOUSTATUS ApicHalGetApicLvtTimerRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLvtThermalSensorRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLvtPerformanceMonitoringCountersRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLvtLint0RegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLvtLint1RegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicLvtErrorRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicInitialCountRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicCurrentCountRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+LOUSTATUS ApicHalGetApicDivideConfigurationRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+
+LOUSTATUS ApicHalSetApicIdRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicTaskPriorityRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicEndOfInterruptRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLogicalDestinationRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicDestinationFormatRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicSpuriousInterruptVectorRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicErrorStatusRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLvtCmciRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicInterruptCommandRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Value);
+LOUSTATUS ApicHalSetApicLvtTimerRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLvtThermalSensorRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLvtPerformanceMonitoringCountersRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLvtLint0RegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLvtLint1RegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicLvtErrorRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicInitialCountRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
+LOUSTATUS ApicHalSetApicDivideConfigurationRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 Value);
 
 
-LOUSTATUS ApicHalGetApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicVersionRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicArbitrationPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicProcessorPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicRemoteReadRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
-LOUSTATUS ApicHalGetApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
+
+LOUSTATUS ApicHalGetApicIdRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* IdOut);
+LOUSTATUS ApicHalGetApicVersionRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* VersionOut, UINT32* MaxLvtOut, BOOLEAN* SupportsEoiSuppresionOut);
+LOUSTATUS ApicHalGetApicLvtTimerRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, APIC_TIMER_MODE* TimerModeOut, BOOLEAN* MaskedOut, BOOLEAN* InterruptPendingOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLvtCmciRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* MaskedOut, BOOLEAN* InterruptPendingOut, APIC_LVT_DELIVERY_MODE* DeliveryModeOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLvtLint0Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* MaskedOut, APIC_TRIGGER_MODE* TriggerModeOut, BOOLEAN* IrrSetOut, APIC_IN_PIN_POLARITY* InPinPolarityOut, BOOLEAN* InterruptPendingOut, APIC_LVT_DELIVERY_MODE* DeliveryModeOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLvtLint1Register(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* MaskedOut, APIC_TRIGGER_MODE* TriggerModeOut, BOOLEAN* IrrSetOut, APIC_IN_PIN_POLARITY* InPinPolarityOut, BOOLEAN* InterruptPendingOut, APIC_LVT_DELIVERY_MODE* DeliveryModeOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLvtErrorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* MaskedOut, BOOLEAN* InterruptPendingOut, APIC_LVT_DELIVERY_MODE* DeliveryModeOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLvtPerformanceMonitoringCountersRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* MaskedOut, BOOLEAN* InterruptPendingOut, APIC_LVT_DELIVERY_MODE* DeliveryModeOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLvtThermalSensorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* MaskedOut, BOOLEAN* InterruptPendingOut, APIC_LVT_DELIVERY_MODE* DeliveryModeOut, UINT8* VectorOut);
+LOUSTATUS ApicHalGetApicLogicalDestinationRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* IdOut);
+LOUSTATUS ApicHalGetApicDestinationFormatRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* DfrModelOut);
+LOUSTATUS ApicHalGetApicArbitrationPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* ClassOut, UINT32* SubClassOut);
+LOUSTATUS ApicHalGetApicTaskPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* ClassOut, UINT32* SubClassOut);
+LOUSTATUS ApicHalGetApicProcessorPriorityRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* ClassOut, UINT32* SubClassOut);
+LOUSTATUS ApicHalGetApicSpuriousInterruptVectorRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, BOOLEAN* EoiBroadcastSuppresedOut, BOOLEAN* FocusProcessorCheckingEnabledOut, BOOLEAN* ApicSoftwareEnabledOut, UINT8* SpuriousInterruptVectorOut);
+
 
 
 

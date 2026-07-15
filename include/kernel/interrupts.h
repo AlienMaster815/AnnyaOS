@@ -113,6 +113,28 @@ void SetInterruptFlags();
 void UnSetInterruptFlags();
 void WaitForInterrupt();
 UINT64 LouKeRouterFallbackIsr(UINT64 StackPtr);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeIpicCreateVectorObject(
+    OPAQUE_PTR*         VectorObjectOut,
+    SIZE                Processor,
+    SIZE                Vector,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Items
+);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeIpicSoftwareMaskVectorObject(
+    OPAQUE_PTR  Object, 
+    SIZE        GroupMember,
+    BOOLEAN     Mask
+);
+
 #endif
 #ifdef __cplusplus
 }

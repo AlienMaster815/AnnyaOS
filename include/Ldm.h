@@ -10,7 +10,6 @@ extern "C" {
 
 #define OPAQUE_ARRAY_SIZE 1
 
-typedef PVOID OPAQUE_PTR;
 
 typedef struct _OFFSETINSTANCEDATAANDLENGTH {
     ULONG OffsetInstanceData;

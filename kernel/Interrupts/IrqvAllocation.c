@@ -63,6 +63,7 @@ LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors){
     return STATUS_SUCCESS;
 }
 
+KERNEL_EXPORT
 LOUSTATUS LouKeIpicCreateVectorObject(
     OPAQUE_PTR*         VectorObjectOut,
     SIZE                Processor,
@@ -238,4 +239,24 @@ LOUSTATUS LouKeIpicAllocateVectorObject(
         LirData,
         1
     );
+}
+
+KERNEL_EXPORT LOUSTATUS LouKeIpicSoftwareMaskVectorObject(OPAQUE_PTR Object, SIZE GroupMember, BOOLEAN Mask){
+    if(!VectorObject){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PIPIC_VECTOR_OBJECT_HANDLE ObjectHandle = (PIPIC_VECTOR_OBJECT_HANDLE)Object;
+    if(ObjectHandle->HandleType == VectorObject){
+        if(GroupMember){
+            return STATUS_INVALID_PARAMETER;
+        }
+
+        ObjectHandle->VectorObject.SoftMasked = Mask;
+        return STATUS_SUCCESS;
+    }
+    if(ObjectHandle->VectorGroup.GroupCount <= GroupMember){
+        return STATUS_INVALID_PARAMETER;
+    }
+    ObjectHandle->VectorGroup.GroupMembers[GroupMember].SoftMasked = Mask;
+    return STATUS_SUCCESS;
 }

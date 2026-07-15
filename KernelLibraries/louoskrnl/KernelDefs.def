@@ -216,3 +216,6 @@ EXPORTS
     MutexInitialize
     LouKeWriteMsr
     LouKeReadMsr
+    LouKeGetCurrentProcessorNumber
+    LouKeIpicCreateVectorObject
+    LouKeIpicSoftwareMaskVectorObject

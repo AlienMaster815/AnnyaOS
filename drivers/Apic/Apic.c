@@ -1,4 +1,7 @@
-#include <LouDDK.h>
+#define APIC_MAIN
+#include "ApicInternals.h"
+
+PPER_PROCESSOR_APIC_DATA PerProcessorApicData = 0x00;
 
 static BOOLEAN ApicDebugOn = false;
 
