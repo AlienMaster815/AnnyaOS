@@ -617,6 +617,11 @@ typedef struct PACKED _MULTIPLE_APIC_DESCRIPTION_TABLE{
     //of structures
 }MULTIPLE_APIC_DESCRIPTION_TABLE, * PMULTIPLE_APIC_DESCRIPTION_TABLE;
 
+typedef struct PACKED _MADT_ICS_COMMON_FORMAT_STRUCTURE{
+    uint8_t                                                 Type;
+    uint8_t                                                 Length;
+}MADT_ICS_COMMON_FORMAT_STRUCTURE, * PMADT_ICS_COMMON_FORMAT_STRUCTURE;
+
 typedef struct PACKED _MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE{
     uint8_t                                                 Type;  //0 
     uint8_t                                                 Length;//8
@@ -661,7 +666,7 @@ typedef struct PACKED _MADT_ICS_LOCAL_APIC_NMI_STRUCTURE{
 typedef struct PACKED _MADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE{
     uint8_t                                                 Type;  //5
     uint8_t                                                 Length;//12
-    uint16_t                                                Reserved;//i see what you did here uefi.org thanks for not breaking my -O2 /s
+    uint16_t                                                Reserved;//i see what you did here uefi.org thanks for not breaking my -O3 /s
     uint64_t                                                LocalApicAddress;
 }MADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE, * PMADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE;
 
@@ -707,7 +712,7 @@ typedef struct PACKED _MADT_ICS_LOCAL_X2_APIC_STRUCTURE{
     uint16_t                                                Reserved1;
     uint32_t                                                X2ApicId;
     uint32_t                                                Flags;
-    uint32_t                                                ProcessorID;
+    uint32_t                                                ProcessorUID;
 }MADT_ICS_LOCAL_X2_APIC_STRUCTURE, * PMADT_ICS_LOCAL_X2_APIC_STRUCTURE;
 
 typedef struct PACKED _MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE{

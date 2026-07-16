@@ -220,3 +220,5 @@ EXPORTS
     LouKeIpicCreateVectorObject
     LouKeIpicSoftwareMaskVectorObject
     LouKeInitializeIpicSubsystem
+    cpuid_subleaf
+    cpuid

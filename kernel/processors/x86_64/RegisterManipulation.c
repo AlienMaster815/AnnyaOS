@@ -4,6 +4,7 @@
 //64 bit Registera
 
 #include <cstdint.h>
+#include <Modulation.h>
 
 uint64_t get_cr3_value() {
     uint64_t cr3_value;
@@ -212,14 +213,14 @@ void set_sp(uint16_t new_sp_value) {
 
 //Special Registers And commands
 
-void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx) {
+KERNEL_EXPORT void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx) {
     asm volatile("cpuid"
         : "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx)
         : "a" (code));
 }
 
 
-void cpuid_subleaf(unsigned int leaf, unsigned int subleaf, 
+KERNEL_EXPORT void cpuid_subleaf(unsigned int leaf, unsigned int subleaf, 
                                  unsigned int *eax, unsigned int *ebx, 
                                  unsigned int *ecx, unsigned int *edx) {
     __asm__ __volatile__(
