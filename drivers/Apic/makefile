@@ -6,7 +6,7 @@ SRC = 	Apic.c \
 		Lapic.c \
 		X1Lapic.c \
 		X2Lapic.c \
-		Hal/Lapic.c \
+		LapicHal.c \
 		ApicIpi.c \
 		LapicEx.c
 

@@ -1,6 +1,6 @@
 #ifndef _APIC_INTERNALS_H
 #define _APIC_INTERNALS_H
-
+#define _KERNEL_MODULE_
 #include <LouAPI.h>
 
 #define APIC_IPI_DISPATCH_VECTOR    0x21
@@ -78,12 +78,38 @@ typedef enum{
     APIC_DESTINATION_SHORTHAND_ALL_ES, //excluding self
 }APIC_DESTINATION_SHORTHAND;
 
-typedef enum {
+typedef enum{
     X1_LOCAL_APIC_OBJECT_TYPE = 0,
     X2_LOCAL_APIC_OBJECT_TYPE,
     IO_APIC_OBJECT_TYPE,
     TOTAL_APIC_OBJECT_TYPES,
 }APIC_OBJECT_TYPE;
+
+typedef enum{
+    IO_APIC_DELIVERY_MODE_FIXED = 0,
+    IO_APIC_DELIVERY_MODE_LOWEST,
+    IO_APIC_DELIVERY_MODE_SMI,
+    IO_APIC_DELIVERY_MODE_NMI,
+    IO_APIC_DELIVERY_MODE_INIT,
+    IO_APIC_DELIVERY_MODE_EXT_INT,
+}IO_APIC_DELIVERY_MODE;
+
+typedef enum{
+    IO_APIC_DELIVERY_MODE_PHYSICAL = 0,
+    IO_APIC_DELIVERY_MODE_LOGICAL = 1,
+}IO_APIC_DESTINATION_MODE;
+
+typedef enum{
+    IO_APIC_PIN_POLARITY_ACTIVE_HIGH = 0,
+    IO_APIC_PIN_POLARITY_ISA_DEFAULT = 0,
+    IO_APIC_PIN_POLARITY_ACTIVE_LOW,
+}IO_APIC_PIN_POLARITY;
+
+typedef enum{
+    IO_APIC_TRIGGER_MODE_EDGE = 0,
+    IO_APIC_TRIGGER_MODE_ISA_DEFAULT = 0,
+    IO_APIC_TRIGGER_MODE_LEVEL,
+}IO_APIC_TRIGGER_MODE;
 
 typedef struct _X1LOCAL_APIC_DEVICE_OBJECT{
     PVOID                           ApicBase;
@@ -91,6 +117,7 @@ typedef struct _X1LOCAL_APIC_DEVICE_OBJECT{
 
 typedef struct _IO_APIC_DEVICE_OBJECT{
     PVOID                           ApicBase;
+    UINT8                           TotalIrqs;
 }IO_APIC_DEVICE_OBJECT, * PIO_APIC_DEVICE_OBJECT;
 
 typedef struct _APIC_DEVICE_OBJECT{
@@ -250,6 +277,16 @@ DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIME
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicTimerInitialCount(UINT32* InitialCountOut);
 DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicTimerInitialCount(UINT32 InitialCount);
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicTimerCurrentCount(UINT32* CurrentCountOut);
+
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicIdRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* VersionOut);
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicVersionRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Version, UINT32* MaxRedirections);
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicArbitrationIdRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Id);
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT64* Out);
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, BOOLEAN* IrrSet, IO_APIC_PIN_POLARITY* PinPolarity, BOOLEAN* InterruptPending, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
+DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT64 In);
+DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, IO_APIC_PIN_POLARITY* PinPolarity, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
+
+
 
 
 //TODO: 

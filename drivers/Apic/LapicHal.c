@@ -1,4 +1,4 @@
-#include "../ApicInternals.h"
+#include "ApicInternals.h"
 
 DRIVER_EXPORT 
 LOUSTATUS 
