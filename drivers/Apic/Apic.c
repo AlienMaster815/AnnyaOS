@@ -1,6 +1,8 @@
 #define APIC_MAIN
 #include "ApicInternals.h"
 
+KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors);
+
 PPER_PROCESSOR_APIC_DATA PerProcessorApicData = 0x00;
 
 static BOOLEAN ApicDebugOn = false;

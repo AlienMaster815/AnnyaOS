@@ -53,7 +53,7 @@ typedef struct _IPIC_VECTOR_OBJECT_HANDLE{
 static PIPIC Ipics = 0x00;
 static SIZE IpicsAllocated = 0;
 
-LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors){
+KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors){
     Ipics = LouKeMallocArray(IPIC, Processors, KERNEL_GENERIC_MEMORY);
     if(!Ipics){
         return STATUS_INSUFFICIENT_RESOURCES;

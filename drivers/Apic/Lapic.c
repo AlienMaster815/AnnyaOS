@@ -661,3 +661,72 @@ ApicHalSetApicSpuriousInterruptVectorRegister(
     }
     return ApicHalSetApicSpuriousInterruptVectorRegisterEx(ApicDeviceObject, Register);
 }
+
+
+
+
+LOUSTATUS 
+ApicHalGetApicDivideConfigurationRegister(
+    PAPIC_DEVICE_OBJECT         ApicDeviceObject,
+    APIC_TIMER_DIVIDE_CONFIG*   DivideConfigOut
+){
+    if(!DivideConfigOut){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT32 Register;
+    LOUSTATUS Status = ApicHalGetApicDivideConfigurationRegisterEx(ApicDeviceObject, &Register);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Register &= ((UINT32)APIC_TIMER_DIVIDE_BY1);
+    *DivideConfigOut = (APIC_TIMER_DIVIDE_CONFIG)Register;
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS
+ApicHalSetApicDivideConfigurationRegister(
+    PAPIC_DEVICE_OBJECT         ApicDeviceObject,
+    APIC_TIMER_DIVIDE_CONFIG    DivideConfig
+){
+    UINT32 Register;
+    LOUSTATUS Status = ApicHalGetApicDivideConfigurationRegisterEx(ApicDeviceObject, &Register);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Register &= ~((UINT32)APIC_TIMER_DIVIDE_BY1);
+    Register |= (UINT32)DivideConfig;
+    return ApicHalSetApicDivideConfigurationRegisterEx(ApicDeviceObject, Register);
+}
+
+LOUSTATUS 
+ApicHalGetApicTimerInitialCount(
+    PAPIC_DEVICE_OBJECT ApicDeviceObject,
+    UINT32*             InitialCountOut
+){
+    return ApicHalGetApicInitialCountRegisterEx(
+        ApicDeviceObject,
+        InitialCountOut
+    );
+}
+
+LOUSTATUS
+ApicHalSetApicTimerInitialCount(
+    PAPIC_DEVICE_OBJECT         ApicDeviceObject,
+    UINT32                      InitialCount
+){
+    return ApicHalSetApicInitialCountRegisterEx(
+        ApicDeviceObject,
+        InitialCount
+    );
+}
+
+LOUSTATUS 
+ApicHalGetApicTimerCurrentCount(
+    PAPIC_DEVICE_OBJECT ApicDeviceObject,
+    UINT32*             CurrentCountOut
+){
+    return ApicHalGetApicCurrentCountRegisterEx(
+        ApicDeviceObject,
+        CurrentCountOut
+    );
+}

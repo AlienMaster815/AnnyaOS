@@ -389,6 +389,9 @@ LOUSTATUS LouKeTsmInitializeIdleThreads();
 
 LOUAPI void InitializeProcessManager(){
 
+    LouPrint("InitializeProcessManager():HERE\n");
+    while(1);
+
     HANDLE SchedDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\SCHED_DEBUG", 0x00);
     BYTE DbgValue = 0;
     LouKeReadRegistryByteValue(SchedDebugKey, &DbgValue);

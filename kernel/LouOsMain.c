@@ -153,19 +153,6 @@ void SetTSC();
 LOUSTATUS LouKeInitializeInterruptSubsystems();
 
 
-void InitializeSymmetricMultiProcessing(){
-    LouPrint("Checking If System Supports SMP\n");
-    if(GetNPROC() < 2)return;
-    //TODO: redo SMP
-    //LouPrint("InitializeSymmetricMultiProcessing()\n");    
-    //LouKeLoadLousineBootTrampoline();
-
-    //LouKeInitializeSmpLouPrint();
-
-    //LouPrint("InitializeSymmetricMultiProcessing() STATUS_SUCCESS\n");    
-
-}
-
 void LouKeWaitForProcessorInitialization();
 
 void AdvancedLousineKernelInitialization(){
@@ -176,8 +163,6 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeInitializeInterruptSubsystems();
         
-    InitializeSymmetricMultiProcessing();
-
     InitializeProcessManager();
 
     LouKeInitializeFullLouACPISubsystem();

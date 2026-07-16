@@ -18,7 +18,7 @@ LOUSTATUS ApicHalInitializeInterProcessorInterrupts(){
     LouKeIpicCreateVectorObject(
         &IpiData->IpiVectorObject,
         ProcessorNumber,
-        0x21,
+        APIC_IPI_DISPATCH_VECTOR,
         false,
         LirRoutine,
         (OPAQUE_PTR)ApicHalInterProcessorInterruptHandler,
