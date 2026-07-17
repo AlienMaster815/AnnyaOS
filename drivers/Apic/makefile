@@ -8,7 +8,8 @@ SRC = 	Apic.c \
 		X2Lapic.c \
 		LapicHal.c \
 		ApicIpi.c \
-		LapicEx.c
+		LapicEx.c \
+		Spurious.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=ApicSubsystemEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

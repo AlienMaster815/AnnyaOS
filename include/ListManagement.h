@@ -71,8 +71,8 @@ static inline void LouKeLListAddTail(PListHeader Tail, PListHeader Header){
     while(LouKeGetAtomic64FromUint64((UINT64*)&Header->NextHeader)){
         Header = (PListHeader)LouKeGetAtomic64FromUint64((UINT64*)&Header->NextHeader);
     }
-    LouKeSetAtomic64FromUint64((UINT64*)Header->NextHeader, (UINT64)(UINTPTR)Tail);
-    LouKeSetAtomic64FromUint64((UINT64*)Header->LastHeader, (UINT64)(UINTPTR)Header);
+    LouKeSetAtomic64FromUint64((UINT64*)&Header->NextHeader, (UINT64)(UINTPTR)Tail);
+    LouKeSetAtomic64FromUint64((UINT64*)&Tail->LastHeader, (UINT64)(UINTPTR)Header);
 }
 
 

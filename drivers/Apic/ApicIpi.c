@@ -1,9 +1,6 @@
 #include "ApicInternals.h"
 
 
-
-
-
 LOUSTATUS ApicHalInterProcessorInterruptHandler(UINT64 Data){
 
 
@@ -11,13 +8,12 @@ LOUSTATUS ApicHalInterProcessorInterruptHandler(UINT64 Data){
 }
 
 
-LOUSTATUS ApicHalInitializeInterProcessorInterrupts(){
-    UINT32 ProcessorNumber = LouKeGetCurrentProcessorNumber();
-    PPER_PROCESSOR_IPI_DATA IpiData  = &PerProcessorApicData[ProcessorNumber].IpiData;
+LOUSTATUS ApicHalInitializeInterProcessorInterrupts(ULONG Cpu){
+    PPER_PROCESSOR_IPI_DATA IpiData  = &PerProcessorApicData[Cpu].IpiData;
     
     LouKeIpicCreateVectorObject(
         &IpiData->IpiVectorObject,
-        ProcessorNumber,
+        Cpu,
         APIC_IPI_DISPATCH_VECTOR,
         false,
         LirRoutine,

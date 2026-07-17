@@ -74,6 +74,7 @@ LOUSTATUS LouKeIpicCreateVectorObject(
     UINT64              LirData,
     SIZE                Items
 ){
+
     if(
         (!Items) || (!VectorObjectOut) || (!Routine) || 
         ((SIZE)RoutineType > (SIZE)LirExRoutine) || ((Vector + Items) > 0xFF)

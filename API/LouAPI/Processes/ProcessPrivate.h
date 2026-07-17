@@ -262,7 +262,6 @@ typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
 LOUAPI uint32_t GetNPROC();
 
 LOUAPI LouKIRQL LouKeGetIrql();
-LOUAPI void LouKeSendIcEOI();
 UINT64 LouKeSwitchToTask(
     UINT64                  StackContex,
     PGENERIC_THREAD_DATA    ThreadFrom,

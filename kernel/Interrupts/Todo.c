@@ -24,13 +24,6 @@ void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu){
     LouKeMemoryBarrier();
 }
 
-LOUAPI void LouKeSendIcEOI(){
-    UINT8 ProcID = ((PLKPCB)GetLKPCB())->ProcID;
-    if(EoiHandler[ProcID]){
-        EoiHandler[ProcID]();
-        LouKeMemoryBarrier();
-    }
-}
 
 LOUAPI void LouKeIcUnmaskIrq(UINT8 Irq){
     UINT8 ProcID = ((PLKPCB)GetLKPCB())->ProcID;

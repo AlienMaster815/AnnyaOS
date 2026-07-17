@@ -4,6 +4,7 @@
 #include <LouAPI.h>
 
 #define APIC_IPI_DISPATCH_VECTOR    0x21
+#define APIC_SPV_HANDLER_VECTOR     0x22
 
 #define IA32_APIC_BASE_MSR_OFFSET               0x1B
 #define IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT    (1 << 10)
@@ -159,6 +160,7 @@ typedef struct _PER_PROCESSOR_APIC_DATA{
     UINT32                          ProcessorID;
     APIC_DEVICE_OBJECT              ApicDeviceObject;
     PER_PROCESSOR_IPI_DATA          IpiData;
+    OPAQUE_PTR                      SpurriousVectorObject;
 }PER_PROCESSOR_APIC_DATA, * PPER_PROCESSOR_APIC_DATA;
 
 #ifndef APIC_MAIN
@@ -166,6 +168,8 @@ extern PPER_PROCESSOR_APIC_DATA PerProcessorApicData;
 #endif
 
 void ApicHalDbgPrint(char* format, ...);
+LOUSTATUS ApicHalInitializeInterProcessorInterrupts(ULONG Cpu);
+
 
 LOUSTATUS ApicHalGetApicIdRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
 LOUSTATUS ApicHalGetApicVersionRegisterEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Out);
@@ -281,6 +285,7 @@ DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIME
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicTimerInitialCount(UINT32* InitialCountOut);
 DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicTimerInitialCount(UINT32 InitialCount);
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicTimerCurrentCount(UINT32* CurrentCountOut);
+DRIVER_EXPORT void ApicHalSignalLocalApicEoi();
 
 DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicIdRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* VersionOut);
 DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicVersionRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Version, UINT32* MaxRedirections);

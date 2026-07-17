@@ -16,7 +16,6 @@ void  SetWinIRQL(UINT8 Irql);
 
 
 void LocalApicSetTimer(bool On);
-void LouKeSendIcEOI();
 
 
 LouKIRQL LouKeGetIrql(){

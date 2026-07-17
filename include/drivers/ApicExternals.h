@@ -154,6 +154,7 @@ DRIVER_IMPORT LOUSTATUS ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIME
 DRIVER_IMPORT LOUSTATUS ApicHalGetLocalApicTimerInitialCount(UINT32* InitialCountOut);
 DRIVER_IMPORT LOUSTATUS ApicHalSetLocalApicTimerInitialCount(UINT32 InitialCount);
 DRIVER_IMPORT LOUSTATUS ApicHalGetLocalApicTimerCurrentCount(UINT32* CurrentCountOut);
+DRIVER_IMPORT void ApicHalSignalLocalApicEoi();
 
 DRIVER_IMPORT LOUSTATUS ApicHalGetIoApicIdRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* VersionOut);
 DRIVER_IMPORT LOUSTATUS ApicHalGetIoApicVersionRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Version, UINT32* MaxRedirections);

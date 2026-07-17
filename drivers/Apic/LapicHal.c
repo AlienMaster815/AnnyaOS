@@ -536,3 +536,12 @@ ApicHalGetLocalApicTimerCurrentCount(
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[ProcessorNumber].ApicDeviceObject;
     return ApicHalGetApicTimerCurrentCount(ApicDeviceObject, CurrentCountOut);
 }
+
+DRIVER_EXPORT void ApicHalSignalLocalApicEoi(){
+    ULONG ProcessorNumber = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[ProcessorNumber].ApicDeviceObject;
+    ApicHalSetApicEndOfInterruptRegisterEx(
+        ApicDeviceObject,
+        0
+    );
+}

@@ -2,6 +2,8 @@
 #include "ApicInternals.h"
 #include <LouACPI.h>
 
+LOUSTATUS ApicHalConfigureSpriousVector(ULONG Processor);
+
 typedef enum{
     LOCAL_APIC_ACPI_ENTRY_VERSION_X1LOCAL_STRUCT = 0,
     LOCAL_APIC_ACPI_ENTRY_VERSION_XSLOCAL_STRUCT = 7,
@@ -90,7 +92,7 @@ static ListHeader NmiOverideList = {0};
 static ListHeader LocalNmiOverideList = {0};
 static ListHeader PlatformSourceList = {0};
 
-//LouKeSendIcEOI
+
 
 DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
 
@@ -446,6 +448,7 @@ LOUSTATUS ApicInitializeApicSubsystem(){
     }
 
     LouKeSignalApicSubsystemInitialized();    
+    LouKeInitializeIpicSubsystem(GetNPROC());
 
     //TODO Initialize IO Apic array
 
@@ -511,6 +514,7 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
         Status = ApicInitializeApicSubsystem();
         if(Status != STATUS_SUCCESS){
             LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic Subsystem\n");
+            while(1);
         }
     }
 
@@ -529,7 +533,25 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
     }
     LouKeWriteMsr(IA32_APIC_BASE_MSR_OFFSET, XapicBaseRegister);
 
+    Status = ApicHalConfigureSpriousVector(Cpu);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic SPV\n");
+        while(1);
+    }
+
+    ApicHalDbgPrint("APIC.SYS:Spurious Vector Initialized\n");
+
+    Status = ApicHalInitializeInterProcessorInterrupts(Cpu);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic IPI\n");
+        while(1);
+    }
+
+    ApicHalDbgPrint("APIC.SYS:IPI System Initialized\n");
+
+
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction():STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 

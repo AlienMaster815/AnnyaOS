@@ -44,3 +44,4 @@ EXPORTS
     ApicHalSetIoApicRedirectionEntryFromObject
     ApicHalConfigureNextApicTimerEvent
     ApicHalGetCurrentCpuVirtualID
+    ApicHalSignalLocalApicEoi

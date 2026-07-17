@@ -298,7 +298,7 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     if(LouKeGetIrql() >= CLOCK_LEVEL){
         ApicHalConfigureNextApicTimerEvent(30);
-        LouKeSendIcEOI();
+        ApicHalSignalLocalApicEoi();
         return CpuCurrentState;
     }
     PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
@@ -307,7 +307,7 @@ LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     MutexUnlock(&ProcLock.Lock);
     LouKeMemoryBarrier();
     ApicHalConfigureNextApicTimerEvent(Schedualer->CurrentThread->TotalMsSlice);
-    LouKeSendIcEOI();
+    ApicHalSignalLocalApicEoi();
     return CpuCurrentState;
 }
 

@@ -28,8 +28,6 @@ typedef struct  PACKED _CPUContext{
     uint64_t ss;
 } CPUContext;
 
-void LouKeSendIcEOI();
-
 typedef struct _INTERRUPT_ROUTER_ENTRY{
     ListHeader  List;
     uint32_t    ListCount;
@@ -85,11 +83,11 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
             //RestoreEverythingWithInterruptBuffer(&ContextHandle);
         }
         //LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
-        LouKeSendIcEOI();
+        ApicHalSignalLocalApicEoi();
         return;
     }
     //LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
-    LouKeSendIcEOI();
+    ApicHalSignalLocalApicEoi();
     return;
     
 	LouPrint("Interrupt Number: %d Was Called\n",Interrupt);
