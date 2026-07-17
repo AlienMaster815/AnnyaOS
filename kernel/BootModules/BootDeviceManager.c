@@ -9,7 +9,7 @@ typedef struct _BOOT_DRIVER_LIST{
 static BOOT_DRIVER_LIST BootDriverList = {0};
 static size_t BootCount = 0;
 
-void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top){
+LOUSTATUS AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top){
     PBOOT_DRIVER_LIST Tmp = &BootDriverList;
     while(Tmp->Peers.NextHeader){
         Tmp = (PBOOT_DRIVER_LIST)Tmp->Peers.NextHeader;
@@ -17,7 +17,11 @@ void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top){
     Tmp->Base = Base;
     Tmp->Top = Top;
     Tmp->Peers.NextHeader = (PListHeader)LouKeMallocType(BOOT_DRIVER_LIST, KERNEL_GENERIC_MEMORY);
+    if(!Tmp->Peers.NextHeader){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
     BootCount++;
+    return STATUS_SUCCESS;
 }
 
 KERNEL_EXPORT

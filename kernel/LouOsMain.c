@@ -77,9 +77,9 @@ uint64_t GetGdtBase();
 void FlushTss();
 void Spurious(uint64_t FaultingStackP);
 void LouKeInitializeLouACPISubsystem();
-void HandleProccessorInitialization();
+LOUSTATUS HandleProccessorInitialization();
 void LouKeProbeSbIsa();
-void SetupGDT(UINT32 ProcessorID);
+LOUSTATUS SetupGDT(UINT32 ProcessorID);
 extern void ReloadGdt();
 extern void LoadTaskRegister();
 uint64_t GetCurrentTimeIn100ns();
@@ -147,7 +147,7 @@ LOUSTATUS LouKeSetEfiTable(uint64_t Address);
 LOUSTATUS LouKeSetRsdp(uintptr_t RSDP,uint8_t Type);
 void InitializeFrameBuffer(PLOADER_FB_MEMORY_MAP FbMaps, SIZE Framebuffers);
 void InitializeBootRegistry(uintptr_t Base, uintptr_t Top);
-void AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
+LOUSTATUS AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
 void SetTSCFrequency(uint64_t Frequency);
 void SetTSC();
 LOUSTATUS LouKeInitializeInterruptSubsystems();
@@ -257,16 +257,16 @@ uint64_t LouKeGetRamSize() {
     return LousineKernelLoaderInformation.RamSize;
 }
 
-static void HaltAndCatchFile() {
+void HaltAndCatchFile(){
     for (;;) {
         asm ("hlt");
     }
 }
 
-void ParserLouLoaderInformation(
+LOUSTATUS ParserLouLoaderInformation(
     PLOADER_INFORMATION LoaderInfo
 ){
-
+    LOUSTATUS Status;
     LouKeSetEfiTable((UINT64)LoaderInfo->EfiSystemTable);
     
     LouKeSetRsdp((UINT64)LoaderInfo->RsdpPointer, (UINT64)LoaderInfo->RsdpVersion);
@@ -276,9 +276,12 @@ void ParserLouLoaderInformation(
     InitializeBootRegistry(LoaderInfo->BootModulesBase[0].Tracker.Base, LoaderInfo->BootModulesBase[0].Tracker.Length);
 
     for(SIZE i = 1 ; i < LoaderInfo->BootModulesCount; i++){
-        AddDriverToBootDeviceManager(LoaderInfo->BootModulesBase[i].Tracker.Base, LoaderInfo->BootModulesBase[i].Tracker.Length);
+        Status = AddDriverToBootDeviceManager(LoaderInfo->BootModulesBase[i].Tracker.Base, LoaderInfo->BootModulesBase[i].Tracker.Length);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
     }
-
+    return STATUS_SUCCESS;
 }
 
 void LouOsKrnlStart(
@@ -304,9 +307,15 @@ void LouOsKrnlStart(
 
     LouKeInitializeBootRegistry();
 
-    SetupGDT(0);
+    Status = SetupGDT(0);
+    if(Status != STATUS_SUCCESS){
+        HaltAndCatchFile();
+    }
 
-    HandleProccessorInitialization();
+    Status = HandleProccessorInitialization();
+    if(Status != STATUS_SUCCESS){
+        HaltAndCatchFile();
+    }
 
     SetUpTimers();
    

@@ -7,6 +7,8 @@
 static spinlock_t ProcLock = {0};
 static BOOLEAN SchedDebugOn = false;
 
+void HaltAndCatchFile();
+
 void LouKeSchedDbgPrint(char* format, ...){
     if(SchedDebugOn){
         va_list args;
@@ -33,7 +35,7 @@ uint64_t LouKeLinkerGetAddress(
 );
 
 LOUAPI
-void SetupGDT(UINT32 ProcessorID);
+LOUSTATUS SetupGDT(UINT32 ProcessorID);
 
 LOUAPI
 void HandleApProccessorInitialization();
@@ -314,9 +316,14 @@ LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
 static mutex_t InitLock = {0};
 
 UNUSED static void ProcessorIdleTask(){
+    LOUSTATUS Status;
     HandleApProccessorInitialization();
     INTEGER ProcID = LouKeGetCurrentProcessorNumber();
-    SetupGDT(ProcID);
+    Status = SetupGDT(ProcID);
+    if(Status != STATUS_SUCCESS){
+        HaltAndCatchFile();
+    }
+
     ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = ProcID;

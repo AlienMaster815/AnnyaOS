@@ -133,11 +133,14 @@ void DebugValueTrap(UINT64 Value){
 
 
 
-void SetupGDT(UINT32 ProcessorID){
+LOUSTATUS SetupGDT(UINT32 ProcessorID){
     LouPrint("Setting Up GDT\n");
 
     PLongModeGdt GDT = (PLongModeGdt)LouKeMallocExVirt32(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
-            
+    if(!GDT){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
     SetGDTSegmentEntry(
             (uint8_t*)&GDT->KCODE,
             0,
@@ -169,10 +172,33 @@ void SetupGDT(UINT32 ProcessorID){
         );
 
     PTSS Tss = (PTSS)LouKeMallocExVirt32(sizeof(TSS), 16, KERNEL_GENERIC_MEMORY);
+    if(!Tss){
+        LouKeFree((PVOID)(UINTPTR)GDT);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
     Tss->IST1 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    if(!Tss->IST1){
+        LouKeFree((PVOID)(UINTPTR)Tss);
+        LouKeFree((PVOID)(UINTPTR)GDT);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
     Tss->IST2 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    if(!Tss->IST2){
+        LouKeFree((PVOID)(UINTPTR)Tss->IST1);
+        LouKeFree((PVOID)(UINTPTR)Tss);
+        LouKeFree((PVOID)(UINTPTR)GDT);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
     Tss->IST3 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    if(!Tss->IST3){
+        LouKeFree((PVOID)(UINTPTR)Tss->IST2);
+        LouKeFree((PVOID)(UINTPTR)Tss->IST1);
+        LouKeFree((PVOID)(UINTPTR)Tss);
+        LouKeFree((PVOID)(UINTPTR)GDT);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
 
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
@@ -188,8 +214,27 @@ void SetupGDT(UINT32 ProcessorID){
     );
         
     uint64_t GsBase = (uint64_t)LouKeMallocEx(0xB080, KILOBYTE_PAGE, USER_GENERIC_MEMORY);
+    if(!GsBase){
+        LouKeFree((PVOID)(UINTPTR)Tss->IST3);        
+        LouKeFree((PVOID)(UINTPTR)Tss->IST2);
+        LouKeFree((PVOID)(UINTPTR)Tss->IST1);
+        LouKeFree((PVOID)(UINTPTR)Tss);
+        LouKeFree((PVOID)(UINTPTR)GDT);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
     PLKPCB NewProcControllBlock = LouKeMallocType(LKPCB, USER_GENERIC_MEMORY);
+
+    if(!GsBase){
+        LouKeFree((PVOID)(UINTPTR)GsBase);
+        LouKeFree((PVOID)(UINTPTR)Tss->IST3);        
+        LouKeFree((PVOID)(UINTPTR)Tss->IST2);
+        LouKeFree((PVOID)(UINTPTR)Tss->IST1);
+        LouKeFree((PVOID)(UINTPTR)Tss);
+        LouKeFree((PVOID)(UINTPTR)GDT);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
 
     SetGDTSegmentEntry(
         (uint8_t*)&GDT->KPCR,
@@ -213,5 +258,5 @@ void SetupGDT(UINT32 ProcessorID){
 
     SetLKPCB((UINT64)NewProcControllBlock);
     
-
+    return STATUS_SUCCESS;
 }

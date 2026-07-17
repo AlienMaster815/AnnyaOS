@@ -86,7 +86,7 @@ void LouKeInitializePat(){
 }
 void SetAvxAllocationSize(SIZE Size);
 
-void HandleProccessorInitialization(){
+LOUSTATUS HandleProccessorInitialization(){
     //the processor should be up by now
     //for apic however now we need to 
     //register our processor core
@@ -130,8 +130,12 @@ void HandleProccessorInitialization(){
     LouKeInitializePat();
     
     PPROCESSOR_FEATURES UserCopy = LouKeMallocType(PROCESSOR_FEATURES, USER_GENERIC_MEMORY);
+    if(!UserCopy){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
     memcpy(UserCopy, &ProcessorFeatures, sizeof(PROCESSOR_FEATURES));
     LouKeInitProcessorAcceleratedFeaturesList(UserCopy);
+    return STATUS_SUCCESS;
 }
 
 void HandleApProccessorInitialization(){
