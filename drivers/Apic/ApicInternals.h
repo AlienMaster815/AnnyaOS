@@ -5,6 +5,10 @@
 
 #define APIC_IPI_DISPATCH_VECTOR    0x21
 
+#define IA32_APIC_BASE_MSR_OFFSET               0x1B
+#define IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT    (1 << 10)
+#define IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT     (1 << 11)
+
 typedef enum{
     APIC_TIMER_MODE_ONE_SHOT = 0,
     APIC_TIMER_MODE_PERIODIC,
@@ -151,6 +155,7 @@ typedef struct _PER_PROCESSOR_IPI_DATA{
 }PER_PROCESSOR_IPI_DATA, * PPER_PROCESSOR_IPI_DATA;
 
 typedef struct _PER_PROCESSOR_APIC_DATA{
+    UINT32                          AbstractionID;
     UINT32                          ApicID;
     UINT32                          ProcessorID;
     APIC_DEVICE_OBJECT              ApicDeviceObject;

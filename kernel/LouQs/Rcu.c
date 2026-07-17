@@ -1,6 +1,6 @@
 #include <LouAPI.h>
 
-LOUAPI uint16_t GetNPROC();
+LOUAPI uint32_t GetNPROC();
 
 //RCU and SRCU objects are the same structure
 

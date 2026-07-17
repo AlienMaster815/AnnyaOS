@@ -4,7 +4,7 @@
 #ifndef _APIC_EXTERN_INTERN_H
 #define _APIC_EXTERN_INTERN_H
 KERNEL_EXPORT UINT32 LouKeGetCurrentCpuPhysicalId();
-KERNEL_EXPORT uint16_t GetNPROC();
+KERNEL_EXPORT uint32_t GetNPROC();
 KERNEL_EXPORT void UpgradeNPROC();
 KERNEL_EXPORT void DowngradeNPROC();
 #endif

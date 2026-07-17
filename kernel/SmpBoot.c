@@ -6,7 +6,7 @@ void LouKeSendProcessorWakeupSignal(INTEGER TrackMember);
 INTEGER 
 GetCurrentCpuTrackMember();
 
-uint16_t GetNPROC();
+uint32_t GetNPROC();
 
 UINT64 GetPageBase();
 

@@ -161,7 +161,7 @@ UNUSED static void* memcpy_avx512(void* destination, const void* source, size_t 
 }
 */
 
-LOUAPI uint16_t GetNPROC();
+LOUAPI uint32_t GetNPROC();
 
 
 KERNEL_EXPORT void* memcpy(void* destination, const void* source, size_t num) {

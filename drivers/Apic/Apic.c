@@ -89,10 +89,6 @@ static ListHeader NmiOverideList = {0};
 static ListHeader LocalNmiOverideList = {0};
 static ListHeader PlatformSourceList = {0};
 
-static PVOID LocalApicAddress = (UINT8*)0xFEE00000;
-
-
-
 static UINT32 ApicGetLocalInitItemProcessorId(
     PLOCAL_APIC_INIT_LIST_ITEM Item
 ){
@@ -156,7 +152,7 @@ static UINT8 ApicGetLocalNmiItemLocalInterrupt(
     return Result;
 }
 
-static void ApicInitializeLocalNmiItem(
+static LOUSTATUS ApicInitializeLocalNmiItem(
     LOCAL_NMI_OVERIDE_ENTRY_VERSION EntryVersion,
     PLOCAL_NMI_OVERIDE_ENTRY        Entry
 ){
@@ -172,21 +168,29 @@ static void ApicInitializeLocalNmiItem(
             (TmpListItem->LocalInterrupt == Item.LocalInterrupt)
         ){
             if(Item.EntryVersion <= TmpListItem->EntryVersion){
-                return;
+                return STATUS_SUCCESS;
             }
             ApicHalDbgPrint("APIC.SYS:Upgrading Local NMI Overide:Version:%h:ID:%h:Vector:%h\n", TmpListItem->EntryVersion, TmpListItem->ProcessorID, TmpListItem->LocalInterrupt);
             TmpListItem->EntryVersion = Item.EntryVersion;
             TmpListItem->Entry = Item.Entry;
             ApicHalDbgPrint("APIC.SYS:Local NMI Overide Now Version:%h\n", TmpListItem->EntryVersion);
-            return;
+            return STATUS_SUCCESS;
         }
-
-
     }
+    TmpListItem = LouKeMallocType(LOCAL_NMI_OVERIDE_ITEM, KERNEL_GENERIC_MEMORY);
+    if(!TmpListItem){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    TmpListItem->EntryVersion = Item.EntryVersion;
+    TmpListItem->Entry = Item.Entry;
+    TmpListItem->ProcessorID = Item.ProcessorID;
+    TmpListItem->LocalInterrupt = Item.LocalInterrupt;
+    LouKeListAddTail(&TmpListItem->Peers, &LocalNmiOverideList);
+    return STATUS_SUCCESS;
 }
 
 
-static void ApicInitializeLocalInitItem(
+static LOUSTATUS ApicInitializeLocalInitItem(
     LOCAL_APIC_ACPI_ENTRY_VERSION   EntryVersion,
     PLOCAL_APIC_ACPI_ENTRY          Entry
 ){
@@ -198,25 +202,29 @@ static void ApicInitializeLocalInitItem(
     ForEachListEntry(TmpListItem, &LocalApicInitList, Peers){
         if(TmpNewListItem.ProcessorID == TmpListItem->ProcessorID){
             if(TmpNewListItem.EntryVersion <= TmpListItem->EntryVersion){
-                return;
+                return STATUS_SUCCESS;
             }
             ApicHalDbgPrint("APIC.SYS:LAPIC Init Entry Upgraded:Entry:%h:Version:%h:Id:%h\n", (UINT64)TmpListItem->Entry, (UINT64)TmpListItem->EntryVersion, (UINT64)TmpListItem->ProcessorID);
             TmpListItem->EntryVersion = EntryVersion;
             TmpListItem->Entry = Entry;
             ApicHalDbgPrint("APIC.SYS:LAPIC Init Entry Changed To:Entry:%h:Version:%h:Id:%h\n", (UINT64)TmpListItem->Entry, (UINT64)TmpListItem->EntryVersion, (UINT64)TmpListItem->ProcessorID);
-            return;
+            return STATUS_SUCCESS;
         }
     }
     TmpListItem = LouKeMallocType(LOCAL_APIC_INIT_LIST_ITEM, KERNEL_GENERIC_MEMORY);
+    if(!TmpListItem){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
     TmpListItem->EntryVersion = TmpNewListItem.EntryVersion;
     TmpListItem->Entry = TmpNewListItem.Entry;
     TmpListItem->ProcessorID = TmpNewListItem.ProcessorID;
     ApicHalDbgPrint("APIC.SYS:New LAPIC Init Entry Added:Entry:%h:Version:%h:Id:%h\n", (UINT64)Entry, (UINT64)EntryVersion, (UINT64)TmpListItem->ProcessorID);
     UpgradeNPROC();
     LouKeListAddTail(&TmpListItem->Peers, &LocalApicInitList);
+    return STATUS_SUCCESS;
 }
 
-static void ApicInitializeIoInitItem(
+static LOUSTATUS ApicInitializeIoInitItem(
     IO_APIC_ACPI_ENTRY_VERSION      EntryVersion,
     PIO_APIC_INIT_LIST_ITEM_ENTRY   Entry
 ){
@@ -228,22 +236,26 @@ static void ApicInitializeIoInitItem(
     ForEachListEntry(TmpListItem, &IoApicInitList, Peers){
         if(TmpNewListItem.ApicID == TmpListItem->ApicID){
             if(TmpNewListItem.EntryVersion <= TmpListItem->EntryVersion){
-                return;
+                return STATUS_SUCCESS;
             }
             ApicHalDbgPrint("APIC.SYS:IO APIC Init Entry Upgraded:Entry:%h:Version:%h:Id:%h\n", (UINT64)TmpListItem->Entry, (UINT64)TmpListItem->EntryVersion, (UINT64)TmpListItem->ApicID);
             TmpListItem->EntryVersion = EntryVersion;
             TmpListItem->Entry = Entry;
             ApicHalDbgPrint("APIC.SYS:IO APIC Init Entry Changed To:Entry:%h:Version:%h:Id:%h\n", (UINT64)TmpListItem->Entry, (UINT64)TmpListItem->EntryVersion, (UINT64)TmpListItem->ApicID);
-            return;
+            return STATUS_SUCCESS;
         }
     }
     TmpListItem = LouKeMallocType(IO_APIC_INIT_LIST_ITEM, KERNEL_GENERIC_MEMORY);
+    if(!TmpListItem){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
     TmpListItem->EntryVersion = TmpNewListItem.EntryVersion;
     TmpListItem->Entry = TmpNewListItem.Entry;
     TmpListItem->ApicID = TmpNewListItem.ApicID;
     ApicHalDbgPrint("APIC.SYS:New IO APIC Init Entry Added:Entry:%h:Version:%h:Id:%h\n", (UINT64)Entry, (UINT64)EntryVersion, (UINT64)TmpListItem->ApicID);
     IoApicCount++;
     LouKeListAddTail(&TmpListItem->Peers, &IoApicInitList);
+    return STATUS_SUCCESS;
 }
 
 
@@ -282,6 +294,21 @@ void DisablePic(){
     outb(PIC2_DATA, 0xFF);
 }
 
+LOUSTATUS ApicHalInitializeApicToMinimalStatus(){
+    UINT64 XapicBaseRegister = LouKeReadMsr(IA32_APIC_BASE_MSR_OFFSET);
+    UINT64 ApicPhyAddress = (XapicBaseRegister >> 36) & 0xFFFFFF;
+    ApicHalDbgPrint("APIC.SYS:LAPIC X1 Physical Address:%h\n", ApicPhyAddress);
+
+
+    XapicBaseRegister |= IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT;
+    if(X2ApicSupport){
+        XapicBaseRegister |= IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT;
+    }
+
+    LouKeWriteMsr(IA32_APIC_BASE_MSR_OFFSET, XapicBaseRegister);
+    
+    return STATUS_SUCCESS;
+}
 
 LOUSTATUS ApicInitializeApicSubsystem(){
     ApicHalDbgPrint("APIC.SYS:ApicInitializeApicSubsystem()\n");
@@ -301,6 +328,7 @@ LOUSTATUS ApicInitializeApicSubsystem(){
     UINT8* TmpMadtLocation = &MadtTable->DynamicMADTBuffer[0];
     PMADT_ICS_COMMON_FORMAT_STRUCTURE CommonMadtFormat;
 
+    LOUSTATUS Status;
 
     while(TmpMadtLocation < TableEnd){
         CommonMadtFormat = (PMADT_ICS_COMMON_FORMAT_STRUCTURE)TmpMadtLocation;
@@ -309,31 +337,48 @@ LOUSTATUS ApicInitializeApicSubsystem(){
             case MADT_ICS_PROCESSOR_LOCAL_APIC:
             case MADT_ICS_LOCAL_SAPIC:
             case MADT_ICS_PROCESSOR_LOCAL_X2APIC:
-                ApicInitializeLocalInitItem((LOCAL_APIC_ACPI_ENTRY_VERSION)(UINT64)CommonMadtFormat->Type, (PLOCAL_APIC_ACPI_ENTRY)(UINT8*)CommonMadtFormat);
+                Status = ApicInitializeLocalInitItem((LOCAL_APIC_ACPI_ENTRY_VERSION)(UINT64)CommonMadtFormat->Type, (PLOCAL_APIC_ACPI_ENTRY)(UINT8*)CommonMadtFormat);
+                if(Status != STATUS_SUCCESS){
+                    goto _INIT_ERROR;
+                }
                 break;
             case MADT_ICS_IO_APIC:
             case MADT_ICS_IO_SAPIC:
-                ApicInitializeIoInitItem((IO_APIC_ACPI_ENTRY_VERSION)(UINT64)CommonMadtFormat->Type, (PIO_APIC_INIT_LIST_ITEM_ENTRY)(UINT8*)CommonMadtFormat);
+                Status = ApicInitializeIoInitItem((IO_APIC_ACPI_ENTRY_VERSION)(UINT64)CommonMadtFormat->Type, (PIO_APIC_INIT_LIST_ITEM_ENTRY)(UINT8*)CommonMadtFormat);
+                if(Status != STATUS_SUCCESS){
+                    goto _INIT_ERROR;
+                }
                 break;
             case MADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE:
-                PMADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE Overide = (PMADT_ICS_LOCAL_APIC_ADDRESS_OVERIDE_STRUCTURE)(UINT8*)CommonMadtFormat;
-                LocalApicAddress = (UINT8*)(UINTPTR)Overide->LocalApicAddress;
+                break;
             case MADT_ICS_INTERRUPT_SOURCE_OVERIDE:
                 PINTERRUPT_SOURCE_OVERIDE_ENTRY NewIntOveride = LouKeMallocType(INTERRUPT_SOURCE_OVERIDE_ENTRY, KERNEL_GENERIC_MEMORY);
+                if(!NewIntOveride){
+                    goto _INIT_ERROR;
+                }
                 NewIntOveride->Overide = (PMADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCTURE)(UINT8*)CommonMadtFormat;
                 LouKeListAddTail(&NewIntOveride->Peers, &IntOverideList);
                 break;
             case MADT_ICS_NON_MASKABLE_OVERIDE:
                 PNMI_SOURCE_OVERIDE_ENTRY NewNmiOveride = LouKeMallocType(NMI_SOURCE_OVERIDE_ENTRY, KERNEL_GENERIC_MEMORY);
+                if(!NewNmiOveride){
+                    goto _INIT_ERROR;
+                }
                 NewNmiOveride->Overide = (PMADT_ICS_NON_MASKABLE_INTERRUPT_SOURCE_STRUCTURE)(UINT8*)CommonMadtFormat;
                 LouKeListAddTail(&NewNmiOveride->Peers, &NmiOverideList);
                 break;
             case MADT_ICS_LOCAL_APIC_NMI:
             case MADT_ICS_LOCAL_X2APIC_NMI:
-                ApicInitializeLocalNmiItem((LOCAL_NMI_OVERIDE_ENTRY_VERSION)(UINT64)CommonMadtFormat->Type, (PLOCAL_NMI_OVERIDE_ENTRY)(UINT8*)CommonMadtFormat);
+                Status = ApicInitializeLocalNmiItem((LOCAL_NMI_OVERIDE_ENTRY_VERSION)(UINT64)CommonMadtFormat->Type, (PLOCAL_NMI_OVERIDE_ENTRY)(UINT8*)CommonMadtFormat);
+                if(Status != STATUS_SUCCESS){
+                    goto _INIT_ERROR;
+                }
                 break;
             case MADT_ICS_PLATFORM_INTERRUPT_SOURCE:
                 PPLATFORM_INTERRUPT_ENTRY NewPlatformSource = LouKeMallocType(PLATFORM_INTERRUPT_ENTRY, KERNEL_GENERIC_MEMORY);
+                if(!NewPlatformSource){
+                    goto _INIT_ERROR;
+                }
                 NewPlatformSource->Source = (PMADT_ICS_PLATFORM_INTERRUPT_SOURCE_STRUCTURE)(UINT8*)CommonMadtFormat;
                 LouKeListAddTail(&NewPlatformSource->Peers, &PlatformSourceList);
                 break;
@@ -343,16 +388,69 @@ LOUSTATUS ApicInitializeApicSubsystem(){
         }
         TmpMadtLocation += CommonMadtFormat->Length;
     }
-    
+        
     if(X2ApicSupport){
         ApicHalDbgPrint("APIC.SYS:System Supports X2APIC Using X2APIC mode\n");
     }
-    ApicHalDbgPrint("APIC.SYS:Apic Subsystem Detected:%d Processors And:%d IO/Apics\n", GetNPROC(), IoApicCount);
-    ApicHalDbgPrint("APIC.SYS:LAPIC Addresses Are:%h\n", LocalApicAddress);
+    UINT32 Processors = (UINT32)GetNPROC();
 
+    ApicHalDbgPrint("APIC.SYS:Apic Subsystem Detected:%d Processors And:%d IO/Apics\n", Processors, IoApicCount);
+    
+    PerProcessorApicData = LouKeMallocArray(PER_PROCESSOR_APIC_DATA, Processors, KERNEL_GENERIC_MEMORY);
+    if(!PerProcessorApicData){
+        goto _INIT_ERROR;
+    }
+    //TODO Initialize IO Apic array
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeApicSubsystem():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
+
+_INIT_ERROR:
+
+    PLOCAL_NMI_OVERIDE_ITEM TmpNmiOverideListItem;    
+    PLOCAL_NMI_OVERIDE_ITEM SafeTmpNmiOverideListItem;    
+    ForEachListEntrySafe(TmpNmiOverideListItem, SafeTmpNmiOverideListItem, &LocalNmiOverideList, Peers){
+        LouKeListDeleteItem(&TmpNmiOverideListItem->Peers);
+        LouKeFree(TmpNmiOverideListItem);
+    }
+
+    PLOCAL_APIC_INIT_LIST_ITEM TmpInitListItem;
+    PLOCAL_APIC_INIT_LIST_ITEM SafeTmpInitListItem;
+    ForEachListEntrySafe(TmpInitListItem, SafeTmpInitListItem, &LocalApicInitList, Peers){
+        LouKeListDeleteItem(&TmpInitListItem->Peers);
+        LouKeFree(TmpInitListItem);
+        DowngradeNPROC();
+    }
+    
+    PIO_APIC_INIT_LIST_ITEM TmpIoListItem;
+    PIO_APIC_INIT_LIST_ITEM SafeTmpIoListItem;
+    ForEachListEntrySafe(TmpIoListItem, SafeTmpIoListItem, &IoApicInitList, Peers){
+        LouKeListDeleteItem(&TmpIoListItem->Peers);
+        LouKeFree(TmpIoListItem);
+    }
+
+    PNMI_SOURCE_OVERIDE_ENTRY TmpNmiOveride;
+    PNMI_SOURCE_OVERIDE_ENTRY SafeTmpNmiOveride;
+    ForEachListEntrySafe(TmpNmiOveride, SafeTmpNmiOveride, &NmiOverideList, Peers){
+        LouKeListDeleteItem(&TmpIoListItem->Peers);
+        LouKeFree(TmpNmiOveride);
+    }
+
+    PINTERRUPT_SOURCE_OVERIDE_ENTRY TmpIntOveride;
+    PINTERRUPT_SOURCE_OVERIDE_ENTRY SafeTmpIntOveride;
+    ForEachListEntrySafe(TmpIntOveride, SafeTmpIntOveride, &IntOverideList, Peers){
+        LouKeListDeleteItem(&TmpIntOveride->Peers);
+        LouKeFree(TmpIntOveride);
+    }
+
+    PPLATFORM_INTERRUPT_ENTRY TmpPlatformSource;
+    PPLATFORM_INTERRUPT_ENTRY SafeTmpPlatformSource;
+    ForEachListEntrySafe(TmpPlatformSource, SafeTmpPlatformSource, &PlatformSourceList, Peers){
+        LouKeListDeleteItem(&TmpPlatformSource->Peers);
+        LouKeFree(TmpPlatformSource);
+    }
+
+    return STATUS_INSUFFICIENT_RESOURCES;
 }
 
 DRIVER_EXPORT 
@@ -368,6 +466,7 @@ ApicInitializeAdvancedProgramableInterruptController(
             LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic Subsystem\n");
         }
     }
+    //ApicHalInitializeApicToMinimalStatus();
 
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptController():STATUS_SUCCESS\n");

@@ -124,7 +124,7 @@ void* LouKeVirtualAllocUser(
     size_t      ReservedSize,   //AllocatedVirtual
     uint64_t    PageFlags
 );
-uint16_t GetNPROC();
+uint32_t GetNPROC();
 LOUSTATUS LouKeInitializeDefaultDemons();
 void LouKeLoadLousineBootTrampoline();
 int LouKeMainWorkDemon();

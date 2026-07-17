@@ -19,9 +19,9 @@ uint32_t GetProcessorBusSpeed() {
     return bus_freq;
 }
 
-uint16_t NPROC = 0;
+uint32_t NPROC = 0;
 
-KERNEL_EXPORT uint16_t GetNPROC() {
+KERNEL_EXPORT uint32_t GetNPROC() {
     return NPROC ? NPROC : 1;
 }
 

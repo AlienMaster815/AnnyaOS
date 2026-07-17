@@ -121,7 +121,7 @@ typedef struct PACKED _GDTREntry{
 }GDTREntry, * PGDTREntry;
 
 extern void InstallGDT(uint64_t GDT);
-uint16_t GetNPROC();
+uint32_t GetNPROC();
 void SetGSBase(uint64_t gs_base);
 
 
