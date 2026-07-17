@@ -163,7 +163,9 @@ DRIVER_IMPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_
 DRIVER_IMPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT64 In);
 DRIVER_IMPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, IO_APIC_PIN_POLARITY* PinPolarity, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
 
-DRIVER_IMPORT LOUSTATUS ApicInitializeAdvancedProgramableInterruptController(SIZE Cpu);
+DRIVER_IMPORT LOUSTATUS ApicInitializeAdvancedProgramableInterruptControllerAbstraction(SIZE Cpu);
+DRIVER_IMPORT LOUSTATUS ApicHalGetCurrentCpuVirtualID(UINT32* Cpu);
+DRIVER_IMPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms);
 
 #endif
 #endif

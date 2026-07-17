@@ -155,7 +155,6 @@ typedef struct _PER_PROCESSOR_IPI_DATA{
 }PER_PROCESSOR_IPI_DATA, * PPER_PROCESSOR_IPI_DATA;
 
 typedef struct _PER_PROCESSOR_APIC_DATA{
-    UINT32                          AbstractionID;
     UINT32                          ApicID;
     UINT32                          ProcessorID;
     APIC_DEVICE_OBJECT              ApicDeviceObject;

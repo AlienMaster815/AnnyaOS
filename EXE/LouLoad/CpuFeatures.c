@@ -32,18 +32,6 @@ void cpuid_subleaf(unsigned int leaf, unsigned int subleaf,
     );
 }
 
-UINT32 LouKeGetCurrentCpuPhysicalId(){
-    unsigned int Eax, Ebx, Ecx, Edx;
-
-    cpuid(1, &Eax, &Ebx, &Ecx, &Edx);
-    BOOLEAN X2ApicSupported = (Ecx & (1 << 21)) ? true : false;
-    if(X2ApicSupported){
-        cpuid(0x0B, &Eax, &Ebx, &Ecx, &Edx);
-        return Edx;
-    }
-    return (Ebx >> 24) & 0xFF;
-}
-
 static BOOLEAN IsGiganticPagesSupported(){
     unsigned int Eax = 0, Ebx = 0, Ecx = 0, Edx = 0;
 

@@ -1,6 +1,11 @@
 //Copyright GPL-2 Tyler Grenier (2026)
 #include <LouDDK.h>
 
+static BOOLEAN ApicSubsystemInitialized = false; 
+
+KERNEL_EXPORT void LouKeSignalApicSubsystemInitialized(){
+    ApicSubsystemInitialized = true;
+}
 
 KERNEL_EXPORT 
 BOOLEAN 
@@ -67,13 +72,22 @@ LouKeGetCurrentNodeNumber(){
     return 0x00;
 }
 
+
 KERNEL_EXPORT 
 ULONG 
 LouKeGetCurrentProcessorNumber(){
-    if(GetLKPCB()){
+    if(GetGSBase() && GetLKPCB()){
         return (ULONG)((PLKPCB)GetLKPCB())->ProcID;    
     }
-    return (ULONG)GetCurrentCpuTrackMember();
+    if(!ApicSubsystemInitialized){
+        return 0;
+    }
+    UINT32 Cpu;
+    LOUSTATUS Status = ApicHalGetCurrentCpuVirtualID(&Cpu);
+    if(Status != STATUS_SUCCESS){
+        return 0;
+    }
+    return Cpu;
 }
 
 KERNEL_EXPORT 

@@ -1,7 +1,7 @@
 LIBRARY APIC.SYS
 
 EXPORTS	
-    ApicInitializeAdvancedProgramableInterruptController
+    ApicInitializeAdvancedProgramableInterruptControllerAbstraction
     ApicHalGetLocalApicIdRegister
     ApicHalGetLocalApicVersionRegister
     ApicHalGetLocalApicLvtTimerRegister
@@ -42,3 +42,5 @@ EXPORTS
     ApicHalGetIoApicRedirectionEntryFromObject
     ApicHalSetIoApicRedirectionEntryFromObjectEx
     ApicHalSetIoApicRedirectionEntryFromObject
+    ApicHalConfigureNextApicTimerEvent
+    ApicHalGetCurrentCpuVirtualID

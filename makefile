@@ -79,7 +79,6 @@ driver_cpp_source_files += $(shell find drivers/gpu/InternalGpuFunctions -name *
 driver_cpp_source_files += $(shell find drivers/ISA -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/pci_systems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/PnP -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/processors -name *.cpp)
 #driver_cpp_source_files += $(shell find drivers/Serial -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/Busses -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/storage/InternalStorageDrivers -name *.cpp)

@@ -226,3 +226,5 @@ EXPORTS
     GetNPROC
     UpgradeNPROC
     DowngradeNPROC
+    LouKeMallocKbPageExVirt32
+    LouKeSignalApicSubsystemInitialized

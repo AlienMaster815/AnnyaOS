@@ -294,13 +294,10 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 );
 
 //static SIZE Foo = 0;
-LOUAPI
-void 
-LouKeConfigureNextApicTimerEvent(SIZE Ms);
 
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     if(LouKeGetIrql() >= CLOCK_LEVEL){
-        LouKeConfigureNextApicTimerEvent(30);
+        ApicHalConfigureNextApicTimerEvent(30);
         LouKeSendIcEOI();
         return CpuCurrentState;
     }
@@ -309,7 +306,7 @@ LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     CpuCurrentState = Schedualer->PsmSchedual(CpuCurrentState);
     MutexUnlock(&ProcLock.Lock);
     LouKeMemoryBarrier();
-    LouKeConfigureNextApicTimerEvent(Schedualer->CurrentThread->TotalMsSlice);
+    ApicHalConfigureNextApicTimerEvent(Schedualer->CurrentThread->TotalMsSlice);
     LouKeSendIcEOI();
     return CpuCurrentState;
 }
@@ -515,7 +512,7 @@ LOUAPI void InitializeProcessManager(){
 
 KERNEL_EXPORT
 uint64_t LouKeGetThreadIdentification(){    
-    INTEGER ProcessorID = GetCurrentCpuTrackMember();
+    INTEGER ProcessorID = LouKeGetCurrentProcessorNumber();
     if(!ProcessBlock.ProcStateBlock){
         return 0;
     }else if(!ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread){
@@ -527,7 +524,7 @@ uint64_t LouKeGetThreadIdentification(){
 KERNEL_EXPORT
 uint64_t
 LouKeGetProcessIdentification(){
-    UINT32 ProcessorID = GetCurrentCpuTrackMember();
+    UINT32 ProcessorID = LouKeGetCurrentProcessorNumber();
     if(!ProcessBlock.ProcStateBlock){
         return 0;
     }else if(!ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentProcess){

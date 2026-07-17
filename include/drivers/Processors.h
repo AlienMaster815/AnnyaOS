@@ -9,8 +9,6 @@ extern "C" {
 #ifndef _USER_MODE_CODE_
 
 #ifndef _KERNEL_MODULE_
-INTEGER 
-GetCurrentCpuTrackMember();
 
 LOUSTATUS LouKeSmpWakeAssistant(
     INTEGER Assistant, 

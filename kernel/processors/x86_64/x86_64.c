@@ -45,7 +45,16 @@ uint64_t GetIdtAsmTailCall(){
     return 0x00;
 }
 
-
+KERNEL_EXPORT UINT32 LouKeGetCurrentCpuPhysicalId(){
+    unsigned int Eax, Ebx, Ecx, Edx;
+    cpuid(1, &Eax, &Ebx, &Ecx, &Edx);
+    BOOLEAN X2ApicSupported = (Ecx & (1 << 21)) ? true : false;
+    if(X2ApicSupported){
+        cpuid(0x0B, &Eax, &Ebx, &Ecx, &Edx);
+        return Edx;
+    }
+    return (Ebx >> 24) & 0xFF;
+}
 
 //0x178BFBFF
 

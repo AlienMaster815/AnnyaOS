@@ -237,9 +237,6 @@ int _LouPrint(char* format, ...){
 
 bool UsingSmp = false;
 
-INTEGER 
-GetCurrentCpuTrackMember();
-
 KERNEL_EXPORT
 int LouPrintEx(char* format, va_list args) {
     LouKIRQL OldLevel;
@@ -247,12 +244,7 @@ int LouPrintEx(char* format, va_list args) {
     LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
     int result = 0;
     if(UsingSmp){
-        if((GetGSBase()) && GetLKPCB()){
-            _LouPrint("CPU:%d : ", (UINT64)((PLKPCB)GetLKPCB())->ProcID);
-        }
-        else{
-            _LouPrint("CPU:%d : ", (UINT64)GetCurrentCpuTrackMember());
-        }
+        _LouPrint("CPU:%d : ", (UINT64)LouKeGetCurrentProcessorNumber());
     }
     
     result = LouPrint_s(format, args);

@@ -96,10 +96,12 @@ typedef struct _ACPI_MADT_LOCAL_APIC_ADDRESS_OVERRIDE {
 
 LOUSTATUS LouKeInitalizeApicSubsystem(){
     LouPrint("LouKeInitalizeApicSubsystem()\n");
+    
+    ApicInitializeAdvancedProgramableInterruptControllerAbstraction(0);
 
-    ApicInitializeAdvancedProgramableInterruptController(0);
-
+    
 
     LouPrint("LouKeInitalizeApicSubsystem():STATUS_SUCCESS\n");
+    while(1);
     return STATUS_SUCCESS;
 }
