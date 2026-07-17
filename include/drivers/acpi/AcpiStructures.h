@@ -194,7 +194,7 @@ extern "C" {
 #define MADT_ICS_LOCAL_SAPIC                                            0x07
 #define MADT_ICS_PLATFORM_INTERRUPT_SOURCE                              0x08
 #define MADT_ICS_PROCESSOR_LOCAL_X2APIC                                 0x09
-#define MADT_ICS_LOCAL_X2APIC                                           0x0A
+#define MADT_ICS_LOCAL_X2APIC_NMI                                       0x0A
 #define MADT_ICS_GIC_CPU_INTERFACE                                      0x0B
 #define MADT_ICS_GIC_DISTRIBUTER                                        0x0C
 #define MADT_ICS_GIC_MSI_FRAME                                          0x0D
@@ -625,7 +625,7 @@ typedef struct PACKED _MADT_ICS_COMMON_FORMAT_STRUCTURE{
 typedef struct PACKED _MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE{
     uint8_t                                                 Type;  //0 
     uint8_t                                                 Length;//8
-    uint8_t                                                 AcpiProcessorUID;
+    uint8_t                                                 ProcessorID;
     uint8_t                                                 ApicID;
     uint32_t                                                LocalApicFlags;
 }MADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE, * PMADT_ICS_PROCESSOR_LOCAL_APIC_STRUCTURE;
@@ -712,17 +712,17 @@ typedef struct PACKED _MADT_ICS_LOCAL_X2_APIC_STRUCTURE{
     uint16_t                                                Reserved1;
     uint32_t                                                X2ApicId;
     uint32_t                                                Flags;
-    uint32_t                                                ProcessorUID;
+    uint32_t                                                ProcessorID;
 }MADT_ICS_LOCAL_X2_APIC_STRUCTURE, * PMADT_ICS_LOCAL_X2_APIC_STRUCTURE;
 
 typedef struct PACKED _MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE{
     uint8_t                                                 Type;//A
     uint8_t                                                 Length;//12
     uint16_t                                                Flags;
-    uint32_t                                                ProcessorUID;
-    uint8_t                                                 localInt;
+    uint32_t                                                ProcessorID;
+    uint8_t                                                 LocalInterrupt;
     uint8_t                                                 Reserved[3];
-}MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE, * PMADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE;;
+}MADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE, * PMADT_ICS_LOCAL_X2_APIC_NMI_STRUCTURE;
 
 typedef union PACKED _MPIDR{ //once again 64s for bit padding glitch
     uint64_t                                                FlatValue;

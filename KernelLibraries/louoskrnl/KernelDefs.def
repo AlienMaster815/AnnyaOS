@@ -222,3 +222,7 @@ EXPORTS
     LouKeInitializeIpicSubsystem
     cpuid_subleaf
     cpuid
+    LouKeGetCurrentCpuPhysicalId
+    GetNPROC
+    UpgradeNPROC
+    DowngradeNPROC

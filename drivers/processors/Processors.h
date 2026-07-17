@@ -5,9 +5,6 @@
 #include <LouDDK.h>
 
 
-LOUAPI uint16_t GetNPROC();
-LOUAPI void UpgradeNPROC();
-LOUAPI void DowngradeNPROC();
 LOUAPI void LouKeInitializeEoiHandler(PVOID Handler, UINT16 Cpu);
 LOUAPI void LouKeInitializeUnmaskHandler(PVOID Handler, UINT16 Cpu);
 LOUAPI void LouKeInitializeMaskHandler(PVOID Handler, UINT16 Cpu);

@@ -21,15 +21,15 @@ uint32_t GetProcessorBusSpeed() {
 
 uint16_t NPROC = 0;
 
-uint16_t GetNPROC() {
+KERNEL_EXPORT uint16_t GetNPROC() {
     return NPROC ? NPROC : 1;
 }
 
-void UpgradeNPROC(){
+KERNEL_EXPORT void UpgradeNPROC(){
     NPROC++;
 }
 
-void DowngradeNPROC(){
+KERNEL_EXPORT void DowngradeNPROC(){
     NPROC--;
 }
 

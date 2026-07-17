@@ -1,9 +1,17 @@
+#include <Modulation.h>
+#include <cstdint.h>
+
+#ifndef _APIC_EXTERN_INTERN_H
+#define _APIC_EXTERN_INTERN_H
+KERNEL_EXPORT UINT32 LouKeGetCurrentCpuPhysicalId();
+KERNEL_EXPORT uint16_t GetNPROC();
+KERNEL_EXPORT void UpgradeNPROC();
+KERNEL_EXPORT void DowngradeNPROC();
+#endif
+
 #ifndef _APIC_INTERNALS_H
 #ifndef _APIC_EXTERNAL_H
 #define _APIC_EXTERNAL_H
-
-#include <Modulation.h>
-#include <cstdint.h>
 
 typedef enum{
     APIC_TIMER_MODE_ONE_SHOT = 0,

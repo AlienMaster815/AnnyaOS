@@ -172,6 +172,7 @@ void SetupGDT(UINT32 ProcessorID){
 
     Tss->IST1 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
     Tss->IST2 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
+    Tss->IST3 = (uintptr_t)(LouKeMallocEx((16 * KILOBYTE), 16, KERNEL_GENERIC_MEMORY) + ((16 * KILOBYTE) - 16));
 
     SetGDTSystemSegmentEntry(
         (uint8_t*)&GDT->TSSLo,
