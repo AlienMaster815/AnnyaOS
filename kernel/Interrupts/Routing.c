@@ -52,10 +52,6 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args){
     
     ForEachLListEntry(TmpVectorObject, ProcessorVectorData, Peers){
 
-        
-        LouPrint("HERE:%h\n", TmpVectorObject->VectorID);
-        while(1);
-
         if(TmpVectorObject->SoftMasked){
             continue;
         }
@@ -78,8 +74,8 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args){
             RestoreEverythingWithInterruptBuffer(&ContextHandle);
         }
     }
-    while(1);
     LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
-    ApicHalSignalLocalApicEoi();
-    
+    if(Interrupt >= 0x20){
+        ApicHalSignalLocalApicEoi();
+    }
 }

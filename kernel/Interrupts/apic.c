@@ -16,8 +16,6 @@ LOUSTATUS LouKeInitalizeApicSubsystem(){
     
     LouPrint("Successfully Initialized Apic:%h\n", ApicID);
 
-    *(UINT8*)0 = 0;
-
     LouPrint("LouKeInitalizeApicSubsystem():STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS;

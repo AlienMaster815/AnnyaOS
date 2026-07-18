@@ -398,7 +398,6 @@ KERNEL_EXPORT LOUSTATUS LouKeIpicSoftwareMaskVectorObject(OPAQUE_PTR Object, SIZ
             //LouPrint("LouKeIpicSoftwareMaskVectorObject():Input Object With Group Object\n");
             return STATUS_INVALID_PARAMETER;
         }
-        LouPrint("YAY:%h\n", ObjectHandle->VectorObject.VectorID);
         ObjectHandle->VectorObject.SoftMasked = Mask;
         return STATUS_SUCCESS;
     }

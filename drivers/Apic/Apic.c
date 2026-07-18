@@ -520,14 +520,15 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
 
     UINT64 XapicBaseRegister = LouKeReadMsr(IA32_APIC_BASE_MSR_OFFSET);
     UINT64 ApicPhyAddress = XapicBaseRegister & 0x000FFFFFFFFFF000ULL;
-    ApicHalDbgPrint("APIC.SYS:LAPIC X1 Physical Address:%h\n", ApicPhyAddress);
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Cpu].ApicDeviceObject;
     XapicBaseRegister |= IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT;
     if(X2ApicSupport){
+        ApicHalDbgPrint("APIC.SYS:Communicating With X2 LAPIC Via MSR\n");
         XapicBaseRegister |= IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT;
         ApicDeviceObject->ApicObjectType = X2_LOCAL_APIC_OBJECT_TYPE;
         
     }else{
+        ApicHalDbgPrint("APIC.SYS:LAPIC X1 Physical Address:%h\n", ApicPhyAddress);
         ApicDeviceObject->ApicObjectType = X1_LOCAL_APIC_OBJECT_TYPE;
         ApicDeviceObject->X1ApicObject.ApicBase = (PVOID)LouKeMallocKbPageExVirt32(1, KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, ApicPhyAddress, true);
     }
