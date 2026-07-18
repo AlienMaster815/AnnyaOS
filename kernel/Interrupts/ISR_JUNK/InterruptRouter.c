@@ -38,8 +38,6 @@ typedef struct _INTERRUPT_ROUTER_ENTRY{
     mutex_t     InterruptMutex;
 }INTERRUPT_ROUTER_ENTRY, * PINTERRUPT_ROUTER_ENTRY;
 
-static INTERRUPT_ROUTER_ENTRY InterruptRouterTable[256] = {0};
-
 void LouKeIcUnmaskIrq(uint8_t irq);
 
 
@@ -58,7 +56,7 @@ void RestoreAdvancedRegisters(uint64_t ContextHandle);
 
 
 
-
+/*
 void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
     //LouKIRQL Irql;
     //LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, &Irql);
@@ -135,3 +133,4 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args) {
 		asm("hlt");
 	}
 }
+*/

@@ -228,3 +228,4 @@ EXPORTS
     DowngradeNPROC
     LouKeMallocKbPageExVirt32
     LouKeSignalApicSubsystemInitialized
+    LouKeIpicCreateVectorObjectEx

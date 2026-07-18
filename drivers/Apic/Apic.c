@@ -533,14 +533,6 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
     }
     LouKeWriteMsr(IA32_APIC_BASE_MSR_OFFSET, XapicBaseRegister);
 
-    Status = ApicHalConfigureSpriousVector(Cpu);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic SPV\n");
-        while(1);
-    }
-
-    ApicHalDbgPrint("APIC.SYS:Spurious Vector Initialized\n");
-
     Status = ApicHalInitializeInterProcessorInterrupts(Cpu);
     if(Status != STATUS_SUCCESS){
         LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic IPI\n");
@@ -549,9 +541,15 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
 
     ApicHalDbgPrint("APIC.SYS:IPI System Initialized\n");
 
+    Status = ApicHalConfigureSpriousVector(Cpu);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("APIC.SYS:ERROR:Unable To Initialize Apic SPV\n");
+        while(1);
+    }
+
+    ApicHalDbgPrint("APIC.SYS:Spurious Vector Initialized\n");
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction():STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

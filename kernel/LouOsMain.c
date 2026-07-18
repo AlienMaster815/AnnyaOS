@@ -40,28 +40,9 @@ static PPROCESSOR_FEATURES ProcAcceleratedFeatures = 0;
 
 LOUSTATUS InitThreadManager();
 LOUSTATUS SetUpTimers();
-void PageFault(UINT64 Rsp);
-void GPF(UINT64 Rsp);
 void DoubleFault(UINT64 Rsp);
 void Clock(UINT64 SavedState);
 void INTERRUPT(UINT8 interrupt_number);
-void NMI(UINT64 Rsp);
-void BreakPoint(UINT64 Rsp);
-void DivideByZero(UINT64 Stack);
-void OverFlow(UINT64 Rsp);
-void BoundRange(UINT64 Rsp);
-void Debug(UINT64 Rsp);
-void InvalidOpcode(UINT64 Rsp);
-void FloatDeviceNotAvailable(UINT64 Rsp);
-void CpOverun(UINT64 Rsp);
-void SegmentNotPresent(UINT64 Rsp);
-void StackSegmentFault(UINT64 Rsp);
-void x87FloatPointError(UINT64 Rsp);
-void AlignmentCheck(UINT64 Rsp);
-void MachineCheck(UINT64 Rsp);
-void SIMDFloatPointException(UINT64 Rsp);
-void VirtualizationException(UINT64 Rsp);
-void ControlProtectionException(UINT64 Rsp);
 void CookieCheckFail(UINT64 Rsp);
 void ParseMBootTags(struct multiboot_tag* MBOOT);
 uint64_t LouKeGetRamSize();
@@ -475,9 +456,7 @@ void LouOsKrnlStart(
 
 //TODO: 
 //Check on NULL references as i go through code : I Updated How The Memory Manager Handles Errors
-//xAPIC has been depreciated work on x2APIC
 //Add mutex to the registry keys and a close function
-//Fix SMP Booting
 //tighten read only security
 //add a schedualer stop for DISPATCH_LEVEL
 
