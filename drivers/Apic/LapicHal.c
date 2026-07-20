@@ -401,6 +401,36 @@ ApicHalSetLocalApicLvtThermalSensorRegister(
     );
 }
 
+
+DRIVER_EXPORT
+LOUSTATUS 
+ApicHalGetLocalApicInterruptCommandRegister(
+    UINT32*                     DestinationField, 
+    APIC_DESTINATION_SHORTHAND* Shorthand, 
+    APIC_TRIGGER_MODE*          TriggerMode, 
+    APIC_LEVEL*                 Level, 
+    BOOLEAN*                    InterruptPending,
+    APIC_DESTINATION_MODE*      DestinationMode, 
+    APIC_ICR_DELIVERY_MODE*     DeliveryMode, 
+    UINT8*                      Vector
+){
+    ULONG ProcessorNumber = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[ProcessorNumber].ApicDeviceObject;
+    return ApicHalGetApicInterruptCommandRegister(
+        ApicDeviceObject,
+        DestinationField,
+        Shorthand,
+        TriggerMode,
+        Level,
+        InterruptPending,
+        DestinationMode,
+        DeliveryMode,
+        Vector
+    );
+}
+
+
+
 DRIVER_EXPORT
 LOUSTATUS 
 ApicHalSetLocalApicInterruptCommandRegister(
@@ -544,4 +574,20 @@ DRIVER_EXPORT void ApicHalSignalLocalApicEoi(){
         ApicDeviceObject,
         0
     );
+}
+
+DRIVER_EXPORT
+LOUSTATUS
+ApicHalGetLocalApicErrorStatus(UINT32* ErrorStatus){
+    ULONG ProcessorNumber = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[ProcessorNumber].ApicDeviceObject;
+    return ApicHalGetApicErrorStatusRegisterEx(ApicDeviceObject, ErrorStatus);
+}
+
+DRIVER_EXPORT
+LOUSTATUS
+ApicHalSetLocalApicErrorStatus(UINT32 Value){
+    ULONG ProcessorNumber = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[ProcessorNumber].ApicDeviceObject;
+    return ApicHalSetApicErrorStatusRegisterEx(ApicDeviceObject, Value);
 }

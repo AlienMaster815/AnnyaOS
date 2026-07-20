@@ -163,6 +163,7 @@ typedef struct _PER_PROCESSOR_APIC_DATA{
     OPAQUE_PTR                      SpurriousVectorObject;
 }PER_PROCESSOR_APIC_DATA, * PPER_PROCESSOR_APIC_DATA;
 
+
 #ifndef APIC_MAIN
 extern PPER_PROCESSOR_APIC_DATA PerProcessorApicData;
 #endif
@@ -249,8 +250,8 @@ LOUSTATUS ApicHalSetApicDivideConfigurationRegister(PAPIC_DEVICE_OBJECT ApicDevi
 LOUSTATUS ApicHalGetApicTimerInitialCount(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* InitialCountOut);
 LOUSTATUS ApicHalSetApicTimerInitialCount(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32 InitialCount);
 LOUSTATUS ApicHalGetApicTimerCurrentCount(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* CurrentCountOut);
-
-
+LOUSTATUS ApicHalGetApicInterruptCommandRegister(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* DestinationField, APIC_DESTINATION_SHORTHAND* Shorthand, APIC_TRIGGER_MODE* TriggerMode, APIC_LEVEL* Level, BOOLEAN* InterruptPending, APIC_DESTINATION_MODE* DestinationMode, APIC_ICR_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
+LOUSTATUS ApicHalSendSipiToAp(UINT32 Ap);
 
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicIdRegister(UINT32* IdOut);
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicVersionRegister(UINT32* VersionOut, UINT32* MaxLvtOut, BOOLEAN* SupportsEoiSuppresionOut);
@@ -294,10 +295,9 @@ DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVIC
 DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, BOOLEAN* IrrSet, IO_APIC_PIN_POLARITY* PinPolarity, BOOLEAN* InterruptPending, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
 DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT64 In);
 DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, IO_APIC_PIN_POLARITY* PinPolarity, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
-
-
-
-
+DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicInterruptCommandRegister(UINT32* DestinationField, APIC_DESTINATION_SHORTHAND* Shorthand, APIC_TRIGGER_MODE* TriggerMode, APIC_LEVEL* Level, BOOLEAN* InterruptPending, APIC_DESTINATION_MODE* DestinationMode, APIC_ICR_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
+DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicErrorStatus(UINT32* ErrorStatus);
+DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicErrorStatus(UINT32 Value);
 //TODO: 
 
 //if ESR bit 4 is set then a redirectable IPI with lowest prioirty 

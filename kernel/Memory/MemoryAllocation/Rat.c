@@ -122,6 +122,29 @@ static BOOLEAN GetFirstFree32BitAddress(PVOID Context, PRAT_TRACKER Tracker){
     return false;
 }
 
+static BOOLEAN GetFirstFreeUnder1GigAddress(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
+    SIZE SpaceLimit = (1 * GIGABYTE);
+    PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
+    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
+    Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
+
+    while((((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) && (((UINT64)Result + AllocContext->Length) <= SpaceLimit)){
+        UINTPTR NextHint = 0x00;
+        if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
+            AllocContext->Base = (UINTPTR)Result;
+            return true;
+        }        
+        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
+        if((UINTPTR)Result == NextHint){
+            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
+        }
+    }
+    return false;
+}
+
 
 static BOOLEAN GetFirstFree64BitAddress(PVOID Context, PRAT_TRACKER Tracker){    
     if((Tracker->Base + Tracker->Length) < (4 * GIGABYTE)){
@@ -250,6 +273,31 @@ PVOID LouKeRatAllocate32BitPhysicalAddress(SIZE Size, SIZE Alignment){
     }
     REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree32BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
+    if(!Successfull){
+        LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Memory\n");
+        LouKeReleaseSpinLock(&RatLock, &Irql);
+        //while(1);
+        return 0x00;
+    } 
+    NewTracker->Base = Context.Base;
+    NewTracker->Length = Context.Length;
+    LouKeReleaseSpinLock(&RatLock, &Irql);
+    //LouPrint("ALOC:%h\n", NewTracker->Base);
+    return (PVOID)Context.Base;
+}
+
+PVOID LouKeRatAllocateUnder1GigPhysicalAddress(SIZE Size, SIZE Alignment){
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&RatLock, &Irql);
+    PRAT_TRACKER NewTracker = LouKeRatGetNextFreeAllocationTracker();
+    if(!NewTracker){
+        LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Trackers\n");
+        LouKeReleaseSpinLock(&RatLock, &Irql);
+        //while(1);
+        return 0x00;
+    }
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
+    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeUnder1GigAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Memory\n");
         LouKeReleaseSpinLock(&RatLock, &Irql);

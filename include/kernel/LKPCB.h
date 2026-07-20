@@ -24,6 +24,29 @@ typedef struct _LKPCB{
     LOUSINE_KERNEL_APIC_DATA    ApicData;
 }LKPCB, * PLKPCB;
 
+typedef struct PACKED _LKSEB{
+    UINT64          KernelApEntry;
+    UINT64          KernelPml4;
+    UINT64          Gdt32[3];
+    UINT64          Gdt64[7];
+    UINT16          GDTP32[3];
+    UINT16          BootStack;
+    UINT32          Reserved1;
+    UINT32          LKSEBEX;
+    UINT32          StackPointer;
+    UINT32          Reserved2;
+    UINT16          GDTP64[5];
+}LKSEB, * PLKSEB;
+
+typedef struct PACKED _LKSEBEX{
+    UINT64 Pml4[512];
+    UINT64 Pml3Low[512];
+    UINT64 Pml2Low[512];
+    UINT64 Pml3High[512];
+    UINT64 Pml2High[512];
+}LKSEBEX, * PLKSEBEX;
+
+
 #ifndef _USER_MODE_CODE_
 LouKIRQL LouKeGetIrql();
 uint64_t GetGSBase();

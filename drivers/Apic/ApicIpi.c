@@ -40,3 +40,81 @@ LOUSTATUS ApicHalInitializeInterProcessorInterrupts(ULONG Cpu){
 
     return STATUS_SUCCESS;
 }
+
+
+LOUSTATUS ApicHalSendSipiToAp(
+    UINT32 Ap
+){
+    ApicHalDbgPrint("APIC.SYS:Waking AP:%h\n", Ap);
+
+    LOUSTATUS Status;
+    BOOLEAN PendingInterrupt = true;
+   
+    while(PendingInterrupt){
+        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+    }
+
+    UINT32 ApicID = PerProcessorApicData[Ap].ApicID;
+    ApicHalSetLocalApicInterruptCommandRegister(
+        ApicID,
+        APIC_DESTINATION_SHORTHAND_NONE,
+        APIC_TRIGGER_MODE_LEVEL,
+        APIC_LEVEL_ASSERT,
+        APIC_DESTINATION_MODE_PHYSICAL,
+        APIC_LVT_DELIVERY_MODE_INIT,
+        0
+    );  
+
+    PendingInterrupt = true;
+    while(PendingInterrupt){
+        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+    }
+
+    ApicHalSetLocalApicInterruptCommandRegister(
+        ApicID,
+        APIC_DESTINATION_SHORTHAND_NONE,
+        APIC_TRIGGER_MODE_LEVEL,
+        APIC_LEVEL_DE_ASSERT,
+        APIC_DESTINATION_MODE_PHYSICAL,
+        APIC_LVT_DELIVERY_MODE_INIT,
+        0
+    );  
+
+    PendingInterrupt = true;
+    while(PendingInterrupt){
+        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+    }
+
+    sleep(10);
+
+    for(SIZE i = 0; i < 2; i++){
+        ApicHalSetLocalApicInterruptCommandRegister(
+            ApicID,
+            APIC_DESTINATION_SHORTHAND_NONE,
+            APIC_TRIGGER_MODE_LEVEL,
+            APIC_LEVEL_DE_ASSERT,
+            APIC_DESTINATION_MODE_PHYSICAL,
+            APIC_ICR_DELIVERY_MODE_STARTUP,
+            0x08
+        );  
+        
+        PendingInterrupt = true;
+        while(PendingInterrupt){
+            Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
+            if(Status != STATUS_SUCCESS){
+                return Status;
+            }
+        }
+    }
+
+    return STATUS_SUCCESS;
+}

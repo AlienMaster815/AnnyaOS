@@ -10,5 +10,6 @@ PVOID LouKeRatAllocate32BitPhysicalAddress(SIZE Size, SIZE Alignment);
 PVOID LouKeRatAllocate64BitPhysicalAddress(SIZE Size, SIZE Alignment);
 PVOID LouKeRatAllocateVirtualAddress(SIZE Size, SIZE Alignment);
 BOOLEAN LouKeRatReserveMemoryRegion(PVOID RegionBase, SIZE RegionSize);
+PVOID LouKeRatAllocateUnder1GigPhysicalAddress(SIZE Size, SIZE Alignment);
 
 #endif

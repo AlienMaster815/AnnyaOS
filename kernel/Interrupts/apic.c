@@ -1,5 +1,16 @@
 #include <LouAPI.h>
 
+void LouKeApInitializationFunction(PLKSEB TrampolineLkseb){
+
+    while(1){
+        asm("hlt");
+    }
+}
+
+KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance(){
+    return (UINT64)LouKeApInitializationFunction;
+}
+
 LOUSTATUS LouKeInitalizeApicSubsystem(){
     LouPrint("LouKeInitalizeApicSubsystem()\n");
     

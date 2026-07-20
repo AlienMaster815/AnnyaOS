@@ -127,7 +127,7 @@ uint64_t GetCr3() {
     return cr3_value;
 }
 
-UINT64 GetPageBase() {
+KERNEL_EXPORT UINT64 GetPageBase() {
     return (UINT64)(GetCr3() & 0x000FFFFFFFFFF000ULL);
 }
 

@@ -730,3 +730,52 @@ ApicHalGetApicTimerCurrentCount(
         CurrentCountOut
     );
 }
+
+DRIVER_EXPORT
+LOUSTATUS 
+ApicHalGetApicInterruptCommandRegister(
+    PAPIC_DEVICE_OBJECT         ApicDeviceObject,
+    UINT32*                     DestinationField, 
+    APIC_DESTINATION_SHORTHAND* Shorthand, 
+    APIC_TRIGGER_MODE*          TriggerMode, 
+    APIC_LEVEL*                 Level, 
+    BOOLEAN*                    InterruptPending,
+    APIC_DESTINATION_MODE*      DestinationMode, 
+    APIC_ICR_DELIVERY_MODE*     DeliveryMode, 
+    UINT8*                      Vector
+){
+    UINT64 Register;
+    LOUSTATUS Status = ApicHalGetApicInterruptCommandRegisterEx(ApicDeviceObject, &Register);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    if(DestinationField){
+        switch(ApicDeviceObject->ApicObjectType){
+            case X1_LOCAL_APIC_OBJECT_TYPE:
+                *DestinationField = (Register >> 56) & 0xFF;
+                break;
+            case X2_LOCAL_APIC_OBJECT_TYPE:
+                *DestinationField = (Register >> 32) & UINT32_MAX;
+                break;
+        }
+    }
+    if(Shorthand){
+        *Shorthand = (APIC_DESTINATION_SHORTHAND)((Register >> 18) & 0x03);   
+    }
+    if(TriggerMode){
+        *TriggerMode = (APIC_TRIGGER_MODE)(Register >> 15) & 0x01;
+    }
+    if(Level){
+        *Level = (APIC_LEVEL)(Register >> 14) & 0x01;
+    }
+    if(InterruptPending){
+        *InterruptPending = (Register & (1 << 12)) ? true : false;
+    }
+    if(DeliveryMode){
+        *DeliveryMode = (APIC_ICR_DELIVERY_MODE)((Register >> 8) & 0x07);
+    }
+    if(Vector){
+        *Vector = Register & 0xFF;
+    }
+    return STATUS_SUCCESS;
+}

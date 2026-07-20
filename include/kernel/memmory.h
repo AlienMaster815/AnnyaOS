@@ -277,12 +277,15 @@ KERNEL_EXPORT
 uint64_t LouKeGetRamSize();
 
 void* LouGeneralAllocateMemoryEx(UINT64 Size,UINT64 Alignment);
-void* LouGeneralAllocateMemoryEx32(UINT64 Size,UINT64 Alignment);
+KERNEL_EXPORT void* LouGeneralAllocateMemoryEx32(UINT64 Size,UINT64 Alignment);
 void* LouGeneralAllocateMemory(UINT64 Size);
 void* LouGeneralAllocateMemory32(UINT64 Size);
 void  LouGeneralFreeMemory(void* Address);
 bool LouCreateMemoryPool(uint64_t* MemoryAddressVirtual,uint64_t* RequestedMemoryAddressPhysical,uint64_t PoolSizeNeeded,uint64_t AlignmentNeeded, uint64_t PageAttributes);
 void LouFreeAlignedMemory(uint8_t* alignedAddr, size_t size);
+
+
+KERNEL_EXPORT void* LouGeneralAllocateMemoryUnder1Gig(UINT64 Size, UINT64 Alignment);
 
 KERNEL_EXPORT
 bool EnforceSystemMemoryMap(

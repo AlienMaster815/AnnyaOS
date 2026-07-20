@@ -63,31 +63,6 @@ static PIPIC Ipics = 0x00;
 static SIZE IpicsAllocated = 0;
 
 
-
-LOUSTATUS
-LouKeIpicEnterCriticalSection(
-    PIPIC_CRITICAL_SECTION  IpicCriticalSection,
-    SIZE                    PeerCpu
-){
-    if(!IpicCriticalSection){
-        return STATUS_INVALID_PARAMETER;
-    }
-    
-
-    LouKeAcquireSpinLock(&IpicCriticalSection->IpicLock, &IpicCriticalSection->IpicIrql);
-
-    return STATUS_SUCCESS;
-}
-
-
-LOUSTATUS
-LouKeIpicExitCriticalSection(
-    PIPIC_CRITICAL_SECTION  IpicCriticalSection
-){
-    LouKeReleaseSpinLock(&IpicCriticalSection->IpicLock, &IpicCriticalSection->IpicIrql);
-    return STATUS_SUCCESS;
-}
-
 PListHeader LouKeIpicGetLocalVectorData(
     ULONG Cpu, 
     UINT8 Interrupt
@@ -118,6 +93,19 @@ void VirtualizationException(UINT64 Rsp);
 void ControlProtectionException(UINT64 Rsp);
 
 
+KERNEL_EXPORT
+LOUSTATUS LouKeIpicCreateVectorObjectEx(
+    OPAQUE_PTR*         VectorObjectOut,
+    SIZE                Processor,
+    SIZE                Vector,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Items,
+    BOOLEAN             DisableIpcSafety
+);
+
 
 KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors){
     Ipics = LouKeMallocArray(IPIC, Processors, KERNEL_GENERIC_MEMORY);
@@ -134,27 +122,27 @@ KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors){
     for(SIZE i = 0 ; i < Processors; i++){
 
         OPAQUE_PTR* ObjectPointer = &GenericRouters[i * 0x16];
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x00], i, 0x00, false, IsrRoutine, (OPAQUE_PTR)DivideByZero, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x01], i, 0x01, false, IsrRoutine, (OPAQUE_PTR)Debug, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x02], i, 0x02, false, IsrRoutine, (OPAQUE_PTR)NMI, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x03], i, 0x03, false, IsrRoutine, (OPAQUE_PTR)BreakPoint, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x04], i, 0x04, false, IsrRoutine, (OPAQUE_PTR)OverFlow, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x05], i, 0x05, false, IsrRoutine, (OPAQUE_PTR)BoundRange, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x06], i, 0x06, false, IsrRoutine, (OPAQUE_PTR)InvalidOpcode, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x07], i, 0x07, false, IsrRoutine, (OPAQUE_PTR)FloatDeviceNotAvailable, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x08], i, 0x08, false, IsrRoutine, (OPAQUE_PTR)CpOverun, 0, 1);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x00], i, 0x00, false, IsrRoutine, (OPAQUE_PTR)DivideByZero, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x01], i, 0x01, false, IsrRoutine, (OPAQUE_PTR)Debug, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x02], i, 0x02, false, IsrRoutine, (OPAQUE_PTR)NMI, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x03], i, 0x03, false, IsrRoutine, (OPAQUE_PTR)BreakPoint, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x04], i, 0x04, false, IsrRoutine, (OPAQUE_PTR)OverFlow, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x05], i, 0x05, false, IsrRoutine, (OPAQUE_PTR)BoundRange, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x06], i, 0x06, false, IsrRoutine, (OPAQUE_PTR)InvalidOpcode, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x07], i, 0x07, false, IsrRoutine, (OPAQUE_PTR)FloatDeviceNotAvailable, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x08], i, 0x08, false, IsrRoutine, (OPAQUE_PTR)CpOverun, 0, 1, true);
 
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x0B], i, 0x0B, false, IsrRoutine, (OPAQUE_PTR)SegmentNotPresent, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x0C], i, 0x0C, false, IsrRoutine, (OPAQUE_PTR)StackSegmentFault, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x0D], i, 0x0D, false, IsrRoutine, (OPAQUE_PTR)GPF, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x0E], i, 0x0E, false, IsrRoutine, (OPAQUE_PTR)PageFault, 0, 1);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x0B], i, 0x0B, false, IsrRoutine, (OPAQUE_PTR)SegmentNotPresent, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x0C], i, 0x0C, false, IsrRoutine, (OPAQUE_PTR)StackSegmentFault, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x0D], i, 0x0D, false, IsrRoutine, (OPAQUE_PTR)GPF, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x0E], i, 0x0E, false, IsrRoutine, (OPAQUE_PTR)PageFault, 0, 1, true);
 
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x10], i, 0x10, false, IsrRoutine, (OPAQUE_PTR)x87FloatPointError, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x11], i, 0x11, false, IsrRoutine, (OPAQUE_PTR)AlignmentCheck, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x12], i, 0x12, false, IsrRoutine, (OPAQUE_PTR)MachineCheck, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x13], i, 0x13, false, IsrRoutine, (OPAQUE_PTR)SIMDFloatPointException, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x14], i, 0x14, false, IsrRoutine, (OPAQUE_PTR)VirtualizationException, 0, 1);
-        LouKeIpicCreateVectorObject(&ObjectPointer[0x15], i, 0x15, false, IsrRoutine, (OPAQUE_PTR)ControlProtectionException, 0, 1);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x10], i, 0x10, false, IsrRoutine, (OPAQUE_PTR)x87FloatPointError, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x11], i, 0x11, false, IsrRoutine, (OPAQUE_PTR)AlignmentCheck, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x12], i, 0x12, false, IsrRoutine, (OPAQUE_PTR)MachineCheck, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x13], i, 0x13, false, IsrRoutine, (OPAQUE_PTR)SIMDFloatPointException, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x14], i, 0x14, false, IsrRoutine, (OPAQUE_PTR)VirtualizationException, 0, 1, true);
+        LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x15], i, 0x15, false, IsrRoutine, (OPAQUE_PTR)ControlProtectionException, 0, 1, true);
 
     }
 
@@ -241,9 +229,7 @@ _INITIALIZE_VECTOR_OBJECT:
         if(DisableIpcSafety){
             LouKeListAddTail(&NewVectorObject[i].Peers, &Ipics[Processor].VectorData[Vector + i]);
         }else{
-            LouKeIpicEnterCriticalSection(&Ipics[Processor].IpicCriticalSection, Processor);
             LouKeListAddTail(&NewVectorObject[i].Peers, &Ipics[Processor].VectorData[Vector + i]);
-            LouKeIpicExitCriticalSection(&Ipics[Processor].IpicCriticalSection);
         }
         LouKeMemoryBarrier();
     }

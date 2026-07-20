@@ -35,6 +35,7 @@ LouKeGetBootDevice(size_t Index){
     return (i == Index) ? (void*)Tmp->Base : 0x00;
 } 
 
+KERNEL_EXPORT
 size_t LouKeGetBootDeviceSize(size_t Index){
     size_t i = 0;
     PBOOT_DRIVER_LIST Tmp = &BootDriverList;

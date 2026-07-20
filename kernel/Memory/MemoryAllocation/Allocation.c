@@ -50,6 +50,22 @@ LouGeneralAllocateMemoryEx(
     return Result;
 }
 
+KERNEL_EXPORT
+void* 
+LouGeneralAllocateMemoryUnder1Gig(
+    UINT64 Size,
+    UINT64 Alignment
+){
+    void* Result = LouKeRatAllocateUnder1GigPhysicalAddress(Size, Alignment);
+    if(!Result){
+        return 0x00;
+    }
+    Result += KSpaceBase;
+    memset(Result, 0, Size);
+    return Result;  
+}
+
+KERNEL_EXPORT
 void* 
 LouGeneralAllocateMemoryEx32(
     UINT64 Size,

@@ -229,3 +229,10 @@ EXPORTS
     LouKeMallocKbPageExVirt32
     LouKeSignalApicSubsystemInitialized
     LouKeIpicCreateVectorObjectEx
+    LouKeGetBootDeviceSize
+    GetPageBase
+    LouGeneralAllocateMemoryEx32
+    LouGeneralAllocateMemoryEx16
+    LouKeInitializeSmpLouPrint
+    LouGeneralAllocateMemoryUnder1Gig
+    LouKeGetMultibootTrampolineEntrance

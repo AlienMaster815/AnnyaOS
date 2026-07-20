@@ -353,6 +353,4 @@ void ApicHalSetX1ApicLvtErrorRegister(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicInitialCountRegister(PVOID ApicBase, UINT32 Value);
 void ApicHalSetX1ApicDivideConfigurationRegister(PVOID ApicBase, UINT32 Value);
 
-
-
 #endif

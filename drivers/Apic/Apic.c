@@ -80,6 +80,7 @@ KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors);
 KERNEL_EXPORT void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
 PPER_PROCESSOR_APIC_DATA PerProcessorApicData = 0x00;
 KERNEL_EXPORT void LouKeSignalApicSubsystemInitialized();
+KERNEL_EXPORT UINT64 GetPageBase();
 
 static SIZE IoApicCount = 0;
 
@@ -92,6 +93,117 @@ static ListHeader NmiOverideList = {0};
 static ListHeader LocalNmiOverideList = {0};
 static ListHeader PlatformSourceList = {0};
 
+KERNEL_EXPORT
+size_t LouKeGetBootDeviceSize(size_t Index);
+
+KERNEL_EXPORT void LouKeInitializeSmpLouPrint();
+KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance();
+
+DRIVER_EXPORT void ApicHalApInitializationFunction(PLKSEB TrampolineLkseb){
+
+    while(1){
+        asm("hlt");
+    }
+}
+
+
+static LOUSTATUS InitializeSmpTrampoline(){
+    WORD LoadOrder = 0x00;
+    PVOID Key = LouKeOpenRegistryHandle(
+        L"KERNEL_DEFAULT_CONFIG\\Subsystems\\Smp",
+        0x00
+    );
+    if(!Key){
+        return STATUS_UNSUCCESSFUL;
+    }
+
+    Key = LouKeOpenRegistryHandle(
+        L"LoadOrder",
+        Key
+    );
+
+    if(!Key){
+        return STATUS_UNSUCCESSFUL;
+    }
+    LouKeReadRegistryWordValue(Key, &LoadOrder);
+        
+    void* DriverBase = LouKeGetBootDevice(LoadOrder);  
+    SIZE DriverSize = LouKeGetBootDeviceSize(LoadOrder);
+
+    PVOID TrampolineArea = (PVOID)0x8000;
+    LouKeMapContinuousMemoryBlock((UINT64)(UINTPTR)TrampolineArea, (UINT64)(UINTPTR)TrampolineArea, ROUND_UP64(4096 + ROUND_UP64(DriverSize, 4096) + sizeof(LKSEB), KILOBYTE_PAGE), KERNEL_DMA_MEMORY);
+    memcpy((PVOID)(UINT8*)TrampolineArea, DriverBase, DriverSize);
+    UINT16  LksebOffset = ROUND_UP64(DriverSize, 4096) + 4096;
+    UINT16  BootStackOffset = LksebOffset - 16;
+    UINT16* StackEntry = (UINT16*)((UINT8*)TrampolineArea + BootStackOffset);
+    UINT8* MovBxInstruction = (UINT8*)TrampolineArea;
+    *StackEntry = (UINT16)((UINTPTR)(UINT8*)TrampolineArea + LksebOffset);
+    MovBxInstruction[2] = (UINT16)(UINTPTR)(UINT8*)StackEntry & 0xFF;
+    MovBxInstruction[3] = ((UINT16)(UINTPTR)(UINT8*)StackEntry >> 8) & 0xFF;
+    
+    PLKSEB TrampolineLkseb = (PLKSEB)(UINT8*)(UINTPTR)((UINTPTR)(UINT8*)TrampolineArea + LksebOffset);
+    memset(TrampolineLkseb, 0, sizeof(LKSEB));
+    PLKSEBEX LksebEx = (PLKSEBEX)(UINT8*)(UINTPTR)((UINTPTR)(UINT8*)LouGeneralAllocateMemoryUnder1Gig(sizeof(LKSEBEX), 4096));
+    if(!LksebEx){
+        LouPrint("Unable To Initialize Smp Subsystem\n");
+        while(1);
+    }
+    TrampolineLkseb->KernelApEntry = (UINT64)LouKeGetMultibootTrampolineEntrance();
+    TrampolineLkseb->KernelPml4 = GetPageBase();
+    
+    TrampolineLkseb->Gdt32[0] = 0x0000000000000000ULL;
+    TrampolineLkseb->Gdt32[1] = 0x00CF9A000000FFFFULL;
+    TrampolineLkseb->Gdt32[2] = 0x00CF92000000FFFFULL;
+
+    TrampolineLkseb->Gdt64[0] = 0x0000000000000000ULL;
+    TrampolineLkseb->Gdt64[1] = 0x00AF9A000000FFFFULL;
+    TrampolineLkseb->Gdt64[2] = 0x00AF92000000FFFFULL;
+    TrampolineLkseb->Gdt64[3] = 0x00A09A000000FFFFULL;
+    TrampolineLkseb->Gdt64[4] = 0x00A092000000FFFFULL;
+    TrampolineLkseb->Gdt64[5] = 0x0000000000000000ULL;
+    TrampolineLkseb->Gdt64[6] = 0x0000000000000000ULL;
+
+    TrampolineLkseb->GDTP32[0] = (8 * 3) - 1;
+    TrampolineLkseb->GDTP32[1] = ((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt32) & UINT16_MAX;
+    TrampolineLkseb->GDTP32[2] = (((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt32) >> 16) & UINT16_MAX;
+
+    TrampolineLkseb->BootStack = (UINT16)(UINTPTR)(UINT8*)TrampolineArea + BootStackOffset;
+
+    TrampolineLkseb->LKSEBEX = (UINT32)((UINTPTR)(UINT8*)LksebEx - KSpaceBase) & UINT32_MAX;
+    TrampolineLkseb->StackPointer = (((((UINT64)(UINTPTR)(UINT8*)LouGeneralAllocateMemoryUnder1Gig(4096, 4096))) - KSpaceBase) & UINT32_MAX) + (4096 - 16);
+    if(!TrampolineLkseb->StackPointer){
+        LouPrint("Unable To Initialize Smp Subsystem\n");
+        while(1);
+    }
+
+    LouPrint("Stack Pointer:%h\n", TrampolineLkseb->StackPointer);
+
+    TrampolineLkseb->GDTP64[0] = (8 * 7) - 1;
+    TrampolineLkseb->GDTP64[1] =  ((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt64) & UINT16_MAX;
+    TrampolineLkseb->GDTP64[2] = (((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt64) >> 16) & UINT16_MAX;
+    TrampolineLkseb->GDTP64[3] = (((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt64) >> 32) & UINT16_MAX;
+    TrampolineLkseb->GDTP64[4] = (((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt64) >> 48) & UINT16_MAX;
+
+    PLKSEBEX LksebExPhy = (PLKSEBEX)((UINTPTR)(UINT8*)LksebEx - KSpaceBase); 
+
+    LksebEx->Pml4[0] = (UINT64)(UINTPTR)(UINT8*)LksebExPhy->Pml3Low | 0b111;
+    LksebEx->Pml4[256] = (UINT64)(UINTPTR)(UINT8*)LksebExPhy->Pml3High | 0b111;
+    LksebEx->Pml3Low[0] = (UINT64)(UINTPTR)(UINT8*)LksebExPhy->Pml2Low | 0b111;
+    LksebEx->Pml3High[0] = (UINT64)(UINTPTR)(UINT8*)LksebExPhy->Pml2High | 0b111;
+    for(SIZE i = 0 ; i < 512; i++){
+        LksebEx->Pml2Low[i] = i * MEGABYTE_PAGE | 0b111 | (1 << 7);
+        LksebEx->Pml2High[i] = i * MEGABYTE_PAGE | 0b111 | (1 << 7);
+    }
+
+    LouKeMemoryBarrier();
+
+    ApicHalDbgPrint("APIC.SYS:Smp Trampoline Initialized\n");
+
+    return STATUS_SUCCESS;
+} 
+
+
+//LouKeUnMapContinuousMemoryBlock(0x8000, ROUND_UP64(4096 + ROUND_UP64(DriverSize, 9) + sizeof(LKSEB), KILOBYTE_PAGE));
 
 
 DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
@@ -448,7 +560,19 @@ LOUSTATUS ApicInitializeApicSubsystem(){
     }
 
     LouKeSignalApicSubsystemInitialized();    
+
     LouKeInitializeIpicSubsystem(GetNPROC());
+
+    if(GetNPROC() > 1){
+        Status = InitializeSmpTrampoline();
+        if(Status != STATUS_SUCCESS){
+            ApicHalDbgPrint("APIC.SYS:Unable To Initialze SMP Subsystems\n");
+            while(1);
+        }
+        LouKeInitializeSmpLouPrint();
+
+    }
+
 
     //TODO Initialize IO Apic array
 
@@ -549,6 +673,24 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
     }
 
     ApicHalDbgPrint("APIC.SYS:Spurious Vector Initialized\n");
+
+    ULONG i;
+    ULONG Count = GetNPROC(); 
+    ULONG CurrentID = LouKeGetCurrentCpuPhysicalId();
+
+    if(!Cpu){
+        for(i = 0; i < Count; i++){
+            if(PerProcessorApicData[i].ProcessorID != CurrentID){
+                Status = ApicHalSendSipiToAp(i);
+                if(Status != STATUS_SUCCESS){
+                    ApicHalDbgPrint("APIC.SYS:Error Initializing CPU\n");
+                    while(1);
+                }
+                break;
+            }
+        }
+        ApicHalDbgPrint("APIC.SYS:Initialization Of First AP Successfull\n");
+    }
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
