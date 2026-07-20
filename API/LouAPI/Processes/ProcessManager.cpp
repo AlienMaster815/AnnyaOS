@@ -382,6 +382,20 @@ UNUSED static void InitializeIdleProcess(){
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
 }
 
+static mutex_t ApProcessorInitLock = {0};
+
+LOUAPI void LouKeInitializeApProcessorInitLock(){
+    MutexLock(&ApProcessorInitLock);
+}
+
+LOUAPI
+void ApInitializeProcessManager(ULONG ProcessorID){
+    MutexSynchronize(&ApProcessorInitLock);
+
+
+
+}
+
 LOUAPI
 void LouKeUnmaskSmpInterrupts(){
     MutexUnlock(&CoreIrqReadyLock);
@@ -511,7 +525,7 @@ LOUAPI void InitializeProcessManager(){
         }*/
     }
 
-
+    MutexUnlock(&ApProcessorInitLock);
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     LouKeSchedDbgPrint("Finished Initializing Process Manager\n");

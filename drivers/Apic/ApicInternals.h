@@ -298,6 +298,8 @@ DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicInterruptCommandRegister(UINT32* DestinationField, APIC_DESTINATION_SHORTHAND* Shorthand, APIC_TRIGGER_MODE* TriggerMode, APIC_LEVEL* Level, BOOLEAN* InterruptPending, APIC_DESTINATION_MODE* DestinationMode, APIC_ICR_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicErrorStatus(UINT32* ErrorStatus);
 DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicErrorStatus(UINT32 Value);
+DRIVER_EXPORT void ApicHalApInitializationFunction(PLKSEB TrampolineLkseb);
+
 //TODO: 
 
 //if ESR bit 4 is set then a redirectable IPI with lowest prioirty 

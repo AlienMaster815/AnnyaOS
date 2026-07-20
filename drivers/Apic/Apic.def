@@ -45,3 +45,4 @@ EXPORTS
     ApicHalConfigureNextApicTimerEvent
     ApicHalGetCurrentCpuVirtualID
     ApicHalSignalLocalApicEoi
+    ApicHalApInitializationFunction

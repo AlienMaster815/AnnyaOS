@@ -99,14 +99,6 @@ size_t LouKeGetBootDeviceSize(size_t Index);
 KERNEL_EXPORT void LouKeInitializeSmpLouPrint();
 KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance();
 
-DRIVER_EXPORT void ApicHalApInitializationFunction(PLKSEB TrampolineLkseb){
-
-    while(1){
-        asm("hlt");
-    }
-}
-
-
 static LOUSTATUS InitializeSmpTrampoline(){
     WORD LoadOrder = 0x00;
     PVOID Key = LouKeOpenRegistryHandle(
@@ -176,7 +168,6 @@ static LOUSTATUS InitializeSmpTrampoline(){
         while(1);
     }
 
-    LouPrint("Stack Pointer:%h\n", TrampolineLkseb->StackPointer);
 
     TrampolineLkseb->GDTP64[0] = (8 * 7) - 1;
     TrampolineLkseb->GDTP64[1] =  ((UINT64)(UINTPTR)(UINT8*)TrampolineLkseb->Gdt64) & UINT16_MAX;
@@ -633,7 +624,7 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
     ULONG Cpu
 ){  
     LOUSTATUS Status;
-    ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction()\n");
+    ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction(%h)\n", Cpu);
     if(!PerProcessorApicData){
         Status = ApicInitializeApicSubsystem();
         if(Status != STATUS_SUCCESS){
@@ -686,10 +677,10 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(
                     ApicHalDbgPrint("APIC.SYS:Error Initializing CPU\n");
                     while(1);
                 }
+                ApicHalDbgPrint("APIC.SYS:Initialization Of First AP Successfull\n");
                 break;
             }
         }
-        ApicHalDbgPrint("APIC.SYS:Initialization Of First AP Successfull\n");
     }
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction():STATUS_SUCCESS\n");
