@@ -42,15 +42,13 @@ void LouKeApInitializationFunction(){
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = ApProcessorID;
 
-    LouKeReleaseReference(&IdleingAps);
-
     UpdateIDT();
     SetUpTimers();
 
-
-    LouPrint("Hello AP World\n");
+    LouKeReleaseReference(&IdleingAps);
     
     ApInitializeProcessManager(ApProcessorID);
+
 
     while(1){
         asm("hlt");
@@ -98,7 +96,5 @@ LOUSTATUS LouKeInitalizeApicSubsystem(){
 
     LouPrint("LouKeInitalizeApicSubsystem():STATUS_SUCCESS\n");
 
-
-    while(1);
     return STATUS_SUCCESS;
 }

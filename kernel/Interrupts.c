@@ -11,7 +11,5 @@ LOUSTATUS LouKeInitializeInterruptSubsystems(){
 
     
 
-    LouPrint("LouKeInitializeInterruptSubsystems()\n");
-    while(1);
     return STATUS_SUCCESS;
 }
