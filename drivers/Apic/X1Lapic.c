@@ -178,3 +178,7 @@ void ApicHalSetX1ApicInitialCountRegister(PVOID ApicBase, UINT32 Value){
 void ApicHalSetX1ApicDivideConfigurationRegister(PVOID ApicBase, UINT32 Value){
     SET_X1APIC_DIVIDE_CONFIGURATION_REGISTER(ApicBase, Value);
 }
+
+void ApicHalSetX1ApicErrorStatusRegister(PVOID ApicBase, UINT32 Value){
+    SET_X1APIC_ERROR_STATUS_REGISTER(ApicBase, Value);
+}

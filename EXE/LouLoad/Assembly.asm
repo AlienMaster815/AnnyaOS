@@ -6,6 +6,7 @@ global InstallGDT
 global SetCr3
 global SetNewStack
 global MsvcAbiJump
+global GetRsp
 
 InstallGDT:
     lgdt [rcx]
@@ -32,3 +33,7 @@ MsvcAbiJump:
     mov rsp, rdx
     mov rbp, rsp
     jmp r8
+
+GetRsp:
+    mov rax, rsp
+    ret

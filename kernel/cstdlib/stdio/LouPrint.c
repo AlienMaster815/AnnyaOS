@@ -264,7 +264,7 @@ int LouPrint(char* format, ...) {
 }
 
 
-KERNEL_EXPORT void LouKeInitializeSmpLouPrint(){
+void LouKeInitializeSmpLouPrint(){
     UsingSmp = true;
     LouKeMemoryBarrier();
 }

@@ -278,6 +278,13 @@ PVOID LoaderAllocateSpace(SIZE Size, SIZE Alignment){
     return (PVOID)Context.Base;
 }
 
+void ApInitializeGdt(){
+    GDTREntry Gdtr;
+    Gdtr.Length = sizeof(LongModeGdt) - 1;
+    Gdtr.Base   = (uint64_t)&GDT;
+
+    InstallGDT((uint64_t)&Gdtr);
+}
 
 void SetGDTSegmentEntry(
     uint8_t* GDTEntry,

@@ -79,15 +79,7 @@ LouKeGetCurrentProcessorNumber(){
     if(GetGSBase() && GetLKPCB()){
         return (ULONG)((PLKPCB)GetLKPCB())->ProcID;    
     }
-    if(!ApicSubsystemInitialized){
-        return 0;
-    }
-    UINT32 Cpu;
-    LOUSTATUS Status = ApicHalGetCurrentCpuVirtualID(&Cpu);
-    if(Status != STATUS_SUCCESS){
-        return 0;
-    }
-    return Cpu;
+    return 0;
 }
 
 KERNEL_EXPORT 

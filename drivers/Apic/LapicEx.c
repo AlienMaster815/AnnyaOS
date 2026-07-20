@@ -759,8 +759,8 @@ ApicHalSetApicErrorStatusRegisterEx(
     APIC_OBJECT_TYPE ObjectType = ApicDeviceObject->ApicObjectType;
     switch(ObjectType){
         case X1_LOCAL_APIC_OBJECT_TYPE:
-            ApicHalDbgPrint("APIC.SYS:WARNING:X1 Apic Device:%h Input Into X2 Apic Function:ApicHalSetApicErrorStatusRegisterEx()\n", ApicDeviceObject);
-            return STATUS_NOT_SUPPORTED;
+            ApicHalSetX1ApicErrorStatusRegister(ApicDeviceObject->X1ApicObject.ApicBase, Value);
+            break;
         case X2_LOCAL_APIC_OBJECT_TYPE:
             ApicHalSetX2ApicErrorStatusRegister(Value);
             break;

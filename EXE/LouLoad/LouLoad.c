@@ -1,5 +1,7 @@
 #include "LouLoadPrivate.h"
 
+UINT64 GetCr3();
+
 static LOADER_INFORMATION LoaderData = {0};
 
 static void HaltAndCatchFile() {
@@ -73,13 +75,51 @@ BOOLEAN ApplyKernelRelocation(
 }
 
 extern void MsvcAbiJump(UINT64 Param1, UINT64 Stack, UINT64 Entry);
+extern void SetCr3(uint64_t Value);
+
+static volatile UINT64 NewApCr3 = 0;
+
+static volatile uint32_t ApInLoaderCount = 0;
+
+extern UINT64 GetRsp();
+
+void LouLoadApEntry(UINT64 StackBottom){
+
+    __atomic_add_fetch(&ApInLoaderCount, 1, __ATOMIC_SEQ_CST);
+
+    while(!NewApCr3){
+        LouKeMemoryBarrier();
+    }
+
+    SetCr3(NewApCr3);
+
+    while(!LoaderData.LoaderApEntry){
+        LouKeMemoryBarrier();
+    }
+    
+
+    MsvcAbiJump(StackBottom, (GetRsp() + KSpaceBase) - 16, LoaderData.LoaderApEntry);
+
+    while(1){
+        HaltAndCatchFile();
+    }
+}
+
+void ApInitializeGdt();
 
 LOUSTATUS LouLoadStartLoader(
     UINT64  LimineData
 ){
   
     PLOADER_INFORMATION pLoaderData = (PLOADER_INFORMATION)LimineData;
+    
     memcpy(&LoaderData, pLoaderData, sizeof(LOADER_INFORMATION));    
+    
+    pLoaderData->LoaderApEntry = (UINT64)LouLoadApEntry;
+
+    while(ApInLoaderCount < pLoaderData->ApCount){
+        LouKeMemoryBarrier();
+    }
 
     //sanitize limine
     pLoaderData = 0x00;
@@ -93,6 +133,9 @@ LOUSTATUS LouLoadStartLoader(
         DEBUG_TRAP;
         while(1);
     }
+    
+    NewApCr3 = GetCr3();
+    ApInitializeGdt();
 
     PVOID KernelBase = (PVOID)LoaderData.LoadedModules[1].Tracker.Base;
     PCOFF_IMAGE_HEADER ImageHeader = CoffGetImageHeader(KernelBase);
@@ -133,7 +176,7 @@ LOUSTATUS LouLoadStartLoader(
     KernelStack += KSpaceBase;
     LoaderData.KernelStackHandle = (KHANDLE)KernelStack;
 
-    MsvcAbiJump((UINT64)&LoaderData, KernelStack + (16 * KILOBYTE), KernelEntry);
+    MsvcAbiJump((UINT64)&LoaderData, KernelStack + (16 * KILOBYTE) - 16, KernelEntry);
 
     HaltAndCatchFile();
     return (LOUSTATUS)~0;

@@ -122,7 +122,7 @@ LongModeStart:
     mov rax, [rcx + 0x0070]
     mov rdx, 0xFFFF800000000000
     or rax, rdx
-    
+
     mov rbp, rax
     mov rsp, rbp
     

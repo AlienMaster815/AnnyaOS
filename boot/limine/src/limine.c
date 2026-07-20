@@ -2,9 +2,16 @@
 #include "cstdlib.h"
 #include "loader.h"
 
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+
 LIMINE_REQUEST_START uint64_t limine_requests_start_marker[] = LIMINE_REQUESTS_START_MARKER;
 
 LIMINE_REQUEST uint64_t limine_base_revision[] = LIMINE_BASE_REVISION(6);
+
+LIMINE_REQUEST struct limine_mp_request mp_request = {
+    .id = LIMINE_MP_REQUEST_ID, 
+    .revision = 0,
+};
 
 LIMINE_REQUEST_END uint64_t limine_requests_end_marker[] = LIMINE_REQUESTS_END_MARKER;
 
@@ -20,6 +27,7 @@ static volatile FORCE_ALIGNMENT(4096) UINT64 L3Tables[512] = {0};
 static volatile FORCE_ALIGNMENT(4096) UINT64 L2Tables[512] = {0};
 
 void MsvcAbiJump(UINT64 Info, UINT64 Jmp, UINT64 Stack);
+
 
 void UnpackLoader(PCOFF_IMAGE_HEADER* ImageHeaderp, PVOID PhysicalAddress, PVOID CoffData){
     PCOFF_IMAGE_HEADER ImageHeader = *ImageHeaderp;
@@ -85,8 +93,60 @@ BOOLEAN ApplyLoaderRelocation(
     return true;
 }
 
-void kmain() {
+static UINT64 TempStack = 0x00; 
+
+//struct limine_mp_info *info
+void ApKernelEntry() {
     
+    while(!TempStack){
+        LouKeMemoryBarrier();
+    }
+    
+    UINT64 LoaderStack = TempStack;
+
+    TempStack = 0x00;
+
+    while(!LoaderInformation.LoaderApEntry){
+        LouKeMemoryBarrier();
+    }
+
+    MsvcAbiJump(LoaderStack, LoaderInformation.LoaderApEntry, LoaderStack + (4096 - 16));
+
+    while(1){
+        HaltAndCatchFile();
+    }
+}
+
+void BootstrapAllCores(void) {
+    struct limine_mp_response* mp_info = mp_request.response;
+
+    for(UINT64 i = 0; i < mp_info->cpu_count; i++) {
+        struct limine_mp_info* cpu = mp_info->cpus[i];
+
+        if (cpu->lapic_id == mp_info->bsp_lapic_id) {
+            continue;
+        }
+
+        __atomic_store_n(&cpu->goto_address, (UINT64)ApKernelEntry, __ATOMIC_SEQ_CST);
+        TempStack = (UINT64)LoaderAllocateSpace(4096, 16);
+        while(TempStack){
+            LouKeMemoryBarrier();
+        }
+
+    }
+}
+
+UINT64 TotalApProcessorCount(){
+    if (mp_request.response == 0x00) {
+        return 0;
+    }
+    struct limine_mp_response *mp_info = mp_request.response;
+    return mp_info->cpu_count - 1;
+}
+
+void kmain(){
+    LoaderInformation.ApCount = TotalApProcessorCount();    
+
     //check revision
     if(LIMINE_BASE_REVISION_SUPPORTED(limine_base_revision) == false){
         HaltAndCatchFile();
@@ -179,7 +239,9 @@ void kmain() {
         LoaderInformation.LoadedModules[i].Tracker.Base = (UINT64)LimineGetPhysicalAddress((UINTPTR)LoaderInformation.LoadedModules[i].Tracker.Base);
     }
 
-    MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE));
+    BootstrapAllCores();
+
+    MsvcAbiJump((UINT64)&LoaderInformation, LoaderEntry, LoaderStack + (16 * KILOBYTE) - 16);
 
     HaltAndCatchFile();
 }

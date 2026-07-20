@@ -113,7 +113,6 @@ void PciMmcfgEarlyInit();
 LOUSTATUS LouKeInitializeBootRegistry();
 HANDLE LouKeLoadLibraryA(string Name);
 void InitializeProcessManager();
-void LouKeInitializeSmpLouPrint();
 void LouKeUnmaskSmpInterrupts();
 DWORD LouKeThreadManagerDemon(PVOID Params);
 struct _GENERIC_THREAD_DATA* LouKeThreadIdToThreadData(UINT32 ThreadID);
@@ -132,9 +131,8 @@ LOUSTATUS AddDriverToBootDeviceManager(uintptr_t Base, uintptr_t Top);
 void SetTSCFrequency(uint64_t Frequency);
 void SetTSC();
 LOUSTATUS LouKeInitializeInterruptSubsystems();
-
-
 void LouKeWaitForProcessorInitialization();
+void LouKeApIdleTillApInitFunction();
 
 void AdvancedLousineKernelInitialization(){
 
@@ -244,6 +242,8 @@ void HaltAndCatchFile(){
     }
 }
 
+ULONG LouKeGetIdleingApCount();
+
 LOUSTATUS ParserLouLoaderInformation(
     PLOADER_INFORMATION LoaderInfo
 ){
@@ -268,8 +268,15 @@ LOUSTATUS ParserLouLoaderInformation(
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
-    EnableCR0WriteProtection();
+    PLOADER_INFORMATION OldLoader = (PLOADER_INFORMATION)pKernelLoaderInfo;
+    OldLoader->LoaderApEntry = (UINT64)LouKeApIdleTillApInitFunction; 
+
+    while(LouKeGetIdleingApCount() < OldLoader->ApCount){
+        LouKeMemoryBarrier();
+    }
+
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
+
     pKernelLoaderInfo = 0x00;
     UINT64* Pml4  = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
     for(SIZE i = 0 ; i < 255; i++){
@@ -301,6 +308,7 @@ void LouOsKrnlStart(
     SetUpTimers();
    
     LouKeInitializeEarlyKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
+
 
     if(!LousineKernelLoaderInformation.EfiSystemTable){
         LouKeHandleSystemIsBios();

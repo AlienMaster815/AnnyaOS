@@ -233,6 +233,5 @@ EXPORTS
     GetPageBase
     LouGeneralAllocateMemoryEx32
     LouGeneralAllocateMemoryEx16
-    LouKeInitializeSmpLouPrint
     LouGeneralAllocateMemoryUnder1Gig
     LouKeGetMultibootTrampolineEntrance

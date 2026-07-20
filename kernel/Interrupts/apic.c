@@ -1,5 +1,6 @@
 #include <LouAPI.h>
 
+void LouKeInitializeSmpLouPrint();
 LOUAPI void HandleApProccessorInitialization();
 LOUAPI void LouKeInitializeApProcessorInitLock();
 extern void SetCr3(uint64_t Value);
@@ -8,23 +9,44 @@ LOUSTATUS SetupGDT(UINT32 ProcessorID);
 void HaltAndCatchFile();
 LOUAPI LOUSTATUS SetUpTimers();
 
-void LouKeApInitializationFunction(PLKSEB TrampolineLkseb){    
+static KERNEL_REFERENCE IdleingAps = {0};
+
+ULONG LouKeGetIdleingApCount(){
+    return LouKeGetReferenceCount(&IdleingAps);
+}
+
+static void (*ApInitializationFunction)() = 0; 
+
+void LouKeApIdleTillApInitFunction(){
+    LouKeAcquireReference(&IdleingAps);
+    while(!ApInitializationFunction){
+        LouKeMemoryBarrier();
+    }
+    ApInitializationFunction();
+}
+
+
+void LouKeApInitializationFunction(){    
+    UINT32 ApProcessorID;
     LOUSTATUS Status;
-    UNUSED PLKSEB PhysicalLkseb = TrampolineLkseb;
-    TrampolineLkseb = (PLKSEB)(UINT8*)((UINT64)(UINT8*)TrampolineLkseb  + KSpaceBase);
-    SetCr3(TrampolineLkseb->KernelPml4);
+
     HandleApProccessorInitialization();
-    ULONG ApProcessorID = LouKeGetCurrentProcessorNumber();
+
+    ApicInitializeAdvancedProgramableInterruptControllerAbstraction(&ApProcessorID);
+
+
     Status = SetupGDT(ApProcessorID);
     if(Status != STATUS_SUCCESS){
         HaltAndCatchFile();
     }
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = ApProcessorID;
+
+    LouKeReleaseReference(&IdleingAps);
+
     UpdateIDT();
     SetUpTimers();
 
-    ApicInitializeAdvancedProgramableInterruptControllerAbstraction(ApProcessorID);
 
     LouPrint("Hello AP World\n");
     
@@ -35,16 +57,26 @@ void LouKeApInitializationFunction(PLKSEB TrampolineLkseb){
     }
 }
 
-KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance(){
-    return (UINT64)LouKeApInitializationFunction;
+void LouKeApIdleTillApicInitializationTask(){
+    
+    
+    
+    
+    while(1){
+        asm("hlt");
+    }    
 }
 
 LOUSTATUS LouKeInitalizeApicSubsystem(){
+    
     LouPrint("LouKeInitalizeApicSubsystem()\n");
     
     LouKeInitializeApProcessorInitLock();
 
     ApicInitializeAdvancedProgramableInterruptControllerAbstraction(0);
+
+    ApInitializationFunction = LouKeApInitializationFunction;
+    LouKeMemoryBarrier();
 
     //test the ID
     UINT32 ApicID;
@@ -54,10 +86,19 @@ LOUSTATUS LouKeInitalizeApicSubsystem(){
         while(1);
     }
 
-    
+    while(LouKeGetIdleingApCount()){
+        LouKeMemoryBarrier();
+    }
+
+    if(GetNPROC() > 1){
+        LouKeInitializeSmpLouPrint();
+    }
+
     LouPrint("Successfully Initialized Apic:%h\n", ApicID);
 
     LouPrint("LouKeInitalizeApicSubsystem():STATUS_SUCCESS\n");
+
+
     while(1);
     return STATUS_SUCCESS;
 }

@@ -69,7 +69,10 @@ typedef struct _LOADER_INFORMATION{
     PLOADER_FB_MEMORY_MAP   FrameBuffers;
     SIZE                    BootModulesCount;
     PLOADER_MEMORY_MAP      BootModulesBase;
+    UINT64                  ApCount;
+    UINT64                  LoaderApEntry;
 }LOADER_INFORMATION, * PLOADER_INFORMATION;
+
 
 #define KSpaceBase 0xFFFF800000000000
 
