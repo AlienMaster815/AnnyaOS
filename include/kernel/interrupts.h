@@ -105,7 +105,6 @@ void LouKeSetIrql(
 );
 LOUSTATUS SetBasicInterrupts();
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
-KERNEL_EXPORT void RegisterInterruptHandler(void(*Handler)(uint64_t),uint8_t InterruptNumber, bool NeedFlotationSave, uint64_t OverideData);
 LOUSTATUS InitializeMainInterruptHandleing();
 LOUSTATUS InitializeStartupInterruptHandleing();
 LOUSTATUS UpdateIDT();
@@ -133,6 +132,15 @@ LouKeIpicSoftwareMaskVectorObject(
     OPAQUE_PTR  Object, 
     SIZE        GroupMember,
     BOOLEAN     Mask
+);
+
+LOUSTATUS LouKeIpicAllocateVectorObjects(
+    OPAQUE_PTR*         VectorObjectOut,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Vectors    
 );
 
 #endif

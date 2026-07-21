@@ -229,7 +229,8 @@ _INITIALIZE_VECTOR_OBJECT:
         if(DisableIpcSafety){
             LouKeListAddTail(&NewVectorObject[i].Peers, &Ipics[Processor].VectorData[Vector + i]);
         }else{
-            LouKeListAddTail(&NewVectorObject[i].Peers, &Ipics[Processor].VectorData[Vector + i]);
+            LouPrint("LouKeIpicCreateVectorObjectEx():HERE\n");
+            while(1);
         }
         LouKeMemoryBarrier();
     }

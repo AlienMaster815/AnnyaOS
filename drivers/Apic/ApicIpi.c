@@ -16,7 +16,7 @@ LOUSTATUS LouKeIpicCreateVectorObjectEx(
 
 LOUSTATUS ApicHalInterProcessorInterruptHandler(UINT64 Data){
 
-
+    LouPrint("HERE\n");
 
 }
 
@@ -41,78 +41,82 @@ LOUSTATUS ApicHalInitializeInterProcessorInterrupts(ULONG Cpu){
     return STATUS_SUCCESS;
 }
 
-
-LOUSTATUS ApicHalSendSipiToAp(
-    UINT32 Ap
+DRIVER_EXPORT 
+LOUSTATUS 
+ApicIpiHalSendNewInterruptRouteData(
+    ULONG   Cpu,
+    PVOID   RouteData
 ){
-    ApicHalDbgPrint("APIC.SYS:Waking AP:%h\n", Ap);
-
     LOUSTATUS Status;
-    BOOLEAN PendingInterrupt = true;
-   
-    Status = ApicHalSetLocalApicErrorStatus(0);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
+    PPER_PROCESSOR_IPI_DATA IpiData  = &PerProcessorApicData[Cpu].IpiData;
 
-    while(PendingInterrupt){
-        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
+    MutexLock(&IpiData->ProcessorLock);
+
+    ApicHalSetLocalApicErrorStatus(0);
+
+    BOOLEAN InterruptPending = true;
+    while(InterruptPending){
+        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &InterruptPending, 0x00, 0x00, 0x00);
         if(Status != STATUS_SUCCESS){
+            MutexUnlock(&IpiData->ProcessorLock);
             return Status;
         }
     }
 
-    UINT32 ApicID = PerProcessorApicData[Ap].ApicID;
+    IpiData->InterruptPacket.PacketType = ROUTE_INSTALLATION_INTERRUPT; 
+    IpiData->InterruptPacket.RouteInstallationPacket.InstallData = RouteData;
 
-    Status = ApicHalSetLocalApicErrorStatus(0);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
 
-    ApicHalSetLocalApicInterruptCommandRegister(
-        ApicID,
+    Status = ApicHalSetLocalApicInterruptCommandRegister(
+        PerProcessorApicData[Cpu].ApicID,
         APIC_DESTINATION_SHORTHAND_NONE,
         APIC_TRIGGER_MODE_EDGE,
         APIC_LEVEL_ASSERT,
         APIC_DESTINATION_MODE_PHYSICAL,
-        APIC_LVT_DELIVERY_MODE_INIT,
-        0
-    );  
+        APIC_ICR_DELIVERY_MODE_FIXED,
+        APIC_IPI_DISPATCH_VECTOR
+    );
+    MutexUnlock(&IpiData->ProcessorLock);
+    return Status;
+}
 
-    PendingInterrupt = true;
-    while(PendingInterrupt){
-        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
+DRIVER_EXPORT 
+LOUSTATUS 
+ApicIpiHalSendNewDemonData(
+    ULONG   Cpu,
+    PVOID   DemonData
+){
+    LOUSTATUS Status;
+    PPER_PROCESSOR_IPI_DATA IpiData  = &PerProcessorApicData[Cpu].IpiData;
+
+    MutexLock(&IpiData->ProcessorLock);
+
+    ApicHalSetLocalApicErrorStatus(0);
+
+    BOOLEAN InterruptPending = true;
+    while(InterruptPending){
+        Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &InterruptPending, 0x00, 0x00, 0x00);
         if(Status != STATUS_SUCCESS){
+            MutexUnlock(&IpiData->ProcessorLock);
             return Status;
         }
     }
 
-    sleep(10);
+    IpiData->InterruptPacket.PacketType = DEMON_INSTALLATION_INTERRUPT; 
+    IpiData->InterruptPacket.RouteInstallationPacket.InstallData = DemonData;
 
-    //for(SIZE i = 0; i < 2; i++){
-        Status = ApicHalSetLocalApicErrorStatus(0);
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-        ApicHalSetLocalApicInterruptCommandRegister(
-            ApicID,
-            APIC_DESTINATION_SHORTHAND_NONE,
-            APIC_TRIGGER_MODE_EDGE,
-            APIC_LEVEL_ASSERT,
-            APIC_DESTINATION_MODE_PHYSICAL,
-            APIC_ICR_DELIVERY_MODE_STARTUP,
-            0x08
-        );  
-        
-        PendingInterrupt = true;
-        while(PendingInterrupt){
-            Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &PendingInterrupt, 0x00, 0x00, 0x00);
-            if(Status != STATUS_SUCCESS){
-                return Status;
-            }
-        }
-        sleep(1);
-    //}
 
-    return STATUS_SUCCESS;
+    Status = ApicHalSetLocalApicInterruptCommandRegister(
+        PerProcessorApicData[Cpu].ApicID,
+        APIC_DESTINATION_SHORTHAND_NONE,
+        APIC_TRIGGER_MODE_EDGE,
+        APIC_LEVEL_ASSERT,
+        APIC_DESTINATION_MODE_PHYSICAL,
+        APIC_ICR_DELIVERY_MODE_FIXED,
+        APIC_IPI_DISPATCH_VECTOR
+    );
+    MutexUnlock(&IpiData->ProcessorLock);
+    return Status;
 }
+
+//ApicIpiHalSendNewProcessData

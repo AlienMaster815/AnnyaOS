@@ -69,7 +69,7 @@ void SetGDTSegmentEntry(
     uint8_t Access, 
     uint8_t Flags
 ){
-    LouPrint("Initializing GDT Segment\n");
+    //LouPrint("Initializing GDT Segment\n");
     if(Limit > 0xFFFFF)LouPrint("WARNING : GDT Limit Cannot Be Above 0xFFFFF\nIgnoring Upper Extended Limit\n");
 
     GDTEntry[0] =  Limit        & 0xFF;
@@ -85,7 +85,7 @@ void SetGDTSegmentEntry(
     GDTEntry[6] |= Flags << 4;
 
 
-    LouPrint("Done Initializing GDT Segment\n");
+    //LouPrint("Done Initializing GDT Segment\n");
 }
 
 void SetGDTSystemSegmentEntry(
@@ -134,7 +134,7 @@ void DebugValueTrap(UINT64 Value){
 
 
 LOUSTATUS SetupGDT(UINT32 ProcessorID){
-    LouPrint("Setting Up GDT\n");
+    //LouPrint("Setting Up GDT\n");
 
     PLongModeGdt GDT = (PLongModeGdt)LouKeMallocExVirt32(sizeof(LongModeGdt), 16, KERNEL_GENERIC_MEMORY);
     if(!GDT){
@@ -248,13 +248,13 @@ LOUSTATUS SetupGDT(UINT32 ProcessorID){
     Gdtr.Length = sizeof(LongModeGdt) - 1;
     Gdtr.Base   = (uint64_t)GDT;
 
-    LouPrint("Installing GDT:%h\n", Gdtr.Base);
+    //LouPrint("Installing GDT:%h\n", Gdtr.Base);
 
     InstallGDT((uint64_t)&Gdtr);
     SetGSBase(GsBase);
 
     LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, 0x00);
-    LouPrint("Done Setting Up GDT\n");
+    //LouPrint("Done Setting Up GDT\n");
 
     SetLKPCB((UINT64)NewProcControllBlock);
     

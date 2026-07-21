@@ -1060,7 +1060,10 @@ static void AhciSetupInterruptHandler(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         while(1);
     } 
     else{
-        RegisterInterruptHandler(AhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)AtaHost);
+
+        LouPrint("AhciSetupInterruptHandler()");
+        while(1);
+        //RegisterInterruptHandler(AhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)AtaHost);
     }
 }
 

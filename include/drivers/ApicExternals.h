@@ -168,5 +168,8 @@ DRIVER_IMPORT LOUSTATUS ApicInitializeAdvancedProgramableInterruptControllerAbst
 DRIVER_IMPORT LOUSTATUS ApicHalGetCurrentCpuVirtualID(UINT32* Cpu);
 DRIVER_IMPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms);
 
-#endif
+DRIVER_IMPORT LOUSTATUS ApicIpiHalSendNewInterruptRouteData(ULONG Cpu, PVOID RouteData);
+DRIVER_IMPORT LOUSTATUS ApicIpiHalSendNewDemonData(ULONG Cpu, PVOID DemonData);
+
+#endif 
 #endif

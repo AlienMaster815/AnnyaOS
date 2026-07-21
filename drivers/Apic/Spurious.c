@@ -1,5 +1,20 @@
 #include "ApicInternals.h"
 
+
+KERNEL_EXPORT
+LOUSTATUS LouKeIpicCreateVectorObjectEx(
+    OPAQUE_PTR*         VectorObjectOut,
+    SIZE                Processor,
+    SIZE                Vector,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Items,
+    BOOLEAN             DisableIpcSafety
+);
+
+
 static UINT8 SpvVector = APIC_SPV_HANDLER_VECTOR;
 static BOOLEAN ApicEnable = true;
 
@@ -11,7 +26,7 @@ UINT64 ApicHalSpurriousInterruptHandler(UINT64 CpuData){
 LOUSTATUS ApicHalConfigureSpriousVector(ULONG Cpu){
     PPER_PROCESSOR_APIC_DATA ApicData = &PerProcessorApicData[Cpu];
     
-    LouKeIpicCreateVectorObject(
+    LouKeIpicCreateVectorObjectEx(
         &ApicData->SpurriousVectorObject,
         Cpu,
         APIC_SPV_HANDLER_VECTOR,
@@ -19,7 +34,8 @@ LOUSTATUS ApicHalConfigureSpriousVector(ULONG Cpu){
         IsrRoutine,
         (OPAQUE_PTR)ApicHalSpurriousInterruptHandler,
         0,
-        1
+        1,
+        true
     );
 
     LouKeIpicSoftwareMaskVectorObject(ApicData->SpurriousVectorObject, 0, false);

@@ -69,7 +69,9 @@ LOUSTATUS AddDevice(
 
     NewXhciDevice->HostDevice.Operations = XhciOperations;
     
-    RegisterInterruptHandler(XhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)NewXhciDevice);
+    LouPrint("XHCI.SYS::AddDevice()()");
+    while(1);
+    //RegisterInterruptHandler(XhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)NewXhciDevice);
 
     Status = LouKeUsbAddHcd(&NewXhciDevice->HostDevice);
 

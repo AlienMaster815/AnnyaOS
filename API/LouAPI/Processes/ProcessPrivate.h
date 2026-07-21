@@ -255,7 +255,7 @@ typedef struct _PROCESSOR_STATE_BLOCK{
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
     mutex_t                         LockOutTagOut;
-    INTEGER                         ProcessorCount;
+    ULONG                           ProcessorCount;
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;
 
@@ -328,5 +328,31 @@ LouKePsmCreateThreadForProcess(
 LOUAPI
 PGENERIC_PROCESS_DATA
 LouKeGetCurrentProcessData();
+
+LOUAPI
+LOUSTATUS LouKePmCreateProcessExNs(
+    PKHANDLE                        HandleOut,                       
+    string                          ProcessName,
+    string                          ProcessPath,
+    HPROCESS                        ParentProcess,  
+    UINT8                           Priority,                 
+    HANDLE                          Section,
+    HANDLE                          AccessToken,
+    PLOUSINE_CREATE_PROCESS_PARAMS  Params,
+    BOOLEAN                         DisableSecurity
+);
+
+LOUAPI
+PTHREAD
+LouKeCreateDeferedDemonExNs(
+    PVOID   Function,
+    PVOID   Params,
+    SIZE    StackSize,
+    UINT8   Priority,
+    BOOL    ProcessorSpcific,
+    INTEGER Processor,
+    PVOID   UnblockTime,
+    BOOLEAN DisableSecurity
+);
 
 #endif

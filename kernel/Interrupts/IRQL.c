@@ -66,6 +66,14 @@ void LouKeSetIrqlNoFlagUpdate(
     }
 }
 
+static BOOLEAN ApicTimerUnmask = false;
+static BOOLEAN ApicTimerMask = true;
+static BOOLEAN ApicTimerInitialized = false;
+
+void InitializeApicTimerVariableForIrql(){
+    ApicTimerInitialized = true;
+}
+
 void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
@@ -79,41 +87,51 @@ void LouKeSetIrql(
 
     switch (NewIrql){
         case PASSIVE_LEVEL:{
-            SetWinIRQL((UINT8)PASSIVE_LEVEL);
             //sanity clear interrupts so nesting occours
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerMask, 0x00);
             asm("cli");
+            SetWinIRQL((UINT8)PASSIVE_LEVEL);
             asm("sti");
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerUnmask, 0x00);
             return;
         }
         case APC_LEVEL:{
-            SetWinIRQL((UINT8)APC_LEVEL);    
             //sanity clear interrupts so nesting occours
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerMask, 0x00);
             asm("cli");
+            SetWinIRQL((UINT8)APC_LEVEL);    
             asm("sti");
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerUnmask, 0x00);
             return;
         }
         case DISPATCH_LEVEL:{
-            SetWinIRQL((UINT8)DISPATCH_LEVEL);    
             //sanity clear interrupts so nesting occours
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerMask, 0x00);
             asm("cli");
+            SetWinIRQL((UINT8)DISPATCH_LEVEL);    
             asm("sti");
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerUnmask, 0x00);
             return;
         }
         case DIRQL:{
-            SetWinIRQL((UINT8)DIRQL);    
             //sanity clear interrupts so nesting occours
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerMask, 0x00);
             asm("cli");
+            SetWinIRQL((UINT8)DIRQL);    
             asm("sti");
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerUnmask, 0x00);
             return;
         } 
         case CLOCK_LEVEL:{
-            SetWinIRQL((UINT8)CLOCK_LEVEL);    
             //sanity clear interrupts so nesting occours
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerMask, 0x00);
             asm("cli");
-            asm("sti");
+            SetWinIRQL((UINT8)CLOCK_LEVEL);    
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerUnmask, 0x00);
             return;
         }
         case HIGH_LEVEL:{
+            if(ApicTimerInitialized)ApicHalSetLocalApicLvtTimerRegister(0x00, &ApicTimerMask, 0x00);
             asm("cli");
             SetWinIRQL((UINT8)HIGH_LEVEL);    
         }

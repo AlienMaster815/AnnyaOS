@@ -164,7 +164,9 @@ LOUSTATUS InitializeVirtualboxInterrupts(PVIRTUALBOX_PRIVATE_DATA VBox){
         return STATUS_UNSUCCESSFUL;
     }
 
-    RegisterInterruptHandler(VirtualboxInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)VBox);
+    LouPrint("InitializeVirtualboxInterrupts()\n");
+    while(1);
+    //RegisterInterruptHandler(VirtualboxInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)VBox);
 
     LouPrint("InitializeVirtualboxInterrupts() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

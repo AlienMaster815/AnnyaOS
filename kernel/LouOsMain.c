@@ -133,6 +133,8 @@ void SetTSC();
 LOUSTATUS LouKeInitializeInterruptSubsystems();
 void LouKeWaitForProcessorInitialization();
 void LouKeApIdleTillApInitFunction();
+void InitializeApicTimerVariableForIrql();
+LOUAPI void LouKeWaitForApInitializationCompletion();
 
 void AdvancedLousineKernelInitialization(){
 
@@ -144,9 +146,13 @@ void AdvancedLousineKernelInitialization(){
         
     InitializeProcessManager();
 
-    LouKeInitializeFullLouACPISubsystem();
+    InitializeApicTimerVariableForIrql();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
+
+    LouKeUnmaskSmpInterrupts();
+
+    LouKeWaitForApInitializationCompletion();
 
     LouKeCreateDemon(
         LouKeThreadManagerDemon,
@@ -157,7 +163,15 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeCreateSystemWorkQeueue();    
 
-    LouKeUnmaskSmpInterrupts();
+    while(1);
+
+    LouKeInitializeFullLouACPISubsystem();
+
+
+
+
+
+
 
     LouPrint("Kernel Advanced System Initialized\n");
     

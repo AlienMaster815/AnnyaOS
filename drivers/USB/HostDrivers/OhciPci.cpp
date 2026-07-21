@@ -78,7 +78,7 @@ LOUSTATUS AddDevice(
         return Status;
     }
 
-    RegisterInterruptHandler(OhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
+    //RegisterInterruptHandler(OhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)OhciDevice);
 
     Status = OhciInitializeDefaultControl(OhciDevice);
     if(Status != STATUS_SUCCESS){

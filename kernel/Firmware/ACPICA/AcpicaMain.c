@@ -225,17 +225,15 @@ UNUSED static bool CheckAcpicaForInterruptManagement(uint8_t Isr){
     return false;
 }
 
+
 ACPI_STATUS AcpiOsInstallInterruptHandler(
     UINT32 InterruptNumber, 
     ACPI_OSD_HANDLER Handler, 
     void* Context
 ){
-    RegisterInterruptHandler(
-        (void(*)(uint64_t))Handler,
-        InterruptNumber + 32,
-        false,
-        (uint64_t)Context
-    );
+
+    LouPrint("AcpiOsInstallInterruptHandler()\n");
+    while(1);
     InitializeAcpiInterruptTracker(InterruptNumber);
     LouPrint("IRQ:%d Installed for ACPI\n", InterruptNumber);
     return AE_OK;

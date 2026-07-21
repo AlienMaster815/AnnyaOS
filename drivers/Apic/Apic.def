@@ -46,3 +46,5 @@ EXPORTS
     ApicHalGetCurrentCpuVirtualID
     ApicHalSignalLocalApicEoi
     ApicHalApInitializationFunction
+    ApicIpiHalSendNewInterruptRouteData
+    ApicIpiHalSendNewDemonData

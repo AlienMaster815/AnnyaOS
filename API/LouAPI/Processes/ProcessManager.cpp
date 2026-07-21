@@ -59,7 +59,7 @@ LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT32 ThreadID);
 
 static mutex_t CoreIrqReadyLock = {0};
 static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
-static INTEGER                           InitializationProcessor = 0; 
+static ULONG                             InitializationProcessor = 0; 
 
 LOUAPI void SetCr3(UINT64);
 LOUAPI UINT64 GetCr3();
@@ -298,7 +298,7 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 //static SIZE Foo = 0;
 
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
-    if(LouKeGetIrql() >= CLOCK_LEVEL){
+    if(MutexIsLocked(&ProcLock.Lock)){
         ApicHalConfigureNextApicTimerEvent(30);
         ApicHalSignalLocalApicEoi();
         return CpuCurrentState;
@@ -313,74 +313,9 @@ LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     return CpuCurrentState;
 }
 
-static mutex_t InitLock = {0};
-
-UNUSED static void ProcessorIdleTask(){
-    LOUSTATUS Status;
-    HandleApProccessorInitialization();
-    INTEGER ProcID = LouKeGetCurrentProcessorNumber();
-    Status = SetupGDT(ProcID);
-    if(Status != STATUS_SUCCESS){
-        HaltAndCatchFile();
-    }
-
-    ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
-    PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
-    KernelProcBlock->ProcID = ProcID;
-    UpdateIDT();
-    SetUpTimers();
-    LouKeInitializeCurrentApApic();
-    INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;
-    KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[CurrentCpu].Schedualer;
-    LouKeSchedDbgPrint("AP Now Idleing\n");
-    MutexUnlock(&InitLock);
-    MutexSynchronize(&CoreIrqReadyLock);
-    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    LouKeSchedDbgPrint("AP Interrupts Enabled\n");
-    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
-}
 
 LOUAPI void SignalProcessorsInitialized();
 LOUAPI void SignalProcessorsInitPending();
-
-UNUSED static void InitializeIdleProcess(){
-    HandleApProccessorInitialization();
-    INTEGER ProcID = LouKeGetCurrentProcessorNumber();
-    SetupGDT(ProcID);
-    ProcessBlock.ProcStateBlock[ProcID].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(ProcID);
-    PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
-    KernelProcBlock->ProcID = ProcID;
-    UpdateIDT();
-    SetUpTimers();
-    LouKeInitializeCurrentApApic();
-    INTEGER CurrentCpu = ((PLKPCB)GetLKPCB())->ProcID;
-    KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[CurrentCpu].Schedualer;
-    
-    PTHREAD NewThread;
-    for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
-        if((i != InitializationProcessor) && (i != CurrentCpu)){
-            MutexLock(&InitLock);
-            NewThread = LouKeCreateDeferedDemonEx(
-                0x00,
-                0x00,
-                16 * KILOBYTE,
-                31,
-                true,
-                i,
-                0
-            );
-            ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
-            ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
-            LouKeSmpWakeAssistant(i, ((PGENERIC_THREAD_DATA)NewThread)->StackTop, (UINT64)ProcessorIdleTask);
-        }
-    }
-
-    LouKeSchedDbgPrint("AP Now Idleing\n");
-    MutexSynchronize(&CoreIrqReadyLock);
-    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
-    LouKeSchedDbgPrint("AP Interrupts Enabled\n");
-    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
-}
 
 static mutex_t ApProcessorInitLock = {0};
 
@@ -388,28 +323,59 @@ LOUAPI void LouKeInitializeApProcessorInitLock(){
     MutexLock(&ApProcessorInitLock);
 }
 
+static KERNEL_REFERENCE ApsWaitingForInterruptEnabling = {0};
+
 LOUAPI
 void ApInitializeProcessManager(ULONG ProcessorID){
     MutexSynchronize(&ApProcessorInitLock);
+    LouKeSchedDbgPrint("Now Initializing Ap Schedualler Data\n");
+
+    PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
+    KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
+
+    PTHREAD NewThread = LouKeCreateDeferedDemonEx(
+        (PVOID)0x00,
+        0x00,
+        4 * KILOBYTE,
+        31,
+        true,
+        ProcessorID,
+        0
+    );
+    ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
+    ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
+
+    LouKeAcquireReference(&ApsWaitingForInterruptEnabling);
 
 
+    MutexSynchronize(&CoreIrqReadyLock);
+    LouKeSchedDbgPrint("Ap Now Enabling Interrupts\n");
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    LouKeSchedDbgPrint("AP Interrupts Enabled\n");
+    LouKeReleaseReference(&ApsWaitingForInterruptEnabling);
 
+    //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
+    while(1){
+        asm("hlt");
+    }
 }
 
 LOUAPI
 void LouKeUnmaskSmpInterrupts(){
     MutexUnlock(&CoreIrqReadyLock);
+}
 
+LOUAPI
+void LouKeWaitForApInitializationCompletion(){
+    while(LouKeGetReferenceCount(&ApsWaitingForInterruptEnabling)){
+        LouKeMemoryBarrier();
+    }
 }
 
 LOUAPI void SetNewBootStack(UINT64 Base, UINT64 Pointer);
 LOUSTATUS LouKeTsmInitializeIdleThreads();
 
 LOUAPI void InitializeProcessManager(){
-
-    LouPrint("InitializeProcessManager():HERE\n");
-    while(1);
-
     HANDLE SchedDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\SCHED_DEBUG", 0x00);
     BYTE DbgValue = 0;
     LouKeReadRegistryByteValue(SchedDebugKey, &DbgValue);
@@ -430,7 +396,6 @@ LOUAPI void InitializeProcessManager(){
     MutexLock(&CoreIrqReadyLock);
     
     LouKeTsmInitializeIdleThreads();
-
 
     PLOUSINE_ACCESS_TOKEN AccessToken = 0x00;
     
@@ -480,11 +445,11 @@ LOUAPI void InitializeProcessManager(){
         0x00
     );
     
-    InitializationProcessor = LouKeGetCurrentProcessorNumber();
-    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(InitializationProcessor);
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessData(KERNEL_PROCESS_NAME, &KernelProcess);
-    for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
+
+    for(ULONG i = 0 ; i < ProcessBlock.ProcessorCount; i++){
+        ProcessBlock.ProcStateBlock[i].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(i);
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetSystemProcess(KernelProcess);
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmInitializeSchedualerObject(
             (UINT64)i, 
@@ -493,10 +458,13 @@ LOUAPI void InitializeProcessManager(){
         );
     }
 
+    MutexUnlock(&ApProcessorInitLock);
+
+
     PTHREAD NewThread = LouKeCreateDeferedDemonEx(
         (PVOID)0x00,
         0x00,
-        16 * KILOBYTE,
+        4 * KILOBYTE,
         31,
         true,
         InitializationProcessor,
@@ -505,28 +473,12 @@ LOUAPI void InitializeProcessManager(){
     ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
     ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
         
-    for(INTEGER i = 0 ; i < ProcessBlock.ProcessorCount; i++){
-        //first available AP gets a procInit and idle
-        /*if(i != InitializationProcessor){
-            NewThread = LouKeCreateDeferedDemonEx(
-                0x00,
-                0x00,
-                16 * KILOBYTE,
-                31,
-                true,
-                i,
-                0
-            );
-            ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
-            ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
-            LouKeSmpWakeAssistant(i, ((PGENERIC_THREAD_DATA)NewThread)->StackTop, (UINT64)InitializeIdleProcess);
-
-            break;
-        }*/
-    }
-
     MutexUnlock(&ApProcessorInitLock);
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
+
+    while(LouKeGetReferenceCount(&ApsWaitingForInterruptEnabling) < (ProcessBlock.ProcessorCount - 1)){
+        LouKeMemoryBarrier();
+    }
 
     LouKeSchedDbgPrint("Finished Initializing Process Manager\n");
 }

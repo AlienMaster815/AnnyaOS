@@ -342,7 +342,9 @@ LouKeHalPs2InstallInterruptHandler(
     PPS2_DEVICE_OBJECT Device, 
     void(*Handler)(uint64_t)
 ){
-    RegisterInterruptHandler(Handler, Device->Irq + 0x20, false, (uint64_t)Device);  
+    LouPrint("LouKeHalPs2InstallInterruptHandler()\n");
+    while(1);
+    //RegisterInterruptHandler(Handler, Device->Irq + 0x20, false, (uint64_t)Device);  
 }
 
 DRIVER_EXPORT 

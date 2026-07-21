@@ -100,9 +100,37 @@ size_t LouKeGetBootDeviceSize(size_t Index);
 KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance();
 
 DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
+    BOOLEAN TimerSetupMask = false;
+    ULONG Processor = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
+    ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIMER_DIVIDE_BY128);
+    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
+    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount * Ms);
+}
 
-    LouPrint("ApicHalConfigureNextApicTimerEvent()\n");
-    while(1);
+
+static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
+    BOOLEAN TimerSetupMask = false;
+    UINT8 TimerSetupVector = APIC_TIMER_VECTOR;
+    UINT32 CurrentCount;
+    APIC_TIMER_MODE TimerSetupMode = APIC_TIMER_MODE_ONE_SHOT;
+
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Cpu].ApicDeviceObject;
+
+
+    ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIMER_DIVIDE_BY128);
+    ApicHalSetLocalApicLvtTimerRegister(&TimerSetupMode, &TimerSetupMask, &TimerSetupVector);
+    ApicHalSetLocalApicTimerInitialCount(0xFFFFFFFF);
+    sleep(1);
+    ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
+
+    ApicDeviceObject->MsTimerCount = 0xFFFFFFFF - CurrentCount;
+    
+    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount);
+
+    ApicHalDbgPrint("APIC.SYS:Ms Timer Count:%h\n", ApicDeviceObject->MsTimerCount);
+
+    return STATUS_SUCCESS;
 }
 
 static UINT32 ApicGetLocalInitItemProcessorId(
@@ -569,6 +597,12 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(UINT32* CpuIdOut
     }
 
     ApicHalDbgPrint("APIC.SYS:Spurious Vector Initialized\n");
+
+    Status = ApicHalInitializeTimer(i);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("APIC.SYS:Error Unable To Initialize Timer\n");
+        while(1);
+    }
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

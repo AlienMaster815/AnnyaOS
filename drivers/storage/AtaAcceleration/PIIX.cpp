@@ -389,8 +389,10 @@ LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* Platform
         AtaHost->Ports[i].Operations->IssueCommand = PiixDmaIssueCommand;
     }
 
-    RegisterInterruptHandler(PiixPrimaryInterruptHandler, 0x20 + 14, false, (UINT64)AtaHost);
-    RegisterInterruptHandler(PiixSecondryInterruptHandler, 0x20 + 15, false, (UINT64)AtaHost);
+    LouPrint("PIIX.SYS:AddDevice()\n");
+    while(1);
+    //RegisterInterruptHandler(PiixPrimaryInterruptHandler, 0x20 + 14, false, (UINT64)AtaHost);
+    //RegisterInterruptHandler(PiixSecondryInterruptHandler, 0x20 + 15, false, (UINT64)AtaHost);
 
     LouPrint("PIIX.SYS:AddDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
