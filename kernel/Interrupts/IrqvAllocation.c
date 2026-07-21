@@ -117,10 +117,9 @@ KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
     IpicsAllocated = Processors;
-    Ipics[0].ProcessorEnabled = true;
     
     for(SIZE i = 0 ; i < Processors; i++){
-
+        Ipics[i].ProcessorEnabled = true;
         OPAQUE_PTR* ObjectPointer = &GenericRouters[i * 0x16];
         LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x00], i, 0x00, false, IsrRoutine, (OPAQUE_PTR)DivideByZero, 0, 1, true);
         LouKeIpicCreateVectorObjectEx(&ObjectPointer[0x01], i, 0x01, false, IsrRoutine, (OPAQUE_PTR)Debug, 0, 1, true);
@@ -164,6 +163,7 @@ LOUSTATUS LouKeIpicCreateVectorObjectEx(
     SIZE                Items,
     BOOLEAN             DisableIpcSafety
 ){
+    LouKeMemoryBarrier();
     if(
         (!Items) || (!VectorObjectOut) || (!Routine) || 
         ((SIZE)RoutineType > (SIZE)LirExRoutine) || ((Vector + Items) > 0xFF)
@@ -182,6 +182,7 @@ LOUSTATUS LouKeIpicCreateVectorObjectEx(
         //}
         return STATUS_INVALID_PARAMETER;
     }
+
     PIPIC_VECTOR_OBJECT_HANDLE Out = LouKeMallocType(IPIC_VECTOR_OBJECT_HANDLE, KERNEL_GENERIC_MEMORY);
     PIPIC_VECTOR_OBJECT NewVectorObject;
     if(!Out){
@@ -229,12 +230,21 @@ _INITIALIZE_VECTOR_OBJECT:
         if(DisableIpcSafety){
             LouKeListAddTail(&NewVectorObject[i].Peers, &Ipics[Processor].VectorData[Vector + i]);
         }else{
-            LouPrint("LouKeIpicCreateVectorObjectEx():HERE\n");
-            while(1);
+            ApicIpiHalSendNewInterruptRouteData(Processor, &NewVectorObject[i]);
         }
         LouKeMemoryBarrier();
     }
     return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT 
+void 
+LouKeIpicSendNewInterruptRoutingData(
+    ULONG Processor,
+    PVOID Data
+){
+    PIPIC_VECTOR_OBJECT NewVectorObject = (PIPIC_VECTOR_OBJECT)Data;
+    LouKeListAddTail(&NewVectorObject->Peers, &Ipics[Processor].VectorData[NewVectorObject->VectorID]);
 }
 
 KERNEL_EXPORT
@@ -273,6 +283,8 @@ LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
     if((Vectors > 32) || (!VectorObjectOut)){
         return STATUS_INVALID_PARAMETER;
     }
+    LouKeMemoryBarrier();
+
     PIPIC TmpIpic = &Ipics[Processor];
 
     SIZE GroundStates = UINT32_MAX;
@@ -287,6 +299,7 @@ LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
             GroundStatesVector = TmpVector;
         }
     }
+    LouKeMemoryBarrier();
 
     LouKeIpicCreateVectorObject(
         VectorObjectOut,
@@ -313,10 +326,10 @@ LOUSTATUS LouKeIpicAllocateVectorObjects(
     if((Vectors > 32) || (!VectorObjectOut)){
         return STATUS_INVALID_PARAMETER;
     }
-    UNUSED PIPIC       TmpIpic;
-    UNUSED SIZE        GroundState = UINT32_MAX;
-    UNUSED SIZE        GroundStateProcessorID = 0;
+    SIZE        GroundState = UINT32_MAX;
+    SIZE        GroundStateProcessorID = 0;
 
+    LouKeMemoryBarrier();
     for(SIZE i = 0; i < IpicsAllocated; i++){
         if(!Ipics[i].ProcessorEnabled){
             continue;
@@ -326,7 +339,8 @@ LOUSTATUS LouKeIpicAllocateVectorObjects(
             GroundState = Ipics[i].VectorAllocationCount;
         }
     }
-    
+    LouKeMemoryBarrier();
+
     return LouKeIpicAllocateVectorObjectsEx(
         VectorObjectOut,
         GroundStateProcessorID,

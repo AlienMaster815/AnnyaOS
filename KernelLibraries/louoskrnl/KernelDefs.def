@@ -235,3 +235,5 @@ EXPORTS
     LouGeneralAllocateMemoryEx16
     LouGeneralAllocateMemoryUnder1Gig
     LouKeGetMultibootTrampolineEntrance
+    LouKeIpicAllocateVectorObjects
+    LouKeIpicSendNewInterruptRoutingData

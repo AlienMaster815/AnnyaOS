@@ -134,7 +134,9 @@ LouKeIpicSoftwareMaskVectorObject(
     BOOLEAN     Mask
 );
 
-LOUSTATUS LouKeIpicAllocateVectorObjects(
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeIpicAllocateVectorObjects(
     OPAQUE_PTR*         VectorObjectOut,
     BOOLEAN             NeedFlotationSave,
     IPIC_ROUTINE_TYPE   RoutineType,

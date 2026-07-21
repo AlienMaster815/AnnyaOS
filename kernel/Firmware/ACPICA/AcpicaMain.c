@@ -198,12 +198,14 @@ typedef struct _ACPICA_INTERRUPT_TRACKER{
     ListHeader  Peers;
     uint8_t     Isr;
     bool        Used;
+    OPAQUE_PTR  Ptr;
 }ACPICA_INTERRUPT_TRACKER, * PACPICA_INTERRUPT_TRACKER;
 
 static ACPICA_INTERRUPT_TRACKER Ait = {0};
 
 static void InitializeAcpiInterruptTracker(
-    uint8_t Isr
+    uint8_t     Isr,
+    OPAQUE_PTR  Ptr
 ){
     PACPICA_INTERRUPT_TRACKER TmpTrk = &Ait;
     while(TmpTrk->Peers.NextHeader){
@@ -211,6 +213,7 @@ static void InitializeAcpiInterruptTracker(
     }
     TmpTrk->Isr = Isr;
     TmpTrk->Isr = true;
+    TmpTrk->Ptr = Ptr;
     TmpTrk->Peers.NextHeader = (PListHeader)LouKeMallocType(ACPICA_INTERRUPT_TRACKER, KERNEL_GENERIC_MEMORY);
 }
 
@@ -231,10 +234,24 @@ ACPI_STATUS AcpiOsInstallInterruptHandler(
     ACPI_OSD_HANDLER Handler, 
     void* Context
 ){
+    OPAQUE_PTR NewVectorObject;
+
+    LouKeIpicAllocateVectorObjects(
+        &NewVectorObject,
+        false,
+        LirRoutine,
+        (OPAQUE_PTR)Handler,
+        (UINT64)Context,
+        1
+    );
+
+    LouKeIpicSoftwareMaskVectorObject(NewVectorObject, 0, false);
+
+    //TODO: add the new vector to the pin
 
     LouPrint("AcpiOsInstallInterruptHandler()\n");
     while(1);
-    InitializeAcpiInterruptTracker(InterruptNumber);
+    InitializeAcpiInterruptTracker(InterruptNumber, NewVectorObject);
     LouPrint("IRQ:%d Installed for ACPI\n", InterruptNumber);
     return AE_OK;
 }

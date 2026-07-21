@@ -752,7 +752,7 @@ ApicHalGetApicInterruptCommandRegister(
     if(DestinationField){
         switch(ApicDeviceObject->ApicObjectType){
             case X1_LOCAL_APIC_OBJECT_TYPE:
-                *DestinationField = (Register >> 56) & 0xFF;
+                *DestinationField = (Register >> 32) & 0xFF;
                 break;
             case X2_LOCAL_APIC_OBJECT_TYPE:
                 *DestinationField = (Register >> 32) & UINT32_MAX;
@@ -763,10 +763,10 @@ ApicHalGetApicInterruptCommandRegister(
         *Shorthand = (APIC_DESTINATION_SHORTHAND)((Register >> 18) & 0x03);   
     }
     if(TriggerMode){
-        *TriggerMode = (APIC_TRIGGER_MODE)(Register >> 15) & 0x01;
+        *TriggerMode = (APIC_TRIGGER_MODE)((Register >> 15) & 0x01);
     }
     if(Level){
-        *Level = (APIC_LEVEL)(Register >> 14) & 0x01;
+        *Level = (APIC_LEVEL)((Register >> 14) & 0x01);
     }
     if(InterruptPending){
         *InterruptPending = (Register & (1 << 12)) ? true : false;

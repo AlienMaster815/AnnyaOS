@@ -165,7 +165,7 @@ typedef struct _IPI_INTERRUPT_PACKET{
 
 typedef struct _PER_PROCESSOR_IPI_DATA{
     OPAQUE_PTR                      IpiVectorObject;
-    mutex_t                         ProcessorLock;
+    spinlock_t                      ProcessorLock;
     IPI_INTERRUPT_PACKET            InterruptPacket;
 }PER_PROCESSOR_IPI_DATA, * PPER_PROCESSOR_IPI_DATA;
 

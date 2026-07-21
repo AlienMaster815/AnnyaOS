@@ -66,7 +66,7 @@ UINT32 ApicHalGetX1ApicInterruptCommandRegisterHigh(PVOID ApicBase){
 
 UINT64 ApicHalGetX1ApicInterruptCommandRegister(PVOID ApicBase){
     UINT64 Register = ApicHalGetX1ApicInterruptCommandRegisterLow(ApicBase);
-    Register |= (UINT64)ApicHalGetX1ApicInterruptCommandRegisterHigh(ApicBase) << 32;
+    Register |= ((UINT64)ApicHalGetX1ApicInterruptCommandRegisterHigh(ApicBase) << 32);
     return Register;
 }
 
@@ -144,6 +144,8 @@ void ApicHalSetX1ApicInterruptCommandRegisterHigh(PVOID ApicBase, UINT32 Value){
 
 void ApicHalSetX1ApicInterruptCommandRegister(PVOID ApicBase, UINT64 Value){
     ApicHalSetX1ApicInterruptCommandRegisterHigh(ApicBase, (Value >> 32) & UINT32_MAX);
+    ApicHalGetX1ApicInterruptCommandRegisterHigh(ApicBase);
+    LouKeMemoryBarrier();
     ApicHalSetX1ApicInterruptCommandRegisterLow(ApicBase, Value & UINT32_MAX);
 }
 

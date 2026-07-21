@@ -163,17 +163,11 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeCreateSystemWorkQeueue();    
 
-    while(1);
-
     LouKeInitializeFullLouACPISubsystem();
 
-
-
-
-
-
-
     LouPrint("Kernel Advanced System Initialized\n");
+
+    while(1);
     
 }
 

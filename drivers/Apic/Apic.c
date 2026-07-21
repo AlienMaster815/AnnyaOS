@@ -450,6 +450,7 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
 
     UINT32 CurrentID;
     ApicHalGetApicIdRegister(ApicDeviceObject, &CurrentID);
+    CurrentID = ApicDeviceObject->ApicObjectType ? CurrentID : GET_X1APIC_ID_VALUE(CurrentID);
 
     PLOCAL_APIC_INIT_LIST_ITEM TmpItem;
     PLOCAL_APIC_INIT_LIST_ITEM SafeTmpItem;
@@ -458,7 +459,7 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
         if(ApicGetLocalInitItemApicId(TmpItem) != CurrentID){
             PerProcessorApicData[Index].ProcessorID = ApicGetLocalInitItemProcessorId(TmpItem);
             PerProcessorApicData[Index].ApicID = ApicGetLocalInitItemApicId(TmpItem);
-            Index++; 
+            Index++;         
         }else{
             PerProcessorApicData[0].ProcessorID = ApicGetLocalInitItemProcessorId(TmpItem);
             PerProcessorApicData[0].ApicID = ApicGetLocalInitItemApicId(TmpItem);
