@@ -133,7 +133,6 @@ void SetTSC();
 LOUSTATUS LouKeInitializeInterruptSubsystems();
 void LouKeWaitForProcessorInitialization();
 void LouKeApIdleTillApInitFunction();
-void InitializeApicTimerVariableForIrql();
 LOUAPI void LouKeWaitForApInitializationCompletion();
 
 void AdvancedLousineKernelInitialization(){
@@ -143,16 +142,16 @@ void AdvancedLousineKernelInitialization(){
     LouKeInitializeSecuritySubsystem();
 
     LouKeInitializeInterruptSubsystems();
-        
-    InitializeProcessManager();
 
-    InitializeApicTimerVariableForIrql();
+    InitializeProcessManager();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
 
     LouKeUnmaskSmpInterrupts();
 
     LouKeWaitForApInitializationCompletion();
+
+    LouKeInitializeFullLouACPISubsystem();
 
     LouKeCreateDemon(
         LouKeThreadManagerDemon,
@@ -162,13 +161,8 @@ void AdvancedLousineKernelInitialization(){
     );
 
     LouKeCreateSystemWorkQeueue();    
-
-    LouKeInitializeFullLouACPISubsystem();
-
     LouPrint("Kernel Advanced System Initialized\n");
-
     while(1);
-    
 }
 
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
@@ -282,7 +276,7 @@ void LouOsKrnlStart(
     while(LouKeGetIdleingApCount() < OldLoader->ApCount){
         LouKeMemoryBarrier();
     }
-
+    
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
 
     pKernelLoaderInfo = 0x00;
@@ -316,7 +310,6 @@ void LouOsKrnlStart(
     SetUpTimers();
    
     LouKeInitializeEarlyKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
-
 
     if(!LousineKernelLoaderInformation.EfiSystemTable){
         LouKeHandleSystemIsBios();

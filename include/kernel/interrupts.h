@@ -145,6 +145,20 @@ LouKeIpicAllocateVectorObjects(
     SIZE                Vectors    
 );
 
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeIpicGetVectorObjectProcessorNumber(
+    OPAQUE_PTR  Object, 
+    ULONG*      ProcessorNumber
+);
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeIpicGetVectorObjectVector(
+    OPAQUE_PTR  Object,
+    UINT8*      Vector
+);
+
 #endif
 #ifdef __cplusplus
 }

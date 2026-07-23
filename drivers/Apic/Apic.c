@@ -21,6 +21,7 @@ typedef struct _LOCAL_APIC_INIT_LIST_ITEM{
     ListHeader                      Peers;
     LOCAL_APIC_ACPI_ENTRY_VERSION   EntryVersion;
     UINT32                          ProcessorID;
+    UINT32                          ApicID;
     PLOCAL_APIC_ACPI_ENTRY          Entry;
 }LOCAL_APIC_INIT_LIST_ITEM, * PLOCAL_APIC_INIT_LIST_ITEM;
 
@@ -80,10 +81,15 @@ static BOOLEAN X2ApicSupport = false;
 KERNEL_EXPORT LOUSTATUS LouKeInitializeIpicSubsystem(SIZE Processors);
 KERNEL_EXPORT void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx);
 PPER_PROCESSOR_APIC_DATA PerProcessorApicData = 0x00;
+PPER_IO_APIC_DATA PerIoApicData = 0x00;
+PPER_IO_OVERIDE_DATA PerIoOverideData = 0x00;
+
 KERNEL_EXPORT void LouKeSignalApicSubsystemInitialized();
 KERNEL_EXPORT UINT64 GetPageBase();
 
-static SIZE IoApicCount = 0;
+SIZE IoApicCount = 0;
+SIZE IoOverideObjectCount = 0;
+
 
 static BOOLEAN ApicDebugOn = false;
 
@@ -100,14 +106,24 @@ size_t LouKeGetBootDeviceSize(size_t Index);
 KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance();
 
 DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
-    BOOLEAN TimerSetupMask = false;
+    if(Ms){
+        ApicHalSignalLocalApicEoi();
+    }
+    Ms ? Ms : 1;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIMER_DIVIDE_BY128);
-    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
     ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount * Ms);
 }
 
+static const APIC_TIMER_DIVIDE_CONFIG TimerConfigs[7] = {
+    APIC_TIMER_DIVIDE_BY128,
+    APIC_TIMER_DIVIDE_BY64,
+    APIC_TIMER_DIVIDE_BY32,
+    APIC_TIMER_DIVIDE_BY16,
+    APIC_TIMER_DIVIDE_BY8,
+    APIC_TIMER_DIVIDE_BY4,
+    APIC_TIMER_DIVIDE_BY2,
+};
 
 static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
     BOOLEAN TimerSetupMask = false;
@@ -116,16 +132,26 @@ static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
     APIC_TIMER_MODE TimerSetupMode = APIC_TIMER_MODE_ONE_SHOT;
 
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Cpu].ApicDeviceObject;
+    LOUSTATUS Status = STATUS_UNSUCCESSFUL;
+    for(SIZE i = 0 ; i < 7; i++){
+        ApicHalSetLocalApicDivideConfigurationRegister(TimerConfigs[i]);
+        ApicHalSetLocalApicLvtTimerRegister(&TimerSetupMode, &TimerSetupMask, &TimerSetupVector);
+        ApicHalSetLocalApicTimerInitialCount(0xFFFFFFFF);
+        sleep(1);
+        ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
 
+        ApicDeviceObject->MsTimerCount = 0xFFFFFFFF - CurrentCount;
+        
+        if(ApicDeviceObject->MsTimerCount){
+            Status = STATUS_SUCCESS;
+            break;
+        }
+    }
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ApicHalInitializeTimer():ERROR:Unable To Initialize Timer\n");
+        while(1);
+    }
 
-    ApicHalSetLocalApicDivideConfigurationRegister(APIC_TIMER_DIVIDE_BY128);
-    ApicHalSetLocalApicLvtTimerRegister(&TimerSetupMode, &TimerSetupMask, &TimerSetupVector);
-    ApicHalSetLocalApicTimerInitialCount(0xFFFFFFFF);
-    sleep(1);
-    ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
-
-    ApicDeviceObject->MsTimerCount = 0xFFFFFFFF - CurrentCount;
-    
     ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount);
 
     ApicHalDbgPrint("APIC.SYS:Ms Timer Count:%h\n", ApicDeviceObject->MsTimerCount);
@@ -170,16 +196,46 @@ static UINT32 ApicGetLocalInitItemApicId(
 }
 
 
-static UINT32 ApicGetIoInitItemApicID(
+static UINT8 ApicGetIoInitItemApicID(
     PIO_APIC_INIT_LIST_ITEM Item
 ){
-    UINT32 Result = 0;
+    UINT8 Result = 0;
     switch(Item->EntryVersion){
         case IO_APIC_ACPI_ENTRY_VERSION_IO_APIC:
             Result = Item->Entry->IoApicEntry.IoApicID;
             break;
         case IO_APIC_ACPI_ENTRY_VERSION_IO_SAPIC:
             Result = Item->Entry->IoSapicEntry.IoApicID;
+            break;
+    }
+    return Result;
+}
+
+static UINT8 ApicGetIoInitItemApicGsiBase(
+    PIO_APIC_INIT_LIST_ITEM Item
+){
+    UINT8 Result = 0;
+    switch(Item->EntryVersion){
+        case IO_APIC_ACPI_ENTRY_VERSION_IO_APIC:
+            Result = Item->Entry->IoApicEntry.GsiBase;
+            break;
+        case IO_APIC_ACPI_ENTRY_VERSION_IO_SAPIC:
+            Result = Item->Entry->IoSapicEntry.GsiBase;
+            break;
+    }
+    return Result;
+}
+
+static UINT32 ApicGetIoInitApicAddress(
+    PIO_APIC_INIT_LIST_ITEM Item
+){
+    UINT32 Result = 0;
+    switch(Item->EntryVersion){
+        case IO_APIC_ACPI_ENTRY_VERSION_IO_APIC:
+            Result = Item->Entry->IoApicEntry.IoApicAddress;
+            break;
+        case IO_APIC_ACPI_ENTRY_VERSION_IO_SAPIC:
+            Result = Item->Entry->IoSapicEntry.IoSapicAddress;
             break;
     }
     return Result;
@@ -261,6 +317,12 @@ static LOUSTATUS ApicInitializeLocalInitItem(
     TmpNewListItem.EntryVersion = EntryVersion;
     TmpNewListItem.Entry = Entry;
     TmpNewListItem.ProcessorID = ApicGetLocalInitItemProcessorId(&TmpNewListItem);
+    TmpNewListItem.ApicID = ApicGetLocalInitItemApicId(&TmpNewListItem);
+    if(X2ApicSupport && TmpNewListItem.ApicID == 0xFFFFFFFF){
+        return STATUS_SUCCESS;
+    }else if(TmpNewListItem.ApicID == 0xFF){
+        return STATUS_SUCCESS;
+    }
     PLOCAL_APIC_INIT_LIST_ITEM TmpListItem;
     ForEachListEntry(TmpListItem, &LocalApicInitList, Peers){
         if(TmpNewListItem.ProcessorID == TmpListItem->ProcessorID){
@@ -281,6 +343,7 @@ static LOUSTATUS ApicInitializeLocalInitItem(
     TmpListItem->EntryVersion = TmpNewListItem.EntryVersion;
     TmpListItem->Entry = TmpNewListItem.Entry;
     TmpListItem->ProcessorID = TmpNewListItem.ProcessorID;
+    TmpListItem->ApicID = TmpNewListItem.ApicID;
     ApicHalDbgPrint("APIC.SYS:New LAPIC Init Entry Added:Entry:%h:Version:%h:Id:%h\n", (UINT64)Entry, (UINT64)EntryVersion, (UINT64)TmpListItem->ProcessorID);
     UpgradeNPROC();
     LouKeListAddTail(&TmpListItem->Peers, &LocalApicInitList);
@@ -295,6 +358,11 @@ static LOUSTATUS ApicInitializeIoInitItem(
     TmpNewListItem.EntryVersion = EntryVersion;
     TmpNewListItem.Entry = Entry;
     TmpNewListItem.ApicID = ApicGetIoInitItemApicID(&TmpNewListItem);
+    if(X2ApicSupport && TmpNewListItem.ApicID == 0xFFFFFFFF){
+        return STATUS_SUCCESS;
+    }else if(TmpNewListItem.ApicID == 0xFF){
+        return STATUS_SUCCESS;
+    }
     PIO_APIC_INIT_LIST_ITEM TmpListItem;
     ForEachListEntry(TmpListItem, &IoApicInitList, Peers){
         if(TmpNewListItem.ApicID == TmpListItem->ApicID){
@@ -315,7 +383,7 @@ static LOUSTATUS ApicInitializeIoInitItem(
     TmpListItem->EntryVersion = TmpNewListItem.EntryVersion;
     TmpListItem->Entry = TmpNewListItem.Entry;
     TmpListItem->ApicID = TmpNewListItem.ApicID;
-    ApicHalDbgPrint("APIC.SYS:New IO APIC Init Entry Added:Entry:%h:Version:%h:Id:%h\n", (UINT64)Entry, (UINT64)EntryVersion, (UINT64)TmpListItem->ApicID);
+    ApicHalDbgPrint("APIC.SYS:New IO APIC Init Entry Added:Entry:%h:Version:%h:Id:%h\n",(UINT64)Entry, (UINT64)EntryVersion, (UINT64)TmpListItem->ApicID);
     IoApicCount++;
     LouKeListAddTail(&TmpListItem->Peers, &IoApicInitList);
     return STATUS_SUCCESS;
@@ -332,7 +400,7 @@ void ApicHalDbgPrint(char* format, ...){
 }
 
 void RemapPic(int offset1, int offset2){
-      unsigned char a1, a2;
+    unsigned char a1, a2;
 
     a1 = inb(PIC1_DATA);
     a2 = inb(PIC2_DATA);
@@ -358,6 +426,13 @@ void DisablePic(){
 }
 
 LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
+    PLOCAL_APIC_INIT_LIST_ITEM TmpItem;
+    PLOCAL_APIC_INIT_LIST_ITEM SafeTmpItem;
+    PIO_APIC_INIT_LIST_ITEM TmpIoListItem;
+    PIO_APIC_INIT_LIST_ITEM SafeTmpIoListItem;
+    PINTERRUPT_SOURCE_OVERIDE_ENTRY TmpIntOveride;
+    PINTERRUPT_SOURCE_OVERIDE_ENTRY SafeTmpIntOveride;
+
     ApicHalDbgPrint("APIC.SYS:ApicInitializeApicSubsystem()\n");
     MadtTable = (PMULTIPLE_APIC_DESCRIPTION_TABLE)LouKeAcquireAcpiTable(MULTIPLE_APIC_DESCRIPTION);
     if(!MadtTable){
@@ -365,11 +440,6 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
         return STATUS_NOT_SUPPORTED;
     }
     DisablePic(); 
-
-    unsigned int eax, ebx, ecx, edx;
-    cpuid(1, &eax, &ebx, &ecx, &edx);
-    X2ApicSupport = ecx & (1 << 21) ? true : false;
-
 
     UINT8* TableEnd = (UINT8*)MadtTable + MadtTable->MadtHeader.Length;
     UINT8* TmpMadtLocation = &MadtTable->DynamicMADTBuffer[0];
@@ -404,6 +474,7 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
                     goto _INIT_ERROR;
                 }
                 NewIntOveride->Overide = (PMADT_ICS_INTERRUPT_SOURCE_OVERIDE_STRUCTURE)(UINT8*)CommonMadtFormat;
+                IoOverideObjectCount++;
                 LouKeListAddTail(&NewIntOveride->Peers, &IntOverideList);
                 break;
             case MADT_ICS_NON_MASKABLE_OVERIDE:
@@ -452,8 +523,6 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
     ApicHalGetApicIdRegister(ApicDeviceObject, &CurrentID);
     CurrentID = ApicDeviceObject->ApicObjectType ? CurrentID : GET_X1APIC_ID_VALUE(CurrentID);
 
-    PLOCAL_APIC_INIT_LIST_ITEM TmpItem;
-    PLOCAL_APIC_INIT_LIST_ITEM SafeTmpItem;
     SIZE Index = 1;
     ForEachListEntrySafe(TmpItem, SafeTmpItem, &LocalApicInitList, Peers){
         if(ApicGetLocalInitItemApicId(TmpItem) != CurrentID){
@@ -468,16 +537,70 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
         LouKeFree(TmpItem);
     }
 
+    SIZE i = 0;
+    PerIoApicData = LouKeMallocArray(PER_IO_APIC_DATA, IoApicCount, KERNEL_GENERIC_MEMORY);
+
+    ForEachListEntrySafe(TmpIoListItem, SafeTmpIoListItem, &IoApicInitList, Peers){
+        UINT32 ApicPhyAddress = ApicGetIoInitApicAddress(TmpIoListItem);
+        UINT8 IoApicId = ApicGetIoInitItemApicID(TmpIoListItem);
+        UINT8 GsiBase = ApicGetIoInitItemApicGsiBase(TmpIoListItem);
+        UINT32 GsiCount = 0;
+        PerIoApicData[i].ApicDeviceObject.ApicObjectType = IO_APIC_OBJECT_TYPE;
+        PerIoApicData[i].ApicDeviceObject.IoApicObject.ApicBase = LouKeMallocKbPageExVirt32(1, KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, ApicPhyAddress, true);
+        PerIoApicData[i].ApicID = IoApicId;
+        PerIoApicData[i].ApicGsiBase = GsiBase;
+
+        ApicHalGetIoApicVersionRegisterFromObject(
+            &PerIoApicData[i].ApicDeviceObject,
+            0x00,
+            &GsiCount
+        );
+        PerIoApicData[i].ApicGsiCount = (UINT8)GsiCount;
+
+        PerIoApicData[i].PinVectorData = LouKeMallocArray(PER_IO_APIC_PIN_DATA, GsiCount, KERNEL_GENERIC_MEMORY);
+        if(!PerIoApicData[i].PinVectorData){
+            LouPrint("APIC.SYS:ApicInitializeApicSubsystem:HERE\n");
+            while(1);
+        }
+        i++;
+        LouKeListDeleteItem(&TmpIoListItem->Peers);
+        LouKeFree(TmpIoListItem);
+    }
+
+    PerIoOverideData = LouKeMallocArray(PER_IO_OVERIDE_DATA, IoOverideObjectCount, KERNEL_GENERIC_MEMORY);
+    i = 0;
+    ForEachListEntrySafe(TmpIntOveride, SafeTmpIntOveride, &IntOverideList, Peers){
+        PerIoOverideData[i].InDirectionIrq = TmpIntOveride->Overide->IrqSource;
+        PerIoOverideData[i].OutDirectionIrq = TmpIntOveride->Overide->Gsi;
+        UINT32 Tmp = ((TmpIntOveride->Overide->MpsIntiFlags & MADT_ICS_ISO_MPS_INTI_FLAG_POLARITY) >> MADT_ICS_ISO_MPS_INTI_FLAG_POLARITY_SHIFT);
+        if(Tmp == 3){
+            PerIoOverideData[i].PinPolarity = IO_APIC_PIN_POLARITY_ACTIVE_LOW;
+        }else{
+            PerIoOverideData[i].PinPolarity = IO_APIC_PIN_POLARITY_ACTIVE_HIGH;
+        }
+        Tmp = ((TmpIntOveride->Overide->MpsIntiFlags & MADT_ICS_ISO_MPS_INTI_FLAG_TRIGGER_MODE) >> MADT_ICS_ISO_MPS_INTI_FLAG_TRIGGER_MODE_SHIFT);        
+        if(Tmp == 3){
+            PerIoOverideData[i].TriggerMode = IO_APIC_TRIGGER_MODE_LEVEL;
+        }else{
+            PerIoOverideData[i].TriggerMode = IO_APIC_TRIGGER_MODE_EDGE;
+        }
+        i++;
+        LouKeListDeleteItem(&TmpIntOveride->Peers);
+        LouKeFree(TmpIntOveride);
+    }
+
     LouKeSignalApicSubsystemInitialized();    
 
     LouKeInitializeIpicSubsystem(GetNPROC());
-
-    //TODO Initialize IO Apic array
 
     ApicHalDbgPrint("APIC.SYS:ApicInitializeApicSubsystem():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 
 _INIT_ERROR:
+
+    if(PerProcessorApicData){
+        LouKeFree(PerProcessorApicData);
+    }
 
     PLOCAL_NMI_OVERIDE_ITEM TmpNmiOverideListItem;    
     PLOCAL_NMI_OVERIDE_ITEM SafeTmpNmiOverideListItem;    
@@ -494,8 +617,6 @@ _INIT_ERROR:
         DowngradeNPROC();
     }
     
-    PIO_APIC_INIT_LIST_ITEM TmpIoListItem;
-    PIO_APIC_INIT_LIST_ITEM SafeTmpIoListItem;
     ForEachListEntrySafe(TmpIoListItem, SafeTmpIoListItem, &IoApicInitList, Peers){
         LouKeListDeleteItem(&TmpIoListItem->Peers);
         LouKeFree(TmpIoListItem);
@@ -508,8 +629,6 @@ _INIT_ERROR:
         LouKeFree(TmpNmiOveride);
     }
 
-    PINTERRUPT_SOURCE_OVERIDE_ENTRY TmpIntOveride;
-    PINTERRUPT_SOURCE_OVERIDE_ENTRY SafeTmpIntOveride;
     ForEachListEntrySafe(TmpIntOveride, SafeTmpIntOveride, &IntOverideList, Peers){
         LouKeListDeleteItem(&TmpIntOveride->Peers);
         LouKeFree(TmpIntOveride);
@@ -534,17 +653,23 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(UINT32* CpuIdOut
     UINT64 XapicBaseRegister = LouKeReadMsr(IA32_APIC_BASE_MSR_OFFSET);
     UINT64 ApicPhyAddress = XapicBaseRegister & 0x000FFFFFFFFFF000ULL;
     APIC_DEVICE_OBJECT ApicDeviceObject = {0};
-    XapicBaseRegister |= IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT;
+
+    if(!X2ApicSupport){
+        X2ApicSupport = (XapicBaseRegister & IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT) ? true : false;
+    }
+    
     if(X2ApicSupport){
         ApicHalDbgPrint("APIC.SYS:Communicating With X2 LAPIC Via MSR\n");
-        XapicBaseRegister |= IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT;
         ApicDeviceObject.ApicObjectType = X2_LOCAL_APIC_OBJECT_TYPE;
     }else{
         ApicHalDbgPrint("APIC.SYS:LAPIC X1 Physical Address:%h\n", ApicPhyAddress);
         ApicDeviceObject.ApicObjectType = X1_LOCAL_APIC_OBJECT_TYPE;
         ApicDeviceObject.X1ApicObject.ApicBase = (PVOID)LouKeMallocKbPageExVirt32(1, KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, ApicPhyAddress, true);
+        if(!(XapicBaseRegister & IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT)){
+            XapicBaseRegister |= IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT;
+            LouKeWriteMsr(IA32_APIC_BASE_MSR_OFFSET, XapicBaseRegister);
+        }
     }
-    LouKeWriteMsr(IA32_APIC_BASE_MSR_OFFSET, XapicBaseRegister);
    
     if(!PerProcessorApicData){
         Status = ApicInitializeApicSubsystem(&ApicDeviceObject);
@@ -611,13 +736,12 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(UINT32* CpuIdOut
 
 LOUAPI
 LOUSTATUS 
-ApicSubsystemEntry(){
-    LouPrint("APIC.SYS:ApicSubsystemEntry()\n");
-    
+ApicSubsystemEntry(){    
     HANDLE ApicDebugKey = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\DEBUG\\APIC_DEBUG", 0x00);
     BYTE DbgValue = 0;
     LouKeReadRegistryByteValue(ApicDebugKey, &DbgValue);
     ApicDebugOn = DbgValue ? true : false;
+    LouPrint("APIC.SYS:ApicSubsystemEntry()\n");
 
 
     LouPrint("APIC.SYS:ApicSubsystemEntry():STATUS_SUCCESS\n");

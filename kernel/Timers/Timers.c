@@ -5,15 +5,7 @@ uint64_t calibrate_tsc();
 
 uint64_t GetTscMaster();
 
-static inline uint64_t read_tsc(void) {
-    uint32_t lo, hi;
-    asm volatile("rdtsc" : "=a"(lo), "=d"(hi));
-    return ((uint64_t)hi << 32) | lo;
-}
-
-
-
-
+uint64_t read_tsc(void);
 
 uint64_t GetCurrentTimeInMilliseconds() {
     uint64_t current_tsc = read_tsc();

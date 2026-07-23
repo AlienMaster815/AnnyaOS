@@ -247,12 +247,17 @@ ACPI_STATUS AcpiOsInstallInterruptHandler(
 
     LouKeIpicSoftwareMaskVectorObject(NewVectorObject, 0, false);
 
+    LouPrint("IRQ:%d Installed for ACPI\n", InterruptNumber);
+
+    InitializeAcpiInterruptTracker(InterruptNumber, NewVectorObject);
+
     //TODO: add the new vector to the pin
 
-    LouPrint("AcpiOsInstallInterruptHandler()\n");
-    while(1);
-    InitializeAcpiInterruptTracker(InterruptNumber, NewVectorObject);
-    LouPrint("IRQ:%d Installed for ACPI\n", InterruptNumber);
+    ApicHalInitializeIsaVectorToIoApicRedirection(
+        NewVectorObject,
+        InterruptNumber
+    );
+
     return AE_OK;
 }
 

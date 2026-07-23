@@ -1,9 +1,14 @@
 #include "ApicInternals.h"
 
+extern PPER_IO_APIC_DATA PerIoApicData;
+extern PPER_IO_OVERIDE_DATA PerIoOverideData;
+extern SIZE IoApicCount;
+extern SIZE IoOverideObjectCount;
+
 #define IO_APIC_ID_OFFSET           0
 #define IO_APIC_VERSION_OFFSET      1
 #define IO_APIC_ARBITRATION_OFFSET  2
-#define IO_APIC_IRQWINDOW_OFFSET(x) ((x * 2 + 0x10) + 1)
+#define IO_APIC_IRQWINDOW_OFFSET(x) (x * 2 + 0x10)
 
 static UINT32 ReadIoApicRegister(
     PVOID ApicBase, 
@@ -63,7 +68,7 @@ ApicHalGetIoApicVersionRegisterFromObject(
         *Version = Register & 0xFF;
     }
     if(MaxRedirections){
-        *MaxRedirections = (Register >> 16) & 0xFF;
+        *MaxRedirections = (((Register >> 16) & 0xFF) + 1);
     }
     return STATUS_SUCCESS;
 }
@@ -85,13 +90,14 @@ ApicHalGetIoApicArbitrationIdRegisterFromObject(
     if(Id){
         *Id = (Register >> 24) & 0x0F;
     }
+    return STATUS_SUCCESS;
 }
 
 DRIVER_EXPORT
 LOUSTATUS 
 ApicHalGetIoApicRedirectionEntryFromObjectEx(
     PAPIC_DEVICE_OBJECT ApicDeviceObject, 
-    UINT64              Entry,
+    UINT8               Entry,
     UINT64*             Out
 ){
     if((!ApicDeviceObject) || (!Out)){
@@ -111,7 +117,7 @@ DRIVER_EXPORT
 LOUSTATUS 
 ApicHalGetIoApicRedirectionEntryFromObject(
     PAPIC_DEVICE_OBJECT         ApicDeviceObject, 
-    UINT64                      Entry,
+    UINT8                       Entry,
     UINT32*                     Destination,
     BOOLEAN*                    Masked,
     IO_APIC_TRIGGER_MODE*       TriggerMode,
@@ -161,7 +167,7 @@ DRIVER_EXPORT
 LOUSTATUS 
 ApicHalSetIoApicRedirectionEntryFromObjectEx(
     PAPIC_DEVICE_OBJECT ApicDeviceObject, 
-    UINT64              Entry,
+    UINT8               Entry,
     UINT64              In
 ){
     if(!ApicDeviceObject){
@@ -181,7 +187,7 @@ DRIVER_EXPORT
 LOUSTATUS 
 ApicHalSetIoApicRedirectionEntryFromObject(
     PAPIC_DEVICE_OBJECT         ApicDeviceObject, 
-    UINT64                      Entry,
+    UINT8                       Entry,
     UINT32*                     Destination,
     BOOLEAN*                    Masked,
     IO_APIC_TRIGGER_MODE*       TriggerMode,
@@ -220,4 +226,85 @@ ApicHalSetIoApicRedirectionEntryFromObject(
         Register = (Register & ~0xFF) | *Vector;
     }
     return ApicHalSetIoApicRedirectionEntryFromObjectEx(ApicDeviceObject, Entry, Register);
+}
+
+DRIVER_EXPORT
+LOUSTATUS
+ApicHalInitializeVectorToIoApicRedirection(
+    OPAQUE_PTR                  VectorObject,
+    UINT8                       GsiVector,
+    IO_APIC_TRIGGER_MODE        TriggerMode,
+    IO_APIC_PIN_POLARITY        PinPolarity
+){
+    ULONG  DestTmp;
+    UINT8  DestinationVector = 0;
+    LOUSTATUS Status = LouKeIpicGetVectorObjectProcessorNumber(VectorObject, &DestTmp);
+    UINT32 DestinationProc = (UINT32)DestTmp; 
+    
+    BOOLEAN Masked = false;
+    if(Status != STATUS_SUCCESS){
+        ApicHalDbgPrint("ApicHalInitializeVectorToIoApicRedirection():ERROR:LouKeIpicGetVectorObjectProcessorNumber()\n");
+        while(1);
+        return Status;
+    }
+    Status = LouKeIpicGetVectorObjectVector(VectorObject, &DestinationVector);
+    if(Status != STATUS_SUCCESS){
+        ApicHalDbgPrint("ApicHalInitializeVectorToIoApicRedirection():ERROR:LouKeIpicGetVectorObjectVector()\n");
+        while(1);
+        return Status;
+    }
+    ULONG Destination = PerProcessorApicData[DestinationProc].ApicID;
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = 0x00;
+    SIZE i;
+    for(i = 0 ; i < IoApicCount; i++){
+        if(RangeInterferes(GsiVector, 1, PerIoApicData[i].ApicGsiBase, PerIoApicData[i].ApicGsiCount)){
+            ApicDeviceObject = &PerIoApicData[i].ApicDeviceObject;
+            break;
+        }
+    }
+    if(!ApicDeviceObject){
+        ApicHalDbgPrint("ApicHalInitializeVectorToIoApicRedirection():ERROR\n");
+        while(1);
+        return STATUS_INVALID_PARAMETER;
+    }
+    IO_APIC_DESTINATION_MODE ApicDestination = IO_APIC_DESTINATION_MODE_PHYSICAL;
+    IO_APIC_DELIVERY_MODE ApicDeliveryMode = IO_APIC_DELIVERY_MODE_FIXED;
+    return ApicHalSetIoApicRedirectionEntryFromObject(
+        ApicDeviceObject,
+        GsiVector - PerIoApicData[i].ApicGsiBase,
+        &DestinationProc,
+        &Masked,
+        &TriggerMode,
+        &PinPolarity,
+        &ApicDestination,
+        &ApicDeliveryMode,
+        &DestinationVector
+    );
+}
+
+DRIVER_EXPORT
+LOUSTATUS
+ApicHalInitializeIsaVectorToIoApicRedirection(
+    OPAQUE_PTR  VectorObject,
+    UINT8       GsiVector
+){
+    
+    IO_APIC_TRIGGER_MODE TriggerMode = IO_APIC_TRIGGER_MODE_ISA_DEFAULT;
+    IO_APIC_PIN_POLARITY PinPolarity = IO_APIC_PIN_POLARITY_ISA_DEFAULT;
+
+    for(SIZE i = 0; i < IoOverideObjectCount; i++){
+        if(PerIoOverideData[i].InDirectionIrq == GsiVector){
+            GsiVector = PerIoOverideData[i].OutDirectionIrq;
+            TriggerMode = PerIoOverideData[i].TriggerMode;
+            PinPolarity = PerIoOverideData[i].PinPolarity;
+            break;
+        }
+    }
+
+    return ApicHalInitializeVectorToIoApicRedirection(
+        VectorObject,
+        GsiVector,
+        TriggerMode,
+        PinPolarity
+    );
 }

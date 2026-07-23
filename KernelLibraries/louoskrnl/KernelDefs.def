@@ -237,3 +237,5 @@ EXPORTS
     LouKeGetMultibootTrampolineEntrance
     LouKeIpicAllocateVectorObjects
     LouKeIpicSendNewInterruptRoutingData
+    LouKeIpicGetVectorObjectProcessorNumber
+    LouKeIpicGetVectorObjectVector

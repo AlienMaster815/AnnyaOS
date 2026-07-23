@@ -709,22 +709,23 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
     UNUSED INTEGER Processors = GetNPROC();
 
     while(1){
-        PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
-        while(TmpThreadHandle->Peers.NextHeader){
-            TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
-            if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
-                PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
-                if(ProcessData){
-                    for(INTEGER i = 0 ; i < Processors; i++){
-                        if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){
-                            ProcessData->ThreadObjects[i].TsmDeasignThreadFromSchedual(TmpThreadHandle);
-                        }
-                    }
-                }
-                LouKeSchedDbgPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
-                LouKeTsmDestroyThreadHandle(TmpThreadHandle);
-            }
-        }
+        //PGENERIC_THREAD_DATA TmpThreadHandle = &MasterThreadList;
+        //while(TmpThreadHandle->Peers.NextHeader){
+        //    TmpThreadHandle = (PGENERIC_THREAD_DATA)TmpThreadHandle->Peers.NextHeader;
+        //    if((TmpThreadHandle->State == THREAD_TERMINATED) && (TmpThreadHandle->Resting)){
+        //        PGENERIC_PROCESS_DATA ProcessData = TmpThreadHandle->Process;         
+        //        if(ProcessData){
+        //            for(INTEGER i = 0 ; i < Processors; i++){
+        //                if(IS_PROCESSOR_AFFILIATED(TmpThreadHandle->AfinityBitmap, i)){
+        //                    ProcessData->ThreadObjects[i].TsmDeasignThreadFromSchedual(TmpThreadHandle);
+        //                }
+        //            }
+        //        }
+        //        LouKeSchedDbgPrint("Thread:%d Has Retired\n", TmpThreadHandle->ThreadID);
+        //        LouKeTsmDestroyThreadHandle(TmpThreadHandle);
+        //    }
+        //}
+        asm("hlt");
     }
     return -1;
 }

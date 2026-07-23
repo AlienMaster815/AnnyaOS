@@ -48,3 +48,4 @@ EXPORTS
     ApicHalApInitializationFunction
     ApicIpiHalSendNewInterruptRouteData
     ApicIpiHalSendNewDemonData
+    ApicHalInitializeIsaVectorToIoApicRedirection

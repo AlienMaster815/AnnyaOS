@@ -11,12 +11,14 @@
 
 #include <LouAPI.h>
 
+uint64_t GetTscMaster();
+uint64_t read_tsc(void);
+
 void RunTimerClockMS(uint64_t TimerInMS){
-    uint64_t Time = GetCurrentTimeInMilliseconds() + TimerInMS;
-    uint64_t Spin = 0;
-    while(Time > Spin){
-        Spin = GetCurrentTimeInMilliseconds();
-    }
+    UINT64 CurrentTSC = read_tsc();
+    UINT64 TscFrequency = GetTscMaster() / 1000;
+    UINT64 Expiration = CurrentTSC + (TimerInMS * TscFrequency);
+    while(read_tsc() <= Expiration);
 }
 
 void RunTimerClockS(uint64_t TimerInS){

@@ -402,7 +402,7 @@ ApicHalSetApicLvtTimerRegister(
     if(VectorIn){
         Register = SET_X1APIC_LVT_TIMER_VECTOR(Register, (UINT32)(*VectorIn));
     }
-    ApicHalSetApicLvtTimerRegisterEx(ApicDeviceObject, Register);
+    return ApicHalSetApicLvtTimerRegisterEx(ApicDeviceObject, Register);
 }
 
 LOUSTATUS 

@@ -408,3 +408,50 @@ KERNEL_EXPORT LOUSTATUS LouKeIpicSoftwareMaskVectorObject(OPAQUE_PTR Object, SIZ
     ObjectHandle->VectorGroup.GroupMembers[GroupMember].SoftMasked = Mask;
     return STATUS_SUCCESS;
 }
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeIpicGetVectorObjectProcessorNumber(
+    OPAQUE_PTR  Object, 
+    ULONG*      ProcessorNumber
+){
+    if((!Object) || (!ProcessorNumber)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PIPIC_VECTOR_OBJECT_HANDLE ObjectHandle = (PIPIC_VECTOR_OBJECT_HANDLE)Object;
+    PIPIC_VECTOR_OBJECT VectorObject = 0x00;
+    switch(ObjectHandle->HandleType){
+        case VECTOR_HANDLE_ID_OBJECT:
+            VectorObject = &ObjectHandle->VectorObject;
+            break;
+        case VECTOR_HANDLE_ID_GROUP:
+            VectorObject = &ObjectHandle->VectorGroup.GroupMembers[0];
+            break;
+        default:
+            return STATUS_INVALID_PARAMETER;
+    }
+    PIPIC Ipic = VectorObject->Ipic;
+    UINTPTR Index = Ipic - Ipics; 
+    *ProcessorNumber = (ULONG)Index; 
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeIpicGetVectorObjectVector(
+    OPAQUE_PTR  Object,
+    UINT8*      Vector
+){
+    if((!Object) || (!Vector)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PIPIC_VECTOR_OBJECT_HANDLE ObjectHandle = (PIPIC_VECTOR_OBJECT_HANDLE)Object;
+    switch(ObjectHandle->HandleType){
+        case VECTOR_HANDLE_ID_OBJECT:
+            *Vector = ObjectHandle->VectorObject.VectorID;
+            break;
+        default:
+            return STATUS_INVALID_PARAMETER;
+    }
+    return STATUS_SUCCESS;
+}

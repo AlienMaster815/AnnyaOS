@@ -11,6 +11,10 @@
 #define IA32_APIC_BASE_MSR_X2APIC_ENABLE_BIT    (1 << 10)
 #define IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT     (1 << 11)
 
+#define IA32_THERMAL_STATUS_REGISTER                    0x01B0
+#define IA32_THERMAL_STATUS_REGISTER_PMU_RESTRICTION    (1 << 11)
+
+
 typedef enum{
     APIC_TIMER_MODE_ONE_SHOT = 0,
     APIC_TIMER_MODE_PERIODIC,
@@ -101,8 +105,8 @@ typedef enum{
 }IO_APIC_DELIVERY_MODE;
 
 typedef enum{
-    IO_APIC_DELIVERY_MODE_PHYSICAL = 0,
-    IO_APIC_DELIVERY_MODE_LOGICAL = 1,
+    IO_APIC_DESTINATION_MODE_PHYSICAL = 0,
+    IO_APIC_DESTINATION_MODE_LOGICAL = 1,
 }IO_APIC_DESTINATION_MODE;
 
 typedef enum{
@@ -123,7 +127,6 @@ typedef struct _X1LOCAL_APIC_DEVICE_OBJECT{
 
 typedef struct _IO_APIC_DEVICE_OBJECT{
     PVOID                           ApicBase;
-    UINT8                           TotalIrqs;
 }IO_APIC_DEVICE_OBJECT, * PIO_APIC_DEVICE_OBJECT;
 
 typedef struct _APIC_DEVICE_OBJECT{
@@ -176,6 +179,25 @@ typedef struct _PER_PROCESSOR_APIC_DATA{
     PER_PROCESSOR_IPI_DATA          IpiData;
     OPAQUE_PTR                      SpurriousVectorObject;
 }PER_PROCESSOR_APIC_DATA, * PPER_PROCESSOR_APIC_DATA;
+
+typedef struct _PER_IO_APIC_PIN_DATA{
+    OPAQUE_PTR*     VectorObject;
+}PER_IO_APIC_PIN_DATA, * PPER_IO_APIC_PIN_DATA;
+
+typedef struct _PER_IO_APIC_DATA{
+    UINT8                   ApicID;
+    UINT8                   ApicGsiBase;
+    UINT8                   ApicGsiCount;
+    APIC_DEVICE_OBJECT      ApicDeviceObject;
+    PPER_IO_APIC_PIN_DATA   PinVectorData;
+}PER_IO_APIC_DATA, * PPER_IO_APIC_DATA;
+
+typedef struct _PER_IO_OVERIDE_DATA{
+    UINT8                   InDirectionIrq;
+    UINT8                   OutDirectionIrq;
+    IO_APIC_PIN_POLARITY    PinPolarity;
+    IO_APIC_TRIGGER_MODE    TriggerMode;
+}PER_IO_OVERIDE_DATA, * PPER_IO_OVERIDE_DATA;
 
 #ifndef APIC_MAIN
 extern PPER_PROCESSOR_APIC_DATA PerProcessorApicData;
@@ -304,10 +326,10 @@ DRIVER_EXPORT void ApicHalSignalLocalApicEoi();
 DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicIdRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* VersionOut);
 DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicVersionRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Version, UINT32* MaxRedirections);
 DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicArbitrationIdRegisterFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT32* Id);
-DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT64* Out);
-DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, BOOLEAN* IrrSet, IO_APIC_PIN_POLARITY* PinPolarity, BOOLEAN* InterruptPending, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
-DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT64 In);
-DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT64 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, IO_APIC_PIN_POLARITY* PinPolarity, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Entry, UINT64* Out);
+DRIVER_EXPORT LOUSTATUS ApicHalGetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, BOOLEAN* IrrSet, IO_APIC_PIN_POLARITY* PinPolarity, BOOLEAN* InterruptPending, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
+DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObjectEx(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Entry, UINT64 In);
+DRIVER_EXPORT LOUSTATUS ApicHalSetIoApicRedirectionEntryFromObject(PAPIC_DEVICE_OBJECT ApicDeviceObject, UINT8 Entry, UINT32* Destination, BOOLEAN* Masked, IO_APIC_TRIGGER_MODE* TriggerMode, IO_APIC_PIN_POLARITY* PinPolarity, IO_APIC_DESTINATION_MODE* DestinationMode, IO_APIC_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicInterruptCommandRegister(UINT32* DestinationField, APIC_DESTINATION_SHORTHAND* Shorthand, APIC_TRIGGER_MODE* TriggerMode, APIC_LEVEL* Level, BOOLEAN* InterruptPending, APIC_DESTINATION_MODE* DestinationMode, APIC_ICR_DELIVERY_MODE* DeliveryMode, UINT8* Vector);
 DRIVER_EXPORT LOUSTATUS ApicHalGetLocalApicErrorStatus(UINT32* ErrorStatus);
 DRIVER_EXPORT LOUSTATUS ApicHalSetLocalApicErrorStatus(UINT32 Value);
@@ -315,6 +337,8 @@ DRIVER_EXPORT void ApicHalApInitializationFunction(PLKSEB TrampolineLkseb);
 
 DRIVER_EXPORT LOUSTATUS ApicIpiHalSendNewInterruptRouteData(ULONG Cpu, PVOID RouteData);
 DRIVER_EXPORT LOUSTATUS ApicIpiHalSendNewDemonData(ULONG Cpu, PVOID DemonData);
+
+DRIVER_EXPORT LOUSTATUS ApicHalInitializeIsaVectorToIoApicRedirection(OPAQUE_PTR VectorObject, UINT8 GsiVector);
 
 //TODO: 
 

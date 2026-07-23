@@ -9,6 +9,12 @@
 
 #define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
 
+#define LouKeSerializeCpu() \
+    do { \
+        unsigned int eax, ebx, ecx, edx; \
+        asm volatile("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(0) : "memory"); \
+    } while(0)
+
 static inline void LouKeReloadCR3(){
     uint64_t cr3;
     asm volatile ("mov %%cr3, %0" : "=r"(cr3));

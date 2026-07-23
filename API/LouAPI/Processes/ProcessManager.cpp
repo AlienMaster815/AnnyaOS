@@ -298,9 +298,8 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 //static SIZE Foo = 0;
 
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
-    if(MutexIsLocked(&ProcLock.Lock)){
+    if(MutexIsLocked(&ProcLock.Lock) || (LouKeGetIrql() == HIGH_LEVEL)){
         ApicHalConfigureNextApicTimerEvent(30);
-        ApicHalSignalLocalApicEoi();
         return CpuCurrentState;
     }
     PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
@@ -309,7 +308,6 @@ LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
     MutexUnlock(&ProcLock.Lock);
     LouKeMemoryBarrier();
     ApicHalConfigureNextApicTimerEvent(Schedualer->CurrentThread->TotalMsSlice);
-    ApicHalSignalLocalApicEoi();
     return CpuCurrentState;
 }
 
@@ -333,28 +331,14 @@ void ApInitializeProcessManager(ULONG ProcessorID){
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
 
-    PTHREAD NewThread = LouKeCreateDeferedDemonEx(
-        (PVOID)0x00,
-        0x00,
-        4 * KILOBYTE,
-        31,
-        true,
-        ProcessorID,
-        0
-    );
-    ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
-    ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
-
     LouKeAcquireReference(&ApsWaitingForInterruptEnabling);
-
 
     MutexSynchronize(&CoreIrqReadyLock);
     LouKeSchedDbgPrint("Ap Now Enabling Interrupts\n");
     LouKeSetIrql(PASSIVE_LEVEL, 0x00);
     LouKeSchedDbgPrint("AP Interrupts Enabled\n");
     LouKeReleaseReference(&ApsWaitingForInterruptEnabling);
-
-    //LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
+    LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     while(1){
         asm("hlt");
     }
@@ -447,7 +431,7 @@ LOUAPI void InitializeProcessManager(){
     
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessData(KERNEL_PROCESS_NAME, &KernelProcess);
-
+    PTHREAD NewThread;
     for(ULONG i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         ProcessBlock.ProcStateBlock[i].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(i);
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetSystemProcess(KernelProcess);
@@ -456,23 +440,20 @@ LOUAPI void InitializeProcessManager(){
             PROCESS_PRIORITY_RINGS, 
             PROCESS_DEFAULT_DISTRIBUTER_INCREMENTER
         );
+        NewThread = LouKeCreateDeferedDemonEx(
+            (PVOID)0x00,
+            0x00,
+            4 * KILOBYTE,
+            31,
+            true,
+            i,
+            0
+        );
+        ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
+        ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
     }
 
-    MutexUnlock(&ApProcessorInitLock);
-
-
-    PTHREAD NewThread = LouKeCreateDeferedDemonEx(
-        (PVOID)0x00,
-        0x00,
-        4 * KILOBYTE,
-        31,
-        true,
-        InitializationProcessor,
-        0
-    );
-    ((PGENERIC_THREAD_DATA)NewThread)->State = THREAD_RUNNING;
-    ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
-        
+    MutexUnlock(&ApProcessorInitLock);        
     MutexUnlock(&ApProcessorInitLock);
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 

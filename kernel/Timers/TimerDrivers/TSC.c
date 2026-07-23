@@ -5,7 +5,7 @@
 #define PIT_CHANNEL_0 0x40
 
 
-static inline uint64_t read_tsc(void) {
+uint64_t read_tsc(void){
     uint32_t lo, hi;
     asm volatile("rdtsc" : "=a"(lo), "=d"(hi));
     return ((uint64_t)hi << 32) | lo;

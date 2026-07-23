@@ -42,7 +42,6 @@ PListHeader LouKeIpicGetLocalVectorData(
 
 
 void InterruptRouter(uint64_t Interrupt, uint64_t Args){
-
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PListHeader ProcessorVectorData = LouKeIpicGetLocalVectorData(Processor, (UINT8)Interrupt);
     PIPIC_VECTOR_OBJECT TmpVectorObject;

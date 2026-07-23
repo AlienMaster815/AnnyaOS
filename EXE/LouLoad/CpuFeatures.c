@@ -14,6 +14,7 @@ void LouKeWriteMsr(uint32_t msr, uint64_t value) {
     __asm__ __volatile__("wrmsr"
                          :
                          : "c"(msr), "a"(low), "d"(high));
+    LouKeSerializeCpu();    
 }
 
 void cpuid(unsigned int code, unsigned int* eax, unsigned int* ebx, unsigned int* ecx, unsigned int* edx) {
