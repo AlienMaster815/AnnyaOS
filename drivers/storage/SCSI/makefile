@@ -1,7 +1,13 @@
 #//Copyright GPL-2 Tyler Grenier (2026)
 INCLUDES = -I../../../include
 TARGET = SCSICORE.SYS
-SRC = 	ScsiCore.c
+SRC = 	ScsiCore.c \
+		Cdb.c \
+		Cdb6.c \
+		Cdb10.c \
+		Cdb12.c \
+		Cdb16.c \
+		CdbVar.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=ScsiCoreEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
