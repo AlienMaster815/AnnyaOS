@@ -674,8 +674,7 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeUnlockProcManager(&Irql);
-    ApicHalConfigureNextApicTimerEvent(0);
-
+    asm("INT $0x20");
 }
 
 LOUAPI
@@ -692,7 +691,7 @@ LouKeYeildExecution(){
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeUnlockProcManager(&Irql);
-    ApicHalConfigureNextApicTimerEvent(0);
+    asm("INT $0x20");
 }
 
 LOUAPI void LouKeUnblockThread(UINT64 ThreadID){
@@ -725,7 +724,7 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
         //        LouKeTsmDestroyThreadHandle(TmpThreadHandle);
         //    }
         //}
-        asm("hlt");
+        //asm("hlt");
     }
     return -1;
 }

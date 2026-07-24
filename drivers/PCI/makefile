@@ -33,7 +33,7 @@ LIB_FILE = PCI.lib  # Output directory is set to the parent directory
 all: $(TARGET) $(LIB_FILE)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../KernelLibraries -llouoskrnl $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../KernelLibraries -llouoskrnl -L../Apic -lApic $(INCLUDES)
 
 # Build Rule
 $(LIB_FILE): $(DEF_FILE)

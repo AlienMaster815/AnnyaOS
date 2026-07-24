@@ -103,13 +103,17 @@ static ListHeader PlatformSourceList = {0};
 KERNEL_EXPORT
 size_t LouKeGetBootDeviceSize(size_t Index);
 
+DRIVER_EXPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu){
+    return PerProcessorApicData[Cpu].ApicID;
+}
+
 KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance();
 
 DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
     if(Ms){
         ApicHalSignalLocalApicEoi();
     }
-    Ms ? Ms : 1;
+    Ms = Ms ? Ms : 1;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
     ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount * Ms);

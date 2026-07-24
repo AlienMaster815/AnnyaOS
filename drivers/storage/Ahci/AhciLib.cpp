@@ -64,6 +64,7 @@ LOUSTATUS AhciPollCommand(
 ){
     size_t i = 0;
     while(i < AHCI_COMMAND_TIMEOUT){
+        sleep(10);
         if((Port->PxCI & (1U << Slot)) == 0){
             break;
         }
@@ -309,6 +310,7 @@ static LOUSTATUS AhciDeInitalizePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
         LouPrint("AHCI.SYS:Failed to stop FIS Reception\n");
         return Status;
     }
+
     return STATUS_SUCCESS;
 }
 
@@ -326,16 +328,29 @@ static void AhciClearPortPendingIrq(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     Port->PxIS |= (1 << AhciPort->PortNumber);
 }
 
+BOOLEAN AhicSoftResetPort(
+    PAHCI_GENERIC_PORT Port 
+){
+    UINT32 Tmp = Port->PxSCTL;
+    Tmp = (Tmp & ~0x0F) | 1;
+    Port->PxSCTL = Tmp;
+    sleep(2);
+    Tmp = Port->PxSCTL;
+    Tmp &= ~0x0F;
+    Port->PxSCTL = Tmp;
+    sleep(2);
+    return Port->PxTFD & (0x80 | 0x08) ? false : true;
+}
+
 static bool AhciDetectAttachedDevice(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-    volatile PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     //the value below is copied from OSDEV from ahci section 
     //"Dettecting Attached Sata Device's" for the SATAPI signature
     AhciPort->DeviceAttached = false;
     
     //PxTFD cannot be set at the time of running this
     if(Port->PxTFD & (0x80 | 0x08)){
-        LouPrint("AHCI.SYS:TFD BSY AND_OR DRQ SET Port Not A Device\n");
         return false;
     }
     // (PxSTSS DET = 0x03 || (PxSTSS IPM = (0x02 || 0x06 || 0x08) is a device
@@ -381,9 +396,6 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
     AhciClearPortPendingIrq(AhciPort);
 
     AhciPort->PortScsiDevice = AhciDetectAttachedDevice(AhciPort);
-    if(!AhciPort->DeviceAttached){
-        return;
-    }
 
     if(PrivateData->DmaBits == 64){
         PrivateData->CommandDma = (uintptr_t)LouKeMalloc(1 * KILOBYTE, UNCACHEABLE_PAGE | PRESENT_PAGE | WRITEABLE_PAGE);
@@ -404,7 +416,20 @@ void AhciInitializePort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
 
     AhciStartFisReception(AhciPort);
 
-    LouPrint("AHCI.SYS:PrivateData->StartCommandEngine:%h\n", PrivateData->StartCommandEngine);
+    if(!AhciPort->DeviceAttached){
+        if(!AhicSoftResetPort(Port)){
+            AhciStopFisReception(AhciPort);
+            if(PrivateData->DmaBits == 64){
+                LouKeFree((PVOID)PrivateData->CommandDma);
+                LouKeFree((PVOID)PrivateData->FisDma);
+            }else{
+                LouKeFreePhy32((PVOID)PrivateData->CommandDma);
+                LouKeFreePhy32((PVOID)PrivateData->FisDma);
+            }
+            return;
+        }
+        AhciPort->PortScsiDevice = AhciDetectAttachedDevice(AhciPort);
+    }
 
     PrivateData->StartCommandEngine(AhciPort);
 

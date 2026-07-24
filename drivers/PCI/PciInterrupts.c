@@ -21,24 +21,21 @@ static void InitializeRequestsAndGroupsToHardwareLimitation(
     UINT32  HardwareLimitation
 ){
     UINT32 RequestedVectors = *RequestedVectorsp;
-    UINT32 Grouped = 1;
-    if(RequestedVectors > HardwareLimitation){
-        Grouped++;
-        RequestedVectors = ROUND_UP64(RequestedVectors, HardwareLimitation);
-        RequestedVectors /= HardwareLimitation;
-        while(RequestedVectors > HardwareLimitation){
-            Grouped++;
-            RequestedVectors =  ROUND_UP64(RequestedVectors, HardwareLimitation) / HardwareLimitation;
-        }
-    }
-    *RequestedVectorsp = RequestedVectors; 
+    UINT32 Grouped = ROUND_UP64(RequestedVectors, HardwareLimitation) / HardwareLimitation;
+    *RequestedVectorsp = ROUND_UP64(RequestedVectors, HardwareLimitation) / Grouped; 
     *Groupedp = Grouped;   
 }
 
+LOUSTATUS PciHalDumbyInterruptHandler(UINT64 Foo){
 
+
+
+}
 
 DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags){
-    UINT16* NewVectors;    
+    OPAQUE_PTR* NewVectors;   
+    LOUSTATUS Status; 
+    UINT8 Vector;
     if(PDEV->InterruptVectors){
         return STATUS_UNSUCCESSFUL;
     }
@@ -49,30 +46,113 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
     //}else 
     if(PciHalPciSupportsMsi(PDEV)){
         UINT32 Grouped;
+        UINT32 HardwareLimitation = MIN(32, PciMsiGetMultiMessageCount(PDEV));
+        LouPrint("PCI Hardware Limitation:%h\n", HardwareLimitation);
         InitializeRequestsAndGroupsToHardwareLimitation(
             &RequestedVectors,
             &Grouped,
-            32
+            HardwareLimitation
         );
 
+        UINT32 MmeBits = 0;
+        UINT32 TmpCount = Grouped;
 
+        while(TmpCount > 1){
+            TmpCount >>= 1;
+            MmeBits++;
+        }
 
-        LouPrint("PCI.SYS:Allocating:%d MSI Vectors Handling:%d Items\n", (UINT64)RequestedVectors, (UINT64)Grouped);
-        while(1);
-    }else{ 
-        PciHalDbgPrint("PCI.SYS:Allocating INT-X Vectors\n");
-        NewVectors = LouKeMallocArray(UINT16, 2, KERNEL_GENERIC_MEMORY);
-        NewVectors[0] = 1;
-        NewVectors[1] = LouKeGetPciInterruptLineFromPin(PDEV);
-        if(!NewVectors[1]){
-            LouPrint("PCI.SYS:PciHalAllocatePciIrqVectors():ERROR:Unable To Get Interrupt Line From Pin\n");
-            LouKeFree(NewVectors);
+        NewVectors = LouKeMallocArray(OPAQUE_PTR, 2, KERNEL_GENERIC_MEMORY);
+        NewVectors[0] = (UINT8*)(UINTPTR)RequestedVectors;
+        Status = LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
+            &NewVectors[1],
+            false,
+            LirRoutine,
+            &PciHalDumbyInterruptHandler,
+            0x00,
+            RequestedVectors,
+            RequestedVectors,
+            254
+        );
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        Status = LouKeIpicGetVectorObjectVector(
+            NewVectors[1],
+            &Vector
+        );
+        if(Status != STATUS_SUCCESS){
+            LouPrint("PCI.SYS:LouKeIpicGetVectorObjectVector()\n");
+            while(1);
+            return Status;
+        }
+        ULONG Processor;
+        Status = LouKeIpicGetVectorObjectProcessorNumber(NewVectors[1], &Processor);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("PCI.SYS:LouKeIpicGetVectorObjectProcessorNumber()\n");
+            return Status;
+        }
+        UINT64 Address = 0xFEE00000;
+        Address |= ((UINT32)ApicHalCpuIdToApicId(Processor) << 12);
+
+        if(!PciMsiSetMessageAddress(PDEV, Address)){
+            LouPrint("PCI.SYS:PciMsiSetMessageAddress()\n");
+            while(1);
             return STATUS_UNSUCCESSFUL;
         }
-        NewVectors[1] += 32;
-        PciHalDbgPrint("PCI.SYS:Using Vector:%h\n", (UINT64)NewVectors[1]);
+        if(!PciMsiSetMessageData(PDEV, (UINT16)Vector)){
+            LouPrint("PCI.SYS:PciMsiSetMessageData()\n");
+            while(1);
+            return STATUS_UNSUCCESSFUL;
+        }
+        UINT16 Control;
+        if(!PciMsiGetMessageControl(PDEV, &Control)){
+            LouPrint("PCI.SYS:PciMsiGetMessageControl()\n");
+            while(1);
+            return STATUS_UNSUCCESSFUL;
+        }
+        Control &= ~(0x07 << 4);
+        Control |= ((MmeBits & 0x07) << 4);
+        Control |= 0x01;
+        if(!PciMsiSetMessageControl(PDEV, Control)){
+            LouPrint("PCI.SYS:PciMsiSetMessageControl()\n");
+            while(1);
+            return STATUS_UNSUCCESSFUL;
+        }
+        PciHalSetCommand(PDEV, PciHalGetCommand(PDEV) | (1 << 10));
+    }else{ 
+        PciHalDbgPrint("PCI.SYS:Allocating INT-X Vectors\n");
+        NewVectors = LouKeMallocArray(OPAQUE_PTR, 2, KERNEL_GENERIC_MEMORY);
+        NewVectors[0] = (UINT8*)(UINTPTR)1;
+        Status = LouKeIpicAllocateVectorObjects(
+            &NewVectors[1],
+            false,
+            LirRoutine,
+            &PciHalDumbyInterruptHandler,
+            0x00,
+            1
+        );
+
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        UINT8 Line = LouKeGetPciInterruptLineFromPin(PDEV);
+        if(!Line){
+            LouPrint("PciHalAllocatePciIrqVectors():ERROR No Pin\n");
+            while(1);
+        }
+        Status = ApicHalInitializeVectorToIoApicRedirection(
+            NewVectors[1],
+            Line,
+            IO_APIC_TRIGGER_MODE_LEVEL,
+            IO_APIC_PIN_POLARITY_ACTIVE_LOW
+        );
+        if(Status != STATUS_SUCCESS){
+            LouPrint("PciHalAllocatePciIrqVectors():ERROR No Redirect\n");
+            while(1);
+            return Status;
+        }
     }
-    
     PDEV->InterruptVectors = NewVectors;
     return STATUS_SUCCESS;
 }
@@ -82,13 +162,59 @@ DRIVER_EXPORT void PciHalFreeIrqVectors(PPCI_DEVICE_OBJECT PDEV){
     while(1);
 }
 
-DRIVER_EXPORT UINT16 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV){
-    return PDEV->InterruptVectors[0];
+DRIVER_EXPORT UINT32 PciHalGetIrqVectorCount(PPCI_DEVICE_OBJECT PDEV){
+    return (UINT32)(UINTPTR)(UINT8*)PDEV->InterruptVectors[0];
 }
 
-DRIVER_EXPORT UINT8 PciHalGetIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT8 Member){
+DRIVER_EXPORT UINT8 PciHalGetIrqVector(PPCI_DEVICE_OBJECT PDEV, UINT32 Member){
     if(Member >= PciHalGetIrqVectorCount(PDEV)){
         return 0x00;
     }
-    return PDEV->InterruptVectors[Member + 1];
+    LOUSTATUS Status;
+    UINT8 Result;
+    if(PciHalGetIrqVectorCount(PDEV) == 1){
+        Status = LouKeIpicGetVectorObjectVector(
+            PDEV->InterruptVectors[1],
+            &Result
+        );
+        if(Status != STATUS_SUCCESS){
+            return 0x00;
+        }
+        return Result;
+    }
+
+    LouPrint("PciHalGetIrqVector()\n");
+    while(1);
+    //return PDEV->InterruptVectors[Member + 1];
+    return 0x00;
+}
+
+DRIVER_EXPORT LOUSTATUS PciHalConnectIrqHandler(
+    PPCI_DEVICE_OBJECT  PDEV,
+    OPAQUE_PTR          Routine, 
+    IPIC_ROUTINE_TYPE   RoutineType, 
+    UINT64              LirData,
+    UINT32              Member       
+){
+    if(Member >= PciHalGetIrqVectorCount(PDEV)){
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    LOUSTATUS Status;
+    if(PciHalGetIrqVectorCount(PDEV) == 1){
+        Status = LouKeIpicChangeVectorObjectHandlerProperties(
+            PDEV->InterruptVectors[1],
+            Routine,
+            RoutineType,
+            LirData
+        );
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        return LouKeIpicSoftwareMaskVectorObject(PDEV->InterruptVectors[1], 0, false);
+    }
+
+    LouPrint("PciHalConnectIrqHandler()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }

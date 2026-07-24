@@ -19,6 +19,7 @@
         <FILETOCPY64>cp API/Virtualization/VMCORE.SYS ISO/ANNYA/SYSTEM64/VMCORE.SYS</FILETOCPY64>                           <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/USB/UsbCore/USBCORE.SYS ISO/ANNYA/SYSTEM64/USBCORE.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/gpu/BootVid/BOOTVID.SYS ISO/ANNYA/SYSTEM64/BOOTVID.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
+        <FILETOCPY64>cp drivers/storage/SCSI/SCSICORE.SYS ISO/ANNYA/SYSTEM64/SCSICORE.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
         <!--PCI Driver-->
         <FILETOCPY64>cp drivers/PCI/PCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PCI.SYS</FILETOCPY64>                                        <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/Apic/APIC.SYS ISO/ANNYA/SYSTEM64/DRIVERS/APIC.SYS</FILETOCPY64>                                        <!--Lousine Kernel Core-->

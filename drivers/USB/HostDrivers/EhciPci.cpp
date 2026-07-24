@@ -19,6 +19,7 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("EHCI.SYS::AddDevice()\n");
+    return STATUS_SUCCESS;
     while(1);
     PPCI_DEVICE_OBJECT PDEV = 0x00;//PlatformDevice->PDEV;
 

@@ -23,6 +23,7 @@ typedef enum {
 typedef struct _PS2_DEVICE_OBJECT{
     PLOU_BUS            BusHandle;
     UINT8               Irq;
+    OPAQUE_PTR          VectorObject;
     BOOL                DeviceExists;
     BOOL                HasDriver;
     UINT8               PortNumber;
@@ -76,10 +77,12 @@ typedef struct _PS2_MOUSE_PRIVATE_DATA{
 }PS2_MOUSE_PRIVATE_DATA, * PPS2_MOUSE_PRIVATE_DATA;
 
 DRIVER_IMPORT
-void 
+LOUSTATUS
 LouKeHalPs2InstallInterruptHandler(
-    PPS2_DEVICE_OBJECT Device, 
-    void(*Handler)(uint64_t)
+    PPS2_DEVICE_OBJECT  Device, 
+    OPAQUE_PTR          Routine,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    UINT64              Data
 );
 
 

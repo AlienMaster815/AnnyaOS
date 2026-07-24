@@ -172,6 +172,8 @@ DRIVER_IMPORT LOUSTATUS ApicIpiHalSendNewInterruptRouteData(ULONG Cpu, PVOID Rou
 DRIVER_IMPORT LOUSTATUS ApicIpiHalSendNewDemonData(ULONG Cpu, PVOID DemonData);
 
 DRIVER_IMPORT LOUSTATUS ApicHalInitializeIsaVectorToIoApicRedirection(OPAQUE_PTR VectorObject, UINT8 GsiVector);
+DRIVER_IMPORT LOUSTATUS ApicHalInitializeVectorToIoApicRedirection(OPAQUE_PTR VectorObject, UINT8 GsiVector, IO_APIC_TRIGGER_MODE TriggerMode, IO_APIC_PIN_POLARITY PinPolarity);
+DRIVER_IMPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu);
 
 #endif 
 #endif

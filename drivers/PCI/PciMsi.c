@@ -178,3 +178,16 @@ BOOLEAN PciMsiSetMaskData(PPCI_DEVICE_OBJECT PDEV, UINT16 Value){
     }
     return PciMsiSetMaskDataEx(PDEV, CapPtr, Value);
 }
+
+UINT8 PciMsiGetMultiMessageCount(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 CapPtr;
+    if(!PciMsiGetMsiCapPtr(PDEV, &CapPtr)){
+        return 0x00;
+    }else if(!CapPtr){
+        return 0x00;
+    }
+    SIZE Control = PciMsiGetMessageControlEx(PDEV, CapPtr);
+    Control >>= 1;
+    Control &= 0x07;
+    return(UINT8)ToThePowerOf2(Control);
+}

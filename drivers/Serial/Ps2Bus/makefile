@@ -15,7 +15,7 @@ TARGET = PS2IO.SYS
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc -L../../Apic -lApic $(INCLUDES)
 
 # Clean rule
 clean:

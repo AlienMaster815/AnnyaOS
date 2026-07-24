@@ -239,3 +239,7 @@ EXPORTS
     LouKeIpicSendNewInterruptRoutingData
     LouKeIpicGetVectorObjectProcessorNumber
     LouKeIpicGetVectorObjectVector
+    LouKeIpicChangeVectorObjectHandlerProperties
+    LouKeIpicAllocateVectorObject
+    LouKeIpicAllocateVectorObjectsEx
+    LouKeIpicAllocateVectorObjectsExWithApicIdLimitation

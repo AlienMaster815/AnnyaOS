@@ -21,6 +21,7 @@ extern "C" {
 #include <cstdlib.h>
 #include <kernel/atomic.h>
 #include "PciIds.h"
+#include <kernel/interrupts.h>
 
 struct _DRIVER_OBJECT;
 struct _DEVICE_OBJECT;
@@ -86,7 +87,7 @@ typedef struct _PCI_DEVICE_OBJECT{
 	struct _PCI_COMMON_CONFIG*	CommonConfig;
 	bool						InterruptsEnabled;
 	int 						NumberOfAssignedVectors;
-	UINT16* 					InterruptVectors;
+	OPAQUE_PTR* 				InterruptVectors;
 	uint8_t						InterruptPin;
 	PCI_INTERRUPT_MECHANISM		InterruptMechanism;
 	void* 						Dev;
@@ -605,6 +606,7 @@ DRIVER_IMPORT LOUSTATUS PciHalMapPciResource(PPCI_DEVICE_OBJECT PDEV, UINT8 Bar,
 DRIVER_IMPORT LOUSTATUS PciHalRegisterLousinePciDeviceTable(struct _DRIVER_OBJECT* DriverObject, PLOUSINE_PCI_DEVICE_TABLE DeviceTable);
 DRIVER_IMPORT PPCI_DEVICE_OBJECT PciHalGetPciDeviceObjectFromLdmDeviceObject(struct _DEVICE_OBJECT* DeviceObject);
 DRIVER_IMPORT LOUSTATUS PciHalScanRuntimeDevices();
+DRIVER_IMPORT LOUSTATUS PciHalConnectIrqHandler(PPCI_DEVICE_OBJECT PDEV, OPAQUE_PTR Routine, IPIC_ROUTINE_TYPE RoutineType, UINT64 LirData, UINT32 Member);
 
 
 #endif

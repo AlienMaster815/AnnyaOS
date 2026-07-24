@@ -162,7 +162,7 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeCreateSystemWorkQeueue();    
     LouPrint("Kernel Advanced System Initialized\n");
-    while(1);
+
 }
 
 void LouKeInitProcessorAcceleratedFeaturesList(PPROCESSOR_FEATURES Features){
@@ -338,8 +338,8 @@ void LouOsKrnlStart(
     }
 
 
-    LouPrint("Successful Boot\n");
-    while(1);
+    //LouPrint("Successful Boot\n");
+    //while(1);
 
     InitializeFileSystemManager();
 

@@ -49,3 +49,5 @@ EXPORTS
     ApicIpiHalSendNewInterruptRouteData
     ApicIpiHalSendNewDemonData
     ApicHalInitializeIsaVectorToIoApicRedirection
+    ApicHalInitializeVectorToIoApicRedirection
+    ApicHalCpuIdToApicId

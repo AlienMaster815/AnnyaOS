@@ -271,14 +271,15 @@ LOUSTATUS LouKeIpicCreateVectorObject(
     );
 }
 
-LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
+LOUSTATUS LouKeIpicAllocateVectorObjectsEx2(
     OPAQUE_PTR*         VectorObjectOut,
     SIZE                Processor,
     BOOLEAN             NeedFlotationSave,
     IPIC_ROUTINE_TYPE   RoutineType,
     OPAQUE_PTR          Routine,
     UINT64              LirData,
-    SIZE                Vectors
+    SIZE                Vectors,
+    SIZE                Alignment
 ){
     if((Vectors > 32) || (!VectorObjectOut)){
         return STATUS_INVALID_PARAMETER;
@@ -288,9 +289,13 @@ LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
     PIPIC TmpIpic = &Ipics[Processor];
 
     SIZE GroundStates = UINT32_MAX;
-    SIZE GroundStatesVector = 0x30;
-    for(SIZE TmpVector = GroundStatesVector; TmpVector < (0xFF - Vectors); TmpVector++){
+    SIZE GroundStatesVector = ROUND_UP64(0x30, Alignment);
+    for(SIZE TmpVector = GroundStatesVector; TmpVector < (0xFF - Vectors); TmpVector += Alignment){
         SIZE Sum = 0;
+        if(RangeInterferes(TmpVector, Vectors, 128, 4)){
+            continue;
+        }
+
         for(SIZE i = 0 ; i < Vectors; i++){
             Sum += TmpIpic->VectorDataCount[TmpVector + i];
         }   
@@ -313,6 +318,85 @@ LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
     );
 
     return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT LOUSTATUS LouKeIpicAllocateVectorObjectsEx(
+    OPAQUE_PTR*         VectorObjectOut,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Vectors,
+    SIZE                Alignment
+){
+    if((Vectors > 32) || (!VectorObjectOut)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    SIZE        GroundState = UINT32_MAX;
+    SIZE        GroundStateProcessorID = 0;
+
+    LouKeMemoryBarrier();
+    for(SIZE i = 0; i < IpicsAllocated; i++){
+        if(!Ipics[i].ProcessorEnabled){
+            continue;
+        }
+        if(Ipics[i].VectorAllocationCount < GroundState){
+            GroundStateProcessorID = i;
+            GroundState = Ipics[i].VectorAllocationCount;
+        }
+    }
+    LouKeMemoryBarrier();
+
+    return LouKeIpicAllocateVectorObjectsEx2(
+        VectorObjectOut,
+        GroundStateProcessorID,
+        NeedFlotationSave,
+        RoutineType,
+        Routine,
+        LirData,
+        Vectors,
+        Alignment
+    );
+}
+
+KERNEL_EXPORT LOUSTATUS LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
+    OPAQUE_PTR*         VectorObjectOut,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Vectors,
+    SIZE                Alignment,
+    SIZE                ApicID
+){
+    if((Vectors > 32) || (!VectorObjectOut)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    SIZE        GroundState = UINT32_MAX;
+    SIZE        GroundStateProcessorID = 0;
+
+    LouKeMemoryBarrier();
+    for(SIZE i = 0; i < IpicsAllocated; i++){
+        if(!Ipics[i].ProcessorEnabled || (ApicHalCpuIdToApicId(i) > ApicID)){
+            continue;
+        }
+        if(Ipics[i].VectorAllocationCount < GroundState){
+            GroundStateProcessorID = i;
+            GroundState = Ipics[i].VectorAllocationCount;
+        }
+    }
+    LouKeMemoryBarrier();
+
+    return LouKeIpicAllocateVectorObjectsEx2(
+        VectorObjectOut,
+        GroundStateProcessorID,
+        NeedFlotationSave,
+        RoutineType,
+        Routine,
+        LirData,
+        Vectors,
+        Alignment
+    );
 }
 
 LOUSTATUS LouKeIpicAllocateVectorObjects(
@@ -341,14 +425,15 @@ LOUSTATUS LouKeIpicAllocateVectorObjects(
     }
     LouKeMemoryBarrier();
 
-    return LouKeIpicAllocateVectorObjectsEx(
+    return LouKeIpicAllocateVectorObjectsEx2(
         VectorObjectOut,
         GroundStateProcessorID,
         NeedFlotationSave,
         RoutineType,
         Routine,
         LirData,
-        Vectors
+        Vectors,
+        1
     );
 }
 
@@ -360,13 +445,14 @@ LOUSTATUS LouKeIpicAllocateVectorObjectEx(
     OPAQUE_PTR          Routine,
     UINT64              LirData
 ){
-    return LouKeIpicAllocateVectorObjectsEx(
+    return LouKeIpicAllocateVectorObjectsEx2(
         VectorObjectOut, 
         Processor, 
         NeedFlotationSave,
         RoutineType,
         Routine,
         LirData,
+        1,
         1
     );
 }
@@ -450,8 +536,45 @@ LouKeIpicGetVectorObjectVector(
         case VECTOR_HANDLE_ID_OBJECT:
             *Vector = ObjectHandle->VectorObject.VectorID;
             break;
+        case VECTOR_HANDLE_ID_GROUP:
+            *Vector = ObjectHandle->VectorGroup.GroupMembers[0].VectorID;
+            break;
         default:
             return STATUS_INVALID_PARAMETER;
     }
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeIpicChangeVectorObjectHandlerProperties(
+    OPAQUE_PTR          Object, 
+    OPAQUE_PTR          Routine,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    UINT64              LirData
+){
+    if((!Object) || (!Routine)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PIPIC_VECTOR_OBJECT_HANDLE ObjectHandle = (PIPIC_VECTOR_OBJECT_HANDLE)Object;
+    switch(ObjectHandle->HandleType){
+        case VECTOR_HANDLE_ID_OBJECT:
+            break;
+        default:
+            return STATUS_INVALID_PARAMETER;
+    }
+    ObjectHandle->VectorObject.RoutineType = RoutineType;
+    switch(RoutineType){
+        case IsrRoutine:
+            ObjectHandle->VectorObject.Routine.Isr = (INTERRUPT_SERVICE_ROUTINE)Routine;
+            break;
+        case LirRoutine:
+            ObjectHandle->VectorObject.Routine.Lir = (LOUSINE_INTERRUPT_ROUTINE)Routine;
+            break;
+        case LirExRoutine:
+            ObjectHandle->VectorObject.Routine.LirEx = (LOUSINE_EXTENDED_INTERRUPT_ROUTINE)Routine;
+            break;
+    }
+    ObjectHandle->VectorObject.LirData = LirData;
     return STATUS_SUCCESS;
 }

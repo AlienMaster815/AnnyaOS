@@ -28,7 +28,8 @@ static LOUSTATUS LouKePs2MouseUpdate(PLOUQ_WORK Work){
     return STATUS_SUCCESS;
 }
 
-static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Ps2Device){ 
+static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Data){ 
+    PPS2_DEVICE_OBJECT Ps2Device = (PPS2_DEVICE_OBJECT)(UINT8*)Data;
     if(!(LouKeHalPs2CheckControllerStatus() & (0x20))){
         return;
     }
@@ -51,7 +52,7 @@ LouKeHalInitializePs2Mouse(
 
     LouKeLouQInitializeWork(&Ps2Device->Work, LouKePs2MouseUpdate, &Ps2Device->Work);
 
-    LouKeHalPs2InstallInterruptHandler(Ps2Device, (void(*)(uint64_t))LouKePs2MouseIrqHandler);
+    LouKeHalPs2InstallInterruptHandler(Ps2Device, (OPAQUE_PTR)LouKePs2MouseIrqHandler, LirRoutine, (UINT64)(UINTPTR)(UINT8*)Ps2Device);
     UINT8 Command;
     Command = Private->Scaling;
     UINT8 Responce;

@@ -159,6 +159,50 @@ LouKeIpicGetVectorObjectVector(
     UINT8*      Vector
 );
 
+KERNEL_EXPORT
+LOUSTATUS
+LouKeIpicChangeVectorObjectHandlerProperties(
+    OPAQUE_PTR          Object, 
+    OPAQUE_PTR          Routine,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    UINT64              LirData
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeIpicAllocateVectorObject(
+    OPAQUE_PTR*         VectorObjectOut,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeIpicAllocateVectorObjectsEx(
+    OPAQUE_PTR*         VectorObjectOut,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Vectors,
+    SIZE                Alignment
+);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
+    OPAQUE_PTR*         VectorObjectOut,
+    BOOLEAN             NeedFlotationSave,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    OPAQUE_PTR          Routine,
+    UINT64              LirData,
+    SIZE                Vectors,
+    SIZE                Alignment,
+    SIZE                ApicId
+);
+
 #endif
 #ifdef __cplusplus
 }

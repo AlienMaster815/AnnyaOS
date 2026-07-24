@@ -337,14 +337,27 @@ LouKeHalPs2CommandPs2Device(
 }
 
 DRIVER_EXPORT
-void 
+LOUSTATUS 
 LouKeHalPs2InstallInterruptHandler(
-    PPS2_DEVICE_OBJECT Device, 
-    void(*Handler)(uint64_t)
+    PPS2_DEVICE_OBJECT  Device, 
+    OPAQUE_PTR          Routine,
+    IPIC_ROUTINE_TYPE   RoutineType,
+    UINT64              LirData
 ){
-    LouPrint("LouKeHalPs2InstallInterruptHandler()\n");
-    while(1);
-    //RegisterInterruptHandler(Handler, Device->Irq + 0x20, false, (uint64_t)Device);  
+    LOUSTATUS Status = LouKeIpicChangeVectorObjectHandlerProperties(
+        Device->VectorObject,
+        Routine,
+        RoutineType,
+        LirData
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Status = LouKeIpicSoftwareMaskVectorObject(Device->VectorObject, 0, false);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    return ApicHalInitializeIsaVectorToIoApicRedirection(Device->VectorObject, Device->Irq);
 }
 
 DRIVER_EXPORT 
@@ -435,16 +448,38 @@ LouKeHalPs2CheckControllerStatus(){
     return Ps2ReadStatus();
 }
 
+LOUSTATUS LouKeHalPs2DumbyInterruptHandler(UINT64 Foo){
+
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS Ps2InitializeBus(PLOU_BUS BussClass, PLOU_BUS_OBJECT Object){
     LOUSTATUS InitStatus;
     LouPrint("PS2IO.SYS:Ps2InitializeBus()\n");
     Object->BusPrivateData = (PVOID)Ps2Devices;
     //Initialize Port 1
+    
     Ps2Devices[0].PortNumber = 0;
     Ps2Devices[0].Irq = KEYBOARD_INTERRUPT;
+    LouKeIpicAllocateVectorObject(
+        &Ps2Devices[0].VectorObject,
+        false,
+        LirRoutine,
+        (OPAQUE_PTR)LouKeHalPs2DumbyInterruptHandler,
+        0x00
+    );
+    
     //Initialize Port 2
     Ps2Devices[1].PortNumber = 1;
     Ps2Devices[1].Irq = AUX_INTERRUPT;
+    LouKeIpicAllocateVectorObject(
+        &Ps2Devices[1].VectorObject,
+        false,
+        LirRoutine,
+        (OPAQUE_PTR)LouKeHalPs2DumbyInterruptHandler,
+        0x00
+    );
+
     for(size_t i = 0 ; i < 2; i++){
         Ps2Devices[i].DeviceExists = true; 
         Ps2Devices[i].ChipsetDevice = true; 

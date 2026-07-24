@@ -95,6 +95,7 @@ typedef enum {
 typedef struct _PS2_DEVICE_OBJECT{
     PLOU_BUS            BusHandle;
     UINT8               Irq;
+    OPAQUE_PTR          VectorObject;    
     BOOL                DeviceExists;
     BOOL                HasDriver;
     UINT8               PortNumber;

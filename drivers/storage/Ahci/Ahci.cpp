@@ -637,7 +637,7 @@ void AhciPortInterruptHandler(
     }
 }
 
-void AhciInterruptHandler(uint64_t IrqData){
+LOUSTATUS AhciInterruptHandler(UINT64 IrqData){
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost = (PLOUSINE_KERNEL_DEVICE_ATA_HOST)IrqData;
     PAHCI_DRIVER_PRIVATE_DATA HostPrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
     PAHCI_GENERIC_HOST_CONTROL Ghc = HostPrivateData->GenericHostController;
@@ -646,16 +646,13 @@ void AhciInterruptHandler(uint64_t IrqData){
     
     IrqStatus = Ghc->InterruptStatus;
     if(!IrqStatus){
-        return;
+        return STATUS_SUCCESS;
     }
     IrqMask = IrqStatus & Pi;//3.1415
-    //LouKeAcquireSpinLock(&AtaHost->HostLock, &Irql);
 
     AhciPortInterruptHandler(AtaHost, IrqMask);
-
     Ghc->InterruptStatus = IrqStatus;
-    //LouKeReleaseSpinLock(&AtaHost->HostLock, &Irql);
-    return;
+    return STATUS_SUCCESS;
 }
 
 static AhciSb600Enable64Bit(
@@ -1000,7 +997,7 @@ static void  AhciInitializeInterrupts(
 
     UINT16 Vectors = PciHalGetIrqVectorCount(PDEV);
     if(Vectors == 1){
-        LouPrint("AHCI.SYS:Interrupts For Ahci Device Initialized\n");
+        LouPrint("AHCI.SYS:Interrupts For Ahci Device Initialized To Vector:%h\n", PciHalGetIrqVector(PDEV, 0));
         return;
     }
 
@@ -1059,12 +1056,13 @@ static void AhciSetupInterruptHandler(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         LouPrint("AhciSetupInterruptHandler()\n");
         while(1);
     } 
-    else{
-
-        LouPrint("AhciSetupInterruptHandler()");
-        while(1);
-        //RegisterInterruptHandler(AhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)AtaHost);
-    }
+    PciHalConnectIrqHandler(
+        PDEV, 
+        (OPAQUE_PTR)AhciInterruptHandler,
+        LirRoutine,
+        (UINT64)(UINTPTR)(UINT8*)AtaHost,
+        0
+    );
 }
 
 LOUSTATUS AddAhciDevice(

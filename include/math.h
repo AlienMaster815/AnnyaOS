@@ -12,6 +12,14 @@ typedef struct _RANGE{
 
 #define IsPowerOf2(x) ((x) > 0 && ((x) & ((x) - 1)) == 0)
 
+static inline SIZE ToThePowerOf2(SIZE x){
+    SIZE Result = 1; 
+    for(SIZE i = 0; i < x; i++){
+        Result *= 2;
+    }
+    return Result;
+}
+
 static inline int ILog2(unsigned int x) {
     int result = 0;
     while (x >>= 1) { // Right shift until x becomes 0
