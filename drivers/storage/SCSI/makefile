@@ -7,7 +7,8 @@ SRC = 	ScsiCore.c \
 		Cdb10.c \
 		Cdb12.c \
 		Cdb16.c \
-		CdbVar.c
+		CdbVar.c \
+		Ssdd.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=ScsiCoreEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

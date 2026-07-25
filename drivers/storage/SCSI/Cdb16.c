@@ -21,3 +21,20 @@ void ScsiCoreEncodeCdb16Command(
     memcpy(Cdb, &tCdb, sizeof(SCSI_CDB16_COMMAND));
 }
 
+LOUSTATUS 
+ScsiCoreEncodeBackgroundControlCommand(
+    PSCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE  Cdb,
+    UINT8                                       BoControl,
+    UINT8                                       BoTime,
+    UINT8                                       Control 
+){
+    if((!Cdb) || (BoControl > 0b11)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    Cdb->OpCode = SCSI_COMMAND_BACKGROUND_CONTROL;
+    Cdb->ServiceAction = SCSI_SERVICE_ACTION_BACKGROUND_CONTROL;
+    Cdb->BoControl = BoControl;
+    Cdb->BoTime = BoTime;
+    Cdb->Control = Control;
+    return STATUS_SUCCESS;
+}
