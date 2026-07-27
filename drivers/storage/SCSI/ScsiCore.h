@@ -115,6 +115,33 @@ typedef struct PACKED _SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE{
     UINT8   Control;
 }SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE, * PSCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE;
 
+typedef struct PACKED _SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE{
+    UINT8   OpCode;         //SCSI_COMMAND_CHANGE_DEFINITION 0x40
+    UINT8   Reserved;       
+    UINT8   Save;
+    UINT8   DefParam;
+    UINT8   Reserved2[4];
+    UINT8   ParamLength;
+    UINT8   Control;
+}SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE, * PSCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_FORMAT_UNIT_COMMAND_STRUCTURE{
+    UINT8   OpCode;                 //SCSI_COMMAND_FORMAT_UNIT 0x04
+    UINT8   FmtInfoLlFmtDataClDfl;
+    UINT8   VendorSpecific;
+    UINT8   Reserved;
+    UINT8   Ffmt;
+    UINT8   Control;
+}SCSI_FORMAT_UNIT_COMMAND_STRUCTURE, * PSCSI_FORMAT_UNIT_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE{
+    UINT8   OpCode;         //SCSI_COMMAND_GET_LBA_STATUS           0x9E
+    UINT8   ServiceAction;  //SCSI_SERVICE_ACTION_GET_LBA_STATUS    0x12
+    UINT64  StartingLba;
+    UINT32  AllocationLength;
+    UINT8   Reserved;
+    UINT8   Control;
+}SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE, * PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE;
 
 #define SCSI_CDBVAR_COMMAND_OPCODE                  0x7F
 
@@ -153,7 +180,7 @@ typedef struct PACKED _SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE{
 #define SCSI_COMMAND_BACKGROUND_CONTROL         0x9E
 #define SCSI_COMMAND_CHANGE_DEFINITION          0x40
 #define SCSI_COMMAND_FORMAT_UNIT                0x04
-#define SCSI_COMMAND_GET_LBA_STATUS             0x9E         
+#define SCSI_COMMAND_GET_LBA_STATUS             0x9E     
 #define SCSI_COMMAND_GET_STREAM_STATUS          0x9E
 #define SCSI_COMMAND_INQUIRY                    0x12
 #define SCSI_COMMAND_LOG_SELECT                 0x4C
@@ -254,6 +281,13 @@ typedef struct PACKED _SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE{
 
 #define SCSI_BO_TIME_NO_LIMIT       0
 
+#define SCSI_CHGDEF_SAVE            1
+
+#define SCSI_CHGDEF_DEFPARAM_CURRENT_OPDEF              0x00
+#define SCSI_CHGDEF_DEFPARAM_SCSI2_OPDEF                0x03
+#define SCSI_CHGDEF_DEFPARAM_SCSI3_OPDEF                0x04
+#define SCSI_CHGDEF_DEFPARAM_MANUFACTURE_OPDEF          0x3F
+
 
 
 LOUSTATUS ScsiCoreGetInfoSenceDataInformation(PSSDD_INFO_STRUCTURE SenceData, UINT64* Out);
@@ -265,7 +299,9 @@ void ScsiCoreEncodeCdb10Command(PSCSI_CDB10_COMMAND Cdb, UINT8 OpCode, UINT8 Ser
 void ScsiCoreEncodeCdb12Command(PSCSI_CDB12_COMMAND Cdb, UINT8 OpCode, UINT8 ServiceActionMci, UINT32 Lba, UINT32 TpaLength, UINT8 Mci, UINT8 Control);
 void ScsiCoreEncodeCdb16Command(PSCSI_CDB16_COMMAND Cdb, UINT8 OpCode, UINT64 Lba, UINT32 TpaLength, UINT8 Mci, UINT8 Control);
 void ScsiCoreEncodeLongLbaCdbVar(PSCSI_LONG_LBA_CDBVAR_COMMAND Cdb, UINT8 Control, UINT8 Mci[5], UINT8 CdbAdditionalLength, UINT16 ServiceAction, UINT8 MciFuaDpoMci, UINT8 Mci2, UINT64 Lba, UINT64 Mci3, UINT32 TpaLength);
-
+void ScsiCoreEncodeBackgroundControlCommand(PSCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE Cdb, UINT8 BoControl, UINT8 BoTime, UINT8 Control);
+void ScsiCoreEncodeChangeDefinitionCommand(PSCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE Cdb, UINT8 Save, UINT8 DefParam, UINT8 ParamLength, UINT8 Control);
+void ScsiCoreEncodeGetLbaStatusCommand(PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE Cdb, UINT64 StartingLba, UINT32 AllocationLength, UINT8 Reserved, UINT8 Control);
 
 
 #endif

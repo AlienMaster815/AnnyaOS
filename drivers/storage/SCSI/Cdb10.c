@@ -22,3 +22,20 @@ void ScsiCoreEncodeCdb10Command(
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_CDB10_COMMAND));
 }
+
+void 
+ScsiCoreEncodeChangeDefinitionCommand(
+    PSCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE   Cdb,
+    UINT8                                       Save,
+    UINT8                                       DefParam,
+    UINT8                                       ParamLength,
+    UINT8                                       Control
+){
+    SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE tCdb;
+    tCdb.OpCode = SCSI_COMMAND_CHANGE_DEFINITION;
+    tCdb.Save = Save;
+    tCdb.DefParam = DefParam;
+    tCdb.ParamLength = ParamLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE));
+}

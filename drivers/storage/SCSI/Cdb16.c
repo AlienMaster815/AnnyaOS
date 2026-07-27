@@ -21,20 +21,39 @@ void ScsiCoreEncodeCdb16Command(
     memcpy(Cdb, &tCdb, sizeof(SCSI_CDB16_COMMAND));
 }
 
-LOUSTATUS 
+void 
 ScsiCoreEncodeBackgroundControlCommand(
     PSCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE  Cdb,
     UINT8                                       BoControl,
     UINT8                                       BoTime,
     UINT8                                       Control 
 ){
-    if((!Cdb) || (BoControl > 0b11)){
-        return STATUS_INVALID_PARAMETER;
-    }
-    Cdb->OpCode = SCSI_COMMAND_BACKGROUND_CONTROL;
-    Cdb->ServiceAction = SCSI_SERVICE_ACTION_BACKGROUND_CONTROL;
-    Cdb->BoControl = BoControl;
-    Cdb->BoTime = BoTime;
-    Cdb->Control = Control;
-    return STATUS_SUCCESS;
+    SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE tCdb;
+    tCdb.OpCode = SCSI_COMMAND_BACKGROUND_CONTROL;
+    tCdb.ServiceAction = SCSI_SERVICE_ACTION_BACKGROUND_CONTROL;
+    tCdb.BoControl = BoControl;
+    tCdb.BoTime = BoTime;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_SERVICE_ACTION_BACKGROUND_CONTROL));
+}
+
+void ScsiCoreEncodeGetLbaStatusCommand(
+    PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE  Cdb,
+    UINT64                                  StartingLba,
+    UINT32                                  AllocationLength,
+    UINT8                                   Reserved,
+    UINT8                                   Control
+){
+    UINT64 Tmp64;
+    UINT32 Tmp32;
+    SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE tCdb;
+    tCdb.OpCode = SCSI_COMMAND_GET_LBA_STATUS;
+    tCdb.ServiceAction = SCSI_SERVICE_ACTION_GET_LBA_STATUS;
+    LouKeSwapEndianess(&StartingLba, &Tmp64, sizeof(UINT64));
+    tCdb.StartingLba = Tmp64;
+    LouKeSwapEndianess(&AllocationLength, &Tmp32, sizeof(UINT32));
+    tCdb.AllocationLength  = Tmp32;
+    tCdb.Reserved = Reserved;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE));
 }
