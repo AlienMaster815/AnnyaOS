@@ -338,8 +338,8 @@ void LouOsKrnlStart(
     }
 
 
-    LouPrint("Successful Boot\n");
-    while(1);
+    //LouPrint("Successful Boot\n");
+    //while(1);
 
     InitializeFileSystemManager();
 

@@ -768,7 +768,7 @@ typedef int errno_t;
 
 ANNA_IMPORT
 LOUSTATUS  
-DrsdGetCurrentScreenArea(
+InternalDrsdGetCurrentScreenArea(
     int* x,
     int* y,
     int* Width,
@@ -776,12 +776,35 @@ DrsdGetCurrentScreenArea(
 );
 
 ANNA_IMPORT
-void 
-DrsdSyncScreens();
+void
+InternalDrsdPutPixelEx(int X , int Y, UINT32 Color);
 
 ANNA_IMPORT
-void
-DrsdPutPixelEx(int X , int Y, UINT32 Color);
+HANDLE
+InternalDrsdCreateFbContext(
+    int                         XLocation,
+    int                         YLocation,
+    int                         Width,
+    int                         Height,
+    UINT16                      BytesPerPixel
+);
+
+ANNA_IMPORT
+void 
+InternalDrsdDeployContext(
+    HANDLE tContext
+);
+
+ANNA_IMPORT
+void 
+InternalDrsdFillColorEx(
+    HANDLE  tContext,
+    int     x,
+    int     y,
+    int     Width,
+    int     Height,
+    UINT32  Color
+);
 
 #endif
 

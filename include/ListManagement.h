@@ -44,6 +44,15 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
         ListMemberIsNotNull((Position), Member); \
         (Position) = ListItemToTypeOrNull((Position)->Member.NextHeader, typeof(*(Position)), Member))
 
+#define ForEachListEntryBackwards(Position, Node, Member) \
+    for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member); \
+        (Position) = ListItemToTypeOrNull((Position)->Member.NextHeader, typeof(*(Position)), Member)){} \
+    for((Position) = ListItemToTypeOrNull(((Node)->LastHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member); \
+        (Position) = ListItemToTypeOrNull((Position)->Member.LastHeader, typeof(*(Position)), Member))
+
+
 #define ForEachListEntrySafe(Position, N, Node, Member) \
     for((Position) = ListItemToTypeOrNull(((Node)->NextHeader), typeof(*(Position)), Member); \
         ListMemberIsNotNull((Position), Member) && ((N) = ListItemToTypeOrNull((Position)->Member.NextHeader, typeof(*(N)), Member), true); \

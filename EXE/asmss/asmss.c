@@ -21,11 +21,26 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
         0x00
     );
 
-    //LouPrint("LouDllGlobalHeap:%h\n", LouDllGlobalHeap);
+    PUSER_PROCESS_HEAP DrsdRuntimeHeap = LouRtlCreateSharedHeap(
+        USER_HEAP_FLAG_GROWABLE,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00
+    );
+
+    //LouPrint("LouDllGlobalHeap:%h\n", DrsdRuntimeHeap);
 
     LOUSTATUS Status = LouRegisterGlobalObject(L"LouDllGlobalHeap", (PVOID)LouDllGlobalHeap);
     if(Status != STATUS_SUCCESS){
         LouPrint("ASMSS.EXE:ERROR Unable To Register Global Heap\n");
+        return Status;
+    }
+
+    Status = LouRegisterGlobalObject(L"DrsdRuntimeHeap", (PVOID)DrsdRuntimeHeap);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ASMSS.EXE:ERROR Unable To Register Drsd Runtime Heap\n");
         return Status;
     }
 
@@ -42,7 +57,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
         return Status;
     }
 
-    //LouExitDosMode();
+    LouExitDosMode();
 
     //HPROCESS WindowManager;
 
