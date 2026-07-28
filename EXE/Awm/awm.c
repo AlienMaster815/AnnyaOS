@@ -16,17 +16,11 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
     LouPrint("Width :%d\n", Width);
     LouPrint("Height:%d\n", Height);
 
-    HANDLE BackgroundFbContext = InternalDrsdCreateFbContext(
+    /*HANDLE BackgroundFbContext = InternalDrsdCreateFbContext(
         x, y,
         Width, Height,
         4
     );
-
-    //for(SIZE Tx = 0; Tx < Width; Tx++){
-    //    for(SIZE Ty = 0; Ty < Height; Ty++){
-    //        InternalDrsdPutPixelEx(Tx + x, Ty + y, SET_RGB(0, 0xC0, 0xC0));
-    //    }
-    //}
 
     InternalDrsdFillColorEx(
         BackgroundFbContext,
@@ -37,7 +31,7 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
 
     InternalDrsdDeployContext(
         BackgroundFbContext
-    );
+    );*/
     
     while(1);
     return STATUS_SUCCESS;

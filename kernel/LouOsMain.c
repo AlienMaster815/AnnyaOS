@@ -134,6 +134,7 @@ LOUSTATUS LouKeInitializeInterruptSubsystems();
 void LouKeWaitForProcessorInitialization();
 void LouKeApIdleTillApInitFunction();
 LOUAPI void LouKeWaitForApInitializationCompletion();
+void LouKeInitializeLouKeMallocSubsystem();
 
 void AdvancedLousineKernelInitialization(){
 
@@ -291,6 +292,8 @@ void LouOsKrnlStart(
         HaltAndCatchFile();
     }
 
+    LouKeInitializeLouKeMallocSubsystem();
+
     ParserLouLoaderInformation(
         &LousineKernelLoaderInformation
     );
@@ -337,9 +340,10 @@ void LouOsKrnlStart(
         while(1);
     }
 
+    //TODO: implement new fast object into the memory manager
 
-    //LouPrint("Successful Boot\n");
-    //while(1);
+    LouPrint("Successful Boot\n");
+    while(1);
 
     InitializeFileSystemManager();
 

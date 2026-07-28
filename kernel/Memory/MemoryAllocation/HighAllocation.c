@@ -25,7 +25,28 @@ typedef PVOID (*PAGE_ALLOCATOR_FUNCTION_EX)(SIZE Size, SIZE Count, UINT64 PageFl
 
 static ListHeader               KernelMemorySpaces[TOTAL_MEMORY_SPACES] = {0};
 static mutex_t                  KernelMemorySpacesLocks[TOTAL_MEMORY_SPACES] = {0};
-const  PAGE_ALLOCATOR_FUNCTION  KernelMemorySpacesPageAllocators[TOTAL_MEMORY_SPACES] = {LouKeMallocPage, LouKeMallocPagePhy32, (PAGE_ALLOCATOR_FUNCTION)LouKeMallocPageVirt32, (PAGE_ALLOCATOR_FUNCTION)LouKeMallocPageVirt64};
+static const  PAGE_ALLOCATOR_FUNCTION  KernelMemorySpacesPageAllocators[TOTAL_MEMORY_SPACES] = {LouKeMallocPage, LouKeMallocPagePhy32, (PAGE_ALLOCATOR_FUNCTION)LouKeMallocPageVirt32, (PAGE_ALLOCATOR_FUNCTION)LouKeMallocPageVirt64};
+
+void LouKeInitializeLouKeMallocSubsystem(){
+    LouKeCreateFastObjectClass(
+        "KMALLOC_VMEM_TRACK",
+        512,
+        sizeof(KMALLOC_VMEM_TRACK),
+        GET_ALIGNMENT(KMALLOC_VMEM_TRACK),
+        0,
+        KERNEL_GENERIC_MEMORY
+    );
+
+    LouKeCreateFastObjectClass(
+        "KMALLOC_PAGE_TRACK",
+        256,
+        sizeof(KMALLOC_PAGE_TRACK),
+        GET_ALIGNMENT(KMALLOC_PAGE_TRACK),
+        0,
+        KERNEL_GENERIC_MEMORY
+    );
+}
+
 
 static 
 BOOLEAN
@@ -86,7 +107,7 @@ LouKeMallocFromTrackers(
         }
     }
 
-    TmpPageTrack = (PKMALLOC_PAGE_TRACK)LouGeneralAllocateMemoryEx(sizeof(KMALLOC_PAGE_TRACK), GET_ALIGNMENT(KMALLOC_PAGE_TRACK));
+    TmpPageTrack = (PKMALLOC_PAGE_TRACK)LouKeAllocateFastObject("KMALLOC_PAGE_TRACK");
 
     Result = PageAllocatorEx ? PageAllocatorEx(MEGABYTE_PAGE, RoundUpSize / MEGABYTE_PAGE, PageFlags, true) : PageAllocator(MEGABYTE_PAGE , RoundUpSize / MEGABYTE_PAGE, PageFlags);
 
@@ -96,7 +117,7 @@ LouKeMallocFromTrackers(
     LouKeListAddTail(&TmpPageTrack->Peers, Track);
 
     _DONE:
-    TmpVMemTrack = (PKMALLOC_VMEM_TRACK)LouGeneralAllocateMemoryEx(sizeof(KMALLOC_VMEM_TRACK), GET_ALIGNMENT(KMALLOC_VMEM_TRACK));
+    TmpVMemTrack = (PKMALLOC_VMEM_TRACK)LouKeAllocateFastObject("KMALLOC_VMEM_TRACK");
     TmpVMemTrack->Address = Result;
     TmpVMemTrack->Size = Size;
     LouKeListAddTail(&TmpVMemTrack->Peers, &TmpPageTrack->VMemTracks);
@@ -170,11 +191,11 @@ LouKeReallocFromTrackers(
                     BOOLEAN Realocate = false;
                     if(!Size){
                         LouKeListDeleteItem(&TmpVMemTrack->Peers);
-                        LouGeneralFreeMemory(TmpVMemTrack);
+                        LouKeFreeFastObject("KMALLOC_VMEM_TRACK", TmpVMemTrack);
                         if(LouKeListIsEmpty(&TmpPageTrack->VMemTracks)){
                             LouKeListDeleteItem(&TmpPageTrack->Peers);
                             LouKeFreePage(TmpPageTrack->PageAddress);
-                            LouGeneralFreeMemory(TmpPageTrack);
+                            LouKeFreeFastObject("KMALLOC_PAGE_TRACK", TmpPageTrack);
                         }
                     }else{
                         if(LouKeTrackAllocationFits(TmpPageTrack, (UINT64)TmpVMemTrack->Address, Size, 0x00) && (TmpPageTrack->Flags == Flags)){
@@ -194,11 +215,11 @@ LouKeReallocFromTrackers(
                         );
                         memcpy(Result, TmpVMemTrack->Address, TmpVMemTrack->Size);
                         LouKeListDeleteItem(&TmpVMemTrack->Peers);
-                        LouGeneralFreeMemory(TmpVMemTrack);
+                        LouKeFreeFastObject("KMALLOC_VMEM_TRACK", TmpVMemTrack);
                         if(LouKeListIsEmpty(&TmpPageTrack->VMemTracks)){
                             LouKeListDeleteItem(&TmpPageTrack->Peers);
                             LouKeFreePage(TmpPageTrack->PageAddress);
-                            LouGeneralFreeMemory(TmpPageTrack);
+                            LouKeFreeFastObject("KMALLOC_PAGE_TRACK", TmpPageTrack);
                         }
                     }
                     return Result;

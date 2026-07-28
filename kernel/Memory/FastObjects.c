@@ -23,8 +23,8 @@ static PFAST_ALLOCATION_TEMPLATE AllocateFastObjectClassTemplate(
     LOUSINE_OBJECT_CONSTRUCTOR      Constructor,
     LOUSINE_OBJECT_DECONSTRUCTOR    DeConstructor
 ){
-    PFAST_ALLOCATION_TEMPLATE NewTemplate = LouKeMallocType(FAST_ALLOCATION_TEMPLATE, KERNEL_GENERIC_MEMORY);
-    NewTemplate->TrackingTag = LouKeMallocArray(CHAR, strlen(ClassName) + 1, KERNEL_GENERIC_MEMORY);
+    PFAST_ALLOCATION_TEMPLATE NewTemplate = LouKeMallocTypeSafe(FAST_ALLOCATION_TEMPLATE, KERNEL_GENERIC_MEMORY);
+    NewTemplate->TrackingTag = LouKeMallocArraySafe(CHAR, strlen(ClassName) + 1, KERNEL_GENERIC_MEMORY);
     strcpy(NewTemplate->TrackingTag, ClassName);
     NewTemplate->ObjectSize = ObjectSize;
     NewTemplate->ObjectCount = ObjectCount;
@@ -53,7 +53,7 @@ static PFAST_ALLOCATION_TEMPLATE AcquireFastObjectTemplate(LOUSTR ClassName){
 static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Template){
     PFAST_ALLOCATION_TRACKER NewTracker;
 
-    NewTracker = LouKeMallocType(FAST_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
+    NewTracker = LouKeMallocTypeSafe(FAST_ALLOCATION_TRACKER, KERNEL_GENERIC_MEMORY);
     NewTracker->AllocationPool = LouKeCreateFixedPool(
         Template->ObjectCount,
         Template->ObjectSize,
@@ -66,7 +66,7 @@ static PFAST_ALLOCATION_TRACKER AllocatePoolTracker(PFAST_ALLOCATION_TEMPLATE Te
     //LouPrint("NewPool:%h With Size:%h ObjSize:%h For Template:%h :: %s\n", NewTracker->AllocationPool->VLocation, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment) * Template->ObjectCount, ROUND_UP64(Template->ObjectSize , Template->ObjectAlignment), Template, Template->TrackingTag);
     
     if(!NewTracker->AllocationPool){
-        LouKeFree(NewTracker);
+        LouKeFreeSafe(NewTracker);
         return 0x00;
     }
 
@@ -81,7 +81,7 @@ static void FreePoolTracker(PFAST_ALLOCATION_TEMPLATE Template, PFAST_ALLOCATION
         LouKeDestroyFixedPool(Tracker->AllocationPool);
         Tracker->AllocationPool = 0x00;
     }
-    LouKeFree(Tracker);
+    LouKeFreeSafe(Tracker);
 }
 
 LOUSTATUS LouKeCreateFastObjectClassEx(
@@ -149,7 +149,6 @@ PVOID LouKeAllocateFastObjectEx(
         LouPrint("LouKeAllocateFastObjectEx():Object Dosent Exist:%s\n", ObjectLookup);
         return 0x00;
     }
-
 
     PVOID Result = 0;
     PFAST_ALLOCATION_TRACKER TmpTracker;

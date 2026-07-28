@@ -247,6 +247,10 @@ static inline size_t GetAlignmentBySize(size_t Size){
 #define LouKeMallocArray(type, count, tag) (type*)LouKeMallocEx(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
 #define LouKeMallocType(Type, Tag) (Type*)LouKeMallocEx(sizeof(Type), GET_ALIGNMENT(Type), Tag)
 
+#define LouKeMallocArraySafe(type, count, tag) (type*)LouKeMallocExSafe(sizeof(type) * (count) , GET_ALIGNMENT(type), (tag))
+#define LouKeMallocTypeSafe(Type, Tag) (Type*)LouKeMallocExSafe(sizeof(Type), GET_ALIGNMENT(Type), Tag)
+
+
 void LouFree(PVOID Addr);
 KERNEL_EXPORT void* LouAllocatePhysical32UpEx(size_t BytesToAllocate, size_t Aligned);
 KERNEL_EXPORT void* LouAllocatePhysical64UpEx(size_t BytesToAllocate, uint64_t Alignment);
@@ -608,6 +612,22 @@ void* LouKeMallocVirt32(
     uint64_t    AllocationFlags
 );
 size_t LouKeGetAllocationSize(PVOID Addrress);
+
+void* LouKeMallocExSafe(size_t AllocationSize, size_t Alignment, uint64_t AllocationFlags);
+void* LouKeMallocExVirt32Safe(size_t AllocationSize, size_t Alignment, uint64_t AllocationFlags);
+void* LouKeMallocSafe(size_t AllocationSize, uint64_t AllocationFlags);
+void* LouKeMallocVirt32Safe(size_t AllocationSize, uint64_t AllocationFlags);
+void* LouKeMallocExPhy32Safe(size_t AllocationSize, size_t Alignment, uint64_t AllocationFlags);
+void* LouKeMallocPhy32Safe(size_t AllocationSize, uint64_t AllocationFlags);
+void LouKeFreeSafe(void* Address);
+void LouKeFreeVirt32Safe(void* Address);
+void LouKeFreePhy32Safe(void* Address);
+SIZE LouKeGetAllocationSizeSafe(PVOID Address);
+void* LouKeReallocExSafe(void* Address, size_t Alignment, size_t NewSize, uint64_t PageFlags);
+void* LouKeReallocSafe(void* Address, size_t NewSize, uint64_t PageFlags);
+void* LouKeReallocExPhy32Safe(void* Address, size_t Alignment, size_t NewSize, UINT64 PageFlags);
+void* LouKeReallocPhy32Safe(void* Address, size_t NewSize, UINT64 PageFlags);
+
 
 KERNEL_EXPORT LOUSTATUS RequestPhysicalAddressEx(
     uint64_t  VAddress,

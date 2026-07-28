@@ -114,8 +114,8 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     uint64_t Flags,
     uint64_t PageFlags
 ){
-    POOL NewPool = (POOL)LouKeMallocType(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
-    NewPool->VLocation = (uint64_t)LouKeMallocEx(ROUND_UP64(ObjectSize, Alignment) * NumberOfPoolMembers, Alignment, PageFlags);
+    POOL NewPool = (POOL)LouKeMallocTypeSafe(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
+    NewPool->VLocation = (uint64_t)LouKeMallocExSafe(ROUND_UP64(ObjectSize, Alignment) * NumberOfPoolMembers, Alignment, PageFlags);
     RequestPhysicalAddress(NewPool->VLocation, &NewPool->Location);
     NewPool->FixedSizePool = true;
     NewPool->Flags = Flags;
@@ -123,7 +123,7 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     NewPool->ObjectSize = ObjectSize;
     NewPool->PoolSize = NumberOfPoolMembers;
     PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &NewPool->MemoryTracks;
-    TmpPoolMemTrack->Peers.NextHeader = (PListHeader)LouKeMallocArray(POOL_MEMORY_TRACKS, NumberOfPoolMembers, KERNEL_GENERIC_MEMORY); 
+    TmpPoolMemTrack->Peers.NextHeader = (PListHeader)LouKeMallocArraySafe(POOL_MEMORY_TRACKS, NumberOfPoolMembers, KERNEL_GENERIC_MEMORY); 
     TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
     for(uint64_t i = 0; i < NumberOfPoolMembers; i++){
         TmpPoolMemTrack[i].Address = NewPool->VLocation + (ROUND_UP64(ObjectSize, Alignment) * i);
@@ -135,9 +135,9 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
 KERNEL_EXPORT
 void LouKeDestroyFixedPool(PLMPOOL_DIRECTORY Pool){
 
-    LouKeFree((void*)Pool->MemoryTracks.Peers.NextHeader);
-    LouKeFree((void*)Pool->VLocation);
-    LouKeFree((void*)Pool);
+    LouKeFreeSafe((void*)Pool->MemoryTracks.Peers.NextHeader);
+    LouKeFreeSafe((void*)Pool->VLocation);
+    LouKeFreeSafe((void*)Pool);
 
 }
 

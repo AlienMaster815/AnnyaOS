@@ -57,7 +57,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
         return Status;
     }
 
-    LouExitDosMode();
+    //LouExitDosMode();
 
     //HPROCESS WindowManager;
 
