@@ -28,7 +28,7 @@ ScsiCoreEncodeBackgroundControlCommand(
     UINT8                                       BoTime,
     UINT8                                       Control 
 ){
-    SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE tCdb;
+    SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_BACKGROUND_CONTROL;
     tCdb.ServiceAction = SCSI_SERVICE_ACTION_BACKGROUND_CONTROL;
     tCdb.BoControl = BoControl;
@@ -46,7 +46,7 @@ void ScsiCoreEncodeGetLbaStatusCommand(
 ){
     UINT64 Tmp64;
     UINT32 Tmp32;
-    SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE tCdb;
+    SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_GET_LBA_STATUS;
     tCdb.ServiceAction = SCSI_SERVICE_ACTION_GET_LBA_STATUS;
     LouKeSwapEndianess(&StartingLba, &Tmp64, sizeof(UINT64));

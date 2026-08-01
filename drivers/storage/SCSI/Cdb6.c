@@ -32,7 +32,7 @@ ScsiCoreEncodeFormatUnitCommand(
     UINT8                               Ffmt,
     UINT8                               Control
 ){
-    SCSI_FORMAT_UNIT_COMMAND_STRUCTURE tCdb;
+    SCSI_FORMAT_UNIT_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_FORMAT_UNIT;
     tCdb.FmtInfoLlFmtDataClDfl = (DefectListFormat) | (CmpList << 3) | (FmtData << 4) | (LongList << 5) | (FmtpInfo << 6);
     tCdb.VendorSpecific = VendorSpecific;

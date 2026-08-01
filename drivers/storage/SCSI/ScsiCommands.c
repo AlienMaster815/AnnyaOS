@@ -28,19 +28,31 @@ ScsiCoreSendBackgroundControlCommandToDevice(
                 ScsiDevice->ScsiFeatures &= ~(SCSI_BACKGROUND_CONTROL_FEATURE);
                 break;
             }
-            case SENSE_RESULT_UNIT_ATTENTION:{ //error handled higher in the API
-                ScsiDevice->DeviceStatus = SCSI_DEVICE_NEEDS_CLEAR_STATE_AND_RETRY;
-                break;
-            }
-            case SENSE_RESULT_NOT_READY:{ //error handled higher in the API
-                ScsiDevice->DeviceStatus = SCSI_DEVICE_NEEDS_TO_WAIT;
-                break;
-            }
-            default: //error handled higher in the API
-                ScsiCoreDbgPrint("SCSICORE.SYS:ScsiCoreSendBackgroundControlCommandToDevice():Unable To Handle Error\n");
-                ScsiDevice->DeviceStatus = SCSI_DEVICE_HARDWARE_FAILURE;
-                break;
+
         }
+    }
+    return Status;
+}
+
+
+LOUSTATUS
+ScsiCoreSendChangeDefinitionCommandToDevice(
+    PSCSI_DEVICE_OBJECT         ScsiDevice,
+    UINT8                       Mode,
+    UINT8                       Save
+){
+    if(!(ScsiDevice->ScsiFeatures & SCSI_CHANGE_DEFINITION_FEATURE)){
+        return STATUS_NOT_SUPPORTED;
+    }
+    LOUSTATUS Status;
+    SCSI_COMMAND_PACKET ControlCommand = {0};
+    ControlCommand.CommandID = SCSI_COMMAND_CHANGE_DEFINITION_ID;
+    ControlCommand.Shdd = ScsiDevice->Shdd;
+    ControlCommand.ScsiDeviceObject = ScsiDevice;
+    ScsiCoreEncodeChangeDefinitionCommand(&ControlCommand.Command.ChangeDefinition, Save, Mode, 0x00, 0x00);
+    Status = ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDeviceSendScsiCommand(&ControlCommand);
+    if(Status != STATUS_SUCCESS){
+        ScsiDevice->ScsiFeatures &= ~(SCSI_CHANGE_DEFINITION_FEATURE);
     }
     return Status;
 }

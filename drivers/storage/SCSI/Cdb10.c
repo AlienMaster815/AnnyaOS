@@ -31,7 +31,7 @@ ScsiCoreEncodeChangeDefinitionCommand(
     UINT8                                       ParamLength,
     UINT8                                       Control
 ){
-    SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE tCdb;
+    SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_CHANGE_DEFINITION;
     tCdb.Save = Save;
     tCdb.DefParam = DefParam;
