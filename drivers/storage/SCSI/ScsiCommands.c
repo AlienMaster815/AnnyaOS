@@ -24,7 +24,7 @@ ScsiCoreSendBackgroundControlCommandToDevice(
         switch(ControlCommand.SenseResult){
             case SENSE_RESULT_ILLEGAL_REQUEST_ID:{ //stop and unset feature flag
                 ScsiCoreEncodeBackgroundControlCommand(&ControlCommand.Command.BackgroundControl, SCSI_BO_CONTROL_STOP_OP, SCSI_BO_TIME_NO_LIMIT, 0x00);
-                Status = ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDeviceSendScsiCommand(&ControlCommand);
+                ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDeviceSendScsiCommand(&ControlCommand);
                 ScsiDevice->ScsiFeatures &= ~(SCSI_BACKGROUND_CONTROL_FEATURE);
                 break;
             }
