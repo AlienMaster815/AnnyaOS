@@ -2,6 +2,7 @@
 #define _SCSI_CORE_EXTERNAL_H
 
 #include <cstdint.h>
+#include <kernel/XArray.h>
 
 //Command data types are in Big Endian (32 : 24 : 16 : 8 : 0)
 
@@ -767,6 +768,60 @@ typedef struct PACKED _SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE{
 #define SCSI_CHGDEF_DEFPARAM_SCSI3_OPDEF                0x04
 #define SCSI_CHGDEF_DEFPARAM_MANUFACTURE_OPDEF          0x3F
 
+struct _SCSI_HOST_DEVICE_DRIVER_OBJECT;
+struct _SCSI_HOST_DEVICE_OBJECT;
 
+typedef enum{
+    SCSI_DEVICE_RUNNING,
+    SCSI_DEVICE_NEEDS_CLEAR_STATE_AND_RETRY,
+    SCSI_DEVICE_NEEDS_TO_WAIT,
+    SCSI_DEVICE_HARDWARE_FAILURE,
+}SCSI_DEVICE_OBJECT_STATUS;
+
+#define SCSI_BACKGROUND_CONTROL_FEATURE     (1 << 0)
+
+typedef struct _SCSI_DEVICE_OBJECT{
+    struct _SCSI_HOST_DEVICE_OBJECT*    Shdd;
+    UINT32                              ScsiFeatures;
+    SCSI_DEVICE_OBJECT_STATUS           DeviceStatus;
+}SCSI_DEVICE_OBJECT, * PSCSI_DEVICE_OBJECT;
+
+typedef enum{
+    SCSI_COMMAND_BACKGROUND_CONTROL_ID = 0,
+}SCSI_COMMAND_PACKET_ID;
+
+typedef enum{
+    SENSE_RESULT_ILLEGAL_REQUEST_ID = 0,
+    SENSE_RESULT_UNIT_ATTENTION,
+    SENSE_RESULT_NOT_READY,
+}SCSI_SENSE_RETURN_ID;
+
+typedef struct _SCSI_COMMAND_PACKET{
+    SCSI_COMMAND_PACKET_ID                          CommandID;
+    SCSI_SENSE_RETURN_ID                            SenseResult;
+    struct _SCSI_HOST_DEVICE_OBJECT*                Shdd;
+    PSCSI_DEVICE_OBJECT                             ScsiDeviceObject;
+    union {
+        SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE   BackgroundControl;
+    }Command;
+    //union{
+
+    //}Sense;
+}SCSI_COMMAND_PACKET, * PSCSI_COMMAND_PACKET;
+
+typedef struct _SCSI_HOST_DEVICE_OBJECT{
+    struct _SCSI_HOST_DEVICE_DRIVER_OBJECT*     DriverObject;
+
+}SCSI_HOST_DEVICE_OBJECT, * PSCSI_HOST_DEVICE_OBJECT;
+
+typedef struct _SCSI_HOST_DEVICE_CALLBACKS{
+    LOUSTATUS   (*ScsiDeviceSendScsiCommand)(PSCSI_COMMAND_PACKET ScsiCommandPacket);
+
+}SCSI_HOST_DEVICE_CALLBACKS, * PSCSI_HOST_DEVICE_CALLBACKS;
+
+typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{
+    LOUSTR                          DriverName;
+    PSCSI_HOST_DEVICE_CALLBACKS     Callbacks;
+}SCSI_HOST_DEVICE_DRIVER_OBJECT, * PSCSI_HOST_DEVICE_DRIVER_OBJECT;
 
 #endif

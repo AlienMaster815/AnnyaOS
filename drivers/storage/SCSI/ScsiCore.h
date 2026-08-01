@@ -3,7 +3,13 @@
 
 #include <LouDDK.h>
 
-
+typedef struct _SCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT{
+    ListHeader                      DriverList;
+    SIZE                            DriverXaID;
+    XARRAY                          ShddArray;
+    ListHeader                      ShddList;
+    SCSI_HOST_DEVICE_DRIVER_OBJECT  DriverObject;
+}SCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT, * PSCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT;
 
 LOUSTATUS ScsiCoreGetInfoSenceDataInformation(PSSDD_INFO_STRUCTURE SenceData, UINT64* Out);
 LOUSTATUS ScsiCoreGetCommandSpecificInfoSenceDataInformation(PSSDD_COMMAND_SPECIFIC_INFO_STRUCTURE SenceData, UINT64* Out);
@@ -17,6 +23,6 @@ void ScsiCoreEncodeLongLbaCdbVar(PSCSI_LONG_LBA_CDBVAR_COMMAND Cdb, UINT8 Contro
 void ScsiCoreEncodeBackgroundControlCommand(PSCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE Cdb, UINT8 BoControl, UINT8 BoTime, UINT8 Control);
 void ScsiCoreEncodeChangeDefinitionCommand(PSCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE Cdb, UINT8 Save, UINT8 DefParam, UINT8 ParamLength, UINT8 Control);
 void ScsiCoreEncodeGetLbaStatusCommand(PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE Cdb, UINT64 StartingLba, UINT32 AllocationLength, UINT8 Reserved, UINT8 Control);
-
+void ScsiCoreDbgPrint(char* format, ...);
 
 #endif
