@@ -99,6 +99,7 @@ extern "C" {
 #include <Rat.h>
 
 #include <drivers/ApicExternals.h>
+#include <drivers/Scsi/ScsiCore.h>
 
 #ifndef _USER_MODE_CODE_
 

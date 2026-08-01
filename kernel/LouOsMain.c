@@ -454,7 +454,7 @@ void LouOsKrnlStart(
     if(Status != STATUS_SUCCESS){
         _SESSION_MANAGER_LAUNCH_FAILURE:
         LouPrint("ERROR Unable To Start Session Manager\n");
-        sleep(5000);
+        sleep(10000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
     }
