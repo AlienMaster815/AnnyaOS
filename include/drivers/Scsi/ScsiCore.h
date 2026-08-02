@@ -210,6 +210,10 @@ typedef struct PACKED _SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE{
     UINT8   Control;
 }SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE, * PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE;
 
+//Start Here
+
+
+
 #define SCSI_CDBVAR_COMMAND_OPCODE                  0x7F
 
 #define SCSI_OPCODE_GROUP_CODE_6BYTE_COMMAND        0b000
@@ -774,6 +778,8 @@ struct _SCSI_HOST_DEVICE_OBJECT;
 
 #define SCSI_BACKGROUND_CONTROL_FEATURE     (1ULL << 0)
 #define SCSI_CHANGE_DEFINITION_FEATURE      (1ULL << 1)
+#define SCSI_CHANGE_FORMAT_UNIT_FEATURE     (1ULL << 2)
+#define SCSI_CHANGE_GET_LBA_STATUS_FEATURE  (1ULL << 3)
 
 
 typedef struct _SCSI_DEVICE_OBJECT{
@@ -784,26 +790,33 @@ typedef struct _SCSI_DEVICE_OBJECT{
 typedef enum{
     SCSI_COMMAND_BACKGROUND_CONTROL_ID = 0,
     SCSI_COMMAND_CHANGE_DEFINITION_ID,
+    SCSI_COMMAND_FORMAT_UNIT_ID,
+    SCSI_COMMAND_GET_LBA_STATUS_ID,
 }SCSI_COMMAND_PACKET_ID;
 
-typedef enum{
-    SENSE_RESULT_ILLEGAL_REQUEST_ID = 0,
-    SENSE_RESULT_UNIT_ATTENTION_ID,
-    SENSE_RESULT_NOT_READY_ID,
-}SCSI_SENSE_RETURN_ID;
+typedef struct _SCSI_FORMAT_UNIT_COMMAND_PACKET{
+    SCSI_FORMAT_UNIT_COMMAND_STRUCTURE  Cdb;
+    PVOID                               ListData;
+    SIZE                                ListSize;
+}SCSI_FORMAT_UNIT_COMMAND_PACKET, * PSCSI_FORMAT_UNIT_COMMAND_PACKET;
+
+typedef struct _SCSI_GET_LBA_STATUS_COMMAND_PACKET{
+    SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE       Cdb;
+    PVOID                                       StatusData;
+    SIZE                                        StatusSize;
+}SCSI_GET_LBA_STATUS_COMMAND_PACKET, * PSCSI_GET_LBA_STATUS_COMMAND_PACKET;
 
 typedef struct _SCSI_COMMAND_PACKET{
     SCSI_COMMAND_PACKET_ID                          CommandID;
-    SCSI_SENSE_RETURN_ID                            SenseResult;
     struct _SCSI_HOST_DEVICE_OBJECT*                Shdd;
     PSCSI_DEVICE_OBJECT                             ScsiDeviceObject;
+    PVOID                                           SenceResult;
     union {
         SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE   BackgroundControl;
         SCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE    ChangeDefinition;
+        SCSI_FORMAT_UNIT_COMMAND_PACKET             FormatUnit;
+        SCSI_GET_LBA_STATUS_COMMAND_PACKET          GetLbaStatus;
     }Command;
-    //union{
-
-    //}Sense;
 }SCSI_COMMAND_PACKET, * PSCSI_COMMAND_PACKET;
 
 typedef struct _SCSI_HOST_DEVICE_OBJECT{
@@ -813,7 +826,7 @@ typedef struct _SCSI_HOST_DEVICE_OBJECT{
 
 typedef struct _SCSI_HOST_DEVICE_CALLBACKS{
     LOUSTATUS   (*ScsiDeviceSendScsiCommand)(PSCSI_COMMAND_PACKET ScsiCommandPacket);
-
+    LOUSTATUS   (*ScsiDevicePrepScsiCommand)(PSCSI_DEVICE_OBJECT ScsiDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
 }SCSI_HOST_DEVICE_CALLBACKS, * PSCSI_HOST_DEVICE_CALLBACKS;
 
 typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{

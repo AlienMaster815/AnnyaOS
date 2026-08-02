@@ -3,6 +3,16 @@
 
 #include <LouDDK.h>
 
+typedef struct _SCSI_INTERNAL_HOST_DEVICE_OBJECT{
+    struct _SCSI_HOST_DEVICE_DRIVER_OBJECT*     DriverObject;
+    ListHeader                                  HostList;
+    SIZE                                        HostXaID;
+    XARRAY                                      DeviceArray;
+    ListHeader                                  DeviceList;
+    SCSI_HOST_DEVICE_OBJECT                     ScsiHostDevice;
+}SCSI_INTERNAL_HOST_DEVICE_OBJECT, * PSCSI_INTERNAL_HOST_DEVICE_OBJECT;
+
+
 typedef struct _SCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT{
     ListHeader                      DriverList;
     SIZE                            DriverXaID;
@@ -22,6 +32,7 @@ void ScsiCoreEncodeCdb16Command(PSCSI_CDB16_COMMAND Cdb, UINT8 OpCode, UINT64 Lb
 void ScsiCoreEncodeLongLbaCdbVar(PSCSI_LONG_LBA_CDBVAR_COMMAND Cdb, UINT8 Control, UINT8 Mci[5], UINT8 CdbAdditionalLength, UINT16 ServiceAction, UINT8 MciFuaDpoMci, UINT8 Mci2, UINT64 Lba, UINT64 Mci3, UINT32 TpaLength);
 void ScsiCoreEncodeBackgroundControlCommand(PSCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE Cdb, UINT8 BoControl, UINT8 BoTime, UINT8 Control);
 void ScsiCoreEncodeChangeDefinitionCommand(PSCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE Cdb, UINT8 Save, UINT8 DefParam, UINT8 ParamLength, UINT8 Control);
+void ScsiCoreEncodeFormatUnitCommand(PSCSI_FORMAT_UNIT_COMMAND_STRUCTURE Cdb, UINT8 DefectListFormat, UINT8 CmpList, UINT8 FmtData, UINT8 LongList, UINT8 FmtpInfo, UINT8 VendorSpecific, UINT8 Ffmt, UINT8 Control);
 void ScsiCoreEncodeGetLbaStatusCommand(PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE Cdb, UINT64 StartingLba, UINT32 AllocationLength, UINT8 Reserved, UINT8 Control);
 void ScsiCoreDbgPrint(char* format, ...);
 
