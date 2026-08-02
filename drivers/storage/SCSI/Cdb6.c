@@ -40,3 +40,24 @@ ScsiCoreEncodeFormatUnitCommand(
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_FORMAT_UNIT_COMMAND_STRUCTURE));
 }
+
+void 
+ScsiCoreEncodeInquiryCommand(
+    PSCSI_INQUIRY_COMMAND_STRUCTURE     Cdb,
+    UINT8                               Evpd,
+    UINT8                               Cmddt, 
+    UINT8                               PageCode,
+    UINT16                              AllocationLength,
+    UINT8                               Control
+){
+    SCSI_INQUIRY_COMMAND_STRUCTURE  tCdb = {0};
+    UINT16 Tmp16;
+    tCdb.OpCode = SCSI_COMMAND_INQUIRY;
+    tCdb.EvpdCmddt = (Evpd | Cmddt << 1);
+    tCdb.PageCode = PageCode;
+    LouKeSwapEndianess(&AllocationLength, &Tmp16, sizeof(UINT16));
+    tCdb.AllocationLength = AllocationLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_INQUIRY_COMMAND_STRUCTURE));
+}
+

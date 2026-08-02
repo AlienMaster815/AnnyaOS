@@ -1,0 +1,6 @@
+#ifndef _SCSI_TO_ATA_TRANSLATION_H
+#define _SCSI_TO_ATA_TRANSLATION_H
+
+
+
+#endif

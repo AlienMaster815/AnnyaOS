@@ -57,7 +57,6 @@ extern "C" {
 #include <kernel/threads.h>
 #include <ListManagement.h>
 #include <kernel/LouQs.h>
-#include <drivers/Scsi/Sam5.h>
 #include <drivers/Ata/ata.h>
 #include <WinTEB.h>
 #include <drivers/Processors.h>

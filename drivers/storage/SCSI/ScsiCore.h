@@ -34,6 +34,8 @@ void ScsiCoreEncodeBackgroundControlCommand(PSCSI_BACKGROUND_CONTROL_COMMAND_STR
 void ScsiCoreEncodeChangeDefinitionCommand(PSCSI_CHANGE_DEFINITION_COMMAND_STRUCTURE Cdb, UINT8 Save, UINT8 DefParam, UINT8 ParamLength, UINT8 Control);
 void ScsiCoreEncodeFormatUnitCommand(PSCSI_FORMAT_UNIT_COMMAND_STRUCTURE Cdb, UINT8 DefectListFormat, UINT8 CmpList, UINT8 FmtData, UINT8 LongList, UINT8 FmtpInfo, UINT8 VendorSpecific, UINT8 Ffmt, UINT8 Control);
 void ScsiCoreEncodeGetLbaStatusCommand(PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE Cdb, UINT64 StartingLba, UINT32 AllocationLength, UINT8 Reserved, UINT8 Control);
+void ScsiCoreEncodeGetStreamStatusCommand(PSCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE Cdb, UINT16 StartingStreamID, UINT32 AllocationLength, UINT8 Control);
+
 void ScsiCoreDbgPrint(char* format, ...);
 
 #endif

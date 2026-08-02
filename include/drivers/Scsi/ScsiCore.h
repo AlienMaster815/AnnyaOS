@@ -212,7 +212,26 @@ typedef struct PACKED _SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE{
 
 //Start Here
 
+typedef struct PACKED _SCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE{
+    UINT8   OpCode;         //SCSI_COMMAND_GET_STREAM_STATUS        0x9E
+    UINT8   ServiceAction;  //SCSI_SERVICE_ACTION_GET_STREAM_STATUS 0x0016
+    UINT16  Reserved1;
+    UINT16  StartingStreamID;
+    UINT32  Reserved2;
+    UINT32  AllocationLength;
+    UINT8   Reserved3;
+    UINT8   Control;
+}SCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE, * PSCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE;
 
+typedef struct PACKED _SCSI_INQUIRY_COMMAND_STRUCTURE{
+    UINT8   OpCode;             //SCSI_COMMAND_INQUIRY  0x12
+    UINT8   EvdpCmddt;
+    UINT8   PageCode;
+    UINT16  AllocationLength;
+    UINT8   Control;
+}SCSI_INQUIRY_COMMAND_STRUCTURE, * PSCSI_INQUIRY_COMMAND_STRUCTURE;
+
+//SCSI_COMMAND_LOG_SELECT
 
 #define SCSI_CDBVAR_COMMAND_OPCODE                  0x7F
 
@@ -833,5 +852,8 @@ typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{
     LOUSTR                          DriverName;
     PSCSI_HOST_DEVICE_CALLBACKS     Callbacks;
 }SCSI_HOST_DEVICE_DRIVER_OBJECT, * PSCSI_HOST_DEVICE_DRIVER_OBJECT;
+
+#include "Sat.h"
+#include "MsiFusion.h"
 
 #endif

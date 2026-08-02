@@ -57,3 +57,22 @@ void ScsiCoreEncodeGetLbaStatusCommand(
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE));
 }
+
+void ScsiCoreEncodeGetStreamStatusCommand(
+    PSCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE   Cdb,
+    UINT16                                      StartingStreamID,
+    UINT32                                      AllocationLength,
+    UINT8                                       Control
+){
+    UINT16 Tmp16;
+    UINT32 Tmp32;
+    SCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_GET_STREAM_STATUS;
+    tCdb.ServiceAction = SCSI_SERVICE_ACTION_GET_STREAM_STATUS;
+    LouKeSwapEndianess(&StartingStreamID, &Tmp16, sizeof(UINT16));
+    tCdb.StartingStreamID = Tmp16;
+    LouKeSwapEndianess(&AllocationLength, &Tmp32, sizeof(UINT32));
+    tCdb.AllocationLength = Tmp32;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE));
+}
