@@ -16,6 +16,13 @@ static ListHeader ContextTree = {0};
 
 typedef void (*FOR_EACH_CONTEX_IN_AREA_CALLBACK)(PDRSD_FB_CONTEXT Context, PVOID Data);
 
+typedef struct _AREA_REDRAW_CONTEXT{
+    int X;
+    int Y;
+    int Width;
+    int Height;
+}AREA_REDRAW_CONTEXT, * PAREA_REDRAW_CONTEXT;
+
 static PListHeader InternalDrsdGetFbContext(
     PListHeader          TreeEntry,
     int  XLocation, int  YLocation, 
@@ -69,16 +76,16 @@ InternalDrsdForEachContextInArea(
             (((TmpContext->YLocation + TmpContext->Height) < YLocation) || (TmpContext->YLocation > (YLocation + Height)))
         )){
             Callback(TmpContext, Data);
+            InternalDrsdForEachContextInArea(
+                &TmpContext->Subordinates,
+                XLocation,
+                YLocation,
+                Width,
+                Height,
+                Callback,
+                Data
+            );
         }
-        InternalDrsdForEachContextInArea(
-            &TmpContext->Subordinates,
-            XLocation,
-            YLocation,
-            Width,
-            Height,
-            Callback,
-            Data
-        );
     }
 }
 
@@ -227,15 +234,39 @@ InternalDrsdCreateFbContext(
     return (HANDLE)NewContext;
 }
 
+static 
+void 
+DrsdRedrawEachContextInArea(PDRSD_FB_CONTEXT Context, PVOID Data){
+    PAREA_REDRAW_CONTEXT RedrawContext = (PAREA_REDRAW_CONTEXT)Data;
+    int BottomX = MAX(Context->XLocation, RedrawContext->X);
+    int TopX = MIN(Context->XLocation + Context->Width, RedrawContext->X + RedrawContext->Width);
+    int BottomY = MAX(Context->YLocation, RedrawContext->Y);
+    int TopY = MIN(Context->YLocation + Context->Height, RedrawContext->Y + RedrawContext->Height);
+    int ContextX = BottomX - Context->XLocation;
+    int ContextY = BottomY - Context->YLocation;
+    int Width = TopX - BottomX;
+    int Height = TopY - BottomY;
+
+    for(SIZE y = 0; y < Height; y++){
+        for(SIZE x = 0 ; x < Width; x++){
+           UserBuffer[(BottomX + x) + ((BottomY + y) * gWidth) ] = Context->Data[(x + ContextX) + ((y + ContextY) * Context->Width)];
+        }
+    }
+}
+
 DRSD_API
 void 
 InternalDrsdRedrawArea(
     int x,      int y,
     int Width,  int Height
 ){
-
-
-
+    AREA_REDRAW_CONTEXT RedrawContext = {x, y, Width, Height};
+    InternalDrsdForEachContextInArea(
+        &ContextTree,
+        x, y, Width, Height,
+        DrsdRedrawEachContextInArea,
+        (PVOID)&RedrawContext
+    );
 }
 
 DRSD_API
@@ -244,11 +275,12 @@ BOOL DllMainCRTStartup(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
     LOUSTATUS Status = LouGetCurrentProccessName(
         &ProcessName
     );
+    
+    LouGetGlobalObject(L"DrsdRuntimeHeap", (PVOID)(UINT8*)&DrsdRuntimeHeap);
 
     if((Status == STATUS_SUCCESS) && (ProcessName.Buffer)){
         if(!strcmp(ProcessName.Buffer, AWM_PROCESS_NAME)){
             WindowManager = true;
-            LouGetGlobalObject(L"DrsdRuntimeHeap", (PVOID)(UINT8*)&DrsdRuntimeHeap);
             Status = LouGetBootFrameBuffer(&BootFrameBuffer);
             if((Status == STATUS_SUCCESS) && (BootFrameBuffer)){
                 LouPrint("DRSD.DLL:Using Boot Framebuffer\n");

@@ -937,8 +937,16 @@ LouKeRtlInt8Mult(
     INT8 i8Multiplier, 
     INT8* pi8Result
 ){
-    LouPrint("LouKeRtlInt8Mult()\n");
-    while(1);
+    if(!pi8Result){
+        return STATUS_INVALID_PARAMETER;
+    }
+    INT64 TmpMultiplicand = (INT64)i8Multiplicand;
+    INT64 TmpMultiplier = (INT64)i8Multiplier;
+    INT64 TmpResult = TmpMultiplicand * TmpMultiplier;
+    if((TmpResult > (INT64)INT8_MAX) || (TmpResult < (INT64)INT8_MIN)){
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pi8Result = (INT8)TmpResult;
     return STATUS_SUCCESS;
 }
 
@@ -949,8 +957,16 @@ LouKeRtlInt8Sub(
     INT8 i8Subtrahend, 
     INT8* pi8Result
 ){
-    LouPrint("LouKeRtlInt8Sub()\n");
-    while(1);
+    if(!pi8Result){
+        return STATUS_INVALID_PARAMETER;
+    }
+    INT64 TmpMinuend = (INT64)i8Minuend;
+    INT64 TmpSubtrahend = (INT64)i8Subtrahend;
+    INT64 TmpResult = TmpMinuend - TmpSubtrahend;
+    if((TmpResult > (INT64)INT8_MAX) || (TmpResult < (INT64)INT8_MIN)){
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pi8Result = (INT8)TmpResult;
     return STATUS_SUCCESS;
 }
 
@@ -960,8 +976,13 @@ LouKeRtlInt8ToUChar(
     INT8 i8Operand, 
     UCHAR* pch
 ){
-    LouPrint("LouKeRtlInt8ToUChar()\n");
-    while(1);
+    if(!pch){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(i8Operand < 0){
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pch = (UCHAR)i8Operand; 
     return STATUS_SUCCESS;
 }
 
@@ -971,8 +992,13 @@ LouKeRtlInt8ToUInt(
     INT8 i8Operand, 
     UINT* puResult
 ){
-    LouPrint("LouKeRtlInt8ToUInt()\n");
-    while(1);
+    if(!puResult){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(i8Operand < 0){
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *puResult = (UINT)i8Operand;
     return STATUS_SUCCESS;
 }
 
@@ -982,8 +1008,13 @@ LouKeRtlInt8ToUInt8(
     INT8 i8Operand, 
     UINT8* pu8Result
 ){
-    LouPrint("LouKeRtlInt8ToUInt8()\n");
-    while(1);
+    if(!pu8Result){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(i8Operand < 0){
+        return STATUS_INTEGER_OVERFLOW;
+    }
+    *pu8Result = (UCHAR)i8Operand; 
     return STATUS_SUCCESS;
 }
 

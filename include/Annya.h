@@ -795,6 +795,13 @@ InternalDrsdDeployContext(
 
 ANNA_IMPORT
 void 
+InternalDrsdRedrawArea(
+    int x,      int y,
+    int Width,  int Height
+);
+
+ANNA_IMPORT
+void 
 InternalDrsdFillColorEx(
     HANDLE  tContext,
     int     x,

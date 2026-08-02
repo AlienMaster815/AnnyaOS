@@ -17,8 +17,8 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
     LouPrint("Height:%d\n", Height);
 
     HANDLE BackgroundFbContext = InternalDrsdCreateFbContext(
-        x, y,
-        Width, Height
+        x + 30, y + 30,
+        Width - 60, Height - 60
     );
 
     InternalDrsdFillColorEx(
@@ -27,10 +27,14 @@ LOUSTATUS AnnyaAwmProcessStartup(HANDLE Peb){
         SET_RGB(0, 0xC0, 0xC0)
     );
 
-
-    InternalDrsdDeployContext(
-        BackgroundFbContext
+    InternalDrsdRedrawArea(
+        x + 30, y + 30,
+        Width - 60, Height - 60
     );
+
+    //InternalDrsdDeployContext(
+    //    BackgroundFbContext
+    //);
     
     while(1);
     return STATUS_SUCCESS;

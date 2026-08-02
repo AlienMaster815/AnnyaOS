@@ -1,6 +1,8 @@
 CC = x86_64-w64-mingw32-gcc
 SRC = 	Drsd.c \
-		Drsd3d.c
+		Drsd3d.c \
+		DrsdGdi.c
+		
 CFLAGS = -shared -nostdlib -nodefaultlibs -mabi=ms -mno-red-zone -mstackrealign
 INCLUDES = -I../../../include
 TARGET = Drsd.dll

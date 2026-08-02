@@ -7,3 +7,4 @@ EXPORTS
     InternalDrsdCreateFbContext
     InternalDrsdDeployContext
     InternalDrsdFillColorEx
+    InternalDrsdRedrawArea
