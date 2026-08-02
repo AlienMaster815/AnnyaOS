@@ -53,7 +53,7 @@ ScsiCoreEncodeInquiryCommand(
     SCSI_INQUIRY_COMMAND_STRUCTURE  tCdb = {0};
     UINT16 Tmp16;
     tCdb.OpCode = SCSI_COMMAND_INQUIRY;
-    tCdb.EvpdCmddt = (Evpd | Cmddt << 1);
+    tCdb.EvdpCmddt = (Evpd | Cmddt << 1);
     tCdb.PageCode = PageCode;
     LouKeSwapEndianess(&AllocationLength, &Tmp16, sizeof(UINT16));
     tCdb.AllocationLength = AllocationLength;

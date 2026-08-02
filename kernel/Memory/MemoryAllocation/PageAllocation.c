@@ -235,7 +235,7 @@ void* LouKeMallocMbPageVirt64(uint64_t PageCount, uint64_t PageFlags, BOOLEAN Cr
         Result = LouAllocatePhysical64UpEx(MEGABYTE_PAGE * PageCount, MEGABYTE_PAGE);
         LouKeVmmCreatePageReserveVm(Result, MEGABYTE_PAGE, PageCount, true, false);
     }
-    return LouKeMallocKbPageExVirt64(PageCount, PageFlags, (UINT64)Result, CreateDevSection);
+    return LouKeMallocMbPageExVirt64(PageCount, PageFlags, (UINT64)Result, CreateDevSection);
 }
 
 

@@ -198,10 +198,9 @@ InternalDrsdCreateFbContext(
     int                         XLocation,
     int                         YLocation,
     int                         Width,
-    int                         Height,
-    UINT16                      BytesPerPixel
+    int                         Height
 ){
-    SIZE DataSize = (Width * BytesPerPixel) * Height;
+    SIZE DataSize = Width * Height;
     PDRSD_FB_CONTEXT NewContext = LouRtlAllocateHeapEx(
         DrsdRuntimeHeap, 
         GetStructureSize(DRSD_FB_CONTEXT, Data, (DataSize / sizeof(UINT32))),
@@ -212,7 +211,6 @@ InternalDrsdCreateFbContext(
     NewContext->YLocation = YLocation;
     NewContext->Width = Width;
     NewContext->Height = Height;
-    NewContext->BytesPerPixel = BytesPerPixel;
     LouMemSet(NewContext->Data, 0, DataSize);
 
     PListHeader ContextList = InternalDrsdGetFbContext(

@@ -115,8 +115,7 @@ void PageFault(uint64_t FaultingStackP) {
             return;
         }
 
-        LouPrint("VAddress:%h\n", VAddress);
-        while(1);
+        LouPrint("Vmm VAddress:%h\n", VAddress);
     }
     if((!PAddress) && (VAddress) && LouKePageFaultIsDueToLazyBuffer((PVOID)VAddress, &LazyOut)){
         Status = LouKeLazyBufferCommitPageForce(LazyOut, (PVOID)VAddress, 1);
@@ -125,7 +124,6 @@ void PageFault(uint64_t FaultingStackP) {
             return;
         }
         LouPrint("VAddress Lazy:%h\n", VAddress);
-        while(1);
     }
 
     if(LouKeVmmIsAddressCow((PVOID)VAddress)){

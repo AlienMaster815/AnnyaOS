@@ -523,6 +523,7 @@ LouRtlCreateHeapEx(
     NewHeap->ReservedSize = ReservedSize;
     NewHeap->CommitSize = CommitSize;
     NewHeap->HeapBase = HeapBase;
+
     LouUserHeapCalculateSize(
         &NewHeap->ReservedSize, 
         &NewHeap->CommitSize
@@ -538,7 +539,7 @@ LouRtlCreateHeapEx(
         NewHeap->HeapBase = LouAllocateVirtualMemoryEx2(NewHeap->ReservedSize, KILOBYTE_PAGE, Shared, USER_GENERIC_MEMORY);
     }
 
-    LouMemSet(NewHeap->HeapBase, 0, CommitSize);
+    LouMemSet(NewHeap->HeapBase, 0, NewHeap->CommitSize);
 
     _DONE:
     if(ResourceLock){
@@ -657,7 +658,7 @@ LouRtlAllocateHeapEx(
         MutexUnlock(&Heap->HeapLock);
     }
     if((Flags & USER_HEAP_FLAG_GROWABLE) && (!Found)){
-        LouPrint("LOUDLL.DLL:LouRtlAllocateHeapEx() GROWABLE\n");
+        LouPrint("LOUDLL.DLL:LouRtlAllocateHeapEx() GROWABLE:SIZE:%d\n", Size);
         while(1);
     }
     return Result;

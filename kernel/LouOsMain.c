@@ -343,7 +343,7 @@ void LouOsKrnlStart(
     //TODO: implement new fast object into the memory manager
 
     LouPrint("Successful Boot\n");
-    while(1);
+    //while(1);
 
     InitializeFileSystemManager();
 

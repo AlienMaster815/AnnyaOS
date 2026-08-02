@@ -43,6 +43,6 @@ LOUSTATUS ScsiCoreEntry(){
 
 
     ScsiCoreDbgPrint("SCSICORE.SYS:ScsiCoreEntry():STATUS_SUCCESS\n");
-    while(1);
+    //while(1);
     return STATUS_SUCCESS;
 }

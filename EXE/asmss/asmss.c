@@ -24,7 +24,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
     PUSER_PROCESS_HEAP DrsdRuntimeHeap = LouRtlCreateSharedHeap(
         USER_HEAP_FLAG_GROWABLE,
         0x00,
-        0x00,
+        10 * MEGABYTE,
         0x00,
         0x00,
         0x00
@@ -57,7 +57,7 @@ LOUSTATUS AnnyaSmssProcessStartup(HANDLE Peb){
         return Status;
     }
 
-    //LouExitDosMode();
+    LouExitDosMode();
 
     //HPROCESS WindowManager;
 

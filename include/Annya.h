@@ -784,8 +784,7 @@ InternalDrsdCreateFbContext(
     int                         XLocation,
     int                         YLocation,
     int                         Width,
-    int                         Height,
-    UINT16                      BytesPerPixel
+    int                         Height
 );
 
 ANNA_IMPORT
