@@ -231,7 +231,147 @@ typedef struct PACKED _SCSI_INQUIRY_COMMAND_STRUCTURE{
     UINT8   Control;
 }SCSI_INQUIRY_COMMAND_STRUCTURE, * PSCSI_INQUIRY_COMMAND_STRUCTURE;
 
-//SCSI_COMMAND_LOG_SELECT
+//sart here for CDB work
+
+typedef struct PACKED _SCSI_LOG_SELECT_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   SpPcr;
+    UINT8   PageCodePc;
+    UINT8   SubPageCode;
+    UINT8   Reserved[3];
+    UINT16  ParameterListLength;
+    UINT8   Control;
+}SCSI_LOG_SELECT_COMMAND_STRUCTURE, * PSCSI_LOG_SELECT_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_LOG_SENSE_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Sp;
+    UINT8   PageCodePc;
+    UINT8   SubPageCode;
+    UINT8   Reserved;
+    UINT16  ParameterPointer;
+    UINT16  AllocationLength;
+    UINT8   Control;
+}SCSI_LOG_SENSE_COMMAND_STRUCTURE, * PSCSI_LOG_SENSE_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_MODE_SELECT6_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   SpRtdPf;
+    UINT16  Reserved;
+    UINT8   ParameterListLength;
+    UINT8   Control;
+}SCSI_MODE_SELECT6_COMMAND_STRUCTURE, * PSCSI_MODE_SELECT6_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_MODE_SELECT10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   SpPf;
+    UINT8   Reserved[5];
+    UINT16  ParameterListLength;
+    UINT8   Control;
+}SCSI_MODE_SELECT10_COMMAND_STRUCTURE, * PSCSI_MODE_SELECT10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_MODE_SENSE6_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Dbd;
+    UINT8   PageCodePc;
+    UINT8   SubPageCode;
+    UINT8   AllocationLength;
+    UINT8   Control;
+}SCSI_MODE_SENSE6_COMMAND_STRUCTURE, * PSCSI_MODE_SENSE6_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_MODE_SENSE10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   DbdLlbaa;
+    UINT8   SupPageCode;
+    UINT8   Reserved[3];
+    UINT16  AllocationLength;
+    UINT8   Control;
+}SCSI_MODE_SENSE10_COMMAND_STRUCTURE, * PSCSI_MODE_SENSE10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT8   Reservedp[5];
+    UINT16  AllocationLength;
+    UINT8   Control;
+}SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE, * PSCSI_PERSISTENT_RESERVED_IN_COMMAND;
+
+typedef struct PACKED _SCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT8   TypeScope;
+    UINT16  Reserved;
+    UINT32  ParameterListLength;
+    UINT8   Control;
+}SCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE, * PSCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ6_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Lba[3];
+    UINT8   TransferLength;
+    UINT8   Control;
+}SCSI_READ6_COMMAND_STRUCTURE, * PSCSI_READ6_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   RarcFuaDpoRdprotect;
+    UINT32  Lba;
+    UINT8   GroupNumber;
+    UINT16  TransferLength;
+    UINT8   Control;
+}SCSI_READ10_COMMAND_STRUCTURE, * PSCSI_READ10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ12_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   RarcFuaDpoRdprotect;
+    UINT32  Lba;
+    UINT32  TransferLength;
+    UINT8   GroupNumberMmc6;
+    UINT8   Control;
+}SCSI_READ12_COMMAND_STRUCTURE, * PSCSI_READ12_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Dld2RarcFuaDpoRdprotect;
+    UINT64  Lba;
+    UINT32  TransferLength;
+    UINT8   Dld0Dld1;
+    UINT8   Control;
+}SCSI_READ16_COMMAND_STRUCTURE, * PSCSI_READ16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT32  Reserved;
+    UINT8   GroupNumber;
+    UINT8   AdditionalLength;
+    UINT16  ServiceAction;
+    UINT8   RarcFuaDp0Rdprotect;
+    UINT64  Lba;
+    UINT32  ExpectedInitialLbRefTag;
+    UINT16  LbApplicationTagMask;
+    UINT32  TransferLength;
+}SCSI_READ32_COMMAND_STRUCTURE, * PSCSI_READ32_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ_BUFFER10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ModeModeSpecific;
+    UINT8   BufferId;
+    UINT8   BufferOffset[3];
+    UINT8   AllocationLength[3];
+    UINT8   Control;
+}SCSI_READ_BUFFER10_COMMAND_STRUCTURE, * PSCSI_READ_BUFFER10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ_BUFFER16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ModeModeSpecific;
+    UINT64  BufferOffset;
+    UINT32  AllocationLength;
+    UINT8   BufferId;
+    UINT8   Control;
+}SCSI_READ_BUFFER16_COMMAND_STRUCTURE, * PSCSI_READ_BUFFER16_COMMAND_STRUCTURE;
+
+//READ_CAPACITY 10
 
 #define SCSI_CDBVAR_COMMAND_OPCODE                  0x7F
 
