@@ -44,6 +44,7 @@
         <!--Storage Drivers-->
         <FILETOCPY64>cp drivers/storage/AtaAcceleration/PIIX.SYS ISO/ANNYA/SYSTEM64/DRIVERS/PIIX.SYS</FILETOCPY64>          <!--PIXX IDE Chipset-->
         <FILETOCPY64>cp drivers/storage/Ahci/AHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AHCI.SYS</FILETOCPY64>                     <!--AHCI Chipset-->
+        <FILETOCPY64>cp drivers/storage/SCSI/Hardware/LSI_SCSI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/LSI_SCSI.SYS</FILETOCPY64>    <!--SCSI Chipset-->
         <!--Serial Drivers-->
         <FILETOCPY64>cp drivers/Serial/Ps2Bus/PS2IO.SYS ISO/ANNYA/SYSTEM64/PS2IO.SYS</FILETOCPY64>                          <!--PS2 BUS-->
         <!--Input Drivers-->

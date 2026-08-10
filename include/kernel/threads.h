@@ -219,59 +219,20 @@ static inline void MutexPriorityUnlock(mutex_t* m){
 
 
 typedef struct {
-    mutex_t Lock;
-    atomic_t ThreadOwner;
+    mutex_t     Check;
+    mutex_t     Lock;
+    atomic_t    ThreadOwner;
 }spinlock_t;
 
 static inline void SpinlockSyncronize(spinlock_t* s){
-    while (s->Lock.locked.counter){
+    while (LouKeGetAtomic(&s->Lock.locked)){
         // spin until unlocked
     }
 }
 
 static inline bool SpinlockIsLocked(spinlock_t* s){
-    return s->Lock.locked.counter;
+    return (bool)LouKeGetAtomic(&s->Lock.locked);
 }
-
-typedef struct {
-    atomic_t Lock;
-    atomic_t Counter;
-    atomic_t Limit;
-    atomic_t ThreadOwner;
-}semaphore_t;
-
-static inline void SemaphoreLock(semaphore_t* sem) {
-    
-    while (1) {
-        int val = atomic_read(&sem->Counter);
-        if (val <= 0)
-            continue;
-        if (atomic_cmpxchg(&sem->Counter, val, val - 1))
-            break;
-    }
-}
-
-
-static inline void SemaphoreUnlock(semaphore_t* sem) {
-    while (1) {
-        int val = atomic_read(&sem->Counter);
-        int lim = atomic_read(&sem->Limit);
-        if (val >= lim)
-            break;
-        if (atomic_cmpxchg(&sem->Counter, val, val + 1))
-            break;
-    }
-}
-
-static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit) {
-    if (!sem) return;
-    atomic_set(&sem->Lock, 0);
-    atomic_set(&sem->Counter, initial);
-    atomic_set(&sem->Limit, limit);
-}
-
-semaphore_t* LouKeCreateSemaphore(int initial, int limit);
-#define LouKeDestroySemaphore(s) LouKeFree(s)
 
 typedef enum{
     KERNEL_THREAD = 1,
@@ -424,6 +385,36 @@ static inline uintptr_t MutexPriorityLock(
     MutexLock(m);
     return 0;
 }
+
+typedef struct {
+    mutex_t     Check;
+    atomic_t    Counter;
+    atomic_t    Limit;
+}semaphore_t;
+
+static inline void SemaphoreLock(semaphore_t* sem) {
+    MutexLock(&sem->Check);
+    while(LouKeGetAtomic(&sem->Counter) >= LouKeGetAtomic(&sem->Limit)){
+        // spin until semaphore goes below limit
+    }
+    LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) + 1);
+    MutexUnlock(&sem->Check);
+}
+
+
+static inline void SemaphoreUnlock(semaphore_t* sem) {
+    LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
+}
+
+static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit) {
+    if (!sem) return;
+    MutexUnlock(&sem->Check);
+    atomic_set(&sem->Counter, initial);
+    atomic_set(&sem->Limit, limit);
+}
+
+semaphore_t* LouKeCreateSemaphore(int initial, int limit);
+#define LouKeDestroySemaphore(s) LouKeFree(s)
 
 #ifdef __cplusplus
 }

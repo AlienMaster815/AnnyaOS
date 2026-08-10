@@ -371,7 +371,536 @@ typedef struct PACKED _SCSI_READ_BUFFER16_COMMAND_STRUCTURE{
     UINT8   Control;
 }SCSI_READ_BUFFER16_COMMAND_STRUCTURE, * PSCSI_READ_BUFFER16_COMMAND_STRUCTURE;
 
-//READ_CAPACITY 10
+typedef struct PACKED _SCSI_READ_CAPACITY10_COMMAND_STRUCTUTRE{
+    UINT8   OpCode;
+    UINT8   Reserved1;
+    UINT32  Lba;
+    UINT16  Reserved2;
+    UINT8   Pmi;
+    UINT8   Control;
+}SCSI_READ_CAPACITY10_COMMAND_STRUCTUTRE, * PSCSI_READ_CAPACITY10_COMMAND_STRUCTUTRE;
+
+typedef struct PACKED _SCSI_READ_CAPACITY16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT64  Lba;
+    UINT32  AllocationLength;
+    UINT8   Pmi;
+    UINT8   Control;
+}SCSI_READ_CAPACITY16_COMMAND_STRUCTURE, * PSCSI_READ_CAPACITY16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ_DEFECT_DATA10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Reserved1;
+    UINT8   DlfReqGListPList;
+    UINT32  Reserved2;
+    UINT16  AllocationLength;
+    UINT8   Control;
+}SCSI_READ_DEFECT_DATA10_COMMAND_STRUCTURE, * PSCSI_READ_DEFECT_DATA10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ_DEFECT_DATA12_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   DlgReqGListPList;
+    UINT32  Adi;
+    UINT32  AllocationLength;
+    UINT8   Reserved;
+    UINT8   Control;
+}SCSI_READ_DEFECT_DATA12_COMMAND_STRUCTURE, * PSCSI_READ_DEFECT_DATA12_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ_LONG10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   CorrctPblock;
+    UINT32  Lba;
+    UINT8   Reserved;
+    UINT16  Btl;
+    UINT8   Control;
+}SCSI_READ_LONG10_COMMAND_STRUCTURE, * PSCSI_READ_LONG10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_READ_LONG16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT64  Lba;
+    UINT16  Reserved;
+    UINT16  Btl;
+    UINT8   CorrctPblock;
+    UINT8   Control;
+}SCSI_READ_LONG16_COMMAND_STRUCTURE, * PSCSI_READ_LONG16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   LongGListLba;
+    UINT8   Reserved[3];
+    UINT8   Control;
+}SCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE, * PSCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Pcv;
+    UINT8   PageCode;
+    UINT16  AllocationLength;
+    UINT8   Control;
+}SCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE, * PSCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_RELEASE10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   LongID3rdParty;
+    UINT8   Obsolete;
+    UINT8   ThirdPartyDevID;
+    UINT8   Reserved[3];
+    UINT16  ParameterListLength;
+    UINT8   Control;
+}SCSI_RELEASE10_COMMAND_STRUCTURE, * PSCSI_RELEASE10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_REPORT_IDENTIFYING_INFORMATION_COMMAND_STRUCUTRE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT16  Reserved;
+    UINT16  Restricted;
+    UINT32  AllocationLength;
+    UINT8   InformationType;
+    UINT8   Control;
+}SCSI_REPORT_IDENTIFYING_INFORMATION_COMMAND_STRUCUTRE, * PSCSI_REPORT_IDENTIFYING_INFORMATION_COMMAND_STRUCUTRE;
+
+typedef struct PACKED _SCSI_REPORT_LUNS_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Reserved1;
+    UINT8   SelectReport;
+    UINT8   Reserved2[3];
+    UINT32  AllocationLength;
+    UINT8   Reserved3;
+    UINT8   Control;
+}SCSI_REPORT_LUNS_COMMAND_STRUCTURE, * PSCSI_REPORT_LUNS_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_REPORT_SUPPORTED_OPERATION_CODES{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT8   ReportingOptionsRctd;
+    UINT8   RequestedOperationCode;
+    UINT16  RequestedServiceAction;
+    UINT32  AllocationLength;
+    UINT8   Reserved;
+    UINT8   Control;
+}SCSI_REPORT_SUPPORTED_OPERATION_CODES, * PSCSI_REPORT_SUPPORTED_OPERATION_CODES;
+
+typedef struct PACKED _SCSI_REPORT_SUPPORTED_TASK_MANAGEMENT_FUNCTIONS_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT8   Repd;
+    UINT8   Reserved1[3];
+    UINT32  AllocationLength;
+    UINT8   Reserved2;
+    UINT8   Control;
+}SCSI_REPORT_SUPPORTED_TASK_MANAGEMENT_FUNCTIONS_COMMAND_STRUCTURE, * PSCSI_REPORT_SUPPORTED_TASK_MANAGEMENT_FUNCTIONS_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_REPORT_TIMESTAMP_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT32  Reserved1;
+    UINT32  AllocationLength;
+    UINT8   Reserved2;
+    UINT8   Control;
+}SCSI_REPORT_TIMESTAMP_COMMAND_STRUCTURE, * PSCSI_REPORT_TIMESTAMP_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_REQUEST_SENSE_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Desc;
+    UINT16  Reserved;
+    UINT8   AllocationLength;
+    UINT8   Control;
+}SCSI_REQUEST_SENSE_COMMAND_STRUCTURE, * PSCSI_REQUEST_SENSE_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_RESERVE6_COMMAND_STRCTURE{
+    UINT8   OpCode;
+    UINT32  Obsolete;
+    UINT8   Control;
+}SCSI_RESERVE6_COMMAND_STRCTURE, * PSCSI_RESERVE6_COMMAND_STRCTURE;
+
+typedef struct PACKED _SCSI_RESERVE10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   LongId3rdpty;
+    UINT8   Obsolete;
+    UINT8   ThirdPartyDevID;
+    UINT8   Reserved[3];
+    UINT16  ParameterListLength;
+    UINT8   Control;
+}SCSI_RESERVE10_COMMAND_STRUCTURE, * PSCSI_RESERVE10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_REZERO_UNIT_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   LunLbaMSB;
+    UINT8   Reserved[3];
+    UINT8   Control;
+}SCSI_REZERO_UNIT_COMMAND_STRUCTURE, * PSCSI_REZERO_UNIT_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SANITIZE_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceActionAuseZnrImmed;
+    UINT8   Reserved[5];
+    UINT16  ParameterListLength;
+    UINT8   Control;
+}SCSI_SANITIZE_COMMAND_STRUCTURE, * PSCSI_SANITIZE_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SECURITY_PROTOCOL_IN_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   SecurityProtocol;
+    UINT16  SecurityProtocolSpecific;
+    UINT8   Inc512;
+    UINT8   Reserved1;
+    UINT32  AllocationLength;
+    UINT8   Reserved2;
+    UINT8   Control;
+}SCSI_SECURITY_PROTOCOL_IN_COMMAND_STRUCTURE, * PSCSI_SECURITY_PROTOCOL_IN_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SECURITY_PROTOCOL_OUT_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   SecurityProtocol;
+    UINT16  SecurityProtocolSpecific;
+    UINT8   Inc512;
+    UINT8   Reserved1;
+    UINT32  TransferLength;
+    UINT8   Reserved2;
+    UINT8   Control;
+}SCSI_SECURITY_PROTOCOL_OUT_COMMAND_STRUCTURE, * PSCSI_SECURITY_PROTOCOL_OUT_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SEEK_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   LunLbaMsb;
+    UINT16  Lba;
+    UINT8   Reserved;
+    UINT8   Control;
+}SCSI_SEEK_COMMAND_STRUCTURE, * PSCSI_SEEK_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SEEK_EX_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Lun;
+    UINT32  Lba;
+    UINT8   Reserved[3];
+    UINT8   Control;
+}SCSI_SEEK_EX_COMMAND_STRUCTURE, * PSCSI_SEEK_EX_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SET_IDENTIFYING_INFORMATION_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT16  Reserved;
+    UINT16  Restricted;
+    UINT32  ParameterListLength;
+    UINT8   InformationType;
+    UINT8   Control;
+}SCSI_SET_IDENTIFYING_INFORMATION_COMMAND_STRUCTURE, * PSCSI_SET_IDENTIFYING_INFORMATION_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SET_TIMESTAMP_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceAction;
+    UINT32  Reserved1;
+    UINT32  ParameterListLength;
+    UINT8   Reserved2;
+    UINT8   Control;
+}SCSI_SET_TIMESTAMP_COMMAND_STRUCTURE, * PSCSI_SET_TIMESTAMP_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_START_STOP_UNIT_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Immed;
+    UINT8   Reserved;
+    UINT8   Pcm; //Power Condition Modifier
+    UINT8   StartLoejNoFlushPc;
+    UINT8   Control;    
+}SCSI_START_STOP_UNIT_COMMAND_STRUCTURE, * PSCSI_START_STOP_UNIT_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_STREAM_CONTROL_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceActionStrCltl;
+    UINT16  Reserved1;
+    UINT16  StrID;
+    UINT8   Reserved2[9];
+    UINT8   Control;
+}SCSI_STREAM_CONTROL_COMMAND_STRUCTURE, * PSCSI_STREAM_CONTROL_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SYNCHRONIZE_CACHE10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Immed;
+    UINT32  Lba;
+    UINT8   GroupNumber;
+    UINT16  NumberOfBlocks;
+    UINT8   Control;
+}SCSI_SYNCHRONIZE_CACHE10_COMMAND_STRUCTURE, * PSCSI_SYNCHRONIZE_CACHE10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_SYNCHRONIZE_CACHE16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Immed;
+    UINT64  Lba;
+    UINT32  NumberOfBlocks;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_SYNCHRONIZE_CACHE16_COMMAND_STRUCTURE, * PSCSI_SYNCHRONIZE_CACHE16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_TEST_UNIT_READY_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT32  Reserved;
+    UINT8   Control;
+}SCSI_TEST_UNIT_READY_COMMAND_STRUCTURE, * PSCSI_TEST_UNIT_READY_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_UNMAP_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Anchor;
+    UINT32  Reserved;
+    UINT8   GroupNumber;
+    UINT16  ParameterListLength;
+    UINT8   Control;
+}SCSI_UNMAP_COMMAND_STRUCTURE, * PSCSI_UNMAP_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_VERIFY10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   BytChkDpoVrProtect;
+    UINT32  Lba;
+    UINT8   GroupNumber;
+    UINT16  VerificationLength;
+    UINT8   Control;
+}SCSI_VERIFY10_COMMAND_STRUCTURE, * PSCSI_VERIFY10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_VERIFY12_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   BytChkDpoVrProtect;
+    UINT32  Lba;
+    UINT32  VerificationLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_VERIFY12_COMMAND_STRUCTURE, * PSCSI_VERIFY12_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_VERIFY16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   BytChkDpoVrProtect;
+    UINT64  Lba;
+    UINT32  VerificationLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_VERIFY16_COMMAND_STRUCTURE, * PSCSI_VERIFY16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_VERIFY32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT32  Reserved1;
+    UINT8   GroupNumber;
+    UINT8   AdditionalCdbLength;
+    UINT16  ServiceAction;
+    UINT8   BytChkDpoVrProtect;
+    UINT8   Reserved2;
+    UINT64  Lba;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
+    UINT32  VerificationLength;
+}SCSI_VERIFY32_COMMAND_STRUCTURE, * PSCSI_VERIFY32_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE6_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   MsbLba;
+    UINT16  Lba;
+    UINT8   TransferLength;
+    UINT8   Control;
+}SCSI_WRITE6_COMMAND_STRUCTURE, * PSCSI_WRITE6_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   FuaDpoWrProtect;
+    UINT32  Lba;
+    UINT8   GroupNumber;
+    UINT16  TransferLength;
+    UINT8   Control;
+}SCSI_WRITE10_COMMAND_STRUCTURE, * PSCSI_WRITE10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE12_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   FuaDpoWrProtect;
+    UINT32  Lba;;
+    UINT32  TransferLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_WRITE12_COMMAND_STRUCTURE, * PSCSI_WRITE12_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Dld2FuaDpoWrProtect;
+    UINT64  Lba;
+    UINT32  TransferLength;
+    UINT8   GroupNumberDld0Dld1;
+    UINT8   Control;
+}SCSI_WRITE16_COMMAND_STRUCTURE, * PSCSI_WRITE16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT32  Reserved1;
+    UINT8   GroupNumber;
+    UINT8   AdditionalCdbLength;
+    UINT16  ServiceAction;
+    UINT8   FuaDp0WrProtect;
+    UINT8   Reserved2;
+    UINT64  Lba;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
+    UINT32  TransferLength;
+}SCSI_WRITE32_COMMAND_STRUCTURE, * PSCSI_WRITE32_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_AND_VERIFY10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   BytChkDpoWrProtect;
+    UINT32  Lba;
+    UINT8   GroupNumber;
+    UINT16  TransferLength;
+    UINT8   Control;
+}SCSI_WRITE_AND_VERIFY10_COMMAND_STRUCTURE, * PSCSI_WRITE_AND_VERIFY10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   BytChkDpoWrProtect;
+    UINT32  Lba;
+    UINT32  TransferLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE, * PSCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_AND_VERICFY16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   BytChkDpoWrProtect;
+    UINT64  Lba;
+    UINT32  TransferLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_WRITE_AND_VERICFY16_COMMAND_STRUCTURE, * PSCSI_WRITE_AND_VERICFY16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_AND_VERICFY32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT32  Reserved1;
+    UINT8   GroupNumber;
+    UINT8   AdditionalCdbLength;
+    UINT16  ServiceAction;
+    UINT8   BytChkDpoWrProtect;
+    UINT8   Reserved2;
+    UINT64  Lba;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
+    UINT32  TransferLength;
+}SCSI_WRITE_AND_VERICFY32_COMMAND_STRUCTURE, * PSCSI_WRITE_AND_VERICFY32_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   FuaDpoWrProtect;
+    UINT64  Lba;
+    UINT16  AtomicBoundry;
+    UINT16  TransferLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE, * PSCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT16  Reserved1;
+    UINT16  AtomicBoundry;
+    UINT8   GroupNumber;
+    UINT8   AdditionalCdbLength;
+    UINT16  ServiceAction;
+    UINT8   FuaDp0WrProtect;
+    UINT8   Reserved2;
+    UINT64  Lba;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
+    UINT32  TransferLength;
+}SCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE, * PSCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_BUFFER_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ModeModeSpecific;
+    UINT8   BufferId;
+    UINT8   BufferOffset[3];
+    UINT8   ParameterListLength[3];
+    UINT8   Control;
+}SCSI_WRITE_BUFFER_COMMAND_STRUCTURE, * PSCSI_WRITE_BUFFER_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_LONG10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   WrUncor;
+    UINT32  Lba;
+    UINT8   Reserved;
+    UINT16  TransferLength;
+    UINT8   Control;
+}SCSI_WRITE_LONG10_COMMAND_STRUCTURE, * PSCSI_WRITE_LONG10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_LONG16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   ServiceActionWrUncor;
+    UINT64  Lba;
+    UINT16  Reserved1;
+    UINT16  TransferLength;
+    UINT8   Reserved2;
+    UINT8   Control;
+}SCSI_WRITE_LONG16_COMMAND_STRUCTURE, * PSCSI_WRITE_LONG16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_SAME10_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   UnMapAnchorWrProtect;
+    UINT32  Lba;
+    UINT8   GroupNumber;
+    UINT16  NumberOfBlocks;
+    UINT8   Control;
+}SCSI_WRITE_SAME10_COMMAND_STRUCTURE, * PSCSI_WRITE_SAME10_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_SAME16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   NdobUnmapAnchorWrProtect;
+    UINT64  Lba;
+    UINT32  NumberOfBlocks;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_WRITE_SAME16_COMMAND_STRUCTURE, * PSCSI_WRITE_SAME16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_SAME32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT32  Reserved1;
+    UINT8   GroupNumber;
+    UINT8   AdditionalCdbLength;
+    UINT16  ServiceAction;
+    UINT8   NdobUnMapAnchorWrProtect;
+    UINT8   Reserved2;
+    UINT64  Lba;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
+    UINT32  NumberOfBlocks;
+}SCSI_WRITE_SAME32_COMMAND_STRUCTURE, * PSCSI_WRITE_SAME32_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_STREAM16_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   FuaDpoWrProtect;
+    UINT64  Lba;
+    UINT16  StrID;
+    UINT16  TransferLength;
+    UINT8   GroupNumber;
+    UINT8   Control;
+}SCSI_WRITE_STREAM16_COMMAND_STRUCTURE, * PSCSI_WRITE_STREAM16_COMMAND_STRUCTURE;
+
+typedef struct PACKED _SCSI_WRITE_STREAM32_COMMAND_STRUCTURE{
+    UINT8   OpCode;
+    UINT8   Control;
+    UINT16  Reserved1;
+    UINT16  StrID;
+    UINT8   GroupNumber;
+    UINT8   AdditionalCdbLength;
+    UINT16  ServiceAction;
+    UINT8   FuaDpoWrProtect;
+    UINT8   Reserved2;
+    UINT64  Lba;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
+    UINT32  TransferLength;
+}SCSI_WRITE_STREAM32_COMMAND_STRUCTURE, * PSCSI_WRITE_STREAM32_COMMAND_STRUCTURE;
+
 
 #define SCSI_CDBVAR_COMMAND_OPCODE                  0x7F
 
@@ -944,6 +1473,7 @@ struct _SCSI_HOST_DEVICE_OBJECT;
 typedef struct _SCSI_DEVICE_OBJECT{
     struct _SCSI_HOST_DEVICE_OBJECT*    Shdd;
     UINT64                              ScsiFeatures;
+    SIZE                                ScsiQueueCount;
 }SCSI_DEVICE_OBJECT, * PSCSI_DEVICE_OBJECT;
 
 typedef enum{
