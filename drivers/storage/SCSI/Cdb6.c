@@ -53,11 +53,28 @@ ScsiCoreEncodeInquiryCommand(
     SCSI_INQUIRY_COMMAND_STRUCTURE  tCdb = {0};
     UINT16 Tmp16;
     tCdb.OpCode = SCSI_COMMAND_INQUIRY;
-    tCdb.EvdpCmddt = (Evpd | Cmddt << 1);
+    tCdb.EvdpCmddt = Evpd | (Cmddt << 1);
     tCdb.PageCode = PageCode;
     LouKeSwapEndianess(&AllocationLength, &Tmp16, sizeof(UINT16));
     tCdb.AllocationLength = AllocationLength;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_INQUIRY_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeModeSelect6Command(
+    PSCSI_MODE_SELECT6_COMMAND_STRUCTURE    Cdb,
+    UINT8                                   Sp,
+    UINT8                                   Rtd,
+    UINT8                                   Pf,
+    UINT8                                   ParameterListLength,
+    UINT8                                   Control
+){
+    SCSI_MODE_SELECT6_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_MODE_SELECT_CDB6;
+    tCdb.SpRtdPf = Sp | (Rtd << 1) | (Pf << 4);
+    tCdb.ParameterListLength = ParameterListLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_MODE_SELECT6_COMMAND_STRUCTURE));
 }
 
