@@ -78,3 +78,39 @@ ScsiCoreEncodeModeSelect6Command(
     memcpy(Cdb, &tCdb, sizeof(SCSI_MODE_SELECT6_COMMAND_STRUCTURE));
 }
 
+void
+ScsiCoreEncodeModeSense6Command(
+    PSCSI_MODE_SENSE6_COMMAND_STRUCTURE Cdb,
+    UINT8                               Dbd,
+    UINT8                               PageCode,
+    UINT8                               Pc,
+    UINT8                               SubPageCode,
+    UINT8                               AllocationLength,
+    UINT8                               Control  
+){
+    SCSI_MODE_SENSE6_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_MODE_SENCE_CDB6;
+    tCdb.Dbd = (Dbd << 3);
+    tCdb.PageCodePc = PageCode | (Pc << 6);
+    tCdb.SubPageCode = SubPageCode;
+    tCdb.AllocationLength = AllocationLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_MODE_SENSE6_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeRead6Command(
+    PSCSI_READ6_COMMAND_STRUCTURE   Cdb,
+    UINT32                          Lba,
+    UINT8                           TransferLength,
+    UINT8                           Control  
+){
+    SCSI_READ6_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_READ_CDB6;
+    tCdb.Lba[0] = (Lba >> 16) & 0x1F;
+    tCdb.Lba[1] = (Lba >> 8) & 0xFF;
+    tCdb.Lba[2] =  Lba & 0xFF;
+    tCdb.TransferLength = TransferLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_READ6_COMMAND_STRUCTURE));
+}

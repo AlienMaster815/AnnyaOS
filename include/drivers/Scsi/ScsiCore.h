@@ -231,8 +231,6 @@ typedef struct PACKED _SCSI_INQUIRY_COMMAND_STRUCTURE{
     UINT8   Control;
 }SCSI_INQUIRY_COMMAND_STRUCTURE, * PSCSI_INQUIRY_COMMAND_STRUCTURE;
 
-//sart here for CDB work
-
 typedef struct PACKED _SCSI_LOG_SELECT_COMMAND_STRUCTURE{
     UINT8   OpCode; //SCSI_COMMAND_LOG_SELECT 0x4C
     UINT8   SpPcr;
@@ -270,6 +268,8 @@ typedef struct PACKED _SCSI_MODE_SELECT10_COMMAND_STRUCTURE{
     UINT8   Control;
 }SCSI_MODE_SELECT10_COMMAND_STRUCTURE, * PSCSI_MODE_SELECT10_COMMAND_STRUCTURE;
 
+//sart here for CDB work
+
 typedef struct PACKED _SCSI_MODE_SENSE6_COMMAND_STRUCTURE{
     UINT8   OpCode; //SCSI_COMMAND_MODE_SENCE_CDB6 0x1A
     UINT8   Dbd;
@@ -282,7 +282,8 @@ typedef struct PACKED _SCSI_MODE_SENSE6_COMMAND_STRUCTURE{
 typedef struct PACKED _SCSI_MODE_SENSE10_COMMAND_STRUCTURE{
     UINT8   OpCode; //SCSI_COMMAND_MODE_SENCE_CDB10 0x5A
     UINT8   DbdLlbaa;
-    UINT8   SupPageCode;
+    UINT8   PageCodePc;
+    UINT8   SubPageCode;
     UINT8   Reserved[3];
     UINT16  AllocationLength;
     UINT8   Control;
@@ -294,7 +295,7 @@ typedef struct PACKED _SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE{
     UINT8   Reservedp[5];
     UINT16  AllocationLength;
     UINT8   Control;
-}SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE, * PSCSI_PERSISTENT_RESERVED_IN_COMMAND;
+}SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE, * PSCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE;
 
 typedef struct PACKED _SCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE{
     UINT8   OpCode; //SCSI_COMMAND_PERSISTENT_RESERVE_OUT 0x5F
@@ -335,21 +336,23 @@ typedef struct PACKED _SCSI_READ16_COMMAND_STRUCTURE{
     UINT8   Dld2RarcFuaDpoRdprotect;
     UINT64  Lba;
     UINT32  TransferLength;
-    UINT8   Dld0Dld1;
+    UINT8   GroupNumberDld0Dld1;
     UINT8   Control;
 }SCSI_READ16_COMMAND_STRUCTURE, * PSCSI_READ16_COMMAND_STRUCTURE;
 
 typedef struct PACKED _SCSI_READ32_COMMAND_STRUCTURE{
     UINT8   OpCode; //SCSI_COMMAND_READ_CDB32 0x7F
     UINT8   Control;
-    UINT32  Reserved;
+    UINT32  Reserved1;
     UINT8   GroupNumber;
     UINT8   AdditionalLength;
     UINT16  ServiceAction;
     UINT8   RarcFuaDp0Rdprotect;
+    UINT8   Reserved2;
     UINT64  Lba;
-    UINT32  ExpectedInitialLbRefTag;
-    UINT16  LbApplicationTagMask;
+    UINT32  EilbrTag;
+    UINT16  ElbaTag;
+    UINT16  LbaTagMask;
     UINT32  TransferLength;
 }SCSI_READ32_COMMAND_STRUCTURE, * PSCSI_READ32_COMMAND_STRUCTURE;
 
@@ -1469,11 +1472,18 @@ struct _SCSI_HOST_DEVICE_OBJECT;
 #define SCSI_CHANGE_FORMAT_UNIT_FEATURE     (1ULL << 2)
 #define SCSI_CHANGE_GET_LBA_STATUS_FEATURE  (1ULL << 3)
 
+typedef struct _SCSI_PORT_DEVICE_OBJECT{
+    struct _SCSI_HOST_DEVICE_OBJECT*    Shdd;
+    SIZE                                PortID;
+    PVOID                               PortPrivateData;
+}SCSI_PORT_DEVICE_OBJECT, * PSCSI_PORT_DEVICE_OBJECT;
 
 typedef struct _SCSI_DEVICE_OBJECT{
     struct _SCSI_HOST_DEVICE_OBJECT*    Shdd;
+    PSCSI_PORT_DEVICE_OBJECT            PortDevice;
     UINT64                              ScsiFeatures;
     SIZE                                ScsiQueueCount;
+    PVOID                               ScsiDevicePrivateData;
 }SCSI_DEVICE_OBJECT, * PSCSI_DEVICE_OBJECT;
 
 typedef enum{
@@ -1498,7 +1508,7 @@ typedef struct _SCSI_GET_LBA_STATUS_COMMAND_PACKET{
 typedef struct _SCSI_COMMAND_PACKET{
     SCSI_COMMAND_PACKET_ID                          CommandID;
     struct _SCSI_HOST_DEVICE_OBJECT*                Shdd;
-    PSCSI_DEVICE_OBJECT                             ScsiDeviceObject;
+    PSCSI_PORT_DEVICE_OBJECT                        ScsiPortDeviceObject;
     PVOID                                           SenceResult;
     union {
         SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE   BackgroundControl;
@@ -1510,12 +1520,12 @@ typedef struct _SCSI_COMMAND_PACKET{
 
 typedef struct _SCSI_HOST_DEVICE_OBJECT{
     struct _SCSI_HOST_DEVICE_DRIVER_OBJECT*     DriverObject;
-
+    PVOID                                       ShddPrivateData;
 }SCSI_HOST_DEVICE_OBJECT, * PSCSI_HOST_DEVICE_OBJECT;
 
 typedef struct _SCSI_HOST_DEVICE_CALLBACKS{
-    LOUSTATUS   (*ScsiDeviceSendScsiCommand)(PSCSI_COMMAND_PACKET ScsiCommandPacket);
-    LOUSTATUS   (*ScsiDevicePrepScsiCommand)(PSCSI_DEVICE_OBJECT ScsiDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
+    LOUSTATUS   (*ScsiDeviceSendScsiCommand)(PSCSI_PORT_DEVICE_OBJECT ScsiPortDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
+    LOUSTATUS   (*ScsiDevicePrepScsiCommand)(PSCSI_PORT_DEVICE_OBJECT ScsiPortDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
 }SCSI_HOST_DEVICE_CALLBACKS, * PSCSI_HOST_DEVICE_CALLBACKS;
 
 typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{

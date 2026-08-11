@@ -15,9 +15,9 @@ ScsiCoreCreateBackgroundControlCommandToDevice(
     
     ControlCommand->CommandID = SCSI_COMMAND_BACKGROUND_CONTROL_ID;
     ControlCommand->Shdd = ScsiDevice->Shdd;
-    ControlCommand->ScsiDeviceObject = ScsiDevice;
+    ControlCommand->ScsiPortDeviceObject = ScsiDevice->PortDevice;
     ScsiCoreEncodeBackgroundControlCommand(&ControlCommand->Command.BackgroundControl, BoControl, BoTime, 0x00);
-    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice, ControlCommand);
+    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice->PortDevice, ControlCommand);
 }
 
 LOUSTATUS
@@ -32,9 +32,9 @@ ScsiCoreCreateChangeDefinitionCommandToDevice(
     }
     ControlCommand->CommandID = SCSI_COMMAND_CHANGE_DEFINITION_ID;
     ControlCommand->Shdd = ScsiDevice->Shdd;
-    ControlCommand->ScsiDeviceObject = ScsiDevice;
+    ControlCommand->ScsiPortDeviceObject = ScsiDevice->PortDevice;
     ScsiCoreEncodeChangeDefinitionCommand(&ControlCommand->Command.ChangeDefinition, Save, Mode, 0x00, 0x00);
-    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice, ControlCommand);
+    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice->PortDevice, ControlCommand);
 }
 
 LOUSTATUS
@@ -55,11 +55,11 @@ ScsiCoreCreateFormatUnitCommand(
     }
     ControlCommand->CommandID = SCSI_COMMAND_FORMAT_UNIT_ID;
     ControlCommand->Shdd = ScsiDevice->Shdd;
-    ControlCommand->ScsiDeviceObject = ScsiDevice;
+    ControlCommand->ScsiPortDeviceObject = ScsiDevice->PortDevice;
     ControlCommand->Command.FormatUnit.ListData = ListData;
     ControlCommand->Command.FormatUnit.ListSize = ListSize;
     ScsiCoreEncodeFormatUnitCommand(&ControlCommand->Command.FormatUnit.Cdb, DefectListFormat, CmpList, FmtData, LongList, FmtpInfo, 0x00, Ffmt, 0x00);
-    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice, ControlCommand);
+    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice->PortDevice, ControlCommand);
 }
 
 LOUSTATUS
@@ -74,9 +74,9 @@ ScsiCoreCreateGetLbaStatusCommand(
     }
     ControlCommand->CommandID = SCSI_COMMAND_GET_LBA_STATUS_ID;
     ControlCommand->Shdd = ScsiDevice->Shdd;
-    ControlCommand->ScsiDeviceObject = ScsiDevice;
+    ControlCommand->ScsiPortDeviceObject = ScsiDevice->PortDevice;
     ControlCommand->Command.GetLbaStatus.StatusData = 0x00;
     ControlCommand->Command.GetLbaStatus.StatusSize = 0x00;
     ScsiCoreEncodeGetLbaStatusCommand(&ControlCommand->Command.GetLbaStatus.Cdb, StartingLba, AllocationLength, 0x00, 0x00);
-    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice, ControlCommand);
+    return ScsiDevice->Shdd->DriverObject->Callbacks->ScsiDevicePrepScsiCommand(ScsiDevice->PortDevice, ControlCommand);
 }

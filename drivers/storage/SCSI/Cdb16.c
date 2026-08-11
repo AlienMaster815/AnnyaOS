@@ -8,14 +8,10 @@ void ScsiCoreEncodeCdb16Command(
     UINT8               Mci,
     UINT8               Control
 ){
-    UINT64 Tmp64;
-    UINT32 Tmp32;
     SCSI_CDB16_COMMAND tCdb = {0};
     tCdb.OpCode = OpCode;
-    LouKeSwapEndianess(&Lba , &Tmp64, sizeof(UINT64));
-    tCdb.Lba = Lba;
-    LouKeSwapEndianess(&TpaLength , &Tmp32, sizeof(UINT32));
-    tCdb.TpaLength = TpaLength;
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.TpaLength = ScsiCoreEncodeUint32(TpaLength); 
     tCdb.Mci = Mci;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_CDB16_COMMAND));
@@ -44,15 +40,11 @@ void ScsiCoreEncodeGetLbaStatusCommand(
     UINT8                                   Reserved,
     UINT8                                   Control
 ){
-    UINT64 Tmp64;
-    UINT32 Tmp32;
     SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_GET_LBA_STATUS;
     tCdb.ServiceAction = SCSI_SERVICE_ACTION_GET_LBA_STATUS;
-    LouKeSwapEndianess(&StartingLba, &Tmp64, sizeof(UINT64));
-    tCdb.StartingLba = Tmp64;
-    LouKeSwapEndianess(&AllocationLength, &Tmp32, sizeof(UINT32));
-    tCdb.AllocationLength  = Tmp32;
+    tCdb.StartingLba = ScsiCoreEncodeUint64(StartingLba);
+    tCdb.AllocationLength = ScsiCoreEncodeUint32(AllocationLength);
     tCdb.Reserved = Reserved;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_GET_LBA_STATUS_COMMAND_STRUCTURE));
@@ -64,15 +56,37 @@ void ScsiCoreEncodeGetStreamStatusCommand(
     UINT32                                      AllocationLength,
     UINT8                                       Control
 ){
-    UINT16 Tmp16;
-    UINT32 Tmp32;
     SCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_GET_STREAM_STATUS;
     tCdb.ServiceAction = SCSI_SERVICE_ACTION_GET_STREAM_STATUS;
-    LouKeSwapEndianess(&StartingStreamID, &Tmp16, sizeof(UINT16));
-    tCdb.StartingStreamID = Tmp16;
-    LouKeSwapEndianess(&AllocationLength, &Tmp32, sizeof(UINT32));
-    tCdb.AllocationLength = Tmp32;
+    tCdb.StartingStreamID = ScsiCoreEncodeUint16(StartingStreamID);
+    tCdb.AllocationLength = ScsiCoreEncodeUint32(AllocationLength);
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE));
 }
+
+void 
+ScsiCoreEncodeRead16Command(
+    PSCSI_READ16_COMMAND_STRUCTURE  Cdb,
+    UINT8                           Dld2,
+    UINT8                           Rarc,
+    UINT8                           Fua,
+    UINT8                           Dpo,
+    UINT8                           RdProtect,
+    UINT64                          Lba,
+    UINT32                          TransferLength,
+    UINT8                           GroupNumber,
+    UINT8                           Dld0,
+    UINT8                           Dld1,
+    UINT8                           Control
+){
+    SCSI_READ16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_READ_CDB16;
+    tCdb.Dld2RarcFuaDpoRdprotect = ((Dld2) | (Rarc << 2) | (Fua << 3) | (Dpo << 4) | (RdProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    tCdb.GroupNumberDld0Dld1 = (GroupNumber | (Dld0 << 6) | (Dld1 << 7));
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_READ16_COMMAND_STRUCTURE));
+}   
+

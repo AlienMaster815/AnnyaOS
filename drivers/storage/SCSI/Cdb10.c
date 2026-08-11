@@ -9,16 +9,12 @@ void ScsiCoreEncodeCdb10Command(
     UINT16              TpaLength,
     UINT8               Control
 ){
-    UINT32 Tmp32;
-    UINT16 Tmp16;
     SCSI_CDB10_COMMAND tCdb = {0};
     tCdb.OpCode = OpCode;
     tCdb.ServiceActionMci = ServiceActionMci;
-    LouKeSwapEndianess(&Lba, &Tmp32, sizeof(UINT32));
-    tCdb.Lba = Tmp32;
+    tCdb.Lba = ScsiCoreEncodeUint32(Lba);
     tCdb.Mci = Mci;
-    LouKeSwapEndianess(&TpaLength, &Tmp16, sizeof(UINT16));
-    tCdb.TpaLength = Tmp16;
+    tCdb.TpaLength = ScsiCoreEncodeUint16(TpaLength);
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_CDB10_COMMAND));
 }
@@ -52,13 +48,11 @@ ScsiCoreEncodeLogSelectCommand(
     UINT8                               Control
 ){
     SCSI_LOG_SELECT_COMMAND_STRUCTURE tCdb = {0}; 
-    UINT16 Tmp16;
     tCdb.OpCode = SCSI_COMMAND_LOG_SELECT;
     tCdb.SpPcr = Sp | (Pcr << 1);
     tCdb.PageCodePc = PageCode | (Pc << 6); 
     tCdb.SubPageCode = SubPageCode;
-    LouKeSwapEndianess(&ParameterListLength, &Tmp16, sizeof(UINT16));
-    tCdb.ParameterListLength = Tmp16;
+    tCdb.ParameterListLength = ScsiCoreEncodeUint16(ParameterListLength);
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_LOG_SELECT_COMMAND_STRUCTURE));
 }
@@ -75,15 +69,12 @@ ScsiCoreEncodeLogSenseCommand(
     UINT8                               Control
 ){
     SCSI_LOG_SENSE_COMMAND_STRUCTURE tCdb = {0};
-    UINT16 Tmp16;
     tCdb.OpCode = SCSI_COMMAND_LOG_SENSE;
     tCdb.Sp = Sp;
     tCdb.PageCodePc = PageCode | (Pc << 6);
     tCdb.SubPageCode = SubPageCode;
-    LouKeSwapEndianess(&ParameterPointer, &Tmp16, sizeof(UINT16));
-    tCdb.ParameterPointer = Tmp16;
-    LouKeSwapEndianess(&AllocationLength, &Tmp16, sizeof(UINT16));
-    tCdb.AllocationLength = Tmp16;
+    tCdb.ParameterPointer = ScsiCoreEncodeUint16(ParameterPointer);
+    tCdb.AllocationLength = ScsiCoreEncodeUint16(AllocationLength);
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_LOG_SENSE_COMMAND_STRUCTURE));
 }
@@ -97,12 +88,85 @@ ScsiCoreEncodeModeSelect10Command(
     UINT8                                   Control
 ){
     SCSI_MODE_SELECT10_COMMAND_STRUCTURE tCdb = {0};
-    UINT16 Tmp16;
     tCdb.OpCode = SCSI_COMMAND_MODE_SELECT_CDB10;
     tCdb.SpPf = Sp | (Pf << 4);
-    LouKeSwapEndianess(&ParameterListLength, &Tmp16, sizeof(UINT16));
-    tCdb.ParameterListLength = Tmp16;
+    tCdb.ParameterListLength = ScsiCoreEncodeUint16(ParameterListLength);
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_MODE_SELECT10_COMMAND_STRUCTURE));
+}
+
+void ScsiCoreEncodeModeSense10Command(
+    PSCSI_MODE_SENSE10_COMMAND_STRUCTURE    Cdb,
+    UINT8                                   Dbd,
+    UINT8                                   Llbaa,
+    UINT8                                   PageCode,
+    UINT8                                   Pc,
+    UINT8                                   SubPageCode,
+    UINT16                                  AllocationLength,
+    UINT8                                   Control
+){
+    SCSI_MODE_SENSE10_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_MODE_SENCE_CDB10;
+    tCdb.DbdLlbaa = ((Dbd << 3) | (Llbaa << 4));
+    tCdb.PageCodePc = PageCode | (Pc << 6);
+    tCdb.SubPageCode = SubPageCode;
+    tCdb.AllocationLength = ScsiCoreEncodeUint16(AllocationLength);
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_MODE_SENSE10_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodePersistentReserveInCommand(
+    PSCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE   Cdb,
+    UINT8                                           ServiceAction,
+    UINT16                                          AllocationLength,
+    UINT8                                           Control
+){
+    SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_PERSISTENT_RESERVE_IN;
+    tCdb.ServiceAction = ServiceAction;
+    tCdb.AllocationLength = ScsiCoreEncodeUint16(AllocationLength);
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodePersistentReserveOutCommand(
+    PSCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE  Cdb,
+    UINT8                                           ServiceAction,
+    UINT8                                           Type,
+    UINT8                                           Scope,
+    UINT32                                          ParameterListLength,
+    UINT8                                           Control
+){
+    SCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_PERSISTENT_RESERVE_OUT;
+    tCdb.ServiceAction = ServiceAction;
+    tCdb.TypeScope = Type | (Scope << 4);
+    tCdb.ParameterListLength = ScsiCoreEncodeUint32(ParameterListLength);
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeRead10Command(
+    PSCSI_READ10_COMMAND_STRUCTURE  Cdb,
+    UINT8                           Rarc,
+    UINT8                           Fua,
+    UINT8                           Dpo,
+    UINT8                           RdProtect,
+    UINT32                          Lba,
+    UINT8                           GroupNumber,
+    UINT16                          TransferLength,
+    UINT8                           Control
+){
+    SCSI_READ10_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_READ_CDB10;
+    tCdb.RarcFuaDpoRdprotect = ((Rarc << 2) | (Fua << 3) | (Dpo << 4) | (RdProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint32(Lba);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.TransferLength = ScsiCoreEncodeUint16(TransferLength);
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_READ10_COMMAND_STRUCTURE));
 }
 

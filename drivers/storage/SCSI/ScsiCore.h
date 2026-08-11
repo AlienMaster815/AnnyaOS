@@ -36,7 +36,21 @@ void ScsiCoreEncodeFormatUnitCommand(PSCSI_FORMAT_UNIT_COMMAND_STRUCTURE Cdb, UI
 void ScsiCoreEncodeGetLbaStatusCommand(PSCSI_GET_LBA_STATUS_COMMAND_STRUCTURE Cdb, UINT64 StartingLba, UINT32 AllocationLength, UINT8 Reserved, UINT8 Control);
 void ScsiCoreEncodeGetStreamStatusCommand(PSCSI_GET_STREAM_STATUS_COMMAND_STRUCTURE Cdb, UINT16 StartingStreamID, UINT32 AllocationLength, UINT8 Control);
 void ScsiCoreEncodeLogSelectCommand(PSCSI_LOG_SELECT_COMMAND_STRUCTURE Cdb, UINT8 Sp, UINT8 Pcr, UINT8 PageCode, UINT8 Pc, UINT8 SubPageCode, UINT16 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeRead32Command(PSCSI_READ32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT16 ServiceAction, UINT8 Rarc, UINT8 Fua, UINT8 Dpo, UINT8 RdProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 TransferLength);
+void ScsiCoreEncodeRead16Command(PSCSI_READ16_COMMAND_STRUCTURE Cdb, UINT8 Dld2, UINT8 Rarc, UINT8 Fua, UINT8 Dpo, UINT8 RdProtect, UINT64 Lba, UINT32 TransferLength, UINT8 GroupNumber, UINT8 Dld0, UINT8 Dld1, UINT8 Control);
+void ScsiCoreEncodeRead12Command(PSCSI_READ12_COMMAND_STRUCTURE Cdb, UINT8 Rarc, UINT8 Fua, UINT16 Dpo, UINT8 RdProtect, UINT32 Lba, UINT32 TransferLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeModeSense10Command(PSCSI_MODE_SENSE10_COMMAND_STRUCTURE Cdb, UINT8 Dbd, UINT8 Llbaa, UINT8 PageCode, UINT8 Pc, UINT8 SubPageCode, UINT16 AllocationLength, UINT8 Control);
+void ScsiCoreEncodePersistentReserveInCommand(PSCSI_PERSISTENT_RESERVE_IN_COMMAND_STRUCTURE Cdb, UINT8 ServiceAction, UINT16 AllocationLength, UINT8 Control);
+void ScsiCoreEncodePersistentReserveOutCommand(PSCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE Cdb, UINT8 ServiceAction, UINT8 Type, UINT8 Scope, UINT32 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeRead10Command(PSCSI_READ10_COMMAND_STRUCTURE Cdb, UINT8 Rarc, UINT8 Fua, UINT8 Dpo, UINT8 RdProtect, UINT32 Lba, UINT8 GroupNumber, UINT16 TransferLength, UINT8 Control);
+void ScsiCoreEncodeModeSense6Command(PSCSI_MODE_SENSE6_COMMAND_STRUCTURE Cdb, UINT8 Dbd, UINT8 PageCode, UINT8 Pc, UINT8 SubPageCode, UINT8 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeRead6Command(PSCSI_READ6_COMMAND_STRUCTURE Cdb, UINT32 Lba, UINT8 TransferLength, UINT8 Control);
 
+
+
+UINT16 ScsiCoreEncodeUint16(UINT16 Input);
+UINT32 ScsiCoreEncodeUint32(UINT32 Input);
+UINT64 ScsiCoreEncodeUint64(UINT64 Input);
 void ScsiCoreDbgPrint(char* format, ...);
 
 #endif
