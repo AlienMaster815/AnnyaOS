@@ -97,6 +97,9 @@ extern "C" {
 #include <USRSPC/msvcrt.h>
 #include <USRSPC/User.h>
 #include <Rat.h>
+
+#include <kernel/DmaFence.h>
+
 #include <drivers/ApicExternals.h>
 #include <drivers/Scsi/ScsiCore.h>
 

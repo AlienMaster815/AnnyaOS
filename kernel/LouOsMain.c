@@ -147,7 +147,7 @@ void AdvancedLousineKernelInitialization(){
     InitializeProcessManager();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
-
+    
     LouKeUnmaskSmpInterrupts();
 
     LouKeWaitForApInitializationCompletion();
@@ -268,6 +268,14 @@ LOUSTATUS ParserLouLoaderInformation(
     return STATUS_SUCCESS;
 }
 
+static void LouKeUnmapInitLowerHalf(){
+    UINT64* Pml4  = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
+    for(SIZE i = 0 ; i < 255; i++){
+        Pml4[i] = 0x00;
+    }
+    LouKeReloadCR3();
+}
+
 void LouOsKrnlStart(
     UINT64 pKernelLoaderInfo
 ){    
@@ -281,11 +289,8 @@ void LouOsKrnlStart(
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
 
     pKernelLoaderInfo = 0x00;
-    UINT64* Pml4  = (UINT64*)((UINT64)GetPageBase() + KSpaceBase);
-    for(SIZE i = 0 ; i < 255; i++){
-        Pml4[i] = 0x00;
-    }
-    LouKeReloadCR3();
+
+    LouKeUnmapInitLowerHalf();
 
     LOUSTATUS Status = LouKeInitializeRatSubsystem(&LousineKernelLoaderInformation);
     if(Status != STATUS_SUCCESS){

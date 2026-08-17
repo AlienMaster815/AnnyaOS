@@ -243,3 +243,9 @@ EXPORTS
     LouKeIpicAllocateVectorObject
     LouKeIpicAllocateVectorObjectsEx
     LouKeIpicAllocateVectorObjectsExWithApicIdLimitation
+    LouKeDmaFenceInitialize
+    LouKeDmaFenceInitialize64
+    LouKeDmaFenceRelease
+    LouKeDmaFenceFree
+    LouKeDmaFenceDescribe
+    LouKeYeildExecution

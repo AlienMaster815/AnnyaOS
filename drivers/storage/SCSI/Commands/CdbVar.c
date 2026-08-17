@@ -1,4 +1,4 @@
-#include "ScsiCore.h"
+#include "../ScsiCore.h"
 
 void 
 ScsiCoreEncodeCdbVar(
@@ -75,4 +75,33 @@ ScsiCoreEncodeRead32Command(
     tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
     tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
     memcpy(Cdb, &tCdb, sizeof(SCSI_READ32_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeVerify32Command(
+    PSCSI_VERIFY32_COMMAND_STRUCTURE    Cdb,
+    UINT8                               Control,
+    UINT8                               GroupNumber,
+    UINT8                               ByteCheck,
+    UINT8                               Dpo,
+    UINT8                               VrProctect,
+    UINT64                              Lba,
+    UINT32                              EilbrTag,
+    UINT16                              ElbaTag,
+    UINT16                              LbaTagMask,
+    UINT32                              VerificationLength
+){
+    SCSI_VERIFY32_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_VERIFY_CDB32;
+    tCdb.Control = Control;
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.AdditionalCdbLength = 0x18;
+    tCdb.ServiceAction = ScsiCoreEncodeUint16(SCSI_SERVICE_ACTION_VERIFY_CDB32);
+    tCdb.BytChkDpoVrProtect = ((ByteCheck << 1) | (Dpo << 4) | (VrProctect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.EilbrTag = ScsiCoreEncodeUint32(EilbrTag);
+    tCdb.ElbaTag = ScsiCoreEncodeUint16(ElbaTag);
+    tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
+    tCdb.VerificationLength = ScsiCoreEncodeUint32(VerificationLength);
+    memcpy(Cdb, &tCdb, sizeof(SCSI_VERIFY32_COMMAND_STRUCTURE));
 }

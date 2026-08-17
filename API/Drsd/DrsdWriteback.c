@@ -25,7 +25,9 @@
  
 #include "DrsdCore.h"
 
-//static LOUSTR DrsdWritebackFenceGetDriverName(HANDLE Fence)
+#define FenceToWbConnector(x) CONTAINER_OF(x->ExternLock, DRSD_WRITEBACK_CONNECTOR, FenceLock)
+
+//static LOUSTR DrsdWritebackFenceGetDriverName(DMA_FENCE Fence)
 
 
 DRIVER_EXPORT 

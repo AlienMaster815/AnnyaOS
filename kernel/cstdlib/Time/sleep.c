@@ -1,6 +1,7 @@
 #include <LouAPI.h>
 
 void RunTimerClockMS(uint64_t TimerInMS);
+void RunTimerClockTill(uint64_t TscStamp);
 
 bool GetAPICStatus();
 
@@ -40,6 +41,15 @@ void sleep(uint64_t Time) {
 		RunTimerClockMS(Time);
 	//}
 }
+
+KERNEL_EXPORT
+void sleep_till(uint64_t Time) {
+
+	//else {
+		RunTimerClockTill(Time);
+	//}
+}
+
 void sleepEx(uint8_t Interval, uint64_t Time) {
 
 }

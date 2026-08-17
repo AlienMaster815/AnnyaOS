@@ -2,12 +2,12 @@
 INCLUDES = -I../../../include
 TARGET = SCSICORE.SYS
 SRC = 	ScsiCore.c \
-		Cdb.c \
-		Cdb6.c \
-		Cdb10.c \
-		Cdb12.c \
-		Cdb16.c \
-		CdbVar.c \
+		Commands/Cdb.c \
+		Commands/Cdb6.c \
+		Commands/Cdb10.c \
+		Commands/Cdb12.c \
+		Commands/Cdb16.c \
+		Commands/CdbVar.c \
 		Ssdd.c \
 		CommandCreation.c
 

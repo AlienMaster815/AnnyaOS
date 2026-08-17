@@ -2,6 +2,9 @@
 #include <LouDDK.h>
 #include "ProcessPrivate.h"
 
+LOUAPI uint64_t GetTscMaster();
+LOUAPI uint64_t read_tsc(void);
+
 LOUAPI
 PGENERIC_THREAD_DATA
 LouKeGetCurrentThreadData();
@@ -659,6 +662,9 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
 
 LOUAPI void LouKeThreadSleep(SIZE Ms){
     uint64_t ThreadID = LouKeGetThreadIdentification();
+    UINT64 CurrentTSC;
+    UINT64 TscFrequency;
+    UINT64 Expiration;
     if(!ThreadID){
         LouPrint("LouKeThreadSleep() ERROR: Thread Non Existent\n");
         return;
@@ -672,9 +678,12 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
         ThreadData->State = THREAD_BLOCKED;
     }
     LouKeGetFutureTime(&Time, Ms);
+    CurrentTSC = read_tsc();
+    TscFrequency = GetTscMaster() / 1000;
+    Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeUnlockProcManager(&Irql);
-    asm("INT $0x20");
+    sleep_till(Expiration);
 }
 
 LOUAPI
@@ -683,15 +692,21 @@ LouKeYeildExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
     LouKIRQL Irql;
     TIME_T Time;
+    UINT64 CurrentTSC;
+    UINT64 TscFrequency;
+    UINT64 Expiration;
     LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }    
     LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
+    CurrentTSC = read_tsc();
+    TscFrequency = GetTscMaster() / 1000;
+    Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     LouKeUnlockProcManager(&Irql);
-    asm("INT $0x20");
+    sleep_till(Expiration);
 }
 
 LOUAPI void LouKeUnblockThread(UINT64 ThreadID){

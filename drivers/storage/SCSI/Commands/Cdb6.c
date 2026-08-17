@@ -1,4 +1,4 @@
-#include "ScsiCore.h"
+#include "../ScsiCore.h"
 
 void ScsiCoreEncodeCdb6Command(
     PSCSI_CDB6_COMMAND  Cdb,
@@ -113,4 +113,97 @@ ScsiCoreEncodeRead6Command(
     tCdb.TransferLength = TransferLength;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_READ6_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeReassignBlocksCommand(
+    PSCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE Cdb,
+    UINT8                                   LongList,
+    UINT8                                   LongLba,
+    UINT8                                   Control
+){
+    SCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_REASIGN_BLOCKS;
+    tCdb.LongGListLba = (LongList | (LongLba << 1));
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeRecieveDiagnosticResultsCommand(
+    PSCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE  Cdb,
+    UINT8                                               Pcv,
+    UINT8                                               PageCode,
+    UINT16                                              AllocationLength,
+    UINT8                                               Control
+){
+    SCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_RECIEVE_DIAGNOSTIC_RESULTS;
+    tCdb.Pcv = Pcv;
+    tCdb.PageCode = PageCode;
+    tCdb.AllocationLength = ScsiCoreEncodeUint16(AllocationLength);
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE));
+}
+
+void
+ScsiCoreEncodeRequestSenseCommand(
+    PSCSI_REQUEST_SENSE_COMMAND_STRUCTURE   Cdb,
+    UINT8                                   Desc,
+    UINT8                                   AllocationLength,
+    UINT8                                   Control
+){
+    SCSI_REQUEST_SENSE_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_REQUEST_SENSE;
+    tCdb.Desc = Desc;
+    tCdb.AllocationLength = AllocationLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_REQUEST_SENSE_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeReserve6Command(
+    PSCSI_RESERVE6_COMMAND_STRUCTURE    Cdb,
+    UINT8                               Control
+){
+    memset(Cdb, 0, sizeof(SCSI_RESERVE6_COMMAND_STRUCTURE));
+    Cdb->OpCode = SCSI_COMMAND_RESERVE_CDB6;
+    Cdb->Control = Control;
+}
+
+void 
+ScsiCoreEncodeRezeroUnitCommand(
+    PSCSI_REZERO_UNIT_COMMAND_STRUCTURE Cdb,
+    UINT8                               Lun,
+    UINT8                               Control
+){
+    memset(Cdb, 0, sizeof(SCSI_REZERO_UNIT_COMMAND_STRUCTURE));
+    Cdb->OpCode = SCSI_COMMAND_REZERO_UNIT;
+    Cdb->LunLbaMSB = (Lun << 5);
+    Cdb->Control = Control;
+}
+
+void 
+ScsiCoreEncodeSeekCommand(
+    PSCSI_SEEK_COMMAND_STRUCTURE    Cdb,
+    UINT8                           Lun,
+    UINT32                          Lba,
+    UINT8                           Control
+){
+    SCSI_SEEK_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_SEEK_CDB6;
+    tCdb.LunLbaMsb = ((Lun << 6) | ((Lba >> 16) & 0x1F));
+    tCdb.Lba = ScsiCoreEncodeUint16((UINT16)(Lba & UINT16_MAX));
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_SEEK_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeTestUnitReadyCommand(
+    PSCSI_TEST_UNIT_READY_COMMAND_STRUCTURE Cdb,
+    UINT8                                   Control
+){
+    memset(Cdb, 0, sizeof(SCSI_TEST_UNIT_READY_COMMAND_STRUCTURE));
+    Cdb->OpCode = SCSI_COMMAND_TEST_UNIT_READY;
+    Cdb->Control = Control;
 }

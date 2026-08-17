@@ -36,6 +36,7 @@ typedef struct _TIME_T{
 
 #ifndef _USER_MODE_CODE_
 KERNEL_EXPORT void sleep(uint64_t Time);
+KERNEL_EXPORT void sleep_till(uint64_t Stamp);
 #ifndef _KERNEL_MODULE_
 uint64_t GetCurrentTimeInMilliseconds();
 void sleepEx(uint8_t Interval, uint64_t Time);

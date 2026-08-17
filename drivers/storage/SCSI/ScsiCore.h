@@ -45,6 +45,43 @@ void ScsiCoreEncodePersistentReserveOutCommand(PSCSI_PERSISTENT_RESERVE_OUT_COMM
 void ScsiCoreEncodeRead10Command(PSCSI_READ10_COMMAND_STRUCTURE Cdb, UINT8 Rarc, UINT8 Fua, UINT8 Dpo, UINT8 RdProtect, UINT32 Lba, UINT8 GroupNumber, UINT16 TransferLength, UINT8 Control);
 void ScsiCoreEncodeModeSense6Command(PSCSI_MODE_SENSE6_COMMAND_STRUCTURE Cdb, UINT8 Dbd, UINT8 PageCode, UINT8 Pc, UINT8 SubPageCode, UINT8 AllocationLength, UINT8 Control);
 void ScsiCoreEncodeRead6Command(PSCSI_READ6_COMMAND_STRUCTURE Cdb, UINT32 Lba, UINT8 TransferLength, UINT8 Control);
+void ScsiCoreEncodeReassignBlocksCommand(PSCSI_REASSIGN_BLOCKS_COMMAND_STRUCTURE Cdb, UINT8 LongList, UINT8 LongLba, UINT8 Control);
+void ScsiCoreEncodeRecieveDiagnosticResultsCommand(PSCSI_RECIEVE_DIAGNOSTIC_RESULTS_COMMAND_STRUCTURE Cdb, UINT8 Pcv, UINT8 PageCode, UINT16 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeRequestSenseCommand(PSCSI_REQUEST_SENSE_COMMAND_STRUCTURE Cdb, UINT8 Desc, UINT8 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReserve6Command(PSCSI_RESERVE6_COMMAND_STRUCTURE Cdb, UINT8 Control);
+void ScsiCoreEncodeRezeroUnitCommand(PSCSI_REZERO_UNIT_COMMAND_STRUCTURE Cdb, UINT8 Lun, UINT8 Control);
+void ScsiCoreEncodeSeekCommand(PSCSI_SEEK_COMMAND_STRUCTURE Cdb, UINT8 Lun, UINT32 Lba, UINT8 Control);
+void ScsiCoreEncodeTestUnitReadyCommand(PSCSI_TEST_UNIT_READY_COMMAND_STRUCTURE Cdb, UINT8 Control);
+void ScsiCoreEncodeReadBuffer10Command(PSCSI_READ_BUFFER10_COMMAND_STRUCTURE Cdb, UINT8 Mode, UINT8 ModeSpecific, UINT8 BufferId, UINT32 BufferOffset, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReadCapacity10Command(PSCSI_READ_CAPACITY10_COMMAND_STRUCTURE Cdb, UINT32 Lba, UINT8 Pmi, UINT8 Control);
+void ScsiCoreEncodeReadDefectData10Command(PSCSI_READ_DEFECT_DATA10_COMMAND_STRUCTURE Cdb, UINT8 DefectListFormat, UINT8 ReqGlist, UINT8 ReqPlist, UINT16 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReadLong10Command(PSCSI_READ_LONG10_COMMAND_STRUCTURE Cdb, UINT8 Corrct, UINT8 Pblock, UINT32 Lba, UINT8 Btl, UINT8 Control);
+void ScsiCoreEncodeRelease10Command(PSCSI_RELEASE10_COMMAND_STRUCTURE Cdb, UINT8 LongId, UINT8 ThirdParty, UINT8 ThirdPartyDevID, UINT16 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeReportLunsCommandStructure(PSCSI_REPORT_LUNS_COMMAND_STRUCTURE Cdb, UINT8 SelectReport, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReportSupportedTaskManagementFunctionsCommand(PSCSI_REPORT_SUPPORTED_TASK_MANAGEMENT_FUNCTIONS_COMMAND_STRUCTURE Cdb, UINT8 Repd, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReserve10Command(PSCSI_RESERVE10_COMMAND_STRUCTURE Cdb, UINT8 LongId, UINT8 ThirdParty, UINT8 ThirdPartyDevID, UINT16 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeSanatizeCommand(PSCSI_SANITIZE_COMMAND_STRUCTURE Cdb, UINT8 ServiceAction, UINT8 Ause, UINT8 Znr, UINT8 Immed, UINT16 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeSeekExtendedCommand(PSCSI_SEEK_EX_COMMAND_STRUCTURE Cdb, UINT8 Lun, UINT32 Lba, UINT8 Control);
+void ScsiCoreEncodeSynchronizeCache10Command(PSCSI_SYNCHRONIZE_CACHE10_COMMAND_STRUCTURE Cdb, UINT8 Immed, UINT32 Lba, UINT8 GroupNumber, UINT16 NumberOfBlocks, UINT8 Control);
+void ScsiCoreEncodeUnmapCommand(PSCSI_UNMAP_COMMAND_STRUCTURE Cdb, UINT8 Anchor, UINT8 GroupNumber, UINT16 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeVerify10Command(PSCSI_VERIFY10_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 VrProctect, UINT32 Lba, UINT8 GroupNumber, UINT16 VerificationLength, UINT8 Control);
+void ScsiCoreEncodeReadDefectData12Command(PSCSI_READ_DEFECT_DATA12_COMMAND_STRUCTURE Cdb, UINT8 DefectListFormat, UINT8 ReqGList, UINT8 ReqPList, UINT32 Adi, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReportIdentifyingInformationCommand(PSCSI_REPORT_IDENTIFYING_INFORMATION_COMMAND_STRUCTURE Cdb, UINT16 Restricted, UINT32 AllocationLength, UINT8 InformationType, UINT8 Control);
+void ScsiCoreEncodeReportSupportedOperationCodesCommand(PSCSI_REPORT_SUPPORTED_OPERATION_CODES Cdb, UINT8 ReportingOptions, UINT8 Rctd, UINT8 RequestedOperationCode, UINT16 RequestedServiceAction, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeReportTimeStampCommand(PSCSI_REPORT_TIMESTAMP_COMMAND_STRUCTURE Cdb, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeSecurityProtocolInCommand(PSCSI_SECURITY_PROTOCOL_IN_COMMAND_STRUCTURE Cdb, UINT8 SecurityProtocol, UINT16 SecurityProtocolSpecific, UINT8 Inc512, UINT32 AllocationLength, UINT8 Control);
+void ScsiCoreEncodeSecurityProtocolOutCommand(PSCSI_SECURITY_PROTOCOL_OUT_COMMAND_STRUCTURE Cdb, UINT8 SecurityProtocol, UINT16 SecurityProtocolSpecific, UINT8 Inc512, UINT32 TransferLength, UINT8 Control);
+void ScsiCoreEncodeSetIdentifyingInformationCommand(PSCSI_SET_IDENTIFYING_INFORMATION_COMMAND_STRUCTURE Cdb, UINT32 ParameterListLength, UINT8 InformationType, UINT8 Control);
+void ScsiCoreEncodeSetTimeStampCommand(PSCSI_SET_TIMESTAMP_COMMAND_STRUCTURE Cdb, UINT32 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeStartStopUnitCommand(PSCSI_START_STOP_UNIT_COMMAND_STRUCTURE Cdb, UINT8 Immed, UINT8 Pcm, UINT8 Start, UINT8 Loej, UINT8 NoFlush, UINT8 PowerCondition, UINT8 Control);
+void ScsiCoreEncodeVerify12Command(PSCSI_VERIFY12_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 VrProctect, UINT32 Lba, UINT32 VerificationLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeReadBuffer16Command(PSCSI_READ_BUFFER16_COMMAND_STRUCTURE Cdb, UINT8 Mode, UINT8 ModeSpecific, UINT64 BufferOffset, UINT32 AllocationLength, UINT8 BufferId, UINT8 Control);
+void ScsiCoreEncodeReadCapacity16Command(PSCSI_READ_CAPACITY16_COMMAND_STRUCTURE Cdb, UINT64 Lba, UINT32 AllocationLength, UINT8 Pmi, UINT8 Control);
+void ScsiCoreEncodeReadLong16Command(PSCSI_READ_LONG16_COMMAND_STRUCTURE Cdb, UINT64 Lba, UINT16 Btl, UINT8 Corrct, UINT8 Pblock, UINT8 Control);
+void ScsiCoreEncodeStreamControlCommand(PSCSI_STREAM_CONTROL_COMMAND_STRUCTURE Cdb, UINT8 StreamControl, UINT16 StreamID, UINT8 Control);
+void ScsiCoreEncodeSynchronizeCache16Command(PSCSI_SYNCHRONIZE_CACHE16_COMMAND_STRUCTURE Cdb, UINT8 Immed, UINT64 Lba, UINT32 NumberOfBlocks, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeVerify16Command(PSCSI_VERIFY16_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 VrProctect, UINT64 Lba, UINT32 VerificationLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeVerify32Command(PSCSI_VERIFY32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT8 ByteCheck, UINT8 Dpo, UINT8 VrProctect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 VerificationLength);
 
 
 

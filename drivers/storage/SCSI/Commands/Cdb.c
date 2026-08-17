@@ -1,4 +1,4 @@
-#include "ScsiCore.h"
+#include "../ScsiCore.h"
 
 LOUSTATUS
 ScsiCoreEncodeOpCode(

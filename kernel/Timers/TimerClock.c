@@ -21,6 +21,11 @@ void RunTimerClockMS(uint64_t TimerInMS){
     while(read_tsc() <= Expiration);
 }
 
+void RunTimerClockTill(uint64_t Stamp){
+    while(read_tsc() <= Stamp);
+}
+
+
 void RunTimerClockS(uint64_t TimerInS){
     RunTimerClockMS(TimerInS * 1000);
 }
