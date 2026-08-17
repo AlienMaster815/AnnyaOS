@@ -2,7 +2,7 @@
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings
 
-LIBS = -L../../../PCI -lPCI
+LIBS = -L../../../PCI -lPCI -L.. -lScsi
 
 # Paths
 INCLUDES = -I../../../../include

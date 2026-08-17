@@ -5,20 +5,25 @@
 
 typedef struct _SCSI_INTERNAL_HOST_DEVICE_OBJECT{
     struct _SCSI_HOST_DEVICE_DRIVER_OBJECT*     DriverObject;
-    ListHeader                                  HostList;
-    SIZE                                        HostXaID;
+    ListHeader                                  HostDeviceList;
+    UINT64                                      HostXaID;
+    mutex_t                                     DeviceListLock;
     XARRAY                                      DeviceArray;
     ListHeader                                  DeviceList;
+    PDEVICE_OBJECT                              LdmDevice;
     SCSI_HOST_DEVICE_OBJECT                     ScsiHostDevice;
 }SCSI_INTERNAL_HOST_DEVICE_OBJECT, * PSCSI_INTERNAL_HOST_DEVICE_OBJECT;
 
 
 typedef struct _SCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT{
     ListHeader                      DriverList;
-    SIZE                            DriverXaID;
-    XARRAY                          ShddArray;
-    ListHeader                      ShddList;
-    SCSI_HOST_DEVICE_DRIVER_OBJECT  DriverObject;
+    UINT64                          DriverXaID;
+    mutex_t                         HostDeviceListLock;
+    XARRAY                          HostDeviceArray;
+    ListHeader                      HostDeviceList;
+    SIZE                            PrivateDataSize;
+    SIZE                            PrivateDataAlignment;
+    PSCSI_HOST_DEVICE_DRIVER_OBJECT DriverObject;
 }SCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT, * PSCSI_INTERNAL_HOST_DEVICE_DRIVER_OBJECT;
 
 LOUSTATUS ScsiCoreGetInfoSenceDataInformation(PSSDD_INFO_STRUCTURE SenceData, UINT64* Out);
@@ -102,11 +107,22 @@ void ScsiCoreEncodeWriteAtomic32Command(PSCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE C
 void ScsiCoreEncodeWriteSame32Command(PSCSI_WRITE_SAME32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT8 Ndob, UINT8 UnMap, UINT8 Anchor, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 NumberOfBlocks);
 void ScsiCoreEncodeWriteStream32Command(PSCSI_WRITE_STREAM32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT16 StreamID, UINT8 GroupNumber, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 TransferLength);
 
-
-
 UINT16 ScsiCoreEncodeUint16(UINT16 Input);
 UINT32 ScsiCoreEncodeUint32(UINT32 Input);
 UINT64 ScsiCoreEncodeUint64(UINT64 Input);
 void ScsiCoreDbgPrint(char* format, ...);
+
+DRIVER_EXPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
+    PSCSI_HOST_DEVICE_DRIVER_OBJECT NewScsiDriverObject,
+    SIZE                            DriverPrivateDataSize,
+    SIZE                            DriverPrivateDataAlignment
+);
+
+DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
+    PSCSI_HOST_DEVICE_DRIVER_OBJECT ScsiDriverObject,
+    PDEVICE_OBJECT                  LdmDevice,
+    PSCSI_HOST_DEVICE_OBJECT*       NewDeviceObjectOut
+);
+
 
 #endif

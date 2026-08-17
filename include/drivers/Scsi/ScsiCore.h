@@ -1523,10 +1523,14 @@ typedef struct _SCSI_COMMAND_PACKET{
 
 typedef struct _SCSI_HOST_DEVICE_OBJECT{
     struct _SCSI_HOST_DEVICE_DRIVER_OBJECT*     DriverObject;
+    PDEVICE_OBJECT                              LdmObject;
     PVOID                                       ShddPrivateData;
 }SCSI_HOST_DEVICE_OBJECT, * PSCSI_HOST_DEVICE_OBJECT;
 
 typedef struct _SCSI_HOST_DEVICE_CALLBACKS{
+    LOUSTATUS   (*ScsiDeviceResetHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
+    LOUSTATUS   (*ScsiDevicePowerOnHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
+    LOUSTATUS   (*ScsiDevicePowerOffHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
     LOUSTATUS   (*ScsiDeviceSendScsiCommand)(PSCSI_PORT_DEVICE_OBJECT ScsiPortDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
     LOUSTATUS   (*ScsiDevicePrepScsiCommand)(PSCSI_PORT_DEVICE_OBJECT ScsiPortDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
 }SCSI_HOST_DEVICE_CALLBACKS, * PSCSI_HOST_DEVICE_CALLBACKS;
@@ -1535,6 +1539,22 @@ typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{
     LOUSTR                          DriverName;
     PSCSI_HOST_DEVICE_CALLBACKS     Callbacks;
 }SCSI_HOST_DEVICE_DRIVER_OBJECT, * PSCSI_HOST_DEVICE_DRIVER_OBJECT;
+
+#ifndef _SCSI_CORE_H
+
+DRIVER_IMPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
+    PSCSI_HOST_DEVICE_DRIVER_OBJECT NewScsiDriverObject,
+    SIZE                            DriverPrivateDataSize,
+    SIZE                            DriverPrivateDataAlignment
+);
+
+DRIVER_IMPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
+    PSCSI_HOST_DEVICE_DRIVER_OBJECT ScsiDriverObject,
+    PDEVICE_OBJECT                  LdmDevice,
+    PSCSI_HOST_DEVICE_OBJECT*       NewDeviceObjectOut
+);
+
+#endif
 
 #include "Sat.h"
 #include "MsiFusion.h"

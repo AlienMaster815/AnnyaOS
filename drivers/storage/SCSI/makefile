@@ -8,8 +8,14 @@ SRC = 	ScsiCore.c \
 		Commands/Cdb12.c \
 		Commands/Cdb16.c \
 		Commands/CdbVar.c \
+		Commands/CreateCommand6.c \
+		Commands/CreateCommand10.c \
+		Commands/CreateCommand12.c \
+		Commands/CreateCommand16.c \
+		Commands/CreateCommandVar.c \
 		Ssdd.c \
-		CommandCreation.c
+		CommandCreation.c \
+		ScsiHost.c
 
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=ScsiCoreEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
