@@ -71,7 +71,7 @@ ScsiCoreEncodeReportIdentifyingInformationCommand(
     tCdb.ServiceAction = SCSI_SERVICE_ACTION_IDENTIFYING_INFORMATION;
     tCdb.Restricted = ScsiCoreEncodeUint16(Restricted);
     tCdb.AllocationLength = ScsiCoreEncodeUint32(AllocationLength);
-    tCdb.InformationType = InformationType;
+    tCdb.InformationType = InformationType << 1;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_REPORT_IDENTIFYING_INFORMATION_COMMAND_STRUCTURE));
 }
@@ -218,4 +218,46 @@ ScsiCoreEncodeVerify12Command(
     tCdb.GroupNumber = GroupNumber;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_VERIFY12_COMMAND_STRUCTURE));
+}
+
+void
+ScsiCoreEncodeWrite12Command(
+    PSCSI_WRITE12_COMMAND_STRUCTURE Cdb,
+    UINT8                           Fua,
+    UINT8                           Dpo,
+    UINT8                           WrProtect,
+    UINT32                          Lba,
+    UINT32                          TransferLength,
+    UINT8                           GroupNumber,
+    UINT8                           Control       
+){
+    SCSI_WRITE12_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_CDB12;
+    tCdb.FuaDpoWrProtect = ((Fua << 3) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint32(Lba);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE12_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteAndVerify12Command(
+    PSCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE  Cdb,
+    UINT8                                       ByteCheck,
+    UINT8                                       Dpo,
+    UINT8                                       WrProtect,
+    UINT32                                      Lba,
+    UINT32                                      TransferLength,
+    UINT8                                       GroupNumber,
+    UINT8                                       Control
+){
+    SCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_AND_VERIFY_CDB12;
+    tCdb.BytChkDpoWrProtect = ((ByteCheck << 1) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint32(Lba);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE));
 }

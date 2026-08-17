@@ -51,12 +51,10 @@ ScsiCoreEncodeInquiryCommand(
     UINT8                               Control
 ){
     SCSI_INQUIRY_COMMAND_STRUCTURE  tCdb = {0};
-    UINT16 Tmp16;
     tCdb.OpCode = SCSI_COMMAND_INQUIRY;
     tCdb.EvdpCmddt = Evpd | (Cmddt << 1);
     tCdb.PageCode = PageCode;
-    LouKeSwapEndianess(&AllocationLength, &Tmp16, sizeof(UINT16));
-    tCdb.AllocationLength = AllocationLength;
+    tCdb.AllocationLength = ScsiCoreEncodeUint16(AllocationLength);
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_INQUIRY_COMMAND_STRUCTURE));
 }
@@ -206,4 +204,20 @@ ScsiCoreEncodeTestUnitReadyCommand(
     memset(Cdb, 0, sizeof(SCSI_TEST_UNIT_READY_COMMAND_STRUCTURE));
     Cdb->OpCode = SCSI_COMMAND_TEST_UNIT_READY;
     Cdb->Control = Control;
+}
+
+void
+ScsiCoreEncodeWrite6Command(
+    PSCSI_WRITE6_COMMAND_STRUCTURE  Cdb,
+    UINT32                          Lba,
+    UINT8                           TransferLength,
+    UINT8                           Control
+){
+    SCSI_WRITE6_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_CDB6;
+    tCdb.MsbLba = (Lba >> 16) & 0xFF;
+    tCdb.Lba = ScsiCoreEncodeUint16((UINT16)(Lba & UINT16_MAX));
+    tCdb.TransferLength = TransferLength;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE6_COMMAND_STRUCTURE));
 }

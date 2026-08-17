@@ -105,3 +105,153 @@ ScsiCoreEncodeVerify32Command(
     tCdb.VerificationLength = ScsiCoreEncodeUint32(VerificationLength);
     memcpy(Cdb, &tCdb, sizeof(SCSI_VERIFY32_COMMAND_STRUCTURE));
 }
+
+void 
+ScsiCoreEncodeWrite32Command(
+    PSCSI_WRITE32_COMMAND_STRUCTURE Cdb,
+    UINT8                           Control,
+    UINT8                           GroupNumber,
+    UINT8                           Fua,
+    UINT8                           Dp0,
+    UINT8                           WrProtect,
+    UINT64                          Lba,
+    UINT32                          EilbrTag,
+    UINT16                          ElbaTag,
+    UINT16                          LbaTagMask,
+    UINT32                          TransferLength
+){
+    SCSI_WRITE32_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_CDB32;
+    tCdb.Control = Control;
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.AdditionalCdbLength = 0x18;
+    tCdb.ServiceAction = ScsiCoreEncodeUint16(SCSI_SERVICE_ACTION_WRITE_CDB32);
+    tCdb.FuaDp0WrProtect = ((Fua << 3) | (Dp0 << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.EilbrTag = ScsiCoreEncodeUint32(EilbrTag);
+    tCdb.ElbaTag = ScsiCoreEncodeUint16(ElbaTag);
+    tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength); 
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE32_COMMAND_STRUCTURE));
+}
+
+void
+ScsiCoreEncodeWriteAndVerify32Command(
+    PSCSI_WRITE_AND_VERIFY32_COMMAND_STRUCTURE  Cdb,
+    UINT8                                       Control,
+    UINT8                                       GroupNumber,
+    UINT8                                       ByteCheck,
+    UINT8                                       Dpo,
+    UINT8                                       WrProtect,
+    UINT64                                      Lba,
+    UINT32                                      EilbrTag,
+    UINT16                                      ElbaTag,
+    UINT16                                      LbaTagMask,
+    UINT32                                      TransferLength
+){
+    SCSI_WRITE_AND_VERIFY32_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_AND_VERIFY_CDB32;
+    tCdb.Control = Control;
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.AdditionalCdbLength = 0x18;
+    tCdb.ServiceAction = ScsiCoreEncodeUint16(SCSI_SERVICE_ACTION_WRITE_AND_VERIFY_CDB32);
+    tCdb.BytChkDpoWrProtect = ((ByteCheck << 1) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.EilbrTag = ScsiCoreEncodeUint32(EilbrTag);
+    tCdb.ElbaTag = ScsiCoreEncodeUint16(ElbaTag);
+    tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_AND_VERIFY32_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteAtomic32Command(
+    PSCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE  Cdb,
+    UINT8                                   Control,
+    UINT16                                  AtomicBoundry,
+    UINT8                                   GroupNumber,
+    UINT8                                   Fua,
+    UINT8                                   Dp0,
+    UINT8                                   WrProtect,
+    UINT64                                  Lba,
+    UINT32                                  EilbrTag,
+    UINT16                                  ElbaTag,
+    UINT16                                  LbaTagMask,
+    UINT32                                  TransferLength
+){
+    SCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_ATOMIC_CDB32;
+    tCdb.Control = Control;
+    tCdb.AtomicBoundry = ScsiCoreEncodeUint16(AtomicBoundry);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.AdditionalCdbLength = 0x18;
+    tCdb.ServiceAction = ScsiCoreEncodeUint16(SCSI_SERVICE_ACTION_WRITE_ATOMIC_CDB32);
+    tCdb.FuaDp0WrProtect = ((Fua << 3) | (Dp0 << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.EilbrTag = ScsiCoreEncodeUint32(EilbrTag);
+    tCdb.ElbaTag = ScsiCoreEncodeUint16(ElbaTag);
+    tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteSame32Command(
+    PSCSI_WRITE_SAME32_COMMAND_STRUCTURE    Cdb,
+    UINT8                                   Control,
+    UINT8                                   GroupNumber,
+    UINT8                                   Ndob,
+    UINT8                                   UnMap,
+    UINT8                                   Anchor,
+    UINT8                                   WrProtect,
+    UINT64                                  Lba,
+    UINT32                                  EilbrTag,
+    UINT16                                  ElbaTag,
+    UINT16                                  LbaTagMask,
+    UINT32                                  NumberOfBlocks
+){
+    SCSI_WRITE_SAME32_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_SAME_CDB32;
+    tCdb.Control = Control;
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.AdditionalCdbLength = 0x18;
+    tCdb.ServiceAction = ScsiCoreEncodeUint16(SCSI_SERVICE_ACTION_WRITE_SAME_CDB32);
+    tCdb.NdobUnMapAnchorWrProtect = (Ndob | (UnMap << 3) | (Anchor << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.EilbrTag = ScsiCoreEncodeUint32(EilbrTag);
+    tCdb.ElbaTag = ScsiCoreEncodeUint16(ElbaTag);
+    tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
+    tCdb.NumberOfBlocks = ScsiCoreEncodeUint32(NumberOfBlocks); 
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_SAME32_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteStream32Command(
+    PSCSI_WRITE_STREAM32_COMMAND_STRUCTURE  Cdb,
+    UINT8                                   Control,
+    UINT16                                  StreamID,
+    UINT8                                   GroupNumber,
+    UINT8                                   Fua,
+    UINT8                                   Dpo,
+    UINT8                                   WrProtect,
+    UINT64                                  Lba,
+    UINT32                                  EilbrTag,
+    UINT16                                  ElbaTag,
+    UINT16                                  LbaTagMask,
+    UINT32                                  TransferLength
+){
+    SCSI_WRITE_STREAM32_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_STREAM_CDB32;
+    tCdb.Control = Control;
+    tCdb.StrID = ScsiCoreEncodeUint16(StreamID);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.AdditionalCdbLength = 0x18;
+    tCdb.ServiceAction = ScsiCoreEncodeUint16(SCSI_SERVICE_ACTION_WRITE_STREAM_CDB32);
+    tCdb.FuaDpoWrProtect = ((Fua << 3) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.EilbrTag = ScsiCoreEncodeUint32(EilbrTag);
+    tCdb.ElbaTag = ScsiCoreEncodeUint16(ElbaTag);
+    tCdb.LbaTagMask = ScsiCoreEncodeUint16(LbaTagMask);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_STREAM32_COMMAND_STRUCTURE));
+}

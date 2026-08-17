@@ -27,7 +27,7 @@ ScsiCoreEncodeBackgroundControlCommand(
     SCSI_BACKGROUND_CONTROL_COMMAND_STRUCTURE tCdb = {0};
     tCdb.OpCode = SCSI_COMMAND_BACKGROUND_CONTROL;
     tCdb.ServiceAction = SCSI_SERVICE_ACTION_BACKGROUND_CONTROL;
-    tCdb.BoControl = BoControl;
+    tCdb.BoControl = (BoControl << 6);
     tCdb.BoTime = BoTime;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_SERVICE_ACTION_BACKGROUND_CONTROL));
@@ -199,4 +199,134 @@ ScsiCoreEncodeVerify16Command(
     tCdb.GroupNumber = GroupNumber;
     tCdb.Control = Control;
     memcpy(Cdb, &tCdb, sizeof(SCSI_VERIFY16_COMMAND_STRUCTURE));
+}
+
+void
+ScsiCoreEncodeWrite16Command(
+    PSCSI_WRITE16_COMMAND_STRUCTURE Cdb,
+    UINT8                           Fua,
+    UINT8                           Dpo,
+    UINT8                           WrProtect,
+    UINT64                          Lba,
+    UINT32                          TransferLength,
+    UINT8                           GroupNumber,
+    UINT8                           Dld0,
+    UINT8                           Dld1,
+    UINT8                           Dld2,
+    UINT8                           Control       
+){
+    SCSI_WRITE16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_CDB16;
+    tCdb.Dld2FuaDpoWrProtect = (Dld2 | (Fua << 3) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    tCdb.GroupNumberDld0Dld1 = (GroupNumber | (Dld0 << 6) | (Dld1 << 7));
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE16_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteAndVerify16Command(
+    PSCSI_WRITE_AND_VERIFY16_COMMAND_STRUCTURE  Cdb,
+    UINT8                                       ByteCheck,
+    UINT8                                       Dpo,
+    UINT8                                       WrProtect,
+    UINT64                                      Lba,
+    UINT32                                      TransferLength,
+    UINT8                                       GroupNumber,
+    UINT8                                       Control
+){
+    SCSI_WRITE_AND_VERIFY16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_AND_VERIFY_CDB16;
+    tCdb.BytChkDpoWrProtect = ((ByteCheck << 1) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.TransferLength = ScsiCoreEncodeUint32(TransferLength);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_AND_VERIFY16_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteAtomic16Command(
+    PSCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE  Cdb,
+    UINT8                                   Fua,
+    UINT8                                   Dpo,
+    UINT8                                   WrProtect,
+    UINT64                                  Lba,
+    UINT16                                  AtomicBoundry,
+    UINT16                                  TransferLength,
+    UINT8                                   GroupNumber,
+    UINT8                                   Control
+){
+    SCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_ATOMIC_CDB16;
+    tCdb.FuaDpoWrProtect = ((Fua << 3) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.AtomicBoundry = ScsiCoreEncodeUint16(AtomicBoundry);
+    tCdb.TransferLength = ScsiCoreEncodeUint16(TransferLength);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteStream16Command(
+    PSCSI_WRITE_STREAM16_COMMAND_STRUCTURE  Cdb,
+    UINT8                                   Fua,
+    UINT8                                   Dpo,
+    UINT8                                   WrProtect,
+    UINT64                                  Lba,
+    UINT16                                  StreamID,
+    UINT16                                  TransferLength,
+    UINT8                                   GroupNumber,
+    UINT8                                   Control
+){
+    SCSI_WRITE_STREAM16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_STREAM_CDB16;
+    tCdb.FuaDpoWrProtect = ((Fua << 3) | (Dpo << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.StrID = ScsiCoreEncodeUint16(StreamID);
+    tCdb.TransferLength = ScsiCoreEncodeUint16(TransferLength);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_STREAM16_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteLong16Command(
+    PSCSI_WRITE_LONG16_COMMAND_STRUCTURE    Cdb,
+    UINT8                                   WrUncor,
+    UINT64                                  Lba,
+    UINT16                                  TransferLength,
+    UINT8                                   Control
+){
+    SCSI_WRITE_LONG16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_LONG_CDB16;
+    tCdb.ServiceActionWrUncor = (SCSI_SERVICE_ACTION_WRITE_LONG_CDB16 | (WrUncor << 6));
+    tCdb.Lba = ScsiCoreEncodeUint64(Lba);
+    tCdb.TransferLength = ScsiCoreEncodeUint16(TransferLength);
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_LONG16_COMMAND_STRUCTURE));
+}
+
+void 
+ScsiCoreEncodeWriteSame16Command(
+    PSCSI_WRITE_SAME16_COMMAND_STRUCTURE    Cdb,
+    UINT8                                   Ndob,
+    UINT8                                   Unmap,
+    UINT8                                   Anchor,
+    UINT8                                   WrProtect,
+    UINT64                                  Lba,
+    UINT32                                  NumberOfBlocks,
+    UINT8                                   GroupNumber,
+    UINT8                                   Control
+){
+    SCSI_WRITE_SAME16_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_WRITE_SAME_CDB16; 
+    tCdb.NdobUnmapAnchorWrProtect = (Ndob | (Unmap << 3) | (Anchor << 4) | (WrProtect << 5));
+    tCdb.Lba = ScsiCoreEncodeUint16(Lba);
+    tCdb.NumberOfBlocks = ScsiCoreEncodeUint32(NumberOfBlocks);
+    tCdb.GroupNumber = GroupNumber;
+    tCdb.Control = Control;
+    memcpy(Cdb, &tCdb, sizeof(SCSI_WRITE_SAME16_COMMAND_STRUCTURE));
 }

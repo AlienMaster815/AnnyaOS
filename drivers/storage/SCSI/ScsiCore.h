@@ -82,6 +82,25 @@ void ScsiCoreEncodeStreamControlCommand(PSCSI_STREAM_CONTROL_COMMAND_STRUCTURE C
 void ScsiCoreEncodeSynchronizeCache16Command(PSCSI_SYNCHRONIZE_CACHE16_COMMAND_STRUCTURE Cdb, UINT8 Immed, UINT64 Lba, UINT32 NumberOfBlocks, UINT8 GroupNumber, UINT8 Control);
 void ScsiCoreEncodeVerify16Command(PSCSI_VERIFY16_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 VrProctect, UINT64 Lba, UINT32 VerificationLength, UINT8 GroupNumber, UINT8 Control);
 void ScsiCoreEncodeVerify32Command(PSCSI_VERIFY32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT8 ByteCheck, UINT8 Dpo, UINT8 VrProctect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 VerificationLength);
+void ScsiCoreEncodeWrite6Command(PSCSI_WRITE6_COMMAND_STRUCTURE Cdb, UINT32 Lba, UINT8 TransferLength, UINT8 Control);
+void ScsiCoreEncodeWrite10Command(PSCSI_WRITE10_COMMAND_STRUCTURE Cdb, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT32 Lba, UINT8 GroupNumber, UINT16 TransferLength, UINT8 Control);
+void ScsiCoreEncodeWriteAndVerify10Command(PSCSI_WRITE_AND_VERIFY10_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 WrProtect, UINT32 Lba, UINT8 GroupNumber, UINT16 TransferLength, UINT8 Control);
+void ScsiCoreEncodeWriteBufferCommand(PSCSI_WRITE_BUFFER_COMMAND_STRUCTURE Cdb, UINT8 Mode, UINT8 ModeSpecific, UINT8 BufferId, UINT32 BufferOffset, UINT32 ParameterListLength, UINT8 Control);
+void ScsiCoreEncodeWriteLong10Command(PSCSI_WRITE_LONG10_COMMAND_STRUCTURE Cdb, UINT8 WrUncor, UINT32 Lba, UINT16 TransferLength, UINT8 Control);
+void ScsiCoreEncodeWriteSame10Command(PSCSI_WRITE_SAME10_COMMAND_STRUCTURE Cdb, UINT8 UnMap, UINT8 Anchor, UINT8 WrProtect, UINT32 Lba, UINT8 GroupNumber, UINT16 NumberOfBlocks, UINT8 Control);
+void ScsiCoreEncodeWrite12Command(PSCSI_WRITE12_COMMAND_STRUCTURE Cdb, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT32 Lba, UINT32 TransferLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeWriteAndVerify12Command(PSCSI_WRITE_AND_VERIFY12_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 WrProtect, UINT32 Lba, UINT32 TransferLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeWrite16Command(PSCSI_WRITE16_COMMAND_STRUCTURE Cdb, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT32 TransferLength, UINT8 GroupNumber, UINT8 Dld0, UINT8 Dld1, UINT8 Dld2, UINT8 Control);
+void ScsiCoreEncodeWriteAndVerify16Command(PSCSI_WRITE_AND_VERIFY16_COMMAND_STRUCTURE Cdb, UINT8 ByteCheck, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT32 TransferLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeWriteAtomic16Command(PSCSI_WRITE_ATOMIC16_COMMAND_STRUCTURE Cdb, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT16 AtomicBoundry, UINT16 TransferLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeWriteStream16Command(PSCSI_WRITE_STREAM16_COMMAND_STRUCTURE Cdb, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT16 StreamID, UINT16 TransferLength, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeWriteLong16Command(PSCSI_WRITE_LONG16_COMMAND_STRUCTURE Cdb, UINT8 WrUncor, UINT64 Lba, UINT16 TransferLength, UINT8 Control);
+void ScsiCoreEncodeWriteSame16Command(PSCSI_WRITE_SAME16_COMMAND_STRUCTURE Cdb, UINT8 Ndob, UINT8 Unmap, UINT8 Anchor, UINT8 WrProtect, UINT64 Lba, UINT32 NumberOfBlocks, UINT8 GroupNumber, UINT8 Control);
+void ScsiCoreEncodeWrite32Command(PSCSI_WRITE32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT8 Fua, UINT8 Dp0, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 TransferLength);
+void ScsiCoreEncodeWriteAndVerify32Command(PSCSI_WRITE_AND_VERIFY32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT8 ByteCheck, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 TransferLength);
+void ScsiCoreEncodeWriteAtomic32Command(PSCSI_WRITE_ATOMIC32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT16 AtomicBoundry, UINT8 GroupNumber, UINT8 Fua, UINT8 Dp0, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 TransferLength);
+void ScsiCoreEncodeWriteSame32Command(PSCSI_WRITE_SAME32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT8 GroupNumber, UINT8 Ndob, UINT8 UnMap, UINT8 Anchor, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 NumberOfBlocks);
+void ScsiCoreEncodeWriteStream32Command(PSCSI_WRITE_STREAM32_COMMAND_STRUCTURE Cdb, UINT8 Control, UINT16 StreamID, UINT8 GroupNumber, UINT8 Fua, UINT8 Dpo, UINT8 WrProtect, UINT64 Lba, UINT32 EilbrTag, UINT16 ElbaTag, UINT16 LbaTagMask, UINT32 TransferLength);
 
 
 

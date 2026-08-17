@@ -184,7 +184,7 @@ extern "C" {
 
 #define ATA_COMMAND_DEVICE_RESET                0x08
 #define ATA_COMMAND_CHECK_POWER                 0xE5
-#define ATA_COMMAND_STANDBY                     0xE2 //https://www.youtube.com/watch?v=wbshq1-dzKA
+#define ATA_COMMAND_STANDBY                     0xE2
 #define ATA_COMMAND_IDLE                        0xE3
 #define ATA_COMMAND_EED                         0x90
 #define ATA_COMMAND_DOWNLOAD_MICRO              0x92
