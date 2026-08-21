@@ -5,6 +5,10 @@
 extern "C"{
 #endif
 
+/*
+
+struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER;
+
 typedef struct _LOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER{
     PPCI_DEVICE_OBJECT      PDEV;
     PDRIVER_OBJECT          DriverObject;
@@ -24,6 +28,7 @@ KERNEL_EXPORT LOUSTATUS LoukeRegisterNetFrameHardwareDriver(
     PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver
 );
 
+*/
 
 #ifdef __cplusplus
 }

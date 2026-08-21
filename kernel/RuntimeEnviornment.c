@@ -53,6 +53,8 @@ void LouKeInitializeEarlyKernelRuntimeEnviornment(KHANDLE KernelHandle){
     
     LouKeEarlyRuntimeLoadModule(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\SCSICORE", KernelHandle);
     
+    LouKeEarlyRuntimeLoadModule(L"KERNEL_DEFAULT_CONFIG\\Subsystems\\ATACORE", KernelHandle);
+
     StartupConfigureImportTable(KernelHandle);
 
 }

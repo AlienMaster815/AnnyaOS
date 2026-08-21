@@ -121,8 +121,16 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
 DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
     PSCSI_HOST_DEVICE_DRIVER_OBJECT ScsiDriverObject,
     PDEVICE_OBJECT                  LdmDevice,
+    PVOID                           PrivateData,
     PSCSI_HOST_DEVICE_OBJECT*       NewDeviceObjectOut
 );
 
+DRIVER_EXPORT LOUSTATUS ScsiCoreEncodeLunAddressingLevel(
+    PLONG_MODE_LUN_STRUCTURE    Lun, 
+    UINT16                      FirstLevel,
+    UINT16                      SecondLevel,
+    UINT16                      ThirdLevel,
+    UINT16                      FourthLevel
+);
 
 #endif

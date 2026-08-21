@@ -23,7 +23,7 @@
  
 #include "AhciMod.h"
 
-
+/*
 //ATA Module Structured Operations
 UNUSED static LOUSINE_ATA_PORT_OPERATIONS AhciGenericOperations{
     //.PrepCommand = AhciGenricDMAPrepCommand,
@@ -183,6 +183,7 @@ UNUSED static AHCI_DRIVER_BOARD_INFORMATION_TABLE AhciBoardInfomationTable[] = {
         .DevicesPortOperations  = &AhciVt8251Operations,
     },
 };  
+*/
 
 UNUSED static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     //Intel Ahci Devices
@@ -458,6 +459,7 @@ VOID AhciUnloadDriver(
     LouPrint("AHCI.SYS:AhciUnloadDriver() RETURN\n");
 }
 
+/*
 static void AhciIntelPcs(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
     uint16_t Tmp;
 
@@ -1064,13 +1066,14 @@ static void AhciSetupInterruptHandler(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost){
         0
     );
 }
+*/
 
 LOUSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AHCI.SYS:AddAhciDevice()\n");
-    LOUSTATUS Status = STATUS_SUCCESS;
+    /*LOUSTATUS Status = STATUS_SUCCESS;
 
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(Device);    
     uint64_t AhciDeviceID = PDEV->DeviceID;
@@ -1345,9 +1348,10 @@ LOUSTATUS AddAhciDevice(
         "Annya/System64/Drivers/AhciGen.sys",
         (void*)AtaHost,
         0x00
-    );
+    );*/
     LouPrint("AHCI.SYS:AddAhciDevice() STATUS_SUCCESS\n");
-    return Status;
+    while(1);
+    return STATUS_SUCCESS; //Status;
 }
 
 LOUAPI

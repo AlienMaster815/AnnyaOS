@@ -905,6 +905,11 @@ typedef struct PACKED _SCSI_WRITE_STREAM32_COMMAND_STRUCTURE{
     UINT32  TransferLength;
 }SCSI_WRITE_STREAM32_COMMAND_STRUCTURE, * PSCSI_WRITE_STREAM32_COMMAND_STRUCTURE;
 
+typedef struct _LONG_MODE_LUN_STRUCTURE{
+    UINT16 AddressingLevels[4];
+}LONG_MODE_LUN_STRUCTURE, * PLONG_MODE_LUN_STRUCTURE;
+
+
 
 #define SCSI_CDBVAR_COMMAND_OPCODE                  0x7F
 
@@ -1531,6 +1536,8 @@ typedef struct _SCSI_HOST_DEVICE_CALLBACKS{
     LOUSTATUS   (*ScsiDeviceResetHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
     LOUSTATUS   (*ScsiDevicePowerOnHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
     LOUSTATUS   (*ScsiDevicePowerOffHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
+    LOUSTATUS   (*ScsiDeviceStartHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
+    LOUSTATUS   (*ScsiDeviceStopHcd)(PSCSI_HOST_DEVICE_OBJECT Hcd);
     LOUSTATUS   (*ScsiDeviceSendScsiCommand)(PSCSI_PORT_DEVICE_OBJECT ScsiPortDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
     LOUSTATUS   (*ScsiDevicePrepScsiCommand)(PSCSI_PORT_DEVICE_OBJECT ScsiPortDevice, PSCSI_COMMAND_PACKET ScsiCommandPacket);
 }SCSI_HOST_DEVICE_CALLBACKS, * PSCSI_HOST_DEVICE_CALLBACKS;
@@ -1551,12 +1558,21 @@ DRIVER_IMPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
 DRIVER_IMPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
     PSCSI_HOST_DEVICE_DRIVER_OBJECT ScsiDriverObject,
     PDEVICE_OBJECT                  LdmDevice,
+    PVOID                           PrivateData,
     PSCSI_HOST_DEVICE_OBJECT*       NewDeviceObjectOut
+);
+
+DRIVER_IMPORT LOUSTATUS ScsiCoreEncodeLunAddressingLevel(
+    PLONG_MODE_LUN_STRUCTURE    Lun, 
+    UINT16                      FirstLevel,
+    UINT16                      SecondLevel,
+    UINT16                      ThirdLevel,
+    UINT16                      FourthLevel
 );
 
 #endif
 
 #include "Sat.h"
-#include "MsiFusion.h"
+#include "MptFusion.h"
 
 #endif

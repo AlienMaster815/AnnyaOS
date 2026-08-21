@@ -36,6 +36,10 @@ void LouKeSetIrqlNoFlagUpdate(
     if(OldIrql){//0x00 is null in this system and is excplicitly checked for sanity
         *OldIrql = GetWinIRQL(); // save the old irql1
     }
+        
+    if(GetWinIRQL() == NewIrql){
+        return;
+    }
 
     switch (NewIrql){
         case PASSIVE_LEVEL:{
@@ -78,7 +82,9 @@ void LouKeSetIrql(
     if(OldIrql){
         *OldIrql = GetWinIRQL(); // save the old irql1
     }
-
+    if(GetWinIRQL() == NewIrql){
+        return;
+    }
     switch (NewIrql){
         case PASSIVE_LEVEL:{
             //sanity clear interrupts so nesting occours

@@ -3,3 +3,4 @@ LIBRARY SCSICORE.SYS
 EXPORTS	
     ScsiCoreRegisterScsiHostDeviceDriver
     ScsiCoreCreateScsiHostDeviceObject
+    ScsiCoreEncodeLunAddressingLevel

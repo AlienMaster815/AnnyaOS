@@ -396,8 +396,18 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             }
             
             TmpBarValue = PciHalGeneralDeviceGetBar(PDEV, Bar);
+            //PciHalDbgPrint("PCI.SYS:TmpBarValue:%h\n", TmpBarValue);
             if(TmpBarValue & 1){
-                break; //TODO:IO_BAR
+                PDEV->BarMapping[Bar] = (UINT64)(TmpBarValue & 0xFFFFFFFC);
+                PciHalGeneralDeviceSetBar(PDEV, Bar, UINT32_MAX);
+                BarSize = PciHalGeneralDeviceGetBar(PDEV, Bar);
+                BarSize &= 0xFFFFFFFC;
+                BarSize = ~(BarSize) + 1;
+                PDEV->BarSize[Bar] = BarSize;
+                PciHalGeneralDeviceSetBar(PDEV, Bar, (UINT32)(PDEV->BarMapping[Bar] & UINT32_MAX));
+                PciHalDbgPrint("PCI.SYS:BAR IO Address:%h\n", PDEV->BarMapping[Bar]);
+                PciHalDbgPrint("PCI.SYS:BAR IO Size:%h\n", PDEV->BarSize[Bar]);
+                break; 
             }
             PciHalGeneralDeviceSetBar(PDEV, Bar, UINT32_MAX);
             BarSize = PciHalGeneralDeviceGetBar(PDEV, Bar);
@@ -423,6 +433,11 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
                 Status = STATUS_INVALID_PARAMETER;
                 break;
             }
+            if(!BarPhyAddress){
+                Status = STATUS_SUCCESS;
+                break;
+            }
+
             BarVAddress = (UINT64)LouVMallocEx(BarSize, BarSize);
             if(!BarPhyAddress && Using32BitAllocator){
                 BarPhyAddress = (UINT64)LouAllocatePhysical32UpEx(BarSize, BarSize);

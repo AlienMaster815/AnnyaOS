@@ -20,6 +20,20 @@
 //          [ Senc START_STOP_UNIT ]    [ Clear Conditon Retry ]
 ===================================================================*/
 
+DRIVER_EXPORT LOUSTATUS ScsiCoreEncodeLunAddressingLevel(
+    PLONG_MODE_LUN_STRUCTURE    Lun, 
+    UINT16                      FirstLevel,
+    UINT16                      SecondLevel,
+    UINT16                      ThirdLevel,
+    UINT16                      FourthLevel
+){
+    Lun->AddressingLevels[0] = ScsiCoreEncodeUint16(FirstLevel);
+    Lun->AddressingLevels[1] = ScsiCoreEncodeUint16(SecondLevel);
+    Lun->AddressingLevels[2] = ScsiCoreEncodeUint16(ThirdLevel);
+    Lun->AddressingLevels[3] = ScsiCoreEncodeUint16(FourthLevel);
+}
+
+
 static BOOLEAN ScsiCoreDebugOn = false;
 
 void ScsiCoreDbgPrint(char* format, ...){

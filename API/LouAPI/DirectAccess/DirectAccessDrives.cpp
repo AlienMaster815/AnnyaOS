@@ -2,17 +2,17 @@
 #include <LouDDK.h>
 
 
-LOUAPI
-PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber);
+//LOUAPI
+//PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber);
 
-LOUAPI
-LOUSTATUS LouKeAtaReadDevice(
-	PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
-    uint64_t LBA,
-    uint32_t SectorCount,
-    uint64_t BufferSize,
-    void* DataBuffer
-);
+//LOUAPI
+//LOUSTATUS LouKeAtaReadDevice(
+//	PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
+//    uint64_t LBA,
+//    uint32_t SectorCount,
+//    uint64_t BufferSize,
+//    void* DataBuffer
+//);
 
 LOUAPI 
 void* 
@@ -23,7 +23,7 @@ uint32_t SectorCount,
 uint64_t* BufferSize,
 LOUSTATUS* State
 ){	
-
+/*
 	uint64_t BufferChecksum;
 	void* Result = 0x00;
 	SYSTEM_DEVICE_IDENTIFIER DevID = LouKeGetStorageDeviceSystemIdentifier(Drive);
@@ -42,7 +42,9 @@ LOUSTATUS* State
 				BufferChecksum = BufferChecksum * 2048;
 			}
 			Result = LouKeMallocEx(BufferChecksum, 2048, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
-			*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result);
+			//(*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result));
+			LouPrint("ReadDrive:HERE\n");
+			while(1);
 			if(*State != STATUS_SUCCESS){
 				LouPrint("State:%h\n", *State);
 			}
@@ -56,11 +58,15 @@ LOUSTATUS* State
 				BufferChecksum = BufferChecksum * 512;
 			}
 			Result = LouKeMallocEx(BufferChecksum, 512, WRITEABLE_PAGE | UNCACHEABLE_PAGE | PRESENT_PAGE);
-			*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result);
+			//(*State = LouKeAtaReadDevice(Port, LBA, SectorCount, *BufferSize, Result));
+			LouPrint("ReadDrive:HERE\n");
+			while(1);
 		}
 	}
-
-	return Result;
+*/
+	LouPrint("ReadDrive()\n");
+	while(1);
+	return STATUS_SUCCESS; //Result;
 }
 
 LOUAPI 

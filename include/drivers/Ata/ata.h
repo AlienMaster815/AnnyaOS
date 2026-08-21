@@ -1,3 +1,4 @@
+/*
 #ifndef _ATA_DEVICE_LIBRARY_H
 #define _ATA_DEVICE_LIBRARY_H
 
@@ -374,7 +375,7 @@ extern "C" {
 #define SATA_DEVSLP                                             0x09
 #define SET_FEATURES_SENCT_DATA                                 0xC3
 #define SET_FEATURES_SENCT_DATA_SUCCESSFULL_NCQ                 0xC4
-#define UNIVERSAL_ATA_MAX_ADDRESS                                0x00
+#define UNIVERSAL_ATA_MAX_ADDRESS                               0x00
 #define UNIVERSAL_ATA_MAX_PASWORD                               0x01
 #define UNIVERSAL_ATA_MAX_LOCK                                  0x02
 #define UNIVERSAL_ATA_MAX_UNLOCK                                0x03    
@@ -914,10 +915,10 @@ typedef struct _ATA_QUEUED_COMMAND{
     bool     PacketCommand;
     uint8_t  ScsiCommandLength;
     //PioData
-    uint16_t MaxByteSize;
-    uint8_t  ScsiCommand[16];
-    uint8_t  HardwareTag;
-    uintptr_t PrdtLocation;
+    uint16_t    MaxByteSize;
+    uint8_t     ScsiCommand[16];
+    uint8_t     HardwareTag;
+    uintptr_t   PrdtLocation;
 }ATA_QUEUED_COMMAND, * PATA_QUEUED_COMMAND;
 
 typedef struct _LOUSINE_KERNEL_DEVICE_ATA_PORT{
@@ -1132,3 +1133,4 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV);
 }
 #endif
 #endif //_ATA_DEVICE_LIBRARY_H
+*/

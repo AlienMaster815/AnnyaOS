@@ -1,5 +1,5 @@
 #include <LouAPI.h>
-
+/*
 static size_t NumberOfStorageDevice = 0x00;
 
 typedef struct _STORAGE_DEVICE_MANAGER_DATA{
@@ -56,3 +56,4 @@ PLOUSINE_KERNEL_DEVICE_ATA_PORT LouKeGetAtaStoragePortObject(uint8_t DriveNumber
 uint8_t LouKeGetNumberOfStorageDevices(){
     return NumberOfStorageDevice;
 }
+*/

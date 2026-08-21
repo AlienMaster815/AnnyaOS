@@ -58,7 +58,7 @@ typedef struct _DRIVE_ID_TABLE{
     bool                        DriveTaken;
 }DRIVE_ID_TABLE, * PDRIVE_ID_TABLE;
 
-static DRIVE_ID_TABLE DriveIdTable[25] = {
+UNUSED static DRIVE_ID_TABLE DriveIdTable[25] = {
     {'A', false},
     {'B', false},
     {'D', false},
@@ -88,7 +88,7 @@ static DRIVE_ID_TABLE DriveIdTable[25] = {
 
 void InitializeFileSystemManager(){
     
-    PVOID SystemIdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER_TYPE", 0x00);
+    /*PVOID SystemIdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER_TYPE", 0x00);
     PVOID IdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER", 0x00);
     UINT8 RawByteId;
     LouKeReadRegistryByteValue(SystemIdHandle, &RawByteId);
@@ -190,7 +190,7 @@ void InitializeFileSystemManager(){
         }
         default:
             break;
-    }
+    }*/
 }
 
 PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable(){

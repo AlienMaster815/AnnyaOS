@@ -58,6 +58,7 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
 DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
     PSCSI_HOST_DEVICE_DRIVER_OBJECT ScsiDriverObject,
     PDEVICE_OBJECT                  LdmDevice,
+    PVOID                           PrivateData,
     PSCSI_HOST_DEVICE_OBJECT*       NewDeviceObjectOut
 ){
     LOUSTATUS Status;
@@ -85,6 +86,9 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
             LouKeFree(NewDeviceObject);
             return STATUS_INSUFFICIENT_RESOURCES;
         }
+        if(PrivateData){
+            memcpy(NewDeviceObject->ScsiHostDevice.ShddPrivateData, PrivateData, ScsiHostDriver->PrivateDataSize);
+        }
     }
 
     MutexLock(&ScsiHostDriver->HostDeviceListLock);
@@ -109,6 +113,39 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
     MutexUnlock(&ScsiHostDriver->HostDeviceListLock);
     *NewDeviceObjectOut = &NewDeviceObject->ScsiHostDevice; 
     ScsiCoreDbgPrint("SCSICORE.SYS:Successfully Created New Device Object\n");
+
+    if(ScsiDriverObject->Callbacks->ScsiDevicePowerOnHcd){
+        Status = ScsiDriverObject->Callbacks->ScsiDevicePowerOnHcd(&NewDeviceObject->ScsiHostDevice);
+        if(Status != STATUS_SUCCESS){
+            goto _ERROR_INITIALIZING_CONTROLLER;
+        }
+    }
+    if(ScsiDriverObject->Callbacks->ScsiDeviceResetHcd){
+        Status = ScsiDriverObject->Callbacks->ScsiDeviceResetHcd(&NewDeviceObject->ScsiHostDevice);
+        if(Status != STATUS_SUCCESS){
+            goto _ERROR_INITIALIZING_CONTROLLER;
+        }
+    }
+    if(ScsiDriverObject->Callbacks->ScsiDeviceStartHcd){
+        Status = ScsiDriverObject->Callbacks->ScsiDeviceStartHcd(&NewDeviceObject->ScsiHostDevice);
+        if(Status != STATUS_SUCCESS){
+            goto _ERROR_INITIALIZING_CONTROLLER;
+        }
+    }
+
     _OUT_ERROR:
     return Status;
+
+    _ERROR_RESETTING_CONTROLLER:
+    if(ScsiDriverObject->Callbacks->ScsiDevicePowerOnHcd){
+        Status = ScsiDriverObject->Callbacks->ScsiDevicePowerOnHcd(&NewDeviceObject->ScsiHostDevice);
+        if(Status != STATUS_SUCCESS){
+            ScsiCoreDbgPrint("SCSICORE.SYS:Unable To Power Down Controller\n");
+        }
+    }
+    _ERROR_INITIALIZING_CONTROLLER:
+
+    LouPrint("ScsiCoreCreateScsiHostDeviceObject()\n");
+    while(1);
+    return STATUS_UNSUCCESSFUL;
 }

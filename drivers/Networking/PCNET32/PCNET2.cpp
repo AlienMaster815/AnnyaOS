@@ -9,6 +9,7 @@
 #include <LouDDK.h>
 #include "PCNETII.h"
 #include <Hal.h>
+/*
 
 LOUSTATUS PcNetIIHardwareInitialize(
     PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver
@@ -83,6 +84,7 @@ void PcNetIIHardwareSetMacAddress(
 
     PcNetPrivate->InitializationBlock.PhysicalAddress = Mac;
 }
+*/
 
 LOUSTATUS InitializePcNetIIDevice(
     PDRIVER_OBJECT DriverObject,
@@ -90,7 +92,7 @@ LOUSTATUS InitializePcNetIIDevice(
 ){
     LouPrint("InitializePcNetIIDevice()\n");
     while(1);
-    PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver;
+    /*PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HardwareDriver;
     PPCNET_II_DRIVER_DATA PcNetPrivate;
     PPCI_DEVICE_OBJECT PDEV = 0;//PlatformDevice->PDEV;
     LOUSTATUS LousineKernelStatus = STATUS_SUCCESS;
@@ -211,6 +213,6 @@ LOUSTATUS InitializePcNetIIDevice(
     LoukeRegisterNetFrameHardwareDriver(HardwareDriver);
 
     LouPrint("InitializePcNetIIDevice() STATUS_SUCCESS\n");
-    while(1);
+    while(1);*/
     return STATUS_SUCCESS;
 }

@@ -339,16 +339,16 @@ void LouOsKrnlStart(
 
     PciHalScanBootDevices();
          
-    uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
-    if(!StorageDevices){
-        LouPrint("No Storage Devices Detected\n");
-        while(1);
-    }
+    //uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
+    //if(!StorageDevices){
+    //    LouPrint("No Storage Devices Detected\n");
+    //    while(1);
+    //}
 
     //TODO: implement new fast object into the memory manager
 
     LouPrint("Successful Boot\n");
-    //while(1);
+    while(1);
 
     InitializeFileSystemManager();
 

@@ -1,5 +1,6 @@
 #include "PIIX.h"
 
+/*
 static spinlock_t PiixLock = {0};
 
 void PiixPrimaryInterruptHandler(UINT64 HandlerData){
@@ -30,6 +31,7 @@ void PiixSecondryInterruptHandler(UINT64 HandlerData){
     LouPrint("PIIX.SYS:PiixSecondryInterruptHandler()\n");
     while(1);
 }
+*/
 
 //the following information is taken from the following sources
 //http://www.bitsavers.org/components/intel/pci/290550-001_82371FB_82371SB_PCI_ISA_IDE_Xcelerator_199605.pdf
@@ -39,6 +41,7 @@ void PiixSecondryInterruptHandler(UINT64 HandlerData){
 //The Following Code Is Coppyright Ubnder GPL2 By:
 //Tyler Grenier (C) 2025 - 2026
 
+/*
 static void PiixCommitTransfer(PPIIX_HOST_PRIVATE_DATA Private, BOOL Primary){
     mutex_t* Lock = Primary ? &Private->PrimaryDmaLock : &Private->SecondaryDmaLock;
     PKERNEL_EVENT_OBJECT Object = Primary ? &Private->PrimaryEvent : &Private->SecondaryEvent;
@@ -330,6 +333,7 @@ LOUSTATUS PiixDmaIssueCommand(
     Result = ReadPiixAta(QueuedCommand, AtaPort);
     return Result;
 }
+*/
 
 static LOUSINE_PCI_DEVICE_TABLE PiixPciDeviceTable[] = {
     //PATA Devices
@@ -343,14 +347,14 @@ void UnloadDriver(PDRIVER_OBJECT Driver){
 
 }
 
-LOUSTATUS PiixInitializePiix3Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
-LOUSTATUS PiixInitializePiix4Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
+//LOUSTATUS PiixInitializePiix3Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
+//LOUSTATUS PiixInitializePiix4Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost);
 
 LOUAPI
 LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* PlatformDevice){
     LouPrint("PIIX.SYS:AddDevice()\n");
     while(1);
-    PPCI_DEVICE_OBJECT PDEV = 0x00; //PlatformDevice->PDEV;
+    /*PPCI_DEVICE_OBJECT PDEV = 0x00; //PlatformDevice->PDEV;
     LOUSTATUS Status;
 
     uint8_t DeviceID = 0;//PlatformDevice->DeviceID;
@@ -394,7 +398,7 @@ LOUSTATUS AddDevice(PDRIVER_OBJECT DriverObject, struct _DEVICE_OBJECT* Platform
     //RegisterInterruptHandler(PiixPrimaryInterruptHandler, 0x20 + 14, false, (UINT64)AtaHost);
     //RegisterInterruptHandler(PiixSecondryInterruptHandler, 0x20 + 15, false, (UINT64)AtaHost);
 
-    LouPrint("PIIX.SYS:AddDevice() STATUS_SUCCESS\n");
+    LouPrint("PIIX.SYS:AddDevice() STATUS_SUCCESS\n");*/
     return STATUS_SUCCESS;
 }
 
@@ -414,7 +418,7 @@ LOUSTATUS DriverEntry(
     LouPrint("PIIX.SYS:DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
-
+/*
 static const UINT8 PiixTimingModes[][2]{
     {IDETIM_ISP_5CLOCK, IDETIM_RTC_4CLOCK}, //Timing 0
     {IDETIM_ISP_5CLOCK, IDETIM_RTC_4CLOCK}, //Timing 1
@@ -493,3 +497,4 @@ LOUSTATUS PiixSetPioTiming(
 
     return STATUS_SUCCESS;
 }
+*/

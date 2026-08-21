@@ -9,7 +9,7 @@
 //The Following Code Is Coppyright Ubnder GPL2 By:
 //Tyler Grenier (C) 2025
 
-
+/*
 //According to specification we can wait the 400ns byt reaing AS 4 times
 static inline void AtaIoWait400ns(uint16_t ControlPort){
     CONTROL_READ_ALTERNATE_STATUS_PORT;
@@ -379,3 +379,5 @@ LOUSTATUS InitializeGenericAtaDevice(PPCI_DEVICE_OBJECT PDEV){
 
     return STATUS_SUCCESS;
 }
+
+*/

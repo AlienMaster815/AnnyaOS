@@ -1,5 +1,5 @@
 #include "PIIX.h"
-
+/*
 //According to specification we can wait the 400ns byt reaing AS 4 times
 static inline void AtaIoWait400ns(uint16_t ControlPort){
     CONTROL_READ_ALTERNATE_STATUS_PORT;
@@ -122,3 +122,4 @@ LOUSTATUS PiixInitializePiix3Xceleration(PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
 
     return STATUS_SUCCESS;
 }
+*/

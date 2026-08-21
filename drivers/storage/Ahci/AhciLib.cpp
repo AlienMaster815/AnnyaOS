@@ -20,6 +20,7 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
 
+/*
 static BOOL AhciMessagesEnabled = true;
  
 void* LouKeMallocAhciCommandTable(uint16_t Entries){
@@ -602,3 +603,4 @@ AhciResetEm(
     Ghc->EmControl = (EmControl | EM_CONTROL_RST);
     return STATUS_SUCCESS;
 }
+*/

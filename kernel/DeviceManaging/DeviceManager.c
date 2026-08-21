@@ -23,7 +23,7 @@ LOUSTATUS LouRegisterStorageDevice(
 );
 
 
-LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
+//LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
 
 LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem);
 LOUSTATUS LouKeDrsdInitializeDevice(
@@ -81,7 +81,7 @@ LOUSTATUS LouKeRegisterDevice(
 
     switch(Sdi){
         case ATA_DEVICE_T:{
-            return DeviceManagerInitializeAtaHostDevice(TmpDevice);
+            return STATUS_UNSUCCESSFUL;//DeviceManagerInitializeAtaHostDevice(TmpDevice);
         }
         case GRAPHICS_DEVICE_T:{
             //return LouKeDrsdInitializeDevice(

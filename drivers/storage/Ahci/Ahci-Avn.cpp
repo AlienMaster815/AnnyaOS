@@ -20,8 +20,8 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
 
-LOUSTATUS AhciAvnHardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
-    LouPrint("AHCI.SYS:AhciAvnHardReset");
-    while(1);
-    return STATUS_SUCCESS;
-}
+//LOUSTATUS AhciAvnHardReset(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort){
+//    LouPrint("AHCI.SYS:AhciAvnHardReset");
+//    while(1);
+//    return STATUS_SUCCESS;
+//}

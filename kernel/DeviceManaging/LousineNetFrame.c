@@ -1,5 +1,7 @@
+#include <drivers/Networking/NetFrame.h>
 #include <LouAPI.h>
 
+/*
 typedef struct _LOU_NETFRAME_TRACK{
     ListHeader     Peers;
     PLOUSINE_KERNEL_NETFRAME_HARDWARE_DRIVER HwDrv;
@@ -32,3 +34,4 @@ LOUSTATUS LoukeRegisterNetFrameHardwareDriver(
     TmpTrack->Peers.NextHeader = (PListHeader)LouKeMallocType(LOU_NETFRAME_TRACK, KERNEL_GENERIC_MEMORY);
     return STATUS_SUCCESS;
 }
+*/

@@ -1,5 +1,5 @@
 #include <LouAPI.h>
-
+/*
 typedef struct _ATA_HOST_DEVICE_LIST{
     ListHeader                      Neighbors;
     PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHostDevices;
@@ -11,11 +11,11 @@ LOUSTATUS LouRegisterStorageDevice(
     PDEVICE_DIRECTORY_TABLE Table
 );
 
-KERNEL_EXPORT
-LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
-    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
-    void* IdBuffer
-);
+//KERNEL_EXPORT
+//LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
+//    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
+//    void* IdBuffer
+//);
  
 KERNEL_EXPORT
 LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
@@ -25,12 +25,15 @@ LOUSTATUS LouKeAtaSendAtapiIdentifyCommand(
 
 uint8_t LouKeAtaGetDeviceType(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtapiPort);
 
-LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
-    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
-    void* IdBuffer
-);
+//LOUSTATUS LouKeAtaSendAtaIdentifyCommand(
+//    PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort,
+//    void* IdBuffer
+//);
 
 LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable){
+    LouPrint("DeviceManagerInitializeAtaPortDevice():HERE\n");
+    while(1);
+
     UNUSED PLOUSINE_KERNEL_DEVICE_ATA_PORT PortToInitialize = PortTable->KeyData;
     LOUSTATUS Status = STATUS_SUCCESS;
 
@@ -45,10 +48,10 @@ LOUSTATUS DeviceManagerInitializeAtaPortDevice(PDEVICE_DIRECTORY_TABLE PortTable
         return STATUS_SUCCESS;
     }else{
         AtaIdBuffer = LouKeMalloc(512, USER_PAGE | WRITEABLE_PAGE | PRESENT_PAGE);
-        Status = LouKeAtaSendAtaIdentifyCommand(
-            PortToInitialize,
-            AtaIdBuffer
-        );
+        //Status = LouKeAtaSendAtaIdentifyCommand(
+        //    PortToInitialize,
+        //    AtaIdBuffer
+        //);
         LouKeFree(AtaIdBuffer);
         if(Status != STATUS_SUCCESS){
             PortToInitialize->PortFunctioning = false;
@@ -102,3 +105,4 @@ PLOUSINE_KERNEL_DEVICE_ATA_HOST LouKeDeviceManagerGetAtaDevice(PPCI_DEVICE_OBJEC
     }
     return 0x00;
 }
+*/
