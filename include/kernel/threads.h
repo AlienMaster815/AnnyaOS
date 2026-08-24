@@ -366,6 +366,36 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     #endif
 }
 
+static BOOLEAN MutexLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
+    #ifndef _USER_MODE_CODE_
+    uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
+    Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
+    if(LockOutTagOut){
+        if(__atomic_test_and_set(&m->locked.counter, 1)) {
+            LouKeReportMutexBlock(m, Thread);
+            return false;
+        }
+    }else{
+        if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
+            //access Granted
+            return true;
+        }
+        if(__atomic_test_and_set(&m->locked.counter, 1)) {
+            LouKeReportMutexBlock(m, Thread);
+            return false;
+        }
+    }
+    Thread = LouKeGetThreadIdentification();
+    LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
+    LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
+    #else
+
+    
+
+    #endif
+    return true;
+}
+
 
 static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
     #ifndef _USER_MODE_CODE_
@@ -404,6 +434,10 @@ static inline void MutexLock(mutex_t* m){
     MutexLockEx(m, true);
 }
 
+static inline BOOLEAN MutexLockOrFalse(mutex_t* m){
+    return MutexLockOrFalseEx(m, true);
+}
+
 static inline void MutexLockOrYield(mutex_t* m){
     MutexLockOrYieldEx(m, true);
 }
@@ -439,6 +473,18 @@ static inline void SemaphoreLock(semaphore_t* sem) {
     }
     LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
     MutexUnlock(&sem->Check);
+}
+
+static inline BOOLEAN SemaphoreLockOrFalse(semaphore_t* sem) {
+    BOOLEAN Result = true;
+    MutexLock(&sem->Check);
+    if(!LouKeGetAtomic(&sem->Counter)){
+        Result = false;
+    }else{
+        LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
+    }
+    MutexUnlock(&sem->Check);
+    return Result;
 }
 
 static inline void SemaphoreLockOrYield(semaphore_t* sem) {

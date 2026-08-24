@@ -6,7 +6,11 @@ TODO:
         this command is used in advance of the CFA WRITE_SECTORS_WITHOUGHT_ERASE or
         a CFA WRITE MULTIPLE WITHOUGHT ERASE command to increase execution speed  
     CFA REQUEST EXTENDED ERROR CODES:
-        define error commands and create logic for error handling
+        define error commands and create logic for error handling : ATA-ATAPI.PDF Page 80
+    CFA_TRANSLATE_SECTOR:
+        create structure for the Translation Information : ATA-ATAPI.PDF Page 82
+    CHECK_POWER_MODE:
+        handle result data : ATA-ATAPI.PDF Page 90
 */
 
 

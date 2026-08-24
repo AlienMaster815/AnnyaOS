@@ -298,12 +298,11 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 //static SIZE Foo = 0;
 
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
-    if(MutexIsLocked(&ProcLock.Lock) || (LouKeGetIrql() == HIGH_LEVEL)){
+    if(MutexLockOrFalse(&ProcLock.Lock) || (LouKeGetIrql() == HIGH_LEVEL)){
         ApicHalConfigureNextApicTimerEvent(30);
         return CpuCurrentState;
     }
     PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
-    MutexLock(&ProcLock.Lock);
     CpuCurrentState = Schedualer->PsmSchedual(CpuCurrentState);
     MutexUnlock(&ProcLock.Lock);
     LouKeMemoryBarrier();
