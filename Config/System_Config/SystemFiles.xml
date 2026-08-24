@@ -15,7 +15,6 @@
         <FILETOCPY64>cp EXE/LouLoad/LOULOAD.EXE ISO/ANNYA/SYSTEM64/LOULOAD.EXE</FILETOCPY64>  
         <!--THEE KERNEL-->
         <FILETOCPY64>cp release/x86_64/LOUOSKRNL.exe ISO/ANNYA/SYSTEM64/LOUOSKRNL.EXE</FILETOCPY64>                         <!--Lousine Kernel Core-->
-        <FILETOCPY64>cp API/Drsd/DRSDCORE.SYS ISO/ANNYA/SYSTEM64/DRSDCORE.SYS</FILETOCPY64>                                 <!--Lousine Kernel Core-->
         <FILETOCPY64>cp API/Virtualization/VMCORE.SYS ISO/ANNYA/SYSTEM64/VMCORE.SYS</FILETOCPY64>                           <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/USB/UsbCore/USBCORE.SYS ISO/ANNYA/SYSTEM64/USBCORE.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
         <FILETOCPY64>cp drivers/gpu/BootVid/BOOTVID.SYS ISO/ANNYA/SYSTEM64/BOOTVID.SYS</FILETOCPY64>                        <!--Lousine Kernel Core-->
@@ -34,7 +33,6 @@
         <FILETOCPY64>cp drivers/Audio/HDA/HDAPCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/HDAPCI.SYS</FILETOCPY64>                    <!--Intel Hd Audio-->
         <FILETOCPY64>cp drivers/Audio/AC97/AC97.SYS ISO/ANNYA/SYSTEM64/DRIVERS/AC97.SYS</FILETOCPY64>                       <!--AC97 Chipset-->
         <!--GPU Drivers-->
-        <FILETOCPY64>cp drivers/gpu/Virtualbox/VBOXGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VBOXGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
         <FILETOCPY64>cp drivers/gpu/VMWare/VMWGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VMWGPU.SYS</FILETOCPY64>                   <!--VMWare GPU-->
         <!--USB Drivers-->
         <FILETOCPY64>cp drivers/USB/HostDrivers/XHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/XHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->

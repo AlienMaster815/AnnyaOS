@@ -1,5 +1,15 @@
 #include "AtaCore.h"
 
+/*
+TODO:
+    CFA ERASE SECTORS: 
+        this command is used in advance of the CFA WRITE_SECTORS_WITHOUGHT_ERASE or
+        a CFA WRITE MULTIPLE WITHOUGHT ERASE command to increase execution speed  
+    CFA REQUEST EXTENDED ERROR CODES:
+        define error commands and create logic for error handling
+*/
+
+
 BOOLEAN DbgPrintEn = false;
 
 LOUSTATUS AtaCoreScsiDeviceResetHcd(PSCSI_HOST_DEVICE_OBJECT Hcd){

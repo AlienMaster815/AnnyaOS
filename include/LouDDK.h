@@ -101,6 +101,7 @@ extern "C" {
 
 #include <drivers/ApicExternals.h>
 #include <drivers/Scsi/ScsiCore.h>
+#include <drivers/Ata/AtaCore.h>
 
 #ifndef _USER_MODE_CODE_
 

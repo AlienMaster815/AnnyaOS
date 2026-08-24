@@ -1,11 +1,19 @@
-#ifndef ATA_CORE_H
-#define ATA_CORE_H
+#ifndef ATA_CORE_INTERNALS_H
+#define ATA_CORE_INTERNALS_H
 
 #define _KERNEL_MODULE_
 
 #include <LouDDK.h>
 
 void AtaCoreDbgPrint(char* format, ...);
+
+void AtaCoreEncodeCfaEraseSectorsCommand(PATA_COMMAND_CFA_ERASE_SECTORS_STRUCTURE Cmd, UINT8 Dev, UINT32 Lba, UINT8 SectorCount);
+void AtaCoreEncodeCfaRequesttExtendedErrorCodeCommand(PATA_COMMAND_CFA_REQUEST_EXTENDED_ERROR_CODE_STRUCTURE  Cmd, UINT8 Dev);
+
+
+
+ATA_DEVICE_COMMAND_STATUS AtaCoreCheckCfaEraseSectorsStatus(PATA_COMMAND_CFA_ERASE_SECTORS_STRUCTURE Sts);
+ATA_DEVICE_COMMAND_STATUS AtaCoreCheckCfaRequestExtendedErrorCode(PATA_COMMAND_CFA_REQUEST_EXTENDED_ERROR_CODE_STRUCTURE Sts);
 
 typedef struct _ATA_SATDEV_PRIVATE_DATA{
     

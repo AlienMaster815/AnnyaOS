@@ -1,2 +1,18 @@
 [KERNEL_DEFAULT_CONFIG\Drivers\PCI\0x8086\0x7111\0xFFFF\0xFFFF\0xFF\0xFF\0xFF]
 "DriverKey" = STRING:"KERNEL_DEFAULT_CONFIG\Drivers\PCI\PIIX";
+
+echo 'module_path: boot():/ANNYA/SYSTEM64/DRSDCORE.SYS' >> ISO/boot/limine.conf ;
+
+
+[KERNEL_DEFAULT_CONFIG\Subsystems\Smp]
+"LoadOrder" = WORD:0x00; 
+
+echo 'module_path: boot():/ANNYA/SYSTEM64/SMPBOOT.LTB' >> ISO/boot/limine.conf ;
+
+<FILETOCPY64>cp API/Drsd/DRSDCORE.SYS ISO/ANNYA/SYSTEM64/DRSDCORE.SYS</FILETOCPY64>                                 <!--Lousine Kernel Core-->
+
+<FILETOCPY64>cp drivers/gpu/Virtualbox/VBOXGPU.SYS ISO/ANNYA/SYSTEM64/DRIVERS/VBOXGPU.SYS</FILETOCPY64>             <!--Virtualbox GPU-->
+
+
+[KERNEL_DEFAULT_CONFIG\Subsystems\0x0]
+"LoadOrder" = WORD:0x06;
