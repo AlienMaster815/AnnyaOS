@@ -101,3 +101,21 @@ void AtaCoreEncodeCheckPowerModeCommand(
     tCmd.Command = ATA_COMMAND_CODE_CHECK_POWER_MODE;
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_CHECK_POWER_MODE_STRUCTURE));
 }
+
+void AtaCoreEncodeConfigureStream(
+    PATA_COMMAND_CONFIGURE_STREAM_STRUCTURE Cmd,
+    UINT8                                   Dev,
+    UINT8                                   Dcctl,
+    UINT8                                   StreamID,
+    UINT8                                   Rw,
+    UINT8                                   Ar,
+    UINT16                                  SectorCount
+){
+    ATA_COMMAND_CONFIGURE_STREAM_STRUCTURE tCmd = {0};
+    tCmd.Features = ATA_CMDBLK_ENCODE_PREV_VALUE(Dcctl) | ATA_CMDBLK_ENCODE_CURR_VALUE(StreamID | (Rw << 6) | (Ar << 7));
+    tCmd.SectorCount = ATA_CMDBLK_ENCODE_PREV_VALUE((SectorCount >> 8) & 0xF) | ATA_CMDBLK_ENCODE_CURR_VALUE(SectorCount & 0xFF); 
+    tCmd.Device = (1 << 6);
+    tCmd.Device |= Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_CONFIGURE_STREAM;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_CONFIGURE_STREAM_STRUCTURE));
+}

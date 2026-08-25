@@ -91,3 +91,13 @@ AtaCoreCheckPowerModeStatus(
     }
     return AtaCoreCheckNsRs(Sts->Error);
 }
+
+ATA_DEVICE_COMMAND_STATUS 
+AtaCoreCheckConfigureStreamStatus(
+    PATA_COMMAND_CONFIGURE_STREAM_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status)){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);
+}
