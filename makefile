@@ -1,5 +1,4 @@
-#Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl llvm clang lld automake autoconf bdf2psf
-#sudo dpkg-reconfigure dash : change to Bash
+#Ubuntu: mingw-w64 nasm xorriso mtools cmake make gcc git binutils flex meson ninja-build openssl llvm clang lld automake autoconf bdf2psf build-essential
 #git clone https://github.com/limine-bootloader/limine
 #cd limine
 #./bootstrap
@@ -8,7 +7,6 @@
 #sudo make install
 #cd ..
 #rm -rf limine
-
 # Target Architecture Supported x86_64
 
 #dll targets
