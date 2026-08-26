@@ -9,6 +9,18 @@ static void AtaCoreEncodeLba28Common(
     Cmd->LbaHigh = (Lba >> 16) & 0xFF;
 }
 
+static void AtaCoreEncodeDeviceConfiguration(
+    PATA_COMMAND_DEVICE_CONFIGURATION_STRUCTURE Cmd,
+    UINT8                                       Dev,
+    UINT8                                       Operation //feature
+){
+    ATA_COMMAND_DEVICE_CONFIGURATION_STRUCTURE tCmd = {0};
+    tCmd.Features = Operation;
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_DEVICE_CONFIGURATION;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_DEVICE_CONFIGURATION_STRUCTURE));
+}
+
 void AtaCoreEncodeCfaEraseSectorsCommand(
     PATA_COMMAND_CFA_ERASE_SECTORS_STRUCTURE    Cmd,
     UINT8                                       Dev,
@@ -102,7 +114,7 @@ void AtaCoreEncodeCheckPowerModeCommand(
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_CHECK_POWER_MODE_STRUCTURE));
 }
 
-void AtaCoreEncodeConfigureStream(
+void AtaCoreEncodeConfigureStreamCommand(
     PATA_COMMAND_CONFIGURE_STREAM_STRUCTURE Cmd,
     UINT8                                   Dev,
     UINT8                                   Dcctl,
@@ -119,3 +131,75 @@ void AtaCoreEncodeConfigureStream(
     tCmd.Command = ATA_COMMAND_CODE_CONFIGURE_STREAM;
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_CONFIGURE_STREAM_STRUCTURE));
 }
+
+void AtaCoreEncodeDeviceConfigurationRestoreCommand(
+    PATA_COMMAND_DEVICE_CONFIGURATION_RESTORE_STRUCTURE Cmd,
+    UINT8                                               Dev
+){
+    AtaCoreEncodeDeviceConfiguration(
+        Cmd,
+        Dev,
+        0xC0 //restore
+    );
+}
+
+void AtaCoreEncodeDeviceConfigurationFreezeLockCommand(
+    PATA_COMMAND_DEVICE_CONFIGURATION_FREEZE_LOCK_STRUCTURE Cmd,
+    UINT8                                                   Dev
+){
+    AtaCoreEncodeDeviceConfiguration(
+        Cmd,
+        Dev,
+        0xC1 //freeze lock
+    );
+}
+
+void AtaCoreEncodeDeviceConfigurationIdentifyCommand(
+    PATA_COMMAND_DEVICE_CONFIGURATION_IDENTIFY_STRUCTURE    Cmd,
+    UINT8                                                   Dev
+){
+    AtaCoreEncodeDeviceConfiguration(
+        Cmd,
+        Dev,
+        0xC2 //Identify
+    );
+}
+
+void AtaCoreEncodeDeviceConfigurationSetCommand(
+    PATA_COMMAND_DEVICE_CONFIGURATION_SET_STRUCTURE     Cmd,
+    UINT8                                               Dev
+){
+    AtaCoreEncodeDeviceConfiguration(
+        Cmd,
+        Dev,
+        0xC3 //Set
+    );
+}
+
+void
+AtaCoreEncodeDeviceResetCommand(
+    PATA_COMMAND_DEVICE_RESET_STRUCTURE Cmd,
+    UINT8                               Dev    
+){
+    ATA_COMMAND_DEVICE_RESET_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_DEVICE_RESET;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_DEVICE_RESET_STRUCTURE));
+}
+
+void AtaCoreEncodeDownloadMicroCodeCommand(
+    PATA_COMMAND_DOWNLOAD_MICROCODE_STRUCTURE   Cmd,
+    UINT8                                       Dev,
+    UINT8                                       SubCommandCode,
+    UINT16                                      SectorCount
+){
+    ATA_COMMAND_DOWNLOAD_MICROCODE_STRUCTURE tCmd = {0};
+    tCmd.Features = SubCommandCode;
+    tCmd.SectorCount = SectorCount & 0xFF;
+    tCmd.LbaLow = (SectorCount >> 8) & 0xFF;
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_DOWNLOAD_MICROCODE;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_DOWNLOAD_MICROCODE_STRUCTURE));
+}
+
+//continue 8.12

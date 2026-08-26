@@ -2,6 +2,7 @@
 
 /*
 TODO:
+    * = multiple commands under a single ATA feature
     CFA ERASE SECTORS: 
         this command is used in advance of the CFA WRITE_SECTORS_WITHOUGHT_ERASE or
         a CFA WRITE MULTIPLE WITHOUGHT ERASE command to increase execution speed  
@@ -11,6 +12,9 @@ TODO:
         create structure for the Translation Information : ATA-ATAPI.PDF Page 82
     CHECK_POWER_MODE:
         handle result data : ATA-ATAPI.PDF Page 90
+    DEVICE CONFIGURATION * : 
+        Check over them when finished with the basics 
+    
 */
 
 

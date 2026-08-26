@@ -76,7 +76,7 @@ ATA_DEVICE_COMMAND_STATUS
 AtaCoreCheckMediaCardTypeStatus(
     PATA_COMMAND_CHECK_MEDIA_CARD_TYPE_STRUCTURE Sts
 ){
-    if(ATA_DEVICE_STATUS_OK(Sts->Status)){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
         return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
     }
     return AtaCoreCheckNsRs(Sts->Error);
@@ -86,7 +86,7 @@ ATA_DEVICE_COMMAND_STATUS
 AtaCoreCheckPowerModeStatus(
     PATA_COMMAND_CHECK_POWER_MODE_STRUCTURE Sts
 ){
-    if(ATA_DEVICE_STATUS_OK(Sts->Status)){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
         return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
     }
     return AtaCoreCheckNsRs(Sts->Error);
@@ -96,8 +96,58 @@ ATA_DEVICE_COMMAND_STATUS
 AtaCoreCheckConfigureStreamStatus(
     PATA_COMMAND_CONFIGURE_STREAM_STRUCTURE Sts
 ){
-    if(ATA_DEVICE_STATUS_OK(Sts->Status)){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
         return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
     }
     return AtaCoreCheckNsRs(Sts->Error);
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckDeviceConfigurationRestoreStatus(
+    PATA_COMMAND_DEVICE_CONFIGURATION_RESTORE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckDeviceConfigurationFreezeLockStatus(
+    PATA_COMMAND_DEVICE_CONFIGURATION_RESTORE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckDeviceConfigurationIdentifyStatus(
+    PATA_COMMAND_DEVICE_CONFIGURATION_RESTORE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckDeviceConfigurationSetStatus(
+    PATA_COMMAND_DEVICE_CONFIGURATION_RESTORE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckDownloadMicroCodeStatus(
+    PATA_COMMAND_DOWNLOAD_MICROCODE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
 }
