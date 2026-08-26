@@ -137,8 +137,8 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
     return Status;
 
     _ERROR_RESETTING_CONTROLLER:
-    if(ScsiDriverObject->Callbacks->ScsiDevicePowerOnHcd){
-        Status = ScsiDriverObject->Callbacks->ScsiDevicePowerOnHcd(&NewDeviceObject->ScsiHostDevice);
+    if(ScsiDriverObject->Callbacks->ScsiDevicePowerOffHcd){
+        Status = ScsiDriverObject->Callbacks->ScsiDevicePowerOffHcd(&NewDeviceObject->ScsiHostDevice);
         if(Status != STATUS_SUCCESS){
             ScsiCoreDbgPrint("SCSICORE.SYS:Unable To Power Down Controller\n");
         }

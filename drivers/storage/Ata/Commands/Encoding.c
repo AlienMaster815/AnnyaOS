@@ -202,4 +202,68 @@ void AtaCoreEncodeDownloadMicroCodeCommand(
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_DOWNLOAD_MICROCODE_STRUCTURE));
 }
 
-//continue 8.12
+void 
+AtaCoreEncodeExecuteDeviceDiagnosticsCommand(
+    PATA_COMMAND_EXECUTE_DEVICE_DIAGNOSTIC  Cmd
+){
+    ATA_COMMAND_EXECUTE_DEVICE_DIAGNOSTIC tCmd = {0};
+    tCmd.Command = ATA_COMMAND_CODE_EXECUTE_DEVICE_DIAGNOSTICS;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_CODE_EXECUTE_DEVICE_DIAGNOSTICS));
+}
+
+void 
+AtaCoreEncodeFlushCacheCommand(
+    PATA_COMMAND_FLUSH_CACHE_STRUCTURE  Cmd,
+    UINT8                               Dev
+){
+    ATA_COMMAND_FLUSH_CACHE_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_FLUSH_CACHE;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_FLUSH_CACHE_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeFlushCacheExCommand(
+    PATA_COMMAND_FLUSH_CACHE_EX_STRUCTURE   Cmd,
+    UINT8                                   Dev
+){
+    ATA_COMMAND_FLUSH_CACHE_EX_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_FLUSH_CACHE_EXT;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_FLUSH_CACHE_EX_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeGetMediaStatusCommand(
+    PATA_COMMAND_GET_MEDIA_STATUS_STRUCTURE Cmd,
+    UINT8                                   Dev
+){
+    ATA_COMMAND_GET_MEDIA_STATUS_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_GET_MEDIA_STATUS;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_GET_MEDIA_STATUS_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeIdentifyDeviceCommand(
+    PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE Cmd,
+    UINT8                                   Dev
+){
+    ATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_IDENTIFY_DEVICE;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeIdentifyPacketDeviceCommand(
+    PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE Cmd,
+    UINT8                                   Dev
+){
+    ATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_IDENTIFY_PACKET_DEVICE;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE));
+}
+
+//contine 8.18

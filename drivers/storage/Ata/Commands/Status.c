@@ -151,3 +151,54 @@ AtaCoreCheckDownloadMicroCodeStatus(
     }
     return AtaCoreCheckNsRs(Sts->Error);  
 }
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckFlushCacheStatus(
+    PATA_COMMAND_FLUSH_CACHE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckFlushCacheExStatus(
+    PATA_COMMAND_FLUSH_CACHE_EX_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckGetMediaStatusStatus(
+    PATA_COMMAND_GET_MEDIA_STATUS_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckGetIdentifyDeviceStatus(
+    PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckGetIdentifyPacketDeviceStatus(
+    PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}

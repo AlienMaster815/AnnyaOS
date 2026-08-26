@@ -14,7 +14,8 @@ TODO:
         handle result data : ATA-ATAPI.PDF Page 90
     DEVICE CONFIGURATION * : 
         Check over them when finished with the basics 
-    
+    IDENTIFY DEVICE:
+        read all the data and behavior, implement the data and behavior: ATA-ATAPI.PDF Page 117
 */
 
 
