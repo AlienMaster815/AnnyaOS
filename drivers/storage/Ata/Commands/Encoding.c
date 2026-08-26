@@ -266,4 +266,28 @@ AtaCoreEncodeIdentifyPacketDeviceCommand(
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE));
 }
 
-//contine 8.18
+void 
+AtaCoreEncodeIdleCommand(
+    PATA_COMMAND_IDLE_STRUCTURE Cmd,
+    UINT8                       TimePeriod,
+    UINT8                       Dev
+){
+    ATA_COMMAND_IDLE_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.SectorCount = TimePeriod;
+    tCmd.Command = ATA_COMMAND_CODE_IDLE;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_IDLE_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeIdleImmediateCommand(
+    PATA_COMMAND_IDLE_IMMEDIATE_STRUCTURE   Cmd,
+    UINT8                                   Dev
+){
+    ATA_COMMAND_IDLE_IMMEDIATE_STRUCTURE tCmd = {0}; 
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_IDLE_IMMEDIATE;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_IDLE_IMMEDIATE_STRUCTURE));
+}
+
+//continue 8.20

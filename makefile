@@ -271,6 +271,8 @@ cleanall:
 	$(MAKE) -C KernelLibraries clean
 	$(MAKE) -C API clean
 	$(MAKE) -C drivers clean
+	$(MAKE) -C UserLibraries/Drsd clean
+	$(MAKE) -C UserLibraries/GDI32 clean
 	$(MAKE) -C UserLibraries/KernelBase clean
 	$(MAKE) -C UserLibraries/LouDll clean
 	$(MAKE) -C UserLibraries/ntdll clean

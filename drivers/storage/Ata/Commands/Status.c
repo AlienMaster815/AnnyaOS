@@ -202,3 +202,24 @@ AtaCoreCheckGetIdentifyPacketDeviceStatus(
     }
     return AtaCoreCheckNsRs(Sts->Error);  
 }
+
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckGetIdleDeviceStatus(
+    PATA_COMMAND_IDLE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
+
+ATA_DEVICE_COMMAND_STATUS
+AtaCoreCheckGetIdleImmediateDeviceStatus(
+    PATA_COMMAND_IDLE_IMMEDIATE_STRUCTURE Sts
+){
+    if(ATA_DEVICE_STATUS_OK(Sts->Status) && (!(Sts->Status & (1 << 3)))){
+        return ATA_DEVICE_COMMAND_STATUS_SUCCESS;
+    }
+    return AtaCoreCheckNsRs(Sts->Error);  
+}
