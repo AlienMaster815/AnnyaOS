@@ -239,9 +239,6 @@ UserSpace:
 	$(MAKE) -C DLL/LouDLLs/User32 clean
 	$(MAKE) -C DLL/LouDLLs/User32 all
 
-#	$(MAKE) -C DLL/LouDLLs/GDI32 clean
-#	$(MAKE) -C DLL/LouDLLs/GDI32 all
-
 annya: release 
 	rm -rf ISO
 	
