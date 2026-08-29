@@ -333,9 +333,12 @@ void LouOsKrnlStart(
         
     InitializeDebuggerComunications();
 
+    LouPrint("Kernel Loaded At:%h\n", LousineKernelLoaderInformation.KernelHandle);
+
     AdvancedLousineKernelInitialization();
 
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
+
 
     PciHalScanBootDevices();
          

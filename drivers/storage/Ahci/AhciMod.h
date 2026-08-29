@@ -18,7 +18,6 @@
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
  */
 
-/*
 #define SATA_SIGNATURE_ATA      0x101
 #define SATA_SIGNATURE_ATAPI    0xEB140101
 #define SATA_SIGNATURE_SEMB     0xC33C0101
@@ -36,7 +35,6 @@
 #define AHCI_GENERATION_5_CAVIUM_ABAR       4
 #define AHCI_LOONGSON_ABAR                  0
 
-//#pragma pack(push, 1)
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_HOST_CONTROL  GenericHostController;
     PAHCI_GENERIC_PORT          GenericPort;
@@ -47,8 +45,8 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                    PioFlags;
     uint64_t                    DmaFlags;
     uint64_t                    PrivateFlags;
-    void                        (*StartCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
-    LOUSTATUS                   (*StopCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    //void                        (*StartCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
+    //LOUSTATUS                   (*StopCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
     uintptr_t                   FisDma;
     uintptr_t                   CommandDma;
     uint16_t                    PortMap;
@@ -62,7 +60,9 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     UINT32                      CommandsQueued;
     KERNEL_EVENT_OBJECT         CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
-//#pragma pack(pop)
+
+/*
+
 
 //Driver Operations
 LOUSTATUS AhciGenricDMAPrepCommand(

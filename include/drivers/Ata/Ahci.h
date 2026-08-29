@@ -146,7 +146,7 @@ typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
     uint32_t                        AtaFlags;
     uint32_t                        PioFlags;
     uint32_t                        DmaFlags;
-    PLOUSINE_ATA_PORT_OPERATIONS    DevicesPortOperations;
+    //PLOUSINE_ATA_PORT_OPERATIONS    DevicesPortOperations;
     uint64_t                        Padding[4];
 }AHCI_DRIVER_BOARD_INFORMATION_TABLE, * PAHCI_DRIVER_BOARD_INFORMATION_TABLE,
  AHCI_DRIVER_BOARD_INFORMATION ,* PAHCI_DRIVER_BOARD_INFORMATION;

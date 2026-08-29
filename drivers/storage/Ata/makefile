@@ -17,7 +17,7 @@ LIB_FILE = Ata.lib  # Output directory is set to the parent directory
 
 # Build rule
 all: $(TARGET) $(LIB_FILE) $(HWDRVERS)
-#	$(MAKE) -C Hardware all
+	$(MAKE) -C Hardware all
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -L../SCSI -lScsi $(INCLUDES)
@@ -29,7 +29,7 @@ $(LIB_FILE): $(DEF_FILE)
 
 # Clean rule
 clean:
-#	$(MAKE) -C Hardware clean
+	$(MAKE) -C Hardware clean
 	rm -f $(TARGET)
 	rm -f $(LIB_FILE)
 

@@ -41,6 +41,5 @@ LOUSTATUS AtaCoreEntry(){
 
 
     AtaCoreDbgPrint("ATACORE.SYS:AtaCoreEntry():STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }

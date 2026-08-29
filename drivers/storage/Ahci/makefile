@@ -7,14 +7,8 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC = 	Ahci.cpp \
-		Ahci-Avn.cpp \
-		Ahci-Vt8251.cpp \
-		AhciLib.cpp \
-		AhciPhyLayer.cpp \
-		AhciPowerManagement.cpp \
-		Ahci-P5wdh.cpp
-
+SRC = 	Ahci.c \
+		AhciLib.c
 TARGET = AHCI.SYS
 
 # Build rule

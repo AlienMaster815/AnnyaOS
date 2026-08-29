@@ -298,7 +298,7 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 //static SIZE Foo = 0;
 
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
-    if(MutexLockOrFalse(&ProcLock.Lock) || (LouKeGetIrql() == HIGH_LEVEL)){
+    if((MutexLockOrFalse(&ProcLock.Lock) != true) || (LouKeGetIrql() == HIGH_LEVEL)){
         ApicHalConfigureNextApicTimerEvent(30);
         return CpuCurrentState;
     }

@@ -266,6 +266,50 @@ typedef enum {
 #define ATA_CMDBLK_DECODE_PREV_VALUE(Value) ((Value >> ATA_CMDBLK_PREV_ENCODE_SHIFT) & ATA_CMDBLK_PREV_ENCODE_MASK)
 #define ATA_CMDBLK_DECODE_CURR_VALUE(Value) ((Value >> ATA_CMDBLK_CURR_ENCODE_SHIFT) & ATA_CMDBLK_CURR_ENCODE_MASK)
 
+#define ATA_HOST_FLAGS_SUPPORTS_PIO     (1UL << 0)
+#define ATA_HOST_FLAGS_SUPPORTS_DMA     (1UL << 1)
 
+struct _ATA_HOST_OPERATIONS;
+struct _ATA_HOST_DEVICE_OBJECT;
+struct _ATA_PORT_OPERATIONS;
+
+typedef struct _ATA_PORT_DEVICE_OBJECT{
+    struct _ATA_HOST_DEVICE_OBJECT* Host;
+    struct _ATA_PORT_OPERATIONS*    Operations;
+    PVOID                           PortPrivateData;
+}ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;
+
+typedef struct _ATA_PORT_OPERATIONS{
+    LOUSTATUS (*AtaPortDeviceReset)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    LOUSTATUS (*AtaPortDeviceStart)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    LOUSTATUS (*AtaPortDeviceStop)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    LOUSTATUS (*AtaPortDeviceWake)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    LOUSTATUS (*AtaPortDeviceSleep)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    LOUSTATUS (*AtaPortDevicePowerUp)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    LOUSTATUS (*AtaPortDevicePowerDown)(PATA_PORT_DEVICE_OBJECT PortDevice);
+}ATA_PORT_OPERATIONS, * PATA_PORT_OPERATIONS;
+
+typedef struct _ATA_HOST_DEVICE_OBJECT{
+    PPCI_DEVICE_OBJECT              PDEV;
+    struct _ATA_HOST_OPERATIONS*    Operations;
+    ULONG                           HostFlags;
+    PVOID                           HostPrivateData;
+    SIZE                            PortCount;
+    PATA_PORT_DEVICE_OBJECT         PortDevices;
+}ATA_HOST_DEVICE_OBJECT, * PATA_HOST_DEVICE_OBJECT;
+
+typedef struct _ATA_HOST_OPERATIONS{
+    LOUSTATUS (*AtaHostDeviceReset)(PATA_HOST_DEVICE_OBJECT HostDevice);
+    LOUSTATUS (*AtaHostDeviceStart)(PATA_HOST_DEVICE_OBJECT HostDevice);
+    LOUSTATUS (*AtaHostDeviceStop)(PATA_HOST_DEVICE_OBJECT HostDevice);
+    LOUSTATUS (*AtaHostDeviceWake)(PATA_HOST_DEVICE_OBJECT HostDevice);
+    LOUSTATUS (*AtaHostDeviceSleep)(PATA_HOST_DEVICE_OBJECT HostDevice);
+    LOUSTATUS (*AtaHostDevicePowerUp)(PATA_HOST_DEVICE_OBJECT HostDevice);
+    LOUSTATUS (*AtaHostDevicePowerDown)(PATA_HOST_DEVICE_OBJECT HostDevice);
+}ATA_HOST_OPERATIONS, * PATA_HOST_OPERATIONS;
+
+
+
+#include "Ahci.h"
 
 #endif

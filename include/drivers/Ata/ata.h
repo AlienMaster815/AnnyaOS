@@ -1091,7 +1091,6 @@ typedef struct _LOUSINE_ATA_PORT_INFORMATION{
 #define DRIVE_HEAD_REGISTER_UNSET_LBA_BIT(x)        (x & ~(1 << 6))
 
 #include "AtaDma.h"
-#include "Ahci.h"
 
 #ifndef _USER_MODE_CODE_
 

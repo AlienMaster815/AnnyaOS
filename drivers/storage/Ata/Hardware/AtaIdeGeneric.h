@@ -33,8 +33,6 @@ typedef struct PACKED _ATA_PRDT_ENTRY{
     UINT8   Edt;
 }ATA_PRDT_ENTRY, * PATA_PRDT_ENTRY;
 
-typedef struct PACKED _ATA_PRDT{
-    ATA_PRDT_ENTRY  Entrys[];
-}ATA_PRDT, * PATA_PRDT;
+
 
 #endif

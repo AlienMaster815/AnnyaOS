@@ -18,7 +18,8 @@
 #AnnyaExp Compile Line
 #x86_64-w64-mingw32-gcc -shared -ffreestanding -nostdlib -nostartfiles -o AnnyaExp.exe AnnyaExp.c -L/path/to/library -lname
 
-#VirtualBoxVM --startvm "AnnyaOS" --dbg
+#cd "C:\Program Files\Oracle\VirtualBox"
+#.\VirtualBoxVM --startvm "AnnyaOS" --dbg
 
 
 INCLUDE = -I. -I include -I include/drivers/acpi -I include/ACPICA
