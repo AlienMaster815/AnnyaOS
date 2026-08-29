@@ -279,7 +279,30 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
     PVOID                           PortPrivateData;
 }ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;
 
+#define ATA_COMMAND_PACKET_FLAGS_DMA        (1UL << 0)
+#define ATA_COMMAND_PACKET_FLAGS_SEND_CMD   (1UL << 1)
+#define ATA_COMMAND_PACKET_FLAGS_DATA_CMD   (1UL << 2)
+#define ATA_COMMAND_PACKET_FLAGS_STAT_CMD   (1UL << 3)
+
+
+
+typedef struct _ATA_COMMAND_PACKET{
+    UINT8   Command;
+    ULONG   CommandFlags;
+    union{
+        struct{
+            STANDARD_ATA_COMMAND_PACKET;
+        }Packet;
+        struct{
+            STANDARD_ATA_COMMAND_PACKET_EX;
+        }ExPacket;
+    };
+}ATA_COMMAND_PACKET, * PATA_COMMAND_PACKET;
+
 typedef struct _ATA_PORT_OPERATIONS{
+    LOUSTATUS (*AtaPortDevicePrepCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
+    LOUSTATUS (*AtaPortDeviceIssueCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
+    LOUSTATUS (*AtaPortDeviceCleanupCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
     LOUSTATUS (*AtaPortDeviceReset)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDeviceStart)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDeviceStop)(PATA_PORT_DEVICE_OBJECT PortDevice);

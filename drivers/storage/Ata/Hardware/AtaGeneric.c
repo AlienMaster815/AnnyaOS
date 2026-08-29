@@ -5,108 +5,48 @@
 #define ATA_BOARD_ID_ISA_DEVICE_HAS_DMA     2
 #define ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA  3
 
-LOUSTATUS AtaGenericPortDeviceReset(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDeviceReset\n");
+LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+
+    LouPrint("AtaGenericPortDevicePrepCommand()\n");
     while(1);
     return STATUS_SUCCESS;
 }
+    
+LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
 
-LOUSTATUS AtaGenericPortDeviceStart(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDeviceStart\n");
+    LouPrint("AtaGenericPortDeviceIssueCommand()\n");
     while(1);
     return STATUS_SUCCESS;
 }
+    
+LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
 
-LOUSTATUS AtaGenericPortDeviceStop(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDeviceStop");
+    LouPrint("AtaGenericPortDeviceCleanupCommand()\n");
     while(1);
     return STATUS_SUCCESS;
 }
-
-LOUSTATUS AtaGenericPortDeviceWake(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDeviceWake");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-LOUSTATUS AtaGenericPortDeviceSleep(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDeviceSleep");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-LOUSTATUS AtaGenericPortDevicePowerUp(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDevicePowerUp");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-LOUSTATUS AtaGenericPortDevicePowerDown(PATA_PORT_DEVICE_OBJECT PortDevice){
-    LouPrint("ATA.SYS:AtaGenericPortDevicePowerDown");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
 
 static ATA_PORT_OPERATIONS PortOperations = {
-    .AtaPortDeviceReset = AtaGenericPortDeviceReset,
-    .AtaPortDeviceStart = AtaGenericPortDeviceStart,
-    .AtaPortDeviceStop = AtaGenericPortDeviceStop,
-    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
-    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
-    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
-    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+    .AtaPortDevicePrepCommand = AtaGenericPortDevicePrepCommand,
+    .AtaPortDeviceIssueCommand = AtaGenericPortDeviceIssueCommand,
+    .AtaPortDeviceCleanupCommand = AtaGenericPortDeviceCleanupCommand,
+//    .AtaPortDeviceReset = AtaGenericPortDeviceReset,
+//    .AtaPortDeviceStart = AtaGenericPortDeviceStart,
+//    .AtaPortDeviceStop = AtaGenericPortDeviceStop,
+//    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
+//    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
+//    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
+//    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
 };
 
-static LOUSTATUS AtaGenericHostDeviceReset(PATA_HOST_DEVICE_OBJECT HostDevice){
-    LouPrint("ATA.SYS:AtaGenericHostDeviceReset()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-static LOUSTATUS AtaGenericHostDeviceStart(PATA_HOST_DEVICE_OBJECT HostDevice){
-    LouPrint("ATA.SYS:AtaGenericHostDeviceStart()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-static LOUSTATUS AtaGenericHostDeviceStop(PATA_HOST_DEVICE_OBJECT HostDevice){
-    LouPrint("ATA.SYS:AtaGenericHostDeviceStop()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-static LOUSTATUS AtaGenericHostDeviceWake(PATA_HOST_DEVICE_OBJECT HostDevice){
-
-    return STATUS_NOT_SUPPORTED;
-}
-
-static LOUSTATUS AtaGenericHostDeviceSleep(PATA_HOST_DEVICE_OBJECT HostDevice){
-
-
-    return STATUS_NOT_SUPPORTED;
-}
-
-static LOUSTATUS AtaGenericHostDevicePowerUp(PATA_HOST_DEVICE_OBJECT HostDevice){
-
-
-    return STATUS_NOT_SUPPORTED;
-}
-
-static LOUSTATUS AtaGenericHostDevicePowerDown(PATA_HOST_DEVICE_OBJECT HostDevice){
-
-
-    return STATUS_NOT_SUPPORTED;
-}
-
 static ATA_HOST_OPERATIONS AtaOperations = {
-    .AtaHostDeviceReset = AtaGenericHostDeviceReset,
-    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
-    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
-    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
-    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
-    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
-    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
+//    .AtaHostDeviceReset = AtaGenericHostDeviceReset,
+//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+//    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
+//    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
+//    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
+//    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
+//    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
 };
 
 static LOUSINE_PCI_DEVICE_TABLE AtaDevices[] = {

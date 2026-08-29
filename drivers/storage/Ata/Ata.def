@@ -1,5 +1,7 @@
 LIBRARY ATACORE.SYS
 
 EXPORTS	
-    AtaCoreRegisterScsiHostDeviceDriver
-    AtaCoreCreateScsiHostDeviceObject
+    AtaCoreAllocateHostDevice
+    AtaCoreFreeHostDevice
+    AtaCoreAllocatePortsForHost
+    AtaCoreFreeAtaPortsFromHost
