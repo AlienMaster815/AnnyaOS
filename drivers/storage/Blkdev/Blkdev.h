@@ -56,7 +56,7 @@ typedef struct _BLOCK_DEVICE_DRIVER_OBJECT{
 typedef struct _BLOCK_DEVICE_OBJECT{
     LOUSTR                          DeviceName;
     PBLOCK_DEVICE_DRIVER_OBJECT     DriverObject;
-    DMA_FENCE                       DmaFence;
+//    DMA_FENCE                       DmaFence;
     BOOLEAN                         RemovableMedia;
     SIZE                            BlockSize;
     SIZE                            TotalBlocks;

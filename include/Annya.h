@@ -12,6 +12,7 @@
 #include <WinAPI/Win32/winternl.h>
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
+#include <ListManagement.h>
 
 #include <cstdio.h>
 #include <string.h>
@@ -44,7 +45,6 @@
 #include <Hal.h>
 #include <math.h>
 #include <kernel/threads.h>
-#include <ListManagement.h>
 #include <kernel/LouQs.h>
 #include <drivers/Ata/ata.h>
 #include <WinTEB.h>

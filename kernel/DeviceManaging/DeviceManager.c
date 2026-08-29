@@ -26,9 +26,6 @@ LOUSTATUS LouRegisterStorageDevice(
 //LOUSTATUS DeviceManagerInitializeAtaHostDevice(PDEVICE_DIRECTORY_TABLE DeviceDirectoryTable);
 
 LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem);
-LOUSTATUS LouKeDrsdInitializeDevice(
-    PDRSD_DEVICE Device
-);
 
 KERNEL_EXPORT
 LOUSTATUS LouKeRegisterDevice(

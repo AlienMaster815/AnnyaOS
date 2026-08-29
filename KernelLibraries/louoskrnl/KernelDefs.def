@@ -249,3 +249,5 @@ EXPORTS
     LouKeDmaFenceFree
     LouKeDmaFenceDescribe
     LouKeYeildExecution
+    LouKeDmaAllocateGenericDmaMemory
+    LouKeDmaAllocateGenericDmaMemory32

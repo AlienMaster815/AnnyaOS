@@ -2,8 +2,7 @@
 INCLUDES = -I../../../include
 TARGET = ATACORE.SYS
 SRC = 	AtaCore.c \
-		Commands/Encoding.c \
-		Commands/Status.c
+		Commands/Encoding.c 
 		
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=AtaCoreEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone

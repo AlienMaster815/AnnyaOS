@@ -2,14 +2,7 @@
 
 LOUSTATUS LouKeLoadFileCall(uint64_t* Data, ACCESS_MASK AccessMask);
 void LouKeCloseFileCall(uint64_t* Data);
-void LouKeUpdateShadowClipState(PDRSD_CLIP Clip);
-void LouKeUpdateClipSubState(
-    PDRSD_CLIP Clip, 
-    INT64 X, INT64 Y, 
-    INT64 Width, INT64 Height
-);
 uint8_t LouKeGetCurrentTimeMinute();
-void LouKeUpdateShadowClipSubState(PDRSD_CLIP Clip, INT64 X, INT64 Y, INT64 Width, INT64 Height);
 int LouPrint_s(char* format, va_list args);
 LOUSTATUS 
 LouKeVmmCreateSectionEx(
@@ -31,7 +24,6 @@ uint64_t LouKeLinkerGetAddress(
 
 void LouKeGenericHeapFree(void* heap, void* Address);
 extern uint64_t RSPPoint;
-void LouKeUpdateClipState(PDRSD_CLIP Clip);
 HANDLE LouKeLoadLibraryA(string Name);
 void* LouKeDrsdGetPlaneInformation(size_t* CountHandle);
 //LOUSTATUS LouKeDrsdSetPlaneInformation(PVOID Context);

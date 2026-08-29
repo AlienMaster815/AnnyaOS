@@ -17,6 +17,7 @@ extern "C" {
 #include <drivers/PciIds.h>
 #include <cstdlib.h>
 #include <kernel/loustatus.h>
+#include <ListManagement.h>
 
 #define SYSV_CONVENTION __attribute__((sysv_abi))
 #define NAKED_FUNCTION __attribute__((naked))
@@ -55,7 +56,6 @@ extern "C" {
 #include <Hal.h>
 #include <math.h>
 #include <kernel/threads.h>
-#include <ListManagement.h>
 #include <kernel/LouQs.h>
 #include <drivers/Ata/ata.h>
 #include <drivers/Networking/IpV4.h>
@@ -98,7 +98,7 @@ extern "C" {
 #include <USRSPC/User.h>
 #include <Rat.h>
 
-#include <kernel/DmaFence.h>
+#include <kernel/Dma.h>
 
 #include <drivers/ApicExternals.h>
 #include <drivers/Scsi/ScsiCore.h>

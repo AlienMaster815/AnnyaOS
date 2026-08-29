@@ -1,21 +1,22 @@
-#Copyright GPL-2 Tyler Grenier (2026)
+#//Copyright GPL-2 Tyler Grenier (2026)
 INCLUDES = -I../../include
-TARGET = VMCORE.SYS
-SRC = VmCore.c \
-		AmdVi.c
-
+TARGET = DRSDCORE.SYS
+SRC = DrsdMain.c
+		
 CC = x86_64-w64-mingw32-gcc
-CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=VmCoreEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
+CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=DrsdCoreEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
 
 # Tool and Flags
 DLLTOOL = x86_64-w64-mingw32-dlltool
 
 # Source and Target
-DEF_FILE = VmCore.def
-LIB_FILE = VmCore.lib  # Output directory is set to the parent directory
+DEF_FILE = DrsdCore.def
+LIB_FILE = DrsdCore.lib  # Output directory is set to the parent directory
+
 
 # Build rule
-all: $(TARGET) #$(LIB_FILE)
+all: $(TARGET) $(LIB_FILE)
+#	$(MAKE) -C Hardware all
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../KernelLibraries -llouoskrnl $(INCLUDES)
@@ -27,5 +28,7 @@ $(LIB_FILE): $(DEF_FILE)
 
 # Clean rule
 clean:
+#	$(MAKE) -C Hardware clean
 	rm -f $(TARGET)
 	rm -f $(LIB_FILE)
+

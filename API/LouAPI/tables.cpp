@@ -24,7 +24,6 @@ typedef struct _TableTracks{
 static LIST_OBJECT DynamicLoadedLibraries = {0};
 static size_t DynamicLoadedLibrarieCount = 0x00;
 
-LOUAPI LOUSTATUS LouKePassVramToDrsdMemoryManager(PDRSD_DEVICE Device, void* VramBase, size_t size, void* PAddress);
 
 ULONG KeNumberProcessors();
 

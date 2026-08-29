@@ -1482,7 +1482,7 @@ struct _SCSI_HOST_DEVICE_OBJECT;
 typedef struct _SCSI_PORT_DEVICE_OBJECT{
     struct _SCSI_HOST_DEVICE_OBJECT*    Shdd;
     SIZE                                PortID;
-    DMA_FENCE                           DmaFence;
+//    DMA_FENCE                           DmaFence;
     PVOID                               PortPrivateData;
 }SCSI_PORT_DEVICE_OBJECT, * PSCSI_PORT_DEVICE_OBJECT;
 

@@ -1,6 +1,9 @@
 #ifndef _LIST_MANAGEMENT_H
 #define _LIST_MANAGEMENT_H
 
+#define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
+#define OFFSET_OF(Type, Field) offsetof(Type, Field)
+
 #include <stdbool.h>
 #include <kernel/threads.h>
 

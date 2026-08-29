@@ -113,6 +113,44 @@ LouKeXaGet(
 }
 
 KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGetOrDoSomthingEx(
+    PXARRAY                 Array,
+    UINT64                  Index,
+    UINT64*                 Out,
+    XARRAY_DO_SOMTHING      Somthing,
+    PVOID                   Context
+){
+    LOUSTATUS Result = LouKeXaGetEx(Array, Index, Out);
+    if(Result == STATUS_SUCCESS){
+        return Result;
+    }
+    return Somthing(Array, Index, Context);
+}
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGetOrDoSomthing(
+    PXARRAY             Array,
+    UINT64              Index,
+    UINT64*             Out,
+    XARRAY_DO_SOMTHING  Somthing,
+    PVOID               Context
+){
+    LOUSTATUS Result;
+    LouKeXaLockArray(Array);
+    Result = LouKeXaGetOrDoSomthingEx(
+        Array,
+        Index,
+        Out,
+        Somthing,
+        Context
+    );
+    LouKeXaUnlockArray(Array);
+    return Result;
+}
+
+KERNEL_EXPORT
 BOOLEAN 
 LouKeXaIsIndexUsed(
     PXARRAY     Array,

@@ -41,6 +41,7 @@ typedef struct _XARRAY{
     ListHeader          Nodes;    
 }XARRAY, * PXARRAY;
 
+typedef LOUSTATUS (*XARRAY_DO_SOMTHING)(PXARRAY Xarray, UINT64 Index, PVOID Context);
 
 
 #ifndef _USER_MODE_CODE_
@@ -225,6 +226,27 @@ LouKeXarrayAllocateUint32(
     UINT32  Limit,
     UINT64  PageFlags
 );
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGetOrDoSomthingEx(
+    PXARRAY                 Array,
+    UINT64                  Index,
+    UINT64*                 Out,
+    XARRAY_DO_SOMTHING      Somthing,
+    PVOID                   Context
+);
+
+KERNEL_EXPORT
+LOUSTATUS
+LouKeXaGetOrDoSomthing(
+    PXARRAY             Array,
+    UINT64              Index,
+    UINT64*             Out,
+    XARRAY_DO_SOMTHING  Somthing,
+    PVOID               Context
+);
+
 
 #else 
 

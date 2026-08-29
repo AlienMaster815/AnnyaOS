@@ -290,4 +290,115 @@ AtaCoreEncodeIdleImmediateCommand(
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_IDLE_IMMEDIATE_STRUCTURE));
 }
 
-//continue 8.20
+void 
+AtaCoreEncodeMediaEjectCommand(
+    PATA_COMMAND_MEDIA_EJECT_STRUCTURE  Cmd,
+    UINT8                               Dev
+){
+    ATA_COMMAND_MEDIA_EJECT_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_MEDIA_EJECT;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_MEDIA_EJECT_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeMediaLockCommand(
+    PATA_COMMAND_MEDIA_LOCK_STRUCTURE   Cmd,
+    UINT8                               Dev
+){
+    ATA_COMMAND_MEDIA_LOCK_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_MEDIA_LOCK;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_MEDIA_LOCK_STRUCTURE));
+}
+
+void
+AtaCoreEncodeMediaUnlockCommand(
+    PATA_COMMAND_MEDIA_UNLOCK_STRUCTURE Cmd,
+    UINT8                               Dev
+){
+    ATA_COMMAND_MEDIA_UNLOCK_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_MEDIA_UNLOCK;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_MEDIA_UNLOCK_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeNopCommand(
+    PATA_COMMAND_NOP_STRUCTURE  Cmd,
+    UINT8                       Dev,
+    UINT8                       SubCommand
+){
+    ATA_COMMAND_NOP_STRUCTURE tCmd = {0};
+    tCmd.Command = ATA_COMMAND_CODE_NOP;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_NOP_STRUCTURE));
+}
+
+void 
+AtaCoreEncodePacketCommand(
+    PATA_COMMAND_PACKET_STRUCTURE   Cmd,
+    UINT8                           Dev,
+    UINT16                          ByteCountLimit,
+    UINT8                           Dma,
+    UINT8                           Ovl,
+    UINT8                           Tag    
+){
+    ATA_COMMAND_PACKET_STRUCTURE tCmd = {0};
+    tCmd.Features = Dma ? 1 : 0;
+    tCmd.Features |= Ovl ? (1 << 2) : 0;
+    tCmd.SectorCount = ((Tag & ((1 << 6) - 1)) << 3);
+    tCmd.LbaMid = ByteCountLimit & 0xFF;
+    tCmd.LbaHigh = (ByteCountLimit >> 8) & 0xFF;
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_PACKET;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_PACKET_STRUCTURE));
+}
+
+void 
+AtaCoreEncodeReadBufferCommand(
+    PATA_COMMAND_READ_BUFFER_STRUCTURE  Cmd,
+    UINT8                               Dev
+){
+    ATA_COMMAND_READ_BUFFER_STRUCTURE tCmd = {0};
+    tCmd.Device = Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_READ_BUFFER;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_BUFFER_STRUCTURE));
+}
+
+void AtaCoreEncodeReadDmaCommand(
+    PATA_COMMAND_READ_DMA_STRUCTURE Cmd,
+    UINT8                           Dev,
+    UINT8                           SectorCount,
+    UINT32                          Lba
+){
+    ATA_COMMAND_READ_DMA_STRUCTURE tCmd = {0};
+    tCmd.SectorCount = SectorCount;
+    tCmd.LbaLow = Lba & 0xFF;
+    tCmd.LbaMid = (Lba >> 8) & 0xFF;
+    tCmd.LbaHigh = (Lba >> 16) & 0xFF;
+    tCmd.Device = (1 << 6) | ((Lba >> 24) & 0xFF);
+    tCmd.Device |= Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_READ_DMA;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_DMA_STRUCTURE));
+}
+
+void AtaCoreEncodeReadDmaExtCommand(
+    PATA_COMMAND_READ_DMA_EXT_STRUCTURE Cmd,
+    UINT8                               Dev,
+    UINT16                              SectorCount,
+    UINT64                              Lba   
+){
+    ATA_COMMAND_READ_DMA_EXT_STRUCTURE tCmd = {0};
+    tCmd.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(SectorCount & 0xFF) | ATA_CMDBLK_ENCODE_PREV_VALUE((SectorCount >> 8) & 0xFF);
+    tCmd.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(Lba & 0xFF) | ATA_CMDBLK_ENCODE_PREV_VALUE((Lba >> 24) & 0xFF);
+    tCmd.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE((Lba >> 8) & 0xFF) | ATA_CMDBLK_ENCODE_PREV_VALUE((Lba >> 32) & 0xFF);
+    tCmd.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE((Lba >> 16) & 0xF) | ATA_CMDBLK_ENCODE_PREV_VALUE((Lba >> 40) & 0xFF);
+    tCmd.Device = (1 << 6);
+    tCmd.Device |= Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_READ_DMA_EXT;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_DMA_EXT_STRUCTURE));
+}
+
+
+
+//continue 8.28

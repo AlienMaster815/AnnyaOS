@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 
+#include <Time.h>
 #include <Ldm.h>
 
 typedef struct _SIGNAL_REG_VALUE {
