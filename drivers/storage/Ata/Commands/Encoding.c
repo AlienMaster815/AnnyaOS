@@ -376,7 +376,7 @@ void AtaCoreEncodeReadDmaCommand(
     tCmd.LbaLow = Lba & 0xFF;
     tCmd.LbaMid = (Lba >> 8) & 0xFF;
     tCmd.LbaHigh = (Lba >> 16) & 0xFF;
-    tCmd.Device = (1 << 6) | ((Lba >> 24) & 0xFF);
+    tCmd.Device = (1 << 6) | ((Lba >> 24) & 0x0F);
     tCmd.Device |= Dev ? (1 << 4) : 0;
     tCmd.Command = ATA_COMMAND_CODE_READ_DMA;
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_DMA_STRUCTURE));
@@ -399,6 +399,43 @@ void AtaCoreEncodeReadDmaExtCommand(
     memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_DMA_EXT_STRUCTURE));
 }
 
+void AtaCoreEncodeReadDmaQueuedCommand(
+    PATA_COMMAND_READ_DMA_QUEUED_STRUCTURE  Cmd,
+    UINT8                                   Dev,
+    UINT8                                   Tag,
+    UINT8                                   SectorCount,
+    UINT32                                  Lba        
+){
+    ATA_COMMAND_READ_DMA_QUEUED_STRUCTURE tCmd = {0};
+    tCmd.Features = SectorCount;
+    tCmd.SectorCount = ((Tag & ((1 << 6) - 1)) << 3); 
+    tCmd.LbaLow = Lba & 0xFF;
+    tCmd.LbaMid = (Lba >> 8) & 0xFF;
+    tCmd.LbaHigh = (Lba >> 16) & 0xFF;
+    tCmd.Device = (1 << 6) | (Lba >> 24) & 0x0F;  
+    tCmd.Device |= Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_READ_DMA_QUEUED;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_DMA_QUEUED_STRUCTURE));
+}
 
+void AtaCoreEncodeReadDmaQueuedExtCommand(
+    PATA_COMMAND_READ_DMA_QUEUED_EXT_STRUCTURE  Cmd,
+    UINT8                                       Dev,
+    UINT8                                       Tag,
+    UINT16                                      SectorCount,
+    UINT64                                      Lba
+){  
 
-//continue 8.28
+    ATA_COMMAND_READ_DMA_QUEUED_EXT_STRUCTURE tCmd = {0};
+    tCmd.Features = ATA_CMDBLK_ENCODE_CURR_VALUE(SectorCount & 0xFF) | ATA_CMDBLK_ENCODE_PREV_VALUE((SectorCount >> 8) & 0xFF);
+    tCmd.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(((Tag & ((1 << 6) - 1)) << 3)); 
+    tCmd.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(Lba & 0xFF) | ATA_CMDBLK_ENCODE_PREV_VALUE((Lba >> 24) & 0xFF);
+    tCmd.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE((Lba >> 8) & 0xFF) | ATA_CMDBLK_ENCODE_PREV_VALUE((Lba >> 32) & 0xFF);
+    tCmd.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE((Lba >> 16) & 0xF) | ATA_CMDBLK_ENCODE_PREV_VALUE((Lba >> 40) & 0xFF);
+    tCmd.Device = (1 << 6);
+    tCmd.Device |= Dev ? (1 << 4) : 0;
+    tCmd.Command = ATA_COMMAND_CODE_READ_DMA_QUEUED_EXT;
+    memcpy(Cmd, &tCmd, sizeof(ATA_COMMAND_READ_DMA_EXT_STRUCTURE));    
+}
+
+//continue 8.30
