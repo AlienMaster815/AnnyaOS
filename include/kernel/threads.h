@@ -325,7 +325,7 @@ LouKeCreateDeferedImpEx(
     PVOID   UnblockTimeHandle
 );
 
-KERNEL_EXPORT void LouKeYeildExecution();
+KERNEL_EXPORT void LouKeYieldExecution();
 
 
 #endif
@@ -408,7 +408,7 @@ static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
                 LouKeReportMutexBlock(m, Thread);
                 Reported = true;
             }
-            LouKeYeildExecution();
+            LouKeYieldExecution();
         }
     }else{
         if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
@@ -416,7 +416,7 @@ static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
             return;
         }
         while (__atomic_test_and_set(&m->locked.counter, 1)) {
-            LouKeYeildExecution();
+            LouKeYieldExecution();
         }
     }
     Thread = LouKeGetThreadIdentification();
@@ -493,7 +493,7 @@ static inline void SemaphoreLockOrYield(semaphore_t* sem) {
     while(!LouKeGetAtomic(&sem->Counter)){
         MutexUnlock(&sem->Check);
         #ifndef _USER_MODE_CODE_
-        LouKeYeildExecution();
+        LouKeYieldExecution();
         #else
 
         #endif

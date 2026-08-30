@@ -324,7 +324,7 @@ void CheckLouCallTables(uint64_t Call, uint64_t DataTmp){
             return;
         }
         case LOUYEILDEXE:{
-            LouKeYeildExecution();
+            LouKeYieldExecution();
             return;
         }
         case LOUCREATESECTIONEX:{

@@ -49,16 +49,25 @@ LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PA
     
 LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
-    SIZE Timeout = 100;
-    while(inb(PrivateData->Ports.CmdSts) & 0x88){
-        sleep(10);
+    UINT8 Foo = inb(PrivateData->Ports.CmdSts);
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+        outb(PrivateData->Ports.Device, CommandPacket->PacketEx.Device);   
+    }else{
+        outb(PrivateData->Ports.Device, CommandPacket->Packet.Device);   
+    }
+
+    sleep(1);
+
+    SIZE Timeout = 1000;
+
+    while(inb(PrivateData->Ports.CmdSts) & 0x80){
+        sleep(1);
         Timeout--;
     }
     if(!Timeout){
         return STATUS_IO_DEVICE_ERROR;
     }
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-        outb(PrivateData->Ports.Device, CommandPacket->PacketEx.Device);   
         outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.SectorCount));
         outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.Features));
         outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaLow));   
@@ -73,7 +82,6 @@ LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, P
         outb(PrivateData->Ports.CmdSts, CommandPacket->PacketEx.Command); 
 
     }else{
-        outb(PrivateData->Ports.Device, CommandPacket->Packet.Device);   
         outb(PrivateData->Ports.SectorCount, CommandPacket->Packet.SectorCount);
         outb(PrivateData->Ports.ErrFeat, CommandPacket->Packet.Features);
         outb(PrivateData->Ports.LbaLow, CommandPacket->Packet.LbaLow);   
@@ -81,14 +89,63 @@ LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, P
         outb(PrivateData->Ports.LbaHigh, CommandPacket->Packet.LbaHigh);   
         outb(PrivateData->Ports.CmdSts, CommandPacket->Packet.Command);   
     }
+    
+    sleep(1);
+
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD){
+        Timeout = 1000;
+        UINT8 Status;
+        while(1){
+            Status = inb(PrivateData->Ports.CmdSts);
+            
+            if((!(Status & 0x80)) && (Status & 0x08)){
+                break;
+            }
+            
+            if(Status & 0x01){
+                return STATUS_IO_DEVICE_ERROR;
+            }
+
+            if(!Timeout){
+                return STATUS_TIMEOUT;
+            }
+
+            sleep(1);
+            Timeout--;
+        }
+        outsw(PrivateData->Ports.Data, CommandPacket->PacketData, CommandPacket->PacketSize / 2);
+        sleep(1);
+    }
 
     return STATUS_SUCCESS;
 }
     
 LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    SIZE Timeout = 100;
     if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
-        return STATUS_SUCCESS;
+        if(CommandPacket->CommandStatus == STATUS_SUCCESS){
+            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
+                UINT8 Status;
+                if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+                    Status = CommandPacket->PacketEx.Status;
+                }else{
+                    Status = CommandPacket->Packet.Status;
+                }
+                if((!(Status & 0x08)) || (Status & 0x01)){
+                    goto _PIO_TRANSFER_DONE;
+                }   
+                if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+                    outsw(PrivateData->Ports.Data, CommandPacket->PioDataOut, 256);
+                }else{
+                    insw(PrivateData->Ports.Data, CommandPacket->PioDataIn, 256);
+                }
+            }
+            _PIO_TRANSFER_DONE:
+            return STATUS_SUCCESS;
+        }else{
+            return STATUS_SUCCESS;
+        }
     }
 
     LouPrint("AtaGenericPortDeviceCleanupCommand()\n");

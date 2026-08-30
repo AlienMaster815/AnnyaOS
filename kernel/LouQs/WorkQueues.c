@@ -24,7 +24,7 @@ DWORD LouKeWorkStackDemon(PVOID Data){
                 LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
             }
         }
-        LouKeYeildExecution();
+        LouKeYieldExecution();
     }
     return STATUS_SUCCESS;
 }

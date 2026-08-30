@@ -688,7 +688,7 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
 
 LOUAPI
 void 
-LouKeYeildExecution(){
+LouKeYieldExecution(){
     PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
     LouKIRQL Irql;
     TIME_T Time;

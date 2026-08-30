@@ -246,7 +246,7 @@ AtaCoreEncodeGetMediaStatusCommand(
 
 void 
 AtaCoreEncodeIdentifyDeviceCommand(
-    PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE Cmd,
+    PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE  Cmd,
     UINT8                                   Dev
 ){
     ATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE tCmd = {0};
@@ -257,8 +257,8 @@ AtaCoreEncodeIdentifyDeviceCommand(
 
 void 
 AtaCoreEncodeIdentifyPacketDeviceCommand(
-    PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE Cmd,
-    UINT8                                   Dev
+    PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE   Cmd,
+    UINT8                                           Dev
 ){
     ATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE tCmd = {0};
     tCmd.Device = Dev ? (1 << 4) : 0;

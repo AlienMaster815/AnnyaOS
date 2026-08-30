@@ -77,7 +77,7 @@ KERNEL_EXPORT void LouKeSrcuSynchronize(PSRCU_OBJECT SrcuObject){
 
     for(int i = 0; i < ProcCount; i++){
         while(LouKeGetReferenceCount(&SrcuObject->PerCpuData[i].Readers)){
-            LouKeYeildExecution();
+            LouKeYieldExecution();
         }
         SrcuObject->PerCpuData[i].CurrentReader = SrcuObject->Writer;
         LouKeMemoryBarrier();

@@ -120,7 +120,7 @@ LouKeIpcGetIpcEx(
             *OutMessage = 0x00;
             return STATUS_UNSUCCESSFUL;
         }
-        LouKeYeildExecution();
+        LouKeYieldExecution();
     }   
     *OutMessage = ListItemToTypeOrNull(Manager->Messages.NextHeader, LOU_IPC_MESSAGE, Peers);
     LouKeListDeleteItem(Manager->Messages.NextHeader);

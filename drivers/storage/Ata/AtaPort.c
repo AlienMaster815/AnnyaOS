@@ -86,30 +86,73 @@ DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(
     return STATUS_SUCCESS;
 }
 
-void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
-    PATA_HOST_DEVICE_OBJECT HostDevice = AtaPort->HostDevice;
+void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PACKET Identify, UINT8 Dev, BOOLEAN PacketDev){
+    PATA_HOST_DEVICE_OBJECT HostDevice = AtaPort->HostDevice;    
+    
     MutexLock(AtaPort->ChannelLock);
-    PATA_COMMAND_PACKET Identify = LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
+
+    memset(Identify, 0, sizeof(ATA_COMMAND_PACKET));
+
     LOUSTATUS Status;
     Identify->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL; 
     LouKeSetAtomicBoolean(&Identify->CommandDone, 0);
     Identify->PioDataIn = LouKeMallocEx(256 * sizeof(UINT16), GET_ALIGNMENT(UINT16), KERNEL_GENERIC_MEMORY);
-    AtaCoreEncodeIdentifyDeviceCommand((PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE)&Identify->Packet, 0);
-
+    if(PacketDev){
+        AtaCoreEncodeIdentifyPacketDeviceCommand((PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE)&Identify->Packet, Dev);
+    }else{
+        AtaCoreEncodeIdentifyDeviceCommand((PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE)&Identify->Packet, Dev);
+    }
     if(AtaPort->Operations->AtaPortDevicePrepCommand){
         Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, Identify);
+        if(Status != STATUS_SUCCESS){
+            Identify->CommandStatus = STATUS_IO_DEVICE_ERROR;
+            LouKeSetAtomicBoolean(&Identify->CommandDone, 1);
+        }
     }
 
-    LouKeListAddTail(&Identify->FifoChain, &AtaPort->CommandList);
+    LouKeListAddTail(&Identify->QueuedCommands, &AtaPort->QueuedCommands);
 
     MutexUnlock(AtaPort->ChannelLock);
-
+        
     while(!LouKeGetAtomicBoolean(&Identify->CommandDone)){
         sleep(10);
     }
 
-    LouPrint("YAY!!! Command Completed\n");
-    while(1);
+    if(Identify->CommandStatus != STATUS_SUCCESS){
+        LouKeFree(Identify->PioDataIn);
+        return;
+    }
+}
+
+void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
+
+    PATA_COMMAND_PACKET Identify = LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
+    SIZE Channels = AtaPort->HostDevice->HostFlags & ATA_HOST_FLAGS_DUAL_CHANNEL ? 2 : 1; 
+    for(SIZE i = 0; i < Channels; i++){
+        BOOLEAN PacketDevice = false;
+                
+        AtaCoreSendIdentifyCommand(AtaPort, Identify, i, false);
+            
+        if((Identify->Packet.Status & (1 << 5)) && (Identify->Packet.Error == 0x04)){
+            PacketDevice = true;
+            AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);
+        }else if(Identify->Packet.Status & (1 << 5)){
+            continue;
+        }else if(Identify->Packet.Status & 0x01){
+            PacketDevice = true;
+            AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);
+        }else if(Identify->CommandStatus == STATUS_TIMEOUT){
+            continue;
+        }
+
+        if(Identify->CommandStatus == STATUS_SUCCESS){
+
+
+
+            LouPrint("YAY!!! Command Completed Successfully\n", Identify->CommandStatus);
+        }
+    }
+    LouPrint("Done Scanning Port\n");
 }
 
 LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){

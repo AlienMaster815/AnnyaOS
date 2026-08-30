@@ -277,7 +277,7 @@ struct _ATA_PORT_OPERATIONS;
 
 typedef struct _ATA_PORT_DEVICE_OBJECT{
     mutex_t*                        ChannelLock;
-    ListHeader                      CommandList;
+    ListHeader                      QueuedCommands;
     struct _ATA_HOST_DEVICE_OBJECT* HostDevice;
     struct _ATA_PORT_OPERATIONS*    Operations;
     ULONG                           PortFlags;
@@ -296,9 +296,10 @@ typedef struct _ATA_COMMAND_PACKET{
     LOUSTATUS       CommandStatus;
     LOUSTATUS       CleanupStatus;
     ATOMIC_BOOLEAN  CommandDone;
-    ListHeader      FifoChain;
-    ListHeader      MultiCmdChain;
+    ListHeader      QueuedCommands;
     ULONG           CommandFlags;
+    SIZE            PacketSize;
+    PVOID           PacketData;
     union{
         PVOID       PioDataIn;
         PVOID       PioDataOut;
@@ -339,7 +340,7 @@ typedef struct _ATA_HOST_DEVICE_OBJECT{
     PVOID                           HostPrivateData;
     SIZE                            PortCount;
     PATA_PORT_DEVICE_OBJECT         PortDevices;
-    PTHREAD                         PortIoManager;
+    PTHREAD*                        PortIoManager;
 }ATA_HOST_DEVICE_OBJECT, * PATA_HOST_DEVICE_OBJECT;
 
 typedef struct _ATA_HOST_OPERATIONS{
