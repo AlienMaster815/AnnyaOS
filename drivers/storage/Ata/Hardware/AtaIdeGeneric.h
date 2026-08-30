@@ -33,6 +33,33 @@ typedef struct PACKED _ATA_PRDT_ENTRY{
     UINT8   Edt;
 }ATA_PRDT_ENTRY, * PATA_PRDT_ENTRY;
 
+#define ATA_GENCMD_DATA_OFFSET(Base)        (((UINT16)(UINTPTR)Base) + 0)
+#define ATA_GENCMD_ERRFEAT_OFFSET(Base)     (((UINT16)(UINTPTR)Base) + 1)
+#define ATA_GENCMD_SECTORCOUNT_OFFSET(Base) (((UINT16)(UINTPTR)Base) + 2)
+#define ATA_GENCMD_LBALOW_OFFSET(Base)      (((UINT16)(UINTPTR)Base) + 3)
+#define ATA_GENCMD_LBAMID_OFFSET(Base)      (((UINT16)(UINTPTR)Base) + 4)
+#define ATA_GENCMD_LBAHIGH_OFFSET(Base)     (((UINT16)(UINTPTR)Base) + 5)
+#define ATA_GENCMD_DEVICE_OFFSET(Base)      (((UINT16)(UINTPTR)Base) + 6)
+#define ATA_GENCMD_CMDSTS_OFFSET(Base)      (((UINT16)(UINTPTR)Base) + 7)
 
+#define ATA_ISACTL_ALTDEVSTS_OFFSET(Base)   ((UINT16)(UINTPTR)Base)
+#define ATA_PCICTL_ALTDEVSTS_OFFSET(Base)   (((UINT16)(UINTPTR)Base) + 2)   
+
+typedef struct _ATA_GENERIC_PRIVATE_DATA{
+    struct {
+        UINT16  Data;
+        UINT16  ErrFeat;
+        UINT16  SectorCount;
+        UINT16  LbaLow;
+        UINT16  LbaMid;
+        UINT16  LbaHigh;
+        UINT16  Device;
+        UINT16  CmdSts;
+        UINT16  AltDevSts;
+        UINT16  BusMasterCmd;
+        UINT16  BusMasterSts;
+        UINT16  BusMasterPrd;
+    }           Ports;
+}ATA_GENERIC_PRIVATE_DATA, * PATA_GENERIC_PRIVATE_DATA;
 
 #endif

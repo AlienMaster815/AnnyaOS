@@ -135,7 +135,7 @@ LouKeCreateDemonEx(
     );
 }
 
-LOUAPI 
+KERNEL_EXPORT 
 PTHREAD 
 LouKeCreateDemon(
     PVOID   Function,

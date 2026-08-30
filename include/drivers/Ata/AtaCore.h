@@ -2,6 +2,8 @@
 #define _ATA_CORE_H
 
 #include <cstdlib.h>
+#include <Modulation.h>
+#include <kernel/threads.h>
 
 #define STANDARD_ATA_COMMAND_PACKET \
     union{ \
@@ -266,42 +268,55 @@ typedef enum {
 #define ATA_CMDBLK_DECODE_PREV_VALUE(Value) ((Value >> ATA_CMDBLK_PREV_ENCODE_SHIFT) & ATA_CMDBLK_PREV_ENCODE_MASK)
 #define ATA_CMDBLK_DECODE_CURR_VALUE(Value) ((Value >> ATA_CMDBLK_CURR_ENCODE_SHIFT) & ATA_CMDBLK_CURR_ENCODE_MASK)
 
-#define ATA_HOST_FLAGS_SUPPORTS_PIO     (1UL << 0)
-#define ATA_HOST_FLAGS_SUPPORTS_DMA     (1UL << 1)
-
 struct _ATA_HOST_OPERATIONS;
 struct _ATA_HOST_DEVICE_OBJECT;
 struct _ATA_PORT_OPERATIONS;
 
+#define ATA_PORT_FLAGS_NO_IRQS  (1 << 0)
+
+
 typedef struct _ATA_PORT_DEVICE_OBJECT{
-    struct _ATA_HOST_DEVICE_OBJECT* Host;
+    mutex_t*                        ChannelLock;
+    ListHeader                      CommandList;
+    struct _ATA_HOST_DEVICE_OBJECT* HostDevice;
     struct _ATA_PORT_OPERATIONS*    Operations;
+    ULONG                           PortFlags;
     PVOID                           PortPrivateData;
 }ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;
 
 #define ATA_COMMAND_PACKET_FLAGS_DMA        (1UL << 0)
-#define ATA_COMMAND_PACKET_FLAGS_SEND_CMD   (1UL << 1)
-#define ATA_COMMAND_PACKET_FLAGS_DATA_CMD   (1UL << 2)
-#define ATA_COMMAND_PACKET_FLAGS_STAT_CMD   (1UL << 3)
-
+#define ATA_COMMAND_PACKET_FLAGS_TRAN_CMD   (1UL << 1)
+#define ATA_COMMAND_PACKET_FLAGS_OUT_CMD    (1UL << 2)
+#define ATA_COMMAND_PACKET_FLAGS_POLL       (1UL << 3)
+#define ATA_COMMAND_PACKET_FLAGS_PACKET_CMD (1UL << 4)
+#define ATA_COMMAND_PACKET_FLAGS_EXT_CMD    (1UL << 5)
 
 
 typedef struct _ATA_COMMAND_PACKET{
-    UINT8   Command;
-    ULONG   CommandFlags;
+    LOUSTATUS       CommandStatus;
+    LOUSTATUS       CleanupStatus;
+    ATOMIC_BOOLEAN  CommandDone;
+    ListHeader      FifoChain;
+    ListHeader      MultiCmdChain;
+    ULONG           CommandFlags;
     union{
-        struct{
-            STANDARD_ATA_COMMAND_PACKET;
-        }Packet;
-        struct{
-            STANDARD_ATA_COMMAND_PACKET_EX;
-        }ExPacket;
+        PVOID       PioDataIn;
+        PVOID       PioDataOut;
+    };
+    union{
+        struct PACKED{
+                    STANDARD_ATA_COMMAND_PACKET;
+        }           Packet;
+        struct PACKED{
+                    STANDARD_ATA_COMMAND_PACKET_EX;
+        }           PacketEx;
     };
 }ATA_COMMAND_PACKET, * PATA_COMMAND_PACKET;
 
 typedef struct _ATA_PORT_OPERATIONS{
     LOUSTATUS (*AtaPortDevicePrepCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
     LOUSTATUS (*AtaPortDeviceIssueCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
+    LOUSTATUS (*AtaPortDeviceGetCommandStatus)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
     LOUSTATUS (*AtaPortDeviceCleanupCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
     LOUSTATUS (*AtaPortDeviceReset)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDeviceStart)(PATA_PORT_DEVICE_OBJECT PortDevice);
@@ -312,13 +327,19 @@ typedef struct _ATA_PORT_OPERATIONS{
     LOUSTATUS (*AtaPortDevicePowerDown)(PATA_PORT_DEVICE_OBJECT PortDevice);
 }ATA_PORT_OPERATIONS, * PATA_PORT_OPERATIONS;
 
+#define ATA_HOST_FLAGS_SUPPORTS_PIO     (1UL << 0)
+#define ATA_HOST_FLAGS_SUPPORTS_DMA     (1UL << 1)
+#define ATA_HOST_FLAGS_DUAL_CHANNEL     (1UL << 2)
+
 typedef struct _ATA_HOST_DEVICE_OBJECT{
     PPCI_DEVICE_OBJECT              PDEV;
+    mutex_t*                        ChannelLocks;
     struct _ATA_HOST_OPERATIONS*    Operations;
     ULONG                           HostFlags;
     PVOID                           HostPrivateData;
     SIZE                            PortCount;
     PATA_PORT_DEVICE_OBJECT         PortDevices;
+    PTHREAD                         PortIoManager;
 }ATA_HOST_DEVICE_OBJECT, * PATA_HOST_DEVICE_OBJECT;
 
 typedef struct _ATA_HOST_OPERATIONS{
@@ -331,6 +352,30 @@ typedef struct _ATA_HOST_OPERATIONS{
     LOUSTATUS (*AtaHostDevicePowerDown)(PATA_HOST_DEVICE_OBJECT HostDevice);
 }ATA_HOST_OPERATIONS, * PATA_HOST_OPERATIONS;
 
+#define ForEachAtaPort(Host, Position, i) \
+    for( \
+        i = 0, Position = &Host->PortDevices[i]; \
+        i < Host->PortCount; \
+        i++ , Position = &Host->PortDevices[i] \
+    ) 
+
+#ifdef ATA_CORE_INTERNALS_H
+
+DRIVER_EXPORT LOUSTATUS AtaCoreAllocateHostDevice(PATA_HOST_DEVICE_OBJECT* HostDeviceOut, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
+DRIVER_EXPORT void AtaCoreFreeHostDevice(PATA_HOST_DEVICE_OBJECT HostDevice);
+DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(PATA_HOST_DEVICE_OBJECT HostDevice, SIZE PortCount, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
+DRIVER_EXPORT void AtaCoreFreeAtaPortsFromHost(PATA_HOST_DEVICE_OBJECT HostDevice);
+DRIVER_EXPORT LOUSTATUS AtaCoreRegisterAtaHostDevice(PATA_HOST_DEVICE_OBJECT NewHostDevice);
+
+#else
+
+DRIVER_IMPORT LOUSTATUS AtaCoreAllocateHostDevice(PATA_HOST_DEVICE_OBJECT* HostDeviceOut, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
+DRIVER_IMPORT void AtaCoreFreeHostDevice(PATA_HOST_DEVICE_OBJECT HostDevice);
+DRIVER_IMPORT LOUSTATUS AtaCoreAllocatePortsForHost(PATA_HOST_DEVICE_OBJECT HostDevice, SIZE PortCount, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
+DRIVER_IMPORT void AtaCoreFreeAtaPortsFromHost(PATA_HOST_DEVICE_OBJECT HostDevice);
+DRIVER_IMPORT LOUSTATUS AtaCoreRegisterAtaHostDevice(PATA_HOST_DEVICE_OBJECT NewHostDevice);
+
+#endif
 
 
 #include "Ahci.h"

@@ -14,7 +14,7 @@ TARGET = ATA.SYS
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES) -L../../../PCI -lPCI
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES) -L../../../PCI -lPCI -L.. -lAta
 
 # Clean rule
 clean:

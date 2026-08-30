@@ -35,11 +35,8 @@ void AtaCoreEncodeMediaUnlockCommand(PATA_COMMAND_MEDIA_UNLOCK_STRUCTURE Cmd, UI
 void AtaCoreEncodeNopCommand(PATA_COMMAND_NOP_STRUCTURE Cmd, UINT8 Dev, UINT8 SubCommand);
 void AtaCoreEncodePacketCommand(PATA_COMMAND_PACKET_STRUCTURE Cmd, UINT8 Dev, UINT16 ByteCountLimit, UINT8 Dma, UINT8 Ovl, UINT8 Tag);
 
+LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice);
 
-
-typedef struct _ATA_SATDEV_PRIVATE_DATA{
-    
-    PVOID AtaDevPrivate;
-}ATA_SATDEV_PRIVATE_DATA, * PATA_SATDEV_PRIVATE_DATA;
+void AtaCorePortIoQueueManager(PVOID Params);
 
 #endif

@@ -5,7 +5,42 @@
 #define ATA_BOARD_ID_ISA_DEVICE_HAS_DMA     2
 #define ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA  3
 
+LOUSTATUS AtaGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+        CommandPacket->PacketEx.Status = inb(PrivateData->Ports.CmdSts);
+        CommandPacket->PacketEx.Device = inb(PrivateData->Ports.Device);
+        outb(PrivateData->Ports.AltDevSts, 0x00);
+        CommandPacket->PacketEx.Error = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.ErrFeat));
+        CommandPacket->PacketEx.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.SectorCount));
+        CommandPacket->PacketEx.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.LbaLow));
+        CommandPacket->PacketEx.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.LbaMid));
+        CommandPacket->PacketEx.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.LbaHigh));
+        outb(PrivateData->Ports.AltDevSts, 0x80);
+        CommandPacket->PacketEx.Error |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.ErrFeat));
+        CommandPacket->PacketEx.SectorCount |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.SectorCount));
+        CommandPacket->PacketEx.LbaLow |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.LbaLow));
+        CommandPacket->PacketEx.LbaMid |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.LbaMid));
+        CommandPacket->PacketEx.LbaHigh |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.LbaHigh));
+        outb(PrivateData->Ports.AltDevSts, 0x00);
+    }else{
+        CommandPacket->Packet.Status = inb(PrivateData->Ports.CmdSts);
+        CommandPacket->Packet.Error = inb(PrivateData->Ports.ErrFeat);
+        CommandPacket->Packet.SectorCount = inb(PrivateData->Ports.SectorCount);
+        CommandPacket->Packet.LbaLow = inb(PrivateData->Ports.LbaLow);
+        CommandPacket->Packet.LbaMid = inb(PrivateData->Ports.LbaMid);
+        CommandPacket->Packet.LbaHigh = inb(PrivateData->Ports.LbaHigh);
+        CommandPacket->Packet.Device = inb(PrivateData->Ports.Device);
+    }
+    return STATUS_SUCCESS;
+}
+    
+
 LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
+        return STATUS_SUCCESS;
+    }
 
     LouPrint("AtaGenericPortDevicePrepCommand()\n");
     while(1);
@@ -13,13 +48,48 @@ LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PA
 }
     
 LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    SIZE Timeout = 100;
+    while(inb(PrivateData->Ports.CmdSts) & 0x88){
+        sleep(10);
+        Timeout--;
+    }
+    if(!Timeout){
+        return STATUS_IO_DEVICE_ERROR;
+    }
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+        outb(PrivateData->Ports.Device, CommandPacket->PacketEx.Device);   
+        outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.SectorCount));
+        outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.Features));
+        outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaLow));   
+        outb(PrivateData->Ports.LbaMid, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaMid));   
+        outb(PrivateData->Ports.LbaHigh, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaHigh));   
 
-    LouPrint("AtaGenericPortDeviceIssueCommand()\n");
-    while(1);
+        outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.SectorCount));
+        outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.Features));
+        outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaLow));   
+        outb(PrivateData->Ports.LbaMid, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaMid));   
+        outb(PrivateData->Ports.LbaHigh, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaHigh));   
+        outb(PrivateData->Ports.CmdSts, CommandPacket->PacketEx.Command); 
+
+    }else{
+        outb(PrivateData->Ports.Device, CommandPacket->Packet.Device);   
+        outb(PrivateData->Ports.SectorCount, CommandPacket->Packet.SectorCount);
+        outb(PrivateData->Ports.ErrFeat, CommandPacket->Packet.Features);
+        outb(PrivateData->Ports.LbaLow, CommandPacket->Packet.LbaLow);   
+        outb(PrivateData->Ports.LbaMid, CommandPacket->Packet.LbaMid);   
+        outb(PrivateData->Ports.LbaHigh, CommandPacket->Packet.LbaHigh);   
+        outb(PrivateData->Ports.CmdSts, CommandPacket->Packet.Command);   
+    }
+
     return STATUS_SUCCESS;
 }
     
 LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
+        return STATUS_SUCCESS;
+    }
 
     LouPrint("AtaGenericPortDeviceCleanupCommand()\n");
     while(1);
@@ -29,6 +99,7 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
 static ATA_PORT_OPERATIONS PortOperations = {
     .AtaPortDevicePrepCommand = AtaGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AtaGenericPortDeviceIssueCommand,
+    .AtaPortDeviceGetCommandStatus = AtaGenericPortDeviceGetCommandStatus,
     .AtaPortDeviceCleanupCommand = AtaGenericPortDeviceCleanupCommand,
 //    .AtaPortDeviceReset = AtaGenericPortDeviceReset,
 //    .AtaPortDeviceStart = AtaGenericPortDeviceStart,
@@ -63,19 +134,110 @@ static LOUSINE_PCI_DEVICE_TABLE AtaDevices[] = {
     {.BaseClass = 0x01, .SubClass = 0x01, .ProgIf = 0x8F, .BoardID = ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA, .GenericEntry = true},
 };
 
+//DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(
+//    PATA_HOST_DEVICE_OBJECT HostDevice,
+//    SIZE                    PortCount,
+//    SIZE                    PrivateDataSize,
+//    SIZE                    PrivateDataAlignment
+//);
+
+//DRIVER_EXPORT LOUSTATUS AtaCoreAllocateHostDevice(
+//    PATA_HOST_DEVICE_OBJECT*    HostDeviceOut,
+//    SIZE                        PrivateDataSize,
+//    SIZE                        PrivateDataAlignment
+//);
+
 LOUSTATUS AddAtaDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("ATA.SYS:AddAtaDevice()\n");
-  
+    LOUSTATUS Status;
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(Device);
+    SIZE i;
+    PciHalEnableIoSpace(PDEV);
+    PciHalEnableMemorySpace(PDEV);
+
+    for(SIZE i = 0 ; i < 4; i++){
+        Status = PciHalMapPciResource(
+            PDEV, 
+            i, 
+            PCI_IOMAP_FLAGS_DEFAULT_MAPPING
+        );
+        if(Status != STATUS_SUCCESS){
+            LouPrint("ATA.SYS:AddAtaDevice() Failed To Allocate PCI Resource\n");
+            while(1);
+        }
+    }
+
     SIZE BoardID = AtaDevices[PDEV->DeviceID].BoardID;
 
     LouPrint("ATA.SYS:BoardID:%d\n", (UINT64)BoardID);
-
-
+    PATA_HOST_DEVICE_OBJECT NewHostDevice;
+    Status = AtaCoreAllocateHostDevice(&NewHostDevice, 0, 0);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ATA.SYS:AddAtaDevice() Failed To Allocate Host\n");
+        while(1);
+    }
     
+    Status = AtaCoreAllocatePortsForHost(NewHostDevice, 2, sizeof(ATA_GENERIC_PRIVATE_DATA), GET_ALIGNMENT(ATA_GENERIC_PRIVATE_DATA));
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ATA.SYS:AddAtaDevice() Failed To Allocate Ports\n");
+        while(1);
+    }
+
+    NewHostDevice->Operations = &AtaOperations;
+   
+    NewHostDevice->HostFlags = ATA_HOST_FLAGS_SUPPORTS_PIO | ATA_HOST_FLAGS_DUAL_CHANNEL;
+    if((BoardID == ATA_BOARD_ID_ISA_DEVICE_HAS_DMA) || (BoardID == ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA)){
+        NewHostDevice->HostFlags |= ATA_HOST_FLAGS_SUPPORTS_DMA;
+    }
+    
+    UINT16 CommandBlock[2];
+    UINT16 AltDevSts[2];
+    UINT16 BusMaster = 0x00;
+    if((BoardID == ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA) || (BoardID == ATA_BOARD_ID_NATIVE_DEVICE_NO_DMA)){
+        CommandBlock[0] = (UINT16)(UINTPTR)PciHalGetIoRegion(PDEV, 0, 0); 
+        CommandBlock[1] = (UINT16)(UINTPTR)PciHalGetIoRegion(PDEV, 2, 0);
+        AltDevSts[0] = ATA_PCICTL_ALTDEVSTS_OFFSET(PciHalGetIoRegion(PDEV, 1, 0));
+        AltDevSts[1] = ATA_PCICTL_ALTDEVSTS_OFFSET(PciHalGetIoRegion(PDEV, 3, 0));
+        if(BoardID == ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA){
+            BusMaster = (UINT16)(UINTPTR)PciHalGetIoRegion(PDEV, 4, 0);
+        }
+    }else{
+        CommandBlock[0] = 0x01F0; 
+        CommandBlock[1] = 0x0170;
+        AltDevSts[0] = ATA_ISACTL_ALTDEVSTS_OFFSET(0x03F6);
+        AltDevSts[1] = ATA_ISACTL_ALTDEVSTS_OFFSET(0x0376);
+        if(BoardID == ATA_BOARD_ID_ISA_DEVICE_HAS_DMA){
+            BusMaster = (UINT16)(UINTPTR)PciHalGetIoRegion(PDEV, 4, 0);
+        }
+    }
+
+    PATA_PORT_DEVICE_OBJECT TmpPort;
+    ForEachAtaPort(NewHostDevice, TmpPort, i){
+        PATA_GENERIC_PRIVATE_DATA GenericData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)TmpPort->PortPrivateData;
+        TmpPort->Operations = &PortOperations;
+        GenericData->Ports.Data = ATA_GENCMD_DATA_OFFSET(CommandBlock[i]);
+        GenericData->Ports.ErrFeat = ATA_GENCMD_ERRFEAT_OFFSET(CommandBlock[i]);
+        GenericData->Ports.SectorCount = ATA_GENCMD_SECTORCOUNT_OFFSET(CommandBlock[i]);
+        GenericData->Ports.LbaLow = ATA_GENCMD_LBALOW_OFFSET(CommandBlock[i]);
+        GenericData->Ports.LbaMid = ATA_GENCMD_LBAMID_OFFSET(CommandBlock[i]);
+        GenericData->Ports.LbaHigh = ATA_GENCMD_LBAHIGH_OFFSET(CommandBlock[i]);
+        GenericData->Ports.Device = ATA_GENCMD_DEVICE_OFFSET(CommandBlock[i]);
+        GenericData->Ports.CmdSts = ATA_GENCMD_CMDSTS_OFFSET(CommandBlock[i]);
+        GenericData->Ports.AltDevSts = AltDevSts[i];
+        GenericData->Ports.BusMasterCmd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_CMD_REG_OFFSET;
+        GenericData->Ports.BusMasterSts = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_STS_REG_OFFSET;
+        GenericData->Ports.BusMasterPrd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_PRD_REG_OFFSET;
+    }
+
+    Status = AtaCoreRegisterAtaHostDevice(NewHostDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("ATA.SYS:AddAtaDevice() Could Not Register ATA Host Device\n");
+        while(1);
+    }
+
     LouPrint("ATA.SYS:AddAtaDevice() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS; //Status;
