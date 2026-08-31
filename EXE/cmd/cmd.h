@@ -65,7 +65,7 @@ typedef enum { //supported DOS commands
     CMD_TIME, CMD_TITLE, CMD_TYPE, 
     CMD_UNLOCK, CMD_VER, CMD_VERIFY, 
     CMD_VOL, CMD_HELP, CMD_CHK_EXTERNAL,
-    CMD_CHDRV
+    CMD_CHDRV, CMD_BREAK,
 }COMMAND;
 
 typedef std::string COMMAND_PARAMETER;
@@ -91,8 +91,7 @@ typedef struct _STRING_COMMAND_DIRECTORY{
 
 //TODO: Add class for command interpeter
 
-#define DOS_INTERNAL_COMMANDS_COUNT     42
-#define DOS_DYNAMIC_COMMAND_COUNT       41
+#define DOS_INTERNAL_COMMANDS_COUNT     43
 
 CMD_STATUS DispatchAssocCommand(COMMAND_PARAMETER Params);
 CMD_STATUS DispatchColorCommand(COMMAND_PARAMETER Params);
@@ -122,7 +121,7 @@ typedef class AnnyaOsCommandEngine{
             {"SETLOCAL", CMD_SETLOCAL, 0x00}, {"START", CMD_START, 0x00}, {"SWITCHES", CMD_SWITCHES, 0x00},
             {"TIME", CMD_TIME, 0x00}, {"TITLE", CMD_TITLE, 0x00}, {"TYPE", CMD_TYPE, 0x00},
             {"ULOCK", CMD_UNLOCK, 0x00}, {"VER", CMD_VER, 0x00}, {"VERIFY", CMD_VERIFY, 0x00},
-            {"VOL", CMD_VOL, 0x00}, {"HELP", CMD_HELP, 0x00}, {" :", CMD_CHDRV, 0x00},
+            {"VOL", CMD_VOL, 0x00}, {"HELP", CMD_HELP, 0x00}, {" :", CMD_CHDRV, 0x00}, {"BREAK", CMD_BREAK, 0x00},
         };
 
     public:

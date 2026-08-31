@@ -26,7 +26,7 @@ AnnyaOsCommandEngine::ParseCommand(
     int FirstSpace = CommandLine.find(' ');
     int CommandLength = (FirstSpace == std::string::npos) ? CommandLineLength : FirstSpace;
     int i;
-    for(i = 0 ; i < DOS_DYNAMIC_COMMAND_COUNT; i++){
+    for(i = 0 ; i < DOS_INTERNAL_COMMANDS_COUNT; i++){
         if(
             (!strncasecmp(CommandLine.c_str(), this->Commands[i].CommandLineString.c_str(), CommandLength)) &&
             (CommandLength == this->Commands[i].CommandLineString.length())
@@ -34,7 +34,7 @@ AnnyaOsCommandEngine::ParseCommand(
             break;
         }
     }
-    if(i < DOS_DYNAMIC_COMMAND_COUNT){
+    if(i < DOS_INTERNAL_COMMANDS_COUNT){
         //std::cout << this->Commands[i].CommandLineString << " " << this->Commands[i].CommandMessage;
         *OutCommand = this->Commands[i].CommandMessage; 
         if(CommandLine.length() == (this->Commands[i].CommandLineString.length() + 1)){
@@ -84,6 +84,12 @@ AnnyaOsCommandEngine::ParseCommand(
                 }
                 break;
             }
+            case CMD_BREAK:{
+                if(CommandLineLength == this->Commands[i].CommandLineString.length()){
+                    return STATUS_NEXT_CMD;
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -113,8 +119,12 @@ AnnyaOsCommandEngine::GetMessage(
         (NewEntry.length() == strlen("help"))
     ){
         std::cout << "Commands Available:\n";
-        for(size_t i = 0 ; i < DOS_DYNAMIC_COMMAND_COUNT; i++){
-            std::cout << this->Commands[i].CommandLineString << std::endl;
+        for(size_t i = 0 ; i < DOS_INTERNAL_COMMANDS_COUNT; i++){
+            if(this->Commands[i].CommandMessage == CMD_CHDRV){
+                std::cout << "[A]:" << std::endl;
+            }else{
+                std::cout << this->Commands[i].CommandLineString << std::endl;
+            }
         }
         std::cout << std::endl;
         return STATUS_EINVAL;
