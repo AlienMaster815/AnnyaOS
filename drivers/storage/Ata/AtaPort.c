@@ -116,6 +116,8 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
 
     LouKeListAddTail(&Identify->QueuedCommands, &AtaPort->QueuedCommands);
 
+    LouKeUnblockThread(LouKeGetThreadIdentificationFromThreadHandle(AtaPort->CommandWorkerThread));
+
     MutexUnlock(AtaPort->ChannelLock);
         
     while(!LouKeGetAtomicBoolean(&Identify->CommandDone)){
@@ -126,6 +128,96 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
         LouKeFree(Identify->PioDataIn);
         return;
     }
+}
+
+void AtaCoreParsePacketDeviceInformation(
+    PATA_COMMAND_PACKET         Identify, 
+    PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
+){
+    UINT16 TmpInfo = *(UINT16*)Identify->PioDataIn;
+    UINT64 CapChecksum;
+    UINT8  FieldMask = 0;
+    EndpointDevice->DeviceCap = 0;
+    EndpointDevice->DeviceCap |= TmpInfo & (1 << 15) ? ATA_ENDPOINT_DEVCAP_ATAPI : 0;
+    EndpointDevice->DeviceCap |= TmpInfo & (1 << 7) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE : 0;
+    EndpointDevice->DeviceCap |= TmpInfo & (1 << 7) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE : 0;
+    EndpointDevice->PacketSize = (TmpInfo & 1) ? 16 : 12;
+
+    TmpInfo = ((UINT16*)Identify->PioDataIn)[49];
+
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 8)) ? ATA_ENDPOINT_DEVCAP_DMA_SUPPORT : 0;
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 9)) ? ATA_ENDPOINT_DEVCAP_LBA_SUPPORT : 0;
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 10)) ? ATA_ENDPOINT_DEVCAP_IORDY_DISABLED : 0;
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 11)) ? ATA_ENDPOINT_DEVCAP_OVERLAP_SUPPORT : 0;
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 13)) ? ATA_ENDPOINT_DEVCAP_OVERLAP_SUPPORT : 0;
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 14)) ? ATA_ENDPOINT_DEVCAP_QUEUE_SUPPORT : 0;
+    EndpointDevice->DeviceCap |= (TmpInfo & (1 << 15)) ? ATA_ENDPOINT_DEVCAP_INTERLEAVE_DMA : 0;
+
+    FieldMask = ((UINT16*)Identify->PioDataIn)[53] & 0x07;
+
+    TmpInfo = ((UINT16*)Identify->PioDataIn)[63];
+    int i;
+    for(i = 2; i >= 0; i--){
+        if(TmpInfo & (1 << i)){
+            EndpointDevice->MaxMDmaSupport = i;
+            break;
+        }
+    }
+
+    for(i = 2; i >= 0; i--){
+        if(TmpInfo & (1 << (i + 8))){
+            EndpointDevice->MDmaSelected = i;
+            break;
+        }
+    }
+
+    EndpointDevice->PioModesSupported = ((UINT16*)Identify->PioDataIn)[64] & 0xFF;
+
+    EndpointDevice->MaxQueueDepth = (((UINT16*)Identify->PioDataIn)[75] & 0xFF) + 1;
+
+    CapChecksum = ((UINT16*)Identify->PioDataIn)[80];
+    if((CapChecksum != 0x00) && (CapChecksum != 0xFFFF)){
+
+    }
+
+    CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[82] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[83];
+    if((CapChecksum != 0x00) && (CapChecksum != 0xFFFFFFFF)){
+        
+        
+        
+        
+        CapChecksum = (UINT64)((UINT16*)Identify->PioDataIn)[84];
+        if((CapChecksum != 0x00) && (CapChecksum != 0xFFFF)){
+
+        }
+    }
+    CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[86] << 24) | ((UINT64)((UINT16*)Identify->PioDataIn)[86] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[87];
+    if((CapChecksum != 0x00) && (CapChecksum != 0x0000FFFFFFFFFFFF)){
+
+    }
+
+
+    for(SIZE i = 0; i < 10; i++){
+        EndpointDevice->SerialNumber[i * 2] = (char)(((((UINT16*)Identify->PioDataIn)[i + 10]) >> 8) & 0xFF);
+        EndpointDevice->SerialNumber[(i * 2) + 1] = (char)((((UINT16*)Identify->PioDataIn)[i + 10]) & 0xFF);
+    }
+    
+    for(SIZE i = 0; i < 4; i++){
+        EndpointDevice->FirmwareVersion[i * 2] = (char)(((((UINT16*)Identify->PioDataIn)[i + 23]) >> 8) & 0xFF);
+        EndpointDevice->FirmwareVersion[(i * 2) + 1] = (char)((((UINT16*)Identify->PioDataIn)[i + 23]) & 0xFF);
+    }
+
+    for(SIZE i = 0; i < 20; i++){
+        EndpointDevice->ModelNumber[i * 2] = (char)(((((UINT16*)Identify->PioDataIn)[i + 27]) >> 8) & 0xFF);
+        EndpointDevice->ModelNumber[(i * 2) + 1] =  (char)((((UINT16*)Identify->PioDataIn)[i + 27]) & 0xFF);
+    }
+
+    //LouPrint("SERIAL:%s\n", EndpointDevice->SerialNumber);
+    //LouPrint("FIRMWARE:%s\n", EndpointDevice->FirmwareVersion);    
+    //LouPrint("MODEL:%s\n", EndpointDevice->ModelNumber);    
+    
+    LouKeFree(Identify->PioDataIn);
+
 }
 
 void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
@@ -150,10 +242,16 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
         }
 
         if(Identify->CommandStatus == STATUS_SUCCESS){
+            PATA_ENDPOINT_DEVICE_OBJECT NewEndpoint = LouKeMallocType(ATA_ENDPOINT_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+            NewEndpoint->Port = AtaPort;
+            NewEndpoint->ChannelDev = i;
 
-
+            if(PacketDevice){
+                AtaCoreParsePacketDeviceInformation(Identify, NewEndpoint);
+            }
 
             LouPrint("YAY!!! Command Completed Successfully\n", Identify->CommandStatus);
+            while(1);
         }
     }
     LouPrint("Done Scanning Port\n");

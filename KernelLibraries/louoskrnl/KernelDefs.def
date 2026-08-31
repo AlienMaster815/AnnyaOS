@@ -253,3 +253,6 @@ EXPORTS
     LouKeDmaFreeGenericDmaMemory
     LouKeDmaDeviceAllocateDmaMemory
     LouKeDmaDeviceFreeDmaMemory
+    LouKeBlockThread
+    LouKeUnblockThread
+    LouKeGetThreadIdentificationFromThreadHandle

@@ -327,6 +327,9 @@ LouKeCreateDeferedImpEx(
 
 KERNEL_EXPORT void LouKeYieldExecution();
 
+KERNEL_EXPORT void LouKeUnblockThread(UINT64 ThreadID);
+KERNEL_EXPORT void LouKeBlockThread(UINT64 ThreadID);
+KERNEL_EXPORT UINT64 LouKeGetThreadIdentificationFromThreadHandle(PTHREAD ThreadHandle);
 
 #endif
 
@@ -340,7 +343,7 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
     BOOLEAN Reported = false;
     if(LockOutTagOut){
-        while (__atomic_test_and_set(&m->locked.counter, 1)) {
+        while (__atomic_test_and_set(&m->locked, 1)) {
             if(!Reported){
                 LouKeReportMutexBlock(m, Thread);
                 Reported = true;
@@ -352,7 +355,7 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
             //access Granted
             return;
         }
-        while (__atomic_test_and_set(&m->locked.counter, 1)) {
+        while (__atomic_test_and_set(&m->locked, 1)) {
             // spin
         }
     }
@@ -371,7 +374,7 @@ static BOOLEAN MutexLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
     uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
     Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
     if(LockOutTagOut){
-        if(__atomic_test_and_set(&m->locked.counter, 1)) {
+        if(__atomic_test_and_set(&m->locked, 1)) {
             LouKeReportMutexBlock(m, Thread);
             return false;
         }
@@ -380,7 +383,7 @@ static BOOLEAN MutexLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
             //access Granted
             return true;
         }
-        if(__atomic_test_and_set(&m->locked.counter, 1)) {
+        if(__atomic_test_and_set(&m->locked, 1)) {
             LouKeReportMutexBlock(m, Thread);
             return false;
         }
@@ -403,7 +406,7 @@ static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
     Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
     BOOLEAN Reported = false;
     if(LockOutTagOut){
-        while (__atomic_test_and_set(&m->locked.counter, 1)){
+        while(__atomic_test_and_set(&m->locked, 1)){
             if(!Reported){
                 LouKeReportMutexBlock(m, Thread);
                 Reported = true;
@@ -415,7 +418,7 @@ static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
             //access Granted
             return;
         }
-        while (__atomic_test_and_set(&m->locked.counter, 1)) {
+        while (__atomic_test_and_set(&m->locked, 1)) {
             LouKeYieldExecution();
         }
     }

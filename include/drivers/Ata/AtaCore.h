@@ -268,12 +268,70 @@ typedef enum {
 #define ATA_CMDBLK_DECODE_PREV_VALUE(Value) ((Value >> ATA_CMDBLK_PREV_ENCODE_SHIFT) & ATA_CMDBLK_PREV_ENCODE_MASK)
 #define ATA_CMDBLK_DECODE_CURR_VALUE(Value) ((Value >> ATA_CMDBLK_CURR_ENCODE_SHIFT) & ATA_CMDBLK_CURR_ENCODE_MASK)
 
+struct _ATA_PORT_DEVICE_OBJECT;
 struct _ATA_HOST_OPERATIONS;
 struct _ATA_HOST_DEVICE_OBJECT;
 struct _ATA_PORT_OPERATIONS;
 
-#define ATA_PORT_FLAGS_NO_IRQS  (1 << 0)
+#define ATA_ENDPOINT_DEVCAP_ATAPI                           (1ULL << 0)
+#define ATA_ENDPOINT_DEVCAP_REMOVEABLE                      (1ULL << 1)
+//RESERVED                                                  (1ULL << 2)
+#define ATA_ENDPOINT_DEVCAP_DMA_SUPPORT                     (1ULL << 3)
+#define ATA_ENDPOINT_DEVCAP_IORDY_SUPPORT                   (1ULL << 4)
+#define ATA_ENDPOINT_DEVCAP_LBA_SUPPORT                     (1ULL << 5)
+#define ATA_ENDPOINT_DEVCAP_IORDY_DISABLED                  (1ULL << 6)
+#define ATA_ENDPOINT_DEVCAP_OVERLAP_SUPPORT                 (1ULL << 7)
+//RESERVED                                                  (1ULL << 8)
+#define ATA_ENDPOINT_DEVCAP_QUEUE_SUPPORT                   (1ULL << 9)
+#define ATA_ENDPOINT_DEVCAP_INTERLEAVE_DMA                  (1ULL << 10)
+#define ATA_ENDPOINT_DEVCAP_NOP_SUPPORT                     (1ULL << 11)
+#define ATA_ENDPOINT_DEVCAP_READBUFF_SUPPORT                (1ULL << 12)
+#define ATA_ENDPOINT_DEVCAP_WRITEBUFF_SUPPORT               (1ULL << 13)
+#define ATA_ENDPOINT_DEVCAP_HPAFS_SUPPORT                   (1ULL << 14) //Host Protected Area Feature Set
+#define ATA_ENDPOINT_DEVCAP_DEVICE_RESET_SUPPORT            (1ULL << 15)
+#define ATA_ENDPOINT_DEVCAP_SERVICE_SUPPORT                 (1ULL << 16)
+#define ATA_ENDPOINT_DEVCAP_RELEASE_INTERRUPT_SUPPORT       (1ULL << 17)
+#define ATA_ENDPOINT_DEVCAP_LOOK_AHEAD_SUPPORT              (1ULL << 18)
+#define ATA_ENDPOINT_DEVCAP_WRITE_CACHE_SUPPORT             (1ULL << 19)
+#define ATA_ENDPOINT_DEVCAP_PACKET_SUPPORT                  (1ULL << 20)
+#define ATA_ENDPOINT_DEVCAP_PM_SUPPORT                      (1ULL << 21)
+#define ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_FEATURE        (1ULL << 22)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_MODE_SUPPORT           (1ULL << 23)
+#define ATA_ENDPOINT_DEVCAP_SMART_SUPPORT                   (1ULL << 24)
+#define ATA_ENDPOINT_DEVCAP_FLUSH_CACHE_SUPPORT             (1ULL << 25)
+#define ATA_ENDPOINT_DEVCAP_DEVCONF_OVERLAY_SUPPORT         (1ULL << 26)
+#define ATA_ENDPOINT_DEVCAP_SETMAX_SECURITY_SUPPORT         (1ULL << 27)
+#define ATA_ENDPOINT_DEVCAP_SETFEAT_SUPPORT                 (1ULL << 28)
+#define ATA_ENDPOINT_DEVCAP_POWER_UP_SUPPORT                (1ULL << 29)
+#define ATA_ENDPOINT_DEVCAP_DOWNLOAD_MICROCODE_SUPPORT      (1ULL << 30)
+#define ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT      (1ULL << 31)
+#define ATA_ENDPOINT_DEVCAP_ENHANCED_SECURITY_ERASE_FEAT    (1ULL << 32)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_COUNT_EXPIRED          (1ULL << 33)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_LEVEL                  (1ULL << 34)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_FROZEN                 (1ULL << 35)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_LOCKED                 (1ULL << 36)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_ENABLED                (1ULL << 37)
+#define ATA_ENDPOINT_DEVCAP_SECURITY_SUPPORT                (1ULL << 38)
 
+
+typedef struct _ATA_ENDPOINT_DEVICE_OBJECT{
+    struct _ATA_PORT_DEVICE_OBJECT* Port;
+    UINT8                           ChannelDev;
+    UINT64                          DeviceCap;
+    UINT8                           MaxMDmaSupport;
+    UINT8                           MDmaSelected;
+    UINT8                           PioModesSupported;
+    UINT8                           MaxQueueDepth;
+    UINT8                           MaxSpecVersionSupport;
+    UINT8                           PacketSize;
+    UINT8                           MaxUDmaSupport;
+    UINT8                           UDmaSelected;
+    CHAR                            SerialNumber[21];
+    CHAR                            FirmwareVersion[9];
+    CHAR                            ModelNumber[41];
+}ATA_ENDPOINT_DEVICE_OBJECT, * PATA_ENDPOINT_DEVICE_OBJECT;
+
+#define ATA_PORT_FLAGS_NO_IRQS  (1 << 0)
 
 typedef struct _ATA_PORT_DEVICE_OBJECT{
     mutex_t*                        ChannelLock;
@@ -283,6 +341,7 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
     struct _ATA_PORT_OPERATIONS*    Operations;
     ULONG                           PortFlags;
     PVOID                           PortPrivateData;
+    PTHREAD                         CommandWorkerThread;
 }ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;
 
 #define ATA_COMMAND_PACKET_FLAGS_DMA        (1UL << 0)
@@ -300,7 +359,7 @@ typedef struct _ATA_COMMAND_PACKET{
     ListHeader                  QueuedCommands;
     ULONG                       CommandFlags;
     SIZE                        PacketSize;
-    PVOID                       PacketData;
+    UINT8                       PacketData[16];
     SIZE                        PioSize;
     union{
         PVOID                   PioDataIn;

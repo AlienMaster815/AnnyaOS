@@ -1,6 +1,5 @@
 #include <LouAPI.h>
 
-void LouKeUnblockThread(UINT64 ThreadID);
 
 KERNEL_EXPORT
 LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){

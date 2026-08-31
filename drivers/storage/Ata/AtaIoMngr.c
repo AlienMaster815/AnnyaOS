@@ -1,13 +1,16 @@
 #include "AtaCore.h"
 
+
+
 void AtaCorePortIoQueueManager(PVOID Params){
     PATA_PORT_DEVICE_OBJECT PortDevice = (PATA_PORT_DEVICE_OBJECT)(UINT8*)Params;
+    UINT64 ThreadID = LouKeGetThreadIdentification();
     while(1){
-        MutexLockOrYield(PortDevice->ChannelLock);
+        MutexLock(PortDevice->ChannelLock);
         PATA_COMMAND_PACKET CommandPacket = ListItemToTypeOrNull(PortDevice->QueuedCommands.NextHeader, ATA_COMMAND_PACKET, QueuedCommands);
         if(!CommandPacket){
             MutexUnlock(PortDevice->ChannelLock);
-            LouKeYieldExecution();
+            LouKeBlockThread(ThreadID);
             continue;
         }
         LouKeListDeleteItem(&CommandPacket->QueuedCommands);
@@ -61,6 +64,5 @@ void AtaCorePortIoQueueManager(PVOID Params){
         }
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
         MutexUnlock(PortDevice->ChannelLock);
-        LouKeYieldExecution();
     }
 }

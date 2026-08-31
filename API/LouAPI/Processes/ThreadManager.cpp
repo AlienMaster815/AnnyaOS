@@ -700,7 +700,7 @@ LouKeYieldExecution(){
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }    
-    LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice * 2);
+    LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
     CurrentTSC = read_tsc();
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
@@ -717,6 +717,23 @@ LOUAPI void LouKeUnblockThread(UINT64 ThreadID){
     ThreadData->State = THREAD_READY;    
     LouKeUnlockProcManager(&Irql);
 }
+
+LOUAPI void LouKeBlockThread(UINT64 ThreadID){
+    LouKIRQL Irql;
+    PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
+    UINT64 CurrentTSC;
+    UINT64 TscFrequency;
+    UINT64 Expiration;
+    LouKeLockProcManager(&Irql);
+    memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
+    ThreadData->State = THREAD_BLOCKED;
+    CurrentTSC = read_tsc();
+    TscFrequency = GetTscMaster() / 1000;
+    Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
+    LouKeUnlockProcManager(&Irql);
+    sleep_till(Expiration);
+}
+
 
 LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
     LouKeSchedDbgPrint("Thread Manager Demon Started\n");
@@ -742,4 +759,9 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
         //asm("hlt");
     }
     return -1;
+}
+
+KERNEL_EXPORT UINT64 LouKeGetThreadIdentificationFromThreadHandle(PTHREAD ThreadHandle){
+    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
+    return ThreadData->ThreadID;
 }
