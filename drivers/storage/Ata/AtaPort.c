@@ -65,12 +65,15 @@ DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(
     if(!HostDevice->PortDevices){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
+
     HostDevice->PortCount = PortCount;
     HostDevice->ChannelLocks = LouKeMallocArray(mutex_t, PortCount, KERNEL_GENERIC_MEMORY);
     if(!HostDevice->ChannelLocks){
         AtaCoreFreeAtaPortsFromHost(HostDevice);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
+
+
     if(PrivateDataSize){
         HostDevice->PortDevices->PortPrivateData = LouKeMallocEx(ROUND_UP64(PrivateDataSize, PrivateDataAlignment) * PortCount, PrivateDataAlignment, KERNEL_GENERIC_MEMORY);
         if(!HostDevice->PortDevices->PortPrivateData){

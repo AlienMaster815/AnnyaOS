@@ -66,6 +66,7 @@ DRIVER_EXPORT LOUSTATUS AtaCoreAllocateHostDevice(
         }
         NewDeviceObject->HostPrivateData = PrivateData;
     }
+    *HostDeviceOut = NewDeviceObject;
     return STATUS_SUCCESS;
 }
 

@@ -285,13 +285,14 @@ LOUSTATUS AddAtaDevice(
     SIZE BoardID = AtaDevices[PDEV->DeviceID].BoardID;
 
     LouPrint("ATA.SYS:BoardID:%d\n", (UINT64)BoardID);
-    PATA_HOST_DEVICE_OBJECT NewHostDevice;
+    PATA_HOST_DEVICE_OBJECT NewHostDevice;    
+    
     Status = AtaCoreAllocateHostDevice(&NewHostDevice, 0, 0);
     if(Status != STATUS_SUCCESS){
         LouPrint("ATA.SYS:AddAtaDevice() Failed To Allocate Host\n");
         while(1);
     }
-    
+        
     Status = AtaCoreAllocatePortsForHost(NewHostDevice, 2, sizeof(ATA_GENERIC_PRIVATE_DATA), GET_ALIGNMENT(ATA_GENERIC_PRIVATE_DATA));
     if(Status != STATUS_SUCCESS){
         LouPrint("ATA.SYS:AddAtaDevice() Failed To Allocate Ports\n");
@@ -300,6 +301,7 @@ LOUSTATUS AddAtaDevice(
 
     NewHostDevice->Operations = &AtaOperations;
    
+
     NewHostDevice->HostFlags = ATA_HOST_FLAGS_SUPPORTS_PIO | ATA_HOST_FLAGS_DUAL_CHANNEL;
     if((BoardID == ATA_BOARD_ID_ISA_DEVICE_HAS_DMA) || (BoardID == ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA)){
         NewHostDevice->HostFlags |= ATA_HOST_FLAGS_SUPPORTS_DMA;
