@@ -700,7 +700,7 @@ LouKeYieldExecution(){
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
     }    
-    LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
+    LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice * 2);
     CurrentTSC = read_tsc();
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);

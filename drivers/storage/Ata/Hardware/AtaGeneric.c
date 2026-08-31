@@ -41,15 +41,30 @@ LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PA
     if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
         return STATUS_SUCCESS;
     }
-
-    LouPrint("AtaGenericPortDevicePrepCommand()\n");
-    while(1);
+    PLOUSINE_DMA_TRANSFER DmaTransfer;
+    PLOUSINE_DMA_DEVICE DmaDevice;
+    PATA_PRDT_ENTRY NewPrdEntry;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+        DmaTransfer = CommandPacket->DmaDataOut;
+    }else{
+        DmaTransfer = CommandPacket->DmaDataIn;
+    }
+    DmaDevice = DmaTransfer->DmaDevice;
+    NewPrdEntry = (PATA_PRDT_ENTRY)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, sizeof(ATA_PRDT_ENTRY), MAX(GET_ALIGNMENT(ATA_PRDT_ENTRY) , ATA_PRDT_ALIGNMENT));
+    NewPrdEntry->DmaAddress = DmaTransfer->DmaAddress;
+    NewPrdEntry->DmaSize = DmaTransfer->DmaSize;
+    if(NewPrdEntry->DmaSize == (64 * KILOBYTE)){
+        NewPrdEntry->DmaSize = 0;
+    }
+    NewPrdEntry->Edt = ATA_PRDT_EDT_VALUE;
+    DmaTransfer->PrivateData = (PVOID)(UINT8*)NewPrdEntry;
     return STATUS_SUCCESS;
 }
     
 LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
     UINT8 Foo = inb(PrivateData->Ports.CmdSts);
+    UINT8 BmCommand;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
         outb(PrivateData->Ports.Device, CommandPacket->PacketEx.Device);   
     }else{
@@ -67,6 +82,24 @@ LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, P
     if(!Timeout){
         return STATUS_IO_DEVICE_ERROR;
     }
+
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
+        outb(PrivateData->Ports.BusMasterCmd, 0x00);
+        outb(PrivateData->Ports.BusMasterSts, 0x06);
+        BmCommand = 0;
+        UINT64  PhysicalPrdt;
+        UINT64  VirtualPrdt;
+        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+            VirtualPrdt = (UINT64)(UINT8*)CommandPacket->DmaDataOut->PrivateData;
+        }else{
+            VirtualPrdt = (UINT64)(UINT8*)CommandPacket->DmaDataIn->PrivateData;
+            BmCommand = (1 << 3); 
+        }
+        RequestPhysicalAddress(VirtualPrdt, &PhysicalPrdt);
+        outl(PrivateData->Ports.BusMasterPrd, PhysicalPrdt);
+        outb(PrivateData->Ports.BusMasterCmd, BmCommand);
+    }
+
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
         outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.SectorCount));
         outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.Features));
@@ -116,6 +149,11 @@ LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, P
         outsw(PrivateData->Ports.Data, CommandPacket->PacketData, CommandPacket->PacketSize / 2);
         sleep(1);
     }
+    
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
+        BmCommand = inb(PrivateData->Ports.BusMasterCmd);
+        outb(PrivateData->Ports.BusMasterCmd, BmCommand | 0x01);
+    }
 
     return STATUS_SUCCESS;
 }
@@ -136,9 +174,9 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
                     goto _PIO_TRANSFER_DONE;
                 }   
                 if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-                    outsw(PrivateData->Ports.Data, CommandPacket->PioDataOut, 256);
+                    outsw(PrivateData->Ports.Data, CommandPacket->PioDataOut, CommandPacket->PioSize);
                 }else{
-                    insw(PrivateData->Ports.Data, CommandPacket->PioDataIn, 256);
+                    insw(PrivateData->Ports.Data, CommandPacket->PioDataIn, CommandPacket->PioSize);
                 }
             }
             _PIO_TRANSFER_DONE:
@@ -147,11 +185,28 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
             return STATUS_SUCCESS;
         }
     }
+    PLOUSINE_DMA_TRANSFER DmaTransfer;
+    PLOUSINE_DMA_DEVICE DmaDevice;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+        DmaTransfer = CommandPacket->DmaDataOut;
+    }else{
+        DmaTransfer = CommandPacket->DmaDataIn;
+    }
+    DmaDevice = DmaTransfer->DmaDevice;
 
-    LouPrint("AtaGenericPortDeviceCleanupCommand()\n");
-    while(1);
+    UINT8 BmCommand = inb(PrivateData->Ports.BusMasterCmd);
+    outb(PrivateData->Ports.BusMasterCmd, BmCommand & ~(0x01));
+    outb(PrivateData->Ports.BusMasterSts, 0x06);
+    LouKeDmaDeviceFreeDmaMemory(DmaDevice, DmaTransfer->PrivateData);
     return STATUS_SUCCESS;
 }
+
+static LOUSINE_DMA_DEVICE PciIdeBusMasterDevice = {
+    .AllocatorData = {
+        .DmaLimit = 32,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
 
 static ATA_PORT_OPERATIONS PortOperations = {
     .AtaPortDevicePrepCommand = AtaGenericPortDevicePrepCommand,
@@ -284,9 +339,13 @@ LOUSTATUS AddAtaDevice(
         GenericData->Ports.Device = ATA_GENCMD_DEVICE_OFFSET(CommandBlock[i]);
         GenericData->Ports.CmdSts = ATA_GENCMD_CMDSTS_OFFSET(CommandBlock[i]);
         GenericData->Ports.AltDevSts = AltDevSts[i];
-        GenericData->Ports.BusMasterCmd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_CMD_REG_OFFSET;
-        GenericData->Ports.BusMasterSts = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_STS_REG_OFFSET;
-        GenericData->Ports.BusMasterPrd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_PRD_REG_OFFSET;
+        if(BusMaster){
+            GenericData->Ports.BusMasterCmd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_CMD_REG_OFFSET;
+            GenericData->Ports.BusMasterSts = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_STS_REG_OFFSET;
+            GenericData->Ports.BusMasterPrd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_PRD_REG_OFFSET;
+            TmpPort->OptionalDmaDevice = &PciIdeBusMasterDevice;
+        }
+    
     }
 
     Status = AtaCoreRegisterAtaHostDevice(NewHostDevice);

@@ -97,6 +97,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
     Identify->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL; 
     LouKeSetAtomicBoolean(&Identify->CommandDone, 0);
     Identify->PioDataIn = LouKeMallocEx(256 * sizeof(UINT16), GET_ALIGNMENT(UINT16), KERNEL_GENERIC_MEMORY);
+    Identify->PioSize = 512;
     if(PacketDev){
         AtaCoreEncodeIdentifyPacketDeviceCommand((PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE)&Identify->Packet, Dev);
     }else{

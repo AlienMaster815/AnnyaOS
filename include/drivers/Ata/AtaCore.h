@@ -278,6 +278,7 @@ struct _ATA_PORT_OPERATIONS;
 typedef struct _ATA_PORT_DEVICE_OBJECT{
     mutex_t*                        ChannelLock;
     ListHeader                      QueuedCommands;
+    PLOUSINE_DMA_DEVICE             OptionalDmaDevice;
     struct _ATA_HOST_DEVICE_OBJECT* HostDevice;
     struct _ATA_PORT_OPERATIONS*    Operations;
     ULONG                           PortFlags;
@@ -293,24 +294,27 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
 
 
 typedef struct _ATA_COMMAND_PACKET{
-    LOUSTATUS       CommandStatus;
-    LOUSTATUS       CleanupStatus;
-    ATOMIC_BOOLEAN  CommandDone;
-    ListHeader      QueuedCommands;
-    ULONG           CommandFlags;
-    SIZE            PacketSize;
-    PVOID           PacketData;
+    LOUSTATUS                   CommandStatus;
+    LOUSTATUS                   CleanupStatus;
+    ATOMIC_BOOLEAN              CommandDone;
+    ListHeader                  QueuedCommands;
+    ULONG                       CommandFlags;
+    SIZE                        PacketSize;
+    PVOID                       PacketData;
+    SIZE                        PioSize;
     union{
-        PVOID       PioDataIn;
-        PVOID       PioDataOut;
+        PVOID                   PioDataIn;
+        PVOID                   PioDataOut;
+        PLOUSINE_DMA_TRANSFER   DmaDataIn;
+        PLOUSINE_DMA_TRANSFER   DmaDataOut;
     };
     union{
         struct PACKED{
-                    STANDARD_ATA_COMMAND_PACKET;
-        }           Packet;
+                            STANDARD_ATA_COMMAND_PACKET;
+        }                   Packet;
         struct PACKED{
-                    STANDARD_ATA_COMMAND_PACKET_EX;
-        }           PacketEx;
+                            STANDARD_ATA_COMMAND_PACKET_EX;
+        }                   PacketEx;
     };
 }ATA_COMMAND_PACKET, * PATA_COMMAND_PACKET;
 

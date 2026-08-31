@@ -7,7 +7,7 @@
 
 #define ATA_PRDT_ALIGNMENT  4
 #define ATA_PRDT_BOUNDRY    64
-#define ATA_PRDT_EDT_VALUE  (1 << 8)
+#define ATA_PRDT_EDT_VALUE  (1 << 7)
 
 #define ATA_BM_PRI_IDE_CMD_REG_OFFSET   0x00
 #define ATA_BM_PRI_IDE_STS_REG_OFFSET   0x02

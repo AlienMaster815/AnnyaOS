@@ -16,6 +16,8 @@
  * AHCI hardware documentation:
  * http://www.intel.com/technology/serialata/pdf/rev1_0.pdf
  * http://www.intel.com/technology/serialata/pdf/rev1_1.pdf
+ 
+    NOTICE:This is a derivative work for the Lousine Kernel 
  */
 
 #define SATA_SIGNATURE_ATA      0x101

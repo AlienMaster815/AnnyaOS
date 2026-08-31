@@ -20,6 +20,176 @@
 
 #include "AhciMod.h"
 
+LOUSTATUS AhciGenericPortDevicePrepCommand(
+    PATA_PORT_DEVICE_OBJECT PortDevice,
+    PATA_COMMAND_PACKET     CommandPacket
+){
+
+    LouPrint("AhciGenericPortDevicePrepCommand()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AhciGenericPortDeviceIssueCommand(
+    PATA_PORT_DEVICE_OBJECT PortDevice,
+    PATA_COMMAND_PACKET     CommandPacket
+){
+
+    LouPrint("AhciGenericPortDeviceIssueCommand()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AhciGenericPortDeviceCleanupCommand(
+    PATA_PORT_DEVICE_OBJECT PortDevice,
+    PATA_COMMAND_PACKET     CommandPacket
+){
+
+    LouPrint("AhciGenericPortDeviceCleanupCommand()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AhciGenericPortDeviceStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
+
+    LouPrint("AhciGenericPortDeviceStartPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AhciGenericPortDeviceStopPort(PATA_PORT_DEVICE_OBJECT PortDevice){
+
+    LouPrint("AhciGenericPortDeviceStopPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS AhciGenericHostReset(PATA_HOST_DEVICE_OBJECT PortDevice){
+
+    LouPrint("AhciGenericPortDeviceStopPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+static ATA_HOST_OPERATIONS AhciGenericHostOperations = {
+    .AtaHostDeviceReset = AhciGenericHostReset,
+//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+//    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
+//    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
+//    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
+//    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
+//    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
+};
+
+//static ATA_HOST_OPERATIONS AhciVt8251HostOperations = {
+//    .AtaHostDeviceReset = AhciGenericHostReset,
+//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+//    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
+//    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
+//    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
+//    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
+//    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
+//};
+
+//static ATA_HOST_OPERATIONS AhciP5wdhHostOperations = {
+//    .AtaHostDeviceReset = AhciGenericHostReset,
+//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+//    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
+//    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
+//    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
+//    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
+//    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
+//};
+
+
+//static ATA_HOST_OPERATIONS AhciAvnHostOperations = {
+//    .AtaHostDeviceReset = AhciGenericHostReset,
+//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+//    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
+//    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
+//    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
+//    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
+//    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
+//};
+
+//static ATA_HOST_OPERATIONS AhciPmpRetySrStHostOperations = {
+//    .AtaHostDeviceReset = AhciGenericHostReset,
+//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+//    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
+//    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
+//    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
+//    .AtaHostDevicePowerUp = AtaGenericHostDevicePowerUp,
+//    .AtaHostDevicePowerDown = AtaGenericHostDevicePowerDown,
+//};
+
+
+//ATA Module Structured Operations
+UNUSED static ATA_PORT_OPERATIONS AhciGenericPortOperations{
+    .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
+    .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
+    .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
+    .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
+    .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+//    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
+//    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
+//    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
+//    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+};
+
+UNUSED static ATA_PORT_OPERATIONS AhciVt8251Operations{
+    .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
+    .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
+    .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
+    .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
+    .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+//    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
+//    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
+//    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
+//    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+};
+
+UNUSED static ATA_PORT_OPERATIONS AhciP5wdhOperations{
+    .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
+    .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
+    .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
+    .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
+    .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+//    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
+//    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
+//    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
+//    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+};
+
+UNUSED static ATA_PORT_OPERATIONS AhciAvnOperations{
+    .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
+    .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
+    .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
+    .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
+    .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+//    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
+//    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
+//    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
+//    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+};
+
+
+UNUSED static ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
+    .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
+    .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
+    .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
+//    .AtaPortDeviceStart = AtaGenericPortDeviceStartPort,
+//    .AtaPortDeviceStop = AtaGenericPortDeviceStopPort,
+//    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
+//    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
+//    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
+//    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+};
+
+
+
+//endof ATA Module Structured Operations
 
 static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     //Intel Ahci Devices
@@ -291,7 +461,6 @@ LOUSTATUS AddAhciDevice(
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AHCI.SYS:AddAhciDevice()\n");
-  
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(Device);
 
     

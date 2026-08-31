@@ -93,34 +93,12 @@ BOOLEAN LouKeRatForEachRatEntry(RAT_ENTRY_HANDLER Handler, PVOID Context, LOADER
 
 typedef struct _REP_GET_ALLOCATION_CTX{
     UINTPTR     Base;
+    ULONG       xBits;
     SIZE        Length;
     SIZE        Alignment;
 }REP_GET_ALLOCATION_CTX, * PREP_GET_ALLOCATION_CTX;
 
 static SIZE VirtualBase = 0;
-
-static BOOLEAN GetFirstFree32BitAddress(PVOID Context, PRAT_TRACKER Tracker){
-    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
-        return false;
-    }
-    SIZE SpaceLimit = (4 * GIGABYTE);
-    PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    PVOID Result = (PVOID)MAX(Tracker->Base, 0xFFFF);
-    Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
-
-    while((((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) && (((UINT64)Result + AllocContext->Length) <= SpaceLimit)){
-        UINTPTR NextHint = 0x00;
-        if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
-            AllocContext->Base = (UINTPTR)Result;
-            return true;
-        }        
-        Result = (PVOID)ROUND_UP64((UINTPTR)NextHint, AllocContext->Alignment);   
-        if((UINTPTR)Result == NextHint){
-            Result = (PVOID)((UINTPTR)Result + AllocContext->Alignment);
-        }
-    }
-    return false;
-}
 
 static BOOLEAN GetFirstFreeUnder1GigAddress(PVOID Context, PRAT_TRACKER Tracker){
     if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
@@ -145,17 +123,19 @@ static BOOLEAN GetFirstFreeUnder1GigAddress(PVOID Context, PRAT_TRACKER Tracker)
     return false;
 }
 
-
-static BOOLEAN GetFirstFree64BitAddress(PVOID Context, PRAT_TRACKER Tracker){    
-    if((Tracker->Base + Tracker->Length) < (4 * GIGABYTE)){
-        return false;
-    }
-    
+static BOOLEAN GetFirstFreeXBitAddress(PVOID Context, PRAT_TRACKER Tracker){    
     PREP_GET_ALLOCATION_CTX AllocContext = (PREP_GET_ALLOCATION_CTX)Context;
-    PVOID Result = (PVOID)MAX(Tracker->Base, (4 * GIGABYTE));
+    ULONG xBits = AllocContext->xBits;
+    
+    UINTPTR LastAddress = ((UINTPTR)-1 >> ((sizeof(UINTPTR) * 8) - xBits));
+
+    PVOID Result = (PVOID)Tracker->Base;
     Result = (PVOID)ROUND_UP64((UINTPTR)Result, AllocContext->Alignment);
 
-    while(((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)){
+    while(
+        (((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(Tracker->Base + Tracker->Length)) &&
+        (((UINTPTR)Result + AllocContext->Length) <= (UINTPTR)(LastAddress))
+    ){
         UINTPTR NextHint = 0x00;
         if(LouKeRatIsAddressFreeEx(Result, AllocContext->Length, &NextHint)){
             AllocContext->Base = (UINTPTR)Result;
@@ -167,6 +147,20 @@ static BOOLEAN GetFirstFree64BitAddress(PVOID Context, PRAT_TRACKER Tracker){
         }
     }
     return false;
+}
+
+static BOOLEAN GetFirstFree64BitAddress(PVOID Context, PRAT_TRACKER Tracker){    
+    if((Tracker->Base + Tracker->Length) < (4 * GIGABYTE)){
+        return false;
+    }
+    return GetFirstFreeXBitAddress(Context, Tracker);
+}
+
+static BOOLEAN GetFirstFree32BitAddress(PVOID Context, PRAT_TRACKER Tracker){
+    if((Tracker->Base + Tracker->Length) <= UINT16_MAX){
+        return false;
+    }
+    return GetFirstFreeXBitAddress(Context, Tracker);
 }
 
 static BOOLEAN GetFirstFreeVirtualAddress(PVOID Context, PRAT_TRACKER Tracker){
@@ -261,6 +255,34 @@ PRAT_TRACKER LouKeRatGetNextFreeAllocationTracker(){
 
 static spinlock_t RatLock = {0};
 
+PVOID LouKeRatAllocateXBitPhysicalAddress(SIZE Size, SIZE Alignment, ULONG xBits){
+    if(!xBits){
+        return 0x00;
+    }
+    LouKIRQL Irql;
+    LouKeAcquireSpinLock(&RatLock, &Irql);
+    PRAT_TRACKER NewTracker = LouKeRatGetNextFreeAllocationTracker();
+    if(!NewTracker){
+        LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Trackers\n");
+        LouKeReleaseSpinLock(&RatLock, &Irql);
+        //while(1);
+        return 0x00;
+    }
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .xBits = xBits, .Length = Size, .Alignment = Alignment};
+    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree32BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
+    if(!Successfull){
+        LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Memory\n");
+        LouKeReleaseSpinLock(&RatLock, &Irql);
+        //while(1);
+        return 0x00;
+    } 
+    NewTracker->Base = Context.Base;
+    NewTracker->Length = Context.Length;
+    LouKeReleaseSpinLock(&RatLock, &Irql);
+    //LouPrint("ALOC:%h\n", NewTracker->Base);
+    return (PVOID)Context.Base;
+}
+
 PVOID LouKeRatAllocate32BitPhysicalAddress(SIZE Size, SIZE Alignment){
     LouKIRQL Irql;
     LouKeAcquireSpinLock(&RatLock, &Irql);
@@ -271,8 +293,8 @@ PVOID LouKeRatAllocate32BitPhysicalAddress(SIZE Size, SIZE Alignment){
         //while(1);
         return 0x00;
     }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
-    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree32BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .xBits = 32, .Length = Size, .Alignment = Alignment};
+    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFreeXBitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
         LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Memory\n");
         LouKeReleaseSpinLock(&RatLock, &Irql);
@@ -321,9 +343,10 @@ PVOID LouKeRatAllocate64BitPhysicalAddress(SIZE Size, SIZE Alignment){
         //while(1);
         return 0x00;
     }
-    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .Length = Size, .Alignment = Alignment};
+    REP_GET_ALLOCATION_CTX Context = {.Base = 0, .xBits = 64, .Length = Size, .Alignment = Alignment};
     BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree64BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
+        Context.xBits = 32;
         Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree32BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
         if(!Successfull){
             LouKeReleaseSpinLock(&RatLock, &Irql);
