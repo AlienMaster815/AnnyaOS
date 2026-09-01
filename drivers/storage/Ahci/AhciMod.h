@@ -37,6 +37,11 @@
 #define AHCI_GENERATION_5_CAVIUM_ABAR       4
 #define AHCI_LOONGSON_ABAR                  0
 
+typedef struct _AHCI_COMMAND_PRIVATE_DATA{
+    UINT32 CommandSlot;
+    
+}AHCI_COMMAND_PRIVATE_DATA, * PAHCI_COMMAND_PRIVATE_DATA;
+
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_HOST_CONTROL              GenericHostController;
     PAHCI_GENERIC_PORT                      GenericPort;
@@ -59,6 +64,8 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     UINT32                                  CommandsQueued;
     KERNEL_EVENT_OBJECT                     CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
+
+
 
 static inline unsigned int AhciRemapDcc(int i){
     return AHCI_REMAP_N_DCC + i * 0x80;
@@ -212,3 +219,47 @@ AhciResetEm(
 #define AHCI_SYSTEM_MODULE_VERSION_MESSAGE "AHCI.SYS Module Version 1.01\n"
 
 //End of Device list from Linux Kernel Documetation
+
+typedef struct PACKED _FIS_D2H{
+    UINT8   FisType;
+#define     FIS_D2H_PMP_PORT_BITS   0x0F
+#define     FIS_D2H_INTERRUPT_BIT   (1 << 6)
+    UINT8   PmpPortInterrupt;
+    UINT8   Status;
+    UINT8   Error;
+    UINT8   LbaLowCurrent;
+    UINT8   LbaMidCurrent;
+    UINT8   LbaHighCurrent;
+    UINT8   Device;
+    UINT8   LbaLowPrevious;
+    UINT8   LbaMidPrevious;
+    UINT8   LbaHighPrevious;
+    UINT8   Reserved1;
+    UINT8   SectorCountCurrent;
+    UINT8   SectorCountPrevious;
+    UINT8   Resevred2[6];
+}FIS_D2H, * PFIS_D2H;
+
+typedef struct PACKED _FIS_PIO{
+    UINT8   FisType;
+#define     FIS_PIO_PMP_PORT_BITS   0x0F
+#define     FIS_PIO_TRANSFER        (1 << 5)
+#define     FIS_PIO_INTERRUPT_BIT   (1 << 6)
+    UINT8   PmpPortTransferInterrupt;
+    UINT8   Status;
+    UINT8   Error;
+    UINT8   LbaLowCurrent;
+    UINT8   LbaMidCurrent;
+    UINT8   LbaHighCurrent;
+    UINT8   Device;
+    UINT8   LbaLowPrevious;
+    UINT8   LbaMidPrevious;
+    UINT8   LbaHighPrevious;
+    UINT8   Reserved1;
+    UINT8   SectorCountCurrent;
+    UINT8   SectorCountPrevious;
+    UINT8   Resered2;
+    UINT8   eStatus;
+    UINT16  TransferCount;
+    UINT8   Resered3[2];
+}FIS_PIO, * PFIS_PIO;

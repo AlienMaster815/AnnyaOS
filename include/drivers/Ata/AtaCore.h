@@ -366,6 +366,7 @@ typedef struct _ATA_COMMAND_PACKET{
     SIZE                        PacketSize;
     UINT8                       PacketData[16];
     SIZE                        PioSize;
+    PVOID                       CommandPrivateData;
     union{
         PVOID                   PioDataIn;
         PVOID                   PioDataOut;
