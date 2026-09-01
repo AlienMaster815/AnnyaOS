@@ -90,6 +90,13 @@ AnnyaOsCommandEngine::ParseCommand(
                 }
                 break;
             }
+            case CMD_DATE:{
+                if(CommandLine.length() < (this->Commands[i].CommandLineString.length() + 2)){
+                    return STATUS_OK;
+                }
+                *OutParams = CommandLine.substr(this->Commands[i].CommandLineString.length() + 1);
+                return STATUS_OK;
+            }
             default:
                 break;
         }

@@ -206,7 +206,7 @@ KERNEL_EXPORT PVOID LouKeAllocateFastObject(
     return LouKeAllocateFastObjectEx(ObjectLookup, 0x00);
 }
 
-void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address){
+KERNEL_EXPORT void LouKeFreeFastObject(LOUSTR ObjectLookup, PVOID Address){
     PFAST_ALLOCATION_TEMPLATE Template = AcquireFastObjectTemplate(ObjectLookup);
     if(!Template){
         LouPrint("LouKeFreeFastObject():Object Dosent Exist:%s\n", ObjectLookup);

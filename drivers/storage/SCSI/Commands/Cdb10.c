@@ -148,6 +148,7 @@ ScsiCoreEncodePersistentReserveOutCommand(
     memcpy(Cdb, &tCdb, sizeof(SCSI_PERSISTENT_RESERVE_OUT_COMMAND_STRUCTURE));
 }
 
+DRIVER_EXPORT
 void 
 ScsiCoreEncodeRead10Command(
     PSCSI_READ10_COMMAND_STRUCTURE  Cdb,
@@ -194,6 +195,7 @@ ScsiCoreEncodeReadBuffer10Command(
     memcpy(Cdb, &tCdb, sizeof(SCSI_READ_BUFFER10_COMMAND_STRUCTURE));
 }
 
+DRIVER_EXPORT
 void 
 ScsiCoreEncodeReadCapacity10Command(
     PSCSI_READ_CAPACITY10_COMMAND_STRUCTURE Cdb,
@@ -202,6 +204,7 @@ ScsiCoreEncodeReadCapacity10Command(
     UINT8                                   Control
 ){
     SCSI_READ_CAPACITY10_COMMAND_STRUCTURE tCdb = {0};
+    tCdb.OpCode = SCSI_COMMAND_READ_CAPACITY_CDB10;
     tCdb.Lba = ScsiCoreEncodeUint32(Lba);
     tCdb.Pmi = Pmi;
     tCdb.Control = Control;

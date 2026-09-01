@@ -1549,6 +1549,15 @@ typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{
 
 #ifndef _SCSI_CORE_H
 
+DRIVER_IMPORT
+void 
+ScsiCoreEncodeReadCapacity10Command(
+    PSCSI_READ_CAPACITY10_COMMAND_STRUCTURE Cdb,
+    UINT32                                  Lba,
+    UINT8                                   Pmi,
+    UINT8                                   Control
+);
+
 DRIVER_IMPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
     PSCSI_HOST_DEVICE_DRIVER_OBJECT NewScsiDriverObject,
     SIZE                            DriverPrivateDataSize,
@@ -1568,6 +1577,20 @@ DRIVER_IMPORT LOUSTATUS ScsiCoreEncodeLunAddressingLevel(
     UINT16                      SecondLevel,
     UINT16                      ThirdLevel,
     UINT16                      FourthLevel
+);
+
+DRIVER_IMPORT
+void 
+ScsiCoreEncodeRead10Command(
+    PSCSI_READ10_COMMAND_STRUCTURE  Cdb,
+    UINT8                           Rarc,
+    UINT8                           Fua,
+    UINT8                           Dpo,
+    UINT8                           RdProtect,
+    UINT32                          Lba,
+    UINT8                           GroupNumber,
+    UINT16                          TransferLength,
+    UINT8                           Control
 );
 
 #endif

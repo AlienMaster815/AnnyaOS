@@ -138,7 +138,7 @@ UNUSED static ATA_PORT_OPERATIONS AhciGenericPortOperations{
 //    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
 };
 
-UNUSED static ATA_PORT_OPERATIONS AhciVt8251Operations{
+UNUSED static ATA_PORT_OPERATIONS AhciVt8251PortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
@@ -150,7 +150,7 @@ UNUSED static ATA_PORT_OPERATIONS AhciVt8251Operations{
 //    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
 };
 
-UNUSED static ATA_PORT_OPERATIONS AhciP5wdhOperations{
+UNUSED static ATA_PORT_OPERATIONS AhciP5wdhPortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
@@ -162,7 +162,7 @@ UNUSED static ATA_PORT_OPERATIONS AhciP5wdhOperations{
 //    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
 };
 
-UNUSED static ATA_PORT_OPERATIONS AhciAvnOperations{
+UNUSED static ATA_PORT_OPERATIONS AhciAvnPortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
@@ -175,7 +175,7 @@ UNUSED static ATA_PORT_OPERATIONS AhciAvnOperations{
 };
 
 
-UNUSED static ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
+UNUSED static ATA_PORT_OPERATIONS AhciPmpRetySrStPortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
@@ -187,7 +187,135 @@ UNUSED static ATA_PORT_OPERATIONS AhciPmpRetySrStOperations{
 //    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
 };
 
-
+UNUSED static AHCI_DRIVER_BOARD_INFORMATION_TABLE AhciBoardInfomationTable[] = {
+    [AHCI_BOARD_NORMAL_AHCI] = {
+        .AhciFlags              = AHCI_FLAG_COMMON,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+    },
+    [AHCI_BOARD_43_BIT_DMA] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_BOARD_43_BIT_DMA,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_IGN_IFFER] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_IGN_IFFER,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_NO_BOUNCE] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_NO_DEBOUNCE,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_NO_MSI] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_NO_MSI,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_INTEL_PCS] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_INTEL_PCS,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_PCS_NO_SLEEP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_INTEL_PCS | AHCI_FLAG_BROKEN_SLEEP,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_PCS_NO_SNTF] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_INTEL_PCS | AHCI_FLAG_BROKEN_SNTF,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_HAS_FBS] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_HAS_FBS,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_AL_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_HAS_NO_PMP | AHCI_FLAG_NO_MSI,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_AVN_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_INTEL_PCS,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciAvnPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_MCP65_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_HAS_NO_PMP | AHCI_FLAG_NO_FPDMA_AA,
+//        .AtaFlags               = ATA_FLAG_NO_DIPM,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_MCP77_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_HAS_NO_PMP | AHCI_FLAG_NO_FPDMA_AA,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_MCP89_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_NO_FPDMA_AA,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_MV_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_NO_NCQ | AHCI_FLAG_NO_MSI | AHCI_FLAG_MV_PATA | AHCI_FLAG_HAS_NO_PMP,
+//        .AtaFlags               = ATA_FLAG_SATA | ATA_FLAG_PIO_DMA,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciGenericPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_SB600_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_NO_MSI | AHCI_FLAG_SECTOR255 | AHCI_FLAG_32BIT_ONLY | AHCI_FLAG_IGN_INTERNAL_SERR,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciPmpRetySrStPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_SB700_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_IGN_INTERNAL_SERR,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciPmpRetySrStPortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+    [AHCI_BOARD_VT8251_CHIP] = {
+        .AhciFlags              = AHCI_FLAG_COMMON | AHCI_FLAG_NO_NCQ | AHCI_FLAG_HAS_NO_PMP,
+        .MaxPioSupport          = 4,
+        .MaxUDmaSupport         = 6,
+        .PortOperations         = &AhciVt8251PortOperations,
+        .HostOperations         = &AhciGenericHostOperations,
+    },
+};
 
 //endof ATA Module Structured Operations
 
@@ -455,16 +583,251 @@ static LOUSINE_PCI_DEVICE_TABLE AhciDevices[] = {
     {0},
 };
 
+static bool ChipHasAppleBios(PPCI_DEVICE_OBJECT PDEV){
+    return (
+        PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_NVIDIA && 
+        PciHalGetDeviceId(PDEV) == PCI_DEVICE_ID_NVIDIA_NFORCE_MCP89_SATA &&
+        PciHalGeneralDeviceGetSubsystemVendorId(PDEV) == PCI_VENDOR_ID_APPLE && 
+        PciHalGeneralDeviceGetSubsystemId(PDEV) == 0xCB89
+    ) ? true : false;
+}
+
+static void NvidiaMcp89AppleBiosUnlockAhciChip(PPCI_DEVICE_OBJECT PDEV){
+    uint32_t Tmp;
+
+    LouPrint("AHCI.SYS:Enableing MCP89 Ahci Mode For Macraps\n");
+    
+    //tell the device we are going to be accessing the controllers
+    //Bios Settings
+    Tmp = PciHalReadUint32(PDEV, 0xF8);
+    Tmp |= (1 << 0x1B);
+    PciHalWriteUint32(PDEV, 0xF8, Tmp);
+    //we have offically broken the terms and conditions of apples 
+    //product use aggrement by modifying a device congratz everybody
+    //(Hosnetly we all broke it when you deviceded to run this sofware
+    //on your macbook)... just fair warning to end user;
+    //now we need to Make Changes withought changing the Device ID
+    //By setting Unsetting Bit 0xF0000000 and setting Bit 0x80000000
+    Tmp = PciHalReadUint32(PDEV, 0x054C);
+    Tmp |= (1 << 0x0C);
+    PciHalWriteUint32(PDEV, 0x054C, Tmp);
+
+    //change the data
+    Tmp = PciHalReadUint32(PDEV, 0x04A4);
+    Tmp &= ~(0xFF);
+    Tmp |= 0x01060100;
+    PciHalWriteUint32(PDEV, 0x04A4, Tmp);
+
+    //cleanup the bios 
+    Tmp = PciHalReadUint32(PDEV, 0x054C);
+    Tmp &= ~(1 << 0x0C);
+    PciHalWriteUint32(PDEV, 0x054C, Tmp);
+
+    Tmp = PciHalReadUint32(PDEV, 0xF8);
+    Tmp &= ~(1 << 0x1B);
+    PciHalWriteUint32(PDEV, 0xF8, Tmp);
+    //Ahci On Apple Bios Should Now Be Unlocked
+}
+
+LOUSTATUS AhciStopCommandEngine(PATA_PORT_DEVICE_OBJECT AtaPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AtaPort); 
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    uint32_t Tmp;
+
+    Tmp = Port->PxCMD;
+    if(!(Tmp & (AHCI_PxCMD_ST | AHCI_PxCMD_CR))){
+        return STATUS_SUCCESS;
+    }
+
+    if(Tmp == 0xFFFFFFFF){
+        LouPrint("AHCI.SYS:Ahci Controller Not Available\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    Tmp &= ~(AHCI_PxCMD_ST);
+    Port->PxCMD = Tmp;
+    Tmp = 0;
+    while(Tmp <= 10000){
+        if(Port->PxCMD & AHCI_PxCMD_CR){
+            sleep(100);
+            Tmp += 100;
+            continue;
+        }
+        break;
+    }
+    if(Tmp >= 10000){
+        LouPrint("AHCI.SYS:Ahci Controller Command Engine Timeout Occoured\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+    LouPrint("AHCI.SYS:Ahci Controller Command Engine Stopped\n");
+    return STATUS_SUCCESS;
+}
+
+
+void AhciStartCommandEngine(PATA_PORT_DEVICE_OBJECT AtaPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AtaPort); 
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+
+    if(Port->PxCMD & AHCI_PxCMD_CR){
+        AhciStopCommandEngine(AtaPort);
+    }
+    while(Port->PxCMD & AHCI_PxCMD_CR){
+        sleep(100);
+    }
+    uint32_t Poll = 0;
+    uint32_t Command = Port->PxCMD;
+    Command |= AHCI_PxCMD_ST;
+    Port->PxCMD = Command;
+    Command = Port->PxCMD;
+    while(!(Port->PxCMD & AHCI_PxCMD_CR)){
+        sleep(100);
+        Poll += 100;
+        if(Poll >= 1000){
+            LouPrint("AHCI.SYS:Timeout Occoured Starting Command Engine\n");
+            AhciStopCommandEngine(AtaPort);
+            return;
+        }
+    }
+    LouPrint("AHCI.SYS:Ahci Command Engine Started\n");
+}
+
 
 LOUSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
 ){
     LouPrint("AHCI.SYS:AddAhciDevice()\n");
+    LOUSTATUS Status = STATUS_SUCCESS;
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(Device);
+    UINT64 AhciDeviceID = PDEV->DeviceID;
+    UINT8 BoardID = AhciDevices[AhciDeviceID].BoardID;
+
+    LouPrint("AHCI.SYS:AHCI BoardID:%d\n", (UINT64)BoardID);
+
+    //According to linux documentation An AHCI Driver Cannot Driver
+    //Parrellel Devices such as those with MARVELL Designs due to a 
+    //mix use of AHCI and Parrallel Ports on the chip therefore it is 
+    //safer to use the generic ATA Driver Written for boot and initialize
+    //an accelerated Driver for non boot Chips as well as the boot chip
+    //once system reaches phase two device initialization with modules
+    if(PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_MARVELL){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+
+    UNUSED PAHCI_DRIVER_BOARD_INFORMATION BoardInformation = &AhciBoardInfomationTable[BoardID];
+    int Abar = AHCI_STANDARD_ABAR;
+    uint8_t PortCount;
+    
+    //According to linux dcumentation NNIDIA MCP89 CHIPS with Apple 
+    //bios's has a locking mechanism for the AHCI chip and needs to
+    //be unlocked before it can be used
+    if(ChipHasAppleBios(PDEV)){
+        NvidiaMcp89AppleBiosUnlockAhciChip(PDEV);
+    }
 
     
+    //due to the nature of probing with base class 1 and sub class 6
+    //the probe includes devices that posses a SAS Sata Chip and AHCI
+    //is only able to drive AHCI devices so we need to tell the user
+    //this to warn them if the need to uses the Drives Attached to the 
+    //SAS platform chip
+    if(PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_PROMISE){
+        LouPrint("AHCI.SYS:WARNING:PDC42819 Detected Only Stata Devices May Be Used With This Module\n");
+    }
+
+    //acording to some proprietary information from STMicro, Cavium,
+    //Enmotus, and Loongson, and a linux kernel document related to
+    //a vendor with and id of 0x1C44 wich I Belive is refering to the 
+    //Enmotus 8000 Storage IO Controller the Actual Standard BAR 5 used
+    //for ABAR is not used on all controllers the following figures what 
+    //bar should actually be use for the controller
+    if((PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_STMICRO) && (PciHalGetDeviceId(PDEV) == 0xCC06)){
+        Abar = AHCI_STA2X11_ABAR; 
+    }else if((PciHalGetVendorId(PDEV)== 0x1C44) && (PciHalGetDeviceId(PDEV) == 0x8000)){
+        Abar = AHCI_ENMOTUS_ABAR;
+    }else if(PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_CAVIUM){
+        if(PciHalGetDeviceId(PDEV) == 0xA01C){
+            Abar = AHCI_CAVIUM_ABAR;
+        }else if(PciHalGetDeviceId(PDEV) == 0xA084){
+            Abar = AHCI_GENERATION_5_CAVIUM_ABAR;
+        }
+    }else if((PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_LOONGSON) && (PciHalGetDeviceId(PDEV) == 0x7A08)){
+        Abar = AHCI_LOONGSON_ABAR;
+    }
+
+    //now we are finally ready to start the controller
+    Status = PciHalEnableMemorySpace(PDEV);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    Status = PciHalEnableIoSpace(PDEV);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    //according to Linux and BSD documentation along with Several 
+    //Documents By Intel documentation surrounding quirks on intel controllers
+    //the ICH6 controllers ID 0x2652 and 0x2653 share ids for PIIX chips and 
+    //AHCI Chips Types and if the controller while in combined mode
+    //can posibly A. make the controller unstable or unsuable or B. just
+    //completly damage the chip up to but not including destorying it
+    if(
+        (PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_INTEL && PciHalGetDeviceId(PDEV) == 0x2652) || 
+        (PciHalGetVendorId(PDEV) == PCI_VENDOR_ID_INTEL && PciHalGetDeviceId(PDEV) == 0x2653)
+    ){
+        //in order for us to ensure that the chips is not in combined mode
+        //we nead to read the ICH map register in pci configuration space
+        //and check if one of the first two bits, if they are we need to
+        //leave this controller alone
+        uint8_t ICHMap;
+
+        ICHMap = PciHalReadUint8(PDEV, ICH_PCI_MAP_REGISTER);
+        if(ICHMap & 0x03){
+            LouPrint("AHCI.SYS:WARNING: Controller is in combined mode and connot enable AHCI Mode\n");
+            return STATUS_NO_SUCH_DEVICE;
+        }  
+    }
     
+    //At this point we are able to grab the host and start filling out
+    //private data from the information on the controller
+
+    PciHalMapPciResource(PDEV, Abar, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
+
+    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)PciHalGetIoRegion(PDEV, Abar, 0);
+
+    PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
+
+    LouPrint("PortCount:%d\n", PortCount);
+
+    PATA_HOST_DEVICE_OBJECT AtaHost; 
+    Status = AtaCoreAllocateHostDevice(&AtaHost, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));
+    if(Status != STATUS_SUCCESS){
+        LouPrint("AHCI.SYS:Unable To Allocate AHCI Host Device\n");
+        while(1);
+    }
+
+    Status = AtaCoreAllocatePortsForHost(AtaHost, PortCount, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));
+    if(Status != STATUS_SUCCESS){
+        LouPrint("AHCI.SYS:Unable To Allocate AHCI Ports Device\n");
+        while(1);
+    }
+
+    PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+
+    PrivateAhciData->PDEV = PDEV;
+    PrivateAhciData->PortMap = Ghc->PortsImplemented;
+
+    PrivateAhciData->StopCommandEngine = AhciStopCommandEngine;
+    PrivateAhciData->StartCommandEngine = AhciStartCommandEngine;
+
+    PrivateAhciData->BoardInfo = BoardInformation;
+
+    for(size_t Slot = 0 ; Slot < 32; Slot++){
+        LouKeInitializeEventTimeOut(&PrivateAhciData->CommandCompletion[Slot], 5000); //10 second timeout
+    }
+
+
     LouPrint("AHCI.SYS:AddAhciDevice() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS; //Status;
@@ -494,7 +857,7 @@ DriverEntry(
     if(Status != STATUS_SUCCESS){
         LouPrint("AHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
     }
-    
+
     LouPrint("AHCI.SYS:DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }

@@ -15,7 +15,7 @@ TARGET = AHCI.SYS
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES) -L../../PCI -lPCI
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc $(INCLUDES) -L../../PCI -lPCI -L../Ata -lAta
 
 # Clean rule
 clean:

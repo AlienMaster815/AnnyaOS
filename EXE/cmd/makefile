@@ -11,7 +11,9 @@ SOURCE = 	cmd.cpp \
 			assoc.cpp \
 			cd.cpp \
 			color.cpp \
-			dir.cpp
+			dir.cpp \
+			date.cpp
+
 TARGET = cmd.exe
 
 ADVAPI_TARGET = advapi.lib

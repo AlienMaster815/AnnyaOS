@@ -38,7 +38,7 @@ LOUSTATUS AtaCoreEntry(){
 
     AtaCoreDbgPrint("ATACORE.SYS:AtaCoreEntry()\n");
 
-
+    LouKeCreateFastObjectClass("ATA_COMMAND_PACKET", 64, sizeof(ATA_COMMAND_PACKET), GET_ALIGNMENT(ATA_COMMAND_PACKET), 0, KERNEL_GENERIC_MEMORY);
 
     AtaCoreDbgPrint("ATACORE.SYS:AtaCoreEntry():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;

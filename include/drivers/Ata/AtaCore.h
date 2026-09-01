@@ -320,6 +320,8 @@ typedef struct _ATA_ENDPOINT_DEVICE_OBJECT{
     struct _ATA_PORT_DEVICE_OBJECT* Port;
     UINT8                           ChannelDev;
     UINT64                          DeviceCap;
+    UINT32                          MaxLba;
+    UINT32                          SectorSize;
     UINT8                           MaxMDmaSupport;
     UINT8                           MDmaSelected;
     UINT8                           PioModesSupported;
@@ -371,11 +373,11 @@ typedef struct _ATA_COMMAND_PACKET{
     };
     union{
         struct PACKED{
-                            STANDARD_ATA_COMMAND_PACKET;
-        }                   Packet;
+                                STANDARD_ATA_COMMAND_PACKET;
+        }                       Packet;
         struct PACKED{
-                            STANDARD_ATA_COMMAND_PACKET_EX;
-        }                   PacketEx;
+                                STANDARD_ATA_COMMAND_PACKET_EX;
+        }                       PacketEx;
     };
 }ATA_COMMAND_PACKET, * PATA_COMMAND_PACKET;
 
@@ -402,6 +404,12 @@ typedef struct _ATA_HOST_DEVICE_OBJECT{
     mutex_t*                        ChannelLocks;
     struct _ATA_HOST_OPERATIONS*    Operations;
     ULONG                           HostFlags;
+    UINT8                           MaxMDmaSupport;
+    UINT8                           MaUMDmaSupport;
+    UINT8                           MaxPioSupport;
+    UINT8                           MDmaSelected;
+    UINT8                           UDmaSelected;
+    UINT8                           PioSelected;
     PVOID                           HostPrivateData;
     SIZE                            PortCount;
     PATA_PORT_DEVICE_OBJECT         PortDevices;

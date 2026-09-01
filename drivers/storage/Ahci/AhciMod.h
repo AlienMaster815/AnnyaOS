@@ -38,29 +38,26 @@
 #define AHCI_LOONGSON_ABAR                  0
 
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
-    PAHCI_GENERIC_HOST_CONTROL  GenericHostController;
-    PAHCI_GENERIC_PORT          GenericPort;
-    PPCI_DEVICE_OBJECT          PDEV;
-    UINT32                      CapOveride;
-    uint64_t                    AhciFlags;
-    uint64_t                    AtaFlags;
-    uint64_t                    PioFlags;
-    uint64_t                    DmaFlags;
-    uint64_t                    PrivateFlags;
-    //void                        (*StartCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
-    //LOUSTATUS                   (*StopCommandEngine)(PLOUSINE_KERNEL_DEVICE_ATA_PORT AtaPort);
-    uintptr_t                   FisDma;
-    uintptr_t                   CommandDma;
-    uint16_t                    PortMap;
-    uint8_t                     InterruptRequestVector;
-    uint8_t                     DmaBits;
-    size_t                      RemappedNvme;
-    uint64_t                    EmLocation;
-    uint64_t                    EmBufferSize;
-    uint8_t                     EmMessageType;
-    uint32_t                    ExternalPortMask;
-    UINT32                      CommandsQueued;
-    KERNEL_EVENT_OBJECT         CommandCompletion[32];
+    PAHCI_GENERIC_HOST_CONTROL              GenericHostController;
+    PAHCI_GENERIC_PORT                      GenericPort;
+    PPCI_DEVICE_OBJECT                      PDEV;
+    UINT32                                  CapOveride;
+    PAHCI_DRIVER_BOARD_INFORMATION_TABLE    BoardInfo;
+    uint64_t                                PrivateFlags;
+    void                                    (*StartCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
+    LOUSTATUS                               (*StopCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
+    uintptr_t                               FisDma;
+    uintptr_t                               CommandDma;
+    uint32_t                                PortMap;
+    uint8_t                                 InterruptRequestVector;
+    uint8_t                                 DmaBits;
+    size_t                                  RemappedNvme;
+    uint64_t                                EmLocation;
+    uint64_t                                EmBufferSize;
+    uint8_t                                 EmMessageType;
+    uint32_t                                ExternalPortMask;
+    UINT32                                  CommandsQueued;
+    KERNEL_EVENT_OBJECT                     CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
 
 /*

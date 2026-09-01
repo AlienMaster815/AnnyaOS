@@ -4,3 +4,5 @@ EXPORTS
     ScsiCoreRegisterScsiHostDeviceDriver
     ScsiCoreCreateScsiHostDeviceObject
     ScsiCoreEncodeLunAddressingLevel
+    ScsiCoreEncodeReadCapacity10Command
+    ScsiCoreEncodeRead10Command

@@ -16,3 +16,10 @@ echo 'module_path: boot():/ANNYA/SYSTEM64/SMPBOOT.LTB' >> ISO/boot/limine.conf ;
 
 [KERNEL_DEFAULT_CONFIG\Subsystems\0x0]
 "LoadOrder" = WORD:0x06;
+
+
+[KERNEL_DEFAULT_CONFIG\Drivers\PCI\VBOXGPU]
+"DriverName" = STRING:"VBOXGPU.SYS";
+
+[KERNEL_DEFAULT_CONFIG\Drivers\PCI\0x80EE\0xBEEF\0xFFFF\0xFFFF\0xFF\0xFF\0xFF]
+"DriverKey" = STRING:"KERNEL_DEFAULT_CONFIG\Drivers\PCI\VBOXGPU";

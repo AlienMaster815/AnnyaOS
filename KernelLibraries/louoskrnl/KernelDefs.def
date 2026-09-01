@@ -256,3 +256,4 @@ EXPORTS
     LouKeBlockThread
     LouKeUnblockThread
     LouKeGetThreadIdentificationFromThreadHandle
+    LouKeFreeFastObject

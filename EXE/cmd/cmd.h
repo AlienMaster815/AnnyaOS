@@ -97,6 +97,8 @@ CMD_STATUS DispatchAssocCommand(COMMAND_PARAMETER Params);
 CMD_STATUS DispatchColorCommand(COMMAND_PARAMETER Params);
 CMD_STATUS DispatchCdCommand(COMMAND_PARAMETER Params);
 CMD_STATUS DispatchDirCommand(COMMAND_PARAMETER Params);
+CMD_STATUS DispatchDateCommand(COMMAND_PARAMETER Params);
+
 
 #ifndef _COMMAND_MAIN_
 extern std::string DriveLetter;
@@ -110,7 +112,7 @@ typedef class AnnyaOsCommandEngine{
         const STRING_COMMAND_DIRECTORY Commands[DOS_INTERNAL_COMMANDS_COUNT] = {
             {"ASSOC", CMD_ASSOC, DispatchAssocCommand}, {"ATMADM", CMD_ATMADM, 0x00}, {"CD", CMD_CD, DispatchCdCommand},
             {"CHDIR", CMD_CHDIR, DispatchCdCommand}, {"CLS", CMD_CLS, 0x00}, {"COLOR", CMD_COLOR, DispatchColorCommand},
-            {"COPY", CMD_COPY, 0x00}, {"CTTY", CMD_CTTY, 0x00}, {"DATE", CMD_DATE, 0x00},
+            {"COPY", CMD_COPY, 0x00}, {"CTTY", CMD_CTTY, 0x00}, {"DATE", CMD_DATE, DispatchDateCommand},
             {"DEL", CMD_DEL, 0x00}, {"DIR", CMD_DIR, DispatchDirCommand}, {"ENDLOCAL", CMD_ENDLOCAL, 0x00},
             {"ERASE", CMD_ERASE, 0x00}, {"EXIT", CMD_EXIT, 0x00}, {"LH", CMD_LH, 0x00},
             {"LOADHIGH", CMD_LOADHIGH, 0x00}, {"LOCK", CMD_LOCK, 0x00}, {"MD", CMD_MD, 0x00},

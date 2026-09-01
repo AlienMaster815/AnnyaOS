@@ -142,12 +142,11 @@ typedef struct _AHCI_GENERIC_PORT{
 
 
 typedef struct _AHCI_DRIVER_BOARD_INFORMATION_TABLE{
-    uint32_t                        AhciFlags;
-    uint32_t                        AtaFlags;
-    uint32_t                        PioFlags;
-    uint32_t                        DmaFlags;
-    //PLOUSINE_ATA_PORT_OPERATIONS    DevicesPortOperations;
-    uint64_t                        Padding[4];
+    UINT32                          AhciFlags;
+    UINT8                           MaxPioSupport;
+    UINT8                           MaxUDmaSupport;
+    PATA_PORT_OPERATIONS            PortOperations;
+    PATA_HOST_OPERATIONS            HostOperations;
 }AHCI_DRIVER_BOARD_INFORMATION_TABLE, * PAHCI_DRIVER_BOARD_INFORMATION_TABLE,
  AHCI_DRIVER_BOARD_INFORMATION ,* PAHCI_DRIVER_BOARD_INFORMATION;
 

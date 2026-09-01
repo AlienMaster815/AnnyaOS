@@ -174,9 +174,9 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
                     goto _PIO_TRANSFER_DONE;
                 }   
                 if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-                    outsw(PrivateData->Ports.Data, CommandPacket->PioDataOut, CommandPacket->PioSize);
+                    outsw(PrivateData->Ports.Data, CommandPacket->PioDataOut, CommandPacket->PioSize / 2);
                 }else{
-                    insw(PrivateData->Ports.Data, CommandPacket->PioDataIn, CommandPacket->PioSize);
+                    insw(PrivateData->Ports.Data, CommandPacket->PioDataIn, CommandPacket->PioSize / 2);
                 }
             }
             _PIO_TRANSFER_DONE:
