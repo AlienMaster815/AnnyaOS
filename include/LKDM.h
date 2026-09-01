@@ -8,7 +8,7 @@ extern "C" {
 #define LkdmAtaHostToPciDevice(AtaHost)     (AtaHost)->PDEV
 #define LkdmAtaPortToPciDevice(AtaPort)     (AtaPort)->PDEV
 #define LkdmAtaHostToPrivateData(AtaHost)   (AtaHost)->HostPrivateData
-#define LkdmAtaPortToPrivateData(AtaPort)   (AtaPort)->PortPrivateData;
+#define LkdmAtaPortToPrivateData(AtaPort)   (AtaPort)->PortPrivateData
 
 #ifdef __cplusplus
 }

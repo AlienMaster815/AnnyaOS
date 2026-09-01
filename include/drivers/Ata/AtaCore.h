@@ -338,6 +338,7 @@ typedef struct _ATA_ENDPOINT_DEVICE_OBJECT{
 #define ATA_PORT_FLAGS_NO_IRQS  (1 << 0)
 
 typedef struct _ATA_PORT_DEVICE_OBJECT{
+    SIZE                            PortNumber;
     mutex_t*                        ChannelLock;
     ListHeader                      QueuedCommands;
     PLOUSINE_DMA_DEVICE             OptionalDmaDevice;

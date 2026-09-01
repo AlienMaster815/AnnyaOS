@@ -7,8 +7,7 @@ INCLUDES = -I../../../include
 
 
 # Source and target
-SRC = 	Ahci.c \
-		AhciLib.c
+SRC = 	Ahci.c 
 TARGET = AHCI.SYS
 
 # Build rule

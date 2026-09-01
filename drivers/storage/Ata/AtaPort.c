@@ -81,6 +81,7 @@ DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(
             return STATUS_INSUFFICIENT_RESOURCES;
         }
         for(SIZE i = 0 ; i < PortCount; i++){
+            HostDevice->PortDevices[i].PortNumber = i;
             HostDevice->PortDevices[i].PortPrivateData = (PVOID)(UINT8*)((UINT64)(UINT8*)HostDevice->PortDevices->PortPrivateData + (ROUND_UP64(PrivateDataSize, PrivateDataAlignment) * i));
             HostDevice->PortDevices[i].ChannelLock = &HostDevice->ChannelLocks[i];
             HostDevice->PortDevices[i].HostDevice = HostDevice;
@@ -369,6 +370,9 @@ LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
 
 _ERROR_CREATING_LIST:
     ForEachAtaPort(HostDevice, TmpPort, i){
+        if(!TmpPort->Operations){
+            continue;
+        }
         AtaCoreFreePortListEntry(TmpPort);
     }
     return Status;

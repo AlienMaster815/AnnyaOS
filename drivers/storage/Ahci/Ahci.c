@@ -20,6 +20,13 @@
 
 #include "AhciMod.h"
 
+static BOOL AhciMessagesEnabled = true;
+
+LOUSTATUS ResetAhcPciController(PATA_HOST_DEVICE_OBJECT AtaHost);
+void AhciPciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost);
+void AhciInitializePort(PATA_PORT_DEVICE_OBJECT AhciPort);
+LOUSTATUS AhciDeInitalizePort(PATA_PORT_DEVICE_OBJECT AhciPort);
+
 LOUSTATUS AhciGenericPortDevicePrepCommand(
     PATA_PORT_DEVICE_OBJECT PortDevice,
     PATA_COMMAND_PACKET     CommandPacket
@@ -51,31 +58,30 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
 }
 
 LOUSTATUS AhciGenericPortDeviceStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
-
-    LouPrint("AhciGenericPortDeviceStartPort()\n");
-    while(1);
+    AhciInitializePort(PortDevice);
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS AhciGenericPortDeviceStopPort(PATA_PORT_DEVICE_OBJECT PortDevice){
-
-    LouPrint("AhciGenericPortDeviceStopPort()\n");
-    while(1);
+    AhciDeInitalizePort(PortDevice);
     return STATUS_SUCCESS;
 }
 
 
-LOUSTATUS AhciGenericHostReset(PATA_HOST_DEVICE_OBJECT PortDevice){
-
-    LouPrint("AhciGenericPortDeviceStopPort()\n");
-    while(1);
+LOUSTATUS AhciGenericHostReset(PATA_HOST_DEVICE_OBJECT AtaHost){
+    ResetAhcPciController(AtaHost);
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS AhciGenericHostStart(PATA_HOST_DEVICE_OBJECT AtaHost){
+    AhciPciInitializeController(AtaHost);
+    PciHalEnableBusMaster(AtaHost->PDEV);
+    return STATUS_SUCCESS;
+}
 
 static ATA_HOST_OPERATIONS AhciGenericHostOperations = {
     .AtaHostDeviceReset = AhciGenericHostReset,
-//    .AtaHostDeviceStart = AtaGenericHostDeviceStart,
+    .AtaHostDeviceStart = AhciGenericHostStart,
 //    .AtaHostDeviceStop = AtaGenericHostDeviceStop,
 //    .AtaHostDeviceWake = AtaGenericHostDeviceWake,
 //    .AtaHostDeviceSleep = AtaGenericHostDeviceSleep,
@@ -691,6 +697,671 @@ void AhciStartCommandEngine(PATA_PORT_DEVICE_OBJECT AtaPort){
     LouPrint("AHCI.SYS:Ahci Command Engine Started\n");
 }
 
+static AhciSb600Enable64Bit(
+    PPCI_DEVICE_OBJECT  PDEV
+){
+    UNUSED static const DMI_SYSTEM_ID SystemIds[] = {
+        {
+            .Identification = "ASUS M2A-VM",
+            .Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "ASUSTeK Computer INC."),
+				DMI_MATCH(DMI_BOARD_NAME, "M2A-VM"),            
+            },
+            .DriverData = (PVOID)"20071026",
+        },
+        {
+			.Identification = "MSI K9A2 Platinum",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "MICRO-STAR INTER"),
+				DMI_MATCH(DMI_BOARD_NAME, "MS-7376"),
+			},
+		},
+        {
+			.Identification = "MSI K9AGM2",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "MICRO-STAR INTER"),
+				DMI_MATCH(DMI_BOARD_NAME, "MS-7327"),
+			},    
+		},
+        {
+			.Identification = "ASUS M3A",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "ASUSTeK Computer INC."),
+				DMI_MATCH(DMI_BOARD_NAME, "M3A"),
+			},
+		},
+        0,
+    };
+
+    PDMI_SYSTEM_ID Match;
+    INTEGER Year, Month, Date;
+    CHAR Buffer[9];
+
+    Match = LouKeDmiGetFirstMatch((PDMI_SYSTEM_ID)SystemIds);
+    if((PDEV->Bus != 0x00) || (PDEV->Function == 0x12) || (!Match)){
+        return false;
+    }
+
+    if(!Match->DriverData){
+        goto _ENABLE_64_BIT;
+    }
+
+    DmiGetDate(DMI_BIOS_DATE, &Year, &Month, &Date);
+    snprintf(Buffer, 9, "%04d%02d%02d", Year, Month, Date);
+
+    if(strcmp(Buffer, (string)Match->DriverData) >= 0){
+        goto _ENABLE_64_BIT;
+    }else{
+        LouPrint("AHCI.SYS:WARNING:Device:%h Can Not Enable 64 Bit DMA BIOS Is Too Old\n", PDEV);
+        return false;
+    }
+
+    _ENABLE_64_BIT:
+    LouPrint("AHCI.SYS:WARNING:Device:%h Enabling 64 Bit DMA\n", PDEV);
+    return true;
+}
+
+static void AhciRemapCheck(
+    PPCI_DEVICE_OBJECT          PDEV,
+    int                         Bar,
+    PAHCI_DRIVER_PRIVATE_DATA   PrivateData
+){
+    int     i;
+    UINT32  Capabilities;
+    PPCI_COMMON_CONFIG PciConfig = PDEV->CommonConfig;
+    if(
+        (PciConfig->Header.VendorID != 0x8086) || 
+        (PciHalGetIoRegionSize(PDEV, Bar) < (512 * KILOBYTE)) ||
+        (Bar != AHCI_STANDARD_ABAR) ||
+        (!(READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_VS_CAPABILITIES))) & 0x01))
+    ){
+        //LouPrint("AHCI.SYS:Vendor:%h\n", PciConfig->Header.VendorID);
+        //LouPrint("AHCI.SYS:BarSize:%h\n", PciHalGetIoRegionSize(PDEV, Bar));
+        //LouPrint("AHCI.SYS:Capabilities:%h\n", READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_VS_CAPABILITIES))));
+        LouPrint("AHCI.SYS:This AHCI Device Does Not Support NVME\n");
+        return;
+    }
+
+    Capabilities = READ_REGISTER_ULONGLONG((ULONGLONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AHCI_REMAP_CAP)));
+    for(i = 0; i < AHCI_MAXIMUM_REMAP; i++){
+        if((Capabilities & (1 << i)) == 0){
+            continue;
+        } 
+        if(READ_REGISTER_ULONG((ULONG*)((UINT8*)((UINTPTR)PrivateData->GenericHostController + AhciRemapDcc(i)))) != PCI_CLASS_STORAGE_EXPRESS){
+            continue;
+        }
+
+        PrivateData->RemappedNvme++;
+    }
+
+    if(!PrivateData->RemappedNvme){
+        LouPrint("AHCI.SYS:This AHCI Device Does Not Have Any NVME To Remap\n");
+        return;
+    }
+
+    LouPrint("AHCI.SYS:This AHCI Device Has %d NVME Devices Remap\n", PrivateData->RemappedNvme);
+    LouPrint("AHCI.SYS:If Your Bios Is In Raid Mode Switch To AHCI Mode To Use The NVME Device\n");
+
+    PrivateData->BoardInfo.AhciFlags |= AHCI_FLAG_NO_MSI;
+}
+
+void AhciSetEmMessages(
+    PAHCI_DRIVER_PRIVATE_DATA HostPrivate
+){
+    UINT8 Messages;
+    PAHCI_GENERIC_HOST_CONTROL Ghc = HostPrivate->GenericHostController;
+    UINT32 EmLocation = Ghc->EmLocation;
+    UINT32 EmControl = Ghc->EmControl;
+
+    if((!AhciMessagesEnabled) || (!(AHCI_SUPPORTS_EMS(Ghc->Capabilities)))){
+        LouPrint("AHCI.SYS:AhciSetEmMessages() EM Not Supported\n");
+        return;
+    }
+
+    Messages = ((EmControl & EM_CONTROL_MESSAGE_TYPE) >> 16);
+
+    if(Messages){
+        HostPrivate->EmLocation = EmLocation;
+        HostPrivate->EmBufferSize = ((EmLocation & 0xFF) * 4);
+        HostPrivate->EmMessageType = Messages;
+        //HostPrivate->AtaFlags |= ATA_FLAG_EM;
+        //if(!(EmControl & EM_CONTROL_ALHD)){
+        //    HostPrivate->AtaFlags |= ATA_FLAG_SW_ACTIVITY;
+        //}
+    }else{
+        LouPrint("AHCI.SYS:AhciSetEmMessages() EM Not Supported\n");
+    }
+
+}
+
+static bool AhciHasBrokenSystemPowerOff(
+    PPCI_DEVICE_OBJECT PDEV
+){
+    static const DMI_SYSTEM_ID BrokenSystems[] = {
+        {
+			.Identification = "HP Compaq nx6310",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP Compaq nx6310"),
+			},
+			.DriverData = (PVOID)0x1F,
+		},
+		{
+			.Identification = "HP Compaq 6720s",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP Compaq 6720s"),
+			},
+			.DriverData = (PVOID)0x1F,
+		},
+        0,
+    }; 
+
+    PDMI_SYSTEM_ID Match = LouKeDmiGetFirstMatch((PDMI_SYSTEM_ID)BrokenSystems);
+
+    if(Match){
+        return (((UINT8)(UINTPTR)Match->DriverData) == PDEV->Slot);
+    }
+
+    return false;
+}
+
+static bool AhciHasBrokenLpm(
+    PPCI_DEVICE_OBJECT PDEV
+){
+
+    static DMI_SYSTEM_ID SystemIds[] = {
+        {
+            .Matches = {
+                DMI_MATCH(DMI_SYSTEM_VENDOR, "LENOVO"),
+                DMI_MATCH(DMI_PRODUCT_VERSION, "ThinkPad X250"),
+            },
+            .DriverData = (PVOID)"20180406",
+        },
+        {
+            .Matches = {
+                DMI_MATCH(DMI_SYSTEM_VENDOR, "LENOVO"),
+                DMI_MATCH(DMI_PRODUCT_VERSION, "ThinkPad L450"),
+            },
+            .DriverData = (PVOID)"20180420",
+        },
+        {
+            .Matches = {
+                DMI_MATCH(DMI_SYSTEM_VENDOR, "LENOVO"),
+                DMI_MATCH(DMI_PRODUCT_VERSION, "ThinkPad T450s"),
+            },
+            .DriverData = (PVOID)"20180315",
+        },
+        {
+            .Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "LENOVO"),
+				DMI_MATCH(DMI_PRODUCT_VERSION, "ThinkPad W541"),
+            },
+            .DriverData = (PVOID)"20180409",
+        },
+        {
+            .Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "ASUSTeK COMPUTER INC."),
+				DMI_MATCH(DMI_PRODUCT_NAME, "ASUSPRO D840MB_M840SA"),
+            },
+        },
+        {
+            .Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "ASUSTeK COMPUTER INC."),
+				DMI_MATCH(DMI_BOARD_NAME, "ROG STRIX B550-F GAMING (WI-FI)"),            
+            },
+        },
+        {},
+    };
+
+    PDMI_SYSTEM_ID Dmi = LouKeDmiGetFirstMatch(SystemIds);
+    INTEGER Year, Month, Date;
+    CHAR Buffer[9];
+
+    if(!Dmi){
+        return false;
+    }
+    if(!Dmi->DriverData){
+        return true;
+    }
+
+    DmiGetDate(DMI_BIOS_DATE, &Year, &Month, &Date);
+    snprintf(Buffer, 9, "%04d%02d%02d", Year, Month, Date);
+
+    return strcmp(Buffer, (string)Dmi->DriverData) < 0;
+}
+
+
+static bool AhciHasBrokenSuspend(PPCI_DEVICE_OBJECT PDEV){
+
+    UNUSED static DMI_SYSTEM_ID SystemIds[] = {
+		{
+			.Identification = "dv4",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME,
+					  "HP Pavilion dv4 Notebook PC"),
+			},
+			.DriverData = (PVOID)"20090105",
+		},
+		{
+			.Identification = "dv5",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP Pavilion dv5 Notebook PC"),
+			},
+			.DriverData = (PVOID)"20090506",
+		},
+		{
+			.Identification = "dv6",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP Pavilion dv6 Notebook PC"),
+			},
+			.DriverData = (PVOID)"20090423",
+		},
+		{
+			.Identification = "HDX18",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Hewlett-Packard"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "HP HDX18 Notebook PC"),
+			},
+			.DriverData = (PVOID)"20090430",
+		},
+		{
+			.Identification = "G725",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "eMachines"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "eMachines G725"),
+			},
+			.DriverData = (PVOID)"20091216",
+		},
+		{ }
+	};    
+    PDMI_SYSTEM_ID Dmi = LouKeDmiGetFirstMatch(SystemIds);
+    INTEGER Year, Month, Date;
+    CHAR Buffer[9];
+
+    if((!Dmi) || (PDEV->Bus) || ((PDEV->Slot != 0x1F) && (PDEV->Function != 2))) {
+        return false;
+    }
+
+    DmiGetDate(DMI_BIOS_DATE, &Year, &Month, &Date);
+    snprintf(Buffer, 9, "%04d%02d%02d", Year, Month, Date);
+    return strcmp(Buffer, (string)Dmi->DriverData) < 0;
+}
+
+
+static bool AhciHasBrokenOnline(
+    PPCI_DEVICE_OBJECT PDEV
+){
+    static DMI_SYSTEM_ID SystemIds[] = {
+        {
+			.Identification = "EP45-DQ6",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "Gigabyte Technology Co., Ltd."),
+				DMI_MATCH(DMI_BOARD_NAME, "EP45-DQ6"),
+			},
+			.DriverData = AHCI_ENCODE_BUSDEVFUNC(0x0A, 0x00, 0),
+		},
+		{
+			.Identification = "EP45-DS5",
+			.Matches = {
+				DMI_MATCH(DMI_BOARD_VENDOR, "Gigabyte Technology Co., Ltd."),
+				DMI_MATCH(DMI_BOARD_NAME, "EP45-DS5"),
+			},
+			.DriverData = (PVOID)AHCI_ENCODE_BUSDEVFUNC(0x03, 0x00, 0),
+		},
+        {},
+    };
+
+    PDMI_SYSTEM_ID Dmi = LouKeDmiGetFirstMatch(SystemIds);
+    if(!Dmi){
+        return false;
+    }
+    UINT8 Bus, Slot, Func;
+    AHCI_DECODE_BUSDEVFUNC(&Bus, &Slot, &Func, Dmi->DriverData); 
+
+    return ((PDEV->Bus == Bus) && (PDEV->Slot == Slot) && (PDEV->Function == Func));
+}
+
+static void AcerSa5_271WorkAround(
+    PAHCI_DRIVER_PRIVATE_DATA   PrivateAhciData,
+    PPCI_DEVICE_OBJECT          PDEV
+){
+    
+    static DMI_SYSTEM_ID SystemIds[] = {
+		{
+			.Identification = "Acer Switch Alpha 12",
+			.Matches = {
+				DMI_MATCH(DMI_SYSTEM_VENDOR, "Acer"),
+				DMI_MATCH(DMI_PRODUCT_NAME, "Switch SA5-271"),
+			},
+		},
+        {},
+    };
+
+    if(LouKeCheckDmiSystem(SystemIds)){
+        LouPrint("AHCI.SYS:Enableing Acer Switch Alpha 12 Workaround\n");
+        if(((PrivateAhciData->GenericHostController->Capabilities) & 0xC734FF00) == 0xC734FF00){
+            PrivateAhciData->PortMap = 0x07;      
+            PrivateAhciData->CapOveride =  0xC734FF02;      
+        }
+    }
+
+}
+
+static void AhciMarkExternalPort(PATA_PORT_DEVICE_OBJECT AtaPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaPort->PortPrivateData;
+    PAHCI_GENERIC_PORT GenericPort = PrivateAhciData->GenericPort;
+    UINT32 Command = GenericPort->PxCMD;
+    UINT32 Capabilities = PrivateAhciData->CapOveride ? PrivateAhciData->CapOveride : PrivateAhciData->GenericHostController->Capabilities;
+
+    if(
+        ((Command & AHCI_COMMAND_ESP) && (Capabilities & AHCI_SUPPORTS_SXS(Capabilities))) || 
+        (Command & AHCI_COMMAND_HPCP)
+    ){
+        if(PrivateAhciData->ExternalPortMask & (1UL << AtaPort->PortNumber)){
+            LouPrint("AHCI.SYS:Ignoring External/Hotplug Capability\n");
+            return;
+        }
+        //AtaPort->AtaPFlags |= ATA_PFLAG_EXTERNAL;
+    }
+}
+
+static void AhciUpdateInitialLpmPolicy(PATA_PORT_DEVICE_OBJECT AtaPort){
+    
+}
+
+static void AhciIntelPcs(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
+    
+    uint16_t Tmp;
+
+    if(!(PrivateData->BoardInfo.AhciFlags & AHCI_FLAG_INTEL_PCS)){
+        return;
+    }
+
+    //according to linux documentation some PCS systems do not 
+    //automatically or faild to enable all the ports so we can
+    //try to do this now
+
+    Tmp = PciHalReadUint16(PDEV, PCS6_PCI_REGISTER);
+
+    if((Tmp & (PrivateData->PortMap & UINT16_MAX)) != (PrivateData->PortMap & UINT16_MAX)){
+        Tmp |= PrivateData->PortMap;
+        PciHalWriteUint16(PDEV, PCS6_PCI_REGISTER, Tmp);
+    }
+
+}
+
+static LOUSTATUS ResetAhciHba(PATA_HOST_DEVICE_OBJECT AtaHost){
+    UNUSED PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    UNUSED PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;    
+    UNUSED uint32_t Tmp;
+    uint32_t Poll = 0;
+    LouPrint("AHCI.SYS:ResetAhciHba()\n");
+
+    Tmp = Ghc->GlobalHostControl;
+    if(!(Tmp & (1 << 31))){
+        Tmp |= (1 << 31);
+        Ghc->GlobalHostControl = Tmp;
+        sleep(100);
+        Tmp = Ghc->GlobalHostControl;
+        if(!(Tmp & (1 << 31))){
+            Tmp |= (1 << 31);
+            for(uint8_t i = 0 ; i < 5; i = 0){
+                Ghc->GlobalHostControl = Tmp;
+            }
+            sleep(100);
+            if(!(Tmp & (1 << 31))){
+                LouPrint("AHCI.SYS:ERROR Setting AE\n");
+                return STATUS_IO_DEVICE_ERROR;
+            }
+        }
+    }
+
+    Tmp = Ghc->GlobalHostControl;
+    Tmp |= 1;
+    Ghc->GlobalHostControl = Tmp;
+
+    while(Poll >= 1000){
+        Tmp = Ghc->GlobalHostControl;
+        if(!(Tmp & 0x01)){
+            break;
+        }
+        Poll += 100;
+        sleep(100);
+    }
+
+    if(Poll >= 1000){
+        LouPrint("AHCI.SYS:Timeout HC Reset HBA Is Stuck\n");
+        return STATUS_IO_DEVICE_ERROR;
+    }
+
+    Tmp = Ghc->GlobalHostControl;
+    if(!(Tmp & (1 << 31))){
+        Tmp |= (1 << 31);
+        Ghc->GlobalHostControl = Tmp;
+        sleep(100);
+        Tmp = Ghc->GlobalHostControl;
+        if(!(Tmp & (1 << 31))){
+            Tmp |= (1 << 31);
+            for(uint8_t i = 0 ; i < 5; i = 0){
+                Ghc->GlobalHostControl = Tmp;
+            }
+            sleep(100);
+            if(!(Tmp & (1 << 31))){
+                LouPrint("AHCI.SYS:ERROR Setting AE\n");
+                return STATUS_IO_DEVICE_ERROR;
+            }
+        }
+    }
+
+
+    LouPrint("AHCI.SYS:ResetAhciHba() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS ResetAhcPciController(PATA_HOST_DEVICE_OBJECT AtaHost){
+    LOUSTATUS Status = STATUS_SUCCESS;
+    PPCI_DEVICE_OBJECT PDEV = LkdmAtaHostToPciDevice(AtaHost);
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    
+    Status = ResetAhciHba(AtaHost);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+
+    AhciIntelPcs(PDEV, PrivateData);
+
+    return STATUS_SUCCESS;
+}
+
+static LOUSTATUS AhciStopFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    uint32_t Tmp = Port->PxCMD;
+    Tmp &= ~(AHCI_PxCMD_FRE);
+    Port->PxCMD = Tmp;
+
+    Tmp = 0;
+    while(Tmp <= 10000){
+        if(Port->PxCMD & AHCI_PxCMD_FR){
+            sleep(100);
+            Tmp += 100;
+            continue;
+        }
+        break;
+    }    
+    if(Tmp >= 10000){
+        return STATUS_IO_DEVICE_ERROR;
+    }
+    LouPrint("AHCI.SYS:Fis Reception Stopped\n");
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS AhciDeInitalizePort(PATA_PORT_DEVICE_OBJECT AhciPort){
+    LOUSTATUS Status;
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
+
+    //Stop Command Engine
+    Status = PrivateData->StopCommandEngine(AhciPort);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("AHCI.SYS:Failed to Stop command engine\n");
+        return Status;
+    }
+
+    //Stop Fis Reception
+    Status = AhciStopFisReception(AhciPort);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("AHCI.SYS:Failed to stop FIS Reception\n");
+        return Status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+
+static void AhciClearPortPendingIrq(PATA_PORT_DEVICE_OBJECT AhciPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+
+    //Clear the SERR Register
+    Port->PxSERR = Port->PxSERR;
+    //Clear the Interrupt Status Register
+    if(Port->PxIS){
+        Port->PxIS = Port->PxIS;
+    }
+
+    Port->PxIS |= (1 << AhciPort->PortNumber);
+}
+
+void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    uint32_t Command;
+    bool HighMem = AHCI_SUPPORTS_S64A(Ghc->Capabilities);
+    uint32_t Poll = 0;
+    uintptr_t CommandDmaPhy;
+    uintptr_t FisDmaPhy;
+
+    RequestPhysicalAddress(PrivateData->CommandDma, &CommandDmaPhy);
+    RequestPhysicalAddress(PrivateData->FisDma, &FisDmaPhy);
+
+    if(HighMem){
+        Port->PxCLBU = (CommandDmaPhy >> 32);
+    }else{
+        Port->PxCLBU = 0;
+    }
+
+    Port->PxCLB = (CommandDmaPhy & 0xFFFFFFFF);
+
+    if(HighMem){
+        Port->PxFBU = (FisDmaPhy >> 32);
+    }else{
+        Port->PxFBU = 0;
+    }
+    Port->PxFB = (FisDmaPhy & 0xFFFFFFFF);
+
+    Command = Port->PxCMD;
+    Command |= AHCI_PxCMD_FRE;
+    Port->PxCMD = Command;
+    //Flush Command
+    Command = Port->PxCMD;
+    while(!(Port->PxCMD & AHCI_PxCMD_FR)){
+        sleep(100);
+        Poll += 100;
+        if(Poll >= 1000){
+            LouPrint("AHCI.SYS:Timeout Occoured Starting Fis Reception\n");
+            return;
+        }
+    }
+    LouPrint("AHCI.SYS:Fis Reception Started\n");
+}
+
+void AhciInitializePort(PATA_PORT_DEVICE_OBJECT AhciPort){
+    LouPrint("AHCI.SYS:AhciInitializePort()\n");
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
+    volatile PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    
+    AhciDeInitalizePort(AhciPort);
+
+    AhciClearPortPendingIrq(AhciPort);
+
+    PrivateData->CommandDma = (UINTPTR)LouKeDmaDeviceAllocateDmaMemory(&PrivateData->DmaDevice, 1 * KILOBYTE, 1 * KILOBYTE);
+    PrivateData->FisDma = (UINTPTR)LouKeDmaDeviceAllocateDmaMemory(&PrivateData->DmaDevice, 256, 256);
+
+
+    if(Port->PxCMD & (1 << 2)){
+        LouPrint("AHCI.SYS:Port Is Powered On\n");
+    }
+    if((Port->PxSCTL & 0x0F) != 3){
+        sleep(10);
+    }
+    LouPrint("AHCI.SYS:Communication Is Up\n");
+
+    AhciStartFisReception(AhciPort);
+
+    PrivateData->StartCommandEngine(AhciPort);
+
+    while((Port->PxTFD & (1 << 7)) && (Port->PxTFD & (1 << 3))){
+        sleep(10);
+    }
+    
+    Port->PxIE = 0xFFFFFFFF;
+
+}
+
+
+void AhciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost){
+    LouPrint("AHCI.SYS:AhciInitializeController\n");
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaHostToPrivateData(AtaHost);
+    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    uint32_t TmpControl;
+    PATA_PORT_DEVICE_OBJECT TmpPort;
+    SIZE i;
+
+    //TmpControl = Ghc->GlobalHostControl;
+    //TmpControl |= (1 << 1);
+    //Ghc->GlobalHostControl = TmpControl;
+    //TmpControl = Ghc->GlobalHostControl;
+    //if(TmpControl & (1 << 1)){
+    //    LouPrint("Interrupts Are Now Active On The Host Controller\n");
+    //}
+    //else{
+    //    LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
+    //}
+}
+
+
+void AhciPciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost){
+    PAHCI_DRIVER_PRIVATE_DATA AhciPrivate = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+    PPCI_DEVICE_OBJECT PDEV = AhciPrivate->PDEV;
+    UINT32 Tmp;
+    UINT8 Mv;
+
+    if(AhciPrivate->BoardInfo.AhciFlags & AHCI_FLAG_MV_PATA){
+        if(PciHalGetDeviceId(PDEV) == 0x6121){
+            Mv = 2;
+        }else{
+            Mv = 4;
+        }
+
+        if(AtaHost->PortCount > Mv){
+            PAHCI_DRIVER_PRIVATE_DATA MvPort = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->PortDevices[Mv].PortPrivateData;
+            MvPort->GenericPort->PxIE = 0;
+            Tmp = MvPort->GenericPort->PxIS;
+            if(Tmp){
+                MvPort->GenericPort->PxIS = Tmp;
+            }
+        }
+    }
+    AhciInitializeController(AtaHost);
+}
+
+
 
 LOUSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
@@ -701,7 +1372,7 @@ LOUSTATUS AddAhciDevice(
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(Device);
     UINT64 AhciDeviceID = PDEV->DeviceID;
     UINT8 BoardID = AhciDevices[AhciDeviceID].BoardID;
-
+    SIZE i = 0;
     LouPrint("AHCI.SYS:AHCI BoardID:%d\n", (UINT64)BoardID);
 
     //According to linux documentation An AHCI Driver Cannot Driver
@@ -807,6 +1478,8 @@ LOUSTATUS AddAhciDevice(
         while(1);
     }
 
+    AtaHost->Operations = BoardInformation->HostOperations;
+    
     Status = AtaCoreAllocatePortsForHost(AtaHost, PortCount, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));
     if(Status != STATUS_SUCCESS){
         LouPrint("AHCI.SYS:Unable To Allocate AHCI Ports Device\n");
@@ -816,22 +1489,164 @@ LOUSTATUS AddAhciDevice(
     PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
 
     PrivateAhciData->PDEV = PDEV;
+    AtaHost->PDEV = PDEV;
     PrivateAhciData->PortMap = Ghc->PortsImplemented;
+    PrivateAhciData->GenericHostController = Ghc;
 
     PrivateAhciData->StopCommandEngine = AhciStopCommandEngine;
     PrivateAhciData->StartCommandEngine = AhciStartCommandEngine;
 
-    PrivateAhciData->BoardInfo = BoardInformation;
 
+    memcpy(&PrivateAhciData->BoardInfo, BoardInformation, sizeof(PrivateAhciData->BoardInfo));
     for(size_t Slot = 0 ; Slot < 32; Slot++){
         LouKeInitializeEventTimeOut(&PrivateAhciData->CommandCompletion[Slot], 5000); //10 second timeout
     }
+
+    //Nvidia MCP65 Chip Revisions 0xA1 and 0xA2 do not support
+    //MSI so we should take note of this however the losuine
+    //currently dosent support interrupts for storage devices
+    //because storage devices are optimized for Poling because
+    //Cpu time slicing is done as a (Virtual Process) meaning that
+    //the system uses interrupt threads to manage context management
+    if(
+        (BoardID == AHCI_BOARD_MCP65_CHIP && PciHalGetRevisionId(PDEV) == 0xA1) || 
+        (BoardID == AHCI_BOARD_MCP65_CHIP && PciHalGetRevisionId(PDEV) == 0xA2) 
+    ){
+        PrivateAhciData->BoardInfo.AhciFlags |= AHCI_FLAG_NO_MSI;
+    }
+    //SB800 doesn't need to conform to the INTERNAL SERR quirk
+    if(BoardID == AHCI_BOARD_SB700_CHIP && PciHalGetRevisionId(PDEV) >= 0x40){
+        PrivateAhciData->BoardInfo.AhciFlags &= ~(AHCI_FLAG_IGN_INTERNAL_SERR);
+    }
+
+    if(AhciSb600Enable64Bit(PDEV)){
+        PrivateAhciData->BoardInfo.AhciFlags &= ~(AHCI_FLAG_32BIT_ONLY);
+    }
+    
+    AhciRemapCheck(PDEV, Abar, PrivateAhciData);
+
+    if(AHCI_SUPPORTS_SNCQ(Ghc->Capabilities)){
+        //PrivateAhciData->BoardInfo.AtaFlags |= ATA_FLAG_NCQ;
+
+        //according the the linux kernel documentation
+        //auto activate optimization SHOULD be supported
+        //all controller however like always some vendors
+        //(NVIDIA) Cut corners and tend to have broken 
+        //implementations on their chips allthough it
+        //is not documented in the actual hardware manuals
+        //it should be handled aproprietly
+        if(!(PrivateAhciData->BoardInfo.AhciFlags & AHCI_FLAG_NO_FPDMA_AA)){
+            //PrivateAhciData->BoardInfo.AtaFlags |= ATA_FLAG_FPDMA_AA;
+        }
+
+        //Finally all systems with NCQ have a Auxil field
+        //PrivateAhciData->BoardInfo.AtaFlags |= ATA_FLAG_FPDMA_AUXILERY;
+    }
+
+    if(AHCI_SUPPORTS_S64A(Ghc->Capabilities)){
+        if(PrivateAhciData->BoardInfo.AhciFlags & AHCI_FLAG_43BIT_DMA_ONLY){
+            PrivateAhciData->DmaDevice.AllocatorData.DmaLimit = 43;        
+        }else{
+            PrivateAhciData->DmaDevice.AllocatorData.DmaLimit = 64;        
+        }
+    }else {
+        PrivateAhciData->BoardInfo.AhciFlags |= AHCI_FLAG_32BIT_ONLY;
+        PrivateAhciData->DmaDevice.AllocatorData.DmaLimit = 32;        
+    }
+
+    PrivateAhciData->DmaDevice.AllocatorData.DmaThreshold = 4 * MEGABYTE;
+    
+    //if(AHCI_SUPPORTS_PMP(Ghc->Capabilities)){
+    //    PrivateAhciData->AtaFlags |= ATA_FLAG_PMP;   
+    //}
+
+    AhciSetEmMessages(PrivateAhciData);
+
+    if(AhciHasBrokenSystemPowerOff(PDEV)){
+        PrivateAhciData->BoardInfo.AhciFlags |= AHCI_FLAG_NO_POWEROFF_SPINDOWN;
+        LouPrint("AHCI.SYS:AHCI Spindown Quirk Skipping Spindown On Power Off\n");
+    }
+    
+    if(AhciHasBrokenLpm(PDEV)){
+        //PrivateAhciData->AtaFlags |= ATA_FLAG_NO_LPM;
+        LouPrint("AHCI.SYS:BIOS Update Required For Link Power Management Support\n");
+    }
+
+    if(AhciHasBrokenSuspend(PDEV)){
+        PrivateAhciData->BoardInfo.AhciFlags |= AHCI_FLAG_NO_SUSPEND;
+        LouPrint("AHCI.SYS:BIOS Update Required For Suspend And Resume\n");
+    }
+    
+    if(AhciHasBrokenOnline(PDEV)){
+        PrivateAhciData->BoardInfo.AhciFlags |= AHCI_SRST_TOUT_IS_OFFLINE;
+        LouPrint("AHCI.SYS:Online Status Unreliable Applying Workaround\n");
+    }
+
+    AcerSa5_271WorkAround(PrivateAhciData, PDEV);
+
+    //AhciInitializeInterrupts(PDEV, PortCount, PrivateAhciData);
+
+    //PrivateAhciData->InterruptRequestVector = PciHalGetIrqVector(PDEV, 0);
+
+    UNUSED UINT32 TmpCap = (PrivateAhciData->CapOveride ? PrivateAhciData->CapOveride : Ghc->Capabilities);
+
+    //if(!(AHCI_SUPPORTS_SSS(TmpCap))){
+    //    PrivateAhciData->AtaFlags |= ATA_FLAG_PARALLEL_SCAN;
+    //}else{
+    //    LouPrint("AHCI.SYS:SSS Bit Set But Bus Scan Disabled\n");
+    //}
+
+    //if(!(AHCI_SUPPORTS_PSC(TmpCap))){
+    //    PrivateAhciData->AtaFlags |= ATA_FLAG_NO_PART;
+    //}
+
+    //if(!(AHCI_SUPPORTS_SSC(TmpCap))){
+    //    PrivateAhciData->AtaFlags |= ATA_FLAG_NO_SSC;
+    //}
+
+    //if(!(AHCI_SUPPORTS_SDS(Ghc->Capabilities2))){
+    //    PrivateAhciData->AtaFlags |= ATA_FLAG_NO_DEV_SLP;
+    //}
+
+    //if(PrivateAhciData->AtaFlags & ATA_FLAG_EM){
+    //    AhciResetEm(AtaHost);
+    //}
+
+
+    PATA_PORT_DEVICE_OBJECT TmpPort;
+    PAHCI_DRIVER_PRIVATE_DATA TmpPrivate;
+    ForEachAtaPort(AtaHost, TmpPort, i){
+        TmpPrivate = (PAHCI_DRIVER_PRIVATE_DATA)TmpPort->PortPrivateData;
+        memcpy(TmpPrivate, PrivateAhciData, sizeof(AHCI_DRIVER_PRIVATE_DATA));
+        TmpPrivate->GenericPort = (PAHCI_GENERIC_PORT)(UINTPTR)((UINTPTR)Ghc + 0x100 + i * 0x80);
+        AhciMarkExternalPort(TmpPort);
+        AhciUpdateInitialLpmPolicy(TmpPort);
+        if(Ghc->PortsImplemented & (1 << i)){
+            //LouPrint("AHCI.SYS:Port:%d Implemented\n", i);
+            TmpPort->Operations = BoardInformation->PortOperations;
+        }
+    }
+
+    //2107
+    //2110
+
+    //AhciSetupInterruptHandler(AtaHost);
+
+    LouPrint("AHCI.SYS:Adding AHCI Device To  ATA Core\n");    
+
+    Status = AtaCoreRegisterAtaHostDevice(AtaHost);    
+    if(Status != STATUS_SUCCESS){
+        LouPrint("AHCI.SYS:AddAtaDevice() Could Not Register AHCI Host Device\n");
+        while(1);
+    }
+
 
 
     LouPrint("AHCI.SYS:AddAhciDevice() STATUS_SUCCESS\n");
     while(1);
     return STATUS_SUCCESS; //Status;
 }
+
 VOID AhciUnloadDriver(
     PDRIVER_OBJECT DriverObject
 ){

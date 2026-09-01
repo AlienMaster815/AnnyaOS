@@ -42,7 +42,7 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     PAHCI_GENERIC_PORT                      GenericPort;
     PPCI_DEVICE_OBJECT                      PDEV;
     UINT32                                  CapOveride;
-    PAHCI_DRIVER_BOARD_INFORMATION_TABLE    BoardInfo;
+    AHCI_DRIVER_BOARD_INFORMATION_TABLE     BoardInfo;
     uint64_t                                PrivateFlags;
     void                                    (*StartCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
     LOUSTATUS                               (*StopCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
@@ -50,7 +50,7 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uintptr_t                               CommandDma;
     uint32_t                                PortMap;
     uint8_t                                 InterruptRequestVector;
-    uint8_t                                 DmaBits;
+    LOUSINE_DMA_DEVICE                      DmaDevice;
     size_t                                  RemappedNvme;
     uint64_t                                EmLocation;
     uint64_t                                EmBufferSize;
@@ -59,6 +59,32 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     UINT32                                  CommandsQueued;
     KERNEL_EVENT_OBJECT                     CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
+
+static inline unsigned int AhciRemapDcc(int i){
+    return AHCI_REMAP_N_DCC + i * 0x80;
+}
+
+#define         AHCI_ENCODE_BUSDEVFUNC(Bus, Slot, Func) (PVOID)(((Bus & 0xFF) << 16) | ((Slot & 0xFF) << 8) | ((Func & 0xFF)))
+static inline 
+void   
+AHCI_DECODE_BUSDEVFUNC(
+    UINT8* Bus, 
+    UINT8* Slot, 
+    UINT8* Func,
+    PVOID pEncoding
+){
+    UINT64 Encoding = (UINT64)pEncoding;
+    if(Bus){
+        *Bus = ((Encoding >> 16) & 0xFF);
+    }
+    if(Slot){
+        *Slot = ((Encoding >> 8) & 0xFF);
+    }
+    if(Func){
+        *Func = ((Encoding) & 0xFF);
+    }
+}
+
 
 /*
 
@@ -141,31 +167,7 @@ static inline void DumpEverything(
 #define PORT_STATE_IDLE                     12
 #define PORT_STATE_NDR_ENTRY                13
 
-#define         AHCI_ENCODE_BUSDEVFUNC(Bus, Slot, Func) (PVOID)(((Bus & 0xFF) << 16) | ((Slot & 0xFF) << 8) | ((Func & 0xFF)))
-static inline 
-void   
-AHCI_DECODE_BUSDEVFUNC(
-    UINT8* Bus, 
-    UINT8* Slot, 
-    UINT8* Func,
-    PVOID pEncoding
-){
-    UINT64 Encoding = (UINT64)pEncoding;
-    if(Bus){
-        *Bus = ((Encoding >> 16) & 0xFF);
-    }
-    if(Slot){
-        *Slot = ((Encoding >> 8) & 0xFF);
-    }
-    if(Func){
-        *Func = ((Encoding) & 0xFF);
-    }
-}
 
-
-static inline unsigned int AhciRemapDcc(int i){
-    return AHCI_REMAP_N_DCC + i * 0x80;
-}
 
 void AhciSetEmMessages(
     PAHCI_DRIVER_PRIVATE_DATA HostPrivate
