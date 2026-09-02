@@ -686,27 +686,18 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     sleep_till(Expiration);
 }
 
+static BOOLEAN Ready = false;
+
+void SetRtlYeildFunction(){
+    Ready = true;
+}
+
 LOUAPI
 void 
 LouKeYieldExecution(){
-    PGENERIC_THREAD_DATA ThreadData = LouKeGetCurrentThreadData();
-    LouKIRQL Irql;
-    TIME_T Time;
-    UINT64 CurrentTSC;
-    UINT64 TscFrequency;
-    UINT64 Expiration;
-    LouKeLockProcManager(&Irql);
-    memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    if(ThreadData->State < THREAD_BLOCKED){
-        ThreadData->State = THREAD_BLOCKED;
-    }    
-    LouKeGetFutureTime(&Time, ThreadData->TotalMsSlice);
-    CurrentTSC = read_tsc();
-    TscFrequency = GetTscMaster() / 1000;
-    Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
-    memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeUnlockProcManager(&Irql);
-    sleep_till(Expiration);
+    if(Ready){
+        asm("INT $0x20");
+    }
 }
 
 LOUAPI void LouKeUnblockThread(UINT64 ThreadID){

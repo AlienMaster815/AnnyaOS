@@ -26,7 +26,6 @@ void LouKeLockProcManager(LouKIRQL* Irql){
 
 void LouKeUnlockProcManager(LouKIRQL* Irql){
     //LouKeReleaseInterruptLock(&ProcLock, Irql);
-    //asm("INT $0x20");
 }
 
 LOUAPI
@@ -65,6 +64,7 @@ static ULONG                             InitializationProcessor = 0;
 LOUAPI void SetCr3(UINT64);
 LOUAPI UINT64 GetCr3();
 LOUAPI void SetLKPCB(UINT64 KernelProcBlock);
+void SetRtlYeildFunction();
 
 //static LouKeManagerProcessSwap();
 void PsmProcessScedualManagerObject::PsmSetProcessTransitionState(){
@@ -425,6 +425,8 @@ LOUAPI void InitializeProcessManager(){
     
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessData(KERNEL_PROCESS_NAME, &KernelProcess);
+
+
     PTHREAD NewThread;
     for(ULONG i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         ProcessBlock.ProcStateBlock[i].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(i);
@@ -448,12 +450,13 @@ LOUAPI void InitializeProcessManager(){
     }
 
     MutexUnlock(&ApProcessorInitLock);        
-    MutexUnlock(&ApProcessorInitLock);
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     while(LouKeGetReferenceCount(&ApsWaitingForInterruptEnabling) < (ProcessBlock.ProcessorCount - 1)){
         LouKeMemoryBarrier();
     }
+    
+    SetRtlYeildFunction();
 
     LouKeSchedDbgPrint("Finished Initializing Process Manager\n");
 }

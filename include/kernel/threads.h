@@ -172,21 +172,28 @@ static inline int LouKeGetAtomic(atomic_t* A){
     return atomic_read(A);
 }
 
-static inline void LouKeSetAtomic64(atomic_int64_t* A, int64_t Value){
+static inline void LouKeSetAtomic64(atomic64_t* A, int64_t Value){
     atomic64_set(A, Value);
 }
 
-static inline int64_t LouKeGetAtomic64(atomic_int64_t* A){
+static inline int64_t LouKeGetAtomic64(atomic64_t* A){
     return atomic64_read(A);
 }
 
-static inline void LouKeSetAtomic64FromUint64(atomic_int64_t* A, uint64_t Value){
-    atomic64_set((atomic_int64_t*)A, (int64_t)Value);
+
+
+static inline void LouKeSetAtomic64FromUint64(atomic64_t* A, uint64_t Value) {
+    union { uint64_t u; int64_t i; } converter;
+    converter.u = Value;
+    A->counter = converter.i;
 }
 
-static inline uint64_t LouKeGetAtomic64FromUint64(atomic_int64_t* A){
-    return atomic64_read((atomic_int64_t*)A);
+static inline uint64_t LouKeGetAtomic64FromUint64(atomic64_t* A) {
+    union { uint64_t u; int64_t i; } converter;
+    converter.i = A->counter;
+    return converter.u;
 }
+
 
 static inline void LouKeSetAtomicBoolean(PATOMIC_BOOLEAN b, int Boolean){
     LouKeSetAtomic(b, Boolean);
@@ -253,7 +260,7 @@ typedef enum{
 typedef struct _EXLO_MUTEX{
     mutex_t         ExloLock;
     semaphore_t     Counter;
-    atomic_int64_t  ExloThread;
+    atomic64_t  ExloThread;
     atomic_t        GracePeriod;
 }EXLO_MUTEX, * PEXLO_MUTEX;
 

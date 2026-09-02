@@ -36,8 +36,11 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
 #define ListItemToTypeOrNull(Header, Type, Member) \
     ((Type*)(UINTPTR)((Header) ? CONTAINER_OF((Header), Type, Member) : 0x00))
 
+#define LListItemToTypeOrNull(Header, Type, Member) \
+    ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic64_t*)&(Header)->NextHeader), Type, Member)
+
 #define ForEachListItem(Position, Node) \
-    for((Position) = (Node); (Position); (Position) = (PListHeader)LouKeGetAtomic64FromUint64((atomic_int64_t*)&(Position)->NextHeader))
+    for((Position) = (Node); (Position); (Position) = (PListHeader)LouKeGetAtomic64FromUint64((atomic64_t*)&(Position)->NextHeader))
 
 #define ForEachLListItem(Position, Node) \
     for((Position) = (Node); (Position); (Position) = (Position)->NextHeader)
@@ -62,13 +65,13 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
         (Position) = (N))
 
 #define ForEachLListEntry(Position, Node, Member) \
-    for((Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic_int64_t*)&(Node)->NextHeader), typeof(*(Position)), Member); \
+    for((Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic64_t*)&(Node)->NextHeader), typeof(*(Position)), Member); \
         ListMemberIsNotNull((Position), Member); \
-        (Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic_int64_t*)&(Position)->Member.NextHeader), typeof(*(Position)), Member))
+        (Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic64_t*)&(Position)->Member.NextHeader), typeof(*(Position)), Member))
 
 #define ForEachLListEntrySafe(Position, N, Node, Member) \
-    for((Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic_int64_t*)&(Node)->NextHeader), typeof(*(Position)), Member); \
-        ListMemberIsNotNull((Position), Member) && ((N) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic_int64_t*)&(Position)->Member.NextHeader), typeof(*(N)), Member), true); \
+    for((Position) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic64_t*)&(Node)->NextHeader), typeof(*(Position)), Member); \
+        ListMemberIsNotNull((Position), Member) && ((N) = ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic64_t*)&(Position)->Member.NextHeader), typeof(*(N)), Member), true); \
         (Position) = (N))
 
 static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
@@ -80,11 +83,11 @@ static inline void LouKeListAddTail(PListHeader Tail, PListHeader Header){
 }
 
 static inline void LouKeLListAddTail(PListHeader Tail, PListHeader Header){
-    while(LouKeGetAtomic64FromUint64((atomic_int64_t*)&Header->NextHeader)){
-        Header = (PListHeader)LouKeGetAtomic64FromUint64((atomic_int64_t*)&Header->NextHeader);
+    while(LouKeGetAtomic64FromUint64((atomic64_t*)&Header->NextHeader)){
+        Header = (PListHeader)LouKeGetAtomic64FromUint64((atomic64_t*)&Header->NextHeader);
     }
-    LouKeSetAtomic64FromUint64((atomic_int64_t*)&Header->NextHeader, (UINT64)(UINTPTR)Tail);
-    LouKeSetAtomic64FromUint64((atomic_int64_t*)&Tail->LastHeader, (UINT64)(UINTPTR)Header);
+    LouKeSetAtomic64FromUint64((atomic64_t*)&Header->NextHeader, (UINT64)(UINTPTR)Tail);
+    LouKeSetAtomic64FromUint64((atomic64_t*)&Tail->LastHeader, (UINT64)(UINTPTR)Header);
 }
 
 
@@ -101,19 +104,19 @@ static inline BOOLEAN LouKeListIsHead(PListHeader List, PListHeader Head){
     for(;!LouKeListEntryIsHead(Position, Head, Member); Position = ListItemToType((Position)->Member.NextHeader, typeof(*(Position)), Member)) \
 
 static inline void LouKeLListDeleteItem(PListHeader Item){
-    PListHeader LastHeader = (PListHeader)(UINT64)LouKeGetAtomic64FromUint64((atomic_int64_t*)&Item->LastHeader);
-    PListHeader NextHeader = (PListHeader)(UINT64)LouKeGetAtomic64FromUint64((atomic_int64_t*)&Item->NextHeader);
+    PListHeader LastHeader = (PListHeader)(UINT64)LouKeGetAtomic64FromUint64((atomic64_t*)&Item->LastHeader);
+    PListHeader NextHeader = (PListHeader)(UINT64)LouKeGetAtomic64FromUint64((atomic64_t*)&Item->NextHeader);
     if(LastHeader){
-        LouKeSetAtomic64FromUint64((atomic_int64_t*)&LastHeader->NextHeader, (int64_t)(UINT64)(UINTPTR)NextHeader);
+        LouKeSetAtomic64FromUint64((atomic64_t*)&LastHeader->NextHeader, (int64_t)(UINT64)(UINTPTR)NextHeader);
     }
     if(NextHeader){
-        LouKeSetAtomic64FromUint64((atomic_int64_t*)&NextHeader->LastHeader, (int64_t)(UINT64)(UINTPTR)LastHeader);
+        LouKeSetAtomic64FromUint64((atomic64_t*)&NextHeader->LastHeader, (int64_t)(UINT64)(UINTPTR)LastHeader);
     }
 }
 
 static inline void LouKeLListDeleteAll(PListHeader Head){
-    LouKeSetAtomic64FromUint64((atomic_int64_t*)&Head->NextHeader, (int64_t)(UINT64)(UINTPTR)0);
-    LouKeSetAtomic64FromUint64((atomic_int64_t*)&Head->LastHeader, (int64_t)(UINT64)(UINTPTR)0);
+    LouKeSetAtomic64FromUint64((atomic64_t*)&Head->NextHeader, (int64_t)(UINT64)(UINTPTR)0);
+    LouKeSetAtomic64FromUint64((atomic64_t*)&Head->LastHeader, (int64_t)(UINT64)(UINTPTR)0);
 }
 
 

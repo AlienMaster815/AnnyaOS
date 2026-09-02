@@ -2,7 +2,6 @@
 #include "ProcessPrivate.h"
 
 static ListHeader MasterProcessList = {0};
-static spinlock_t ProcessListLock = {0};
 static KERNEL_REFERENCE TotalProcesses = {0};
 static XARRAY ProcessThreadIDXa = {};
 
@@ -47,7 +46,6 @@ uint64_t LouKeLinkerGetAddress(
 
 
 static PGENERIC_PROCESS_DATA CreateProcessObjectA(string ProcessName, string ProcessPath){    
-    LouKIRQL Irql; 
     PGENERIC_PROCESS_DATA NewProcessObject = LouKeMallocType(GENERIC_PROCESS_DATA , KERNEL_GENERIC_MEMORY);
 
     SIZE ProcessNameLen = strlen(ProcessName);
@@ -66,10 +64,8 @@ static PGENERIC_PROCESS_DATA CreateProcessObjectA(string ProcessName, string Pro
         NewProcessObject->ProcessPathUnicode[i] = (WCHAR)NewProcessObject->ProcessPath[i];
     }
 
-    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
-    LouKeListAddTail(&NewProcessObject->Peers, &MasterProcessList);
+    LouKeLListAddTail(&NewProcessObject->Peers, &MasterProcessList);
     LouKeAcquireReference(&TotalProcesses);
-    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
 
     return NewProcessObject;
 }
@@ -77,10 +73,7 @@ static PGENERIC_PROCESS_DATA CreateProcessObjectA(string ProcessName, string Pro
 UNUSED static void DestroyProcessObject(
     PGENERIC_PROCESS_DATA ProcessObject
 ){    
-    LouKIRQL                Irql;
-    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
-    LouKeListDeleteItem(&ProcessObject->Peers);
-    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
+    LouKeLListDeleteItem(&ProcessObject->Peers);
     LouKeFree(ProcessObject->ProcessName);
     LouKeFree(ProcessObject->ProcessPath);
     LouKeFree(ProcessObject);
@@ -276,17 +269,13 @@ LOUSTATUS LouKePsmGetProcessData(
     if((!ProcessName) || (!OutHandle)){
         return STATUS_INVALID_PARAMETER;
     }
-    LouKIRQL Irql;
     PGENERIC_PROCESS_DATA TmpHandle;
-    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
-    ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
+    ForEachLListEntry(TmpHandle, &MasterProcessList, Peers){
         ForEachIf(!strcmp(TmpHandle->ProcessName, ProcessName)){
             *OutHandle = (HANDLE)TmpHandle;
-            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
             return STATUS_SUCCESS;
         }
     }
-    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
     *OutHandle = 0x00;
     return STATUS_NO_SUCH_FILE;
 }
@@ -298,17 +287,13 @@ LOUSTATUS LouKePsmGetProcessDataW(
     if((!ProcessName) || (!OutHandle)){
         return STATUS_INVALID_PARAMETER;
     }
-    LouKIRQL Irql;
     PGENERIC_PROCESS_DATA TmpHandle;
-    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
-    ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
+    ForEachLListEntry(TmpHandle, &MasterProcessList, Peers){
         ForEachIf(!wcscmp(TmpHandle->ProcessNameUnicode, ProcessName)){
             *OutHandle = (HANDLE)TmpHandle;
-            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
             return STATUS_SUCCESS;
         }
     }
-    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
     *OutHandle = 0x00;
     return STATUS_NO_SUCH_FILE;
 }
@@ -317,15 +302,11 @@ LOUAPI
 uint64_t 
 LouKePsmGetProcessPml4(uint32_t ProcessID){
     PGENERIC_PROCESS_DATA TmpHandle;
-    LouKIRQL Irql;
-    LouKeAcquireSpinLock(&ProcessListLock, &Irql);
-    ForEachListEntry(TmpHandle, &MasterProcessList, Peers){
+    ForEachLListEntry(TmpHandle, &MasterProcessList, Peers){
         if(ProcessID == TmpHandle->ProcessID){
-            LouKeReleaseSpinLock(&ProcessListLock, &Irql);
             return (TmpHandle->PMLTree - KSpaceBase);
         }
     }
-    LouKeReleaseSpinLock(&ProcessListLock, &Irql);
     return 0x00;
 }
 

@@ -79,7 +79,6 @@ LouKeCreateDeferedDemonEx(
         MARK_PROCESSOR_AFFILIATED(AfinityMask, Processor);
     }
 
-
     LOUSTATUS Status;
     PGENERIC_THREAD_DATA NewThread; 
     Status = CreateDemonThreadHandle(
