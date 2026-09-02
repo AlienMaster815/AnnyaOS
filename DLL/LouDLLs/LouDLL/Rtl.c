@@ -611,7 +611,7 @@ LouRtlAllocateHeapEx(
         while(1);
     }
     if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
-        MutexLock(&Heap->HeapLock);
+        AtomicLock(&Heap->HeapLock);
     }
     PUSER_HEAP_ALLOCATION_TRACKER TmpTracker;
     PVOID TmpResult = Heap->HeapBase;

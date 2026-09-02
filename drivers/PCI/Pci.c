@@ -124,6 +124,7 @@ void PciHalLegacyFallbackCheckSlot(
     UINT8   Slot
 ){
     UINT16 VendorID = LegacyPciGetVendorIdEx(Bus, Slot, 0);
+  
     UINT8 HeaderType = LegacyPciGetHeaderTypeEx(Bus, Slot, 0);
 
     if(VendorID == 0xFFFF){
@@ -261,6 +262,7 @@ void PciHalInitializePciBus(
     UINT8   Bus
 ){
     PciHalDbgPrint("PCI.SYS:Scaning Group:%d::Bus:%d\n", (UINT64)Group, (UINT64)Bus);
+    
     for(SIZE i = 0 ; i < 32; i++){
         BOOLEAN Success = false;
         UINT32* EcamDeviceBase = PciHalGetNativePciPhysicalAddress(
@@ -307,6 +309,7 @@ LOUSTATUS PciEntry(){
     PciHalDbgPrint("PCI.SYS:PciEntry()\n");
 
     PciHalDbgPrint("PCI.SYS:Initializing PCI Objects\n");
+
 
     LouKeCreateFastObjectClass("PDEV", 256, sizeof(PCI_DEVICE_OBJECT), GET_ALIGNMENT(PCI_DEVICE_OBJECT), 0, KERNEL_GENERIC_MEMORY);
     LouKeCreateFastObjectClass("PCICONFIG", 256, sizeof(PCI_COMMON_CONFIG), GET_ALIGNMENT(PCI_COMMON_CONFIG), 0 , KERNEL_GENERIC_MEMORY);

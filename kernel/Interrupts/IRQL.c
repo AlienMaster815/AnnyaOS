@@ -30,6 +30,7 @@ void LouKeSetIrqlNoFlagUpdate(
     LouKIRQL* OldIrql
 ){
     if(!GetGSBase()){
+        *OldIrql = HIGH_LEVEL;
         return;
     }
     
@@ -112,16 +113,20 @@ void LouKeSetIrql(
             asm("cli");
             SetWinIRQL((UINT8)DIRQL);    
             asm("sti");
+            ApciHalStartApicTimerEvents();
             return;
         } 
         case CLOCK_LEVEL:{
             //sanity clear interrupts so nesting occours
+            ApciHalStopApicTimerEvents();
             asm("cli");
             SetWinIRQL((UINT8)CLOCK_LEVEL);    
             asm("sti");
+            ApciHalStartApicTimerEvents();
             return;
         }
         case HIGH_LEVEL:{
+            ApciHalStopApicTimerEvents();
             asm("cli");
             SetWinIRQL((UINT8)HIGH_LEVEL);    
             return;
@@ -131,17 +136,32 @@ void LouKeSetIrql(
     }
 }
 
+void LouKeRaiseIrql(
+    LouKIRQL    Irql,
+    LouKIRQL*   OldIrql
+){
+    if(OldIrql){
+        *OldIrql = LouKeGetIrql();
+    }
+    if(*OldIrql >= Irql)return;
+    LouKeSetIrql(Irql, 0x00);
+}
+
+void LouKeLowerIrql(
+    LouKIRQL    Irql
+){
+    if(LouKeGetIrql() <= Irql)return;
+    LouKeSetIrql(Irql, 0x00);
+}
+
 void KeRaiseIrql( // for wdk compatibility
     LouKIRQL DispatchLevel, 
     LouKIRQL* OldIrql
 ){
-    if(*OldIrql >= DispatchLevel)return;
-    LouKeSetIrql(DispatchLevel, OldIrql);
-    LouKeMemoryBarrier();
+
 }
 
 void KeLowerIrql(LouKIRQL DispatchLevel){//For WDK Compatibility
-    LouKeSetIrql(DispatchLevel, 0x00);
-    LouKeMemoryBarrier();
+
 }
 

@@ -10,11 +10,8 @@ void LouKeBcdToBinary(uint8_t* bcd_value){
     *bcd_value = (*bcd_value / 16 * 10) + (*bcd_value % 16);
 }
 
-static mutex_t RtcTex;
-
 LOUAPI
 void read_rtc() {
-    MutexLock(&RtcTex);
     UNUSED uint8_t second, minute, hour, day, month, year;
 
     outb(0x70, 0x0A);
@@ -44,5 +41,4 @@ void read_rtc() {
     LouKeBcdToBinary(&year);
 
     //LouPrint("Time:%d:%d\n", hour, minute);
-    MutexUnlock(&RtcTex);
 }

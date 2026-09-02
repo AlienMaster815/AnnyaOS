@@ -1,13 +1,13 @@
 #include <LouAPI.h>
 
 KERNEL_EXPORT void LouKeAcquireSpinLock(spinlock_t* LockValue, LouKIRQL* Irql){
-    LouKeSetIrql(HIGH_LEVEL, Irql);
-    MutexLock(&LockValue->Lock);
+    LouKeRaiseIrql(DISPATCH_LEVEL, Irql);
+    AtomicLock(&LockValue->Lock);
 }
 
 KERNEL_EXPORT void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql){
     MutexUnlock(&LockValue->Lock);
-    LouKeSetIrql(*Irql, 0x00);
+    LouKeLowerIrql(*Irql);
 }
 
 

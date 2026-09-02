@@ -175,5 +175,8 @@ DRIVER_IMPORT LOUSTATUS ApicHalInitializeIsaVectorToIoApicRedirection(OPAQUE_PTR
 DRIVER_IMPORT LOUSTATUS ApicHalInitializeVectorToIoApicRedirection(OPAQUE_PTR VectorObject, UINT8 GsiVector, IO_APIC_TRIGGER_MODE TriggerMode, IO_APIC_PIN_POLARITY PinPolarity);
 DRIVER_IMPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu);
 
+DRIVER_EXPORT void ApciHalStopApicTimerEvents();
+DRIVER_IMPORT void ApciHalStartApicTimerEvents();
+
 #endif 
 #endif

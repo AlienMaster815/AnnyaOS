@@ -29,6 +29,7 @@ LOUSTATUS ApicHalInterProcessorInterruptHandler(UINT64 Data){
             break;
         default:
             LouPrint("APIC.SYS:ApicHalInterProcessorInterruptHandler():Unhandled IPI\n");
+            while(1);
             break;
     }
     return STATUS_SUCCESS;

@@ -251,8 +251,8 @@ LOUSTATUS SetupGDT(UINT32 ProcessorID){
     //LouPrint("Installing GDT:%h\n", Gdtr.Base);
 
     InstallGDT((uint64_t)&Gdtr);
+    
     SetGSBase(GsBase);
-
     LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, 0x00);
     //LouPrint("Done Setting Up GDT\n");
 

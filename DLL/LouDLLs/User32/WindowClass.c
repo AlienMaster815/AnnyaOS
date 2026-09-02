@@ -299,7 +299,7 @@ ATOM RegisterClassExW(
     BOOLEAN GlobalClass = (NewClass->Style & WINDOW_CS_GLOBAL_CLASS) ? true : false;
     LPWSTR ClassName = 0x00;
     LPWSTR MenuName = 0x00;
-    MutexLock(&ClassesLock);
+    AtomicLock(&ClassesLock);
 
     if(GlobalClass){
         Status = AllocateGlobalClass(
@@ -495,7 +495,7 @@ UnregisterClassW(
         return false;
     }
     if(OptAtom){
-        MutexLock(&ClassesLock);    
+        AtomicLock(&ClassesLock);    
         Result = UnregisterClassWAtom(OptAtom, Instance);
         MutexUnlock(&ClassesLock);
         return Result;

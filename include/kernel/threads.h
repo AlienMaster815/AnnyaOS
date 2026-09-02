@@ -180,11 +180,11 @@ static inline int64_t LouKeGetAtomic64(atomic_int64_t* A){
     return atomic64_read(A);
 }
 
-static inline void LouKeSetAtomic64FromUint64(UINT64* A, int64_t Value){
-    atomic64_set((atomic_int64_t*)A, Value);
+static inline void LouKeSetAtomic64FromUint64(atomic_int64_t* A, uint64_t Value){
+    atomic64_set((atomic_int64_t*)A, (int64_t)Value);
 }
 
-static inline int64_t LouKeGetAtomic64FromUint64(UINT64* A){
+static inline uint64_t LouKeGetAtomic64FromUint64(atomic_int64_t* A){
     return atomic64_read((atomic_int64_t*)A);
 }
 
@@ -196,11 +196,14 @@ static inline bool LouKeGetAtomicBoolean(PATOMIC_BOOLEAN b){
     return (bool)LouKeGetAtomic(b);
 }
 
+#ifndef _USER_MODE_CODE_
+KERNEL_EXPORT void LouKeYieldExecution();
 static inline void MutexSynchronize(mutex_t* m){
     while (LouKeGetAtomic(&m->locked)) {
-        // spin until it's unlocked
+        LouKeYieldExecution();
     }
 }
+#endif
 
 static inline bool MutexIsLocked(mutex_t* m){
     return LouKeGetAtomic(&m->locked);
@@ -224,6 +227,14 @@ typedef struct {
     atomic_t    ThreadOwner;
 }spinlock_t;
 
+typedef struct {
+    mutex_t     Check;
+    mutex_t     Unlock;
+    atomic_t    Counter;
+    atomic_t    Limit;
+}semaphore_t;
+
+
 static inline void SpinlockSyncronize(spinlock_t* s){
     while (LouKeGetAtomic(&s->Lock.locked)){
         // spin until unlocked
@@ -238,6 +249,13 @@ typedef enum{
     KERNEL_THREAD = 1,
     USER_THREAD = 2,
 }THREAD_TYPE;
+
+typedef struct _EXLO_MUTEX{
+    mutex_t         ExloLock;
+    semaphore_t     Counter;
+    atomic_int64_t  ExloThread;
+    atomic_t        GracePeriod;
+}EXLO_MUTEX, * PEXLO_MUTEX;
 
 #ifndef _USER_MODE_CODE_
 
@@ -325,19 +343,31 @@ LouKeCreateDeferedImpEx(
     PVOID   UnblockTimeHandle
 );
 
-KERNEL_EXPORT void LouKeYieldExecution();
 
 KERNEL_EXPORT void LouKeUnblockThread(UINT64 ThreadID);
 KERNEL_EXPORT void LouKeBlockThread(UINT64 ThreadID);
 KERNEL_EXPORT UINT64 LouKeGetThreadIdentificationFromThreadHandle(PTHREAD ThreadHandle);
+
+LOUSTATUS 
+LouKeInitializeExloMutexEx(
+    PEXLO_MUTEX     ExloMutex,
+    UINT64          ExloThread,
+    int             GracePeriod
+);
+
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeInitializeExloMutex(
+    PEXLO_MUTEX     ExloMutex,
+    UINT64          ExloThread
+);
 
 #endif
 
 KERNEL_EXPORT void MutexDestroy(mutex_t* m);
 KERNEL_EXPORT void MutexInitialize(mutex_t* m);
 
-
-static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
+static void AtomicLockEx(mutex_t* m, bool LockOutTagOut){
     #ifndef _USER_MODE_CODE_
     uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
     Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
@@ -369,7 +399,7 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     #endif
 }
 
-static BOOLEAN MutexLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
+static BOOLEAN AtomicLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
     #ifndef _USER_MODE_CODE_
     uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
     Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
@@ -400,7 +430,7 @@ static BOOLEAN MutexLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
 }
 
 
-static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
+static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     #ifndef _USER_MODE_CODE_
     uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
     Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
@@ -433,39 +463,17 @@ static void MutexLockOrYieldEx(mutex_t* m, bool LockOutTagOut){
 }
 
 
+static inline void AtomicLock(mutex_t* m){
+    AtomicLockEx(m, true);
+}
+
+static inline BOOLEAN AtomicLockOrFalse(mutex_t* m){
+    return AtomicLockOrFalseEx(m, true);
+}
+
 static inline void MutexLock(mutex_t* m){
     MutexLockEx(m, true);
 }
-
-static inline BOOLEAN MutexLockOrFalse(mutex_t* m){
-    return MutexLockOrFalseEx(m, true);
-}
-
-static inline void MutexLockOrYield(mutex_t* m){
-    MutexLockOrYieldEx(m, true);
-}
-
-
-static inline uintptr_t MutexPriorityLock(
-    mutex_t* m, 
-    uintptr_t Handle, 
-    int Privaledge
-){
-    if((m->locked.counter) && (m->PrivaledgeLevel.counter < Privaledge)){
-        uintptr_t OldHandle = m->Handle.counter;
-        m->Handle.counter = Handle;
-        m->PrivaledgeLevel.counter = Privaledge;
-        return OldHandle;
-    }
-    MutexLock(m);
-    return 0;
-}
-
-typedef struct {
-    mutex_t     Check;
-    atomic_t    Counter;
-    atomic_t    Limit;
-}semaphore_t;
 
 int LouPrint(char*, ...);
 
@@ -490,25 +498,10 @@ static inline BOOLEAN SemaphoreLockOrFalse(semaphore_t* sem) {
     return Result;
 }
 
-static inline void SemaphoreLockOrYield(semaphore_t* sem) {
-    _RETRY_LOCK:
-    MutexLockOrYield(&sem->Check);
-    while(!LouKeGetAtomic(&sem->Counter)){
-        MutexUnlock(&sem->Check);
-        #ifndef _USER_MODE_CODE_
-        LouKeYieldExecution();
-        #else
-
-        #endif
-        goto _RETRY_LOCK;
-    }
-    LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
-    MutexUnlock(&sem->Check);
-}
-
-
 static inline void SemaphoreUnlock(semaphore_t* sem) {
+    MutexLock(&sem->Unlock);
     LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
+    MutexUnlock(&sem->Unlock);
 }
 
 static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit) {
@@ -516,6 +509,10 @@ static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit)
     MutexUnlock(&sem->Check);
     atomic_set(&sem->Counter, initial);
     atomic_set(&sem->Limit, limit);
+}
+
+static inline BOOLEAN SemaphoreBeingUsed(semaphore_t* sem) {
+    return (LouKeGetAtomic(&sem->Counter) == LouKeGetAtomic(&sem->Limit));
 }
 
 semaphore_t* LouKeCreateSemaphore(int initial, int limit);

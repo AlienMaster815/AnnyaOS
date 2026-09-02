@@ -116,7 +116,7 @@ DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
     Ms = Ms ? Ms : 1;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount * Ms);
+    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount);
 }
 
 static const APIC_TIMER_DIVIDE_CONFIG TimerConfigs[7] = {
@@ -129,6 +129,29 @@ static const APIC_TIMER_DIVIDE_CONFIG TimerConfigs[7] = {
     APIC_TIMER_DIVIDE_BY2,
 };
 
+DRIVER_EXPORT
+void ApciHalStopApicTimerEvents(){
+    /*BOOLEAN TimerSetupMask = true;
+    ULONG Processor = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
+    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);*/
+}
+
+DRIVER_EXPORT 
+void ApciHalStartApicTimerEvents(){
+    /*BOOLEAN TimerSetupMask = false;
+    ULONG Processor = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
+    UINT32 CurrentCount;
+    ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
+    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
+    if(CurrentCount){
+        ApicHalSetLocalApicTimerInitialCount(CurrentCount);
+    }else{
+        ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->TimerConfigTick);
+    }*/
+}
+
 static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
     BOOLEAN TimerSetupMask = false;
     UINT8 TimerSetupVector = APIC_TIMER_VECTOR;
@@ -136,6 +159,7 @@ static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
     APIC_TIMER_MODE TimerSetupMode = APIC_TIMER_MODE_ONE_SHOT;
 
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Cpu].ApicDeviceObject;
+    
     LOUSTATUS Status = STATUS_UNSUCCESSFUL;
     for(SIZE i = 0 ; i < 7; i++){
         ApicHalSetLocalApicDivideConfigurationRegister(TimerConfigs[i]);
@@ -148,6 +172,37 @@ static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
         
         if(ApicDeviceObject->MsTimerCount){
             Status = STATUS_SUCCESS;
+            ApicDeviceObject->TimerConfigSelector = i;
+            switch(i){
+                case 0:{
+                    ApicDeviceObject->TimerConfigTick = 128;
+                    break;
+                }
+                case 1:{
+                    ApicDeviceObject->TimerConfigTick = 64;
+                    break;
+                }
+                case 2:{
+                    ApicDeviceObject->TimerConfigTick = 32;
+                    break;
+                }
+                case 3:{
+                    ApicDeviceObject->TimerConfigTick = 16;
+                    break;
+                }
+                case 4:{
+                    ApicDeviceObject->TimerConfigTick = 8;
+                    break;
+                }
+                case 5:{
+                    ApicDeviceObject->TimerConfigTick = 4;
+                    break;
+                }
+                case 6:{
+                    ApicDeviceObject->TimerConfigTick = 2;
+                    break;
+                }
+            }
             break;
         }
     }

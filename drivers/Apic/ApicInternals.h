@@ -131,6 +131,8 @@ typedef struct _IO_APIC_DEVICE_OBJECT{
 
 typedef struct _APIC_DEVICE_OBJECT{
     APIC_OBJECT_TYPE                ApicObjectType;
+    UINT8                           TimerConfigTick;
+    UINT8                           TimerConfigSelector;
     UINT32                          MsTimerCount;
     union{
         X1LOCAL_APIC_DEVICE_OBJECT  X1ApicObject;

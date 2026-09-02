@@ -20,10 +20,10 @@ void sintToString(int64_t num, char* str);
 //void uintToLittleEndianHexString(uint64_t number, char* hexString);
 void uintToHexString(uint64_t number, char* hexString);
 
-static spinlock_t PrintLock; 
+static mutex_t PrintLock; 
 
 mutex_t* LouKeGetPrintMutex(){
-    return &PrintLock.Lock;
+    return &PrintLock;
 }
 
 
@@ -238,17 +238,15 @@ int _LouPrint(char* format, ...){
 bool UsingSmp = false;
 
 KERNEL_EXPORT
-int LouPrintEx(char* format, va_list args) {
-    LouKIRQL OldLevel;
-        
-    LouKeAcquireSpinLock(&PrintLock ,&OldLevel);
+int LouPrintEx(char* format, va_list args) {        
+    MutexLock(&PrintLock);
     int result = 0;
     if(UsingSmp){
         _LouPrint("CPU:%d : ", (UINT64)LouKeGetCurrentProcessorNumber());
     }
     
     result = LouPrint_s(format, args);
-    LouKeReleaseSpinLock(&PrintLock ,&OldLevel);
+    MutexUnlock(&PrintLock);
     return result;
 }
 

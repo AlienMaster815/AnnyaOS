@@ -4,7 +4,7 @@
 
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
-static spinlock_t ProcLock = {0};
+//static spinlock_t ProcLock = {0};
 static BOOLEAN SchedDebugOn = false;
 
 void HaltAndCatchFile();
@@ -21,11 +21,11 @@ void LouKeSchedDbgPrint(char* format, ...){
 LOUAPI PGDT_RECORD LouKeGetGdtRecord(UINT32 ProcessorID);
 
 void LouKeLockProcManager(LouKIRQL* Irql){
-    LouKeAcquireSpinLock(&ProcLock, Irql);
+    //LouKeAcquireSpinLock(&ProcLock, Irql);
 }
 
 void LouKeUnlockProcManager(LouKIRQL* Irql){
-    LouKeReleaseSpinLock(&ProcLock, Irql);
+    //LouKeReleaseSpinLock(&ProcLock, Irql);
 }
 
 LOUAPI
@@ -298,14 +298,13 @@ LOUAPI void LouKeSetIrqlNoFlagUpdate(
 //static SIZE Foo = 0;
 
 LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
-    if((MutexLockOrFalse(&ProcLock.Lock) != true) || (LouKeGetIrql() == HIGH_LEVEL)){
-        ApicHalConfigureNextApicTimerEvent(30);
-        return CpuCurrentState;
-    }
+    //if(MutexLockOrFalse(&ProcLock.Lock) != true){
+    //    ApicHalConfigureNextApicTimerEvent(1);
+    //    return CpuCurrentState;
+    //}
     PSCHEDUAL_MANAGER Schedualer = (PSCHEDUAL_MANAGER)((PLKPCB)GetLKPCB())->Schedualer;
     CpuCurrentState = Schedualer->PsmSchedual(CpuCurrentState);
-    MutexUnlock(&ProcLock.Lock);
-    LouKeMemoryBarrier();
+    //MutexUnlock(&ProcLock.Lock);
     ApicHalConfigureNextApicTimerEvent(Schedualer->CurrentThread->TotalMsSlice);
     return CpuCurrentState;
 }
@@ -317,7 +316,7 @@ LOUAPI void SignalProcessorsInitPending();
 static mutex_t ApProcessorInitLock = {0};
 
 LOUAPI void LouKeInitializeApProcessorInitLock(){
-    MutexLock(&ApProcessorInitLock);
+    AtomicLock(&ApProcessorInitLock);
 }
 
 static KERNEL_REFERENCE ApsWaitingForInterruptEnabling = {0};
@@ -374,9 +373,6 @@ LOUAPI void InitializeProcessManager(){
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = InitializationProcessor;
     KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer;
-
-    MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
-    MutexLock(&CoreIrqReadyLock);
     
     LouKeTsmInitializeIdleThreads();
 

@@ -103,6 +103,13 @@ void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 );
+void LouKeRaiseIrql(
+    LouKIRQL    Irql,
+    LouKIRQL*   OldIrql
+);
+void LouKeLowerIrql(
+    LouKIRQL     Irql
+);
 LOUSTATUS SetBasicInterrupts();
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
 LOUSTATUS InitializeMainInterruptHandleing();

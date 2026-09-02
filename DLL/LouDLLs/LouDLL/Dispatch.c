@@ -32,7 +32,7 @@ LouUserGetMessage(
     LOUSINE_USER_MESSAGE_TYPE       Type,
     LOUSINE_USER_MESSAGE_PRIORITY   Priority
 ){
-    MutexSynchronize(&MessageMutex);
+    /*MutexSynchronize(&MessageMutex);
     PLOUSINE_USER_SHARED_MESSAGE Prev = &UserMessages;
     PLOUSINE_USER_SHARED_MESSAGE Tmp = (PLOUSINE_USER_SHARED_MESSAGE)Prev->Peers.NextHeader;
 
@@ -60,7 +60,8 @@ LouUserGetMessage(
     }
     LouYeildExecution();
     *Message = 0x00;
-    return true;
+    return true;*/
+    return false;
 }
 
 static LOUSINE_MESSAGE_HANDLER MessageHandlers[LOUSINE_USER_MESSAGE_COUNT] = {
