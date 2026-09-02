@@ -1,5 +1,6 @@
 #include "ApicInternals.h"
 
+
 KERNEL_EXPORT
 LOUSTATUS LouKeIpicCreateVectorObjectEx(
     OPAQUE_PTR*         VectorObjectOut,
@@ -23,15 +24,7 @@ LouKeIpicSendNewInterruptRoutingData(
 LOUSTATUS ApicHalInterProcessorInterruptHandler(UINT64 Data){
     PIPI_INTERRUPT_PACKET InterruptPacket = (PIPI_INTERRUPT_PACKET)Data;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
-    switch(InterruptPacket->PacketType){
-        case ROUTE_INSTALLATION_INTERRUPT:
-            LouKeIpicSendNewInterruptRoutingData(Processor, InterruptPacket->RouteInstallationPacket.InstallData);
-            break;
-        default:
-            LouPrint("APIC.SYS:ApicHalInterProcessorInterruptHandler():Unhandled IPI\n");
-            while(1);
-            break;
-    }
+    InterruptPacket->IpiHandler(Processor, InterruptPacket->IpiData);
     return STATUS_SUCCESS;
 }
 
@@ -57,20 +50,21 @@ LOUSTATUS ApicHalInitializeInterProcessorInterrupts(ULONG Cpu){
 }
 
 
-DRIVER_EXPORT 
-LOUSTATUS 
-ApicIpiHalSendNewInterruptRouteData(
-    ULONG   Cpu,
-    PVOID   RouteData
+
+LOUSTATUS ApicIpiHalSendIpiToCpu(
+    ULONG                       Cpu,
+    IPI_HANDLER                 IpiHandler,
+    PVOID                       Data
 ){
     LouKIRQL Irql;
     LOUSTATUS Status;
     PPER_PROCESSOR_IPI_DATA IpiData  = &PerProcessorApicData[Cpu].IpiData;
     
-    LouKeAcquireSpinLock(&IpiData->ProcessorLock, &Irql);
+    LouKeAcquireInterruptLock(&IpiData->ProcessorLock, &Irql);
     ULONG Processor = LouKeGetCurrentProcessorNumber(Cpu); 
+    
     if(Cpu == Processor){
-        LouKeIpicSendNewInterruptRoutingData(Processor, RouteData);
+        LouKeIpicSendNewInterruptRoutingData(Processor, Data);
         LouKeReleaseSpinLock(&IpiData->ProcessorLock, &Irql);
         return STATUS_SUCCESS;
     }
@@ -87,8 +81,8 @@ ApicIpiHalSendNewInterruptRouteData(
         }
     }
 
-    IpiData->InterruptPacket.PacketType = ROUTE_INSTALLATION_INTERRUPT; 
-    IpiData->InterruptPacket.RouteInstallationPacket.InstallData = RouteData;
+    IpiData->InterruptPacket.IpiData = Data; 
+    IpiData->InterruptPacket.IpiHandler = IpiHandler;
 
     Status = ApicHalSetLocalApicInterruptCommandRegister(
         PerProcessorApicData[Cpu].ApicID,
@@ -99,9 +93,23 @@ ApicIpiHalSendNewInterruptRouteData(
         APIC_ICR_DELIVERY_MODE_FIXED,
         APIC_IPI_DISPATCH_VECTOR
     );
-    LouKeReleaseSpinLock(&IpiData->ProcessorLock, &Irql);
+    LouKeReleaseInterruptLock(&IpiData->ProcessorLock, &Irql);
     return Status;
 }
+
+DRIVER_EXPORT 
+LOUSTATUS 
+ApicIpiHalSendNewInterruptRouteData(
+    ULONG   Cpu,
+    PVOID   RouteData
+){
+    return ApicIpiHalSendIpiToCpu(
+        Cpu,
+        LouKeIpicSendNewInterruptRoutingData,
+        RouteData
+    );
+}
+
 
 
 //ApicIpiHalSendNewProcessData

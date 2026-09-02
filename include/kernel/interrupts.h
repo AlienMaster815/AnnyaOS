@@ -110,6 +110,9 @@ void LouKeRaiseIrql(
 void LouKeLowerIrql(
     LouKIRQL     Irql
 );
+KERNEL_EXPORT void LouKeAcquireInterruptLock(spinlock_t* LockValue, LouKIRQL* Irql);
+KERNEL_EXPORT void LouKeReleaseInterruptLock(spinlock_t* LockValue, LouKIRQL* Irql);
+
 LOUSTATUS SetBasicInterrupts();
 LOUSTATUS set_idt_gate(int num,void (*handler)(), uint16_t selector, uint8_t ist, uint8_t type_attr);
 LOUSTATUS InitializeMainInterruptHandleing();

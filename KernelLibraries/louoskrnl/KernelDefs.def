@@ -257,3 +257,5 @@ EXPORTS
     LouKeUnblockThread
     LouKeGetThreadIdentificationFromThreadHandle
     LouKeFreeFastObject
+    LouKeAcquireInterruptLock
+    LouKeReleaseInterruptLock
