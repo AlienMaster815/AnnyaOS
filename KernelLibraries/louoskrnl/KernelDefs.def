@@ -259,3 +259,4 @@ EXPORTS
     LouKeFreeFastObject
     LouKeAcquireInterruptLock
     LouKeReleaseInterruptLock
+    LouKeGetCurrentThreadHandle

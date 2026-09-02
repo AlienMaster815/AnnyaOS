@@ -1,6 +1,9 @@
 #include <Modulation.h>
 #include <cstdint.h>
 
+typedef void (*IPI_HANDLER)(ULONG Processor, PVOID Data);
+
+
 #ifndef _APIC_EXTERN_INTERN_H
 #define _APIC_EXTERN_INTERN_H
 KERNEL_EXPORT UINT32 LouKeGetCurrentCpuPhysicalId();
@@ -119,6 +122,7 @@ typedef enum{
     IO_APIC_TRIGGER_MODE_LEVEL,
 }IO_APIC_TRIGGER_MODE;
 
+
 typedef PVOID PAPIC_DEVICE_OBJECT;
 
 DRIVER_IMPORT LOUSTATUS ApicHalGetLocalApicIdRegister(UINT32* IdOut);
@@ -177,6 +181,8 @@ DRIVER_IMPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu);
 
 DRIVER_EXPORT void ApciHalStopApicTimerEvents();
 DRIVER_IMPORT void ApciHalStartApicTimerEvents();
+
+DRIVER_IMPORT LOUSTATUS ApicIpiHalSendIpiToCpu(ULONG Cpu, IPI_HANDLER IpiHandler, PVOID Data);
 
 #endif 
 #endif

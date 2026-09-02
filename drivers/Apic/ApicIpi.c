@@ -51,7 +51,7 @@ LOUSTATUS ApicHalInitializeInterProcessorInterrupts(ULONG Cpu){
 
 
 
-LOUSTATUS ApicIpiHalSendIpiToCpu(
+DRIVER_EXPORT LOUSTATUS ApicIpiHalSendIpiToCpu(
     ULONG                       Cpu,
     IPI_HANDLER                 IpiHandler,
     PVOID                       Data
@@ -65,7 +65,7 @@ LOUSTATUS ApicIpiHalSendIpiToCpu(
     
     if(Cpu == Processor){
         LouKeIpicSendNewInterruptRoutingData(Processor, Data);
-        LouKeReleaseSpinLock(&IpiData->ProcessorLock, &Irql);
+        LouKeReleaseInterruptLock(&IpiData->ProcessorLock, &Irql);
         return STATUS_SUCCESS;
     }
     
@@ -76,7 +76,7 @@ LOUSTATUS ApicIpiHalSendIpiToCpu(
     while(InterruptPending){
         Status = ApicHalGetLocalApicInterruptCommandRegister(0x00, 0x00, 0x00, 0x00, &InterruptPending, 0x00, 0x00, 0x00);
         if(Status != STATUS_SUCCESS){
-            LouKeReleaseSpinLock(&IpiData->ProcessorLock, &Irql);
+            LouKeReleaseInterruptLock(&IpiData->ProcessorLock, &Irql);
             return Status;
         }
     }

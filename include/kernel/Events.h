@@ -10,7 +10,7 @@ typedef struct _KERNEL_EVENT_OBJECT{
     BOOL                Completed;
     mutex_t             Lock;
     SIZE                TimeOut;
-    SIZE                ThreadID;
+    PTHREAD             Thread;
 }KERNEL_EVENT_OBJECT, * PKERNEL_EVENT_OBJECT;
 
 static inline void LouKeInitializeEventTimeOut(

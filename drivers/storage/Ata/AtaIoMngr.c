@@ -4,13 +4,13 @@
 
 void AtaCorePortIoQueueManager(PVOID Params){
     PATA_PORT_DEVICE_OBJECT PortDevice = (PATA_PORT_DEVICE_OBJECT)(UINT8*)Params;
-    UINT64 ThreadID = LouKeGetThreadIdentification();
+    PTHREAD Thread = LouKeGetCurrentThreadHandle();
     while(1){
         MutexLock(PortDevice->ChannelLock);
         PATA_COMMAND_PACKET CommandPacket = ListItemToTypeOrNull(PortDevice->QueuedCommands.NextHeader, ATA_COMMAND_PACKET, QueuedCommands);
         if(!CommandPacket){
             MutexUnlock(PortDevice->ChannelLock);
-            LouKeBlockThread(ThreadID);
+            LouKeBlockThread(Thread);
             continue;
         }
         LouKeListDeleteItem(&CommandPacket->QueuedCommands);

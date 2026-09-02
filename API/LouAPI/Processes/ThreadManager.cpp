@@ -659,6 +659,7 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
         LouKeFree(FreeItem);
     }
 }
+static mutex_t BlockLock = {0};
 
 LOUAPI void LouKeThreadSleep(SIZE Ms){
     uint64_t ThreadID = LouKeGetThreadIdentification();
@@ -669,10 +670,11 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
         LouPrint("LouKeThreadSleep() ERROR: Thread Non Existent\n");
         return;
     }
-    LouKIRQL Irql;
+    //LouKIRQL Irql;
     TIME_T Time;
+    MutexLock(&BlockLock);
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeLockProcManager(&Irql);
+    //LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
@@ -682,47 +684,41 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
-    LouKeUnlockProcManager(&Irql);
+    MutexUnlock(&BlockLock);
+    //LouKeUnlockProcManager(&Irql);
+    if(ThreadData->ThreadID == ThreadID){
+        LouKeYieldExecution();
+    }
     sleep_till(Expiration);
-}
-
-static BOOLEAN Ready = false;
-
-void SetRtlYeildFunction(){
-    Ready = true;
 }
 
 LOUAPI
 void 
 LouKeYieldExecution(){
-    if(Ready){
-        asm("INT $0x20");
-    }
+    asm("INT $0x20");
 }
 
-LOUAPI void LouKeUnblockThread(UINT64 ThreadID){
-    LouKIRQL Irql;
-    PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeLockProcManager(&Irql);
+
+LOUAPI void LouKeUnblockThread(PTHREAD Thread){
+    //LouKIRQL Irql;
+    MutexLock(&BlockLock);
+    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
+    //LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_READY;    
-    LouKeUnlockProcManager(&Irql);
+    MutexUnlock(&BlockLock);
+    //LouKeUnlockProcManager(&Irql);
 }
 
-LOUAPI void LouKeBlockThread(UINT64 ThreadID){
-    LouKIRQL Irql;
-    PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    UINT64 CurrentTSC;
-    UINT64 TscFrequency;
-    UINT64 Expiration;
-    LouKeLockProcManager(&Irql);
+LOUAPI void LouKeBlockThread(PTHREAD Thread){
+    UINT64 CurrentID = LouKeGetThreadIdentification();
+    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
+    MutexLock(&BlockLock);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    ThreadData->State = THREAD_BLOCKED;
-    CurrentTSC = read_tsc();
-    TscFrequency = GetTscMaster() / 1000;
-    Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
-    LouKeUnlockProcManager(&Irql);
-    sleep_till(Expiration);
+    MutexUnlock(&BlockLock);
+    if(ThreadData->ThreadID == CurrentID){
+        LouKeYieldExecution();
+    }
 }
 
 
@@ -748,6 +744,7 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
         //    }
         //}
         //asm("hlt");
+        LouKeYieldExecution();
     }
     return -1;
 }

@@ -147,7 +147,6 @@ typedef enum {
     TOTAL_IPI_INTERRUPT_PACKET_TYPES,
 }IPI_INTERRUPT_PACKET_TYPE;
 
-typedef void (*IPI_HANDLER)(ULONG Processor, PVOID Data);
 
 typedef struct _IPI_INTERRUPT_PACKET{
     IPI_HANDLER                 IpiHandler;

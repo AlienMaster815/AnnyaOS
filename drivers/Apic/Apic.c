@@ -131,15 +131,15 @@ static const APIC_TIMER_DIVIDE_CONFIG TimerConfigs[7] = {
 
 DRIVER_EXPORT
 void ApciHalStopApicTimerEvents(){
-    /*BOOLEAN TimerSetupMask = true;
+    BOOLEAN TimerSetupMask = true;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);*/
+    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
 }
 
 DRIVER_EXPORT 
 void ApciHalStartApicTimerEvents(){
-    /*BOOLEAN TimerSetupMask = false;
+    BOOLEAN TimerSetupMask = false;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
     UINT32 CurrentCount;
@@ -149,7 +149,7 @@ void ApciHalStartApicTimerEvents(){
         ApicHalSetLocalApicTimerInitialCount(CurrentCount);
     }else{
         ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->TimerConfigTick);
-    }*/
+    }
 }
 
 static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){

@@ -1,10 +1,12 @@
 #include <LouAPI.h>
 
 
+PTHREAD LouKeGetCurrentThreadHandle();
+
 KERNEL_EXPORT
 LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
     MutexLock(&Event->Lock);
-    Event->ThreadID = LouKeGetThreadIdentification();
+    Event->Thread = (PTHREAD)LouKeGetCurrentThreadHandle();
     LouKeThreadSleep(Event->TimeOut);
     BOOL Completed = Event->Completed;
     Event->Completed = false;
@@ -15,5 +17,5 @@ LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
 KERNEL_EXPORT
 void LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event){
     Event->Completed = true;
-    LouKeUnblockThread(Event->ThreadID);
+    LouKeUnblockThread(Event->Thread);
 }

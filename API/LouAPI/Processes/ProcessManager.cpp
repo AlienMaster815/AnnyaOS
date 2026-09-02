@@ -64,7 +64,6 @@ static ULONG                             InitializationProcessor = 0;
 LOUAPI void SetCr3(UINT64);
 LOUAPI UINT64 GetCr3();
 LOUAPI void SetLKPCB(UINT64 KernelProcBlock);
-void SetRtlYeildFunction();
 
 //static LouKeManagerProcessSwap();
 void PsmProcessScedualManagerObject::PsmSetProcessTransitionState(){
@@ -425,8 +424,6 @@ LOUAPI void InitializeProcessManager(){
     
     HANDLE KernelProcess = 0x00;
     LouKePsmGetProcessData(KERNEL_PROCESS_NAME, &KernelProcess);
-
-
     PTHREAD NewThread;
     for(ULONG i = 0 ; i < ProcessBlock.ProcessorCount; i++){
         ProcessBlock.ProcStateBlock[i].Schedualer.ProcessorGdtData = LouKeGetGdtRecord(i);
@@ -450,13 +447,12 @@ LOUAPI void InitializeProcessManager(){
     }
 
     MutexUnlock(&ApProcessorInitLock);        
+    MutexUnlock(&ApProcessorInitLock);
     MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     while(LouKeGetReferenceCount(&ApsWaitingForInterruptEnabling) < (ProcessBlock.ProcessorCount - 1)){
         LouKeMemoryBarrier();
     }
-    
-    SetRtlYeildFunction();
 
     LouKeSchedDbgPrint("Finished Initializing Process Manager\n");
 }
@@ -491,6 +487,12 @@ LouKeGetCurrentThreadData(){
     return ProcessBlock.ProcStateBlock[ProcessorID].Schedualer.CurrentThread;
 }
 
+KERNEL_EXPORT
+PTHREAD 
+LouKeGetCurrentThreadHandle(){
+    return (PTHREAD)LouKeGetCurrentThreadData();
+}
+
 LOUAPI
 PGENERIC_PROCESS_DATA
 LouKeGetCurrentProcessData(){
@@ -505,6 +507,27 @@ uint64_t GetAdvancedRegisterInterruptsStorage(){
 }
 
 
+typedef struct _INIT_PROCESS_SCHED_TAIL_DATA{
+    PGENERIC_PROCESS_DATA   Process;
+    SIZE                    Proc;
+}INIT_PROCESS_SCHED_TAIL_DATA, * PINIT_PROCESS_SCHED_TAIL_DATA;
+
+void LouKeInitProceSchedTailInternal(ULONG Processor, PVOID Data){
+    PINIT_PROCESS_SCHED_TAIL_DATA Tmp = (PINIT_PROCESS_SCHED_TAIL_DATA)Data;
+    ProcessBlock.ProcStateBlock[Tmp->Proc].Schedualer.PsmAsignProcessToSchedual(Tmp->Process); 
+}
+
+
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc){
-    ProcessBlock.ProcStateBlock[Proc].Schedualer.PsmAsignProcessToSchedual(Process); 
+    INIT_PROCESS_SCHED_TAIL_DATA TailData = {
+        .Process = Process,
+        .Proc = Proc,
+    };
+
+    ApicIpiHalSendIpiToCpu(
+        Proc,
+        LouKeInitProceSchedTailInternal,
+        &TailData
+    );
+
 }

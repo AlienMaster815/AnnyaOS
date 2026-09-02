@@ -118,7 +118,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
 
     LouKeListAddTail(&Identify->QueuedCommands, &AtaPort->QueuedCommands);
 
-    LouKeUnblockThread(LouKeGetThreadIdentificationFromThreadHandle(AtaPort->CommandWorkerThread));
+    LouKeUnblockThread(AtaPort->CommandWorkerThread);
 
     MutexUnlock(AtaPort->ChannelLock);
         

@@ -272,6 +272,8 @@ LouKeGetProcessIdentification();
 KERNEL_EXPORT
 uint64_t LouKeGetThreadIdentification();
 
+PTHREAD LouKeGetCurrentThreadHandle();
+
 uint32_t LouKeCreateUserProcess(void (*Function)(), PVOID FunctionParameters, size_t StackSize);
 void LouKeInitializeDelayedWork(
     void (*DelayedFunction)(uint64_t PrivateData),
@@ -351,8 +353,8 @@ LouKeCreateDeferedImpEx(
 );
 
 
-KERNEL_EXPORT void LouKeUnblockThread(UINT64 ThreadID);
-KERNEL_EXPORT void LouKeBlockThread(UINT64 ThreadID);
+KERNEL_EXPORT void LouKeUnblockThread(PTHREAD Thread);
+KERNEL_EXPORT void LouKeBlockThread(PTHREAD ThreadID);
 KERNEL_EXPORT UINT64 LouKeGetThreadIdentificationFromThreadHandle(PTHREAD ThreadHandle);
 
 LOUSTATUS 

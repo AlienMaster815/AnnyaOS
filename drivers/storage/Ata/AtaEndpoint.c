@@ -46,7 +46,7 @@ AtaCoreGetEndpointCapacity(
         
         LouKeListAddTail(&CommandPacket->QueuedCommands, &AtaPort->QueuedCommands);
 
-        LouKeUnblockThread(LouKeGetThreadIdentificationFromThreadHandle(AtaPort->CommandWorkerThread));
+        LouKeUnblockThread(AtaPort->CommandWorkerThread);
 
         MutexUnlock(AtaPort->ChannelLock);
 
@@ -117,7 +117,7 @@ AtaCoreReadSectorsFromEndpointDevice(
         
         LouKeListAddTail(&CommandPacket->QueuedCommands, &AtaPort->QueuedCommands);
 
-        LouKeUnblockThread(LouKeGetThreadIdentificationFromThreadHandle(AtaPort->CommandWorkerThread));
+        LouKeUnblockThread(AtaPort->CommandWorkerThread);
 
         MutexUnlock(AtaPort->ChannelLock);
 

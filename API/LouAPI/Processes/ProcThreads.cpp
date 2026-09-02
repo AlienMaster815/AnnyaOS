@@ -9,6 +9,17 @@ uint64_t LouKeLinkerGetAddress(
     string FunctionName
 );
 
+typedef struct _THREAD_SCHED_DATA{
+    PGENERIC_THREAD_DATA*   ThreadData;
+    PGENERIC_PROCESS_DATA   ProcessData;
+    ULONG                   Cpu;
+}THREAD_SCHED_DATA, * PTHREAD_SCHED_DATA;
+
+
+void TsmAsignThreadToSchedualInternal(ULONG Cpu, PVOID Data){
+    PTHREAD_SCHED_DATA Tail = (PTHREAD_SCHED_DATA)Data;
+    Tail->ProcessData->ThreadObjects[Cpu].TsmAsignThreadToSchedual(*(PGENERIC_THREAD_DATA*)Tail->ThreadData);
+}
 
 
 LOUAPI
@@ -48,9 +59,16 @@ LouKePsmCreateDeferedThreadForProcessEx(
 
     PGENERIC_PROCESS_DATA ProcessData = (PGENERIC_PROCESS_DATA)Process;
     INTEGER Processors = GetNPROC();
+    THREAD_SCHED_DATA   Data;
+    Data.ThreadData = (PGENERIC_THREAD_DATA*)ThreadOut;
+    Data.ProcessData = ProcessData;
     for(INTEGER i = 0 ; i < Processors; i++){
         if(IS_PROCESSOR_AFFILIATED((*(PGENERIC_THREAD_DATA*)ThreadOut)->AfinityBitmap, i)){
-            ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(*(PGENERIC_THREAD_DATA*)ThreadOut);
+            ApicIpiHalSendIpiToCpu(
+                i,
+                TsmAsignThreadToSchedualInternal,
+                &Data
+            );
         }
     }
 

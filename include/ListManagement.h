@@ -37,7 +37,11 @@ typedef bool (*LIST_SEARCH_FUNC)(PLIST_LINK Link, void* Params);
     ((Type*)(UINTPTR)((Header) ? CONTAINER_OF((Header), Type, Member) : 0x00))
 
 #define LListItemToTypeOrNull(Header, Type, Member) \
-    ListItemToTypeOrNull((PVOID)LouKeGetAtomic64FromUint64((atomic64_t*)&(Header)->NextHeader), Type, Member)
+    ListItemToTypeOrNull(((Header)->Member.NextHeader), Type, Member)
+
+#define LListCurrentItemToTypeOrNull(Header, Type, Member) \
+    ListItemToTypeOrNull((&(Header)->Member), Type, Member)
+
 
 #define ForEachListItem(Position, Node) \
     for((Position) = (Node); (Position); (Position) = (PListHeader)LouKeGetAtomic64FromUint64((atomic64_t*)&(Position)->NextHeader))
