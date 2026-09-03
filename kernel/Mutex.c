@@ -21,11 +21,11 @@ KERNEL_EXPORT void MutexInitialize(mutex_t* m){
 LOUSTATUS 
 LouKeInitializeExloMutexEx(
     PEXLO_MUTEX     ExloMutex,
-    UINT64          ExloThread,
+    PTHREAD         ExloThread,
     int             GracePeriod
 ){  
     memset(ExloMutex, 0, sizeof(*ExloMutex));
-    LouKeSetAtomic64FromUint64(&ExloMutex->ExloThread, ExloThread);
+    LouKeSetAtomic64FromUint64(&ExloMutex->ExloThread, (UINT64)ExloThread);
     SemaphoreInitialize(&ExloMutex->Counter, GracePeriod, GracePeriod);
     LouKeMemoryBarrier();
     return STATUS_SUCCESS;
@@ -34,7 +34,7 @@ LouKeInitializeExloMutexEx(
 LOUSTATUS 
 LouKeInitializeExloMutex(
     PEXLO_MUTEX     ExloMutex,
-    UINT64          ExloThread
+    PTHREAD         ExloThread
 ){
     return LouKeInitializeExloMutexEx(
         ExloMutex,
@@ -47,27 +47,33 @@ void
 LouKeAcquireExloMutex(
     PEXLO_MUTEX ExloMutex
 ){
-    UINT64 CurrentThread = LouKeGetThreadIdentification();
-    UINT64 ExloThread = LouKeGetAtomic64FromUint64(&ExloMutex->ExloThread);
-
-    MutexLock(&ExloMutex->ExloLock);
+    /*PTHREAD CurrentThread = (PTHREAD)LouKeGetCurrentThreadHandle();
+    PTHREAD ExloThread = (PTHREAD)LouKeGetAtomic64FromUint64(&ExloMutex->ExloThread);
     if(CurrentThread == ExloThread){
-        while(SemaphoreBeingUsed(&ExloMutex->Counter));
+        MutexLock(&ExloMutex->ExloLock);
+        while(SemaphoreBeingUsed(&ExloMutex->Counter)){
+            LouKeYieldExecution();
+        }
         return;
     }
-    SemaphoreLock(&ExloMutex->Counter);
-    MutexUnlock(&ExloMutex->ExloLock);
+    if(SemaphoreIsFull(&ExloMutex->Counter)){
+        LouKeUnblockThread(ExloThread);
+    }
+    SemaphoreSynchronizeIfFullTillEvent(&ExloMutex->Counter, &ExloMutex->ReleaseEvent);
+    MutexSynchronize(&ExloMutex->ExloLock);
+    SemaphoreLock(&ExloMutex->Counter);*/
 }
 
 void 
 LouKeReleaseExloLock(
     PEXLO_MUTEX ExloMutex
 ){
-    UINT64 CurrentThread = LouKeGetThreadIdentification();
-    UINT64 ExloThread = LouKeGetAtomic64FromUint64(&ExloMutex->ExloThread);
+    /*PTHREAD CurrentThread = LouKeGetCurrentThreadHandle();
+    PTHREAD ExloThread = (PTHREAD)LouKeGetAtomic64FromUint64(&ExloMutex->ExloThread);
     if(CurrentThread == ExloThread){
+        LouKeSignalEvent(&ExloMutex->ReleaseEvent);
         MutexUnlock(&ExloMutex->ExloLock);
     }else{
         SemaphoreUnlock(&ExloMutex->Counter);
-    }
+    }*/
 }

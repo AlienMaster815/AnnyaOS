@@ -41,11 +41,8 @@ void AhciFreeCommandPrivateData(PVOID Object){
 LOUSTATUS AtaGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
     PAHCI_COMMAND_PRIVATE_DATA CmdPrivate = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
-    while(PrivateData->GenericPort->PxCI & (1 << CmdPrivate->CommandSlot)){
-        sleep(1);
-        if(PrivateData->GenericPort->PxIS & ((1 << 30) | (1 << 27))){
-            return STATUS_IO_DEVICE_ERROR;
-        }
+    if(PrivateData->GenericPort->PxCI & (1 << CmdPrivate->CommandSlot)){
+        return STATUS_NO_WORK_DONE;
     }
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
         PFIS_D2H Fis = (PFIS_D2H)(UINT8*)(PrivateData->FisDma + 0x40); 

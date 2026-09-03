@@ -7,7 +7,11 @@ KERNEL_EXPORT
 LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event){
     MutexLock(&Event->Lock);
     Event->Thread = (PTHREAD)LouKeGetCurrentThreadHandle();
-    LouKeThreadSleep(Event->TimeOut);
+    if(Event->TimeOut){
+        LouKeThreadSleep(Event->TimeOut);
+    }else{
+        LouKeBlockThread(Event->Thread);
+    }
     BOOL Completed = Event->Completed;
     Event->Completed = false;
     MutexUnlock(&Event->Lock);

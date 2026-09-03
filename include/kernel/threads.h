@@ -263,11 +263,15 @@ typedef enum{
     USER_THREAD = 2,
 }THREAD_TYPE;
 
+#include <kernel/Events.h>
+
 typedef struct _EXLO_MUTEX{
-    mutex_t         ExloLock;
-    semaphore_t     Counter;
-    atomic64_t  ExloThread;
-    atomic_t        GracePeriod;
+    mutex_t             Check;
+    mutex_t             ExloLock;
+    semaphore_t         Counter;
+    atomic64_t          ExloThread;
+    atomic_t            GracePeriod;
+    KERNEL_EVENT_OBJECT ReleaseEvent;
 }EXLO_MUTEX, * PEXLO_MUTEX;
 
 #ifndef _USER_MODE_CODE_
@@ -366,7 +370,7 @@ KERNEL_EXPORT UINT64 LouKeGetThreadIdentificationFromThreadHandle(PTHREAD Thread
 LOUSTATUS 
 LouKeInitializeExloMutexEx(
     PEXLO_MUTEX     ExloMutex,
-    UINT64          ExloThread,
+    PTHREAD         ExloThread,
     int             GracePeriod
 );
 
@@ -374,7 +378,7 @@ KERNEL_EXPORT
 LOUSTATUS 
 LouKeInitializeExloMutex(
     PEXLO_MUTEX     ExloMutex,
-    UINT64          ExloThread
+    PTHREAD         ExloThread
 );
 
 #endif
