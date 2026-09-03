@@ -92,8 +92,10 @@ typedef enum {
 
 typedef struct _GENERIC_THREAD_DATA{
     ListHeader                      Peers; //thread manager chain
+    KERNEL_REFERENCE                Reference;
     mutex_t                         LockOutTagOut;
     thread_state_t                  State;
+    LouKIRQL                        ThreadIrql;
     struct _GENERIC_PROCESS_DATA*   Process;
     KERNEL_REFERENCE                EFBY;
     TEB                             Teb;
@@ -170,20 +172,29 @@ typedef class TsmThreadSchedualManagerObject{
     private:
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
+        ATOMIC_BOOLEAN                      ThreadWorkQueueNeedsWork;
+        spinlock_t                          ThreadWorkQueueLock;
+        PTHREAD_RING                        ThreadWorkQueue[THREAD_PRIORITY_RINGS];
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
         PGENERIC_THREAD_DATA                IdleTask;
+        void                                TsmHandleThreadWorkQueueData();
+        PGENERIC_THREAD_DATA                TsmGetNextFreeThread();
+
+        void                                TsmSetThreadTransitionState();
+        void                                TsmSetThreadSystemState(PGDT_RECORD GdtRecord, PGENERIC_THREAD_DATA Thread);
         PGENERIC_THREAD_DATA                TsmGetNext(PGENERIC_THREAD_DATA CurrentThread, bool ProcessChange);
     public:
+        void                                TsmDeAsginThreadRingItem(PTHREAD_RING*  QueueItem, PTHREAD_RING ThreadRing);
         LOUSTATUS                           TsmInitializeSchedualerObject(
                                                 UINT64                          ProcessorID, 
                                                 struct _GENERIC_PROCESS_DATA*   ProcessData,
                                                 UINT64                          DistibutionLimitor,
                                                 UINT64                          DistributerIncrementation
                                             );
-        PGENERIC_THREAD_DATA                TsmSchedual(PGENERIC_THREAD_DATA CurrentThread, bool ProcessChange);
+        PGENERIC_THREAD_DATA                TsmSchedual();
         PGENERIC_THREAD_DATA                TsmYeild(PGENERIC_THREAD_DATA CurrentThread, bool ProcessChange);
-        void                                TsmAsignThreadToSchedual(PGENERIC_THREAD_DATA Thread);
         void                                TsmDeasignThreadFromSchedual(PGENERIC_THREAD_DATA Thread);
+        void                                TsmAssignThreadWorkQueueData(PTHREAD_RING ProcessRing);
 }THREAD_SCHEDUAL_MANAGER, * PTHREAD_SCHEDUAL_MANAGER;
 
 #define THREAD_DEFAULT_DISTRIBUTER_INCREMENTER 1
@@ -191,6 +202,7 @@ typedef class TsmThreadSchedualManagerObject{
 
 typedef struct _GENERIC_PROCESS_DATA{
     ListHeader                              Peers;
+    KERNEL_REFERENCE                        Reference;
     struct _GENERIC_PROCESS_DATA*           ParentProcess;
     string                                  ProcessName;
     LPWSTR                                  ProcessNameUnicode;
@@ -222,12 +234,19 @@ typedef class PsmProcessScedualManagerObject{
     private:
         SCHEDUALER_DISTRIBUTION_OBJECT      LoadDistributer;
         UINT64                              ProcessorID;
+        ATOMIC_BOOLEAN                      ProcessWorkQueueNeedsWork;
+        spinlock_t                          ProcessWorkQueueLock;
+        PPROCESS_RING                       ProcessWorkQueue[PROCESS_PRIORITY_RINGS];
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
+        PGENERIC_THREAD_DATA                OwnerThread;
+
         PGENERIC_PROCESS_DATA               SystemProcess;
+        void                                PsmDeAsginProcessRingItem(PPROCESS_RING*  QueueItem, PPROCESS_RING ProcessRing);
+        void                                PsmHandleProcessWorkQueueData();
+        PGENERIC_PROCESS_DATA               PsmGetNextFreeProcess();
         void                                PsmSetProcessTransitionState();
         void                                PsmSetThreadSystemState(PGDT_RECORD GdtRecord, PGENERIC_THREAD_DATA Thread);
     public:
-        PGENERIC_THREAD_DATA                OwnerThread;
         PGENERIC_THREAD_DATA                CurrentThread;
         PGENERIC_PROCESS_DATA               CurrentProcess;
         PGDT_RECORD                         ProcessorGdtData;
@@ -238,12 +257,12 @@ typedef class PsmProcessScedualManagerObject{
                                             );
         UINT64                              PsmSchedual(UINT64 IrqState);
         void                                PsmYeildThread(UINT64 IrqState);
-        void                                PsmAsignProcessToSchedual(PGENERIC_PROCESS_DATA Process);
         void                                PsmDeasignProcessFromSchedual(PGENERIC_PROCESS_DATA Process, bool SelfIdentifiing);
         UINT64                              PsmGetCurrentProcessID();
         UINT64                              PsmGetCurrentSubsystem();
         void                                PsmSetSystemProcess(HANDLE ProcessData);
         void                                PsmSetCurrentThread(PGENERIC_THREAD_DATA Thread);
+        void                                PsmAssignProcessWorkQueueData(PPROCESS_RING ProcessRing);
 }PROCESS_SCHEDUAL_MANAGER, * PPROCESS_SCHEDUAL_MANAGER;
 
 typedef PROCESS_SCHEDUAL_MANAGER SCHEDUAL_MANAGER, *PSCHEDUAL_MANAGER;
@@ -354,5 +373,7 @@ LouKeCreateDeferedDemonExNs(
     PVOID   UnblockTime,
     BOOLEAN DisableSecurity
 );
+
+PTHREAD_RING LouKeTsmCreateThreadRing(PGENERIC_THREAD_DATA ThreadHandle);
 
 #endif

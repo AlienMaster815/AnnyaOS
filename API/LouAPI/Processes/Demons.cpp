@@ -105,7 +105,7 @@ LouKeCreateDeferedDemonEx(
     INTEGER Processors = GetNPROC();
     for(INTEGER i = 0 ; i < Processors; i++){
         if(IS_PROCESSOR_AFFILIATED(NewThread->AfinityBitmap, i)){
-            ProcessData->ThreadObjects[i].TsmAsignThreadToSchedual(NewThread);
+            ProcessData->ThreadObjects[i].TsmAssignThreadWorkQueueData(LouKeTsmCreateThreadRing(NewThread));
         }
     }
     return NewThread;

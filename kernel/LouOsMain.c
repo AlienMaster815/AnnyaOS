@@ -147,9 +147,10 @@ void AdvancedLousineKernelInitialization(){
     InitializeProcessManager();
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
-    
-    LouKeUnmaskSmpInterrupts();
 
+    LouKeUnmaskSmpInterrupts();
+    
+    
     LouKeWaitForApInitializationCompletion();
 
     LouKeInitializeFullLouACPISubsystem();
@@ -285,7 +286,6 @@ void LouOsKrnlStart(
     while(LouKeGetIdleingApCount() < OldLoader->ApCount){
         LouKeMemoryBarrier();
     }
-    
     memcpy(&LousineKernelLoaderInformation, (PVOID)pKernelLoaderInfo, sizeof(LOADER_INFORMATION));
 
     pKernelLoaderInfo = 0x00;
@@ -350,7 +350,6 @@ void LouOsKrnlStart(
     //TODO: implement new fast object into the memory manager
 
     LouPrint("Successful Boot\n");
-    while(1);
 
     InitializeFileSystemManager();
 

@@ -184,5 +184,7 @@ DRIVER_IMPORT void ApciHalStartApicTimerEvents();
 
 DRIVER_IMPORT LOUSTATUS ApicIpiHalSendIpiToCpu(ULONG Cpu, IPI_HANDLER IpiHandler, PVOID Data);
 
+DRIVER_EXPORT void ApicHalConfigureYeildExecution();
+
 #endif 
 #endif

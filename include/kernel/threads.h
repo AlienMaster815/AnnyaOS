@@ -210,6 +210,11 @@ static inline void MutexSynchronize(mutex_t* m){
         LouKeYieldExecution();
     }
 }
+static inline void AtomicSynchronize(mutex_t* m){
+    while (LouKeGetAtomic(&m->locked)) {
+
+    }
+}
 #endif
 
 static inline bool MutexIsLocked(mutex_t* m){
@@ -217,6 +222,7 @@ static inline bool MutexIsLocked(mutex_t* m){
 }
 
 static inline void MutexUnlock(mutex_t* m){
+    LouKeMemoryBarrier();
     LouKeSetAtomic(&m->locked, 0);
 }
 

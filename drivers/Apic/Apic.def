@@ -54,3 +54,4 @@ EXPORTS
     ApciHalStartApicTimerEvents
     ApciHalStopApicTimerEvents
     ApicIpiHalSendIpiToCpu
+    ApicHalConfigureYeildExecution

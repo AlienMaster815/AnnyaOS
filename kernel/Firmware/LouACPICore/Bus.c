@@ -235,7 +235,7 @@ void LouKeInitializeFullLouACPISubsystem(){
         LouPrint("AcpiInitializeSubsystem failed\n");
         return;
     }
-    
+        
     LouKeAcpiDbgPrint("Initializing Tables\n");
     Status = AcpiInitializeTables(NULL, LouKeAcpiGetTableCount(), FALSE);
     if (ACPI_FAILURE(Status)) {

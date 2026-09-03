@@ -152,6 +152,13 @@ void ApciHalStartApicTimerEvents(){
     }
 }
 
+DRIVER_EXPORT void ApicHalConfigureYeildExecution(){
+    BOOLEAN TimerSetupMask = false;
+    ULONG Processor = LouKeGetCurrentProcessorNumber();
+    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
+    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->TimerConfigTick);
+}
+
 static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
     BOOLEAN TimerSetupMask = false;
     UINT8 TimerSetupVector = APIC_TIMER_VECTOR;

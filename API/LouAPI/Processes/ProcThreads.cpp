@@ -15,13 +15,6 @@ typedef struct _THREAD_SCHED_DATA{
     ULONG                   Cpu;
 }THREAD_SCHED_DATA, * PTHREAD_SCHED_DATA;
 
-
-void TsmAsignThreadToSchedualInternal(ULONG Cpu, PVOID Data){
-    PTHREAD_SCHED_DATA Tail = (PTHREAD_SCHED_DATA)Data;
-    Tail->ProcessData->ThreadObjects[Cpu].TsmAsignThreadToSchedual(*(PGENERIC_THREAD_DATA*)Tail->ThreadData);
-}
-
-
 LOUAPI
 LOUSTATUS 
 LouKePsmCreateDeferedThreadForProcessEx(
@@ -59,16 +52,12 @@ LouKePsmCreateDeferedThreadForProcessEx(
 
     PGENERIC_PROCESS_DATA ProcessData = (PGENERIC_PROCESS_DATA)Process;
     INTEGER Processors = GetNPROC();
-    THREAD_SCHED_DATA   Data;
-    Data.ThreadData = (PGENERIC_THREAD_DATA*)ThreadOut;
-    Data.ProcessData = ProcessData;
+    //THREAD_SCHED_DATA   Data;
+    //Data.ThreadData = (PGENERIC_THREAD_DATA*)ThreadOut;
+    //Data.ProcessData = ProcessData;
     for(INTEGER i = 0 ; i < Processors; i++){
         if(IS_PROCESSOR_AFFILIATED((*(PGENERIC_THREAD_DATA*)ThreadOut)->AfinityBitmap, i)){
-            ApicIpiHalSendIpiToCpu(
-                i,
-                TsmAsignThreadToSchedualInternal,
-                &Data
-            );
+            ProcessData->ThreadObjects[i].TsmAssignThreadWorkQueueData(LouKeTsmCreateThreadRing(*(PGENERIC_THREAD_DATA*)ThreadOut));
         }
     }
 

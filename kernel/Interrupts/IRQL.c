@@ -86,12 +86,14 @@ void LouKeSetIrql(
     if(GetWinIRQL() == NewIrql){
         return;
     }
+
     switch (NewIrql){
         case PASSIVE_LEVEL:{
             //sanity clear interrupts so nesting occours
             asm("cli");
             SetWinIRQL((UINT8)PASSIVE_LEVEL);
             asm("sti");
+            ApciHalStartApicTimerEvents();
             return;
         }
         case APC_LEVEL:{
@@ -99,6 +101,7 @@ void LouKeSetIrql(
             asm("cli");
             SetWinIRQL((UINT8)APC_LEVEL);    
             asm("sti");
+            ApciHalStartApicTimerEvents();
             return;
         }
         case DISPATCH_LEVEL:{
@@ -106,6 +109,7 @@ void LouKeSetIrql(
             asm("cli");
             SetWinIRQL((UINT8)DISPATCH_LEVEL);    
             asm("sti");
+            ApciHalStartApicTimerEvents();
             return;
         }
         case DIRQL:{

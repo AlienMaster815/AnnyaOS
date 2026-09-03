@@ -17,6 +17,8 @@ ULONG LouKeGetIdleingApCount(){
 
 static void (*ApInitializationFunction)() = 0; 
 
+static mutex_t InitLock = {0};
+
 void LouKeApIdleTillApInitFunction(){
     LouKeAcquireReference(&IdleingAps);
     while(!ApInitializationFunction){
@@ -30,25 +32,29 @@ void LouKeApInitializationFunction(){
     UINT32 ApProcessorID;
     LOUSTATUS Status;
 
+    AtomicLock(&InitLock);
+
     HandleApProccessorInitialization();
 
     ApicInitializeAdvancedProgramableInterruptControllerAbstraction(&ApProcessorID);
-
 
     Status = SetupGDT(ApProcessorID);
     if(Status != STATUS_SUCCESS){
         HaltAndCatchFile();
     }
+
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->ProcID = ApProcessorID;
 
     UpdateIDT();
+
     SetUpTimers();
+
+    MutexUnlock(&InitLock);
 
     LouKeReleaseReference(&IdleingAps);
     
     ApInitializeProcessManager(ApProcessorID);
-
 
     while(1){
         asm("hlt");
@@ -76,6 +82,10 @@ LOUSTATUS LouKeInitalizeApicSubsystem(){
     ApInitializationFunction = LouKeApInitializationFunction;
     LouKeMemoryBarrier();
 
+    while(LouKeGetIdleingApCount()){
+        LouKeMemoryBarrier();
+    }
+
     //test the ID
     UINT32 ApicID;
     LOUSTATUS Status = ApicHalGetLocalApicIdRegister(&ApicID);
@@ -84,9 +94,6 @@ LOUSTATUS LouKeInitalizeApicSubsystem(){
         while(1);
     }
 
-    while(LouKeGetIdleingApCount()){
-        LouKeMemoryBarrier();
-    }
 
     if(GetNPROC() > 1){
         LouKeInitializeSmpLouPrint();
@@ -95,6 +102,6 @@ LOUSTATUS LouKeInitalizeApicSubsystem(){
     LouPrint("Successfully Initialized Apic:%h\n", ApicID);
 
     LouPrint("LouKeInitalizeApicSubsystem():STATUS_SUCCESS\n");
-
+    
     return STATUS_SUCCESS;
 }
