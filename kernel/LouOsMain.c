@@ -339,17 +339,28 @@ void LouOsKrnlStart(
 
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
 
-    PciHalScanBootDevices();
-         
+    //PciHalScanBootDevices();
+    
+    sleep(2000);
+    
     //uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     //if(!StorageDevices){
     //    LouPrint("No Storage Devices Detected\n");
     //    while(1);
     //}
 
-    //TODO: implement new fast object into the memory manager
+    //TODO: 
+    //make all thread management into spinlocks.
+    //lock threads before changes
+    //add blocking to mutex's
 
     LouPrint("Successful Boot\n");
+    
+    sleep(5000);
+    
+    LouKeSystemShutdown(ShutdownReboot);
+
+    while(1);
 
     InitializeFileSystemManager();
 

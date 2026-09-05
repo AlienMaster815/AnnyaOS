@@ -260,3 +260,5 @@ EXPORTS
     LouKeAcquireInterruptLock
     LouKeReleaseInterruptLock
     LouKeGetCurrentThreadHandle
+    LouKeMxBlockThread
+    LouKeMxUnblockThread

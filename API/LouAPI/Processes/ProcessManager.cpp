@@ -149,8 +149,8 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     SetWinIRQL(NextThread->ThreadIrql);
     this->CurrentThread = NextThread;
     this->CurrentProcess = NextProcess;
-    MutexUnlock(&NextThread->LockOutTagOut);
-    MutexUnlock(&NextProcess->LockOutTagOut);
+    MutexUnlock(&NextThread->LockOutTagOut.Lock);
+    MutexUnlock(&NextProcess->LockOutTagOut.Lock);
     return IrqState;
 }
 
@@ -178,13 +178,13 @@ PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
             PGENERIC_PROCESS_DATA Process = TmpRing->ProcessData;
             TailRing = (PPROCESS_RING)TmpRing->Peers.LastHeader;
             PGENERIC_PROCESS_DATA Tail = TailRing->ProcessData;
-            if(AtomicLockOrFalse(&Tail->LockOutTagOut)){
+            if(AtomicLockOrFalse(&Tail->LockOutTagOut.Lock)){
                 if(Tail->ProcessState == PROCESS_TERMINATED){
                     PsmDeAsginProcessRingItem(&this->Processes[NextRing], TailRing);
                 }
-                MutexUnlock(&Tail->LockOutTagOut);
+                MutexUnlock(&Tail->LockOutTagOut.Lock);
             }
-            if(AtomicLockOrFalse(&Process->LockOutTagOut)){
+            if(AtomicLockOrFalse(&Process->LockOutTagOut.Lock)){
                 if(Process->ProcessState == PROCESS_BLOCKED){
                     if(
                         (!LouKeIsTimeoutNull(&Process->BlockTimeout)) &&
@@ -200,7 +200,7 @@ PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
                     //the thread inside the process
                     return Process;
                 }
-                MutexUnlock(&Process->LockOutTagOut);
+                MutexUnlock(&Process->LockOutTagOut.Lock);
             }
             TmpRing = (PPROCESS_RING)TmpRing->Peers.NextHeader;
             if(TmpRingAnchor == TmpRing){

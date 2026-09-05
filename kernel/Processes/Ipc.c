@@ -111,7 +111,7 @@ LouKeIpcGetIpcEx(
     PLOU_IPC_MESSAGE*   OutMessage,
     BOOLEAN             WaitForMessage
 ){
-    if((!Manager) || (!OutMessage)){
+    /*if((!Manager) || (!OutMessage)){
         return STATUS_INVALID_PARAMETER;
     }
     MutexLock(&Manager->Lock);
@@ -120,12 +120,13 @@ LouKeIpcGetIpcEx(
             *OutMessage = 0x00;
             return STATUS_UNSUCCESSFUL;
         }
-        LouKeYieldExecution();
+        //LouKeYieldExecution();
     }   
     *OutMessage = ListItemToTypeOrNull(Manager->Messages.NextHeader, LOU_IPC_MESSAGE, Peers);
     LouKeListDeleteItem(Manager->Messages.NextHeader);
     MutexUnlock(&Manager->Lock);    
-    return STATUS_SUCCESS;
+    return STATUS_SUCCESS;*/
+    return STATUS_UNSUCCESSFUL;
 }
 
 KERNEL_EXPORT

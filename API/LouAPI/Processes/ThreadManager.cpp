@@ -638,10 +638,10 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
         LouPrint("LouKeThreadSleep() ERROR: Thread Non Existent\n");
         return;
     }
-    //LouKIRQL Irql;
+    LouKIRQL Irql;
     TIME_T Time;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    MutexLock(&ThreadData->LockOutTagOut);
+    LouKeAcquireInterruptLock(&ThreadData->LockOutTagOut, &Irql);
     //LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
@@ -650,7 +650,7 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     CurrentTSC = read_tsc();
-    MutexUnlock(&ThreadData->LockOutTagOut);
+    LouKeReleaseInterruptLock(&ThreadData->LockOutTagOut, &Irql);
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     //LouKeUnlockProcManager(&Irql);
@@ -668,26 +668,31 @@ LouKeYieldExecution(){
 
 
 LOUAPI void LouKeUnblockThread(PTHREAD Thread){
-    //LouKIRQL Irql;
+    LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
     //LouKeLockProcManager(&Irql);
-    MutexLock(&ThreadData->LockOutTagOut);
+    LouKeAcquireInterruptLock(&ThreadData->LockOutTagOut, &Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_READY;    
-    MutexUnlock(&ThreadData->LockOutTagOut);
+    LouKeReleaseInterruptLock(&ThreadData->LockOutTagOut, &Irql);
     //LouKeUnlockProcManager(&Irql);
+}
+
+LOUAPI void LouKeBlockThreadNoYield(PTHREAD Thread){
+    LouKIRQL Irql;
+    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
+    LouKeAcquireInterruptLock(&ThreadData->LockOutTagOut, &Irql);
+    memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
+    LouKeReleaseInterruptLock(&ThreadData->LockOutTagOut, &Irql);
 }
 
 LOUAPI void LouKeBlockThread(PTHREAD Thread){
     UINT64 CurrentID = LouKeGetThreadIdentification();
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
-    MutexLock(&ThreadData->LockOutTagOut);
-    memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    MutexUnlock(&ThreadData->LockOutTagOut);
+    LouKeBlockThreadNoYield(Thread);
     if(ThreadData->ThreadID == CurrentID){
         LouKeYieldExecution();
     }
-
 }
 
 
@@ -809,13 +814,13 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
             PGENERIC_THREAD_DATA Thread = TmpRing->ThreadData;
             TailRing = (PTHREAD_RING)TmpRing->Peers.LastHeader;
             PGENERIC_THREAD_DATA Tail = TailRing->ThreadData;
-            if(AtomicLockOrFalse(&Tail->LockOutTagOut)){
+            if(AtomicLockOrFalse(&Tail->LockOutTagOut.Lock)){
                 if(Tail->State == THREAD_TERMINATED){
                     TsmDeAsginThreadRingItem(&this->Threads[NextRing], TailRing);
                 }
-                MutexUnlock(&Tail->LockOutTagOut);
+                MutexUnlock(&Tail->LockOutTagOut.Lock);
             }
-            if(AtomicLockOrFalse(&Thread->LockOutTagOut)){
+            if(AtomicLockOrFalse(&Thread->LockOutTagOut.Lock)){
                 if(Thread->State == THREAD_BLOCKED){
                     if(
                         (!LouKeIsTimeoutNull(&Thread->BlockTimeout)) &&
@@ -831,7 +836,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
                     //the thread inside the process
                     return Thread;
                 }
-                MutexUnlock(&Thread->LockOutTagOut);
+                MutexUnlock(&Thread->LockOutTagOut.Lock);
             }
             TmpRing = (PTHREAD_RING)TmpRing->Peers.NextHeader;
             if(TmpRingAnchor == TmpRing){
