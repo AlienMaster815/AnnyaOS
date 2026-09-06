@@ -339,9 +339,9 @@ void LouOsKrnlStart(
 
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
 
-    //PciHalScanBootDevices();
+    PciHalScanBootDevices();
     
-    sleep(2000);
+    //sleep(2000);
     
     //uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     //if(!StorageDevices){
@@ -350,15 +350,21 @@ void LouOsKrnlStart(
     //}
 
     //TODO: 
-    //make all thread management into spinlocks.
-    //lock threads before changes
-    //add blocking to mutex's
+    //add a new system for Scatter Devices
+    //to use a single api for abstract 
+    //transfers have them use DMA devices
+    //and have attributes for the alignment
+    //of data as well as how many scatter
+    //entries can be used and use the 
+    //threshold OR an overide for how many
+    //bytes can be transfered and optional
+    //padding to the end
 
     LouPrint("Successful Boot\n");
     
-    sleep(5000);
+    //sleep(5000);
     
-    LouKeSystemShutdown(ShutdownReboot);
+    //LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
 
@@ -370,7 +376,7 @@ void LouOsKrnlStart(
 
     LouKeProbeSbIsa();
 
-    //PciHalScanRuntimeDevices();    
+    PciHalScanRuntimeDevices();    
 
     //TODO: stub LdmCore.h 
 

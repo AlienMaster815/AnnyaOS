@@ -100,7 +100,7 @@ void LouKeSetIrql(
             //sanity clear interrupts so nesting occours
             asm("cli");
             SetWinIRQL((UINT8)APC_LEVEL);    
-            asm("sti");
+            //asm("sti");
             ApciHalStartApicTimerEvents();
             return;
         }
@@ -108,7 +108,7 @@ void LouKeSetIrql(
             //sanity clear interrupts so nesting occours
             asm("cli");
             SetWinIRQL((UINT8)DISPATCH_LEVEL);    
-            asm("sti");
+            //asm("sti");
             ApciHalStartApicTimerEvents();
             return;
         }
@@ -116,7 +116,7 @@ void LouKeSetIrql(
             //sanity clear interrupts so nesting occours
             asm("cli");
             SetWinIRQL((UINT8)DIRQL);    
-            asm("sti");
+            //asm("sti");
             ApciHalStartApicTimerEvents();
             return;
         } 
@@ -125,8 +125,8 @@ void LouKeSetIrql(
             ApciHalStopApicTimerEvents();
             asm("cli");
             SetWinIRQL((UINT8)CLOCK_LEVEL);    
-            asm("sti");
-            ApciHalStartApicTimerEvents();
+            //asm("sti");
+            //ApciHalStartApicTimerEvents();
             return;
         }
         case HIGH_LEVEL:{

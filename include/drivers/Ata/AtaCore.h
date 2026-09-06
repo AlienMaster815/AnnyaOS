@@ -345,6 +345,7 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
     struct _ATA_HOST_DEVICE_OBJECT* HostDevice;
     struct _ATA_PORT_OPERATIONS*    Operations;
     ULONG                           PortFlags;
+    semaphore_t                     PrepLock;
     PVOID                           PortPrivateData;
     PTHREAD                         CommandWorkerThread;
 }ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;

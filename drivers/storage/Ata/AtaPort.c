@@ -348,6 +348,7 @@ LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
     }
 
     ForEachAtaPort(HostDevice, TmpPort, i){
+        SemaphoreInitialize(&TmpPort->PrepLock, 32, 32);
         if(TmpPort->Operations->AtaPortDeviceReset){
             Status = TmpPort->Operations->AtaPortDeviceReset(TmpPort);
             if(Status != STATUS_SUCCESS){

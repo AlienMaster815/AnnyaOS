@@ -38,8 +38,10 @@
 #define AHCI_LOONGSON_ABAR                  0
 
 typedef struct _AHCI_COMMAND_PRIVATE_DATA{
-    UINT32 CommandSlot;
-    
+    UINT8                   CommandSlot;
+    UINTPTR                 CommandHeader;
+    UINTPTR                 CommandTable;
+    LOUSINE_DMA_TRANSFER    PioDmaTransfer;
 }AHCI_COMMAND_PRIVATE_DATA, * PAHCI_COMMAND_PRIVATE_DATA;
 
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
@@ -61,7 +63,7 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                                EmBufferSize;
     uint8_t                                 EmMessageType;
     uint32_t                                ExternalPortMask;
-    UINT32                                  CommandsQueued;
+    UINT32                                  CommandSlot;
     KERNEL_EVENT_OBJECT                     CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
 
@@ -112,51 +114,7 @@ void AhciStartPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 void AhciStopPort(PLOUSINE_KERNEL_DEVICE_ATA_PORT AhciPort);
 //Endof Driver Operations
 
-static inline void DumpPort(PAHCI_GENERIC_PORT AhciPort){
-    LouPrint("PxCLB   :%h\n", AhciPort->PxCLB);
-    LouPrint("PxCLBU  :%h\n", AhciPort->PxCLBU);
-    LouPrint("PxFB    :%h\n", AhciPort->PxFB);
-    LouPrint("PxFBU   :%h\n", AhciPort->PxFBU);
-    LouPrint("PxIS    :%h\n", AhciPort->PxIS);
-    LouPrint("PxIE    :%h\n", AhciPort->PxIE);
-    LouPrint("PxCMD   :%h\n", AhciPort->PxCMD);
-    LouPrint("PxTFD   :%h\n", AhciPort->PxTFD);
-    LouPrint("PxSIG   :%h\n", AhciPort->PxSIG);
-    LouPrint("PxSSTS  :%h\n", AhciPort->PxSSTS);
-    LouPrint("PxSCTL  :%h\n", AhciPort->PxSCTL);
-    LouPrint("PxSERR  :%h\n", AhciPort->PxSERR);
-    LouPrint("PxSACT  :%h\n", AhciPort->PxSACT);
-    LouPrint("PxCI    :%h\n", AhciPort->PxCI);
-    LouPrint("PxSNTF  :%h\n", AhciPort->PxSNTF);
-    LouPrint("PxFBS   :%h\n", AhciPort->PxFBS);
-    LouPrint("PxDEVSLP:%h\n", AhciPort->PxDEVSLP);
-    LouPrint("PxVS    :%h\n", AhciPort->PxVS);
-}
 
-static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
-    LouPrint("CAP     :%h\n", Ghc->Capabilities);
-    LouPrint("GHC     :%h\n", Ghc->GlobalHostControl);
-    LouPrint("IS      :%h\n", Ghc->InterruptStatus);
-    LouPrint("PI      :%h\n", Ghc->PortsImplemented);
-    LouPrint("VS      :%h\n", Ghc->Version);
-    LouPrint("CC_CTL  :%h\n", Ghc->CCC_Control);
-    LouPrint("CC_PORTS:%h\n", Ghc->CccPorts);
-    LouPrint("EM_LOC  :%h\n", Ghc->EmLocation);
-    LouPrint("EM_CTL  :%h\n", Ghc->EmControl);
-    LouPrint("CAP2    :%h\n", Ghc->Capabilities2);
-    LouPrint("BIHC    :%h\n", Ghc->BiosHandoff);
-}
-
-static inline void DumpEverything(
-    PLOUSINE_KERNEL_DEVICE_ATA_HOST AtaHost
-){
-    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData; 
-    DumpGhc(PrivateData->GenericHostController);
-    ForEachAtaPort(AtaHost){
-        PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData2 = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[AtaPortIndex].PortPrivateData;
-        DumpPort(PrivateAhciData2->GenericPort);
-    }    
-}
 
 //port States
 #define PORT_STATE_UNDEFINED                0
@@ -220,6 +178,28 @@ AhciResetEm(
 
 //End of Device list from Linux Kernel Documetation
 
+typedef struct PACKED _FIS_H2D{
+    UINT8   FisType;
+#define FIS_H2D_PMP_PORT_BITS   0x0F
+#define FIS_H2D_COMMAND_BIT     (1 << 7)
+    UINT8   PmpC;
+    UINT8   Command;
+    UINT8   FeatureCurrent;
+    UINT8   LbaLowCurrent;
+    UINT8   LbaMidCurrent;
+    UINT8   LbaHighCurrent;
+    UINT8   Device;
+    UINT8   LbaLowPrevious;
+    UINT8   LbaMidPrevious;
+    UINT8   LbaHighPrevious;
+    UINT8   FeaturePrevious;
+    UINT8   SectorCountCurrent;
+    UINT8   SectorCountPrevious;
+    UINT8   IsochCommandCompletion;
+    UINT8   Control;
+    UINT8   Reserved[4];
+}FIS_H2D, * PFIS_H2D;
+
 typedef struct PACKED _FIS_D2H{
     UINT8   FisType;
 #define     FIS_D2H_PMP_PORT_BITS   0x0F
@@ -263,3 +243,84 @@ typedef struct PACKED _FIS_PIO{
     UINT16  TransferCount;
     UINT8   Resered3[2];
 }FIS_PIO, * PFIS_PIO;
+
+typedef struct PACKED _COMMAND_HEADER{
+    UINT8   CflAWP;
+#define COMMAND_HEADER_FIS_LENGTH_BITS  0x1F
+#define COMMAND_HEADER_ATAPI_BIT        (1 << 5)
+#define COMMAND_HEADER_WRITE_BIT        (1 << 6)
+#define COMMAND_HEADER_PREFETCH_BIT     (1 << 7)  
+    UINT8   RBCPmp;
+#define COMMAND_HEADER_RESET_BIT        (1 << 0)
+#define COMMAND_HEADER_BIST_BIT         (1 << 1)
+#define COMMAND_HEADER_CLR_ROK_BIT      (1 << 2)
+#define COMMAND_HEADER_PMP_SHIFT        (4)
+#define COMMAND_HEADER_PMP_BITS         0x0F
+    UINT16  Prdtl;
+    UINT32  Ctba;
+    UINT32  Ctbau;
+    UINT32  Reserved[5];
+}COMMAND_HEADER, * PCOMMAND_HEADER;
+
+typedef struct PACKED _COMMAND_TABLE_PRDT{
+    UINT32  Dba;
+    UINT32  Dbau;
+    UINT32  Reserved;
+    UINT32  DbcI;
+#define COMMAND_TABLE_DBC_BITS ((1 << 22) - 1)
+#define COMMAND_TABLE_INT_BIT   (1 << 31)
+}COMMAND_TABLE_PRDT, * PCOMMAND_TABLE_PRDT;
+
+typedef struct PACKED _COMMAND_TABLE{
+    UINT8               CmdFis[64]; 
+    UINT8               AtapiCommand[16];
+    UINT8               Reserved[48];   
+    COMMAND_TABLE_PRDT  Prdts[];
+}COMMAND_TABLE, * PCOMMAND_TABLE;
+
+
+static inline void DumpPort(PAHCI_GENERIC_PORT AhciPort){
+    LouPrint("PxCLB   :%h\n", AhciPort->PxCLB);
+    LouPrint("PxCLBU  :%h\n", AhciPort->PxCLBU);
+    LouPrint("PxFB    :%h\n", AhciPort->PxFB);
+    LouPrint("PxFBU   :%h\n", AhciPort->PxFBU);
+    LouPrint("PxIS    :%h\n", AhciPort->PxIS);
+    LouPrint("PxIE    :%h\n", AhciPort->PxIE);
+    LouPrint("PxCMD   :%h\n", AhciPort->PxCMD);
+    LouPrint("PxTFD   :%h\n", AhciPort->PxTFD);
+    LouPrint("PxSIG   :%h\n", AhciPort->PxSIG);
+    LouPrint("PxSSTS  :%h\n", AhciPort->PxSSTS);
+    LouPrint("PxSCTL  :%h\n", AhciPort->PxSCTL);
+    LouPrint("PxSERR  :%h\n", AhciPort->PxSERR);
+    LouPrint("PxSACT  :%h\n", AhciPort->PxSACT);
+    LouPrint("PxCI    :%h\n", AhciPort->PxCI);
+    LouPrint("PxSNTF  :%h\n", AhciPort->PxSNTF);
+    LouPrint("PxFBS   :%h\n", AhciPort->PxFBS);
+    LouPrint("PxDEVSLP:%h\n", AhciPort->PxDEVSLP);
+    LouPrint("PxVS    :%h\n", AhciPort->PxVS);
+}
+
+/*static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
+    LouPrint("CAP     :%h\n", Ghc->Capabilities);
+    LouPrint("GHC     :%h\n", Ghc->GlobalHostControl);
+    LouPrint("IS      :%h\n", Ghc->InterruptStatus);
+    LouPrint("PI      :%h\n", Ghc->PortsImplemented);
+    LouPrint("VS      :%h\n", Ghc->Version);
+    LouPrint("CC_CTL  :%h\n", Ghc->CCC_Control);
+    LouPrint("CC_PORTS:%h\n", Ghc->CccPorts);
+    LouPrint("EM_LOC  :%h\n", Ghc->EmLocation);
+    LouPrint("EM_CTL  :%h\n", Ghc->EmControl);
+    LouPrint("CAP2    :%h\n", Ghc->Capabilities2);
+    LouPrint("BIHC    :%h\n", Ghc->BiosHandoff);
+}*/
+
+//static inline void DumpEverything(
+//    PATA_HOST_DEVICE_OBJECT AtaHost
+//){
+//    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData; 
+//    DumpGhc(PrivateData->GenericHostController);
+//    ForEachAtaPort(AtaHost){
+//        PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData2 = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[AtaPortIndex].PortPrivateData;
+//        DumpPort(PrivateAhciData2->GenericPort);
+//    }    
+//}

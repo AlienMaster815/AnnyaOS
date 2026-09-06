@@ -36,77 +36,161 @@ void AhciFreeCommandPrivateData(PVOID Object){
     LouKeFreeFastObject("AHCI_COMMAND_PRIVATE_DATA", Object);
 }
 
+#define AHCI_PXIS_FATAL_ERRORS ((1U << 30) | (1U << 29) | (1U << 28) | (1U << 27)) 
 
-
-LOUSTATUS AtaGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
     PAHCI_COMMAND_PRIVATE_DATA CmdPrivate = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
-    if(PrivateData->GenericPort->PxCI & (1 << CmdPrivate->CommandSlot)){
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
+        LouPrint("Port Before Entering POLL Loop\n");
+        DumpPort(PrivateData->GenericPort);
+        SIZE Timeout = 1000;
+        while((PrivateData->GenericPort->PxCI & (1 << CmdPrivate->CommandSlot)) && Timeout){
+            if(PrivateData->GenericPort->PxIS & (AHCI_PXIS_FATAL_ERRORS)){
+                return STATUS_IO_DEVICE_ERROR;
+            }   
+            sleep(1);
+            Timeout--;     
+        }
+        if(!Timeout){
+            LouPrint("Port At Timeout\n");
+            DumpPort(PrivateData->GenericPort);
+            return STATUS_TIMEOUT;
+        }
+
+    }
+    else if(PrivateData->GenericPort->PxCI & (1 << CmdPrivate->CommandSlot)){
         return STATUS_NO_WORK_DONE;
     }
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
-        PFIS_D2H Fis = (PFIS_D2H)(UINT8*)(PrivateData->FisDma + 0x40); 
-        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-            CommandPacket->PacketEx.Status = Fis->Status;
-            CommandPacket->PacketEx.Device = Fis->Device;
-            CommandPacket->PacketEx.Error = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->Error);
-            CommandPacket->PacketEx.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->SectorCountCurrent);
-            CommandPacket->PacketEx.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaLowCurrent);
-            CommandPacket->PacketEx.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaMidCurrent);
-            CommandPacket->PacketEx.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaHighCurrent);
-            //CommandPacket->PacketEx.Error |= ATA_CMDBLK_ENCODE_PREV_VALUE(); NOT SUPPORTED with AHCI
-            CommandPacket->PacketEx.SectorCount |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->SectorCountPrevious);
-            CommandPacket->PacketEx.LbaLow |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaLowPrevious);
-            CommandPacket->PacketEx.LbaMid |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaMidPrevious);
-            CommandPacket->PacketEx.LbaHigh |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaHighPrevious);
-        }else{
-            CommandPacket->Packet.Status = Fis->Status;
-            CommandPacket->Packet.Error = Fis->Error;
-            CommandPacket->Packet.SectorCount = Fis->SectorCountCurrent;
-            CommandPacket->Packet.LbaLow = Fis->LbaLowCurrent;
-            CommandPacket->Packet.LbaMid = Fis->LbaMidCurrent;
-            CommandPacket->Packet.LbaHigh = Fis->LbaHighCurrent;
-            CommandPacket->Packet.Device = Fis->Device;
-        }
+    PFIS_D2H Fis = (PFIS_D2H)(UINT8*)(PrivateData->FisDma + 0x40); 
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+        CommandPacket->PacketEx.Status = Fis->Status;
+        CommandPacket->PacketEx.Device = Fis->Device;
+        CommandPacket->PacketEx.Error = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->Error);
+        CommandPacket->PacketEx.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->SectorCountCurrent);
+        CommandPacket->PacketEx.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaLowCurrent);
+        CommandPacket->PacketEx.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaMidCurrent);
+        CommandPacket->PacketEx.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaHighCurrent);
+        //CommandPacket->PacketEx.Error |= ATA_CMDBLK_ENCODE_PREV_VALUE(); NOT SUPPORTED with AHCI
+        CommandPacket->PacketEx.SectorCount |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->SectorCountPrevious);
+        CommandPacket->PacketEx.LbaLow |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaLowPrevious);
+        CommandPacket->PacketEx.LbaMid |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaMidPrevious);
+        CommandPacket->PacketEx.LbaHigh |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaHighPrevious);
     }else{
-        PFIS_PIO Fis = (PFIS_PIO)(UINT8*)(PrivateData->FisDma + 0x20); 
-        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-            CommandPacket->PacketEx.Status = Fis->Status;
-            CommandPacket->PacketEx.Device = Fis->Device;
-            CommandPacket->PacketEx.Error = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->Error);
-            CommandPacket->PacketEx.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->SectorCountCurrent);
-            CommandPacket->PacketEx.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaLowCurrent);
-            CommandPacket->PacketEx.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaMidCurrent);
-            CommandPacket->PacketEx.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE(Fis->LbaHighCurrent);
-            //CommandPacket->PacketEx.Error |= ATA_CMDBLK_ENCODE_PREV_VALUE(); NOT SUPPORTED with AHCI
-            CommandPacket->PacketEx.SectorCount |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->SectorCountPrevious);
-            CommandPacket->PacketEx.LbaLow |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaLowPrevious);
-            CommandPacket->PacketEx.LbaMid |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaMidPrevious);
-            CommandPacket->PacketEx.LbaHigh |= ATA_CMDBLK_ENCODE_PREV_VALUE(Fis->LbaHighPrevious);
-        }else{
-            CommandPacket->Packet.Status = Fis->Status;
-            CommandPacket->Packet.Error = Fis->Error;
-            CommandPacket->Packet.SectorCount = Fis->SectorCountCurrent;
-            CommandPacket->Packet.LbaLow = Fis->LbaLowCurrent;
-            CommandPacket->Packet.LbaMid = Fis->LbaMidCurrent;
-            CommandPacket->Packet.LbaHigh = Fis->LbaHighCurrent;
-            CommandPacket->Packet.Device = Fis->Device;
-        }
-    }
+        CommandPacket->Packet.Status = Fis->Status;
+        CommandPacket->Packet.Error = Fis->Error;
+        CommandPacket->Packet.SectorCount = Fis->SectorCountCurrent;
+        CommandPacket->Packet.LbaLow = Fis->LbaLowCurrent;
+        CommandPacket->Packet.LbaMid = Fis->LbaMidCurrent;
+        CommandPacket->Packet.LbaHigh = Fis->LbaHighCurrent;
+        CommandPacket->Packet.Device = Fis->Device;
+    }   
     return STATUS_SUCCESS;
 }
     
+//TODO: Allocate 1 Command Table Structure per Header 
 
+static 
+LOUSTATUS 
+AhciGenericGetFreeCommandSlot(PAHCI_DRIVER_PRIVATE_DATA PrivateData, UINT8* Slot){
+    for(UINT8 i = 0 ; i < 32; i++){
+        if(!(PrivateData->CommandSlot & (1 << i))){
+            PrivateData->CommandSlot |= (1 << i);
+            *Slot = i;
+            return STATUS_SUCCESS;
+        }
+    }
+    return STATUS_INSUFFICIENT_RESOURCES;
+}
 
 LOUSTATUS AhciGenericPortDevicePrepCommand(
     PATA_PORT_DEVICE_OBJECT PortDevice,
     PATA_COMMAND_PACKET     CommandPacket
-){
-    //if(CommandPacket->CommandFlags & ())
+){  
+    UINT8 Slot;
+    PLOUSINE_DMA_TRANSFER DmaTransfer;
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    PLOUSINE_DMA_DEVICE DmaDevice = &PrivateData->DmaDevice;
+    
+    LOUSTATUS Status = AhciGenericGetFreeCommandSlot(PrivateData, &Slot);    
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    PCOMMAND_HEADER CmdHeader = (PCOMMAND_HEADER)(UINT8*)(PrivateData->CommandDma + (Slot * 32));
+    PAHCI_COMMAND_PRIVATE_DATA NewCommandData = (PAHCI_COMMAND_PRIVATE_DATA)LouKeAllocateFastObject("AHCI_COMMAND_PRIVATE_DATA");
+    if(!NewCommandData){
+        PrivateData->CommandSlot &= ~(1 << Slot); 
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
+        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+            DmaTransfer = CommandPacket->DmaDataOut;
+        }else{
+            DmaTransfer = CommandPacket->DmaDataIn;
+        }
+    }else{
+        DmaTransfer = &NewCommandData->PioDmaTransfer;
+        DmaTransfer->DmaSize = CommandPacket->PioSize;
+        DmaTransfer->DmaAddress = (UINTPTR)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, DmaTransfer->DmaSize, 8);
+        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+            memcpy((PVOID)DmaTransfer->DmaAddress, CommandPacket->PioDataOut, DmaTransfer->DmaSize);
+        }
+    }
+    NewCommandData->CommandSlot = Slot;
+    NewCommandData->CommandHeader = (UINTPTR)(UINT8*)CmdHeader;
+    PCOMMAND_TABLE CmdTable = (PCOMMAND_TABLE)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, GetStructureSize(COMMAND_TABLE, Prdts, 1), 128);
+    NewCommandData->CommandTable = (UINTPTR)(UINT8*)CmdTable;
+    UINT64 CommandTableDma; 
+    UINT64 DataDma;
+    RequestPhysicalAddress((UINT64)NewCommandData->CommandTable, &CommandTableDma);
+    RequestPhysicalAddress((UINT64)DmaTransfer->DmaAddress, &DataDma);
 
+    CmdHeader->Prdtl = 1;
+    CmdHeader->CflAWP = sizeof(FIS_H2D) / sizeof(UINT32);
+    CmdHeader->Ctba = CommandTableDma & UINT32_MAX;
+    CmdHeader->Ctbau = (CommandTableDma >> 32) & UINT32_MAX;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+        CmdHeader->CflAWP |= COMMAND_HEADER_WRITE_BIT;
+    }
+    CmdHeader->RBCPmp = COMMAND_HEADER_CLR_ROK_BIT;
 
-    LouPrint("AhciGenericPortDevicePrepCommand()\n");
-    while(1);
+    CmdTable->Prdts[0].Dba = DataDma & UINT32_MAX;
+    CmdTable->Prdts[0].Dbau = (DataDma >> 32) & UINT32_MAX;
+    CmdTable->Prdts[0].DbcI = (DmaTransfer->DmaSize - 1) | COMMAND_TABLE_INT_BIT;
+
+    PFIS_H2D H2dFis = (PFIS_H2D)(UINT8*)CmdTable;
+    H2dFis->FisType = 0x27;
+    H2dFis->PmpC = FIS_H2D_COMMAND_BIT;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+        H2dFis->Command = CommandPacket->PacketEx.Command;
+        H2dFis->LbaLowCurrent = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaLow);
+        H2dFis->LbaMidCurrent = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaMid);
+        H2dFis->LbaHighCurrent = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaHigh);
+        H2dFis->FeatureCurrent = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.Features);
+        H2dFis->Device = CommandPacket->PacketEx.Device;
+        H2dFis->LbaLowPrevious = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaLow);
+        H2dFis->LbaMidPrevious = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaMid);
+        H2dFis->LbaHighPrevious = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaHigh);
+        H2dFis->SectorCountCurrent = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.SectorCount);
+        H2dFis->SectorCountPrevious = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.SectorCount);
+        H2dFis->FeaturePrevious = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.Features);
+    }else{
+        H2dFis->Command = CommandPacket->Packet.Command;
+        H2dFis->LbaLowCurrent = CommandPacket->Packet.LbaLow;
+        H2dFis->LbaMidCurrent = CommandPacket->Packet.LbaMid;
+        H2dFis->LbaHighCurrent = CommandPacket->Packet.LbaHigh;
+        H2dFis->Device = CommandPacket->Packet.Device;
+        H2dFis->SectorCountCurrent = CommandPacket->Packet.SectorCount;
+        H2dFis->FeatureCurrent = CommandPacket->Packet.Features;
+    }
+
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD){
+        CmdHeader->CflAWP |= COMMAND_HEADER_ATAPI_BIT;
+        memcpy(CmdTable->AtapiCommand, (PVOID)CommandPacket->PacketData , CommandPacket->PacketSize);
+    }
+
+    CommandPacket->CommandPrivateData = (PVOID)(UINT8*)NewCommandData;
+
     return STATUS_SUCCESS;
 }
 
@@ -114,9 +198,23 @@ LOUSTATUS AhciGenericPortDeviceIssueCommand(
     PATA_PORT_DEVICE_OBJECT PortDevice,
     PATA_COMMAND_PACKET     CommandPacket
 ){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    PrivateData->GenericPort->PxIS = UINT32_MAX;
+    SIZE Timeout = 1000;
+    while((PrivateData->GenericPort->PxTFD & ((1 << 7) | (1 << 6))) && Timeout){
+        sleep(1);
+        Timeout--;
+    }    
+    if(!Timeout){
+        return STATUS_TIMEOUT;
+    }
+    PAHCI_COMMAND_PRIVATE_DATA CmdPrivate = (PAHCI_COMMAND_PRIVATE_DATA)(UINT8*)CommandPacket->CommandPrivateData;
+    LouPrint("Port Before CI Set\n");
+    DumpPort(PrivateData->GenericPort);
 
-    LouPrint("AhciGenericPortDeviceIssueCommand()\n");
-    while(1);
+    PrivateData->GenericPort->PxCI = (1 << CmdPrivate->CommandSlot);    
+    LouPrint("Port After CI Set\n");
+    DumpPort(PrivateData->GenericPort);
     return STATUS_SUCCESS;
 }
 
@@ -129,6 +227,7 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
     while(1);
     return STATUS_SUCCESS;
 }
+
 
 LOUSTATUS AhciGenericPortDeviceStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
     AhciInitializePort(PortDevice);
@@ -208,6 +307,7 @@ static ATA_HOST_OPERATIONS AhciGenericHostOperations = {
 UNUSED static ATA_PORT_OPERATIONS AhciGenericPortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
+    .AtaPortDeviceGetCommandStatus = AhciGenericPortDeviceGetCommandStatus,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
@@ -1324,19 +1424,19 @@ void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
     RequestPhysicalAddress(PrivateData->FisDma, &FisDmaPhy);
 
     if(HighMem){
-        Port->PxCLBU = (CommandDmaPhy >> 32);
+        Port->PxCLBU = (CommandDmaPhy >> 32) & UINT32_MAX;
     }else{
         Port->PxCLBU = 0;
     }
 
-    Port->PxCLB = (CommandDmaPhy & 0xFFFFFFFF);
+    Port->PxCLB = (CommandDmaPhy & UINT32_MAX);
 
     if(HighMem){
-        Port->PxFBU = (FisDmaPhy >> 32);
+        Port->PxFBU = (FisDmaPhy >> 32) & UINT32_MAX;
     }else{
         Port->PxFBU = 0;
     }
-    Port->PxFB = (FisDmaPhy & 0xFFFFFFFF);
+    Port->PxFB = (FisDmaPhy & UINT32_MAX);
 
     Command = Port->PxCMD;
     Command |= AHCI_PxCMD_FRE;
