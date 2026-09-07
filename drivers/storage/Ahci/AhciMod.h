@@ -51,7 +51,7 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     UINT32                                  CapOveride;
     AHCI_DRIVER_BOARD_INFORMATION_TABLE     BoardInfo;
     uint64_t                                PrivateFlags;
-    void                                    (*StartCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
+    LOUSTATUS                               (*StartCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
     LOUSTATUS                               (*StopCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
     uintptr_t                               FisDma;
     uintptr_t                               CommandDma;
@@ -63,6 +63,8 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                                EmBufferSize;
     uint8_t                                 EmMessageType;
     uint32_t                                ExternalPortMask;
+    BOOLEAN                                 AtapiDevice;
+    BOOLEAN                                 DeviceAttached;
     UINT32                                  CommandSlot;
     KERNEL_EVENT_OBJECT                     CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
