@@ -45,13 +45,14 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
     //DumpPort(PrivateData->GenericPort);
     LOUSTATUS Status;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
-        SIZE Timeout = 1000;
         Status = LouKeMmioWaitTillClear(
             (PULONG)&PrivateData->GenericPort->PxCI, 
             1 << CmdPrivate->CommandSlot,
             10,
-            1000
+            10000
         );
+        DumpPort(PrivateData->GenericPort);
+        while(1);
         if(PrivateData->GenericPort->PxIS & (AHCI_PXIS_FATAL_ERRORS)){
             return STATUS_IO_DEVICE_ERROR;
         } 
@@ -111,6 +112,8 @@ LOUSTATUS AhciGenericPortDevicePrepCommand(
     PLOUSINE_DMA_TRANSFER DmaTransfer;
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
     PLOUSINE_DMA_DEVICE DmaDevice = &PrivateData->DmaDevice;
+
+  
     LOUSTATUS Status = AhciGenericGetFreeCommandSlot(PrivateData, &Slot);    
     if(Status != STATUS_SUCCESS){
         return Status;
@@ -202,15 +205,11 @@ LOUSTATUS AhciGenericPortDeviceIssueCommand(
 ){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
     LOUSTATUS Status;
-    LouPrint("Port Before Issueing Command\n");
-    DumpPort(PrivateData->GenericPort);
-    while(1);
 
-    PrivateData->GenericPort->PxIS = UINT32_MAX;
     SIZE Timeout = 1000;
     Status = LouKeMmioWaitTillClear(
         (PULONG)&PrivateData->GenericPort->PxTFD,
-        ((1 << 7) | (1 << 6)),
+        ((1 << 7) | (1 << 3)),
         10,
         1000
     );
@@ -218,6 +217,7 @@ LOUSTATUS AhciGenericPortDeviceIssueCommand(
         return Status;
     }
     PAHCI_COMMAND_PRIVATE_DATA CmdPrivate = (PAHCI_COMMAND_PRIVATE_DATA)(UINT8*)CommandPacket->CommandPrivateData;
+
     PrivateData->GenericPort->PxCI = (1 << CmdPrivate->CommandSlot);    
     return STATUS_SUCCESS;
 }
@@ -239,7 +239,23 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
 //}
 
 LOUSTATUS AhciGenericPortDeviceStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
-    AhciInitializePort(PortDevice);
+//    AhciInitializePort(PortDevice);
+    //SIZE CommandSize =
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    SIZE DmaSize, ReciveFisSize;
+
+    DmaSize = AHCI_PORT_PRIVATE_DMA_SIZE;
+    ReciveFisSize = AHCI_RECIVE_FIS_SIZE;
+
+    PrivateData->DmaData = (UINTPTR)LouKeDmaDeviceAllocateDmaMemory(&PrivateData->DmaDevice, DmaSize, KILOBYTE);
+    RequestPhysicalAddress(PrivateData->DmaData, &PrivateData->DmaDataDma);
+
+    LouPrint("DmaSize:%h\nReciveFisSize:%h\n", DmaSize, ReciveFisSize);
+
+    LouPrint("DmaData:%h\nDmaDataDma:%h\n", PrivateData->DmaData, PrivateData->DmaDataDma);
+
+    LouPrint("AhciGenericPortDeviceStartPort()\n");
+    while(1);
     return STATUS_SUCCESS;//AhciResetPortDevice(PortDevice);
 }
 
@@ -1378,16 +1394,13 @@ static void AhciClearPortPendingIrq(PATA_PORT_DEVICE_OBJECT AhciPort){
     Port->PxIS |= (1 << AhciPort->PortNumber);
 }
 
-void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
+void AhciInitializeMemory(PATA_PORT_DEVICE_OBJECT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
-    LOUSTATUS Status;
-    uint32_t Command;
-    bool HighMem = AHCI_SUPPORTS_S64A(Ghc->Capabilities);
-    uint32_t Poll = 0;
     uintptr_t CommandDmaPhy;
     uintptr_t FisDmaPhy;
+    bool HighMem = AHCI_SUPPORTS_S64A(Ghc->Capabilities);
 
     RequestPhysicalAddress(PrivateData->CommandDma, &CommandDmaPhy);
     RequestPhysicalAddress(PrivateData->FisDma, &FisDmaPhy);
@@ -1406,6 +1419,15 @@ void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
         Port->PxFBU = 0;
     }
     Port->PxFB = (FisDmaPhy & UINT32_MAX);
+}
+
+void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    LOUSTATUS Status;
+    uint32_t Command;
+    uint32_t Poll = 0;
+
 
     Command = Port->PxCMD;
     Command |= AHCI_PxCMD_FRE;
@@ -1419,88 +1441,29 @@ void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
     LouPrint("AHCI.SYS:Fis Reception Started\n");
 }
 
-BOOLEAN AhicSoftResetPort(
-    PAHCI_GENERIC_PORT Port 
-){
-    UINT32 Tmp = Port->PxSCTL;
-    Tmp = (Tmp & ~0x0F) | 1;
-    Port->PxSCTL = Tmp;
-    sleep(2);
-    Tmp = Port->PxSCTL;
-    Tmp &= ~0x0F;
-    Port->PxSCTL = Tmp;
-    sleep(2);
-    return Port->PxTFD & (0x80 | 0x08) ? false : true;
-}
-
-
-static bool AhciDetectAttachedDevice(PATA_PORT_DEVICE_OBJECT AhciPort){
-    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
-    //the value below is copied from OSDEV from ahci section 
-    //"Dettecting Attached Sata Device's" for the SATAPI signature
-    PrivateData->DeviceAttached = false;
-    
-    //PxTFD cannot be set at the time of running this
-    if(Port->PxTFD & (0x80 | 0x08)){
-
-        return false;
-    }
-    // (PxSTSS DET = 0x03 || (PxSTSS IPM = (0x02 || 0x06 || 0x08) is a device
-    uint32_t PxSSTS = Port->PxSSTS;
-    uint8_t Det = PxSSTS & 0x0F; 
-    uint8_t Ipm = (PxSSTS >> 8) & 0x0F;
-
-
-    if(Det != 0x03){
-        LouPrint("AHCI.SYS:PxSTSS DET != 0x03:%h\n", Det);
-        return false;
-    }
-
-    switch(Ipm){
-        case 0x08:
-        case 0x06:
-        case 0x02:
-        case 0x01:
-            //LouPrint("IPM:%d\n", Ipm);
-            break;
-        default:
-            LouPrint("AHCI.SYS:PxSTSS IPM Invalid:%h\n",Ipm);
-            return false;
-    }
-
-    PrivateData->DeviceAttached = true;
-
-    if(Port->PxSIG == 0xEB140101){
-        LouPrint("AHCI.SYS:Ahci Port Is SATAPI Device\n");
-        return true;
-    }
-    return false;
-}
-
-LOUSTATUS AhciSendSoftwareReset(PATA_PORT_DEVICE_OBJECT AhciPort){
-
-
-    return STATUS_SUCCESS;
-}
-
 LOUSTATUS AhciSendPortReset(PATA_PORT_DEVICE_OBJECT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     LOUSTATUS Status;
-    PrivateData->StopCommandEngine(AhciPort);
 
-    Port->PxSCTL = 1;
-    sleep(2);
-    Port->PxSCTL = 0;
-    SIZE Timeout = 100;
-    Status = LouKeMmioWaitForCondition((PULONG)&Port->PxSSTS, 0x0F, 0x03, 10, 1000);
+    UINT32 Sctl = Port->PxSCTL; 
+    Sctl &= ~0x0F; 
+    Port->PxSCTL = Sctl | 1; 
+
+    sleep(2); 
+
+    Sctl = Port->PxSCTL;
+    Sctl &= ~0x0F;
+    Port->PxSCTL = Sctl; 
+
+    Status = LouKeMmioWaitForCondition((PULONG)&Port->PxSSTS, 0x0F0F, 0x0103 , 10, 1000);
     if(Status != STATUS_SUCCESS){
         return Status;
     }
-
-    Port->PxSERR = UINT32_MAX;
-    Port->PxIS = UINT32_MAX;
+    Status = LouKeMmioWaitTillSet((PULONG)&Port->PxSSTS, 0xF0, 10, 1000);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
     return STATUS_SUCCESS;
 }
 
@@ -1508,6 +1471,7 @@ LOUSTATUS AhciInitializePort(PATA_PORT_DEVICE_OBJECT AhciPort){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AhciPort->PortPrivateData;
     PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
     LOUSTATUS Status;
+
 
     LouPrint("AHCI.SYS:AhciInitializePort\n");
     AhciDeInitalizePort(AhciPort);
@@ -1521,32 +1485,22 @@ LOUSTATUS AhciInitializePort(PATA_PORT_DEVICE_OBJECT AhciPort){
         LouPrint("AHCI.SYS:Port Is Powered On\n");
     }
 
-    LouPrint("AHCI.SYS:Communication Is Up\n");
+    AhciInitializeMemory(AhciPort);
 
-    Port->PxSERR = 0xFFFFFFFF;
+    AhciSendPortReset(AhciPort);
 
     AhciStartFisReception(AhciPort);
 
-    Port->PxSERR = 0xFFFFFFFF;
-
-    Status = LouKeMmioWaitTillClear((PULONG)&Port->PxTFD ,(1 << 7) | (1 << 3), 10, 1000);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("Wait Failed\n");
-    }
-
-    Port->PxSERR = 0xFFFFFFFF;
-    Port->PxIE = 0xFFFFFFFF;
-
     PrivateData->StartCommandEngine(AhciPort);
-    
 
-    //AhciSendPortReset(AhciPort);
+    Port->PxSERR = UINT32_MAX;
+    Port->PxIS = UINT32_MAX;
 
-
-    LouPrint("After Command Engine Start\n");
-    DumpPort(PrivateData->GenericPort);
-
+    sleep(1000);
+    DumpEverything(AhciPort->HostDevice);
     while(1);
+
+    //Port->PxIE = UINT32_MAX;
     return STATUS_SUCCESS;
 }
 
@@ -1568,16 +1522,16 @@ void AhciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost){
     }       
     
 
-    TmpControl = Ghc->GlobalHostControl;
-    TmpControl |= (1 << 1);
-    Ghc->GlobalHostControl = TmpControl;
-    TmpControl = Ghc->GlobalHostControl;
-    if(TmpControl & (1 << 1)){
-        LouPrint("Interrupts Are Now Active On The Host Controller\n");
-    }
-    else{
-        LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
-    }
+    //TmpControl = Ghc->GlobalHostControl;
+    //TmpControl |= (1 << 1);
+    //Ghc->GlobalHostControl = TmpControl;
+    //TmpControl = Ghc->GlobalHostControl;
+    //if(TmpControl & (1 << 1)){
+    //    LouPrint("Interrupts Are Now Active On The Host Controller\n");
+    //}
+    //else{
+    //    LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
+    //}
 }
 
 

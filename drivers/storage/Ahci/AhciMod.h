@@ -28,6 +28,20 @@
 #define HBA_PORT_IPM_ACTIVE     1
 #define HBA_PORT_DET_PRESENT    3
 
+#define AHCI_MAX_PORTS                  32
+#define AHCI_MAX_SCATTER_GATHERS        168
+#define AHCI_DMA_BOUNDRY                UINT32_MAX
+#define AHCI_MAX_COMMANDS               32
+#define AHCI_COMMAND_SIZE               32
+#define AHCI_COMMAND_SLOT_SIZE          (AHCI_MAX_COMMANDS * AHCI_COMMAND_SIZE)
+#define AHCI_RECIVE_FIS_SIZE            256
+#define AHCI_COMMAND_TABLE_CDB          0x40
+#define AHCI_COMMAND_TABLE_HEADER_SIZE  0x80
+#define AHCI_COMMAND_TABLE_SIZE         (AHCI_COMMAND_TABLE_HEADER_SIZE + (AHCI_MAX_SCATTER_GATHERS * 16))
+#define AHCI_COMMAND_TABLE_AR_SIZE      (AHCI_COMMAND_TABLE_SIZE * AHCI_MAX_COMMANDS)
+#define AHCI_PORT_PRIVATE_DMA_SIZE      (AHCI_COMMAND_SLOT_SIZE + AHCI_COMMAND_TABLE_AR_SIZE + AHCI_RECIVE_FIS_SIZE)
+#define AHCI_PORT_PRIVATE_FBS_DMA_SIZE  (AHCI_COMMAND_SLOT_SIZE + AHCI_COMMAND_TABLE_AR_SIZE + (AHCI_RECIVE_FIS_SIZE * 16))
+
 
 
 #define AHCI_STANDARD_ABAR                  5
@@ -53,7 +67,11 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uint64_t                                PrivateFlags;
     LOUSTATUS                               (*StartCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
     LOUSTATUS                               (*StopCommandEngine)(PATA_PORT_DEVICE_OBJECT AtaPort);
+    uintptr_t                               DmaData;
+    uintptr_t                               DmaDataDma;
+    uintptr_t                               Fis;
     uintptr_t                               FisDma;
+    uintptr_t                               Command;
     uintptr_t                               CommandDma;
     uint32_t                                PortMap;
     uint8_t                                 InterruptRequestVector;
@@ -327,4 +345,39 @@ static inline void DumpEverything(
         PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData2 = (PAHCI_DRIVER_PRIVATE_DATA)TmpPort->PortPrivateData;
         DumpPort(PrivateAhciData2->GenericPort);
     }    
+}
+
+static inline void DumpH2dFis(
+    PFIS_H2D H2dFis
+){
+    LouPrint("H2dFis->FisType       :%bc\n", (UINT64)H2dFis->FisType);
+    LouPrint("H2dFis->Pmpc          :%bc\n", (UINT64)H2dFis->PmpC);
+    LouPrint("H2dFis->Command       :%h\n", (UINT64)H2dFis->Command);
+    LouPrint("H2dFis->FeatureCurrent:%h\n", (UINT64)H2dFis->FeatureCurrent);
+    LouPrint("H2dFis->LbaLowCurrent :%h\n", (UINT64)H2dFis->LbaLowCurrent);
+    LouPrint("H2dFis->LbaMidCurrent :%h\n", (UINT64)H2dFis->LbaMidCurrent);
+    LouPrint("H2dFis->LbaHighCurrent:%h\n", (UINT64)H2dFis->LbaHighCurrent);
+    LouPrint("H2dFis->Device        :%h\n", (UINT64)H2dFis->Device);
+    LouPrint("H2dFis->LbaLowPrev    :%h\n", (UINT64)H2dFis->LbaLowPrevious);
+    LouPrint("H2dFis->LbaMidPrev    :%h\n", (UINT64)H2dFis->LbaMidPrevious);
+    LouPrint("H2dFis->LbaHighPrev   :%h\n", (UINT64)H2dFis->LbaHighPrevious);
+    LouPrint("H2dFis->FeaturePrev   :%h\n", (UINT64)H2dFis->FeaturePrevious);
+    LouPrint("H2dFis->SCCurrent     :%h\n", (UINT64)H2dFis->SectorCountCurrent);
+    LouPrint("H2dFis->SCPrev        :%h\n", (UINT64)H2dFis->SectorCountPrevious);
+    LouPrint("H2dFis->ICC           :%h\n", (UINT64)H2dFis->IsochCommandCompletion);
+    LouPrint("H2dFis->Control       :%h\n", (UINT64)H2dFis->Control);
+}
+
+static inline void DumpPrdt(PCOMMAND_TABLE_PRDT Prdt){
+    LouPrint("Prdt->Dba     :%h\n", (UINT64)Prdt->Dba);
+    LouPrint("Prdt->Dbau    :%h\n", (UINT64)Prdt->Dbau);
+    LouPrint("Prdt->DbcI    :%h\n", (UINT64)Prdt->DbcI);
+}
+
+static inline void DumpCmdHeader(PCOMMAND_HEADER CmdHeader){
+    LouPrint("CmdHeader->CflAWP :%h\n", (UINT64)CmdHeader->CflAWP);
+    LouPrint("CmdHeader->RBCPmp :%h\n", (UINT64)CmdHeader->RBCPmp);
+    LouPrint("CmdHeader->Prdtl  :%h\n", (UINT64)CmdHeader->Prdtl);
+    LouPrint("CmdHeader->Ctba   :%h\n", (UINT64)CmdHeader->Ctba);
+    LouPrint("CmdHeader->Ctbau  :%h\n", (UINT64)CmdHeader->Ctbau);
 }
