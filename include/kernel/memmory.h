@@ -194,10 +194,12 @@ typedef struct _LMPOOL_DIRECTORY{
     uint64_t            VLocation;
     uint64_t            PoolSize;
     uint64_t            ObjectSize;
+    uint64_t            Alignment;
+    uint64_t            CachedTracks;
     uint64_t            Flags;
     uint64_t*           FreeList;
     uint64_t            FreeListTop;       
-    POOL_MEMORY_TRACKS  MemoryTracks;
+    POOL_MEMORY_TRACKS  MemoryTracks[];
 }LMPOOL_DIRECTORY, * PLMPOOL_DIRECTORY, * POOL;
 
 typedef struct _BO{
@@ -791,6 +793,10 @@ void* LouKeMemReMap(void* Location, size_t Size, uint64_t Flags);
 void  LouKeMemReleaseReMap(void* Address);
 
 void LouKeFreePhy32(void*);
+
+KERNEL_EXPORT LOUSTATUS LouKeMmioWaitForCondition(volatile ULONG* Register, ULONG And, ULONG Condition, LONG DebounceMs, LONG Timeout);
+KERNEL_EXPORT LOUSTATUS LouKeMmioWaitTillClear(volatile ULONG* Register, ULONG And, LONG DebounceMs, LONG Timeout);
+KERNEL_EXPORT LOUSTATUS LouKeMmioWaitTillSet(volatile ULONG* Register, ULONG And, LONG DebounceMs, LONG Timeout);
 
 #ifndef _KERNEL_MODULE_
 typedef struct  __attribute__((packed, aligned(4096))) _PageTable {

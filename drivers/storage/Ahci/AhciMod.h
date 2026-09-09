@@ -302,7 +302,7 @@ static inline void DumpPort(PAHCI_GENERIC_PORT AhciPort){
     LouPrint("PxVS    :%h\n", AhciPort->PxVS);
 }
 
-/*static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
+static inline void DumpGhc(PAHCI_GENERIC_HOST_CONTROL Ghc){
     LouPrint("CAP     :%h\n", Ghc->Capabilities);
     LouPrint("GHC     :%h\n", Ghc->GlobalHostControl);
     LouPrint("IS      :%h\n", Ghc->InterruptStatus);
@@ -314,15 +314,17 @@ static inline void DumpPort(PAHCI_GENERIC_PORT AhciPort){
     LouPrint("EM_CTL  :%h\n", Ghc->EmControl);
     LouPrint("CAP2    :%h\n", Ghc->Capabilities2);
     LouPrint("BIHC    :%h\n", Ghc->BiosHandoff);
-}*/
+}
 
-//static inline void DumpEverything(
-//    PATA_HOST_DEVICE_OBJECT AtaHost
-//){
-//    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData; 
-//    DumpGhc(PrivateData->GenericHostController);
-//    ForEachAtaPort(AtaHost){
-//        PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData2 = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->Ports[AtaPortIndex].PortPrivateData;
-//        DumpPort(PrivateAhciData2->GenericPort);
-//    }    
-//}
+static inline void DumpEverything(
+    PATA_HOST_DEVICE_OBJECT AtaHost
+){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData; 
+    DumpGhc(PrivateData->GenericHostController);
+    PATA_PORT_DEVICE_OBJECT TmpPort;
+    SIZE i;
+    ForEachAtaPort(AtaHost, TmpPort, i){
+        PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData2 = (PAHCI_DRIVER_PRIVATE_DATA)TmpPort->PortPrivateData;
+        DumpPort(PrivateAhciData2->GenericPort);
+    }    
+}

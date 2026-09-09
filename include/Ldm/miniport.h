@@ -469,42 +469,42 @@ unsigned char _BitTestAndSet64(
 #define BarrierAfterReadR2() _ReadWriteBarrier()
 
 FORCE_INLINE
-UCHAR READ_REGISTER_UCHAR(PUCHAR Register){
+UCHAR READ_REGISTER_UCHAR(volatile UCHAR* Register){
     return *Register;
 }
 
 FORCE_INLINE
-VOID WRITE_REGISTER_UCHAR(PUCHAR Register, UCHAR Value){
+VOID WRITE_REGISTER_UCHAR(volatile UCHAR* Register, UCHAR Value){
     *Register = Value;
 }
 
 FORCE_INLINE
-USHORT READ_REGISTER_USHORT(volatile PUSHORT Register){
+USHORT READ_REGISTER_USHORT(volatile USHORT* Register){
     return *Register;
 }
 
 FORCE_INLINE
-VOID WRITE_REGISTER_USHORT(volatile PUSHORT Register, USHORT Value){
+VOID WRITE_REGISTER_USHORT(volatile USHORT* Register, USHORT Value){
     *Register = Value;
 }
 
 FORCE_INLINE
-ULONG READ_REGISTER_ULONG(volatile PULONG Register){
+ULONG READ_REGISTER_ULONG(volatile ULONG* Register){
     return *Register;
 }
 
 FORCE_INLINE
-VOID WRITE_REGISTER_ULONG(volatile PULONG Register, ULONG Value){
+VOID WRITE_REGISTER_ULONG(volatile ULONG* Register, ULONG Value){
     *Register = Value;
 }
 
 FORCE_INLINE
-ULONGLONG READ_REGISTER_ULONGLONG(volatile PULONGLONG Register){
+ULONGLONG READ_REGISTER_ULONGLONG(volatile ULONGLONG* Register){
     return *Register;
 }
 
 FORCE_INLINE
-VOID WRITE_REGISTER_ULONGLONG(volatile PULONGLONG Register, ULONGLONG Value){
+VOID WRITE_REGISTER_ULONGLONG(volatile ULONGLONG* Register, ULONGLONG Value){
     *Register = Value;
 }
 

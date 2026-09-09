@@ -340,6 +340,7 @@ LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
     SIZE i;
     PATA_PORT_DEVICE_OBJECT TmpPort;
     LOUSTATUS Status;
+      
     ForEachAtaPort(HostDevice, TmpPort, i){
         Status = AtaCoreAllocatePortListEntry(TmpPort);
         if(Status != STATUS_SUCCESS){

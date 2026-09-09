@@ -262,3 +262,6 @@ EXPORTS
     LouKeGetCurrentThreadHandle
     LouKeMxBlockThread
     LouKeMxUnblockThread
+    LouKeMmioWaitForCondition
+    LouKeMmioWaitTillClear
+    LouKeMmioWaitTillSet

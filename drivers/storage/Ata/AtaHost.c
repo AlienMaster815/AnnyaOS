@@ -91,7 +91,6 @@ DRIVER_EXPORT LOUSTATUS AtaCoreRegisterAtaHostDevice(PATA_HOST_DEVICE_OBJECT New
             goto _REGISTER_ERROR_REMOVE_ENTRY;
         }
     }
-
     NewHostDevice->PortIoManager = LouKeMallocArray(PTHREAD, NewHostDevice->PortCount, KERNEL_GENERIC_MEMORY);
     for(SIZE i = 0; i < NewHostDevice->PortCount; i++){
         NewHostDevice->PortIoManager[i] = LouKeCreateDemon(
@@ -102,7 +101,6 @@ DRIVER_EXPORT LOUSTATUS AtaCoreRegisterAtaHostDevice(PATA_HOST_DEVICE_OBJECT New
         );
         NewHostDevice->PortDevices[i].CommandWorkerThread = NewHostDevice->PortIoManager[i];
     }
-
 
     Status = AtaCoreRegisterAtaPorts(NewHostDevice);
     if(Status != STATUS_SUCCESS){

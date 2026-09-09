@@ -20,7 +20,8 @@
 
 #cd "C:\Program Files\Oracle\VirtualBox"
 #.\VirtualBoxVM --startvm "Annya" --dbg
-
+#ssh -p 2222 127.0.0.1
+#cd /media/sf_AnnyaOS
 
 INCLUDE = -I. -I include -I include/drivers/acpi -I include/ACPICA
 

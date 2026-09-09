@@ -26,13 +26,15 @@ PLMPOOL_DIRECTORY LouKeMapPool(
 }
 
 KERNEL_EXPORT
-PLMPOOL_DIRECTORY LouKeMapDynamicPool(
+PLMPOOL_DIRECTORY LouKeMapDynamicPoolEx(
     uint64_t    LocationOfPool,
     size_t      PoolSize,
+    size_t      CachedTracks,
     string      Tag,
     uint64_t    Flags
 ){
-    POOL NewPool = (POOL)LouKeMallocType(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
+    CachedTracks = CachedTracks ? CachedTracks : 1;
+    POOL NewPool = (POOL)LouKeMallocEx(GetStructureSize(LMPOOL_DIRECTORY, MemoryTracks, CachedTracks), GET_ALIGNMENT(LMPOOL_DIRECTORY), KERNEL_GENERIC_MEMORY);
     NewPool->VLocation = LocationOfPool;
     NewPool->FixedSizePool = false;
     NewPool->Flags = Flags;
@@ -40,7 +42,29 @@ PLMPOOL_DIRECTORY LouKeMapDynamicPool(
     NewPool->ObjectSize = 0;
     NewPool->PoolSize = PoolSize;
     NewPool->FixedSizePool = false;
+    NewPool->CachedTracks = CachedTracks;
     return NewPool;
+}
+
+
+KERNEL_EXPORT
+PLMPOOL_DIRECTORY LouKeMapDynamicPool(
+    uint64_t    LocationOfPool,
+    size_t      PoolSize,
+    string      Tag,
+    uint64_t    Flags
+){
+    size_t CachedTracks = 1;
+    if(PoolSize > KILOBYTE_PAGE){
+        CachedTracks = PoolSize/KILOBYTE_PAGE;
+    }
+    return LouKeMapDynamicPoolEx(
+        LocationOfPool,
+        PoolSize,
+        CachedTracks,
+        Tag,
+        Flags
+    );
 }
 
 
@@ -69,10 +93,9 @@ void LouKeFreeFromFixedPool(
         LouPrint("LouKeMallocFromFixedPool() : ERROR Input Is Not A Fixed Pool\n");
         return;
     }
-    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &Pool->MemoryTracks;
-    TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
+    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = Pool->MemoryTracks;
     MutexLock(&Pool->PoolLock);
-    uint64_t Index = ((uint64_t)Object - Pool->VLocation) / Pool->ObjectSize;    
+    uint64_t Index = ((uint64_t)Object - Pool->VLocation) / ROUND_UP64(Pool->ObjectSize, Pool->Alignment);    
 
     if(TmpPoolMemTrack[Index].Address != (uint64_t)Object){
         LouPrint("LouKeMallocFromFixedPool() : Error Memory Leak\n");
@@ -91,8 +114,7 @@ void* LouKeMallocFromFixedPool(
         LouPrint("LouKeMallocFromFixedPool() : ERROR Input Is Not A Fixed Pool\n");
         return 0x00;
     }
-    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &Pool->MemoryTracks;
-    TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
+    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = Pool->MemoryTracks;
     MutexLock(&Pool->PoolLock);
     for(uint64_t i = 0 ; i < Pool->PoolSize; i++){
         if(!TmpPoolMemTrack[i].AddressInUse){
@@ -114,7 +136,7 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     uint64_t Flags,
     uint64_t PageFlags
 ){
-    POOL NewPool = (POOL)LouKeMallocTypeSafe(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
+    POOL NewPool = (POOL)LouKeMallocExSafe(GetStructureSize(LMPOOL_DIRECTORY, MemoryTracks, NumberOfPoolMembers), GET_ALIGNMENT(LMPOOL_DIRECTORY), KERNEL_GENERIC_MEMORY);
     NewPool->VLocation = (uint64_t)LouKeMallocExSafe(ROUND_UP64(ObjectSize, Alignment) * NumberOfPoolMembers, Alignment, PageFlags);
     RequestPhysicalAddress(NewPool->VLocation, &NewPool->Location);
     NewPool->FixedSizePool = true;
@@ -122,9 +144,8 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
     NewPool->Tag = Tag;
     NewPool->ObjectSize = ObjectSize;
     NewPool->PoolSize = NumberOfPoolMembers;
-    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = &NewPool->MemoryTracks;
-    TmpPoolMemTrack->Peers.NextHeader = (PListHeader)LouKeMallocArraySafe(POOL_MEMORY_TRACKS, NumberOfPoolMembers, KERNEL_GENERIC_MEMORY); 
-    TmpPoolMemTrack = (PPOOL_MEMORY_TRACKS)TmpPoolMemTrack->Peers.NextHeader;
+    NewPool->Alignment = Alignment;
+    PPOOL_MEMORY_TRACKS TmpPoolMemTrack = NewPool->MemoryTracks;
     for(uint64_t i = 0; i < NumberOfPoolMembers; i++){
         TmpPoolMemTrack[i].Address = NewPool->VLocation + (ROUND_UP64(ObjectSize, Alignment) * i);
         TmpPoolMemTrack[i].AddressInUse = false;
@@ -134,11 +155,8 @@ PLMPOOL_DIRECTORY LouKeCreateFixedPool(
 
 KERNEL_EXPORT
 void LouKeDestroyFixedPool(PLMPOOL_DIRECTORY Pool){
-
-    LouKeFreeSafe((void*)Pool->MemoryTracks.Peers.NextHeader);
     LouKeFreeSafe((void*)Pool->VLocation);
     LouKeFreeSafe((void*)Pool);
-
 }
 
 void LouKeMallocTrimFixedPool(
@@ -161,7 +179,8 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPoolEx(
     uint64_t Flags,
     uint64_t PageFlags
 ){
-    POOL NewPool = (POOL)LouKeMallocType(LMPOOL_DIRECTORY, KERNEL_GENERIC_MEMORY);
+    CachedTracks = CachedTracks ? CachedTracks : 1;
+    POOL NewPool = (POOL)LouKeMallocEx(GetStructureSize(LMPOOL_DIRECTORY, MemoryTracks, CachedTracks), GET_ALIGNMENT(LMPOOL_DIRECTORY), KERNEL_GENERIC_MEMORY);
     NewPool->VLocation = (uint64_t)LouKeMallocEx(PoolSize, PagedTypeAlignement, PageFlags);
     RequestPhysicalAddress(NewPool->VLocation, &NewPool->Location);
     NewPool->LastOut = NewPool->VLocation;
@@ -169,6 +188,7 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPoolEx(
     NewPool->Flags = Flags;
     NewPool->Tag = Tag;
     NewPool->PoolSize = PoolSize;
+    NewPool->CachedTracks = CachedTracks;
     return NewPool;
 }
 
@@ -179,7 +199,7 @@ PLMPOOL_DIRECTORY LouKeCreateDynamicPool(
     uint64_t Flags,
     uint64_t PageFlags
 ){
-    size_t CachedTracks = 0;
+    size_t CachedTracks = 1;
     if(PoolSize > KILOBYTE_PAGE){
         CachedTracks = PoolSize/KILOBYTE_PAGE;
     }
@@ -197,30 +217,44 @@ KERNEL_EXPORT
 void LouKeFreeFromDynamicPool(POOL Pool, void* Address){
 
     PPOOL_MEMORY_TRACKS Node;
-    ForEachListEntry(Node, &Pool->MemoryTracks.Peers, Peers){
-        if (Node->Address == (uint64_t)Address) {
-            LouKeListDeleteItem(&Node->Peers);
-            LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
+    PPOOL_MEMORY_TRACKS sNode;
+    UNUSED SIZE CachedMember = Pool->CachedTracks;
+    MutexLock(&Pool->PoolLock);
+    Node = Pool->MemoryTracks;
+    for(SIZE i = 0 ; i < CachedMember; i++){
+        if((Node[i].AddressInUse) && (Node[i].Address == (UINTPTR)Address)){
+            Node[i].Address = 0x00;
+            Node[i].MemorySize = 0x00;
+            Node[i].AddressInUse = false;
+            MutexUnlock(&Pool->PoolLock);
             return;
         }
     }
+    ForEachListEntrySafe(Node, sNode, &Pool->MemoryTracks->Peers, Peers){
+        if(Node->Address == (uint64_t)Address) {
+            LouKeListDeleteItem(&Node->Peers);
+            LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
+            MutexUnlock(&Pool->PoolLock);
+            return;
+        }
+    }
+    MutexUnlock(&Pool->PoolLock);
     LouPrint("LouKeFreeFromDynamicPool(): ERROR - Address not found: %h\n", Address);
 }
 
 
 KERNEL_EXPORT
 void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alignment){
-    if (Pool->FixedSizePool) {
+    if(Pool->FixedSizePool) {
         LouPrint("LouKeMallocFromDynamicPoolEx(): ERROR - FixedSizePool input\n");
         return NULL;
     }   
-
     BOOLEAN NoWrapArround = Pool->Flags & POOL_FLAG_NO_WRAP_ARROUND;
     BOOLEAN NoMemset = Pool->Flags & POOL_FLAG_NO_MEMSET; 
-
     size_t Base = Pool->VLocation;
     size_t Limit = Base + Pool->PoolSize;
-    uint64_t Start; 
+    uint64_t Start;
+    MutexLock(&Pool->PoolLock);
     if(!NoWrapArround){
         Start = ROUND_UP64(Pool->LastOut ? Pool->LastOut : Base, Alignment);
     }else{
@@ -228,41 +262,64 @@ void* LouKeMallocFromDynamicPoolEx(POOL Pool, size_t AllocationSize, size_t Alig
     }
     uint64_t Result = Start;
     bool Wrapped = false;
+    UNUSED SIZE CachedMembers = Pool->CachedTracks;
+    PPOOL_MEMORY_TRACKS Node = Pool->MemoryTracks;
+    PPOOL_MEMORY_TRACKS nNode = 0x00;
+    for(SIZE i = 0; i < CachedMembers; i++){
+        if(!Node[i].AddressInUse){
+            nNode = &Node[i];
+            break;
+        }
+    }
 
-retry_search:
-    while ((Result + AllocationSize) <= Limit) {
+_RETRY_SEARCH:
+    while((Result + AllocationSize) <= Limit){
         bool Conflict = false;
-        PPOOL_MEMORY_TRACKS Node;
-        ForEachListEntry(Node, &Pool->MemoryTracks.Peers, Peers){
+        Node = Pool->MemoryTracks;
+        for(SIZE i = 0; i < CachedMembers; i++){
+            if((Node[i].AddressInUse) && (RangeInterferes(Result, AllocationSize, Node[i].Address, Node[i].MemorySize))){
+                Result = ROUND_UP64(Node[i].Address + Node[i].MemorySize, Alignment);
+                Conflict = true;
+                goto _NEXT_CHECK;
+            }
+        }    
+_NEXT_CHECK:
+        if(Conflict){
+            continue;
+        }
+        ForEachListEntry(Node, &Pool->MemoryTracks->Peers, Peers){
             if (RangeInterferes(Result, AllocationSize, Node->Address, Node->MemorySize)) {
                 Result = ROUND_UP64(Node->Address + Node->MemorySize, Alignment);
                 Conflict = true;
-                break;
+                goto _DONE_CHECKING;
             }
         }
-        if (!Conflict) {
-            PPOOL_MEMORY_TRACKS NewTrack = (PPOOL_MEMORY_TRACKS)LouKeAllocateFastObject("DYNAMIC_POOL_HELPER");
-            NewTrack->Address = Result;
-            NewTrack->MemorySize = AllocationSize;
-            LouKeListAddTail(&NewTrack->Peers, &Pool->MemoryTracks.Peers);
+_DONE_CHECKING:
+        if(!Conflict){
+            if(!nNode){
+                nNode = LouKeAllocateFastObject("DYNAMIC_POOL_HELPER");
+                LouKeListAddTail(&nNode->Peers, &Pool->MemoryTracks->Peers);
+            }
+            nNode->AddressInUse = true;
+            nNode->Address = Result;
+            nNode->MemorySize = AllocationSize;
             if(!NoWrapArround){
-                Pool->LastOut = Result + AllocationSize;
+                Pool->LastOut = Result;
             }
             if(!NoMemset){
-                memset((void*)Result, 0, AllocationSize);
+                memset((PVOID)Result, 0, AllocationSize);
             }
-            return (void*)Result;
+            MutexUnlock(&Pool->PoolLock);
+            return (PVOID)Result;
         }
     }
-
-    if ((!Wrapped && Start != Base) && (!NoWrapArround)) {
-        Result = Base;
+    if((!Wrapped && Start != Base) && (!NoWrapArround)) {
+        Result = ROUND_UP64(Base, Alignment);
         Wrapped = true;
-        goto retry_search;
+        goto _RETRY_SEARCH;
     }
-
-    //LouPrint("LouKeMallocFromDynamicPoolEx(): OUT OF MEMORY: Requested=%h PoolSize=%h\n", AllocationSize, Pool->PoolSize);
-    return NULL;
+    MutexUnlock(&Pool->PoolLock);
+    return 0x00;
 }
 
 
@@ -278,7 +335,7 @@ void LouKeDestroyDynamicPool(
     POOL Pool
 ){
     PPOOL_MEMORY_TRACKS Node;
-    ForEachListEntry(Node, &Pool->MemoryTracks.Peers, Peers){
+    ForEachListEntry(Node, &Pool->MemoryTracks->Peers, Peers){
         LouKeFreeFastObject("DYNAMIC_POOL_HELPER", Node);
     }
     LouKeFree((void*)Pool->VLocation);

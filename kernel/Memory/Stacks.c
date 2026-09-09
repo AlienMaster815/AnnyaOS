@@ -51,7 +51,7 @@ LouKeCreateStack(
     UINT64 CommitBase = ((UINT64)NewStack->Stack + VSize) - CommitSize;
 
     if(!LouKeVmmAddressCausePageFault((PVOID)CommitBase, &StackTracker)){
-        LouPrint("ERROR: Unable To Get Tracker\n");
+        LouPrint("ERROR:Unable To Get Tracker\n");
         while(1);
     }
 
