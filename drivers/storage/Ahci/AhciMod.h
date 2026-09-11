@@ -55,7 +55,8 @@ typedef struct _AHCI_COMMAND_PRIVATE_DATA{
     UINT8                   CommandSlot;
     UINTPTR                 CommandHeader;
     UINTPTR                 CommandTable;
-    LOUSINE_DMA_TRANSFER    PioDmaTransfer;
+    //LOUSINE_DMA_TRANSFER    PioDmaTransfer;
+    PVOID                   PioDmaTransfer;
 }AHCI_COMMAND_PRIVATE_DATA, * PAHCI_COMMAND_PRIVATE_DATA;
 
 typedef struct _AHCI_DRIVER_PRIVATE_DATA{
@@ -73,6 +74,8 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uintptr_t                               FisDma;
     uintptr_t                               Command;
     uintptr_t                               CommandDma;
+    uintptr_t                               CommandTable;
+    uintptr_t                               CommandTableDma;
     uint32_t                                PortMap;
     uint8_t                                 InterruptRequestVector;
     LOUSINE_DMA_DEVICE                      DmaDevice;
@@ -265,21 +268,11 @@ typedef struct PACKED _FIS_PIO{
 }FIS_PIO, * PFIS_PIO;
 
 typedef struct PACKED _COMMAND_HEADER{
-    UINT8   CflAWP;
-#define COMMAND_HEADER_FIS_LENGTH_BITS  0x1F
-#define COMMAND_HEADER_ATAPI_BIT        (1 << 5)
-#define COMMAND_HEADER_WRITE_BIT        (1 << 6)
-#define COMMAND_HEADER_PREFETCH_BIT     (1 << 7)  
-    UINT8   RBCPmp;
-#define COMMAND_HEADER_RESET_BIT        (1 << 0)
-#define COMMAND_HEADER_BIST_BIT         (1 << 1)
-#define COMMAND_HEADER_CLR_ROK_BIT      (1 << 2)
-#define COMMAND_HEADER_PMP_SHIFT        (4)
-#define COMMAND_HEADER_PMP_BITS         0x0F
-    UINT16  Prdtl;
+    UINT32  Options;
+    UINT32  Status;
     UINT32  Ctba;
     UINT32  Ctbau;
-    UINT32  Reserved[5];
+    UINT32  Reserved[4];
 }COMMAND_HEADER, * PCOMMAND_HEADER;
 
 typedef struct PACKED _COMMAND_TABLE_PRDT{
@@ -374,10 +367,10 @@ static inline void DumpPrdt(PCOMMAND_TABLE_PRDT Prdt){
     LouPrint("Prdt->DbcI    :%h\n", (UINT64)Prdt->DbcI);
 }
 
-static inline void DumpCmdHeader(PCOMMAND_HEADER CmdHeader){
+/*static inline void DumpCmdHeader(PCOMMAND_HEADER CmdHeader){
     LouPrint("CmdHeader->CflAWP :%h\n", (UINT64)CmdHeader->CflAWP);
     LouPrint("CmdHeader->RBCPmp :%h\n", (UINT64)CmdHeader->RBCPmp);
     LouPrint("CmdHeader->Prdtl  :%h\n", (UINT64)CmdHeader->Prdtl);
     LouPrint("CmdHeader->Ctba   :%h\n", (UINT64)CmdHeader->Ctba);
     LouPrint("CmdHeader->Ctbau  :%h\n", (UINT64)CmdHeader->Ctbau);
-}
+}*/

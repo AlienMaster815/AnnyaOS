@@ -18,7 +18,6 @@ TODO:
         read all the data and behavior, implement the data and behavior: ATA-ATAPI.PDF Page 117
 */
 
-
 BOOLEAN DbgPrintEn = false;
 
 void AtaCoreDbgPrint(char* format, ...){

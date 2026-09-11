@@ -300,7 +300,10 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
         BOOLEAN PacketDevice = false;
                 
         AtaCoreSendIdentifyCommand(AtaPort, Identify, i, false);
-            
+        //TODO: check AHCI if its getting the fises or just returning (i think it is)
+        LouPrint("STATUS:%h\n", Identify->Packet.Status);
+        while(1);
+
         if((Identify->Packet.Status & (1 << 5)) && (Identify->Packet.Error == 0x04)){
             PacketDevice = true;
             AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);

@@ -356,6 +356,7 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
 #define ATA_COMMAND_PACKET_FLAGS_POLL       (1UL << 3)
 #define ATA_COMMAND_PACKET_FLAGS_PACKET_CMD (1UL << 4)
 #define ATA_COMMAND_PACKET_FLAGS_EXT_CMD    (1UL << 5)
+#define ATA_COMMAND_PACKET_FLAGS_EH         (1UL << 6)
 
 
 typedef struct _ATA_COMMAND_PACKET{
@@ -368,6 +369,8 @@ typedef struct _ATA_COMMAND_PACKET{
     UINT8                       PacketData[16];
     SIZE                        PioSize;
     PVOID                       CommandPrivateData;
+    UINT32                      Auxilery;
+    UINT8                       Control;
     union{
         PVOID                   PioDataIn;
         PVOID                   PioDataOut;
