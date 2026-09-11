@@ -399,6 +399,7 @@ typedef struct _ATA_PORT_OPERATIONS{
     LOUSTATUS (*AtaPortDeviceSleep)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDevicePowerUp)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDevicePowerDown)(PATA_PORT_DEVICE_OBJECT PortDevice);
+    BOOLEAN   (*AtaPortDeviceIsaPacketDevice)(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev);
 }ATA_PORT_OPERATIONS, * PATA_PORT_OPERATIONS;
 
 #define ATA_HOST_FLAGS_SUPPORTS_PIO     (1UL << 0)

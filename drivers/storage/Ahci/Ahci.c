@@ -28,6 +28,10 @@ LOUSTATUS AhciInitializePort(PATA_PORT_DEVICE_OBJECT AhciPort);
 LOUSTATUS AhciDeInitalizePort(PATA_PORT_DEVICE_OBJECT AhciPort);
 void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort);
 
+BOOLEAN AhciPortDeviceIsaPacketDevice(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev){
+    return (((PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData)->GenericPort->PxSIG == 0xEB140101);
+}
+
 PVOID AhciAllocateCommandPrivateData(){
     return LouKeAllocateFastObject("AHCI_COMMAND_PRIVATE_DATA");
 }
@@ -64,8 +68,12 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
     UINT8* FisBase = (UINT8*)PrivateData->Fis;
     LOUSTATUS Status;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
-        Status = LouKeMmioWaitTillClear((PULONG)&PrivateData->GenericPort->PxCI, 1 << CommandPrivateData->CommandSlot, 10, 1000);
+        Status = LouKeMmioWaitTillClear((PULONG)&PrivateData->GenericPort->PxCI, 1 << CommandPrivateData->CommandSlot, 10, 5000);
         if(Status != STATUS_SUCCESS){
+            
+            LouPrint("AHCI.SYS:CI Did Not Clear\n");
+            DumpPort(PrivateData->GenericPort);
+            while(1);
             return Status;
         }
     }
@@ -165,6 +173,7 @@ LOUSTATUS AhciGenericPortDevicePrepCommand(
 ){  
     UINT8 Slot;
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    UINT32 Signature = PrivateData->GenericPort->PxSIG;
     BOOLEAN AtapiCommand = (CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD) ? true : false;
     const UINT32 CommandFisLength = 5;
     LOUSTATUS Status = AhciGenericGetFreeCommandSlot(PrivateData, &Slot);    
@@ -396,6 +405,7 @@ static ATA_PORT_OPERATIONS AhciGenericPortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -408,6 +418,7 @@ static ATA_PORT_OPERATIONS AhciVt8251PortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -420,6 +431,7 @@ static ATA_PORT_OPERATIONS AhciP5wdhPortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -432,6 +444,7 @@ static ATA_PORT_OPERATIONS AhciAvnPortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
+    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -443,6 +456,7 @@ static ATA_PORT_OPERATIONS AhciPmpRetySrStPortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
+    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
 //    .AtaPortDeviceStart = AtaGenericPortDeviceStartPort,
 //    .AtaPortDeviceStop = AtaGenericPortDeviceStopPort,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,

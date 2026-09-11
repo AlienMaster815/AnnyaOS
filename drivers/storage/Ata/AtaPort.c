@@ -298,11 +298,17 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
     SIZE Channels = AtaPort->HostDevice->HostFlags & ATA_HOST_FLAGS_DUAL_CHANNEL ? 2 : 1; 
     for(SIZE i = 0; i < Channels; i++){
         BOOLEAN PacketDevice = false;
-                
+        if(AtaPort->Operations->AtaPortDeviceIsaPacketDevice){
+            PacketDevice = AtaPort->Operations->AtaPortDeviceIsaPacketDevice(AtaPort, i);
+            if(PacketDevice){
+                LouPrint("PACKET Device Detected Skipping Probe\n");
+                AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);
+                goto _SKIP_IDENTIFICATION_PROBE;
+            }
+        
+        }
+        
         AtaCoreSendIdentifyCommand(AtaPort, Identify, i, false);
-        //TODO: check AHCI if its getting the fises or just returning (i think it is)
-        LouPrint("STATUS:%h\n", Identify->Packet.Status);
-        while(1);
 
         if((Identify->Packet.Status & (1 << 5)) && (Identify->Packet.Error == 0x04)){
             PacketDevice = true;
@@ -318,7 +324,9 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
         if((Identify->Packet.Status == 0x00) || (Identify->Packet.Status == 0xFF)){
             continue;
         }
-         
+            
+        _SKIP_IDENTIFICATION_PROBE:
+
         if(Identify->CommandStatus == STATUS_SUCCESS){
             PATA_ENDPOINT_DEVICE_OBJECT NewEndpoint = LouKeMallocType(ATA_ENDPOINT_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
             NewEndpoint->Port = AtaPort;
