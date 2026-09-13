@@ -4,7 +4,7 @@
 
 #define USER_THREAD_STUB "AnnyaUserThreadStub"
 
-//static spinlock_t ProcLock = {0};
+static spinlock_t ProcLock = {0};
 static BOOLEAN SchedDebugOn = false;
 
 void HaltAndCatchFile();
@@ -20,12 +20,15 @@ void LouKeSchedDbgPrint(char* format, ...){
 
 LOUAPI PGDT_RECORD LouKeGetGdtRecord(UINT32 ProcessorID);
 
+static KERNEL_REFERENCE ProcRef;
+
 void LouKeLockProcManager(LouKIRQL* Irql){
-    //LouKeAcquireInterruptLock(&ProcLock, Irql);
+    LouKeAcquireInterruptLock(&ProcLock, Irql);
+    while(LouKeGetReferenceCount(&ProcRef));
 }
 
 void LouKeUnlockProcManager(LouKIRQL* Irql){
-    //LouKeReleaseInterruptLock(&ProcLock, Irql);
+    LouKeReleaseInterruptLock(&ProcLock, Irql);
 }
 
 LOUAPI
@@ -128,13 +131,19 @@ LOUAPI void SetWinIRQL(UINT8 Irql);
 LOUAPI LouKIRQL GetWinIRQL();
 
 UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
+    if(MutexIsLocked(&ProcLock.Lock)){
+        return IrqState;
+    }
+    LouKeAcquireReference(&ProcRef);
+    
     PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
     PGENERIC_PROCESS_DATA   CurrentProcess = this->CurrentProcess;
     PGENERIC_PROCESS_DATA   NextProcess = PsmGetNextFreeProcess(); 
     BOOL                    ProcessSwitch = (CurrentProcess != NextProcess);
     ULONG                   ProcessorNumber = LouKeGetCurrentProcessorNumber();
     PGENERIC_THREAD_DATA    NextThread = NextProcess->ThreadObjects[ProcessorNumber].TsmSchedual();
-    
+    BOOL                    ThreadSwitch = (CurrentThread != NextThread);
+
     CurrentThread->ThreadIrql = GetWinIRQL();
 
     if(ProcessSwitch){
@@ -146,11 +155,16 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         CurrentThread,
         NextThread
     );
+    if(ThreadSwitch){
+        MutexUnlock(&CurrentThread->LockOutTagOut);
+    }
+    if(ProcessSwitch){
+        MutexUnlock(&CurrentProcess->LockOutTagOut);
+    }
     SetWinIRQL(NextThread->ThreadIrql);
     this->CurrentThread = NextThread;
     this->CurrentProcess = NextProcess;
-    MutexUnlock(&NextThread->LockOutTagOut.Lock);
-    MutexUnlock(&NextProcess->LockOutTagOut.Lock);
+    LouKeReleaseReference(&ProcRef);
     return IrqState;
 }
 
@@ -165,8 +179,6 @@ UNUSED static void LouKePsmDestroyProcessRing(PPROCESS_RING ProcessRing){
     LouKeFree(ProcessRing);
 }
 
-
-
 PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
     UINT64 CurrentRing = this->LoadDistributer.CurrentIndexor;
     UINT64 NextRing = EulerCurveIndexor(&this->LoadDistributer); 
@@ -178,13 +190,13 @@ PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
             PGENERIC_PROCESS_DATA Process = TmpRing->ProcessData;
             TailRing = (PPROCESS_RING)TmpRing->Peers.LastHeader;
             PGENERIC_PROCESS_DATA Tail = TailRing->ProcessData;
-            if(AtomicLockOrFalse(&Tail->LockOutTagOut.Lock)){
+            if(AtomicLockOrFalse(&Tail->LockOutTagOut)){
                 if(Tail->ProcessState == PROCESS_TERMINATED){
                     PsmDeAsginProcessRingItem(&this->Processes[NextRing], TailRing);
                 }
-                MutexUnlock(&Tail->LockOutTagOut.Lock);
+                MutexUnlock(&Tail->LockOutTagOut);
             }
-            if(AtomicLockOrFalse(&Process->LockOutTagOut.Lock)){
+            if(AtomicLockOrFalse(&Process->LockOutTagOut)){
                 if(Process->ProcessState == PROCESS_BLOCKED){
                     if(
                         (!LouKeIsTimeoutNull(&Process->BlockTimeout)) &&
@@ -200,7 +212,7 @@ PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
                     //the thread inside the process
                     return Process;
                 }
-                MutexUnlock(&Process->LockOutTagOut.Lock);
+                MutexUnlock(&Process->LockOutTagOut);
             }
             TmpRing = (PPROCESS_RING)TmpRing->Peers.NextHeader;
             if(TmpRingAnchor == TmpRing){

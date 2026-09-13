@@ -145,12 +145,13 @@ typedef struct _NT_CONTEXT{ //recreation of CONTEXT in WINAPI
 }NT_CONTEXT, * PNT_CONTEXT;
 
 typedef struct _mutex_t{
+    ListHeader  MutexQueue;
+    atomic_t    MutexQueueLock;
     atomic_t    locked;
     atomic_t    Handle;
     atomic_t    PrivaledgeLevel;
     atomic_t    ThreadOwnerLow;
     atomic_t    ThreadOwnerHigh;
-    atomic_t    WaitQueueLock;
     ListHeader  WaitQueue;
 } mutex_t;
 
@@ -213,7 +214,6 @@ static inline bool LouKeGetAtomicBoolean(PATOMIC_BOOLEAN b){
 #ifndef _USER_MODE_CODE_
 
 KERNEL_EXPORT void LouKeMxBlockThread(mutex_t* m);
-KERNEL_EXPORT void LouKeMxUnblockThread(mutex_t* m);
 
 KERNEL_EXPORT void LouKeYieldExecution();
 static inline void MutexSynchronize(mutex_t* m){
@@ -239,7 +239,6 @@ static inline void MutexUnlock(mutex_t* m){
     #ifndef _USER_MODE_CODE_
     LouKeSetAtomic(&m->ThreadOwnerLow, 0x00);
     LouKeSetAtomic(&m->ThreadOwnerHigh, 0x00);
-    LouKeMxUnblockThread(m);
     #endif
     LouKeSetAtomic(&m->locked, 0);
 }
@@ -469,7 +468,8 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
 
     if(LockOutTagOut){
         while(__atomic_test_and_set(&m->locked, 1)){
-            LouKeMxBlockThread(m);
+            //LouKeReportMutexBlock(m, LouKeGetThreadIdentification());
+            LouKeYieldExecution();
         }
     }else{
         uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
@@ -479,7 +479,8 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
             return;
         }
         while (__atomic_test_and_set(&m->locked, 1)) {
-            LouKeMxBlockThread(m);
+            //LouKeReportMutexBlock(m, LouKeGetThreadIdentification());
+            LouKeYieldExecution();
         }
     }
     uint64_t Thread = LouKeGetThreadIdentification();

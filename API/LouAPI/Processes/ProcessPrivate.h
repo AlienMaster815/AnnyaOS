@@ -94,7 +94,7 @@ typedef struct _GENERIC_THREAD_DATA{
     ListHeader                      Peers; //thread manager chain
     ListHeader                      WaitQueue;
     KERNEL_REFERENCE                Reference;
-    spinlock_t                      LockOutTagOut;
+    mutex_t                         LockOutTagOut;
     thread_state_t                  State;
     LouKIRQL                        ThreadIrql;
     struct _GENERIC_PROCESS_DATA*   Process;
@@ -209,7 +209,7 @@ typedef struct _GENERIC_PROCESS_DATA{
     LPWSTR                                  ProcessNameUnicode;
     string                                  ProcessPath;
     LPWSTR                                  ProcessPathUnicode;
-    spinlock_t                              LockOutTagOut;
+    mutex_t                                 LockOutTagOut;
     UINT64                                  PMLTree;
     UINT32                                  ProcessID;
     UINT8                                   ProcessPriority;

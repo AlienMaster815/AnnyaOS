@@ -261,7 +261,6 @@ EXPORTS
     LouKeReleaseInterruptLock
     LouKeGetCurrentThreadHandle
     LouKeMxBlockThread
-    LouKeMxUnblockThread
     LouKeMmioWaitForCondition
     LouKeMmioWaitTillClear
     LouKeMmioWaitTillSet

@@ -16,10 +16,7 @@ void LouKeLockProcManager(LouKIRQL* Irql);
 void LouKeUnlockProcManager(LouKIRQL* Irql);
 
 void KernelThreadStub(DWORD(*Work)(PVOID), PVOID Param, PGENERIC_THREAD_DATA Thread){
-    DWORD Result = 0;
-    LouKeSchedDbgPrint("Thread:%d Has Started\n", Thread->ThreadID);
-    Result = Work(Param);
-    LouKeSchedDbgPrint("Thread:%d Exited With Code:%h\n", Thread->ThreadID, Result);
+    Work(Param);
     LouKeDestroyThread(Thread);
     while(1){
         asm("hlt");
@@ -641,8 +638,7 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     LouKIRQL Irql;
     TIME_T Time;
     PGENERIC_THREAD_DATA ThreadData = LouKeThreadIdToThreadData(ThreadID);
-    LouKeAcquireInterruptLock(&ThreadData->LockOutTagOut, &Irql);
-    //LouKeLockProcManager(&Irql);
+    LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     if(ThreadData->State < THREAD_BLOCKED){
         ThreadData->State = THREAD_BLOCKED;
@@ -650,10 +646,9 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     LouKeGetFutureTime(&Time, Ms);
     memcpy(&ThreadData->BlockTimeout, &Time, sizeof(TIME_T));
     CurrentTSC = read_tsc();
-    LouKeReleaseInterruptLock(&ThreadData->LockOutTagOut, &Irql);
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
-    //LouKeUnlockProcManager(&Irql);
+    LouKeUnlockProcManager(&Irql);
     if(ThreadData->ThreadID == ThreadID){
         LouKeYieldExecution();
     }
@@ -670,20 +665,18 @@ LouKeYieldExecution(){
 LOUAPI void LouKeUnblockThread(PTHREAD Thread){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
-    //LouKeLockProcManager(&Irql);
-    LouKeAcquireInterruptLock(&ThreadData->LockOutTagOut, &Irql);
+    LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
     ThreadData->State = THREAD_READY;    
-    LouKeReleaseInterruptLock(&ThreadData->LockOutTagOut, &Irql);
-    //LouKeUnlockProcManager(&Irql);
+    LouKeUnlockProcManager(&Irql);
 }
 
 LOUAPI void LouKeBlockThreadNoYield(PTHREAD Thread){
     LouKIRQL Irql;
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)Thread;
-    LouKeAcquireInterruptLock(&ThreadData->LockOutTagOut, &Irql);
+    LouKeLockProcManager(&Irql);
     memset(&ThreadData->BlockTimeout, 0, sizeof(TIME_T));
-    LouKeReleaseInterruptLock(&ThreadData->LockOutTagOut, &Irql);
+    LouKeUnlockProcManager(&Irql);
 }
 
 LOUAPI void LouKeBlockThread(PTHREAD Thread){
@@ -697,7 +690,6 @@ LOUAPI void LouKeBlockThread(PTHREAD Thread){
 
 
 LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
-    LouKeSchedDbgPrint("Thread Manager Demon Started\n");
     UNUSED INTEGER Processors = GetNPROC();
 
     while(1){
@@ -814,13 +806,13 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
             PGENERIC_THREAD_DATA Thread = TmpRing->ThreadData;
             TailRing = (PTHREAD_RING)TmpRing->Peers.LastHeader;
             PGENERIC_THREAD_DATA Tail = TailRing->ThreadData;
-            if(AtomicLockOrFalse(&Tail->LockOutTagOut.Lock)){
+            if(AtomicLockOrFalse(&Tail->LockOutTagOut)){
                 if(Tail->State == THREAD_TERMINATED){
                     TsmDeAsginThreadRingItem(&this->Threads[NextRing], TailRing);
                 }
-                MutexUnlock(&Tail->LockOutTagOut.Lock);
+                MutexUnlock(&Tail->LockOutTagOut);
             }
-            if(AtomicLockOrFalse(&Thread->LockOutTagOut.Lock)){
+            if(AtomicLockOrFalse(&Thread->LockOutTagOut)){
                 if(Thread->State == THREAD_BLOCKED){
                     if(
                         (!LouKeIsTimeoutNull(&Thread->BlockTimeout)) &&
@@ -836,7 +828,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
                     //the thread inside the process
                     return Thread;
                 }
-                MutexUnlock(&Thread->LockOutTagOut.Lock);
+                MutexUnlock(&Thread->LockOutTagOut);
             }
             TmpRing = (PTHREAD_RING)TmpRing->Peers.NextHeader;
             if(TmpRingAnchor == TmpRing){
