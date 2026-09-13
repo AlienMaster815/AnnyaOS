@@ -26,7 +26,7 @@ AtaCoreGetEndpointCapacity(
 
         UINT8 CapacityData[8] = {0};
         PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
-        PATA_COMMAND_PACKET CommandPacket = LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
+        PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
         ScsiCoreEncodeReadCapacity10Command((PSCSI_READ_CAPACITY10_COMMAND_STRUCTURE)CommandPacket->PacketData, 0, 0, 0);
         CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD; 
@@ -56,7 +56,7 @@ AtaCoreGetEndpointCapacity(
 
         Status = CommandPacket->CommandStatus;
 
-        LouKeFree(CommandPacket);
+        AtaCoreFreeAtaCommandPacket(CommandPacket);
 
         if(Status != STATUS_SUCCESS){
             LouPrint("AtaCoreGetEndpointCapacity():COMMAND_ERROR\n");
@@ -97,7 +97,7 @@ AtaCoreReadSectorsFromEndpointDevice(
     
     if(EndpointDevice->DeviceCap & ATA_ENDPOINT_DEVCAP_ATAPI){
         PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
-        PATA_COMMAND_PACKET CommandPacket = LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
+        PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
         ScsiCoreEncodeRead10Command((PSCSI_READ10_COMMAND_STRUCTURE)CommandPacket->PacketData, 0, 0, 0, 0, Lba, 0, SectorCount, 0x00);
         CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD; 
@@ -127,7 +127,7 @@ AtaCoreReadSectorsFromEndpointDevice(
 
         Status = CommandPacket->CommandStatus;
 
-        LouKeFree(CommandPacket);
+        AtaCoreFreeAtaCommandPacket(CommandPacket);
 
         if(Status != STATUS_SUCCESS){
             LouPrint("AtaCoreGetEndpointCapacity():COMMAND_ERROR\n");
@@ -140,8 +140,71 @@ AtaCoreReadSectorsFromEndpointDevice(
     return STATUS_UNSUCCESSFUL;
 }
 
-void AtaCoreRegisterEndpointDevice(
+LOUSTATUS AtaCoreBlkdevFlushDevice(PBLOCK_DEVICE_OBJECT BlockDevice){
+
+    LouPrint("ATACORE.SYS:AtaCoreBlkdevFlushDevice()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AtaCoreBlkdevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK_SEGMENT Segment){
+
+
+    LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AtaCoreBlkdevWriteDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK_SEGMENT Segment){
+
+    LouPrint("ATACORE.SYS:AtaCoreBlkdevWriteDeviceSegment()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AtaCoreBlkdevReadDeviceBlock(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK Block){
+
+    LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceBlock()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS AtaCoreBlkdevWriteDeviceBlock(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK Block){
+
+    LouPrint("ATACORE.SYS:AtaCoreBlkdevWriteDeviceBlock()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+static BLKDEV_OPERATIONS AtaCoreBlkdevOperations = {
+    //TODO Flush device
+    .ReadDeviceSegment = AtaCoreBlkdevReadDeviceSegment,
+    .WriteDeviceSegment = AtaCoreBlkdevWriteDeviceSegment,
+    .ReadDeviceBlock = AtaCoreBlkdevReadDeviceBlock,
+    .WriteDeviceBlock = AtaCoreBlkdevWriteDeviceBlock,
+};
+
+static LOUSINE_DMA_DEVICE DefaultAtaEndpointDmaDevice = {
+    .MaxScatterCount = 1,
+    .AllocatorData = {
+        .DmaLimit = 64,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
+
+LOUSTATUS AtaCoreRegisterEndpointDevice(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
 ){
-
+        
+    if(!EndpointDevice->Port->OptionalDmaDevice){
+        EndpointDevice->Port->OptionalDmaDevice = &DefaultAtaEndpointDmaDevice;
+    }
+    return BlkdevApiCreateDeviceObject(
+        0x00,
+        EndpointDevice->Port->OptionalDmaDevice,
+        EndpointDevice->SectorSize,
+        EndpointDevice->MaxLba,
+        &AtaCoreBlkdevOperations,
+        (PVOID)EndpointDevice
+    );
 }

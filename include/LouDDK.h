@@ -9,6 +9,7 @@ extern "C" {
 
 #define WINAPI __stdcall
 
+
 #define CONTAINER_OF(ptr, type, field_name) ((type *)(((char *)ptr) - offsetof(type, field_name)))
 #define OFFSET_OF(Type, Field) offsetof(Type, Field)
 
@@ -102,6 +103,7 @@ extern "C" {
 #include <drivers/ApicExternals.h>
 #include <drivers/Scsi/ScsiCore.h>
 #include <drivers/Ata/AtaCore.h>
+#include <drivers/BlkDev.h>
 
 #ifndef _USER_MODE_CODE_
 

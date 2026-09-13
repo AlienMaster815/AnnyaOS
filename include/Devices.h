@@ -170,7 +170,6 @@ LOUSTATUS* State
 
 void ReleaseDriveHandle(void* DriveHandle);
 
-typedef PVOID PLATFORM_DEVICE;
 
 
 KERNEL_EXPORT void* LouKeGetBootDevice(size_t Index);

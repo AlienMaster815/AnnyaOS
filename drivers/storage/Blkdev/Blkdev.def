@@ -1,1 +1,4 @@
 LIBRARY BLKDEV.SYS
+
+EXPORTS	
+    BlkdevApiCreateDeviceObject

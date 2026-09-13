@@ -2,6 +2,7 @@
 #define _LOU_DMA_API
 
 #define LOUSINE_DMA_DEVICE_FLAGS_USING_PRIVATE_DMA_ALLOCATOR    (1 << 0)
+#define LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED          (1 << 1)
 
 struct _LOUSINE_DMA_DEVICE;
 
@@ -15,6 +16,7 @@ typedef struct _LOUSINE_DMA_TRANSFER{
 
 typedef struct _LOUSINE_DMA_DEVICE{
     ULONG           DmaDeviceFlags;
+    SIZE            MaxScatterCount;
     PVOID           PrivateData;
     union{
         struct{

@@ -112,6 +112,8 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
         if(Status != STATUS_SUCCESS){
             Identify->CommandStatus = STATUS_IO_DEVICE_ERROR;
             LouKeSetAtomicBoolean(&Identify->CommandDone, 1);
+            LouKeFree(Identify->PioDataIn);
+
         }
     }
 
@@ -334,10 +336,10 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
 
             if(PacketDevice){
                 AtaCoreParsePacketDeviceInformation(Identify, NewEndpoint);
+                AtaCoreGetEndpointCapacity(NewEndpoint, 0x00, 0x00);
+                AtaCoreRegisterEndpointDevice(NewEndpoint);
             }else{
                 LouPrint("TODO: finish the normal ATA Devices\n");
-                
-                LouKeFree(Identify->PioDataIn);
                 while(1);
             }
 
@@ -377,8 +379,6 @@ LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
         AtaCoreProbePortForDevice(TmpPort);
     }
 
-    LouPrint("ATACORE.SYS:AtaCoreRegisterAtaPorts()\n");
-    while(1);
     return STATUS_SUCCESS;
 
 _ERROR_CREATING_LIST:

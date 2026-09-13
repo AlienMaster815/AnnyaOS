@@ -124,6 +124,7 @@ typedef union _LARGE_INTEGER {
     LONGLONG QuadPart;
 } LARGE_INTEGER, *PLARGE_INTEGER;
 
+typedef PVOID PLATFORM_DEVICE;
 
 #ifdef __cplusplus
 }

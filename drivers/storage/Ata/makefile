@@ -26,7 +26,7 @@ all: $(TARGET) $(LIB_FILE) $(HWDRVERS)
 	$(MAKE) -C Hardware all
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -L../SCSI -lScsi $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl -L../SCSI -lScsi -L../Blkdev -lBlkdev $(INCLUDES)
 
 # Build Rule
 $(LIB_FILE): $(DEF_FILE)

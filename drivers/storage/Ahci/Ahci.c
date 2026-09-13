@@ -1758,7 +1758,7 @@ LOUSTATUS AddAhciDevice(
         PrivateAhciData->BoardInfo.AhciFlags |= AHCI_FLAG_32BIT_ONLY;
         PrivateAhciData->DmaDevice.AllocatorData.DmaLimit = 32;        
     }
-
+    PrivateAhciData->DmaDevice.MaxScatterCount = AHCI_MAX_SCATTER_GATHERS;
     PrivateAhciData->DmaDevice.AllocatorData.DmaThreshold = 4 * MEGABYTE;
     
     //if(AHCI_SUPPORTS_PMP(Ghc->Capabilities)){
@@ -1842,10 +1842,7 @@ LOUSTATUS AddAhciDevice(
         while(1);
     }
 
-
-
     LouPrint("AHCI.SYS:AddAhciDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS; //Status;
 }
 

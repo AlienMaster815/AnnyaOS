@@ -202,6 +202,7 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
 }
 
 static LOUSINE_DMA_DEVICE PciIdeBusMasterDevice = {
+    .MaxScatterCount = 8320,
     .AllocatorData = {
         .DmaLimit = 32,
         .DmaThreshold = 64 * KILOBYTE,
@@ -357,7 +358,6 @@ LOUSTATUS AddAtaDevice(
     }
 
     LouPrint("ATA.SYS:AddAtaDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS; //Status;
 }
 
