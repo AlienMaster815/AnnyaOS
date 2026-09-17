@@ -1,3 +1,4 @@
+/*
 #include "Xhci.h"
 
 void XhciInterruptHandler(uint64_t UsbHostData){
@@ -182,3 +183,4 @@ LOUSTATUS XhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket){
     while(1);
     return STATUS_SUCCESS;
 }
+*/

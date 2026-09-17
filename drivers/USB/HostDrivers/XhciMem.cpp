@@ -1,5 +1,5 @@
+/*
 #include "Xhci.h"
-
 
 LOUSTATUS
 XhciAllocateDmaMemory32(
@@ -91,3 +91,4 @@ LOUSTATUS XhciInitializeMemoryManagement(
 
     return STATUS_SUCCESS;
 }
+*/

@@ -1,6 +1,27 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+
 #include "Xhci.h"
 
+LOUAPI
+LOUSTATUS DriverEntry(
+    PDRIVER_OBJECT  DriverObject,
+    PUNICODE_STRING RegistryEntry
+){
+    LouPrint("XHCI.SYS::DriverEntry()\n");
+
+    //DriverObject->DriverExtension->AddDevice = AddDevice;
+    //DriverObject->DriverUnload = UnloadDriver;
+
+    //LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedXhciPciDevices);
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("XHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    //}    
+
+    LouPrint("XHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
+    //while(1);
+    return STATUS_SUCCESS;
+}
+/*
 static const USB_HOST_OPERATIONS XhciOperations = {
     .UsbHcdResetHostController = XhciResetHostController,
     .UsbHcdStopHostController = XhciStopHostController,
@@ -84,22 +105,5 @@ LOUSTATUS AddDevice(
     return STATUS_SUCCESS;
 }
 
-LOUAPI
-LOUSTATUS DriverEntry(
-    PDRIVER_OBJECT  DriverObject,
-    PUNICODE_STRING RegistryEntry
-){
-    LouPrint("XHCI.SYS::DriverEntry()\n");
 
-    DriverObject->DriverExtension->AddDevice = AddDevice;
-    DriverObject->DriverUnload = UnloadDriver;
-
-    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedXhciPciDevices);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("XHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
-    }    
-
-    LouPrint("XHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
+*/

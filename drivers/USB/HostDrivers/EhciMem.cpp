@@ -1,4 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+/*
 #include "EHCI.h"
 
 //TODO: Add support for 64 bit supported systems
@@ -118,3 +119,4 @@ EhciAllocateAsyncHead(
 
     return STATUS_SUCCESS;
 }
+*/

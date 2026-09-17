@@ -1,4 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+/*
 #ifndef _UHCI_H
 #define _UHCI_H
 
@@ -216,3 +217,4 @@ void UhciClearPortStatusControl2(
 
 
 #endif
+*/

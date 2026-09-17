@@ -1,4 +1,102 @@
-#ifndef _USB_H
+#ifndef _USB_CORE_H
+#define _USB_CORE_H
+
+#ifndef __cplusplus
+#include <LouAPI.h>
+#else
+#include <LouDDK.h>
+extern "C" {
+#endif
+
+struct _USB_HCD_OBJECT;
+
+#ifndef _USER_MODE_CODE_
+
+
+#define USBHCD_FLAGS_VERSION_MASK       0x0F
+#define USBHCD_FLAGS_VERSION_SHIFT      0
+#define USBHCD_FLAGS_GET_VERSION(f)     ((f >> USBHCD_FLAGS_VERSION_SHIFT) & USBHCD_FLAGS_VERSION_MASK)
+#define USBHCD_FLAGS_SET_VERSION(x)     ((x & USBHCD_FLAGS_VERSION_MASK) << USBHCD_FLAGS_VERSION_SHIFT)
+
+typedef enum {
+    RHPORT_STATUS_NEEDS_RESET = 0,
+    RHPORT_STATUS_RUNNING,
+    RHPORT_STATUS_IDLE,
+}RHPORT_STATUS;
+
+struct _USB_DEVICE_OBJECT;
+
+typedef struct _USB_ENDPOINT_OBJECT{
+
+}USB_ENDPOINT_OBJECT, * PUSB_ENDPOINT_OBJECT;
+
+#define USB_PIPE_FLAGS_INOUT_MASK           0x03
+#define USB_PIPE_FLAGS_INOUT_SHIFT          0
+#define USB_PIPE_FLAGS_GET_INOUT(f)         ((f >> USB_PIPE_FLAGS_INOUT_SHIFT) & USB_PIPE_FLAGS_INOUT_MASK)
+#define USB_PIPE_FLAGS_SET_INOUT(x)         ((f & USB_PIPE_FLAGS_INOUT_MASK) << USB_PIPE_FLAGS_INOUT_SHIFT)
+#define USB_PIPE_FLAGS_HAS_INPUT            0x01
+#define USB_PIPE_FLAGS_HAS_OUTPUT           0x02
+#define USB_PIPE_FLAGS_IOFLAG_TO_VECTOR(f)  (f - 1)
+
+
+typedef struct _USB_PIPE_OBJECT{
+    ListHeader              Peers;
+    ULONG                   PipeFlags;
+    PUSB_ENDPOINT_OBJECT    EndpointObject[2];
+}USB_PIPE_OBJECT, * PUSB_PIPE_OBJECT;
+
+typedef struct _USB_DEVICE_OBJECT{
+    struct _USB_DEVICE_OBJECT*  Uplink;         //Hub or similar device (if connected)
+    ListHeader                  Peers;          //Current Topology Peers
+    ListHeader                  Subordinates;   //Subordinate members (if Hub or similar device)
+    struct _USB_HCD_OBJECT*     Hcd;
+    UINT8                       DeviceAddress;
+    ListHeader                  PipeObjects;
+    PVOID                       DevicePrivateData;
+}USB_DEVICE_OBJECT, * PUSB_DEVICE_OBJECT;
+
+typedef struct _USBHCD_OPERATIONS{
+    //HCD Operations
+    LOUSTATUS       (*ResetHcdDevice)(struct _USB_HCD_OBJECT* Hcd);
+    LOUSTATUS       (*StartHcdDevice)(struct _USB_HCD_OBJECT* Hcd);
+    LOUSTATUS       (*StopHcdDevice)(struct _USB_HCD_OBJECT* Hcd);
+    //Roothub Operations
+    RHPORT_STATUS   (*GetHcdRhPortStatus)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
+    LOUSTATUS       (*ResetRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
+    LOUSTATUS       (*StartRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
+    LOUSTATUS       (*StopRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
+    //Device Operations
+    LOUSTATUS       (*ConnectDevice)(PUSB_DEVICE_OBJECT Device);
+    LOUSTATUS       (*DisconnectDevice)(PUSB_DEVICE_OBJECT Device);
+    //Endpoint Operations
+    LOUSTATUS       (*ConnectEndpoint)(PUSB_ENDPOINT_OBJECT Endpoint);
+    LOUSTATUS       (*DisconnectEndpoint)(PUSB_ENDPOINT_OBJECT Endpoint);
+}USBHCD_OPERATIONS, * PUSBHCD_OPERATIONS;
+
+typedef struct _USB_HCD_OBJECT{
+    PPCI_DEVICE_OBJECT  PDEV;
+    ULONG               HcdFlags;
+    ListHeader          Companions;
+    XARRAY              DeviceAddressPool;
+    ListHeader          HcdDevices;
+    PVOID               HcdPrivateData;
+}USB_HCD_OBJECT, * PUSB_HCD_OBJECT; 
+
+
+
+#else //user mode code
+
+
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+
+/*#ifndef _USB_H
 #define _USB_H
 
 #ifndef __cplusplus
@@ -275,3 +373,4 @@ LOUSTATUS LouKeUsbSetConfiguration(
 }
 #endif
 #endif
+*/

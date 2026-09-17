@@ -1,3 +1,4 @@
+/*
 #include "Xhci.h"
 
 static void XhciPrintCapabilities(
@@ -79,3 +80,4 @@ XhciGetCapabilities(
 
     return STATUS_SUCCESS;
 }
+*/

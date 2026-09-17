@@ -1,5 +1,27 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+
 #include "EHCI.h"
+
+LOUAPI
+LOUSTATUS DriverEntry(
+    PDRIVER_OBJECT  DriverObject,
+    PUNICODE_STRING RegistryEntry
+){
+    LouPrint("EHCI.SYS::DriverEntry()\n");
+
+    //DriverObject->DriverExtension->AddDevice = AddDevice;
+    //DriverObject->DriverUnload = UnloadDriver;
+    
+    //LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedEhciPciDevices);
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("EHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    //}
+    //while(1);
+    LouPrint("EHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+/*
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedEhciPciDevices[] = {
     {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x20, .GenericEntry = true},
@@ -48,77 +70,61 @@ LOUSTATUS AddDevice(
 
     EhciStopHostController(EhciDevice);    
 
-    /*EhciResetController(EhciDevice);
+    //EhciResetController(EhciDevice);
 
-    UINTPTR TmpVAddress; 
-    UINTPTR TmpPAddress; 
-    Status = EhciAllocatePeriodicFrameListBase(EhciDevice);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
-    Status = EhciAllocateAsyncHead(EhciDevice);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
+    //UINTPTR TmpVAddress; 
+    //UINTPTR TmpPAddress; 
+    //Status = EhciAllocatePeriodicFrameListBase(EhciDevice);
+    //if(Status != STATUS_SUCCESS){
+    //    return Status;
+    //}
+    //Status = EhciAllocateAsyncHead(EhciDevice);
+    //if(Status != STATUS_SUCCESS){
+    //    return Status;
+    //}
 
-    OpRegs->UsbStatus = EHCI_USBSTS_SET_USBINT(OpRegs->UsbStatus, 1);
-    Status = LouKeWaitForUlongRegisterConditionMs(
-        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
-        10,
-        EHCI_USBSTS_USBINT,
-        0
-    );
+    //OpRegs->UsbStatus = EHCI_USBSTS_SET_USBINT(OpRegs->UsbStatus, 1);
+    //Status = LouKeWaitForUlongRegisterConditionMs(
+    //    (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+    //    10,
+    //    EHCI_USBSTS_USBINT,
+    //    0
+    //);
 
-    if(Status != STATUS_SUCCESS){
-        LouPrint("EHCI.SYS:Unable To Clear USBINT Bit In USBSTS\n");
-        return STATUS_IO_DEVICE_ERROR;
-    }
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("EHCI.SYS:Unable To Clear USBINT Bit In USBSTS\n");
+    //    return STATUS_IO_DEVICE_ERROR;
+    //}
 
-    OpRegs->UsbCommand = EHCI_SET_USBCMD_RS(OpRegs->UsbCommand, 1);
+    //OpRegs->UsbCommand = EHCI_SET_USBCMD_RS(OpRegs->UsbCommand, 1);
 
-    Status = LouKeWaitForUlongRegisterConditionMs(
-        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
-        10,
-        EHCI_USBSTS_HC_HALTED,
-        0
-    );
+    //Status = LouKeWaitForUlongRegisterConditionMs(
+    //    (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus),
+    //    10,
+    //    EHCI_USBSTS_HC_HALTED,
+    //    0
+    //);
 
-    if(Status != STATUS_SUCCESS){
-        LouPrint("EHCI.SYS:Host Faild To Start\n");
-        return STATUS_IO_DEVICE_ERROR;
-    }
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("EHCI.SYS:Host Faild To Start\n");
+    //    return STATUS_IO_DEVICE_ERROR;
+    //}
 
-    OpRegs->UsbCommand = EHCI_SET_USBCMD_ASE(OpRegs->UsbCommand, 1);
+    //OpRegs->UsbCommand = EHCI_SET_USBCMD_ASE(OpRegs->UsbCommand, 1);
 
-    UINT8 PortCount = EhciDevice->EhciPortCount;
+    //UINT8 PortCount = EhciDevice->EhciPortCount;
 
-    for(UINT8 i = 0 ; i < PortCount; i++){
-        if(EHCI_GET_PORTSC_CCS(OpRegs->PortStatusControl[i])){
-            LouPrint("EHCI.SYS:Device Connected On Port:%d\n", i);
-            while(1);
-        }   
-    }*/
+    //for(UINT8 i = 0 ; i < PortCount; i++){
+    //    if(EHCI_GET_PORTSC_CCS(OpRegs->PortStatusControl[i])){
+    //        LouPrint("EHCI.SYS:Device Connected On Port:%d\n", i);
+    //        while(1);
+    //    }   
+    //}
 
     LouPrint("EHCI.SYS::AddDevice() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
-LOUAPI
-LOUSTATUS DriverEntry(
-    PDRIVER_OBJECT  DriverObject,
-    PUNICODE_STRING RegistryEntry
-){
-    LouPrint("EHCI.SYS::DriverEntry()\n");
 
-    DriverObject->DriverExtension->AddDevice = AddDevice;
-    DriverObject->DriverUnload = UnloadDriver;
-    
-    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedEhciPciDevices);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("EHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
-    }
 
-    LouPrint("EHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
+*/

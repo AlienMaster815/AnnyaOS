@@ -1,4 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+/*
 #include "OHCI.h"
 
 static UINT8 OhciGetTdBufferRounding(POHCI_TRANSFER_DESCRIPTOR Td){
@@ -518,3 +519,4 @@ void OhciDestroyStatusTD(POHCI_ED_LIST EdItem){
 void OhciDestroyDummyTD(POHCI_ED_LIST EdItem){
     DestroyTDHelper(EdItem);
 }
+*/

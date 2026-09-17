@@ -5,6 +5,12 @@
 #include <LouDDK.h>
 #include <usb.h>
 
+
+#endif
+
+
+/*
+
 //ASYNC for controll and bulk
 //ISOCH for Interrupt and periodic
 
@@ -1741,4 +1747,4 @@ LOUSTATUS XhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
 
 void XhciInterruptHandler(uint64_t UsbHostData);
 
-#endif
+*/

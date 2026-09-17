@@ -1,5 +1,28 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+
 #include "OHCI.h"
+
+LOUAPI
+LOUSTATUS DriverEntry(
+    PDRIVER_OBJECT  DriverObject,
+    PUNICODE_STRING RegistryEntry
+){
+    LouPrint("OHCI.SYS::DriverEntry()\n");
+
+    //DriverObject->DriverExtension->AddDevice = AddDevice;
+    //DriverObject->DriverUnload = UnloadDriver;
+
+    //LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedOhciPciDevices);
+    //if(Status != STATUS_SUCCESS){
+    //    LouPrint("OHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    //}
+
+    LouPrint("OHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
+    //while(1);
+    return STATUS_SUCCESS;
+}
+
+/*
 
 static const USB_HOST_OPERATIONS OhciOperations = {
     .UsbHcdResetHostController = OhciResetHostController,
@@ -97,22 +120,6 @@ LOUSTATUS AddDevice(
     return STATUS_SUCCESS;
 }
 
-LOUAPI
-LOUSTATUS DriverEntry(
-    PDRIVER_OBJECT  DriverObject,
-    PUNICODE_STRING RegistryEntry
-){
-    LouPrint("OHCI.SYS::DriverEntry()\n");
 
-    DriverObject->DriverExtension->AddDevice = AddDevice;
-    DriverObject->DriverUnload = UnloadDriver;
 
-    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedOhciPciDevices);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
-    }
-
-    LouPrint("OHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
+*/

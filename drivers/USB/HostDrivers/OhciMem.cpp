@@ -1,4 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+/*
 #include "OHCI.h"
 
 LOUSTATUS
@@ -36,3 +37,4 @@ UINT32 OhciGetDmaAddress(
     RequestPhysicalAddress((UINT64)VAddress, &PhyAddress);
     return (UINT32)(UINTPTR)PhyAddress;
 }
+*/

@@ -8,6 +8,14 @@
 #include <usb.h>
 
 
+
+#endif
+
+
+/*
+
+
+
 typedef struct _OHCI_ED_INITIALIZOR{
     UINT8       FunctionAddress;
     UINT8       EndpointNumber      :   4;
@@ -376,4 +384,4 @@ void OhciDestroyDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 void OhciDestroyStatusTD(POHCI_ED_LIST EdItem);
 void OhciDestroyDummyTD(POHCI_ED_LIST EdItem);
 POHCI_ED_LIST OhciEdToEdList(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR Ed);
-#endif
+*/

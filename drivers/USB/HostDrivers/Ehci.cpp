@@ -1,4 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+/*
 #include "EHCI.h"
 
 LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice){
@@ -51,4 +52,4 @@ LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice){
     LouPrint("EHCI.SYS:EhciResetController() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
-
+*/

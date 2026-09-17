@@ -6,6 +6,14 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
+
+#endif
+
+/*
+
+
+
+
 #define EHCI_OPERATIONAL_REGISTER_BAR   0 
 #define EHCI_CAP_REGISTER_OFFSET        0
 
@@ -437,4 +445,4 @@ LOUSTATUS EhciAllocateAsyncHead(PEHCI_DEVICE EhciDevice);
 
 
 
-#endif
+*/

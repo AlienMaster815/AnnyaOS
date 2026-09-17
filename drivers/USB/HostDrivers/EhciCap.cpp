@@ -1,4 +1,6 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+
+/*
 #include "EHCI.h"
 
 static void EhciPrintCapabilities(
@@ -84,3 +86,4 @@ void EhciGetHostCapabilities(PEHCI_DEVICE EhciDevice){
 
     LouPrint("EHCI.SYS:EhciGetHostCapabilities() DONE\n");
 }
+*/

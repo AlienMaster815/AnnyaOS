@@ -1,4 +1,6 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+
+/*
 #include "UsbCore.h"
 
 
@@ -79,3 +81,4 @@ LOUSTATUS LouKeUsbAddDeviceToHcd(
     LouPrint("LouKeUsbAddDeviceToHcd() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
+*/
