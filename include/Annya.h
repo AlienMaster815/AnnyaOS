@@ -134,16 +134,27 @@ typedef void* PTHREAD;
 
 typedef unsigned int UINT;
 typedef unsigned short USHORT, * PUSHORT;
+typedef UINT64 AOA_PUSHORT;
 
 typedef void*       HWND;
-typedef void*       HMENU;
-typedef uint16_t    MSG;
-typedef void*       LOUDISPMSG;
+typedef UINT64      AOA_HWND;
 
-typedef void* HANDLE;
-typedef HANDLE FILE;
+typedef void*       HMENU;
+typedef UINT64      AOA_HWND;
+
+typedef uint16_t    MSG;
+
+typedef void*       LOUDISPMSG;
+typedef UINT64      AOA_LOUDISPMSG;
+
+typedef void*   HANDLE;
+typedef UINT64  AOA_HANDLE;
+
+typedef HANDLE      FILE;
+typedef AOA_HANDLE  AOA_FILE;
 
 typedef void (__cdecl *FunctionVector)(void);
+typedef UINT64 AoaFunctionVector;
 
 struct _AWM_CLIP_TREE;
 
@@ -158,6 +169,8 @@ typedef struct _CHILD_WINDOW_TRACKER{
     ListHeader              Peers;
     struct _WINDOW_HANDLE*  Child;
 }CHILD_WINDOW_TRACKER, * PCHILD_WINDOW_TRACKER;
+
+typedef UINT64 AOA_PCHILD_WINDOW_TRACKER;
 
 typedef struct _WINDOW_HANDLE{
     PVOID                   Charecteristics;
@@ -188,6 +201,8 @@ typedef struct _WINDOW_HANDLE{
     DWORD                   ExtendedWindowStyle;
     UINT64                  ThreadID;
 }WINDOW_HANDLE, * PWINDOW_HANDLE;
+
+typedef UINT64 AOA_PWINDOW_HANDLE;
 
 #define TRAY_WINDOW             "AnnyaShell_TrayWnd"
 #define DEKSTOP_BACKGROUND      "AnnyaDekstopBackground"
@@ -222,6 +237,8 @@ typedef struct _WIN_API_SECUTIY_ATTRIBUTES{
     bool        HandleIsInherited;
 }WIN_API_SECUTIY_ATTRIBUTES, * PWIN_API_SECUTIY_ATTRIBUTES;
 
+typedef UINT64 AOA_PWIN_API_SECUTIY_ATTRIBUTES;
+
 typedef struct _WIN_API_STARTUP_INFOA{
     uint32_t    StructureSize; // = 0x40;
     string      Reserved;
@@ -249,6 +266,8 @@ typedef struct _WIN_API_STARTUP_INFOA{
     void*       StdError;
 }WIN_API_STARTUP_INFOA, * PWIN_API_STARTUP_INFOA;
 
+typedef UINT64 AOA_PWIN_API_STARTUP_INFOA;
+
 typedef struct _WIN_API_PROCESS_INFORMATION{
     void*       ProcessHandle;
     void*       ThreadHandle;
@@ -256,12 +275,15 @@ typedef struct _WIN_API_PROCESS_INFORMATION{
     uint32_t    ThreadIdentification;
 }WIN_API_PROCESS_INFORMATION, * PWIN_API_PROCESS_INFORMATION;
 
+typedef UINT64 AOA_PWIN_API_PROCESS_INFORMATION;
 
 
 //Pivate Data for Shell/Annya API Windows
 typedef struct _ANNYA_DESKTOP_SETUP_PACKET{
     WNDPROC WindowCallback;
 }ANNYA_DESKTOP_SETUP_PACKET, * PANNYA_DESKTOP_SETUP_PACKET;
+
+typedef UINT64 AOA_PANNYA_DESKTOP_SETUP_PACKET;
 
 typedef struct _BOOTVID_FRAMEBUFFER{
     ListHeader  Head;
@@ -274,6 +296,8 @@ typedef struct _BOOTVID_FRAMEBUFFER{
     UINT8       Bpp;
     UINT32*     UserBuffer;
 }BOOTVID_FRAMEBUFFER, * PBOOTVID_FRAMEBUFFER;
+
+typedef UINT64 AOA_PBOOTVID_FRAMEBUFFER;
 
 #ifndef _USER_32_
 
