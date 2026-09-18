@@ -28,6 +28,23 @@ LOUSTATUS AhciInitializePort(PATA_PORT_DEVICE_OBJECT AhciPort);
 LOUSTATUS AhciDeInitalizePort(PATA_PORT_DEVICE_OBJECT AhciPort);
 void AhciStartFisReception(PATA_PORT_DEVICE_OBJECT AhciPort);
 
+
+static LOUSTATUS AhciStopFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    uint32_t Tmp = Port->PxCMD;
+    LOUSTATUS Status;
+    Tmp &= ~(AHCI_PxCMD_FRE);
+    Port->PxCMD = Tmp;
+
+    Status = LouKeMmioWaitTillClear((PULONG)&Port->PxCMD, AHCI_PxCMD_FR, 10, 1000);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    LouPrint("AHCI.SYS:Fis Reception Stopped\n");
+    return STATUS_SUCCESS;
+}
+
 BOOLEAN AhciPortDeviceIsaPacketDevice(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev){
     return (((PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData)->GenericPort->PxSIG == 0xEB140101);
 }
@@ -40,7 +57,6 @@ void AhciFreeCommandPrivateData(PVOID Object){
     LouKeFreeFastObject("AHCI_COMMAND_PRIVATE_DATA", Object);
 }
 
-#define AHCI_PXIS_FATAL_ERRORS ((1U << 30) | (1U << 29) | (1U << 28) | (1U << 27)) 
 
 void GetCommandPacketFromFis(UINT8* Fis, PATA_COMMAND_PACKET CommandPacket){
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
@@ -62,21 +78,39 @@ void GetCommandPacketFromFis(UINT8* Fis, PATA_COMMAND_PACKET CommandPacket){
     }
 }
 
+void AhciHandleCommandErrorRecovery(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    LouPrint("AHCI.SYS:AhciHandleCommandErrorRecovery()\n");
+    while(1);
+}
+
+
 LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
     PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
     UINT8* FisBase = (UINT8*)PrivateData->Fis;
     LOUSTATUS Status;
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
-        Status = LouKeMmioWaitTillClear((PULONG)&PrivateData->GenericPort->PxCI, 1 << CommandPrivateData->CommandSlot, 10, 5000);
-        if(Status != STATUS_SUCCESS){
-            
-            LouPrint("AHCI.SYS:CI Did Not Clear\n");
-            DumpPort(PrivateData->GenericPort);
-            while(1);
-            return Status;
+    
+    for(SIZE i = 0; i < 10; i++){
+        if(PrivateData->GenericPort->PxIS & (1UL << 30)){
+            UINT32 Tfd = PrivateData->GenericPort->PxTFD;
+            UINT8 TfdError = (Tfd >> 8) & UINT8_MAX;
+            UINT8 TfdStatus = Tfd & UINT8_MAX;
+            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
+                CommandPacket->PacketEx.Status = TfdStatus;
+                CommandPacket->PacketEx.Error = TfdError;
+            }else{
+                CommandPacket->Packet.Status = TfdStatus;
+                CommandPacket->Packet.Error = TfdError; 
+            }
+            return STATUS_IO_DEVICE_ERROR;
+        }
+        Status = LouKeMmioWaitTillClear((PULONG)&PrivateData->GenericPort->PxCI, 1UL << CommandPrivateData->CommandSlot, 10, 500);
+        if(Status == STATUS_SUCCESS){
+            break;
         }
     }
+    
+    //I am not doing NCQ yet
     //ifdef NCQ
     //const UINT8* Fis = FisBase + 0x58;
     //if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
@@ -244,7 +278,11 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
     PATA_COMMAND_PACKET     CommandPacket
 ){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
-    PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
+    PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData; 
+    if(CommandPacket->CommandStatus != STATUS_SUCCESS){
+        LouPrint("CommandStatus:%h\n", CommandPacket->CommandStatus);
+        AhciHandleCommandErrorRecovery(PortDevice, CommandPacket);
+    } 
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
         return STATUS_SUCCESS;
     }
@@ -264,15 +302,24 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
 //}
 
 
-static void AhciStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
+static LOUSTATUS AhciStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
 
     AhciStartFisReception(PortDevice);
+
+    if(
+        (!PrivateData->GenericPort->PxSIG) ||
+        (PrivateData->GenericPort->PxSIG == UINT32_MAX)
+    ){
+        AhciStopFisReception(PortDevice);
+        return STATUS_NO_SUCH_DEVICE;
+    }
 
     //TODO check for a delay
     PrivateData->StartCommandEngine(PortDevice);
 
     //TODO:EM and SW
+    return STATUS_SUCCESS;
 }
 
 void AhciPowerUp(PATA_PORT_DEVICE_OBJECT PortDevice){
@@ -293,8 +340,7 @@ void AhciPowerUp(PATA_PORT_DEVICE_OBJECT PortDevice){
 LOUSTATUS AhciPortResume(PATA_PORT_DEVICE_OBJECT PortDevice){
     //TODO check PM
     AhciPowerUp(PortDevice);
-    AhciStartPort(PortDevice);
-    return STATUS_SUCCESS;
+    return AhciStartPort(PortDevice);
 }
 
 LOUSTATUS AhciGenericPortDeviceStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
@@ -1415,21 +1461,6 @@ LOUSTATUS ResetAhcPciController(PATA_HOST_DEVICE_OBJECT AtaHost){
     return STATUS_SUCCESS;
 }
 
-static LOUSTATUS AhciStopFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
-    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)LkdmAtaPortToPrivateData(AhciPort);
-    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
-    uint32_t Tmp = Port->PxCMD;
-    LOUSTATUS Status;
-    Tmp &= ~(AHCI_PxCMD_FRE);
-    Port->PxCMD = Tmp;
-
-    Status = LouKeMmioWaitTillClear((PULONG)&Port->PxCMD, AHCI_PxCMD_FR, 10, 1000);
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
-    LouPrint("AHCI.SYS:Fis Reception Stopped\n");
-    return STATUS_SUCCESS;
-}
 
 
 LOUSTATUS AhciDeInitalizePort(PATA_PORT_DEVICE_OBJECT AhciPort){

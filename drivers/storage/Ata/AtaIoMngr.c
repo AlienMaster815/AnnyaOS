@@ -19,7 +19,7 @@ void AtaCorePortIoQueueManager(PVOID Params){
             goto _COMMAND_FINISHED;
         }
         if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
-            SIZE Timeout = 1000;
+            SIZE Timeout = 5000;
             _KEEP_POLLING:
             CommandPacket->CommandStatus = PortDevice->Operations->AtaPortDeviceGetCommandStatus(PortDevice, CommandPacket);
             if(CommandPacket->CommandStatus != STATUS_SUCCESS){

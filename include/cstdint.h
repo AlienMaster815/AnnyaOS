@@ -72,11 +72,18 @@ typedef struct _uint48_t{
     uint16_t    HighWord;
 }uint48_t;
 
+#ifdef __x86_64__
 typedef __int128 int128_t, INT128, * PINT128;
+#else 
+typedef unsigned long long int128_t[4], INT128[4], * PINT128[4];
+#endif
+
+
+
 
 typedef struct _INT_512{
-    __int128 low;  // Lower 128 bits
-    __int128 high; // Higher 128 bits
+    int128_t low;  // Lower 128 bits
+    int128_t high; // Higher 128 bits
 } int512_t, INT_512, * PINT_512;
 
 

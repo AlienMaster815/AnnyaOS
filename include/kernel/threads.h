@@ -202,6 +202,15 @@ static inline uint64_t LouKeGetAtomic64FromUint64(atomic64_t* A) {
     return converter.u;
 }
 
+static inline void LouKeSetAtomic32FromUint32(atomic_t* A, uint32_t Value) {
+    LouKeSetAtomic(A, Value);
+}
+
+static inline uint32_t LouKeGetAtomic32FromUint32(atomic_t* A) {
+    return (UINT32)LouKeGetAtomic(A);
+}
+
+
 
 static inline void LouKeSetAtomicBoolean(PATOMIC_BOOLEAN b, int Boolean){
     LouKeSetAtomic(b, Boolean);

@@ -39,7 +39,13 @@ extern "C" {
 typedef bool BOOL;
 typedef unsigned int UINT;
 typedef unsigned long long UINT64;
+
+#ifdef __x86_64__
 typedef unsigned long long size_t;
+#else 
+typedef unsigned int size_t;
+#endif
+
 typedef unsigned short wchar_t;
 
 typedef unsigned int DWORD;
