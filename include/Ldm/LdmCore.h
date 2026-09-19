@@ -10,239 +10,239 @@ extern "C" {
 #define CONNECT_LINE_BASED 2
 #define CONNECT_MESSAGE_BASED 3
 
-
-typedef enum _IO_NOTIFICATION_EVENT_CATEGORY {
-    EventCategoryReserved = 0,
-    EventCategoryHardwareProfileChange,
-    EventCategoryDeviceInterfaceChange,
-    EventCategoryTargetDeviceChange,
-    EventCategoryKernelSoftRestart,
+typedef enum _IO_NOTIFICATION_EVENT_CATEGORY{
+   EventCategoryReserved = 0,
+   EventCategoryHardwareProfileChange,
+   EventCategoryDeviceInterfaceChange,
+   EventCategoryTargetDeviceChange,
+   EventCategoryKernelSoftRestart,
 }IO_NOTIFICATION_EVENT_CATEGORY, * PIO_NOTIFICATION_EVENT_CATEGORY;
 
 typedef enum _IOMMU_MAP_PHYSICAL_ADDRESS_TYPE{
-    MapPhysicalAddressTypeMdl = 0,
-    MapPhysicalAddressTypeContiguousRange,
-    MapPhysicalAddressTypePfn,
-    MapPhysicalAddressTypeMax,
+   MapPhysicalAddressTypeMdl = 0,
+   MapPhysicalAddressTypeContiguousRange,
+   MapPhysicalAddressTypePfn,
+   MapPhysicalAddressTypeMax,
 }IOMMU_MAP_PHYSICAL_ADDRESS_TYPE, * PIOMMU_MAP_PHYSICAL_ADDRESS_TYPE;
 
 typedef enum _KEY_SET_INFORMATION_CLASS{
-    KeyWriteTimeInformation = 0,
-    KeyWow64FlagsInformation,
-    KeyControlFlagsInformation,
-    KeySetVirtualizationInformation,
-    KeySetDebugInformation,
-    KeySetHandleTagsInformation,
-    KeySetLayerInformation,
-    MaxKeySetInfoClass,
+   KeyWriteTimeInformation = 0,
+   KeyWow64FlagsInformation,
+   KeyControlFlagsInformation,
+   KeySetVirtualizationInformation,
+   KeySetDebugInformation,
+   KeySetHandleTagsInformation,
+   KeySetLayerInformation,
+   MaxKeySetInfoClass,
 }KEY_SET_INFORMATION_CLASS, * PKEY_SET_INFORMATION_CLASS;
 
-typedef enum _KEY_VALUE_INFORMATION_CLASS {
-    KeyValueBasicInformation = 0,
-    KeyValueFullInformation,
-    KeyValuePartialInformation,
-    KeyValueFullInformationAlign64,
-    KeyValuePartialInformationAlign64,
-    KeyValueLayerInformation,
-    MaxKeyValueInfoClass,
+typedef enum _KEY_VALUE_INFORMATION_CLASS{
+   KeyValueBasicInformation = 0,
+   KeyValueFullInformation,
+   KeyValuePartialInformation,
+   KeyValueFullInformationAlign64,
+   KeyValuePartialInformationAlign64,
+   KeyValueLayerInformation,
+   MaxKeyValueInfoClass,
 }KEY_VALUE_INFORMATION_CLASS, * PKEY_VALUE_INFORMATION_CLASS;
 
-typedef enum _IO_PRIORITY_HINT {
-    IoPriorityVeryLow = 0,
-    IoPriorityLow,
-    IoPriorityNormal,
-    IoPriorityHigh,
-    IoPriorityCritical,
-    MaxIoPriorityTypes,
+typedef enum _IO_PRIORITY_HINT{
+   IoPriorityVeryLow = 0,
+   IoPriorityLow,
+   IoPriorityNormal,
+   IoPriorityHigh,
+   IoPriorityCritical,
+   MaxIoPriorityTypes,
 }IO_PRIORITY_HINT, * PIO_PRIORITY_HINT;
 
 
-typedef struct _XSAVE_CET_U_FORMAT {
-    ULONG64     Ia32CetUMsr;
-    ULONG64     Ia32Pl3SspMsr;
+typedef struct _XSAVE_CET_U_FORMAT{
+   ULONG64     Ia32CetUMsr;
+   ULONG64     Ia32Pl3SspMsr;
 }XSAVE_CET_U_FORMAT, * PXSAVE_CET_U_FORMAT;
 
 typedef enum _KEY_INFORMATION_CLASS{
-    KeyBasicInformation = 0,
-    KeyNodeInformation,
-    KeyFullInformation,
-    KeyNameInformation,
-    KeyCachedInformation,
-    KeyFlagsInformation,
-    KeyVirtualizationInformation,
-    KeyHandleTagsInformation,
-    KeyTrustInformation,
-    KeyLayerInformation,
-    MaxKeyInfoClass
+   KeyBasicInformation = 0,
+   KeyNodeInformation,
+   KeyFullInformation,
+   KeyNameInformation,
+   KeyCachedInformation,
+   KeyFlagsInformation,
+   KeyVirtualizationInformation,
+   KeyHandleTagsInformation,
+   KeyTrustInformation,
+   KeyLayerInformation,
+   MaxKeyInfoClass
 }KEY_INFORMATION_CLASS, * PKEY_INFORMATION_CLASS;;
 
 
 typedef enum _WORK_QUEUE_TYPE{
-    CriticalWorkQueue = 0,
-    DelayedWorkQueue,
-    HyperCriticalWorkQueue,
-    NormalWorkQueue,
-    BackgroundWorkQueue,
-    RealTimeWorkQueue,
-    SuperCriticalWorkQueue,
-    MaximumWorkQueue,
-    CustomPriorityWorkQueue,
+   CriticalWorkQueue = 0,
+   DelayedWorkQueue,
+   HyperCriticalWorkQueue,
+   NormalWorkQueue,
+   BackgroundWorkQueue,
+   RealTimeWorkQueue,
+   SuperCriticalWorkQueue,
+   MaximumWorkQueue,
+   CustomPriorityWorkQueue,
 }WORK_QUEUE_TYPE, * PWORK_QUEUE_TYPE;
 
 typedef enum _TRACE_INFORMATION_CLASS{
-    TraceIdClass = 0,
-    TraceHandleClass,
-    TraceEnableFlagsClass,
-    TraceEnableLevelClass,
-    GlobalLoggerHandleClass,
-    EventLoggerHandleClass,
-    AllLoggerHandlesClass,
-    TraceHandleByNameClass,
-    LoggerEventsLostClass,
-    TraceSessionSettingsClass,
-    LoggerEventsLoggedClass,
-    DiskIoNotifyRoutinesClass,
-    TraceInformationClassReserved1,
-    FltIoNotifyRoutinesClass,
-    TraceInformationClassReserved2,
-    WdfNotifyRoutinesClass,
-    MaxTraceInformationClass,
+   TraceIdClass = 0,
+   TraceHandleClass,
+   TraceEnableFlagsClass,
+   TraceEnableLevelClass,
+   GlobalLoggerHandleClass,
+   EventLoggerHandleClass,
+   AllLoggerHandlesClass,
+   TraceHandleByNameClass,
+   LoggerEventsLostClass,
+   TraceSessionSettingsClass,
+   LoggerEventsLoggedClass,
+   DiskIoNotifyRoutinesClass,
+   TraceInformationClassReserved1,
+   FltIoNotifyRoutinesClass,
+   TraceInformationClassReserved2,
+   WdfNotifyRoutinesClass,
+   MaxTraceInformationClass,
 }TRACE_INFORMATION_CLASS, * PTRACE_INFORMATION_CLASS;
 
 typedef struct _TRANSACTION_BASIC_INFORMATION{
-    GUID    TransactionId;
-    ULONG   State;
-    ULONG   Outcome;
+   GUID    TransactionId;
+   ULONG   State;
+   ULONG   Outcome;
 }TRANSACTION_BASIC_INFORMATION, * PTRANSACTION_BASIC_INFORMATION;
 
-typedef struct _TRANSACTION_ENLISTMENT_PAIR {
-    GUID    EnlistmentId;
-    GUID    ResourceManagerId;
+typedef struct _TRANSACTION_ENLISTMENT_PAIR{
+   GUID    EnlistmentId;
+   GUID    ResourceManagerId;
 } TRANSACTION_ENLISTMENT_PAIR, * PTRANSACTION_ENLISTMENT_PAIR;
 
-typedef struct _TRANSACTION_ENLISTMENTS_INFORMATION {
-    ULONG                           NumberOfEnlistments;
-    TRANSACTION_ENLISTMENT_PAIR     EnlistmentPair[1];
+typedef struct _TRANSACTION_ENLISTMENTS_INFORMATION{
+   ULONG                           NumberOfEnlistments;
+   TRANSACTION_ENLISTMENT_PAIR     EnlistmentPair[1];
 } TRANSACTION_ENLISTMENTS_INFORMATION, * PTRANSACTION_ENLISTMENTS_INFORMATION;
 
-typedef enum _TRANSACTION_INFORMATION_CLASS {
-    TransactionBasicInformation = 0,
-    TransactionPropertiesInformation,
-    TransactionEnlistmentInformation,
-    TransactionSuperiorEnlistmentInformation,
-} TRANSACTION_INFORMATION_CLASS, * PTRANSACTION_INFORMATION_CLASS;
+typedef enum _TRANSACTION_INFORMATION_CLASS{
+   TransactionBasicInformation = 0,
+   TransactionPropertiesInformation,
+   TransactionEnlistmentInformation,
+   TransactionSuperiorEnlistmentInformation,
+}TRANSACTION_INFORMATION_CLASS, * PTRANSACTION_INFORMATION_CLASS;
 
 typedef enum _TRANSACTION_OUTCOME{
-    TransactionOutcomeUndetermined = 0,
-    TransactionOutcomeCommitted,
-    TransactionOutcomeAborted
+   TransactionOutcomeUndetermined = 0,
+   TransactionOutcomeCommitted,
+   TransactionOutcomeAborted
 }TRANSACTION_OUTCOME, * PTRANSACTION_OUTCOME;
 
 typedef struct _TRANSACTION_PROPERTIES_INFORMATION{
-    ULONG           IsolationLevel;
-    ULONG           IsolationFlags;
-    LARGE_INTEGER   Timeout;
-    ULONG           Outcome;
-    ULONG           DescriptionLength;
-    WCHAR           Description[1];
+   ULONG           IsolationLevel;
+   ULONG           IsolationFlags;
+   LARGE_INTEGER   Timeout;
+   ULONG           Outcome;
+   ULONG           DescriptionLength;
+   WCHAR           Description[1];
 }TRANSACTION_PROPERTIES_INFORMATION, * PTRANSACTION_PROPERTIES_INFORMATION;
 
 typedef struct _KEY_VALUE_ENTRY {
-    PUNICODE_STRING     ValueName;
-    ULONG               DataLength;
-    ULONG               DataOffset;
-    ULONG               Type;
+   PUNICODE_STRING     ValueName;
+   ULONG               DataLength;
+   ULONG               DataOffset;
+   ULONG               Type;
 } KEY_VALUE_ENTRY, * PKEY_VALUE_ENTRY;
 
-typedef struct _RESOURCEMANAGER_BASIC_INFORMATION {
-    GUID    ResourceManagerId;
-    ULONG   DescriptionLength;
-    WCHAR   Description[1];
-} RESOURCEMANAGER_BASIC_INFORMATION, * PRESOURCEMANAGER_BASIC_INFORMATION;
+typedef struct _RESOURCEMANAGER_BASIC_INFORMATION{
+   GUID    ResourceManagerId;
+   ULONG   DescriptionLength;
+   WCHAR   Description[1];
+}RESOURCEMANAGER_BASIC_INFORMATION, * PRESOURCEMANAGER_BASIC_INFORMATION;
 
-typedef struct _RESOURCEMANAGER_COMPLETION_INFORMATION {
-    HANDLE      IoCompletionPortHandle;
-    ULONG_PTR   CompletionKey;
+typedef struct _RESOURCEMANAGER_COMPLETION_INFORMATION{
+   HANDLE      IoCompletionPortHandle;
+   ULONG_PTR   CompletionKey;
 } RESOURCEMANAGER_COMPLETION_INFORMATION, * PRESOURCEMANAGER_COMPLETION_INFORMATION;
 
 typedef enum _RESOURCEMANAGER_INFORMATION_CLASS{
-    ResourceManagerBasicInformation = 0,
-    ResourceManagerCompletionInformation,
+   ResourceManagerBasicInformation = 0,
+   ResourceManagerCompletionInformation,
 }RESOURCEMANAGER_INFORMATION_CLASS, * PRESOURCEMANAGER_INFORMATION_CLASS;
 
 typedef struct _SYSTEM_POOL_ZEROING_INFORMATION{
-    BOOLEAN     PoolZeroingSupportPresent;
+   BOOLEAN     PoolZeroingSupportPresent;
 }SYSTEM_POOL_ZEROING_INFORMATION, * PSYSTEM_POOL_ZEROING_INFORMATION;
 
 typedef enum _SYSTEM_POWER_CONDITION{
-    PoAc = 0,
-    PoDc,
-    PoHot,
-    PoConditionMaximum,
+   PoAc = 0,
+   PoDc,
+   PoHot,
+   PoConditionMaximum,
 }SYSTEM_POWER_CONDITION, * PSYSTEM_POWER_CONDITION;
 
 
 typedef struct _FILE_OBJECT{
-    CSHORT                              Type;
-    CSHORT                              Size;
-    struct _DEVICE_OBJECT*              DeviceObject;
-    struct _VPB*                        Vpb;
-    PVOID                               FsContext;
-    PVOID                               FsContext2;
-    PSECTION_OBJECT_POINTERS            SectionObjectPointer;
-    PVOID                               PrivateCacheMap;
-    LOUSTATUS                           FinalStatus;
-    struct _FILE_OBJECT*                RelatedFileObject;
-    BOOLEAN                             LockOperation;
-    BOOLEAN                             DeletePending;
-    BOOLEAN                             ReadAccess;
-    BOOLEAN                             WriteAccess;
-    BOOLEAN                             DeleteAccess;
-    BOOLEAN                             SharedRead;
-    BOOLEAN                             SharedWrite;
-    BOOLEAN                             SharedDelete;
-    ULONG                               Flags;
-    UNICODE_STRING                      FileName;
-    LARGE_INTEGER                       CurrentByteOffset;
-    ULONG                               Waiters;
-    ULONG                               Busy;
-    PVOID                               LastLock;
-    KEVENT                              Lock;
-    KEVENT                              Event;
-    PIO_COMPLETION_CONTEXT              CompletionContext;
-    KSPIN_LOCK                          IrpListLock;
-    LIST_ENTRY                          IrpList;
-    PVOID                               FileObjectExtension;
-} FILE_OBJECT, * PFILE_OBJECT;
+   CSHORT                              Type;
+   CSHORT                              Size;
+   struct _DEVICE_OBJECT*              DeviceObject;
+   struct _VPB*                        Vpb;
+   PVOID                               FsContext;
+   PVOID                               FsContext2;
+   PSECTION_OBJECT_POINTERS            SectionObjectPointer;
+   PVOID                               PrivateCacheMap;
+   LOUSTATUS                           FinalStatus;
+   struct _FILE_OBJECT*                RelatedFileObject;
+   BOOLEAN                             LockOperation;
+   BOOLEAN                             DeletePending;
+   BOOLEAN                             ReadAccess;
+   BOOLEAN                             WriteAccess;
+   BOOLEAN                             DeleteAccess;
+   BOOLEAN                             SharedRead;
+   BOOLEAN                             SharedWrite;
+   BOOLEAN                             SharedDelete;
+   ULONG                               Flags;
+   UNICODE_STRING                      FileName;
+   LARGE_INTEGER                       CurrentByteOffset;
+   ULONG                               Waiters;
+   ULONG                               Busy;
+   PVOID                               LastLock;
+   KEVENT                              Lock;
+   KEVENT                              Event;
+   PIO_COMPLETION_CONTEXT              CompletionContext;
+   KSPIN_LOCK                          IrpListLock;
+   LIST_ENTRY                          IrpList;
+   PVOID                               FileObjectExtension;
+}FILE_OBJECT, * PFILE_OBJECT;
 
 typedef struct _TARGET_DEVICE_CUSTOM_NOTIFICATION{
-    USHORT          Version;
-    USHORT          Size;
-    GUID            Event;
-    PFILE_OBJECT    FileObject;
-    LONG            NameBufferOffset;
-    UCHAR           CustomDataBuffer[1];
+   USHORT          Version;
+   USHORT          Size;
+   GUID            Event;
+   PFILE_OBJECT    FileObject;
+   LONG            NameBufferOffset;
+   UCHAR           CustomDataBuffer[1];
 } TARGET_DEVICE_CUSTOM_NOTIFICATION, * PTARGET_DEVICE_CUSTOM_NOTIFICATION;
 
-typedef struct _TARGET_DEVICE_REMOVAL_NOTIFICATION {
-    USHORT          Version;
-    USHORT          Size;
-    GUID            Event;
-    PFILE_OBJECT    FileObject;
-} TARGET_DEVICE_REMOVAL_NOTIFICATION, * PTARGET_DEVICE_REMOVAL_NOTIFICATION;
+typedef struct _TARGET_DEVICE_REMOVAL_NOTIFICATION{
+   USHORT          Version;
+   USHORT          Size;
+   GUID            Event;
+   PFILE_OBJECT    FileObject;
+}TARGET_DEVICE_REMOVAL_NOTIFICATION, * PTARGET_DEVICE_REMOVAL_NOTIFICATION;
 
 typedef struct _SET_POWER_SETTING_VALUE{
-    ULONG                   Version;
-    GUID                    Guid;
-    SYSTEM_POWER_CONDITION  PowerCondition;
-    ULONG                   DataLength;
-    UCHAR*                  Data;
-} SET_POWER_SETTING_VALUE, * PSET_POWER_SETTING_VALUE;
+   ULONG                   Version;
+   GUID                    Guid;
+   SYSTEM_POWER_CONDITION  PowerCondition;
+   ULONG                   DataLength;
+   UCHAR*                  Data;
+}SET_POWER_SETTING_VALUE, * PSET_POWER_SETTING_VALUE;
 
 typedef struct _POOL_CREATE_EXTENDED_PARAMS{
-    ULONG   Version;
+   ULONG   Version;
 }POOL_CREATE_EXTENDED_PARAMS, * PPOOL_CREATE_EXTENDED_PARAMS;
 
+//resume cleanup here
 
 typedef enum _POOL_EXTENDED_PARAMETER_TYPE {
     PoolExtendedParameterInvalidType = 0,
@@ -1787,13 +1787,13 @@ typedef struct _IO_STACK_LOCATION {
   PVOID                  Context;
 } IO_STACK_LOCATION, *PIO_STACK_LOCATION;
 
-typedef struct _IO_STATUS_BLOCK64 {
-  union {
-    LOUSTATUS Status;
-    PVOID64  Pointer;
-  } DUMMYUNIONNAME;
-  ULONG64 Information;
-} IO_STATUS_BLOCK64;
+typedef struct _IO_STATUS_BLOCK64{
+   union{
+      LOUSTATUS   Status;
+      PVOID       Pointer;
+   };
+   ULONG_PTR      Information;
+}IO_STATUS_BLOCK64, * PIO_STATUS_BLOCK64;
 
 typedef struct _IRP {
     CSHORT                    Type;

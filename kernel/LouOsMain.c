@@ -362,9 +362,9 @@ void LouOsKrnlStart(
 
     LouPrint("Successful Boot\n");
     
-    sleep(2000);
+    //sleep(2000);
     
-    LouKeSystemShutdown(ShutdownReboot);
+    //LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
 

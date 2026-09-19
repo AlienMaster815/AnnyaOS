@@ -6,12 +6,31 @@
 
 struct _LOUSINE_DMA_DEVICE;
 
+typedef struct _LOUSINE_SCATTER_DMA_TRANSFER{
+    SIZE        TransferCount;
+    struct{
+        UINTPTR DmaAddress;
+        SIZE    DmaSize;
+    }           Transfers[];
+}LOUSINE_SCATTER_DMA_TRANSFER, * PLOUSINE_SCATTER_DMA_TRANSFER;
+
+typedef enum{
+    LOUSINE_DMA_TRANSFER_TYPE_STANDARD = 0,
+    LOUSINE_DMA_TRANSFER_TYPE_SCATTERED,
+}LOUSINE_DMA_TRANSFER_TYPE;
+
 typedef struct _LOUSINE_DMA_TRANSFER{
-    struct _LOUSINE_DMA_DEVICE* DmaDevice;
-    ATOMIC_BOOLEAN              DmaDone;
-    PVOID                       PrivateData;
-    UINTPTR                     DmaAddress; 
-    SIZE                        DmaSize;
+    struct _LOUSINE_DMA_DEVICE*         DmaDevice;
+    ATOMIC_BOOLEAN                      DmaDone;
+    PVOID                               PrivateData;
+    LOUSINE_DMA_TRANSFER_TYPE           Type;
+    union{
+        struct{
+            UINTPTR                     DmaAddress; 
+            SIZE                        DmaSize;
+        }                               StandardTransfer;
+        PLOUSINE_SCATTER_DMA_TRANSFER   ScatteredTransfer;
+    };
 }LOUSINE_DMA_TRANSFER, * PLOUSINE_DMA_TRANSFER;
 
 typedef struct _LOUSINE_DMA_DEVICE{

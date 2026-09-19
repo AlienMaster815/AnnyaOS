@@ -237,7 +237,7 @@ typedef struct _IO_STATUS_BLOCK {
         PVOID       Pointer;
     };
     ULONG_PTR       Information;
-} IO_STATUS_BLOCK,*  PIO_STATUS_BLOCK;
+}STATUS_BLOCK, * PSTATUS_BLOCK, IO_STATUS_BLOCK,*  PIO_STATUS_BLOCK;
 
 struct _FILE_OBJECT;
 

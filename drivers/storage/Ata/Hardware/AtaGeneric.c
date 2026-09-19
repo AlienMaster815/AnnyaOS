@@ -34,7 +34,28 @@ LOUSTATUS AtaGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevic
     }
     return STATUS_SUCCESS;
 }
-    
+
+static void InitializeGenericAtaSgElement(
+    PLOUSINE_DMA_TRANSFER   DmaTransfer,
+    PATA_PRDT_ENTRY*        AtaSg         
+){
+    PLOUSINE_DMA_DEVICE DmaDevice = DmaTransfer->DmaDevice;
+    PATA_PRDT_ENTRY     NewPrdEntry;
+    SIZE                TransferCount = 1;
+    if(DmaTransfer->Type == LOUSINE_DMA_TRANSFER_TYPE_SCATTERED){
+        LouPrint("ATA.SYS:InitializeGenericAtaSgElement()\n");
+        while(1);
+    }
+
+    NewPrdEntry = (PATA_PRDT_ENTRY)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, sizeof(ATA_PRDT_ENTRY), MAX(GET_ALIGNMENT(ATA_PRDT_ENTRY) , ATA_PRDT_ALIGNMENT));
+    NewPrdEntry->DmaAddress = DmaTransfer->StandardTransfer.DmaAddress;
+    NewPrdEntry->DmaSize = DmaTransfer->StandardTransfer.DmaSize;
+    if(NewPrdEntry->DmaSize == (64 * KILOBYTE)){
+        NewPrdEntry->DmaSize = 0;
+    }
+    NewPrdEntry->Edt = ATA_PRDT_EDT_VALUE;
+    *AtaSg = (PATA_PRDT_ENTRY)(UINT8*)NewPrdEntry;
+}
 
 LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
@@ -42,22 +63,14 @@ LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PA
         return STATUS_SUCCESS;
     }
     PLOUSINE_DMA_TRANSFER DmaTransfer;
-    PLOUSINE_DMA_DEVICE DmaDevice;
     PATA_PRDT_ENTRY NewPrdEntry;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
         DmaTransfer = CommandPacket->DmaDataOut;
     }else{
         DmaTransfer = CommandPacket->DmaDataIn;
     }
-    DmaDevice = DmaTransfer->DmaDevice;
-    NewPrdEntry = (PATA_PRDT_ENTRY)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, sizeof(ATA_PRDT_ENTRY), MAX(GET_ALIGNMENT(ATA_PRDT_ENTRY) , ATA_PRDT_ALIGNMENT));
-    NewPrdEntry->DmaAddress = DmaTransfer->DmaAddress;
-    NewPrdEntry->DmaSize = DmaTransfer->DmaSize;
-    if(NewPrdEntry->DmaSize == (64 * KILOBYTE)){
-        NewPrdEntry->DmaSize = 0;
-    }
-    NewPrdEntry->Edt = ATA_PRDT_EDT_VALUE;
-    DmaTransfer->PrivateData = (PVOID)(UINT8*)NewPrdEntry;
+    InitializeGenericAtaSgElement(DmaTransfer, &NewPrdEntry);
+    DmaTransfer->PrivateData = NewPrdEntry;
     return STATUS_SUCCESS;
 }
     
