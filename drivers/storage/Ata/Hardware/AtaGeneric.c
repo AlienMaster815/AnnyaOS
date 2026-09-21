@@ -215,6 +215,7 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
 }
 
 static LOUSINE_DMA_DEVICE PciIdeBusMasterDevice = {
+    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
     .MaxScatterCount = 8320,
     .AllocatorData = {
         .DmaLimit = 32,

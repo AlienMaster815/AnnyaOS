@@ -201,6 +201,8 @@ void AhciFillCommandSlot(
     CmdSlot[Slot].Ctbau = (CommandTable >> 32) & UINT32_MAX;
 }
 
+
+
 LOUSTATUS AhciGenericPortDevicePrepCommand(
     PATA_PORT_DEVICE_OBJECT PortDevice,
     PATA_COMMAND_PACKET     CommandPacket
@@ -352,6 +354,10 @@ LOUSTATUS AhciGenericPortDeviceStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
     ReciveFisSize = AHCI_RECIVE_FIS_SIZE;
 
     PrivateData->DmaData = (UINTPTR)LouKeDmaDeviceAllocateDmaMemory(&PrivateData->DmaDevice, DmaSize, KILOBYTE);
+    if(!PrivateData->DmaData){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    
     RequestPhysicalAddress(PrivateData->DmaData, &PrivateData->DmaDataDma);
     DmaData = PrivateData->DmaData;
     DmaDataDma = PrivateData->DmaDataDma;
@@ -1789,6 +1795,7 @@ LOUSTATUS AddAhciDevice(
         PrivateAhciData->BoardInfo.AhciFlags |= AHCI_FLAG_32BIT_ONLY;
         PrivateAhciData->DmaDevice.AllocatorData.DmaLimit = 32;        
     }
+    PrivateAhciData->DmaDevice.DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED;
     PrivateAhciData->DmaDevice.MaxScatterCount = AHCI_MAX_SCATTER_GATHERS;
     PrivateAhciData->DmaDevice.AllocatorData.DmaThreshold = 4 * MEGABYTE;
     
