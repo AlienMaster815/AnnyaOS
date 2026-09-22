@@ -314,13 +314,13 @@ ACPI_STATUS AcpiOsReadPciConfiguration(
 
     switch(Width){
         case 8:
-            *Value = PciHalReadUint8(PDEV, Reg);
+            *Value = PDEV ? PciHalReadUint8(PDEV, Reg) : UINT8_MAX;
             break;
         case 16:
-            *Value = PciHalReadUint16(PDEV, Reg);
+            *Value = PDEV ? PciHalReadUint16(PDEV, Reg) : UINT16_MAX;
             break;
         case 32:
-            *Value = PciHalReadUint32(PDEV, Reg);
+            *Value = PDEV ? PciHalReadUint32(PDEV, Reg) : UINT32_MAX;
             break;
         default:
             return AE_BAD_PARAMETER;
@@ -342,6 +342,10 @@ ACPI_STATUS AcpiOsWritePciConfiguration(
         PciId->Device,
         PciId->Function
     );
+
+    if(!PDEV){
+        return AE_OK;
+    }
 
     switch(Width){
         case 8:

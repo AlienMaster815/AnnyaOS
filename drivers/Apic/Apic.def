@@ -55,3 +55,4 @@ EXPORTS
     ApciHalStopApicTimerEvents
     ApicIpiHalSendIpiToCpu
     ApicHalConfigureYeildExecution
+    ApicHalMaskIoApicRedirectionEntry

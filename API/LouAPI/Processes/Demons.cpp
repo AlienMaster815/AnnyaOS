@@ -90,7 +90,6 @@ LouKeCreateDeferedDemonEx(
         AfinityMask,
         UnblockTime
     );
-
     if(Status != STATUS_SUCCESS){
         LouPrint("LouKeCreateDeferedDemonEx() Unable To Create Thread\n");
         return 0x00;
@@ -102,6 +101,7 @@ LouKeCreateDeferedDemonEx(
         LouPrint("LouKeCreateDeferedDemonEx() Unable To Get Kernel Process Handle\n");
         return 0x00;
     }
+
     INTEGER Processors = GetNPROC();
     for(INTEGER i = 0 ; i < Processors; i++){
         if(IS_PROCESSOR_AFFILIATED(NewThread->AfinityBitmap, i)){

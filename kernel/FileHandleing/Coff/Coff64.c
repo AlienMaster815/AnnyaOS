@@ -525,7 +525,8 @@ LOUSTATUS ConfigureImportTables(
 
 void LouKeLibTraceInitializeLibrarary(
     UINT64      LibraryBase,
-    UINT64      LibrarySize
+    UINT64      LibrarySize,
+    PCHAR       ModID
 );
 
 LOUSTATUS LouKeLoadCoffImage64(
@@ -598,11 +599,6 @@ LOUSTATUS LouKeLoadCoffImage64(
         LouPrint("Finished Applying Relocations\n");
     }
 
-    LouKeLibTraceInitializeLibrarary(
-        (UINT64)CfiObject->LoadedAddress,
-        ISize
-    );
-
     Status = ConfigureConfigurationStructure(CfiObject);
     if(Status != STATUS_SUCCESS){
         return Status;
@@ -612,6 +608,13 @@ LOUSTATUS LouKeLoadCoffImage64(
     if(Status != STATUS_SUCCESS){
         return Status;
     }
+
+    LouKeLibTraceInitializeLibrarary(
+        (UINT64)CfiObject->LoadedAddress,
+        ISize,
+        CfiObject->FormalName
+    );
+
 
     UINT64* ModDependencies = 0;
     Status = ConfigureImportTables(CfiObject, &ModDependencies);

@@ -622,6 +622,9 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
             &GsiCount
         );
         PerIoApicData[i].ApicGsiCount = (UINT8)GsiCount;
+        for(SIZE tIoApicEntry = 0 ; tIoApicEntry < GsiCount; tIoApicEntry++){
+            ApicHalMaskIoApicRedirectionEntry(&PerIoApicData[i].ApicDeviceObject, tIoApicEntry, true);
+        }
 
         PerIoApicData[i].PinVectorData = LouKeMallocArray(PER_IO_APIC_PIN_DATA, GsiCount, KERNEL_GENERIC_MEMORY);
         if(!PerIoApicData[i].PinVectorData){

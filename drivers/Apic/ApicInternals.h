@@ -329,6 +329,8 @@ DRIVER_EXPORT LOUSTATUS ApicHalInitializeIsaVectorToIoApicRedirection(OPAQUE_PTR
 DRIVER_EXPORT LOUSTATUS ApicHalInitializeVectorToIoApicRedirection(OPAQUE_PTR VectorObject, UINT8 GsiVector, IO_APIC_TRIGGER_MODE TriggerMode, IO_APIC_PIN_POLARITY PinPolarity);
 DRIVER_EXPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu);
 
+DRIVER_EXPORT LOUSTATUS ApicHalMaskIoApicRedirectionEntry(PAPIC_DEVICE_OBJECT IoApic, UINT8 Entry, BOOLEAN Mask);
+
 //TODO: 
 
 //if ESR bit 4 is set then a redirectable IPI with lowest prioirty 

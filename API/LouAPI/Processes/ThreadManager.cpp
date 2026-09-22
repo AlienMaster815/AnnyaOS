@@ -769,8 +769,10 @@ void TsmThreadSchedualManagerObject::TsmHandleThreadWorkQueueData(){
 }
 
 void TsmThreadSchedualManagerObject::TsmAssignThreadWorkQueueData(PTHREAD_RING NewThreadRing){
+    
     LouKIRQL Irql;
     LouKeAcquireInterruptLock(&this->ThreadWorkQueueLock, &Irql);
+
     PGENERIC_THREAD_DATA Thread = NewThreadRing->ThreadData;
     LouKeAcquireReference(&Thread->Reference);
     PTHREAD_RING CurrentThreadRing = this->ThreadWorkQueue[Thread->ThreadPriority];
@@ -791,8 +793,10 @@ void TsmThreadSchedualManagerObject::TsmAssignThreadWorkQueueData(PTHREAD_RING N
     RequiredRing->Peers.NextHeader         = (PListHeader)NewThreadRing;
 
     _THREAD_ASSIGNMENT_DONE:
+
     LouKeSetAtomicBoolean(&this->ThreadWorkQueueNeedsWork, 1);
     LouKeReleaseInterruptLock(&this->ThreadWorkQueueLock, &Irql);
+
 }
 
 PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){

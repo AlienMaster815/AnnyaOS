@@ -73,6 +73,8 @@ ApicHalGetIoApicVersionRegisterFromObject(
     return STATUS_SUCCESS;
 }
 
+
+
 DRIVER_EXPORT
 LOUSTATUS 
 ApicHalGetIoApicArbitrationIdRegisterFromObject(
@@ -163,6 +165,7 @@ ApicHalGetIoApicRedirectionEntryFromObject(
     return STATUS_SUCCESS;
 }
 
+
 DRIVER_EXPORT
 LOUSTATUS 
 ApicHalSetIoApicRedirectionEntryFromObjectEx(
@@ -227,6 +230,22 @@ ApicHalSetIoApicRedirectionEntryFromObject(
     }
     return ApicHalSetIoApicRedirectionEntryFromObjectEx(ApicDeviceObject, Entry, Register);
 }
+
+LOUSTATUS ApicHalMaskIoApicRedirectionEntry(PAPIC_DEVICE_OBJECT IoApic, UINT8 Entry, BOOLEAN Mask){
+    return ApicHalSetIoApicRedirectionEntryFromObject(
+        IoApic, 
+        Entry,
+        0x00, 
+        &Mask,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00
+    );
+}
+
+
 
 DRIVER_EXPORT
 LOUSTATUS

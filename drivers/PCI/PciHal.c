@@ -91,7 +91,7 @@ typedef struct _PCI_DISPATCH_TEMPLATE{
 }PCI_DISPATCH_TEMPLATE, * PPCI_DISPATCH_TEMPLATE;
 
 static const PCI_DISPATCH_TEMPLATE Dispatch[PciTotalDispatch]= {
-    {
+    [PciLegacyDispatch] = {
         //Basic Legacy
         .PciHalReadUint32 = LegacyPciReadUint32,
         .PciHalWriteUint32 = LegacyPciWriteUint32,
@@ -175,7 +175,7 @@ static const PCI_DISPATCH_TEMPLATE Dispatch[PciTotalDispatch]= {
         .PciHalCardBusDeviceGetSubsystemDeviceId = LegacyPciCardBusGetSubsystemDeviceId,
         .PciHalCardBusDeviceGet16BitPcCardLegacyModeBaseAddress = LegacyPciCardBusGet16BitPcCardLegacyModeBaseAddress,
     }, 
-    {
+    [PciNativeDispatch] = {
         //Basic Native
         .PciHalReadUint32 = NativePciReadUint32,
         .PciHalWriteUint32 = NativePciWriteUint32,
