@@ -209,7 +209,6 @@ LOUSTATUS AhciGenericPortDevicePrepCommand(
 ){  
     UINT8 Slot;
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
-    UINT32 Signature = PrivateData->GenericPort->PxSIG;
     BOOLEAN AtapiCommand = (CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD) ? true : false;
     const UINT32 CommandFisLength = 5;
     LOUSTATUS Status = AhciGenericGetFreeCommandSlot(PrivateData, &Slot);    
@@ -319,7 +318,7 @@ static LOUSTATUS AhciStartPort(PATA_PORT_DEVICE_OBJECT PortDevice){
 
     //TODO check for a delay
     PrivateData->StartCommandEngine(PortDevice);
-
+    PrivateData->GenericPort->PxIE = UINT32_MAX;
     //TODO:EM and SW
     return STATUS_SUCCESS;
 }
@@ -1564,16 +1563,16 @@ void AhciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost){
     }       
     
 
-    //TmpControl = Ghc->GlobalHostControl;
-    //TmpControl |= (1 << 1);
-    //Ghc->GlobalHostControl = TmpControl;
-    //TmpControl = Ghc->GlobalHostControl;
-    //if(TmpControl & (1 << 1)){
-    //    LouPrint("Interrupts Are Now Active On The Host Controller\n");
-    //}
-    //else{
-    //    LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
-    //}
+    TmpControl = Ghc->GlobalHostControl;
+    TmpControl |= (1 << 1);
+    Ghc->GlobalHostControl = TmpControl;
+    TmpControl = Ghc->GlobalHostControl;
+    if(TmpControl & (1 << 1)){
+        LouPrint("Interrupts Are Now Active On The Host Controller\n");
+    }
+    else{
+        LouPrint("Interrupts Were Unable Activate On The Host Controller\n");
+    }
 }
 
 
@@ -1602,7 +1601,49 @@ void AhciPciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost){
     AhciInitializeController(AtaHost);
 }
 
+static void AhciInitializeInterrupts(PPCI_DEVICE_OBJECT PDEV, SIZE PortCount, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
+    
+    if(PrivateData->BoardInfo.AhciFlags & AHCI_FLAG_NO_MSI){
+        PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY);
+    }
 
+    PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY | PCI_IRQ_USE_MSI | PCI_IRQ_USE_MSI_X);
+}
+
+LOUSTATUS AhciInterruptHandler(UINT64 LirData){
+    PATA_HOST_DEVICE_OBJECT AtaHost = (PATA_HOST_DEVICE_OBJECT)(UINT8*)LirData;
+    SIZE i;
+    PATA_PORT_DEVICE_OBJECT TmpPort;
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData;
+    UINT32 InterruptsHandled = 0;
+    ForEachAtaPort(AtaHost, TmpPort, i){
+        PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)TmpPort->PortPrivateData;
+        UINT32 PxIS = PrivateData->GenericPort->PxIS;
+        if(!PxIS){
+            continue;
+        }
+
+
+        if(TmpPort->CurrentDmaFence){
+            LouKeDmaSignalDmaFence(TmpPort->CurrentDmaFence);
+        }
+        PrivateData->GenericPort->PxIS = UINT32_MAX;
+    }
+
+    PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+    PrivateData->GenericHostController->InterruptStatus = UINT32_MAX;
+    return STATUS_SUCCESS;
+}
+
+static void AhciSetupInterruptHandler(PATA_HOST_DEVICE_OBJECT AtaHost){
+    PciHalConnectIrqHandler(
+        AtaHost->PDEV,
+        (OPAQUE_PTR)AhciInterruptHandler,
+        LirRoutine,
+        (UINT64)(UINTPTR)(UINT8*)AtaHost,
+        0
+    );
+}
 
 LOUSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
@@ -1740,9 +1781,6 @@ LOUSTATUS AddAhciDevice(
 
 
     memcpy(&PrivateAhciData->BoardInfo, BoardInformation, sizeof(PrivateAhciData->BoardInfo));
-    for(size_t Slot = 0 ; Slot < 32; Slot++){
-        LouKeInitializeEventTimeOut(&PrivateAhciData->CommandCompletion[Slot], 5000); //10 second timeout
-    }
 
     //Nvidia MCP65 Chip Revisions 0xA1 and 0xA2 do not support
     //MSI so we should take note of this however the losuine
@@ -1827,9 +1865,9 @@ LOUSTATUS AddAhciDevice(
 
     AcerSa5_271WorkAround(PrivateAhciData, PDEV);
 
-    //AhciInitializeInterrupts(PDEV, PortCount, PrivateAhciData);
+    AhciInitializeInterrupts(PDEV, PortCount, PrivateAhciData);
 
-    //PrivateAhciData->InterruptRequestVector = PciHalGetIrqVector(PDEV, 0);
+    PrivateAhciData->InterruptRequestVector = PciHalGetIrqVector(PDEV, 0);
 
     UNUSED UINT32 TmpCap = (PrivateAhciData->CapOveride ? PrivateAhciData->CapOveride : Ghc->Capabilities);
 
@@ -1870,7 +1908,7 @@ LOUSTATUS AddAhciDevice(
     //2107
     //2110
 
-    //AhciSetupInterruptHandler(AtaHost);
+    AhciSetupInterruptHandler(AtaHost);
 
     LouPrint("AHCI.SYS:Adding AHCI Device To  ATA Core\n");    
 

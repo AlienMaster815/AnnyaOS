@@ -57,7 +57,7 @@ _DMA_ALLOCATION_ERROR:
     return 0x00;
 }
 
-void LouKeDestroyDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
+KERNEL_EXPORT void LouKeDestroyDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
     PLOUSINE_DMA_DEVICE DmaDevice = Transfer->DmaDevice;
     LONG i = 0; 
     switch(Transfer->Type){
@@ -73,5 +73,54 @@ void LouKeDestroyDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
         default:
             LouKeFree(Transfer);
             break;
+    }
+}
+
+KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer, int Wait, bool Poll){
+    if(!Transfer){
+        return STATUS_INVALID_PARAMETER;
+    }
+    if(Poll){
+        LouKeSetAtomic(&Transfer->DmaFence.Wait, Wait);
+    }else{
+        LouKeInitializeEventTimeOut(&Transfer->DmaFence.DoneEvent, (SIZE)Wait);
+    }
+    LouKeSetAtomicBoolean(&Transfer->DmaFence.Poll, Poll);
+    return STATUS_SUCCESS;
+}
+
+uint64_t read_tsc();
+uint64_t GetTscMaster();
+
+KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
+    BOOLEAN Poll = LouKeGetAtomicBoolean(&Transfer->DmaFence.Poll);
+    SIZE    CurrentTSC;
+    SIZE    TscFrequency;
+    SIZE    Expiration;
+    SIZE    Wait = (SIZE)LouKeGetAtomic(&Transfer->DmaFence.Wait);
+    BOOLEAN TransferDone;
+    if(Poll){
+        CurrentTSC = read_tsc();
+        TscFrequency = GetTscMaster() / 1000;
+        Expiration = CurrentTSC + (Wait * TscFrequency);
+        while(CurrentTSC <= Expiration){
+            CurrentTSC = read_tsc();
+            TransferDone = LouKeGetAtomicBoolean(&Transfer->DmaDone);
+            if(TransferDone){
+                return STATUS_SUCCESS;
+            }
+        }
+        return STATUS_TIMEOUT;
+    }
+    return LouKeWaitForEvent(&Transfer->DmaFence.DoneEvent);
+}
+
+KERNEL_EXPORT
+void LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence){
+    PLOUSINE_DMA_TRANSFER Transfer = CONTAINER_OF(Fence, LOUSINE_DMA_TRANSFER, DmaFence);
+    BOOLEAN Poll = LouKeGetAtomicBoolean(&Transfer->DmaFence.Poll);
+    LouKeSetAtomicBoolean(&Transfer->DmaDone, true);
+    if(!Poll){
+        LouKeSignalEvent(&Transfer->DmaFence.DoneEvent);
     }
 }

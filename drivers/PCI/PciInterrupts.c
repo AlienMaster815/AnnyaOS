@@ -40,11 +40,11 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
         return STATUS_UNSUCCESSFUL;
     }
 
-    //if(PciHalPciSupportsMsix(PDEV)){
+    //if(PciHalPciSupportsMsix(PDEV) && (Flags & PCI_IRQ_USE_MSI_X)){
     //    LouPrint("PCI.SYS:Allocating MSI-X Vectors\n");
     //    while(1);
     //}else 
-    if(PciHalPciSupportsMsi(PDEV)){
+    /*if(PciHalPciSupportsMsi(PDEV) && (Flags & PCI_IRQ_USE_MSI)){
         UINT32 Grouped;
         UINT32 HardwareLimitation = MIN(32, PciMsiGetMultiMessageCount(PDEV));
         LouPrint("PCI Hardware Limitation:%h\n", HardwareLimitation);
@@ -120,7 +120,8 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
             return STATUS_UNSUCCESSFUL;
         }
         PciHalSetCommand(PDEV, PciHalGetCommand(PDEV) | (1 << 10));
-    }else{ 
+    }else{ */
+    if(Flags & PCI_IRQ_USE_LEGACY){
         PciHalDbgPrint("PCI.SYS:Allocating INT-X Vectors\n");
         NewVectors = LouKeMallocArray(OPAQUE_PTR, 2, KERNEL_GENERIC_MEMORY);
         NewVectors[0] = (UINT8*)(UINTPTR)1;
@@ -152,9 +153,11 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
             while(1);
             return Status;
         }
+        PDEV->InterruptVectors = NewVectors;
+        return STATUS_SUCCESS;
     }
-    PDEV->InterruptVectors = NewVectors;
-    return STATUS_SUCCESS;
+    LouPrint("PciHalAllocatePciIrqVectors():ERROR Unable To Allocate Vectors\n");
+    while(1);
 }
 
 DRIVER_EXPORT void PciHalFreeIrqVectors(PPCI_DEVICE_OBJECT PDEV){

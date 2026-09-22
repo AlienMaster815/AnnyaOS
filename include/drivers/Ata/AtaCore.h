@@ -337,6 +337,8 @@ typedef struct _ATA_ENDPOINT_DEVICE_OBJECT{
 
 #define ATA_PORT_FLAGS_NO_IRQS  (1 << 0)
 
+struct _LOUSINE_DMA_FENCE;
+
 typedef struct _ATA_PORT_DEVICE_OBJECT{
     SIZE                            PortNumber;
     mutex_t*                        ChannelLock;
@@ -348,6 +350,7 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
     semaphore_t                     PrepLock;
     PVOID                           PortPrivateData;
     PTHREAD                         CommandWorkerThread;
+    struct _LOUSINE_DMA_FENCE*      CurrentDmaFence;
 }ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;
 
 #define ATA_COMMAND_PACKET_FLAGS_DMA        (1UL << 0)

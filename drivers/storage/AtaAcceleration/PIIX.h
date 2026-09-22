@@ -49,8 +49,8 @@
 
 typedef struct _PIIX_HOST_PRIVATE_DATA{
     PPCI_DEVICE_OBJECT      PDEV;
-    KERNEL_EVENT_OBJECT     PrimaryEvent;
-    KERNEL_EVENT_OBJECT     SecondaryEvent;
+    //KERNEL_EVENT_OBJECT     PrimaryEvent;
+    //KERNEL_EVENT_OBJECT     SecondaryEvent;
     mutex_t                 PrimaryDmaLock;
     mutex_t                 SecondaryDmaLock;
     UINT32                  Bmiba;

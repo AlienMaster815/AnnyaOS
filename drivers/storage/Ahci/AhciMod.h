@@ -87,7 +87,6 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     BOOLEAN                                 AtapiDevice;
     BOOLEAN                                 DeviceAttached;
     UINT32                                  CommandSlot;
-    KERNEL_EVENT_OBJECT                     CommandCompletion[32];
 }AHCI_DRIVER_PRIVATE_DATA, * PAHCI_DRIVER_PRIVATE_DATA;
 
 

@@ -19,10 +19,17 @@ typedef enum{
     LOUSINE_DMA_TRANSFER_TYPE_SCATTERED,
 }LOUSINE_DMA_TRANSFER_TYPE;
 
+typedef struct _LOUSINE_DMA_FENCE{
+    atomic_t            Wait;
+    ATOMIC_BOOLEAN      Poll;    
+    KERNEL_EVENT_OBJECT DoneEvent;
+}LOUSINE_DMA_FENCE, * PLOUSINE_DMA_FENCE;
+
 typedef struct _LOUSINE_DMA_TRANSFER{
     struct _LOUSINE_DMA_DEVICE*         DmaDevice;
     ATOMIC_BOOLEAN                      DmaDone;
     PVOID                               PrivateData;
+    LOUSINE_DMA_FENCE                   DmaFence;
     LOUSINE_DMA_TRANSFER_TYPE           Type;
     union{
         struct{
@@ -58,6 +65,13 @@ KERNEL_EXPORT void LouKeDmaFreeGenericDmaMemory(PVOID Data, ULONG Limit, ULONG T
 
 KERNEL_EXPORT PVOID LouKeDmaDeviceAllocateDmaMemory(PLOUSINE_DMA_DEVICE DmaDevice, SIZE Size, SIZE Alignment);
 KERNEL_EXPORT void LouKeDmaDeviceFreeDmaMemory(PLOUSINE_DMA_DEVICE DmaDevice, PVOID Data);
+
+
+KERNEL_EXPORT void LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence);
+KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer);
+KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer, int Wait, bool Poll);
+KERNEL_EXPORT void LouKeDestroyDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer);
+KERNEL_EXPORT PLOUSINE_DMA_TRANSFER LouKeCreateDmaTransfer(PLOUSINE_DMA_DEVICE DmaDevice, SIZE AllocationSize, SIZE LowestAlignment);
 
 #ifdef __cplusplus
 }

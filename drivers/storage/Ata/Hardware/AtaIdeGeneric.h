@@ -47,19 +47,19 @@ typedef struct PACKED _ATA_PRDT_ENTRY{
 
 typedef struct _ATA_GENERIC_PRIVATE_DATA{
     struct {
-        UINT16  Data;
-        UINT16  ErrFeat;
-        UINT16  SectorCount;
-        UINT16  LbaLow;
-        UINT16  LbaMid;
-        UINT16  LbaHigh;
-        UINT16  Device;
-        UINT16  CmdSts;
-        UINT16  AltDevSts;
-        UINT16  BusMasterCmd;
-        UINT16  BusMasterSts;
-        UINT16  BusMasterPrd;
-    }           Ports;
+        UINT16              Data;
+        UINT16              ErrFeat;
+        UINT16              SectorCount;
+        UINT16              LbaLow;
+        UINT16              LbaMid;
+        UINT16              LbaHigh;
+        UINT16              Device;
+        UINT16              CmdSts;
+        UINT16              AltDevSts;
+        UINT16              BusMasterCmd;
+        UINT16              BusMasterSts;
+        UINT16              BusMasterPrd;
+    }                       Ports;
 }ATA_GENERIC_PRIVATE_DATA, * PATA_GENERIC_PRIVATE_DATA;
 
 #endif

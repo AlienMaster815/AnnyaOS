@@ -264,3 +264,8 @@ EXPORTS
     LouKeMmioWaitForCondition
     LouKeMmioWaitTillClear
     LouKeMmioWaitTillSet
+    LouKeDmaSignalDmaFence
+    LouKeFenceDmaTransfer
+    LouKeSetupDmaTransferFence
+    LouKeDestroyDmaTransfer
+    LouKeCreateDmaTransfer
