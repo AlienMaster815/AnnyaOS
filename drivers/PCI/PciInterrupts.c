@@ -3,16 +3,27 @@
 //Developer Notes:
 
 #include "Pci.h"
+#include "PciMsi.h"
 
 KERNEL_EXPORT uint8_t LouKeGetPciInterruptLineFromPin(PPCI_DEVICE_OBJECT PDEV);
 
 
 static BOOLEAN PciHalPciSupportsMsix(PPCI_DEVICE_OBJECT PDEV){
-    return (PciHalGetCapabilitiesPointer(PDEV, PCI_CAPABILITY_MSI, false)) ? true : false; 
+    return (PciHalGetCapabilitiesPointer(PDEV, PCI_CAPABILITY_MSI_X, false)) ? true : false; 
 }
 
 static BOOLEAN PciHalPciSupportsMsi(PPCI_DEVICE_OBJECT PDEV){
     return (PciHalGetCapabilitiesPointer(PDEV, PCI_CAPABILITY_MSI, false)) ? true : false; 
+}
+
+void PciHalDisableMsiInterrupts(PPCI_DEVICE_OBJECT PDEV){
+    UINT16 Control;
+    if(PciMsixGetMessageControl(PDEV, &Control)){
+        PciMsixSetMessageControl(PDEV, Control & ~(PCI_MSIX_MSG_CTRL_MSIX_ENABLE));
+    }
+    if(PciMsiGetMessageControl(PDEV, &Control)){
+        PciMsiSetMessageControl(PDEV, Control & ~(PCI_MSI_MSG_CTRL_ENABLE));
+    }
 }
 
 static void InitializeRequestsAndGroupsToHardwareLimitation(

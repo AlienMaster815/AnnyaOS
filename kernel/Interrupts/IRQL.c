@@ -144,7 +144,7 @@ void LouKeRaiseIrql(
     LouKIRQL    Irql,
     LouKIRQL*   OldIrql
 ){
-    LouKIRQL tOldIrql = LouKeGetIrql();;
+    LouKIRQL tOldIrql = LouKeGetIrql();
     if(OldIrql){
         *OldIrql = tOldIrql;
     }

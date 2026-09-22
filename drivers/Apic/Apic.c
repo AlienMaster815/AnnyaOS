@@ -116,7 +116,9 @@ DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
     Ms = Ms ? Ms : 1;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount);
+    BOOLEAN TimerSetupMask = false;
+    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
+    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount * Ms);
 }
 
 static const APIC_TIMER_DIVIDE_CONFIG TimerConfigs[7] = {
@@ -505,7 +507,6 @@ LOUSTATUS ApicInitializeApicSubsystem(PAPIC_DEVICE_OBJECT ApicDeviceObject){
         ApicHalDbgPrint("APIC.SYS:ApicInitializeApicSubsystem():ERROR Apic Not Supported\n");
         return STATUS_NOT_SUPPORTED;
     }
-    DisablePic(); 
 
     UINT8* TableEnd = (UINT8*)MadtTable + MadtTable->MadtHeader.Length;
     UINT8* TmpMadtLocation = &MadtTable->DynamicMADTBuffer[0];
@@ -719,6 +720,8 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(UINT32* CpuIdOut
     LOUSTATUS Status;
     ApicHalDbgPrint("APIC.SYS:ApicInitializeAdvancedProgramableInterruptControllerAbstraction()\n");
 
+    DisablePic(); 
+
     UINT64 XapicBaseRegister = LouKeReadMsr(IA32_APIC_BASE_MSR_OFFSET);
     UINT64 ApicPhyAddress = XapicBaseRegister & 0x000FFFFFFFFFF000ULL;
     APIC_DEVICE_OBJECT ApicDeviceObject = {0};
@@ -733,7 +736,7 @@ ApicInitializeAdvancedProgramableInterruptControllerAbstraction(UINT32* CpuIdOut
     }else{
         ApicHalDbgPrint("APIC.SYS:LAPIC X1 Physical Address:%h\n", ApicPhyAddress);
         ApicDeviceObject.ApicObjectType = X1_LOCAL_APIC_OBJECT_TYPE;
-        ApicDeviceObject.X1ApicObject.ApicBase = (PVOID)LouKeMallocKbPageExVirt32(1, KERNEL_WRITEABLE_PAGE_UNCAHEABLE_PRESENT, ApicPhyAddress, true);
+        ApicDeviceObject.X1ApicObject.ApicBase = (PVOID)LouKeMallocKbPageExVirt32(1, KERNEL_DMA_MEMORY, ApicPhyAddress, true);
         if(!(XapicBaseRegister & IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT)){
             XapicBaseRegister |= IA32_APIC_BASE_MSR_XAPIC_ENABLE_BIT;
             LouKeWriteMsr(IA32_APIC_BASE_MSR_OFFSET, XapicBaseRegister);

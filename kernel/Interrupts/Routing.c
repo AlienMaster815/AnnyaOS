@@ -48,13 +48,12 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args){
     LouKIRQL Irql;
     LouKeSetIrqlNoFlagUpdate(HIGH_LEVEL, &Irql);
     uint64_t ContextHandle = 0x00;
-    
+
     ForEachLListEntry(TmpVectorObject, ProcessorVectorData, Peers){
 
         if(TmpVectorObject->SoftMasked){
             continue;
         }
-
         if(TmpVectorObject->NeedFlotationSave){
             SaveEverythingWithInterruptBuffer(&ContextHandle);
         }
@@ -74,7 +73,9 @@ void InterruptRouter(uint64_t Interrupt, uint64_t Args){
         }
     }
     LouKeSetIrqlNoFlagUpdate(Irql, 0x00);
+
     if(Interrupt >= 0x20){
         ApicHalSignalLocalApicEoi();
     }
+
 }

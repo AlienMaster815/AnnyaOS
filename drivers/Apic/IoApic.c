@@ -8,32 +8,30 @@ extern SIZE IoOverideObjectCount;
 #define IO_APIC_ID_OFFSET           0
 #define IO_APIC_VERSION_OFFSET      1
 #define IO_APIC_ARBITRATION_OFFSET  2
-#define IO_APIC_IRQWINDOW_OFFSET(x) (x * 2 + 0x10)
+#define IO_APIC_IRQWINDOW_OFFSET(x) ((x) * 2 + 0x10)
 
-static UINT32 ReadIoApicRegister(
-    PVOID ApicBase, 
-    UINT8 Register
+UINT32 ReadIoApicRegister(
+    PVOID  ApicBase, 
+    UINT32 Register
 ){
-    UINT32 volatile* IoApic = (UINT32 volatile*)ApicBase;
-    IoApic[0] = Register;
-    return IoApic[4];
+    WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase), Register);
+    return (UINT32)READ_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + 0x10));
 }
 
-static void WriteIoApicRegister(
+void WriteIoApicRegister(
     PVOID   ApicBase, 
-    UINT8   Register, 
+    UINT32  Register, 
     UINT32  Value
 ){
-    UINT32 volatile* IoApic = (UINT32 volatile*)ApicBase;
-    IoApic[0] = Register;
-    IoApic[4] = Value;
+    WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase), Register);
+    WRITE_REGISTER_ULONG((PULONG)(PVOID)((UINTPTR)ApicBase + 0x10), Value);
 }
 
 DRIVER_EXPORT
 LOUSTATUS 
 ApicHalGetIoApicIdRegisterFromObject(
     PAPIC_DEVICE_OBJECT ApicDeviceObject,
-    UINT32*             VersionOut
+    UINT32*             IdOut
 ){
     if(!ApicDeviceObject){
         return STATUS_INVALID_PARAMETER;
@@ -43,8 +41,8 @@ ApicHalGetIoApicIdRegisterFromObject(
         return STATUS_INVALID_PARAMETER;
     }
     UINT32 Register = ReadIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, IO_APIC_ID_OFFSET);
-    if(VersionOut){
-        *VersionOut = ((Register >> 24) & 0x0F);
+    if(IdOut){
+        *IdOut = ((Register >> 24) & 0xFF);
     }
     return STATUS_SUCCESS;
 }
@@ -90,7 +88,7 @@ ApicHalGetIoApicArbitrationIdRegisterFromObject(
     }
     UINT32 Register = ReadIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, IO_APIC_ARBITRATION_OFFSET);
     if(Id){
-        *Id = (Register >> 24) & 0x0F;
+        *Id = (Register >> 24) & 0xFF;
     }
     return STATUS_SUCCESS;
 }
@@ -109,9 +107,9 @@ ApicHalGetIoApicRedirectionEntryFromObjectEx(
         ApicHalDbgPrint("APIC.SYS:WARNING:Apic Device:%h Is Not An Io Apic In Io Apic Function:ApicHalGetIoApicRedirectionEntryFromObjectEx()", ApicDeviceObject);
         return STATUS_INVALID_PARAMETER;
     }  
-    UINT8 Offset = IO_APIC_IRQWINDOW_OFFSET(Entry);
+    UINT32 Offset = IO_APIC_IRQWINDOW_OFFSET((UINT32)Entry);
     *Out = (UINT64)ReadIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, Offset);
-    *Out |= (UINT64)ReadIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, Offset + 1) << 32;
+    *Out |= ((UINT64)ReadIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, Offset + 1) << 32);
     return STATUS_SUCCESS;
 }
 
@@ -157,7 +155,7 @@ ApicHalGetIoApicRedirectionEntryFromObject(
         *DestinationMode = (IO_APIC_DESTINATION_MODE)((Register >> 11) & 0x01);
     }
     if(DeliveryMode){
-        *DeliveryMode = (IO_APIC_DESTINATION_MODE)((Register >> 8) & 0x07);
+        *DeliveryMode = (IO_APIC_DELIVERY_MODE)((Register >> 8) & 0x07);
     }
     if(Vector){
         *Vector = Register & 0xFF;
@@ -180,7 +178,7 @@ ApicHalSetIoApicRedirectionEntryFromObjectEx(
         ApicHalDbgPrint("APIC.SYS:WARNING:Apic Device:%h Is Not An Io Apic In Io Apic Function:ApicHalSetIoApicRedirectionEntryFromObjectEx()", ApicDeviceObject);
         return STATUS_INVALID_PARAMETER;
     }  
-    UINT8 Offset = IO_APIC_IRQWINDOW_OFFSET(Entry);
+    UINT32 Offset = IO_APIC_IRQWINDOW_OFFSET((UINT32)Entry);
     WriteIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, Offset, In & UINT32_MAX);
     WriteIoApicRegister(ApicDeviceObject->IoApicObject.ApicBase, Offset + 1, (In >> 32) & UINT32_MAX);
     return STATUS_SUCCESS;
@@ -208,22 +206,22 @@ ApicHalSetIoApicRedirectionEntryFromObject(
         Register = (Register & ~(0xFFULL << 56)) | (((UINT64)*Destination & 0xFF) << 56);
     }
     if(Masked){
-        Register &= ~(1 << 16);
+        Register &= ~(1ULL << 16);
         if(*Masked){
-            Register |= (1 << 16);
+            Register |= (1ULL << 16);
         }
     }
     if(TriggerMode){
-        Register = (Register & ~(1 << 15)) | (((UINT32)*TriggerMode & 0x01) << 15); 
+        Register = (Register & ~(1ULL << 15)) | (((UINT64)*TriggerMode & 0x01) << 15); 
     }
     if(PinPolarity){
-        Register = (Register & ~(0x01 << 13)) | (((UINT32)*PinPolarity & 0x01) << 13);
+        Register = (Register & ~(0x01ULL << 13)) | (((UINT64)*PinPolarity & 0x01) << 13);
     }
     if(DestinationMode){
-        Register = (Register & ~(0x01 << 11)) | (((UINT32)*DestinationMode & 0x01) << 11);
+        Register = (Register & ~(0x01ULL << 11)) | (((UINT64)*DestinationMode & 0x01) << 11);
     }
     if(DeliveryMode){
-        Register = (Register & ~(0x07 << 8)) | (((UINT32)*DeliveryMode & 0x07) << 8);
+        Register = (Register & ~(0x07ULL << 8)) | (((UINT64)*DeliveryMode & 0x07) << 8);
     }
     if(Vector){
         Register = (Register & ~0xFF) | *Vector;
@@ -272,7 +270,7 @@ ApicHalInitializeVectorToIoApicRedirection(
         while(1);
         return Status;
     }
-    ULONG Destination = PerProcessorApicData[DestinationProc].ApicID;
+    UINT32 Destination = (UINT32)PerProcessorApicData[DestinationProc].ApicID;
     PAPIC_DEVICE_OBJECT ApicDeviceObject = 0x00;
     SIZE i;
     for(i = 0 ; i < IoApicCount; i++){
@@ -291,7 +289,7 @@ ApicHalInitializeVectorToIoApicRedirection(
     return ApicHalSetIoApicRedirectionEntryFromObject(
         ApicDeviceObject,
         GsiVector - PerIoApicData[i].ApicGsiBase,
-        &DestinationProc,
+        &Destination,
         &Masked,
         &TriggerMode,
         &PinPolarity,
