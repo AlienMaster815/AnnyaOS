@@ -18,7 +18,7 @@ void  SetWinIRQL(UINT8 Irql);
 void LocalApicSetTimer(bool On);
 
 
-LouKIRQL LouKeGetIrql(){
+KERNEL_EXPORT LouKIRQL LouKeGetIrql(){
     if(!GetGSBase()){
         return HIGH_LEVEL;
     }
@@ -73,7 +73,7 @@ void LouKeSetIrqlNoFlagUpdate(
 
 
 
-void LouKeSetIrql(
+KERNEL_EXPORT void LouKeSetIrql(
     LouKIRQL  NewIrql,
     LouKIRQL* OldIrql
 ){
@@ -90,49 +90,39 @@ void LouKeSetIrql(
     switch (NewIrql){
         case PASSIVE_LEVEL:{
             //sanity clear interrupts so nesting occours
-            asm("cli");
             SetWinIRQL((UINT8)PASSIVE_LEVEL);
+            asm("cli");
             asm("sti");
-            ApciHalStartApicTimerEvents();
             return;
         }
         case APC_LEVEL:{
             //sanity clear interrupts so nesting occours
-            asm("cli");
             SetWinIRQL((UINT8)APC_LEVEL);    
-            //asm("sti");
-            ApciHalStartApicTimerEvents();
+            asm("cli");
+            asm("sti");
             return;
         }
         case DISPATCH_LEVEL:{
             //sanity clear interrupts so nesting occours
-            asm("cli");
             SetWinIRQL((UINT8)DISPATCH_LEVEL);    
-            //asm("sti");
-            ApciHalStartApicTimerEvents();
+            asm("cli");
             return;
         }
         case DIRQL:{
             //sanity clear interrupts so nesting occours
-            asm("cli");
             SetWinIRQL((UINT8)DIRQL);    
-            //asm("sti");
-            ApciHalStartApicTimerEvents();
+            asm("cli");
             return;
         } 
         case CLOCK_LEVEL:{
             //sanity clear interrupts so nesting occours
-            ApciHalStopApicTimerEvents();
-            asm("cli");
             SetWinIRQL((UINT8)CLOCK_LEVEL);    
-            //asm("sti");
-            //ApciHalStartApicTimerEvents();
+            asm("cli");
             return;
         }
         case HIGH_LEVEL:{
-            ApciHalStopApicTimerEvents();
+            SetWinIRQL((UINT8)HIGH_LEVEL);
             asm("cli");
-            SetWinIRQL((UINT8)HIGH_LEVEL);    
             return;
         }
         default: // error case

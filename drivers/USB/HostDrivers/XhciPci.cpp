@@ -2,6 +2,31 @@
 
 #include "Xhci.h"
 
+LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
+    {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .GenericEntry = true},
+    {0},
+};
+
+LOUAPI 
+VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
+    LouPrint("XHCI.SYS::UnloadDriver()\n");
+    //we have nothing to unload
+    LouPrint("XHCI.SYS::UnloadDriver() STATUS_SUCCESS\n");
+}
+
+
+LOUSTATUS AddDevice(
+    PDRIVER_OBJECT DriverObject, 
+    struct _DEVICE_OBJECT* PlatformDevice
+){
+    LouPrint("XHCI.SYS::AddDevice()\n");
+
+
+    LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
+    //while(1);
+    return STATUS_SUCCESS;
+}
+
 LOUAPI
 LOUSTATUS DriverEntry(
     PDRIVER_OBJECT  DriverObject,
@@ -9,16 +34,15 @@ LOUSTATUS DriverEntry(
 ){
     LouPrint("XHCI.SYS::DriverEntry()\n");
 
-    //DriverObject->DriverExtension->AddDevice = AddDevice;
-    //DriverObject->DriverUnload = UnloadDriver;
+    DriverObject->DriverExtension->AddDevice = AddDevice;
+    DriverObject->DriverUnload = UnloadDriver;
 
-    //LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedXhciPciDevices);
-    //if(Status != STATUS_SUCCESS){
-    //    LouPrint("XHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
-    //}    
+    LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedXhciPciDevices);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+    }    
 
     LouPrint("XHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    //while(1);
     return STATUS_SUCCESS;
 }
 /*
@@ -31,17 +55,6 @@ static const USB_HOST_OPERATIONS XhciOperations = {
 };
 
 
-UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
-    {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .GenericEntry = true},
-    {0},
-};
-
-LOUAPI 
-VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
-    LouPrint("XHCI.SYS::UnloadDriver()\n");
-    //we have nothing to unload
-    LouPrint("XHCI.SYS::UnloadDriver() STATUS_SUCCESS\n");
-}
 
 
 LOUSTATUS AddDevice(

@@ -269,6 +269,8 @@ LOUSTATUS LouKeTsmCreateThreadHandleNsEx(
         NewThreadHandle->SavedState.rflags = 0x0202;        //interrupts enabled no operation normal
     }
 
+    NewThreadHandle->ThreadIrql = PASSIVE_LEVEL;
+
     LouKeSchedDbgPrint("New StackBase:%h\n", NewThreadHandle->StackBase);
     LouKeSchedDbgPrint("New StackTop :%h\n", NewThreadHandle->StackTop);
     

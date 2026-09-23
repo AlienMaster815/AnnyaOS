@@ -108,6 +108,8 @@ DRIVER_EXPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu){
 }
 
 KERNEL_EXPORT UINT64 LouKeGetMultibootTrampolineEntrance();
+KERNEL_EXPORT uint64_t read_tsc(void);
+
 
 DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
     if(Ms){
@@ -116,8 +118,6 @@ DRIVER_EXPORT void ApicHalConfigureNextApicTimerEvent(SIZE Ms){
     Ms = Ms ? Ms : 1;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    BOOLEAN TimerSetupMask = false;
-    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
     ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount * Ms);
 }
 
@@ -131,34 +131,17 @@ static const APIC_TIMER_DIVIDE_CONFIG TimerConfigs[7] = {
     APIC_TIMER_DIVIDE_BY2,
 };
 
-DRIVER_EXPORT
-void ApciHalStopApicTimerEvents(){
-    BOOLEAN TimerSetupMask = true;
-    ULONG Processor = LouKeGetCurrentProcessorNumber();
-    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
-}
-
-DRIVER_EXPORT 
-void ApciHalStartApicTimerEvents(){
-    BOOLEAN TimerSetupMask = false;
-    ULONG Processor = LouKeGetCurrentProcessorNumber();
-    PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
-    UINT32 CurrentCount;
-    ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
-    ApicHalSetLocalApicLvtTimerRegister(0x00, &TimerSetupMask, 0x00);
-    if(CurrentCount){
-        ApicHalSetLocalApicTimerInitialCount(CurrentCount);
-    }else{
-        ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->TimerConfigTick);
-    }
-}
-
 DRIVER_EXPORT void ApicHalConfigureYeildExecution(){
-    BOOLEAN TimerSetupMask = false;
     ULONG Processor = LouKeGetCurrentProcessorNumber();
     PAPIC_DEVICE_OBJECT ApicDeviceObject = &PerProcessorApicData[Processor].ApicDeviceObject;
+    LouKIRQL Irql = LouKeGetIrql();
+    LouKeSetIrql(PASSIVE_LEVEL, 0x00);
+    UINT64 TscStamp = read_tsc() + ApicDeviceObject->TscsPerTick;
     ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->TimerConfigTick);
+    while(TscStamp >= read_tsc()){
+        asm("hlt");
+    }
+    LouKeSetIrql(Irql, 0x00);
 }
 
 static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
@@ -176,7 +159,6 @@ static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
         ApicHalSetLocalApicTimerInitialCount(0xFFFFFFFF);
         sleep(1);
         ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
-
         ApicDeviceObject->MsTimerCount = 0xFFFFFFFF - CurrentCount;
         
         if(ApicDeviceObject->MsTimerCount){
@@ -219,6 +201,14 @@ static LOUSTATUS ApicHalInitializeTimer(ULONG Cpu){
         LouPrint("ApicHalInitializeTimer():ERROR:Unable To Initialize Timer\n");
         while(1);
     }
+
+    UINT64 TscStamp1 = read_tsc();
+    ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->TimerConfigTick);
+    while(CurrentCount){
+        ApicHalGetLocalApicTimerCurrentCount(&CurrentCount);
+    }
+    UINT64 TscStamp2 = read_tsc();
+    ApicDeviceObject->TscsPerTick = (TscStamp2 - TscStamp1) + 1;
 
     ApicHalSetLocalApicTimerInitialCount(ApicDeviceObject->MsTimerCount);
 

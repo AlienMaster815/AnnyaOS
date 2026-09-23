@@ -131,7 +131,7 @@ LOUAPI void SetWinIRQL(UINT8 Irql);
 LOUAPI LouKIRQL GetWinIRQL();
 
 UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
-    if(MutexIsLocked(&ProcLock.Lock)){
+    if(MutexIsLocked(&ProcLock.Lock) || (LouKeGetIrql() >= CLOCK_LEVEL)){
         return IrqState;
     }
     LouKeAcquireReference(&ProcRef);

@@ -528,25 +528,21 @@ LOUSTATUS PciHalInitializeUninitializedDevices(
 ){
     ListHeader TmpList = {0};
     PPCI_DEVICE_GROUP TmpUninitializedDevice;
+    PPCI_DEVICE_GROUP TmpUninitializedDeviceSafe;
     if(!Module->DriverObject->DriverExtension->AddDevice){
         return STATUS_UNSUCCESSFUL;
     }
-    MutexLock(&Module->UninitializedDeviceGroupLock);
-    
-    TmpList = Module->UninitializedDeviceGroup;
-    LouKeListDeleteAll(&Module->UninitializedDeviceGroup);
-    
-    MutexUnlock(&Module->UninitializedDeviceGroupLock);
     
     LOUSTATUS Status;
     MutexLock(&Module->InitializedDeviceGroupLock);
-    ForEachListEntry(TmpUninitializedDevice, &TmpList, Peers){
+    ForEachListEntrySafe(TmpUninitializedDevice, TmpUninitializedDeviceSafe, &Module->UninitializedDeviceGroup, Peers){
         Status = Module->DriverObject->DriverExtension->AddDevice(Module->DriverObject, &TmpUninitializedDevice->LdmDeviceObject);    
         if(!NT_SUCCESS(Status)){
             MutexUnlock(&Module->InitializedDeviceGroupLock);
             return Status;
         }
         TmpUninitializedDevice->PciDeviceobject->DeviceManaged = true;
+        LouKeListDeleteItem(&TmpUninitializedDevice->Peers);
         LouKeListAddTail(&TmpUninitializedDevice->Peers, &Module->InitializedDeviceGroup);
     }
     MutexUnlock(&Module->InitializedDeviceGroupLock);

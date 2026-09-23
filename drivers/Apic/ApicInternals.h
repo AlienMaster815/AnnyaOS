@@ -133,6 +133,7 @@ typedef struct _APIC_DEVICE_OBJECT{
     APIC_OBJECT_TYPE                ApicObjectType;
     UINT8                           TimerConfigTick;
     UINT8                           TimerConfigSelector;
+    UINT64                          TscsPerTick;                          
     UINT32                          MsTimerCount;
     union{
         X1LOCAL_APIC_DEVICE_OBJECT  X1ApicObject;
@@ -330,6 +331,7 @@ DRIVER_EXPORT LOUSTATUS ApicHalInitializeVectorToIoApicRedirection(OPAQUE_PTR Ve
 DRIVER_EXPORT ULONG ApicHalCpuIdToApicId(ULONG Cpu);
 
 DRIVER_EXPORT LOUSTATUS ApicHalMaskIoApicRedirectionEntry(PAPIC_DEVICE_OBJECT IoApic, UINT8 Entry, BOOLEAN Mask);
+
 
 //TODO: 
 

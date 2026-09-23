@@ -350,6 +350,8 @@ void LouOsKrnlStart(
     //}
 
     //TODO: 
+    //finish the IRQL system for all cores
+    
     //add a new system for Scatter Devices
     //to use a single api for abstract 
     //transfers have them use DMA devices
@@ -362,9 +364,9 @@ void LouOsKrnlStart(
 
     LouPrint("Successful Boot\n");
     
-    //sleep(2000);
+    sleep(2000);
     
-    //LouKeSystemShutdown(ShutdownReboot);
+    LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
 

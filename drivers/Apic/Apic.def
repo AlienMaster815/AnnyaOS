@@ -51,8 +51,6 @@ EXPORTS
     ApicHalInitializeIsaVectorToIoApicRedirection
     ApicHalInitializeVectorToIoApicRedirection
     ApicHalCpuIdToApicId
-    ApciHalStartApicTimerEvents
-    ApciHalStopApicTimerEvents
     ApicIpiHalSendIpiToCpu
     ApicHalConfigureYeildExecution
     ApicHalMaskIoApicRedirectionEntry
