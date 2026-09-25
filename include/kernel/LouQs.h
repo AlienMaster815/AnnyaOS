@@ -23,6 +23,7 @@ typedef struct  _LOUQ{
     ListHeader                  Peers;
     spinlock_t                  LOUQLock;
     mutex_t                     LouQtex;
+    LOUSTATUS                   Status;
     ATOMIC_BOOLEAN              InQueue;
     struct _LOUQ_COMPLETION*    Completion;
 }LOUQ, * PLOUQ;

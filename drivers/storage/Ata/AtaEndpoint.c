@@ -24,7 +24,7 @@ AtaCoreGetEndpointCapacity(
             return STATUS_SUCCESS;
         }
 
-        UINT8 CapacityData[8] = {0};
+        UINT16 CapacityData[4] = {0};
         PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
         PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
@@ -60,6 +60,9 @@ AtaCoreGetEndpointCapacity(
 
         if(Status != STATUS_SUCCESS){
             LouPrint("AtaCoreGetEndpointCapacity():COMMAND_ERROR\n");
+            if(OutSectorSize){
+                *OutSectorSize = 0x00;
+            }
             return Status;
         }
         EndpointDevice->SectorSize = ((UINT32)CapacityData[4] << 24) | ((UINT32)CapacityData[5] << 16) | ((UINT32)CapacityData[6] << 8) | (UINT32)CapacityData[7];

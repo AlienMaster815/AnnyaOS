@@ -20,7 +20,7 @@ DWORD LouKeWorkStackDemon(PVOID Data){
             PLOUQ_WORK TmpWork;
             PLOUQ_WORK ForwardWork;
             ForEachListEntrySafe(TmpWork, ForwardWork, &TmpList, QueueObject.Peers){
-                TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
+                TmpWork->QueueObject.Status = TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
                 LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
                 LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
             }

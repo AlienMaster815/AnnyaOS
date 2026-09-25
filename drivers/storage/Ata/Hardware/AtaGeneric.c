@@ -5,24 +5,102 @@
 #define ATA_BOARD_ID_ISA_DEVICE_HAS_DMA     2
 #define ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA  3
 
+#define ATA_IDE_COMMAND_GRACE_PERIOD        10000
+
+void AtaGeneric400NsDelay(PATA_GENERIC_PRIVATE_DATA PrivateData){
+    inb(PrivateData->Ports.AltDevSts);
+    inb(PrivateData->Ports.AltDevSts);
+    inb(PrivateData->Ports.AltDevSts);
+    inb(PrivateData->Ports.AltDevSts);
+}
+
+LOUSTATUS AtaPortDeviceGetDeviceType(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev, ATA_DEVICE_TYPE* Type){
+    if((!PortDevice) || (!Type) || (Dev > 1)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)PortDevice->PortPrivateData;
+    SIZE    Timeout;
+    UINT8   Status;
+    UINT16  SigLo;    
+    UINT16  SigHi;
+    UINT16  Sig;
+    UINT8   Device = 0xA0 | (Dev << 4);
+    
+    outb(PrivateData->Ports.Device, Device);
+    AtaGeneric400NsDelay(PrivateData);
+
+    Status = inb(PrivateData->Ports.CmdSts);
+    if(
+        (Status == 0xFF) || 
+        (Status == 0x7F) || 
+        (!Status)
+    ){
+        *Type = ATA_DEVICE_TYPE_NO_DEVICE;
+        return STATUS_SUCCESS;
+    }
+
+    outb(PrivateData->Ports.AltDevSts, 0x04);
+    AtaGeneric400NsDelay(PrivateData);
+    outb(PrivateData->Ports.AltDevSts, 0x00);
+
+    Timeout = 10000;
+    while(Timeout--){
+        Status = inb(PrivateData->Ports.CmdSts);
+        if((Status & (1 << 6)) && (!(Status & (1 <<  7)))){
+            break;
+        }
+        AtaGeneric400NsDelay(PrivateData);
+    }
+    if(!Timeout){
+        return STATUS_TIMEOUT;
+    }
+
+    outb(PrivateData->Ports.Device, Device);
+    AtaGeneric400NsDelay(PrivateData);
+    SigLo = inb(PrivateData->Ports.LbaMid);
+    SigHi = inb(PrivateData->Ports.LbaHigh);
+    Sig = SigLo | (SigHi << 8);
+    LouPrint("SIG:%h\n", Sig);
+    switch(Sig){
+        case 0:
+            *Type = ATA_DEVICE_TYPE_ATA_DEVICE; 
+            break;
+        case 0xEB14:
+            *Type = ATA_DEVICE_TYPE_ATAPI_DEVICE;
+            break;
+        case 0xC33C:
+            *Type = ATA_DEVICE_TYPE_SATA_DEVICE;
+            break;
+        case 0x9669:
+            *Type = ATA_DEVICE_TYPE_SATAPI_DEVICE;
+            break;
+        default:
+            return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS AtaGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
         CommandPacket->PacketEx.Status = inb(PrivateData->Ports.CmdSts);
         CommandPacket->PacketEx.Device = inb(PrivateData->Ports.Device);
         outb(PrivateData->Ports.AltDevSts, 0x00);
+        AtaGeneric400NsDelay(PrivateData);
         CommandPacket->PacketEx.Error = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.ErrFeat));
         CommandPacket->PacketEx.SectorCount = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.SectorCount));
         CommandPacket->PacketEx.LbaLow = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.LbaLow));
         CommandPacket->PacketEx.LbaMid = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.LbaMid));
         CommandPacket->PacketEx.LbaHigh = ATA_CMDBLK_ENCODE_CURR_VALUE(inb(PrivateData->Ports.LbaHigh));
         outb(PrivateData->Ports.AltDevSts, 0x80);
+        AtaGeneric400NsDelay(PrivateData);
         CommandPacket->PacketEx.Error |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.ErrFeat));
         CommandPacket->PacketEx.SectorCount |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.SectorCount));
         CommandPacket->PacketEx.LbaLow |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.LbaLow));
         CommandPacket->PacketEx.LbaMid |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.LbaMid));
         CommandPacket->PacketEx.LbaHigh |= ATA_CMDBLK_ENCODE_PREV_VALUE(inb(PrivateData->Ports.LbaHigh));
         outb(PrivateData->Ports.AltDevSts, 0x00);
+        AtaGeneric400NsDelay(PrivateData);
     }else{
         CommandPacket->Packet.Status = inb(PrivateData->Ports.CmdSts);
         CommandPacket->Packet.Error = inb(PrivateData->Ports.ErrFeat);
@@ -73,130 +151,113 @@ LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PA
     DmaTransfer->PrivateData = NewPrdEntry;
     return STATUS_SUCCESS;
 }
-    
-LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+ 
+void AtaGenericSetTaskFile(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
-    UINT8 Foo = inb(PrivateData->Ports.CmdSts);
-    UINT8 BmCommand;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-        outb(PrivateData->Ports.Device, CommandPacket->PacketEx.Device);   
+        outb(PrivateData->Ports.Device, CommandPacket->PacketEx.Device);
+        AtaGeneric400NsDelay(PrivateData);
+        outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.Features));
+        outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.SectorCount));
+        outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaLow));
+        outb(PrivateData->Ports.LbaMid, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaMid));
+        outb(PrivateData->Ports.LbaHigh, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaHigh));
+        AtaGeneric400NsDelay(PrivateData);
+        outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.Features));
+        outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.SectorCount));
+        outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaLow));
+        outb(PrivateData->Ports.LbaMid, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaMid));
+        outb(PrivateData->Ports.LbaHigh, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaHigh));
+        AtaGeneric400NsDelay(PrivateData);
+        outb(PrivateData->Ports.CmdSts, CommandPacket->Packet.Command);
     }else{
-        outb(PrivateData->Ports.Device, CommandPacket->Packet.Device);   
+        outb(PrivateData->Ports.Device, CommandPacket->Packet.Device);
+        AtaGeneric400NsDelay(PrivateData);
+        outb(PrivateData->Ports.ErrFeat, CommandPacket->Packet.Features);
+        outb(PrivateData->Ports.SectorCount, CommandPacket->Packet.SectorCount);
+        outb(PrivateData->Ports.LbaLow, CommandPacket->Packet.LbaLow);
+        outb(PrivateData->Ports.LbaMid, CommandPacket->Packet.LbaMid);
+        outb(PrivateData->Ports.LbaHigh, CommandPacket->Packet.LbaHigh);
+        AtaGeneric400NsDelay(PrivateData);
+        outb(PrivateData->Ports.CmdSts, CommandPacket->Packet.Command);
     }
+    AtaGeneric400NsDelay(PrivateData);
+}
 
-    sleep(1);
+LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    SIZE Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
+    UINT8 Status;
+    SIZE TransferDone = 0;
+    SIZE tSize;
 
-    SIZE Timeout = 1000;
+    AtaGenericSetTaskFile(PortDevice, CommandPacket);
 
-    while(inb(PrivateData->Ports.CmdSts) & 0x80){
-        sleep(1);
-        Timeout--;
+    Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
+    while(Timeout--){
+        Status = inb(PrivateData->Ports.CmdSts);
+        if(Status & 1){
+            return STATUS_IO_DEVICE_ERROR;
+        }
+        if(!(Status & (1 << 7)) && (Status & (1 << 3))) {
+            break;
+        }
+        AtaGeneric400NsDelay(PrivateData);
     }
     if(!Timeout){
-        return STATUS_IO_DEVICE_ERROR;
+        return STATUS_TIMEOUT;
     }
-
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
-        outb(PrivateData->Ports.BusMasterCmd, 0x00);
-        outb(PrivateData->Ports.BusMasterSts, 0x06);
-        BmCommand = 0;
-        UINT64  PhysicalPrdt;
-        UINT64  VirtualPrdt;
-        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-            VirtualPrdt = (UINT64)(UINT8*)CommandPacket->DmaDataOut->PrivateData;
-        }else{
-            VirtualPrdt = (UINT64)(UINT8*)CommandPacket->DmaDataIn->PrivateData;
-            BmCommand = (1 << 3); 
-        }
-        RequestPhysicalAddress(VirtualPrdt, &PhysicalPrdt);
-        outl(PrivateData->Ports.BusMasterPrd, PhysicalPrdt);
-        outb(PrivateData->Ports.BusMasterCmd, BmCommand);
-    }
-
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-        outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.SectorCount));
-        outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.Features));
-        outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaLow));   
-        outb(PrivateData->Ports.LbaMid, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaMid));   
-        outb(PrivateData->Ports.LbaHigh, ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaHigh));   
-
-        outb(PrivateData->Ports.SectorCount, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.SectorCount));
-        outb(PrivateData->Ports.ErrFeat, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.Features));
-        outb(PrivateData->Ports.LbaLow, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaLow));   
-        outb(PrivateData->Ports.LbaMid, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaMid));   
-        outb(PrivateData->Ports.LbaHigh, ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaHigh));   
-        outb(PrivateData->Ports.CmdSts, CommandPacket->PacketEx.Command); 
-
-    }else{
-        outb(PrivateData->Ports.SectorCount, CommandPacket->Packet.SectorCount);
-        outb(PrivateData->Ports.ErrFeat, CommandPacket->Packet.Features);
-        outb(PrivateData->Ports.LbaLow, CommandPacket->Packet.LbaLow);   
-        outb(PrivateData->Ports.LbaMid, CommandPacket->Packet.LbaMid);   
-        outb(PrivateData->Ports.LbaHigh, CommandPacket->Packet.LbaHigh);   
-        outb(PrivateData->Ports.CmdSts, CommandPacket->Packet.Command);   
-    }
-    
-    sleep(1);
+ 
 
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD){
-        Timeout = 1000;
-        UINT8 Status;
-        while(1){
-            Status = inb(PrivateData->Ports.CmdSts);
-            
-            if((!(Status & 0x80)) && (Status & 0x08)){
-                break;
-            }
-            
-            if(Status & 0x01){
-                return STATUS_IO_DEVICE_ERROR;
-            }
+        outsw(PrivateData->Ports.Data, CommandPacket->PacketData, CommandPacket->PacketSize / 2);
+    }
 
+    Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
+        tSize = (CommandPacket->SectorSize ? CommandPacket->SectorSize : 512);
+        if(CommandPacket->PioSize < tSize){
+            tSize = CommandPacket->PioSize;
+        }
+        while(TransferDone < CommandPacket->PioSize){
+            Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
+            while(Timeout--){
+                Status = inb(PrivateData->Ports.CmdSts);
+                if(Status & 1){
+                    return STATUS_IO_DEVICE_ERROR;
+                }
+                if(!(Status & (1 << 7)) && (Status & (1 << 3))) {
+                    break;
+                }
+                AtaGeneric400NsDelay(PrivateData);
+            }
             if(!Timeout){
                 return STATUS_TIMEOUT;
             }
-
-            sleep(1);
-            Timeout--;
+            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
+                outsw(PrivateData->Ports.Data, (UINT16*)((UINT8*)CommandPacket->PioDataOut + TransferDone), tSize / 2);
+            }else{
+                insw(PrivateData->Ports.Data, (UINT16*)((UINT8*)CommandPacket->PioDataIn + TransferDone), tSize / 2);
+            }
+            TransferDone += tSize;
         }
-        outsw(PrivateData->Ports.Data, CommandPacket->PacketData, CommandPacket->PacketSize / 2);
-        sleep(1);
-    }
-    
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
-        BmCommand = inb(PrivateData->Ports.BusMasterCmd);
-        outb(PrivateData->Ports.BusMasterCmd, BmCommand | 0x01);
-    }
-
+    }    
     return STATUS_SUCCESS;
+}
+
+LOUSTATUS AtaGenericPortDeviceIssueCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
+    PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
+    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
+        LouPrint("ATA>SYS:AtaGenericPortDeviceIssueCommand():HERE\n"); //not doing dma yet
+        while(1);
+    }
+    return AtaGenericPortDeviceIssuePioCommand(PortDevice, CommandPacket);
 }
     
 LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
     PATA_GENERIC_PRIVATE_DATA PrivateData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)PortDevice->PortPrivateData;
-    SIZE Timeout = 100;
     if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
-        if(CommandPacket->CommandStatus == STATUS_SUCCESS){
-            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
-                UINT8 Status;
-                if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-                    Status = CommandPacket->PacketEx.Status;
-                }else{
-                    Status = CommandPacket->Packet.Status;
-                }
-                if((!(Status & 0x08)) || (Status & 0x01)){
-                    goto _PIO_TRANSFER_DONE;
-                }   
-                if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-                    outsw(PrivateData->Ports.Data, CommandPacket->PioDataOut, CommandPacket->PioSize / 2);
-                }else{
-                    insw(PrivateData->Ports.Data, CommandPacket->PioDataIn, CommandPacket->PioSize / 2);
-                }
-            }
-            _PIO_TRANSFER_DONE:
-            return STATUS_SUCCESS;
-        }else{
-            return STATUS_SUCCESS;
-        }
+        return STATUS_SUCCESS;
     }
     PLOUSINE_DMA_TRANSFER DmaTransfer;
     PLOUSINE_DMA_DEVICE DmaDevice;
@@ -223,6 +284,8 @@ static LOUSINE_DMA_DEVICE PciIdeBusMasterDevice = {
     },
 };
 
+
+
 static ATA_PORT_OPERATIONS PortOperations = {
     .AtaPortDevicePrepCommand = AtaGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AtaGenericPortDeviceIssueCommand,
@@ -235,6 +298,7 @@ static ATA_PORT_OPERATIONS PortOperations = {
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
 //    .AtaPortDevicePowerDown = AtaGenericPortDevicePowerDown,
+    .AtaPortDeviceGetDeviceType = AtaPortDeviceGetDeviceType,
 };
 
 static ATA_HOST_OPERATIONS AtaOperations = {
@@ -285,7 +349,7 @@ LOUSTATUS AddAtaDevice(
     PciHalEnableIoSpace(PDEV);
     PciHalEnableMemorySpace(PDEV);
 
-    for(SIZE i = 0 ; i < 4; i++){
+    for(SIZE i = 0 ; i < 5; i++){
         Status = PciHalMapPciResource(
             PDEV, 
             i, 
@@ -343,6 +407,7 @@ LOUSTATUS AddAtaDevice(
         }
     }
 
+
     PATA_PORT_DEVICE_OBJECT TmpPort;
     ForEachAtaPort(NewHostDevice, TmpPort, i){
         PATA_GENERIC_PRIVATE_DATA GenericData = (PATA_GENERIC_PRIVATE_DATA)(UINT8*)TmpPort->PortPrivateData;
@@ -362,9 +427,7 @@ LOUSTATUS AddAtaDevice(
             GenericData->Ports.BusMasterPrd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_PRD_REG_OFFSET;
             TmpPort->OptionalDmaDevice = &PciIdeBusMasterDevice;
         }
-    
     }
-
     Status = AtaCoreRegisterAtaHostDevice(NewHostDevice);
     if(Status != STATUS_SUCCESS){
         LouPrint("ATA.SYS:AddAtaDevice() Could Not Register ATA Host Device\n");

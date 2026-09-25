@@ -360,6 +360,7 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
 #define ATA_COMMAND_PACKET_FLAGS_PACKET_CMD (1UL << 4)
 #define ATA_COMMAND_PACKET_FLAGS_EXT_CMD    (1UL << 5)
 #define ATA_COMMAND_PACKET_FLAGS_EH         (1UL << 6)
+#define ATA_COMMAND_PACKET_FLAGS_DRQMS      (1UL << 7)
 
 
 typedef struct _ATA_COMMAND_PACKET{
@@ -368,8 +369,9 @@ typedef struct _ATA_COMMAND_PACKET{
     ATOMIC_BOOLEAN              CommandDone;
     ListHeader                  QueuedCommands;
     ULONG                       CommandFlags;
+    SIZE                        SectorSize;
     SIZE                        PacketSize;
-    UINT8                       PacketData[16];
+    UINT16                      PacketData[8];
     SIZE                        PioSize;
     PVOID                       CommandPrivateData;
     UINT32                      Auxilery;
@@ -390,6 +392,14 @@ typedef struct _ATA_COMMAND_PACKET{
     };
 }ATA_COMMAND_PACKET, * PATA_COMMAND_PACKET;
 
+typedef enum{
+    ATA_DEVICE_TYPE_NO_DEVICE = 0,
+    ATA_DEVICE_TYPE_ATA_DEVICE,
+    ATA_DEVICE_TYPE_ATAPI_DEVICE,
+    ATA_DEVICE_TYPE_SATA_DEVICE,
+    ATA_DEVICE_TYPE_SATAPI_DEVICE,
+}ATA_DEVICE_TYPE;
+
 typedef struct _ATA_PORT_OPERATIONS{
     LOUSTATUS (*AtaPortDevicePrepCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
     LOUSTATUS (*AtaPortDeviceIssueCommand)(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket);
@@ -402,7 +412,7 @@ typedef struct _ATA_PORT_OPERATIONS{
     LOUSTATUS (*AtaPortDeviceSleep)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDevicePowerUp)(PATA_PORT_DEVICE_OBJECT PortDevice);
     LOUSTATUS (*AtaPortDevicePowerDown)(PATA_PORT_DEVICE_OBJECT PortDevice);
-    BOOLEAN   (*AtaPortDeviceIsaPacketDevice)(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev);
+    LOUSTATUS (*AtaPortDeviceGetDeviceType)(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev, ATA_DEVICE_TYPE* Type);
 }ATA_PORT_OPERATIONS, * PATA_PORT_OPERATIONS;
 
 #define ATA_HOST_FLAGS_SUPPORTS_PIO     (1UL << 0)

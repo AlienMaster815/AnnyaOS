@@ -4,11 +4,12 @@
 UINT32 RunAcpiPowerOff(){
     ACPI_STATUS Status;
 
-    Status = AcpiEnterSleepStatePrep(ACPI_STATE_S5);
-    if (ACPI_FAILURE(Status)) {
-        LouPrint("Failed to prepare S5 sleep state: %h\n", Status);
-        return ACPI_INTERRUPT_HANDLED;
-    }
+    //Status = 
+    AcpiEnterSleepStatePrep(ACPI_STATE_S5);
+    //if (ACPI_FAILURE(Status)) {
+    //    LouPrint("Failed to prepare S5 sleep state: %h\n", Status);
+    //    return ACPI_INTERRUPT_HANDLED;
+    //}
 
     Status = AcpiEnterSleepState(ACPI_STATE_S5);
     if (ACPI_FAILURE(Status)) {
@@ -19,16 +20,14 @@ UINT32 RunAcpiPowerOff(){
     return ACPI_INTERRUPT_HANDLED;
 }
 
-UINT32 AcpiPbHandler(void* Context){
-    LouPrint("Power button pressed. Initiating shutdown...\n");
-    return RunAcpiPowerOff();
-}
 
 static void RunSafeShutdownSequence(
     SHUTDOWN_ACTION Action
 ){
 
 }
+
+
 
 void LouKeSystemShutdown(
     SHUTDOWN_ACTION Action
@@ -51,4 +50,18 @@ void LouKeSystemShutdown(
             RunAcpiPowerOff();
             break;
     }
+}
+
+LOUSTATUS LouKeAcpiPbInterruptWorker(PLOUQ_WORK Work){
+    LouKeSystemShutdown(ShutdownPowerOff);
+    return STATUS_SUCCESS;
+}
+
+//static LOUQ_WORK AcpiWork = {0};
+
+UINT32 AcpiPbHandler(void* Context){
+    //AcpiWork.Work.DelayedFunction = LouKeAcpiPbInterruptWorker;
+    //LouKeQueueWork(&AcpiWork);
+    LouKeSystemShutdown(ShutdownPowerOff);
+    return ACPI_INTERRUPT_HANDLED;
 }

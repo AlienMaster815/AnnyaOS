@@ -45,8 +45,22 @@ static LOUSTATUS AhciStopFisReception(PATA_PORT_DEVICE_OBJECT AhciPort){
     return STATUS_SUCCESS;
 }
 
-BOOLEAN AhciPortDeviceIsaPacketDevice(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev){
-    return (((PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData)->GenericPort->PxSIG == 0xEB140101);
+LOUSTATUS AhciPortGetDeviceType(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev, ATA_DEVICE_TYPE* Type){
+    if((!PortDevice) || (Dev) || (!Type)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    switch(PrivateData->GenericPort->PxSIG){
+        case 0x00000101:
+            *Type = ATA_DEVICE_TYPE_SATA_DEVICE;
+            break;
+        case 0xEB140101:
+            *Type = ATA_DEVICE_TYPE_SATAPI_DEVICE;
+            break;
+        default: 
+            return STATUS_UNSUCCESSFUL;
+    }
+    return STATUS_SUCCESS;
 }
 
 PVOID AhciAllocateCommandPrivateData(){
@@ -456,7 +470,7 @@ static ATA_PORT_OPERATIONS AhciGenericPortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
-    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
+    .AtaPortDeviceGetDeviceType = AhciPortGetDeviceType,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -469,7 +483,7 @@ static ATA_PORT_OPERATIONS AhciVt8251PortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
-    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
+    .AtaPortDeviceGetDeviceType = AhciPortGetDeviceType,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -482,7 +496,7 @@ static ATA_PORT_OPERATIONS AhciP5wdhPortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
-    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
+    .AtaPortDeviceGetDeviceType = AhciPortGetDeviceType,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -495,7 +509,7 @@ static ATA_PORT_OPERATIONS AhciAvnPortOperations{
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
     .AtaPortDeviceStart = AhciGenericPortDeviceStartPort,
     .AtaPortDeviceStop = AhciGenericPortDeviceStopPort,
-    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
+    .AtaPortDeviceGetDeviceType = AhciPortGetDeviceType,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
 //    .AtaPortDeviceSleep = AtaGenericPortDeviceSleep,
 //    .AtaPortDevicePowerUp = AtaGenericPortDevicePowerUp,
@@ -507,7 +521,7 @@ static ATA_PORT_OPERATIONS AhciPmpRetySrStPortOperations{
     .AtaPortDevicePrepCommand = AhciGenericPortDevicePrepCommand,
     .AtaPortDeviceIssueCommand = AhciGenericPortDeviceIssueCommand,
     .AtaPortDeviceCleanupCommand = AhciGenericPortDeviceCleanupCommand,
-    .AtaPortDeviceIsaPacketDevice = AhciPortDeviceIsaPacketDevice,
+    .AtaPortDeviceGetDeviceType = AhciPortGetDeviceType,
 //    .AtaPortDeviceStart = AtaGenericPortDeviceStartPort,
 //    .AtaPortDeviceStop = AtaGenericPortDeviceStopPort,
 //    .AtaPortDeviceWake = AtaGenericPortDeviceWake,
@@ -1752,6 +1766,8 @@ LOUSTATUS AddAhciDevice(
     PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
 
     LouPrint("PortCount:%d\n", PortCount);
+    while(1);
+
 
     PATA_HOST_DEVICE_OBJECT AtaHost; 
     Status = AtaCoreAllocateHostDevice(&AtaHost, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));

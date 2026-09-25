@@ -494,7 +494,7 @@ LOUAPI void InitializeProcessManager(){
             0x00,
             4 * KILOBYTE,
             31,
-            true,
+            false,
             i,
             0
         );

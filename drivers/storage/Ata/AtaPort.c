@@ -134,6 +134,26 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
     }
 }
 
+static void ShiftDeviceStringToBegining(const PCHAR StringIn, const PCHAR StringOut, SIZE StringSize){
+    SIZE    i;
+    //change the string from BE to LE encodings
+    for(i = 0; i < (StringSize / 2); i++){
+        StringOut[i * 2] = StringIn[i * 2 + 1];
+        StringOut[i * 2 + 1] = StringIn[i * 2];
+    }
+    //find the first charecter in the string
+    for(i = 0; i < StringSize; i++){
+        if(StringOut[i] != ' '){
+            break;
+        }
+    }
+    //if the first charecter is not at offset 0 move the whole string to 0
+    if(i){
+        memcpy(StringOut, &StringOut[i], StringSize - i);
+        memset(&StringOut[StringSize - i], 0, i);
+    }
+}
+
 void AtaCoreParsePacketDeviceInformation(
     PATA_COMMAND_PACKET         Identify, 
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
@@ -179,10 +199,15 @@ void AtaCoreParsePacketDeviceInformation(
 
     EndpointDevice->MaxQueueDepth = (((UINT16*)Identify->PioDataIn)[75] & 0xFF) + 1;
 
-    //CapChecksum = ((UINT16*)Identify->PioDataIn)[80];
-    //if((CapChecksum != 0x00) && (CapChecksum != 0xFFFF)){
-    //TODO: Read the most recent spec and implement features
-    //}
+    
+    SIZE foobar = 3;
+    CapChecksum = ((UINT16*)Identify->PioDataIn)[80];
+    if((CapChecksum != 0x00) && (CapChecksum != 0xFFFF)){
+        for(; foobar < 14; foobar++){
+            if(!(CapChecksum & (1UL << foobar)))break;
+        }
+        //TODO: Read the most recent spec and implement features
+    }
 
     CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[82] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[83];
     if((CapChecksum != 0x00) && (CapChecksum != 0xFFFFFFFF)){
@@ -271,33 +296,23 @@ void AtaCoreParsePacketDeviceInformation(
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 5)) ? ATA_ENDPOINT_DEVCAP_ENHANCED_SECURITY_ERASE_FEAT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 8)) ? ATA_ENDPOINT_DEVCAP_SECURITY_LEVEL : 0;
 
-    for(SIZE i = 0; i < 10; i++){
-        EndpointDevice->SerialNumber[i * 2] = (char)(((((UINT16*)Identify->PioDataIn)[i + 10]) >> 8) & 0xFF);
-        EndpointDevice->SerialNumber[(i * 2) + 1] = (char)((((UINT16*)Identify->PioDataIn)[i + 10]) & 0xFF);
-    }
-    
-    for(SIZE i = 0; i < 4; i++){
-        EndpointDevice->FirmwareVersion[i * 2] = (char)(((((UINT16*)Identify->PioDataIn)[i + 23]) >> 8) & 0xFF);
-        EndpointDevice->FirmwareVersion[(i * 2) + 1] = (char)((((UINT16*)Identify->PioDataIn)[i + 23]) & 0xFF);
-    }
+    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 20, EndpointDevice->SerialNumber, 20);
 
-    for(SIZE i = 0; i < 20; i++){
-        EndpointDevice->ModelNumber[i * 2] = (char)(((((UINT16*)Identify->PioDataIn)[i + 27]) >> 8) & 0xFF);
-        EndpointDevice->ModelNumber[(i * 2) + 1] =  (char)((((UINT16*)Identify->PioDataIn)[i + 27]) & 0xFF);
-    }
+    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 46, EndpointDevice->FirmwareVersion, 8);
+    
+    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 54, EndpointDevice->ModelNumber, 40);
+
 
     LouPrint("SERIAL:%s\n", EndpointDevice->SerialNumber);
     LouPrint("FIRMWARE:%s\n", EndpointDevice->FirmwareVersion);    
     LouPrint("MODEL:%s\n", EndpointDevice->ModelNumber);    
-    
+    LouPrint("SUPPORT:%d\n", foobar);
     LouKeFree(Identify->PioDataIn);
 
 }
 
-void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
+/*
 
-    PATA_COMMAND_PACKET Identify = AtaCoreAllocateAtaCommandPacket();//LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
-    SIZE Channels = AtaPort->HostDevice->HostFlags & ATA_HOST_FLAGS_DUAL_CHANNEL ? 2 : 1; 
     for(SIZE i = 0; i < Channels; i++){
         BOOLEAN PacketDevice = false;
         if(AtaPort->Operations->AtaPortDeviceIsaPacketDevice){
@@ -312,18 +327,16 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
         
         AtaCoreSendIdentifyCommand(AtaPort, Identify, i, false);
 
-        if((Identify->Packet.Status & (1 << 5)) && (Identify->Packet.Error == 0x04)){
+        if((Identify->Packet.Status & ((1 << 5) | 1)) && (Identify->Packet.Error == 0x04)){
             PacketDevice = true;
             AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);
-        }else if(Identify->Packet.Status & (1 << 5)){
-            continue;
         }else if(Identify->Packet.Status & 0x01){
             PacketDevice = true;
             AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);
         }else if(Identify->CommandStatus == STATUS_TIMEOUT){
             continue;
         }
-        if((Identify->Packet.Status == 0x00) || (Identify->Packet.Status == 0xFF)){
+        if((Identify->Packet.Status & ((1 << 5) | 2)) || (Identify->Packet.Status == 0x00) || (Identify->Packet.Status == 0xFF)){
             continue;
         }
             
@@ -338,22 +351,74 @@ void AtaCoreProbePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
                 AtaCoreParsePacketDeviceInformation(Identify, NewEndpoint);
                 AtaCoreGetEndpointCapacity(NewEndpoint, 0x00, 0x00);
                 AtaCoreRegisterEndpointDevice(NewEndpoint);
+                while(1);
             }else{
                 LouPrint("TODO: finish the normal ATA Devices\n");
                 while(1);
             }
 
+        }else {
+            //LouPrint("Error :%h\n", Identify->Packet.Error);
+            //LouPrint("Status:%h\n", Identify->Packet.Status);
+            //LouPrint("CmdSTS:%h\n", Identify->CommandStatus);
         }
     }
     AtaCoreFreeAtaCommandPacket(Identify);
     LouPrint("Done Scanning Port\n");
+*/
+
+void AtaCoreInitializePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
+
+    PATA_COMMAND_PACKET Identify = AtaCoreAllocateAtaCommandPacket();//LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
+    SIZE Channels = AtaPort->HostDevice->HostFlags & ATA_HOST_FLAGS_DUAL_CHANNEL ? 2 : 1; 
+    for(SIZE i = 0 ; i < Channels; i++){
+        ATA_DEVICE_TYPE Type = ATA_DEVICE_TYPE_NO_DEVICE;
+        LOUSTATUS Status = AtaPort->Operations->AtaPortDeviceGetDeviceType(AtaPort, i, &Type);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("ATA.SYS:AtaCoreInitializePortForDevice()\n");
+            while(1);
+        }
+        if((Status == STATUS_SUCCESS) && (!Type)){
+            continue;
+        }
+
+        switch(Type){
+            case ATA_DEVICE_TYPE_ATA_DEVICE:
+            case ATA_DEVICE_TYPE_SATA_DEVICE:{
+                LouPrint("ATA Device Detected\n");
+                while(1);
+                break;
+            }
+
+            case ATA_DEVICE_TYPE_ATAPI_DEVICE:
+            case ATA_DEVICE_TYPE_SATAPI_DEVICE:{
+                AtaCoreSendIdentifyCommand(AtaPort, Identify, i, true);
+                if(Identify->CommandStatus == STATUS_SUCCESS){
+                    PATA_ENDPOINT_DEVICE_OBJECT NewEndpoint = LouKeMallocType(ATA_ENDPOINT_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+                    NewEndpoint->Port = AtaPort;
+                    NewEndpoint->ChannelDev = i;
+                    AtaCoreParsePacketDeviceInformation(Identify, NewEndpoint);
+                    AtaCoreGetEndpointCapacity(NewEndpoint, 0x00, 0x00);
+                    AtaCoreRegisterEndpointDevice(NewEndpoint);
+                }
+                break;
+            }
+
+            case ATA_DEVICE_TYPE_NO_DEVICE: 
+            default:{
+                continue;
+            }
+        }
+    }
 }
 
 LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
     SIZE i;
     PATA_PORT_DEVICE_OBJECT TmpPort;
     LOUSTATUS Status;
-      
+    
+    
+
     ForEachAtaPort(HostDevice, TmpPort, i){
         Status = AtaCoreAllocatePortListEntry(TmpPort);
         if(Status != STATUS_SUCCESS){
@@ -376,7 +441,7 @@ LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
             }
         }
         
-        AtaCoreProbePortForDevice(TmpPort);
+        AtaCoreInitializePortForDevice(TmpPort);
     }
 
     return STATUS_SUCCESS;

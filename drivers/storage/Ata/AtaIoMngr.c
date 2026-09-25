@@ -15,54 +15,23 @@ void AtaCorePortIoQueueManager(PVOID Params){
         }
         LouKeListDeleteItem(&CommandPacket->QueuedCommands);
         CommandPacket->CommandStatus = PortDevice->Operations->AtaPortDeviceIssueCommand(PortDevice, CommandPacket);
-        if(CommandPacket->CommandStatus != STATUS_SUCCESS){
-            goto _COMMAND_FINISHED;
-        }
+        LOUSTATUS tStatus = STATUS_SUCCESS;
         if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
-            SIZE Timeout = 5000;
-            _KEEP_POLLING:
-            CommandPacket->CommandStatus = PortDevice->Operations->AtaPortDeviceGetCommandStatus(PortDevice, CommandPacket);
-            if(CommandPacket->CommandStatus != STATUS_SUCCESS){
-                goto _COMMAND_FINISHED;
-            }
-            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
-                if(CommandPacket->PacketEx.Status & ((1 << 5) | 1)){
-                    CommandPacket->CommandStatus = STATUS_IO_DEVICE_ERROR;
-                    goto _COMMAND_FINISHED;
-                }
-                if(CommandPacket->PacketEx.Status & 0x80){
-                    if(!Timeout){
-                        CommandPacket->CommandStatus = STATUS_TIMEOUT;
-                        goto _COMMAND_FINISHED;
-                    }
-                    sleep(1);
-                    Timeout--;
-                    goto _KEEP_POLLING;
-                }
-            }else{
-                if(CommandPacket->Packet.Status & ((1 << 5) | 1)){
-                    CommandPacket->CommandStatus = STATUS_IO_DEVICE_ERROR;
-                    goto _COMMAND_FINISHED;
-                }
-                if(CommandPacket->Packet.Status & 0x80){
-                    if(!Timeout){
-                        CommandPacket->CommandStatus = STATUS_TIMEOUT;
-                        goto _COMMAND_FINISHED;
-                    }
-                    sleep(1);
-                    Timeout--;
-                    goto _KEEP_POLLING;
-                }
-            }
+            tStatus = PortDevice->Operations->AtaPortDeviceGetCommandStatus(PortDevice, CommandPacket);
         }else{
             LouPrint("AtaCorePortIoQueueManager() Not Polling\n");
             while(1);
         }
-        _COMMAND_FINISHED:
+        if(CommandPacket->CommandStatus == STATUS_SUCCESS){
+            CommandPacket->CommandStatus = tStatus;
+        }
+        LouPrint("Port:%d:Error :%h\n", PortDevice->PortNumber, CommandPacket->Packet.Error);
+        LouPrint("Port:%d:Status:%h\n", PortDevice->PortNumber, CommandPacket->Packet.Status);
+        LouPrint("Port:%d:CmdSTS:%h\n", PortDevice->PortNumber, CommandPacket->CommandStatus);
         if(PortDevice->Operations->AtaPortDeviceCleanupCommand){
             CommandPacket->CleanupStatus = PortDevice->Operations->AtaPortDeviceCleanupCommand(PortDevice, CommandPacket);
         }
-        LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
         MutexUnlock(PortDevice->ChannelLock);
+        LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
     }
 }

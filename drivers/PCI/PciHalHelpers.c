@@ -398,12 +398,12 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             TmpBarValue = PciHalGeneralDeviceGetBar(PDEV, Bar);
             //PciHalDbgPrint("PCI.SYS:TmpBarValue:%h\n", TmpBarValue);
             if(TmpBarValue & 1){
-                PDEV->BarMapping[Bar] = (UINT64)(TmpBarValue & 0xFFFFFFFC);
+                PDEV->BarMapping[Bar] = (UINT64)(TmpBarValue & 0xFFFFFFFCULL);
                 PciHalGeneralDeviceSetBar(PDEV, Bar, UINT32_MAX);
                 BarSize = PciHalGeneralDeviceGetBar(PDEV, Bar);
                 BarSize &= 0xFFFFFFFC;
                 BarSize = ~(BarSize) + 1;
-                PDEV->BarSize[Bar] = BarSize;
+                PDEV->BarSize[Bar] = (UINT16)BarSize;
                 PciHalGeneralDeviceSetBar(PDEV, Bar, (UINT32)(PDEV->BarMapping[Bar] & UINT32_MAX));
                 PciHalDbgPrint("PCI.SYS:BAR IO Address:%h\n", PDEV->BarMapping[Bar]);
                 PciHalDbgPrint("PCI.SYS:BAR IO Size:%h\n", PDEV->BarSize[Bar]);
