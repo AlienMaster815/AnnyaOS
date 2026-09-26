@@ -441,6 +441,14 @@ LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice){
             }
         }
         
+        HostDevice->PortIoManager[i] = LouKeCreateDemon(
+            AtaCorePortIoQueueManager,
+            &HostDevice->PortDevices[i],
+            8 * KILOBYTE,
+            31
+        );
+        HostDevice->PortDevices[i].CommandWorkerThread = HostDevice->PortIoManager[i];
+
         AtaCoreInitializePortForDevice(TmpPort);
     }
 

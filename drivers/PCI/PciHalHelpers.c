@@ -379,14 +379,16 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
     if(IoOn)PciHalDisableIoSpace(PDEV);
     if(MemOn)PciHalDisableMemorySpace(PDEV);
     
-    UINT32 BarSize = 0;
+    UINT64 BarSize = 0;
+    UINT64 BarVSize = 0;
+    UINT64 FlooredPhyAddress;
+    UINT64 BaseOffset;
     UINT32 TmpBarValue = 0;
     UINT32 TmpUpperBarValue = 0;
     UINT64 BarPhyAddress = 0;
     UINT64 BarVAddress = 0;
     BOOLEAN WriteThroght = false;
     BOOLEAN Using32BitAllocator = false;
-
     switch(HeaderType){
         case 0:{
             if(Bar > 5){
@@ -398,13 +400,13 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             TmpBarValue = PciHalGeneralDeviceGetBar(PDEV, Bar);
             //PciHalDbgPrint("PCI.SYS:TmpBarValue:%h\n", TmpBarValue);
             if(TmpBarValue & 1){
-                PDEV->BarMapping[Bar] = (UINT64)(TmpBarValue & 0xFFFFFFFCULL);
+                PDEV->BarMapping[Bar] = (UINT64)(TmpBarValue & 0xFFFCULL);
                 PciHalGeneralDeviceSetBar(PDEV, Bar, UINT32_MAX);
                 BarSize = PciHalGeneralDeviceGetBar(PDEV, Bar);
-                BarSize &= 0xFFFFFFFC;
+                BarSize &= 0xFFFC;
                 BarSize = ~(BarSize) + 1;
                 PDEV->BarSize[Bar] = (UINT16)BarSize;
-                PciHalGeneralDeviceSetBar(PDEV, Bar, (UINT32)(PDEV->BarMapping[Bar] & UINT32_MAX));
+                PciHalGeneralDeviceSetBar(PDEV, Bar, (UINT32)(PDEV->BarMapping[Bar]));
                 PciHalDbgPrint("PCI.SYS:BAR IO Address:%h\n", PDEV->BarMapping[Bar]);
                 PciHalDbgPrint("PCI.SYS:BAR IO Size:%h\n", PDEV->BarSize[Bar]);
                 break; 
@@ -413,10 +415,10 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
             BarSize = PciHalGeneralDeviceGetBar(PDEV, Bar);
             if(!((TmpBarValue >> 1) & 0x03)){
                 BarSize &= 0xFFFFFFF0;
-                BarSize = ~(BarSize) + 1;
+                BarSize = (UINT32)(~(BarSize) + 1);
                 BarPhyAddress = TmpBarValue & 0xFFFFFFF0;
                 Using32BitAllocator = true;
-            }else if(!((TmpBarValue >> 1) & 0x03) == 1){
+            }else if(((TmpBarValue >> 1) & 0x03) == 1){
                 LouPrint("PCI.SYS:Pci HAL Cannot Allocate 16 Bit Memory At This Time\n");
                 Status = STATUS_INVALID_PARAMETER;
                 break;
@@ -434,40 +436,37 @@ DRIVER_EXPORT LOUSTATUS PciHalMapPciResource(
                 break;
             }
             if(!BarPhyAddress){
-                Status = STATUS_SUCCESS;
+                LouPrint("PCI.SYS:WARNING:BAR not Implemented\n");
                 break;
             }
-
-            BarVAddress = (UINT64)LouVMallocEx(BarSize, BarSize);
-            if(!BarPhyAddress && Using32BitAllocator){
-                BarPhyAddress = (UINT64)LouAllocatePhysical32UpEx(BarSize, BarSize);
-            }else if(!BarPhyAddress){
-                BarPhyAddress = (UINT64)LouAllocatePhysical64UpEx(BarSize, BarSize);
-            }
-            else{
-                EnforceSystemMemoryMap(BarPhyAddress, BarSize);
-            }
+            FlooredPhyAddress = ROUND_DOWN64(BarPhyAddress, KILOBYTE_PAGE);
+            BaseOffset = BarPhyAddress - FlooredPhyAddress;
+            BarVSize = ROUND_UP64(BaseOffset + BarSize, KILOBYTE_PAGE);
             
+            BarVAddress = (UINT64)LouVMallocEx(BarVSize, BarVSize);
+              
+            EnforceSystemMemoryMap(FlooredPhyAddress, BarVSize);
+
             if(Using32BitAllocator){
-                PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress);
+                PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress & UINT32_MAX);
             }else{
                 PciHalGeneralDeviceSetBar(PDEV, Bar, BarPhyAddress & UINT32_MAX);
                 PciHalGeneralDeviceSetBar(PDEV, Bar + 1, (BarPhyAddress >> 32) & UINT32_MAX);
             }
 
             if(PCI_IOMAP_FLAGS_NO_WRITE_THROUGH){
-                LouKeMapContinuousMemoryBlockKb(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
+                LouKeMapContinuousMemoryBlockKb(FlooredPhyAddress, BarVAddress, BarVSize, KERNEL_DMA_MEMORY);
             }else if(PCI_IOMAP_FLAGS_USE_WRITE_COMBINE){
-                LouKeMapContinuousMemoryBlockKb(BarPhyAddress, BarVAddress, BarSize, KERNEL_WRITE_COMBINE_MEMORY);
+                LouKeMapContinuousMemoryBlockKb(FlooredPhyAddress, BarVAddress, BarVSize, KERNEL_WRITE_COMBINE_MEMORY);
             }else {
-                LouKeMapContinuousMemoryBlockKb(BarPhyAddress, BarVAddress, BarSize, KERNEL_DMA_MEMORY);
+                LouKeMapContinuousMemoryBlockKb(FlooredPhyAddress, BarVAddress, BarVSize, KERNEL_DMA_MEMORY);
             }
 
-            PDEV->BarMapping[Bar] = BarVAddress;
+            PDEV->BarMapping[Bar] = BarVAddress + BaseOffset;
             PDEV->BarSize[Bar] = BarSize;
-            PDEV->BarFlags[Bar] = OverideFlags; 
+            PDEV->BarFlags[Bar] = OverideFlags;
             PciHalDbgPrint("PCI.SYS:BAR Physical Address:%h\n", BarPhyAddress);
-            PciHalDbgPrint("PCI.SYS:BAR Virtual  Address:%h\n", BarVAddress);
+            PciHalDbgPrint("PCI.SYS:BAR Virtual  Address:%h\n", BarVAddress + BaseOffset);
             PciHalDbgPrint("PCI.SYS:BAR Size            :%h\n", BarSize);
             break;
         }

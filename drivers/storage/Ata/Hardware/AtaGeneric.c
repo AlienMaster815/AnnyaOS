@@ -382,10 +382,7 @@ LOUSTATUS AddAtaDevice(
    
 
     NewHostDevice->HostFlags = ATA_HOST_FLAGS_SUPPORTS_PIO | ATA_HOST_FLAGS_DUAL_CHANNEL;
-    if((BoardID == ATA_BOARD_ID_ISA_DEVICE_HAS_DMA) || (BoardID == ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA)){
-        NewHostDevice->HostFlags |= ATA_HOST_FLAGS_SUPPORTS_DMA;
-    }
-    
+
     UINT16 CommandBlock[2];
     UINT16 AltDevSts[2];
     UINT16 BusMaster = 0x00;
@@ -396,6 +393,9 @@ LOUSTATUS AddAtaDevice(
         AltDevSts[1] = ATA_PCICTL_ALTDEVSTS_OFFSET(PciHalGetIoRegion(PDEV, 3, 0));
         if(BoardID == ATA_BOARD_ID_NATIVE_DEVICE_HAS_DMA){
             BusMaster = (UINT16)(UINTPTR)PciHalGetIoRegion(PDEV, 4, 0);
+            if(BusMaster){
+                NewHostDevice->HostFlags |= ATA_HOST_FLAGS_SUPPORTS_DMA;
+            }
         }
     }else{
         CommandBlock[0] = 0x01F0; 
@@ -404,6 +404,9 @@ LOUSTATUS AddAtaDevice(
         AltDevSts[1] = ATA_ISACTL_ALTDEVSTS_OFFSET(0x0376);
         if(BoardID == ATA_BOARD_ID_ISA_DEVICE_HAS_DMA){
             BusMaster = (UINT16)(UINTPTR)PciHalGetIoRegion(PDEV, 4, 0);
+            if(BusMaster){
+                NewHostDevice->HostFlags |= ATA_HOST_FLAGS_SUPPORTS_DMA;
+            }
         }
     }
 
@@ -425,8 +428,8 @@ LOUSTATUS AddAtaDevice(
             GenericData->Ports.BusMasterCmd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_CMD_REG_OFFSET;
             GenericData->Ports.BusMasterSts = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_STS_REG_OFFSET;
             GenericData->Ports.BusMasterPrd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_PRD_REG_OFFSET;
-            TmpPort->OptionalDmaDevice = &PciIdeBusMasterDevice;
         }
+        TmpPort->OptionalDmaDevice = &PciIdeBusMasterDevice;
     }
     Status = AtaCoreRegisterAtaHostDevice(NewHostDevice);
     if(Status != STATUS_SUCCESS){

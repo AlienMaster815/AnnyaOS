@@ -50,6 +50,7 @@ LOUSTATUS AhciPortGetDeviceType(PATA_PORT_DEVICE_OBJECT PortDevice, SIZE Dev, AT
         return STATUS_INVALID_PARAMETER;
     }
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    LouPrint("SIG:%h\n", (UINT64)PrivateData->GenericPort->PxSIG);
     switch(PrivateData->GenericPort->PxSIG){
         case 0x00000101:
             *Type = ATA_DEVICE_TYPE_SATA_DEVICE;
@@ -1659,6 +1660,87 @@ static void AhciSetupInterruptHandler(PATA_HOST_DEVICE_OBJECT AtaHost){
     );
 }
 
+//static UINT32 AhciGetPortMask(PPCI_DEVICE_OBJECT PDEV, )
+
+static void AhciSaveInitialConfig(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
+    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    UINT32 Version;
+    UINT32 PortMap;
+
+    AhciEnableAhci(Ghc);
+    UINT32 MaxPorts = AHCI_GET_NP(Ghc->Capabilities) + 1;
+    Version = Ghc->Version;
+
+    //TODO get caps
+
+    PortMap = Ghc->PortsImplemented;
+    if(PrivateData->SavedPortMap && (PortMap != PrivateData->SavedPortMap)){
+        LouPrint("AHCI.SYS:WARNING:Forcing Known Port Map For Chip\n");
+        PortMap = PrivateData->SavedPortMap;
+    }else{
+        PrivateData->SavedPortMap = PortMap;
+    }
+
+    if(PrivateData->MaskPortMap){
+        LouPrint("AHCI.SYS:NOTICE:Forcing A Mask For Ports On Chip\n");
+        PortMap &= PrivateData->MaskPortMap;
+    }
+
+    if(PortMap){
+        int MapPorts = 0;
+        for(SIZE i = 0; i < MaxPorts; i++){
+            if(PortMap & (1 << i)){
+                MapPorts++;
+            }
+            if(MapPorts > MaxPorts){
+                PortMap = 0;
+            }
+        }
+    }
+
+    if((!PortMap) && (Version < 0x10300)){
+        LouPrint("AHCI.SYS:Spec Violation Detected Reconfiguring Ports\n");
+        PortMap = ((1 << MaxPorts) - 1);
+        PrivateData->SavedPortMap = PortMap;
+    }
+
+
+    PrivateData->PortMap = PortMap;
+
+}
+
+static void AhciPciSaveInitialConfig(PPCI_DEVICE_OBJECT PDEV, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
+    UINT16 VendorID = PciHalGetVendorId(PDEV);
+    UINT16 DeviceID = PciHalGetDeviceId(PDEV);
+    if((VendorID == PCI_VENDOR_ID_JMICRON) && (DeviceID == 0x2361)){
+        PrivateData->SavedPortMap = 1;
+    }
+
+    if(PrivateData->BoardInfo.AhciFlags & AHCI_FLAG_MV_PATA){
+        if(DeviceID == 0x6121){
+            PrivateData->MaskPortMap = 0x03;
+        }else{
+            PrivateData->MaskPortMap = 0x0F;
+        }
+    }else{
+        //UINT32 Mask = 0;
+    }
+
+    AhciSaveInitialConfig(PDEV, PrivateData);
+}
+
+static LOUSTATUS AhciValidateBarSize(PPCI_DEVICE_OBJECT PDEV, int Abar, PAHCI_DRIVER_PRIVATE_DATA PrivateData){
+    PAHCI_GENERIC_HOST_CONTROL Ghc = PrivateData->GenericHostController;
+    UINT32 MaxPorts = AHCI_GET_NP(Ghc->Capabilities) + 1;
+    UINT32 LastPortEnd = 0x100 + (MaxPorts * 0x80);
+    UINT32 BarSize = PciHalGetIoRegionSize(PDEV, Abar);
+    if(LastPortEnd > BarSize){
+        LouPrint("AHCI.SYS:WARNING:ABAR is too small For Reported Ports\n");
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS AddAhciDevice(
     PDRIVER_OBJECT DriverObject,
     struct _DEVICE_OBJECT* Device
@@ -1761,14 +1843,6 @@ LOUSTATUS AddAhciDevice(
 
     PciHalMapPciResource(PDEV, Abar, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
 
-    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)PciHalGetIoRegion(PDEV, Abar, 0);
-
-    PortCount = AHCI_GET_NP(Ghc->Capabilities) + 1;
-
-    LouPrint("PortCount:%d\n", PortCount);
-    while(1);
-
-
     PATA_HOST_DEVICE_OBJECT AtaHost; 
     Status = AtaCoreAllocateHostDevice(&AtaHost, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));
     if(Status != STATUS_SUCCESS){
@@ -1776,27 +1850,39 @@ LOUSTATUS AddAhciDevice(
         while(1);
     }
 
+    PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
+
+    PAHCI_GENERIC_HOST_CONTROL Ghc = (PAHCI_GENERIC_HOST_CONTROL)PciHalGetIoRegion(PDEV, Abar, 0);
+    PrivateAhciData->GenericHostController = Ghc;
+    PrivateAhciData->PDEV = PDEV;
+    AtaHost->PDEV = PDEV;
+
     AtaHost->Operations = BoardInformation->HostOperations;
 
+    memcpy(&PrivateAhciData->BoardInfo, BoardInformation, sizeof(PrivateAhciData->BoardInfo));
+
+    PrivateAhciData->StopCommandEngine = AhciStopCommandEngine;
+    PrivateAhciData->StartCommandEngine = AhciStartCommandEngine;
+
+    AhciValidateBarSize(PDEV, Abar, PrivateAhciData);
+
+    AhciPciSaveInitialConfig(PDEV, PrivateAhciData);
+
+    PrivateAhciData->PortsMapped = 0;
+    for(SIZE i = 0; i < 32; i++){
+        if(PrivateAhciData->PortMap & (1 << i)){
+            PrivateAhciData->PortsMapped++;
+        }
+    }
+
+    PortCount = PrivateAhciData->PortsMapped;
+    LouPrint("PortCount:%h\n", (UINT64)PortCount);
 
     Status = AtaCoreAllocatePortsForHost(AtaHost, PortCount, sizeof(AHCI_DRIVER_PRIVATE_DATA), GET_ALIGNMENT(AHCI_DRIVER_PRIVATE_DATA));
     if(Status != STATUS_SUCCESS){
         LouPrint("AHCI.SYS:Unable To Allocate AHCI Ports Device\n");
         while(1);
     }
-
-    PAHCI_DRIVER_PRIVATE_DATA PrivateAhciData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
-
-    PrivateAhciData->PDEV = PDEV;
-    AtaHost->PDEV = PDEV;
-    PrivateAhciData->PortMap = Ghc->PortsImplemented;
-    PrivateAhciData->GenericHostController = Ghc;
-
-    PrivateAhciData->StopCommandEngine = AhciStopCommandEngine;
-    PrivateAhciData->StartCommandEngine = AhciStartCommandEngine;
-
-
-    memcpy(&PrivateAhciData->BoardInfo, BoardInformation, sizeof(PrivateAhciData->BoardInfo));
 
     //Nvidia MCP65 Chip Revisions 0xA1 and 0xA2 do not support
     //MSI so we should take note of this however the losuine
@@ -1912,13 +1998,19 @@ LOUSTATUS AddAhciDevice(
 
     PATA_PORT_DEVICE_OBJECT TmpPort;
     PAHCI_DRIVER_PRIVATE_DATA TmpPrivate;
+    SIZE Port;
+    SIZE PiIndex = 0;
     ForEachAtaPort(AtaHost, TmpPort, i){
         TmpPrivate = (PAHCI_DRIVER_PRIVATE_DATA)TmpPort->PortPrivateData;
+        while(!(PrivateAhciData->PortMap & (1 << PiIndex))){
+            PiIndex++;
+        }
         TmpPort->Operations = BoardInformation->PortOperations;
         memcpy(TmpPrivate, PrivateAhciData, sizeof(AHCI_DRIVER_PRIVATE_DATA));
-        TmpPrivate->GenericPort = (PAHCI_GENERIC_PORT)(UINTPTR)((UINTPTR)Ghc + 0x100 + i * 0x80);
+        TmpPrivate->GenericPort = (PAHCI_GENERIC_PORT)(UINTPTR)((UINTPTR)Ghc + 0x100 + PiIndex * 0x80);
         AhciMarkExternalPort(TmpPort);
         AhciUpdateInitialLpmPolicy(TmpPort);
+        PiIndex++;
     }
 
     //2107

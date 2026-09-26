@@ -77,6 +77,9 @@ typedef struct _AHCI_DRIVER_PRIVATE_DATA{
     uintptr_t                               CommandTable;
     uintptr_t                               CommandTableDma;
     uint32_t                                PortMap;
+    uint32_t                                SavedPortMap;
+    uint32_t                                MaskPortMap;
+    uint32_t                                PortsMapped;
     uint8_t                                 InterruptRequestVector;
     LOUSINE_DMA_DEVICE                      DmaDevice;
     size_t                                  RemappedNvme;
