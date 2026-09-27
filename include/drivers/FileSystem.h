@@ -13,26 +13,28 @@ typedef enum _SYSTEM_IDENTIFIER_TYPE{
     VOLUME_SERIAL_NUMBER    = 1,
 }SYSTEM_IDENTIFIER_TYPE;
 
+struct _BLOCK_DEVICE_OBJECT;
+struct _LOUSINE_KERNEL_FILESYSTEM;
 
+typedef struct _LOUSINE_KERNEL_MOUNTED_FILESYSTEM{
+    ListHeader                          Peers;
+    ListHeader                          gPeers;
+    struct _LOUSINE_KERNEL_FILESYSTEM*  FileSystem;
+    LOUSINE_KERNEL_DRIVE_ID             DriveID;
+    bool                                SystemDisk;
+    struct _BLOCK_DEVICE_OBJECT*        BlockDevice;
+    UINT64                              BlockOffset;
+}LOUSINE_KERNEL_MOUNTED_FILESYSTEM, * PLOUSINE_KERNEL_MOUNTED_FILESYSTEM;
 
 typedef struct _LOUSINE_KERNEL_FILESYSTEM{
-    LOUSINE_KERNEL_DRIVE_ID                     DriveID;
-    uint8_t                                     PortID;
-    bool                                        SystemDisk;
-    struct _LOUSINE_KERNEL_FILESYSTEM*          (*FileSystemScan)(uint8_t PortNumber);
-    LOUSTATUS                                   (*FileSystemFormatDisk)(LOUSINE_KERNEL_STORAGE_DEVICE_ID DriveNumber, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
-    FILE*                                       (*FileSystemOpen)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem, uint64_t PageFlags);
-    bool                                        (*FileSystemSeek)(string FilePath, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
-    void                                        (*FileSystemClose)(string FilePath, FILE* File, struct _LOUSINE_KERNEL_FILESYSTEM* LouKeFileSystem);
-    LOUSTATUS                                   (*FileSystemGetVsi)(struct _LOUSINE_KERNEL_FILESYSTEM*, UINT64* OutVsi);
-    LOUSTATUS                                   (*FileSystemGetVid)(struct _LOUSINE_KERNEL_FILESYSTEM*, LOUSTR* OutVsi);
-    uint64_t                                    FileAllocationTableSector;
+    LOUSTATUS   (*FileSystemScan)(struct _BLOCK_DEVICE_OBJECT* BlockDevice, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM* OutFilesystem);
+    LOUSTATUS   (*FileSystemFormatDisk)(struct _BLOCK_DEVICE_OBJECT* BlockDevice, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM* LouKeFileSystem);
+    LOUSTATUS   (*FileSystemOpen)(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, FILE** OutFile);
+    LOUSTATUS   (*FileSystemSeek)(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem);
+    void        (*FileSystemClose)(string FilePath, FILE* File, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem);
+    LOUSTATUS   (*FileSystemGetVsi)(PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, UINT64* OutVsi);
+    LOUSTATUS   (*FileSystemGetVid)(PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, LOUSTR* OutVsi);
 }LOUSINE_KERNEL_FILESYSTEM, * PLOUSINE_KERNEL_FILESYSTEM;
-
-typedef struct _LOUSINE_KERNEL_MOUNTED_FILESYSTEMS{
-    ListHeader                  List;
-    PLOUSINE_KERNEL_FILESYSTEM  FileSystem;
-}LOUSINE_KERNEL_MOUNTED_FILESYSTEMS, * PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS;
 
 #define ISO     0x01
 #define FAT_SYS 0x02
@@ -46,6 +48,11 @@ typedef struct _FSStruct{
 typedef struct _ISO_STRUCT{
     uint64_t PathTableSize;
 }ISO_STRUCT, *PISO_STRUCT;
+
+
+KERNEL_EXPORT LOUSTATUS LouKeAllocateLousineKernelFilesystem(PLOUSINE_KERNEL_FILESYSTEM* OutFilesystem);
+KERNEL_EXPORT LOUSTATUS LouKeRegisterFileSystem(PLOUSINE_KERNEL_FILESYSTEM NewFileSystem);
+KERNEL_EXPORT LOUSTATUS LouKeUnRegisterFileSystem(PLOUSINE_KERNEL_FILESYSTEM FileSystem);
 
 #ifndef _USER_MODE_CODE_
 #ifndef _KERNEL_MODULE_

@@ -16,7 +16,7 @@
 #define DL_MSB_LO32 DL_LSB_HI32 + 1
 #define DL_MSB DL_MSB_LO32 + 1
 
-static bool IsIsoFileSystemEntryFileToken(string Entry, size_t EntrySize){
+/*static bool IsIsoFileSystemEntryFileToken(string Entry, size_t EntrySize){
     //the iso Filesystem has two different entryies
     //it has a directory entry and a file entry the 
     //to determine the difference the files have a 
@@ -27,10 +27,10 @@ static bool IsIsoFileSystemEntryFileToken(string Entry, size_t EntrySize){
     Entry -= 2;
     //compare for a ;1
     return (strncmp(Entry, ";1", 2) == 0);
-}
+}*/
 
 
-static bool IsPathAFileToken(string Path){
+/*static bool IsPathAFileToken(string Path){
     //The Losuine Kernel's Path system follows 
     //a c string style path it should be noted
     //that a file token is a path with and null
@@ -49,9 +49,9 @@ static bool IsPathAFileToken(string Path){
         default:
             return false;
     }
-}
+}*/
 
-static bool IsIso9660ItemOfSearch(uint8_t* FOO, string SearchDirectory){
+/*static bool IsIso9660ItemOfSearch(uint8_t* FOO, string SearchDirectory){
     bool SearchDirectoryIsFileToken = IsPathAFileToken(SearchDirectory);
     bool DirectoryEntryIsFileToken = IsIsoFileSystemEntryFileToken((string)&FOO[33], FOO[32]);
     //if the value in Directory length is less 
@@ -72,7 +72,7 @@ static bool IsIso9660ItemOfSearch(uint8_t* FOO, string SearchDirectory){
     //the Directory we are looking for
     //https://www.youtube.com/watch?v=ihyjXd2C-E8
     else return false;
-}
+}*/
 
 
 uint32_t ISOGetLBA(uint8_t* DirectoryEntry){
@@ -99,7 +99,7 @@ uint32_t ISOGetDirecotrySize(uint8_t* DirectoryEntry){
     return DATA_LEN;
 }
 
-static FILE* ISOLouKeFindDirectory(
+/*static FILE* ISOLouKeFindDirectory(
     uint32_t RootLBA,
     uint32_t RootSize, 
     uint8_t DrvNum, 
@@ -218,11 +218,12 @@ static FILE* ISOLouKeFindDirectory(
 
     LouPrint("Done With Recursion: Could Not Find File\n");
     return 0;
-}
+}*/
 
-static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x10){
-    
+//static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x10){
+    /*
     VolumeDescriptor VD;
+
 
     LOUSTATUS Status = STATUS_SUCCESS;
     uint64_t BufferSize = 2048;
@@ -301,18 +302,25 @@ static VolumeDescriptor ReadVolumeDescriptor(uint8_t DrvNum,uint32_t sector = 0x
 
         ReleaseDriveHandle((PVOID)Test);
 
-        return VD;
-}
+        return VD;*/
+
+//}
 
 
 LOUAPI
-void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-    LouKeFreeFileData(File);
+void Iso9660FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
+    //LouKeFreeFileData(File);
+
+    LouPrint("Iso9660FileSystemClose()\n");
+    while(1);
 }
 
 LOUAPI
-FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
+LOUSTATUS Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, FILE** OutFile){
 
+    LouPrint("Iso9660FileSystemOpen\n");
+    while(1);
+    /*
     UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
     //:/Dir/dir/.../file
@@ -338,13 +346,18 @@ FILE* Iso9660FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyst
         FilePath,
         false,
         PageFlags
-    );
+    );*/
     
+    LouPrint("Iso9660FileSystemOpen()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 LOUAPI
-bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-    UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
+LOUSTATUS Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
+    LouPrint("Iso9660FileSystemSeek()\n");
+    while(1);
+    /*UNUSED VolumeDescriptor VD = ReadVolumeDescriptor(FilesystemHandle->PortID);
 
     //:/Dir/dir/.../file
     //LouPrint("Seeking File:%s\n", FilePath);
@@ -368,16 +381,19 @@ bool Iso9660FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM Filesyste
         FilePath,
         true,
         KERNEL_DMA_MEMORY
-    );
+    );*/
+    
+    return STATUS_SUCCESS;
+
 }
 
 LOUAPI
 LOUSTATUS
 Iso9660FileSystemGetVid(
-    PLOUSINE_KERNEL_FILESYSTEM  FilesystemHandle,
-    LOUSTR*                     OutVid
+    PLOUSINE_KERNEL_MOUNTED_FILESYSTEM FileSystem, 
+    LOUSTR* OutVsi
 ){
-    if(!OutVid){
+    /*if(!OutVid){
         return STATUS_INVALID_PARAMETER;
     }
     
@@ -404,40 +420,46 @@ Iso9660FileSystemGetVid(
     }
     LOUSTR NewString = LouKeMallocArray(CHAR, i + 1, KERNEL_GENERIC_MEMORY);
     strncpy(NewString, TmpData, i);
-    *OutVid = NewString;
+    *OutVid = NewString;*/
+
+    LouPrint("Iso9660FileSystemGetVid()\n");
+    while(1);
     return STATUS_SUCCESS;
 }
 
 LOUAPI
-PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystemScan(uint8_t PortID){
-    VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
+LOUSTATUS Iso9660FileSystemScan(PBLOCK_DEVICE_OBJECT BlockDevice, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM* OutFilesystem){
+    /*VolumeDescriptor PVD = ReadVolumeDescriptor(PortID);
     //Create A File System Structure
     if((PVD.Type == ISO_PrimaryVolumeDescriptor) && (strncmp(PVD.Identifier, "CD001", 5) == 0) && (PVD.Version == 0x01)){
         LouPrint("ISO FileSystem Has Been Found Parseing ISO System Information\n");
         PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
         Iso9660FileSystem->PortID = PortID;
-        Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
-        Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
-        Iso9660FileSystem->FileSystemOpen = Iso9660FileSystemOpen;
-        Iso9660FileSystem->FileSystemSeek = Iso9660FileSystemSeek;
-        Iso9660FileSystem->FileSystemGetVid = Iso9660FileSystemGetVid;
+
         return Iso9660FileSystem;
-    }
-    return 0x00;
+    }*/
+
+    LouPrint("Iso9660FileSystemScan()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 LOUAPI
 LOUSTATUS Iso9660DriverEntry(){
+    LOUSTATUS Status;
+    PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem;
 
-    PLOUSINE_KERNEL_FILESYSTEM Iso9660FileSystem = LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
-
-    Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
-
-    return LouKeRegisterDevice(
-        0x00, 
-        FILESYSTEM_DEVICE_T,
-        "HKEY_LOCAL_MACHINE:/ANNYA/SYSTEM64/DRIVERS/ISO9660.SYS",
-        (void*)Iso9660FileSystem,
-        (void*)Iso9660FileSystem
+    Status = LouKeAllocateLousineKernelFilesystem(
+        &Iso9660FileSystem
     );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Iso9660FileSystem->FileSystemScan = Iso9660FileSystemScan;
+    Iso9660FileSystem->FileSystemClose = Iso9660FileSystemClose;
+    Iso9660FileSystem->FileSystemOpen = Iso9660FileSystemOpen;
+    Iso9660FileSystem->FileSystemSeek = Iso9660FileSystemSeek;
+    Iso9660FileSystem->FileSystemGetVid = Iso9660FileSystemGetVid;
+
+    return LouKeRegisterFileSystem(Iso9660FileSystem);
 }

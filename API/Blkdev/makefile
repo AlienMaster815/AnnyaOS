@@ -1,7 +1,11 @@
 #//Copyright GPL-2 Tyler Grenier (2026)
-INCLUDES = -I../../../include
+INCLUDES = -I../../include
 TARGET = BLKDEV.SYS
-SRC = Blkdev.c
+SRC = Blkdev.c \
+		Blkman.c \
+		Read.c \
+		Write.c \
+		Lnkman.c
 		
 CC = x86_64-w64-mingw32-gcc
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=BlkDevEntry -fno-builtin -Wno-multichar -mabi=ms -mno-red-zone
@@ -19,7 +23,7 @@ all: $(TARGET) $(LIB_FILE)
 #	$(MAKE) -C Hardware all
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../../KernelLibraries -llouoskrnl $(INCLUDES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -L../../KernelLibraries -llouoskrnl $(INCLUDES)
 
 # Build Rule
 $(LIB_FILE): $(DEF_FILE)

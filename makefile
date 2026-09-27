@@ -36,7 +36,7 @@ MAKEDIR64 := $(shell awk -F '[<>]' '/<MainDirectoryStructure64>/{print " " $$3 "
 CPY32 := $(shell awk -F '[<>]' '/<FILETOCPY32>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 CPY64 := $(shell awk -F '[<>]' '/<FILETOCPY64>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 
-LIBS = drivers/gpu/BootVid/BootVid.lib drivers/PCI/PCI.lib drivers/Apic/Apic.lib
+LIBS = drivers/gpu/BootVid/BootVid.lib drivers/PCI/PCI.lib drivers/Apic/Apic.lib API/Blkdev/Blkdev.lib
 
 CC = x86_64-w64-mingw32-gcc
 CP = x86_64-w64-mingw32-g++
@@ -78,11 +78,9 @@ driver_cpp_source_files := $(shell find drivers/AGP -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/FileSystems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/gpu/InternalGpuFunctions -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/ISA -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/pci_systems -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/PnP -name *.cpp)
 #driver_cpp_source_files += $(shell find drivers/Serial -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/Busses -name *.cpp)
-driver_cpp_source_files += $(shell find drivers/storage/InternalStorageDrivers -name *.cpp)
 #driver_cpp_source_files += $(shell find drivers/virtualization -name *.cpp)
 driver_cpp_source_files += $(shell find drivers/Subsystems -name *.cpp)
 

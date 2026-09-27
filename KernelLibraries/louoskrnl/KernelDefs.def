@@ -79,7 +79,6 @@ EXPORTS
     READ_REGISTER_ULONG
     LouMallocAtaHost
     sleep
-    LouKeRegisterDevice
     AtaStdQcDefer
     LouKeWaitForUlongRegisterConditionMs
     LouKeCreateFixedPool
@@ -272,3 +271,9 @@ EXPORTS
     LouKeSetIrql
     LouKeGetIrql
     read_tsc
+    LouKeDmaTransferGetOffsetVa
+    LouKeXaIsIndexUsedEx
+    LouKeXaStoreEx
+    LouKeXaFreeUint64
+    LouKeXaIsIndexUsed
+    LouKeXaStore

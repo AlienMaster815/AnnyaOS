@@ -25,9 +25,9 @@ void AtaCorePortIoQueueManager(PVOID Params){
         if(CommandPacket->CommandStatus == STATUS_SUCCESS){
             CommandPacket->CommandStatus = tStatus;
         }
-        LouPrint("Port:%d:Error :%h\n", PortDevice->PortNumber, CommandPacket->Packet.Error);
-        LouPrint("Port:%d:Status:%h\n", PortDevice->PortNumber, CommandPacket->Packet.Status);
-        LouPrint("Port:%d:CmdSTS:%h\n", PortDevice->PortNumber, CommandPacket->CommandStatus);
+        //LouPrint("Port:%d:Error :%h\n", PortDevice->PortNumber, CommandPacket->Packet.Error);
+        //LouPrint("Port:%d:Status:%h\n", PortDevice->PortNumber, CommandPacket->Packet.Status);
+        //LouPrint("Port:%d:CmdSTS:%h\n", PortDevice->PortNumber, CommandPacket->CommandStatus);
         if(PortDevice->Operations->AtaPortDeviceCleanupCommand){
             CommandPacket->CleanupStatus = PortDevice->Operations->AtaPortDeviceCleanupCommand(PortDevice, CommandPacket);
         }

@@ -124,3 +124,39 @@ void LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence){
         LouKeSignalEvent(&Transfer->DmaFence.DoneEvent);
     }
 }
+
+KERNEL_EXPORT PVOID LouKeDmaTransferGetOffsetVa(PLOUSINE_DMA_TRANSFER Transfer, SIZE ByteOffset, SIZE* RemainingInSegment){
+    if(!Transfer){
+        return 0x00;
+    }
+    switch(Transfer->Type){
+        case LOUSINE_DMA_TRANSFER_TYPE_STANDARD:{
+            if(Transfer->StandardTransfer.DmaSize < ByteOffset){
+                return 0x00;
+            }   
+            if(RemainingInSegment){
+                *RemainingInSegment = Transfer->StandardTransfer.DmaSize - ByteOffset;
+            }
+            return (PVOID)((UINT8*)Transfer->StandardTransfer.DmaAddress + ByteOffset);
+        }
+        case LOUSINE_DMA_TRANSFER_TYPE_SCATTERED:
+            break;
+        default:
+            return 0x00;
+    }    
+    SIZE SgCount = Transfer->ScatteredTransfer->TransferCount;
+    SIZE TmpOffset = 0;
+    SIZE CurrentOffset;
+    for(SIZE i = 0; i < SgCount; i++){
+        if((TmpOffset + Transfer->ScatteredTransfer->Transfers[i].DmaSize) < ByteOffset){
+            TmpOffset += Transfer->ScatteredTransfer->Transfers[i].DmaSize;
+            continue;
+        }
+        CurrentOffset = (ByteOffset - TmpOffset);
+        if(RemainingInSegment){
+            *RemainingInSegment = Transfer->ScatteredTransfer->Transfers[i].DmaSize - CurrentOffset;
+        }
+        return (PVOID)((UINT8*)Transfer->ScatteredTransfer->Transfers[i].DmaAddress + CurrentOffset);
+    }
+    return 0x00;
+}   

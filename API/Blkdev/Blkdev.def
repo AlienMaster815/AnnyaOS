@@ -1,0 +1,11 @@
+LIBRARY BLKDEV.SYS
+
+EXPORTS	
+    BlkdevApiCreateDeviceObject
+    BlkDevGetBlockDevices
+    BlkDevPutBlockDevices
+    BlkdevApiGetBlockSize
+    BlkDevApiAcquireDeviceReference
+    BlkDevApiReleaseDeviceReference
+    BlkDevApiOpenBlockSegment
+    BlkDevApiCloseBlockSegment

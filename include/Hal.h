@@ -328,7 +328,6 @@ struct _PHYSICAL_COUNTER_RESOURCE_LIST;
 #define LouKeHalClosePciCompanions(x) LouKeFree((PVOID)x)
 #define LouKeClosePciDeviceGroup(x) LouKeFree((uint8_t*)x)
 KERNEL_EXPORT void* LouKeHalGetPciVirtualBaseAddress(PPCI_COMMON_CONFIG Config, uint8_t BarNumber);
-KERNEL_EXPORT LOUSTATUS LouKeRegisterDevice(PPCI_DEVICE_OBJECT PDEV, SYSTEM_DEVICE_IDENTIFIER Sdi, string LRE, void* KeyData, void* DevicePrivateData);
 
 KERNEL_EXPORT void LouKeHalPciEnableInterrupts(PPCI_DEVICE_OBJECT PDEV);
 KERNEL_EXPORT void LouKeHalPciDisableInterrupts(PPCI_DEVICE_OBJECT PDEV);

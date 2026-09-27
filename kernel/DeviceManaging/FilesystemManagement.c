@@ -4,53 +4,53 @@ LOUSTATUS Iso9660DriverEntry();
 uint8_t LouKeGetNumberOfStorageDevices();
 LOUSTATUS FatDriverEntry();
 
+
 typedef struct _LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE{
-    ListHeader                   List;
-    PDEVICE_DIRECTORY_TABLE      FileSystem;
+    ListHeader                  Peers;
+    ListHeader                  Mfs;
+    LOUSINE_KERNEL_FILESYSTEM   FileSystem;
 }LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE, * PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE;
 
-static LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE FileSystemTable;
-static size_t FileSystemTableMembers = 0;
+static mutex_t      FileSystemsLock = {0};
+static ListHeader   FileSystems = {0};
+static SIZE         FileSystemsLoaded = 0;
 
-static LOUSINE_KERNEL_MOUNTED_FILESYSTEMS   MountedFileSystemTable;
-static size_t                               MountedFileSystemTableMembers;
-
-LOUSTATUS LouRegisterFileSystemDevice(PDEVICE_DIRECTORY_TABLE NewFileSystem){
-    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
-    for(size_t i = 0 ; i < FileSystemTableMembers; i++){
-        if(Tmp->List.NextHeader){
-            Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
-        }else{
-            Tmp->List.NextHeader = (PListHeader)LouKeMallocType(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE,  KERNEL_GENERIC_MEMORY);
-            Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
-        }
+KERNEL_EXPORT LOUSTATUS LouKeAllocateLousineKernelFilesystem(PLOUSINE_KERNEL_FILESYSTEM* OutFilesystem){
+    if(!OutFilesystem){
+        return STATUS_INVALID_PARAMETER;
     }
-    Tmp->FileSystem = NewFileSystem;
-    FileSystemTableMembers++;
+    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE NewTable = LouKeMallocType(LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE, KERNEL_GENERIC_MEMORY);
+    if(!NewTable){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    *OutFilesystem = &NewTable->FileSystem; 
     return STATUS_SUCCESS;
 }
 
-
-LOUSTATUS LouUnRegisterFileSystemDevice(PDEVICE_INFORMATION_TABLE FileSystem){
-    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
-    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp2 = &FileSystemTable;
-    for(size_t i = 0 ; i < FileSystemTableMembers; i++){
-        if(Tmp->List.NextHeader){
-            Tmp = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp->List.NextHeader;
-        }
-        if(Tmp->FileSystem == FileSystem){
-            for(size_t j = 0 ; j < i; j++){
-                if(Tmp->List.NextHeader){
-                    Tmp2 = (PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE)Tmp2->List.NextHeader;
-                }       
-            }
-            Tmp2->List.NextHeader = Tmp->List.NextHeader; 
-            LouKeFree((PVOID)Tmp);
-            FileSystemTableMembers--;
-            return STATUS_SUCCESS;
-        }
+KERNEL_EXPORT LOUSTATUS LouKeRegisterFileSystem(PLOUSINE_KERNEL_FILESYSTEM NewFileSystem){
+    if(!NewFileSystem){
+        return STATUS_INVALID_PARAMETER;
     }
-    return STATUS_UNSUCCESSFUL;
+    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE NewFileSystemTable = CONTAINER_OF(NewFileSystem, LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE, FileSystem);
+    MutexLock(&FileSystemsLock);
+    LouKeListAddTail(&NewFileSystemTable->Peers, &FileSystems);
+    FileSystemsLoaded++;
+    MutexUnlock(&FileSystemsLock);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT LOUSTATUS LouKeUnRegisterFileSystem(PLOUSINE_KERNEL_FILESYSTEM FileSystem){
+    if(!FileSystem){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE FileSystemTable = CONTAINER_OF(FileSystem, LOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE, FileSystem);
+
+    MutexLock(&FileSystemsLock);
+    LouKeListDeleteItem(&FileSystemTable->Peers);
+    FileSystemsLoaded--;
+    MutexUnlock(&FileSystemsLock);
+    LouKeFree(FileSystemTable);
+    return STATUS_SUCCESS;
 }
 
 typedef struct _DRIVE_ID_TABLE{
@@ -88,7 +88,7 @@ UNUSED static DRIVE_ID_TABLE DriveIdTable[25] = {
 
 void InitializeFileSystemManager(){
     
-    /*PVOID SystemIdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER_TYPE", 0x00);
+    PVOID SystemIdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER_TYPE", 0x00);
     PVOID IdHandle = LouKeOpenRegistryHandle(L"KERNEL_DEFAULT_CONFIG\\SystemDrive\\SYSTEM_IDENTIFIER", 0x00);
     UINT8 RawByteId;
     LouKeReadRegistryByteValue(SystemIdHandle, &RawByteId);
@@ -112,7 +112,38 @@ void InitializeFileSystemManager(){
     Iso9660DriverEntry(); 
     //FatDriverEntry();      
 
-    uint8_t PortCount = LouKeGetNumberOfStorageDevices();
+    PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE TmpTable;
+    PListHeader BlockDevices = BlkDevGetBlockDevices();
+    PBLOCK_DEVICE_OBJECT TmpBlockDevice;
+    ForEachListEntry(TmpBlockDevice, BlockDevices, Peers){
+        BlkDevApiAcquireDeviceReference(TmpBlockDevice);
+        if(!BlkdevApiGetBlockSize(TmpBlockDevice)){
+            goto _PUT_BLKDEV;
+        }
+        ForEachListEntry(TmpTable, &FileSystems, Peers){
+            PLOUSINE_KERNEL_FILESYSTEM TmpFileSystem = &TmpTable->FileSystem;
+            PLOUSINE_KERNEL_MOUNTED_FILESYSTEM MountedFileSystem;
+            LOUSTATUS Status;
+            if(!TmpFileSystem->FileSystemScan){
+                goto _NEXT_FILESYSTEM;
+            }
+            Status = TmpFileSystem->FileSystemScan(TmpBlockDevice, &MountedFileSystem);
+            if(Status != STATUS_SUCCESS){
+                goto _NEXT_FILESYSTEM;
+            }
+
+            LouPrint("InitializeFileSystemManager()\n");
+            while(1);
+
+        _NEXT_FILESYSTEM:
+        }
+
+    _PUT_BLKDEV:
+        BlkDevApiReleaseDeviceReference(TmpBlockDevice);
+    }
+    BlkDevPutBlockDevices();
+
+    /*uint8_t PortCount = LouKeGetNumberOfStorageDevices();
     PLOUSINE_KERNEL_DEVICE_MANAGER_FILE_SYSTEM_TABLE Tmp = &FileSystemTable;
     for(size_t FileSystemIndex = 0 ; FileSystemIndex < FileSystemTableMembers; FileSystemIndex++){
         PLOUSINE_KERNEL_FILESYSTEM FileSystemHandle = Tmp->FileSystem->KeyData;
@@ -191,12 +222,4 @@ void InitializeFileSystemManager(){
         default:
             break;
     }*/
-}
-
-PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable(){
-    return &MountedFileSystemTable;
-}
-
-size_t GetMountedFileSystemTableMembers(){
-    return MountedFileSystemTableMembers;
 }

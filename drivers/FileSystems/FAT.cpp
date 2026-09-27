@@ -86,97 +86,104 @@ typedef uint8_t FINAL_VERDICT;
 #define FAT32_EXT   4
 
 LOUAPI
-void Fat12FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+void Fat12FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
 
-    
-
+    LouPrint("Fat12FileSystemClose()\n");
+    while(1);
 }
 
 LOUAPI
-FILE* Fat12FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
+LOUSTATUS Fat12FileSystemOpen(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, FILE** OutFile){
 
-
-
-    return 0x00;
+    LouPrint("Fat12FileSystemOpen()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 LOUAPI
-bool Fat12FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+LOUSTATUS Fat12FileSystemSeek(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
 
-    
-    return false;
-}
-
-
-LOUAPI
-void Fat16FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-
-    
-
-}
-
-LOUAPI
-FILE* Fat16FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
-
-
-
-    return 0x00;
-}
-
-LOUAPI
-bool Fat16FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-
-    
-    return false;
+    LouPrint("Fat12FileSystemSeek()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 
 LOUAPI
-void Fat32FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+void Fat16FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
 
-    
-
+    LouPrint("Fat12FileSystemClose()\n");
+    while(1);
 }
 
 LOUAPI
-FILE* Fat32FileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
+LOUSTATUS Fat16FileSystemOpen(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, FILE** OutFile){
 
-
-
-    return 0x00;
+    LouPrint("Fat16FileSystemOpen\n");
+    while(1);
+    return  STATUS_SUCCESS;
 }
 
 LOUAPI
-bool Fat32FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+LOUSTATUS 
+Fat16FileSystemSeek(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
 
-    return false;
+    LouPrint("Fat16FileSystemSeek()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+LOUAPI
+void Fat32FileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
+
+    LouPrint("Fat32FileSystemClose()\n");
+    while(1);
+}
+
+LOUAPI
+FILE* Fat32FileSystemOpen(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, FILE** OutFile){
+
+
+    LouPrint("Fat32FileSystemOpen");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUAPI
+LOUSTATUS Fat32FileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
+
+    LouPrint("Fat32FileSystemSeek()\n");
+    while(1);   
+    return STATUS_SUCCESS;
 }
 
 LOUAPI
 void Fat32ExtFileSystemClose(string FilePath, FILE* File, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
 
-    
-
+    LouPrint("Fat32ExtFileSystemClose()\n");
+    while(1);   
 }
 
 LOUAPI
-FILE* Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle, uint64_t PageFlags){
+LOUSTATUS Fat32ExtFileSystemOpen(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem, FILE** OutFile){
 
-
-
-    return 0x00;
+    LouPrint("Fat32ExtFileSystemOpen\n");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 LOUAPI
-bool Fat32ExtFileSystemSeek(string FilePath, PLOUSINE_KERNEL_FILESYSTEM FilesystemHandle){
-
-    return false;
+LOUSTATUS Fat32ExtFileSystemSeek(string FilePath, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM LouKeFileSystem){
+    LouPrint("Fat32ExtFileSystemSeek()");
+    while(1);
+    return STATUS_SUCCESS;
 }
 
 
 LOUAPI
-PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
-    LouPrint("Searching For Fat FileSystem\n");
+LOUSTATUS FatFileSystemScan(PBLOCK_DEVICE_OBJECT BlockDevice, PLOUSINE_KERNEL_MOUNTED_FILESYSTEM* OutFilesystem){
+    /*LouPrint("Searching For Fat FileSystem\n");
     
     LOUSTATUS Status = STATUS_SUCCESS;
     uint64_t BufferSize = 512;
@@ -298,22 +305,18 @@ PLOUSINE_KERNEL_FILESYSTEM FatFileSystemScan(uint8_t PortID){
         NewFat32ExtSystem->FileSystemSeek = Fat32ExtFileSystemSeek;
         return NewFat32ExtSystem;
     }
-    }
+    }*/
     //redundant return for for the fussy mingw
-    return 0x00;
+    return STATUS_SUCCESS;
 }
 
 LOUAPI
 LOUSTATUS FatDriverEntry(){
-    PLOUSINE_KERNEL_FILESYSTEM FatFileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
+    //PLOUSINE_KERNEL_FILESYSTEM FatFileSystem = (PLOUSINE_KERNEL_FILESYSTEM)LouKeMallocType(LOUSINE_KERNEL_FILESYSTEM, KERNEL_GENERIC_MEMORY);
 
-    FatFileSystem->FileSystemScan = FatFileSystemScan;
+    //FatFileSystem->FileSystemScan = FatFileSystemScan;
 
-    return LouKeRegisterDevice(
-        0x00, 
-        FILESYSTEM_DEVICE_T,
-        "HKEY_LOCAL_MACHINE:/ANNYA/SYSTEM64/DRIVERS/FAT.SYS",
-        (void*)FatFileSystem,
-        (void*)FatFileSystem
-    );
+    LouPrint("FatDriverEntry()\n");
+    while(1);
+    return STATUS_SUCCESS;
 }

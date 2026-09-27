@@ -7,21 +7,23 @@
 #include <kernel/XArray.h>
 
 typedef struct _BLOCK_SEGMENT{
-    SIZE    BlockID;
-    SIZE    Blocks;
+    SIZE    BlockNumber;
+    SIZE    BlockCount;
 }BLOCK_SEGMENT, * PBLOCK_SEGMENT;
 
 struct _BLKDEV_OPENED_BLOCK_SEGMENT;
+struct _BLOCK_DEVICE_OBJECT;
 
 typedef struct _BLKDEV_OPENED_BLOCK{
-    SIZE                                        BlockID;
+    ListHeader                                  Peers;
+    SIZE                                        BlockNumber;
+    SIZE                                        BlockSize;
     BOOLEAN                                     BlockInSegment;
-    PVOID                                       BlockData;
     KERNEL_REFERENCE                            References;
     mutex_t                                     Loto;
-    LOUSINE_DMA_TRANSFER                        DmaTransfer;
+    struct _BLOCK_DEVICE_OBJECT*                Device;
     union{
-        SIZE                                    BlockSize;
+        PLOUSINE_DMA_TRANSFER                   DmaTransfer;
         struct _BLKDEV_OPENED_BLOCK_SEGMENT*    OwnerSegment;
     };
 }BLKDEV_OPENED_BLOCK, * PBLKDEV_OPENED_BLOCK;
@@ -29,17 +31,17 @@ typedef struct _BLKDEV_OPENED_BLOCK{
 typedef struct _BLKDEV_OPENED_BLOCK_SEGMENT{
     ListHeader                      Peers;
     BLOCK_SEGMENT                   BlockSegment;
-    PVOID                           BlockData;
     SIZE                            BlockSize;
-    SIZE                            BlockCount;
-    SIZE                            BlockSizeTotal;
+    SIZE                            TotalSize;
     KERNEL_REFERENCE                References;
     mutex_t                         Loto;
-    LOUSINE_DMA_TRANSFER            DmaTransfer;
+    struct _BLOCK_DEVICE_OBJECT*    Device;
+    PLOUSINE_DMA_TRANSFER           DmaTransfer;
     BLKDEV_OPENED_BLOCK             Blocks[];
 }BLKDEV_OPENED_BLOCK_SEGMENT, * PBLKDEV_OPENED_BLOCK_SEGMENT;
 
 #define BLKDEV_FLAGS_READ_ONLY_DEVICE   (1 << 0)
+#define BLKDEV_FLAGS_
 
 struct _BLKDEV_OPERATIONS;
 
@@ -49,11 +51,13 @@ typedef struct _BLOCK_DEVICE_OBJECT{
     PLOUSINE_DMA_DEVICE         DmaDevice;
     SIZE                        BlockSize;
     SIZE                        BlockCount;
+    mutex_t                     Loto;
     struct _BLKDEV_OPERATIONS*  Operations;
     PVOID                       PrivateData;
     ListHeader                  OpenedSegments;
     ListHeader                  OpenedBlocksList;
     XARRAY                      OpenedBlocksXa;
+    KERNEL_REFERENCE            DeviceReference;
 }BLOCK_DEVICE_OBJECT, * PBLOCK_DEVICE_OBJECT;
 
 
@@ -82,25 +86,27 @@ BlkdevApiCreateDeviceObject(
     PVOID               PrivateData
 );
 
-#ifndef _KERNEL_MODULE_ //i dont want externals using these
-DRIVER_IMPORT LOUSTATUS BlkdevApiAcquireBlockDevices(ListHeader** BlockDevicesList);
-DRIVER_IMPORT LOUSTATUS BlkdevApiReleaseBlockDevices();
-#endif
+DRIVER_IMPORT LOUSTATUS BlkDevApiFlushBlockDevice(PBLOCK_DEVICE_OBJECT Device);
+DRIVER_IMPORT LOUSTATUS BlkDevApiSoftwareDefragment(PBLOCK_DEVICE_OBJECT Device);
+DRIVER_IMPORT LOUSTATUS BlkDevApiHardwareDefragment(PBLOCK_DEVICE_OBJECT Device);
 
-DRIVER_IMPORT LOUSTATUS BlkdevApiFlushBlockDevice(PBLOCK_DEVICE_OBJECT Device);
-DRIVER_IMPORT LOUSTATUS BlkdevApiSoftwareDefragment(PBLOCK_DEVICE_OBJECT Device);
-DRIVER_IMPORT LOUSTATUS BlkdevApiHardwareDefragment(PBLOCK_DEVICE_OBJECT Device);
+DRIVER_IMPORT LOUSTATUS BlkDevApiReadBlock(PBLKDEV_OPENED_BLOCK Block, PVOID Buffer, SIZE ByteOffset, SIZE ByteCount);
+DRIVER_IMPORT LOUSTATUS BlkDevApiWriteBlock(PBLKDEV_OPENED_BLOCK Block, PVOID Buffer, SIZE ByteOffset, SIZE ByteCount);
+DRIVER_IMPORT LOUSTATUS BlkDevApiCloseBlock(PBLKDEV_OPENED_BLOCK Block);
+DRIVER_IMPORT LOUSTATUS BlkDevApiOpenBlock(PBLOCK_DEVICE_OBJECT Device, SIZE Block, PBLKDEV_OPENED_BLOCK* BlockOut);
 
-DRIVER_IMPORT LOUSTATUS BlkdevApiReadBlock(PBLOCK_DEVICE_OBJECT Device, PBLKDEV_OPENED_BLOCK Block);
-DRIVER_IMPORT LOUSTATUS BlkdevApiWriteBlock(PBLOCK_DEVICE_OBJECT Device, PBLKDEV_OPENED_BLOCK Block);
-DRIVER_IMPORT LOUSTATUS BlkdevApiCloseBlock(PBLOCK_DEVICE_OBJECT Device, PBLKDEV_OPENED_BLOCK Block);
-DRIVER_IMPORT LOUSTATUS BlkdevApiOpenBlock(PBLOCK_DEVICE_OBJECT Device, SIZE BlockID, PBLKDEV_OPENED_BLOCK* BlockOut);
+DRIVER_IMPORT LOUSTATUS BlkDevApiReadBlockSegment(PBLKDEV_OPENED_BLOCK_SEGMENT Segment, PVOID Buffer, SIZE ByteOffset, SIZE ByteCount);
+DRIVER_IMPORT LOUSTATUS BlkDevApiWriteBlockSegment(PBLKDEV_OPENED_BLOCK_SEGMENT Segment, PVOID Buffer, SIZE ByteOffset, SIZE ByteCount);
+DRIVER_IMPORT LOUSTATUS BlkDevApiCloseBlockSegment(PBLKDEV_OPENED_BLOCK_SEGMENT Segment);
+DRIVER_IMPORT LOUSTATUS BlkDevApiOpenBlockSegment(PBLOCK_DEVICE_OBJECT Device, PBLOCK_SEGMENT BlockSegment, PBLKDEV_OPENED_BLOCK_SEGMENT* SegmentOut);
 
-DRIVER_IMPORT LOUSTATUS BlkdevApiReadBlockSegment(PBLOCK_DEVICE_OBJECT Device, PBLKDEV_OPENED_BLOCK_SEGMENT Segment);
-DRIVER_IMPORT LOUSTATUS BlkdevApiWriteBlockSegment(PBLOCK_DEVICE_OBJECT Device, PBLKDEV_OPENED_BLOCK_SEGMENT Segment);
-DRIVER_IMPORT LOUSTATUS BlkdevApiCloseBlockSegment(PBLOCK_DEVICE_OBJECT Device, PBLKDEV_OPENED_BLOCK_SEGMENT Segment);
-DRIVER_IMPORT LOUSTATUS BlkdevApiOpenBlockSegment(PBLOCK_DEVICE_OBJECT Device, PBLOCK_SEGMENT BlockSegment, PBLKDEV_OPENED_BLOCK_SEGMENT* SegmentOut);
+DRIVER_IMPORT PListHeader BlkDevGetBlockDevices();
+DRIVER_IMPORT void BlkDevPutBlockDevices();
 
+DRIVER_IMPORT SIZE BlkdevApiGetBlockSize(PBLOCK_DEVICE_OBJECT BlockDevice);
+
+DRIVER_IMPORT LOUSTATUS BlkDevApiAcquireDeviceReference(PBLOCK_DEVICE_OBJECT BlockDevice);
+DRIVER_IMPORT void BlkDevApiReleaseDeviceReference(PBLOCK_DEVICE_OBJECT BlockDevice);
 
 
 #endif

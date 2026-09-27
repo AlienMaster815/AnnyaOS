@@ -23,6 +23,22 @@ LOUSTATUS BlkDevEntry(){
     return STATUS_SUCCESS;
 }
 
+DRIVER_EXPORT PListHeader BlkDevGetBlockDevices(){
+    MutexLock(&DeviceLock);
+    return &DeviceList;
+}
+
+DRIVER_EXPORT void BlkDevPutBlockDevices(){
+    MutexUnlock(&DeviceLock);
+}
+
+DRIVER_EXPORT
+SIZE  
+BlkdevApiGetBlockSize(
+    PBLOCK_DEVICE_OBJECT BlockDevice
+){
+    return BlockDevice->BlockSize;
+}
 
 DRIVER_EXPORT 
 LOUSTATUS 
@@ -55,4 +71,20 @@ BlkdevApiCreateDeviceObject(
     BlkDevDbgPrint("BLKDEV.SYS:Block Device Created Successfully\n");
 
     return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT LOUSTATUS BlkDevApiAcquireDeviceReference(PBLOCK_DEVICE_OBJECT BlockDevice){
+    if(!BlockDevice){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    if(LouKeAcquireReference(&BlockDevice->DeviceReference)){
+        return STATUS_SUCCESS;
+    }
+    return STATUS_UNSUCCESSFUL;
+}
+
+DRIVER_EXPORT void BlkDevApiReleaseDeviceReference(PBLOCK_DEVICE_OBJECT BlockDevice){
+    if(BlockDevice){
+        LouKeReleaseReference(&BlockDevice->DeviceReference);
+    }
 }

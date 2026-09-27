@@ -339,7 +339,9 @@ void LouOsKrnlStart(
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
 
     PciHalScanBootDevices();
-    
+
+    InitializeFileSystemManager();
+
     //sleep(2000);
     
     //uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();

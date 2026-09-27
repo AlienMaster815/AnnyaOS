@@ -5,14 +5,17 @@
 LOUAPI FSStruct* GetDriveFss(uint8_t DriveNumber);
 LOUAPI FSStruct* GetSystemDiskFss();
 LOUAPI uint8_t GetDriveNumberByFss(FSStruct* Fs);
-LOUAPI PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable();
-LOUAPI size_t GetMountedFileSystemTableMembers();
+//LOUAPI PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS GetMountedFileSystemTable();
+//LOUAPI size_t GetMountedFileSystemTableMembers();
 //static spinlock_t FOpenLock;
 
 LOUAPI
 bool fseek(string FileName){
-      
-    PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
+    
+    LouPrint("fseek()\n");
+    while(1);
+
+    /*PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
 
     size_t FileSystemsToCheck = GetMountedFileSystemTableMembers();
     char DriveString[2] = {
@@ -48,15 +51,17 @@ bool fseek(string FileName){
         if(MountedSystems->List.NextHeader){
             MountedSystems = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)MountedSystems->List.NextHeader;
         }
-    }
+    }*/
 
     return false;
 }
 
 LOUAPI
 PVOID fopen(string FileName, uint64_t PageFlags){
-    
-    PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
+    LouPrint("fopen()\n");
+    while(1);
+
+    /*PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();
 
     size_t FileSystemsToCheck = GetMountedFileSystemTableMembers();
     char DriveString[2] = {
@@ -93,7 +98,7 @@ PVOID fopen(string FileName, uint64_t PageFlags){
             MountedSystems = (PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS)MountedSystems->List.NextHeader;
         }
     }
-    LouPrint("Unable To Open File:%s\n", FileName);
+    LouPrint("Unable To Open File:%s\n", FileName);*/
     return 0x00;
 }
 
