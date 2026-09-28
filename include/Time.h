@@ -41,6 +41,8 @@ KERNEL_EXPORT void sleep_till(uint64_t Stamp);
 uint64_t GetCurrentTimeInMilliseconds();
 void sleepEx(uint8_t Interval, uint64_t Time);
 void LouKeThreadSleep(size_t Ms);
+void LouKeThreadSleepNoYield(SIZE Ms);
+void LouKeBlockThreadNoYield(PTHREAD Thread);
 uint64_t GetTscFromNowMilliseconds(uint64_t ms);
 bool LouKeDidTimeoutExpire(PTIME_T Timeout);
 bool LouKeIsTimeoutNull(PTIME_T Timeout);

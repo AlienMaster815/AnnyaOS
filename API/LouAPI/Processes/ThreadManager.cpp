@@ -628,7 +628,8 @@ void TsmThreadSchedualManagerObject::TsmDeasignThreadFromSchedual(PGENERIC_THREA
     }
 }
 
-LOUAPI void LouKeThreadSleep(SIZE Ms){
+
+LOUAPI void LouKeThreadSleepEx(SIZE Ms, BOOLEAN Yeild){
     uint64_t ThreadID = LouKeGetThreadIdentification();
     UINT64 CurrentTSC;
     UINT64 TscFrequency;
@@ -651,10 +652,19 @@ LOUAPI void LouKeThreadSleep(SIZE Ms){
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     LouKeUnlockProcManager(&Irql);
-    if(ThreadData->ThreadID == ThreadID){
+    if(Yeild){
         LouKeYieldExecution();
+        sleep_till(Expiration);
     }
-    sleep_till(Expiration);
+}
+
+
+LOUAPI void LouKeThreadSleepNoYield(SIZE Ms){
+    LouKeThreadSleepEx(Ms, false);
+}
+
+LOUAPI void LouKeThreadSleep(SIZE Ms){
+    LouKeThreadSleepEx(Ms, true);
 }
 
 LOUAPI

@@ -168,12 +168,18 @@ VmmAllocationTrackerAllocate(
             NewData->Flags = Flags;
             NewData->AllocationTracker = LouKeAllocateLazyBuffer((PVOID)AllocationTracker->VBase, AllocationTracker->VSize, 0, Flags);
             //store the new process tracker in its xarray
-            LouKeXaStore(
+            LOUSTATUS Status = LouKeXaStore(
                 &AllocationTracker->VmmData,
                 ProcessID,
                 NewData,
+                0x00,
                 KERNEL_GENERIC_MEMORY
             );
+            if(Status != STATUS_SUCCESS){
+                LouPrint("VmmAllocationTrackerAllocate()\n");
+                while(1);
+            }
+            
             //alloctate the needed buffer
             Result = LouKeMallocFromLazyBufferEx(NewData->AllocationTracker, Size, Alignment);
             //if successfull acquire references to the process counter AND the Item counter

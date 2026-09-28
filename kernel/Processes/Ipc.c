@@ -39,7 +39,10 @@ LouKeCreateIpcManagerForProcess(
         goto _ERROR_OUT;
     }
     NewManager->Callback = Callback;
-    LouKeXaStore(&ProcessIpcManagers, ProcessID, NewManager, KERNEL_GENERIC_MEMORY);
+    Status = LouKeXaStore(&ProcessIpcManagers, ProcessID, NewManager, 0x00, KERNEL_GENERIC_MEMORY);
+    if(Status != STATUS_SUCCESS){
+        goto _ERROR_OUT;
+    }
     if(OutManagerOpt){
         *OutManagerOpt = NewManager;
     }

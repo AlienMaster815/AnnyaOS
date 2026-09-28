@@ -6,24 +6,8 @@ extern "C"{
 #endif
 
 
-typedef struct _KERNEL_EVENT_OBJECT{
-    BOOL                Completed;
-    mutex_t             Lock;
-    SIZE                TimeOut;
-    PTHREAD             Thread;
-}KERNEL_EVENT_OBJECT, * PKERNEL_EVENT_OBJECT;
-
-static inline void LouKeInitializeEventTimeOut(
-    PKERNEL_EVENT_OBJECT    Event,
-    size_t                  TimeOut
-){
-    Event->TimeOut = TimeOut;
-}
-
 #ifndef _USER_MODE_CODE_
 
-KERNEL_EXPORT LOUSTATUS LouKeWaitForEvent(PKERNEL_EVENT_OBJECT Event);
-KERNEL_EXPORT void      LouKeSignalEvent(PKERNEL_EVENT_OBJECT Event);
 
 #endif
 

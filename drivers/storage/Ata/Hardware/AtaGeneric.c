@@ -428,8 +428,8 @@ LOUSTATUS AddAtaDevice(
             GenericData->Ports.BusMasterCmd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_CMD_REG_OFFSET;
             GenericData->Ports.BusMasterSts = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_STS_REG_OFFSET;
             GenericData->Ports.BusMasterPrd = BusMaster + (ATA_BM_SEC_IDE_CMD_REG_OFFSET * i) + ATA_BM_PRI_IDE_PRD_REG_OFFSET;
+            TmpPort->OptionalDmaDevice = &PciIdeBusMasterDevice;    
         }
-        TmpPort->OptionalDmaDevice = &PciIdeBusMasterDevice;
     }
     Status = AtaCoreRegisterAtaHostDevice(NewHostDevice);
     if(Status != STATUS_SUCCESS){

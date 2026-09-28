@@ -3,16 +3,16 @@
 
 
 KERNEL_EXPORT
-PVOID 
+LOUSTATUS 
 LouKeXaStoreEx(
     PXARRAY     Array,
     UINT64      Index,
     PVOID       Pointer,
+    PVOID*      LastPointerOut,
     UINT64      PageFlags
 ){
     PXARRAY_NODE TmpNode;
     BOOLEAN NodePreExists = false;
-    UINTPTR Result;
     UINT64 Member;
     ForEachListEntry(TmpNode, &Array->Nodes, Peers){
         if(RangeInterferes(
@@ -25,16 +25,20 @@ LouKeXaStoreEx(
     }
     if(!NodePreExists){
         TmpNode = LouKeMallocType(XARRAY_NODE, PageFlags);
+        if(!TmpNode){
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
         TmpNode->Base = ROUND_DOWN64(Index, 64);
         LouKeListAddTail(&TmpNode->Peers, &Array->Nodes);  
     }
 
     Member = Index - TmpNode->Base;
-    Result = TmpNode->Entries[Member];
+    if(LastPointerOut){
+        *LastPointerOut = (PVOID)TmpNode->Entries[Member];
+    }
     TmpNode->Entries[Member] = (UINT64)Pointer;
     TmpNode->Bitmap |= (1 << Member);
-
-    return (PVOID)Result;
+    return STATUS_SUCCESS;
 }
 
 KERNEL_EXPORT
@@ -167,16 +171,17 @@ LouKeXaIsIndexUsed(
 }
 
 KERNEL_EXPORT
-PVOID 
+LOUSTATUS 
 LouKeXaStore(
     PXARRAY     Array,
     UINT64      Index,
     PVOID       Pointer,
+    PVOID*      LastPointerOut,
     UINT64      PageFlags
 ){
-    PVOID Result;
+    LOUSTATUS Result;
     LouKeXaLockArray(Array);
-    Result = LouKeXaStoreEx(Array, Index, Pointer, PageFlags);
+    Result = LouKeXaStoreEx(Array, Index, Pointer, LastPointerOut, PageFlags);
     LouKeXaUnlockArray(Array);
     return Result;
 }
@@ -197,15 +202,16 @@ LouKeXarrayAllocateUint64(
     LouKeXaLockArray(Array);
     for(; i < Limit; i++){
         if(!LouKeXaIsIndexUsedEx(Array, i)){
-            LouKeXaStoreEx(
+            LOUSTATUS Status = LouKeXaStoreEx(
                 Array,
                 i,
                 Entry,
+                0x00,
                 PageFlags
             );
             *Id = i;
             LouKeXaUnlockArray(Array);
-            return STATUS_SUCCESS;
+            return Status;
         }
     }   
     LouKeXaUnlockArray(Array);
@@ -234,15 +240,16 @@ LouKeXarrayAllocateInt(
     Limit = Limit ? Limit : INT32_MAX;
     for(; i <= Limit; i++){
         if(!LouKeXaIsIndexUsedEx(Array, i)){
-            LouKeXaStoreEx(
+            LOUSTATUS Status = LouKeXaStoreEx(
                 Array,
                 i,
                 Entry,
+                0x00,
                 PageFlags
             );
             *Id = i;
             LouKeXaUnlockArray(Array);
-            return STATUS_SUCCESS;
+            return Status;
         }
     }   
     LouKeXaUnlockArray(Array);
@@ -266,15 +273,16 @@ LouKeXarrayAllocateUint32(
     Limit = Limit ? Limit : UINT32_MAX;
     for(; i <= Limit; i++){
         if(!LouKeXaIsIndexUsedEx(Array, (UINT64)i)){
-            LouKeXaStoreEx(
+            LOUSTATUS Status = LouKeXaStoreEx(
                 Array,
                 (UINT64)i,
                 Entry,
+                0x00,
                 PageFlags
             );
             *Id = i;
             LouKeXaUnlockArray(Array);
-            return STATUS_SUCCESS;
+            return Status;
         }
     }   
     LouKeXaUnlockArray(Array);

@@ -56,7 +56,9 @@ BlkdevApiCreateDeviceObject(
         BlkDevDbgPrint("BLKDEV.SYS:Unable To Create New Block Device\n");
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-    
+
+    LouPrint("BlockSize:%h\n", BlockSize);
+
     NewBlockDevice->DeviceFlags = DeviceFlags;
     NewBlockDevice->DmaDevice = DmaDevice;
     NewBlockDevice->BlockSize = BlockSize;

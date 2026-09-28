@@ -277,3 +277,4 @@ EXPORTS
     LouKeXaFreeUint64
     LouKeXaIsIndexUsed
     LouKeXaStore
+    LouKeQueueInterruptWork 

@@ -60,7 +60,7 @@ LouKeAcquireExloMutex(
         LouKeUnblockThread(ExloThread);
     }
     SemaphoreSynchronizeIfFullTillEvent(&ExloMutex->Counter, &ExloMutex->ReleaseEvent);
-    MutexSynchronize(&ExloMutex->ExloLock);
+    MutexSynchronizeNoBlocking(&ExloMutex->ExloLock);
     SemaphoreLock(&ExloMutex->Counter);*/
 }
 

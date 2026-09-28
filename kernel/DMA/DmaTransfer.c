@@ -2,6 +2,9 @@
 
 //TODO LouKeCreateDmaTransfer
 
+uint64_t read_tsc();
+uint64_t GetTscMaster();
+
 PLOUSINE_DMA_TRANSFER LouKeCreateDmaTransfer(PLOUSINE_DMA_DEVICE DmaDevice, SIZE AllocationSize, SIZE LowestAlignment){
     if(!DmaDevice){
         return 0x00;
@@ -44,7 +47,7 @@ PLOUSINE_DMA_TRANSFER LouKeCreateDmaTransfer(PLOUSINE_DMA_DEVICE DmaDevice, SIZE
         NewTransfer->StandardTransfer.DmaSize = AllocationSize;
     }
     NewTransfer->DmaDevice = DmaDevice;
-    LouKeSetAtomicBoolean(&NewTransfer->DmaDone, 0);
+    NewTransfer->DmaDone = 0;
     return NewTransfer;
 
 _DMA_ALLOCATION_ERROR:
@@ -80,50 +83,90 @@ KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfe
     if(!Transfer){
         return STATUS_INVALID_PARAMETER;
     }
-    if(Poll){
-        LouKeSetAtomic(&Transfer->DmaFence.Wait, Wait);
-    }else{
-        LouKeInitializeEventTimeOut(&Transfer->DmaFence.DoneEvent, (SIZE)Wait);
+    MutexLock(&Transfer->DmaFence.DmaFenceFence);
+    MutexLock(&Transfer->DmaFence.DmaFence);
+    Transfer->DmaFence.Wait = Wait;
+    Transfer->DmaFence.Poll = Poll;
+    if(!Poll){
+        Transfer->DmaFence.Thread = LouKeGetCurrentThreadHandle();
     }
-    LouKeSetAtomicBoolean(&Transfer->DmaFence.Poll, Poll);
     return STATUS_SUCCESS;
 }
 
-uint64_t read_tsc();
-uint64_t GetTscMaster();
+void _LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence){
+    MutexSynchronizeNoBlocking(&Fence->DmaFence); //yeild till the fence is ready
+    PLOUSINE_DMA_TRANSFER Transfer = CONTAINER_OF(Fence, LOUSINE_DMA_TRANSFER, DmaFence);
+    Transfer->DmaDone = true;
+    if(Fence->Thread){
+        LouKeUnblockThread(Fence->Thread);
+    }
+}
+
+
+
+LOUSTATUS _LouKeDmaSignalDmaFenceDelayedWork(PVOID Data){
+    _LouKeDmaSignalDmaFence((PLOUSINE_DMA_FENCE)Data);
+    return STATUS_SUCCESS;
+}
+
+KERNEL_EXPORT
+void 
+LouKeDmaSignalDmaFence(
+    PLOUSINE_DMA_FENCE Fence
+){
+    DELAYED_FUNCTION Work ={
+        .DelayedFunction = _LouKeDmaSignalDmaFenceDelayedWork,
+        .WorkData = (PVOID)Fence,
+    };
+    LouKeQueueInterruptWork(Work);
+}
 
 KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
-    BOOLEAN Poll = LouKeGetAtomicBoolean(&Transfer->DmaFence.Poll);
+    BOOLEAN Poll = Transfer->DmaFence.Poll;
     SIZE    CurrentTSC;
     SIZE    TscFrequency;
     SIZE    Expiration;
-    SIZE    Wait = (SIZE)LouKeGetAtomic(&Transfer->DmaFence.Wait);
+    SIZE    Wait = (SIZE)Transfer->DmaFence.Wait;
     BOOLEAN TransferDone;
     if(Poll){
+        MutexUnlock(&Transfer->DmaFence.DmaFence);
         CurrentTSC = read_tsc();
         TscFrequency = GetTscMaster() / 1000;
         Expiration = CurrentTSC + (Wait * TscFrequency);
         while(CurrentTSC <= Expiration){
             CurrentTSC = read_tsc();
-            TransferDone = LouKeGetAtomicBoolean(&Transfer->DmaDone);
+            TransferDone = Transfer->DmaDone;
             if(TransferDone){
                 return STATUS_SUCCESS;
             }
         }
         return STATUS_TIMEOUT;
     }
-    return LouKeWaitForEvent(&Transfer->DmaFence.DoneEvent);
+    LouKIRQL Irql;
+    LouKeRaiseIrql(HIGH_LEVEL, &Irql);
+    if(Wait){
+        LouKeThreadSleepNoYield((SIZE)Wait);
+    }else{
+        LouKeBlockThreadNoYield(Transfer->DmaFence.Thread);
+    }
+    MutexUnlock(&Transfer->DmaFence.DmaFence);
+    LouKeLowerIrql(Irql);
+    TransferDone = Transfer->DmaDone;
+    if(!TransferDone){
+        LouKeYieldExecution();
+    }
+    return TransferDone ? STATUS_SUCCESS : STATUS_TIMEOUT;
 }
 
-KERNEL_EXPORT
-void LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence){
-    PLOUSINE_DMA_TRANSFER Transfer = CONTAINER_OF(Fence, LOUSINE_DMA_TRANSFER, DmaFence);
-    BOOLEAN Poll = LouKeGetAtomicBoolean(&Transfer->DmaFence.Poll);
-    LouKeSetAtomicBoolean(&Transfer->DmaDone, true);
-    if(!Poll){
-        LouKeSignalEvent(&Transfer->DmaFence.DoneEvent);
+KERNEL_EXPORT LOUSTATUS LouKeFinishDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer){
+    if(!Transfer){
+        return STATUS_INVALID_PARAMETER;
     }
+    MutexUnlock(&Transfer->DmaFence.DmaFenceFence);
+    return STATUS_SUCCESS;
 }
+
+
 
 KERNEL_EXPORT PVOID LouKeDmaTransferGetOffsetVa(PLOUSINE_DMA_TRANSFER Transfer, SIZE ByteOffset, SIZE* RemainingInSegment){
     if(!Transfer){

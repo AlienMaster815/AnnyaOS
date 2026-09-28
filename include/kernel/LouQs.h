@@ -15,7 +15,7 @@ extern "C" {
 struct _LOUQ_WORK;
 
 typedef struct _DELAYED_FUNCTION{
-    LOUSTATUS         (*DelayedFunction)(struct _LOUQ_WORK*);
+    LOUSTATUS         (*DelayedFunction)(void* Data);
     void*               WorkData;
 }DELAYED_FUNCTION, * PDELAYED_FUNCTION;
 
@@ -30,6 +30,7 @@ typedef struct  _LOUQ{
 
 typedef struct _LOUQ_WORK{
     LOUQ                QueueObject;
+    BOOLEAN             Free;
     PVOID               Data;//TODO change to ATOMIC64
     DELAYED_FUNCTION    Work;
 }LOUQ_WORK, * PLOUQ_WORK;
@@ -60,7 +61,7 @@ typedef struct _LOUQ_COMPLETION{
     PLOUQ               QueueObject;
 }LOUQ_COMPLETION, * PLOUQ_COMPLETION;
 
-static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(struct _LOUQ_WORK*), PVOID Data){
+static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(void*), PVOID Data){
     Work->Work.DelayedFunction = Function;
     Work->Work.WorkData = Data;
 }
@@ -72,6 +73,12 @@ KERNEL_EXPORT LOUSTATUS LouKeQueueDelayedWork(string QueueName, PLOUQ_WORK WorkI
 KERNEL_EXPORT LOUSTATUS LouKeQueueTimedWork(string QueueName, PLOUQ_WORK WorkItem, PTIME_T Delay);
 
 KERNEL_EXPORT LOUSTATUS LouKeWaitForCompletionTimeout(PLOUQ_COMPLETION Completion, SIZE Hz);
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeQueueInterruptWork(
+    DELAYED_FUNCTION    Work
+);
 
 KERNEL_EXPORT
 LOUSTATUS LouKeCreateWorkQueue(

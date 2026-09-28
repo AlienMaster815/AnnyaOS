@@ -24,7 +24,7 @@ AtaCoreGetEndpointCapacity(
             return STATUS_SUCCESS;
         }
 
-        UINT16 CapacityData[4] = {0};
+        FORCE_ALIGNMENT(2) UINT8 CapacityData[8] = {0};
         PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
         PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
@@ -82,12 +82,15 @@ AtaCoreGetEndpointCapacity(
 }
 
 LOUSTATUS 
-AtaCoreReadSectorsFromEndpointDevice(
+AtaCoreReadSectorsFromEndpointDevicePolled(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
     UINT32                      Lba,
     UINT32                      SectorCount,
     PVOID                       OutBuffer
 ){
+    if(!OutBuffer){
+        return STATUS_INVALID_PARAMETER;
+    }
     UINT32 MaxLba;
     UINT32 SectorSize;
     LOUSTATUS Status = AtaCoreGetEndpointCapacity(EndpointDevice, &MaxLba, &SectorSize);
@@ -107,6 +110,7 @@ AtaCoreReadSectorsFromEndpointDevice(
         CommandPacket->PacketSize = 12;
         CommandPacket->PioDataIn = OutBuffer;
         CommandPacket->PioSize = SectorCount * SectorSize;
+        CommandPacket->SectorSize = SectorSize;
         AtaCoreEncodePacketCommand((PATA_COMMAND_PACKET_STRUCTURE)&CommandPacket->Packet, EndpointDevice->ChannelDev, SectorCount * SectorSize, 0, 0, 0);
         if(AtaPort->Operations->AtaPortDevicePrepCommand){
             Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, CommandPacket);
@@ -151,11 +155,42 @@ LOUSTATUS AtaCoreBlkdevFlushDevice(PBLOCK_DEVICE_OBJECT BlockDevice){
 }
 
 LOUSTATUS AtaCoreBlkdevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK_SEGMENT Segment){
-
-
-    LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment()\n");
-    while(1);
-    return STATUS_SUCCESS;
+    PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice = (PATA_ENDPOINT_DEVICE_OBJECT)BlockDevice->PrivateData;
+    if(BlockDevice->DeviceFlags & BLKDEV_FLAGS_COMPLETION_INTERRUPT){
+        LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment()\n");
+        while(1);
+    }
+    LOUSTATUS Status;
+    SIZE Count = 0;
+    SIZE TotalCount = Segment->TotalSize;
+    SIZE Remaining;
+    SIZE TransferCount;
+    SIZE Sectors;
+    SIZE CurrentSector;
+    SIZE SectorSize = BlkdevApiGetBlockSize(BlockDevice);
+    while(Count < TotalCount){
+        PVOID Mem = LouKeDmaTransferGetOffsetVa(Segment->DmaTransfer, Count, &Remaining);
+        if(!Mem){
+            return STATUS_INVALID_PARAMETER;
+        }
+        TransferCount = MIN(Remaining, TotalCount);
+        CurrentSector = Count / SectorSize;
+        Sectors = TransferCount / SectorSize;
+        Status = AtaCoreReadSectorsFromEndpointDevicePolled(
+            EndpointDevice, 
+            CurrentSector,
+            Sectors,
+            Mem
+        );    
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        LouPrint("%h\n", ((UINT8*)Mem)[510]);
+        LouPrint("%h\n", ((UINT8*)Mem)[511]);
+        Count += TransferCount;
+    }
+    LouKeDmaSignalDmaFence(&Segment->DmaTransfer->DmaFence);
+    return STATUS_SUCCESS; 
 }
 
 LOUSTATUS AtaCoreBlkdevWriteDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK_SEGMENT Segment){
@@ -165,26 +200,11 @@ LOUSTATUS AtaCoreBlkdevWriteDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLK
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS AtaCoreBlkdevReadDeviceBlock(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK Block){
-
-    LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceBlock()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-LOUSTATUS AtaCoreBlkdevWriteDeviceBlock(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK Block){
-
-    LouPrint("ATACORE.SYS:AtaCoreBlkdevWriteDeviceBlock()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
 
 static BLKDEV_OPERATIONS AtaCoreBlkdevOperations = {
     //TODO Flush device
     .ReadDeviceSegment = AtaCoreBlkdevReadDeviceSegment,
     .WriteDeviceSegment = AtaCoreBlkdevWriteDeviceSegment,
-    .ReadDeviceBlock = AtaCoreBlkdevReadDeviceBlock,
-    .WriteDeviceBlock = AtaCoreBlkdevWriteDeviceBlock,
 };
 
 static LOUSINE_DMA_DEVICE DefaultAtaEndpointDmaDevice = {
@@ -205,8 +225,8 @@ LOUSTATUS AtaCoreRegisterEndpointDevice(
     return BlkdevApiCreateDeviceObject(
         0x00,
         EndpointDevice->Port->OptionalDmaDevice,
-        EndpointDevice->SectorSize,
-        EndpointDevice->MaxLba,
+        (SIZE)EndpointDevice->SectorSize,
+        (SIZE)EndpointDevice->MaxLba,
         &AtaCoreBlkdevOperations,
         (PVOID)EndpointDevice
     );

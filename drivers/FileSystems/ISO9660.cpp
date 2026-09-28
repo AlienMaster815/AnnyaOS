@@ -439,6 +439,20 @@ LOUSTATUS Iso9660FileSystemScan(PBLOCK_DEVICE_OBJECT BlockDevice, PLOUSINE_KERNE
         return Iso9660FileSystem;
     }*/
 
+    BLOCK_SEGMENT Mbr = {
+        .BlockNumber = 0,
+        .BlockCount = 1,
+    };
+    PBLKDEV_OPENED_BLOCK_SEGMENT BlockSegment;
+    LOUSTATUS Status = BlkDevApiOpenBlockSegment(BlockDevice, &Mbr, &BlockSegment);
+    if(Status == STATUS_SUCCESS){
+        UINT16 BootSignature = 0;
+        Status = BlkDevApiReadBlockSegment(BlockSegment, &BootSignature, 510, 2);
+        if(Status == STATUS_SUCCESS){
+            LouPrint("BootSignature:%h\n", BootSignature);
+        }
+    }
+
     LouPrint("Iso9660FileSystemScan()\n");
     while(1);
     return STATUS_SUCCESS;

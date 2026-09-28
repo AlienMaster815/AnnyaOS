@@ -20,14 +20,16 @@ typedef enum{
 }LOUSINE_DMA_TRANSFER_TYPE;
 
 typedef struct _LOUSINE_DMA_FENCE{
-    atomic_t            Wait;
-    ATOMIC_BOOLEAN      Poll;    
-    KERNEL_EVENT_OBJECT DoneEvent;
+    int                 Wait;
+    BOOLEAN             Poll; 
+    PTHREAD             Thread;   
+    mutex_t             DmaFenceFence;
+    mutex_t             DmaFence;
 }LOUSINE_DMA_FENCE, * PLOUSINE_DMA_FENCE;
 
 typedef struct _LOUSINE_DMA_TRANSFER{
     struct _LOUSINE_DMA_DEVICE*         DmaDevice;
-    ATOMIC_BOOLEAN                      DmaDone;
+    BOOLEAN                             DmaDone;
     PVOID                               PrivateData;
     LOUSINE_DMA_FENCE                   DmaFence;
     LOUSINE_DMA_TRANSFER_TYPE           Type;

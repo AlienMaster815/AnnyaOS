@@ -32,7 +32,7 @@ LouUserGetMessage(
     LOUSINE_USER_MESSAGE_TYPE       Type,
     LOUSINE_USER_MESSAGE_PRIORITY   Priority
 ){
-    /*MutexSynchronize(&MessageMutex);
+    /*MutexSynchronizeNoBlocking(&MessageMutex);
     PLOUSINE_USER_SHARED_MESSAGE Prev = &UserMessages;
     PLOUSINE_USER_SHARED_MESSAGE Tmp = (PLOUSINE_USER_SHARED_MESSAGE)Prev->Peers.NextHeader;
 

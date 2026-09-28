@@ -152,7 +152,7 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeSetIrql(PASSIVE_LEVEL, 0x00); 
 
-    LouKeInitializeFullLouACPISubsystem();
+    LouKeCreateSystemWorkQeueue();    
 
     LouKeCreateDemon(
         LouKeThreadManagerDemon,
@@ -161,7 +161,8 @@ void AdvancedLousineKernelInitialization(){
         31
     );
 
-    LouKeCreateSystemWorkQeueue();    
+    LouKeInitializeFullLouACPISubsystem();
+
     LouPrint("Kernel Advanced System Initialized\n");
 
 }

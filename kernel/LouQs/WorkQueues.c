@@ -23,9 +23,13 @@ DWORD LouKeWorkStackDemon(PVOID Data){
                 TmpWork->QueueObject.Status = TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
                 LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
                 LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
+                if(TmpWork->Free){
+                    LouKeFreeFastObject("LOUQ_WORK", TmpWork);
+                }
             }
+        }else{
+            LouKeBlockThread(WorkerThread);
         }
-        LouKeBlockThread(WorkerThread);
     }
     return STATUS_SUCCESS;
 }
@@ -58,11 +62,36 @@ LOUSTATUS
 LouKeQueueWork(
     PLOUQ_WORK WorkItem
 ){
-    return LouKeWqQueueWork(
+    LOUSTATUS Status = LouKeWqQueueWork(
         &MainWorkQueue,
         WorkItem
     );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    LouKeUnblockThread(MainWorkQueue.QueueThread);
+    return STATUS_SUCCESS;
 }
+
+KERNEL_EXPORT 
+LOUSTATUS 
+LouKeQueueInterruptWork(
+    DELAYED_FUNCTION    Work
+){
+    PLOUQ_WORK WorkItem = LouKeAllocateFastObject("LOUQ_WORK");
+    WorkItem->Work = Work;
+    WorkItem->Free = true;
+    LOUSTATUS Status = LouKeWqQueueWork(
+        &MainWorkQueue,
+        WorkItem
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    LouKeUnblockThread(MainWorkQueue.QueueThread);
+    return STATUS_SUCCESS;
+}
+
 
 
 KERNEL_EXPORT 
@@ -117,6 +146,14 @@ LOUSTATUS LouKeCreateSystemWorkQeueue(){
         return STATUS_UNSUCCESSFUL;
     }
 
+    LouKeCreateFastObjectClass(
+        "LOUQ_WORK",
+        512,
+        sizeof(LOUQ_WORK),
+        GET_ALIGNMENT(LOUQ_WORK),
+        0,
+        KERNEL_GENERIC_MEMORY
+    );
     MainWorkQueue.QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)&MainWorkQueue, 16 * KILOBYTE, 31);
 
     return STATUS_SUCCESS;

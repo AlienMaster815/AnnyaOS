@@ -225,7 +225,7 @@ static inline bool LouKeGetAtomicBoolean(PATOMIC_BOOLEAN b){
 KERNEL_EXPORT void LouKeMxBlockThread(mutex_t* m);
 
 KERNEL_EXPORT void LouKeYieldExecution();
-static inline void MutexSynchronize(mutex_t* m){
+static inline void MutexSynchronizeNoBlocking(mutex_t* m){
     while (LouKeGetAtomic(&m->locked)) {
         LouKeYieldExecution();
     }
@@ -297,7 +297,6 @@ typedef struct _EXLO_MUTEX{
     semaphore_t         Counter;
     atomic64_t          ExloThread;
     atomic_t            GracePeriod;
-    KERNEL_EVENT_OBJECT ReleaseEvent;
 }EXLO_MUTEX, * PEXLO_MUTEX;
 
 #ifndef _USER_MODE_CODE_

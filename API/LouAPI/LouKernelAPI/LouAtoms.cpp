@@ -180,9 +180,9 @@ static LOUSTATUS AllocateLocalAtom(
     wcsncpy(LocalTracker->AtomName, AtomName, NameLength);    
 
     *OutAtom = (RTL_ATOM)GlobalTracker->AtomID; 
-    LouKeXaStore(&GlobalTracker->LocalTable, Process, LocalTracker, KERNEL_GENERIC_MEMORY);
+    Status = LouKeXaStore(&GlobalTracker->LocalTable, Process, LocalTracker, 0x00, KERNEL_GENERIC_MEMORY);
     MutexUnlock(&LousineAtomManager.ManagerLock);
-    return STATUS_SUCCESS;
+    return Status;
 }
 
 KERNEL_EXPORT

@@ -126,7 +126,6 @@ typedef struct _OHCI_DEVICE{
     mutex_t                         DeviceMutex;
     UINT64                          HccaAddress;
     UINT32                          Fminterval;
-    KERNEL_EVENT_OBJECT             OhciCommitEvent;
     OHCI_ED_LIST                    ControlEDs;
     OHCI_ED_LIST                    BulkEDs;
     OHCI_ED_LIST                    IsochIntEDs[32];

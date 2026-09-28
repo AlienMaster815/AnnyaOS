@@ -31,7 +31,10 @@ static LOUSTATUS CreateDmaLimitManager(
     if(!NewHead){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-    LouKeXaStoreEx(Array, Index, (PVOID)NewHead, KERNEL_GENERIC_MEMORY);
+    LOUSTATUS Status = LouKeXaStoreEx(Array, Index, (PVOID)NewHead, 0x00, KERNEL_GENERIC_MEMORY);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
     Out = (UINT64*)Context; 
     *Out = (UINT64)(UINTPTR)(UINT8*)NewHead; 
     return STATUS_SUCCESS;
@@ -51,7 +54,10 @@ static LOUSTATUS CreateThresholdManager(
     if(!NewHead){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-    LouKeXaStoreEx(Array, Index, (PVOID)NewHead, KERNEL_GENERIC_MEMORY);
+    LOUSTATUS Status = LouKeXaStoreEx(Array, Index, (PVOID)NewHead, 0x00, KERNEL_GENERIC_MEMORY);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
     Out = (UINT64*)Context; 
     *Out = (UINT64)(UINTPTR)(UINT8*)NewHead; 
     return STATUS_SUCCESS;

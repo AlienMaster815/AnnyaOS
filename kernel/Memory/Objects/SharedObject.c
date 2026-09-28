@@ -58,7 +58,12 @@ LouKeRegisterSharedObjectEx(
         MutexUnlock(&GlobalPointerManagerLock);
         return STATUS_INVALID_PARAMETER;
     }
-    LouKeXaStore(&GlobalPointerManager, Atom, Object, KERNEL_GENERIC_MEMORY);
+    Status = LouKeXaStore(&GlobalPointerManager, Atom, Object, 0x00, KERNEL_GENERIC_MEMORY);
+    if(Status != STATUS_SUCCESS){
+        LouKeDeleteAtom(Atom);
+        MutexUnlock(&GlobalPointerManagerLock);
+        return Status;
+    }
     if(OutAtom){
         *OutAtom = Atom;
     }

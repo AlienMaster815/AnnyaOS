@@ -32,6 +32,7 @@ BlkDevApiOpenBlockSegment(
     if(!BlockDevice || !SegmentOut || !BlockSegment){
         return STATUS_INVALID_PARAMETER;
     }
+    SIZE i;
     PBLKDEV_OPENED_BLOCK_SEGMENT TmpSegment;
     MutexLock(&BlockDevice->Loto);
     ForEachListEntry(TmpSegment, &BlockDevice->OpenedSegments, Peers){
@@ -74,7 +75,8 @@ BlkDevApiOpenBlockSegment(
     NewSegment->TotalSize = BlockSize * BlockCount;
     NewSegment->DmaTransfer = LouKeCreateDmaTransfer(BlockDevice->DmaDevice, NewSegment->TotalSize, BlockSize);
     if(!NewSegment->DmaTransfer){
-        BlkDevDbgPrint("BLKDEV.SYS:Block Device(%h) Unable To Create Dma Transfer\n", BlockDevice);
+        BlkDevDbgPrint("BLKDEV.SYS:Block Device(%h) Unable To Create Dma Transfer:TransferSize:%h:BlockSize:%h\n", BlockDevice, NewSegment->TotalSize, BlockSize);
+        Status = STATUS_INSUFFICIENT_RESOURCES;
         goto _ERROR_OUT;
     }
     LouKeAcquireReference(&NewSegment->References);
@@ -85,19 +87,31 @@ BlkDevApiOpenBlockSegment(
         BlkDevDbgPrint("BLKDEV.SYS:Block Device(%h) Unable To Read Device Segment\n", BlockDevice);
         goto _ERROR_OUT;
     }
-    for(SIZE i = 0 ; i < BlockCount; i++){
+    for(i = 0 ; i < BlockCount; i++){
         PBLKDEV_OPENED_BLOCK NewBlock = &NewSegment->Blocks[i];
         NewBlock->BlockNumber = BlockNumber + i; 
         NewBlock->BlockSize = BlockSize;
         NewBlock->BlockInSegment = true; 
         NewBlock->OwnerSegment = NewSegment;       
         NewBlock->Device = BlockDevice;
+        Status = LouKeXaStore(OpenedBlocks, NewBlock->BlockNumber, NewBlock, 0x00, KERNEL_GENERIC_MEMORY);
+        if(Status != STATUS_SUCCESS){
+            goto _ERROR_ON_XA_STORE;
+        }
         LouKeAcquireReference(&NewBlock->References);
         LouKeListAddTail(&NewBlock->Peers, &BlockDevice->OpenedBlocksList);
-        LouKeXaStore(OpenedBlocks, NewBlock->BlockNumber, NewBlock, KERNEL_GENERIC_MEMORY);
     }
+    LouKeListAddTail(&NewSegment->Peers, &BlockDevice->OpenedSegments);
     MutexUnlock(&BlockDevice->Loto);
     return STATUS_SUCCESS;
+_ERROR_ON_XA_STORE:
+    for(SIZE j = 0; j < i; j++){
+        PBLKDEV_OPENED_BLOCK NewBlock = &NewSegment->Blocks[j];
+        LouKeXaFreeUint64(OpenedBlocks, NewBlock->BlockNumber);
+        LouKeListDeleteItem(&NewBlock->Peers);
+        LouKeReleaseReference(&NewBlock->References);
+    }    
+
 _ERROR_OUT:
     if(NewSegment && NewSegment->DmaTransfer){
         LouKeDestroyDmaTransfer(NewSegment->DmaTransfer);
@@ -118,16 +132,14 @@ BlkDevApiCloseBlockSegment(
     PBLOCK_DEVICE_OBJECT BlockDevice = Segment->Device;
     SIZE CurrentReferences;
     MutexLock(&BlockDevice->Loto);
-    MutexLock(&Segment->Loto);
-    PXARRAY OpenedBlocks = &BlockDevice->OpenedBlocksXa;
     LouKeReleaseReference(&Segment->References);
     CurrentReferences = LouKeGetReferenceCount(&Segment->References);
     if(CurrentReferences){
-        MutexUnlock(&Segment->Loto);
+        MutexUnlock(&BlockDevice->Loto);
         return STATUS_SUCCESS;
     }
     LouKeListDeleteItem(&Segment->Peers);
-
+    PXARRAY OpenedBlocks = &BlockDevice->OpenedBlocksXa;
     SIZE BlockNumber = Segment->BlockSegment.BlockNumber;
     SIZE BlockCount = Segment->BlockSegment.BlockCount;
 

@@ -140,11 +140,12 @@ LouKeXaDestroy(
 //}
 
 KERNEL_EXPORT
-PVOID 
+LOUSTATUS 
 LouKeXaStore(
     PXARRAY     Array,
     UINT64      Index,
     PVOID       Pointer,
+    PVOID*      LastPointerOut,
     UINT64      PageFlags
 );
 
@@ -163,11 +164,12 @@ LouKeXaIsIndexUsedEx(
 );
 
 KERNEL_EXPORT
-PVOID 
+LOUSTATUS
 LouKeXaStoreEx(
     PXARRAY     Array,
     UINT64      Index,
     PVOID       Pointer,
+    PVOID*      LastPointerOut,
     UINT64      PageFlags
 );
 
