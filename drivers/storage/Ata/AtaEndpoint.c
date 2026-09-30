@@ -106,7 +106,7 @@ AtaCoreReadSectorsFromEndpointDevicePolled(
         PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
         ScsiCoreEncodeRead10Command((PSCSI_READ10_COMMAND_STRUCTURE)CommandPacket->PacketData, 0, 0, 0, 0, Lba, 0, SectorCount, 0x00);
-        CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD; 
+        CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD | ATA_COMMAND_PACKET_FLAGS_FETCH_DYNAMIC_RETURN; 
         CommandPacket->PacketSize = 12;
         CommandPacket->PioDataIn = OutBuffer;
         CommandPacket->PioSize = SectorCount * SectorSize;
@@ -185,8 +185,6 @@ LOUSTATUS AtaCoreBlkdevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKD
         if(Status != STATUS_SUCCESS){
             return Status;
         }
-        LouPrint("%h\n", ((UINT8*)Mem)[510]);
-        LouPrint("%h\n", ((UINT8*)Mem)[511]);
         Count += TransferCount;
     }
     LouKeDmaSignalDmaFence(&Segment->DmaTransfer->DmaFence);

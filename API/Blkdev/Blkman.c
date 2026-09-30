@@ -79,6 +79,7 @@ BlkDevApiOpenBlockSegment(
         Status = STATUS_INSUFFICIENT_RESOURCES;
         goto _ERROR_OUT;
     }
+
     LouKeAcquireReference(&NewSegment->References);
     NewSegment->BlockSegment = *BlockSegment;
     NewSegment->Device = BlockDevice;

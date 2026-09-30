@@ -211,6 +211,7 @@ LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice
 
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD){
         outsw(PrivateData->Ports.Data, CommandPacket->PacketData, CommandPacket->PacketSize / 2);
+        AtaGeneric400NsDelay(PrivateData);
     }
 
     Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
@@ -227,18 +228,32 @@ LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice
                     return STATUS_IO_DEVICE_ERROR;
                 }
                 if(!(Status & (1 << 7)) && (Status & (1 << 3))) {
-                    break;
+                    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_PACKET_CMD){
+                        UINT8 ExpectedPhase = (CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD) ? 0 : 2; 
+                        if((inb(PrivateData->Ports.SectorCount) & 0x03) == ExpectedPhase){
+                            break;
+                        }
+                    }else{
+                        break;
+                    }
                 }
                 AtaGeneric400NsDelay(PrivateData);
             }
             if(!Timeout){
                 return STATUS_TIMEOUT;
             }
+            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_FETCH_DYNAMIC_RETURN){
+                tSize = (((SIZE)inb(PrivateData->Ports.LbaHigh) << 8) | (SIZE)inb(PrivateData->Ports.LbaMid));
+                if(tSize == 0x0C){
+                    continue;
+                }
+            }
             if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
                 outsw(PrivateData->Ports.Data, (UINT16*)((UINT8*)CommandPacket->PioDataOut + TransferDone), tSize / 2);
             }else{
                 insw(PrivateData->Ports.Data, (UINT16*)((UINT8*)CommandPacket->PioDataIn + TransferDone), tSize / 2);
             }
+    
             TransferDone += tSize;
         }
     }    

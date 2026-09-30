@@ -353,15 +353,15 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
     struct _LOUSINE_DMA_FENCE*      CurrentDmaFence;
 }ATA_PORT_DEVICE_OBJECT, * PATA_PORT_DEVICE_OBJECT;
 
-#define ATA_COMMAND_PACKET_FLAGS_DMA        (1UL << 0)
-#define ATA_COMMAND_PACKET_FLAGS_TRAN_CMD   (1UL << 1)
-#define ATA_COMMAND_PACKET_FLAGS_OUT_CMD    (1UL << 2)
-#define ATA_COMMAND_PACKET_FLAGS_POLL       (1UL << 3)
-#define ATA_COMMAND_PACKET_FLAGS_PACKET_CMD (1UL << 4)
-#define ATA_COMMAND_PACKET_FLAGS_EXT_CMD    (1UL << 5)
-#define ATA_COMMAND_PACKET_FLAGS_EH         (1UL << 6)
-#define ATA_COMMAND_PACKET_FLAGS_DRQMS      (1UL << 7)
-
+#define ATA_COMMAND_PACKET_FLAGS_DMA                    (1UL << 0)
+#define ATA_COMMAND_PACKET_FLAGS_TRAN_CMD               (1UL << 1)
+#define ATA_COMMAND_PACKET_FLAGS_OUT_CMD                (1UL << 2)
+#define ATA_COMMAND_PACKET_FLAGS_POLL                   (1UL << 3)
+#define ATA_COMMAND_PACKET_FLAGS_PACKET_CMD             (1UL << 4)
+#define ATA_COMMAND_PACKET_FLAGS_EXT_CMD                (1UL << 5)
+#define ATA_COMMAND_PACKET_FLAGS_EH                     (1UL << 6)
+#define ATA_COMMAND_PACKET_FLAGS_DRQMS                  (1UL << 7)
+#define ATA_COMMAND_PACKET_FLAGS_FETCH_DYNAMIC_RETURN   (1UL << 8)
 
 typedef struct _ATA_COMMAND_PACKET{
     LOUSTATUS                   CommandStatus;
