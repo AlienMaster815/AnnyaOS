@@ -244,7 +244,7 @@ LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice
             }
             if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_FETCH_DYNAMIC_RETURN){
                 tSize = (((SIZE)inb(PrivateData->Ports.LbaHigh) << 8) | (SIZE)inb(PrivateData->Ports.LbaMid));
-                if(tSize == 0x0C){
+                if((tSize == 0x0C) || (tSize == 0x0F)){
                     continue;
                 }
             }

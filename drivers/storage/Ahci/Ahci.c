@@ -93,9 +93,27 @@ void GetCommandPacketFromFis(UINT8* Fis, PATA_COMMAND_PACKET CommandPacket){
     }
 }
 
+static void AhciComResetPort(PATA_PORT_DEVICE_OBJECT PortDevice){
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    PAHCI_GENERIC_PORT Port = PrivateData->GenericPort;
+    Port->PxSCTL |= 1;
+    sleep(2);
+    Port->PxSCTL &= ~(0x0F);
+}
+
 void AhciHandleCommandErrorRecovery(PATA_PORT_DEVICE_OBJECT PortDevice, PATA_COMMAND_PACKET CommandPacket){
-    LouPrint("AHCI.SYS:AhciHandleCommandErrorRecovery()\n");
-    while(1);
+    PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
+    PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
+    LOUSTATUS Status;
+    if(PrivateData->GenericPort->PxCI & (1 << CommandPrivateData->CommandSlot)){
+        Status = PrivateData->StopCommandEngine(PortDevice);
+        if(Status != STATUS_SUCCESS){
+            AhciComResetPort(PortDevice);
+        }
+        PrivateData->GenericPort->PxIS = UINT32_MAX;
+        PrivateData->GenericPort->PxSERR = UINT32_MAX;
+        PrivateData->StartCommandEngine(PortDevice);
+    }
 }
 
 
@@ -104,8 +122,8 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
     PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
     UINT8* FisBase = (UINT8*)PrivateData->Fis;
     LOUSTATUS Status;
-    
-    for(SIZE i = 0; i < 10; i++){
+    SIZE i;
+    for(i = 0; i < 5; i++){
         if(PrivateData->GenericPort->PxIS & (1UL << 30)){
             UINT32 Tfd = PrivateData->GenericPort->PxTFD;
             UINT8 TfdError = (Tfd >> 8) & UINT8_MAX;
@@ -123,6 +141,10 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
         if(Status == STATUS_SUCCESS){
             break;
         }
+    }
+
+    if(Status != STATUS_SUCCESS){
+        return Status;
     }
     
     //I am not doing NCQ yet

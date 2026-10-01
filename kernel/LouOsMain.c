@@ -352,6 +352,9 @@ void LouOsKrnlStart(
     //}
 
     //TODO: 
+    //add a louq work into the DMA fence for 
+    //interruptable fences
+    
     //finish the IRQL system for all cores
 
     //add a new system for Scatter Devices
