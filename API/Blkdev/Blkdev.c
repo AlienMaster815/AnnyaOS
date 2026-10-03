@@ -57,7 +57,8 @@ BlkdevApiCreateDeviceObject(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-    LouPrint("BlockSize:%h\n", BlockSize);
+    LouPrint("Block Size :%d\n", BlockSize);
+    LouPrint("Block Count:%d\n", BlockCount);
 
     NewBlockDevice->DeviceFlags = DeviceFlags;
     NewBlockDevice->DmaDevice = DmaDevice;

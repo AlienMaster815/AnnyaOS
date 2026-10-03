@@ -275,7 +275,7 @@ struct _ATA_PORT_OPERATIONS;
 
 #define ATA_ENDPOINT_DEVCAP_ATAPI                           (1ULL << 0)
 #define ATA_ENDPOINT_DEVCAP_REMOVEABLE                      (1ULL << 1)
-//RESERVED                                                  (1ULL << 2)
+#define ATA_ENDPOINT_DEVCAP_STANDBY_TIMER_SUPPORTED         (1ULL << 2)
 #define ATA_ENDPOINT_DEVCAP_DMA_SUPPORT                     (1ULL << 3)
 #define ATA_ENDPOINT_DEVCAP_IORDY_SUPPORT                   (1ULL << 4)
 #define ATA_ENDPOINT_DEVCAP_LBA_SUPPORT                     (1ULL << 5)
@@ -320,7 +320,7 @@ typedef struct _ATA_ENDPOINT_DEVICE_OBJECT{
     struct _ATA_PORT_DEVICE_OBJECT* Port;
     UINT8                           ChannelDev;
     UINT64                          DeviceCap;
-    UINT32                          MaxLba;
+    UINT64                          MaxLba;
     UINT32                          SectorSize;
     UINT8                           MaxMDmaSupport;
     UINT8                           MDmaSelected;

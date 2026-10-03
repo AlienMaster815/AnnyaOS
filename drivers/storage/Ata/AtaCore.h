@@ -42,8 +42,8 @@ void AtaCorePortIoQueueManager(PVOID Params);
 PVOID AtaCoreAllocateAtaCommandPacket();
 void AtaCoreFreeAtaCommandPacket(PVOID Object);
 
-LOUSTATUS AtaCoreGetEndpointCapacity(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32* OutLba, UINT32* OutSectorSize);
-LOUSTATUS AtaCoreReadSectorsFromEndpointDevice(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT32 SectorCount, PVOID OutBuffer);
+LOUSTATUS AtaCoreGetEndpointCapacity(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT64* OutLba, UINT32* OutSectorSize);
+LOUSTATUS AtaCoreReadSectorsFromEndpointDevice(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT64 Lba, UINT32 SectorCount, PVOID OutBuffer);
 LOUSTATUS AtaCoreRegisterEndpointDevice(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice);
 
 #endif

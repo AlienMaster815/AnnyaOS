@@ -3,10 +3,10 @@
 
 KERNEL_ENTRY LOUSTATUS UsbCoreSubsystemEntry(){
 
-    //LouPrint("Hello From UsbCoreSubsystemEntry\n");
+    LouPrint("UsbCoreSubsystemEntry()\n");
 
     
-
+    while(1);
     return STATUS_SUCCESS;
 }
 

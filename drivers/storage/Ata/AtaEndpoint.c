@@ -5,7 +5,7 @@
 LOUSTATUS 
 AtaCoreGetEndpointCapacity(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
-    UINT32*                     OutLba,
+    UINT64*                     OutLba,
     UINT32*                     OutSectorSize 
 ){
     if(!EndpointDevice){
@@ -75,23 +75,26 @@ AtaCoreGetEndpointCapacity(
         } 
         return STATUS_SUCCESS;
     }
-
-
-
-    return STATUS_INVALID_PARAMETER;
+    if(OutLba){
+        *OutLba = EndpointDevice->MaxLba;
+    } 
+    if(OutSectorSize){ 
+        *OutSectorSize = EndpointDevice->SectorSize;
+    } 
+    return STATUS_SUCCESS;
 }
 
 LOUSTATUS 
-AtaCoreReadSectorsFromEndpointDevicePolled(
+AtaCoreReadSectorsFromEndpointAtapiDevicePolled(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
-    UINT32                      Lba,
+    UINT64                      Lba,
     UINT32                      SectorCount,
     PVOID                       OutBuffer
 ){
     if(!OutBuffer){
         return STATUS_INVALID_PARAMETER;
     }
-    UINT32 MaxLba;
+    UINT64 MaxLba;
     UINT32 SectorSize;
     LOUSTATUS Status = AtaCoreGetEndpointCapacity(EndpointDevice, &MaxLba, &SectorSize);
     if(Status != STATUS_SUCCESS){
@@ -160,6 +163,15 @@ LOUSTATUS AtaCoreBlkdevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKD
         LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment()\n");
         while(1);
     }
+
+    LOUSTATUS (*AtaCommandReadFunctionPolled)(PATA_ENDPOINT_DEVICE_OBJECT, UINT64, UINT32, PVOID);
+
+    if(EndpointDevice->DeviceCap & ATA_ENDPOINT_DEVCAP_ATAPI){
+        AtaCommandReadFunctionPolled = AtaCoreReadSectorsFromEndpointAtapiDevicePolled;
+    }else{
+        LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment():ATA\n");
+        while(1);
+    }
     LOUSTATUS Status;
     SIZE Count = 0;
     SIZE TotalCount = Segment->TotalSize;
@@ -176,7 +188,7 @@ LOUSTATUS AtaCoreBlkdevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKD
         TransferCount = MIN(Remaining, TotalCount);
         CurrentSector = Count / SectorSize;
         Sectors = TransferCount / SectorSize;
-        Status = AtaCoreReadSectorsFromEndpointDevicePolled(
+        Status = AtaCommandReadFunctionPolled(
             EndpointDevice, 
             CurrentSector,
             Sectors,

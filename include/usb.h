@@ -55,7 +55,7 @@ typedef struct _USB_DEVICE_OBJECT{
     PVOID                       DevicePrivateData;
 }USB_DEVICE_OBJECT, * PUSB_DEVICE_OBJECT;
 
-typedef struct _USBHCD_OPERATIONS{
+typedef struct _USB_HCD_OPERATIONS{
     //HCD Operations
     LOUSTATUS       (*ResetHcdDevice)(struct _USB_HCD_OBJECT* Hcd);
     LOUSTATUS       (*StartHcdDevice)(struct _USB_HCD_OBJECT* Hcd);
@@ -71,22 +71,28 @@ typedef struct _USBHCD_OPERATIONS{
     //Endpoint Operations
     LOUSTATUS       (*ConnectEndpoint)(PUSB_ENDPOINT_OBJECT Endpoint);
     LOUSTATUS       (*DisconnectEndpoint)(PUSB_ENDPOINT_OBJECT Endpoint);
-}USBHCD_OPERATIONS, * PUSBHCD_OPERATIONS;
+}USB_HCD_OPERATIONS, * PUSB_HCD_OPERATIONS;
 
 typedef struct _USB_HCD_OBJECT{
-    PPCI_DEVICE_OBJECT  PDEV;
-    ULONG               HcdFlags;
-    ListHeader          Companions;
-    XARRAY              DeviceAddressPool;
-    ListHeader          HcdDevices;
-    PVOID               HcdPrivateData;
+    PPCI_DEVICE_OBJECT      PDEV;
+    ULONG                   HcdFlags;
+    ListHeader              Companions;
+    XARRAY                  DeviceAddressPool;
+    ListHeader              HcdDevices;
+    PVOID                   HcdPrivateData;
+    PUSB_HCD_OPERATIONS     Operations;
 }USB_HCD_OBJECT, * PUSB_HCD_OBJECT; 
+
+LOUSTATUS UsbCoreCreateHcdObject(
+    PPCI_DEVICE_OBJECT  PDEV,
+    ULONG               Flags,
+    PVOID               PrivateData,
+    PUSB_HCD_OPERATIONS Operations
+);
 
 
 
 #else //user mode code
-
-
 
 #endif
 

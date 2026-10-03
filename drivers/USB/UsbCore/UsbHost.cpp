@@ -1,5 +1,47 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 
+#include "UsbCore.h"
+
+LOUSTATUS UsbCoreCreateHcdObject(
+    PPCI_DEVICE_OBJECT  PDEV,
+    ULONG               Flags,
+    PVOID               PrivateData,
+    PUSB_HCD_OPERATIONS Operations
+){
+    PUSB_HCD_OBJECT NewHcdObject;
+    LOUSTATUS Status;
+    if(!Operations){
+        return STATUS_INVALID_PARAMETER;
+    }
+    NewHcdObject = LouKeMallocType(USB_HCD_OBJECT, KERNEL_GENERIC_MEMORY);
+    if(!NewHcdObject){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    NewHcdObject->PDEV = PDEV;
+    NewHcdObject->HcdFlags = Flags;
+    NewHcdObject->HcdPrivateData = PrivateData;
+    NewHcdObject->Operations = Operations;
+
+    if(Operations->ResetHcdDevice){
+        Status = Operations->ResetHcdDevice(NewHcdObject);
+        if(Status != STATUS_SUCCESS){
+            LouKeFree(NewHcdObject);
+            return Status;
+        }
+    }
+
+    if(Operations->StartHcdDevice){
+        Status = Operations->StartHcdDevice(NewHcdObject);
+        if(Status != STATUS_SUCCESS){
+            LouKeFree(NewHcdObject);
+            return Status;
+        }
+    }
+    return STATUS_SUCCESS;
+}
+
+
 /*
 #include "UsbCore.h"
 
