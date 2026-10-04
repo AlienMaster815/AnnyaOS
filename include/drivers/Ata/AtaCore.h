@@ -344,6 +344,7 @@ typedef struct _ATA_PORT_DEVICE_OBJECT{
     mutex_t*                        ChannelLock;
     ListHeader                      QueuedCommands;
     PLOUSINE_DMA_DEVICE             OptionalDmaDevice;
+#define AtaCoreDmaDevice            OptionalDmaDevice
     struct _ATA_HOST_DEVICE_OBJECT* HostDevice;
     struct _ATA_PORT_OPERATIONS*    Operations;
     ULONG                           PortFlags;
@@ -372,16 +373,11 @@ typedef struct _ATA_COMMAND_PACKET{
     SIZE                        SectorSize;
     SIZE                        PacketSize;
     UINT16                      PacketData[8];
-    SIZE                        PioSize;
+    SIZE                        TransferSize;
     PVOID                       CommandPrivateData;
     UINT32                      Auxilery;
     UINT8                       Control;
-    union{
-        PVOID                   PioDataIn;
-        PVOID                   PioDataOut;
-        PLOUSINE_DMA_TRANSFER   DmaDataIn;
-        PLOUSINE_DMA_TRANSFER   DmaDataOut;
-    };
+    PLOUSINE_DMA_TRANSFER       TransferData;
     union{
         struct PACKED{
                                 STANDARD_ATA_COMMAND_PACKET;

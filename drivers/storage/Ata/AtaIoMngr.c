@@ -5,6 +5,7 @@
 void AtaCorePortIoQueueManager(PVOID Params){
     PATA_PORT_DEVICE_OBJECT PortDevice = (PATA_PORT_DEVICE_OBJECT)(UINT8*)Params;
     PTHREAD Thread = LouKeGetCurrentThreadHandle();
+    BOOLEAN CommandPolled;
     while(1){
         MutexLock(PortDevice->ChannelLock);
         PATA_COMMAND_PACKET CommandPacket = ListItemToTypeOrNull(PortDevice->QueuedCommands.NextHeader, ATA_COMMAND_PACKET, QueuedCommands);
@@ -14,9 +15,10 @@ void AtaCorePortIoQueueManager(PVOID Params){
             continue;
         }
         LouKeListDeleteItem(&CommandPacket->QueuedCommands);
+        CommandPolled = CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL;
         CommandPacket->CommandStatus = PortDevice->Operations->AtaPortDeviceIssueCommand(PortDevice, CommandPacket);
         LOUSTATUS tStatus = STATUS_SUCCESS;
-        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL){
+        if(CommandPolled){
             tStatus = PortDevice->Operations->AtaPortDeviceGetCommandStatus(PortDevice, CommandPacket);
         }else{
             LouPrint("AtaCorePortIoQueueManager() Not Polling\n");
@@ -33,5 +35,8 @@ void AtaCorePortIoQueueManager(PVOID Params){
         }
         MutexUnlock(PortDevice->ChannelLock);
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
+        if(CommandPolled){
+            LouKeDmaSignalDmaFence(&CommandPacket->TransferData->DmaFence);
+        }   
     }
 }

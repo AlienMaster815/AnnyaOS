@@ -24,15 +24,15 @@ AtaCoreGetEndpointCapacity(
             return STATUS_SUCCESS;
         }
 
-        FORCE_ALIGNMENT(2) UINT8 CapacityData[8] = {0};
+        UINT8 CapacityData[8] = {0};
         PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
         PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
         ScsiCoreEncodeReadCapacity10Command((PSCSI_READ_CAPACITY10_COMMAND_STRUCTURE)CommandPacket->PacketData, 0, 0, 0);
         CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD; 
         CommandPacket->PacketSize = 12;
-        CommandPacket->PioDataIn = CapacityData;
-        CommandPacket->PioSize = 8;
+        CommandPacket->TransferData = LouKeCreateDmaTransfer(AtaPort->AtaCoreDmaDevice, 8, 2);
+        CommandPacket->TransferSize = 8;
         AtaCoreEncodePacketCommand((PATA_COMMAND_PACKET_STRUCTURE)&CommandPacket->Packet, EndpointDevice->ChannelDev, 8, 0, 0, 0);
         if(AtaPort->Operations->AtaPortDevicePrepCommand){
             Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, CommandPacket);
@@ -56,15 +56,20 @@ AtaCoreGetEndpointCapacity(
 
         Status = CommandPacket->CommandStatus;
 
-        AtaCoreFreeAtaCommandPacket(CommandPacket);
-
         if(Status != STATUS_SUCCESS){
+            AtaCoreFreeAtaCommandPacket(CommandPacket);
             LouPrint("AtaCoreGetEndpointCapacity():COMMAND_ERROR\n");
             if(OutSectorSize){
                 *OutSectorSize = 0x00;
             }
             return Status;
         }
+        memcpy(CapacityData, LouKeDmaTransferGetOffsetVa(CommandPacket->TransferData, 0, 0), 8);
+        LouKeDestroyDmaTransfer(CommandPacket->TransferData);
+
+        AtaCoreFreeAtaCommandPacket(CommandPacket);
+
+
         EndpointDevice->SectorSize = ((UINT32)CapacityData[4] << 24) | ((UINT32)CapacityData[5] << 16) | ((UINT32)CapacityData[6] << 8) | (UINT32)CapacityData[7];
         EndpointDevice->MaxLba = ((UINT32)CapacityData[0] << 24) | ((UINT32)CapacityData[1] << 16) | ((UINT32)CapacityData[2] << 8) | (UINT32)CapacityData[3];
         if(OutLba){
@@ -89,11 +94,8 @@ AtaCoreReadSectorsFromEndpointAtapiDevicePolled(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
     UINT64                      Lba,
     UINT32                      SectorCount,
-    PVOID                       OutBuffer
+    PLOUSINE_DMA_TRANSFER       Transfer
 ){
-    if(!OutBuffer){
-        return STATUS_INVALID_PARAMETER;
-    }
     UINT64 MaxLba;
     UINT32 SectorSize;
     LOUSTATUS Status = AtaCoreGetEndpointCapacity(EndpointDevice, &MaxLba, &SectorSize);
@@ -111,8 +113,8 @@ AtaCoreReadSectorsFromEndpointAtapiDevicePolled(
         ScsiCoreEncodeRead10Command((PSCSI_READ10_COMMAND_STRUCTURE)CommandPacket->PacketData, 0, 0, 0, 0, Lba, 0, SectorCount, 0x00);
         CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD | ATA_COMMAND_PACKET_FLAGS_FETCH_DYNAMIC_RETURN; 
         CommandPacket->PacketSize = 12;
-        CommandPacket->PioDataIn = OutBuffer;
-        CommandPacket->PioSize = SectorCount * SectorSize;
+        CommandPacket->TransferData = Transfer;
+        CommandPacket->TransferSize = SectorCount * SectorSize;
         CommandPacket->SectorSize = SectorSize;
         AtaCoreEncodePacketCommand((PATA_COMMAND_PACKET_STRUCTURE)&CommandPacket->Packet, EndpointDevice->ChannelDev, SectorCount * SectorSize, 0, 0, 0);
         if(AtaPort->Operations->AtaPortDevicePrepCommand){
@@ -164,43 +166,19 @@ LOUSTATUS AtaCoreBlkdevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKD
         while(1);
     }
 
-    LOUSTATUS (*AtaCommandReadFunctionPolled)(PATA_ENDPOINT_DEVICE_OBJECT, UINT64, UINT32, PVOID);
 
     if(EndpointDevice->DeviceCap & ATA_ENDPOINT_DEVCAP_ATAPI){
-        AtaCommandReadFunctionPolled = AtaCoreReadSectorsFromEndpointAtapiDevicePolled;
-    }else{
-        LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment():ATA\n");
-        while(1);
-    }
-    LOUSTATUS Status;
-    SIZE Count = 0;
-    SIZE TotalCount = Segment->TotalSize;
-    SIZE Remaining;
-    SIZE TransferCount;
-    SIZE Sectors;
-    SIZE CurrentSector;
-    SIZE SectorSize = BlkdevApiGetBlockSize(BlockDevice);
-    while(Count < TotalCount){
-        PVOID Mem = LouKeDmaTransferGetOffsetVa(Segment->DmaTransfer, Count, &Remaining);
-        if(!Mem){
-            return STATUS_INVALID_PARAMETER;
-        }
-        TransferCount = MIN(Remaining, TotalCount);
-        CurrentSector = Count / SectorSize;
-        Sectors = TransferCount / SectorSize;
-        Status = AtaCommandReadFunctionPolled(
+        return AtaCoreReadSectorsFromEndpointAtapiDevicePolled(
             EndpointDevice, 
-            CurrentSector,
-            Sectors,
-            Mem
-        );    
-        if(Status != STATUS_SUCCESS){
-            return Status;
-        }
-        Count += TransferCount;
+            Segment->BlockSegment.BlockNumber, 
+            Segment->BlockSegment.BlockCount, 
+            Segment->DmaTransfer
+        );
     }
-    LouKeDmaSignalDmaFence(&Segment->DmaTransfer->DmaFence);
-    return STATUS_SUCCESS; 
+        
+    LouPrint("ATACORE.SYS:AtaCoreBlkdevReadDeviceSegment():ATA\n");
+    while(1);
+    return STATUS_INVALID_PARAMETER; 
 }
 
 LOUSTATUS AtaCoreBlkdevWriteDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPENED_BLOCK_SEGMENT Segment){

@@ -140,15 +140,9 @@ LOUSTATUS AtaGenericPortDevicePrepCommand(PATA_PORT_DEVICE_OBJECT PortDevice, PA
     if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
         return STATUS_SUCCESS;
     }
-    PLOUSINE_DMA_TRANSFER DmaTransfer;
     PATA_PRDT_ENTRY NewPrdEntry;
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-        DmaTransfer = CommandPacket->DmaDataOut;
-    }else{
-        DmaTransfer = CommandPacket->DmaDataIn;
-    }
-    InitializeGenericAtaSgElement(DmaTransfer, &NewPrdEntry);
-    DmaTransfer->PrivateData = NewPrdEntry;
+    InitializeGenericAtaSgElement(CommandPacket->TransferData, &NewPrdEntry);
+    CommandPacket->TransferData->PrivateData = NewPrdEntry;
     return STATUS_SUCCESS;
 }
  
@@ -217,10 +211,10 @@ LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice
     Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
         tSize = (CommandPacket->SectorSize ? CommandPacket->SectorSize : 512);
-        if(CommandPacket->PioSize < tSize){
-            tSize = CommandPacket->PioSize;
+        if(CommandPacket->TransferSize < tSize){
+            tSize = CommandPacket->TransferSize;
         }
-        while(TransferDone < CommandPacket->PioSize){
+        while(TransferDone < CommandPacket->TransferSize){
             Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
             while(Timeout--){
                 Status = inb(PrivateData->Ports.CmdSts);
@@ -249,9 +243,17 @@ LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice
                 }
             }
             if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-                outsw(PrivateData->Ports.Data, (UINT16*)((UINT8*)CommandPacket->PioDataOut + TransferDone), tSize / 2);
+                outsw(
+                    PrivateData->Ports.Data, 
+                    (UINT16*)((UINT8*)LouKeDmaTransferGetOffsetVa(CommandPacket->TransferData, TransferDone, 0x00)),
+                    tSize / 2
+                );
             }else{
-                insw(PrivateData->Ports.Data, (UINT16*)((UINT8*)CommandPacket->PioDataIn + TransferDone), tSize / 2);
+                insw(
+                    PrivateData->Ports.Data, 
+                    (UINT16*)((UINT8*)LouKeDmaTransferGetOffsetVa(CommandPacket->TransferData, TransferDone, 0x00)), 
+                    tSize / 2
+                );
             }
     
             TransferDone += tSize;
@@ -274,19 +276,11 @@ LOUSTATUS AtaGenericPortDeviceCleanupCommand(PATA_PORT_DEVICE_OBJECT PortDevice,
     if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA)){
         return STATUS_SUCCESS;
     }
-    PLOUSINE_DMA_TRANSFER DmaTransfer;
-    PLOUSINE_DMA_DEVICE DmaDevice;
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-        DmaTransfer = CommandPacket->DmaDataOut;
-    }else{
-        DmaTransfer = CommandPacket->DmaDataIn;
-    }
-    DmaDevice = DmaTransfer->DmaDevice;
-
+    PLOUSINE_DMA_DEVICE DmaDevice = CommandPacket->TransferData->DmaDevice;
     UINT8 BmCommand = inb(PrivateData->Ports.BusMasterCmd);
     outb(PrivateData->Ports.BusMasterCmd, BmCommand & ~(0x01));
     outb(PrivateData->Ports.BusMasterSts, 0x06);
-    LouKeDmaDeviceFreeDmaMemory(DmaDevice, DmaTransfer->PrivateData);
+    LouKeDmaDeviceFreeDmaMemory(DmaDevice, CommandPacket->TransferData->PrivateData);
     return STATUS_SUCCESS;
 }
 

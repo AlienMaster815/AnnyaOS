@@ -100,8 +100,8 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
     LOUSTATUS Status;
     Identify->CommandFlags = ATA_COMMAND_PACKET_FLAGS_TRAN_CMD | ATA_COMMAND_PACKET_FLAGS_POLL; 
     LouKeSetAtomicBoolean(&Identify->CommandDone, 0);
-    Identify->PioDataIn = LouKeMallocEx(256 * sizeof(UINT16), GET_ALIGNMENT(UINT16), KERNEL_GENERIC_MEMORY);
-    Identify->PioSize = 512;
+    Identify->TransferData = LouKeCreateDmaTransfer(AtaPort->AtaCoreDmaDevice, 512, 2);
+    Identify->TransferSize = 512;
     if(PacketDev){
         AtaCoreEncodeIdentifyPacketDeviceCommand((PATA_COMMAND_IDENTIFY_PACKET_DEVICE_STRUCTURE)&Identify->Packet, Dev);
     }else{
@@ -112,8 +112,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
         if(Status != STATUS_SUCCESS){
             Identify->CommandStatus = STATUS_IO_DEVICE_ERROR;
             LouKeSetAtomicBoolean(&Identify->CommandDone, 1);
-            LouKeFree(Identify->PioDataIn);
-
+            LouKeDestroyDmaTransfer(Identify->TransferData);
         }
     }
 
@@ -129,7 +128,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
     }
 
     if(Identify->CommandStatus != STATUS_SUCCESS){
-        LouKeFree(Identify->PioDataIn);
+        LouKeDestroyDmaTransfer(Identify->TransferData);
         return;
     }
 }
@@ -158,7 +157,9 @@ void AtaCoreParsePacketDeviceInformation(
     PATA_COMMAND_PACKET         Identify, 
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
 ){
-    UINT16 TmpInfo = *(UINT16*)Identify->PioDataIn;
+    //the lowest ata threshold is 64 kilobytes so 512 bytes will allways be in one pool
+    UINT8* DmaAddress = (UINT8*)LouKeDmaTransferGetOffsetVa(Identify->TransferData, 0, 0);
+    UINT16 TmpInfo = *(UINT16*)DmaAddress; 
     UINT64 CapChecksum;
     UINT8  FieldMask = 0;
     EndpointDevice->DeviceCap = 0;
@@ -166,7 +167,7 @@ void AtaCoreParsePacketDeviceInformation(
     EndpointDevice->DeviceCap |= TmpInfo & (1 << 7) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE : 0;
     EndpointDevice->PacketSize = (TmpInfo & 1) ? 16 : 12;
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[49];
+    TmpInfo = ((UINT16*)DmaAddress)[49];
 
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 8)) ? ATA_ENDPOINT_DEVCAP_DMA_SUPPORT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 9)) ? ATA_ENDPOINT_DEVCAP_LBA_SUPPORT : 0;
@@ -176,9 +177,9 @@ void AtaCoreParsePacketDeviceInformation(
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 14)) ? ATA_ENDPOINT_DEVCAP_QUEUE_SUPPORT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 15)) ? ATA_ENDPOINT_DEVCAP_INTERLEAVE_DMA : 0;
 
-    FieldMask = ((UINT16*)Identify->PioDataIn)[53] & 0x07;
+    FieldMask = ((UINT16*)DmaAddress)[53] & 0x07;
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[63];
+    TmpInfo = ((UINT16*)DmaAddress)[63];
     int i;
     for(i = 2; i >= 0; i--){
         if(TmpInfo & (1 << i)){
@@ -194,13 +195,13 @@ void AtaCoreParsePacketDeviceInformation(
         }
     }
 
-    EndpointDevice->PioModesSupported = ((UINT16*)Identify->PioDataIn)[64] & 0xFF;
+    EndpointDevice->PioModesSupported = ((UINT16*)DmaAddress)[64] & 0xFF;
 
-    EndpointDevice->MaxQueueDepth = (((UINT16*)Identify->PioDataIn)[75] & 0xFF) + 1;
+    EndpointDevice->MaxQueueDepth = (((UINT16*)DmaAddress)[75] & 0xFF) + 1;
 
     
     SIZE foobar = 3;
-    CapChecksum = ((UINT16*)Identify->PioDataIn)[80];
+    CapChecksum = ((UINT16*)DmaAddress)[80];
     if((CapChecksum != 0x00) && (CapChecksum != 0xFFFF)){
         for(; foobar < 14; foobar++){
             if(!(CapChecksum & (1UL << foobar)))break;
@@ -208,9 +209,9 @@ void AtaCoreParsePacketDeviceInformation(
         //TODO: Read the most recent spec and implement features
     }
 
-    CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[82] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[83];
+    CapChecksum = ((UINT64)((UINT16*)DmaAddress)[82] << 16) | (UINT64)((UINT16*)DmaAddress)[83];
     if((CapChecksum != 0x00) && (CapChecksum != 0xFFFFFFFF)){
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[82];
+        TmpInfo = ((UINT16*)DmaAddress)[82];
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_SMART_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 1)) ? ATA_ENDPOINT_DEVCAP_SECURITY_MODE_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 2)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_FEATURE : 0;
@@ -226,7 +227,7 @@ void AtaCoreParsePacketDeviceInformation(
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 13)) ? ATA_ENDPOINT_DEVCAP_READBUFF_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 14)) ? ATA_ENDPOINT_DEVCAP_NOP_SUPPORT : 0;
         
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[83];
+        TmpInfo = ((UINT16*)DmaAddress)[83];
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_DOWNLOAD_MICROCODE_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 4)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 5)) ? ATA_ENDPOINT_DEVCAP_POWER_UP_SUPPORT : 0;
@@ -237,9 +238,9 @@ void AtaCoreParsePacketDeviceInformation(
 
         
     }
-    CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[85] << 24) | ((UINT64)((UINT16*)Identify->PioDataIn)[86] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[87];
+    CapChecksum = ((UINT64)((UINT16*)DmaAddress)[85] << 24) | ((UINT64)((UINT16*)DmaAddress)[86] << 16) | (UINT64)((UINT16*)DmaAddress)[87];
     if((CapChecksum != 0x00) && (CapChecksum != 0x0000FFFFFFFFFFFF)){
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[85];
+        TmpInfo = ((UINT16*)DmaAddress)[85];
 
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 0)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_SMART_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 1)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_SECURITY_MODE_SUPPORT);
@@ -256,7 +257,7 @@ void AtaCoreParsePacketDeviceInformation(
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 13)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_READBUFF_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 14)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_NOP_SUPPORT);
     
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[86];
+        TmpInfo = ((UINT16*)DmaAddress)[86];
     
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 0)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_DOWNLOAD_MICROCODE_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 4)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT);
@@ -266,7 +267,7 @@ void AtaCoreParsePacketDeviceInformation(
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 11)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_DEVCONF_OVERLAY_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 12)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_FLUSH_CACHE_SUPPORT);
 
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[87];
+        TmpInfo = ((UINT16*)DmaAddress)[87];
         for(i = 5; i >= 0; i--){
             if(TmpInfo & (1 << i)){
                 EndpointDevice->MaxMDmaSupport = i;
@@ -283,9 +284,9 @@ void AtaCoreParsePacketDeviceInformation(
 
     }
 
-    EndpointDevice->DeviceCap |= (((UINT16*)Identify->PioDataIn)[127] & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT : 0;
+    EndpointDevice->DeviceCap |= (((UINT16*)DmaAddress)[127] & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT : 0;
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[128];
+    TmpInfo = ((UINT16*)DmaAddress)[128];
 
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_SECURITY_SUPPORT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 1)) ? ATA_ENDPOINT_DEVCAP_SECURITY_ENABLED : 0;
@@ -295,32 +296,33 @@ void AtaCoreParsePacketDeviceInformation(
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 5)) ? ATA_ENDPOINT_DEVCAP_ENHANCED_SECURITY_ERASE_FEAT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 8)) ? ATA_ENDPOINT_DEVCAP_SECURITY_LEVEL : 0;
 
-    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 20, EndpointDevice->SerialNumber, 20);
+    ShiftDeviceStringToBegining((PCHAR)DmaAddress + 20, EndpointDevice->SerialNumber, 20);
 
-    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 46, EndpointDevice->FirmwareVersion, 8);
+    ShiftDeviceStringToBegining((PCHAR)DmaAddress + 46, EndpointDevice->FirmwareVersion, 8);
     
-    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 54, EndpointDevice->ModelNumber, 40);
+    ShiftDeviceStringToBegining((PCHAR)DmaAddress + 54, EndpointDevice->ModelNumber, 40);
 
 
     LouPrint("ATAPI SERIAL:%s\n", EndpointDevice->SerialNumber);
     LouPrint("ATAPI FIRMWARE:%s\n", EndpointDevice->FirmwareVersion);    
     LouPrint("ATAPI MODEL:%s\n", EndpointDevice->ModelNumber);    
     LouPrint("ATAPI SUPPORT:%d\n", foobar);
-    LouKeFree(Identify->PioDataIn);
-
+    LouKeDestroyDmaTransfer(Identify->TransferData);
 }
 
 void AtaCoreParseStandardDeviceInformation(
     PATA_COMMAND_PACKET         Identify, 
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
 ){
-    UINT16 TmpInfo = *(UINT16*)Identify->PioDataIn;
+    //the lowest ata threshold is 64 kilobytes so 512 bytes will allways be in one pool
+    UINT8* DmaAddress = (UINT8*)LouKeDmaTransferGetOffsetVa(Identify->TransferData, 0, 0);
+    UINT16 TmpInfo = *(UINT16*)DmaAddress;
     UINT64 CapChecksum;
     UINT8  FieldMask = 0;
     EndpointDevice->DeviceCap = 0;
     EndpointDevice->DeviceCap |= TmpInfo & (1 << 7) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE : 0;
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[49];
+    TmpInfo = ((UINT16*)DmaAddress)[49];
 
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 8)) ? ATA_ENDPOINT_DEVCAP_DMA_SUPPORT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 9)) ? ATA_ENDPOINT_DEVCAP_LBA_SUPPORT : 0;
@@ -330,9 +332,9 @@ void AtaCoreParseStandardDeviceInformation(
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 14)) ? ATA_ENDPOINT_DEVCAP_QUEUE_SUPPORT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 15)) ? ATA_ENDPOINT_DEVCAP_INTERLEAVE_DMA : 0;
 
-    FieldMask = ((UINT16*)Identify->PioDataIn)[53] & 0x07;
+    FieldMask = ((UINT16*)DmaAddress)[53] & 0x07;
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[63];
+    TmpInfo = ((UINT16*)DmaAddress)[63];
     int i;
     for(i = 2; i >= 0; i--){
         if(TmpInfo & (1 << i)){
@@ -348,12 +350,12 @@ void AtaCoreParseStandardDeviceInformation(
         }
     }
 
-    EndpointDevice->PioModesSupported = ((UINT16*)Identify->PioDataIn)[64] & 0xFF;
+    EndpointDevice->PioModesSupported = ((UINT16*)DmaAddress)[64] & 0xFF;
 
-    EndpointDevice->MaxQueueDepth = (((UINT16*)Identify->PioDataIn)[75] & 0xFF) + 1;
+    EndpointDevice->MaxQueueDepth = (((UINT16*)DmaAddress)[75] & 0xFF) + 1;
 
     SIZE foobar = 3;
-    CapChecksum = ((UINT16*)Identify->PioDataIn)[80];
+    CapChecksum = ((UINT16*)DmaAddress)[80];
     if((CapChecksum != 0x00) && (CapChecksum != 0xFFFF)){
         for(; foobar < 14; foobar++){
             if(!(CapChecksum & (1UL << foobar)))break;
@@ -361,9 +363,9 @@ void AtaCoreParseStandardDeviceInformation(
         //TODO: Read the most recent spec and implement features
     }
 
-    CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[82] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[83];
+    CapChecksum = ((UINT64)((UINT16*)DmaAddress)[82] << 16) | (UINT64)((UINT16*)DmaAddress)[83];
     if((CapChecksum != 0x00) && (CapChecksum != 0xFFFFFFFF)){
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[82];
+        TmpInfo = ((UINT16*)DmaAddress)[82];
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_SMART_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 1)) ? ATA_ENDPOINT_DEVCAP_SECURITY_MODE_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 2)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_FEATURE : 0;
@@ -379,7 +381,7 @@ void AtaCoreParseStandardDeviceInformation(
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 13)) ? ATA_ENDPOINT_DEVCAP_READBUFF_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 14)) ? ATA_ENDPOINT_DEVCAP_NOP_SUPPORT : 0;
         
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[83];
+        TmpInfo = ((UINT16*)DmaAddress)[83];
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_DOWNLOAD_MICROCODE_SUPPORT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 4)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT : 0;
         EndpointDevice->DeviceCap |= (TmpInfo & (1 << 5)) ? ATA_ENDPOINT_DEVCAP_POWER_UP_SUPPORT : 0;
@@ -390,9 +392,9 @@ void AtaCoreParseStandardDeviceInformation(
 
         
     }
-    CapChecksum = ((UINT64)((UINT16*)Identify->PioDataIn)[85] << 24) | ((UINT64)((UINT16*)Identify->PioDataIn)[86] << 16) | (UINT64)((UINT16*)Identify->PioDataIn)[87];
+    CapChecksum = ((UINT64)((UINT16*)DmaAddress)[85] << 24) | ((UINT64)((UINT16*)DmaAddress)[86] << 16) | (UINT64)((UINT16*)DmaAddress)[87];
     if((CapChecksum != 0x00) && (CapChecksum != 0x0000FFFFFFFFFFFF)){
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[85];
+        TmpInfo = ((UINT16*)DmaAddress)[85];
 
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 0)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_SMART_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 1)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_SECURITY_MODE_SUPPORT);
@@ -409,7 +411,7 @@ void AtaCoreParseStandardDeviceInformation(
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 13)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_READBUFF_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 14)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_NOP_SUPPORT);
     
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[86];
+        TmpInfo = ((UINT16*)DmaAddress)[86];
     
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 0)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_DOWNLOAD_MICROCODE_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 4)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT);
@@ -419,7 +421,7 @@ void AtaCoreParseStandardDeviceInformation(
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 11)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_DEVCONF_OVERLAY_SUPPORT);
         EndpointDevice->DeviceCap &= (TmpInfo & (1 << 12)) ? UINT64_MAX : ~(ATA_ENDPOINT_DEVCAP_FLUSH_CACHE_SUPPORT);
 
-        TmpInfo = ((UINT16*)Identify->PioDataIn)[87];
+        TmpInfo = ((UINT16*)DmaAddress)[87];
         for(i = 5; i >= 0; i--){
             if(TmpInfo & (1 << i)){
                 EndpointDevice->MaxMDmaSupport = i;
@@ -436,9 +438,9 @@ void AtaCoreParseStandardDeviceInformation(
 
     }
 
-    EndpointDevice->DeviceCap |= (((UINT16*)Identify->PioDataIn)[127] & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT : 0;
+    EndpointDevice->DeviceCap |= (((UINT16*)DmaAddress)[127] & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_REMOVEABLE_MEDIA_STAT_FEAT : 0;
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[128];
+    TmpInfo = ((UINT16*)DmaAddress)[128];
 
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 0)) ? ATA_ENDPOINT_DEVCAP_SECURITY_SUPPORT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 1)) ? ATA_ENDPOINT_DEVCAP_SECURITY_ENABLED : 0;
@@ -448,32 +450,31 @@ void AtaCoreParseStandardDeviceInformation(
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 5)) ? ATA_ENDPOINT_DEVCAP_ENHANCED_SECURITY_ERASE_FEAT : 0;
     EndpointDevice->DeviceCap |= (TmpInfo & (1 << 8)) ? ATA_ENDPOINT_DEVCAP_SECURITY_LEVEL : 0;
 
-    EndpointDevice->MaxLba = ((UINT16*)Identify->PioDataIn)[100];
-    EndpointDevice->MaxLba |= (((UINT64)((UINT16*)Identify->PioDataIn)[101]) << 16);
-    EndpointDevice->MaxLba |= (((UINT64)((UINT16*)Identify->PioDataIn)[102]) << 24);
-    EndpointDevice->MaxLba |= (((UINT64)((UINT16*)Identify->PioDataIn)[103]) << 32);
+    EndpointDevice->MaxLba = ((UINT16*)DmaAddress)[100];
+    EndpointDevice->MaxLba |= (((UINT64)((UINT16*)DmaAddress)[101]) << 16);
+    EndpointDevice->MaxLba |= (((UINT64)((UINT16*)DmaAddress)[102]) << 24);
+    EndpointDevice->MaxLba |= (((UINT64)((UINT16*)DmaAddress)[103]) << 32);
 
-    TmpInfo = ((UINT16*)Identify->PioDataIn)[106];
+    TmpInfo = ((UINT16*)DmaAddress)[106];
     if(TmpInfo & (1 << 13)){
-        EndpointDevice->SectorSize = ((UINT32)((UINT16*)Identify->PioDataIn)[117]);
-        EndpointDevice->SectorSize |= (((UINT32)((UINT16*)Identify->PioDataIn)[118]) << 16);
+        EndpointDevice->SectorSize = ((UINT32)((UINT16*)DmaAddress)[117]);
+        EndpointDevice->SectorSize |= (((UINT32)((UINT16*)DmaAddress)[118]) << 16);
     }else{
         EndpointDevice->SectorSize = 512;
     }
 
-    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 20, EndpointDevice->SerialNumber, 20);
+    ShiftDeviceStringToBegining((PCHAR)DmaAddress + 20, EndpointDevice->SerialNumber, 20);
 
-    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 46, EndpointDevice->FirmwareVersion, 8);
+    ShiftDeviceStringToBegining((PCHAR)DmaAddress + 46, EndpointDevice->FirmwareVersion, 8);
     
-    ShiftDeviceStringToBegining((PCHAR)Identify->PioDataIn + 54, EndpointDevice->ModelNumber, 40);
+    ShiftDeviceStringToBegining((PCHAR)DmaAddress + 54, EndpointDevice->ModelNumber, 40);
 
 
     LouPrint("ATA SERIAL:%s\n", EndpointDevice->SerialNumber);
     LouPrint("ATA FIRMWARE:%s\n", EndpointDevice->FirmwareVersion);    
     LouPrint("ATA MODEL:%s\n", EndpointDevice->ModelNumber);    
     LouPrint("ATA SUPPORT:%d\n", foobar);  
-    LouKeFree(Identify->PioDataIn);
-
+    LouKeDestroyDmaTransfer(Identify->TransferData);
 }
 
 /*

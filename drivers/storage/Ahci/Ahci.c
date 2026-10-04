@@ -238,7 +238,29 @@ void AhciFillCommandSlot(
     CmdSlot[Slot].Ctbau = (CommandTable >> 32) & UINT32_MAX;
 }
 
+/*
+static void InitializeGenericAtaSgElement(
+    PLOUSINE_DMA_TRANSFER   DmaTransfer,
+    PATA_PRDT_ENTRY*        AtaSg         
+){
+    PLOUSINE_DMA_DEVICE DmaDevice = DmaTransfer->DmaDevice;
+    PATA_PRDT_ENTRY     NewPrdEntry;
+    SIZE                TransferCount = 1;
+    if(DmaTransfer->Type == LOUSINE_DMA_TRANSFER_TYPE_SCATTERED){
+        LouPrint("ATA.SYS:InitializeGenericAtaSgElement()\n");
+        while(1);
+    }
 
+    NewPrdEntry = (PATA_PRDT_ENTRY)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, sizeof(ATA_PRDT_ENTRY), MAX(GET_ALIGNMENT(ATA_PRDT_ENTRY) , ATA_PRDT_ALIGNMENT));
+    NewPrdEntry->DmaAddress = DmaTransfer->StandardTransfer.DmaAddress;
+    NewPrdEntry->DmaSize = DmaTransfer->StandardTransfer.DmaSize;
+    if(NewPrdEntry->DmaSize == (64 * KILOBYTE)){
+        NewPrdEntry->DmaSize = 0;
+    }
+    NewPrdEntry->Edt = ATA_PRDT_EDT_VALUE;
+    *AtaSg = (PATA_PRDT_ENTRY)(UINT8*)NewPrdEntry;
+}
+*/
 
 LOUSTATUS AhciGenericPortDevicePrepCommand(
     PATA_PORT_DEVICE_OBJECT PortDevice,
@@ -265,26 +287,8 @@ LOUSTATUS AhciGenericPortDevicePrepCommand(
     }
 
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
-        if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
-            LouPrint("TODO:AHCI.SYS:DMA\n");
-            while(1);
-        }else{
-            //TODO:Finish dynamic sg management
-             
-            CommandPrivateData->PioDmaTransfer = LouKeDmaDeviceAllocateDmaMemory(&PrivateData->DmaDevice, CommandPacket->PioSize, 2); 
-            CommandPrivateData->CommandSlot = Slot;
-            if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD){
-                memcpy(CommandPrivateData->PioDmaTransfer, CommandPacket->PioDataOut, CommandPacket->PioSize);
-            }
-            UINTPTR Foo;
-            RequestPhysicalAddress((UINT64)CommandPrivateData->PioDmaTransfer, &Foo);
-            PCOMMAND_TABLE_PRDT TablePrdt = (PCOMMAND_TABLE_PRDT)(CommandTable + 0x80);
-            TablePrdt->DbcI = CommandPacket->PioSize - 1;
-            TablePrdt->Dba = Foo & UINT32_MAX;
-            TablePrdt->Dbau = (Foo >> 32) & UINT32_MAX;
-            ElementCount = 1;
-        }
-
+        LouPrint("TODO:AHCI.SYS:DMA\n");
+        while(1);
     }
 
     Options = CommandFisLength | (ElementCount << 16); 
@@ -324,12 +328,6 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
         return STATUS_SUCCESS;
     }
-    if(!(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_OUT_CMD)){
-        memcpy(CommandPacket->PioDataIn, CommandPrivateData->PioDmaTransfer, CommandPacket->PioSize);
-    }
-    LouKeDmaDeviceFreeDmaMemory(&PrivateData->DmaDevice, CommandPrivateData->PioDmaTransfer);
-    LouKeFreeFastObject("AHCI_COMMAND_PRIVATE_DATA",CommandPacket->CommandPrivateData);
-    CommandPacket->CommandPrivateData = 0x00;
     return STATUS_SUCCESS;
 }
 
