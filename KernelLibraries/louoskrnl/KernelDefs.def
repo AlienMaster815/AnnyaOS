@@ -278,3 +278,7 @@ EXPORTS
     LouKeXaIsIndexUsed
     LouKeXaStore
     LouKeQueueInterruptWork 
+    LouKeCreateSrcuObject
+    LouKeSrcuReadObjectAcquire
+    LouKeSrcuReadObjectRelease
+    LouKeSrcuWriteObjectAcquire

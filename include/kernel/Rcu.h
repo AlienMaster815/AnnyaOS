@@ -1,59 +1,48 @@
 #ifndef _RCU_H
 #define _RCU_H
 
-typedef struct _SRCU_PER_CPU_OBJECT{
-    LouKIRQL                Irql;
-    int                     NonRcuSleepableProcessorIndex;
-    KERNEL_REFERENCE        Readers;
-    PVOID                   CurrentReader;
-}SRCU_PER_CPU_OBJECT, * PSRCU_PER_CPU_OBJECT,
-  RCU_PER_CPU_OBJECT, *  PRCU_PER_CPU_OBJECT;
+#include <kernel/threads.h>
+
+#ifdef _RCU_INTERNALS
 
 typedef struct _SRCU_OBJECT{
-    BOOLEAN                 Sleepable;
-    BOOLEAN                 MbAfterReadUnlock;
-    PVOID                   Writer;
-    PSRCU_PER_CPU_OBJECT    PerCpuData;
-}SRCU_OBJECT, * PSRCU_OBJECT,
-  RCU_OBJECT, *  PRCU_OBJECT;
+    atomic_t        Readers;
+    mutex_t         ReadLock;
+    mutex_t         WriteLock;
+    PVOID           Items[2];
+    SIZE            ItemSize;
+}SRCU_OBJECT, * PSRCU_OBJECT, * PRCU_OBJECT;
 
-#define DEFINE_SRCU(Name) \
-    SRCU_OBJECT Name = { \
-        .Sleepable = true, \
-    }
+#else
+typedef PVOID PSRCU_OBJECT;
+typedef PVOID PRCU_OBJECT;
+#endif
 
-#define DEFINE_RCU(Name) \
-    SRCU_OBJECT Name = { \
-        .Sleepable = false, \
-    }
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeCreateSrcuObject(
+    PSRCU_OBJECT*   ObjectOut, 
+    SIZE            ObjectSize, 
+    SIZE            ObjectAlignment,
+    UINT64          AllocationFlags
+);
 
-#define DEFINE_STATIC_SRCU(Name) \
-    static SRCU_OBJECT Name = { \
-        .Sleepable = true, \
-    }
+KERNEL_EXPORT
+PVOID 
+LouKeSrcuReadObjectAcquire(
+    PSRCU_OBJECT SrcuObject
+);
 
-#define DEFINE_STATIC_RCU(Name) \
-    static SRCU_OBJECT Name = { \
-        .Sleepable = false, \
-    }
+KERNEL_EXPORT
+void 
+LouKeSrcuReadObjectRelease(
+    PSRCU_OBJECT SrcuObject
+);
 
-//TODO: Fast
-KERNEL_EXPORT LOUSTATUS LouKeInitializeSrcuObject(PSRCU_OBJECT SrcuObject);
-KERNEL_EXPORT LOUSTATUS LouKeInitializeRcuObject(PRCU_OBJECT RcuObject);
-
-KERNEL_EXPORT void LouKeDeInitializeSrcuObject(PSRCU_OBJECT SrcuObject);
-KERNEL_EXPORT void LouKeDeInitializeRcuObject(PRCU_OBJECT RcuObject);
-
-KERNEL_EXPORT void LouKeForceSrcuMbAfterReadUnlock(PSRCU_OBJECT SrcuObject);
-KERNEL_EXPORT void LouKeForceRcuMbAfterReadUnlock(PRCU_OBJECT RcuObject);
-
-KERNEL_EXPORT int LouKeSrcuAcquireReadLock(PRCU_OBJECT RcuObject);
-KERNEL_EXPORT void LouKeRcuAcquireReadLock();
-
-KERNEL_EXPORT void LouKeSrcuReleaseReadLock(PSRCU_OBJECT SrcuObject, int Processor);
-KERNEL_EXPORT void LouKeRcuReleaseReadLock(PSRCU_OBJECT SrcuObject);
-
-KERNEL_EXPORT void LouKeSrcuSynchronize(PSRCU_OBJECT SrcuObject);
-KERNEL_EXPORT void LouKeRcuSynchronize(PRCU_OBJECT RcuObject);
+KERNEL_EXPORT
+PVOID 
+LouKeSrcuWriteObjectAcquire(
+    PSRCU_OBJECT SrcuObject
+);
 
 #endif

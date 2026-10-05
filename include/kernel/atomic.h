@@ -58,6 +58,14 @@ static inline bool atomic64_cmpxchg(atomic64_t* v, int old, int newv) {
     return __atomic_compare_exchange_n(&v->counter, &old, newv, 0, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
 }
 
+static inline void atomic_increment(atomic_t* v){
+    __atomic_fetch_add(&v->counter, 1, __ATOMIC_SEQ_CST);
+}
+
+static inline void atomic_decrement(atomic_t* v){
+    __atomic_fetch_sub(&v->counter, 1, __ATOMIC_SEQ_CST);
+}
+
 
 #ifdef __cplusplus
 }

@@ -171,6 +171,14 @@ static inline int LouKeAtomicTestAndSet(atomic_t* m, int Value){
     return __atomic_test_and_set(m, 1);
 } 
 
+static inline void LouKeAtomicIncrement(atomic_t* v){
+    atomic_increment(v);
+}
+
+static inline void LouKeAtomicDecrement(atomic_t* v){
+    atomic_decrement(v);
+}
+
 
 static inline void LouKeSetAtomic(atomic_t* A, int Value){
     atomic_set(A, Value);

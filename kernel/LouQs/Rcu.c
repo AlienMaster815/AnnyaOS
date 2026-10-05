@@ -1,89 +1,77 @@
+#define _RCU_INTERNALS
 #include <LouAPI.h>
 
-LOUAPI uint32_t GetNPROC();
+#define SRCU_READ_COPY_POINTER      0 
+#define SRCU_WRITE_COPY_POINTER     1
 
-//RCU and SRCU objects are the same structure
-
-KERNEL_EXPORT LOUSTATUS LouKeInitializeSrcuObject(PSRCU_OBJECT SrcuObject){
-    if(!SrcuObject){
+KERNEL_EXPORT
+LOUSTATUS 
+LouKeCreateSrcuObject(
+    PSRCU_OBJECT*   ObjectOut, 
+    SIZE            ObjectSize, 
+    SIZE            ObjectAlignment,
+    UINT64          AllocationFlags
+){
+    if((!ObjectOut) || (!ObjectSize) || (!ObjectAlignment)){
         return STATUS_INVALID_PARAMETER;
     }
-    memset(SrcuObject, 0, sizeof(SRCU_OBJECT));
-    SrcuObject->Sleepable = true;
+    PSRCU_OBJECT NewObject = LouKeMallocType(SRCU_OBJECT, KERNEL_GENERIC_MEMORY);
+    if(!NewObject){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    
+    NewObject->Items[SRCU_READ_COPY_POINTER] = LouKeMallocEx(ObjectSize, ObjectAlignment, AllocationFlags);
+    if(!NewObject->Items[SRCU_READ_COPY_POINTER]){
+        LouKeFree(NewObject);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    NewObject->Items[SRCU_WRITE_COPY_POINTER] = LouKeMallocEx(ObjectSize, ObjectAlignment, AllocationFlags);
+    if(!NewObject->Items[SRCU_WRITE_COPY_POINTER]){
+        LouKeFree(NewObject->Items[SRCU_READ_COPY_POINTER]);
+        LouKeFree(NewObject);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    NewObject->ItemSize = ObjectSize;
+
+    *ObjectOut = NewObject;
     return STATUS_SUCCESS;
 }
 
-KERNEL_EXPORT LOUSTATUS LouKeInitializeRcuObject(PRCU_OBJECT RcuObject){
-    if(!RcuObject){
-        return STATUS_INVALID_PARAMETER;
-    }
-    memset(RcuObject, 0, sizeof(RCU_OBJECT));
-    RcuObject->Sleepable = false;
-    return STATUS_SUCCESS;
+KERNEL_EXPORT
+PVOID 
+LouKeSrcuReadObjectAcquire(
+    PSRCU_OBJECT SrcuObject
+){
+    MutexSynchronizeNoBlocking(&SrcuObject->ReadLock); //this function dosent block instead it yeilds if mutex is locked
+    LouKeAtomicIncrement(&SrcuObject->Readers);
+    return SrcuObject->Items[SRCU_READ_COPY_POINTER];
 }
 
-KERNEL_EXPORT void LouKeDeInitializeSrcuObject(PRCU_OBJECT SrcuObject){
-    if(!SrcuObject){
-        return;
-    }
-    memset(SrcuObject, 0, sizeof(RCU_OBJECT));
+KERNEL_EXPORT
+void 
+LouKeSrcuReadObjectRelease(
+    PSRCU_OBJECT SrcuObject
+){
+    LouKeAtomicDecrement(&SrcuObject->Readers);
 }
 
-KERNEL_EXPORT void LouKeDeInitializeRcuObject(PRCU_OBJECT RcuObject){
-    if(!RcuObject){
-        return;
-    }
-    memset(RcuObject, 0, sizeof(RCU_OBJECT));
+KERNEL_EXPORT
+PVOID 
+LouKeSrcuWriteObjectAcquire(
+    PSRCU_OBJECT SrcuObject
+){
+    MutexLock(&SrcuObject->WriteLock);
+    return SrcuObject->Items[SRCU_WRITE_COPY_POINTER];
 }
 
-KERNEL_EXPORT int LouKeSrcuAcquireReadLock(PSRCU_OBJECT SrcuObject){
-    int Processor = LouKeGetCurrentProcessorNumber();
-    LouKeMemoryBarrier();    
-    if(!SrcuObject->Sleepable){
-        LouKeSetIrql(DISPATCH_LEVEL, &SrcuObject->PerCpuData[Processor].Irql);
-    }
-    LouKeAcquireReference(&SrcuObject->PerCpuData[Processor].Readers);
-    return Processor;
-}
-
-KERNEL_EXPORT void LouKeSrcuReleaseReadLock(PSRCU_OBJECT SrcuObject, int Token){
-    int Processor = Token;
-    if(SrcuObject->MbAfterReadUnlock){
-        LouKeMemoryBarrier();
-    }
-    LouKeReleaseReference(&SrcuObject->PerCpuData[Processor].Readers);
-    if(!SrcuObject->Sleepable){
-        LouKeSetIrql(SrcuObject->PerCpuData[Processor].Irql, 0x00);
-    }
-}
-
-KERNEL_EXPORT void LouKeRcuAcquireReadLock(PRCU_OBJECT RcuObject){
-    int ProcessorID = LouKeGetCurrentProcessorNumber();
-    RcuObject->PerCpuData[ProcessorID].NonRcuSleepableProcessorIndex = LouKeSrcuAcquireReadLock(RcuObject);
-}
-
-KERNEL_EXPORT void LouKeRcuReleaseReadLock(PRCU_OBJECT RcuObject){
-    int ProcessorID = LouKeGetCurrentProcessorNumber();
-    LouKeSrcuReleaseReadLock(RcuObject, RcuObject->PerCpuData[ProcessorID].NonRcuSleepableProcessorIndex);
-}
-
-KERNEL_EXPORT void LouKeRcuAssignPointer(PRCU_OBJECT RcuObject, PVOID NewPointer){
-    RcuObject->Writer = NewPointer;
-    LouKeMemoryBarrier();
-}
-
-KERNEL_EXPORT void LouKeSrcuSynchronize(PSRCU_OBJECT SrcuObject){
-    int ProcCount = GetNPROC();
-
-    for(int i = 0; i < ProcCount; i++){
-        while(LouKeGetReferenceCount(&SrcuObject->PerCpuData[i].Readers)){
-            LouKeYieldExecution();
-        }
-        SrcuObject->PerCpuData[i].CurrentReader = SrcuObject->Writer;
-        LouKeMemoryBarrier();
-    }
-}
-
-KERNEL_EXPORT void LouKeRcuSynchronize(PRCU_OBJECT RcuObject){
-    LouKeSrcuSynchronize(RcuObject);
+void LouKeSrcuWriteObjectRelease(PSRCU_OBJECT SrcuObject){
+    MutexLock(&SrcuObject->ReadLock); //lock new readers
+    while(LouKeGetAtomic(&SrcuObject->Readers)){ //wait for all Other readers to leave
+        LouKeYieldExecution();
+    } 
+    memcpy(SrcuObject->Items[SRCU_READ_COPY_POINTER], SrcuObject->Items[SRCU_WRITE_COPY_POINTER], SrcuObject->ItemSize); //copy writer data to reader data
+    //memory fences happen in the unlocks
+    MutexUnlock(&SrcuObject->ReadLock);
+    MutexUnlock(&SrcuObject->WriteLock);
 }
