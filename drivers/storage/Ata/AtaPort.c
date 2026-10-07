@@ -93,8 +93,6 @@ DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(
 void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PACKET Identify, UINT8 Dev, BOOLEAN PacketDev){
     PATA_HOST_DEVICE_OBJECT HostDevice = AtaPort->HostDevice;    
     
-    MutexLock(AtaPort->ChannelLock);
-
     memset(Identify, 0, sizeof(ATA_COMMAND_PACKET));
 
     LOUSTATUS Status;
@@ -116,12 +114,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
         }
     }
 
-
-    LouKeListAddTail(&Identify->QueuedCommands, &AtaPort->QueuedCommands);
-
-    LouKeUnblockThread(AtaPort->CommandWorkerThread);
-
-    MutexUnlock(AtaPort->ChannelLock);
+    AtaCoreCommitCommandPacketToPort(Identify, AtaPort);
         
     while(!LouKeGetAtomicBoolean(&Identify->CommandDone)){
         sleep(10);

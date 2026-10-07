@@ -1,6 +1,8 @@
 #ifndef _SCSI_CORE_H
 #define _SCSI_CORE_H
 
+#define _KERNEL_MODULE_
+
 #include <LouDDK.h>
 
 typedef struct _SCSI_INTERNAL_HOST_DEVICE_OBJECT{
@@ -111,6 +113,8 @@ UINT16 ScsiCoreEncodeUint16(UINT16 Input);
 UINT32 ScsiCoreEncodeUint32(UINT32 Input);
 UINT64 ScsiCoreEncodeUint64(UINT64 Input);
 void ScsiCoreDbgPrint(char* format, ...);
+
+DRIVER_EXPORT LOUSTATUS ScsiCoreDecodeOpcodeEx(PVOID Packet, UINT8* Out);
 
 DRIVER_EXPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
     PSCSI_HOST_DEVICE_DRIVER_OBJECT NewScsiDriverObject,

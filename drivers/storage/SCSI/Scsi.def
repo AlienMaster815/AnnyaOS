@@ -1,6 +1,7 @@
 LIBRARY SCSICORE.SYS
 
 EXPORTS	
+    ScsiCoreDecodeOpcodeEx
     ScsiCoreRegisterScsiHostDeviceDriver
     ScsiCoreCreateScsiHostDeviceObject
     ScsiCoreEncodeLunAddressingLevel

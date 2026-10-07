@@ -5,6 +5,8 @@ SRC = 	AtaCore.c \
 		Commands/Encoding.c \
 		Commands/Commands.c \
 		Commands/Atapi.c \
+		Commands/AtapiStart.c \
+		Commands/AtapiEnd.c \
 		AtaHost.c \
 		AtaPort.c \
 		AtaIoMngr.c \

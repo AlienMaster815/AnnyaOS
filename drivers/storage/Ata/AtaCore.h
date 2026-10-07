@@ -35,6 +35,12 @@ void AtaCoreEncodeMediaUnlockCommand(PATA_COMMAND_MEDIA_UNLOCK_STRUCTURE Cmd, UI
 void AtaCoreEncodeNopCommand(PATA_COMMAND_NOP_STRUCTURE Cmd, UINT8 Dev, UINT8 SubCommand);
 void AtaCoreEncodePacketCommand(PATA_COMMAND_PACKET_STRUCTURE Cmd, UINT8 Dev, UINT16 ByteCountLimit, UINT8 Dma, UINT8 Ovl, UINT8 Tag);
 
+//ATA CORE INTERNALS ONLY
+LOUSTATUS _AtaCoreAtapiEndpointStartReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET* pCommandPacket);
+LOUSTATUS _AtaCoreAtapiEndpointEndCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket, UINT32* pLastLba, UINT32* pSectorSize);
+LOUSTATUS _AtaCoreAtapiEndpointStartRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer, PATA_COMMAND_PACKET* CommandPacket);
+LOUSTATUS _AtaCoreAtapiEndpointEndRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket);
+
 LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice);
 
 void AtaCorePortIoQueueManager(PVOID Params);
@@ -45,5 +51,14 @@ void AtaCoreFreeAtaCommandPacket(PVOID Object);
 LOUSTATUS AtaCoreGetEndpointCapacity(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT64* OutLba, UINT32* OutSectorSize);
 LOUSTATUS AtaCoreReadSectorsFromEndpointDevice(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT64 Lba, UINT32 SectorCount, PVOID OutBuffer);
 LOUSTATUS AtaCoreRegisterEndpointDevice(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice);
+
+void AtaCoreCommitCommandPacketToPort(PATA_COMMAND_PACKET CommandPacket, PATA_PORT_DEVICE_OBJECT AtaPort);
+
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32* LastLba, UINT32* SectorSize);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointStartReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET* CommandPacket);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointEndCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket, UINT32* pLastLba, UINT32* pSectorSize);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointStartRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer, PATA_COMMAND_PACKET* CommandPacket);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointEndRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket);
 
 #endif

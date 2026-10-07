@@ -1,5 +1,46 @@
 #include "../ScsiCore.h"
 
+DRIVER_EXPORT 
+LOUSTATUS 
+ScsiCoreDecodeOpcodeEx(
+    PVOID   Packet,
+    UINT8*  Out
+){
+    if((!Packet) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT8* Data = (UINT8*)Packet;
+    *Out = *Data;
+    return STATUS_SUCCESS;
+}
+
+DRIVER_EXPORT 
+LOUSTATUS
+ScsiCoreDecodeOpcode(
+    PVOID   Packet,
+    UINT8*  CommandCode,
+    UINT8*  GroupCode
+){
+    if(!Packet){
+        return STATUS_INVALID_PARAMETER;
+    }
+    UINT8 Op;
+    LOUSTATUS Status = ScsiCoreDecodeOpcodeEx(
+        Packet,
+        &Op
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    if(CommandCode){
+        *CommandCode = Op & 0b1111;
+    }
+    if(GroupCode){
+        *GroupCode = ((Op >> 5) & 0b111);
+    }
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS
 ScsiCoreEncodeOpCode(
     UINT8*  Out, 

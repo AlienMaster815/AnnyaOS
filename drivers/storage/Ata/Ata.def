@@ -6,3 +6,6 @@ EXPORTS
     AtaCoreAllocatePortsForHost
     AtaCoreFreeAtaPortsFromHost
     AtaCoreRegisterAtaHostDevice
+    AtaCoreAtapiEndpointReadCapacity10
+    AtaCoreAtapiEndpointStartCapacity10
+    AtaCoreAtapiEndpointEndCapacity10

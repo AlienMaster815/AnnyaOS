@@ -1549,6 +1549,9 @@ typedef struct _SCSI_HOST_DEVICE_DRIVER_OBJECT{
 
 #ifndef _SCSI_CORE_H
 
+DRIVER_IMPORT LOUSTATUS ScsiCoreDecodeOpcodeEx(PVOID Packet, UINT8* Out);
+
+
 DRIVER_IMPORT
 void 
 ScsiCoreEncodeReadCapacity10Command(

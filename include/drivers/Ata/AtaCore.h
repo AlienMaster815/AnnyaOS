@@ -376,6 +376,7 @@ typedef struct _ATA_COMMAND_PACKET{
     SIZE                        TransferSize;
     PVOID                       CommandPrivateData;
     UINT32                      Auxilery;
+    ULONG                       OpCode;
     UINT8                       Control;
     PLOUSINE_DMA_TRANSFER       TransferData;
     union{
@@ -451,19 +452,42 @@ typedef struct _ATA_HOST_OPERATIONS{
 
 #ifdef ATA_CORE_INTERNALS_H
 
+//DRIVER API
 DRIVER_EXPORT LOUSTATUS AtaCoreAllocateHostDevice(PATA_HOST_DEVICE_OBJECT* HostDeviceOut, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
 DRIVER_EXPORT void AtaCoreFreeHostDevice(PATA_HOST_DEVICE_OBJECT HostDevice);
 DRIVER_EXPORT LOUSTATUS AtaCoreAllocatePortsForHost(PATA_HOST_DEVICE_OBJECT HostDevice, SIZE PortCount, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
 DRIVER_EXPORT void AtaCoreFreeAtaPortsFromHost(PATA_HOST_DEVICE_OBJECT HostDevice);
 DRIVER_EXPORT LOUSTATUS AtaCoreRegisterAtaHostDevice(PATA_HOST_DEVICE_OBJECT NewHostDevice);
 
+//KERNEL API
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32* LastLba, UINT32* SectorSize);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointStartReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET* CommandPacket);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointEndCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket, UINT32* pLastLba, UINT32* pSectorSize);
+
+
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointStartRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer, PATA_COMMAND_PACKET* CommandPacket);
+DRIVER_EXPORT LOUSTATUS AtaCoreAtapiEndpointEndRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket);
+
 #else
 
+//DRIVER API
 DRIVER_IMPORT LOUSTATUS AtaCoreAllocateHostDevice(PATA_HOST_DEVICE_OBJECT* HostDeviceOut, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
 DRIVER_IMPORT void AtaCoreFreeHostDevice(PATA_HOST_DEVICE_OBJECT HostDevice);
 DRIVER_IMPORT LOUSTATUS AtaCoreAllocatePortsForHost(PATA_HOST_DEVICE_OBJECT HostDevice, SIZE PortCount, SIZE PrivateDataSize, SIZE PrivateDataAlignment);
 DRIVER_IMPORT void AtaCoreFreeAtaPortsFromHost(PATA_HOST_DEVICE_OBJECT HostDevice);
 DRIVER_IMPORT LOUSTATUS AtaCoreRegisterAtaHostDevice(PATA_HOST_DEVICE_OBJECT NewHostDevice);
+
+//KERNEL API
+DRIVER_IMPORT LOUSTATUS AtaCoreAtapiEndpointReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32* LastLba, UINT32* SectorSize);
+DRIVER_IMPORT LOUSTATUS AtaCoreAtapiEndpointStartReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET* CommandPacket);
+DRIVER_IMPORT LOUSTATUS AtaCoreAtapiEndpointEndCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket, UINT32* pLastLba, UINT32* pSectorSize);
+
+
+DRIVER_IMPORT LOUSTATUS AtaCoreAtapiEndpointRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer);
+DRIVER_IMPORT LOUSTATUS AtaCoreAtapiEndpointStartRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer, PATA_COMMAND_PACKET* CommandPacket);
+DRIVER_IMPORT LOUSTATUS AtaCoreAtapiEndpointEndRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket);
+
 
 #endif
 
