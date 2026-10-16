@@ -17,7 +17,7 @@ ULONG LouKeGetIdleingApCount(){
 
 static void (*ApInitializationFunction)() = 0; 
 
-static mutex_t InitLock = {0};
+static ATOMIC_LOCK InitLock = {0};
 
 void LouKeApIdleTillApInitFunction(){
     LouKeAcquireReference(&IdleingAps);
@@ -50,7 +50,7 @@ void LouKeApInitializationFunction(){
 
     SetUpTimers();
 
-    MutexUnlock(&InitLock);
+    AtomicUnlock(&InitLock);
 
     LouKeReleaseReference(&IdleingAps);
     

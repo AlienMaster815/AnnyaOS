@@ -282,3 +282,6 @@ EXPORTS
     LouKeSrcuReadObjectAcquire
     LouKeSrcuReadObjectRelease
     LouKeSrcuWriteObjectAcquire
+    LouKeThreadSleep
+    MutexBlock
+    MutexUnblock

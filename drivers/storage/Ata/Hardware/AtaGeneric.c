@@ -209,6 +209,21 @@ LOUSTATUS AtaGenericPortDeviceIssuePioCommand(PATA_PORT_DEVICE_OBJECT PortDevice
     }
 
     Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
+    while(Timeout--){
+        Status = inb(PrivateData->Ports.CmdSts);
+        if(Status & 1){
+            return STATUS_IO_DEVICE_ERROR;
+        }
+        if(!(Status & (1 << 7)) && (Status & (1 << 3))) {
+            break;
+        }
+        AtaGeneric400NsDelay(PrivateData);
+    }
+    if(!Timeout){
+        return STATUS_TIMEOUT;
+    }
+
+    Timeout = ATA_IDE_COMMAND_GRACE_PERIOD;
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
         tSize = (CommandPacket->SectorSize ? CommandPacket->SectorSize : 512);
         if(CommandPacket->TransferSize < tSize){

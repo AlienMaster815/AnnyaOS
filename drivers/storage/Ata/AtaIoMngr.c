@@ -11,7 +11,8 @@ void AtaCorePortIoQueueManager(PVOID Params){
         PATA_COMMAND_PACKET CommandPacket = ListItemToTypeOrNull(PortDevice->QueuedCommands.NextHeader, ATA_COMMAND_PACKET, QueuedCommands);
         if(!CommandPacket){
             MutexUnlock(PortDevice->ChannelLock);
-            LouKeBlockThread(Thread);
+            LouKeYieldExecution();
+            //LouKeBlockThread(Thread);
             continue;
         }
         LouKeListDeleteItem(&CommandPacket->QueuedCommands);

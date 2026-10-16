@@ -1,5 +1,49 @@
 #include "../AtaCore.h"
 
+LOUSTATUS
+_AtaCoreAtapiEndpointStartTestUnitReady(
+    PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
+    PATA_COMMAND_PACKET*        pCommandPacket
+){
+    PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
+    PATA_COMMAND_PACKET CommandPacket = AtaCoreAllocateAtaCommandPacket();
+    LOUSTATUS Status;
+    if(!CommandPacket){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 0);
+    ScsiCoreEncodeTestUnitReadyCommand((PSCSI_TEST_UNIT_READY_COMMAND_STRUCTURE)CommandPacket->PacketData, 0x00);
+    CommandPacket->OpCode = ATA_COMMAND_CODE_PACKET;
+    CommandPacket->CommandFlags = ATA_COMMAND_PACKET_FLAGS_POLL | ATA_COMMAND_PACKET_FLAGS_PACKET_CMD;
+    CommandPacket->PacketSize = 12;
+    CommandPacket->TransferData = 0x00;
+    CommandPacket->TransferSize = 0x00;
+    AtaCoreEncodePacketCommand((PATA_COMMAND_PACKET_STRUCTURE)&CommandPacket->Packet, EndpointDevice->ChannelDev, 0x00, 0, 0, 0);
+    if(AtaPort->Operations->AtaPortDevicePrepCommand){
+        Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, CommandPacket);
+        if(Status != STATUS_SUCCESS){
+            AtaCoreFreeAtaCommandPacket(CommandPacket);
+            return STATUS_IO_DEVICE_ERROR; 
+        }
+    }
+    AtaCoreCommitCommandPacketToPort(CommandPacket, AtaPort);
+    *pCommandPacket = CommandPacket;
+}
+
+LOUSTATUS 
+AtaCoreAtapiEndpointStartTestUnitReady(
+    PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
+    PATA_COMMAND_PACKET*        pCommandPacket
+){
+    if(!EndpointDevice || !pCommandPacket){
+        return STATUS_INVALID_PARAMETER;
+    }
+    else if(!(EndpointDevice->DeviceCap & ATA_ENDPOINT_DEVCAP_ATAPI)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    return _AtaCoreAtapiEndpointStartTestUnitReady(EndpointDevice, pCommandPacket);
+}
+
 LOUSTATUS 
 _AtaCoreAtapiEndpointStartReadCapacity10(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, 
@@ -23,8 +67,9 @@ _AtaCoreAtapiEndpointStartReadCapacity10(
     if(AtaPort->Operations->AtaPortDevicePrepCommand){
         Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, CommandPacket);
         if(Status != STATUS_SUCCESS){
-            CommandPacket->CommandStatus = STATUS_IO_DEVICE_ERROR;
-            LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
+            LouKeDestroyDmaTransfer(CommandPacket->TransferData);
+            AtaCoreFreeAtaCommandPacket(CommandPacket);
+            return STATUS_IO_DEVICE_ERROR; 
         }
     }
     AtaCoreCommitCommandPacketToPort(CommandPacket, AtaPort);
@@ -77,13 +122,12 @@ _AtaCoreAtapiEndpointStartRead10(
     if(AtaPort->Operations->AtaPortDevicePrepCommand){
         Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, CommandPacket);
         if(Status != STATUS_SUCCESS){
-            CommandPacket->CommandStatus = STATUS_IO_DEVICE_ERROR;
-            LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
+            LouKeDestroyDmaTransfer(CommandPacket->TransferData);
+            AtaCoreFreeAtaCommandPacket(CommandPacket);
+            return STATUS_IO_DEVICE_ERROR; 
         }
     }
-
     AtaCoreCommitCommandPacketToPort(CommandPacket, AtaPort);
-
     *pCommandPacket = CommandPacket;
     return STATUS_SUCCESS;
 }

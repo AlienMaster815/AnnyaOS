@@ -144,28 +144,10 @@ typedef struct _NT_CONTEXT{ //recreation of CONTEXT in WINAPI
     };
 }NT_CONTEXT, * PNT_CONTEXT;
 
-typedef struct _mutex_t{
-    ListHeader  MutexQueue;
-    atomic_t    MutexQueueLock;
-    atomic_t    locked;
-    atomic_t    Handle;
-    atomic_t    PrivaledgeLevel;
-    atomic_t    ThreadOwnerLow;
-    atomic_t    ThreadOwnerHigh;
-    ListHeader  WaitQueue;
-} mutex_t;
-
-typedef void* PTHREAD;
-typedef void* PTHREAD_DATA;
-
-#define MUTEX_FREE 0
-#define MUTEX_LOCKED 1
-
-#define ACTIVE_THREAD 0
-#define INACTIVE_THREAD 1
-
-#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
-#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
+typedef struct _atomic_lock_t{
+    atomic_t    Locked;
+    atomic_t    Waitors;
+}atomic_lock_t, ATOMIC_LOCK, * PATOMIC_LOCK; 
 
 static inline int LouKeAtomicTestAndSet(atomic_t* m, int Value){
     return __atomic_test_and_set(m, 1);
@@ -188,7 +170,7 @@ static inline int LouKeGetAtomic(atomic_t* A){
     return atomic_read(A);
 }
 
-static inline void LouKeSetAtomic64(atomic64_t* A, int64_t Value){
+static inline void LouKeSetAtomic64(atomic64_t* A, uint64_t Value){
     atomic64_set(A, Value);
 }
 
@@ -196,7 +178,85 @@ static inline int64_t LouKeGetAtomic64(atomic64_t* A){
     return atomic64_read(A);
 }
 
+KERNEL_EXPORT void LouKeYieldExecution();
 
+static void AtomicUnlock(PATOMIC_LOCK Lock){
+    LouKeSetAtomic(&Lock->Locked, 0);
+} 
+
+static void AtomicLockEx(PATOMIC_LOCK Lock, bool Yield){
+    LouKeAtomicIncrement(&Lock->Waitors);
+    while(__atomic_test_and_set(&Lock->Locked, 1)){
+        if(Yield){
+            #ifndef _USER_MODE_CODE_
+            LouKeYieldExecution();
+            #else
+            //LouYieldExecution();
+            #endif
+        }
+    };
+    LouKeAtomicDecrement(&Lock->Waitors);
+}
+
+static inline BOOLEAN AtomicLockOrFalse(PATOMIC_LOCK Lock){
+    if(__atomic_test_and_set(&Lock->Locked, 1)){
+        return false;
+    }
+    return true;
+}
+
+static inline void AtomicLockOrYield(PATOMIC_LOCK Lock){
+    AtomicLockEx(Lock, true);
+}
+
+static inline void AtomicLock(PATOMIC_LOCK Lock){
+    AtomicLockEx(Lock, false);
+}
+
+static bool AtomicLockLocked(PATOMIC_LOCK Lock){
+    return LouKeGetAtomic(&Lock->Locked) ? true : false;
+}
+
+static inline void AtomicSynchronizeEx(PATOMIC_LOCK Lock, bool Yield){
+    while(AtomicLockLocked(Lock)){
+        if(Yield){
+            #ifndef _USER_MODE_CODE_
+            LouKeYieldExecution();
+            #else
+            //LouYieldExecution();
+            #endif
+        }
+    }
+}
+
+static inline void AtomicSynchronize(PATOMIC_LOCK Lock){
+    AtomicSynchronizeEx(Lock, false);
+}
+
+typedef struct _mutex_t{
+    ATOMIC_LOCK Locked;  
+    ATOMIC_LOCK LockOutTagOut;
+    atomic64_t  MutexHolder;
+    ListHeader  WaitorList;
+    atomic_t    Waitors;
+}mutex_t, MUTEX, * PMUTEX;
+
+#ifndef _USER_MODE_CODE_
+KERNEL_EXPORT void MutexBlock(PMUTEX Mutex);
+KERNEL_EXPORT void MutexUnblock(PMUTEX Mutex);
+#endif
+
+typedef void* PTHREAD;
+typedef void* PTHREAD_DATA;
+
+#define MUTEX_FREE 0
+#define MUTEX_LOCKED 1
+
+#define ACTIVE_THREAD 0
+#define INACTIVE_THREAD 1
+
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 static inline void LouKeSetAtomic64FromUint64(atomic64_t* A, uint64_t Value) {
     union { uint64_t u; int64_t i; } converter;
@@ -232,64 +292,60 @@ static inline bool LouKeGetAtomicBoolean(PATOMIC_BOOLEAN b){
 
 KERNEL_EXPORT void LouKeMxBlockThread(mutex_t* m);
 
-KERNEL_EXPORT void LouKeYieldExecution();
 static inline void MutexSynchronizeNoBlocking(mutex_t* m){
-    while (LouKeGetAtomic(&m->locked)) {
+    while(AtomicLockLocked(&m->Locked)){
+        #ifndef _USER_MODE_CODE_
         LouKeYieldExecution();
+        #else
+        //LouYieldExecution();
+        #endif
     }
 }
-static inline void AtomicSynchronize(mutex_t* m){
-    while (LouKeGetAtomic(&m->locked)) {
 
+static inline void MutexSynchronize(mutex_t* m){
+    while(AtomicLockLocked(&m->Locked)){
+        #ifndef _USER_MODE_CODE_
+        MutexBlock(m);
+        #else
+        //LouYieldExecution();
+        #endif
     }
 }
+
 #endif
 
 static inline bool MutexIsLocked(mutex_t* m){
-    return LouKeGetAtomic(&m->locked);
+    return AtomicLockLocked(&m->Locked);
 }
-
-
 
 static inline void MutexUnlock(mutex_t* m){
-    LouKeMemoryBarrier();
     #ifndef _USER_MODE_CODE_
-    LouKeSetAtomic(&m->ThreadOwnerLow, 0x00);
-    LouKeSetAtomic(&m->ThreadOwnerHigh, 0x00);
+    MutexUnblock(m);
     #endif
-    LouKeSetAtomic(&m->locked, 0);
+    LouKeMemoryBarrier();
 }
-
-
-static inline void MutexPriorityUnlock(mutex_t* m){
-    m->Handle.counter = 0x00;
-    m->PrivaledgeLevel.counter = 0x00;
-    MutexUnlock(m);
-}
-
 
 typedef struct {
     mutex_t     Check;
-    mutex_t     Lock;
-    atomic_t    ThreadOwner;
+    ATOMIC_LOCK Lock;
 }spinlock_t;
 
 typedef struct {
-    mutex_t     Check;
-    mutex_t     Unlock;
+    ATOMIC_LOCK LockOutTagOut;
+    MUTEX       Locked;
     atomic_t    Counter;
     atomic_t    Limit;
 }semaphore_t;
 
 
 static inline void SpinlockSyncronize(spinlock_t* s){
-    while (LouKeGetAtomic(&s->Lock.locked)){
+    while(AtomicLockLocked(&s->Lock)){
         // spin until unlocked
     }
 }
 
 static inline bool SpinlockIsLocked(spinlock_t* s){
-    return (bool)LouKeGetAtomic(&s->Lock.locked);
+    return AtomicLockLocked(&s->Lock);
 }
 
 typedef enum{
@@ -420,88 +476,23 @@ LouKeInitializeExloMutex(
 KERNEL_EXPORT void MutexDestroy(mutex_t* m);
 KERNEL_EXPORT void MutexInitialize(mutex_t* m);
 
-static void AtomicLockEx(mutex_t* m, bool LockOutTagOut){
-    #ifndef _USER_MODE_CODE_
-    if(LockOutTagOut){
-        while (__atomic_test_and_set(&m->locked, 1)) {
-
-        }
-    }else{
-        uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
-        Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
-        if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
-            //access Granted
-            return;
-        }
-        while (__atomic_test_and_set(&m->locked, 1)) {
-            // spin
-        }
-    }
-    uint64_t Thread = LouKeGetThreadIdentification();
-    LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
-    LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
-    #else
-
-    
-
-    #endif
-}
-
-static BOOLEAN AtomicLockOrFalseEx(mutex_t* m, bool LockOutTagOut){
-    #ifndef _USER_MODE_CODE_
-    uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
-    Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
-    if(LockOutTagOut){
-        if(__atomic_test_and_set(&m->locked, 1)) {
-            return false;
-        }
-    }else{
-        uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
-        Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
-        if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
-            //access Granted
-            return true;
-        }
-        if(__atomic_test_and_set(&m->locked, 1)) {
-            return false;
-        }
-    }
-    Thread = LouKeGetThreadIdentification();
-    LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
-    LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
-    #else
-
-    
-
-    #endif
-    return true;
-}
-
-
-
 static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     #ifndef _USER_MODE_CODE_
-
+    uint64_t Thread;
     if(LockOutTagOut){
-        while(__atomic_test_and_set(&m->locked, 1)){
-            //LouKeReportMutexBlock(m, LouKeGetThreadIdentification());
-            LouKeYieldExecution();
-        }
+        //LouKeReportMutexBlock(m, LouKeGetThreadIdentification());
+        MutexBlock(m);
     }else{
-        uint64_t Thread = (uint64_t)LouKeGetAtomic(&m->ThreadOwnerLow);
-        Thread |= (((uint64_t)LouKeGetAtomic(&m->ThreadOwnerHigh)) << 32);
-        if((Thread == LouKeGetThreadIdentification()) && (LouKeGetAtomic(&m->locked) == 0x01)){
+        Thread = (uint64_t)LouKeGetAtomic64(&m->MutexHolder);
+        if((Thread == LouKeGetThreadIdentification()) && (AtomicLockLocked(&m->Locked))){
             //access Granted
             return;
         }
-        while (__atomic_test_and_set(&m->locked, 1)) {
-            //LouKeReportMutexBlock(m, LouKeGetThreadIdentification());
-            LouKeYieldExecution();
-        }
+        MutexBlock(m);
     }
-    uint64_t Thread = LouKeGetThreadIdentification();
-    LouKeSetAtomic(&m->ThreadOwnerLow, Thread & 0xFFFFFFFF);
-    LouKeSetAtomic(&m->ThreadOwnerHigh, Thread >> 32);
+    //Thread = LouKeGetThreadIdentification();
+    //LouKeSetAtomic64(&m->MutexHolder, (UINT64)Thread);
+
     #else
 
     
@@ -509,14 +500,6 @@ static void MutexLockEx(mutex_t* m, bool LockOutTagOut){
     #endif
 }
 
-
-static inline void AtomicLock(mutex_t* m){
-    AtomicLockEx(m, true);
-}
-
-static inline BOOLEAN AtomicLockOrFalse(mutex_t* m){
-    return AtomicLockOrFalseEx(m, true);
-}
 
 static inline void MutexLock(mutex_t* m){
     MutexLockEx(m, true);
@@ -525,35 +508,35 @@ static inline void MutexLock(mutex_t* m){
 int LouPrint(char*, ...);
 
 static inline void SemaphoreLock(semaphore_t* sem) {
-    MutexLock(&sem->Check);
+    AtomicLock(&sem->LockOutTagOut);
     while(!LouKeGetAtomic(&sem->Counter)){
         // spin until semaphore goes below limit
     }
-    LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
-    MutexUnlock(&sem->Check);
+    LouKeAtomicDecrement(&sem->Counter);
+    AtomicUnlock(&sem->LockOutTagOut);
 }
 
 static inline BOOLEAN SemaphoreLockOrFalse(semaphore_t* sem) {
     BOOLEAN Result = true;
-    MutexLock(&sem->Check);
+    AtomicLock(&sem->LockOutTagOut);
     if(!LouKeGetAtomic(&sem->Counter)){
         Result = false;
     }else{
-        LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
+        LouKeAtomicDecrement(&sem->Counter);
     }
-    MutexUnlock(&sem->Check);
+    AtomicUnlock(&sem->LockOutTagOut);
     return Result;
 }
 
 static inline void SemaphoreUnlock(semaphore_t* sem) {
-    MutexLock(&sem->Unlock);
-    LouKeSetAtomic(&sem->Counter, LouKeGetAtomic(&sem->Counter) - 1);
-    MutexUnlock(&sem->Unlock);
+    AtomicLock(&sem->LockOutTagOut);
+    LouKeAtomicIncrement(&sem->Counter);
+    AtomicUnlock(&sem->LockOutTagOut);
 }
 
 static inline void SemaphoreInitialize(semaphore_t* sem, int initial, int limit) {
     if (!sem) return;
-    MutexUnlock(&sem->Check);
+    AtomicUnlock(&sem->LockOutTagOut);
     atomic_set(&sem->Counter, initial);
     atomic_set(&sem->Limit, limit);
 }

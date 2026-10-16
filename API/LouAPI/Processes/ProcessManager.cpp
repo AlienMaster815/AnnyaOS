@@ -60,7 +60,7 @@ LOUAPI VOID LouKeDestroyThread(PVOID ThreadHandle);
 
 LOUAPI PGENERIC_THREAD_DATA LouKeThreadIdToThreadData(UINT32 ThreadID);
 
-static mutex_t CoreIrqReadyLock = {0};
+static ATOMIC_LOCK CoreIrqReadyLock = {0};
 static LOUSINE_PROCESS_MANAGER_BLOCK     ProcessBlock = {0};
 static ULONG                             InitializationProcessor = 0; 
 
@@ -131,7 +131,7 @@ LOUAPI void SetWinIRQL(UINT8 Irql);
 LOUAPI LouKIRQL GetWinIRQL();
 
 UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
-    if(MutexIsLocked(&ProcLock.Lock) || (LouKeGetIrql() >= CLOCK_LEVEL)){
+    if(AtomicLockLocked(&ProcLock.Lock) || (LouKeGetIrql() >= CLOCK_LEVEL)){
         return IrqState;
     }
     LouKeAcquireReference(&ProcRef);
@@ -156,10 +156,10 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
         NextThread
     );
     if(ThreadSwitch){
-        MutexUnlock(&CurrentThread->LockOutTagOut);
+        AtomicUnlock(&CurrentThread->LockOutTagOut);
     }
     if(ProcessSwitch){
-        MutexUnlock(&CurrentProcess->LockOutTagOut);
+        AtomicUnlock(&CurrentProcess->LockOutTagOut);
     }
     SetWinIRQL(NextThread->ThreadIrql);
     this->CurrentThread = NextThread;
@@ -194,7 +194,7 @@ PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
                 if(Tail->ProcessState == PROCESS_TERMINATED){
                     PsmDeAsginProcessRingItem(&this->Processes[NextRing], TailRing);
                 }
-                MutexUnlock(&Tail->LockOutTagOut);
+                AtomicUnlock(&Tail->LockOutTagOut);
             }
             if(AtomicLockOrFalse(&Process->LockOutTagOut)){
                 if(Process->ProcessState == PROCESS_BLOCKED){
@@ -212,7 +212,7 @@ PGENERIC_PROCESS_DATA PsmProcessScedualManagerObject::PsmGetNextFreeProcess(){
                     //the thread inside the process
                     return Process;
                 }
-                MutexUnlock(&Process->LockOutTagOut);
+                AtomicUnlock(&Process->LockOutTagOut);
             }
             TmpRing = (PPROCESS_RING)TmpRing->Peers.NextHeader;
             if(TmpRingAnchor == TmpRing){
@@ -271,7 +271,7 @@ void PsmProcessScedualManagerObject::PsmHandleProcessWorkQueueData(){
         this->ProcessWorkQueue[CurrentPriority] = 0;
     }
     LouKeSetAtomicBoolean(&this->ProcessWorkQueueNeedsWork, 0);
-    MutexUnlock(&this->ProcessWorkQueueLock.Lock);
+    AtomicUnlock(&this->ProcessWorkQueueLock.Lock);
 }
 
 void PsmProcessScedualManagerObject::PsmAssignProcessWorkQueueData(PPROCESS_RING NewProcessRing){
@@ -358,7 +358,7 @@ LOUAPI UINT64 UpdateProcessManager(uint64_t CpuCurrentState){
 LOUAPI void SignalProcessorsInitialized();
 LOUAPI void SignalProcessorsInitPending();
 
-static mutex_t ApProcessorInitLock = {0};
+static ATOMIC_LOCK ApProcessorInitLock = {0};
 
 LOUAPI void LouKeInitializeApProcessorInitLock(){
     AtomicLock(&ApProcessorInitLock);
@@ -366,7 +366,7 @@ LOUAPI void LouKeInitializeApProcessorInitLock(){
 
 static KERNEL_REFERENCE ApsWaitingForInterruptEnabling = {0};
 
-static mutex_t InitLock = {0};
+static ATOMIC_LOCK InitLock = {0};
 
 LOUAPI UINT8 GetWinIRQL();
 
@@ -378,7 +378,7 @@ void ApInitializeProcessManager(ULONG ProcessorID){
 
     PLKPCB KernelProcBlock = (PLKPCB)GetLKPCB();
     KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[ProcessorID].Schedualer;
-    MutexUnlock(&InitLock);
+    AtomicUnlock(&InitLock);
 
     LouKeAcquireReference(&ApsWaitingForInterruptEnabling);    
     AtomicSynchronize(&CoreIrqReadyLock);
@@ -395,7 +395,7 @@ void ApInitializeProcessManager(ULONG ProcessorID){
 
 LOUAPI
 void LouKeUnmaskSmpInterrupts(){
-    MutexUnlock(&CoreIrqReadyLock);
+    AtomicUnlock(&CoreIrqReadyLock);
 }
 
 LOUAPI
@@ -425,8 +425,8 @@ LOUAPI void InitializeProcessManager(){
     KernelProcBlock->ProcID = InitializationProcessor;
     KernelProcBlock->Schedualer = (UINT64)&ProcessBlock.ProcStateBlock[InitializationProcessor].Schedualer;
 
-    MutexLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
-    MutexLock(&CoreIrqReadyLock);
+    AtomicLock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
+    AtomicLock(&CoreIrqReadyLock);
     
     LouKeTsmInitializeIdleThreads();
 
@@ -502,9 +502,8 @@ LOUAPI void InitializeProcessManager(){
         ProcessBlock.ProcStateBlock[i].Schedualer.PsmSetCurrentThread((PGENERIC_THREAD_DATA)NewThread);
     }
 
-    MutexUnlock(&ApProcessorInitLock);        
-    MutexUnlock(&ApProcessorInitLock);
-    MutexUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
+    AtomicUnlock(&ApProcessorInitLock);        
+    AtomicUnlock(&ProcessBlock.ProcStateBlock[InitializationProcessor].LockOutTagOut);
 
     while(LouKeGetReferenceCount(&ApsWaitingForInterruptEnabling) < (ProcessBlock.ProcessorCount - 1)){
         LouKeMemoryBarrier();

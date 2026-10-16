@@ -37,10 +37,10 @@ typedef struct _TIME_T{
 #ifndef _USER_MODE_CODE_
 KERNEL_EXPORT void sleep(uint64_t Time);
 KERNEL_EXPORT void sleep_till(uint64_t Stamp);
+KERNEL_EXPORT void LouKeThreadSleep(size_t Ms);
 #ifndef _KERNEL_MODULE_
 uint64_t GetCurrentTimeInMilliseconds();
 void sleepEx(uint8_t Interval, uint64_t Time);
-void LouKeThreadSleep(size_t Ms);
 void LouKeThreadSleepNoYield(SIZE Ms);
 void LouKeBlockThreadNoYield(PTHREAD Thread);
 uint64_t GetTscFromNowMilliseconds(uint64_t ms);

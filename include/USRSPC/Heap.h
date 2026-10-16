@@ -48,7 +48,7 @@ typedef struct _USER_HEAP_ALLOCATION_TRACKER{
 }USER_HEAP_ALLOCATION_TRACKER, * PUSER_HEAP_ALLOCATION_TRACKER;
 
 typedef struct _USER_PROCESS_HEAP{
-    mutex_t                 HeapLock;
+    ATOMIC_LOCK             HeapLock;
     PVOID                   HeapBase;
     SIZE                    ReservedSize;
     SIZE                    CommitSize;

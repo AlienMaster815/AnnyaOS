@@ -341,7 +341,7 @@ void LouOsKrnlStart(
 
     PciHalScanBootDevices();
 
-    InitializeFileSystemManager();
+    //InitializeFileSystemManager();
 
     //sleep(2000);
     
@@ -357,21 +357,13 @@ void LouOsKrnlStart(
     
     //finish the IRQL system for all cores
 
-    //add a new system for Scatter Devices
-    //to use a single api for abstract 
-    //transfers have them use DMA devices
-    //and have attributes for the alignment
-    //of data as well as how many scatter
-    //entries can be used and use the 
-    //threshold OR an overide for how many
-    //bytes can be transfered and optional
-    //padding to the end
+    //fix usermode to use mutexes
 
     LouPrint("Successful Boot\n");
     
-    //sleep(2000);
+    sleep(2000);
     
-    //LouKeSystemShutdown(ShutdownReboot);
+    LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
 

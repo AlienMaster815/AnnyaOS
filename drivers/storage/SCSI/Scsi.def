@@ -7,3 +7,4 @@ EXPORTS
     ScsiCoreEncodeLunAddressingLevel
     ScsiCoreEncodeReadCapacity10Command
     ScsiCoreEncodeRead10Command
+    ScsiCoreEncodeTestUnitReadyCommand

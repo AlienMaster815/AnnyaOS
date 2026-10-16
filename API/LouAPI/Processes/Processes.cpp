@@ -251,7 +251,7 @@ LOUSTATUS LouKePmCreateProcessEx(
             31
         );
 
-        AtomicSynchronize(&Tmp->Lock);
+        MutexSynchronize(&Tmp->Lock);
         LouKeFree(Tmp->ModEntrys);
         LouKeFree(Tmp);
 

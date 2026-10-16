@@ -663,7 +663,7 @@ LOUAPI void LouKeThreadSleepNoYield(SIZE Ms){
     LouKeThreadSleepEx(Ms, false);
 }
 
-LOUAPI void LouKeThreadSleep(SIZE Ms){
+KERNEL_EXPORT void LouKeThreadSleep(SIZE Ms){
     LouKeThreadSleepEx(Ms, true);
 }
 
@@ -777,7 +777,7 @@ void TsmThreadSchedualManagerObject::TsmHandleThreadWorkQueueData(){
         this->ThreadWorkQueue[CurrentPriority] = 0;
     }
     LouKeSetAtomicBoolean(&this->ThreadWorkQueueNeedsWork, 0);
-    MutexUnlock(&this->ThreadWorkQueueLock.Lock);
+    AtomicUnlock(&this->ThreadWorkQueueLock.Lock);
 }
 
 void TsmThreadSchedualManagerObject::TsmAssignThreadWorkQueueData(PTHREAD_RING NewThreadRing){
@@ -826,7 +826,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
                 if(Tail->State == THREAD_TERMINATED){
                     TsmDeAsginThreadRingItem(&this->Threads[NextRing], TailRing);
                 }
-                MutexUnlock(&Tail->LockOutTagOut);
+                AtomicUnlock(&Tail->LockOutTagOut);
             }
             if(AtomicLockOrFalse(&Thread->LockOutTagOut)){
                 if(Thread->State == THREAD_BLOCKED){
@@ -844,7 +844,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
                     //the thread inside the process
                     return Thread;
                 }
-                MutexUnlock(&Thread->LockOutTagOut);
+                AtomicUnlock(&Thread->LockOutTagOut);
             }
             TmpRing = (PTHREAD_RING)TmpRing->Peers.NextHeader;
             if(TmpRingAnchor == TmpRing){
@@ -858,3 +858,13 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
     }
 }
 
+LOUAPI void LouKeTsmAddThreadToMutexWaitList(PTHREAD PThread, PListHeader List){
+    PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)PThread;
+    LouKeListAddTail(&ThreadData->WaitQueue, List);
+}
+
+LOUAPI PTHREAD LouKeTsmGetNextThreadInMutexWaitList(PListHeader List){
+    PGENERIC_THREAD_DATA ThreadData = ListItemToTypeOrNull(List->NextHeader, GENERIC_THREAD_DATA, WaitQueue);
+    LouKeListDeleteItem(&ThreadData->WaitQueue);
+    return (PTHREAD)ThreadData;
+}

@@ -29,8 +29,8 @@ typedef struct _IDENTIFICATION_RANGE{
 }IDENTIFICATION_RANGE, * PIDENTIFICATION_RANGE;
 
 typedef struct _KERNEL_REFERENCE{
-    mutex_t     IncrementLock;
-    mutex_t     RaceLock;
+    ATOMIC_LOCK IncrementLock;
+    ATOMIC_LOCK RaceLock;
     atomic_t    ReferenceCounter;
     //TODO: Add variables as needed
 }KERNEL_REFERENCE, * PKERNEL_REFERENCE;
@@ -55,19 +55,19 @@ typedef LOUSTATUS (*LOUSINE_OBJECT_DECONSTRUCTOR)(PVOID Object);
 static inline UINT32 LouKeGetReferenceCount(PKERNEL_REFERENCE KRef){
     AtomicLock(&KRef->RaceLock);
     UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
-    MutexUnlock(&KRef->RaceLock);
+    AtomicUnlock(&KRef->RaceLock);
     return Tmp;
 }
 
 static inline int LouKeAcquireReference(PKERNEL_REFERENCE KRef){
-    if(MutexIsLocked(&KRef->IncrementLock)){
+    if(AtomicLockLocked(&KRef->IncrementLock)){
         return false;
     }
     AtomicLock(&KRef->RaceLock);
     UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
     Tmp++;
     LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
-    MutexUnlock(&KRef->RaceLock);
+    AtomicUnlock(&KRef->RaceLock);
     return (int)Tmp;
 }
 
@@ -84,7 +84,7 @@ static inline void LouKeReleaseReference(PKERNEL_REFERENCE KRef){
     UINT32 Tmp = (UINT32)LouKeGetAtomic(&KRef->ReferenceCounter);
     Tmp--;
     LouKeSetAtomic(&KRef->ReferenceCounter,Tmp);
-    MutexUnlock(&KRef->RaceLock);
+    AtomicUnlock(&KRef->RaceLock);
 }
 
 static inline void LouKeReleaseReferenceAndCall(

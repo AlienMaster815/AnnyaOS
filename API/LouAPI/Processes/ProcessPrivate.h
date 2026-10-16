@@ -94,7 +94,7 @@ typedef struct _GENERIC_THREAD_DATA{
     ListHeader                      Peers; //thread manager chain
     ListHeader                      WaitQueue;
     KERNEL_REFERENCE                Reference;
-    mutex_t                         LockOutTagOut;
+    ATOMIC_LOCK                     LockOutTagOut;
     thread_state_t                  State;
     LouKIRQL                        ThreadIrql;
     struct _GENERIC_PROCESS_DATA*   Process;
@@ -209,7 +209,7 @@ typedef struct _GENERIC_PROCESS_DATA{
     LPWSTR                                  ProcessNameUnicode;
     string                                  ProcessPath;
     LPWSTR                                  ProcessPathUnicode;
-    mutex_t                                 LockOutTagOut;
+    ATOMIC_LOCK                             LockOutTagOut;
     UINT64                                  PMLTree;
     UINT32                                  ProcessID;
     UINT8                                   ProcessPriority;
@@ -269,12 +269,12 @@ typedef class PsmProcessScedualManagerObject{
 typedef PROCESS_SCHEDUAL_MANAGER SCHEDUAL_MANAGER, *PSCHEDUAL_MANAGER;
 
 typedef struct _PROCESSOR_STATE_BLOCK{
-    mutex_t                         LockOutTagOut;
+    ATOMIC_LOCK                     LockOutTagOut;
     SCHEDUAL_MANAGER                Schedualer;
 }PROCESSOR_STATE_BLOCK, * PPROCESSOR_STATE_BLOCK;
 
 typedef struct _LOUSINE_PROCESS_MANAGER_BLOCK{
-    mutex_t                         LockOutTagOut;
+    ATOMIC_LOCK                     LockOutTagOut;
     ULONG                           ProcessorCount;
     PPROCESSOR_STATE_BLOCK          ProcStateBlock;
 }LOUSINE_PROCESS_MANAGER_BLOCK, * PLOUSINE_PROCESS_MANAGER_BLOCK;

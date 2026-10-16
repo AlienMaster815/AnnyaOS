@@ -130,7 +130,14 @@ LouKeDmaAllocateGenericDmaMemory(
     ULONG   Threshold
 ){
     PDMA_LIMIT_MANAGER LimitManager = GetLimitManager(Limit); 
+    if(!LimitManager){
+        return 0x00;
+    }
+
     PDMA_THRESHOLD_MANAGER ThresholdManager = GetThresholdManager(LimitManager, Threshold);
+    if(!ThresholdManager){
+        return 0x00;
+    }    
     
     PDMA_ALLOCATION_LIST_ENTRY TmpEntry;
     MutexLock(&ThresholdManager->LockOutTagOut);

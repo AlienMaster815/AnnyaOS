@@ -655,7 +655,7 @@ LouRtlAllocateHeapEx(
     }
 
     if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
-        MutexUnlock(&Heap->HeapLock);
+        AtomicUnlock(&Heap->HeapLock);
     }
     if((Flags & USER_HEAP_FLAG_GROWABLE) && (!Found)){
         LouPrint("LOUDLL.DLL:LouRtlAllocateHeapEx() GROWABLE:SIZE:%d\n", Size);
@@ -688,7 +688,7 @@ LouRtlFreeHeap(
 ){
     Flags |= Heap->HeapFlags;
     if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
-        MutexLock(&Heap->HeapLock);
+        AtomicLock(&Heap->HeapLock);
     }
     PUSER_HEAP_ALLOCATION_TRACKER TmpTracker;
     ForEachListEntry(TmpTracker, &Heap->Allocations, Peers){
@@ -707,7 +707,7 @@ LouRtlFreeHeap(
     }
 _DONE:
     if(!(Flags & USER_HEAP_FLAG_NO_SERIALIZE)){
-        MutexUnlock(&Heap->HeapLock);
+        AtomicUnlock(&Heap->HeapLock);
     }
     return 0x00;
 }

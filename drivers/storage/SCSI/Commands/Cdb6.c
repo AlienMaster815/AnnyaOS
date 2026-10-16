@@ -196,6 +196,7 @@ ScsiCoreEncodeSeekCommand(
     memcpy(Cdb, &tCdb, sizeof(SCSI_SEEK_COMMAND_STRUCTURE));
 }
 
+DRIVER_EXPORT
 void 
 ScsiCoreEncodeTestUnitReadyCommand(
     PSCSI_TEST_UNIT_READY_COMMAND_STRUCTURE Cdb,

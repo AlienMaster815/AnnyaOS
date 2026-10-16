@@ -1596,6 +1596,14 @@ ScsiCoreEncodeRead10Command(
     UINT8                           Control
 );
 
+DRIVER_IMPORT
+void 
+ScsiCoreEncodeTestUnitReadyCommand(
+    PSCSI_TEST_UNIT_READY_COMMAND_STRUCTURE Cdb, 
+    UINT8                                   Control
+);
+
+
 #endif
 
 #include "Sat.h"

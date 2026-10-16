@@ -16,7 +16,7 @@ typedef struct _GLOBAL_WINDOW_CLASS_TRACKER{
     PWINDOW_CLASS_TRACKER   GlobalClass;
 }GLOBAL_WINDOW_CLASS_TRACKER, * PGLOBAL_WINDOW_CLASS_TRACKER;
 
-static mutex_t      ClassesLock;
+static ATOMIC_LOCK  ClassesLock;
 static ListHeader   LocalClasses;
 static ListHeader   GlobalClassReferences;
 
@@ -310,12 +310,12 @@ ATOM RegisterClassExW(
             NewClass->MenuName
         );
         if(Status == STATUS_INVALID_PARAMETER){
-            MutexUnlock(&ClassesLock);    
+            AtomicUnlock(&ClassesLock);    
             LouPrint("USER32.DLL:RegisterClassExW() Unable To Create Global Class EINVAL\n");
             return 0x00;
         }
         else if(Status != STATUS_SUCCESS){
-            MutexUnlock(&ClassesLock);    
+            AtomicUnlock(&ClassesLock);    
             LouPrint("USER32.DLL:RegisterClassExW() Unable To Create Global Class Allocation Error\n");
             return 0x00;
         }
@@ -328,12 +328,12 @@ ATOM RegisterClassExW(
             NewClass->MenuName
         );
         if(Status == STATUS_INVALID_PARAMETER){
-            MutexUnlock(&ClassesLock);    
+            AtomicUnlock(&ClassesLock);    
             LouPrint("USER32.DLL:RegisterClassExW() Unable To Create Local Class EINVAL\n");
             return 0x00;
         }
         else if(Status != STATUS_SUCCESS){
-            MutexUnlock(&ClassesLock);    
+            AtomicUnlock(&ClassesLock);    
             LouPrint("USER32.DLL:RegisterClassExW() Unable To Create Local Class Allocation Error\n");
             return 0x00;
         }
@@ -347,7 +347,7 @@ ATOM RegisterClassExW(
     NewTracker->ClassExW.ClassCursor = NewClass->ClassCursor;
     NewTracker->ClassExW.BackgroundBrush = NewClass->BackgroundBrush;
     NewTracker->Atom = Atom;
-    MutexUnlock(&ClassesLock);    
+    AtomicUnlock(&ClassesLock);    
     return Atom;
 }
 
@@ -497,11 +497,10 @@ UnregisterClassW(
     if(OptAtom){
         AtomicLock(&ClassesLock);    
         Result = UnregisterClassWAtom(OptAtom, Instance);
-        MutexUnlock(&ClassesLock);
+        AtomicUnlock(&ClassesLock);
         return Result;
     }
-    MutexLock(&ClassesLock);    
     Result = UnregisterClassWName((LPWSTR)ClassName, Instance);
-    MutexUnlock(&ClassesLock);
+    AtomicUnlock(&ClassesLock);
     return Result;
 }
