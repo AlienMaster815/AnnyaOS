@@ -111,6 +111,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
             Identify->CommandStatus = STATUS_IO_DEVICE_ERROR;
             LouKeSetAtomicBoolean(&Identify->CommandDone, 1);
             LouKeDestroyDmaTransfer(Identify->TransferData);
+            return;
         }
     }
 
@@ -526,6 +527,14 @@ void AtaCoreParseStandardDeviceInformation(
     LouPrint("Done Scanning Port\n");
 */
 
+static LOUSINE_DMA_DEVICE DefaultAtaEndpointDmaDevice = {
+    .MaxScatterCount = 1,
+    .AllocatorData = {
+        .DmaLimit = 64,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
+
 void AtaCoreInitializePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
 
     PATA_COMMAND_PACKET Identify = AtaCoreAllocateAtaCommandPacket();//LouKeMallocType(ATA_COMMAND_PACKET, KERNEL_GENERIC_MEMORY);
@@ -539,6 +548,10 @@ void AtaCoreInitializePortForDevice(PATA_PORT_DEVICE_OBJECT AtaPort){
         }
         if((Status == STATUS_SUCCESS) && (!Type)){
             continue;
+        }
+
+        if(!AtaPort->OptionalDmaDevice){
+            AtaPort->OptionalDmaDevice = &DefaultAtaEndpointDmaDevice;
         }
 
         switch(Type){

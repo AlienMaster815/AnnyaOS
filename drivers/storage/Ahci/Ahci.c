@@ -123,9 +123,11 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
     UINT8* FisBase = (UINT8*)PrivateData->Fis;
     LOUSTATUS Status;
     SIZE i;
+    UINT32 Tfd = PrivateData->GenericPort->PxTFD;
     for(i = 0; i < 5; i++){
         if(PrivateData->GenericPort->PxIS & (1UL << 30)){
-            UINT32 Tfd = PrivateData->GenericPort->PxTFD;
+            //UINT32 
+            Tfd = PrivateData->GenericPort->PxTFD;
             UINT8 TfdError = (Tfd >> 8) & UINT8_MAX;
             UINT8 TfdStatus = Tfd & UINT8_MAX;
             if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_EXT_CMD){
@@ -146,7 +148,6 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
     if(Status != STATUS_SUCCESS){
         return Status;
     }
-    
     //I am not doing NCQ yet
     //ifdef NCQ
     //const UINT8* Fis = FisBase + 0x58;
@@ -159,6 +160,7 @@ LOUSTATUS AhciGenericPortDeviceGetCommandStatus(PATA_PORT_DEVICE_OBJECT PortDevi
     //}
     //CommandPacket->
     //Endif
+
     GetCommandPacketFromFis(FisBase + 0x40, CommandPacket);
     return STATUS_SUCCESS;
 }
@@ -178,6 +180,10 @@ AhciGenericGetFreeCommandSlot(PAHCI_DRIVER_PRIVATE_DATA PrivateData, UINT8* Slot
     return STATUS_INSUFFICIENT_RESOURCES;
 }
 
+static void AhciGenericFreeCommandSlot(PAHCI_DRIVER_PRIVATE_DATA PrivateData, UINT8 Slot){
+    PrivateData->CommandSlot &= (1 << Slot);
+}
+
 static void CommandPacketToFis(PATA_COMMAND_PACKET CommandPacket, int Command, UINT8* Fis){
     Fis[0] = 0x27;
     Fis[1] = 0;
@@ -191,7 +197,7 @@ static void CommandPacketToFis(PATA_COMMAND_PACKET CommandPacket, int Command, U
         Fis[4] = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaLow);
         Fis[5] = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaMid);
         Fis[6] = ATA_CMDBLK_DECODE_CURR_VALUE(CommandPacket->PacketEx.LbaHigh);
-        Fis[7] = CommandPacket->PacketEx.Device;
+        Fis[7] = CommandPacket->PacketEx.Device & ~(0xA0);
 
         Fis[8] = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaLow);
         Fis[9] = ATA_CMDBLK_DECODE_PREV_VALUE(CommandPacket->PacketEx.LbaMid);
@@ -207,7 +213,7 @@ static void CommandPacketToFis(PATA_COMMAND_PACKET CommandPacket, int Command, U
         Fis[4] = CommandPacket->Packet.LbaLow;
         Fis[5] = CommandPacket->Packet.LbaMid;
         Fis[6] = CommandPacket->Packet.LbaHigh;
-        Fis[7] = CommandPacket->Packet.Device;
+        Fis[7] = CommandPacket->Packet.Device & ~(0xA0);
 
         Fis[8] = 0x00;
         Fis[9] = 0x00;
@@ -262,6 +268,25 @@ static void InitializeGenericAtaSgElement(
 }
 */
 
+static UINT32 InitializeAhciAtaSgElement(
+    PLOUSINE_DMA_TRANSFER   DmaTransfer,
+    UINT8*                  CommandTable
+){
+    PCOMMAND_TABLE_PRDT AhciSg = (PCOMMAND_TABLE_PRDT)(CommandTable + AHCI_COMMAND_TABLE_HEADER_SIZE);
+    if(DmaTransfer->Type == LOUSINE_DMA_TRANSFER_TYPE_SCATTERED){
+        LouPrint("AHCI.SYS:InitializeAhciAtaSgElement() 1\n");
+        while(1);
+    }
+    UINT64 DmaAddress;
+    RequestPhysicalAddress((UINT64)DmaTransfer->StandardTransfer.DmaAddress, &DmaAddress);
+    UINT64 DmaSize = DmaTransfer->StandardTransfer.DmaSize - 1;   
+    memset(AhciSg, 0, sizeof(COMMAND_TABLE_PRDT));
+    AhciSg->Dba = DmaAddress & UINT32_MAX;
+    AhciSg->Dbau = (DmaAddress >> 32) & UINT32_MAX;
+    AhciSg->DbcI = DmaSize;
+    return 1;
+}
+
 LOUSTATUS AhciGenericPortDevicePrepCommand(
     PATA_PORT_DEVICE_OBJECT PortDevice,
     PATA_COMMAND_PACKET     CommandPacket
@@ -274,21 +299,21 @@ LOUSTATUS AhciGenericPortDevicePrepCommand(
     if(Status != STATUS_SUCCESS){
         return Status;
     }
-    UINT8* CommandTable = (UINT8*)(PrivateData->CommandTable + (UINT32)Slot * AHCI_COMMAND_TABLE_SIZE);;
+    UINT8* CommandTable = (UINT8*)(PrivateData->CommandTable + (UINT32)Slot * AHCI_COMMAND_TABLE_SIZE);
     CommandPacket->CommandPrivateData = LouKeAllocateFastObject("AHCI_COMMAND_PRIVATE_DATA");
     PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
+    CommandPrivateData->CommandSlot = Slot;
     UINT32 ElementCount = 0;
     UINT32 Options;
 
     CommandPacketToFis(CommandPacket, 1, CommandTable);
-    memset(CommandTable + 0x40, 0, 32);
+    memset(CommandTable + AHCI_COMMAND_TABLE_CDB, 0, 32);
     if(AtapiCommand){
-        memcpy(CommandTable + 0x40, CommandPacket->PacketData, CommandPacket->PacketSize);
+        memcpy(CommandTable + AHCI_COMMAND_TABLE_CDB, CommandPacket->PacketData, CommandPacket->PacketSize);
     }
 
     if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_TRAN_CMD){
-        LouPrint("TODO:AHCI.SYS:DMA\n");
-        while(1);
+        ElementCount = InitializeAhciAtaSgElement(CommandPacket->TransferData, CommandTable);
     }
 
     Options = CommandFisLength | (ElementCount << 16); 
@@ -320,14 +345,14 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
     PATA_COMMAND_PACKET     CommandPacket
 ){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
-    PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData; 
+    PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
+    CommandPacket->CommandPrivateData = 0x00; 
     if(CommandPacket->CommandStatus != STATUS_SUCCESS){
         LouPrint("CommandStatus:%h\n", CommandPacket->CommandStatus);
         AhciHandleCommandErrorRecovery(PortDevice, CommandPacket);
     } 
-    if(CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_DMA){
-        return STATUS_SUCCESS;
-    }
+    AhciGenericFreeCommandSlot(PrivateData, CommandPrivateData->CommandSlot);
+    LouKeFreeFastObject("AHCI_COMMAND_PRIVATE_DATA", CommandPrivateData);
     return STATUS_SUCCESS;
 }
 
@@ -1590,6 +1615,7 @@ void AhciInitializeController(PATA_HOST_DEVICE_OBJECT AtaHost){
     LOUSTATUS Status;
     
     ForEachAtaPort(AtaHost, TmpPort, i){
+        TmpPort->OptionalDmaDevice = &PrivateData->DmaDevice;
         Status = AhciDeInitalizePort(TmpPort);
         if(Status != STATUS_SUCCESS){
             LouPrint("AHCI.SYS:WARNING:Unable To DeInit Port:%d\n", i);
@@ -1657,14 +1683,11 @@ LOUSTATUS AhciInterruptHandler(UINT64 LirData){
         if(!PxIS){
             continue;
         }
-
-
         if(TmpPort->CurrentDmaFence){
             LouKeDmaSignalDmaFence(TmpPort->CurrentDmaFence);
         }
         PrivateData->GenericPort->PxIS = UINT32_MAX;
     }
-
     PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)AtaHost->HostPrivateData;
     PrivateData->GenericHostController->InterruptStatus = UINT32_MAX;
     return STATUS_SUCCESS;

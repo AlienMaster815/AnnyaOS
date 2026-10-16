@@ -126,7 +126,9 @@ static void InitializeGenericAtaSgElement(
     }
 
     NewPrdEntry = (PATA_PRDT_ENTRY)(UINT8*)LouKeDmaDeviceAllocateDmaMemory(DmaDevice, sizeof(ATA_PRDT_ENTRY), MAX(GET_ALIGNMENT(ATA_PRDT_ENTRY) , ATA_PRDT_ALIGNMENT));
-    NewPrdEntry->DmaAddress = DmaTransfer->StandardTransfer.DmaAddress;
+    UINT64 pDma;
+    RequestPhysicalAddress(DmaTransfer->StandardTransfer.DmaAddress, &pDma);
+    NewPrdEntry->DmaAddress = pDma;
     NewPrdEntry->DmaSize = DmaTransfer->StandardTransfer.DmaSize;
     if(NewPrdEntry->DmaSize == (64 * KILOBYTE)){
         NewPrdEntry->DmaSize = 0;

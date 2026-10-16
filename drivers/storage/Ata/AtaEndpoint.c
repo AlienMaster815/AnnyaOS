@@ -31,6 +31,7 @@ AtaCoreGetEndpointCapacity(
         if(Status != STATUS_SUCCESS){
             return Status;
         }
+        
         EndpointDevice->MaxLba = tLastLba;
         EndpointDevice->SectorSize = tSectorSize;
         if(OutLba){
@@ -124,21 +125,10 @@ static BLKDEV_OPERATIONS AtaCoreBlkdevOperations = {
     .WriteDeviceSegment = AtaCoreBlkdevWriteDeviceSegment,
 };
 
-static LOUSINE_DMA_DEVICE DefaultAtaEndpointDmaDevice = {
-    .MaxScatterCount = 1,
-    .AllocatorData = {
-        .DmaLimit = 64,
-        .DmaThreshold = 64 * KILOBYTE,
-    },
-};
-
 LOUSTATUS AtaCoreRegisterEndpointDevice(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
 ){
         
-    if(!EndpointDevice->Port->OptionalDmaDevice){
-        EndpointDevice->Port->OptionalDmaDevice = &DefaultAtaEndpointDmaDevice;
-    }
     return BlkdevApiCreateDeviceObject(
         0x00,
         EndpointDevice->Port->OptionalDmaDevice,
