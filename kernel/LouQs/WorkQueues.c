@@ -20,11 +20,13 @@ DWORD LouKeWorkStackDemon(PVOID Data){
             PLOUQ_WORK TmpWork;
             PLOUQ_WORK ForwardWork;
             ForEachListEntrySafe(TmpWork, ForwardWork, &TmpList, QueueObject.Peers){
-                TmpWork->QueueObject.Status = TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
-                LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
-                LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
-                if(TmpWork->Free){
-                    LouKeFreeFastObject("LOUQ_WORK", TmpWork);
+                if(TmpWork->Work.DelayedFunction){
+                    TmpWork->QueueObject.Status = TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
+                    LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
+                    LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
+                    if(TmpWork->Free){
+                        LouKeFreeFastObject("LOUQ_WORK", TmpWork);
+                    }
                 }
             }
         }else{
@@ -41,9 +43,14 @@ LouKeWqQueueWork(
     PLOUQ_WORK_QUEUE    WorkQueue,
     PLOUQ_WORK          WorkItem
 ){
+    LouKIRQL Irql;
     LouKeSetAtomicBoolean(&WorkItem->QueueObject.InQueue, 1);
-    SpinlockSyncronize(&WorkQueue->AddLock);
+    MutexLock(&WorkItem->QueueObject.LouQtex);
+    LouKeAcquireInterruptLock(&WorkQueue->AddLock, &Irql);
     LouKeListAddTail(&WorkItem->QueueObject.Peers, &WorkQueue->QueuedWork);
+    LouKeReleaseInterruptLock(&WorkQueue->AddLock, &Irql);
+    MutexUnlock(&WorkItem->QueueObject.LouQtex);
+    LouKeUnblockThread(WorkQueue->QueueThread);
     return STATUS_SUCCESS;
 }
 
@@ -69,7 +76,6 @@ LouKeQueueWork(
     if(Status != STATUS_SUCCESS){
         return Status;
     }
-    LouKeUnblockThread(MainWorkQueue.QueueThread);
     return STATUS_SUCCESS;
 }
 
@@ -88,7 +94,6 @@ LouKeQueueInterruptWork(
     if(Status != STATUS_SUCCESS){
         return Status;
     }
-    LouKeUnblockThread(MainWorkQueue.QueueThread);
     return STATUS_SUCCESS;
 }
 

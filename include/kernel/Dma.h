@@ -25,6 +25,7 @@ typedef struct _LOUSINE_DMA_FENCE{
     PTHREAD             Thread;   
     mutex_t             DmaFenceFence;
     mutex_t             DmaFence;
+    LOUQ_WORK           SignalWork;
 }LOUSINE_DMA_FENCE, * PLOUSINE_DMA_FENCE;
 
 typedef struct _LOUSINE_DMA_TRANSFER{

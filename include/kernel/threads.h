@@ -15,6 +15,9 @@ extern "C" {
 //TODO: Add 64 bit atomic values to lock out tag out 
 //mechanism now that the kernel supports them
 
+#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
+#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
+
 typedef struct _NT_ARM64_CONTEXT{
     DWORD           ContextFlags;
     DWORD           Cpsr;
@@ -181,6 +184,7 @@ static inline int64_t LouKeGetAtomic64(atomic64_t* A){
 KERNEL_EXPORT void LouKeYieldExecution();
 
 static void AtomicUnlock(PATOMIC_LOCK Lock){
+    LouKeMemoryBarrier();
     LouKeSetAtomic(&Lock->Locked, 0);
 } 
 
@@ -252,9 +256,6 @@ typedef void* PTHREAD_DATA;
 
 #define ACTIVE_THREAD 0
 #define INACTIVE_THREAD 1
-
-#define LouKeMemoryBarrier() asm volatile("mfence" : : : "memory")
-#define LouKePauseMemoryBarrier() asm volatile("pause" : : : "memory")
 
 static inline void LouKeSetAtomic64FromUint64(atomic64_t* A, uint64_t Value) {
     union { uint64_t u; int64_t i; } converter;

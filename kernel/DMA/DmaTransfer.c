@@ -114,11 +114,11 @@ void
 LouKeDmaSignalDmaFence(
     PLOUSINE_DMA_FENCE Fence
 ){
-    DELAYED_FUNCTION Work ={
-        .DelayedFunction = _LouKeDmaSignalDmaFenceDelayedWork,
-        .WorkData = (PVOID)Fence,
-    };
-    LouKeQueueInterruptWork(Work);
+    MutexLock(&Fence->SignalWork.QueueObject.LouQtex);
+    Fence->SignalWork.Work.DelayedFunction = _LouKeDmaSignalDmaFenceDelayedWork;
+    Fence->SignalWork.Work.WorkData = (PVOID)Fence; 
+    MutexUnlock(&Fence->SignalWork.QueueObject.LouQtex);
+    LouKeQueueWork(&Fence->SignalWork);
 }
 
 KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){

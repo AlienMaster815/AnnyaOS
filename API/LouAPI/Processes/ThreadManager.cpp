@@ -653,7 +653,7 @@ LOUAPI void LouKeThreadSleepEx(SIZE Ms, BOOLEAN Yeild){
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     LouKeUnlockProcManager(&Irql);
     if(Yeild){
-        //LouKeYieldExecution();
+        LouKeYieldExecution();
         sleep_till(Expiration);
     }
 }
@@ -722,7 +722,7 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
         //    }
         //}
         //asm("hlt");
-        //LouKeYieldExecution();
+        LouKeYieldExecution();
     }
     return -1;
 }
