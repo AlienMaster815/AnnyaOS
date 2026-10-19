@@ -132,6 +132,9 @@ static inline void LouKeLListDeleteItem(PListHeader Item){
         LouKeSetAtomic64FromUint64((atomic64_t*)&NextHeader->LastHeader, (int64_t)(UINT64)(UINTPTR)LastHeader);
     }
 
+    LouKeSetAtomic64FromUint64((atomic64_t*)&Item->LastHeader, 0x00);
+    LouKeSetAtomic64FromUint64((atomic64_t*)&Item->NextHeader, 0x00);
+
     #else 
 
     PListHeader LastHeader = (PListHeader)(UINT32)LouKeGetAtomic32FromUint32((atomic_t*)&Item->LastHeader);
@@ -142,6 +145,9 @@ static inline void LouKeLListDeleteItem(PListHeader Item){
     if(NextHeader){
         LouKeSetAtomic32FromUint32((atomic_t*)&NextHeader->LastHeader, (int32_t)(UINT32)(UINTPTR)LastHeader);
     }
+
+    LouKeSetAtomic32FromUint32((atomic64_t*)&Item->LastHeader, 0x00);
+    LouKeSetAtomic32FromUint32((atomic64_t*)&Item->NextHeader, 0x00);
 
     #endif
 }
@@ -166,6 +172,8 @@ static inline void LouKeListDeleteItem(PListHeader Item){
     if(NextHeader){
         NextHeader->LastHeader = LastHeader;
     }
+    Item->NextHeader = 0x00;
+    Item->LastHeader = 0x00;
 }
 
 static inline void LouKeListDeleteAll(PListHeader Head){

@@ -154,12 +154,12 @@ void AdvancedLousineKernelInitialization(){
 
     LouKeCreateSystemWorkQeueue();    
 
-    LouKeCreateDemon(
-        LouKeThreadManagerDemon,
-        0,
-        16 * KILOBYTE,
-        31
-    );
+    //LouKeCreateDemon(
+    //    LouKeThreadManagerDemon,
+    //    0,
+    //    16 * KILOBYTE,
+    //    31
+    //);
 
     LouKeInitializeFullLouACPISubsystem();
 

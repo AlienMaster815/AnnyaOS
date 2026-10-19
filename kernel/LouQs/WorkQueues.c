@@ -7,7 +7,7 @@ static LOUQ_WORK_QUEUE MainWorkQueue = {
 
 DWORD LouKeWorkStackDemon(PVOID Data){
     UNUSED PLOUQ_WORK_QUEUE WorkQueueData = (PLOUQ_WORK_QUEUE)Data;
-    PTHREAD WorkerThread = LouKeGetCurrentThreadHandle();
+    UNUSED PTHREAD WorkerThread = LouKeGetCurrentThreadHandle();
     LouPrint("Work Queue Started:%s\n", WorkQueueData->QueueName);
     LouKIRQL Irql;
     while(1){

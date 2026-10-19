@@ -653,7 +653,7 @@ LOUAPI void LouKeThreadSleepEx(SIZE Ms, BOOLEAN Yeild){
     Expiration = CurrentTSC + (ThreadData->TotalMsSlice * TscFrequency);
     LouKeUnlockProcManager(&Irql);
     if(Yeild){
-        LouKeYieldExecution();
+        //LouKeYieldExecution();
         sleep_till(Expiration);
     }
 }
@@ -722,7 +722,7 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
         //    }
         //}
         //asm("hlt");
-        LouKeYieldExecution();
+        //LouKeYieldExecution();
     }
     return -1;
 }
@@ -730,20 +730,6 @@ LOUAPI DWORD LouKeThreadManagerDemon(PVOID Params){
 KERNEL_EXPORT UINT64 LouKeGetThreadIdentificationFromThreadHandle(PTHREAD ThreadHandle){
     PGENERIC_THREAD_DATA ThreadData = (PGENERIC_THREAD_DATA)ThreadHandle;
     return ThreadData->ThreadID;
-}
-
-
-
-
-void TsmThreadSchedualManagerObject::TsmDeAsginThreadRingItem(PTHREAD_RING* QueueItem, PTHREAD_RING ThreadRing){
-    PGENERIC_THREAD_DATA Thread = ThreadRing->ThreadData;    
-    if(ThreadRing == (PTHREAD_RING)ThreadRing->Peers.NextHeader){
-        *QueueItem = 0;
-    }else if(ThreadRing == *QueueItem){
-        *QueueItem =  (PTHREAD_RING)ThreadRing->Peers.NextHeader;
-    }
-    LouKeListDeleteItem(&ThreadRing->Peers);
-    LouKeReleaseReference(&Thread->Reference);
 }
 
 void TsmThreadSchedualManagerObject::TsmHandleThreadWorkQueueData(){
@@ -817,18 +803,29 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
     while(1){
         PTHREAD_RING TmpRing = this->Threads[NextRing];
         PTHREAD_RING TmpRingAnchor = TmpRing;
-        PTHREAD_RING TailRing;
+        UNUSED PTHREAD_RING ForwardRing;
         while(TmpRing){
             PGENERIC_THREAD_DATA Thread = TmpRing->ThreadData;
-            TailRing = (PTHREAD_RING)TmpRing->Peers.LastHeader;
-            PGENERIC_THREAD_DATA Tail = TailRing->ThreadData;
-            if(AtomicLockOrFalse(&Tail->LockOutTagOut)){
-                if(Tail->State == THREAD_TERMINATED){
-                    TsmDeAsginThreadRingItem(&this->Threads[NextRing], TailRing);
-                }
-                AtomicUnlock(&Tail->LockOutTagOut);
-            }
+            ForwardRing = (PTHREAD_RING)TmpRing->Peers.NextHeader;
             if(AtomicLockOrFalse(&Thread->LockOutTagOut)){
+                if(Thread->State == THREAD_TERMINATED){
+                    if(AtomicLockOrFalse(&this->ThreadWorkDeQueueLock.Lock)){
+                        this->Threads[NextRing] = 0x00;
+                        LouKeListDeleteItem(&TmpRing->Peers);
+                        LouKeListAddTail(&TmpRing->Peers, &this->ThreadWorkDeQueue.Peers);
+                        AtomicUnlock(&this->ThreadWorkDeQueueLock.Lock);                        
+                        AtomicUnlock(&Thread->LockOutTagOut);
+                        if(TmpRing != ForwardRing){
+                            if(TmpRing == TmpRingAnchor){
+                                TmpRingAnchor = ForwardRing; 
+                            }
+                            this->Threads[NextRing] = ForwardRing;
+                            TmpRing = ForwardRing;
+                            goto _SKIP_NEXT_RING_IMPLEMENTATION;
+                        }
+                        goto _COMPILER_NESTED_LOOP_BREAK_BUG_FIX;
+                    }
+                }
                 if(Thread->State == THREAD_BLOCKED){
                     if(
                         (!LouKeIsTimeoutNull(&Thread->BlockTimeout)) &&
@@ -838,7 +835,7 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
                     }
                 }
                 if(Thread->State == THREAD_READY){
-                    this->Threads[NextRing] = TmpRing;
+                    this->Threads[NextRing] = (PTHREAD_RING)TmpRing->Peers.NextHeader;
                     //dont unlock we will do this before ending 
                     //the schedal but not before schedualing
                     //the thread inside the process
@@ -847,10 +844,12 @@ PGENERIC_THREAD_DATA TsmThreadSchedualManagerObject::TsmGetNextFreeThread(){
                 AtomicUnlock(&Thread->LockOutTagOut);
             }
             TmpRing = (PTHREAD_RING)TmpRing->Peers.NextHeader;
+_SKIP_NEXT_RING_IMPLEMENTATION:
             if(TmpRingAnchor == TmpRing){
-                break;
+                goto _COMPILER_NESTED_LOOP_BREAK_BUG_FIX;
             }
         }
+_COMPILER_NESTED_LOOP_BREAK_BUG_FIX:
         if(CurrentRing == NextRing){
             return this->IdleTask; //each processor has a private idle task
         }

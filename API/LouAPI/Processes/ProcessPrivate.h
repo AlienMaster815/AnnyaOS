@@ -176,6 +176,8 @@ typedef class TsmThreadSchedualManagerObject{
         ATOMIC_BOOLEAN                      ThreadWorkQueueNeedsWork;
         spinlock_t                          ThreadWorkQueueLock;
         PTHREAD_RING                        ThreadWorkQueue[THREAD_PRIORITY_RINGS];
+        spinlock_t                          ThreadWorkDeQueueLock;
+        THREAD_RING                         ThreadWorkDeQueue;
         PTHREAD_RING                        Threads[THREAD_PRIORITY_RINGS];
         PGENERIC_THREAD_DATA                IdleTask;
         void                                TsmHandleThreadWorkQueueData();
@@ -185,7 +187,6 @@ typedef class TsmThreadSchedualManagerObject{
         void                                TsmSetThreadSystemState(PGDT_RECORD GdtRecord, PGENERIC_THREAD_DATA Thread);
         PGENERIC_THREAD_DATA                TsmGetNext(PGENERIC_THREAD_DATA CurrentThread, bool ProcessChange);
     public:
-        void                                TsmDeAsginThreadRingItem(PTHREAD_RING*  QueueItem, PTHREAD_RING ThreadRing);
         LOUSTATUS                           TsmInitializeSchedualerObject(
                                                 UINT64                          ProcessorID, 
                                                 struct _GENERIC_PROCESS_DATA*   ProcessData,
@@ -238,11 +239,13 @@ typedef class PsmProcessScedualManagerObject{
         ATOMIC_BOOLEAN                      ProcessWorkQueueNeedsWork;
         spinlock_t                          ProcessWorkQueueLock;
         PPROCESS_RING                       ProcessWorkQueue[PROCESS_PRIORITY_RINGS];
+        spinlock_t                          ProcessWorkDeQueueLock;
+        PROCESS_RING                        ProcessWorkDeQueue;
         PPROCESS_RING                       Processes[PROCESS_PRIORITY_RINGS];
         PGENERIC_THREAD_DATA                OwnerThread;
 
         PGENERIC_PROCESS_DATA               SystemProcess;
-        void                                PsmDeAsginProcessRingItem(PPROCESS_RING*  QueueItem, PPROCESS_RING ProcessRing);
+        BOOLEAN                             PsmDeAsginProcessRingItem(PPROCESS_RING*  QueueItem, PPROCESS_RING ProcessRing);
         void                                PsmHandleProcessWorkQueueData();
         PGENERIC_PROCESS_DATA               PsmGetNextFreeProcess();
         void                                PsmSetProcessTransitionState();

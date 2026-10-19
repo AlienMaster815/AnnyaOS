@@ -150,7 +150,7 @@ typedef struct _atomic_lock_t{
 }atomic_lock_t, ATOMIC_LOCK, * PATOMIC_LOCK; 
 
 static inline int LouKeAtomicTestAndSet(atomic_t* m, int Value){
-    return __atomic_test_and_set(m, 1);
+    return __atomic_test_and_set(m, Value);
 } 
 
 static inline void LouKeAtomicIncrement(atomic_t* v){
@@ -185,8 +185,7 @@ static void AtomicUnlock(PATOMIC_LOCK Lock){
 } 
 
 static void AtomicLockEx(PATOMIC_LOCK Lock, bool Yield){
-    LouKeAtomicIncrement(&Lock->Waitors);
-    while(__atomic_test_and_set(&Lock->Locked, 1)){
+    while(LouKeAtomicTestAndSet(&Lock->Locked, 1)){
         if(Yield){
             #ifndef _USER_MODE_CODE_
             LouKeYieldExecution();
@@ -195,11 +194,10 @@ static void AtomicLockEx(PATOMIC_LOCK Lock, bool Yield){
             #endif
         }
     };
-    LouKeAtomicDecrement(&Lock->Waitors);
 }
 
 static inline BOOLEAN AtomicLockOrFalse(PATOMIC_LOCK Lock){
-    if(__atomic_test_and_set(&Lock->Locked, 1)){
+    if(LouKeAtomicTestAndSet(&Lock->Locked, 1)){
         return false;
     }
     return true;

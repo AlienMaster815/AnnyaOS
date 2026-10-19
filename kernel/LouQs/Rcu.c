@@ -68,7 +68,7 @@ LouKeSrcuWriteObjectAcquire(
 void LouKeSrcuWriteObjectRelease(PSRCU_OBJECT SrcuObject){
     MutexLock(&SrcuObject->ReadLock); //lock new readers
     while(LouKeGetAtomic(&SrcuObject->Readers)){ //wait for all Other readers to leave
-        LouKeYieldExecution();
+        //LouKeYieldExecution();
     } 
     memcpy(SrcuObject->Items[SRCU_READ_COPY_POINTER], SrcuObject->Items[SRCU_WRITE_COPY_POINTER], SrcuObject->ItemSize); //copy writer data to reader data
     //memory fences happen in the unlocks
