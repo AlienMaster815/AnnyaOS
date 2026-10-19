@@ -24,10 +24,6 @@ void
 MutexBlock(
     PMUTEX Mutex
 ){
-    AtomicLock(&Mutex->Locked);
-    return;
-
-
     BOOLEAN LockAcquired;
     //enter an atomic lock at current irql but force
     //the lock to yeild the current thread if the lock
@@ -66,9 +62,6 @@ void
 MutexUnblock(
     PMUTEX Mutex
 ){
-    AtomicUnlock(&Mutex->Locked);
-    return;
-
     //enter an atomic lock at current irql but force
     //the lock to yeild the current thread if the lock
     //is being held by somebody else
