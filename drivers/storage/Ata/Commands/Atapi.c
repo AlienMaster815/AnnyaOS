@@ -3,10 +3,15 @@
 LOUSTATUS AtaCoreAtapiEndpointTestUnitReady(
     PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice
 ){
-    //PATA_PORT_DEVICE_OBJECT AtaPort = EndpointDevice->Port;
-    //PATA_COMMAND_PACKET CommandPacket
-
-    return STATUS_SUCCESS;
+    if((!EndpointDevice) || (!(EndpointDevice->DeviceCap & ATA_ENDPOINT_DEVCAP_ATAPI))){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PATA_COMMAND_PACKET CommandPacket;
+    LOUSTATUS Status = _AtaCoreAtapiEndpointStartTestUnitReady(EndpointDevice, &CommandPacket);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    return _AtaCoreAtapiEndpointEndTestUnitReady(EndpointDevice, CommandPacket);
 }
 
 DRIVER_EXPORT

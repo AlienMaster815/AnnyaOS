@@ -75,12 +75,14 @@ typedef struct _USB_HCD_OPERATIONS{
 
 typedef struct _USB_HCD_OBJECT{
     PPCI_DEVICE_OBJECT      PDEV;
+    SIZE                    DmaTransferMinimumAlignment;
     ULONG                   HcdFlags;
     ListHeader              Companions;
     XARRAY                  DeviceAddressPool;
     ListHeader              HcdDevices;
     PVOID                   HcdPrivateData;
     PUSB_HCD_OPERATIONS     Operations;
+    LOUSINE_DMA_DEVICE      DmaDevice;
 }USB_HCD_OBJECT, * PUSB_HCD_OBJECT; 
 
 LOUSTATUS UsbCoreCreateHcdObject(
@@ -90,7 +92,76 @@ LOUSTATUS UsbCoreCreateHcdObject(
     PUSB_HCD_OPERATIONS Operations
 );
 
+#define USB_DEVREQ_REQUEST_TYPE_RECIPIENT_DEVICE    0x00
+#define USB_DEVREQ_REQUEST_TYPE_RECIPIENT_INTERFACE 0x01
+#define USB_DEVREQ_REQUEST_TYPE_RECIPIENT_ENDPOINT  0x02
+#define USB_DEVREQ_REQUEST_TYPE_RECIPIENT_OTHER     0x03
 
+#define USB_DEVREQ_REQUEST_TYPE_REQUEST_STANDARD    0x00
+#define USB_DEVREQ_REQUEST_TYPE_REQUEST_CLASS       0x01
+#define USB_DEVREQ_REQUEST_TYPE_REQUEST_VENDOR      0x02
+
+#define USB_DEVREQ_REQUEST_TYPE_DIRECTION_H2D       0x00
+#define USB_DEVREQ_REQUEST_TYPE_DIRECTION_D2H       0x01
+
+#define USB_DEVREQ_REQUEST_TYPE_RECIPIENT_SHIFT     0
+#define USB_DEVREQ_REQUEST_TYPE_RECIPIENT_MASK      0x1F
+
+#define USB_DEVREQ_REQUEST_TYPE_REQUEST_SHIFT       5
+#define USB_DEVREQ_REQUEST_TYPE_REQUEST_MASK        0x03
+
+#define USB_DEVREQ_REQUEST_TYPE_DIRECTION_SHIFT     7
+#define USB_DEVREQ_REQUEST_TYPE_DIRECTION_MASK      1
+
+#define USB_DEVREQ_ENCODE_REQUEST_TYPE(Recipient, Request, Direction)  (((Recipient & USB_DEVREQ_REQUEST_TYPE_RECIPIENT_MASK) << USB_DEVREQ_REQUEST_TYPE_RECIPIENT_SHIFT) | ((Request & USB_DEVREQ_REQUEST_TYPE_REQUEST_MASK) << USB_DEVREQ_REQUEST_TYPE_REQUEST_SHIFT) | ((Direction & USB_DEVREQ_REQUEST_TYPE_DIRECTION_MASK) << USB_DEVREQ_REQUEST_TYPE_DIRECTION_SHIFT))
+
+#define USB_DEVREQ_REQUEST_GET_STATUS           0
+#define USB_DEVREQ_REQUEST_CLEAR_FEATURE        1
+#define USB_DEVREQ_REQEUST_SET_FEATURE          3
+#define USB_DEVREQ_REQUEST_SET_ADDRESS          5
+#define USB_DEVREQ_REQUEST_GET_DESCRIPTOR       6
+#define USB_DEVREQ_REQUEST_SET_DESCRIPTOR       7
+#define USB_DEVREQ_REQUEST_GET_CONFIGURATION    8
+#define USB_DEVREQ_REQUEST_SET_CONFIGURATION    9
+#define USB_DEVREQ_REQUEST_GET_INTERFACE        10
+#define USB_DEVREQ_REQUEST_SET_INTERFACE        11
+#define USB_DEVREQ_REQUEST_SYNC_FRAME           12
+
+typedef enum{
+    USB_TRANSFER_DATA_TYPE_UNKOWN = 0,
+    USB_TRANSFER_DATA_TYPE_SETUP = 1,
+    USB_TRANSFER_DATA_TYPE_DATA = 2,
+    USB_TRANSFER_DATA_TYPE_STATUS = 3,
+}USB_TRANSFER_DATA_TYPE;
+
+typedef struct _USB_TRANSFER_DATA{
+    ListHeader              Peers;
+    USB_TRANSFER_DATA_TYPE  Type;
+    union{
+        struct{
+            PVOID           VAddress;
+            PVOID           PAddress;
+        }                   Setup;
+        struct{
+            PVOID           VAddress;
+            PVOID           PAddress;
+            SIZE            Size;
+        }                   Data;
+        struct{
+            LOUSTATUS       ApiStatus;
+        }                   Status;
+    };
+}USB_TRANSFER_DATA, * PUSB_TRANSFER_DATA;
+
+#ifndef _USB_CORE_H
+
+DRIVER_IMPORT LOUSTATUS UsbCoreCreateSetAddressPacket(PUSB_DEVICE_OBJECT UsbDevice, UINT16 NewAddress, PUSB_TRANSFER_DATA* TransferOut);
+
+#else 
+
+DRIVER_EXPORT LOUSTATUS UsbCoreCreateSetAddressPacket(PUSB_DEVICE_OBJECT UsbDevice, UINT16 NewAddress, PUSB_TRANSFER_DATA* TransferOut);
+
+#endif
 
 #else //user mode code
 

@@ -40,6 +40,8 @@ LOUSTATUS _AtaCoreAtapiEndpointStartReadCapacity10(PATA_ENDPOINT_DEVICE_OBJECT E
 LOUSTATUS _AtaCoreAtapiEndpointEndCapacity10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket, UINT32* pLastLba, UINT32* pSectorSize);
 LOUSTATUS _AtaCoreAtapiEndpointStartRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, UINT32 Lba, UINT16 SectorCount, PLOUSINE_DMA_TRANSFER Transfer, PATA_COMMAND_PACKET* CommandPacket);
 LOUSTATUS _AtaCoreAtapiEndpointEndRead10(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket);
+LOUSTATUS _AtaCoreAtapiEndpointEndTestUnitReady(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET CommandPacket);
+LOUSTATUS _AtaCoreAtapiEndpointStartTestUnitReady(PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice, PATA_COMMAND_PACKET* pCommandPacket);
 
 LOUSTATUS AtaCoreRegisterAtaPorts(PATA_HOST_DEVICE_OBJECT HostDevice);
 

@@ -1,5 +1,38 @@
 #include "../AtaCore.h"
 
+LOUSTATUS
+_AtaCoreAtapiEndpointEndTestUnitReady(
+    PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
+    PATA_COMMAND_PACKET         CommandPacket
+){
+    SIZE Timeout = 3000;
+    LOUSTATUS Result;
+    while(LouKeGetAtomicBoolean(&CommandPacket->CommandDone) && Timeout){
+        LouKeThreadSleep(30);
+        Timeout -= 30;
+    }
+    if(!Timeout){
+        Result = STATUS_TIMEOUT;
+        goto _COMMAND_ERROR_OUT;
+    }
+    Result = (CommandPacket->Packet.Status & 1) ? STATUS_IO_DEVICE_ERROR : STATUS_SUCCESS; 
+_COMMAND_ERROR_OUT:
+    AtaCoreFreeAtaCommandPacket(CommandPacket);
+    return Result;
+}
+
+LOUSTATUS
+AtaCoreAtapiEndpointEndTestUnitReady(
+    PATA_ENDPOINT_DEVICE_OBJECT EndpointDevice,
+    PATA_COMMAND_PACKET         CommandPacket
+){
+    if((!EndpointDevice) || (!CommandPacket)){
+        return STATUS_INVALID_PARAMETER;
+    }else if((!(EndpointDevice->DeviceCap & ATA_ENDPOINT_DEVCAP_ATAPI)) || (CommandPacket->OpCode != ATA_COMMAND_CODE_PACKET)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    _AtaCoreAtapiEndpointEndTestUnitReady(EndpointDevice, CommandPacket);
+}
 
 LOUSTATUS 
 _AtaCoreAtapiEndpointEndCapacity10(

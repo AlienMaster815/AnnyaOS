@@ -351,10 +351,7 @@ void LouOsKrnlStart(
     //    while(1);
     //}
 
-    //TODO: 
-    //add a louq work into the DMA fence for 
-    //interruptable fences
-    
+    //TODO:
     //finish the IRQL system for all cores
 
     //fix usermode to use mutexes
