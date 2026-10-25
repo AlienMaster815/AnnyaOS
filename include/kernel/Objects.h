@@ -13,19 +13,14 @@ extern "C" {
 #include <string.h>
 #include <kernel/threads.h>
 #include <cstdio.h>
-
+#include <kernel/XArray.h>
 
 #define GET_ITEM_OFFSET(Object, Item) ((SIZE)&((Object*)0x00)->Item)
 
 typedef struct _IDENTIFICATION_RANGE{
-    INTEGER     RangeStart;
-    INTEGER     Entries;
-    mutex_t     RangeLock;
-    struct{
-        INTEGER RangeID;
-        PVOID   Object;
-        BOOL    RangeAllocated;
-    }Identities[];
+    INTEGER IdRangeStart;
+    INTEGER IdRangeEnd;
+    XARRAY  IdRangeData;
 }IDENTIFICATION_RANGE, * PIDENTIFICATION_RANGE;
 
 typedef struct _KERNEL_REFERENCE{

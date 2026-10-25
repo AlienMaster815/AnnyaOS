@@ -2,15 +2,17 @@
 
 #include "UsbCore.h"
 
+DRIVER_EXPORT
 LOUSTATUS UsbCoreCreateHcdObject(
     PPCI_DEVICE_OBJECT  PDEV,
     ULONG               Flags,
     PVOID               PrivateData,
+    PLOUSINE_DMA_DEVICE DmaDevice,
     PUSB_HCD_OPERATIONS Operations
 ){
     PUSB_HCD_OBJECT NewHcdObject;
     LOUSTATUS Status;
-    if(!Operations){
+    if((!Operations) || (!DmaDevice)){
         return STATUS_INVALID_PARAMETER;
     }
     NewHcdObject = LouKeMallocType(USB_HCD_OBJECT, KERNEL_GENERIC_MEMORY);
@@ -22,6 +24,8 @@ LOUSTATUS UsbCoreCreateHcdObject(
     NewHcdObject->HcdFlags = Flags;
     NewHcdObject->HcdPrivateData = PrivateData;
     NewHcdObject->Operations = Operations;
+    NewHcdObject->DeviceAddresses = LouKeCreateIdentificationRange(1, 127);
+    memcpy(&NewHcdObject->DmaDevice, DmaDevice, sizeof(LOUSINE_DMA_DEVICE));
 
     if(Operations->ResetHcdDevice){
         Status = Operations->ResetHcdDevice(NewHcdObject);
@@ -38,6 +42,10 @@ LOUSTATUS UsbCoreCreateHcdObject(
             return Status;
         }
     }
+
+
+
+
     return STATUS_SUCCESS;
 }
 

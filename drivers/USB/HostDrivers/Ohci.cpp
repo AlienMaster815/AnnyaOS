@@ -1,7 +1,8 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
-/*
 #include "OHCI.h"
 
+PVOID OhciEarlyDmaAllocate(SIZE Size, SIZE Alignment);
+void OhciEarlyDmaFree(PVOID Address);
 
 LOUSTATUS 
 OhciInitialzeHcca(
@@ -15,18 +16,87 @@ OhciInitialzeHcca(
     UINT64 PhyAddress;
     LOUSTATUS Status;
 
-    Status = OhciAllocateDma(256, 256, (PVOID*)&OhciDevice->HccaAddress);
-    if(Status != STATUS_SUCCESS){
+    OhciDevice->HccaAddress = (UINT64)(UINT8*)OhciEarlyDmaAllocate(256, 256);
+    if(!OhciDevice->HccaAddress){
         LouPrint("OHCI.SYS:Unable To Allocate HCCA Memory\n");
         return Status;
     }
 
-    OhciDevice->OperationalRegisters->HcHCCA = OhciGetDmaAddress((PVOID)OhciDevice->HccaAddress);
+    OhciDevice->OperationalRegisters->HcHCCA = OhciGetDmaAddress((PVOID)(UINT8*)OhciDevice->HccaAddress);
 
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS OhciResetHcdDevice(PUSB_HCD_OBJECT Hcd){
+    LouPrint("OhciResetHcdDevice()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
 
+LOUSTATUS OhciStartHcdDevice(PUSB_HCD_OBJECT Hcd){
+    LouPrint("OhciStartHcdDevice()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS OhciStopHcdDevice(PUSB_HCD_OBJECT Hcd){
+    LouPrint("OhciStopHcdDevice()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint){
+    LouPrint("OhciHcdCreateEndpoint()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
+    LouPrint("OhciHcdDestroyEndpoint()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+RHPORT_STATUS OhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("OhciGetHcdRhPortStatus\n");
+    while(1);
+    return RHPORT_STATUS_NEEDS_RESET;
+}
+
+LOUSTATUS OhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("OhciResetRhPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("OhciStartRhPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("OhciStopRhPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_DATA Transfer){
+    LouPrint("OhciPrepTransfer()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_DATA Transfer){
+    LouPrint("OhciCommitTransfer()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+/*
 
 LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
     LouPrint("OHCI.SYS:OhciInitializeFunctionDevice()\n");

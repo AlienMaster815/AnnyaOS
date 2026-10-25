@@ -32,7 +32,7 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreRegisterScsiHostDeviceDriver(
     }
     //NewScsiCoreHostDriver->DriverXaID = 0; already 0 adding this for behavior reference
     MutexLock(&ScsiHostDriverListLock);
-    Status = LouKeXarrayAllocateUint64(
+    Status = LouKeXaAllocateUint64(
         &ScsiHostDriverArray,
         &NewScsiCoreHostDriver->DriverXaID,
         NewScsiCoreHostDriver,
@@ -92,7 +92,7 @@ DRIVER_EXPORT LOUSTATUS ScsiCoreCreateScsiHostDeviceObject(
     }
 
     MutexLock(&ScsiHostDriver->HostDeviceListLock);
-    Status = LouKeXarrayAllocateUint64(
+    Status = LouKeXaAllocateUint64(
         &ScsiHostDriver->HostDeviceArray, 
         &NewDeviceObject->HostXaID, 
         NewDeviceObject, 

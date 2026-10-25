@@ -7,15 +7,6 @@
 #include <Hal.h>
 #include <usb.h>
 
-
-
-#endif
-
-
-/*
-
-
-
 typedef struct _OHCI_ED_INITIALIZOR{
     UINT8       FunctionAddress;
     UINT8       EndpointNumber      :   4;
@@ -120,7 +111,6 @@ typedef struct _OHCI_PORT{
 
 typedef struct _OHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
-    USB_HOST_DEVICE                 UsbHost;
     POHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
     spinlock_t                      IoLock;
     mutex_t                         DeviceMutex;
@@ -332,10 +322,18 @@ static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
 
 #define UsbHcdToOhciDevice(HostDevice) CONTAINER_OF(HostDevice, OHCI_DEVICE, UsbHost)
 
+#endif
+
 LOUSTATUS 
 OhciInitialzeHcca(
     POHCI_DEVICE    OhciDevice
 );
+
+LOUSTATUS OhciAllocateDma(size_t Size, size_t Alignment, PVOID* Out); 
+void OhciFreeDma(PVOID VAddress);
+UINT32 OhciGetDmaAddress(PVOID VAddress);
+
+/*
 
 LOUSTATUS OhciCreateEndpoint(
     POHCI_DEVICE    OhciDevice,
@@ -346,20 +344,7 @@ LOUSTATUS OhciCreateEndpoint(
     OHCI_ED_TYPE    EdType
 );
 
-LOUSTATUS
-OhciAllocateDma(
-    size_t  Size,
-    size_t  Alignment,
-    PVOID*  Out
-); 
 
-void OhciFreeDma(
-    PVOID VAddress
-);
-
-UINT32 OhciGetDmaAddress(
-    PVOID VAddress
-);
 
 LOUSTATUS OhciResetHostController(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);

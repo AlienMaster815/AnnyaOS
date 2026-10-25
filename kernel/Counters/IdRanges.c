@@ -1,42 +1,31 @@
 #include <LouAPI.h>
 
-
 KERNEL_EXPORT
 INTEGER 
 LouKeAcquireIdFromRange(
     PIDENTIFICATION_RANGE   IdRange,
     PVOID                   Object
 ){
-    if((!IdRange) || (!Object)){
+    if(!IdRange){
         return (INTEGER)-1;
     }
-    MutexLock(&IdRange->RangeLock);
-    INTEGER MemberCount = IdRange->Entries;
-    INTEGER Result = (INTEGER)-1;
-    for(INTEGER i = 0; i < MemberCount; i++){
-        if(!IdRange->Identities[i].RangeAllocated){
-            Result = IdRange->Identities[i].RangeID;
-            IdRange->Identities[i].Object = Object;
-            IdRange->Identities[i].RangeAllocated = true;
-            break;
-        }
+    UINT64 Start = (UINT64)IdRange->IdRangeStart; 
+    LOUSTATUS Status = LouKeXaAllocateUint64(&IdRange->IdRangeData, &Start, Object, (UINT64)IdRange->IdRangeEnd, KERNEL_GENERIC_MEMORY);
+    if(Status != STATUS_SUCCESS){
+        return (INTEGER)-1;
     }
-    MutexUnlock(&IdRange->RangeLock);
-    return Result;
+    return (INTEGER)Start;
 }
 
 KERNEL_EXPORT
 void LouKeReleaseIdFromRange(
-    PIDENTIFICATION_RANGE IdRange,
-    INTEGER Id
+    PIDENTIFICATION_RANGE   IdRange,
+    INTEGER                 Id
 ){
-    if((!IdRange) ||  (Id >= (IdRange->RangeStart + IdRange->Entries)) || (Id < IdRange->RangeStart)){
+    if(!IdRange){
         return;
     }
-    MutexLock(&IdRange->RangeLock);
-    IdRange->Identities[Id - IdRange->RangeStart].RangeAllocated = false;
-    IdRange->Identities[Id - IdRange->RangeStart].Object = 0x00;
-    MutexUnlock(&IdRange->RangeLock);
+    LouKeXaFreeUint64(&IdRange->IdRangeData, (UINT64)Id);
 }
 
 KERNEL_EXPORT
@@ -45,20 +34,11 @@ LouKeCreateIdentificationRange(
     INTEGER RangeStart,
     INTEGER RangeEnd
 ){
-    PIDENTIFICATION_RANGE Result = 0x00;
-    INTEGER MemberCount; 
-    if(RangeStart > RangeEnd){
-        return 0x00;
+    PIDENTIFICATION_RANGE NewRange = LouKeMallocType(IDENTIFICATION_RANGE, KERNEL_GENERIC_MEMORY);
+    if(!NewRange){
+        return NewRange;
     }
-    MemberCount = (RangeEnd - RangeStart) + 1;
-    Result = LouKeMallocEx(GetStructureSize(IDENTIFICATION_RANGE, Identities, MemberCount), GET_ALIGNMENT(IDENTIFICATION_RANGE), KERNEL_GENERIC_MEMORY);
-    Result->RangeStart = RangeStart; 
-    Result->Entries = MemberCount;
-
-    for(INTEGER i = 0 ; i < MemberCount; i++){
-        Result->Identities[i].RangeID = RangeStart + i;  
-        Result->Identities[i].Object = 0x00;
-        Result->Identities[i].RangeAllocated = false;
-    }
-    return Result;
+    NewRange->IdRangeStart = RangeStart;
+    NewRange->IdRangeEnd = RangeEnd;
+    return NewRange;
 }

@@ -29,7 +29,7 @@ LOUAPI UINT64 GetCr3();
 
 UINT32 AllocateThreadID(){
     UINT32 NewID = 1;
-    LouKeXarrayAllocateUint32(&ProcessThreadIDXa, &NewID, 0x00, 0, KERNEL_GENERIC_MEMORY);
+    LouKeXaAllocateUint32(&ProcessThreadIDXa, &NewID, 0x00, 0, KERNEL_GENERIC_MEMORY);
     return NewID;
 }
 
@@ -82,7 +82,7 @@ UNUSED static void DestroyProcessObject(
 
 static UINT32 AllocateProcessID(){
     UINT32 NewID = 0;
-    LouKeXarrayAllocateUint32(&ProcessThreadIDXa, &NewID, 0x00, 0, KERNEL_GENERIC_MEMORY);
+    LouKeXaAllocateUint32(&ProcessThreadIDXa, &NewID, 0x00, 0, KERNEL_GENERIC_MEMORY);
     return NewID;
 }
 void LouKeInitProceSchedTail(PGENERIC_PROCESS_DATA Process, size_t Proc);

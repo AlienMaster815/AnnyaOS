@@ -151,8 +151,8 @@ EXPORTS
     LouKeRealloc
     LouKeReallocEx
     LouKeXaIdrAllocate
-    LouKeXarrayAllocateUint64
-    LouKeXarrayAllocateInt
+    LouKeXaAllocateUint64
+    LouKeXaAllocateInt
     LouKeCreateWorkQueue
     LouKeFreePage
     LouKeGetRamSize
@@ -285,3 +285,4 @@ EXPORTS
     LouKeThreadSleep
     MutexBlock
     MutexUnblock
+    LouKeFinishDmaTransferFence

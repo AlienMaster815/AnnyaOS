@@ -97,6 +97,7 @@ void _LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence){
     MutexSynchronizeNoBlocking(&Fence->DmaFence); //yeild till the fence is ready
     PLOUSINE_DMA_TRANSFER Transfer = CONTAINER_OF(Fence, LOUSINE_DMA_TRANSFER, DmaFence);
     Transfer->DmaDone = true;
+    LouKeMemoryBarrier();
     if(Fence->Thread){
         LouKeUnblockThread(Fence->Thread);
     }
@@ -139,10 +140,13 @@ KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
             if(TransferDone){
                 return STATUS_SUCCESS;
             }
+            LouKeYieldExecution();
         }
         return STATUS_TIMEOUT;
     }
-    LouKIRQL Irql;
+    LouPrint("LouKeFenceDmaTransfer():HERE\n");
+    while(1);
+    /*LouKIRQL Irql;
     LouKeRaiseIrql(HIGH_LEVEL, &Irql);
     if(Wait){
         LouKeThreadSleepNoYield((SIZE)Wait);
@@ -154,8 +158,8 @@ KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
     TransferDone = Transfer->DmaDone;
     if(!TransferDone){
         LouKeYieldExecution();
-    }
-    return TransferDone ? STATUS_SUCCESS : STATUS_TIMEOUT;
+    }*/
+    return STATUS_SUCCESS;//TransferDone ? STATUS_SUCCESS : STATUS_TIMEOUT;
 }
 
 KERNEL_EXPORT LOUSTATUS LouKeFinishDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer){

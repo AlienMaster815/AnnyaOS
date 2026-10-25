@@ -188,7 +188,7 @@ LouKeXaStore(
 
 KERNEL_EXPORT 
 LOUSTATUS 
-LouKeXarrayAllocateUint64(
+LouKeXaAllocateUint64(
     PXARRAY Array,
     UINT64* Id,
     PVOID   Entry, 
@@ -220,7 +220,7 @@ LouKeXarrayAllocateUint64(
 
 KERNEL_EXPORT
 LOUSTATUS 
-LouKeXarrayAllocateInt(
+LouKeXaAllocateInt(
     PXARRAY Array,
     int*    Id,
     PVOID   Entry, 
@@ -258,7 +258,7 @@ LouKeXarrayAllocateInt(
 
 KERNEL_EXPORT
 LOUSTATUS 
-LouKeXarrayAllocateUint32(
+LouKeXaAllocateUint32(
     PXARRAY Array,
     UINT32* Id,
     PVOID   Entry, 

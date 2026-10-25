@@ -83,7 +83,7 @@ static LOUSTATUS AllocateGlobalAtom(
     NewTracker->LocalAtom = false;
     NewTracker->AtomID = 1;
 
-    Status = LouKeXarrayAllocateUint64(
+    Status = LouKeXaAllocateUint64(
         &LousineAtomManager.GlobalTable,
         &NewTracker->AtomID,
         NewTracker,
@@ -132,7 +132,7 @@ static LOUSTATUS AllocateLocalGlobalAtomTracker(
     TmpTracker->LocalAtom = true;
     TmpTracker->AtomID = 1;
     
-    Status = LouKeXarrayAllocateUint64(
+    Status = LouKeXaAllocateUint64(
         &LousineAtomManager.GlobalTable,
         &TmpTracker->AtomID,
         TmpTracker,

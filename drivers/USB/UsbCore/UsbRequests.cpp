@@ -60,7 +60,7 @@ LOUSTATUS UsbCoreCreateUsbTransferDataHandle(
 }
 
 void 
-_UsbCoreCreateUsbDeviceRequestSetupPacketDataEx(
+_UsbCoreDestroyUsbDeviceRequestSetupPacketDataEx(
     PUSB_HCD_OBJECT HcdObject,   
     PVOID           UsbSetupOut
 ){
@@ -228,13 +228,14 @@ UsbCoreCreateUsbDeviceRequestSetupPacketEx(
 DRIVER_EXPORT
 LOUSTATUS 
 UsbCoreCreateSetAddressPacket(
-    PUSB_DEVICE_OBJECT  UsbDevice,
-    UINT16              NewAddress,
-    PUSB_TRANSFER_DATA* TransferOut
+    PUSB_ENDPOINT_OBJECT    Endpoint,
+    UINT16                  NewAddress,
+    PUSB_TRANSFER_DATA*     TransferOut
 ){
-    if(!UsbDevice){
+    if((UsbCoreGetEndpointDeviceAddress(Endpoint)) || (UsbCoreGetEndpointId(Endpoint))){
         return STATUS_INVALID_PARAMETER;
     }
+    PUSB_DEVICE_OBJECT UsbDevice = UsbCoreGetDeviceFromEndpoint(Endpoint);
     PUSB_HCD_OBJECT HcdObject = UsbDevice->Hcd;
     if((!HcdObject) || (!TransferOut)){
         return STATUS_INVALID_PARAMETER;
@@ -257,10 +258,12 @@ UsbCoreCreateSetAddressPacket(
         &NewTransferItem
     );
     if(Status != STATUS_SUCCESS){
-        _UsbCoreCreateUsbDeviceRequestSetupPacketDataEx(HcdObject, (*TransferOut)->Setup.VAddress);
+        _UsbCoreDestroyUsbDeviceRequestSetupPacketDataEx(HcdObject, (*TransferOut)->Setup.VAddress);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
     LouKeListAddTail(&NewTransferItem->Peers, &(*TransferOut)->Peers);
+    NewTransferItem->Endpoint = Endpoint;
+    (*TransferOut)->Endpoint = Endpoint; 
     return STATUS_SUCCESS;
 }
 

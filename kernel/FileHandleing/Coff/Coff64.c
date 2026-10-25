@@ -641,7 +641,7 @@ LOUSTATUS LouKeLoadCoffImage64(
         }
         PCFI_TLS_DIRECTORY64 TlsDirectory = (PCFI_TLS_DIRECTORY64)((UINTPTR)CfiObject->LoadedAddress + (UINTPTR)Pe64ImageHeader->OptionalHeader.PE64.DataDirectories[CFI_DDOFFSET_TLS_TABLE].VirtualAddress);
         TlsDirectory->AddressOfIndex = 0x00;
-        LouKeXarrayAllocateUint64(&Coff64VmmTlsIds, &TlsDirectory->AddressOfIndex, TlsDirectory, UINT64_MAX, KERNEL_GENERIC_MEMORY);
+        LouKeXaAllocateUint64(&Coff64VmmTlsIds, &TlsDirectory->AddressOfIndex, TlsDirectory, UINT64_MAX, KERNEL_GENERIC_MEMORY);
         Coff64VmmTlsSectionsLoaded++;
         CfiObject->TlsDirectory = TlsDirectory;
     }

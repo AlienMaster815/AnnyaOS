@@ -9,7 +9,7 @@ LouKeXaIdrAllocate(
     int         End,
     UINT64      PageFlags 
 ){
-    return LouKeXarrayAllocateInt(
+    return LouKeXaAllocateInt(
         Array, 
         Start,
         Pointer,

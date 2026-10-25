@@ -2,7 +2,9 @@ INCLUDES = -I../../../include
 TARGET = USBCORE.SYS
 SRC = UsbCore.cpp \
 		UsbHost.cpp \
-		UsbRequests.cpp 
+		UsbRequests.cpp \
+		Endpoints.cpp \
+		Devices.cpp
 
 CC = x86_64-w64-mingw32-g++
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=UsbCoreSubsystemEntry -fno-builtin
