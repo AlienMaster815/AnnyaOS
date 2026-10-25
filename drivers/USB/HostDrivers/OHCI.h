@@ -112,6 +112,7 @@ typedef struct _OHCI_PORT{
 typedef struct _OHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
     POHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
+    POHCI_ENDPOINT_DESCRIPTOR       DefaultControlEd;
     spinlock_t                      IoLock;
     mutex_t                         DeviceMutex;
     UINT64                          HccaAddress;
@@ -329,9 +330,11 @@ OhciInitialzeHcca(
     POHCI_DEVICE    OhciDevice
 );
 
-LOUSTATUS OhciAllocateDma(size_t Size, size_t Alignment, PVOID* Out); 
-void OhciFreeDma(PVOID VAddress);
+LOUSTATUS OhciAllocateDma(PUSB_HCD_OBJECT HcdObject, size_t Size, size_t Alignment, PVOID* Out);
+void OhciFreeDma(PUSB_HCD_OBJECT HcdObject, PVOID VAddress);
 UINT32 OhciGetDmaAddress(PVOID VAddress);
+LOUSTATUS OhciInitializeDefaultControl(PUSB_HCD_OBJECT HcdObject);
+LOUSTATUS OhciCreateControlED(PUSB_HCD_OBJECT HcdObject, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
 
 /*
 
@@ -351,8 +354,6 @@ LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStopHostController(PUSB_HOST_DEVICE HostDevice);
 LOUSTATUS OhciStartHostController(PUSB_HOST_DEVICE HostDevice);
 void OhciInterruptHandler(uint64_t UsbHostData);
-LOUSTATUS OhciInitializeDefaultControl(POHCI_DEVICE OhciDevice);
-LOUSTATUS OhciCreateControlED(POHCI_DEVICE OhciDevice, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
 LOUSTATUS OhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
 LOUSTATUS OhciCreateSetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 LOUSTATUS OhciCreateDataTDs(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);

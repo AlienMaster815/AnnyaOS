@@ -68,6 +68,7 @@ LOUSTATUS AddDevice(
     PDRIVER_OBJECT  DriverObject, 
     PDEVICE_OBJECT  PlatformDevice
 ){
+    LOUSTATUS Status;
     LouPrint("OHCI.SYS::AddDevice()\n");
     POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
     OhciDevice->PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);
@@ -92,9 +93,10 @@ LOUSTATUS AddDevice(
     LouPrint("OHCI.SYS:Operational Reg:%h\n", OhciDevice->OperationalRegisters);
     
     //TODO: Allocate Interrupt Handler
-    
 
-    LOUSTATUS Status = UsbCoreCreateHcdObject(
+    OhciInitialzeHcca(OhciDevice);
+    
+    Status = UsbCoreCreateHcdObject(
         OhciDevice->PDEV,
         USBHCD_FLAGS_SET_VERSION(1),
         OhciDevice,
@@ -126,10 +128,10 @@ LOUSTATUS DriverEntry(
     LOUSTATUS Status = PciHalRegisterLousinePciDeviceTable(DriverObject, SupportedOhciPciDevices);
     if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS::DriverEntry():ERROR Unable To Register Pci Device Table\n");
+        return STATUS_UNSUCCESSFUL;
     }
 
     LouPrint("OHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
-    //while(1);
     return STATUS_SUCCESS;
 }
 

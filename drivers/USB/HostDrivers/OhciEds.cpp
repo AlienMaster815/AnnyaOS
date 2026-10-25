@@ -1,8 +1,5 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
-/*
 #include "OHCI.h"
-
-
 
 LOUSTATUS OhciInitializeEndpointDescriptor(
     POHCI_ENDPOINT_DESCRIPTOR   EndpointDescriptor,
@@ -32,7 +29,8 @@ LOUSTATUS OhciInitializeEndpointDescriptor(
 
 LOUSTATUS OhciCreateED(
     POHCI_ENDPOINT_DESCRIPTOR*  EndpointDescriptor,
-    POHCI_ED_INITIALIZOR        Initializor
+    POHCI_ED_INITIALIZOR        Initializor,
+    PUSB_HCD_OBJECT             HcdObject
 ){
     LOUSTATUS Status;
     LouPrint("OHCI.SYS:OhciCreateED()\n");
@@ -45,6 +43,7 @@ LOUSTATUS OhciCreateED(
     POHCI_ENDPOINT_DESCRIPTOR   Ed;
     
     Status = OhciAllocateDma(
+        HcdObject,
         sizeof(OHCI_ENDPOINT_DESCRIPTOR),
         16,
         &Out
@@ -54,7 +53,6 @@ LOUSTATUS OhciCreateED(
         return Status;
     }
     Ed = (POHCI_ENDPOINT_DESCRIPTOR)Out;
-    *EndpointDescriptor = Ed;
 
     Status = OhciInitializeEndpointDescriptor(
         Ed,
@@ -62,9 +60,12 @@ LOUSTATUS OhciCreateED(
     );
 
     if(Status != STATUS_SUCCESS){
+        OhciFreeDma(HcdObject, Out);
         LouPrint("OHCI.SYS:Could Not Create ED\n");
         return Status;
     }
+    
+    *EndpointDescriptor = Ed;
 
     LouPrint("OHCI.SYS:OhciCreateED() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
@@ -117,47 +118,8 @@ static void AddToControlList(
     );
 }
 
-
-LOUSTATUS OhciCreateControlEDEx(
-    POHCI_DEVICE                OhciDevice,
-    POHCI_ENDPOINT_DESCRIPTOR*  EdOut,
-    POHCI_ED_INITIALIZOR        Initializor
-){
-    LOUSTATUS Status;
-
-    LouPrint("OHCI.SYS:OhciCreateControlED()\n");
-
-    if((!OhciDevice) || (!Initializor) || (!EdOut)){
-        LouPrint("OHCI.SYS:Invalid Parameter\n");
-        return STATUS_INVALID_PARAMETER;
-    }
-
-
-    POHCI_ENDPOINT_DESCRIPTOR Ed;
-
-    Status = OhciCreateED(
-        &Ed,
-        Initializor
-    );
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Could Not Create ED\n");
-        return Status;
-    }
-
-    *EdOut = Ed;
-
-    AddToControlList(
-        OhciDevice,
-        Ed
-    );
-
-    LouPrint("OHCI.SYS:OhciCreateControlED() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
 LOUSTATUS OhciCreateControlED(
-    POHCI_DEVICE                OhciDevice,
+    PUSB_HCD_OBJECT             HcdObject,
     POHCI_ENDPOINT_DESCRIPTOR*  EdOut,
     POHCI_ED_INITIALIZOR        Initializor
 ){
@@ -165,17 +127,18 @@ LOUSTATUS OhciCreateControlED(
 
     LouPrint("OHCI.SYS:OhciCreateControlED()\n");
 
-    if((!OhciDevice) || (!Initializor) || (!EdOut)){
+    if((!HcdObject) || (!Initializor) || (!EdOut)){
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
     }
-
+    POHCI_DEVICE OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
 
     POHCI_ENDPOINT_DESCRIPTOR Ed;
 
     Status = OhciCreateED(
         &Ed,
-        Initializor
+        Initializor,
+        HcdObject
     );
 
     if(Status != STATUS_SUCCESS){
@@ -193,6 +156,8 @@ LOUSTATUS OhciCreateControlED(
     LouPrint("OHCI.SYS:OhciCreateControlED() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
+
+/*
 
 static void AddToBulkList(
     POHCI_DEVICE                OhciDevice,

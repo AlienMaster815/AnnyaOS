@@ -27,8 +27,55 @@ OhciInitialzeHcca(
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS OhciResetHcdDevice(PUSB_HCD_OBJECT Hcd){
+
+LOUSTATUS OhciInitializeDefaultControl(
+    PUSB_HCD_OBJECT HcdObject
+){
+    LouPrint("OHCI.SYS:OhciInitializeLists()\n");
+    POHCI_DEVICE OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
+    LOUSTATUS Status;
+    UINT32 DmaAddress;
+    OHCI_ED_INITIALIZOR Initializor = {0};
+    POHCI_ENDPOINT_DESCRIPTOR EdOut;
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
+
+    Initializor.FunctionAddress = 0;
+    Initializor.EndpointNumber = 0;
+    Initializor.Direction = OHCI_ED_DIRECTION_GFTD0;
+    Initializor.MaximumPacketSize = 8;
+    Initializor.Skip = 1;
+
+    Status = OhciCreateControlED(
+        HcdObject,
+        &EdOut,
+        &Initializor
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Could Not Add Default Control ED\n");
+        return Status;
+    }
+    DmaAddress = OhciGetDmaAddress(EdOut);
+    OpRegs->HcControlHeadED = DmaAddress;
+
+    LouPrint("OHCI.SYS:OhciInitializeLists() STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS OhciResetHcdDevice(PUSB_HCD_OBJECT HcdObject){
     LouPrint("OhciResetHcdDevice()\n");
+    LOUSTATUS Status;
+    Status = OhciInitializeDefaultControl(HcdObject);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Error Initializing Lists\n");
+        return STATUS_SUCCESS;
+    }
+
+    //START HERE with porting the original reset code
+   
+   
+    LouPrint("OhciResetHcdDevice():STATUS_SUCCESS\n");
+   
     while(1);
     return STATUS_SUCCESS;
 }
@@ -456,38 +503,6 @@ void OhciInterruptHandler(uint64_t UsbHostData){
     LouPrint("OHCI.SYS:%h\n", OhciDevice->OperationalRegisters->HcInterruptStatus);
 
     while(1);
-}
-
-LOUSTATUS OhciInitializeDefaultControl(
-    POHCI_DEVICE OhciDevice
-){
-    LouPrint("OHCI.SYS:OhciInitializeLists()\n");
-    LOUSTATUS Status;
-    UINT32 DmaAddress;
-    OHCI_ED_INITIALIZOR Initializor = {0};
-    POHCI_ENDPOINT_DESCRIPTOR EdOut;
-    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
-
-    Initializor.FunctionAddress = 0;
-    Initializor.EndpointNumber = 0;
-    Initializor.Direction = OHCI_ED_DIRECTION_GFTD0;
-    Initializor.MaximumPacketSize = 8;
-    Initializor.Skip = 1;
-
-    Status = OhciCreateControlED(
-        OhciDevice,
-        &EdOut,
-        &Initializor
-    );
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Could Not Add Default Control ED\n");
-        return Status;
-    }
-    DmaAddress = OhciGetDmaAddress(EdOut);
-    OpRegs->HcControlHeadED = DmaAddress;
-
-    LouPrint("OHCI.SYS:OhciInitializeLists() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
 }
 
 LOUSTATUS OhciCommitRequest(
