@@ -23,10 +23,10 @@ typedef struct _OHCI_ED_INITIALIZOR{
 }OHCI_ED_INITIALIZOR, * POHCI_ED_INITIALIZOR;
 
 typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_ENDPOINT_DESCRIPTOR{
-    UINT32      Dword0;
-    UINT32      Dword1;
-    UINT32      Dword2;
-    UINT32      Dword3;
+    volatile UINT32      Dword0;
+    volatile UINT32      Dword1;
+    volatile UINT32      Dword2;
+    volatile UINT32      Dword3;
 }OHCI_ENDPOINT_DESCRIPTOR, * POHCI_ENDPOINT_DESCRIPTOR;
 
 typedef struct _OHCI_TD_INITIALIZOR{
@@ -42,10 +42,10 @@ typedef struct _OHCI_TD_INITIALIZOR{
 }OHCI_TD_INITIALIZOR, * POHCI_TD_INITIALIZOR;
 
 typedef struct PACKED FORCE_ALIGNMENT(16) _OHCI_TRANSFER_DESCRIPTOR{
-    UINT32      Dword0;
-    UINT32      Dword1;
-    UINT32      Dword2;
-    UINT32      Dword3;
+    volatile UINT32      Dword0;
+    volatile UINT32      Dword1;
+    volatile UINT32      Dword2;
+    volatile UINT32      Dword3;
 }OHCI_TRANSFER_DESCRIPTOR, * POHCI_TRANSFER_DESCRIPTOR;
 
 typedef struct _OHCI_TD_LIST{
@@ -65,34 +65,34 @@ typedef struct _OHCI_ED_LIST{
 
 
 typedef struct PACKED _OHCI_HCCA{
-    UINT32      InterruptTable[32];
-    UINT16      HccaFrameNumber;
-    UINT16      HccaPad1;
-    UINT32      HccaDoneHead;
+    volatile UINT32      InterruptTable[32];
+    volatile UINT16      HccaFrameNumber;
+    volatile UINT16      HccaPad1;
+    volatile UINT32      HccaDoneHead;
 }OHCI_HCCA, * POHCI_HCCA;
 
 typedef struct PACKED _OHCI_OPERATIONAL_REGISTERS{
-    UINT32      HcRevision;
-    UINT32      HcControl;
-    UINT32      HcCommandStatus;
-    UINT32      HcInterruptStatus;
-    UINT32      HcInterruptEnable;
-    UINT32      HcInterruptDisable;
-    UINT32      HcHCCA;
-    UINT32      HcPeriodCurrentED;
-    UINT32      HcControlHeadED;
-    UINT32      HcControlCurrentED;
-    UINT32      HcBulkHeadED;
-    UINT32      HcBulkCurrentED;
-    UINT32      HcDoneHead;
-    UINT32      HcFmInterval;
-    UINT32      HcFmRemaining;
-    UINT32      HcPeriodicStart;
-    UINT32      HcLSThreshold;
-    UINT32      HcRhDescriptorA;
-    UINT32      HcRhDescriptorB;
-    UINT32      HcRhStatus;
-    UINT32      HcRhPortStatus[];
+    volatile UINT32      HcRevision;
+    volatile UINT32      HcControl;
+    volatile UINT32      HcCommandStatus;
+    volatile UINT32      HcInterruptStatus;
+    volatile UINT32      HcInterruptEnable;
+    volatile UINT32      HcInterruptDisable;
+    volatile UINT32      HcHCCA;
+    volatile UINT32      HcPeriodCurrentED;
+    volatile UINT32      HcControlHeadED;
+    volatile UINT32      HcControlCurrentED;
+    volatile UINT32      HcBulkHeadED;
+    volatile UINT32      HcBulkCurrentED;
+    volatile UINT32      HcDoneHead;
+    volatile UINT32      HcFmInterval;
+    volatile UINT32      HcFmRemaining;
+    volatile UINT32      HcPeriodicStart;
+    volatile UINT32      HcLSThreshold;
+    volatile UINT32      HcRhDescriptorA;
+    volatile UINT32      HcRhDescriptorB;
+    volatile UINT32      HcRhStatus;
+    volatile UINT32      HcRhPortStatus[];
 }OHCI_OPERATIONAL_REGISTERS, * POHCI_OPERATIONAL_REGISTERS;
 
 typedef enum {
@@ -128,11 +128,11 @@ typedef struct _OHCI_IO_PACKET_PRIVATE_DATA{
 }OHCI_IO_PACKET_PRIVATE_DATA, * POHCI_IO_PACKET_PRIVATE_DATA;
 
 typedef struct PACKED _OHCI_TRANSFER_INFO{
-    UINT8   RequestType;
-    UINT8   Request;
-    UINT16  Value;
-    UINT16  Index;
-    UINT16  Length;
+    volatile UINT8   RequestType;
+    volatile UINT8   Request;
+    volatile UINT16  Value;
+    volatile UINT16  Index;
+    volatile UINT16  Length;
 }OHCI_TRANSFER_INFO, * POHCI_TRANSFER_INFO;
 
 #define OHCI_REVISION_HC_BIT     (0x01)
@@ -184,7 +184,7 @@ typedef struct PACKED _OHCI_TRANSFER_INFO{
 #define SET_OHCI_CONTROL_IE(Control, x)     (Control = ((Control & ~(1 << OHCI_CONTROL_IE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_IE_BIT)))
 #define SET_OHCI_CONTROL_CLE(Control, x)    (Control = ((Control & ~(1 << OHCI_CONTROL_CLE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_CLE_BIT)))
 #define SET_OHCI_COTROL_BLE(Control, x)     (Control = ((Control & ~(1 << OHCI_CONTROL_BLE_BIT)) |= ((x & 0x01) << OHCI_CONTROL_BLE_BIT)))
-static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
+static inline UINT32 SET_OHCI_CONTROL_HCFS(UINT32 Control, UINT32 Mod){
     Control = Control & ~(OHCI_CONTROL_HCFS_MASK << OHCI_CONTROL_HCFS_BITS);
     Control |= ((Mod & OHCI_CONTROL_HCFS_MASK) << OHCI_CONTROL_HCFS_BITS);
     return Control;
@@ -325,11 +325,7 @@ static inline UINT32 SET_OHCI_COTROL_HCFS(UINT32 Control, UINT32 Mod){
 
 #endif
 
-LOUSTATUS 
-OhciInitialzeHcca(
-    POHCI_DEVICE    OhciDevice
-);
-
+LOUSTATUS OhciInitialzeHcca(PUSB_HCD_OBJECT HcdObject);
 LOUSTATUS OhciAllocateDma(PUSB_HCD_OBJECT HcdObject, size_t Size, size_t Alignment, PVOID* Out);
 void OhciFreeDma(PUSB_HCD_OBJECT HcdObject, PVOID VAddress);
 UINT32 OhciGetDmaAddress(PVOID VAddress);

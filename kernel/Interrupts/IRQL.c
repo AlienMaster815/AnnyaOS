@@ -130,6 +130,7 @@ KERNEL_EXPORT void LouKeSetIrql(
     }
 }
 
+KERNEL_EXPORT
 void LouKeRaiseIrql(
     LouKIRQL    Irql,
     LouKIRQL*   OldIrql
@@ -142,6 +143,7 @@ void LouKeRaiseIrql(
     LouKeSetIrql(Irql, 0x00);
 }
 
+KERNEL_EXPORT
 void LouKeLowerIrql(
     LouKIRQL    Irql
 ){

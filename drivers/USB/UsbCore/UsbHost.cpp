@@ -2,6 +2,9 @@
 
 #include "UsbCore.h"
 
+void UsbCoreHcdIoQueueManager(PVOID Params);
+void UsbCoreHcdIoDeQueueManager(PVOID Params);
+
 DRIVER_EXPORT
 LOUSTATUS UsbCoreCreateHcdObject(
     PPCI_DEVICE_OBJECT  PDEV,
@@ -43,8 +46,33 @@ LOUSTATUS UsbCoreCreateHcdObject(
         }
     }
 
+    NewHcdObject->IoQueueManager = LouKeCreateDemon(
+        (PVOID)UsbCoreHcdIoQueueManager,
+        (PVOID)NewHcdObject,
+        8 * KILOBYTE,
+        31
+    );
+    if(!NewHcdObject->IoQueueManager){
+        Operations->StopHcdDevice(NewHcdObject);
+        LouKeFree(NewHcdObject);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
+    NewHcdObject->IoDeQueueManager = LouKeCreateDemon(
+        (PVOID)UsbCoreHcdIoDeQueueManager,
+        (PVOID)NewHcdObject,
+        8 * KILOBYTE,
+        31
+    );
+    if(!NewHcdObject->IoDeQueueManager){
+        Operations->StopHcdDevice(NewHcdObject);
+        LouKeFree(NewHcdObject);
+        LouPrint("USBCORE.SYS:UsbCoreCreateHcdObject():HERE\n");
+        while(1);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
+    //TODO:Create Endpoint 0 enumerate the root hub 
 
     return STATUS_SUCCESS;
 }

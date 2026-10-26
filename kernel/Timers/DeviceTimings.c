@@ -91,7 +91,7 @@ LouKeWaitForUlongRegisterConditionMs(
         return STATUS_INVALID_PARAMETER;
     }
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
-    ULONG Tmp = *Mmio;
+    ULONG Tmp = *(volatile ULONG*)Mmio;
     do{
         Tmp = *Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));

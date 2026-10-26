@@ -286,3 +286,5 @@ EXPORTS
     MutexBlock
     MutexUnblock
     LouKeFinishDmaTransferFence
+    LouKeRaiseIrql
+    LouKeLowerIrql

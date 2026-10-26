@@ -82,6 +82,7 @@ typedef struct _USB_HCD_OPERATIONS{
     //Transfer Operations
     LOUSTATUS       (*PrepTransfer)(struct _USB_TRANSFER_DATA* Transfer);
     LOUSTATUS       (*CommitTransfer)(struct _USB_TRANSFER_DATA* Transfer);
+    LOUSTATUS       (*GetTransferStatus)(struct _USB_TRANSFER_DATA* Transfer);
 }USB_HCD_OPERATIONS, * PUSB_HCD_OPERATIONS;
 
 typedef struct _USB_HCD_OBJECT{
@@ -95,6 +96,12 @@ typedef struct _USB_HCD_OBJECT{
     PUSB_HCD_OPERATIONS     Operations;
     LOUSINE_DMA_DEVICE      DmaDevice;
     SIZE                    HcdMaxBandwith;
+    PTHREAD                 IoQueueManager;
+    mutex_t                 IoQueueLock;
+    ListHeader              IoQueueItems;
+    PTHREAD                 IoDeQueueManager;
+    mutex_t                 IoDeQueueLock;
+    ListHeader              IoDeQueueItems;
 }USB_HCD_OBJECT, * PUSB_HCD_OBJECT; 
 
 

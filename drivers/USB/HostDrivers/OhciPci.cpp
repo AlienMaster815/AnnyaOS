@@ -26,14 +26,6 @@ static LOUSINE_DMA_DEVICE TypicalOhciBusMasterDevice = {
     },
 };
 
-PVOID OhciEarlyDmaAllocate(SIZE Size, SIZE Alignment){
-    return LouKeDmaDeviceAllocateDmaMemory(&TypicalOhciBusMasterDevice, Size, Alignment);
-}
-
-void OhciEarlyDmaFree(PVOID Address){
-    LouKeDmaDeviceFreeDmaMemory(&TypicalOhciBusMasterDevice, Address);
-}
-
 static USB_HCD_OPERATIONS OhciHcdOperations = {
     //Host Operations
     .ResetHcdDevice = OhciResetHcdDevice,
@@ -93,8 +85,6 @@ LOUSTATUS AddDevice(
     LouPrint("OHCI.SYS:Operational Reg:%h\n", OhciDevice->OperationalRegisters);
     
     //TODO: Allocate Interrupt Handler
-
-    OhciInitialzeHcca(OhciDevice);
     
     Status = UsbCoreCreateHcdObject(
         OhciDevice->PDEV,
@@ -107,11 +97,7 @@ LOUSTATUS AddDevice(
         LouKeFree(OhciDevice);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-
-
-
     LouPrint("OHCI.SYS::AddDevice():STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
