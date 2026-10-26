@@ -327,7 +327,340 @@ typedef struct _DRSD_ARG_QUERY_ADAPTER_INFO{
 typedef LOUSTATUS DRSD_DDI_QUERY_ADAPTER_INFO(HANDLE, PDRSD_ARG_QUERY_ADAPTER_INFO);
 typedef DRSD_DDI_QUERY_ADAPTER_INFO* PDRSD_DDI_QUERY_ADAPTER_INFO;
 
+typedef LOUSTATUS DRSD_DDI_CREATE_DEVICE(HANDLE, PDRSD_ARG_CREATE_DEVICE);
+typedef DRSD_DDI_CREATE_DEVICE* PDRSD_DDI_CREATE_DEVICE;
 
+typedef struct _DRSD_SEGMENT_BANK_PREFERENCE{
+    union{
+        struct{
+            UINT    Bank0       :   7;
+            UINT    Direction0  :   1;
+            UINT    Bank1       :   7;
+            UINT    Direction1  :   1;
+            UINT    Bank2       :   7;
+            UINT    Direction2  :   1;
+            UINT    Bank3       :   7;
+            UINT    Direction3  :   1;
+        };
+        UINT        Value;
+    };
+}DRSD_SEGMENT_BANK_PREFERENCE, * PDRSD_SEGMENT_BANK_PREFERENCE;
+
+typedef struct _DRSD_SEGMENT_PREFERENCE{
+    union{
+        struct{
+            UINT    SegmentId0  :   5;
+            UINT    Direction0  :   1;
+            UINT    SegmentId1  :   5;
+            UINT    Direction1  :   1;
+            UINT    SegmentId2  :   5;
+            UINT    Direction2  :   1;
+            UINT    SegmentId3  :   5;
+            UINT    Direction3  :   1;
+            UINT    SegmentId4  :   5;
+            UINT    Direction4  :   1;
+            UINT    Reserved    :   2;
+        };
+        UINT        Value;
+    };
+}DRSD_SEGMENT_PREFERENCE, * PDRSD_SEGMENT_PREFERENCE;
+
+typedef struct _DRSD_ALLOCATION_INFO_FLAGS{
+    union{
+        struct{
+            UINT    CpuVisable                      :   1;
+            UINT    PermanentSysMem                 :   1;
+            UINT    Cached                          :   1;
+            UINT    Protected                       :   1;
+            UINT    ExistingSysMem                  :   1;
+            UINT    ExistingKernelSysMem            :   1;
+            UINT    FromEndOfSegment                :   1;
+            UINT    Swizzled                        :   1;
+            UINT    Overlay                         :   1;
+            UINT    Capture                         :   1;
+            UINT    UseAlternateVa                  :   1;
+            UINT    SynchronusPaging                :   1;
+            UINT    LinkMirrored                    :   1;
+            UINT    LingInstanced                   :   1;
+            UINT    HistoryBuffer                   :   1;
+            UINT    AccessedPhysically              :   1;
+            UINT    ExplicitResidencyNotification   :   1;
+            UINT    HardwareProtected               :   1;
+            UINT    CpuVisableOnDemand              :   1;
+            UINT    Reserved                        :   4;
+            UINT    DRSD_ALLOC_RESERVED16           :   1;
+            UINT    DRSD_ALLOC_RESERVED15           :   1;
+            UINT    DRSD_ALLOC_RESERVED14           :   1;
+            UINT    DRSD_ALLOC_RESERVED13           :   1;
+            UINT    DRSD_ALLOC_RESERVED12           :   1;
+            UINT    DRSD_ALLOC_RESERVED11           :   1;
+            UINT    DRSD_ALLOC_RESERVED10           :   1;
+            UINT    DRSD_ALLOC_RESERVED9            :   1;
+            UINT    DRSD_ALLOC_RESERVED4            :   1;
+            UINT    DRSD_ALLOC_RESERVED3            :   1;
+            UINT    DRSD_ALLOC_RESERVED2            :   1;
+            UINT    DRSD_ALLOC_RESERVED1            :   1;
+            UINT    DRSD_ALLOC_RESERVED0            :   1;
+        };
+        UINT        Value;
+    };
+}DRSD_ALLOCATION_INFO_FLAGS, * PDRSD_ALLOCATION_INFO_FLAGS;
+
+typedef struct _DRSD_ALLOCATION_INFO_FLAGS_LDDM2_0{
+    union{
+        struct{
+            UINT    CpuVisable                      :   1;
+            UINT    PermanentSysMem                 :   1;
+            UINT    Cached                          :   1;
+            UINT    Protected                       :   1;
+            UINT    ExistingSysMem                  :   1;
+            UINT    ExistingKernelSysMem            :   1;
+            UINT    FromEndOfSegment                :   1;
+            UINT    DisableLargePageMapping         :   1;
+            UINT    Overlay                         :   1;
+            UINT    Capture                         :   1;
+            UINT    CreateInVpr                     :   1;
+            UINT    Reserved00                      :   1;
+            UINT    DRSD_ALLOC_RESERVED17           :   1;
+            UINT    Reserved02                      :   1;
+            UINT    MapApertureCpuVisable           :   1;
+            UINT    Reserved03                      :   1;
+            UINT    HistoryBuffer                   :   1;
+            UINT    AccessedPhysically              :   1;
+            UINT    ExplicitResidencyNotification   :   1;
+            UINT    HardwareProtected               :   1;
+            UINT    CpuVisableOnDemand              :   1;
+            UINT    DRSD_ALLOC_RESERVED16           :   1;
+            UINT    DRSD_ALLOC_RESERVED15           :   1;
+            UINT    DRSD_ALLOC_RESERVED14           :   1;
+            UINT    DRSD_ALLOC_RESERVED13           :   1;
+            UINT    DRSD_ALLOC_RESERVED12           :   1;
+            UINT    DRSD_ALLOC_RESERVED11           :   1;
+            UINT    DRSD_ALLOC_RESERVED10           :   1;
+            UINT    DRSD_ALLOC_RESERVED9            :   1;
+            UINT    DRSD_ALLOC_RESERVED4            :   1;
+            UINT    DRSD_ALLOC_RESERVED3            :   1;
+            UINT    DRSD_ALLOC_RESERVED2            :   1;
+            UINT    DRSD_ALLOC_RESERVED1            :   1;
+            UINT    DRSD_ALLOC_RESERVED0            :   1;
+        };
+        UINT        Value;
+    };
+}DRSD_ALLOCATION_INFO_FLAGS_LDDM2_0, * PDRSD_ALLOCATION_INFO_FLAGS_LDDM2_0;
+
+typedef enum{
+    D3DDDIFMT_UNKNOWN = 0,
+    D3DDDIFMT_R8G8B8,
+    D3DDDIFMT_A8R8G8B8,
+    D3DDDIFMT_X8R8G8B8,
+    D3DDDIFMT_R5G6B5,
+    D3DDDIFMT_X1R5G5B5,
+    D3DDDIFMT_A1R5G5B5,
+    D3DDDIFMT_A4R4G4B4,
+    D3DDDIFMT_R3G3B2,
+    D3DDDIFMT_A8,
+    D3DDDIFMT_A8R3G3B2,
+    D3DDDIFMT_X4R4G4B4,
+    D3DDDIFMT_A2B10G10R10,
+    D3DDDIFMT_A8B8G8R8,
+    D3DDDIFMT_X8B8G8R8,
+    D3DDDIFMT_G16R16,
+    D3DDDIFMT_A2R10G10B10,
+    D3DDDIFMT_A16B16G16R16,
+    D3DDDIFMT_A8P8,
+    D3DDDIFMT_P8,
+    D3DDDIFMT_L8,
+    D3DDDIFMT_A8L8,
+    D3DDDIFMT_A4L4,
+    D3DDDIFMT_V8U8,
+    D3DDDIFMT_L6V5U5,
+    D3DDDIFMT_X8L8V8U8,
+    D3DDDIFMT_Q8W8V8U8,
+    D3DDDIFMT_V16U16,
+    D3DDDIFMT_W11V11U10,
+    D3DDDIFMT_A2W10V10U10,
+    D3DDDIFMT_UYVY,
+    D3DDDIFMT_R8G8_B8G8,
+    D3DDDIFMT_YUY2,
+    D3DDDIFMT_G8R8_G8B8,
+    D3DDDIFMT_DXT1,
+    D3DDDIFMT_DXT2,
+    D3DDDIFMT_DXT3,
+    D3DDDIFMT_DXT4,
+    D3DDDIFMT_DXT5,
+    D3DDDIFMT_D16_LOCKABLE,
+    D3DDDIFMT_D32,
+    D3DDDIFMT_D15S1,
+    D3DDDIFMT_D24S8,
+    D3DDDIFMT_D24X8,
+    D3DDDIFMT_D24X4S4,
+    D3DDDIFMT_D16,
+    D3DDDIFMT_D32F_LOCKABLE,
+    D3DDDIFMT_D24FS8,
+    D3DDDIFMT_D32_LOCKABLE,
+    D3DDDIFMT_S8_LOCKABLE,
+    D3DDDIFMT_S1D15,
+    D3DDDIFMT_S8D24,
+    D3DDDIFMT_X8D24,
+    D3DDDIFMT_X4S4D24,
+    D3DDDIFMT_L16,
+    D3DDDIFMT_G8R8,
+    D3DDDIFMT_R8,
+    D3DDDIFMT_VERTEXDATA,
+    D3DDDIFMT_INDEX16,
+    D3DDDIFMT_INDEX32,
+    D3DDDIFMT_Q16W16V16U16,
+    D3DDDIFMT_MULTI2_ARGB8,
+    D3DDDIFMT_R16F,
+    D3DDDIFMT_G16R16F,
+    D3DDDIFMT_A16B16G16R16F,
+    D3DDDIFMT_R32F,
+    D3DDDIFMT_G32R32F,
+    D3DDDIFMT_A32B32G32R32F,
+    D3DDDIFMT_CxV8U8,
+    D3DDDIFMT_A1,
+    D3DDDIFMT_A2B10G10R10_XR_BIAS,
+    D3DDDIFMT_DXVACOMPBUFFER_BASE,
+    D3DDDIFMT_PICTUREPARAMSDATA,
+    D3DDDIFMT_MACROBLOCKDATA,
+    D3DDDIFMT_RESIDUALDIFFERENCEDATA,
+    D3DDDIFMT_DEBLOCKINGDATA,
+    D3DDDIFMT_INVERSEQUANTIZATIONDATA,
+    D3DDDIFMT_SLICECONTROLDATA,
+    D3DDDIFMT_BITSTREAMDATA,
+    D3DDDIFMT_MOTIONVECTORBUFFER,
+    D3DDDIFMT_FILMGRAINBUFFER,
+    D3DDDIFMT_DXVA_RESERVED9,
+    D3DDDIFMT_DXVA_RESERVED10,
+    D3DDDIFMT_DXVA_RESERVED11,
+    D3DDDIFMT_DXVA_RESERVED12,
+    D3DDDIFMT_DXVA_RESERVED13,
+    D3DDDIFMT_DXVA_RESERVED14,
+    D3DDDIFMT_DXVA_RESERVED15,
+    D3DDDIFMT_DXVA_RESERVED16,
+    D3DDDIFMT_DXVA_RESERVED17,
+    D3DDDIFMT_DXVA_RESERVED18,
+    D3DDDIFMT_DXVA_RESERVED19,
+    D3DDDIFMT_DXVA_RESERVED20,
+    D3DDDIFMT_DXVA_RESERVED21,
+    D3DDDIFMT_DXVA_RESERVED22,
+    D3DDDIFMT_DXVA_RESERVED23,
+    D3DDDIFMT_DXVA_RESERVED24,
+    D3DDDIFMT_DXVA_RESERVED25,
+    D3DDDIFMT_DXVA_RESERVED26,
+    D3DDDIFMT_DXVA_RESERVED27,
+    D3DDDIFMT_DXVA_RESERVED28,
+    D3DDDIFMT_DXVA_RESERVED29,
+    D3DDDIFMT_DXVA_RESERVED30,
+    D3DDDIFMT_DXVA_RESERVED31,
+    D3DDDIFMT_DXVACOMPBUFFER_MAX,
+    D3DDDIFMT_BINARYBUFFER,
+    D3DDDIFMT_FORCE_UINT
+}D3DDDIFORMAT;
+
+typedef struct _DRSD_ALLOCATION_USAGE_INFO1{
+    union{
+        struct{
+            UINT        PrivateFormat   :   1;
+            UINT        Swizzled        :   1;
+            UINT        MipMap          :   1;
+            UINT        Cube            :   1;
+            UINT        Volume          :   1;
+            UINT        Vertex          :   1;
+            UINT        Index           :   1;
+            UINT        Reserved        :   25;
+        };
+        UINT            Value;
+    }                   Flags;
+    union{
+        D3DDDIFORMAT    Format;
+        UINT            PrivateFormat;
+    };
+    UINT                SwizzledFormat;
+    UINT                ByteOffset;
+    UINT                Width;
+    UINT                Height;
+    UINT                Pitch;
+    UINT                Depth;
+    UINT                SlicePitch;
+}DRSD_ALLOCATION_USAGE_INFO1, * PDRSD_ALLOCATION_USAGE_INFO1;
+
+typedef struct _DRSD_ALLOCATION_USAGE_HINT{
+    UINT                        Version;
+    DRSD_ALLOCATION_USAGE_INFO1 v1;
+}DRSD_ALLOCATION_USAGE_HINT, * PDRSD_ALLOCATION_USAGE_HINT;
+
+typedef struct _DRSD_ALLOCATION_INFO_FLAGS2{
+    union{
+        struct{
+            UINT    SharedBackingStoreWithKmd               :   1;
+            UINT    NoImplicitSynchronization               :   1;
+            UINT    DisablePartialResidency                 :   1;
+            UINT    RestrictedToSingleSegment               :   1;
+            UINT    NeedPagingVaAtResidencyNotification     :   1;
+            UINT    Reserved01                              :   1;
+            UINT    FaultAndStall                           :   1;
+            UINT    Reserved                                :   25;
+        };
+        UINT        Value;
+    };
+}DRSD_ALLOCATION_INFO_FLAGS2, * PDRSD_ALLOCATION_INFO_FLAGS2;
+
+typedef struct _DRSD_ALLOCATION_INFO{
+    PVOID                                   PrivateDriverData;
+    UINT                                    PrivateDriverDataSize;
+    union{
+        UINT                                Alignment;
+        struct{
+            UINT16                          MinimumPageSize;
+            UINT16                          RecomendedPageSize;
+        };
+    };
+    SIZE                                    Size;
+    SIZE                                    PitchAlignment;
+    DRSD_SEGMENT_BANK_PREFERENCE            HintedBlank;
+    DRSD_SEGMENT_PREFERENCE                 PreferedSegment;
+    union{
+        UINT                                SupportedReadSegmentSet;
+        UINT                                MmuSet;
+    };
+    UINT                                    SupportedWriteSegmentSet;
+    UINT                                    EvictionSegmentSet;
+    union{
+        UINT                                MaximumRenamingListLength;
+        UINT                                PhyscialAdapterIndex;
+    };
+    HANDLE                                  Allocation;
+    union{
+        DRSD_ALLOCATION_INFO_FLAGS          Flags;
+        DRSD_ALLOCATION_INFO_FLAGS_LDDM2_0  FlagsLddm2;
+    };
+    PDRSD_ALLOCATION_USAGE_HINT             AllocationUsageHint;
+    UINT                                    AllocationPriority;
+    DRSD_ALLOCATION_INFO_FLAGS2             Flags2;
+}DRSD_ALLOCATION_INFO, * PDRSD_ALLOCATION_INFO;
+
+typedef struct _DRSD_CREATE_ALLOCATION_FLAGS{
+    union{
+        struct{
+            UINT    Resource : 1;
+            UINT    Reserved : 31;
+        };
+        UINT        Flags;
+    };
+}DRSD_CREATE_ALLOCATION_FLAGS, * PDRSD_CREATE_ALLOCATION_FLAGS;
+
+typedef struct _DRSD_ARG_CREATE_ALLOCATION{
+    const PVOID                     PrivateDriverData;
+    UINT                            PrivateDriverDataSize;
+    UINT                            NumAllocations;
+    PDRSD_ALLOCATION_INFO           AllocationInfo;
+    HANDLE                          Resource;
+    DRSD_CREATE_ALLOCATION_FLAGS    Flags;
+}DRSD_ARG_CREATE_ALLOCATION, * PDRSD_ARG_CREATE_ALLOCATION;
+
+typedef LOUSTATUS DRSD_DDI_CREATE_ALLOCATION(HANDLE, PDRSD_ARG_CREATE_ALLOCATION);
+typedef DRSD_DDI_CREATE_ALLOCATION* PDRSD_DDI_CREATE_ALLOCATION;
 
 typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
     ULONG                               Version;
@@ -348,7 +681,9 @@ typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
     PDRSD_DDI_QUERY_INTERFACE           DrsdDdiQueryInterface;
     PDRSD_DDI_CONTROL_ETW_LOGGING       DrsdDdiControlEtwLogging;
     PDRSD_DDI_QUERY_ADAPTER_INFO        DrsdDdiQueryAdapterInfo;
-    //next DXGKDDI_CREATEDEVICE
+    PDRSD_DDI_CREATE_DEVICE             DrsdDdiCreateDevice;
+    PDRSD_DDI_CREATE_ALLOCATION         DrsdDdiCreateAllocation;
+    //PDXGKDDI_DESTROYALLOCATION
 }DRSD_DRIVER_INITIALIZATION_DATA, * PDRSD_DRIVER_INITIALIZATION_DATA;
 
 #ifndef _USER_MODE_CODE_
