@@ -662,28 +662,206 @@ typedef struct _DRSD_ARG_CREATE_ALLOCATION{
 typedef LOUSTATUS DRSD_DDI_CREATE_ALLOCATION(HANDLE, PDRSD_ARG_CREATE_ALLOCATION);
 typedef DRSD_DDI_CREATE_ALLOCATION* PDRSD_DDI_CREATE_ALLOCATION;
 
+typedef struct _DRSD_DESTROY_ALLOCATION_FLAGS{
+    union{
+        struct{
+            UINT    DestroyResource :   1;
+            UINT    Reserved        :   31;
+        };
+        UINT        Value;
+    };
+}DRSD_DESTROY_ALLOCATION_FLAGS, * PDRSD_DESTROY_ALLOCATION_FLAGS;
+
+typedef struct _DRSD_ARG_DESTROY_ALLOCATION_FLAGS{
+    UINT                            NumAllocations;
+    const PHANDLE                   AllocationList;
+    HANDLE                          Resource;
+    DRSD_DESTROY_ALLOCATION_FLAGS   Flags;
+}DRSD_ARG_DESTROY_ALLOCATION_FLAGS, * PDRSD_ARG_DESTROY_ALLOCATION_FLAGS;
+
+typedef LOUSTATUS DRSD_DDI_DESTROY_ALLOCATION(HANDLE, PDRSD_ARG_DESTROY_ALLOCATION_FLAGS);
+typedef DRSD_DDI_DESTROY_ALLOCATION* PDRSD_DDI_DESTROY_ALLOCATION;
+
+typedef struct _D3DDDI_MULTISAMPLING_METHOD{
+    UINT    NumSamples;
+    UINT    NumQualityLevels;
+}D3DDDI_MULTISAMPLING_METHOD, * PD3DDDI_MULTISAMPLING_METHOD;
+
+typedef struct _D3DDDI_RATIONAL{
+    UINT    Numerator;
+    UINT    Denomerator;
+}D3DDDI_RATIONAL, * PD3DDDI_RATIONAL;
+
+typedef struct _DRSD_DESCRIBE_ALLOCATION_FLAGS{
+    union{
+        struct{
+            UINT    CheckDisplayMode    :   1;
+            UINT    Reserved            :   31;
+        };
+        UINT        Value;
+    };
+}DRSD_DESCRIBE_ALLOCATION_FLAGS, * PDRSD_DESCRIBE_ALLOCATION_FLAGS;
+
+typedef enum{
+    D3DDDI_ROTATION_IDENTITY = 0,
+    D3DDDI_ROTATION_90,
+    D3DDDI_ROTATION_180,
+    D3DDDI_ROTATION_270
+}D3DDDI_ROTATION;
+
+typedef struct _DRSD_ARG_DESCRIBE_ALLOCATION{
+    HANDLE                          Allocation;
+    UINT                            Width;
+    UINT                            Height;
+    D3DDDIFORMAT                    Format;
+    D3DDDI_MULTISAMPLING_METHOD     MultisamplingMethod;
+    D3DDDI_RATIONAL                 RefreshRate;
+    UINT                            PrivateDriverFormatAttribute;
+    DRSD_DESCRIBE_ALLOCATION_FLAGS  Flags;
+    D3DDDI_ROTATION                 Rotation;
+}DRSD_ARG_DESCRIBE_ALLOCATION, * PDRSD_ARG_DESCRIBE_ALLOCATION;
+
+typedef LOUSTATUS DRSD_DDI_DESCRIBE_ALLOCATION(HANDLE, PDRSD_ARG_DESCRIBE_ALLOCATION);
+typedef DRSD_DDI_DESCRIBE_ALLOCATION* PDRSD_DDI_DESCRIBE_ALLOCATION;
+
+typedef enum{
+    DRSD_D3D_STANDARD_ALLOCATION_SHARED_PRIMARY_SURFACE = 1,
+    DRSD_D3D_STANDARD_ALLOCATION_SHADOW_SURFACE,
+    DRSD_D3D_STANDARD_ALLOCATION_STAGING_SURFACE,
+    DRSD_D3D_STANDARD_ALLOCATION_GDI_SURFACE,
+    DRSD_D3D_STANDARD_ALLOCATION_VGPU,
+    DRSD_D3D_STANDARD_ALLOCATION_FENCE_STORAGE,
+}DRSD_D3D_STANDARD_ALLOCATION_TYPE;
+
+typedef UINT D3DDDI_VIDEO_PRESENT_SOURCE_ID;
+
+
+typedef struct _DRSD_D3D_SHARED_PRIMARY_SURFACE_DATA{
+    UINT                            Width;
+    UINT                            Height;
+    D3DDDIFORMAT                    Format;
+    D3DDDI_RATIONAL                 RefreshRate;
+    D3DDDI_VIDEO_PRESENT_SOURCE_ID  VidPnSourceId;
+}DRSD_D3D_SHARED_PRIMARY_SURFACE_DATA, * PDRSD_D3D_SHARED_PRIMARY_SURFACE_DATA;
+
+typedef struct _DRSD_D3D_SHADOW_SURFACE_DATA{
+    UINT            Width;
+    UINT            Height;
+    D3DDDIFORMAT    Format;
+    UINT            Pitch;
+}DRSD_D3D_SHADOW_SURFACE_DATA, * PDRSD_D3D_SHADOW_SURFACE_DATA;
+
+typedef struct _DRSD_D3D_STAGING_SURFACE_DATA{
+    UINT    Width;
+    UINT    Height;
+    UINT    Pitch;
+}DRSD_D3D_STAGING_SURFACE_DATA, * PDRSD_D3D_STAGING_SURFACE_DATA;
+
+typedef enum{
+    DRSD_D3D_GDI_SURFACE_INVALID = 0,
+    DRSD_D3D_GDI_SURFACE_TEXTURE,
+    DRSD_D3D_GDI_SURFACE_STAGING_CPUVISIBLE,
+    DRSD_D3D_GDI_SURFACE_STAGING,
+    DRSD_D3D_GDI_SURFACE_LOOKUPTABLE,
+    DRSD_D3D_GDI_SURFACE_EXISTINGSYSMEM,
+    DRSD_D3D_GDI_SURFACE_TEXTURE_CPUVISIBLE,
+    DRSD_D3D_GDI_SURFACE_TEXTURE_CROSSADAPTER,
+    DRSD_D3D_GDI_SURFACE_TEXTURE_CPUVISIBLE_CROSSADAPTER,
+}DRSD_D3D_GDI_SURFACE_TYPE;
+
+typedef struct _DRSD_D3D_GDI_SURFACE_FLAGS{
+    union{
+        struct{
+            UINT    Reserved : 32;
+        };
+        UINT        Value;
+    };
+}DRSD_D3D_GDI_SURFACE_FLAGS, * PDRSD_D3D_GDI_SURFACE_FLAGS;
+
+typedef struct _DRSD_D3D_GDI_SURFACE_DATA{
+    UINT                        Width;
+    UINT                        Height;
+    D3DDDIFORMAT                Format;
+    DRSD_D3D_GDI_SURFACE_TYPE   Type;
+    DRSD_D3D_GDI_SURFACE_FLAGS  Flags;
+    UINT                        Pitch;
+}DRSD_D3D_GDI_SURFACE_DATA, * PDRSD_D3D_GDI_SURFACE_DATA;
+
+typedef struct _DRSD_D3D_VIRTUAL_GPU_SURFACE_DATA{
+    UINT64  Size;
+    UINT    Alignment;
+    UINT    DriverSegmentId;
+    UINT    PrivateDriverData;
+}DRSD_D3D_VIRTUAL_GPU_SURFACE_DATA, * PDRSD_D3D_VIRTUAL_GPU_SURFACE_DATA;
+
+typedef enum{
+    DRSD_ARG_FENCE_STORAGE_VALUE_TYPE_CURRENT_VALUE = 0,   
+    DRSD_ARG_FENCE_STORAGE_VALUE_TYPE_MONITORED_VALUE,   
+}DRSD_ARG_FENCE_STORAGE_VALUE_TYPE;
+
+typedef enum{
+    D3DDDI_NATIVE_FENCE_TYPE_DEFAULT = 0,
+    D3DDDI_NATIVE_FENCE_TYPE_INTRA_GPU,
+}D3DDDI_NATIVE_FENCE_TYPE;
+
+typedef struct _DRSD_ARG_FENCE_STORAGE_FLAGS{
+    UINT    Reserved;
+}DRSD_ARG_FENCE_STORAGE_FLAGS, * PDRSD_ARG_FENCE_STORAGE_FLAGS;
+
+typedef struct _DRSD_D3D_FENCE_STORAGE_SURFACE_DATA{
+    UINT                                PhyscialAdapterIndex;
+    DRSD_ARG_FENCE_STORAGE_VALUE_TYPE   FenceStorageValueType;
+    D3DDDI_NATIVE_FENCE_TYPE            FenceStorageType;
+    DRSD_ARG_FENCE_STORAGE_FLAGS        Flags;
+    UINT                                Reserved;
+    DRSD_ALLOCATION_INFO                AllocationInfo;
+}DRSD_D3D_FENCE_STORAGE_SURFACE_DATA, * PDRSD_D3D_FENCE_STORAGE_SURFACE_DATA;
+
+typedef struct _DRSD_ARG_GET_STANDARD_ALLOCATION_DRIVER_DATA{
+    DRSD_D3D_STANDARD_ALLOCATION_TYPE           StandardAllocationType;
+    union{
+        PDRSD_D3D_SHARED_PRIMARY_SURFACE_DATA   CreateSharedPrimarySurfaceData;
+        PDRSD_D3D_SHADOW_SURFACE_DATA           CreateShadowSurfaceData;
+        PDRSD_D3D_STAGING_SURFACE_DATA          CreateStagingSurfaceData;
+        PDRSD_D3D_GDI_SURFACE_DATA              CreateGdiSurfaceData;
+        PDRSD_D3D_VIRTUAL_GPU_SURFACE_DATA      CreateVirtualGpuSurfaceData;
+        PDRSD_D3D_FENCE_STORAGE_SURFACE_DATA    CreateFenceStorageData;
+    };
+    PVOID                                       AllocationPrivateDriverData;
+    UINT                                        AllocationPrivateDriverDataSize;
+    PVOID                                       ResourcePrivateDriverData;
+    UINT                                        ResourcePrivateDriverDataSize;
+    UINT                                        PhyscialAdapterIndex;
+}DRSD_ARG_GET_STANDARD_ALLOCATION_DRIVER_DATA, * PDRSD_ARG_GET_STANDARD_ALLOCATION_DRIVER_DATA;
+
+typedef LOUSTATUS DRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA(HANDLE, PDRSD_ARG_GET_STANDARD_ALLOCATION_DRIVER_DATA);
+typedef DRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA* PDRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA;
+
 typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
-    ULONG                               Version;
-    PDRSD_DDI_ADD_DEVICE                DrsdDdiAddDevice;
-    PDRSD_DDI_START_DEVICE              DrsdDdiStartDevice;
-    PDRSD_DDI_STOP_DEVICE               DrsdDdiStopDevice;
-    PDRSD_DDI_REMOVE_DEVICE             DrsdDdiRemoveDevice;
-    PDRSD_DDI_DISPATCH_IO_REQUEST       DrsdDdiDispatchIoRequest;
-    PDRSD_DDI_INTERRUPT_ROUTINE         DrsdDdiInterruptRoutine;
-    PDRSD_DDI_DPC_ROUTINE               DrsdDdiDpcRoutine;
-    PDRSD_DDI_QUERY_CHILD_RELATIONS     DrsdDdiQueryChildRelations;
-    PDRSD_DDI_QUERY_CHILD_STATUS        DrsdDdiQueryChildStatus;
-    PDRSD_DDI_QUERY_DEVICE_DESCRIPTOR   DrsdDdiQueryDeviceDescriptor;
-    PDRSD_DDI_SET_POWER_STATE           DrsdDdiSetPowerState;
-    PDRSD_DDI_NOTIFY_ACPI_EVENT         DrsdDdiNotifyAcpiEvent;
-    PDRSD_DDI_RESET_DEVICE              DrsdDdiResetDevice;
-    PDRSD_DDI_UNLOAD                    DrsdDdiUnload;
-    PDRSD_DDI_QUERY_INTERFACE           DrsdDdiQueryInterface;
-    PDRSD_DDI_CONTROL_ETW_LOGGING       DrsdDdiControlEtwLogging;
-    PDRSD_DDI_QUERY_ADAPTER_INFO        DrsdDdiQueryAdapterInfo;
-    PDRSD_DDI_CREATE_DEVICE             DrsdDdiCreateDevice;
-    PDRSD_DDI_CREATE_ALLOCATION         DrsdDdiCreateAllocation;
-    //PDXGKDDI_DESTROYALLOCATION
+    ULONG                                           Version;
+    PDRSD_DDI_ADD_DEVICE                            DrsdDdiAddDevice;
+    PDRSD_DDI_START_DEVICE                          DrsdDdiStartDevice;
+    PDRSD_DDI_STOP_DEVICE                           DrsdDdiStopDevice;
+    PDRSD_DDI_REMOVE_DEVICE                         DrsdDdiRemoveDevice;
+    PDRSD_DDI_DISPATCH_IO_REQUEST                   DrsdDdiDispatchIoRequest;
+    PDRSD_DDI_INTERRUPT_ROUTINE                     DrsdDdiInterruptRoutine;
+    PDRSD_DDI_DPC_ROUTINE                           DrsdDdiDpcRoutine;
+    PDRSD_DDI_QUERY_CHILD_RELATIONS                 DrsdDdiQueryChildRelations;
+    PDRSD_DDI_QUERY_CHILD_STATUS                    DrsdDdiQueryChildStatus;
+    PDRSD_DDI_QUERY_DEVICE_DESCRIPTOR               DrsdDdiQueryDeviceDescriptor;
+    PDRSD_DDI_SET_POWER_STATE                       DrsdDdiSetPowerState;
+    PDRSD_DDI_NOTIFY_ACPI_EVENT                     DrsdDdiNotifyAcpiEvent;
+    PDRSD_DDI_RESET_DEVICE                          DrsdDdiResetDevice;
+    PDRSD_DDI_UNLOAD                                DrsdDdiUnload;
+    PDRSD_DDI_QUERY_INTERFACE                       DrsdDdiQueryInterface;
+    PDRSD_DDI_CONTROL_ETW_LOGGING                   DrsdDdiControlEtwLogging;
+    PDRSD_DDI_QUERY_ADAPTER_INFO                    DrsdDdiQueryAdapterInfo;
+    PDRSD_DDI_CREATE_DEVICE                         DrsdDdiCreateDevice;
+    PDRSD_DDI_CREATE_ALLOCATION                     DrsdDdiCreateAllocation;
+    PDRSD_DDI_DESTROY_ALLOCATION                    DrsdDdiDestroyAllocation;
+    PDRSD_DDI_DESCRIBE_ALLOCATION                   DrsdDdiDescribeAllocation;
+    PDRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA   DrsdDdiGetStandardAllocationDriverData;
+    //PDXGKDDI_ACQUIRESWIZZLINGRANGE
 }DRSD_DRIVER_INITIALIZATION_DATA, * PDRSD_DRIVER_INITIALIZATION_DATA;
 
 #ifndef _USER_MODE_CODE_

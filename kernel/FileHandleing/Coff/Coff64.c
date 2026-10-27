@@ -660,7 +660,7 @@ LOUSTATUS LouKeLoadCoffImage64(
 
     EnableCoffImageProtection(CfiObject);
         
-    LouPrint("PE Loaded At Address:%h\n", CfiObject->LoadedAddress);
+    LouPrint("%s Loaded At Address:%h\n", CfiObject->FormalName, CfiObject->LoadedAddress);
 
     return STATUS_SUCCESS;
 }

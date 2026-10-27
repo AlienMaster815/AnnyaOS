@@ -2,6 +2,57 @@
 
 #include "Xhci.h"
 
+LOUSTATUS XhciResetHcdDevice(PUSB_HCD_OBJECT Hcd);
+LOUSTATUS XhciStartHcdDevice(PUSB_HCD_OBJECT Hcd);
+LOUSTATUS XhciStopHcdDevice(PUSB_HCD_OBJECT Hcd);
+LOUSTATUS XhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
+LOUSTATUS XhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
+
+
+RHPORT_STATUS XhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+LOUSTATUS XhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+LOUSTATUS XhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+
+LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
+LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
+
+static LOUSINE_DMA_DEVICE Xhci32BitBusMasterDevice = {
+    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
+    .MaxScatterCount = 8320,
+    .AllocatorData = {
+        .DmaLimit = 32,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
+
+static LOUSINE_DMA_DEVICE Xhci64BitBusMasterDevice = {
+    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
+    .MaxScatterCount = 8320,
+    .AllocatorData = {
+        .DmaLimit = 64,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
+
+
+static USB_HCD_OPERATIONS XhciHcdOperations = {
+    //Host Operations
+    .ResetHcdDevice = XhciResetHcdDevice,
+    .StartHcdDevice = XhciStartHcdDevice,
+    .StopHcdDevice = XhciStopHcdDevice,
+    .HcdCreateEndpoint = XhciHcdCreateEndpoint,
+    .HcdDestroyEndpoint = XhciHcdDestroyEndpoint,
+    //Roothub Operations
+    .GetHcdRhPortStatus = XhciGetHcdRhPortStatus,
+    .ResetRhPort = XhciResetRhPort,
+    .StartRhPort = XhciStartRhPort,
+    .StopRhPort = XhciStopRhPort,
+    //Transfer Operations
+    .PrepTransfer = XhciPrepTransfer,
+    .CommitTransfer = XhciCommitTransfer,
+};
+
 LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
     {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .GenericEntry = true},
     {0},
@@ -23,7 +74,7 @@ LOUSTATUS AddDevice(
 
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    //while(1);
+    while(1);
     return STATUS_SUCCESS;
 }
 
