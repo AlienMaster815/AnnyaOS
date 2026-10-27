@@ -5,12 +5,6 @@
 #include <LouDDK.h>
 #include <usb.h>
 
-
-#endif
-
-
-/*
-
 //ASYNC for controll and bulk
 //ISOCH for Interrupt and periodic
 
@@ -1710,7 +1704,6 @@ typedef struct _XHCI_ERDP_VA_POINTER{
 
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT              PDEV;
-    USB_HOST_DEVICE                 HostDevice;
     PXHCI_CAPABILITIES_REGISTER     CapRegisters;
     PXHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
     PXHCI_DOORBELL_REGISTERS        DoorbellRegisters;
@@ -1727,9 +1720,12 @@ typedef struct _XHCI_DEVICE{
     ListHeader                      VirtualErdpAddresses;
 }XHCI_DEVICE, * PXHCI_DEVICE;
 
-static inline PXHCI_DEVICE LouKeUsbHostDeviceToXhciDevice(PUSB_HOST_DEVICE HostDevice){
-    return (PXHCI_DEVICE)CONTAINER_OF(HostDevice, XHCI_DEVICE, HostDevice);
-}
+#endif
+
+
+/*
+
+
 
 LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciAllocateDmaMemory32(SIZE Size, SIZE Alignment, PVOID Out);
