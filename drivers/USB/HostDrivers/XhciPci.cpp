@@ -17,24 +17,6 @@ LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
 
-static LOUSINE_DMA_DEVICE Xhci32BitBusMasterDevice = {
-    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
-    .MaxScatterCount = 8320,
-    .AllocatorData = {
-        .DmaLimit = 32,
-        .DmaThreshold = 64 * KILOBYTE,
-    },
-};
-
-static LOUSINE_DMA_DEVICE Xhci64BitBusMasterDevice = {
-    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
-    .MaxScatterCount = 8320,
-    .AllocatorData = {
-        .DmaLimit = 64,
-        .DmaThreshold = 64 * KILOBYTE,
-    },
-};
-
 
 static USB_HCD_OPERATIONS XhciHcdOperations = {
     //Host Operations
@@ -71,7 +53,47 @@ LOUSTATUS AddDevice(
     struct _DEVICE_OBJECT* PlatformDevice
 ){
     LouPrint("XHCI.SYS::AddDevice()\n");
+    LOUSTATUS Status;
+    PXHCI_DEVICE NewXhciDevice = LouKeMallocType(XHCI_DEVICE, KERNEL_GENERIC_MEMORY);
+    PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
+    NewXhciDevice->PDEV = PDEV;
 
+    PciHalEnableMemorySpace(PDEV);
+
+    PciHalEnableBusMaster(PDEV);
+    
+    PciHalMapPciResource(PDEV, XHCI_MMIO_REGISTERS_BAR, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
+
+    NewXhciDevice->CapRegisters = (PXHCI_CAPABILITIES_REGISTER)PciHalGetIoRegion(PDEV, XHCI_MMIO_REGISTERS_BAR, XHCI_MMIO_REGISTERS_OFFSET);
+
+    LouPrint("XHCI.SYS:CAP_REG:%h\n", NewXhciDevice->CapRegisters);
+
+    NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
+    NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
+    NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
+
+    XhciGetCapabilities(NewXhciDevice);
+    
+    PLOUSINE_DMA_DEVICE DmaDevice;
+    Status = XhciInitializeMemoryManagement(NewXhciDevice, &DmaDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS::AddDevice():XhciInitializeMemoryManagement():FAILED\n");
+        while(1);
+    }    
+
+    //TODO: Initialize Interrupts    
+
+    Status = UsbCoreCreateHcdObject(
+        NewXhciDevice->PDEV,
+        USBHCD_FLAGS_SET_VERSION(3),
+        NewXhciDevice,
+        DmaDevice,
+        &XhciHcdOperations
+    );
+    if(Status != STATUS_SUCCESS){
+        LouKeFree(NewXhciDevice);
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
     while(1);
@@ -97,17 +119,6 @@ LOUSTATUS DriverEntry(
     return STATUS_SUCCESS;
 }
 /*
-static const USB_HOST_OPERATIONS XhciOperations = {
-    .UsbHcdResetHostController = XhciResetHostController,
-    .UsbHcdStopHostController = XhciStopHostController,
-    .UsbHcdStartHostController = XhciStartHostController,
-    .UsbHcdProbeRootHub = XhciProbeRootHub,
-    .UsbHcdCommitRequest = XhciCommitRequest,
-};
-
-
-
-
 LOUSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
     struct _DEVICE_OBJECT* PlatformDevice

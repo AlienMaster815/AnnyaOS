@@ -1693,9 +1693,6 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
 
 //slot management at 94
 
-typedef LOUSTATUS (*XHCI_ALLOCATION_FUNCTION)(SIZE, SIZE, PVOID*);
-typedef void (*XHCI_FREE_FUNCTION)(PVOID);
-
 typedef struct _XHCI_ERDP_VA_POINTER{
     ListHeader                              Peers;
     PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY    TableEntry;
@@ -1709,8 +1706,6 @@ typedef struct _XHCI_DEVICE{
     PXHCI_DOORBELL_REGISTERS        DoorbellRegisters;
     PXHCI_RUNTIME_REGISTERS         RuntimeRegisters;
     XHCI_DEVICE_OBJECT_CAPABILITIES Capabilities;
-    XHCI_ALLOCATION_FUNCTION        XhciAllocationFunction;
-    XHCI_FREE_FUNCTION              XhciFreeFunction;
     XARRAY                          DeviceContexts;
     PVOID                           VirtualScratchpadAddress;
     PVOID                           VirtualScratchpadArrayAddress;
@@ -1720,26 +1715,23 @@ typedef struct _XHCI_DEVICE{
     ListHeader                      VirtualErdpAddresses;
 }XHCI_DEVICE, * PXHCI_DEVICE;
 
-#endif
+LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
+LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device, PLOUSINE_DMA_DEVICE* DmaDevice);
 
+
+
+#endif
 
 /*
 
 
 
-LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciAllocateDmaMemory32(SIZE Size, SIZE Alignment, PVOID Out);
 LOUSTATUS XhciAllocateDmaMemory64(SIZE Size, SIZE Alignment, PVOID Out);
 LOUSTATUS XhciAllocateDmaMemory(PXHCI_DEVICE Device, SIZE Size, SIZE Alignment, PVOID* Out);
-LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device);
 UINT64 XhciGetDmaAddress(PVOID Address);
 LOUSTATUS XhciInitializeDevice(PXHCI_DEVICE Device);
 
-LOUSTATUS XhciResetHostController(PUSB_HOST_DEVICE HostDevice);
-LOUSTATUS XhciStopHostController(PUSB_HOST_DEVICE HostDevice);
-LOUSTATUS XhciStartHostController(PUSB_HOST_DEVICE HostDevice);
-LOUSTATUS XhciProbeRootHub(PUSB_HOST_DEVICE HostDevice);
-LOUSTATUS XhciCommitRequest(PUSB_HOST_IO_PACKET IoPacket);
 
 void XhciInterruptHandler(uint64_t UsbHostData);
 

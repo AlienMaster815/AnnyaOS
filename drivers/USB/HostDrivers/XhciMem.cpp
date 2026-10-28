@@ -1,5 +1,39 @@
-/*
 #include "Xhci.h"
+
+static LOUSINE_DMA_DEVICE Xhci32BitBusMasterDevice = {
+    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
+    .MaxScatterCount = 8320,
+    .AllocatorData = {
+        .DmaLimit = 32,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
+
+static LOUSINE_DMA_DEVICE Xhci64BitBusMasterDevice = {
+    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
+    .MaxScatterCount = 8320,
+    .AllocatorData = {
+        .DmaLimit = 64,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
+
+LOUSTATUS XhciInitializeMemoryManagement(
+    PXHCI_DEVICE            Device,
+    PLOUSINE_DMA_DEVICE*    DmaDevice
+){
+    if((!Device) || (!DmaDevice)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    if(Device->Capabilities.Dma64Supported){
+        *DmaDevice = &Xhci64BitBusMasterDevice;
+    }else{
+        *DmaDevice = &Xhci32BitBusMasterDevice;
+    }
+    return STATUS_SUCCESS;
+}
+
+/*
 
 LOUSTATUS
 XhciAllocateDmaMemory32(
@@ -72,23 +106,5 @@ UINT64 XhciGetDmaAddress(
     return Result;
 }
 
-LOUSTATUS XhciInitializeMemoryManagement(
-    PXHCI_DEVICE Device
-){
-    if(!Device){
-        return STATUS_INVALID_PARAMETER;
-    }
 
-    if(Device->Capabilities.Dma64Supported){
-        Device->XhciAllocationFunction = XhciAllocateDmaMemory64;
-        Device->XhciFreeFunction = XhciFreeDmaMemory64;
-    }else{
-        Device->XhciAllocationFunction = XhciAllocateDmaMemory32;
-        Device->XhciFreeFunction = XhciFreeDmaMemory32;
-    }
-
-
-
-    return STATUS_SUCCESS;
-}
 */
