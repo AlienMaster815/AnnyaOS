@@ -1,5 +1,5 @@
 #Copyright GPL-2 Tyler Grenier (2026)
-INCLUDES = -I../../include
+INCLUDES = -I../../include -I ../../include/drivers/acpi -I ../../include/ACPICA
 TARGET = VMCORE.SYS
 SRC = VmCore.c \
 		AmdVi.c

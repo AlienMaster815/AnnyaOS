@@ -1,6 +1,6 @@
 #include "ScsiCore.h"
 
-static LouKeXaDefine(ScsiHostDriverArray);
+static DEFINE_XARRAY(ScsiHostDriverArray);
 static ListHeader ScsiHostDriverList = {0};
 static mutex_t ScsiHostDriverListLock = {0};
 

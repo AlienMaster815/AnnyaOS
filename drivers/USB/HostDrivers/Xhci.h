@@ -15,16 +15,16 @@
 #define XHCI_MMIO_REGISTERS_OFFSET  0
 
 typedef struct PACKED _XHCI_CAPABILITIES_REGISTER{
-    UINT8       CapLength;
-    UINT8       Reserved1;
-    UINT16      HciVersion;
-    UINT32      HcsParams1;
-    UINT32      HcsParams2;
-    UINT32      HcsParams3;
-    UINT32      HccParams1;
-    UINT32      DoorbellOffset;
-    UINT32      RuntimeRegOfffset;
-    UINT32      HccParams2;
+    volatile UINT8       CapLength;
+    volatile UINT8       Reserved1;
+    volatile UINT16      HciVersion;
+    volatile UINT32      HcsParams1;
+    volatile UINT32      HcsParams2;
+    volatile UINT32      HcsParams3;
+    volatile UINT32      HccParams1;
+    volatile UINT32      DoorbellOffset;
+    volatile UINT32      RuntimeRegOfffset;
+    volatile UINT32      HccParams2;
 }XHCI_CAPABILITIES_REGISTER, * PXHCI_CAPABILITIES_REGISTER;
 
 //HCSPARAMS1
@@ -171,29 +171,27 @@ typedef struct PACKED _XHCI_CAPABILITIES_REGISTER{
 //HC Operational Registers
 
 typedef struct PACKED _XHCI_USB_PORT_REGISTER_SET{
-    UINT32                          PortStatusControl;
-    UINT32                          PortPMSC;
-    UINT32                          PortLI;
-    UINT32                          PortHLPMC;
+    volatile UINT32                          PortStatusControl;
+    volatile UINT32                          PortPMSC;
+    volatile UINT32                          PortLI;
+    volatile UINT32                          PortHLPMC;
 }XHCI_USB_PORT_REGISTER_SET, * PXHCI_USB_PORT_REGISTER_SET;
 
 typedef struct PACKED _XHCI_OPERATIONAL_REGISTERS{
-    UINT32                          UsbCommand;
-    UINT32                          UsbStatus;                      
-    UINT32                          PageSize;                       
-    UINT8                           ReservedZ1[0x13 - 0x0C];        
-    UINT32                          DncCtrl;
-    UINT64                          Crcr;
-    UINT8                           ReservedZ2[0x2F - 0x20];
-    UINT64                          Dcbaap;
-    UINT32                          Config;
-    UINT8                           ReservedZ3[0x03FF - 0x003C];
-    XHCI_USB_PORT_REGISTER_SET      Ports[];
+    volatile UINT32                          UsbCommand;
+    volatile UINT32                          UsbStatus;                      
+    volatile UINT32                          PageSize;                       
+    volatile UINT8                           ReservedZ1[0x13 - 0x0C];        
+    volatile UINT32                          DncCtrl;
+    volatile UINT64                          Crcr;
+    volatile UINT8                           ReservedZ2[0x2F - 0x20];
+    volatile UINT64                          Dcbaap;
+    volatile UINT32                          Config;
+    volatile UINT8                           ReservedZ3[0x03FF - 0x003C];
+    volatile XHCI_USB_PORT_REGISTER_SET      Ports[];
 }XHCI_OPERATIONAL_REGISTERS, * PXHCI_OPERATIONAL_REGISTERS;
 
-#define GET_XHCI_PAGE_SIZE(PageSize)        (2^(PageSize+12))
-
-#define GET_XHCI_OPERATIONAL_REGISTERS(Cap)         ((PXHCI_OPERATIONAL_REGISTERS)((UINT64)((PXHCI_CAPABILITIES_REGISTER)Cap)->CapLength + (UINT64)Cap))
+#define GET_XHCI_OPERATIONAL_REGISTERS(Cap)         ((PXHCI_OPERATIONAL_REGISTERS)((UINT64)(((PXHCI_CAPABILITIES_REGISTER)Cap)->CapLength) + (UINT64)Cap))
 
 //393
 
@@ -431,7 +429,7 @@ typedef struct PACKED _XHCI_OPERATIONAL_REGISTERS{
 #define XHCI_PORTEXSC_L1_TIMEOUT_xTNs(x)   (MIN(x, 0xFF) ? (MIN(x, 0xFF) * 256) : 128)
 
 typedef struct PACKED _XHCI_INTERUPT_REGISTER_SET{
-    UINT32  DWord[8];
+    volatile UINT32  DWord[8];
 }XHCI_INTERUPT_REGISTER_SET, * PXHCI_INTERUPT_REGISTER_SET;
 
 #define XHCI_INT_REG_SET_IP_DWord           0
@@ -480,12 +478,12 @@ typedef struct PACKED _XHCI_INTERUPT_REGISTER_SET{
 #define XHCI_INT_REG_SET_ERDP_HI            (XHCI_INT_REG_SET_ERDP_HI_MASK << XHCI_INT_REG_SET_ERDP_HI_SHIFT)
 
 typedef struct PACKED _XHCI_INTERUPT_REGISTER{
-    UINT32      Iman;
-    UINT32      Imod;
-    UINT32      Erstsz;
-    UINT32      Rsvdp;
-    UINT64      Erstba;
-    UINT64      Erdp;
+    volatile UINT32      Iman;
+    volatile UINT32      Imod;
+    volatile UINT32      Erstsz;
+    volatile UINT32      Rsvdp;
+    volatile UINT64      Erstba;
+    volatile UINT64      Erdp;
 }XHCI_INTERUPT_REGISTER, * PXHCI_INTERUPT_REGISTER;
 
 #define XHCI_INT_REG_IMAN_IP_MASK       1
@@ -514,7 +512,7 @@ typedef struct PACKED _XHCI_INTERUPT_REGISTER{
 #define XHCI_INT_REG_ERDP_MASK          0xFFFFFFFFFFFFFFF0
 
 typedef struct PACKED _XHCI_DOORBELL_REGISTERS{
-    UINT32      Doorbell[256];
+    volatile UINT32      Doorbell[256];
 }XHCI_DOORBELL_REGISTERS, * PXHCI_DOORBELL_REGISTERS;
 
 #define XHCI_GET_DOORBELL_REGISTERS(Cap)        (PXHCI_DOORBELL_REGISTERS)((UINTPTR)Cap + Cap->DoorbellOffset)
@@ -527,9 +525,9 @@ typedef struct PACKED _XHCI_DOORBELL_REGISTERS{
 #define XHCI_DOORBELL_TASK_ID                   (XHCI_DOORBELL_REG_DB_TARGET_MASK << XHCI_DOORBELL_REG_DB_TARGET_SHIFT)
 
 typedef struct PACKED _XHCI_RUNTIME_REGISTERS{
-    UINT32                  MicroFrameIndex;
-    UINT8                   ReservedZ[0x1F - 0x04];
-    XHCI_INTERUPT_REGISTER  Irqx[];
+    volatile UINT32                  MicroFrameIndex;
+    volatile UINT8                   ReservedZ[0x1F - 0x04];
+    volatile XHCI_INTERUPT_REGISTER  Irqx[];
 }XHCI_RUNTIME_REGISTERS, * PXHCI_RUNTIME_REGISTERS;
 
 #define XHCI_GET_RUNTIME_REGISTERS(Cap)         (PXHCI_RUNTIME_REGISTERS)((UINTPTR)Cap + Cap->RuntimeRegOfffset)
@@ -537,13 +535,13 @@ typedef struct PACKED _XHCI_RUNTIME_REGISTERS{
 #define XHCI_RUNTIME_REG_MAX_IRQS           1023
 
 typedef struct PACKED _XHCI_VTIO_REGISTERS{
-    UINT32      VtioCap;
-    UINT32      VtioCa;
-    UINT32      VtioDa[8];
-    UINT8       Rsvdp[0x2F - 0x28];
-    UINT32      VtioIa[32];
-    UINT8       Rsvdz[0xFF - 0xB0];
-    UINT32      VtioEa[255];
+    volatile UINT32      VtioCap;
+    volatile UINT32      VtioCa;
+    volatile UINT32      VtioDa[8];
+    volatile UINT8       Rsvdp[0x2F - 0x28];
+    volatile UINT32      VtioIa[32];
+    volatile UINT8       Rsvdz[0xFF - 0xB0];
+    volatile UINT32      VtioEa[255];
 }XHCI_VTIO_REGISTERS, * PXHCI_VTIO_REGISTERS;
 
 #define XHCI_VTIOCAP_PDMAID_MASK            0xFFFF
@@ -624,9 +622,9 @@ typedef struct PACKED _XHCI_VTIO_REGISTERS{
 //#define XHCI_SCRATCHPAD_BUFFERS_ALIGNMENT                 PAGE
 
 typedef struct PACKED _XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY{
-    UINT64  SegmentBuffer;
-    UINT16  SegmentSize;
-    UINT8   Reserved[6];
+    volatile UINT64  SegmentBuffer;
+    volatile UINT16  SegmentSize;
+    volatile UINT8   Reserved[6];
 }XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY, * PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY;
 
 
@@ -634,7 +632,7 @@ typedef struct PACKED _XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY{
 #define XHCI_DEVICE_CONTEXT_BASE_ADDRESS_ARRAY_ALLOCATION_SIZE(MaxSlotsEn) ((MaxSlotsEn + 1) * sizeof(UINT64))
 
 typedef struct PACKED _XHCI_SLOT_CONTEXT{
-    UINT32      DWord[8];
+    volatile UINT32      DWord[8];
 }XHCI_SLOT_CONTEXT, * PXHCI_SLOT_CONTEXT;
 
 //offset 0
@@ -688,7 +686,7 @@ typedef struct PACKED _XHCI_SLOT_CONTEXT{
 #define XHCI_SLOT_CONTEXT_SLOT_STATE                (XHCI_SLOT_CONTEXT_SLOT_STATE_MASK << XHCI_SLOT_CONTEXT_SLOT_STATE_SHIFT)
 
 typedef struct PACKED _XHCI_ENDPOINT_CONTEXT{
-    UINT32      DWord[8];
+    volatile UINT32      DWord[8];
 }XHCI_ENDPOINT_CONTEXT, * PXHCI_ENDPOINT_CONTEXT;
 
 //offset 0
@@ -742,7 +740,7 @@ typedef struct PACKED _XHCI_ENDPOINT_CONTEXT{
 #define XHCI_ENDPOINT_CONTEXT_MAX_ESIT_LO           (XHCI_ENDPOINT_CONTEXT_MAX_ESIT_LO_MASK << XHCI_ENDPOINT_CONTEXT_MAX_ESIT_LO_SHIFT)
 
 typedef struct PACKED _XHCI_STREAM_CONTEXT{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_STREAM_CONTEXT, * PXHCI_STREAM_CONTEXT;
 
 //offset 0
@@ -766,13 +764,13 @@ typedef struct PACKED _XHCI_STREAM_CONTEXT{
 #define XHCI_DEVICE_CONTEXT_TO_EPx_OUT(Ctx, x)      (&Ctx->EpX[XHCI_DEVICE_CONTEXT_EP_OUT][x])
 
 typedef struct PACKED _XHCI_DEVICE_CONTEXT{
-    XHCI_SLOT_CONTEXT       SlotContext;
-    XHCI_ENDPOINT_CONTEXT   Ep0BiDir;
-    XHCI_ENDPOINT_CONTEXT   EpX[][2];
+    volatile XHCI_SLOT_CONTEXT       SlotContext;
+    volatile XHCI_ENDPOINT_CONTEXT   Ep0BiDir;
+    volatile XHCI_ENDPOINT_CONTEXT   EpX[][2];
 }XHCI_DEVICE_CONTEXT, * PXHCI_DEVICE_CONTEXT;
 
 typedef struct PACKED _XHCI_INPUT_CONTROL_CONTEXT{
-    UINT32      DWord[8];
+    volatile UINT32      DWord[8];
 }XHCI_INPUT_CONTROL_CONTEXT, * PXHCI_INPUT_CONTROL_CONTEXT;
 
 //offset 0
@@ -800,10 +798,10 @@ typedef struct PACKED _XHCI_INPUT_CONTROL_CONTEXT{
 #define XHCI_INPUT_CONTEXT_TO_EPx_OUT(Ctx, x)               (&Ctx->EpX[XHCI_INPUT_CONTEXT_EP_OUT][x])
 
 typedef struct PACKED _XHCI_INPUT_CONTEXT{
-    XHCI_INPUT_CONTROL_CONTEXT      InputControlContext;
-    XHCI_SLOT_CONTEXT               Slot;
-    XHCI_ENDPOINT_CONTEXT           Ep0;
-    XHCI_ENDPOINT_CONTEXT           EpX[][2];
+    volatile XHCI_INPUT_CONTROL_CONTEXT      InputControlContext;
+    volatile XHCI_SLOT_CONTEXT               Slot;
+    volatile XHCI_ENDPOINT_CONTEXT           Ep0;
+    volatile XHCI_ENDPOINT_CONTEXT           EpX[][2];
 }XHCI_INPUT_CONTEXT, * PXHCI_INPUT_CONTEXT;
 
 typedef UINT32 XHCI_PORT_BANDWIDTH_CONTEXT;
@@ -815,7 +813,7 @@ typedef XHCI_PORT_BANDWIDTH_CONTEXT* PXHCI_PORT_BANDWIDTH_CONTEXT;
 #define XHCI_PORT_BANDWIDTH_CONTEXT_PORTx(x)                (XHCI_PORT_BANDWIDTH_CONTEXT_PORTx_MASK << XHCI_PORT_BANDWIDTH_CONTEXT_PORTx_SHIFT(x))
 
 typedef struct _XHCI_NORMAL_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_NORMAL_TRB, * PXHCI_NORMAL_TRB;
 
 //offset 0
@@ -868,7 +866,7 @@ typedef struct _XHCI_NORMAL_TRB{
 //control TRBs will have Setup then Data if required then Status TDs
 
 typedef struct PACKED _XHCI_SETUP_STAGE_TRB{
-    UINT32      DWord[4];
+    volatile UINT32      DWord[4];
 }XHCI_SETUP_STAGE_TRB, * PXHCI_SETUP_STAGE_TRB;
 
 //offset 0
@@ -916,7 +914,7 @@ typedef struct PACKED _XHCI_SETUP_STAGE_TRB{
 #define XHCI_SETUP_STAGE_TRB_TRANSFER_TYPE                  (XHCI_SETUP_STAGE_TRB_TRANSFER_TYPE_MASK << XHCI_SETUP_STAGE_TRB_TRANSFER_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_DATA_STAGE_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_DATA_STAGE_TRB, * PXHCI_DATA_STAGE_TRB;
 
 //offset 0
@@ -970,7 +968,7 @@ typedef struct PACKED _XHCI_DATA_STAGE_TRB{
 #define XHCI_DATA_STAGE_TRB_DIR                             (XHCI_DATA_STAGE_TRB_DIR_MASK << XHCI_DATA_STAGE_TRB_DIR_SHIFT)
 
 typedef struct PACKED _XHCI_STATUS_STAGE_TRB{
-    UINT32      DWord[4];
+    volatile UINT32      DWord[4];
 }XHCI_STATUS_STAGE_TRB, * PXHCI_STATUS_STAGE_TRB;
 
 //offset 8
@@ -999,7 +997,7 @@ typedef struct PACKED _XHCI_STATUS_STAGE_TRB{
 #define XHCI_STATUS_STAGE_TRB_DIR                           (XHCI_STATUS_STAGE_TRB_DIR_MASK << XHCI_STATUS_STAGE_TRB_DIR_SHIFT)
 
 typedef struct PACKED _XHCI_ISOCH_TRB{
-    UINT32      DWord[4];
+    volatile UINT32      DWord[4];
 }XHCI_ISOCH_TRB, * PXHCI_ISOCH_TRB;
 
 //offset 0
@@ -1065,7 +1063,7 @@ typedef struct PACKED _XHCI_ISOCH_TRB{
 #define XHCI_ISOCH_TRB_SIA                                  (XHCI_ISOCH_TRB_SIA_MASK << XHCI_ISOCH_TRB_SIA_SHIFT)
 
 typedef struct PACKED _XHCI_NO_OP_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_NO_OP_TRB, * PXHCI_NO_OP_TRB;
 
 //offset 8
@@ -1091,7 +1089,7 @@ typedef struct PACKED _XHCI_NO_OP_TRB{
 #define XHCI_NO_OP_TRB_TYPE                                 (XHCI_NO_OP_TRB_TYPE_MASK << XHCI_NO_OP_TRB_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_TRANSFER_EVENT_TRB{
-    UINT32      DWord[4];
+    volatile UINT32      DWord[4];
 }XHCI_TRANSFER_EVENT_TRB, * PXHCI_TRANSFER_EVENT_TRB;
 
 //offset 0
@@ -1130,7 +1128,7 @@ typedef struct PACKED _XHCI_TRANSFER_EVENT_TRB{
 #define XHCI_TRANSFER_EVENT_TRB_SLOT_ID                     (XHCI_TRANSFER_EVENT_TRB_SLOT_ID_MASK << XHCI_TRANSFER_EVENT_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_COMMAND_COMPLETION_EVENT{
-    UINT32      DWord[4];
+    volatile UINT32      DWord[4];
 }XHCI_COMMAND_COMPLETION_EVENT, * PXHCI_COMMAND_COMPLETION_EVENT;
 
 //offset 0
@@ -1166,7 +1164,7 @@ typedef struct PACKED _XHCI_COMMAND_COMPLETION_EVENT{
 #define XHCI_COMMAND_COMPLETION_EVENT_TRB_SLOT_ID                   (XHCI_COMMAND_COMPLETION_EVENT_TRB_SLOT_ID_MASK << XHCI_COMMAND_COMPLETION_EVENT_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_PORT_STATUS_CHANGE_EVENT_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_PORT_STATUS_CHANGE_EVENT_TRB, * PXHCI_PORT_STATUS_CHANGE_EVENT_TRB;
 
 //offset 0
@@ -1188,7 +1186,7 @@ typedef struct PACKED _XHCI_PORT_STATUS_CHANGE_EVENT_TRB{
 #define XHCI_PORT_STATUS_CHANGE_EVENT_TRB_TYPE                      (XHCI_PORT_STATUS_CHANGE_EVENT_TRB_TYPE_MASK << XHCI_PORT_STATUS_CHANGE_EVENT_TRB_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_BANDWIDTH_REQUEST_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_BANDWIDTH_REQUEST_TRB, * PXHCI_BANDWIDTH_REQUEST_TRB;
 
 //offset 8
@@ -1207,7 +1205,7 @@ typedef struct PACKED _XHCI_BANDWIDTH_REQUEST_TRB{
 #define XHCI_BANDWIDTH_REQUEST_TRB_SLOT_ID_SHIFT                    24
 
 typedef struct PACKED _XHCI_DOORBELL_EVENT_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_DOORBELL_EVENT_TRB, * PXHCI_DOORBELL_EVENT_TRB;
 
 //offset 0
@@ -1235,7 +1233,7 @@ typedef struct PACKED _XHCI_DOORBELL_EVENT_TRB{
 #define XHCI_DOORBELL_EVENT_TRB_SLOT_ID                             (XHCI_DOORBELL_EVENT_TRB_SLOT_ID_MASK << XHCI_DOORBELL_EVENT_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_HOST_CONTROLLER_EVENT_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_HOST_CONTROLLER_EVENT_TRB, * PXHCI_HOST_CONTROLLER_EVENT_TRB;
 
 //offset 8
@@ -1252,7 +1250,7 @@ typedef struct PACKED _XHCI_HOST_CONTROLLER_EVENT_TRB{
 #define XHCI_HOST_CONTROLLER_EVENT_TRB_TYPE                         (XHCI_HOST_CONTROLLER_EVENT_TRB_TYPE_MASK << XHCI_HOST_CONTROLLER_EVENT_TRB_TYPE_SHIFT)
 
 typedef struct _XHCI_DEVICE_NOTIFICATION_EVENT_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_DEVICE_NOTIFICATION_EVENT_TRB, * PXHCI_DEVICE_NOTIFICATION_EVENT_TRB;
 
 #define XHCI_DEVICE_NOTIFICATION_EVENT_TRB_NOTIFICATION_TYPE_MASK   0x0F
@@ -1279,7 +1277,7 @@ typedef struct _XHCI_DEVICE_NOTIFICATION_EVENT_TRB{
 #define XHCI_DEVICE_NOTIFICATION_EVENT_TRB_SLOT_ID                  (XHCI_DEVICE_NOTIFICATION_EVENT_TRB_SLOT_ID_MASK << XHCI_DEVICE_NOTIFICATION_EVENT_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_MFINDEX_WRAP_EVENT_TRB{
-    UINT32  DWord;
+    volatile UINT32  DWord;
 }XHCI_MFINDEX_WRAP_EVENT_TRB, * PXHCI_MFINDEX_WRAP_EVENT_TRB;
 
 //offset 8
@@ -1296,7 +1294,7 @@ typedef struct PACKED _XHCI_MFINDEX_WRAP_EVENT_TRB{
 #define XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE                            (XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE_MASK << XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_NO_OP_COMMAND_TRB{
-    UINT32 DWord[4];
+    volatile UINT32 DWord[4];
 }XHCI_NO_OP_COMMAND_TRB, * PXHCI_NO_OP_COMMAND_TRB;
 
 //offset 12
@@ -1308,7 +1306,7 @@ typedef struct PACKED _XHCI_NO_OP_COMMAND_TRB{
 #define XHCI_NO_OP_COMMAND_TRB_TYPE                                 (XHCI_NO_OP_COMMAND_TRB_TYPE_MASK << XHCI_NO_OP_COMMAND_TRB_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_ENABLE_SLOT_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_ENABLE_SLOT_COMMAND_TRB, * PXHCI_ENABLE_SLOT_COMMAND_TRB;
 
 //offset 12
@@ -1323,7 +1321,7 @@ typedef struct PACKED _XHCI_ENABLE_SLOT_COMMAND_TRB{
 #define XHCI_ENABLE_SLOT_COMMAND_TRB_SLOT_TYPE                      (XHCI_ENABLE_SLOT_COMMAND_TRB_SLOT_TYPE_MASK << XHCI_ENABLE_SLOT_COMMAND_TRB_SLOT_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_DISABLE_SLOT_TRB{
-    UINT32 DWord[4];
+    volatile UINT32 DWord[4];
 }XHCI_DISABLE_SLOT_TRB, * PXHCI_DISABLE_SLOT_TRB;
 
 //offset 12
@@ -1338,7 +1336,7 @@ typedef struct PACKED _XHCI_DISABLE_SLOT_TRB{
 #define XHCI_DISABLE_SLOT_TRB_SLOT_ID                               (XHCI_DISABLE_SLOT_TRB_SLOT_ID_MASK << XHCI_DISABLE_SLOT_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_ADDRESS_DEVICE_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_ADDRESS_DEVICE_COMMAND_TRB, * PXHCI_ADDRESS_DEVICE_COMMAND_TRB;   
 
 //offset 0
@@ -1366,7 +1364,7 @@ typedef struct PACKED _XHCI_ADDRESS_DEVICE_COMMAND_TRB{
 #define XHCI_ADDRESS_DEVICE_COMMAND_TRB_SLOT_ID                     (XHCI_ADDRESS_DEVICE_COMMAND_TRB_SLOT_ID_MASK << XHCI_ADDRESS_DEVICE_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_CONFIGURE_ENDPOINT_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_CONFIGURE_ENDPOINT_COMMAND_TRB, * PXHCI_CONFIGURE_ENDPOINT_COMMAND_TRB;
 
 //offset 0
@@ -1394,7 +1392,7 @@ typedef struct PACKED _XHCI_CONFIGURE_ENDPOINT_COMMAND_TRB{
 #define XHCI_CONFIGURE_ENDPOINT_COMMAND_TRB_SLOT_ID                 (XHCI_CONFIGURE_ENDPOINT_COMMAND_TRB_SLOT_ID_MASK << XHCI_CONFIGURE_ENDPOINT_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_EVALUATE_CONTEXT_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_EVALUATE_CONTEXT_COMMAND_TRB, * PXHCI_EVALUATE_CONTEXT_COMMAND_TRB;
 
 //offset 0
@@ -1419,7 +1417,7 @@ typedef struct PACKED _XHCI_EVALUATE_CONTEXT_COMMAND_TRB{
 #define XHCI_EVALUATE_CONTEXT_COMMAND_TRB_SLOT_ID                   (XHCI_EVALUATE_CONTEXT_COMMAND_TRB_SLOT_ID_MASK << XHCI_EVALUATE_CONTEXT_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_RESET_ENDPOINT_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_RESET_ENDPOINT_COMMAND_TRB, * PXHCI_RESET_ENDPOINT_COMMAND_TRB;
 
 //offset 12
@@ -1440,7 +1438,7 @@ typedef struct PACKED _XHCI_RESET_ENDPOINT_COMMAND_TRB{
 #define XHCI_RESET_ENDPOINT_COMMAND_TRB_SLOT_ID                     (XHCI_RESET_ENDPOINT_COMMAND_TRB_SLOT_ID_MASK << XHCI_RESET_ENDPOINT_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_STOP_ENDPOINT_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_STOP_ENDPOINT_COMMAND_TRB, * PXHCI_STOP_ENDPOINT_COMMAND_TRB;
 
 //offset 12
@@ -1464,7 +1462,7 @@ typedef struct PACKED _XHCI_STOP_ENDPOINT_COMMAND_TRB{
 #define XHCI_STOP_ENDPOINT_COMMAND_TRB_SLOT_ID                      (XHCI_STOP_ENDPOINT_COMMAND_TRB_SLOT_ID_MASK << XHCI_STOP_ENDPOINT_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_SET_TR_DQUEUE_PTR_COMMAND_TRB{
-    UINT32 DWord[4];
+    volatile UINT32 DWord[4];
 }XHCI_SET_TR_DQUEUE_PTR_COMMAND_TRB, * PXHCI_SET_TR_DQUEUE_PTR_COMMAND_TRB;
 
 //offset 0
@@ -1501,7 +1499,7 @@ typedef struct PACKED _XHCI_SET_TR_DQUEUE_PTR_COMMAND_TRB{
 #define XHCI_SET_TR_DEQUEUE_PTR_COMMAND_TRB_SLOT_ID                 (XHCI_SET_TR_DEQUEUE_PTR_COMMAND_TRB_SLOT_ID_MASK << XHCI_SET_TR_DEQUEUE_PTR_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_RESET_DEVICE_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_RESET_DEVICE_COMMAND_TRB, * PXHCI_RESET_DEVICE_COMMAND_TRB;
 
 #define XHCI_RESET_DEVICE_COMMAND_TRB_CYCLE_BIT_MASK                1
@@ -1518,7 +1516,7 @@ typedef struct PACKED _XHCI_RESET_DEVICE_COMMAND_TRB{
 
 //Latency Tolerence Value
 typedef struct PACKED _XHCI_LTV_COMMAND_TRB{
-    UINT32 DWord[4];
+    volatile UINT32 DWord[4];
 }XHCI_LTV_COMMAND_TRB, * PXHCI_LTV_COMMAND_TRB;
 
 //offset 12
@@ -1533,7 +1531,7 @@ typedef struct PACKED _XHCI_LTV_COMMAND_TRB{
 #define XHCI_LTV_COMMAND_TRB_BEST_EFFORT_LTV                        (XHCI_LTV_COMMAND_TRB_BEST_EFFORT_LTV_MASK << XHCI_LTV_COMMAND_TRB_BEST_EFFORT_LTV_SHIFT)
 
 typedef struct PACKED _XHCI_GET_PORT_BANDWIDTH_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_GET_PORT_BANDWIDTH_COMMAND_TRB, * PXHCI_GET_PORT_BANDWIDTH_COMMAND_TRB;
 
 //offset 0
@@ -1561,7 +1559,7 @@ typedef struct PACKED _XHCI_GET_PORT_BANDWIDTH_COMMAND_TRB{
 #define XHCI_GET_PORT_BANDWIDTH_COMMAND_TRB_HUB_SLOT_ID             (XHCI_GET_PORT_BANDWIDTH_COMMAND_TRB_HUB_SLOT_ID << XHCI_GET_PORT_BANDWIDTH_COMMAND_TRB_HUB_SLOT_ID_SHIFT)
 
 typedef struct _XHCI_FORCE_HEADER_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_FORCE_HEADER_COMMAND_TRB, * PXHCI_FORCE_HEADER_COMMAND_TRB;
 
 //offset 0
@@ -1594,7 +1592,7 @@ typedef struct _XHCI_FORCE_HEADER_COMMAND_TRB{
 #define XHCI_FORCE_HEADER_COMMAND_TRB_ROOTHUB_PORT_NUM              (XHCI_FORCE_HEADER_COMMAND_TRB_ROOTHUB_PORT_NUM_MASK << XHCI_FORCE_HEADER_COMMAND_TRB_ROOTHUB_PORT_NUM_SHIFT)
 
 typedef struct PACKED _XHCI_GET_EXT_PROPERTY_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_GET_EXT_PROPERTY_COMMAND_TRB, * PXHCI_GET_EXT_PROPERTY_COMMAND_TRB;
 
 //offset 0
@@ -1630,7 +1628,7 @@ typedef struct PACKED _XHCI_GET_EXT_PROPERTY_COMMAND_TRB{
 #define XHCI_GET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID                   (XHCI_GET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID_MASK << XHCI_GET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID_SHIFT)
 
 typedef struct PACKED _XHCI_SET_EXT_PROPERTY_COMMAND_TRB{
-    UINT32  DWord[4];
+    volatile UINT32  DWord[4];
 }XHCI_SET_EXT_PROPERTY_COMMAND_TRB, * PXHCI_SET_EXT_PROPERTY_COMMAND_TRB;
 
 //offset 8
@@ -1658,11 +1656,103 @@ typedef struct PACKED _XHCI_SET_EXT_PROPERTY_COMMAND_TRB{
 #define XHCI_SET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID_SHIFT             24
 #define XHCI_SET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID                   (XHCI_SET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID_MASK << XHCI_SET_EXT_PROPERTY_COMMAND_TRB_SLOT_ID_SHIFT)
 
+typedef struct _XHCI_LINK_TRB{
+    volatile UINT32 DWord[4]; 
+}XHCI_LINK_TRB, * PXHCI_LINK_TRB;
 
-//503
-//page 506 is the end of TRB
+//offset 8
+#define XHCI_LINK_TRB_INTERRUPTER_TARGET_MASK                       0x03FF
+#define XHCI_LINK_TRB_INTERRUPTER_TARGET_SHIFT                      22
+#define XHCI_LINK_TRB_INTERRUPTER_TARGET                            (XHCI_LINK_TRB_INTERRUPTER_TARGET_MASK << XHCI_LINK_TRB_INTERRUPTER_TARGET_SHIFT)
+
+//offset 12
+#define XHCI_LINK_TRB_CYCLE_BIT_MASK                                1
+#define XHCI_LINK_TRB_CYCLE_BIT_SHIFT                               0
+#define XHCI_LINK_TRB_CYCLE_BIT                                     (XHCI_LINK_TRB_CYCLE_BIT_MASK << XHCI_LINK_TRB_CYCLE_BIT_SHIFT)
+#define XHCI_LINK_TRB_CHAIN_BIT_MASK                                1
+#define XHCI_LINK_TRB_CHAIN_BIT_SHIFT                               4
+#define XHCI_LINK_TRB_CHAIN_BIT                                     (XHCI_LINK_TRB_CHAIN_BIT_MASK << XHCI_LINK_TRB_CHAIN_BIT_SHIFT)
+#define XHCI_LINK_TRB_IOC_MASK                                      1
+#define XHCI_LINK_TRB_IOC_SHIFT                                     5
+#define XHCI_LINK_TRB_IOC                                           (XHCI_LINK_TRB_IOC_MASK << XHCI_LINK_TRB_IOC_SHIFT)
+#define XHCI_LINK_TRB_TRB_TYPE_MASK                                 0x3F
+#define XHCI_LINK_TRB_TRB_TYPE_SHIFT                                19
+#define XHCI_LINK_TRB_TRB_TYPE                                      (XHCI_LINK_TRB_TRB_TYPE_MASK << XHCI_LINK_TRB_TRB_TYPE_SHIFT)
+
+
+typedef struct _XHCI_EVENT_DATA_TRB{
+    UINT32 DWord[4];
+}XHCI_EVENT_DATA_TRB, * PXHCI_EVENT_DATA_TRB;
+
+
+//8
+#define XHCI_EVENT_DATA_TRB_INTERRUPTER_TARGET_MASK                 0x03FF
+#define XHCI_EVENT_DATA_TRB_INTERRUPTER_TARGET_SHIFT                22
+#define XHCI_EVENT_DATA_TRB_INTERRUPTER_TARGET                      (XHCI_EVENT_DATA_TRB_INTERRUPTER_TARGET_MASK << XHCI_EVENT_DATA_TRB_INTERRUPTER_TARGET_SHIFT)
+
+//offset 12
+#define XHCI_EVENT_DATA_TRB_CYCLE_BIT_MASK                          1
+#define XHCI_EVENT_DATA_TRB_CYCLE_BIT_SHIFT                         0
+#define XHCI_EVENT_DATA_TRB_CYCLE_BIT                               (XHCI_EVENT_DATA_TRB_CYCLE_BIT_MASK << XHCI_EVENT_DATA_TRB_CYCLE_BIT_SHIFT)
+#define XHCI_EVENT_DATA_TRB_ENT_MASK                                1
+#define XHCI_EVENT_DATA_TRB_ENT_SHIFT                               1
+#define XHCI_EVENT_DATA_TRB_ENT                                     (XHCI_EVENT_DATA_TRB_ENT_MASK << XHCI_EVENT_DATA_TRB_ENT_SHIFT)
+#define XHCI_EVENT_DATA_TRB_CHAIN_BIT_MASK                          1
+#define XHCI_EVENT_DATA_TRB_CHAIN_BIT_SHIFT                         4
+#define XHCI_EVENT_DATA_TRB_CHAIN_BIT                               (XHCI_EVENT_DATA_TRB_CHAIN_BIT_MASK << XHCI_EVENT_DATA_TRB_CHAIN_BIT_SHIFT)
+#define XHCI_EVENT_DATA_TRB_IOC_MASK                                1
+#define XHCI_EVENT_DATA_TRB_IOC_SHIFT                               5
+#define XHCI_EVENT_DATA_TRB_IOC                                     (XHCI_EVENT_DATA_TRB_IOC_MASK << XHCI_EVENT_DATA_TRB_IOC_SHIFT)
+#define XHCI_EVENT_DATA_TRB_BEI_MASK                                1
+#define XHCI_EVENT_DATA_TRB_BEI_SHIFT                               9
+#define XHCI_EVENT_DATA_TRB_BEI                                     (XHCI_EVENT_DATA_TRB_BEI_MASK << XHCI_EVENT_DATA_TRB_BEI_SHIFT)
+#define XHCI_EVENT_DATA_TRB_TRB_TYPE_MASK                           0x3F
+#define XHCI_EVENT_DATA_TRB_TRB_TYPE_SHIFT                          10
+#define XHCI_EVENT_DATA_TRB_TRB_TYPE                                (XHCI_EVENT_DATA_TRB_TRB_TYPE_MASK << XHCI_EVENT_DATA_TRB_TRB_TYPE_SHIFT)
+
+
+//page 507
+#define XHCI_TRB_COMPLETION_CODE_INVALID                            0
+#define XHCI_TRB_COMPLETION_CODE_SUCCESS                            1
+#define XHCI_TRB_COMPLETION_CODE_DATA_BUFFER_ERROR                  2
+#define XHCI_TRB_COMPLETION_CODE_BABBLE_DETECTED_ERROR              3
+#define XHCI_TRB_COMPLETION_CODE_USB_TRANSACTION_ERROR              4
+#define XHCI_TRB_COMPLETION_CODE_TRB_ERROR                          5
+#define XHCI_TRB_COMPLETION_CODE_STALL_ERROR                        6
+#define XHCI_TRB_COMPLETION_CODE_RESOURCE_ERROR                     7
+#define XHCI_TRB_COMPLETION_CODE_BANDWIDTH_ERROR                    8
+#define XHCI_TRB_COMPLETION_CODE_NO_SLOTS_AVAILABLE_ERROR           9
+#define XHCI_TRB_COMPLETION_CODE_INVALID_STREAM_TYPE_ERROR          10
+#define XHCI_TRB_COMPLETION_CODE_SLOT_NOT_ENABLED_ERROR             11
+#define XHCI_TRB_COMPLETION_CODE_ENDPOINT_NOT_ENABLED_ERROR         12
+#define XHCI_TRB_COMPLETION_CODE_SHORT_PACKED                       13
+#define XHCI_TRB_COMPLETION_CODE_RING_UNDERUN                       14
+#define XHCI_TRB_COMPLETION_CODE_RING_OVERRUN                       15
+#define XHCI_TRB_COMPLETION_CODE_VF_EVENT_RING_FULL_ERROR           16
+#define XHCI_TRB_COMPLETION_CODE_PARAMETER_ERROR                    17
+#define XHCI_TRB_COMPLETION_CODE_BANDWIDTH_OVERRUN_ERROR            18
+#define XHCI_TRB_COMPLETION_CODE_CONTEXT_STATE_ERROR                19
+#define XHCI_TRB_COMPLETION_CODE_NO_PING_RESPONCE_ERROR             20
+#define XHCI_TRB_COMPLETION_CODE_EVENT_RING_FULL_ERROR              21
+#define XHCI_TRB_COMPLETION_CODE_INCOMPATIBLE_DEVICE_ERROR          22
+#define XHCI_TRB_COMPLETION_CODE_MISSED_SERVICE_ERROR               23
+#define XHCI_TRB_COMPLETION_CODE_COMMAND_RING_STOPPED               24
+#define XHCI_TRB_COMPLETION_CODE_COMMAND_ABORTED                    25
+#define XHCI_TRB_COMPLETION_CODE_STOPPED                            26
+#define XHCI_TRB_COMPLETION_CODE_STOPPED_LENGTH_INVALID             27
+#define XHCI_TRB_COMPLETION_CODE_STOPPED_SHORT_PACKET               28
+#define XHCI_TRB_COMPLETION_CODE_MAX_EXIT_LATENCY_TOO_LARGE_ERROR   29
+#define XHCI_TRB_COMPLETION_CODE_ISOCH_BUFFER_OVERRUN               31
+#define XHCI_TRB_COMPLETION_CODE_EVENT_LOST_ERROR                   32
+#define XHCI_TRB_COMPLETION_CODE_UNDEFINED_ERROR                    33
+#define XHCI_TRB_COMPLETION_CODE_INVALID_STREAM_ID_ERROR            34
+#define XHCI_TRB_COMPLETION_CODE_SECONDARY_BANDWIDTH_ERROR          35
+#define XHCI_TRB_COMPLETION_CODE_SPLIT_TRANSACTION_ERROR            36
+
+//page 511
 
 //page 591 is the end
+
 
 typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     UINT16                          Version;
@@ -1689,6 +1779,7 @@ typedef struct _XHCI_DEVICE_OBJECT_CAPABILITIES{
     BOOLEAN                         CfcSupport;
     UINT8                           MaxPsaSize;
     UINT16                          xEcp;
+    SIZE                            PageSize;
 }XHCI_DEVICE_OBJECT_CAPABILITIES, * PXHCI_DEVICE_OBJECT_CAPABILITIES;
 
 //slot management at 94
@@ -1699,24 +1790,44 @@ typedef struct _XHCI_ERDP_VA_POINTER{
     PVOID                                   VirtualErdp;
 }XHCI_ERDP_VA_POINTER, * PXHCI_ERDP_VA_POINTER;
 
+typedef PVOID XHCI_UNRESTRICTED_DMA_ALLOCATOR_FUNCTION(SIZE, SIZE, UINT64);
+typedef XHCI_UNRESTRICTED_DMA_ALLOCATOR_FUNCTION* PXHCI_UNRESTRICTED_DMA_ALLOCATOR_FUNCTION;
+
+typedef void XHCI_UNRESTRICTED_DMA_FREE_FUNCTION(PVOID);
+typedef XHCI_UNRESTRICTED_DMA_FREE_FUNCTION* PXHCI_UNRESTRICTED_DMA_FREE_FUNCTION;
+
 typedef struct _XHCI_DEVICE{
-    PPCI_DEVICE_OBJECT              PDEV;
-    PXHCI_CAPABILITIES_REGISTER     CapRegisters;
-    PXHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
-    PXHCI_DOORBELL_REGISTERS        DoorbellRegisters;
-    PXHCI_RUNTIME_REGISTERS         RuntimeRegisters;
-    XHCI_DEVICE_OBJECT_CAPABILITIES Capabilities;
-    XARRAY                          DeviceContexts;
+    PPCI_DEVICE_OBJECT                              PDEV;
+    PXHCI_CAPABILITIES_REGISTER                     CapRegisters;
+    PXHCI_OPERATIONAL_REGISTERS                     OperationalRegisters;
+    PXHCI_DOORBELL_REGISTERS                        DoorbellRegisters;
+    PXHCI_RUNTIME_REGISTERS                         RuntimeRegisters;
+    XHCI_DEVICE_OBJECT_CAPABILITIES                 Capabilities;
+    LOUSINE_DMA_DEVICE                              TransferDmaDevice;
+    LOUSINE_DMA_DEVICE                              PageSizeDmaDevice;
+    struct{
+        PXHCI_UNRESTRICTED_DMA_ALLOCATOR_FUNCTION   UnrestrictedDmaAllocatorAlloc;
+        PXHCI_UNRESTRICTED_DMA_FREE_FUNCTION        UnrestrictedDmaAllocatorFree;
+    }                                               UnrestrictedDmaAllocatorFunctions;
+    PVOID                                           VirtualDcbaapAddress;
+
+    /*XARRAY                          DeviceContexts;
     PVOID                           VirtualScratchpadAddress;
     PVOID                           VirtualScratchpadArrayAddress;
-    PVOID                           VirtualDcbaapAddress;
     PVOID                           VirtualCommandRingAddress;
     PVOID                           VirtualErstbaAddress;
-    ListHeader                      VirtualErdpAddresses;
+    ListHeader                      VirtualErdpAddresses;*/
 }XHCI_DEVICE, * PXHCI_DEVICE;
 
 LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
-LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device, PLOUSINE_DMA_DEVICE* DmaDevice);
+LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device);
+LOUSTATUS XhciAllocateUnrestrictedDmaMemory(PXHCI_DEVICE XhciDevice, SIZE AllocationSize, SIZE Alignment, PVOID* Out);
+LOUSTATUS XhciFreeUnrestrictedDmaMemory(PXHCI_DEVICE XhciDevice, PVOID Address);
+LOUSTATUS XhciAllocateTransferDmaMemory(PXHCI_DEVICE XhciDevice, SIZE AllocationSize, SIZE AllocationAlignment, PVOID* Out);
+LOUSTATUS XhciFreeTransferDmaMemory(PXHCI_DEVICE XhciDevice, PVOID Address);
+LOUSTATUS XhciAllocatePageSizeDmaMemory(PXHCI_DEVICE XhciDevice, SIZE AllocationSize, SIZE AllocationAlignment, PVOID* Out);
+LOUSTATUS XhciFreePageSizeDmaMemory(PXHCI_DEVICE XhciDevice, PVOID Address);
+UINT64 XhciGetDmaAddress(PVOID Address);
 
 
 
@@ -1728,8 +1839,6 @@ LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device, PLOUSINE_DMA_DEVIC
 
 LOUSTATUS XhciAllocateDmaMemory32(SIZE Size, SIZE Alignment, PVOID Out);
 LOUSTATUS XhciAllocateDmaMemory64(SIZE Size, SIZE Alignment, PVOID Out);
-LOUSTATUS XhciAllocateDmaMemory(PXHCI_DEVICE Device, SIZE Size, SIZE Alignment, PVOID* Out);
-UINT64 XhciGetDmaAddress(PVOID Address);
 LOUSTATUS XhciInitializeDevice(PXHCI_DEVICE Device);
 
 

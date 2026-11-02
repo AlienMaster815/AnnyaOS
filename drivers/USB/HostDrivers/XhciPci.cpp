@@ -17,6 +17,7 @@ LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
 
+#define XHCI_INTEL_PANTHER_POINT_QUIRK 1
 
 static USB_HCD_OPERATIONS XhciHcdOperations = {
     //Host Operations
@@ -36,7 +37,8 @@ static USB_HCD_OPERATIONS XhciHcdOperations = {
 };
 
 LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
-    {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .GenericEntry = true},
+    //{.VendorID = PCI_VENDOR_ID_INTEL, .DeviceID = 0x1E31, .BoardID = XHCI_INTEL_PANTHER_POINT_QUIRK, .SimpleEntry = true},
+    {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .BoardID = 0, .GenericEntry = true},
     {0},
 };
 
@@ -58,6 +60,11 @@ LOUSTATUS AddDevice(
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
     NewXhciDevice->PDEV = PDEV;
 
+    //if(SupportedXhciPciDevices[PDEV->DeviceID].BoardID){
+    //    LouPrint("Quirk Detected\n");
+    //    while(1);
+    //}
+
     PciHalEnableMemorySpace(PDEV);
 
     PciHalEnableBusMaster(PDEV);
@@ -68,26 +75,45 @@ LOUSTATUS AddDevice(
 
     LouPrint("XHCI.SYS:CAP_REG:%h\n", NewXhciDevice->CapRegisters);
 
-    NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
+    NewXhciDevice->OperationalRegisters = GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
     NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
     NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
 
     XhciGetCapabilities(NewXhciDevice);
     
     PLOUSINE_DMA_DEVICE DmaDevice;
-    Status = XhciInitializeMemoryManagement(NewXhciDevice, &DmaDevice);
+    Status = XhciInitializeMemoryManagement(NewXhciDevice);
     if(Status != STATUS_SUCCESS){
         LouPrint("XHCI.SYS::AddDevice():XhciInitializeMemoryManagement():FAILED\n");
         while(1);
     }    
 
+    Status = XhciAllocatePageSizeDmaMemory(
+        NewXhciDevice, 
+        XHCI_DEVICE_CONTEXT_BASE_ADDRESS_ARRAY_ALLOCATION_SIZE(NewXhciDevice->Capabilities.MaxSlots), 
+        64, 
+        &NewXhciDevice->VirtualDcbaapAddress
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:AddDevice():Could Not Allocate Data For Dcbaa\n");
+        while(1);
+    }
+
+    LouPrint("XHCI.SYS:New Dcbaa Virtual Address :%h\n", NewXhciDevice->VirtualDcbaapAddress);
+    LouPrint("XHCI.SYS:New Dcbaa Physical Address:%h\n", XhciGetDmaAddress(NewXhciDevice->VirtualDcbaapAddress));
+
+    //PAGE 80
+
     //TODO: Initialize Interrupts    
+
+    LouPrint("XHCI.SYS::AddDevice():HERE\n\n");
+    while(1);
 
     Status = UsbCoreCreateHcdObject(
         NewXhciDevice->PDEV,
         USBHCD_FLAGS_SET_VERSION(3),
         NewXhciDevice,
-        DmaDevice,
+        &NewXhciDevice->TransferDmaDevice,
         &XhciHcdOperations
     );
     if(Status != STATUS_SUCCESS){
@@ -118,67 +144,3 @@ LOUSTATUS DriverEntry(
     LouPrint("XHCI.SYS::DriverEntry() STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
-/*
-LOUSTATUS AddDevice(
-    PDRIVER_OBJECT DriverObject, 
-    struct _DEVICE_OBJECT* PlatformDevice
-){
-    LouPrint("XHCI.SYS::AddDevice()\n");
-    LOUSTATUS Status;
-    PXHCI_DEVICE NewXhciDevice = LouKeMallocType(XHCI_DEVICE, KERNEL_GENERIC_MEMORY);
-    PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
-    NewXhciDevice->PDEV = PDEV;
-    
-    NewXhciDevice->HostDevice.BusAddresses = LouKeCreateIdentificationRange(1, 256);
-
-    PciHalEnableMemorySpace(PDEV);
-
-    PciHalEnableBusMaster(PDEV);
-    
-    PciHalMapPciResource(PDEV, XHCI_MMIO_REGISTERS_BAR, PCI_IOMAP_FLAGS_DEFAULT_MAPPING);
-
-    NewXhciDevice->CapRegisters = (PXHCI_CAPABILITIES_REGISTER)PciHalGetIoRegion(PDEV, XHCI_MMIO_REGISTERS_BAR, XHCI_MMIO_REGISTERS_OFFSET);
-
-    LouPrint("XHCI.SYS:CAP_REG:%h\n", NewXhciDevice->CapRegisters);
-
-    NewXhciDevice->OperationalRegisters = (PXHCI_OPERATIONAL_REGISTERS)GET_XHCI_OPERATIONAL_REGISTERS(NewXhciDevice->CapRegisters);
-    NewXhciDevice->DoorbellRegisters = XHCI_GET_DOORBELL_REGISTERS(NewXhciDevice->CapRegisters);
-    NewXhciDevice->RuntimeRegisters = XHCI_GET_RUNTIME_REGISTERS(NewXhciDevice->CapRegisters);
-
-    XhciGetCapabilities(NewXhciDevice);
-
-    Status = XhciInitializeMemoryManagement(NewXhciDevice);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("XHCI.SYS::AddDevice():XhciInitializeMemoryManagement():FAILED\n");
-        while(1);
-    }
-
-    Status = PciHalAllocatePciIrqVectors(
-        PDEV,
-        1, //TODO:check spec to see how many interrupts XHCI actually supports
-        PCI_IRQ_USE_LEGACY
-    );
-    if(Status != STATUS_SUCCESS){
-        LouPrint("XHCI.SYS::AddDevice():Unable To Allocate IRQs\n");
-        while(1);
-    }
-
-    NewXhciDevice->HostDevice.Operations = XhciOperations;
-    
-    LouPrint("XHCI.SYS::AddDevice()()");
-    while(1);
-    //RegisterInterruptHandler(XhciInterruptHandler, PciHalGetIrqVector(PDEV, 0), false, (uint64_t)NewXhciDevice);
-
-    Status = LouKeUsbAddHcd(&NewXhciDevice->HostDevice);
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("XHCI.SYS::AddDevice():Unable To Register XHCI Host Device\n");
-    }
-
-    LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-
-*/

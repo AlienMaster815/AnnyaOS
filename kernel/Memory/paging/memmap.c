@@ -4,6 +4,8 @@
 
 static mutex_t PageTableLock = {0};
 
+PVOID LouKeMallocKbPageFrame();
+
 //LouKe PFN Architecture
 
 void CacheFlush(void* addr) {
@@ -23,101 +25,6 @@ void CalculateTableMarks(
     *L2Entry = (VAddress >> 21) & 0x1FF;
     *L1Entry = (VAddress >> 12) & 0x1FF;
 }
-
-static LOU_PFN_TABLE_ENTRY PfnDatabase = {0};
-static size_t PageFrameCount = 0;
-
-void LouKeMallocPageFrameNumber(
-    uint64_t Virtual,
-    uint64_t Physical,
-    bool     LargePage,
-    uint64_t Flags,
-    uint64_t PageAddress
-){
-    PLOU_PFN_TABLE_ENTRY CurrentEntry = &PfnDatabase, LastEntry = 0;
-
-    for(size_t i = 0; i < PageFrameCount; i++){
-        if(CurrentEntry->Chain.NextHeader){
-            LastEntry = CurrentEntry;
-            CurrentEntry = (PLOU_PFN_TABLE_ENTRY)CurrentEntry->Chain.NextHeader;
-        }else{ //Unlikely
-            //TODO:Bluescreen for Data Leak, Memory manager is compromised use panic KCall
-            while(1);
-        }
-    }
-    
-    CurrentEntry->Chain.LastHeader  = (PListHeader)LastEntry;
-    CurrentEntry->VirtualAddress    = Virtual;
-    CurrentEntry->PhysicalAddres    = Physical;
-    CurrentEntry->LargePage         = LargePage;
-    CurrentEntry->PresentPage       = true;
-    CurrentEntry->Flags             = Flags;
-    CurrentEntry->PageAddress       = PageAddress;
-    CurrentEntry->Chain.NextHeader  = (PListHeader)LouGeneralAllocateMemoryEx(sizeof(LOU_PFN_TABLE_ENTRY), GET_ALIGNMENT(LOU_PFN_TABLE_ENTRY));
-    PageFrameCount++;
-}
-
-static inline bool IsPfnPhysicalCompatible(
-    PLOU_PFN_TABLE_ENTRY    Pfn,
-    uint64_t                Physical
-){
-    if(
-        (Pfn->PhysicalAddres == Physical) && 
-        (Pfn->PresentPage == true) 
-    )return  true;
-    return false;
-}
-
-PLOU_PFN_TABLE_ENTRY LouKePageToPFNIndex(
-    uint64_t PAddress,
-    PLOU_PFN_TABLE_ENTRY PfnIndex
-){
-    PLOU_PFN_TABLE_ENTRY CurrentEntry = &PfnDatabase;
-    size_t i = 0;
-    for(; i < PageFrameCount; i++){
-        if(CurrentEntry == PfnIndex){
-            break;
-        }
-        if(CurrentEntry->Chain.NextHeader){
-            CurrentEntry = (PLOU_PFN_TABLE_ENTRY)CurrentEntry->Chain.NextHeader;
-        }
-        else{ //Unlikely
-            CurrentEntry = &PfnDatabase;
-        }
-    }
-
-    for(; i < PageFrameCount; i++){
-        if(IsPfnPhysicalCompatible(
-            CurrentEntry,
-            PAddress
-        )){
-            return CurrentEntry;
-        }
-        if(CurrentEntry->Chain.NextHeader){
-            CurrentEntry = (PLOU_PFN_TABLE_ENTRY)CurrentEntry->Chain.NextHeader;
-        }else if(i == (PageFrameCount - 1)){
-            if(&PfnDatabase == PfnIndex){
-                return PfnIndex;
-            }else{
-                CurrentEntry = &PfnDatabase;
-                i = 0; 
-            }
-        }else {
-            if((uint64_t)CurrentEntry->Chain.NextHeader == (uint64_t)PfnIndex){
-                return PfnIndex;
-            }
-        }
-    }
-    return 0x00;
-}
-
-PLOU_PFN_TABLE_ENTRY LouKePageToPFN(
-    uint64_t PAddress
-){
-    return  LouKePageToPFNIndex(PAddress, &PfnDatabase);
-}
-
-//Endof LouKe PFN Architecture
 
 #define StartMap (10ULL * MEGABYTE)
 
@@ -200,7 +107,7 @@ static inline bool PageFrameL2SanityCheck(uint64_t oldL2){
 static UINT64* PageDown(UINT64* PageUpperBase, UINT64 UpperIndex){
     UINT64 Base = PageUpperBase[UpperIndex] & ~(PAGE_FLAGSSPACE);
     if(!Base){
-        Base = (UINT64)LouGeneralAllocateMemoryEx(4096, 4096);
+        Base = (UINT64)LouKeMallocKbPageFrame();
         PageUpperBase[UpperIndex] = GetPageValue(Base - KSpaceBase, 0b111);
     }else {
         Base += KSpaceBase;
@@ -338,11 +245,11 @@ bool LouMapAddressEx(uint64_t PAddress, uint64_t VAddress, uint64_t FLAGS, uint6
         TmpPageBase[L2Entry] = GetPageValue(PAddress, FLAGS | (1 << 7));
     }else if(PageSize == KILOBYTE_PAGE){
         if(TmpPageBase[L2Entry] & (1 << 7)){
-            NewPage = LouGeneralAllocateMemory(4096);
+            NewPage = LouKeMallocKbPageFrame();
             InitializePageTableWithIndex(NewPage, TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE), KILOBYTE_PAGE);
             TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - KSpaceBase), 0b111);
         }else if(!(TmpPageBase[L2Entry] & ~(PAGE_FLAGSSPACE))){
-            NewPage = LouGeneralAllocateMemory(4096);
+            NewPage = LouKeMallocKbPageFrame();
             TmpPageBase[L2Entry] = GetPageValue(((UINT64)NewPage - KSpaceBase), 0b111);
         }
         else{

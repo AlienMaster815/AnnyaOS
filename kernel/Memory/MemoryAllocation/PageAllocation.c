@@ -2,6 +2,121 @@
 
 uint64_t LouKeGetRamSize();
 
+typedef struct _PAGE_FRAME_FAST_ALLOCATION_TRACKER{
+    ListHeader  Peers;
+    UINT64      Map;
+    UINT64      Address;
+    UINT8       Allocations : 7;
+    UINT8       Full        : 1;
+}PAGE_FRAME_FAST_ALLOCATION_TRACKER, * PPAGE_FRAME_FAST_ALLOCATION_TRACKER;
+
+static ListHeader KbPageFrameTrackerList = {0};
+static mutex_t KbPageFrameTrackerListLock = {0};
+
+static PPAGE_FRAME_FAST_ALLOCATION_TRACKER LouKeMallocPageFrameTracker(
+    SIZE        PageSize,
+    PListHeader TrackerList
+){
+    PPAGE_FRAME_FAST_ALLOCATION_TRACKER NewTracker = LouGeneralAllocateMemoryEx(sizeof(PAGE_FRAME_FAST_ALLOCATION_TRACKER), GET_ALIGNMENT(PAGE_FRAME_FAST_ALLOCATION_TRACKER));
+    NewTracker->Address = (UINT64)(UINT8*)LouKeRatAllocate64BitPhysicalAddress(PageSize * 64, PageSize);
+    LouKeListAddTail(&NewTracker->Peers, TrackerList);
+    return NewTracker;
+}
+
+static void LouKeFreePageFrameTracker(PPAGE_FRAME_FAST_ALLOCATION_TRACKER Tracker){
+    LouKeListDeleteItem(&Tracker->Peers);
+    LouKeRatFreeAddress(Tracker->Address);
+    LouGeneralFreeMemory(Tracker);
+}
+
+static void LouKeFreePageFrameItem(SIZE PageFrameSize, SIZE FrameAddress, UINT64* Item, PVOID Address){
+    SIZE szAddress = (SIZE)(UINT8*)Address;
+    SIZE i = (szAddress - FrameAddress) / PageFrameSize;
+    *Item = ((*Item) & ~(1 << i));
+}
+
+static PVOID LouKeMallocPageFrameItem(SIZE PageFrameSize, SIZE FrameAddress, UINT64* Item){
+    SIZE AddressMap = *Item;
+    SIZE i;
+    for(i = 0 ; i < 64; i++){
+        if(!(AddressMap & (1 << i))){
+            break;
+        }
+    }
+    if(i >= 64){
+        return 0x00;
+    }
+    *Item = ((*Item) | (1 << i));
+    return (PVOID)(UINT8*)(FrameAddress + (i * PageFrameSize));
+}
+
+PVOID LouKeMallocKbPageFrame(){
+    PVOID Result = 0x00;
+    MutexLock(&KbPageFrameTrackerListLock);
+    PPAGE_FRAME_FAST_ALLOCATION_TRACKER Tracker;
+    ForEachListEntry(Tracker, &KbPageFrameTrackerList, Peers){        
+        if(Tracker->Full){
+            continue;
+        }
+        Result = LouKeMallocPageFrameItem(
+            KILOBYTE_PAGE,
+            Tracker->Address,
+            &Tracker->Map
+        );
+        if(Result){
+            Tracker->Allocations++;
+            goto _DONE;
+        }
+        Tracker->Full = 1;
+    }
+    if(!Result){
+        Tracker = LouKeMallocPageFrameTracker(
+            KILOBYTE_PAGE, 
+            &KbPageFrameTrackerList
+        );
+        if(!Tracker){
+            goto _DONE;
+        }
+        Result = LouKeMallocPageFrameItem(
+            KILOBYTE_PAGE,
+            Tracker->Address,
+            &Tracker->Map
+        );
+        if(!Result){
+            goto _DONE;
+        }
+        Tracker->Allocations++;
+    }
+_DONE:
+    MutexUnlock(&KbPageFrameTrackerListLock);
+    return (PVOID)(UINT8*)(((UINT64)(UINT8*)Result) + KSpaceBase); 
+}
+
+void LouKeFreeKbPageFrame(PVOID Address){
+    Address = (PVOID)(UINT8*)(((UINT64)(UINT8*)Address) - KSpaceBase);
+    MutexLock(&KbPageFrameTrackerListLock);
+    PPAGE_FRAME_FAST_ALLOCATION_TRACKER Tracker;
+    ForEachListEntry(Tracker, &KbPageFrameTrackerList, Peers){
+        if(!RangeInterferes((UINT64)Address, 1, Tracker->Address, 64 * KILOBYTE_PAGE)){
+            continue;
+        }
+        Tracker->Allocations--;
+        if(Tracker->Allocations){
+            LouKeFreePageFrameItem(
+                KILOBYTE_PAGE,
+                Tracker->Address,
+                &Tracker->Map,
+                Address
+            );
+            Tracker->Full = 0;
+            break;
+        } 
+        LouKeFreePageFrameTracker(Tracker);
+        break;
+    }
+    MutexUnlock(&KbPageFrameTrackerListLock);
+}
+
 KERNEL_EXPORT
 PVOID LouKeMallocKbPageEx(
     SIZE    PageCount, 

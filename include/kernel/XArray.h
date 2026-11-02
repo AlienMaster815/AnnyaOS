@@ -46,17 +46,17 @@ typedef LOUSTATUS (*XARRAY_DO_SOMTHING)(PXARRAY Xarray, UINT64 Index, PVOID Cont
 
 #ifndef _USER_MODE_CODE_
 
-#define LouKeXaDefineFlags(Name, Flags) \
+#define DEFINE_XARRAY_FLAGS(Name, Flags) \
 XARRAY Name = { \
     .Flags = Flags \
 };
 
-#define LouKeXaDefine(Name) \
+#define DEFINE_XARRAY(Name) \
 XARRAY Name;
 
-#define LouKeXaDefineAlloc(Name) LouKeXaDefine(Name)
+#define LouKeXaDefineAlloc(Name) DEFINE_XARRAY(Name)
 
-#define LouKeXaDefineAlloc1(Name) LouKeXaDefineFlags(Name, XARRAY_FLAGS_STATIC_ALLOC1)
+#define LouKeXaDefineAlloc1(Name) DEFINE_XARRAY_FLAGS(Name, XARRAY_FLAGS_STATIC_ALLOC1)
 
 static
 inline 

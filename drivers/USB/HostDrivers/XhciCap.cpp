@@ -32,6 +32,7 @@ static void XhciPrintCapabilities(
     LouPrint("XHCI.SYS:Contiguous Frame ID Supported            :%d\n", XhciDevice->Capabilities.CfcSupport);
     LouPrint("XHCI.SYS:Max PSA Size                             :%h\n", XhciDevice->Capabilities.MaxPsaSize);
     LouPrint("XHCI.SYS:xECP Pointer                             :%h\n", XhciDevice->Capabilities.xEcp);
+    LouPrint("XHCI.SYS:PageSize                                 :%h\n", XhciDevice->Capabilities.PageSize);
 
     LouPrint("\nXHCI.SYS:ENDOF Device Capabilities\n");
 }
@@ -74,7 +75,7 @@ XhciGetCapabilities(
     XhciDevice->Capabilities.CfcSupport = ((Tmp & XHCI_CAP_CFC) ? true : false);
     XhciDevice->Capabilities.MaxPsaSize = (UINT8)((Tmp >> XHCI_CAP_MAX_PSA_SIZE_SHIFT) & XHCI_CAP_MAX_PSA_SIZE_MASK);
     XhciDevice->Capabilities.xEcp = (UINT16)((Tmp >> XHCI_CAP_XECP_SHIFT) & XHCI_CAP_XECP_MASK);
-
+    XhciDevice->Capabilities.PageSize = ToThePowerOf2(XhciDevice->OperationalRegisters->PageSize + 12);
     XhciPrintCapabilities(XhciDevice);
 
     return STATUS_SUCCESS;

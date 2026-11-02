@@ -775,20 +775,6 @@ uint64_t LouKeGetOffsetInPage(
 
 uint64_t LouKePageToPhysicalAddres(uint64_t* Page);
 
-typedef struct _LOU_PFN_TABLE_ENTRY{
-    ListHeader  Chain;
-    uint64_t    VirtualAddress;
-    uint64_t    PhysicalAddres;
-    bool        LargePage;
-    bool        PresentPage;
-    uint64_t    Flags;
-    uint64_t    PageAddress;
-}LOU_PFN_TABLE_ENTRY, * PLOU_PFN_TABLE_ENTRY;
-
-PLOU_PFN_TABLE_ENTRY LouKePageToPFN(
-    uint64_t PAddress
-);
-
 void* LouKeMemReMap(void* Location, size_t Size, uint64_t Flags);
 void  LouKeMemReleaseReMap(void* Address);
 

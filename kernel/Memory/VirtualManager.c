@@ -1,5 +1,46 @@
 #include <LouAPI.h>
 
+#define KERNEL_VM_GET_PAGE_ADDRESS(PageData)    (PageData & ~(4095))
+#define KERNEL_VM_GET_PAGE_FLAGS(PageData)      (PageData & (4095))
+#define KERNEL_VM_PAGE_VBIT                     (1 << 0)
+
+typedef struct _KERNEL_VM_ALLOCATION_TRACKER{
+    UINT64              PageData;
+    UINT8*              Map;
+}KERNEL_VM_ALLOCATION_TRACKER, * PKERNEL_VM_ALLOCATION_TRACKER;
+
+typedef struct _KERNEL_VM_ALLOCATION_TRACKER_NODE{
+    ListHeader                      Peers;
+    SIZE                            PageCountPerMap;
+    UINT64                          TrackerNodeMap;
+    KERNEL_VM_ALLOCATION_TRACKER    TrackerNodeItems[64];  
+    UINT8                           Bitmaps[];
+}KERNEL_VM_ALLOCATION_TRACKER_NODE, * PKERNEL_VM_ALLOCATION_TRACKER_NODE;
+
+static ListHeader KernelVmAllocationTrackerList = {0};
+static mutex_t KernelVmAllocationTrackerListLock = {0}; 
+
+PKERNEL_VM_ALLOCATION_TRACKER_NODE LouKeVmmAllocateKernelVmTrackerNode(
+    SIZE PageCountPerMap
+){
+    SIZE BitmapsCount = (ROUND_UP64(PageCountPerMap, 8) * 64) / 8;
+    PKERNEL_VM_ALLOCATION_TRACKER_NODE NewNode = (PKERNEL_VM_ALLOCATION_TRACKER_NODE)LouGeneralAllocateMemoryEx(GetStructureSize(KERNEL_VM_ALLOCATION_TRACKER_NODE, Bitmaps, BitmapsCount), GET_ALIGNMENT(KERNEL_VM_ALLOCATION_TRACKER));
+    NewNode->PageCountPerMap = PageCountPerMap;
+    PageCountPerMap = (ROUND_UP64(PageCountPerMap, 8) / 8);
+    for(SIZE i = 0 ; i < 64; i++){
+        NewNode->TrackerNodeItems[i].Map = &NewNode->Bitmaps[PageCountPerMap * i];
+    }
+    MutexLock(&KernelVmAllocationTrackerListLock);
+    LouKeListAddTail(&NewNode->Peers, &KernelVmAllocationTrackerList);
+    MutexUnlock(&KernelVmAllocationTrackerListLock);
+    return NewNode;
+}
+
+//LouGeneralAllocateMemoryEx();
+
+
+
+
 typedef struct _KERNEL_PAGE_REMAP{
     ListHeader          Peers;
     PVOID               PageAddress;

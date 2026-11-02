@@ -44,6 +44,7 @@ static USB_HCD_OPERATIONS OhciHcdOperations = {
 };
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedOhciPciDevices[] = {
+    {.VendorID = PCI_VENDOR_ID_STMICRO, .DeviceID = 0xCC01, .SimpleEntry = true},
     {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x10, .GenericEntry = true},
     {0},
 };

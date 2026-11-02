@@ -12,9 +12,9 @@ LouKeWaitForUcharRegisterConditionMs(
         return STATUS_INVALID_PARAMETER;
     }
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
-    UCHAR Tmp = *Mmio;
+    UCHAR Tmp = *(volatile CHAR*)Mmio;
     do{
-        Tmp = *Mmio;
+        Tmp = *(volatile CHAR*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
     if((Tmp & Mask) != Value){
@@ -51,9 +51,9 @@ LouKeWaitForUshortRegisterConditionMs(
         return STATUS_INVALID_PARAMETER;
     }
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
-    UCHAR Tmp = *Mmio;
+    UCHAR Tmp = *(volatile USHORT*)Mmio;
     do{
-        Tmp = *Mmio;
+        Tmp = *(volatile USHORT*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
     if((Tmp & Mask) != Value){
@@ -93,7 +93,7 @@ LouKeWaitForUlongRegisterConditionMs(
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
     ULONG Tmp = *(volatile ULONG*)Mmio;
     do{
-        Tmp = *Mmio;
+        Tmp = *(volatile ULONG*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
     if((Tmp & Mask) != Value){
@@ -131,9 +131,9 @@ LouKeWaitForUlonglongRegisterConditionMs(
         return STATUS_INVALID_PARAMETER;
     }
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
-    ULONG Tmp = *Mmio;
+    ULONG Tmp = *(volatile ULONGLONG*)Mmio;
     do{
-        Tmp = *Mmio;
+        Tmp = *(volatile ULONGLONG*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
     if((Tmp & Mask) != Value){

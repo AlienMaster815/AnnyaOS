@@ -356,6 +356,8 @@ void LouOsKrnlStart(
 
     //fix usermode to use mutexes
 
+    //add non threshold limited DMA allocations
+
     LouPrint("Successful Boot\n");
     
     sleep(2000);
