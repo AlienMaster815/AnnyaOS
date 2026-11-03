@@ -1,39 +1,213 @@
 #include <LouAPI.h>
 
-#define KERNEL_VM_GET_PAGE_ADDRESS(PageData)    (PageData & ~(4095))
-#define KERNEL_VM_GET_PAGE_FLAGS(PageData)      (PageData & (4095))
-#define KERNEL_VM_PAGE_VBIT                     (1 << 0)
+
+typedef struct _KERNEL_VM_ALLOCATION_DEFRAGMENTER{
+    ListHeader          Peers;
+    UINT64              PageAddress;
+    UINT64              PageCount;
+}KERNEL_VM_ALLOCATION_DEFRAGMENTER, * PKERNEL_VM_ALLOCATION_DEFRAGMENTER;
+
+typedef struct _KERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE{
+    ListHeader                          Peers;
+    UINT64                              DefragmenterMap;
+    KERNEL_VM_ALLOCATION_DEFRAGMENTER   DefragmenterNodeItems[64];
+}KERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE, * PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE;
 
 typedef struct _KERNEL_VM_ALLOCATION_TRACKER{
-    UINT64              PageData;
-    UINT8*              Map;
+    ListHeader          Peers;
+    ListHeader          VirtualDefragmenters;
+    ListHeader          PhysicalDefragmenters;
+    UINT64              PageAddress;
+    UINT64              PageCount;
 }KERNEL_VM_ALLOCATION_TRACKER, * PKERNEL_VM_ALLOCATION_TRACKER;
 
 typedef struct _KERNEL_VM_ALLOCATION_TRACKER_NODE{
     ListHeader                      Peers;
-    SIZE                            PageCountPerMap;
     UINT64                          TrackerNodeMap;
-    KERNEL_VM_ALLOCATION_TRACKER    TrackerNodeItems[64];  
-    UINT8                           Bitmaps[];
+    KERNEL_VM_ALLOCATION_TRACKER    TrackerNodeItems[64];
 }KERNEL_VM_ALLOCATION_TRACKER_NODE, * PKERNEL_VM_ALLOCATION_TRACKER_NODE;
 
 static ListHeader KernelVmAllocationTrackerList = {0};
 static mutex_t KernelVmAllocationTrackerListLock = {0}; 
 
-PKERNEL_VM_ALLOCATION_TRACKER_NODE LouKeVmmAllocateKernelVmTrackerNode(
-    SIZE PageCountPerMap
-){
-    SIZE BitmapsCount = (ROUND_UP64(PageCountPerMap, 8) * 64) / 8;
-    PKERNEL_VM_ALLOCATION_TRACKER_NODE NewNode = (PKERNEL_VM_ALLOCATION_TRACKER_NODE)LouGeneralAllocateMemoryEx(GetStructureSize(KERNEL_VM_ALLOCATION_TRACKER_NODE, Bitmaps, BitmapsCount), GET_ALIGNMENT(KERNEL_VM_ALLOCATION_TRACKER));
-    NewNode->PageCountPerMap = PageCountPerMap;
-    PageCountPerMap = (ROUND_UP64(PageCountPerMap, 8) / 8);
-    for(SIZE i = 0 ; i < 64; i++){
-        NewNode->TrackerNodeItems[i].Map = &NewNode->Bitmaps[PageCountPerMap * i];
+static ListHeader KernelVmAllocationDefragmenterList = {0};
+static mutex_t KernelVmAllocationDefragmenterListLock = {0}; 
+
+
+static PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE LouKeVmmAllocateVmDefragmenterNode(){
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE NewDefragmenter = (PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE)LouGeneralAllocateMemoryEx(sizeof(KERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE), GET_ALIGNMENT(KERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE));
+    if(!NewDefragmenter){
+        return 0x00;
     }
+    LouKeListAddTail(&NewDefragmenter->Peers, &KernelVmAllocationDefragmenterList);
+    return NewDefragmenter;
+}
+
+static void LouKeVmmFreeVmDefragmenterNode(PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE Node){
+    LouKeListDeleteItem(&Node->Peers);
+    LouGeneralFreeMemory(Node);
+}
+
+static PKERNEL_VM_ALLOCATION_DEFRAGMENTER _LouKeVmmAllocateVmDefragmenter(
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE Node 
+){
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER Result = 0x00;
+    UINT64 NodeMap;
+    SIZE i;
+    if(!Node){
+        return 0x00; 
+    }else if(Node->DefragmenterMap == UINT64_MAX){
+        return 0x00;
+    }
+    NodeMap = Node->DefragmenterMap;
+    for(i = 0 ; i < 64; i++){
+        if(!(NodeMap & (1 << i))){
+            NodeMap |= (1 << i);
+            Node->DefragmenterMap = NodeMap;
+            Result = &Node->DefragmenterNodeItems[i];
+            break;
+        }
+    }
+    if(i >= 64){
+        return 0x00;
+    }
+    memset(Result, 0, sizeof(KERNEL_VM_ALLOCATION_DEFRAGMENTER));
+    return Result;
+}
+
+PKERNEL_VM_ALLOCATION_DEFRAGMENTER LouKeVmmAllocateVmDefragmenter(){
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER NewDefragmenter;
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE TmpNode;
+    MutexLock(&KernelVmAllocationDefragmenterListLock);
+    ForEachListEntry(TmpNode, &KernelVmAllocationDefragmenterList, Peers){
+        NewDefragmenter = _LouKeVmmAllocateVmDefragmenter(TmpNode);
+        if(NewDefragmenter){
+            break;
+        }
+    }
+    if(!NewDefragmenter){
+        TmpNode = LouKeVmmAllocateVmDefragmenterNode();
+        NewDefragmenter = _LouKeVmmAllocateVmDefragmenter(TmpNode);
+    }
+    MutexUnlock(&KernelVmAllocationDefragmenterListLock);
+    return NewDefragmenter;
+}
+
+
+static BOOLEAN _LouKeVmmFreeVmDefragmenter(
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE Node,
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER      Defragmenter 
+){
+    if(!RangeInterferes((UINT64)(UINT8*)Defragmenter, 1, (UINT64)(UINT8*)Node, sizeof(KERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE))){
+        return false;
+    }
+    SIZE Entry = (((UINT64)(UINT8*)Defragmenter) - ((UINT64)(UINT8*)&Node->DefragmenterNodeItems[0])) / sizeof(KERNEL_VM_ALLOCATION_DEFRAGMENTER);
+    Node->DefragmenterMap &= ~(1 << Entry);
+    return true;
+}
+
+void LouKeVmmFreeVmDefragmenter(
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER Defragmenter
+){
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER_NODE TmpNode;
+    MutexLock(&KernelVmAllocationDefragmenterListLock);
+    ForEachListEntry(TmpNode, &KernelVmAllocationDefragmenterList, Peers){
+        if(_LouKeVmmFreeVmDefragmenter(TmpNode, Defragmenter)){
+            if(!TmpNode->DefragmenterMap){
+                LouKeVmmFreeVmDefragmenterNode(TmpNode);
+            }
+            break;
+        }
+    }
+    MutexUnlock(&KernelVmAllocationDefragmenterListLock);
+}
+
+static PKERNEL_VM_ALLOCATION_TRACKER_NODE LouKeVmmAllocateVmTrackerNode(){
+    PKERNEL_VM_ALLOCATION_TRACKER_NODE NewTracker = (PKERNEL_VM_ALLOCATION_TRACKER_NODE)LouGeneralAllocateMemoryEx(sizeof(KERNEL_VM_ALLOCATION_TRACKER_NODE), GET_ALIGNMENT(KERNEL_VM_ALLOCATION_TRACKER_NODE));
+    if(!NewTracker){
+        return 0x00;
+    }
+    LouKeListAddTail(&NewTracker->Peers, &KernelVmAllocationTrackerList);
+    return NewTracker;
+}
+
+static void LouKeVmmFreeVmTrackerNode(PKERNEL_VM_ALLOCATION_TRACKER_NODE Node){
+    LouKeListDeleteItem(&Node->Peers);
+    LouGeneralFreeMemory(Node);
+}
+
+static PKERNEL_VM_ALLOCATION_TRACKER _LouKeVmmAllocateVmTracker(
+    PKERNEL_VM_ALLOCATION_TRACKER_NODE Node 
+){
+    PKERNEL_VM_ALLOCATION_TRACKER Result = 0x00;
+    UINT64 NodeMap;
+    SIZE i;
+    if(!Node){
+        return 0x00; 
+    }else if(Node->TrackerNodeMap == UINT64_MAX){
+        return 0x00;
+    }
+    NodeMap = Node->TrackerNodeMap;
+    for(i = 0 ; i < 64; i++){
+        if(!(NodeMap & (1 << i))){
+            NodeMap |= (1 << i);
+            Node->TrackerNodeMap = NodeMap;
+            Result = &Node->TrackerNodeItems[i];
+            break;
+        }
+    }
+    if(i >= 64){
+        return 0x00;
+    }
+    memset(Result, 0, sizeof(KERNEL_VM_ALLOCATION_TRACKER));
+    return Result;
+}
+
+PKERNEL_VM_ALLOCATION_TRACKER LouKeVmmAllocateVmTracker(){
+    PKERNEL_VM_ALLOCATION_TRACKER       NewTracker;
+    PKERNEL_VM_ALLOCATION_TRACKER_NODE  TmpNode;
     MutexLock(&KernelVmAllocationTrackerListLock);
-    LouKeListAddTail(&NewNode->Peers, &KernelVmAllocationTrackerList);
+    ForEachListEntry(TmpNode, &KernelVmAllocationTrackerList, Peers){
+        NewTracker = _LouKeVmmAllocateVmTracker(TmpNode);
+        if(NewTracker){
+            break;
+        }
+    }
+    if(!NewTracker){
+        TmpNode = LouKeVmmAllocateVmTrackerNode();
+        NewTracker = _LouKeVmmAllocateVmTracker(TmpNode);
+    }
     MutexUnlock(&KernelVmAllocationTrackerListLock);
-    return NewNode;
+    return NewTracker;
+}
+
+
+static BOOLEAN _LouKeVmmFreeVmTracker(
+    PKERNEL_VM_ALLOCATION_TRACKER_NODE Node,
+    PKERNEL_VM_ALLOCATION_TRACKER      Tracker 
+){
+    if(!RangeInterferes((UINT64)(UINT8*)Tracker, 1, (UINT64)(UINT8*)Node, sizeof(KERNEL_VM_ALLOCATION_TRACKER_NODE))){
+        return false;
+    }
+    SIZE Entry = (((UINT64)(UINT8*)Tracker) - ((UINT64)(UINT8*)&Node->TrackerNodeItems[0])) / sizeof(KERNEL_VM_ALLOCATION_TRACKER);
+    Node->TrackerNodeMap &= ~(1 << Entry);
+    return true;
+}
+
+void LouKeVmmFreeVmTracker(
+    PKERNEL_VM_ALLOCATION_TRACKER Tracker
+){
+    PKERNEL_VM_ALLOCATION_TRACKER_NODE TmpNode;
+    MutexLock(&KernelVmAllocationTrackerListLock);
+    ForEachListEntry(TmpNode, &KernelVmAllocationTrackerList, Peers){
+        if(_LouKeVmmFreeVmTracker(TmpNode, Tracker)){
+            if(!TmpNode->TrackerNodeMap){
+                LouKeVmmFreeVmTrackerNode(TmpNode);
+            }
+            break;
+        }
+    }
+    MutexUnlock(&KernelVmAllocationTrackerListLock);
 }
 
 //LouGeneralAllocateMemoryEx();

@@ -38,6 +38,7 @@ static void LouKeFreePageFrameItem(SIZE PageFrameSize, SIZE FrameAddress, UINT64
 static PVOID LouKeMallocPageFrameItem(SIZE PageFrameSize, SIZE FrameAddress, UINT64* Item){
     SIZE AddressMap = *Item;
     SIZE i;
+    PVOID Result;
     for(i = 0 ; i < 64; i++){
         if(!(AddressMap & (1 << i))){
             break;
@@ -47,7 +48,9 @@ static PVOID LouKeMallocPageFrameItem(SIZE PageFrameSize, SIZE FrameAddress, UIN
         return 0x00;
     }
     *Item = ((*Item) | (1 << i));
-    return (PVOID)(UINT8*)(FrameAddress + (i * PageFrameSize));
+    Result = (PVOID)(UINT8*)(FrameAddress + (i * PageFrameSize));
+    memset(Result, 0, PageFrameSize);
+    return Result;
 }
 
 PVOID LouKeMallocKbPageFrame(){
