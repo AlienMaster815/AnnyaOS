@@ -49,7 +49,6 @@ static PVOID LouKeMallocPageFrameItem(SIZE PageFrameSize, SIZE FrameAddress, UIN
     }
     *Item = ((*Item) | (1 << i));
     Result = (PVOID)(UINT8*)(FrameAddress + (i * PageFrameSize));
-    memset(Result, 0, PageFrameSize);
     return Result;
 }
 
@@ -92,7 +91,9 @@ PVOID LouKeMallocKbPageFrame(){
     }
 _DONE:
     MutexUnlock(&KbPageFrameTrackerListLock);
-    return (PVOID)(UINT8*)(((UINT64)(UINT8*)Result) + KSpaceBase); 
+    Result = (PVOID)(UINT8*)(((UINT64)(UINT8*)Result) + KSpaceBase);
+    memset(Result, 0, 4096);
+    return Result; 
 }
 
 void LouKeFreeKbPageFrame(PVOID Address){

@@ -65,7 +65,7 @@ LouKeMallocFromTrackersSafe(
     ListHeader*                 Track = &KernelMemorySpaces[MemorySpace];
     PVOID                       Result = 0x00;
     PKMALLOC_PAGE_TRACK         TmpPageTrack = 0x00;
-    uint64_t                    RoundUpSize = ROUND_UP64(Size, MEGABYTE_PAGE);
+    uint64_t                    RoundUpSize = ROUND_UP64(Size + Alignment, MEGABYTE_PAGE);
     PAGE_ALLOCATOR_FUNCTION     PageAllocator = KernelMemorySpacesPageAllocators[MemorySpace];
     PAGE_ALLOCATOR_FUNCTION_EX  PageAllocatorEx = MemorySpace > 1 ? (PAGE_ALLOCATOR_FUNCTION_EX)KernelMemorySpacesPageAllocators[MemorySpace] : 0x00;
     PKMALLOC_VMEM_TRACK         TmpVMemTrack;
@@ -97,7 +97,7 @@ LouKeMallocFromTrackersSafe(
 
     _DONE:
     TmpVMemTrack = (PKMALLOC_VMEM_TRACK)LouGeneralAllocateMemoryEx(sizeof(KMALLOC_VMEM_TRACK), GET_ALIGNMENT(KMALLOC_VMEM_TRACK));
-    TmpVMemTrack->Address = Result;
+    TmpVMemTrack->Address = (PVOID)ROUND_UP64((UINT64)Result, Alignment);
     TmpVMemTrack->Size = Size;
     LouKeListAddTail(&TmpVMemTrack->Peers, &TmpPageTrack->VMemTracks);
     MutexUnlock(Lock);
