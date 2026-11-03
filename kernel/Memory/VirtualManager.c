@@ -4,6 +4,7 @@
 typedef struct _KERNEL_VM_ALLOCATION_DEFRAGMENTER{
     ListHeader          Peers;
     UINT64              PageAddress;
+    UINT64              PageSize;
     UINT64              PageCount;
 }KERNEL_VM_ALLOCATION_DEFRAGMENTER, * PKERNEL_VM_ALLOCATION_DEFRAGMENTER;
 
@@ -18,6 +19,7 @@ typedef struct _KERNEL_VM_ALLOCATION_TRACKER{
     ListHeader          VirtualDefragmenters;
     ListHeader          PhysicalDefragmenters;
     UINT64              PageAddress;
+    UINT64              PageSize;
     UINT64              PageCount;
 }KERNEL_VM_ALLOCATION_TRACKER, * PKERNEL_VM_ALLOCATION_TRACKER;
 
@@ -208,6 +210,159 @@ void LouKeVmmFreeVmTracker(
         }
     }
     MutexUnlock(&KernelVmAllocationTrackerListLock);
+}
+
+static ListHeader   Vm64AllocationTrackers = {0};
+static mutex_t      Vm64AllocationTrackersLock = {0};
+
+static 
+LOUSTATUS
+LouKeVmmCreateVmPageReserveVm64(
+    PVOID                           PageAddress, 
+    SIZE                            PageSize,  
+    SIZE                            PageCount,
+    PKERNEL_VM_ALLOCATION_TRACKER*  OutTracker
+){
+    if((!PageAddress) || (!PageSize) || (!PageCount) || (!OutTracker)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PKERNEL_VM_ALLOCATION_TRACKER TmpTracker;
+    PKERNEL_VM_ALLOCATION_TRACKER NewTracker;
+    ForEachListEntry(TmpTracker, &Vm64AllocationTrackers, Peers){
+        if(RangeInterferes((UINT64)(UINT8*)PageAddress, PageSize * PageCount, TmpTracker->PageAddress, TmpTracker->PageSize * TmpTracker->PageCount)){
+            LouPrint("LouKeVmmCreateVirtualMemoryPageReserveVm64():ERROR\nNew Page Map Interferes With An Existing Map\nPageAddress:%h:PageSize:%h:PageCount:%h\nTmpTracker->PageAddress:%h:TmpTracker->PageSize:%h:TmpTracker->PageCount:%h\n", PageAddress, PageSize, PageCount, TmpTracker->PageAddress, TmpTracker->PageSize, TmpTracker->PageCount);
+            MutexUnlock(&Vm64AllocationTrackersLock);
+            return STATUS_UNSUCCESSFUL;
+        }
+    }
+    NewTracker = LouKeVmmAllocateVmTracker();
+    if(!NewTracker){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    NewTracker->PageAddress = (UINT64)(UINT8*)PageAddress;
+    NewTracker->PageSize = PageSize;
+    NewTracker->PageCount = PageCount;
+    *OutTracker = NewTracker;
+    LouKeListAddTail(&NewTracker->Peers, &Vm64AllocationTrackers);
+    return STATUS_SUCCESS;
+}
+
+void LouKeVmmFreeVmPageReservedVm64(
+    PKERNEL_VM_ALLOCATION_TRACKER Tracker
+){
+    LouKeListDeleteItem(&Tracker->Peers);   
+    LouKeVmmFreeVmTracker(Tracker);
+}
+
+
+LOUSTATUS
+LouKeVmmCreatePhysicalMemoryPageReserveVm64(
+    PVOID   PageAddress, 
+    SIZE    PageSize,  
+    SIZE    PageCount
+){
+    LOUSTATUS Status;
+    PKERNEL_VM_ALLOCATION_TRACKER NewTracker;
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER NewDefragmenter;
+    MutexLock(&Vm64AllocationTrackersLock);
+    
+    Status = LouKeVmmCreateVmPageReserveVm64(
+        PageAddress, 
+        PageSize,
+        PageCount,
+        &NewTracker
+    );
+    if(Status != STATUS_SUCCESS){
+        goto _DONE;
+    }
+    NewDefragmenter = LouKeVmmAllocateVmDefragmenter();
+    if(!NewDefragmenter){
+        LouKeVmmFreeVmPageReservedVm64(NewTracker);
+        Status = STATUS_INSUFFICIENT_RESOURCES;
+        goto _DONE;
+    }
+
+    NewDefragmenter->PageAddress = (UINT64)(UINT8*)PageAddress;
+    NewDefragmenter->PageSize = PageSize;
+    NewDefragmenter->PageCount = PageCount;
+    LouKeListAddTail(&NewDefragmenter->Peers, &NewTracker->VirtualDefragmenters);
+_DONE:
+    MutexUnlock(&Vm64AllocationTrackersLock);
+    return Status;
+}
+
+PVOID 
+LouKeVmmAllocatePhysicalMemoryFromPageReserveVm64(
+    PKERNEL_VM_ALLOCATION_TRACKER   Tracker,
+    SIZE                            PageSize,
+    SIZE                            PageCount
+){
+    UINT64 Result = 0x00;
+    UINT64 TrackerPageAddress = Tracker->PageAddress;
+    UINT64 TmpCheck = TrackerPageAddress;
+    UINT64 TrackerPageSize = Tracker->PageSize;
+    UINT64 TrackerPageCount = Tracker->PageCount;
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER TmpDefragmenter;
+    PKERNEL_VM_ALLOCATION_DEFRAGMENTER NewDefragmenter;
+    while((TmpCheck + (PageSize * PageCount)) <= (TrackerPageAddress + (TrackerPageSize * TrackerPageCount))){
+        BOOLEAN FoundAddress = true;
+        ForEachListEntry(TmpDefragmenter, &Tracker->PhysicalDefragmenters, Peers){
+            if(RangeInterferes(
+                TmpCheck, 
+                PageSize * PageCount, 
+                TmpDefragmenter->PageAddress, 
+                TmpDefragmenter->PageSize * TmpDefragmenter->PageCount
+            )){
+                FoundAddress = false;
+                break;
+            }
+        }
+        if(FoundAddress){
+            NewDefragmenter = LouKeVmmAllocateVmDefragmenter();
+            if(!NewDefragmenter){
+                break;
+            }
+            NewDefragmenter->PageAddress = TmpCheck;
+            NewDefragmenter->PageCount = PageCount;
+            NewDefragmenter->PageSize = PageSize;
+            LouKeListAddTail(&NewDefragmenter->Peers, &Tracker->PhysicalDefragmenters);
+            Result = TmpCheck;
+            break;
+        }
+        SIZE Hint = TmpDefragmenter->PageAddress + (TmpDefragmenter->PageSize * TmpDefragmenter->PageCount);
+        TmpCheck = ROUND_UP64(Hint, PageSize);
+        if(TmpCheck == Hint){
+            TmpCheck += PageSize;
+        }
+    }
+    return (PVOID)(UINT8*)Result;
+}
+
+LOUSTATUS
+LouKeVmmGetPhsicalPageReserveVm64(
+    SIZE    PageSize,
+    SIZE    PageCount,
+    PVOID*  Out
+){
+    if((!PageSize) || (!PageCount) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    PKERNEL_VM_ALLOCATION_TRACKER TmpTracker;
+    LOUSTATUS Status = STATUS_INSUFFICIENT_RESOURCES;
+    MutexLock(&Vm64AllocationTrackersLock);
+    ForEachListEntry(TmpTracker, &Vm64AllocationTrackers, Peers){
+        if((TmpTracker->PageSize * TmpTracker->PageCount) < (PageSize * PageCount)){
+            continue;
+        }
+        PVOID Result = LouKeVmmAllocatePhysicalMemoryFromPageReserveVm64(TmpTracker, PageSize, PageCount);
+        if(Result){
+            *Out = Result;
+            Status = STATUS_SUCCESS;
+            break;
+        }
+    }
+    MutexUnlock(&Vm64AllocationTrackersLock);
+    return Status;
 }
 
 //LouGeneralAllocateMemoryEx();
