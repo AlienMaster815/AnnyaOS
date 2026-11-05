@@ -812,7 +812,11 @@ typedef XHCI_PORT_BANDWIDTH_CONTEXT* PXHCI_PORT_BANDWIDTH_CONTEXT;
 #define XHCI_PORT_BANDWIDTH_CONTEXT_PORTx_SHIFT(x)          ((x % 4) * 8)
 #define XHCI_PORT_BANDWIDTH_CONTEXT_PORTx(x)                (XHCI_PORT_BANDWIDTH_CONTEXT_PORTx_MASK << XHCI_PORT_BANDWIDTH_CONTEXT_PORTx_SHIFT(x))
 
-typedef struct _XHCI_NORMAL_TRB{
+typedef struct PACKED _XHCI_GENERIC_TRB{
+    volatile UINT32  DWord[4];
+}XHCI_GENERIC_TRB, * PXHCI_GENERIC_TRB;
+
+typedef struct PACKED _XHCI_NORMAL_TRB{
     volatile UINT32  DWord[4];
 }XHCI_NORMAL_TRB, * PXHCI_NORMAL_TRB;
 
@@ -1085,7 +1089,7 @@ typedef struct PACKED _XHCI_NO_OP_TRB{
 #define XHCI_NO_OP_TRB_IOC_SHIFT                            5
 #define XHCI_NO_OP_TRB_IOC                                  (XHCI_NO_OP_TRB_IOC_MASK << XHCI_NO_OP_TRB_IOC_SHIFT)
 #define XHCI_NO_OP_TRB_TYPE_MASK                            0x3F
-#define XHCI_NO_OP_TRB_TYPE_TYPE                            10
+#define XHCI_NO_OP_TRB_TYPE_SHIFT                           10
 #define XHCI_NO_OP_TRB_TYPE                                 (XHCI_NO_OP_TRB_TYPE_MASK << XHCI_NO_OP_TRB_TYPE_SHIFT)
 
 typedef struct PACKED _XHCI_TRANSFER_EVENT_TRB{
@@ -1293,17 +1297,9 @@ typedef struct PACKED _XHCI_MFINDEX_WRAP_EVENT_TRB{
 #define XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE_SHIFT                      10
 #define XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE                            (XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE_MASK << XHCI_MFINDEX_WRAP_EVENT_TRB_TYPE_SHIFT)
 
-typedef struct PACKED _XHCI_NO_OP_COMMAND_TRB{
+typedef struct PACKED _XHCI_GENERIC_COMMAND_TRB{
     volatile UINT32 DWord[4];
-}XHCI_NO_OP_COMMAND_TRB, * PXHCI_NO_OP_COMMAND_TRB;
-
-//offset 12
-#define XHCI_NO_OP_COMMAND_TRB_CYCLE_BIT_MASK                       1
-#define XHCI_NO_OP_COMMAND_TRB_CYCLE_BIT_SHIFT                      0
-#define XHCI_NO_OP_COMMAND_TRB_CYCLE_BIT                            (XHCI_NO_OP_COMMAND_TRB_CYCLE_BIT_MASK << XHCI_NO_OP_COMMAND_TRB_CYCLE_BIT_SHIFT)
-#define XHCI_NO_OP_COMMAND_TRB_TYPE_MASK                            0x3F
-#define XHCI_NO_OP_COMMAND_TRB_TYPE_SHIFT                           10
-#define XHCI_NO_OP_COMMAND_TRB_TYPE                                 (XHCI_NO_OP_COMMAND_TRB_TYPE_MASK << XHCI_NO_OP_COMMAND_TRB_TYPE_SHIFT)
+}XHCI_GENERIC_COMMAND_TRB, * PXHCI_GENERIC_COMMAND_TRB;
 
 typedef struct PACKED _XHCI_ENABLE_SLOT_COMMAND_TRB{
     volatile UINT32  DWord[4];
@@ -1669,6 +1665,9 @@ typedef struct _XHCI_LINK_TRB{
 #define XHCI_LINK_TRB_CYCLE_BIT_MASK                                1
 #define XHCI_LINK_TRB_CYCLE_BIT_SHIFT                               0
 #define XHCI_LINK_TRB_CYCLE_BIT                                     (XHCI_LINK_TRB_CYCLE_BIT_MASK << XHCI_LINK_TRB_CYCLE_BIT_SHIFT)
+#define XHCI_LINK_TRB_TOGGLE_BIT_MASK                               1
+#define XHCI_LINK_TRB_TOGGLE_BIT_SHIFT                              1
+#define XHCI_LINK_TRB_TOGGLE_BIT                                    (XHCI_LINK_TRB_TOGGLE_BIT_MASK << XHCI_LINK_TRB_TOGGLE_BIT_SHIFT)
 #define XHCI_LINK_TRB_CHAIN_BIT_MASK                                1
 #define XHCI_LINK_TRB_CHAIN_BIT_SHIFT                               4
 #define XHCI_LINK_TRB_CHAIN_BIT                                     (XHCI_LINK_TRB_CHAIN_BIT_MASK << XHCI_LINK_TRB_CHAIN_BIT_SHIFT)
@@ -1751,6 +1750,11 @@ typedef struct _XHCI_EVENT_DATA_TRB{
 
 //page 511
 
+#define XHCI_TRB_TYPE_LINK_TRB                                      6
+
+
+#define XHCI_TRB_TYPE_NO_OP                                         8
+
 //page 591 is the end
 
 
@@ -1796,6 +1800,16 @@ typedef XHCI_UNRESTRICTED_DMA_ALLOCATOR_FUNCTION* PXHCI_UNRESTRICTED_DMA_ALLOCAT
 typedef void XHCI_UNRESTRICTED_DMA_FREE_FUNCTION(PVOID);
 typedef XHCI_UNRESTRICTED_DMA_FREE_FUNCTION* PXHCI_UNRESTRICTED_DMA_FREE_FUNCTION;
 
+
+typedef struct _XHCI_RING_MANAGER{
+    UINT8                       Pcs; 
+    ATOMIC_BOOLEAN              RingFull;
+    mutex_t                     RingLock;
+    UINT8                       RingEnqueuePointer; 
+    PXHCI_GENERIC_TRB           VirtualRing;
+    PXHCI_GENERIC_TRB           PhysicalRing;
+}XHCI_RING_MANAGER, * PXHCI_RING_MANAGER;
+
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT                              PDEV;
     PXHCI_CAPABILITIES_REGISTER                     CapRegisters;
@@ -1810,7 +1824,7 @@ typedef struct _XHCI_DEVICE{
         PXHCI_UNRESTRICTED_DMA_FREE_FUNCTION        UnrestrictedDmaAllocatorFree;
     }                                               UnrestrictedDmaAllocatorFunctions;
     PVOID                                           VirtualDcbaapAddress;
-
+    XHCI_RING_MANAGER                               CommandRingManager;
     /*XARRAY                          DeviceContexts;
     PVOID                           VirtualScratchpadAddress;
     PVOID                           VirtualScratchpadArrayAddress;
@@ -1829,7 +1843,9 @@ LOUSTATUS XhciAllocatePageSizeDmaMemory(PXHCI_DEVICE XhciDevice, SIZE Allocation
 LOUSTATUS XhciFreePageSizeDmaMemory(PXHCI_DEVICE XhciDevice, PVOID Address);
 UINT64 XhciGetDmaAddress(PVOID Address);
 
+void XhciEncodeLinkTrb(PXHCI_LINK_TRB LinkTrb, UINT64 RingSegmentPointer, UINT16 InterrupterTarget, UINT8 CycleBit, UINT8 ToggleCycle, UINT8 ChainBit, UINT8 InterruptOnCompletion);
 
+LOUSTATUS XhciInitializeCommandRingManager(PXHCI_DEVICE Device);
 
 #endif
 

@@ -14,8 +14,9 @@ SRC1 =  XhciPci.cpp \
 		XhciCap.cpp \
 		XhciSlots.cpp \
 		XhciMem.cpp \
-		XhciPorts.cpp
-
+		XhciPorts.cpp \
+		XhciTrbs.cpp \
+		XhciRings.cpp
 TARGET1 = XHCI.SYS
 
 SRC2 = Ohci.cpp \

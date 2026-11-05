@@ -102,7 +102,13 @@ LOUSTATUS AddDevice(
     LouPrint("XHCI.SYS:New Dcbaa Virtual Address :%h\n", NewXhciDevice->VirtualDcbaapAddress);
     LouPrint("XHCI.SYS:New Dcbaa Physical Address:%h\n", XhciGetDmaAddress(NewXhciDevice->VirtualDcbaapAddress));
 
+    XhciInitializeCommandRingManager(NewXhciDevice);
+
     //PAGE 80
+
+    //NOTE: Page 104 is the Command Ring Operation Information
+
+    //NOTE: Page 439 is a table of all the data structures
 
     //TODO: Initialize Interrupts    
 
