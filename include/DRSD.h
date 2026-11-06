@@ -985,6 +985,161 @@ typedef struct _DRSD_ARG_SUBMIT_COMMAND{
 typedef LOUSTATUS DRSD_DDI_SUBMIT_COMMAND(HANDLE, PDRSD_ARG_SUBMIT_COMMAND);
 typedef DRSD_DDI_SUBMIT_COMMAND* PDRSD_DDI_SUBMIT_COMMAND;
 
+typedef struct _DRSD_PREEMPT_COMMAND_FLAGS{
+    union{
+        struct{
+            UINT    Reserved    :   32;
+        };
+        UINT        Value;
+    };
+}DRSD_PREEMPT_COMMAND_FLAGS, * PDRSD_PREEMPT_COMMAND_FLAGS;
+
+typedef struct _DRSD_ARG_PREEMPT_COMMAND{
+    UINT                        PreemptFenceId;
+    UINT                        NodeOrdinal;
+    UINT                        EngineOrdinal;
+    DRSD_PREEMPT_COMMAND_FLAGS  Flags;
+}DRSD_ARG_PREEMPT_COMMAND, * PDRSD_ARG_PREEMPT_COMMAND;
+
+typedef LOUSTATUS DRSD_DDI_PREEMPT_COMMAND(HANDLE, PDRSD_ARG_PREEMPT_COMMAND);
+typedef DRSD_DDI_PREEMPT_COMMAND* PDRSD_DDI_PREEMPT_COMMAND;
+
+typedef enum{
+    DRSD_OPERATION_TRANSFER = 0,
+    DRSD_OPERATION_FILL = 1,
+    DRSD_OPERATION_DISCARD_CONTENT = 2,
+    DRSD_OPERATION_READ_PHYSICAL = 3,
+    DRSD_OPERATION_WRITE_PHYSICAL = 4,
+    DRSD_OPERATION_MAP_APERTURE_SEGMENT = 5,
+    DRSD_OPERATION_UNMAP_APERATURE_SEGMENT = 6,
+    DRSD_OPERATION_SPECIAL_LOCK_TRANSFER = 7,
+    DRSD_OPERATION_VIRTUAL_TRANSFER = 8,
+    DRSD_OPERATION_VIRTUAL_FILL = 9,
+    DRSD_OPERATION_INIT_CONTEXT_RESOURCE = 10,
+    DRSD_OPERATION_UPDATE_PAGE_TABLE = 11,
+    DRSD_OPERATION_FLUSH_TLB = 12,
+    DRSD_OPERATION_UPDATE_CONTEXT_ALLOCATION = 13,
+    DRSD_OPERATION_COPY_PAGE_TABLE_ENTRIES = 14,
+    DRSD_OPERATION_NOTIFY_RESIDENCY = 15,
+    DRSD_OPERATION_SIGNAL_MONITORED_FENCE = 16,
+    DRSD_OPERATION_MAP_APERTURE_SEGMENT2 = 17,
+    DRSD_OPERATION_NOTIFY_FENCE_RESIDENCY = 18,
+    DRSD_OPERATION_MAP_MMU = 19,
+    DRSD_OPERATION_UNMAP_MMU = 20,
+    DRSD_OPERATION_NOTIFY_RESIDENCY2 = 21,
+    DRSD_OPERATION_RESERVED22 = 22,
+    DRSD_OPERATION_TRANSFER2 = 23,
+    DRSD_OPERATION_FILL2 = 24,
+    DRSD_OPERATION_DISCARD_CONTENT2 = 25,
+}DRSD_BUILD_PAGING_BUFFER_OPERATION;
+
+typedef struct _DRSD_TRANSFER_FLAGS{
+    union{
+        struct{
+            UINT    Swizzle             :   1;
+            UINT    Unswizzle           :   1;
+            UINT    AllocationIsIdle    :   1;
+            UINT    TransferStart       :   1;
+            UINT    TransferEnd         :   1;
+            UINT    Reserved            :   27;
+        };
+        UINT        Value;
+    };
+}DRSD_TRANSFER_FLAGS, * PDRSD_TRANSFER_FLAGS;
+
+typedef struct _DRSD_ARG_BUILD_PAGING_BUFFER_TRANSFER{
+    HANDLE                      Allocation;
+    UINT                        TransferOffset;
+    SIZE                        TransferSize;
+    struct{
+        UINT                    SegmentID;
+        union{
+            LARGE_INTEGER       SegmentAddress;
+            PMDL                Mdl;                 
+        };
+    }Source;
+    struct{
+        UINT                    SegmentID;
+        union{
+            LARGE_INTEGER       SegmentAddress;
+            PMDL                Mdl;  
+        };
+    }Destination;
+    DRSD_TRANSFER_FLAGS         Flags;
+    UINT                        MdlOffset;
+}DRSD_ARG_BUILD_PAGING_BUFFER_TRANSFER, * PDRSD_ARG_BUILD_PAGING_BUFFER_TRANSFER;
+
+typedef struct _DRSD_ARG_BUILD_PAGING_BUFFER_FILL{
+    HANDLE              Allocation;
+    SIZE                FillSize;
+    UINT                FillPattern;
+    struct{
+        UINT            SegmentID;
+        LARGE_INTEGER   SegmentAddress;
+    }Destination;
+}DRSD_ARG_BUILD_PAGING_BUFFER_FILL, * PDRSD_ARG_BUILD_PAGING_BUFFER_FILL;
+
+typedef struct _DRSD_DISCARD_CONTENT_FLAGS{
+    union{
+        struct{
+            UINT    AllocationIsIdle    :   1;
+            UINT    Reserved            :   31;
+        };  
+        UINT        Value;
+    };
+}DRSD_DISCARD_CONTENT_FLAGS, * PDRSD_DISCARD_CONTENT_FLAGS;
+
+typedef struct _DRSD_ARG_BUILD_PAGING_BUFFER_DISCARD_CONTENT{
+    HANDLE                      Allocation;
+    DRSD_DISCARD_CONTENT_FLAGS  Flags;
+    UINT                        SegmentID;
+    PHYSICAL_ADDRESS            SegmentAddress;
+}DRSD_ARG_BUILD_PAGING_BUFFER_DISCARD_CONTENT, * PDRSD_ARG_BUILD_PAGING_BUFFER_DISCARD_CONTENT;
+
+typedef struct _DRSD_ARG_BUILD_PAGING_BUFFER_READ_PHYSICAL{
+    UINT                SegmentID;
+    PHYSICAL_ADDRESS    PhysicalAddress;
+}DRSD_ARG_BUILD_PAGING_BUFFER_READ_PHYSICAL, * PDRSD_ARG_BUILD_PAGING_BUFFER_READ_PHYSICAL, 
+    DRSD_ARG_BUILD_PAGING_BUFFER_WRITE_PHYSICAL, * PDRSD_ARG_BUILD_PAGING_BUFFER_WRITE_PHYSICAL;
+
+typedef struct _DRSD_MAP_ARPERTURE_FLAGS{
+    union{
+        struct{
+            UINT    CacheCoherent   :   1;
+            UINT    Reserved        :   31;
+        };
+        UINT        Value;
+    };
+}DRSD_MAP_ARPERTURE_FLAGS, * PDRSD_MAP_ARPERTURE_FLAGS;
+
+typedef struct _DRSD_ARG_BUILD_PAGING_BUFFER_MAP_APERTURE_SEGMENT{
+    HANDLE                      Device;
+    HANDLE                      Allocation;
+    UINT                        SegmentID;
+    SIZE                        OffsetInPages;
+    SIZE                        NumberOfPages;
+    PMDL                        Mdl;
+    DRSD_MAP_ARPERTURE_FLAGS    Flags;
+    ULONG                       MdlOffset;
+}DRSD_ARG_BUILD_PAGING_BUFFER_MAP_APERTURE_SEGMENT, * PDRSD_ARG_BUILD_PAGING_BUFFER_MAP_APERTURE_SEGMENT;
+
+typedef struct _DRSD_ARG_BUILD_PAGING_BUFFER{
+    PVOID                                                       DmaBuffer;
+    UINT                                                        DmaSize;
+    PVOID                                                       DmaBufferPrivateData;
+    UINT                                                        DmaBufferPrivateDataSize;
+    DRSD_BUILD_PAGING_BUFFER_OPERATION                          Operation;
+    union{
+        DRSD_ARG_BUILD_PAGING_BUFFER_TRANSFER                   Transfer;
+        DRSD_ARG_BUILD_PAGING_BUFFER_FILL                       Destination;
+        DRSD_ARG_BUILD_PAGING_BUFFER_DISCARD_CONTENT            DiscardContent;
+        DRSD_ARG_BUILD_PAGING_BUFFER_READ_PHYSICAL              ReadPhysical;
+        DRSD_ARG_BUILD_PAGING_BUFFER_WRITE_PHYSICAL             WritePhysical;  
+        DRSD_ARG_BUILD_PAGING_BUFFER_MAP_APERTURE_SEGMENT       MapApertureSegment;
+        //UnmapApertureSegment
+    };
+}DRSD_ARG_BUILD_PAGING_BUFFER, * PDRSD_ARG_BUILD_PAGING_BUFFER;
+
 typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
     ULONG                                           Version;
     PDRSD_DDI_ADD_DEVICE                            DrsdDdiAddDevice;
@@ -1013,7 +1168,8 @@ typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
     PDRSD_DDI_RELEASE_SWIZZLING_RANGE               DrsdDdiReleaseSwizzlingRange;
     PDRSD_DDI_PATCH                                 DrsdDdiPatch;
     PDRSD_DDI_SUBMIT_COMMAND                        DrsdDdiSubmitCommand;
-    //PDXGKDDI_PREEMPTCOMMAND
+    PDRSD_DDI_PREEMPT_COMMAND                       DrsdDdiPreemptCommand;
+    //PDXGKDDI_BUILDPAGINGBUFFER                
 }DRSD_DRIVER_INITIALIZATION_DATA, * PDRSD_DRIVER_INITIALIZATION_DATA;
 
 #ifndef _USER_MODE_CODE_
