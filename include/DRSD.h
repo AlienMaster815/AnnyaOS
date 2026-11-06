@@ -23,7 +23,7 @@ typedef struct _DRSD_DEVICE_INFO_FLAGS{
 typedef struct _DRSD_DEVICE_INFO{
     UINT                    DmaBufferSize;
     UINT                    DmaBufferSegmentSet;
-    UINT                    DmaBufferPRivateDataSize;
+    UINT                    DmaBufferPrivateDataSize;
     UINT                    AllocationListSize;
     UINT                    PatchLocationListSize;
     DRSD_DEVICE_INFO_FLAGS  Flags;
@@ -837,6 +837,154 @@ typedef struct _DRSD_ARG_GET_STANDARD_ALLOCATION_DRIVER_DATA{
 typedef LOUSTATUS DRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA(HANDLE, PDRSD_ARG_GET_STANDARD_ALLOCATION_DRIVER_DATA);
 typedef DRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA* PDRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA;
 
+typedef struct _DRSD_ARG_ACQUIRE_SWIZZLING_RANGE{
+    HANDLE              Allocation;
+    UINT                PrivateDriverData;
+    UINT                RangeID;
+    UINT                SegmentID;
+    SIZE                RangeSize;
+    PHYSICAL_ADDRESS    PciTranslatedAddress;
+}DRSD_ARG_ACQUIRE_SWIZZLING_RANGE, * PDRSD_ARG_ACQUIRE_SWIZZLING_RANGE;
+
+typedef LOUSTATUS DRSD_DDI_ACQUIRE_SWIZZLING_RANGE(HANDLE, PDRSD_ARG_ACQUIRE_SWIZZLING_RANGE);
+typedef DRSD_DDI_ACQUIRE_SWIZZLING_RANGE* PDRSD_DDI_ACQUIRE_SWIZZLING_RANGE;
+
+typedef struct _DRSD_ARG_RELEASE_SWIZZLING_RANGE{
+    HANDLE  Allocation;
+    UINT    PrivateDriverData;
+    UINT    RangeID;
+}DRSD_ARG_RELEASE_SWIZZLING_RANGE, * PDRSD_ARG_RELEASE_SWIZZLING_RANGE;
+
+typedef LOUSTATUS DRSD_DDI_RELEASE_SWIZZLING_RANGE(HANDLE, PDRSD_ARG_RELEASE_SWIZZLING_RANGE);
+typedef DRSD_DDI_RELEASE_SWIZZLING_RANGE* PDRSD_DDI_RELEASE_SWIZZLING_RANGE;
+
+typedef ULONGLONG D3DGPU_VIRTUAL_ADDRESS; 
+
+typedef struct _DRSD_ALLOCATION_LIST{
+    HANDLE                      DeviceSpecificAllocation;
+    struct{
+        UINT                    WriteOperation  :   1;
+        UINT                    SegmentID       :   1;
+        UINT                    Reserved        :   26;
+    };
+#ifndef _DRSD_API_USE_LEGACY_DXGK_ALLOCATION_LIST_MEMBER
+    union{
+        PHYSICAL_ADDRESS        PhysicalAddress;
+        D3DGPU_VIRTUAL_ADDRESS  VirtualAddress;
+    };
+#else 
+    PHYSICAL_ADDRESS            PhysicalAddres;
+#endif
+}DRSD_ALLOCATION_LIST, * PDRSD_ALLOCATION_LIST;
+
+typedef struct _D3DDDI_PATCH_LOCATION_LIST{
+    UINT                AllocationIndex;
+    union{
+        struct{
+            UINT        SlotId      :   24;
+            UINT        Reserved    :   8;
+        };
+        UINT            Value;
+    };
+    UINT                DriverId;
+    UINT                AllocationOffset;
+    UINT                PatchOffset;
+    UINT                SplitOffset;
+}D3DDDI_PATCH_LOCATION_LIST, * PD3DDDI_PATCH_LOCATION_LIST;
+
+typedef struct _DRSD_PATCH_FLAGS{
+    union{
+        struct{
+            UINT    Pageing             :   1;
+            UINT    Present             :   1;
+            UINT    RedirectionPresent  :   1;
+            UINT    NullRendering       :   1;
+            UINT    Reserved            :   28;
+        };
+        UINT        Value;
+    };
+}DRSD_PATCH_FLAGS, * PDRSD_PATCH_FLAGS;
+
+typedef struct _DRSD_ARG_PATCH{
+    union{
+        HANDLE                  Device;
+        HANDLE                  Context;
+    };
+    UINT                        DmaBufferSegmentId;
+    PHYSICAL_ADDRESS            DmaBufferPhysicalAddress;
+    PVOID                       DmaBuffer;
+    UINT                        DmaBufferSize;
+    UINT                        DmaBufferSubmissionStartOffset;
+    UINT                        DmaBufferSubmissionEndOffset;
+    PDRSD_ALLOCATION_LIST       AllocationList;
+    UINT                        AllocationListSize;
+    PD3DDDI_PATCH_LOCATION_LIST PatchLocationList;
+    UINT                        PatchLocationListSize;
+    UINT                        PatchLocationListSubmissionStart;
+    UINT                        PatchLocationListSubmissionLength;
+    UINT                        SubmissionFenceId;
+    DRSD_PATCH_FLAGS            Flags;
+    UINT                        EngineOrdinal;
+}DRSD_ARG_PATCH, * PDRSD_ARG_PATCH;
+
+typedef LOUSTATUS DRSD_DDI_PATCH(HANDLE, DRSD_ARG_PATCH);
+typedef DRSD_DDI_PATCH* PDRSD_DDI_PATCH;
+
+typedef struct _DRSD_SUBMIT_COMMAND_FLAGS{
+    union{
+        struct{
+            UINT    Paging              :   1;
+            UINT    Present             :   1;
+            UINT    RedirectionPresent  :   1;
+            UINT    NullRendering       :   1;
+            UINT    Flip                :   1;
+            UINT    FlipWithNoWait      :   1;
+            UINT    ContextSwitch       :   1;
+            UINT    Resubmission        :   1;
+            UINT    VirtualMachineData  :   1;
+            UINT    Reserved            :   23;
+        };
+        UINT        Value;
+    };
+}DRSD_SUBMIT_COMMAND_FLAGS, * PDRSD_SUBMIT_COMMAND_FLAGS;
+
+typedef UINT D3DDDI_VIDEO_PRESENT_SOURCE_ID;
+
+typedef enum{
+    D3DDDI_FLIP_INTERVAL_IMMEDIATE = 0,
+    D3DDDI_FLIP_INTERVAL_ONE,
+    D3DDDI_FLIP_INTERVAL_TWO,
+    D3DDDI_FLIP_INTERVAL_THREE,
+    D3DDDI_FLIP_INTERVAL_FOUR,
+    D3DDDI_FLIP_INTERVAL_IMMEDIATE_ALLOW_TEARING,
+}D3DDDI_FLIP_INTERVAL_TYPE;
+
+typedef struct _DRSD_ARG_SUBMIT_COMMAND{
+    union{
+        HANDLE                      Device;
+        HANDLE                      Context;
+    };
+    UINT                            DmaBufferSegmentId;
+    PHYSICAL_ADDRESS                DmaBufferPhysicalAddress;
+    UINT                            DmaBufferSize;
+    UINT                            DmaBufferSubmissionStartOffset;
+    UINT                            DmaBufferSubmissionEndOffset;
+    PVOID                           DmaBufferPrivateData;
+    UINT                            DmaBufferPrivateDataSize;
+    UINT                            DmaBufferPrivateSubmissionStartOffset;
+    UINT                            DmaBufferPrivateSubmissionEndOffset;
+    UINT                            SubmissionFenceId;
+    D3DDDI_VIDEO_PRESENT_SOURCE_ID  VidPnSourceId;
+    D3DDDI_FLIP_INTERVAL_TYPE       FlipInterval;
+    DRSD_SUBMIT_COMMAND_FLAGS       Flags;
+    UINT                            EngineOrdinal;
+    D3DGPU_VIRTUAL_ADDRESS          DmaBufferVirtualAddress;
+    UINT                            NodeOrdinal;
+}DRSD_ARG_SUBMIT_COMMAND, * PDRSD_ARG_SUBMIT_COMMAND;
+
+typedef LOUSTATUS DRSD_DDI_SUBMIT_COMMAND(HANDLE, PDRSD_ARG_SUBMIT_COMMAND);
+typedef DRSD_DDI_SUBMIT_COMMAND* PDRSD_DDI_SUBMIT_COMMAND;
+
 typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
     ULONG                                           Version;
     PDRSD_DDI_ADD_DEVICE                            DrsdDdiAddDevice;
@@ -861,7 +1009,11 @@ typedef struct _DRSD_DRIVER_INITIALIZATION_DATA{
     PDRSD_DDI_DESTROY_ALLOCATION                    DrsdDdiDestroyAllocation;
     PDRSD_DDI_DESCRIBE_ALLOCATION                   DrsdDdiDescribeAllocation;
     PDRSD_DDI_GET_STANDARD_ALLOCATION_DRIVER_DATA   DrsdDdiGetStandardAllocationDriverData;
-    //PDXGKDDI_ACQUIRESWIZZLINGRANGE
+    PDRSD_DDI_ACQUIRE_SWIZZLING_RANGE               DrsdDdiAcquireSwizzlingRange;
+    PDRSD_DDI_RELEASE_SWIZZLING_RANGE               DrsdDdiReleaseSwizzlingRange;
+    PDRSD_DDI_PATCH                                 DrsdDdiPatch;
+    PDRSD_DDI_SUBMIT_COMMAND                        DrsdDdiSubmitCommand;
+    //PDXGKDDI_PREEMPTCOMMAND
 }DRSD_DRIVER_INITIALIZATION_DATA, * PDRSD_DRIVER_INITIALIZATION_DATA;
 
 #ifndef _USER_MODE_CODE_
