@@ -192,4 +192,35 @@ UINT64 XhciGetDmaAddress(
     return Result;
 }
 
+LOUSTATUS 
+XhciAllocateScratchpadMemory(
+    PXHCI_DEVICE XhciDevice
+){
+    LOUSTATUS Status;
+    SIZE MaxScratchpageBufs = XhciDevice->Capabilities.MaxScratchpageBufs;
+    if(!MaxScratchpageBufs){
+        LouPrint("XHCI.SYS:Device Does Not Use Sratchpad Buffers\n");
+        return STATUS_SUCCESS;
+    }
+    XhciDevice->VirtualScratchpadAddresses = LouKeMallocArray(PVOID, MaxScratchpageBufs, KERNEL_GENERIC_MEMORY);
+    if(!XhciDevice->VirtualScratchpadAddresses){
+        LouPrint("XHCI.SYS:Unable To Allocate Resources for XhciDevice->VirtualScratchpadAddresses Variable\n");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
 
+    Status = XhciAllocatePageSizeDmaMemory(XhciDevice, MaxScratchpageBufs * sizeof(UINT64), 64, &XhciDevice->VirtualScratchpadArrayAddress);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Unable To Allocate Scratchpad Array\n");
+        return Status;
+    }
+    UINT64* Foo = (UINT64*)XhciDevice->VirtualScratchpadArrayAddress;
+    SIZE PageSize = XhciDevice->Capabilities.PageSize;
+    for(SIZE i = 0; i < MaxScratchpageBufs; i++){
+        Status = XhciAllocatePageSizeDmaMemory(XhciDevice, PageSize, 1, &XhciDevice->VirtualScratchpadAddresses[i]);
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        Foo[i] = XhciGetDmaAddress(XhciDevice->VirtualScratchpadAddresses[i]);
+    }
+    return STATUS_SUCCESS;
+}

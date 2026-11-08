@@ -210,7 +210,7 @@ LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
     UINT64              LirData,
     SIZE                Vectors,
     SIZE                Alignment,
-    SIZE                ApicId
+    SIZE                MaxApicID
 );
 
 #endif

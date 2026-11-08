@@ -17,6 +17,8 @@ LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
 
+LOUSTATUS XhciInterruptHandler(UINT64 Data);
+
 #define XHCI_INTEL_PANTHER_POINT_QUIRK 1
 
 static USB_HCD_OPERATIONS XhciHcdOperations = {
@@ -102,18 +104,58 @@ LOUSTATUS AddDevice(
     LouPrint("XHCI.SYS:New Dcbaa Virtual Address :%h\n", NewXhciDevice->VirtualDcbaapAddress);
     LouPrint("XHCI.SYS:New Dcbaa Physical Address:%h\n", XhciGetDmaAddress(NewXhciDevice->VirtualDcbaapAddress));
 
-    XhciInitializeCommandRingManager(NewXhciDevice);
+    Status = XhciAllocateScratchpadMemory(NewXhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Unable To Allocate Stratchpad Memory\n");
+        while(1);
+    }
+    if(NewXhciDevice->VirtualScratchpadArrayAddress){
+        *(UINT64*)NewXhciDevice->VirtualDcbaapAddress = XhciGetDmaAddress(NewXhciDevice->VirtualScratchpadArrayAddress);
+    }
+
+    Status = XhciInitializeCommandRingManager(NewXhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Fatal Error:Unable To Allocate Command Ring\n");
+        while(1);
+    }
+
+    Status = PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY | PCI_IRQ_USE_MSI | PCI_IRQ_USE_MSI_X);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Fatal Error:Unable To Allocate Interrupt Vectors\n");
+        while(1);
+    }
+    Status = PciHalConnectIrqHandler(
+        PDEV,
+        (OPAQUE_PTR)XhciInterruptHandler,
+        LirRoutine,
+        (UINT64)(UINTPTR)(UINT8*)NewXhciDevice,
+        0
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Fatal Error:Unable To Connect Interrupt Handler\n");
+        while(1);
+    }
+    Status = XhciAllocateUnrestrictedDmaMemory(
+        NewXhciDevice, 
+        sizeof(XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY), 
+        64, 
+        &NewXhciDevice->VirtualErstbaAddress
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Fatal Error:Unable To Allocate Event Ring Table\n");
+        while(1);
+    }
+    Status = XhciInitializeEventRingManager(NewXhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XHCI.SYS:Fatal Error:Unable To Allocate Event Ring\n");
+        while(1);
+    }
 
     //PAGE 80
 
     //NOTE: Page 104 is the Command Ring Operation Information
 
     //NOTE: Page 439 is a table of all the data structures
-
-    //TODO: Initialize Interrupts    
-
-    LouPrint("XHCI.SYS::AddDevice():HERE\n\n");
-    while(1);
 
     Status = UsbCoreCreateHcdObject(
         NewXhciDevice->PDEV,
@@ -123,12 +165,11 @@ LOUSTATUS AddDevice(
         &XhciHcdOperations
     );
     if(Status != STATUS_SUCCESS){
-        LouKeFree(NewXhciDevice);
-        return STATUS_INSUFFICIENT_RESOURCES;
+        LouPrint("XHCI.SYS:Fatal Error:Unable To Allocate Register Controller\n");
+        while(1);
     }
 
     LouPrint("XHCI.SYS::AddDevice() STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 

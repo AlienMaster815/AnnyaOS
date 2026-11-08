@@ -268,12 +268,15 @@ PVOID LouKeRatAllocateXBitPhysicalAddress(SIZE Size, SIZE Alignment, ULONG xBits
         return 0x00;
     }
     REP_GET_ALLOCATION_CTX Context = {.Base = 0, .xBits = xBits, .Length = Size, .Alignment = Alignment};
-    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree32BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
+    BOOLEAN Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree64BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
     if(!Successfull){
-        LouPrint("LouKeRatAllocate32BitPhysicalAddress() No Free Memory\n");
-        MutexUnlock(&RatLock);
-        //while(1);
-        return 0x00;
+        Successfull = LouKeRatForEachRatEntryTillTrue(GetFirstFree32BitAddress, (PVOID)&Context, LOADER_USABLE_MEMORY);
+        if(!Successfull){
+            MutexUnlock(&RatLock);
+            LouPrint("LouKeRatAllocate64BitPhysicalAddress() No Free Memory\n");
+            //while(1);
+            return 0x00;
+        }
     } 
     NewTracker->Base = Context.Base;
     NewTracker->Length = Context.Length;

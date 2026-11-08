@@ -1666,9 +1666,10 @@ static void AhciInitializeInterrupts(PPCI_DEVICE_OBJECT PDEV, SIZE PortCount, PA
     
     if(PrivateData->BoardInfo.AhciFlags & AHCI_FLAG_NO_MSI){
         PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY);
+        return;
     }
-
-    PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY | PCI_IRQ_USE_MSI | PCI_IRQ_USE_MSI_X);
+    // | PCI_IRQ_USE_MSI | PCI_IRQ_USE_MSI_X
+    PciHalAllocatePciIrqVectors(PDEV, 1, PCI_IRQ_USE_LEGACY);
 }
 
 LOUSTATUS AhciInterruptHandler(UINT64 LirData){

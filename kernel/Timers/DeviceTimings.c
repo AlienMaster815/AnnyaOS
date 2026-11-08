@@ -14,6 +14,7 @@ LouKeWaitForUcharRegisterConditionMs(
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
     UCHAR Tmp = *(volatile CHAR*)Mmio;
     do{
+        sleep(1);
         Tmp = *(volatile CHAR*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
@@ -53,6 +54,7 @@ LouKeWaitForUshortRegisterConditionMs(
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
     UCHAR Tmp = *(volatile USHORT*)Mmio;
     do{
+        sleep(1);
         Tmp = *(volatile USHORT*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
@@ -93,6 +95,7 @@ LouKeWaitForUlongRegisterConditionMs(
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
     ULONG Tmp = *(volatile ULONG*)Mmio;
     do{
+        sleep(1);
         Tmp = *(volatile ULONG*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
@@ -133,6 +136,7 @@ LouKeWaitForUlonglongRegisterConditionMs(
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
     ULONG Tmp = *(volatile ULONGLONG*)Mmio;
     do{
+        sleep(1);
         Tmp = *(volatile ULONGLONG*)Mmio;
     }while(((Tmp & Mask) != Value) && (GetCurrentTimeInMilliseconds() < Limit));
 
@@ -171,6 +175,7 @@ LouKeWaitForAtomicBooleanRegisterConditionMs(
     size_t Limit = (GetCurrentTimeInMilliseconds() + MsWait);
     BOOLEAN Tmp = LouKeGetAtomicBoolean(Mmio);
     do{
+        sleep(1);
         Tmp = LouKeGetAtomicBoolean(Mmio);
     }while((Tmp != Test) && (GetCurrentTimeInMilliseconds() < Limit));
 

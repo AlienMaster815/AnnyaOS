@@ -4,7 +4,8 @@ LOUSTATUS XhciInitializeRingManager(
     PXHCI_DEVICE        XhciDevice,
     PXHCI_RING_MANAGER  RingManager,
     SIZE                RingMembers,
-    SIZE                RingAlignment
+    SIZE                RingAlignment,
+    BOOLEAN             CreatingLinkAtEnd
 ){
     if(
         (!XhciDevice) || (!RingManager) || 
@@ -21,6 +22,17 @@ LOUSTATUS XhciInitializeRingManager(
     MutexUnlock(&RingManager->RingLock);
     RingManager->RingEnqueuePointer = 0;
     if(RingManager->VirtualRing){
+        if(CreatingLinkAtEnd){
+            XhciEncodeLinkTrb(
+                (PXHCI_LINK_TRB)&RingManager->VirtualRing[RingMembers - 1],
+                (UINT64)(UINT8*)&RingManager->PhysicalRing[0],
+                0,
+                1,
+                1,
+                0,
+                0
+            );   
+        }
         return STATUS_SUCCESS;
     }
     Status = XhciAllocateTransferDmaMemory(XhciDevice, sizeof(XHCI_GENERIC_TRB) * RingMembers, RingAlignment, &TmpPvoid);
@@ -36,16 +48,17 @@ LOUSTATUS XhciInitializeRingManager(
         return Status;
     }
     RingManager->PhysicalRing = (PXHCI_GENERIC_TRB)(UINT8*)Tmp64;
-
-    XhciEncodeLinkTrb(
-        (PXHCI_LINK_TRB)&RingManager->VirtualRing[RingMembers],
-        (UINT64)(UINT8*)&RingManager->PhysicalRing[0],
-        0,
-        1,
-        1,
-        0,
-        0
-    );
+    if(CreatingLinkAtEnd){
+        XhciEncodeLinkTrb(
+            (PXHCI_LINK_TRB)&RingManager->VirtualRing[RingMembers - 1],
+            (UINT64)(UINT8*)&RingManager->PhysicalRing[0],
+            0,
+            1,
+            1,
+            0,
+            0
+        );   
+    }
     return STATUS_SUCCESS;
 }
 
@@ -57,10 +70,87 @@ XhciInitializeCommandRingManager(
     if(!XhciDevice){
         return STATUS_INVALID_PARAMETER;
     }
-    return XhciInitializeRingManager(
+    Status = XhciInitializeRingManager(
         XhciDevice,
         &XhciDevice->CommandRingManager,
-        256,
-        64
+        0xFF,
+        64,
+        true
     );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    LouPrint("XHCI.SYS:New Command Ring:%h\n", &XhciDevice->CommandRingManager.PhysicalRing[0]);
+    return STATUS_SUCCESS;  
+}
+
+LOUSTATUS 
+XhciResetCommandRing(
+    PXHCI_DEVICE    XhciDevice
+){
+    LOUSTATUS Status;
+    if(!XhciDevice){
+        return STATUS_INVALID_PARAMETER;
+    }
+    Status = XhciInitializeRingManager(
+        XhciDevice,
+        &XhciDevice->CommandRingManager,
+        0xFF,
+        64,
+        true
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    LouPrint("XHCI.SYS:Reset Command Ring:%h\n", &XhciDevice->CommandRingManager.PhysicalRing[0]);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS
+XhciInitializeEventRingManager(
+    PXHCI_DEVICE    XhciDevice
+){
+    LOUSTATUS Status;
+    if(!XhciDevice){
+        return STATUS_INVALID_PARAMETER;
+    }
+    Status = XhciInitializeRingManager(
+        XhciDevice,
+        &XhciDevice->EventRingManager,
+        0xFF,
+        64,
+        false
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY Table = (PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY)XhciDevice->VirtualErstbaAddress;
+    Table->SegmentBuffer = (UINT64)(UINT8*)&XhciDevice->EventRingManager.PhysicalRing[0]; 
+    Table->SegmentSize = 0xFF;
+    LouKeMemoryBarrier();
+    LouPrint("XHCI.SYS:New Event Segment Buffer:%h\n", Table->SegmentBuffer);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciResetEventRing(PXHCI_DEVICE XhciDevice){
+    LOUSTATUS Status;
+    if(!XhciDevice){
+        return STATUS_INVALID_PARAMETER;
+    }
+    Status = XhciInitializeRingManager(
+        XhciDevice,
+        &XhciDevice->EventRingManager,
+        0xFF,
+        64,
+        false
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY Table = (PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY)XhciDevice->VirtualErstbaAddress;
+    Table->SegmentBuffer = (UINT64)(UINT8*)&XhciDevice->EventRingManager.PhysicalRing[0]; 
+    Table->SegmentSize = 0xFF;
+    LouKeMemoryBarrier();
+    LouPrint("XHCI.SYS:Reset Event Segment Buffer:%h\n", Table->SegmentBuffer);
+    return STATUS_SUCCESS;
 }

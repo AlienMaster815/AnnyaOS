@@ -23,7 +23,7 @@ typedef struct PACKED _XHCI_CAPABILITIES_REGISTER{
     volatile UINT32      HcsParams3;
     volatile UINT32      HccParams1;
     volatile UINT32      DoorbellOffset;
-    volatile UINT32      RuntimeRegOfffset;
+    volatile UINT32      RuntimeRegOffset;
     volatile UINT32      HccParams2;
 }XHCI_CAPABILITIES_REGISTER, * PXHCI_CAPABILITIES_REGISTER;
 
@@ -42,7 +42,7 @@ typedef struct PACKED _XHCI_CAPABILITIES_REGISTER{
 #define GET_XHCI_CAP_MAX_DEVICE_SLOTS(x)            ((((PXHCI_CAPABILITIES_REGISTER)x)->HcsParams1 & XHCI_CAP_MAX_PORTS_MASK) >> XHCI_CAP_MAX_INTERRUPTS_SHIFT)
 
 //HCSPARAMS2
-#define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_MASK      0xF8
+#define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_MASK      0x1F
 #define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO_SHIFT     27
 #define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO           (XHCI_CAP_SCRATCHPAD_BUFFERS_MASK << XHCI_CAP_SCRATCHPAD_BUFFERS_SHIFT)
 #define GET_XHCI_CAP_MAX_SCRATCHPAD_BUFFERSLO(x)    ((((PXHCI_CAPABILITIES_REGISTER)x)->HcsParams2 & XHCI_CAP_SCRATCHPAD_BUFFERS) >> XHCI_CAP_SCRATCHPAD_BUFFERS_SHIFT)
@@ -50,7 +50,7 @@ typedef struct PACKED _XHCI_CAPABILITIES_REGISTER{
 #define XHCI_CAP_SCRATCHPAD_RESTORE_SHIFT           26
 #define XHCI_CAP_SCRATCHPAD_RESTORE                 (XHCI_CAP_SCRATCHPAD_RESTORE_MASK << XHCI_CAP_SCRATCHPAD_RESTORE_SHIFT)
 #define GET_XHCI_CAP_SCRATCHPAD_RESTORE(x)          ((((PXHCI_CAPABILITIES_REGISTER)x)->HcsParams2 & XHCI_CAP_SCRATCHPAD_RESTORE) >> XHCI_CAP_SCRATCHPAD_RESTORE_SHIFT)
-#define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_MASK      0x3E
+#define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_MASK      0x1F
 #define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_SHIFT     21
 #define XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI           (XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_MASK << XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_SHIFT)
 #define GET_XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI(x)    ((((PXHCI_CAPABILITIES_REGISTER)x)->HcsParams2 & XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI) >> XHCI_CAP_MAX_SCRATCHPAD_BUFFERSHI_SHIFT)
@@ -179,17 +179,18 @@ typedef struct PACKED _XHCI_USB_PORT_REGISTER_SET{
 
 typedef struct PACKED _XHCI_OPERATIONAL_REGISTERS{
     volatile UINT32                          UsbCommand;
-    volatile UINT32                          UsbStatus;                      
-    volatile UINT32                          PageSize;                       
-    volatile UINT8                           ReservedZ1[0x13 - 0x0C];        
+    volatile UINT32                          UsbStatus;    
+    volatile UINT32                          PageSize;    
+    volatile UINT8                           ReservedZ1[8];
     volatile UINT32                          DncCtrl;
     volatile UINT64                          Crcr;
-    volatile UINT8                           ReservedZ2[0x2F - 0x20];
+    volatile UINT8                           ReservedZ2[16];
     volatile UINT64                          Dcbaap;
     volatile UINT32                          Config;
-    volatile UINT8                           ReservedZ3[0x03FF - 0x003C];
+    volatile UINT8                           ReservedZ3[964];
     volatile XHCI_USB_PORT_REGISTER_SET      Ports[];
 }XHCI_OPERATIONAL_REGISTERS, * PXHCI_OPERATIONAL_REGISTERS;
+
 
 #define GET_XHCI_OPERATIONAL_REGISTERS(Cap)         ((PXHCI_OPERATIONAL_REGISTERS)((UINT64)(((PXHCI_CAPABILITIES_REGISTER)Cap)->CapLength) + (UINT64)Cap))
 
@@ -526,11 +527,12 @@ typedef struct PACKED _XHCI_DOORBELL_REGISTERS{
 
 typedef struct PACKED _XHCI_RUNTIME_REGISTERS{
     volatile UINT32                  MicroFrameIndex;
-    volatile UINT8                   ReservedZ[0x1F - 0x04];
+    volatile UINT8                   ReservedZ[28];
     volatile XHCI_INTERUPT_REGISTER  Irqx[];
 }XHCI_RUNTIME_REGISTERS, * PXHCI_RUNTIME_REGISTERS;
 
-#define XHCI_GET_RUNTIME_REGISTERS(Cap)         (PXHCI_RUNTIME_REGISTERS)((UINTPTR)Cap + Cap->RuntimeRegOfffset)
+
+#define XHCI_GET_RUNTIME_REGISTERS(Cap)         (PXHCI_RUNTIME_REGISTERS)((UINTPTR)Cap + Cap->RuntimeRegOffset)
 
 #define XHCI_RUNTIME_REG_MAX_IRQS           1023
 
@@ -1808,7 +1810,8 @@ typedef struct _XHCI_RING_MANAGER{
     UINT8                       RingEnqueuePointer; 
     PXHCI_GENERIC_TRB           VirtualRing;
     PXHCI_GENERIC_TRB           PhysicalRing;
-}XHCI_RING_MANAGER, * PXHCI_RING_MANAGER;
+}XHCI_RING_MANAGER, * PXHCI_RING_MANAGER, 
+    XHCI_EVENT_RING_MANAGER, * PXHCI_EVENT_RING_MANAGER;
 
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT                              PDEV;
@@ -1825,12 +1828,15 @@ typedef struct _XHCI_DEVICE{
     }                                               UnrestrictedDmaAllocatorFunctions;
     PVOID                                           VirtualDcbaapAddress;
     XHCI_RING_MANAGER                               CommandRingManager;
-    /*XARRAY                          DeviceContexts;
+    XHCI_EVENT_RING_MANAGER                         EventRingManager;
+    PVOID                                           VirtualErstbaAddress;
+    PVOID                                           VirtualScratchpadArrayAddress;
+    PVOID*                                          VirtualScratchpadAddresses;
+    /*
+    XARRAY                          DeviceContexts;
     PVOID                           VirtualScratchpadAddress;
-    PVOID                           VirtualScratchpadArrayAddress;
-    PVOID                           VirtualCommandRingAddress;
-    PVOID                           VirtualErstbaAddress;
-    ListHeader                      VirtualErdpAddresses;*/
+    ListHeader                      VirtualErdpAddresses;
+    */
 }XHCI_DEVICE, * PXHCI_DEVICE;
 
 LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
@@ -1846,6 +1852,10 @@ UINT64 XhciGetDmaAddress(PVOID Address);
 void XhciEncodeLinkTrb(PXHCI_LINK_TRB LinkTrb, UINT64 RingSegmentPointer, UINT16 InterrupterTarget, UINT8 CycleBit, UINT8 ToggleCycle, UINT8 ChainBit, UINT8 InterruptOnCompletion);
 
 LOUSTATUS XhciInitializeCommandRingManager(PXHCI_DEVICE Device);
+LOUSTATUS XhciInitializeEventRingManager(PXHCI_DEVICE XhciDevice);
+LOUSTATUS XhciResetCommandRing(PXHCI_DEVICE XhciDevice);
+LOUSTATUS XhciResetEventRing(PXHCI_DEVICE XhciDevice);
+LOUSTATUS XhciAllocateScratchpadMemory(PXHCI_DEVICE XhciDevice);
 
 #endif
 

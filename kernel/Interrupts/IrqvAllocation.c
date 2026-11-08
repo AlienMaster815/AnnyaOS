@@ -367,7 +367,7 @@ KERNEL_EXPORT LOUSTATUS LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
     UINT64              LirData,
     SIZE                Vectors,
     SIZE                Alignment,
-    SIZE                ApicID
+    SIZE                MaxApicID
 ){
     if((Vectors > 32) || (!VectorObjectOut)){
         return STATUS_INVALID_PARAMETER;
@@ -377,7 +377,7 @@ KERNEL_EXPORT LOUSTATUS LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
 
     LouKeMemoryBarrier();
     for(SIZE i = 0; i < IpicsAllocated; i++){
-        if(!Ipics[i].ProcessorEnabled || (ApicHalCpuIdToApicId(i) > ApicID)){
+        if(!Ipics[i].ProcessorEnabled || (ApicHalCpuIdToApicId(i) > MaxApicID)){
             continue;
         }
         if(Ipics[i].VectorAllocationCount < GroundState){

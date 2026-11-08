@@ -26,15 +26,21 @@ void PciHalDisableMsiInterrupts(PPCI_DEVICE_OBJECT PDEV){
     }
 }
 
-static void InitializeRequestsAndGroupsToHardwareLimitation(
+static BOOLEAN InitializeRequestsAndGroupsToHardwareLimitation(
     UINT32* RequestedVectorsp,
-    UINT32* Groupedp,
+    UINT32* MmeBits,
     UINT32  HardwareLimitation
 ){
     UINT32 RequestedVectors = *RequestedVectorsp;
-    UINT32 Grouped = ROUND_UP64(RequestedVectors, HardwareLimitation) / HardwareLimitation;
-    *RequestedVectorsp = ROUND_UP64(RequestedVectors, HardwareLimitation) / Grouped; 
-    *Groupedp = Grouped;   
+    UINT32 i;
+    for(i = 0; ToThePowerOf2(i) < RequestedVectors; i++);
+    RequestedVectors = ToThePowerOf2(i);
+    if(RequestedVectors > HardwareLimitation){
+        return false;
+    }
+    *MmeBits = i;
+    *RequestedVectorsp = RequestedVectors;
+    return true;
 }
 
 LOUSTATUS PciHalDumbyInterruptHandler(UINT64 Foo){
@@ -51,28 +57,24 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
         return STATUS_UNSUCCESSFUL;
     }
 
-    //if(PciHalPciSupportsMsix(PDEV) && (Flags & PCI_IRQ_USE_MSI_X)){
-    //    LouPrint("PCI.SYS:Allocating MSI-X Vectors\n");
-    //    while(1);
-    //}else 
-    /*if(PciHalPciSupportsMsi(PDEV) && (Flags & PCI_IRQ_USE_MSI)){
+    if(PciHalPciSupportsMsix(PDEV) && (Flags & PCI_IRQ_USE_MSI_X)){
+        LouPrint("PCI.SYS:Allocating MSI-X Vectors\n");
+        while(1);
+    }else if(PciHalPciSupportsMsi(PDEV) && (Flags & PCI_IRQ_USE_MSI)){
+        PciHalDbgPrint("PCI.SYS:Allocating MSI Vectors\n");
+        UINT32 MmeBits;
         UINT32 Grouped;
         UINT32 HardwareLimitation = MIN(32, PciMsiGetMultiMessageCount(PDEV));
-        LouPrint("PCI Hardware Limitation:%h\n", HardwareLimitation);
-        InitializeRequestsAndGroupsToHardwareLimitation(
+        PciHalDbgPrint("PCI Hardware Limitation:%h\n", HardwareLimitation);
+        BOOLEAN Success = InitializeRequestsAndGroupsToHardwareLimitation(
             &RequestedVectors,
-            &Grouped,
+            &MmeBits,
             HardwareLimitation
         );
-
-        UINT32 MmeBits = 0;
-        UINT32 TmpCount = Grouped;
-
-        while(TmpCount > 1){
-            TmpCount >>= 1;
-            MmeBits++;
+        if(!Success){
+            PciHalDbgPrint("Vector Request Excedes Hardware Limitation:%h\n", RequestedVectors);
+            return STATUS_INSUFFICIENT_RESOURCES;
         }
-
         NewVectors = LouKeMallocArray(OPAQUE_PTR, 2, KERNEL_GENERIC_MEMORY);
         NewVectors[0] = (UINT8*)(UINTPTR)RequestedVectors;
         Status = LouKeIpicAllocateVectorObjectsExWithApicIdLimitation(
@@ -83,7 +85,7 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
             0x00,
             RequestedVectors,
             RequestedVectors,
-            254
+            0xFF
         );
         if(Status != STATUS_SUCCESS){
             return Status;
@@ -131,8 +133,9 @@ DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UIN
             return STATUS_UNSUCCESSFUL;
         }
         PciHalSetCommand(PDEV, PciHalGetCommand(PDEV) | (1 << 10));
-    }else{ */
-    if(Flags & PCI_IRQ_USE_LEGACY){
+        PDEV->InterruptVectors = NewVectors;
+        return STATUS_SUCCESS;
+    }else if(Flags & PCI_IRQ_USE_LEGACY){
         PciHalDbgPrint("PCI.SYS:Allocating INT-X Vectors\n");
         NewVectors = LouKeMallocArray(OPAQUE_PTR, 2, KERNEL_GENERIC_MEMORY);
         NewVectors[0] = (UINT8*)(UINTPTR)1;
