@@ -346,11 +346,11 @@ LOUSTATUS AhciGenericPortDeviceCleanupCommand(
 ){
     PAHCI_DRIVER_PRIVATE_DATA PrivateData = (PAHCI_DRIVER_PRIVATE_DATA)PortDevice->PortPrivateData;
     PAHCI_COMMAND_PRIVATE_DATA CommandPrivateData = (PAHCI_COMMAND_PRIVATE_DATA)CommandPacket->CommandPrivateData;
-    CommandPacket->CommandPrivateData = 0x00; 
     if(CommandPacket->CommandStatus != STATUS_SUCCESS){
         LouPrint("CommandStatus:%h\n", CommandPacket->CommandStatus);
         AhciHandleCommandErrorRecovery(PortDevice, CommandPacket);
     } 
+    CommandPacket->CommandPrivateData = 0x00; 
     AhciGenericFreeCommandSlot(PrivateData, CommandPrivateData->CommandSlot);
     LouKeFreeFastObject("AHCI_COMMAND_PRIVATE_DATA", CommandPrivateData);
     return STATUS_SUCCESS;

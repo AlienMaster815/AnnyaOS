@@ -50,8 +50,8 @@ LOUSTATUS PciHalDumbyInterruptHandler(UINT64 Foo){
 }
 
 DRIVER_EXPORT LOUSTATUS PciHalAllocatePciIrqVectors(PPCI_DEVICE_OBJECT PDEV, UINT32 RequestedVectors, UINT64 Flags){
-    OPAQUE_PTR* NewVectors;   
-    LOUSTATUS Status; 
+    OPAQUE_PTR* NewVectors;
+    LOUSTATUS Status;
     UINT8 Vector;
     if(PDEV->InterruptVectors){
         return STATUS_UNSUCCESSFUL;

@@ -63,7 +63,7 @@ _AtaCoreAtapiEndpointStartReadCapacity10(
     CommandPacket->TransferData = LouKeCreateDmaTransfer(AtaPort->AtaCoreDmaDevice, 8, 2);
     CommandPacket->TransferSize = 8;
     AtaCoreEncodePacketCommand((PATA_COMMAND_PACKET_STRUCTURE)&CommandPacket->Packet, EndpointDevice->ChannelDev, 8, 0, 0, 0);
-    LouKeSetupDmaTransferFence(CommandPacket->TransferData, 5000, true);
+    LouKeSetupDmaTransferFence(CommandPacket->TransferData, 500, true);
     if(AtaPort->Operations->AtaPortDevicePrepCommand){
         Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, CommandPacket);
         if(Status != STATUS_SUCCESS){
