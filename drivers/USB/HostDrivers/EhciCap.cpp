@@ -1,89 +1,96 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
+#include "Ehci.h"
 
-/*
-#include "EHCI.h"
-
-static void EhciPrintCapabilities(
-    PEHCI_DEVICE    EhciDevice
+void EhciPrintCapabilities(
+    PEHCI_DEVICE_CAPABILITIES Capabilities
 ){
-    LouPrint("EHCI.SYS:EhciPrintCapabilities()\n");
-    
-    if(EhciDevice->Dma64Supported){
-        LouPrint("EHCI.SYS:Ehci Controller Supports 64 Bit DMA Data Structures\n");
+    LouPrint("\n");
+    LouPrint("START:EHCI_CAPS\n");
+    LouPrint("EHCI Version:%d.%d\n", Capabilities->EhciMajorVersion, Capabilities->EhciMinorVersion);
+    LouPrint("Number Of Ports:%d\n", Capabilities->NumberOfPorts);
+    LouPrint("Ports Per Companion Controller:%d\n", Capabilities->PortsPerCompanionController);
+    LouPrint("Number Of Companion Controllers:%d\n", Capabilities->NumberOfCompanionControllers);
+    LouPrint("Debug Port Number:%d\n", Capabilities->DebugPortNumber);
+    LouPrint("ISOCH Schedualing Threashold:%h\n", Capabilities->IsochronusSchedulingThreshold);
+    LouPrint("Ehci Extended Cap Pointer:%h\n", Capabilities->EhciExtendedCapabilitiesPointer);
+
+    if(Capabilities->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PPC){
+        LouPrint("Power Port Control Supported\n");
     }else{
-        LouPrint("EHCI.SYS:Ehci Controller Does Not Support 64 Bit DMA Data Structures\n");
+        LouPrint("Power Port Control Not Supported\n");
     }
 
-    if(EhciDevice->PortIndicatorSupport){
-        LouPrint("EHCI.SYS:Ehci Controller Supports Port Indicators\n");
-    }else {
-        LouPrint("EHCI.SYS:Ehci Controller Does Not Support Port Indicators\n");
+    if(Capabilities->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_ROUTING_RULES){
+        LouPrint("Has Port Routing Rules\n");
+        LouPrint("Port Routing Data:%h\n", Capabilities->EhciOptionalPortRoute);
+    }else{
+        LouPrint("Does Not Have Port Routing Rules\n");
     }
 
-    if(EhciDevice->EhciRoutingThroughPORTROUTE){
-        LouPrint("EHCI.SYS:Ehci Controller Routes Through HCSP-PORTROUTE\n");
+    if(Capabilities->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_INDICATORS){
+        LouPrint("Has Port Indicators\n");
     }else{
-        LouPrint("EHCI.SYS:Ehci Controller Routes Through A Commpanion Hiarchy\n");
+        LouPrint("Does Not Have Port Indicators\n");
     }
 
-    if(EhciDevice->PortPowerControlSupport){
-        LouPrint("EHCI.SYS:Ehci Controller Supports Power Control\n");
+    if(Capabilities->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_64BIT_DMA){
+        LouPrint("Supports Long Mode DMA\n");
     }else{
-        LouPrint("EHCI.SYS:Ehci Controller Does Not Support Power Control\n");
+        LouPrint("Does Not Support Long Mode DMA\n");
     }
 
-    if(EhciDevice->HighSpeedParkSupport){
-        LouPrint("EHCI.SYS:Ehci Controller Supports High Speed Park\n");
+    if(Capabilities->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PROGRAMMABLE_FRAME_LIST){
+        LouPrint("Has Programmable Frame List\n");        
     }else{
-        LouPrint("EHCI.SYS:Ehci Controller Does Not Support High Speed Park\n");
-    } 
-
-    if(EhciDevice->SmallFrameSizeSupport){
-        LouPrint("EHCI.SYS:Ehci Controller Supports Small Frame Lists\n");
-    }else{
-        LouPrint("EHCI.SYS:Ehci Controller Does Not Support Small Frame Lists\n");
+        LouPrint("Does Not Have Programmable Frame List\n");        
     }
 
-    LouPrint("EHCI.SYS:Ehci Controller Has %d Ports\n", EhciDevice->EhciPortCount);
+    if(Capabilities->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_ASYNC_SCHEDULE_PARK){
+        LouPrint("Has Async Schedual Park\n");
+    }else{
+        LouPrint("Does Not Have Async Schedual Park\n");
+    }
 
-    LouPrint("EHCI.SYS:Ehci Controller Has %d Ports Per Companion\n", EhciDevice->OhciPortMultiplier);
-    
-    LouPrint("EHCI.SYS:Ehci Controller Has %d Companions\n", EhciDevice->OhciCompanionCount);
-
-    LouPrint("EHCI.SYS:Ehci Controllers Debug Port Is Port:%d\n", EhciDevice->DebugPort);
-
-    LouPrint("EHCI.SYS:Ehci Controller Has EECP Information At PCI Config Offset:%h\n", EhciDevice->EecpPciCapPointer);
-
-    LouPrint("EHCI.SYS:Ehci Controllers Isochronus Schedualing Threshold Value Is:%h\n", EhciDevice->Ist);
-
-    LouPrint("EHCI.SYS:EhciPrintCapabilities() DONE\n");
+    LouPrint("ENDOF:EHCI_CAPS\n\n");    
 }
 
-void EhciGetHostCapabilities(PEHCI_DEVICE EhciDevice){
-    LouPrint("EHCI.SYS:EhciGetHostCapabilities()\n");
+void EhciGetHostCapabilities(PEHCI_DEVICE_OBJECT EhciObject){
     
-    PEHCI_CAPABILITY_REGISTERS CapReg = EhciDevice->Capabilities;
-    UINT32 HcsParams = CapReg->HcsParams;
-    UINT32 HccParams = CapReg->HccParams;
+    EhciObject->OperationalRegisters = (PEHCI_HOST_OPERATIONAL_REGISTERS)(UINT8*)(((UINT64)(UINT8*)EhciObject->CapabilitiesRegisters) + (UINT64)EhciObject->CapabilitiesRegisters->CapLength);
+    PEHCI_CAPABILITY_REGISTERS CapRegs = EhciObject->CapabilitiesRegisters;    
+    PEHCI_DEVICE_CAPABILITIES ObjCaps = &EhciObject->EhciDeviceCapabilities;
+    UINT64 Tmp = CapRegs->HciVersion;
+    
+    ObjCaps->EhciMajorVersion = (Tmp >> 8) & 0xFF;
+    ObjCaps->EhciMinorVersion = Tmp & 0xFF;
+    
+    Tmp = CapRegs->HcsParams;
 
-    //LouPrint("EHCI.SYS:HcsParams:%bi\n", HcsParams);
-    //LouPrint("EHCI.SYS:HccParams:%bi\n", HccParams);
+    ObjCaps->NumberOfPorts = (Tmp >> EHCI_HCSPARAMS_N_PORTS_SHIFT) & EHCI_HCSPARAMS_N_PORTS_MASK;
 
-    EhciDevice->Dma64Supported = EHCI_CAP_TO_BOOLEAN(EHCI_SUPPORTS_64BIT_DATA_STRUCTURES(HccParams));
-    EhciDevice->PortIndicatorSupport = EHCI_CAP_TO_BOOLEAN(EHCI_SUPPORTS_P_INDICATOR(HcsParams));
-    EhciDevice->EhciRoutingThroughPORTROUTE = EHCI_CAP_TO_BOOLEAN(EHCI_PORT_ROUTING_BY_HCSPP_PORTROUTE(HcsParams));
-    EhciDevice->PortPowerControlSupport = EHCI_CAP_TO_BOOLEAN(EHCI_SUPPORTS_PPC(HcsParams));
-    EhciDevice->HighSpeedParkSupport = EHCI_CAP_TO_BOOLEAN(EHCI_SUPPORTS_HIGH_SPEED_PARK(HccParams));
-    EhciDevice->SmallFrameSizeSupport = EHCI_CAP_TO_BOOLEAN(EHCI_SUPPORTS_SMALL_FRAME_LISTS(HccParams));
-    EhciDevice->EhciPortCount = EHCI_GET_N_PORTS(HcsParams);
-    EhciDevice->OhciPortMultiplier = EHCI_GET_N_PCC(HcsParams);
-    EhciDevice->OhciCompanionCount = EHCI_GET_N_CC(HcsParams);
-    EhciDevice->DebugPort = EHCI_GET_DEBUG_PORT_NUMBER(HcsParams);
-    EhciDevice->EecpPciCapPointer = EHCI_GET_EECP(HccParams);
-    EhciDevice->Ist = EHCI_GET_IST(HccParams);
+    ObjCaps->EhciMiscFlags |= (Tmp & (EHCI_HCSPARAMS_PPC)) ? EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PPC : 0;
+    ObjCaps->EhciMiscFlags |= (Tmp & (EHCI_HCSPARAMS_PRR)) ? EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_ROUTING_RULES : 0;
 
-    EhciPrintCapabilities(EhciDevice);
+    ObjCaps->PortsPerCompanionController = (Tmp >> EHCI_HCSPARAMS_N_PCC_SHIFT) & EHCI_HCSPARAMS_N_PCC_MASK;
+    ObjCaps->NumberOfCompanionControllers = (Tmp >> EHCI_HCSPARAMS_N_CC_SHIFT) & EHCI_HCSPARAMS_N_CC_MASK;
+    
+    ObjCaps->EhciMiscFlags |= (Tmp & (EHCI_HCSPARAMS_P_INDICATOR)) ? EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_INDICATORS : 0;
 
-    LouPrint("EHCI.SYS:EhciGetHostCapabilities() DONE\n");
+    ObjCaps->DebugPortNumber = (Tmp >> EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_SHIFT) & EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_MASK;
+
+    Tmp = CapRegs->HccParams;
+
+    ObjCaps->EhciMiscFlags |= (Tmp & (EHCI_HCCPARAMS_64AC)) ? EHCI_DEVICE_CAPABILITIES_MISC_FLAG_64BIT_DMA : 0; 
+    ObjCaps->EhciMiscFlags |= (Tmp & (EHCI_HCCPARAMS_PFLF)) ? EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PROGRAMMABLE_FRAME_LIST : 0; 
+    ObjCaps->EhciMiscFlags |= (Tmp & (EHCI_HCCPARAMS_ASPC)) ? EHCI_DEVICE_CAPABILITIES_MISC_FLAG_ASYNC_SCHEDULE_PARK : 0; 
+
+    ObjCaps->IsochronusSchedulingThreshold = (Tmp >> EHCI_HCCPARAMS_IST_SHIFT) & EHCI_HCCPARAMS_IST_MASK;
+    ObjCaps->EhciExtendedCapabilitiesPointer = (Tmp >> EHCI_HCCPARAMS_EECP_SHIFT) & EHCI_HCCPARAMS_EECP_MASK;
+
+    if(ObjCaps->EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_ROUTING_RULES){
+        ObjCaps->EhciOptionalPortRoute = CapRegs->HcspPortRoute;
+        ObjCaps->EhciOptionalPortRoute &= ((1ULL << 61) - 1);
+    }
+
+    EhciPrintCapabilities(ObjCaps);
 }
-*/

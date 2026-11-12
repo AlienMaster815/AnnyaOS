@@ -30,35 +30,34 @@ typedef struct PACKED _EHCI_CAPABILITY_REGISTERS{
 
 //Hcs Parameters Cap Register
 #define EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_MASK                   0x0F
-#define EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_SHIFT                  24
+#define EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_SHIFT                  20
+#define EHCI_HCSPARAMS_DEBUG_PORT_NUMBER                        (EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_MASK << EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_SHIFT)
+
 #define EHCI_HCSPARAMS_P_INDICATOR_MASK                         1
 #define EHCI_HCSPARAMS_P_INDICATOR_SHIFT                        16
+#define EHCI_HCSPARAMS_P_INDICATOR                              (EHCI_HCSPARAMS_P_INDICATOR_MASK << EHCI_HCSPARAMS_P_INDICATOR_SHIFT)
+
 #define EHCI_HCSPARAMS_N_CC_MASK                                0x0F     
 #define EHCI_HCSPARAMS_N_CC_SHIFT                               12
+#define EHCI_HCSPARAMS_N_CC                                     (EHCI_HCSPARAMS_N_CC_MASK << EHCI_HCSPARAMS_N_CC_SHIFT)
+
 #define EHCI_HCSPARAMS_N_PCC_MASK                               0x0F
 #define EHCI_HCSPARAMS_N_PCC_SHIFT                              8
+#define EHCI_HCSPARAMS_N_PCC                                    (EHCI_HCSPARAMS_N_PCC_MASK << EHCI_HCSPARAMS_N_PCC_SHIFT)
+
 #define EHCI_HCSPARAMS_PRR_MASK                                 1
 #define EHCI_HCSPARAMS_PRR_SHIFT                                7
+#define EHCI_HCSPARAMS_PRR                                      (EHCI_HCSPARAMS_PRR_MASK << EHCI_HCSPARAMS_PRR_SHIFT)
+
 #define EHCI_HCSPARAMS_PPC_MASK                                 1
-#define EHCI_HCSPARAMS_PPC_SHIFT                                7
+#define EHCI_HCSPARAMS_PPC_SHIFT                                4
+#define EHCI_HCSPARAMS_PPC                                      (EHCI_HCSPARAMS_PPC_MASK << EHCI_HCSPARAMS_PPC_SHIFT)
+
 #define EHCI_HCSPARAMS_N_PORTS_MASK                             0x0F
 #define EHCI_HCSPARAMS_N_PORTS_SHIFT                            0
-
-#define EHCI_HCSPARAMS_DEBUG_PORT_NUMBER                        (EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_MASK << EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_SHIFT)
-#define EHCI_HCSPARAMS_P_INDICATOR                              (EHCI_HCSPARAMS_P_INDICATOR_MASK << EHCI_HCSPARAMS_P_INDICATOR_SHIFT)
-#define EHCI_HCSPARAMS_N_CC                                     (EHCI_HCSPARAMS_N_CC_MASK << EHCI_HCSPARAMS_N_CC_SHIFT)
-#define EHCI_HCSPARAMS_N_PCC                                    (EHCI_HCSPARAMS_N_PCC_MASK << EHCI_HCSPARAMS_N_PCC_SHIFT)
-#define EHCI_HCSPARAMS_PRR                                      (EHCI_HCSPARAMS_PRR_MASK << EHCI_HCSPARAMS_PRR_SHIFT)
-#define EHCI_HCSPARAMS_PPC                                      (EHCI_HCSPARAMS_PPC_MASK << EHCI_HCSPARAMS_PPC_SHIFT)
 #define EHCI_HCSPARAMS_N_PORTS                                  (EHCI_HCSPARAMS_N_PORTS_MASK << EHCI_HCSPARAMS_N_PORTS_SHIFT)
 
-#define EHCI_GET_DEBUG_PORT_NUMBER(HcsParams)                   ((HcsParams & EHCI_HCSPARAMS_DEBUG_PORT_NUMBER) >> EHCI_HCSPARAMS_DEBUG_PORT_NUMBER_SHIFT)
-#define EHCI_SUPPORTS_P_INDICATOR(HcsParams)                    (HcsParams & EHCI_HCSPARAMS_P_INDICATOR)
-#define EHCI_GET_N_CC(HcsParams)                                ((HcsParams & EHCI_HCSPARAMS_N_CC) >> EHCI_HCSPARAMS_N_CC_SHIFT)
-#define EHCI_GET_N_PCC(HcsParams)                               ((HcsParams & EHCI_HCSPARAMS_N_PCC) >> EHCI_HCSPARAMS_N_PCC_SHIFT)
-#define EHCI_PORT_ROUTING_BY_HCSPP_PORTROUTE(HcsParmas)         (HcsParmas & EHCI_HCSPARAMS_PRR)
-#define EHCI_SUPPORTS_PPC(HcsParams)                            (HcsParams & EHCI_HCSPARAMS_PPC)
-#define EHCI_GET_N_PORTS(HcsParams)                             ((HcsParams & EHCI_HCSPARAMS_N_PORTS) >> EHCI_HCSPARAMS_N_PORTS_SHIFT)
+
 
 //Hcc Parameters Cap Reegister
 #define EHCI_HCCPARAMS_EECP_MASK                                0xFF
@@ -282,11 +281,32 @@ typedef struct PACKED _EHCI_QH{
 #define PORTSC_PIC_GREEN                0b10
 #define PORTSC_PIC_UNDEFINED            0b11
 
-typedef struct _EHCI_DEVICE{
+#define EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PPC                          (1 << 0)
+#define EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_ROUTING_RULES           (1 << 1)
+#define EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PORT_INDICATORS              (1 << 2)
+#define EHCI_DEVICE_CAPABILITIES_MISC_FLAG_64BIT_DMA                    (1 << 3)
+#define EHCI_DEVICE_CAPABILITIES_MISC_FLAG_PROGRAMMABLE_FRAME_LIST      (1 << 4)
+#define EHCI_DEVICE_CAPABILITIES_MISC_FLAG_ASYNC_SCHEDULE_PARK          (1 << 5)
+
+typedef struct _EHCI_DEVICE_CAPABILITIES{
+    UINT8   EhciMajorVersion;
+    UINT8   EhciMinorVersion;
+    UINT8   NumberOfPorts;
+    UINT8   PortsPerCompanionController;
+    UINT8   NumberOfCompanionControllers;
+    UINT8   DebugPortNumber;
+    UINT8   IsochronusSchedulingThreshold;
+    UINT8   EhciExtendedCapabilitiesPointer;
+    UINT64  EhciOptionalPortRoute;
+    UINT8   EhciMiscFlags;   
+}EHCI_DEVICE_CAPABILITIES, * PEHCI_DEVICE_CAPABILITIES;
+
+typedef struct _EHCI_DEVICE_OBJECT{
     PPCI_DEVICE_OBJECT                  PDEV;
-    PEHCI_CAPABILITY_REGISTERS          Capabilities;
+    PEHCI_CAPABILITY_REGISTERS          CapabilitiesRegisters;
     PEHCI_HOST_OPERATIONAL_REGISTERS    OperationalRegisters;
-    
+    EHCI_DEVICE_CAPABILITIES            EhciDeviceCapabilities;
+
 /*
     UINTPTR                             PeriodicFrameListBase;
     UINTPTR                             AshQHAddress;
@@ -304,8 +324,9 @@ typedef struct _EHCI_DEVICE{
     UINT8                               EecpPciCapPointer;
     UINT8                               Ist;
 */
-}EHCI_DEVICE, * PEHCI_DEVICE;
+}EHCI_DEVICE_OBJECT, * PEHCI_DEVICE_OBJECT;
 
+void EhciGetHostCapabilities(PEHCI_DEVICE_OBJECT EhciObject);
 
 #endif
 
@@ -325,8 +346,6 @@ typedef struct _EHCI_DEVICE{
 
 
 
-void EhciGetHostCapabilities(PEHCI_DEVICE EhciDevice);
-LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice);
 LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice);
 UINTPTR EhciGetDmaAddress(PVOID VAddress);
 void EhciFreeDma(PEHCI_DEVICE EhciDevice, PVOID VAddress);

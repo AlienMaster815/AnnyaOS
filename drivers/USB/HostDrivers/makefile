@@ -31,7 +31,7 @@ SRC3 = Ehci.cpp \
 		EhciMem.cpp
 TARGET3 = EHCI.SYS
 
-SRC4 = EhciPci.cpp
+SRC4 = UhciPci.cpp
 TARGET4 = UHCI.SYS
 
 

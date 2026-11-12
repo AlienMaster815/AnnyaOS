@@ -3,7 +3,8 @@
 static void XhciPrintCapabilities(
     PXHCI_DEVICE XhciDevice
 ){
-    LouPrint("XHCI.SYS:Device Capabilities\n\n");
+    LouPrint("\n");
+    LouPrint("XHCI.SYS:Device Capabilities\n");
     
     LouPrint("XHCI.SYS:DEV_CAP:Version                          :%h\n", XhciDevice->Capabilities.Version);
     LouPrint("XHCI.SYS:DEV_CAP:MaxSlots                         :%d\n", XhciDevice->Capabilities.MaxSlots);
@@ -34,7 +35,7 @@ static void XhciPrintCapabilities(
     LouPrint("XHCI.SYS:xECP Pointer                             :%h\n", XhciDevice->Capabilities.xEcp);
     LouPrint("XHCI.SYS:PageSize                                 :%h\n", XhciDevice->Capabilities.PageSize);
 
-    LouPrint("\nXHCI.SYS:ENDOF Device Capabilities\n");
+    LouPrint("XHCI.SYS:ENDOF Device Capabilities\n\n");
 }
 
 LOUSTATUS 
