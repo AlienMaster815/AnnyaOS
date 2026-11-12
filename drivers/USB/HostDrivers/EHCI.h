@@ -6,14 +6,6 @@
 #include <LouDDK.h>
 #include <Hal.h>
 
-
-#endif
-
-/*
-
-
-
-
 #define EHCI_OPERATIONAL_REGISTER_BAR   0 
 #define EHCI_CAP_REGISTER_OFFSET        0
 
@@ -71,28 +63,26 @@ typedef struct PACKED _EHCI_CAPABILITY_REGISTERS{
 //Hcc Parameters Cap Reegister
 #define EHCI_HCCPARAMS_EECP_MASK                                0xFF
 #define EHCI_HCCPARAMS_EECP_SHIFT                               8
+#define EHCI_HCCPARAMS_EECP                                     (EHCI_HCCPARAMS_EECP_MASK << EHCI_HCCPARAMS_EECP_SHIFT)
+
+
 #define EHCI_HCCPARAMS_IST_MASK                                 0x0F
 #define EHCI_HCCPARAMS_IST_SHIFT                                4
+#define EHCI_HCCPARAMS_IST                                      (EHCI_HCCPARAMS_IST_MASK << EHCI_HCCPARAMS_IST_SHIFT)
+
+
 #define EHCI_HCCPARAMS_ASPC_MASK                                1
 #define EHCI_HCCPARAMS_ASPC_SHIFT                               2
+#define EHCI_HCCPARAMS_ASPC                                     (EHCI_HCCPARAMS_ASPC_MASK << EHCI_HCCPARAMS_ASPC_SHIFT)
+
+
 #define EHCI_HCCPARAMS_PFLF_MASK                                1
 #define EHCI_HCCPARAMS_PFLF_SHIFT                               1
+#define EHCI_HCCPARAMS_PFLF                                     (EHCI_HCCPARAMS_PFLF_MASK << EHCI_HCCPARAMS_PFLF_SHIFT)
+
 #define EHCI_HCCPARAMS_64AC_MASK                                1
 #define EHCI_HCCPARAMS_64AC_SHIFT                               0                                    
-
-#define EHCI_HCCPARAMS_EECP                                     (EHCI_HCCPARAMS_EECP_MASK << EHCI_HCCPARAMS_EECP_SHIFT)
-#define EHCI_HCCPARAMS_IST                                      (EHCI_HCCPARAMS_IST_MASK << EHCI_HCCPARAMS_IST_SHIFT)
-#define EHCI_HCCPARAMS_ASPC                                     (EHCI_HCCPARAMS_ASPC_MASK << EHCI_HCCPARAMS_ASPC_SHIFT)
-#define EHCI_HCCPARAMS_PFLF                                     (EHCI_HCCPARAMS_PFLF_MASK << EHCI_HCCPARAMS_PFLF_SHIFT)
 #define EHCI_HCCPARAMS_64AC                                     (EHCI_HCCPARAMS_64AC_MASK << EHCI_HCCPARAMS_64AC_SHIFT)
-
-#define EHCI_GET_EECP(HccParams)                                ((HccParams & EHCI_HCCPARAMS_EECP) >> EHCI_HCCPARAMS_EECP_SHIFT)
-#define EHCI_GET_IST(HccParams)                                 ((HccParams & EHCI_HCCPARAMS_IST) >> EHCI_HCCPARAMS_IST_SHIFT)
-#define EHCI_SUPPORTS_HIGH_SPEED_PARK(HccParams)                (HccParams & EHCI_HCCPARAMS_ASPC)
-#define EHCI_SUPPORTS_SMALL_FRAME_LISTS(HccParams)              (HccParams & EHCI_HCCPARAMS_PFLF)
-#define EHCI_SUPPORTS_64BIT_DATA_STRUCTURES(HccParams)          (HccParams & EHCI_HCCPARAMS_64AC)
-
-#define EHCI_CAP_TO_BOOLEAN(Cap)    (Cap ? true : false)
 
 //TODO: HCSP-PORTROUTE
 
@@ -104,116 +94,50 @@ typedef struct PACKED _EHCI_HOST_OPERATIONAL_REGISTERS{
     UINT32      ControlDsSegment;       //CTRLDSSEGMENT
     UINT32      FrameListBaseAddress;   //PERIODICLISTBASE
     UINT32      NextAsyncListAddress;   //ASYNCLISTADDR
-    UINT8       Reserved[0x3F - 0x1C];
+    UINT8       Reserved[36];
     UINT32      ConfigFlag;             //CONFIGFLAG
     UINT32      PortStatusControl[];    //PORTSC      
 }EHCI_HOST_OPERATIONAL_REGISTERS, * PEHCI_HOST_OPERATIONAL_REGISTERS;
 
 #define EHCI_USBCMD_ITC_MASK                    0xFF
 #define EHCI_USBCMD_ITC_SHIFT                   16
+#define EHCI_USBCMD_ITC                         (EHCI_USBCMD_ITC_MASK << EHCI_USBCMD_ITC_SHIFT)
+
 #define EHCI_USBCMD_ASPME_MASK                  1
 #define EHCI_USBCMD_ASPME_SHIFT                 11
+#define EHCI_USBCMD_ASPME                       (EHCI_USBCMD_ASPME_MASK << EHCI_USBCMD_ASPME_SHIFT)
+
 #define EHCI_USBCMD_ASPMC_MASK                  3
 #define EHCI_USBCMD_ASPMC_SHIFT                 8
+#define EHCI_USBCMD_ASPMC                       (EHCI_USBCMD_ASPME_MASK << EHCI_USBCMD_ASPMC_SHIFT)
+
 #define EHCI_USBCMD_LHCR_MASK                   1
 #define EHCI_USBCMD_LHCR_SHIFT                  7
+#define EHCI_USBCMD_LHCR                        (EHCI_USBCMD_LHCR_MASK << EHCI_USBCMD_LHCR_SHIFT)
+
 #define EHCI_USBCMD_IAAD_MASK                   1
 #define EHCI_USBCMD_IAAD_SHIFT                  6
+#define EHCI_USBCMD_IAAD                        (EHCI_USBCMD_IAAD_MASK << EHCI_USBCMD_IAAD_SHIFT)
+
 #define EHCI_USBCMD_ASE_MASK                    1
 #define EHCI_USBCMD_ASE_SHIFT                   5
+#define EHCI_USBCMD_ASE                         (EHCI_USBCMD_ASE_MASK << EHCI_USBCMD_ASE_SHIFT)
+
 #define EHCI_USBCMD_PSE_MASK                    1
 #define EHCI_USBCMD_PSE_SHIFT                   4
+#define EHCI_USBCMD_PSE                         (EHCI_USBCMD_PSE_MASK << EHCI_USBCMD_PSE_SHIFT)
+
 #define EHCI_USBCMD_FLS_MASK                    3
 #define EHCI_USBCMD_FLS_SHIFT                   2
+#define EHCI_USBCMD_FLS                         (EHCI_USBCMD_FLS_MASK << EHCI_USBCMD_FLS_SHIFT)
+
 #define EHCI_USBCMD_HCRESET_MASK                1
 #define EHCI_USBCMD_HCRESET_SHIFT               1
+#define EHCI_USBCMD_HCRESET                     (EHCI_USBCMD_HCRESET_MASK << EHCI_USBCMD_HCRESET_SHIFT)
+
 #define EHCI_USBCMD_RS_MASK                     1
 #define EHCI_USBCMD_RS_SHIFT                    0                          
-
-
-#define EHCI_USBCMD_ITC                         (EHCI_USBCMD_ITC_MASK << EHCI_USBCMD_ITC_SHIFT)
-#define EHCI_USBCMD_ASPME                       (EHCI_USBCMD_ASPME_MASK << EHCI_USBCMD_ASPME_SHIFT)
-#define EHCI_USBCMD_ASPMC                       (EHCI_USBCMD_ASPME_MASK << EHCI_USBCMD_ASPMC_SHIFT)
-#define EHCI_USBCMD_LHCR                        (EHCI_USBCMD_LHCR_MASK << EHCI_USBCMD_LHCR_SHIFT)
-#define EHCI_USBCMD_IAAD                        (EHCI_USBCMD_IAAD_MASK << EHCI_USBCMD_IAAD_SHIFT)
-#define EHCI_USBCMD_ASE                         (EHCI_USBCMD_ASE_MASK << EHCI_USBCMD_ASE_SHIFT)
-#define EHCI_USBCMD_PSE                         (EHCI_USBCMD_PSE_MASK << EHCI_USBCMD_PSE_SHIFT)
-#define EHCI_USBCMD_FLS                         (EHCI_USBCMD_FLS_MASK << EHCI_USBCMD_FLS_SHIFT)
-#define EHCI_USBCMD_HCRESET                     (EHCI_USBCMD_HCRESET_MASK << EHCI_USBCMD_HCRESET_SHIFT)
 #define EHCI_USBCMD_RS                          (EHCI_USBCMD_RS_MASK << EHCI_USBCMD_RS_SHIFT)
-
-
-#define EHCI_GET_USBCMO_ITC(UsbCmd)             ((UsbCmd & EHCI_USBCMD_ITC) >> EHCI_USBCMD_ITC_SHIFT)
-#define EHCI_GET_USBCMD_ASPME(UsbCmd)           (UsbCmd & EHCI_USBCMD_ASPME)
-#define EHCI_GET_USBCMD_ASPMC(UsbCmd)           ((UsbCmd & EHCI_USBCMD_ASPMC) >> EHCI_USBCMD_ASPMC_SHIFT)
-#define EHCI_GET_USBCMD_LHCR(UsbCmd)            (UsbCmd & EHCI_USBCMD_LHCR)
-#define EHCI_GET_USBCMD_IAAD(UsbCmd)            (UsbCmd & EHCI_USBCMD_IAAD)
-#define EHCI_GET_USBCMD_ASE(UsbCmd)             (UsbCmd & EHCI_USBCMD_ASE)
-#define EHCI_GET_USBCMD_PSE(UsbCmd)             (UsbCmd & EHCI_USBCMD_PSE)
-#define EHCI_GET_USBCMD_FLS(UsbCmd)             ((UsbCmd & EHCI_USBCMD_FLS) >> EHCI_USBCMD_FLS_SHIFT)
-#define EHCI_GET_USBCMD_HCRESET(UsbCmd)         (UsbCmd & EHCI_USBCMD_HCRESET)
-#define EHCI_GET_USBCMD_RS(UsbCmd)              (UsbCmd & EHCI_USBCMD_RS)
-
-static inline UINT32 EHCI_SET_USBCMD_ITC(UINT32 UsbCmd, UINT8 Itc){
-    UsbCmd &= ~(EHCI_USBCMD_ITC);
-    UsbCmd |= ((UINT32)Itc << EHCI_USBCMD_ITC_SHIFT);
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_ASPME(UINT32 UsbCmd, BOOL Aspme){
-    UsbCmd &= ~(EHCI_USBCMD_ASPME);
-    Aspme ? UsbCmd |= (EHCI_USBCMD_ASPME) : UsbCmd |= 0;
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_ASPMC(UINT32 UsbCmd, UINT8 Aspmc){
-    UsbCmd &= ~(EHCI_USBCMD_ASPMC);
-    UsbCmd |= ((Aspmc & EHCI_USBCMD_ASPMC_MASK) << EHCI_USBCMD_ASPMC_SHIFT);
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_LHCR(UINT32 UsbCmd, BOOL Lhcr){
-    UsbCmd &= ~(EHCI_USBCMD_LHCR);
-    Lhcr ? UsbCmd |= EHCI_USBCMD_LHCR : UsbCmd |= 0;
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_IAAD(UINT32 UsbCmd, BOOL Iaad){
-    UsbCmd &= ~(EHCI_USBCMD_IAAD);
-    Iaad ? UsbCmd |= EHCI_USBCMD_IAAD: UsbCmd |= 0;
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_ASE(UINT32 UsbCmd, BOOL Ase){
-    UsbCmd &= ~(EHCI_USBCMD_ASE);
-    Ase ? UsbCmd |= EHCI_USBCMD_ASE : UsbCmd |= 0;
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_PSE(UINT32 UsbCmd, BOOL Pse){
-    UsbCmd &= ~(EHCI_USBCMD_PSE);
-    Pse ? UsbCmd |= EHCI_USBCMD_PSE : UsbCmd |= 0; 
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_FLS(UINT32 UsbCmd, UINT8 Fls){
-    UsbCmd &= ~(EHCI_USBCMD_FLS);
-    UsbCmd |= ((UINT32)(Fls & EHCI_USBCMD_FLS_MASK) << EHCI_USBCMD_FLS_SHIFT);
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_HCRESET(UINT32 UsbCmd, BOOL Hcreset){
-    UsbCmd &= ~(EHCI_USBCMD_HCRESET);
-    Hcreset ? UsbCmd |= EHCI_USBCMD_HCRESET : UsbCmd |= 0;
-    return UsbCmd;
-}
-
-static inline UINT32 EHCI_SET_USBCMD_RS(UINT32 UsbCmd, BOOL Rs){
-    UsbCmd &= ~(EHCI_USBCMD_RS);
-    Rs ? UsbCmd |= EHCI_USBCMD_RS : UsbCmd |= 0;
-    return UsbCmd;
-}
-
 
 #define EHCI_ITC_1FRAME                         0x01
 #define EHCI_ITC_2FRAME                         0x02
@@ -262,56 +186,6 @@ static inline UINT32 EHCI_SET_USBCMD_RS(UINT32 UsbCmd, BOOL Rs){
 #define EHCI_USBSTS_USBERRINT                   (EHCI_USBSTS_USBERRINT_MASK << EHCI_USBSTS_USBERRINT_SHIFT)
 #define EHCI_USBSTS_USBINT                      (EHCI_USBSTS_USBINT_MASK << EHCI_USBSTS_USBINT_SHIFT)
 
-#define EHCI_GET_USBSTS_ASS(UsbSts)             (UsbSts & EHCI_USBSTS_ASS)   
-#define EHCI_GET_USBSTS_PSS(UsbSts)             (UsbSts & EHCI_USBSTS_PSS)   
-#define EHCI_GET_USBSTS_RECLAMATION(UsbSts)     (UsbSts & EHCI_USBSTS_RECLAMATION)   
-#define EHCI_GET_USBSTS_HC_HALTED(UsbSts)       (UsbSts & EHCI_USBSTS_HC_HALTED)   
-//the rest are writable
-#define EHCI_GET_USBSTS_IAA(UsbSts)             (UsbSts & EHCI_USBSTS_IAA)
-#define EHCI_GET_USBSTS_HSE(UsbSts)             (UsbSts & EHCI_USBSTS_HSE)
-#define EHCI_GET_USBSTS_FLR(UsbSts)             (UsbSts & EHCI_USBSTS_FLR)
-#define EHCI_GET_USBSTS_PCD(UsbSts)             (UsbSts & EHCI_USBSTS_PCD)
-#define EHCI_GET_USBSTS_USBERRINT(UsbSts)       (UsbSts & EHCI_USBSTS_USBERRINT)
-#define EHCI_GET_USBSTS_USBINT(UsbSts)          (UsbSts & EHCI_USBSTS_USBINT)
-
-
-
-static inline UINT32 EHCI_USBSTS_SET_IAA(UINT32 UsbSts, BOOL Iaa){
-    UsbSts &= ~(EHCI_USBSTS_IAA);
-    Iaa ? UsbSts |= EHCI_USBSTS_IAA : UsbSts |= 0;
-    return UsbSts;
-}
-
-static inline UINT32 EHCI_USBSTS_SET_HSE(UINT32 UsbSts, BOOL Hse){
-    UsbSts &= ~(EHCI_USBSTS_HSE);
-    Hse ? UsbSts |= EHCI_USBSTS_HSE : UsbSts |= 0;
-    return UsbSts;
-}
-
-static inline UINT32 EHCI_USBSTS_SET_FLR(UINT32 UsbSts, BOOL Flr){
-    UsbSts &= ~(EHCI_USBSTS_FLR);
-    Flr ? UsbSts |= EHCI_USBSTS_FLR : UsbSts |= 0;
-    return UsbSts;
-}
-
-static inline UINT32 EHCI_USBSTS_SET_PCD(UINT32 UsbSts, BOOL Pcd){
-    UsbSts &= ~(EHCI_USBSTS_PCD);
-    Pcd ? UsbSts |= EHCI_USBSTS_PCD : UsbSts |= 0;
-    return UsbSts;
-}
-
-static inline UINT32 EHCI_USBSTS_SET_USBERRINT(UINT32 UsbSts, BOOL v){
-    UsbSts &= ~(EHCI_USBSTS_USBERRINT);
-    v ? UsbSts |= EHCI_USBSTS_USBERRINT : UsbSts |= 0;
-    return UsbSts;
-}
-
-static inline UINT32 EHCI_USBSTS_SET_USBINT(UINT32 UsbSts, BOOL v){
-    UsbSts &= ~(EHCI_USBSTS_USBINT);
-    v ? UsbSts |= EHCI_USBSTS_USBINT : UsbSts |= 0;
-    return UsbSts;
-}
-
 #define EHCI_PFLE_TERMINATE_BIT 1
 
 typedef struct PACKED _EHCI_QH{
@@ -329,76 +203,72 @@ typedef struct PACKED _EHCI_QH{
 //PORTSC
 #define EHCI_PORTSC_WKOC_E_MASK         1
 #define EHCI_PORTSC_WKOC_E_SHIFT        22
+#define EHCI_PORTSC_WKOC_E              (EHCI_PORTSC_WKOC_E_MASK << EHCI_PORTSC_WKOC_E_SHIFT) //RW
+
 #define EHCI_PORTSC_WKDSCNNT_E_MASK     1
 #define EHCI_PORTSC_WKDSCNNT_E_SHIFT    21
+#define EHCI_PORTSC_WKDSCNNT_E          (EHCI_PORTSC_WKDSCNNT_E_MASK << EHCI_PORTSC_WKDSCNNT_E_SHIFT) //RW
+
 #define EHCI_PORTSC_WKCNNT_E_MASK       1
 #define EHCI_PORTSC_WKCNNT_E_SHIFT      20
+#define EHCI_PORTSC_WKCNNT_E            (EHCI_PORTSC_WKCNNT_E_MASK << EHCI_PORTSC_WKCNNT_E_SHIFT) //RW
+
 #define EHCI_PORTSC_PTC_MASK            0x0F
 #define EHCI_PORTSC_PTC_SHIFT           16
+#define EHCI_PORTSC_PTC                 (EHCI_PORTSC_PTC_MASK << EHCI_PORTSC_PTC_SHIFT) //RW
+
 #define EHCI_PORTSC_PIC_MASK            3
 #define EHCI_PORTSC_PIC_SHIFT           14
+#define EHCI_PORTSC_PIC                 (EHCI_PORTSC_PIC_MASK << EHCI_PORTSC_PIC_SHIFT) //R
+
+
 #define EHCI_PORTSC_PORT_OWNER_MASK     1
 #define EHCI_PORTSC_PORT_OWNER_SHIFT    13
+#define EHCI_PORTSC_PORT_OWNER          (EHCI_PORTSC_PORT_OWNER_MASK << EHCI_PORTSC_PORT_OWNER_SHIFT) //RW
+
 #define EHCI_PORTSC_PORT_POWER_MASK     1
 #define EHCI_PORTSC_PORT_POWER_SHIFT    12
+#define EHCI_PORTSC_PORT_POWER          (EHCI_PORTSC_PORT_POWER_MASK << EHCI_PORTSC_PORT_POWER_SHIFT) //RW
+
 #define EHCI_PORTSC_LINE_STATUS_MASK    3
 #define EHCI_PORTSC_LINE_STATUS_SHIFT   10
+#define EHCI_PORTSC_LINE_STATUS         (EHCI_PORTSC_LINE_STATUS_MASK << EHCI_PORTSC_LINE_STATUS_SHIFT) //R
+
 #define EHCI_PORTSC_PORT_RESET_MASK     1
 #define EHCI_PORTSC_PORT_RESET_SHIFT    8
+#define EHCI_PORTSC_PORT_RESET          (EHCI_PORTSC_PORT_RESET_MASK << EHCI_PORTSC_PORT_RESET_SHIFT) //RW
+
 #define EHCI_PORTSC_SUSPEND_MASK        1
 #define EHCI_PORTSC_SUSPEND_SHIFT       7
+#define EHCI_PORTSC_SUSPEND             (EHCI_PORTSC_SUSPEND_MASK << EHCI_PORTSC_SUSPEND_SHIFT) //RW
+
 #define EHCI_PORTSC_FPR_MASK            1
 #define EHCI_PORTSC_FPR_SHIFT           6
+#define EHCI_PORTSC_FPR                 (EHCI_PORTSC_FPR_MASK << EHCI_PORTSC_FPR_SHIFT) //RW
+
 #define EHCI_PORTSC_OCC_MASK            1
 #define EHCI_PORTSC_OCC_SHIFT           5
+#define EHCI_PORTSC_OCC                 (EHCI_PORTSC_OCC_MASK << EHCI_PORTSC_OCC_SHIFT) //RW
+
 #define EHCI_PORTSC_OCA_MASK            1
 #define EHCI_PORTSC_OCA_SHIFT           4
+#define EHCI_PORTSC_OCA                 (EHCI_PORTSC_OCA_MASK << EHCI_PORTSC_OCA_SHIFT) //R
+
 #define EHCI_PORTSC_PEC_MASK            1
 #define EHCI_PORTSC_PEC_SHIFT           3
+#define EHCI_PORTSC_PEC                 (EHCI_PORTSC_PEC_MASK << EHCI_PORTSC_PEC_SHIFT) //RW
+
 #define EHCI_PORTSC_PORT_ENABLE_MASK    1
 #define EHCI_PORTSC_PORT_ENABLE_SHIFT   2
+#define EHCI_PORTSC_PORT_ENABLE         (EHCI_PORTSC_PORT_ENABLE_MASK << EHCI_PORTSC_PORT_ENABLE_SHIFT) //RW
+
 #define EHCI_PORTSC_CSC_MASK            1
 #define EHCI_PORTSC_CSC_SHIFT           1
+#define EHCI_PORTSC_CSC                 (EHCI_PORTSC_CSC_MASK << EHCI_PORTSC_CSC_SHIFT) //RW
+
 #define EHCI_PORTSC_CCS_MASK            1
 #define EHCI_PORTSC_CCS_SHIFT           0
-
-#define EHCI_PORTSC_WKOC_E                      (EHCI_PORTSC_WKOC_E_MASK << EHCI_PORTSC_WKOC_E_SHIFT) //RW
-#define EHCI_PORTSC_WKDSCNNT_E                  (EHCI_PORTSC_WKDSCNNT_E_MASK << EHCI_PORTSC_WKDSCNNT_E_SHIFT) //RW
-#define EHCI_PORTSC_WKCNNT_E                    (EHCI_PORTSC_WKCNNT_E_MASK << EHCI_PORTSC_WKCNNT_E_SHIFT) //RW
-#define EHCI_PORTSC_PTC                         (EHCI_PORTSC_PTC_MASK << EHCI_PORTSC_PTC_SHIFT) //RW
-#define EHCI_PORTSC_PIC                         (EHCI_PORTSC_PIC_MASK << EHCI_PORTSC_PIC_SHIFT) //R
-#define EHCI_PORTSC_PORT_OWNER                  (EHCI_PORTSC_PORT_OWNER_MASK << EHCI_PORTSC_PORT_OWNER_SHIFT) //RW
-#define EHCI_PORTSC_PORT_POWER                  (EHCI_PORTSC_PORT_POWER_MASK << EHCI_PORTSC_PORT_POWER_SHIFT) //RW
-#define EHCI_PORTSC_LINE_STATUS                 (EHCI_PORTSC_LINE_STATUS_MASK << EHCI_PORTSC_LINE_STATUS_SHIFT) //R
-#define EHCI_PORTSC_PORT_RESET                  (EHCI_PORTSC_PORT_RESET_MASK << EHCI_PORTSC_PORT_RESET_SHIFT) //RW
-#define EHCI_PORTSC_SUSPEND                     (EHCI_PORTSC_SUSPEND_MASK << EHCI_PORTSC_SUSPEND_SHIFT) //RW
-#define EHCI_PORTSC_FPR                         (EHCI_PORTSC_FPR_MASK << EHCI_PORTSC_FPR_SHIFT) //RW
-#define EHCI_PORTSC_OCC                         (EHCI_PORTSC_OCC_MASK << EHCI_PORTSC_OCC_SHIFT) //RW
-#define EHCI_PORTSC_OCA                         (EHCI_PORTSC_OCA_MASK << EHCI_PORTSC_OCA_SHIFT) //R
-#define EHCI_PORTSC_PEC                         (EHCI_PORTSC_PEC_MASK << EHCI_PORTSC_PEC_SHIFT) //RW
-#define EHCI_PORTSC_PORT_ENABLE                 (EHCI_PORTSC_PORT_ENABLE_MASK << EHCI_PORTSC_PORT_ENABLE_SHIFT) //RW
-#define EHCI_PORTSC_CSC                         (EHCI_PORTSC_CSC_MASK << EHCI_PORTSC_CSC_SHIFT) //RW
-#define EHCI_PORTSC_CCS                         (EHCI_PORTSC_CCS_MASK << EHCI_PORTSC_CCS_SHIFT) //R
-
-#define EHCI_GET_PORTSC_WKOC_E(PortSc)          (PortSc & EHCI_PORTSC_WKOC_E)
-#define EHCI_GET_PORTSC_WKDSCNNT_E(PortSc)      (PortSc & EHCI_PORTSC_WKDSCNNT_E)
-#define EHCI_GET_PORTSC_WKCNNT_E(PortSc)        (PortSc & EHCI_PORTSC_WKCNNT_E)
-#define EHCI_GET_PORTSC_PTC(PortSc)             ((PortSc & EHCI_PORTSC_PTC) >> EHCI_PORTSC_PTC_SHIFT)
-#define EHCI_GET_PORTSC_PIC(PortSc)             ((PortSc & EHCI_PORTSC_PIC) >> EHCI_PORTSC_PIC_SHIFT)
-#define EHCI_GET_PORTSC_PORT_OWNER(PortSc)      (PortSc & EHCI_PORTSC_PORT_OWNER)
-#define EHCI_GET_PORTSC_PORT_POWER(PortSc)      (PortSc & EHCI_PORTSC_PORT_POWER)
-#define EHCI_GET_PORTSC_LINE_STATUS(PortSc)     ((PortSc & EHCI_PORTSC_LINE_STATUS) >> EHCI_PORTSC_LINE_STATUS_SHIFT)
-#define EHCI_GET_PORTSC_PORT_RESET(PortSc)      (PortSc & EHCI_PORTSC_PORT_RESET)
-#define EHCI_GET_PORTSC_SUSPEND(PortSc)         (PortSc & EHCI_PORTSC_SUSPEND)
-#define EHCI_GET_PORTSC_FPR(PortSc)             (PortSc & EHCI_PORTSC_FPR)
-#define EHCI_GET_PORTSC_OCC(PortSc)             (PortSc & EHCI_PORTSC_OCC)
-#define EHCI_GET_PORTSC_OCA(PortSc)             (PortSc & EHCI_PORTSC_OCA)
-#define EHCI_GET_PORTSC_PEC(PortSc)             (PortSc & EHCI_PORTSC_PEC)
-#define EHCI_GET_PORTSC_PORT_ENABLE(PortSc)     (PortSc & EHCI_PORTSC_PORT_ENABLE)
-#define EHCI_GET_PORTSC_CSC(PortSc)             (PortSc & EHCI_PORTSC_CSC)
-#define EHCI_GET_PORTSC_CCS(PortSc)             (PortSc & EHCI_PORTSC_CCS)
-
-
+#define EHCI_PORTSC_CCS                 (EHCI_PORTSC_CCS_MASK << EHCI_PORTSC_CCS_SHIFT) //R
 
 #define PORTSC_PTC_NOT_ENABLED          0b0000
 #define PORTSC_PTC_J_STATE              0b0001
@@ -412,11 +282,12 @@ typedef struct PACKED _EHCI_QH{
 #define PORTSC_PIC_GREEN                0b10
 #define PORTSC_PIC_UNDEFINED            0b11
 
-
 typedef struct _EHCI_DEVICE{
     PPCI_DEVICE_OBJECT                  PDEV;
     PEHCI_CAPABILITY_REGISTERS          Capabilities;
     PEHCI_HOST_OPERATIONAL_REGISTERS    OperationalRegisters;
+    
+/*
     UINTPTR                             PeriodicFrameListBase;
     UINTPTR                             AshQHAddress;
     EHCI_PCI_EXTENTIONS                 Extentions;
@@ -432,7 +303,27 @@ typedef struct _EHCI_DEVICE{
     UINT8                               DebugPort;        
     UINT8                               EecpPciCapPointer;
     UINT8                               Ist;
+*/
 }EHCI_DEVICE, * PEHCI_DEVICE;
+
+
+#endif
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void EhciGetHostCapabilities(PEHCI_DEVICE EhciDevice);
 LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice);

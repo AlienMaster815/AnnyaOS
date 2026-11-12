@@ -7,7 +7,6 @@ LIBRARIES = -L../../../KernelLibraries -llouoskrnl -lLouDDKCrtc -L../UsbCore -lu
 # Paths
 INCLUDES = -I../../../include
 
-
 # Source and target
 SRC1 =  XhciPci.cpp \
 		Xhci.cpp \
@@ -32,14 +31,16 @@ SRC3 = Ehci.cpp \
 		EhciMem.cpp
 TARGET3 = EHCI.SYS
 
+SRC4 = EhciPci.cpp
+TARGET4 = UHCI.SYS
+
 
 
 # Build rule
-all: $(TARGET1) $(TARGET2) $(TARGET3)
+all: $(TARGET1) $(TARGET2) $(TARGET3) $(TARGET4)
 
 $(TARGET1): $(SRC1)
 	$(CC) $(CFLAGS) -o $(TARGET1) $(SRC1) $(LIBRARIES) $(INCLUDES)
-
 
 $(TARGET2): $(SRC2)
 	$(CC) $(CFLAGS) -o $(TARGET2) $(SRC2) $(LIBRARIES) $(INCLUDES)
@@ -47,8 +48,12 @@ $(TARGET2): $(SRC2)
 $(TARGET3): $(SRC3)
 	$(CC) $(CFLAGS) -o $(TARGET3) $(SRC3) $(LIBRARIES) $(INCLUDES)
 
+$(TARGET4): $(SRC4)
+	$(CC) $(CFLAGS) -o $(TARGET4) $(SRC4) $(LIBRARIES) $(INCLUDES)
+
 # Clean rule
 clean:
 	rm -f $(TARGET1)
 	rm -f $(TARGET2)
 	rm -f $(TARGET3)
+	rm -f $(TARGET4)

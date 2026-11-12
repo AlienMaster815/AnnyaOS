@@ -3,6 +3,8 @@
 #ifndef _USBCORE_H
 #define _USBCORE_H
 
+//TODO: Check ACPI _PLD table for the port numbers for XHCI transfers
+
 #include <LouDDK.h>
 #include <usb.h>
 

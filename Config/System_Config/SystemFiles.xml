@@ -39,6 +39,7 @@
         <FILETOCPY64>cp drivers/USB/HostDrivers/XHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/XHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/USB/HostDrivers/OHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/OHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
         <FILETOCPY64>cp drivers/USB/HostDrivers/EHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/EHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
+        <FILETOCPY64>cp drivers/USB/HostDrivers/UHCI.SYS ISO/ANNYA/SYSTEM64/DRIVERS/UHCI.SYS</FILETOCPY64>                  <!--VMWare GPU-->
         <!--DMA Drivers-->
         <FILETOCPY64>cp drivers/DMA/8237A/8237A.SYS ISO/ANNYA/SYSTEM64/DRIVERS/8237A.SYS</FILETOCPY64>                      <!--8237A DMA Controller-->
         <!--Storage Drivers-->

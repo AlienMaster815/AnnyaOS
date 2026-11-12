@@ -5,6 +5,9 @@
 void UsbCoreHcdIoQueueManager(PVOID Params);
 void UsbCoreHcdIoDeQueueManager(PVOID Params);
 
+static ListHeader   UsbHcdList = {0};
+static mutex_t      UsbHcdListLock {0};
+
 DRIVER_EXPORT
 LOUSTATUS UsbCoreCreateHcdObject(
     PPCI_DEVICE_OBJECT  PDEV,
@@ -65,15 +68,20 @@ LOUSTATUS UsbCoreCreateHcdObject(
         31
     );
     if(!NewHcdObject->IoDeQueueManager){
+        //TODO: Destroy Queue Demon
         Operations->StopHcdDevice(NewHcdObject);
         LouKeFree(NewHcdObject);
         LouPrint("USBCORE.SYS:UsbCoreCreateHcdObject():HERE\n");
         while(1);
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-
     //TODO:Create Endpoint 0 enumerate the root hub 
 
+
+
+    MutexLock(&UsbHcdListLock);
+    LouKeListAddTail(&NewHcdObject->Peers, &UsbHcdList);
+    MutexUnlock(&UsbHcdListLock);
     return STATUS_SUCCESS;
 }
 

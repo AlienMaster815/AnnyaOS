@@ -1,9 +1,18 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
-/*
 #ifndef _UHCI_H
 #define _UHCI_H
 
 #include <LouDDK.h>
+#include <Hal.h>
+#include <usb.h>
+
+
+
+
+
+#endif
+
+/*
 
 #define UHCI_USBCMD         0x00 //Usb Command Register Read/Write                      WORD
 #define UHCI_USBSTS         0x02 //Usb Status Read/Clear On Write                       WORD

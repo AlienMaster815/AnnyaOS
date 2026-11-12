@@ -86,6 +86,7 @@ typedef struct _USB_HCD_OPERATIONS{
 }USB_HCD_OPERATIONS, * PUSB_HCD_OPERATIONS;
 
 typedef struct _USB_HCD_OBJECT{
+    ListHeader              Peers;
     PPCI_DEVICE_OBJECT      PDEV;
     SIZE                    DmaTransferMinimumAlignment;
     ULONG                   HcdFlags;
