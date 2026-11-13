@@ -1,5 +1,7 @@
 #include <LouAPI.h>
 
+static BOOLEAN MainWorkQueueRunning = false;
+
 static LOUQ_WORK_QUEUE MainWorkQueue = {
     .QueueName = "Lousine Kernel Main System Queue",
     .QueuePriority = 31,
@@ -10,6 +12,10 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     UNUSED PTHREAD WorkerThread = LouKeGetCurrentThreadHandle();
     LouPrint("Work Queue Started:%s\n", WorkQueueData->QueueName);
     LouKIRQL Irql;
+    if(!strcmp(WorkQueueData->QueueName, MainWorkQueue.QueueName)){
+        MainWorkQueueRunning = true;
+        LouKeMemoryBarrier();
+    }
     while(1){
         if(!LouKeListIsEmpty(&WorkQueueData->QueuedWork)){
             LouKeAcquireSpinLock(&WorkQueueData->AddLock, &Irql);
@@ -160,6 +166,8 @@ LOUSTATUS LouKeCreateSystemWorkQeueue(){
         KERNEL_GENERIC_MEMORY
     );
     MainWorkQueue.QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)&MainWorkQueue, 16 * KILOBYTE, 31);
-
+    while(!MainWorkQueueRunning){
+        LouKeYieldExecution();
+    }
     return STATUS_SUCCESS;
 }
