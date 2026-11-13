@@ -36,7 +36,7 @@ MAKEDIR64 := $(shell awk -F '[<>]' '/<MainDirectoryStructure64>/{print " " $$3 "
 CPY32 := $(shell awk -F '[<>]' '/<FILETOCPY32>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 CPY64 := $(shell awk -F '[<>]' '/<FILETOCPY64>/{print " " $$3 ";"}' $(SystemFileTable) | tr '\n' ' ')
 
-LIBS = drivers/gpu/BootVid/BootVid.lib drivers/PCI/PCI.lib drivers/Apic/Apic.lib API/Blkdev/Blkdev.lib
+LIBS = drivers/gpu/BootVid/BootVid.lib drivers/PCI/PCI.lib drivers/Apic/Apic.lib API/Blkdev/Blkdev.lib drivers/USB/UsbCore/usbcore.lib
 
 CC = x86_64-w64-mingw32-gcc
 CP = x86_64-w64-mingw32-g++

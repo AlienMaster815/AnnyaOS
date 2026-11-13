@@ -19,8 +19,6 @@ LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
 
 LOUSTATUS XhciInterruptHandler(UINT64 Data);
 
-#define XHCI_INTEL_PANTHER_POINT_QUIRK 1
-
 static USB_HCD_OPERATIONS XhciHcdOperations = {
     //Host Operations
     .ResetHcdDevice = XhciResetHcdDevice,
@@ -39,7 +37,6 @@ static USB_HCD_OPERATIONS XhciHcdOperations = {
 };
 
 LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
-    //{.VendorID = PCI_VENDOR_ID_INTEL, .DeviceID = 0x1E31, .BoardID = XHCI_INTEL_PANTHER_POINT_QUIRK, .SimpleEntry = true},
     {.BaseClass = 0x0C, .SubClass = 0x03, .ProgIf = 0x30, .BoardID = 0, .GenericEntry = true},
     {0},
 };
@@ -61,11 +58,6 @@ LOUSTATUS AddDevice(
     PXHCI_DEVICE NewXhciDevice = LouKeMallocType(XHCI_DEVICE, KERNEL_GENERIC_MEMORY);
     PPCI_DEVICE_OBJECT PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);    
     NewXhciDevice->PDEV = PDEV;
-
-    //if(SupportedXhciPciDevices[PDEV->DeviceID].BoardID){
-    //    LouPrint("Quirk Detected\n");
-    //    while(1);
-    //}
 
     PciHalEnableMemorySpace(PDEV);
 

@@ -10,7 +10,7 @@ static LOUSTATUS _XhciStopHcdDevice(PUSB_HCD_OBJECT HcdDevice){
         (PULONG)LouKeCastToUnalignedPointer((PVOID)&XhciDevice->OperationalRegisters->UsbStatus),
         10,
         XHCI_USBSTS_HCH,
-        1
+        XHCI_USBSTS_HCH
     );
 }
 

@@ -5,6 +5,7 @@
 
 #include <LouDDK.h>
 #include <Hal.h>
+#include <usb.h>
 
 #define EHCI_OPERATIONAL_REGISTER_BAR   0 
 #define EHCI_CAP_REGISTER_OFFSET        0
@@ -306,7 +307,9 @@ typedef struct _EHCI_DEVICE_OBJECT{
     PEHCI_CAPABILITY_REGISTERS          CapabilitiesRegisters;
     PEHCI_HOST_OPERATIONAL_REGISTERS    OperationalRegisters;
     EHCI_DEVICE_CAPABILITIES            EhciDeviceCapabilities;
-
+    LOUSINE_DMA_DEVICE                  DataStructureDmaDev;
+    LOUSINE_DMA_DEVICE                  MainDmaDev;
+    PVOID                               VirtualFrameListBase;
 /*
     UINTPTR                             PeriodicFrameListBase;
     UINTPTR                             AshQHAddress;
@@ -327,32 +330,8 @@ typedef struct _EHCI_DEVICE_OBJECT{
 }EHCI_DEVICE_OBJECT, * PEHCI_DEVICE_OBJECT;
 
 void EhciGetHostCapabilities(PEHCI_DEVICE_OBJECT EhciObject);
+LOUSTATUS EhciInitializeEhciMemoryManagement(PEHCI_DEVICE_OBJECT EhciObject);
+LOUSTATUS EhciAllocatePeriodicFrameListBase(PEHCI_DEVICE_OBJECT EhciObject);
+UINTPTR EhciGetDmaAddress(PVOID VAddress);
 
 #endif
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice);
-UINTPTR EhciGetDmaAddress(PVOID VAddress);
-void EhciFreeDma(PEHCI_DEVICE EhciDevice, PVOID VAddress);
-LOUSTATUS EhciAllocateDma(PEHCI_DEVICE EhciDevice, SIZE size, SIZE Alignment, PVOID* Out);
-LOUSTATUS EhciAllocatePeriodicFrameListBase(PEHCI_DEVICE EhciDevice);
-LOUSTATUS EhciAllocateAsyncHead(PEHCI_DEVICE EhciDevice);
-
-
-
-*/

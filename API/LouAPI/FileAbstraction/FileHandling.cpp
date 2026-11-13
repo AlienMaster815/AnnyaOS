@@ -58,7 +58,7 @@ bool fseek(string FileName){
 
 LOUAPI
 PVOID fopen(string FileName, uint64_t PageFlags){
-    LouPrint("fopen()\n");
+    LouPrint("fopen(%s, %h)\n", FileName, PageFlags);
     while(1);
 
     /*PLOUSINE_KERNEL_MOUNTED_FILESYSTEMS MountedSystems = GetMountedFileSystemTable();

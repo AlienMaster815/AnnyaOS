@@ -1,47 +1,88 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
-/*
-#include "EHCI.h"
+#include "Ehci.h"
 
-//TODO: Add support for 64 bit supported systems
+static LOUSINE_DMA_DEVICE EhciDataStructure = {
+    .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
+    .MaxScatterCount = 8320,
+    .AllocatorData = {
+        .DmaLimit = 32,
+        .DmaThreshold = 64 * KILOBYTE,
+    },
+};
 
-static LOUSTATUS
-EhciAllocateDma32(
-    size_t  Size,
-    size_t  Alignment,
-    PVOID*  Out
-){
-    if((!Out) || (!Alignment) || (!Size)){
+static LOUSTATUS AllocateDmaMemoryFromDevice(
+    PLOUSINE_DMA_DEVICE DmaDevice,
+    SIZE                AllocationSize,
+    SIZE                Alignment,
+    PVOID*              Out
+){  
+    if(
+        (!DmaDevice) || (!AllocationSize) ||
+        (!Alignment) || (!Out)
+    ){
         return STATUS_INVALID_PARAMETER;
     }
-    PVOID Result = LouKeMallocExPhy32(Size, Alignment, KERNEL_DMA_MEMORY);
-    UINT64 PhyAddress;
-    RequestPhysicalAddress((UINT64)Result, &PhyAddress);
-    if((PhyAddress + Size) > UINT32_MAX){
-        LouPrint("EHCI.SYS:Unable To Allocate 32 Bit Memmory\n");
-        LouKeFreePhy32(Result);
-        *Out = 0x00; 
+    PVOID Tmp = LouKeDmaDeviceAllocateDmaMemory(DmaDevice, AllocationSize, Alignment);
+    if(!Tmp){
         return STATUS_INSUFFICIENT_RESOURCES;
     }
-    *Out = Result;
+    *Out = Tmp;
     return STATUS_SUCCESS;
 }
 
-
-LOUSTATUS EhciAllocateDma(
-    PEHCI_DEVICE    EhciDevice,
-    SIZE            size, 
-    SIZE            Alignment,
-    PVOID*          Out
+static LOUSTATUS FreeDmaMemoryFromDevice(
+    PLOUSINE_DMA_DEVICE DmaDevice,
+    PVOID               Address
 ){
-    //if(EhciDevice->Dma64Supported){
-        //if((!Out) || (!Alignment) || (!size)){
-        //    return STATUS_INVALID_PARAMETER;
-        //}
-        //*Out = LouKeMallocEx(size, Alignment, KERNEL_DMA_MEMORY);
-        //return STATUS_SUCCESS; 
-    //}
+    if((!DmaDevice) || (!Address)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    LouKeDmaDeviceFreeDmaMemory(DmaDevice, Address);
+    return STATUS_SUCCESS;
+}
 
-    return EhciAllocateDma32(size, Alignment, Out);
+LOUSTATUS EhciInitializeEhciMemoryManagement(
+    PEHCI_DEVICE_OBJECT EhciObject
+){
+
+    memcpy(&EhciObject->DataStructureDmaDev, &EhciDataStructure, sizeof(LOUSINE_DMA_DEVICE));
+    memcpy(&EhciObject->MainDmaDev, &EhciDataStructure, sizeof(LOUSINE_DMA_DEVICE));
+    if(EhciObject->EhciDeviceCapabilities.EhciMiscFlags & EHCI_DEVICE_CAPABILITIES_MISC_FLAG_64BIT_DMA){
+        EhciObject->MainDmaDev.AllocatorData.DmaLimit = 64;
+    }
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciAllocateDmaMemoryForDataStructures(
+    PEHCI_DEVICE_OBJECT     EhciObject,
+    SIZE                    AllocationSize,
+    SIZE                    AllocationAlignment,
+    PVOID*                  Out
+){
+    return AllocateDmaMemoryFromDevice(&EhciObject->DataStructureDmaDev, AllocationSize, AllocationAlignment, Out); 
+}
+
+LOUSTATUS EhciFreeDmaMemoryForDataStructures(
+    PEHCI_DEVICE_OBJECT     EhciObject,
+    PVOID                   Address
+){
+    return FreeDmaMemoryFromDevice(&EhciObject->DataStructureDmaDev, Address);
+}
+
+LOUSTATUS EhciAllocateDmaMemory(
+    PEHCI_DEVICE_OBJECT     EhciObject,
+    SIZE                    AllocationSize,
+    SIZE                    AllocationAlignment,
+    PVOID*                  Out
+){
+    return AllocateDmaMemoryFromDevice(&EhciObject->MainDmaDev, AllocationSize, AllocationAlignment, Out); 
+}
+
+LOUSTATUS EhciFreeDmaMemory(
+    PEHCI_DEVICE_OBJECT     EhciObject,
+    PVOID                   Address
+){
+    return FreeDmaMemoryFromDevice(&EhciObject->MainDmaDev, Address);
 }
 
 UINTPTR EhciGetDmaAddress(
@@ -52,38 +93,33 @@ UINTPTR EhciGetDmaAddress(
     return (UINTPTR)PhyAddress;
 }
 
-void EhciFreeDma(PEHCI_DEVICE EhciDevice, PVOID VAddress){
-    //if(EhciDevice->Dma64Supported){
-    //    LouKeFree(VAddress);
-    //    return;
-    //}
-    LouKeFreePhy32(VAddress);
-}
-
 LOUSTATUS 
 EhciAllocatePeriodicFrameListBase(
-    PEHCI_DEVICE    EhciDevice
+    PEHCI_DEVICE_OBJECT    EhciObject
 ){
-    LOUSTATUS Status;
-    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciDevice->OperationalRegisters;
-    PVOID Out;
-    
-    Status = EhciAllocateDma(EhciDevice, 4 * KILOBYTE, 4 * KILOBYTE, &Out);
+    LOUSTATUS   Status;
+    PVOID       Flb;
+    UINT32*     Tmp;
+    Status = EhciAllocateDmaMemoryForDataStructures(EhciObject, sizeof(UINT32) * 1024, KILOBYTE_PAGE, &Flb);
     if(Status != STATUS_SUCCESS){
-        LouPrint("EHCI.SYS:Could Not Allocate Resources For Periodic Frame List\n");
         return Status;
     }
-    
-    EhciDevice->PeriodicFrameListBase = (UINTPTR)Out;
-
-    UINT32* Tmp = (UINT32*)EhciDevice->PeriodicFrameListBase;
+    Tmp = (UINT32*)Flb;
+    EhciObject->VirtualFrameListBase = Flb;
     for(size_t i = 0 ; i < 1024; i++){
         Tmp[i] = EHCI_PFLE_TERMINATE_BIT;
     }
-    OpRegs->FrameListBaseAddress = EhciGetDmaAddress((PVOID)EhciDevice->PeriodicFrameListBase);    
-
     return STATUS_SUCCESS;
 }
+
+void EhciResetPeriodicFrameList(PVOID FrameListBaseAddress){
+    UINT32* Tmp = (UINT32*)FrameListBaseAddress;
+    for(size_t i = 0 ; i < 1024; i++){
+        Tmp[i] = EHCI_PFLE_TERMINATE_BIT;
+    }
+}
+
+/*
 
 LOUSTATUS 
 EhciAllocateAsyncHead(

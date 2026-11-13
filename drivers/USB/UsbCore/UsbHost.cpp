@@ -76,7 +76,7 @@ LOUSTATUS UsbCoreCreateHcdObject(
         return STATUS_INSUFFICIENT_RESOURCES;
     }
     //TODO:Create Endpoint 0 enumerate the root hub 
-
+    //Add Check Status For Non Interruptable setups
 
 
     MutexLock(&UsbHcdListLock);
@@ -85,6 +85,17 @@ LOUSTATUS UsbCoreCreateHcdObject(
     return STATUS_SUCCESS;
 }
 
+DRIVER_EXPORT
+LOUSTATUS
+UsbCoreInitializeHostManagementAndBootDevices(){
+    LouPrint("UsbCoreInitializeHostManagementAndBootDevices()\n");
+
+    
+
+    LouPrint("UsbCoreInitializeHostManagementAndBootDevices():STATUS_SUCCESS\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
 
 /*
 #include "UsbCore.h"

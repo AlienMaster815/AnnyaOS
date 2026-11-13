@@ -135,6 +135,7 @@ void LouKeWaitForProcessorInitialization();
 void LouKeApIdleTillApInitFunction();
 LOUAPI void LouKeWaitForApInitializationCompletion();
 void LouKeInitializeLouKeMallocSubsystem();
+DRIVER_EXPORT LOUSTATUS UsbCoreInitializeHostManagementAndBootDevices();
 
 void AdvancedLousineKernelInitialization(){
 
@@ -339,6 +340,8 @@ void LouOsKrnlStart(
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
 
     PciHalScanBootDevices();
+
+    UsbCoreInitializeHostManagementAndBootDevices();
 
     //InitializeFileSystemManager();
 

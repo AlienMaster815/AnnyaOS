@@ -6,3 +6,4 @@ EXPORTS
     LouKeUsbGetDescriptorRequest
     LouKeUsbSetAddress
     UsbCoreCreateHcdObject
+    UsbCoreInitializeHostManagementAndBootDevices

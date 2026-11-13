@@ -14,6 +14,39 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("EHCI.SYS::UnloadDriver() STATUS_SUCCESS\n");
 }
 
+LOUSTATUS EhciResetHcdDevice(PUSB_HCD_OBJECT Hcd);
+LOUSTATUS EhciStartHcdDevice(PUSB_HCD_OBJECT Hcd);
+LOUSTATUS EhciStopHcdDevice(PUSB_HCD_OBJECT Hcd);
+LOUSTATUS EhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
+LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
+
+
+RHPORT_STATUS EhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+LOUSTATUS EhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+LOUSTATUS EhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+LOUSTATUS EhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+
+LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
+LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
+
+LOUSTATUS EhciInterruptHandler(UINT64 Data);
+
+static USB_HCD_OPERATIONS EhciHcdOperations = {
+    //Host Operations
+    .ResetHcdDevice = EhciResetHcdDevice,
+    .StartHcdDevice = EhciStartHcdDevice,
+    .StopHcdDevice = EhciStopHcdDevice,
+    .HcdCreateEndpoint = EhciHcdCreateEndpoint,
+    .HcdDestroyEndpoint = EhciHcdDestroyEndpoint,
+    //Roothub Operations
+    .GetHcdRhPortStatus = EhciGetHcdRhPortStatus,
+    .ResetRhPort = EhciResetRhPort,
+    .StartRhPort = EhciStartRhPort,
+    .StopRhPort = EhciStopRhPort,
+    //Transfer Operations
+    .PrepTransfer = EhciPrepTransfer,
+    .CommitTransfer = EhciCommitTransfer,
+};
 
 LOUSTATUS AddDevice(
     PDRIVER_OBJECT DriverObject, 
@@ -48,9 +81,32 @@ LOUSTATUS AddDevice(
 
     LouPrint("NewEhciDevice->OperationalRegisters:%h\n", NewEhciDevice->OperationalRegisters);
 
+    Status = EhciInitializeEhciMemoryManagement(NewEhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS::Unable to initialize Memory Management\n");
+        while(1);
+    }
 
+    Status = EhciAllocatePeriodicFrameListBase(NewEhciDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS::Unable to allocate Frame List Base\n");
+        while(1);
+    }
+
+    //TODO Allocate Interrupts
+
+    Status = UsbCoreCreateHcdObject(
+        NewEhciDevice->PDEV,
+        USBHCD_FLAGS_SET_VERSION(2),
+        NewEhciDevice,
+        &NewEhciDevice->MainDmaDev,
+        &EhciHcdOperations
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS:Fatal Error:Unable To Allocate Register Controller\n");
+        while(1);
+    }
     LouPrint("EHCI.SYS::AddDevice():STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -71,13 +127,3 @@ LOUSTATUS DriverEntry(
     LouPrint("EHCI.SYS::DriverEntry() STATUS_SUCCESS\n");    
     return STATUS_SUCCESS;
 }
-
-/*
-
-
-
-
-
-
-
-*/

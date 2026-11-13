@@ -1,55 +1,156 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
-/*
-#include "EHCI.h"
+#include "Ehci.h"
 
-LOUSTATUS EhciStopHostController(PEHCI_DEVICE EhciDevice){
-    LouPrint("EHCI.SYS:EhciStopHostController()\n");
-    if(!EhciDevice){
-        LouPrint("EHCI.SYS:EhciStopHostController() EINVAL_PARAM\n");
-        return STATUS_INVALID_PARAMETER;
-    }
-    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciDevice->OperationalRegisters;
-    LOUSTATUS Status;
-    if(!EHCI_GET_USBSTS_HC_HALTED(OpRegs->UsbStatus)){
-        OpRegs->UsbCommand = EHCI_SET_USBCMD_RS(OpRegs->UsbCommand, 0);
-        Status = LouKeWaitForUlongRegisterConditionMs(
-            (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbStatus), //this is not unaligned the compiler is a bitch
-            10,
-            EHCI_USBSTS_HC_HALTED,
-            1
-        );
-        if(Status != STATUS_SUCCESS){
-            LouPrint("EHCI.SYS:Ehci Controller Failed To Halt\n");
-            return Status;
-        }
+void EhciResetPeriodicFrameList(PVOID FrameListBaseAddress);
 
+static LOUSTATUS _EhciStopHcdDevice(PUSB_HCD_OBJECT HcdObject){
+    PEHCI_DEVICE_OBJECT EhciObject = (PEHCI_DEVICE_OBJECT)HcdObject->HcdPrivateData;
+    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciObject->OperationalRegisters;
+    UINT32 Command = OpRegs->UsbCommand;
+    UINT32 Status = OpRegs->UsbStatus;
+    if((!(Command & EHCI_USBCMD_RS)) && (Status & EHCI_USBSTS_HC_HALTED)){
+        return STATUS_SUCCESS;
     }
-    LouPrint("EHCI.SYS:EhciStopHostController() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
+    Command &= ~(EHCI_USBCMD_RS);
+    OpRegs->UsbCommand = Command;
+
+    return LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer((PVOID)&OpRegs->UsbStatus),
+        5000,
+        EHCI_USBSTS_HC_HALTED,
+        EHCI_USBSTS_HC_HALTED
+    );
 }
 
-LOUSTATUS EhciResetController(PEHCI_DEVICE EhciDevice){
-    LouPrint("EHCI.SYS:EhciResetController()\n");
-    if(!EhciDevice){
-        LouPrint("EHCI.SYS:EhciResetController() EINVAL_PARAM\n");
-        return STATUS_INVALID_PARAMETER;
+LOUSTATUS EhciResetHcdDevice(PUSB_HCD_OBJECT HcdObject){
+    LouPrint("EHCI.SYS:EhciResetHcdDevice()\n");
+    PEHCI_DEVICE_OBJECT EhciObject = (PEHCI_DEVICE_OBJECT)HcdObject->HcdPrivateData;
+    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciObject->OperationalRegisters;
+    UINT32 Command;
+    UINT32 Status;
+    LOUSTATUS LouStatus = _EhciStopHcdDevice(HcdObject);
+    if(LouStatus != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS:Unable To Stop Controller\n");
+        return LouStatus;
     }
+    Command = OpRegs->UsbCommand;
+    Command |= EHCI_USBCMD_HCRESET;
+    OpRegs->UsbCommand = Command;
 
-    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciDevice->OperationalRegisters;
-    LOUSTATUS Status;
-
-    OpRegs->UsbCommand = EHCI_SET_USBCMD_HCRESET(OpRegs->UsbCommand, 1);
-    Status = LouKeWaitForUlongRegisterConditionMs(
-        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->UsbCommand), //this is not unaligned the compiler is a bitch
-        10,
+    LouStatus = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer((PVOID)&OpRegs->UsbCommand),
+        5000,
         EHCI_USBCMD_HCRESET,
         0
     );
-    if(Status != STATUS_SUCCESS){
-        LouPrint("EHCI.SYS:Ehci Controller Failed To Reset\n");
-        return Status;
+    if(LouStatus != STATUS_SUCCESS){
+        return LouStatus;
     }
-    LouPrint("EHCI.SYS:EhciResetController() STATUS_SUCCESS\n");
+
+    //TODO: Enable Interrupts
+
+    EhciResetPeriodicFrameList(EhciObject->VirtualFrameListBase);
+
+    OpRegs->FrameListBaseAddress = EhciGetDmaAddress(EhciObject->VirtualFrameListBase);
+
+    Command = OpRegs->UsbCommand;
+
+    Command &= ~(EHCI_USBCMD_ITC);
+    Command |= (1 << EHCI_USBCMD_ITC_SHIFT);
+    
+    OpRegs->UsbCommand = Command;
+
+    LouPrint("EHCI.SYS:EhciResetHcdDevice():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
-*/
+
+LOUSTATUS EhciStartHcdDevice(PUSB_HCD_OBJECT HcdObject){
+    LouPrint("EHCI.SYS:EhciStartHcdDevice()\n");
+    PEHCI_DEVICE_OBJECT EhciObject = (PEHCI_DEVICE_OBJECT)HcdObject->HcdPrivateData; 
+    PEHCI_HOST_OPERATIONAL_REGISTERS OpRegs = EhciObject->OperationalRegisters;
+    UINT32 Command = OpRegs->UsbCommand;
+    Command |= (EHCI_USBCMD_RS);
+    OpRegs->UsbCommand = Command;
+    OpRegs->ConfigFlag = 1;
+
+    LOUSTATUS Status = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer((PVOID)&OpRegs->UsbStatus),
+        5000,
+        EHCI_USBSTS_HC_HALTED,
+        0
+    );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS:Unable To Start Device\n");
+        return Status;
+    }
+
+    LouPrint("EHCI.SYS:EhciStartHcdDevice():STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciStopHcdDevice(PUSB_HCD_OBJECT HcdObject){
+    LouPrint("EHCI.SYS:EhciStopHcdDevice()\n");
+    LOUSTATUS Status = _EhciStopHcdDevice(HcdObject);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("EHCI.SYS:Unable To Stop Controller\n");
+        return Status;
+    }
+    LouPrint("EHCI.SYS:EhciStopHcdDevice():STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint){
+    LouPrint("EHCI.SYS:EhciHcdCreateEndpoint()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
+    LouPrint("EHCI.SYS:EhciHcdDestroyEndpoint()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+RHPORT_STATUS EhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("EHCI.SYS:EhciGetHcdRhPortStatus()\n");
+    while(1);
+    return RHPORT_STATUS_NEEDS_RESET;
+}
+
+LOUSTATUS EhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("EHCI.SYS:EhciResetRhPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("EHCI.SYS:EhciStartRhPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+    LouPrint("EHCI.SYS:EhciStopRhPort()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_DATA Transfer){
+    LouPrint("EHCI.SYS:EhciPrepTransfer()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
+LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_DATA Transfer){
+    LouPrint("EHCI.SYS:EhciCommitTransfer()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciInterruptHandler(UINT64 Data){
+    LouPrint("EHCI.SYS:EhciInterruptHandler()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
