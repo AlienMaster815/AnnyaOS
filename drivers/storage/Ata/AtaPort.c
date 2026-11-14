@@ -105,6 +105,7 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
     }else{
         AtaCoreEncodeIdentifyDeviceCommand((PATA_COMMAND_IDENTIFY_DEVICE_STRUCTURE)&Identify->Packet, Dev);
     }
+    LouKeSetupDmaTransferFence(Identify->TransferData, 5000, true);
     if(AtaPort->Operations->AtaPortDevicePrepCommand){
         Status = AtaPort->Operations->AtaPortDevicePrepCommand(AtaPort, Identify);
         if(Status != STATUS_SUCCESS){
@@ -117,11 +118,11 @@ void AtaCoreSendIdentifyCommand(PATA_PORT_DEVICE_OBJECT AtaPort, PATA_COMMAND_PA
 
     AtaCoreCommitCommandPacketToPort(Identify, AtaPort);
         
-    while(!LouKeGetAtomicBoolean(&Identify->CommandDone)){
-        sleep(10);
+    Status = LouKeFenceDmaTransfer(Identify->TransferData);
+    if(Status == STATUS_SUCCESS){
+        Status = Identify->CommandStatus;
     }
-
-    if(Identify->CommandStatus != STATUS_SUCCESS){
+    if(Status != STATUS_SUCCESS){
         LouKeDestroyDmaTransfer(Identify->TransferData);
         return;
     }

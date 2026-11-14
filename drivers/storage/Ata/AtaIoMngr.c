@@ -35,7 +35,7 @@ void AtaCorePortIoQueueManager(PVOID Params){
         }
         MutexUnlock(PortDevice->ChannelLock);
         LouKeSetAtomicBoolean(&CommandPacket->CommandDone, 1);
-        if(CommandPolled){
+        if(CommandPolled && CommandPacket->TransferData){
             LouKeDmaSignalDmaFence(&CommandPacket->TransferData->DmaFence);
         }   
     }

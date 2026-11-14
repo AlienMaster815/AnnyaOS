@@ -5,6 +5,10 @@
 void UsbCoreHcdIoQueueManager(PVOID Params);
 void UsbCoreHcdIoDeQueueManager(PVOID Params);
 
+
+LOUSTATUS UsbCoreCreateDefaultUsbDeviceObject(PUSB_HCD_OBJECT HostObject);
+
+
 static ListHeader   UsbHcdList = {0};
 static mutex_t      UsbHcdListLock {0};
 
@@ -98,7 +102,12 @@ UsbCoreInitializeHostManagementAndBootDevices(){
         }
         HasXhci = true;
         LouPrint("USBCORE.SYS:Initializing Xhci Host Device:%h\n", TmpHcd);
-        
+
+        UsbCoreCreateDefaultUsbDeviceObject(TmpHcd);
+
+        //PUSB_ENDPOINT_OBJECT NewEndpoint0 = LouKeMallocType();
+
+
         
         //TODO:Create Endpoint 0 enumerate the root hub 
         //Add Check Status For Non Interruptable setups

@@ -136,6 +136,7 @@ void LouKeApIdleTillApInitFunction();
 LOUAPI void LouKeWaitForApInitializationCompletion();
 void LouKeInitializeLouKeMallocSubsystem();
 DRIVER_EXPORT LOUSTATUS UsbCoreInitializeHostManagementAndBootDevices();
+void LouKeWaitForSystemWorkQueue();
 
 void AdvancedLousineKernelInitialization(){
 
@@ -339,9 +340,11 @@ void LouOsKrnlStart(
 
     LouKeInitializeKernelRuntimeEnviornment(LousineKernelLoaderInformation.KernelHandle);
 
+    LouKeWaitForSystemWorkQueue();
+
     PciHalScanBootDevices();
 
-    UsbCoreInitializeHostManagementAndBootDevices();
+    //UsbCoreInitializeHostManagementAndBootDevices();
 
     //InitializeFileSystemManager();
 
@@ -355,16 +358,19 @@ void LouOsKrnlStart(
 
     //TODO:
     //finish the IRQL system for all cores
-
+    //
     //fix usermode to use mutexes
-
+    //
     //add non threshold limited DMA allocations
+    //
+    //Update the registry compiler for the modern Pool allocations
+
 
     LouPrint("Successful Boot\n");
     
-    //sleep(2000);
+    sleep(2000);
     
-    //LouKeSystemShutdown(ShutdownReboot);
+    LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
 

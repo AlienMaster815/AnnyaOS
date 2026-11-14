@@ -115,10 +115,7 @@ void
 LouKeDmaSignalDmaFence(
     PLOUSINE_DMA_FENCE Fence
 ){
-    MutexLock(&Fence->SignalWork.QueueObject.LouQtex);
-    Fence->SignalWork.Work.DelayedFunction = _LouKeDmaSignalDmaFenceDelayedWork;
-    Fence->SignalWork.Work.WorkData = (PVOID)Fence; 
-    MutexUnlock(&Fence->SignalWork.QueueObject.LouQtex);
+    LouKeLouQInitializeWork(&Fence->SignalWork, _LouKeDmaSignalDmaFenceDelayedWork, (PVOID)Fence);
     LouKeQueueWork(&Fence->SignalWork);
 }
 

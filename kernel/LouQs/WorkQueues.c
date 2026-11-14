@@ -11,28 +11,23 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     UNUSED PLOUQ_WORK_QUEUE WorkQueueData = (PLOUQ_WORK_QUEUE)Data;
     UNUSED PTHREAD WorkerThread = LouKeGetCurrentThreadHandle();
     LouPrint("Work Queue Started:%s\n", WorkQueueData->QueueName);
-    LouKIRQL Irql;
-    if(!strcmp(WorkQueueData->QueueName, MainWorkQueue.QueueName)){
-        MainWorkQueueRunning = true;
-        LouKeMemoryBarrier();
-    }
+    LouKIRQL    Irql;
+    UNUSED PLOUQ_WORK  TmpWork;
+    UNUSED PLOUQ_WORK  ForwardWork;
+    ListHeader  TmpList;
     while(1){
-        if(!LouKeListIsEmpty(&WorkQueueData->QueuedWork)){
-            LouKeAcquireSpinLock(&WorkQueueData->AddLock, &Irql);
-            ListHeader TmpList = WorkQueueData->QueuedWork;
-            LouKeListDeleteAll(&WorkQueueData->QueuedWork);
-            LouKeReleaseSpinLock(&WorkQueueData->AddLock, &Irql);
-
-            PLOUQ_WORK TmpWork;
-            PLOUQ_WORK ForwardWork;
+        LouKeAcquireInterruptLock(&WorkQueueData->AddLock, &Irql);
+        TmpList = WorkQueueData->QueuedWork;
+        LouKeListDeleteAll(&WorkQueueData->QueuedWork);
+        LouKeMemoryBarrier();
+        LouKeReleaseInterruptLock(&WorkQueueData->AddLock, &Irql);
+        if(TmpList.NextHeader){
             ForEachListEntrySafe(TmpWork, ForwardWork, &TmpList, QueueObject.Peers){
-                if(TmpWork->Work.DelayedFunction){
-                    TmpWork->QueueObject.Status = TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
-                    LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
-                    LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
-                    if(TmpWork->Free){
-                        LouKeFreeFastObject("LOUQ_WORK", TmpWork);
-                    }
+                TmpWork->QueueObject.Status = TmpWork->Work.DelayedFunction(TmpWork->Work.WorkData);
+                LouKeListDeleteItem(&TmpWork->QueueObject.Peers);
+                LouKeSetAtomicBoolean(&TmpWork->QueueObject.InQueue, 0);
+                if(TmpWork->Free){
+                    LouKeFreeFastObject("LOUQ_WORK", TmpWork);
                 }
             }
         }else{
@@ -42,6 +37,14 @@ DWORD LouKeWorkStackDemon(PVOID Data){
     return STATUS_SUCCESS;
 }
 
+DWORD 
+LouKeMainWorkStackDemon(
+    PVOID Data
+){
+    MainWorkQueueRunning = true;
+    LouKeMemoryBarrier();
+    return LouKeWorkStackDemon(Data);
+}
 
 KERNEL_EXPORT
 LOUSTATUS 
@@ -49,13 +52,15 @@ LouKeWqQueueWork(
     PLOUQ_WORK_QUEUE    WorkQueue,
     PLOUQ_WORK          WorkItem
 ){
+
     LouKIRQL Irql;
-    LouKeSetAtomicBoolean(&WorkItem->QueueObject.InQueue, 1);
-    MutexLock(&WorkItem->QueueObject.LouQtex);
     LouKeAcquireInterruptLock(&WorkQueue->AddLock, &Irql);
-    LouKeListAddTail(&WorkItem->QueueObject.Peers, &WorkQueue->QueuedWork);
+    if(!LouKeGetAtomicBoolean(&WorkItem->QueueObject.InQueue)){
+        LouKeSetAtomicBoolean(&WorkItem->QueueObject.InQueue, 1);
+        LouKeListAddTail(&WorkItem->QueueObject.Peers, &WorkQueue->QueuedWork);
+        LouKeMemoryBarrier();
+    }
     LouKeReleaseInterruptLock(&WorkQueue->AddLock, &Irql);
-    MutexUnlock(&WorkItem->QueueObject.LouQtex);
     LouKeUnblockThread(WorkQueue->QueueThread);
     return STATUS_SUCCESS;
 }
@@ -75,24 +80,6 @@ LOUSTATUS
 LouKeQueueWork(
     PLOUQ_WORK WorkItem
 ){
-    LOUSTATUS Status = LouKeWqQueueWork(
-        &MainWorkQueue,
-        WorkItem
-    );
-    if(Status != STATUS_SUCCESS){
-        return Status;
-    }
-    return STATUS_SUCCESS;
-}
-
-KERNEL_EXPORT 
-LOUSTATUS 
-LouKeQueueInterruptWork(
-    DELAYED_FUNCTION    Work
-){
-    PLOUQ_WORK WorkItem = LouKeAllocateFastObject("LOUQ_WORK");
-    WorkItem->Work = Work;
-    WorkItem->Free = true;
     LOUSTATUS Status = LouKeWqQueueWork(
         &MainWorkQueue,
         WorkItem
@@ -165,9 +152,13 @@ LOUSTATUS LouKeCreateSystemWorkQeueue(){
         0,
         KERNEL_GENERIC_MEMORY
     );
-    MainWorkQueue.QueueThread = LouKeCreateDemon(LouKeWorkStackDemon, (PVOID)&MainWorkQueue, 16 * KILOBYTE, 31);
+    MainWorkQueue.QueueThread = LouKeCreateDemon(LouKeMainWorkStackDemon, (PVOID)&MainWorkQueue, 16 * KILOBYTE, 31);
+
+    return STATUS_SUCCESS;
+}
+
+void LouKeWaitForSystemWorkQueue(){
     while(!MainWorkQueueRunning){
         LouKeYieldExecution();
-    }
-    return STATUS_SUCCESS;
+    }    
 }

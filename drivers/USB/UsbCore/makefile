@@ -5,7 +5,8 @@ SRC = UsbCore.cpp \
 		UsbRequests.cpp \
 		Endpoints.cpp \
 		Devices.cpp \
-		UsbIoManager.cpp
+		UsbIoManager.cpp \
+		Pipes.cpp
 
 CC = x86_64-w64-mingw32-g++
 CFLAGS = -shared -m64 -nostdlib -nodefaultlibs -Wno-write-strings -O3 -mconsole --entry=UsbCoreSubsystemEntry -fno-builtin

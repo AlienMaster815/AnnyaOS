@@ -33,7 +33,7 @@ static void LouKePs2MouseIrqHandler(PPS2_DEVICE_OBJECT Data){
     if(!(LouKeHalPs2CheckControllerStatus() & (0x20))){
         return;
     }
-    LouKeQueueWork(&Ps2Device->Work);
+    //LouKeQueueWork(&Ps2Device->Work);
 }
 
 
@@ -43,7 +43,7 @@ LouKeHalInitializePs2Mouse(
     PPS2_DEVICE_OBJECT Ps2Device
 ){
     LouPrint("LouKeHalInitializePs2Mouse()\n");
-
+    while(1);
     Ps2Device->DriverPrivateData = (PVOID)LouKeMallocType(PS2_MOUSE_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);
     PPS2_MOUSE_PRIVATE_DATA Private = (PPS2_MOUSE_PRIVATE_DATA)Ps2Device->DriverPrivateData;
 

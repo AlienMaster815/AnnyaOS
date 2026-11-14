@@ -64,6 +64,7 @@ typedef struct _LOUQ_COMPLETION{
 static inline void LouKeLouQInitializeWork(PLOUQ_WORK Work, LOUSTATUS(*Function)(void*), PVOID Data){
     Work->Work.DelayedFunction = Function;
     Work->Work.WorkData = Data;
+    LouKeMemoryBarrier();
 }
 
 #ifndef _USER_MODE_CODE_
