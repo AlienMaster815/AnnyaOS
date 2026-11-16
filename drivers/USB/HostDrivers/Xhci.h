@@ -1809,7 +1809,7 @@ typedef struct _XHCI_RING_MANAGER{
     UINT8                       Pcs; 
     ATOMIC_BOOLEAN              RingFull;
     mutex_t                     RingLock;
-    PIDENTIFICATION_RANGE       RingAllocator; 
+    UINT8                       RingEnqueuePointer; 
     PXHCI_GENERIC_TRB           VirtualRing;
     PXHCI_GENERIC_TRB           PhysicalRing;
 }XHCI_RING_MANAGER, * PXHCI_RING_MANAGER, 
