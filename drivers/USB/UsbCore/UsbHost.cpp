@@ -86,6 +86,69 @@ LOUSTATUS UsbCoreCreateHcdObject(
     return STATUS_SUCCESS;
 }
 
+void UsbCoreCreateRoothubDevice(
+    PUSB_HCD_OBJECT HcdObject, 
+    SIZE            PortNumber
+){
+    PUSB_DEVICE_OBJECT NewDevice = LouKeMallocType(USB_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
+    NewDevice->DeviceAddress = LouKeAcquireIdFromRange(HcdObject->DeviceAddresses, NewDevice);
+    if(!NewDevice->DeviceAddress){
+        LouKeFree(NewDevice);
+        return;
+    }
+    NewDevice->Uplink = 0x00;
+    NewDevice->UplinkPort = PortNumber;
+    NewDevice->Hcd = HcdObject;
+
+    //TODO:Send a SET ADDRESS to the DefaultControlPipe
+    
+    //DefaultControlPipe
+
+}
+
+LOUSTATUS UsbCoreProbeRootHub(PUSB_HCD_OBJECT HcdObject){
+    LouPrint("UsbCoreProbeRootHub()\n");
+    SIZE RhPortCount = 0;
+    LOUSTATUS PortResetStatus;
+    if(HcdObject->Operations->GetHcdRhPortCount){
+        RhPortCount = HcdObject->Operations->GetHcdRhPortCount(HcdObject);
+    }
+    if(!RhPortCount){
+        RhPortCount = 256;
+    }
+
+    for(SIZE i = 0; i < RhPortCount; i++){
+        if(!HcdObject->Operations->GetHcdRhPortStatus){
+            //LouPrint("");
+            continue;
+        }
+
+        RHPORT_STATUS RhPortStatus = HcdObject->Operations->GetHcdRhPortStatus(HcdObject, i);
+
+        if(RhPortStatus == RHPORT_STATUS_NO_DEVICE){
+            continue;
+        }
+
+        if(!HcdObject->Operations->ResetRhPort){
+            continue;
+        }
+
+        PortResetStatus = HcdObject->Operations->ResetRhPort(HcdObject, i);
+        if(PortResetStatus != STATUS_SUCCESS){
+            continue;
+        }
+
+        UsbCoreCreateRoothubDevice(HcdObject, i);
+
+        LouPrint("UsbCoreProbeRootHub(%d):FOUND_DEVICE\n", i);
+        while(1);
+    }
+
+
+    LouPrint("UsbCoreProbeRootHub():STATUS_SUCCESS\n");
+    return STATUS_SUCCESS;
+}
+
 DRIVER_EXPORT
 LOUSTATUS
 UsbCoreInitializeHostManagementAndBootDevices(){
@@ -104,6 +167,8 @@ UsbCoreInitializeHostManagementAndBootDevices(){
         LouPrint("USBCORE.SYS:Initializing Xhci Host Device:%h\n", TmpHcd);
 
         UsbCoreCreateDefaultUsbDeviceObject(TmpHcd);
+
+        UsbCoreProbeRootHub(TmpHcd);
 
         //PUSB_ENDPOINT_OBJECT NewEndpoint0 = LouKeMallocType();
 

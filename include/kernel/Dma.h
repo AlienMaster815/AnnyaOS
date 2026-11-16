@@ -21,7 +21,6 @@ typedef enum{
 
 typedef struct _LOUSINE_DMA_FENCE{
     int                 Wait;
-    BOOLEAN             Poll; 
     PTHREAD             Thread;   
     mutex_t             DmaFenceFence;
     mutex_t             DmaFence;
@@ -72,7 +71,7 @@ KERNEL_EXPORT void LouKeDmaDeviceFreeDmaMemory(PLOUSINE_DMA_DEVICE DmaDevice, PV
 
 KERNEL_EXPORT void LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence);
 KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer);
-KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer, int Wait, bool Poll);
+KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer, int Wait);
 KERNEL_EXPORT void LouKeDestroyDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer);
 KERNEL_EXPORT PLOUSINE_DMA_TRANSFER LouKeCreateDmaTransfer(PLOUSINE_DMA_DEVICE DmaDevice, SIZE AllocationSize, SIZE LowestAlignment);
 KERNEL_EXPORT PVOID LouKeDmaTransferGetOffsetVa(PLOUSINE_DMA_TRANSFER Transfer, SIZE ByteOffset, SIZE* RemainingInSegment);

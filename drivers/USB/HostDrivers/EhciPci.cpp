@@ -20,14 +20,15 @@ LOUSTATUS EhciStopHcdDevice(PUSB_HCD_OBJECT Hcd);
 LOUSTATUS EhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
 LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
 
-
+SIZE EhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject);
 RHPORT_STATUS EhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS EhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS EhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS EhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 
-LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
-LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
+LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS EhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
 
 LOUSTATUS EhciInterruptHandler(UINT64 Data);
 
@@ -39,6 +40,7 @@ static USB_HCD_OPERATIONS EhciHcdOperations = {
     .HcdCreateEndpoint = EhciHcdCreateEndpoint,
     .HcdDestroyEndpoint = EhciHcdDestroyEndpoint,
     //Roothub Operations
+    .GetHcdRhPortCount = EhciGetHcdRhPortCount,
     .GetHcdRhPortStatus = EhciGetHcdRhPortStatus,
     .ResetRhPort = EhciResetRhPort,
     .StartRhPort = EhciStartRhPort,
@@ -46,6 +48,7 @@ static USB_HCD_OPERATIONS EhciHcdOperations = {
     //Transfer Operations
     .PrepTransfer = EhciPrepTransfer,
     .CommitTransfer = EhciCommitTransfer,
+    .GetTransferStatus = EhciGetTransferStatus,
 };
 
 LOUSTATUS AddDevice(

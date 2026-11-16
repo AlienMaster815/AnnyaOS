@@ -8,14 +8,15 @@ LOUSTATUS OhciStopHcdDevice(PUSB_HCD_OBJECT Hcd);
 LOUSTATUS OhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
 LOUSTATUS OhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
 
-
+SIZE OhciGetHcdRhPortCount(PUSB_HCD_OBJECT Hcd);
 RHPORT_STATUS OhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS OhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS OhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS OhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 
-LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
-LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
+LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS OhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
 
 static LOUSINE_DMA_DEVICE TypicalOhciBusMasterDevice = {
     .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
@@ -34,6 +35,7 @@ static USB_HCD_OPERATIONS OhciHcdOperations = {
     .HcdCreateEndpoint = OhciHcdCreateEndpoint,
     .HcdDestroyEndpoint = OhciHcdDestroyEndpoint,
     //Roothub Operations
+    .GetHcdRhPortCount = OhciGetHcdRhPortCount,
     .GetHcdRhPortStatus = OhciGetHcdRhPortStatus,
     .ResetRhPort = OhciResetRhPort,
     .StartRhPort = OhciStartRhPort,
@@ -41,6 +43,7 @@ static USB_HCD_OPERATIONS OhciHcdOperations = {
     //Transfer Operations
     .PrepTransfer = OhciPrepTransfer,
     .CommitTransfer = OhciCommitTransfer,
+    .GetTransferStatus = OhciGetTransferStatus,
 };
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedOhciPciDevices[] = {

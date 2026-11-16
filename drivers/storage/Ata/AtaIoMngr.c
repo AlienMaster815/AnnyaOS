@@ -16,7 +16,6 @@ void AtaCorePortIoQueueManager(PVOID Params){
         }
         LouKeListDeleteItem(&CommandPacket->QueuedCommands);
         MutexUnlock(PortDevice->ChannelLock);
-
         CommandPolled = CommandPacket->CommandFlags & ATA_COMMAND_PACKET_FLAGS_POLL;
         CommandPacket->CommandStatus = PortDevice->Operations->AtaPortDeviceIssueCommand(PortDevice, CommandPacket);
         LOUSTATUS tStatus = STATUS_SUCCESS;

@@ -8,14 +8,15 @@ LOUSTATUS XhciStopHcdDevice(PUSB_HCD_OBJECT Hcd);
 LOUSTATUS XhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
 LOUSTATUS XhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
 
-
+SIZE XhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject);
 RHPORT_STATUS XhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 
-LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_DATA Transfer);
-LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer);
+LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
 
 LOUSTATUS XhciInterruptHandler(UINT64 Data);
 
@@ -27,6 +28,7 @@ static USB_HCD_OPERATIONS XhciHcdOperations = {
     .HcdCreateEndpoint = XhciHcdCreateEndpoint,
     .HcdDestroyEndpoint = XhciHcdDestroyEndpoint,
     //Roothub Operations
+    .GetHcdRhPortCount = XhciGetHcdRhPortCount,
     .GetHcdRhPortStatus = XhciGetHcdRhPortStatus,
     .ResetRhPort = XhciResetRhPort,
     .StartRhPort = XhciStartRhPort,
@@ -34,6 +36,7 @@ static USB_HCD_OPERATIONS XhciHcdOperations = {
     //Transfer Operations
     .PrepTransfer = XhciPrepTransfer,
     .CommitTransfer = XhciCommitTransfer,
+    .GetTransferStatus = XhciGetTransferStatus,
 };
 
 LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {
@@ -127,6 +130,7 @@ LOUSTATUS AddDevice(
         LouPrint("XHCI.SYS:Fatal Error:Unable To Connect Interrupt Handler\n");
         while(1);
     }
+
     Status = XhciAllocateUnrestrictedDmaMemory(
         NewXhciDevice, 
         sizeof(XHCI_EVENT_RING_SEGMENT_TABLE_ENTRY), 

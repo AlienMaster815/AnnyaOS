@@ -79,17 +79,14 @@ KERNEL_EXPORT void LouKeDestroyDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
     }
 }
 
-KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer, int Wait, bool Poll){
+KERNEL_EXPORT LOUSTATUS LouKeSetupDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer, int Wait){
     if(!Transfer){
         return STATUS_INVALID_PARAMETER;
     }
     MutexLock(&Transfer->DmaFence.DmaFenceFence);
     MutexLock(&Transfer->DmaFence.DmaFence);
     Transfer->DmaFence.Wait = Wait;
-    Transfer->DmaFence.Poll = Poll;
-    if(!Poll){
-        Transfer->DmaFence.Thread = LouKeGetCurrentThreadHandle();
-    }
+    Transfer->DmaFence.Thread = LouKeGetCurrentThreadHandle();
     return STATUS_SUCCESS;
 }
 
@@ -98,9 +95,7 @@ void _LouKeDmaSignalDmaFence(PLOUSINE_DMA_FENCE Fence){
     PLOUSINE_DMA_TRANSFER Transfer = CONTAINER_OF(Fence, LOUSINE_DMA_TRANSFER, DmaFence);
     Transfer->DmaDone = true;
     LouKeMemoryBarrier();
-    if(Fence->Thread){
-        LouKeUnblockThread(Fence->Thread);
-    }
+    LouKeUnblockThread(Fence->Thread);
 }
 
 
@@ -120,43 +115,17 @@ LouKeDmaSignalDmaFence(
 }
 
 KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
-    BOOLEAN Poll = Transfer->DmaFence.Poll;
     SIZE    CurrentTSC;
     SIZE    TscFrequency;
     SIZE    Expiration;
     SIZE    Wait = (SIZE)Transfer->DmaFence.Wait;
-    BOOLEAN TransferDone;
-    if(Poll){
-        MutexUnlock(&Transfer->DmaFence.DmaFence);
-        CurrentTSC = read_tsc();
-        TscFrequency = GetTscMaster() / 1000;
-        Expiration = CurrentTSC + (Wait * TscFrequency);
-        while(CurrentTSC <= Expiration){
-            CurrentTSC = read_tsc();
-            TransferDone = Transfer->DmaDone;
-            if(TransferDone){
-                return STATUS_SUCCESS;
-            }
-            LouKeYieldExecution();
-        }
-        return STATUS_TIMEOUT;
-    }
-    LouPrint("LouKeFenceDmaTransfer():HERE\n");
-    while(1);
-    /*LouKIRQL Irql;
-    LouKeRaiseIrql(HIGH_LEVEL, &Irql);
-    if(Wait){
-        LouKeThreadSleepNoYield((SIZE)Wait);
-    }else{
-        LouKeBlockThreadNoYield(Transfer->DmaFence.Thread);
-    }
     MutexUnlock(&Transfer->DmaFence.DmaFence);
-    LouKeLowerIrql(Irql);
-    TransferDone = Transfer->DmaDone;
-    if(!TransferDone){
-        LouKeYieldExecution();
-    }*/
-    return STATUS_SUCCESS;//TransferDone ? STATUS_SUCCESS : STATUS_TIMEOUT;
+    CurrentTSC = read_tsc();
+    TscFrequency = GetTscMaster() / 1000;
+    Expiration = CurrentTSC + (Wait * TscFrequency);
+    LouKeThreadSleep(Wait);
+    CurrentTSC = read_tsc();
+    return (CurrentTSC >= Expiration) ? STATUS_TIMEOUT : STATUS_SUCCESS;
 }
 
 KERNEL_EXPORT LOUSTATUS LouKeFinishDmaTransferFence(PLOUSINE_DMA_TRANSFER Transfer){

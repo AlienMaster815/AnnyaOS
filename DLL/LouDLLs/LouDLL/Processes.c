@@ -64,11 +64,14 @@ LouCreateProcessA(
     }
 
     HANDLE NewTokenHandle;
-    LouCreateAccessToken(
+    Status = LouCreateAccessToken(
         &NewTokenHandle,
         RequestedAccess,
         0x00
     );
+    if(Status != STATUS_SUCCESS){
+        LouPrint("LouCreateProcessA():1\n");
+    }
 
     Status = LouCreateProcessEx2(
         OutProcess,
@@ -82,7 +85,7 @@ LouCreateProcessA(
     );
     if(Status != STATUS_SUCCESS){
         //TODO: Destroy Section
-        LouPrint("LouCreateProcessA()\n");
+        LouPrint("LouCreateProcessA():2\n");
         return Status;
     }
     return STATUS_SUCCESS;

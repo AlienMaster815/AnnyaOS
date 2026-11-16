@@ -5,6 +5,7 @@ KERNEL_ENTRY LOUSTATUS UsbCoreSubsystemEntry(){
 
     //LouPrint("UsbCoreSubsystemEntry()\n");
 
+    LouKeCreateFastObjectClass("USB_TRANSFER_OBJECT", 64, sizeof(USB_TRANSFER_OBJECT), GET_ALIGNMENT(USB_TRANSFER_OBJECT), 0, KERNEL_GENERIC_MEMORY);
     
     //while(1);
     return STATUS_SUCCESS;

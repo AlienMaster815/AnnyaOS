@@ -135,49 +135,184 @@ LOUSTATUS XhciStopHcdDevice(PUSB_HCD_OBJECT HcdObject){
 }
 
 LOUSTATUS XhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint){
+    UINT8 DeviceAddress = UsbCoreGetEndpointDeviceAddress(NewEndpoint);
+    if(!DeviceAddress){
+        return STATUS_SUCCESS;
+    }
+    UINT8 Dci = (UsbCoreGetEndpointId(NewEndpoint) * 2);
+    if(!Dci){
+        Dci = 1;
+    }else if(NewEndpoint->Direction == USB_ENDPOINT_DIRECTION_IN){
+        Dci++;
+    }
+
+
+
+
+
     LouPrint("XHCI.SYS:XhciHcdCreateEndpoint()\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS XhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
+    UINT8 DeviceAddress = UsbCoreGetEndpointDeviceAddress(Endpoint);
+    if(!DeviceAddress){
+        return STATUS_SUCCESS;
+    }
+
+
     LouPrint("XHCI.SYS:XhciHcdDestroyEndpoint()\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
-RHPORT_STATUS XhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port){
-    LouPrint("XHCI.SYS:XhciGetHcdRhPortStatus()\n");
-    while(1);
+SIZE XhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject){
+    PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    return XhciDevice->Capabilities.MaxPorts;
+}   
+
+RHPORT_STATUS XhciGetHcdRhPortStatus(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
+    if(Port >= XhciGetHcdRhPortCount(HcdObject)){
+        return RHPORT_STATUS_NO_DEVICE;
+    }
+    PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    UINT32 PortSc = XhciDevice->OperationalRegisters->Ports[Port].PortStatusControl; 
+    UINT32 Pls;
+
+    if(!(PortSc & XHCI_PORTSC_CSS)){
+        return RHPORT_STATUS_NO_DEVICE;
+    }
+
+    if(!(PortSc & XHCI_PORTSC_PED)){
+        return RHPORT_STATUS_NEEDS_RESET;
+    }
+    Pls = ((PortSc >> XHCI_PORTSC_PLS_SHIFT) & XHCI_PORTSC_PLS_MASK); 
+    if(Pls == XHCI_PLS_U0_STATE){
+        return RHPORT_STATUS_RUNNING;
+    }
+
+    if((Pls >= XHCI_PLS_U1_STATE) && (Pls <= XHCI_PLS_U3_STATE)){
+        return RHPORT_STATUS_IDLE;
+    } 
+
     return RHPORT_STATUS_NEEDS_RESET;
 }
 
-LOUSTATUS XhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
-    LouPrint("XHCI.SYS:XhciResetRhPort()\n");
-    while(1);
+LOUSTATUS XhciResetRhPort(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
+    if(Port >= XhciGetHcdRhPortCount(HcdObject)){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    PULONG PortScReg = (PULONG)LouKeCastToUnalignedPointer((PVOID)&XhciDevice->OperationalRegisters->Ports[Port].PortStatusControl); 
+    ULONG PortSc = *PortScReg;    
+    if(!(PortSc & XHCI_PORTSC_CSS)){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    PortSc = (PortSc & XHCI_PORTSC_PRESERVE_MASK) | XHCI_PORTSC_PR | XHCI_PORTSC_PRC;
+    *PortScReg = PortSc;
+
+    LOUSTATUS Status = LouKeWaitForUlongRegisterConditionMs(
+        PortScReg,
+        5000,
+        XHCI_PORTSC_PR | XHCI_PORTSC_PRC, 
+        XHCI_PORTSC_PRC
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    *PortScReg = (((*PortScReg) & XHCI_PORTSC_PRESERVE_MASK) | XHCI_PORTSC_PRC);
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS XhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
-    LouPrint("XHCI.SYS:XhciStartRhPort()\n");
-    while(1);
+LOUSTATUS XhciStartRhPort(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
+    if(Port >= XhciGetHcdRhPortCount(HcdObject)){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    PULONG PortScReg = (PULONG)LouKeCastToUnalignedPointer((PVOID)&XhciDevice->OperationalRegisters->Ports[Port].PortStatusControl);
+    ULONG PortSc = *PortScReg;
+
+    if(!(PortSc & XHCI_PORTSC_CSS)){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    ULONG Pls = ((PortSc >> XHCI_PORTSC_PLS_SHIFT) & XHCI_PORTSC_PLS_MASK);
+    if((PortSc & XHCI_PORTSC_PED) && (Pls == XHCI_PLS_U0_STATE)){
+        return STATUS_SUCCESS;
+    }
+    if(!(PortSc & XHCI_PORTSC_PP)){
+        *PortScReg = (PortSc & XHCI_PORTSC_PRESERVE_MASK) | XHCI_PORTSC_PP;
+        LOUSTATUS Status = LouKeWaitForUlongRegisterConditionMs(
+            PortScReg,
+            100,
+            XHCI_PORTSC_PP,
+            XHCI_PORTSC_PP
+        );
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        PortSc = *PortScReg;
+        Pls = ((PortSc >> XHCI_PORTSC_PLS_SHIFT) & XHCI_PORTSC_PLS_MASK);
+    }
+    if((PortSc & XHCI_PORTSC_PED) && (Pls >= XHCI_PLS_U1_STATE) && (Pls <= XHCI_PLS_U3_STATE)){
+        ULONG Next = (PortSc & (XHCI_PORTSC_PRESERVE_MASK & ~(XHCI_PORTSC_PLS_MASK << XHCI_PORTSC_PLS_SHIFT)));
+        Next |= (XHCI_PLS_U0_STATE << XHCI_PORTSC_PLS_SHIFT) | XHCI_PORTSC_LWS;
+        *PortScReg = Next;
+
+        return LouKeWaitForUlongRegisterConditionMs(
+            PortScReg,
+            100,
+            (XHCI_PORTSC_PLS_MASK << XHCI_PORTSC_PLS_SHIFT),
+            (XHCI_PLS_U0_STATE << XHCI_PORTSC_PLS_SHIFT)
+        );
+    }
+    return XhciResetRhPort(HcdObject, Port);
+}
+
+LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
+    if(Port >= XhciGetHcdRhPortCount(HcdObject)){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    PULONG PortScReg = (PULONG)LouKeCastToUnalignedPointer((PVOID)&XhciDevice->OperationalRegisters->Ports[Port].PortStatusControl);
+    ULONG PortSc = *PortScReg;
+    if(!(PortSc & XHCI_PORTSC_CSS)){
+        return STATUS_NO_SUCH_DEVICE;
+    }
+    ULONG Pls = ((PortSc >> XHCI_PORTSC_PLS_SHIFT) & XHCI_PORTSC_PLS_MASK);
+    if(!(PortSc & XHCI_PORTSC_PED) || (Pls == XHCI_PLS_U3_STATE)){
+        return STATUS_SUCCESS;
+    }
+    ULONG Next = (PortSc & (XHCI_PORTSC_PRESERVE_MASK & ~XHCI_PORTSC_PLS));
+    Next |= (XHCI_PLS_U3_STATE << XHCI_PORTSC_PLS_SHIFT) | XHCI_PORTSC_LWS;
+    *PortScReg = Next;
+    LOUSTATUS Status = LouKeWaitForUlongRegisterConditionMs(
+        PortScReg,
+        100,
+        XHCI_PORTSC_PLS,
+        (XHCI_PLS_U3_STATE << XHCI_PORTSC_PLS_SHIFT)
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    *PortScReg = ((*PortScReg) & XHCI_PORTSC_PRESERVE_MASK) | XHCI_PORTSC_PLC;
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
-    LouPrint("XHCI.SYS:XhciStopRhPort()\n");
-    while(1);
-    return STATUS_SUCCESS;
-}
-
-LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_DATA Transfer){
+LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
     LouPrint("XHCI.SYS:XhciPrepTransfer()\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_DATA Transfer){
+LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
     LouPrint("XHCI.SYS:XhciCommitTransfer()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
+    LouPrint("XhciGetTransferStatus()\n");
     while(1);
     return STATUS_SUCCESS;
 }

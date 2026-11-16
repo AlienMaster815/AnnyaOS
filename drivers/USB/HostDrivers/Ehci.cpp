@@ -111,6 +111,10 @@ LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
     return STATUS_SUCCESS;
 }
 
+SIZE EhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject){
+    PEHCI_DEVICE_OBJECT EhciObject = (PEHCI_DEVICE_OBJECT)HcdObject->HcdPrivateData;
+    return EhciObject->EhciDeviceCapabilities.NumberOfPorts;
+}
 
 RHPORT_STATUS EhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port){
     LouPrint("EHCI.SYS:EhciGetHcdRhPortStatus()\n");
@@ -136,15 +140,21 @@ LOUSTATUS EhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_DATA Transfer){
+LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
     LouPrint("EHCI.SYS:EhciPrepTransfer()\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
 
-LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_DATA Transfer){
+LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
     LouPrint("EHCI.SYS:EhciCommitTransfer()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+LOUSTATUS EhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
+    LouPrint("EhciGetTransferStatus()\n");
     while(1);
     return STATUS_SUCCESS;
 }

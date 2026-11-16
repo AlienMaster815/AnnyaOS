@@ -36,14 +36,15 @@ typedef enum {
 typedef struct _USB_ENDPOINT_OBJECT{
     struct _USB_PIPE_OBJECT*    PipeObject;
     USB_ENDPOINT_DIRECTION      Direction;
-    SIZE                        EndpointMaxBandwith;
+    SIZE                        MaxPacketSize;
+    SIZE                        MaxBandwidth;
     PVOID                       HcdEndpointPrivateData;
 }USB_ENDPOINT_OBJECT, * PUSB_ENDPOINT_OBJECT;
 
 #define USB_PIPE_FLAGS_INOUT_MASK           0x03
 #define USB_PIPE_FLAGS_INOUT_SHIFT          0
 #define USB_PIPE_FLAGS_GET_INOUT(f)         ((f >> USB_PIPE_FLAGS_INOUT_SHIFT) & USB_PIPE_FLAGS_INOUT_MASK)
-#define USB_PIPE_FLAGS_SET_INOUT(x)         ((f & USB_PIPE_FLAGS_INOUT_MASK) << USB_PIPE_FLAGS_INOUT_SHIFT)
+#define USB_PIPE_FLAGS_SET_INOUT(f)         ((f & USB_PIPE_FLAGS_INOUT_MASK) << USB_PIPE_FLAGS_INOUT_SHIFT)
 #define USB_PIPE_FLAGS_HAS_INPUT            0x01
 #define USB_PIPE_FLAGS_HAS_OUTPUT           0x02
 #define USB_PIPE_FLAGS_IOFLAG_TO_VECTOR(f)  (f - 1)
@@ -59,6 +60,7 @@ typedef struct _USB_PIPE_OBJECT{
 
 typedef struct _USB_DEVICE_OBJECT{
     struct _USB_DEVICE_OBJECT*  Uplink;         //Hub or similar device (if connected)
+    SIZE                        UplinkPort;
     ListHeader                  Peers;          //Current Topology Peers
     ListHeader                  Subordinates;   //Subordinate members (if Hub or similar device)
     struct _USB_HCD_OBJECT*     Hcd;
@@ -76,14 +78,15 @@ typedef struct _USB_HCD_OPERATIONS{
     LOUSTATUS       (*HcdCreateEndpoint)(struct _USB_HCD_OBJECT* Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
     LOUSTATUS       (*HcdDestroyEndpoint)(PUSB_ENDPOINT_OBJECT Endpoint);
     //Roothub Operations
+    SIZE            (*GetHcdRhPortCount)(struct _USB_HCD_OBJECT* Hcd);
     RHPORT_STATUS   (*GetHcdRhPortStatus)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
     LOUSTATUS       (*ResetRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
     LOUSTATUS       (*StartRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
     LOUSTATUS       (*StopRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
     //Transfer Operations
-    LOUSTATUS       (*PrepTransfer)(struct _USB_TRANSFER_DATA* Transfer);
-    LOUSTATUS       (*CommitTransfer)(struct _USB_TRANSFER_DATA* Transfer);
-    LOUSTATUS       (*GetTransferStatus)(struct _USB_TRANSFER_DATA* Transfer);
+    LOUSTATUS       (*PrepTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);
+    LOUSTATUS       (*CommitTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);
+    LOUSTATUS       (*GetTransferStatus)(struct _USB_TRANSFER_OBJECT* Transfer);
 }USB_HCD_OPERATIONS, * PUSB_HCD_OPERATIONS;
 
 typedef struct _USB_HCD_OBJECT{
@@ -93,18 +96,21 @@ typedef struct _USB_HCD_OBJECT{
     ULONG                   HcdFlags;
     ListHeader              Companions;
     PIDENTIFICATION_RANGE   DeviceAddresses;
-    ListHeader              HcdDevices;
     PVOID                   HcdPrivateData;
     PUSB_HCD_OPERATIONS     Operations;
     LOUSINE_DMA_DEVICE      DmaDevice;
     SIZE                    HcdMaxBandwith;
+    SIZE                    PortCount;
     PTHREAD                 IoQueueManager;
-    mutex_t                 IoQueueLock;
+    spinlock_t              IoQueueLock;
     ListHeader              IoQueueItems;
     PTHREAD                 IoDeQueueManager;
-    mutex_t                 IoDeQueueLock;
+    spinlock_t              IoDeQueueLock;
     ListHeader              IoDeQueueItems;
+    ATOMIC_LOCK             HandoffLock;
+    ListHeader              HandoffQueue;
     USB_DEVICE_OBJECT       DefaultDevice;
+    ListHeader              DeviceList;
 }USB_HCD_OBJECT, * PUSB_HCD_OBJECT; 
 
 
@@ -143,13 +149,31 @@ typedef struct _USB_HCD_OBJECT{
 #define USB_DEVREQ_REQUEST_SET_INTERFACE        11
 #define USB_DEVREQ_REQUEST_SYNC_FRAME           12
 
-typedef struct _USB_TRANSFER_DATA{
-    UINT64 Foo;
-}USB_TRANSFER_DATA, * PUSB_TRANSFER_DATA;
+typedef enum{
+    USB_TRANSFER_OBJECT_UNKOWN = 0,
+    USB_TRANSFER_OBJECT_CONTROL,
+    USB_TRANSFER_OBJECT_BULK,
+    USB_TRANSFER_OBJECT_INTERRUPT,
+    USB_TRANSFER_OBJECT_ISOCH,
+}USB_TRANSFER_OBJECT_TYPE;
+
+typedef struct _USB_TRANSFER_OBJECT{
+    ListHeader                      Peers;
+    USB_TRANSFER_OBJECT_TYPE        ObjectType;
+    PUSB_DEVICE_OBJECT              UsbDevice;
+    PUSB_PIPE_OBJECT                Pipe;
+    BOOLEAN                         TransferDone;
+    ULONG                           TransferFlags;
+    PVOID                           HcdPrivateData[4];
+    PVOID                           SetupData; //if control Transfer
+    PLOUSINE_DMA_TRANSFER           Transfer;
+}USB_TRANSFER_OBJECT, * PUSB_TRANSFER_OBJECT;
 
 #ifndef _USB_CORE_H
 
 DRIVER_IMPORT LOUSTATUS UsbCoreCreateHcdObject(PPCI_DEVICE_OBJECT PDEV, ULONG Flags, PVOID PrivateData, PLOUSINE_DMA_DEVICE DmaDevice, PUSB_HCD_OPERATIONS Operations);
+DRIVER_IMPORT SIZE UsbCoreGetEndpointId(PUSB_ENDPOINT_OBJECT EndpointObject);
+DRIVER_IMPORT SIZE UsbCoreGetEndpointDeviceAddress(PUSB_ENDPOINT_OBJECT EndpointObject);
 
 #else 
 

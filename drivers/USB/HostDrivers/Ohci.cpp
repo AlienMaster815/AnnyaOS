@@ -233,6 +233,11 @@ LOUSTATUS OhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
     return STATUS_SUCCESS;
 }
 
+SIZE OhciGetHcdRhPortCount(PUSB_HCD_OBJECT Hcd){
+    LouPrint("OhciGetHcdRhPortCount():HERE\n");
+    while(1);
+}
+
 RHPORT_STATUS OhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port){
     LouPrint("OhciGetHcdRhPortStatus\n");
     while(1);
@@ -257,19 +262,24 @@ LOUSTATUS OhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_DATA Transfer){
+LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
     LouPrint("OhciPrepTransfer()\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
 
-LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_DATA Transfer){
+LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
     LouPrint("OhciCommitTransfer()\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS OhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
+    LouPrint("OhciGetTransferStatus()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
 
 /*
 

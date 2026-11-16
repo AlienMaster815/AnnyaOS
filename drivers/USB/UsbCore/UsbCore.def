@@ -7,3 +7,5 @@ EXPORTS
     LouKeUsbSetAddress
     UsbCoreCreateHcdObject
     UsbCoreInitializeHostManagementAndBootDevices
+    UsbCoreGetEndpointId
+    UsbCoreGetEndpointDeviceAddress

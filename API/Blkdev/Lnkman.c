@@ -8,7 +8,7 @@ LOUSTATUS BlkDevReadDeviceSegment(PBLOCK_DEVICE_OBJECT BlockDevice, PBLKDEV_OPEN
     }
     LOUSTATUS Status;
     MutexLock(&Segment->Loto);
-    LouKeSetupDmaTransferFence(Segment->DmaTransfer, 5000, ((BlockDevice->DeviceFlags & BLKDEV_FLAGS_COMPLETION_INTERRUPT) ? false : true));
+    LouKeSetupDmaTransferFence(Segment->DmaTransfer, 5000);
     Status = BlockDevice->Operations->ReadDeviceSegment(BlockDevice, Segment);
     LouKeFinishDmaTransferFence(Segment->DmaTransfer);
     MutexUnlock(&Segment->Loto);
