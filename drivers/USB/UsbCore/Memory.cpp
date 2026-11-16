@@ -30,18 +30,26 @@ UsbCoreAllocateUsbControlTransfer(
     NewTransferObject->UsbDevice = Device;
     NewTransferObject->Pipe = Pipe;
     NewTransferObject->TransferFlags = TransferFlags;    
-    NewTransferObject->SetupData = LouKeDmaDeviceAllocateDmaMemory(&HcdObject->DmaDevice, sizeof(UINT64), GET_ALIGNMENT(UINT64));
-    if(!NewTransferObject->SetupData){
-        UsbCoreFreeUsbTransferObject(NewTransferObject);
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
     if(DataSize){
+        NewTransferObject->SetupData = LouKeDmaDeviceAllocateDmaMemory(&HcdObject->DmaDevice, sizeof(UINT64), GET_ALIGNMENT(UINT64));
+        if(!NewTransferObject->SetupData){
+            UsbCoreFreeUsbTransferObject(NewTransferObject);
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
         NewTransferObject->Transfer = LouKeCreateDmaTransfer(&HcdObject->DmaDevice, DataSize, DataAlignment);
         if(!NewTransferObject->Transfer){
             LouKeDmaDeviceFreeDmaMemory(&HcdObject->DmaDevice, NewTransferObject->SetupData);
             UsbCoreFreeUsbTransferObject(NewTransferObject);
             return STATUS_INSUFFICIENT_RESOURCES;
         }   
+    }else{
+        NewTransferObject->TransferFlags |= USB_TRANSFER_FLAG_NO_DATA;
+        NewTransferObject->Transfer = LouKeCreateDmaTransfer(&HcdObject->DmaDevice, sizeof(UINT64), GET_ALIGNMENT(UINT64));
+        if(!NewTransferObject->Transfer){
+            UsbCoreFreeUsbTransferObject(NewTransferObject);
+            return STATUS_INSUFFICIENT_RESOURCES;
+        }
+        NewTransferObject->SetupData = LouKeDmaTransferGetOffsetVa(NewTransferObject->Transfer, 0, 0x00);
     }
     *OutTransfer = NewTransferObject;
     return STATUS_SUCCESS;
@@ -55,10 +63,12 @@ UsbCoreFreeUsbControlTransfer(
         return STATUS_INVALID_PARAMETER;
     }
     PUSB_HCD_OBJECT HcdObject = Transfer->UsbDevice->Hcd;
-    if(Transfer->Transfer){
+    if(Transfer->TransferFlags & USB_TRANSFER_FLAG_NO_DATA){
         LouKeDestroyDmaTransfer(Transfer->Transfer);
+    }else{
+        LouKeDestroyDmaTransfer(Transfer->Transfer);
+        LouKeDmaDeviceFreeDmaMemory(&HcdObject->DmaDevice, Transfer->SetupData);
     }
-    LouKeDmaDeviceFreeDmaMemory(&HcdObject->DmaDevice, Transfer->SetupData);
     UsbCoreFreeUsbTransferObject(Transfer);
     return STATUS_SUCCESS;
 }

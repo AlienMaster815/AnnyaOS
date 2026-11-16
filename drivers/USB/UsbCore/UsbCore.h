@@ -8,5 +8,7 @@
 #include <LouDDK.h>
 #include <usb.h>
 
+void UsbCoreCommitUsbTransferToCommandEngine(PUSB_TRANSFER_OBJECT TransferObject, int MsTimeout);
+LOUSTATUS UsbCoreFenceTransferObject(PUSB_TRANSFER_OBJECT TransferObject);
 
 #endif

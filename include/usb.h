@@ -157,6 +157,9 @@ typedef enum{
     USB_TRANSFER_OBJECT_ISOCH,
 }USB_TRANSFER_OBJECT_TYPE;
 
+#define USB_TRANSFER_FLAG_DATA_OUT  (1 << 0)
+#define USB_TRANSFER_FLAG_NO_DATA   (1 << 1)
+
 typedef struct _USB_TRANSFER_OBJECT{
     ListHeader                      Peers;
     USB_TRANSFER_OBJECT_TYPE        ObjectType;
