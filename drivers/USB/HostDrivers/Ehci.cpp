@@ -159,6 +159,11 @@ LOUSTATUS EhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS EhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer){
+
+    return STATUS_SUCCESS;
+}
+
 LOUSTATUS EhciInterruptHandler(UINT64 Data){
     LouPrint("EHCI.SYS:EhciInterruptHandler()\n");
     while(1);

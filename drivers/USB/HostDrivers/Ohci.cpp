@@ -281,6 +281,12 @@ LOUSTATUS OhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS OhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer){
+
+
+    return STATUS_SUCCESS;
+}
+
 /*
 
 LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){

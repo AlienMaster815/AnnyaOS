@@ -28,6 +28,7 @@ void LouKeReleaseIdFromRange(
     LouKeXaFreeUint64(&IdRange->IdRangeData, (UINT64)Id);
 }
 
+
 KERNEL_EXPORT
 PIDENTIFICATION_RANGE
 LouKeCreateIdentificationRange(

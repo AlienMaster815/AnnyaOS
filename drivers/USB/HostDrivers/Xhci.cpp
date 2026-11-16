@@ -134,20 +134,18 @@ LOUSTATUS XhciStopHcdDevice(PUSB_HCD_OBJECT HcdObject){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS XhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint){
+LOUSTATUS XhciHcdCreateEndpoint(PUSB_HCD_OBJECT HcdObject, PUSB_ENDPOINT_OBJECT NewEndpoint){
     UINT8 DeviceAddress = UsbCoreGetEndpointDeviceAddress(NewEndpoint);
     if(!DeviceAddress){
         return STATUS_SUCCESS;
     }
-    UINT8 Dci = (UsbCoreGetEndpointId(NewEndpoint) * 2);
-    if(!Dci){
-        Dci = 1;
-    }else if(NewEndpoint->Direction == USB_ENDPOINT_DIRECTION_IN){
-        Dci++;
+    PXHCI_DEVICE XhciObject = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    PXHCI_ENDPOINT_PRIVATE_DATA NewPrivateData = LouKeMallocType(XHCI_ENDPOINT_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);
+    if(!NewPrivateData){
+        return STATUS_INSUFFICIENT_RESOURCES;
     }
 
-
-
+    
 
 
     LouPrint("XHCI.SYS:XhciHcdCreateEndpoint()\n");
@@ -300,19 +298,34 @@ LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
 }
 
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("XHCI.SYS:XhciPrepTransfer()\n");
-    while(1);
+    if(!Transfer->UsbDevice->DeviceAddress){
+        return STATUS_SUCCESS;
+    }
+
+
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("XHCI.SYS:XhciCommitTransfer()\n");
-    while(1);
+    if(!Transfer->UsbDevice->DeviceAddress){
+        return STATUS_SUCCESS;
+    }
+
+
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("XhciGetTransferStatus()\n");
-    while(1);
+    if(!Transfer->UsbDevice->DeviceAddress){
+        return STATUS_SUCCESS;
+    }
+
+
+    return STATUS_NO_WORK_DONE;
+}
+
+LOUSTATUS XhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer){
+
+
     return STATUS_SUCCESS;
 }

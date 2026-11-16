@@ -11,4 +11,12 @@
 void UsbCoreCommitUsbTransferToCommandEngine(PUSB_TRANSFER_OBJECT TransferObject, int MsTimeout);
 LOUSTATUS UsbCoreFenceTransferObject(PUSB_TRANSFER_OBJECT TransferObject);
 
+LOUSTATUS UsbCoreAllocateUsbControlTransfer(PUSB_TRANSFER_OBJECT* OutTransfer, PUSB_DEVICE_OBJECT Device, PUSB_PIPE_OBJECT Pipe, ULONG TransferFlags, SIZE DataSize, SIZE DataAlignment);
+LOUSTATUS UsbCoreFreeUsbControlTransfer(PUSB_TRANSFER_OBJECT Transfer);
+
+LOUSTATUS _UsbCoreDeviceRequestSetAddressStart(PUSB_TRANSFER_OBJECT* OutObject, PUSB_DEVICE_OBJECT UsbDevice, UINT8 Address);
+LOUSTATUS _UsbCoreDeviceRequestSetAddressEnd(PUSB_TRANSFER_OBJECT TransferObject);
+
+LOUSTATUS UsbCoreCreateDefaultPipe(PUSB_DEVICE_OBJECT UsbDevice);
+
 #endif

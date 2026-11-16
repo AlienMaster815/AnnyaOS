@@ -20,7 +20,12 @@ LOUSTATUS XhciInitializeRingManager(
     RingManager->Pcs = 1;
     LouKeSetAtomicBoolean(&RingManager->RingFull, false);
     MutexUnlock(&RingManager->RingLock);
-    RingManager->RingEnqueuePointer = 0;
+    
+    if(RingManager->RingAllocator){
+        LouKeDestroyIdentificationRange(RingManager->RingAllocator);
+    }
+    RingManager->RingAllocator = LouKeCreateIdentificationRange(0, 254); 
+
     if(RingManager->VirtualRing){
         if(CreatingLinkAtEnd){
             XhciEncodeLinkTrb(
@@ -104,6 +109,29 @@ XhciResetCommandRing(
     }
     LouPrint("XHCI.SYS:Reset Command Ring:%h\n", &XhciDevice->CommandRingManager.PhysicalRing[0]);
     return STATUS_SUCCESS;
+}
+
+LOUSTATUS XhciCommitCommandRing(PXHCI_DEVICE XhciDevice){
+
+}
+
+LOUSTATUS XhciAllocateCommandTrb(PXHCI_DEVICE XhciDevice, PXHCI_GENERIC_TRB* Out){
+    if((!XhciDevice) || (!Out)){
+        return STATUS_INVALID_PARAMETER;
+    }
+    INTEGER AllocationID = LouKeAcquireIdFromRange(XhciDevice->CommandRingManager.RingAllocator, 0x00);
+    LouPrint("Allocating Ring:%h\n", AllocationID);
+    *Out = (PXHCI_GENERIC_TRB)&XhciDevice->CommandRingManager.VirtualRing[AllocationID];
+    return STATUS_SUCCESS;
+}
+
+void XhciFreeCommandTrb(PXHCI_DEVICE XhciDevice, PXHCI_GENERIC_TRB Trb){
+    INTEGER ID = (INTEGER)(((UINT64)(UINT8*)Trb) - ((UINT64)(UINT8*)XhciDevice->CommandRingManager.VirtualRing));
+    if(ID){
+        ID /= sizeof(XHCI_GENERIC_TRB);
+    }
+    LouPrint("Freeing Ring:%h\n", ID);
+    LouKeReleaseIdFromRange(XhciDevice->CommandRingManager.RingAllocator, ID);
 }
 
 LOUSTATUS

@@ -99,10 +99,16 @@ void UsbCoreCreateRoothubDevice(
     NewDevice->Uplink = 0x00;
     NewDevice->UplinkPort = PortNumber;
     NewDevice->Hcd = HcdObject;
-
-    //TODO:Send a SET ADDRESS to the DefaultControlPipe
-    
-    //DefaultControlPipe
+    LOUSTATUS Status = UsbCoreDeviceRequestSetAddress(&HcdObject->DefaultDevice, NewDevice->DeviceAddress);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("UsbCoreCreateRoothubDevice():HERE 1\n");
+        while(1);
+    }
+    Status = UsbCoreCreateDefaultPipe(NewDevice);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("UsbCoreCreateRoothubDevice():HERE 2\n");
+        while(1);
+    }
 
 }
 

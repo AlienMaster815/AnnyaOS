@@ -73,9 +73,13 @@ void UsbCoreCommitUsbTransferToCommandEngine(
     PUSB_TRANSFER_OBJECT    TransferObject,
     int                     MsTimeout
 ){
+
     LouKeSetupDmaTransferFence(TransferObject->Transfer, MsTimeout);
     PUSB_HCD_OBJECT HcdObject = TransferObject->UsbDevice->Hcd;
     LouKIRQL Irql;
+    if(HcdObject->Operations->PrepTransfer){
+        HcdObject->Operations->PrepTransfer(TransferObject);
+    }
     LouKeAcquireInterruptLock(&HcdObject->IoQueueLock, &Irql);
     LouKeListAddTail(&TransferObject->Peers, &HcdObject->IoQueueItems);
     LouKeReleaseInterruptLock(&HcdObject->IoQueueLock, &Irql);
@@ -86,5 +90,11 @@ LOUSTATUS
 UsbCoreFenceTransferObject(
     PUSB_TRANSFER_OBJECT    TransferObject
 ){
-    return LouKeFenceDmaTransfer(TransferObject->Transfer);
+    LOUSTATUS CleanupStatus;
+    PUSB_HCD_OBJECT HcdObject = TransferObject->UsbDevice->Hcd;
+    LOUSTATUS Status = LouKeFenceDmaTransfer(TransferObject->Transfer);
+    if(HcdObject->Operations->CleanupTransfer){
+        CleanupStatus = HcdObject->Operations->CleanupTransfer(TransferObject);
+    }
+    return (CleanupStatus != STATUS_SUCCESS) ? STATUS_IO_DEVICE_ERROR : Status;
 }

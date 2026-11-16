@@ -1,6 +1,5 @@
 #include "UsbCore.h"
 
-LOUSTATUS UsbCoreCreateDefaultPipe(PUSB_DEVICE_OBJECT UsbDevice);
 
 PUSB_DEVICE_OBJECT UsbCoreGetDeviceFromEndpoint(PUSB_ENDPOINT_OBJECT EndpointObject){
     return EndpointObject->PipeObject->UsbDevice;

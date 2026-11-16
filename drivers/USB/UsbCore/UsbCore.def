@@ -9,3 +9,5 @@ EXPORTS
     UsbCoreInitializeHostManagementAndBootDevices
     UsbCoreGetEndpointId
     UsbCoreGetEndpointDeviceAddress
+    UsbCoreDeviceRequestSetAddressStart
+    UsbCoreDeviceRequestSetAddressEnd

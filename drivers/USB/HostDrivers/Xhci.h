@@ -1809,7 +1809,7 @@ typedef struct _XHCI_RING_MANAGER{
     UINT8                       Pcs; 
     ATOMIC_BOOLEAN              RingFull;
     mutex_t                     RingLock;
-    UINT8                       RingEnqueuePointer; 
+    PIDENTIFICATION_RANGE       RingAllocator; 
     PXHCI_GENERIC_TRB           VirtualRing;
     PXHCI_GENERIC_TRB           PhysicalRing;
 }XHCI_RING_MANAGER, * PXHCI_RING_MANAGER, 
@@ -1840,6 +1840,11 @@ typedef struct _XHCI_DEVICE{
     ListHeader                      VirtualErdpAddresses;
     */
 }XHCI_DEVICE, * PXHCI_DEVICE;
+
+typedef struct _XHCI_ENDPOINT_PRIVATE_DATA{
+    ULONG   SlotID;
+    UINT8   ActualAddress;
+}XHCI_ENDPOINT_PRIVATE_DATA, * PXHCI_ENDPOINT_PRIVATE_DATA;
 
 LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device);

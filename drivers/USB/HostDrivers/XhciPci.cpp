@@ -17,6 +17,7 @@ LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS XhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer);
 
 LOUSTATUS XhciInterruptHandler(UINT64 Data);
 
@@ -37,6 +38,7 @@ static USB_HCD_OPERATIONS XhciHcdOperations = {
     .PrepTransfer = XhciPrepTransfer,
     .CommitTransfer = XhciCommitTransfer,
     .GetTransferStatus = XhciGetTransferStatus,
+    .CleanupTransfer = XhciCleanupTransfer,
 };
 
 LOUSINE_PCI_DEVICE_TABLE SupportedXhciPciDevices[] = {

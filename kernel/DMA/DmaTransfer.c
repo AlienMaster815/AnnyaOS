@@ -119,11 +119,15 @@ KERNEL_EXPORT LOUSTATUS LouKeFenceDmaTransfer(PLOUSINE_DMA_TRANSFER Transfer){
     SIZE    TscFrequency;
     SIZE    Expiration;
     SIZE    Wait = (SIZE)Transfer->DmaFence.Wait;
-    MutexUnlock(&Transfer->DmaFence.DmaFence);
+    LouKIRQL Irql;
+    LouKeRaiseIrql(HIGH_LEVEL, &Irql);
     CurrentTSC = read_tsc();
     TscFrequency = GetTscMaster() / 1000;
     Expiration = CurrentTSC + (Wait * TscFrequency);
-    LouKeThreadSleep(Wait);
+    LouKeThreadSleepNoYield(Wait);
+    MutexUnlock(&Transfer->DmaFence.DmaFence);
+    LouKeYieldExecution();
+    LouKeLowerIrql(Irql);
     CurrentTSC = read_tsc();
     return (CurrentTSC >= Expiration) ? STATUS_TIMEOUT : STATUS_SUCCESS;
 }

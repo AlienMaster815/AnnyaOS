@@ -29,6 +29,7 @@ LOUSTATUS EhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS EhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS EhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS EhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS EhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer);
 
 LOUSTATUS EhciInterruptHandler(UINT64 Data);
 
@@ -49,6 +50,7 @@ static USB_HCD_OPERATIONS EhciHcdOperations = {
     .PrepTransfer = EhciPrepTransfer,
     .CommitTransfer = EhciCommitTransfer,
     .GetTransferStatus = EhciGetTransferStatus,
+    .CleanupTransfer = EhciCleanupTransfer,
 };
 
 LOUSTATUS AddDevice(

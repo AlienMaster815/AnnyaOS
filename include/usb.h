@@ -87,6 +87,7 @@ typedef struct _USB_HCD_OPERATIONS{
     LOUSTATUS       (*PrepTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);
     LOUSTATUS       (*CommitTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);
     LOUSTATUS       (*GetTransferStatus)(struct _USB_TRANSFER_OBJECT* Transfer);
+    LOUSTATUS       (*CleanupTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);
 }USB_HCD_OPERATIONS, * PUSB_HCD_OPERATIONS;
 
 typedef struct _USB_HCD_OBJECT{
@@ -185,6 +186,7 @@ SIZE UsbCoreGetEndpointDeviceAddress(PUSB_ENDPOINT_OBJECT EndpointObject);
 PUSB_DEVICE_OBJECT UsbCoreGetDeviceFromEndpoint(PUSB_ENDPOINT_OBJECT EndpointObject);
 
 DRIVER_EXPORT LOUSTATUS UsbCoreCreateHcdObject(PPCI_DEVICE_OBJECT PDEV, ULONG Flags, PVOID PrivateData, PLOUSINE_DMA_DEVICE DmaDevice, PUSB_HCD_OPERATIONS Operations);
+DRIVER_EXPORT LOUSTATUS UsbCoreDeviceRequestSetAddress(PUSB_DEVICE_OBJECT UsbDevice, UINT8 Address);
 
 #endif
 

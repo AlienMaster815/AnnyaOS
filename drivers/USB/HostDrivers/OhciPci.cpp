@@ -17,6 +17,7 @@ LOUSTATUS OhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS OhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
+LOUSTATUS OhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer);
 
 static LOUSINE_DMA_DEVICE TypicalOhciBusMasterDevice = {
     .DmaDeviceFlags = LOUSINE_DMA_DEVICE_FLAGS_SCATTER_DMA_SUPPORTED,
@@ -44,6 +45,7 @@ static USB_HCD_OPERATIONS OhciHcdOperations = {
     .PrepTransfer = OhciPrepTransfer,
     .CommitTransfer = OhciCommitTransfer,
     .GetTransferStatus = OhciGetTransferStatus,
+    .CleanupTransfer = OhciCleanupTransfer,
 };
 
 UNUSED LOUSINE_PCI_DEVICE_TABLE SupportedOhciPciDevices[] = {
