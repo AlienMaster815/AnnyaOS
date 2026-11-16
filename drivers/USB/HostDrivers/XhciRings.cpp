@@ -24,7 +24,7 @@ LOUSTATUS XhciInitializeRingManager(
     if(RingManager->RingAllocator){
         LouKeDestroyIdentificationRange(RingManager->RingAllocator);
     }
-    RingManager->RingAllocator = LouKeCreateIdentificationRange(0, 254); 
+    RingManager->RingAllocator = LouKeCreateIdentificationRange(0, RingMembers - 2); 
 
     if(RingManager->VirtualRing){
         if(CreatingLinkAtEnd){
