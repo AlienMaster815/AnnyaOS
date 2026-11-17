@@ -174,26 +174,13 @@ DRIVER_EXPORT
 LOUSTATUS
 UsbCoreInitializeHostManagementAndBootDevices(){
     LouPrint("UsbCoreInitializeHostManagementAndBootDevices()\n");
-    
-    BOOLEAN HasXhci, HasEhci;
-
     MutexLock(&UsbHcdListLock);
-    
     PUSB_HCD_OBJECT TmpHcd;
     ForEachListEntry(TmpHcd, &UsbHcdList, Peers){
-        ForEachIf(USBHCD_FLAGS_GET_VERSION(TmpHcd->HcdFlags) != 3){
-            continue;
-        }
-        HasXhci = true;
-        LouPrint("USBCORE.SYS:Initializing Xhci Host Device:%h\n", TmpHcd);
-
         UsbCoreCreateDefaultUsbDeviceObject(TmpHcd);
-
         UsbCoreProbeRootHub(TmpHcd);
     }
-
     MutexUnlock(&UsbHcdListLock);
-
     LouPrint("UsbCoreInitializeHostManagementAndBootDevices():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
