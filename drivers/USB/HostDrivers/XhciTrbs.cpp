@@ -49,3 +49,16 @@ XhciEncodeLinkTrb(
         ((CycleBit & XHCI_LINK_TRB_CYCLE_BIT_MASK) << XHCI_LINK_TRB_CYCLE_BIT_SHIFT) | ((ToggleCycle & XHCI_LINK_TRB_TOGGLE_BIT_MASK) << XHCI_LINK_TRB_TOGGLE_BIT_SHIFT) | ((ChainBit & XHCI_LINK_TRB_CHAIN_BIT_MASK) << XHCI_LINK_TRB_CHAIN_BIT_SHIFT) | ((InterruptOnCompletion & XHCI_LINK_TRB_IOC_MASK) << XHCI_LINK_TRB_IOC_SHIFT) | (XHCI_TRB_TYPE_LINK_TRB << XHCI_LINK_TRB_TRB_TYPE_SHIFT)
     );
 }
+
+void XhciEncodeEnableSlotTrb(
+    PXHCI_ENABLE_SLOT_COMMAND_TRB   EsTrb,
+    UINT8                           CycleBit
+){
+    XhciEncodeTrbData(
+        (PXHCI_GENERIC_TRB)EsTrb,
+        0x00, 
+        0x00,
+        0x00,
+        ((CycleBit & XHCI_NORMAL_TRB_CYCLE_BIT_MASK) << XHCI_NORMAL_TRB_CYCLE_BIT_SHIFT) | (XHCI_TRB_TYPE_ENABLE_SLOT << XHCI_LINK_TRB_TRB_TYPE_SHIFT)
+    );
+}

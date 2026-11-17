@@ -14,6 +14,8 @@ LOUSTATUS XhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 
+LOUSTATUS XhciDeviceAllocateAddress(PUSB_HCD_OBJECT Hcd, PUSB_DEVICE_OBJECT Device);
+
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer);
@@ -34,6 +36,8 @@ static USB_HCD_OPERATIONS XhciHcdOperations = {
     .ResetRhPort = XhciResetRhPort,
     .StartRhPort = XhciStartRhPort,
     .StopRhPort = XhciStopRhPort,
+    //Device Operations
+    .DeviceAllocateAddress = XhciDeviceAllocateAddress,
     //Transfer Operations
     .PrepTransfer = XhciPrepTransfer,
     .CommitTransfer = XhciCommitTransfer,

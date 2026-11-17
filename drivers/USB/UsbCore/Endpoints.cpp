@@ -42,7 +42,7 @@ LOUSTATUS UsbCoreCreateDefaultOutEndpoint(PUSB_PIPE_OBJECT Pipe){
     if(!(USB_PIPE_FLAGS_GET_INOUT(Pipe->PipeFlags) & USB_PIPE_FLAGS_HAS_OUTPUT)){
         return STATUS_INVALID_PARAMETER;
     }
-    PUSB_ENDPOINT_OBJECT OutputEndpoint = Pipe->EndpointObject[USB_PIPE_FLAGS_IOFLAG_TO_VECTOR(USB_PIPE_FLAGS_HAS_INPUT)];
+    PUSB_ENDPOINT_OBJECT OutputEndpoint = Pipe->EndpointObject[USB_PIPE_FLAGS_IOFLAG_TO_VECTOR(USB_PIPE_FLAGS_HAS_OUTPUT)];
     if(!OutputEndpoint){
         return STATUS_UNSUCCESSFUL;
     }   

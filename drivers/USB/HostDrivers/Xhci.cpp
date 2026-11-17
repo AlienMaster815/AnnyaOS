@@ -77,7 +77,7 @@ LOUSTATUS XhciResetHcdDevice(PUSB_HCD_OBJECT HcdDevice){
     XhciDevice->OperationalRegisters->Config = Tmp32;
 
     XhciDevice->OperationalRegisters->Dcbaap = XhciGetDmaAddress(XhciDevice->VirtualDcbaapAddress);
-    XhciDevice->OperationalRegisters->Crcr = (UINT64)(UINT8*)&XhciDevice->CommandRingManager.PhysicalRing[0];
+    XhciDevice->OperationalRegisters->Crcr = (UINT64)(UINT8*)&XhciDevice->CommandRingManager.PhysicalRing[0] | 1;
 
     PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY Table = (PXHCI_EVENT_RING_SEGMENT_TABLE_ENTRY)XhciDevice->VirtualErstbaAddress;
     XhciDevice->RuntimeRegisters->Irqx[0].Erstsz = 1;
@@ -139,13 +139,11 @@ LOUSTATUS XhciHcdCreateEndpoint(PUSB_HCD_OBJECT HcdObject, PUSB_ENDPOINT_OBJECT 
     if(!DeviceAddress){
         return STATUS_SUCCESS;
     }
-    PXHCI_DEVICE XhciObject = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
-    PXHCI_ENDPOINT_PRIVATE_DATA NewPrivateData = LouKeMallocType(XHCI_ENDPOINT_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);
-    if(!NewPrivateData){
-        return STATUS_INSUFFICIENT_RESOURCES;
+    UINT8 EndpointID = UsbCoreGetEndpointId(NewEndpoint);
+    if(!EndpointID){
+        return STATUS_SUCCESS;
     }
 
-    
 
 
     LouPrint("XHCI.SYS:XhciHcdCreateEndpoint()\n");
@@ -158,6 +156,11 @@ LOUSTATUS XhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
     if(!DeviceAddress){
         return STATUS_SUCCESS;
     }
+    UINT8 EndpointID = UsbCoreGetEndpointId(Endpoint);
+    if(!EndpointID){
+        return STATUS_SUCCESS;
+    }
+
 
 
     LouPrint("XHCI.SYS:XhciHcdDestroyEndpoint()\n");
@@ -297,9 +300,131 @@ LOUSTATUS XhciStopRhPort(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS XhciDeviceAllocateAddress(
+    PUSB_HCD_OBJECT     HcdObject, 
+    PUSB_DEVICE_OBJECT  Device
+){
+    PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
+    UINT32 Slot;
+    SIZE CtxSize = XhciDevice->Capabilities.Context64Byte ? 64 : 32;
+    PXHCI_DEVICE_PRIVATE_DATA PrivateData = LouKeMallocType(XHCI_DEVICE_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);
+    UINT32 PortSc = XhciDevice->OperationalRegisters->Ports[Device->PortNumber].PortStatusControl;
+    UINT32 PortSpeed = (PortSc >> 10) & 0xF;
+
+    Device->PortSpeed = PortSpeed;
+    Device->HcdPrivateData = (PVOID)PrivateData;
+
+    LOUSTATUS Status = XhciAllocateTransferDmaMemory(XhciDevice, CtxSize * 32, 64, &PrivateData->SlotContextOutData);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Status = XhciAllocateTransferDmaMemory(XhciDevice, CtxSize * 33, 64, &PrivateData->SlotContextInData);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Status = XhciInitializeTransferRingManager(XhciDevice, PrivateData);
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    Status = XhciEnableSlot(XhciDevice, &Slot);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XhciDeviceAllocateAddress():FAILED_ES\n");
+        while(1);
+    }
+
+    PrivateData->SlotID = Slot;
+
+    UINT64* Dcbaa = (UINT64*)(UINT8*)XhciDevice->VirtualDcbaapAddress;
+    Dcbaa[Slot] = (UINT64)(UINT8*)XhciGetDmaAddress(PrivateData->SlotContextOutData);
+
+    UINT32* InputCtrlCtx = (UINT32*)((UINT8*)PrivateData->SlotContextInData + (0 * CtxSize));
+    UINT32* SlotCtx      = (UINT32*)((UINT8*)PrivateData->SlotContextInData + (1 * CtxSize));
+    UINT32* Ep0Context   = (UINT32*)((UINT8*)PrivateData->SlotContextInData + (2 * CtxSize));
+
+    InputCtrlCtx[0] = 0;
+    InputCtrlCtx[1] = 0x3;
+
+    SlotCtx[0] = (1 << 27) | (PortSpeed << 20);
+    SlotCtx[1] = (((Device->PortNumber + 1) & 0xFF) << 16);
+
+    UINT32 MaxPacketSize = 8;
+    if(PortSpeed == 3){
+        MaxPacketSize = 64;
+    }
+    else if(PortSpeed >= 4){
+        MaxPacketSize = 512;
+    }
+
+    Ep0Context[1] = (MaxPacketSize << 16) | (4 << 3) | (3 << 1);
+
+    UINT64 RingPhys = (UINT64)(UINT8*)&PrivateData->TransferRing.PhysicalRing[0];
+    Ep0Context[2] = ((UINT32)(RingPhys & UINT32_MAX)) | 1;
+    Ep0Context[3] = (UINT32)((RingPhys >> 32) & UINT32_MAX);
+    Ep0Context[4] = 8;
+
+    LouKeMemoryBarrier();
+
+    TRB_RING_HANDLE RingHandle;
+    TRB_RING_HANDLE EventHandle;
+    UINT64 InputCtxPhys = (UINT64)(UINT8*)XhciGetDmaAddress(PrivateData->SlotContextInData);
+
+    MutexLock(&XhciDevice->CommandRingManager.RingLock);
+    MutexLock(&XhciDevice->EventRingManager.RingLock);
+
+    Status = XhciAllocateCommandTrb(XhciDevice, &RingHandle);
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XhciDeviceAllocateAddress():FAILED_ALLOC_TRB\n");
+        while(1);
+    }
+
+    RingHandle.Trb->DWord[0] = (UINT32)(InputCtxPhys & UINT32_MAX);
+    RingHandle.Trb->DWord[1] = (UINT32)((InputCtxPhys >> 32) & UINT32_MAX);
+    RingHandle.Trb->DWord[2] = 0;
+    RingHandle.Trb->DWord[3] = ((Slot & 0xFF) << 24) | (11 << 10) | (RingHandle.TrbCycleBit & 1);
+
+    LouKeMemoryBarrier();
+    XhciDevice->DoorbellRegisters->Doorbell[0] = 0;
+
+_TRY_AGAIN:
+    SIZE Timeout = 5000;
+    Status = XhciGetNextEventTrb(XhciDevice, &EventHandle);
+    while((Status != STATUS_SUCCESS) && (Timeout)){
+        Status = XhciGetNextEventTrb(XhciDevice, &EventHandle);
+        sleep(100);
+        Timeout -= 100;
+    }
+
+    if(Status != STATUS_SUCCESS){
+        LouPrint("XhciDeviceAllocateAddress():NO EVENT\n");
+        while(1);
+    }
+
+    UINT8 TrbType = (EventHandle.Trb->DWord[3] >> 10) & 0x3F;
+    if(TrbType != 33){
+        goto _TRY_AGAIN;
+    }
+
+    UINT8 CompletionCode = (EventHandle.Trb->DWord[2] >> 24) & 0xFF;
+    if(CompletionCode != 1){
+        LouPrint("XhciDeviceAllocateAddress():BAD COMPLETION:%d\n", CompletionCode);
+        while(1);
+    }
+
+    MutexUnlock(&XhciDevice->CommandRingManager.RingLock);
+    MutexUnlock(&XhciDevice->EventRingManager.RingLock);
+
+    UINT32* OutSlotCtx = (UINT32*)PrivateData->SlotContextOutData;
+    UINT8 AssignedAddress = OutSlotCtx[3] & 0xFF;
+    Device->DeviceAddress = AssignedAddress;
+
+    return STATUS_SUCCESS;
+}
+
+
+
 LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
     if(!Transfer->UsbDevice->DeviceAddress){
-        return STATUS_SUCCESS;
+        return STATUS_INVALID_PARAMETER;
     }
 
 
@@ -308,7 +433,7 @@ LOUSTATUS XhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
 
 LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
     if(!Transfer->UsbDevice->DeviceAddress){
-        return STATUS_SUCCESS;
+        return STATUS_INVALID_PARAMETER;
     }
 
 
@@ -317,7 +442,7 @@ LOUSTATUS XhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
 
 LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
     if(!Transfer->UsbDevice->DeviceAddress){
-        return STATUS_SUCCESS;
+        return STATUS_INVALID_PARAMETER;
     }
 
 
@@ -325,7 +450,9 @@ LOUSTATUS XhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
 }
 
 LOUSTATUS XhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer){
-
+    if(!Transfer->UsbDevice->DeviceAddress){
+        return STATUS_INVALID_PARAMETER;
+    }
 
     return STATUS_SUCCESS;
 }

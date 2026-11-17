@@ -61,6 +61,8 @@ typedef struct _USB_PIPE_OBJECT{
 typedef struct _USB_DEVICE_OBJECT{
     struct _USB_DEVICE_OBJECT*  Uplink;         //Hub or similar device (if connected)
     SIZE                        UplinkPort;
+    SIZE                        PortNumber;
+    SIZE                        PortSpeed;
     ListHeader                  Peers;          //Current Topology Peers
     ListHeader                  Subordinates;   //Subordinate members (if Hub or similar device)
     struct _USB_HCD_OBJECT*     Hcd;
@@ -68,6 +70,7 @@ typedef struct _USB_DEVICE_OBJECT{
     USB_PIPE_OBJECT             DefaultControlPipe;
     ListHeader                  PipeObjects;
     PVOID                       DevicePrivateData;
+    PVOID                       HcdPrivateData;
 }USB_DEVICE_OBJECT, * PUSB_DEVICE_OBJECT;
 
 typedef struct _USB_HCD_OPERATIONS{
@@ -83,6 +86,8 @@ typedef struct _USB_HCD_OPERATIONS{
     LOUSTATUS       (*ResetRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
     LOUSTATUS       (*StartRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
     LOUSTATUS       (*StopRhPort)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
+    //Device Operations
+    LOUSTATUS       (*DeviceAllocateAddress)(struct _USB_HCD_OBJECT* Hcd, PUSB_DEVICE_OBJECT Device);
     //Transfer Operations
     LOUSTATUS       (*PrepTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);
     LOUSTATUS       (*CommitTransfer)(struct _USB_TRANSFER_OBJECT* Transfer);

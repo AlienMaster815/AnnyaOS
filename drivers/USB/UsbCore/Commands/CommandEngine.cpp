@@ -19,8 +19,8 @@ void UsbCoreHcdIoQueueManager(PVOID Params){
         NewHandofEntries = false;
         AtomicLock(&HcdObject->HandoffLock);
         ForEachListEntrySafe(TransferObject, TransferObjectSafe, &HcdObject->IoQueueItems, Peers){
-            LouKeListDeleteItem(&TransferObject->Peers);
             HcdObject->Operations->CommitTransfer(TransferObject);
+            LouKeListDeleteItem(&TransferObject->Peers);
             LouKeListAddTail(&TransferObject->Peers, &HcdObject->HandoffQueue);
             NewHandofEntries = true;
         }

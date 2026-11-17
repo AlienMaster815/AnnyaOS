@@ -1679,7 +1679,7 @@ typedef struct _XHCI_LINK_TRB{
 #define XHCI_LINK_TRB_IOC_SHIFT                                     5
 #define XHCI_LINK_TRB_IOC                                           (XHCI_LINK_TRB_IOC_MASK << XHCI_LINK_TRB_IOC_SHIFT)
 #define XHCI_LINK_TRB_TRB_TYPE_MASK                                 0x3F
-#define XHCI_LINK_TRB_TRB_TYPE_SHIFT                                19
+#define XHCI_LINK_TRB_TRB_TYPE_SHIFT                                10
 #define XHCI_LINK_TRB_TRB_TYPE                                      (XHCI_LINK_TRB_TRB_TYPE_MASK << XHCI_LINK_TRB_TRB_TYPE_SHIFT)
 
 
@@ -1758,6 +1758,7 @@ typedef struct _XHCI_EVENT_DATA_TRB{
 
 
 #define XHCI_TRB_TYPE_NO_OP                                         8
+#define XHCI_TRB_TYPE_ENABLE_SLOT                                   9
 
 //page 591 is the end
 
@@ -1804,16 +1805,22 @@ typedef XHCI_UNRESTRICTED_DMA_ALLOCATOR_FUNCTION* PXHCI_UNRESTRICTED_DMA_ALLOCAT
 typedef void XHCI_UNRESTRICTED_DMA_FREE_FUNCTION(PVOID);
 typedef XHCI_UNRESTRICTED_DMA_FREE_FUNCTION* PXHCI_UNRESTRICTED_DMA_FREE_FUNCTION;
 
-
 typedef struct _XHCI_RING_MANAGER{
     UINT8                       Pcs; 
-    ATOMIC_BOOLEAN              RingFull;
     mutex_t                     RingLock;
-    UINT8                       RingEnqueuePointer; 
+    UINT8                       RingMembers;
+    UINT8                       CurrentUsedEntries;
+    UINT8                       RingEnqueuePointer;
     PXHCI_GENERIC_TRB           VirtualRing;
     PXHCI_GENERIC_TRB           PhysicalRing;
 }XHCI_RING_MANAGER, * PXHCI_RING_MANAGER, 
     XHCI_EVENT_RING_MANAGER, * PXHCI_EVENT_RING_MANAGER;
+
+typedef struct _TRB_RING_HANDLE{
+    UINT8               RingEntry;
+    UINT8               TrbCycleBit;
+    PXHCI_GENERIC_TRB   Trb;
+}TRB_RING_HANDLE, * PTRB_RING_HANDLE;
 
 typedef struct _XHCI_DEVICE{
     PPCI_DEVICE_OBJECT                              PDEV;
@@ -1841,10 +1848,12 @@ typedef struct _XHCI_DEVICE{
     */
 }XHCI_DEVICE, * PXHCI_DEVICE;
 
-typedef struct _XHCI_ENDPOINT_PRIVATE_DATA{
-    ULONG   SlotID;
-    UINT8   ActualAddress;
-}XHCI_ENDPOINT_PRIVATE_DATA, * PXHCI_ENDPOINT_PRIVATE_DATA;
+typedef struct _XHCI_DEVICE_PRIVATE_DATA{
+    ULONG               SlotID;
+    PVOID               SlotContextInData;
+    PVOID               SlotContextOutData;
+    XHCI_RING_MANAGER   TransferRing;
+}XHCI_DEVICE_PRIVATE_DATA, * PXHCI_DEVICE_PRIVATE_DATA;
 
 LOUSTATUS XhciGetCapabilities(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciInitializeMemoryManagement(PXHCI_DEVICE Device);
@@ -1863,6 +1872,18 @@ LOUSTATUS XhciInitializeEventRingManager(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciResetCommandRing(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciResetEventRing(PXHCI_DEVICE XhciDevice);
 LOUSTATUS XhciAllocateScratchpadMemory(PXHCI_DEVICE XhciDevice);
+
+void XhciLockRingManager(PXHCI_RING_MANAGER Manager);
+void XhciUnlockRingManager(PXHCI_RING_MANAGER Manager);
+
+LOUSTATUS XhciEnableSlot(PXHCI_DEVICE XhciDevice, UINT32* SlotOut);
+
+LOUSTATUS XhciInitializeTransferRingManager(PXHCI_DEVICE XhciDevice, PXHCI_DEVICE_PRIVATE_DATA PrivateData);
+
+LOUSTATUS XhciAllocateCommandTrb(PXHCI_DEVICE XhciDevice, PTRB_RING_HANDLE TrbHandle);
+void XhciEncodeEnableSlotTrb(PXHCI_ENABLE_SLOT_COMMAND_TRB EsTrb, UINT8 CycleBit);
+LOUSTATUS XhciGetNextEventTrb(PXHCI_DEVICE XhciDevice, PTRB_RING_HANDLE TrbHandle);
+
 
 #endif
 

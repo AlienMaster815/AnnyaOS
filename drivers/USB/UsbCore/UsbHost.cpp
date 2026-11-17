@@ -8,9 +8,11 @@ void UsbCoreHcdIoDeQueueManager(PVOID Params);
 
 LOUSTATUS UsbCoreCreateDefaultUsbDeviceObject(PUSB_HCD_OBJECT HostObject);
 
+static ListHeader   UsbDevicesList = {0};
+static mutex_t      UsbDevicesListLock = {0};
 
 static ListHeader   UsbHcdList = {0};
-static mutex_t      UsbHcdListLock {0};
+static mutex_t      UsbHcdListLock = {0};
 
 DRIVER_EXPORT
 LOUSTATUS UsbCoreCreateHcdObject(
@@ -90,26 +92,41 @@ void UsbCoreCreateRoothubDevice(
     PUSB_HCD_OBJECT HcdObject, 
     SIZE            PortNumber
 ){
+    LOUSTATUS Status; 
     PUSB_DEVICE_OBJECT NewDevice = LouKeMallocType(USB_DEVICE_OBJECT, KERNEL_GENERIC_MEMORY);
-    NewDevice->DeviceAddress = LouKeAcquireIdFromRange(HcdObject->DeviceAddresses, NewDevice);
-    if(!NewDevice->DeviceAddress){
-        LouKeFree(NewDevice);
-        return;
-    }
     NewDevice->Uplink = 0x00;
-    NewDevice->UplinkPort = PortNumber;
+    NewDevice->UplinkPort = 0x00;
+    NewDevice->PortNumber = PortNumber;
     NewDevice->Hcd = HcdObject;
-    LOUSTATUS Status = UsbCoreDeviceRequestSetAddress(&HcdObject->DefaultDevice, NewDevice->DeviceAddress);
-    if(Status != STATUS_SUCCESS){
-        LouPrint("UsbCoreCreateRoothubDevice():HERE 1\n");
-        while(1);
+
+    if(HcdObject->Operations->DeviceAllocateAddress){
+        Status = HcdObject->Operations->DeviceAllocateAddress(HcdObject, NewDevice);
+        if((Status != STATUS_SUCCESS) || (!NewDevice->DeviceAddress)){
+            LouKeFree(NewDevice);
+            return;
+        }
+    }else{
+        NewDevice->DeviceAddress = LouKeAcquireIdFromRange(HcdObject->DeviceAddresses, NewDevice);
+        if(!NewDevice->DeviceAddress){
+            LouKeFree(NewDevice);
+            return;
+        }
+        Status = UsbCoreDeviceRequestSetAddress(&HcdObject->DefaultDevice, NewDevice->DeviceAddress);
+        if(Status != STATUS_SUCCESS){
+            LouPrint("UsbCoreCreateRoothubDevice():HERE 1\n");
+            while(1);
+        }
+
     }
+
     Status = UsbCoreCreateDefaultPipe(NewDevice);
     if(Status != STATUS_SUCCESS){
         LouPrint("UsbCoreCreateRoothubDevice():HERE 2\n");
         while(1);
     }
-
+    MutexLock(&UsbDevicesListLock);
+    LouKeListAddTail(&NewDevice->Peers, &UsbDevicesList);
+    MutexUnlock(&UsbDevicesListLock);
 }
 
 LOUSTATUS UsbCoreProbeRootHub(PUSB_HCD_OBJECT HcdObject){
@@ -146,8 +163,6 @@ LOUSTATUS UsbCoreProbeRootHub(PUSB_HCD_OBJECT HcdObject){
 
         UsbCoreCreateRoothubDevice(HcdObject, i);
 
-        LouPrint("UsbCoreProbeRootHub(%d):FOUND_DEVICE\n", i);
-        while(1);
     }
 
 
@@ -175,19 +190,10 @@ UsbCoreInitializeHostManagementAndBootDevices(){
         UsbCoreCreateDefaultUsbDeviceObject(TmpHcd);
 
         UsbCoreProbeRootHub(TmpHcd);
-
-        //PUSB_ENDPOINT_OBJECT NewEndpoint0 = LouKeMallocType();
-
-
-        
-        //TODO:Create Endpoint 0 enumerate the root hub 
-        //Add Check Status For Non Interruptable setups
-
     }
 
     MutexUnlock(&UsbHcdListLock);
 
     LouPrint("UsbCoreInitializeHostManagementAndBootDevices():STATUS_SUCCESS\n");
-    while(1);
     return STATUS_SUCCESS;
 }
