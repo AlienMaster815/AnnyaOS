@@ -168,6 +168,13 @@ LOUSTATUS XhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS XhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE PacketSize){
+    LouPrint("XHCI.SYS:XhicHcdChangeEndpointPacketSize()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
+
 SIZE XhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject){
     PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
     return XhciDevice->Capabilities.MaxPorts;

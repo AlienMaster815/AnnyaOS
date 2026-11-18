@@ -222,6 +222,14 @@ LOUSTATUS OhciStopHcdDevice(PUSB_HCD_OBJECT HcdObject){
 }
 
 LOUSTATUS OhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint){
+    UINT8                   UsbAddress = UsbCoreGetEndpointDeviceAddress(NewEndpoint);
+    UINT8                   EndpointID = UsbCoreGetEndpointId(NewEndpoint);
+    UINT8                   PipeType = UsbCoreGetEndpointsPipeType(NewEndpoint);
+    USB_ENDPOINT_DIRECTION  Direction = NewEndpoint->Direction;
+
+
+
+
     LouPrint("OhciHcdCreateEndpoint()\n");
     while(1);
     return STATUS_SUCCESS;
@@ -232,6 +240,13 @@ LOUSTATUS OhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
     while(1);
     return STATUS_SUCCESS;
 }
+
+LOUSTATUS OhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE PacketSize){
+    LouPrint("OhciHcdChangeEndpointPacketSize()\n");    
+    while(1)
+    return STATUS_SUCCESS;
+}
+
 
 SIZE OhciGetHcdRhPortCount(PUSB_HCD_OBJECT Hcd){
     LouPrint("OhciGetHcdRhPortCount():HERE\n");
@@ -282,279 +297,7 @@ LOUSTATUS OhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
 }
 
 LOUSTATUS OhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer){
-
-
-    return STATUS_SUCCESS;
-}
-
-/*
-
-LOUSTATUS OhciInitializeFunctionDevice(PUSB_FUNCTION_DEVICE FunctionDevice){
-    LouPrint("OHCI.SYS:OhciInitializeFunctionDevice()\n");
-    PUSB_HOST_DEVICE HostDevice = UsbFunctionDeviceToHcd(FunctionDevice);
-    POHCI_DEVICE OhciDevice = UsbHcdToOhciDevice(HostDevice);
-    OHCI_ED_INITIALIZOR Initializor = {0};
-    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
-    LOUSTATUS Status;
-    UINT8   Port = FunctionDevice->PortNumber;
-    UINT32  Tmp = OHCI_PORT_STATUS_PRS;
-
-    OpRegs->HcRhPortStatus[Port] = Tmp;
-
-    Status = LouKeWaitForUlongRegisterConditionMs(
-        (PULONG)LouKeCastToUnalignedPointer(&OpRegs->HcRhPortStatus[Port]), //it actually is aligned the compiler just gives a warning
-        100,
-        OHCI_PORT_STATUS_PRS,
-        0
-    );
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Port:%d Hung On PRS Command\n", Port);
-        return STATUS_TIMEOUT;
-    }
-    
-
-    Tmp = OpRegs->HcRhPortStatus[Port];
-    if(Tmp & OHCI_PORT_STATUS_PRSC){
-        OpRegs->HcRhPortStatus[Port] = OHCI_PORT_STATUS_PRSC;
-    }
-
-    Tmp = OpRegs->HcRhPortStatus[Port];
-    if(!(Tmp & OHCI_PORT_STATUS_PES)){
-        OpRegs->HcRhPortStatus[Port] = OHCI_PORT_STATUS_PES;
-    }
-    FunctionDevice->PortEnabled = true;
-
-    Tmp = OpRegs->HcRhPortStatus[Port];
-    if(Tmp & OHCI_PORT_STATUS_PESC){
-        OpRegs->HcRhPortStatus[Port] = OHCI_PORT_STATUS_PESC;
-    }
-
-    Tmp = OpRegs->HcRhPortStatus[Port];
-
-    if(Tmp & OHCI_PORT_STATUS_LSDA){
-        LouPrint("OHCI.SYS:Device Is Low Speed\n");
-        FunctionDevice->FunctionSpeed = UsbLowSpeedFunction;
-    }else{
-        LouPrint("OHCI.SYS:Device Is Full Speed\n");
-        FunctionDevice->FunctionSpeed = UsbFullSpeedFunction;
-    }
-
-    USB_HOST_IO_PACKET IoPacket = {0};
-
-    OHCI_IO_PACKET_PRIVATE_DATA IoData = {0};
-
-    IoData.EdItem = (POHCI_ED_LIST)OhciDevice->ControlEDs.Peers.NextHeader;
-
-    FunctionDevice->PrivateHostFunctionData = &IoData;
-
-    Status = LouKeUsbGetDescriptorRequest(
-        FunctionDevice,
-        &IoPacket,
-        USB_DESCRIPTOR_TYPE_DEVICE,
-        0,
-        18,
-        0,
-        &FunctionDevice->DeviceDescriptor
-    );    
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Error Getting Descriptor\n");
-        return Status;
-    }
-
-    PUSB_STANDARD_DEVICE_DESCRIPTOR DeviceDescriptor = &FunctionDevice->DeviceDescriptor;
-    UINT8 NewAddress = LouKeAcquireIdFromRange(OhciDevice->UsbHost.BusAddresses, (PVOID)OhciDevice);
-
-    Status = LouKeUsbSetAddress(
-        FunctionDevice,
-        &IoPacket,
-        NewAddress
-    );
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Error Setting Up New Device Address\n");
-        while(1);
-    }
-
-    Initializor.FunctionAddress = NewAddress; 
-    Initializor.EndpointNumber = 0;
-    Initializor.MaximumPacketSize = DeviceDescriptor->MaxPacketSize;
-    Initializor.Direction = OHCI_ED_DIRECTION_GFTD0;
-    Initializor.Skip = 1;
-
-    POHCI_ENDPOINT_DESCRIPTOR EdOut;
-
-    Status = OhciCreateControlED(
-        OhciDevice,
-        &EdOut,
-        &Initializor
-    );
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Error Unable To Create New ED\n");
-        while(1);
-    }
-
-    IoData.EdItem = OhciEdToEdList(OhciDevice, EdOut);
-
-    if(!IoData.EdItem){
-        LouPrint("OHCI.SYS:Error Unable To Get New ED\n");
-        while(1);
-    }    
-
-    PUSB_STANDARD_CONFIGURATION_DESCRIPTOR ConfigurationBuffer = (PUSB_STANDARD_CONFIGURATION_DESCRIPTOR)LouKeMallocArray(UINT8, 9, KERNEL_GENERIC_MEMORY);
-
-
-    Status = LouKeUsbGetDescriptorRequest(
-        FunctionDevice,
-        &IoPacket,
-        USB_DESCRIPTOR_TYPE_CONFIGURATION,
-        0,
-        9,
-        0,
-        ConfigurationBuffer
-    );    
-
-    if(Status != STATUS_SUCCESS){
-        LouPrint("OHCI.SYS:Error Unable To Get Device Configuration\n");
-    }
-
-    FunctionDevice->Configurations = (PUSB_STANDARD_CONFIGURATION_DESCRIPTOR)LouKeMallocArray(UINT8, ConfigurationBuffer->TotalLength, KERNEL_GENERIC_MEMORY);
-
-    Status = LouKeUsbGetDescriptorRequest(
-        FunctionDevice,
-        &IoPacket,
-        USB_DESCRIPTOR_TYPE_CONFIGURATION,
-        0,
-        ConfigurationBuffer->TotalLength,
-        0,
-        FunctionDevice->Configurations
-    );   
-
-    LouKeFree(ConfigurationBuffer);
-
-    LouPrint("OHCI.SYS:OhciInitializeFunctionDevice() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
-static const USB_FUNCTION_OPERATIONS FunctionOperations = {
-    .UsbInitializeFunctionDevice = OhciInitializeFunctionDevice,
-};
-
-LOUSTATUS OhciProbeRootHub(PUSB_HOST_DEVICE HostDevice){
-    LouPrint("OHCI.SYS:OhciProbeRootHub()\n");
-    LOUSTATUS Status;
-    POHCI_DEVICE OhciDevice = UsbHcdToOhciDevice(HostDevice);
-    USB_FUNCTION_DEVICE UsbDescriptor;
-    UINT32 HcRhDescriptorA;
-    UINT8 Ports;
-
-    HcRhDescriptorA = OhciDevice->OperationalRegisters->HcRhDescriptorA;
-    Ports = HcRhDescriptorA & 0x0F;
-
-    LouPrint("OHCI.SYS:Ports:%d\n", Ports);
-
-    for(size_t i = 0 ; i < Ports; i++){
-        UINT32 TmpPortStatus = OhciDevice->OperationalRegisters->HcRhPortStatus[i];
-
-        if(TmpPortStatus & OHCI_PORT_STATUS_CCS){
-            LouPrint("OHCI.SYS:Port:%d Is Connected To Somthing\n", i);
-            UsbDescriptor.PortNumber = i;
-            UsbDescriptor.Operations = FunctionOperations;
-            UsbDescriptor.MaxPacketSize = 8;
-            Status = LouKeUsbAddDeviceToHcd(
-                HostDevice,
-                &HostDevice->RootHub.FunctionDevice,
-                &UsbDescriptor
-            );
-
-            if(Status != STATUS_SUCCESS){
-                LouPrint("OHCI.SYS:Error Adding Device To Host\n");
-                return Status;
-            }
-        }
-    }
-
-    LouPrint("OHCI.SYS:OhciProbeRootHub() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;
-}
-
-void OhciInterruptHandler(uint64_t UsbHostData){
-    POHCI_DEVICE OhciDevice = (POHCI_DEVICE)UsbHostData;
-    BOOL Handled = false;
-    if(OhciDevice->OperationalRegisters->HcInterruptStatus & (1 << 1)){
-        LouKeSignalEvent(&OhciDevice->OhciCommitEvent);
-        OhciDevice->OperationalRegisters->HcInterruptStatus |= (1 << 1);
-        Handled = true;
-    }
-
-
-    if(Handled){
-        return;
-    }
-    LouPrint("OHCI.SYS:OhciInterruptHandler()\n");
-
-    LouPrint("OHCI.SYS:%h\n", OhciDevice->OperationalRegisters->HcInterruptStatus);
-
+    LouPrint("OhciCleanupTransfer()\n");
     while(1);
+    return STATUS_SUCCESS;
 }
-
-LOUSTATUS OhciCommitRequest(
-    PUSB_HOST_IO_PACKET IoPacket
-){
-    //LouPrint("OHCI.SYS:OhciCommitRequest()\n");
-    POHCI_IO_PACKET_PRIVATE_DATA IoData;
-    PUSB_FUNCTION_DEVICE FunctionDevice = IoPacket->FunctionDevice;
-    IoData = (POHCI_IO_PACKET_PRIVATE_DATA)FunctionDevice->PrivateHostFunctionData;
-    POHCI_ED_LIST EdItem = (POHCI_ED_LIST)IoData->EdItem;
-    PUSB_HOST_DEVICE Hcd = UsbFunctionDeviceToHcd(FunctionDevice);
-    POHCI_DEVICE OhciDevice = CONTAINER_OF(Hcd, OHCI_DEVICE, UsbHost);
-    LOUSTATUS Status;
-    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
-
-    MutexLock(&EdItem->EdLock);
-    
-    if(IoPacket->TransferType == USB_TRANSFER_TYPE_CONTROL){
-        OhciCreateSetupTD(IoPacket, EdItem);
-        OhciCreateDataTDs(IoPacket, EdItem);
-        OhciCreateStatusTD(IoPacket, EdItem);
-        OhciCreateDummyTD(EdItem);
-
-        OhciAddTdsToEd(EdItem);
-
-        OpRegs->HcInterruptStatus = 0xFFFFFFFF;
-        OpRegs->HcInterruptEnable = ((1 << 1) | (1 << 31));
-        OpRegs->HcCommandStatus |= (1 << 1);
-
-        OhciCommitEd(EdItem);
-        Status = LouKeWaitForEvent(&OhciDevice->OhciCommitEvent);
-        OhciStopEd(EdItem);
-    
-        if(Status != STATUS_SUCCESS){
-            LouPrint("OHCI.SYS:Device Failed To Commit Buffer To Endpoint\n");
-            while(1);
-        }
-
-        OhciDestroySetupTD(IoPacket, EdItem);
-        OhciDestroyDataTDs(IoPacket, EdItem);
-        OhciDestroyStatusTD(EdItem);
-        OhciDestroyDummyTD(EdItem);
-        if(EdItem->Tds.Peers.NextHeader){
-            LouPrint("OHCI.SYS Error ED List Wasent Properly Freed\n");
-            while(1);
-        }
-
-        OpRegs->HcInterruptDisable = ((1 << 1) | (1 << 31));
-        OpRegs->HcInterruptStatus = 0xFFFFFFFF;
-
-
-    }else{
-        LouPrint("OHCI.SYS:Invalid Parameter\n");
-        return STATUS_INVALID_PARAMETER;
-    }    
-
-    MutexUnlock(&EdItem->EdLock);
-    //LouPrint("OHCI.SYS:OhciCommitRequest() STATUS_SUCCESS\n");
-    return STATUS_SUCCESS;  
-}
-*/

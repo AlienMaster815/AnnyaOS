@@ -321,7 +321,18 @@ static inline UINT32 SET_OHCI_CONTROL_HCFS(UINT32 Control, UINT32 Mod){
 #define OHCI_TD_CC_MASK         0x0F
 #define OHCI_TD_CC_SHIFT        28
 
-#define UsbHcdToOhciDevice(HostDevice) CONTAINER_OF(HostDevice, OHCI_DEVICE, UsbHost)
+typedef struct _OHCI_TD_PRIVATE_DATA{
+    ListHeader  Peers;
+    PVOID       VirtualAddress;
+    PVOID       PhysicalAddres;
+}OHCI_TD_PRIVATE_DATA, * POHCI_TD_PRIVATE_DATA;
+
+typedef struct _OHCI_ENDPOINT_PRIVATE_DATA{
+    ListHeader  Peers;
+    PVOID       VirtualAddress;
+    PVOID       PhysicalAddres;
+    ListHeader  TdsPrivateData;
+}OHCI_ENDPOINT_PRIVATE_DATA, * POHCI_ENDPOINT_PRIVATE_DATA;
 
 #endif
 

@@ -119,7 +119,7 @@ void UsbCoreCreateRoothubDevice(
 
     }
 
-    Status = UsbCoreCreateDefaultPipe(NewDevice);
+    Status = UsbCoreCreateDefaultControlPipe(NewDevice);
     if(Status != STATUS_SUCCESS){
         LouPrint("UsbCoreCreateRoothubDevice():HERE 2\n");
         while(1);

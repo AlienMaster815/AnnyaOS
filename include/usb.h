@@ -49,6 +49,18 @@ typedef struct _USB_ENDPOINT_OBJECT{
 #define USB_PIPE_FLAGS_HAS_OUTPUT           0x02
 #define USB_PIPE_FLAGS_IOFLAG_TO_VECTOR(f)  (f - 1)
 
+#define USB_PIPE_FLAGS_TYPE_MASK            0x07
+#define USB_PIPE_FLAGS_TYPE_SHIFT           2
+#define USB_PIPE_FLAGS_GET_TYPE(f)          ((f >> USB_PIPE_FLAGS_TYPE_SHIFT) & USB_PIPE_FLAGS_TYPE_MASK)
+#define USB_PIPE_FLAGS_SET_TYPE(f)          ((f & USB_PIPE_FLAGS_TYPE_MASK) << USB_PIPE_FLAGS_TYPE_SHIFT)
+
+#define USB_PIPE_TYPE_UNKOWN                0
+#define USB_PIPE_TYPE_CONTROL               1
+#define USB_PIPE_TYPE_BULK                  2
+#define USB_PIPE_TYPE_INTERRUPT             3
+#define USB_PIPE_TYPE_ISOCH                 4
+
+
 typedef struct _USB_PIPE_OBJECT{
     ListHeader                  Peers;
     struct _USB_DEVICE_OBJECT*  UsbDevice;
@@ -80,6 +92,7 @@ typedef struct _USB_HCD_OPERATIONS{
     LOUSTATUS       (*StopHcdDevice)(struct _USB_HCD_OBJECT* Hcd);
     LOUSTATUS       (*HcdCreateEndpoint)(struct _USB_HCD_OBJECT* Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
     LOUSTATUS       (*HcdDestroyEndpoint)(PUSB_ENDPOINT_OBJECT Endpoint);
+    LOUSTATUS       (*HcdChangeEndpointPacketSize)(PUSB_ENDPOINT_OBJECT Endpoint, SIZE PacketSize);
     //Roothub Operations
     SIZE            (*GetHcdRhPortCount)(struct _USB_HCD_OBJECT* Hcd);
     RHPORT_STATUS   (*GetHcdRhPortStatus)(struct _USB_HCD_OBJECT* Hcd, UINT32 Port);
@@ -178,11 +191,12 @@ typedef struct _USB_TRANSFER_OBJECT{
     PLOUSINE_DMA_TRANSFER           Transfer;
 }USB_TRANSFER_OBJECT, * PUSB_TRANSFER_OBJECT;
 
-#ifndef _USB_CORE_H
+#ifndef _USB_CORE_INTERNALS_
 
 DRIVER_IMPORT LOUSTATUS UsbCoreCreateHcdObject(PPCI_DEVICE_OBJECT PDEV, ULONG Flags, PVOID PrivateData, PLOUSINE_DMA_DEVICE DmaDevice, PUSB_HCD_OPERATIONS Operations);
 DRIVER_IMPORT SIZE UsbCoreGetEndpointId(PUSB_ENDPOINT_OBJECT EndpointObject);
 DRIVER_IMPORT SIZE UsbCoreGetEndpointDeviceAddress(PUSB_ENDPOINT_OBJECT EndpointObject);
+DRIVER_IMPORT UINT8 UsbCoreGetEndpointsPipeType(PUSB_ENDPOINT_OBJECT Endpoint);
 
 #else 
 

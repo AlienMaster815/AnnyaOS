@@ -11,6 +11,6 @@ UsbCoreCreateDefaultUsbDeviceObject(
 ){
     HostObject->DefaultDevice.Hcd = HostObject;
     HostObject->DefaultDevice.DeviceAddress = 0;
-    return UsbCoreCreateDefaultPipe(&HostObject->DefaultDevice);
+    return UsbCoreCreateDefaultControlPipe(&HostObject->DefaultDevice);
 }
 

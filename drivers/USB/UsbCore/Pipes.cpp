@@ -3,7 +3,15 @@
 LOUSTATUS UsbCoreCreateDefaultInEndpoint(PUSB_PIPE_OBJECT Pipe);
 LOUSTATUS UsbCoreCreateDefaultOutEndpoint(PUSB_PIPE_OBJECT Pipe);
 
-LOUSTATUS UsbCoreCreateDefaultPipe(PUSB_DEVICE_OBJECT UsbDevice){
+DRIVER_EXPORT
+UINT8 
+UsbCoreGetEndpointsPipeType(
+    PUSB_ENDPOINT_OBJECT    Endpoint
+){
+    return USB_PIPE_FLAGS_GET_TYPE(Endpoint->PipeObject->PipeFlags);
+}
+
+LOUSTATUS UsbCoreCreateDefaultControlPipe(PUSB_DEVICE_OBJECT UsbDevice){
     LOUSTATUS Status;
     UsbDevice->DefaultControlPipe.UsbDevice = UsbDevice;
     UsbDevice->DefaultControlPipe.PipeID = 0;
@@ -14,7 +22,7 @@ LOUSTATUS UsbCoreCreateDefaultPipe(PUSB_DEVICE_OBJECT UsbDevice){
     UsbDevice->DefaultControlPipe.EpoHandle = (PVOID)NewEndpoint;
     UsbDevice->DefaultControlPipe.EndpointObject[0] = &NewEndpoint[0];
     UsbDevice->DefaultControlPipe.EndpointObject[1] = &NewEndpoint[1];
-    UsbDevice->DefaultControlPipe.PipeFlags = USB_PIPE_FLAGS_SET_INOUT(USB_PIPE_FLAGS_HAS_INPUT | USB_PIPE_FLAGS_HAS_OUTPUT);
+    UsbDevice->DefaultControlPipe.PipeFlags = USB_PIPE_FLAGS_SET_INOUT(USB_PIPE_FLAGS_HAS_INPUT | USB_PIPE_FLAGS_HAS_OUTPUT) | USB_PIPE_FLAGS_SET_TYPE(USB_PIPE_TYPE_CONTROL);
     Status = UsbCoreCreateDefaultInEndpoint(&UsbDevice->DefaultControlPipe);    
     if(Status != STATUS_SUCCESS){
         return Status;

@@ -111,6 +111,12 @@ LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint){
     return STATUS_SUCCESS;
 }
 
+LOUSTATUS EhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE PacketSize){
+    LouPrint("EHCI.SYS:EhciHcdChangeEndpointPacketSize()\n");
+    while(1);
+    return STATUS_SUCCESS;
+}
+
 SIZE EhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject){
     PEHCI_DEVICE_OBJECT EhciObject = (PEHCI_DEVICE_OBJECT)HcdObject->HcdPrivateData;
     return EhciObject->EhciDeviceCapabilities.NumberOfPorts;

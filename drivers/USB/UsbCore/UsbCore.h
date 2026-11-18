@@ -1,7 +1,7 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #define _KERNEL_MODULE_
-#ifndef _USBCORE_H
-#define _USBCORE_H
+#ifndef _USB_CORE_INTERNALS_
+#define _USB_CORE_INTERNALS_
 
 //TODO: Check ACPI _PLD table for the port numbers for XHCI transfers
 
@@ -17,6 +17,6 @@ LOUSTATUS UsbCoreFreeUsbControlTransfer(PUSB_TRANSFER_OBJECT Transfer);
 LOUSTATUS _UsbCoreDeviceRequestSetAddressStart(PUSB_TRANSFER_OBJECT* OutObject, PUSB_DEVICE_OBJECT UsbDevice, UINT8 Address);
 LOUSTATUS _UsbCoreDeviceRequestSetAddressEnd(PUSB_TRANSFER_OBJECT TransferObject);
 
-LOUSTATUS UsbCoreCreateDefaultPipe(PUSB_DEVICE_OBJECT UsbDevice);
+LOUSTATUS UsbCoreCreateDefaultControlPipe(PUSB_DEVICE_OBJECT UsbDevice);
 
 #endif

@@ -11,3 +11,4 @@ EXPORTS
     UsbCoreGetEndpointDeviceAddress
     UsbCoreDeviceRequestSetAddressStart
     UsbCoreDeviceRequestSetAddressEnd
+    UsbCoreGetEndpointsPipeType

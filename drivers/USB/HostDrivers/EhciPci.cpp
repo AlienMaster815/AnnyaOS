@@ -19,6 +19,7 @@ LOUSTATUS EhciStartHcdDevice(PUSB_HCD_OBJECT Hcd);
 LOUSTATUS EhciStopHcdDevice(PUSB_HCD_OBJECT Hcd);
 LOUSTATUS EhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint);
 LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
+LOUSTATUS EhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE PacketSize);
 
 SIZE EhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject);
 RHPORT_STATUS EhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
@@ -40,6 +41,7 @@ static USB_HCD_OPERATIONS EhciHcdOperations = {
     .StopHcdDevice = EhciStopHcdDevice,
     .HcdCreateEndpoint = EhciHcdCreateEndpoint,
     .HcdDestroyEndpoint = EhciHcdDestroyEndpoint,
+    .HcdChangeEndpointPacketSize = EhciHcdChangeEndpointPacketSize,
     //Roothub Operations
     .GetHcdRhPortCount = EhciGetHcdRhPortCount,
     .GetHcdRhPortStatus = EhciGetHcdRhPortStatus,
