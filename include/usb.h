@@ -31,7 +31,10 @@ struct _USB_PIPE_OBJECT;
 typedef enum {
     USB_ENDPOINT_DIRECTION_IN = 0,
     USB_ENDPOINT_DIRECTION_OUT,
+    USB_ENDPOINT_DIRECTION_IO,
 }USB_ENDPOINT_DIRECTION;
+
+
 
 typedef struct _USB_ENDPOINT_OBJECT{
     struct _USB_PIPE_OBJECT*    PipeObject;
@@ -54,6 +57,8 @@ typedef struct _USB_ENDPOINT_OBJECT{
 #define USB_PIPE_FLAGS_GET_TYPE(f)          ((f >> USB_PIPE_FLAGS_TYPE_SHIFT) & USB_PIPE_FLAGS_TYPE_MASK)
 #define USB_PIPE_FLAGS_SET_TYPE(f)          ((f & USB_PIPE_FLAGS_TYPE_MASK) << USB_PIPE_FLAGS_TYPE_SHIFT)
 
+#define USB_PIPE_FLAGS_HAS_DUAL_DIRECTION   (1 << 5)
+
 #define USB_PIPE_TYPE_UNKOWN                0
 #define USB_PIPE_TYPE_CONTROL               1
 #define USB_PIPE_TYPE_BULK                  2
@@ -67,6 +72,7 @@ typedef struct _USB_PIPE_OBJECT{
     SIZE                        PipeID; //ID for the endpoints
     ULONG                       PipeFlags;
     PVOID                       EpoHandle;
+    PVOID                       HcdPipePrivateData;
     PUSB_ENDPOINT_OBJECT        EndpointObject[2];
 }USB_PIPE_OBJECT, * PUSB_PIPE_OBJECT;
 
@@ -121,12 +127,12 @@ typedef struct _USB_HCD_OBJECT{
     SIZE                    HcdMaxBandwith;
     SIZE                    PortCount;
     PTHREAD                 IoQueueManager;
-    spinlock_t              IoQueueLock;
+    mutex_t                 IoQueueLock;
     ListHeader              IoQueueItems;
     PTHREAD                 IoDeQueueManager;
-    spinlock_t              IoDeQueueLock;
+    mutex_t                 IoDeQueueLock;
     ListHeader              IoDeQueueItems;
-    ATOMIC_LOCK             HandoffLock;
+    mutex_t                 HandoffLock;
     ListHeader              HandoffQueue;
     USB_DEVICE_OBJECT       DefaultDevice;
     ListHeader              DeviceList;
@@ -186,8 +192,9 @@ typedef struct _USB_TRANSFER_OBJECT{
     PUSB_PIPE_OBJECT                Pipe;
     BOOLEAN                         TransferDone;
     ULONG                           TransferFlags;
-    PVOID                           HcdPrivateData[4];
+    PVOID                           HcdPrivateData;
     PVOID                           SetupData; //if control Transfer
+    SIZE                            TransferSize;
     PLOUSINE_DMA_TRANSFER           Transfer;
 }USB_TRANSFER_OBJECT, * PUSB_TRANSFER_OBJECT;
 
@@ -197,6 +204,7 @@ DRIVER_IMPORT LOUSTATUS UsbCoreCreateHcdObject(PPCI_DEVICE_OBJECT PDEV, ULONG Fl
 DRIVER_IMPORT SIZE UsbCoreGetEndpointId(PUSB_ENDPOINT_OBJECT EndpointObject);
 DRIVER_IMPORT SIZE UsbCoreGetEndpointDeviceAddress(PUSB_ENDPOINT_OBJECT EndpointObject);
 DRIVER_IMPORT UINT8 UsbCoreGetEndpointsPipeType(PUSB_ENDPOINT_OBJECT Endpoint);
+DRIVER_IMPORT ULONG UsbCoreGetPortFromEndpoint(PUSB_ENDPOINT_OBJECT EndpointObject);
 
 #else 
 

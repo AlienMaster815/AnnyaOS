@@ -106,7 +106,6 @@ void* LouKeVirtualAllocUser(
     uint64_t    PageFlags
 );
 uint32_t GetNPROC();
-LOUSTATUS LouKeInitializeDefaultDemons();
 void LouKeLoadLousineBootTrampoline();
 int LouKeMainWorkDemon();
 void PciMmcfgEarlyInit();
@@ -348,7 +347,7 @@ void LouOsKrnlStart(
 
     //InitializeFileSystemManager();
 
-    //sleep(2000);
+    //LouKeThreadSleep(2000);
     
     //uint8_t StorageDevices = LouKeGetNumberOfStorageDevices();
     //if(!StorageDevices){
@@ -368,13 +367,11 @@ void LouOsKrnlStart(
 
     LouPrint("Successful Boot\n");
     
-    //sleep(2000);
+    //LouKeThreadSleep(2000);
     
     //LouKeSystemShutdown(ShutdownReboot);
 
     while(1);
-
-    InitializeFileSystemManager();
 
     LouKeInitializeMouseHandling();
 
@@ -483,12 +480,12 @@ void LouOsKrnlStart(
     if(Status != STATUS_SUCCESS){
         _SESSION_MANAGER_LAUNCH_FAILURE:
         LouPrint("ERROR Unable To Start Session Manager\n");
-        sleep(10000);
+        LouKeThreadSleep(10000);
         LouKeSystemShutdown(ShutdownReboot);
         while(1);
     }
     LouPrint("Lousine Kernel Successfully Initialized\n");
-    //sleep(3000);
+    //LouKeThreadSleep(3000);
     //LouKeSystemShutdown(ShutdownReboot);
     LouKeDestroyThread(LouKeThreadIdToThreadData(LouKeGetThreadIdentification()));
     //ITS ALIIIIIVVVVEE!!!

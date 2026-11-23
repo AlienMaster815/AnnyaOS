@@ -114,16 +114,14 @@ ACPI_STATUS AcpiOsExecute(ACPI_EXECUTE_TYPE Type, ACPI_OSD_EXEC_CALLBACK Functio
 }
 
 void AcpiOsSleep(UINT64 Ms){
-    LouPrint("AcpiOsSleep()\n");
-    while(1);
-    sleep((size_t)Ms);
+    LouKeThreadSleep((size_t)Ms);
 }
 
 void AcpiOsStall(UINT32 Mcs){
     LouPrint("AcpiOsStall()\n");
     while(1);   
     if(Mcs > 1000){
-        sleep(Mcs / 1000);
+        LouKeThreadSleep(Mcs / 1000);
     }
 }
 

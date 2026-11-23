@@ -88,7 +88,7 @@ LOUSTATUS UsbCoreCreateHcdObject(
     return STATUS_SUCCESS;
 }
 
-void UsbCoreCreateRoothubDevice(
+LOUSTATUS UsbCoreCreateRoothubDevice(
     PUSB_HCD_OBJECT HcdObject, 
     SIZE            PortNumber
 ){
@@ -103,13 +103,13 @@ void UsbCoreCreateRoothubDevice(
         Status = HcdObject->Operations->DeviceAllocateAddress(HcdObject, NewDevice);
         if((Status != STATUS_SUCCESS) || (!NewDevice->DeviceAddress)){
             LouKeFree(NewDevice);
-            return;
+            return STATUS_UNSUCCESSFUL;
         }
     }else{
         NewDevice->DeviceAddress = LouKeAcquireIdFromRange(HcdObject->DeviceAddresses, NewDevice);
         if(!NewDevice->DeviceAddress){
             LouKeFree(NewDevice);
-            return;
+            return STATUS_UNSUCCESSFUL;
         }
         Status = UsbCoreDeviceRequestSetAddress(&HcdObject->DefaultDevice, NewDevice->DeviceAddress);
         if(Status != STATUS_SUCCESS){
@@ -127,19 +127,16 @@ void UsbCoreCreateRoothubDevice(
     MutexLock(&UsbDevicesListLock);
     LouKeListAddTail(&NewDevice->Peers, &UsbDevicesList);
     MutexUnlock(&UsbDevicesListLock);
+    return STATUS_SUCCESS;
 }
 
 LOUSTATUS UsbCoreProbeRootHub(PUSB_HCD_OBJECT HcdObject){
     LouPrint("UsbCoreProbeRootHub()\n");
     SIZE RhPortCount = 0;
-    LOUSTATUS PortResetStatus;
+    LOUSTATUS Status;
     if(HcdObject->Operations->GetHcdRhPortCount){
         RhPortCount = HcdObject->Operations->GetHcdRhPortCount(HcdObject);
     }
-    if(!RhPortCount){
-        RhPortCount = 256;
-    }
-
     for(SIZE i = 0; i < RhPortCount; i++){
         if(!HcdObject->Operations->GetHcdRhPortStatus){
             //LouPrint("");
@@ -147,7 +144,6 @@ LOUSTATUS UsbCoreProbeRootHub(PUSB_HCD_OBJECT HcdObject){
         }
 
         RHPORT_STATUS RhPortStatus = HcdObject->Operations->GetHcdRhPortStatus(HcdObject, i);
-
         if(RhPortStatus == RHPORT_STATUS_NO_DEVICE){
             continue;
         }
@@ -156,13 +152,16 @@ LOUSTATUS UsbCoreProbeRootHub(PUSB_HCD_OBJECT HcdObject){
             continue;
         }
 
-        PortResetStatus = HcdObject->Operations->ResetRhPort(HcdObject, i);
-        if(PortResetStatus != STATUS_SUCCESS){
+        Status = HcdObject->Operations->ResetRhPort(HcdObject, i);
+        if(Status != STATUS_SUCCESS){
             continue;
         }
 
-        UsbCoreCreateRoothubDevice(HcdObject, i);
 
+        Status = UsbCoreCreateRoothubDevice(HcdObject, i);
+        if(Status == STATUS_SUCCESS){
+            LouPrint("Device Created For RootHub Port%d\n", i);
+        }
     }
 
 

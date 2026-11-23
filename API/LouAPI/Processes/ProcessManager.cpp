@@ -20,11 +20,11 @@ void LouKeSchedDbgPrint(char* format, ...){
 
 LOUAPI PGDT_RECORD LouKeGetGdtRecord(UINT32 ProcessorID);
 
-static KERNEL_REFERENCE ProcRef;
+static atomic_t ProcRef = {0};
 
 void LouKeLockProcManager(LouKIRQL* Irql){
     LouKeAcquireInterruptLock(&ProcLock, Irql);
-    while(LouKeGetReferenceCount(&ProcRef));
+    while(LouKeGetAtomic(&ProcRef));
 }
 
 void LouKeUnlockProcManager(LouKIRQL* Irql){
@@ -130,11 +130,9 @@ void PsmProcessScedualManagerObject::PsmSetThreadSystemState(
 LOUAPI void SetWinIRQL(UINT8 Irql);
 LOUAPI LouKIRQL GetWinIRQL();
 
-static atomic_t Foobar = {0}; 
-
 UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
     while(AtomicLockLocked(&ProcLock.Lock));
-    LouKeAcquireReference(&ProcRef);
+    LouKeAtomicIncrement(&ProcRef);
 
     ULONG                   ProcessorNumber = LouKeGetCurrentProcessorNumber();    
     PGENERIC_THREAD_DATA    CurrentThread = this->CurrentThread;
@@ -165,8 +163,7 @@ UINT64 PsmProcessScedualManagerObject::PsmSchedual(UINT64 IrqState){
 
     }
 
-    LouKeReleaseReference(&ProcRef);
-    LouKeSetAtomic(&Foobar, 0);
+    LouKeAtomicDecrement(&ProcRef);
     return IrqState;
 }
 

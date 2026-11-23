@@ -11,6 +11,8 @@ LOUSTATUS OhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE Pa
 
 SIZE OhciGetHcdRhPortCount(PUSB_HCD_OBJECT Hcd);
 RHPORT_STATUS OhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+ULONG OhciGetHcdRhPortSpeed(PUSB_HCD_OBJECT Hcd, UINT32 Port);
+
 LOUSTATUS OhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS OhciStartRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS OhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);
@@ -25,7 +27,7 @@ static LOUSINE_DMA_DEVICE TypicalOhciBusMasterDevice = {
     .MaxScatterCount = 8320,
     .AllocatorData = {
         .DmaLimit = 32,
-        .DmaThreshold = 64 * KILOBYTE,
+        .DmaThreshold = 8 * KILOBYTE,
     },
 };
 
@@ -63,16 +65,16 @@ VOID UnloadDriver(PDRIVER_OBJECT DriverObject){
     LouPrint("OHCI.SYS::UnloadDriver() STATUS_SUCCESS\n");
 }
 
-
 LOUSTATUS AddDevice(
     PDRIVER_OBJECT  DriverObject, 
     PDEVICE_OBJECT  PlatformDevice
 ){
     LOUSTATUS Status;
     LouPrint("OHCI.SYS::AddDevice()\n");
+
     POHCI_DEVICE OhciDevice = LouKeMallocType(OHCI_DEVICE, KERNEL_GENERIC_MEMORY);
     OhciDevice->PDEV = PciHalGetPciDeviceObjectFromLdmDeviceObject(PlatformDevice);
-    
+ 
     PciHalEnableMemorySpace(OhciDevice->PDEV);
     PciHalEnableIoSpace(OhciDevice->PDEV);
 
@@ -91,7 +93,7 @@ LOUSTATUS AddDevice(
     }
     
     LouPrint("OHCI.SYS:Operational Reg:%h\n", OhciDevice->OperationalRegisters);
-    
+ 
     //TODO: Allocate Interrupt Handler
     
     Status = UsbCoreCreateHcdObject(

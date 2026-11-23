@@ -57,7 +57,6 @@ typedef struct _OHCI_TD_LIST{
 
 typedef struct _OHCI_ED_LIST{
     ListHeader                  Peers;
-    mutex_t                     EdLock;
     PVOID                       Ed;
     SIZE                        TdCount;
     OHCI_TD_LIST                Tds;
@@ -87,6 +86,7 @@ typedef struct PACKED _OHCI_OPERATIONAL_REGISTERS{
     volatile UINT32      HcDoneHead;
     volatile UINT32      HcFmInterval;
     volatile UINT32      HcFmRemaining;
+    volatile UINT32      HcFmNumber;
     volatile UINT32      HcPeriodicStart;
     volatile UINT32      HcLSThreshold;
     volatile UINT32      HcRhDescriptorA;
@@ -110,9 +110,11 @@ typedef struct _OHCI_PORT{
 }OHCI_PORT, * POHCI_PORT;
 
 typedef struct _OHCI_DEVICE{
+    SIZE                            PortCountOveride;
     PPCI_DEVICE_OBJECT              PDEV;
     POHCI_OPERATIONAL_REGISTERS     OperationalRegisters;
     POHCI_ENDPOINT_DESCRIPTOR       DefaultControlEd;
+    POHCI_ENDPOINT_DESCRIPTOR       Device0Ed;
     spinlock_t                      IoLock;
     mutex_t                         DeviceMutex;
     UINT64                          HccaAddress;
@@ -321,18 +323,16 @@ static inline UINT32 SET_OHCI_CONTROL_HCFS(UINT32 Control, UINT32 Mod){
 #define OHCI_TD_CC_MASK         0x0F
 #define OHCI_TD_CC_SHIFT        28
 
-typedef struct _OHCI_TD_PRIVATE_DATA{
-    ListHeader  Peers;
-    PVOID       VirtualAddress;
-    PVOID       PhysicalAddres;
-}OHCI_TD_PRIVATE_DATA, * POHCI_TD_PRIVATE_DATA;
+typedef struct _OHCI_ED_PRIVATE_DATA{
+    POHCI_ED_LIST       EdHandle;
+}OHCI_ED_PRIVATE_DATA, * POHCI_ED_PRIVATE_DATA;
 
-typedef struct _OHCI_ENDPOINT_PRIVATE_DATA{
-    ListHeader  Peers;
-    PVOID       VirtualAddress;
-    PVOID       PhysicalAddres;
-    ListHeader  TdsPrivateData;
-}OHCI_ENDPOINT_PRIVATE_DATA, * POHCI_ENDPOINT_PRIVATE_DATA;
+typedef struct _OHCI_TRANSFER_PRIVATE_DATA{
+    OHCI_TD_LIST    Setup;   
+    POHCI_TD_LIST   DoneHeadID;
+    POHCI_TD_LIST   DumbyID;
+    POHCI_TD_LIST   TransferChain;
+}OHCI_TRANSFER_PRIVATE_DATA, * POHCI_TRANSFER_PRIVATE_DATA;
 
 #endif
 
@@ -341,7 +341,13 @@ LOUSTATUS OhciAllocateDma(PUSB_HCD_OBJECT HcdObject, size_t Size, size_t Alignme
 void OhciFreeDma(PUSB_HCD_OBJECT HcdObject, PVOID VAddress);
 UINT32 OhciGetDmaAddress(PVOID VAddress);
 LOUSTATUS OhciInitializeDefaultControl(PUSB_HCD_OBJECT HcdObject);
-LOUSTATUS OhciCreateControlED(PUSB_HCD_OBJECT HcdObject, POHCI_ENDPOINT_DESCRIPTOR* EdOut, POHCI_ED_INITIALIZOR Initializor);
+LOUSTATUS OhciCreateControlED(PUSB_HCD_OBJECT HcdObject, POHCI_ED_LIST* EdHandleOut, POHCI_ED_INITIALIZOR Initializor);
+LOUSTATUS OhciCreateDummyTD(PUSB_HCD_OBJECT HcdObject, POHCI_TD_LIST TdList, POHCI_TD_LIST* TdOut);
+LOUSTATUS OhciCreateDummyTDForED(PUSB_HCD_OBJECT HcdObject, POHCI_ED_LIST EdItem);
+LOUSTATUS OhciCreateStatusTD(PUSB_HCD_OBJECT HcdObject, POHCI_TD_LIST SetupHandle, UINT8 Direction, POHCI_TD_LIST* OutHandle); 
+LOUSTATUS OhciCreateSetupTD(PUSB_HCD_OBJECT HcdObject, UINT32 PhyAddress, POHCI_TD_LIST TdHandle);
+void OhciSetEdSkip(POHCI_ENDPOINT_DESCRIPTOR Ed, BOOLEAN Skip);
+void OhciSetEdTail(POHCI_ENDPOINT_DESCRIPTOR Ed, UINT32 Tail);
 
 /*
 
@@ -368,7 +374,6 @@ LOUSTATUS OhciCreateStatusTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem)
 LOUSTATUS OhciAddTdsToEd(POHCI_ED_LIST EdItem);
 void OhciCommitEd(POHCI_ED_LIST EdItem);
 void OhciStopEd(POHCI_ED_LIST EdItem);
-LOUSTATUS OhciCreateDummyTD(POHCI_ED_LIST EdItem);
 BOOL OhciDidTdsSucessfullyExecute(POHCI_ED_LIST EdList);
 void OhciCleanTdsFromEd(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);
 void OhciDestroySetupTD(PUSB_HOST_IO_PACKET IoPacket, POHCI_ED_LIST EdItem);

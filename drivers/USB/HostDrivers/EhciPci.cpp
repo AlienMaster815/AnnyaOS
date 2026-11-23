@@ -21,6 +21,7 @@ LOUSTATUS EhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEnd
 LOUSTATUS EhciHcdDestroyEndpoint(PUSB_ENDPOINT_OBJECT Endpoint);
 LOUSTATUS EhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE PacketSize);
 
+
 SIZE EhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject);
 RHPORT_STATUS EhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port);
 LOUSTATUS EhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port);

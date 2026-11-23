@@ -8,7 +8,7 @@ _AtaCoreAtapiEndpointEndTestUnitReady(
     SIZE Timeout = 3000;
     LOUSTATUS Result;
     while(LouKeGetAtomicBoolean(&CommandPacket->CommandDone) && Timeout){
-        LouKeThreadSleep(30);
+        sleep(30);
         Timeout -= 30;
     }
     if(!Timeout){

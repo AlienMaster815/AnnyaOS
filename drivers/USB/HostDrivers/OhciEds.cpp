@@ -1,6 +1,20 @@
 //Copyright GPL-2 Tyler Grenier (2025 - 2026)
 #include "OHCI.h"
 
+void OhciSetEdSkip(POHCI_ENDPOINT_DESCRIPTOR Ed, BOOLEAN Skip){
+    if(!Skip){
+        Ed->Dword0 &= ~(OHCI_ED_K_MASK << OHCI_ED_K_SHIFT);
+    }else{
+        Ed->Dword0 |= (OHCI_ED_K_MASK << OHCI_ED_K_SHIFT);
+    }
+    LouKeMemoryBarrier();
+}
+
+void OhciSetEdTail(POHCI_ENDPOINT_DESCRIPTOR Ed, UINT32 Tail){
+    Ed->Dword1 = (Ed->Dword1 & ~OHCI_ED_TAILP_MASK) | (Tail & OHCI_ED_TAILP_MASK);
+    LouKeMemoryBarrier();
+}
+
 LOUSTATUS OhciInitializeEndpointDescriptor(
     POHCI_ENDPOINT_DESCRIPTOR   EndpointDescriptor,
     POHCI_ED_INITIALIZOR        Initializor
@@ -72,11 +86,13 @@ LOUSTATUS OhciCreateED(
 }
 
 static void TraverseListAndAdd(
-    POHCI_DEVICE                OhciDevice,
+    PUSB_HCD_OBJECT             HcdObject,
     POHCI_ED_LIST               EndpointList,
     UINT32                      IoMask,
-    POHCI_ENDPOINT_DESCRIPTOR   Ed
+    POHCI_ENDPOINT_DESCRIPTOR   Ed,
+    POHCI_ED_LIST*              EdHandleOut
 ){
+    POHCI_DEVICE                OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
     POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
     POHCI_ENDPOINT_DESCRIPTOR   LastEd;
     UINT32 Tmp = OpRegs->HcControl & IoMask;
@@ -95,6 +111,7 @@ static void TraverseListAndAdd(
 
     EdList->Ed = (PVOID)Ed;
 
+    OhciCreateDummyTDForED(HcdObject, EdList);
 
     if(LastEd){
         DmaAddress = OhciGetDmaAddress((PVOID)Ed);
@@ -103,37 +120,43 @@ static void TraverseListAndAdd(
 
     Ed->Dword3 = 0;
 
+    *EdHandleOut = EdList;
+
     OpRegs->HcControl |= Tmp;
 }
 
 static void AddToControlList(
-    POHCI_DEVICE                OhciDevice,
-    POHCI_ENDPOINT_DESCRIPTOR   Ed
+    PUSB_HCD_OBJECT             HcdObject,
+    POHCI_ENDPOINT_DESCRIPTOR   Ed,
+    POHCI_ED_LIST*              EdHandleOut
 ){
+    POHCI_DEVICE OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
     TraverseListAndAdd(
-        OhciDevice,
+        HcdObject,
         &OhciDevice->ControlEDs,
         OHCI_CONTROL_CLE,
-        Ed
+        Ed,
+        EdHandleOut
     );
 }
 
 LOUSTATUS OhciCreateControlED(
     PUSB_HCD_OBJECT             HcdObject,
-    POHCI_ENDPOINT_DESCRIPTOR*  EdOut,
+    POHCI_ED_LIST*              EdHandleOut,
     POHCI_ED_INITIALIZOR        Initializor
 ){
     LOUSTATUS Status;
 
     LouPrint("OHCI.SYS:OhciCreateControlED()\n");
 
-    if((!HcdObject) || (!Initializor) || (!EdOut)){
+    if((!HcdObject) || (!Initializor) || (!EdHandleOut)){
         LouPrint("OHCI.SYS:Invalid Parameter\n");
         return STATUS_INVALID_PARAMETER;
     }
     POHCI_DEVICE OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
 
     POHCI_ENDPOINT_DESCRIPTOR Ed;
+    
 
     Status = OhciCreateED(
         &Ed,
@@ -146,11 +169,10 @@ LOUSTATUS OhciCreateControlED(
         return Status;
     }
 
-    *EdOut = Ed;
-
     AddToControlList(
-        OhciDevice,
-        Ed
+        HcdObject,
+        Ed,
+        EdHandleOut
     );
 
     LouPrint("OHCI.SYS:OhciCreateControlED() STATUS_SUCCESS\n");

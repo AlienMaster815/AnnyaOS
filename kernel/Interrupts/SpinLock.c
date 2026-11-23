@@ -11,8 +11,8 @@ KERNEL_EXPORT void LouKeReleaseSpinLock(spinlock_t* LockValue, LouKIRQL* Irql){
 }
 
 KERNEL_EXPORT void LouKeAcquireInterruptLock(spinlock_t* LockValue, LouKIRQL* Irql){
-    AtomicLockOrYield(&LockValue->Lock);
     LouKeRaiseIrql(HIGH_LEVEL, Irql);
+    AtomicLock(&LockValue->Lock);
 }
 
 KERNEL_EXPORT void LouKeReleaseInterruptLock(spinlock_t* LockValue, LouKIRQL* Irql){

@@ -37,7 +37,7 @@ LOUSTATUS OhciInitializeDefaultControl(
     LOUSTATUS Status;
     UINT32 DmaAddress;
     OHCI_ED_INITIALIZOR Initializor = {0};
-    POHCI_ENDPOINT_DESCRIPTOR EdOut;
+    POHCI_ED_LIST               EdHandleOut;
     POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
 
     Initializor.FunctionAddress = 0;
@@ -48,15 +48,15 @@ LOUSTATUS OhciInitializeDefaultControl(
 
     Status = OhciCreateControlED(
         HcdObject,
-        &EdOut,
+        &EdHandleOut,
         &Initializor
     );
     if(Status != STATUS_SUCCESS){
         LouPrint("OHCI.SYS:Could Not Add Default Control ED\n");
         return Status;
     }
-    OhciDevice->DefaultControlEd = EdOut;
-    DmaAddress = OhciGetDmaAddress(EdOut);
+    OhciDevice->DefaultControlEd = (POHCI_ENDPOINT_DESCRIPTOR)EdHandleOut->Ed;
+    DmaAddress = OhciGetDmaAddress(EdHandleOut->Ed);
     OpRegs->HcControlHeadED = DmaAddress;
 
     LouPrint("OHCI.SYS:OhciInitializeLists() STATUS_SUCCESS\n");
@@ -221,17 +221,64 @@ LOUSTATUS OhciStopHcdDevice(PUSB_HCD_OBJECT HcdObject){
     return STATUS_SUCCESS;
 }
 
-LOUSTATUS OhciHcdCreateEndpoint(PUSB_HCD_OBJECT Hcd, PUSB_ENDPOINT_OBJECT NewEndpoint){
-    UINT8                   UsbAddress = UsbCoreGetEndpointDeviceAddress(NewEndpoint);
-    UINT8                   EndpointID = UsbCoreGetEndpointId(NewEndpoint);
-    UINT8                   PipeType = UsbCoreGetEndpointsPipeType(NewEndpoint);
-    USB_ENDPOINT_DIRECTION  Direction = NewEndpoint->Direction;
-
-
-
-
+LOUSTATUS OhciHcdCreateEndpoint(PUSB_HCD_OBJECT HcdObject, PUSB_ENDPOINT_OBJECT NewEndpoint){
     LouPrint("OhciHcdCreateEndpoint()\n");
-    while(1);
+    UINT8                       UsbAddress = UsbCoreGetEndpointDeviceAddress(NewEndpoint);
+    UINT8                       EndpointID = UsbCoreGetEndpointId(NewEndpoint);
+    UINT8                       PipeType = UsbCoreGetEndpointsPipeType(NewEndpoint);
+    ULONG                       Port = UsbCoreGetPortFromEndpoint(NewEndpoint);
+    USB_ENDPOINT_DIRECTION      Direction = NewEndpoint->Direction;
+    UINT32                      PortStatus = ((POHCI_DEVICE)HcdObject->HcdPrivateData)->OperationalRegisters->HcRhPortStatus[Port];; 
+    BOOLEAN                     LowSpeed = 0;
+    OHCI_ED_INITIALIZOR         Initializor = {0};
+    POHCI_ED_LIST               EdHandleOut;
+    LOUSTATUS                   Status;
+    POHCI_ED_PRIVATE_DATA       EdPrivateData = LouKeMallocType(OHCI_ED_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);
+    if(!EdPrivateData){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    if(UsbAddress){
+        POHCI_ENDPOINT_DESCRIPTOR Ed = ((POHCI_DEVICE)HcdObject->HcdPrivateData)->Device0Ed;
+        LowSpeed = (Ed->Dword0 & (OHCI_ED_S_MASK << OHCI_ED_S_SHIFT)) ? 1 : 0;
+    }
+    
+    Initializor.FunctionAddress = UsbAddress;
+    Initializor.EndpointNumber = EndpointID;
+    if(Direction == USB_ENDPOINT_DIRECTION_IO){
+        Initializor.Direction = 0;
+    }else{
+        Initializor.Direction = (Direction == USB_ENDPOINT_DIRECTION_IN) ? 2 : 1;
+    }
+    Initializor.MaximumPacketSize = 8;
+    Initializor.Speed = (UINT8)LowSpeed;
+    switch(PipeType){
+        case USB_PIPE_TYPE_CONTROL:{
+            Status = OhciCreateControlED(
+                HcdObject,
+                &EdHandleOut,
+                &Initializor
+            );
+            break;
+        }
+        default:
+            Status = STATUS_INVALID_PARAMETER;
+            break;
+    }
+    if(Status != STATUS_SUCCESS){
+        LouPrint("OHCI.SYS:Could Not Add Default Control ED\n");
+        return Status;
+    }
+
+    EdPrivateData->EdHandle = EdHandleOut;
+
+    NewEndpoint->HcdEndpointPrivateData = (PVOID)EdPrivateData;
+
+    if(!UsbAddress){
+        ((POHCI_DEVICE)HcdObject->HcdPrivateData)->Device0Ed = (POHCI_ENDPOINT_DESCRIPTOR)EdHandleOut->Ed;
+    }
+
+    LouPrint("OhciHcdCreateEndpoint():STATUS_SUCCESS\n");
     return STATUS_SUCCESS;
 }
 
@@ -247,21 +294,55 @@ LOUSTATUS OhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE Pa
     return STATUS_SUCCESS;
 }
 
-
-SIZE OhciGetHcdRhPortCount(PUSB_HCD_OBJECT Hcd){
-    LouPrint("OhciGetHcdRhPortCount():HERE\n");
-    while(1);
+SIZE OhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject){
+    return (SIZE)(((POHCI_DEVICE)HcdObject->HcdPrivateData)->OperationalRegisters->HcRhDescriptorA) & 0xFF; 
 }
 
-RHPORT_STATUS OhciGetHcdRhPortStatus(PUSB_HCD_OBJECT Hcd, UINT32 Port){
-    LouPrint("OhciGetHcdRhPortStatus\n");
-    while(1);
-    return RHPORT_STATUS_NEEDS_RESET;
+RHPORT_STATUS OhciGetHcdRhPortStatus(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
+    POHCI_DEVICE OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
+    UINT32 PortStatus = OpRegs->HcRhPortStatus[Port];
+    if(!(PortStatus & OHCI_PORT_STATUS_CCS)){
+        return RHPORT_STATUS_NO_DEVICE;
+    }
+    if(!(PortStatus & OHCI_PORT_STATUS_PES)){
+        return RHPORT_STATUS_NEEDS_RESET;
+    }
+    if(PortStatus & OHCI_PORT_STATUS_PSS){
+        return RHPORT_STATUS_IDLE;
+    }
+    return RHPORT_STATUS_RUNNING;
 }
 
-LOUSTATUS OhciResetRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
+LOUSTATUS OhciResetRhPort(PUSB_HCD_OBJECT HcdObject, UINT32 Port){
+    POHCI_DEVICE                OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
+    UINT32                      PortStatus;
+    POHCI_ENDPOINT_DESCRIPTOR   Ed = OhciDevice->Device0Ed;
+    UINT8                       LowSpeed = 0;
+    LOUSTATUS                   Status;
+    OpRegs->HcRhPortStatus[Port] = OHCI_PORT_STATUS_PRS;
+    Status = LouKeWaitForUlongRegisterConditionMs(
+        (PULONG)LouKeCastToUnalignedPointer((PVOID)&OpRegs->HcRhPortStatus[Port]),
+        100,
+        OHCI_PORT_STATUS_PRS,
+        0
+    );
+
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    } 
+
+    PortStatus = OpRegs->HcRhPortStatus[Port];
+
+    LowSpeed = (PortStatus & (OHCI_PORT_STATUS_LSDA)) ? 1 : 0;
+
+    Ed->Dword0 &= ~(OHCI_ED_S_MASK << OHCI_ED_S_SHIFT);
+    Ed->Dword0 |= (LowSpeed << OHCI_ED_S_SHIFT);
+
+    sleep(10);
+
     LouPrint("OhciResetRhPort()\n");
-    while(1);
     return STATUS_SUCCESS;
 }
 
@@ -278,26 +359,138 @@ LOUSTATUS OhciStopRhPort(PUSB_HCD_OBJECT Hcd, UINT32 Port){
 }
 
 LOUSTATUS OhciPrepTransfer(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("OhciPrepTransfer()\n");
-    while(1);
+    PUSB_DEVICE_OBJECT          UsbDevice = Transfer->UsbDevice;
+    PUSB_HCD_OBJECT             HcdDevice = UsbDevice->Hcd;
+    POHCI_DEVICE                OhciDevice = (POHCI_DEVICE)HcdDevice->HcdPrivateData;
+    USB_TRANSFER_OBJECT_TYPE    TransferType = Transfer->ObjectType;
+    POHCI_TRANSFER_PRIVATE_DATA TransferPrivateData = LouKeMallocType(OHCI_TRANSFER_PRIVATE_DATA, KERNEL_GENERIC_MEMORY);  
+    LOUSTATUS                   Status;
+    if(!TransferPrivateData){
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+    
+    Transfer->HcdPrivateData = (PVOID)TransferPrivateData;
+
+    Status = OhciCreateSetupTD(
+        HcdDevice,
+        OhciGetDmaAddress(Transfer->SetupData),
+        &TransferPrivateData->Setup
+    );
+    if(Status != STATUS_SUCCESS){
+        return Status;
+    }
+    if(!Transfer->TransferSize){
+        Status = OhciCreateStatusTD(
+            HcdDevice,
+            &TransferPrivateData->Setup,
+            2,
+            &TransferPrivateData->DumbyID
+        );
+        if(Status != STATUS_SUCCESS){
+            return Status;
+        }
+        TransferPrivateData->DumbyID = (POHCI_TD_LIST)TransferPrivateData->DumbyID->Peers.NextHeader;
+        return STATUS_SUCCESS;
+    }
+    LouPrint("OhciPrepTransfer():HERE\n"); //TODO: setup TD's for transfer
+    while(1);    
     return STATUS_SUCCESS;
 }
 
 
 LOUSTATUS OhciCommitTransfer(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("OhciCommitTransfer()\n");
+    PUSB_DEVICE_OBJECT          UsbDevice = Transfer->UsbDevice;
+    PUSB_HCD_OBJECT             HcdObject = UsbDevice->Hcd;
+    POHCI_DEVICE                OhciDevice = (POHCI_DEVICE)HcdObject->HcdPrivateData;
+    POHCI_TRANSFER_PRIVATE_DATA TransferPrivateData = (POHCI_TRANSFER_PRIVATE_DATA)Transfer->HcdPrivateData;
+    POHCI_TD_LIST               DumbyID = TransferPrivateData->DumbyID;
+    USB_TRANSFER_OBJECT_TYPE    TransferType = Transfer->ObjectType;
+    POHCI_OPERATIONAL_REGISTERS OpRegs = OhciDevice->OperationalRegisters;
+
+    if(TransferType == USB_TRANSFER_OBJECT_CONTROL){
+        PUSB_ENDPOINT_OBJECT Endpoint = Transfer->Pipe->EndpointObject[0];
+        POHCI_ED_PRIVATE_DATA EndpointData = (POHCI_ED_PRIVATE_DATA)Endpoint->HcdEndpointPrivateData;
+        POHCI_ENDPOINT_DESCRIPTOR Ed = (POHCI_ENDPOINT_DESCRIPTOR)EndpointData->EdHandle->Ed;
+        POHCI_TD_LIST OldDumby = (POHCI_TD_LIST)EndpointData->EdHandle->Tds.Peers.NextHeader;
+        EndpointData->EdHandle->Tds.Peers.NextHeader = (PListHeader)DumbyID;
+        TransferPrivateData->DoneHeadID = OldDumby;
+        
+        OhciSetEdSkip(Ed, true);
+
+        memcpy(OldDumby->Td, TransferPrivateData->Setup.Td, sizeof(OHCI_TRANSFER_DESCRIPTOR));
+        OldDumby->Peers.NextHeader = TransferPrivateData->Setup.Peers.NextHeader;
+
+        OhciSetEdTail(Ed, OhciGetDmaAddress(DumbyID->Td));
+
+        OhciSetEdSkip(Ed, false);
+
+        OpRegs->HcCommandStatus = OHCI_COMMAND_STATUS_CLF;
+
+        return STATUS_SUCCESS;
+    }
+
+    LouPrint("OhciCommitTransfer():HERE\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
 LOUSTATUS OhciGetTransferStatus(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("OhciGetTransferStatus()\n");
+    PUSB_DEVICE_OBJECT          UsbDevice = Transfer->UsbDevice;
+    PUSB_HCD_OBJECT             HcdObject = UsbDevice->Hcd;
+    POHCI_TRANSFER_PRIVATE_DATA TransferPrivateData = (POHCI_TRANSFER_PRIVATE_DATA)Transfer->HcdPrivateData;
+    POHCI_TD_LIST               DumbyID = TransferPrivateData->DumbyID;
+    USB_TRANSFER_OBJECT_TYPE    TransferType = Transfer->ObjectType;
+
+    if(TransferType == USB_TRANSFER_OBJECT_CONTROL){
+        PUSB_ENDPOINT_OBJECT      Endpoint = Transfer->Pipe->EndpointObject[0];
+        POHCI_ED_PRIVATE_DATA     EndpointData = (POHCI_ED_PRIVATE_DATA)Endpoint->HcdEndpointPrivateData;
+        POHCI_ENDPOINT_DESCRIPTOR Ed = (POHCI_ENDPOINT_DESCRIPTOR)EndpointData->EdHandle->Ed;
+
+        LouKeMemoryBarrier();
+
+        UINT32 HeadP = Ed->Dword2;
+        UINT32 TailDummyPhys = OhciGetDmaAddress(DumbyID->Td);
+        BOOLEAN Halted = (Ed->Dword2 & 0x01) ? true : false;
+
+        if(!Halted && (HeadP != TailDummyPhys)){
+            return STATUS_NO_WORK_DONE;
+        }
+        POHCI_TD_LIST CurrentTdNode = TransferPrivateData->DoneHeadID;
+        while(CurrentTdNode && (CurrentTdNode != DumbyID)){
+            POHCI_TRANSFER_DESCRIPTOR Td = (POHCI_TRANSFER_DESCRIPTOR)CurrentTdNode->Td;
+            UINT8 Cc = (UINT8)((Td->Dword0 >> OHCI_TD_CC_SHIFT) & OHCI_TD_CC_MASK);
+            if(Cc != 0x00){
+                return STATUS_UNSUCCESSFUL;
+            }
+            CurrentTdNode = (POHCI_TD_LIST)CurrentTdNode->Peers.NextHeader;
+        }
+        return STATUS_SUCCESS;
+    }
+
+    LouPrint("OhciGetTransferStatus():HERE\n");
     while(1);
     return STATUS_SUCCESS;
 }
 
+
 LOUSTATUS OhciCleanupTransfer(PUSB_TRANSFER_OBJECT Transfer){
-    LouPrint("OhciCleanupTransfer()\n");
-    while(1);
+    PUSB_DEVICE_OBJECT          UsbDevice = Transfer->UsbDevice;
+    PUSB_HCD_OBJECT             HcdObject = UsbDevice->Hcd;
+    POHCI_TRANSFER_PRIVATE_DATA TransferPrivateData = (POHCI_TRANSFER_PRIVATE_DATA)Transfer->HcdPrivateData;
+    POHCI_TD_LIST               DumbyID = TransferPrivateData->DumbyID;
+    if(TransferPrivateData->Setup.Td){
+        OhciFreeDma(HcdObject, TransferPrivateData->Setup.Td);
+    }
+    POHCI_TD_LIST Current = TransferPrivateData->DoneHeadID;
+    while(Current && (Current != DumbyID)){
+        POHCI_TD_LIST Next = (POHCI_TD_LIST)Current->Peers.NextHeader;
+        if(Current->Td){
+            OhciFreeDma(HcdObject, Current->Td);
+        }
+        LouKeFree(Current);
+        Current = Next;
+    }
+    LouKeFree(TransferPrivateData);
     return STATUS_SUCCESS;
 }
+

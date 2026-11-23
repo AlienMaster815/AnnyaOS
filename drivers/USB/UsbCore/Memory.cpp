@@ -42,6 +42,7 @@ UsbCoreAllocateUsbControlTransfer(
             UsbCoreFreeUsbTransferObject(NewTransferObject);
             return STATUS_INSUFFICIENT_RESOURCES;
         }   
+        NewTransferObject->TransferSize = DataSize;
     }else{
         NewTransferObject->TransferFlags |= USB_TRANSFER_FLAG_NO_DATA;
         NewTransferObject->Transfer = LouKeCreateDmaTransfer(&HcdObject->DmaDevice, sizeof(UINT64), GET_ALIGNMENT(UINT64));
@@ -50,6 +51,7 @@ UsbCoreAllocateUsbControlTransfer(
             return STATUS_INSUFFICIENT_RESOURCES;
         }
         NewTransferObject->SetupData = LouKeDmaTransferGetOffsetVa(NewTransferObject->Transfer, 0, 0x00);
+        NewTransferObject->TransferSize = 0x00;
     }
     *OutTransfer = NewTransferObject;
     return STATUS_SUCCESS;

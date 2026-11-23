@@ -174,7 +174,6 @@ LOUSTATUS XhciHcdChangeEndpointPacketSize(PUSB_ENDPOINT_OBJECT Endpoint, SIZE Pa
     return STATUS_SUCCESS;
 }
 
-
 SIZE XhciGetHcdRhPortCount(PUSB_HCD_OBJECT HcdObject){
     PXHCI_DEVICE XhciDevice = (PXHCI_DEVICE)HcdObject->HcdPrivateData;
     return XhciDevice->Capabilities.MaxPorts;
