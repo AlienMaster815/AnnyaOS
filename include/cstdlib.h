@@ -41,8 +41,8 @@ typedef const UNICODE_STRING* PCUNICODE_STRING;
 typedef const UNICODE_STRING CUNICODE_STRING;
 
 typedef struct  _ListHeader{
-    struct _ListHeader* LastHeader;
     struct _ListHeader* NextHeader;
+    struct _ListHeader* LastHeader;
 }ListHeader, * PListHeader;
 
 #ifdef __cplusplus
