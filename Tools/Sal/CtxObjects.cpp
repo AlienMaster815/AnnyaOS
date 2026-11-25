@@ -1,5 +1,5 @@
 #define _SAL_INTERNALS_
-#include "Sal.h"
+#include <Sal.h>
 
 PSAL_ALLOCATION_OBJECT SalContextObjectManager::CreateAllocationObject(){
     return this->ObjectManager.AllocateObject();

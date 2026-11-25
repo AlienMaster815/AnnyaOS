@@ -1,5 +1,5 @@
 #define _SAL_INTERNALS_
-#include "Sal.h"
+#include <Sal.h>
 
 PVOID SalAllocateMemory(SIZE Size, SIZE Alignment){
     if(!Size){

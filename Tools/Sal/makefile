@@ -3,7 +3,7 @@ SOURCE   = Sal.cpp \
 			CtxObjects.cpp
 OBJ      = $(SOURCE:.cpp=.o)
 COMPILER = g++
-FLAGS    = -Wall -Wextra -fPIC -fvisibility=hidden -DBUILDING_DLL -Wno-unused-parameter -Wno-unused-private-field
+FLAGS    = -I ../Include -Wall -Wextra -fPIC -fvisibility=hidden -DBUILDING_DLL -Wno-unused-parameter -Wno-unused-private-field
 LD       = ld
 OUTPUT   = ../Sal.so
 

@@ -1,5 +1,5 @@
 #define _SAL_INTERNALS_
-#include "Sal.h"
+#include <Sal.h>
 
 PSAL_ALLOCATION_OBJECT_NODE SalAllocationObjectManager::AllocateNode(){
     PSAL_ALLOCATION_OBJECT_NODE NewNode = SalAllocateType(SAL_ALLOCATION_OBJECT_NODE);
