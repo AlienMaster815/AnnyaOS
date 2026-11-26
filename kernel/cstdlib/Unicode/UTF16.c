@@ -10,7 +10,7 @@ SIZE Utf16EncodedLength(
     return 1;
 }
 
-UINT32 Utf16ToUint32(
+UINT32 Utf16CharToUint32Char(
     UINT16* Charecter
 ){
     if(Charecter[0] >= 0xD800 && Charecter[0] <= 0xDBFF){
