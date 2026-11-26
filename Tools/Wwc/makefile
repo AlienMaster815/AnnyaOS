@@ -1,6 +1,6 @@
-SOURCE   = wcsext.c
-OBJ      = $(SOURCE:.c=.o)
-COMPILER = gcc
+SOURCE   = mbslib.cpp
+OBJ      = $(SOURCE:.cpp=.o)
+COMPILER = g++
 FLAGS    = -I ../Include -Wall -Wextra -fPIC -fvisibility=hidden -DBUILDING_DLL -Wno-unused-parameter -Wno-unused-private-field
 LD       = ld
 OUTPUT   = ../Wwc.so
